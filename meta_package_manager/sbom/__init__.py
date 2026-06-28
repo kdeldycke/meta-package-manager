@@ -16,7 +16,7 @@
 """Export the installed-package inventory as Software Bill of Materials documents.
 
 This subpackage is the home of every SBOM-flavored writer in ``mpm``. Its
-existence mirrors the optional ``[sbom]`` install extra defined in
+existence mirrors the optional ``[sbom-offline]`` install extra defined in
 ``pyproject.toml``: a default ``pip install meta-package-manager`` does not
 pull ``cyclonedx-python-lib`` or ``spdx-tools``, so the modules below guard
 their heavy imports with ``try/except`` and expose

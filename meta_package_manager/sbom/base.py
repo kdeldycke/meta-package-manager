@@ -17,7 +17,7 @@
 
 Kept deliberately free of SPDX or CycloneDX dependencies: instantiating
 :py:class:`SBOM` directly is meaningless, but importing the symbols here
-is safe even when the optional ``[sbom]`` extra is not installed.
+is safe even when the optional ``[sbom-offline]`` extra is not installed.
 """
 
 from __future__ import annotations
@@ -32,9 +32,11 @@ else:
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
     from ..package import PackageMetadata
+    from .vulnerabilities import Vulnerability
 
 
 class ExportFormat(StrEnum):
@@ -78,6 +80,36 @@ class SBOM:
         # Keys used to dedup ``_track_addition`` calls across subclasses
         # that may invoke it more than once per (manager, package) pair.
         self._tracked_additions: set[tuple[str, str]] = set()
+        # ``purl string -> vulnerabilities`` attached post-hoc by the
+        # network layer (``mpm --network sbom``). Distinct from
+        # PackageMetadata, which the local extractor produces: this is
+        # data fetched after the fact from OSV and bound to the document
+        # via :py:meth:`attach_vulnerabilities`. Renderers consume it in
+        # their ``finalize`` override.
+        self.vulnerabilities_by_purl: dict[str, tuple[Vulnerability, ...]] = {}
+
+    def all_purls(self) -> Iterator[str]:
+        """Yield every package purl present in the document.
+
+        Powers the vulnerability scan: the network layer queries OSV once
+        with the full purl set rather than once per package. Subclasses
+        implement this against their own component index.
+        """
+        raise NotImplementedError
+
+    def attach_vulnerabilities(
+        self,
+        vulnerabilities: dict[str, tuple[Vulnerability, ...]],
+    ) -> None:
+        """Bind cross-package vulnerability data to the document.
+
+        Called by the CLI between the per-package ``add_package`` loop and
+        ``finalize``, only in ``--network`` mode. Renderers read the
+        stored data in their ``finalize`` override and project it into the
+        format-native vulnerability surface (CycloneDX ``vulnerabilities``
+        array, SPDX security ``externalRefs``).
+        """
+        self.vulnerabilities_by_purl.update(vulnerabilities)
 
     def _track_addition(
         self,
@@ -115,10 +147,21 @@ class SBOM:
         usable by tests or programmatic consumers without re-parsing the
         rendered document.
         """
+        # Count unique advisories and the packages they affect. The same
+        # advisory can affect several packages, so the vulnerability total
+        # is over distinct ids, not over the per-purl lists.
+        affected_purls = [p for p, v in self.vulnerabilities_by_purl.items() if v]
+        unique_vuln_ids = {
+            vuln.id
+            for vulns in self.vulnerabilities_by_purl.values()
+            for vuln in vulns
+        }
         return {
             "packages_total": sum(self.packages_per_manager.values()),
             "packages_per_manager": dict(self.packages_per_manager),
             "enriched_per_manager": dict(self.enriched_per_manager),
+            "vulnerabilities_total": len(unique_vuln_ids),
+            "vulnerable_packages": len(affected_purls),
         }
 
     def finalize(self) -> None:

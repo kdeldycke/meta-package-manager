@@ -131,13 +131,17 @@ $ mpm --brew sbom > deep.spdx.json
 
 ## Coverage matrix
 
-| Manager  | License | Homepage | Download URL | Checksums | Dependency graph | Per-package SBOM |
-| -------- | :-----: | :------: | :----------: | :-------: | :--------------: | :--------------: |
-| Homebrew |    ✓    |    ✓     |      ✓       |     ✓     |        ✓         |    ✓ (opt-in)    |
-| pip      |    ✓    |    ✓     |              |           |        ✓         |                  |
-| Others   |         |          |              |           |                  |                  |
+| Manager  | License | Homepage | Download URL | Checksums | Dependency graph | Per-package SBOM | Vulnerabilities |
+| -------- | :-----: | :------: | :----------: | :-------: | :--------------: | :--------------: | :-------------: |
+| Homebrew |    ✓    |    ✓     |      ✓       |     ✓     |        ✓         |    ✓ (opt-in)    |                 |
+| pip      |    ✓    |    ✓     |              |           |        ✓         |                  |  ✓ (`--network`) |
+| npm      |         |          |              |           |                  |                  |  ✓ (`--network`) |
+| cargo    |         |          |              |           |                  |                  |  ✓ (`--network`) |
+| gem      |         |          |              |           |                  |                  |  ✓ (`--network`) |
+| composer |         |          |              |           |                  |                  |  ✓ (`--network`) |
+| Others   |         |          |              |           |                  |                  |                 |
 
-Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time.
+Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time. The vulnerability column tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems); a manager OSV does not index (Homebrew, `mas`, the distro managers OSV needs a release qualifier for) gets no advisories rather than an error.
 
 For the `license` column specifically, [Tern](https://github.com/tern-tools/tern) is a useful reference: a Python tool that derives per-package licenses across OS package managers and integrates ScanCode for file-level license detection, the data `mpm` would need to fill licenses beyond Homebrew and pip.
 
@@ -165,21 +169,42 @@ This invoke-the-real-tool approach is not unique to `mpm`. CycloneDX's own [carg
 
 The tools are complementary. Reach for Syft, Trivy, or cdxgen to inventory a build artifact, container, or source repository; reach for `mpm sbom` to inventory the software actually installed on a machine.
 
+## Vulnerability scanning
+
+By default `mpm sbom` works entirely offline. Pass the global `--network` flag to enrich the document with known vulnerabilities, looked up against [OSV.dev](https://osv.dev):
+
+```shell-session
+$ mpm --network sbom --cyclonedx > inventory.cdx.json
+```
+
+In CycloneDX output each advisory lands in the document's `vulnerabilities` array, described once and pointing (through `affects`) at every component it impacts, with its severity rating, CVSS vector, CWE ids, aliases (the CVE behind a GHSA, for instance), and advisory links. SPDX 2.3 has no first-class vulnerability section, so each advisory is attached to its package as a `SECURITY`-category external reference of type `advisory`, with the severity and fixed-version facts folded into the reference comment.
+
+Coverage tracks OSV's ecosystems: language managers like pip, npm, cargo, gem, and composer resolve to OSV ecosystems and get scanned; system managers like Homebrew are not indexed by OSV, so their packages simply come back without advisories. Responses are cached on disk (under the OS user-cache directory) so repeat scans are fast and stay within OSV's rate limits.
+
+Network failures degrade gracefully: a missing extra, an unreachable OSV, or an unwritable cache logs a warning and still produces the SBOM, just without vulnerability data.
+
+```{caution}
+Running `--network` transmits the ecosystem coordinates of your installed packages (name, version, ecosystem) to OSV.dev. The offline default never makes network calls.
+```
+
 ## Installation
 
-SBOM export is an optional extra. `pip install meta-package-manager` does not pull the CycloneDX and SPDX dependencies; install the `[sbom]` extra to enable the `mpm sbom` subcommand:
+SBOM export is gated behind optional extras, split by usage:
+
+- **`[sbom-offline]`** pulls the CycloneDX and SPDX writer libraries needed to render documents from local data. This is what `mpm sbom` needs for its default offline operation.
+- **`[sbom-online]`** adds the HTTP client and cache used by `mpm --network sbom` for the OSV.dev vulnerability lookups described above.
 
 ```shell-session
-$ pip install meta-package-manager[sbom]
+$ pip install meta-package-manager[sbom-offline]
 ```
 
-Or with `uv`:
+For vulnerability scanning, install both:
 
 ```shell-session
-$ uv tool install 'meta-package-manager[sbom]'
+$ uv tool install 'meta-package-manager[sbom-offline,sbom-online]'
 ```
 
-Without the extra, `mpm sbom` exits with an explanatory error pointing at this install step.
+Without `[sbom-offline]`, `mpm sbom` exits with an explanatory error pointing at this install step. Without `[sbom-online]`, the `--network` flag logs a warning and falls back to an offline document.
 
 ## See also
 
@@ -201,6 +226,16 @@ Without the extra, `mpm sbom` exits with an explanatory error pointing at this i
    :undoc-members:
 
 .. automodule:: meta_package_manager.sbom.spdx
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+.. automodule:: meta_package_manager.sbom.vulnerabilities
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+.. automodule:: meta_package_manager.sbom._network
    :members:
    :show-inheritance:
    :undoc-members:

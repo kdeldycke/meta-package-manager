@@ -667,11 +667,16 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
     $ uv pip install meta-package-manager[jsonc]
     ```
   - - [JSONC](https://kdeldycke.github.io/click-extra/config.html#jsonc) config files: `--config mpm.jsonc`
-* - `sbom`
+* - `sbom-offline`
   - ```{code-block} shell-session
-    $ uv pip install meta-package-manager[sbom]
+    $ uv pip install meta-package-manager[sbom-offline]
     ```
-  - - CycloneDX and SPDX SBOM generation: {doc}`mpm sbom <sbom>`
+  - - CycloneDX and SPDX SBOM generation from local data: {doc}`mpm sbom <sbom>`
+* - `sbom-online`
+  - ```{code-block} shell-session
+    $ uv pip install meta-package-manager[sbom-online]
+    ```
+  - - Network enrichment for `mpm --network sbom`: OSV.dev vulnerability lookups
 * - `toml`
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[toml]

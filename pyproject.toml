@@ -193,21 +193,39 @@ dependencies = [
 optional-dependencies.hjson = [ "click-extra[hjson]" ]
 optional-dependencies.json5 = [ "click-extra[json5]" ]
 optional-dependencies.jsonc = [ "click-extra[jsonc]" ]
-# SBOM generation (`mpm sbom`) needs the CycloneDX and SPDX libraries.  The
-# cyclonedx [validation] extra is intentionally omitted: schema validation
-# runs in the test suite (see tests/test_cli_sbom.py), which keeps
-# jsonschema, rfc3987-syntax, lark, and lxml out of the runtime install even
-# with `mpm[sbom]`.  cyclonedx-python-lib 11.4.0 is the first to expose the
-# CycloneDX 1.7 schema (`JsonV1Dot7`, `SchemaVersion.V1_7`) that
-# `meta_package_manager.sbom.CycloneDX` targets, and is also new enough to
-# support Python 3.14; 11.9.0 introduced `LicenseExpression.details` for
-# per-identifier license-expression metadata (`LicenseExpressionDetails`),
-# which the renderer uses to attach canonical SPDX URLs to each identifier
-# inside a compound expression.  spdx-tools 0.8.0 introduced the `spdx_tools`
-# namespace that meta_package_manager.sbom.spdx imports (model,
-# validation.document_validator, common.spdx_licensing, and the
-# json/rdf/tagvalue/xml/yaml writers); 0.8.2 is the floor we build against.
-optional-dependencies.sbom = [ "cyclonedx-python-lib>=11.9", "spdx-tools>=0.8.2" ]
+# SBOM generation (`mpm sbom`) is split into two extras matching the two
+# usage modes:
+#
+# - [sbom-offline]: pulls the CycloneDX and SPDX writer libraries so
+#   `mpm sbom` can render documents from purely local data (manager
+#   CLIs and on-disk metadata).  The cyclonedx [validation] extra is
+#   intentionally omitted: schema validation runs in the test suite
+#   (see tests/test_cli_sbom.py), which keeps jsonschema,
+#   rfc3987-syntax, lark, and lxml out of the runtime install even with
+#   `mpm[sbom-offline]`.  cyclonedx-python-lib 11.4.0 is the first to
+#   expose the CycloneDX 1.7 schema (`JsonV1Dot7`, `SchemaVersion.V1_7`)
+#   that `meta_package_manager.sbom.CycloneDX` targets, and is also new
+#   enough to support Python 3.14; 11.9.0 introduced
+#   `LicenseExpression.details` for per-identifier license-expression
+#   metadata (`LicenseExpressionDetails`), which the renderer uses to
+#   attach canonical SPDX URLs to each identifier inside a compound
+#   expression.  spdx-tools 0.8.0 introduced the `spdx_tools` namespace
+#   that meta_package_manager.sbom.spdx imports (model,
+#   validation.document_validator, common.spdx_licensing, and the
+#   json/rdf/tagvalue/xml/yaml writers); 0.8.2 is the floor we build
+#   against.
+#
+# - [sbom-online]: adds httpx (the HTTP client used by
+#   meta_package_manager.sbom._network) and platformdirs (used to
+#   locate the on-disk response cache at the OS-appropriate location).
+#   These power the opt-in `mpm --network sbom` mode that queries
+#   OSV.dev for vulnerability data and attaches it to the rendered
+#   document.  httpx 0.27 is the first release with the stable
+#   `httpx.Timeout` constructor signature we rely on; platformdirs 4 is
+#   the current major and matches what click-extra already ships
+#   transitively.
+optional-dependencies.sbom-offline = [ "cyclonedx-python-lib>=11.9", "spdx-tools>=0.8.2" ]
+optional-dependencies.sbom-online = [ "httpx>=0.27", "platformdirs>=4" ]
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
 # will be set without version specifier as they are already constrained.
 optional-dependencies.toml = [ "click-extra[toml]" ]
@@ -247,10 +265,17 @@ test = [
   "pytest-xdist[psutil]>=3.7",
   # Imported by tests/test_docs.py to parse workflow YAML; 6.0 is the modern API.
   "pyyaml>=6",
-  # SPDX SBOM generation is now gated behind the [sbom] extra (see
-  # [project.optional-dependencies]); re-add spdx-tools at test time so the
-  # SPDX-format tests in tests/test_cli_sbom.py still import.
+  # respx mocks httpx calls in the sbom._network tests so the OSV adapter
+  # test suite stays offline. Tied to httpx 0.27+ to match the [sbom-online]
+  # floor; 0.22 is the first respx release supporting it.
+  "respx>=0.22",
+  # SPDX SBOM generation is now gated behind the [sbom-offline] extra (see
+  # [project.optional-dependencies]); re-add spdx-tools and httpx at test
+  # time so the SPDX-format and OSV-adapter tests in tests/test_cli_sbom.py
+  # still import.
   "spdx-tools",
+  # respx requires httpx as a peer; pin the same floor as [sbom-online].
+  "httpx>=0.27",
 ]
 docs = [
   "click-extra[sphinx]",
@@ -527,13 +552,16 @@ test-matrix.exclude = [
 ]
 # Sync optional-dependencies into the build venv so the Nuitka binary ships
 # every feature gated behind try/except imports in click-extra and mpm:
-#   - sbom: cyclonedx-python-lib + spdx-tools, for `mpm sbom --spdx` and
-#           `mpm sbom --cyclonedx`.
+#   - sbom-offline: cyclonedx-python-lib + spdx-tools, for `mpm sbom --spdx`
+#                   and `mpm sbom --cyclonedx` rendering from local data.
+#   - sbom-online: httpx + platformdirs, for the opt-in
+#                  `mpm --network sbom` mode that queries OSV.dev for
+#                  vulnerability data and caches responses on disk.
 #   - toml/yaml/json5/jsonc/hjson/xml: click-extra config-file readers, for
 #           `mpm --config <path>` and `mpm --table-format <fmt>` output.
 # Paired with `include-package` in [tool.nuitka] below to defeat Nuitka's
 # try/except import skip.
-nuitka.extras = [ "hjson", "json5", "jsonc", "sbom", "toml", "xml", "yaml" ]
+nuitka.extras = [ "hjson", "json5", "jsonc", "sbom-offline", "sbom-online", "toml", "xml", "yaml" ]
 # Render the mpm Click command tree as roff `.1` files and attach them as
 # `mpm-manpages.tar.gz` to every GitHub release (handled by the `manpages` job
 # in repomatic's `_release-engine.yaml`). The `module:function` form bypasses

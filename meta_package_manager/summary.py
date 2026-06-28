@@ -184,4 +184,12 @@ def sbom_summary(sbom: SBOM, bundled: bool) -> tuple[Counter, list[str]]:
     if dep_edges:
         notes.append(f"{dep_edges} dependency edges emitted.")
 
+    vulnerabilities = stats.get("vulnerabilities_total") or 0
+    vulnerable_packages = stats.get("vulnerable_packages") or 0
+    if vulnerabilities:
+        notes.append(
+            f"{vulnerabilities} vulnerabilities found across "
+            f"{vulnerable_packages} packages."
+        )
+
     return counts, notes

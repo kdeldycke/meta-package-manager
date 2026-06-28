@@ -656,6 +656,98 @@ def test_cyclonedx_stats_count_external_bom_refs(tmp_path):
     assert cast("int", stats["dependency_edges"]) >= 1
 
 
+def _sample_vulnerability():
+    """Build a Vulnerability without importing the network-only module at
+    collection time would not work, so import it lazily here."""
+    from datetime import datetime, timezone
+
+    from meta_package_manager.sbom.vulnerabilities import Vulnerability
+
+    return Vulnerability(
+        id="GHSA-aaaa-bbbb-cccc",
+        source="OSV",
+        summary="XSS in example",
+        description="Long detail.",
+        severity="critical",
+        cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        cwe_ids=("CWE-79",),
+        aliases=("CVE-2021-99999",),
+        references=("https://example.com/advisory",),
+        fixed_versions=("1.0.1",),
+        published_date=datetime(2021, 1, 1, tzinfo=timezone.utc),
+        modified_date=datetime(2021, 6, 1, tzinfo=timezone.utc),
+        advisory_url="https://osv.dev/vulnerability/GHSA-aaaa-bbbb-cccc",
+    )
+
+
+def test_spdx_renders_attached_vulnerabilities():
+    """Attached advisories become SECURITY external refs in SPDX."""
+    s = SPDX()
+    s.init_doc()
+    manager = _as_manager(_StubManager("pip", "Python pip"))
+    package = _make_package("pip", "django", "1.0.0")
+    s.add_package(manager, package, EMPTY_METADATA)
+    purl = package.purl.to_string()
+    s.attach_vulnerabilities({purl: (_sample_vulnerability(),)})
+    s.finalize()
+    doc = json.loads(s.export())  # exporting also validates the document.
+    django = next(p for p in doc["packages"] if p["name"] == "django")
+    security_refs = [
+        ref
+        for ref in django.get("externalRefs", [])
+        if ref["referenceCategory"] == "SECURITY"
+        and ref["referenceType"] == "advisory"
+    ]
+    assert len(security_refs) == 1
+    assert "GHSA-aaaa-bbbb-cccc" in security_refs[0]["referenceLocator"]
+    assert s.stats()["vulnerabilities_total"] == 1
+    assert s.stats()["vulnerable_packages"] == 1
+
+
+def test_cyclonedx_renders_attached_vulnerabilities():
+    """Attached advisories become a CycloneDX vulnerabilities array entry."""
+    c = CycloneDX()
+    c.init_doc()
+    manager = _as_manager(_StubManager("pip", "Python pip"))
+    package = _make_package("pip", "django", "1.0.0")
+    c.add_package(manager, package, EMPTY_METADATA)
+    purl = package.purl.to_string()
+    c.attach_vulnerabilities({purl: (_sample_vulnerability(),)})
+    c.finalize()
+    content = c.export()
+    assert_valid_cyclonedx(content, ExportFormat.JSON)
+    doc = json.loads(content)
+    vulns = doc.get("vulnerabilities", [])
+    assert len(vulns) == 1
+    assert vulns[0]["id"] == "GHSA-aaaa-bbbb-cccc"
+    affects = {target["ref"] for target in vulns[0]["affects"]}
+    assert affects == {purl}
+    assert vulns[0]["ratings"][0]["severity"] == "critical"
+
+
+def test_shared_advisory_deduplicated_in_cyclonedx():
+    """One advisory affecting two components yields a single record with
+    two affects targets."""
+    c = CycloneDX()
+    c.init_doc()
+    manager = _as_manager(_StubManager("pip", "Python pip"))
+    django = _make_package("pip", "django", "1.0.0")
+    flask = _make_package("pip", "flask", "2.0.0")
+    c.add_package(manager, django, EMPTY_METADATA)
+    c.add_package(manager, flask, EMPTY_METADATA)
+    vuln = _sample_vulnerability()
+    c.attach_vulnerabilities({
+        django.purl.to_string(): (vuln,),
+        flask.purl.to_string(): (vuln,),
+    })
+    c.finalize()
+    doc = json.loads(c.export())
+    vulns = doc.get("vulnerabilities", [])
+    assert len(vulns) == 1
+    affects = {target["ref"] for target in vulns[0]["affects"]}
+    assert affects == {django.purl.to_string(), flask.purl.to_string()}
+
+
 def test_minimal_mode_skips_metadata_extractor(invoke):
     """``--minimal`` must avoid the rich-metadata code path so the
     export matches the historical bare shape even for managers that

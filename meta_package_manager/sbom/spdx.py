@@ -16,8 +16,8 @@
 """SPDX 2.3 writer plus the per-package upstream-SBOM merge logic.
 
 Heavy ``spdx_tools`` imports are guarded behind a ``try/except`` block so
-this module is importable even when the optional ``[sbom]`` extra is not
-installed; in that case ``spdx_support`` is ``False`` and the
+this module is importable even when the optional ``[sbom-offline]`` extra is
+not installed; in that case ``spdx_support`` is ``False`` and the
 :py:class:`SPDX` class is still defined for type-hint compatibility but
 will not function (every public method depends on the missing imports).
 
@@ -83,7 +83,7 @@ try:
 except ImportError:
     spdx_support = False
     logging.getLogger("meta_package_manager").debug(
-        "SPDX support disabled: install meta-package-manager[sbom] to enable it.",
+        "SPDX support disabled: install meta-package-manager[sbom-offline] to enable it.",
     )
 
 TYPE_CHECKING = False
@@ -172,6 +172,28 @@ def _coerce_spdx_string(raw):
     return raw
 
 
+def _vuln_comment(vuln) -> str:
+    """Render a one-line human summary for an SPDX security ``externalRef``.
+
+    SPDX 2.3 cannot model severity, CWE, or fixed versions structurally,
+    so the most useful per-advisory facts are folded into the ref's free-
+    text comment. ``vuln`` is a
+    :py:class:`meta_package_manager.sbom.vulnerabilities.Vulnerability`;
+    the parameter is untyped to avoid importing the network-side module
+    at runtime when the ``[sbom-online]`` extra is absent.
+    """
+    parts = [vuln.id]
+    if vuln.severity:
+        parts.append(f"severity={vuln.severity}")
+    if vuln.aliases:
+        parts.append(f"aliases={', '.join(vuln.aliases)}")
+    if vuln.fixed_versions:
+        parts.append(f"fixed in {', '.join(vuln.fixed_versions)}")
+    if vuln.summary:
+        parts.append(vuln.summary)
+    return " | ".join(parts)
+
+
 class SPDX(SBOM):
     """Generates an SPDX document from a list of packages.
 
@@ -185,7 +207,7 @@ class SPDX(SBOM):
     seen_ids: set[str]
     name_index: dict[tuple[str, str], str]
     # 4th tuple slot is a ``RelationshipType`` instance; typed as ``Any``
-    # because that enum is only importable when the ``[sbom]`` extra is.
+    # because that enum is only importable when the ``[sbom-offline]`` extra is.
     pending_relationships: list[tuple[str, str, str, Any]]
     merged_docs: dict[str, str]
 
@@ -218,6 +240,11 @@ class SPDX(SBOM):
         # call so cross-package edges can be wired up at the end of the scan
         # regardless of the order managers report their packages in.
         self.name_index = {}
+        # ``purl string -> docid`` and ``docid -> SPDXPackage`` indexes used
+        # to attach vulnerability data (keyed by purl) onto the right
+        # package object during :py:meth:`finalize`.
+        self.purl_index: dict[str, str] = {}
+        self.package_by_docid: dict[str, Any] = {}
         # Each entry is ``(source_docid, manager_id, target_id, relationship_type)``.
         # The renderer cannot turn declared dependencies into relationships
         # immediately because the dependency target may not have been added
@@ -258,7 +285,7 @@ class SPDX(SBOM):
         downstream redistributor) it wins.
 
         Returns ``Any`` rather than ``Actor`` because ``Actor`` is conditionally
-        imported behind the ``[sbom]`` extra: annotating with it would make this
+        imported behind the ``[sbom-offline]`` extra: annotating with it would make this
         module fail type-checking when the extra is not installed.
         """
         if metadata.supplier:
@@ -369,6 +396,7 @@ class SPDX(SBOM):
             return
         self.seen_ids.add(package_docid)
         self.name_index[(manager.id, package.id)] = package_docid
+        self.purl_index[package.purl.to_string()] = package_docid
         self._track_addition(manager.id, package.id, metadata)
 
         download_location = metadata.download_url or SpdxNoAssertion()
@@ -386,28 +414,28 @@ class SPDX(SBOM):
         license_declared = self._license_or_noassertion(metadata.license_declared)
         copyright_text = metadata.copyright_text or None
 
-        self.document.packages.append(
-            SPDXPackage(
-                name=package.id,
-                spdx_id=package_docid,
-                version=str(package.installed_version),
-                supplier=self._supplier_for(manager, metadata),
-                originator=self._originator_for(metadata),
-                download_location=download_location,
-                files_analyzed=files_analyzed,
-                checksums=self._checksums_for(metadata),
-                homepage=homepage,
-                license_concluded=license_concluded,
-                license_declared=license_declared,
-                copyright_text=copyright_text,
-                summary=metadata.summary or package.name,
-                description=metadata.description or package.description,
-                external_references=self._external_refs_for(package, metadata),
-                primary_package_purpose=PackagePurpose.INSTALL,
-                release_date=metadata.release_date,
-                built_date=metadata.build_date,
-            )
+        spdx_package = SPDXPackage(
+            name=package.id,
+            spdx_id=package_docid,
+            version=str(package.installed_version),
+            supplier=self._supplier_for(manager, metadata),
+            originator=self._originator_for(metadata),
+            download_location=download_location,
+            files_analyzed=files_analyzed,
+            checksums=self._checksums_for(metadata),
+            homepage=homepage,
+            license_concluded=license_concluded,
+            license_declared=license_declared,
+            copyright_text=copyright_text,
+            summary=metadata.summary or package.name,
+            description=metadata.description or package.description,
+            external_references=self._external_refs_for(package, metadata),
+            primary_package_purpose=PackagePurpose.INSTALL,
+            release_date=metadata.release_date,
+            built_date=metadata.build_date,
         )
+        self.document.packages.append(spdx_package)
+        self.package_by_docid[package_docid] = spdx_package
 
         # A DESCRIBES relationship asserts that the document indeed describes the
         # package.
@@ -570,14 +598,31 @@ class SPDX(SBOM):
             )
         )
 
+    def all_purls(self) -> Any:
+        """Yield every inventory package purl in insertion order.
+
+        Only the directly-installed packages carry a purl in
+        ``purl_index``; transitive packages spliced in from merged
+        upstream SBOMs are not queried for vulnerabilities (their own
+        upstream document already carries that provenance, and they are
+        not what the user installed).
+        """
+        yield from self.purl_index
+
     def finalize(self) -> None:
-        """Emit pending dependency relationships.
+        """Emit pending dependency relationships and vulnerability refs.
 
         Walks the queue built by :py:meth:`add_package` and emits each
         relationship only when both ends resolve to packages we actually
         included in the document. Dangling references (the target package
         is not installed) are dropped silently: the SBOM only describes
         what is on the system, not what could be.
+
+        Then attaches any vulnerability data bound via
+        :py:meth:`attach_vulnerabilities`. SPDX 2.3 has no first-class
+        vulnerability section, so each advisory becomes a
+        SECURITY-category ``ExternalPackageRef`` of type ``advisory`` on
+        the affected package, pointing at the advisory URL.
         """
         for source_docid, manager_id, target_id, rel_type in self.pending_relationships:
             target_docid = self.name_index.get((manager_id, target_id))
@@ -586,6 +631,23 @@ class SPDX(SBOM):
             self.document.relationships.append(
                 Relationship(target_docid, rel_type, source_docid)
             )
+
+        for purl_str, vulns in self.vulnerabilities_by_purl.items():
+            docid = self.purl_index.get(purl_str)
+            if not docid:
+                continue
+            spdx_package = self.package_by_docid.get(docid)
+            if spdx_package is None:
+                continue
+            for vuln in vulns:
+                spdx_package.external_references.append(
+                    ExternalPackageRef(
+                        ExternalPackageRefCategory.SECURITY,
+                        "advisory",
+                        vuln.advisory_url,
+                        comment=_vuln_comment(vuln),
+                    )
+                )
 
     def stats(self) -> dict[str, object]:
         """Extend the base stats with SPDX-specific counters.

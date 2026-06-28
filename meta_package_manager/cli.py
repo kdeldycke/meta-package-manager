@@ -506,6 +506,19 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         ),
     ),
     option(
+        "--network/--no-network",
+        default=False,
+        help=(
+            "Opt into network calls during the run. Today this only "
+            "affects 'mpm sbom', which uses the flag to query OSV.dev "
+            "for vulnerability data and attach it to the rendered "
+            "document. Responses are cached on disk so repeat runs are "
+            "fast. Defaults off; the offline path remains the default. "
+            "Note: when enabled, this transmits the package inventory "
+            "to the queried services."
+        ),
+    ),
+    option(
         "--suggest-contribs/--no-suggest-contribs",
         default=True,
         help="Print a contribution invitation when a user override targets a "
@@ -539,6 +552,7 @@ def mpm(
     description,
     sort_by,
     summary,
+    network,
     suggest_contribs,
 ):
     """CLI options shared by all subcommands."""
@@ -689,6 +703,7 @@ def mpm(
             "description",
             "sort_by",
             "summary",
+            "network",
         ),
         defaults=(
             all_managers,
@@ -698,6 +713,7 @@ def mpm(
             description,
             sort_by,
             summary,
+            network,
         ),
     )()
 
@@ -2466,15 +2482,15 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     if spdx:
         if not spdx_support:
             raise UsageError(
-                "SPDX SBOM generation requires the [sbom] extra. "
-                "Install with: pip install meta-package-manager[sbom]",
+                "SPDX SBOM generation requires the [sbom-offline] extra. "
+                "Install with: pip install meta-package-manager[sbom-offline]",
             )
         sbom_class = SPDX
     else:
         if not cyclonedx_support:
             raise UsageError(
-                "CycloneDX SBOM generation requires the [sbom] extra. "
-                "Install with: pip install meta-package-manager[sbom]",
+                "CycloneDX SBOM generation requires the [sbom-offline] extra. "
+                "Install with: pip install meta-package-manager[sbom-offline]",
             )
         if export_format not in (ExportFormat.JSON, ExportFormat.XML):
             logging.critical(f"{standard} does not support {export_format} format.")
@@ -2527,7 +2543,43 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
             for package in installed_packages:
                 sbom.add_package(manager, package)
 
+    if ctx.obj.network:
+        _scan_and_attach_vulnerabilities(sbom)
+
     sbom.finalize()
     if ctx.obj.summary:
         print_summary(*sbom_summary(sbom, bundled))
     echo(sbom.export(), file=prep_path(export_path))
+
+
+def _scan_and_attach_vulnerabilities(sbom: SBOM) -> None:
+    """Query OSV for the SBOM's packages and attach the results.
+
+    Runs only in ``--network`` mode. Failures degrade gracefully: a
+    missing ``[sbom-online]`` extra or any network error logs a warning
+    and leaves the document without vulnerability data rather than
+    aborting the export. The heavy network imports are deferred to here
+    so the offline path never pays for them.
+    """
+    from .sbom._network import NetworkClient, NetworkError, network_support
+    from .sbom.vulnerabilities import scan_vulnerabilities
+
+    if not network_support:
+        logging.warning(
+            "Vulnerability scan skipped: the --network option needs the "
+            "[sbom-online] extra. Install with: "
+            "pip install meta-package-manager[sbom-online]",
+        )
+        return
+
+    try:
+        with NetworkClient() as client:
+            vulnerabilities = scan_vulnerabilities(sbom.all_purls(), client)
+    except NetworkError as exc:
+        logging.warning(
+            f"Vulnerability scan failed ({exc}); the SBOM will not include "
+            "vulnerability data. Re-run later or drop --network to silence.",
+        )
+        return
+
+    sbom.attach_vulnerabilities(vulnerabilities)

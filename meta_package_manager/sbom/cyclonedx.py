@@ -59,13 +59,22 @@ try:
         LicenseExpressionDetails,
     )
     from cyclonedx.model.lifecycle import LifecyclePhase, PredefinedLifecycle
+    from cyclonedx.model.vulnerability import (
+        BomTarget,
+        Vulnerability as CDXVulnerability,
+        VulnerabilityAdvisory,
+        VulnerabilityRating,
+        VulnerabilityReference,
+        VulnerabilitySeverity,
+        VulnerabilitySource,
+    )
     from cyclonedx.output import make_outputter
     from cyclonedx.output.json import JsonV1Dot7
     from cyclonedx.schema import OutputFormat, SchemaVersion
 except ImportError:
     cyclonedx_support = False
     logging.getLogger("meta_package_manager").debug(
-        "CycloneDX support disabled: install meta-package-manager[sbom] to enable it.",
+        "CycloneDX support disabled: install meta-package-manager[sbom-offline] to enable it.",
     )
 
 TYPE_CHECKING = False
@@ -81,6 +90,7 @@ if TYPE_CHECKING:
 # values are typed ``HashAlgorithm`` instances but the conditional
 # ``try/except`` import above hides that fact from the type checker.
 _CYCLONEDX_HASH_MAP: dict[str, Any] = {}
+_CYCLONEDX_SEVERITY_MAP: dict[str, Any] = {}
 if cyclonedx_support:
     _CYCLONEDX_HASH_MAP = {
         ChecksumAlgorithm.MD5.value: HashAlgorithm.MD5,
@@ -91,6 +101,14 @@ if cyclonedx_support:
         ChecksumAlgorithm.SHA3_512.value: HashAlgorithm.SHA3_512,
         ChecksumAlgorithm.BLAKE2B_256.value: HashAlgorithm.BLAKE2B_256,
         ChecksumAlgorithm.BLAKE2B_512.value: HashAlgorithm.BLAKE2B_512,
+    }
+    # Maps the coarse severity labels produced by
+    # meta_package_manager.sbom.vulnerabilities onto CycloneDX's enum.
+    _CYCLONEDX_SEVERITY_MAP = {
+        "low": VulnerabilitySeverity.LOW,
+        "medium": VulnerabilitySeverity.MEDIUM,
+        "high": VulnerabilitySeverity.HIGH,
+        "critical": VulnerabilitySeverity.CRITICAL,
     }
 
 
@@ -413,18 +431,110 @@ class CycloneDX(SBOM):
         for dep in metadata.dependencies:
             self.pending_dependencies.append((data, manager.id, dep.target_id))
 
+    def all_purls(self) -> Any:
+        """Yield every component purl in insertion order.
+
+        Each component's ``bom_ref`` is its purl string, so the same
+        values double as the vulnerability ``affects`` targets in
+        :py:meth:`finalize`.
+        """
+        for component in self.component_index.values():
+            if component.purl is not None:
+                yield component.purl.to_string()
+
     def finalize(self) -> None:
-        """Resolve queued dependency edges between Components.
+        """Resolve queued dependency edges and attach vulnerability records.
 
         Mirrors :py:meth:`meta_package_manager.sbom.spdx.SPDX.finalize`.
         Dangling references (the dependency target is not in the inventory)
         are dropped silently.
+
+        Vulnerability data bound via
+        :py:meth:`meta_package_manager.sbom.base.SBOM.attach_vulnerabilities`
+        is projected into the CycloneDX ``vulnerabilities`` array. Each
+        advisory is described once at the document level with an
+        ``affects`` list pointing at every component (by ``bom_ref``,
+        which equals the purl) it impacts.
         """
         for source, manager_id, target_id in self.pending_dependencies:
             target = self.component_index.get((manager_id, target_id))
             if target is None:
                 continue
             self.document.register_dependency(source, [target])
+
+        self._attach_vulnerability_records()
+
+    def _attach_vulnerability_records(self) -> None:
+        """Build CycloneDX ``Vulnerability`` objects from attached data.
+
+        Deduplicates by advisory id: an advisory that hits several
+        components is emitted once with multiple ``affects`` targets.
+        """
+        if not self.vulnerabilities_by_purl:
+            return
+        purls_with_component = {
+            c.purl.to_string() for c in self.component_index.values() if c.purl
+        }
+        by_id: dict[str, Any] = {}
+        for purl_str, vulns in self.vulnerabilities_by_purl.items():
+            if purl_str not in purls_with_component:
+                continue
+            for vuln in vulns:
+                cdx_vuln = by_id.get(vuln.id)
+                if cdx_vuln is None:
+                    cdx_vuln = self._build_cyclonedx_vuln(vuln)
+                    by_id[vuln.id] = cdx_vuln
+                    self.document.vulnerabilities.add(cdx_vuln)
+                cdx_vuln.affects.add(BomTarget(ref=purl_str))
+
+    @staticmethod
+    def _build_cyclonedx_vuln(vuln) -> Any:
+        """Translate a portable ``Vulnerability`` into a CycloneDX one.
+
+        ``vuln`` is a
+        :py:class:`meta_package_manager.sbom.vulnerabilities.Vulnerability`;
+        left untyped so this module need not import the network-side
+        module when the ``[sbom-online]`` extra is absent.
+        """
+        source = VulnerabilitySource(
+            name=vuln.source,
+            url=XsUri(vuln.advisory_url) if vuln.advisory_url else None,
+        )
+        ratings = []
+        severity = _CYCLONEDX_SEVERITY_MAP.get(vuln.severity or "")
+        if severity is not None or vuln.cvss_vector:
+            ratings.append(
+                VulnerabilityRating(
+                    source=source,
+                    severity=severity,
+                    vector=vuln.cvss_vector,
+                )
+            )
+        # OSV CWE ids look like "CWE-79"; CycloneDX wants the bare integer.
+        cwes = []
+        for cwe in vuln.cwe_ids:
+            digits = cwe.removeprefix("CWE-")
+            if digits.isdigit():
+                cwes.append(int(digits))
+        references = [
+            VulnerabilityReference(id=alias, source=source)
+            for alias in vuln.aliases
+        ]
+        advisories = [
+            VulnerabilityAdvisory(url=XsUri(url)) for url in vuln.references
+        ]
+        return CDXVulnerability(
+            id=vuln.id,
+            source=source,
+            description=vuln.summary,
+            detail=vuln.description,
+            ratings=ratings,
+            cwes=cwes,
+            references=references,
+            advisories=advisories,
+            published=vuln.published_date,
+            updated=vuln.modified_date,
+        )
 
     def stats(self) -> dict[str, object]:
         """Extend the base stats with CycloneDX-specific counters.

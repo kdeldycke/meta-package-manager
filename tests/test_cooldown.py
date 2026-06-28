@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import gc
 import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -360,6 +361,26 @@ def test_yay_cooldown_overlay_without_user_config(tmp_path, monkeypatch):
     overlay = Path(env["XDG_CONFIG_HOME"]) / "yay"
     assert (overlay / "init.lua").is_file()
     assert not (overlay / "config.json").exists()
+
+
+def test_yay_cooldown_overlay_survives_manager_gc(tmp_path, monkeypatch):
+    """The overlay must outlive the Yay instance's garbage collection.
+
+    Cleanup is registered with ``atexit``, not ``weakref.finalize(self, ...)``: yay
+    re-reads ``init.lua`` mid-run, so a GC-tied removal could delete the overlay before
+    yay finishes and silently fail the gate open.
+    """
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    manager = Yay()
+    manager.__dict__["version"] = parse_version("13.0.2")
+    manager.cooldown = timedelta(days=7)
+    init_lua = Path(manager.cooldown_env()["XDG_CONFIG_HOME"]) / "yay" / "init.lua"
+    assert init_lua.is_file()
+
+    del manager
+    gc.collect()
+    assert init_lua.is_file(), "overlay deleted when the Yay instance was collected"
 
 
 def test_yay_cooldown_epoch_clamped_to_zero(tmp_path, monkeypatch):

@@ -18,9 +18,9 @@ from __future__ import annotations
 
 import os
 import re
+import atexit
 import shutil
 import tempfile
-import weakref
 from datetime import datetime, timezone
 from functools import cached_property
 from pathlib import Path
@@ -491,8 +491,8 @@ class Yay(Pacman):
     def _cooldown_overlay_dir(self) -> Path:
         """Materialize the private config tree mpm points yay at for the cooldown.
 
-        Built once per manager instance and removed when the instance is collected or at
-        interpreter exit. The tree holds two entries under ``<root>/yay/``:
+        Built once per manager instance and removed at interpreter exit. The tree holds
+        two entries under ``<root>/yay/``:
 
         - ``init.lua``: the static :py:data:`_YAY_COOLDOWN_INIT_LUA` policy.
         - ``config.json``: a symlink to the user's real config, so the
@@ -504,9 +504,19 @@ class Yay(Pacman):
         from ``XDG_CONFIG_HOME`` (per ``dirs.go``); its cache, build dir and
         ``vcs.json`` follow ``XDG_CACHE_HOME``/``HOME`` and are untouched by the
         redirect.
+
+        .. warning::
+            Cleanup is registered with :py:func:`atexit`, **not**
+            ``weakref.finalize(self, ...)``. The overlay must outlive every yay
+            subprocess that reads it, and yay re-reads ``init.lua`` mid-run (it re-execs
+            during an install that pulls dependencies). Tying removal to this instance's
+            garbage collection raced that re-read: if the manager was collected after
+            :py:meth:`cooldown_env` but before yay finished, the overlay vanished and
+            the gate silently failed *open*: the worst outcome for a supply-chain
+            control. Process-lifetime cleanup is a safe upper bound; the tree is tiny.
         """
         root = Path(tempfile.mkdtemp(prefix="mpm-yay-cooldown-"))
-        weakref.finalize(self, shutil.rmtree, root, ignore_errors=True)
+        atexit.register(shutil.rmtree, root, ignore_errors=True)
 
         config_dir = root / "yay"
         config_dir.mkdir(parents=True, exist_ok=True)

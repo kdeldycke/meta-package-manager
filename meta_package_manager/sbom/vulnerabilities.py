@@ -28,6 +28,18 @@ ecosystems (PyPI, npm, crates.io, RubyGems, Packagist); system package
 managers like Homebrew are not in OSV, so their packages come back with
 no advisories rather than an error.
 
+.. note::
+   Covering system package managers (``brew``, ``apt``, ``macports``,
+   ``mas``, ...) means going through NVD, which indexes by CPE
+   (vendor/product plus version ranges) rather than by ecosystem
+   coordinate. That route is deliberately deferred: mapping a package
+   name to its CPE is fuzzy and the main source of false positives,
+   and NVD offers no batch coordinate lookup to match OSV's
+   ``querybatch``. Until that lands, the rendered document is standard
+   CycloneDX/SPDX, so anyone needing system-package coverage can feed
+   it to an external CPE-based scanner (OSV-Scanner, Grype, Trivy, or
+   Intel's cve-bin-tool).
+
 Two-stage protocol:
 
 1. A batched ``POST /v1/querybatch`` maps each queried coordinate to a

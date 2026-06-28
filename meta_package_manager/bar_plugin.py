@@ -60,6 +60,16 @@ XBAR_MIN_VERSION = (2, 1, 7)
 MPM_MIN_VERSION = (5, 0, 0)
 """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
+MPM_TIMEOUT = 60
+"""Maximum duration in seconds the plugin lets any single ``mpm`` call run.
+
+Passed as ``--timeout`` to every ``mpm`` invocation so the plugin is never at the
+mercy of mpm's own per-operation defaults, which are tuned for interactive CLI use
+and far too long for a background menubar refresh (120s for read-only queries, 500s
+for state-changing operations like ``sync``). A wedged package manager then fails
+the whole refresh in a minute instead of freezing the menubar for several.
+"""
+
 
 class MPMPlugin:
     """Implements the minimal code necessary to locate and call the ``mpm`` CLI on the
@@ -437,7 +447,10 @@ class MPMPlugin:
             return
 
         # Force a sync of all local package databases.
-        run((*mpm_args, "--verbosity", "ERROR", "sync"), check=False)
+        run(
+            (*mpm_args, "--verbosity", "ERROR", "--timeout", str(MPM_TIMEOUT), "sync"),
+            check=False,
+        )
 
         # Fetch outdated packages from all package managers available on the system.
         # We defer all rendering to mpm itself so it can compute more intricate layouts.
@@ -445,7 +458,15 @@ class MPMPlugin:
             # We silence all errors but the CRITICAL ones. All others will be captured
             # by mpm in --plugin-output mode and rendered back into each manager
             # section.
-            (*mpm_args, "--verbosity", "CRITICAL", "outdated", "--plugin-output"),
+            (
+                *mpm_args,
+                "--verbosity",
+                "CRITICAL",
+                "--timeout",
+                str(MPM_TIMEOUT),
+                "outdated",
+                "--plugin-output",
+            ),
             capture_output=True,
             encoding="utf-8",
             check=False,

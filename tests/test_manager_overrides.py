@@ -253,6 +253,48 @@ def test_per_manager_timeout_beats_global_default(reset_overrides):
     assert selected[0].timeout == 42
 
 
+@pytest.mark.parametrize(
+    ("override", "expected"),
+    (
+        pytest.param(None, 999, id="global-timeout-reaches-detection"),
+        pytest.param(42, 42, id="per-manager-override-survives-detection"),
+    ),
+)
+def test_timeout_binds_detection_phase(
+    reset_overrides, monkeypatch, override, expected
+):
+    """``_select_managers`` binds the version-detection probes to the resolved timeout
+    *before* ``warm_availability`` runs them: the global ``--timeout`` reaches a plain
+    candidate, while a per-manager override still keeps precedence."""
+    if override is not None:
+        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": override}})
+
+    # Capture each candidate's timeout at the moment detection would fire.
+    recorded: dict[str, int | None] = {}
+
+    class _StopProbe(Exception):
+        """Halt the generator right after the recording point, so the test never
+        reaches the real availability loop and stays hermetic."""
+
+    def fake_warm(managers):
+        for manager in managers:
+            recorded[manager.id] = manager.timeout
+        raise _StopProbe
+
+    monkeypatch.setattr("meta_package_manager.pool.warm_availability", fake_warm)
+
+    with pytest.raises(_StopProbe):
+        list(
+            pool._select_managers(
+                keep=(OVERRIDE_TARGET,),
+                drop_not_found=True,
+                timeout=999,
+            )
+        )
+
+    assert recorded[OVERRIDE_TARGET] == expected
+
+
 def test_per_manager_ignore_auto_updates_beats_global_default(reset_overrides):
     apply_manager_overrides(pool, {OVERRIDE_TARGET: {"ignore_auto_updates": False}})
     selected = list(

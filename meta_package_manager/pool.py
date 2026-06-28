@@ -318,12 +318,24 @@ class ManagerPool:
         # command that touches many managers; the filter loop stays sequential, so
         # its skip / "does not implement" logging keeps its order.
         if drop_not_found:
-            warm_availability(
+            candidates = [
                 self.register[manager_id]
                 for manager_id in selected_ids
                 if not implements_operation
                 or implements(self.register[manager_id], implements_operation)
-            )
+            ]
+            # Bind the version-detection probes to the user's --timeout before they
+            # run, so a wedged binary cannot outlast the cap during detection the way
+            # it could when the timeout was applied only to the operation below. Only
+            # timeout is pre-applied: the rest of extra_options (notably dry_run, which
+            # would turn detection into a no-op simulation) must wait for the loop. A
+            # per-manager [mpm.managers.<id>] timeout override keeps precedence, just
+            # as it does in the loop.
+            if "timeout" in extra_options:
+                for manager in candidates:
+                    if "timeout" not in self.overridden_fields.get(manager.id, set()):
+                        manager.timeout = extra_options["timeout"]
+            warm_availability(candidates)
 
         # Deduplicate managers IDs while preserving order, then remove excluded
         # managers.

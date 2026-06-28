@@ -167,6 +167,10 @@ class Pip(PackageManager):
             Python 3.10.10 (Feb  8 2023, 05:34) [Clang 14.0.0 (clang-1400.0.29.202)]
         """
         if self.executable:
+            # Tag this as a version probe so it inherits the short read-only timeout
+            # rather than the long mutating default, matching the base ``version``
+            # property. ``python --version`` should never need the conservative cap.
+            self._active_operation = "version"
             self.run_cli(
                 ("--version", "--version"),
                 auto_pre_cmds=False,

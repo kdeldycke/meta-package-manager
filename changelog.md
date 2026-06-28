@@ -5,6 +5,10 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [bar-plugin] Cap each `mpm` call the plugin makes at 60 seconds via `--timeout`, so a wedged package manager fails the menubar refresh in about a minute instead of stalling it for several.
+- [mpm] `--timeout` now also bounds the manager version-detection probes, not just the operation that follows, so a wedged binary cannot outlast the limit during startup detection.
+- [pip] Probe the Python interpreter version under the short read-only timeout instead of the long state-changing default.
+
 ## [`7.0.1` (2026-06-27)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.0...v7.0.1)
 
 - [mpm] Fix `ParameterSource` import from older Click dependency.

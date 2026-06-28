@@ -1,13 +1,16 @@
 ---
 name: "Temp - yay cooldown live test"
 
-# TEMPORARY workflow. Bisects, against a real Arch Linux + yay >= 13, which element
-# of mpm's generated cooldown init.lua stops the AURPreInstall abort from firing:
-# the bare probe aborts, but mpm's full hook (chaining + UpgradeSelect-first +
-# conditional) does not. Manual dispatch only; delete once root-caused.
+# TEMPORARY workflow. Validates the mpm yay --cooldown overlay (Yay.cooldown_env /
+# supports_cooldown) against a real Arch Linux + yay >= 13 environment, which the
+# hermetic unit layer cannot cover. Manual dispatch only; delete once confirmed.
 #
-# All variants use a positive cutoff one day below `downgrade`'s observed
-# last_modified (1779803521), so a correctly wired hook BLOCKS the install.
+# It drives yay directly with the environment mpm's cooldown_env() produces, rather
+# than through `mpm install`: mpm prefixes yay with sudo (correct for raw pacman),
+# and yay refuses to build as root. Running yay as the unprivileged build user is
+# the faithful way to exercise the AURPreInstall hook the overlay delivers. Each
+# case appends a diagnostic hook that logs the last_modified/cutoff yay's hook sees
+# if mpm's own hook does not abort.
 #
 # Upstream context: https://github.com/Jguer/yay/issues/2883
 
@@ -16,8 +19,8 @@ name: "Temp - yay cooldown live test"
     inputs:
       aur-package:
         description: >
-          A small AUR-only package (absent from the official repos). Must build
-          quickly and pull no heavy dependencies.
+          A small AUR-only package (absent from the official repos) for the
+          install A/B test. Must build quickly and pull no heavy dependencies.
         default: downgrade
         type: string
 
@@ -39,16 +42,15 @@ jobs:
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-      - name: Write the bisection probe
+      - name: Write the live validator
         run: |
-          cat > yay_cooldown_probe.py <<'PY'
-          """Bisect which element of mpm's cooldown init.lua breaks the abort."""
+          cat > yay_cooldown_validate.py <<'PY'
+          """Validate mpm's real yay cooldown overlay end-to-end against a live yay."""
 
           from __future__ import annotations
 
           import os
           import subprocess
-          import tempfile
           from datetime import timedelta
           from pathlib import Path
 
@@ -56,112 +58,35 @@ jobs:
 
           pkg = os.environ["AUR_PACKAGE"]
           home = Path(os.environ["HOME"])
-          # `downgrade` last_modified observed earlier; cutoff one day below -> block.
-          cutoff = "1779717121"
+          diag_log = home / "diag.log"
 
-          # A user config the chaining variant must load (writes a sentinel on load).
+          # A user config the overlay must preserve: a sentinel-writing init.lua proves
+          # the overlay chains it instead of shadowing it.
           user_yay = home / ".config" / "yay"
           user_yay.mkdir(parents=True, exist_ok=True)
+          sentinel = user_yay / "chained.sentinel"
           (user_yay / "init.lua").write_text(
-              'local f = io.open(os.getenv("HOME") .. "/.config/yay/sent", "w")\n'
-              'if f then f:write("x"); f:close() end\n',
+              'local f = io.open(os.getenv("HOME") .. "/.config/yay/chained.sentinel", "w")\n'
+              'if f then f:write("loaded"); f:close() end\n',
               encoding="UTF-8",
           )
           (user_yay / "config.json").write_text("{}\n", encoding="UTF-8")
 
-          # Shared logging helper prepended to every variant: records init reach and
-          # hook firing to $HOME/bisect.log so we can tell "never fired" from "fired
-          # but did not abort".
-          LOG = r'''
-          local function w(s)
-            local f = io.open(os.getenv("HOME") .. "/bisect.log", "a")
-            if f then f:write(s .. "\n"); f:close() end
-          end
-          w("INIT REACHED END marker pending...")
-          '''
-
-          # V1: bare unconditional abort (the probe that already worked).
-          V1 = r'''
-          yay.create_autocmd("AURPreInstall", {
-            desc = "v1",
-            callback = function(event) w("V1 fired"); yay.abort("V1 ABORT") end,
-          })
-          w("V1 registered")
-          '''
-
-          # V2: conditional abort reading the cutoff from the environment.
-          V2 = r'''
-          local cutoff = tonumber(os.getenv("MPM_COOLDOWN_EPOCH"))
-          w("V2 cutoff=" .. tostring(cutoff))
-          yay.create_autocmd("AURPreInstall", {
-            desc = "v2",
-            callback = function(event)
-              w("V2 fired lm=" .. tostring(event.data.last_modified))
-              if event.data.last_modified and event.data.last_modified >= cutoff then
-                yay.abort("V2 ABORT")
-              end
-            end,
-          })
-          w("V2 registered")
-          '''
-
-          # V3: V2 with an UpgradeSelect hook registered first.
-          V3 = r'''
-          local cutoff = tonumber(os.getenv("MPM_COOLDOWN_EPOCH"))
-          yay.create_autocmd("UpgradeSelect", {
-            desc = "v3u",
-            callback = function(event) return { exclude = {} } end,
-          })
-          yay.create_autocmd("AURPreInstall", {
-            desc = "v3a",
-            callback = function(event)
-              w("V3 fired lm=" .. tostring(event.data.last_modified))
-              if event.data.last_modified and event.data.last_modified >= cutoff then
-                yay.abort("V3 ABORT")
-              end
-            end,
-          })
-          w("V3 registered")
-          '''
-
-          # V4: V3 with the user-config chaining preamble (mpm's full structure).
-          V4 = r'''
-          local cutoff = tonumber(os.getenv("MPM_COOLDOWN_EPOCH"))
-          local user_dir = os.getenv("MPM_YAY_USER_DIR")
-          if user_dir and user_dir ~= "" then
-            package.path = user_dir .. "/?.lua;" .. user_dir .. "/?/init.lua;" .. package.path
-            local user_init = user_dir .. "/init.lua"
-            local handle = io.open(user_init, "r")
-            if handle then
-              handle:close()
-              pcall(dofile, user_init)
-            end
-          end
-          w("V4 after chaining; cutoff=" .. tostring(cutoff))
-          if cutoff then
-            yay.create_autocmd("UpgradeSelect", {
-              desc = "v4u",
-              callback = function(event) return { exclude = {} } end,
-            })
-            yay.create_autocmd("AURPreInstall", {
-              desc = "v4a",
-              callback = function(event)
-                w("V4 fired lm=" .. tostring(event.data.last_modified))
-                if event.data.last_modified and event.data.last_modified >= cutoff then
-                  yay.abort("V4 ABORT")
-                end
-              end,
-            })
-            w("V4 registered")
-          end
-          '''
-
-
-          def write_overlay(name: str, lua: str) -> Path:
-              root = home / name
-              (root / "yay").mkdir(parents=True, exist_ok=True)
-              (root / "yay" / "init.lua").write_text(lua, encoding="UTF-8")
-              return root
+          # Appended after mpm's own hooks: fires (and logs) only if mpm's AURPreInstall
+          # did NOT abort, so we can see the last_modified/cutoff it was given.
+          DIAG = (
+              '\nlocal function wd(s)\n'
+              '  local f = io.open(os.getenv("HOME") .. "/diag.log", "a")\n'
+              '  if f then f:write(s .. "\\n"); f:close() end\n'
+              'end\n'
+              'yay.create_autocmd("AURPreInstall", {\n'
+              '  desc = "diag",\n'
+              '  callback = function(event)\n'
+              '    wd("DIAG fired lm=" .. tostring(event.data.last_modified)\n'
+              '      .. " cutoff=" .. tostring(tonumber(os.getenv("MPM_COOLDOWN_EPOCH"))))\n'
+              '  end,\n'
+              '})\n'
+          )
 
 
           def installed() -> bool:
@@ -173,110 +98,53 @@ jobs:
                   subprocess.run(["sudo", "pacman", "--remove", "--noconfirm", pkg])
 
 
-          bisect_log = home / "bisect.log"
-          results = {}
-          for name, lua in (("V1", V1), ("V2", V2), ("V3", V3), ("V4", V4)):
-              print(f"\n=== {name} (expect BLOCKED) ===", flush=True)
+          def overlay_env(delta: timedelta) -> dict[str, str]:
+              manager = Yay()
+              manager.cooldown = delta
+              print(f"yay version: {manager.version}", flush=True)
+              assert manager.supports_cooldown, "real yay must advertise cooldown support"
+              env = {**os.environ, **manager.cooldown_env()}
+              init = Path(env["XDG_CONFIG_HOME"]) / "yay" / "init.lua"
+              init.write_text(init.read_text() + DIAG, encoding="UTF-8")
+              return env
+
+
+          # downgrade-style leaf packages are last-modified well within a year, so a
+          # 365-day floor holds them back while a 1-second floor lets them through.
+          cases = [
+              ("365-day cooldown (realistic floor)", timedelta(days=365), True),
+              ("40000-day cooldown (epoch clamped to 0)", timedelta(days=40000), True),
+              ("1-second cooldown (no real floor)", timedelta(seconds=1), False),
+          ]
+
+          first = True
+          for label, delta, expect_blocked in cases:
+              want = "BLOCKED" if expect_blocked else "ALLOWED"
+              print(f"\n=== {label}: expect {want} ===", flush=True)
               cleanup()
-              bisect_log.unlink(missing_ok=True)
-              env = {
-                  **os.environ,
-                  "XDG_CONFIG_HOME": str(write_overlay(name, LOG + lua)),
-                  "MPM_COOLDOWN_EPOCH": cutoff,
-                  "MPM_YAY_USER_DIR": str(user_yay),
-              }
+              diag_log.unlink(missing_ok=True)
+              sentinel.unlink(missing_ok=True)
+              env = overlay_env(delta)
+              print(f"injected epoch: {env['MPM_COOLDOWN_EPOCH']}", flush=True)
               subprocess.run(
                   ["yay", "--sync", "--noconfirm", pkg], env=env, text=True
               )
+              if first:
+                  assert sentinel.exists(), "overlay did not chain the user's init.lua"
+                  first = False
               blocked = not installed()
-              results[name] = blocked
-              trace = bisect_log.read_text().strip() if bisect_log.exists() else "(no log)"
-              print(f"{name}: blocked={blocked} | trace: {trace!r}", flush=True)
-
-          # V5 = V4 but with a config.json in the overlay (mpm symlinks one in).
-          print("\n=== V5 = V4 + config.json in overlay (expect BLOCKED) ===", flush=True)
-          cleanup()
-          bisect_log.unlink(missing_ok=True)
-          ov5 = write_overlay("V5", LOG + V4)
-          (ov5 / "yay" / "config.json").write_text("{}\n", encoding="UTF-8")
-          subprocess.run(
-              ["yay", "--sync", "--noconfirm", pkg],
-              env={
-                  **os.environ,
-                  "XDG_CONFIG_HOME": str(ov5),
-                  "MPM_COOLDOWN_EPOCH": cutoff,
-                  "MPM_YAY_USER_DIR": str(user_yay),
-              },
-              text=True,
-          )
-          results["V5"] = not installed()
-          trace = bisect_log.read_text().strip() if bisect_log.exists() else "(no log)"
-          print(f"V5: blocked={results['V5']} | trace: {trace!r}", flush=True)
-
-          # V6 = V4 but with the overlay in a /tmp mkdtemp dir (like mpm).
-          print("\n=== V6 = V4 in /tmp overlay (expect BLOCKED) ===", flush=True)
-          cleanup()
-          bisect_log.unlink(missing_ok=True)
-          root6 = Path(tempfile.mkdtemp(prefix="mpm-yay-cooldown-"))
-          (root6 / "yay").mkdir(parents=True, exist_ok=True)
-          (root6 / "yay" / "init.lua").write_text(LOG + V4, encoding="UTF-8")
-          subprocess.run(
-              ["yay", "--sync", "--noconfirm", pkg],
-              env={
-                  **os.environ,
-                  "XDG_CONFIG_HOME": str(root6),
-                  "MPM_COOLDOWN_EPOCH": cutoff,
-                  "MPM_YAY_USER_DIR": str(user_yay),
-              },
-              text=True,
-          )
-          results["V6"] = not installed()
-          trace = bisect_log.read_text().strip() if bisect_log.exists() else "(no log)"
-          print(f"V6: blocked={results['V6']} | trace: {trace!r}", flush=True)
-
-          # V7 = mpm's REAL cooldown_env() overlay (reproduces the failing run exactly),
-          # plus a diagnostic AURPreInstall hook appended after mpm's own hooks. The diag
-          # hook only fires if mpm's hook did NOT abort, revealing the lm/cutoff it saw.
-          print("\n=== V7 = mpm's real cooldown_env() overlay (expect BLOCKED) ===", flush=True)
-          cleanup()
-          bisect_log.unlink(missing_ok=True)
-          manager = Yay()
-          manager.cooldown = timedelta(days=365)
-          env7 = {**os.environ, **manager.cooldown_env()}
-          ov7 = Path(env7["XDG_CONFIG_HOME"]) / "yay"
-          print(
-              f"V7 cutoff(env)={env7.get('MPM_COOLDOWN_EPOCH')} "
-              f"config.json={ (ov7 / 'config.json').exists() }",
-              flush=True,
-          )
-          ov7_init = ov7 / "init.lua"
-          ov7_init.write_text(
-              ov7_init.read_text()
-              + '\nlocal function w7(s)\n'
-              '  local f = io.open(os.getenv("HOME") .. "/bisect.log", "a")\n'
-              '  if f then f:write(s .. "\\n"); f:close() end\n'
-              'end\n'
-              'w7("V7 mpm init.lua reached end")\n'
-              'yay.create_autocmd("AURPreInstall", {\n'
-              '  desc = "v7diag",\n'
-              '  callback = function(event)\n'
-              '    w7("V7 DIAG fired lm=" .. tostring(event.data.last_modified)\n'
-              '      .. " cutoff_env=" .. tostring(tonumber(os.getenv("MPM_COOLDOWN_EPOCH"))))\n'
-              '  end,\n'
-              '})\n',
-              encoding="UTF-8",
-          )
-          subprocess.run(
-              ["yay", "--sync", "--noconfirm", pkg], env=env7, text=True
-          )
-          results["V7"] = not installed()
-          trace = bisect_log.read_text().strip() if bisect_log.exists() else "(no log)"
-          print(f"V7: blocked={results['V7']} | trace: {trace!r}", flush=True)
+              diag = (
+                  diag_log.read_text().strip()
+                  if diag_log.exists()
+                  else "(mpm hook aborted; diag never ran)"
+              )
+              print(f"{label}: blocked={blocked} | diag: {diag}", flush=True)
+              assert blocked == expect_blocked, (
+                  f"{label}: expected blocked={expect_blocked}, got {blocked}"
+              )
 
           cleanup()
-          print("\n=== BISECTION SUMMARY ===", flush=True)
-          for name in ("V1", "V2", "V3", "V4", "V5", "V6", "V7"):
-              print(f"  {name}: {'BLOCKED' if results[name] else 'installed (abort failed)'}", flush=True)
+          print("\nALL LIVE CHECKS PASSED", flush=True)
           PY
 
       - name: Create an unprivileged build user
@@ -296,9 +164,9 @@ jobs:
       - name: Report yay version
         run: sudo --set-home --user builder yay --version
 
-      - name: Run the bisection probe
+      - name: Validate the cooldown overlay against real yay
         env:
           AUR_PACKAGE: ${{ inputs.aur-package }}
         run: >
           sudo --set-home --user builder --preserve-env=AUR_PACKAGE
-          uv run --frozen python yay_cooldown_probe.py
+          uv run --frozen python yay_cooldown_validate.py

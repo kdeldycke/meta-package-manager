@@ -8,6 +8,7 @@
 - [bar-plugin] Cap each `mpm` call the plugin makes at 60 seconds via `--timeout`, so a wedged package manager fails the menubar refresh in about a minute instead of stalling it for several.
 - [mpm] `--timeout` now also bounds the manager version-detection probes, not just the operation that follows, so a wedged binary cannot outlast the limit during startup detection.
 - [pip] Probe the Python interpreter version under the short read-only timeout instead of the long state-changing default.
+- [pip] Only target a Python the user can actually install into. mpm's own Homebrew-bundled virtualenv and any externally-managed, non-virtualenv interpreter (PEP 668) are skipped during discovery, so `meta-package-manager`, its bundled dependencies, and other distro-managed packages no longer surface as bogus `outdated` pip upgrades; the manager falls through to a usable `python` on `PATH`, or reports pip unavailable when none exists. Supersedes the dependency-tree filter from {issue}`1767`.
 
 ## [`7.0.1` (2026-06-27)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.0...v7.0.1)
 

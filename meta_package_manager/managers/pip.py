@@ -20,6 +20,7 @@ import email.message
 import importlib.metadata
 import json
 import re
+import subprocess
 import sys
 from functools import cached_property
 from pathlib import Path
@@ -28,6 +29,7 @@ from typing import cast
 from extra_platforms import ALL_PLATFORMS
 
 from ..capabilities import version_not_implemented
+from ..execution import READ_ONLY_TIMEOUT
 from ..manager import PackageManager
 from ..package import (
     EMPTY_METADATA,
@@ -44,6 +46,21 @@ if TYPE_CHECKING:
 
     from ..package import Package
     from ..version import TokenizedString
+
+
+_EXTERNALLY_MANAGED_PROBE = (
+    "import os, sys, sysconfig; "
+    "marker = os.path.join(sysconfig.get_path('stdlib'), 'EXTERNALLY-MANAGED'); "
+    "print(1 if os.path.exists(marker) and sys.prefix == sys.base_prefix else 0)"
+)
+"""One-liner run inside a candidate interpreter to report whether :pep:`668` would
+block ``pip install`` into its default scope.
+
+Prints ``1`` when the interpreter is externally managed (an ``EXTERNALLY-MANAGED``
+marker sits in its ``stdlib`` directory) *and* is not a virtualenv
+(``sys.prefix == sys.base_prefix``), the exact combination pip refuses to install
+into without ``--break-system-packages``. Prints ``0`` otherwise.
+"""
 
 
 _DEP_SPEC_SPLIT_REGEX = re.compile(
@@ -132,25 +149,123 @@ class Pip(PackageManager):
         cli_names: Iterable[str],
         env=None,
     ) -> Generator[Path, None, None]:
-        """Prepend the current Python executable to the list of found binaries.
+        """Yield the Python interpreters the pip manager may target.
+
+        The running interpreter is probed first, so an ``mpm`` installed into a
+        virtualenv manages that virtualenv's own packages, then the Python(s)
+        found on ``PATH``. Two kinds of interpreter are skipped, so the pip
+        manager only ever targets a scope the user can actually install into:
+
+        - mpm's own distributor-managed bundle (see
+          :py:meth:`_running_from_bundled_app`), and
+        - any externally-managed, non-virtualenv interpreter :pep:`668` would
+          forbid ``pip install`` into (see :py:meth:`_pip_install_blocked`).
+
+        When every candidate is skipped the manager is left with no
+        :py:attr:`cli_path` and reports as unavailable, which is correct: there
+        is no user-managed pip environment to act on.
 
         .. todo::
 
             Evaluate `pythonfinder <https://github.com/sarugaku/pythonfinder>`_ to
             replace our custom search logic.
         """
-        # Get current Python executable.
         current_python = None
         current_exec = sys.executable
-        if current_exec:
+        # Skip the running interpreter when it is mpm's own bundled environment:
+        # probing it would shadow the user's real Python and surface mpm and its
+        # pinned dependencies as bogus pip upgrades.
+        if current_exec and not self._running_from_bundled_app():
             current_python = Path(current_exec)
-            yield current_python
+            # Still track it for the dedup below even when PEP 668 blocks it.
+            if not self._pip_install_blocked(current_python):
+                yield current_python
 
-        # Return the rest of the Python executables found on the system as usual.
+        # Return the rest of the Python executables found on the system as usual,
+        # skipping the one already covered above and any externally-managed,
+        # non-virtualenv interpreter pip could not install into.
         for py_path in super().search_all_cli(cli_names=cli_names, env=env):
-            # Do not yield the current Python executable twice.
-            if current_python and py_path != current_python:
-                yield py_path
+            if py_path == current_python or self._pip_install_blocked(py_path):
+                continue
+            yield py_path
+
+    @staticmethod
+    def _running_from_bundled_app() -> bool:
+        """Is ``mpm`` running from its own distributor-managed application bundle?
+
+        Some distributors ship ``mpm`` inside a private virtualenv they own and
+        manage, instead of installing it into a Python environment the user
+        drives with pip. Homebrew is the canonical case: its formula stages
+        ``meta-package-manager`` and every dependency under a ``Cellar`` prefix
+        via ``brew``, in a ``--without-pip --system-site-packages`` virtualenv
+        whose interpreter :py:meth:`search_all_cli` would otherwise probe first.
+
+        Treating that bundle as a pip scope is wrong twice over: it shadows the
+        user's real Python (so ``mpm --pip`` reports only mpm's own closure), and
+        it surfaces ``meta-package-manager`` itself, its pinned dependencies, and
+        unrelated ``--system-site-packages`` leakage as outdated pip packages
+        whose upgrade command would mutate the bundle behind the distributor's
+        back. When this returns ``True``, :py:meth:`search_all_cli` skips the
+        running interpreter and falls through to the Python(s) on ``PATH``.
+
+        Detection keys on Homebrew's two independent fingerprints, either of
+        which is conclusive on its own:
+
+        - ``sys.prefix`` sits under a ``Cellar`` directory (covering the
+          ``/opt/homebrew``, ``/usr/local`` and Linuxbrew prefixes), or
+        - ``meta-package-manager``'s ``INSTALLER`` dist-info record is ``brew``.
+
+        .. note::
+
+            Other standalone-app installers (``pipx``, ``uv tool``) also place
+            ``mpm`` in a private virtualenv, but are not detected here: they
+            leave an ``INSTALLER`` of ``pip`` or ``uv`` and live outside
+            ``Cellar``, so these signals alone cannot tell them apart from a
+            deliberate user install. See :issue:`1767`.
+        """
+        if "/Cellar/" in sys.prefix:
+            return True
+        try:
+            installer = (
+                importlib.metadata.distribution("meta-package-manager").read_text(
+                    "INSTALLER",
+                )
+                or ""
+            )
+        except importlib.metadata.PackageNotFoundError:
+            return False
+        return installer.strip().lower() == "brew"
+
+    def _pip_install_blocked(self, python_path: Path) -> bool:
+        """Would :pep:`668` block ``pip install`` into ``python_path``'s default scope?
+
+        Runs the candidate interpreter with :py:data:`_EXTERNALLY_MANAGED_PROBE` to
+        decide whether it is an externally-managed, non-virtualenv interpreter: the
+        kind a system or distribution package manager owns, where pip refuses to
+        install. :py:meth:`search_all_cli` drops such interpreters so the pip manager
+        only ever targets a Python the user can actually install into, instead of
+        surfacing that environment's distro-managed packages as outdated pip upgrades
+        whose installation pip would reject.
+
+        The probe inherits the ``--timeout`` override when one is set, else the
+        :py:data:`~meta_package_manager.execution.READ_ONLY_TIMEOUT` read-only cap.
+
+        Errs on the side of keeping a candidate: a probe that times out, crashes, or
+        prints anything unexpected returns ``False``, leaving discovery untouched
+        rather than hiding a usable interpreter.
+        """
+        timeout = self.timeout if self.timeout is not None else READ_ONLY_TIMEOUT
+        try:
+            result = subprocess.run(
+                (str(python_path), "-c", _EXTERNALLY_MANAGED_PROBE),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return False
+        return result.stdout.strip() == "1"
 
     @cached_property
     def version(self) -> TokenizedString | None:
@@ -377,71 +492,6 @@ class Pip(PackageManager):
             extras=extras,
         )
 
-    @staticmethod
-    def _own_dependency_names() -> frozenset[str]:
-        """Collect :pep:`503`-normalized names of all packages in
-        ``meta-package-manager``'s dependency tree.
-
-        ``pip list --not-required`` is supposed to filter transitive
-        dependencies, but it relies on ``Requires-Dist`` metadata in each
-        installed distribution to reconstruct the dependency graph. Homebrew's
-        Python formula packaging breaks this assumption: each dependency is
-        declared as an independent ``resource`` block in the formula and
-        ``pip install``-ed individually into the formula's virtualenv. Because
-        each resource is installed in isolation, pip never sees that (for
-        example) ``defusedxml`` is required by ``py-serializable`` which is
-        required by ``cyclonedx-python-lib`` which is required by
-        ``meta-package-manager``. From pip's perspective every resource looks
-        like a top-level package, so ``--not-required`` lets them through and
-        they all appear as outdated.
-
-        When ``meta-package-manager`` is installed via ``uv`` or ``pip``
-        directly the metadata is intact and ``--not-required`` filters
-        correctly. The tree walk is gated on the ``INSTALLER`` dist-info
-        record: only installations attributed to ``pip`` (which includes
-        Homebrew's internal pip) trigger the walk. Modern installers like
-        ``uv`` write their own installer tag, so the walk is skipped entirely
-        in those environments.
-
-        The walk starts at ``meta-package-manager`` and recursively collects
-        every reachable dependency name via ``importlib.metadata``. If the
-        distribution is not found (running from source without installing),
-        the method returns an empty set and the filter is skipped.
-
-        See :issue:`1767`.
-        """
-        # Only Homebrew-style pip installations break --not-required metadata.
-        # Modern installers (uv, poetry, etc.) preserve Requires-Dist and are
-        # identified by their INSTALLER tag, so we skip the walk for them.
-        try:
-            mpm_dist = importlib.metadata.distribution("meta-package-manager")
-        except importlib.metadata.PackageNotFoundError:
-            return frozenset()
-        installer = (mpm_dist.read_text("INSTALLER") or "").strip().lower()
-        if installer != "pip":
-            return frozenset()
-
-        seen: set[str] = set()
-        queue = ["meta-package-manager"]
-        while queue:
-            raw_name = queue.pop()
-            # PEP 503 normalization: lowercase, collapse separator runs.
-            normalized = re.sub(r"[-_.]+", "-", raw_name).lower()
-            if normalized in seen:
-                continue
-            seen.add(normalized)
-            try:
-                dist = importlib.metadata.distribution(raw_name)
-            except importlib.metadata.PackageNotFoundError:
-                continue
-            for req_str in dist.requires or []:
-                match = re.match(r"[A-Za-z0-9][-A-Za-z0-9_.]*", req_str)
-                if match:
-                    queue.append(match.group())
-        # Keep only dependencies; mpm itself should still appear if outdated.
-        seen.discard("meta-package-manager")
-        return frozenset(seen)
-
     @property
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
@@ -452,13 +502,6 @@ class Pip(PackageManager):
             restricting results to top-level packages only. Upgrading transitive
             dependencies can break version constraints of their parent packages.
             See :issue:`1214`.
-
-        .. caution::
-
-            Results are additionally filtered against ``meta-package-manager``'s
-            own dependency tree to suppress false positives caused by Homebrew's
-            per-resource installation layout. See ``_own_dependency_names()``
-            and :issue:`1767`.
 
         .. code-block:: shell-session
 
@@ -528,14 +571,9 @@ class Pip(PackageManager):
         )
 
         if output:
-            own_deps = self._own_dependency_names()
             for package in json.loads(output):
-                pkg_name = package["name"]
-                # Skip packages that belong to mpm's own dependency tree.
-                if re.sub(r"[-_.]+", "-", pkg_name).lower() in own_deps:
-                    continue
                 yield self.package(
-                    id=pkg_name,
+                    id=package["name"],
                     installed_version=package["version"],
                     latest_version=package["latest_version"],
                 )

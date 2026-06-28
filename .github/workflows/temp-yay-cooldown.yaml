@@ -1,10 +1,11 @@
 ---
 name: "Temp - yay cooldown live test"
 
-# TEMPORARY workflow. Incremental bisection from a known-good simple overlay toward
-# mpm's real overlay, adding the real hook bodies one at a time, to pin what breaks
-# the AURPreInstall gate on a true first clone. Each case is a true cold clone.
-# Manual dispatch only.
+# TEMPORARY workflow. The mpm cooldown hook logic gates first-clone installs fine
+# (Z-series), but mpm's REAL init.lua text does not. This tests the two structural
+# elements unique to the real text - the `if cutoff then` wrapper and the chaining
+# block (parsed even when skipped) - added to the known-good core, config.json + /tmp,
+# true cold clone. Manual dispatch only.
 #
 # Upstream context: https://github.com/Jguer/yay/issues/2883
 
@@ -34,21 +35,22 @@ jobs:
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-      - name: Write the incremental probe
+      - name: Write the structural probe
         run: |
           cat > yay_cooldown_probe.py <<'PY'
-          """Incremental bisection: add mpm's real hook bodies until the gate breaks."""
+          """Test the structural elements unique to mpm's real init.lua text."""
 
           from __future__ import annotations
 
           import os
           import subprocess
+          import tempfile
           from pathlib import Path
 
           pkg = os.environ["AUR_PACKAGE"]
           home = Path(os.environ["HOME"])
           log = home / "diag.log"
-          cutoff = "1779717121"  # below downgrade's last_modified -> abort if it fires.
+          cutoff = "1779717121"
 
           WD = (
               'local function wd(s)\n'
@@ -58,14 +60,17 @@ jobs:
               'local cutoff = tonumber(os.getenv("MPM_COOLDOWN_EPOCH"))\n'
               'wd("START")\n'
           )
-          ABORT = (
-              'yay.create_autocmd("AURPreInstall", {\n'
-              '  desc = "h",\n'
-              '  callback = function(event)\n'
-              '    wd("FIRED lm=" .. tostring(event.data.last_modified))\n'
-              '    yay.abort("ABORT")\n'
-              '  end,\n'
-              '})\n'
+          CHAIN_BLOCK = (
+              'local user_dir = os.getenv("MPM_YAY_USER_DIR")\n'
+              'if user_dir and user_dir ~= "" then\n'
+              '  package.path = user_dir .. "/?.lua;" .. user_dir .. "/?/init.lua;" .. package.path\n'
+              '  local h = io.open(user_dir .. "/init.lua", "r")\n'
+              '  if h then\n'
+              '    h:close()\n'
+              '    local ok, err = pcall(dofile, user_dir .. "/init.lua")\n'
+              '    if not ok then yay.log.error("user init failed: " .. tostring(err)) end\n'
+              '  end\n'
+              'end\n'
           )
           REAL_UPSEL = (
               'yay.create_autocmd("UpgradeSelect", {\n'
@@ -93,14 +98,14 @@ jobs:
               '})\n'
           )
           END = 'wd("END")\n'
+          HOOKS = REAL_UPSEL + REAL_AUR
 
-          CORE = WD + REAL_UPSEL + REAL_AUR + END  # = Y3, which blocks first-clone.
-          # Z1 adds config.json, Z2 puts the overlay in /tmp, Z3 adds both (= X7 deltas).
-          import tempfile
           VARIANTS = {
-              "Z1 core + config.json": (CORE, True, False),
-              "Z2 core + /tmp overlay": (CORE, False, True),
-              "Z3 core + config.json + /tmp": (CORE, True, True),
+              "W1 core + if-cutoff wrapper": WD + "if cutoff then\n" + HOOKS + "end\n" + END,
+              "W2 core + chaining block": WD + CHAIN_BLOCK + HOOKS + END,
+              "W3 core + wrapper + chaining (= mpm)": (
+                  WD + CHAIN_BLOCK + "if cutoff then\n" + HOOKS + "end\n" + END
+              ),
           }
 
 
@@ -118,15 +123,14 @@ jobs:
 
 
           results = {}
-          for name, (lua, with_config, in_tmp) in VARIANTS.items():
+          for name, lua in VARIANTS.items():
               log.unlink(missing_ok=True)
               reset_cold()
-              root = Path(tempfile.mkdtemp(prefix="mpm-yay-cooldown-")) if in_tmp else home / name.split()[0].lower()
+              root = Path(tempfile.mkdtemp(prefix="mpm-yay-cooldown-"))
               ov = root / "yay"
               ov.mkdir(parents=True, exist_ok=True)
               (ov / "init.lua").write_text(lua, encoding="UTF-8")
-              if with_config:
-                  (ov / "config.json").write_text("{}\n", encoding="UTF-8")
+              (ov / "config.json").write_text("{}\n", encoding="UTF-8")
               env = {**os.environ, "XDG_CONFIG_HOME": str(root), "MPM_COOLDOWN_EPOCH": cutoff}
               print(f"\n=== {name} (true cold; expect BLOCK) ===", flush=True)
               subprocess.run(["yay", "--sync", "--noconfirm", pkg], env=env, text=True)
@@ -158,7 +162,7 @@ jobs:
       - name: Report yay version
         run: sudo --set-home --user builder yay --version
 
-      - name: Run the incremental probe
+      - name: Run the structural probe
         env:
           AUR_PACKAGE: ${{ inputs.aur-package }}
         run: >

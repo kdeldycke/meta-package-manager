@@ -48,6 +48,7 @@ jobs:
 
           import os
           import subprocess
+          import tempfile
           from pathlib import Path
 
           pkg = os.environ["AUR_PACKAGE"]
@@ -189,9 +190,50 @@ jobs:
               trace = bisect_log.read_text().strip() if bisect_log.exists() else "(no log)"
               print(f"{name}: blocked={blocked} | trace: {trace!r}", flush=True)
 
+          # V5 = V4 but with a config.json in the overlay (mpm symlinks one in).
+          print("\n=== V5 = V4 + config.json in overlay (expect BLOCKED) ===", flush=True)
+          cleanup()
+          bisect_log.unlink(missing_ok=True)
+          ov5 = write_overlay("V5", LOG + V4)
+          (ov5 / "yay" / "config.json").write_text("{}\n", encoding="UTF-8")
+          subprocess.run(
+              ["yay", "--sync", "--noconfirm", pkg],
+              env={
+                  **os.environ,
+                  "XDG_CONFIG_HOME": str(ov5),
+                  "MPM_COOLDOWN_EPOCH": cutoff,
+                  "MPM_YAY_USER_DIR": str(user_yay),
+              },
+              text=True,
+          )
+          results["V5"] = not installed()
+          trace = bisect_log.read_text().strip() if bisect_log.exists() else "(no log)"
+          print(f"V5: blocked={results['V5']} | trace: {trace!r}", flush=True)
+
+          # V6 = V4 but with the overlay in a /tmp mkdtemp dir (like mpm).
+          print("\n=== V6 = V4 in /tmp overlay (expect BLOCKED) ===", flush=True)
+          cleanup()
+          bisect_log.unlink(missing_ok=True)
+          root6 = Path(tempfile.mkdtemp(prefix="mpm-yay-cooldown-"))
+          (root6 / "yay").mkdir(parents=True, exist_ok=True)
+          (root6 / "yay" / "init.lua").write_text(LOG + V4, encoding="UTF-8")
+          subprocess.run(
+              ["yay", "--sync", "--noconfirm", pkg],
+              env={
+                  **os.environ,
+                  "XDG_CONFIG_HOME": str(root6),
+                  "MPM_COOLDOWN_EPOCH": cutoff,
+                  "MPM_YAY_USER_DIR": str(user_yay),
+              },
+              text=True,
+          )
+          results["V6"] = not installed()
+          trace = bisect_log.read_text().strip() if bisect_log.exists() else "(no log)"
+          print(f"V6: blocked={results['V6']} | trace: {trace!r}", flush=True)
+
           cleanup()
           print("\n=== BISECTION SUMMARY ===", flush=True)
-          for name in ("V1", "V2", "V3", "V4"):
+          for name in ("V1", "V2", "V3", "V4", "V5", "V6"):
               print(f"  {name}: {'BLOCKED' if results[name] else 'installed (abort failed)'}", flush=True)
           PY
 

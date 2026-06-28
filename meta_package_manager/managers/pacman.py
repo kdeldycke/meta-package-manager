@@ -395,6 +395,16 @@ class Yay(Pacman):
     usable for everything except the cooldown.
     """
 
+    _resolving_cooldown_env = False
+    """Re-entrancy guard for :py:meth:`cooldown_env`.
+
+    Held while :py:meth:`cooldown_env` resolves :py:attr:`supports_cooldown`, whose
+    :py:attr:`version <meta_package_manager.execution.CLIExecutor.version>` lookup runs
+    ``yay --version`` through :py:meth:`run`, which calls straight back into
+    :py:meth:`cooldown_env`. The nested call returns early so the probe runs without a
+    cooldown env instead of recursing until the stack overflows.
+    """
+
     @property
     def supports_cooldown(self) -> bool:
         """Whether this yay can natively enforce a release-age cooldown.
@@ -427,17 +437,28 @@ class Yay(Pacman):
         Returns an empty mapping when no cooldown is set or the installed yay predates
         the Lua hooks (see :py:attr:`supports_cooldown`).
         """
-        if self.cooldown is None or not self.supports_cooldown:
+        if self.cooldown is None:
             return {}
-        cutoff = datetime.now(tz=timezone.utc) - self.cooldown
-        env = {
-            "XDG_CONFIG_HOME": str(self._cooldown_overlay_dir),
-            "MPM_COOLDOWN_EPOCH": str(int(cutoff.timestamp())),
-        }
-        user_dir = self._user_yay_config_dir()
-        if user_dir is not None:
-            env["MPM_YAY_USER_DIR"] = str(user_dir)
-        return env
+        # Resolving `supports_cooldown` reads `version`, which runs `yay --version`
+        # through `run()`, re-entering this method. Break that loop: a version probe
+        # needs no cooldown env, and the outer call finishes once `version` is cached.
+        if self._resolving_cooldown_env:
+            return {}
+        self._resolving_cooldown_env = True
+        try:
+            if not self.supports_cooldown:
+                return {}
+            cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+            env = {
+                "XDG_CONFIG_HOME": str(self._cooldown_overlay_dir),
+                "MPM_COOLDOWN_EPOCH": str(int(cutoff.timestamp())),
+            }
+            user_dir = self._user_yay_config_dir()
+            if user_dir is not None:
+                env["MPM_YAY_USER_DIR"] = str(user_dir)
+            return env
+        finally:
+            self._resolving_cooldown_env = False
 
     @staticmethod
     def _user_yay_config_dir() -> Path | None:

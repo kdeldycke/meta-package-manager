@@ -362,6 +362,41 @@ def test_yay_cooldown_overlay_without_user_config(tmp_path, monkeypatch):
     assert not (overlay / "config.json").exists()
 
 
+def test_yay_cooldown_no_recursion_when_version_resolved_lazily(tmp_path, monkeypatch):
+    """Resolving the version lazily under an active cooldown must not recurse.
+
+    ``version`` runs ``yay --version`` through ``run()``, which injects
+    ``cooldown_env()``, which consults ``supports_cooldown`` -> ``version``. The
+    re-entrancy guard must break that loop. Regression for a live ``RecursionError``
+    the pre-seeded-version tests above could not catch.
+    """
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    manager = Yay()
+    manager.cooldown = timedelta(days=7)
+    # Make the binary look present so the `version` property actually probes.
+    manager.__dict__["supported"] = True
+    manager.__dict__["executable"] = True
+
+    def fake_run_cli(*args, **kwargs):
+        # The real run() injects cooldown_env() on every CLI call; mimic that so the
+        # version probe re-enters cooldown_env -> supports_cooldown -> version.
+        manager.cooldown_env()
+        return "yay v13.0.2 - libalpm v13.0.1"
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+
+    # Must terminate and resolve correctly (used to raise RecursionError).
+    assert str(manager.version) == "13.0.2"
+    assert manager.supports_cooldown is True
+    assert set(manager.cooldown_env()) == {
+        "XDG_CONFIG_HOME",
+        "MPM_COOLDOWN_EPOCH",
+        "MPM_YAY_USER_DIR",
+    }
+
+
 def test_cooldown_permits_without_cooldown():
     manager = Homebrew()
     manager.cooldown = None

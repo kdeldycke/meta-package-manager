@@ -10,6 +10,7 @@ description = "🎁 wraps all package managers with a unifying CLI"
 readme = "readme.md"
 keywords = [
   "alpine linux",
+  "anaconda",
   "apk",
   "apm",
   "apt",
@@ -24,6 +25,7 @@ keywords = [
   "CLI",
   "cli-tools",
   "composer",
+  "conda",
   "cpan",
   "cyclonedx",
   "deb-get",
@@ -574,6 +576,10 @@ label = "📦 manager: composer"
 patterns = [ "composer", "php" ]
 
 [[tool.repomatic.labels.content-rules]]
+label = "📦 manager: conda"
+patterns = [ "conda", "anaconda", "miniconda", "conda-forge" ]
+
+[[tool.repomatic.labels.content-rules]]
 label = "📦 manager: dnf-based"
 patterns = [ "dnf", "yum", "rpm", "fedora", "redhat", "rhel" ]
 
@@ -734,6 +740,11 @@ description = "choco"
 name = "📦 manager: composer"
 color = "bfdadc"
 description = "composer"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: conda"
+color = "bfdadc"
+description = "conda"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: cpan"
@@ -942,6 +953,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/chocolatey*", "tests/*ch
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: composer"
 any-glob-to-any-file = [ "meta_package_manager/managers/composer*", "tests/*composer*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: conda"
+any-glob-to-any-file = [ "meta_package_manager/managers/conda*", "tests/*conda*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: dnf-based"

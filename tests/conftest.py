@@ -256,6 +256,7 @@ PACKAGE_IDS = {
     "cask": "itsycal",
     "choco": "hyperfine",
     "composer": "ralouphie/getallheaders",
+    "conda": "pytz",  # Pure-Python, zero-dependency leaf on the default channel.
     "cpan": "Try::Tiny",
     "deb-get": "deb-get",
     "dnf": "nyancat",

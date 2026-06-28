@@ -236,7 +236,6 @@ homepages:
   chezmoi: https://www.chezmoi.io
   choosenim: https://github.com/dom96/choosenim
   chromebrew: https://chromebrew.github.io
-  conda: https://docs.conda.io
   containers: https://github.com/containers/podman
   dein: https://github.com/Shougo/dein.vim
   deno: https://deno.com

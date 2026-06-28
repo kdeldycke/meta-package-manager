@@ -33,6 +33,7 @@ from .managers.asdf import ASDF
 from .managers.cargo import Cargo
 from .managers.chocolatey import Choco
 from .managers.composer import Composer
+from .managers.conda import Conda
 from .managers.cpan import CPAN
 from .managers.deb_get import Deb_Get
 from .managers.dnf import DNF, DNF5, YUM
@@ -91,6 +92,7 @@ manager_classes = (
     Cask,
     Choco,
     Composer,
+    Conda,
     CPAN,
     Deb_Get,
     DNF,

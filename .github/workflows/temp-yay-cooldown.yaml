@@ -1,0 +1,143 @@
+---
+name: "Temp - yay cooldown live test"
+
+# TEMPORARY workflow. Validates the yay --cooldown overlay (the
+# Yay.cooldown_env / supports_cooldown prototype) against a real Arch Linux +
+# yay >= 13 environment, which the hermetic unit layer cannot cover. Manual
+# dispatch only; delete once the behavior is confirmed and any permanent
+# coverage is decided.
+#
+# It drives yay directly with the environment mpm's cooldown_env() produces,
+# rather than through `mpm install`: mpm prefixes yay with sudo (correct for raw
+# pacman), and yay refuses to build as root. Running yay as the unprivileged
+# build user is the faithful way to exercise the AURPreInstall/UpgradeSelect
+# hooks the overlay delivers.
+#
+# Upstream context: https://github.com/Jguer/yay/issues/2883
+
+"on":
+  workflow_dispatch:
+    inputs:
+      aur-package:
+        description: >
+          A small AUR-only package (absent from the official repos) for the
+          install A/B test. Must build quickly and pull no heavy dependencies.
+        default: downgrade
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+
+  yay-cooldown:
+    name: "yay --cooldown on Arch Linux"
+    runs-on: ubuntu-24.04
+    container:
+      image: archlinux:base-devel
+    steps:
+      - name: Update system and install tooling
+        run: >
+          pacman --sync --refresh --sysupgrade --noconfirm --needed
+          base-devel git nodejs python sudo uv
+
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Write the live validator
+        run: |
+          cat > yay_cooldown_validate.py <<'PY'
+          """Drive a real yay with mpm's cooldown overlay and assert the gate works."""
+
+          from __future__ import annotations
+
+          import os
+          import subprocess
+          from datetime import timedelta
+          from pathlib import Path
+
+          from meta_package_manager.managers.pacman import Yay
+
+          pkg = os.environ["AUR_PACKAGE"]
+          user_yay = Path(os.environ["HOME"], ".config", "yay")
+          user_yay.mkdir(parents=True, exist_ok=True)
+
+          # A user init.lua that drops a sentinel when loaded, proving the overlay
+          # chains the user's real config instead of shadowing it.
+          sentinel = user_yay / "chained.sentinel"
+          (user_yay / "init.lua").write_text(
+              'local f = io.open(os.getenv("HOME") .. "/.config/yay/chained.sentinel", "w")\n'
+              'if f then f:write("loaded"); f:close() end\n',
+              encoding="UTF-8",
+          )
+          (user_yay / "config.json").write_text("{}\n", encoding="UTF-8")
+
+
+          def cooldown_env(delta: timedelta) -> dict[str, str]:
+              manager = Yay()
+              manager.cooldown = delta
+              print(f"detected yay version: {manager.version}", flush=True)
+              assert manager.supports_cooldown, "real yay must advertise cooldown support"
+              overlay = manager.cooldown_env()
+              print("injected:", {k: overlay[k] for k in sorted(overlay)}, flush=True)
+              return {**os.environ, **overlay}
+
+
+          def installed(name: str) -> bool:
+              return subprocess.run(["pacman", "--query", name]).returncode == 0
+
+
+          def yay_install(name: str, env: dict[str, str]) -> str:
+              proc = subprocess.run(
+                  ["yay", "--sync", "--noconfirm", name],
+                  env=env,
+                  text=True,
+                  encoding="UTF-8",
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.STDOUT,
+              )
+              print(proc.stdout, flush=True)
+              return proc.stdout
+
+
+          assert not installed(pkg), f"{pkg!r} must start uninstalled"
+
+          print(f"\n=== a 100-year cooldown must hold back {pkg} ===", flush=True)
+          sentinel.unlink(missing_ok=True)
+          out = yay_install(pkg, cooldown_env(timedelta(days=36500)))
+          assert sentinel.exists(), "overlay did not chain the user's init.lua"
+          assert not installed(pkg), f"{pkg!r} was installed despite the cooldown"
+          if "mpm cooldown" not in out:
+              print("NOTE: abort message not seen in output (state proof still holds)")
+          print(f"PASS: {pkg} blocked, user init.lua chained", flush=True)
+
+          print(f"\n=== a 1-second cooldown must allow {pkg} ===", flush=True)
+          yay_install(pkg, cooldown_env(timedelta(seconds=1)))
+          assert installed(pkg), f"{pkg!r} was not installed under a 1s cooldown"
+          print(f"PASS: {pkg} installed under a 1s cooldown", flush=True)
+
+          print("\nALL LIVE CHECKS PASSED", flush=True)
+          PY
+
+      - name: Create an unprivileged build user
+        run: |
+          useradd --create-home builder
+          printf 'builder ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/builder
+          chmod 0440 /etc/sudoers.d/builder
+          chown --recursive builder:builder .
+
+      - name: Install yay from the AUR
+        run: >
+          sudo --set-home --user builder bash -c
+          'git clone --depth 1 https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+          && cd /tmp/yay-bin
+          && makepkg --install --syncdeps --noconfirm'
+
+      - name: Report yay version
+        run: sudo --set-home --user builder yay --version
+
+      - name: Validate the cooldown overlay against real yay
+        env:
+          AUR_PACKAGE: ${{ inputs.aur-package }}
+        run: >
+          sudo --set-home --user builder --preserve-env=AUR_PACKAGE
+          uv run --frozen python yay_cooldown_validate.py

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 from click.exceptions import BadParameter
@@ -27,9 +28,11 @@ from meta_package_manager.duration import Duration
 from meta_package_manager.managers.cargo import Cargo
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM
+from meta_package_manager.managers.pacman import Yay, _YAY_COOLDOWN_INIT_LUA
 from meta_package_manager.managers.pip import Pip
 from meta_package_manager.managers.pipx import Pipx
 from meta_package_manager.managers.uv import UV, UVX
+from meta_package_manager.version import parse_version
 
 """Test the supply-chain release-age cooldown feature."""
 
@@ -241,6 +244,122 @@ def test_npm_injects_integer_days(cooldown, expected_days):
     assert manager.cooldown_env() == {}
     manager.cooldown = cooldown
     assert manager.cooldown_env() == {"npm_config_min-release-age": expected_days}
+
+
+def test_yay_advertises_cooldown_while_idle():
+    """While idle, yay reports its structural capability without a version probe.
+
+    The import-time ``COOLDOWN_SUPPORTED_MANAGERS`` help text reads this for every
+    manager, so it must never shell out to ``yay --version``.
+    """
+    manager = Yay()
+    assert manager.cooldown is None
+    assert manager.supports_cooldown is True
+    assert manager.cooldown_env_var == "XDG_CONFIG_HOME"
+    assert "version" not in manager.__dict__
+    assert manager.cooldown_env() == {}
+
+
+@pytest.mark.parametrize(
+    ("version", "supported"),
+    (
+        ("13.0.0", True),
+        ("13.0.2", True),
+        ("14.1.0", True),
+        ("12.4.2", False),
+        ("11.0.0", False),
+    ),
+)
+def test_yay_cooldown_version_gate(version, supported):
+    """yay can enforce a cooldown only from v13.0.0, when its Lua hooks landed."""
+    manager = Yay()
+    # Bypass the live `yay --version` probe with a parsed fake.
+    manager.__dict__["version"] = parse_version(version)
+    manager.cooldown = timedelta(days=7)
+    assert manager.supports_cooldown is supported
+    # An unsupported version must never inject a half-configured environment.
+    if not supported:
+        assert manager.cooldown_env() == {}
+
+
+def test_yay_cooldown_undetectable_version():
+    """A yay whose version cannot be parsed cannot enforce a cooldown."""
+    manager = Yay()
+    manager.__dict__["version"] = None
+    manager.cooldown = timedelta(days=7)
+    assert manager.supports_cooldown is False
+    assert manager.cooldown_env() == {}
+
+
+def test_yay_cooldown_policy_gates_both_paths():
+    """The generated policy gates upgrades and installs off the same cutoff."""
+    assert 'create_autocmd("UpgradeSelect"' in _YAY_COOLDOWN_INIT_LUA
+    assert 'create_autocmd("AURPreInstall"' in _YAY_COOLDOWN_INIT_LUA
+    assert "MPM_COOLDOWN_EPOCH" in _YAY_COOLDOWN_INIT_LUA
+
+
+@pytest.mark.parametrize(
+    ("env", "expected"),
+    (
+        ({"XDG_CONFIG_HOME": "/xdg", "HOME": "/home/u"}, Path("/xdg/yay")),
+        ({"HOME": "/home/u"}, Path("/home/u/.config/yay")),
+        ({}, None),
+    ),
+)
+def test_yay_user_config_dir(env, expected, monkeypatch):
+    """The real config dir follows yay's own XDG_CONFIG_HOME over HOME precedence."""
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    monkeypatch.delenv("HOME", raising=False)
+    for key, value in env.items():
+        monkeypatch.setenv(key, value)
+    assert Yay._user_yay_config_dir() == expected
+
+
+def test_yay_cooldown_overlay(tmp_path, monkeypatch):
+    """An active cooldown on a recent yay builds a lossless XDG_CONFIG_HOME overlay."""
+    user_cfg = tmp_path / ".config" / "yay"
+    user_cfg.mkdir(parents=True)
+    (user_cfg / "config.json").write_text("{}")
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    manager = Yay()
+    manager.__dict__["version"] = parse_version("13.0.2")
+    manager.cooldown = timedelta(days=7)
+    env = manager.cooldown_env()
+
+    assert set(env) == {"XDG_CONFIG_HOME", "MPM_COOLDOWN_EPOCH", "MPM_YAY_USER_DIR"}
+    assert env["MPM_YAY_USER_DIR"] == str(user_cfg)
+
+    # The cutoff sits roughly one cooldown in the past (a minute of slack).
+    cutoff = datetime.fromtimestamp(int(env["MPM_COOLDOWN_EPOCH"]), tz=timezone.utc)
+    now = datetime.now(tz=timezone.utc)
+    assert abs((now - cutoff) - timedelta(days=7)) < timedelta(minutes=1)
+
+    # The overlay carries the generated policy and a symlink back to the real config.
+    overlay = Path(env["XDG_CONFIG_HOME"]) / "yay"
+    assert (overlay / "init.lua").read_text(encoding="UTF-8") == _YAY_COOLDOWN_INIT_LUA
+    config_link = overlay / "config.json"
+    assert config_link.is_symlink()
+    assert config_link.resolve() == (user_cfg / "config.json").resolve()
+
+    # The directory is memoized, so repeated calls reuse the same overlay.
+    assert manager.cooldown_env()["XDG_CONFIG_HOME"] == env["XDG_CONFIG_HOME"]
+
+
+def test_yay_cooldown_overlay_without_user_config(tmp_path, monkeypatch):
+    """With no user config present, the overlay omits the config.json symlink."""
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    manager = Yay()
+    manager.__dict__["version"] = parse_version("13.0.2")
+    manager.cooldown = timedelta(days=7)
+    env = manager.cooldown_env()
+
+    overlay = Path(env["XDG_CONFIG_HOME"]) / "yay"
+    assert (overlay / "init.lua").is_file()
+    assert not (overlay / "config.json").exists()
 
 
 def test_cooldown_permits_without_cooldown():

@@ -22,11 +22,8 @@ python3Packages.buildPythonApplication (finalAttrs: {
   dependencies = with python3Packages; [
     boltons
     click-extra
-    cyclonedx-python-lib
     extra-platforms
-    more-itertools
     packageurl-python
-    spdx-tools
     tomli-w
     xmltodict
   ];
@@ -37,8 +34,8 @@ python3Packages.buildPythonApplication (finalAttrs: {
   pythonImportsCheck = [ "meta_package_manager" ];
 
   meta = {
-    description = "CLI wrapping all package managers with a unifying interface";
-    homepage = "https://github.com/kdeldycke/meta-package-manager";
+    description = "Package managers abstraction and unification tool";
+    homepage = "https://kdeldycke.github.io/meta-package-manager/";
     changelog = "https://github.com/kdeldycke/meta-package-manager/blob/v${finalAttrs.version}/changelog.md";
     license = lib.licenses.gpl2Plus;
     # Add: maintainers = with lib.maintainers; [ kdeldycke ];

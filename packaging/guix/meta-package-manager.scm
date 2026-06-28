@@ -3,49 +3,59 @@
 ;;; This definition is maintained in the mpm repository and updated automatically
 ;;; on each release.  To use it locally:
 ;;;
-;;;   guix install --load-path=packaging/guix python-meta-package-manager
+;;;   guix install --load-path=packaging/guix meta-package-manager
 ;;;
 ;;; To submit upstream, copy the define-public form into the appropriate module
-;;; in the Guix repository (gnu/packages/python-xyz.scm).
+;;; in the Guix repository (gnu/packages/package-management.scm).
 
 (define-module (meta-package-manager)
   #:use-module (guix build-system pyproject)
-  #:use-module (guix download)
+  #:use-module (guix gexp)
+  #:use-module (guix git-download)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (gnu packages python-build)
+  #:use-module (gnu packages python-check)
   #:use-module (gnu packages python-xyz))
 
-(define-public python-meta-package-manager
+(define-public meta-package-manager
   (package
-    (name "python-meta-package-manager")
+    (name "meta-package-manager")
     (version "7.0.1")
     (source
      (origin
-       (method url-fetch)
-       (uri (pypi-uri "meta_package_manager" version))
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/kdeldycke/meta-package-manager")
+             (commit (string-append "v" version))))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "044mc82wdscyn9w1wfd28220klr8wg129a63kk90ppm79l6vmqsd"))))
+        (base32 "1y56z5970kp540w408y0fzk7g7r27vplqqihdav7gf8mqzfd23sz"))))
     (build-system pyproject-build-system)
+    ;; Upstream builds with uv-build, which is not yet packaged for Guix; fall
+    ;; back to setuptools.  Skip the SBOM CLI test, which pulls heavy optional
+    ;; dependencies that are not declared here.
+    (arguments
+     (list #:build-backend "setuptools.build_meta"
+           #:test-flags #~(list "--ignore=tests/test_cli_sbom.py")))
+    (native-inputs
+     (list python-pytest
+           python-pyyaml
+           python-setuptools
+           python-tomlkit))
     ;; Some propagated inputs may not yet exist in Guix and will need packaging
     ;; before this definition can be submitted upstream.
     (propagated-inputs
      (list python-boltons
            python-click-extra
-           python-cyclonedx-python-lib
            python-extra-platforms
-           python-more-itertools
            python-packageurl-python
-           python-spdx-tools
            python-tomli-w
            python-xmltodict))
-    (native-inputs
-     (list python-uv-build))
-    (home-page "https://github.com/kdeldycke/meta-package-manager")
-    (synopsis "CLI that wraps all package managers with a unifying interface")
-    (description
-     "Meta Package Manager (mpm) is a CLI that wraps multiple package managers
-behind a unified interface.  It can list, search, install, upgrade, and remove
-packages across all detected managers simultaneously.  Output formats include
-tables, JSON, and CSV.")
+    (home-page "https://kdeldycke.github.io/meta-package-manager/")
+    (synopsis "Package managers abstraction and unification tool")
+    (description "Meta Package Manager (mpm) is a CLI that wraps multiple
+GNU/Linux package managers behind a unified interface.  It can list, search,
+install, upgrade, and remove packages across all detected managers
+simultaneously.  Output formats include tables, JSON, and CSV.")
     (license license:gpl2+)))

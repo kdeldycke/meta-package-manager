@@ -12,6 +12,8 @@
 - [mpm] Managers that share a backend lock (`brew`/`cask` over Homebrew, `apt`/`apt-mint`/`deb-get` over dpkg, plus the RPM and pacman families) now run serially within their family during the state-changing commands (`sync`, `cleanup`, `upgrade`, `install`, `remove`, `restore`) instead of racing on the lock, while unrelated managers still run concurrently. This fixes `cask` being spuriously marked `✗` (*"Another active Homebrew update process is already running"*) when `brew` and `cask` synced at once. Family members resolving to an identical command (both running `brew update` for `sync`) now execute it a single time.
 - [yay] Honor `--cooldown` by overlaying a generated `init.lua` through a private `XDG_CONFIG_HOME`, holding back AUR upgrades and installs newer than the release-age floor while preserving the user's own yay config. Requires yay `13.0.0` for its Lua hooks; an older yay reports no cooldown support.
 - [conda] Add Conda package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, and `cleanup` support, cross-platform on Linux, macOS, and Windows; requires conda `>=4.6.0`.
+- [guix] Rename the reference package to `meta-package-manager`, fetch its source from the tagged git commit instead of the PyPI sdist, build it with the `setuptools.build_meta` backend, and drop the now-optional SBOM and `more-itertools` inputs to match the shipped dependency set.
+- [nix] Drop the now-optional SBOM and `more-itertools` dependencies from the reference package definition.
 
 ## [`7.0.1` (2026-06-27)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.0...v7.0.1)
 

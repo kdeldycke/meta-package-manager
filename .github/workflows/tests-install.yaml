@@ -152,7 +152,7 @@ jobs:
         run: |
           chmod +x guix-install.sh
           yes | sudo ./guix-install.sh
-      - run: guix install --load-path=./packaging/guix python-meta-package-manager
+      - run: guix install --load-path=./packaging/guix meta-package-manager
       - run: mpm --version
 
   # https://search.nixos.org/packages?query=meta-package-manager

@@ -217,7 +217,7 @@ A Guix package definition is [maintained in the repository](https://github.com/k
 
 ```{code-block} shell-session
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
-$ guix install --load-path=./meta-package-manager/packaging/guix python-meta-package-manager
+$ guix install --load-path=./meta-package-manager/packaging/guix meta-package-manager
 ```
 
 ````{admonition} Help land it in the Guix channel
@@ -225,7 +225,7 @@ $ guix install --load-path=./meta-package-manager/packaging/guix python-meta-pac
 The Guix package is pending review at [guix/guix#8047](https://codeberg.org/guix/guix/pulls/8047). Once merged, installation will be a one-liner:
 
 ```{code-block} shell-session
-$ guix install python-meta-package-manager
+$ guix install meta-package-manager
 ```
 
 You can help move it forward by showing your support on [the pull request](https://codeberg.org/guix/guix/pulls/8047).

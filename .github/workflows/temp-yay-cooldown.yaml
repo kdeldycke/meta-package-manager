@@ -35,7 +35,7 @@ jobs:
       - name: Update system and install tooling
         run: >
           pacman --sync --refresh --sysupgrade --noconfirm --needed
-          base-devel git nodejs python sudo
+          base-devel git nodejs python sudo uv
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
@@ -49,7 +49,10 @@ jobs:
           import os
           import subprocess
           import tempfile
+          from datetime import timedelta
           from pathlib import Path
+
+          from meta_package_manager.managers.pacman import Yay
 
           pkg = os.environ["AUR_PACKAGE"]
           home = Path(os.environ["HOME"])
@@ -231,9 +234,48 @@ jobs:
           trace = bisect_log.read_text().strip() if bisect_log.exists() else "(no log)"
           print(f"V6: blocked={results['V6']} | trace: {trace!r}", flush=True)
 
+          # V7 = mpm's REAL cooldown_env() overlay (reproduces the failing run exactly),
+          # plus a diagnostic AURPreInstall hook appended after mpm's own hooks. The diag
+          # hook only fires if mpm's hook did NOT abort, revealing the lm/cutoff it saw.
+          print("\n=== V7 = mpm's real cooldown_env() overlay (expect BLOCKED) ===", flush=True)
+          cleanup()
+          bisect_log.unlink(missing_ok=True)
+          manager = Yay()
+          manager.cooldown = timedelta(days=365)
+          env7 = {**os.environ, **manager.cooldown_env()}
+          ov7 = Path(env7["XDG_CONFIG_HOME"]) / "yay"
+          print(
+              f"V7 cutoff(env)={env7.get('MPM_COOLDOWN_EPOCH')} "
+              f"config.json={ (ov7 / 'config.json').exists() }",
+              flush=True,
+          )
+          ov7_init = ov7 / "init.lua"
+          ov7_init.write_text(
+              ov7_init.read_text()
+              + '\nlocal function w7(s)\n'
+              '  local f = io.open(os.getenv("HOME") .. "/bisect.log", "a")\n'
+              '  if f then f:write(s .. "\\n"); f:close() end\n'
+              'end\n'
+              'w7("V7 mpm init.lua reached end")\n'
+              'yay.create_autocmd("AURPreInstall", {\n'
+              '  desc = "v7diag",\n'
+              '  callback = function(event)\n'
+              '    w7("V7 DIAG fired lm=" .. tostring(event.data.last_modified)\n'
+              '      .. " cutoff_env=" .. tostring(tonumber(os.getenv("MPM_COOLDOWN_EPOCH"))))\n'
+              '  end,\n'
+              '})\n',
+              encoding="UTF-8",
+          )
+          subprocess.run(
+              ["yay", "--sync", "--noconfirm", pkg], env=env7, text=True
+          )
+          results["V7"] = not installed()
+          trace = bisect_log.read_text().strip() if bisect_log.exists() else "(no log)"
+          print(f"V7: blocked={results['V7']} | trace: {trace!r}", flush=True)
+
           cleanup()
           print("\n=== BISECTION SUMMARY ===", flush=True)
-          for name in ("V1", "V2", "V3", "V4", "V5", "V6"):
+          for name in ("V1", "V2", "V3", "V4", "V5", "V6", "V7"):
               print(f"  {name}: {'BLOCKED' if results[name] else 'installed (abort failed)'}", flush=True)
           PY
 
@@ -259,4 +301,4 @@ jobs:
           AUR_PACKAGE: ${{ inputs.aur-package }}
         run: >
           sudo --set-home --user builder --preserve-env=AUR_PACKAGE
-          python yay_cooldown_probe.py
+          uv run --frozen python yay_cooldown_probe.py

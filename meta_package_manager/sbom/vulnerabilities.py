@@ -190,7 +190,7 @@ def _parse_purls(purls: Iterable[str]) -> dict[str, _OSVQuery]:
         try:
             purl = PackageURL.from_string(purl_str)
         except ValueError:
-            logging.debug(f"Skipping unparseable purl: {purl_str!r}")
+            logging.debug(f"Skipping unparsable purl: {purl_str!r}")
             continue
         ecosystem = OSV_ECOSYSTEMS.get(purl.type or "")
         if not ecosystem:

@@ -167,8 +167,12 @@ class Pip(PackageManager):
 
         .. todo::
 
-            Evaluate `pythonfinder <https://github.com/sarugaku/pythonfinder>`_ to
-            replace our custom search logic.
+            Evaluate `findpython <https://github.com/frostming/findpython>`_ (the
+            maintained MIT rewrite of ``pythonfinder``) to replace the discovery
+            loop here. It would only cover discovery: the eligibility filters
+            (:py:meth:`_running_from_bundled_app`, :py:meth:`_pip_install_blocked`)
+            stay mpm's job, since findpython locates interpreters but does not
+            judge whether ``pip install`` is allowed into one.
         """
         current_python = None
         current_exec = sys.executable

@@ -1,11 +1,11 @@
 ---
 name: "Temp - yay cooldown live test"
 
-# TEMPORARY workflow. The mpm cooldown hook logic gates first-clone installs fine
-# (Z-series), but mpm's REAL init.lua text does not. This tests the two structural
-# elements unique to the real text - the `if cutoff then` wrapper and the chaining
-# block (parsed even when skipped) - added to the known-good core, config.json + /tmp,
-# true cold clone. Manual dispatch only.
+# TEMPORARY workflow. mpm's full overlay STRUCTURE gates first-clone installs fine
+# (W-series), but mpm's real cooldown_env() overlay does not. The only remaining
+# difference is that cooldown_env() makes config.json a SYMLINK to the user's config,
+# while the working reconstructions used a regular file. This tests mpm's real overlay
+# both ways. Manual dispatch only.
 #
 # Upstream context: https://github.com/Jguer/yay/issues/2883
 
@@ -35,78 +35,64 @@ jobs:
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-      - name: Write the structural probe
+      - name: Write the symlink probe
         run: |
           cat > yay_cooldown_probe.py <<'PY'
-          """Test the structural elements unique to mpm's real init.lua text."""
+          """Test mpm's real overlay with config.json as a symlink vs a regular file."""
 
           from __future__ import annotations
 
           import os
           import subprocess
-          import tempfile
+          from datetime import timedelta
           from pathlib import Path
+
+          from meta_package_manager.managers.pacman import Yay
 
           pkg = os.environ["AUR_PACKAGE"]
           home = Path(os.environ["HOME"])
           log = home / "diag.log"
-          cutoff = "1779717121"
 
-          WD = (
-              'local function wd(s)\n'
+          # A real user config so cooldown_env() has something to symlink.
+          user_yay = home / ".config" / "yay"
+          user_yay.mkdir(parents=True, exist_ok=True)
+          (user_yay / "init.lua").write_text(
+              'local f = io.open(os.getenv("HOME") .. "/.config/yay/sent", "w")\n'
+              'if f then f:write("x"); f:close() end\n',
+              encoding="UTF-8",
+          )
+          (user_yay / "config.json").write_text("{}\n", encoding="UTF-8")
+
+          END = (
+              '\nlocal function wd(s)\n'
               '  local f = io.open(os.getenv("HOME") .. "/diag.log", "a")\n'
               '  if f then f:write(s .. "\\n"); f:close() end\n'
               'end\n'
-              'local cutoff = tonumber(os.getenv("MPM_COOLDOWN_EPOCH"))\n'
-              'wd("START")\n'
-          )
-          CHAIN_BLOCK = (
-              'local user_dir = os.getenv("MPM_YAY_USER_DIR")\n'
-              'if user_dir and user_dir ~= "" then\n'
-              '  package.path = user_dir .. "/?.lua;" .. user_dir .. "/?/init.lua;" .. package.path\n'
-              '  local h = io.open(user_dir .. "/init.lua", "r")\n'
-              '  if h then\n'
-              '    h:close()\n'
-              '    local ok, err = pcall(dofile, user_dir .. "/init.lua")\n'
-              '    if not ok then yay.log.error("user init failed: " .. tostring(err)) end\n'
-              '  end\n'
-              'end\n'
-          )
-          REAL_UPSEL = (
-              'yay.create_autocmd("UpgradeSelect", {\n'
-              '  desc = "u",\n'
-              '  callback = function(event)\n'
-              '    local exclude = {}\n'
-              '    for _, p in ipairs(event.data.upgrades) do\n'
-              '      if p.repository == "aur" and p.last_modified >= cutoff then\n'
-              '        yay.log.info("hold " .. p.name); table.insert(exclude, p.name)\n'
-              '      end\n'
-              '    end\n'
-              '    return { exclude = exclude }\n'
-              '  end,\n'
-              '})\n'
-          )
-          REAL_AUR = (
+              'wd("END reached")\n'
               'yay.create_autocmd("AURPreInstall", {\n'
-              '  desc = "a",\n'
+              '  desc = "diag",\n'
               '  callback = function(event)\n'
-              '    if event.data.last_modified and event.data.last_modified >= cutoff then\n'
-              '      wd("FIRED lm=" .. tostring(event.data.last_modified))\n'
-              '      yay.abort("mpm cooldown: " .. event.match .. " is newer than floor")\n'
-              '    end\n'
+              '    wd("DIAG FIRED lm=" .. tostring(event.data.last_modified))\n'
               '  end,\n'
               '})\n'
           )
-          END = 'wd("END")\n'
-          HOOKS = REAL_UPSEL + REAL_AUR
 
-          VARIANTS = {
-              "W1 core + if-cutoff wrapper": WD + "if cutoff then\n" + HOOKS + "end\n" + END,
-              "W2 core + chaining block": WD + CHAIN_BLOCK + HOOKS + END,
-              "W3 core + wrapper + chaining (= mpm)": (
-                  WD + CHAIN_BLOCK + "if cutoff then\n" + HOOKS + "end\n" + END
-              ),
-          }
+
+          def build(copy_config: bool) -> dict[str, str]:
+              manager = Yay()
+              manager.cooldown = timedelta(days=365)
+              env = {**os.environ, **manager.cooldown_env()}
+              ovyay = Path(env["XDG_CONFIG_HOME"]) / "yay"
+              init = ovyay / "init.lua"
+              init.write_text(init.read_text() + END, encoding="UTF-8")
+              cfg = ovyay / "config.json"
+              print(f"  config.json is_symlink={cfg.is_symlink()}", flush=True)
+              if copy_config and cfg.is_symlink():
+                  content = cfg.read_text()
+                  cfg.unlink()
+                  cfg.write_text(content, encoding="UTF-8")
+                  print("  -> replaced symlink with a regular file", flush=True)
+              return env
 
 
           def installed(name: str) -> bool:
@@ -122,26 +108,19 @@ jobs:
               subprocess.run(["rm", "-rf", str(home / ".cache" / "yay")])
 
 
-          results = {}
-          for name, lua in VARIANTS.items():
+          def run_case(name: str, env: dict[str, str]) -> None:
               log.unlink(missing_ok=True)
               reset_cold()
-              root = Path(tempfile.mkdtemp(prefix="mpm-yay-cooldown-"))
-              ov = root / "yay"
-              ov.mkdir(parents=True, exist_ok=True)
-              (ov / "init.lua").write_text(lua, encoding="UTF-8")
-              (ov / "config.json").write_text("{}\n", encoding="UTF-8")
-              env = {**os.environ, "XDG_CONFIG_HOME": str(root), "MPM_COOLDOWN_EPOCH": cutoff}
               print(f"\n=== {name} (true cold; expect BLOCK) ===", flush=True)
               subprocess.run(["yay", "--sync", "--noconfirm", pkg], env=env, text=True)
-              results[name] = not installed(pkg)
               trace = log.read_text().strip() if log.exists() else "(no diag.log)"
-              print(f"{name}: blocked={results[name]} | trace: {trace!r}", flush=True)
+              print(f"{name}: blocked={not installed(pkg)} | trace: {trace!r}", flush=True)
 
+
+          run_case("REAL (config.json symlink)", build(copy_config=False))
+          run_case("COPYCFG (config.json regular file)", build(copy_config=True))
           reset_cold()
-          print("\n=== SUMMARY ===", flush=True)
-          for name in VARIANTS:
-              print(f"  {name}: {'BLOCKED' if results[name] else 'INSTALLED (not gated)'}", flush=True)
+          print("\nDONE", flush=True)
           PY
 
       - name: Create an unprivileged build user
@@ -162,7 +141,7 @@ jobs:
       - name: Report yay version
         run: sudo --set-home --user builder yay --version
 
-      - name: Run the structural probe
+      - name: Run the symlink probe
         env:
           AUR_PACKAGE: ${{ inputs.aur-package }}
         run: >

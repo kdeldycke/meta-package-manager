@@ -2,6 +2,8 @@
 
 Each built-in manager exposes a small set of attributes that can be overridden from the configuration file. Add a `[mpm.managers.<id>]` section (or `[tool.mpm.managers.<id>]` in `pyproject.toml`) for each manager you want to tune. Values from the file take precedence over the built-in defaults and over the matching global `[mpm]` settings or `--<flag>` command-line values when both apply to the same field.
 
+(overridable-fields)=
+
 ## Overridable fields
 
 | Field                 | Type             | Description                                                                            |
@@ -74,8 +76,82 @@ pre_args = ["--quiet", "--color", "never"]
 
 Unknown manager IDs and unknown field names are reported as warnings on `<stderr>` and skipped: a typo will not crash `mpm`. Type mismatches (a single string passed where a list is expected) raise an error so the offending value can be corrected.
 
+(define-a-new-manager)=
+
+## Define a new manager
+
+A `[mpm.managers.<id>]` section whose ID is **not** a built-in manager defines a brand-new manager rather than overriding one. `mpm` builds it at startup and treats it like any built-in: it gets its own `--<id>` / `--no-<id>` selectors, joins the default set on its supported platforms, and is driven by every subcommand it implements.
+
+```{important}
+A manager definition makes `mpm` run the commands you declare. Definitions are only loaded from a trusted, local configuration file (owned by you, not world-writable, never a remote `--config` URL). Read {doc}`security` before adding one.
+```
+
+### Required keys
+
+| Key          | Type             | Description                                                          |
+| :----------- | :--------------- | :------------------------------------------------------------------ |
+| `platforms`  | list of strings  | Platform or group IDs the manager runs on (like `linux`, `macos`, `all_platforms`, or a specific `ubuntu`). |
+| `operations` | table            | At least one operation (see below). A manager with no operations does nothing. |
+
+Every [overridable field](#overridable-fields) (`cli_names`, `cli_search_path`, `requirement`, `version_regexes`, `pre_args`, `extra_env`, `timeout`, ...) may also be set, plus `name` and `homepage_url`. When `cli_names` is omitted it defaults to the manager ID.
+
+### Operations
+
+Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every operation takes an `args` list appended after the resolved binary.
+
+**Command operations** run a CLI and need nothing else:
+
+| Operation     | Required placeholder | Maps to                                   |
+| :------------ | :------------------- | :---------------------------------------- |
+| `install`     | `{package_id}`       | `mpm install`                             |
+| `remove`      | `{package_id}`       | `mpm remove`                              |
+| `upgrade_one` | `{package_id}`       | single-package `mpm upgrade` (needs `installed` too) |
+| `upgrade_all` | none                 | `mpm upgrade --all`                       |
+| `sync`        | none                 | `mpm sync`                                |
+| `cleanup`     | none                 | `mpm cleanup`                             |
+
+**Query operations** (`installed`, `outdated`, `search`) parse the command's output. `search` also takes the `{query}` placeholder. Provide *either* a `regex` matched against each output line, *or* a JSON parser (`format = "json"` with a `fields` mapping and optional `list_path`). Both map these recognized fields to a package:
+
+- `package_id` (always required),
+- `installed_version` (required by `installed`),
+- `latest_version` (required by `outdated`).
+
 ```{note}
-Per-manager overrides apply to existing built-in managers only. Defining brand-new managers from configuration is on the roadmap but not part of this release.
+Version pinning is not expressible yet: `install` and `upgrade` on a config-defined manager always let the manager choose the version, and a `{version}` placeholder is not substituted. Native exact/extended search filtering is likewise not declarable, so `mpm` refilters `search` results itself.
+```
+
+### Example
+
+```toml
+[mpm.managers.deno]
+name = "Deno"
+platforms = ["linux", "macos", "windows"]
+homepage_url = "https://deno.land"
+cli_names = ["deno"]
+requirement = ">=1.40"
+version_regexes = ['deno (?P<version>\S+)']
+
+[mpm.managers.deno.operations.installed]
+args = ["list"]
+regex = '^(?P<package_id>\S+)@(?P<installed_version>\S+)$'
+
+[mpm.managers.deno.operations.outdated]
+args = ["outdated", "--json"]
+format = "json"
+list_path = "packages"
+fields = { package_id = "name", installed_version = "current", latest_version = "latest" }
+
+[mpm.managers.deno.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.deno.operations.upgrade_one]
+args = ["install", "--force", "{package_id}"]
+```
+
+After this, `mpm --deno installed`, `mpm outdated`, and `mpm install jq --deno` all work, and `--deno` appears in `mpm --help`.
+
+```{tip}
+A definition covers managers whose listings parse line-by-line or as a flat JSON array. When the real CLI needs multi-line records, pagination, or stateful parsing, the regex/JSON DSL is not enough: {doc}`write a real manager and upstream it <add-new-manager>` instead.
 ```
 
 ## Help improve detection upstream
@@ -94,4 +170,5 @@ suggest_contribs = false
 ## See also
 
 - {doc}`configuration` — global `[mpm]` settings and configuration-file precedence rules.
-- {doc}`add-new-manager` — for contributors who want to upstream a new manager rather than override an existing one.
+- {doc}`security` — the trust model behind overrides and definitions, and why configuration is code.
+- {doc}`add-new-manager` — for contributors who want to upstream a new manager rather than override or define one privately.

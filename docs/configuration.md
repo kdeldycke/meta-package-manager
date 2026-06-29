@@ -267,7 +267,7 @@ paru = false
 
 ## Per-manager overrides
 
-Each built-in manager exposes a small set of attributes (CLI names, search paths, timeouts, ...) that can be tuned from the configuration file using a `[mpm.managers.<id>]` section. See {doc}`overrides` for the schema, examples, and the `mpm config-template` helper that prints a ready-to-paste block.
+Each built-in manager exposes a small set of attributes (CLI names, search paths, timeouts, ...) that can be tuned from the configuration file using a `[mpm.managers.<id>]` section. A section keyed by an ID that is not a built-in instead **defines a brand-new manager** from configuration. See {doc}`overrides` for both the override schema and the definition schema, plus the `mpm config-template` helper that prints a ready-to-paste block. Because a definition makes `mpm` run the commands you declare, read {doc}`security` first.
 
 ## Precedence
 

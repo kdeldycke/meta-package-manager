@@ -40,6 +40,15 @@ def main():
 
     That way we can deduce all three cases from the entry point.
     """
+    # Register config-defined managers before importing the Click group, so the
+    # dynamic --<id> selectors enumerate them as first-class flags alongside the
+    # built-ins. Best-effort and local-only; the authoritative registration happens
+    # during config loading (config.register_config_managers_from_context).
+    from meta_package_manager.config import register_eager_config_managers
+    from meta_package_manager.pool import pool
+
+    register_eager_config_managers(pool)
+
     from meta_package_manager.cli import mpm
 
     mpm(prog_name=mpm.name)

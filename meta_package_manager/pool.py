@@ -181,6 +181,28 @@ class ManagerPool:
         return register  # type: ignore[return-value]
 
     @cached_property
+    def builtin_manager_ids(self) -> frozenset[str]:
+        """IDs of the managers shipped with mpm, taken from :data:`manager_classes`.
+
+        Computed from the classes (their ``id`` is set by the metaclass at class
+        creation, no instantiation needed). Lets the configuration layer tell a
+        built-in *override* apart from a brand-new manager *definition*: a
+        ``[mpm.managers.<id>]`` section whose ID is in this set tunes a built-in,
+        any other ID defines a new manager. See
+        :py:func:`meta_package_manager.config.validate_manager_overrides_section`.
+        """
+        return frozenset(klass.id for klass in manager_classes)
+
+    @cached_property
+    def config_defined_ids(self) -> set[str]:
+        """IDs of managers added at runtime from configuration definitions.
+
+        Populated by :py:meth:`add_manager`. Disjoint from
+        :py:attr:`builtin_manager_ids`.
+        """
+        return set()
+
+    @cached_property
     def overridden_fields(self) -> dict[str, set[str]]:
         """Per-manager attribute names that the user explicitly overrode via
         ``[mpm.managers.<id>]``.
@@ -215,6 +237,25 @@ class ManagerPool:
 
     def items(self):
         return self.register.items()
+
+    def add_manager(self, manager: PackageManager) -> None:
+        """Register a runtime-built manager (from a config definition) into the pool.
+
+        Inserts the instance and evicts the cached ID lists so the new manager is
+        picked up by selection, default-set computation and the dynamic CLI flags.
+        Built into the pool (rather than mutating ``register`` from outside) so the
+        cache invalidation stays in one place. Applied by
+        :py:func:`meta_package_manager.config.register_config_managers`.
+        """
+        self.register[manager.id] = manager
+        self.config_defined_ids.add(manager.id)
+        for cached_list in (
+            "all_manager_ids",
+            "default_manager_ids",
+            "maintained_manager_ids",
+            "unsupported_manager_ids",
+        ):
+            self.__dict__.pop(cached_list, None)
 
     # Pre-compute all sorts of constants.
 

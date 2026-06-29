@@ -18,6 +18,7 @@ cli-parameters
 configuration
 overrides
 cooldown
+security
 bar-plugin
 falsehoods
 benchmark

@@ -79,6 +79,7 @@ from .config import (
     build_manager_overrides_validator,
     dump_manager_overrides,
     print_contribution_hints,
+    register_config_managers_from_context,
 )
 from .duration import Duration
 from .execution import (
@@ -587,9 +588,12 @@ def mpm(
         and ctx.meta[VERBOSITY_LEVEL] != LogLevel.DEBUG
     )
 
-    # Apply per-manager attribute overrides from [mpm.managers.<id>] sections of
-    # the config file, before any subcommand observes the pool. Also collects any
-    # contribution-hint candidates onto ctx.meta for the close-time callback below.
+    # Register any brand-new managers defined in [mpm.managers.<id>] sections, then
+    # apply per-manager attribute overrides, both before any subcommand observes the
+    # pool. Registration is the authoritative pass (covers config sources the eager
+    # pre-load in __main__ could not reach); overrides also collect contribution-hint
+    # candidates onto ctx.meta for the close-time callback below.
+    register_config_managers_from_context(ctx, pool)
     apply_manager_overrides_from_context(ctx, pool)
     if suggest_contribs:
         ctx.call_on_close(partial(print_contribution_hints, ctx))

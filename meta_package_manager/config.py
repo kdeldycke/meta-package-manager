@@ -31,14 +31,28 @@ keeping all configuration policy out of :py:mod:`meta_package_manager.pool`.
 from __future__ import annotations
 
 import logging
+import os
+import re
+import stat
+import sys
 import urllib.parse
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import tomli_w
+from click import get_app_dir
 from click_extra import echo
-from click_extra.config import ConfigValidator, ValidationError
+from click_extra.config import (
+    CONFIG_PATH_METADATA_KEY,
+    ConfigValidator,
+    ValidationError,
+    read_file,
+)
 from click_extra.context import CONF_FULL
 from click_extra.theme import get_current_theme as theme
+from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS
+
+from .manager import ManagerDefinition, OperationSpec, build_manager_class
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -218,13 +232,15 @@ values. Safe to pop even if nothing was cached.
 """
 
 
-CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset({
-    "cli_names",
-    "cli_search_path",
-    "requirement",
-    "version_cli_options",
-    "version_regexes",
-})
+CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset(
+    {
+        "cli_names",
+        "cli_search_path",
+        "requirement",
+        "version_cli_options",
+        "version_regexes",
+    }
+)
 """Subset of :data:`OVERRIDABLE_FIELDS` whose override probably reflects a real
 upstream detection bug rather than a personal preference.
 
@@ -360,15 +376,19 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
     ]
     for hint in hints:
         url = _build_issue_url(hint)
-        lines.extend((
-            f"  - {theme().invoked_command(hint.manager_id)}: "
-            f"override on `{hint.field}`",
-            f"    File a report: {url}",
-        ))
-    lines.extend((
-        "",
-        "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
-    ))
+        lines.extend(
+            (
+                f"  - {theme().invoked_command(hint.manager_id)}: "
+                f"override on `{hint.field}`",
+                f"    File a report: {url}",
+            )
+        )
+    lines.extend(
+        (
+            "",
+            "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
+        )
+    )
     return "\n".join(lines)
 
 
@@ -387,46 +407,71 @@ def validate_manager_overrides_section(
     ``--validate-config`` path and the runtime application path enforce the
     same rules.
 
-    :raises click_extra.ValidationError: when ``section`` is not a mapping,
-        references an unknown manager ID, sets an unknown override field, or
-        provides a value of the wrong type for a known field. The ``path`` of
-        the raised error is relative to the ``[mpm.managers]`` section root
-        (e.g. ``"winget.cli_searchpath"``); click-extra prepends the app
-        prefix when surfacing the error.
+    A section keyed by a built-in manager ID is validated as an *override* (its
+    fields must be a subset of :data:`OVERRIDABLE_FIELDS`). A section keyed by any
+    other ID is validated as a brand-new manager *definition* via
+    :py:func:`parse_manager_definition`.
+
+    :raises click_extra.ValidationError: when ``section`` is not a mapping, an
+        override sets an unknown field or a wrong-typed value, or a definition is
+        malformed. The ``path`` of the raised error is relative to the
+        ``[mpm.managers]`` section root (e.g. ``"winget.cli_searchpath"``);
+        click-extra prepends the app prefix when surfacing the error.
     """
     if not section:
         return
     if not isinstance(section, dict):
         raise ValidationError("", f"expected a table, got {type(section).__name__}")
     for manager_id, fields in section.items():
-        if manager_id not in pool.register:
-            raise ValidationError(
-                manager_id,
-                f"unknown manager ID {manager_id!r}",
-                code="unknown_manager",
-            )
-        if not isinstance(fields, dict):
-            raise ValidationError(
-                manager_id,
-                f"expected a table, got {type(fields).__name__}",
-                code="invalid_type",
-            )
-        for field_name, raw_value in fields.items():
-            converter = OVERRIDABLE_FIELDS.get(field_name)
-            if converter is None:
+        if manager_id in pool.builtin_manager_ids:
+            _validate_override_fields(manager_id, fields)
+        else:
+            # A section for an unknown ID that carries neither a definition's
+            # required identity nor operations is most likely a typo of a built-in
+            # ID rather than a new manager: report it as such for a clearer message.
+            if (
+                isinstance(fields, dict)
+                and "operations" not in fields
+                and "platforms" not in fields
+            ):
                 raise ValidationError(
-                    f"{manager_id}.{field_name}",
-                    f"unknown field. Allowed: {', '.join(sorted(OVERRIDABLE_FIELDS))}",
-                    code="unknown_field",
+                    manager_id,
+                    f"unknown manager ID {manager_id!r}. To define a new manager, "
+                    "declare 'platforms' and an [operations] table (see docs/overrides.md).",
+                    code="unknown_manager",
                 )
-            try:
-                converter(raw_value)
-            except TypeError as ex:
-                raise ValidationError(
-                    f"{manager_id}.{field_name}",
-                    str(ex),
-                    code="invalid_type",
-                ) from ex
+            parse_manager_definition(manager_id, fields)
+
+
+def _validate_override_fields(manager_id: str, fields: Any) -> None:
+    """Validate one ``[mpm.managers.<built-in id>]`` override section.
+
+    Each field must be a known :data:`OVERRIDABLE_FIELDS` attribute and carry a
+    value its converter accepts. Raises :class:`click_extra.ValidationError` on the
+    first problem.
+    """
+    if not isinstance(fields, dict):
+        raise ValidationError(
+            manager_id,
+            f"expected a table, got {type(fields).__name__}",
+            code="invalid_type",
+        )
+    for field_name, raw_value in fields.items():
+        converter = OVERRIDABLE_FIELDS.get(field_name)
+        if converter is None:
+            raise ValidationError(
+                f"{manager_id}.{field_name}",
+                f"unknown field. Allowed: {', '.join(sorted(OVERRIDABLE_FIELDS))}",
+                code="unknown_field",
+            )
+        try:
+            converter(raw_value)
+        except TypeError as ex:
+            raise ValidationError(
+                f"{manager_id}.{field_name}",
+                str(ex),
+                code="invalid_type",
+            ) from ex
 
 
 def apply_manager_overrides(
@@ -468,6 +513,10 @@ def apply_manager_overrides(
 
     hints: list[ContributionHint] = []
     for manager_id, fields in overrides.items():
+        # Sections keyed by a non-built-in ID are brand-new manager definitions,
+        # handled by register_config_managers, not attribute overrides.
+        if manager_id not in pool.builtin_manager_ids:
+            continue
         manager = pool.register[manager_id]
         for field_name, raw_value in fields.items():
             value = OVERRIDABLE_FIELDS[field_name](raw_value)
@@ -578,9 +627,40 @@ def apply_manager_overrides_from_context(
     conf_full = ctx.meta.get(CONF_FULL) or {}
     mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
     overrides = mpm_section.get("managers") if isinstance(mpm_section, dict) else None
+    _warn_risky_overrides_from_untrusted_source(ctx, pool, overrides)
     hints = apply_manager_overrides(pool, overrides)
     if hints:
         ctx.meta.setdefault(CTX_HINTS_KEY, []).extend(hints)
+
+
+def _warn_risky_overrides_from_untrusted_source(
+    ctx: click.Context,
+    pool: ManagerPool,
+    overrides: Mapping[str, Any] | None,
+) -> None:
+    """Warn when a command-redirecting override is read from an untrusted config source.
+
+    Overrides on built-in managers still apply (for backward compatibility), but a
+    :data:`RISKY_OVERRIDE_FIELDS` override (``pre_cmds``, ``cli_names``,
+    ``cli_search_path``) sourced from a remote URL or an unsafe-permission file can make
+    mpm run an arbitrary binary, so it earns a loud heads-up. See ``docs/security.md``.
+    """
+    if not overrides:
+        return
+    source, source_is_url = _config_source(ctx)
+    if not source_is_url and (source is None or config_file_is_trusted(source)):
+        return
+    for manager_id, fields in overrides.items():
+        if manager_id not in pool.builtin_manager_ids or not isinstance(fields, dict):
+            continue
+        risky = RISKY_OVERRIDE_FIELDS.intersection(fields)
+        if risky:
+            origin = "a remote URL" if source_is_url else f"untrusted file {source}"
+            logging.warning(
+                f"Override of {', '.join(sorted(risky))} on "
+                f"{theme().invoked_command(manager_id)} comes from {origin}; "
+                "these fields can run arbitrary commands (see docs/security.md).",
+            )
 
 
 def print_contribution_hints(ctx: click.Context) -> None:
@@ -596,3 +676,574 @@ def print_contribution_hints(ctx: click.Context) -> None:
     message = format_contribution_hints(hints)
     if message:
         echo(message, err=True)
+
+
+# Brand-new manager definitions.
+#
+# Everything below turns a ``[mpm.managers.<id>]`` section whose ID is *not* a built-in
+# into a live manager. This module owns the schema and the policy (what a definition may
+# contain, where it may be loaded from); the class-building factory lives in
+# :py:mod:`meta_package_manager.manager`. The split mirrors the override mechanism above:
+# the pool owns instances, this module owns configuration policy.
+
+
+VALID_PLATFORM_TOKENS: Final[frozenset[str]] = frozenset(
+    {platform.id for platform in ALL_PLATFORMS} | set(ALL_GROUP_IDS),
+)
+"""Platform and group IDs accepted in a definition's ``platforms`` list.
+
+Union of every :py:class:`extra_platforms.Platform` ID and every group ID, so both a
+specific platform (``ubuntu``) and a group (``linux``, ``all_platforms``) resolve.
+"""
+
+
+DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
+    name: OVERRIDABLE_FIELDS[name]
+    for name in (
+        "cli_names",
+        "cli_search_path",
+        "extra_env",
+        "post_args",
+        "pre_args",
+        "pre_cmds",
+        "requirement",
+        "timeout",
+        "version_cli_options",
+        "version_regexes",
+    )
+}
+"""CLI-execution attributes a definition may set, reusing the override converters.
+
+The runtime-preference fields (``deprecated``, ``dry_run``, ``ignore_auto_updates``,
+``stop_on_error``) are excluded: they are command-line/global concerns, not part of a
+manager's identity, and resolve through the usual option precedence.
+"""
+
+
+DEFINITION_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
+    {"name", "platforms", "homepage_url", "operations"},
+)
+"""Top-level keys of a definition section that are not CLI-execution fields."""
+
+
+QUERY_OPERATIONS: Final[frozenset[str]] = frozenset(
+    {"installed", "outdated", "search"},
+)
+"""Operations that parse the command's stdout into packages."""
+
+
+COMMAND_OPERATIONS: Final[frozenset[str]] = frozenset(
+    {"install", "remove", "sync", "cleanup", "upgrade_one", "upgrade_all"},
+)
+"""Operations that only run a command and produce no inventory to parse."""
+
+
+ALL_DEFINITION_OPERATIONS: Final[frozenset[str]] = QUERY_OPERATIONS | COMMAND_OPERATIONS
+"""Every operation name a definition may declare."""
+
+
+RECOGNIZED_PARSE_FIELDS: Final[frozenset[str]] = frozenset(
+    {"package_id", "installed_version", "latest_version"},
+)
+"""Named regex groups / JSON field keys a query parser may map to a package."""
+
+
+REQUIRED_PARSE_FIELDS: Final[Mapping[str, frozenset[str]]] = {
+    "installed": frozenset({"package_id", "installed_version"}),
+    "outdated": frozenset({"package_id", "latest_version"}),
+    "search": frozenset({"package_id"}),
+}
+"""Parse fields each query operation must extract to be useful."""
+
+
+OPERATION_ARG_PLACEHOLDER: Final[Mapping[str, str]] = {
+    "install": "package_id",
+    "remove": "package_id",
+    "upgrade_one": "package_id",
+    "search": "query",
+}
+"""Placeholder each operation's ``args`` must reference, so a value is actually passed
+to the CLI (a ``remove`` with no ``{package_id}`` would target nothing)."""
+
+
+QUERY_OPERATION_KEYS: Final[frozenset[str]] = frozenset(
+    {"args", "regex", "format", "fields", "list_path"},
+)
+"""Keys allowed in a query operation's table."""
+
+
+COMMAND_OPERATION_KEYS: Final[frozenset[str]] = frozenset({"args"})
+"""Keys allowed in a command operation's table."""
+
+
+RISKY_OVERRIDE_FIELDS: Final[frozenset[str]] = frozenset(
+    {"pre_cmds", "cli_names", "cli_search_path"},
+)
+"""Override fields that can redirect mpm to run an arbitrary binary (or ``sudo``).
+
+When such an override is read from an untrusted config source,
+:py:func:`apply_manager_overrides_from_context` logs a warning. See ``docs/security.md``.
+"""
+
+
+def config_file_is_trusted(path: Path) -> bool:
+    """Whether a config file is safe to load executable manager definitions from.
+
+    Trusted on POSIX when both the file and its parent directory are owned by the
+    current user or root and are not group- or world-writable, mirroring how ``ssh``,
+    ``git`` and ``sudo`` reason about config-file trust: a writable file (or a writable
+    directory that lets an attacker swap the file) could inject arbitrary commands.
+
+    On platforms without ``os.getuid`` (Windows), the POSIX ownership model does not
+    apply and the check is skipped (returns ``True``); see ``docs/security.md`` for the
+    rationale and the residual risk.
+    """
+    if not hasattr(os, "getuid"):
+        return True
+    trusted_owners = {os.getuid(), 0}
+    for target, is_dir in ((path, False), (path.parent, True)):
+        try:
+            stats = target.stat()
+        except OSError:
+            return False
+        if stats.st_uid not in trusted_owners:
+            return False
+        writable_by_others = stats.st_mode & (stat.S_IWGRP | stat.S_IWOTH)
+        sticky = stats.st_mode & stat.S_ISVTX
+        # A group/world-writable directory is safe only if sticky (like ``/tmp``):
+        # the sticky bit stops others renaming or replacing the config file. A
+        # group/world-writable file is always unsafe.
+        if writable_by_others and not (is_dir and sticky):
+            return False
+    return True
+
+
+def _config_source(ctx: click.Context) -> tuple[Path | None, bool]:
+    """Return ``(local_path, is_url)`` for the config file click-extra loaded.
+
+    Reads the location click-extra records under
+    :data:`~click_extra.config.CONFIG_PATH_METADATA_KEY`. A remote URL yields
+    ``(None, True)``; a local file yields ``(Path, False)``; nothing loaded yields
+    ``(None, False)``.
+    """
+    raw = ctx.meta.get(CONFIG_PATH_METADATA_KEY)
+    if not raw:
+        return None, False
+    text = str(raw)
+    if text.startswith(("http://", "https://")):
+        return None, True
+    return Path(text), False
+
+
+def parse_manager_definition(
+    manager_id: str,
+    section: Any,
+) -> ManagerDefinition:
+    """Validate and parse one ``[mpm.managers.<id>]`` definition section.
+
+    Returns a :py:class:`~meta_package_manager.manager.ManagerDefinition` ready for
+    :py:func:`~meta_package_manager.manager.build_manager_class`. Raises
+    :class:`click_extra.ValidationError` (path relative to the ``[mpm.managers]``
+    root) on any problem, so the same function backs both ``--validate-config`` and
+    the runtime registration path.
+    """
+    if not isinstance(section, dict):
+        raise ValidationError(
+            manager_id,
+            f"expected a table, got {type(section).__name__}",
+            code="invalid_type",
+        )
+    if not re.fullmatch(r"[a-z][a-z0-9-]*", manager_id):
+        raise ValidationError(
+            manager_id,
+            f"invalid manager ID {manager_id!r}: use lowercase letters, digits and "
+            "dashes (e.g. 'my-tool').",
+            code="invalid_id",
+        )
+    for required in ("platforms", "operations"):
+        if required not in section:
+            raise ValidationError(
+                f"{manager_id}.{required}",
+                f"a config-defined manager must declare {required!r}.",
+                code="missing_field",
+            )
+
+    try:
+        platforms = _to_str_tuple(section["platforms"])
+    except TypeError as ex:
+        raise ValidationError(
+            f"{manager_id}.platforms", str(ex), code="invalid_type"
+        ) from ex
+    if not platforms:
+        raise ValidationError(
+            f"{manager_id}.platforms",
+            "must list at least one platform or group.",
+            code="invalid_value",
+        )
+    for token in platforms:
+        if token.lower() not in VALID_PLATFORM_TOKENS:
+            raise ValidationError(
+                f"{manager_id}.platforms",
+                f"unknown platform or group {token!r}.",
+                code="unknown_platform",
+            )
+
+    name = manager_id
+    if "name" in section:
+        try:
+            name = _to_str(section["name"])
+        except TypeError as ex:
+            raise ValidationError(
+                f"{manager_id}.name", str(ex), code="invalid_type"
+            ) from ex
+    homepage_url = None
+    if "homepage_url" in section:
+        try:
+            homepage_url = _to_str(section["homepage_url"])
+        except TypeError as ex:
+            raise ValidationError(
+                f"{manager_id}.homepage_url", str(ex), code="invalid_type"
+            ) from ex
+
+    cli_fields: dict[str, Any] = {}
+    for key, value in section.items():
+        if key in DEFINITION_IDENTITY_FIELDS:
+            continue
+        converter = DEFINITION_CLI_FIELDS.get(key)
+        if converter is None:
+            allowed = sorted(set(DEFINITION_CLI_FIELDS) | DEFINITION_IDENTITY_FIELDS)
+            raise ValidationError(
+                f"{manager_id}.{key}",
+                f"unknown field. Allowed: {', '.join(allowed)}.",
+                code="unknown_field",
+            )
+        try:
+            cli_fields[key] = converter(value)
+        except TypeError as ex:
+            raise ValidationError(
+                f"{manager_id}.{key}", str(ex), code="invalid_type"
+            ) from ex
+
+    operations = _parse_operations(manager_id, section["operations"])
+    return ManagerDefinition(
+        manager_id=manager_id,
+        name=name,
+        platforms=platforms,
+        homepage_url=homepage_url,
+        cli_fields=cli_fields,
+        operations=operations,
+    )
+
+
+def _parse_operations(
+    manager_id: str,
+    raw: Any,
+) -> dict[str, OperationSpec]:
+    """Validate and parse the ``[mpm.managers.<id>.operations]`` sub-table."""
+    if not isinstance(raw, dict) or not raw:
+        raise ValidationError(
+            f"{manager_id}.operations",
+            "must be a non-empty table of operations.",
+            code="invalid_type",
+        )
+    operations = {}
+    for op_name, op_section in raw.items():
+        if op_name not in ALL_DEFINITION_OPERATIONS:
+            raise ValidationError(
+                f"{manager_id}.operations.{op_name}",
+                f"unknown operation. Allowed: "
+                f"{', '.join(sorted(ALL_DEFINITION_OPERATIONS))}.",
+                code="unknown_operation",
+            )
+        operations[op_name] = _parse_operation_spec(manager_id, op_name, op_section)
+    return operations
+
+
+def _parse_operation_spec(
+    manager_id: str,
+    op_name: str,
+    raw: Any,
+) -> OperationSpec:
+    """Validate and parse one operation table into an :class:`OperationSpec`."""
+    path = f"{manager_id}.operations.{op_name}"
+    if not isinstance(raw, dict):
+        raise ValidationError(
+            path, f"expected a table, got {type(raw).__name__}", code="invalid_type"
+        )
+
+    is_query = op_name in QUERY_OPERATIONS
+    allowed_keys = QUERY_OPERATION_KEYS if is_query else COMMAND_OPERATION_KEYS
+    for key in raw:
+        if key not in allowed_keys:
+            raise ValidationError(
+                f"{path}.{key}",
+                f"unknown key. Allowed: {', '.join(sorted(allowed_keys))}.",
+                code="unknown_field",
+            )
+
+    if "args" not in raw:
+        raise ValidationError(f"{path}.args", "required.", code="missing_field")
+    try:
+        args = _to_str_tuple(raw["args"])
+    except TypeError as ex:
+        raise ValidationError(f"{path}.args", str(ex), code="invalid_type") from ex
+    if not args:
+        raise ValidationError(
+            f"{path}.args", "must be a non-empty list.", code="invalid_value"
+        )
+
+    placeholder = OPERATION_ARG_PLACEHOLDER.get(op_name)
+    if placeholder and not any(f"{{{placeholder}}}" in arg for arg in args):
+        raise ValidationError(
+            f"{path}.args",
+            f"{op_name} args must reference the {{{placeholder}}} placeholder.",
+            code="invalid_value",
+        )
+
+    if is_query:
+        return _parse_query_spec(path, op_name, args, raw)
+    return OperationSpec(args=args)
+
+
+def _parse_query_spec(
+    path: str,
+    op_name: str,
+    args: tuple[str, ...],
+    raw: dict[str, Any],
+) -> OperationSpec:
+    """Validate the parser half of a query operation (``regex`` or JSON ``fields``)."""
+    has_regex = "regex" in raw
+    has_json = raw.get("format") == "json" or "fields" in raw
+    if has_regex and has_json:
+        raise ValidationError(
+            path, "use either 'regex' or JSON 'fields', not both.", code="invalid_value"
+        )
+    if not has_regex and not has_json:
+        raise ValidationError(
+            path,
+            "a query operation needs a 'regex' or a JSON 'fields' parser.",
+            code="missing_field",
+        )
+    required = REQUIRED_PARSE_FIELDS[op_name]
+
+    if has_regex:
+        try:
+            regex = _to_str(raw["regex"])
+        except TypeError as ex:
+            raise ValidationError(f"{path}.regex", str(ex), code="invalid_type") from ex
+        try:
+            compiled = re.compile(regex)
+        except re.error as ex:
+            raise ValidationError(
+                f"{path}.regex",
+                f"invalid regular expression: {ex}.",
+                code="invalid_value",
+            ) from ex
+        _check_parse_fields(f"{path}.regex", set(compiled.groupindex), required)
+        return OperationSpec(args=args, parse_mode="regex", regex=regex)
+
+    if "fields" not in raw:
+        raise ValidationError(
+            f"{path}.fields",
+            "JSON parsing requires a 'fields' mapping.",
+            code="missing_field",
+        )
+    try:
+        fields = _to_str_dict(raw["fields"])
+    except TypeError as ex:
+        raise ValidationError(f"{path}.fields", str(ex), code="invalid_type") from ex
+    _check_parse_fields(f"{path}.fields", set(fields), required)
+    list_path = None
+    if "list_path" in raw:
+        try:
+            list_path = _to_str(raw["list_path"])
+        except TypeError as ex:
+            raise ValidationError(
+                f"{path}.list_path", str(ex), code="invalid_type"
+            ) from ex
+    return OperationSpec(
+        args=args, parse_mode="json", list_path=list_path, fields=fields
+    )
+
+
+def _check_parse_fields(path: str, present: set[str], required: frozenset[str]) -> None:
+    """Reject unrecognized parse fields and require the mandatory ones."""
+    unknown = present - RECOGNIZED_PARSE_FIELDS
+    if unknown:
+        raise ValidationError(
+            path,
+            f"unrecognized field(s): {', '.join(sorted(unknown))}. "
+            f"Allowed: {', '.join(sorted(RECOGNIZED_PARSE_FIELDS))}.",
+            code="invalid_value",
+        )
+    missing = required - present
+    if missing:
+        raise ValidationError(
+            path,
+            f"missing required field(s): {', '.join(sorted(missing))}.",
+            code="invalid_value",
+        )
+
+
+def register_config_managers(
+    pool: ManagerPool,
+    definitions: Mapping[str, ManagerDefinition],
+    *,
+    source: Path | None = None,
+    source_is_url: bool = False,
+) -> list[str]:
+    """Build and register config-defined managers into ``pool``, applying the trust gate.
+
+    A definition is skipped (with a warning) when its ID collides with a built-in, when
+    it comes from a remote URL config, or when its local config file fails
+    :py:func:`config_file_is_trusted`. Returns the IDs actually registered. Definitions
+    whose ID is already in the pool (e.g. registered by the eager pre-load) are silently
+    skipped so the eager and callback passes are idempotent.
+    """
+    registered = []
+    for manager_id, definition in definitions.items():
+        if manager_id in pool.builtin_manager_ids:
+            logging.warning(
+                f"Ignoring config-defined manager {manager_id!r}: "
+                "a built-in manager already uses this ID.",
+            )
+            continue
+        if manager_id in pool.register:
+            continue
+        if source_is_url:
+            logging.warning(
+                f"Refusing to define manager {manager_id!r} from a remote config URL "
+                "for safety (see docs/security.md).",
+            )
+            continue
+        if source is not None and not config_file_is_trusted(source):
+            logging.warning(
+                f"Refusing to define manager {manager_id!r} from {source}: "
+                "unsafe config file ownership or permissions (see docs/security.md).",
+            )
+            continue
+        pool.add_manager(build_manager_class(definition)())
+        registered.append(manager_id)
+        logging.info(
+            f"Defined manager {theme().invoked_command(manager_id)} "
+            f"from {source or 'configuration'}.",
+        )
+    return registered
+
+
+def _collect_definitions(
+    pool: ManagerPool,
+    sections: Mapping[str, Any],
+) -> dict[str, ManagerDefinition]:
+    """Parse the non-built-in sections of ``[mpm.managers]`` into definitions.
+
+    Sections keyed by a built-in ID (overrides) and any that fail to parse are skipped:
+    parse failures were already surfaced by the load-time validator, so re-raising here
+    would only duplicate the error.
+    """
+    definitions = {}
+    for manager_id, section in sections.items():
+        if manager_id in pool.builtin_manager_ids or manager_id in pool.register:
+            continue
+        try:
+            definitions[manager_id] = parse_manager_definition(manager_id, section)
+        except ValidationError:
+            continue
+    return definitions
+
+
+def register_config_managers_from_context(
+    ctx: click.Context,
+    pool: ManagerPool,
+) -> None:
+    """Register config-defined managers from the loaded config (authoritative pass).
+
+    Reads the parsed config under :data:`~click_extra.context.CONF_FULL`, parses the
+    non-built-in ``[mpm.managers.<id>]`` sections, and registers them through
+    :py:func:`register_config_managers`. This is the source of truth for *availability*:
+    a manager defined in a config the eager pre-load could not reach (a URL, a custom
+    path) still works from here, it just does not get a dedicated CLI flag.
+    """
+    conf_full = ctx.meta.get(CONF_FULL) or {}
+    mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
+    sections = mpm_section.get("managers") if isinstance(mpm_section, dict) else None
+    if not sections:
+        return
+    source, source_is_url = _config_source(ctx)
+    register_config_managers(
+        pool,
+        _collect_definitions(pool, sections),
+        source=source,
+        source_is_url=source_is_url,
+    )
+
+
+def _candidate_config_path() -> tuple[Path | None, bool]:
+    """Best-effort resolution of the config path for the eager pre-load.
+
+    Mirrors click-extra's default discovery enough to find new-manager definitions
+    before the CLI is built, without re-implementing all of it: an explicit
+    ``MPM_CONFIG`` env var or ``--config`` argument wins, otherwise the first config
+    file in the default application directory is used. Returns ``(path, is_url)``;
+    URLs are reported but not read here (the authoritative pass handles them).
+    """
+    raw = os.environ.get("MPM_CONFIG")
+    argv = sys.argv[1:]
+    for index, arg in enumerate(argv):
+        if arg == "--config" and index + 1 < len(argv):
+            raw = argv[index + 1]
+        elif arg.startswith("--config="):
+            raw = arg.split("=", 1)[1]
+    if raw:
+        if raw.startswith(("http://", "https://")):
+            return None, True
+        candidate = Path(raw).expanduser()
+        return (candidate if candidate.is_file() else None), False
+    app_dir = Path(get_app_dir("mpm"))
+    if app_dir.is_dir():
+        for pattern in ("*.toml", "*.json", "*.ini"):
+            for match in sorted(app_dir.glob(pattern)):
+                if match.is_file():
+                    return match, False
+    return None, False
+
+
+def discover_config_definitions(
+    pool: ManagerPool,
+) -> tuple[dict[str, ManagerDefinition], Path | None]:
+    """Eagerly read new-manager definitions before the CLI group is built.
+
+    Best-effort and local-only: any error (no config, parse failure, missing reader)
+    yields no definitions so CLI startup never breaks. URL configs are deferred to the
+    authoritative :py:func:`register_config_managers_from_context` pass. Supports both
+    the standalone ``[mpm.managers]`` layout and ``[tool.mpm.managers]`` in
+    ``pyproject.toml``.
+    """
+    try:
+        path, is_url = _candidate_config_path()
+        if is_url or path is None:
+            return {}, None
+        data = read_file(path) or {}
+        root = data.get("mpm")
+        if not isinstance(root, dict) and isinstance(data.get("tool"), dict):
+            root = data["tool"].get("mpm")
+        sections = root.get("managers") if isinstance(root, dict) else None
+        if not isinstance(sections, dict):
+            return {}, None
+        return _collect_definitions(pool, sections), path
+    except Exception as ex:  # noqa: BLE001
+        # Eager discovery must never break startup; the authoritative pass re-runs it.
+        logging.debug(f"Eager config-definition discovery skipped: {ex!r}")
+        return {}, None
+
+
+def register_eager_config_managers(pool: ManagerPool) -> None:
+    """Register config-defined managers before the CLI group is constructed.
+
+    Called from ``__main__.main()`` ahead of importing the Click group, so the dynamic
+    ``--<id>`` / ``--no-<id>`` selectors enumerate the augmented pool and config-defined
+    managers become first-class flags alongside the built-ins.
+    """
+    definitions, source = discover_config_definitions(pool)
+    if definitions:
+        register_config_managers(pool, definitions, source=source)

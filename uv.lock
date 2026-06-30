@@ -266,8 +266,8 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "8.1.1"
-source = { registry = "https://pypi.org/simple" }
+version = "8.2.0.dev0"
+source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#936692706ade7da19df3463e10907eaae751d955" }
 dependencies = [
     { name = "boltons" },
     { name = "click" },
@@ -278,10 +278,6 @@ dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "wcmatch" },
     { name = "wcwidth" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4c/ee/61eb8cadbf58b3570bab603106076e46466e890f7aba19ac4a420b27511f/click_extra-8.1.1.tar.gz", hash = "sha256:d9fa8de46b5fac91c7cbb0be5e1a788f04845d01a5580f210f90761f16be7cd6", size = 306766, upload-time = "2026-06-24T15:35:08.632Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/46/406186bcf0963d0fcd9e89c0e00f4dcb761ad5b1ec91fbca7fd4f1909677/click_extra-8.1.1-py3-none-any.whl", hash = "sha256:73b51c2247177a2830573420d90f9bdc07dbcd2d226e34d098a7f4cd53972180", size = 333109, upload-time = "2026-06-24T15:35:07.107Z" },
 ]
 
 [package.optional-dependencies]
@@ -1118,13 +1114,13 @@ typing = [
 requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1" },
     { name = "boltons", specifier = ">=25" },
-    { name = "click-extra", specifier = ">=8.1.1" },
-    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
-    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
-    { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },
-    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'" },
-    { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
-    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
+    { name = "click-extra", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
     { name = "extra-platforms", specifier = ">=10" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
@@ -1139,7 +1135,7 @@ provides-extras = ["hjson", "json5", "jsonc", "sbom-offline", "sbom-online", "to
 
 [package.metadata.requires-dev]
 docs = [
-    { name = "click-extra", extras = ["sphinx"] },
+    { name = "click-extra", extras = ["sphinx"], git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
     { name = "furo", specifier = ">=2025.9.25" },
     { name = "myst-parser", specifier = ">=4" },
     { name = "sphinx", specifier = ">=8" },
@@ -1153,8 +1149,8 @@ docs = [
     { name = "tomlkit", specifier = ">=0.13" },
 ]
 test = [
-    { name = "click-extra", extras = ["pytest"] },
-    { name = "click-extra", extras = ["toml"] },
+    { name = "click-extra", extras = ["pytest"], git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["toml"], git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.11" },
     { name = "cyclonedx-python-lib", extras = ["validation"] },
     { name = "extra-platforms" },

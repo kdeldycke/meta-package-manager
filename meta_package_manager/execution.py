@@ -52,7 +52,6 @@ import subprocess
 import sys
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import nullcontext
 from datetime import datetime, timezone
 from functools import cached_property
@@ -65,11 +64,11 @@ from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
 from click.core import ParameterSource
 from click_extra import echo, get_current_context
-from click_extra.context import JOBS, VERBOSITY_LEVEL
+from click_extra.context import JOBS
 from click_extra.envvar import env_copy
-from click_extra.logging import LogLevel
+from click_extra.execution import resolve_jobs, run_jobs, run_lanes
 from click_extra.spinner import Spinner
-from click_extra.testing import INDENT, PROMPT, args_cleanup
+from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
 
@@ -205,22 +204,6 @@ stalled during the first second. Only the quickest calls (cached version probes,
 trivial metadata queries) finish within this delay and stay silent; anything
 slower (a ``guix search``, a source build) shows the spinner right away.
 """
-
-
-def format_cli_prompt(
-    cmd_args: Iterable[str], extra_env: TEnvVars | None = None
-) -> str:
-    """Render the shell prompt simulating a CLI invocation, for logs and dry-runs.
-
-    Prefixes the ``PROMPT`` to any ``extra_env`` assignments and the command line,
-    both styled through the active theme. Reimplements the helper click-extra made
-    private (``_format_cli_prompt``) in ``8.0.0``.
-    """
-    env_string = ""
-    if extra_env:
-        assignments = "".join(f"{k}={v} " for k, v in extra_env.items())
-        env_string = theme().envvar(assignments)
-    return PROMPT + env_string + theme().invoked_command(" ".join(cmd_args))
 
 
 class CLIExecutor:
@@ -1172,25 +1155,15 @@ Lets :func:`merge_into_lock_lanes` resolve a manager's mutual-exclusion group in
 def effective_jobs(ctx: Context | None, count: int) -> int:
     """Resolve how many worker threads to use for a batch of ``count`` items.
 
-    Returns the number of managers to process in parallel; ``1`` means run
-    sequentially in the calling thread. Collapses to sequential when:
-
-    - there is no active CLI context (programmatic or test use),
-    - a single item leaves nothing to parallelize,
-    - the user passed :option:`mpm --jobs` ``1``, or
-    - the effective verbosity is ``DEBUG`` (whether from ``--verbosity`` or the
-      ``-v``/``-q`` counters), where coherent per-manager log narration matters
-      more than the speed-up (interleaved threads would scramble it).
-
-    Otherwise the :option:`mpm --jobs` value wins, capped at ``count``: there is
-    no point spinning up more workers than there are items.
+    Thin wrapper over :py:func:`click_extra.execution.resolve_jobs` pinning mpm's
+    policy: always collapse to a single (sequential) worker at ``DEBUG`` verbosity,
+    where coherent per-manager log narration matters more than the speed-up
+    (interleaved threads would scramble it). The base helper also collapses to
+    sequential with no active CLI context, for a single item, or at
+    :option:`mpm --jobs` ``1``; otherwise the :option:`mpm --jobs` value wins,
+    capped at ``count`` (no point spinning up more workers than there are items).
     """
-    if ctx is None or count <= 1:
-        return 1
-    if ctx.meta.get(VERBOSITY_LEVEL) == LogLevel.DEBUG:
-        return 1
-    jobs = ctx.meta.get(JOBS, 1)
-    return min(jobs, count) if jobs > 1 else 1
+    return resolve_jobs(ctx, count, serial_at_debug=True)
 
 
 def warm_availability(managers: Iterable[PackageManager]) -> None:
@@ -1215,9 +1188,8 @@ def warm_availability(managers: Iterable[PackageManager]) -> None:
     jobs = effective_jobs(get_current_context(silent=True), len(candidates))
     if jobs <= 1:
         return
-    with ThreadPoolExecutor(max_workers=jobs) as executor:
-        # Reading `available` forces and caches the probe inside each worker.
-        list(executor.map(lambda manager: manager.available, candidates))
+    # Reading `available` forces and caches the probe inside each worker.
+    list(run_jobs(lambda manager: manager.available, candidates, jobs=jobs))
 
 
 def trail_glyph(ok: bool) -> str:
@@ -1425,53 +1397,48 @@ def dispatch(
         ctx = get_current_context(silent=True)
     jobs = effective_jobs(ctx, len(lanes))
     managers = [manager for lane_managers, _ in lanes for manager in lane_managers]
-    with OperationTrail(
-        managers,
-        label=label,
-        done_label=done_label,
-        unit=unit,
-        total=total,
-        jobs=jobs,
-        coverage=coverage,
-    ) as trail:
 
-        def run_lane(
-            lane: tuple[
-                tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]
-            ],
-        ) -> None:
-            lane_managers, tasks = lane
-            # A multi-manager lane is a lock family: share one command cache across its
-            # members for the lane's lifetime so byte-identical invocations (brew and
-            # cask both running `brew update`) collapse to a single subprocess.
-            cache: dict[tuple, tuple[int, str, str]] | None = (
-                {} if len(lane_managers) > 1 else None
+    # A multi-manager lane is a lock family: its members share one command cache
+    # for the run, so byte-identical invocations (brew and cask both running
+    # `brew update`) hit the subprocess once. Each cache belongs to a single lane
+    # whose tasks run serially on one worker (via run_lanes), so only that thread
+    # touches it: no lock needed. Cleared in the finally below.
+    shared_caches: list[tuple[tuple[PackageManager, ...], dict]] = [
+        (lane_managers, {}) for lane_managers, _ in lanes if len(lane_managers) > 1
+    ]
+    for lane_managers, cache in shared_caches:
+        for manager in lane_managers:
+            manager.run_cache = cache
+
+    try:
+        with OperationTrail(
+            managers,
+            label=label,
+            done_label=done_label,
+            unit=unit,
+            total=total,
+            jobs=jobs,
+            coverage=coverage,
+        ) as trail:
+            # Each lane's tasks run serially on one worker, marking the trail as each
+            # completes; distinct lanes run concurrently, sized by ``effective_jobs``.
+            list(
+                run_lanes(
+                    lambda task: trail.mark(*task()),
+                    [tasks for _managers, tasks in lanes],
+                    jobs=jobs,
+                )
             )
-            if cache is not None:
-                for manager in lane_managers:
-                    manager.run_cache = cache
-            try:
-                for task in tasks:
-                    trail.mark(*task())
-            finally:
-                if cache is not None:
-                    for manager in lane_managers:
-                        manager.run_cache = None
 
-        if jobs <= 1:
-            for lane in lanes:
-                run_lane(lane)
-        else:
-            with ThreadPoolExecutor(max_workers=jobs) as executor:
-                futures = [executor.submit(run_lane, lane) for lane in lanes]
-                for future in as_completed(futures):
-                    future.result()
-
-        if coverage:
-            trail.finish(True, f"{done_label} {total} {unit}")
-        else:
-            ok = trail.ok_count
-            trail.finish(ok == total, f"{done_label} {ok}/{total} {unit}")
+            if coverage:
+                trail.finish(True, f"{done_label} {total} {unit}")
+            else:
+                ok = trail.ok_count
+                trail.finish(ok == total, f"{done_label} {ok}/{total} {unit}")
+    finally:
+        for lane_managers, _ in shared_caches:
+            for manager in lane_managers:
+                manager.run_cache = None
 
 
 def merge_into_lock_lanes(

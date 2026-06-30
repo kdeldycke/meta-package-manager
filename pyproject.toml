@@ -294,8 +294,6 @@ docs = [
   "sphinx-copybutton>=0.5.2",
   # sphinx-design 0.6 introduced the card/grid/tab directive syntax used in docs.
   "sphinx-design>=0.6",
-  # sphinx-issues 5.0 is the modern major providing the :issue:/:pr: roles.
-  "sphinx-issues>=5",
   # sphinxcontrib-mermaid 1.2.3 fixed mermaid_d3_zoom support, enabled in docs/conf.py.
   "sphinxcontrib-mermaid>=1.2.3",
   # sphinxext-opengraph 0.13 stabilized OpenGraph metadata generation for Sphinx 8+.

@@ -5,11 +5,11 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
 ## Packages
 
 01. A package has a name.
-02. A package has only one name (see {issue}`26`).
+02. A package has only one name (see [#26](https://github.com/kdeldycke/meta-package-manager/issues/26)).
 03. A package name is unique.
 04. Package
     [names are composed of ASCII characters](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L205-L206).
-05. A package name is the same as its ID (see {issue}`11`).
+05. A package name is the same as its ID (see [#11](https://github.com/kdeldycke/meta-package-manager/issues/11)).
 06. There is only one way to install a package.
 07. Only one version of a package is available on a system.
 08. Shared [dependencies are always compatible](https://en.wikipedia.org/wiki/Dependency_hell).
@@ -42,7 +42,7 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
     [tracks installed versions](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L219-L221).
 15. Package managers
     [can track removed packages](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L239-L242)
-    (see {issue}`17`).
+    (see [#17](https://github.com/kdeldycke/meta-package-manager/issues/17)).
 16. Package managers are documented.
 17. A package manager has a version.
 18. A package manager check package integrity.

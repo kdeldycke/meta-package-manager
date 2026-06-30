@@ -28,8 +28,6 @@ extensions = [
     # Adds a copy button to code blocks.
     "sphinx_copybutton",
     "sphinx_design",
-    # Link to GitHub issues and PRs.
-    "sphinx_issues",
     "sphinxext.opengraph",
     "myst_parser",
     "sphinx.ext.autosectionlabel",
@@ -77,10 +75,6 @@ autodoc_default_options = {
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
-# GitHub pre-implemented shortcuts.
-github_user = "kdeldycke"
-issues_github_path = f"{github_user}/{project_id}"
-
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "click": ("https://click.palletsprojects.com", None),
@@ -98,17 +92,17 @@ html_logo = "assets/logo-square.svg"
 html_theme_options = {
     "sidebar_hide_name": True,
     # Activates edit links.
-    "source_repository": f"https://github.com/{issues_github_path}",
+    "source_repository": f"https://github.com/kdeldycke/{project_id}",
     "source_branch": "main",
     "source_directory": "docs/",
     "announcement": (
         f"{project} works fine, but is <em>maintained by only one person</em> "
         "😶‍🌫️.<br/>You can help if you "
         "<strong><a class='reference external' "
-        f"href='https://github.com/sponsors/{github_user}'>"
+        "href='https://github.com/sponsors/kdeldycke'>"
         "purchase business support 🤝</a></strong> or "
         "<strong><a class='reference external' "
-        f"href='https://github.com/sponsors/{github_user}'>"
+        "href='https://github.com/sponsors/kdeldycke'>"
         "sponsor the project 🫶</a></strong>."
     ),
 }

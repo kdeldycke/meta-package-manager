@@ -162,5 +162,5 @@ The [LibreSelery](https://github.com/protontypes/LibreSelery) project (archived 
 
 And also see this article in which [someone algorithmically donated $5000+ to Open Source via GitHub Sponsors and PyPI data](https://kvinogradov.com/algo-sponsors/).
 
-This is being discussed at {issue}`501`.
+This is being discussed at [#501](https://github.com/kdeldycke/meta-package-manager/issues/501).
 ```

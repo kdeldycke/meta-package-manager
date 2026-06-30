@@ -37,7 +37,8 @@ class Flatpak(PackageManager):
 
         All operations target the system-wide scope except ``cleanup`` which only
         repairs the user installation. Per-scope targeting (system vs user) is
-        tracked in :issue:`1725`.
+        tracked in `#1725
+        <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
     """
 
     homepage_url = "https://flatpak.org"

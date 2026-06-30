@@ -39,7 +39,8 @@ class Gem(PackageManager):
         All operations target the default gem scope (controlled by ``GEM_HOME``).
         On system Ruby this means system-level gems, which may require elevated
         privileges for write operations. Per-scope targeting (system vs user gems)
-        is tracked in :issue:`1725`.
+        is tracked in `#1725
+        <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
 
     ..tip::
 

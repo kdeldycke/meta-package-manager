@@ -40,7 +40,8 @@ class NPM(PackageManager):
 
         All operations target the global scope via ``--global``. Per-scope targeting
         and multi-binary discovery (e.g. multiple node versions via nvm) are tracked
-        in :issue:`1725`.
+        in `#1725
+        <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
     """
 
     name = "Node npm"

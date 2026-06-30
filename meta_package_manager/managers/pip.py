@@ -94,7 +94,8 @@ class Pip(PackageManager):
         All operations target the default pip scope (system site-packages, or the
         active virtualenv). Per-scope targeting (system vs user vs venv) and
         multi-binary discovery (e.g. multiple pythons via pyenv) are tracked in
-        :issue:`1725`.
+        `#1725
+        <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
     """
 
     name = "Python pip"
@@ -225,7 +226,8 @@ class Pip(PackageManager):
             ``mpm`` in a private virtualenv, but are not detected here: they
             leave an ``INSTALLER`` of ``pip`` or ``uv`` and live outside
             ``Cellar``, so these signals alone cannot tell them apart from a
-            deliberate user install. See :issue:`1767`.
+            deliberate user install. See `#1767
+            <https://github.com/kdeldycke/meta-package-manager/issues/1767>`__.
         """
         if "/Cellar/" in sys.prefix:
             return True
@@ -505,7 +507,8 @@ class Pip(PackageManager):
             The ``--not-required`` flag filters out transitive dependencies,
             restricting results to top-level packages only. Upgrading transitive
             dependencies can break version constraints of their parent packages.
-            See :issue:`1214`.
+            See `#1214
+            <https://github.com/kdeldycke/meta-package-manager/issues/1214>`__.
 
         .. code-block:: shell-session
 

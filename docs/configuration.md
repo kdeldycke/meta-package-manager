@@ -289,6 +289,19 @@ Configuration file /home/user/.config/mpm/config.toml is valid.
 
 This validates option names against the CLI parameters and reports unknown keys.
 
+## Exporting the resolved configuration
+
+`--export-config FORMAT` prints the fully-resolved configuration: every option's effective value once the config file, environment variables, and built-in defaults have been merged. It then exits without running any command. Where `--show-params` below is a debug table of *where* each value came from, this emits a clean document you can save straight back as a config file.
+
+`FORMAT` is one of `toml`, `yaml`, `json`, `json5`, `jsonc`, `hjson`, or `xml`:
+
+```{click:run}
+from meta_package_manager.cli import mpm
+invoke(mpm, args=["--export-config", "toml"])
+```
+
+For instance, `mpm --export-config toml > ~/.config/mpm/config.toml` seeds a config file from your live setup.
+
 ## Troubleshooting
 
 You can easily debug the way `mpm` sources its configuration with `--show-params`:

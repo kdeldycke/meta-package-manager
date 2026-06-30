@@ -353,7 +353,12 @@ product-version = "7.1.0"
 macos-app-icon = "docs/assets/icon.icns"
 linux-icon = "docs/assets/icon.png"
 windows-icon-from-ico = "docs/assets/icon.ico"
-include-package-data = [ "click_extra" ]
+# Nuitka omits a package's own data files unless named here. The
+# meta_package_manager.managers package carries yay_cooldown.lua, read at runtime
+# via importlib.resources for the yay --cooldown overlay (see
+# meta_package_manager.managers.pacman); without it the compiled binary would crash
+# on import. The wheel (uv_build) includes the file with no extra config.
+include-package-data = [ "click_extra", "meta_package_manager.managers:*.lua" ]
 # Packages whose imports are gated behind try/except in click-extra (config
 # loader) and meta_package_manager.sbom: Nuitka skips these even when they
 # are installed, so force-include them. Pairs with `[tool.repomatic]

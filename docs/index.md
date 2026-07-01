@@ -18,6 +18,7 @@ cli-parameters
 configuration
 overrides
 cooldown
+sudo
 security
 bar-plugin
 falsehoods

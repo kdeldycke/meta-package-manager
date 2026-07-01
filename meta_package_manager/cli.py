@@ -470,6 +470,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "--cooldown",
         type=Duration(),
         default="",
+        show_default="disabled",
         metavar="DURATION",
         help="Refuse to install or upgrade any package version published more "
         "recently than this duration, as a mitigation against supply-chain "

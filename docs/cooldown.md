@@ -14,6 +14,8 @@ $ mpm --cooldown "1 week" install some-package
 $ mpm --cooldown 12h --allow-unsupported-managers upgrade --all   # let unsupported managers run too
 ```
 
+If you are unsure which value to pick, `--cooldown '7 days'` is a reasonable default: long enough for most compromised releases to be flagged and pulled from registries, short enough to keep security updates timely. There is no bare `--cooldown` shorthand: the option always takes an explicit duration.
+
 `--cooldown` accepts three input shapes:
 
 - **Friendly duration**: `7 days`, `1 week`, `12h`, `30m`, `45s`, a bare number of days (`7`), or `0` / empty to disable the gate.

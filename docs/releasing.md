@@ -21,7 +21,7 @@ The package directory name must match the nuspec basename: this is enforced by [
 
 ## Guix
 
-The Guix package definition is maintained in-tree at `packaging/guix/`. The `guix` job in `release.yaml` runs after the main release, fetches the PyPI sdist SHA256, converts it to Nix-style base32, and updates the `.scm` file. Since Guix packages live on [Codeberg](https://codeberg.org/guix/guix) and require reviewed PRs, the job only opens a PR to this repository with the updated definition, which can then be pushed to the upstream PR at [guix/guix#8047](https://codeberg.org/guix/guix/pulls/8047).
+`meta-package-manager` and its dependencies are [part of GNU Guix](https://packages.guix.gnu.org/packages/meta-package-manager/) upstream, merged via [guix/guix#8047](https://codeberg.org/guix/guix/pulls/8047) on 2026-06-28. The package definition is also maintained in-tree at `packaging/guix/`. The `guix` job in `release.yaml` runs after the main release, computes the `git-fetch` hash of the tagged checkout (the NAR SHA256 in Nix-style base32, see `packaging/guix/update.py`), and updates the `.scm` file. Since Guix packages live on [Codeberg](https://codeberg.org/guix/guix) and require reviewed PRs, the job only opens a PR to this repository with the updated definition; each version bump is then forwarded upstream as a new Guix PR.
 
 ## Nix
 

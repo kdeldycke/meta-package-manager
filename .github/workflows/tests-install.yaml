@@ -132,10 +132,40 @@ jobs:
         run: chmod +x mpm
       - run: ./mpm --version
 
+  # https://packages.guix.gnu.org/packages/meta-package-manager/
+  # https://codeberg.org/guix/guix/src/branch/master/gnu/packages/package-management.scm
+  # meta-package-manager landed in Guix upstream via
+  # https://codeberg.org/guix/guix/pulls/8047 (merged into master 2026-06-28).
+  # `guix pull` refreshes the local channel to a commit that ships it before
+  # installing. Heavyweight (the pull can build for a while) and Linux-only, so
+  # keep it continue-on-error.
+  guix:
+    name: ⁉️ guix
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install Guix
+        run: >
+          wget --quiet --output-document=guix-install.sh
+          https://git.savannah.gnu.org/cgit/guix.git/plain/etc/guix-install.sh
+      - name: Run Guix installer
+        run: |
+          chmod +x guix-install.sh
+          yes | sudo ./guix-install.sh
+      - name: Refresh channel and expose the pulled guix
+        run: |
+          guix pull
+          echo "${HOME}/.config/guix/current/bin" >> "${GITHUB_PATH}"
+      - name: Install mpm and expose its profile
+        run: |
+          guix install meta-package-manager
+          echo "${HOME}/.guix-profile/bin" >> "${GITHUB_PATH}"
+      - run: mpm --version
+
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix
-  # The Guix package definition is maintained locally and has been submitted
-  # upstream at https://codeberg.org/guix/guix/pulls/8047. Install from the
-  # in-repo definition to validate the documented build instructions.
+  # The Guix package definition is also maintained locally (it landed upstream
+  # via https://codeberg.org/guix/guix/pulls/8047). Install from the in-repo
+  # definition to validate the documented build instructions.
   # Guix is Linux-only and the official install script is heavyweight; mark
   # as continue-on-error until the setup is proven stable.
   guix-source:

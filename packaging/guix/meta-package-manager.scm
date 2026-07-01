@@ -5,8 +5,9 @@
 ;;;
 ;;;   guix install --load-path=packaging/guix meta-package-manager
 ;;;
-;;; To submit upstream, copy the define-public form into the appropriate module
-;;; in the Guix repository (gnu/packages/package-management.scm).
+;;; meta-package-manager and its dependencies are now part of GNU Guix upstream
+;;; (gnu/packages/package-management.scm).  This in-tree copy is kept for local
+;;; installs and drives the automated version bumps forwarded upstream.
 
 (define-module (meta-package-manager)
   #:use-module (guix build-system pyproject)
@@ -43,8 +44,7 @@
            python-pyyaml
            python-setuptools
            python-tomlkit))
-    ;; Some propagated inputs may not yet exist in Guix and will need packaging
-    ;; before this definition can be submitted upstream.
+    ;; Propagated inputs are available in Guix upstream.
     (propagated-inputs
      (list python-boltons
            python-click-extra

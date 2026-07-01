@@ -213,23 +213,22 @@ You can help move it forward by showing your support on [the pull request](https
 `````
 
 `````{tab-item} Guix
-A Guix package definition is [maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix) and can be installed from a local checkout:
-
-```{code-block} shell-session
-$ git clone https://github.com/kdeldycke/meta-package-manager.git
-$ guix install --load-path=./meta-package-manager/packaging/guix meta-package-manager
-```
-
-````{admonition} Help land it in the Guix channel
-:class: important
-The Guix package is pending review at [guix/guix#8047](https://codeberg.org/guix/guix/pulls/8047). Once merged, installation will be a one-liner:
+Meta Package Manager is [available in GNU Guix](https://packages.guix.gnu.org/packages/meta-package-manager/), so you just need to:
 
 ```{code-block} shell-session
 $ guix install meta-package-manager
 ```
 
-You can help move it forward by showing your support on [the pull request](https://codeberg.org/guix/guix/pulls/8047).
-````
+```{tip}
+The package [landed in Guix on 2026-06-28](https://codeberg.org/guix/guix/pulls/8047). If `guix install` cannot find it yet, refresh your channels first with `guix pull`.
+```
+
+To build the bleeding-edge version instead, install from [the definition maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix):
+
+```{code-block} shell-session
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ guix install --load-path=./meta-package-manager/packaging/guix meta-package-manager
+```
 `````
 
 `````{tab-item} Void Linux
@@ -425,6 +424,10 @@ At this moment, `mpm` can be installed with itself via these managers:
 
 ```{code-block} shell-session
 $ mpm --brew install meta-package-manager
+```
+
+```{code-block} shell-session
+$ mpm --guix install meta-package-manager
 ```
 
 ```{code-block} shell-session

@@ -46,6 +46,8 @@ class Emerge(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
+    default_sudo = True
+
     requirement = ">=3.0.0"
 
     pre_args = ("--quiet", "--color", "n", "--nospinner")

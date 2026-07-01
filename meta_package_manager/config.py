@@ -195,6 +195,7 @@ OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "pre_cmds": _to_str_tuple,
     "requirement": _to_str,
     "stop_on_error": _to_bool,
+    "sudo": _to_bool,
     "timeout": _to_int,
     "version_cli_options": _to_str_tuple,
     "version_regexes": _to_str_tuple,
@@ -642,8 +643,9 @@ def _warn_risky_overrides_from_untrusted_source(
 
     Overrides on built-in managers still apply (for backward compatibility), but a
     :data:`RISKY_OVERRIDE_FIELDS` override (``pre_cmds``, ``cli_names``,
-    ``cli_search_path``) sourced from a remote URL or an unsafe-permission file can make
-    mpm run an arbitrary binary, so it earns a loud heads-up. See ``docs/security.md``.
+    ``cli_search_path``, ``sudo``) sourced from a remote URL or an unsafe-permission file
+    can make mpm run an arbitrary binary, or run one as root, so it earns a loud
+    heads-up. See ``docs/security.md``.
     """
     if not overrides:
         return
@@ -777,7 +779,7 @@ COMMAND_OPERATION_KEYS: Final[frozenset[str]] = frozenset({"args"})
 
 
 RISKY_OVERRIDE_FIELDS: Final[frozenset[str]] = frozenset(
-    {"pre_cmds", "cli_names", "cli_search_path"},
+    {"pre_cmds", "cli_names", "cli_search_path", "sudo"},
 )
 """Override fields that can redirect mpm to run an arbitrary binary (or ``sudo``).
 

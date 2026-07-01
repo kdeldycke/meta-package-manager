@@ -19,6 +19,7 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 | `pre_cmds`            | list of strings  | Commands prepended to every CLI invocation (typically `sudo`).                         |
 | `requirement`         | string           | PEP 440-style version requirement the manager must satisfy to be considered available. |
 | `stop_on_error`       | boolean          | Stop on the first CLI error from this manager instead of continuing.                   |
+| `sudo`                | boolean          | Run this manager's privileged operations through `sudo` (overrides its built-in default: system managers escalate, user-level managers do not). |
 | `timeout`             | integer          | Maximum duration in seconds for each CLI call from this manager.                       |
 | `version_cli_options` | list of strings  | CLI options used to extract the manager's reported version.                            |
 | `version_regexes`     | list of strings  | Regular expressions tried in order to extract the version from CLI output.             |

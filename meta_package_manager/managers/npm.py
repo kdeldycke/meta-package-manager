@@ -332,7 +332,9 @@ class NPM(PackageManager):
 
             added 3 packages in 3s
         """
-        return self.run_cli("install", "--no-fund", "--no-audit", package_id)
+        # Marked privileged so --sudo / `[mpm.managers.npm] sudo = true` can escalate
+        # global installs; dormant by default (npm's default_sudo is False).
+        return self.run_cli("install", "--no-fund", "--no-audit", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -343,7 +345,7 @@ class NPM(PackageManager):
             $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 upgrade
         """
-        return self.build_cli("update")
+        return self.build_cli("update", sudo=True)
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -358,7 +360,7 @@ class NPM(PackageManager):
             $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 upgrade raven
         """
-        return self.build_cli("upgrade", f"{package_id}")
+        return self.build_cli("upgrade", f"{package_id}", sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.
@@ -368,7 +370,7 @@ class NPM(PackageManager):
             $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 uninstall raven
         """
-        return self.run_cli("uninstall", package_id)
+        return self.run_cli("uninstall", package_id, sudo=True)
 
     def cleanup(self) -> None:
         """Removes things we don't need anymore.

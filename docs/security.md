@@ -38,7 +38,7 @@ Because a {ref}`manager definition <define-a-new-manager>` is the most capable c
 
 1. **Trusted local files only.** `mpm` refuses to build a manager from a definition unless the config file (and its parent directory) is owned by you or root and is not group- or world-writable. This mirrors how `ssh`, `git`, and `sudo` reject unsafe-permission config. A world-writable directory is accepted only when it carries the sticky bit (like `/tmp`), which prevents others from replacing your file.
 2. **No definitions from remote configs.** `mpm` supports `--config <url>`, but it will not synthesize a manager from a definition fetched over the network. Overrides of built-in managers still load from a URL for backward compatibility.
-3. **A warning for risky overrides from untrusted sources.** When an override of `pre_cmds`, `cli_names`, or `cli_search_path` (the fields that can redirect `mpm` to an arbitrary binary) is read from a remote URL or an unsafe-permission file, `mpm` prints a warning. The override still applies, so existing setups keep working, but the heads-up is loud.
+3. **A warning for risky overrides from untrusted sources.** When an override of `pre_cmds`, `cli_names`, `cli_search_path` (the fields that can redirect `mpm` to an arbitrary binary), or `sudo` (which runs a manager's binary as root) is read from a remote URL or an unsafe-permission file, `mpm` prints a warning. The override still applies, so existing setups keep working, but the heads-up is loud.
 
 ```{note}
 The permission check is POSIX-only. On Windows the file-ownership model differs (ACLs rather than Unix mode bits), so the check is skipped. Keep your configuration directory restricted to your own account.

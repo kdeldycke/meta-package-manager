@@ -31,6 +31,7 @@ from meta_package_manager.config import (
     INVALIDATED_CACHED_PROPS,
     MAX_ISSUE_URL_LENGTH,
     OVERRIDABLE_FIELDS,
+    RISKY_OVERRIDE_FIELDS,
     ContributionHint,
     _build_issue_url,
     apply_manager_overrides,
@@ -321,6 +322,37 @@ def test_global_default_still_applies_without_override():
     assert selected[0].timeout == 77
     # Reset for following tests.
     pool["uv"].__dict__.pop("timeout", None)
+
+
+def test_sudo_override(reset_overrides):
+    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"sudo": True}})
+    assert pool[OVERRIDE_TARGET].sudo is True
+
+
+def test_sudo_override_rejects_int(reset_overrides):
+    with pytest.raises(ValidationError):
+        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"sudo": 1}})
+
+
+def test_per_manager_sudo_beats_global_default(reset_overrides):
+    """A per-manager ``sudo`` override survives the global ``setattr`` loop, so a
+    manager can opt out of (or into) escalation regardless of the global ``--sudo``."""
+    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"sudo": False}})
+    selected = list(
+        pool._select_managers(
+            keep=(OVERRIDE_TARGET,),
+            drop_not_found=False,
+            sudo=True,
+        )
+    )
+    assert len(selected) == 1
+    assert selected[0].sudo is False
+
+
+def test_sudo_is_a_risky_override_field():
+    """`[mpm.managers.<id>] sudo = true` from an untrusted source can run a binary as
+    root, so it must trip the untrusted-source warning like pre_cmds."""
+    assert "sudo" in RISKY_OVERRIDE_FIELDS
 
 
 CONFIG_TEMPLATE = dedent("""\

@@ -42,6 +42,8 @@ class APK(PackageManager):
 
     platforms = LINUX_LIKE
 
+    default_sudo = True
+
     requirement = ">=2.10.0"
     """The ``list`` applet, used by :py:meth:`installed` and :py:meth:`outdated`,
     was introduced in version ``2.10.0``.

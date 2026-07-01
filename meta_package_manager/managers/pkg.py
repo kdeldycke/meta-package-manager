@@ -513,6 +513,8 @@ class Ports(PackageManager):
 
     platforms = FREEBSD
 
+    default_sudo = True
+
     cli_names = ("make",)
     """The ports tree is driven by FreeBSD's :command:`make`.
 

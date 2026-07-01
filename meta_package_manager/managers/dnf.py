@@ -42,6 +42,8 @@ class DNF(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
+    default_sudo = True
+
     requirement = ">=4.0.0"
 
     cli_names: tuple[str, ...] = ("dnf", "dnf4")

@@ -48,6 +48,8 @@ class XBPS(PackageManager):
 
     platforms = LINUX_LIKE
 
+    default_sudo = True
+
     requirement = ">=0.59"
     """Version 0.59 is the first to ship the long-form options
     (``--list-pkgs``, ``--repository``, ``--search``, ``--update``,

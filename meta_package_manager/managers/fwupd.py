@@ -38,6 +38,8 @@ class FWUPD(PackageManager):
 
     platforms = LINUX_LIKE
 
+    default_sudo = True
+
     requirement = ">=1.9.5"
     """Version `1.9.5 is the first supporting --json parameter for get-devices command
     <https://github.com/fwupd/fwupd/releases/tag/1.9.5>`_.

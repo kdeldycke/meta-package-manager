@@ -35,7 +35,9 @@ Cutting across both altitudes,
 :py:func:`meta_package_manager.execution.install_interrupt_handler` and
 :py:func:`meta_package_manager.execution.terminate_live_processes` make Ctrl+C abort a
 concurrent fan-out cleanly, by killing the in-flight subprocesses whose worker threads
-would otherwise keep the thread pool (and the interpreter) from shutting down.
+would otherwise keep the thread pool (and the interpreter) from shutting down; and
+:py:func:`meta_package_manager.execution.prime_sudo` authenticates ``sudo`` once up front
+so a privilege-escalation password prompt never stalls the run from inside that fan-out.
 
 .. note::
     The name and intent mirror :py:mod:`click_extra.execution` from the sibling
@@ -299,6 +301,97 @@ def install_interrupt_handler(ctx: Context) -> None:
     ctx.call_on_close(lambda: signal.signal(signal.SIGINT, previous))
 
 
+# Up-front sudo priming for a mutating fan-out.
+#
+# A concurrent state-changing command mutes per-manager output and feeds each child
+# ``stdin=/dev/null``, so a ``sudo`` password prompt raised mid-run — by mpm's own
+# ``sudo -n`` or by a manager that escalates internally (Homebrew ``cask``) — lands
+# invisibly on ``/dev/tty`` and can stall the run up to the mutating timeout. Priming
+# authenticates once, up front, in one clearly-labeled prompt, then keeps the credential
+# warm; every later escalation on the same terminal then spends the cache silently.
+
+
+_SUDO_KEEPALIVE_INTERVAL: Final = 60
+"""Seconds between ``sudo -n -v`` credential-cache refreshes during a run.
+
+Comfortably under sudo's default ``timestamp_timeout`` (5 minutes), so the cache warmed
+by :py:func:`prime_sudo` stays valid for the whole command. A host configured with a
+shorter ``timestamp_timeout`` may still see a mid-run escalation re-prompt or fail.
+"""
+
+_SUDO_PRIMED: Final = "mpm_sudo_primed"
+"""``ctx.meta`` key marking that :py:func:`prime_sudo` already ran this invocation."""
+
+
+def _resolved_sudo(manager: PackageManager) -> bool:
+    """Whether ``manager`` escalates: its :py:attr:`~CLIExecutor.sudo` override if set,
+    else its built-in :py:attr:`~CLIExecutor.default_sudo`."""
+    return manager.sudo if manager.sudo is not None else manager.default_sudo
+
+
+def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
+    """Authenticate ``sudo`` once, up front, for a mutating fan-out that will escalate.
+
+    Validates the ``sudo`` credential on mpm's controlling terminal in a single
+    clearly-labeled foreground prompt, then keeps it warm with a background refresh, so
+    every later escalation on the same terminal — mpm's own ``sudo -n`` *and* a manager's
+    internal ``sudo`` (Homebrew ``cask``) — spends the cache instead of blocking on an
+    invisible prompt inside the concurrent fan-out.
+
+    Call at the top of each mutating subcommand, before the fan-out draws its spinner.
+    Returns without prompting (leaving escalations to fail fast through their own
+    ``sudo -n``) when there is nothing to prime:
+
+    - Windows (no ``sudo``) or the process is already root,
+    - no selected manager escalates (:py:func:`_resolved_sudo`),
+    - a dry run (no real CLI is executed),
+    - already primed once this invocation (idempotent), or
+    - no interactive terminal to prompt on: one warning is logged and the escalating
+      managers are left to fail fast rather than block on a prompt no one can answer.
+    """
+    managers = list(managers)
+    if is_any_windows() or getattr(os, "geteuid", lambda: 1)() == 0:
+        return
+    if not any(_resolved_sudo(manager) for manager in managers):
+        return
+    if any(manager.dry_run for manager in managers):
+        return
+    if ctx.meta.get(_SUDO_PRIMED):
+        return
+    ctx.meta[_SUDO_PRIMED] = True
+
+    if not (sys.stdin.isatty() and sys.stderr.isatty()):
+        logging.warning(
+            "Some managers need administrator rights, but no terminal is available to "
+            "prompt for a password: they may fail. Re-run in a terminal, pre-authenticate "
+            "with `sudo -v`, or drop them with --no-sudo.",
+        )
+        return
+
+    echo(
+        "Some managers need administrator rights: enter your password if prompted.",
+        err=True,
+    )
+    if subprocess.run(("sudo", "-v"), check=False).returncode != 0:
+        logging.warning(
+            "Could not acquire sudo credentials: managers needing root may fail.",
+        )
+        return
+
+    # Keep the credential fresh for the whole run so a long fan-out does not outlast
+    # sudo's timestamp and re-prompt mid-flight. Output is captured so a failed refresh
+    # cannot smear the aggregate spinner drawing on stderr. The daemon thread is stopped
+    # when the context closes (normal exit or Ctrl+C both run close callbacks).
+    stop = threading.Event()
+
+    def keepalive() -> None:
+        while not stop.wait(_SUDO_KEEPALIVE_INTERVAL):
+            subprocess.run(("sudo", "-n", "-v"), capture_output=True, check=False)
+
+    threading.Thread(target=keepalive, daemon=True).start()
+    ctx.call_on_close(stop.set)
+
+
 class CLIExecutor:
     """Locate a manager's CLI on the system and run it.
 
@@ -440,6 +533,32 @@ class CLIExecutor:
     install and upgrade operations are skipped for managers lacking native
     release-age support, so nothing slips in unguarded. Setting this to ``False``
     opts into running those operations anyway, without the safeguard.
+    """
+
+    sudo: bool | None = None
+    """User escalation policy: run this manager's privileged commands with ``sudo``.
+
+    ``None`` (the default) means the user expressed no preference, so the built-in
+    :py:attr:`default_sudo` decides. ``True``/``False`` force escalation on or off for
+    every operation this manager marks privileged (a ``build_cli(..., sudo=True)`` call).
+    Set globally by :option:`mpm --sudo` / :option:`mpm --no-sudo` and per manager by the
+    ``[mpm.managers.<id>] sudo`` config key, the latter winning (see
+    :py:meth:`meta_package_manager.pool.ManagerPool._select_managers`).
+
+    Only privileged operations on UNIX are ever escalated. A manager that escalates
+    *internally* (Homebrew ``cask``) has no such markers and is never wrapped in ``sudo``
+    by ``mpm``: its own ``sudo`` is instead served by the credential cache warmed by
+    :py:func:`prime_sudo`.
+    """
+
+    default_sudo: bool = False
+    """Built-in escalation default, used when :py:attr:`sudo` is ``None``.
+
+    ``False`` on the base: most managers install into user-writable trees and never need
+    root. The system package managers whose privileged operations require root (``apt``,
+    ``dnf``, ``pacman``, ``zypper``, ...) set this to ``True`` so their
+    ``build_cli(..., sudo=True)`` operations escalate out of the box, while staying
+    switchable off through :py:attr:`sudo` (``--no-sudo`` or config) for rootless setups.
     """
 
     cooldown_env_var: ClassVar[str | None] = None
@@ -1050,7 +1169,7 @@ class CLIExecutor:
 
         .. code-block:: shell-session
 
-            $ [<pre_cmds>|sudo] <cli_path> <pre_args> <*args> <post_args>
+            $ [<pre_cmds>|sudo -n] <cli_path> <pre_args> <*args> <post_args>
 
         * :py:attr:`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
           is added before the CLI path.
@@ -1079,10 +1198,13 @@ class CLIExecutor:
         * ``override_pre_args=tuple()``
         * ``override_post_args=tuple()``
 
-        On linux, the command can be run with `sudo <https://www.sudo.ws>`_ if the
-        parameter of the same name is set to ``True``. In which case the
-        ``override_pre_cmds`` parameter is not allowed to be set and the
-        ``auto_pre_cmds`` parameter is forced to ``False``.
+        On UNIX, an operation marked privileged (``sudo=True``) is escalated only when
+        the per-manager policy opts in (:py:attr:`sudo`, falling back to
+        :py:attr:`default_sudo`). It is then run through `sudo <https://www.sudo.ws>`_
+        with ``-n`` (non-interactive: it spends the credential cache warmed by
+        :py:func:`prime_sudo` and fails fast rather than blocking on a password prompt).
+        When escalation applies, ``override_pre_cmds`` is not allowed to be set and
+        ``auto_pre_cmds`` is forced to ``False``. A non-UNIX host never escalates.
         """
         # Apply delegation overrides if set by a DelegatedMethod descriptor.
         delegate_path = getattr(self, "_delegate_cli_path", None)
@@ -1092,17 +1214,26 @@ class CLIExecutor:
 
         params: list[TArg | TNestedArgs] = []
 
-        # Sudo replaces any pre-command, be it overridden or automatic.
-        if sudo:
-            if current_platform() not in UNIX:
-                msg = "sudo only supported on UNIX."
-                raise NotImplementedError(msg)
+        # Resolve whether this privileged operation is actually escalated: the caller
+        # marks the operation as needing root (``sudo``), the per-manager policy opts in
+        # (the ``sudo`` override, else ``default_sudo``), and the platform has ``sudo``.
+        # A non-UNIX host simply does not escalate rather than raising.
+        escalate = bool(
+            sudo
+            and (self.sudo if self.sudo is not None else self.default_sudo)
+            and current_platform() in UNIX
+        )
+        # Sudo replaces any pre-command, be it overridden or automatic. ``-n`` keeps the
+        # call non-interactive: it spends the credential cache warmed up front by
+        # prime_sudo() and fails fast instead of blocking on an invisible /dev/tty
+        # password prompt buried in the concurrent fan-out.
+        if escalate:
             if override_pre_cmds:
                 msg = "Pre-commands not allowed if sudo is requested."
                 raise ValueError(msg)
             if auto_pre_cmds:
                 auto_pre_cmds = False
-            params.append("sudo")
+            params.extend(("sudo", "-n"))
         elif override_pre_cmds:
             params.extend(override_pre_cmds)  # type: ignore[arg-type]
         elif auto_pre_cmds:

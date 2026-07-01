@@ -537,9 +537,31 @@ Package installers may write to any location; options such as `--appdir` are ign
 Password:
 ```
 
-Both cases are not handled gracefully by `mpm`, which [doesn't support (yet) interactive password](https://github.com/kdeldycke/meta-package-manager/issues/33) management and capture.
+### Escalation policy
 
-A workaround on Linux is to install `mpm` with `sudo`, so you'll be able to invoke it with `sudo` too:
+Which managers escalate is decided per manager. System package managers (`apt`, `dnf`, `pacman`, `zypper`, `xbps`, and the like) run their state-changing operations through `sudo` by default; user-level managers (`brew`, `npm`, `pip`, ...) do not. Override it globally with `--sudo` / `--no-sudo`, or per manager with the `sudo` key of a [`[mpm.managers.<id>]`](overrides.md) section:
+
+```toml
+[mpm.managers.npm]
+sudo = true    # Run global npm installs through sudo.
+
+[mpm.managers.pacman]
+sudo = false   # Rootless setup: never escalate pacman.
+```
+
+### One prompt, up front
+
+`mpm` runs managers concurrently with their output muted behind a progress spinner, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that will escalate, `mpm` therefore authenticates `sudo` once, up front, on your terminal, then keeps the credential warm for the rest of the run. Every escalated call after that spends the cached credential silently, so nothing blocks in the fan-out.
+
+That single prompt also covers a manager that escalates internally: on macOS, `brew`'s own `sudo` (for a cask like the `macfuse` example above) reuses the warmed credential when you pass `--sudo`.
+
+Off a terminal (a pipe, CI, the menubar plugin), `mpm` cannot prompt, so managers needing root fail fast with a clear error instead of hanging.
+
+A stock `mpm upgrade` on macOS does not pre-authenticate for casks (matching `brew`'s own lazy behavior), so a cask needing admin rights still prompts mid-run; run `mpm --sudo upgrade` for the clean one-prompt experience.
+
+### Running `mpm` itself as root
+
+On Linux you may instead install and run `mpm` under `sudo`, so every manager it drives is already privileged:
 
 ```shell-session
 $ sudo uv tool install meta-package-manager

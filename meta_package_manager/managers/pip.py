@@ -604,7 +604,9 @@ class Pip(PackageManager):
             Installing collected packages: python-dateutil, arrow
             Successfully installed arrow-1.1.1 python-dateutil-2.8.2
         """
-        return self.run_cli("install", package_id)
+        # Marked privileged so --sudo / `[mpm.managers.pip] sudo = true` can escalate
+        # global installs; dormant by default (pip's default_sudo is False).
+        return self.run_cli("install", package_id, sudo=True)
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -633,7 +635,7 @@ class Pip(PackageManager):
 
             See: https://github.com/pypa/pip/issues/59
         """
-        return self.build_cli("install", "--upgrade", package_id)
+        return self.build_cli("install", "--upgrade", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
@@ -642,7 +644,7 @@ class Pip(PackageManager):
 
             $ python -m pip --no-color uninstall --yes arrow
         """
-        return self.run_cli("uninstall", "--yes", package_id)
+        return self.run_cli("uninstall", "--yes", package_id, sudo=True)
 
     def cleanup(self) -> None:
         """Removes things we don't need anymore.

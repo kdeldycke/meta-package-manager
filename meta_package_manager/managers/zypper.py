@@ -56,6 +56,8 @@ class Zypper(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
+    default_sudo = True
+
     requirement = ">=1.14.0"
 
     pre_args = (

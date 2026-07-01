@@ -68,6 +68,8 @@ class Pacman(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
+    default_sudo = True
+
     requirement = ">=5.0.0"
 
     pre_args = ("--noconfirm", "--color", "never")

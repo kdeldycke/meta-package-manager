@@ -89,6 +89,7 @@ from .execution import (
     collect_per_package,
     highlight_cli_name,
     install_interrupt_handler,
+    prime_sudo,
     warn_jobs_ignored,
 )
 from .manager import PackageManager
@@ -429,6 +430,15 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         help="Stop right away or continue operations on manager CLI error.",
     ),
     option(
+        "--sudo/--no-sudo",
+        default=None,
+        help="Force running privileged manager operations with (or without) sudo. "
+        "Unset by default, letting each manager decide: system managers (apt, dnf, "
+        "pacman, ...) escalate, user-level managers do not. When escalation is needed "
+        "on a terminal, mpm authenticates once up front instead of prompting mid-run; "
+        "off a terminal, managers needing root fail fast rather than stalling.",
+    ),
+    option(
         "-d",
         "--dry-run",
         is_flag=True,
@@ -548,6 +558,7 @@ def mpm(
     all_managers,
     ignore_auto_updates,
     stop_on_error,
+    sudo,
     dry_run,
     timeout,
     cooldown,
@@ -695,6 +706,7 @@ def mpm(
             ignore_auto_updates=ignore_auto_updates,
             # Does the manager should raise on error or not.
             stop_on_error=stop_on_error,
+            sudo=sudo,
             dry_run=dry_run,
             timeout=timeout,
             progress=show_progress,
@@ -1497,6 +1509,10 @@ def _dispatch_sourced_operation(
     )
     manager_ids = tuple(manager.id for manager in selected_managers)
 
+    # Authenticate sudo once up front if any selected manager will escalate, so a
+    # password prompt never stalls the concurrent fan-out below.
+    prime_sudo(ctx, selected_managers)
+
     # Subset of selected managers implementing `installed`, queried to discover which
     # manager(s) a spec untied to one was installed with.
     sourcing_managers = tuple(
@@ -1639,6 +1655,10 @@ def install(ctx, packages_specs):
         "Installation priority: > "
         f"{' > '.join(map(theme().invoked_command, manager_ids))}",
     )
+
+    # Authenticate sudo once up front if any selected manager will escalate, covering
+    # both the concurrent tied-package fan-out and the sequential priority search below.
+    prime_sudo(ctx, selected_managers)
 
     solver = Solver(packages_specs, manager_priority=manager_ids)
     packages_per_managers = solver.resolve_specs_group_by_managers()
@@ -1858,6 +1878,7 @@ def upgrade(ctx, all, packages_specs):
         managers = list(
             ctx.obj.selected_managers(implements_operation=Operations.upgrade_all),
         )
+        prime_sudo(ctx, managers)
         # Explicit --<id> picks announce loudly; an implicit "upgrade everything" stays
         # at DEBUG so the default run shows only the trail (matching the explicit /
         # implicit levels select_managers already uses for its skip messages).
@@ -1937,6 +1958,7 @@ def remove(ctx, packages_specs):
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.sync))
+    prime_sudo(ctx, managers)
     announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
 
     # Sync is independent per manager, so fan out concurrently with a ✓/✗ trail and
@@ -1955,6 +1977,7 @@ def sync(ctx):
 def cleanup(ctx):
     """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
+    prime_sudo(ctx, managers)
     announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
 
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✗ trail
@@ -2320,6 +2343,7 @@ def restore(ctx, toml_files):
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.install),
     )
+    prime_sudo(ctx, selected_managers)
 
     # Collect every package a manager failed to install, to raise a non-zero exit code
     # at the end (matching install, remove and upgrade).

@@ -22,9 +22,11 @@ import subprocess
 import sys
 import threading
 import time
+from unittest.mock import patch
 
 import click
 import pytest
+from extra_platforms import ALL_PLATFORMS, UNIX
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
@@ -37,10 +39,17 @@ from meta_package_manager.execution import (
     _LIVE_PROCESSES_LOCK,
     CLIError,
     install_interrupt_handler,
+    prime_sudo,
     terminate_live_processes,
 )
+from meta_package_manager.pool import pool
 
 from .fake_manager import FakeManager
+
+# A UNIX and a non-UNIX platform to force build_cli's platform gate deterministically,
+# independent of the host the tests run on.
+_UNIX_PLATFORM = next(iter(UNIX))
+_NON_UNIX_PLATFORM = next(p for p in ALL_PLATFORMS if p not in UNIX)
 
 
 def test_operation_timeouts_cover_all_operations():
@@ -384,3 +393,199 @@ def test_install_interrupt_handler_skips_off_main_thread():
     worker.join()
     assert not errors
     assert signal.getsignal(signal.SIGINT) is original
+
+
+# Privilege escalation: a per-op marker gated by a per-manager policy, escalated with
+# `sudo -n`, primed once up front so a password prompt never stalls the fan-out.
+
+
+def test_build_cli_escalates_with_sudo_n_when_policy_on():
+    """A privileged op escalates to `sudo -n` when the manager's policy opts in."""
+    manager = FakeManager()
+    manager.sudo = True
+    with patch(
+        "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
+    ):
+        cli = manager.build_cli("install", "pkg", sudo=True)
+    assert cli[:2] == ("sudo", "-n")
+
+
+def test_build_cli_no_escalation_when_policy_off():
+    """`--no-sudo` (policy False) drops escalation even on a privileged op."""
+    manager = FakeManager()
+    manager.sudo = False
+    with patch(
+        "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
+    ):
+        cli = manager.build_cli("install", "pkg", sudo=True)
+    assert "sudo" not in cli
+
+
+def test_build_cli_no_escalation_off_unix():
+    """A non-UNIX host never escalates (no crash), even with policy on."""
+    manager = FakeManager()
+    manager.sudo = True
+    with patch(
+        "meta_package_manager.execution.current_platform",
+        return_value=_NON_UNIX_PLATFORM,
+    ):
+        cli = manager.build_cli("install", "pkg", sudo=True)
+    assert "sudo" not in cli
+
+
+def test_build_cli_marker_required_for_escalation():
+    """Policy on but no per-op marker (sudo=False default) means no escalation."""
+    manager = FakeManager()
+    manager.sudo = True
+    with patch(
+        "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
+    ):
+        cli = manager.build_cli("list")
+    assert "sudo" not in cli
+
+
+def test_default_sudo_matches_system_managers():
+    """Exactly the system package managers (and their subclasses) escalate by
+    default; user-level managers and pkg (which has no sudo markers) do not."""
+    escalating = {mid for mid, manager in pool.items() if type(manager).default_sudo}
+    assert escalating == {
+        "apk",
+        "apt",
+        "apt-mint",
+        "deb-get",
+        "dnf",
+        "dnf5",
+        "emerge",
+        "eopkg",
+        "fwupd",
+        "pacaur",
+        "pacman",
+        "paru",
+        "ports",
+        "xbps",
+        "yay",
+        "yum",
+        "zypper",
+    }
+    for mid in ("pkg", "brew", "cask", "npm", "pip", "cargo"):
+        assert pool[mid].default_sudo is False
+
+
+def test_npm_sudo_marker_dormant_until_opted_in():
+    """npm marks its global installs privileged, but stays unescalated until the user
+    opts in via --sudo / config (default_sudo is False)."""
+    from meta_package_manager.managers.npm import NPM
+
+    manager = NPM()
+    assert manager.default_sudo is False
+    with patch(
+        "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
+    ):
+        assert "sudo" not in manager.build_cli("update", sudo=True)
+        manager.sudo = True
+        assert manager.build_cli("update", sudo=True)[:2] == ("sudo", "-n")
+
+
+def _escalating_manager() -> FakeManager:
+    """A fake manager whose policy escalates, to trip prime_sudo."""
+    manager = FakeManager()
+    manager.sudo = True
+    return manager
+
+
+def test_prime_sudo_skips_when_no_manager_escalates():
+    ctx = click.Context(click.Command("mpm"))
+    with patch("meta_package_manager.execution.subprocess.run") as run:
+        prime_sudo(ctx, [FakeManager()])
+    run.assert_not_called()
+
+
+def test_prime_sudo_skips_on_windows():
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        patch("meta_package_manager.execution.is_any_windows", return_value=True),
+        patch("meta_package_manager.execution.subprocess.run") as run,
+    ):
+        prime_sudo(ctx, [_escalating_manager()])
+    run.assert_not_called()
+
+
+def test_prime_sudo_skips_when_root():
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        patch("meta_package_manager.execution.is_any_windows", return_value=False),
+        patch("meta_package_manager.execution.os.geteuid", return_value=0, create=True),
+        patch("meta_package_manager.execution.subprocess.run") as run,
+    ):
+        prime_sudo(ctx, [_escalating_manager()])
+    run.assert_not_called()
+
+
+def test_prime_sudo_skips_on_dry_run():
+    ctx = click.Context(click.Command("mpm"))
+    manager = _escalating_manager()
+    manager.dry_run = True
+    with (
+        patch("meta_package_manager.execution.is_any_windows", return_value=False),
+        patch(
+            "meta_package_manager.execution.os.geteuid", return_value=1000, create=True
+        ),
+        patch("meta_package_manager.execution.subprocess.run") as run,
+    ):
+        prime_sudo(ctx, [manager])
+    run.assert_not_called()
+
+
+def test_prime_sudo_warns_without_tty(caplog):
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        patch("meta_package_manager.execution.is_any_windows", return_value=False),
+        patch(
+            "meta_package_manager.execution.os.geteuid", return_value=1000, create=True
+        ),
+        patch("sys.stdin.isatty", return_value=False),
+        patch("meta_package_manager.execution.subprocess.run") as run,
+        caplog.at_level(logging.WARNING),
+    ):
+        prime_sudo(ctx, [_escalating_manager()])
+    run.assert_not_called()
+    assert any("no terminal" in record.getMessage() for record in caplog.records)
+
+
+def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        patch("meta_package_manager.execution.is_any_windows", return_value=False),
+        patch(
+            "meta_package_manager.execution.os.geteuid", return_value=1000, create=True
+        ),
+        patch("sys.stdin.isatty", return_value=True),
+        patch("sys.stderr.isatty", return_value=True),
+        patch("meta_package_manager.execution.subprocess.run") as run,
+    ):
+        run.return_value = subprocess.CompletedProcess((), 0)
+        prime_sudo(ctx, [_escalating_manager()])
+        # Authenticated once, up front, before the fan-out.
+        assert run.call_args_list[0].args[0] == ("sudo", "-v")
+        # Stop the keep-alive (a stop callback was registered on the context) while
+        # subprocess.run is still patched, so no real sudo escapes the test.
+        ctx.close()
+
+
+def test_prime_sudo_is_idempotent():
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        patch("meta_package_manager.execution.is_any_windows", return_value=False),
+        patch(
+            "meta_package_manager.execution.os.geteuid", return_value=1000, create=True
+        ),
+        patch("sys.stdin.isatty", return_value=True),
+        patch("sys.stderr.isatty", return_value=True),
+        patch("meta_package_manager.execution.subprocess.run") as run,
+    ):
+        run.return_value = subprocess.CompletedProcess((), 0)
+        prime_sudo(ctx, [_escalating_manager()])
+        prime_sudo(ctx, [_escalating_manager()])
+        ctx.close()
+    prompts = [c for c in run.call_args_list if c.args[0] == ("sudo", "-v")]
+    assert len(prompts) == 1

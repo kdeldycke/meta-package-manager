@@ -164,6 +164,7 @@ class ManagerPool:
             "progress",
             "require_cooldown_support",
             "stop_on_error",
+            "sudo",
             "timeout",
         },
     )

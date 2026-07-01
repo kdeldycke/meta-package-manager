@@ -45,6 +45,8 @@ class Deb_Get(PackageManager):
 
     platforms = LINUX_LIKE
 
+    default_sudo = True
+
     version_cli_options = ("version",)
     """
     .. code-block:: shell-session

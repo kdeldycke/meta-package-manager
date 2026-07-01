@@ -147,7 +147,7 @@ def manager_source_url(manager_id: str) -> str:
 
     Resolves the manager class via :py:data:`meta_package_manager.pool.pool`,
     then uses :py:mod:`inspect` to derive the source file and line number of
-    the class declaration. Used by the benchmark page to back each ``✓`` in
+    the class declaration. Used by the benchmark page to back each ``✅`` in
     the ``mpm`` column with a link to its implementation.
     """
     cls = type(pool[manager_id])
@@ -161,7 +161,7 @@ def benchmark_managers_table() -> str:
     """Produce the ``Package manager support`` table of the benchmark page.
 
     The ``mpm`` column is auto-derived from the live pool: each implemented
-    manager renders as ``[✓](source_url)``, linking to the class definition
+    manager renders as ``[✅](source_url)``, linking to the class definition
     that proves the support. Competitor columns are filled from
     ``docs/benchmark.yaml``, which only encodes what the *other* tools
     support.
@@ -172,11 +172,15 @@ def benchmark_managers_table() -> str:
     competitor-only managers. IDs without any known URL render as plain
     ``\\`code\\```.
 
-    Support cells are normally ``✓``, but render as ``≈[^coarse]`` when the
+    Support cells are normally ``✅``, but render as ``[🟡](url)`` when the
     ``(manager_id, competitor)`` pair is listed in the YAML's
-    ``coarse_support`` map. ``≈`` means the competitor can only reach this
-    manager through a coarser umbrella step (topgrade's ``--only shell`` or
-    ``--only vim``), never in isolation.
+    ``coarse_support`` map, with the URL pointing to the maintainer's own
+    acknowledgement of the bundling. ``🟡`` means the competitor can only
+    reach this manager through a coarser umbrella step (topgrade's
+    ``--only shell`` or ``--only vim``), never in isolation. Refused
+    managers (from the ``refused`` map) render as ``[❌](url)`` where the
+    URL is the specific decision or refusal that documents the declined
+    support.
 
     Manager rows are the sorted union of pool IDs and YAML keys, so a new
     entry on either side appears in the table without manual edits.
@@ -185,10 +189,11 @@ def benchmark_managers_table() -> str:
     data = yaml.safe_load(yaml_path.read_text())
     competitor_data: dict[str, list[str]] = data["managers"]
     homepages: dict[str, str] = data.get("homepages", {})
-    coarse_support: dict[str, list[str]] = data.get("coarse_support", {})
+    coarse_support: dict[str, dict[str, str]] = data.get("coarse_support", {})
+    refused: dict[str, dict[str, str]] = data.get("refused", {})
 
     pool_ids = set(pool.all_manager_ids)
-    all_ids = sorted(pool_ids | competitor_data.keys())
+    all_ids = sorted(pool_ids | competitor_data.keys() | refused.keys())
 
     headers = ["Manager", "`mpm`"]
     headers.extend(f"`{name}`[^{name}]" for name in BENCHMARK_COMPETITORS)
@@ -202,19 +207,23 @@ def benchmark_managers_table() -> str:
         label = f"[`{mid}`]({url})" if url else f"`{mid}`"
         row = [label]
         if mid in pool_ids:
-            row.append(f"[✓]({manager_source_url(mid)})")
+            row.append(f"[✅]({manager_source_url(mid)})")
         else:
             row.append("")
         flags = set(competitor_data.get(mid, []))
-        coarse_flags = set(coarse_support.get(mid, []))
+        coarse_map = coarse_support.get(mid, {})
+        refused_map = refused.get(mid, {})
         cells: list[str] = []
         for name in BENCHMARK_COMPETITORS:
-            if name not in flags:
-                cells.append("")
-            elif name in coarse_flags:
-                cells.append("≈[^coarse]")
+            if name in flags:
+                if name in coarse_map:
+                    cells.append(f"[🟡]({coarse_map[name]})")
+                else:
+                    cells.append("✅")
+            elif name in refused_map:
+                cells.append(f"[❌]({refused_map[name]})")
             else:
-                cells.append("✓")
+                cells.append("")
         row.extend(cells)
         table.append(row)
 

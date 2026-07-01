@@ -37,6 +37,17 @@
 # ``≈[^coarse]`` instead of ``✓`` for these pairs. Every coarse entry must
 # also exist in ``managers`` (you cannot be coarse-only-supported without
 # being supported at all).
+#
+# ``refused`` records ``(manager_id, competitor, evidence_url)`` triples where
+# the competitor has *explicitly declined* to support the manager, with a
+# link to the specific issue, PR, or comment carrying the refusal. Cells in
+# the support table render as ``[❌](url)`` for these pairs, letting readers
+# audit each claim against the upstream decision. The evidence link must
+# point to a concrete refusal (a maintainer comment, a ``NOT_PLANNED``
+# closure, a rejected PR), not a generic repo homepage: absence of support
+# without a documented decision stays a blank cell. A ``(manager_id,
+# competitor)`` pair cannot appear in both ``managers`` and ``refused`` for
+# the same competitor.
 
 managers:
   0install: []
@@ -58,6 +69,7 @@ managers:
   bin: [topgrade]
   brew: [topgrade, pacaptr, pacapt, sysget]
   bun: [topgrade]
+  cabal: []
   cargo: [topgrade]
   cask: [topgrade, pacaptr, pacapt, sysget]
   cave: [pacapt]
@@ -125,6 +137,7 @@ managers:
   oh-my-zsh: [topgrade]
   ollama: [topgrade]
   opam: [topgrade]
+  opencode: []
   opkg: [pacapt]
   pacaur: []
   pacdef: [topgrade]
@@ -207,6 +220,7 @@ managers:
   yarn-berry: [topgrade]
   yay: [topgrade]
   yazi: [topgrade]
+  yt-dlp: []
   yum: [topgrade, pacapt, sysget, whohas]
   zgenom: [topgrade]
   zigup: [topgrade]
@@ -231,6 +245,7 @@ homepages:
   bash-it: https://bash-it.readthedocs.io
   bin: https://github.com/marcosnils/bin
   bun: https://bun.sh
+  cabal: https://www.haskell.org/cabal/
   cave: https://exherbo.org
   certbot: https://certbot.eff.org
   chezmoi: https://www.chezmoi.io
@@ -279,6 +294,7 @@ homepages:
   oh-my-zsh: https://ohmyz.sh
   ollama: https://ollama.com
   opam: https://opam.ocaml.org
+  opencode: https://github.com/sst/opencode
   pacdef: https://github.com/steven-omaha/pacdef
   packer-nvim: https://github.com/wbthomason/packer.nvim
   pamac: https://gitlab.manjaro.org/applications/pamac
@@ -336,6 +352,7 @@ homepages:
   xcodes: https://github.com/XcodesOrg/xcodes
   yadm: https://yadm.io
   yazi: https://yazi-rs.github.io
+  yt-dlp: https://github.com/yt-dlp/yt-dlp
   zgenom: https://github.com/jandamm/zgenom
   zigup: https://github.com/marler8997/zigup
   zim: https://zimfw.sh
@@ -354,28 +371,72 @@ coarse_support:
   #     `mason`, `neobundle`, `packer-nvim`, `paq`, `plug`, `voom`,
   #     `vundle`). `topgrade --only vim` runs all of them.
   # Keys are sorted alphabetically rather than grouped by cluster so the
-  # well-formedness test stays simple.
-  antibody: [topgrade]
-  antidote: [topgrade]
-  antigen: [topgrade]
-  bash-it: [topgrade]
-  dein: [topgrade]
-  fish-plug: [topgrade]
-  fisher: [topgrade]
-  fundle: [topgrade]
-  lazy: [topgrade]
-  mason: [topgrade]
-  neobundle: [topgrade]
-  oh-my-bash: [topgrade]
-  oh-my-fish: [topgrade]
-  oh-my-zsh: [topgrade]
-  packer-nvim: [topgrade]
-  paq: [topgrade]
-  plug: [topgrade]
-  voom: [topgrade]
-  vundle: [topgrade]
-  zgenom: [topgrade]
-  zim: [topgrade]
-  zinit: [topgrade]
-  zplug: [topgrade]
-  zr: [topgrade]
+  # well-formedness test stays simple. Values are `{competitor: url}` maps
+  # linking to the maintainer's own confirmation of the coarse bundling
+  # (like the `Step::Shell` / `Step::Vim` acknowledgement in topgrade
+  # discussion #961). Cells render as `[🟡](url)`.
+  antibody:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  antidote:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  antigen:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  bash-it:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  dein:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  fish-plug:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  fisher:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  fundle:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  lazy:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  mason:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  neobundle:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  oh-my-bash:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  oh-my-fish:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  oh-my-zsh:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  packer-nvim:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  paq:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  plug:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  voom:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  vundle:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  zgenom:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  zim:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  zinit:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  zplug:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  zr:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+
+refused:
+  # Each entry records a manager the competitor explicitly declined to
+  # implement, keyed by manager-id then by competitor, with the value being
+  # the URL of the refusal (issue closed as NOT_PLANNED, maintainer comment,
+  # rejected PR). Procedural closures (like "please reopen using the correct
+  # template" that never got a followup) count as refusals here too: the
+  # request was made, the issue was closed, no support followed. Keys and
+  # nested keys are sorted alphabetically.
+  cabal:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/320
+  opencode:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/1688
+  yt-dlp:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/1764
+  zerobrew:
+    topgrade: https://github.com/topgrade-rs/topgrade/issues/2003

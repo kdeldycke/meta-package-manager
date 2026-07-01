@@ -201,7 +201,7 @@ def test_benchmark_yaml_well_formed():
     competitor set and homepage URLs for non-pool managers."""
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
     data = safe_load(yaml_path.read_text(encoding="utf-8"))
-    assert set(data) == {"managers", "homepages", "coarse_support"}
+    assert set(data) == {"managers", "homepages", "coarse_support", "refused"}
 
     competitors = set(docs_update.BENCHMARK_COMPETITORS)
     for mid, flags in data["managers"].items():
@@ -223,29 +223,64 @@ def test_benchmark_yaml_well_formed():
         assert isinstance(url, str)
         assert url.startswith(("http://", "https://"))
 
-    # coarse_support: same shape and validation rules as managers, but every
-    # listed (mid, competitor) pair must also exist in managers (you cannot be
-    # coarse-only-supported without being supported at all).
+    # coarse_support: mapping ``{manager_id: {competitor: url}}``. Every
+    # listed (mid, competitor) pair must also exist in managers (you cannot
+    # be coarse-only-supported without being supported at all).
     coarse = data["coarse_support"]
     assert list(coarse) == sorted(coarse), (
         "coarse_support keys must be sorted alphabetically"
     )
-    for mid, flags in coarse.items():
+    for mid, entries in coarse.items():
         assert mid == mid.lower()
-        assert isinstance(flags, list)
-        assert flags, f"{mid!r} has an empty coarse_support list; omit the row"
-        assert set(flags).issubset(competitors)
-        assert len(flags) == len(set(flags))
-        assert flags == sorted(flags, key=docs_update.BENCHMARK_COMPETITORS.index)
+        assert isinstance(entries, dict)
+        assert entries, f"{mid!r} has an empty coarse_support mapping; omit the row"
+        assert list(entries) == sorted(entries), (
+            f"coarse_support[{mid!r}] competitor keys must be sorted alphabetically"
+        )
+        assert set(entries).issubset(competitors)
         # No-orphan invariant: the manager must be supported in the first place.
         assert mid in data["managers"], (
             f"coarse_support[{mid!r}] has no matching entry in managers"
         )
-        missing = set(flags) - set(data["managers"][mid])
+        missing = set(entries) - set(data["managers"][mid])
         assert not missing, (
             f"coarse_support[{mid!r}] flags competitors {sorted(missing)} that "
             f"are not in managers[{mid!r}]"
         )
+        for competitor, url in entries.items():
+            assert isinstance(url, str)
+            assert url.startswith(("http://", "https://")), (
+                f"coarse_support[{mid!r}][{competitor!r}] URL must be an http(s) link"
+            )
+
+    # refused: mapping ``{manager_id: {competitor: evidence_url}}``. Each
+    # (manager_id, competitor) pair must NOT overlap with managers[mid]:
+    # a competitor cannot both support and refuse the same manager.
+    refused = data["refused"]
+    assert list(refused) == sorted(refused), (
+        "refused keys must be sorted alphabetically"
+    )
+    for mid, entries in refused.items():
+        assert mid == mid.lower()
+        assert isinstance(entries, dict)
+        assert entries, f"{mid!r} has an empty refused mapping; omit the row"
+        assert list(entries) == sorted(entries), (
+            f"refused[{mid!r}] competitor keys must be sorted alphabetically"
+        )
+        assert set(entries).issubset(competitors)
+        # No-conflict invariant: a competitor cannot be listed in both
+        # managers (supports) and refused (declined) for the same mid.
+        supports = set(data["managers"].get(mid, []))
+        conflict = supports & set(entries)
+        assert not conflict, (
+            f"refused[{mid!r}] lists competitors {sorted(conflict)} that also "
+            f"support the manager in managers[{mid!r}]"
+        )
+        for competitor, url in entries.items():
+            assert isinstance(url, str)
+            assert url.startswith(("http://", "https://")), (
+                f"refused[{mid!r}][{competitor!r}] URL must be an http(s) link"
+            )
 
 
 def test_benchmark_homepages_cover_non_pool_managers():

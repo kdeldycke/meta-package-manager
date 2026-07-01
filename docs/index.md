@@ -9,7 +9,7 @@ hide-toc: true
 :maxdepth: 2
 :hidden:
 install
-usecase
+features
 duplicates
 output-formats
 dump

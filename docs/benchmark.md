@@ -3,7 +3,7 @@
 Attempting to unify all package managers is a Sisyphean task.
 
 This did not prevent me or others to try to solve that problem. It is not easy to explain why
-but [there might be a greater need for such tools](usecase.md) out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
+but [there might be a greater need for such tools](features.md) out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
 
 ## Features
 
@@ -18,21 +18,21 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Configurable output | [✅](configuration.md#available-options) | | | | | | | ✅ | |
 | Sortable output | [✅](configuration.md#global-options) | | | | | | | | |
 | Colored output | [✅](output-formats.md) | ✅ | | | | | ✅ | ✅ | ✅ |
-| Version parsing and diff | [✅](usecase.md) | | | | | | | | |
-| [purl](https://github.com/package-url/purl-spec) support | [✅](usecase.md) | | | | | | | | |
+| Version parsing and diff | [✅](features.md) | | | | | | | | |
+| [purl](https://github.com/package-url/purl-spec) support | [✅](features.md) | | | | | | | | |
 | JSON export | [✅](output-formats.md#json) | | | | | | ✅ | ✅ | |
 | CSV export | [✅](output-formats.md#csv) | | | | | | | | |
 | Markup export | [✅](output-formats.md) | | | | | | | | |
 | Configuration file | [✅](configuration.md) | ✅ | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Non-interactive | [✅](configuration.md#global-options) | ✅ | ✅ | | | ✅ | ✅ | ✅ | ✅ |
 | Dry-run | [✅](configuration.md#global-options) | ✅ | ✅ | | | | ✅ | ✅ | |
-| Sudo elevation | [✅](install.md#password-prompts-and-sudo) | ✅ | ✅ | | | | | | |
+| Sudo elevation | [✅](sudo.md) | ✅ | ✅ | | | | | | |
 | Supply-chain cooldown | [✅](cooldown.md) | | | | | | | ✅ | |
 | Desktop notifications | | ✅ | | | | | | | |
 | Bash auto-completion | [✅](install.md#shell-completion) | | | | | | ✅ | ✅ | ✅ |
 | Zsh auto-completion | [✅](install.md#shell-completion) | | | | | | ✅ | ✅ | ✅ |
 | Fish auto-completion | [✅](install.md#shell-completion) | | | | | | ✅ | ✅ | ✅ |
-| [XKCD #1654](https://xkcd.com/1654/) | [✅](usecase.md#solve-xkcd) | | | | | | | | |
+| [XKCD #1654](https://xkcd.com/1654/) | [✅](duplicates.md#install-with-the-first-available-manager) | | | | | | | | |
 | [Xbar/SwiftBar plugin](bar-plugin.md) | [✅](bar-plugin.md) | | | | | | | | |
 | Project-scoped manifest[^scope] | | | | | | | ✅ | ✅ | ✅ |
 | Apply manifest (declarative install) | [✅](dump.md) | | | | | | ✅ | ✅ | ✅ |
@@ -42,7 +42,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Third-party backend plugins | | | | | | | ✅ | ✅ | ✅ |
 | Per-package hooks (pre/post install) | | | | | | | | ✅ | ✅ |
 | Trust mechanism for project configs | | | | | | | | ✅ | |
-| Backend-prefixed package IDs | [✅](usecase.md) | | | | | | | ✅ | |
+| Backend-prefixed package IDs | [✅](features.md) | | | | | | | ✅ | |
 | Shim-based version routing | | | | | | | | ✅ | ✅ |
 | Walk-up directory resolution | | | | | | | | ✅ | ✅ |
 | Legacy version file ingestion | | | | | | | | ✅ | ✅ |

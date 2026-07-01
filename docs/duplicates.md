@@ -1,6 +1,6 @@
-# {octicon}`duplicate` Cross-manager duplicates
+# {octicon}`duplicate` Cross-manager operations
 
-The same package name often shows up across multiple managers: a tool packaged simultaneously for Homebrew, Cargo, npm, and pipx, or installed by mistake through more than one route on the same machine. `mpm` treats this as a first-class concern, with one command to find the best source for a new install and another to surface installations that already overlap.
+The same package name often shows up across multiple managers: a tool packaged simultaneously for Homebrew, Cargo, npm, and pipx, or installed by mistake through more than one route on the same machine. `mpm` treats this as a first-class concern: find the best source for a new install, let it pick that source for you, and surface installations that already overlap.
 
 ## Find the best source
 
@@ -28,6 +28,21 @@ Installed 1/1 packages
 ```
 
 This pattern catches the common "I want the freshest version" decision without having to query each manager by hand.
+
+## Install with the first available manager
+
+Rather than searching and picking a source by hand, let `mpm` install a package with the first manager (by priority) that has it, implementing [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/):
+
+![XKCD #1654 - Universal Install Script](http://imgs.xkcd.com/comics/universal_install_script.png)
+
+```shell-session
+$ mpm --xkcd install markdown
+Installation priority: pip > brew > npm > dnf > apt > steamcmd
+warning: pip does not implement search operation.
+markdown existence unconfirmed, try to directly install it...
+Install markdown package with pip...
+(...)
+```
 
 ## Audit existing installations
 

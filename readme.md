@@ -54,7 +54,7 @@ $ uvx meta-package-manager
 - [Snapshot installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-dump) to a TOML manifest or a Brewfile.
 - [Restore/install list of packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-restore) from TOML files.
 - [Software Bill of Materials](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
-- Pin-point commands to a [subset of package managers](https://kdeldycke.github.io/meta-package-manager/usecase.html) (include/exclude selectors).
+- Pin-point commands to a [subset of package managers](https://kdeldycke.github.io/meta-package-manager/configuration.html#selecting-managers) (include/exclude selectors).
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
 - Export output to [JSON or user-friendly tables](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm).
 - [Shell auto-completion](https://kdeldycke.github.io/meta-package-manager/install.html) for Bash, Zsh and Fish.
@@ -301,6 +301,48 @@ The same query argument restricts the listing to outdated packages whose ID or n
 $ mpm outdated git
 ```
 
+### Upgrade outdated packages
+
+[A recent study shows that 70% of vulnerabilities lie in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications), so keeping every piece of software up to date is one of the key habits of security professionals. `mpm` upgrades all packages from all managers with a one-liner:
+
+```shell-session
+$ mpm upgrade --all
+Updating all outdated packages from brew...
+==> Upgrading 4 outdated packages:
+gnu-getopt 2.35.1 -> 2.35.2
+rclone 1.51.0 -> 1.52.0
+fd 8.1.0 -> 8.1.1
+youtube-dl 2020.05.08 -> 2020.05.29
+(...)
+Updating all outdated packages from cask...
+==> Upgrading 4 outdated packages:
+balenaetcher 1.5.89 -> 1.5.94, libreoffice 6.4.3 -> 6.4.4
+(...)
+Updating all outdated packages from gem...
+Updating openssl
+(...)
+Updating all outdated packages from npm...
++ npm@6.14.5
+(...)
+Updating all outdated packages from pip...
+Successfully installed dephell-argparse-0.1.3
+Successfully installed dephell-pythons-0.1.15
+```
+
+This is the primary use case of `mpm`, and the main reason I built it.
+
+### Upgrade with a supply-chain cooldown
+
+There is a counter-argument to the advice above. Chasing the newest release the moment it ships is exactly how supply-chain attacks reach you: a compromised version is usually detected and pulled within days of publication, but an immediate upgrade installs it before that happens. Blindly staying on the bleeding edge trades one risk (outdated, vulnerable libraries) for another (freshly poisoned releases).
+
+`mpm` reconciles the two with a release-age cooldown, refusing any version published more recently than a threshold:
+
+```shell-session
+$ mpm --cooldown "7 days" upgrade --all
+```
+
+You still pick up older security fixes promptly, while sitting out the risky first days of a brand-new release. See [the cooldown guide](https://kdeldycke.github.io/meta-package-manager/cooldown.html) for the full mechanism and which managers enforce it natively.
+
 ### List managers
 
 If you wonder why your package manager doesn't seems to be identified, you can list all those recognized by `mpm` with:
@@ -358,7 +400,7 @@ Feel free to send a PR to add your project in this list if you are relying on `m
 Other subcommands and options are documented in:
 
 - the [detailed help screens](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html)
-- the [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html) where you’ll find inspiration on how to leverage `mpm` power
+- the [feature guide](https://kdeldycke.github.io/meta-package-manager/features.html) where you’ll find inspiration on how to leverage `mpm` power
 
 <!-- operation-footnotes-start -->
 

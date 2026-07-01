@@ -184,6 +184,28 @@ Always update documentation when making changes:
 - **`changelog.md`**: Add a bullet point describing **what** changed (new features, bug fixes, behavior changes), not **why**. Keep entries concise and actionable. Justifications and rationale belong in documentation or code comments, not in the changelog.
 - **`readme.md`**: Update relevant sections when adding/modifying public API, classes, or functions.
 
+### Benchmark page (`docs/benchmark.md`)
+
+The benchmark compares `mpm` against related tools. It mixes one generated table with several hand-maintained ones, and its cells follow strict evidence rules.
+
+**Generated vs hand-maintained.** Only the "Package manager support" table (between `<!-- benchmark-managers-start -->` / `-end`) is produced by `docs/docs_update.py` (`benchmark_managers_table()`), fed by `docs/benchmark.yaml`; its competitor set is the `BENCHMARK_COMPETITORS` tuple. Every other table (Features, Operations, OS, Distribution, Activity, Popularity, Metadata) is edited by hand. After any change that can affect the generated block, run `uv run python docs/docs_update.py`; `test_benchmark_table_in_sync` fails if it drifts. The mpm-column links in the generated table are class source-line anchors that shift when a manager module is edited, so regenerate after touching manager source.
+
+**Cell glyphs (benchmark only — `readme.md`'s operation matrix keeps plain `✓`).**
+
+- `✅` — supported. The `mpm` `✅` is always a link: to the manager class's source line in the generated table, to the feature's user documentation in the Features table. A competitor's `✅` is a bare glyph.
+- `❌` — not supported, **and only ever written with a link to explicit, verifiable evidence** that the project lacks or rejects the feature: an issue/PR closed not-planned, a maintainer "out of scope" / "won't add" comment, a still-open unaddressed feature request, or an official doc/man-page stating the limitation. **Absence of the feature is never sufficient** — if no citable source exists, leave the cell blank. Verify every URL (`gh issue view`, `gh api`, or WebFetch) and keep the exact supporting quote before committing the link; prefer a precise `#issuecomment-<id>` anchor when a maintainer states the position. This mirrors the "Concurrent multi-PM execution" row.
+- `🟡` — coarse/bundled support the competitor cannot invoke in isolation (e.g., topgrade's `--only shell` running every shell-plugin manager at once), also with an evidence link.
+
+**`docs/benchmark.yaml`** has four alphabetically-sorted keys: `managers` (which competitor supports each manager), `homepages` (URLs for non-pool managers only), `coarse_support` (`{manager: {competitor: url}}`), and `refused` (`{manager: {competitor: url}}` for competitors that explicitly declined a manager `mpm` wraps). `test_benchmark_yaml_well_formed` enforces the shape plus the no-orphan and no-conflict invariants (a `(manager, competitor)` pair cannot be in both `managers` and `refused`).
+
+**Scope and competitor set.** Feature/Operation rows cover only capabilities in `mpm`'s domain (cross-manager package operations, output, config, distribution). Do not add rows for a competitor's out-of-domain features (a runtime version manager's shims, task runner, env-var management, per-project version files). Columns are the wrapper peer group (`topgrade`, `pacaptr`, `pacapt`, `sysget`, `whohas`) plus `brew` (its Brewfile is a declarative multi-backend installer); `mise`/`asdf` were removed as out-of-scope version managers, kept only as managers `mpm` wraps in the generated table.
+
+**Auditing competitor cells.** When (re)checking a column, research one competitor project at a time (parallel agents work well); each must verify every URL and quote and report "no evidence → blank" rather than infer a gap from absence.
+
+### Manager augmentations page (`docs/augmentations.md`)
+
+Documents capabilities `mpm` backfills on top of native tools. Two classes: *selective* — only some managers need it (full `upgrade --all`, exact/extended search, search-from-scratch), shown in the per-manager table — and *universal* — every managed tool gains it (`--dry-run` simulation, cross-scheme version parsing, purl identifiers, uniform sudo). The per-manager table is hand-maintained with no sync test yet, so re-verify it against `meta_package_manager/capabilities.py` when adding a manager.
+
 ## File naming conventions
 
 ### Extensions: prefer long form

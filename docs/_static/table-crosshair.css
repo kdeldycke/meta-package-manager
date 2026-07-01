@@ -1,0 +1,53 @@
+/*
+ * Crosshair hover highlight for wide comparison tables (benchmark page).
+ *
+ * The classes are only ever applied by table-crosshair.js, and only on the
+ * benchmark page, so these rules are inert everywhere else. Colors come from
+ * furo's own CSS variables, so the highlight adapts to light and dark themes.
+ */
+
+/* Hovered row and column: subtle wash. */
+table td.crosshair-col,
+table th.crosshair-col,
+table td.crosshair-row,
+table th.crosshair-row {
+  background-color: var(--color-background-hover, rgba(128, 128, 128, 0.12));
+}
+
+/* Emphasize the anchors of the crosshair: the column header and the row label. */
+table thead th.crosshair-col,
+table td.crosshair-row:first-child,
+table th.crosshair-row:first-child {
+  font-weight: 700;
+}
+
+/* The hovered cell itself: stronger highlight plus an outline, so the
+ * (row, column) intersection is unambiguous. */
+table td.crosshair-cell,
+table th.crosshair-cell {
+  background-color: var(--color-highlight-on-target, rgba(255, 209, 0, 0.4));
+  outline: 2px solid var(--color-brand-primary, #336790);
+  outline-offset: -2px;
+}
+
+/*
+ * Full-cell links. When a cell's entire content is a single link (the ✅/❌
+ * comparison glyphs, or a whole-cell feature label), stretch the link's hit
+ * area over the whole cell so a click anywhere in the cell follows it. The
+ * real <a> is untouched, so keyboard focus, middle-click and open-in-new-tab
+ * keep working. The `linked-cell` class is applied by table-crosshair.js only
+ * when the anchor is the cell's sole content, so cells that mix a link with
+ * text are never affected. The `::after` overlay is transparent, so the
+ * crosshair highlight still shows through.
+ */
+table td.linked-cell,
+table th.linked-cell {
+  position: relative;
+  cursor: pointer;
+}
+table td.linked-cell a[href]::after,
+table th.linked-cell a[href]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}

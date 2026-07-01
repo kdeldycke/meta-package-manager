@@ -162,7 +162,8 @@ copyright = f"{author} and contributors"
 html_show_sphinx = False
 
 html_static_path = ["_static"]
-html_css_files = ["custom.css"]
+html_css_files = ["custom.css", "table-crosshair.css"]
+html_js_files = ["table-crosshair.js"]
 
 # Opt into click_extra.sphinx's executable directives. Enables the ``click:run``
 # blocks in docs/cli-parameters.md and docs/configuration.md, which run mpm's CLI

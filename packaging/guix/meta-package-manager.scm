@@ -49,7 +49,7 @@
      (list python-boltons
            python-click-extra
            python-extra-platforms
-           python-packageurl-python
+           python-packageurl
            python-tomli-w
            python-xmltodict))
     (home-page "https://kdeldycke.github.io/meta-package-manager/")

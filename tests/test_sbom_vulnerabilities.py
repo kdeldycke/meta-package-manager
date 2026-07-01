@@ -154,9 +154,7 @@ def test_normalize_osv_record_full():
     assert vuln.aliases == ("CVE-2021-99999",)
     assert vuln.fixed_versions == ("1.0.1",)
     assert vuln.references == ("https://example.com/advisory",)
-    assert vuln.advisory_url == (
-        "https://osv.dev/vulnerability/GHSA-aaaa-bbbb-cccc"
-    )
+    assert vuln.advisory_url == ("https://osv.dev/vulnerability/GHSA-aaaa-bbbb-cccc")
     assert vuln.published_date is not None
     assert vuln.modified_date is not None
 
@@ -279,9 +277,7 @@ def test_vulnerability_dataclass_is_frozen():
 
 def test_batch_chunks_beyond_limit(client, monkeypatch):
     """More than OSV_BATCH_LIMIT coordinates split into multiple batches."""
-    monkeypatch.setattr(
-        "meta_package_manager.sbom.vulnerabilities.OSV_BATCH_LIMIT", 2
-    )
+    monkeypatch.setattr("meta_package_manager.sbom.vulnerabilities.OSV_BATCH_LIMIT", 2)
     with respx.mock(base_url="https://api.osv.dev") as mock:
         batch = mock.post("/v1/querybatch").mock(
             return_value=httpx.Response(200, json={"results": [{}, {}]}),

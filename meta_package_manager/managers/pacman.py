@@ -16,9 +16,9 @@
 
 from __future__ import annotations
 
+import atexit
 import os
 import re
-import atexit
 import shutil
 import tempfile
 from datetime import datetime, timezone
@@ -42,7 +42,8 @@ if TYPE_CHECKING:
 
 
 _YAY_COOLDOWN_INIT_LUA = (
-    resources.files("meta_package_manager.managers")
+    resources
+    .files("meta_package_manager.managers")
     .joinpath("yay_cooldown.lua")
     .read_text(encoding="UTF-8")
 )

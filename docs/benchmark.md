@@ -356,7 +356,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 [^scope]: `mpm`'s `ManagerScope.PROJECT` placeholder and `discover_projects()` extension point are defined but not yet wired into a project-local resolver.
 
-[^coarse]: `🟡` marks managers that the competitor cannot upgrade in isolation. Support is bundled inside a coarser umbrella step that upgrades every sibling manager at the same time. Topgrade is the typical case: `topgrade --only shell` runs every installed zsh/bash/fish plugin manager (`antibody`, `oh-my-zsh`, `zinit`, …) in one shot, and `topgrade --only vim` does the same for vim/nvim plugin managers (`plug`, `vundle`, `lazy`, …). There is no `topgrade --only antibody` or `topgrade --only plug`.
+[^coarse]: 🟡 marks managers that the competitor cannot upgrade in isolation. Support is bundled inside a coarser umbrella step that upgrades every sibling manager at the same time. Topgrade is the typical case: `topgrade --only shell` runs every installed zsh/bash/fish plugin manager (`antibody`, `oh-my-zsh`, `zinit`, …) in one shot, and `topgrade --only vim` does the same for vim/nvim plugin managers (`plug`, `vundle`, `lazy`, …). There is no `topgrade --only antibody` or `topgrade --only plug`.
 
 [^bsd]: BSD: FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS.
 

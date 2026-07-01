@@ -329,6 +329,26 @@ def _resolved_sudo(manager: PackageManager) -> bool:
     return manager.sudo if manager.sudo is not None else manager.default_sudo
 
 
+def _is_sudo_auth_failure(error: str) -> bool:
+    """Whether ``error`` is ``sudo`` refusing to authenticate non-interactively.
+
+    ``sudo -n`` writes one of these to ``<stderr>`` when it has no cached credentials
+    and cannot prompt for a password (nothing cached, no controlling terminal, no
+    askpass helper). Lets :py:meth:`CLIExecutor.run` turn an opaque escalation failure
+    into an actionable hint.
+    """
+    lowered = error.lower()
+    return "sudo:" in lowered and any(
+        marker in lowered
+        for marker in (
+            "a password is required",
+            "a terminal is required",
+            "no tty present",
+            "askpass",
+        )
+    )
+
+
 def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     """Authenticate ``sudo`` once, up front, for a mutating fan-out that will escalate.
 
@@ -1139,6 +1159,17 @@ class CLIExecutor:
         if failed:
             # Produce an exception and eventually raise it.
             exception = CLIError(code, output, error)
+            # A non-interactive escalation that could not authenticate is a
+            # missing-credential problem, not a real command failure. Point the user
+            # at the fix, naming the manager (this also answers "which one just asked
+            # for my password?").
+            if clean_args[:2] == ("sudo", "-n") and _is_sudo_auth_failure(error):
+                manager_id = self.id  # type: ignore[attr-defined]
+                logging.warning(
+                    f"{manager_id} needs administrator rights but sudo has no cached "
+                    "credentials; re-run in a terminal, or with `mpm --sudo` to "
+                    "authenticate once up front.",
+                )
             if must_succeed or self.stop_on_error:
                 raise exception
             # Accumulate errors.

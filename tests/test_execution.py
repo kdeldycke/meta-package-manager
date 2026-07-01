@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import signal
 import subprocess
 import sys
@@ -26,7 +27,7 @@ from unittest.mock import patch
 
 import click
 import pytest
-from extra_platforms import ALL_PLATFORMS, UNIX
+from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
@@ -38,6 +39,7 @@ from meta_package_manager.execution import (
     _LIVE_PROCESSES,
     _LIVE_PROCESSES_LOCK,
     CLIError,
+    _is_sudo_auth_failure,
     install_interrupt_handler,
     prime_sudo,
     terminate_live_processes,
@@ -323,6 +325,7 @@ def test_terminate_live_processes_ignores_already_reaped():
         (sys.executable, "-c", "pass"),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        encoding="utf-8",
     )
     proc.wait(timeout=5)  # Already exited before we signal it.
     with _LIVE_PROCESSES_LOCK:
@@ -347,6 +350,7 @@ def test_install_interrupt_handler_terminates_children_and_reraises():
         (sys.executable, "-c", "import time; time.sleep(30)"),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        encoding="utf-8",
     )
     with _LIVE_PROCESSES_LOCK:
         _LIVE_PROCESSES.add(proc)
@@ -589,3 +593,78 @@ def test_prime_sudo_is_idempotent():
         ctx.close()
     prompts = [c for c in run.call_args_list if c.args[0] == ("sudo", "-v")]
     assert len(prompts) == 1
+
+
+@pytest.mark.parametrize(
+    ("error", "expected"),
+    (
+        ("sudo: a password is required", True),
+        ("sudo: a terminal is required to read the password", True),
+        ("sudo: no tty present and no askpass program specified", True),
+        ("SUDO: A PASSWORD IS REQUIRED", True),
+        ("", False),
+        ("error: package not found", False),
+        ("sudo: command not found", False),
+    ),
+)
+def test_is_sudo_auth_failure(error, expected):
+    assert _is_sudo_auth_failure(error) is expected
+
+
+@pytest.mark.skipif(is_any_windows(), reason="escalation is UNIX-only")
+def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
+    """A real `sudo -n` that cannot authenticate triggers the actionable hint.
+
+    A fake `sudo` on ``PATH`` mimics "no cached credentials", so the whole
+    build_cli → subprocess → failure-gate → hint path runs for real, without root.
+    """
+    fake_sudo = tmp_path / "sudo"
+    fake_sudo.write_text("#!/bin/sh\necho 'sudo: a password is required' >&2\nexit 1\n")
+    fake_sudo.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{tmp_path}{os.pathsep}{os.environ['PATH']}")
+
+    manager = FakeManager()
+    manager.sudo = True
+    with patch(
+        "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
+    ):
+        cli = manager.build_cli("-c", "pass", sudo=True)
+        assert cli[:2] == ("sudo", "-n")
+        with caplog.at_level(logging.WARNING):
+            manager.run(*cli)
+    assert any("mpm --sudo" in record.getMessage() for record in caplog.records)
+
+
+@pytest.mark.parametrize(
+    "args",
+    (
+        pytest.param(("install", "fake-pkg"), id="install"),
+        pytest.param(("upgrade", "--all"), id="upgrade-all"),
+        pytest.param(("upgrade", "fake-pkg"), id="upgrade-packages"),
+        pytest.param(("remove", "fake-pkg"), id="remove"),
+        pytest.param(("sync",), id="sync"),
+        pytest.param(("cleanup",), id="cleanup"),
+    ),
+)
+def test_mutating_subcommands_prime_sudo(invoke, fake_pool, args):
+    """Every mutating subcommand authenticates sudo up front, so a future command
+    cannot silently skip the priming."""
+    with patch("meta_package_manager.cli.prime_sudo") as prime:
+        invoke("--dry-run", *args)
+    assert prime.called, f"`mpm {args[0]}` did not call prime_sudo"
+
+
+def test_restore_primes_sudo(invoke, fake_pool, tmp_path):
+    """`restore` fans installs out too, so it also primes sudo up front."""
+    toml_file = tmp_path / "backup.toml"
+    toml_file.write_text("")
+    with patch("meta_package_manager.cli.prime_sudo") as prime:
+        invoke("--dry-run", "restore", str(toml_file))
+    assert prime.called
+
+
+def test_read_subcommand_does_not_prime_sudo(invoke, fake_pool):
+    """A read-only command never escalates, so it must not prompt for sudo."""
+    with patch("meta_package_manager.cli.prime_sudo") as prime:
+        invoke("--dry-run", "installed")
+    assert not prime.called

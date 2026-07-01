@@ -171,7 +171,7 @@ dependencies = [
   # ConfigValidator / ValidationError import move to click_extra.config,
   # print_table()'s sort_key parameter, and the 8.1.1 fix for the
   # EnumChoice-typed --sort-by default; 8.2.0 covers them all.
-  "click-extra>=8.2.0",
+  "click-extra>=8.2",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
   # Required at runtime by meta_package_manager.package and
@@ -254,6 +254,8 @@ test = [
   # the heavy validation stack stays out of the install. See tests/test_cli_sbom.py.
   "cyclonedx-python-lib[validation]",
   "extra-platforms",
+  # respx requires httpx as a peer; pin the same floor as [sbom-online].
+  "httpx>=0.27",
   # pytest 9.0.0 reads native TOML config from the [tool.pytest] table used in this file.
   "pytest>=9",
   # pytest-cov 7.x is the release series wired to pytest 9's plugin interface.
@@ -276,8 +278,6 @@ test = [
   # time so the SPDX-format and OSV-adapter tests in tests/test_cli_sbom.py
   # still import.
   "spdx-tools",
-  # respx requires httpx as a peer; pin the same floor as [sbom-online].
-  "httpx>=0.27",
 ]
 docs = [
   "click-extra[sphinx]",

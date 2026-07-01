@@ -490,6 +490,26 @@ mpm, version 4.13.0
 (...)
 ```
 
+## Python compatibility
+
+The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented.
+
+<!-- python-compat-start -->
+
+| `mpm`               | Released   | `2.7` | `3.6` | `3.7` | `3.8` | `3.9` | `3.10` | `3.11` | `3.12` | `3.13` | `3.14` |
+| :------------------ | :--------- | :---: | :---: | :---: | :---: | :---: | :----: | :----: | :----: | :----: | :----: |
+| `6.x` → `7.x`       | 2025-12-08 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |
+| `5.21.0`            | 2025-05-28 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |   ❌   |   ✅   |   ✅   |   ✅   |   ❌   |
+| `5.19.x` → `5.20.x` | 2024-11-13 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |   ✅   |   ✅   |   ✅   |   ✅   |   ❌   |
+| `5.17.x` → `5.18.x` | 2024-07-07 |  ❌   |  ❌   |  ❌   |  ❌   |  ✅   |   ✅   |   ✅   |   ✅   |   ❌   |   ❌   |
+| `5.14.x` → `5.16.x` | 2024-01-12 |  ❌   |  ❌   |  ❌   |  ✅   |  ✅   |   ✅   |   ✅   |   ✅   |   ❌   |   ❌   |
+| `3.2.0` → `5.13.1`  | 2020-05-31 |  ❌   |  ❌   |  ✅   |  ✅   |  ✅   |   ✅   |   ✅   |   ✅   |   ❌   |   ❌   |
+| `2.9.0` → `3.1.0`   | 2020-03-18 |  ❌   |  ✅   |  ✅   |  ✅   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
+| `2.5.0` → `2.8.0`   | 2017-03-01 |  ✅   |  ✅   |  ✅   |  ❌   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
+| `1.8.0` → `2.4.0`   | 2016-08-22 |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
+
+<!-- python-compat-end -->
+
 ## Password prompts and `sudo`
 
 The majority of package managers on Linux requires `sudo` to perform system-wide operations.

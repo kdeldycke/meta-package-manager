@@ -9,7 +9,7 @@ hide-toc: true
 :maxdepth: 2
 :hidden:
 install
-features
+augmentations
 duplicates
 output-formats
 dump

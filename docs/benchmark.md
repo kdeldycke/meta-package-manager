@@ -3,7 +3,7 @@
 Attempting to unify all package managers is a Sisyphean task.
 
 This did not prevent me or others to try to solve that problem. It is not easy to explain why
-but [there might be a greater need for such tools](features.md) out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
+but [there might be a greater need for such tools](augmentations.md) out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
 
 ## Features
 

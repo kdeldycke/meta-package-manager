@@ -400,7 +400,7 @@ Feel free to send a PR to add your project in this list if you are relying on `m
 Other subcommands and options are documented in:
 
 - the [detailed help screens](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html)
-- the [feature guide](https://kdeldycke.github.io/meta-package-manager/features.html) where you’ll find inspiration on how to leverage `mpm` power
+- the [manager augmentations](https://kdeldycke.github.io/meta-package-manager/augmentations.html) where you’ll find inspiration on how to leverage `mpm` power
 
 <!-- operation-footnotes-start -->
 

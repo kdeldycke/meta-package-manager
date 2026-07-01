@@ -1,4 +1,4 @@
-# {octicon}`duplicate` Cross-manager operations
+# {octicon}`stack` Cross-manager operations
 
 The same package name often shows up across multiple managers: a tool packaged simultaneously for Homebrew, Cargo, npm, and pipx, or installed by mistake through more than one route on the same machine. `mpm` treats this as a first-class concern: find the best source for a new install, let it pick that source for you, and surface installations that already overlap.
 

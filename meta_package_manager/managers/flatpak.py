@@ -88,12 +88,11 @@ class Flatpak(PackageManager):
 
             $ flatpak list --app --columns=name,application,version \
             > --ostree-verbose
-            Name                      Application ID                   Version
-            Peek                      com.uploadedlobster.peek         1.3.1
-            Fragments                 de.haeckerfelix.Fragments        1.4
-            GNOME MPV                 io.github.GnomeMpv               0.16
-            Syncthing GTK             me.kozec.syncthingtk             v0.9.4.3
-            Builder                   org.flatpak.Builder
+            Peek	com.uploadedlobster.peek	1.3.1
+            Fragments	de.haeckerfelix.Fragments	1.4
+            GNOME MPV	io.github.GnomeMpv	0.16
+            Syncthing GTK	me.kozec.syncthingtk	v0.9.4.3
+            Builder	org.flatpak.Builder
         """
         output = self.run_cli(
             "list",

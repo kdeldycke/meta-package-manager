@@ -104,8 +104,8 @@ class Pacstall(PackageManager):
 
             $ pacstall --list-upgrades
             Upgradable: 2
-            \tneofetch @ pacstall-programs#master ( 7.1.0-2 -> 7.2.0-1 )
-            \tneovim @ pacstall-programs#master ( 0.9.4-1 -> 0.10.0-1 )
+            	neofetch @ pacstall-programs#master ( 7.1.0-2 -> 7.2.0-1 )
+            	neovim @ pacstall-programs#master ( 0.9.4-1 -> 0.10.0-1 )
         """
         output = self.run_cli("--list-upgrades")
         for match in self._OUTDATED_REGEXP.finditer(output):

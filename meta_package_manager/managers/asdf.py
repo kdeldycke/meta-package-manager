@@ -125,7 +125,7 @@ class ASDF(PackageManager):
               18.20.4
              *20.10.0
             ruby
-              3.2.0
+             *3.2.0
         """
         for plugin, version, _ in self._parse_list():
             yield self.package(id=plugin, installed_version=version)

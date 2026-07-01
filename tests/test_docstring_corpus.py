@@ -45,6 +45,7 @@ from __future__ import annotations
 import ast
 import inspect
 import re
+import shlex
 import textwrap
 from functools import cache
 from pathlib import Path
@@ -54,8 +55,15 @@ import pytest
 from meta_package_manager.pool import pool
 from meta_package_manager.version import parse_version
 
-DIRECTIVE = ".. code-block:: shell-session"
-"""reStructuredText directive introducing a captured CLI session."""
+DIRECTIVES = (
+    ".. code-block:: shell-session",
+    ".. code-block:: pwsh-session",
+)
+"""reStructuredText directives introducing a captured CLI session.
+
+PowerShell sessions use ``> `` as their prompt, which the dissector already
+recognizes, so both flavors share one extraction path.
+"""
 
 ELISION = re.compile(r"\(\.\.\.\)|\.\.\.|…")
 """Marks output a docstring abbreviated: an illustration, not a literal fixture."""
@@ -74,19 +82,19 @@ KNOWN_EXCEPTIONS = {
         reason="`remote-ls --ostree-verbose` appends branch/arch columns whose "
         "exact tab layout is unverified without a live capture.",
     ),
-    "pipx-outdated": pytest.mark.skip(
-        reason="outdated runs a per-venv `pipx runpip <venv> list --outdated`; the "
-        "installed example venv (pycowsay) differs from the outdated one (poetry), "
-        "so no single documented block feeds the nested pip JSON.",
+    "ports-upgrade_one_cli": pytest.mark.skip(
+        reason="upgrade_one_cli resolves the package's port origin through a "
+        "live pkg query the stubbed CLI cannot answer.",
+    ),
+    "scoop-sync": pytest.mark.skip(
+        reason="sync's docstring is a narrative before/after transcript: the "
+        "`scoop status` blocks illustrate the state around the one `scoop "
+        "update` the method actually runs.",
     ),
     "sdkman-outdated": pytest.mark.skip(
         reason="`sdk` is a shell builtin driven via `echo n | sdk upgrade`; "
         "outdated never routes through `run_cli` and the sample is an interactive "
         "prompt.",
-    ),
-    "yarn-outdated": pytest.mark.skip(
-        reason="Documented command pipes through `| jq`, so the sample is "
-        "prettified; the parser consumes yarn's raw single-line `--json` stream.",
     ),
 }
 
@@ -100,7 +108,7 @@ def extract_blocks(docstring: str | None) -> list[str]:
     i = 0
     while i < len(lines):
         line = lines[i]
-        if line.strip() == DIRECTIVE:
+        if line.strip() in DIRECTIVES:
             directive_indent = len(line) - len(line.lstrip())
             i += 1
             body = []
@@ -144,6 +152,36 @@ def _dissect(block: str) -> tuple[list[str], str]:
 def split_session(block: str) -> str:
     """Return just the command output of a shell-session block."""
     return _dissect(block)[1]
+
+
+def _block_commands(block: str) -> list[list[str]]:
+    """Return each documented command of a block as its own token list.
+
+    Unlike :func:`_dissect`, which pools every command of a block, this keeps
+    commands separate so a block documenting several invocations (an ``apt``
+    cleanup running ``autoremove`` then ``autoclean``) yields one list each.
+    Prompt flavor is per-block: ``$``-primary with ``>`` continuations for
+    shell sessions, ``>``-primary for PowerShell sessions.
+    """
+    lines = block.splitlines()
+    primary = "$ " if any(line.lstrip().startswith("$ ") for line in lines) else "> "
+    commands: list[list[str]] = []
+    continuing = False
+    for line in lines:
+        stripped = line.lstrip()
+        starts = stripped.startswith(primary)
+        continues = continuing and (
+            stripped.startswith("> ") or not stripped.startswith(("$ ", "> "))
+        )
+        if starts:
+            commands.append([])
+        elif not continues:
+            continuing = False
+            continue
+        text = stripped[2:] if stripped.startswith(("$ ", "> ")) else stripped
+        commands[-1].extend(text.rstrip(" \\").split())
+        continuing = stripped.rstrip().endswith("\\")
+    return commands
 
 
 def _string_node(node: ast.AST) -> ast.Constant | None:
@@ -367,3 +405,221 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         for version in (package.installed_version, package.latest_version):
             if version:
                 assert parse_version(str(version))
+
+
+# --- Mutation commands: the documented invocation must be the constructed one. ---
+
+MUTATION_MEMBERS = (
+    "cleanup",
+    "install",
+    "remove",
+    "sync",
+    "upgrade_all_cli",
+    "upgrade_one_cli",
+)
+"""Mutation methods whose docstrings document the exact CLI they run."""
+
+PID_SENTINEL = "MPM-DOC-SENTINEL"
+"""Stand-in package id; the documented command carries a real example id where
+the constructed command carries this."""
+
+BUILD_CLI_KWARGS = frozenset((
+    "auto_post_args",
+    "auto_pre_args",
+    "auto_pre_cmds",
+    "override_cli_path",
+    "override_post_args",
+    "override_pre_args",
+    "override_pre_cmds",
+))
+"""``run_cli`` kwargs forwarded to ``build_cli`` when reconstructing the full
+command. ``sudo`` is deliberately not forwarded: escalation depends on platform
+and policy, so documented ``sudo`` prefixes are stripped on the other side."""
+
+
+def _strip_sudo(tokens: list[str]) -> list[str]:
+    """Drop a leading ``sudo`` (and its ``-n``) from a command."""
+    if tokens and tokens[0] == "sudo":
+        return tokens[2:] if tokens[1:2] == ["-n"] else tokens[1:]
+    return tokens
+
+
+def _documented_commands(
+    cls: type, member: str, extra_env: dict[str, str] | None
+) -> list[list[str]]:
+    """Every literal command documented for a mutation member, normalized.
+
+    A command piped into another program or elided with ``...`` is an
+    illustration. A leading ``sudo`` (and its ``-n``) is dropped on both the
+    documented and constructed sides: escalation depends on platform and
+    per-manager policy, not on the command's shape. Tokens restating the
+    manager's ``extra_env`` (``BATCH=yes`` for Ports) document environment
+    variables, not argv, and are dropped too.
+    """
+    env_tokens = {f"{key}={value}" for key, value in (extra_env or {}).items()}
+    commands = []
+    for block in _class_blocks(cls).get(member, ()):
+        for raw_tokens in _block_commands(block):
+            # Re-tokenize with shell quoting rules so a quoted argument (a
+            # PowerShell ``-Command "..."`` payload) stays one token, matching
+            # the constructed argv. Unbalanced quotes mean the command is an
+            # illustration, like a pipe or an elision.
+            try:
+                tokens = shlex.split(" ".join(raw_tokens))
+            except ValueError:
+                continue
+            if (
+                not tokens
+                or "|" in tokens
+                or "&&" in tokens
+                or any(ELISION.search(t) for t in tokens)
+            ):
+                continue
+            tokens = [token for token in tokens if token not in env_tokens]
+            # A leading VAR=VALUE is a shell environment prefix, not argv
+            # (``IGNORE_OSVERSION=yes pkg update``).
+            while tokens and re.match(r"[A-Za-z_][A-Za-z0-9_]*=", tokens[0]):
+                tokens.pop(0)
+            commands.append(_strip_sudo(tokens))
+    return commands
+
+
+def _normalize_constructed(command: tuple, cli_names: tuple[str, ...]) -> list[str]:
+    """Shape a constructed command like its documented counterpart.
+
+    Drops the ``sudo -n`` escalation prefix, unwraps the ``bash -c "source ...
+    && <command>"`` indirection used for shell-function managers (sdkman), and
+    reduces the absolute binary path to its basename.
+    """
+    tokens = _strip_sudo([str(token) for token in command])
+    if tokens[:2] == ["bash", "-c"] and len(tokens) == 3 and " && " in tokens[2]:
+        tokens = shlex.split(tokens[2].rsplit(" && ", 1)[1])
+    if tokens:
+        tokens[0] = Path(tokens[0]).name
+    return tokens
+
+
+def _matches(
+    documented: list[str], constructed: list[str], cli_names: tuple[str, ...]
+) -> bool:
+    """Positional token compare, tolerating the sentinel and binary aliases.
+
+    Wherever the constructed command carries the sentinel, the documented one
+    may carry any non-flag token (the example package id, possibly with a
+    pinned version). The leading binary may be documented under any of the
+    manager's CLI names (``python`` for a ``python3`` binary).
+    """
+    if len(documented) != len(constructed):
+        return False
+    for position, (doc_token, built_token) in enumerate(zip(documented, constructed)):
+        if PID_SENTINEL in built_token:
+            if doc_token.startswith("-"):
+                return False
+        elif doc_token != built_token:
+            if not (position == 0 and doc_token in cli_names):
+                return False
+    return True
+
+
+def _mutation_fixtures():
+    """Yield one ``pytest.param`` per manager mutation member with literal
+    documented commands."""
+    for manager in pool.values():
+        for member in MUTATION_MEMBERS:
+            documented = _documented_commands(
+                type(manager), member, getattr(manager, "extra_env", None)
+            )
+            if documented:
+                param_id = f"{manager.id}-{member}"
+                yield pytest.param(
+                    manager,
+                    member,
+                    documented,
+                    id=param_id,
+                    marks=KNOWN_EXCEPTIONS.get(param_id, ()),
+                )
+
+
+@pytest.mark.parametrize("manager, member, documented", list(_mutation_fixtures()))
+def test_documented_command_matches_construction(
+    manager, member, documented, monkeypatch
+):
+    """The command a mutation docstring shows must be the one the method builds."""
+    monkeypatch.setattr(manager, "which", lambda cli_name: Path("/usr/bin") / cli_name)
+    monkeypatch.setattr(
+        manager, "cli_path", Path("/usr/bin") / manager.cli_names[0], raising=False
+    )
+
+    constructed = []
+
+    def record_run_cli(*args, **kwargs) -> str:
+        build_kwargs = {k: v for k, v in kwargs.items() if k in BUILD_CLI_KWARGS}
+        constructed.append(manager.build_cli(*args, **build_kwargs))
+        return ""
+
+    def record_run(*args, **kwargs) -> str:
+        # ``run`` takes the full, already-built command as a nested structure
+        # (emerge's cleanup calls ``self.upgrade()``, which executes
+        # ``upgrade_all_cli()`` through ``run``): flatten it like ``run`` does.
+        def flatten(items):
+            for item in items:
+                if isinstance(item, (list, tuple)):
+                    yield from flatten(item)
+                elif item is not None:
+                    yield item
+
+        command = tuple(flatten(args))
+        if command:
+            constructed.append(command)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", record_run_cli)
+    monkeypatch.setattr(manager, "run", record_run)
+    # A method may consult the inventory first (sdkman's remove looks up the
+    # installed version to pass to ``uninstall``): feed it one sentinel package.
+    monkeypatch.setattr(
+        type(manager),
+        "installed",
+        property(
+            lambda self: iter(
+                [self.package(id=PID_SENTINEL, installed_version=PID_SENTINEL)]
+            )
+        ),
+    )
+
+    if member == "install":
+        manager.install(PID_SENTINEL)
+        # A second, version-pinned invocation covers docstrings whose example
+        # pins a version (``asdf install nodejs 20.10.0``). Managers without
+        # version support may balk: the unpinned record is enough for them.
+        try:
+            manager.install(PID_SENTINEL, version=PID_SENTINEL)
+        except Exception:
+            pass
+    elif member == "remove":
+        manager.remove(PID_SENTINEL)
+    elif member in ("sync", "cleanup"):
+        getattr(manager, member)()
+    elif member == "upgrade_all_cli":
+        constructed.append(manager.upgrade_all_cli())
+    else:  # upgrade_one_cli
+        constructed.append(manager.upgrade_one_cli(PID_SENTINEL))
+        try:
+            constructed.append(
+                manager.upgrade_one_cli(PID_SENTINEL, version=PID_SENTINEL)
+            )
+        except Exception:
+            pass
+
+    normalized = [
+        _normalize_constructed(command, manager.cli_names)
+        for command in constructed
+        if command
+    ]
+    for doc_command in documented:
+        assert any(
+            _matches(doc_command, built, manager.cli_names) for built in normalized
+        ), (
+            f"documented command {doc_command} is not constructed by {member}(); "
+            f"constructed: {normalized}"
+        )

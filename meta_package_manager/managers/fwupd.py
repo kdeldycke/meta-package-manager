@@ -531,10 +531,9 @@ class FWUPD(PackageManager):
             Scheduling…              [***************************************]
             362301da643102b9f38477387e2193e57abaa590 is already scheduled to be updated
         """
-        package_specs = package_id
-        if version:
-            package_specs += f" {version}"
-        return self.run_cli("install", package_specs, sudo=True)
+        # A None version is discarded by the args-flattening pipeline, so the
+        # device ID and the release version each stay their own argv element.
+        return self.run_cli("install", package_id, version, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided

@@ -218,7 +218,7 @@ class EOPKG(PackageManager):
 
             $ sudo eopkg --no-color upgrade --yes-all
         """
-        return self.build_cli("upgrade", sudo=True)
+        return self.build_cli("upgrade", "--yes-all", sudo=True)
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -321,7 +321,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo --no-color eopkg update-repo
+            $ sudo eopkg --no-color update-repo
             Updating repository: Solus
             eopkg-index.xml.xz.sha1sum  (40.0  B)100%   0.00 --/- [--:--:--] [complete]
             eopkg-index.xml.xz           (3.1 MB)100%  87.40 KB/s [00:00:34] [complete]

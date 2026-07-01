@@ -194,7 +194,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global require illuminate/contracts
+            $ composer global --no-ansi require illuminate/contracts
         """
         return self.run_cli("require", package_id)
 
@@ -204,7 +204,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global update
+            $ composer global --no-ansi update
         """
         return self.build_cli("update")
 
@@ -219,7 +219,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global update illuminate/contracts
+            $ composer global --no-ansi update illuminate/contracts
         """
         return self.build_cli("update", package_id)
 
@@ -228,7 +228,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global remove illuminate/contracts
+            $ composer global --no-ansi remove illuminate/contracts
         """
         return self.run_cli("remove", package_id)
 
@@ -239,6 +239,6 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global clear-cache
+            $ composer global --no-ansi clear-cache
         """
         self.run_cli("clear-cache")

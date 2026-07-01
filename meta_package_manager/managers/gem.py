@@ -255,7 +255,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem uninstall left-pad
+            $ gem uninstall left-pad --quiet
             Successfully uninstalled left-pad-1.1.0
         """
         return self.run_cli("uninstall", package_id)
@@ -265,7 +265,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem sources --update
+            $ gem sources --update --quiet
         """
         self.run_cli("sources", "--update")
 

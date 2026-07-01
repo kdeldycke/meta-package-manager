@@ -207,7 +207,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo pacman --noconfirm --sync firefox
+            $ sudo pacman --noconfirm --color never --sync firefox
         """
         return self.run_cli("--sync", package_id, sudo=True)
 
@@ -216,7 +216,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo pacman --noconfirm --sync --refresh --sysupgrade
+            $ sudo pacman --noconfirm --color never --sync --refresh --sysupgrade
         """
         return self.build_cli("--sync", "--refresh", "--sysupgrade", sudo=True)
 
@@ -230,7 +230,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo pacman --noconfirm --sync firefox
+            $ sudo pacman --noconfirm --color never --sync firefox
         """
         return self.build_cli("--sync", package_id, sudo=True)
 
@@ -239,7 +239,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo pacman --noconfirm --remove firefox
+            $ sudo pacman --noconfirm --color never --remove firefox
         """
         return self.run_cli("--remove", package_id, sudo=True)
 
@@ -248,7 +248,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pacman --noconfirm --sync --refresh
+            $ pacman --noconfirm --color never --sync --refresh
         """
         self.run_cli("--sync", "--refresh")
 
@@ -257,7 +257,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo pacman --noconfirm --sync --clean --clean
+            $ sudo pacman --noconfirm --color never --sync --clean --clean
         """
         self.run_cli("--sync", "--clean", "--clean", sudo=True)
 

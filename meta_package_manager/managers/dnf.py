@@ -165,7 +165,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo dnf --color=never --assumeyes install pip
+            $ sudo dnf --color=never --quiet --assumeyes install pip
         """
         return self.run_cli("--assumeyes", "install", package_id, sudo=True)
 
@@ -175,9 +175,9 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo dnf --color=never --assumeyes upgrade
+            $ sudo dnf --color=never --quiet --assumeyes upgrade
         """
-        return self.build_cli("upgrade", sudo=True)
+        return self.build_cli("--assumeyes", "upgrade", sudo=True)
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -190,16 +190,16 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo dnf --color=never --assumeyes upgrade pip
+            $ sudo dnf --color=never --quiet --assumeyes upgrade pip
         """
-        return self.build_cli("upgrade", package_id, sudo=True)
+        return self.build_cli("--assumeyes", "upgrade", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.
 
         .. code-block:: shell-session
 
-            $ sudo dnf --color=never --assumeyes autoremove package_id
+            $ sudo dnf --color=never --quiet --assumeyes autoremove package_id
         """
 
         return self.run_cli("--assumeyes", "autoremove", package_id, sudo=True)
@@ -209,7 +209,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            $ dnf --color=never check-update
+            $ dnf --color=never --quiet check-update
         """
         self.run_cli("check-update")
 
@@ -218,8 +218,8 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo dnf --color=never --assumeyes autoremove
-            $ dnf --color=never clean all
+            $ sudo dnf --color=never --quiet --assumeyes autoremove
+            $ dnf --color=never --quiet clean all
         """
         self.run_cli("--assumeyes", "autoremove", sudo=True)
         self.run_cli("clean", "all")

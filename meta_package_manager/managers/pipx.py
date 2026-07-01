@@ -124,33 +124,20 @@ class Pipx(PackageManager):
             Mimics ``Pip.outdated()`` operation. There probably is a way to factorize
             it.
 
+        Only the venv's main package is reported; its dependencies also show up
+        in ``pip list --outdated`` but are silenced:
+
         .. code-block:: shell-session
 
-            $ pipx runpip poetry list --no-color --format=json --outdated \
+            $ pipx runpip pycowsay list --no-color --format=json --outdated \
             > --verbose --quiet | jq
             [
               {
-                "name": "charset-normalizer",
-                "version": "2.0.12",
-                "location": "~/.local/pipx/venvs/poetry/lib/python3.10/site-packages",
+                "name": "pycowsay",
+                "version": "0.0.0.1",
+                "location": "~/.local/pipx/venvs/pycowsay/lib/python3.10/site-packages",
                 "installer": "pip",
-                "latest_version": "2.1.0",
-                "latest_filetype": "wheel"
-              },
-              {
-                "name": "packaging",
-                "version": "20.9",
-                "location": "~/.local/pipx/venvs/poetry/lib/python3.10/site-packages",
-                "installer": "pip",
-                "latest_version": "21.3",
-                "latest_filetype": "wheel"
-              },
-              {
-                "name": "virtualenv",
-                "version": "20.14.1",
-                "location": "~/.local/pipx/venvs/poetry/lib/python3.10/site-packages",
-                "installer": "pip",
-                "latest_version": "20.15.0",
+                "latest_version": "0.0.0.2",
                 "latest_filetype": "wheel"
               }
             ]

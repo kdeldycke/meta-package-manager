@@ -191,6 +191,6 @@ class Choco(PackageManager):
 
         .. code-block:: pwsh-session
 
-            > choco uninstall ccleaner --yes --limit-output
+            > choco uninstall ccleaner --yes --limit-output --no-progress --no-color --retry-count=3
         """
         return self.run_cli("uninstall", package_id, "--yes", "--limit-output")

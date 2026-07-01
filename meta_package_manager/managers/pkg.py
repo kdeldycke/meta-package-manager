@@ -376,7 +376,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pkg install --yes dmg2img
+            $ pkg --quiet install --yes dmg2img
             Updating FreeBSD repository catalogue...
             FreeBSD repository is up to date.
             All repositories are up to date.
@@ -398,7 +398,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pkg upgrade --yes
+            $ pkg --quiet upgrade --yes
         """
         return self.build_cli("upgrade", "--yes")
 
@@ -413,7 +413,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pkg upgrade --yes dmg2img
+            $ pkg --quiet upgrade --yes dmg2img
         """
         return self.build_cli("upgrade", "--yes", package_id)
 
@@ -422,7 +422,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pkg delete --yes dmg2img
+            $ pkg --quiet delete --yes dmg2img
             Checking integrity... done (0 conflicting)
             Deinstallation has been requested for the following 1 packages:
 
@@ -441,7 +441,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ IGNORE_OSVERSION=yes pkg update
+            $ IGNORE_OSVERSION=yes pkg --quiet update
             Updating FreeBSD repository catalogue...
             Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
             Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
@@ -453,7 +453,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pkg update
+            $ pkg --quiet update
             Updating FreeBSD repository catalogue...
             Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
             Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
@@ -471,13 +471,13 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pkg autoremove --yes
+            $ pkg --quiet autoremove --yes
             Checking integrity... done (0 conflicting)
             Nothing to do.
 
         .. code-block:: shell-session
 
-            $ pkg clean --yes --all
+            $ pkg --quiet clean --yes --all
             Nothing to do.
         """
         self.run_cli("autoremove", "--yes")

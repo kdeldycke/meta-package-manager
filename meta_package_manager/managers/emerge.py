@@ -243,7 +243,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo emerge --color n --nospinner dev-vcs/git
+            $ sudo emerge --quiet --color n --nospinner dev-vcs/git
         """
         return self.run_cli(package_id, sudo=True)
 
@@ -253,7 +253,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo emerge --update --newuse --deep --color n --nospinner @world
+            $ sudo emerge --quiet --color n --nospinner --update --newuse --deep @world
         """
         return self.build_cli(
             "--update",
@@ -274,7 +274,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo emerge --update --color n --nospinner dev-vcs/git
+            $ sudo emerge --quiet --color n --nospinner --update dev-vcs/git
         """
         return self.build_cli(
             "--update",
@@ -287,7 +287,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo emerge --unmerge --color n --nospinner dev-vcs/git
+            $ sudo emerge --quiet --color n --nospinner --unmerge dev-vcs/git
         """
         return self.run_cli("--unmerge", package_id, sudo=True)
 
@@ -296,7 +296,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo emerge --sync --color n --nospinner
+            $ sudo emerge --quiet --color n --nospinner --sync
         """
         self.run_cli("--sync", sudo=True)
 
@@ -320,8 +320,8 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo emerge --update --newuse --deep --color n --nospinner @world
-            $ sudo emerge --depclean
+            $ sudo emerge --quiet --color n --nospinner --update --newuse --deep @world
+            $ sudo emerge --quiet --color n --nospinner --depclean
             $ sudo eclean distfiles
         """
         # Forces an upgrade first, as recommended by emerge documentation.

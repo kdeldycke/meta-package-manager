@@ -149,41 +149,15 @@ class YarnClassic(Yarn):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
+        Yarn emits its ``--json`` output as a stream of one JSON object per line
+        (the sample below elides the ``info`` color-legend object; the
+        human-readable transcript further down shows it):
+
         .. code-block:: shell-session
 
-            $ yarn --json outdated --cwd ~/.config/yarn/global | jq
+            $ yarn --json outdated --cwd ~/.config/yarn/global
             {"type":"warning","data":"package.json: No license field"}
-            {
-              "type": "info",
-              "data":
-                "Color legend : \\n"
-                " \\"<red>\\"    : Major Update backward-incompatible updates \\n"
-                " \\"<yellow>\\" : Minor Update backward-compatible features \\n"
-                " \\"<green>\\"  : Patch Update backward-compatible bug fixes"
-            }
-            {
-              "type": "table",
-              "data": {
-                "head": [
-                  "Package",
-                  "Current",
-                  "Wanted",
-                  "Latest",
-                  "Package Type",
-                  "URL"
-                ],
-                "body": [
-                  [
-                    "markdown",
-                    "0.4.0",
-                    "0.4.0",
-                    "0.5.0",
-                    "dependencies",
-                    "git://github.com/evilstreak/markdown-js.git"
-                  ]
-                ]
-              }
-            }
+            {"type":"table","data":{"head":["Package","Current","Wanted","Latest","Package Type","URL"],"body":[["markdown","0.4.0","0.4.0","0.5.0","dependencies","git://github.com/evilstreak/markdown-js.git"]]}}
 
         .. code-block:: shell-session
 
@@ -320,7 +294,7 @@ class YarnClassic(Yarn):
 
         .. code-block:: shell-session
 
-            $ yarn global add awesome-lint
+            $ yarn --silent global add awesome-lint
             yarn global v1.22.19
             [1/4] 🔍  Resolving packages...
             [2/4] 🚚  Fetching packages...
@@ -339,7 +313,7 @@ class YarnClassic(Yarn):
 
         .. code-block:: shell-session
 
-            $ yarn global upgrade --latest
+            $ yarn --silent global upgrade --latest
             yarn global v1.22.19
             [1/4] 🔍  Resolving packages...
             [2/4] 🚚  Fetching packages...
@@ -375,7 +349,7 @@ class YarnClassic(Yarn):
 
         .. code-block:: shell-session
 
-            $ yarn global upgrade markdown --latest
+            $ yarn --silent global upgrade markdown --latest
             yarn global v1.22.19
             [1/4] 🔍  Resolving packages...
             [2/4] 🚚  Fetching packages...
@@ -397,7 +371,7 @@ class YarnClassic(Yarn):
 
         .. code-block:: shell-session
 
-            $ yarn global remove awesome-lint
+            $ yarn --silent global remove awesome-lint
             yarn global v1.22.19
             [1/2] 🗑  Removing module awesome-lint...
             [2/2] 🔨  Regenerating lockfile and installing missing dependencies...

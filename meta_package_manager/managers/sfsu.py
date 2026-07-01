@@ -181,7 +181,7 @@ class SFSU(PackageManager):
 
         .. code-block:: pwsh-session
 
-            > sfsu update
+            > sfsu update --no-color
         """
         self.run_cli("update")
 
@@ -190,6 +190,6 @@ class SFSU(PackageManager):
 
         .. code-block:: pwsh-session
 
-            > sfsu cleanup --all --cache
+            > sfsu cleanup --all --cache --no-color
         """
         self.run_cli("cleanup", "--all", "--cache")

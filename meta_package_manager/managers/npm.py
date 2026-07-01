@@ -334,7 +334,7 @@ class NPM(PackageManager):
         """
         # Marked privileged so --sudo / `[mpm.managers.npm] sudo = true` can escalate
         # global installs; dormant by default (npm's default_sudo is False).
-        return self.run_cli("install", "--no-fund", "--no-audit", package_id, sudo=True)
+        return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -343,7 +343,7 @@ class NPM(PackageManager):
         .. code-block:: shell-session
 
             $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                upgrade
+                update
         """
         return self.build_cli("update", sudo=True)
 

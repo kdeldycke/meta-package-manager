@@ -129,7 +129,7 @@ class Cargo(PackageManager):
 
         .. code-block:: shell-session
 
-            $ cargo --color never install bore-cli
+            $ cargo --color never --quiet install bore-cli
               Updating crates.io index
             Downloaded bore-cli v0.4.0
             Downloaded 1 crate (20.9 KB) in 0.26s
@@ -150,7 +150,7 @@ class Cargo(PackageManager):
 
         .. code-block:: shell-session
 
-            $ cargo --color never uninstall bore-cli
+            $ cargo --color never --quiet uninstall bore-cli
                 Removing /Users/me/.cargo/bin/bore
         """
         return self.run_cli("uninstall", package_id)

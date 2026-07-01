@@ -88,6 +88,7 @@ from .execution import (
     collect_from_managers,
     collect_per_package,
     highlight_cli_name,
+    install_interrupt_handler,
     warn_jobs_ignored,
 )
 from .manager import PackageManager
@@ -558,6 +559,12 @@ def mpm(
     suggest_contribs,
 ):
     """CLI options shared by all subcommands."""
+    # Make the first Ctrl+C terminate any in-flight package-manager subprocesses so a
+    # concurrent fan-out (upgrade, install, ...) aborts cleanly instead of hanging on
+    # worker threads whose children survived the terminal signal. Restored on close.
+    # See meta_package_manager.execution for the full rationale.
+    install_interrupt_handler(ctx)
+
     # Silence all log messages for serialization rendering unless in debug mode.
     if (
         ctx.meta[TABLE_FORMAT] in SERIALIZATION_FORMATS

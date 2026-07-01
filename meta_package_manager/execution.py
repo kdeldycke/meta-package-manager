@@ -31,6 +31,12 @@ shared ``✓``/``✗`` ledger (:py:class:`meta_package_manager.execution.Operati
 and the :py:func:`meta_package_manager.execution.trail_line` atom) that the concurrent
 and sequential paths both report through.
 
+Cutting across both altitudes,
+:py:func:`meta_package_manager.execution.install_interrupt_handler` and
+:py:func:`meta_package_manager.execution.terminate_live_processes` make Ctrl+C abort a
+concurrent fan-out cleanly, by killing the in-flight subprocesses whose worker threads
+would otherwise keep the thread pool (and the interpreter) from shutting down.
+
 .. note::
     The name and intent mirror :py:mod:`click_extra.execution` from the sibling
     `click-extra <https://github.com/kdeldycke/click-extra>`_ project, which gathers
@@ -47,6 +53,7 @@ import math
 import os
 import re
 import shutil
+import signal
 import stat
 import subprocess
 import sys
@@ -79,7 +86,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable
     from contextlib import AbstractContextManager
     from datetime import timedelta
-    from types import TracebackType
+    from types import FrameType, TracebackType
 
     from click import Context
     from click_extra.envvar import TEnvVars
@@ -204,6 +211,92 @@ stalled during the first second. Only the quickest calls (cached version probes,
 trivial metadata queries) finish within this delay and stay silent; anything
 slower (a ``guix search``, a source build) shows the spinner right away.
 """
+
+
+# Interrupt handling for concurrent fan-outs.
+#
+# Python delivers Ctrl+C (SIGINT/KeyboardInterrupt) only to the main thread, but a
+# concurrent command (``mpm upgrade``, ``install``, ...) runs each manager's CLI in a
+# worker thread of a ``ThreadPoolExecutor`` (see ``click_extra.execution.run_lanes``).
+# The workers never see the interrupt; what actually stops their subprocesses is the
+# terminal, which sends SIGINT to the whole foreground process group, mpm's children
+# included. Any child that survives that signal (a ``sudo`` reading its password from
+# ``/dev/tty``, a manager mid-transaction) keeps its worker blocked in
+# ``communicate()``, so the pool cannot be joined: the abort then hangs, first in the
+# executor's ``shutdown(wait=True)`` teardown and again in the interpreter's atexit
+# thread-join. That double block is why a second Ctrl+C was needed and why it surfaced
+# an "Exception ignored on threading shutdown" traceback.
+#
+# The fix: track every live subprocess and, on the first Ctrl+C, terminate them from
+# the main thread's signal handler so the workers unblock and the pool drains cleanly.
+
+
+_LIVE_PROCESSES: Final[set[subprocess.Popen[str]]] = set()
+"""Registry of package-manager subprocesses currently running.
+
+Populated by :py:meth:`CLIExecutor.run` for the lifetime of each ``communicate()``
+call (added right after spawn, discarded in its ``finally``). Read by
+:py:func:`terminate_live_processes` to interrupt them all at once. Guarded by
+:py:data:`_LIVE_PROCESSES_LOCK`, since the fan-out runs :py:meth:`CLIExecutor.run` from
+several worker threads concurrently.
+"""
+
+
+_LIVE_PROCESSES_LOCK: Final = threading.Lock()
+"""Guards :py:data:`_LIVE_PROCESSES` against concurrent mutation by worker threads."""
+
+
+def terminate_live_processes() -> None:
+    """Send ``SIGTERM`` to every package-manager subprocess currently running.
+
+    Called from the main thread's ``SIGINT`` handler (see
+    :py:func:`install_interrupt_handler`) so a concurrent fan-out aborts promptly:
+    terminating the children unblocks the worker threads parked in
+    :py:meth:`subprocess.Popen.communicate`, letting the thread pool drain instead of
+    hanging on a child that ignored the terminal's process-group ``SIGINT``.
+
+    Uses ``SIGTERM`` rather than ``SIGKILL`` so a child still gets to clean up, notably
+    to restore terminal state a ``sudo`` password prompt may have altered. The registry
+    is snapshotted under the lock, then signalled outside it, because :py:meth:`run` may
+    be discarding its own entries from other threads at the same time.
+    """
+    with _LIVE_PROCESSES_LOCK:
+        live = tuple(_LIVE_PROCESSES)
+    for proc in live:
+        try:
+            proc.terminate()
+        except OSError:
+            # Reaped between the snapshot and the signal: nothing left to stop.
+            pass
+
+
+def install_interrupt_handler(ctx: Context) -> None:
+    """Make the first Ctrl+C terminate in-flight subprocesses, then abort as usual.
+
+    Installs a ``SIGINT`` handler for the duration of the CLI run that calls
+    :py:func:`terminate_live_processes` before re-raising :py:class:`KeyboardInterrupt`
+    (exactly what Python's default handler raises). The abort then proceeds normally,
+    but the concurrent fan-out no longer hangs on surviving children. The previous
+    handler is restored when ``ctx`` closes.
+
+    Must run in the main thread: :py:func:`signal.signal` refuses to install a handler
+    from any other, so a non-main-thread caller (embedded use, some tests) is a no-op
+    that keeps the default Ctrl+C behavior.
+
+    A signal handler is required here rather than a ``try``/``except KeyboardInterrupt``
+    around the fan-out: the interrupt unwinds through the executor's blocking
+    ``shutdown(wait=True)`` teardown *before* any ``except`` in mpm could run, so the
+    children must be killed at signal-delivery time, ahead of that teardown.
+    """
+    if threading.current_thread() is not threading.main_thread():
+        return
+
+    def handler(signum: int, frame: FrameType | None) -> None:
+        terminate_live_processes()
+        raise KeyboardInterrupt
+
+    previous = signal.signal(signal.SIGINT, handler)
+    ctx.call_on_close(lambda: signal.signal(signal.SIGINT, previous))
 
 
 class CLIExecutor:
@@ -797,6 +890,11 @@ class CLIExecutor:
                     return ""
                 raise
             logging.debug(f"Spawned PID {proc.pid}: {clean_args[0]}.")
+            # Track the live child so the main thread's SIGINT handler can terminate
+            # it on Ctrl+C (see terminate_live_processes): this worker thread never
+            # receives the interrupt itself.
+            with _LIVE_PROCESSES_LOCK:
+                _LIVE_PROCESSES.add(proc)
             effective_timeout = self._resolve_timeout()
             spinner = self._make_spinner()
             spinner.start()
@@ -865,6 +963,10 @@ class CLIExecutor:
             finally:
                 # Safety net: stop on the success path and on any other exit.
                 spinner.stop()
+                # The child is no longer live: drop it so a later Ctrl+C does not
+                # try to signal an already-reaped process.
+                with _LIVE_PROCESSES_LOCK:
+                    _LIVE_PROCESSES.discard(proc)
             code = proc.returncode
             output = stdout or ""
             error = stderr or ""

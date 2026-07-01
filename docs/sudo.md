@@ -30,10 +30,10 @@ Override the default globally with `--sudo` / `--no-sudo`, or per manager with t
 
 ```toml
 [mpm.managers.npm]
-sudo = true    # Run global npm installs through sudo.
+sudo = true # Run global npm installs through sudo.
 
 [mpm.managers.pacman]
-sudo = false   # Rootless setup: never escalate pacman.
+sudo = false # Rootless setup: never escalate pacman.
 ```
 
 A per-manager `sudo` value wins over the global flag, so you can escalate everything with `--sudo` while keeping a single manager rootless, or the reverse.

@@ -134,11 +134,11 @@ $ mpm --brew sbom > deep.spdx.json
 | Manager  | License | Homepage | Download URL | Checksums | Dependency graph | Per-package SBOM | Vulnerabilities |
 | -------- | :-----: | :------: | :----------: | :-------: | :--------------: | :--------------: | :-------------: |
 | Homebrew |    ✓    |    ✓     |      ✓       |     ✓     |        ✓         |    ✓ (opt-in)    |                 |
-| pip      |    ✓    |    ✓     |              |           |        ✓         |                  |  ✓ (`--network`) |
-| npm      |         |          |              |           |                  |                  |  ✓ (`--network`) |
-| cargo    |         |          |              |           |                  |                  |  ✓ (`--network`) |
-| gem      |         |          |              |           |                  |                  |  ✓ (`--network`) |
-| composer |         |          |              |           |                  |                  |  ✓ (`--network`) |
+| pip      |    ✓    |    ✓     |              |           |        ✓         |                  | ✓ (`--network`) |
+| npm      |         |          |              |           |                  |                  | ✓ (`--network`) |
+| cargo    |         |          |              |           |                  |                  | ✓ (`--network`) |
+| gem      |         |          |              |           |                  |                  | ✓ (`--network`) |
+| composer |         |          |              |           |                  |                  | ✓ (`--network`) |
 | Others   |         |          |              |           |                  |                  |                 |
 
 Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time. The vulnerability column tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems); a manager OSV does not index (Homebrew, `mas`, the distro managers OSV needs a release qualifier for) gets no advisories rather than an error.

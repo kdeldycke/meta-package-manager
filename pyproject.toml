@@ -155,21 +155,23 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.1.1 is the floor mpm targets. The 8.x series bundles the
-  # features earlier floors tracked (the ConfigValidator / ValidationError config
-  # types used by meta_package_manager.config, write_manpages() and the
-  # click_extra_manpages Sphinx machinery driving docs/cli-parameters.md, and the
-  # Spinner widget meta_package_manager.execution shows during long CLI calls),
-  # and reorganizes the API in ways mpm now depends on directly:
-  #   - HelpKeywords and highlight moved to click_extra.highlight when the
-  #     click_extra.colorize module was split.
-  #   - print_table() gained a sort_key parameter, replacing the dropped
-  #     print_sorted_table helper (reimplemented in meta_package_manager.cli).
-  #   - ConfigValidator / ValidationError import from click_extra.config: 8.1.0
-  #     dropped their top-level re-export.
-  # The floor is 8.1.1, not 8.1.0: 8.1.0 stringified the tuple default of the
-  # EnumChoice-typed --sort-by option and broke every table command.
-  "click-extra>=8.1.1",
+  # click-extra 8.2.0 is the floor mpm targets, the first release shipping the
+  # APIs mpm imports directly:
+  #   - resolve_jobs / run_jobs / run_lanes from click_extra.execution, the
+  #     concurrency primitives meta_package_manager.execution builds its
+  #     fan-outs on.
+  #   - format_cli_prompt, published in click_extra.testing.
+  #   - The --export-config option (named to avoid clashing with mpm's `dump`
+  #     command), inherited through the default option set and documented in
+  #     docs/configuration.md.
+  #   - The click_extra.sphinx.matrix machinery behind docs/install.md's
+  #     compatibility tables and their refresh in docs/docs_update.py (via the
+  #     [sphinx] extra of the docs dependency group).
+  # Earlier 8.x floors tracked the split click_extra.highlight module, the
+  # ConfigValidator / ValidationError import move to click_extra.config,
+  # print_table()'s sort_key parameter, and the 8.1.1 fix for the
+  # EnumChoice-typed --sort-by default; 8.2.0 covers them all.
+  "click-extra>=8.2.0",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
   # Required at runtime by meta_package_manager.package and
@@ -326,16 +328,9 @@ exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-06-25T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-07-02T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
-
-# Track click-extra's main branch until its next release reaches PyPI: mpm now uses
-# resolve_jobs / run_lanes / format_cli_prompt and the renamed --export-config option,
-# added there after 8.1.4. Once that release ships, drop this table and bump the
-# "click-extra>=..." dependency floor to the version that includes them.
-[tool.uv.sources]
-click-extra = { git = "https://github.com/kdeldycke/click-extra.git", branch = "main" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

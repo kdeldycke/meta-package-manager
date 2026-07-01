@@ -16,7 +16,8 @@
 """Dynamic documentation content generation.
 
 Called by repomatic's ``update-docs`` job to regenerate tables, diagrams and
-other dynamic content in ``readme.md``.
+other dynamic content in ``readme.md``, ``docs/benchmark.md`` and
+``docs/install.md``.
 
 .. warning::
     The generated Mermaid syntax targets the version bundled with
@@ -29,6 +30,7 @@ other dynamic content in ``readme.md``.
 from __future__ import annotations
 
 import inspect
+import sys
 from pathlib import Path
 from textwrap import dedent
 
@@ -41,6 +43,14 @@ from meta_package_manager.capabilities import Operations, implements
 from meta_package_manager.labels import LABELS
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
+
+# The matrix machinery imports Sphinx, which only the docs dependency group
+# provides. Gate it so this script (and the tests loading it) still runs in
+# environments without that group: update_matrices() then skips with a notice.
+try:
+    from click_extra.sphinx.matrix import update_matrix_blocks
+except ImportError:
+    update_matrix_blocks = None
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
@@ -358,7 +368,27 @@ def update_benchmark() -> None:
     )
 
 
+def update_matrices() -> None:
+    """Refresh the compatibility matrices embedded in the documentation.
+
+    Regenerates from the project's git tags the Python and click-extra
+    compatibility tables that ``docs/install.md`` embeds in
+    ``<!-- matrix ... -->`` marker regions, through `click-extra's matrix
+    mechanism
+    <https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive>`_.
+    """
+    if update_matrix_blocks is None:
+        print(
+            "Skip matrix refresh: click-extra[sphinx] is not installed. Run:"
+            " uv run --group docs -- python docs/docs_update.py",
+            file=sys.stderr,
+        )
+        return
+    update_matrix_blocks((PROJECT_ROOT / "docs", PROJECT_ROOT / "readme.md"))
+
+
 if __name__ == "__main__":
     update_labels()
     update_readme()
     update_benchmark()
+    update_matrices()

@@ -22,6 +22,7 @@ import sys
 from itertools import permutations
 from pathlib import Path
 
+import pytest
 from extra_platforms import Group, extract_members
 from yaml import Loader, load, safe_load
 
@@ -340,3 +341,26 @@ def test_benchmark_table_in_sync():
 
     on_disk = benchmark.split(start_tag, 1)[1].split(end_tag, 1)[0]
     assert on_disk == docs_update.benchmark_managers_table()
+
+
+def test_matrix_blocks_in_sync():
+    """Check the compatibility matrices embedded in the docs match a fresh
+    regeneration from the git tags.
+
+    Drift here means a release changed the Python classifiers or the
+    click-extra requirement without re-running ``docs/docs_update.py``.
+
+    Skipped when click-extra's ``[sphinx]`` extra (pulled by the ``docs``
+    dependency group) is missing, as in the hermetic unit-test environment.
+    Without the full tag history (shallow clone, sdist build), regeneration
+    leaves every block untouched and the test passes vacuously.
+    """
+    matrix = pytest.importorskip(
+        "click_extra.sphinx.matrix",
+        reason="needs the docs dependency group (click-extra[sphinx])",
+    )
+    stale = matrix.update_matrix_blocks(
+        (PROJECT_ROOT / "docs", PROJECT_ROOT / "readme.md"),
+        check=True,
+    )
+    assert not stale

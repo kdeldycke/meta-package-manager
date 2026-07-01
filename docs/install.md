@@ -495,23 +495,44 @@ mpm, version 4.13.0
 
 ## Python compatibility
 
-The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented.
+The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented. The table is regenerated from the release tags by `docs/docs_update.py`, through click-extra's [`matrix` mechanism](https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive):
 
-<!-- python-compat-start -->
+<!-- matrix python package=mpm -->
 
-| `mpm`               | Released   | `2.7` | `3.6` | `3.7` | `3.8` | `3.9` | `3.10` | `3.11` | `3.12` | `3.13` | `3.14` |
-| :------------------ | :--------- | :---: | :---: | :---: | :---: | :---: | :----: | :----: | :----: | :----: | :----: |
-| `6.x` → `7.x`       | 2025-12-08 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |
-| `5.21.0`            | 2025-05-28 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |   ❌   |   ✅   |   ✅   |   ✅   |   ❌   |
-| `5.19.x` → `5.20.x` | 2024-11-13 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |   ✅   |   ✅   |   ✅   |   ✅   |   ❌   |
-| `5.17.x` → `5.18.x` | 2024-07-07 |  ❌   |  ❌   |  ❌   |  ❌   |  ✅   |   ✅   |   ✅   |   ✅   |   ❌   |   ❌   |
-| `5.14.x` → `5.16.x` | 2024-01-12 |  ❌   |  ❌   |  ❌   |  ✅   |  ✅   |   ✅   |   ✅   |   ✅   |   ❌   |   ❌   |
-| `3.2.0` → `5.13.1`  | 2020-05-31 |  ❌   |  ❌   |  ✅   |  ✅   |  ✅   |   ✅   |   ✅   |   ✅   |   ❌   |   ❌   |
-| `2.9.0` → `3.1.0`   | 2020-03-18 |  ❌   |  ✅   |  ✅   |  ✅   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
-| `2.5.0` → `2.8.0`   | 2017-03-01 |  ✅   |  ✅   |  ✅   |  ❌   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
-| `1.8.0` → `2.4.0`   | 2016-08-22 |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
+| `mpm`               | Released   | `2.7` | `3.3` | `3.4` | `3.5` | `3.6` | `3.7` | `3.8` | `3.9` | `3.10` | `3.11` | `3.12` | `3.13` | `3.14` |
+| :------------------ | :--------- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :----: | :----: | :----: | :----: | :----: |
+| `6.0.x` → `7.x`     | 2025-12-08 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |
+| `5.21.0`            | 2025-05-28 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |   ❌   |   ✅   |   ✅   |   ✅   |   ❌   |
+| `5.19.x` → `5.20.x` | 2024-11-13 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |   ✅   |   ✅   |   ✅   |   ✅   |   ❌   |
+| `5.17.x` → `5.18.x` | 2024-07-07 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ✅   |   ✅   |   ✅   |   ✅   |   ❌   |   ❌   |
+| `5.14.x` → `5.16.x` | 2024-01-12 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ✅   |  ✅   |   ✅   |   ✅   |   ✅   |   ❌   |   ❌   |
+| `3.2.x` → `5.13.x`  | 2020-05-31 |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ✅   |  ✅   |  ✅   |   ✅   |   ✅   |   ✅   |   ❌   |   ❌   |
+| `2.9.x` → `3.1.x`   | 2020-03-18 |  ❌   |  ❌   |  ❌   |  ❌   |  ✅   |  ✅   |  ✅   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
+| `2.5.x` → `2.8.x`   | 2017-03-01 |  ✅   |  ❌   |  ✅   |  ✅   |  ✅   |  ✅   |  ✅   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
+| `2.1.x` → `2.4.x`   | 2016-12-17 |  ✅   |  ✅   |  ✅   |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
+| `1.8.x` → `2.1.x`   | 2016-08-22 |  ✅   |  ✅   |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |  ❌   |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |
 
-<!-- python-compat-end -->
+<!-- matrix-end -->
+
+## click-extra compatibility
+
+`mpm` builds its CLI on [click-extra](https://github.com/kdeldycke/click-extra), and the two evolve in lockstep: most `mpm` releases raise their click-extra floor to pick up features and fixes. The table below shows which click-extra versions each `mpm` release range accepts at install time, derived from the click-extra requirement specifier across release tags. Columns are minor-grouped where the specifiers only distinguish minors, and split per patch where a floor pins a specific patch; the right edge is the click-extra version currently resolved in `uv.lock`. Rows start at `6.0.0` to keep the column set readable, and the table is regenerated by the same [`matrix` mechanism](https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive) as the Python one:
+
+<!-- matrix click-extra package=mpm version-floor=6.0.0 show-spec -->
+
+| `mpm`             | Released   | Spec       | `7.2` | `7.5.0` | `7.5.1` | `7.6.0` | `7.6.2` | `7.7` | `7.11` | `7.15` | `7.16.0` | `7.16.1` | `7.19` | `8.1.0` | `8.1.1` | `8.2` |
+| :---------------- | :--------- | :--------- | :---: | :-----: | :-----: | :-----: | :-----: | :---: | :----: | :----: | :------: | :------: | :----: | :-----: | :-----: | :---: |
+| `7.x`             | 2026-06-26 | `>=8.1.1`  |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ❌   |   ❌    |   ✅    |  ✅   |
+| `6.6.0`           | 2026-06-17 | `>=7.19`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ✅   |   ✅    |   ✅    |  ✅   |
+| `6.5.x`           | 2026-05-25 | `>=7.16.1` |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
+| `6.4.x`           | 2026-05-04 | `>=7.15`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
+| `6.4.0`           | 2026-04-27 | `>=7.11`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
+| `6.2.x` → `6.3.x` | 2026-03-26 | `>=7.7.0`  |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
+| `6.2.0`           | 2026-03-25 | `>=7.6.2`  |  ❌   |   ❌    |   ❌    |   ❌    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
+| `6.1.1`           | 2026-02-05 | `>=7.5.1`  |  ❌   |   ❌    |   ✅    |   ✅    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
+| `6.0.x` → `6.1.x` | 2025-12-08 | `>=7.2.0`  |  ✅   |   ✅    |   ✅    |   ✅    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
+
+<!-- matrix-end -->
 
 ## Shell completion
 

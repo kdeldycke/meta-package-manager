@@ -5,6 +5,9 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Raise the click-extra floor from `8.1.1` to `8.2.0`, the first release shipping the concurrency primitives (`resolve_jobs`, `run_lanes`), the `--export-config` option, and the compatibility-matrix machinery `mpm` relies on.
+- [mpm] Document click-extra compatibility on the installation page: a new table shows which click-extra versions each `mpm` release range accepts at install time.
+- [mpm] The Python and click-extra compatibility tables of the installation page are now regenerated from the release tags by `docs/docs_update.py`, through click-extra's `matrix` mechanism, and a new test fails when they drift. The Python table gains the `3.3`, `3.4` and `3.5` columns and corrects several historical ranges.
 - [bar-plugin] Cap each `mpm` call the plugin makes at 60 seconds via `--timeout`, so a wedged package manager fails the menubar refresh in about a minute instead of stalling it for several.
 - [mpm] `--timeout` now also bounds the manager version-detection probes, not just the operation that follows, so a wedged binary cannot outlast the limit during startup detection.
 - [pip] Probe the Python interpreter version under the short read-only timeout instead of the long state-changing default.

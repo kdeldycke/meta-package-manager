@@ -31,13 +31,13 @@ from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
+    _LIVE_PROCESSES,
+    _LIVE_PROCESSES_LOCK,
     DEFAULT_TIMEOUT,
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
     READ_ONLY_TIMEOUT,
     SPINNER_DELAY,
-    _LIVE_PROCESSES,
-    _LIVE_PROCESSES_LOCK,
     CLIError,
     _is_sudo_auth_failure,
     install_interrupt_handler,

@@ -695,8 +695,7 @@ def test_spdx_renders_attached_vulnerabilities():
     security_refs = [
         ref
         for ref in django.get("externalRefs", [])
-        if ref["referenceCategory"] == "SECURITY"
-        and ref["referenceType"] == "advisory"
+        if ref["referenceCategory"] == "SECURITY" and ref["referenceType"] == "advisory"
     ]
     assert len(security_refs) == 1
     assert "GHSA-aaaa-bbbb-cccc" in security_refs[0]["referenceLocator"]

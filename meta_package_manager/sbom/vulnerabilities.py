@@ -207,9 +207,7 @@ def _parse_purls(purls: Iterable[str]) -> dict[str, _OSVQuery]:
         key = _coordinate_key(ecosystem, name, purl.version)
         query = queries.get(key)
         if query is None:
-            query = _OSVQuery(
-                ecosystem=ecosystem, name=name, version=purl.version
-            )
+            query = _OSVQuery(ecosystem=ecosystem, name=name, version=purl.version)
             queries[key] = query
         query.purls.append(purl_str)
     return queries
@@ -235,12 +233,12 @@ def _batch_query(
     for chunk_start, chunk in _enumerate_chunks(queries):
         payload = {"queries": [q.as_osv_payload() for q in chunk]}
         response = client.post(OSV_BATCH_ENDPOINT, payload)
-        results = (response or {}).get("results", []) if isinstance(response, dict) else []
+        results = (
+            (response or {}).get("results", []) if isinstance(response, dict) else []
+        )
         for offset, result in enumerate(results):
             vuln_ids = [
-                v["id"]
-                for v in (result or {}).get("vulns", []) or []
-                if v.get("id")
+                v["id"] for v in (result or {}).get("vulns", []) or [] if v.get("id")
             ]
             if vuln_ids:
                 ids_by_index[chunk_start + offset] = vuln_ids
@@ -294,9 +292,7 @@ def _normalize_osv_record(raw: dict) -> Vulnerability:
     fixed_versions = _extract_fixed_versions(raw.get("affected", []) or [])
 
     references = tuple(
-        ref["url"]
-        for ref in raw.get("references", []) or []
-        if ref.get("url")
+        ref["url"] for ref in raw.get("references", []) or [] if ref.get("url")
     )
 
     return Vulnerability(
@@ -335,9 +331,11 @@ def _extract_fixed_versions(affected: list) -> tuple[str, ...]:
     fixed: list[str] = []
     for entry in affected:
         for rng in entry.get("ranges", []) or []:
-            for event in rng.get("events", []) or []:
-                if "fixed" in event:
-                    fixed.append(event["fixed"])
+            fixed.extend(
+                event["fixed"]
+                for event in rng.get("events", []) or []
+                if "fixed" in event
+            )
     return tuple(dict.fromkeys(fixed))
 
 

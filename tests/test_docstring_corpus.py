@@ -177,7 +177,11 @@ def _raw_literal(node: ast.Constant, source: str) -> str | None:
         start += 1  # Skip a string prefix (r, u, ...).
     body = segment[start:]
     for quote in ('"""', "'''", '"', "'"):
-        if len(body) >= 2 * len(quote) and body.startswith(quote) and body.endswith(quote):
+        if (
+            len(body) >= 2 * len(quote)
+            and body.startswith(quote)
+            and body.endswith(quote)
+        ):
             return body[len(quote) : -len(quote)]
     return None
 
@@ -318,10 +322,15 @@ def _fixtures():
                     id=param_id,
                     marks=KNOWN_EXCEPTIONS.get(param_id, ()),
                 )
-        if any(_is_fixture(split_session(b)) for b in blocks_by_member.get("outdated", ())):
+        if any(
+            _is_fixture(split_session(b)) for b in blocks_by_member.get("outdated", ())
+        ):
             param_id = f"{manager.id}-outdated"
             yield pytest.param(
-                manager, "outdated", None, id=param_id,
+                manager,
+                "outdated",
+                None,
+                id=param_id,
                 marks=KNOWN_EXCEPTIONS.get(param_id, ()),
             )
 

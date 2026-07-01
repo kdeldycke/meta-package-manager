@@ -44,6 +44,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from typing_extensions import Self
+
 network_support = True
 try:
     import httpx
@@ -199,7 +201,7 @@ class NetworkClient:
             self._client.close()
             self._client = None
 
-    def __enter__(self) -> NetworkClient:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *exc_info) -> None:

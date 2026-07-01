@@ -517,12 +517,9 @@ class CycloneDX(SBOM):
             if digits.isdigit():
                 cwes.append(int(digits))
         references = [
-            VulnerabilityReference(id=alias, source=source)
-            for alias in vuln.aliases
+            VulnerabilityReference(id=alias, source=source) for alias in vuln.aliases
         ]
-        advisories = [
-            VulnerabilityAdvisory(url=XsUri(url)) for url in vuln.references
-        ]
+        advisories = [VulnerabilityAdvisory(url=XsUri(url)) for url in vuln.references]
         return CDXVulnerability(
             id=vuln.id,
             source=source,

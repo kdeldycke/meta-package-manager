@@ -29,7 +29,7 @@ from meta_package_manager.duration import Duration
 from meta_package_manager.managers.cargo import Cargo
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM
-from meta_package_manager.managers.pacman import Yay, _YAY_COOLDOWN_INIT_LUA
+from meta_package_manager.managers.pacman import _YAY_COOLDOWN_INIT_LUA, Yay
 from meta_package_manager.managers.pip import Pip
 from meta_package_manager.managers.pipx import Pipx
 from meta_package_manager.managers.uv import UV, UVX

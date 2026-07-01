@@ -1,9 +1,11 @@
 # Changelog
 
-## [`7.1.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.1...main)
+## [`7.1.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.1.0...main)
 
 > [!WARNING]
 > This version is **not released yet** and is under active development.
+
+## [`7.1.0` (2026-07-01)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.1...v7.1.0)
 
 - [mpm] Raise the click-extra floor from `8.1.1` to `8.2.0`, the first release shipping the concurrency primitives (`resolve_jobs`, `run_lanes`), the `--export-config` option, and the compatibility-matrix machinery `mpm` relies on.
 - [mpm] Document click-extra compatibility on the installation page: a new table shows which click-extra versions each `mpm` release range accepts at install time.

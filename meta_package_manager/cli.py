@@ -368,7 +368,6 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     - To remove a manager from the selection, use --no-<manager-id> selectors.
     - Order of the selectors is preserved for priority-sensitive subcommands.
     - Exclusion of a manager always takes precedence over its inclusion.
-    \b
 
     """),
     *single_manager_selectors(),

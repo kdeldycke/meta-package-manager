@@ -79,3 +79,28 @@ It goes one step further for a manager that ships no search command at all. `opk
 $ mpm --opkg search nano
 (...)
 ```
+
+## Universal augmentations
+
+The table above is *selective*: each ✅ backfills a capability only some managers lack. A second class of augmentation applies to **every** manager `mpm` drives, whether or not its native CLI cooperates.
+
+### Safe `--dry-run` everywhere
+
+`mpm` intercepts each state-changing call and logs it instead of running it, so any manager becomes previewable even when its own CLI has no dry-run mode:
+
+```shell-session
+$ mpm --dry-run --apt upgrade --all
+warning: Dry-run: (...)
+```
+
+### Comparable versions across schemes
+
+Package managers report versions in mutually incompatible schemes: semver, PEP 440, calendar versioning, Debian epochs, Gentoo suffixes, and more. Rather than a parser per format, `mpm` runs every version through a single tokenizer that yields a good-enough ordering, so `outdated` shows a meaningful installed-to-latest comparison even for managers whose native output never could.
+
+### Standard package URLs (purl)
+
+Every package `mpm` reports carries a [purl](https://github.com/package-url/purl-spec) identifier that the native tools do not emit. It is the same identifier that powers `mpm sbom`, giving every manager a portable, tool-agnostic package name.
+
+### One sudo prompt, uniform policy
+
+Managers disagree on whether an operation needs root. `mpm` applies a consistent policy: system managers (`apt`, `dnf`, `pacman`, …) escalate, user-level managers do not. On an interactive terminal it authenticates once up front instead of letting each manager prompt mid-run; off a terminal, managers that need root fail fast rather than hanging on a hidden prompt.

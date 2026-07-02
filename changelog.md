@@ -1,6 +1,6 @@
 # Changelog
 
-## [`7.1.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.1...main)
+## [`8.0.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.1...main)
 
 > [!WARNING]
 > This version is **not released yet** and is under active development.

@@ -35,10 +35,23 @@ no advisories rather than an error.
    coordinate. That route is deliberately deferred: mapping a package
    name to its CPE is fuzzy and the main source of false positives,
    and NVD offers no batch coordinate lookup to match OSV's
-   ``querybatch``. Until that lands, the rendered document is standard
-   CycloneDX/SPDX, so anyone needing system-package coverage can feed
-   it to an external CPE-based scanner (OSV-Scanner, Grype, Trivy, or
-   Intel's cve-bin-tool).
+   ``querybatch``. Until that lands, system-package coverage means
+   pointing a CPE-based scanner (OSV-Scanner, Grype, Trivy, or Intel's
+   cve-bin-tool) directly at the host. Feeding them the rendered
+   CycloneDX/SPDX is not enough: the exported components carry purls
+   but no CPEs, so a ``pkg:brew/...`` entry decodes as an
+   unknown-ecosystem package and silently matches nothing (verified
+   against Grype ``0.115.0``).
+
+.. seealso::
+   `VulnerableCode <https://github.com/aboutcode-org/vulnerablecode>`_
+   is the candidate second source: it aggregates OSV, GitHub and the
+   Linux distro trackers (Debian, Arch, Gentoo, Red Hat, SUSE, Ubuntu)
+   plus project-specific feeds behind a purl-keyed API, with a public
+   instance at `public.vulnerablecode.io
+   <https://public.vulnerablecode.io>`_. That would widen coverage
+   beyond OSV's language ecosystems without mpm taking on CPE mapping
+   itself.
 
 Two-stage protocol:
 

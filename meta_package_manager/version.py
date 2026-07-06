@@ -105,6 +105,12 @@ References
   illustrates how two incompatible formats (dotted-decimal and
   floating-point) require careful mapping. A reminder that version
   comparison cannot be reduced to "split on dots, compare integers."
+
+- `univers <https://github.com/aboutcode-org/univers>`_ — scheme-aware
+  version parsing and comparison (PEP 440, semver, Debian, RPM, Gentoo
+  ebuild, and more) plus the ``vers`` range spec, from the same AboutCode
+  team maintaining purl. The reference implementation to evaluate if this
+  heuristic comparator ever needs per-scheme accuracy.
 """
 
 from __future__ import annotations

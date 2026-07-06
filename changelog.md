@@ -35,6 +35,7 @@
 - [fwupd] Fix version-pinned installs: the device ID and release version were joined into a single CLI argument that `fwupdmgr` could not parse.
 - [npm] `install` no longer passes `--no-fund` and `--no-audit` twice.
 - [mpm] The installation page now documents which Python and click-extra versions each `mpm` release accepts, in tables regenerated from the release tags and guarded by a drift test.
+- [mpm] Catalog every released standalone binary on a new documentation page, linking each platform build to its download and public VirusTotal analysis, with a detection-rate trend chart.
 - [mpm] Add a hermetic test replaying each manager's documented CLI samples through its own parsers and command builders, covering `installed`, `outdated`, `--version`, and the mutation commands; corrected the stale samples flagged across a dozen managers. Toward [#1023](https://github.com/kdeldycke/meta-package-manager/issues/1023).
 
 ## [`7.0.1` (2026-06-27)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.0...v7.0.1)

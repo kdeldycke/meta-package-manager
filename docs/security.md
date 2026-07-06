@@ -10,9 +10,9 @@ This is not new to any one feature. The per-manager override mechanism alone alr
 
 ```toml
 [mpm.managers.brew]
-cli_search_path = ["/tmp/somewhere"]   # searched before $PATH
-cli_names = ["not-really-brew"]        # the binary mpm executes
-pre_cmds = ["sudo"]                     # prepended to every invocation
+cli_search_path = ["/tmp/somewhere"] # searched before $PATH
+cli_names = ["not-really-brew"]      # the binary mpm executes
+pre_cmds = ["sudo"]                  # prepended to every invocation
 ```
 
 Defining a {ref}`brand-new manager <define-a-new-manager>` makes this capability explicit rather than more powerful: a definition spells out the commands to run, but choosing the binary (`cli_names` + `cli_search_path`) already permitted running anything. The ceiling is the same either way: configuration is code.

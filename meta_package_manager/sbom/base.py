@@ -152,9 +152,7 @@ class SBOM:
         # is over distinct ids, not over the per-purl lists.
         affected_purls = [p for p, v in self.vulnerabilities_by_purl.items() if v]
         unique_vuln_ids = {
-            vuln.id
-            for vulns in self.vulnerabilities_by_purl.values()
-            for vuln in vulns
+            vuln.id for vulns in self.vulnerabilities_by_purl.values() for vuln in vulns
         }
         return {
             "packages_total": sum(self.packages_per_manager.values()),

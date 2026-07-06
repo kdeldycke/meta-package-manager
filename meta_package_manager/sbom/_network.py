@@ -58,6 +58,7 @@ except ImportError:
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
     from typing_extensions import Self
 
 

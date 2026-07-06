@@ -358,9 +358,11 @@ def _extract_fixed_versions(affected: list) -> tuple[str, ...]:
     fixed: list[str] = []
     for entry in affected:
         for rng in entry.get("ranges", []) or []:
-            for event in rng.get("events", []) or []:
-                if "fixed" in event:
-                    fixed.append(event["fixed"])
+            fixed.extend(
+                event["fixed"]
+                for event in rng.get("events", []) or []
+                if "fixed" in event
+            )
     return tuple(dict.fromkeys(fixed))
 
 

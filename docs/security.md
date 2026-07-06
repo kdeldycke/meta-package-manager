@@ -44,6 +44,8 @@ Because a {ref}`manager definition <define-a-new-manager>` is the most capable c
 The permission check is POSIX-only. On Windows the file-ownership model differs (ACLs rather than Unix mode bits), so the check is skipped. Keep your configuration directory restricted to your own account.
 ```
 
+These guardrails govern definitions read from a *configuration file*. `mpm` also ships a few managers as **bundled definitions**: read-only `*.toml` files inside the installed package (like [`meta_package_manager/managers/gh_ext.toml`](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/gh_ext.toml)). Those are trusted exactly like the Python modules beside them, installed from the same reviewed release, so they load without the trust and remote-source checks above. The trust gate exists for files an attacker might write, not for package data you could not alter without already controlling the installation.
+
 ## Recommendations
 
 - Keep your configuration file in the default per-user directory and make sure it is not group- or world-writable.

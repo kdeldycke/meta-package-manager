@@ -12,8 +12,8 @@ Implement support for a new package manager in `mpm`, or complete an incomplete 
 
 Before writing anything, decide how the manager will be implemented. `mpm` supports two paths:
 
-- **Class-based:** a Python module in `meta_package_manager/managers/`. Full power: multi-line or stateful output parsing, version pinning, per-operation search flags, conditional `sudo`, delegation, sibling binaries, arbitrary logic. This is the only path that ships a manager inside `mpm` for every user, and it is what the rest of this document describes.
-- **Config-based:** a declarative `[mpm.managers.<id>]` block that `mpm` turns into a live manager at startup, with no Python (documented in {doc}`/overrides`, "Define a new manager"). Quick to write, but constrained: each operation is a fixed argument list, and listings must parse either line-by-line with a single regex or as one flat top-level JSON array. Today such a definition lives in the user's own trusted configuration file, not in `mpm`'s shipped set.
+- **Class-based:** a Python module in `meta_package_manager/managers/`. Full power: multi-line or stateful output parsing, version pinning, per-operation search flags, conditional `sudo`, delegation, sibling binaries, arbitrary logic. It is the most capable path, and what the rest of this document describes.
+- **Config-based:** a declarative `[mpm.managers.<id>]` block that `mpm` turns into a live manager at startup, with no Python (documented in {doc}`/overrides`, "Define a new manager"). Quick to write, but constrained: each operation is a fixed argument list, and listings must parse either line-by-line with a single regex or as one flat top-level JSON array. A definition can live two places: in a user's own trusted configuration file (a private, per-machine manager), or bundled with `mpm` as read-only package data (a manager shipped to every user, like a built-in). The bundled path is how `mpm` distributes a simple manager as data instead of code.
 
 Reach for config-based **only when every one of these holds**. If any fails, the manager needs a class:
 
@@ -25,7 +25,7 @@ Reach for config-based **only when every one of these holds**. If any fails, the
 | The manager installs globally.                                                       | Packages are scoped to an activated project or environment (`flox`; `cabal outdated` is project-only).                                             |
 | Version pinning and native exact/extended search filtering are both unnecessary.     | The manager's whole point is selecting versions, or search must be resolved exactly server-side.                                                   |
 
-Config-based is the lighter choice for a private, local, or one-off manager: no module, no pool registration, none of the file checklist below. When the manager could serve the wider community, prefer a class and upstream it: {doc}`/overrides` and {doc}`/security` explain why a reviewed, shipped manager beats executable configuration.
+Config-based skips the class machinery: no Python module, no `pool.py` registration, no version pinning or delegation. A private definition needs nothing beyond your own config file; shipping one bundled adds only a short metadata checklist (see below). Reach for a class when the manager needs power the DSL cannot express, and upstream it if it would help others: {doc}`/overrides` and {doc}`/security` explain why a reviewed, shipped manager beats executable configuration.
 
 ## Config-based managers
 
@@ -44,6 +44,25 @@ The declarative schema (required keys, every operation, the regex and JSON parse
 5. **Add tests** by mirroring `tests/test_manager_definition.py`: `parse_manager_definition` for validation cases, `build_manager_class(...)` with a monkeypatched `run_cli` for parsing, and the `fake_tool` fixture for an end-to-end run through a real subprocess.
 
 Design around the DSL's fixed limits (all detailed in {doc}`/overrides`): no version pinning (`install` and `upgrade` always take the latest, `{version}` is never substituted); listings are line-by-line regex or a single flat JSON array, with no multi-line records, pagination, or value transforms; `search` cannot declare native exact or extended filtering, so `mpm` refilters the results itself. If any of these is load-bearing for the manager, stop and write a class instead.
+
+### Where a config-based definition lives
+
+A definition has two homes:
+
+- **Private (a user's config).** Drop the `[mpm.managers.<id>]` block into your own configuration file. `mpm` picks it up on the next run: nothing else to touch, and it never leaves your machine.
+- **Bundled (shipped with `mpm`).** Put the block in its own `meta_package_manager/managers/<id>.toml` file. `mpm` loads every shipped `*.toml` at startup and registers it like a built-in, so every user gets its `--<id>` flag. Bundled files are read-only package data, so they load without the config-file trust gate that guards a user's own definitions (see {doc}`/security`). `meta_package_manager/managers/gh_ext.toml` is the worked example.
+
+Shipping a bundled definition is far lighter than the class-based checklist below, with no module, no labels, and no destructive-test entry:
+
+| File                                      | Change                                                                                          |
+| :---------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| `meta_package_manager/managers/<id>.toml` | The definition: one `[mpm.managers.<id>]` section. Auto-discovered, so no loader edit is needed. |
+| `pyproject.toml`                          | Add the manager ID (and its ecosystem name) to `keywords`.                                       |
+| `tests/test_pool.py`                      | Increment the `len(pool)` assertion in `test_manager_count`; `len(manager_classes)` stays.       |
+| `tests/test_manager_definition.py`        | Add loader and parse tests, mirroring the `gh-ext` ones.                                         |
+| `changelog.md`                            | A `- [<id>] Add ...` entry.                                                                      |
+
+Then run `docs/docs_update.py` to regenerate the readme Sankey diagram, the operations matrix, and the benchmark table. A bundled config manager needs **no** `pool.py` import, `labels.py` group, `docs/meta_package_manager.managers.md` automodule, or `tests/conftest.py` `PACKAGE_IDS` entry: those are class-only. Its command mapping is covered by the unit tests, not the destructive install/remove suite.
 
 ## Completing an incomplete integration
 

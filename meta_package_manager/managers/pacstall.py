@@ -57,8 +57,11 @@ class Pacstall(PackageManager):
         6.3.7 Vanilla
     """
 
+    # Upgrade rows are indented (a tab in real pacstall output); the header line
+    # sits at column 0. Match any indentation, not a literal tab: Python
+    # formatters expand tabs inside the docstring sample the corpus test replays.
     _OUTDATED_REGEXP = re.compile(
-        r"^\t(?P<package_id>\S+)\s+@\s+\S+"
+        r"^[ \t]+(?P<package_id>\S+)\s+@\s+\S+"
         r"\s+\(\s*(?P<installed_version>\S+)"
         r"\s*->\s*(?P<latest_version>\S+)\s*\)",
         re.MULTILINE,

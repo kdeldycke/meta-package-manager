@@ -204,7 +204,7 @@ def benchmark_managers_table() -> str:
     entry on either side appears in the table without manual edits.
     """
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
-    data = yaml.safe_load(yaml_path.read_text())
+    data = yaml.safe_load(yaml_path.read_text(encoding="UTF-8"))
     competitor_data: dict[str, list[str]] = data["managers"]
     homepages: dict[str, str] = data.get("homepages", {})
     coarse_support: dict[str, dict[str, str]] = data.get("coarse_support", {})
@@ -274,7 +274,7 @@ def replace_content(
     assert filepath.exists(), f"File {filepath} does not exist."
     assert filepath.is_file(), f"File {filepath} is not a file."
 
-    orig_content = filepath.read_text()
+    orig_content = filepath.read_text(encoding="UTF-8")
 
     assert start_tag in orig_content, (
         f"Start tag {start_tag!r} not found in {filepath}."
@@ -290,6 +290,7 @@ def replace_content(
     wrapped = f"\n\n{new_content.strip()}\n\n" if new_content.strip() else "\n\n"
     filepath.write_text(
         f"{pre_content}{start_tag}{wrapped}{end_tag}{post_content}",
+        encoding="UTF-8",
     )
 
 
@@ -359,10 +360,13 @@ def update_readme() -> None:
     # inline.
     start_tag = "<!-- operation-footnotes-start -->\n\n"
     end_tag = "<!-- operation-footnotes-end -->\n"
-    orig_content = readme.read_text()
+    orig_content = readme.read_text(encoding="UTF-8")
     pre_content, rest = orig_content.split(start_tag, 1)
     _, post_content = rest.split(end_tag, 1)
-    readme.write_text(f"{pre_content}{start_tag}{footnotes}{end_tag}{post_content}")
+    readme.write_text(
+        f"{pre_content}{start_tag}{footnotes}{end_tag}{post_content}",
+        encoding="UTF-8",
+    )
 
 
 def update_benchmark() -> None:

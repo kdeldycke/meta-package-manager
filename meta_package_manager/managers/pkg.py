@@ -738,7 +738,7 @@ class Ports(PackageManager):
             raise FileNotFoundError("git")
         self.run_cli(
             "-C",
-            str(PORTS_TREE),
+            PORTS_TREE.as_posix(),
             "pull",
             "--ff-only",
             override_cli_path=git_path,
@@ -760,7 +760,7 @@ class Ports(PackageManager):
         """
         self.run_cli(
             "-C",
-            str(PORTS_TREE),
+            PORTS_TREE.as_posix(),
             "clean",
             "DISTCLEAN=yes",
             sudo=True,

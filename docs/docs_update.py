@@ -160,7 +160,13 @@ def manager_source_url(manager_id: str) -> str:
     the class declaration. Used by the benchmark page to back each ``✅`` in
     the ``mpm`` column with a link to its implementation.
     """
-    cls = type(pool[manager_id])
+    manager = pool[manager_id]
+    # A config-defined manager (built from a shipped TOML file, not a class body) has no
+    # Python source line to point at; link to its bundled definition file instead.
+    source = getattr(manager, "definition_source", None)
+    if source:
+        return f"{GITHUB_BLOB_URL}/{source}"
+    cls = type(manager)
     src = Path(inspect.getsourcefile(cls)).resolve()  # type: ignore[arg-type]
     rel = src.relative_to(PROJECT_ROOT)
     _, lineno = inspect.getsourcelines(cls)

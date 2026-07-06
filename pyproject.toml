@@ -36,6 +36,8 @@ keywords = [
   "flatpak",
   "fwupd",
   "gem",
+  "gh-ext",
+  "github cli",
   "gnu guix",
   "guix",
   "homebrew",
@@ -351,7 +353,7 @@ windows-icon-from-ico = "docs/assets/icon.ico"
 # via importlib.resources for the yay --cooldown overlay (see
 # meta_package_manager.managers.pacman); without it the compiled binary would crash
 # on import. The wheel (uv_build) includes the file with no extra config.
-include-package-data = [ "click_extra", "meta_package_manager.managers:*.lua" ]
+include-package-data = [ "click_extra", "meta_package_manager.managers:*.lua", "meta_package_manager.managers:*.toml" ]
 # Packages whose imports are gated behind try/except in click-extra (config
 # loader) and meta_package_manager.sbom: Nuitka skips these even when they
 # are installed, so force-include them. Pairs with `[tool.repomatic]
@@ -813,6 +815,11 @@ description = "fwupd"
 name = "📦 manager: gem"
 color = "bfdadc"
 description = "gem"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: gh-ext"
+color = "bfdadc"
+description = "gh-ext"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: guix"

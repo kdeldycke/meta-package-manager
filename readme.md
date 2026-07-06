@@ -94,6 +94,7 @@ Meta Package Manager,eopkg,1
 Meta Package Manager,flatpak,1
 Meta Package Manager,fwupd,1
 Meta Package Manager,gem,1
+Meta Package Manager,gh-ext,1
 Meta Package Manager,guix,1
 Meta Package Manager,macports,1
 Meta Package Manager,mas,1
@@ -160,6 +161,7 @@ Meta Package Manager,zypper,1
 | [`flatpak`](https://flatpak.org)                                                        | >=1.2.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`fwupd`](https://fwupd.org)                                                            | >=1.9.5          |          |           |      🐧       |       |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |          |   ✓    |           |
 | [`gem`](https://rubygems.org)                                                           | >=2.5.0          |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`gh-ext`](https://cli.github.com)                                                      | >=2.0.0          |          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |            |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`guix`](https://guix.gnu.org)                                                          |                  |          |           |      🐧       |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`macports`](https://www.macports.org)                                                  | >=2.0.0          |          |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`mas`](https://github.com/mas-cli/mas)                                                 | >=7.0.0          |          |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |

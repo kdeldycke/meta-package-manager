@@ -709,6 +709,16 @@ class ConfigDrivenManager(PackageManager):
     future config-driven behavior.
     """
 
+    definition_source: str | None = None
+    """Repo-relative path to the bundled TOML file this manager was defined in.
+
+    Set by :py:func:`meta_package_manager.config.build_bundled_managers` for the
+    managers mpm ships as package data; stays ``None`` for a manager defined in a
+    user's own configuration file. The documentation generator links a bundled
+    manager's benchmark entry to this file, a config-defined manager having no Python
+    source line to point at.
+    """
+
 
 def _render_args(args: tuple[str, ...], **substitutions: str) -> list[str]:
     """Substitute ``{token}`` placeholders in each CLI argument.

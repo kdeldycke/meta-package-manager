@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 
 import pytest
 from click_extra import ValidationError
@@ -28,6 +29,7 @@ from click_extra import ValidationError
 from meta_package_manager.capabilities import Operations, implements
 from meta_package_manager.config import (
     config_file_is_trusted,
+    load_bundled_definitions,
     parse_manager_definition,
     register_config_managers,
     validate_manager_overrides_section,
@@ -511,3 +513,103 @@ def test_cli_rejects_bad_definition(invoke, create_config, reset_definitions):
     result = invoke("--config", str(conf_path), "managers")
     assert result.exit_code != 0
     assert "narnia" in result.output
+
+
+# Bundled manager definitions shipped with mpm as package data.
+
+
+def _fresh_gh_ext():
+    """Build a throwaway gh-ext instance so parsing tests can monkeypatch ``run_cli``
+    without mutating the shared pool singleton."""
+    for definition, _ in load_bundled_definitions():
+        if definition.manager_id == "gh-ext":
+            return build_manager_class(definition)()
+    raise AssertionError("gh-ext is not among the bundled definitions")
+
+
+def test_bundled_definitions_are_valid():
+    """Every shipped definition parses and reports a repo-relative TOML source."""
+    bundled = load_bundled_definitions()
+    assert bundled, "mpm ships at least one bundled manager definition"
+    for definition, source in bundled:
+        assert isinstance(definition, ManagerDefinition)
+        assert source.startswith("meta_package_manager/managers/")
+        assert source.endswith(".toml")
+
+
+def test_bundled_ids_disjoint_from_builtins():
+    assert pool.bundled_manager_ids
+    assert pool.bundled_manager_ids.isdisjoint(pool.builtin_manager_ids)
+    assert pool.known_manager_ids == pool.builtin_manager_ids | pool.bundled_manager_ids
+
+
+def test_gh_ext_registered():
+    """The bundled gh-ext manager is always present in the pool, config-defined."""
+    assert "gh-ext" in pool.bundled_manager_ids
+    manager = pool["gh-ext"]
+    assert isinstance(manager, ConfigDrivenManager)
+    assert manager.name == "GitHub CLI extensions"
+    assert manager.homepage_url == "https://cli.github.com"
+    assert manager.definition_source == "meta_package_manager/managers/gh_ext.toml"
+
+
+@pytest.mark.parametrize(
+    ("operation", "expected"),
+    (
+        (Operations.installed, True),
+        (Operations.search, True),
+        (Operations.install, True),
+        (Operations.remove, True),
+        (Operations.upgrade, True),
+        (Operations.upgrade_all, True),
+        (Operations.outdated, False),
+        (Operations.sync, False),
+        (Operations.cleanup, False),
+    ),
+)
+def test_gh_ext_capabilities(operation, expected):
+    assert implements(pool["gh-ext"], operation) is expected
+
+
+def test_gh_ext_version_regex():
+    match = re.search(
+        pool["gh-ext"].version_regexes[0], "gh version 2.62.0 (2024-11-14)"
+    )
+    assert match is not None
+    assert match.group("version") == "2.62.0"
+
+
+def test_gh_ext_parses_installed():
+    """Parse the headerless, tab-separated ``gh extension list`` piped output.
+
+    Column 1 is ``gh <name>`` (the short name is the package id), column 2 the
+    ``owner/repo`` slug, column 3 the free-form version (a tag or a commit SHA).
+    """
+    manager = _fresh_gh_ext()
+    manager.run_cli = lambda *args, **kwargs: (
+        "gh dash\tdlvhdr/gh-dash\tv4.7.0\ngh cockpit\tgithub/gh-cockpit\ta1b2c3d4"
+    )
+    assert [(p.id, str(p.installed_version)) for p in manager.installed] == [
+        ("dash", "v4.7.0"),
+        ("cockpit", "a1b2c3d4"),
+    ]
+
+
+def test_gh_ext_parses_search():
+    """Extract the ``owner/repo`` slug from ``gh extension search`` output by content.
+
+    Covers all three row shapes: the first row whose leading empty-state tab ``run_cli``
+    strips off (slug in column 1), a row with an empty install-state column (slug in
+    column 2), and a row whose install-state column is populated with ``installed``.
+    """
+    manager = _fresh_gh_ext()
+    manager.run_cli = lambda *args, **kwargs: (
+        "dlvhdr/gh-dash\tA rich terminal UI for GitHub\n"
+        "\tvilmibm/gh-screensaver\tScreensavers for your terminal\n"
+        "installed\tcli/gh-webhook\tForward webhooks to localhost"
+    )
+    assert [p.id for p in manager.search("gh", False, False)] == [
+        "dlvhdr/gh-dash",
+        "vilmibm/gh-screensaver",
+        "cli/gh-webhook",
+    ]

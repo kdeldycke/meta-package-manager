@@ -30,6 +30,7 @@ keeping all configuration policy out of :py:mod:`meta_package_manager.pool`.
 
 from __future__ import annotations
 
+import importlib.resources
 import logging
 import os
 import re
@@ -37,6 +38,7 @@ import stat
 import sys
 import urllib.parse
 from dataclasses import dataclass, field
+from functools import cache
 from pathlib import Path
 
 import tomli_w
@@ -53,6 +55,11 @@ from click_extra.theme import get_current_theme as theme
 from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS
 
 from .manager import ManagerDefinition, OperationSpec, build_manager_class
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -424,7 +431,7 @@ def validate_manager_overrides_section(
     if not isinstance(section, dict):
         raise ValidationError("", f"expected a table, got {type(section).__name__}")
     for manager_id, fields in section.items():
-        if manager_id in pool.builtin_manager_ids:
+        if manager_id in pool.known_manager_ids:
             _validate_override_fields(manager_id, fields)
         else:
             # A section for an unknown ID that carries neither a definition's
@@ -514,9 +521,10 @@ def apply_manager_overrides(
 
     hints: list[ContributionHint] = []
     for manager_id, fields in overrides.items():
-        # Sections keyed by a non-built-in ID are brand-new manager definitions,
-        # handled by register_config_managers, not attribute overrides.
-        if manager_id not in pool.builtin_manager_ids:
+        # Sections keyed by an ID mpm does not ship (neither a built-in class nor a
+        # bundled definition) are brand-new manager definitions, handled by
+        # register_config_managers, not attribute overrides.
+        if manager_id not in pool.known_manager_ids:
             continue
         manager = pool.register[manager_id]
         for field_name, raw_value in fields.items():
@@ -653,7 +661,7 @@ def _warn_risky_overrides_from_untrusted_source(
     if not source_is_url and (source is None or config_file_is_trusted(source)):
         return
     for manager_id, fields in overrides.items():
-        if manager_id not in pool.builtin_manager_ids or not isinstance(fields, dict):
+        if manager_id not in pool.known_manager_ids or not isinstance(fields, dict):
             continue
         risky = RISKY_OVERRIDE_FIELDS.intersection(fields)
         if risky:
@@ -1104,10 +1112,10 @@ def register_config_managers(
     """
     registered = []
     for manager_id, definition in definitions.items():
-        if manager_id in pool.builtin_manager_ids:
+        if manager_id in pool.known_manager_ids:
             logging.warning(
                 f"Ignoring config-defined manager {manager_id!r}: "
-                "a built-in manager already uses this ID.",
+                "a built-in or bundled manager already uses this ID.",
             )
             continue
         if manager_id in pool.register:
@@ -1145,7 +1153,7 @@ def _collect_definitions(
     """
     definitions = {}
     for manager_id, section in sections.items():
-        if manager_id in pool.builtin_manager_ids or manager_id in pool.register:
+        if manager_id in pool.known_manager_ids or manager_id in pool.register:
             continue
         try:
             definitions[manager_id] = parse_manager_definition(manager_id, section)
@@ -1249,3 +1257,82 @@ def register_eager_config_managers(pool: ManagerPool) -> None:
     definitions, source = discover_config_definitions(pool)
     if definitions:
         register_config_managers(pool, definitions, source=source)
+
+
+# Bundled manager definitions.
+#
+# mpm ships a few managers as data rather than Python classes: a TOML file per manager
+# under meta_package_manager/managers/, each a single [mpm.managers.<id>] section in the
+# exact schema a user would write. They are parsed and built through the same
+# parse_manager_definition / build_manager_class path as any user definition, then loaded
+# into the pool at construction time (ManagerPool.register), so they are always available
+# and earn first-class --<id> flags. The trust gate guarding user definitions does not
+# apply: package data shipped in the wheel is read-only and as trusted as the Python
+# modules beside it.
+
+
+BUNDLED_DEFINITIONS_PACKAGE: Final[str] = "meta_package_manager.managers"
+"""Import package whose ``*.toml`` resources hold mpm's bundled manager definitions."""
+
+
+@cache
+def load_bundled_definitions() -> tuple[tuple[ManagerDefinition, str], ...]:
+    """Parse every bundled ``[mpm.managers.<id>]`` definition shipped as package data.
+
+    Reads each ``*.toml`` resource of :data:`BUNDLED_DEFINITIONS_PACKAGE` via
+    :py:mod:`importlib.resources` (so it works the same from an unpacked install, a zip
+    or a Nuitka onefile), and validates every section with
+    :py:func:`parse_manager_definition`. Returns ``(definition, source)`` pairs, where
+    ``source`` is the repo-relative path used to link the manager's documentation. Cached
+    because the shipped files never change at runtime.
+
+    A malformed bundled file is a packaging bug, but it is logged and skipped rather than
+    raised so one bad resource cannot break ``mpm`` startup for everyone. The hermetic
+    ``test_bundled_definitions`` keeps the shipped files valid.
+    """
+    definitions: list[tuple[ManagerDefinition, str]] = []
+    resources = importlib.resources.files(BUNDLED_DEFINITIONS_PACKAGE)
+    for resource in sorted(resources.iterdir(), key=lambda item: item.name):
+        if not resource.name.endswith(".toml"):
+            continue
+        source = f"meta_package_manager/managers/{resource.name}"
+        try:
+            data = tomllib.loads(resource.read_text(encoding="UTF-8"))
+        except (OSError, tomllib.TOMLDecodeError) as ex:
+            logging.warning(f"Skipping unreadable bundled definition {source}: {ex}")
+            continue
+        sections = data.get("mpm", {}).get("managers", {})
+        for manager_id, section in sections.items():
+            try:
+                definitions.append(
+                    (parse_manager_definition(manager_id, section), source),
+                )
+            except ValidationError as ex:
+                logging.warning(
+                    f"Skipping invalid bundled manager {manager_id!r} in {source}: {ex}",
+                )
+    return tuple(definitions)
+
+
+def bundled_manager_ids() -> frozenset[str]:
+    """IDs of the managers mpm ships as bundled configuration definitions."""
+    return frozenset(
+        definition.manager_id for definition, _ in load_bundled_definitions()
+    )
+
+
+def build_bundled_managers() -> list[PackageManager]:
+    """Instantiate every bundled definition into a live, pool-ready manager.
+
+    Each :py:class:`~meta_package_manager.manager.ConfigDrivenManager` subclass records
+    the TOML file it came from in
+    :py:attr:`~meta_package_manager.manager.ConfigDrivenManager.definition_source`, so the
+    documentation generator can link to it. Called once by
+    :py:attr:`meta_package_manager.pool.ManagerPool.register`.
+    """
+    managers = []
+    for definition, source in load_bundled_definitions():
+        klass = build_manager_class(definition)
+        setattr(klass, "definition_source", source)
+        managers.append(klass())
+    return managers

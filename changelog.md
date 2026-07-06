@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Ship package managers as bundled configuration definitions: a TOML file under `meta_package_manager/managers/`, built through the same schema as a user's `[mpm.managers.<id>]` section but loaded at startup like a built-in. Bundled definitions are exempt from the config-file trust gate, being read-only package data rather than user-writable configuration.
+- [gh-ext] Add GitHub CLI extensions (`gh extension`) manager with `installed`, `search`, `install`, `upgrade`, and `remove` support, cross-platform on Linux, macOS, and Windows; mpm's first bundled configuration-defined manager. Requires gh `>=2.0.0`.
 - [mpm] Raise the click-extra floor from `8.1.1` to `8.2.0`, the first release shipping the concurrency primitives (`resolve_jobs`, `run_lanes`), the `--export-config` option, and the compatibility-matrix machinery `mpm` relies on.
 - [mpm] Document click-extra compatibility on the installation page: a new table shows which click-extra versions each `mpm` release range accepts at install time.
 - [mpm] The Python and click-extra compatibility tables of the installation page are now regenerated from the release tags by `docs/docs_update.py`, through click-extra's `matrix` mechanism, and a new test fails when they drift. The Python table gains the `3.3`, `3.4` and `3.5` columns and corrects several historical ranges.

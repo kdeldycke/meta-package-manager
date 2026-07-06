@@ -155,6 +155,10 @@ After this, `mpm --deno installed`, `mpm outdated`, and `mpm install jq --deno` 
 A definition covers managers whose listings parse line-by-line or as a flat JSON array. When the real CLI needs multi-line records, pagination, or stateful parsing, the regex/JSON DSL is not enough: {doc}`write a real manager and upstream it <add-new-manager>` instead.
 ```
 
+```{note}
+mpm ships one such definition itself, as a worked and tested example: [`meta_package_manager/managers/gh_ext.toml`](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/gh_ext.toml) defines the `gh-ext` manager (GitHub CLI extensions) using exactly the schema above, and mpm loads it at startup like a built-in. Bundled definitions are the same mechanism as a personal definition, only read from trusted package data instead of your configuration file.
+```
+
 ## Help improve detection upstream
 
 When an override targets a field that often points to an upstream detection bug, `mpm` prints a one-line invitation to file a bug report so the heuristics can be improved for everyone. The fields that trigger an invitation are: `cli_names`, `cli_search_path`, `requirement`, `version_cli_options`, and `version_regexes`. Overrides on preference fields like `timeout` or `ignore_auto_updates` never trigger an invitation.

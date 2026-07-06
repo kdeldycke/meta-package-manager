@@ -24,6 +24,7 @@ from boltons.iterutils import unique
 from click_extra import get_current_context
 from click_extra.theme import get_current_theme as theme
 
+from . import config
 from .capabilities import implements
 from .execution import warm_availability
 from .managers.apk import APK
@@ -174,12 +175,20 @@ class ManagerPool:
 
     @cached_property
     def register(self) -> dict[str, PackageManager]:
-        """Instantiate all supported package managers."""
-        register = {}
+        """Instantiate all supported package managers.
+
+        Built-in classes first, then mpm's bundled configuration-defined managers
+        (built from shipped ``*.toml`` package data). Both land here at construction
+        time, so the augmented pool is complete before the CLI enumerates it to build
+        the dynamic ``--<id>`` flags, in every context including the test runner.
+        """
+        register: dict[str, PackageManager] = {}
         for klass in manager_classes:
             manager = klass()
             register[manager.id] = manager
-        return register  # type: ignore[return-value]
+        for bundled in config.build_bundled_managers():
+            register[bundled.id] = bundled
+        return register
 
     @cached_property
     def builtin_manager_ids(self) -> frozenset[str]:
@@ -202,6 +211,27 @@ class ManagerPool:
         :py:attr:`builtin_manager_ids`.
         """
         return set()
+
+    @cached_property
+    def bundled_manager_ids(self) -> frozenset[str]:
+        """IDs of the managers mpm ships as bundled configuration definitions.
+
+        Config-defined (built from shipped ``*.toml`` package data, not a Python
+        class) yet always present in :py:attr:`register` like the built-ins. Disjoint
+        from :py:attr:`builtin_manager_ids` and :py:attr:`config_defined_ids`.
+        """
+        return config.bundled_manager_ids()
+
+    @cached_property
+    def known_manager_ids(self) -> frozenset[str]:
+        """Every manager ID mpm ships: built-in classes plus bundled definitions.
+
+        A ``[mpm.managers.<id>]`` section keyed by one of these tunes a shipped
+        manager (an override); any other ID defines a brand-new one. The configuration
+        layer routes override-versus-definition on this set. See
+        :py:func:`meta_package_manager.config.validate_manager_overrides_section`.
+        """
+        return self.builtin_manager_ids | self.bundled_manager_ids
 
     @cached_property
     def overridden_fields(self) -> dict[str, set[str]]:

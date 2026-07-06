@@ -8,6 +8,43 @@ disable-model-invocation: true
 
 Implement support for a new package manager in `mpm`, or complete an incomplete integration. If adding a manager requested via a GitHub issue, extract CLI output samples from the issue body to guide the implementation.
 
+## Choose an implementation strategy: class-based or config-based
+
+Before writing anything, decide how the manager will be implemented. `mpm` supports two paths:
+
+- **Class-based:** a Python module in `meta_package_manager/managers/`. Full power: multi-line or stateful output parsing, version pinning, per-operation search flags, conditional `sudo`, delegation, sibling binaries, arbitrary logic. This is the only path that ships a manager inside `mpm` for every user, and it is what the rest of this document describes.
+- **Config-based:** a declarative `[mpm.managers.<id>]` block that `mpm` turns into a live manager at startup, with no Python (documented in {doc}`/overrides`, "Define a new manager"). Quick to write, but constrained: each operation is a fixed argument list, and listings must parse either line-by-line with a single regex or as one flat top-level JSON array. Today such a definition lives in the user's own trusted configuration file, not in `mpm`'s shipped set.
+
+Reach for config-based **only when every one of these holds**. If any fails, the manager needs a class:
+
+| Requirement                                                                          | Rules out config-based when                                                                                                                        |
+| :----------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A version command prints a regex-extractable version string.                         | The CLI reports no version at all (like macOS `msupdate`).                                                                                         |
+| `installed`, `outdated` and `search` each emit one package per line, or one flat top-level JSON array. | Records span multiple lines (`pacman -Ss`, `cabal list`) or the JSON is an object keyed by package or environment name (`mise`, `pixi`, `pnpm`). |
+| Every mutating operation is one argument list with `{package_id}` or `{query}` substituted in. | An operation needs conditional `sudo`, several binaries, delegation, or output post-processing.                                          |
+| The manager installs globally.                                                       | Packages are scoped to an activated project or environment (`flox`; `cabal outdated` is project-only).                                             |
+| Version pinning and native exact/extended search filtering are both unnecessary.     | The manager's whole point is selecting versions, or search must be resolved exactly server-side.                                                   |
+
+Config-based is the lighter choice for a private, local, or one-off manager: no module, no pool registration, none of the file checklist below. When the manager could serve the wider community, prefer a class and upstream it: {doc}`/overrides` and {doc}`/security` explain why a reviewed, shipped manager beats executable configuration.
+
+## Config-based managers
+
+The declarative schema (required keys, every operation, the regex and JSON parsers, placeholders, worked examples) is the "Define a new manager" section of {doc}`/overrides`, which is the source of truth. This section adds only the authoring workflow and the pitfalls that decide success.
+
+1. **Capture real output first.** For each operation you plan to declare, run the actual CLI and paste its output. Confirm a single per-line regex or one flat JSON array can extract `package_id` (plus `installed_version` for `installed`, `latest_version` for `outdated`). Never assume a format.
+2. **Write the block.** Add `[mpm.managers.<id>]` with an `<id>` that no built-in uses. Set `platforms`, the `operations` table, and the identity fields (`cli_names`, `requirement`, `version_regexes`, ...). Silence color and interactivity via `pre_args`, `post_args` or `extra_env` (like `NO_COLOR = "1"`) so the parser sees clean text. `mpm config-template` prints the built-ins' overridable fields as a formatting reference.
+3. **Declare only expressible operations.** A manager with no non-mutating "list upgradable" command (common: `soar`, `appman`, `gh extension`) omits `outdated`; `mpm` auto-skips it and `upgrade --all` still works. Never fake an operation with a mutating command.
+4. **Validate against the real CLI.** `mpm` checks the definition at load and reports the first problem with a precise path:
+
+   ```shell-session
+   $ mpm --config ./my-managers.toml managers
+   $ mpm --config ./my-managers.toml --<id> installed
+   ```
+
+5. **Add tests** by mirroring `tests/test_manager_definition.py`: `parse_manager_definition` for validation cases, `build_manager_class(...)` with a monkeypatched `run_cli` for parsing, and the `fake_tool` fixture for an end-to-end run through a real subprocess.
+
+Design around the DSL's fixed limits (all detailed in {doc}`/overrides`): no version pinning (`install` and `upgrade` always take the latest, `{version}` is never substituted); listings are line-by-line regex or a single flat JSON array, with no multi-line records, pagination, or value transforms; `search` cannot declare native exact or extended filtering, so `mpm` refilters the results itself. If any of these is load-bearing for the manager, stop and write a class instead.
+
 ## Completing an incomplete integration
 
 External contributors often submit a working manager module (`managers/<name>.py`, `pool.py`, `conftest.py`) but skip the documentation and metadata files. See [kdeldycke/meta-package-manager#1758](https://github.com/kdeldycke/meta-package-manager/pull/1758) for a typical example: the PR added code and tests but was missing 10+ files.

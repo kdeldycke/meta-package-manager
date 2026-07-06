@@ -343,7 +343,10 @@ require a console-script entry point, ...).
 Only to be used for destructive tests.
 """
 
-assert set(PACKAGE_IDS) == set(pool.all_manager_ids)
+# Bundled config-defined managers (like gh-ext) are exercised by the hermetic
+# test_manager_definition suite, not by the destructive host install/remove tests, so
+# PACKAGE_IDS covers exactly the built-in class managers.
+assert set(PACKAGE_IDS) == set(pool.builtin_manager_ids)
 
 # Collection of pre-computed parametrized decorators.
 
@@ -448,5 +451,11 @@ The predicate is a zero-argument callable: ``is_linux`` for the unprivileged Lin
 # install/remove would only contribute flakiness (see PackageManager.deprecated).
 maintained_manager_ids_and_dummy_package = pytest.mark.parametrize(
     "manager_id,package_id",
-    tuple(param(mid, PACKAGE_IDS[mid], id=mid) for mid in pool.maintained_manager_ids),
+    tuple(
+        param(mid, PACKAGE_IDS[mid], id=mid)
+        for mid in pool.maintained_manager_ids
+        # Bundled config-defined managers carry no PACKAGE_IDS entry and are not
+        # destructively install/remove-tested; their command mapping is unit-tested.
+        if mid in pool.builtin_manager_ids
+    ),
 )

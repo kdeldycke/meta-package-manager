@@ -355,10 +355,10 @@ def test_matrix_blocks_in_sync():
     Without the full tag history (shallow clone, sdist build), regeneration
     leaves every block untouched and the test passes vacuously.
     """
-    matrix = pytest.importorskip(
-        "click_extra.sphinx.matrix",
-        reason="needs the docs dependency group (click-extra[sphinx])",
-    )
+    try:
+        from click_extra.sphinx import matrix
+    except ImportError:
+        pytest.skip("needs the docs dependency group (click-extra[sphinx])")
     stale = matrix.update_matrix_blocks(
         (PROJECT_ROOT / "docs", PROJECT_ROOT / "readme.md"),
         check=True,

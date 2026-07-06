@@ -44,8 +44,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-from typing_extensions import Self
-
 network_support = True
 try:
     import httpx
@@ -60,6 +58,7 @@ except ImportError:
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Mapping
+    from typing_extensions import Self
 
 
 DEFAULT_TIMEOUT = 30.0

@@ -1,0 +1,64 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# soar (https://github.com/pkgforge/soar) is a fast package manager for portable Linux
+# binaries and AppImages. See docs/overrides.md ("Define a new manager") for the schema
+# and meta_package_manager/config.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against the soar-cli 0.12.6 source:
+#   - `soar --json` emits newline-delimited log records, not one JSON array, so the DSL's
+#     flat-JSON parser cannot consume it; the readable text output is parsed instead.
+#   - `--no-color` (a global flag; soar does NOT honor NO_COLOR) strips ANSI so the line
+#     regexes see clean text.
+#   - `install` and `remove` block on an interactive prompt unless `-y` is passed, which
+#     would hang mpm's non-interactive subprocess.
+
+[mpm.managers.soar]
+name = "Soar"
+homepage_url = "https://github.com/pkgforge/soar"
+# soar is Linux-only (it relies on landlock and other Linux syscalls); "linux_like" also
+# covers WSL.
+platforms = ["linux_like"]
+cli_names = ["soar"]
+# 0.12 is the CLI surface parsed below (list-installed, search, -y, --no-color). soar is
+# pre-1.0 and makes no cross-minor compatibility promise, so the floor tracks that line.
+requirement = ">=0.12.0"
+# Strip ANSI from every call so the query regexes see clean text.
+pre_args = ["--no-color"]
+# `soar --version` prints "soar 0.12.6". Nightly builds print "soar nightly-<sha>", which
+# intentionally fails this release-version match.
+version_regexes = ['soar\s+(?P<version>\d+\.\d+\.\d+)']
+
+# `soar list-installed` prints one "name-version:repo (date) (size)[ status]" per line.
+# The name/version split is the last "-" before a digit-led version, ahead of the ":"
+# that separates the repo. A trailing summary block matches nothing and is skipped.
+[mpm.managers.soar.operations.installed]
+args = ["list-installed"]
+regex = '^(?P<package_id>.+)-(?P<installed_version>\d[^:]*):'
+
+# `soar search <query>` prints "[icon] name#pkg_id:repo | version | type - desc (size)".
+# The package id is the name before "#"; matching only that keeps parsing robust against
+# the richer trailing columns.
+[mpm.managers.soar.operations.search]
+args = ["search", "{query}"]
+regex = '^\[.\] (?P<package_id>[^#\s]+)#'
+
+# install and remove need -y, or they block on an interactive selection prompt.
+[mpm.managers.soar.operations.install]
+args = ["install", "-y", "{package_id}"]
+
+[mpm.managers.soar.operations.remove]
+args = ["remove", "-y", "{package_id}"]
+
+[mpm.managers.soar.operations.upgrade_one]
+args = ["update", "{package_id}"]
+
+[mpm.managers.soar.operations.upgrade_all]
+args = ["update"]
+
+[mpm.managers.soar.operations.sync]
+args = ["sync"]
+
+[mpm.managers.soar.operations.cleanup]
+args = ["clean", "--cache"]
+
+# No `outdated`: soar has no non-mutating "list upgradable" command, so mpm auto-skips it.

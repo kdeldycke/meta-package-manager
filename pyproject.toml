@@ -13,6 +13,7 @@ keywords = [
   "anaconda",
   "apk",
   "apm",
+  "appimage",
   "apt",
   "apt-mint",
   "asdf",
@@ -82,6 +83,7 @@ keywords = [
   "sdkman",
   "sfsu",
   "snap",
+  "soar",
   "spdx",
   "steamcmd",
   "stew",
@@ -900,6 +902,11 @@ description = "sdkman"
 name = "📦 manager: snap"
 color = "bfdadc"
 description = "snap"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: soar"
+color = "bfdadc"
+description = "soar"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: steamcmd"

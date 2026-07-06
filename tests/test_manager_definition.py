@@ -613,3 +613,72 @@ def test_gh_ext_parses_search():
         "vilmibm/gh-screensaver",
         "cli/gh-webhook",
     ]
+
+
+def _fresh_soar():
+    """Build a throwaway soar instance for parse tests, avoiding the pool singleton."""
+    for definition, _ in load_bundled_definitions():
+        if definition.manager_id == "soar":
+            return build_manager_class(definition)()
+    raise AssertionError("soar is not among the bundled definitions")
+
+
+def test_soar_registered():
+    """The bundled soar manager is always present in the pool, config-defined."""
+    assert "soar" in pool.bundled_manager_ids
+    manager = pool["soar"]
+    assert isinstance(manager, ConfigDrivenManager)
+    assert manager.name == "Soar"
+    assert manager.homepage_url == "https://github.com/pkgforge/soar"
+    assert manager.definition_source == "meta_package_manager/managers/soar.toml"
+
+
+@pytest.mark.parametrize(
+    ("operation", "expected"),
+    (
+        (Operations.installed, True),
+        (Operations.search, True),
+        (Operations.install, True),
+        (Operations.remove, True),
+        (Operations.upgrade, True),
+        (Operations.upgrade_all, True),
+        (Operations.sync, True),
+        (Operations.cleanup, True),
+        (Operations.outdated, False),
+    ),
+)
+def test_soar_capabilities(operation, expected):
+    assert implements(pool["soar"], operation) is expected
+
+
+def test_soar_version_regex():
+    match = re.search(pool["soar"].version_regexes[0], "soar 0.12.6")
+    assert match is not None
+    assert match.group("version") == "0.12.6"
+
+
+def test_soar_parses_installed():
+    """Parse ``soar list-installed``: split "name-version:repo" at the last "-" before a
+    digit-led version, so multi-hyphen names stay intact."""
+    manager = _fresh_soar()
+    manager.run_cli = lambda *args, **kwargs: (
+        "bat-0.24.0:soarpkgs (2025-01-15) (1.8 MB)\n"
+        "google-chrome-131.0:soarpkgs (2025-01-14) (95.2 MB)\n"
+        "7-zip-24.09:soarpkgs (2025-01-10) (1.5 MB) [Broken]"
+    )
+    assert [(p.id, str(p.installed_version)) for p in manager.installed] == [
+        ("bat", "0.24.0"),
+        ("google-chrome", "131.0"),
+        ("7-zip", "24.09"),
+    ]
+
+
+def test_soar_parses_search():
+    """Extract the package name (before "#") from each ``soar search`` line, tolerating
+    both the installed (✓/+) and available (○/-) state icons."""
+    manager = _fresh_soar()
+    manager.run_cli = lambda *args, **kwargs: (
+        "[+] bat#official:soarpkgs | 0.24.0 | archive - A cat clone (1.8 MB)\n"
+        "[✓] ripgrep#official:soarpkgs | 14.1.0 | archive - Fast search (4.2 MB)"
+    )
+    assert [p.id for p in manager.search("bat", False, False)] == ["bat", "ripgrep"]

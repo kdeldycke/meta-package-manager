@@ -116,6 +116,7 @@ Meta Package Manager,scoop,1
 Meta Package Manager,sdkman,1
 Meta Package Manager,sfsu,1
 Meta Package Manager,snap,1
+Meta Package Manager,soar,1
 Meta Package Manager,steamcmd,1
 Meta Package Manager,stew,1
 Meta Package Manager,topgrade,1
@@ -183,6 +184,7 @@ Meta Package Manager,zypper,1
 | [`sdkman`](https://sdkman.io)                                                           | >=5.0.0          |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`sfsu`](https://github.com/winpax/sfsu)                                                | >=1.16.0         |          |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`snap`](https://snapcraft.io)                                                          | >=2.0.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`soar`](https://github.com/pkgforge/soar)                                              | >=0.12.0         |          |           |      🐧       |       |             |         |      ✓      |            |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         |                  |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |             |            |          |     ✓     |           |               |          |        |           |
 | [`stew`](https://github.com/marwanhawari/stew)                                          | >=0.3.0          |          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |            |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`topgrade`](https://github.com/topgrade-rs/topgrade)                                   | >=17.0.0         |          |    🅱️     |      🐧       |  🍎   |             |   🪟    |             |            |          |           |           |       ✓       |          |        |           |

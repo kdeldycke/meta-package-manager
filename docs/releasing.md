@@ -15,7 +15,7 @@ The release PR must be merged via "Rebase and merge" (never squash). See the `re
 
 ## Chocolatey
 
-The Chocolatey package definition is maintained in-tree at `packaging/choco/meta-package-manager/`, but is no longer pushed to the [Chocolatey community repository](https://community.chocolatey.org/packages/meta-package-manager) (see [Impact on Chocolatey](#impact-on-chocolatey) for the rejection rationale). The automated `chocolatey` job has been removed from `release.yaml`; only the in-tree nuspec remains, so users can build and install locally (see [`install.md`](install.md)) and the `choco-source` job in `tests-install.yaml` keeps the build instructions exercised.
+The Chocolatey package definition is maintained in-tree at `packaging/choco/meta-package-manager/`, but is no longer pushed to the [Chocolatey community repository](https://community.chocolatey.org/packages/meta-package-manager) (see [Impact on Chocolatey](binaries.md#impact-on-chocolatey) for the rejection rationale). The automated `chocolatey` job has been removed from `release.yaml`; only the in-tree nuspec remains, so users can build and install locally (see [`install.md`](install.md)) and the `choco-source` job in `tests-install.yaml` keeps the build instructions exercised.
 
 The package directory name must match the nuspec basename: this is enforced by [Chocolatey-AU's `AUPackage`](https://github.com/chocolatey-community/Chocolatey-AU/blob/develop/src/Private/AUPackage.ps1), which derives the nuspec path from `Split-Path -Leaf $pwd`.
 
@@ -31,58 +31,4 @@ Two dependencies (`click-extra` and `extra-platforms`) are also bundled in `pack
 
 ## Antivirus false positives on Windows binaries
 
-Nuitka `--onefile` Windows x64 binaries are systematically flagged by antivirus engines on VirusTotal. This is a structural issue with the Nuitka compilation model, not a sign of actual malware.
-
-### Why it happens
-
-Nuitka `--onefile` creates a self-extracting archive that decompresses an embedded Python runtime to a temporary directory and executes it at launch. This "drop and execute from temp" pattern is behaviorally identical to trojan droppers, which triggers heuristic and ML-based detections.
-
-Additional factors:
-
-- Nuitka is popular with malware authors for source code protection, which poisons AV heuristics for all Nuitka-compiled binaries.
-- `mpm` invokes external system commands (package managers), triggering behavioral rules for command-and-control activity.
-- Microsoft has gone as far as [suspending an Artifact Signing account](https://github.com/Nuitka/Nuitka/issues/3842) over Nuitka onefile binaries.
-
-### Typical detection profile
-
-Based on the `v6.2.1` release (scanned 2026-04-10):
-
-| Platform           | Detection rate | VT reports                                                                                                                                                                                                                                            | Notes                                   |
-| ------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Linux x64          | 0/62           |                                                                                                                                                                                                                                                       | Clean                                   |
-| Linux ARM64        | 0/60           |                                                                                                                                                                                                                                                       | Clean                                   |
-| macOS x64          | 0-1/63         |                                                                                                                                                                                                                                                       | Occasional ML false positive            |
-| macOS ARM64        | 2/55-60        | [`meta-package-manager`](https://www.virustotal.com/gui/file/61c7a27f13b3c5a1f6cd079362c51880af9f1a945b6e3ec59ee3e5951efae1b0), [`mpm`](https://www.virustotal.com/gui/file/3369b48aed98d4ddedcf3e414f4fbf2e4fd8560ec1195b8c0ff5f41765e4bbd5)         | Cynet, Microsoft ML, Avast/AVG          |
-| Windows ARM64      | 1/68-70        | [`meta-package-manager`](https://www.virustotal.com/gui/file/ebd0e35a09da7b496127aeca5669c2c5b1ab1e74c4f529ae050672850e8f627f), [`mpm`](https://www.virustotal.com/gui/file/136d9410d3887b1023e30f9e31f6e3d054d117ebd08cf50d7d8f83f87a3c6b39)         | Fewer ARM64 heuristics in AV engines    |
-| **Windows x64**    | **33-35/70**   | [**`meta-package-manager`**](https://www.virustotal.com/gui/file/5435366a1bdd6790074caacd1c5b4a9d22d28e996671d0a432b399d06762707e), [**`mpm`**](https://www.virustotal.com/gui/file/3edbaf472a6a154db6c2f9f33f935737eeead50a8a7159612ebe0ba930d3a47f) | Heavily flagged by heuristic/ML engines |
-| `.whl` / `.tar.gz` | 0/56-63        |                                                                                                                                                                                                                                                       | Clean (Python source, no Nuitka)        |
-
-The Windows x64 detections come from generic signatures like `Gen:Variant.Application.tedy` (BitDefender family), [`Trojan:Win32/Sabsik`](https://www.microsoft.com/en-us/wdsi/threats/malware-encyclopedia-description?Name=Trojan:Win32/Sabsik.EN.A!ml&threatId=-2147156305) (Microsoft), `Python/Packed.Nuitka.AL` (ESET), and various ML-based classifiers.
-
-### Submitting false positive reports
-
-After each release, if VirusTotal detections are high, submit false positive reports to the major vendors. Priority order by impact:
-
-1. **Microsoft** (https://www.microsoft.com/en-us/wdsi/filesubmission): most influential engine. Covers `Sabsik`, `Wacatac` detections. Turnaround: 1-2 business days.
-2. **BitDefender** (https://www.bitdefender.com/submit/): their engine powers ~6 downstream vendors (ALYac, Arcabit, Emsisoft, GData, MicroWorld-eScan, VIPRE). Fixing BitDefender removes the most detections per submission.
-3. **ESET** (email `samples@eset.com`, files in password-protected ZIP with password `infected`): covers `Python/Packed.Nuitka.AL`. Turnaround: 1-3 business days.
-4. **Symantec** (https://symsubmit.symantec.com/false_positive): covers `ML.Attribute.HighConfidence`. ML-based detections may take longer (3-7 business days).
-5. **Avast/AVG** (https://www.avast.com/submit-a-sample): shared engine, one submission covers both. Covers `Win64:Malware-gen`.
-6. **Sophos** (https://support.sophos.com/support/s/filesubmission): covers `Generic Reputation PUA`. PUA submissions require justification of the software's legitimate purpose. Turnaround: up to 15 business days.
-
-A complete list of vendor FP contacts is maintained by [VirusTotal](https://docs.virustotal.com/docs/false-positive-contacts) and [False-Positive-Center](https://github.com/yaronelh/False-Positive-Center).
-
-### Impact on Chocolatey
-
-Chocolatey's moderation pipeline rejects any package flagged by more than 10 antivirus engines on VirusTotal ([chocolatey/home#395](https://github.com/chocolatey/home/issues/395#issuecomment-4378555157)). The Windows x64 binary sits at 33-35/70 detections, well above that threshold, so [submission `6.4.2`](https://community.chocolatey.org/packages/meta-package-manager/6.4.2) was rejected and automated publishing to the community repository has been removed from `release.yaml`. Reaching the cutoff would require either lowering the detection count through false-positive submissions (a moving target) or applying one of the [long-term mitigations](#long-term-mitigations) below.
-
-### Long-term mitigations
-
-- **Code signing with an EV certificate** would reduce heuristic detections across the board, especially from Microsoft and Symantec ML models.
-- **Switching from `--onefile` to `--standalone`** would eliminate the self-extracting pattern entirely, at the cost of distributing a directory instead of a single `.exe`.
-- **Nuitka Commercial** (https://nuitka.net/doc/commercial.html) claims proprietary AV-mitigation techniques but offers no guarantees.
-
-### References
-
-- Previous report: [#1157](https://github.com/kdeldycke/meta-package-manager/issues/1157)
-- Nuitka issues: [Nuitka/Nuitka#2685](https://github.com/Nuitka/Nuitka/issues/2685), [Nuitka/Nuitka#2495](https://github.com/Nuitka/Nuitka/issues/2495), [Nuitka/Nuitka#2757](https://github.com/Nuitka/Nuitka/issues/2757), [Nuitka/Nuitka#3842](https://github.com/Nuitka/Nuitka/issues/3842)
+Moved to the [binaries catalog](binaries.md#antivirus-false-positives-on-windows-binaries), which pairs the engineering background, false-positive playbook, and long-term mitigations with the live per-release detection data.

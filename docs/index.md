@@ -9,6 +9,7 @@ hide-toc: true
 :maxdepth: 2
 :hidden:
 install
+binaries
 augmentations
 duplicates
 output-formats

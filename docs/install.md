@@ -321,12 +321,12 @@ $ file ./mpm*
 (antivirus-false-positives)=
 
 ```{important} Antivirus false positives
-The Windows binaries (and to a lesser extent the macOS ARM64 ones, plus anything downstream that bundles them like the Chocolatey package) are flagged by heuristic and ML-based antivirus engines. These are false positives caused by the [Nuitka](https://nuitka.net) `--onefile` packaging pattern, not by anything `mpm` does. Engineering background, detection profile, and long-term mitigations are documented in [`releasing.md`](releasing.md#antivirus-false-positives-on-windows-binaries).
+The Windows binaries (and to a lesser extent the macOS ARM64 ones, plus anything downstream that bundles them like the Chocolatey package) are flagged by heuristic and ML-based antivirus engines. These are false positives caused by the [Nuitka](https://nuitka.net) `--onefile` packaging pattern, not by anything `mpm` does. Engineering background, per-release detection data, and long-term mitigations are documented on the [binaries catalog](binaries.md#antivirus-false-positives-on-windows-binaries).
 
 **If your antivirus quarantines an `mpm` binary:**
 
 1. Verify the binary you downloaded with the [attestation procedure below](#release-verification). It cryptographically proves the artifact came from this repository's release pipeline.
-2. Submit a false-positive report to your antivirus vendor with the verified binary. The [priority vendor list in `releasing.md`](releasing.md#submitting-false-positive-reports) covers the engines responsible for most detections, and [VirusTotal's vendor directory](https://docs.virustotal.com/docs/false-positive-contacts) covers the rest.
+2. Submit a false-positive report to your antivirus vendor with the verified binary. The [priority vendor list on the binaries catalog](binaries.md#submitting-false-positive-reports) covers the engines responsible for most detections, and [VirusTotal's vendor directory](https://docs.virustotal.com/docs/false-positive-contacts) covers the rest.
 
 The more independent reports a vendor receives, the more likely a detection gets reclassified, and that is the only practical path back to a working Chocolatey community-repository submission.
 ```

@@ -54,6 +54,15 @@ myst_enable_extensions = [
 # https://github.com/mgaitan/sphinxcontrib-mermaid/issues/99#issuecomment-2339587001
 myst_fence_as_directive = ["mermaid"]
 
+# Register every heading as a resolvable cross-reference target so in-page
+# `[text](#anchor)` links resolve (and broken ones warn) at build time, making
+# Sphinx the authority for internal anchors. The slug function is pinned to
+# docutils' `make_id` so MyST anchors match the section IDs docutils already
+# emits, keeping existing anchor URLs stable. Mirrors the upstream repomatic
+# docs configuration.
+myst_heading_anchors = 6
+myst_heading_slug_func = "docutils.nodes.make_id"
+
 mermaid_d3_zoom = True
 
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

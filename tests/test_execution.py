@@ -31,13 +31,13 @@ from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
+    _LIVE_PROCESSES,
+    _LIVE_PROCESSES_LOCK,
     DEFAULT_TIMEOUT,
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
     READ_ONLY_TIMEOUT,
     SPINNER_DELAY,
-    _LIVE_PROCESSES,
-    _LIVE_PROCESSES_LOCK,
     CLIError,
     _is_sudo_auth_failure,
     install_interrupt_handler,
@@ -186,7 +186,7 @@ def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
     elif expectation == "accumulate":
         manager.run_cli("-c", script, must_succeed=must_succeed)
         assert [error.code for error in manager.cli_errors] == [8]
-    else:  # tolerate
+    else:  # tolerate.
         output = manager.run_cli("-c", script, must_succeed=must_succeed)
         assert output == "boom"
         assert manager.cli_errors == []

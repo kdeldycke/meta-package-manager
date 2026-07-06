@@ -78,7 +78,7 @@ from ._network import NetworkError
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Iterator
 
     from ._network import NetworkClient
 
@@ -88,6 +88,13 @@ OSV_BASE_URL = "https://api.osv.dev"
 
 OSV_BATCH_ENDPOINT = f"{OSV_BASE_URL}/v1/querybatch"
 OSV_VULN_ENDPOINT = f"{OSV_BASE_URL}/v1/vulns"
+
+OSV_ADVISORY_URL = "https://osv.dev/vulnerability"
+"""Prefix of the human-facing OSV advisory page.
+
+Deliberately the web host (``osv.dev``), distinct from the API host
+(``api.osv.dev``) that :data:`OSV_BASE_URL` anchors.
+"""
 
 OSV_BATCH_LIMIT = 1000
 """Maximum number of queries OSV accepts in a single ``querybatch`` call."""
@@ -120,6 +127,20 @@ OSV_ECOSYSTEMS: dict[str, str] = {
 """Maps mpm manager ids to `OSV ecosystem names
 <https://ossf.github.io/osv-schema/#defined-ecosystems>`_."""
 
+_SEVERITY_ALIASES = {
+    "LOW": "low",
+    "MODERATE": "medium",
+    "MEDIUM": "medium",
+    "HIGH": "high",
+    "CRITICAL": "critical",
+}
+"""Maps GHSA/OSV severity labels onto mpm's coarse vocabulary.
+
+Keyed by the upper-cased source label; the values are the ``low`` / ``medium`` /
+``high`` / ``critical`` labels the renderers expect. See
+:py:func:`_normalize_severity`.
+"""
+
 
 @dataclass(frozen=True)
 class Vulnerability:
@@ -130,7 +151,7 @@ class Vulnerability:
     """
 
     id: str
-    """Primary advisory identifier (``GHSA-…``, ``CVE-…``, ``OSV-…``)."""
+    """Primary advisory identifier (``GHSA-...``, ``CVE-...``, ``OSV-...``)."""
 
     source: str = "OSV"
     """Origin database. Only ``OSV`` is produced today."""
@@ -203,7 +224,7 @@ def _parse_purls(purls: Iterable[str]) -> dict[str, _OSVQuery]:
         try:
             purl = PackageURL.from_string(purl_str)
         except ValueError:
-            logging.debug(f"Skipping unparseable purl: {purl_str!r}")
+            logging.debug(f"Skipping unparsable purl: {purl_str!r}")
             continue
         ecosystem = OSV_ECOSYSTEMS.get(purl.type or "")
         if not ecosystem:
@@ -220,15 +241,13 @@ def _parse_purls(purls: Iterable[str]) -> dict[str, _OSVQuery]:
         key = _coordinate_key(ecosystem, name, purl.version)
         query = queries.get(key)
         if query is None:
-            query = _OSVQuery(
-                ecosystem=ecosystem, name=name, version=purl.version
-            )
+            query = _OSVQuery(ecosystem=ecosystem, name=name, version=purl.version)
             queries[key] = query
         query.purls.append(purl_str)
     return queries
 
 
-def _chunked(items: list, size: int):
+def _chunked(items: list, size: int) -> Iterator[list]:
     """Yield successive ``size``-length slices of ``items``."""
     for start in range(0, len(items), size):
         yield items[start : start + size]
@@ -248,19 +267,19 @@ def _batch_query(
     for chunk_start, chunk in _enumerate_chunks(queries):
         payload = {"queries": [q.as_osv_payload() for q in chunk]}
         response = client.post(OSV_BATCH_ENDPOINT, payload)
-        results = (response or {}).get("results", []) if isinstance(response, dict) else []
+        results = response.get("results", []) if isinstance(response, dict) else []
         for offset, result in enumerate(results):
             vuln_ids = [
-                v["id"]
-                for v in (result or {}).get("vulns", []) or []
-                if v.get("id")
+                v["id"] for v in (result or {}).get("vulns", []) or [] if v.get("id")
             ]
             if vuln_ids:
                 ids_by_index[chunk_start + offset] = vuln_ids
     return ids_by_index
 
 
-def _enumerate_chunks(queries: list[_OSVQuery]):
+def _enumerate_chunks(
+    queries: list[_OSVQuery],
+) -> Iterator[tuple[int, list[_OSVQuery]]]:
     """Yield ``(absolute_start_index, chunk)`` for each OSV batch slice."""
     index = 0
     for chunk in _chunked(queries, OSV_BATCH_LIMIT):
@@ -307,9 +326,7 @@ def _normalize_osv_record(raw: dict) -> Vulnerability:
     fixed_versions = _extract_fixed_versions(raw.get("affected", []) or [])
 
     references = tuple(
-        ref["url"]
-        for ref in raw.get("references", []) or []
-        if ref.get("url")
+        ref["url"] for ref in raw.get("references", []) or [] if ref.get("url")
     )
 
     return Vulnerability(
@@ -325,7 +342,7 @@ def _normalize_osv_record(raw: dict) -> Vulnerability:
         fixed_versions=fixed_versions,
         published_date=_parse_timestamp(raw.get("published")),
         modified_date=_parse_timestamp(raw.get("modified")),
-        advisory_url=f"https://osv.dev/vulnerability/{vuln_id}",
+        advisory_url=f"{OSV_ADVISORY_URL}/{vuln_id}",
     )
 
 
@@ -333,14 +350,7 @@ def _normalize_severity(label: str | None) -> str | None:
     """Collapse GHSA-style severity labels into our coarse vocabulary."""
     if not label:
         return None
-    mapping = {
-        "LOW": "low",
-        "MODERATE": "medium",
-        "MEDIUM": "medium",
-        "HIGH": "high",
-        "CRITICAL": "critical",
-    }
-    return mapping.get(label.strip().upper())
+    return _SEVERITY_ALIASES.get(label.strip().upper())
 
 
 def _extract_fixed_versions(affected: list) -> tuple[str, ...]:

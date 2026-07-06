@@ -55,7 +55,7 @@ from .version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Callable, Iterable, Iterator
 
     from .version import TokenizedString
 
@@ -798,7 +798,9 @@ def _iter_parsed(
             yield kwargs
 
 
-def _make_query_property(spec: OperationSpec, compiled: re.Pattern[str] | None):
+def _make_query_property(
+    spec: OperationSpec, compiled: re.Pattern[str] | None
+) -> property:
     """Build an ``installed``/``outdated`` property that runs the CLI and parses it."""
 
     def query(self: PackageManager) -> Iterator[Package]:
@@ -809,7 +811,9 @@ def _make_query_property(spec: OperationSpec, compiled: re.Pattern[str] | None):
     return property(query)
 
 
-def _make_search(spec: OperationSpec, compiled: re.Pattern[str] | None):
+def _make_search(
+    spec: OperationSpec, compiled: re.Pattern[str] | None
+) -> Callable[..., Iterator[Package]]:
     """Build a ``search`` method. Native exact/extended filtering is not expressed in
     the DSL, so :py:meth:`PackageManager.refiltered_search` refilters the raw results.
     """
@@ -833,7 +837,7 @@ def _warn_version_unsupported(version: str | None) -> None:
         )
 
 
-def _make_install(spec: OperationSpec):
+def _make_install(spec: OperationSpec) -> Callable[..., str]:
     """Build an ``install`` method substituting ``{package_id}`` into the args."""
 
     def install(
@@ -845,7 +849,7 @@ def _make_install(spec: OperationSpec):
     return install
 
 
-def _make_remove(spec: OperationSpec):
+def _make_remove(spec: OperationSpec) -> Callable[..., str]:
     """Build a ``remove`` method substituting ``{package_id}`` into the args."""
 
     def remove(self: PackageManager, package_id: str) -> str:
@@ -854,7 +858,7 @@ def _make_remove(spec: OperationSpec):
     return remove
 
 
-def _make_void(spec: OperationSpec):
+def _make_void(spec: OperationSpec) -> Callable[..., None]:
     """Build a ``sync``/``cleanup`` method that runs the CLI and discards its output."""
 
     def operation(self: PackageManager) -> None:
@@ -863,7 +867,7 @@ def _make_void(spec: OperationSpec):
     return operation
 
 
-def _make_upgrade_one_cli(spec: OperationSpec):
+def _make_upgrade_one_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
     """Build an ``upgrade_one_cli`` returning the per-package upgrade command line."""
 
     def upgrade_one_cli(
@@ -875,7 +879,7 @@ def _make_upgrade_one_cli(spec: OperationSpec):
     return upgrade_one_cli
 
 
-def _make_upgrade_all_cli(spec: OperationSpec):
+def _make_upgrade_all_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
     """Build an ``upgrade_all_cli`` returning the upgrade-everything command line."""
 
     def upgrade_all_cli(self: PackageManager) -> tuple[str, ...]:
@@ -884,7 +888,7 @@ def _make_upgrade_all_cli(spec: OperationSpec):
     return upgrade_all_cli
 
 
-def build_manager_class(definition: ManagerDefinition) -> type[PackageManager]:
+def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManager]:
     """Synthesize a :py:class:`PackageManager` subclass from a validated definition.
 
     Assembles a class namespace from the definition's identity and CLI fields, then
@@ -931,6 +935,6 @@ def build_manager_class(definition: ManagerDefinition) -> type[PackageManager]:
 
     class_name = "Config_" + definition.manager_id.replace("-", "_")
     return cast(
-        "type[PackageManager]",
+        "type[ConfigDrivenManager]",
         MetaPackageManager(class_name, (ConfigDrivenManager,), namespace),
     )

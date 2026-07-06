@@ -543,7 +543,7 @@ def test_lock_family_lane_shares_a_run_cache():
     collect_from_managers(
         "Syncing",
         "Synced",
-        [brew, cask, gem],  # type: ignore[arg-type]
+        [brew, cask, gem],  # type: ignore[list-item]
         work,
         report_state=True,
         ctx=ctx,  # type: ignore[arg-type]

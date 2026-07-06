@@ -6,44 +6,46 @@ Package managers are not comparable: some ship advanced features others lack. Ra
 
 Each ✅ below is a capability `mpm` synthesizes for a manager that does not provide it natively. The rest of this page explains each column.
 
-| Manager | Full `upgrade --all` | Exact search | Extended search |
-| :--- | :---: | :---: | :---: |
-| `apk` |  | ✅ |  |
-| `apm` |  | ✅ |  |
-| `apt-mint` |  |  | ✅ |
-| `asdf` | ✅ | ✅ | ✅ |
-| `cargo` |  | ✅ | ✅ |
-| `composer` |  | ✅ |  |
-| `conda` |  | ✅ | ✅ |
-| `deb-get` |  | ✅ | ✅ |
-| `dnf` |  | ✅ | ✅ |
-| `dnf5` |  | ✅ | ✅ |
-| `eopkg` |  | ✅ |  |
-| `flatpak` |  | ✅ | ✅ |
-| `gem` |  |  | ✅ |
-| `guix` |  | ✅ | ✅ |
-| `mas` |  | ✅ | ✅ |
-| `mise` |  | ✅ |  |
-| `nix` |  | ✅ | ✅ |
-| `npm` |  | ✅ |  |
-| `opkg` |  | ✅ | ✅ |
-| `pacaur` |  |  | ✅ |
-| `pacman` |  |  | ✅ |
-| `pacstall` |  | ✅ | ✅ |
-| `paru` |  |  | ✅ |
-| `pip` | ✅ |  |  |
-| `pnpm` |  | ✅ |  |
-| `pwsh-gallery` |  |  | ✅ |
-| `scoop` |  | ✅ | ✅ |
-| `sfsu` |  | ✅ | ✅ |
-| `snap` |  | ✅ | ✅ |
-| `steamcmd` | ✅ |  |  |
-| `uv` | ✅ |  |  |
-| `xbps` |  | ✅ | ✅ |
-| `yarn` |  | ✅ | ✅ |
-| `yarn-berry` |  | ✅ | ✅ |
-| `yay` |  |  | ✅ |
-| `yum` |  | ✅ | ✅ |
+| Manager        | Full `upgrade --all` | Exact search | Extended search |
+| :------------- | :------------------: | :----------: | :-------------: |
+| `apk`          |                      |      ✅      |                 |
+| `apm`          |                      |      ✅      |                 |
+| `apt-mint`     |                      |              |       ✅        |
+| `asdf`         |          ✅          |      ✅      |       ✅        |
+| `cargo`        |                      |      ✅      |       ✅        |
+| `composer`     |                      |      ✅      |                 |
+| `conda`        |                      |      ✅      |       ✅        |
+| `deb-get`      |                      |      ✅      |       ✅        |
+| `dnf`          |                      |      ✅      |       ✅        |
+| `dnf5`         |                      |      ✅      |       ✅        |
+| `eopkg`        |                      |      ✅      |                 |
+| `flatpak`      |                      |      ✅      |       ✅        |
+| `gem`          |                      |              |       ✅        |
+| `gh-ext`       |                      |      ✅      |       ✅        |
+| `guix`         |                      |      ✅      |       ✅        |
+| `mas`          |                      |      ✅      |       ✅        |
+| `mise`         |                      |      ✅      |                 |
+| `nix`          |                      |      ✅      |       ✅        |
+| `npm`          |                      |      ✅      |                 |
+| `opkg`         |                      |      ✅      |       ✅        |
+| `pacaur`       |                      |              |       ✅        |
+| `pacman`       |                      |              |       ✅        |
+| `pacstall`     |                      |      ✅      |       ✅        |
+| `paru`         |                      |              |       ✅        |
+| `pip`          |          ✅          |              |                 |
+| `pnpm`         |                      |      ✅      |                 |
+| `pwsh-gallery` |                      |              |       ✅        |
+| `scoop`        |                      |      ✅      |       ✅        |
+| `sfsu`         |                      |      ✅      |       ✅        |
+| `snap`         |                      |      ✅      |       ✅        |
+| `soar`         |                      |      ✅      |       ✅        |
+| `steamcmd`     |          ✅          |              |                 |
+| `uv`           |          ✅          |              |                 |
+| `xbps`         |                      |      ✅      |       ✅        |
+| `yarn`         |                      |      ✅      |       ✅        |
+| `yarn-berry`   |                      |      ✅      |       ✅        |
+| `yay`          |                      |              |       ✅        |
+| `yum`          |                      |      ✅      |       ✅        |
 
 ## Free `upgrade --all`
 

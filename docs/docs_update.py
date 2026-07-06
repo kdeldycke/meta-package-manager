@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import inspect
 import sys
+from collections.abc import Callable
 from pathlib import Path
 from textwrap import dedent
 
@@ -47,6 +48,7 @@ from meta_package_manager.pool import pool
 # The matrix machinery imports Sphinx, which only the docs dependency group
 # provides. Gate it so this script (and the tests loading it) still runs in
 # environments without that group: update_matrices() then skips with a notice.
+update_matrix_blocks: Callable[..., list[Path]] | None
 try:
     from click_extra.sphinx.matrix import update_matrix_blocks
 except ImportError:

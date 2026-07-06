@@ -27,7 +27,7 @@ install does not pull them, so this module is importable but
 :py:data:`network_support` reports ``False`` until the user installs the
 ``[sbom-online]`` extra.
 
-The cache is mandatory rather than optional. The online mode is only
+Caching is central to the design. The online mode is only
 worth using with a warm cache: vulnerability records are immutable once
 published, batch queries are large, and remote services rate-limit. The
 cache lives under the OS-appropriate user cache directory (resolved via
@@ -43,6 +43,8 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+
+from typing_extensions import Self
 
 network_support = True
 try:
@@ -60,6 +62,14 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
 
+DEFAULT_TIMEOUT = 30.0
+"""Per-request timeout in seconds.
+
+OSV batch queries over a few hundred purls comfortably answer within
+this window; the value is generous enough to absorb a slow link without
+hanging a scan indefinitely.
+"""
+
 DEFAULT_TTL = 86400
 """Default cache time-to-live in seconds (24 hours).
 
@@ -69,24 +79,8 @@ finite TTL. Immutable per-advisory detail records are cached with a far
 longer TTL by their callers.
 """
 
-DEFAULT_TIMEOUT = 30.0
-"""Per-request timeout in seconds.
-
-OSV batch queries over a few hundred purls comfortably answer within
-this window; the value is generous enough to absorb a slow link without
-hanging a scan indefinitely.
-"""
-
 MAX_RETRIES = 3
 """Number of retry attempts on transient failures before giving up."""
-
-CACHE_SIZE_CEILING = 1_000_000_000
-"""Soft ceiling (1 GB) past which the cache directory is pruned.
-
-The cache is keyed by unique request payloads the user has ever issued,
-so in practice it stays tiny (a few MB of JSON). The ceiling is a
-runaway backstop, not an expected operating point.
-"""
 
 
 class NetworkError(Exception):
@@ -199,7 +193,7 @@ class NetworkClient:
             self._client.close()
             self._client = None
 
-    def __enter__(self) -> NetworkClient:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *exc_info) -> None:

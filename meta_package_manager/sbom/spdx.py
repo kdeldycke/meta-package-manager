@@ -83,11 +83,13 @@ try:
 except ImportError:
     spdx_support = False
     logging.getLogger("meta_package_manager").debug(
-        "SPDX support disabled: install meta-package-manager[sbom-offline] to enable it.",
+        "SPDX support disabled: "
+        "install meta-package-manager[sbom-offline] to enable it.",
     )
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from typing import Any
 
     from ..manager import PackageManager
@@ -598,7 +600,7 @@ class SPDX(SBOM):
             )
         )
 
-    def all_purls(self) -> Any:
+    def all_purls(self) -> Iterator[str]:
         """Yield every inventory package purl in insertion order.
 
         Only the directly-installed packages carry a purl in

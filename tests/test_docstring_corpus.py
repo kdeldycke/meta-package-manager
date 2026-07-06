@@ -47,6 +47,7 @@ import inspect
 import re
 import shlex
 import textwrap
+from contextlib import suppress
 from functools import cache
 from pathlib import Path
 
@@ -215,7 +216,11 @@ def _raw_literal(node: ast.Constant, source: str) -> str | None:
         start += 1  # Skip a string prefix (r, u, ...).
     body = segment[start:]
     for quote in ('"""', "'''", '"', "'"):
-        if len(body) >= 2 * len(quote) and body.startswith(quote) and body.endswith(quote):
+        if (
+            len(body) >= 2 * len(quote)
+            and body.startswith(quote)
+            and body.endswith(quote)
+        ):
             return body[len(quote) : -len(quote)]
     return None
 
@@ -342,7 +347,9 @@ def _fixtures():
     command-dispatching stub so its (possibly two-command) path is exercised whole.
     """
     for manager in pool.values():
-        blocks_by_member = _class_blocks(type(manager))
+        # The pool yields untyped instances, and mypy cannot match type[Any]
+        # against the cache wrapper's Hashable parameter.
+        blocks_by_member = _class_blocks(type(manager))  # type: ignore[arg-type]
         for member in ("installed", "version_regexes"):
             for index, block in enumerate(blocks_by_member.get(member, ())):
                 output = split_session(block)
@@ -356,10 +363,15 @@ def _fixtures():
                     id=param_id,
                     marks=KNOWN_EXCEPTIONS.get(param_id, ()),
                 )
-        if any(_is_fixture(split_session(b)) for b in blocks_by_member.get("outdated", ())):
+        if any(
+            _is_fixture(split_session(b)) for b in blocks_by_member.get("outdated", ())
+        ):
             param_id = f"{manager.id}-outdated"
             yield pytest.param(
-                manager, "outdated", None, id=param_id,
+                manager,
+                "outdated",
+                None,
+                id=param_id,
                 marks=KNOWN_EXCEPTIONS.get(param_id, ()),
             )
 
@@ -393,7 +405,7 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         default = _member_output(type(manager), "outdated")
         monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
         packages = list(manager.outdated)
-    else:  # installed
+    else:  # installed.
         monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
         packages = list(manager.installed)
 
@@ -515,9 +527,10 @@ def _matches(
         if PID_SENTINEL in built_token:
             if doc_token.startswith("-"):
                 return False
-        elif doc_token != built_token:
-            if not (position == 0 and doc_token in cli_names):
-                return False
+        elif doc_token != built_token and not (
+            position == 0 and doc_token in cli_names
+        ):
+            return False
     return True
 
 
@@ -581,9 +594,9 @@ def test_documented_command_matches_construction(
         type(manager),
         "installed",
         property(
-            lambda self: iter(
-                [self.package(id=PID_SENTINEL, installed_version=PID_SENTINEL)]
-            )
+            lambda self: iter([
+                self.package(id=PID_SENTINEL, installed_version=PID_SENTINEL)
+            ])
         ),
     )
 
@@ -592,24 +605,21 @@ def test_documented_command_matches_construction(
         # A second, version-pinned invocation covers docstrings whose example
         # pins a version (``asdf install nodejs 20.10.0``). Managers without
         # version support may balk: the unpinned record is enough for them.
-        try:
+        with suppress(Exception):
             manager.install(PID_SENTINEL, version=PID_SENTINEL)
-        except Exception:
-            pass
     elif member == "remove":
         manager.remove(PID_SENTINEL)
     elif member in ("sync", "cleanup"):
         getattr(manager, member)()
     elif member == "upgrade_all_cli":
         constructed.append(manager.upgrade_all_cli())
-    else:  # upgrade_one_cli
+    else:  # upgrade_one_cli.
         constructed.append(manager.upgrade_one_cli(PID_SENTINEL))
-        try:
+        # Same version-pinned second pass as ``install`` above.
+        with suppress(Exception):
             constructed.append(
                 manager.upgrade_one_cli(PID_SENTINEL, version=PID_SENTINEL)
             )
-        except Exception:
-            pass
 
     normalized = [
         _normalize_constructed(command, manager.cli_names)

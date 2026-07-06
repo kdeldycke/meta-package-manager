@@ -240,15 +240,13 @@ values. Safe to pop even if nothing was cached.
 """
 
 
-CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset(
-    {
-        "cli_names",
-        "cli_search_path",
-        "requirement",
-        "version_cli_options",
-        "version_regexes",
-    }
-)
+CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset({
+    "cli_names",
+    "cli_search_path",
+    "requirement",
+    "version_cli_options",
+    "version_regexes",
+})
 """Subset of :data:`OVERRIDABLE_FIELDS` whose override probably reflects a real
 upstream detection bug rather than a personal preference.
 
@@ -384,19 +382,15 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
     ]
     for hint in hints:
         url = _build_issue_url(hint)
-        lines.extend(
-            (
-                f"  - {theme().invoked_command(hint.manager_id)}: "
-                f"override on `{hint.field}`",
-                f"    File a report: {url}",
-            )
-        )
-    lines.extend(
-        (
-            "",
-            "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
-        )
-    )
+        lines.extend((
+            f"  - {theme().invoked_command(hint.manager_id)}: "
+            f"override on `{hint.field}`",
+            f"    File a report: {url}",
+        ))
+    lines.extend((
+        "",
+        "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
+    ))
     return "\n".join(lines)
 
 
@@ -616,6 +610,20 @@ accumulated between :py:func:`apply_manager_overrides_from_context` and
 :py:func:`print_contribution_hints`."""
 
 
+def _managers_section(ctx: click.Context) -> Mapping[str, Any] | None:
+    """Return the ``[mpm.managers]`` mapping from the loaded config, or ``None``.
+
+    Reads the full parsed config :py:mod:`click_extra` exposes under
+    :data:`~click_extra.context.CONF_FULL` and drills into ``["mpm"]["managers"]``,
+    tolerating a missing or malformed layer at each step. Shared by
+    :py:func:`apply_manager_overrides_from_context` (the override pass) and
+    :py:func:`register_config_managers_from_context` (the definition pass).
+    """
+    conf_full = ctx.meta.get(CONF_FULL) or {}
+    mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
+    return mpm_section.get("managers") if isinstance(mpm_section, dict) else None
+
+
 def apply_manager_overrides_from_context(
     ctx: click.Context,
     pool: ManagerPool,
@@ -633,9 +641,7 @@ def apply_manager_overrides_from_context(
     stashed under :data:`CTX_HINTS_KEY` for :py:func:`print_contribution_hints` to
     surface at the end of the run.
     """
-    conf_full = ctx.meta.get(CONF_FULL) or {}
-    mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
-    overrides = mpm_section.get("managers") if isinstance(mpm_section, dict) else None
+    overrides = _managers_section(ctx)
     _warn_risky_overrides_from_untrusted_source(ctx, pool, overrides)
     hints = apply_manager_overrides(pool, overrides)
     if hints:
@@ -828,6 +834,11 @@ def config_file_is_trusted(path: Path) -> bool:
     return True
 
 
+def _is_remote_url(location: str) -> bool:
+    """Whether a config location string points at a remote URL, not a local path."""
+    return location.startswith(("http://", "https://"))
+
+
 def _config_source(ctx: click.Context) -> tuple[Path | None, bool]:
     """Return ``(local_path, is_url)`` for the config file click-extra loaded.
 
@@ -840,7 +851,7 @@ def _config_source(ctx: click.Context) -> tuple[Path | None, bool]:
     if not raw:
         return None, False
     text = str(raw)
-    if text.startswith(("http://", "https://")):
+    if _is_remote_url(text):
         return None, True
     return Path(text), False
 
@@ -1174,9 +1185,7 @@ def register_config_managers_from_context(
     a manager defined in a config the eager pre-load could not reach (a URL, a custom
     path) still works from here, it just does not get a dedicated CLI flag.
     """
-    conf_full = ctx.meta.get(CONF_FULL) or {}
-    mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
-    sections = mpm_section.get("managers") if isinstance(mpm_section, dict) else None
+    sections = _managers_section(ctx)
     if not sections:
         return
     source, source_is_url = _config_source(ctx)
@@ -1205,7 +1214,7 @@ def _candidate_config_path() -> tuple[Path | None, bool]:
         elif arg.startswith("--config="):
             raw = arg.split("=", 1)[1]
     if raw:
-        if raw.startswith(("http://", "https://")):
+        if _is_remote_url(raw):
             return None, True
         candidate = Path(raw).expanduser()
         return (candidate if candidate.is_file() else None), False
@@ -1330,9 +1339,9 @@ def build_bundled_managers() -> list[PackageManager]:
     documentation generator can link to it. Called once by
     :py:attr:`meta_package_manager.pool.ManagerPool.register`.
     """
-    managers = []
+    managers: list[PackageManager] = []
     for definition, source in load_bundled_definitions():
         klass = build_manager_class(definition)
-        setattr(klass, "definition_source", source)
+        klass.definition_source = source
         managers.append(klass())
     return managers

@@ -322,8 +322,16 @@ shorter ``timestamp_timeout`` may still see a mid-run escalation re-prompt or fa
 _SUDO_PRIMED: Final = "mpm_sudo_primed"
 """``ctx.meta`` key marking that :py:func:`prime_sudo` already ran this invocation."""
 
+_SUDO_ESCALATION_PREFIX: Final = ("sudo", "-n")
+"""Argv prefix mpm prepends to escalate a manager command non-interactively.
 
-def _resolved_sudo(manager: PackageManager) -> bool:
+:py:meth:`CLIExecutor.build_cli` emits it and :py:meth:`CLIExecutor.run` matches it
+byte-for-byte to turn a ``sudo -n`` authentication failure into an actionable hint, so
+the two sites must stay in lockstep.
+"""
+
+
+def _resolved_sudo(manager: CLIExecutor) -> bool:
     """Whether ``manager`` escalates: its :py:attr:`~CLIExecutor.sudo` override if set,
     else its built-in :py:attr:`~CLIExecutor.default_sudo`."""
     return manager.sudo if manager.sudo is not None else manager.default_sudo
@@ -1163,7 +1171,8 @@ class CLIExecutor:
             # missing-credential problem, not a real command failure. Point the user
             # at the fix, naming the manager (this also answers "which one just asked
             # for my password?").
-            if clean_args[:2] == ("sudo", "-n") and _is_sudo_auth_failure(error):
+            is_escalation = clean_args[:2] == _SUDO_ESCALATION_PREFIX
+            if is_escalation and _is_sudo_auth_failure(error):
                 manager_id = self.id  # type: ignore[attr-defined]
                 logging.warning(
                     f"{manager_id} needs administrator rights but sudo has no cached "
@@ -1249,11 +1258,7 @@ class CLIExecutor:
         # marks the operation as needing root (``sudo``), the per-manager policy opts in
         # (the ``sudo`` override, else ``default_sudo``), and the platform has ``sudo``.
         # A non-UNIX host simply does not escalate rather than raising.
-        escalate = bool(
-            sudo
-            and (self.sudo if self.sudo is not None else self.default_sudo)
-            and current_platform() in UNIX
-        )
+        escalate = bool(sudo and _resolved_sudo(self) and current_platform() in UNIX)
         # Sudo replaces any pre-command, be it overridden or automatic. ``-n`` keeps the
         # call non-interactive: it spends the credential cache warmed up front by
         # prime_sudo() and fails fast instead of blocking on an invisible /dev/tty
@@ -1264,7 +1269,7 @@ class CLIExecutor:
                 raise ValueError(msg)
             if auto_pre_cmds:
                 auto_pre_cmds = False
-            params.extend(("sudo", "-n"))
+            params.extend(_SUDO_ESCALATION_PREFIX)
         elif override_pre_cmds:
             params.extend(override_pre_cmds)  # type: ignore[arg-type]
         elif auto_pre_cmds:

@@ -29,7 +29,7 @@ from meta_package_manager.duration import Duration
 from meta_package_manager.managers.cargo import Cargo
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM
-from meta_package_manager.managers.pacman import Yay, _YAY_COOLDOWN_INIT_LUA
+from meta_package_manager.managers.pacman import _YAY_COOLDOWN_INIT_LUA, Yay
 from meta_package_manager.managers.pip import Pip
 from meta_package_manager.managers.pipx import Pipx
 from meta_package_manager.managers.uv import UV, UVX
@@ -333,12 +333,16 @@ def test_yay_cooldown_overlay(tmp_path, monkeypatch):
     assert env["MPM_YAY_USER_DIR"] == str(user_cfg)
 
     # The cutoff sits roughly one cooldown in the past (a minute of slack).
-    cutoff = datetime.fromtimestamp(int(env["MPM_COOLDOWN_EPOCH"]), tz=timezone.utc)
+    epoch = env["MPM_COOLDOWN_EPOCH"]
+    assert epoch is not None
+    cutoff = datetime.fromtimestamp(int(epoch), tz=timezone.utc)
     now = datetime.now(tz=timezone.utc)
     assert abs((now - cutoff) - timedelta(days=7)) < timedelta(minutes=1)
 
     # The overlay carries the generated policy and a symlink back to the real config.
-    overlay = Path(env["XDG_CONFIG_HOME"]) / "yay"
+    xdg_home = env["XDG_CONFIG_HOME"]
+    assert xdg_home is not None
+    overlay = Path(xdg_home) / "yay"
     assert (overlay / "init.lua").read_text(encoding="UTF-8") == _YAY_COOLDOWN_INIT_LUA
     config_link = overlay / "config.json"
     assert config_link.is_symlink()
@@ -358,7 +362,9 @@ def test_yay_cooldown_overlay_without_user_config(tmp_path, monkeypatch):
     manager.cooldown = timedelta(days=7)
     env = manager.cooldown_env()
 
-    overlay = Path(env["XDG_CONFIG_HOME"]) / "yay"
+    xdg_home = env["XDG_CONFIG_HOME"]
+    assert xdg_home is not None
+    overlay = Path(xdg_home) / "yay"
     assert (overlay / "init.lua").is_file()
     assert not (overlay / "config.json").exists()
 
@@ -375,7 +381,9 @@ def test_yay_cooldown_overlay_survives_manager_gc(tmp_path, monkeypatch):
     manager = Yay()
     manager.__dict__["version"] = parse_version("13.0.2")
     manager.cooldown = timedelta(days=7)
-    init_lua = Path(manager.cooldown_env()["XDG_CONFIG_HOME"]) / "yay" / "init.lua"
+    xdg_home = manager.cooldown_env()["XDG_CONFIG_HOME"]
+    assert xdg_home is not None
+    init_lua = Path(xdg_home) / "yay" / "init.lua"
     assert init_lua.is_file()
 
     del manager

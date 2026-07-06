@@ -234,7 +234,7 @@ def test_routing_builtin_is_override():
 
 def test_routing_typo_of_builtin_is_unknown_manager():
     with pytest.raises(ValidationError, match="unknown manager ID"):
-        validate_manager_overrides_section({"bre": {"cli_names": ["brew"]}}, pool=pool)
+        validate_manager_overrides_section({"brw": {"cli_names": ["brew"]}}, pool=pool)
 
 
 def test_routing_definition_is_validated():
@@ -317,7 +317,7 @@ def test_build_class_implements(operations, implemented, not_implemented):
         assert implements(manager, operation) is False
 
 
-def test_factory_regex_parsing():
+def test_factory_regex_parsing(monkeypatch):
     manager = build_manager_class(
         _definition(
             installed=OperationSpec(
@@ -327,14 +327,16 @@ def test_factory_regex_parsing():
             ),
         ),
     )()
-    manager.run_cli = lambda *args, **kwargs: "ruff@0.1.2\nblack@24.1.0"
+    monkeypatch.setattr(
+        manager, "run_cli", lambda *args, **kwargs: "ruff@0.1.2\nblack@24.1.0"
+    )
     assert [(p.id, str(p.installed_version)) for p in manager.installed] == [
         ("ruff", "0.1.2"),
         ("black", "24.1.0"),
     ]
 
 
-def test_factory_json_parsing():
+def test_factory_json_parsing(monkeypatch):
     manager = build_manager_class(
         _definition(
             outdated=OperationSpec(
@@ -349,8 +351,12 @@ def test_factory_json_parsing():
             ),
         ),
     )()
-    manager.run_cli = lambda *a, **k: json.dumps(
-        {"packages": [{"name": "ruff", "current": "0.1.2", "latest": "0.2.0"}]},
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *a, **k: json.dumps(
+            {"packages": [{"name": "ruff", "current": "0.1.2", "latest": "0.2.0"}]},
+        ),
     )
     outdated = list(manager.outdated)
     assert len(outdated) == 1
@@ -359,19 +365,23 @@ def test_factory_json_parsing():
     assert str(outdated[0].latest_version) == "0.2.0"
 
 
-def test_factory_command_substitution():
+def test_factory_command_substitution(monkeypatch):
     manager = build_manager_class(
         _definition(
             install=OperationSpec(args=("install", "{package_id}")),
             upgrade_one=OperationSpec(args=("install", "--force", "{package_id}")),
         ),
     )()
-    captured = {}
-    manager.run_cli = lambda *args, **kwargs: captured.update(install=args) or ""
+    captured: dict[str, tuple[str, ...]] = {}
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: captured.update(install=args) or "",
+    )
     manager.install("jq")
     assert captured["install"] == ("install", "jq")
     # upgrade_one_cli builds a command line off the resolved binary path.
-    manager.build_cli = lambda *args, **kwargs: args
+    monkeypatch.setattr(manager, "build_cli", lambda *args, **kwargs: args)
     assert manager.upgrade_one_cli("jq") == ("install", "--force", "jq")
 
 
@@ -518,13 +528,13 @@ def test_cli_rejects_bad_definition(invoke, create_config, reset_definitions):
 # Bundled manager definitions shipped with mpm as package data.
 
 
-def _fresh_gh_ext():
-    """Build a throwaway gh-ext instance so parsing tests can monkeypatch ``run_cli``
-    without mutating the shared pool singleton."""
+def _fresh_bundled(manager_id):
+    """Build a throwaway config-defined manager instance so parsing tests can
+    monkeypatch ``run_cli`` without mutating the shared pool singleton."""
     for definition, _ in load_bundled_definitions():
-        if definition.manager_id == "gh-ext":
+        if definition.manager_id == manager_id:
             return build_manager_class(definition)()
-    raise AssertionError("gh-ext is not among the bundled definitions")
+    raise AssertionError(f"{manager_id} is not among the bundled definitions")
 
 
 def test_bundled_definitions_are_valid():
@@ -543,14 +553,31 @@ def test_bundled_ids_disjoint_from_builtins():
     assert pool.known_manager_ids == pool.builtin_manager_ids | pool.bundled_manager_ids
 
 
-def test_gh_ext_registered():
-    """The bundled gh-ext manager is always present in the pool, config-defined."""
-    assert "gh-ext" in pool.bundled_manager_ids
-    manager = pool["gh-ext"]
+@pytest.mark.parametrize(
+    ("manager_id", "name", "homepage_url", "definition_source"),
+    (
+        (
+            "gh-ext",
+            "GitHub CLI extensions",
+            "https://cli.github.com",
+            "meta_package_manager/managers/gh_ext.toml",
+        ),
+        (
+            "soar",
+            "Soar",
+            "https://github.com/pkgforge/soar",
+            "meta_package_manager/managers/soar.toml",
+        ),
+    ),
+)
+def test_bundled_registered(manager_id, name, homepage_url, definition_source):
+    """Each bundled manager is always present in the pool, config-defined."""
+    assert manager_id in pool.bundled_manager_ids
+    manager = pool[manager_id]
     assert isinstance(manager, ConfigDrivenManager)
-    assert manager.name == "GitHub CLI extensions"
-    assert manager.homepage_url == "https://cli.github.com"
-    assert manager.definition_source == "meta_package_manager/managers/gh_ext.toml"
+    assert manager.name == name
+    assert manager.homepage_url == homepage_url
+    assert manager.definition_source == definition_source
 
 
 @pytest.mark.parametrize(
@@ -571,12 +598,17 @@ def test_gh_ext_capabilities(operation, expected):
     assert implements(pool["gh-ext"], operation) is expected
 
 
-def test_gh_ext_version_regex():
-    match = re.search(
-        pool["gh-ext"].version_regexes[0], "gh version 2.62.0 (2024-11-14)"
-    )
+@pytest.mark.parametrize(
+    ("manager_id", "version_output", "expected_version"),
+    (
+        ("gh-ext", "gh version 2.62.0 (2024-11-14)", "2.62.0"),
+        ("soar", "soar 0.12.6", "0.12.6"),
+    ),
+)
+def test_bundled_version_regex(manager_id, version_output, expected_version):
+    match = re.search(pool[manager_id].version_regexes[0], version_output)
     assert match is not None
-    assert match.group("version") == "2.62.0"
+    assert match.group("version") == expected_version
 
 
 def test_gh_ext_parses_installed():
@@ -585,7 +617,7 @@ def test_gh_ext_parses_installed():
     Column 1 is ``gh <name>`` (the short name is the package id), column 2 the
     ``owner/repo`` slug, column 3 the free-form version (a tag or a commit SHA).
     """
-    manager = _fresh_gh_ext()
+    manager = _fresh_bundled("gh-ext")
     manager.run_cli = lambda *args, **kwargs: (
         "gh dash\tdlvhdr/gh-dash\tv4.7.0\ngh cockpit\tgithub/gh-cockpit\ta1b2c3d4"
     )
@@ -602,7 +634,7 @@ def test_gh_ext_parses_search():
     strips off (slug in column 1), a row with an empty install-state column (slug in
     column 2), and a row whose install-state column is populated with ``installed``.
     """
-    manager = _fresh_gh_ext()
+    manager = _fresh_bundled("gh-ext")
     manager.run_cli = lambda *args, **kwargs: (
         "dlvhdr/gh-dash\tA rich terminal UI for GitHub\n"
         "\tvilmibm/gh-screensaver\tScreensavers for your terminal\n"
@@ -613,24 +645,6 @@ def test_gh_ext_parses_search():
         "vilmibm/gh-screensaver",
         "cli/gh-webhook",
     ]
-
-
-def _fresh_soar():
-    """Build a throwaway soar instance for parse tests, avoiding the pool singleton."""
-    for definition, _ in load_bundled_definitions():
-        if definition.manager_id == "soar":
-            return build_manager_class(definition)()
-    raise AssertionError("soar is not among the bundled definitions")
-
-
-def test_soar_registered():
-    """The bundled soar manager is always present in the pool, config-defined."""
-    assert "soar" in pool.bundled_manager_ids
-    manager = pool["soar"]
-    assert isinstance(manager, ConfigDrivenManager)
-    assert manager.name == "Soar"
-    assert manager.homepage_url == "https://github.com/pkgforge/soar"
-    assert manager.definition_source == "meta_package_manager/managers/soar.toml"
 
 
 @pytest.mark.parametrize(
@@ -651,16 +665,10 @@ def test_soar_capabilities(operation, expected):
     assert implements(pool["soar"], operation) is expected
 
 
-def test_soar_version_regex():
-    match = re.search(pool["soar"].version_regexes[0], "soar 0.12.6")
-    assert match is not None
-    assert match.group("version") == "0.12.6"
-
-
 def test_soar_parses_installed():
     """Parse ``soar list-installed``: split "name-version:repo" at the last "-" before a
     digit-led version, so multi-hyphen names stay intact."""
-    manager = _fresh_soar()
+    manager = _fresh_bundled("soar")
     manager.run_cli = lambda *args, **kwargs: (
         "bat-0.24.0:soarpkgs (2025-01-15) (1.8 MB)\n"
         "google-chrome-131.0:soarpkgs (2025-01-14) (95.2 MB)\n"
@@ -676,7 +684,7 @@ def test_soar_parses_installed():
 def test_soar_parses_search():
     """Extract the package name (before "#") from each ``soar search`` line, tolerating
     both the installed (✓/+) and available (○/-) state icons."""
-    manager = _fresh_soar()
+    manager = _fresh_bundled("soar")
     manager.run_cli = lambda *args, **kwargs: (
         "[+] bat#official:soarpkgs | 0.24.0 | archive - A cat clone (1.8 MB)\n"
         "[✓] ripgrep#official:soarpkgs | 14.1.0 | archive - Fast search (4.2 MB)"

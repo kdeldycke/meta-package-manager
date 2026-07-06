@@ -74,7 +74,8 @@ try:
 except ImportError:
     cyclonedx_support = False
     logging.getLogger("meta_package_manager").debug(
-        "CycloneDX support disabled: install meta-package-manager[sbom-offline] to enable it.",
+        "CycloneDX support disabled: "
+        "install meta-package-manager[sbom-offline] to enable it.",
     )
 
 TYPE_CHECKING = False
@@ -431,7 +432,7 @@ class CycloneDX(SBOM):
         for dep in metadata.dependencies:
             self.pending_dependencies.append((data, manager.id, dep.target_id))
 
-    def all_purls(self) -> Any:
+    def all_purls(self) -> Iterator[str]:
         """Yield every component purl in insertion order.
 
         Each component's ``bom_ref`` is its purl string, so the same
@@ -517,12 +518,9 @@ class CycloneDX(SBOM):
             if digits.isdigit():
                 cwes.append(int(digits))
         references = [
-            VulnerabilityReference(id=alias, source=source)
-            for alias in vuln.aliases
+            VulnerabilityReference(id=alias, source=source) for alias in vuln.aliases
         ]
-        advisories = [
-            VulnerabilityAdvisory(url=XsUri(url)) for url in vuln.references
-        ]
+        advisories = [VulnerabilityAdvisory(url=XsUri(url)) for url in vuln.references]
         return CDXVulnerability(
             id=vuln.id,
             source=source,

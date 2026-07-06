@@ -709,13 +709,13 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
 Install all extras at once with:
 
 ```{code-block} shell-session
-$ uv pip install meta-package-manager[hjson,json5,jsonc,sbom,toml,xml,yaml]
+$ uv pip install meta-package-manager[hjson,json5,jsonc,sbom-offline,sbom-online,toml,xml,yaml]
 ```
 
 Or with `pip`:
 
 ```{code-block} shell-session
-$ pip install meta-package-manager[hjson,json5,jsonc,sbom,toml,xml,yaml]
+$ pip install meta-package-manager[hjson,json5,jsonc,sbom-offline,sbom-online,toml,xml,yaml]
 ```
 
 When working from a cloned repository, [`uv sync`](https://docs.astral.sh/uv/reference/cli/#uv-sync) installs all runtime extras plus dev groups (`test`, `docs`, `typing`) in one shot:

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, cast
 from xml.etree import ElementTree
@@ -42,6 +43,7 @@ from meta_package_manager.package import (
     Supplier,
 )
 from meta_package_manager.sbom import SBOM, SPDX, CycloneDX, ExportFormat
+from meta_package_manager.sbom.vulnerabilities import Vulnerability
 
 from .test_cli import CLISubCommandTests
 
@@ -657,12 +659,7 @@ def test_cyclonedx_stats_count_external_bom_refs(tmp_path):
 
 
 def _sample_vulnerability():
-    """Build a Vulnerability without importing the network-only module at
-    collection time would not work, so import it lazily here."""
-    from datetime import datetime, timezone
-
-    from meta_package_manager.sbom.vulnerabilities import Vulnerability
-
+    """Build a sample ``Vulnerability`` for the render tests."""
     return Vulnerability(
         id="GHSA-aaaa-bbbb-cccc",
         source="OSV",
@@ -695,8 +692,7 @@ def test_spdx_renders_attached_vulnerabilities():
     security_refs = [
         ref
         for ref in django.get("externalRefs", [])
-        if ref["referenceCategory"] == "SECURITY"
-        and ref["referenceType"] == "advisory"
+        if ref["referenceCategory"] == "SECURITY" and ref["referenceType"] == "advisory"
     ]
     assert len(security_refs) == 1
     assert "GHSA-aaaa-bbbb-cccc" in security_refs[0]["referenceLocator"]

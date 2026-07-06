@@ -17,13 +17,13 @@ Before writing anything, decide how the manager will be implemented. `mpm` suppo
 
 Reach for config-based **only when every one of these holds**. If any fails, the manager needs a class:
 
-| Requirement                                                                          | Rules out config-based when                                                                                                                        |
-| :----------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
-| A version command prints a regex-extractable version string.                         | The CLI reports no version at all (like macOS `msupdate`).                                                                                         |
+| Requirement                                                                                            | Rules out config-based when                                                                                                                      |
+| :----------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| A version command prints a regex-extractable version string.                                           | The CLI reports no version at all (like macOS `msupdate`).                                                                                       |
 | `installed`, `outdated` and `search` each emit one package per line, or one flat top-level JSON array. | Records span multiple lines (`pacman -Ss`, `cabal list`) or the JSON is an object keyed by package or environment name (`mise`, `pixi`, `pnpm`). |
-| Every mutating operation is one argument list with `{package_id}` or `{query}` substituted in. | An operation needs conditional `sudo`, several binaries, delegation, or output post-processing.                                          |
-| The manager installs globally.                                                       | Packages are scoped to an activated project or environment (`flox`; `cabal outdated` is project-only).                                             |
-| Version pinning and native exact/extended search filtering are both unnecessary.     | The manager's whole point is selecting versions, or search must be resolved exactly server-side.                                                   |
+| Every mutating operation is one argument list with `{package_id}` or `{query}` substituted in.         | An operation needs conditional `sudo`, several binaries, delegation, or output post-processing.                                                  |
+| The manager installs globally.                                                                         | Packages are scoped to an activated project or environment (`flox`; `cabal outdated` is project-only).                                           |
+| Version pinning and native exact/extended search filtering are both unnecessary.                       | The manager's whole point is selecting versions, or search must be resolved exactly server-side.                                                 |
 
 Config-based skips the class machinery: no Python module, no `pool.py` registration, no version pinning or delegation. A private definition needs nothing beyond your own config file; shipping one bundled adds only a short metadata checklist (see below). Reach for a class when the manager needs power the DSL cannot express, and upstream it if it would help others: {doc}`/overrides` and {doc}`/security` explain why a reviewed, shipped manager beats executable configuration.
 
@@ -32,8 +32,11 @@ Config-based skips the class machinery: no Python module, no `pool.py` registrat
 The declarative schema (required keys, every operation, the regex and JSON parsers, placeholders, worked examples) is the "Define a new manager" section of {doc}`/overrides`, which is the source of truth. This section adds only the authoring workflow and the pitfalls that decide success.
 
 1. **Capture real output first.** For each operation you plan to declare, run the actual CLI and paste its output. Confirm a single per-line regex or one flat JSON array can extract `package_id` (plus `installed_version` for `installed`, `latest_version` for `outdated`). Never assume a format.
+
 2. **Write the block.** Add `[mpm.managers.<id>]` with an `<id>` that no built-in uses. Set `platforms`, the `operations` table, and the identity fields (`cli_names`, `requirement`, `version_regexes`, ...). Silence color and interactivity via `pre_args`, `post_args` or `extra_env` (like `NO_COLOR = "1"`) so the parser sees clean text. `mpm config-template` prints the built-ins' overridable fields as a formatting reference.
+
 3. **Declare only expressible operations.** A manager with no non-mutating "list upgradable" command (common: `soar`, `appman`, `gh extension`) omits `outdated`; `mpm` auto-skips it and `upgrade --all` still works. Never fake an operation with a mutating command.
+
 4. **Validate against the real CLI.** `mpm` checks the definition at load and reports the first problem with a precise path:
 
    ```shell-session
@@ -54,8 +57,8 @@ A definition has two homes:
 
 Shipping a bundled definition is far lighter than the class-based checklist below, with no module, no labels, and no destructive-test entry:
 
-| File                                      | Change                                                                                          |
-| :---------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| File                                      | Change                                                                                           |
+| :---------------------------------------- | :----------------------------------------------------------------------------------------------- |
 | `meta_package_manager/managers/<id>.toml` | The definition: one `[mpm.managers.<id>]` section. Auto-discovered, so no loader edit is needed. |
 | `pyproject.toml`                          | Add the manager ID (and its ecosystem name) to `keywords`.                                       |
 | `tests/test_pool.py`                      | Increment the `len(pool)` assertion in `test_manager_count`; `len(manager_classes)` stays.       |

@@ -1,5 +1,10 @@
 # Changelog
 
+## [`7.1.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.1.0...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`7.1.0` (2026-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.1...v7.1.0)
 
 - **Breaking:** [mpm] Split the `[sbom]` extra into `[sbom-offline]` (CycloneDX and SPDX document rendering) and `[sbom-online]` (the `--network` vulnerability lookups). `pip install meta-package-manager[sbom]` no longer resolves: use `[sbom-offline]` for the previous behavior, adding `[sbom-online]` for vulnerability scanning.

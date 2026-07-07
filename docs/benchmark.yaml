@@ -71,7 +71,7 @@ managers:
   bun: [topgrade]
   cabal: []
   cargo: [topgrade]
-  cask: [topgrade, pacaptr, pacapt, sysget]
+  cask: [topgrade, pacaptr, pacapt]
   cave: [pacapt]
   certbot: [topgrade]
   chezmoi: [topgrade]
@@ -86,13 +86,14 @@ managers:
   deno: [topgrade]
   distrobox: [topgrade]
   dkp-pacman: [topgrade]
-  dnf: [topgrade, pacaptr, sysget, whohas]
+  dnf: [topgrade, pacaptr, pacapt, sysget, whohas]
   dnf5: []
   dotnet: [topgrade]
   emacs: [topgrade]
   emerge: [topgrade, pacaptr, pacapt, sysget, whohas]
   eopkg: [topgrade, sysget]
   etc-update: [topgrade]
+  fink: [whohas]
   fish-plug: [topgrade]
   fisher: [topgrade]
   flatpak: [topgrade, sysget]
@@ -103,9 +104,9 @@ managers:
   gcloud: [topgrade]
   gem: [topgrade, sysget]
   getnf: [topgrade]
+  gh-ext: [topgrade]
   ghcup: [topgrade]
   git: [topgrade]
-  github-cli-extensions: [topgrade]
   gnome-shell: [topgrade]
   go: [topgrade]
   guix: [topgrade, sysget]
@@ -156,9 +157,13 @@ managers:
   pipx: [topgrade]
   pipxu: [topgrade]
   pixi: [topgrade]
+  # PackageKit's CLI. pacaptr only reaches it through its explicit
+  # ``--using pkcon`` syntax, never by auto-detection.
+  pkcon: [pacaptr]
   pkg: [topgrade, pacapt, sysget, whohas]
-  pkg-mgr: [sysget]
-  pkg-tools: [pacapt]
+  # OpenBSD's pkg_add/pkg_delete/pkg_info suite. pacapt wraps it as
+  # ``pkg_tools`` and sysget as ``pkg_mgr``: same base tools, single row.
+  pkg-tools: [pacapt, sysget, whohas]
   pkgfile: [topgrade]
   pkgin: [topgrade, whohas]
   platformio-core: [topgrade]
@@ -166,9 +171,9 @@ managers:
   pnpm: [topgrade]
   podman: [topgrade]
   poetry: [topgrade]
-  powershell: [topgrade]
   protonplus: [topgrade]
   protonup: [topgrade]
+  pwsh-gallery: [topgrade]
   pyenv: [topgrade]
   raco: [topgrade]
   rcm: [topgrade]
@@ -177,11 +182,12 @@ managers:
   rtcl: [topgrade]
   rustup: [topgrade]
   rye: [topgrade]
-  scoop: [topgrade, pacaptr, sysget]
+  scoop: [topgrade, pacaptr]
   sdkman: [topgrade]
   sheldon: [topgrade]
   slapt-get: [sysget, whohas]
   snap: [topgrade, sysget]
+  sorcery: [whohas]
   spack: []
   sparkle: [topgrade]
   spicetify: [topgrade]
@@ -201,6 +207,7 @@ managers:
   toolbx: [topgrade]
   trizen: [topgrade]
   typst: [topgrade]
+  urpmi: [whohas]
   uv: [topgrade]
   vagrant: [topgrade]
   vcpkg: [topgrade]
@@ -211,7 +218,7 @@ managers:
   vscodium: [topgrade]
   vundle: [topgrade]
   waydroid: [topgrade]
-  winget: [topgrade]
+  winget: [topgrade, pacaptr]
   wsl: [topgrade]
   xbps: [topgrade, pacaptr, pacapt, sysget]
   xcodes: [topgrade]
@@ -259,6 +266,7 @@ homepages:
   dotnet: https://learn.microsoft.com/dotnet/core/tools/
   emacs: https://www.gnu.org/software/emacs/
   etc-update: https://wiki.gentoo.org/wiki/Etc-update
+  fink: https://www.finkproject.org
   fish-plug: https://github.com/kidonng/fish-plug
   fisher: https://github.com/jorgebucaran/fisher
   flutter: https://flutter.dev
@@ -268,7 +276,6 @@ homepages:
   getnf: https://github.com/getnf/getnf
   ghcup: https://www.haskell.org/ghcup/
   git: https://git-scm.com
-  github-cli-extensions: https://cli.github.com/manual/gh_extension
   gnome-shell: https://extensions.gnome.org
   go: https://go.dev
   haxelib: https://lib.haxe.org
@@ -306,15 +313,14 @@ homepages:
   pipupgrade: https://github.com/achillesrasquinha/pipupgrade
   pipxu: https://github.com/bulletmark/pipxu
   pixi: https://pixi.sh
-  pkg-mgr: https://man.openbsd.org/pkg_add
-  pkg-tools: http://www.slackware.com/config/packages.php
+  pkcon: https://packagekit.freedesktop.org
+  pkg-tools: https://man.openbsd.org/pkg_add
   pkgfile: https://github.com/falconindy/pkgfile
   pkgin: https://pkgin.net
   platformio-core: https://platformio.org
   plug: https://github.com/junegunn/vim-plug
   podman: https://podman.io
   poetry: https://python-poetry.org
-  powershell: https://learn.microsoft.com/powershell/
   protonplus: https://github.com/Vysp3r/ProtonPlus
   protonup: https://github.com/AUNaseef/protonup
   pyenv: https://github.com/pyenv/pyenv
@@ -327,6 +333,7 @@ homepages:
   rye: https://rye.astral.sh
   sheldon: https://sheldon.cli.rs
   slapt-get: https://software.jaos.org/git/slapt-get/
+  sorcery: https://sourcemage.org/Sorcery
   spack: https://spack.io
   sparkle: https://sparkle-project.org
   spicetify: https://spicetify.app
@@ -341,6 +348,7 @@ homepages:
   toolbx: https://containertoolbx.org
   trizen: https://github.com/trizen/trizen
   typst: https://typst.app
+  urpmi: https://wiki.mageia.org/en/URPMI
   vagrant: https://www.vagrantup.com
   vcpkg: https://vcpkg.io
   vim: https://www.vim.org

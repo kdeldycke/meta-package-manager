@@ -111,11 +111,14 @@ def _completed(stdout):
 )
 def test_pip_install_blocked_parses_probe(stdout, expected):
     """The probe's ``1``/``0`` output maps to blocked/not-blocked."""
+    candidate = Path("/usr/bin/python3")
     with patch(PATCH_RUN, return_value=_completed(stdout)) as run:
-        assert Pip()._pip_install_blocked(Path("/usr/bin/python3")) is expected
-    # The candidate interpreter runs the externally-managed one-liner.
+        assert Pip()._pip_install_blocked(candidate) is expected
+    # The candidate interpreter runs the externally-managed one-liner. Compare
+    # against the same str() conversion the probe applies, so the expectation
+    # holds on Windows where the path stringifies with backslashes.
     command = run.call_args.args[0]
-    assert command[0] == "/usr/bin/python3"
+    assert command[0] == str(candidate)
     assert command[1] == "-c"
     assert "EXTERNALLY-MANAGED" in command[2]
 

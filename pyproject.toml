@@ -15,25 +15,33 @@ keywords = [
   "apm",
   "appimage",
   "apt",
+  "apt-cyg",
   "apt-mint",
   "asdf",
   "atom",
   "brew",
   "cargo",
   "cask",
+  "cave",
   "choco",
   "chocotaley",
+  "chromebrew",
+  "chromeos",
+  "clear linux",
   "CLI",
   "cli-tools",
   "composer",
   "conda",
   "cpan",
   "cyclonedx",
+  "cygwin",
   "deb-get",
   "dnf",
   "dnf5",
   "emerge",
   "eopkg",
+  "exherbo",
+  "fink",
   "flatpak",
   "fwupd",
   "gem",
@@ -45,26 +53,35 @@ keywords = [
   "mac app store",
   "macos",
   "macports",
+  "mageia",
   "mas",
   "meta-package-manager",
   "mise",
+  "netbsd",
   "nix",
   "nixpkgs",
   "node",
   "npm",
+  "openbsd",
   "opkg",
   "pacaur",
   "package",
   "package manager",
   "package url",
   "package-manager-cli",
+  "packagekit",
   "pacman",
   "pacstall",
+  "paludis",
   "paru",
   "php composer",
   "pip",
   "pipx",
+  "pkcon",
   "pkg",
+  "pkg-tools",
+  "pkgin",
+  "pkgsrc",
   "plugin",
   "pnpm",
   "portage",
@@ -82,14 +99,27 @@ keywords = [
   "scoop",
   "sdkman",
   "sfsu",
+  "slackware",
+  "slapt-get",
+  "slitaz",
   "snap",
   "soar",
+  "solaris",
+  "sorcery",
+  "source mage",
   "spdx",
   "steamcmd",
   "stew",
+  "sun-tools",
+  "svr4",
   "swiftbar",
   "swiftbar-plugin",
+  "swupd",
+  "tazpkg",
+  "tex live",
+  "tlmgr",
   "topgrade",
+  "urpmi",
   "uv",
   "uvx",
   "visual studio code",
@@ -176,8 +206,11 @@ dependencies = [
   # print_table()'s sort_key parameter, and the 8.1.1 fix for the
   # EnumChoice-typed --sort-by default; 8.2.0 covers them all.
   "click-extra>=8.2",
-  # extra-platforms 10.0.0 drops the distro dependency.
-  "extra-platforms>=10",
+  # extra-platforms 13.1.0 adds the ChromeOS, Clear Linux, SliTaz and Source Mage
+  # detections that the chromebrew, swupd, tazpkg and sorcery managers declare.
+  # Tracked from git main through [tool.uv.sources] until 13.1.0 is released; relax
+  # to ">=13.1" then.
+  "extra-platforms>=13.1.0.dev0",
   # Required at runtime by meta_package_manager.package and
   # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
   # cross-manager package identification, independent of SBOM features. That API
@@ -333,6 +366,10 @@ exclude-newer = "1 week"
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
 exclude-newer-package = { click-extra = "2026-07-02T00:00:00Z" }
+# Track extra-platforms from git main for the unreleased 13.1.0 platform
+# detections (ChromeOS, Clear Linux, SliTaz, Source Mage). Drop this source once
+# 13.1.0 lands on PyPI.
+sources = { extra-platforms = { git = "https://github.com/kdeldycke/extra-platforms.git", branch = "main" } }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 
@@ -604,6 +641,10 @@ label = "📦 manager: apm"
 patterns = [ "apm", "atom" ]
 
 [[tool.repomatic.labels.content-rules]]
+label = "📦 manager: apt-cyg"
+patterns = [ "apt-cyg", "cygwin" ]
+
+[[tool.repomatic.labels.content-rules]]
 label = "📦 manager: asdf"
 patterns = [ "asdf", "asdf-vm", "version manager" ]
 
@@ -688,6 +729,10 @@ label = "📦 manager: pip-based"
 patterns = [ "pip", "pipx" ]
 
 [[tool.repomatic.labels.content-rules]]
+label = "📦 manager: pkcon"
+patterns = [ "pkcon", "packagekit" ]
+
+[[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pkg-based"
 patterns = [ "pkg", "ports", "freebsd", "freebsd ports" ]
 
@@ -710,6 +755,18 @@ patterns = [ "snap" ]
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: steamcmd"
 patterns = [ "steamcmd", "steam", "valve" ]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: sun-tools"
+patterns = [ "sun-tools", "solaris", "svr4", "pkgadd", "pkgrm" ]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: swupd"
+patterns = [ "swupd", "clear linux", "clearlinux" ]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: tazpkg"
+patterns = [ "tazpkg", "slitaz" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: uv-based"
@@ -766,6 +823,11 @@ color = "bfdadc"
 description = "apm"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: apt-cyg"
+color = "bfdadc"
+description = "apt-cyg"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: asdf"
 color = "bfdadc"
 description = "asdf"
@@ -776,9 +838,19 @@ color = "bfdadc"
 description = "cargo"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: cave"
+color = "bfdadc"
+description = "cave"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: choco"
 color = "bfdadc"
 description = "choco"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: chromebrew"
+color = "bfdadc"
+description = "chromebrew"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: composer"
@@ -809,6 +881,11 @@ description = "emerge"
 name = "📦 manager: eopkg"
 color = "bfdadc"
 description = "eopkg"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: fink"
+color = "bfdadc"
+description = "fink"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: flatpak"
@@ -881,9 +958,24 @@ color = "bfdadc"
 description = "pip, pipx"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: pkcon"
+color = "bfdadc"
+description = "pkcon"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: pkg-based"
 color = "bfdadc"
 description = "pkg, ports"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: pkg-tools"
+color = "bfdadc"
+description = "pkg-tools"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: pkgin"
+color = "bfdadc"
+description = "pkgin"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pwsh-gallery"
@@ -893,7 +985,7 @@ description = "pwsh-gallery"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: rpm-based"
 color = "bfdadc"
-description = "dnf, dnf5, yum, zypper"
+description = "dnf, dnf5, urpmi, yum, zypper"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: scoop-based"
@@ -906,6 +998,11 @@ color = "bfdadc"
 description = "sdkman"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: slapt-get"
+color = "bfdadc"
+description = "slapt-get"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: snap"
 color = "bfdadc"
 description = "snap"
@@ -916,6 +1013,11 @@ color = "bfdadc"
 description = "soar"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: sorcery"
+color = "bfdadc"
+description = "sorcery"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: steamcmd"
 color = "bfdadc"
 description = "steamcmd"
@@ -924,6 +1026,26 @@ description = "steamcmd"
 name = "📦 manager: stew"
 color = "bfdadc"
 description = "stew"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: sun-tools"
+color = "bfdadc"
+description = "sun-tools"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: swupd"
+color = "bfdadc"
+description = "swupd"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: tazpkg"
+color = "bfdadc"
+description = "tazpkg"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: tlmgr"
+color = "bfdadc"
+description = "tlmgr"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: topgrade"
@@ -963,7 +1085,7 @@ description = "DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
 [[tool.repomatic.labels.extra]]
 name = "🖥 platform: Linux"
 color = "bfd4f2"
-description = "Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, …"
+description = "Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, ChromeOS, …"
 
 [[tool.repomatic.labels.extra]]
 name = "🖥 platform: macOS"
@@ -993,6 +1115,10 @@ label = "📦 manager: apm"
 any-glob-to-any-file = [ "meta_package_manager/managers/apm*", "tests/*apm*" ]
 
 [[tool.repomatic.labels.file-rules]]
+label = "📦 manager: apt-cyg"
+any-glob-to-any-file = [ "meta_package_manager/managers/apt_cyg*", "tests/*apt_cyg*" ]
+
+[[tool.repomatic.labels.file-rules]]
 label = "📦 manager: asdf"
 any-glob-to-any-file = [ "meta_package_manager/managers/asdf*", "tests/*asdf*" ]
 
@@ -1019,7 +1145,8 @@ any-glob-to-any-file = [ "meta_package_manager/managers/dnf*", "tests/*dnf*" ]
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: dpkg-based"
 any-glob-to-any-file = [
-  "meta_package_manager/managers/apt*",
+  # The dot keeps apt.py (APT, APT_Mint) in and apt_cyg.py (its own label) out.
+  "meta_package_manager/managers/apt.*",
   "meta_package_manager/managers/dpkg*",
   "meta_package_manager/managers/opkg*",
   "tests/*apt*",
@@ -1104,8 +1231,14 @@ label = "📦 manager: pip-based"
 any-glob-to-any-file = [ "meta_package_manager/managers/pip*", "tests/*pip*" ]
 
 [[tool.repomatic.labels.file-rules]]
+label = "📦 manager: pkcon"
+any-glob-to-any-file = [ "meta_package_manager/managers/pkcon*", "tests/*pkcon*" ]
+
+[[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pkg-based"
-any-glob-to-any-file = [ "meta_package_manager/managers/pkg*", "tests/*pkg*", "tests/*ports*" ]
+# The dot keeps pkg.py (PKG, Ports) in and pkcon.py, pkgin.toml and pkg_tools.toml
+# (their own labels) out.
+any-glob-to-any-file = [ "meta_package_manager/managers/pkg.*", "tests/*pkg*", "tests/*ports*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pwsh-gallery"
@@ -1131,6 +1264,18 @@ any-glob-to-any-file = [ "meta_package_manager/managers/snap*", "tests/*snap*" ]
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: steamcmd"
 any-glob-to-any-file = [ "meta_package_manager/managers/steamcmd*", "tests/*steamcmd*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: sun-tools"
+any-glob-to-any-file = [ "meta_package_manager/managers/sun_tools*", "tests/*sun_tools*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: swupd"
+any-glob-to-any-file = [ "meta_package_manager/managers/swupd*", "tests/*swupd*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: tazpkg"
+any-glob-to-any-file = [ "meta_package_manager/managers/tazpkg*", "tests/*tazpkg*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: uv-based"

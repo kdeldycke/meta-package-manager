@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import os
 import re
+from pathlib import Path
 
 import pytest
 from click_extra import ValidationError
@@ -193,6 +194,54 @@ def test_parse_definition_returns_dataclass():
             id="unknown-top-level-field",
         ),
         pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "installed": {
+                        "args": ["list"],
+                        "regex": r"(?P<package_id>\S+) (?P<installed_version>\S+)",
+                        "sudo": True,
+                    },
+                },
+            },
+            "unknown key",
+            id="sudo-on-query-operation",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {"sync": {"args": ["s"], "cli": ""}},
+            },
+            "must be a non-empty string",
+            id="empty-operation-cli",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {"sync": {"args": ["s"], "sudo": "yes"}},
+            },
+            "expected a boolean",
+            id="non-boolean-sudo",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {"sync": {"args": ["s"]}},
+                "version_cli": 1,
+            },
+            "expected a string",
+            id="non-string-version-cli",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {"sync": {"args": ["s"]}},
+                "default_sudo": "yes",
+            },
+            "expected a boolean",
+            id="non-boolean-default-sudo",
+        ),
+        pytest.param(
             {"platforms": ["linux"]},
             "must declare 'operations'",
             id="missing-operations",
@@ -220,6 +269,41 @@ def test_parse_definition_rejects_bad_id():
         parse_manager_definition(
             "MyTool", {"platforms": ["linux"], "operations": {"sync": {"args": ["s"]}}}
         )
+
+
+def test_parse_definition_multi_binary_and_sudo():
+    """A definition can span sibling binaries, mark privileged operations, and
+    declare an alternate version probe."""
+    definition = parse_manager_definition(
+        "urpmi-like",
+        {
+            "platforms": ["linux"],
+            "cli_names": ["urpmi"],
+            "default_sudo": True,
+            "version_cli": "uname",
+            "operations": {
+                "search": {
+                    "args": ["--fuzzy", "{query}"],
+                    "cli": "urpmq",
+                    "regex": r"^(?P<package_id>\S+)$",
+                },
+                "install": {"args": ["--auto", "{package_id}"], "sudo": True},
+                "remove": {
+                    "args": ["--auto", "{package_id}"],
+                    "cli": "urpme",
+                    "sudo": True,
+                },
+            },
+        },
+    )
+    assert definition.cli_fields["default_sudo"] is True
+    assert definition.cli_fields["version_cli"] == "uname"
+    assert definition.operations["search"].cli == "urpmq"
+    assert definition.operations["search"].sudo is False
+    assert definition.operations["install"].cli is None
+    assert definition.operations["install"].sudo is True
+    assert definition.operations["remove"].cli == "urpme"
+    assert definition.operations["remove"].sudo is True
 
 
 # Section routing: built-in override vs new-manager definition.
@@ -385,6 +469,59 @@ def test_factory_command_substitution(monkeypatch):
     assert manager.upgrade_one_cli("jq") == ("install", "--force", "jq")
 
 
+def test_factory_operation_cli(monkeypatch):
+    """An operation carrying its own ``cli`` resolves the sibling binary and routes
+    the call through it; a missing sibling is an error, not a silent fallback."""
+    manager = build_manager_class(
+        _definition(
+            remove=OperationSpec(args=("--auto", "{package_id}"), cli="urpme"),
+        ),
+    )()
+    sibling = Path("/fake/bin/urpme")
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(manager, "which", lambda name: sibling)
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: captured.update(args=args, **kwargs) or "",
+    )
+    manager.remove("jq")
+    assert captured["args"] == ("--auto", "jq")
+    assert captured["override_cli_path"] == sibling
+
+    monkeypatch.setattr(manager, "which", lambda name: None)
+    with pytest.raises(FileNotFoundError, match="urpme not found"):
+        manager.remove("jq")
+
+
+def test_factory_operation_sudo(monkeypatch):
+    """A ``sudo = true`` operation is built privileged; unmarked ones are not."""
+    manager = build_manager_class(
+        _definition(
+            install=OperationSpec(args=("--auto", "{package_id}"), sudo=True),
+            sync=OperationSpec(args=("update",)),
+            upgrade_all=OperationSpec(args=("--auto-select",), sudo=True),
+        ),
+    )()
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: captured.update(kwargs) or "",
+    )
+    manager.install("jq")
+    assert captured["sudo"] is True
+    manager.sync()
+    assert captured["sudo"] is False
+    monkeypatch.setattr(
+        manager,
+        "build_cli",
+        lambda *args, **kwargs: captured.update(kwargs) or args,
+    )
+    manager.upgrade_all_cli()
+    assert captured["sudo"] is True
+
+
 # Trust gate.
 
 
@@ -485,6 +622,35 @@ def test_factory_functional(tmp_path, fake_tool, reset_definitions):
 
 
 @skip_windows
+def test_factory_functional_version_cli(tmp_path, fake_tool, reset_definitions):
+    """The version probe runs the ``version_cli`` binary instead of the main CLI,
+    like OS-versioned tool suites exposing no version flag of their own."""
+    probe = tmp_path / "myuname"
+    probe.write_text("#!/bin/sh\necho '7.7'\n")
+    probe.chmod(0o755)
+    definition = ManagerDefinition(
+        manager_id="mytool",
+        name="My Tool",
+        platforms=("all_platforms",),
+        homepage_url=None,
+        cli_fields={
+            "cli_names": ("mytool",),
+            "cli_search_path": (str(tmp_path),),
+            "requirement": ">=7.0",
+            "version_cli": "myuname",
+            "version_cli_options": ("-r",),
+            "version_regexes": (r"(?P<version>[\d.]+)",),
+        },
+        operations={
+            "sync": OperationSpec(args=("update",)),
+        },
+    )
+    manager = build_manager_class(definition)()
+    assert str(manager.version) == "7.7"
+    assert manager.available is True
+
+
+@skip_windows
 def test_cli_lists_config_defined_manager(
     invoke, create_config, tmp_path, fake_tool, reset_definitions
 ):
@@ -557,16 +723,70 @@ def test_bundled_ids_disjoint_from_builtins():
     ("manager_id", "name", "homepage_url", "definition_source"),
     (
         (
+            "cave",
+            "cave",
+            "https://exherbo.org",
+            "meta_package_manager/managers/cave.toml",
+        ),
+        (
+            "chromebrew",
+            "Chromebrew",
+            "https://chromebrew.github.io",
+            "meta_package_manager/managers/chromebrew.toml",
+        ),
+        (
+            "fink",
+            "Fink",
+            "https://www.finkproject.org",
+            "meta_package_manager/managers/fink.toml",
+        ),
+        (
             "gh-ext",
             "GitHub CLI extensions",
             "https://cli.github.com",
             "meta_package_manager/managers/gh_ext.toml",
         ),
         (
+            "pkg-tools",
+            "OpenBSD pkg tools",
+            "https://man.openbsd.org/pkg_add",
+            "meta_package_manager/managers/pkg_tools.toml",
+        ),
+        (
+            "pkgin",
+            "Pkgin",
+            "https://pkgin.net",
+            "meta_package_manager/managers/pkgin.toml",
+        ),
+        (
+            "slapt-get",
+            "slapt-get",
+            "https://software.jaos.org/",
+            "meta_package_manager/managers/slapt_get.toml",
+        ),
+        (
             "soar",
             "Soar",
             "https://github.com/pkgforge/soar",
             "meta_package_manager/managers/soar.toml",
+        ),
+        (
+            "sorcery",
+            "Sorcery",
+            "https://sourcemage.org",
+            "meta_package_manager/managers/sorcery.toml",
+        ),
+        (
+            "tlmgr",
+            "TeX Live Manager",
+            "https://www.tug.org/texlive/",
+            "meta_package_manager/managers/tlmgr.toml",
+        ),
+        (
+            "urpmi",
+            "urpmi",
+            "https://wiki.mageia.org/en/URPMI",
+            "meta_package_manager/managers/urpmi.toml",
         ),
     ),
 )
@@ -601,8 +821,25 @@ def test_gh_ext_capabilities(operation, expected):
 @pytest.mark.parametrize(
     ("manager_id", "version_output", "expected_version"),
     (
+        ("cave", "cave 3.0.1", "3.0.1"),
+        ("chromebrew", "1.75.0", "1.75.0"),
+        ("fink", "Package manager version: 0.45.6", "0.45.6"),
         ("gh-ext", "gh version 2.62.0 (2024-11-14)", "2.62.0"),
+        # pkg-tools probes `uname -r`, the suite shipping with the OS release.
+        ("pkg-tools", "7.7", "7.7"),
+        ("pkgin", "pkgin 26.4.0 (using SQLite 3.45.1)", "26.4.0"),
+        ("slapt-get", "slapt-get version 0.11.12", "0.11.12"),
         ("soar", "soar 0.12.6", "0.12.6"),
+        # Sorcery prints the bare content of /etc/sorcery/version, a datestamp.
+        ("sorcery", "20240108", "20240108"),
+        (
+            "tlmgr",
+            "tlmgr revision 66798 (2023-04-08 02:15:21 +0200)\n"
+            "tlmgr using installation: /usr/local/texlive/2023\n"
+            "TeX Live (https://tug.org/texlive) version 2023",
+            "2023",
+        ),
+        ("urpmi", "urpmi 8.121.7", "8.121.7"),
     ),
 )
 def test_bundled_version_regex(manager_id, version_output, expected_version):
@@ -690,3 +927,169 @@ def test_soar_parses_search():
         "[✓] ripgrep#official:soarpkgs | 14.1.0 | archive - Fast search (4.2 MB)"
     )
     assert [p.id for p in manager.search("bat", False, False)] == ["bat", "ripgrep"]
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "operation", "output", "expected"),
+    (
+        pytest.param(
+            "cave",
+            "installed",
+            "app-arch/gzip 1.14\nsys-apps/sed 4.9",
+            [("app-arch/gzip", "1.14"), ("sys-apps/sed", "4.9")],
+            id="cave-installed",
+        ),
+        pytest.param(
+            "chromebrew",
+            "installed",
+            "Package        Version\n=======\nless           643\nnano           8.2",
+            [("less", "643"), ("nano", "8.2")],
+            id="chromebrew-installed",
+        ),
+        pytest.param(
+            "chromebrew",
+            "search",
+            "less: GNU less is a paginator\nlesspipe: Filters for less",
+            [("less", None), ("lesspipe", None)],
+            id="chromebrew-search",
+        ),
+        pytest.param(
+            "fink",
+            "installed",
+            " i \tfiglet\t2.2.5-1\tPrints text as ASCII art\n"
+            "(i)\tnano\t6.2-1\tSmall editor\n"
+            "   \tlynx\t2.9.0-1\tText browser is not installed",
+            [("figlet", "2.2.5-1"), ("nano", "6.2-1")],
+            id="fink-installed",
+        ),
+        pytest.param(
+            "pkg-tools",
+            "installed",
+            "unzip-6.0p17        Extract files from ZIP archives\n"
+            "lunzip-1.14p0       Lzip decompressor",
+            [("unzip", "6.0p17"), ("lunzip", "1.14p0")],
+            id="pkg-tools-installed",
+        ),
+        pytest.param(
+            "pkg-tools",
+            "search",
+            "lunzip-1.14p0\nunzip-6.0p17 (installed)\nunzip-6.0p17-iconv",
+            [
+                ("lunzip", "1.14p0"),
+                ("unzip", "6.0p17"),
+                ("unzip", "6.0p17-iconv"),
+            ],
+            id="pkg-tools-search",
+        ),
+        pytest.param(
+            "pkgin",
+            "installed",
+            "lbdb-0.48.1nb1;The little brother's database\n"
+            "mutt-1.14.5;Text-based MIME mail client",
+            [("lbdb", "0.48.1nb1"), ("mutt", "1.14.5")],
+            id="pkgin-installed",
+        ),
+        pytest.param(
+            "pkgin",
+            "outdated",
+            "abook-0.6.2;<;Text-based addressbook program",
+            [("abook", "0.6.2")],
+            id="pkgin-outdated",
+        ),
+        pytest.param(
+            "pkgin",
+            "search",
+            "abook-0.6.1          Text-based addressbook program\n"
+            "mutt-1.14.5 =        Text-based MIME mail client\n"
+            "=: package is installed and up-to-date\n"
+            "<: package is installed but newer version is available\n"
+            ">: installed package has a greater version than available package",
+            [("abook", "0.6.1"), ("mutt", "1.14.5")],
+            id="pkgin-search",
+        ),
+        pytest.param(
+            "slapt-get",
+            "installed",
+            "tree-2.3.2-x86_64-1 [inst=yes]: display directory tree\n"
+            "util-linux-2.39-x86_64-1 [inst=yes]: collection of utilities",
+            [("tree", "2.3.2"), ("util-linux", "2.39")],
+            id="slapt-get-installed",
+        ),
+        pytest.param(
+            "slapt-get",
+            "search",
+            "tree-2.3.2-x86_64-1 [inst=no]: display directory tree",
+            [("tree", "2.3.2")],
+            id="slapt-get-search",
+        ),
+        pytest.param(
+            "sorcery",
+            "installed",
+            "cowsay:20240108:installed:3.03\nvim:20230101:held:9.0",
+            [("cowsay", "3.03"), ("vim", "9.0")],
+            id="sorcery-installed",
+        ),
+        pytest.param(
+            "sorcery",
+            "search",
+            "cowsay 3.03 @test\ntree 2.1.1 @stable",
+            [("cowsay", "3.03"), ("tree", "2.1.1")],
+            id="sorcery-search",
+        ),
+        pytest.param(
+            "tlmgr",
+            "installed",
+            "tlmgr: package repository https://mirror.ctan.org (verified)\n"
+            "sansmath,15878\ntitlesec,68677",
+            [("sansmath", "15878"), ("titlesec", "68677")],
+            id="tlmgr-installed",
+        ),
+        pytest.param(
+            "tlmgr",
+            "outdated",
+            "location-url\thttps://mirror.ctan.org\n"
+            "total-bytes\t323544\n"
+            "end-of-header\n"
+            "adjmulticol\tu\t62935\t63073\t316000\t-\t-\t-\t-\t-\n"
+            "end-of-updates\n"
+            "running mktexlsr ...",
+            [("adjmulticol", "63073")],
+            id="tlmgr-outdated",
+        ),
+        pytest.param(
+            "urpmi",
+            "installed",
+            "sgml-skel 0.7-24.mga9\ndesktop-file-utils 0.26-5.mga9",
+            [("sgml-skel", "0.7-24.mga9"), ("desktop-file-utils", "0.26-5.mga9")],
+            id="urpmi-installed",
+        ),
+        pytest.param(
+            "urpmi",
+            "outdated",
+            "kernel-desktop-6.6.0-1.mga9\nfvwm3-1.0.2-1.1.mga8",
+            [("kernel-desktop", "6.6.0-1.mga9"), ("fvwm3", "1.0.2-1.1.mga8")],
+            id="urpmi-outdated",
+        ),
+    ),
+)
+def test_bundled_parsing(manager_id, operation, output, expected):
+    """Lock each bundled definition's regexes to output samples derived from the
+    upstream tools' own source code or documentation.
+
+    Versions are compared as raw captured strings (``None`` when the regex has no
+    version group). ``which`` is stubbed so operations declaring a sibling ``cli``
+    resolve without the real binary installed.
+    """
+    manager = _fresh_bundled(manager_id)
+    manager.which = lambda name: Path("/fake/bin") / name
+    manager.run_cli = lambda *args, **kwargs: output
+    if operation == "search":
+        packages = manager.search("query", False, False)
+    else:
+        packages = getattr(manager, operation)
+    role = "installed_version" if operation == "installed" else "latest_version"
+    results = [
+        (p.id, str(version) if (version := getattr(p, role)) else None)
+        for p in packages
+    ]
+    assert results == expected

@@ -69,10 +69,11 @@ def test_manager_classes_order():
 
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
-    assert len(manager_classes) == 56
-    # Two extra beyond the built-in classes: the bundled gh-ext and soar config-defined
-    # managers, shipped as package data and loaded into the pool at construction.
-    assert len(pool) == 58
+    assert len(manager_classes) == 61
+    # Eleven extra beyond the built-in classes: the bundled config-defined managers
+    # (cave, chromebrew, fink, gh-ext, pkg-tools, pkgin, slapt-get, soar, sorcery,
+    # tlmgr, urpmi), shipped as package data and loaded into the pool at construction.
+    assert len(pool) == 72
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))
 

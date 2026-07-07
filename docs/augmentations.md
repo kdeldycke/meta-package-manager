@@ -11,14 +11,17 @@ Each ✅ below is a capability `mpm` synthesizes for a manager that does not pro
 | `apk`          |                      |      ✅      |                 |
 | `apm`          |                      |      ✅      |                 |
 | `apt-mint`     |                      |              |       ✅        |
+| `apt-cyg`       |                      |      ✅      |       ✅        |
 | `asdf`         |          ✅          |      ✅      |       ✅        |
 | `cargo`        |                      |      ✅      |       ✅        |
+| `chromebrew`    |                      |      ✅      |       ✅        |
 | `composer`     |                      |      ✅      |                 |
 | `conda`        |                      |      ✅      |       ✅        |
 | `deb-get`      |                      |      ✅      |       ✅        |
 | `dnf`          |                      |      ✅      |       ✅        |
 | `dnf5`         |                      |      ✅      |       ✅        |
 | `eopkg`        |                      |      ✅      |                 |
+| `fink`          |                      |      ✅      |       ✅        |
 | `flatpak`      |                      |      ✅      |       ✅        |
 | `gem`          |                      |              |       ✅        |
 | `gh-ext`       |                      |      ✅      |       ✅        |
@@ -33,13 +36,22 @@ Each ✅ below is a capability `mpm` synthesizes for a manager that does not pro
 | `pacstall`     |                      |      ✅      |       ✅        |
 | `paru`         |                      |              |       ✅        |
 | `pip`          |          ✅          |              |                 |
+| `pkcon`         |                      |      ✅      |       ✅        |
+| `pkg-tools`     |                      |      ✅      |       ✅        |
+| `pkgin`         |                      |      ✅      |       ✅        |
 | `pnpm`         |                      |      ✅      |                 |
 | `pwsh-gallery` |                      |              |       ✅        |
 | `scoop`        |                      |      ✅      |       ✅        |
 | `sfsu`         |                      |      ✅      |       ✅        |
+| `slapt-get`     |                      |      ✅      |       ✅        |
 | `snap`         |                      |      ✅      |       ✅        |
 | `soar`         |                      |      ✅      |       ✅        |
+| `sorcery`       |                      |      ✅      |       ✅        |
 | `steamcmd`     |          ✅          |              |                 |
+| `swupd`         |                      |      ✅      |       ✅        |
+| `tazpkg`        |                      |      ✅      |       ✅        |
+| `tlmgr`         |                      |      ✅      |       ✅        |
+| `urpmi`         |                      |      ✅      |       ✅        |
 | `uv`           |          ✅          |              |                 |
 | `xbps`         |                      |      ✅      |       ✅        |
 | `yarn`         |                      |      ✅      |       ✅        |

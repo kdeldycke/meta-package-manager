@@ -1,0 +1,79 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# tlmgr is TeX Live's native package manager (https://www.tug.org/texlive/). See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/config.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against the tlmgr.pl source (TeX-Live/texlive-infra) and
+# real captures:
+#   - Package operations only work on a vanilla upstream TeX Live install.
+#     Distro-packaged TeX Live (Debian, Fedora) is dpkg/rpm-owned and disables
+#     tlmgr's mutating commands.
+#   - `info --data name,localrev` prints headerless CSV, one "name,revision" record
+#     per line; both fields are bare and comma-free. The --data option appeared in
+#     TeX Live 2018, hence the version floor.
+#   - The outdated listing runs in --machine-readable mode: tab-separated records
+#     between an "end-of-header" and an "end-of-updates" line, with a one-char
+#     status in field 2 ("u" = updatable). Diagnostics move to stderr in that mode.
+#   - TeX Live versions are years. The version regex deliberately matches only the
+#     4 digits following "version", so pre-2017 layouts ("TeX Live 2016 version
+#     20160523") resolve to their year and fail the >=2018 floor.
+#   - tlmgr never prompts on per-package operations and never self-escalates: on the
+#     default user-owned /usr/local/texlive install no root is needed, while
+#     root-owned installs refuse mutations. Mutating operations are marked
+#     privileged but escalation stays opt-in (default_sudo is left off): pass
+#     `--sudo` to mpm for a root-owned TeX tree.
+
+[mpm.managers.tlmgr]
+name = "TeX Live Manager"
+homepage_url = "https://www.tug.org/texlive/"
+platforms = ["unix", "windows"]
+cli_names = ["tlmgr"]
+requirement = ">=2018"
+version_regexes = ['TeX Live.*version (?P<version>\d{4})']
+
+[mpm.managers.tlmgr.operations.installed]
+args = ["info", "--only-installed", "--data", "name,localrev"]
+regex = '^(?P<package_id>[^,]+),(?P<installed_version>\d+)$'
+
+# Header lines ("location-url", "total-bytes", "end-of-header"), the
+# "end-of-updates" terminator and the trailing mktexlsr noise all fail the
+# single-char "u" status field and are skipped.
+[mpm.managers.tlmgr.operations.outdated]
+args = ["--machine-readable", "update", "--list", "--all"]
+regex = '^(?P<package_id>[^\t]+)\tu\t(?P<installed_version>\d+)\t(?P<latest_version>\d+)\t'
+
+# Name and description matches print one "pkgname - short description" line each;
+# the repository diagnostic line carries no " - " after its first token. The query
+# is a Perl regex on tlmgr's side.
+[mpm.managers.tlmgr.operations.search]
+args = ["search", "--global", "{query}"]
+regex = '^(?P<package_id>[^\s:]+) - '
+
+[mpm.managers.tlmgr.operations.install]
+args = ["install", "{package_id}"]
+sudo = true
+
+[mpm.managers.tlmgr.operations.remove]
+args = ["remove", "{package_id}"]
+sudo = true
+
+[mpm.managers.tlmgr.operations.upgrade_one]
+args = ["update", "{package_id}"]
+sudo = true
+
+# Excludes the tlmgr infrastructure itself, which is the sync operation's job.
+[mpm.managers.tlmgr.operations.upgrade_all]
+args = ["update", "--all"]
+sudo = true
+
+# tlmgr re-fetches the remote TLPDB on demand and keeps no separate metadata cache:
+# self-updating the tool is the closest analogue to a catalog refresh.
+[mpm.managers.tlmgr.operations.sync]
+args = ["update", "--self"]
+sudo = true
+
+# Prunes old package backups down to the configured autobackup count.
+[mpm.managers.tlmgr.operations.cleanup]
+args = ["backup", "--clean", "--all"]
+sudo = true

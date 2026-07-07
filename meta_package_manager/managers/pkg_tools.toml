@@ -1,0 +1,75 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# OpenBSD's pkg tools are the base system's package suite, spanning three binaries:
+# pkg_info (queries), pkg_add (install/upgrade) and pkg_delete (remove/cleanup). See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/config.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against the pkg_add/pkg_info/pkg_delete man pages
+# (man.openbsd.org), the OpenBSD FAQ 15, and the OpenBSD::PkgInfo/Update Perl source:
+#   - None of the three binaries has a version flag (-V and -v mean progress/verbose):
+#     the suite ships with the base system and is versioned with the OS, so the
+#     version probe runs `uname -r` instead (like "7.7").
+#   - Package names fuse "stem-version" with OpenBSD's pN patch suffix and optional
+#     flavor tails (unzip-6.0p17, unzip-6.0p17-iconv): the version capture starts at
+#     the last dash before a digit and absorbs any flavor tail.
+#   - Packages are located through /etc/installurl, configured by default on modern
+#     OpenBSD: there is no local index to refresh, hence no sync operation. Outdated
+#     is omitted too: `pkg_add -u -n -v` interleaves progress meters and can list
+#     several candidates per package, which defeats per-line parsing.
+#   - -I forces non-interactive mode on every mutating call (the default is
+#     interactive on a terminal). Mutations need root: OpenBSD's base convention is
+#     doas, but mpm's escalation runs through sudo (available as a package).
+
+[mpm.managers.pkg-tools]
+name = "OpenBSD pkg tools"
+homepage_url = "https://man.openbsd.org/pkg_add"
+platforms = ["openbsd"]
+cli_names = ["pkg_info"]
+# The pkg_* tools live in /usr/sbin, not always on a regular user's PATH.
+cli_search_path = ["/usr/sbin"]
+default_sudo = true
+version_cli = "uname"
+version_cli_options = ["-r"]
+version_regexes = ['^(?P<version>[\d.]+)']
+
+# Bare `pkg_info` implies -I -a (one "stem-version  comment" line per installed
+# package, the name padded to a minimum of 20 characters); the flags are passed
+# explicitly since an operation needs a non-empty args list.
+[mpm.managers.pkg-tools.operations.installed]
+args = ["-I", "-a"]
+regex = '^(?P<package_id>\S+)-(?P<installed_version>\d\S*)\s'
+
+# -Q searches the remote repository by substring and prints bare "stem-version"
+# lines; an exactly-installed match gets " (installed)" appended, which falls
+# outside the captured tokens.
+[mpm.managers.pkg-tools.operations.search]
+args = ["-Q", "{query}"]
+regex = '^(?P<package_id>\S+)-(?P<latest_version>\d\S*)'
+
+[mpm.managers.pkg-tools.operations.install]
+cli = "pkg_add"
+args = ["-I", "{package_id}"]
+sudo = true
+
+[mpm.managers.pkg-tools.operations.remove]
+cli = "pkg_delete"
+args = ["-I", "{package_id}"]
+sudo = true
+
+[mpm.managers.pkg-tools.operations.upgrade_one]
+cli = "pkg_add"
+args = ["-u", "-I", "{package_id}"]
+sudo = true
+
+# `pkg_add -u` with no package name updates every installed package.
+[mpm.managers.pkg-tools.operations.upgrade_all]
+cli = "pkg_add"
+args = ["-u", "-I"]
+sudo = true
+
+# `pkg_delete -a` deletes unused dependencies (orphans).
+[mpm.managers.pkg-tools.operations.cleanup]
+cli = "pkg_delete"
+args = ["-a", "-I"]
+sudo = true

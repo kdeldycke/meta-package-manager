@@ -96,11 +96,18 @@ A manager definition makes `mpm` run the commands you declare. Definitions are o
 
 Every [overridable field](#overridable-fields) (`cli_names`, `cli_search_path`, `requirement`, `version_regexes`, `pre_args`, `extra_env`, `timeout`, ...) may also be set, plus `name` and `homepage_url`. When `cli_names` is omitted it defaults to the manager ID.
 
+Two definition-only fields have no override counterpart:
+
+| Key            | Type    | Description                                                                                                                                                                                                                                       |
+| :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `default_sudo` | boolean | The manager's built-in escalation policy: operations marked `sudo = true` escalate by default. The user's global `--sudo`/`--no-sudo` flag or a `sudo` override still win. See [privilege escalation](sudo.md).                                   |
+| `version_cli`  | string  | Alternate binary probed for the manager's version, for tool suites whose own binaries report none (OpenBSD's `pkg_add`: the suite is versioned with the OS, so `uname` reports it). Probed with `version_cli_options`, parsed with `version_regexes`. |
+
 ### Operations
 
-Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every operation takes an `args` list appended after the resolved binary.
+Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every operation takes an `args` list appended after the resolved binary. An operation may also name its own `cli` (a sibling binary resolved on the same search path), so one definition can span a multi-binary suite: `urpmq` searching while `urpmi` installs and `urpme` removes. Without `cli`, the operation runs the manager's main binary.
 
-**Command operations** run a CLI and need nothing else:
+**Command operations** run a CLI and need nothing else. A command operation may add `sudo = true` to mark itself privileged, mirroring the escalation flag built-in managers set in code: whether it actually escalates follows the usual policy (the definition's `default_sudo`, then the global `--sudo`/`--no-sudo` flag). Query operations are read-only and never escalate.
 
 | Operation     | Required placeholder | Maps to                                              |
 | :------------ | :------------------- | :--------------------------------------------------- |

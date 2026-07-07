@@ -36,6 +36,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.apt_cyg module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.apt_cyg
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.asdf module
 
 ```{eval-rst}
@@ -85,6 +94,15 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.cpan
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.deb_get module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.deb_get
    :members:
    :show-inheritance:
    :undoc-members:
@@ -189,6 +207,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.nix module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.nix
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.npm module
 
 ```{eval-rst}
@@ -216,6 +243,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.pacstall module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.pacstall
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.pip module
 
 ```{eval-rst}
@@ -229,6 +265,15 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.pipx
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.pkcon module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.pkcon
    :members:
    :show-inheritance:
    :undoc-members:
@@ -270,6 +315,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.sdkman module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.sdkman
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.sfsu module
 
 ```{eval-rst}
@@ -292,6 +346,51 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.steamcmd
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.stew module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.stew
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.sun_tools module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.sun_tools
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.swupd module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.swupd
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.tazpkg module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.tazpkg
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.topgrade module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.topgrade
    :members:
    :show-inheritance:
    :undoc-members:
@@ -337,6 +436,15 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.yarn
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.zerobrew module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.zerobrew
    :members:
    :show-inheritance:
    :undoc-members:

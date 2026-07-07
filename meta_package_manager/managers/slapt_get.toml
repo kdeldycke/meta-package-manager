@@ -1,0 +1,65 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# slapt-get (https://software.jaos.org/) is an apt-get-style front-end to Slackware's
+# pkgtools. See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/config.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against the slapt-get 0.11.12 C source (src/main.c,
+# src/transaction.c) and its man page:
+#   - Listing lines print a fused "name-version-arch-build [inst=yes|no]: description"
+#     record, where slapt-get's own log pattern treats the three trailing dash-fields
+#     as version-arch-build. The regexes capture the bare upstream version and drop
+#     the arch and build tags.
+#   - `--search` is a POSIX regex over names, matching available then installed-only
+#     packages.
+#   - No `outdated`: `--upgrade --simulate` prints a wrapped, names-only paragraph
+#     with no versions, which cannot satisfy the per-line parser.
+#   - `--no-prompt` answers the "Do you want to continue? [y/N]" prompt; mutations
+#     (including `--update`, which writes the package cache) need root, and Slackware
+#     ships no sudo by default, so mpm's own escalation does the work.
+
+[mpm.managers.slapt-get]
+name = "slapt-get"
+homepage_url = "https://software.jaos.org/"
+platforms = ["slackware"]
+cli_names = ["slapt-get"]
+default_sudo = true
+# First line of `slapt-get --version` is "slapt-get version 0.11.12", followed by the
+# license blurb.
+version_regexes = ['slapt-get version (?P<version>\S+)']
+
+[mpm.managers.slapt-get.operations.installed]
+args = ["--installed"]
+regex = '^(?P<package_id>.+)-(?P<installed_version>[^-\s]+)-[^-\s]+-[^-\s]+ \[inst=yes\]: '
+
+[mpm.managers.slapt-get.operations.search]
+args = ["--search", "{query}"]
+regex = '^(?P<package_id>.+)-(?P<latest_version>[^-\s]+)-[^-\s]+-[^-\s]+ \[inst=(?:yes|no)\]: '
+
+[mpm.managers.slapt-get.operations.install]
+args = ["--install", "--no-prompt", "{package_id}"]
+sudo = true
+
+[mpm.managers.slapt-get.operations.remove]
+args = ["--remove", "--no-prompt", "{package_id}"]
+sudo = true
+
+# `--install` pulls the newest available version of an installed package: slapt-get
+# has no dedicated single-package upgrade.
+[mpm.managers.slapt-get.operations.upgrade_one]
+args = ["--install", "--no-prompt", "{package_id}"]
+sudo = true
+
+[mpm.managers.slapt-get.operations.upgrade_all]
+args = ["--upgrade", "--no-prompt"]
+sudo = true
+
+# Retrieves the package data from the configured mirrors.
+[mpm.managers.slapt-get.operations.sync]
+args = ["--update"]
+sudo = true
+
+# Purges the package download cache.
+[mpm.managers.slapt-get.operations.cleanup]
+args = ["--clean"]
+sudo = true

@@ -30,6 +30,7 @@ from .execution import warm_availability
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
+from .managers.apt_cyg import APT_Cyg
 from .managers.asdf import ASDF
 from .managers.cargo import Cargo
 from .managers.chocolatey import Choco
@@ -55,6 +56,7 @@ from .managers.pacman import Pacaur, Pacman, Paru, Yay
 from .managers.pacstall import Pacstall
 from .managers.pip import Pip
 from .managers.pipx import Pipx
+from .managers.pkcon import Pkcon
 from .managers.pkg import PKG, Ports
 from .managers.pnpm import PNPM
 from .managers.pwsh_gallery import PWSH_Gallery
@@ -64,6 +66,9 @@ from .managers.sfsu import SFSU
 from .managers.snap import Snap
 from .managers.steamcmd import SteamCMD
 from .managers.stew import Stew
+from .managers.sun_tools import Sun_Tools
+from .managers.swupd import Swupd
+from .managers.tazpkg import Tazpkg
 from .managers.topgrade import Topgrade
 from .managers.uv import UV, UVX
 from .managers.vscode import VSCode, VSCodium
@@ -86,6 +91,7 @@ manager_classes = (
     APK,
     APM,
     APT,
+    APT_Cyg,
     APT_Mint,
     ASDF,
     Brew,
@@ -116,6 +122,7 @@ manager_classes = (
     Paru,
     Pip,
     Pipx,
+    Pkcon,
     PKG,
     PNPM,
     Ports,
@@ -126,6 +133,9 @@ manager_classes = (
     Snap,
     SteamCMD,
     Stew,
+    Sun_Tools,
+    Swupd,
+    Tazpkg,
     Topgrade,
     UV,
     UVX,

@@ -245,7 +245,6 @@ homepages:
   antidote: https://getantidote.github.io
   antigen: https://github.com/zsh-users/antigen
   app-man: https://github.com/ivan-hc/AppMan
-  apt-cyg: https://github.com/transcode-open/apt-cyg
   aqua: https://aquaproj.github.io
   atuin: https://atuin.sh
   aura: https://github.com/fosskers/aura
@@ -253,11 +252,9 @@ homepages:
   bin: https://github.com/marcosnils/bin
   bun: https://bun.sh
   cabal: https://www.haskell.org/cabal/
-  cave: https://exherbo.org
   certbot: https://certbot.eff.org
   chezmoi: https://www.chezmoi.io
   choosenim: https://github.com/dom96/choosenim
-  chromebrew: https://chromebrew.github.io
   containers: https://github.com/containers/podman
   dein: https://github.com/Shougo/dein.vim
   deno: https://deno.com
@@ -266,7 +263,6 @@ homepages:
   dotnet: https://learn.microsoft.com/dotnet/core/tools/
   emacs: https://www.gnu.org/software/emacs/
   etc-update: https://wiki.gentoo.org/wiki/Etc-update
-  fink: https://www.finkproject.org
   fish-plug: https://github.com/kidonng/fish-plug
   fisher: https://github.com/jorgebucaran/fisher
   flutter: https://flutter.dev
@@ -313,10 +309,7 @@ homepages:
   pipupgrade: https://github.com/achillesrasquinha/pipupgrade
   pipxu: https://github.com/bulletmark/pipxu
   pixi: https://pixi.sh
-  pkcon: https://packagekit.freedesktop.org
-  pkg-tools: https://man.openbsd.org/pkg_add
   pkgfile: https://github.com/falconindy/pkgfile
-  pkgin: https://pkgin.net
   platformio-core: https://platformio.org
   plug: https://github.com/junegunn/vim-plug
   podman: https://podman.io
@@ -332,23 +325,16 @@ homepages:
   rustup: https://rustup.rs
   rye: https://rye.astral.sh
   sheldon: https://sheldon.cli.rs
-  slapt-get: https://software.jaos.org/git/slapt-get/
-  sorcery: https://sourcemage.org/Sorcery
   spack: https://spack.io
   sparkle: https://sparkle-project.org
   spicetify: https://spicetify.app
   stack: https://docs.haskellstack.org
-  sun-tools: https://docs.oracle.com/cd/E88353_01/html/E72487/pkgadd-8.html
-  swupd: https://github.com/clearlinux/swupd-client
   system: https://github.com/topgrade-rs/topgrade
-  tazpkg: https://slitaz.org
   tldr: https://tldr.sh
-  tlmgr: https://www.tug.org/texlive/tlmgr.html
   tmux: https://github.com/tmux-plugins/tpm
   toolbx: https://containertoolbx.org
   trizen: https://github.com/trizen/trizen
   typst: https://typst.app
-  urpmi: https://wiki.mageia.org/en/URPMI
   vagrant: https://www.vagrantup.com
   vcpkg: https://vcpkg.io
   vim: https://www.vim.org

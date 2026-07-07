@@ -1,0 +1,78 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# pkgin (https://pkgin.net) is the binary package manager for pkgsrc, NetBSD's
+# portable package collection (also used on illumos/SmartOS, macOS and Linux). See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/config.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against the pkgin 26.4.0 source (main.c, pkglist.c,
+# messages.h) and its man page:
+#   - Global flags precede the command word (`pkgin -y install foo`); pkgin has no
+#     long options at all.
+#   - `-p` switches listings to a semicolon-delimited machine format
+#     ("name-version;comment"), used for installed and outdated. Plain `search`
+#     output is parsed with a fused "name-version" split on the last dash before a
+#     digit (pkgsrc versions may carry an "nbN" revision suffix, like
+#     "lbdb-0.48.1nb1").
+#   - `-l '<'` filters the listing to packages whose installed version is older than
+#     the repository's, printing the *available* version: a non-mutating outdated
+#     listing. It reflects the local summary database, so run `mpm sync` first.
+#   - Every non-empty search ends with a three-line "=:/<:/>:" legend footer, which
+#     matches nothing in the regex and is skipped.
+#   - Queries run unprivileged on the existing database; every mutating command
+#     (including `update`, which rebuilds the database) needs root.
+
+[mpm.managers.pkgin]
+name = "Pkgin"
+homepage_url = "https://pkgin.net"
+platforms = ["netbsd"]
+cli_names = ["pkgin"]
+default_sudo = true
+# Lowercase -v prints the version (uppercase -V is verbose): "pkgin 26.4.0 (using
+# SQLite 3.45.1)".
+version_cli_options = ["-v"]
+version_regexes = ['pkgin (?P<version>[\d.]+)']
+
+[mpm.managers.pkgin.operations.installed]
+args = ["-p", "list"]
+regex = '^(?P<package_id>.+)-(?P<installed_version>\d[^;]*);'
+
+# The "<" filter prints one "name-version;<;comment" line per upgradable package,
+# where name-version is the newer *available* package.
+[mpm.managers.pkgin.operations.outdated]
+args = ["-p", "-l", "<", "list"]
+regex = '^(?P<package_id>.+)-(?P<latest_version>\d[^;]*);<;'
+
+# Case-insensitive POSIX extended regex over names and comments.
+[mpm.managers.pkgin.operations.search]
+args = ["search", "{query}"]
+regex = '^(?P<package_id>\S+)-(?P<latest_version>\d\S*)'
+
+[mpm.managers.pkgin.operations.install]
+args = ["-y", "install", "{package_id}"]
+sudo = true
+
+[mpm.managers.pkgin.operations.remove]
+args = ["-y", "remove", "{package_id}"]
+sudo = true
+
+# `install` on an already-installed package pulls the newest version: pkgin has no
+# dedicated single-package upgrade verb.
+[mpm.managers.pkgin.operations.upgrade_one]
+args = ["-y", "install", "{package_id}"]
+sudo = true
+
+[mpm.managers.pkgin.operations.upgrade_all]
+args = ["-y", "upgrade"]
+sudo = true
+
+# Refreshes the local and remote pkg_summary databases.
+[mpm.managers.pkgin.operations.sync]
+args = ["update"]
+sudo = true
+
+# Empties the download cache (/var/db/pkgin/cache). Orphan removal is the separate
+# `pkgin autoremove`, which -y does not auto-confirm, so it is not mapped.
+[mpm.managers.pkgin.operations.cleanup]
+args = ["clean"]
+sudo = true

@@ -1,0 +1,66 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# cave is the client of Paludis, Exherbo's package mangler (https://exherbo.org,
+# https://paludis.exherbo.org). See docs/overrides.md ("Define a new manager") for
+# the schema and meta_package_manager/config.py (build_bundled_managers) for the
+# loader.
+#
+# Parsing notes, verified against the cave man pages (paludis.exherbo.org/clients/):
+#   - `print-ids` is the only machine-parseable listing ("No formatting is used,
+#     making the output suitable for parsing by scripts"), with a caller-controlled
+#     --format; the '*/*::installed' spec selects the installed repository.
+#   - No `search`: `cave search` emits multi-line human records with no format
+#     control, and `print-ids --matching` needs an exact spec rather than a fuzzy
+#     query. No `outdated` either: the `cave resolve` plan is human-oriented.
+#   - `resolve` never prompts (it refuses risky transactions instead, wanting
+#     explicit --permit-* flags), so no assume-yes flag exists or is needed.
+#   - Execute phases (--execute) and sync need root; plan-only and print-ids calls
+#     do not.
+
+[mpm.managers.cave]
+name = "cave"
+homepage_url = "https://exherbo.org"
+platforms = ["exherbo"]
+cli_names = ["cave"]
+# Global flag, placed before the subcommand: disables color on every call.
+pre_args = ["--colour", "no"]
+default_sudo = true
+# `cave --version` reports a bare semver, currently in the 3.0.x series.
+version_regexes = ['(?P<version>\d+\.\d+\.\d+)']
+
+# The format string is interpreted by cave itself (%c category, %p package,
+# %v version, \n newline): single-quoted TOML keeps the backslash literal.
+[mpm.managers.cave.operations.installed]
+args = ["print-ids", "--matching", "*/*::installed", "--format", '%c/%p %v\n']
+regex = '^(?P<package_id>\S+) (?P<installed_version>\S+)$'
+
+[mpm.managers.cave.operations.install]
+args = ["resolve", "--execute", "{package_id}"]
+sudo = true
+
+# `cave uninstall foo` is documented as the same as `cave resolve !foo`; dependents
+# may require explicit --permit-uninstall flags, which mpm does not pass.
+[mpm.managers.cave.operations.remove]
+args = ["uninstall", "--execute", "{package_id}"]
+sudo = true
+
+# Resolving a package installs its best available version, upgrading in place.
+[mpm.managers.cave.operations.upgrade_one]
+args = ["resolve", "--execute", "{package_id}"]
+sudo = true
+
+# Resolving the world set with --complete ("do all optional work... often used when
+# updating 'world'") is the documented whole-system upgrade.
+[mpm.managers.cave.operations.upgrade_all]
+args = ["resolve", "--complete", "world", "--execute"]
+sudo = true
+
+[mpm.managers.cave.operations.sync]
+args = ["sync"]
+sudo = true
+
+# Uninstalls any package that is neither in 'world' nor a dependency of it (orphan
+# removal).
+[mpm.managers.cave.operations.cleanup]
+args = ["purge", "--execute"]
+sudo = true

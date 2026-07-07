@@ -77,12 +77,15 @@ sankey-beta
 Meta Package Manager,apk,1
 Meta Package Manager,apm,1
 Meta Package Manager,apt,1
+Meta Package Manager,apt-cyg,1
 Meta Package Manager,apt-mint,1
 Meta Package Manager,asdf,1
 Meta Package Manager,brew,1
 Meta Package Manager,cargo,1
 Meta Package Manager,cask,1
+Meta Package Manager,cave,1
 Meta Package Manager,choco,1
+Meta Package Manager,chromebrew,1
 Meta Package Manager,composer,1
 Meta Package Manager,conda,1
 Meta Package Manager,cpan,1
@@ -91,6 +94,7 @@ Meta Package Manager,dnf,1
 Meta Package Manager,dnf5,1
 Meta Package Manager,emerge,1
 Meta Package Manager,eopkg,1
+Meta Package Manager,fink,1
 Meta Package Manager,flatpak,1
 Meta Package Manager,fwupd,1
 Meta Package Manager,gem,1
@@ -108,18 +112,28 @@ Meta Package Manager,pacstall,1
 Meta Package Manager,paru,1
 Meta Package Manager,pip,1
 Meta Package Manager,pipx,1
+Meta Package Manager,pkcon,1
 Meta Package Manager,pkg,1
+Meta Package Manager,pkg-tools,1
+Meta Package Manager,pkgin,1
 Meta Package Manager,pnpm,1
 Meta Package Manager,ports,1
 Meta Package Manager,pwsh-gallery,1
 Meta Package Manager,scoop,1
 Meta Package Manager,sdkman,1
 Meta Package Manager,sfsu,1
+Meta Package Manager,slapt-get,1
 Meta Package Manager,snap,1
 Meta Package Manager,soar,1
+Meta Package Manager,sorcery,1
 Meta Package Manager,steamcmd,1
 Meta Package Manager,stew,1
+Meta Package Manager,sun-tools,1
+Meta Package Manager,swupd,1
+Meta Package Manager,tazpkg,1
+Meta Package Manager,tlmgr,1
 Meta Package Manager,topgrade,1
+Meta Package Manager,urpmi,1
 Meta Package Manager,uv,1
 Meta Package Manager,uvx,1
 Meta Package Manager,vscode,1
@@ -145,12 +159,15 @@ Meta Package Manager,zypper,1
 | [`apk`](https://gitlab.alpinelinux.org/alpine/apk-tools)                                | >=2.10.0         |          |           |      🐧       |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`apm`](https://atom.io/packages) [⚠️](https://github.blog/2022-06-08-sunsetting-atom/) | >=1.0.0          |          |    🅱️     |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`apt`](https://wiki.debian.org/AptCLI)                                                 | >=1.0.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`apt-cyg`](https://github.com/transcode-open/apt-cyg)                                  |                  |          |           |               |       |             |         |      ✓      |            |    ✓     |     ✓     |           |               |    ✓     |   ✓    |           |
 | [`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52)               | >=1.0.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`asdf`](https://asdf-vm.com)                                                           | >=0.16.0         |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |
 | [`brew`](https://brew.sh)                                                               | >=6.0.0          |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`cargo`](https://doc.rust-lang.org/cargo/)                                             | >=1.0.0          |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |    ✓     |     ✓     |           |               |    ✓     |        |           |
 | [`cask`](https://github.com/Homebrew/homebrew-cask)                                     | >=6.0.0          |          |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`cave`](https://exherbo.org)                                                           |                  |          |           |               |       |             |         |      ✓      |            |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`choco`](https://chocolatey.org)                                                       | >=2.0.0          |          |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`chromebrew`](https://chromebrew.github.io)                                            |                  |          |           |               |       |             |         |      ✓      |            |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |
 | [`composer`](https://getcomposer.org)                                                   | >=1.4.0          |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`conda`](https://conda.org)                                                            | >=4.6.0          |          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`cpan`](https://www.cpan.org)                                                          | >=1.64           |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |          |        |           |
@@ -159,6 +176,7 @@ Meta Package Manager,zypper,1
 | [`dnf5`](https://github.com/rpm-software-management/dnf5)                               | >=5.0.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`emerge`](https://wiki.gentoo.org/wiki/Portage#emerge)                                 | >=3.0.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`eopkg`](https://github.com/getsolus/eopkg/)                                           | >=3.2.0          |          |           |      🐧       |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`fink`](https://www.finkproject.org)                                                   |                  |          |           |               |  🍎   |             |         |      ✓      |            |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`flatpak`](https://flatpak.org)                                                        | >=1.2.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`fwupd`](https://fwupd.org)                                                            | >=1.9.5          |          |           |      🐧       |       |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |          |   ✓    |           |
 | [`gem`](https://rubygems.org)                                                           | >=2.5.0          |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
@@ -176,18 +194,28 @@ Meta Package Manager,zypper,1
 | [`paru`](https://github.com/Morganamilo/paru)                                           | >=1.9.3          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`pip`](https://pip.pypa.io)                                                            | >=26.1.0         |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`pipx`](https://pipx.pypa.io)                                                          | >=1.0.0          |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`pkcon`](https://www.freedesktop.org/software/PackageKit/)                             | >=0.7.0          |          |           |               |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |
 | [`pkg`](https://github.com/freebsd/pkg)                                                 | >=1.11           |          |           |               |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`pkg-tools`](https://man.openbsd.org/pkg_add)                                          |                  |          |           |               |       |             |         |      ✓      |            |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
+| [`pkgin`](https://pkgin.net)                                                            |                  |          |           |               |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`pnpm`](https://pnpm.io)                                                               | >=11.0.0         |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`ports`](https://www.freebsd.org/ports/)                                               |                  |          |           |               |       |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`pwsh-gallery`](https://www.powershellgallery.com)                                     | >=7.4.0          |          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`scoop`](https://scoop.sh)                                                             | >=0.2.4          |          |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`sdkman`](https://sdkman.io)                                                           | >=5.0.0          |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`sfsu`](https://github.com/winpax/sfsu)                                                | >=1.16.0         |          |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`slapt-get`](https://software.jaos.org/)                                               |                  |          |           |               |       |             |         |      ✓      |            |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`snap`](https://snapcraft.io)                                                          | >=2.0.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`soar`](https://github.com/pkgforge/soar)                                              | >=0.12.0         |          |           |      🐧       |       |             |         |      ✓      |            |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`sorcery`](https://sourcemage.org)                                                     |                  |          |           |               |       |             |         |      ✓      |            |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         |                  |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |             |            |          |     ✓     |           |               |          |        |           |
 | [`stew`](https://github.com/marwanhawari/stew)                                          | >=0.3.0          |          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |            |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`sun-tools`](https://docs.oracle.com/cd/E86824_01/html/E54763/pkginfo-1.html)          |                  |          |           |               |       |             |         |      ✓      |            |          |           |           |               |    ✓     |        |           |
+| [`swupd`](https://github.com/clearlinux/swupd-client)                                   |                  |          |           |               |       |             |         |      ✓      |            |    ✓     |     ✓     |           |       ✓       |    ✓     |        |     ✓     |
+| [`tazpkg`](https://slitaz.org)                                                          |                  |          |           |               |       |             |         |      ✓      |            |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`tlmgr`](https://www.tug.org/texlive/)                                                 | >=2018           |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`topgrade`](https://github.com/topgrade-rs/topgrade)                                   | >=17.0.0         |          |    🅱️     |      🐧       |  🍎   |             |   🪟    |             |            |          |           |           |       ✓       |          |        |           |
+| [`urpmi`](https://wiki.mageia.org/en/URPMI)                                             |                  |          |           |               |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`uv`](https://docs.astral.sh/uv)                                                       | >=0.5.0          |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`uvx`](https://docs.astral.sh/uv/guides/tools/)                                        | >=0.10.10        |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`vscode`](https://code.visualstudio.com)                                               | >=1.60.0         |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |          |     ✓     |           |               |    ✓     |        |           |
@@ -410,6 +438,6 @@ Other subcommands and options are documented in:
 
 [^bsd]: BSD: DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS.
 
-[^linux]: Linux: Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Generic Linux, Gentoo Linux, Guix System, IBM PowerKVM, Kali Linux, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, Manjaro Linux, NixOS, Nobara, openSUSE, openSUSE Tumbleweed, OpenWrt, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Ultramarine, Void Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.
+[^linux]: Linux: Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, ChromeOS, Clear Linux OS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Generic Linux, Gentoo Linux, Guix System, IBM PowerKVM, Kali Linux, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, Manjaro Linux, NixOS, Nobara, openSUSE, openSUSE Tumbleweed, OpenWrt, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SliTaz GNU/Linux, Source Mage GNU/Linux, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Ultramarine, Void Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.
 
 [^unix]: Unix: Cygwin, GNU/Hurd, Haiku, IBM AIX, IBM i, illumos, Solaris.<!-- operation-footnotes-end -->

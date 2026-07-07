@@ -1,0 +1,62 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# Chromebrew (https://chromebrew.github.io) is the package manager for ChromeOS,
+# installing into /usr/local as the regular user. See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/config.py (build_bundled_managers)
+# for the loader.
+#
+# Parsing notes, verified against the chromebrew master source (bin/crew,
+# commands/list.rb, commands/search.rb, lib/const.rb):
+#   - crew must NOT run as root: bin/crew hard-aborts when Process.uid is zero, so no
+#     operation is marked sudo.
+#   - Output is colorized through HighLine (.lightgreen and friends) and crew does not
+#     honor the NO_COLOR environment variable: every operation passes its --no-color
+#     flag, which sits after the subcommand in crew's docopt grammar.
+#   - `crew list installed` is name-only; the --verbose form adds the version column
+#     but injects a "Package"/"Version" header row and a "=======" separator. The
+#     installed regex requires a digit-led version so both decorations fall through.
+#   - No `outdated`: `crew list` states are available/compatible/incompatible/
+#     essential/installed only, and `crew upgrade` computes AND applies upgrades, so
+#     there is no non-mutating upgradable listing. No `cleanup` either: CREW_DOCOPT
+#     has no clean verb.
+
+[mpm.managers.chromebrew]
+name = "Chromebrew"
+homepage_url = "https://chromebrew.github.io"
+platforms = ["chromeos"]
+cli_names = ["crew"]
+# Chromebrew is a rolling release with no meaningful floor: the whole CLI surface used
+# here (list/search/install/remove/upgrade/update, --no-color, the bare `crew version`)
+# is long-standing, so any version mpm finds is accepted.
+# `crew version` (no argument) prints the bare tool version, like "1.75.0". With an
+# argument it prints that package's version instead: version_cli_options must stay a
+# bare "version".
+version_cli_options = ["version"]
+version_regexes = ['^(?P<version>[\d.]+)$']
+
+[mpm.managers.chromebrew.operations.installed]
+args = ["list", "--verbose", "--no-color", "installed"]
+regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\d\S*)$'
+
+# `crew search` prints one "name: description" line per match; the name is the token
+# before the first ": " (descriptions may contain colons of their own).
+[mpm.managers.chromebrew.operations.search]
+args = ["search", "--no-color", "{query}"]
+regex = '^(?P<package_id>[^\s:]+): '
+
+[mpm.managers.chromebrew.operations.install]
+args = ["install", "--no-color", "{package_id}"]
+
+[mpm.managers.chromebrew.operations.remove]
+args = ["remove", "--no-color", "{package_id}"]
+
+[mpm.managers.chromebrew.operations.upgrade_one]
+args = ["upgrade", "--no-color", "{package_id}"]
+
+[mpm.managers.chromebrew.operations.upgrade_all]
+args = ["upgrade", "--no-color"]
+
+# `crew update` refreshes the package definitions (the apt-update analogue), distinct
+# from `crew upgrade`.
+[mpm.managers.chromebrew.operations.sync]
+args = ["update"]

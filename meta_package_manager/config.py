@@ -714,25 +714,43 @@ specific platform (``ubuntu``) and a group (``linux``, ``all_platforms``) resolv
 
 
 DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
-    name: OVERRIDABLE_FIELDS[name]
-    for name in (
-        "cli_names",
-        "cli_search_path",
-        "extra_env",
-        "post_args",
-        "pre_args",
-        "pre_cmds",
-        "requirement",
-        "timeout",
-        "version_cli_options",
-        "version_regexes",
-    )
+    **{
+        name: OVERRIDABLE_FIELDS[name]
+        for name in (
+            "cli_names",
+            "cli_search_path",
+            "extra_env",
+            "post_args",
+            "pre_args",
+            "pre_cmds",
+            "requirement",
+            "timeout",
+            "version_cli_options",
+            "version_regexes",
+        )
+    },
+    # Definition-only fields, with no OVERRIDABLE_FIELDS counterpart: a built-in
+    # manager's escalation default and version probe are reviewed code, while a
+    # definition declares them as data.
+    "default_sudo": _to_bool,
+    "version_cli": _to_str,
 }
-"""CLI-execution attributes a definition may set, reusing the override converters.
+"""CLI-execution attributes a definition may set, mostly reusing the override
+converters.
 
 The runtime-preference fields (``deprecated``, ``dry_run``, ``ignore_auto_updates``,
 ``stop_on_error``) are excluded: they are command-line/global concerns, not part of a
 manager's identity, and resolve through the usual option precedence.
+
+Two fields are definition-only:
+
+- ``default_sudo`` is the manager's built-in escalation policy (see
+  :py:attr:`~meta_package_manager.execution.CLIExecutor.default_sudo`). Operations
+  marked ``sudo = true`` escalate by default, while the user's global ``--no-sudo``
+  flag or a ``sudo`` override still win.
+- ``version_cli`` names an alternate binary for the version probe (see
+  :py:attr:`~meta_package_manager.execution.CLIExecutor.version_cli`), for suites
+  whose own binaries expose no version flag (OpenBSD's ``pkg_add``).
 """
 
 
@@ -783,13 +801,25 @@ to the CLI (a ``remove`` with no ``{package_id}`` would target nothing)."""
 
 
 QUERY_OPERATION_KEYS: Final[frozenset[str]] = frozenset(
-    {"args", "regex", "format", "fields", "list_path"},
+    {"args", "cli", "regex", "format", "fields", "list_path"},
 )
-"""Keys allowed in a query operation's table."""
+"""Keys allowed in a query operation's table.
+
+``cli`` names an alternate binary for this operation, resolved on the search path at
+call time: it lets one definition span sibling binaries (``urpmq`` querying while
+``urpmi`` installs). Queries never take a ``sudo`` key: read-only operations stay
+unprivileged.
+"""
 
 
-COMMAND_OPERATION_KEYS: Final[frozenset[str]] = frozenset({"args"})
-"""Keys allowed in a command operation's table."""
+COMMAND_OPERATION_KEYS: Final[frozenset[str]] = frozenset({"args", "cli", "sudo"})
+"""Keys allowed in a command operation's table.
+
+``cli`` is the same alternate-binary hook as on query operations. ``sudo = true``
+marks the operation as privileged, mirroring the ``sudo=True`` flag built-in managers
+pass to ``run_cli``: escalation then follows the per-manager policy (the definition's
+``default_sudo``, overridden by the user's ``--sudo``/``--no-sudo``).
+"""
 
 
 RISKY_OVERRIDE_FIELDS: Final[frozenset[str]] = frozenset(
@@ -1021,9 +1051,27 @@ def _parse_operation_spec(
             code="invalid_value",
         )
 
+    cli = None
+    if "cli" in raw:
+        try:
+            cli = _to_str(raw["cli"])
+        except TypeError as ex:
+            raise ValidationError(f"{path}.cli", str(ex), code="invalid_type") from ex
+        if not cli:
+            raise ValidationError(
+                f"{path}.cli", "must be a non-empty string.", code="invalid_value"
+            )
+
     if is_query:
-        return _parse_query_spec(path, op_name, args, raw)
-    return OperationSpec(args=args)
+        return _parse_query_spec(path, op_name, args, raw, cli=cli)
+
+    sudo = False
+    if "sudo" in raw:
+        try:
+            sudo = _to_bool(raw["sudo"])
+        except TypeError as ex:
+            raise ValidationError(f"{path}.sudo", str(ex), code="invalid_type") from ex
+    return OperationSpec(args=args, cli=cli, sudo=sudo)
 
 
 def _parse_query_spec(
@@ -1031,6 +1079,7 @@ def _parse_query_spec(
     op_name: str,
     args: tuple[str, ...],
     raw: dict[str, Any],
+    cli: str | None = None,
 ) -> OperationSpec:
     """Validate the parser half of a query operation (``regex`` or JSON ``fields``)."""
     has_regex = "regex" in raw
@@ -1061,7 +1110,7 @@ def _parse_query_spec(
                 code="invalid_value",
             ) from ex
         _check_parse_fields(f"{path}.regex", set(compiled.groupindex), required)
-        return OperationSpec(args=args, parse_mode="regex", regex=regex)
+        return OperationSpec(args=args, cli=cli, parse_mode="regex", regex=regex)
 
     if "fields" not in raw:
         raise ValidationError(
@@ -1083,7 +1132,7 @@ def _parse_query_spec(
                 f"{path}.list_path", str(ex), code="invalid_type"
             ) from ex
     return OperationSpec(
-        args=args, parse_mode="json", list_path=list_path, fields=fields
+        args=args, cli=cli, parse_mode="json", list_path=list_path, fields=fields
     )
 
 

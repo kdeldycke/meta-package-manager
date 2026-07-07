@@ -643,6 +643,26 @@ class OperationSpec:
     pin versions (see :func:`_make_install`).
     """
 
+    cli: str | None = None
+    """Alternate binary name for this operation, or ``None`` for the manager's main
+    :py:attr:`~meta_package_manager.execution.CLIExecutor.cli_path`.
+
+    Resolved with :py:meth:`~meta_package_manager.manager.PackageManager.which` at
+    call time, so one definition can span sibling binaries (``urpmi``/``urpme``/
+    ``urpmq``, ``cast``/``dispel``/``gaze``). The operation fails with
+    :py:exc:`FileNotFoundError` when the binary is missing rather than silently
+    falling back to the main CLI.
+    """
+
+    sudo: bool = False
+    """Mark the operation as privileged, mirroring the ``sudo=True`` flag built-in
+    managers pass to :py:meth:`~meta_package_manager.execution.CLIExecutor.run_cli`.
+
+    Escalation still follows the per-manager policy: the definition's
+    ``default_sudo``, overridden by the user's ``--sudo``/``--no-sudo``. Only command
+    operations may set it; queries stay unprivileged.
+    """
+
     parse_mode: str = "none"
     """How to turn the command's stdout into packages: ``"regex"`` (per-line named
     groups), ``"json"`` (structured extraction), or ``"none"`` for command-only
@@ -798,13 +818,28 @@ def _iter_parsed(
             yield kwargs
 
 
+def _op_cli_path(manager: PackageManager, spec: OperationSpec) -> Path | None:
+    """Resolve the operation's alternate binary, or ``None`` for the main CLI.
+
+    A declared-but-missing binary is an error: falling back to the main CLI would run
+    the operation's arguments against the wrong program.
+    """
+    if not spec.cli:
+        return None
+    cli_path = manager.which(spec.cli)
+    if not cli_path:
+        msg = f"{spec.cli} not found"
+        raise FileNotFoundError(msg)
+    return cli_path
+
+
 def _make_query_property(
     spec: OperationSpec, compiled: re.Pattern[str] | None
 ) -> property:
     """Build an ``installed``/``outdated`` property that runs the CLI and parses it."""
 
     def query(self: PackageManager) -> Iterator[Package]:
-        output = self.run_cli(*spec.args)
+        output = self.run_cli(*spec.args, override_cli_path=_op_cli_path(self, spec))
         for kwargs in _iter_parsed(output, spec, compiled):
             yield self.package(**kwargs)
 
@@ -821,7 +856,10 @@ def _make_search(
     def search(
         self: PackageManager, query: str, extended: bool, exact: bool
     ) -> Iterator[Package]:
-        output = self.run_cli(*_render_args(spec.args, query=query))
+        output = self.run_cli(
+            *_render_args(spec.args, query=query),
+            override_cli_path=_op_cli_path(self, spec),
+        )
         for kwargs in _iter_parsed(output, spec, compiled):
             yield self.package(**kwargs)
 
@@ -844,7 +882,11 @@ def _make_install(spec: OperationSpec) -> Callable[..., str]:
         self: PackageManager, package_id: str, version: str | None = None
     ) -> str:
         _warn_version_unsupported(version)
-        return self.run_cli(*_render_args(spec.args, package_id=package_id))
+        return self.run_cli(
+            *_render_args(spec.args, package_id=package_id),
+            override_cli_path=_op_cli_path(self, spec),
+            sudo=spec.sudo,
+        )
 
     return install
 
@@ -853,7 +895,11 @@ def _make_remove(spec: OperationSpec) -> Callable[..., str]:
     """Build a ``remove`` method substituting ``{package_id}`` into the args."""
 
     def remove(self: PackageManager, package_id: str) -> str:
-        return self.run_cli(*_render_args(spec.args, package_id=package_id))
+        return self.run_cli(
+            *_render_args(spec.args, package_id=package_id),
+            override_cli_path=_op_cli_path(self, spec),
+            sudo=spec.sudo,
+        )
 
     return remove
 
@@ -862,7 +908,11 @@ def _make_void(spec: OperationSpec) -> Callable[..., None]:
     """Build a ``sync``/``cleanup`` method that runs the CLI and discards its output."""
 
     def operation(self: PackageManager) -> None:
-        self.run_cli(*spec.args)
+        self.run_cli(
+            *spec.args,
+            override_cli_path=_op_cli_path(self, spec),
+            sudo=spec.sudo,
+        )
 
     return operation
 
@@ -874,7 +924,11 @@ def _make_upgrade_one_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]
         self: PackageManager, package_id: str, version: str | None = None
     ) -> tuple[str, ...]:
         _warn_version_unsupported(version)
-        return self.build_cli(*_render_args(spec.args, package_id=package_id))
+        return self.build_cli(
+            *_render_args(spec.args, package_id=package_id),
+            override_cli_path=_op_cli_path(self, spec),
+            sudo=spec.sudo,
+        )
 
     return upgrade_one_cli
 
@@ -883,7 +937,11 @@ def _make_upgrade_all_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]
     """Build an ``upgrade_all_cli`` returning the upgrade-everything command line."""
 
     def upgrade_all_cli(self: PackageManager) -> tuple[str, ...]:
-        return self.build_cli(*spec.args)
+        return self.build_cli(
+            *spec.args,
+            override_cli_path=_op_cli_path(self, spec),
+            sudo=spec.sudo,
+        )
 
     return upgrade_all_cli
 

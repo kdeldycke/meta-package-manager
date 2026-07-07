@@ -529,12 +529,8 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "13.0.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/9f/4d/b793283bf4d002e7ffa8ad45c125f1f2306b238c0a641677d6b3a7397f1a/extra_platforms-13.0.1.tar.gz", hash = "sha256:2194e5cd8d58fbbba42d2810f15fea3da072020109998ca8d7ec938abcf59717", size = 80935, upload-time = "2026-06-18T15:58:55.474Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/1b/f8/d9c3fb099faa51808f80255cc94df94f283be8a61e842459e8bb3e12dab0/extra_platforms-13.0.1-py3-none-any.whl", hash = "sha256:fd3b572504557e4b48323dc9704baf2fa939aed37dba5d9963a4aeffd3c9e325", size = 84499, upload-time = "2026-06-18T15:58:54.067Z" },
-]
+version = "13.1.0.dev0"
+source = { git = "https://github.com/kdeldycke/extra-platforms.git?branch=main#9a647b76bc451a2d1d194c96da7239a8f4d5db4e" }
 
 [[package]]
 name = "fqdn"
@@ -1110,7 +1106,7 @@ requires-dist = [
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
-    { name = "extra-platforms", specifier = ">=10" },
+    { name = "extra-platforms", git = "https://github.com/kdeldycke/extra-platforms.git?branch=main" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
     { name = "packageurl-python", specifier = ">=0.11" },
     { name = "platformdirs", marker = "extra == 'sbom-online'", specifier = ">=4" },
@@ -1140,7 +1136,7 @@ test = [
     { name = "click-extra", extras = ["toml"] },
     { name = "coverage", extras = ["toml"], specifier = ">=7.11" },
     { name = "cyclonedx-python-lib", extras = ["validation"] },
-    { name = "extra-platforms" },
+    { name = "extra-platforms", git = "https://github.com/kdeldycke/extra-platforms.git?branch=main" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-cov", specifier = ">=7" },

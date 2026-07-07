@@ -487,6 +487,21 @@ class CLIExecutor:
     below to extract the version number.
     """
 
+    version_cli: str | None = None
+    """Alternate binary probed for the manager's version, instead of the main CLI.
+
+    Some manager suites expose no version flag on any of their own binaries (OpenBSD's
+    ``pkg_add``/``pkg_info``, Solaris' ``pkgadd``/``pkginfo``): they ship with the base
+    system and are versioned with the OS itself. Naming a ``version_cli`` (like
+    ``uname``) makes the version probe run that binary with
+    :py:attr:`version_cli_options` and parse its output with
+    :py:attr:`version_regexes`, while every operation keeps using the manager's own
+    :py:attr:`cli_path`. The binary is resolved with
+    :py:meth:`~meta_package_manager.manager.PackageManager.which`; the version resolves
+    to ``None`` (manager not :py:attr:`fresh
+    <meta_package_manager.manager.PackageManager.fresh>`) when it is not found.
+    """
+
     version_regexes: tuple[str, ...] = (r"(?P<version>\S+)",)
     """Regular expressions used to extract the version number.
 
@@ -846,6 +861,13 @@ class CLIExecutor:
         if not self.supported:  # type: ignore[attr-defined]
             return None
         if self.executable:
+            # An alternate version binary must resolve, or the version is unknowable.
+            version_cli_path = None
+            if self.version_cli:
+                version_cli_path = self.which(self.version_cli)
+                if not version_cli_path:
+                    logging.debug(f"Version binary {self.version_cli!r} not found.")
+                    return None
             # Version detection is a fast liveness probe, so tag it as a read-only
             # operation: a wedged binary then trips the short timeout instead of the
             # long mutating one. Safe to leave set: ``_select_managers`` re-stamps the
@@ -854,6 +876,7 @@ class CLIExecutor:
             self._active_operation = "version"
             output = self.run_cli(
                 self.version_cli_options,
+                override_cli_path=version_cli_path,
                 auto_pre_cmds=False,
                 auto_pre_args=False,
                 auto_post_args=False,

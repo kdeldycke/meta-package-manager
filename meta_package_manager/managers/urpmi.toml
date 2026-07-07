@@ -1,0 +1,83 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# urpmi is the RPM front-end of the Mandriva lineage (Mageia, OpenMandriva, ROSA),
+# spanning several binaries: urpmi (install/upgrade/cache), urpme (remove), urpmq
+# (queries) and urpmi.update (media refresh). See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/config.py
+# (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against the urpmi Perl source (urpm/args.pm, urpmq, urpme,
+# urpmi.update) and the urpmi/urpmq/urpme man pages:
+#   - urpmi has no native installed-package listing: enumeration goes through rpm
+#     itself, which urpmi fronts (librpm is always present), with a caller-controlled
+#     --queryformat.
+#   - urpmq's package-data output is one bare "name" per line; -r appends
+#     "-version-release". The regexes split the fused NVR on its last two
+#     dash-fields.
+#   - Every human-facing string is gettext-localized: LC_ALL=C keeps the parsed
+#     output stable (package data itself is not translated, but errors and prompts
+#     are).
+#   - --auto suppresses all urpmi/urpme prompts. --version is undocumented in the
+#     man pages but implemented in the shared options table of every tool.
+#   - Mutations abort for non-root users ("Only superuser is allowed to install
+#     packages"), including urpmi.update and --clean.
+
+[mpm.managers.urpmi]
+name = "urpmi"
+homepage_url = "https://wiki.mageia.org/en/URPMI"
+platforms = ["mageia", "mandriva"]
+cli_names = ["urpmi"]
+extra_env = { LC_ALL = "C" }
+default_sudo = true
+# `urpmi --version` prints "urpmi <version>", like "urpmi 8.121.7".
+version_regexes = ['urpmi (?P<version>\S+)']
+
+# The {NAME}-style tokens below are rpm queryformat tags, left untouched by mpm's
+# placeholder substitution (which only knows {package_id} and {query}).
+[mpm.managers.urpmi.operations.installed]
+cli = "rpm"
+args = ["--query", "--all", "--queryformat", '%{NAME} %{VERSION}-%{RELEASE}\n']
+regex = '^(?P<package_id>\S+) (?P<installed_version>\S+)$'
+
+# `urpmq --auto-select` is the read-only lister of upgradable packages (`urpmi
+# --auto-select` is the mutating upgrade); -r appends "-version-release" to each
+# name, split below on the last two dash-fields.
+[mpm.managers.urpmi.operations.outdated]
+cli = "urpmq"
+args = ["--auto-select", "-r"]
+regex = '^(?P<package_id>.+)-(?P<latest_version>[^-]+-[^-]+)$'
+
+[mpm.managers.urpmi.operations.search]
+cli = "urpmq"
+args = ["--fuzzy", "{query}", "-r"]
+regex = '^(?P<package_id>.+)-(?P<latest_version>[^-]+-[^-]+)$'
+
+[mpm.managers.urpmi.operations.install]
+args = ["--auto", "{package_id}"]
+sudo = true
+
+[mpm.managers.urpmi.operations.remove]
+cli = "urpme"
+args = ["--auto", "{package_id}"]
+sudo = true
+
+# Installing pulls the newest version from the media, upgrading in place: urpmi has
+# no dedicated per-package upgrade.
+[mpm.managers.urpmi.operations.upgrade_one]
+args = ["--auto", "{package_id}"]
+sudo = true
+
+[mpm.managers.urpmi.operations.upgrade_all]
+args = ["--auto-select", "--auto"]
+sudo = true
+
+# Refreshes all enabled non-removable media.
+[mpm.managers.urpmi.operations.sync]
+cli = "urpmi.update"
+args = ["-a"]
+sudo = true
+
+# Removes all packages from the /var/cache/urpmi/rpms cache.
+[mpm.managers.urpmi.operations.cleanup]
+args = ["--clean"]
+sudo = true

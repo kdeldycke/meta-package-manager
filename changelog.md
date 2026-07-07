@@ -6,6 +6,22 @@
 > This version is **not released yet** and is under active development.
 
 - [mpm] Fix benchmark data: merge the duplicate OpenBSD (`pkg-mgr`/`pkg-tools`), `gh-ext` and `pwsh-gallery` rows; add missing `pkcon`, `fink`, `sorcery` and `urpmi` rows; fix `winget`, `dnf`, `scoop` and `cask` competitor flags.
+- [mpm] Config-defined managers gain multi-binary and privilege support: a per-operation `cli` key runs an operation through a sibling binary, `sudo = true` marks it privileged (honoring the new `default_sudo` definition field and the global `--sudo`/`--no-sudo` policy), and `version_cli` probes an alternate binary for tool suites exposing no version flag.
+- [mpm] `mpm` is now a strict superset of `pacaptr`, `pacapt`, `sysget` and `whohas`: every package manager those tools support is now wrapped.
+- [apt-cyg] Add apt-cyg (Cygwin) package manager with `installed`, `search`, `install`, `remove` and `sync` support on Windows/Cygwin.
+- [cave] Add cave (Exherbo's Paludis client) with `installed`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
+- [chromebrew] Add Chromebrew (`crew`) package manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support on ChromeOS; a bundled configuration-defined manager.
+- [fink] Add Fink package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support on macOS; a bundled configuration-defined manager.
+- [pkcon] Add PackageKit's console client (`pkcon`) with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove` and `sync` support on Linux. Requires PackageKit `>=0.7.0`.
+- [pkg-tools] Add OpenBSD's pkg tools (`pkg_add`/`pkg_info`/`pkg_delete`) with `installed`, `search`, `install`, `upgrade`, `remove` and `cleanup` support; a bundled configuration-defined manager.
+- [pkgin] Add pkgin (NetBSD pkgsrc) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
+- [slapt-get] Add slapt-get (Slackware) package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
+- [sorcery] Add Sorcery (Source Mage GNU/Linux) package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
+- [sun-tools] Add Solaris' SVR4 package tools (`pkginfo`/`pkgrm`) with `installed` and `remove` support: SVR4 packages come from local media, so there is no repository to search, install from or upgrade against.
+- [swupd] Add Clear Linux's swupd with `installed`, `search`, `install`, `upgrade --all`, `remove` and `cleanup` support, operating on bundles.
+- [tazpkg] Add TazPkg (SliTaz GNU/Linux) package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support.
+- [tlmgr] Add TeX Live Manager (`tlmgr`) with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support, cross-platform; a bundled configuration-defined manager. Requires TeX Live `>=2018`.
+- [urpmi] Add urpmi (Mageia and the Mandriva lineage) with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
 
 ## [`7.1.0` (2026-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.1...v7.1.0)
 

@@ -249,6 +249,7 @@ PACKAGE_IDS = {
     "apk": "nyancat",
     "apm": "markdown-pdf",
     "apt": "nyancat",
+    "apt-cyg": "tree",
     "apt-mint": "nyancat",
     "asdf": "jq",
     "brew": "nyancat",
@@ -278,6 +279,7 @@ PACKAGE_IDS = {
     "paru": "nyancat",
     "pip": "pytz",
     "pipx": "pycowsay",
+    "pkcon": "hello",
     "pkg": "nyancat",
     "pnpm": "ms",
     "ports": "net/nyancat",
@@ -288,6 +290,11 @@ PACKAGE_IDS = {
     "snap": "hello-world",
     "steamcmd": "1007",  # Steamworks SDK Redist.
     "stew": "sharkdp/hyperfine",
+    # SVR4 packages install from local datastreams, not a repository: install is
+    # unimplemented so the destructive round-trip auto-skips.
+    "sun-tools": "SUNWzlib",
+    "swupd": "curl",  # A small additive bundle: os-core never depends on it.
+    "tazpkg": "nano",  # Used by tazpkg's own test suite.
     "topgrade": "topgrade",
     "uv": "pytz",
     "uvx": "pycowsay",

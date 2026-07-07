@@ -146,6 +146,11 @@ jobs:
           # must compile from source, which needs libxml2 and libxslt headers.
           sudo apt --quiet --yes install libxml2-dev libxslt-dev
 
+      # PackageKit
+      - name: PackageKit - Linux install
+        if: runner.os == 'Linux'
+        run: sudo apt --quiet --yes install packagekit
+
       # Chocolatey
       - name: Chocolatey - Windows self-upgrade
         if: runner.os == 'Windows'

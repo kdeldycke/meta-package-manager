@@ -1,0 +1,84 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# Sorcery (https://sourcemage.org) is Source Mage GNU/Linux's source-based package
+# manager, a suite of bash tools: sorcery itself plus gaze (queries), cast (install),
+# dispel (remove), scribe (grimoire sync) and cleanse (cleanup). See docs/overrides.md
+# ("Define a new manager") for the schema and meta_package_manager/config.py
+# (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against the sorcery source (usr/sbin/sorcery, usr/sbin/gaze,
+# var/lib/sorcery/modules/libstate, and the gaze/cast/dispel/scribe/cleanse man pages):
+#   - gaze is the only read-only, non-root binary; its global -q flag (before the
+#     subcommand) forces PAGER=cat and drops the human "query -> " prefix, so the
+#     regexes see clean unpaged text.
+#   - `gaze installed` dumps the spell status file: one "spell:YYYYMMDD:status:version"
+#     line per record, with status one of installed/held (exiled lines are filtered
+#     out by gaze itself). The file is append-only, so a spell upgraded in place may
+#     briefly show duplicate lines.
+#   - Every mutating operation needs root: when not root, sorcery re-execs itself
+#     through `su`, which would block mpm's non-interactive subprocess. Marking the
+#     operations sudo = true routes them through mpm's own escalation instead.
+#   - No `outdated`: `sorcery queue` requires root, rewrites the queue state file and
+#     ends on an interactive "edit the queue?" prompt, so there is no cleanly
+#     non-mutating upgradable listing.
+#   - `cast` compiles from source and may prompt on a spell's first cast (optional
+#     dependencies, configuration); sorcery has no universal --yes flag.
+
+[mpm.managers.sorcery]
+name = "Sorcery"
+homepage_url = "https://sourcemage.org"
+platforms = ["sourcemage"]
+cli_names = ["sorcery"]
+default_sudo = true
+# `sorcery --version` prints the bare content of /etc/sorcery/version, a datestamp
+# like "20240108" on current releases (older stable lines used dotted forms).
+version_regexes = ['^(?P<version>[\d.]+)$']
+
+[mpm.managers.sorcery.operations.installed]
+cli = "gaze"
+args = ["-q", "installed"]
+regex = '^(?P<package_id>[^:]+):[^:]*:(?:installed|held):(?P<installed_version>.+)$'
+
+# `gaze -q search -name <regex>` greps spell names and prints one
+# "spell version @grimoire" line per match.
+[mpm.managers.sorcery.operations.search]
+cli = "gaze"
+args = ["-q", "search", "-name", "{query}"]
+regex = '^(?P<package_id>\S+) (?P<latest_version>\S+) @'
+
+[mpm.managers.sorcery.operations.install]
+cli = "cast"
+args = ["{package_id}"]
+sudo = true
+
+[mpm.managers.sorcery.operations.remove]
+cli = "dispel"
+args = ["{package_id}"]
+sudo = true
+
+# Re-casting an installed spell rebuilds it at the grimoire's current version: sorcery
+# has no separate upgrade-one verb.
+[mpm.managers.sorcery.operations.upgrade_one]
+cli = "cast"
+args = ["{package_id}"]
+sudo = true
+
+# `sorcery upgrade` rebuilds the install queue and casts it, without first
+# self-updating the sorcery tool (that is `sorcery system-update`).
+[mpm.managers.sorcery.operations.upgrade_all]
+args = ["upgrade"]
+sudo = true
+
+# `scribe update` refreshes all grimoires (the spell catalogue), the apt-update
+# analogue. Distinct from `sorcery update`, which upgrades the sorcery tool itself.
+[mpm.managers.sorcery.operations.sync]
+cli = "scribe"
+args = ["update"]
+sudo = true
+
+# `cleanse --sweep` deletes unnecessary sources and binary caches (the documented
+# replacement for the old `gaze prune`).
+[mpm.managers.sorcery.operations.cleanup]
+cli = "cleanse"
+args = ["--sweep"]
+sudo = true

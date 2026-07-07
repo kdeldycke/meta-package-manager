@@ -262,7 +262,7 @@ selection_cases = {
 
 @pytest.mark.parametrize(
     ("kwargs", "expected"),
-    (
+    tuple(
         pytest.param(kwargs, expected, id=test_id)
         for test_id, (kwargs, expected) in selection_cases.items()
     ),

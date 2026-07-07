@@ -144,7 +144,7 @@ shell_args = pytest.mark.parametrize(
 
 shell_python_args = pytest.mark.parametrize(
     "shell_args,python_args",
-    (
+    tuple(
         pytest.param(s_args, p_args, id=" ".join(args_cleanup(s_args, p_args)))
         for s_args, p_args in product(
             _shell_invocation_matrix(), _python_invocation_matrix()

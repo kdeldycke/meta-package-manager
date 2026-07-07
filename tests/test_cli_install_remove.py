@@ -160,13 +160,13 @@ class TestInstallRemove(CLISubCommandTests):
                 assert "critical: No manager selected.\n" in result.stderr
                 continue
 
-            # npm and cargo installs are flaky on the CI runners: they depend on
-            # the live npm registry and crates.io plus a healthy toolchain, and
-            # regularly surface transient failures. Accept exit 1 like
-            # test_single_manager_upgrade_all does for the same reason; the
-            # check_manager_selection below still asserts mpm dispatched to the
-            # manager.
-            if manager_id in {"cargo", "npm"}:
+            # npm, cargo, and winget installs are flaky on the CI runners: they
+            # depend on live registries (npm, crates.io, the winget community
+            # source) plus a healthy toolchain, and regularly surface transient
+            # failures. Accept exit 1 like test_single_manager_upgrade_all does
+            # for the same reason; the check_manager_selection below still
+            # asserts mpm dispatched to the manager.
+            if manager_id in {"cargo", "npm", "winget"}:
                 assert result.exit_code in (0, 1)
             else:
                 assert result.exit_code == 0

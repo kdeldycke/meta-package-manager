@@ -665,12 +665,12 @@ label = "📦 manager: conda"
 patterns = [ "conda", "anaconda", "miniconda", "conda-forge" ]
 
 [[tool.repomatic.labels.content-rules]]
-label = "📦 manager: dnf-based"
-patterns = [ "dnf", "yum", "rpm", "fedora", "redhat", "rhel" ]
+label = "📦 manager: rpm-based"
+patterns = [ "dnf", "yum", "rpm", "fedora", "redhat", "rhel", "zypper", "opensuse", "suse", "urpmi", "mageia" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: dpkg-based"
-patterns = [ "apt", "apt-mint", "aptitude", "dpkg", "opkg", "ubuntu", "debian", "mint" ]
+patterns = [ "apt", "apt-mint", "aptitude", "dpkg", "opkg", "ubuntu", "debian", "mint", "deb-get", "pacstall" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: emerge"
@@ -698,7 +698,7 @@ patterns = [ "guix", "gnu guix" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: homebrew"
-patterns = [ "brew", "cask", "homebrew", "tap", "formula" ]
+patterns = [ "brew", "cask", "homebrew", "tap", "formula", "zerobrew", "zb" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: macports"
@@ -721,10 +721,6 @@ label = "📦 manager: pacman-based"
 patterns = [ "pacman", "arch", "pacaur", "paru", "yay" ]
 
 [[tool.repomatic.labels.content-rules]]
-label = "📦 manager: pacstall"
-patterns = [ "pacstall" ]
-
-[[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pip-based"
 patterns = [ "pip", "pipx" ]
 
@@ -741,7 +737,7 @@ label = "📦 manager: pwsh-gallery"
 patterns = [ "powershell", "powershell gallery", "psgallery", "psresourceget", "pwsh" ]
 
 [[tool.repomatic.labels.content-rules]]
-label = "📦 manager: scoop"
+label = "📦 manager: scoop-based"
 patterns = [ "scoop", "sfsu" ]
 
 [[tool.repomatic.labels.content-rules]]
@@ -783,14 +779,6 @@ patterns = [ "winget" ]
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: xbps"
 patterns = [ "xbps", "void linux", "void" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: zerobrew"
-patterns = [ "zerobrew", "zb" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: zypper"
-patterns = [ "zypper", "opensuse", "suse" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: BSD"
@@ -1139,19 +1127,28 @@ label = "📦 manager: conda"
 any-glob-to-any-file = [ "meta_package_manager/managers/conda*", "tests/*conda*" ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: dnf-based"
-any-glob-to-any-file = [ "meta_package_manager/managers/dnf*", "tests/*dnf*" ]
+label = "📦 manager: rpm-based"
+any-glob-to-any-file = [
+  "meta_package_manager/managers/dnf*",
+  "meta_package_manager/managers/zypper*",
+  "tests/*dnf*",
+  "tests/*zypper*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: dpkg-based"
 any-glob-to-any-file = [
   # The dot keeps apt.py (APT, APT_Mint) in and apt_cyg.py (its own label) out.
   "meta_package_manager/managers/apt.*",
+  "meta_package_manager/managers/deb_get*",
   "meta_package_manager/managers/dpkg*",
   "meta_package_manager/managers/opkg*",
+  "meta_package_manager/managers/pacstall*",
   "tests/*apt*",
+  "tests/*deb_get*",
   "tests/*dpkg*",
   "tests/*opkg*",
+  "tests/*pacstall*",
 ]
 
 [[tool.repomatic.labels.file-rules]]
@@ -1180,7 +1177,12 @@ any-glob-to-any-file = [ "meta_package_manager/managers/guix*", "tests/*guix*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: homebrew"
-any-glob-to-any-file = [ "meta_package_manager/managers/homebrew*", "tests/*homebrew*" ]
+any-glob-to-any-file = [
+  "meta_package_manager/managers/homebrew*",
+  "meta_package_manager/managers/zerobrew*",
+  "tests/*homebrew*",
+  "tests/*zerobrew*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: macports"
@@ -1223,10 +1225,6 @@ any-glob-to-any-file = [
 ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: pacstall"
-any-glob-to-any-file = [ "meta_package_manager/managers/pacstall*", "tests/*pacstall*" ]
-
-[[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pip-based"
 any-glob-to-any-file = [ "meta_package_manager/managers/pip*", "tests/*pip*" ]
 
@@ -1245,7 +1243,7 @@ label = "📦 manager: pwsh-gallery"
 any-glob-to-any-file = [ "meta_package_manager/managers/pwsh_gallery*", "tests/*pwsh_gallery*" ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: scoop"
+label = "📦 manager: scoop-based"
 any-glob-to-any-file = [
   "meta_package_manager/managers/scoop*",
   "meta_package_manager/managers/sfsu*",
@@ -1292,14 +1290,6 @@ any-glob-to-any-file = [ "meta_package_manager/managers/winget*", "tests/*winget
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: xbps"
 any-glob-to-any-file = [ "meta_package_manager/managers/xbps*", "tests/*xbps*" ]
-
-[[tool.repomatic.labels.file-rules]]
-label = "📦 manager: zerobrew"
-any-glob-to-any-file = [ "meta_package_manager/managers/zerobrew*", "tests/*zerobrew*" ]
-
-[[tool.repomatic.labels.file-rules]]
-label = "📦 manager: zypper"
-any-glob-to-any-file = [ "meta_package_manager/managers/zypper*", "tests/*zypper*" ]
 
 [tool.gitleaks]
 allowlist.description = "False positives"

@@ -197,6 +197,28 @@ def test_extra_labels_in_pyproject():
     assert generated == registry
 
 
+def test_label_rules_reference_known_labels():
+    """Every hand-maintained file- and content-rule must target a label that exists
+    in the generated ``[tool.repomatic.labels.extra]`` block.
+
+    A rule naming an unknown label silently applies a label the repository does not
+    have: the stale ``dnf-based`` rules left behind when the ``labels.py`` group was
+    renamed ``rpm-based``, or per-manager rules (``zypper``, ``pacstall``) outliving
+    the manager's absorption into an ecosystem group.
+    """
+    pyproject = PROJECT_ROOT / "pyproject.toml"
+    data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    labels_config = data["tool"]["repomatic"]["labels"]
+    known = {label["name"] for label in labels_config["extra"]}
+    for section in ("content-rules", "file-rules"):
+        stale = [
+            rule["label"]
+            for rule in labels_config[section]
+            if rule["label"] not in known
+        ]
+        assert not stale, f"{section} reference unknown labels: {stale}"
+
+
 def test_benchmark_yaml_well_formed():
     """Check ``docs/benchmark.yaml`` only encodes flags from the known
     competitor set and homepage URLs for non-pool managers."""

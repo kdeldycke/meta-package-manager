@@ -69,7 +69,6 @@ from .managers.stew import Stew
 from .managers.sun_tools import Sun_Tools
 from .managers.swupd import Swupd
 from .managers.tazpkg import Tazpkg
-from .managers.topgrade import Topgrade
 from .managers.uv import UV, UVX
 from .managers.vscode import VSCode, VSCodium
 from .managers.winget import WinGet
@@ -136,7 +135,6 @@ manager_classes = (
     Sun_Tools,
     Swupd,
     Tazpkg,
-    Topgrade,
     UV,
     UVX,
     VSCode,

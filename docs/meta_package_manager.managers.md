@@ -387,15 +387,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.managers.topgrade module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.topgrade
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.managers.uv module
 
 ```{eval-rst}

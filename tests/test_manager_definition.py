@@ -783,6 +783,12 @@ def test_bundled_ids_disjoint_from_builtins():
             "meta_package_manager/managers/tlmgr.toml",
         ),
         (
+            "topgrade",
+            "Topgrade",
+            "https://github.com/topgrade-rs/topgrade",
+            "meta_package_manager/managers/topgrade.toml",
+        ),
+        (
             "urpmi",
             "urpmi",
             "https://wiki.mageia.org/en/URPMI",
@@ -839,6 +845,7 @@ def test_gh_ext_capabilities(operation, expected):
             "TeX Live (https://tug.org/texlive) version 2023",
             "2023",
         ),
+        ("topgrade", "topgrade 17.4.0", "17.4.0"),
         ("urpmi", "urpmi 8.121.7", "8.121.7"),
     ),
 )

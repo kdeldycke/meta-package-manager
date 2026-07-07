@@ -1,0 +1,39 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# A meta-meta-package-manager: topgrade (https://github.com/topgrade-rs/topgrade)
+# wrapped by mpm. See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/config.py (build_bundled_managers) for the loader.
+#
+# topgrade is a Rust utility that auto-detects every package manager, runtime
+# version manager, plugin manager and OS updater installed on the host, then runs
+# each one in sequence. From mpm's vantage point it looks like a black-box
+# upgrader: there is no notion of installed packages, no concept of outdated
+# entries, no search index, no install or remove primitives. Only `upgrade --all`
+# makes sense, and it is the only operation declared here.
+#
+# Adding topgrade to mpm's pool is a knowing nod to XKCD #927
+# (https://xkcd.com/927/): mpm already wraps every package manager topgrade wraps,
+# so routing through it is structurally redundant. The benefit is access to
+# topgrade's broader catalog of runtime/plugin managers in the same
+# `mpm upgrade --all` invocation (mise, rustup, oh-my-zsh, JetBrains plugins,
+# vim/tmux plugin managers, and so on) without having to teach mpm each one.
+#
+# Caution: `mpm upgrade --topgrade` runs `topgrade --yes` to skip the interactive
+# prompts. If you also select other managers that topgrade itself drives (brew,
+# apt, pacman, ...), those will be upgraded twice in the same run.
+
+[mpm.managers.topgrade]
+name = "Topgrade"
+homepage_url = "https://github.com/topgrade-rs/topgrade"
+platforms = ["bsd", "linux_like", "macos", "all_windows"]
+cli_names = ["topgrade"]
+# Pinned to the 17.x series, which matches the topgrade revision the benchmark
+# page is calibrated against (see docs/benchmark.md).
+requirement = ">=17.0.0"
+# `topgrade --version` prints "topgrade 17.4.0".
+version_regexes = ['topgrade\s+(?P<version>\S+)']
+
+# --yes skips topgrade's "press enter to continue" prompts so the run completes
+# unattended, matching the contract mpm expects from an upgrade-all operation.
+[mpm.managers.topgrade.operations.upgrade_all]
+args = ["--yes"]

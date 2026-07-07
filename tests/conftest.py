@@ -295,7 +295,6 @@ PACKAGE_IDS = {
     "sun-tools": "SUNWzlib",
     "swupd": "curl",  # A small additive bundle: os-core never depends on it.
     "tazpkg": "nano",  # Used by tazpkg's own test suite.
-    "topgrade": "topgrade",
     "uv": "pytz",
     "uvx": "pycowsay",
     "vscode": "tamasfe.even-better-toml",
@@ -344,8 +343,8 @@ require a console-script entry point, ...).
 
     A few managers cannot offer a small binary: ``sdkman`` only ships full SDKs
     (``jbang`` is its lightest candidate), and ``mas`` needs a signed App Store app (its
-    test is skipped anyway). ``deb-get`` and ``topgrade`` have no real per-package
-    install, so they reference themselves.
+    test is skipped anyway). ``deb-get`` has no real per-package install, so it
+    references itself.
 
 Only to be used for destructive tests.
 """

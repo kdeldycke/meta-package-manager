@@ -21,6 +21,7 @@
 - [swupd] Add Clear Linux's swupd with `installed`, `search`, `install`, `upgrade --all`, `remove` and `cleanup` support, operating on bundles.
 - [tazpkg] Add TazPkg (SliTaz GNU/Linux) package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support.
 - [tlmgr] Add TeX Live Manager (`tlmgr`) with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support, cross-platform; a bundled configuration-defined manager. Requires TeX Live `>=2018`.
+- [topgrade] Convert from a Python class to a bundled configuration-defined manager, with no functional change.
 - [urpmi] Add urpmi (Mageia and the Mandriva lineage) with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
 
 ## [`7.1.0` (2026-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.1...v7.1.0)

@@ -26,6 +26,9 @@
 
 ## [`7.1.0` (2026-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.1...v7.1.0)
 
+> [!NOTE]
+> `7.1.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/7.1.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.1.0).
+
 - **Breaking:** [mpm] Split the `[sbom]` extra into `[sbom-offline]` (CycloneDX and SPDX document rendering) and `[sbom-online]` (the `--network` vulnerability lookups). `pip install meta-package-manager[sbom]` no longer resolves: use `[sbom-offline]` for the previous behavior, adding `[sbom-online]` for vulnerability scanning.
 - [mpm] Define brand-new package managers from the configuration file: a `[mpm.managers.<id>]` section declares a manager's platforms, CLI and version detection, and per-operation commands with `regex` or JSON parsers. Defined managers get `--<id>` / `--no-<id>` selectors and join the default set.
 - [mpm] Manager definitions load only from a trusted local config file (owned by you, not world-writable, never a remote `--config` URL), and a command-redirecting override (`pre_cmds`, `cli_names`, `cli_search_path`) read from an untrusted source now warns: see the new {doc}`security` page.

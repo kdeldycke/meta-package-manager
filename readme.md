@@ -43,7 +43,7 @@ $ uvx meta-package-manager
 - Supports macOS, Linux and Windows.
 - [Standalone executables](#executables) for Linux, macOS and Windows.
 - [List installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-installed).
-- [List duplicate installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#cmdoption-mpm-installed-d).
+- [List duplicate installed packages](https://kdeldycke.github.io/meta-package-manager/duplicates.html).
 - [Search for packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-search).
 - [Install a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-install).
 - [Remove a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-remove).

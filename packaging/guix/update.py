@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Update the Guix package definition to the latest release.
 
 Fetches the latest release version from GitHub, computes the Guix

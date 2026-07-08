@@ -16,7 +16,7 @@
 """Field-aware sorting of the multi-manager result tables.
 
 The :command:`mpm` subcommands render heterogeneous tables (different columns per
-command) but share one global :option:`mpm --sort-by` selector. This module owns the
+command) but share one global ``mpm --sort-by`` selector. This module owns the
 vocabulary of sortable fields (:py:class:`SortableField`) and the row-sort key builder
 (:py:func:`print_sorted_table`) that maps the selected fields onto whichever columns a
 given table happens to carry.
@@ -99,7 +99,7 @@ def print_sorted_table(
     Reimplements the ``print_sorted_table`` helper click-extra dropped in ``8.0.0``,
     where :class:`click_extra.table.SortByOption` instead bakes the sort key into
     ``ctx.print_table``. That option derives its choices from a single command's
-    columns, whereas mpm shares one global :option:`mpm --sort-by` across subcommands
+    columns, whereas mpm shares one global ``mpm --sort-by`` across subcommands
     with heterogeneous tables, so the key is built here.
     """
     fields = [field for _, field in headers]

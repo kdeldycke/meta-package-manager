@@ -15,9 +15,16 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Dynamic documentation content generation.
 
-Called by repomatic's ``update-docs`` job to regenerate tables, diagrams and
-other dynamic content in ``readme.md``, ``docs/benchmark.md`` and
-``docs/install.md``.
+Called by repomatic's ``update-docs`` job to regenerate the tables and diagrams
+checked into ``readme.md`` (which GitHub renders as static markdown), plus the
+label registry in ``pyproject.toml``.
+
+The Sphinx-only pages need no regeneration script: ``docs/benchmark.md``
+renders its manager-support table live at build time through a
+``{python:render}`` directive calling :func:`benchmark_managers_table`, and the
+``<!-- matrix ... -->`` compatibility blocks of ``docs/install.md`` are
+refreshed by ``update-docs``'s own directive-refresh phase (``click-extra
+refresh-directives``).
 
 .. warning::
     The generated Mermaid syntax targets the version bundled with
@@ -30,8 +37,6 @@ other dynamic content in ``readme.md``, ``docs/benchmark.md`` and
 from __future__ import annotations
 
 import inspect
-import sys
-from collections.abc import Callable
 from pathlib import Path
 from textwrap import dedent
 
@@ -44,15 +49,6 @@ from meta_package_manager.capabilities import Operations, implements
 from meta_package_manager.labels import LABELS
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
-
-# The matrix machinery imports Sphinx, which only the docs dependency group
-# provides. Gate it so this script (and the tests loading it) still runs in
-# environments without that group: update_matrices() then skips with a notice.
-update_matrix_blocks: Callable[..., list[Path]] | None
-try:
-    from click_extra.sphinx.matrix import update_matrix_blocks
-except ImportError:
-    update_matrix_blocks = None
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
@@ -177,6 +173,10 @@ def manager_source_url(manager_id: str) -> str:
 
 def benchmark_managers_table() -> str:
     """Produce the ``Package manager support`` table of the benchmark page.
+
+    Rendered live at Sphinx build time by the ``{python:render}`` block in
+    ``docs/benchmark.md``, so the table (and its source-line anchors) always
+    matches the code being documented without a checked-in copy.
 
     The ``mpm`` column is auto-derived from the live pool: each implemented
     manager renders as ``[✅](source_url)``, linking to the class definition
@@ -369,38 +369,6 @@ def update_readme() -> None:
     )
 
 
-def update_benchmark() -> None:
-    """Refresh the auto-generated table in ``docs/benchmark.md``."""
-    benchmark = PROJECT_ROOT / "docs" / "benchmark.md"
-    replace_content(
-        benchmark,
-        benchmark_managers_table(),
-        "<!-- benchmark-managers-start -->",
-        "<!-- benchmark-managers-end -->",
-    )
-
-
-def update_matrices() -> None:
-    """Refresh the compatibility matrices embedded in the documentation.
-
-    Regenerates from the project's git tags the Python and click-extra
-    compatibility tables that ``docs/install.md`` embeds in
-    ``<!-- matrix ... -->`` marker regions, through `click-extra's matrix
-    mechanism
-    <https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive>`_.
-    """
-    if update_matrix_blocks is None:
-        print(
-            "Skip matrix refresh: click-extra[sphinx] is not installed. Run:"
-            " uv run --group docs -- python docs/docs_update.py",
-            file=sys.stderr,
-        )
-        return
-    update_matrix_blocks((PROJECT_ROOT / "docs", PROJECT_ROOT / "readme.md"))
-
-
 if __name__ == "__main__":
     update_labels()
     update_readme()
-    update_benchmark()
-    update_matrices()

@@ -65,7 +65,7 @@ jobs:
       - name: Run repomatic metadata
         id: metadata
         run: >
-          uvx --no-progress 'repomatic==6.31.0' metadata
+          uvx --no-progress 'repomatic==7.1.0' metadata
           --format github-json --output "$GITHUB_OUTPUT"
           test_matrix test_matrix_pr
 
@@ -186,14 +186,13 @@ jobs:
           brew install npm
       - name: NPM - Windows upgrade
         if: runner.os == 'Windows'
-        run: |
-          npm install --global npm
+        run: npm install --global npm # zizmor: ignore[adhoc-packages]
 
       # pnpm
       # Installed through npm, which the steps above set up on every OS (Node itself is
       # pre-installed on all GitHub-hosted runners), so one cross-platform step suffices.
       - name: pnpm - install
-        run: npm install --global pnpm
+        run: npm install --global pnpm # zizmor: ignore[adhoc-packages]
 
       # Cargo
       - name: Cargo - macOS install

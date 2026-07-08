@@ -347,22 +347,25 @@ def test_manager_homepage_url(manager):
     assert manager.homepage_url.startswith(("http://", "https://"))
 
 
-def test_benchmark_table_in_sync():
-    """Check the auto-generated ``Package manager support`` table matches the
-    current pool and YAML.
+def test_benchmark_table_renders():
+    """Check the ``Package manager support`` table generator still produces a
+    well-formed table from the current pool and YAML.
 
-    Drift here means someone edited ``docs/benchmark.md`` between the markers
-    by hand, or added a manager without re-running ``docs/docs_update.py``.
+    The table is rendered live at Sphinx build time by the ``{python:render}``
+    block in ``docs/benchmark.md``, so there is no checked-in copy to compare
+    against: this test only guards the generator against crashes and structural
+    regressions (a broken YAML entry, a manager without a source file).
     """
-    benchmark = (PROJECT_ROOT / "docs" / "benchmark.md").read_text(encoding="utf-8")
-
-    start_tag = "<!-- benchmark-managers-start -->\n\n"
-    end_tag = "\n\n<!-- benchmark-managers-end -->"
-    assert start_tag in benchmark
-    assert end_tag in benchmark
-
-    on_disk = benchmark.split(start_tag, 1)[1].split(end_tag, 1)[0]
-    assert on_disk == docs_update.benchmark_managers_table()
+    table = docs_update.benchmark_managers_table()
+    lines = table.splitlines()
+    assert len(lines) > 2
+    header = lines[0]
+    assert header.startswith("| Manager")
+    assert "`mpm`" in header
+    for competitor in docs_update.BENCHMARK_COMPETITORS:
+        assert f"`{competitor}`" in header
+    # Every pool manager must land one row backed by a source link.
+    assert sum(line.count("[✅](") for line in lines) == len(pool)
 
 
 def test_matrix_blocks_in_sync():
@@ -370,7 +373,8 @@ def test_matrix_blocks_in_sync():
     regeneration from the git tags.
 
     Drift here means a release changed the Python classifiers or the
-    click-extra requirement without re-running ``docs/docs_update.py``.
+    click-extra requirement before repomatic's ``update-docs`` job refreshed
+    the embedded blocks.
 
     Skipped when click-extra's ``[sphinx]`` extra (pulled by the ``docs``
     dependency group) is missing, as in the hermetic unit-test environment.

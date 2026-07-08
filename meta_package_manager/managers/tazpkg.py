@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import SLITAZ
 
@@ -59,7 +60,7 @@ class Tazpkg(PackageManager):
     default_sudo = True
 
     # Keep gettext-localized headers and prompts in English.
-    extra_env = {"LC_ALL": "C"}
+    extra_env: ClassVar = {"LC_ALL": "C"}
 
     # Render titles, separators and markers as plain text instead of ANSI-decorated.
     post_args = ("--output=raw",)

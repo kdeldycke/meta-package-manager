@@ -9,6 +9,11 @@
 - [mpm] Config-defined managers gain multi-binary and privilege support: a per-operation `cli` key runs an operation through a sibling binary, `sudo = true` marks it privileged (honoring the new `default_sudo` definition field and the global `--sudo`/`--no-sudo` policy), and `version_cli` probes an alternate binary for tool suites exposing no version flag.
 - [mpm] `mpm` is now a strict superset of `pacaptr`, `pacapt`, `sysget` and `whohas`: every package manager those tools support is now wrapped.
 - [mpm] Extend the destructive install/remove test round-trip to the bundled configuration-defined managers; CI exercises it for real against `gh-ext`.
+- [mpm] Require click-extra `8.3` or newer.
+- [mpm] Rename the `stats` configuration key to `summary`, matching the `--summary` option it was detached from; add `sudo`, `jobs` and `network` to the typed configuration schema; stop the schema from advertising a flat `500` default for `timeout`, which is resolved per operation.
+- [mpm] Render the configuration reference, the CLI reference and the benchmark's manager-support table live at documentation build time, through click-extra's `click:config`, `click:tree` and `python:render` directives; drop `sphinx-click`.
+- [mpm] Make the binaries catalog table searchable and sortable, with relative-age hints on release dates.
+- [mpm] Exercise every subcommand's `--help` screen against the compiled binaries in the CLI test plan.
 - [apt-cyg] Add apt-cyg (Cygwin) package manager with `installed`, `search`, `install`, `remove` and `sync` support on Windows/Cygwin.
 - [cave] Add cave (Exherbo's Paludis client) with `installed`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
 - [chromebrew] Add Chromebrew (`crew`) package manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support on ChromeOS; a bundled configuration-defined manager.

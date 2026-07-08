@@ -495,7 +495,7 @@ mpm, version 4.13.0
 
 ## Python compatibility
 
-The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented. The table is regenerated from the release tags by `docs/docs_update.py`, through click-extra's [`matrix` mechanism](https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive):
+The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented. The table is regenerated from the release tags by repomatic's `update-docs` job, through click-extra's [`matrix` mechanism](https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive):
 
 <!-- matrix python package=mpm -->
 
@@ -520,18 +520,18 @@ The table below shows which Python versions each `mpm` release range supports. F
 
 <!-- matrix click-extra package=mpm version-floor=6.0.0 show-spec -->
 
-| `mpm`             | Released   | Spec       | `7.2` | `7.5.0` | `7.5.1` | `7.6.0` | `7.6.2` | `7.7` | `7.11` | `7.15` | `7.16.0` | `7.16.1` | `7.19` | `8.1.0` | `8.1.1` | `8.2` |
-| :---------------- | :--------- | :--------- | :---: | :-----: | :-----: | :-----: | :-----: | :---: | :----: | :----: | :------: | :------: | :----: | :-----: | :-----: | :---: |
-| `7.1.0`           | 2026-07-07 | `>=8.2`    |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ❌   |   ❌    |   ❌    |  ✅   |
-| `7.0.x`           | 2026-06-26 | `>=8.1.1`  |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ❌   |   ❌    |   ✅    |  ✅   |
-| `6.6.0`           | 2026-06-17 | `>=7.19`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ✅   |   ✅    |   ✅    |  ✅   |
-| `6.5.x`           | 2026-05-25 | `>=7.16.1` |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
-| `6.4.x`           | 2026-05-04 | `>=7.15`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
-| `6.4.0`           | 2026-04-27 | `>=7.11`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
-| `6.2.x` → `6.3.x` | 2026-03-26 | `>=7.7.0`  |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
-| `6.2.0`           | 2026-03-25 | `>=7.6.2`  |  ❌   |   ❌    |   ❌    |   ❌    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
-| `6.1.1`           | 2026-02-05 | `>=7.5.1`  |  ❌   |   ❌    |   ✅    |   ✅    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
-| `6.0.x` → `6.1.x` | 2025-12-08 | `>=7.2.0`  |  ✅   |   ✅    |   ✅    |   ✅    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |
+| `mpm`             | Released   | Spec       | `7.2` | `7.5.0` | `7.5.1` | `7.6.0` | `7.6.2` | `7.7` | `7.11` | `7.15` | `7.16.0` | `7.16.1` | `7.19` | `8.1.0` | `8.1.1` | `8.2` | `8.3` |
+| :---------------- | :--------- | :--------- | :---: | :-----: | :-----: | :-----: | :-----: | :---: | :----: | :----: | :------: | :------: | :----: | :-----: | :-----: | :---: | :---: |
+| `7.1.0`           | 2026-07-07 | `>=8.2`    |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ❌   |   ❌    |   ❌    |  ✅   |  ✅   |
+| `7.0.x`           | 2026-06-26 | `>=8.1.1`  |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ❌   |   ❌    |   ✅    |  ✅   |  ✅   |
+| `6.6.0`           | 2026-06-17 | `>=7.19`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |
+| `6.5.x`           | 2026-05-25 | `>=7.16.1` |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |
+| `6.4.x`           | 2026-05-04 | `>=7.15`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |
+| `6.4.0`           | 2026-04-27 | `>=7.11`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |
+| `6.2.x` → `6.3.x` | 2026-03-26 | `>=7.7.0`  |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |
+| `6.2.0`           | 2026-03-25 | `>=7.6.2`  |  ❌   |   ❌    |   ❌    |   ❌    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |
+| `6.1.1`           | 2026-02-05 | `>=7.5.1`  |  ❌   |   ❌    |   ✅    |   ✅    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |
+| `6.0.x` → `6.1.x` | 2025-12-08 | `>=7.2.0`  |  ✅   |   ✅    |   ✅    |   ✅    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |
 
 <!-- matrix-end -->
 

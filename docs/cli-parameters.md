@@ -1,18 +1,9 @@
 # {octicon}`command-palette` CLI parameters
 
-## Help screen
+The reference below walks the live command tree at build time, so every help screen matches the documented release. Each command section is anchored by its command path (like `#mpm-install`), the same scheme the readme and benchmark pages link to.
 
-```{click:run}
+```{click:tree} mpm
 from meta_package_manager.cli import mpm
-invoke(mpm, args=["--help"])
-```
-
-## Options
-
-```{eval-rst}
-.. click:: meta_package_manager.cli:mpm
-    :prog: mpm
-    :nested: full
 ```
 
 ## Man pages

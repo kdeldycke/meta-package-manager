@@ -125,7 +125,7 @@ Sequential order is recommended as most package managers don't support concurren
 
 The mpm test suite has two layers:
 
-- A **hermetic unit layer** (`test_cooldown`, `test_docs`, `test_docstring_corpus`, `test_managers`, `test_pool`, `test_specifier`, `test_version`) that needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox; its only extra build dependency is `pyyaml`, imported by `tests/test_docs.py`.
+- A **hermetic unit layer** (`test_cooldown`, `test_docs`, `test_docstring_corpus`, `test_help`, `test_managers`, `test_pool`, `test_specifier`, `test_version`) that needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox; its only extra build dependency is `pyyaml`, imported by `tests/test_docs.py`.
 - An **integration layer** (`tests/test_manager_*.py`, `tests/test_cli*.py`) that drives the ~30 real package managers (`apt`, `brew`, `pip`, `npm`, and more) and the `mpm` CLI end-to-end. These cannot run in a hermetic builder.
 
 As of mpm > `6.6.0`, the integration layer **auto-skips when `$HOME` is `/homeless-shelter`** — the build-sandbox convention shared by Guix and Nix — via `extra_platforms.pytest.skip_guix_build` (wired up in `tests/conftest.py`). Those distributors can therefore run the whole `pytest` suite unmodified: just make `pyyaml` available and **do not override `$HOME`** in the package definition, or the auto-skip stops firing and the integration tests fail.
@@ -188,7 +188,7 @@ Always update documentation when making changes:
 
 The benchmark compares `mpm` against related tools. It mixes one generated table with several hand-maintained ones, and its cells follow strict evidence rules.
 
-**Generated vs hand-maintained.** Only the "Package manager support" table (between `<!-- benchmark-managers-start -->` / `-end`) is produced by `docs/docs_update.py` (`benchmark_managers_table()`), fed by `docs/benchmark.yaml`; its competitor set is the `BENCHMARK_COMPETITORS` tuple. Every other table (Features, Operations, OS, Distribution, Activity, Popularity, Metadata) is edited by hand. After any change that can affect the generated block, run `uv run python docs/docs_update.py`; `test_benchmark_table_in_sync` fails if it drifts. The mpm-column links in the generated table are class source-line anchors that shift when a manager module is edited, so regenerate after touching manager source.
+**Generated vs hand-maintained.** Only the "Package manager support" table is generated: it renders live at Sphinx build time through the `{python:render}` block in `docs/benchmark.md`, which calls `benchmark_managers_table()` from `docs/docs_update.py`, fed by `docs/benchmark.yaml`; its competitor set is the `BENCHMARK_COMPETITORS` tuple. Every other table (Features, Operations, OS, Distribution, Activity, Popularity, Metadata) is edited by hand. There is no checked-in copy to regenerate or keep in sync: the mpm-column ✅ links (class source-line anchors) are computed at build time, so they never drift from the manager source. `test_benchmark_table_renders` guards the generator against crashes and structural regressions.
 
 **Cell glyphs (benchmark only — `readme.md`'s operation matrix keeps plain `✓`).**
 

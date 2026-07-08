@@ -348,3 +348,99 @@ stderr_contains = "No such command 'bogus-subcommand'"
 cli_parameters = "--bogus-flag"
 exit_code = 2
 stderr_contains = "No such option '--bogus-flag'"
+
+# Every command and subcommand must render its --help screen without crashing,
+# including in the compiled binaries where a missing data file or lazy import
+# only surfaces at runtime. One case per command path, in the CLI's own sorted
+# order; the root --help is covered by its dedicated case above.
+# tests/test_help.py keeps this roster in sync with the live command tree.
+
+[[cases]]
+cli_parameters = "cleanup --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm cleanup"
+
+[[cases]]
+cli_parameters = "config-template --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm config-template"
+
+[[cases]]
+cli_parameters = "dump --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm dump"
+
+[[cases]]
+cli_parameters = "help --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm help"
+
+[[cases]]
+cli_parameters = "install --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm install"
+
+[[cases]]
+cli_parameters = "installed --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm installed"
+
+[[cases]]
+cli_parameters = "managers --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm managers"
+
+[[cases]]
+cli_parameters = "outdated --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm outdated"
+
+[[cases]]
+cli_parameters = "remove --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm remove"
+
+[[cases]]
+cli_parameters = "restore --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm restore"
+
+[[cases]]
+cli_parameters = "sbom --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm sbom"
+
+[[cases]]
+cli_parameters = "search --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm search"
+
+[[cases]]
+cli_parameters = "sync --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm sync"
+
+[[cases]]
+cli_parameters = "upgrade --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm upgrade"
+
+[[cases]]
+cli_parameters = "which --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm which"

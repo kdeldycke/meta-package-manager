@@ -81,31 +81,68 @@ class MpmConfig:
     ``mpm`` group.
 
     .. note::
-        Dynamic manager selectors (``brew = true``, ``pip = false``, etc.) and
-        click-extra built-in options (``verbosity``, ``table_format``) are handled
+        Dynamic manager selectors (``brew = true``, ``pip = false``, etc.),
+        click-extra built-in options (``verbosity``, ``table_format``) and
+        one-shot utility flags (``--bar-plugin-path``, ``--xkcd``) are handled
         by the ``default_map`` pipeline and do not appear here.
+
+    .. note::
+        Multi-word fields pin their config path through
+        ``CONFIG_PATH_METADATA_KEY``: mpm's configuration convention is
+        underscored keys (matching Click parameter names, the
+        ``--validate-config`` checks and every documented example), while
+        click-extra would otherwise kebab-case field names in the rendered
+        ``click:config`` reference.
     """
 
-    all_managers: bool = False
+    all_managers: bool = field(
+        default=False,
+        metadata={CONFIG_PATH_METADATA_KEY: "all_managers"},
+    )
     """Force evaluation of all managers, including unsupported and deprecated."""
 
-    ignore_auto_updates: bool = True
+    ignore_auto_updates: bool = field(
+        default=True,
+        metadata={CONFIG_PATH_METADATA_KEY: "ignore_auto_updates"},
+    )
     """Exclude auto-updating packages from outdated/upgrade results."""
 
-    stop_on_error: bool = False
+    stop_on_error: bool = field(
+        default=False,
+        metadata={CONFIG_PATH_METADATA_KEY: "stop_on_error"},
+    )
     """Stop on first manager CLI error instead of continuing."""
 
-    dry_run: bool = False
+    dry_run: bool = field(
+        default=False,
+        metadata={CONFIG_PATH_METADATA_KEY: "dry_run"},
+    )
     """Simulate CLI calls without performing any action."""
 
-    timeout: int = 500
-    """Maximum duration in seconds for each manager CLI call."""
+    sudo: bool | None = None
+    """Force privileged manager operations with (``True``) or without (``False``)
+    ``sudo``. Unset by default: system managers escalate, user-level managers do
+    not. Overridden per manager by a ``sudo`` entry in ``[mpm.managers.<id>]``."""
+
+    timeout: int | None = None
+    """Maximum duration in seconds for each manager CLI call. When unset, a
+    per-operation default applies: ``120`` for read-only queries (``installed``,
+    ``outdated``, ``search``) and ``500`` for state-changing operations. A set
+    value overrides every operation."""
+
+    jobs: int | str = "auto"
+    """Maximum number of managers to run concurrently. Accepts an integer, or the
+    keywords ``auto`` (one fewer than the logical CPU count, the default) and
+    ``max`` (every logical CPU); set ``1`` to run sequentially."""
 
     cooldown: str = ""
     """Minimum release age (like ``7 days`` or ``1 week``) a package version must
     reach before it can be installed or upgraded. Empty disables the gate."""
 
-    require_cooldown_support: bool = True
+    require_cooldown_support: bool = field(
+        default=True,
+        metadata={CONFIG_PATH_METADATA_KEY: "require_cooldown_support"},
+    )
     """Require managers to natively support a requested cooldown to run
     install/upgrade: skip those that cannot (fail-closed). Set to ``False`` to run
     them anyway, without the safeguard."""
@@ -113,13 +150,24 @@ class MpmConfig:
     description: bool = False
     """Show package description in results."""
 
-    sort_by: list[str] = field(default_factory=lambda: ["manager_id"])
+    sort_by: list[str] = field(
+        default_factory=lambda: ["manager_id"],
+        metadata={CONFIG_PATH_METADATA_KEY: "sort_by"},
+    )
     """Default fields to sort results by, in priority order."""
 
-    stats: bool = True
-    """Print per-manager package statistics."""
+    summary: bool = True
+    """Print an end-of-run summary on stderr: a count line of per-manager totals
+    plus any subcommand-specific follow-up notes."""
 
-    suggest_contribs: bool = True
+    network: bool = False
+    """Opt into network calls during the run. Today this only affects
+    ``mpm sbom``, which queries OSV.dev for vulnerability data."""
+
+    suggest_contribs: bool = field(
+        default=True,
+        metadata={CONFIG_PATH_METADATA_KEY: "suggest_contribs"},
+    )
     """Print a contribution invitation when a user override targets a field that
     likely indicates an upstream detection bug."""
 

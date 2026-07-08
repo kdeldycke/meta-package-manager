@@ -189,8 +189,10 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.2.0 is the floor mpm targets, the first release shipping the
-  # APIs mpm imports directly:
+  # click-extra 8.3.0 is the floor mpm targets, the first release shipping the
+  # `click:config` Sphinx directive that renders the option reference in
+  # docs/configuration.md (via the [sphinx] extra of the docs dependency
+  # group). The 8.2.0 series brought the rest of the surface mpm relies on:
   #   - resolve_jobs / run_jobs / run_lanes from click_extra.execution, the
   #     concurrency primitives meta_package_manager.execution builds its
   #     fan-outs on.
@@ -199,13 +201,13 @@ dependencies = [
   #     command), inherited through the default option set and documented in
   #     docs/configuration.md.
   #   - The click_extra.sphinx.matrix machinery behind docs/install.md's
-  #     compatibility tables and their refresh in docs/docs_update.py (via the
-  #     [sphinx] extra of the docs dependency group).
+  #     compatibility tables, and the `click:tree` / `python:render`
+  #     directives behind docs/cli-parameters.md and docs/benchmark.md.
   # Earlier 8.x floors tracked the split click_extra.highlight module, the
   # ConfigValidator / ValidationError import move to click_extra.config,
   # print_table()'s sort_key parameter, and the 8.1.1 fix for the
-  # EnumChoice-typed --sort-by default; 8.2.0 covers them all.
-  "click-extra>=8.2",
+  # EnumChoice-typed --sort-by default; 8.3.0 covers them all.
+  "click-extra>=8.3",
   # extra-platforms 13.1.0 adds the ChromeOS, Clear Linux, SliTaz and Source Mage
   # detections that the chromebrew, swupd, tazpkg and sorcery managers declare.
   "extra-platforms>=13.1",
@@ -325,10 +327,11 @@ docs = [
   "sphinx>=8",
   # sphinx-autodoc-typehints 2.4.0 is the first release aligned to Python >= 3.10.
   "sphinx-autodoc-typehints>=2.4",
-  # sphinx-click 6.1.0 is the first version to drop Python 3.9.
-  "sphinx-click>=6.1",
   # sphinx-copybutton 0.5.2 stabilized the code-block copy button.
   "sphinx-copybutton>=0.5.2",
+  # sphinx-datatables 1.0.0 is the first stable release; makes the binaries
+  # catalog table searchable and sortable client-side (pulls sphinxcontrib-jquery).
+  "sphinx-datatables>=1",
   # sphinx-design 0.6 introduced the card/grid/tab directive syntax used in docs.
   "sphinx-design>=0.6",
   # sphinxcontrib-mermaid 1.2.3 fixed mermaid_d3_zoom support, enabled in docs/conf.py.
@@ -363,7 +366,7 @@ exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-07-02T00:00:00Z", extra-platforms = "2026-07-09T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-07-09T00:00:00Z", extra-platforms = "2026-07-09T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 
@@ -438,7 +441,7 @@ warn_unreachable = true
 pretty = true
 warn_unused_configs = true
 # Sphinx >= 9.1 uses PEP 695 `type` statements, which mypy rejects under the
-# project's --python-version 3.10 floor. docs/docs_update.py imports
+# project's --python-version 3.10 floor. tests/test_docs.py imports
 # click_extra.sphinx.matrix (which imports sphinx), so skip following imports
 # into sphinx instead of analyzing its 3.12+ source.
 overrides = [

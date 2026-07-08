@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX
 
@@ -63,7 +64,7 @@ class Pkcon(PackageManager):
 
     # Keep gettext-localized status words and preamble labels in English so the
     # parsing regexes hold.
-    extra_env = {"LC_ALL": "C"}
+    extra_env: ClassVar = {"LC_ALL": "C"}
 
     # --plain forces the machine-readable output branch even on a terminal.
     post_args = ("--plain",)

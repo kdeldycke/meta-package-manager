@@ -509,17 +509,27 @@ def test_factory_operation_sudo(monkeypatch):
         "run_cli",
         lambda *args, **kwargs: captured.update(kwargs) or "",
     )
+    # Each phase clears the dict so its assert reads the state its own call
+    # captured, and reads through a local: mypy narrows the ``captured["sudo"]``
+    # subscript on each assert and cannot see the monkeypatched methods mutate
+    # the dict, so re-asserting the same subscript with alternating values
+    # would mark the later phases unreachable.
     manager.install("jq")
-    assert captured["sudo"] is True
+    install_sudo = captured["sudo"]
+    assert install_sudo is True
+    captured.clear()
     manager.sync()
-    assert captured["sudo"] is False
+    sync_sudo = captured["sudo"]
+    assert sync_sudo is False
     monkeypatch.setattr(
         manager,
         "build_cli",
         lambda *args, **kwargs: captured.update(kwargs) or args,
     )
+    captured.clear()
     manager.upgrade_all_cli()
-    assert captured["sudo"] is True
+    upgrade_all_sudo = captured["sudo"]
+    assert upgrade_all_sudo is True
 
 
 # Trust gate.

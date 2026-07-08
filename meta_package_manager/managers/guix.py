@@ -150,7 +150,7 @@ class Guix(PackageManager):
             size of the package set, not the number of results. A single
             search runs for tens of seconds on a freshly pulled Guix, and far
             longer from an in-tree dev checkout that recompiles modules on the
-            fly. The call is bounded by :option:`mpm --timeout`; when that is
+            fly. The call is bounded by ``mpm --timeout``; when that is
             unset, ``search`` uses the 120s read-only default, past which the
             process is killed and no results are returned, so a slow search can
             look like a hang.

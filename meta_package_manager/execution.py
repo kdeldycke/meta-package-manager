@@ -43,7 +43,7 @@ so a privilege-escalation password prompt never stalls the run from inside that 
     The name and intent mirror :py:mod:`click_extra.execution` from the sibling
     `click-extra <https://github.com/kdeldycke/click-extra>`_ project, which gathers
     options that govern how a CLI runs (parallelism, timing, exit code). Co-locating
-    the cross-manager scheduling here realizes that alignment: :option:`mpm --jobs`
+    the cross-manager scheduling here realizes that alignment: ``mpm --jobs``
     and the fan-out it drives now sit beside the per-call timeout and spinner they
     build upon.
 """
@@ -584,7 +584,7 @@ class CLIExecutor:
     ``None`` (the default) means the user expressed no preference, so the built-in
     :py:attr:`default_sudo` decides. ``True``/``False`` force escalation on or off for
     every operation this manager marks privileged (a ``build_cli(..., sudo=True)`` call).
-    Set globally by :option:`mpm --sudo` / :option:`mpm --no-sudo` and per manager by the
+    Set globally by ``mpm --sudo`` / ``mpm --no-sudo`` and per manager by the
     ``[mpm.managers.<id>] sudo`` config key, the latter winning (see
     :py:meth:`meta_package_manager.pool.ManagerPool._select_managers`).
 
@@ -966,7 +966,7 @@ class CLIExecutor:
             :py:attr:`subprocess.CompletedProcess.stdout` and
             :py:attr:`subprocess.CompletedProcess.stderr`
           * returning ready-to-use normalized strings (dedented and stripped)
-          * letting :option:`mpm --dry-run` and :option:`mpm --stop-on-error` have
+          * letting ``mpm --dry-run`` and ``mpm --stop-on-error`` have
             expected effect on execution
 
         :param must_succeed: if ``True``, raise
@@ -1349,10 +1349,11 @@ class CLIExecutor:
         * ``auto_extra_env=False`` to skip the automatic addition of
           :py:attr:`self.extra_env <meta_package_manager.manager.PackageManager.extra_env>`
         * ``override_extra_env=dict()`` to locally overrides the later
-        * ``force_exec`` ignores the :option:`mpm --dry-run` and :option:`mpm
-          --stop-on-error` options to force the execution and completion of the command.
+        * ``force_exec`` ignores the ``mpm --dry-run`` and
+          ``mpm --stop-on-error`` options to force the execution and
+          completion of the command.
         * ``must_succeed`` raises on non-zero exit regardless of
-          :option:`mpm --stop-on-error`. See :py:meth:`run` for details.
+          ``mpm --stop-on-error``. See :py:meth:`run` for details.
         """
         cli = self.build_cli(
             *args,
@@ -1452,7 +1453,7 @@ def effective_jobs(ctx: Context | None, count: int) -> int:
     where coherent per-manager log narration matters more than the speed-up
     (interleaved threads would scramble it). The base helper also collapses to
     sequential with no active CLI context, for a single item, or at
-    :option:`mpm --jobs` ``1``; otherwise the :option:`mpm --jobs` value wins,
+    ``mpm --jobs`` ``1``; otherwise the ``mpm --jobs`` value wins,
     capped at ``count`` (no point spinning up more workers than there are items).
     """
     return resolve_jobs(ctx, count, serial_at_debug=True)
@@ -1474,7 +1475,7 @@ def warm_availability(managers: Iterable[PackageManager]) -> None:
 
     Sized by :func:`effective_jobs`: a no-op (leaving the probes to lazy,
     sequential evaluation) without an active context, at ``DEBUG`` verbosity, for a
-    single candidate, or at :option:`mpm --jobs` ``1``.
+    single candidate, or at ``mpm --jobs`` ``1``.
     """
     candidates = list(managers)
     jobs = effective_jobs(get_current_context(silent=True), len(candidates))
@@ -1515,7 +1516,7 @@ class OperationTrail:
       (``install``/``remove``/``upgrade <packages>``/``restore``) drive this directly,
       since they chain managers by priority (a hit in the first manager skips the
       rest) and so cannot fan out; it is also every :func:`dispatch` fallback at
-      :option:`mpm --jobs` ``1`` or ``DEBUG`` verbosity.
+      ``mpm --jobs`` ``1`` or ``DEBUG`` verbosity.
     - **concurrent** (``jobs > 1``): suppress the per-manager spinners (which would
       collide on stderr) and drive one aggregate spinner, buffering outcomes until it
       first draws, then streaming the rest live.
@@ -1668,7 +1669,7 @@ def dispatch(
     plus a finisher, behind a single aggregate spinner when concurrent (a slow batch on
     a terminal) and silent otherwise.
 
-    Concurrency is sized by :func:`effective_jobs` (driven by :option:`mpm --jobs`): it
+    Concurrency is sized by :func:`effective_jobs` (driven by ``mpm --jobs``): it
     collapses to a sequential pass — preserving each manager's own per-call spinner —
     for a single lane, at ``--jobs 1``, or at ``DEBUG`` verbosity.
 
@@ -1852,7 +1853,7 @@ def warn_jobs_ignored(ctx: Context) -> None:
     the rest), which is cross-manager-sequential, so the whole command runs serially.
     The other state changers (``remove``, ``upgrade <packages>``, ``restore``, and
     ``install`` of fully manager-tied specs) now fan out through
-    :func:`collect_per_package`. When the user explicitly raised :option:`mpm --jobs`
+    :func:`collect_per_package`. When the user explicitly raised ``mpm --jobs``
     above ``1``, say so once at ``INFO``: the request simply has no effect on this
     run, which is narration, not a problem.
     """

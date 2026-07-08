@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import tomllib  # type: ignore[import-not-found]  # stdlib >=3.11; docs require >=3.12.
 
 project_path = Path(__file__).parent.parent.resolve()
+
+# Make this docs directory importable so the `{python:render}` block in
+# benchmark.md can call the table generator in docs_update.py at build time.
+sys.path.insert(0, str(Path(__file__).parent))
 
 # Fetch general information about the project from pyproject.toml.
 toml_path = project_path / "pyproject.toml"
@@ -31,10 +36,14 @@ extensions = [
     "sphinxext.opengraph",
     "myst_parser",
     "sphinx.ext.autosectionlabel",
-    "sphinx_click",
     "sphinx_autodoc_typehints",
     "click_extra.sphinx",
     "sphinxcontrib.mermaid",
+    # jQuery must be listed explicitly: sphinx-datatables only activates it
+    # from a html-page-context callback, too late for the jquery.js static
+    # file to be registered and copied, leaving `$` undefined at runtime.
+    "sphinxcontrib.jquery",
+    "sphinx_datatables",
 ]
 
 # https://myst-parser.readthedocs.io/en/latest/syntax/optional.html
@@ -64,6 +73,65 @@ myst_heading_anchors = 6
 myst_heading_slug_func = "docutils.nodes.make_id"
 
 mermaid_d3_zoom = True
+
+# Applies to every table carrying the (default) `sphinx-datatable` class:
+# currently only the binaries catalog. An empty `order` preserves the CSV's
+# newest-first row order on load instead of DataTables' default first-column
+# ascending sort; the page length accommodates one release's worth of
+# binaries per page with room to spare. The render callback appends a
+# relative hint ("9 days ago") to the Released column (index 2 in
+# repomatic.binaries_page.CSV_HEADERS) at display time only, so sorting and
+# searching keep operating on the raw ISO dates and the generated CSV stays
+# free of hints that would go stale between releases. Passed as a raw JS
+# string because a JSON dict cannot carry the function. Raw string: the JS
+# regex's backslashes are not Python escapes.
+datatables_options = r"""
+{
+    "order": [],
+    "pageLength": 25,
+    "columnDefs": [
+        {
+            "targets": 2,
+            "render": function (data, type, row) {
+                if (type !== "display" || !data) {
+                    return data;
+                }
+                // Cells arrive as rendered HTML (<p>2026-07-02</p>), so
+                // extract the date instead of parsing the markup.
+                const match = /\d{4}-\d{2}-\d{2}/.exec(data);
+                if (!match) {
+                    return data;
+                }
+                const days = Math.floor(
+                    (Date.now() - Date.parse(match[0])) / 86400000);
+                if (!isFinite(days)) {
+                    return data;
+                }
+                let hint;
+                if (days <= 0) {
+                    hint = "today";
+                } else if (days === 1) {
+                    hint = "a day ago";
+                } else if (days < 30) {
+                    hint = days + " days ago";
+                } else if (days < 350) {
+                    const months = Math.round(days / 30.44);
+                    hint = months === 1 ? "a month ago" : months + " months ago";
+                } else {
+                    const years = Math.round(days / 365.25);
+                    hint = years === 1 ? "a year ago" : years + " years ago";
+                }
+                // Inject inside the paragraph so the hint stays on the
+                // same line as the date.
+                const label = " (" + hint + ")";
+                return data.includes("</p>")
+                    ? data.replace("</p>", label + "</p>")
+                    : data + label;
+            }
+        }
+    ]
+}
+"""
 
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Parsing of release-age durations for the :option:`mpm --cooldown` option.
+"""Parsing of release-age durations for the ``mpm --cooldown`` option.
 
 Defines :py:class:`Duration`, the :py:class:`click_extra.ParamType` that turns a
 friendly duration, an ISO 8601 duration, or an RFC 3339 timestamp into a

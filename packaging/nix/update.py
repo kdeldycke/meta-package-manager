@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Update the Nix package definition to the latest GitHub release.
 
 Fetches the latest release version from GitHub, computes the source hash using

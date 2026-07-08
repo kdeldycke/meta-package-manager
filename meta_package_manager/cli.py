@@ -142,7 +142,7 @@ See the corresponding `implementation rationale in issue #10
 COOLDOWN_SUPPORTED_MANAGERS = tuple(
     sorted(mid for mid, manager in pool.items() if manager.supports_cooldown)
 )
-"""IDs of the managers that natively enforce a release-age :option:`mpm --cooldown`.
+"""IDs of the managers that natively enforce a release-age ``mpm --cooldown``.
 
 Derived from the pool so the ``--cooldown`` help text never drifts from the set of
 managers that actually carry a :py:attr:`cooldown_env_var
@@ -306,7 +306,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     Returns the normalized path of the standalone `bar_plugin.py
     <https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/bar_plugin.py>`_
     script that is distributed with this Python module. This
-    is made available under the :option:`mpm --bar-plugin-path` option.
+    is made available under the ``mpm --bar-plugin-path`` option.
 
     Notice that the fully-qualified home directory get replaced by its
     shorthand (``~``) if applicable:
@@ -772,13 +772,13 @@ def managers(ctx):
     """List every package manager detected on the system.
 
     Only reports by default all managers supported on the current platform. To include
-    unsupported and deprecated managers in the report, use the :option:`--all-managers`
+    unsupported and deprecated managers in the report, use the ``--all-managers``
     flag.
 
     User's own selection configuration are intentionally ignored, so a manager dropped
     from regular operations is still visible here for troubleshooting. To narrow down the
     report to a subset of managers, pass the same selectors as for other subcommands (e.g.
-    :option:`--pip` or :option:`--no-apt`).
+    ``--pip`` or ``--no-apt``).
     """
     if ctx.obj.user_drops:
         dropped = ", ".join(map(theme().invoked_command, sorted(ctx.obj.user_drops)))

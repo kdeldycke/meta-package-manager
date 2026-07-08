@@ -208,9 +208,7 @@ dependencies = [
   "click-extra>=8.2",
   # extra-platforms 13.1.0 adds the ChromeOS, Clear Linux, SliTaz and Source Mage
   # detections that the chromebrew, swupd, tazpkg and sorcery managers declare.
-  # Tracked from git main through [tool.uv.sources] until 13.1.0 is released; relax
-  # to ">=13.1" then.
-  "extra-platforms>=13.1.0.dev0",
+  "extra-platforms>=13.1",
   # Required at runtime by meta_package_manager.package and
   # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
   # cross-manager package identification, independent of SBOM features. That API
@@ -365,11 +363,7 @@ exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-07-02T00:00:00Z" }
-# Track extra-platforms from git main for the unreleased 13.1.0 platform
-# detections (ChromeOS, Clear Linux, SliTaz, Source Mage). Drop this source once
-# 13.1.0 lands on PyPI.
-sources = { extra-platforms = { git = "https://github.com/kdeldycke/extra-platforms.git", branch = "main" } }
+exclude-newer-package = { click-extra = "2026-07-02T00:00:00Z", extra-platforms = "2026-07-09T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 

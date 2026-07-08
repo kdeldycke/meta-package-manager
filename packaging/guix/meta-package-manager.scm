@@ -22,7 +22,7 @@
 (define-public meta-package-manager
   (package
     (name "meta-package-manager")
-    (version "7.0.1")
+    (version "7.1.0")
     (source
      (origin
        (method git-fetch)
@@ -31,7 +31,7 @@
              (commit (string-append "v" version))))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "1y56z5970kp540w408y0fzk7g7r27vplqqihdav7gf8mqzfd23sz"))))
+        (base32 "0m6r96q4kwglinchi6ir5adn8rpmz0wnzrs1l6m0gmxpcbgi3dnm"))))
     (build-system pyproject-build-system)
     ;; Upstream builds with uv-build, which is not yet packaged for Guix; fall
     ;; back to setuptools.  Skip the SBOM CLI test, which pulls heavy optional

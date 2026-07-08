@@ -30,6 +30,10 @@ runs:
     - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
       with:
         enable-cache: false
+        # Downstream callers invoke this action without a checkout (the codegen drops it: see
+        # _render_publish_pypi_job in repomatic/github/workflow_sync.py), so the empty workdir
+        # is by design and setup-uv's warning about it is noise.
+        ignore-empty-workdir: true
 
     - name: Download build artifact
       id: download

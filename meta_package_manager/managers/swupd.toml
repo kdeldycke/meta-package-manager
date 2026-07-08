@@ -1,0 +1,56 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# Clear Linux's software updater (https://github.com/clearlinux/swupd-client)
+# manages *bundles* (collections of files), not individually-versioned packages:
+# bundles carry no version of their own and follow the single whole-system OS
+# version. See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/config.py (build_bundled_managers) for the loader.
+#
+# --quiet is swupd's blessed machine channel: data flows through its print()
+# helper while decorations (headers, "-" prefixes, "Total:" footers) flow through
+# info(), which --quiet drops. Every query below relies on it.
+#
+# Two operations are deliberately not declared:
+# - outdated: `swupd check-update` reports a single whole-OS version delta through
+#   its *exit code* (0 when an update exists), not a per-bundle listing.
+# - upgrade of a single bundle: bundles cannot be upgraded individually, only the
+#   whole OS via `swupd update`, declared as upgrade_all.
+
+[mpm.managers.swupd]
+name = "Clear Linux Software Updater"
+homepage_url = "https://github.com/clearlinux/swupd-client"
+platforms = ["clearlinux"]
+default_sudo = true
+# `swupd --version` prints "swupd 7.0.0", then an indented copyright line.
+version_regexes = ['swupd (?P<version>\S+)']
+
+# One bare bundle name per line, no version: bundles are versioned with the OS.
+[mpm.managers.swupd.operations.installed]
+args = ["bundle-list", "--quiet"]
+regex = '^(?P<package_id>\S+)$'
+
+# swupd has no bundle-name search: `swupd search` locates the bundle providing a
+# *binary or library* (and needs the external swupd-search tool), while
+# `search-file` matches file paths. So the whole available bundle catalog is
+# listed and mpm's refiltering narrows it against the query.
+[mpm.managers.swupd.operations.search]
+args = ["bundle-list", "--all", "--quiet"]
+regex = '^(?P<package_id>\S+)$'
+
+[mpm.managers.swupd.operations.install]
+args = ["bundle-add", "--assume=yes", "{package_id}"]
+sudo = true
+
+[mpm.managers.swupd.operations.remove]
+args = ["bundle-remove", "--assume=yes", "{package_id}"]
+sudo = true
+
+# Updates the whole OS to the latest version.
+[mpm.managers.swupd.operations.upgrade_all]
+args = ["update", "--assume=yes"]
+sudo = true
+
+# Removes cached update content from the state directory.
+[mpm.managers.swupd.operations.cleanup]
+args = ["clean"]
+sudo = true

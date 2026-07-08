@@ -1,0 +1,44 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# apt-cyg (https://github.com/transcode-open/apt-cyg) is a single bash script
+# wrapping Cygwin's package repository. See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/config.py
+# (build_bundled_managers) for the loader.
+#
+# Cygwin has no root/sudo concept: every operation runs as the invoking user.
+# apt-cyg has no upgrade, outdated or cache-cleaning command at all: packages are
+# upgraded by re-running Cygwin's own `setup` program.
+
+[mpm.managers.apt-cyg]
+name = "apt-cyg"
+homepage_url = "https://github.com/transcode-open/apt-cyg"
+platforms = ["cygwin"]
+# apt-cyg is effectively unversioned: the only version signal is the hardcoded
+# literal in its usage text, which has always reported "1":
+#   $ apt-cyg --version
+#   apt-cyg version 1
+version_regexes = ['apt-cyg version (?P<version>\S+)']
+
+# `apt-cyg list` skips the INSTALLED.DB header and prints one bare package name per
+# line (the script's own awk implementation), without any version.
+[mpm.managers.apt-cyg.operations.installed]
+args = ["list"]
+regex = '^\s*(?P<package_id>\S+)\s*$'
+
+# `listall` greps the downloaded setup.ini catalog (populated by `apt-cyg update`)
+# and prints one bare matching name per line. The query is interpreted by apt-cyg
+# as a regular expression; results carry no version or description, so exact and
+# extended matching are refiltered by mpm.
+[mpm.managers.apt-cyg.operations.search]
+args = ["listall", "{query}"]
+regex = '^\s*(?P<package_id>\S+)\s*$'
+
+[mpm.managers.apt-cyg.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.apt-cyg.operations.remove]
+args = ["remove", "{package_id}"]
+
+# Refreshes the setup.ini package catalog from the configured mirror.
+[mpm.managers.apt-cyg.operations.sync]
+args = ["update"]

@@ -1,0 +1,43 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# Rust's cargo (https://doc.rust-lang.org/cargo/), covering the binaries installed
+# with `cargo install`. See docs/overrides.md ("Define a new manager") for the
+# schema and meta_package_manager/config.py (build_bundled_managers) for the
+# loader.
+#
+# cargo has no outdated listing and no upgrade command for installed binaries:
+# re-running `cargo install` is the upstream upgrade story, so neither operation
+# is declared.
+
+[mpm.managers.cargo]
+name = "Rust cargo"
+homepage_url = "https://doc.rust-lang.org/cargo/"
+platforms = ["all_platforms"]
+requirement = ">=1.0.0"
+# --color never suppresses colored output, --quiet the cargo log messages.
+pre_args = ["--color", "never", "--quiet"]
+# Brewfile's DSL has a first-class `cargo` entry type, so `mpm dump --brewfile`
+# exports crates installed through this manager.
+brewfile_entry_type = "cargo"
+# `cargo --version` prints "cargo 1.59.0".
+version_regexes = ['cargo\s+(?P<version>\S+)']
+
+# `cargo install --list` prints one "name vX.Y.Z:" header per crate, followed by
+# indented binary names that the anchored regex skips.
+[mpm.managers.cargo.operations.installed]
+args = ["install", "--list"]
+regex = '^(?P<package_id>\S+)\s+v(?P<installed_version>\S+):$'
+
+# `cargo search` rows read `name = "version"    # description`. cargo caps search
+# at 100 results, so with client-side exact/extended refiltering on top the final
+# results cannot be guaranteed complete. The description column is not captured:
+# the DSL only recognizes id and versions.
+[mpm.managers.cargo.operations.search]
+args = ["search", "--limit", "100", "{query}"]
+regex = '^(?P<package_id>\S+)\s+=\s+"(?P<latest_version>\S+)"'
+
+[mpm.managers.cargo.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.cargo.operations.remove]
+args = ["uninstall", "{package_id}"]

@@ -36,28 +36,10 @@
    :undoc-members:
 ```
 
-## meta_package_manager.managers.apt_cyg module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.apt_cyg
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.managers.asdf module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.asdf
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.cargo module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.cargo
    :members:
    :show-inheritance:
    :undoc-members:
@@ -85,15 +67,6 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.conda
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.cpan module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.cpan
    :members:
    :show-inheritance:
    :undoc-members:
@@ -225,15 +198,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.managers.opkg module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.opkg
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.managers.pacman module
 
 ```{eval-rst}
@@ -342,15 +306,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.managers.steamcmd module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.steamcmd
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.managers.stew module
 
 ```{eval-rst}
@@ -369,15 +324,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.managers.swupd module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.swupd
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.managers.tazpkg module
 
 ```{eval-rst}
@@ -391,15 +337,6 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.uv
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.vscode module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.vscode
    :members:
    :show-inheritance:
    :undoc-members:

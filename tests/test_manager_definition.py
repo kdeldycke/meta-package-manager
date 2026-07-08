@@ -124,6 +124,37 @@ def test_parse_definition_returns_dataclass():
     assert definition.operations["install"].parse_mode == "none"
 
 
+def test_parse_definition_versionless_catalog_manager():
+    """A tool with no per-package versions, no search command and a Brewfile mapping.
+
+    Locks three schema affordances at once: an ``installed`` regex may capture only
+    the package ID (Clear Linux bundles and Cygwin listings carry no version), a
+    ``search`` may omit ``{query}`` to list the whole catalog and rely on
+    client-side refiltering, and the Brewfile export fields land on the built class.
+    """
+    definition = parse_manager_definition(
+        "bundletool",
+        {
+            "platforms": ["linux"],
+            "brewfile_entry_type": "brew",
+            "brewfile_skip_warning": "Skipping {count} bundle(s).",
+            "operations": {
+                "installed": {
+                    "args": ["list"],
+                    "regex": r"^(?P<package_id>\S+)$",
+                },
+                "search": {
+                    "args": ["list", "--all"],
+                    "regex": r"^(?P<package_id>\S+)$",
+                },
+            },
+        },
+    )
+    klass = build_manager_class(definition)
+    assert klass.brewfile_entry_type == "brew"
+    assert klass.brewfile_skip_warning == "Skipping {count} bundle(s)."
+
+
 @pytest.mark.parametrize(
     ("section", "expected"),
     (
@@ -143,9 +174,25 @@ def test_parse_definition_returns_dataclass():
             id="missing-package-id-placeholder",
         ),
         pytest.param(
-            {"platforms": ["linux"], "operations": {"search": {"args": ["s"]}}},
-            "must reference the {query} placeholder",
-            id="missing-query-placeholder",
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "search": {
+                        "args": ["s", "{qeury}"],
+                        "regex": r"^(?P<package_id>\S+)$",
+                    },
+                },
+            },
+            "unknown placeholder(s): {qeury}",
+            id="typoed-placeholder",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {"sync": {"args": ["s", "{package_id}"]}},
+            },
+            "sync args take no placeholder",
+            id="placeholder-on-placeholderless-operation",
         ),
         pytest.param(
             {"platforms": ["linux"], "operations": {"installed": {"args": ["list"]}}},
@@ -156,11 +203,11 @@ def test_parse_definition_returns_dataclass():
             {
                 "platforms": ["linux"],
                 "operations": {
-                    "installed": {"args": ["list"], "regex": r"^(?P<package_id>\S+)$"},
+                    "outdated": {"args": ["o"], "regex": r"^(?P<package_id>\S+)$"},
                 },
             },
             "missing required",
-            id="regex-missing-installed-version",
+            id="regex-missing-latest-version",
         ),
         pytest.param(
             {
@@ -733,6 +780,18 @@ def test_bundled_ids_disjoint_from_builtins():
     ("manager_id", "name", "homepage_url", "definition_source"),
     (
         (
+            "apt-cyg",
+            "apt-cyg",
+            "https://github.com/transcode-open/apt-cyg",
+            "meta_package_manager/managers/apt_cyg.toml",
+        ),
+        (
+            "cargo",
+            "Rust cargo",
+            "https://doc.rust-lang.org/cargo/",
+            "meta_package_manager/managers/cargo.toml",
+        ),
+        (
             "cave",
             "cave",
             "https://exherbo.org",
@@ -745,6 +804,12 @@ def test_bundled_ids_disjoint_from_builtins():
             "meta_package_manager/managers/chromebrew.toml",
         ),
         (
+            "cpan",
+            "Perl CPAN",
+            "https://www.cpan.org",
+            "meta_package_manager/managers/cpan.toml",
+        ),
+        (
             "fink",
             "Fink",
             "https://www.finkproject.org",
@@ -755,6 +820,12 @@ def test_bundled_ids_disjoint_from_builtins():
             "GitHub CLI extensions",
             "https://cli.github.com",
             "meta_package_manager/managers/gh_ext.toml",
+        ),
+        (
+            "opkg",
+            "opkg",
+            "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/",
+            "meta_package_manager/managers/opkg.toml",
         ),
         (
             "pkg-tools",
@@ -787,6 +858,18 @@ def test_bundled_ids_disjoint_from_builtins():
             "meta_package_manager/managers/sorcery.toml",
         ),
         (
+            "steamcmd",
+            "Valve SteamCMD",
+            "https://developer.valvesoftware.com/wiki/SteamCMD",
+            "meta_package_manager/managers/steamcmd.toml",
+        ),
+        (
+            "swupd",
+            "Clear Linux Software Updater",
+            "https://github.com/clearlinux/swupd-client",
+            "meta_package_manager/managers/swupd.toml",
+        ),
+        (
             "tlmgr",
             "TeX Live Manager",
             "https://www.tug.org/texlive/",
@@ -803,6 +886,18 @@ def test_bundled_ids_disjoint_from_builtins():
             "urpmi",
             "https://wiki.mageia.org/en/URPMI",
             "meta_package_manager/managers/urpmi.toml",
+        ),
+        (
+            "vscode",
+            "Visual Studio Code",
+            "https://code.visualstudio.com",
+            "meta_package_manager/managers/vscode.toml",
+        ),
+        (
+            "vscodium",
+            "VSCodium",
+            "https://vscodium.com",
+            "meta_package_manager/managers/vscodium.toml",
         ),
     ),
 )
@@ -837,10 +932,18 @@ def test_gh_ext_capabilities(operation, expected):
 @pytest.mark.parametrize(
     ("manager_id", "version_output", "expected_version"),
     (
+        ("apt-cyg", "apt-cyg version 1", "1"),
+        ("cargo", "cargo 1.59.0", "1.59.0"),
         ("cave", "cave 3.0.1", "3.0.1"),
         ("chromebrew", "1.75.0", "1.75.0"),
+        (
+            "cpan",
+            ">(info): /usr/bin/cpan script version 1.676, CPAN.pm version 2.28",
+            "2.28",
+        ),
         ("fink", "Package manager version: 0.45.6", "0.45.6"),
         ("gh-ext", "gh version 2.62.0 (2024-11-14)", "2.62.0"),
+        ("opkg", "opkg version 0.3.6 (libsolv 0.7.5)", "0.3.6"),
         # pkg-tools probes `uname -r`, the suite shipping with the OS release.
         ("pkg-tools", "7.7", "7.7"),
         ("pkgin", "pkgin 26.4.0 (using SQLite 3.45.1)", "26.4.0"),
@@ -848,6 +951,12 @@ def test_gh_ext_capabilities(operation, expected):
         ("soar", "soar 0.12.6", "0.12.6"),
         # Sorcery prints the bare content of /etc/sorcery/version, a datestamp.
         ("sorcery", "20240108", "20240108"),
+        (
+            "steamcmd",
+            "Steam Console Client (c) Valve Corporation - version 1648077083",
+            "1648077083",
+        ),
+        ("swupd", "swupd 7.0.0", "7.0.0"),
         (
             "tlmgr",
             "tlmgr revision 66798 (2023-04-08 02:15:21 +0200)\n"
@@ -857,6 +966,19 @@ def test_gh_ext_capabilities(operation, expected):
         ),
         ("topgrade", "topgrade 17.4.0", "17.4.0"),
         ("urpmi", "urpmi 8.121.7", "8.121.7"),
+        # vscode and vscodium declare no version_regexes: `code --version` prints
+        # the bare version, then the commit hash and arch on their own lines, and
+        # the default probe regex picks the first token up.
+        (
+            "vscode",
+            "1.60.2\n7f6ab5485bbc008386c4386d08766667e155244e\nx64",
+            "1.60.2",
+        ),
+        (
+            "vscodium",
+            "1.60.2\n7f6ab5485bbc008386c4386d08766667e155244e\nx64",
+            "1.60.2",
+        ),
     ),
 )
 def test_bundled_version_regex(manager_id, version_output, expected_version):
@@ -949,8 +1071,62 @@ def test_soar_parses_search():
 
 
 @pytest.mark.parametrize(
+    ("operation", "expected"),
+    (
+        (Operations.install, True),
+        (Operations.installed, False),
+        (Operations.outdated, False),
+        (Operations.search, False),
+        (Operations.remove, False),
+        (Operations.sync, False),
+        (Operations.cleanup, False),
+        # The declared upgrade_one command is not enough: single-package upgrade
+        # also needs an `installed` listing to resolve which manager owns the
+        # package, and SteamCMD cannot provide one. Same verdict as the former
+        # Python class.
+        (Operations.upgrade, False),
+        (Operations.upgrade_all, False),
+    ),
+)
+def test_steamcmd_capabilities(operation, expected):
+    """SteamCMD exposes no inventory: only install and per-title upgrade exist,
+    both mapping to the same idempotent ``+app_update`` command."""
+    assert implements(pool["steamcmd"], operation) is expected
+
+
+@pytest.mark.parametrize(
     ("manager_id", "operation", "output", "expected"),
     (
+        pytest.param(
+            "apt-cyg",
+            "installed",
+            "bash\ncoreutils\ntree",
+            [("bash", None), ("coreutils", None), ("tree", None)],
+            id="apt-cyg-installed",
+        ),
+        pytest.param(
+            "apt-cyg",
+            "search",
+            "tree",
+            [("tree", None)],
+            id="apt-cyg-search",
+        ),
+        pytest.param(
+            "cargo",
+            "installed",
+            "bore-cli v0.4.0:\n    bore\nripgrep v13.0.0:\n    rg",
+            [("bore-cli", "0.4.0"), ("ripgrep", "13.0.0")],
+            id="cargo-installed",
+        ),
+        pytest.param(
+            "cargo",
+            "search",
+            'python = "0.0.0"                  # Python.\n'
+            'pyo3 = "0.16.4"                   # Bindings to Python interpreter\n'
+            "... and 1664 crates more (use --limit N to see more)",
+            [("python", "0.0.0"), ("pyo3", "0.16.4")],
+            id="cargo-search",
+        ),
         pytest.param(
             "cave",
             "installed",
@@ -973,6 +1149,32 @@ def test_soar_parses_search():
             id="chromebrew-search",
         ),
         pytest.param(
+            "cpan",
+            "installed",
+            "Loading internal logger. Log::Log4perl recommended for better logging\n"
+            "O\t1.03\nErrno\t1.33\nEncode\t3.08_01\nmeta_notation\tundef",
+            [
+                ("O", "1.03"),
+                ("Errno", "1.33"),
+                ("Encode", "3.08_01"),
+                ("meta_notation", None),
+            ],
+            id="cpan-installed",
+        ),
+        pytest.param(
+            "cpan",
+            "outdated",
+            "Loading internal logger. Log::Log4perl recommended for better logging\n"
+            "Reading '/Users/kde/.cpan/Metadata'\n"
+            "  Database was generated on Thu, 26 Mar 2026 13:41:03 GMT\n"
+            "Module Name                                Local    CPAN\n"
+            "---------------------------------------------------------------\n"
+            "Algorithm::C3                             0.1000  0.1100\n"
+            "Archive::Tar                              2.3800  3.0400",
+            [("Algorithm::C3", "0.1100"), ("Archive::Tar", "3.0400")],
+            id="cpan-outdated",
+        ),
+        pytest.param(
             "fink",
             "installed",
             " i \tfiglet\t2.2.5-1\tPrints text as ASCII art\n"
@@ -980,6 +1182,35 @@ def test_soar_parses_search():
             "   \tlynx\t2.9.0-1\tText browser is not installed",
             [("figlet", "2.2.5-1"), ("nano", "6.2-1")],
             id="fink-installed",
+        ),
+        pytest.param(
+            "opkg",
+            "installed",
+            "3rd-party-feed-configs - 1.1-r0\naio-grab - 1.0+git71+c79e264-r0",
+            [
+                ("3rd-party-feed-configs", "1.1-r0"),
+                ("aio-grab", "1.0+git71+c79e264-r0"),
+            ],
+            id="opkg-installed",
+        ),
+        pytest.param(
+            "opkg",
+            "outdated",
+            "openpli-bootlogo - 20190717-r0 - 20190718-r0\n"
+            "enigma2-hotplug - 2.7+git1720+55c6b34-r0 - 2.7+git1722+daf2f52-r0",
+            [
+                ("openpli-bootlogo", "20190718-r0"),
+                ("enigma2-hotplug", "2.7+git1722+daf2f52-r0"),
+            ],
+            id="opkg-outdated",
+        ),
+        pytest.param(
+            "opkg",
+            "search",
+            "bash - 5.0-r0 - An sh-compatible command language interpreter\n"
+            "busybox - 1.31.0-r0 - Tiny versions of many common UNIX utilities",
+            [("bash", "5.0-r0"), ("busybox", "1.31.0-r0")],
+            id="opkg-search",
         ),
         pytest.param(
             "pkg-tools",
@@ -1056,6 +1287,20 @@ def test_soar_parses_search():
             id="sorcery-search",
         ),
         pytest.param(
+            "swupd",
+            "installed",
+            "editors\nos-core\nos-core-update",
+            [("editors", None), ("os-core", None), ("os-core-update", None)],
+            id="swupd-installed",
+        ),
+        pytest.param(
+            "swupd",
+            "search",
+            "curl\neditors\nos-core",
+            [("curl", None), ("editors", None), ("os-core", None)],
+            id="swupd-search",
+        ),
+        pytest.param(
             "tlmgr",
             "installed",
             "tlmgr: package repository https://mirror.ctan.org (verified)\n"
@@ -1088,6 +1333,26 @@ def test_soar_parses_search():
             "kernel-desktop-6.6.0-1.mga9\nfvwm3-1.0.2-1.1.mga8",
             [("kernel-desktop", "6.6.0-1.mga9"), ("fvwm3", "1.0.2-1.1.mga8")],
             id="urpmi-outdated",
+        ),
+        pytest.param(
+            "vscode",
+            "installed",
+            "ms-python.python@2021.9.1246542782\n"
+            "ms-toolsai.jupyter@2021.8.2041215044\n"
+            "tamasfe.even-better-toml@0.14.2",
+            [
+                ("ms-python.python", "2021.9.1246542782"),
+                ("ms-toolsai.jupyter", "2021.8.2041215044"),
+                ("tamasfe.even-better-toml", "0.14.2"),
+            ],
+            id="vscode-installed",
+        ),
+        pytest.param(
+            "vscodium",
+            "installed",
+            "tamasfe.even-better-toml@0.14.2",
+            [("tamasfe.even-better-toml", "0.14.2")],
+            id="vscodium-installed",
         ),
     ),
 )

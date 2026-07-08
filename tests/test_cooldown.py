@@ -26,7 +26,7 @@ from click.exceptions import BadParameter
 
 from meta_package_manager.cli import cooldown_permits
 from meta_package_manager.duration import Duration
-from meta_package_manager.managers.cargo import Cargo
+from meta_package_manager.managers.gem import Gem
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM
 from meta_package_manager.managers.pacman import _YAY_COOLDOWN_INIT_LUA, Yay
@@ -201,7 +201,7 @@ def test_supported_managers_advertise_cooldown(manager_class, env_var):
     assert manager.cooldown_env_var == env_var
 
 
-@pytest.mark.parametrize("manager_class", (Cargo, Homebrew))
+@pytest.mark.parametrize("manager_class", (Gem, Homebrew))
 def test_unsupported_managers_lack_cooldown(manager_class):
     manager = manager_class()
     assert manager.supports_cooldown is False

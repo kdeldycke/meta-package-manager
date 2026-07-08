@@ -1,0 +1,36 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# Visual Studio Code's extension manager (https://code.visualstudio.com), driven
+# through the `code` CLI. See docs/overrides.md ("Define a new manager") for the
+# schema and meta_package_manager/config.py (build_bundled_managers) for the
+# loader.
+#
+# The Marketplace cannot be queried from the CLI: no search, outdated or upgrade
+# command exists (extensions self-update in the background), so only the installed
+# listing, install and remove are declared.
+#
+# No version_regexes: `code --version` prints the bare version, then the commit
+# hash and the arch on their own lines, and the default regex picks the first
+# token up.
+
+[mpm.managers.vscode]
+name = "Visual Studio Code"
+homepage_url = "https://code.visualstudio.com"
+platforms = ["all_platforms"]
+cli_names = ["code"]
+requirement = ">=1.60.0"
+# Brewfile's DSL has a first-class `vscode` entry type, so `mpm dump --brewfile`
+# exports extensions installed through this manager.
+brewfile_entry_type = "vscode"
+
+# `code --list-extensions --show-versions` prints "publisher.extension@version"
+# rows.
+[mpm.managers.vscode.operations.installed]
+args = ["--list-extensions", "--show-versions"]
+regex = '^(?P<package_id>[^@\s]+)@(?P<installed_version>\S+)$'
+
+[mpm.managers.vscode.operations.install]
+args = ["--install-extension", "{package_id}"]
+
+[mpm.managers.vscode.operations.remove]
+args = ["--uninstall-extension", "{package_id}"]

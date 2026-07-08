@@ -1,0 +1,32 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# Valve's SteamCMD (https://developer.valvesoftware.com/wiki/SteamCMD) drives the
+# Steam content system from the command line. See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/config.py
+# (build_bundled_managers) for the loader.
+#
+# SteamCMD exposes no inventory: there is no way to list installed titles, pending
+# updates or search the catalog from the CLI, so only install and per-title upgrade
+# are declared, both mapping to the same idempotent `+app_update` command. Titles
+# are designated by their numeric Steam application ID.
+
+[mpm.managers.steamcmd]
+name = "Valve SteamCMD"
+homepage_url = "https://developer.valvesoftware.com/wiki/SteamCMD"
+platforms = ["all_platforms"]
+cli_names = ["steamcmd"]
+# Every invocation must end with +quit or SteamCMD stays in its interactive prompt.
+post_args = ["+quit"]
+# SteamCMD is hardly versioned at all: no minimal requirement is enforced, and the
+# probe reads the build timestamp from the banner `steamcmd +quit` prints:
+# "Steam Console Client (c) Valve Corporation - version 1648077083".
+version_cli_options = ["+quit"]
+version_regexes = ['Valve Corporation - version (?P<version>\S+)']
+
+# `validate` forces integrity verification of the installed content, which is what
+# makes the same command safe for both install and upgrade.
+[mpm.managers.steamcmd.operations.install]
+args = ["+app_update", "{package_id}", "validate"]
+
+[mpm.managers.steamcmd.operations.upgrade_one]
+args = ["+app_update", "{package_id}", "validate"]

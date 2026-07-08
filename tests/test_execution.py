@@ -449,13 +449,15 @@ def test_build_cli_marker_required_for_escalation():
 
 
 def test_default_sudo_matches_system_managers():
-    """Exactly the system package managers (and their subclasses) escalate by
-    default; user-level managers and pkg (which has no sudo markers) do not."""
+    """Exactly the system package managers (classes, their subclasses and bundled
+    definitions alike) escalate by default; user-level managers and pkg (which has
+    no sudo markers) do not."""
     escalating = {mid for mid, manager in pool.items() if type(manager).default_sudo}
     assert escalating == {
         "apk",
         "apt",
         "apt-mint",
+        "cave",
         "deb-get",
         "dnf",
         "dnf5",
@@ -465,7 +467,15 @@ def test_default_sudo_matches_system_managers():
         "pacaur",
         "pacman",
         "paru",
+        "pkg-tools",
+        "pkgin",
         "ports",
+        "slapt-get",
+        "sorcery",
+        "sun-tools",
+        "swupd",
+        "tazpkg",
+        "urpmi",
         "xbps",
         "yay",
         "yum",

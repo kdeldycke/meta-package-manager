@@ -65,23 +65,20 @@ A definition has two homes:
 - **Private (a user's config).** Drop the `[mpm.managers.<id>]` block into your own configuration file. `mpm` picks it up on the next run: nothing else to touch, and it never leaves your machine.
 - **Bundled (shipped with `mpm`).** Put the block in its own `meta_package_manager/managers/<id>.toml` file. `mpm` loads every shipped `*.toml` at startup and registers it like a built-in, so every user gets its `--<id>` flag. Bundled files are read-only package data, so they load without the config-file trust gate that guards a user's own definitions (see {doc}`/security`). `meta_package_manager/managers/gh_ext.toml` is the worked example.
 
-Shipping a bundled definition is far lighter than the class-based checklist below, with no module, no labels, and no destructive-test entry:
+Shipping a bundled definition is far lighter than the class-based checklist below, with no module and no labels:
 
 | File                                      | Change                                                                                                                                                                                |
 | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `meta_package_manager/managers/<id>.toml` | The definition: one `[mpm.managers.<id>]` section. Auto-discovered, so no loader edit is needed.                                                                                      |
 | `pyproject.toml`                          | Add the manager ID (and its ecosystem name) to `keywords`.                                                                                                                            |
+| `tests/conftest.py`                       | Add a `PACKAGE_IDS` entry: the destructive install/remove round-trip covers bundled managers too, and the import-time assertion requires every shipped manager to carry one.          |
 | `tests/test_pool.py`                      | Increment the `len(pool)` assertion in `test_manager_count`; `len(manager_classes)` stays.                                                                                            |
 | `tests/test_manager_definition.py`        | Extend the `test_bundled_registered`, `test_bundled_version_regex` and `test_bundled_parsing` parametrizes; the last one locks each query regex to a source-derived output sample.  |
 | `changelog.md`                            | A `- [<id>] Add ...` entry.                                                                                                                                                           |
 | `docs/augmentations.md`                   | Add the manager's row: DSL search is always refiltered, so it gains exact + extended search ✅.                                                                                        |
 | `docs/benchmark.yaml`                     | If the manager already had a competitor row, delete its `homepages:` entry: the homepage now comes from the definition (`test_benchmark_homepages_cover_non_pool_managers` enforces). |
 
-Then run `docs/docs_update.py` to regenerate the readme Sankey diagram, the operations matrix, and the benchmark table. A bundled config manager needs **no** `pool.py` import, `labels.py` group, label rules, `docs/meta_package_manager.managers.md` automodule, or `tests/conftest.py` `PACKAGE_IDS` entry: those are class-only. Its command mapping is covered by the unit tests, not the destructive install/remove suite.
-
-```{caution}
-Never add a `PACKAGE_IDS` entry for a bundled manager. `tests/conftest.py` asserts at import time that `PACKAGE_IDS` covers *exactly* the class managers, so a stray bundled entry (or a missing class entry) aborts collection of the whole test session, not a single test.
-```
+Then run `docs/docs_update.py` to regenerate the readme Sankey diagram, the operations matrix, and the benchmark table. A bundled config manager needs **no** `pool.py` import, `labels.py` group, label rules, or `docs/meta_package_manager.managers.md` automodule: those are class-only.
 
 ## Completing an incomplete integration
 

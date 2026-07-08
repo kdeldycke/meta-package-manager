@@ -1,0 +1,46 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# opkg (https://git.yoctoproject.org/cgit/cgit.cgi/opkg/) is the lightweight
+# package manager of embedded Linux distributions (OpenWrt, Yocto). See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/config.py (build_bundled_managers) for the loader.
+
+[mpm.managers.opkg]
+name = "opkg"
+homepage_url = "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/"
+platforms = ["unix_without_macos"]
+requirement = ">=0.2.0"
+# `opkg --version` prints "opkg version 0.3.6 (libsolv 0.7.5)".
+version_regexes = ['opkg\s+version\s+(?P<version>\S+)']
+
+# `opkg list-installed` prints "name - version" rows.
+[mpm.managers.opkg.operations.installed]
+args = ["list-installed"]
+regex = '^(?P<package_id>\S+) - (?P<installed_version>\S+)'
+
+# `opkg list-upgradable` prints "name - installed - latest" rows.
+[mpm.managers.opkg.operations.outdated]
+args = ["list-upgradable"]
+regex = '^(?P<package_id>\S+) - (?P<installed_version>\S+) - (?P<latest_version>\S+)'
+
+# opkg has no search command, so the whole catalog is listed ("name - version -
+# description" rows) and mpm's refiltering narrows it against the query. The
+# description column is not captured: the DSL only recognizes id and versions.
+[mpm.managers.opkg.operations.search]
+args = ["list"]
+regex = '^(?P<package_id>\S+) - (?P<latest_version>\S+) - .+$'
+
+[mpm.managers.opkg.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.opkg.operations.remove]
+args = ["remove", "{package_id}"]
+
+[mpm.managers.opkg.operations.upgrade_all]
+args = ["upgrade"]
+
+[mpm.managers.opkg.operations.upgrade_one]
+args = ["upgrade", "{package_id}"]
+
+[mpm.managers.opkg.operations.sync]
+args = ["update"]

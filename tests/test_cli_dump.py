@@ -34,6 +34,7 @@ from meta_package_manager.brewfile import (
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.managers.mas import MAS
 from meta_package_manager.package import Package
+from meta_package_manager.pool import pool
 
 
 @dataclass
@@ -257,42 +258,35 @@ def test_mas_brewfile_entry_falls_back_to_id_when_name_missing():
 
 
 def test_vscodium_brewfile_skip_warning_set():
-    """VSCodium overrides VSCode's ``brewfile_entry_type`` to ``None`` so its
-    extensions are not silently emitted as ``vscode`` (which would install to VS
-    Code instead of VSCodium). The warning is the audible signal."""
-    from meta_package_manager.managers.vscode import VSCode, VSCodium
-
-    assert VSCode.brewfile_entry_type == "vscode"
-    assert VSCodium.brewfile_entry_type is None
-    assert VSCodium.brewfile_skip_warning is not None
-    assert "{count}" in VSCodium.brewfile_skip_warning
+    """VSCodium's definition declares no ``brewfile_entry_type`` so its extensions
+    are not silently emitted as ``vscode`` (which would install to VS Code instead
+    of VSCodium). The warning is the audible signal."""
+    assert pool["vscode"].brewfile_entry_type == "vscode"
+    assert pool["vscodium"].brewfile_entry_type is None
+    assert pool["vscodium"].brewfile_skip_warning is not None
+    assert "{count}" in pool["vscodium"].brewfile_skip_warning
 
 
 def test_phase_2_to_4_managers_have_brewfile_entry_types():
     """Every brew-bundle-supported manager except ``go`` and ``krew`` has a
-    mapping. Catches regressions if a manager's class is reorganized and the
-    attribute is dropped."""
-    from meta_package_manager.managers.cargo import Cargo
-    from meta_package_manager.managers.flatpak import Flatpak
-    from meta_package_manager.managers.homebrew import Brew, Cask
-    from meta_package_manager.managers.mas import MAS
-    from meta_package_manager.managers.npm import NPM
-    from meta_package_manager.managers.uv import UV, UVX
-    from meta_package_manager.managers.vscode import VSCode
-    from meta_package_manager.managers.winget import WinGet
-
-    assert Brew.brewfile_entry_type == "brew"
-    assert Cask.brewfile_entry_type == "cask"
-    assert MAS.brewfile_entry_type == "mas"
-    assert VSCode.brewfile_entry_type == "vscode"
-    assert NPM.brewfile_entry_type == "npm"
-    assert Cargo.brewfile_entry_type == "cargo"
-    assert UVX.brewfile_entry_type == "uv"
-    assert WinGet.brewfile_entry_type == "winget"
-    assert Flatpak.brewfile_entry_type == "flatpak"
+    mapping. Catches regressions if a manager's class is reorganized (or converted
+    to a bundled definition) and the attribute is dropped."""
+    expected_entry_types = {
+        "brew": "brew",
+        "cargo": "cargo",
+        "cask": "cask",
+        "flatpak": "flatpak",
+        "mas": "mas",
+        "npm": "npm",
+        "uvx": "uv",
+        "vscode": "vscode",
+        "winget": "winget",
+    }
+    for manager_id, entry_type in expected_entry_types.items():
+        assert pool[manager_id].brewfile_entry_type == entry_type
     # The pip-style UV manager intentionally has no mapping: its packages are
     # environment-level Python deps, not top-level tools.
-    assert UV.brewfile_entry_type is None
+    assert pool["uv"].brewfile_entry_type is None
 
 
 def test_build_brewfile_round_trip_format_is_parseable_by_ruby_inspect():

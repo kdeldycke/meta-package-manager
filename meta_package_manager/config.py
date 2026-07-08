@@ -778,8 +778,10 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
         )
     },
     # Definition-only fields, with no OVERRIDABLE_FIELDS counterpart: a built-in
-    # manager's escalation default and version probe are reviewed code, while a
-    # definition declares them as data.
+    # manager's escalation default, version probe and Brewfile mapping are reviewed
+    # code, while a definition declares them as data.
+    "brewfile_entry_type": _to_str,
+    "brewfile_skip_warning": _to_str,
     "default_sudo": _to_bool,
     "version_cli": _to_str,
 }
@@ -790,8 +792,14 @@ The runtime-preference fields (``deprecated``, ``dry_run``, ``ignore_auto_update
 ``stop_on_error``) are excluded: they are command-line/global concerns, not part of a
 manager's identity, and resolve through the usual option precedence.
 
-Two fields are definition-only:
+Four fields are definition-only:
 
+- ``brewfile_entry_type`` maps the manager onto a Homebrew Bundle DSL entry so its
+  installed packages join ``mpm dump --brewfile`` exports (see
+  :py:attr:`~meta_package_manager.manager.PackageManager.brewfile_entry_type`).
+- ``brewfile_skip_warning`` is the message emitted when the manager's packages are
+  deliberately left out of such an export (see
+  :py:attr:`~meta_package_manager.manager.PackageManager.brewfile_skip_warning`).
 - ``default_sudo`` is the manager's built-in escalation policy (see
   :py:attr:`~meta_package_manager.execution.CLIExecutor.default_sudo`). Operations
   marked ``sudo = true`` escalate by default, while the user's global ``--no-sudo``
@@ -831,21 +839,52 @@ RECOGNIZED_PARSE_FIELDS: Final[frozenset[str]] = frozenset(
 
 
 REQUIRED_PARSE_FIELDS: Final[Mapping[str, frozenset[str]]] = {
-    "installed": frozenset({"package_id", "installed_version"}),
+    "installed": frozenset({"package_id"}),
     "outdated": frozenset({"package_id", "latest_version"}),
     "search": frozenset({"package_id"}),
 }
-"""Parse fields each query operation must extract to be useful."""
+"""Parse fields each query operation must extract to be useful.
+
+``installed`` needs only the package ID: some tools genuinely track no per-package
+version (Clear Linux bundles under ``swupd``, Cygwin listings under ``apt-cyg``), and
+mpm's package model treats the installed version as optional everywhere. ``outdated``
+without a ``latest_version`` would report nothing actionable, so there the version
+capture stays mandatory.
+"""
 
 
 OPERATION_ARG_PLACEHOLDER: Final[Mapping[str, str]] = {
     "install": "package_id",
     "remove": "package_id",
     "upgrade_one": "package_id",
-    "search": "query",
 }
 """Placeholder each operation's ``args`` must reference, so a value is actually passed
-to the CLI (a ``remove`` with no ``{package_id}`` would target nothing)."""
+to the CLI (a ``remove`` with no ``{package_id}`` would target nothing).
+
+``search`` is deliberately absent: its ``{query}`` placeholder is optional. A tool
+with no real search command can still declare the operation by listing its whole
+catalog (``opkg list``, ``swupd bundle-list --all``) and letting
+:py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` narrow the
+results, mirroring the search-from-scratch augmentation some built-in managers use.
+"""
+
+
+ALLOWED_ARG_PLACEHOLDERS: Final[Mapping[str, frozenset[str]]] = {
+    "install": frozenset({"package_id"}),
+    "remove": frozenset({"package_id"}),
+    "search": frozenset({"query"}),
+    "upgrade_one": frozenset({"package_id"}),
+}
+"""Placeholders each operation's ``args`` may reference.
+
+Operations absent from this mapping take no placeholder at all. Any ``{token}``
+outside the operation's set is rejected at parse time: a typoed ``{qeury}`` would
+otherwise reach the CLI as a literal argument and fail in silent, tool-specific ways.
+"""
+
+
+ARG_PLACEHOLDER_REGEX: Final = re.compile(r"\{([a-z_]+)\}")
+"""Match ``{placeholder}`` tokens in an operation's args, for validation."""
 
 
 QUERY_OPERATION_KEYS: Final[frozenset[str]] = frozenset(
@@ -1091,8 +1130,26 @@ def _parse_operation_spec(
             f"{path}.args", "must be a non-empty list.", code="invalid_value"
         )
 
+    found_placeholders = {
+        token for arg in args for token in ARG_PLACEHOLDER_REGEX.findall(arg)
+    }
+    allowed_placeholders = ALLOWED_ARG_PLACEHOLDERS.get(op_name, frozenset())
+    unknown_placeholders = found_placeholders - allowed_placeholders
+    if unknown_placeholders:
+        listing = ", ".join("{" + p + "}" for p in sorted(unknown_placeholders))
+        if allowed_placeholders:
+            hint = "Allowed: " + ", ".join(
+                "{" + p + "}" for p in sorted(allowed_placeholders)
+            )
+        else:
+            hint = f"{op_name} args take no placeholder"
+        raise ValidationError(
+            f"{path}.args",
+            f"unknown placeholder(s): {listing}. {hint}.",
+            code="invalid_value",
+        )
     placeholder = OPERATION_ARG_PLACEHOLDER.get(op_name)
-    if placeholder and not any(f"{{{placeholder}}}" in arg for arg in args):
+    if placeholder and placeholder not in found_placeholders:
         raise ValidationError(
             f"{path}.args",
             f"{op_name} args must reference the {{{placeholder}}} placeholder.",

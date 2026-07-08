@@ -30,13 +30,10 @@ from .execution import warm_availability
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
-from .managers.apt_cyg import APT_Cyg
 from .managers.asdf import ASDF
-from .managers.cargo import Cargo
 from .managers.chocolatey import Choco
 from .managers.composer import Composer
 from .managers.conda import Conda
-from .managers.cpan import CPAN
 from .managers.deb_get import Deb_Get
 from .managers.dnf import DNF, DNF5, YUM
 from .managers.emerge import Emerge
@@ -51,7 +48,6 @@ from .managers.mas import MAS
 from .managers.mise import Mise
 from .managers.nix import Nix
 from .managers.npm import NPM
-from .managers.opkg import OPKG
 from .managers.pacman import Pacaur, Pacman, Paru, Yay
 from .managers.pacstall import Pacstall
 from .managers.pip import Pip
@@ -64,13 +60,10 @@ from .managers.scoop import Scoop
 from .managers.sdkman import SDKMAN
 from .managers.sfsu import SFSU
 from .managers.snap import Snap
-from .managers.steamcmd import SteamCMD
 from .managers.stew import Stew
 from .managers.sun_tools import Sun_Tools
-from .managers.swupd import Swupd
 from .managers.tazpkg import Tazpkg
 from .managers.uv import UV, UVX
-from .managers.vscode import VSCode, VSCodium
 from .managers.winget import WinGet
 from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
@@ -90,16 +83,13 @@ manager_classes = (
     APK,
     APM,
     APT,
-    APT_Cyg,
     APT_Mint,
     ASDF,
     Brew,
-    Cargo,
     Cask,
     Choco,
     Composer,
     Conda,
-    CPAN,
     Deb_Get,
     DNF,
     DNF5,
@@ -114,7 +104,6 @@ manager_classes = (
     Mise,
     Nix,
     NPM,
-    OPKG,
     Pacaur,
     Pacman,
     Pacstall,
@@ -130,15 +119,11 @@ manager_classes = (
     SDKMAN,
     SFSU,
     Snap,
-    SteamCMD,
     Stew,
     Sun_Tools,
-    Swupd,
     Tazpkg,
     UV,
     UVX,
-    VSCode,
-    VSCodium,
     WinGet,
     XBPS,
     YarnBerry,

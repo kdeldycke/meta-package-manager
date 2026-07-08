@@ -1,0 +1,34 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# VSCodium (https://vscodium.com) is the telemetry-free community build of Visual
+# Studio Code; its `codium` CLI exposes the exact same extension command surface as
+# `code`, so this definition mirrors vscode.toml. See docs/overrides.md ("Define a
+# new manager") for the schema and meta_package_manager/config.py
+# (build_bundled_managers) for the loader.
+#
+# No version_regexes: `codium --version` prints the bare version, then the commit
+# hash and the arch on their own lines, and the default regex picks the first
+# token up.
+
+[mpm.managers.vscodium]
+name = "VSCodium"
+homepage_url = "https://vscodium.com"
+platforms = ["all_platforms"]
+cli_names = ["codium"]
+requirement = ">=1.60.0"
+# Brewfile's `vscode` extension entry installs to VS Code only. Emitting VSCodium
+# extensions under that entry type would silently misroute them, so they are
+# skipped from `mpm dump --brewfile` exports with the warning below.
+brewfile_skip_warning = "Skipping {count} VSCodium extension(s) in Brewfile output: brew bundle has no `vscodium` entry type, and emitting them as `vscode` would install them to VS Code instead of VSCodium."
+
+# `codium --list-extensions --show-versions` prints "publisher.extension@version"
+# rows.
+[mpm.managers.vscodium.operations.installed]
+args = ["--list-extensions", "--show-versions"]
+regex = '^(?P<package_id>[^@\s]+)@(?P<installed_version>\S+)$'
+
+[mpm.managers.vscodium.operations.install]
+args = ["--install-extension", "{package_id}"]
+
+[mpm.managers.vscodium.operations.remove]
+args = ["--uninstall-extension", "{package_id}"]

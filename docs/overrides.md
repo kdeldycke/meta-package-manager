@@ -96,12 +96,14 @@ A manager definition makes `mpm` run the commands you declare. Definitions are o
 
 Every [overridable field](#overridable-fields) (`cli_names`, `cli_search_path`, `requirement`, `version_regexes`, `pre_args`, `extra_env`, `timeout`, ...) may also be set, plus `name` and `homepage_url`. When `cli_names` is omitted it defaults to the manager ID.
 
-Two definition-only fields have no override counterpart:
+Four definition-only fields have no override counterpart:
 
-| Key            | Type    | Description                                                                                                                                                                                                                                       |
-| :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `default_sudo` | boolean | The manager's built-in escalation policy: operations marked `sudo = true` escalate by default. The user's global `--sudo`/`--no-sudo` flag or a `sudo` override still win. See [privilege escalation](sudo.md).                                   |
-| `version_cli`  | string  | Alternate binary probed for the manager's version, for tool suites whose own binaries report none (OpenBSD's `pkg_add`: the suite is versioned with the OS, so `uname` reports it). Probed with `version_cli_options`, parsed with `version_regexes`. |
+| Key                     | Type    | Description                                                                                                                                                                                                                                       |
+| :---------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `brewfile_entry_type`   | string  | Name of the [Homebrew Bundle DSL](https://docs.brew.sh/Brew-Bundle-and-Brewfile) entry this manager maps to (`vscode`, `cargo`, ...), so its installed packages join `mpm dump --brewfile` exports. Omit it for managers with no Brewfile equivalent. |
+| `brewfile_skip_warning` | string  | Warning emitted when this manager's installed packages are deliberately left out of a Brewfile export, where staying silent would mislead. Supports a `{count}` placeholder for the number of packages skipped.                                   |
+| `default_sudo`          | boolean | The manager's built-in escalation policy: operations marked `sudo = true` escalate by default. The user's global `--sudo`/`--no-sudo` flag or a `sudo` override still win. See [privilege escalation](sudo.md).                                   |
+| `version_cli`           | string  | Alternate binary probed for the manager's version, for tool suites whose own binaries report none (OpenBSD's `pkg_add`: the suite is versioned with the OS, so `uname` reports it). Probed with `version_cli_options`, parsed with `version_regexes`. |
 
 ### Operations
 
@@ -118,11 +120,13 @@ Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every 
 | `sync`        | none                 | `mpm sync`                                           |
 | `cleanup`     | none                 | `mpm cleanup`                                        |
 
-**Query operations** (`installed`, `outdated`, `search`) parse the command's output. `search` also takes the `{query}` placeholder. Provide *either* a `regex` matched against each output line, *or* a JSON parser (`format = "json"` with a `fields` mapping and optional `list_path`). Both map these recognized fields to a package:
+**Query operations** (`installed`, `outdated`, `search`) parse the command's output. `search` may embed the `{query}` placeholder in its `args`; omitting it is also valid for tools with no real search command, whose `search` then lists the whole catalog (`opkg list`, `swupd bundle-list --all`) and relies on `mpm`'s client-side refiltering to narrow the results. Provide *either* a `regex` matched against each output line, *or* a JSON parser (`format = "json"` with a `fields` mapping and optional `list_path`). Both map these recognized fields to a package:
 
 - `package_id` (always required),
-- `installed_version` (required by `installed`),
+- `installed_version` (optional: some tools track no per-package version, like `swupd`'s Clear Linux bundles),
 - `latest_version` (required by `outdated`).
+
+Any `{token}` in an operation's `args` outside that operation's recognized placeholders is rejected at load time, so a typo like `{qeury}` surfaces immediately instead of reaching the tool as a literal argument.
 
 ```{note}
 Version pinning is not expressible yet: `install` and `upgrade` on a config-defined manager always let the manager choose the version, and a `{version}` placeholder is not substituted. Native exact/extended search filtering is likewise not declarable, so `mpm` refilters `search` results itself.

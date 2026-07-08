@@ -1,0 +1,46 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# The cpan client of the Comprehensive Perl Archive Network (https://www.cpan.org).
+# See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/config.py (build_bundled_managers) for the loader.
+#
+# Installs may require sudo when using the system Perl; local::lib gives user-local
+# installs instead. cpan cannot uninstall a module, so no remove operation is
+# declared.
+
+[mpm.managers.cpan]
+name = "Perl CPAN"
+homepage_url = "https://www.cpan.org"
+platforms = ["all_platforms"]
+requirement = ">=1.64"
+# PERL_MM_USE_DEFAULT suppresses the interactive configuration cpan may launch on
+# first run.
+extra_env = { PERL_MM_USE_DEFAULT = "1" }
+# `cpan -v` prints ">(info): /usr/bin/cpan script version 1.676, CPAN.pm version
+# 2.28"; the CPAN.pm version is the meaningful one.
+version_cli_options = ["-v"]
+version_regexes = ['CPAN\.pm\s+version\s+(?P<version>\S+)']
+
+# `cpan -l` prints tab-separated "Module<TAB>version" rows. Modules with no
+# installed version report the literal "undef", which the alternation deliberately
+# keeps out of the version group so the package is yielded version-less.
+[mpm.managers.cpan.operations.installed]
+args = ["-l"]
+regex = '^(?P<package_id>\S+)\t(?:undef|(?P<installed_version>\S+))$'
+
+# `cpan -O` prints "Module  local  latest" columns. Only true three-column rows
+# match: the loader banner, "Reading ..." line, indented "Database was generated"
+# line, column header and dashed separator all fail the anchored three-token shape.
+[mpm.managers.cpan.operations.outdated]
+args = ["-O"]
+regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+(?P<latest_version>\S+)$'
+
+# A bare module name installs it.
+[mpm.managers.cpan.operations.install]
+args = ["{package_id}"]
+
+[mpm.managers.cpan.operations.upgrade_all]
+args = ["-u"]
+
+[mpm.managers.cpan.operations.upgrade_one]
+args = ["-i", "{package_id}"]

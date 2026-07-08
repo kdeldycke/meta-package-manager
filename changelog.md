@@ -8,10 +8,12 @@
 - [mpm] Fix benchmark data: merge the duplicate OpenBSD (`pkg-mgr`/`pkg-tools`), `gh-ext` and `pwsh-gallery` rows; add missing `pkcon`, `fink`, `sorcery` and `urpmi` rows; fix `winget`, `dnf`, `scoop` and `cask` competitor flags.
 - [mpm] Config-defined managers gain multi-binary and privilege support: a per-operation `cli` key runs an operation through a sibling binary, `sudo = true` marks it privileged (honoring the new `default_sudo` definition field and the global `--sudo`/`--no-sudo` policy), and `version_cli` probes an alternate binary for tool suites exposing no version flag.
 - [mpm] `mpm` is now a strict superset of `pacaptr`, `pacapt`, `sysget` and `whohas`: every package manager those tools support is now wrapped.
+- [mpm] Extend the destructive install/remove test round-trip to the bundled configuration-defined managers; CI exercises it for real against `gh-ext`.
 - [apt-cyg] Add apt-cyg (Cygwin) package manager with `installed`, `search`, `install`, `remove` and `sync` support on Windows/Cygwin.
 - [cave] Add cave (Exherbo's Paludis client) with `installed`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
 - [chromebrew] Add Chromebrew (`crew`) package manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support on ChromeOS; a bundled configuration-defined manager.
 - [fink] Add Fink package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support on macOS; a bundled configuration-defined manager.
+- [gh-ext] Report installed extensions by their `owner/repo` slug instead of the bare extension name, so the ids returned by `mpm installed` and `mpm backup` feed back into `install`, `remove`, `upgrade` and `restore`.
 - [pkcon] Add PackageKit's console client (`pkcon`) with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove` and `sync` support on Linux. Requires PackageKit `>=0.7.0`.
 - [pkg-tools] Add OpenBSD's pkg tools (`pkg_add`/`pkg_info`/`pkg_delete`) with `installed`, `search`, `install`, `upgrade`, `remove` and `cleanup` support; a bundled configuration-defined manager.
 - [pkgin] Add pkgin (NetBSD pkgsrc) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.

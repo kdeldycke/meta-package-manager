@@ -858,16 +858,18 @@ def test_bundled_version_regex(manager_id, version_output, expected_version):
 def test_gh_ext_parses_installed():
     """Parse the headerless, tab-separated ``gh extension list`` piped output.
 
-    Column 1 is ``gh <name>`` (the short name is the package id), column 2 the
-    ``owner/repo`` slug, column 3 the free-form version (a tag or a commit SHA).
+    Column 1 is ``gh <name>``, column 2 the ``owner/repo`` slug (the package id: the
+    one identifier every gh operation accepts, so installed ids round-trip through
+    remove/upgrade and backup/restore), column 3 the free-form version (a tag or a
+    commit SHA).
     """
     manager = _fresh_bundled("gh-ext")
     manager.run_cli = lambda *args, **kwargs: (
         "gh dash\tdlvhdr/gh-dash\tv4.7.0\ngh cockpit\tgithub/gh-cockpit\ta1b2c3d4"
     )
     assert [(p.id, str(p.installed_version)) for p in manager.installed] == [
-        ("dash", "v4.7.0"),
-        ("cockpit", "a1b2c3d4"),
+        ("dlvhdr/gh-dash", "v4.7.0"),
+        ("github/gh-cockpit", "a1b2c3d4"),
     ]
 
 

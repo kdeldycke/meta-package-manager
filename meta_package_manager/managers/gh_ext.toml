@@ -20,10 +20,12 @@ version_regexes = ['gh version\s+(?P<version>\d+\.\d+\.\d+)']
 # Piped (non-TTY) `gh extension list` is tab-separated, untruncated, uncolored and
 # headerless. Column 1 is the literal "gh <name>" invocation, column 2 the "owner/repo"
 # slug, column 3 the free-form version (a semver tag or an 8-char commit SHA), so
-# installed_version is captured opaquely.
+# installed_version is captured opaquely. The slug is the package id: it is the one
+# identifier every operation accepts (see the install comment below), so installed ids
+# round-trip through remove/upgrade and backup/restore.
 [mpm.managers.gh-ext.operations.installed]
 args = ["extension", "list"]
-regex = '^gh (?P<package_id>\S+)\t\S+/\S+\t(?P<installed_version>\S+)'
+regex = '^gh \S+\t(?P<package_id>\S+/\S+)\t(?P<installed_version>\S+)'
 
 # `gh extension search` prints tab-separated rows: an install-state column (empty, or
 # "installed"), the "owner/repo" slug, then a description. run_cli strips the captured
@@ -33,9 +35,10 @@ regex = '^gh (?P<package_id>\S+)\t\S+/\S+\t(?P<installed_version>\S+)'
 args = ["extension", "search", "{query}"]
 regex = '(?P<package_id>\S+/\S+)'
 
-# Install takes an "owner/repo" slug, while list/remove/upgrade use the short name gh
-# derives from it ("dlvhdr/gh-dash" installs as "dash"). This per-operation id
-# difference is inherent to gh, not to mpm.
+# Every operation takes the "owner/repo" slug: install requires it, while remove and
+# upgrade normalize it down to the short name gh derives from it ("dlvhdr/gh-dash" is
+# extension "dash"). Keying packages on the slug is thus the only scheme under which
+# the ids reported by `installed` above feed back into every other operation.
 [mpm.managers.gh-ext.operations.install]
 args = ["extension", "install", "{package_id}"]
 

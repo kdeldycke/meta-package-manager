@@ -490,6 +490,11 @@ jobs:
           --override-ini=junit_family=legacy
           --numprocesses=0 --skip-non-destructive --run-destructive
           --ignore=./tests/test_bar_plugin.py
+        env:
+          # The runners ship gh unauthenticated, and gh refuses extension installs
+          # without credentials. Feed it the workflow token so the gh-ext destructive
+          # install/remove round-trip runs for real (see conftest.py's PACKAGE_IDS).
+          GH_TOKEN: ${{ github.token }}
 
       - name: Upload coverage to Codecov
         # Skip on prepare-release PRs (Codecov cannot create commits on protected

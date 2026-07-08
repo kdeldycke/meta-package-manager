@@ -17,8 +17,10 @@
 
 from __future__ import annotations
 
+import subprocess
 from functools import partial
 from operator import attrgetter
+from shutil import which
 
 import pytest
 
@@ -255,7 +257,9 @@ PACKAGE_IDS = {
     "brew": "nyancat",
     "cargo": "fsays",
     "cask": "itsycal",
+    "cave": "base/figlet",
     "choco": "hyperfine",
+    "chromebrew": "sl",
     "composer": "ralouphie/getallheaders",
     "conda": "pytz",  # Pure-Python, zero-dependency leaf on the default channel.
     "cpan": "Try::Tiny",
@@ -264,9 +268,12 @@ PACKAGE_IDS = {
     "dnf5": "nyancat",
     "emerge": "games-misc/nyancat",
     "eopkg": "sl",
+    "fink": "figlet",
     "flatpak": "org.gnome.Calculator",
     "fwupd": "f95c9218acd12697af946874bfe4239587209232",  # No-op without device.
     "gem": "paint",
+    # A tiny script-based extension (a bare git clone), from a GitHub CLI maintainer.
+    "gh-ext": "mislav/gh-branch",
     "guix": "hello",
     "macports": "hello",
     "mas": "747648890",  # Telegram (test is always skipped).
@@ -276,18 +283,24 @@ PACKAGE_IDS = {
     "opkg": "lolcat",
     "pacaur": "nyancat",
     "pacman": "nyancat",
+    "pacstall": "hello",
     "paru": "nyancat",
     "pip": "pytz",
     "pipx": "pycowsay",
     "pkcon": "hello",
     "pkg": "nyancat",
+    "pkg-tools": "nyancat",
+    "pkgin": "nyancat",
     "pnpm": "ms",
     "ports": "net/nyancat",
     "pwsh-gallery": "Posh-Git",
     "scoop": "main/hyperfine",
     "sdkman": "jbang",
     "sfsu": "main/hyperfine",
+    "slapt-get": "nano",
     "snap": "hello-world",
+    "soar": "bat",  # Single-file static binary from the soarpkgs registry.
+    "sorcery": "figlet",
     "steamcmd": "1007",  # Steamworks SDK Redist.
     "stew": "sharkdp/hyperfine",
     # SVR4 packages install from local datastreams, not a repository: install is
@@ -295,6 +308,9 @@ PACKAGE_IDS = {
     "sun-tools": "SUNWzlib",
     "swupd": "curl",  # A small additive bundle: os-core never depends on it.
     "tazpkg": "nano",  # Used by tazpkg's own test suite.
+    "tlmgr": "lipsum",  # Pure dummy-text package: a leaf with no style dependencies.
+    "topgrade": "topgrade",  # Declares no install operation: the round-trip auto-skips.
+    "urpmi": "figlet",
     "uv": "pytz",
     "uvx": "pycowsay",
     "vscode": "tamasfe.even-better-toml",
@@ -303,7 +319,6 @@ PACKAGE_IDS = {
     "xbps": "sl",
     "yarn": "ms",
     "yarn-berry": "ms",
-    "pacstall": "hello",
     "yay": "nyancat",
     "yum": "nyancat",
     "zerobrew": "nyancat",
@@ -326,9 +341,12 @@ and free of side effects:
 
 Wherever a manager exposes general-purpose binaries the same low-impact tools are reused
 for consistency: ``nyancat`` (a single-file C binary packaged by nearly every Linux
-distro, Homebrew and FreeBSD as ``net/nyancat``), GNU ``hello`` for the functional
-managers (Guix, Nix) and ``hyperfine`` for the Windows binary stores and ``stew``.
-Distros that lack ``nyancat`` fall back to ``sl`` (Solus, Void) or ``lolcat`` (OpenWrt).
+distro, Homebrew, FreeBSD as ``net/nyancat``, OpenBSD and pkgsrc as ``misc/nyancat``),
+GNU ``hello`` for the functional managers (Guix, Nix) and ``hyperfine`` for the Windows
+binary stores and ``stew``. Distros that lack ``nyancat`` fall back to ``sl``
+(Chromebrew, Solus, Void), ``figlet`` (another tiny dependency-free C binary, for
+Exherbo, Fink, Mageia and Source Mage), ``lolcat`` (OpenWrt) or ``nano`` (Slackware's
+official tree carries none of the above, so ``slapt-get`` mirrors ``tazpkg``).
 Language and application managers use the smallest inert package native to their
 ecosystem (``ms`` for npm and Yarn, ``pycowsay`` for the pipx-style installers that
 require a console-script entry point, ...).
@@ -344,15 +362,19 @@ require a console-script entry point, ...).
     A few managers cannot offer a small binary: ``sdkman`` only ships full SDKs
     (``jbang`` is its lightest candidate), and ``mas`` needs a signed App Store app (its
     test is skipped anyway). ``deb-get`` has no real per-package install, so it
-    references itself.
+    references itself, and ``topgrade`` declares no install operation at all, so its
+    round-trip auto-skips. ``gh-ext`` references its extension by the ``owner/repo``
+    slug: the only id ``gh extension install`` accepts, and the id scheme its
+    ``installed`` operation reports.
 
 Only to be used for destructive tests.
 """
 
-# Bundled config-defined managers (like gh-ext) are exercised by the hermetic
-# test_manager_definition suite, not by the destructive host install/remove tests, so
-# PACKAGE_IDS covers exactly the built-in class managers.
-assert set(PACKAGE_IDS) == set(pool.builtin_manager_ids)
+# Every manager mpm ships gets an entry: the built-in classes and the bundled
+# config-defined managers alike. The hermetic test_manager_definition suite locks the
+# latter's command mapping, but only the destructive round-trip proves the mapped
+# commands work against the real tool on hosts that carry it.
+assert set(PACKAGE_IDS) == set(pool.known_manager_ids)
 
 # Collection of pre-computed parametrized decorators.
 
@@ -391,6 +413,24 @@ CLI calls keeps the doomed attempts cheap: long enough for the fast failures to 
 short enough that the genuine hangs do not dominate the destructive job's wall-clock.
 """
 
+
+def gh_unauthenticated() -> bool:
+    """Whether the ``gh`` CLI is present but holds no usable credentials.
+
+    ``gh`` refuses to run ``extension install`` unauthenticated, so the gh-ext
+    destructive round-trip can only succeed where it resolves a token. ``gh auth
+    token`` probes the resolved credentials (stored logins and ``GH_TOKEN``-style
+    environment variables alike) without any network call. A missing ``gh`` is not
+    flagged: selection then finds no available manager and the test already exits on
+    its "No manager selected" path.
+    """
+    gh_path = which("gh")
+    if not gh_path:
+        return False
+    probe = subprocess.run((gh_path, "auth", "token"), capture_output=True, check=False)
+    return probe.returncode != 0
+
+
 INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
     # choco installs to an admin-only location the unelevated CI process cannot write to.
     "choco": is_github_ci,
@@ -410,6 +450,9 @@ INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
     "fwupd": lambda: True,
     # gem writes to the system gem directory, unwritable by the unelevated Linux user.
     "gem": is_linux,
+    # gh refuses extension installs without credentials; tests.yaml feeds the workflow
+    # token to the destructive CI step so this round-trip runs for real there.
+    "gh-ext": gh_unauthenticated,
     # mas resolves an install through an App Store search that finds nothing for the
     # numeric id on the headless runners, so the install fails.
     "mas": is_github_ci,
@@ -440,8 +483,9 @@ skipped, since the failed install left nothing to remove and the working manager
 cover the removal path.
 
 The predicate is a zero-argument callable: ``is_linux`` for the unprivileged Linux runner,
-``is_github_ci`` for GitHub Actions only (a configured local box can still install), or
-``lambda: True`` for managers no environment can install.
+``is_github_ci`` for GitHub Actions only (a configured local box can still install),
+``lambda: True`` for managers no environment can install, or a live probe like
+``gh_unauthenticated`` when installability hinges on host state rather than platform.
 
 .. note::
 
@@ -457,11 +501,5 @@ The predicate is a zero-argument callable: ``is_linux`` for the unprivileged Lin
 # install/remove would only contribute flakiness (see PackageManager.deprecated).
 maintained_manager_ids_and_dummy_package = pytest.mark.parametrize(
     "manager_id,package_id",
-    tuple(
-        param(mid, PACKAGE_IDS[mid], id=mid)
-        for mid in pool.maintained_manager_ids
-        # Bundled config-defined managers carry no PACKAGE_IDS entry and are not
-        # destructively install/remove-tested; their command mapping is unit-tested.
-        if mid in pool.builtin_manager_ids
-    ),
+    tuple(param(mid, PACKAGE_IDS[mid], id=mid) for mid in pool.maintained_manager_ids),
 )

@@ -126,9 +126,41 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
     return implemented
 
 
+def upgrade_all_is_synthesized(
+    manager: PackageManager | type[PackageManager],
+) -> bool:
+    """Whether ``mpm`` backfills the manager's ``upgrade --all``.
+
+    ``True`` when the manager supports the operation only through the one-by-one
+    fallback of :py:meth:`meta_package_manager.manager.PackageManager.upgrade`:
+    it implements ``outdated`` and ``upgrade_one_cli`` but no class in its
+    hierarchy provides a native ``upgrade_all_cli``. ``False`` when a native
+    one-shot command exists, or when the operation is not supported at all.
+
+    Feeds the per-manager table of ``docs/augmentations.md``, rendered live by
+    ``docs/docs_update.py``.
+    """
+    if not implements(manager, Operations.upgrade_all):
+        return False
+    cls = manager if isinstance(manager, type) else type(manager)
+    for klass in cls.mro():
+        if klass is PackageManager:
+            break
+        if "upgrade_all_cli" in klass.__dict__:
+            return False
+    return True
+
+
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):
     """Decorator factory to be used on ``search()`` operations to signal ``mpm``
-    framework manager's capabilities."""
+    framework manager's capabilities.
+
+    The flags are exposed as ``extended_support`` and ``exact_support`` attributes
+    on the wrapped method, so the documentation can derive which managers rely on
+    :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` to
+    honor the ``--exact`` and ``--extended`` flags. An undecorated ``search``
+    carries no attribute and is read as natively supporting both refinements.
+    """
 
     def decorator(function):
         @wraps(function)
@@ -156,6 +188,8 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
 
             return function(self, query, extended, exact)  # type: ignore
 
+        wrapper.extended_support = extended_support  # type: ignore[attr-defined]
+        wrapper.exact_support = exact_support  # type: ignore[attr-defined]
         return wrapper
 
     return decorator

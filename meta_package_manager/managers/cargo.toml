@@ -41,3 +41,31 @@ args = ["install", "{package_id}"]
 
 [mpm.managers.cargo.operations.remove]
 args = ["uninstall", "{package_id}"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "cargo 1.59.0"
+expected = "1.59.0"
+
+[[samples.installed]]
+output = """
+bore-cli v0.4.0:
+    bore
+ripgrep v13.0.0:
+    rg"""
+packages = [
+  { id = "bore-cli", version = "0.4.0" },
+  { id = "ripgrep", version = "13.0.0" },
+]
+
+[[samples.search]]
+output = """
+python = "0.0.0"                  # Python.
+pyo3 = "0.16.4"                   # Bindings to Python interpreter
+... and 1664 crates more (use --limit N to see more)"""
+packages = [
+  { id = "python", version = "0.0.0" },
+  { id = "pyo3", version = "0.16.4" },
+]

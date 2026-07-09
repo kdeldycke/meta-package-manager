@@ -32,3 +32,20 @@ args = ["--install-extension", "{package_id}"]
 
 [mpm.managers.vscodium.operations.remove]
 args = ["--uninstall-extension", "{package_id}"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+# Same bare three-line output as vscode, probed by the default regex.
+[samples.version]
+output = """
+1.60.2
+7f6ab5485bbc008386c4386d08766667e155244e
+x64"""
+expected = "1.60.2"
+
+[[samples.installed]]
+output = "tamasfe.even-better-toml@0.14.2"
+packages = [
+  { id = "tamasfe.even-better-toml", version = "0.14.2" },
+]

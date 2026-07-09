@@ -863,6 +863,10 @@ def _make_search(
         for kwargs in _iter_parsed(output, spec, compiled):
             yield self.package(**kwargs)
 
+    # Same introspection surface as the search_capabilities decorator on class
+    # managers: both refinements always rely on mpm's refiltering here.
+    search.extended_support = False  # type: ignore[attr-defined]
+    search.exact_support = False  # type: ignore[attr-defined]
     return search
 
 

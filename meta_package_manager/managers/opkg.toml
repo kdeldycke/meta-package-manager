@@ -44,3 +44,37 @@ args = ["upgrade"]
 
 [mpm.managers.opkg.operations.sync]
 args = ["update"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "opkg version 0.3.6 (libsolv 0.7.5)"
+expected = "0.3.6"
+
+[[samples.installed]]
+output = """
+3rd-party-feed-configs - 1.1-r0
+aio-grab - 1.0+git71+c79e264-r0"""
+packages = [
+  { id = "3rd-party-feed-configs", version = "1.1-r0" },
+  { id = "aio-grab", version = "1.0+git71+c79e264-r0" },
+]
+
+[[samples.outdated]]
+output = """
+openpli-bootlogo - 20190717-r0 - 20190718-r0
+enigma2-hotplug - 2.7+git1720+55c6b34-r0 - 2.7+git1722+daf2f52-r0"""
+packages = [
+  { id = "openpli-bootlogo", version = "20190718-r0" },
+  { id = "enigma2-hotplug", version = "2.7+git1722+daf2f52-r0" },
+]
+
+[[samples.search]]
+output = """
+bash - 5.0-r0 - An sh-compatible command language interpreter
+busybox - 1.31.0-r0 - Tiny versions of many common UNIX utilities"""
+packages = [
+  { id = "bash", version = "5.0-r0" },
+  { id = "busybox", version = "1.31.0-r0" },
+]

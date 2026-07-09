@@ -204,7 +204,7 @@ The benchmark compares `mpm` against related tools. It mixes one generated table
 
 ### Manager augmentations page (`docs/augmentations.md`)
 
-Documents capabilities `mpm` backfills on top of native tools. Two classes: *selective* — only some managers need it (full `upgrade --all`, exact/extended search, search-from-scratch), shown in the per-manager table — and *universal* — every managed tool gains it (`--dry-run` simulation, cross-scheme version parsing, purl identifiers, uniform sudo). The per-manager table is hand-maintained with no sync test yet, so re-verify it against `meta_package_manager/capabilities.py` when adding a manager.
+Documents capabilities `mpm` backfills on top of native tools. Two classes: *selective* — only some managers need it (full `upgrade --all`, exact/extended search), shown in the per-manager table — and *universal* — every managed tool gains it (`--dry-run` simulation, cross-scheme version parsing, purl identifiers, uniform sudo). The per-manager table renders live at Sphinx build time through the `{python:render}` block calling `augmentations_table()` from `docs/docs_update.py`, derived from the capability declarations (`upgrade_all_is_synthesized()` and the `search_capabilities` flags in `meta_package_manager/capabilities.py`), so it never drifts from the code. `test_augmentations_table_renders` guards the generator.
 
 ## File naming conventions
 

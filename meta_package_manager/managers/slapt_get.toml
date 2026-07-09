@@ -63,3 +63,25 @@ sudo = true
 [mpm.managers.slapt-get.operations.cleanup]
 args = ["--clean"]
 sudo = true
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "slapt-get version 0.11.12"
+expected = "0.11.12"
+
+[[samples.installed]]
+output = """
+tree-2.3.2-x86_64-1 [inst=yes]: display directory tree
+util-linux-2.39-x86_64-1 [inst=yes]: collection of utilities"""
+packages = [
+  { id = "tree", version = "2.3.2" },
+  { id = "util-linux", version = "2.39" },
+]
+
+[[samples.search]]
+output = "tree-2.3.2-x86_64-1 [inst=no]: display directory tree"
+packages = [
+  { id = "tree", version = "2.3.2" },
+]

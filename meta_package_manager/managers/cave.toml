@@ -64,3 +64,19 @@ sudo = true
 [mpm.managers.cave.operations.cleanup]
 args = ["purge", "--execute"]
 sudo = true
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "cave 3.0.1"
+expected = "3.0.1"
+
+[[samples.installed]]
+output = """
+app-arch/gzip 1.14
+sys-apps/sed 4.9"""
+packages = [
+  { id = "app-arch/gzip", version = "1.14" },
+  { id = "sys-apps/sed", version = "4.9" },
+]

@@ -1432,6 +1432,13 @@ def register_eager_config_managers(pool: ManagerPool) -> None:
 # and earn first-class --<id> flags. The trust gate guarding user definitions does not
 # apply: package data shipped in the wheel is read-only and as trusted as the Python
 # modules beside it.
+#
+# Each bundled file also carries a top-level [samples] table: source-derived output
+# fixtures locking the version probe and the declared parsers, the config-defined twin
+# of the shell-session samples embedded in class docstrings. The loader below only
+# consumes the "mpm" key, so samples never reach the runtime; they feed the hermetic
+# test_bundled_version_regex and test_bundled_parsing suites, which glob the shipped
+# files and derive their parametrizes from them.
 
 
 BUNDLED_DEFINITIONS_PACKAGE: Final[str] = "meta_package_manager.managers"
@@ -1451,7 +1458,8 @@ def load_bundled_definitions() -> tuple[tuple[ManagerDefinition, str], ...]:
 
     A malformed bundled file is a packaging bug, but it is logged and skipped rather than
     raised so one bad resource cannot break ``mpm`` startup for everyone. The hermetic
-    ``test_bundled_definitions`` keeps the shipped files valid.
+    ``test_bundled_inventory`` and ``test_bundled_registered`` keep the shipped files
+    valid.
     """
     definitions: list[tuple[ManagerDefinition, str]] = []
     resources = importlib.resources.files(BUNDLED_DEFINITIONS_PACKAGE)

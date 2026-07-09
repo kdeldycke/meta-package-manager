@@ -82,3 +82,29 @@ sudo = true
 cli = "cleanse"
 args = ["--sweep"]
 sudo = true
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+# Sorcery prints the bare content of /etc/sorcery/version, a datestamp.
+[samples.version]
+output = "20240108"
+expected = "20240108"
+
+[[samples.installed]]
+output = """
+cowsay:20240108:installed:3.03
+vim:20230101:held:9.0"""
+packages = [
+  { id = "cowsay", version = "3.03" },
+  { id = "vim", version = "9.0" },
+]
+
+[[samples.search]]
+output = """
+cowsay 3.03 @test
+tree 2.1.1 @stable"""
+packages = [
+  { id = "cowsay", version = "3.03" },
+  { id = "tree", version = "2.1.1" },
+]

@@ -17,6 +17,9 @@
 
 from __future__ import annotations
 
+import inspect
+from pathlib import Path
+
 from boltons.iterutils import flatten
 from extra_platforms import extract_members
 
@@ -27,6 +30,7 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     TLabelSet = frozenset[str]
     TLabelGroup = dict[str, TLabelSet]
+    TLabelRules = list[tuple[str, tuple[str, ...]]]
 
 
 LABELS: list[tuple[str, str, str]] = [
@@ -163,3 +167,166 @@ LABELS = sorted(
     (*LABELS, *_manager_label_rows, *_platform_label_rows),
     key=lambda i: str.casefold(i[0]),
 )
+
+
+# Labeller rules.
+#
+# repomatic's PR/issue labeller consumes two rule sets from pyproject.toml:
+# content-rules (keyword patterns matched against issue and PR text) and file-rules
+# (globs matched against a PR's changed files). Both are synced into
+# [tool.repomatic.labels.*] by docs/docs_update.py. The mechanical parts (manager IDs,
+# definition-file globs) derive from the pool; only the ecosystem synonyms below are
+# curated by hand.
+
+
+CONTENT_RULES_STATIC: TLabelRules = [
+    ("🔌 bar-plugin", ("plugin", "swiftbar", "xbar")),
+]
+"""Content rules for labels that are not derived from the pool."""
+
+
+FILE_RULES_STATIC: TLabelRules = [
+    ("🔌 bar-plugin", ("meta_package_manager/bar_plugin/*", "tests/*bar_plugin*")),
+    (f"{MANAGER_PREFIX}mpm", ("meta_package_manager/*",)),
+]
+"""File rules for labels that are not derived from the pool.
+
+``mpm`` gets no content rule: as the project's own name it would match nearly
+every issue and PR.
+"""
+
+
+MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "apk": ("alpine", "alpine linux"),
+    "apm": ("atom",),
+    "apt-cyg": ("cygwin",),
+    "asdf": ("asdf-vm", "version manager"),
+    "cargo": ("crate", "rust"),
+    "cave": ("exherbo", "paludis"),
+    "choco": ("chocolatey",),
+    "chromebrew": ("chrome os", "chromeos"),
+    "composer": ("php",),
+    "conda": ("anaconda", "conda-forge", "miniconda"),
+    "cpan": ("perl",),
+    "dpkg-based": ("aptitude", "debian", "dpkg", "mint", "ubuntu"),
+    "emerge": ("gentoo", "portage"),
+    "eopkg": ("solus",),
+    "flatpak": ("flat",),
+    "fwupd": ("fwupdmgr", "lvfs"),
+    "gem": ("ruby",),
+    "gh-ext": ("gh extension", "github cli"),
+    "guix": ("gnu guix",),
+    "homebrew": ("formula", "homebrew", "tap", "zb"),
+    "macports": ("port",),
+    "mas": ("app store", "app-store"),
+    "nix": ("nixos", "nixpkgs"),
+    "npm-based": ("node",),
+    "pacman-based": ("arch",),
+    "pkcon": ("packagekit",),
+    "pkg-based": ("freebsd", "freebsd ports"),
+    "pkg-tools": ("openbsd", "pkg_add"),
+    "pkgin": ("netbsd", "pkgsrc"),
+    "pwsh-gallery": (
+        "powershell",
+        "powershell gallery",
+        "psgallery",
+        "psresourceget",
+        "pwsh",
+    ),
+    "rpm-based": ("fedora", "mageia", "opensuse", "redhat", "rhel", "rpm", "suse"),
+    "sdkman": ("sdk man",),
+    "slapt-get": ("slackware",),
+    "sorcery": ("source mage",),
+    "steamcmd": ("steam", "valve"),
+    "sun-tools": ("pkgadd", "pkgrm", "solaris", "svr4"),
+    "swupd": ("clear linux", "clearlinux"),
+    "tazpkg": ("slitaz",),
+    "tlmgr": ("ctan", "tex live", "texlive"),
+    "vscode-based": ("visual studio", "visual studio code"),
+    "xbps": ("void", "void linux"),
+}
+"""Curated ecosystem synonyms feeding each manager label's content rule.
+
+Keyed by the manager or group ID the label derives from. The rule's baseline
+patterns (the member manager IDs) come for free from the pool: only add here the
+distro names, language names and aliases users actually type in issues.
+"""
+
+# Check synonym keys against the label registry: a key matching no manager label is
+# a leftover from a renamed group or a removed manager.
+assert set(MANAGER_CONTENT_KEYWORDS).issubset(
+    set(all_manager_label_ids) | set(MANAGER_LABEL_GROUPS)
+)
+
+
+PLATFORM_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "BSD": ("bsd",),
+    "Linux": ("linux",),
+    "macOS": ("apple", "mac os", "macos", "os x", "osx"),
+    "Unix": ("unix",),
+    "Windows": ("c:", "microsoft", "windows"),
+}
+"""Curated keyword patterns feeding each platform label's content rule."""
+
+assert set(PLATFORM_CONTENT_KEYWORDS) == {p_obj.name for p_obj in MAIN_PLATFORMS}
+
+
+def _label_members() -> dict[str, set[str]]:
+    """Regroup :data:`MANAGER_LABELS` by label: ``{label_name: {manager_id, ...}}``.
+
+    The ``mpm`` pseudo-manager is left out: it maps to no pool entry and its label
+    is ruled by :data:`FILE_RULES_STATIC`.
+    """
+    members: dict[str, set[str]] = {}
+    for manager_id, label_name in MANAGER_LABELS.items():
+        if manager_id == "mpm":
+            continue
+        members.setdefault(label_name, set()).add(manager_id)
+    return members
+
+
+def _definition_stem(manager_id: str) -> str:
+    """File stem of the manager's definition: its module or bundled TOML file."""
+    manager = pool[manager_id]
+    source = getattr(manager, "definition_source", None)
+    if source:
+        return Path(source).stem
+    return Path(inspect.getfile(type(manager))).stem
+
+
+def generate_content_rules() -> TLabelRules:
+    """Build every content rule: static ones plus one per manager and platform label.
+
+    A manager label's patterns are its member IDs plus the curated
+    :data:`MANAGER_CONTENT_KEYWORDS` synonyms. Rules are sorted by label, patterns
+    alphabetically, both case-insensitively.
+    """
+    rules = list(CONTENT_RULES_STATIC)
+    for label_name, manager_ids in _label_members().items():
+        key = label_name.removeprefix(MANAGER_PREFIX)
+        patterns = set(manager_ids) | set(MANAGER_CONTENT_KEYWORDS.get(key, ()))
+        rules.append((label_name, tuple(sorted(patterns, key=str.casefold))))
+    for platform_name, platform_patterns in PLATFORM_CONTENT_KEYWORDS.items():
+        rules.append((f"{PLATFORM_PREFIX}{platform_name}", platform_patterns))
+    return sorted(rules, key=lambda rule: str.casefold(rule[0]))
+
+
+def generate_file_rules() -> TLabelRules:
+    """Build every file rule: static ones plus one per manager label.
+
+    A manager label matches its members' definition files (Python modules and
+    bundled TOML files alike, anchored on the full stem so ``pkg.*`` never swallows
+    ``pkgin.toml`` or ``pkcon.py``) and any test file carrying a member's stem or
+    ID. Platform labels have no file rule: no file is platform-specific.
+    """
+    rules = list(FILE_RULES_STATIC)
+    for label_name, manager_ids in _label_members().items():
+        definition_stems = {_definition_stem(mid) for mid in manager_ids}
+        test_stems = definition_stems | {mid.replace("-", "_") for mid in manager_ids}
+        globs = [
+            f"meta_package_manager/managers/{stem}.*"
+            for stem in sorted(definition_stems)
+        ]
+        globs.extend(f"tests/*{stem}*" for stem in sorted(test_stems))
+        rules.append((label_name, tuple(globs)))
+    return sorted(rules, key=lambda rule: str.casefold(rule[0]))

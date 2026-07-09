@@ -77,3 +77,35 @@ sudo = true
 [mpm.managers.tlmgr.operations.cleanup]
 args = ["backup", "--clean", "--all"]
 sudo = true
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = """
+tlmgr revision 66798 (2023-04-08 02:15:21 +0200)
+tlmgr using installation: /usr/local/texlive/2023
+TeX Live (https://tug.org/texlive) version 2023"""
+expected = "2023"
+
+[[samples.installed]]
+output = """
+tlmgr: package repository https://mirror.ctan.org (verified)
+sansmath,15878
+titlesec,68677"""
+packages = [
+  { id = "sansmath", version = "15878" },
+  { id = "titlesec", version = "68677" },
+]
+
+[[samples.outdated]]
+output = """
+location-url\thttps://mirror.ctan.org
+total-bytes\t323544
+end-of-header
+adjmulticol\tu\t62935\t63073\t316000\t-\t-\t-\t-\t-
+end-of-updates
+running mktexlsr ..."""
+packages = [
+  { id = "adjmulticol", version = "63073" },
+]

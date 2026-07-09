@@ -44,3 +44,38 @@ args = ["-i", "{package_id}"]
 
 [mpm.managers.cpan.operations.upgrade_all]
 args = ["-u"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = ">(info): /usr/bin/cpan script version 1.676, CPAN.pm version 2.28"
+expected = "2.28"
+
+[[samples.installed]]
+output = """
+Loading internal logger. Log::Log4perl recommended for better logging
+O\t1.03
+Errno\t1.33
+Encode\t3.08_01
+meta_notation\tundef"""
+packages = [
+  { id = "O", version = "1.03" },
+  { id = "Errno", version = "1.33" },
+  { id = "Encode", version = "3.08_01" },
+  { id = "meta_notation" },
+]
+
+[[samples.outdated]]
+output = """
+Loading internal logger. Log::Log4perl recommended for better logging
+Reading '/Users/kde/.cpan/Metadata'
+  Database was generated on Thu, 26 Mar 2026 13:41:03 GMT
+Module Name                                Local    CPAN
+---------------------------------------------------------------
+Algorithm::C3                             0.1000  0.1100
+Archive::Tar                              2.3800  3.0400"""
+packages = [
+  { id = "Algorithm::C3", version = "0.1100" },
+  { id = "Archive::Tar", version = "3.0400" },
+]

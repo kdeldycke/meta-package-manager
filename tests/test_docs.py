@@ -26,7 +26,13 @@ import pytest
 from extra_platforms import Group, extract_members
 from yaml import Loader, load, safe_load
 
-from meta_package_manager.labels import LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
+from meta_package_manager.labels import (
+    LABELS,
+    MANAGER_PREFIX,
+    PLATFORM_PREFIX,
+    generate_content_rules,
+    generate_file_rules,
+)
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 
@@ -198,8 +204,8 @@ def test_extra_labels_in_pyproject():
 
 
 def test_label_rules_reference_known_labels():
-    """Every hand-maintained file- and content-rule must target a label that exists
-    in the generated ``[tool.repomatic.labels.extra]`` block.
+    """Every file- and content-rule must target a label that exists in the
+    generated ``[tool.repomatic.labels.extra]`` block.
 
     A rule naming an unknown label silently applies a label the repository does not
     have: the stale ``dnf-based`` rules left behind when the ``labels.py`` group was
@@ -217,6 +223,30 @@ def test_label_rules_reference_known_labels():
             if rule["label"] not in known
         ]
         assert not stale, f"{section} reference unknown labels: {stale}"
+
+
+def test_label_rules_in_pyproject():
+    """Check the generated ``[tool.repomatic.labels.*]`` rule blocks in
+    ``pyproject.toml`` match a fresh generation from the pool.
+
+    Drift means a manager was added without running ``docs/docs_update.py``
+    (repomatic's ``update-docs`` job self-heals this on the next push).
+    """
+    pyproject = PROJECT_ROOT / "pyproject.toml"
+    data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    labels_config = data["tool"]["repomatic"]["labels"]
+
+    checked_in_content = [
+        (rule["label"], tuple(rule["patterns"]))
+        for rule in labels_config["content-rules"]
+    ]
+    assert checked_in_content == generate_content_rules()
+
+    checked_in_file = [
+        (rule["label"], tuple(rule["any-glob-to-any-file"]))
+        for rule in labels_config["file-rules"]
+    ]
+    assert checked_in_file == generate_file_rules()
 
 
 def test_benchmark_yaml_well_formed():
@@ -366,6 +396,28 @@ def test_benchmark_table_renders():
         assert f"`{competitor}`" in header
     # Every pool manager must land one row backed by a source link.
     assert sum(line.count("[✅](") for line in lines) == len(pool)
+
+
+def test_augmentations_table_renders():
+    """Check the augmentations table generator still produces a well-formed
+    table from the current pool.
+
+    The table is rendered live at Sphinx build time by the ``{python:render}``
+    block in ``docs/augmentations.md``, so there is no checked-in copy to compare
+    against: this test only guards the generator against crashes and structural
+    regressions.
+    """
+    table = docs_update.augmentations_table()
+    lines = table.splitlines()
+    assert len(lines) > 2
+    assert lines[0].startswith("| Manager")
+    rows = lines[2:]
+    # Only managers gaining at least one backfilled capability are listed.
+    assert 0 < len(rows) < len(pool)
+    assert all(line.count("✅") >= 1 for line in rows)
+    # The one-by-one upgrade fallback backfills pip, the canonical example
+    # narrated in the page's prose.
+    assert any(line.startswith("| `pip` ") and "✅" in line for line in rows)
 
 
 def test_matrix_blocks_in_sync():

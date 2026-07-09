@@ -73,3 +73,31 @@ sudo = true
 cli = "pkg_delete"
 args = ["-a", "-I"]
 sudo = true
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+# pkg-tools probes `uname -r`, the suite shipping with the OS release.
+[samples.version]
+output = "7.7"
+expected = "7.7"
+
+[[samples.installed]]
+output = """
+unzip-6.0p17        Extract files from ZIP archives
+lunzip-1.14p0       Lzip decompressor"""
+packages = [
+  { id = "unzip", version = "6.0p17" },
+  { id = "lunzip", version = "1.14p0" },
+]
+
+[[samples.search]]
+output = """
+lunzip-1.14p0
+unzip-6.0p17 (installed)
+unzip-6.0p17-iconv"""
+packages = [
+  { id = "lunzip", version = "1.14p0" },
+  { id = "unzip", version = "6.0p17" },
+  { id = "unzip", version = "6.0p17-iconv" },
+]

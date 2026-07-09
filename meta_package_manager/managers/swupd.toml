@@ -54,3 +54,32 @@ sudo = true
 [mpm.managers.swupd.operations.cleanup]
 args = ["clean"]
 sudo = true
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "swupd 7.0.0"
+expected = "7.0.0"
+
+[[samples.installed]]
+output = """
+editors
+os-core
+os-core-update"""
+packages = [
+  { id = "editors" },
+  { id = "os-core" },
+  { id = "os-core-update" },
+]
+
+[[samples.search]]
+output = """
+curl
+editors
+os-core"""
+packages = [
+  { id = "curl" },
+  { id = "editors" },
+  { id = "os-core" },
+]

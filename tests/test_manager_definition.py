@@ -19,14 +19,18 @@ configuration section."""
 
 from __future__ import annotations
 
+import inspect
 import json
 import os
 import re
+import sys
+from operator import attrgetter
 from pathlib import Path
 
 import pytest
 from click_extra import ValidationError
 
+import meta_package_manager
 from meta_package_manager.capabilities import Operations, implements
 from meta_package_manager.config import (
     config_file_is_trusted,
@@ -42,6 +46,11 @@ from meta_package_manager.manager import (
     build_manager_class,
 )
 from meta_package_manager.pool import pool
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 skip_windows = pytest.mark.skipif(
     not hasattr(os, "getuid"),
@@ -750,6 +759,22 @@ def test_cli_rejects_bad_definition(invoke, create_config, reset_definitions):
 
 # Bundled manager definitions shipped with mpm as package data.
 
+BUNDLED_DEFINITION_FILES = sorted(
+    (Path(inspect.getfile(meta_package_manager)).parent / "managers").glob("*.toml"),
+)
+"""Every definition file mpm ships, discovered exactly like the runtime loader."""
+
+BUNDLED_FILE_DATA = {
+    toml_path: tomllib.loads(toml_path.read_text(encoding="UTF-8"))
+    for toml_path in BUNDLED_DEFINITION_FILES
+}
+"""Parsed content of each shipped file: the definition and its ``[samples]``.
+
+The samples are the source-derived output fixtures feeding
+``test_bundled_version_regex`` and ``test_bundled_parsing``, so adding a bundled
+manager (with its samples) extends those tests without touching this module.
+"""
+
 
 def _fresh_bundled(manager_id):
     """Build a throwaway config-defined manager instance so parsing tests can
@@ -776,139 +801,59 @@ def test_bundled_ids_disjoint_from_builtins():
     assert pool.known_manager_ids == pool.builtin_manager_ids | pool.bundled_manager_ids
 
 
-@pytest.mark.parametrize(
-    ("manager_id", "name", "homepage_url", "definition_source"),
-    (
-        (
-            "apt-cyg",
-            "apt-cyg",
-            "https://github.com/transcode-open/apt-cyg",
-            "meta_package_manager/managers/apt_cyg.toml",
-        ),
-        (
-            "cargo",
-            "Rust cargo",
-            "https://doc.rust-lang.org/cargo/",
-            "meta_package_manager/managers/cargo.toml",
-        ),
-        (
-            "cave",
-            "cave",
-            "https://exherbo.org",
-            "meta_package_manager/managers/cave.toml",
-        ),
-        (
-            "chromebrew",
-            "Chromebrew",
-            "https://chromebrew.github.io",
-            "meta_package_manager/managers/chromebrew.toml",
-        ),
-        (
-            "cpan",
-            "Perl CPAN",
-            "https://www.cpan.org",
-            "meta_package_manager/managers/cpan.toml",
-        ),
-        (
-            "fink",
-            "Fink",
-            "https://www.finkproject.org",
-            "meta_package_manager/managers/fink.toml",
-        ),
-        (
-            "gh-ext",
-            "GitHub CLI extensions",
-            "https://cli.github.com",
-            "meta_package_manager/managers/gh_ext.toml",
-        ),
-        (
-            "opkg",
-            "opkg",
-            "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/",
-            "meta_package_manager/managers/opkg.toml",
-        ),
-        (
-            "pkg-tools",
-            "OpenBSD pkg tools",
-            "https://man.openbsd.org/pkg_add",
-            "meta_package_manager/managers/pkg_tools.toml",
-        ),
-        (
-            "pkgin",
-            "Pkgin",
-            "https://pkgin.net",
-            "meta_package_manager/managers/pkgin.toml",
-        ),
-        (
-            "slapt-get",
-            "slapt-get",
-            "https://software.jaos.org/",
-            "meta_package_manager/managers/slapt_get.toml",
-        ),
-        (
-            "soar",
-            "Soar",
-            "https://github.com/pkgforge/soar",
-            "meta_package_manager/managers/soar.toml",
-        ),
-        (
-            "sorcery",
-            "Sorcery",
-            "https://sourcemage.org",
-            "meta_package_manager/managers/sorcery.toml",
-        ),
-        (
-            "steamcmd",
-            "Valve SteamCMD",
-            "https://developer.valvesoftware.com/wiki/SteamCMD",
-            "meta_package_manager/managers/steamcmd.toml",
-        ),
-        (
-            "swupd",
-            "Clear Linux Software Updater",
-            "https://github.com/clearlinux/swupd-client",
-            "meta_package_manager/managers/swupd.toml",
-        ),
-        (
-            "tlmgr",
-            "TeX Live Manager",
-            "https://www.tug.org/texlive/",
-            "meta_package_manager/managers/tlmgr.toml",
-        ),
-        (
-            "topgrade",
-            "Topgrade",
-            "https://github.com/topgrade-rs/topgrade",
-            "meta_package_manager/managers/topgrade.toml",
-        ),
-        (
-            "urpmi",
-            "urpmi",
-            "https://wiki.mageia.org/en/URPMI",
-            "meta_package_manager/managers/urpmi.toml",
-        ),
-        (
-            "vscode",
-            "Visual Studio Code",
-            "https://code.visualstudio.com",
-            "meta_package_manager/managers/vscode.toml",
-        ),
-        (
-            "vscodium",
-            "VSCodium",
-            "https://vscodium.com",
-            "meta_package_manager/managers/vscodium.toml",
-        ),
-    ),
-)
-def test_bundled_registered(manager_id, name, homepage_url, definition_source):
-    """Each bundled manager is always present in the pool, config-defined."""
+def test_bundled_inventory():
+    """The pool registers exactly one bundled manager per shipped TOML file.
+
+    Catches a loader-side skip: a malformed file is logged and dropped at load
+    time, so the pool silently missing an ID would be the only trace.
+    """
+    assert BUNDLED_DEFINITION_FILES
+    file_ids = set()
+    for toml_path, data in BUNDLED_FILE_DATA.items():
+        sections = data["mpm"]["managers"]
+        assert len(sections) == 1, f"{toml_path.name} must define a single manager"
+        file_ids.update(sections)
+    assert file_ids == set(pool.bundled_manager_ids)
+
+
+@pytest.mark.parametrize("toml_path", BUNDLED_DEFINITION_FILES, ids=attrgetter("stem"))
+def test_bundled_registered(toml_path):
+    """Each shipped definition file lands in the pool as a config-defined manager.
+
+    Every expectation derives from the file itself, so a new bundled manager is
+    covered without extending any hardcoded list here. The file must carry
+    nothing but its definition and the test samples locking its parsers.
+    """
+    data = BUNDLED_FILE_DATA[toml_path]
+    assert set(data) <= {"mpm", "samples"}, (
+        f"unexpected top-level keys in {toml_path.name}"
+    )
+
+    manager_id = next(iter(data["mpm"]["managers"]))
+    assert toml_path.stem == manager_id.replace("-", "_")
     assert manager_id in pool.bundled_manager_ids
     manager = pool[manager_id]
     assert isinstance(manager, ConfigDrivenManager)
-    assert manager.name == name
-    assert manager.homepage_url == homepage_url
-    assert manager.definition_source == definition_source
+    assert (
+        manager.definition_source == f"meta_package_manager/managers/{toml_path.name}"
+    )
+    assert manager.name
+    assert manager.homepage_url
+
+    # Validate the shape of the sample fixtures consumed by the tests below.
+    samples = data.get("samples", {})
+    assert set(samples) <= {"version", "installed", "outdated", "search"}
+    assert "version" in samples, (
+        f"{toml_path.name} must ship a [samples.version] fixture"
+    )
+    assert set(samples["version"]) == {"output", "expected"}
+    for operation in ("installed", "outdated", "search"):
+        for sample in samples.get(operation, ()):
+            assert set(sample) == {"output", "packages"}
+            assert sample["packages"], "a sample must expect at least one package"
+            for package in sample["packages"]:
+                assert set(package) <= {"id", "version"}
+                assert package["id"]
 
 
 @pytest.mark.parametrize(
@@ -929,100 +874,28 @@ def test_gh_ext_capabilities(operation, expected):
     assert implements(pool["gh-ext"], operation) is expected
 
 
-@pytest.mark.parametrize(
-    ("manager_id", "version_output", "expected_version"),
-    (
-        ("apt-cyg", "apt-cyg version 1", "1"),
-        ("cargo", "cargo 1.59.0", "1.59.0"),
-        ("cave", "cave 3.0.1", "3.0.1"),
-        ("chromebrew", "1.75.0", "1.75.0"),
-        (
-            "cpan",
-            ">(info): /usr/bin/cpan script version 1.676, CPAN.pm version 2.28",
-            "2.28",
-        ),
-        ("fink", "Package manager version: 0.45.6", "0.45.6"),
-        ("gh-ext", "gh version 2.62.0 (2024-11-14)", "2.62.0"),
-        ("opkg", "opkg version 0.3.6 (libsolv 0.7.5)", "0.3.6"),
-        # pkg-tools probes `uname -r`, the suite shipping with the OS release.
-        ("pkg-tools", "7.7", "7.7"),
-        ("pkgin", "pkgin 26.4.0 (using SQLite 3.45.1)", "26.4.0"),
-        ("slapt-get", "slapt-get version 0.11.12", "0.11.12"),
-        ("soar", "soar 0.12.6", "0.12.6"),
-        # Sorcery prints the bare content of /etc/sorcery/version, a datestamp.
-        ("sorcery", "20240108", "20240108"),
-        (
-            "steamcmd",
-            "Steam Console Client (c) Valve Corporation - version 1648077083",
-            "1648077083",
-        ),
-        ("swupd", "swupd 7.0.0", "7.0.0"),
-        (
-            "tlmgr",
-            "tlmgr revision 66798 (2023-04-08 02:15:21 +0200)\n"
-            "tlmgr using installation: /usr/local/texlive/2023\n"
-            "TeX Live (https://tug.org/texlive) version 2023",
-            "2023",
-        ),
-        ("topgrade", "topgrade 17.4.0", "17.4.0"),
-        ("urpmi", "urpmi 8.121.7", "8.121.7"),
-        # vscode and vscodium declare no version_regexes: `code --version` prints
-        # the bare version, then the commit hash and arch on their own lines, and
-        # the default probe regex picks the first token up.
-        (
-            "vscode",
-            "1.60.2\n7f6ab5485bbc008386c4386d08766667e155244e\nx64",
-            "1.60.2",
-        ),
-        (
-            "vscodium",
-            "1.60.2\n7f6ab5485bbc008386c4386d08766667e155244e\nx64",
-            "1.60.2",
-        ),
-    ),
-)
-def test_bundled_version_regex(manager_id, version_output, expected_version):
-    match = re.search(pool[manager_id].version_regexes[0], version_output)
+def _version_sample_params():
+    """One param per shipped definition file, from its ``[samples.version]`` fixture."""
+    params = []
+    for data in BUNDLED_FILE_DATA.values():
+        manager_id = next(iter(data["mpm"]["managers"]))
+        sample = data.get("samples", {}).get("version")
+        if sample:
+            params.append(
+                pytest.param(
+                    manager_id, sample["output"], sample["expected"], id=manager_id
+                ),
+            )
+    return params
+
+
+@pytest.mark.parametrize(("manager_id", "output", "expected"), _version_sample_params())
+def test_bundled_version_regex(manager_id, output, expected):
+    """Lock each bundled definition's version probe to the output sample shipped in
+    its TOML file, derived from the upstream tool's own source or documentation."""
+    match = re.search(pool[manager_id].version_regexes[0], output)
     assert match is not None
-    assert match.group("version") == expected_version
-
-
-def test_gh_ext_parses_installed():
-    """Parse the headerless, tab-separated ``gh extension list`` piped output.
-
-    Column 1 is ``gh <name>``, column 2 the ``owner/repo`` slug (the package id: the
-    one identifier every gh operation accepts, so installed ids round-trip through
-    remove/upgrade and backup/restore), column 3 the free-form version (a tag or a
-    commit SHA).
-    """
-    manager = _fresh_bundled("gh-ext")
-    manager.run_cli = lambda *args, **kwargs: (
-        "gh dash\tdlvhdr/gh-dash\tv4.7.0\ngh cockpit\tgithub/gh-cockpit\ta1b2c3d4"
-    )
-    assert [(p.id, str(p.installed_version)) for p in manager.installed] == [
-        ("dlvhdr/gh-dash", "v4.7.0"),
-        ("github/gh-cockpit", "a1b2c3d4"),
-    ]
-
-
-def test_gh_ext_parses_search():
-    """Extract the ``owner/repo`` slug from ``gh extension search`` output by content.
-
-    Covers all three row shapes: the first row whose leading empty-state tab ``run_cli``
-    strips off (slug in column 1), a row with an empty install-state column (slug in
-    column 2), and a row whose install-state column is populated with ``installed``.
-    """
-    manager = _fresh_bundled("gh-ext")
-    manager.run_cli = lambda *args, **kwargs: (
-        "dlvhdr/gh-dash\tA rich terminal UI for GitHub\n"
-        "\tvilmibm/gh-screensaver\tScreensavers for your terminal\n"
-        "installed\tcli/gh-webhook\tForward webhooks to localhost"
-    )
-    assert [p.id for p in manager.search("gh", False, False)] == [
-        "dlvhdr/gh-dash",
-        "vilmibm/gh-screensaver",
-        "cli/gh-webhook",
-    ]
+    assert match.group("version") == expected
 
 
 @pytest.mark.parametrize(
@@ -1041,33 +914,6 @@ def test_gh_ext_parses_search():
 )
 def test_soar_capabilities(operation, expected):
     assert implements(pool["soar"], operation) is expected
-
-
-def test_soar_parses_installed():
-    """Parse ``soar list-installed``: split "name-version:repo" at the last "-" before a
-    digit-led version, so multi-hyphen names stay intact."""
-    manager = _fresh_bundled("soar")
-    manager.run_cli = lambda *args, **kwargs: (
-        "bat-0.24.0:soarpkgs (2025-01-15) (1.8 MB)\n"
-        "google-chrome-131.0:soarpkgs (2025-01-14) (95.2 MB)\n"
-        "7-zip-24.09:soarpkgs (2025-01-10) (1.5 MB) [Broken]"
-    )
-    assert [(p.id, str(p.installed_version)) for p in manager.installed] == [
-        ("bat", "0.24.0"),
-        ("google-chrome", "131.0"),
-        ("7-zip", "24.09"),
-    ]
-
-
-def test_soar_parses_search():
-    """Extract the package name (before "#") from each ``soar search`` line, tolerating
-    both the installed (✓/+) and available (○/-) state icons."""
-    manager = _fresh_bundled("soar")
-    manager.run_cli = lambda *args, **kwargs: (
-        "[+] bat#official:soarpkgs | 0.24.0 | archive - A cat clone (1.8 MB)\n"
-        "[✓] ripgrep#official:soarpkgs | 14.1.0 | archive - Fast search (4.2 MB)"
-    )
-    assert [p.id for p in manager.search("bat", False, False)] == ["bat", "ripgrep"]
 
 
 @pytest.mark.parametrize(
@@ -1094,275 +940,41 @@ def test_steamcmd_capabilities(operation, expected):
     assert implements(pool["steamcmd"], operation) is expected
 
 
+def _parsing_sample_params():
+    """One param per query-operation sample shipped in the definition files."""
+    params = []
+    for data in BUNDLED_FILE_DATA.values():
+        manager_id = next(iter(data["mpm"]["managers"]))
+        samples = data.get("samples", {})
+        for operation in ("installed", "outdated", "search"):
+            op_samples = samples.get(operation, ())
+            for index, sample in enumerate(op_samples):
+                expected = [
+                    (package["id"], package.get("version"))
+                    for package in sample["packages"]
+                ]
+                param_id = f"{manager_id}-{operation}"
+                if len(op_samples) > 1:
+                    param_id += f"-{index}"
+                params.append(
+                    pytest.param(
+                        manager_id, operation, sample["output"], expected, id=param_id
+                    ),
+                )
+    return params
+
+
 @pytest.mark.parametrize(
     ("manager_id", "operation", "output", "expected"),
-    (
-        pytest.param(
-            "apt-cyg",
-            "installed",
-            "bash\ncoreutils\ntree",
-            [("bash", None), ("coreutils", None), ("tree", None)],
-            id="apt-cyg-installed",
-        ),
-        pytest.param(
-            "apt-cyg",
-            "search",
-            "tree",
-            [("tree", None)],
-            id="apt-cyg-search",
-        ),
-        pytest.param(
-            "cargo",
-            "installed",
-            "bore-cli v0.4.0:\n    bore\nripgrep v13.0.0:\n    rg",
-            [("bore-cli", "0.4.0"), ("ripgrep", "13.0.0")],
-            id="cargo-installed",
-        ),
-        pytest.param(
-            "cargo",
-            "search",
-            'python = "0.0.0"                  # Python.\n'
-            'pyo3 = "0.16.4"                   # Bindings to Python interpreter\n'
-            "... and 1664 crates more (use --limit N to see more)",
-            [("python", "0.0.0"), ("pyo3", "0.16.4")],
-            id="cargo-search",
-        ),
-        pytest.param(
-            "cave",
-            "installed",
-            "app-arch/gzip 1.14\nsys-apps/sed 4.9",
-            [("app-arch/gzip", "1.14"), ("sys-apps/sed", "4.9")],
-            id="cave-installed",
-        ),
-        pytest.param(
-            "chromebrew",
-            "installed",
-            "Package        Version\n=======\nless           643\nnano           8.2",
-            [("less", "643"), ("nano", "8.2")],
-            id="chromebrew-installed",
-        ),
-        pytest.param(
-            "chromebrew",
-            "search",
-            "less: GNU less is a paginator\nlesspipe: Filters for less",
-            [("less", None), ("lesspipe", None)],
-            id="chromebrew-search",
-        ),
-        pytest.param(
-            "cpan",
-            "installed",
-            "Loading internal logger. Log::Log4perl recommended for better logging\n"
-            "O\t1.03\nErrno\t1.33\nEncode\t3.08_01\nmeta_notation\tundef",
-            [
-                ("O", "1.03"),
-                ("Errno", "1.33"),
-                ("Encode", "3.08_01"),
-                ("meta_notation", None),
-            ],
-            id="cpan-installed",
-        ),
-        pytest.param(
-            "cpan",
-            "outdated",
-            "Loading internal logger. Log::Log4perl recommended for better logging\n"
-            "Reading '/Users/kde/.cpan/Metadata'\n"
-            "  Database was generated on Thu, 26 Mar 2026 13:41:03 GMT\n"
-            "Module Name                                Local    CPAN\n"
-            "---------------------------------------------------------------\n"
-            "Algorithm::C3                             0.1000  0.1100\n"
-            "Archive::Tar                              2.3800  3.0400",
-            [("Algorithm::C3", "0.1100"), ("Archive::Tar", "3.0400")],
-            id="cpan-outdated",
-        ),
-        pytest.param(
-            "fink",
-            "installed",
-            " i \tfiglet\t2.2.5-1\tPrints text as ASCII art\n"
-            "(i)\tnano\t6.2-1\tSmall editor\n"
-            "   \tlynx\t2.9.0-1\tText browser is not installed",
-            [("figlet", "2.2.5-1"), ("nano", "6.2-1")],
-            id="fink-installed",
-        ),
-        pytest.param(
-            "opkg",
-            "installed",
-            "3rd-party-feed-configs - 1.1-r0\naio-grab - 1.0+git71+c79e264-r0",
-            [
-                ("3rd-party-feed-configs", "1.1-r0"),
-                ("aio-grab", "1.0+git71+c79e264-r0"),
-            ],
-            id="opkg-installed",
-        ),
-        pytest.param(
-            "opkg",
-            "outdated",
-            "openpli-bootlogo - 20190717-r0 - 20190718-r0\n"
-            "enigma2-hotplug - 2.7+git1720+55c6b34-r0 - 2.7+git1722+daf2f52-r0",
-            [
-                ("openpli-bootlogo", "20190718-r0"),
-                ("enigma2-hotplug", "2.7+git1722+daf2f52-r0"),
-            ],
-            id="opkg-outdated",
-        ),
-        pytest.param(
-            "opkg",
-            "search",
-            "bash - 5.0-r0 - An sh-compatible command language interpreter\n"
-            "busybox - 1.31.0-r0 - Tiny versions of many common UNIX utilities",
-            [("bash", "5.0-r0"), ("busybox", "1.31.0-r0")],
-            id="opkg-search",
-        ),
-        pytest.param(
-            "pkg-tools",
-            "installed",
-            "unzip-6.0p17        Extract files from ZIP archives\n"
-            "lunzip-1.14p0       Lzip decompressor",
-            [("unzip", "6.0p17"), ("lunzip", "1.14p0")],
-            id="pkg-tools-installed",
-        ),
-        pytest.param(
-            "pkg-tools",
-            "search",
-            "lunzip-1.14p0\nunzip-6.0p17 (installed)\nunzip-6.0p17-iconv",
-            [
-                ("lunzip", "1.14p0"),
-                ("unzip", "6.0p17"),
-                ("unzip", "6.0p17-iconv"),
-            ],
-            id="pkg-tools-search",
-        ),
-        pytest.param(
-            "pkgin",
-            "installed",
-            "lbdb-0.48.1nb1;The little brother's database\n"
-            "mutt-1.14.5;Text-based MIME mail client",
-            [("lbdb", "0.48.1nb1"), ("mutt", "1.14.5")],
-            id="pkgin-installed",
-        ),
-        pytest.param(
-            "pkgin",
-            "outdated",
-            "abook-0.6.2;<;Text-based addressbook program",
-            [("abook", "0.6.2")],
-            id="pkgin-outdated",
-        ),
-        pytest.param(
-            "pkgin",
-            "search",
-            "abook-0.6.1          Text-based addressbook program\n"
-            "mutt-1.14.5 =        Text-based MIME mail client\n"
-            "=: package is installed and up-to-date\n"
-            "<: package is installed but newer version is available\n"
-            ">: installed package has a greater version than available package",
-            [("abook", "0.6.1"), ("mutt", "1.14.5")],
-            id="pkgin-search",
-        ),
-        pytest.param(
-            "slapt-get",
-            "installed",
-            "tree-2.3.2-x86_64-1 [inst=yes]: display directory tree\n"
-            "util-linux-2.39-x86_64-1 [inst=yes]: collection of utilities",
-            [("tree", "2.3.2"), ("util-linux", "2.39")],
-            id="slapt-get-installed",
-        ),
-        pytest.param(
-            "slapt-get",
-            "search",
-            "tree-2.3.2-x86_64-1 [inst=no]: display directory tree",
-            [("tree", "2.3.2")],
-            id="slapt-get-search",
-        ),
-        pytest.param(
-            "sorcery",
-            "installed",
-            "cowsay:20240108:installed:3.03\nvim:20230101:held:9.0",
-            [("cowsay", "3.03"), ("vim", "9.0")],
-            id="sorcery-installed",
-        ),
-        pytest.param(
-            "sorcery",
-            "search",
-            "cowsay 3.03 @test\ntree 2.1.1 @stable",
-            [("cowsay", "3.03"), ("tree", "2.1.1")],
-            id="sorcery-search",
-        ),
-        pytest.param(
-            "swupd",
-            "installed",
-            "editors\nos-core\nos-core-update",
-            [("editors", None), ("os-core", None), ("os-core-update", None)],
-            id="swupd-installed",
-        ),
-        pytest.param(
-            "swupd",
-            "search",
-            "curl\neditors\nos-core",
-            [("curl", None), ("editors", None), ("os-core", None)],
-            id="swupd-search",
-        ),
-        pytest.param(
-            "tlmgr",
-            "installed",
-            "tlmgr: package repository https://mirror.ctan.org (verified)\n"
-            "sansmath,15878\ntitlesec,68677",
-            [("sansmath", "15878"), ("titlesec", "68677")],
-            id="tlmgr-installed",
-        ),
-        pytest.param(
-            "tlmgr",
-            "outdated",
-            "location-url\thttps://mirror.ctan.org\n"
-            "total-bytes\t323544\n"
-            "end-of-header\n"
-            "adjmulticol\tu\t62935\t63073\t316000\t-\t-\t-\t-\t-\n"
-            "end-of-updates\n"
-            "running mktexlsr ...",
-            [("adjmulticol", "63073")],
-            id="tlmgr-outdated",
-        ),
-        pytest.param(
-            "urpmi",
-            "installed",
-            "sgml-skel 0.7-24.mga9\ndesktop-file-utils 0.26-5.mga9",
-            [("sgml-skel", "0.7-24.mga9"), ("desktop-file-utils", "0.26-5.mga9")],
-            id="urpmi-installed",
-        ),
-        pytest.param(
-            "urpmi",
-            "outdated",
-            "kernel-desktop-6.6.0-1.mga9\nfvwm3-1.0.2-1.1.mga8",
-            [("kernel-desktop", "6.6.0-1.mga9"), ("fvwm3", "1.0.2-1.1.mga8")],
-            id="urpmi-outdated",
-        ),
-        pytest.param(
-            "vscode",
-            "installed",
-            "ms-python.python@2021.9.1246542782\n"
-            "ms-toolsai.jupyter@2021.8.2041215044\n"
-            "tamasfe.even-better-toml@0.14.2",
-            [
-                ("ms-python.python", "2021.9.1246542782"),
-                ("ms-toolsai.jupyter", "2021.8.2041215044"),
-                ("tamasfe.even-better-toml", "0.14.2"),
-            ],
-            id="vscode-installed",
-        ),
-        pytest.param(
-            "vscodium",
-            "installed",
-            "tamasfe.even-better-toml@0.14.2",
-            [("tamasfe.even-better-toml", "0.14.2")],
-            id="vscodium-installed",
-        ),
-    ),
+    _parsing_sample_params(),
 )
 def test_bundled_parsing(manager_id, operation, output, expected):
-    """Lock each bundled definition's regexes to output samples derived from the
-    upstream tools' own source code or documentation.
+    """Lock each bundled definition's parsers to the output samples shipped in its
+    TOML file, derived from the upstream tools' own source code or documentation.
 
-    Versions are compared as raw captured strings (``None`` when the regex has no
-    version group). ``which`` is stubbed so operations declaring a sibling ``cli``
-    resolve without the real binary installed.
+    Versions are compared as raw captured strings (omitted from the sample when
+    the regex captures no version group). ``which`` is stubbed so operations
+    declaring a sibling ``cli`` resolve without the real binary installed.
     """
     manager = _fresh_bundled(manager_id)
     manager.which = lambda name: Path("/fake/bin") / name

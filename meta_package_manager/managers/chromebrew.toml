@@ -60,3 +60,30 @@ args = ["upgrade", "--no-color"]
 # from `crew upgrade`.
 [mpm.managers.chromebrew.operations.sync]
 args = ["update"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "1.75.0"
+expected = "1.75.0"
+
+[[samples.installed]]
+output = """
+Package        Version
+=======
+less           643
+nano           8.2"""
+packages = [
+  { id = "less", version = "643" },
+  { id = "nano", version = "8.2" },
+]
+
+[[samples.search]]
+output = """
+less: GNU less is a paginator
+lesspipe: Filters for less"""
+packages = [
+  { id = "less" },
+  { id = "lesspipe" },
+]

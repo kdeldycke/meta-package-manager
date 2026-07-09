@@ -34,3 +34,27 @@ args = ["--install-extension", "{package_id}"]
 
 [mpm.managers.vscode.operations.remove]
 args = ["--uninstall-extension", "{package_id}"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+# vscode and vscodium declare no version_regexes: `code --version` prints the
+# bare version, then the commit hash and arch on their own lines, and the
+# default probe regex picks the first token up.
+[samples.version]
+output = """
+1.60.2
+7f6ab5485bbc008386c4386d08766667e155244e
+x64"""
+expected = "1.60.2"
+
+[[samples.installed]]
+output = """
+ms-python.python@2021.9.1246542782
+ms-toolsai.jupyter@2021.8.2041215044
+tamasfe.even-better-toml@0.14.2"""
+packages = [
+  { id = "ms-python.python", version = "2021.9.1246542782" },
+  { id = "ms-toolsai.jupyter", version = "2021.8.2041215044" },
+  { id = "tamasfe.even-better-toml", version = "0.14.2" },
+]

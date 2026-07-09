@@ -76,3 +76,37 @@ sudo = true
 [mpm.managers.pkgin.operations.cleanup]
 args = ["clean"]
 sudo = true
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "pkgin 26.4.0 (using SQLite 3.45.1)"
+expected = "26.4.0"
+
+[[samples.installed]]
+output = """
+lbdb-0.48.1nb1;The little brother's database
+mutt-1.14.5;Text-based MIME mail client"""
+packages = [
+  { id = "lbdb", version = "0.48.1nb1" },
+  { id = "mutt", version = "1.14.5" },
+]
+
+[[samples.outdated]]
+output = "abook-0.6.2;<;Text-based addressbook program"
+packages = [
+  { id = "abook", version = "0.6.2" },
+]
+
+[[samples.search]]
+output = """
+abook-0.6.1          Text-based addressbook program
+mutt-1.14.5 =        Text-based MIME mail client
+=: package is installed and up-to-date
+<: package is installed but newer version is available
+>: installed package has a greater version than available package"""
+packages = [
+  { id = "abook", version = "0.6.1" },
+  { id = "mutt", version = "1.14.5" },
+]

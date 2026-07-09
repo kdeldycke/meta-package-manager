@@ -4,60 +4,13 @@ Package managers are not comparable: some ship advanced features others lack. Ra
 
 ## Managers gaining features
 
-Each ✅ below is a capability `mpm` synthesizes for a manager that does not provide it natively. The rest of this page explains each column.
+Each ✅ below is a capability `mpm` synthesizes for a manager that does not provide it natively. The table renders straight from the capability declarations in the manager implementations, so it never drifts from the code. The rest of this page explains each column.
 
-| Manager        | Full `upgrade --all` | Exact search | Extended search |
-| :------------- | :------------------: | :----------: | :-------------: |
-| `apk`          |                      |      ✅      |                 |
-| `apm`          |                      |      ✅      |                 |
-| `apt-cyg`       |                      |      ✅      |       ✅        |
-| `apt-mint`     |                      |              |       ✅        |
-| `asdf`         |          ✅          |      ✅      |       ✅        |
-| `cargo`        |                      |      ✅      |       ✅        |
-| `chromebrew`    |                      |      ✅      |       ✅        |
-| `composer`     |                      |      ✅      |                 |
-| `conda`        |                      |      ✅      |       ✅        |
-| `deb-get`      |                      |      ✅      |       ✅        |
-| `dnf`          |                      |      ✅      |       ✅        |
-| `dnf5`         |                      |      ✅      |       ✅        |
-| `eopkg`        |                      |      ✅      |                 |
-| `fink`          |                      |      ✅      |       ✅        |
-| `flatpak`      |                      |      ✅      |       ✅        |
-| `gem`          |                      |              |       ✅        |
-| `gh-ext`       |                      |      ✅      |       ✅        |
-| `guix`         |                      |      ✅      |       ✅        |
-| `mas`          |                      |      ✅      |       ✅        |
-| `mise`         |                      |      ✅      |                 |
-| `nix`          |                      |      ✅      |       ✅        |
-| `npm`          |                      |      ✅      |                 |
-| `opkg`         |                      |      ✅      |       ✅        |
-| `pacaur`       |                      |              |       ✅        |
-| `pacman`       |                      |              |       ✅        |
-| `pacstall`     |                      |      ✅      |       ✅        |
-| `paru`         |                      |              |       ✅        |
-| `pip`          |          ✅          |              |                 |
-| `pkcon`         |                      |      ✅      |       ✅        |
-| `pkg-tools`     |                      |      ✅      |       ✅        |
-| `pkgin`         |                      |      ✅      |       ✅        |
-| `pnpm`         |                      |      ✅      |                 |
-| `pwsh-gallery` |                      |              |       ✅        |
-| `scoop`        |                      |      ✅      |       ✅        |
-| `sfsu`         |                      |      ✅      |       ✅        |
-| `slapt-get`     |                      |      ✅      |       ✅        |
-| `snap`         |                      |      ✅      |       ✅        |
-| `soar`         |                      |      ✅      |       ✅        |
-| `sorcery`       |                      |      ✅      |       ✅        |
-| `steamcmd`     |          ✅          |              |                 |
-| `swupd`         |                      |      ✅      |       ✅        |
-| `tazpkg`        |                      |      ✅      |       ✅        |
-| `tlmgr`         |                      |      ✅      |       ✅        |
-| `urpmi`         |                      |      ✅      |       ✅        |
-| `uv`           |          ✅          |              |                 |
-| `xbps`         |                      |      ✅      |       ✅        |
-| `yarn`         |                      |      ✅      |       ✅        |
-| `yarn-berry`   |                      |      ✅      |       ✅        |
-| `yay`          |                      |              |       ✅        |
-| `yum`          |                      |      ✅      |       ✅        |
+```{python:render}
+from docs_update import augmentations_table
+
+print(augmentations_table())
+```
 
 ## Free `upgrade --all`
 
@@ -81,7 +34,7 @@ Successfully installed graphviz-0.14
 (...)
 ```
 
-Today this backfills `asdf`, `pip`, `steamcmd` and `uv` (the *Full `upgrade --all`* column above).
+The *Full `upgrade --all`* column above lists the managers relying on this backfill.
 
 ## Better search
 

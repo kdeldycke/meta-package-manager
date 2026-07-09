@@ -53,3 +53,34 @@ args = ["extension", "upgrade", "--all"]
 
 # No `outdated`: `gh extension list` has no update-available column and gh offers no
 # non-mutating "list upgradable" command, so mpm auto-skips outdated for this manager.
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "gh version 2.62.0 (2024-11-14)"
+expected = "2.62.0"
+
+# Covers both version shapes of column 3: a semver tag and an 8-char commit SHA.
+[[samples.installed]]
+output = """
+gh dash\tdlvhdr/gh-dash\tv4.7.0
+gh cockpit\tgithub/gh-cockpit\ta1b2c3d4"""
+packages = [
+  { id = "dlvhdr/gh-dash", version = "v4.7.0" },
+  { id = "github/gh-cockpit", version = "a1b2c3d4" },
+]
+
+# Covers all three row shapes: the first row whose leading empty-state tab
+# run_cli strips off (slug in column 1), a row with an empty install-state
+# column (slug in column 2), and a row whose install-state column is populated.
+[[samples.search]]
+output = """
+dlvhdr/gh-dash\tA rich terminal UI for GitHub
+\tvilmibm/gh-screensaver\tScreensavers for your terminal
+installed\tcli/gh-webhook\tForward webhooks to localhost"""
+packages = [
+  { id = "dlvhdr/gh-dash" },
+  { id = "vilmibm/gh-screensaver" },
+  { id = "cli/gh-webhook" },
+]

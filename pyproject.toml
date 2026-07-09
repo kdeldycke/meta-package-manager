@@ -24,7 +24,7 @@ keywords = [
   "cask",
   "cave",
   "choco",
-  "chocotaley",
+  "chocolatey",
   "chromebrew",
   "chromeos",
   "clear linux",
@@ -653,176 +653,263 @@ manpages.asset-name = "mpm-manpages"
 
 # Content-based labeller rules. See repomatic's labels.content-rules schema.
 [[tool.repomatic.labels.content-rules]]
-label = "🔌 bar-plugin"
-patterns = [ "xbar", "swiftbar", "plugin" ]
-
-[[tool.repomatic.labels.content-rules]]
 label = "📦 manager: apk"
-patterns = [ "apk", "alpine", "alpine linux" ]
+patterns = ["alpine", "alpine linux", "apk"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: apm"
-patterns = [ "apm", "atom" ]
+patterns = ["apm", "atom"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: apt-cyg"
-patterns = [ "apt-cyg", "cygwin" ]
+patterns = ["apt-cyg", "cygwin"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: asdf"
-patterns = [ "asdf", "asdf-vm", "version manager" ]
+patterns = ["asdf", "asdf-vm", "version manager"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: cargo"
-patterns = [ "cargo", "rust", "crate" ]
+patterns = ["cargo", "crate", "rust"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: cave"
+patterns = ["cave", "exherbo", "paludis"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: choco"
-patterns = [ "choco", "chocolatey" ]
+patterns = ["choco", "chocolatey"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: chromebrew"
+patterns = ["chrome os", "chromebrew", "chromeos"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: composer"
-patterns = [ "composer", "php" ]
+patterns = ["composer", "php"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: conda"
-patterns = [ "conda", "anaconda", "miniconda", "conda-forge" ]
+patterns = ["anaconda", "conda", "conda-forge", "miniconda"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: cpan"
+patterns = ["cpan", "perl"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: dpkg-based"
-patterns = [ "apt", "apt-mint", "aptitude", "dpkg", "opkg", "ubuntu", "debian", "mint", "deb-get", "pacstall" ]
+patterns = [
+  "apt",
+  "apt-mint",
+  "aptitude",
+  "deb-get",
+  "debian",
+  "dpkg",
+  "mint",
+  "opkg",
+  "pacstall",
+  "ubuntu",
+]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: emerge"
-patterns = [ "emerge", "portage", "gentoo" ]
+patterns = ["emerge", "gentoo", "portage"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: eopkg"
-patterns = [ "eopkg", "solus" ]
+patterns = ["eopkg", "solus"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: fink"
+patterns = ["fink"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: flatpak"
-patterns = [ "flatpak", "flat" ]
+patterns = ["flat", "flatpak"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: fwupd"
-patterns = [ "fwupd", "fwupdmgr", "lvfs" ]
+patterns = ["fwupd", "fwupdmgr", "lvfs"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: gem"
-patterns = [ "gem", "ruby" ]
+patterns = ["gem", "ruby"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: gh-ext"
+patterns = ["gh extension", "gh-ext", "github cli"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: guix"
-patterns = [ "guix", "gnu guix" ]
+patterns = ["gnu guix", "guix"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: homebrew"
-patterns = [ "brew", "cask", "homebrew", "tap", "formula", "zerobrew", "zb" ]
+patterns = ["brew", "cask", "formula", "homebrew", "tap", "zb", "zerobrew"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: macports"
-patterns = [ "macports", "port" ]
+patterns = ["macports", "port"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: mas"
-patterns = [ "mas", "app store", "app-store" ]
+patterns = ["app store", "app-store", "mas"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: mise"
+patterns = ["mise"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: nix"
-patterns = [ "nix", "nixpkgs", "nixos" ]
+patterns = ["nix", "nixos", "nixpkgs"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: npm-based"
-patterns = [ "npm", "node", "pnpm", "yarn" ]
+patterns = ["node", "npm", "pnpm", "yarn", "yarn-berry"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pacman-based"
-patterns = [ "pacman", "arch", "pacaur", "paru", "yay" ]
+patterns = ["arch", "pacaur", "pacman", "paru", "yay"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pip-based"
-patterns = [ "pip", "pipx" ]
+patterns = ["pip", "pipx"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pkcon"
-patterns = [ "pkcon", "packagekit" ]
+patterns = ["packagekit", "pkcon"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pkg-based"
-patterns = [ "pkg", "ports", "freebsd", "freebsd ports" ]
+patterns = ["freebsd", "freebsd ports", "pkg", "ports"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: pkg-tools"
+patterns = ["openbsd", "pkg-tools", "pkg_add"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: pkgin"
+patterns = ["netbsd", "pkgin", "pkgsrc"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pwsh-gallery"
-patterns = [ "powershell", "powershell gallery", "psgallery", "psresourceget", "pwsh" ]
+patterns = [
+  "powershell",
+  "powershell gallery",
+  "psgallery",
+  "psresourceget",
+  "pwsh",
+  "pwsh-gallery",
+]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: rpm-based"
-patterns = [ "dnf", "yum", "rpm", "fedora", "redhat", "rhel", "zypper", "opensuse", "suse", "urpmi", "mageia" ]
+patterns = [
+  "dnf",
+  "dnf5",
+  "fedora",
+  "mageia",
+  "opensuse",
+  "redhat",
+  "rhel",
+  "rpm",
+  "suse",
+  "urpmi",
+  "yum",
+  "zypper",
+]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: scoop-based"
-patterns = [ "scoop", "sfsu" ]
+patterns = ["scoop", "sfsu"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: sdkman"
-patterns = [ "sdkman", "sdk man" ]
+patterns = ["sdk man", "sdkman"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: slapt-get"
+patterns = ["slackware", "slapt-get"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: snap"
-patterns = [ "snap" ]
+patterns = ["snap"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: soar"
+patterns = ["soar"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: sorcery"
+patterns = ["sorcery", "source mage"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: steamcmd"
-patterns = [ "steamcmd", "steam", "valve" ]
+patterns = ["steam", "steamcmd", "valve"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: stew"
+patterns = ["stew"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: sun-tools"
-patterns = [ "sun-tools", "solaris", "svr4", "pkgadd", "pkgrm" ]
+patterns = ["pkgadd", "pkgrm", "solaris", "sun-tools", "svr4"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: swupd"
-patterns = [ "swupd", "clear linux", "clearlinux" ]
+patterns = ["clear linux", "clearlinux", "swupd"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: tazpkg"
-patterns = [ "tazpkg", "slitaz" ]
+patterns = ["slitaz", "tazpkg"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: tlmgr"
+patterns = ["ctan", "tex live", "texlive", "tlmgr"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: topgrade"
+patterns = ["topgrade"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: uv-based"
-patterns = [ "uv", "uvx" ]
+patterns = ["uv", "uvx"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: vscode-based"
-patterns = [ "vscode", "vscodium", "visual studio code", "visual studio" ]
+patterns = ["visual studio", "visual studio code", "vscode", "vscodium"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: winget"
-patterns = [ "winget" ]
+patterns = ["winget"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: xbps"
-patterns = [ "xbps", "void linux", "void" ]
+patterns = ["void", "void linux", "xbps"]
+
+[[tool.repomatic.labels.content-rules]]
+label = "🔌 bar-plugin"
+patterns = ["plugin", "swiftbar", "xbar"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: BSD"
-patterns = [ "bsd" ]
+patterns = ["bsd"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: Linux"
-patterns = [ "linux" ]
+patterns = ["linux"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: macOS"
-patterns = [ "macos", "mac os", "osx", "os x", "apple" ]
+patterns = ["apple", "mac os", "macos", "os x", "osx"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: Unix"
-patterns = [ "unix" ]
+patterns = ["unix"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: Windows"
-patterns = [ "windows", "c:", "microsoft" ]
+patterns = ["c:", "microsoft", "windows"]
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: apk"
@@ -1115,205 +1202,275 @@ color = "bfd4f2"
 description = "Windows"
 
 [[tool.repomatic.labels.file-rules]]
-label = "🔌 bar-plugin"
-any-glob-to-any-file = [ "meta_package_manager/bar_plugin/*", "tests/*bar_plugin*" ]
-
-[[tool.repomatic.labels.file-rules]]
 label = "📦 manager: apk"
-any-glob-to-any-file = [ "meta_package_manager/managers/apk*", "tests/*apk*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/apk.*", "tests/*apk*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: apm"
-any-glob-to-any-file = [ "meta_package_manager/managers/apm*", "tests/*apm*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/apm.*", "tests/*apm*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: apt-cyg"
-any-glob-to-any-file = [ "meta_package_manager/managers/apt_cyg*", "tests/*apt_cyg*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/apt_cyg.*", "tests/*apt_cyg*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: asdf"
-any-glob-to-any-file = [ "meta_package_manager/managers/asdf*", "tests/*asdf*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/asdf.*", "tests/*asdf*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: cargo"
-any-glob-to-any-file = [ "meta_package_manager/managers/cargo*", "tests/*cargo*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/cargo.*", "tests/*cargo*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: cave"
+any-glob-to-any-file = ["meta_package_manager/managers/cave.*", "tests/*cave*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: choco"
-any-glob-to-any-file = [ "meta_package_manager/managers/chocolatey*", "tests/*chocolatey*" ]
+any-glob-to-any-file = [
+  "meta_package_manager/managers/chocolatey.*",
+  "tests/*choco*",
+  "tests/*chocolatey*",
+]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: chromebrew"
+any-glob-to-any-file = ["meta_package_manager/managers/chromebrew.*", "tests/*chromebrew*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: composer"
-any-glob-to-any-file = [ "meta_package_manager/managers/composer*", "tests/*composer*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/composer.*", "tests/*composer*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: conda"
-any-glob-to-any-file = [ "meta_package_manager/managers/conda*", "tests/*conda*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/conda.*", "tests/*conda*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: cpan"
+any-glob-to-any-file = ["meta_package_manager/managers/cpan.*", "tests/*cpan*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: dpkg-based"
 any-glob-to-any-file = [
-  # The dot keeps apt.py (APT, APT_Mint) in and apt_cyg.py (its own label) out.
   "meta_package_manager/managers/apt.*",
-  "meta_package_manager/managers/deb_get*",
-  "meta_package_manager/managers/dpkg*",
-  "meta_package_manager/managers/opkg*",
-  "meta_package_manager/managers/pacstall*",
+  "meta_package_manager/managers/deb_get.*",
+  "meta_package_manager/managers/opkg.*",
+  "meta_package_manager/managers/pacstall.*",
   "tests/*apt*",
+  "tests/*apt_mint*",
   "tests/*deb_get*",
-  "tests/*dpkg*",
   "tests/*opkg*",
   "tests/*pacstall*",
 ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: emerge"
-any-glob-to-any-file = [ "meta_package_manager/managers/emerge*", "tests/*emerge*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/emerge.*", "tests/*emerge*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: eopkg"
-any-glob-to-any-file = [ "meta_package_manager/managers/eopkg*", "tests/*eopkg*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/eopkg.*", "tests/*eopkg*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: fink"
+any-glob-to-any-file = ["meta_package_manager/managers/fink.*", "tests/*fink*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: flatpak"
-any-glob-to-any-file = [ "meta_package_manager/managers/flatpak*", "tests/*flatpak*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/flatpak.*", "tests/*flatpak*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: fwupd"
-any-glob-to-any-file = [ "meta_package_manager/managers/fwupd*", "tests/*fwupd*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/fwupd.*", "tests/*fwupd*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: gem"
-any-glob-to-any-file = [ "meta_package_manager/managers/gem*", "tests/*gem*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/gem.*", "tests/*gem*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: gh-ext"
+any-glob-to-any-file = ["meta_package_manager/managers/gh_ext.*", "tests/*gh_ext*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: guix"
-any-glob-to-any-file = [ "meta_package_manager/managers/guix*", "tests/*guix*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/guix.*", "tests/*guix*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: homebrew"
 any-glob-to-any-file = [
-  "meta_package_manager/managers/homebrew*",
-  "meta_package_manager/managers/zerobrew*",
+  "meta_package_manager/managers/homebrew.*",
+  "meta_package_manager/managers/zerobrew.*",
+  "tests/*brew*",
+  "tests/*cask*",
   "tests/*homebrew*",
   "tests/*zerobrew*",
 ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: macports"
-any-glob-to-any-file = [ "meta_package_manager/managers/macports*", "tests/*macports*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/macports.*", "tests/*macports*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mas"
-any-glob-to-any-file = [ "meta_package_manager/managers/mas*", "tests/*mas*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/mas.*", "tests/*mas*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: mise"
+any-glob-to-any-file = ["meta_package_manager/managers/mise.*", "tests/*mise*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mpm"
-any-glob-to-any-file = [ "meta_package_manager/*" ]
+any-glob-to-any-file = ["meta_package_manager/*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: nix"
-any-glob-to-any-file = [ "meta_package_manager/managers/nix*", "tests/*nix*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/nix.*", "tests/*nix*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: npm-based"
 any-glob-to-any-file = [
-  "meta_package_manager/managers/npm*",
-  "meta_package_manager/managers/pnpm*",
-  "meta_package_manager/managers/yarn*",
+  "meta_package_manager/managers/npm.*",
+  "meta_package_manager/managers/pnpm.*",
+  "meta_package_manager/managers/yarn.*",
   "tests/*npm*",
   "tests/*pnpm*",
   "tests/*yarn*",
+  "tests/*yarn_berry*",
 ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pacman-based"
 any-glob-to-any-file = [
-  "meta_package_manager/managers/pacman*",
-  "meta_package_manager/managers/pacaur*",
-  "meta_package_manager/managers/paru*",
-  "meta_package_manager/managers/yay*",
-  "tests/*pacman*",
+  "meta_package_manager/managers/pacman.*",
   "tests/*pacaur*",
+  "tests/*pacman*",
   "tests/*paru*",
   "tests/*yay*",
 ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pip-based"
-any-glob-to-any-file = [ "meta_package_manager/managers/pip*", "tests/*pip*" ]
+any-glob-to-any-file = [
+  "meta_package_manager/managers/pip.*",
+  "meta_package_manager/managers/pipx.*",
+  "tests/*pip*",
+  "tests/*pipx*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pkcon"
-any-glob-to-any-file = [ "meta_package_manager/managers/pkcon*", "tests/*pkcon*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/pkcon.*", "tests/*pkcon*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pkg-based"
-# The dot keeps pkg.py (PKG, Ports) in and pkcon.py, pkgin.toml and pkg_tools.toml
-# (their own labels) out.
-any-glob-to-any-file = [ "meta_package_manager/managers/pkg.*", "tests/*pkg*", "tests/*ports*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/pkg.*", "tests/*pkg*", "tests/*ports*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: pkg-tools"
+any-glob-to-any-file = ["meta_package_manager/managers/pkg_tools.*", "tests/*pkg_tools*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: pkgin"
+any-glob-to-any-file = ["meta_package_manager/managers/pkgin.*", "tests/*pkgin*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pwsh-gallery"
-any-glob-to-any-file = [ "meta_package_manager/managers/pwsh_gallery*", "tests/*pwsh_gallery*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/pwsh_gallery.*", "tests/*pwsh_gallery*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: rpm-based"
 any-glob-to-any-file = [
-  "meta_package_manager/managers/dnf*",
-  "meta_package_manager/managers/zypper*",
+  "meta_package_manager/managers/dnf.*",
+  "meta_package_manager/managers/urpmi.*",
+  "meta_package_manager/managers/zypper.*",
   "tests/*dnf*",
+  "tests/*dnf5*",
+  "tests/*urpmi*",
+  "tests/*yum*",
   "tests/*zypper*",
 ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: scoop-based"
 any-glob-to-any-file = [
-  "meta_package_manager/managers/scoop*",
-  "meta_package_manager/managers/sfsu*",
+  "meta_package_manager/managers/scoop.*",
+  "meta_package_manager/managers/sfsu.*",
   "tests/*scoop*",
-  "tests/*sfsu*"
+  "tests/*sfsu*",
 ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: sdkman"
-any-glob-to-any-file = [ "meta_package_manager/managers/sdkman*", "tests/*sdkman*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/sdkman.*", "tests/*sdkman*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: slapt-get"
+any-glob-to-any-file = ["meta_package_manager/managers/slapt_get.*", "tests/*slapt_get*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: snap"
-any-glob-to-any-file = [ "meta_package_manager/managers/snap*", "tests/*snap*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/snap.*", "tests/*snap*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: soar"
+any-glob-to-any-file = ["meta_package_manager/managers/soar.*", "tests/*soar*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: sorcery"
+any-glob-to-any-file = ["meta_package_manager/managers/sorcery.*", "tests/*sorcery*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: steamcmd"
-any-glob-to-any-file = [ "meta_package_manager/managers/steamcmd*", "tests/*steamcmd*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/steamcmd.*", "tests/*steamcmd*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: stew"
+any-glob-to-any-file = ["meta_package_manager/managers/stew.*", "tests/*stew*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: sun-tools"
-any-glob-to-any-file = [ "meta_package_manager/managers/sun_tools*", "tests/*sun_tools*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/sun_tools.*", "tests/*sun_tools*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: swupd"
-any-glob-to-any-file = [ "meta_package_manager/managers/swupd*", "tests/*swupd*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/swupd.*", "tests/*swupd*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: tazpkg"
-any-glob-to-any-file = [ "meta_package_manager/managers/tazpkg*", "tests/*tazpkg*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/tazpkg.*", "tests/*tazpkg*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: tlmgr"
+any-glob-to-any-file = ["meta_package_manager/managers/tlmgr.*", "tests/*tlmgr*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: topgrade"
+any-glob-to-any-file = ["meta_package_manager/managers/topgrade.*", "tests/*topgrade*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: uv-based"
-any-glob-to-any-file = [ "meta_package_manager/managers/uv*", "tests/*uv*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/uv.*", "tests/*uv*", "tests/*uvx*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: vscode-based"
-any-glob-to-any-file = [ "meta_package_manager/managers/vscode*", "tests/*vscode*" ]
+any-glob-to-any-file = [
+  "meta_package_manager/managers/vscode.*",
+  "meta_package_manager/managers/vscodium.*",
+  "tests/*vscode*",
+  "tests/*vscodium*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: winget"
-any-glob-to-any-file = [ "meta_package_manager/managers/winget*", "tests/*winget*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/winget.*", "tests/*winget*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: xbps"
-any-glob-to-any-file = [ "meta_package_manager/managers/xbps*", "tests/*xbps*" ]
+any-glob-to-any-file = ["meta_package_manager/managers/xbps.*", "tests/*xbps*"]
+
+[[tool.repomatic.labels.file-rules]]
+label = "🔌 bar-plugin"
+any-glob-to-any-file = ["meta_package_manager/bar_plugin/*", "tests/*bar_plugin*"]
 
 [tool.gitleaks]
 allowlist.description = "False positives"

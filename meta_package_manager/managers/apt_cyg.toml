@@ -42,3 +42,27 @@ args = ["remove", "{package_id}"]
 # Refreshes the setup.ini package catalog from the configured mirror.
 [mpm.managers.apt-cyg.operations.sync]
 args = ["update"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "apt-cyg version 1"
+expected = "1"
+
+[[samples.installed]]
+output = """
+bash
+coreutils
+tree"""
+packages = [
+  { id = "bash" },
+  { id = "coreutils" },
+  { id = "tree" },
+]
+
+[[samples.search]]
+output = "tree"
+packages = [
+  { id = "tree" },
+]

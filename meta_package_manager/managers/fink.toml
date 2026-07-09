@@ -62,3 +62,20 @@ args = ["--yes", "selfupdate"]
 # Default scope purges obsolete .deb archives and source tarballs.
 [mpm.managers.fink.operations.cleanup]
 args = ["--yes", "cleanup"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "Package manager version: 0.45.6"
+expected = "0.45.6"
+
+[[samples.installed]]
+output = """
+ i \tfiglet\t2.2.5-1\tPrints text as ASCII art
+(i)\tnano\t6.2-1\tSmall editor
+   \tlynx\t2.9.0-1\tText browser is not installed"""
+packages = [
+  { id = "figlet", version = "2.2.5-1" },
+  { id = "nano", version = "6.2-1" },
+]

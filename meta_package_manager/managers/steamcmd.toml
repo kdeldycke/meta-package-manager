@@ -30,3 +30,10 @@ args = ["+app_update", "{package_id}", "validate"]
 
 [mpm.managers.steamcmd.operations.upgrade_one]
 args = ["+app_update", "{package_id}", "validate"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "Steam Console Client (c) Valve Corporation - version 1648077083"
+expected = "1648077083"

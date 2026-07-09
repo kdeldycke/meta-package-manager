@@ -17,14 +17,15 @@
 
 Called by repomatic's ``update-docs`` job to regenerate the tables and diagrams
 checked into ``readme.md`` (which GitHub renders as static markdown), plus the
-label registry in ``pyproject.toml``.
+pool-derived blocks of ``pyproject.toml``: the ``[project]`` keywords, the label
+registry and the labeller rules.
 
-The Sphinx-only pages need no regeneration script: ``docs/benchmark.md``
-renders its manager-support table live at build time through a
-``{python:render}`` directive calling :func:`benchmark_managers_table`, and the
-``<!-- matrix ... -->`` compatibility blocks of ``docs/install.md`` are
-refreshed by ``update-docs``'s own directive-refresh phase (``click-extra
-refresh-directives``).
+The Sphinx-only pages need no regeneration script: ``docs/benchmark.md`` and
+``docs/augmentations.md`` render their per-manager tables live at build time
+through ``{python:render}`` directives calling :func:`benchmark_managers_table`
+and :func:`augmentations_table`, and the ``<!-- matrix ... -->`` compatibility
+blocks of ``docs/install.md`` are refreshed by ``update-docs``'s own
+directive-refresh phase (``click-extra refresh-directives``).
 
 .. warning::
     The generated Mermaid syntax targets the version bundled with
@@ -45,8 +46,16 @@ import yaml
 from click_extra.table import TableFormat, render_table
 from extra_platforms import Group, extract_members
 
-from meta_package_manager.capabilities import Operations, implements
-from meta_package_manager.labels import LABELS
+from meta_package_manager.capabilities import (
+    Operations,
+    implements,
+    upgrade_all_is_synthesized,
+)
+from meta_package_manager.labels import (
+    LABELS,
+    generate_content_rules,
+    generate_file_rules,
+)
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 
@@ -60,6 +69,72 @@ GITHUB_BLOB_URL = "https://github.com/kdeldycke/meta-package-manager/blob/main"
 
 Pinned to the ``main`` branch so the generated artifact references the same
 revision the docs are built from.
+"""
+
+KEYWORDS_EXTRAS = (
+    "alpine linux",
+    "anaconda",
+    "appimage",
+    "atom",
+    "chocolatey",
+    "chromeos",
+    "clear linux",
+    "CLI",
+    "cli-tools",
+    "cyclonedx",
+    "cygwin",
+    "exherbo",
+    "github cli",
+    "gnu guix",
+    "homebrew",
+    "mac app store",
+    "macos",
+    "mageia",
+    "meta-package-manager",
+    "netbsd",
+    "nixpkgs",
+    "node",
+    "openbsd",
+    "package",
+    "package manager",
+    "package url",
+    "package-manager-cli",
+    "packagekit",
+    "paludis",
+    "php composer",
+    "pkgsrc",
+    "plugin",
+    "portage",
+    "powershell",
+    "powershell-gallery",
+    "psresourceget",
+    "purl",
+    "pwsh",
+    "ruby",
+    "ruby-gem",
+    "rust",
+    "sbom",
+    "slackware",
+    "slitaz",
+    "solaris",
+    "source mage",
+    "spdx",
+    "svr4",
+    "swiftbar",
+    "swiftbar-plugin",
+    "tex live",
+    "visual studio code",
+    "void linux",
+    "xbar",
+    "xbar-plugin",
+    "zb",
+)
+"""Curated PyPI keywords beyond the manager IDs themselves.
+
+Ecosystem names, platform names and generic discovery terms. The manager IDs come
+for free from the pool: :func:`update_keywords` merges both sets into
+``pyproject.toml``. When a new manager brings a well-known ecosystem name that
+differs from its ID (like ``gh-ext`` and ``github cli``), add the alias here.
 """
 
 
@@ -256,6 +331,52 @@ def benchmark_managers_table() -> str:
     )
 
 
+def augmentations_table() -> str:
+    """Produce the per-manager table of the augmentations page.
+
+    Rendered live at Sphinx build time by the ``{python:render}`` block in
+    ``docs/augmentations.md``, so the table always matches the code being
+    documented without a checked-in copy.
+
+    Each ``✅`` marks a capability ``mpm`` synthesizes for a manager that lacks
+    it natively, straight from the capability introspection helpers:
+
+    - *Full* ``upgrade --all``: the manager only reaches the operation through
+      the one-by-one fallback
+      (:func:`meta_package_manager.capabilities.upgrade_all_is_synthesized`).
+    - *Exact search* and *Extended search*: the manager's native search cannot
+      filter that way, so ``mpm`` refilters the raw results itself (the
+      ``exact_support``/``extended_support`` flags set by
+      :func:`meta_package_manager.capabilities.search_capabilities` and the
+      config-defined manager builder).
+
+    Managers needing no backfill at all are left out of the table.
+    """
+    table = []
+    for mid, manager in sorted(pool.items()):
+        upgrade_all = upgrade_all_is_synthesized(manager)
+        search_func = getattr(type(manager), "search", None)
+        has_search = implements(manager, Operations.search)
+        exact = has_search and not getattr(search_func, "exact_support", True)
+        extended = has_search and not getattr(search_func, "extended_support", True)
+        if not (upgrade_all or exact or extended):
+            continue
+        table.append([
+            f"`{mid}`",
+            "✅" if upgrade_all else "",
+            "✅" if exact else "",
+            "✅" if extended else "",
+        ])
+
+    return render_table(
+        table,
+        headers=["Manager", "Full `upgrade --all`", "Exact search", "Extended search"],
+        table_format=TableFormat.GITHUB,
+        colalign=["left", "center", "center", "center"],
+        disable_numparse=True,
+    )
+
+
 def replace_content(
     filepath: Path,
     new_content: str,
@@ -294,22 +415,55 @@ def replace_content(
     )
 
 
-def update_labels() -> None:
-    """Sync the :data:`~meta_package_manager.labels.LABELS` registry into the
-    ``[tool.repomatic.labels.extra]`` block of ``pyproject.toml``.
+def _string_array(values: tuple[str, ...], multiline: bool = False):
+    """Render strings as a ``tomlkit`` array, one item per line when asked or long.
 
-    repomatic's ``sync-labels`` reads these inline definitions and applies them
-    to the GitHub repository at run time.
+    ``tomlkit``'s own ``multiline()`` hard-codes a 4-space indent; re-parsing an
+    explicitly rendered body keeps the 2-space indent used across
+    ``pyproject.toml``.
+    """
+    array = tomlkit.array()
+    array.extend(values)
+    if not multiline and len(array.as_string()) <= 76:
+        return array
+    body = "".join(f"  {tomlkit.item(value).as_string()},\n" for value in values)
+    return tomlkit.array(f"[\n{body}]")
+
+
+def _rules_aot(rules: list[tuple[str, tuple[str, ...]]], field: str):
+    """Render labeller rules as a ``tomlkit`` array-of-tables.
+
+    Each rule becomes a ``{label, <field>}`` table. The pattern array switches to
+    one-item-per-line when its inline form would run long.
+    """
+    aot = tomlkit.aot()
+    for label, values in rules:
+        entry = tomlkit.table()
+        entry["label"] = label
+        entry[field] = _string_array(values)
+        aot.append(entry)
+    return aot
+
+
+def update_labels() -> None:
+    """Sync the label registry and labeller rules into ``pyproject.toml``.
+
+    Regenerates the three ``[tool.repomatic.labels.*]`` arrays from
+    :mod:`meta_package_manager.labels`: ``extra`` (from
+    :data:`~meta_package_manager.labels.LABELS`), ``content-rules`` and
+    ``file-rules`` (from the pool-derived rule generators). repomatic's
+    ``sync-labels`` and labeller jobs read these inline definitions at run time.
 
     .. note::
         The edit is done with ``tomlkit`` round-trip so the rest of
         ``pyproject.toml`` (comments, key order, formatting) is preserved: only
-        the ``extra`` array is regenerated. The per-entry layout matches what
+        the three label arrays are regenerated. The per-entry layout matches what
         ``pyproject-fmt`` emits, so the result survives the autofix formatting
         pass without churn.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
+    labels_table = doc["tool"]["repomatic"]["labels"]
 
     extra = tomlkit.aot()
     for name, color, description in LABELS:
@@ -319,19 +473,48 @@ def update_labels() -> None:
         entry["color"] = color.lstrip("#")
         entry["description"] = description
         extra.append(entry)
-    doc["tool"]["repomatic"]["labels"]["extra"] = extra
-    # Separate the last entry from the following table with one blank line.
-    extra[-1]["description"].trivia.trail = "\n\n"
+
+    arrays = {
+        "content-rules": _rules_aot(generate_content_rules(), "patterns"),
+        "extra": extra,
+        "file-rules": _rules_aot(generate_file_rules(), "any-glob-to-any-file"),
+    }
+    for key, aot in arrays.items():
+        labels_table[key] = aot
+        # Separate the last entry from the following table with one blank line.
+        last_field = list(aot[-1].keys())[-1]
+        aot[-1][last_field].trivia.trail = "\n\n"
 
     content = tomlkit.dumps(doc)
-    # tomlkit prefixes the inserted array-of-tables with two blank lines;
-    # collapse the section's leading separator to a single blank line.
-    content = content.replace(
-        "\n\n\n[[tool.repomatic.labels.extra]]",
-        "\n\n[[tool.repomatic.labels.extra]]",
-        1,
-    )
+    for key in arrays:
+        # tomlkit prefixes each inserted array-of-tables with two blank lines;
+        # collapse the section's leading separator to a single blank line.
+        content = content.replace(
+            f"\n\n\n[[tool.repomatic.labels.{key}]]",
+            f"\n\n[[tool.repomatic.labels.{key}]]",
+            1,
+        )
     pyproject.write_text(content, encoding="UTF-8")
+
+
+def update_keywords() -> None:
+    """Sync the ``[project]`` keywords of ``pyproject.toml``.
+
+    The keyword set is the pool's manager IDs merged with the curated
+    :data:`KEYWORDS_EXTRAS`, so a new manager advertises itself on PyPI without
+    a hand edit. Same ``tomlkit`` round-trip as :func:`update_labels`.
+    """
+    pyproject = PROJECT_ROOT / "pyproject.toml"
+    doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
+
+    doc["project"]["keywords"] = _string_array(
+        tuple(
+            sorted(set(KEYWORDS_EXTRAS) | set(pool.all_manager_ids), key=str.casefold),
+        ),
+        multiline=True,
+    )
+
+    pyproject.write_text(tomlkit.dumps(doc), encoding="UTF-8")
 
 
 def update_readme() -> None:
@@ -370,5 +553,6 @@ def update_readme() -> None:
 
 
 if __name__ == "__main__":
+    update_keywords()
     update_labels()
     update_readme()

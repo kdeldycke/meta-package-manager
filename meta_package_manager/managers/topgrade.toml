@@ -37,3 +37,10 @@ version_regexes = ['topgrade\s+(?P<version>\S+)']
 # unattended, matching the contract mpm expects from an upgrade-all operation.
 [mpm.managers.topgrade.operations.upgrade_all]
 args = ["--yes"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "topgrade 17.4.0"
+expected = "17.4.0"

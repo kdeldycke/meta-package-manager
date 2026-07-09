@@ -81,3 +81,28 @@ sudo = true
 [mpm.managers.urpmi.operations.cleanup]
 args = ["--clean"]
 sudo = true
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "urpmi 8.121.7"
+expected = "8.121.7"
+
+[[samples.installed]]
+output = """
+sgml-skel 0.7-24.mga9
+desktop-file-utils 0.26-5.mga9"""
+packages = [
+  { id = "sgml-skel", version = "0.7-24.mga9" },
+  { id = "desktop-file-utils", version = "0.26-5.mga9" },
+]
+
+[[samples.outdated]]
+output = """
+kernel-desktop-6.6.0-1.mga9
+fvwm3-1.0.2-1.1.mga8"""
+packages = [
+  { id = "kernel-desktop", version = "6.6.0-1.mga9" },
+  { id = "fvwm3", version = "1.0.2-1.1.mga8" },
+]

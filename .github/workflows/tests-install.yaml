@@ -81,7 +81,7 @@ jobs:
           - windows-11-arm
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Pack
         shell: pwsh
         working-directory: packaging/choco/meta-package-manager
@@ -173,7 +173,7 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Install Guix
         run: >
           wget --quiet --output-document=guix-install.sh
@@ -220,7 +220,7 @@ jobs:
           - macos-26
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: cachix/install-nix-action@v31
         with:
           nix_path: nixpkgs=channel:nixos-unstable
@@ -279,7 +279,7 @@ jobs:
           - windows-2025
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run CLI via pip
@@ -302,7 +302,7 @@ jobs:
           - windows-2025
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI via pipx
@@ -354,7 +354,7 @@ jobs:
           - windows-2025
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI

@@ -456,6 +456,11 @@ INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
     # mas resolves an install through an App Store search that finds nothing for the
     # numeric id on the headless runners, so the install fails.
     "mas": is_github_ci,
+    # pkcon hands mutations to packagekitd, which authorizes them through polkit; the
+    # headless runner ships no policy permitting unattended installs for the unelevated
+    # user, so the transaction is refused. See the Pkcon class docstring for why mpm
+    # does not sudo-escalate pkcon itself.
+    "pkcon": is_github_ci,
     # pnpm add --global needs a PNPM_HOME (from `pnpm setup`) the runners do not set up.
     "pnpm": is_github_ci,
     # pwsh-gallery's PSResourceGet lookup is unreliable on the runners: Find-PSResource

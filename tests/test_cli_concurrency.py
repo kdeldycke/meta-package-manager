@@ -490,7 +490,20 @@ def test_lock_family_not_serialized_for_reads():
     """Reads take no backend lock, so family members keep separate lanes and threads."""
     ctx = FakeContext(jobs=4)
     managers = [FakeManager("brew"), FakeManager("cask"), FakeManager("gem")]
-    work, threads_by_id = _thread_recorder()
+    threads_by_id: dict = {}
+    lock = threading.Lock()
+    # The barrier releases only once all three reads are in flight, which both proves
+    # the lanes run concurrently and pins each to a distinct thread. The sleep-based
+    # overlap of _thread_recorder is racy here: a lane finishing before the last
+    # submit lets the pool reuse its thread, as seen on free-threaded builds.
+    barrier = threading.Barrier(3, timeout=5)
+
+    def work(manager):
+        barrier.wait()
+        with lock:
+            threads_by_id.setdefault(manager.id, []).append(threading.current_thread())
+        return manager.id, {}
+
     # report_state defaults to False: the read path keeps one lane per manager.
     collect_from_managers(
         "Listing",

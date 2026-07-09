@@ -137,10 +137,13 @@ def test_cli_search_path(manager):
     for search_path in manager.cli_search_path:
         path_obj = Path(search_path).resolve()
         assert path_obj.is_absolute()
-        if sys.version_info >= (3, 13) and is_windows():
-            assert not os.path.isreserved(path_obj)
-        else:
-            assert not path_obj.is_reserved()
+        # Reserved names only exist on Windows: POSIX's is_reserved() always returned
+        # False and was removed in Python 3.15, so the check is Windows-gated.
+        if is_windows():
+            if sys.version_info >= (3, 13):
+                assert not os.path.isreserved(path_obj)
+            else:
+                assert not path_obj.is_reserved()
         if path_obj.exists():
             assert path_obj.is_file() or path_obj.is_dir()
 
@@ -226,10 +229,13 @@ def test_cli_path(manager):
     if manager.cli_path is not None:
         assert isinstance(manager.cli_path, Path)
         assert manager.cli_path.is_absolute()
-        if sys.version_info >= (3, 13) and is_windows():
-            assert not os.path.isreserved(manager.cli_path)
-        else:
-            assert not manager.cli_path.is_reserved()
+        # Reserved names only exist on Windows: POSIX's is_reserved() always returned
+        # False and was removed in Python 3.15, so the check is Windows-gated.
+        if is_windows():
+            if sys.version_info >= (3, 13):
+                assert not os.path.isreserved(manager.cli_path)
+            else:
+                assert not manager.cli_path.is_reserved()
         assert manager.cli_path.is_file()
 
 

@@ -22,8 +22,6 @@ from functools import cached_property
 
 from boltons.iterutils import unique
 from click_extra import get_current_context
-from click_extra.theme import get_current_theme as theme
-
 from . import config
 from .capabilities import implements
 from .execution import warm_availability
@@ -416,8 +414,8 @@ class ManagerPool:
                 # (matching the not-available skip below), hidden by the WARNING default.
                 logging.log(
                     logging.INFO if explicit_selection else logging.DEBUG,
-                    f"{theme().invoked_command(manager_id)} "
-                    f"does not implement {implements_operation}.",
+                    f"Does not implement {implements_operation}.",
+                    extra={"label": manager_id},
                 )
                 continue
 
@@ -426,7 +424,8 @@ class ManagerPool:
                 reason = manager.unavailable_reason or "unavailable"
                 logging.log(
                     logging.INFO if explicit_selection else logging.DEBUG,
-                    f"Skip {theme().invoked_command(manager_id)} manager: {reason}.",
+                    f"Skipped: {reason}.",
+                    extra={"label": manager_id},
                 )
                 continue
 

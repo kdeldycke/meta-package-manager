@@ -404,6 +404,8 @@ The CLI defaults to `WARNING` (inherited from click-extra's `--verbosity` defaul
 
 Heuristic for a new line: if it narrates a decision, a step, or a command run on the system it is `INFO`; a raw mechanism or a command's output is `DEBUG`; something genuinely wrong **and** not already shown by the ✓/✗ trail is `WARNING`. "Your option had no effect here" is `INFO`, not `WARNING`.
 
+A manager-scoped line passes `extra={"label": manager.id}` instead of naming the manager in the message: click-extra's formatter renders the ID glued into the level prefix (`warning:gem: Could not list installed packages.`), matching the streamed CLI output lines and making logs grep-able by manager. Keep the ID in prose only where it is the object of the sentence (`X has been installed with Y`) or names a config artifact (`No [gem] section found.`).
+
 An enum surfaced in any message must render as its bare member name: give it `__str__`/`__format__` returning `self.name`. A functional `Enum("Operations", (...))` otherwise leaks the `Operations.outdated` repr where the message wanted `outdated`.
 
 ### Operation state: the ✓/✗ trail
@@ -426,7 +428,7 @@ Trail conventions:
 
 ### Exit codes
 
-Action commands (`install`, `remove`, `upgrade <packages>`, `restore`) collect per-package failures and exit non-zero with a `critical:` summary. Maintenance commands (`sync`, `cleanup`, `upgrade --all`) are best-effort: they mark a failed manager `✗` but stay exit-`0`.
+Action commands (`install`, `remove`, `upgrade <packages>`, `restore`) collect per-package failures and exit non-zero with a `critical:` summary. `-0`/`--zero-exit` opts out of that gate (see `exit_on_failures` in `cli.py`): the summary still prints but the exit stays `0`; usage and configuration errors keep exiting `2` regardless. Maintenance commands (`sync`, `cleanup`, `upgrade --all`) are best-effort: they mark a failed manager `✗` but stay exit-`0`.
 
 ## Testing guidelines
 

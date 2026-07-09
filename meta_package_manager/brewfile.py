@@ -63,10 +63,12 @@ so that any third-party tap a downstream ``brew`` or ``cask`` entry references i
 registered before the install step runs.
 """
 
-DEFAULT_TAPS: frozenset[tuple[str, str]] = frozenset({
-    ("homebrew", "core"),
-    ("homebrew", "cask"),
-})
+DEFAULT_TAPS: frozenset[tuple[str, str]] = frozenset(
+    {
+        ("homebrew", "core"),
+        ("homebrew", "cask"),
+    }
+)
 """Taps that ``brew`` enables by default. Never emitted as explicit ``tap`` lines."""
 
 
@@ -195,8 +197,8 @@ def build_brewfile(
                 packages: tuple[Package, ...] = tuple(manager.installed)
             except Exception:  # noqa: BLE001
                 logging.warning(
-                    "Could not list installed packages from %s.",
-                    manager.id,
+                    "Could not list installed packages.",
+                    extra={"label": manager.id},
                 )
                 continue
         else:

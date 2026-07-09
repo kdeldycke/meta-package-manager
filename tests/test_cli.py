@@ -299,14 +299,15 @@ class TestSelectorPrecedence(InspectCLIOutput):
         stats line; the manager id is matched by its ``<mid>: <count>`` slice
         instead of by tailing the stream because at ``--verbosity DEBUG`` a
         few ``Reset <logger> to WARNING`` lines trail the stats line.
-        Unavailable ones surface as ``Skip <mid> manager: ...``: that message
-        is demoted to DEBUG for implicit selection, so test invocations pass
+        Unavailable ones surface as ``Skipped: ...`` lines tagged with the
+        manager ID in their level prefix (``debug:<mid>:``): that message is
+        demoted to DEBUG for implicit selection, so test invocations pass
         ``--verbosity DEBUG`` to keep both signals visible.
         """
         yield from (
             bool(re.search(rf"\b{re.escape(mid)}: \d+", stderr)),
-            f"Skip {mid} manager:" in stderr,
-            f"{mid} does not implement " in stderr,
+            f":{mid}: Skipped:" in stderr,
+            f":{mid}: Does not implement " in stderr,
         )
 
     @pytest.mark.parametrize(

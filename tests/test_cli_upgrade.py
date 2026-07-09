@@ -42,14 +42,14 @@ class TestUpgrade(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # Log-level prefix is omitted because Skip/does-not-implement are
-            # demoted to DEBUG for implicit selection and stay at WARNING/INFO
-            # for explicit ones (``mpm --<mid> upgrade``).
-            f"{mid} does not implement upgrade_all_cli." in stderr,
-            f"{mid} does not implement {Operations.upgrade_all}." in stderr,
-            f"Upgrade all outdated packages from {mid}..." in stderr,
+            # The glued ``:<mid>:`` label form matches whatever level the
+            # message lands at: demoted to DEBUG for implicit selection,
+            # WARNING/INFO for explicit ones (``mpm --<mid> upgrade``).
+            f":{mid}: Does not implement upgrade_all_cli." in stderr,
+            f":{mid}: Does not implement {Operations.upgrade_all}." in stderr,
+            f":{mid}: Upgrade all outdated packages..." in stderr,
             bool(re.search(rf"Upgrade \S+ with {mid}\.\.\.", stderr)),
-            f"Skip {mid} manager:" in stderr,
+            f":{mid}: Skipped:" in stderr,
         )
 
     @pytest.mark.parametrize("all_option", ("--all", None))

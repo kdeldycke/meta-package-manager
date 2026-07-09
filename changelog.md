@@ -11,6 +11,9 @@
 - [mpm] Disclosed CLI invocations are themed by token family: dim prompt sigil, environment name/value assignment pairs, highlighted binary name (directory plain, in the `$`-prompt and spawn-trace lines), option-styled flags.
 - [mpm] `--no-color` now also strips the color of log lines emitted from background threads (streamed subprocess output, concurrent fan-outs).
 - [mpm] The capability probe logs one answered `DEBUG` line per manager (`brew implements installed.`) instead of an unanswered question exposing the raw class repr.
+- [mpm] Add `-0`/`--zero-exit`: action commands then report per-package failures without gating automation on a non-zero exit code. Usage and configuration errors keep exiting `2`.
+- [mpm] Manager-scoped log lines now carry the manager ID in their level prefix (`warning:gem: Could not list installed packages.`) instead of naming it in the message, matching the streamed CLI output and making logs grep-able by manager.
+- [mpm] The `mpm managers` table's binary-path highlighting is delegated to click-extra's `highlight_bin_name`, the same renderer as the `$`-prompt and spawn-trace log lines.
 - [mpm] Log lines emitted while a progress spinner animates now print on their own line above it, instead of garbling the in-progress frame.
 - [mpm] Delegate subprocess spawning, output streaming, timeout enforcement and Ctrl+C child termination to `click-extra`.
 - [mpm] Authenticate the GitHub API release lookups in the Guix, Nix and yay cooldown workflow jobs, which flaked on the anonymous rate limit.

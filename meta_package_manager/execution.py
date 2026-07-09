@@ -78,6 +78,7 @@ from click_extra.execution import (
     INDENT,
     args_cleanup,
     format_cli_prompt,
+    highlight_bin_name,
     resolve_jobs,
     run_cli,
     run_jobs,
@@ -143,25 +144,25 @@ class CLIError(Exception):
 def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | None:
     """Highlight the binary name in the provided ``path``.
 
-    If ``match_names`` is provided, only highlight the start of the binary name that is
-    in the list.
+    The name is only highlighted when it matches one of the recognized
+    ``match_names``, so an unrecognized binary stays plain. Matching is
+    insensitive to case on Windows and case-sensitive on other platforms, thanks
+    to ``os.path.normcase``.
 
-    Matching is insensitive to case on Windows and case-sensitive on other platforms,
-    thanks to ``os.path.normcase``.
+    The rendering is delegated to
+    :py:func:`click_extra.execution.highlight_bin_name`, the same helper behind
+    the ``$``-prompt and spawn-trace log lines, so the ``mpm managers`` table and
+    the logs can never drift apart.
     """
     if path is None:
         return None
 
-    highlighted_name = path.name
-    for ref_name in match_names:
-        if os.path.normcase(ref_name).startswith(os.path.normcase(path.name)):
-            highlighted_name = (
-                theme().invoked_command(path.name[: len(ref_name)])
-                + path.name[len(ref_name) :]
-            )
-            break
-
-    return f"{path.parent}{os.path.sep}{highlighted_name}"
+    if any(
+        os.path.normcase(ref_name).startswith(os.path.normcase(path.name))
+        for ref_name in match_names
+    ):
+        return highlight_bin_name(str(path))
+    return str(path)
 
 
 READ_ONLY_TIMEOUT: Final = 120
@@ -952,6 +953,8 @@ class CLIExecutor:
         elif self.dry_run:
             logging.warning(f"Dry-run: {cli_msg}")
         else:
+            # ``id`` is declared on the ``PackageManager`` subclass, not this mixin.
+            manager_id: str = self.id  # type: ignore[attr-defined]
             # The invocation is disclosed at INFO so `--verbosity INFO` shows (and
             # lets the user reproduce) every CLI mpm runs on the system. The
             # version-detection probes stay at DEBUG: they are discovery, fired
@@ -973,7 +976,7 @@ class CLIExecutor:
                         clean_args,
                         extra_env=extra_env,
                         timeout=effective_timeout,
-                        label=self.id,  # type: ignore[attr-defined]
+                        label=manager_id,
                         command_level=command_level,
                         windows_creation_flags=self.windows_creation_flags,
                     )
@@ -1004,7 +1007,7 @@ class CLIExecutor:
                 # already killed the child (and its whole tree on Windows).
                 self._cleanup_windows_processes()
                 msg = f"Timed out after {effective_timeout}s."
-                logging.warning(msg)
+                logging.warning(msg, extra={"label": manager_id})
                 exception = CLIError(None, "", msg)
                 if must_succeed or self.stop_on_error:
                     raise exception
@@ -1014,7 +1017,7 @@ class CLIExecutor:
                 # run_cli killed the child before re-raising; the spinner was
                 # stopped by the `with` teardown.
                 msg = "Subprocess interrupted by a console signal."
-                logging.warning(msg)
+                logging.warning(msg, extra={"label": manager_id})
                 exception = CLIError(None, "", msg)
                 self.cli_errors.append(exception)
                 return ""
@@ -1066,11 +1069,11 @@ class CLIExecutor:
             # for my password?").
             is_escalation = clean_args[:2] == _SUDO_ESCALATION_PREFIX
             if is_escalation and _is_sudo_auth_failure(error):
-                manager_id = self.id  # type: ignore[attr-defined]
                 logging.warning(
-                    f"{manager_id} needs administrator rights but sudo has no cached "
+                    "Needs administrator rights but sudo has no cached "
                     "credentials; re-run in a terminal, or with `mpm --sudo` to "
                     "authenticate once up front.",
+                    extra={"label": self.id},  # type: ignore[attr-defined]
                 )
             if must_succeed or self.stop_on_error:
                 raise exception

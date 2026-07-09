@@ -39,8 +39,6 @@ import logging
 from enum import Enum
 from functools import wraps
 
-from click_extra.theme import get_current_theme as theme
-
 from .manager import PackageManager
 
 TYPE_CHECKING = False
@@ -123,8 +121,8 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
         msg = f"Can't guess {cls} implementation of {op}."
         raise NotImplementedError(msg)
 
-    verdict = "implements" if implemented else "does not implement"
-    logging.debug(f"{theme().invoked_command(cls.id)} {verdict} {op}.")
+    verdict = "Implements" if implemented else "Does not implement"
+    logging.debug(f"{verdict} {op}.", extra={"label": cls.id})
     return implemented
 
 
@@ -144,12 +142,14 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
             if exact and not exact_support:
                 refilter = True
                 logging.info(
-                    f"{self.id} does not implement exact search operation.",
+                    "Does not implement exact search operation.",
+                    extra={"label": self.id},
                 )
             if extended and not extended_support:
                 refilter = True
                 logging.info(
-                    f"{self.id} does not implement extended search operation.",
+                    "Does not implement extended search operation.",
+                    extra={"label": self.id},
                 )
             if refilter:
                 logging.debug("Refiltering of raw results has been activated.")

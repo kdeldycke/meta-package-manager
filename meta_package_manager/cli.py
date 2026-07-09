@@ -58,8 +58,9 @@ from click_extra import (
     option_group,
     pass_context,
     search_params,
+    zero_exit_option,
 )
-from click_extra.context import PROGRESS, TABLE_FORMAT, VERBOSITY_LEVEL
+from click_extra.context import PROGRESS, TABLE_FORMAT, VERBOSITY_LEVEL, ZERO_EXIT
 from click_extra.execution import install_interrupt_handler
 from click_extra.highlight import HelpKeywords, highlight
 from click_extra.logging import LogLevel
@@ -355,6 +356,9 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         ),
     },
 )
+# Honored by exit_on_failures(): the action commands' per-package failures then
+# report without gating automation on a non-zero exit code.
+@zero_exit_option
 @option_group(
     "Package manager selection",
     # ---------------------- 80 characters reference limit ----------------------- #
@@ -915,9 +919,7 @@ def _safe_packages(
     try:
         return tuple(packages_asdict(source(), fields))
     except CLIError:
-        logging.warning(
-            f"Could not {action} from {theme().invoked_command(manager.id)}."
-        )
+        logging.warning(f"Could not {action}.", extra={"label": manager.id})
         return ()
 
 
@@ -1387,13 +1389,15 @@ def cooldown_permits(manager: PackageManager) -> bool:
         return True
     if not manager.require_cooldown_support:
         logging.warning(
-            f"{theme().invoked_command(manager.id)} cannot enforce the release-age "
-            "cooldown; running it without the supply-chain safeguard.",
+            "Cannot enforce the release-age cooldown; running without the "
+            "supply-chain safeguard.",
+            extra={"label": manager.id},
         )
         return True
     logging.warning(
-        f"Skip {theme().invoked_command(manager.id)}: it cannot enforce the "
-        "release-age cooldown. Use --allow-unsupported-managers to run it anyway.",
+        "Skipped: cannot enforce the release-age cooldown. "
+        "Use --allow-unsupported-managers to run it anyway.",
+        extra={"label": manager.id},
     )
     return False
 
@@ -1440,12 +1444,18 @@ def _package_task(
             try:
                 output = action(manager, spec)
             except NotImplementedError:
-                logging.info(f"{mgr} does not implement {verb} operation.")
+                logging.info(
+                    f"Does not implement {verb} operation.",
+                    extra={"label": manager.id},
+                )
             except CLIError:
-                logging.info(f"Could not {verb} {package_label(spec)} with {mgr}.")
+                logging.info(
+                    f"Could not {verb} {package_label(spec)}.",
+                    extra={"label": manager.id},
+                )
             else:
                 if output:
-                    logging.info(output)
+                    logging.info(output, extra={"label": manager.id})
                 return True, f"{package_label(spec)} {past} {prep} {mgr}"
         with lock:
             record_failure(spec)
@@ -1461,20 +1471,33 @@ def _maintenance_work(
 ) -> Callable[[PackageManager], tuple[str, dict]]:
     """Build a ``work`` callable for a maintenance command's fan-out.
 
-    Logs ``message`` (with the themed manager name substituted for ``{}``) at the
-    ``announce`` level, runs ``operation(manager)``, and returns
+    Logs ``message`` at the ``announce`` level, tagged with the manager ID (rendered
+    into the level prefix, ``info:brew:``), runs ``operation(manager)``, and returns
     ``(id, {"errors": <CLI errors raised during the run>})`` so a manager that grows
     its error list is marked ``✗`` in the trail. Shared by ``sync`` and ``cleanup``,
     whose work differs only in the message and the manager method.
     """
 
     def work(manager: PackageManager) -> tuple[str, dict]:
-        logging.log(announce, message.format(theme().invoked_command(manager.id)))
+        logging.log(announce, message, extra={"label": manager.id})
         before = len(manager.cli_errors)
         operation(manager)
         return manager.id, {"errors": manager.cli_errors[before:]}
 
     return work
+
+
+def exit_on_failures(ctx: Context) -> None:
+    """Exit with code ``1`` to report the per-package failures collected this run.
+
+    Follows the linter convention where findings gate automation, unless the user
+    opted out with ``-0``/``--zero-exit``: the run then keeps its ``0`` exit code,
+    and the ``critical:`` summary already printed stays the durable record. Usage
+    and configuration errors are unaffected: they exit ``2`` regardless, as
+    genuine execution failures.
+    """
+    if not ctx.meta.get(ZERO_EXIT):
+        ctx.exit(1)
 
 
 def _dispatch_sourced_operation(
@@ -1566,25 +1589,27 @@ def _dispatch_sourced_operation(
             manager = pool.get(manager_id)
             if apply_cooldown and not cooldown_permits(manager):
                 continue
-            tasks.append((
-                manager,
-                _package_task(
+            tasks.append(
+                (
                     manager,
-                    spec,
-                    failures_lock,
-                    action=action,
-                    verb=verb,
-                    past=past,
-                    prep=prep,
-                    record_failure=lambda s: failures.append(s.package_id),
-                ),
-            ))
+                    _package_task(
+                        manager,
+                        spec,
+                        failures_lock,
+                        action=action,
+                        verb=verb,
+                        past=past,
+                        prep=prep,
+                        record_failure=lambda s: failures.append(s.package_id),
+                    ),
+                )
+            )
 
     collect_per_package(label, done_label, tasks)
 
     if failures:
         logging.critical(f"Could not {verb}: " + ", ".join(sorted(set(failures))) + ".")
-        ctx.exit(1)
+        exit_on_failures(ctx)
 
 
 def _attempt_install(manager: PackageManager, spec: Specifier) -> bool:
@@ -1602,17 +1627,18 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> bool:
             output = manager.install(spec.package_id, version=spec.version)
         except NotImplementedError:
             logging.info(
-                f"{theme().invoked_command(manager.id)} "
-                "does not implement install operation.",
+                "Does not implement install operation.",
+                extra={"label": manager.id},
             )
             return False
         except CLIError:
             logging.info(
-                f"Could not install {spec} with {theme().invoked_command(manager.id)}.",
+                f"Could not install {spec}.",
+                extra={"label": manager.id},
             )
             return False
     if output:
-        logging.info(output)
+        logging.info(output, extra={"label": manager.id})
     return True
 
 
@@ -1714,7 +1740,7 @@ def install(ctx, packages_specs):
                 + ", ".join(sorted(str(spec) for spec in unresolved_specs))
                 + ".",
             )
-            ctx.exit(1)
+            exit_on_failures(ctx)
         return
 
     # Untied packages present: the priority search cannot fan out, so run sequentially
@@ -1780,8 +1806,8 @@ def install(ctx, packages_specs):
                 )
             except NotImplementedError:
                 logging.info(
-                    f"{theme().invoked_command(manager.id)} "
-                    "does not implement search operation.",
+                    "Does not implement search operation.",
+                    extra={"label": manager.id},
                 )
                 logging.info(
                     f"{spec.package_id} existence unconfirmed, "
@@ -1789,16 +1815,16 @@ def install(ctx, packages_specs):
                 )
             except CLIError:
                 logging.info(
-                    f"Could not search for {spec.package_id} "
-                    f"with {theme().invoked_command(manager.id)}.",
+                    f"Could not search for {spec.package_id}.",
+                    extra={"label": manager.id},
                 )
                 trail(spec, manager.id, "not_found")
                 continue
             else:
                 if not matches:
                     logging.info(
-                        f"No {spec.package_id} package found "
-                        f"on {theme().invoked_command(manager.id)}.",
+                        f"No {spec.package_id} package found.",
+                        extra={"label": manager.id},
                     )
                     trail(spec, manager.id, "not_found")
                     continue
@@ -1830,7 +1856,7 @@ def install(ctx, packages_specs):
             + ", ".join(sorted(str(spec) for spec in unresolved_specs))
             + ".",
         )
-        ctx.exit(1)
+        exit_on_failures(ctx)
 
 
 @mpm.command(aliases=["update"], short_help="Upgrade packages.", section=MAINTENANCE)
@@ -1893,11 +1919,15 @@ def upgrade(ctx, all, packages_specs):
                     "failed": True,
                     "label": f"{mgr} skipped (cooldown)",
                 }
-            logging.log(announce, f"Upgrade all outdated packages from {mgr}...")
+            logging.log(
+                announce,
+                "Upgrade all outdated packages...",
+                extra={"label": manager.id},
+            )
             before = len(manager.cli_errors)
             output = manager.upgrade()
             if output:
-                logging.info(output)
+                logging.info(output, extra={"label": manager.id})
             return manager.id, {"errors": manager.cli_errors[before:]}
 
         # Full upgrade is independent per manager, so fan out concurrently with a
@@ -1967,7 +1997,7 @@ def sync(ctx):
         "Syncing",
         "Synced",
         managers,
-        _maintenance_work(announce, "Sync {} package info...", lambda m: m.sync()),
+        _maintenance_work(announce, "Sync package info...", lambda m: m.sync()),
         report_state=True,
     )
 
@@ -1986,7 +2016,7 @@ def cleanup(ctx):
         "Cleaning up",
         "Cleaned",
         managers,
-        _maintenance_work(announce, "Cleanup {}...", lambda m: m.cleanup()),
+        _maintenance_work(announce, "Cleanup...", lambda m: m.cleanup()),
         report_state=True,
     )
 
@@ -2207,9 +2237,7 @@ def _dump_toml(
     )
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        logging.info(
-            f"Dumping packages from {theme().invoked_command(manager.id)}...",
-        )
+        logging.info("Dumping packages...", extra={"label": manager.id})
         packages = tuple(
             packages_asdict(
                 _filter_matches(manager.installed_or_empty(), query, exact=exact),
@@ -2380,7 +2408,7 @@ def restore(ctx, toml_files):
                     f"No [{theme().invoked_command(manager.id)}] section found.",
                 )
                 continue
-            logging.info(f"Restore {theme().invoked_command(manager.id)} packages...")
+            logging.info("Restore packages...", extra={"label": manager.id})
             for package_id, version in doc[manager.id].items():
                 spec = Specifier(
                     raw_spec=f"pkg:{manager.id}/{package_id}{VERSION_SEP}{version}",
@@ -2388,19 +2416,25 @@ def restore(ctx, toml_files):
                     manager_id=manager.id,
                     version=str(version),
                 )
-                tasks.append((
-                    manager,
-                    _package_task(
+                tasks.append(
+                    (
                         manager,
-                        spec,
-                        failures_lock,
-                        action=lambda m, s: m.install(s.package_id, version=s.version),
-                        verb="install",
-                        past="installed",
-                        prep="with",
-                        record_failure=lambda s: restore_failures.append(s.package_id),
-                    ),
-                ))
+                        _package_task(
+                            manager,
+                            spec,
+                            failures_lock,
+                            action=lambda m, s: m.install(
+                                s.package_id, version=s.version
+                            ),
+                            verb="install",
+                            past="installed",
+                            prep="with",
+                            record_failure=lambda s: restore_failures.append(
+                                s.package_id
+                            ),
+                        ),
+                    )
+                )
 
     collect_per_package("Restoring", "Restored", tasks)
 
@@ -2409,7 +2443,7 @@ def restore(ctx, toml_files):
         logging.critical(
             "Could not restore: " + ", ".join(sorted(set(restore_failures))) + ".",
         )
-        ctx.exit(1)
+        exit_on_failures(ctx)
 
 
 @mpm.command(
@@ -2542,7 +2576,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     by_id = {manager.id: manager for manager in managers}
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        logging.info(f"Export packages from {theme().invoked_command(manager.id)}...")
+        logging.info("Export packages...", extra={"label": manager.id})
         installed_packages = tuple(
             _filter_matches(manager.installed_or_empty(), query, exact=exact)
         )
@@ -2554,8 +2588,8 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
                 enriched = list(manager.package_metadata_batch(installed_packages))
             except Exception as exc:  # noqa: BLE001
                 logging.info(
-                    f"Falling back to minimal SBOM data for "
-                    f"{theme().invoked_command(manager.id)}: {exc}"
+                    f"Falling back to minimal SBOM data: {exc}",
+                    extra={"label": manager.id},
                 )
         return manager.id, {
             "packages": installed_packages,

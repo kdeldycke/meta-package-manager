@@ -198,13 +198,13 @@ class TestSBOM(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # Log-level prefix is omitted because Skip/does-not-implement are
-            # demoted to DEBUG for implicit selection and stay at WARNING/INFO
-            # for explicit ones (``mpm --<mid> sbom``).
-            f"Export packages from {mid}..." in stderr,
-            f"{mid} does not implement {Operations.installed}" in stderr,
-            f"Skip {mid} manager:" in stderr,
-            f"Could not list installed packages from {mid}." in stderr,
+            # The glued ``:<mid>:`` label form matches whatever level the
+            # message lands at: demoted to DEBUG for implicit selection,
+            # WARNING/INFO for explicit ones (``mpm --<mid> sbom``).
+            f":{mid}: Export packages..." in stderr,
+            f":{mid}: Does not implement {Operations.installed}" in stderr,
+            f":{mid}: Skipped:" in stderr,
+            f":{mid}: Could not list installed packages." in stderr,
         )
 
     def test_default_spdx_json_output_to_console(self, invoke, subcmd):

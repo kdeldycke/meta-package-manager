@@ -30,4 +30,4 @@ def subcmd():
 class TestSync(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
-        yield from (f"Sync {mid} package info..." in stderr,)
+        yield from (f":{mid}: Sync package info..." in stderr,)

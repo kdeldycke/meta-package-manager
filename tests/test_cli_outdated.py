@@ -42,11 +42,11 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # Log-level prefix is omitted because the message is demoted to
-            # DEBUG for implicit selection (``mpm outdated``) but stays at
-            # WARNING/INFO for explicit ones (``mpm --<mid> outdated``).
-            f"{mid} does not implement {Operations.outdated}" in stderr,
-            f"Skip {mid} manager:" in stderr,
+            # The glued ``:<mid>:`` label form matches whatever level the
+            # message lands at: demoted to DEBUG for implicit selection
+            # (``mpm outdated``), INFO for explicit ones.
+            f":{mid}: Does not implement {Operations.outdated}" in stderr,
+            f":{mid}: Skipped:" in stderr,
             # Stats line at the end of output.
             f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
         )

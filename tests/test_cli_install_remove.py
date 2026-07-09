@@ -81,6 +81,14 @@ class TestInstallRemove(CLISubCommandTests):
         result = invoke("install", "package-provided-by-no-manager")
         assert result.exit_code == 1
 
+    @pytest.mark.parametrize("flag", ("--zero-exit", "-0"))
+    def test_install_unresolved_zero_exit_opt_out(self, invoke, fake_pool, flag):
+        """-0/--zero-exit keeps the exit code at 0 on per-package failures; the
+        critical summary stays as the durable record."""
+        result = invoke(flag, "install", "package-provided-by-no-manager")
+        assert result.exit_code == 0
+        assert "Could not install: package-provided-by-no-manager." in result.stderr
+
     def test_remove_absent_package_is_idempotent(self, invoke, fake_pool):
         """Removing a package no manager has installed is a no-op, not a failure.
 

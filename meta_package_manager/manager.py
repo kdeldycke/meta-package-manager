@@ -40,7 +40,6 @@ from functools import cached_property
 from pathlib import Path
 from typing import ClassVar, cast
 
-from click_extra.theme import get_current_theme as theme
 from extra_platforms import (
     Group,
     Platform,
@@ -268,8 +267,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             return False
         if self.requirement and self.version not in VersionRange(self.requirement):
             logging.debug(
-                f"{self.id} {self.version} does not satisfy "
+                f"{self.version} does not satisfy "
                 f"{self.requirement!r} version requirement.",
+                extra={"label": self.id},
             )
             return False
         return True
@@ -290,12 +290,12 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
            <meta_package_manager.manager.PackageManager.fresh>`.
         """
         logging.debug(
-            f"{theme().invoked_command(self.id)} is: "
-            f"deprecated? {self.deprecated}; "
+            f"Deprecated? {self.deprecated}; "
             f"supported? {self.supported}; "
             f"found at: {highlight_cli_name(self.cli_path, self.cli_names)}; "
             f"executable? {self.executable}; "
             f"fresh? {self.fresh}.",
+            extra={"label": self.id},
         )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
@@ -346,8 +346,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             return tuple(self.installed)
         except CLIError:
             logging.warning(
-                f"Could not list installed packages "
-                f"from {theme().invoked_command(self.id)}.",
+                "Could not list installed packages.",
+                extra={"label": self.id},
             )
             return ()
 

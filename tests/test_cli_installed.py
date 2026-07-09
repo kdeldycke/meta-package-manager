@@ -38,10 +38,10 @@ class TestInstalled(CLISubCommandTests, CLITableTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # Log-level prefix is omitted because the message is demoted to
-            # DEBUG for implicit selection (``mpm installed``) but stays at
-            # WARNING/INFO for explicit ones (``mpm --<mid> installed``).
-            f"Skip {mid} manager:" in stderr,
+            # The glued ``:<mid>:`` label form matches whatever level the
+            # message lands at: demoted to DEBUG for implicit selection
+            # (``mpm installed``), INFO for explicit ones.
+            f":{mid}: Skipped:" in stderr,
             # Stats line at the end of output.
             f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
         )

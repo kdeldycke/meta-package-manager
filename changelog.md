@@ -1,5 +1,10 @@
 # Changelog
 
+## [`7.2.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.2.0...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`7.2.0` (2026-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v7.1.0...v7.2.0)
 
 - [mpm] Config-defined managers gain multi-binary support: a per-operation `cli` key runs an operation through a sibling binary, and `version_cli` probes an alternate binary for tool suites exposing no version flag.

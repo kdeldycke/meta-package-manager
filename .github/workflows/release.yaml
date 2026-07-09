@@ -79,11 +79,13 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Check for new release
         id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Authenticated lookup: anonymous api.github.com calls from shared runner IPs trip the rate limit.
           latest=$(
-            curl --silent --fail \
-              https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest \
-            | python3 -c "import json, sys; print(json.load(sys.stdin)['tag_name'].lstrip('v'))"
+            gh api repos/kdeldycke/meta-package-manager/releases/latest \
+              --jq '.tag_name | ltrimstr("v")'
           )
           current=$(
             grep --only-matching --perl-regexp '\(version "\K[^"]+' \
@@ -155,11 +157,13 @@ jobs:
       - uses: cachix/install-nix-action@v31
       - name: Check for new release
         id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Authenticated lookup: anonymous api.github.com calls from shared runner IPs trip the rate limit.
           latest=$(
-            curl --silent --fail \
-              https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest \
-            | python3 -c "import json, sys; print(json.load(sys.stdin)['tag_name'].lstrip('v'))"
+            gh api repos/kdeldycke/meta-package-manager/releases/latest \
+              --jq '.tag_name | ltrimstr("v")'
           )
           current=$(
             grep --only-matching --perl-regexp 'version = "\K[^"]+' \

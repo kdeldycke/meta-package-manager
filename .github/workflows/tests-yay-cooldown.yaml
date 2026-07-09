@@ -143,10 +143,14 @@ jobs:
 
       # Track the latest yay release so this guard catches regressions from new yay
       # versions. Installed from GitHub releases (reliable host; the AUR git endpoint
-      # flakes intermittently).
+      # flakes intermittently). The API lookup authenticates with GITHUB_TOKEN to avoid
+      # the anonymous shared-IP rate limit; raw curl, as the Arch container has no gh.
       - name: Install the latest yay from GitHub releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="$(curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
             https://api.github.com/repos/Jguer/yay/releases/latest \
             | python -c 'import json, sys; print(json.load(sys.stdin)["tag_name"])')"
           version="${tag#v}"

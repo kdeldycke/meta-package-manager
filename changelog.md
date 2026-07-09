@@ -9,6 +9,9 @@
 
 ## [`7.2.0` (2026-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v7.1.0...v7.2.0)
 
+> [!NOTE]
+> `7.2.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/7.2.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.2.0).
+
 - [mpm] Config-defined managers gain multi-binary support: a per-operation `cli` key runs an operation through a sibling binary, and `version_cli` probes an alternate binary for tool suites exposing no version flag.
 - [mpm] Config-defined managers gain privilege support: `sudo = true` marks an operation privileged, the new `default_sudo` field sets the manager-wide default, and both honor the global `--sudo`/`--no-sudo` policy.
 - [mpm] Manager definitions gain Brewfile export mappings: the new definition-only `brewfile_entry_type` and `brewfile_skip_warning` fields mirror the class attributes consumed by `mpm dump --brewfile`.

@@ -34,8 +34,14 @@ flowchart LR
         json_with_comments(["`json-with-comments`"])
     end
 
+    subgraph ext_sbom-offline [--extra sbom-offline]
+        ext_sbom-offline_spdx_tools{{"`spdx-tools >=0.8.2`"}}
+        ext_sbom-offline_cyclonedx_python_lib{{"`cyclonedx-python-lib >=11.9`"}}
+    end
+
     subgraph ext_sbom-online [--extra sbom-online]
         platformdirs{{"`platformdirs >=4`"}}
+        ext_sbom-online_httpx{{"`httpx >=0.27`"}}
     end
 
     subgraph grp_docs [--group docs]
@@ -43,23 +49,23 @@ flowchart LR
         myst_parser{{"`myst-parser >=4`"}}
         furo{{"`furo >=2025.9.25`"}}
         pygments(["`pygments`"])
-        pyyaml{{"`pyyaml`"}}
         requests(["`requests`"])
-        docutils(["`docutils`"])
         idna(["`idna`"])
         jinja2(["`jinja2`"])
-        sphinx_click{{"`sphinx-click >=6.1`"}}
+        sphinx_datatables{{"`sphinx-datatables >=1`"}}
         sphinxcontrib_mermaid{{"`sphinxcontrib-mermaid >=1.2.3`"}}
         beautifulsoup4(["`beautifulsoup4`"])
         certifi(["`certifi`"])
+        docutils(["`docutils`"])
         markdown_it_py(["`markdown-it-py`"])
+        packaging(["`packaging`"])
         accessible_pygments(["`accessible-pygments`"])
         mdit_py_plugins(["`mdit-py-plugins`"])
-        packaging(["`packaging`"])
         sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
         sphinx_basic_ng(["`sphinx-basic-ng`"])
         sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
         sphinx_design{{"`sphinx-design >=0.6`"}}
+        sphinxcontrib_jquery(["`sphinxcontrib-jquery`"])
         sphinxext_opengraph{{"`sphinxext-opengraph >=0.13`"}}
         tomlkit{{"`tomlkit >=0.13`"}}
         alabaster(["`alabaster`"])
@@ -87,6 +93,7 @@ flowchart LR
         cyclonedx_python_lib{{"`cyclonedx-python-lib`"}}
         httpx{{"`httpx >=0.27`"}}
         referencing(["`referencing`"])
+        pyyaml{{"`pyyaml >=6`"}}
         anyio(["`anyio`"])
         pytest_cov{{"`pytest-cov >=7`"}}
         pytest_xdist{{"`pytest-xdist >=3.7`"}}
@@ -138,20 +145,20 @@ flowchart LR
         types_xmltodict{{"`types-xmltodict >=1.0.1.20250920`"}}
     end
 
-    meta_package_manager ==>|" >=8.2 "| click_extra
+    meta_package_manager ==>|" >=8.3 "| click_extra
     meta_package_manager ==>|" >=2 "| tomli
     meta_package_manager ==>|" >=0.12 "| xmltodict
     meta_package_manager ==>|" >=25 "| boltons
-    meta_package_manager ==>|" >=10 "| extra_platforms
+    meta_package_manager ==>|" >=13.1 "| extra_platforms
     meta_package_manager ==>|" >=0.11 "| packageurl_python
     meta_package_manager ==>|" >=1 "| backports_strenum
     meta_package_manager ==>|" >=1 "| tomli_w
     sphinx --> pygments
     sphinx --> requests
     sphinx --> tomli
-    sphinx --> docutils
     sphinx --> jinja2
     sphinx --> colorama
+    sphinx --> docutils
     sphinx --> packaging
     sphinx --> alabaster
     sphinx --> babel
@@ -166,12 +173,12 @@ flowchart LR
     sphinx --> sphinxcontrib_serializinghtml
     click_extra --> sphinx
     click_extra --> pytest
-    click_extra --> click_0
     click_extra --> pygments
     click_extra --> pyyaml
     click_extra --> tomli
-    click_extra --> docutils
+    click_extra --> click_0
     click_extra --> cloup
+    click_extra --> docutils
     click_extra --> xmltodict
     click_extra --> boltons
     click_extra --> extra_platforms
@@ -190,8 +197,8 @@ flowchart LR
     pytest --> packaging
     pytest --> pluggy
     pytest --> iniconfig
-    spdx_tools --> click_0
     spdx_tools --> pyyaml
+    spdx_tools --> click_0
     spdx_tools --> license_expression
     spdx_tools --> rdflib
     spdx_tools --> xmltodict
@@ -209,8 +216,8 @@ flowchart LR
     cyclonedx_python_lib --> sortedcontainers
     myst_parser --> sphinx
     myst_parser --> pyyaml
-    myst_parser --> docutils
     myst_parser --> jinja2
+    myst_parser --> docutils
     myst_parser --> markdown_it_py
     myst_parser --> mdit_py_plugins
     furo --> sphinx
@@ -228,9 +235,9 @@ flowchart LR
     pytest_xdist --> pytest
     pytest_xdist --> execnet
     pytest_xdist --> psutil
-    sphinx_click --> sphinx
-    sphinx_click --> click_0
-    sphinx_click --> docutils
+    sphinx_datatables --> sphinx
+    sphinx_datatables --> packaging
+    sphinx_datatables --> sphinxcontrib_jquery
     sphinxcontrib_mermaid --> sphinx
     sphinxcontrib_mermaid --> pyyaml
     sphinxcontrib_mermaid --> jinja2
@@ -258,7 +265,6 @@ flowchart LR
     referencing --> typing_extensions
     referencing --> attrs
     referencing --> rpds_py
-    click_0 --> colorama
     requests --> idna
     requests --> certifi
     requests --> charset_normalizer
@@ -266,6 +272,7 @@ flowchart LR
     anyio --> typing_extensions
     anyio --> idna
     anyio --> exceptiongroup
+    click_0 --> colorama
     jinja2 --> markupsafe
     beautifulsoup4 --> typing_extensions
     beautifulsoup4 --> soupsieve
@@ -282,6 +289,7 @@ flowchart LR
     mdit_py_plugins --> markdown_it_py
     py_serializable --> defusedxml
     sphinx_basic_ng --> sphinx
+    sphinxcontrib_jquery --> sphinx
     tabulate --> wcwidth
     wcmatch --> bracex
     isoduration --> arrow
@@ -294,10 +302,14 @@ flowchart LR
     meta_package_manager -.-> ext_hjson
     meta_package_manager -.-> ext_json5
     meta_package_manager -.-> ext_jsonc
+    meta_package_manager -.-> ext_sbom-offline
     meta_package_manager -.-> ext_sbom-online
     meta_package_manager -.-> grp_docs
     meta_package_manager -.-> grp_test
     meta_package_manager -.-> grp_typing
+    ext_sbom-offline_spdx_tools -.- spdx_tools
+    ext_sbom-offline_cyclonedx_python_lib -.- cyclonedx_python_lib
+    ext_sbom-online_httpx -.- httpx
 
     click accessible_pygments "https://pypi.org/project/accessible-pygments/" _blank
     click alabaster "https://pypi.org/project/alabaster/" _blank
@@ -385,12 +397,13 @@ flowchart LR
     click sphinx "https://pypi.org/project/sphinx/" _blank
     click sphinx_autodoc_typehints "https://pypi.org/project/sphinx-autodoc-typehints/" _blank
     click sphinx_basic_ng "https://pypi.org/project/sphinx-basic-ng/" _blank
-    click sphinx_click "https://pypi.org/project/sphinx-click/" _blank
     click sphinx_copybutton "https://pypi.org/project/sphinx-copybutton/" _blank
+    click sphinx_datatables "https://pypi.org/project/sphinx-datatables/" _blank
     click sphinx_design "https://pypi.org/project/sphinx-design/" _blank
     click sphinxcontrib_applehelp "https://pypi.org/project/sphinxcontrib-applehelp/" _blank
     click sphinxcontrib_devhelp "https://pypi.org/project/sphinxcontrib-devhelp/" _blank
     click sphinxcontrib_htmlhelp "https://pypi.org/project/sphinxcontrib-htmlhelp/" _blank
+    click sphinxcontrib_jquery "https://pypi.org/project/sphinxcontrib-jquery/" _blank
     click sphinxcontrib_jsmath "https://pypi.org/project/sphinxcontrib-jsmath/" _blank
     click sphinxcontrib_mermaid "https://pypi.org/project/sphinxcontrib-mermaid/" _blank
     click sphinxcontrib_qthelp "https://pypi.org/project/sphinxcontrib-qthelp/" _blank
@@ -412,6 +425,9 @@ flowchart LR
     click wcwidth "https://pypi.org/project/wcwidth/" _blank
     click webcolors "https://pypi.org/project/webcolors/" _blank
     click xmltodict "https://pypi.org/project/xmltodict/" _blank
+    click ext_sbom-offline_spdx_tools "https://pypi.org/project/spdx-tools/" _blank
+    click ext_sbom-offline_cyclonedx_python_lib "https://pypi.org/project/cyclonedx-python-lib/" _blank
+    click ext_sbom-online_httpx "https://pypi.org/project/httpx/" _blank
 
     style meta_package_manager stroke-width:3px
     style backports_strenum stroke-width:3px
@@ -435,8 +451,8 @@ flowchart LR
     style spdx_tools stroke-width:3px
     style sphinx stroke-width:3px
     style sphinx_autodoc_typehints stroke-width:3px
-    style sphinx_click stroke-width:3px
     style sphinx_copybutton stroke-width:3px
+    style sphinx_datatables stroke-width:3px
     style sphinx_design stroke-width:3px
     style sphinxcontrib_mermaid stroke-width:3px
     style sphinxext_opengraph stroke-width:3px
@@ -447,11 +463,15 @@ flowchart LR
     style types_pyyaml stroke-width:3px
     style types_xmltodict stroke-width:3px
     style xmltodict stroke-width:3px
+    style ext_sbom-offline_spdx_tools stroke-width:3px,stroke-dasharray:5 5
+    style ext_sbom-offline_cyclonedx_python_lib stroke-width:3px,stroke-dasharray:5 5
+    style ext_sbom-online_httpx stroke-width:3px,stroke-dasharray:5 5
 
     style primary-deps fill:#1565C020,stroke:#42A5F5
     style ext_hjson fill:#7B1FA220,stroke:#BA68C8
     style ext_json5 fill:#7B1FA220,stroke:#BA68C8
     style ext_jsonc fill:#7B1FA220,stroke:#BA68C8
+    style ext_sbom-offline fill:#7B1FA220,stroke:#BA68C8
     style ext_sbom-online fill:#7B1FA220,stroke:#BA68C8
     style grp_docs fill:#546E7A20,stroke:#90A4AE
     style grp_test fill:#546E7A20,stroke:#90A4AE

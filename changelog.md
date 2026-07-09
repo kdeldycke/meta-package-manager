@@ -12,6 +12,7 @@
 - [mpm] `--no-color` now also strips the color of log lines emitted from background threads (streamed subprocess output, concurrent fan-outs).
 - [mpm] The capability probe logs one answered `DEBUG` line per manager (`brew implements installed.`) instead of an unanswered question exposing the raw class repr.
 - [mpm] Add `-0`/`--zero-exit`: action commands then report per-package failures without gating automation on a non-zero exit code. Usage and configuration errors keep exiting `2`.
+- [mpm] Add a `--columns` option to the table-rendering subcommands (`managers`, `installed`, `outdated`, `search`, `which`): a comma-separated list of column IDs restricts and reorders the table, SQL-`SELECT`-style, validated against each command's column registry. `mpm search`'s description column joins the registry: `--description` is now a shorthand for selecting it, and an explicit `--columns` selection wins. Serialized formats keep the full structured payload.
 - [mpm] Manager-scoped log lines now carry the manager ID in their level prefix (`warning:gem: Could not list installed packages.`) instead of naming it in the message, matching the streamed CLI output and making logs grep-able by manager.
 - [mpm] The `mpm managers` table's binary-path highlighting is delegated to click-extra's `highlight_bin_name`, the same renderer as the `$`-prompt and spawn-trace log lines.
 - [mpm] Log lines emitted while a progress spinner animates now print on their own line above it, instead of garbling the in-progress frame.

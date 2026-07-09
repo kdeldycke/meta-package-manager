@@ -24,6 +24,7 @@ import pytest
 from boltons.iterutils import same
 
 from meta_package_manager.capabilities import Operations
+from meta_package_manager.cli import OUTDATED_COLUMNS
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 
@@ -39,6 +40,8 @@ BAR_PLUGIN_KEYWORDS = frozenset({"shell"}.union({f"param{i}" for i in range(1, 1
 
 
 class TestOutdated(CLISubCommandTests, CLITableTests):
+    columns_registry = OUTDATED_COLUMNS
+
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (

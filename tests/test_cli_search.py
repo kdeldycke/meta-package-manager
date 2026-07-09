@@ -25,6 +25,7 @@ from boltons.iterutils import same
 from extra_platforms.pytest import skip_github_ci, unless_macos
 
 from meta_package_manager.capabilities import Operations
+from meta_package_manager.cli import SEARCH_COLUMNS
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 
@@ -43,6 +44,8 @@ def subcmd():
 
 
 class TestSearch(CLISubCommandTests, CLITableTests):
+    columns_registry = SEARCH_COLUMNS
+
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
@@ -54,6 +57,40 @@ class TestSearch(CLISubCommandTests, CLITableTests):
             # Stats line at the end of output.
             f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
         )
+
+    def test_description_column_selection(self, invoke, fake_pool):
+        """The description column hides by default, appears with ``--description``,
+        and an explicit ``--columns`` selection is authoritative either way."""
+        # Hidden by default.
+        result = invoke("search", "match-me", color=False)
+        assert result.exit_code == 0
+        assert "Description" not in result.stdout
+
+        # The --description shorthand adds the column.
+        result = invoke("--description", "search", "match-me", color=False)
+        assert result.exit_code == 0
+        assert "Description" in result.stdout
+
+        # An explicit --columns selection surfaces it without the shorthand...
+        result = invoke(
+            "search", "match-me", "--columns", "package_id,description", color=False
+        )
+        assert result.exit_code == 0
+        header = next(line for line in result.stdout.splitlines() if "│" in line)
+        assert "Description" in header
+        assert "Manager" not in header
+
+        # ...and wins over the shorthand when it leaves the column out.
+        result = invoke(
+            "--description",
+            "search",
+            "match-me",
+            "--columns",
+            "package_id",
+            color=False,
+        )
+        assert result.exit_code == 0
+        assert "Description" not in result.stdout
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--table-format", "json", subcmd)

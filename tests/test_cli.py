@@ -408,6 +408,36 @@ class CLITableTests:
     Any table output is also allowed to be rendered in all serialization formats.
     """
 
+    columns_registry: tuple = ()
+    """The subcommand's column registry (a ``cli.py`` ``*_COLUMNS`` constant).
+
+    Set by each subclass so the generic ``--columns`` tests below resolve column
+    IDs to their header labels from the same source of truth the CLI uses.
+    """
+
+    columns_test_pair: tuple[str, str] = ("manager_id", "package_id")
+    """Two column IDs, guaranteed by the subcommand's registry, that the generic
+    projection test selects in this order. Overridden by subclasses whose
+    registry has no package columns."""
+
+    def test_columns_projection(self, invoke, subcmd, fake_pool):
+        """``--columns`` restricts and reorders the table, SQL-SELECT-style."""
+        first, second = self.columns_test_pair
+        labels = {spec.id: spec.label for spec, _ in self.columns_registry}
+        result = invoke(subcmd, "--columns", f"{first},{second}", color=False)
+        assert result.exit_code == 0
+        header = next(line for line in result.stdout.splitlines() if "│" in line)
+        # Two columns only, in the selection's order.
+        assert header.count("│") == 3
+        assert 0 < header.index(labels[first]) < header.index(labels[second])
+
+    def test_columns_unknown_id(self, invoke, subcmd, fake_pool):
+        """An unknown column ID fails fast, listing the accepted ones."""
+        result = invoke(subcmd, "--columns", "bogus")
+        assert result.exit_code == 2
+        assert "Unknown value(s): 'bogus'" in result.stderr
+        assert self.columns_test_pair[0] in result.stderr
+
     @pytest.mark.parametrize("mode", TableFormat)
     def test_all_table_rendering(self, invoke, mode):
         result = invoke("--table-format", mode, "installed")

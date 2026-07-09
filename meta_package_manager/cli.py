@@ -50,6 +50,7 @@ from click_extra import (
     UsageError,
     VersionOption,
     argument,
+    columns_option,
     echo,
     file_path,
     group,
@@ -60,13 +61,22 @@ from click_extra import (
     search_params,
     zero_exit_option,
 )
-from click_extra.context import PROGRESS, TABLE_FORMAT, VERBOSITY_LEVEL, ZERO_EXIT
+from click_extra.context import (
+    COLUMNS,
+    PROGRESS,
+    TABLE_FORMAT,
+    VERBOSITY_LEVEL,
+    ZERO_EXIT,
+)
 from click_extra.execution import install_interrupt_handler
 from click_extra.highlight import HelpKeywords, highlight
 from click_extra.logging import LogLevel
 from click_extra.table import (
     SERIALIZATION_FORMATS,
+    ColumnSpec,
     print_data,
+    select_columns,
+    select_row,
 )
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import current_architecture, current_platform, reduce
@@ -117,7 +127,7 @@ else:
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Sequence
     from typing import IO
 
     from click_extra import Context, Parameter
@@ -152,6 +162,192 @@ support to a manager surfaces it here automatically.
 """
 
 
+# Column registries of the table-rendering subcommands.
+#
+# Each registry pairs a click-extra ColumnSpec (whose ID addresses the column from
+# --columns) with the SortableField the column carries for mpm's global --sort-by
+# (None for a column that cannot drive the sort). A registry is the single source
+# of truth for its command: the same tuple feeds the @columns_option declaration
+# (which validates the user selection) and print_projected_table() (which projects
+# headers and rows before rendering).
+#
+# The pair's second element is annotated `str | None` rather than
+# `SortableField | None`: on Python 3.10, SortableField extends
+# backports.strenum.StrEnum, whose stubs type the members as plain `str`, so the
+# tighter annotation only checks under 3.11+. StrEnum members being `str`
+# subclasses, the wider annotation is accurate on every supported version.
+
+
+MANAGERS_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+    (
+        ColumnSpec("manager_id", "Manager ID", "Manager's identifier."),
+        SortableField.MANAGER_ID,
+    ),
+    (
+        ColumnSpec("manager_name", "Name", "Manager's common name."),
+        SortableField.MANAGER_NAME,
+    ),
+    (
+        ColumnSpec("supported", "Supported", "Support status on the current platform."),
+        None,
+    ),
+    (
+        ColumnSpec("cli", "CLI", "Location of the manager's binary on the system."),
+        None,
+    ),
+    (
+        ColumnSpec("executable", "Executable", "Whether the binary is executable."),
+        None,
+    ),
+    (
+        ColumnSpec(
+            "version",
+            "Version",
+            "Manager's self-reported version, and the unsatisfied requirement "
+            "when stale.",
+        ),
+        SortableField.VERSION,
+    ),
+)
+"""Columns of the ``mpm managers`` table."""
+
+INSTALLED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+    (
+        ColumnSpec("package_id", "Package ID", "Package's identifier."),
+        SortableField.PACKAGE_ID,
+    ),
+    (
+        ColumnSpec("package_name", "Name", "Package's common name."),
+        SortableField.PACKAGE_NAME,
+    ),
+    (
+        ColumnSpec("manager_id", "Manager", "Manager reporting the package."),
+        SortableField.MANAGER_ID,
+    ),
+    (
+        ColumnSpec(
+            "installed_version", "Installed version", "Version currently installed."
+        ),
+        SortableField.VERSION,
+    ),
+)
+"""Columns of the ``mpm installed`` table."""
+
+OUTDATED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+    *INSTALLED_COLUMNS,
+    (
+        ColumnSpec(
+            "latest_version", "Latest version", "Version available for upgrade."
+        ),
+        None,
+    ),
+)
+"""Columns of the ``mpm outdated`` table."""
+
+SEARCH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+    (
+        ColumnSpec("package_id", "Package ID", "Package's identifier."),
+        SortableField.PACKAGE_ID,
+    ),
+    (
+        ColumnSpec("package_name", "Name", "Package's common name."),
+        SortableField.PACKAGE_NAME,
+    ),
+    (
+        ColumnSpec("manager_id", "Manager", "Manager reporting the match."),
+        SortableField.MANAGER_ID,
+    ),
+    (
+        ColumnSpec("latest_version", "Latest version", "Latest version available."),
+        SortableField.VERSION,
+    ),
+    (
+        ColumnSpec(
+            "description",
+            "Description",
+            "Package description, for managers that provide one. Out of the "
+            "default selection: select it explicitly or pass --description.",
+        ),
+        None,
+    ),
+)
+"""Columns of the ``mpm search`` table.
+
+The ``description`` column exists in the registry (so ``--columns`` can select it)
+but stays out of the default selection unless ``--description`` (or ``--extended``,
+which searches descriptions) is passed.
+"""
+
+WHICH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+    (
+        ColumnSpec(
+            "manager_id", "Manager ID", "Manager whose search path found the binary."
+        ),
+        SortableField.MANAGER_ID,
+    ),
+    (
+        ColumnSpec(
+            "priority", "Priority", "Rank of the match in the manager's search path."
+        ),
+        None,
+    ),
+    (
+        ColumnSpec("cli_path", "CLI path", "Location of the matched binary."),
+        None,
+    ),
+    (
+        ColumnSpec(
+            "symlink",
+            "Symlink destination",
+            "Resolved target when the match is a symlink.",
+        ),
+        None,
+    ),
+)
+"""Columns of the ``mpm which`` table."""
+
+
+def column_specs(
+    columns: Sequence[tuple[ColumnSpec, str | None]],
+) -> tuple[ColumnSpec, ...]:
+    """Extract the bare :class:`ColumnSpec` tuple from a column registry."""
+    return tuple(spec for spec, _ in columns)
+
+
+def print_projected_table(
+    ctx: Context,
+    columns: Sequence[tuple[ColumnSpec, str | None]],
+    rows: Iterable[dict[str, str | None]],
+    sort_by: Sequence[SortableField],
+    default_ids: Sequence[str] | None = None,
+) -> None:
+    """Render dict ``rows`` as a table projected through ``--columns``.
+
+    The ``--columns`` selection restricts and reorders the rendering,
+    SQL-``SELECT``-style; click-extra's
+    :class:`~click_extra.table.ColumnsOption` already validated it against the
+    same ``columns`` registry, so unknown IDs never reach this point.
+    ``default_ids`` is the selection applied when the user passed none
+    (``search`` uses it to hide the description column unless
+    ``--description``); ``None`` keeps every column in canonical order.
+
+    Sorting stays on mpm's global ``--sort-by``: a sort field whose column is
+    projected out is simply skipped by
+    :py:func:`~meta_package_manager.sorting.print_sorted_table`.
+    """
+    selected = ctx.meta.get(COLUMNS) or tuple(default_ids or ())
+    projected = select_columns(column_specs(columns), selected)
+    sort_field = {spec.id: field for spec, field in columns}
+    ids = tuple(spec.id for spec in projected)
+    # print_table is mpm's field-aware sorted variant, assigned onto the root
+    # context at group setup: a dynamic attribute mypy cannot see.
+    ctx.find_root().print_table(  # type: ignore[attr-defined]
+        tuple((spec.label, sort_field[spec.id]) for spec in projected),
+        [select_row(row, ids, ids) for row in rows],
+        sort_by,
+    )
+
+
 def is_stdout(filepath: Path) -> bool:
     """Check if a file path is set to stdout.
 
@@ -177,6 +373,10 @@ def print_serialized_and_exit(ctx: Context, data: object) -> None:
     """
     table_format = ctx.meta[TABLE_FORMAT]
     if table_format in SERIALIZATION_FORMATS:
+        # A --columns selection does not apply here: serialized documents carry
+        # the full structured payload. No "ignoring option" note is logged
+        # either, since the mpm group body silences all logging for
+        # serialization formats (unless at DEBUG) to keep the streams clean.
         print_data(
             data, table_format, root_element="mpm", package="meta-package-manager"
         )
@@ -500,7 +700,9 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "--description",
         is_flag=True,
         default=False,
-        help="Show package description in results.",
+        help="Show package description in results. Shorthand for adding the "
+        "'description' column to 'mpm search'; an explicit --columns selection "
+        "wins.",
     ),
     option(
         "-s",
@@ -771,6 +973,7 @@ mpm.excluded_keywords = HelpKeywords(choices={"version"})  # type: ignore[attr-d
     "on the system.",
     section=EXPLORE,
 )
+@columns_option(columns=column_specs(MANAGERS_COLUMNS))
 @pass_context
 def managers(ctx):
     """List every package manager detected on the system.
@@ -822,7 +1025,7 @@ def managers(ctx):
         print_serialized_and_exit(ctx, manager_data)
 
     # Human-friendly content rendering.
-    table = []
+    table: list[dict[str, str | None]] = []
     for manager in inventory():
         # Build up the OS column content.
         os_infos = (
@@ -859,28 +1062,19 @@ def managers(ctx):
                     version_infos += f" {manager.requirement}"
 
         table.append(
-            (
-                getattr(theme(), "success" if manager.fresh else "error")(manager.id),
-                manager.name,
-                os_infos,
-                cli_infos,
-                theme().success(OK_GLYPH) if manager.executable else "",
-                version_infos,
-            ),
+            {
+                "manager_id": getattr(theme(), "success" if manager.fresh else "error")(
+                    manager.id
+                ),
+                "manager_name": manager.name,
+                "supported": os_infos,
+                "cli": cli_infos,
+                "executable": theme().success(OK_GLYPH) if manager.executable else "",
+                "version": version_infos,
+            }
         )
 
-    ctx.find_root().print_table(
-        (
-            ("Manager ID", SortableField.MANAGER_ID),
-            ("Name", SortableField.MANAGER_NAME),
-            ("Supported", None),
-            ("CLI", None),
-            ("Executable", None),
-            ("Version", SortableField.VERSION),
-        ),
-        table,
-        ctx.obj.sort_by,
-    )
+    print_projected_table(ctx, MANAGERS_COLUMNS, table, ctx.obj.sort_by)
 
 
 def _manager_result(
@@ -983,6 +1177,7 @@ def _query_highlighter(query: str | None) -> Callable[[str], str]:
     help="Only list installed packages sharing the same ID. Implies "
     "`--sort-by package_id` to make duplicates easier to compare between themselves.",
 )
+@columns_option(columns=column_specs(INSTALLED_COLUMNS))
 @argument("query", type=STRING, required=False)
 @pass_context
 def installed(ctx, exact, duplicates, query):
@@ -1048,15 +1243,17 @@ def installed(ctx, exact, duplicates, query):
 
     # Human-friendly content rendering, highlighting the query matches (if any).
     highlight_query = _query_highlighter(query)
-    table = []
+    table: list[dict[str, str | None]] = []
     for manager_id, installed_pkg in installed_data.items():
         table += [
-            (
-                highlight_query(info["id"]) if info["id"] else "",
-                highlight_query(info["name"]) if info["name"] else "",
-                manager_id,
-                str(info["installed_version"]) if info["installed_version"] else "?",
-            )
+            {
+                "package_id": highlight_query(info["id"]) if info["id"] else "",
+                "package_name": highlight_query(info["name"]) if info["name"] else "",
+                "manager_id": manager_id,
+                "installed_version": str(info["installed_version"])
+                if info["installed_version"]
+                else "?",
+            }
             for info in installed_pkg["packages"]
         ]
 
@@ -1068,17 +1265,7 @@ def installed(ctx, exact, duplicates, query):
         )
         sort_by = (SortableField.PACKAGE_ID,)
 
-    # Print table.
-    ctx.find_root().print_table(
-        (
-            ("Package ID", SortableField.PACKAGE_ID),
-            ("Name", SortableField.PACKAGE_NAME),
-            ("Manager", SortableField.MANAGER_ID),
-            ("Installed version", SortableField.VERSION),
-        ),
-        table,
-        sort_by,
-    )
+    print_projected_table(ctx, INSTALLED_COLUMNS, table, sort_by)
 
     if ctx.obj.summary:
         print_summary(package_counts(installed_data))
@@ -1100,6 +1287,7 @@ def installed(ctx, exact, duplicates, query):
     "The layout is dynamic and depends on environment variables set by either Xbar "
     "or SwiftBar.",
 )
+@columns_option(columns=column_specs(OUTDATED_COLUMNS))
 @argument("query", type=STRING, required=False)
 @pass_context
 def outdated(ctx, exact, plugin_output, query):
@@ -1147,7 +1335,7 @@ def outdated(ctx, exact, plugin_output, query):
 
     # Human-friendly content rendering, highlighting the query matches (if any).
     highlight_query = _query_highlighter(query)
-    table = []
+    table: list[dict[str, str | None]] = []
     for manager_id, outdated_pkg in outdated_data.items():
         for info in outdated_pkg["packages"]:
             installed_version, latest_version = diff_versions(
@@ -1155,27 +1343,18 @@ def outdated(ctx, exact, plugin_output, query):
                 info["latest_version"],
             )
             table.append(
-                (
-                    highlight_query(info["id"]) if info["id"] else "",
-                    highlight_query(info["name"]) if info["name"] else "",
-                    manager_id,
-                    installed_version,
-                    latest_version,
-                ),
+                {
+                    "package_id": highlight_query(info["id"]) if info["id"] else "",
+                    "package_name": highlight_query(info["name"])
+                    if info["name"]
+                    else "",
+                    "manager_id": manager_id,
+                    "installed_version": installed_version,
+                    "latest_version": latest_version,
+                }
             )
 
-    # Sort and print table.
-    ctx.find_root().print_table(
-        (
-            ("Package ID", SortableField.PACKAGE_ID),
-            ("Name", SortableField.PACKAGE_NAME),
-            ("Manager", SortableField.MANAGER_ID),
-            ("Installed version", SortableField.VERSION),
-            ("Latest version", None),
-        ),
-        table,
-        ctx.obj.sort_by,
-    )
+    print_projected_table(ctx, OUTDATED_COLUMNS, table, ctx.obj.sort_by)
 
     if ctx.obj.summary:
         print_summary(package_counts(outdated_data))
@@ -1209,6 +1388,7 @@ def outdated(ctx, exact, plugin_output, query):
     default=True,
     help="Let mpm refilters managers' search results.",
 )
+@columns_option(columns=column_specs(SEARCH_COLUMNS))
 @argument("query", type=STRING, required=True)
 @pass_context
 def search(ctx, extended, exact, refilter, query):
@@ -1251,41 +1431,42 @@ def search(ctx, extended, exact, refilter, query):
     # Machine-friendly data rendering.
     print_serialized_and_exit(ctx, matches)
 
-    # Human-friendly content rendering, highlighting the query matches.
+    # Human-friendly content rendering, highlighting the query matches. The
+    # description cell is always populated so an explicit --columns selection can
+    # surface it; the default selection below hides it unless --description.
     highlight_query = _query_highlighter(query)
-    table = []
+    table: list[dict[str, str | None]] = []
     for manager_id, matching_pkg in matches.items():
         for pkg in matching_pkg["packages"]:
-            line = [
-                highlight_query(pkg["id"]) if pkg["id"] else "",
-                highlight_query(pkg["name"]) if pkg["name"] else "",
-                manager_id,
-                str(pkg["latest_version"]) if pkg["latest_version"] else "?",
-            ]
-            if show_description:
-                line.append(
-                    highlight_query(pkg.get("description"))
+            table.append(
+                {
+                    "package_id": highlight_query(pkg["id"]) if pkg["id"] else "",
+                    "package_name": highlight_query(pkg["name"]) if pkg["name"] else "",
+                    "manager_id": manager_id,
+                    "latest_version": str(pkg["latest_version"])
+                    if pkg["latest_version"]
+                    else "?",
+                    "description": highlight_query(pkg.get("description"))
                     if pkg.get("description")
                     else "",
-                )
-            table.append(line)
+                }
+            )
 
-    # Sort and print table.
-    headers: list[tuple[str, str | None]] = [
-        ("Package ID", SortableField.PACKAGE_ID),
-        ("Name", SortableField.PACKAGE_NAME),
-        ("Manager", SortableField.MANAGER_ID),
-        ("Latest version", SortableField.VERSION),
-    ]
-    if show_description:
-        headers.append(("Description", None))
-    ctx.find_root().print_table(headers, table, ctx.obj.sort_by)
+    default_ids = tuple(
+        spec.id
+        for spec in column_specs(SEARCH_COLUMNS)
+        if show_description or spec.id != "description"
+    )
+    print_projected_table(
+        ctx, SEARCH_COLUMNS, table, ctx.obj.sort_by, default_ids=default_ids
+    )
 
     if ctx.obj.summary:
         print_summary(package_counts(matches))
 
 
 @mpm.command(aliases=["locate"], short_help="Locate CLIs on system.", section=EXPLORE)
+@columns_option(columns=column_specs(WHICH_COLUMNS))
 @argument("cli_names", type=STRING, nargs=-1, required=True)
 @pass_context
 def which(ctx, cli_names):
@@ -1316,7 +1497,7 @@ def which(ctx, cli_names):
         print_serialized_and_exit(ctx, cli_data)
 
     # Print table.
-    table = []
+    table: list[dict[str, str | None]] = []
     for manager in ctx.obj.selected_managers():
         for priority, found_cli in enumerate(manager.search_all_cli(cli_names)):
             # Resolve symlinks and highlight the CLI name.
@@ -1327,23 +1508,14 @@ def which(ctx, cli_names):
                 assert resolved is not None
                 symlink = f"→ {resolved}"
             table.append(
-                (
-                    manager.id,
-                    str(priority),
-                    highlight_cli_name(found_cli, cli_names),
-                    symlink,
-                ),
+                {
+                    "manager_id": manager.id,
+                    "priority": str(priority),
+                    "cli_path": highlight_cli_name(found_cli, cli_names),
+                    "symlink": symlink,
+                }
             )
-    ctx.find_root().print_table(
-        (
-            ("Manager ID", SortableField.MANAGER_ID),
-            ("Priority", None),
-            ("CLI path", None),
-            ("Symlink destination", None),
-        ),
-        table,
-        ctx.obj.sort_by,
-    )
+    print_projected_table(ctx, WHICH_COLUMNS, table, ctx.obj.sort_by)
 
 
 @mpm.command(

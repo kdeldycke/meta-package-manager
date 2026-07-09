@@ -134,8 +134,8 @@ class TestRestore(CLISubCommandTests):
         # Accept exit code 1: an end-to-end install can fail on a flaky backend.
         assert result.exit_code in (0, 1)
         assert "uv-npm-dummy.toml" in result.stderr
-        assert "Restore uv packages..." not in result.stderr
-        assert "Restore npm packages..." in result.stderr
+        assert ":uv: Restore packages..." not in result.stderr
+        assert ":npm: Restore packages..." in result.stderr
 
     @pytest.mark.destructive()
     def test_restore_excluded_manager(self, invoke, create_config):
@@ -161,8 +161,8 @@ class TestRestore(CLISubCommandTests):
         # Accept exit code 1: an end-to-end install can fail on a flaky backend.
         assert result.exit_code in (0, 1)
         assert "uv-npm-dummy.toml" in result.stderr
-        assert "Restore uv packages..." in result.stderr
-        assert "Restore npm packages..." not in result.stderr
+        assert ":uv: Restore packages..." in result.stderr
+        assert ":npm: Restore packages..." not in result.stderr
 
     def test_empty_manager(self, invoke, create_config):
         toml_path = create_config(
@@ -175,4 +175,4 @@ class TestRestore(CLISubCommandTests):
         result = invoke("--verbosity", "INFO", "restore", str(toml_path), color=False)
         assert result.exit_code == 0
         assert "uv-empty.toml" in result.stderr
-        assert "Restore uv packages..." in result.stderr
+        assert ":uv: Restore packages..." in result.stderr

@@ -23,6 +23,7 @@ import json
 import pytest
 from boltons.iterutils import same
 
+from meta_package_manager.cli import INSTALLED_COLUMNS
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 
@@ -35,6 +36,8 @@ def subcmd():
 
 
 class TestInstalled(CLISubCommandTests, CLITableTests):
+    columns_registry = INSTALLED_COLUMNS
+
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (

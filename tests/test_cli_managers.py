@@ -23,6 +23,7 @@ import re
 import pytest
 from boltons.iterutils import same
 
+from meta_package_manager.cli import MANAGERS_COLUMNS
 from meta_package_manager.pool import pool
 
 from .conftest import all_manager_ids, unsupported_manager_ids
@@ -35,6 +36,9 @@ def subcmd():
 
 
 class TestManagers(CLISubCommandTests, CLITableTests):
+    columns_registry = MANAGERS_COLUMNS
+    columns_test_pair = ("manager_id", "version")
+
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (

@@ -21,6 +21,8 @@ import re
 
 import pytest
 
+from meta_package_manager.cli import WHICH_COLUMNS
+
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
@@ -30,6 +32,9 @@ def subcmd():
 
 
 class TestWhich(CLISubCommandTests, CLITableTests):
+    columns_registry = WHICH_COLUMNS
+    columns_test_pair = ("manager_id", "cli_path")
+
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (

@@ -178,12 +178,12 @@ def test_parse_definition_versionless_catalog_manager():
                 "platforms": ["linux"],
                 "operations": {
                     "search": {
-                        "args": ["s", "{qeury}"],
+                        "args": ["s", "{query}"],
                         "regex": r"^(?P<package_id>\S+)$",
                     },
                 },
             },
-            "unknown placeholder(s): {qeury}",
+            "unknown placeholder(s): {query}",
             id="typoed-placeholder",
         ),
         pytest.param(

@@ -878,7 +878,7 @@ ALLOWED_ARG_PLACEHOLDERS: Final[Mapping[str, frozenset[str]]] = {
 """Placeholders each operation's ``args`` may reference.
 
 Operations absent from this mapping take no placeholder at all. Any ``{token}``
-outside the operation's set is rejected at parse time: a typoed ``{qeury}`` would
+outside the operation's set is rejected at parse time: a typoed ``{query}`` would
 otherwise reach the CLI as a literal argument and fail in silent, tool-specific ways.
 """
 

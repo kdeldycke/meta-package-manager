@@ -126,7 +126,7 @@ Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every 
 - `installed_version` (optional: some tools track no per-package version, like `swupd`'s Clear Linux bundles),
 - `latest_version` (required by `outdated`).
 
-Any `{token}` in an operation's `args` outside that operation's recognized placeholders is rejected at load time, so a typo like `{qeury}` surfaces immediately instead of reaching the tool as a literal argument.
+Any `{token}` in an operation's `args` outside that operation's recognized placeholders is rejected at load time, so a typo like `{query}` surfaces immediately instead of reaching the tool as a literal argument.
 
 ```{note}
 Version pinning is not expressible yet: `install` and `upgrade` on a config-defined manager always let the manager choose the version, and a `{version}` placeholder is not substituted. Native exact/extended search filtering is likewise not declarable, so `mpm` refilters `search` results itself.

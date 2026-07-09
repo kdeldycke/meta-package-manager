@@ -31,7 +31,7 @@
              (commit (string-append "v" version))))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "0m6r96q4kwglinchi6ir5adn8rpmz0wnzrs1l6m0gmxpcbgi3dnm"))))
+        (base32 "0m6r96q4kwglinchi6ir5and8rpmz0wnzrs1l6m0gmxpcbgi3dnm"))))
     (build-system pyproject-build-system)
     ;; Upstream builds with uv-build, which is not yet packaged for Guix; fall
     ;; back to setuptools.  Skip the SBOM CLI test, which pulls heavy optional

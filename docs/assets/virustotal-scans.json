@@ -468,5 +468,125 @@
 		"suspicious": 0,
 		"tag": "v7.0.1",
 		"undetected": 58
+	},
+	{
+		"filename": "meta-package-manager-7.1.0-linux-arm64.bin",
+		"harmless": 0,
+		"malicious": 0,
+		"scanned": "2026-07-07",
+		"sha256": "96ca67ff9076615e6b6859e6682a759c151b2c025c47e2fbdc71db3646f1fa8c",
+		"suspicious": 0,
+		"tag": "v7.1.0",
+		"undetected": 63
+	},
+	{
+		"filename": "meta-package-manager-7.1.0-linux-x64.bin",
+		"harmless": 0,
+		"malicious": 0,
+		"scanned": "2026-07-07",
+		"sha256": "0378712e7bdb2e0127352499210a44d3551dd276dca7c7f3e9b5fe86e9ecb413",
+		"suspicious": 0,
+		"tag": "v7.1.0",
+		"undetected": 63
+	},
+	{
+		"filename": "meta-package-manager-7.1.0-macos-arm64.bin",
+		"harmless": 0,
+		"malicious": 2,
+		"scanned": "2026-07-07",
+		"sha256": "7261ba608808a73be305cd5d1021487f6726acb650a742db2459fe0690a5c59e",
+		"suspicious": 0,
+		"tag": "v7.1.0",
+		"undetected": 58
+	},
+	{
+		"filename": "meta-package-manager-7.1.0-macos-x64.bin",
+		"harmless": 0,
+		"malicious": 0,
+		"scanned": "2026-07-07",
+		"sha256": "4dd2008a0551f3393620de60dd711fb62432924bb2e5555fc6514a1a6dcbd753",
+		"suspicious": 0,
+		"tag": "v7.1.0",
+		"undetected": 61
+	},
+	{
+		"filename": "meta-package-manager-7.1.0-windows-arm64.exe",
+		"harmless": 0,
+		"malicious": 2,
+		"scanned": "2026-07-07",
+		"sha256": "54d80efaece399ea56602ec73121902a22766d52788b3736811751604fa15dfb",
+		"suspicious": 0,
+		"tag": "v7.1.0",
+		"undetected": 64
+	},
+	{
+		"filename": "meta-package-manager-7.1.0-windows-x64.exe",
+		"harmless": 0,
+		"malicious": 11,
+		"scanned": "2026-07-07",
+		"sha256": "de3539509d8db9317f0fbdcecdf21abe64220b61c24a07fca1fee0f99070a4c7",
+		"suspicious": 0,
+		"tag": "v7.1.0",
+		"undetected": 50
+	},
+	{
+		"filename": "meta-package-manager-7.2.0-linux-arm64.bin",
+		"harmless": 0,
+		"malicious": 0,
+		"scanned": "2026-07-09",
+		"sha256": "3f1109a4d253c55d62586bd60b404e0db032bbeac80571dd6015139f90ab5c8e",
+		"suspicious": 0,
+		"tag": "v7.2.0",
+		"undetected": 62
+	},
+	{
+		"filename": "meta-package-manager-7.2.0-linux-x64.bin",
+		"harmless": 0,
+		"malicious": 0,
+		"scanned": "2026-07-09",
+		"sha256": "f61a451bf3d7cc47df0c37d71a8a70abeb8da960003321aec3274cb6fb728541",
+		"suspicious": 0,
+		"tag": "v7.2.0",
+		"undetected": 62
+	},
+	{
+		"filename": "meta-package-manager-7.2.0-macos-arm64.bin",
+		"harmless": 0,
+		"malicious": 1,
+		"scanned": "2026-07-09",
+		"sha256": "df40686010a6fc4d3e327e7ce00a8eaaade465d3f8e2dbe1b5df8dbb28fbb85a",
+		"suspicious": 0,
+		"tag": "v7.2.0",
+		"undetected": 54
+	},
+	{
+		"filename": "meta-package-manager-7.2.0-macos-x64.bin",
+		"harmless": 0,
+		"malicious": 0,
+		"scanned": "2026-07-09",
+		"sha256": "7781508d53673c1149ff27a96a953435beed201381ff31bf5e30a116941fa29f",
+		"suspicious": 0,
+		"tag": "v7.2.0",
+		"undetected": 62
+	},
+	{
+		"filename": "meta-package-manager-7.2.0-windows-arm64.exe",
+		"harmless": 0,
+		"malicious": 2,
+		"scanned": "2026-07-09",
+		"sha256": "36ea1e2e35fd854fa800f6a0daa135ec905f1f3959053d169bdc399c8120fcf9",
+		"suspicious": 0,
+		"tag": "v7.2.0",
+		"undetected": 65
+	},
+	{
+		"filename": "meta-package-manager-7.2.0-windows-x64.exe",
+		"harmless": 0,
+		"malicious": 17,
+		"scanned": "2026-07-09",
+		"sha256": "04510eb885f9e41ca820d9d55e09ffcca882694630ba9a1d0dd07a5976b88dbd",
+		"suspicious": 0,
+		"tag": "v7.2.0",
+		"undetected": 52
 	}
 ]

@@ -189,25 +189,33 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.3.0 is the floor mpm targets, the first release shipping the
-  # `click:config` Sphinx directive that renders the option reference in
-  # docs/configuration.md (via the [sphinx] extra of the docs dependency
-  # group). The 8.2.0 series brought the rest of the surface mpm relies on:
-  #   - resolve_jobs / run_jobs / run_lanes from click_extra.execution, the
-  #     concurrency primitives meta_package_manager.execution builds its
-  #     fan-outs on.
-  #   - format_cli_prompt, published in click_extra.testing.
-  #   - The --export-config option (named to avoid clashing with mpm's `dump`
-  #     command), inherited through the default option set and documented in
-  #     docs/configuration.md.
-  #   - The click_extra.sphinx.matrix machinery behind docs/install.md's
-  #     compatibility tables, and the `click:tree` / `python:render`
-  #     directives behind docs/cli-parameters.md and docs/benchmark.md.
-  # Earlier 8.x floors tracked the split click_extra.highlight module, the
-  # ConfigValidator / ValidationError import move to click_extra.config,
-  # print_table()'s sort_key parameter, and the 8.1.1 fix for the
-  # EnumChoice-typed --sort-by default; 8.3.0 covers them all.
-  "click-extra>=8.3",
+  # click-extra 8.4.0 is the floor mpm targets, the first version shipping the
+  # subprocess-execution primitives meta_package_manager.execution now delegates
+  # to:
+  #   - run_cli, the spawn/stream/timeout engine disclosing invocations at INFO
+  #     and streaming their output live to DEBUG logs.
+  #   - install_interrupt_handler / terminate_live_processes, the Ctrl+C child
+  #     termination machinery (moved from mpm).
+  #   - args_cleanup / format_cli_prompt / INDENT relocated from
+  #     click_extra.testing to click_extra.execution.
+  #   - The logging-to-spinner bridge that prints log records above a running
+  #     spinner instead of garbling its frame.
+  # The 8.3.0 series brought the `click:config` Sphinx directive rendering the
+  # option reference in docs/configuration.md (via the [sphinx] extra of the
+  # docs dependency group); 8.2.0 the resolve_jobs / run_jobs / run_lanes
+  # concurrency primitives, the --export-config option, the
+  # click_extra.sphinx.matrix machinery behind docs/install.md's compatibility
+  # tables, and the `click:tree` / `python:render` directives behind
+  # docs/cli-parameters.md and docs/benchmark.md. Earlier 8.x floors tracked
+  # the split click_extra.highlight module, the ConfigValidator /
+  # ValidationError import move to click_extra.config, print_table()'s
+  # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
+  # default; 8.4.0 covers them all.
+  #
+  # The `.dev0` suffix keeps the specifier satisfiable by the unreleased tree
+  # the [tool.uv.sources] git override tracks; tighten to >=8.4 once 8.4.0 is
+  # published and the override is dropped.
+  "click-extra>=8.4.0.dev0",
   # extra-platforms 13.1.0 adds the ChromeOS, Clear Linux, SliTaz and Source Mage
   # detections that the chromebrew, swupd, tazpkg and sorcery managers declare.
   "extra-platforms>=13.1",
@@ -369,6 +377,16 @@ exclude-newer = "1 week"
 exclude-newer-package = { click-extra = "2026-07-09T00:00:00Z", extra-platforms = "2026-07-09T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
+
+[tool.uv.sources]
+# Track click-extra's main branch, which carries the unreleased subprocess-execution
+# primitives mpm delegates to (run_cli, the Ctrl+C child termination machinery, the
+# logging-to-spinner bridge). The lockfile pins the exact commit; refresh it with
+# `uv lock --upgrade-package click-extra`. Switch to the sibling checkout instead
+# ({ path = "../click-extra", editable = true }) to test its work-in-progress changes
+# before they land, and drop this override entirely once click-extra 8.4.0 is
+# published and the version floor is tightened to >=8.4.
+click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

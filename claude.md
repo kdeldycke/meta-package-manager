@@ -399,10 +399,10 @@ When invoking `uv` and `uvx` commands in GitHub Actions workflows:
 The CLI defaults to `WARNING` (inherited from click-extra's `--verbosity` default). Classify every `logging` call into one tier:
 
 - **`WARNING` (default view):** genuine problems only, such as failures with no other on-screen signal, safety notices (cooldown safeguard skipped, a file about to be overwritten), the end-of-run "N managers reported errors" summary, and timeouts. Plus `critical` for fatal conditions. Keep it sparse.
-- **`INFO` (narration):** the operational story, like the selection summary, install/dispatch priority, per-manager announcements, discovery (`X has been installed with Y`), capability skips (`X does not implement Y`), and "ignoring option ..." no-ops.
-- **`DEBUG` (technical):** raw CLI invocations, result refiltering, manager-selection parsing, internal data dumps.
+- **`INFO` (narration):** the operational story, like the selection summary, install/dispatch priority, per-manager announcements, discovery (`X has been installed with Y`), capability skips (`X does not implement Y`), "ignoring option ..." no-ops, and every CLI invocation run on the system (the reproducible `$`-prompt line with forced environment variables, so the user can replay by hand what mpm does). Version-detection probes are the exception and stay at `DEBUG`: they are discovery, fired for every candidate manager, and would drown the narration.
+- **`DEBUG` (technical):** raw CLI output (streamed live, line by line, the manager ID glued into the level prefix as `debug:<manager_id>:`), version-detection probes, result refiltering, manager-selection parsing, internal data dumps.
 
-Heuristic for a new line: if it narrates a decision or step it is `INFO`; a raw mechanism or command is `DEBUG`; something genuinely wrong **and** not already shown by the ✓/✗ trail is `WARNING`. "Your option had no effect here" is `INFO`, not `WARNING`.
+Heuristic for a new line: if it narrates a decision, a step, or a command run on the system it is `INFO`; a raw mechanism or a command's output is `DEBUG`; something genuinely wrong **and** not already shown by the ✓/✗ trail is `WARNING`. "Your option had no effect here" is `INFO`, not `WARNING`.
 
 An enum surfaced in any message must render as its bare member name: give it `__str__`/`__format__` returning `self.name`. A functional `Enum("Operations", (...))` otherwise leaks the `Operations.outdated` repr where the message wanted `outdated`.
 

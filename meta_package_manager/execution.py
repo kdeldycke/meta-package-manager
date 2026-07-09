@@ -32,20 +32,21 @@ and the :py:func:`meta_package_manager.execution.trail_line` atom) that the conc
 and sequential paths both report through.
 
 Cutting across both altitudes,
-:py:func:`meta_package_manager.execution.install_interrupt_handler` and
-:py:func:`meta_package_manager.execution.terminate_live_processes` make Ctrl+C abort a
-concurrent fan-out cleanly, by killing the in-flight subprocesses whose worker threads
-would otherwise keep the thread pool (and the interpreter) from shutting down; and
-:py:func:`meta_package_manager.execution.prime_sudo` authenticates ``sudo`` once up front
-so a privilege-escalation password prompt never stalls the run from inside that fan-out.
+:py:func:`meta_package_manager.execution.prime_sudo` authenticates ``sudo`` once up
+front so a privilege-escalation password prompt never stalls the run from inside a
+concurrent fan-out.
 
 .. note::
     The name and intent mirror :py:mod:`click_extra.execution` from the sibling
-    `click-extra <https://github.com/kdeldycke/click-extra>`_ project, which gathers
-    options that govern how a CLI runs (parallelism, timing, exit code). Co-locating
-    the cross-manager scheduling here realizes that alignment: ``mpm --jobs``
-    and the fan-out it drives now sit beside the per-call timeout and spinner they
-    build upon.
+    `click-extra <https://github.com/kdeldycke/click-extra>`_ project, where the
+    generic layers now live: the concurrency primitives (``run_jobs``/``run_lanes``
+    driven by ``mpm --jobs``), the single-subprocess engine
+    (:py:func:`click_extra.execution.run_cli`, which disclosed invocations and
+    streams output to the logs), and the Ctrl+C machinery
+    (:py:func:`click_extra.execution.install_interrupt_handler` terminating the
+    in-flight children registered by ``run_cli``). This module keeps what is
+    package-manager policy: per-operation timeouts, sudo escalation, cooldown
+    enforcement, dry-run, the lock families and the ``✓``/``✗`` trail.
 """
 
 from __future__ import annotations
@@ -55,7 +56,6 @@ import math
 import os
 import re
 import shutil
-import signal
 import stat
 import subprocess
 import sys
@@ -66,7 +66,7 @@ from datetime import datetime, timezone
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
-from typing import ClassVar, Final, cast
+from typing import ClassVar, Final
 from unittest.mock import patch
 
 from boltons.iterutils import unique
@@ -74,10 +74,16 @@ from boltons.strutils import strip_ansi
 from click.core import ParameterSource
 from click_extra import echo, get_current_context
 from click_extra.context import JOBS
-from click_extra.envvar import env_copy
-from click_extra.execution import resolve_jobs, run_jobs, run_lanes
+from click_extra.execution import (
+    INDENT,
+    args_cleanup,
+    format_cli_prompt,
+    resolve_jobs,
+    run_cli,
+    run_jobs,
+    run_lanes,
+)
 from click_extra.spinner import Spinner
-from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
 
@@ -88,11 +94,11 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable
     from contextlib import AbstractContextManager
     from datetime import timedelta
-    from types import FrameType, TracebackType
+    from types import TracebackType
 
     from click import Context
     from click_extra.envvar import TEnvVars
-    from click_extra.testing import TArg, TNestedArgs
+    from click_extra.execution import TArg, TNestedArgs
     from typing_extensions import Self
 
     from .manager import PackageManager
@@ -213,92 +219,6 @@ stalled during the first second. Only the quickest calls (cached version probes,
 trivial metadata queries) finish within this delay and stay silent; anything
 slower (a ``guix search``, a source build) shows the spinner right away.
 """
-
-
-# Interrupt handling for concurrent fan-outs.
-#
-# Python delivers Ctrl+C (SIGINT/KeyboardInterrupt) only to the main thread, but a
-# concurrent command (``mpm upgrade``, ``install``, ...) runs each manager's CLI in a
-# worker thread of a ``ThreadPoolExecutor`` (see ``click_extra.execution.run_lanes``).
-# The workers never see the interrupt; what actually stops their subprocesses is the
-# terminal, which sends SIGINT to the whole foreground process group, mpm's children
-# included. Any child that survives that signal (a ``sudo`` reading its password from
-# ``/dev/tty``, a manager mid-transaction) keeps its worker blocked in
-# ``communicate()``, so the pool cannot be joined: the abort then hangs, first in the
-# executor's ``shutdown(wait=True)`` teardown and again in the interpreter's atexit
-# thread-join. That double block is why a second Ctrl+C was needed and why it surfaced
-# an "Exception ignored on threading shutdown" traceback.
-#
-# The fix: track every live subprocess and, on the first Ctrl+C, terminate them from
-# the main thread's signal handler so the workers unblock and the pool drains cleanly.
-
-
-_LIVE_PROCESSES: Final[set[subprocess.Popen[str]]] = set()
-"""Registry of package-manager subprocesses currently running.
-
-Populated by :py:meth:`CLIExecutor.run` for the lifetime of each ``communicate()``
-call (added right after spawn, discarded in its ``finally``). Read by
-:py:func:`terminate_live_processes` to interrupt them all at once. Guarded by
-:py:data:`_LIVE_PROCESSES_LOCK`, since the fan-out runs :py:meth:`CLIExecutor.run` from
-several worker threads concurrently.
-"""
-
-
-_LIVE_PROCESSES_LOCK: Final = threading.Lock()
-"""Guards :py:data:`_LIVE_PROCESSES` against concurrent mutation by worker threads."""
-
-
-def terminate_live_processes() -> None:
-    """Send ``SIGTERM`` to every package-manager subprocess currently running.
-
-    Called from the main thread's ``SIGINT`` handler (see
-    :py:func:`install_interrupt_handler`) so a concurrent fan-out aborts promptly:
-    terminating the children unblocks the worker threads parked in
-    :py:meth:`subprocess.Popen.communicate`, letting the thread pool drain instead of
-    hanging on a child that ignored the terminal's process-group ``SIGINT``.
-
-    Uses ``SIGTERM`` rather than ``SIGKILL`` so a child still gets to clean up, notably
-    to restore terminal state a ``sudo`` password prompt may have altered. The registry
-    is snapshotted under the lock, then signalled outside it, because :py:meth:`run` may
-    be discarding its own entries from other threads at the same time.
-    """
-    with _LIVE_PROCESSES_LOCK:
-        live = tuple(_LIVE_PROCESSES)
-    for proc in live:
-        try:
-            proc.terminate()
-        except OSError:
-            # Reaped between the snapshot and the signal: nothing left to stop.
-            pass
-
-
-def install_interrupt_handler(ctx: Context) -> None:
-    """Make the first Ctrl+C terminate in-flight subprocesses, then abort as usual.
-
-    Installs a ``SIGINT`` handler for the duration of the CLI run that calls
-    :py:func:`terminate_live_processes` before re-raising :py:class:`KeyboardInterrupt`
-    (exactly what Python's default handler raises). The abort then proceeds normally,
-    but the concurrent fan-out no longer hangs on surviving children. The previous
-    handler is restored when ``ctx`` closes.
-
-    Must run in the main thread: :py:func:`signal.signal` refuses to install a handler
-    from any other, so a non-main-thread caller (embedded use, some tests) is a no-op
-    that keeps the default Ctrl+C behavior.
-
-    A signal handler is required here rather than a ``try``/``except KeyboardInterrupt``
-    around the fan-out: the interrupt unwinds through the executor's blocking
-    ``shutdown(wait=True)`` teardown *before* any ``except`` in mpm could run, so the
-    children must be killed at signal-delivery time, ahead of that teardown.
-    """
-    if threading.current_thread() is not threading.main_thread():
-        return
-
-    def handler(signum: int, frame: FrameType | None) -> None:
-        terminate_live_processes()
-        raise KeyboardInterrupt
-
-    previous = signal.signal(signal.SIGINT, handler)
-    ctx.call_on_close(lambda: signal.signal(signal.SIGINT, previous))
 
 
 # Up-front sudo priming for a mutating fan-out.
@@ -948,6 +868,22 @@ class CLIExecutor:
             timer=True,
         )
 
+    def _cleanup_windows_processes(self) -> None:
+        """Forcibly terminate the lingering grandchildren this manager is known to
+        leave behind on Windows (see :py:attr:`windows_processes_to_cleanup`).
+
+        No-op on non-Windows platforms and for managers with no cleanup list.
+        """
+        if not is_any_windows():
+            return
+        for proc_name in self.windows_processes_to_cleanup:
+            subprocess.run(
+                ("taskkill", "/F", "/T", "/IM", proc_name),
+                capture_output=True,
+                timeout=5,
+                check=False,
+            )
+
     def run(
         self,
         *args: TArg | TNestedArgs,
@@ -961,7 +897,10 @@ class CLIExecutor:
         casted to strings.
 
         Running commands with that method takes care of:
-          * adding logs at the appropriate level
+          * disclosing the invocation at ``INFO`` (the reproducible ``$``-prompt
+            line with forced environment variables) and streaming the raw output
+            live to ``DEBUG``, prefixed with the manager ID, via
+            :py:func:`click_extra.execution.run_cli`
           * removing ANSI escape codes from
             :py:attr:`subprocess.CompletedProcess.stdout` and
             :py:attr:`subprocess.CompletedProcess.stderr`
@@ -1004,40 +943,40 @@ class CLIExecutor:
         cached = cache.get(cache_key) if cache is not None else None
 
         if cached is not None:
-            # Replay the peer's result: the subprocess is skipped, but the logging and
-            # failure gate below still run, so this manager is marked like the peer.
+            # Replay the peer's result: the subprocess is skipped, but the failure
+            # gate below still runs, so this manager is marked like the peer. INFO,
+            # like the command disclosure it stands in for: it explains why this
+            # manager shows no prompt line of its own.
             code, output, error = cached
-            logging.debug(f"Reuse lock-family peer result: {cli_msg}")
+            logging.info(f"Reuse lock-family peer result: {cli_msg}")
         elif self.dry_run:
             logging.warning(f"Dry-run: {cli_msg}")
         else:
-            logging.debug(cli_msg)
-            # On Windows, CREATE_NO_WINDOW suppresses any console window the
-            # child might open, while still capturing stdout/stderr via the
-            # explicit PIPE handles.
-            # stdin=DEVNULL prevents child processes from blocking on stdin reads.
-            # SW_HIDE is a belt-and-suspenders suppression of console windows.
-            # STARTUPINFO must be created per call because subprocess overwrites
-            # its hStd* fields.
-            # On POSIX, both creationflags=0 and startupinfo=None are no-ops.
-            _si = getattr(subprocess, "STARTUPINFO", None)
-            if _si is not None:
-                _si = _si()
-                _si.dwFlags = getattr(subprocess, "STARTF_USESHOWWINDOW", 0)
-                _si.wShowWindow = 0  # SW_HIDE
+            # The invocation is disclosed at INFO so `--verbosity INFO` shows (and
+            # lets the user reproduce) every CLI mpm runs on the system. The
+            # version-detection probes stay at DEBUG: they are discovery, fired
+            # for every candidate manager, and would drown the narration.
+            command_level = (
+                logging.DEBUG if self._active_operation == "version" else logging.INFO
+            )
+            effective_timeout = self._resolve_timeout()
+            spinner = self._make_spinner()
             try:
-                proc = subprocess.Popen(
-                    clean_args,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    encoding="utf-8",
-                    errors="replace",
-                    env=cast("subprocess._ENV", env_copy(extra_env)),
-                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)
-                    | self.windows_creation_flags,
-                    startupinfo=_si,
-                )
+                # run_cli() owns the spawn: it registers the child in click-extra's
+                # live-process registry (so the SIGINT handler installed by mpm's
+                # CLI terminates it on Ctrl+C), streams the raw output to DEBUG
+                # logs line by line (prefixed with the manager ID), and enforces
+                # the timeout. The spinner wraps the whole call; its 0.1s delay
+                # keeps it invisible while the invocation line is disclosed.
+                with spinner:
+                    result = run_cli(
+                        clean_args,
+                        extra_env=extra_env,
+                        timeout=effective_timeout,
+                        label=self.id,  # type: ignore[attr-defined]
+                        command_level=command_level,
+                        windows_creation_flags=self.windows_creation_flags,
+                    )
             except OSError as ex:
                 winerror = getattr(ex, "winerror", None)
                 # Windows shims trigger WinError 193 when spawned as a subprocess.
@@ -1059,59 +998,11 @@ class CLIExecutor:
                     self.executable = False
                     return ""
                 raise
-            logging.debug(f"Spawned PID {proc.pid}: {clean_args[0]}.")
-            # Track the live child so the main thread's SIGINT handler can terminate
-            # it on Ctrl+C (see terminate_live_processes): this worker thread never
-            # receives the interrupt itself.
-            with _LIVE_PROCESSES_LOCK:
-                _LIVE_PROCESSES.add(proc)
-            effective_timeout = self._resolve_timeout()
-            spinner = self._make_spinner()
-            spinner.start()
-            try:
-                logging.debug(
-                    f"Waiting for PID {proc.pid} (timeout={effective_timeout}s).",
-                )
-                stdout, stderr = proc.communicate(timeout=effective_timeout)
-                logging.debug(
-                    f"PID {proc.pid} exited {proc.returncode}; "
-                    f"stdout {len(stdout)} chars, stderr {len(stderr)} chars."
-                )
-                if is_any_windows():
-                    for proc_name in self.windows_processes_to_cleanup:
-                        subprocess.run(
-                            ("taskkill", "/F", "/T", "/IM", proc_name),
-                            capture_output=True,
-                            timeout=5,
-                            check=False,
-                        )
             except subprocess.TimeoutExpired:
-                # Erase the spinner before the timeout warning is logged.
-                spinner.stop()
-                logging.debug(f"PID {proc.pid} timed out; sending kill.")
-                if is_any_windows():
-                    # Grandchild processes (e.g. installer EXEs spawned by
-                    # winget's COM server) inherit the pipe write handles and
-                    # keep them open after proc.kill(), which would cause
-                    # communicate() to block until every grandchild exits.
-                    # taskkill /F /T kills the entire process tree, closing
-                    # all inherited handles so communicate() returns promptly.
-                    subprocess.run(
-                        ("taskkill", "/F", "/T", "/PID", str(proc.pid)),
-                        capture_output=True,
-                        timeout=10,
-                        check=False,
-                    )
-                    for proc_name in self.windows_processes_to_cleanup:
-                        subprocess.run(
-                            ("taskkill", "/F", "/T", "/IM", proc_name),
-                            capture_output=True,
-                            timeout=5,
-                            check=False,
-                        )
-                proc.kill()
-                stdout, stderr = proc.communicate()
-                logging.debug(f"PID {proc.pid} killed; exit {proc.returncode}.")
+                # The spinner was stopped by the `with` teardown as the exception
+                # propagated, so the warning below lands on a clean line. run_cli
+                # already killed the child (and its whole tree on Windows).
+                self._cleanup_windows_processes()
                 msg = f"Timed out after {effective_timeout}s."
                 logging.warning(msg)
                 exception = CLIError(None, "", msg)
@@ -1120,26 +1011,17 @@ class CLIExecutor:
                 self.cli_errors.append(exception)
                 return ""
             except KeyboardInterrupt:
-                # Erase the spinner before the interrupt warning is logged.
-                spinner.stop()
-                logging.debug(f"PID {proc.pid} interrupted; sending kill.")
-                proc.kill()
-                proc.communicate()
+                # run_cli killed the child before re-raising; the spinner was
+                # stopped by the `with` teardown.
                 msg = "Subprocess interrupted by a console signal."
                 logging.warning(msg)
                 exception = CLIError(None, "", msg)
                 self.cli_errors.append(exception)
                 return ""
-            finally:
-                # Safety net: stop on the success path and on any other exit.
-                spinner.stop()
-                # The child is no longer live: drop it so a later Ctrl+C does not
-                # try to signal an already-reaped process.
-                with _LIVE_PROCESSES_LOCK:
-                    _LIVE_PROCESSES.discard(proc)
-            code = proc.returncode
-            output = stdout or ""
-            error = stderr or ""
+            code = result.returncode
+            output = result.stdout or ""
+            error = result.stderr or ""
+            self._cleanup_windows_processes()
 
         # Publish a freshly produced result — real or dry-run — so lock-family peers
         # replay it instead of re-running, collapsing identical invocations even under
@@ -1149,25 +1031,13 @@ class CLIExecutor:
         if cache is not None and cached is None:
             cache[cache_key] = (code, output, error)
 
-        # Normalize messages.
+        # Normalize messages. The raw streams were already narrated live to DEBUG
+        # by run_cli, so nothing is re-dumped here: what follows only shapes the
+        # returned value for parsing.
         if error:
             error = dedent(strip_ansi(error).strip())
         if output:
             output = dedent(strip_ansi(output).strip())
-
-        # Log <stdout> and <stderr> output.
-        #
-        # Both streams capture the raw output of an external CLI, not mpm's
-        # own messages, so they go to DEBUG: callers running ``mpm outdated``
-        # do not want gem extension warnings, mas Spotlight chatter or yarn's
-        # missing-node error flooding the table they came to see. Failures
-        # still propagate either as a raised :py:class:`CLIError` (when
-        # ``must_succeed`` or ``stop_on_error`` is set) or via
-        # :py:attr:`cli_errors` for end-of-run summaries.
-        if output:
-            logging.debug(indent(output, INDENT))
-        if error:
-            logging.debug(indent(error, INDENT))
 
         # Detect a failed run.
         #

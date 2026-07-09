@@ -60,6 +60,7 @@ from click_extra import (
     search_params,
 )
 from click_extra.context import PROGRESS, TABLE_FORMAT, VERBOSITY_LEVEL
+from click_extra.execution import install_interrupt_handler
 from click_extra.highlight import HelpKeywords, highlight
 from click_extra.logging import LogLevel
 from click_extra.table import (
@@ -88,7 +89,6 @@ from .execution import (
     collect_from_managers,
     collect_per_package,
     highlight_cli_name,
-    install_interrupt_handler,
     prime_sudo,
     warn_jobs_ignored,
 )

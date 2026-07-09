@@ -39,6 +39,8 @@ import logging
 from enum import Enum
 from functools import wraps
 
+from click_extra.theme import get_current_theme as theme
+
 from .manager import PackageManager
 
 TYPE_CHECKING = False
@@ -82,10 +84,11 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
     """Inspect a manager's implementation to check for proper support of an operation.
 
     Accepts either a manager instance or its class; support is determined from the
-    class hierarchy.
+    class hierarchy. The verdict is narrated as a single answered ``DEBUG`` line
+    (``brew implements installed.``), keyed on the manager ID rather than the raw
+    class repr.
     """
     cls = manager if isinstance(manager, type) else type(manager)
-    logging.debug(f"Does {cls} implements {op}?")
 
     # General case: the operation and the method implementing it shares the same ID.
     method_deps: tuple[set[str], ...] = ({op.name},)
@@ -103,20 +106,26 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
     # If none of the classes in the inheritance hierarchy up to the base one
     # implements the operation, then we can be certain the manager doesn't implement
     # the operation at all.
+    implemented = None
     for klass in cls.mro():
         if klass is PackageManager:
-            return False
+            implemented = False
+            break
         # Presence of the operation function is not enough to rules out proper
         # implementation, as it can be a method that raises NotImplemented error
         # anyway. See for instance the upgrade_all_cli in pip.py:
         # https://github.com/kdeldycke/meta-package-manager/blob/4acc003/meta_package_manager/managers/pip.py#L271-L279
-        for method_ids in method_deps:
-            all_deps_found = method_ids.issubset(klass.__dict__)
-            if all_deps_found:
-                return True
+        if any(method_ids.issubset(klass.__dict__) for method_ids in method_deps):
+            implemented = True
+            break
 
-    msg = f"Can't guess {cls} implementation of {op}."
-    raise NotImplementedError(msg)
+    if implemented is None:
+        msg = f"Can't guess {cls} implementation of {op}."
+        raise NotImplementedError(msg)
+
+    verdict = "implements" if implemented else "does not implement"
+    logging.debug(f"{theme().invoked_command(cls.id)} {verdict} {op}.")
+    return implemented
 
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):

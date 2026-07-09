@@ -5,6 +5,14 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] `--verbosity INFO` now discloses every package manager CLI invocation as a reproducible `$`-prompt line, forced environment variables included. Version-detection probes stay at `DEBUG`.
+- [mpm] The output of package manager CLIs now streams to `DEBUG` logs live, line by line and tagged with the manager ID, instead of being dumped once the call completes. Closes [#528](https://github.com/kdeldycke/meta-package-manager/issues/528).
+- [mpm] Streamed `DEBUG` lines glue the manager ID into their level prefix (`debug:mas: ...`), styled like an invoked command, matching the `mpm managers` table. Closes [#530](https://github.com/kdeldycke/meta-package-manager/issues/530).
+- [mpm] Disclosed CLI invocations are themed by token family: dim prompt sigil, environment name/value assignment pairs, highlighted binary name (directory plain, in the `$`-prompt and spawn-trace lines), option-styled flags.
+- [mpm] `--no-color` now also strips the color of log lines emitted from background threads (streamed subprocess output, concurrent fan-outs).
+- [mpm] The capability probe logs one answered `DEBUG` line per manager (`brew implements installed.`) instead of an unanswered question exposing the raw class repr.
+- [mpm] Log lines emitted while a progress spinner animates now print on their own line above it, instead of garbling the in-progress frame.
+- [mpm] Delegate subprocess spawning, output streaming, timeout enforcement and Ctrl+C child termination to `click-extra`.
 - [mpm] Authenticate the GitHub API release lookups in the Guix, Nix and yay cooldown workflow jobs, which flaked on the anonymous rate limit.
 
 ## [`7.2.0` (2026-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v7.1.0...v7.2.0)

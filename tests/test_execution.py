@@ -18,21 +18,18 @@ from __future__ import annotations
 
 import logging
 import os
-import signal
 import subprocess
-import sys
 import threading
 import time
 from unittest.mock import patch
 
 import click
 import pytest
+from click_extra.execution import _LIVE_PROCESSES, terminate_live_processes
 from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
-    _LIVE_PROCESSES,
-    _LIVE_PROCESSES_LOCK,
     DEFAULT_TIMEOUT,
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
@@ -40,9 +37,7 @@ from meta_package_manager.execution import (
     SPINNER_DELAY,
     CLIError,
     _is_sudo_auth_failure,
-    install_interrupt_handler,
     prime_sudo,
-    terminate_live_processes,
 )
 from meta_package_manager.pool import pool
 
@@ -274,7 +269,7 @@ def test_run_cache_collapses_dry_run(caplog):
         first.run_cli("-c", "pass")
         second.run_cli("-c", "pass")
 
-    # The command is announced once; the peer is a silent (DEBUG) cache hit.
+    # The command is announced once; the peer is a silent (INFO) cache hit.
     dry_run_lines = [
         record
         for record in caplog.records
@@ -285,16 +280,18 @@ def test_run_cache_collapses_dry_run(caplog):
     assert len(cache) == 1
 
 
-# Interrupt handling: a live-subprocess registry plus a SIGINT handler let the first
-# Ctrl+C terminate in-flight children so a concurrent fan-out aborts without hanging.
+# Interrupt handling: the live-subprocess registry and the SIGINT handler live in
+# click_extra.execution (and are tested there). This checks mpm's side of the
+# contract: CLIExecutor.run() must route its subprocess through run_cli() so the
+# child lands in that registry for the duration of the call.
 
 
 def test_run_registers_live_process_then_discards_it():
     """run() tracks its subprocess while it runs, and drops it once done.
 
     A background call parks in a real subprocess. Once it is registered,
-    terminate_live_processes() unblocks it, and run()'s ``finally`` clears the registry:
-    this is the exact path the SIGINT handler drives on Ctrl+C.
+    terminate_live_processes() unblocks it, and run_cli()'s ``finally`` clears the
+    registry: this is the exact path the SIGINT handler drives on Ctrl+C.
     """
     manager = FakeManager()
 
@@ -315,88 +312,8 @@ def test_run_registers_live_process_then_discards_it():
     finally:
         terminate_live_processes()
         worker.join(timeout=5)
-    # run()'s finally discarded the child once communicate() returned.
+    # run_cli()'s finally discarded the child once it was reaped.
     assert not _LIVE_PROCESSES
-
-
-def test_terminate_live_processes_ignores_already_reaped():
-    """A process gone between snapshot and signal is skipped, not raised on."""
-    proc = subprocess.Popen(
-        (sys.executable, "-c", "pass"),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding="utf-8",
-    )
-    proc.wait(timeout=5)  # Already exited before we signal it.
-    with _LIVE_PROCESSES_LOCK:
-        _LIVE_PROCESSES.add(proc)
-    try:
-        terminate_live_processes()  # Must not raise on the dead process.
-    finally:
-        with _LIVE_PROCESSES_LOCK:
-            _LIVE_PROCESSES.discard(proc)
-
-
-def test_install_interrupt_handler_terminates_children_and_reraises():
-    """The installed SIGINT handler SIGTERMs live children, then raises to abort."""
-    ctx = click.Context(click.Command("mpm"))
-    original = signal.getsignal(signal.SIGINT)
-    install_interrupt_handler(ctx)
-    handler = signal.getsignal(signal.SIGINT)
-    assert callable(handler)
-    assert handler is not original
-
-    proc = subprocess.Popen(
-        (sys.executable, "-c", "import time; time.sleep(30)"),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding="utf-8",
-    )
-    with _LIVE_PROCESSES_LOCK:
-        _LIVE_PROCESSES.add(proc)
-    try:
-        # Simulate signal delivery: the handler kills the child, then re-raises.
-        with pytest.raises(KeyboardInterrupt):
-            handler(signal.SIGINT, None)
-        assert proc.wait(timeout=5) != 0
-    finally:
-        with _LIVE_PROCESSES_LOCK:
-            _LIVE_PROCESSES.discard(proc)
-        if proc.poll() is None:
-            proc.kill()
-        ctx.close()  # Restores the previous handler via call_on_close.
-    assert signal.getsignal(signal.SIGINT) is original
-
-
-def test_install_interrupt_handler_restored_on_context_close():
-    """Closing the context restores the handler in place before the install."""
-    original = signal.getsignal(signal.SIGINT)
-    ctx = click.Context(click.Command("mpm"))
-    try:
-        install_interrupt_handler(ctx)
-        assert signal.getsignal(signal.SIGINT) is not original
-    finally:
-        ctx.close()
-    assert signal.getsignal(signal.SIGINT) is original
-
-
-def test_install_interrupt_handler_skips_off_main_thread():
-    """signal.signal() only works in the main thread: off-thread install is a no-op."""
-    original = signal.getsignal(signal.SIGINT)
-    ctx = click.Context(click.Command("mpm"))
-    errors: list[BaseException] = []
-
-    def off_main():
-        try:
-            install_interrupt_handler(ctx)
-        except BaseException as exc:  # noqa: BLE001
-            errors.append(exc)
-
-    worker = threading.Thread(target=off_main)
-    worker.start()
-    worker.join()
-    assert not errors
-    assert signal.getsignal(signal.SIGINT) is original
 
 
 # Privilege escalation: a per-op marker gated by a per-manager policy, escalated with

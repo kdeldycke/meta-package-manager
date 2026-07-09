@@ -22,7 +22,7 @@ import shlex
 from pathlib import Path
 from typing import ClassVar
 
-from click_extra.testing import args_cleanup
+from click_extra.execution import args_cleanup
 from extra_platforms import LINUX_LIKE, MACOS
 
 from ..manager import PackageManager

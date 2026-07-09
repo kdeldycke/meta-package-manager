@@ -22,6 +22,7 @@ from functools import cached_property
 
 from boltons.iterutils import unique
 from click_extra import get_current_context
+
 from . import config
 from .capabilities import implements
 from .execution import warm_availability

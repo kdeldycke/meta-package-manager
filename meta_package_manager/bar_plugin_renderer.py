@@ -41,6 +41,7 @@ from unittest.mock import patch
 from boltons.iterutils import flatten
 from click_extra import echo
 from click_extra.table import TableFormat, render_table
+
 from .bar_plugin import MPMPlugin
 from .pool import pool
 

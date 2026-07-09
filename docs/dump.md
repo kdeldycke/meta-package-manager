@@ -98,7 +98,7 @@ $ mpm dump --brewfile Brewfile
 $ brew bundle install --file=Brewfile
 ```
 
-Only the managers natively supported by Homebrew Bundle make it into the file: `brew`, `cask`, `mas`, `vscode`, `npm`, `cargo`, `uv`, `winget`, and `flatpak`. Everything else (`apt`, `dnf`, `pacman`, `pip`, `pipx`, `gem`, `snap`, `scoop`, `chocolatey`, `sdkman`, ...) gets tallied in the header but excluded from the body.
+Only the managers natively supported by Homebrew Bundle make it into the file: `brew`, `cask`, `mas`, `vscode`, `npm`, `cargo`, `uvx`, `winget`, and `flatpak`. Everything else (`apt`, `dnf`, `pacman`, `pip`, `pipx`, `gem`, `snap`, `scoop`, `chocolatey`, `sdkman`, ...) gets tallied in the header but excluded from the body.
 
 The header carries a deliberate warning:
 

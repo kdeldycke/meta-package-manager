@@ -405,7 +405,16 @@ default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "Jav
 # `oject` (a "project" fragment surfaced when CLI-help output wraps a line).
 default.extend-words = { astroid = "astroid", oject = "oject" }
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
-default.extend-ignore-re = [ "(?s)<!-- typos:off -->.*?<!-- typos:on -->" ]
+default.extend-ignore-re = [
+  "(?s)<!-- typos:off -->.*?<!-- typos:on -->",
+  # `{qeury}` is an intentional typo example: the definition schema rejects unknown
+  # placeholders at load time, and docs/overrides.md, config.py and the
+  # `typoed-placeholder` test case all demonstrate that rejection with it.
+  "\\{qeury\\}",
+  # Guix base32 source hashes are random strings; typos otherwise mangles embedded
+  # letter runs (`adn` to `and`), corrupting the hash.
+  'base32 "[0-9a-z]{52}"',
+]
 default.extend-ignore-identifiers-re = [
   # error: `buildd` should be `build`, `builds`
   #     ╭▸ ./claude.md:118

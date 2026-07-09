@@ -141,7 +141,7 @@ def get_git_base32(version: str) -> str:
 
 def get_current_version(scm_path: Path) -> str:
     """Extract the current version from the .scm file."""
-    content = scm_path.read_text()
+    content = scm_path.read_text(encoding="utf-8")
     match = re.search(r'\(version "([^"]+)"\)', content)
     if not match:
         msg = f"Cannot find version string in {scm_path}"
@@ -151,7 +151,7 @@ def get_current_version(scm_path: Path) -> str:
 
 def update_scm(scm_path: Path, version: str, base32_hash: str) -> None:
     """Update the version and hash in the .scm file."""
-    content = scm_path.read_text()
+    content = scm_path.read_text(encoding="utf-8")
     content = re.sub(
         r'\(version "[^"]+"\)',
         f'(version "{version}")',
@@ -162,7 +162,7 @@ def update_scm(scm_path: Path, version: str, base32_hash: str) -> None:
         f'(base32 "{base32_hash}")',
         content,
     )
-    scm_path.write_text(content)
+    scm_path.write_text(content, encoding="utf-8")
 
 
 def main() -> None:

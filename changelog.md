@@ -5,39 +5,35 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
-- [mpm] Fix benchmark data: merge the duplicate OpenBSD (`pkg-mgr`/`pkg-tools`), `gh-ext` and `pwsh-gallery` rows; add missing `pkcon`, `fink`, `sorcery` and `urpmi` rows; fix `winget`, `dnf`, `scoop` and `cask` competitor flags.
-- [mpm] Config-defined managers gain multi-binary and privilege support: a per-operation `cli` key runs an operation through a sibling binary, `sudo = true` marks it privileged (honoring the new `default_sudo` definition field and the global `--sudo`/`--no-sudo` policy), and `version_cli` probes an alternate binary for tool suites exposing no version flag.
-- [mpm] `mpm` is now a strict superset of `pacaptr`, `pacapt`, `sysget` and `whohas`: every package manager those tools support is now wrapped.
-- [mpm] Extend the destructive install/remove test round-trip to the bundled configuration-defined managers; CI exercises it for real against `gh-ext`.
+- [mpm] Config-defined managers gain multi-binary support: a per-operation `cli` key runs an operation through a sibling binary, and `version_cli` probes an alternate binary for tool suites exposing no version flag.
+- [mpm] Config-defined managers gain privilege support: `sudo = true` marks an operation privileged, the new `default_sudo` field sets the manager-wide default, and both honor the global `--sudo`/`--no-sudo` policy.
 - [mpm] Manager definitions gain Brewfile export mappings: the new definition-only `brewfile_entry_type` and `brewfile_skip_warning` fields mirror the class attributes consumed by `mpm dump --brewfile`.
-- [mpm] Loosen and tighten the definition schema: an `installed` query may now capture no version (for tools whose packages are unversioned), a `search` may omit the `{query}` placeholder to list the whole catalog and rely on client-side refiltering, and any unrecognized `{placeholder}` token in operation args is now rejected at load time.
-- [mpm] Require click-extra `8.3` or newer.
-- [mpm] Rename the `stats` configuration key to `summary`, matching the `--summary` option it was detached from; add `sudo`, `jobs` and `network` to the typed configuration schema; stop the schema from advertising a flat `500` default for `timeout`, which is resolved per operation.
-- [mpm] Render the configuration reference, the CLI reference and the benchmark's manager-support table live at documentation build time, through click-extra's `click:config`, `click:tree` and `python:render` directives; drop `sphinx-click`.
-- [mpm] Make the binaries catalog table searchable and sortable, with relative-age hints on release dates.
-- [mpm] Exercise every subcommand's `--help` screen against the compiled binaries in the CLI test plan.
+- [mpm] Relax and harden the definition schema: an `installed` query may capture no version, a `search` may omit the `{query}` placeholder and rely on client-side refiltering, and unrecognized `{placeholder}` tokens in operation args are rejected at load time.
 - [apt-cyg] Add apt-cyg (Cygwin) package manager with `installed`, `search`, `install`, `remove` and `sync` support on Windows/Cygwin; a bundled configuration-defined manager.
-- [cargo] Convert from a Python class to a bundled configuration-defined manager. The optional description column of search results is no longer populated.
 - [cave] Add cave (Exherbo's Paludis client) with `installed`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
 - [chromebrew] Add Chromebrew (`crew`) package manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support on ChromeOS; a bundled configuration-defined manager.
-- [cpan] Convert from a Python class to a bundled configuration-defined manager, with no functional change.
 - [fink] Add Fink package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support on macOS; a bundled configuration-defined manager.
-- [gh-ext] Report installed extensions by their `owner/repo` slug instead of the bare extension name, so the ids returned by `mpm installed` and `mpm backup` feed back into `install`, `remove`, `upgrade` and `restore`.
-- [opkg] Convert from a Python class to a bundled configuration-defined manager. The optional description column of search results is no longer populated.
 - [pkcon] Add PackageKit's console client (`pkcon`) with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove` and `sync` support on Linux. Requires PackageKit `>=0.7.0`.
 - [pkg-tools] Add OpenBSD's pkg tools (`pkg_add`/`pkg_info`/`pkg_delete`) with `installed`, `search`, `install`, `upgrade`, `remove` and `cleanup` support; a bundled configuration-defined manager.
 - [pkgin] Add pkgin (NetBSD pkgsrc) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
 - [slapt-get] Add slapt-get (Slackware) package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
 - [sorcery] Add Sorcery (Source Mage GNU/Linux) package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
-- [steamcmd] Convert from a Python class to a bundled configuration-defined manager, with no functional change.
 - [sun-tools] Add Solaris' SVR4 package tools (`pkginfo`/`pkgrm`) with `installed` and `remove` support: SVR4 packages come from local media, so there is no repository to search, install from or upgrade against.
 - [swupd] Add Clear Linux's swupd with `installed`, `search`, `install`, `upgrade --all`, `remove` and `cleanup` support, operating on bundles; a bundled configuration-defined manager.
 - [tazpkg] Add TazPkg (SliTaz GNU/Linux) package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support.
 - [tlmgr] Add TeX Live Manager (`tlmgr`) with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support, cross-platform; a bundled configuration-defined manager. Requires TeX Live `>=2018`.
-- [topgrade] Convert from a Python class to a bundled configuration-defined manager, with no functional change.
 - [urpmi] Add urpmi (Mageia and the Mandriva lineage) with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support; a bundled configuration-defined manager.
-- [vscode] Convert from a Python class to a bundled configuration-defined manager, with no functional change.
-- [vscodium] Convert from a Python class to a bundled configuration-defined manager, with no functional change.
+- [mpm] `mpm` is now a strict superset of `pacaptr`, `pacapt`, `sysget` and `whohas`: every package manager those tools support is now wrapped.
+- [mpm] Convert the cargo and opkg managers from Python classes to bundled configuration definitions; the optional description column of their search results is no longer populated.
+- [mpm] Convert the cpan, steamcmd, topgrade, vscode and vscodium managers from Python classes to bundled configuration definitions, with no functional change.
+- [gh-ext] Report installed extensions by their `owner/repo` slug instead of the bare extension name, so the ids returned by `mpm installed` and `mpm backup` feed back into `install`, `remove`, `upgrade` and `restore`.
+- [mpm] Require click-extra `8.3` and extra-platforms `13.1` or newer.
+- [mpm] Rename the `stats` configuration key to `summary`, matching the `--summary` option; add `sudo`, `jobs` and `network` to the typed configuration schema; stop advertising a flat `500` default for `timeout`, which is resolved per operation.
+- [mpm] Render the configuration reference, the CLI reference and the benchmark's manager-support table live at documentation build time, through click-extra's `click:config`, `click:tree` and `python:render` directives; drop `sphinx-click`.
+- [mpm] Fix benchmark data: merge the duplicate OpenBSD (`pkg-mgr`/`pkg-tools`), `gh-ext` and `pwsh-gallery` rows; add missing `pkcon`, `fink`, `sorcery` and `urpmi` rows; fix `winget`, `dnf`, `scoop` and `cask` competitor flags.
+- [mpm] Make the binaries catalog table searchable and sortable, with relative-age hints on release dates.
+- [mpm] Exercise every subcommand's `--help` screen against the compiled binaries in the CLI test plan.
+- [mpm] Extend the destructive install/remove test round-trip to the bundled configuration-defined managers; CI exercises it for real against `gh-ext`.
 
 ## [`7.1.0` (2026-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.1...v7.1.0)
 

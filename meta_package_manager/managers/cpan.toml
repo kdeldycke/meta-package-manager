@@ -39,8 +39,8 @@ regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+(?P<latest_version>
 [mpm.managers.cpan.operations.install]
 args = ["{package_id}"]
 
-[mpm.managers.cpan.operations.upgrade_all]
-args = ["-u"]
-
 [mpm.managers.cpan.operations.upgrade_one]
 args = ["-i", "{package_id}"]
+
+[mpm.managers.cpan.operations.upgrade_all]
+args = ["-u"]

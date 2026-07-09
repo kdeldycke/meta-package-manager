@@ -662,10 +662,6 @@ label = "📦 manager: conda"
 patterns = [ "conda", "anaconda", "miniconda", "conda-forge" ]
 
 [[tool.repomatic.labels.content-rules]]
-label = "📦 manager: rpm-based"
-patterns = [ "dnf", "yum", "rpm", "fedora", "redhat", "rhel", "zypper", "opensuse", "suse", "urpmi", "mageia" ]
-
-[[tool.repomatic.labels.content-rules]]
 label = "📦 manager: dpkg-based"
 patterns = [ "apt", "apt-mint", "aptitude", "dpkg", "opkg", "ubuntu", "debian", "mint", "deb-get", "pacstall" ]
 
@@ -732,6 +728,10 @@ patterns = [ "pkg", "ports", "freebsd", "freebsd ports" ]
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pwsh-gallery"
 patterns = [ "powershell", "powershell gallery", "psgallery", "psresourceget", "pwsh" ]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: rpm-based"
+patterns = [ "dnf", "yum", "rpm", "fedora", "redhat", "rhel", "zypper", "opensuse", "suse", "urpmi", "mageia" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: scoop-based"
@@ -1124,15 +1124,6 @@ label = "📦 manager: conda"
 any-glob-to-any-file = [ "meta_package_manager/managers/conda*", "tests/*conda*" ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: rpm-based"
-any-glob-to-any-file = [
-  "meta_package_manager/managers/dnf*",
-  "meta_package_manager/managers/zypper*",
-  "tests/*dnf*",
-  "tests/*zypper*",
-]
-
-[[tool.repomatic.labels.file-rules]]
 label = "📦 manager: dpkg-based"
 any-glob-to-any-file = [
   # The dot keeps apt.py (APT, APT_Mint) in and apt_cyg.py (its own label) out.
@@ -1238,6 +1229,15 @@ any-glob-to-any-file = [ "meta_package_manager/managers/pkg.*", "tests/*pkg*", "
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pwsh-gallery"
 any-glob-to-any-file = [ "meta_package_manager/managers/pwsh_gallery*", "tests/*pwsh_gallery*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: rpm-based"
+any-glob-to-any-file = [
+  "meta_package_manager/managers/dnf*",
+  "meta_package_manager/managers/zypper*",
+  "tests/*dnf*",
+  "tests/*zypper*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: scoop-based"

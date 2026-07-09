@@ -74,7 +74,11 @@ class Tazpkg(PackageManager):
             "$PKGS_DB/installed.info")
     """
 
-    version_cli_options = ("-F\t", '$1=="tazpkg"{print $2}', "/var/lib/tazpkg/installed.info")
+    version_cli_options = (
+        "-F\t",
+        '$1=="tazpkg"{print $2}',
+        "/var/lib/tazpkg/installed.info",
+    )
 
     version_regexes = (r"^(?P<version>[\d.]+)$",)
     """A bare integer Mercurial revision on cooking releases (``944``) or a dotted

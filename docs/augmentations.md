@@ -10,8 +10,8 @@ Each ✅ below is a capability `mpm` synthesizes for a manager that does not pro
 | :------------- | :------------------: | :----------: | :-------------: |
 | `apk`          |                      |      ✅      |                 |
 | `apm`          |                      |      ✅      |                 |
-| `apt-mint`     |                      |              |       ✅        |
 | `apt-cyg`       |                      |      ✅      |       ✅        |
+| `apt-mint`     |                      |              |       ✅        |
 | `asdf`         |          ✅          |      ✅      |       ✅        |
 | `cargo`        |                      |      ✅      |       ✅        |
 | `chromebrew`    |                      |      ✅      |       ✅        |

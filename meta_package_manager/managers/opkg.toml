@@ -36,11 +36,11 @@ args = ["install", "{package_id}"]
 [mpm.managers.opkg.operations.remove]
 args = ["remove", "{package_id}"]
 
-[mpm.managers.opkg.operations.upgrade_all]
-args = ["upgrade"]
-
 [mpm.managers.opkg.operations.upgrade_one]
 args = ["upgrade", "{package_id}"]
+
+[mpm.managers.opkg.operations.upgrade_all]
+args = ["upgrade"]
 
 [mpm.managers.opkg.operations.sync]
 args = ["update"]

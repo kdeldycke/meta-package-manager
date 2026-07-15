@@ -25,6 +25,8 @@
 - [mpm] The PyPI keywords and the labeller file/content rules in `pyproject.toml` are now generated from the manager pool by `docs/docs_update.py`. Every bundled manager gains labeller coverage, definition-file globs are anchored on their full stem, and the `chocotaley` keyword typo is fixed.
 - [mpm] Bundled manager definitions now embed their version-probe and parser output samples in a `[samples]` table of their own TOML file; the test suite derives its checks from the shipped files instead of hardcoded per-manager fixtures.
 
+## [`7.2.1.dev0` (2026-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v7.2.0...v7.2.1.dev0)
+
 ## [`7.2.0` (2026-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v7.1.0...v7.2.0)
 
 > [!NOTE]

@@ -323,6 +323,22 @@ class _StallWatchdog(logging.Handler):
     verbatim to the root logger, whose level click-extra's ``--verbosity``
     manages, keeping the display byte-identical to an un-teed run at every
     verbosity.
+
+    .. note::
+
+        Considered alternative: a ``SUDO_ASKPASS`` helper. ``brew`` documents
+        passing ``--askpass`` to its internal ``sudo`` whenever that variable is
+        set, so mpm could export a helper into the child environment and rebrand
+        the hidden prompt itself ("[mpm] cask needs your password..."), working
+        even under hardened sudoers policies whose timestamps the priming cache
+        cannot serve (see :py:data:`_SUDO_CACHE_WARM`). Rejected for now: the
+        helper reads the raw password and pipes it to ``sudo`` (a security
+        surface this notice avoids entirely), it needs a side channel to pause
+        the spinner that would smear its prompt, and it only covers tools
+        honoring the variable (``brew`` does, ``fink``'s plain ``sudo`` re-exec
+        does not). Revisit if this notice proves insufficient in the field; the
+        scoped ``sudo = true`` opt-in documented in ``docs/sudo.md`` already
+        covers users wanting a guaranteed up-front prompt.
     """
 
     tee: logging.Logger

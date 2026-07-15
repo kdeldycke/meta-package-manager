@@ -418,15 +418,19 @@ def replace_content(
 def _string_array(values: tuple[str, ...], multiline: bool = False):
     """Render strings as a ``tomlkit`` array, one item per line when asked or long.
 
-    ``tomlkit``'s own ``multiline()`` hard-codes a 4-space indent; re-parsing an
-    explicitly rendered body keeps the 2-space indent used across
-    ``pyproject.toml``.
+    Both layouts replicate ``pyproject-fmt``'s canonical style: inline arrays
+    are padded with spaces inside the brackets, exploded arrays get a 2-space
+    indent (``tomlkit``'s own ``multiline()`` hard-codes 4) and a trailing
+    comma. Any deviation is churn: the ``format-pyproject`` autofix job would
+    endlessly rewrite what the ``update-docs`` job regenerates.
+    ``test_pyproject_updates_are_pyproject_fmt_fixpoint`` guards the match.
     """
-    array = tomlkit.array()
-    array.extend(values)
-    if not multiline and len(array.as_string()) <= 76:
-        return array
-    body = "".join(f"  {tomlkit.item(value).as_string()},\n" for value in values)
+    items = [tomlkit.item(value).as_string() for value in values]
+    inline = f"[ {', '.join(items)} ]"
+    # 78 preserves the historical 76-character budget of the unpadded form.
+    if not multiline and len(inline) <= 78:
+        return tomlkit.array(inline)
+    body = "".join(f"  {item},\n" for item in items)
     return tomlkit.array(f"[\n{body}]")
 
 

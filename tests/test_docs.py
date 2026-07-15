@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import importlib.util
 import re
+import shutil
 import sys
 from itertools import permutations
 from pathlib import Path
@@ -247,6 +248,29 @@ def test_label_rules_in_pyproject():
         for rule in labels_config["file-rules"]
     ]
     assert checked_in_file == generate_file_rules()
+
+
+def test_pyproject_updates_are_pyproject_fmt_fixpoint(monkeypatch, tmp_path):
+    """The ``pyproject.toml`` writers must emit ``pyproject-fmt``-canonical style.
+
+    Any deviation makes the ``update-docs`` and ``format-pyproject`` autofix
+    jobs endlessly rewrite each other's output. The committed file is
+    canonicalized first, so the assertion only judges the writers' own output,
+    whatever formatting state the working tree is in.
+    """
+    pyproject_fmt = pytest.importorskip(
+        "pyproject_fmt",
+        reason="pyproject-fmt is optional; hermetic builds run without it",
+    )
+    scratch = tmp_path / "pyproject.toml"
+    shutil.copyfile(PROJECT_ROOT / "pyproject.toml", scratch)
+    pyproject_fmt.run([str(scratch)])
+
+    monkeypatch.setattr(docs_update, "PROJECT_ROOT", tmp_path)
+    docs_update.update_labels()
+    docs_update.update_keywords()
+
+    assert pyproject_fmt.run(["--check", str(scratch)]) == 0
 
 
 def test_benchmark_yaml_well_formed():

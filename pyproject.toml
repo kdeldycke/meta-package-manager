@@ -301,6 +301,11 @@ test = [
   "extra-platforms",
   # respx requires httpx as a peer; pin the same floor as [sbom-online].
   "httpx>=0.27",
+  # Guards the pyproject-fmt fixpoint of the pyproject.toml sections rewritten by
+  # docs/docs_update.py, so the update-docs and format-pyproject autofix jobs never
+  # rewrite each other's output. Optional: the test skips when the package is
+  # missing, keeping hermetic distro builds working. 2.25.1 is the verified style.
+  "pyproject-fmt>=2.25.1",
   # pytest 9.0.0 reads native TOML config from the [tool.pytest] table used in this file.
   "pytest>=9",
   # pytest-cov 7.x is the release series wired to pytest 9's plugin interface.

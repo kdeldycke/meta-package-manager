@@ -382,7 +382,7 @@ exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-07-09T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-07-17T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 

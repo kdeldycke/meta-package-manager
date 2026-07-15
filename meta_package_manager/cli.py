@@ -43,6 +43,7 @@ from boltons.cacheutils import LRI, cached
 from click_extra import (
     STRING,
     Choice,
+    Duration,
     EnumChoice,
     File,
     IntRange,
@@ -59,11 +60,13 @@ from click_extra import (
     option_group,
     pass_context,
     search_params,
+    sort_by_option,
     zero_exit_option,
 )
 from click_extra.context import (
     COLUMNS,
     PROGRESS,
+    SORT_BY,
     TABLE_FORMAT,
     VERBOSITY_LEVEL,
     ZERO_EXIT,
@@ -93,7 +96,6 @@ from .config import (
     print_contribution_hints,
     register_config_managers_from_context,
 )
-from .duration import Duration
 from .execution import (
     CLIError,
     OperationTrail,
@@ -114,7 +116,7 @@ from .sbom import (
     cyclonedx_support,
     spdx_support,
 )
-from .sorting import SortableField, print_sorted_table
+from .sorting import SortableField
 from .specifier import VERSION_SEP, Solver, Specifier
 from .sudo import prime_sudo
 from .summary import package_counts, print_summary, sbom_summary
@@ -318,7 +320,6 @@ def print_projected_table(
     ctx: Context,
     columns: Sequence[tuple[ColumnSpec, str | None]],
     rows: Iterable[dict[str, str | None]],
-    sort_by: Sequence[SortableField],
     default_ids: Sequence[str] | None = None,
 ) -> None:
     """Render dict ``rows`` as a table projected through ``--columns``.
@@ -331,20 +332,21 @@ def print_projected_table(
     (``search`` uses it to hide the description column unless
     ``--description``); ``None`` keeps every column in canonical order.
 
-    Sorting stays on mpm's global ``--sort-by``: a sort field whose column is
-    projected out is simply skipped by
-    :py:func:`~meta_package_manager.sorting.print_sorted_table`.
+    Sorting stays on mpm's global ``--sort-by``: each header pairs its label
+    with the sortable field the column carries, and click-extra's
+    :py:func:`~click_extra.table.print_table` resolves the selection per
+    table. A sort field whose column is projected out is simply skipped, and a
+    table carrying none of the selected fields keeps its original row order.
     """
     selected = ctx.meta.get(COLUMNS) or tuple(default_ids or ())
     projected = select_columns(column_specs(columns), selected)
     sort_field = {spec.id: field for spec, field in columns}
     ids = tuple(spec.id for spec in projected)
-    # print_table is mpm's field-aware sorted variant, assigned onto the root
-    # context at group setup: a dynamic attribute mypy cannot see.
+    # print_table renders through the table format resolved at group setup: a
+    # dynamic attribute mypy cannot see.
     ctx.find_root().print_table(  # type: ignore[attr-defined]
-        tuple((spec.label, sort_field[spec.id]) for spec in projected),
         [select_row(row, ids, ids) for row in rows],
-        sort_by,
+        tuple((spec.label, sort_field[spec.id]) for spec in projected),
     )
 
 
@@ -704,11 +706,11 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "'description' column to 'mpm search'; an explicit --columns selection "
         "wins.",
     ),
-    option(
-        "-s",
-        "--sort-by",
-        type=EnumChoice(SortableField),
-        multiple=True,
+    # Bare field IDs declare a click-extra field vocabulary: the selection is
+    # resolved per table at print time, from the fields its headers carry.
+    sort_by_option(
+        *SortableField,
+        param_decls=("-s", "--sort-by"),
         default=(SortableField.MANAGER_ID,),
         help="Sort results by this field. Repeat to add tie-breakers in priority "
         "order, like '-s manager_id -s package_id'.",
@@ -770,7 +772,6 @@ def mpm(
     cooldown,
     require_cooldown_support,
     description,
-    sort_by,
     summary,
     network,
     suggest_contribs,
@@ -931,7 +932,6 @@ def mpm(
             "user_drops",
             "selected_managers",
             "description",
-            "sort_by",
             "summary",
             "network",
         ),
@@ -941,18 +941,10 @@ def mpm(
             managers_to_remove,
             selected_managers,
             description,
-            sort_by,
             summary,
             network,
         ),
     )()
-
-    # Override ctx.print_table with mpm's field-aware sorted variant, so
-    # subcommands keep their (headers, table, sort_by) call contract.
-    ctx.print_table = partial(
-        print_sorted_table,
-        table_format=ctx.meta[TABLE_FORMAT],
-    )
 
 
 # Extend --version output with Python and platform metadata.
@@ -1072,7 +1064,7 @@ def managers(ctx):
             "version": version_infos,
         })
 
-    print_projected_table(ctx, MANAGERS_COLUMNS, table, ctx.obj.sort_by)
+    print_projected_table(ctx, MANAGERS_COLUMNS, table)
 
 
 def _manager_result(
@@ -1256,14 +1248,13 @@ def installed(ctx, exact, duplicates, query):
         ]
 
     # Force sorting by package ID in duplicate mode.
-    sort_by = ctx.obj.sort_by
     if duplicates:
         logging.info(
             "Force table sorting on package ID because of --duplicates option."
         )
-        sort_by = (SortableField.PACKAGE_ID,)
+        ctx.meta[SORT_BY] = (SortableField.PACKAGE_ID,)
 
-    print_projected_table(ctx, INSTALLED_COLUMNS, table, sort_by)
+    print_projected_table(ctx, INSTALLED_COLUMNS, table)
 
     if ctx.obj.summary:
         print_summary(package_counts(installed_data))
@@ -1348,7 +1339,7 @@ def outdated(ctx, exact, plugin_output, query):
                 "latest_version": latest_version,
             })
 
-    print_projected_table(ctx, OUTDATED_COLUMNS, table, ctx.obj.sort_by)
+    print_projected_table(ctx, OUTDATED_COLUMNS, table)
 
     if ctx.obj.summary:
         print_summary(package_counts(outdated_data))
@@ -1449,9 +1440,7 @@ def search(ctx, extended, exact, refilter, query):
         for spec in column_specs(SEARCH_COLUMNS)
         if show_description or spec.id != "description"
     )
-    print_projected_table(
-        ctx, SEARCH_COLUMNS, table, ctx.obj.sort_by, default_ids=default_ids
-    )
+    print_projected_table(ctx, SEARCH_COLUMNS, table, default_ids=default_ids)
 
     if ctx.obj.summary:
         print_summary(package_counts(matches))
@@ -1505,7 +1494,7 @@ def which(ctx, cli_names):
                 "cli_path": highlight_cli_name(found_cli, cli_names),
                 "symlink": symlink,
             })
-    print_projected_table(ctx, WHICH_COLUMNS, table, ctx.obj.sort_by)
+    print_projected_table(ctx, WHICH_COLUMNS, table)
 
 
 @mpm.command(

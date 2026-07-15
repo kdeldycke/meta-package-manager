@@ -159,12 +159,10 @@ class BarPluginRenderer(MPMPlugin):
                     p["installed_version"] if p["installed_version"] else "?",
                     p["latest_version"],
                 )
-                table.append(
-                    (
-                        (p.get("name") or p.get("id"), installed, "→", latest),
-                        p["upgrade_cli"],
-                    )
-                )
+                table.append((
+                    (p.get("name") or p.get("id"), installed, "→", latest),
+                    p["upgrade_cli"],
+                ))
 
             # Table-like rendering
             if self.table_rendering:

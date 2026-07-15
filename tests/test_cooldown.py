@@ -22,10 +22,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
-from click.exceptions import BadParameter
+from click_extra import Duration
 
 from meta_package_manager.cli import cooldown_permits
-from meta_package_manager.duration import Duration
 from meta_package_manager.managers.gem import Gem
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM
@@ -35,124 +34,12 @@ from meta_package_manager.managers.pipx import Pipx
 from meta_package_manager.managers.uv import UV, UVX
 from meta_package_manager.version import parse_version
 
-"""Test the supply-chain release-age cooldown feature."""
+"""Test the supply-chain release-age cooldown feature.
 
-
-@pytest.mark.parametrize(
-    ("value", "expected"),
-    (
-        # Friendly durations.
-        ("7 days", timedelta(days=7)),
-        ("1 week", timedelta(weeks=1)),
-        ("2 weeks", timedelta(weeks=2)),
-        ("3d", timedelta(days=3)),
-        ("12h", timedelta(hours=12)),
-        ("30m", timedelta(minutes=30)),
-        ("45s", timedelta(seconds=45)),
-        ("1.5d", timedelta(days=1, hours=12)),
-        # A bare number defaults to days.
-        ("7", timedelta(days=7)),
-        # Spacing and case are irrelevant.
-        ("  6   HOURS  ", timedelta(hours=6)),
-        # ISO 8601 durations.
-        ("P7D", timedelta(days=7)),
-        ("P1W", timedelta(weeks=1)),
-        ("PT12H", timedelta(hours=12)),
-        ("PT30M", timedelta(minutes=30)),
-        ("PT45S", timedelta(seconds=45)),
-        ("P1WT6H", timedelta(weeks=1, hours=6)),
-        ("P2DT3H30M", timedelta(days=2, hours=3, minutes=30)),
-        # ISO 8601 is case-insensitive.
-        ("p7d", timedelta(days=7)),
-        ("pt12h", timedelta(hours=12)),
-        # Zero and empty values disable the gate.
-        ("0", None),
-        ("0 days", None),
-        ("PT0H", None),
-        ("", None),
-        (None, None),
-    ),
-)
-def test_duration_parsing(value, expected):
-    assert Duration().convert(value, None, None) == expected
-
-
-def test_duration_passthrough_timedelta():
-    """An already-parsed timedelta is returned unchanged (idempotent conversion)."""
-    delta = timedelta(days=2)
-    assert Duration().convert(delta, None, None) is delta
-
-
-@pytest.mark.parametrize(
-    "value",
-    (
-        "bogus",
-        "2 fortnights",
-        "abc",
-        "tomorrow",
-        "-3d",
-        # Bare ISO 8601 prefix with no components.
-        "P",
-        # Unknown ISO 8601 unit.
-        "P3X",
-        # Date without a time zone.
-        "2024-05-01",
-        "2024-05-01T00:00:00",
-        # Malformed RFC 3339 timestamp.
-        "2024-99-99T00:00:00Z",
-    ),
-)
-def test_duration_invalid(value):
-    with pytest.raises(BadParameter):
-        Duration().convert(value, None, None)
-
-
-@pytest.mark.parametrize(
-    "value",
-    (
-        # Friendly form.
-        "7 months",
-        "1 year",
-        "3 months",
-        "2 years",
-        # ISO 8601 form (M before T = months, Y = years).
-        "P3M",
-        "P1Y",
-        "P1Y6M",
-    ),
-)
-def test_duration_rejects_calendar_units(value):
-    """Months and years are explicitly rejected because their length is ambiguous."""
-    with pytest.raises(BadParameter) as exc_info:
-        Duration().convert(value, None, None)
-    assert "calendar units" in str(exc_info.value)
-    assert "ambiguous" in str(exc_info.value)
-
-
-@pytest.mark.parametrize(
-    "value",
-    (
-        # Z suffix.
-        "2024-05-01T00:00:00Z",
-        # Explicit UTC offset.
-        "2024-05-01T00:00:00+00:00",
-        # Non-UTC offset.
-        "2024-05-01T02:00:00+02:00",
-        # Lowercase T and Z accepted.
-        "2024-05-01t00:00:00z",
-    ),
-)
-def test_duration_absolute_timestamp(value):
-    """An RFC 3339 timestamp is converted to ``now - timestamp`` at parse time."""
-    result = Duration().convert(value, None, None)
-    expected = datetime.now(tz=timezone.utc) - datetime(2024, 5, 1, tzinfo=timezone.utc)
-    assert isinstance(result, timedelta)
-    assert abs(result - expected) < timedelta(seconds=5)
-
-
-def test_duration_future_timestamp_disables_gate():
-    """A timestamp in the future is treated as 'no cooldown' (returns None)."""
-    assert Duration().convert("2999-01-01T00:00:00Z", None, None) is None
+Parsing of the ``--cooldown`` value itself (friendly, ISO 8601 and RFC 3339
+shapes, calendar-unit rejection, zero / future-timestamp disabling) is covered
+upstream by click-extra's ``Duration`` test suite: only the cooldown semantics
+built on top of the parsed ``timedelta`` are exercised here."""
 
 
 @pytest.mark.parametrize(

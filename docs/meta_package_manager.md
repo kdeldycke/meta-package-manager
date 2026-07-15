@@ -73,15 +73,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.duration module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.duration
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.execution module
 
 ```{eval-rst}

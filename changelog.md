@@ -25,6 +25,7 @@
 - [mpm] The PyPI keywords and the labeller file/content rules in `pyproject.toml` are now generated from the manager pool by `docs/docs_update.py`. Every bundled manager gains labeller coverage, definition-file globs are anchored on their full stem, and the `chocotaley` keyword typo is fixed.
 - [mpm] Bundled manager definitions now embed their version-probe and parser output samples in a `[samples]` table of their own TOML file; the test suite derives its checks from the shipped files instead of hardcoded per-manager fixtures.
 - [bar-plugin] Version differences are now highlighted in the outdated-package menu lines, with the same coloring as `mpm outdated`: common prefix gray, installed suffix red, latest suffix green. Package lines carry `ansi=true` so both SwiftBar and Xbar render the colors.
+- [mpm] Delegate `--cooldown` duration parsing and the cross-command `--sort-by` machinery to click-extra: the `Duration` parameter type moved upstream as-is, and table sorting now flows through click-extra's field-vocabulary `SortByOption` and field-aware `print_table`, keeping the same per-table semantics (selected fields the table carries lead the sort, absent ones are skipped, and a table carrying none keeps its row order). `-s`/`--sort-by` now renders at the end of its option group in help screens, like every other click-extra option.
 
 ## [`7.2.0` (2026-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v7.1.0...v7.2.0)
 

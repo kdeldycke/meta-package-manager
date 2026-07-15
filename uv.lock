@@ -12,7 +12,7 @@ exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for 
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
-click-extra = "2026-07-09T00:00:00Z"
+click-extra = "2026-07-17T00:00:00Z"
 
 [[package]]
 name = "accessible-pygments"
@@ -249,7 +249,7 @@ wheels = [
 [[package]]
 name = "click-extra"
 version = "8.4.0.dev0"
-source = { git = "https://github.com/kdeldycke/click-extra?branch=main#e6c743d82e701139803ab8e5e8427edaff718ea6" }
+source = { git = "https://github.com/kdeldycke/click-extra?branch=main#119e4be6ae3b79b36da56c8fcc0bdb62d52b1204" }
 dependencies = [
     { name = "boltons" },
     { name = "click" },

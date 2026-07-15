@@ -435,15 +435,17 @@ PID_SENTINEL = "MPM-DOC-SENTINEL"
 """Stand-in package id; the documented command carries a real example id where
 the constructed command carries this."""
 
-BUILD_CLI_KWARGS = frozenset((
-    "auto_post_args",
-    "auto_pre_args",
-    "auto_pre_cmds",
-    "override_cli_path",
-    "override_post_args",
-    "override_pre_args",
-    "override_pre_cmds",
-))
+BUILD_CLI_KWARGS = frozenset(
+    (
+        "auto_post_args",
+        "auto_pre_args",
+        "auto_pre_cmds",
+        "override_cli_path",
+        "override_post_args",
+        "override_pre_args",
+        "override_pre_cmds",
+    )
+)
 """``run_cli`` kwargs forwarded to ``build_cli`` when reconstructing the full
 command. ``sudo`` is deliberately not forwarded: escalation depends on platform
 and policy, so documented ``sudo`` prefixes are stripped on the other side."""
@@ -452,7 +454,9 @@ and policy, so documented ``sudo`` prefixes are stripped on the other side."""
 def _strip_sudo(tokens: list[str]) -> list[str]:
     """Drop a leading ``sudo`` (and its ``-n``) from a command."""
     if tokens and tokens[0] == "sudo":
-        return tokens[2:] if tokens[1:2] == ["-n"] else tokens[1:]
+        if tokens[1:2] in (["-n"], ["--non-interactive"]):
+            return tokens[2:]
+        return tokens[1:]
     return tokens
 
 
@@ -499,7 +503,8 @@ def _documented_commands(
 def _normalize_constructed(command: tuple, cli_names: tuple[str, ...]) -> list[str]:
     """Shape a constructed command like its documented counterpart.
 
-    Drops the ``sudo -n`` escalation prefix, unwraps the ``bash -c "source ...
+    Drops the ``sudo --non-interactive`` escalation prefix, unwraps the ``bash -c
+    "source ...
     && <command>"`` indirection used for shell-function managers (sdkman), and
     reduces the absolute binary path to its basename.
     """
@@ -594,9 +599,9 @@ def test_documented_command_matches_construction(
         type(manager),
         "installed",
         property(
-            lambda self: iter([
-                self.package(id=PID_SENTINEL, installed_version=PID_SENTINEL)
-            ])
+            lambda self: iter(
+                [self.package(id=PID_SENTINEL, installed_version=PID_SENTINEL)]
+            )
         ),
     )
 

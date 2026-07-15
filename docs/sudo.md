@@ -40,7 +40,7 @@ A per-manager `sudo` value wins over the global flag, so you can escalate everyt
 
 ## One prompt, up front
 
-`mpm` runs managers concurrently with their output muted behind a progress spinner, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A cache found warm (a prior `sudo -v`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all.
+`mpm` runs managers concurrently with their output muted behind a progress spinner, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A cache found warm (a prior `sudo --validate`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all.
 
 Only a cold cache, on an interactive terminal, leads to a prompt: a notice names the managers about to escalate and the subcommand, then a single branded `sudo` prompt authenticates once for the whole run, so nothing blocks in the fan-out:
 
@@ -50,7 +50,7 @@ apt, deb-get need administrator rights to upgrade: enter your password.
 [mpm] password for apt, deb-get:
 ```
 
-Off a terminal (a pipe, CI, the menubar plugin), `mpm` cannot prompt: a warning names the managers needing root, and they fail fast with a clear error instead of hanging. To escalate unattended, configure a `NOPASSWD` rule for the managers' commands: the probe then finds the cache warm and keeps it alive. A prior `sudo -v` also works, but only from the same terminal session `mpm` runs in: under sudo's default terminal-keyed timestamps, credentials cached in one terminal do not carry to a `mpm` launched without one (a menubar plugin, a CI step), so `NOPASSWD` is the robust choice there.
+Off a terminal (a pipe, CI, the menubar plugin), `mpm` cannot prompt: a warning names the managers needing root, and they fail fast with a clear error instead of hanging. To escalate unattended, configure a `NOPASSWD` rule for the managers' commands: the probe then finds the cache warm and keeps it alive. A prior `sudo --validate` also works, but only from the same terminal session `mpm` runs in: under sudo's default terminal-keyed timestamps, credentials cached in one terminal do not carry to a `mpm` launched without one (a menubar plugin, a CI step), so `NOPASSWD` is the robust choice there.
 
 ## Managers escalating internally
 

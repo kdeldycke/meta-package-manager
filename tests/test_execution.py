@@ -313,19 +313,21 @@ def test_run_registers_live_process_then_discards_it():
 
 
 # Privilege escalation: a per-op marker gated by a per-manager policy, escalated with
-# `sudo -n`. The priming, keepalive, policy inventories and stall watchdog are covered
+# `sudo --non-interactive`. The priming, keepalive, policy inventories and stall
+# watchdog are covered
 # in test_sudo.py; these exercise the wrapping and failure-hint paths of execution.py.
 
 
 def test_build_cli_escalates_with_sudo_n_when_policy_on():
-    """A privileged op escalates to `sudo -n` when the manager's policy opts in."""
+    """A privileged op escalates to `sudo --non-interactive` when the manager's
+    policy opts in."""
     manager = FakeManager()
     manager.sudo = True
     with patch(
         "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
     ):
         cli = manager.build_cli("install", "pkg", sudo=True)
-    assert cli[:2] == ("sudo", "-n")
+    assert cli[:2] == ("sudo", "--non-interactive")
 
 
 def test_build_cli_no_escalation_when_policy_off():
@@ -374,12 +376,15 @@ def test_npm_sudo_marker_dormant_until_opted_in():
     ):
         assert "sudo" not in manager.build_cli("update", sudo=True)
         manager.sudo = True
-        assert manager.build_cli("update", sudo=True)[:2] == ("sudo", "-n")
+        assert manager.build_cli("update", sudo=True)[:2] == (
+            "sudo",
+            "--non-interactive",
+        )
 
 
 @pytest.mark.skipif(is_any_windows(), reason="escalation is UNIX-only")
 def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
-    """A real `sudo -n` that cannot authenticate triggers the actionable hint.
+    """A real `sudo --non-interactive` that cannot authenticate triggers the actionable hint.
 
     A fake `sudo` on ``PATH`` mimics "no cached credentials", so the whole
     build_cli → subprocess → failure-gate → hint path runs for real, without root.
@@ -395,7 +400,7 @@ def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
         "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
     ):
         cli = manager.build_cli("-c", "pass", sudo=True)
-        assert cli[:2] == ("sudo", "-n")
+        assert cli[:2] == ("sudo", "--non-interactive")
         with caplog.at_level(logging.WARNING):
             manager.run(*cli)
     assert any("mpm --sudo" in record.getMessage() for record in caplog.records)

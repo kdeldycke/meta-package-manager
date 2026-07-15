@@ -20,7 +20,8 @@ a mocked ``subprocess.run`` (no test ever launches a real ``sudo``), the escalat
 policy inventories across the manager pool, and the
 :class:`meta_package_manager.sudo._StallWatchdog` end to end through
 :class:`tests.fake_manager.FakeManager` (whose CLI is the Python interpreter, so
-its subprocesses are real but harmless). The ``sudo -n`` command wrapping of
+its subprocesses are real but harmless). The ``sudo --non-interactive`` command
+wrapping of
 ``build_cli()``, the authentication-failure hint of ``run()`` and the CLI wiring
 of ``prime_sudo`` stay in :mod:`tests.test_execution`.
 """
@@ -170,7 +171,7 @@ def test_prime_sudo_warns_without_tty(caplog):
         prime_sudo(ctx, [_escalating_manager()])
     # The non-interactive probe is the only subprocess: no prompt can be answered.
     assert run.call_count == 1
-    assert run.call_args.args[0] == ("sudo", "-n", "-v")
+    assert run.call_args.args[0] == ("sudo", "--non-interactive", "--validate")
     assert any(
         "fakemanager needs administrator rights" in record.getMessage()
         and "no terminal" in record.getMessage()
@@ -198,9 +199,13 @@ def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
             # The non-interactive probe runs first, then authenticates once, up
             # front, before the fan-out, with the branded prompt.
             assert run.call_count == 2
-            assert run.call_args_list[0].args[0] == ("sudo", "-n", "-v")
+            assert run.call_args_list[0].args[0] == (
+                "sudo",
+                "--non-interactive",
+                "--validate",
+            )
             prompt_argv = run.call_args_list[1].args[0]
-            assert prompt_argv[:3] == ("sudo", "-v", "-p")
+            assert prompt_argv[:3] == ("sudo", "--validate", "--prompt")
             assert prompt_argv[3].startswith("[mpm] password for ")
             assert "fakemanager" in prompt_argv[3]
             assert _SUDO_CACHE_WARM.is_set()
@@ -229,7 +234,7 @@ def test_prime_sudo_is_idempotent():
         finally:
             ctx.close()
     assert run.call_count == 1
-    assert run.call_args.args[0] == ("sudo", "-n", "-v")
+    assert run.call_args.args[0] == ("sudo", "--non-interactive", "--validate")
 
 
 def test_prime_sudo_warm_probe_stays_silent_on_tty(capsys):
@@ -247,7 +252,7 @@ def test_prime_sudo_warm_probe_stays_silent_on_tty(capsys):
         try:
             prime_sudo(ctx, [_escalating_manager()])
             assert run.call_count == 1
-            assert run.call_args.args[0] == ("sudo", "-n", "-v")
+            assert run.call_args.args[0] == ("sudo", "--non-interactive", "--validate")
             assert _SUDO_CACHE_WARM.is_set()
         finally:
             ctx.close()
@@ -297,7 +302,7 @@ def test_prime_sudo_cold_internal_only_never_prompts_on_tty(capsys, caplog):
         finally:
             ctx.close()
     assert run.call_count == 1
-    assert run.call_args.args[0] == ("sudo", "-n", "-v")
+    assert run.call_args.args[0] == ("sudo", "--non-interactive", "--validate")
     assert not _SUDO_CACHE_WARM.is_set()
     assert not caplog.records
     assert capsys.readouterr().err == ""
@@ -391,7 +396,63 @@ def test_prime_sudo_notice_names_managers_and_subcommand(
         finally:
             ctx.close()
     assert expected_notice in capsys.readouterr().err
-    assert run.call_args_list[1].args[0] == ("sudo", "-v", "-p", expected_prompt)
+    assert run.call_args_list[1].args[0] == (
+        "sudo",
+        "--validate",
+        "--prompt",
+        expected_prompt,
+    )
+
+
+@pytest.mark.parametrize(
+    "manager_ids",
+    (
+        pytest.param(("alpha", "beta"), id="plain-slugs"),
+        # Adversarial ids a creative future prompt must still neutralize: sudo expands
+        # %h/%H/%p/%u/%U in --prompt, and %% collapses to a literal %.
+        pytest.param(("we%ird", "100%"), id="percent"),
+        pytest.param(("%p", "%u%H"), id="sudo-escapes"),
+        pytest.param(("a%%b",), id="pre-doubled"),
+    ),
+)
+def test_sudo_prompt_respects_sudo_constraints(manager_ids):
+    """Whatever the prompt copy becomes, the ``--prompt`` argument handed to ``sudo``
+    must stay within sudo's constraints.
+
+    Locks the properties rather than the wording, so a future rewording trips here
+    only if it breaks sudo: every ``%`` must be doubled (``sudo --prompt`` expands
+    ``%h``/``%H``/``%p``/``%u``/``%U``, and a lone ``%`` is undefined), the prompt
+    must be a single line (a newline would detach the ask from the input cursor),
+    and it must end with a space so the typed password is not glued to the text.
+    """
+    ctx = click.Context(click.Command("upgrade"))
+    managers = []
+    for manager_id in manager_ids:
+        manager = _escalating_manager()
+        manager.id = manager_id
+        managers.append(manager)
+    with (
+        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
+        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
+        patch("sys.stdin.isatty", return_value=True),
+        patch("sys.stderr.isatty", return_value=True),
+        patch("meta_package_manager.sudo.subprocess.run") as run,
+    ):
+        # Cold probe, then a failed password prompt: no keepalive to tear down.
+        run.return_value = subprocess.CompletedProcess((), 1)
+        try:
+            prime_sudo(ctx, managers)
+        finally:
+            ctx.close()
+    prompt_argv = run.call_args_list[1].args[0]
+    assert prompt_argv[:3] == ("sudo", "--validate", "--prompt")
+    prompt = prompt_argv[3]
+    assert prompt
+    # Doubling check: with every %% pair removed, no expandable % may remain.
+    assert "%" not in prompt.replace("%%", "")
+    assert "\n" not in prompt
+    assert "\r" not in prompt
+    assert prompt.endswith(" ")
 
 
 @pytest.mark.parametrize(

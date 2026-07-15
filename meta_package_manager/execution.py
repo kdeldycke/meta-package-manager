@@ -1040,7 +1040,7 @@ class CLIExecutor:
 
         .. code-block:: shell-session
 
-            $ [<pre_cmds>|sudo -n] <cli_path> <pre_args> <*args> <post_args>
+            $ [<pre_cmds>|sudo --non-interactive] <cli_path> <pre_args> <*args> <post_args>
 
         * :py:attr:`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
           is added before the CLI path.
@@ -1072,7 +1072,7 @@ class CLIExecutor:
         On UNIX, an operation marked privileged (``sudo=True``) is escalated only when
         the per-manager policy opts in (:py:attr:`sudo`, falling back to
         :py:attr:`default_sudo`). It is then run through `sudo <https://www.sudo.ws>`_
-        with ``-n`` (non-interactive: it spends the credential cache warmed by
+        with ``--non-interactive`` (it spends the credential cache warmed by
         :py:func:`~meta_package_manager.sudo.prime_sudo` and fails fast rather than
         blocking on a password prompt).
         When escalation applies, ``override_pre_cmds`` is not allowed to be set and
@@ -1091,8 +1091,8 @@ class CLIExecutor:
         # (the ``sudo`` override, else ``default_sudo``), and the platform has ``sudo``.
         # A non-UNIX host simply does not escalate rather than raising.
         escalate = bool(sudo and _resolved_sudo(self) and current_platform() in UNIX)
-        # Sudo replaces any pre-command, be it overridden or automatic. ``-n`` keeps the
-        # call non-interactive: it spends the credential cache warmed up front by
+        # Sudo replaces any pre-command, be it overridden or automatic.
+        # ``--non-interactive`` spends the credential cache warmed up front by
         # prime_sudo() and fails fast instead of blocking on an invisible /dev/tty
         # password prompt buried in the concurrent fan-out.
         if escalate:

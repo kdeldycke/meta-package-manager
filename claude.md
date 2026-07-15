@@ -380,6 +380,8 @@ Always prefer long-form options over short-form for readability when invoking co
 - Use `--verbose` instead of `-v`.
 - Use `--recursive` instead of `-r`.
 
+The same rule applies to every argv `mpm` constructs at runtime: the manager commands built by the manager classes and definitions, and the `sudo` invocations in `meta_package_manager/sudo.py` (`sudo --non-interactive --validate`, not `sudo -n -v`). Long forms make the `--verbosity INFO` command disclosure self-documenting.
+
 ### `uv` flags in CI workflows
 
 When invoking `uv` and `uvx` commands in GitHub Actions workflows:

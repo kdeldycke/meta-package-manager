@@ -26,7 +26,8 @@ each mutating subcommand.
 
 Why priming exists: a concurrent state-changing command mutes per-manager output
 and feeds each child ``stdin=/dev/null``, so a ``sudo`` password prompt raised
-mid-run (by mpm's own ``sudo -n`` or by a manager that escalates internally, like
+mid-run (by mpm's own ``sudo --non-interactive`` or by a manager that escalates
+internally, like
 Homebrew ``cask``) lands invisibly on ``/dev/tty`` and can stall the run up to the
 mutating timeout. Priming first probes the credential cache non-interactively:
 found warm, it is silently kept alive for the whole run; found cold on a terminal,
@@ -110,18 +111,20 @@ silent-call stall watchdog skips arming while this flag is set.
     goes unflagged. Priming still authenticates; only the watchdog is suppressed.
 """
 
-_SUDO_ESCALATION_PREFIX: Final = ("sudo", "-n")
+_SUDO_ESCALATION_PREFIX: Final = ("sudo", "--non-interactive")
 """Argv prefix mpm prepends to escalate a manager command non-interactively.
 
 :py:meth:`CLIExecutor.build_cli
 <meta_package_manager.execution.CLIExecutor.build_cli>` emits it and
 :py:meth:`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>` matches
-it byte-for-byte to turn a ``sudo -n`` authentication failure into an actionable
+it byte-for-byte to turn a ``sudo --non-interactive`` authentication failure into
+an actionable
 hint, so the two sites must stay in lockstep.
 """
 
 _SUDO_KEEPALIVE_INTERVAL: Final = 60
-"""Seconds between ``sudo -n -v`` credential-cache refreshes during a run.
+"""Seconds between ``sudo --non-interactive --validate`` credential-cache
+refreshes during a run.
 
 Comfortably under sudo's default ``timestamp_timeout`` (5 minutes), so the cache warmed
 by :py:func:`prime_sudo` stays valid for the whole command. A host configured with a
@@ -143,7 +146,8 @@ def _resolved_sudo(manager: CLIExecutor) -> bool:
 def _is_sudo_auth_failure(error: str) -> bool:
     """Whether ``error`` is ``sudo`` refusing to authenticate non-interactively.
 
-    ``sudo -n`` writes one of these to ``<stderr>`` when it has no cached credentials
+    ``sudo --non-interactive`` writes one of these to ``<stderr>`` when it has no
+    cached credentials
     and cannot prompt for a password (nothing cached, no controlling terminal, no
     askpass helper). Lets :py:meth:`CLIExecutor.run
     <meta_package_manager.execution.CLIExecutor.run>` turn an opaque escalation
@@ -175,7 +179,11 @@ def _start_sudo_keepalive(ctx: Context) -> None:
 
     def keepalive() -> None:
         while not stop.wait(_SUDO_KEEPALIVE_INTERVAL):
-            subprocess.run(("sudo", "-n", "-v"), capture_output=True, check=False)
+            subprocess.run(
+                ("sudo", "--non-interactive", "--validate"),
+                capture_output=True,
+                check=False,
+            )
 
     threading.Thread(target=keepalive, daemon=True).start()
     _SUDO_CACHE_WARM.set()
@@ -190,11 +198,13 @@ def _start_sudo_keepalive(ctx: Context) -> None:
 def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     """Warm the ``sudo`` credential cache, up front, for a mutating fan-out.
 
-    Probes the cache non-interactively (``sudo -n -v``) before considering any
-    prompt. A warm cache (pre-authenticated ``sudo -v``, a ``NOPASSWD`` rule, a
+    Probes the cache non-interactively (``sudo --non-interactive --validate``)
+    before considering any
+    prompt. A warm cache (pre-authenticated ``sudo --validate``, a ``NOPASSWD`` rule, a
     recent run) is silently kept fresh for the whole invocation by
     :py:func:`_start_sudo_keepalive`, so every later escalation on the same
-    terminal, mpm's own ``sudo -n`` as well as a manager's internal ``sudo``
+    terminal, mpm's own ``sudo --non-interactive`` as well as a manager's internal
+    ``sudo``
     (:py:attr:`CLIExecutor.internal_sudo
     <meta_package_manager.execution.CLIExecutor.internal_sudo>`), spends the cache
     instead of blocking on an invisible prompt inside the concurrent fan-out. Only
@@ -233,7 +243,11 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     ctx.meta[_SUDO_PRIMED] = True
 
     try:
-        probe = subprocess.run(("sudo", "-n", "-v"), capture_output=True, check=False)
+        probe = subprocess.run(
+            ("sudo", "--non-interactive", "--validate"),
+            capture_output=True,
+            check=False,
+        )
     except OSError:
         # No sudo on PATH (FileNotFoundError), or one that cannot be run: not executable
         # for this user (PermissionError), not a valid binary (OSError). Degrade to a
@@ -241,7 +255,8 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         logging.warning("sudo could not be run: managers needing root may fail.")
         return
     if probe.returncode == 0:
-        # Cache already warm (a prior ``sudo -v``, a NOPASSWD rule): keep it fresh,
+        # Cache already warm (a prior ``sudo --validate``, a NOPASSWD rule):
+        # keep it fresh,
         # silently. A CI job with pre-cached credentials thus gets the keepalive
         # instead of the no-terminal warning.
         _start_sudo_keepalive(ctx)
@@ -254,7 +269,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
                 f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
                 "rights, but no terminal is available to prompt for a password: "
                 "they may fail. Re-run in a terminal, pre-authenticate with "
-                "`sudo -v`, or drop them with --no-sudo.",
+                "`sudo --validate`, or drop them with --no-sudo.",
             )
         # An internal-only selection stays silent: each manager's own sudo fails
         # fast and surfaces through its error path.
@@ -272,10 +287,11 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         f"{ctx.command.name}: enter your password.",
         err=True,
     )
-    # ``sudo -p`` expands %-escapes; manager IDs are plain slugs, so the escaping
+    # ``sudo --prompt`` expands %-escapes; manager IDs are plain slugs, so the escaping
     # is belt-and-braces.
     prompt = f"[mpm] password for {ids}: ".replace("%", "%%")
-    if subprocess.run(("sudo", "-v", "-p", prompt), check=False).returncode != 0:
+    prompt_cli = ("sudo", "--validate", "--prompt", prompt)
+    if subprocess.run(prompt_cli, check=False).returncode != 0:
         logging.warning(
             "Could not acquire sudo credentials: managers needing root may fail.",
         )

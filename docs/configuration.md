@@ -65,11 +65,11 @@ See the [release-age cooldown](#release-age-cooldown) section below for the safe
 
 Click-extra's built-in options ride the same configuration pipeline. The most useful ones:
 
-| Key            | Type    | Default             | Description                                                                                                                                                                                                                                       |
-| :------------- | :------ | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `verbosity`    | string  | `"WARNING"`         | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`.                                                                                                                                                                                 |
-| `progress`     | boolean | `true`              | Show a progress spinner on stderr during long manager CLI calls. Self-disabled off a terminal (pipes, `TERM=dumb`, CI) and by `--accessible`; mpm also suppresses it for serialized output and at DEBUG verbosity.                                  |
-| `table_format` | string  | `"rounded-outline"` | Table rendering style (see `mpm --help` for all choices).                                                                                                                                                                                          |
+| Key            | Type    | Default             | Description                                                                                                                                                                                                        |
+| :------------- | :------ | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verbosity`    | string  | `"WARNING"`         | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`.                                                                                                                                                 |
+| `progress`     | boolean | `true`              | Show a progress spinner on stderr during long manager CLI calls. Self-disabled off a terminal (pipes, `TERM=dumb`, CI) and by `--accessible`; mpm also suppresses it for serialized output and at DEBUG verbosity. |
+| `table_format` | string  | `"rounded-outline"` | Table rendering style (see `mpm --help` for all choices).                                                                                                                                                          |
 
 ### Release-age cooldown
 

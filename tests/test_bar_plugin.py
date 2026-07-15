@@ -255,7 +255,7 @@ class TestBarPlugin:
                     # Package upgrade line.
                     (
                         r"(--)?[\S ]+ \S+ → \S+ \| shell=\S+( param\d+=\S+)+ "
-                        r"refresh=true terminal=(true|false alternate=true)$",
+                        r"ansi=true refresh=true terminal=(true|false alternate=true)$",
                         False,
                     ),
                 ),
@@ -269,7 +269,7 @@ class TestBarPlugin:
                     # Package upgrade line.
                     (
                         r"(--)?[\S ]+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ "
-                        r"font=[Mm]enlo size=12 refresh=true "
+                        r"font=[Mm]enlo size=12 ansi=true refresh=true "
                         r"terminal=(true|false alternate=true)?$",
                         False,
                     ),

@@ -44,6 +44,7 @@ from click_extra.table import TableFormat, render_table
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
+from .version import diff_versions
 
 
 class BarPluginRenderer(MPMPlugin):
@@ -124,11 +125,13 @@ class BarPluginRenderer(MPMPlugin):
         """Main method implementing the final structured rendering in *Bar plugin
         dialect.
 
-        ..todo::
-
-            Wait for ANSI-aware layout in table to be merged upstream so we can highly
-            version differences in bar plugin. See:
-            https://github.com/astanin/python-tabulate/pull/184
+        Version columns carry the ANSI colors produced by
+        :py:func:`meta_package_manager.version.diff_versions`: common prefix
+        gray, old suffix red, new suffix green. Table alignment survives the
+        escape codes thanks to ``tabulate``'s ANSI-aware layout
+        (`astanin/python-tabulate#184
+        <https://github.com/astanin/python-tabulate/pull/184>`_), and package
+        menu lines opt into rendering them with the ``ansi=true`` parameter.
         """
         managers = outdated_data.values()
         font = self.monospace_font if self.table_rendering else self.default_font
@@ -150,18 +153,18 @@ class BarPluginRenderer(MPMPlugin):
             plural = "s" if package_count > 1 else ""
             package_label = f"package{plural}"
 
-            table = [
-                (
-                    (
-                        p.get("name") or p.get("id"),
-                        p["installed_version"],
-                        "→",
-                        p["latest_version"],
-                    ),
-                    p["upgrade_cli"],
+            table = []
+            for p in manager["packages"]:
+                installed, latest = diff_versions(
+                    p["installed_version"] if p["installed_version"] else "?",
+                    p["latest_version"],
                 )
-                for p in manager["packages"]
-            ]
+                table.append(
+                    (
+                        (p.get("name") or p.get("id"), installed, "→", latest),
+                        p["upgrade_cli"],
+                    )
+                )
 
             # Table-like rendering
             if self.table_rendering:
@@ -194,12 +197,15 @@ class BarPluginRenderer(MPMPlugin):
                 error = "⚠️ "
             self.pp(f"{error}{header}", font)
 
-            # Print a menu entry for each outdated packages.
+            # Print a menu entry for each outdated packages. The ansi=true
+            # parameter renders the version-diff colors; SwiftBar defaults it
+            # to false, Xbar to true, so it is always spelled out.
             for line, upgrade_cli in zip(formatted_lines, upgrade_cli_list):
                 self.print_cli_item(
                     f"{submenu}{line}",
                     upgrade_cli,
                     font,
+                    "ansi=true",
                     "refresh=true",
                 )
 

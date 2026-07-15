@@ -24,6 +24,7 @@
 - [mpm] The per-manager table of the augmentations page now renders live at Sphinx build time, derived from the capability declarations in the manager implementations. Drops `steamcmd`'s stale full-`upgrade --all` row.
 - [mpm] The PyPI keywords and the labeller file/content rules in `pyproject.toml` are now generated from the manager pool by `docs/docs_update.py`. Every bundled manager gains labeller coverage, definition-file globs are anchored on their full stem, and the `chocotaley` keyword typo is fixed.
 - [mpm] Bundled manager definitions now embed their version-probe and parser output samples in a `[samples]` table of their own TOML file; the test suite derives its checks from the shipped files instead of hardcoded per-manager fixtures.
+- [bar-plugin] Version differences are now highlighted in the outdated-package menu lines, with the same coloring as `mpm outdated`: common prefix gray, installed suffix red, latest suffix green. Package lines carry `ansi=true` so both SwiftBar and Xbar render the colors.
 
 ## [`7.2.0` (2026-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v7.1.0...v7.2.0)
 

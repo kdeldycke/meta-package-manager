@@ -778,11 +778,12 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
         )
     },
     # Definition-only fields, with no OVERRIDABLE_FIELDS counterpart: a built-in
-    # manager's escalation default, version probe and Brewfile mapping are reviewed
+    # manager's escalation policies, version probe and Brewfile mapping are reviewed
     # code, while a definition declares them as data.
     "brewfile_entry_type": _to_str,
     "brewfile_skip_warning": _to_str,
     "default_sudo": _to_bool,
+    "internal_sudo": _to_bool,
     "version_cli": _to_str,
 }
 """CLI-execution attributes a definition may set, mostly reusing the override
@@ -792,7 +793,7 @@ The runtime-preference fields (``deprecated``, ``dry_run``, ``ignore_auto_update
 ``stop_on_error``) are excluded: they are command-line/global concerns, not part of a
 manager's identity, and resolve through the usual option precedence.
 
-Four fields are definition-only:
+Five fields are definition-only:
 
 - ``brewfile_entry_type`` maps the manager onto a Homebrew Bundle DSL entry so its
   installed packages join ``mpm dump --brewfile`` exports (see
@@ -804,6 +805,10 @@ Four fields are definition-only:
   :py:attr:`~meta_package_manager.execution.CLIExecutor.default_sudo`). Operations
   marked ``sudo = true`` escalate by default, while the user's global ``--no-sudo``
   flag or a ``sudo`` override still win.
+- ``internal_sudo`` marks a manager whose CLI invokes ``sudo`` itself mid-run (see
+  :py:attr:`~meta_package_manager.execution.CLIExecutor.internal_sudo`). mpm never
+  wraps its commands in ``sudo``; priming instead reuses a warm credential cache
+  for these internal escalations. See ``docs/sudo.md``.
 - ``version_cli`` names an alternate binary for the version probe (see
   :py:attr:`~meta_package_manager.execution.CLIExecutor.version_cli`), for suites
   whose own binaries expose no version flag (OpenBSD's ``pkg_add``).

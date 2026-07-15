@@ -18,12 +18,10 @@ from __future__ import annotations
 
 import logging
 import os
-import subprocess
 import threading
 import time
 from unittest.mock import patch
 
-import click
 import pytest
 from click_extra.execution import _LIVE_PROCESSES, terminate_live_processes
 from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
@@ -36,8 +34,6 @@ from meta_package_manager.execution import (
     READ_ONLY_TIMEOUT,
     SPINNER_DELAY,
     CLIError,
-    _is_sudo_auth_failure,
-    prime_sudo,
 )
 from meta_package_manager.pool import pool
 
@@ -317,7 +313,8 @@ def test_run_registers_live_process_then_discards_it():
 
 
 # Privilege escalation: a per-op marker gated by a per-manager policy, escalated with
-# `sudo -n`, primed once up front so a password prompt never stalls the fan-out.
+# `sudo -n`. The priming, keepalive, policy inventories and stall watchdog are covered
+# in test_sudo.py; these exercise the wrapping and failure-hint paths of execution.py.
 
 
 def test_build_cli_escalates_with_sudo_n_when_policy_on():
@@ -365,43 +362,6 @@ def test_build_cli_marker_required_for_escalation():
     assert "sudo" not in cli
 
 
-def test_default_sudo_matches_system_managers():
-    """Exactly the system package managers (classes, their subclasses and bundled
-    definitions alike) escalate by default; user-level managers and pkg (which has
-    no sudo markers) do not."""
-    escalating = {mid for mid, manager in pool.items() if type(manager).default_sudo}
-    assert escalating == {
-        "apk",
-        "apt",
-        "apt-mint",
-        "cave",
-        "deb-get",
-        "dnf",
-        "dnf5",
-        "emerge",
-        "eopkg",
-        "fwupd",
-        "pacaur",
-        "pacman",
-        "paru",
-        "pkg-tools",
-        "pkgin",
-        "ports",
-        "slapt-get",
-        "sorcery",
-        "sun-tools",
-        "swupd",
-        "tazpkg",
-        "urpmi",
-        "xbps",
-        "yay",
-        "yum",
-        "zypper",
-    }
-    for mid in ("pkg", "brew", "cask", "npm", "pip", "cargo"):
-        assert pool[mid].default_sudo is False
-
-
 def test_npm_sudo_marker_dormant_until_opted_in():
     """npm marks its global installs privileged, but stays unescalated until the user
     opts in via --sudo / config (default_sudo is False)."""
@@ -415,127 +375,6 @@ def test_npm_sudo_marker_dormant_until_opted_in():
         assert "sudo" not in manager.build_cli("update", sudo=True)
         manager.sudo = True
         assert manager.build_cli("update", sudo=True)[:2] == ("sudo", "-n")
-
-
-def _escalating_manager() -> FakeManager:
-    """A fake manager whose policy escalates, to trip prime_sudo."""
-    manager = FakeManager()
-    manager.sudo = True
-    return manager
-
-
-def test_prime_sudo_skips_when_no_manager_escalates():
-    ctx = click.Context(click.Command("mpm"))
-    with patch("meta_package_manager.execution.subprocess.run") as run:
-        prime_sudo(ctx, [FakeManager()])
-    run.assert_not_called()
-
-
-def test_prime_sudo_skips_on_windows():
-    ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.execution.is_any_windows", return_value=True),
-        patch("meta_package_manager.execution.subprocess.run") as run,
-    ):
-        prime_sudo(ctx, [_escalating_manager()])
-    run.assert_not_called()
-
-
-def test_prime_sudo_skips_when_root():
-    ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.execution.is_any_windows", return_value=False),
-        patch("meta_package_manager.execution.os.geteuid", return_value=0, create=True),
-        patch("meta_package_manager.execution.subprocess.run") as run,
-    ):
-        prime_sudo(ctx, [_escalating_manager()])
-    run.assert_not_called()
-
-
-def test_prime_sudo_skips_on_dry_run():
-    ctx = click.Context(click.Command("mpm"))
-    manager = _escalating_manager()
-    manager.dry_run = True
-    with (
-        patch("meta_package_manager.execution.is_any_windows", return_value=False),
-        patch(
-            "meta_package_manager.execution.os.geteuid", return_value=1000, create=True
-        ),
-        patch("meta_package_manager.execution.subprocess.run") as run,
-    ):
-        prime_sudo(ctx, [manager])
-    run.assert_not_called()
-
-
-def test_prime_sudo_warns_without_tty(caplog):
-    ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.execution.is_any_windows", return_value=False),
-        patch(
-            "meta_package_manager.execution.os.geteuid", return_value=1000, create=True
-        ),
-        patch("sys.stdin.isatty", return_value=False),
-        patch("meta_package_manager.execution.subprocess.run") as run,
-        caplog.at_level(logging.WARNING),
-    ):
-        prime_sudo(ctx, [_escalating_manager()])
-    run.assert_not_called()
-    assert any("no terminal" in record.getMessage() for record in caplog.records)
-
-
-def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
-    ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.execution.is_any_windows", return_value=False),
-        patch(
-            "meta_package_manager.execution.os.geteuid", return_value=1000, create=True
-        ),
-        patch("sys.stdin.isatty", return_value=True),
-        patch("sys.stderr.isatty", return_value=True),
-        patch("meta_package_manager.execution.subprocess.run") as run,
-    ):
-        run.return_value = subprocess.CompletedProcess((), 0)
-        prime_sudo(ctx, [_escalating_manager()])
-        # Authenticated once, up front, before the fan-out.
-        assert run.call_args_list[0].args[0] == ("sudo", "-v")
-        # Stop the keep-alive (a stop callback was registered on the context) while
-        # subprocess.run is still patched, so no real sudo escapes the test.
-        ctx.close()
-
-
-def test_prime_sudo_is_idempotent():
-    ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.execution.is_any_windows", return_value=False),
-        patch(
-            "meta_package_manager.execution.os.geteuid", return_value=1000, create=True
-        ),
-        patch("sys.stdin.isatty", return_value=True),
-        patch("sys.stderr.isatty", return_value=True),
-        patch("meta_package_manager.execution.subprocess.run") as run,
-    ):
-        run.return_value = subprocess.CompletedProcess((), 0)
-        prime_sudo(ctx, [_escalating_manager()])
-        prime_sudo(ctx, [_escalating_manager()])
-        ctx.close()
-    prompts = [c for c in run.call_args_list if c.args[0] == ("sudo", "-v")]
-    assert len(prompts) == 1
-
-
-@pytest.mark.parametrize(
-    ("error", "expected"),
-    (
-        ("sudo: a password is required", True),
-        ("sudo: a terminal is required to read the password", True),
-        ("sudo: no tty present and no askpass program specified", True),
-        ("SUDO: A PASSWORD IS REQUIRED", True),
-        ("", False),
-        ("error: package not found", False),
-        ("sudo: command not found", False),
-    ),
-)
-def test_is_sudo_auth_failure(error, expected):
-    assert _is_sudo_auth_failure(error) is expected
 
 
 @pytest.mark.skipif(is_any_windows(), reason="escalation is UNIX-only")
@@ -595,3 +434,59 @@ def test_read_subcommand_does_not_prime_sudo(invoke, fake_pool):
     with patch("meta_package_manager.cli.prime_sudo") as prime:
         invoke("--dry-run", "installed")
     assert not prime.called
+
+
+@pytest.mark.parametrize(
+    ("args", "expected_operation"),
+    (
+        pytest.param(("remove", "fake-pkg-alpha"), "remove", id="remove"),
+        pytest.param(("upgrade", "fake-pkg-alpha"), "upgrade", id="upgrade-packages"),
+    ),
+)
+def test_sourced_operation_restamps_active_operation(
+    invoke, fake_pool, monkeypatch, args, expected_operation
+):
+    """A sourced ``remove``/``upgrade <packages>`` restores the real operation stamp
+    before its mutating fan-out.
+
+    Source discovery re-selects the managers with ``installed``, which re-stamps
+    ``_active_operation = "installed"`` on the shared singletons. Left uncorrected, the
+    mutating commands would resolve the read-only timeout and skip the escalator stall
+    watchdog (both keyed on ``_active_operation``). This drives the real selection flow,
+    unlike the watchdog unit tests that stamp the attribute by hand: it fails if the
+    dispatch stops restoring the stamp.
+    """
+    # The sourced dispatch fetches the acting manager through ``pool.get``; return the
+    # fake so a real task is built. ``fake-pkg-alpha`` is in the fake's installed set,
+    # so an untied spec resolves to it without touching a real binary.
+    monkeypatch.setattr(pool, "get", lambda manager_id: fake_pool)
+    # Cooldown gating is host-dependent; permit unconditionally so the task is built.
+    monkeypatch.setattr(
+        "meta_package_manager.cli.cooldown_permits", lambda manager: True
+    )
+    invoke("--dry-run", *args)
+    assert fake_pool._active_operation == expected_operation
+
+
+def test_untied_install_search_runs_under_read_only_stamp(
+    invoke, fake_pool, monkeypatch
+):
+    """The untied-install priority search runs under the ``search`` stamp, not
+    ``install``.
+
+    The search is read-only and can never escalate, so it must not resolve the mutating
+    timeout nor arm the internal-escalator stall watchdog (both keyed on
+    ``_active_operation``). Without the stamp, a slow ``brew search`` of a cask would be
+    misread as a hidden password prompt.
+    """
+    recorded = {}
+
+    def fake_search(*, extended, exact, query):
+        recorded["operation"] = fake_pool._active_operation
+        return iter(())
+
+    monkeypatch.setattr(fake_pool, "refiltered_search", fake_search)
+    # An untied name the fake does not install is unmatched, so it drops onto the
+    # sequential priority search that probes each manager with refiltered_search.
+    invoke("--dry-run", "install", "unmatched-name")
+    assert recorded["operation"] == Operations.search.name

@@ -870,6 +870,10 @@ class Cask(Homebrew):
     platforms = MACOS  # type: ignore[assignment]
     """Casks are only available on macOS, not Linux or WSL."""
 
+    internal_sudo = True
+    """Cask artifacts (``.pkg`` installers, kernel extensions) run ``sudo`` from
+    inside ``brew``."""
+
     cli_names = ("brew",)
 
     post_args = ("--cask",)

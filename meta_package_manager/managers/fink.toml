@@ -26,6 +26,8 @@ name = "Fink"
 homepage_url = "https://www.finkproject.org"
 platforms = ["macos"]
 cli_names = ["fink"]
+# fink self-escalates through /usr/bin/sudo: see the parsing notes above.
+internal_sudo = true
 # Only the first line of `fink --version` is stable: "Package manager version:
 # 0.45.6". The distribution and copyright lines below it vary.
 version_regexes = ['Package manager version: (?P<version>\S+)']

@@ -31,10 +31,10 @@ shared ``✓``/``✗`` ledger (:py:class:`meta_package_manager.execution.Operati
 and the :py:func:`meta_package_manager.execution.trail_line` atom) that the concurrent
 and sequential paths both report through.
 
-Cutting across both altitudes,
-:py:func:`meta_package_manager.execution.prime_sudo` authenticates ``sudo`` once up
-front so a privilege-escalation password prompt never stalls the run from inside a
-concurrent fan-out.
+The ``sudo`` machinery that cuts across both altitudes (credential priming, the
+keepalive, the hidden-prompt stall watchdog) lives in
+:py:mod:`meta_package_manager.sudo`: this module only consumes it, to wrap escalated
+commands and diagnose their failures.
 
 .. note::
     The name and intent mirror :py:mod:`click_extra.execution` from the sibling
@@ -88,6 +88,14 @@ from click_extra.spinner import Spinner
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
 
+from .sudo import (
+    _STALL_NOTICE_OPERATIONS,
+    _SUDO_CACHE_WARM,
+    _SUDO_ESCALATION_PREFIX,
+    _StallWatchdog,
+    _is_sudo_auth_failure,
+    _resolved_sudo,
+)
 from .version import parse_version
 
 TYPE_CHECKING = False
@@ -220,125 +228,6 @@ stalled during the first second. Only the quickest calls (cached version probes,
 trivial metadata queries) finish within this delay and stay silent; anything
 slower (a ``guix search``, a source build) shows the spinner right away.
 """
-
-
-# Up-front sudo priming for a mutating fan-out.
-#
-# A concurrent state-changing command mutes per-manager output and feeds each child
-# ``stdin=/dev/null``, so a ``sudo`` password prompt raised mid-run — by mpm's own
-# ``sudo -n`` or by a manager that escalates internally (Homebrew ``cask``) — lands
-# invisibly on ``/dev/tty`` and can stall the run up to the mutating timeout. Priming
-# authenticates once, up front, in one clearly-labeled prompt, then keeps the credential
-# warm; every later escalation on the same terminal then spends the cache silently.
-
-
-_SUDO_KEEPALIVE_INTERVAL: Final = 60
-"""Seconds between ``sudo -n -v`` credential-cache refreshes during a run.
-
-Comfortably under sudo's default ``timestamp_timeout`` (5 minutes), so the cache warmed
-by :py:func:`prime_sudo` stays valid for the whole command. A host configured with a
-shorter ``timestamp_timeout`` may still see a mid-run escalation re-prompt or fail.
-"""
-
-_SUDO_PRIMED: Final = "mpm_sudo_primed"
-"""``ctx.meta`` key marking that :py:func:`prime_sudo` already ran this invocation."""
-
-_SUDO_ESCALATION_PREFIX: Final = ("sudo", "-n")
-"""Argv prefix mpm prepends to escalate a manager command non-interactively.
-
-:py:meth:`CLIExecutor.build_cli` emits it and :py:meth:`CLIExecutor.run` matches it
-byte-for-byte to turn a ``sudo -n`` authentication failure into an actionable hint, so
-the two sites must stay in lockstep.
-"""
-
-
-def _resolved_sudo(manager: CLIExecutor) -> bool:
-    """Whether ``manager`` escalates: its :py:attr:`~CLIExecutor.sudo` override if set,
-    else its built-in :py:attr:`~CLIExecutor.default_sudo`."""
-    return manager.sudo if manager.sudo is not None else manager.default_sudo
-
-
-def _is_sudo_auth_failure(error: str) -> bool:
-    """Whether ``error`` is ``sudo`` refusing to authenticate non-interactively.
-
-    ``sudo -n`` writes one of these to ``<stderr>`` when it has no cached credentials
-    and cannot prompt for a password (nothing cached, no controlling terminal, no
-    askpass helper). Lets :py:meth:`CLIExecutor.run` turn an opaque escalation failure
-    into an actionable hint.
-    """
-    lowered = error.lower()
-    return "sudo:" in lowered and any(
-        marker in lowered
-        for marker in (
-            "a password is required",
-            "a terminal is required",
-            "no tty present",
-            "askpass",
-        )
-    )
-
-
-def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
-    """Authenticate ``sudo`` once, up front, for a mutating fan-out that will escalate.
-
-    Validates the ``sudo`` credential on mpm's controlling terminal in a single
-    clearly-labeled foreground prompt, then keeps it warm with a background refresh, so
-    every later escalation on the same terminal — mpm's own ``sudo -n`` *and* a manager's
-    internal ``sudo`` (Homebrew ``cask``) — spends the cache instead of blocking on an
-    invisible prompt inside the concurrent fan-out.
-
-    Call at the top of each mutating subcommand, before the fan-out draws its spinner.
-    Returns without prompting (leaving escalations to fail fast through their own
-    ``sudo -n``) when there is nothing to prime:
-
-    - Windows (no ``sudo``) or the process is already root,
-    - no selected manager escalates (:py:func:`_resolved_sudo`),
-    - a dry run (no real CLI is executed),
-    - already primed once this invocation (idempotent), or
-    - no interactive terminal to prompt on: one warning is logged and the escalating
-      managers are left to fail fast rather than block on a prompt no one can answer.
-    """
-    managers = list(managers)
-    if is_any_windows() or getattr(os, "geteuid", lambda: 1)() == 0:
-        return
-    if not any(_resolved_sudo(manager) for manager in managers):
-        return
-    if any(manager.dry_run for manager in managers):
-        return
-    if ctx.meta.get(_SUDO_PRIMED):
-        return
-    ctx.meta[_SUDO_PRIMED] = True
-
-    if not (sys.stdin.isatty() and sys.stderr.isatty()):
-        logging.warning(
-            "Some managers need administrator rights, but no terminal is available to "
-            "prompt for a password: they may fail. Re-run in a terminal, pre-authenticate "
-            "with `sudo -v`, or drop them with --no-sudo.",
-        )
-        return
-
-    echo(
-        "Some managers need administrator rights: enter your password if prompted.",
-        err=True,
-    )
-    if subprocess.run(("sudo", "-v"), check=False).returncode != 0:
-        logging.warning(
-            "Could not acquire sudo credentials: managers needing root may fail.",
-        )
-        return
-
-    # Keep the credential fresh for the whole run so a long fan-out does not outlast
-    # sudo's timestamp and re-prompt mid-flight. Output is captured so a failed refresh
-    # cannot smear the aggregate spinner drawing on stderr. The daemon thread is stopped
-    # when the context closes (normal exit or Ctrl+C both run close callbacks).
-    stop = threading.Event()
-
-    def keepalive() -> None:
-        while not stop.wait(_SUDO_KEEPALIVE_INTERVAL):
-            subprocess.run(("sudo", "-n", "-v"), capture_output=True, check=False)
-
-    threading.Thread(target=keepalive, daemon=True).start()
-    ctx.call_on_close(stop.set)
 
 
 class CLIExecutor:
@@ -510,9 +399,10 @@ class CLIExecutor:
     :py:meth:`meta_package_manager.pool.ManagerPool._select_managers`).
 
     Only privileged operations on UNIX are ever escalated. A manager that escalates
-    *internally* (Homebrew ``cask``) has no such markers and is never wrapped in ``sudo``
-    by ``mpm``: its own ``sudo`` is instead served by the credential cache warmed by
-    :py:func:`prime_sudo`.
+    *internally* (:py:attr:`internal_sudo`) has no such markers and is never wrapped
+    in ``sudo`` by ``mpm``: its own ``sudo`` reuses the credential cache when
+    :py:func:`~meta_package_manager.sudo.prime_sudo` finds it already warm, and is
+    otherwise covered by the silent-call notice in :py:meth:`run`.
     """
 
     default_sudo: bool = False
@@ -523,6 +413,23 @@ class CLIExecutor:
     ``dnf``, ``pacman``, ``zypper``, ...) set this to ``True`` so their
     ``build_cli(..., sudo=True)`` operations escalate out of the box, while staying
     switchable off through :py:attr:`sudo` (``--no-sudo`` or config) for rootless setups.
+    """
+
+    internal_sudo: bool = False
+    """Marks a manager whose CLI invokes ``sudo`` itself mid-run.
+
+    Homebrew ``cask`` runs it from installer artifacts and ``fink`` re-execs its
+    root commands through it. mpm never wraps such a manager's commands: none of
+    its operations carry a ``build_cli(..., sudo=True)`` marker, and running the
+    tool under ``sudo`` is often forbidden outright (``brew`` refuses root).
+    Consumed by :py:func:`~meta_package_manager.sudo.prime_sudo`, whose
+    opportunistic probe keeps an already-warm credential cache alive for these
+    internal escalations, and by the silent-call notice in :py:meth:`run`, which
+    flags a possibly-hidden password prompt on a cold cache.
+
+    Forcing ``sudo = true`` on such a manager (config key or ``--sudo``) still
+    never wraps its commands, but does promote it into the up-front prompt path of
+    :py:func:`~meta_package_manager.sudo.prime_sudo`.
     """
 
     cooldown_env_var: ClassVar[str | None] = None
@@ -902,6 +809,10 @@ class CLIExecutor:
             line with forced environment variables) and streaming the raw output
             live to ``DEBUG``, prefixed with the manager ID, via
             :py:func:`click_extra.execution.run_cli`
+          * flagging, on a terminal, the mutating call of an internal escalator
+            that goes silent on a cold credential cache and may be blocked on a
+            hidden password prompt (see
+            :py:class:`~meta_package_manager.sudo._StallWatchdog`)
           * removing ANSI escape codes from
             :py:attr:`subprocess.CompletedProcess.stdout` and
             :py:attr:`subprocess.CompletedProcess.stderr`
@@ -964,6 +875,19 @@ class CLIExecutor:
             )
             effective_timeout = self._resolve_timeout()
             spinner = self._make_spinner()
+            # A mutating command of an internal escalator (cask, fink) may block
+            # on a hidden ``sudo`` password prompt when prime_sudo() found no warm
+            # credential cache to keep alive. Arm the stall watchdog around the
+            # spawn so the silence is flagged, on the terminal where the prompt
+            # waits, while it can still be answered.
+            watchdog = None
+            if (
+                self.internal_sudo
+                and self._active_operation in _STALL_NOTICE_OPERATIONS
+                and sys.stderr.isatty()
+                and not _SUDO_CACHE_WARM.is_set()
+            ):
+                watchdog = _StallWatchdog(manager_id)
             try:
                 # run_cli() owns the spawn: it registers the child in click-extra's
                 # live-process registry (so the SIGINT handler installed by mpm's
@@ -971,15 +895,26 @@ class CLIExecutor:
                 # logs line by line (prefixed with the manager ID), and enforces
                 # the timeout. The spinner wraps the whole call; its 0.1s delay
                 # keeps it invisible while the invocation line is disclosed.
-                with spinner:
-                    result = run_cli(
-                        clean_args,
-                        extra_env=extra_env,
-                        timeout=effective_timeout,
-                        label=manager_id,
-                        command_level=command_level,
-                        windows_creation_flags=self.windows_creation_flags,
-                    )
+                try:
+                    with spinner:
+                        result = run_cli(
+                            clean_args,
+                            extra_env=extra_env,
+                            timeout=effective_timeout,
+                            label=manager_id,
+                            command_level=command_level,
+                            windows_creation_flags=self.windows_creation_flags,
+                            # The tee routes each streamed record through the
+                            # armed watchdog before the root logger. ``None`` is
+                            # run_cli's default, the untouched root-logger path.
+                            log=watchdog.tee if watchdog is not None else None,
+                        )
+                finally:
+                    # Disarm on every exit of the spawn: success, spawn failure,
+                    # timeout and Ctrl+C all stop the notice thread before their
+                    # handlers below log their own diagnosis.
+                    if watchdog is not None:
+                        watchdog.stop()
             except OSError as ex:
                 winerror = getattr(ex, "winerror", None)
                 # Windows shims trigger WinError 193 when spawned as a subprocess.
@@ -1138,7 +1073,8 @@ class CLIExecutor:
         the per-manager policy opts in (:py:attr:`sudo`, falling back to
         :py:attr:`default_sudo`). It is then run through `sudo <https://www.sudo.ws>`_
         with ``-n`` (non-interactive: it spends the credential cache warmed by
-        :py:func:`prime_sudo` and fails fast rather than blocking on a password prompt).
+        :py:func:`~meta_package_manager.sudo.prime_sudo` and fails fast rather than
+        blocking on a password prompt).
         When escalation applies, ``override_pre_cmds`` is not allowed to be set and
         ``auto_pre_cmds`` is forced to ``False``. A non-UNIX host never escalates.
         """

@@ -70,4 +70,6 @@ Every package `mpm` reports carries a [purl](https://github.com/package-url/purl
 
 ### One sudo prompt, uniform policy
 
-Managers disagree on whether an operation needs root. `mpm` applies a consistent policy: system managers (`apt`, `dnf`, `pacman`, …) escalate, user-level managers do not. On an interactive terminal it authenticates once up front instead of letting each manager prompt mid-run; off a terminal, managers that need root fail fast rather than hanging on a hidden prompt.
+Managers disagree on whether an operation needs root. `mpm` applies a consistent policy: system managers (`apt`, `dnf`, `pacman`, …) escalate, user-level managers do not. Before a state-changing command it probes the `sudo` credential cache and silently keeps a warm one alive; only a cold cache on an interactive terminal draws a single up-front password prompt, naming the escalating managers and branded `[mpm]`, instead of letting each manager prompt mid-run. Off a terminal, managers that need root fail fast rather than hanging on a hidden prompt.
+
+Managers that run `sudo` from inside their own commands (`cask`, `fink`) reuse the warm cache too; on a cold one, a mutating call that goes silent on a terminal draws a warning pointing at the possibly hidden password prompt. See [privilege escalation](sudo.md) for the full story.

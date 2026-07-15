@@ -298,6 +298,15 @@ def test_parse_definition_versionless_catalog_manager():
             id="non-boolean-default-sudo",
         ),
         pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {"sync": {"args": ["s"]}},
+                "internal_sudo": "yes",
+            },
+            "expected a boolean",
+            id="non-boolean-internal-sudo",
+        ),
+        pytest.param(
             {"platforms": ["linux"]},
             "must declare 'operations'",
             id="missing-operations",
@@ -360,6 +369,25 @@ def test_parse_definition_multi_binary_and_sudo():
     assert definition.operations["install"].sudo is True
     assert definition.operations["remove"].cli == "urpme"
     assert definition.operations["remove"].sudo is True
+
+
+def test_parse_definition_internal_sudo():
+    """A definition can mark its tool as escalating internally (like fink), and
+    the flag lands on the built class without touching the wrapping policy."""
+    definition = parse_manager_definition(
+        "finklike",
+        {
+            "platforms": ["macos"],
+            "internal_sudo": True,
+            "operations": {
+                "install": {"args": ["install", "{package_id}"]},
+            },
+        },
+    )
+    assert definition.cli_fields["internal_sudo"] is True
+    klass = build_manager_class(definition)
+    assert klass.internal_sudo is True
+    assert klass.default_sudo is False
 
 
 # Section routing: built-in override vs new-manager definition.

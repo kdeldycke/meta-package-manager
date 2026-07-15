@@ -100,7 +100,6 @@ from .execution import (
     collect_from_managers,
     collect_per_package,
     highlight_cli_name,
-    prime_sudo,
     warn_jobs_ignored,
 )
 from .manager import PackageManager
@@ -117,6 +116,7 @@ from .sbom import (
 )
 from .sorting import SortableField, print_sorted_table
 from .specifier import VERSION_SEP, Solver, Specifier
+from .sudo import prime_sudo
 from .summary import package_counts, print_summary, sbom_summary
 from .version import diff_versions
 
@@ -1777,6 +1777,14 @@ def _dispatch_sourced_operation(
                 )
             )
 
+    # The sourcing selection above re-stamped `_active_operation = "installed"` on the
+    # shared manager singletons. Restore the real operation before the mutating fan-out
+    # so each command resolves the mutating timeout and, for an internal escalator, arms
+    # the hidden-prompt stall watchdog (both keyed on `_active_operation`; see
+    # CLIExecutor.run and ManagerPool._select_managers).
+    for task_manager in {manager for manager, _task in tasks}:
+        task_manager._active_operation = operation.name
+
     collect_per_package(label, done_label, tasks)
 
     if failures:
@@ -1968,6 +1976,12 @@ def install(ctx, packages_specs):
             # Is the package available on this manager? The per-attempt reason is INFO
             # narration; the ✗ trail line below names the manager that missed.
             matches = None
+            # refiltered_search runs the read-only `search` operation. Stamp it as such
+            # so it resolves the read-only timeout and does not arm the mutating stall
+            # watchdog: an internal escalator (cask) would otherwise misread a slow
+            # search as a hidden password prompt. The finally restores "install" for the
+            # attempt below.
+            manager._active_operation = Operations.search.name
             try:
                 matches = tuple(
                     manager.refiltered_search(
@@ -2004,6 +2018,8 @@ def install(ctx, packages_specs):
                 if len(matches) != 1:
                     msg = "Exact search returned multiple packages."
                     raise ValueError(msg)
+            finally:
+                manager._active_operation = Operations.install.name
 
             # On a failed install, fall through to the next manager in priority order.
             if not _attempt_install(manager, spec):

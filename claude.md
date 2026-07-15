@@ -398,7 +398,7 @@ When invoking `uv` and `uvx` commands in GitHub Actions workflows:
 
 The CLI defaults to `WARNING` (inherited from click-extra's `--verbosity` default). Classify every `logging` call into one tier:
 
-- **`WARNING` (default view):** genuine problems only, such as failures with no other on-screen signal, safety notices (cooldown safeguard skipped, a file about to be overwritten), the end-of-run "N managers reported errors" summary, and timeouts. Plus `critical` for fatal conditions. Keep it sparse.
+- **`WARNING` (default view):** genuine problems only, such as failures with no other on-screen signal, safety notices (cooldown safeguard skipped, a file about to be overwritten, a silent CLI call that may be hiding a `sudo` password prompt), the end-of-run "N managers reported errors" summary, and timeouts. Plus `critical` for fatal conditions. Keep it sparse.
 - **`INFO` (narration):** the operational story, like the selection summary, install/dispatch priority, per-manager announcements, discovery (`X has been installed with Y`), capability skips (`X does not implement Y`), "ignoring option ..." no-ops, and every CLI invocation run on the system (the reproducible `$`-prompt line with forced environment variables, so the user can replay by hand what mpm does). Version-detection probes are the exception and stay at `DEBUG`: they are discovery, fired for every candidate manager, and would drown the narration.
 - **`DEBUG` (technical):** raw CLI output (streamed live, line by line, the manager ID glued into the level prefix as `debug:<manager_id>:`), version-detection probes, result refiltering, manager-selection parsing, internal data dumps.
 

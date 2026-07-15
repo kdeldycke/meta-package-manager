@@ -40,13 +40,38 @@ A per-manager `sudo` value wins over the global flag, so you can escalate everyt
 
 ## One prompt, up front
 
-`mpm` runs managers concurrently with their output muted behind a progress spinner, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that will escalate, `mpm` therefore authenticates `sudo` once, up front, on your terminal, then keeps the credential warm for the rest of the run. Every escalated call after that spends the cached credential silently, so nothing blocks in the fan-out.
+`mpm` runs managers concurrently with their output muted behind a progress spinner, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A cache found warm (a prior `sudo -v`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all.
 
-That single prompt also covers a manager that escalates internally: on macOS, `brew`'s own `sudo` (for a cask like the `macfuse` example above) reuses the warmed credential when you pass `--sudo`.
+Only a cold cache, on an interactive terminal, leads to a prompt: a notice names the managers about to escalate and the subcommand, then a single branded `sudo` prompt authenticates once for the whole run, so nothing blocks in the fan-out:
 
-Off a terminal (a pipe, CI, the menubar plugin), `mpm` cannot prompt, so managers needing root fail fast with a clear error instead of hanging.
+```shell-session
+$ mpm upgrade
+apt, deb-get need administrator rights to upgrade: enter your password.
+[mpm] password for apt, deb-get:
+```
 
-A stock `mpm upgrade` on macOS does not pre-authenticate for casks (matching `brew`'s own lazy behavior), so a cask needing admin rights still prompts mid-run; run `mpm --sudo upgrade` for the clean one-prompt experience.
+Off a terminal (a pipe, CI, the menubar plugin), `mpm` cannot prompt: a warning names the managers needing root, and they fail fast with a clear error instead of hanging. To escalate unattended, configure a `NOPASSWD` rule for the managers' commands: the probe then finds the cache warm and keeps it alive. A prior `sudo -v` also works, but only from the same terminal session `mpm` runs in: under sudo's default terminal-keyed timestamps, credentials cached in one terminal do not carry to a `mpm` launched without one (a menubar plugin, a CI step), so `NOPASSWD` is the robust choice there.
+
+## Managers escalating internally
+
+Some managers run `sudo` from inside their own commands: on macOS, `brew` escalates while installing a cask with a privileged payload (the `macfuse` example above), and `fink` re-execs its root commands through `sudo`. `mpm` never wraps these managers in `sudo` (`brew` even refuses to run as root), and most of their runs never escalate, so a stock `mpm upgrade` does not pre-authenticate for them: prompting on every run would be worse than the rare mid-run prompt it avoids.
+
+Two mechanisms cover that rare prompt instead. When the up-front probe finds the credential cache already warm, the keepalive is armed for internal escalators too, so their mid-run `sudo` spends the cache silently. And on a cold cache, a mutating call of such a manager that stays silent for 30 seconds on a terminal draws a warning, while there is still time to answer the prompt:
+
+```shell-session
+$ mpm install macfuse
+(...)
+warning:cask: No output for 30s: may be waiting on a hidden password prompt. Last output: "==> Running installer for macfuse; your password may be necessary."
+```
+
+For a guaranteed one-prompt experience, opt the manager into up-front authentication with a scoped `sudo = true` override:
+
+```toml
+[mpm.managers.cask]
+sudo = true # Authenticate up front before any privileged cask payload.
+```
+
+or scope the global flag to the manager: `mpm --cask --sudo upgrade`. Prefer these to a bare `mpm --sudo upgrade`, which is broader than it looks: the global flag covers every selected manager, and also activates dormant privileged markers like `pip`'s and `npm`'s, wrapping their global installs in `sudo`.
 
 ## Running `mpm` itself as root
 

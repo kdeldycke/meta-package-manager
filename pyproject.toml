@@ -211,11 +211,7 @@ dependencies = [
   # ValidationError import move to click_extra.config, print_table()'s
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
   # default; 8.4.0 covers them all.
-  #
-  # The `.dev0` suffix keeps the specifier satisfiable by the unreleased tree
-  # the [tool.uv.sources] git override tracks; tighten to >=8.4 once 8.4.0 is
-  # published and the override is dropped.
-  "click-extra>=8.4.0.dev0",
+  "click-extra>=8.4",
   # extra-platforms 13.1.0 adds the ChromeOS, Clear Linux, SliTaz and Source Mage
   # detections that the chromebrew, swupd, tazpkg and sorcery managers declare.
   "extra-platforms>=13.1",
@@ -374,14 +370,6 @@ packages.find.include = [ "meta_package_manager*" ]
 
 [tool.uv]
 required-version = ">=0.11.23,<0.12"
-# Track click-extra's main branch, which carries the unreleased subprocess-execution
-# primitives mpm delegates to (run_cli, the Ctrl+C child termination machinery, the
-# logging-to-spinner bridge). The lockfile pins the exact commit; refresh it with
-# `uv lock --upgrade-package click-extra`. Switch to the sibling checkout instead
-# ({ path = "../click-extra", editable = true }) to test its work-in-progress changes
-# before they land, and drop this override entirely once click-extra 8.4.0 is
-# published and the version floor is tightened to >=8.4.
-sources.click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in

@@ -20,6 +20,7 @@
 - [mpm] The `mpm managers` table's binary-path highlighting is delegated to click-extra's `highlight_bin_name`, the same renderer as the `$`-prompt and spawn-trace log lines.
 - [mpm] Log lines emitted while a progress spinner animates now print on their own line above it, instead of garbling the in-progress frame.
 - [mpm] Delegate subprocess spawning, output streaming, timeout enforcement and Ctrl+C child termination to `click-extra`.
+- [mpm] Raise the click-extra floor from `8.3.0` to `8.4.0`, the first release shipping the subprocess-execution primitives and the logging-to-spinner bridge `mpm` delegates to.
 - [mpm] Authenticate the GitHub API release lookups in the Guix, Nix and yay cooldown workflow jobs, which flaked on the anonymous rate limit.
 - [mpm] The per-manager table of the augmentations page now renders live at Sphinx build time, derived from the capability declarations in the manager implementations. Drops `steamcmd`'s stale full-`upgrade --all` row.
 - [mpm] The PyPI keywords and the labeller file/content rules in `pyproject.toml` are now generated from the manager pool by `docs/docs_update.py`. Every bundled manager gains labeller coverage, definition-file globs are anchored on their full stem, and the `chocotaley` keyword typo is fixed.

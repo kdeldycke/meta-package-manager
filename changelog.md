@@ -5,10 +5,10 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
-- [mpm] Move the declarative-manager schema, validation and class factory into the new `meta_package_manager.definitions` module, out of `meta_package_manager.config` (which keeps the loading policy: trust gate, override application, registration passes) and `meta_package_manager.manager` (which keeps the base class only).
-- [mpm] Move the cross-manager fan-out machinery (`collect_from_managers`, `collect_per_package`, `OperationTrail`, the shared-lock families and the jobs policy) into the new `meta_package_manager.dispatch` module, out of `meta_package_manager.execution` (which keeps the single-subprocess engine).
-- [mpm] Move the per-command column registries and the table-projection and serialization helpers into the new `meta_package_manager.tables` module, which also absorbs the `meta_package_manager.sorting` module and its `SortableField` vocabulary.
-- [mpm] `meta_package_manager.sbom` no longer re-exports the SBOM writers: import them from `meta_package_manager.sbom.base`, `meta_package_manager.sbom.spdx` and `meta_package_manager.sbom.cyclonedx`.
+- **Breaking:** [mpm] Move the declarative-manager schema, validation and class factory into the new `meta_package_manager.definitions` module, out of `meta_package_manager.config` (which keeps the loading policy: trust gate, override application, registration passes) and `meta_package_manager.manager` (which keeps the base class only).
+- **Breaking:** [mpm] Move the cross-manager fan-out machinery (`collect_from_managers`, `collect_per_package`, `OperationTrail`, the shared-lock families and the jobs policy) into the new `meta_package_manager.dispatch` module, out of `meta_package_manager.execution` (which keeps the single-subprocess engine).
+- **Breaking:** [mpm] Move the per-command column registries and the table-projection and serialization helpers into the new `meta_package_manager.tables` module, which also absorbs the `meta_package_manager.sorting` module and its `SortableField` vocabulary.
+- **Breaking:** [mpm] `meta_package_manager.sbom` no longer re-exports the SBOM writers: import them from `meta_package_manager.sbom.base`, `meta_package_manager.sbom.spdx` and `meta_package_manager.sbom.cyclonedx`.
 - [mpm] The `--query`, `--exact` and `--overwrite` options of `dump` and `sbom` now share a single definition and help text.
 - [mpm] Fix the bar-plugin labeller file rule, whose glob targeted a directory and could never match the plugin's module files.
 - [bar-plugin] The `<xbar.version>` header tracks the package version again: it fell out of the version-bump configuration during the `bump-my-version` migration and was stuck at `7.0.0.dev0`.

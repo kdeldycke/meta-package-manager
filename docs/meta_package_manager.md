@@ -73,6 +73,24 @@
    :undoc-members:
 ```
 
+## meta_package_manager.definitions module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.definitions
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.dispatch module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.dispatch
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.execution module
 
 ```{eval-rst}
@@ -127,15 +145,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.sorting module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.sorting
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.specifier module
 
 ```{eval-rst}
@@ -158,6 +167,15 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.summary
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.tables module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.tables
    :members:
    :show-inheritance:
    :undoc-members:

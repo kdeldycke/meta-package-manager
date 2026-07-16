@@ -421,8 +421,7 @@ class WinGet(PackageManager):
         return self.run_cli(args)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade all outdated packages.
 
         .. code-block:: pwsh-session
 
@@ -455,8 +454,7 @@ class WinGet(PackageManager):
     def upgrade_one_cli(
         self, package_id: str, version: str | None = None
     ) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade the provided package.
 
         .. code-block:: pwsh-session
 

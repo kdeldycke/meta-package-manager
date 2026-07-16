@@ -18,11 +18,18 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from functools import partial
 from operator import attrgetter
 from shutil import which
 
 import pytest
+
+# Shared version-gated TOML reader, re-exported for the whole test suite.
+if sys.version_info >= (3, 11):
+    import tomllib  # noqa: F401
+else:
+    import tomli as tomllib  # type: ignore[import-not-found]  # noqa: F401
 
 # Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.pytest import create_config, runner  # noqa: F401
@@ -182,6 +189,44 @@ def invoke(runner):  # noqa: F811
     yield partial(runner.invoke, mpm)
 
 
+@fixture
+def stub_run_cli(monkeypatch):
+    """Replace a manager's ``run_cli`` with a canned-output stub.
+
+    Returns a ``stub(manager, output)`` callable: every ``run_cli`` call on
+    ``manager`` then returns ``output`` without spawning a subprocess. The
+    workhorse of the output-parsing tests (``test_manager_*``). To assert on
+    the arguments a manager builds instead, see :func:`capture_run_cli`.
+    """
+
+    def stub(manager, output: str) -> None:
+        monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+
+    return stub
+
+
+@fixture
+def capture_run_cli(monkeypatch):
+    """Replace a manager's ``run_cli`` with a positional-argument recorder.
+
+    Returns a ``capture(manager, output="")`` callable, which patches the
+    manager and hands back the list every call's positional arguments are
+    appended to, so a test can assert on the exact CLI the manager builds.
+    """
+
+    def capture(manager, output: str = "") -> list[tuple]:
+        calls: list[tuple] = []
+
+        def fake_run_cli(*args, **kwargs):
+            calls.append(args)
+            return output
+
+        monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+        return calls
+
+    return capture
+
+
 def _patch_pool_with(monkeypatch, fake):
     """Replace ``pool.select_managers`` with a generator yielding ``fake``.
 
@@ -227,7 +272,7 @@ def slow_fake_pool(monkeypatch):
     return _patch_pool_with(monkeypatch, TimingOutFakeManager())
 
 
-@fixture(scope="class")
+@fixture
 def subcmd():
     """Fixture used in ``test_cli_*.py`` files to set the subcommand arguments in all
     CLI calls.
@@ -370,11 +415,6 @@ assert set(PACKAGE_IDS) == set(pool.known_manager_ids)
 # Collection of pre-computed parametrized decorators.
 
 all_managers = pytest.mark.parametrize("manager", pool.values(), ids=attrgetter("id"))
-available_managers = pytest.mark.parametrize(
-    "manager",
-    tuple(m for m in pool.values() if m.available),
-    ids=attrgetter("id"),
-)
 
 all_manager_ids = pytest.mark.parametrize("manager_id", pool.all_manager_ids)
 maintained_manager_ids = pytest.mark.parametrize(
@@ -387,7 +427,7 @@ unsupported_manager_ids = pytest.mark.parametrize(
     pool.unsupported_manager_ids,
 )
 
-manager_classes = pytest.mark.parametrize(  # type: ignore[assignment]
+manager_classes_params = pytest.mark.parametrize(
     "manager_class",
     manager_classes,
     ids=attrgetter("name"),

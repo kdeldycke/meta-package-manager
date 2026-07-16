@@ -21,7 +21,7 @@ import re
 
 import pytest
 
-from meta_package_manager.cli import WHICH_COLUMNS
+from meta_package_manager.tables import WHICH_COLUMNS
 
 from .test_cli import CLISubCommandTests, CLITableTests
 

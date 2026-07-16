@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import logging
 import subprocess
+from contextlib import ExitStack, contextmanager
 from unittest.mock import patch
 
 import click
@@ -115,30 +116,59 @@ def _internal_manager() -> FakeManager:
     return manager
 
 
+@contextmanager
+def prime_sudo_env(
+    *,
+    windows: bool = False,
+    root: bool = False,
+    stdin_tty: bool | None = None,
+    stderr_tty: bool | None = None,
+):
+    """Patch the whole environment ``prime_sudo`` probes, yielding the ``run`` mock.
+
+    Pins the platform (``windows``), the effective user (``root``) and the terminal
+    state (``None`` leaves the real descriptor unpatched, for tests that never reach
+    the TTY check), and replaces ``subprocess.run`` so no test ever launches a real
+    ``sudo``. Callers set the mock's ``return_value``/``side_effect`` to shape the
+    probe and prompt outcomes.
+    """
+    with ExitStack() as stack:
+        stack.enter_context(
+            patch("meta_package_manager.sudo.is_any_windows", return_value=windows),
+        )
+        stack.enter_context(
+            patch(
+                "meta_package_manager.sudo.os.geteuid",
+                return_value=0 if root else 1000,
+                create=True,
+            ),
+        )
+        if stdin_tty is not None:
+            stack.enter_context(patch("sys.stdin.isatty", return_value=stdin_tty))
+        if stderr_tty is not None:
+            stack.enter_context(patch("sys.stderr.isatty", return_value=stderr_tty))
+        yield stack.enter_context(
+            patch("meta_package_manager.sudo.subprocess.run"),
+        )
+
+
 def test_prime_sudo_skips_when_no_manager_escalates():
     ctx = click.Context(click.Command("mpm"))
-    with patch("meta_package_manager.sudo.subprocess.run") as run:
+    with prime_sudo_env() as run:
         prime_sudo(ctx, [FakeManager()])
     run.assert_not_called()
 
 
 def test_prime_sudo_skips_on_windows():
     ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-    ):
+    with prime_sudo_env(windows=True) as run:
         prime_sudo(ctx, [_escalating_manager()])
     run.assert_not_called()
 
 
 def test_prime_sudo_skips_when_root():
     ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=0, create=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-    ):
+    with prime_sudo_env(root=True) as run:
         prime_sudo(ctx, [_escalating_manager()])
     run.assert_not_called()
 
@@ -147,11 +177,7 @@ def test_prime_sudo_skips_on_dry_run():
     ctx = click.Context(click.Command("mpm"))
     manager = _escalating_manager()
     manager.dry_run = True
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-    ):
+    with prime_sudo_env() as run:
         prime_sudo(ctx, [manager])
     run.assert_not_called()
 
@@ -160,13 +186,7 @@ def test_prime_sudo_warns_without_tty(caplog):
     """A cold cache off-terminal: the probe still runs first, then one warning
     names the managers left to fail fast instead of blocking on a prompt."""
     ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("sys.stdin.isatty", return_value=False),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-        caplog.at_level(logging.WARNING),
-    ):
+    with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
         run.return_value = subprocess.CompletedProcess((), 1)
         prime_sudo(ctx, [_escalating_manager()])
     # The non-interactive probe is the only subprocess: no prompt can be answered.
@@ -183,13 +203,7 @@ def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
     """A cold cache on a terminal: probe first, then one branded password prompt,
     then the keepalive until the context closes."""
     ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("sys.stdin.isatty", return_value=True),
-        patch("sys.stderr.isatty", return_value=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-    ):
+    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
         run.side_effect = (
             subprocess.CompletedProcess((), 1),  # Cold-cache probe.
             subprocess.CompletedProcess((), 0),  # Successful password prompt.
@@ -220,13 +234,7 @@ def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
 def test_prime_sudo_is_idempotent():
     """A second call on the same context is a no-op: one probe, ever."""
     ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("sys.stdin.isatty", return_value=True),
-        patch("sys.stderr.isatty", return_value=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-    ):
+    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
         run.return_value = subprocess.CompletedProcess((), 0)
         try:
             prime_sudo(ctx, [_escalating_manager()])
@@ -241,13 +249,7 @@ def test_prime_sudo_warm_probe_stays_silent_on_tty(capsys):
     """A warm credential cache (pre-authenticated, NOPASSWD): no notice, no
     prompt, just the keepalive until the context closes."""
     ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("sys.stdin.isatty", return_value=True),
-        patch("sys.stderr.isatty", return_value=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-    ):
+    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
         run.return_value = subprocess.CompletedProcess((), 0)
         try:
             prime_sudo(ctx, [_escalating_manager()])
@@ -265,13 +267,7 @@ def test_prime_sudo_warm_probe_keeps_alive_off_tty(caplog):
     pre-cached credentials gets the keepalive instead of the no-terminal
     warning."""
     ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("sys.stdin.isatty", return_value=False),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-        caplog.at_level(logging.WARNING),
-    ):
+    with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
         run.return_value = subprocess.CompletedProcess((), 0)
         try:
             prime_sudo(ctx, [_escalating_manager()])
@@ -289,11 +285,7 @@ def test_prime_sudo_cold_internal_only_never_prompts_on_tty(capsys, caplog):
     the stall notice covers the rare mid-run prompt instead."""
     ctx = click.Context(click.Command("mpm"))
     with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("sys.stdin.isatty", return_value=True),
-        patch("sys.stderr.isatty", return_value=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
         caplog.at_level(logging.WARNING),
     ):
         run.return_value = subprocess.CompletedProcess((), 1)
@@ -312,13 +304,7 @@ def test_prime_sudo_cold_internal_only_stays_silent_off_tty(caplog):
     """Off-terminal, an internal-only selection gets no warning: each manager's
     own sudo fails fast and surfaces through its error path."""
     ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("sys.stdin.isatty", return_value=False),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-        caplog.at_level(logging.WARNING),
-    ):
+    with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
         run.return_value = subprocess.CompletedProcess((), 1)
         try:
             prime_sudo(ctx, [_internal_manager()])
@@ -340,12 +326,7 @@ def test_prime_sudo_warns_when_sudo_cannot_run(caplog, probe_error):
     """A UNIX host whose sudo is missing or not executable gets one warning instead
     of the probe crashing prime_sudo. Both raise an OSError subclass from the probe."""
     ctx = click.Context(click.Command("mpm"))
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-        caplog.at_level(logging.WARNING),
-    ):
+    with prime_sudo_env() as run, caplog.at_level(logging.WARNING):
         run.side_effect = probe_error
         prime_sudo(ctx, [_escalating_manager()])
     assert not _SUDO_CACHE_WARM.is_set()
@@ -382,13 +363,7 @@ def test_prime_sudo_notice_names_managers_and_subcommand(
         manager = _escalating_manager()
         manager.id = manager_id
         managers.append(manager)
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("sys.stdin.isatty", return_value=True),
-        patch("sys.stderr.isatty", return_value=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-    ):
+    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
         # Cold probe, then a failed password prompt: no keepalive to tear down.
         run.return_value = subprocess.CompletedProcess((), 1)
         try:
@@ -431,13 +406,7 @@ def test_sudo_prompt_respects_sudo_constraints(manager_ids):
         manager = _escalating_manager()
         manager.id = manager_id
         managers.append(manager)
-    with (
-        patch("meta_package_manager.sudo.is_any_windows", return_value=False),
-        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
-        patch("sys.stdin.isatty", return_value=True),
-        patch("sys.stderr.isatty", return_value=True),
-        patch("meta_package_manager.sudo.subprocess.run") as run,
-    ):
+    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
         # Cold probe, then a failed password prompt: no keepalive to tear down.
         run.return_value = subprocess.CompletedProcess((), 1)
         try:

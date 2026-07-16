@@ -308,8 +308,7 @@ class YarnClassic(Yarn):
         return self.run_cli("global", "add", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade all outdated packages.
 
         .. code-block:: shell-session
 
@@ -344,8 +343,7 @@ class YarnClassic(Yarn):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade the provided package.
 
         .. code-block:: shell-session
 

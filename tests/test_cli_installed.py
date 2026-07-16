@@ -23,9 +23,9 @@ import json
 import pytest
 from boltons.iterutils import same
 
-from meta_package_manager.cli import INSTALLED_COLUMNS
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
+from meta_package_manager.tables import INSTALLED_COLUMNS
 
 from .test_cli import CLISubCommandTests, CLITableTests
 

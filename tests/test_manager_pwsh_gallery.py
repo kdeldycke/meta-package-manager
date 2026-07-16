@@ -78,27 +78,23 @@ def test_parse_json_array(manager, output, expected):
     assert manager._parse_json_array(output) == expected
 
 
-def test_installed_yields_packages(manager, monkeypatch):
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *a, **kw: '[{"Name":"PSReadLine","Version":"2.3.6"}]',
-    )
+def test_installed_yields_packages(manager, stub_run_cli):
+    stub_run_cli(manager, '[{"Name":"PSReadLine","Version":"2.3.6"}]')
     packages = list(manager.installed)
     assert len(packages) == 1
     assert packages[0].id == "PSReadLine"
     assert str(packages[0].installed_version) == "2.3.6"
 
 
-def test_installed_handles_empty_pipeline(manager, monkeypatch):
+def test_installed_handles_empty_pipeline(manager, stub_run_cli):
     """A fresh shell with no resources installed produces empty stdout."""
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: "")
+    stub_run_cli(manager, "")
     assert list(manager.installed) == []
 
 
-def test_outdated_yields_only_upgrades(manager, monkeypatch):
+def test_outdated_yields_only_upgrades(manager, stub_run_cli):
     output = '[{"Name":"PSReadLine","Installed":"2.3.4","Latest":"2.3.6"}]'
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+    stub_run_cli(manager, output)
     packages = list(manager.outdated)
     assert len(packages) == 1
     assert packages[0].id == "PSReadLine"
@@ -106,53 +102,35 @@ def test_outdated_yields_only_upgrades(manager, monkeypatch):
     assert str(packages[0].latest_version) == "2.3.6"
 
 
-def test_search_passes_wildcard_pattern(manager, monkeypatch):
+def test_search_passes_wildcard_pattern(manager, capture_run_cli):
     """Fuzzy search wraps the query with ``*`` wildcards in the expression."""
-    captured = []
-
-    def fake_run_cli(*args, **kwargs):
-        captured.append(args)
-        return "[]"
-
-    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    captured = capture_run_cli(manager, "[]")
     list(manager.search("readline", extended=False, exact=False))
     assert "'*readline*'" in captured[0][0]
 
 
-def test_search_exact_drops_wildcards(manager, monkeypatch):
+def test_search_exact_drops_wildcards(manager, capture_run_cli):
     """Exact search passes the query verbatim, without surrounding wildcards."""
-    captured = []
-
-    def fake_run_cli(*args, **kwargs):
-        captured.append(args)
-        return "[]"
-
-    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    captured = capture_run_cli(manager, "[]")
     list(manager.search("PSReadLine", extended=False, exact=True))
     assert "'PSReadLine'" in captured[0][0]
     assert "*PSReadLine*" not in captured[0][0]
 
 
-def test_search_yields_description(manager, monkeypatch):
+def test_search_yields_description(manager, stub_run_cli):
     output = (
         '[{"Name":"PSReadLine","Version":"2.3.6",'
         '"Description":"Great command line editing in PowerShell."}]'
     )
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+    stub_run_cli(manager, output)
     packages = list(manager.search("readline", extended=False, exact=False))
     assert len(packages) == 1
     assert packages[0].description == "Great command line editing in PowerShell."
     assert str(packages[0].latest_version) == "2.3.6"
 
 
-def test_install_builds_expected_expression(manager, monkeypatch):
-    captured = []
-
-    def fake_run_cli(*args, **kwargs):
-        captured.append(args)
-        return ""
-
-    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+def test_install_builds_expected_expression(manager, capture_run_cli):
+    captured = capture_run_cli(manager)
     manager.install("PSReadLine")
     expression = captured[0][0]
     assert "Install-PSResource" in expression
@@ -163,14 +141,8 @@ def test_install_builds_expected_expression(manager, monkeypatch):
     assert "-Version" not in expression
 
 
-def test_install_with_version_appends_flag(manager, monkeypatch):
-    captured = []
-
-    def fake_run_cli(*args, **kwargs):
-        captured.append(args)
-        return ""
-
-    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+def test_install_with_version_appends_flag(manager, capture_run_cli):
+    captured = capture_run_cli(manager)
     manager.install("PSReadLine", version="2.3.6")
     expression = captured[0][0]
     assert "-Version '2.3.6'" in expression
@@ -198,29 +170,17 @@ def test_upgrade_one_cli_with_version_appends_flag(manager):
     assert "-Version '2.3.6'" in expression
 
 
-def test_remove_quotes_package_id(manager, monkeypatch):
-    captured = []
-
-    def fake_run_cli(*args, **kwargs):
-        captured.append(args)
-        return ""
-
-    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+def test_remove_quotes_package_id(manager, capture_run_cli):
+    captured = capture_run_cli(manager)
     manager.remove("PSReadLine")
     expression = captured[0][0]
     assert "Uninstall-PSResource" in expression
     assert "-Name 'PSReadLine'" in expression
 
 
-def test_install_escapes_embedded_single_quote(manager, monkeypatch):
+def test_install_escapes_embedded_single_quote(manager, capture_run_cli):
     """A package ID with a literal ``'`` is doubled inside the quoted string."""
-    captured = []
-
-    def fake_run_cli(*args, **kwargs):
-        captured.append(args)
-        return ""
-
-    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    captured = capture_run_cli(manager)
     manager.install("O'Brien")
     expression = captured[0][0]
     assert "'O''Brien'" in expression

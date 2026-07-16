@@ -25,9 +25,9 @@ from boltons.iterutils import same
 from extra_platforms.pytest import skip_github_ci, unless_macos
 
 from meta_package_manager.capabilities import Operations
-from meta_package_manager.cli import SEARCH_COLUMNS
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
+from meta_package_manager.tables import SEARCH_COLUMNS
 
 from .test_cli import CLISubCommandTests, CLITableTests
 
@@ -153,7 +153,9 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         result = invoke("--color", "--mas", "search", "钉")
         assert result.exit_code == 0
         assert "钉钉" in result.stdout
-        assert " \x1b[32m\x1b[1m钉钉\x1b[0m " in result.stdout
+        # The match is emphasized with the theme's search style (green since
+        # click-extra 8.4.0, which dropped the bold).
+        assert " \x1b[32m钉钉\x1b[0m " in result.stdout
 
     def test_search_highlight(self, invoke):
         """We search on cargo as it is available on all platforms.

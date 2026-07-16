@@ -218,7 +218,7 @@ class NPM(PackageManager):
                 if pkg_infos["wanted"] == "linked":
                     continue
                 yield self.package(
-                    id=f"{pkg_id}",
+                    id=pkg_id,
                     # It seems "current" is not always populated.
                     installed_version=pkg_infos.get("current"),
                     latest_version=pkg_infos["latest"],
@@ -337,8 +337,7 @@ class NPM(PackageManager):
         return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade all outdated packages.
 
         .. code-block:: shell-session
 
@@ -360,7 +359,7 @@ class NPM(PackageManager):
             $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 upgrade raven
         """
-        return self.build_cli("upgrade", f"{package_id}", sudo=True)
+        return self.build_cli("upgrade", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.

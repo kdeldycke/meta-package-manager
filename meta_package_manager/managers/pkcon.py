@@ -99,13 +99,8 @@ class Pkcon(PackageManager):
             if not match:
                 continue
             name_version = match.group("blob").rsplit(".", 1)[0]
-            split = self._NAME_VERSION_REGEXP.match(name_version)
-            if split:
-                yield (
-                    match.group("status"),
-                    split.group("package_id"),
-                    split.group("version"),
-                )
+            if split := self.split_name_version(name_version):
+                yield match.group("status"), *split
             else:
                 yield match.group("status"), name_version, None
 

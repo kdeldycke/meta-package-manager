@@ -143,8 +143,7 @@ class TestInstallRemove(CLISubCommandTests):
             # supersedes the blocker expectation, which only applies once the manager is
             # present and reaches its (doomed) install.
             if result.exit_code == 2:
-                assert not result.stdout
-                assert "critical: No manager selected.\n" in result.stderr
+                self.assert_no_manager_selected(result)
                 return
             assert result.exit_code == 1
             assert f"Could not install: {package_id}" in result.stderr, (
@@ -164,8 +163,7 @@ class TestInstallRemove(CLISubCommandTests):
 
             # The manager is not available on this host: mpm selected nothing.
             if result.exit_code == 2:
-                assert not result.stdout
-                assert "critical: No manager selected.\n" in result.stderr
+                self.assert_no_manager_selected(result)
                 continue
 
             # npm, cargo, and winget installs are flaky on the CI runners: they

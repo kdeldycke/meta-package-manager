@@ -99,12 +99,9 @@ class APK(PackageManager):
         output = self.run_cli("list", "--installed")
 
         for match in self._INSTALLED_REGEXP.finditer(output):
-            name_match = self._NAME_VERSION_REGEXP.match(match.group("pkgver"))
-            if name_match:
-                yield self.package(
-                    id=name_match.group("package_id"),
-                    installed_version=name_match.group("version"),
-                )
+            if split := self.split_name_version(match.group("pkgver")):
+                package_id, version = split
+                yield self.package(id=package_id, installed_version=version)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -123,13 +120,13 @@ class APK(PackageManager):
         output = self.run_cli("list", "--upgradable")
 
         for match in self._OUTDATED_REGEXP.finditer(output):
-            new_match = self._NAME_VERSION_REGEXP.match(match.group("pkgver"))
-            old_match = self._NAME_VERSION_REGEXP.match(match.group("from_pkgver"))
-            if new_match and old_match:
+            new_split = self.split_name_version(match.group("pkgver"))
+            old_split = self.split_name_version(match.group("from_pkgver"))
+            if new_split and old_split:
                 yield self.package(
-                    id=new_match.group("package_id"),
-                    installed_version=old_match.group("version"),
-                    latest_version=new_match.group("version"),
+                    id=new_split[0],
+                    installed_version=old_split[1],
+                    latest_version=new_split[1],
                 )
 
     @search_capabilities(exact_support=False)
@@ -165,12 +162,9 @@ class APK(PackageManager):
         output = self.run_cli(*args)
 
         for line in output.splitlines():
-            match = self._NAME_VERSION_REGEXP.match(line.strip())
-            if match:
-                yield self.package(
-                    id=match.group("package_id"),
-                    latest_version=match.group("version"),
-                )
+            if split := self.split_name_version(line.strip()):
+                package_id, version = split
+                yield self.package(id=package_id, latest_version=version)
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

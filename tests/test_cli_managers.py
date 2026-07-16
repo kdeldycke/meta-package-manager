@@ -18,16 +18,15 @@
 from __future__ import annotations
 
 import json
-import re
 
 import pytest
 from boltons.iterutils import same
 
-from meta_package_manager.cli import MANAGERS_COLUMNS
 from meta_package_manager.pool import pool
+from meta_package_manager.tables import MANAGERS_COLUMNS
 
 from .conftest import all_manager_ids, unsupported_manager_ids
-from .test_cli import CLISubCommandTests, CLITableTests
+from .test_cli import CLISubCommandTests, CLITableTests, managers_table_signals
 
 
 @pytest.fixture
@@ -41,15 +40,7 @@ class TestManagers(CLISubCommandTests, CLITableTests):
 
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
-        yield from (
-            # Search in manager table.
-            bool(
-                re.search(
-                    rf"│\s+{mid}\s+│.+│\s+(✓|✘).+│\s+(✓|✘)",
-                    stdout,
-                ),
-            ),
-        )
+        yield from managers_table_signals(mid, stdout, stderr)
 
     @all_manager_ids
     def test_all_managers(self, invoke, subcmd, manager_id):

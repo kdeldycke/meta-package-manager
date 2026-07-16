@@ -17,28 +17,28 @@
 """Configuration utilities for ``mpm``.
 
 Hosts the schema of the ``[mpm]`` configuration section consumed by
-:py:mod:`click_extra` and the per-manager attribute override mechanism driven by
-``[mpm.managers.<id>]`` sections of the same configuration file.
+:py:mod:`click_extra` and the runtime policy around the ``[mpm.managers.<id>]``
+sections of the same configuration file: applying attribute overrides to shipped
+managers, gating manager definitions on the trust of their source, and registering
+them into the pool.
 
-The override mechanism keeps the pool and the configuration concerns separate:
+The concerns stay separate across three modules:
 :py:class:`meta_package_manager.pool.ManagerPool` owns the live manager instances
-and the per-manager ``overridden_fields`` tracking dict, while this module owns the
-schema (which fields are overridable, how to coerce values) and the application
-logic. The pool is mutated through the :py:func:`apply_manager_overrides` helper,
-keeping all configuration policy out of :py:mod:`meta_package_manager.pool`.
+and the per-manager ``overridden_fields`` tracking dict;
+:py:mod:`meta_package_manager.definitions` owns the declarative schema (which
+fields a section may set, how to coerce values) and the class factory; this module
+owns the loading policy and mutates the pool through the
+:py:func:`apply_manager_overrides` and :py:func:`register_config_managers` helpers.
 """
 
 from __future__ import annotations
 
-import importlib.resources
 import logging
 import os
-import re
 import stat
 import sys
 import urllib.parse
 from dataclasses import dataclass, field
-from functools import cache
 from pathlib import Path
 
 import tomli_w
@@ -52,22 +52,21 @@ from click_extra.config import (
 )
 from click_extra.context import CONF_FULL
 from click_extra.theme import get_current_theme as theme
-from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS
 
-from .manager import ManagerDefinition, OperationSpec, build_manager_class
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
+from .definitions import (
+    OVERRIDABLE_FIELDS,
+    build_manager_class,
+    parse_manager_definition,
+)
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Mapping
     from typing import Any, Final
 
     import click
 
+    from .definitions import ManagerDefinition
     from .manager import PackageManager
     from .pool import ManagerPool
 
@@ -182,95 +181,6 @@ class MpmConfig:
     coverage of the override block."""
 
 
-def _to_str(value: Any) -> str:
-    """Validate that the value is a string."""
-    if not isinstance(value, str):
-        raise TypeError(f"expected a string, got {type(value).__name__}: {value!r}")
-    return value
-
-
-def _to_bool(value: Any) -> bool:
-    """Validate that the value is a boolean."""
-    if not isinstance(value, bool):
-        raise TypeError(f"expected a boolean, got {type(value).__name__}: {value!r}")
-    return value
-
-
-def _to_int(value: Any) -> int:
-    """Validate that the value is an integer.
-
-    Rejects ``bool`` because :py:class:`bool` is a subclass of :py:class:`int`
-    in Python, but configuration intent is unambiguous: a boolean is never an
-    acceptable integer.
-    """
-    if not isinstance(value, int) or isinstance(value, bool):
-        raise TypeError(f"expected an integer, got {type(value).__name__}: {value!r}")
-    return value
-
-
-def _to_str_tuple(value: Any) -> tuple[str, ...]:
-    """Validate that the value is a list/tuple of strings, return a tuple."""
-    if not isinstance(value, (list, tuple)):
-        raise TypeError(
-            f"expected a list of strings, got {type(value).__name__}: {value!r}"
-        )
-    for item in value:
-        if not isinstance(item, str):
-            raise TypeError(
-                f"expected all entries to be strings, "
-                f"got {type(item).__name__}: {item!r}"
-            )
-    return tuple(value)
-
-
-def _to_str_dict(value: Any) -> dict[str, str]:
-    """Validate that the value is a mapping of strings to strings."""
-    if not isinstance(value, dict):
-        raise TypeError(
-            f"expected a table of string-to-string, "
-            f"got {type(value).__name__}: {value!r}"
-        )
-    for k, v in value.items():
-        if not isinstance(k, str) or not isinstance(v, str):
-            raise TypeError(
-                f"expected a table of string-to-string entries, got {k!r} = {v!r}"
-            )
-    return dict(value)
-
-
-OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
-    "cli_names": _to_str_tuple,
-    "cli_search_path": _to_str_tuple,
-    "deprecated": _to_bool,
-    "dry_run": _to_bool,
-    "extra_env": _to_str_dict,
-    "ignore_auto_updates": _to_bool,
-    "post_args": _to_str_tuple,
-    "pre_args": _to_str_tuple,
-    "pre_cmds": _to_str_tuple,
-    "requirement": _to_str,
-    "stop_on_error": _to_bool,
-    "sudo": _to_bool,
-    "timeout": _to_int,
-    "version_cli_options": _to_str_tuple,
-    "version_regexes": _to_str_tuple,
-}
-"""Per-manager attributes a user is allowed to override from the ``[mpm.managers.<id>]``
-configuration section.
-
-Each entry maps a :py:class:`meta_package_manager.manager.PackageManager` attribute name
-to a converter that validates the raw TOML value and returns the value as the
-attribute's expected runtime type. Lists are coerced into tuples to match the
-attributes' tuple types.
-
-.. note::
-    ``id``, ``name``, ``platforms``, ``homepage_url`` and ``virtual`` are
-    intentionally excluded: they are identity, lookup or platform-classification
-    attributes that the pool's registration relies on. Phase 1 of TOML-driven
-    configuration only exposes attributes whose runtime override is safe.
-"""
-
-
 INVALIDATED_CACHED_PROPS: Final[tuple[str, ...]] = (
     "available",
     "cli_path",
@@ -280,7 +190,7 @@ INVALIDATED_CACHED_PROPS: Final[tuple[str, ...]] = (
     "version",
 )
 """Cached properties on :py:class:`meta_package_manager.manager.PackageManager` that may
-have been computed from attributes covered by :data:`OVERRIDABLE_FIELDS`.
+have been computed from attributes covered by :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`.
 
 Any pre-computed values are popped from the manager instance's ``__dict__`` after an
 override is applied so the next access recomputes them against the new attribute
@@ -288,14 +198,16 @@ values. Safe to pop even if nothing was cached.
 """
 
 
-CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset({
-    "cli_names",
-    "cli_search_path",
-    "requirement",
-    "version_cli_options",
-    "version_regexes",
-})
-"""Subset of :data:`OVERRIDABLE_FIELDS` whose override probably reflects a real
+CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset(
+    {
+        "cli_names",
+        "cli_search_path",
+        "requirement",
+        "version_cli_options",
+        "version_regexes",
+    }
+)
+"""Subset of :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` whose override probably reflects a real
 upstream detection bug rather than a personal preference.
 
 When the user overrides one of these, mpm did not find the binary, used the wrong
@@ -430,15 +342,19 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
     ]
     for hint in hints:
         url = _build_issue_url(hint)
-        lines.extend((
-            f"  - {theme().invoked_command(hint.manager_id)}: "
-            f"override on `{hint.field}`",
-            f"    File a report: {url}",
-        ))
-    lines.extend((
-        "",
-        "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
-    ))
+        lines.extend(
+            (
+                f"  - {theme().invoked_command(hint.manager_id)}: "
+                f"override on `{hint.field}`",
+                f"    File a report: {url}",
+            )
+        )
+    lines.extend(
+        (
+            "",
+            "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
+        )
+    )
     return "\n".join(lines)
 
 
@@ -450,7 +366,7 @@ def validate_manager_overrides_section(
     """Strict validator for the ``[mpm.managers.<id>]`` configuration sub-tree.
 
     Pure function: inspects ``section`` against the pool's registered managers
-    and :data:`OVERRIDABLE_FIELDS`, raises the first
+    and :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`, raises the first
     :class:`click_extra.ValidationError` it encounters, never mutates the pool.
     Suitable for registration as a :class:`click_extra.ConfigValidator` and for
     direct invocation by :py:func:`apply_manager_overrides` so both the
@@ -458,9 +374,9 @@ def validate_manager_overrides_section(
     same rules.
 
     A section keyed by a built-in manager ID is validated as an *override* (its
-    fields must be a subset of :data:`OVERRIDABLE_FIELDS`). A section keyed by any
+    fields must be a subset of :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`). A section keyed by any
     other ID is validated as a brand-new manager *definition* via
-    :py:func:`parse_manager_definition`.
+    :py:func:`~meta_package_manager.definitions.parse_manager_definition`.
 
     :raises click_extra.ValidationError: when ``section`` is not a mapping, an
         override sets an unknown field or a wrong-typed value, or a definition is
@@ -496,7 +412,7 @@ def validate_manager_overrides_section(
 def _validate_override_fields(manager_id: str, fields: Any) -> None:
     """Validate one ``[mpm.managers.<built-in id>]`` override section.
 
-    Each field must be a known :data:`OVERRIDABLE_FIELDS` attribute and carry a
+    Each field must be a known :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` attribute and carry a
     value its converter accepts. Raises :class:`click_extra.ValidationError` on the
     first problem.
     """
@@ -630,7 +546,7 @@ def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
     """Return the current overridable attributes of ``manager`` as a TOML-ready
     dict.
 
-    Walks :data:`OVERRIDABLE_FIELDS` in alphabetical order, reads each attribute
+    Walks :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` in alphabetical order, reads each attribute
     from the manager instance, and converts tuples to lists so :py:mod:`tomli_w`
     can serialize the result without translation. Attributes whose value is
     ``None`` are skipped: TOML cannot express ``None`` and the user cannot
@@ -744,174 +660,10 @@ def print_contribution_hints(ctx: click.Context) -> None:
 
 # Brand-new manager definitions.
 #
-# Everything below turns a ``[mpm.managers.<id>]`` section whose ID is *not* a built-in
-# into a live manager. This module owns the schema and the policy (what a definition may
-# contain, where it may be loaded from); the class-building factory lives in
-# :py:mod:`meta_package_manager.manager`. The split mirrors the override mechanism above:
-# the pool owns instances, this module owns configuration policy.
-
-
-VALID_PLATFORM_TOKENS: Final[frozenset[str]] = frozenset(
-    {platform.id for platform in ALL_PLATFORMS} | set(ALL_GROUP_IDS),
-)
-"""Platform and group IDs accepted in a definition's ``platforms`` list.
-
-Union of every :py:class:`extra_platforms.Platform` ID and every group ID, so both a
-specific platform (``ubuntu``) and a group (``linux``, ``all_platforms``) resolve.
-"""
-
-
-DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
-    **{
-        name: OVERRIDABLE_FIELDS[name]
-        for name in (
-            "cli_names",
-            "cli_search_path",
-            "extra_env",
-            "post_args",
-            "pre_args",
-            "pre_cmds",
-            "requirement",
-            "timeout",
-            "version_cli_options",
-            "version_regexes",
-        )
-    },
-    # Definition-only fields, with no OVERRIDABLE_FIELDS counterpart: a built-in
-    # manager's escalation policies, version probe and Brewfile mapping are reviewed
-    # code, while a definition declares them as data.
-    "brewfile_entry_type": _to_str,
-    "brewfile_skip_warning": _to_str,
-    "default_sudo": _to_bool,
-    "internal_sudo": _to_bool,
-    "version_cli": _to_str,
-}
-"""CLI-execution attributes a definition may set, mostly reusing the override
-converters.
-
-The runtime-preference fields (``deprecated``, ``dry_run``, ``ignore_auto_updates``,
-``stop_on_error``) are excluded: they are command-line/global concerns, not part of a
-manager's identity, and resolve through the usual option precedence.
-
-Five fields are definition-only:
-
-- ``brewfile_entry_type`` maps the manager onto a Homebrew Bundle DSL entry so its
-  installed packages join ``mpm dump --brewfile`` exports (see
-  :py:attr:`~meta_package_manager.manager.PackageManager.brewfile_entry_type`).
-- ``brewfile_skip_warning`` is the message emitted when the manager's packages are
-  deliberately left out of such an export (see
-  :py:attr:`~meta_package_manager.manager.PackageManager.brewfile_skip_warning`).
-- ``default_sudo`` is the manager's built-in escalation policy (see
-  :py:attr:`~meta_package_manager.execution.CLIExecutor.default_sudo`). Operations
-  marked ``sudo = true`` escalate by default, while the user's global ``--no-sudo``
-  flag or a ``sudo`` override still win.
-- ``internal_sudo`` marks a manager whose CLI invokes ``sudo`` itself mid-run (see
-  :py:attr:`~meta_package_manager.execution.CLIExecutor.internal_sudo`). mpm never
-  wraps its commands in ``sudo``; priming instead reuses a warm credential cache
-  for these internal escalations. See ``docs/sudo.md``.
-- ``version_cli`` names an alternate binary for the version probe (see
-  :py:attr:`~meta_package_manager.execution.CLIExecutor.version_cli`), for suites
-  whose own binaries expose no version flag (OpenBSD's ``pkg_add``).
-"""
-
-
-DEFINITION_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
-    {"name", "platforms", "homepage_url", "operations"},
-)
-"""Top-level keys of a definition section that are not CLI-execution fields."""
-
-
-QUERY_OPERATIONS: Final[frozenset[str]] = frozenset(
-    {"installed", "outdated", "search"},
-)
-"""Operations that parse the command's stdout into packages."""
-
-
-COMMAND_OPERATIONS: Final[frozenset[str]] = frozenset(
-    {"install", "remove", "sync", "cleanup", "upgrade_one", "upgrade_all"},
-)
-"""Operations that only run a command and produce no inventory to parse."""
-
-
-ALL_DEFINITION_OPERATIONS: Final[frozenset[str]] = QUERY_OPERATIONS | COMMAND_OPERATIONS
-"""Every operation name a definition may declare."""
-
-
-RECOGNIZED_PARSE_FIELDS: Final[frozenset[str]] = frozenset(
-    {"package_id", "installed_version", "latest_version"},
-)
-"""Named regex groups / JSON field keys a query parser may map to a package."""
-
-
-REQUIRED_PARSE_FIELDS: Final[Mapping[str, frozenset[str]]] = {
-    "installed": frozenset({"package_id"}),
-    "outdated": frozenset({"package_id", "latest_version"}),
-    "search": frozenset({"package_id"}),
-}
-"""Parse fields each query operation must extract to be useful.
-
-``installed`` needs only the package ID: some tools genuinely track no per-package
-version (Clear Linux bundles under ``swupd``, Cygwin listings under ``apt-cyg``), and
-mpm's package model treats the installed version as optional everywhere. ``outdated``
-without a ``latest_version`` would report nothing actionable, so there the version
-capture stays mandatory.
-"""
-
-
-OPERATION_ARG_PLACEHOLDER: Final[Mapping[str, str]] = {
-    "install": "package_id",
-    "remove": "package_id",
-    "upgrade_one": "package_id",
-}
-"""Placeholder each operation's ``args`` must reference, so a value is actually passed
-to the CLI (a ``remove`` with no ``{package_id}`` would target nothing).
-
-``search`` is deliberately absent: its ``{query}`` placeholder is optional. A tool
-with no real search command can still declare the operation by listing its whole
-catalog (``opkg list``, ``swupd bundle-list --all``) and letting
-:py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` narrow the
-results, mirroring the search-from-scratch augmentation some built-in managers use.
-"""
-
-
-ALLOWED_ARG_PLACEHOLDERS: Final[Mapping[str, frozenset[str]]] = {
-    "install": frozenset({"package_id"}),
-    "remove": frozenset({"package_id"}),
-    "search": frozenset({"query"}),
-    "upgrade_one": frozenset({"package_id"}),
-}
-"""Placeholders each operation's ``args`` may reference.
-
-Operations absent from this mapping take no placeholder at all. Any ``{token}``
-outside the operation's set is rejected at parse time: a typoed ``{qeury}`` would
-otherwise reach the CLI as a literal argument and fail in silent, tool-specific ways.
-"""
-
-
-ARG_PLACEHOLDER_REGEX: Final = re.compile(r"\{([a-z_]+)\}")
-"""Match ``{placeholder}`` tokens in an operation's args, for validation."""
-
-
-QUERY_OPERATION_KEYS: Final[frozenset[str]] = frozenset(
-    {"args", "cli", "regex", "format", "fields", "list_path"},
-)
-"""Keys allowed in a query operation's table.
-
-``cli`` names an alternate binary for this operation, resolved on the search path at
-call time: it lets one definition span sibling binaries (``urpmq`` querying while
-``urpmi`` installs). Queries never take a ``sudo`` key: read-only operations stay
-unprivileged.
-"""
-
-
-COMMAND_OPERATION_KEYS: Final[frozenset[str]] = frozenset({"args", "cli", "sudo"})
-"""Keys allowed in a command operation's table.
-
-``cli`` is the same alternate-binary hook as on query operations. ``sudo = true``
-marks the operation as privileged, mirroring the ``sudo=True`` flag built-in managers
-pass to ``run_cli``: escalation then follows the per-manager policy (the definition's
-``default_sudo``, overridden by the user's ``--sudo``/``--no-sudo``).
-"""
+# Everything below is the *policy* half of config-defined managers: where a
+# ``[mpm.managers.<id>]`` section may be loaded from, whether its source is trusted,
+# and the registration passes wired into the CLI. The schema, validation and
+# class-building machinery lives in :py:mod:`meta_package_manager.definitions`.
 
 
 RISKY_OVERRIDE_FIELDS: Final[frozenset[str]] = frozenset(
@@ -976,293 +728,6 @@ def _config_source(ctx: click.Context) -> tuple[Path | None, bool]:
     if _is_remote_url(text):
         return None, True
     return Path(text), False
-
-
-def parse_manager_definition(
-    manager_id: str,
-    section: Any,
-) -> ManagerDefinition:
-    """Validate and parse one ``[mpm.managers.<id>]`` definition section.
-
-    Returns a :py:class:`~meta_package_manager.manager.ManagerDefinition` ready for
-    :py:func:`~meta_package_manager.manager.build_manager_class`. Raises
-    :class:`click_extra.ValidationError` (path relative to the ``[mpm.managers]``
-    root) on any problem, so the same function backs both ``--validate-config`` and
-    the runtime registration path.
-    """
-    if not isinstance(section, dict):
-        raise ValidationError(
-            manager_id,
-            f"expected a table, got {type(section).__name__}",
-            code="invalid_type",
-        )
-    if not re.fullmatch(r"[a-z][a-z0-9-]*", manager_id):
-        raise ValidationError(
-            manager_id,
-            f"invalid manager ID {manager_id!r}: use lowercase letters, digits and "
-            "dashes (e.g. 'my-tool').",
-            code="invalid_id",
-        )
-    for required in ("platforms", "operations"):
-        if required not in section:
-            raise ValidationError(
-                f"{manager_id}.{required}",
-                f"a config-defined manager must declare {required!r}.",
-                code="missing_field",
-            )
-
-    try:
-        platforms = _to_str_tuple(section["platforms"])
-    except TypeError as ex:
-        raise ValidationError(
-            f"{manager_id}.platforms", str(ex), code="invalid_type"
-        ) from ex
-    if not platforms:
-        raise ValidationError(
-            f"{manager_id}.platforms",
-            "must list at least one platform or group.",
-            code="invalid_value",
-        )
-    for token in platforms:
-        if token.lower() not in VALID_PLATFORM_TOKENS:
-            raise ValidationError(
-                f"{manager_id}.platforms",
-                f"unknown platform or group {token!r}.",
-                code="unknown_platform",
-            )
-
-    name = manager_id
-    if "name" in section:
-        try:
-            name = _to_str(section["name"])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{manager_id}.name", str(ex), code="invalid_type"
-            ) from ex
-    homepage_url = None
-    if "homepage_url" in section:
-        try:
-            homepage_url = _to_str(section["homepage_url"])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{manager_id}.homepage_url", str(ex), code="invalid_type"
-            ) from ex
-
-    cli_fields: dict[str, Any] = {}
-    for key, value in section.items():
-        if key in DEFINITION_IDENTITY_FIELDS:
-            continue
-        converter = DEFINITION_CLI_FIELDS.get(key)
-        if converter is None:
-            allowed = sorted(set(DEFINITION_CLI_FIELDS) | DEFINITION_IDENTITY_FIELDS)
-            raise ValidationError(
-                f"{manager_id}.{key}",
-                f"unknown field. Allowed: {', '.join(allowed)}.",
-                code="unknown_field",
-            )
-        try:
-            cli_fields[key] = converter(value)
-        except TypeError as ex:
-            raise ValidationError(
-                f"{manager_id}.{key}", str(ex), code="invalid_type"
-            ) from ex
-
-    operations = _parse_operations(manager_id, section["operations"])
-    return ManagerDefinition(
-        manager_id=manager_id,
-        name=name,
-        platforms=platforms,
-        homepage_url=homepage_url,
-        cli_fields=cli_fields,
-        operations=operations,
-    )
-
-
-def _parse_operations(
-    manager_id: str,
-    raw: Any,
-) -> dict[str, OperationSpec]:
-    """Validate and parse the ``[mpm.managers.<id>.operations]`` sub-table."""
-    if not isinstance(raw, dict) or not raw:
-        raise ValidationError(
-            f"{manager_id}.operations",
-            "must be a non-empty table of operations.",
-            code="invalid_type",
-        )
-    operations = {}
-    for op_name, op_section in raw.items():
-        if op_name not in ALL_DEFINITION_OPERATIONS:
-            raise ValidationError(
-                f"{manager_id}.operations.{op_name}",
-                f"unknown operation. Allowed: "
-                f"{', '.join(sorted(ALL_DEFINITION_OPERATIONS))}.",
-                code="unknown_operation",
-            )
-        operations[op_name] = _parse_operation_spec(manager_id, op_name, op_section)
-    return operations
-
-
-def _parse_operation_spec(
-    manager_id: str,
-    op_name: str,
-    raw: Any,
-) -> OperationSpec:
-    """Validate and parse one operation table into an :class:`OperationSpec`."""
-    path = f"{manager_id}.operations.{op_name}"
-    if not isinstance(raw, dict):
-        raise ValidationError(
-            path, f"expected a table, got {type(raw).__name__}", code="invalid_type"
-        )
-
-    is_query = op_name in QUERY_OPERATIONS
-    allowed_keys = QUERY_OPERATION_KEYS if is_query else COMMAND_OPERATION_KEYS
-    for key in raw:
-        if key not in allowed_keys:
-            raise ValidationError(
-                f"{path}.{key}",
-                f"unknown key. Allowed: {', '.join(sorted(allowed_keys))}.",
-                code="unknown_field",
-            )
-
-    if "args" not in raw:
-        raise ValidationError(f"{path}.args", "required.", code="missing_field")
-    try:
-        args = _to_str_tuple(raw["args"])
-    except TypeError as ex:
-        raise ValidationError(f"{path}.args", str(ex), code="invalid_type") from ex
-    if not args:
-        raise ValidationError(
-            f"{path}.args", "must be a non-empty list.", code="invalid_value"
-        )
-
-    found_placeholders = {
-        token for arg in args for token in ARG_PLACEHOLDER_REGEX.findall(arg)
-    }
-    allowed_placeholders = ALLOWED_ARG_PLACEHOLDERS.get(op_name, frozenset())
-    unknown_placeholders = found_placeholders - allowed_placeholders
-    if unknown_placeholders:
-        listing = ", ".join("{" + p + "}" for p in sorted(unknown_placeholders))
-        if allowed_placeholders:
-            hint = "Allowed: " + ", ".join(
-                "{" + p + "}" for p in sorted(allowed_placeholders)
-            )
-        else:
-            hint = f"{op_name} args take no placeholder"
-        raise ValidationError(
-            f"{path}.args",
-            f"unknown placeholder(s): {listing}. {hint}.",
-            code="invalid_value",
-        )
-    placeholder = OPERATION_ARG_PLACEHOLDER.get(op_name)
-    if placeholder and placeholder not in found_placeholders:
-        raise ValidationError(
-            f"{path}.args",
-            f"{op_name} args must reference the {{{placeholder}}} placeholder.",
-            code="invalid_value",
-        )
-
-    cli = None
-    if "cli" in raw:
-        try:
-            cli = _to_str(raw["cli"])
-        except TypeError as ex:
-            raise ValidationError(f"{path}.cli", str(ex), code="invalid_type") from ex
-        if not cli:
-            raise ValidationError(
-                f"{path}.cli", "must be a non-empty string.", code="invalid_value"
-            )
-
-    if is_query:
-        return _parse_query_spec(path, op_name, args, raw, cli=cli)
-
-    sudo = False
-    if "sudo" in raw:
-        try:
-            sudo = _to_bool(raw["sudo"])
-        except TypeError as ex:
-            raise ValidationError(f"{path}.sudo", str(ex), code="invalid_type") from ex
-    return OperationSpec(args=args, cli=cli, sudo=sudo)
-
-
-def _parse_query_spec(
-    path: str,
-    op_name: str,
-    args: tuple[str, ...],
-    raw: dict[str, Any],
-    cli: str | None = None,
-) -> OperationSpec:
-    """Validate the parser half of a query operation (``regex`` or JSON ``fields``)."""
-    has_regex = "regex" in raw
-    has_json = raw.get("format") == "json" or "fields" in raw
-    if has_regex and has_json:
-        raise ValidationError(
-            path, "use either 'regex' or JSON 'fields', not both.", code="invalid_value"
-        )
-    if not has_regex and not has_json:
-        raise ValidationError(
-            path,
-            "a query operation needs a 'regex' or a JSON 'fields' parser.",
-            code="missing_field",
-        )
-    required = REQUIRED_PARSE_FIELDS[op_name]
-
-    if has_regex:
-        try:
-            regex = _to_str(raw["regex"])
-        except TypeError as ex:
-            raise ValidationError(f"{path}.regex", str(ex), code="invalid_type") from ex
-        try:
-            compiled = re.compile(regex)
-        except re.error as ex:
-            raise ValidationError(
-                f"{path}.regex",
-                f"invalid regular expression: {ex}.",
-                code="invalid_value",
-            ) from ex
-        _check_parse_fields(f"{path}.regex", set(compiled.groupindex), required)
-        return OperationSpec(args=args, cli=cli, parse_mode="regex", regex=regex)
-
-    if "fields" not in raw:
-        raise ValidationError(
-            f"{path}.fields",
-            "JSON parsing requires a 'fields' mapping.",
-            code="missing_field",
-        )
-    try:
-        fields = _to_str_dict(raw["fields"])
-    except TypeError as ex:
-        raise ValidationError(f"{path}.fields", str(ex), code="invalid_type") from ex
-    _check_parse_fields(f"{path}.fields", set(fields), required)
-    list_path = None
-    if "list_path" in raw:
-        try:
-            list_path = _to_str(raw["list_path"])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{path}.list_path", str(ex), code="invalid_type"
-            ) from ex
-    return OperationSpec(
-        args=args, cli=cli, parse_mode="json", list_path=list_path, fields=fields
-    )
-
-
-def _check_parse_fields(path: str, present: set[str], required: frozenset[str]) -> None:
-    """Reject unrecognized parse fields and require the mandatory ones."""
-    unknown = present - RECOGNIZED_PARSE_FIELDS
-    if unknown:
-        raise ValidationError(
-            path,
-            f"unrecognized field(s): {', '.join(sorted(unknown))}. "
-            f"Allowed: {', '.join(sorted(RECOGNIZED_PARSE_FIELDS))}.",
-            code="invalid_value",
-        )
-    missing = required - present
-    if missing:
-        raise ValidationError(
-            path,
-            f"missing required field(s): {', '.join(sorted(missing))}.",
-            code="invalid_value",
-        )
 
 
 def register_config_managers(
@@ -1425,90 +890,3 @@ def register_eager_config_managers(pool: ManagerPool) -> None:
     definitions, source = discover_config_definitions(pool)
     if definitions:
         register_config_managers(pool, definitions, source=source)
-
-
-# Bundled manager definitions.
-#
-# mpm ships a few managers as data rather than Python classes: a TOML file per manager
-# under meta_package_manager/managers/, each a single [mpm.managers.<id>] section in the
-# exact schema a user would write. They are parsed and built through the same
-# parse_manager_definition / build_manager_class path as any user definition, then loaded
-# into the pool at construction time (ManagerPool.register), so they are always available
-# and earn first-class --<id> flags. The trust gate guarding user definitions does not
-# apply: package data shipped in the wheel is read-only and as trusted as the Python
-# modules beside it.
-#
-# Each bundled file also carries a top-level [samples] table: source-derived output
-# fixtures locking the version probe and the declared parsers, the config-defined twin
-# of the shell-session samples embedded in class docstrings. The loader below only
-# consumes the "mpm" key, so samples never reach the runtime; they feed the hermetic
-# test_bundled_version_regex and test_bundled_parsing suites, which glob the shipped
-# files and derive their parametrizes from them.
-
-
-BUNDLED_DEFINITIONS_PACKAGE: Final[str] = "meta_package_manager.managers"
-"""Import package whose ``*.toml`` resources hold mpm's bundled manager definitions."""
-
-
-@cache
-def load_bundled_definitions() -> tuple[tuple[ManagerDefinition, str], ...]:
-    """Parse every bundled ``[mpm.managers.<id>]`` definition shipped as package data.
-
-    Reads each ``*.toml`` resource of :data:`BUNDLED_DEFINITIONS_PACKAGE` via
-    :py:mod:`importlib.resources` (so it works the same from an unpacked install, a zip
-    or a Nuitka onefile), and validates every section with
-    :py:func:`parse_manager_definition`. Returns ``(definition, source)`` pairs, where
-    ``source`` is the repo-relative path used to link the manager's documentation. Cached
-    because the shipped files never change at runtime.
-
-    A malformed bundled file is a packaging bug, but it is logged and skipped rather than
-    raised so one bad resource cannot break ``mpm`` startup for everyone. The hermetic
-    ``test_bundled_inventory`` and ``test_bundled_registered`` keep the shipped files
-    valid.
-    """
-    definitions: list[tuple[ManagerDefinition, str]] = []
-    resources = importlib.resources.files(BUNDLED_DEFINITIONS_PACKAGE)
-    for resource in sorted(resources.iterdir(), key=lambda item: item.name):
-        if not resource.name.endswith(".toml"):
-            continue
-        source = f"meta_package_manager/managers/{resource.name}"
-        try:
-            data = tomllib.loads(resource.read_text(encoding="UTF-8"))
-        except (OSError, tomllib.TOMLDecodeError) as ex:
-            logging.warning(f"Skipping unreadable bundled definition {source}: {ex}")
-            continue
-        sections = data.get("mpm", {}).get("managers", {})
-        for manager_id, section in sections.items():
-            try:
-                definitions.append(
-                    (parse_manager_definition(manager_id, section), source),
-                )
-            except ValidationError as ex:
-                logging.warning(
-                    f"Skipping invalid bundled manager {manager_id!r} in {source}: {ex}",
-                )
-    return tuple(definitions)
-
-
-def bundled_manager_ids() -> frozenset[str]:
-    """IDs of the managers mpm ships as bundled configuration definitions."""
-    return frozenset(
-        definition.manager_id for definition, _ in load_bundled_definitions()
-    )
-
-
-def build_bundled_managers() -> list[PackageManager]:
-    """Instantiate every bundled definition into a live, pool-ready manager.
-
-    Each :py:class:`~meta_package_manager.manager.ConfigDrivenManager` subclass records
-    the TOML file it came from in
-    :py:attr:`~meta_package_manager.manager.ConfigDrivenManager.definition_source`, so the
-    documentation generator can link to it. Called once by
-    :py:attr:`meta_package_manager.pool.ManagerPool.register`.
-    """
-    managers: list[PackageManager] = []
-    for definition, source in load_bundled_definitions():
-        klass = build_manager_class(definition)
-        klass.definition_source = source
-        managers.append(klass())
-    return managers

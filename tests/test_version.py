@@ -18,9 +18,9 @@ from __future__ import annotations
 
 import copy
 import operator
-import re
 
 import pytest
+from boltons.strutils import strip_ansi
 
 from meta_package_manager.version import (
     Token,
@@ -806,11 +806,6 @@ def test_parse_version_is_tokenized_string():
     assert v == TokenizedString("1.2.3")
 
 
-def _strip_ansi(s: str) -> str:
-    """Remove ANSI escape codes, returning plain text."""
-    return re.sub(r"\x1b\[[0-9;]*m", "", s)
-
-
 @pytest.mark.parametrize(
     ("old", "new", "expected_common", "expected_old", "expected_new"),
     (
@@ -847,8 +842,8 @@ def test_diff_versions(old, new, expected_common, expected_old, expected_new):
     styled_old, styled_new = diff_versions(old, new)
 
     # Plain text must equal the full original string.
-    assert _strip_ansi(styled_old) == (str(old) if old else "")
-    assert _strip_ansi(styled_new) == (str(new) if new else "")
+    assert strip_ansi(styled_old) == (str(old) if old else "")
+    assert strip_ansi(styled_new) == (str(new) if new else "")
 
     # Verify the split point.
     full_old = str(old) if old else ""

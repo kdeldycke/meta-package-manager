@@ -692,8 +692,7 @@ class Homebrew(PackageManager):
         return self.run_cli("install", "--quiet", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade all outdated packages.
 
         ``brew`` and ``cask`` share the same command.
 
@@ -755,8 +754,7 @@ class Homebrew(PackageManager):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade the provided package.
 
         ``brew`` and ``cask`` share the same command.
 

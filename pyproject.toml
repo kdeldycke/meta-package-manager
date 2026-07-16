@@ -508,6 +508,12 @@ glob = "./**/__init__.py"
 ignore_missing_version = true
 
 [[tool.bumpversion.files]]
+# Update the version advertised in the Xbar/SwiftBar plugin header.
+filename = "./meta_package_manager/bar_plugin.py"
+search = "<xbar.version>{current_version}</xbar.version>"
+replace = "<xbar.version>{new_version}</xbar.version>"
+
+[[tool.bumpversion.files]]
 # Update version in [project] section. Anchored to a line start (regex) so it
 # does not also match version-suffixed keys like file-version/product-version
 # under [tool.nuitka], which contain `version = "X"` as a substring (their
@@ -1461,7 +1467,7 @@ any-glob-to-any-file = [ "meta_package_manager/managers/xbps.*", "tests/*xbps*" 
 
 [[tool.repomatic.labels.file-rules]]
 label = "🔌 bar-plugin"
-any-glob-to-any-file = [ "meta_package_manager/bar_plugin/*", "tests/*bar_plugin*" ]
+any-glob-to-any-file = [ "meta_package_manager/bar_plugin*", "tests/*bar_plugin*" ]
 
 [tool.gitleaks]
 allowlist.description = "False positives"

@@ -125,67 +125,83 @@ class InspectCLIOutput:
             assert set(found_managers).issubset(selected)
 
 
-class TestCommonCLI:
-    """Single tests for CLI behavior shared by all subcommands.
+# CLI behavior shared by all subcommands is exercised once, on a single
+# non-destructive subcommand (like ``mpm installed`` or ``mpm managers``): the
+# selection logic and code path is the same for all of them, so repeating the
+# test per subcommand would only slow the suite down.
 
-    If we have to, we only run the test on a single, non-destructive subcommand
-    (like ``mpm installed`` or ``mpm managers``). Not all subcommands are tested.
 
-    That way we prevent running similar tests which are operating on the same, shared
-    code path. Thus improving overall execution of the test suite.
+def test_executable_module():
+    """Try running the CLI as a Python module.
+
+    Use the current Python executable so we don't have to worry about missing
+    dependencies.
     """
-
-    def test_executable_module(self):
-        """Try running the CLI as a Python module.
-
-        Use the current Python executable so we don't have to worry about missing
-        dependencies.
-        """
-        process = subprocess.run(
-            (sys.executable, "-m", "meta_package_manager", "--version"),
-            capture_output=True,
-            encoding="utf-8",
-            check=False,
-        )
-        assert process.returncode == 0
-        assert not process.stderr
-        # click_extra appends ``+<git_short_hash>`` to ``.dev`` versions at
-        # runtime, so accept the optional local version identifier suffix.
-        # Newer versions of click_extra also append a Python version/platform
-        # line, so match that optional trailing line too.
-        assert re.fullmatch(
-            # click-extra 8.0's --color defaults to the tri-state ``auto``, which
-            # strips ANSI codes for non-interactive output. subprocess.run captures
-            # via pipes (non-TTY), so the version screen comes through uncolored.
-            rf"mpm, version {re.escape(__version__)}(\+[0-9a-f]+)?\n"
-            rf"(Python [^\n]+\n)?",
-            process.stdout,
-        )
-
-    def test_timeout(self, invoke, slow_fake_pool):
-        """Check that timeout is handled gracefully: command exits 0 and logs a warning."""
-        result = invoke("--timeout", "1", "outdated")
-        assert result.exit_code == 0
-        assert result.exception is None
-        assert "Timed out after 1s." in result.stderr
-
-    @pytest.mark.parametrize(
-        ("summary_arg", "active_summary"),
-        (("--summary", True), ("--no-summary", False), (None, True)),
+    process = subprocess.run(
+        (sys.executable, "-m", "meta_package_manager", "--version"),
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
     )
-    def test_summary(self, invoke, fake_pool, summary_arg, active_summary):
-        """Test the result on all combinations of optional summary options."""
-        result = invoke(summary_arg, "installed")
-        assert result.exit_code == 0
-        # With --no-summary at the default WARNING verbosity stderr can be empty, so
-        # guard the last-line lookup instead of indexing into a possibly-empty list.
-        lines = result.stderr.splitlines()
-        summary_match = lines and re.match(
-            r"\d+ packages total \((\w+: \d+(, )?)+\)\.",
-            # Last line of stderr.
-            lines[-1],
-        )
-        assert active_summary is bool(summary_match)
+    assert process.returncode == 0
+    assert not process.stderr
+    # click_extra appends ``+<git_short_hash>`` to ``.dev`` versions at
+    # runtime, so accept the optional local version identifier suffix.
+    # Newer versions of click_extra also append a Python version/platform
+    # line, so match that optional trailing line too.
+    assert re.fullmatch(
+        # click-extra 8.0's --color defaults to the tri-state ``auto``, which
+        # strips ANSI codes for non-interactive output. subprocess.run captures
+        # via pipes (non-TTY), so the version screen comes through uncolored.
+        rf"mpm, version {re.escape(__version__)}(\+[0-9a-f]+)?\n"
+        rf"(Python [^\n]+\n)?",
+        process.stdout,
+    )
+
+
+def test_timeout(invoke, slow_fake_pool):
+    """Check that timeout is handled gracefully: command exits 0 and logs a warning."""
+    result = invoke("--timeout", "1", "outdated")
+    assert result.exit_code == 0
+    assert result.exception is None
+    assert "Timed out after 1s." in result.stderr
+
+
+@pytest.mark.parametrize(
+    ("summary_arg", "active_summary"),
+    (("--summary", True), ("--no-summary", False), (None, True)),
+)
+def test_summary(invoke, fake_pool, summary_arg, active_summary):
+    """Test the result on all combinations of optional summary options."""
+    result = invoke(summary_arg, "installed")
+    assert result.exit_code == 0
+    # With --no-summary at the default WARNING verbosity stderr can be empty, so
+    # guard the last-line lookup instead of indexing into a possibly-empty list.
+    lines = result.stderr.splitlines()
+    summary_match = lines and re.match(
+        r"\d+ packages total \((\w+: \d+(, )?)+\)\.",
+        # Last line of stderr.
+        lines[-1],
+    )
+    assert active_summary is bool(summary_match)
+
+
+def managers_table_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
+    """Signals telling whether ``mid`` shows up in the ``mpm managers`` table.
+
+    Lives at module level so both the selection tests below and the dedicated
+    ``managers`` subcommand suite (``tests.test_cli_managers``) share it through
+    downward imports, instead of one test module importing the other sideways.
+    """
+    yield from (
+        # Search in manager table.
+        bool(
+            re.search(
+                rf"│\s+{mid}\s+│.+│\s+(✓|✘).+│\s+(✓|✘)",
+                stdout,
+            ),
+        ),
+    )
 
 
 class TestManagerSelection(InspectCLIOutput):
@@ -202,17 +218,7 @@ class TestManagerSelection(InspectCLIOutput):
 
     @staticmethod
     def evaluate_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
-        """Borrow the signals from the ``--manager`` test suite.
-
-        Module is imported inplace to avoid circular import.
-        """
-        from .test_cli_managers import TestManagers
-
-        return TestManagers.evaluate_signals(  # type: ignore[no-any-return]
-            mid,
-            stdout,
-            stderr,
-        )
+        return managers_table_signals(mid, stdout, stderr)
 
     @pytest.mark.parametrize("selector", ("--manager", "--exclude"))
     def test_invalid_manager_selector(self, invoke, selector):
@@ -400,6 +406,18 @@ class CLISubCommandTests(InspectCLIOutput):
     inherited by sub-command specific test cases.
     """
 
+    @staticmethod
+    def assert_no_manager_selected(result) -> None:
+        """Assert the run stopped on the ``No manager selected.`` exit-``2`` guard.
+
+        Shared by every subcommand test that deselects all managers (or selects
+        only managers lacking the operation) and expects the run to refuse to
+        proceed.
+        """
+        assert result.exit_code == 2
+        assert not result.stdout
+        assert "critical: No manager selected.\n" in result.stderr
+
 
 class CLITableTests:
     """Test subcommands whose output is a configurable table.
@@ -408,7 +426,7 @@ class CLITableTests:
     """
 
     columns_registry: tuple = ()
-    """The subcommand's column registry (a ``cli.py`` ``*_COLUMNS`` constant).
+    """The subcommand's column registry (a ``tables.py`` ``*_COLUMNS`` constant).
 
     Set by each subclass so the generic ``--columns`` tests below resolve column
     IDs to their header labels from the same source of truth the CLI uses.

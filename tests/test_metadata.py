@@ -31,16 +31,12 @@ import json
 import re
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 
 import pytest
 from extra_platforms.pytest import skip_guix_build
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
+from .conftest import tomllib
 
 
 PROJECT_ROOT = Path(__file__).parent.parent

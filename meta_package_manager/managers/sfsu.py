@@ -92,7 +92,6 @@ class SFSU(PackageManager):
             for pkg in json.loads(output):
                 yield self.package(
                     id=pkg["name"],
-                    name=pkg["name"],
                     installed_version=pkg["version"],
                 )
 
@@ -125,7 +124,6 @@ class SFSU(PackageManager):
             for pkg in data.get("packages", []):
                 yield self.package(
                     id=pkg["name"],
-                    name=pkg["name"],
                     installed_version=pkg["current"],
                     latest_version=pkg["available"],
                 )
@@ -164,7 +162,6 @@ class SFSU(PackageManager):
                 for pkg in packages:
                     yield self.package(
                         id=pkg["name"],
-                        name=pkg["name"],
                         latest_version=pkg["version"],
                     )
 

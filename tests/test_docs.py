@@ -19,7 +19,6 @@ from __future__ import annotations
 import importlib.util
 import re
 import shutil
-import sys
 from itertools import permutations
 from pathlib import Path
 
@@ -37,7 +36,7 @@ from meta_package_manager.labels import (
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 
-from .conftest import all_managers
+from .conftest import tomllib, all_managers
 
 
 def _load_docs_update():
@@ -57,11 +56,6 @@ def _load_docs_update():
 
 
 docs_update = _load_docs_update()
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
 
 
 """ Test all non-code artifacts depending on manager definitions.

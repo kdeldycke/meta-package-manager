@@ -31,12 +31,12 @@ def manager():
     return Mise()
 
 
-def test_installed_yields_packages(manager, monkeypatch):
+def test_installed_yields_packages(manager, stub_run_cli):
     output = (
         '{"node": [{"version": "20.10.0", '
         '"install_path": "/home/me/.local/share/mise/installs/node/20.10.0"}]}'
     )
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+    stub_run_cli(manager, output)
     packages = list(manager.installed)
     assert len(packages) == 1
     assert packages[0].id == "node"
@@ -44,39 +44,39 @@ def test_installed_yields_packages(manager, monkeypatch):
 
 
 @pytest.mark.parametrize("output", ("", "{}"))
-def test_installed_handles_empty(manager, monkeypatch, output):
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+def test_installed_handles_empty(manager, stub_run_cli, output):
+    stub_run_cli(manager, output)
     assert list(manager.installed) == []
 
 
-def test_installed_yields_one_package_per_version(manager, monkeypatch):
+def test_installed_yields_one_package_per_version(manager, stub_run_cli):
     output = (
         '{"node": ['
         '{"version": "18.20.0", "install_path": "/x/node/18.20.0"},'
         '{"version": "20.10.0", "install_path": "/x/node/20.10.0"}'
         "]}"
     )
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+    stub_run_cli(manager, output)
     packages = list(manager.installed)
     assert len(packages) == 2
     assert {p.id for p in packages} == {"node"}
     assert {str(p.installed_version) for p in packages} == {"18.20.0", "20.10.0"}
 
 
-def test_installed_preserves_backend_prefix(manager, monkeypatch):
+def test_installed_preserves_backend_prefix(manager, stub_run_cli):
     """Backend-prefixed IDs like ``pipx:ruff`` round-trip without rewriting."""
     output = (
         '{"pipx:ruff": [{"version": "0.6.9", "install_path": "/x/pipx-ruff/0.6.9"}]}'
     )
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+    stub_run_cli(manager, output)
     packages = list(manager.installed)
     assert len(packages) == 1
     assert packages[0].id == "pipx:ruff"
 
 
-def test_outdated_yields_upgrades(manager, monkeypatch):
+def test_outdated_yields_upgrades(manager, stub_run_cli):
     output = '{"node": {"requested": "20", "current": "20.0.0", "latest": "20.10.0"}}'
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+    stub_run_cli(manager, output)
     packages = list(manager.outdated)
     assert len(packages) == 1
     assert packages[0].id == "node"
@@ -85,30 +85,30 @@ def test_outdated_yields_upgrades(manager, monkeypatch):
 
 
 @pytest.mark.parametrize("output", ("", "{}"))
-def test_outdated_handles_empty(manager, monkeypatch, output):
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+def test_outdated_handles_empty(manager, stub_run_cli, output):
+    stub_run_cli(manager, output)
     assert list(manager.outdated) == []
 
 
-def test_search_parses_table(manager, monkeypatch):
+def test_search_parses_table(manager, stub_run_cli):
     output = (
         "node                Node.js JavaScript runtime\n"
         "node-build          Compile and install Node.js\n"
         "nodejs              alias for node\n"
     )
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+    stub_run_cli(manager, output)
     packages = list(manager.search("node", extended=False, exact=False))
     assert [p.id for p in packages] == ["node", "node-build", "nodejs"]
     assert packages[0].description == "Node.js JavaScript runtime"
     assert packages[1].description == "Compile and install Node.js"
 
 
-def test_search_keeps_descriptions_with_inner_spaces(manager, monkeypatch):
+def test_search_keeps_descriptions_with_inner_spaces(manager, stub_run_cli):
     """A description containing single-space-separated words is preserved
     intact: the regex only treats the run of 2+ spaces between columns as a
     delimiter."""
     output = "ripgrep            line-oriented search tool\n"
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
+    stub_run_cli(manager, output)
     packages = list(manager.search("rg", extended=False, exact=False))
     assert len(packages) == 1
     assert packages[0].description == "line-oriented search tool"
@@ -122,14 +122,8 @@ def test_search_keeps_descriptions_with_inner_spaces(manager, monkeypatch):
         ("20.10.0", "node@20.10.0"),
     ),
 )
-def test_install_builds_spec(manager, monkeypatch, version, expected_spec):
-    captured: list = []
-
-    def _capture(*args, **kwargs):
-        captured.append(args)
-        return ""
-
-    monkeypatch.setattr(manager, "run_cli", _capture)
+def test_install_builds_spec(manager, capture_run_cli, version, expected_spec):
+    captured = capture_run_cli(manager)
     manager.install("node", version=version)
     assert captured == [("install", expected_spec)]
 
@@ -154,39 +148,21 @@ def test_upgrade_one_cli_builds_spec(manager, version, expected_spec):
     assert cli[-1] == expected_spec
 
 
-def test_remove_uses_all_flag(manager, monkeypatch):
+def test_remove_uses_all_flag(manager, capture_run_cli):
     """``--all`` matches mpm's "remove the package, full stop" contract even
     when ``mise`` has multiple versions of the same tool installed."""
-    captured: list = []
-
-    def _capture(*args, **kwargs):
-        captured.append(args)
-        return ""
-
-    monkeypatch.setattr(manager, "run_cli", _capture)
+    captured = capture_run_cli(manager)
     manager.remove("node")
     assert captured == [("uninstall", "--all", "node")]
 
 
-def test_sync_runs_plugins_update(manager, monkeypatch):
-    captured: list = []
-
-    def _capture(*args, **kwargs):
-        captured.append(args)
-        return ""
-
-    monkeypatch.setattr(manager, "run_cli", _capture)
+def test_sync_runs_plugins_update(manager, capture_run_cli):
+    captured = capture_run_cli(manager)
     manager.sync()
     assert captured == [("plugins", "update")]
 
 
-def test_cleanup_runs_cache_clear(manager, monkeypatch):
-    captured: list = []
-
-    def _capture(*args, **kwargs):
-        captured.append(args)
-        return ""
-
-    monkeypatch.setattr(manager, "run_cli", _capture)
+def test_cleanup_runs_cache_clear(manager, capture_run_cli):
+    captured = capture_run_cli(manager)
     manager.cleanup()
     assert captured == [("cache", "clear")]

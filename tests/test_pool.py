@@ -28,7 +28,7 @@ from click_extra.logging import LogLevel
 
 import meta_package_manager
 from meta_package_manager.cli import mpm
-from meta_package_manager.execution import SHARED_LOCK_FAMILIES, warm_availability
+from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES, warm_availability
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.pool import manager_classes, pool
 

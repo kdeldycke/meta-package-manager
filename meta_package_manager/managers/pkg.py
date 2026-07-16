@@ -393,8 +393,7 @@ class PKG(PackageManager):
         return self.run_cli("install", "--yes", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade all outdated packages.
 
         .. code-block:: shell-session
 
@@ -408,8 +407,7 @@ class PKG(PackageManager):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade the provided package.
 
         .. code-block:: shell-session
 
@@ -635,16 +633,14 @@ class Ports(PackageManager):
         )
 
         for match in self._OUTDATED_REGEXP.finditer(output):
-            full_id = match.group("package_id")
-            latest_version = match.group("latest_version")
-            split = self._NAME_VERSION_REGEXP.match(full_id)
+            split = self.split_name_version(match.group("package_id"))
             if not split:
                 continue
-            package_id, installed_version = split.groups()
+            package_id, installed_version = split
             yield self.package(
                 id=package_id,
                 installed_version=installed_version,
-                latest_version=latest_version,
+                latest_version=match.group("latest_version"),
             )
 
     @version_not_implemented

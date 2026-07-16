@@ -37,7 +37,7 @@ from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 from meta_package_manager.version import TokenizedString
 
-from .conftest import all_managers, manager_classes
+from .conftest import all_managers, manager_classes_params
 
 """ Test the structure, data and types returned by all package managers.
 
@@ -333,7 +333,7 @@ def test_operation_order():
 
 
 # Check the code of each file registered in the pool.
-@manager_classes  # type: ignore[operator]
+@manager_classes_params
 def test_content_order(manager_class):
     """Lint each package manager definition file to check its code structure is the same
     as the canonical PackageManager base class."""

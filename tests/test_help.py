@@ -25,17 +25,14 @@ the live command tree and fails naming the missing or orphaned entries.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import click
 
 from meta_package_manager.cli import mpm
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
+from .conftest import tomllib
+
 
 PLAN_PATH = Path(__file__).parent / "cli-test-plan.toml"
 

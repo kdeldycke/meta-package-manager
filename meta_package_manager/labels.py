@@ -186,7 +186,10 @@ CONTENT_RULES_STATIC: TLabelRules = [
 
 
 FILE_RULES_STATIC: TLabelRules = [
-    ("🔌 bar-plugin", ("meta_package_manager/bar_plugin/*", "tests/*bar_plugin*")),
+    # The plugin spans two sibling modules: the stdlib-only bar_plugin.py script and
+    # its mpm-side bar_plugin_renderer.py companion. No trailing slash: they are
+    # modules, not a package directory.
+    ("🔌 bar-plugin", ("meta_package_manager/bar_plugin*", "tests/*bar_plugin*")),
     (f"{MANAGER_PREFIX}mpm", ("meta_package_manager/*",)),
 ]
 """File rules for labels that are not derived from the pool.

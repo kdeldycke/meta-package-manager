@@ -18,28 +18,15 @@
 This subpackage is the home of every SBOM-flavored writer in ``mpm``. Its
 existence mirrors the optional ``[sbom-offline]`` install extra defined in
 ``pyproject.toml``: a default ``pip install meta-package-manager`` does not
-pull ``cyclonedx-python-lib`` or ``spdx-tools``, so the modules below guard
+pull ``cyclonedx-python-lib`` or ``spdx-tools``, so the format modules guard
 their heavy imports with ``try/except`` and expose
 ``spdx_support`` / ``cyclonedx_support`` flags that callers check before
 instantiating the rendering classes.
 
-The public surface re-exported here is the only API
-:py:mod:`meta_package_manager.cli` and the test suite depend on. Internal
-helpers (license parsing, checksum maps, etc.) stay in their respective
-format modules.
+Import from the named modules directly: the format-agnostic base class and
+export-format enum from :py:mod:`meta_package_manager.sbom.base`, the writers
+and their support flags from :py:mod:`meta_package_manager.sbom.spdx` and
+:py:mod:`meta_package_manager.sbom.cyclonedx`.
 """
 
 from __future__ import annotations
-
-from .base import SBOM, ExportFormat
-from .cyclonedx import CycloneDX, cyclonedx_support
-from .spdx import SPDX, spdx_support
-
-__all__ = (
-    "SBOM",
-    "SPDX",
-    "CycloneDX",
-    "ExportFormat",
-    "cyclonedx_support",
-    "spdx_support",
-)

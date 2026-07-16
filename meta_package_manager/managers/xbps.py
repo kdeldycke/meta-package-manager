@@ -117,12 +117,12 @@ class XBPS(PackageManager):
         )
 
         for match in self._INSTALLED_REGEXP.finditer(output):
-            name_match = self._NAME_VERSION_REGEXP.match(match.group("pkgver"))
-            if name_match:
+            if split := self.split_name_version(match.group("pkgver")):
+                package_id, version = split
                 yield self.package(
-                    id=name_match.group("package_id"),
+                    id=package_id,
                     description=match.group("description").strip(),
-                    installed_version=name_match.group("version"),
+                    installed_version=version,
                 )
 
     @property
@@ -144,13 +144,12 @@ class XBPS(PackageManager):
         output = self.run_cli("--update", "--dry-run")
 
         for match in self._OUTDATED_REGEXP.finditer(output):
-            name_match = self._NAME_VERSION_REGEXP.match(match.group("pkgver"))
-            if name_match:
-                package_id = name_match.group("package_id")
+            if split := self.split_name_version(match.group("pkgver")):
+                package_id, version = split
                 yield self.package(
                     id=package_id,
                     installed_version=installed_versions.get(package_id),
-                    latest_version=name_match.group("version"),
+                    latest_version=version,
                 )
 
     @search_capabilities(extended_support=False, exact_support=False)
@@ -179,12 +178,12 @@ class XBPS(PackageManager):
         )
 
         for match in self._SEARCH_REGEXP.finditer(output):
-            name_match = self._NAME_VERSION_REGEXP.match(match.group("pkgver"))
-            if name_match:
+            if split := self.split_name_version(match.group("pkgver")):
+                package_id, version = split
                 yield self.package(
-                    id=name_match.group("package_id"),
+                    id=package_id,
                     description=match.group("description").strip(),
-                    latest_version=name_match.group("version"),
+                    latest_version=version,
                 )
 
     @version_not_implemented

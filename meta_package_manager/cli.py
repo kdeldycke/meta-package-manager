@@ -64,7 +64,6 @@ from click_extra import (
     zero_exit_option,
 )
 from click_extra.context import (
-    COLUMNS,
     PROGRESS,
     SORT_BY,
     TABLE_FORMAT,
@@ -74,13 +73,7 @@ from click_extra.context import (
 from click_extra.execution import install_interrupt_handler
 from click_extra.highlight import HelpKeywords, highlight
 from click_extra.logging import LogLevel
-from click_extra.table import (
-    SERIALIZATION_FORMATS,
-    ColumnSpec,
-    print_data,
-    select_columns,
-    select_row,
-)
+from click_extra.table import SERIALIZATION_FORMATS
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import current_architecture, current_platform, reduce
 
@@ -96,30 +89,34 @@ from .config import (
     print_contribution_hints,
     register_config_managers_from_context,
 )
-from .execution import (
-    CLIError,
+from .dispatch import (
     OperationTrail,
     collect_from_managers,
     collect_per_package,
-    highlight_cli_name,
     warn_jobs_ignored,
 )
+from .execution import CLIError, highlight_cli_name
 from .manager import PackageManager
 from .package import packages_asdict
 from .platforms import MAIN_PLATFORMS
 from .pool import pool
-from .sbom import (
-    SBOM,
-    SPDX,
-    CycloneDX,
-    ExportFormat,
-    cyclonedx_support,
-    spdx_support,
-)
-from .sorting import SortableField
+from .sbom.base import SBOM, ExportFormat
+from .sbom.cyclonedx import CycloneDX, cyclonedx_support
+from .sbom.spdx import SPDX, spdx_support
 from .specifier import VERSION_SEP, Solver, Specifier
 from .sudo import prime_sudo
 from .summary import package_counts, print_summary, sbom_summary
+from .tables import (
+    INSTALLED_COLUMNS,
+    MANAGERS_COLUMNS,
+    OUTDATED_COLUMNS,
+    SEARCH_COLUMNS,
+    WHICH_COLUMNS,
+    SortableField,
+    column_specs,
+    print_projected_table,
+    print_serialized_and_exit,
+)
 from .version import diff_versions
 
 if sys.version_info >= (3, 11):
@@ -129,7 +126,7 @@ else:
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator, Sequence
+    from collections.abc import Callable, Iterator
     from typing import IO
 
     from click_extra import Context, Parameter
@@ -164,192 +161,6 @@ support to a manager surfaces it here automatically.
 """
 
 
-# Column registries of the table-rendering subcommands.
-#
-# Each registry pairs a click-extra ColumnSpec (whose ID addresses the column from
-# --columns) with the SortableField the column carries for mpm's global --sort-by
-# (None for a column that cannot drive the sort). A registry is the single source
-# of truth for its command: the same tuple feeds the @columns_option declaration
-# (which validates the user selection) and print_projected_table() (which projects
-# headers and rows before rendering).
-#
-# The pair's second element is annotated `str | None` rather than
-# `SortableField | None`: on Python 3.10, SortableField extends
-# backports.strenum.StrEnum, whose stubs type the members as plain `str`, so the
-# tighter annotation only checks under 3.11+. StrEnum members being `str`
-# subclasses, the wider annotation is accurate on every supported version.
-
-
-MANAGERS_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
-    (
-        ColumnSpec("manager_id", "Manager ID", "Manager's identifier."),
-        SortableField.MANAGER_ID,
-    ),
-    (
-        ColumnSpec("manager_name", "Name", "Manager's common name."),
-        SortableField.MANAGER_NAME,
-    ),
-    (
-        ColumnSpec("supported", "Supported", "Support status on the current platform."),
-        None,
-    ),
-    (
-        ColumnSpec("cli", "CLI", "Location of the manager's binary on the system."),
-        None,
-    ),
-    (
-        ColumnSpec("executable", "Executable", "Whether the binary is executable."),
-        None,
-    ),
-    (
-        ColumnSpec(
-            "version",
-            "Version",
-            "Manager's self-reported version, and the unsatisfied requirement "
-            "when stale.",
-        ),
-        SortableField.VERSION,
-    ),
-)
-"""Columns of the ``mpm managers`` table."""
-
-INSTALLED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
-    (
-        ColumnSpec("package_id", "Package ID", "Package's identifier."),
-        SortableField.PACKAGE_ID,
-    ),
-    (
-        ColumnSpec("package_name", "Name", "Package's common name."),
-        SortableField.PACKAGE_NAME,
-    ),
-    (
-        ColumnSpec("manager_id", "Manager", "Manager reporting the package."),
-        SortableField.MANAGER_ID,
-    ),
-    (
-        ColumnSpec(
-            "installed_version", "Installed version", "Version currently installed."
-        ),
-        SortableField.VERSION,
-    ),
-)
-"""Columns of the ``mpm installed`` table."""
-
-OUTDATED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
-    *INSTALLED_COLUMNS,
-    (
-        ColumnSpec(
-            "latest_version", "Latest version", "Version available for upgrade."
-        ),
-        None,
-    ),
-)
-"""Columns of the ``mpm outdated`` table."""
-
-SEARCH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
-    (
-        ColumnSpec("package_id", "Package ID", "Package's identifier."),
-        SortableField.PACKAGE_ID,
-    ),
-    (
-        ColumnSpec("package_name", "Name", "Package's common name."),
-        SortableField.PACKAGE_NAME,
-    ),
-    (
-        ColumnSpec("manager_id", "Manager", "Manager reporting the match."),
-        SortableField.MANAGER_ID,
-    ),
-    (
-        ColumnSpec("latest_version", "Latest version", "Latest version available."),
-        SortableField.VERSION,
-    ),
-    (
-        ColumnSpec(
-            "description",
-            "Description",
-            "Package description, for managers that provide one. Out of the "
-            "default selection: select it explicitly or pass --description.",
-        ),
-        None,
-    ),
-)
-"""Columns of the ``mpm search`` table.
-
-The ``description`` column exists in the registry (so ``--columns`` can select it)
-but stays out of the default selection unless ``--description`` (or ``--extended``,
-which searches descriptions) is passed.
-"""
-
-WHICH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
-    (
-        ColumnSpec(
-            "manager_id", "Manager ID", "Manager whose search path found the binary."
-        ),
-        SortableField.MANAGER_ID,
-    ),
-    (
-        ColumnSpec(
-            "priority", "Priority", "Rank of the match in the manager's search path."
-        ),
-        None,
-    ),
-    (
-        ColumnSpec("cli_path", "CLI path", "Location of the matched binary."),
-        None,
-    ),
-    (
-        ColumnSpec(
-            "symlink",
-            "Symlink destination",
-            "Resolved target when the match is a symlink.",
-        ),
-        None,
-    ),
-)
-"""Columns of the ``mpm which`` table."""
-
-
-def column_specs(
-    columns: Sequence[tuple[ColumnSpec, str | None]],
-) -> tuple[ColumnSpec, ...]:
-    """Extract the bare :class:`ColumnSpec` tuple from a column registry."""
-    return tuple(spec for spec, _ in columns)
-
-
-def print_projected_table(
-    ctx: Context,
-    columns: Sequence[tuple[ColumnSpec, str | None]],
-    rows: Iterable[dict[str, str | None]],
-    default_ids: Sequence[str] | None = None,
-) -> None:
-    """Render dict ``rows`` as a table projected through ``--columns``.
-
-    The ``--columns`` selection restricts and reorders the rendering,
-    SQL-``SELECT``-style; click-extra's
-    :class:`~click_extra.table.ColumnsOption` already validated it against the
-    same ``columns`` registry, so unknown IDs never reach this point.
-    ``default_ids`` is the selection applied when the user passed none
-    (``search`` uses it to hide the description column unless
-    ``--description``); ``None`` keeps every column in canonical order.
-
-    Sorting stays on mpm's global ``--sort-by``: each header pairs its label
-    with the sortable field the column carries, and click-extra's
-    :py:func:`~click_extra.table.print_table` resolves the selection per
-    table. A sort field whose column is projected out is simply skipped, and a
-    table carrying none of the selected fields keeps its original row order.
-    """
-    selected = ctx.meta.get(COLUMNS) or tuple(default_ids or ())
-    projected = select_columns(column_specs(columns), selected)
-    sort_field = {spec.id: field for spec, field in columns}
-    ids = tuple(spec.id for spec in projected)
-    # print_table renders through the table format resolved at group setup: a
-    # dynamic attribute mypy cannot see.
-    ctx.find_root().print_table(  # type: ignore[attr-defined]
-        [select_row(row, ids, ids) for row in rows],
-        tuple((spec.label, sort_field[spec.id]) for spec in projected),
-    )
-
-
 def is_stdout(filepath: Path) -> bool:
     """Check if a file path is set to stdout.
 
@@ -363,26 +174,6 @@ def prep_path(filepath: Path) -> IO | None:
     if is_stdout(filepath):
         return None
     return filepath.open("w", encoding="UTF-8")
-
-
-def print_serialized_and_exit(ctx: Context, data: object) -> None:
-    """Render ``data`` in the active serialization format, then exit.
-
-    When the global ``--table-format`` resolves to one of the structured
-    serialization formats (JSON, YAML, TOML, XML, ...), serialize ``data`` under
-    the shared ``mpm`` root element and stop the program. Otherwise return, so
-    the caller falls through to its human-friendly table rendering.
-    """
-    table_format = ctx.meta[TABLE_FORMAT]
-    if table_format in SERIALIZATION_FORMATS:
-        # A --columns selection does not apply here: serialized documents carry
-        # the full structured payload. No "ignoring option" note is logged
-        # either, since the mpm group body silences all logging for
-        # serialization formats (unless at DEBUG) to keep the streams clean.
-        print_data(
-            data, table_format, root_element="mpm", package="meta-package-manager"
-        )
-        ctx.exit()
 
 
 def guard_existing_output(ctx: Context, output_path: Path, *, overwrite: bool) -> None:
@@ -879,7 +670,7 @@ def mpm(
 
         The selection summary is logged at ``DEBUG`` on the first call only. The
         ``✓``-trailed spinner from
-        :py:func:`meta_package_manager.execution.collect_from_managers` already names every
+        :py:func:`meta_package_manager.dispatch.collect_from_managers` already names every
         manager that ran, so this summary is redundant at default verbosity for
         read-only commands; it is kept for troubleshooting, where it also surfaces
         config-driven drops that never appear in the trail. Logging on the first call
@@ -1009,10 +800,7 @@ def managers(ctx):
         )
         for manager in inventory():
             manager_data[manager.id] = {fid: getattr(manager, fid) for fid in fields}
-            # Serialize errors at the last minute to gather all we encountered.
-            manager_data[manager.id]["errors"] = list(
-                {expt.error for expt in manager.cli_errors},
-            )
+            manager_data[manager.id]["errors"] = _cli_errors(manager)
 
         print_serialized_and_exit(ctx, manager_data)
 
@@ -1053,18 +841,49 @@ def managers(ctx):
                 if not manager.fresh:
                     version_infos += f" {manager.requirement}"
 
-        table.append({
-            "manager_id": getattr(theme(), "success" if manager.fresh else "error")(
-                manager.id
-            ),
-            "manager_name": manager.name,
-            "supported": os_infos,
-            "cli": cli_infos,
-            "executable": theme().success(OK_GLYPH) if manager.executable else "",
-            "version": version_infos,
-        })
+        table.append(
+            {
+                "manager_id": getattr(theme(), "success" if manager.fresh else "error")(
+                    manager.id
+                ),
+                "manager_name": manager.name,
+                "supported": os_infos,
+                "cli": cli_infos,
+                "executable": theme().success(OK_GLYPH) if manager.executable else "",
+                "version": version_infos,
+            }
+        )
 
     print_projected_table(ctx, MANAGERS_COLUMNS, table)
+
+
+def _cli_errors(manager: PackageManager) -> list[str]:
+    """Serialize the distinct CLI errors ``manager`` accumulated so far.
+
+    Collected at the last minute — after the manager's query ran — so the list
+    gathers everything the run produced. A non-empty list marks the manager's
+    ``✗`` in the concurrent spinner trail (see
+    :py:func:`meta_package_manager.dispatch.collect_from_managers`) and ships in
+    the serialized payloads.
+    """
+    return list({expt.error for expt in manager.cli_errors})
+
+
+def _snapshot_installed(
+    manager: PackageManager,
+    query: str | None,
+    *,
+    exact: bool,
+) -> tuple[Package, ...]:
+    """Materialize the manager's installed inventory, filtered by ``query``.
+
+    The shared fetch of every inventory consumer (``installed``, ``dump``,
+    ``dump --brewfile``, ``sbom``): a best-effort
+    :py:meth:`~meta_package_manager.manager.PackageManager.installed_or_empty`
+    snapshot (a broken manager yields no packages instead of aborting the batch),
+    post-filtered through :py:func:`_filter_matches`.
+    """
+    return tuple(_filter_matches(manager.installed_or_empty(), query, exact=exact))
 
 
 def _manager_result(
@@ -1074,17 +893,13 @@ def _manager_result(
 
     The payload shape — ``id``, ``name``, ``packages``, ``errors`` — is shared by
     the ``installed``, ``outdated`` and ``search`` subcommands, their serialized
-    output and their table rendering. ``errors`` is collected at the last minute so
-    it gathers every distinct CLI error the manager accumulated during the query; a
-    non-empty list also marks the manager's ``✗`` in the concurrent spinner trail
-    (see :py:func:`meta_package_manager.execution.collect_from_managers`).
+    output and their table rendering.
     """
     return manager.id, {
         "id": manager.id,
         "name": manager.name,
         "packages": packages,
-        # Serialize errors at the last minute to gather all we encountered.
-        "errors": list({expt.error for expt in manager.cli_errors}),
+        "errors": _cli_errors(manager),
     }
 
 
@@ -1151,14 +966,51 @@ def _query_highlighter(query: str | None) -> Callable[[str], str]:
     return highlighter
 
 
-@mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
-@option(
+# Options shared by several subcommands. Each application of a decorator below
+# instantiates its own Option, so one definition can safely serve many commands.
+
+exact_match_option = option(
     "--exact/--fuzzy",
     default=False,
     help="With a QUERY, only keep packages whose ID or name matches it exactly, "
     "instead of the default case-insensitive, tokenized (fuzzy) match. No effect "
     "without a QUERY.",
 )
+"""``--exact`` refinement of the optional positional ``QUERY`` of ``installed`` and
+``outdated``."""
+
+query_option = option(
+    "--query",
+    type=STRING,
+    default=None,
+    metavar="QUERY",
+    help="Only keep installed packages whose ID or name matches QUERY. Fuzzy "
+    "by default (case-insensitive, tokenized); see --exact.",
+)
+"""``--query`` filter of the inventory exporters (``dump``, ``sbom``)."""
+
+query_exact_option = option(
+    "--exact/--fuzzy",
+    default=False,
+    help="With --query, require a verbatim match on the package ID or name instead "
+    "of the default fuzzy match. No effect without --query.",
+)
+"""``--exact`` refinement of :data:`query_option`."""
+
+overwrite_option = option(
+    "--overwrite",
+    "--force",
+    "--replace",
+    is_flag=True,
+    default=False,
+    help="Allow the target file to be silently wiped out if it already exists.",
+)
+"""Opt-in clobbering of an existing output file (``dump``, ``sbom``); see
+:func:`guard_existing_output`."""
+
+
+@mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
+@exact_match_option
 @option(
     "-d",
     "--duplicates",
@@ -1189,13 +1041,8 @@ def installed(ctx, exact, duplicates, query):
     )
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        # installed_or_empty() never raises (it swallows errors into an empty
-        # result), so no CLIError guard is needed here.
         packages = tuple(
-            packages_asdict(
-                _filter_matches(manager.installed_or_empty(), query, exact=exact),
-                fields,
-            )
+            packages_asdict(_snapshot_installed(manager, query, exact=exact), fields)
         )
         return _manager_result(manager, packages)
 
@@ -1261,13 +1108,7 @@ def installed(ctx, exact, duplicates, query):
 
 
 @mpm.command(short_help="List outdated packages.", section=EXPLORE)
-@option(
-    "--exact/--fuzzy",
-    default=False,
-    help="With a QUERY, only keep packages whose ID or name matches it exactly, "
-    "instead of the default case-insensitive, tokenized (fuzzy) match. No effect "
-    "without a QUERY.",
-)
+@exact_match_option
 @option(
     "--plugin-output",
     is_flag=True,
@@ -1331,13 +1172,17 @@ def outdated(ctx, exact, plugin_output, query):
                 info["installed_version"] if info["installed_version"] else "?",
                 info["latest_version"],
             )
-            table.append({
-                "package_id": highlight_query(info["id"]) if info["id"] else "",
-                "package_name": highlight_query(info["name"]) if info["name"] else "",
-                "manager_id": manager_id,
-                "installed_version": installed_version,
-                "latest_version": latest_version,
-            })
+            table.append(
+                {
+                    "package_id": highlight_query(info["id"]) if info["id"] else "",
+                    "package_name": highlight_query(info["name"])
+                    if info["name"]
+                    else "",
+                    "manager_id": manager_id,
+                    "installed_version": installed_version,
+                    "latest_version": latest_version,
+                }
+            )
 
     print_projected_table(ctx, OUTDATED_COLUMNS, table)
 
@@ -1423,17 +1268,19 @@ def search(ctx, extended, exact, refilter, query):
     table: list[dict[str, str | None]] = []
     for manager_id, matching_pkg in matches.items():
         for pkg in matching_pkg["packages"]:
-            table.append({
-                "package_id": highlight_query(pkg["id"]) if pkg["id"] else "",
-                "package_name": highlight_query(pkg["name"]) if pkg["name"] else "",
-                "manager_id": manager_id,
-                "latest_version": str(pkg["latest_version"])
-                if pkg["latest_version"]
-                else "?",
-                "description": highlight_query(pkg.get("description"))
-                if pkg.get("description")
-                else "",
-            })
+            table.append(
+                {
+                    "package_id": highlight_query(pkg["id"]) if pkg["id"] else "",
+                    "package_name": highlight_query(pkg["name"]) if pkg["name"] else "",
+                    "manager_id": manager_id,
+                    "latest_version": str(pkg["latest_version"])
+                    if pkg["latest_version"]
+                    else "?",
+                    "description": highlight_query(pkg.get("description"))
+                    if pkg.get("description")
+                    else "",
+                }
+            )
 
     default_ids = tuple(
         spec.id
@@ -1462,9 +1309,6 @@ def which(ctx, cli_names):
     On Windows, it additionally suppress the default lookup in the current directory,
     which takes precedence on other paths.
     """
-    if ctx.obj.sort_by:
-        logging.info("Ignore --sort-by option for which command.")
-
     # Machine-friendly data rendering.
     table_format = ctx.meta[TABLE_FORMAT]
     if table_format in SERIALIZATION_FORMATS:
@@ -1488,12 +1332,14 @@ def which(ctx, cli_names):
                 resolved = highlight_cli_name(found_cli.resolve(), cli_names)
                 assert resolved is not None
                 symlink = f"→ {resolved}"
-            table.append({
-                "manager_id": manager.id,
-                "priority": str(priority),
-                "cli_path": highlight_cli_name(found_cli, cli_names),
-                "symlink": symlink,
-            })
+            table.append(
+                {
+                    "manager_id": manager.id,
+                    "priority": str(priority),
+                    "cli_path": highlight_cli_name(found_cli, cli_names),
+                    "symlink": symlink,
+                }
+            )
     print_projected_table(ctx, WHICH_COLUMNS, table)
 
 
@@ -1615,6 +1461,17 @@ def _package_task(
     return task
 
 
+def _announce_level(ctx: Context) -> int:
+    """Log level for a maintenance command's per-manager announcement.
+
+    An explicit ``--<id>`` selection announces loudly at ``INFO``; an implicit
+    "run everything" stays at ``DEBUG`` so the default view shows only the trail
+    (matching the explicit/implicit levels ``select_managers`` already uses for
+    its skip messages). Shared by ``sync``, ``cleanup`` and ``upgrade --all``.
+    """
+    return logging.INFO if ctx.obj.user_selection else logging.DEBUG
+
+
 def _maintenance_work(
     announce: int,
     message: str,
@@ -1638,15 +1495,22 @@ def _maintenance_work(
     return work
 
 
-def exit_on_failures(ctx: Context) -> None:
-    """Exit with code ``1`` to report the per-package failures collected this run.
+def exit_on_failures(ctx: Context, verb: str, failures: Iterable[object]) -> None:
+    """Report the per-package ``failures`` collected this run and exit non-zero.
 
-    Follows the linter convention where findings gate automation, unless the user
-    opted out with ``-0``/``--zero-exit``: the run then keeps its ``0`` exit code,
-    and the ``critical:`` summary already printed stays the durable record. Usage
-    and configuration errors are unaffected: they exit ``2`` regardless, as
-    genuine execution failures.
+    A no-op when ``failures`` is empty. Otherwise prints the durable
+    ``critical: Could not {verb}: ...`` summary (deduplicated and sorted), then
+    exits with code ``1``, following the linter convention where findings gate
+    automation. The user opts out of that gate with ``-0``/``--zero-exit``: the
+    run then keeps its ``0`` exit code, the printed summary staying the durable
+    record. Usage and configuration errors are unaffected: they exit ``2``
+    regardless, as genuine execution failures. Shared by every action command
+    (``install``, ``remove``, ``upgrade <packages>``, ``restore``).
     """
+    items = sorted({str(failure) for failure in failures})
+    if not items:
+        return
+    logging.critical(f"Could not {verb}: " + ", ".join(items) + ".")
     if not ctx.meta.get(ZERO_EXIT):
         ctx.exit(1)
 
@@ -1670,7 +1534,7 @@ def _dispatch_sourced_operation(
     spec to the managers that can act on it — the manager named in the spec, or every
     selected manager that reports the package installed — then run ``action`` per
     (package, manager) concurrently across managers and serially within each (see
-    :func:`meta_package_manager.execution.collect_per_package`). A package no manager
+    :func:`meta_package_manager.dispatch.collect_per_package`). A package no manager
     recognizes is skipped with an error; any genuine failure exits non-zero with a
     ``critical`` summary, matching ``install``.
 
@@ -1740,19 +1604,21 @@ def _dispatch_sourced_operation(
             manager = pool.get(manager_id)
             if apply_cooldown and not cooldown_permits(manager):
                 continue
-            tasks.append((
-                manager,
-                _package_task(
+            tasks.append(
+                (
                     manager,
-                    spec,
-                    failures_lock,
-                    action=action,
-                    verb=verb,
-                    past=past,
-                    prep=prep,
-                    record_failure=lambda s: failures.append(s.package_id),
-                ),
-            ))
+                    _package_task(
+                        manager,
+                        spec,
+                        failures_lock,
+                        action=action,
+                        verb=verb,
+                        past=past,
+                        prep=prep,
+                        record_failure=lambda s: failures.append(s.package_id),
+                    ),
+                )
+            )
 
     # The sourcing selection above re-stamped `_active_operation = "installed"` on the
     # shared manager singletons. Restore the real operation before the mutating fan-out
@@ -1764,9 +1630,7 @@ def _dispatch_sourced_operation(
 
     collect_per_package(label, done_label, tasks)
 
-    if failures:
-        logging.critical(f"Could not {verb}: " + ", ".join(sorted(set(failures))) + ".")
-        exit_on_failures(ctx)
+    exit_on_failures(ctx, verb, failures)
 
 
 def _attempt_install(manager: PackageManager, spec: Specifier) -> bool:
@@ -1891,13 +1755,7 @@ def install(ctx, packages_specs):
                 tasks.append((manager, task))
         collect_per_package("Installing", "Installed", tasks)
 
-        if unresolved_specs:
-            logging.critical(
-                "Could not install: "
-                + ", ".join(sorted(str(spec) for spec in unresolved_specs))
-                + ".",
-            )
-            exit_on_failures(ctx)
+        exit_on_failures(ctx, "install", unresolved_specs)
         return
 
     # Untied packages present: the priority search cannot fan out, so run sequentially
@@ -2015,13 +1873,7 @@ def install(ctx, packages_specs):
 
     # Fail with a non-zero exit code if any requested package went uninstalled by every
     # selected manager.
-    if unresolved_specs:
-        logging.critical(
-            "Could not install: "
-            + ", ".join(sorted(str(spec) for spec in unresolved_specs))
-            + ".",
-        )
-        exit_on_failures(ctx)
+    exit_on_failures(ctx, "install", unresolved_specs)
 
 
 @mpm.command(aliases=["update"], short_help="Upgrade packages.", section=MAINTENANCE)
@@ -2070,10 +1922,7 @@ def upgrade(ctx, all, packages_specs):
             ctx.obj.selected_managers(implements_operation=Operations.upgrade_all),
         )
         prime_sudo(ctx, managers)
-        # Explicit --<id> picks announce loudly; an implicit "upgrade everything" stays
-        # at DEBUG so the default run shows only the trail (matching the explicit /
-        # implicit levels select_managers already uses for its skip messages).
-        announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
+        announce = _announce_level(ctx)
 
         def upgrade_all_work(manager: PackageManager) -> tuple[str, dict]:
             mgr = theme().invoked_command(manager.id)
@@ -2154,7 +2003,7 @@ def sync(ctx):
     """Sync local package metadata and info from external sources."""
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.sync))
     prime_sudo(ctx, managers)
-    announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
+    announce = _announce_level(ctx)
 
     # Sync is independent per manager, so fan out concurrently with a ✓/✗ trail and
     # a success-count finisher (see collect_from_managers).
@@ -2173,7 +2022,7 @@ def cleanup(ctx):
     """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
     prime_sudo(ctx, managers)
-    announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
+    announce = _announce_level(ctx)
 
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✗ trail
     # and a success-count finisher (see collect_from_managers).
@@ -2209,14 +2058,7 @@ def cleanup(ctx):
         "header and excluded from the output."
     ),
 )
-@option(
-    "--overwrite",
-    "--force",
-    "--replace",
-    is_flag=True,
-    default=False,
-    help="Allow the output file to be silently wiped out if it already exists.",
-)
+@overwrite_option
 @option(
     "--header/--no-header",
     "include_header",
@@ -2238,20 +2080,8 @@ def cleanup(ctx):
     "the version currently installed on the system. Requires the [OUTPUT_PATH] "
     "argument.",
 )
-@option(
-    "--query",
-    type=STRING,
-    default=None,
-    metavar="QUERY",
-    help="Only snapshot installed packages whose ID or name matches QUERY. Fuzzy "
-    "by default (case-insensitive, tokenized); see --exact.",
-)
-@option(
-    "--exact/--fuzzy",
-    default=False,
-    help="With --query, require a verbatim match on the package ID or name instead "
-    "of the default fuzzy match. No effect without --query.",
-)
+@query_option
+@query_exact_option
 @argument(
     "output_path",
     type=file_path(writable=True, resolve_path=True, allow_dash=True),
@@ -2404,14 +2234,11 @@ def _dump_toml(
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         logging.info("Dumping packages...", extra={"label": manager.id})
         packages = tuple(
-            packages_asdict(
-                _filter_matches(manager.installed_or_empty(), query, exact=exact),
-                fields,
-            )
+            packages_asdict(_snapshot_installed(manager, query, exact=exact), fields)
         )
         return manager.id, {
             "packages": packages,
-            "errors": list({e.error for e in manager.cli_errors}),
+            "errors": _cli_errors(manager),
         }
 
     # Query each manager's installed packages concurrently, then assemble the
@@ -2467,12 +2294,9 @@ def _dump_brewfile(
     )
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        packages = tuple(
-            _filter_matches(manager.installed_or_empty(), query, exact=exact)
-        )
         return manager.id, {
-            "packages": packages,
-            "errors": list({e.error for e in manager.cli_errors}),
+            "packages": _snapshot_installed(manager, query, exact=exact),
+            "errors": _cli_errors(manager),
         }
 
     # Query each manager's installed packages concurrently, then build the Brewfile
@@ -2581,28 +2405,30 @@ def restore(ctx, toml_files):
                     manager_id=manager.id,
                     version=str(version),
                 )
-                tasks.append((
-                    manager,
-                    _package_task(
+                tasks.append(
+                    (
                         manager,
-                        spec,
-                        failures_lock,
-                        action=lambda m, s: m.install(s.package_id, version=s.version),
-                        verb="install",
-                        past="installed",
-                        prep="with",
-                        record_failure=lambda s: restore_failures.append(s.package_id),
-                    ),
-                ))
+                        _package_task(
+                            manager,
+                            spec,
+                            failures_lock,
+                            action=lambda m, s: m.install(
+                                s.package_id, version=s.version
+                            ),
+                            verb="install",
+                            past="installed",
+                            prep="with",
+                            record_failure=lambda s: restore_failures.append(
+                                s.package_id
+                            ),
+                        ),
+                    )
+                )
 
     collect_per_package("Restoring", "Restored", tasks)
 
     # Fail with a non-zero exit code if any referenced package could not be installed.
-    if restore_failures:
-        logging.critical(
-            "Could not restore: " + ", ".join(sorted(set(restore_failures))) + ".",
-        )
-        exit_on_failures(ctx)
+    exit_on_failures(ctx, "restore", restore_failures)
 
 
 @mpm.command(
@@ -2621,14 +2447,7 @@ def restore(ctx, toml_files):
     help=f"File format of the export. Defaults to JSON for {sys.stdout.name}. If not "
     "provided, will be autodetected from file extension.",
 )
-@option(
-    "--overwrite",
-    "--force",
-    "--replace",
-    is_flag=True,
-    default=False,
-    help="Allow the target file to be silently wiped out if it already exists.",
-)
+@overwrite_option
 @option(
     "--bundled/--minimal",
     default=True,
@@ -2644,20 +2463,8 @@ def restore(ctx, toml_files):
         "pick --minimal for fast inventory snapshots."
     ),
 )
-@option(
-    "--query",
-    type=STRING,
-    default=None,
-    metavar="QUERY",
-    help="Only export installed packages whose ID or name matches QUERY. Fuzzy "
-    "by default (case-insensitive, tokenized); see --exact.",
-)
-@option(
-    "--exact/--fuzzy",
-    default=False,
-    help="With --query, require a verbatim match on the package ID or name instead "
-    "of the default fuzzy match. No effect without --query.",
-)
+@query_option
+@query_exact_option
 @argument(
     "export_path",
     type=file_path(writable=True, resolve_path=True, allow_dash=True),
@@ -2736,9 +2543,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         logging.info("Export packages...", extra={"label": manager.id})
-        installed_packages = tuple(
-            _filter_matches(manager.installed_or_empty(), query, exact=exact)
-        )
+        installed_packages = _snapshot_installed(manager, query, exact=exact)
         # In --bundled mode, enrich each package with its metadata here too, so the
         # slow per-manager metadata fetch parallelizes alongside the listing.
         enriched = None
@@ -2753,7 +2558,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
         return manager.id, {
             "packages": installed_packages,
             "enriched": enriched,
-            "errors": list({e.error for e in manager.cli_errors}),
+            "errors": _cli_errors(manager),
         }
 
     # Query (and, for --bundled, enrich) each manager concurrently, then add the

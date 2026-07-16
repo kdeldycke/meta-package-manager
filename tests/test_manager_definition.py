@@ -23,7 +23,6 @@ import inspect
 import json
 import os
 import re
-import sys
 from operator import attrgetter
 from pathlib import Path
 
@@ -34,23 +33,21 @@ import meta_package_manager
 from meta_package_manager.capabilities import Operations, implements
 from meta_package_manager.config import (
     config_file_is_trusted,
-    load_bundled_definitions,
-    parse_manager_definition,
     register_config_managers,
     validate_manager_overrides_section,
 )
-from meta_package_manager.manager import (
+from meta_package_manager.definitions import (
     ConfigDrivenManager,
     ManagerDefinition,
     OperationSpec,
     build_manager_class,
+    load_bundled_definitions,
+    parse_manager_definition,
 )
 from meta_package_manager.pool import pool
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
+from .conftest import tomllib
+
 
 skip_windows = pytest.mark.skipif(
     not hasattr(os, "getuid"),
@@ -63,13 +60,7 @@ def _clean_definitions() -> None:
     for manager_id in list(pool.config_defined_ids):
         pool.register.pop(manager_id, None)
     pool.config_defined_ids.clear()
-    for cached_list in (
-        "all_manager_ids",
-        "default_manager_ids",
-        "maintained_manager_ids",
-        "unsupported_manager_ids",
-    ):
-        pool.__dict__.pop(cached_list, None)
+    pool._evict_id_caches()
 
 
 @pytest.fixture

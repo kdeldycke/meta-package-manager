@@ -139,8 +139,7 @@ class Zypper(PackageManager):
             return
 
         package_list = (
-            xmltodict
-            .parse(output)
+            xmltodict.parse(output)
             .get("stream", {})
             .get("search-result", {})
             .get("solvable-list", {})
@@ -212,8 +211,7 @@ class Zypper(PackageManager):
 
         package_list = []
         update_list = (
-            xmltodict
-            .parse(output)
+            xmltodict.parse(output)
             .get("stream", {})
             .get("update-status", {})
             .get("update-list", {})
@@ -274,8 +272,7 @@ class Zypper(PackageManager):
         return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade all outdated packages.
 
         .. code-block:: shell-session
 
@@ -290,8 +287,7 @@ class Zypper(PackageManager):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade the provided package.
 
         .. code-block:: shell-session
 

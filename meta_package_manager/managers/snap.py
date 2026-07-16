@@ -102,7 +102,7 @@ class Snap(PackageManager):
         """Fetch matching packages.
 
         .. caution::
-            Search is extended by default. So we returns the best subset of results and
+            Search is extended by default. So we return the best subset of results and
             let :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
             refine them.
 
@@ -142,8 +142,7 @@ class Snap(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade all outdated packages.
 
         .. code-block:: shell-session
 
@@ -157,8 +156,7 @@ class Snap(PackageManager):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+        """Generates the CLI to upgrade the provided package.
 
         .. code-block:: shell-session
 

@@ -31,13 +31,10 @@ availability policy: whether the manager is supported, fresh, and ready to use.
 
 from __future__ import annotations
 
-import json
 import logging
 import re
-from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
-from pathlib import Path
 from typing import ClassVar, cast
 
 from extra_platforms import (
@@ -45,7 +42,6 @@ from extra_platforms import (
     Platform,
     current_platform,
     extract_members,
-    traits_from_ids,
 )
 
 from .execution import CLIError, CLIExecutor, highlight_cli_name
@@ -54,7 +50,8 @@ from .version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator
+    from collections.abc import Iterable, Iterator
+    from pathlib import Path
 
     from .version import TokenizedString
 
@@ -221,14 +218,28 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         r"^(?P<package_id>.+)-(?P<version>\d\S*)$",
     )
     """Default ``<package_id>-<version>`` splitter for managers whose listings pack the
-    name and version into one dash-joined token (``apk``, ``nix``, ``xbps``).
+    name and version into one dash-joined token (``apk``, ``nix``, ``xbps``), consumed
+    through :py:meth:`split_name_version`.
 
     The ``.+`` name segment is greedy, so the version starts at the *last* hyphen
     followed by a digit: dashes inside the name (``python3``) stay with the name, while
     trailing ecosystem suffixes (Alpine ``-r<release>``, XBPS ``_<revision>``) stay with
     the version. Managers with a different layout override it (``pkg`` allows a
-    non-numeric version lead).
+    non-numeric version lead, ``pkcon`` a non-greedy name).
     """
+
+    def split_name_version(self, token: str) -> tuple[str, str] | None:
+        """Split a dash-joined ``<package_id>-<version>`` token into its two parts.
+
+        Matches ``token`` against :data:`_NAME_VERSION_REGEXP` (or the subclass's
+        override of it) and returns the ``(package_id, version)`` pair, or ``None``
+        when the token carries no recognizable version. Shared by every manager
+        whose listings glue the name and version together.
+        """
+        match = self._NAME_VERSION_REGEXP.match(token)
+        if not match:
+            return None
+        return match.group("package_id"), match.group("version")
 
     def package(self, **kwargs) -> Package:
         """Instantiate a ``Package`` object from the manager.
@@ -617,386 +628,3 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             - Conda: ``conda-lock.yml``
         """
         raise NotImplementedError
-
-
-# Configuration-defined managers.
-#
-# Everything below turns a declarative ``[mpm.managers.<id>]`` definition (parsed and
-# validated in :py:mod:`meta_package_manager.config`) into a live
-# :py:class:`PackageManager` subclass. The schema dataclasses (:class:`OperationSpec`,
-# :class:`ManagerDefinition`) are the contract between that validation layer and the
-# :func:`build_manager_class` factory here; they live in this module, beside the base
-# class they extend, so :py:mod:`meta_package_manager.config` can import them without a
-# circular dependency.
-
-
-@dataclass(frozen=True)
-class OperationSpec:
-    """Declarative specification of one operation of a config-defined manager."""
-
-    args: tuple[str, ...]
-    """CLI arguments appended after the resolved binary, before
-    :py:attr:`~meta_package_manager.execution.CLIExecutor.post_args`.
-
-    May embed the ``{package_id}`` and ``{query}`` placeholders, substituted at call
-    time. ``{version}`` is intentionally unsupported: config-defined managers do not
-    pin versions (see :func:`_make_install`).
-    """
-
-    cli: str | None = None
-    """Alternate binary name for this operation, or ``None`` for the manager's main
-    :py:attr:`~meta_package_manager.execution.CLIExecutor.cli_path`.
-
-    Resolved with :py:meth:`~meta_package_manager.manager.PackageManager.which` at
-    call time, so one definition can span sibling binaries (``urpmi``/``urpme``/
-    ``urpmq``, ``cast``/``dispel``/``gaze``). The operation fails with
-    :py:exc:`FileNotFoundError` when the binary is missing rather than silently
-    falling back to the main CLI.
-    """
-
-    sudo: bool = False
-    """Mark the operation as privileged, mirroring the ``sudo=True`` flag built-in
-    managers pass to :py:meth:`~meta_package_manager.execution.CLIExecutor.run_cli`.
-
-    Escalation still follows the per-manager policy: the definition's
-    ``default_sudo``, overridden by the user's ``--sudo``/``--no-sudo``. Only command
-    operations may set it; queries stay unprivileged.
-    """
-
-    parse_mode: str = "none"
-    """How to turn the command's stdout into packages: ``"regex"`` (per-line named
-    groups), ``"json"`` (structured extraction), or ``"none"`` for command-only
-    operations that produce no inventory (install, remove, sync, ...)."""
-
-    regex: str | None = None
-    """Regular expression matched against each stdout line in ``"regex"`` mode.
-
-    Recognized named groups: ``package_id`` (required), ``installed_version`` and
-    ``latest_version`` (optional). Compiled with :py:data:`re.MULTILINE`.
-    """
-
-    list_path: str | None = None
-    """Dotted path to the package array inside the JSON document in ``"json"`` mode.
-
-    ``None`` or empty means the document is itself the array.
-    """
-
-    fields: dict[str, str] | None = None
-    """Mapping of recognized package field (``package_id``, ``installed_version``,
-    ``latest_version``) to its JSON key, in ``"json"`` mode."""
-
-
-@dataclass(frozen=True)
-class ManagerDefinition:
-    """A brand-new package manager declared from a ``[mpm.managers.<id>]`` section.
-
-    Produced by :py:func:`meta_package_manager.config.parse_manager_definition` after
-    validation, consumed by :func:`build_manager_class`.
-    """
-
-    manager_id: str
-    """Manager ID, taken from the configuration section name."""
-
-    name: str
-    """Human-readable manager name."""
-
-    platforms: tuple[str, ...]
-    """Platform and group ID strings, resolved to
-    :py:class:`extra_platforms.Platform` members at build time."""
-
-    homepage_url: str | None
-    """Project home page, for documentation reference only."""
-
-    cli_fields: dict[str, object]
-    """Overridable CLI-execution attributes (``cli_names``, ``requirement``,
-    ``version_regexes``, ...), pre-coerced to their runtime types."""
-
-    operations: dict[str, OperationSpec]
-    """Declared operations keyed by name (``installed``, ``install``, ...)."""
-
-
-class ConfigDrivenManager(PackageManager):
-    """Base class for managers synthesized from configuration.
-
-    Carries no operation methods on purpose: only the dynamically-created subclass
-    returned by :func:`build_manager_class` defines the operations the user actually
-    declared, so :py:func:`meta_package_manager.capabilities.implements` reports an
-    accurate capability set. Defining an operation here would make *every*
-    config-defined manager falsely advertise it.
-
-    Exists mainly as a marker (``isinstance(manager, ConfigDrivenManager)``
-    distinguishes user-defined managers from built-ins) and as a shared home for any
-    future config-driven behavior.
-    """
-
-    definition_source: str | None = None
-    """Repo-relative path to the bundled TOML file this manager was defined in.
-
-    Set by :py:func:`meta_package_manager.config.build_bundled_managers` for the
-    managers mpm ships as package data; stays ``None`` for a manager defined in a
-    user's own configuration file. The documentation generator links a bundled
-    manager's benchmark entry to this file, a config-defined manager having no Python
-    source line to point at.
-    """
-
-
-def _render_args(args: tuple[str, ...], **substitutions: str) -> list[str]:
-    """Substitute ``{token}`` placeholders in each CLI argument.
-
-    Only the explicitly-passed tokens are replaced; an argument with no placeholder
-    passes through untouched. Substitution is textual on already-split arguments, never
-    a shell expansion, so an injected value stays a single argv element.
-    """
-    rendered = []
-    for arg in args:
-        for token, value in substitutions.items():
-            arg = arg.replace("{" + token + "}", value)
-        rendered.append(arg)
-    return rendered
-
-
-def _navigate_json(data: object, list_path: str | None) -> list:
-    """Walk ``list_path`` into a parsed JSON document and return the package array.
-
-    Returns an empty list when the path does not resolve to a list, so a malformed or
-    unexpected payload yields no packages rather than raising.
-    """
-    if list_path:
-        for key in list_path.split("."):
-            if not isinstance(data, dict):
-                return []
-            data = data.get(key)
-    return data if isinstance(data, list) else []
-
-
-def _iter_parsed(
-    output: str,
-    spec: OperationSpec,
-    compiled: re.Pattern[str] | None,
-) -> Iterator[dict[str, str]]:
-    """Yield ``Package`` keyword dicts extracted from a query command's ``output``.
-
-    Honors :py:attr:`OperationSpec.parse_mode`: per-line named-group matching for
-    ``"regex"``, key lookups under :py:attr:`OperationSpec.list_path` for ``"json"``.
-    Skips entries with no ``package_id`` and version values that are absent or null.
-    """
-    if not output:
-        return
-    if spec.parse_mode == "regex":
-        assert compiled is not None
-        for line in output.splitlines():
-            match = compiled.search(line)
-            if not match:
-                continue
-            groups = match.groupdict()
-            package_id = groups.get("package_id")
-            if not package_id:
-                continue
-            kwargs = {"id": package_id}
-            for role in ("installed_version", "latest_version"):
-                if groups.get(role):
-                    kwargs[role] = groups[role]
-            yield kwargs
-    elif spec.parse_mode == "json":
-        assert spec.fields is not None
-        try:
-            data = json.loads(output)
-        except json.JSONDecodeError:
-            logging.warning("Could not parse JSON output for config-defined manager.")
-            return
-        for item in _navigate_json(data, spec.list_path):
-            if not isinstance(item, dict):
-                continue
-            raw_id = item.get(spec.fields["package_id"])
-            if not raw_id:
-                continue
-            kwargs = {"id": str(raw_id)}
-            for role in ("installed_version", "latest_version"):
-                json_key = spec.fields.get(role)
-                if json_key is not None and item.get(json_key) is not None:
-                    kwargs[role] = str(item[json_key])
-            yield kwargs
-
-
-def _op_cli_path(manager: PackageManager, spec: OperationSpec) -> Path | None:
-    """Resolve the operation's alternate binary, or ``None`` for the main CLI.
-
-    A declared-but-missing binary is an error: falling back to the main CLI would run
-    the operation's arguments against the wrong program.
-    """
-    if not spec.cli:
-        return None
-    cli_path = manager.which(spec.cli)
-    if not cli_path:
-        msg = f"{spec.cli} not found"
-        raise FileNotFoundError(msg)
-    return cli_path
-
-
-def _make_query_property(
-    spec: OperationSpec, compiled: re.Pattern[str] | None
-) -> property:
-    """Build an ``installed``/``outdated`` property that runs the CLI and parses it."""
-
-    def query(self: PackageManager) -> Iterator[Package]:
-        output = self.run_cli(*spec.args, override_cli_path=_op_cli_path(self, spec))
-        for kwargs in _iter_parsed(output, spec, compiled):
-            yield self.package(**kwargs)
-
-    return property(query)
-
-
-def _make_search(
-    spec: OperationSpec, compiled: re.Pattern[str] | None
-) -> Callable[..., Iterator[Package]]:
-    """Build a ``search`` method. Native exact/extended filtering is not expressed in
-    the DSL, so :py:meth:`PackageManager.refiltered_search` refilters the raw results.
-    """
-
-    def search(
-        self: PackageManager, query: str, extended: bool, exact: bool
-    ) -> Iterator[Package]:
-        output = self.run_cli(
-            *_render_args(spec.args, query=query),
-            override_cli_path=_op_cli_path(self, spec),
-        )
-        for kwargs in _iter_parsed(output, spec, compiled):
-            yield self.package(**kwargs)
-
-    # Same introspection surface as the search_capabilities decorator on class
-    # managers: both refinements always rely on mpm's refiltering here.
-    search.extended_support = False  # type: ignore[attr-defined]
-    search.exact_support = False  # type: ignore[attr-defined]
-    return search
-
-
-def _warn_version_unsupported(version: str | None) -> None:
-    """Log the standard warning when a version pin reaches a config-defined manager."""
-    if version:
-        logging.warning(
-            "Configuration-defined managers do not support version pinning. "
-            "Letting the package manager choose the version.",
-        )
-
-
-def _make_install(spec: OperationSpec) -> Callable[..., str]:
-    """Build an ``install`` method substituting ``{package_id}`` into the args."""
-
-    def install(
-        self: PackageManager, package_id: str, version: str | None = None
-    ) -> str:
-        _warn_version_unsupported(version)
-        return self.run_cli(
-            *_render_args(spec.args, package_id=package_id),
-            override_cli_path=_op_cli_path(self, spec),
-            sudo=spec.sudo,
-        )
-
-    return install
-
-
-def _make_remove(spec: OperationSpec) -> Callable[..., str]:
-    """Build a ``remove`` method substituting ``{package_id}`` into the args."""
-
-    def remove(self: PackageManager, package_id: str) -> str:
-        return self.run_cli(
-            *_render_args(spec.args, package_id=package_id),
-            override_cli_path=_op_cli_path(self, spec),
-            sudo=spec.sudo,
-        )
-
-    return remove
-
-
-def _make_void(spec: OperationSpec) -> Callable[..., None]:
-    """Build a ``sync``/``cleanup`` method that runs the CLI and discards its output."""
-
-    def operation(self: PackageManager) -> None:
-        self.run_cli(
-            *spec.args,
-            override_cli_path=_op_cli_path(self, spec),
-            sudo=spec.sudo,
-        )
-
-    return operation
-
-
-def _make_upgrade_one_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
-    """Build an ``upgrade_one_cli`` returning the per-package upgrade command line."""
-
-    def upgrade_one_cli(
-        self: PackageManager, package_id: str, version: str | None = None
-    ) -> tuple[str, ...]:
-        _warn_version_unsupported(version)
-        return self.build_cli(
-            *_render_args(spec.args, package_id=package_id),
-            override_cli_path=_op_cli_path(self, spec),
-            sudo=spec.sudo,
-        )
-
-    return upgrade_one_cli
-
-
-def _make_upgrade_all_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
-    """Build an ``upgrade_all_cli`` returning the upgrade-everything command line."""
-
-    def upgrade_all_cli(self: PackageManager) -> tuple[str, ...]:
-        return self.build_cli(
-            *spec.args,
-            override_cli_path=_op_cli_path(self, spec),
-            sudo=spec.sudo,
-        )
-
-    return upgrade_all_cli
-
-
-def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManager]:
-    """Synthesize a :py:class:`PackageManager` subclass from a validated definition.
-
-    Assembles a class namespace from the definition's identity and CLI fields, then
-    adds one method (or property) per declared operation. Only the declared operations
-    land in the namespace, so :py:func:`meta_package_manager.capabilities.implements`
-    reflects exactly what the user configured. Single- and all-package upgrades map to
-    :py:meth:`~PackageManager.upgrade_one_cli` / :py:meth:`~PackageManager.upgrade_all_cli`
-    so the inherited :py:meth:`~PackageManager.upgrade` orchestrator drives them, just
-    like the built-in managers.
-    """
-    namespace: dict[str, object] = {
-        "id": definition.manager_id,
-        "name": definition.name,
-        "homepage_url": definition.homepage_url,
-        "platforms": traits_from_ids(*definition.platforms),
-        "__module__": __name__,
-        "__doc__": (
-            f"Package manager {definition.manager_id!r} defined from configuration."
-        ),
-    }
-    namespace.update(definition.cli_fields)
-
-    for op_name, spec in definition.operations.items():
-        compiled = None
-        if spec.parse_mode == "regex":
-            assert spec.regex is not None
-            compiled = re.compile(spec.regex, re.MULTILINE)
-        if op_name == "installed":
-            namespace["installed"] = _make_query_property(spec, compiled)
-        elif op_name == "outdated":
-            namespace["outdated"] = _make_query_property(spec, compiled)
-        elif op_name == "search":
-            namespace["search"] = _make_search(spec, compiled)
-        elif op_name == "install":
-            namespace["install"] = _make_install(spec)
-        elif op_name == "remove":
-            namespace["remove"] = _make_remove(spec)
-        elif op_name in ("sync", "cleanup"):
-            namespace[op_name] = _make_void(spec)
-        elif op_name == "upgrade_one":
-            namespace["upgrade_one_cli"] = _make_upgrade_one_cli(spec)
-        elif op_name == "upgrade_all":
-            namespace["upgrade_all_cli"] = _make_upgrade_all_cli(spec)
-
-    class_name = "Config_" + definition.manager_id.replace("-", "_")
-    return cast(
-        "type[ConfigDrivenManager]",
-        MetaPackageManager(class_name, (ConfigDrivenManager,), namespace),
-    )

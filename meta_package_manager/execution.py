@@ -15,26 +15,19 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """CLI-execution engine shared by every package manager.
 
-Two altitudes live here. The lower one runs *one* manager's CLI in one subprocess:
-the :py:class:`meta_package_manager.execution.CLIExecutor` mixin (which
+Runs *one* manager's CLI in one subprocess: the
+:py:class:`meta_package_manager.execution.CLIExecutor` mixin (which
 :py:class:`meta_package_manager.manager.PackageManager` inherits) locates the binary
 and runs it, the :py:class:`meta_package_manager.execution.CLIError` exception carries
 a failed call's result, and :py:func:`meta_package_manager.execution.highlight_cli_name`
 themes a binary's name.
 
-The higher one schedules *many* managers at once: the concurrent fan-out primitives
-:py:func:`meta_package_manager.execution.collect_from_managers` and
-:py:func:`meta_package_manager.execution.collect_per_package`, the
-:py:func:`meta_package_manager.execution.effective_jobs` policy that sizes them, the
-up-front :py:func:`meta_package_manager.execution.warm_availability` probe, and the
-shared ``✓``/``✗`` ledger (:py:class:`meta_package_manager.execution.OperationTrail`
-and the :py:func:`meta_package_manager.execution.trail_line` atom) that the concurrent
-and sequential paths both report through.
-
-The ``sudo`` machinery that cuts across both altitudes (credential priming, the
-keepalive, the hidden-prompt stall watchdog) lives in
-:py:mod:`meta_package_manager.sudo`: this module only consumes it, to wrap escalated
-commands and diagnose their failures.
+Scheduling *many* managers at once is the next altitude up, and lives in
+:py:mod:`meta_package_manager.dispatch`: the concurrent fan-out primitives, the
+lock families and the shared ``✓``/``✗`` trail. The ``sudo`` machinery that cuts
+across both altitudes (credential priming, the keepalive, the hidden-prompt stall
+watchdog) lives in :py:mod:`meta_package_manager.sudo`: this module only consumes
+it, to wrap escalated commands and diagnose their failures.
 
 .. note::
     The name and intent mirror :py:mod:`click_extra.execution` from the sibling
@@ -46,7 +39,7 @@ commands and diagnose their failures.
     (:py:func:`click_extra.execution.install_interrupt_handler` terminating the
     in-flight children registered by ``run_cli``). This module keeps what is
     package-manager policy: per-operation timeouts, sudo escalation, cooldown
-    enforcement, dry-run, the lock families and the ``✓``/``✗`` trail.
+    enforcement and dry-run.
 """
 
 from __future__ import annotations
@@ -59,8 +52,6 @@ import shutil
 import stat
 import subprocess
 import sys
-import threading
-import time
 from contextlib import nullcontext
 from datetime import datetime, timezone
 from functools import cached_property
@@ -71,21 +62,15 @@ from unittest.mock import patch
 
 from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
-from click.core import ParameterSource
-from click_extra import echo, get_current_context
-from click_extra.context import JOBS
 from click_extra.execution import (
     INDENT,
     args_cleanup,
     format_cli_prompt,
     highlight_bin_name,
-    resolve_jobs,
     run_cli,
-    run_jobs,
-    run_lanes,
 )
 from click_extra.spinner import Spinner
-from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
+from click_extra.theme import get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
 
 from .sudo import (
@@ -100,17 +85,13 @@ from .version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator, Iterable
+    from collections.abc import Generator, Iterable
     from contextlib import AbstractContextManager
     from datetime import timedelta
-    from types import TracebackType
 
-    from click import Context
     from click_extra.envvar import TEnvVars
     from click_extra.execution import TArg, TNestedArgs
-    from typing_extensions import Self
 
-    from .manager import PackageManager
     from .version import TokenizedString
 
 
@@ -472,8 +453,9 @@ class CLIExecutor:
     """Optional cache that de-duplicates identical CLI runs within a lock family.
 
     ``None`` by default, which disables caching: every :py:meth:`run` call spawns its own
-    subprocess. :func:`dispatch` injects one shared dict into all the managers of a
-    multi-manager lock-family lane (see :data:`SHARED_LOCK_FAMILIES`) for the duration of
+    subprocess. :func:`meta_package_manager.dispatch.dispatch` injects one shared dict
+    into all the managers of a multi-manager lock-family lane (see
+    :data:`meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`) for the duration of
     that lane, so members resolving to a byte-identical command (``brew`` and ``cask``
     both running ``brew update`` for :command:`mpm sync`) run the subprocess once and
     replay the cached ``(code, output, error)`` for the rest. The replay still walks
@@ -1193,487 +1175,3 @@ class CLIExecutor:
         # Execute the command with eventual local options.
         with local_option1, local_option2:
             return self.run(*cli, extra_env=extra_env, must_succeed=must_succeed)
-
-
-# Cross-manager dispatch.
-#
-# Everything above runs one manager's CLI in one subprocess. The rest of this module
-# schedules many managers: the job-count policy that decides sequential-vs-concurrent
-# (:func:`effective_jobs`), the up-front availability warming used during selection
-# (:func:`warm_availability`), the two spinner-wrapped fan-out primitives the CLI
-# subcommands drive (:func:`collect_from_managers`, :func:`collect_per_package`), and
-# the shared ``✓``/``✗`` trail (:class:`OperationTrail` plus the :func:`trail_line`
-# atom) that the concurrent and sequential paths both report through.
-
-
-SHARED_LOCK_FAMILIES: Final[tuple[frozenset[str], ...]] = (
-    frozenset({"apt", "apt-mint", "deb-get"}),
-    frozenset({"brew", "cask"}),
-    frozenset({"dnf", "dnf5", "yum", "zypper"}),
-    frozenset({"pacman", "pacstall"}),
-)
-"""Managers that contend for one shared backend lock, grouped by backend.
-
-Different managers are otherwise independent processes over disjoint state, so running
-them in parallel is safe. The exception is a handful that drive a *shared* backend and
-serialize on its lock:
-
-- ``apt``, ``apt-mint`` and ``deb-get`` all reach :command:`dpkg`
-  (``/var/lib/dpkg/lock``).
-- ``brew`` and ``cask`` are the *same* :command:`brew` binary and serialize on
-  Homebrew's own update lock: two concurrent ``brew update`` (which :command:`mpm sync`
-  issues identically for both, as the formula/cask split does not apply to it) collide,
-  one failing with *"Another active Homebrew update process is already running"*.
-- ``dnf``, ``dnf5``, ``yum`` and ``zypper`` all reach the RPM database.
-- ``pacman`` and ``pacstall`` all reach the pacman database
-  (``/var/lib/pacman/db.lck``).
-
-Concurrency is safe *across* families and unsafe *within* one, just as it is unsafe
-within a single manager (which is why a manager's own packages stay serial). When two
-members run at once the shared lock makes them *block or fail*, never corrupt.
-
-Enforced for the mutating fan-outs only: :func:`merge_into_lock_lanes` collapses each
-family's members into a single :func:`dispatch` lane, so they run serially while
-distinct families still run in parallel. The read-only queries
-(``installed``/``outdated``/``search``) take no backend lock, so they keep one lane per
-manager and stay fully concurrent. Members of a lane also share a command cache (see
-:py:attr:`CLIExecutor.run_cache`), so two that resolve to a byte-identical invocation
-(``brew`` and ``cask`` for ``sync`` and ``cleanup``) run the subprocess once.
-
-Adding a newly-conflicting set of managers is a one-line edit here: append a
-``frozenset`` of their ids and both the serialization and the cache pick it up.
-"""
-
-
-_LOCK_FAMILY_BY_MANAGER: Final[dict[str, frozenset[str]]] = {
-    manager_id: family for family in SHARED_LOCK_FAMILIES for manager_id in family
-}
-"""Reverse index of :data:`SHARED_LOCK_FAMILIES`: each member maps to its family.
-
-Lets :func:`merge_into_lock_lanes` resolve a manager's mutual-exclusion group in O(1).
-"""
-
-
-def effective_jobs(ctx: Context | None, count: int) -> int:
-    """Resolve how many worker threads to use for a batch of ``count`` items.
-
-    Thin wrapper over :py:func:`click_extra.execution.resolve_jobs` pinning mpm's
-    policy: always collapse to a single (sequential) worker at ``DEBUG`` verbosity,
-    where coherent per-manager log narration matters more than the speed-up
-    (interleaved threads would scramble it). The base helper also collapses to
-    sequential with no active CLI context, for a single item, or at
-    ``mpm --jobs`` ``1``; otherwise the ``mpm --jobs`` value wins,
-    capped at ``count`` (no point spinning up more workers than there are items).
-    """
-    return resolve_jobs(ctx, count, serial_at_debug=True)
-
-
-def warm_availability(managers: Iterable[PackageManager]) -> None:
-    """Probe several managers' ``available`` concurrently.
-
-    Reading ``available`` forces a manager's ``--version`` detection, whose
-    result (and the ``cli_path`` / ``executable`` / ``version`` it depends on) is
-    cached on the instance. Warming the candidate set up front turns the
-    sequential string of probes into a single round bounded by the slowest one,
-    shaving startup latency off any command that touches many managers.
-
-    Each manager is a distinct instance with its own cached attributes and
-    subprocess, so the probes are independent and thread-safe; the GIL is released
-    while each waits. The executor barrier publishes every cached value before the
-    caller reads it back.
-
-    Sized by :func:`effective_jobs`: a no-op (leaving the probes to lazy,
-    sequential evaluation) without an active context, at ``DEBUG`` verbosity, for a
-    single candidate, or at ``mpm --jobs`` ``1``.
-    """
-    candidates = list(managers)
-    jobs = effective_jobs(get_current_context(silent=True), len(candidates))
-    if jobs <= 1:
-        return
-    # Reading `available` forces and caches the probe inside each worker.
-    list(run_jobs(lambda manager: manager.available, candidates, jobs=jobs))
-
-
-def trail_glyph(ok: bool) -> str:
-    """Return the themed ``✓`` or ``✗`` glyph for a trail line or finisher."""
-    return theme().success(OK_GLYPH) if ok else theme().error(KO_GLYPH)
-
-
-def trail_line(ok: bool, message: str) -> str:
-    """Format one ``✓``/``✗`` trail line: a status glyph followed by ``message``."""
-    return f"{trail_glyph(ok)} {message}"
-
-
-def _state_failed(data: dict) -> bool:
-    """Whether a manager's result fails its ``✓``/``✗`` trail line.
-
-    A non-empty ``data["errors"]`` (CLI errors, or a read query's error list) or an
-    explicit ``data["failed"]`` flag (``upgrade --all``'s cooldown skips, which run
-    no CLI of their own) both mark the line ``✗``.
-    """
-    return bool(data.get("errors") or data.get("failed"))
-
-
-class OperationTrail:
-    """A ``✓``/``✗`` progress trail and finisher for a batch of operations.
-
-    The single report surface for every fan-out command, rendered one of two ways
-    depending on concurrency:
-
-    - **sequential** (``jobs <= 1``): echo each outcome between the managers' own
-      per-call spinners, with no aggregate spinner. The ordering-bound state changers
-      (``install``/``remove``/``upgrade <packages>``/``restore``) drive this directly,
-      since they chain managers by priority (a hit in the first manager skips the
-      rest) and so cannot fan out; it is also every :func:`dispatch` fallback at
-      ``mpm --jobs`` ``1`` or ``DEBUG`` verbosity.
-    - **concurrent** (``jobs > 1``): suppress the per-manager spinners (which would
-      collide on stderr) and drive one aggregate spinner, buffering outcomes until it
-      first draws, then streaming the rest live.
-
-    Both are gated on ``--progress`` (folded into each manager's ``progress``) plus an
-    interactive stderr, so pipes, CI, serialized and ``DEBUG`` runs stay silent. A read
-    command whose result *table* is the real output stays silent in sequential mode too
-    (``coverage=True``): the per-call spinners already narrate progress, so the trail
-    would be noise. The running ``✓``/total tally is kept as outcomes land, so a caller
-    computes no counts of its own.
-
-    Thread-safe: :meth:`mark` may be called from worker threads. Use it as a context
-    manager whenever it may run concurrently, to bound the aggregate spinner's life; a
-    purely sequential caller (``install``'s priority search) may construct it bare.
-
-    :param managers: the batch's managers, read for the ``--progress`` gate and (when
-        concurrent) to mute their per-call spinners.
-    :param label: present-tense verb for the running spinner ("Searching").
-    :param done_label: past-tense verb for the finisher ("Searched").
-    :param unit: the noun counted in the spinner and finisher ("managers", "packages").
-    :param total: how many outcomes are expected, for the ``done/total`` count.
-    :param jobs: the worker count from :func:`effective_jobs`; ``> 1`` selects the
-        concurrent rendering.
-    :param coverage: when set, a sequential run stays silent (the caller has another
-        output, its result table). Unused when concurrent.
-    """
-
-    def __init__(
-        self,
-        managers: Iterable[PackageManager],
-        *,
-        label: str = "",
-        done_label: str = "",
-        unit: str = "",
-        total: int = 0,
-        jobs: int = 1,
-        coverage: bool = False,
-    ) -> None:
-        self.label = label
-        self.done_label = done_label
-        self.unit = unit
-        self.total = total
-        self.concurrent = jobs > 1
-        self._managers = tuple(managers)
-        self._lock = threading.Lock()
-        self._done = 0
-        self._ok = 0
-        self._start = time.monotonic()
-        self._spinner: Spinner | None = None
-        self._buffer: list[str] = []
-        progress = any(manager.progress for manager in self._managers)
-        # Sequential read commands stay silent: their result table is the output and
-        # each manager keeps its own per-call spinner, so the trail would be noise.
-        self._echo = (
-            progress and not self.concurrent and not coverage and sys.stderr.isatty()
-        )
-        # Concurrent: a single aggregate spinner stands in for the muted per-call ones.
-        self._enabled = None if progress else False
-
-    def __enter__(self) -> Self:
-        if self.concurrent:
-            for manager in self._managers:
-                manager.progress = False
-            self._spinner = Spinner(
-                f"{self.label} 0/{self.total} {self.unit}",
-                delay=SPINNER_DELAY,
-                enabled=self._enabled,
-                timer=True,
-            )
-            self._spinner.__enter__()
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        if self._spinner is not None:
-            self._spinner.__exit__(exc_type, exc_val, exc_tb)
-            self._spinner = None
-
-    @property
-    def ok_count(self) -> int:
-        """How many marked outcomes have succeeded so far."""
-        return self._ok
-
-    def mark(self, ok: bool, message: str) -> None:
-        """Record one ``✓``/``✗`` outcome: tally it and render its trail line."""
-        with self._lock:
-            self._done += 1
-            if ok:
-                self._ok += 1
-            if self._spinner is not None:
-                self._buffer.append(trail_line(ok, message))
-                self._spinner.label = (
-                    f"{self.label} {self._done}/{self.total} {self.unit}"
-                )
-                self._flush()
-            elif self._echo:
-                echo(trail_line(ok, message), err=True)
-
-    def _flush(self) -> None:
-        # Caller holds the lock. Drain buffered lines once the spinner is drawing;
-        # before that, echo() would write unconditionally and leak into a pipe.
-        if self._spinner is None or not self._spinner.shown:
-            return
-        for text in self._buffer:
-            self._spinner.echo(text)
-        self._buffer.clear()
-
-    def finish(self, ok: bool, summary: str) -> None:
-        """Render the persistent ``✓``/``✗`` ``{summary}`` finisher."""
-        if self._spinner is not None:
-            with self._lock:
-                self._flush()
-            if self._spinner.shown:
-                self._spinner.label = summary
-                (self._spinner.ok if ok else self._spinner.fail)()
-        elif self._echo:
-            elapsed = time.monotonic() - self._start
-            echo(trail_line(ok, f"{summary} ({elapsed:.1f}s)"), err=True)
-
-
-def dispatch(
-    label: str,
-    done_label: str,
-    unit: str,
-    lanes: list[
-        tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]
-    ],
-    *,
-    coverage: bool = False,
-    ctx: Context | None = None,
-) -> None:
-    """Fan a set of work *lanes* out across managers, narrating a ``✓``/``✗`` trail.
-
-    The single scheduling primitive behind both :func:`collect_from_managers` and
-    :func:`collect_per_package`. A *lane* is one or more managers paired with a list of
-    callables; lanes run concurrently (one worker each) while a lane's own callables run
-    serially, because a package manager cannot safely run two of its own invocations at
-    once, nor can two managers sharing a backend lock (see :data:`SHARED_LOCK_FAMILIES`).
-    A lane usually wraps a single manager; :func:`merge_into_lock_lanes` is what bundles
-    a whole lock family into one, and such a lane also gets a shared command cache (see
-    :py:attr:`CLIExecutor.run_cache`) so its members collapse identical invocations.
-
-    Each callable does its work, records its own outcome (output to ``INFO``, failures
-    into a caller-owned list) and returns ``(ok, message)`` for the trail. The whole
-    batch reports through one :class:`OperationTrail`: a per-outcome ``✓``/``✗`` line
-    plus a finisher, behind a single aggregate spinner when concurrent (a slow batch on
-    a terminal) and silent otherwise.
-
-    Concurrency is sized by :func:`effective_jobs` (driven by ``mpm --jobs``): it
-    collapses to a sequential pass — preserving each manager's own per-call spinner —
-    for a single lane, at ``--jobs 1``, or at ``DEBUG`` verbosity.
-
-    :param coverage: forwarded to :class:`OperationTrail`. Read commands set it (their
-        result table is the output, so the sequential pass stays silent and the finisher
-        reports coverage, ``{done_label} N {unit}``, always ``✓``). Maintenance and
-        state-changing commands leave it ``False`` (the trail *is* their output, so the
-        finisher reports the success count, ``{done_label} N/M {unit}``, ``✗`` on any
-        failure).
-    :param ctx: the active click context, read only to size concurrency
-        (:func:`effective_jobs`). Defaults to the current context, so a command need not
-        thread it; tests pass an explicit stand-in.
-    """
-    total = sum(len(tasks) for _managers, tasks in lanes)
-    if not total:
-        return
-    if ctx is None:
-        ctx = get_current_context(silent=True)
-    jobs = effective_jobs(ctx, len(lanes))
-    managers = [manager for lane_managers, _ in lanes for manager in lane_managers]
-
-    # A multi-manager lane is a lock family: its members share one command cache
-    # for the run, so byte-identical invocations (brew and cask both running
-    # `brew update`) hit the subprocess once. Each cache belongs to a single lane
-    # whose tasks run serially on one worker (via run_lanes), so only that thread
-    # touches it: no lock needed. Cleared in the finally below.
-    shared_caches: list[tuple[tuple[PackageManager, ...], dict]] = [
-        (lane_managers, {}) for lane_managers, _ in lanes if len(lane_managers) > 1
-    ]
-    for lane_managers, cache in shared_caches:
-        for manager in lane_managers:
-            manager.run_cache = cache
-
-    try:
-        with OperationTrail(
-            managers,
-            label=label,
-            done_label=done_label,
-            unit=unit,
-            total=total,
-            jobs=jobs,
-            coverage=coverage,
-        ) as trail:
-            # Each lane's tasks run serially on one worker, marking the trail as each
-            # completes; distinct lanes run concurrently, sized by ``effective_jobs``.
-            list(
-                run_lanes(
-                    lambda task: trail.mark(*task()),
-                    [tasks for _managers, tasks in lanes],
-                    jobs=jobs,
-                )
-            )
-
-            if coverage:
-                trail.finish(True, f"{done_label} {total} {unit}")
-            else:
-                ok = trail.ok_count
-                trail.finish(ok == total, f"{done_label} {ok}/{total} {unit}")
-    finally:
-        for lane_managers, _ in shared_caches:
-            for manager in lane_managers:
-                manager.run_cache = None
-
-
-def merge_into_lock_lanes(
-    pairs: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]],
-) -> list[tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]]:
-    """Group ``(manager, task)`` pairs into :func:`dispatch` lanes, one per lock family.
-
-    Managers sharing a :data:`SHARED_LOCK_FAMILIES` entry collapse into a single lane so
-    their tasks run serially (the lane is :func:`dispatch`'s unit of mutual exclusion),
-    while unrelated managers each keep their own lane and run concurrently. A manager not
-    in any family keys on its own id, so its tasks still group together (a manager's own
-    invocations cannot overlap either). First-seen order is preserved, both across lanes
-    and within a lane's task list.
-
-    Used by the mutating fan-outs only: the state changers through
-    :func:`collect_per_package`, and ``sync``/``cleanup``/``upgrade --all`` through
-    :func:`collect_from_managers`. The read commands take no backend lock and skip this,
-    keeping one lane per manager.
-    """
-    lanes: dict[
-        object, tuple[list[PackageManager], list[Callable[[], tuple[bool, str]]]]
-    ]
-    lanes = {}
-    for manager, task in pairs:
-        key = _LOCK_FAMILY_BY_MANAGER.get(manager.id, manager.id)
-        lane_managers, lane_tasks = lanes.setdefault(key, ([], []))
-        if manager not in lane_managers:
-            lane_managers.append(manager)
-        lane_tasks.append(task)
-    return [(tuple(ms), ts) for ms, ts in lanes.values()]
-
-
-def collect_from_managers(
-    label: str,
-    done_label: str,
-    managers: list[PackageManager],
-    work: Callable[[PackageManager], tuple[str, dict]],
-    *,
-    report_state: bool = False,
-    ctx: Context | None = None,
-) -> list[tuple[str, dict]]:
-    """Run ``work(manager)`` for every manager concurrently, results in input order.
-
-    The fan-out primitive for the read-only commands (``installed``/``outdated``/
-    ``search``) and the independent maintenance commands (``sync``/``cleanup``/
-    ``upgrade --all``). It adapts each manager into a :func:`dispatch` unit that runs
-    ``work`` and stashes the ``(id, data)`` result in input position, so the returned
-    list mirrors ``managers`` regardless of completion order. The maintenance commands
-    (``report_state``) then merge lock-family members into shared serial lanes
-    (:func:`merge_into_lock_lanes`); the read commands keep one lane per manager.
-
-    ``work`` returns this manager's ``(id, data)``; it must handle its own
-    :py:class:`meta_package_manager.execution.CLIError` (each manager owns its
-    subprocess and error list, so the call is thread-safe per manager). A truthy
-    ``data["errors"]`` (or ``data["failed"]``) marks that manager's trail line ``✗``;
-    an optional ``data["label"]`` overrides its text (``upgrade --all`` uses it for
-    cooldown skips).
-
-    :param report_state: maintenance commands set it (their only output is the trail).
-        It flips the finisher to a success count, keeps the trail in the sequential
-        fallback, and turns on lock-family serialization. Read commands leave it
-        ``False``: their table is the output, so the sequential fallback is silent and
-        the finisher reports coverage. Passed to :func:`dispatch` as the inverse of
-        ``coverage``.
-    """
-    results: list[tuple[str, dict]] = [("", {})] * len(managers)
-
-    def make_unit(
-        index: int, manager: PackageManager
-    ) -> Callable[[], tuple[bool, str]]:
-        def unit() -> tuple[bool, str]:
-            manager_id, data = work(manager)
-            results[index] = (manager_id, data)
-            text = data.get("label") or theme().invoked_command(manager_id)
-            return not _state_failed(data), text
-
-        return unit
-
-    pairs = [(manager, make_unit(i, manager)) for i, manager in enumerate(managers)]
-    # Mutating fan-outs (report_state) serialize lock families into shared lanes; the
-    # read commands take no backend lock and keep one lane per manager.
-    lanes: list[tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]]
-    if report_state:
-        lanes = merge_into_lock_lanes(pairs)
-    else:
-        lanes = [((manager,), [unit]) for manager, unit in pairs]
-    dispatch(label, done_label, "managers", lanes, coverage=not report_state, ctx=ctx)
-    return results
-
-
-def collect_per_package(
-    label: str,
-    done_label: str,
-    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]],
-    *,
-    ctx: Context | None = None,
-) -> None:
-    """Run per-package operations across managers concurrently, serial within each.
-
-    The fan-out primitive for the ordering-free state changers that act on many
-    (package, manager) pairs: ``remove``, ``upgrade <packages>``, ``restore`` and the
-    manager-tied specs of ``install``. Takes a flat list of ``(manager, task)`` pairs
-    and groups them into lanes by lock family (:func:`merge_into_lock_lanes`) — so a
-    manager's own packages, and any lock-family peers, stay serial while unrelated
-    managers run in parallel — then drives :func:`dispatch`. Each task returns
-    ``(ok, message)`` after doing its CLI call and recording its own outcome. The
-    unmatched-package priority search of ``install`` is *not* routed here: it has genuine
-    cross-manager ordering (stop at the first manager that has the package) and stays
-    sequential on its own.
-    """
-    dispatch(label, done_label, "packages", merge_into_lock_lanes(tasks), ctx=ctx)
-
-
-def warn_jobs_ignored(ctx: Context) -> None:
-    """Note that ``--jobs`` does not parallelize this run.
-
-    Only ``install`` with at least one *untied* package reaches this: those packages
-    need a priority search (install with the first manager that has the package, skip
-    the rest), which is cross-manager-sequential, so the whole command runs serially.
-    The other state changers (``remove``, ``upgrade <packages>``, ``restore``, and
-    ``install`` of fully manager-tied specs) now fan out through
-    :func:`collect_per_package`. When the user explicitly raised ``mpm --jobs``
-    above ``1``, say so once at ``INFO``: the request simply has no effect on this
-    run, which is narration, not a problem.
-    """
-    if ctx.meta.get(JOBS, 1) <= 1:
-        return
-    if ctx.find_root().get_parameter_source("jobs") not in (
-        ParameterSource.COMMANDLINE,
-        ParameterSource.ENVIRONMENT,
-    ):
-        return
-    logging.info(
-        "This command dispatches managers sequentially by priority; "
-        "--jobs does not parallelize it.",
-    )

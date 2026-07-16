@@ -74,12 +74,9 @@ class Nix(PackageManager):
         output = self.run_cli("--query", "--installed")
 
         for line in output.splitlines():
-            match = self._NAME_VERSION_REGEXP.match(line.strip())
-            if match:
-                yield self.package(
-                    id=match.group("package_id"),
-                    installed_version=match.group("version"),
-                )
+            if split := self.split_name_version(line.strip()):
+                package_id, version = split
+                yield self.package(id=package_id, installed_version=version)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -98,13 +95,11 @@ class Nix(PackageManager):
         )
 
         for match in self._OUTDATED_REGEXP.finditer(output):
-            name_match = self._NAME_VERSION_REGEXP.match(
-                match.group("name_version"),
-            )
-            if name_match:
+            if split := self.split_name_version(match.group("name_version")):
+                package_id, version = split
                 yield self.package(
-                    id=name_match.group("package_id"),
-                    installed_version=name_match.group("version"),
+                    id=package_id,
+                    installed_version=version,
                     latest_version=match.group("latest_version"),
                 )
 
@@ -143,12 +138,12 @@ class Nix(PackageManager):
             name_version = parts[1]
             description = parts[2] if len(parts) > 2 else None
 
-            name_match = self._NAME_VERSION_REGEXP.match(name_version)
-            if name_match:
+            if split := self.split_name_version(name_version):
+                package_id, version = split
                 yield self.package(
-                    id=name_match.group("package_id"),
+                    id=package_id,
                     description=description,
-                    latest_version=name_match.group("version"),
+                    latest_version=version,
                 )
 
     @version_not_implemented

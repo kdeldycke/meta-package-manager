@@ -19,7 +19,6 @@
 
 from __future__ import annotations
 
-import sys
 from textwrap import dedent
 
 import pytest
@@ -30,7 +29,6 @@ from meta_package_manager.config import (
     CONTRIBUTION_HINT_FIELDS,
     INVALIDATED_CACHED_PROPS,
     MAX_ISSUE_URL_LENGTH,
-    OVERRIDABLE_FIELDS,
     RISKY_OVERRIDE_FIELDS,
     ContributionHint,
     _build_issue_url,
@@ -38,14 +36,11 @@ from meta_package_manager.config import (
     dump_manager_overrides,
     format_contribution_hints,
 )
+from meta_package_manager.definitions import OVERRIDABLE_FIELDS
 from meta_package_manager.pool import pool
 
-from .conftest import all_manager_ids
+from .conftest import tomllib, all_manager_ids
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
 
 OVERRIDE_TARGET = "pip"
 """Manager ID used as a fixture target for override tests.

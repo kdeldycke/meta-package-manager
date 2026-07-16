@@ -42,7 +42,9 @@ from meta_package_manager.package import (
     PackageMetadata,
     Supplier,
 )
-from meta_package_manager.sbom import SBOM, SPDX, CycloneDX, ExportFormat
+from meta_package_manager.sbom.base import SBOM, ExportFormat
+from meta_package_manager.sbom.cyclonedx import CycloneDX
+from meta_package_manager.sbom.spdx import SPDX
 from meta_package_manager.sbom.vulnerabilities import Vulnerability
 
 from .test_cli import CLISubCommandTests
@@ -732,10 +734,12 @@ def test_shared_advisory_deduplicated_in_cyclonedx():
     c.add_package(manager, django, EMPTY_METADATA)
     c.add_package(manager, flask, EMPTY_METADATA)
     vuln = _sample_vulnerability()
-    c.attach_vulnerabilities({
-        django.purl.to_string(): (vuln,),
-        flask.purl.to_string(): (vuln,),
-    })
+    c.attach_vulnerabilities(
+        {
+            django.purl.to_string(): (vuln,),
+            flask.purl.to_string(): (vuln,),
+        }
+    )
     c.finalize()
     doc = json.loads(c.export())
     vulns = doc.get("vulnerabilities", [])

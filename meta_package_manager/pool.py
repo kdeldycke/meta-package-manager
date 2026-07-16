@@ -23,9 +23,9 @@ from functools import cached_property
 from boltons.iterutils import unique
 from click_extra import get_current_context
 
-from . import config
+from . import definitions
 from .capabilities import implements
-from .execution import warm_availability
+from .dispatch import warm_availability
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
@@ -178,7 +178,7 @@ class ManagerPool:
         for klass in manager_classes:
             manager = klass()
             register[manager.id] = manager
-        for bundled in config.build_bundled_managers():
+        for bundled in definitions.build_bundled_managers():
             register[bundled.id] = bundled
         return register
 
@@ -212,7 +212,7 @@ class ManagerPool:
         class) yet always present in :py:attr:`register` like the built-ins. Disjoint
         from :py:attr:`builtin_manager_ids` and :py:attr:`config_defined_ids`.
         """
-        return config.bundled_manager_ids()
+        return definitions.bundled_manager_ids()
 
     @cached_property
     def known_manager_ids(self) -> frozenset[str]:
@@ -261,6 +261,21 @@ class ManagerPool:
     def items(self):
         return self.register.items()
 
+    def _evict_id_caches(self) -> None:
+        """Drop the cached ID lists so the next access recomputes them.
+
+        Called whenever the pool's membership changes, so selection, default-set
+        computation and the dynamic CLI flags observe the new member set. The test
+        suite reuses it to de-register the managers it injects.
+        """
+        for cached_list in (
+            "all_manager_ids",
+            "default_manager_ids",
+            "maintained_manager_ids",
+            "unsupported_manager_ids",
+        ):
+            self.__dict__.pop(cached_list, None)
+
     def add_manager(self, manager: PackageManager) -> None:
         """Register a runtime-built manager (from a config definition) into the pool.
 
@@ -272,13 +287,7 @@ class ManagerPool:
         """
         self.register[manager.id] = manager
         self.config_defined_ids.add(manager.id)
-        for cached_list in (
-            "all_manager_ids",
-            "default_manager_ids",
-            "maintained_manager_ids",
-            "unsupported_manager_ids",
-        ):
-            self.__dict__.pop(cached_list, None)
+        self._evict_id_caches()
 
     # Pre-compute all sorts of constants.
 

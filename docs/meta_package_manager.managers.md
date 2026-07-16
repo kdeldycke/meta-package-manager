@@ -45,15 +45,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.managers.chocolatey module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.chocolatey
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.managers.composer module
 
 ```{eval-rst}
@@ -148,15 +139,6 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.homebrew
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.macports module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.macports
    :members:
    :show-inheritance:
    :undoc-members:
@@ -306,15 +288,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.managers.stew module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.stew
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.managers.sun_tools module
 
 ```{eval-rst}
@@ -364,15 +337,6 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.yarn
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.zerobrew module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.zerobrew
    :members:
    :show-inheritance:
    :undoc-members:

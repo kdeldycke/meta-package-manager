@@ -30,7 +30,6 @@ from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
 from .managers.asdf import ASDF
-from .managers.chocolatey import Choco
 from .managers.composer import Composer
 from .managers.conda import Conda
 from .managers.deb_get import Deb_Get
@@ -42,7 +41,6 @@ from .managers.fwupd import FWUPD
 from .managers.gem import Gem
 from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
-from .managers.macports import MacPorts
 from .managers.mas import MAS
 from .managers.mise import Mise
 from .managers.nix import Nix
@@ -59,14 +57,12 @@ from .managers.scoop import Scoop
 from .managers.sdkman import SDKMAN
 from .managers.sfsu import SFSU
 from .managers.snap import Snap
-from .managers.stew import Stew
 from .managers.sun_tools import Sun_Tools
 from .managers.tazpkg import Tazpkg
 from .managers.uv import UV, UVX
 from .managers.winget import WinGet
 from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
-from .managers.zerobrew import ZeroBrew
 from .managers.zypper import Zypper
 
 TYPE_CHECKING = False
@@ -86,7 +82,6 @@ manager_classes = (
     ASDF,
     Brew,
     Cask,
-    Choco,
     Composer,
     Conda,
     Deb_Get,
@@ -98,7 +93,6 @@ manager_classes = (
     FWUPD,
     Gem,
     Guix,
-    MacPorts,
     MAS,
     Mise,
     Nix,
@@ -118,7 +112,6 @@ manager_classes = (
     SDKMAN,
     SFSU,
     Snap,
-    Stew,
     Sun_Tools,
     Tazpkg,
     UV,
@@ -129,7 +122,6 @@ manager_classes = (
     YarnClassic,
     Yay,
     YUM,
-    ZeroBrew,
     Zypper,
 )
 """The list of all classes implementing the specific package managers.

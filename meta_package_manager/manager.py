@@ -31,6 +31,7 @@ availability policy: whether the manager is supported, fresh, and ready to use.
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 from enum import Enum
@@ -52,6 +53,7 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
     from pathlib import Path
+    from typing import Any
 
     from .version import TokenizedString
 
@@ -240,6 +242,34 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         if not match:
             return None
         return match.group("package_id"), match.group("version")
+
+    def parse_json(self, output: str) -> Any | None:
+        """Parse a query's JSON ``output``, tolerating empty and malformed captures.
+
+        The shared first step of every JSON-emitting query, for built-in managers
+        and config-defined operations alike (see
+        :py:func:`meta_package_manager.definitions._iter_parsed`). Returns ``None``
+        when the command produced no output (a manager with nothing to report often
+        prints nothing at all), and when the output is not valid JSON, which logs
+        one warning tagged with the manager ID instead of raising: a query that
+        cannot be parsed yields no packages, mirroring how the fan-out commands
+        swallow a failed CLI call into an empty result.
+
+        Queries whose failure semantics differ keep their own parsing: a per-line
+        NDJSON stream (``pkg search``), a hard :py:exc:`CLIError` on malformed
+        payloads (``pwsh-gallery``), a best-effort metadata enrichment logging at
+        ``DEBUG`` (``brew info``).
+        """
+        if not output:
+            return None
+        try:
+            return json.loads(output)
+        except json.JSONDecodeError as ex:
+            logging.warning(
+                f"Could not parse JSON output: {ex}",
+                extra={"label": self.id},
+            )
+            return None
 
     def package(self, **kwargs) -> Package:
         """Instantiate a ``Package`` object from the manager.

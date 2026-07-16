@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import email.message
 import importlib.metadata
-import json
 import re
 import subprocess
 import sys
@@ -347,8 +346,9 @@ class Pip(PackageManager):
             "list", "--format=json", "--verbose", "--quiet", must_succeed=True
         )
 
-        if output:
-            for package in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for package in data:
                 yield self.package(
                     id=package["name"],
                     installed_version=package["version"],
@@ -577,8 +577,9 @@ class Pip(PackageManager):
             must_succeed=True,
         )
 
-        if output:
-            for package in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for package in data:
                 yield self.package(
                     id=package["name"],
                     installed_version=package["version"],

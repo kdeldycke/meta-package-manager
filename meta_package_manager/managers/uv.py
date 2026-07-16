@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 import re
 
 from extra_platforms import ALL_PLATFORMS
@@ -126,8 +125,9 @@ class UV(UVBase):
         """
         output = self.run_cli("pip", "list", "--format=json", must_succeed=True)
 
-        if output:
-            for package in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for package in data:
                 yield self.package(
                     id=package["name"],
                     installed_version=package["version"],
@@ -159,8 +159,9 @@ class UV(UVBase):
             "pip", "list", "--outdated", "--format=json", must_succeed=True
         )
 
-        if output:
-            for package in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for package in data:
                 yield self.package(
                     id=package["name"],
                     installed_version=package["version"],

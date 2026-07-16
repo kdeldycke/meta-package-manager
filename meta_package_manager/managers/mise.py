@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 import re
 
 from extra_platforms import ALL_PLATFORMS
@@ -112,9 +111,10 @@ class Mise(PackageManager):
             }
         """
         output = self.run_cli("ls", "--installed", "--json", must_succeed=True)
-        if not output:
+        data = self.parse_json(output)
+        if not data:
             return
-        for tool_id, entries in json.loads(output).items():
+        for tool_id, entries in data.items():
             for entry in entries:
                 yield self.package(
                     id=tool_id,
@@ -137,9 +137,10 @@ class Mise(PackageManager):
             }
         """
         output = self.run_cli("outdated", "--json", must_succeed=True)
-        if not output:
+        data = self.parse_json(output)
+        if not data:
             return
-        for tool_id, info in json.loads(output).items():
+        for tool_id, info in data.items():
             yield self.package(
                 id=tool_id,
                 installed_version=info["current"],

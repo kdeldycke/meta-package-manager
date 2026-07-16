@@ -60,6 +60,9 @@ it, but every tool and consumer in the wild assumes this default.
 
 
 class PKG(PackageManager):
+    """FreeBSD's binary pkg frontend, fetching pre-compiled artifacts from the
+    official repository."""
+
     name = "FreeBSD pkg"
 
     homepage_url = "https://github.com/freebsd/pkg"

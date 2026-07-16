@@ -31,6 +31,8 @@ if TYPE_CHECKING:
 
 
 class Scoop(PackageManager):
+    """Scoop is a user-level installer for Windows, unpacking into ``~/scoop``."""
+
     name = "Scoop"
 
     homepage_url = "https://scoop.sh"

@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 
 from extra_platforms import LINUX_LIKE
 
@@ -32,6 +31,12 @@ if TYPE_CHECKING:
 
 
 class FWUPD(PackageManager):
+    """fwupd manages device firmware, treating each updatable device as a package.
+
+    Inventory and upgrades come from the LVFS (Linux Vendor Firmware Service),
+    with devices identified by their GUIDs.
+    """
+
     name = "Linux fwupd"
 
     homepage_url = "https://fwupd.org"
@@ -320,8 +325,9 @@ class FWUPD(PackageManager):
         """
         output = self.run_cli("get-devices", "--json", must_succeed=True)
 
-        if output:
-            for device in json.loads(output)["Devices"]:
+        data = self.parse_json(output)
+        if data:
+            for device in data["Devices"]:
                 if "updatable" in device["Flags"]:
                     yield self.package(
                         id=device["DeviceId"],
@@ -496,8 +502,9 @@ class FWUPD(PackageManager):
         """
         output = self.run_cli("get-updates", "--json", must_succeed=True)
 
-        if output:
-            for device in json.loads(output)["Devices"]:
+        data = self.parse_json(output)
+        if data:
+            for device in data["Devices"]:
                 if "updatable" in device["Flags"] and device.get("Releases"):
                     yield self.package(
                         id=device["DeviceId"],

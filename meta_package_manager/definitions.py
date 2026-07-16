@@ -44,7 +44,6 @@ on it without a circular import.
 from __future__ import annotations
 
 import importlib.resources
-import json
 import logging
 import re
 import sys
@@ -283,10 +282,32 @@ results, mirroring the search-from-scratch augmentation some built-in managers u
 """
 
 
+SEARCH_REFINEMENT_KEYS: Final[frozenset[str]] = frozenset(
+    {"exact_args", "extended_args", "id_name_only_args"},
+)
+"""Optional per-refinement argument templates of the ``search`` operation.
+
+Each key holds the CLI arguments spliced into the ``args`` template — at the
+position of the matching ``{exact_args}``-style marker — when the refinement is
+active: ``exact_args`` for an ``--exact`` search, ``extended_args`` for an
+``--extended`` one, and ``id_name_only_args`` for the default ID/name-restricted
+mode (mpm's ``--id-name-only``, for tools like Chocolatey whose *unrestricted*
+search is the default and take a flag to narrow it). An inactive refinement
+expands its marker to nothing.
+
+Declaring a key advertises native support for the matching mpm flag
+(``exact_args`` sets the ``search`` method's ``exact_support`` introspection
+attribute, either of the other two sets ``extended_support``), which feeds the
+augmentations documentation.
+:py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` still
+refines the results client-side either way, exactly as for the built-in managers.
+"""
+
+
 ALLOWED_ARG_PLACEHOLDERS: Final[Mapping[str, frozenset[str]]] = {
     "install": frozenset({"package_id"}),
     "remove": frozenset({"package_id"}),
-    "search": frozenset({"query"}),
+    "search": frozenset({"query"}) | SEARCH_REFINEMENT_KEYS,
     "upgrade_one": frozenset({"package_id"}),
 }
 """Placeholders each operation's ``args`` may reference.
@@ -301,25 +322,47 @@ ARG_PLACEHOLDER_REGEX: Final = re.compile(r"\{([a-z_]+)\}")
 """Match ``{placeholder}`` tokens in an operation's args, for validation."""
 
 
+JSON_FIELD_SELECTOR_REGEX: Final = re.compile(
+    r"^(?P<key>[^\[\]]+?)(?:\[(?P<index>\d+)\])?$",
+)
+"""Parse a JSON field selector: a key name with an optional ``[N]`` list index.
+
+A bare ``version`` maps the package field to the item's ``version`` key. A
+``versions[0]`` selector additionally picks one element out of a list-valued key
+(zerobrew reports each package's installed versions as an array). Anything more
+nested stays out of the DSL on purpose: a manager needing real JSON traversal is
+better served by a Python class.
+"""
+
+
 QUERY_OPERATION_KEYS: Final[frozenset[str]] = frozenset(
-    {"args", "cli", "regex", "format", "fields", "list_path"},
+    {"args", "cli", "regex", "format", "fields", "list_path", "sudo"},
 )
 """Keys allowed in a query operation's table.
 
-``cli`` names an alternate binary for this operation, resolved on the search path at
-call time: it lets one definition span sibling binaries (``urpmq`` querying while
-``urpmi`` installs). Queries never take a ``sudo`` key: read-only operations stay
-unprivileged.
+``cli`` is the same alternate-binary hook as on command operations. ``sudo = true``
+marks the query as privileged, for the rare tool that gates even its read-only
+listings behind root (``deb-get``'s upgradable check); escalation then follows the
+usual per-manager policy.
 """
+
+
+SEARCH_OPERATION_KEYS: Final[frozenset[str]] = (
+    QUERY_OPERATION_KEYS | SEARCH_REFINEMENT_KEYS
+)
+"""Keys allowed in the ``search`` operation's table: a query operation plus the
+per-refinement argument templates of :data:`SEARCH_REFINEMENT_KEYS`."""
 
 
 COMMAND_OPERATION_KEYS: Final[frozenset[str]] = frozenset({"args", "cli", "sudo"})
 """Keys allowed in a command operation's table.
 
-``cli`` is the same alternate-binary hook as on query operations. ``sudo = true``
-marks the operation as privileged, mirroring the ``sudo=True`` flag built-in managers
-pass to ``run_cli``: escalation then follows the per-manager policy (the definition's
-``default_sudo``, overridden by the user's ``--sudo``/``--no-sudo``).
+``cli`` names an alternate binary for this operation, resolved on the search path
+at call time: it lets one definition span sibling binaries (``urpmq`` querying
+while ``urpmi`` installs). ``sudo = true`` marks the operation as privileged,
+mirroring the ``sudo=True`` flag built-in managers pass to ``run_cli``: escalation
+then follows the per-manager policy (the definition's ``default_sudo``, overridden
+by the user's ``--sudo``/``--no-sudo``).
 """
 
 
@@ -352,9 +395,27 @@ class OperationSpec:
     managers pass to :py:meth:`~meta_package_manager.execution.CLIExecutor.run_cli`.
 
     Escalation still follows the per-manager policy: the definition's
-    ``default_sudo``, overridden by the user's ``--sudo``/``--no-sudo``. Only command
-    operations may set it; queries stay unprivileged.
+    ``default_sudo``, overridden by the user's ``--sudo``/``--no-sudo``. Command
+    operations are the usual bearers; a query may also set it, for the rare tool
+    that gates its read-only listings behind root (``deb-get``).
     """
+
+    exact_args: tuple[str, ...] | None = None
+    """Arguments spliced at the ``{exact_args}`` marker of a ``search``'s ``args``
+    when an exact match is requested, or ``None`` when the tool has no native
+    exact mode. See :data:`SEARCH_REFINEMENT_KEYS`."""
+
+    extended_args: tuple[str, ...] | None = None
+    """Arguments spliced at the ``{extended_args}`` marker of a ``search``'s
+    ``args`` when the extended (description-reaching) mode is requested, or
+    ``None`` when the tool has no native switch for it. See
+    :data:`SEARCH_REFINEMENT_KEYS`."""
+
+    id_name_only_args: tuple[str, ...] | None = None
+    """Arguments spliced at the ``{id_name_only_args}`` marker of a ``search``'s
+    ``args`` when the default ID/name-restricted mode is requested, for tools
+    whose unrestricted search is the default (Chocolatey's ``--by-id-only``), or
+    ``None``. See :data:`SEARCH_REFINEMENT_KEYS`."""
 
     parse_mode: str = "none"
     """How to turn the command's stdout into packages: ``"regex"`` (per-line named
@@ -376,7 +437,11 @@ class OperationSpec:
 
     fields: dict[str, str] | None = None
     """Mapping of recognized package field (``package_id``, ``installed_version``,
-    ``latest_version``) to its JSON key, in ``"json"`` mode."""
+    ``latest_version``) to its JSON selector, in ``"json"`` mode.
+
+    A selector is a key name with an optional ``[N]`` list index
+    (``versions[0]``); see :data:`JSON_FIELD_SELECTOR_REGEX`.
+    """
 
 
 @dataclass(frozen=True)
@@ -568,7 +633,12 @@ def _parse_operation_spec(
         )
 
     is_query = op_name in QUERY_OPERATIONS
-    allowed_keys = QUERY_OPERATION_KEYS if is_query else COMMAND_OPERATION_KEYS
+    if op_name == "search":
+        allowed_keys = SEARCH_OPERATION_KEYS
+    elif is_query:
+        allowed_keys = QUERY_OPERATION_KEYS
+    else:
+        allowed_keys = COMMAND_OPERATION_KEYS
     for key in raw:
         if key not in allowed_keys:
             raise ValidationError(
@@ -625,16 +695,79 @@ def _parse_operation_spec(
                 f"{path}.cli", "must be a non-empty string.", code="invalid_value"
             )
 
-    if is_query:
-        return _parse_query_spec(path, op_name, args, raw, cli=cli)
-
     sudo = False
     if "sudo" in raw:
         try:
             sudo = _to_bool(raw["sudo"])
         except TypeError as ex:
             raise ValidationError(f"{path}.sudo", str(ex), code="invalid_type") from ex
-    return OperationSpec(args=args, cli=cli, sudo=sudo)
+
+    common = _parse_search_refinements(path, args, raw, found_placeholders)
+    common.update(cli=cli, sudo=sudo)
+
+    if is_query:
+        return _parse_query_spec(path, op_name, args, raw, common)
+
+    return OperationSpec(args=args, **common)
+
+
+def _parse_search_refinements(
+    path: str,
+    args: tuple[str, ...],
+    raw: dict[str, Any],
+    found_placeholders: set[str],
+) -> dict[str, Any]:
+    """Validate and parse the per-refinement argument templates of a ``search``.
+
+    Returns the :data:`SEARCH_REFINEMENT_KEYS` entries of the
+    :class:`OperationSpec` constructor. Only ``search`` can carry them (the
+    key filter upstream rejects them elsewhere), so for every other operation
+    this collapses to three ``None`` values. Each declared refinement must pair
+    with its ``{marker}`` in ``args`` — a marker with no argument list would
+    leak into the CLI as a literal token, a list with no marker would never
+    render — and the marker must stand as a whole argument, since a list cannot
+    expand inside a larger string.
+    """
+    refinements: dict[str, Any] = {}
+    for refinement in sorted(SEARCH_REFINEMENT_KEYS):
+        marker = "{" + refinement + "}"
+        for arg in args:
+            if marker in arg and arg != marker:
+                raise ValidationError(
+                    f"{path}.args",
+                    f"{marker} must be a standalone argument, not embedded in {arg!r}.",
+                    code="invalid_value",
+                )
+        if refinement not in raw:
+            refinements[refinement] = None
+            if refinement in found_placeholders:
+                raise ValidationError(
+                    f"{path}.args",
+                    f"references {marker} but declares no {refinement!r} list.",
+                    code="invalid_value",
+                )
+            continue
+        try:
+            values = _to_str_tuple(raw[refinement])
+        except TypeError as ex:
+            raise ValidationError(
+                f"{path}.{refinement}", str(ex), code="invalid_type"
+            ) from ex
+        for value in values:
+            if ARG_PLACEHOLDER_REGEX.search(value):
+                raise ValidationError(
+                    f"{path}.{refinement}",
+                    f"{value!r} may not carry a placeholder.",
+                    code="invalid_value",
+                )
+        if refinement not in found_placeholders:
+            raise ValidationError(
+                f"{path}.args",
+                f"declares {refinement!r} but the args have no {marker} marker.",
+                code="invalid_value",
+            )
+        refinements[refinement] = values
+    return refinements
 
 
 def _parse_query_spec(
@@ -642,9 +775,13 @@ def _parse_query_spec(
     op_name: str,
     args: tuple[str, ...],
     raw: dict[str, Any],
-    cli: str | None = None,
+    common: dict[str, Any],
 ) -> OperationSpec:
-    """Validate the parser half of a query operation (``regex`` or JSON ``fields``)."""
+    """Validate the parser half of a query operation (``regex`` or JSON ``fields``).
+
+    ``common`` carries the constructor entries already validated upstream (the
+    alternate ``cli``, the ``sudo`` marker, the search refinements).
+    """
     has_regex = "regex" in raw
     has_json = raw.get("format") == "json" or "fields" in raw
     if has_regex and has_json:
@@ -673,7 +810,7 @@ def _parse_query_spec(
                 code="invalid_value",
             ) from ex
         _check_parse_fields(f"{path}.regex", set(compiled.groupindex), required)
-        return OperationSpec(args=args, cli=cli, parse_mode="regex", regex=regex)
+        return OperationSpec(args=args, parse_mode="regex", regex=regex, **common)
 
     if "fields" not in raw:
         raise ValidationError(
@@ -686,6 +823,14 @@ def _parse_query_spec(
     except TypeError as ex:
         raise ValidationError(f"{path}.fields", str(ex), code="invalid_type") from ex
     _check_parse_fields(f"{path}.fields", set(fields), required)
+    for role, selector in fields.items():
+        if not JSON_FIELD_SELECTOR_REGEX.match(selector):
+            raise ValidationError(
+                f"{path}.fields",
+                f"invalid selector {selector!r} for {role}: use a key name with "
+                "an optional [N] list index, like 'version' or 'versions[0]'.",
+                code="invalid_value",
+            )
     list_path = None
     if "list_path" in raw:
         try:
@@ -695,7 +840,7 @@ def _parse_query_spec(
                 f"{path}.list_path", str(ex), code="invalid_type"
             ) from ex
     return OperationSpec(
-        args=args, cli=cli, parse_mode="json", list_path=list_path, fields=fields
+        args=args, parse_mode="json", list_path=list_path, fields=fields, **common
     )
 
 
@@ -747,7 +892,30 @@ def _navigate_json(data: object, list_path: str | None) -> list:
     return data if isinstance(data, list) else []
 
 
+def _json_field(item: dict, selector: str) -> Any:
+    """Resolve a field ``selector`` against one JSON package ``item``.
+
+    A bare key returns the key's value; a ``key[N]`` selector picks the ``N``-th
+    element out of a list-valued key (see :data:`JSON_FIELD_SELECTOR_REGEX`,
+    which validated the syntax at parse time). Anything that does not resolve —
+    missing key, non-list value under an indexed selector, out-of-range index —
+    returns ``None``, so an unexpected payload yields incomplete packages rather
+    than raising.
+    """
+    match = JSON_FIELD_SELECTOR_REGEX.match(selector)
+    assert match is not None, f"unvalidated selector {selector!r}"
+    value = item.get(match.group("key"))
+    index = match.group("index")
+    if index is None:
+        return value
+    if not isinstance(value, list):
+        return None
+    position = int(index)
+    return value[position] if position < len(value) else None
+
+
 def _iter_parsed(
+    manager: PackageManager,
     output: str,
     spec: OperationSpec,
     compiled: re.Pattern[str] | None,
@@ -755,11 +923,13 @@ def _iter_parsed(
     """Yield ``Package`` keyword dicts extracted from a query command's ``output``.
 
     Honors :py:attr:`OperationSpec.parse_mode`: per-line named-group matching for
-    ``"regex"``, key lookups under :py:attr:`OperationSpec.list_path` for ``"json"``.
-    Skips entries with no ``package_id`` and version values that are absent or null.
+    ``"regex"``, key lookups under :py:attr:`OperationSpec.list_path` for ``"json"``
+    (parsed through the shared
+    :py:meth:`~meta_package_manager.manager.PackageManager.parse_json`, so a
+    malformed payload warns and yields nothing, exactly like the built-in
+    managers). Skips entries with no ``package_id`` and version values that are
+    absent or null.
     """
-    if not output:
-        return
     if spec.parse_mode == "regex":
         assert compiled is not None
         for line in output.splitlines():
@@ -777,22 +947,22 @@ def _iter_parsed(
             yield kwargs
     elif spec.parse_mode == "json":
         assert spec.fields is not None
-        try:
-            data = json.loads(output)
-        except json.JSONDecodeError:
-            logging.warning("Could not parse JSON output for config-defined manager.")
+        data = manager.parse_json(output)
+        if data is None:
             return
         for item in _navigate_json(data, spec.list_path):
             if not isinstance(item, dict):
                 continue
-            raw_id = item.get(spec.fields["package_id"])
+            raw_id = _json_field(item, spec.fields["package_id"])
             if not raw_id:
                 continue
             kwargs = {"id": str(raw_id)}
             for role in ("installed_version", "latest_version"):
-                json_key = spec.fields.get(role)
-                if json_key is not None and item.get(json_key) is not None:
-                    kwargs[role] = str(item[json_key])
+                selector = spec.fields.get(role)
+                if selector is not None:
+                    value = _json_field(item, selector)
+                    if value is not None:
+                        kwargs[role] = str(value)
             yield kwargs
 
 
@@ -817,35 +987,71 @@ def _make_query_property(
     """Build an ``installed``/``outdated`` property that runs the CLI and parses it."""
 
     def query(self: PackageManager) -> Iterator[Package]:
-        output = self.run_cli(*spec.args, override_cli_path=_op_cli_path(self, spec))
-        for kwargs in _iter_parsed(output, spec, compiled):
+        output = self.run_cli(
+            *spec.args,
+            override_cli_path=_op_cli_path(self, spec),
+            sudo=spec.sudo,
+        )
+        for kwargs in _iter_parsed(self, output, spec, compiled):
             yield self.package(**kwargs)
 
     return property(query)
 
 
+def _expand_search_args(
+    spec: OperationSpec, query: str, extended: bool, exact: bool
+) -> list[str]:
+    """Render a ``search``'s ``args`` template for one query.
+
+    Each :data:`SEARCH_REFINEMENT_KEYS` marker expands, in place, to its
+    argument list when the matching refinement is active and to nothing
+    otherwise (``id_name_only_args`` being active when ``extended`` is *not*
+    requested). The ``{query}`` placeholder is substituted last.
+    """
+    active: dict[str, tuple[str, ...] | None] = {
+        "exact_args": spec.exact_args if exact else (),
+        "extended_args": spec.extended_args if extended else (),
+        "id_name_only_args": spec.id_name_only_args if not extended else (),
+    }
+    expanded: list[str] = []
+    for arg in spec.args:
+        token = arg[1:-1] if arg.startswith("{") and arg.endswith("}") else None
+        if token in active:
+            expanded.extend(active[token] or ())
+        else:
+            expanded.append(arg)
+    return _render_args(tuple(expanded), query=query)
+
+
 def _make_search(
     spec: OperationSpec, compiled: re.Pattern[str] | None
 ) -> Callable[..., Iterator[Package]]:
-    """Build a ``search`` method. Native exact/extended filtering is not expressed in
-    the DSL, so :py:meth:`~meta_package_manager.manager.PackageManager.refiltered_search`
-    refilters the raw results.
+    """Build a ``search`` method.
+
+    The per-refinement argument templates (see :data:`SEARCH_REFINEMENT_KEYS`)
+    render the tool's native exact/extended switches when declared;
+    :py:meth:`~meta_package_manager.manager.PackageManager.refiltered_search`
+    refilters the raw results either way, exactly as for the built-in managers.
     """
 
     def search(
         self: PackageManager, query: str, extended: bool, exact: bool
     ) -> Iterator[Package]:
         output = self.run_cli(
-            *_render_args(spec.args, query=query),
+            *_expand_search_args(spec, query, extended, exact),
             override_cli_path=_op_cli_path(self, spec),
+            sudo=spec.sudo,
         )
-        for kwargs in _iter_parsed(output, spec, compiled):
+        for kwargs in _iter_parsed(self, output, spec, compiled):
             yield self.package(**kwargs)
 
     # Same introspection surface as the search_capabilities decorator on class
-    # managers: both refinements always rely on mpm's refiltering here.
-    search.extended_support = False  # type: ignore[attr-defined]
-    search.exact_support = False  # type: ignore[attr-defined]
+    # managers: a declared refinement template advertises native support, its
+    # absence signals reliance on mpm's refiltering.
+    search.extended_support = (  # type: ignore[attr-defined]
+        spec.extended_args is not None or spec.id_name_only_args is not None
+    )
+    search.exact_support = spec.exact_args is not None  # type: ignore[attr-defined]
     return search
 
 

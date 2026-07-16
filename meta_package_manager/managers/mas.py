@@ -31,6 +31,11 @@ if TYPE_CHECKING:
 
 
 class MAS(PackageManager):
+    """mas drives the Mac App Store from the command line.
+
+    Packages are App Store applications, identified by their numeric adamID.
+    """
+
     name = "Mac App Store"
 
     homepage_url = "https://github.com/mas-cli/mas"

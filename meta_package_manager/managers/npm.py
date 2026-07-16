@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -78,15 +77,6 @@ class NPM(PackageManager):
     See https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age.
     """
 
-    def cooldown_env_value(self) -> str:
-        """Render :py:attr:`meta_package_manager.execution.CLIExecutor.cooldown` as an
-        integer day count for npm's ``min-release-age``.
-
-        Sub-day cooldowns round up so the gate over-protects rather than silently
-        collapses to ``0`` (the "no cooldown" sentinel).
-        """
-        return self.cooldown_rounded_up(86400)
-
     pre_args = (
         # Operates in "global" mode, so that packages are installed into the
         # prefix folder instead of the current working directory.
@@ -108,6 +98,15 @@ class NPM(PackageManager):
         $ npm --version
         6.13.7
     """
+
+    def cooldown_env_value(self) -> str:
+        """Render :py:attr:`meta_package_manager.execution.CLIExecutor.cooldown` as an
+        integer day count for npm's ``min-release-age``.
+
+        Sub-day cooldowns round up so the gate over-protects rather than silently
+        collapses to ``0`` (the "no cooldown" sentinel).
+        """
+        return self.cooldown_rounded_up(86400)
 
     def run_cli(self, *args: TArg | TNestedArgs, **kwargs: Any) -> str:
         """Like the common run_cli helper, but silence NPM's JSON output on error.
@@ -181,8 +180,9 @@ class NPM(PackageManager):
         """
         output = self.run_cli("--json", "--depth", "0", "list", must_succeed=True)
 
-        if output:
-            for pkg_id, pkg_infos in json.loads(output).get("dependencies", {}).items():
+        data = self.parse_json(output)
+        if data:
+            for pkg_id, pkg_infos in data.get("dependencies", {}).items():
                 yield self.package(
                     id=pkg_id,
                     installed_version=pkg_infos["version"],
@@ -213,8 +213,9 @@ class NPM(PackageManager):
         """
         output = self.run_cli("--json", "outdated", must_succeed=True)
 
-        if output:
-            for pkg_id, pkg_infos in json.loads(output).items():
+        data = self.parse_json(output)
+        if data:
+            for pkg_id, pkg_infos in data.items():
                 if pkg_infos["wanted"] == "linked":
                     continue
                 yield self.package(
@@ -313,8 +314,9 @@ class NPM(PackageManager):
 
         output = self.run_cli("search", "--json", search_args, query, must_succeed=True)
 
-        if output:
-            for pkg_infos in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for pkg_infos in data:
                 yield self.package(
                     id=pkg_infos.get("name"),
                     description=pkg_infos.get("description"),

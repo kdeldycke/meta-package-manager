@@ -31,6 +31,8 @@ if TYPE_CHECKING:
 
 
 class EOPKG(PackageManager):
+    """Solus' eopkg package manager, a PiSi fork."""
+
     name = "Solus eopkg"
 
     homepage_url = "https://github.com/getsolus/eopkg/"

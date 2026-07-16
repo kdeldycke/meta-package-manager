@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -111,8 +110,9 @@ class PNPM(PackageManager):
             "list", "--global", "--json", "--depth", "0", must_succeed=True
         )
 
-        if output:
-            for project in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for project in data:
                 for pkg_id, pkg_infos in project.get("dependencies", {}).items():
                     yield self.package(
                         id=pkg_id,
@@ -144,8 +144,9 @@ class PNPM(PackageManager):
         """
         output = self.run_cli("outdated", "--global", "--json", must_succeed=True)
 
-        if output:
-            for pkg_id, pkg_infos in json.loads(output).items():
+        data = self.parse_json(output)
+        if data:
+            for pkg_id, pkg_infos in data.items():
                 yield self.package(
                     id=pkg_id,
                     installed_version=pkg_infos.get("current"),
@@ -183,8 +184,9 @@ class PNPM(PackageManager):
         """
         output = self.run_cli("search", "--json", query, must_succeed=True)
 
-        if output:
-            for pkg_infos in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for pkg_infos in data:
                 yield self.package(
                     id=pkg_infos["name"],
                     description=pkg_infos.get("description"),

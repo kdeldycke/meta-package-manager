@@ -458,6 +458,7 @@ Keep definitions sorted for readability and to minimize merge conflicts:
 
 - **Workflow jobs**: Ordered by execution dependency (upstream jobs first), then alphabetically within the same dependency level.
 - **Python module-level constants and variables**: Alphabetically, unless there is a logical grouping or dependency order. Hard-coded domain constants should be placed at the top of the file, immediately after imports. These constants encode domain assertions and business rules — surfacing them early gives readers an immediate sense of the assumptions the module operates under.
+- **Manager class members**: The canonical declaration order (identity, escalation policy, requirement, CLI plumbing, version probe, toggles, then methods in base-class order) is the `CANONICAL_ATTRS` tuple in `tests/test_managers.py`, enforced by `test_content_order`. Manager-specific constants (the `_*_REGEXP` parsers) conventionally sit between the attributes and the operations.
 - **YAML configuration keys**: Alphabetically within each mapping level.
 - **Documentation lists and tables**: Alphabetically, unless a logical order (e.g., chronological in changelog) takes precedence.
 

@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 
 from extra_platforms import BSD, LINUX_LIKE, MACOS, WINDOWS
 
@@ -31,6 +30,8 @@ if TYPE_CHECKING:
 
 
 class APM(PackageManager):
+    """Atom's apm, the package manager of the sunset Atom editor."""
+
     deprecated = True
     deprecation_url = "https://github.blog/2022-06-08-sunsetting-atom/"
     """GitHub announced the end of the project for December 15, 2022.
@@ -162,8 +163,9 @@ class APM(PackageManager):
         """
         output = self.run_cli("list", "--json", must_succeed=True)
 
-        if output:
-            for package_list in json.loads(output).values():
+        data = self.parse_json(output)
+        if data:
+            for package_list in data.values():
                 for pkg in package_list:
                     yield self.package(
                         id=pkg["name"],
@@ -324,8 +326,9 @@ class APM(PackageManager):
         """
         output = self.run_cli("outdated", "--compatible", "--json", must_succeed=True)
 
-        if output:
-            for pkg in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for pkg in data:
                 yield self.package(
                     id=pkg["name"],
                     description=pkg["description"],
@@ -427,8 +430,9 @@ class APM(PackageManager):
 
         output = self.run_cli("search", search_args, "--json", query, must_succeed=True)
 
-        if output:
-            for pkg in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for pkg in data:
                 yield self.package(
                     id=pkg["name"],
                     description=pkg["description"],

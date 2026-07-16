@@ -1,0 +1,96 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# MacPorts (https://www.macports.org) installs into /opt/local by default; the
+# `port` binary lives at /opt/local/bin/port. See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# Parsing notes:
+#   - `port -q installed` reports only active ports: the (active) anchor in the
+#     installed regex skips the inactive versions MacPorts keeps around, and the
+#     version capture stops at the first "+" so variant suffixes
+#     ("@3.12.3_0+lzma+optimizations") stay out of the version.
+#   - `port search --line` prints tab-separated "name version category description"
+#     rows; the {extended_args} template maps mpm's --extended to --description and
+#     {exact_args} maps --exact, both sitting before the trailing "--line {query}".
+
+[mpm.managers.macports]
+name = "MacPorts"
+homepage_url = "https://www.macports.org"
+platforms = ["macos"]
+cli_names = ["port"]
+cli_search_path = ["/opt/local/bin"]
+requirement = ">=2.0.0"
+# `port version` prints "Version: 2.12.4".
+version_cli_options = ["version"]
+version_regexes = ['Version:\s+(?P<version>\S+)']
+
+[mpm.managers.macports.operations.installed]
+args = ["-q", "installed"]
+regex = '^\s+(?P<package_id>\S+)\s+@(?P<installed_version>[^+\s]+)\S*\s+\(active\)'
+
+[mpm.managers.macports.operations.outdated]
+args = ["-q", "outdated"]
+regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+<\s+(?P<latest_version>\S+)'
+
+[mpm.managers.macports.operations.search]
+args = ["search", "--name", "{extended_args}", "{exact_args}", "--line", "{query}"]
+extended_args = ["--description"]
+exact_args = ["--exact"]
+regex = '^(?P<package_id>[^\t]+)\t(?P<latest_version>[^\t]+)\t[^\t]+\t.+$'
+
+[mpm.managers.macports.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.macports.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+[mpm.managers.macports.operations.upgrade_one]
+args = ["upgrade", "{package_id}"]
+
+[mpm.managers.macports.operations.upgrade_all]
+args = ["upgrade", "outdated"]
+
+# `port sync` refreshes the local ports tree from the remote repositories.
+[mpm.managers.macports.operations.sync]
+args = ["sync"]
+
+# Remove work directories, distfiles and logs for installed ports.
+[mpm.managers.macports.operations.cleanup]
+args = ["clean", "--all", "installed"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "Version: 2.12.4"
+expected = "2.12.4"
+
+[[samples.installed]]
+output = """
+  curl @8.7.1_0 (active)
+  python312 @3.12.3_0+lzma+optimizations (active)
+  vim @9.1.0_0 (active)"""
+packages = [
+  { id = "curl", version = "8.7.1_0" },
+  { id = "python312", version = "3.12.3_0" },
+  { id = "vim", version = "9.1.0_0" },
+]
+
+[[samples.outdated]]
+output = """
+curl                            8.7.1_0 < 8.8.0_0
+python312                       3.12.3_0 < 3.12.4_0"""
+packages = [
+  { id = "curl", version = "8.8.0_0" },
+  { id = "python312", version = "3.12.4_0" },
+]
+
+[[samples.search]]
+output = """
+MacVim\t9.1.1092\taqua\tMacVim - VIM for macOS
+vim\t9.1.1092\teditors\tVi IMproved"""
+packages = [
+  { id = "MacVim", version = "9.1.1092" },
+  { id = "vim", version = "9.1.1092" },
+]

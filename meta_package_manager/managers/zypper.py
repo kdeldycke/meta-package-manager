@@ -35,6 +35,8 @@ if TYPE_CHECKING:
     from ..version import TokenizedString
 
     class SearchResult(TypedDict):
+        """One XML search match, reduced to the fields the dedup logic keys on."""
+
         id: str
         version: TokenizedString
 

@@ -31,6 +31,8 @@ if TYPE_CHECKING:
 
 
 class Snap(PackageManager):
+    """Canonical's snap installs sandboxed, self-updating packages."""
+
     homepage_url = "https://snapcraft.io"
 
     platforms = UNIX_WITHOUT_MACOS

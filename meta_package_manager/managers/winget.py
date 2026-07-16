@@ -31,6 +31,8 @@ if TYPE_CHECKING:
 
 
 class WinGet(PackageManager):
+    """Microsoft's official Windows package manager."""
+
     homepage_url = "https://github.com/microsoft/winget-cli"
 
     brewfile_entry_type = "winget"

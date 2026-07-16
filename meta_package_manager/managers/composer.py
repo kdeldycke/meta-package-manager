@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 import re
 
 from extra_platforms import ALL_PLATFORMS
@@ -32,6 +31,12 @@ if TYPE_CHECKING:
 
 
 class Composer(PackageManager):
+    """Composer manages the global PHP packages of a user.
+
+    Operations run in global mode, targeting the user-wide ``~/.composer``
+    project rather than a working tree.
+    """
+
     name = "PHP Composer"
 
     homepage_url = "https://getcomposer.org"
@@ -90,8 +95,8 @@ class Composer(PackageManager):
             (...)
         """
         output = self.run_cli("show", "--format=json", must_succeed=True)
-        if output:
-            package_list = json.loads(output)
+        package_list = self.parse_json(output)
+        if package_list:
             for package in package_list["installed"]:
                 package_id = package["name"]
                 yield self.package(id=package_id, installed_version=package["version"])
@@ -124,8 +129,8 @@ class Composer(PackageManager):
         """
         output = self.run_cli("outdated", "--format=json", must_succeed=True)
 
-        if output:
-            package_list = json.loads(output)
+        package_list = self.parse_json(output)
+        if package_list:
             for package in package_list["installed"]:
                 package_id = package["name"]
                 yield self.package(

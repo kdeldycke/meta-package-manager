@@ -244,15 +244,83 @@ def test_parse_definition_versionless_catalog_manager():
             {
                 "platforms": ["linux"],
                 "operations": {
-                    "installed": {
-                        "args": ["list"],
-                        "regex": r"(?P<package_id>\S+) (?P<installed_version>\S+)",
-                        "sudo": True,
+                    "search": {
+                        "args": ["search", "{query}", "{exact_args}"],
+                        "regex": r"^(?P<package_id>\S+)$",
                     },
                 },
             },
-            "unknown key",
-            id="sudo-on-query-operation",
+            "declares no 'exact_args' list",
+            id="search-marker-without-refinement-list",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "search": {
+                        "args": ["search", "{query}"],
+                        "exact_args": ["--exact"],
+                        "regex": r"^(?P<package_id>\S+)$",
+                    },
+                },
+            },
+            "no {exact_args} marker",
+            id="search-refinement-list-without-marker",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "search": {
+                        "args": ["search", "{query}", "--flag={exact_args}"],
+                        "exact_args": ["--exact"],
+                        "regex": r"^(?P<package_id>\S+)$",
+                    },
+                },
+            },
+            "must be a standalone argument",
+            id="search-embedded-refinement-marker",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "search": {
+                        "args": ["search", "{query}", "{exact_args}"],
+                        "exact_args": ["--match={query}"],
+                        "regex": r"^(?P<package_id>\S+)$",
+                    },
+                },
+            },
+            "may not carry a placeholder",
+            id="search-refinement-with-placeholder",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "installed": {
+                        "args": ["list", "--json"],
+                        "format": "json",
+                        "fields": {"package_id": "name", "installed_version": "v[x]"},
+                    },
+                },
+            },
+            "invalid selector",
+            id="json-bad-field-selector",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "installed": {
+                        "args": ["list", "{exact_args}"],
+                        "regex": r"^(?P<package_id>\S+)$",
+                    },
+                },
+            },
+            "unknown placeholder",
+            id="refinement-marker-outside-search",
         ),
         pytest.param(
             {
@@ -605,6 +673,141 @@ def test_factory_operation_sudo(monkeypatch):
     manager.upgrade_all_cli()
     upgrade_all_sudo = captured["sudo"]
     assert upgrade_all_sudo is True
+
+
+def test_factory_query_sudo(monkeypatch):
+    """A query marked ``sudo = true`` runs privileged, for tools that gate even
+    their read-only listings behind root (deb-get's upgradable check)."""
+    manager = build_manager_class(
+        _definition(
+            outdated=OperationSpec(
+                args=("upgradable",),
+                sudo=True,
+                parse_mode="regex",
+                regex=r"^(?P<package_id>\S+) (?P<latest_version>\S+)$",
+            ),
+        ),
+    )()
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: captured.update(kwargs) or "",
+    )
+    list(manager.outdated)
+    assert captured["sudo"] is True
+
+
+@pytest.mark.parametrize(
+    ("extended", "exact", "expected_args"),
+    (
+        pytest.param(
+            False,
+            False,
+            ("search", "--by-id-only", "--line", "vim"),
+            id="id-name-only-fuzzy",
+        ),
+        pytest.param(
+            True,
+            False,
+            ("search", "--description", "--line", "vim"),
+            id="extended-fuzzy",
+        ),
+        pytest.param(
+            False,
+            True,
+            ("search", "--by-id-only", "--exact", "--line", "vim"),
+            id="id-name-only-exact",
+        ),
+        pytest.param(
+            True,
+            True,
+            ("search", "--description", "--exact", "--line", "vim"),
+            id="extended-exact",
+        ),
+    ),
+)
+def test_factory_search_refinements(monkeypatch, extended, exact, expected_args):
+    """Refinement markers expand in place to their argument lists when active,
+    and to nothing otherwise; declaring them advertises native support."""
+    manager = build_manager_class(
+        _definition(
+            search=OperationSpec(
+                args=(
+                    "search",
+                    "{id_name_only_args}",
+                    "{extended_args}",
+                    "{exact_args}",
+                    "--line",
+                    "{query}",
+                ),
+                exact_args=("--exact",),
+                extended_args=("--description",),
+                id_name_only_args=("--by-id-only",),
+                parse_mode="regex",
+                regex=r"^(?P<package_id>\S+)$",
+            ),
+        ),
+    )()
+    captured: dict[str, tuple[str, ...]] = {}
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: captured.update(args=args) or "",
+    )
+    list(manager.search("vim", extended=extended, exact=exact))
+    assert captured["args"] == expected_args
+    search_func = type(manager).search
+    assert search_func.exact_support is True
+    assert search_func.extended_support is True
+
+
+def test_factory_search_without_refinements_relies_on_refiltering():
+    """A plain search template advertises no native refinement support."""
+    manager = build_manager_class(
+        _definition(
+            search=OperationSpec(
+                args=("search", "{query}"),
+                parse_mode="regex",
+                regex=r"^(?P<package_id>\S+)$",
+            ),
+        ),
+    )()
+    search_func = type(manager).search
+    assert search_func.exact_support is False
+    assert search_func.extended_support is False
+
+
+def test_factory_json_array_field(monkeypatch):
+    """A ``key[N]`` selector picks one element out of a list-valued JSON field,
+    and resolves to nothing on non-list values or out-of-range indexes."""
+    manager = build_manager_class(
+        _definition(
+            installed=OperationSpec(
+                args=("list", "--json"),
+                parse_mode="json",
+                fields={
+                    "package_id": "name",
+                    "installed_version": "installed_versions[0]",
+                },
+            ),
+        ),
+    )()
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *a, **k: json.dumps(
+            [
+                {"name": "jq", "installed_versions": ["1.7.1", "1.6"]},
+                {"name": "empty", "installed_versions": []},
+                {"name": "scalar", "installed_versions": "oops"},
+            ]
+        ),
+    )
+    packages = {p.id: p.installed_version for p in manager.installed}
+    assert str(packages["jq"]) == "1.7.1"
+    assert packages["empty"] is None
+    assert packages["scalar"] is None
 
 
 # Trust gate.

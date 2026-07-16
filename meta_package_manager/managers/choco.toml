@@ -1,0 +1,100 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# Chocolatey (https://chocolatey.org) is the community package manager for Windows.
+# See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# Parsing notes:
+#   - Every operation passes --limit-output, whose pipe-delimited rows are the
+#     machine-readable format; --no-progress, --no-color and --retry-count ride
+#     along as post_args on every invocation.
+#   - `choco search` reaches into all package metadata by default: the
+#     {id_name_only_args} template narrows it to package IDs for mpm's default
+#     --id-name-only mode, and {exact_args} maps --exact.
+
+[mpm.managers.choco]
+name = "Chocolatey"
+homepage_url = "https://chocolatey.org"
+platforms = ["windows"]
+cli_names = ["choco"]
+# 2.0.0 is the first version not requiring the --local-only option on `choco list`,
+# which has been entirely removed. Source:
+# https://docs.chocolatey.org/en-us/guides/upgrading-to-chocolatey-v2-v6#the-list-command-now-lists-local-packages-only-and-the-local-only-and-lo-options-have-been-removed
+requirement = ">=2.0.0"
+post_args = ["--no-progress", "--no-color", "--retry-count=3"]
+
+# `choco list --limit-output` prints one "id|version" row per installed package.
+[mpm.managers.choco.operations.installed]
+args = ["list", "--limit-output"]
+regex = '^(?P<package_id>.+)\|(?P<installed_version>.+)$'
+
+# `choco outdated --limit-output` prints "id|installed|latest|pinned" rows.
+[mpm.managers.choco.operations.outdated]
+args = ["outdated", "--limit-output"]
+regex = '^(?P<package_id>.+)\|(?P<installed_version>.+)\|(?P<latest_version>.+)\|.+$'
+
+[mpm.managers.choco.operations.search]
+args = ["search", "{query}", "--limit-output", "{id_name_only_args}", "{exact_args}"]
+id_name_only_args = ["--by-id-only"]
+exact_args = ["--exact"]
+regex = '^(?P<package_id>.+)\|(?P<latest_version>.+)$'
+
+[mpm.managers.choco.operations.install]
+args = ["install", "{package_id}", "--yes", "--limit-output"]
+
+[mpm.managers.choco.operations.remove]
+args = ["uninstall", "{package_id}", "--yes", "--limit-output"]
+
+[mpm.managers.choco.operations.upgrade_one]
+args = ["upgrade", "{package_id}", "--yes", "--limit-output"]
+
+[mpm.managers.choco.operations.upgrade_all]
+args = ["upgrade", "all", "--yes", "--limit-output"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "2.2.2"
+expected = "2.2.2"
+
+[[samples.installed]]
+output = """
+adobereader|11.0.10
+ccleaner|5.03.5128
+chocolatey|0.9.9.2
+ConEmu|14.9.23.0
+gimp|2.8.14.1
+git|1.9.5.20150114"""
+packages = [
+  { id = "adobereader", version = "11.0.10" },
+  { id = "ccleaner", version = "5.03.5128" },
+  { id = "chocolatey", version = "0.9.9.2" },
+  { id = "ConEmu", version = "14.9.23.0" },
+  { id = "gimp", version = "2.8.14.1" },
+  { id = "git", version = "1.9.5.20150114" },
+]
+
+[[samples.outdated]]
+output = """
+7zip.commandline|16.02.0.20170209|16.02.0.20170209|false
+atom|1.23.3|1.24.0|false
+bulkrenameutility|3.0.0.1|3.0.0.1|false"""
+packages = [
+  { id = "7zip.commandline", version = "16.02.0.20170209" },
+  { id = "atom", version = "1.24.0" },
+  { id = "bulkrenameutility", version = "3.0.0.1" },
+]
+
+[[samples.search]]
+output = """
+virtualbox|6.1.0
+VirtualBox.ExtensionPack|5.1.10.20161223
+enigmavirtualbox|9.20
+virtualbox-guest-additions-guest.install|6.1.0"""
+packages = [
+  { id = "virtualbox", version = "6.1.0" },
+  { id = "VirtualBox.ExtensionPack", version = "5.1.10.20161223" },
+  { id = "enigmavirtualbox", version = "9.20" },
+  { id = "virtualbox-guest-additions-guest.install", version = "6.1.0" },
+]

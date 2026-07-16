@@ -1224,11 +1224,7 @@ any-glob-to-any-file = [ "meta_package_manager/managers/cave.*", "tests/*cave*" 
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: choco"
-any-glob-to-any-file = [
-  "meta_package_manager/managers/chocolatey.*",
-  "tests/*choco*",
-  "tests/*chocolatey*",
-]
+any-glob-to-any-file = [ "meta_package_manager/managers/choco.*", "tests/*choco*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: chromebrew"

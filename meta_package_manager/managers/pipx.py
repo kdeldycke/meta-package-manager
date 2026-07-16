@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 from operator import attrgetter
 
 from extra_platforms import ALL_PLATFORMS
@@ -32,6 +31,8 @@ if TYPE_CHECKING:
 
 
 class Pipx(PackageManager):
+    """pipx installs Python CLI applications, each in its own isolated venv."""
+
     name = "Python pipx"
 
     homepage_url = "https://pipx.pypa.io"
@@ -106,8 +107,9 @@ class Pipx(PackageManager):
         """
         output = self.run_cli("list", "--json", must_succeed=True)
 
-        if output:
-            for package_id, package_info in json.loads(output)["venvs"].items():
+        data = self.parse_json(output)
+        if data:
+            for package_id, package_info in data["venvs"].items():
                 yield self.package(
                     id=package_id,
                     installed_version=package_info["metadata"]["main_package"][
@@ -157,8 +159,9 @@ class Pipx(PackageManager):
                 must_succeed=True,
             )
 
-            if output:
-                for sub_package in json.loads(output):
+            data = self.parse_json(output)
+            if data:
+                for sub_package in data:
                     # Only report the main package as outdated, silencing its
                     # dependencies.
                     sub_package_id = sub_package["name"]

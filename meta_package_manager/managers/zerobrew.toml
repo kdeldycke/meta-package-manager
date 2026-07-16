@@ -1,0 +1,81 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# ZeroBrew (https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible
+# package manager written in Rust, reusing Homebrew's formula ecosystem but storing
+# packages in a content-addressable store at /opt/zerobrew. See docs/overrides.md
+# ("Define a new manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# ZeroBrew has no `search` command: use `brew search` or browse the Homebrew formula
+# repository instead.
+
+[mpm.managers.zerobrew]
+name = "zerobrew"
+homepage_url = "https://github.com/lucasgelfond/zerobrew"
+platforms = ["linux_like", "macos"]
+cli_names = ["zb"]
+# Default macOS install location.
+cli_search_path = ["/opt/zerobrew/bin"]
+# `zb upgrade` was added in 0.3.0. The `outdated` command and its --json output were
+# already available in 0.2.0.
+requirement = ">=0.3.0"
+# Suppress terminal styling from the `console` Rust crate.
+extra_env = { NO_COLOR = "1" }
+# `zb --version` prints "zb 0.3.0".
+version_regexes = ['zb\s+(?P<version>\S+)']
+
+# `zb list` prints one "name version" line per package.
+[mpm.managers.zerobrew.operations.installed]
+args = ["list"]
+regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)$'
+
+# Each entry reports its installed versions as an array: the [0] selector picks the
+# first one, and a package with an empty array is yielded version-less.
+[mpm.managers.zerobrew.operations.outdated]
+args = ["outdated", "--json"]
+format = "json"
+fields = { package_id = "name", installed_version = "installed_versions[0]", latest_version = "current_version" }
+
+[mpm.managers.zerobrew.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.zerobrew.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+[mpm.managers.zerobrew.operations.upgrade_one]
+args = ["upgrade", "{package_id}"]
+
+# Called with no argument, `zb upgrade` upgrades every package `zb outdated` lists.
+[mpm.managers.zerobrew.operations.upgrade_all]
+args = ["upgrade"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code or documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "zb 0.3.0"
+expected = "0.3.0"
+
+[[samples.installed]]
+output = """
+jq 1.7.1
+wget 1.24.5"""
+packages = [
+  { id = "jq", version = "1.7.1" },
+  { id = "wget", version = "1.24.5" },
+]
+
+[[samples.outdated]]
+output = """
+[
+  {
+    "name": "jq",
+    "installed_versions": [
+      "1.7.1"
+    ],
+    "current_version": "1.7.2"
+  }
+]"""
+packages = [
+  { id = "jq", version = "1.7.2" },
+]

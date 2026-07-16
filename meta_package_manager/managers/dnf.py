@@ -224,6 +224,8 @@ class DNF(PackageManager):
 
 
 class DNF5(DNF):
+    """The dnf5 rewrite of DNF, reference package manager as of Fedora 41."""
+
     name = "Fedora DNF5"
 
     homepage_url = "https://github.com/rpm-software-management/dnf5"

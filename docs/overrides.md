@@ -110,7 +110,7 @@ Five definition-only fields have no override counterpart:
 
 Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every operation takes an `args` list appended after the resolved binary. An operation may also name its own `cli` (a sibling binary resolved on the same search path), so one definition can span a multi-binary suite: `urpmq` searching while `urpmi` installs and `urpme` removes. Without `cli`, the operation runs the manager's main binary.
 
-**Command operations** run a CLI and need nothing else. A command operation may add `sudo = true` to mark itself privileged, mirroring the escalation flag built-in managers set in code: whether it actually escalates follows the usual policy (the definition's `default_sudo`, then the global `--sudo`/`--no-sudo` flag). Query operations are read-only and never escalate.
+**Command operations** run a CLI and need nothing else. Any operation may add `sudo = true` to mark itself privileged, mirroring the escalation flag built-in managers set in code: whether it actually escalates follows the usual policy (the definition's `default_sudo`, then the global `--sudo`/`--no-sudo` flag). Command operations are the usual bearers; a query may also carry it, for the rare tool that gates even its read-only listings behind root (`deb-get`'s upgradable check).
 
 | Operation     | Required placeholder | Maps to                                              |
 | :------------ | :------------------- | :--------------------------------------------------- |
@@ -127,10 +127,14 @@ Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every 
 - `installed_version` (optional: some tools track no per-package version, like `swupd`'s Clear Linux bundles),
 - `latest_version` (required by `outdated`).
 
+A JSON field maps to a key name, optionally suffixed with a `[N]` list index to pick one element out of a list-valued key: `installed_version = "installed_versions[0]"` reads the first entry of each package's version array.
+
+When the tool has native switches for `mpm search`'s refinements, `search` can declare them as argument templates: `exact_args` (spliced in when `--exact` is requested), `extended_args` (when `--extended` reaches into descriptions) and `id_name_only_args` (for tools whose *unrestricted* search is the default and take a flag to narrow it to IDs and names, like Chocolatey's `--by-id-only`). Each declared list must pair with a `{exact_args}`-style marker in `args`, standing as its own argument, that expands in place when the refinement is active and to nothing otherwise. `mpm` still refilters the results client-side either way, exactly as for built-in managers.
+
 Any `{token}` in an operation's `args` outside that operation's recognized placeholders is rejected at load time, so a typo like `{qeury}` surfaces immediately instead of reaching the tool as a literal argument.
 
 ```{note}
-Version pinning is not expressible yet: `install` and `upgrade` on a config-defined manager always let the manager choose the version, and a `{version}` placeholder is not substituted. Native exact/extended search filtering is likewise not declarable, so `mpm` refilters `search` results itself.
+Version pinning is not expressible yet: `install` and `upgrade` on a config-defined manager always let the manager choose the version, and a `{version}` placeholder is not substituted.
 ```
 
 ### Example

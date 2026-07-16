@@ -23,7 +23,6 @@ Install and upgrade operations are delegated to Scoop.
 
 from __future__ import annotations
 
-import json
 
 from extra_platforms import WINDOWS
 
@@ -88,8 +87,9 @@ class SFSU(PackageManager):
             ]
         """
         output = self.run_cli("list", "--json")
-        if output:
-            for pkg in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for pkg in data:
                 yield self.package(
                     id=pkg["name"],
                     installed_version=pkg["version"],
@@ -119,8 +119,8 @@ class SFSU(PackageManager):
             }
         """
         output = self.run_cli("status", "--only", "apps", "--json")
-        if output:
-            data = json.loads(output)
+        data = self.parse_json(output)
+        if data:
             for pkg in data.get("packages", []):
                 yield self.package(
                     id=pkg["name"],
@@ -155,8 +155,8 @@ class SFSU(PackageManager):
             }
         """
         output = self.run_cli("search", "--json", query)
-        if output:
-            data = json.loads(output)
+        data = self.parse_json(output)
+        if data:
             # Results are grouped by bucket name.
             for packages in data.values():
                 for pkg in packages:

@@ -288,28 +288,108 @@ def test_package_matches(pkg_id, pkg_name, query, extended, exact, expected):
     assert package.matches(query, extended=extended, exact=exact) is expected
 
 
-def collect_props_ref():
-    """Build the canonical reference from the base class.
+def _collect_class_members(klass: type, name: str) -> tuple[list[str], list[str]]:
+    """Collect a base class's ``(attributes, methods)`` in declaration order.
 
-    We need to parse the AST so we can collect both attributes and naked type
-    annotations.
+    Parses the AST so naked type annotations (``AnnAssign``) are collected
+    alongside plain assignments and function definitions.
     """
-    tree = ast.parse(Path(inspect.getfile(PackageManager)).read_bytes())
-
-    manager_class = None
-    for n in tree.body:
-        if isinstance(n, ast.ClassDef) and n.name == "PackageManager":
-            manager_class = n
-            break
-
-    assert manager_class is not None
-    for node in manager_class.body:
+    tree = ast.parse(Path(inspect.getfile(klass)).read_bytes())
+    class_node = next(
+        n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == name
+    )
+    attributes: list[str] = []
+    methods: list[str] = []
+    for node in class_node.body:
         if isinstance(node, ast.AnnAssign):
-            yield node.target.id  # type: ignore[union-attr]
+            attributes.append(node.target.id)  # type: ignore[union-attr]
         if isinstance(node, ast.Assign):
-            yield from [t.id for t in node.targets]  # type: ignore[attr-defined]
+            attributes.extend(t.id for t in node.targets)  # type: ignore[attr-defined]
         if isinstance(node, ast.FunctionDef):
-            yield node.name
+            methods.append(node.name)
+    return attributes, methods
+
+
+CANONICAL_ATTRS = (
+    # Identity.
+    "scope",
+    "deprecated",
+    "deprecation_url",
+    "id",
+    "name",
+    "homepage_url",
+    # Export mappings.
+    "brewfile_entry_type",
+    "brewfile_skip_warning",
+    "platforms",
+    "virtual",
+    # Escalation policy.
+    "sudo",
+    "default_sudo",
+    "internal_sudo",
+    # Version gate and native cooldown marker.
+    "requirement",
+    "cooldown_env_var",
+    # CLI plumbing.
+    "cli_names",
+    "cli_search_path",
+    "extra_env",
+    "pre_cmds",
+    "pre_args",
+    "post_args",
+    # Version probe.
+    "version_cli",
+    "version_cli_options",
+    "version_regexes",
+    # Behavior toggles and platform specifics.
+    "ignore_auto_updates",
+    "stop_on_error",
+    "dry_run",
+    "timeout",
+    "_active_operation",
+    "progress",
+    "cooldown",
+    "require_cooldown_support",
+    "windows_creation_flags",
+    "windows_processes_to_cleanup",
+    "cli_errors",
+    "run_cache",
+    # Parsing constants.
+    "_NAME_VERSION_REGEXP",
+)
+"""Canonical declaration order of the attributes a manager class may override.
+
+The documented convention every manager module follows: identity first, then the
+escalation policy, the version requirement, the CLI plumbing, the version probe,
+and the rarely-overridden toggles. Manager-specific constants (the ``_*_REGEXP``
+parsers) are not governed and conventionally sit between the attributes and the
+operations. Consumed by ``test_content_order``, which checks each manager's
+relative declaration order against this sequence.
+"""
+
+
+def collect_props_ref():
+    """Build the canonical member-order reference for manager classes.
+
+    Attributes follow :data:`CANONICAL_ATTRS`; methods follow the base classes'
+    own declaration order, ``CLIExecutor``'s (binary discovery, version probe,
+    execution engine) before ``PackageManager``'s (helpers, availability, then
+    the operations). The curated attribute list is cross-checked against the
+    base classes so a new base attribute cannot silently escape governance.
+    """
+    from meta_package_manager.execution import CLIExecutor
+
+    pm_attrs, pm_methods = _collect_class_members(PackageManager, "PackageManager")
+    exec_attrs, exec_methods = _collect_class_members(CLIExecutor, "CLIExecutor")
+
+    declared = set(pm_attrs) | set(exec_attrs)
+    assert set(CANONICAL_ATTRS) == declared, (
+        "CANONICAL_ATTRS drifted from the base classes: "
+        f"missing {declared - set(CANONICAL_ATTRS)}, "
+        f"stale {set(CANONICAL_ATTRS) - declared}"
+    )
+
+    return (*CANONICAL_ATTRS, *exec_methods, *pm_methods)
 
 
 props_ref = tuple(collect_props_ref())
@@ -335,16 +415,22 @@ def test_operation_order():
 # Check the code of each file registered in the pool.
 @manager_classes_params
 def test_content_order(manager_class):
-    """Lint each package manager definition file to check its code structure is the same
-    as the canonical PackageManager base class."""
-    # Collect in order the IDs of all properties (ast.Assign) and functions in
-    # the class.
+    """Lint each manager class to check its members follow the canonical order.
+
+    Attributes must follow :data:`CANONICAL_ATTRS` and methods the base classes'
+    own declaration order (see :func:`collect_props_ref`); ungoverned names
+    (manager-specific parsing constants and helpers) may sit anywhere.
+    """
+    # Collect in order the IDs of all attributes (plain and annotated
+    # assignments alike) and functions of the class.
     collected_props = []
 
     klass_tree = ast.parse(inspect.getsource(manager_class))
     class_node = klass_tree.body[0]
     assert isinstance(class_node, ast.ClassDef)
     for node in class_node.body:
+        if isinstance(node, ast.AnnAssign):
+            collected_props.append(node.target.id)  # type: ignore[union-attr]
         if isinstance(node, ast.Assign):
             collected_props.extend([t.id for t in node.targets])  # type: ignore[attr-defined]
         if isinstance(node, ast.FunctionDef):

@@ -321,15 +321,6 @@ class Yay(Pacman):
 
     requirement = ">=11.0.0"
 
-    version_regexes = (r"yay\s+v(?P<version>\S+)",)
-    r"""Search version right after the ``yay`` string.
-
-    .. code-block:: shell-session
-
-        $ yay --version
-        yay v11.1.2 - libalpm v13.0.1
-    """
-
     cooldown_env_var = "XDG_CONFIG_HOME"
     """yay reads no release-age option of its own, so mpm repurposes ``XDG_CONFIG_HOME``
     to point yay at the throwaway config overlay built by :py:meth:`cooldown_env`.
@@ -338,6 +329,15 @@ class Yay(Pacman):
     cutoff itself rides alongside it in ``MPM_COOLDOWN_EPOCH``. Set so the structural
     ``supports_cooldown`` check (and the ``--cooldown`` help text) still recognize yay
     as cooldown-capable.
+    """
+
+    version_regexes = (r"yay\s+v(?P<version>\S+)",)
+    r"""Search version right after the ``yay`` string.
+
+    .. code-block:: shell-session
+
+        $ yay --version
+        yay v11.1.2 - libalpm v13.0.1
     """
 
     cooldown_requirement = ">=13.0.0"

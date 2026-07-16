@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
 
@@ -102,8 +101,9 @@ class Conda(PackageManager):
         """
         output = self.run_cli("list", "--json", must_succeed=True)
 
-        if output:
-            for package in json.loads(output):
+        data = self.parse_json(output)
+        if data:
+            for package in data:
                 yield self.package(
                     id=package["name"],
                     installed_version=package["version"],
@@ -172,10 +172,8 @@ class Conda(PackageManager):
             "update", "--all", "--dry-run", "--json", must_succeed=True
         )
 
-        if not output:
-            return
-
-        actions = json.loads(output).get("actions")
+        data = self.parse_json(output)
+        actions = data.get("actions") if data else None
         if not actions:
             return
 
@@ -233,12 +231,13 @@ class Conda(PackageManager):
         """
         output = self.run_cli("search", f"*{query}*", "--json")
 
-        if output:
+        data = self.parse_json(output)
+        if data:
             # A query matching nothing is reported as a non-zero exit carrying an
             # error payload ({"error": ..., "exception_name":
             # "PackagesNotFoundError"}) rather than an empty object, so skip any
             # value that is not a build list.
-            for package_id, builds in json.loads(output).items():
+            for package_id, builds in data.items():
                 if isinstance(builds, list) and builds:
                     yield self.package(
                         id=package_id,

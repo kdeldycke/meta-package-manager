@@ -518,8 +518,8 @@ class Homebrew(PackageManager):
         # https://github.com/kdeldycke/meta-package-manager/issues/1703
         output = self.run_cli("outdated", options, must_succeed=True)
 
-        if output:
-            package_list = json.loads(output)
+        package_list = self.parse_json(output)
+        if package_list:
             for pkg_info in package_list["formulae"] + package_list["casks"]:
                 # Interpret installed versions.
                 versions = pkg_info["installed_versions"]
@@ -847,18 +847,22 @@ class Homebrew(PackageManager):
 
 
 class Brew(Homebrew):
+    """The formula half of Homebrew, installing CLI tools built from recipes."""
+
     name = "Homebrew Formulae"
 
     homepage_url = "https://brew.sh"
+
+    brewfile_entry_type = "brew"
 
     cli_names = ("brew",)
 
     post_args = ("--formula",)
 
-    brewfile_entry_type = "brew"
-
 
 class Cask(Homebrew):
+    """The cask half of Homebrew, installing pre-built macOS applications."""
+
     name = "Homebrew Cask"
 
     homepage_url = "https://github.com/Homebrew/homebrew-cask"

@@ -66,6 +66,22 @@ def test_trust_tap_qualified_package(manager_class, package_id, tap_id):
 
 
 @pytest.mark.parametrize("manager_class", (Brew, Cask))
+@pytest.mark.parametrize("ignore_auto_updates", (True, False))
+def test_upgrade_all_cli_greedy_is_cask_only(manager_class, ignore_auto_updates):
+    """--include-auto-updates adds --greedy to cask's upgrade-all command only.
+
+    ``brew upgrade`` rejects ``--greedy`` alongside ``--formula`` (mutually
+    exclusive options), so ``brew`` must never grow the flag.
+    """
+    manager = manager_class()
+    manager.ignore_auto_updates = ignore_auto_updates
+    cli = manager.upgrade_all_cli()
+    assert "upgrade" in cli
+    expect_greedy = not ignore_auto_updates and manager_class is Cask
+    assert ("--greedy" in cli) is expect_greedy
+
+
+@pytest.mark.parametrize("manager_class", (Brew, Cask))
 def test_install_routes_through_trust_tap(manager_class):
     """install() always calls trust_tap() so the gate is uniform across paths."""
     manager = manager_class()

@@ -694,7 +694,8 @@ class Homebrew(PackageManager):
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        ``brew`` and ``cask`` share the same command.
+        ``brew`` and ``cask`` share the same command, but ``cask`` overrides this
+        method to append ``--greedy`` when auto-updating packages are included.
 
         .. code-block:: shell-session
 
@@ -879,3 +880,34 @@ class Cask(Homebrew):
     cli_names = ("brew",)
 
     post_args = ("--cask",)
+
+    def upgrade_all_cli(self) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all outdated packages.
+
+        Adds ``--greedy`` to the shared ``brew upgrade`` command when auto-updating
+        packages are included, mirroring :py:meth:`Homebrew.outdated`. Without it,
+        ``brew upgrade`` skips casks flagged ``auto_updates true`` or
+        ``version :latest``, so ``mpm --include-auto-updates upgrade --all`` would
+        report them as outdated but never upgrade them.
+
+        .. note::
+
+            This override is cask-only by necessity: ``brew upgrade`` declares
+            ``--greedy`` and ``--formula`` mutually exclusive, while
+            ``brew outdated`` accepts the pair. The conflict is intentional:
+            ``--formula`` has conflicted with ``--greedy`` ever since the selector
+            switch `was added to brew upgrade in August 2020
+            <https://github.com/Homebrew/brew/pull/8229>`_, and a request to
+            tolerate ``--greedy`` as a no-op in formula-only contexts `was
+            declined as invalid usage
+            <https://github.com/Homebrew/brew/issues/16135>`_. This method can
+            therefore never fold back into the base class shared with ``brew``.
+
+            A cask explicitly passed to ``brew upgrade`` is always evaluated
+            greedily, so :py:meth:`Homebrew.upgrade_one_cli` needs no counterpart.
+        """
+        options = ["--quiet", "--yes"]
+        # Includes auto-update packages or not.
+        if not self.ignore_auto_updates:
+            options.append("--greedy")
+        return self.build_cli("upgrade", options)

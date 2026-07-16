@@ -969,16 +969,14 @@ def _iter_parsed(
 def _op_cli_path(manager: PackageManager, spec: OperationSpec) -> Path | None:
     """Resolve the operation's alternate binary, or ``None`` for the main CLI.
 
-    A declared-but-missing binary is an error: falling back to the main CLI would run
-    the operation's arguments against the wrong program.
+    Thin adapter over
+    :py:meth:`~meta_package_manager.execution.CLIExecutor.sibling_cli`, which
+    raises on a declared-but-missing binary: falling back to the main CLI would
+    run the operation's arguments against the wrong program.
     """
     if not spec.cli:
         return None
-    cli_path = manager.which(spec.cli)
-    if not cli_path:
-        msg = f"{spec.cli} not found"
-        raise FileNotFoundError(msg)
-    return cli_path
+    return manager.sibling_cli(spec.cli)
 
 
 def _make_query_property(

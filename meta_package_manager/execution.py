@@ -634,6 +634,31 @@ class CLIExecutor:
             return cli_path_found
         return None
 
+    def sibling_cli(self, name: str, *, same_dir: bool = False) -> Path:
+        """Resolve the path of a sibling binary of the manager's main CLI.
+
+        Some managers ship as a suite of binaries (``xbps-install``/``xbps-query``,
+        ``pkg_add``/``pkg_info``, emerge's ``qlist``): an operation then runs a
+        sibling instead of the main CLI. By default the sibling is searched like the
+        main CLI itself (:py:meth:`which`, honoring :py:attr:`cli_search_path`), and
+        a missing binary raises :py:exc:`FileNotFoundError` rather than silently
+        falling back to the wrong program.
+
+        ``same_dir=True`` instead takes the sibling from the directory of
+        :py:attr:`cli_path`, without an existence probe: suites installing all
+        their binaries side by side (XBPS, Nix) guarantee the neighbor, and
+        resolving it from the same directory can never mix two installations. A
+        genuinely missing file then surfaces at spawn time.
+        """
+        if same_dir:
+            assert self.cli_path is not None
+            return self.cli_path.parent / name
+        sibling_path = self.which(name)
+        if not sibling_path:
+            msg = f"{name} not found"
+            raise FileNotFoundError(msg)
+        return sibling_path
+
     @cached_property
     def cli_path(self) -> Path | None:
         """Fully qualified path to the canonical package manager binary.

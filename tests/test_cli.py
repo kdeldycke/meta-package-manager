@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import re
 import subprocess
@@ -24,10 +25,12 @@ from collections.abc import Collection, Iterable, Iterator
 from textwrap import dedent
 
 import pytest
+from boltons.iterutils import same
 from boltons.strutils import strip_ansi
 from click_extra.table import SERIALIZATION_FORMATS, TableFormat
 
 from meta_package_manager import __version__
+from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
@@ -399,6 +402,52 @@ class TestSelectorPrecedence(InspectCLIOutput):
             self.check_manager_selection(result, expected)
 
 
+def check_packages_payload(result, optional_keys: frozenset[str] = frozenset()) -> None:
+    """Validate the serialized ``{manager: {id, name, errors, packages}}`` payload.
+
+    The shared shape check of the package-reporting subcommands (``installed``,
+    ``outdated``, ``search``) in ``--table-format json`` mode: every manager entry
+    carries the standard keys (plus the subcommand's ``optional_keys``, like
+    ``outdated``'s ``upgrade_all_cli``), and every package serializes a subset of
+    the :class:`~meta_package_manager.package.Package` fields as strings.
+    """
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+
+    assert data
+    assert isinstance(data, dict)
+    assert set(data).issubset(pool.default_manager_ids)
+
+    for manager_id, info in data.items():
+        assert isinstance(manager_id, str)
+        assert isinstance(info, dict)
+
+        keys = {"errors", "id", "name", "packages"}
+        for key in optional_keys:
+            if key in info:
+                assert isinstance(info[key], str)
+                keys.add(key)
+        assert set(info) == keys
+
+        assert isinstance(info["errors"], list)
+        if info["errors"]:
+            assert same(map(type, info["errors"]), str)
+        assert isinstance(info["id"], str)
+        assert isinstance(info["name"], str)
+
+        assert info["id"] == manager_id
+
+        assert isinstance(info["packages"], list)
+        for pkg in info["packages"]:
+            assert isinstance(pkg, dict)
+
+            fields = {f.name for f in dataclasses.fields(Package)}
+            assert set(pkg).issubset(fields)
+
+            for f in pkg:
+                assert isinstance(pkg[f], str) or pkg[f] is None
+
+
 class CLISubCommandTests(InspectCLIOutput):
     """All these tests runs on each subcommand.
 
@@ -499,3 +548,27 @@ class CLITableTests:
 # The per-table resolution of --sort-by (field-to-column mapping, skipped
 # absent fields, original order when none is carried) is covered upstream by
 # click-extra's column_sort_key() test suite.
+
+
+class CLIQueryTests:
+    """Template for inventory subcommands taking an optional positional ``QUERY``.
+
+    Runs against the deterministic ``fake_pool`` package set. Subclasses keep
+    their own ``test_query_filter`` parametrize — the case data *is* the
+    per-command filtering semantics — and delegate each case's assertions to
+    :meth:`check_filtered_ids`.
+    """
+
+    @staticmethod
+    def check_filtered_ids(result, expected_ids: set[str]) -> None:
+        """Assert the serialized payload reports exactly ``expected_ids``."""
+        assert result.exit_code == 0
+        data = json.loads(result.stdout)
+        package_ids = {pkg["id"] for info in data.values() for pkg in info["packages"]}
+        assert package_ids == expected_ids
+
+    def test_query_highlight(self, invoke, subcmd, fake_pool):
+        """The matched substring is wrapped in the theme's green search style."""
+        result = invoke("--color", subcmd, "alpha")
+        assert result.exit_code == 0
+        assert "\x1b[32malpha\x1b[0m" in result.stdout

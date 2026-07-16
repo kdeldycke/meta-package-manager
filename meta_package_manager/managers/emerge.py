@@ -129,10 +129,7 @@ class Emerge(PackageManager):
             app-admin/system-config-printer-1.5.16-r1
             app-arch/p7zip-16.02-r8
         """
-        # Locate qlist.
-        qlist_path = self.which("qlist")
-        if not qlist_path:
-            raise FileNotFoundError("qlist")
+        qlist_path = self.sibling_cli("qlist")
 
         output = self.run_cli(
             "--installed",

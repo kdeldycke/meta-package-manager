@@ -17,19 +17,14 @@
 
 from __future__ import annotations
 
-import dataclasses
-import json
 
 import pytest
-from boltons.iterutils import same
 from extra_platforms.pytest import skip_github_ci, unless_macos
 
 from meta_package_manager.capabilities import Operations
-from meta_package_manager.package import Package
-from meta_package_manager.pool import pool
 from meta_package_manager.tables import SEARCH_COLUMNS
 
-from .test_cli import CLISubCommandTests, CLITableTests
+from .test_cli import CLISubCommandTests, CLITableTests, check_packages_payload
 
 
 @pytest.fixture
@@ -94,37 +89,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--table-format", "json", subcmd)
-        assert result.exit_code == 0
-        data = json.loads(result.stdout)
-
-        assert data
-        assert isinstance(data, dict)
-        assert set(data).issubset(pool.default_manager_ids)
-
-        for manager_id, info in data.items():
-            assert isinstance(manager_id, str)
-            assert isinstance(info, dict)
-
-            assert isinstance(info["id"], str)
-            assert isinstance(info["name"], str)
-
-            assert set(info) == {"errors", "id", "name", "packages"}
-
-            assert isinstance(info["errors"], list)
-            if info["errors"]:
-                assert same(map(type, info["errors"]), str)
-
-            assert info["id"] == manager_id
-
-            assert isinstance(info["packages"], list)
-            for pkg in info["packages"]:
-                assert isinstance(pkg, dict)
-
-                fields = {f.name for f in dataclasses.fields(Package)}
-                assert set(pkg).issubset(fields)
-
-                for f in pkg:
-                    assert isinstance(pkg[f], str) or pkg[f] is None
+        check_packages_payload(result)
 
     @unless_macos
     @skip_github_ci

@@ -585,9 +585,7 @@ class Ports(PackageManager):
             curl 8.7.1 ftp/curl Non-interactive tool to get files from FTP/HTTP servers
             python311 3.11.9 lang/python311 Interpreted object-oriented programming language
         """
-        pkg_path = self.which("pkg")
-        if not pkg_path:
-            raise FileNotFoundError("pkg")
+        pkg_path = self.sibling_cli("pkg")
 
         output = self.run_cli(
             "query",
@@ -623,9 +621,7 @@ class Ports(PackageManager):
             python311-3.11.9                   <   needs updating (port has 3.11.10)
             vim-9.1.0                          =   up-to-date with port
         """
-        pkg_path = self.which("pkg")
-        if not pkg_path:
-            raise FileNotFoundError("pkg")
+        pkg_path = self.sibling_cli("pkg")
 
         output = self.run_cli(
             "version",
@@ -732,9 +728,7 @@ class Ports(PackageManager):
 
             $ sudo git -C /usr/ports pull --ff-only
         """
-        git_path = self.which("git")
-        if not git_path:
-            raise FileNotFoundError("git")
+        git_path = self.sibling_cli("git")
         self.run_cli(
             "-C",
             PORTS_TREE.as_posix(),
@@ -775,9 +769,7 @@ class Ports(PackageManager):
         if "/" in package_id:
             return package_id
 
-        pkg_path = self.which("pkg")
-        if not pkg_path:
-            raise FileNotFoundError("pkg")
+        pkg_path = self.sibling_cli("pkg")
         output = self.run_cli(
             "search",
             "--exact",

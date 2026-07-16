@@ -195,10 +195,9 @@ class Nix(PackageManager):
 
             $ nix-channel --update
         """
-        assert self.cli_path is not None
         self.run_cli(
             "--update",
-            override_cli_path=self.cli_path.parent / "nix-channel",
+            override_cli_path=self.sibling_cli("nix-channel", same_dir=True),
         )
 
     def cleanup(self) -> None:
@@ -208,8 +207,7 @@ class Nix(PackageManager):
 
             $ nix-collect-garbage --delete-old
         """
-        assert self.cli_path is not None
         self.run_cli(
             "--delete-old",
-            override_cli_path=self.cli_path.parent / "nix-collect-garbage",
+            override_cli_path=self.sibling_cli("nix-collect-garbage", same_dir=True),
         )

@@ -17,17 +17,17 @@
 
 from __future__ import annotations
 
-import dataclasses
-import json
 
 import pytest
-from boltons.iterutils import same
 
-from meta_package_manager.package import Package
-from meta_package_manager.pool import pool
 from meta_package_manager.tables import INSTALLED_COLUMNS
 
-from .test_cli import CLISubCommandTests, CLITableTests
+from .test_cli import (
+    CLIQueryTests,
+    CLISubCommandTests,
+    CLITableTests,
+    check_packages_payload,
+)
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def subcmd():
     return "installed"
 
 
-class TestInstalled(CLISubCommandTests, CLITableTests):
+class TestInstalled(CLISubCommandTests, CLITableTests, CLIQueryTests):
     columns_registry = INSTALLED_COLUMNS
 
     @staticmethod
@@ -51,34 +51,7 @@ class TestInstalled(CLISubCommandTests, CLITableTests):
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--table-format", "json", subcmd)
-        assert result.exit_code == 0
-        data = json.loads(result.stdout)
-
-        assert set(data).issubset(pool.default_manager_ids)
-
-        for manager_id, info in data.items():
-            assert isinstance(manager_id, str)
-            assert isinstance(info, dict)
-
-            assert set(info) == {"errors", "id", "name", "packages"}
-
-            assert isinstance(info["errors"], list)
-            if info["errors"]:
-                assert same(map(type, info["errors"]), str)
-            assert isinstance(info["id"], str)
-            assert isinstance(info["name"], str)
-            assert isinstance(info["packages"], list)
-
-            assert info["id"] == manager_id
-
-            for pkg in info["packages"]:
-                assert isinstance(pkg, dict)
-
-                fields = {f.name for f in dataclasses.fields(Package)}
-                assert set(pkg).issubset(fields)
-
-                for f in pkg:
-                    assert isinstance(pkg[f], str) or pkg[f] is None
+        check_packages_payload(result)
 
     @pytest.mark.parametrize(
         ("args", "expected_ids"),
@@ -97,13 +70,4 @@ class TestInstalled(CLISubCommandTests, CLITableTests):
     )
     def test_query_filter(self, invoke, fake_pool, args, expected_ids):
         result = invoke("--table-format", "json", "installed", *args)
-        assert result.exit_code == 0
-        data = json.loads(result.stdout)
-        package_ids = {pkg["id"] for info in data.values() for pkg in info["packages"]}
-        assert package_ids == expected_ids
-
-    def test_query_highlight(self, invoke, fake_pool):
-        """The matched substring is wrapped in the theme's green search style."""
-        result = invoke("--color", "installed", "alpha")
-        assert result.exit_code == 0
-        assert "\x1b[32malpha\x1b[0m" in result.stdout
+        self.check_filtered_ids(result, expected_ids)

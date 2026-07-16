@@ -110,10 +110,9 @@ class XBPS(PackageManager):
             ii cmark-gfm-0.29.0.gfm.13_1     CommonMark parsing and rendering library
             ii curl-8.5.0_1                  Command line tool for transferring data
         """
-        assert self.cli_path is not None
         output = self.run_cli(
             "--list-pkgs",
-            override_cli_path=self.cli_path.parent / "xbps-query",
+            override_cli_path=self.sibling_cli("xbps-query", same_dir=True),
         )
 
         for match in self._INSTALLED_REGEXP.finditer(output):
@@ -169,12 +168,11 @@ class XBPS(PackageManager):
             [-] firefox-120.0_1            Standalone web browser from mozilla.org
             [*] firefox-esr-115.5.0_1      Extended support release of Firefox
         """
-        assert self.cli_path is not None
         output = self.run_cli(
             "--repository",
             "--search",
             query,
-            override_cli_path=self.cli_path.parent / "xbps-query",
+            override_cli_path=self.sibling_cli("xbps-query", same_dir=True),
         )
 
         for match in self._SEARCH_REGEXP.finditer(output):
@@ -226,12 +224,11 @@ class XBPS(PackageManager):
 
             $ sudo xbps-remove --recursive --yes firefox
         """
-        assert self.cli_path is not None
         return self.run_cli(
             "--recursive",
             "--yes",
             package_id,
-            override_cli_path=self.cli_path.parent / "xbps-remove",
+            override_cli_path=self.sibling_cli("xbps-remove", same_dir=True),
             sudo=True,
         )
 
@@ -251,11 +248,10 @@ class XBPS(PackageManager):
 
             $ sudo xbps-remove --remove-orphans --clean-cache --yes
         """
-        assert self.cli_path is not None
         self.run_cli(
             "--remove-orphans",
             "--clean-cache",
             "--yes",
-            override_cli_path=self.cli_path.parent / "xbps-remove",
+            override_cli_path=self.sibling_cli("xbps-remove", same_dir=True),
             sudo=True,
         )

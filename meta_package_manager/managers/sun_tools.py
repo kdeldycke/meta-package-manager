@@ -138,10 +138,7 @@ class Sun_Tools(PackageManager):
 
             $ sudo pkgrm -n SUNWzlib
         """
-        pkgrm_path = self.which("pkgrm")
-        if not pkgrm_path:
-            msg = "pkgrm not found"
-            raise FileNotFoundError(msg)
+        pkgrm_path = self.sibling_cli("pkgrm")
         return self.run_cli(
             "-n",
             package_id,

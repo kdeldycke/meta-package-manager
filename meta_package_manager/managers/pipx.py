@@ -22,6 +22,7 @@ from extra_platforms import ALL_PLATFORMS
 
 from ..capabilities import version_not_implemented
 from ..manager import PackageManager
+from ..version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -62,6 +63,15 @@ class Pipx(PackageManager):
         pip releases silently ignore the env var.
 
     See https://github.com/pypa/pipx/issues/1811.
+    """
+
+    outdated_requirement = ">=1.16.0"
+    """Minimum pipx version providing the native outdated query.
+
+    `1.16.0 <https://github.com/pypa/pipx/releases/tag/1.16.0>`_ introduced
+    ``pipx list --outdated`` (see https://github.com/pypa/pipx/issues/149). Kept
+    apart from :py:attr:`requirement` (``>=1.0.0``) so an older pipx stays fully
+    usable, :py:attr:`outdated` falling back to one pip probe per venv.
     """
 
     @property
@@ -121,13 +131,41 @@ class Pipx(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. todo::
+        pipx ``1.16.0`` introduced a native outdated query, which checks all
+        venvs in a single call, each against its own backend (pip or uv).
+        Injected packages are excluded by default, so only each venv's main
+        package is reported. Pinned packages are kept: a newer release exists,
+        even if ``pipx upgrade`` skips them.
 
-            Mimics ``Pip.outdated()`` operation. There probably is a way to factorize
-            it.
+        .. code-block:: shell-session
 
-        Only the venv's main package is reported; its dependencies also show up
-        in ``pip list --outdated`` but are silenced:
+            $ pipx list --outdated --output=json | jq
+            {
+              "command": ["list"],
+              "data": {
+                "packages_checked": 1,
+                "packages": [
+                  {
+                    "environment": "pycowsay",
+                    "package": "pycowsay",
+                    "version": "0.0.0.1",
+                    "latest_version": "0.0.0.2",
+                    "injected": false,
+                    "pinned": false
+                  }
+                ],
+                "skipped": []
+              },
+              "errors": [],
+              "exit_code": 0,
+              "pipx_result_version": "1",
+              "status": "success"
+            }
+
+        A pipx older than :py:attr:`outdated_requirement` falls back to probing
+        each venv with its embedded pip, one call per package. Only the venv's
+        main package is reported; its dependencies also show up in
+        ``pip list --outdated`` but are silenced:
 
         .. code-block:: shell-session
 
@@ -143,7 +181,28 @@ class Pipx(PackageManager):
                 "latest_filetype": "wheel"
               }
             ]
+
+        .. todo::
+
+            Drop the fallback, which mimics ``Pip.outdated()``, once pipx
+            ``1.16.0`` is old enough to be required outright.
         """
+        if self.version is not None and self.version in VersionRange(
+            self.outdated_requirement
+        ):
+            output = self.run_cli(
+                "list", "--outdated", "--output=json", must_succeed=True
+            )
+            data = self.parse_json(output)
+            if data:
+                for package_info in data["data"]["packages"]:
+                    yield self.package(
+                        id=package_info["package"],
+                        installed_version=package_info["version"],
+                        latest_version=package_info["latest_version"],
+                    )
+            return
+
         for main_package_id in map(attrgetter("id"), self.installed):
             # --quiet is required here to silence warning and error messages
             # mangling the JSON content.
@@ -171,6 +230,10 @@ class Pipx(PackageManager):
                             installed_version=sub_package["version"],
                             latest_version=sub_package["latest_version"],
                         )
+
+    # No search operation: the feature request was closed as not planned, as PyPI
+    # exposes no search API and custom search logic is out of pipx's design scope.
+    # See https://github.com/pypa/pipx/issues/777#issuecomment-990919047.
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

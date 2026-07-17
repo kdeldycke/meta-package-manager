@@ -29,13 +29,26 @@ if TYPE_CHECKING:
 
 
 class PNPM(PackageManager):
-    """See command equivalences at:
+    """A Node.js package manager with a content-addressable global store.
+
+    Like :py:class:`meta_package_manager.managers.npm.NPM`, mpm drives pnpm in
+    global mode (``--global`` on every operation) and parses its ``--json`` output.
+    Command equivalences with the sibling JS managers are listed at
     https://github.com/antfu-collective/ni?tab=readme-ov-file#ni.
 
     .. note::
+        pnpm enforces a supply-chain cooldown through its ``minimumReleaseAge``
+        setting (counted in minutes), refusing to install any release published
+        more recently than the configured age. The version floor is set by
+        ``search``, which first shipped in ``11.0.0``; that release also clears the
+        earlier ``minimumReleaseAge`` floor, so one requirement guards every
+        advertised operation.
 
-        All operations target the global scope via ``--global``, like the
-        :py:class:`meta_package_manager.managers.npm.NPM` manager.
+    .. caution::
+        ``pnpm outdated`` exits ``1`` when it finds outdated packages, printing the
+        report to ``<stdout>`` with an empty ``<stderr>``. The query passes
+        ``must_succeed`` so this benign non-zero exit is tolerated instead of
+        raising.
     """
 
     name = "Node pnpm"

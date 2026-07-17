@@ -48,6 +48,13 @@ class PWSH_Gallery(PackageManager):
     module.
 
     .. note::
+        Every operation is one PowerShell expression, run non-interactively
+        with no user profile loaded. Reads emit ``ConvertTo-Json -AsArray`` and
+        are parsed as JSON; ``outdated`` has no native cmdlet, so its
+        installed-versus-gallery comparison runs inside that single ``pwsh``
+        call rather than as one round trip per installed module.
+
+    .. note::
         Only ``pwsh`` (PowerShell 7+) is supported. Legacy Windows PowerShell 5.1
         is intentionally excluded: it ships ``PowerShellGet`` v2, which depends on
         the NuGet provider and prompts to trust ``PSGallery`` on first install.
@@ -91,7 +98,7 @@ class PWSH_Gallery(PackageManager):
 
     .. note::
         Version detection (``pwsh --version``) skips ``pre_args`` because
-        :py:func:`meta_package_manager.manager.PackageManager.version` calls
+        :py:attr:`version <meta_package_manager.execution.CLIExecutor.version>` calls
         ``run_cli`` with ``auto_pre_args=False``.
     """
 

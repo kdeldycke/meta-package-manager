@@ -22,14 +22,6 @@ from docs_update import manager_operations
 print(manager_operations("slapt-get"))
 ```
 
-## Command line
-
-```{python:render}
-from docs_update import manager_cli
-
-print(manager_cli("slapt-get"))
-```
-
 ## Ecosystem
 
 ```{python:render}
@@ -44,4 +36,36 @@ print(manager_ecosystem("slapt-get"))
 from docs_update import manager_usage
 
 print(manager_usage("slapt-get"))
+```
+
+## Command line
+
+```{python:render}
+from docs_update import manager_cli
+
+print(manager_cli("slapt-get"))
+```
+
+## Privilege escalation
+
+```{python:render}
+from docs_update import manager_sudo
+
+print(manager_sudo("slapt-get"))
+```
+
+## Cooldown
+
+```{python:render}
+from docs_update import manager_cooldown
+
+print(manager_cooldown("slapt-get"))
+```
+
+## Reference traces
+
+```{python:render}
+from docs_update import manager_traces
+
+print(manager_traces("slapt-get"))
 ```

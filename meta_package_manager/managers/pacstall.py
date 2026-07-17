@@ -32,12 +32,23 @@ if TYPE_CHECKING:
 
 
 class Pacstall(PackageManager):
-    """Pacstall is an AUR-inspired package manager for Ubuntu and other Linux
+    """AUR-inspired, source-based package manager for Ubuntu and other Linux
     distributions.
 
+    Pacstall builds packages from "pacscripts" and installs the results as
+    ``.deb`` archives through ``dpkg``. ``mpm`` forces ``NO_COLOR`` and
+    ``DISABLE_PROMPTS`` so output is uncolored and every call stays
+    non-interactive.
+
     .. note::
-        Pacstall builds packages from source using "pacscripts" and installs
-        them as ``.deb`` files via ``dpkg``.
+        Listing installed packages is a two-step probe: piped ``--list`` prints
+        bare names with no versions, so ``mpm`` follows each with a
+        ``--cache-info <pkg> version`` call to recover its version.
+
+    .. note::
+        ``--search`` matches names only and reports no versions. There is no
+        per-package upgrade verb either, so upgrading one package reinstalls it
+        through ``--install``.
     """
 
     homepage_url = "https://pacstall.dev"

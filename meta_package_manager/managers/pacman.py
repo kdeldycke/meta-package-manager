@@ -61,7 +61,28 @@ delivered.
 
 
 class Pacman(PackageManager):
-    """See command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta."""
+    """Arch Linux's native package manager, covering the official repositories.
+
+    ``mpm`` forces ``--noconfirm`` and ``--color never`` on every call so pacman
+    runs unattended and prints uncolored text the regexes can parse. Installed
+    packages come from ``--query`` and upgradable ones from
+    ``--query --upgrades``; searches hit the sync databases via
+    ``--sync --search``.
+
+    The ``Pacaur``, ``Paru`` and ``Yay`` subclasses are AUR helpers that reuse
+    every parser and forced argument here unchanged, overriding only the binary
+    (and, for ``yay``, adding a release-age cooldown).
+
+    See command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta.
+
+    .. caution::
+        ``--query --upgrades`` only reports updates for packages tracked in a
+        sync database, so foreign packages (installed with ``pacman -U``, as AUR
+        helpers do) stay invisible to the base ``pacman`` binary. The subclasses
+        escape this because their own binary also queries the AUR RPC. This
+        upstream behavior is not confirmed on a live Arch box: see
+        :py:meth:`Pacman.outdated`.
+    """
 
     name = "Arch Linux pacman"
 
@@ -264,7 +285,12 @@ class Pacman(PackageManager):
 
 
 class Pacaur(Pacman):
-    """``Pacaur`` wraps ``pacman`` and shadows its options."""
+    """AUR helper wrapping ``pacman``, driven through the ``pacaur`` binary.
+
+    Inherits every operation, parser and forced argument from ``Pacman``; only
+    the binary and version probe differ. Routing through ``pacaur`` is what lets
+    ``--query --upgrades`` report AUR updates on top of the official repositories.
+    """
 
     name = "Arch Linux pacaur"
 
@@ -283,7 +309,14 @@ class Pacaur(Pacman):
 
 
 class Paru(Pacman):
-    """``paru`` wraps ``pacman`` and shadows its options."""
+    """AUR helper wrapping ``pacman``, driven through the ``paru`` binary.
+
+    Inherits every operation, parser and forced argument from ``Pacman``; only
+    the binary and version probe differ. Its own ``--query --upgrades`` reports
+    AUR updates on top of the official repositories. The ``>=1.9.3`` floor is the
+    first ``paru`` release to implement ``--sysupgrade``, the flag the inherited
+    ``upgrade_all_cli`` builds.
+    """
 
     name = "Arch Linux paru"
 
@@ -303,7 +336,12 @@ class Paru(Pacman):
 
 
 class Yay(Pacman):
-    """``yay`` wraps ``pacman`` and shadows its options.
+    """AUR helper wrapping ``pacman``, driven through the ``yay`` binary.
+
+    Inherits every operation, parser and forced argument from ``Pacman``; the
+    binary, version probe and the release-age cooldown below are what differ. Its
+    own ``--query --upgrades`` reports AUR updates on top of the official
+    repositories.
 
     .. note::
         yay exposes no release-age flag, so mpm enforces the supply-chain

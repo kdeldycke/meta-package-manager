@@ -22,14 +22,6 @@ from docs_update import manager_operations
 print(manager_operations("fwupd"))
 ```
 
-## Command line
-
-```{python:render}
-from docs_update import manager_cli
-
-print(manager_cli("fwupd"))
-```
-
 ## Ecosystem
 
 ```{python:render}
@@ -44,4 +36,28 @@ print(manager_ecosystem("fwupd"))
 from docs_update import manager_usage
 
 print(manager_usage("fwupd"))
+```
+
+## Command line
+
+```{python:render}
+from docs_update import manager_cli
+
+print(manager_cli("fwupd"))
+```
+
+## Privilege escalation
+
+```{python:render}
+from docs_update import manager_sudo
+
+print(manager_sudo("fwupd"))
+```
+
+## Cooldown
+
+```{python:render}
+from docs_update import manager_cooldown
+
+print(manager_cooldown("fwupd"))
 ```

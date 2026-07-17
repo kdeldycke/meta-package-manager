@@ -22,14 +22,6 @@ from docs_update import manager_operations
 print(manager_operations("mise"))
 ```
 
-## Command line
-
-```{python:render}
-from docs_update import manager_cli
-
-print(manager_cli("mise"))
-```
-
 ## Ecosystem
 
 ```{python:render}
@@ -44,4 +36,28 @@ print(manager_ecosystem("mise"))
 from docs_update import manager_usage
 
 print(manager_usage("mise"))
+```
+
+## Command line
+
+```{python:render}
+from docs_update import manager_cli
+
+print(manager_cli("mise"))
+```
+
+## Privilege escalation
+
+```{python:render}
+from docs_update import manager_sudo
+
+print(manager_sudo("mise"))
+```
+
+## Cooldown
+
+```{python:render}
+from docs_update import manager_cooldown
+
+print(manager_cooldown("mise"))
 ```

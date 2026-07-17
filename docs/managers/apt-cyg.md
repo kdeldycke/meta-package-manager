@@ -22,14 +22,6 @@ from docs_update import manager_operations
 print(manager_operations("apt-cyg"))
 ```
 
-## Command line
-
-```{python:render}
-from docs_update import manager_cli
-
-print(manager_cli("apt-cyg"))
-```
-
 ## Ecosystem
 
 ```{python:render}
@@ -44,4 +36,36 @@ print(manager_ecosystem("apt-cyg"))
 from docs_update import manager_usage
 
 print(manager_usage("apt-cyg"))
+```
+
+## Command line
+
+```{python:render}
+from docs_update import manager_cli
+
+print(manager_cli("apt-cyg"))
+```
+
+## Privilege escalation
+
+```{python:render}
+from docs_update import manager_sudo
+
+print(manager_sudo("apt-cyg"))
+```
+
+## Cooldown
+
+```{python:render}
+from docs_update import manager_cooldown
+
+print(manager_cooldown("apt-cyg"))
+```
+
+## Reference traces
+
+```{python:render}
+from docs_update import manager_traces
+
+print(manager_traces("apt-cyg"))
 ```

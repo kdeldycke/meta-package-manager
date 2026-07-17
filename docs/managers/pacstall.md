@@ -22,14 +22,6 @@ from docs_update import manager_operations
 print(manager_operations("pacstall"))
 ```
 
-## Command line
-
-```{python:render}
-from docs_update import manager_cli
-
-print(manager_cli("pacstall"))
-```
-
 ## Ecosystem
 
 ```{python:render}
@@ -44,4 +36,28 @@ print(manager_ecosystem("pacstall"))
 from docs_update import manager_usage
 
 print(manager_usage("pacstall"))
+```
+
+## Command line
+
+```{python:render}
+from docs_update import manager_cli
+
+print(manager_cli("pacstall"))
+```
+
+## Privilege escalation
+
+```{python:render}
+from docs_update import manager_sudo
+
+print(manager_sudo("pacstall"))
+```
+
+## Cooldown
+
+```{python:render}
+from docs_update import manager_cooldown
+
+print(manager_cooldown("pacstall"))
 ```

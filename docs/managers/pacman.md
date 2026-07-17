@@ -22,14 +22,6 @@ from docs_update import manager_operations
 print(manager_operations("pacman"))
 ```
 
-## Command line
-
-```{python:render}
-from docs_update import manager_cli
-
-print(manager_cli("pacman"))
-```
-
 ## Ecosystem
 
 ```{python:render}
@@ -44,4 +36,28 @@ print(manager_ecosystem("pacman"))
 from docs_update import manager_usage
 
 print(manager_usage("pacman"))
+```
+
+## Command line
+
+```{python:render}
+from docs_update import manager_cli
+
+print(manager_cli("pacman"))
+```
+
+## Privilege escalation
+
+```{python:render}
+from docs_update import manager_sudo
+
+print(manager_sudo("pacman"))
+```
+
+## Cooldown
+
+```{python:render}
+from docs_update import manager_cooldown
+
+print(manager_cooldown("pacman"))
 ```

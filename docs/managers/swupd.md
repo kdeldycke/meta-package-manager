@@ -22,14 +22,6 @@ from docs_update import manager_operations
 print(manager_operations("swupd"))
 ```
 
-## Command line
-
-```{python:render}
-from docs_update import manager_cli
-
-print(manager_cli("swupd"))
-```
-
 ## Ecosystem
 
 ```{python:render}
@@ -44,4 +36,36 @@ print(manager_ecosystem("swupd"))
 from docs_update import manager_usage
 
 print(manager_usage("swupd"))
+```
+
+## Command line
+
+```{python:render}
+from docs_update import manager_cli
+
+print(manager_cli("swupd"))
+```
+
+## Privilege escalation
+
+```{python:render}
+from docs_update import manager_sudo
+
+print(manager_sudo("swupd"))
+```
+
+## Cooldown
+
+```{python:render}
+from docs_update import manager_cooldown
+
+print(manager_cooldown("swupd"))
+```
+
+## Reference traces
+
+```{python:render}
+from docs_update import manager_traces
+
+print(manager_traces("swupd"))
 ```

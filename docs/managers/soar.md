@@ -22,14 +22,6 @@ from docs_update import manager_operations
 print(manager_operations("soar"))
 ```
 
-## Command line
-
-```{python:render}
-from docs_update import manager_cli
-
-print(manager_cli("soar"))
-```
-
 ## Ecosystem
 
 ```{python:render}
@@ -44,4 +36,36 @@ print(manager_ecosystem("soar"))
 from docs_update import manager_usage
 
 print(manager_usage("soar"))
+```
+
+## Command line
+
+```{python:render}
+from docs_update import manager_cli
+
+print(manager_cli("soar"))
+```
+
+## Privilege escalation
+
+```{python:render}
+from docs_update import manager_sudo
+
+print(manager_sudo("soar"))
+```
+
+## Cooldown
+
+```{python:render}
+from docs_update import manager_cooldown
+
+print(manager_cooldown("soar"))
+```
+
+## Reference traces
+
+```{python:render}
+from docs_update import manager_traces
+
+print(manager_traces("soar"))
 ```

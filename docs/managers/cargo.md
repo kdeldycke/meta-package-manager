@@ -22,14 +22,6 @@ from docs_update import manager_operations
 print(manager_operations("cargo"))
 ```
 
-## Command line
-
-```{python:render}
-from docs_update import manager_cli
-
-print(manager_cli("cargo"))
-```
-
 ## Ecosystem
 
 ```{python:render}
@@ -44,4 +36,36 @@ print(manager_ecosystem("cargo"))
 from docs_update import manager_usage
 
 print(manager_usage("cargo"))
+```
+
+## Command line
+
+```{python:render}
+from docs_update import manager_cli
+
+print(manager_cli("cargo"))
+```
+
+## Privilege escalation
+
+```{python:render}
+from docs_update import manager_sudo
+
+print(manager_sudo("cargo"))
+```
+
+## Cooldown
+
+```{python:render}
+from docs_update import manager_cooldown
+
+print(manager_cooldown("cargo"))
+```
+
+## Reference traces
+
+```{python:render}
+from docs_update import manager_traces
+
+print(manager_traces("cargo"))
 ```

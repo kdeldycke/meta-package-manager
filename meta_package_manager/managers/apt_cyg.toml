@@ -8,6 +8,11 @@
 # Cygwin has no root/sudo concept: every operation runs as the invoking user.
 # apt-cyg has no upgrade, outdated or cache-cleaning command at all: packages are
 # upgraded by re-running Cygwin's own `setup` program.
+#
+# Both `list` (installed) and `listall` (search) print bare package names, one per
+# line, with no version or description. apt-cyg applies the search query as a
+# regular expression over the downloaded `setup.ini` catalog, so mpm refilters
+# exact and extended matches itself.
 
 [mpm.managers.apt-cyg]
 name = "apt-cyg"

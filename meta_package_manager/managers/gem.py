@@ -34,6 +34,11 @@ if TYPE_CHECKING:
 class Gem(PackageManager):
     """The RubyGems package manager.
 
+    gem emits no machine-readable format, so installed, outdated and search
+    listings are parsed from its text output. A gem can keep several versions
+    installed side by side (``molinillo (0.5.4, 0.4.5, 0.2.3)``); mpm reports
+    the highest as the installed version.
+
     .. note::
 
         All operations target the default gem scope (controlled by ``GEM_HOME``).
@@ -62,8 +67,8 @@ class Gem(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    # Default to the version shipped with the latest maintained macOS version,
-    # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
+    # Default to the version shipped with the latest maintained macOS version:
+    # macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
     requirement = ">=2.5.0"
     """
     .. code-block:: shell-session

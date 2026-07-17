@@ -476,7 +476,11 @@ def test_manager_page_sections_render(manager):
     fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
     for _title, func_name in docs_update.MANAGER_SECTIONS:
         output = getattr(docs_update, func_name)(manager.id)
-        assert output.strip()
+        # Reference traces only exist for bundled managers carrying operation
+        # samples; every other section renders for every manager (a section
+        # with no output is omitted from the stub by manager_page_stub).
+        if func_name != "manager_traces":
+            assert output.strip()
         # Fenced blocks (code samples, eval-rst) cannot produce MyST headings:
         # only the prose between them must stay heading-free.
         assert not heading.search(fence.sub("", output))

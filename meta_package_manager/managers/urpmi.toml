@@ -10,17 +10,17 @@
 # urpmi.update) and the urpmi/urpmq/urpme man pages:
 #   - urpmi has no native installed-package listing: enumeration goes through rpm
 #     itself, which urpmi fronts (librpm is always present), with a caller-controlled
-#     --queryformat.
-#   - urpmq's package-data output is one bare "name" per line; -r appends
-#     "-version-release". The regexes split the fused NVR on its last two
+#     `--queryformat`.
+#   - urpmq's package-data output is one bare package name per line; `-r` appends
+#     `-version-release`. The regexes split the fused NVR on its last two
 #     dash-fields.
 #   - Every human-facing string is gettext-localized: LC_ALL=C keeps the parsed
 #     output stable (package data itself is not translated, but errors and prompts
 #     are).
-#   - --auto suppresses all urpmi/urpme prompts. --version is undocumented in the
+#   - `--auto` suppresses all urpmi/urpme prompts. `--version` is undocumented in the
 #     man pages but implemented in the shared options table of every tool.
 #   - Mutations abort for non-root users ("Only superuser is allowed to install
-#     packages"), including urpmi.update and --clean.
+#     packages"), including urpmi.update and `--clean`.
 
 [mpm.managers.urpmi]
 name = "urpmi"

@@ -8,6 +8,9 @@
 #
 # ZeroBrew has no `search` command: use `brew search` or browse the Homebrew formula
 # repository instead.
+#
+# The `>=0.3.0` floor is where `zb upgrade` landed; `zb outdated` and its `--json`
+# output shipped earlier, in 0.2.0.
 
 [mpm.managers.zerobrew]
 name = "zerobrew"

@@ -31,6 +31,14 @@ if TYPE_CHECKING:
 class Conda(PackageManager):
     """Conda cross-language package and environment manager.
 
+    Reads go through conda's ``--json`` mode: installed packages come from
+    ``conda list --json`` and search from ``conda search "*query*" --json``.
+    conda has no dedicated outdated command, so the upgrade the solver would
+    perform is simulated with ``conda update --all --dry-run --json`` and its
+    ``UNLINK`` (current) and ``LINK`` (candidate) sets are diffed by name: a
+    name in both is an in-place upgrade, while a ``LINK``-only entry is a
+    freshly pulled dependency and is not reported.
+
     .. note::
 
         Every operation targets conda's *currently active* environment, which is
@@ -39,6 +47,14 @@ class Conda(PackageManager):
         from the inherited ``CONDA_PREFIX`` / ``CONDA_DEFAULT_ENV``, exactly as a
         bare ``conda`` call in the same shell would. Per-environment targeting is
         not supported yet.
+
+    .. note::
+
+        The ``>=4.6.0`` floor is the release where ``update --dry-run --json``
+        settled on an ``actions`` mapping whose ``LINK`` / ``UNLINK`` values are
+        package dicts, the shape the outdated diff parses. Much older conda
+        wrapped ``actions`` in a list and emitted bare
+        ``channel::name-version-build`` strings instead.
     """
 
     name = "Conda"

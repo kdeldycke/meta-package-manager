@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class APT(PackageManager):
-    """Base package manager shared by variation of the apt command.
+    """Base class for Debian's ``apt`` front-end and its variants.
 
     Documentation:
 
@@ -39,6 +39,24 @@ class APT(PackageManager):
     - http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
+
+    mpm drives the high-level ``apt`` binary, not ``apt-get`` or ``apt-cache``,
+    over system-wide packages. Mutations escalate through ``sudo`` and force
+    ``--yes`` to stay non-interactive. :py:class:`APT_Mint` retargets Linux
+    Mint's same-named but differently-behaved ``apt``.
+
+    .. note::
+        apt's listing and search commands emit ``Listing...``, ``Sorting...``
+        and ``Full Text Search...`` preambles plus progress indicators.
+        ``--quiet`` drops the progress bars, and each parser anchors on the
+        ``name/suite version arch`` row shape, so the preamble lines fall
+        through.
+
+    .. note::
+        ``search`` matches names only by default. An exact query is wrapped as
+        the ``^query$`` regex apt supports natively; an extended query switches
+        to ``--full`` to pull descriptions into the output for mpm to
+        post-filter.
     """
 
     name = "Debian apt"
@@ -290,9 +308,21 @@ class APT(PackageManager):
 
 
 class APT_Mint(APT):
-    """Special version of apt for Linux Mint.
+    """Linux Mint's ``apt``, a wrapper script that shadows Debian's ``apt``.
 
-    Exactly the same as its parent but implement specific version extraction.
+    Mint ships its own ``apt`` command reusing the name but not the behavior of
+    :py:class:`APT`, so only version probing and search parsing are overridden
+    here; every other operation is inherited.
+
+    .. note::
+        Mint's ``apt --version`` prints no ``apt <version>`` line, so the
+        version is read from ``apt version apt``: the version of the apt package
+        itself.
+
+    .. caution::
+        Search rows are ``<status> <name> - <description>`` with no version
+        column and no ``--full`` mode, so extended matching is unsupported and
+        results carry no version.
     """
 
     name = "Linux Mint apt"

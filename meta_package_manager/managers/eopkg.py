@@ -31,7 +31,16 @@ if TYPE_CHECKING:
 
 
 class EOPKG(PackageManager):
-    """Solus' eopkg package manager, a PiSi fork."""
+    """Solus' eopkg package manager, a PiSi fork.
+
+    ``installed`` and ``outdated`` parse eopkg's fixed-width, ``|``-delimited
+    status table; the column regex requires that pipe structure, so the header
+    and ``===`` separator rows fall through. ``--no-color`` is forced to keep
+    the output free of ANSI escapes.
+
+    Mutating operations pass ``--yes-all`` to auto-confirm eopkg's prompts so
+    they run unattended.
+    """
 
     name = "Solus eopkg"
 

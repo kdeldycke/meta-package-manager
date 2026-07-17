@@ -163,14 +163,22 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     (None, "manager_intro"),
     ("Platforms", "manager_platforms"),
     ("Operations", "manager_operations"),
-    ("Command line", "manager_cli"),
     ("Ecosystem", "manager_ecosystem"),
     ("Usage", "manager_usage"),
+    ("Command line", "manager_cli"),
+    ("Privilege escalation", "manager_sudo"),
+    ("Cooldown", "manager_cooldown"),
+    ("Reference traces", "manager_traces"),
 )
 """Layout of a per-manager documentation page: section title, generator function.
 
-Single source of truth for :func:`manager_page_stub` and the structural tests. The
-headings live in the committed stubs, never in the generated content: the
+Single source of truth for :func:`manager_page_stub` and the structural tests.
+Sections promote ``mpm`` usage first, then document ``mpm``'s preconceptions
+about the native tool (its invocation, then the captured traces backing the
+parsers). A section whose generator produces nothing for a given manager is
+omitted from its stub.
+
+The headings live in the committed stubs, never in the generated content: the
 ``{python:render}`` directive nested-parses its output into the surrounding
 document, where MyST headings rely on fragile section reparenting. Every
 generator listed here must therefore emit heading-free MyST.
@@ -442,6 +450,29 @@ def _toml_definition(definition_source: str) -> dict:
     )
 
 
+def _cooldown_status(manager_id: str) -> tuple[str, str, str] | None:
+    """Extract a manager's row from the cooldown support table.
+
+    The "Supported managers" table of ``docs/cooldown.md`` is the hand-curated
+    source of truth for release-age gating: per manager, a status glyph, the
+    native mechanism and an upstream reference. Returns the three cells with
+    their markdown preserved (``—`` marks an empty cell), or ``None`` when the
+    table has no row for the manager yet.
+    """
+    text = (PROJECT_ROOT / "docs" / "cooldown.md").read_text(encoding="UTF-8")
+    section = text.partition("## Supported managers")[2].partition("\n## ")[0]
+    for line in section.splitlines():
+        if not line.startswith("| "):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) < 4:
+            continue
+        row_id = cells[0].strip("*` ").split(" ")[0].strip("*`")
+        if row_id == manager_id:
+            return cells[1], cells[2], cells[3]
+    return None
+
+
 def _toml_definition_intro(definition_source: str) -> str | None:
     """Extract the description comment atop a bundled TOML definition.
 
@@ -475,8 +506,14 @@ def _toml_definition_intro(definition_source: str) -> str | None:
     if not paragraphs:
         return None
     intro = "\n\n".join(paragraphs)
+
+    def autolink(match: re.Match) -> str:
+        # Keep trailing punctuation out of the link target.
+        url = match.group(0).rstrip(".,;:")
+        return f"<{url}>{match.group(0)[len(url):]}"
+
     # MyST's linkify extension is off: turn bare URLs into explicit autolinks.
-    return re.sub(r"https?://[^\s)>]+", lambda url: f"<{url.group(0)}>", intro)
+    return re.sub(r"https?://[^\s)>]+", autolink, intro)
 
 
 def manager_intro(manager_id: str) -> str:
@@ -653,16 +690,16 @@ def manager_cli(manager_id: str) -> str:
     """Produce the command-line section of a manager's documentation page.
 
     Documents how ``mpm`` drives the manager: binary names and lookup tweaks,
-    the arguments and environment forced on every call, the escalation and
-    cooldown behaviors, then the version probe and its parsing regexes. Beyond
-    the always-shown CLI names and version probe, only non-default facts are
-    listed. The argv fragments (pre-commands, forced arguments) are collated
-    into single code spans, matching how they appear on the command line.
+    the arguments and environment forced on every call, then the version probe
+    and its parsing regexes. Beyond the always-shown CLI names and version
+    probe, only non-default facts are listed. The argv fragments (pre-commands,
+    forced arguments) are collated into single code spans, matching how they
+    appear on the command line. Escalation and cooldown each have their own
+    section (:func:`manager_sudo`, :func:`manager_cooldown`).
 
-    Bundled TOML managers additionally surface their ``[samples]`` fixtures:
-    the version probe shows its captured output as a terminal transcript, and
-    each sampled operation shows the native command and the raw output ``mpm``
-    parses.
+    Bundled TOML managers additionally show the version probe's captured
+    ``[samples]`` output as a terminal transcript; the per-operation samples
+    render in the reference-traces section (:func:`manager_traces`).
     """
     m = pool[manager_id]
 
@@ -683,40 +720,12 @@ def manager_cli(manager_id: str) -> str:
         lines.extend(f"  - `{k}={v}`" for k, v in sorted(m.extra_env.items()))
     if m.timeout is not None:
         lines.append(f"- Call timeout: {m.timeout} seconds")
-    if m.default_sudo:
-        lines.append(
-            "- Privileged operations run through [`sudo`](../sudo.md)",
-        )
-    if m.internal_sudo:
-        lines.append(
-            "- Runs `sudo` from inside its own commands, never wrapped by `mpm` "
-            "(see [privilege escalation](../sudo.md))",
-        )
-    if m.supports_cooldown:
-        lines.append(
-            f"- Native [cooldown](../cooldown.md) support through the "
-            f"`{m.cooldown_env_var}` environment variable",
-        )
 
     version_sample = None
-    op_samples = []
     source = getattr(m, "definition_source", None)
     if source:
         doc = _toml_definition(source)
-        samples = doc.get("samples", {})
-        version_sample = samples.get("version", {}).get("output")
-        operations = doc["mpm"]["managers"][manager_id].get("operations", {})
-        for op in Operations:
-            spec = operations.get(op.name, {})
-            for sample in samples.get(op.name, ()):
-                command = " ".join((
-                    spec.get("cli", m.cli_names[0]),
-                    *spec.get("args", ()),
-                ))
-                output = sample["output"].strip("\n")
-                op_samples.append(
-                    _fenced(f"$ {command}\n{output}", "shell-session"),
-                )
+        version_sample = doc.get("samples", {}).get("version", {}).get("output")
 
     probe = " ".join(((m.version_cli or m.cli_names[0]), *m.version_cli_options))
     regex_suffix = (
@@ -741,13 +750,6 @@ def manager_cli(manager_id: str) -> str:
             f"with{regex_suffix}:",
         )
     parts.append(regex_fence)
-
-    if op_samples:
-        parts.append(
-            "Native outputs `mpm` parses, as captured in the "
-            f"[bundled definition]({manager_source_url(manager_id)}):",
-        )
-        parts.extend(op_samples)
 
     return "\n\n".join(parts)
 
@@ -781,8 +783,9 @@ def manager_usage(manager_id: str) -> str:
     """Produce the usage section of a manager's documentation page.
 
     A few ready-to-paste invocations targeting this manager alone, each gated on
-    the operation being implemented, followed by pointers to the selection and
-    configuration levers.
+    the operation being implemented, a ``--dry-run`` variant to try ``mpm``
+    without touching the system, and pointers to the selection and configuration
+    levers.
     """
     m = pool[manager_id]
     examples = [f"$ mpm --{manager_id} installed"]
@@ -792,14 +795,172 @@ def manager_usage(manager_id: str) -> str:
         examples.append(f"$ mpm --{manager_id} upgrade --all")
     if implements(m, Operations.install):
         examples.append(f"$ mpm install pkg:{manager_id}/hello")
+    if implements(m, Operations.upgrade_all):
+        examples.append(f"$ mpm --dry-run --{manager_id} upgrade --all")
+    elif implements(m, Operations.install):
+        examples.append(f"$ mpm --dry-run install pkg:{manager_id}/hello")
     fence = "```shell-session\n" + "\n".join(examples) + "\n```"
+
+    dry_run = (
+        "Every example above accepts [`--dry-run`](../augmentations.md), which "
+        "simulates the underlying manager calls without touching the system: the "
+        "safe way to watch what `mpm` would do before trusting it."
+    )
 
     outro = (
         f"Deselect the manager for a single run with `--no-{manager_id}`, disable "
         "it from your [configuration](../configuration.md), or tune its invocation "
         "attributes with [per-manager overrides](../overrides.md)."
     )
-    return f"{fence}\n\n{outro}"
+    return f"{fence}\n\n{dry_run}\n\n{outro}"
+
+
+def manager_sudo(manager_id: str) -> str:
+    """Produce the privilege-escalation section of a manager's documentation page.
+
+    States which escalation policy applies (system-wide ``sudo`` wrapping,
+    internal escalation, or none) and how to flip it, deriving everything from
+    the escalation attributes so the page can never contradict the code. For
+    config-defined managers that do not escalate internally, the operations
+    marked ``sudo = true`` in the bundled TOML definition are listed by name.
+    """
+    m = pool[manager_id]
+    if m.internal_sudo:
+        policy = (
+            f"{m.name} runs `sudo` from inside its own commands: `mpm` never "
+            "wraps it, keeps an already-warm credential cache alive for those "
+            "internal escalations, and warns when a mutating call goes silent "
+            "on a terminal with a cold cache, since a password prompt may be "
+            "hiding in the stream."
+        )
+    elif m.default_sudo:
+        policy = (
+            "System-wide manager: `mpm` wraps its privileged operations in "
+            "`sudo` out of the box. Instead of letting the tool prompt "
+            "mid-run, `mpm` primes the credential cache up-front, with a "
+            "single branded password prompt at most. Turn escalation off for "
+            "rootless setups with `--no-sudo` or the per-manager "
+            "[`sudo` override](../overrides.md)."
+        )
+    else:
+        policy = (
+            "`mpm` runs this manager as the current user and never prepends "
+            "`sudo` by default. Flip the policy for its privileged operations "
+            "with `--sudo` or the per-manager [`sudo` override](../overrides.md)."
+        )
+
+    parts = [policy]
+    source = getattr(m, "definition_source", None)
+    if source and not m.internal_sudo:
+        operations = _toml_definition(source)["mpm"]["managers"][manager_id].get(
+            "operations",
+            {},
+        )
+        # Map the definition-schema operation names to the user-facing ones.
+        privileged = sorted(
+            {"upgrade_one": "upgrade"}.get(op, op)
+            for op, spec in operations.items()
+            if spec.get("sudo")
+        )
+        if privileged:
+            ops_list = ", ".join(f"`{op}`" for op in privileged)
+            plural = "s" if len(privileged) > 1 else ""
+            parts.append(f"Root is required for its {ops_list} operation{plural}.")
+        else:
+            parts.append("None of its operations needs root.")
+    parts.append("See [privilege escalation](../sudo.md) for the full policy.")
+    return "\n\n".join(parts)
+
+
+def manager_cooldown(manager_id: str) -> str:
+    """Produce the cooldown section of a manager's documentation page.
+
+    Reuses the manager's row from the hand-curated "Supported managers" table
+    of ``docs/cooldown.md`` (status, native mechanism, upstream reference), so
+    the page and the cooldown overview can never diverge. Tops it with the
+    enforcement facts derived from the manager's declarations: the injected
+    environment variable when ``mpm`` drives a native gate, or the fail-closed
+    skip applying to everyone else.
+    """
+    m = pool[manager_id]
+    row = _cooldown_status(manager_id)
+
+    parts = []
+    if m.supports_cooldown:
+        parts.append(
+            "`mpm` natively enforces its [release-age cooldown](../cooldown.md) "
+            f"on {m.name}, injecting the `{m.cooldown_env_var}` environment "
+            "variable on every call.",
+        )
+    elif row:
+        parts.append(
+            f"State of {m.name}'s release-age gating, from the "
+            "[cooldown support table](../cooldown.md#supported-managers):",
+        )
+    else:
+        parts.append(
+            "Not yet assessed in the "
+            "[cooldown support table](../cooldown.md#supported-managers).",
+        )
+    if row:
+        status, mechanism, reference = row
+        facts = [f"- Status: {status}"]
+        if mechanism != "—":
+            facts.append(f"- Mechanism: {mechanism}")
+        if reference != "—":
+            facts.append(f"- Reference: {reference}")
+        parts.append("\n".join(facts))
+    if not m.supports_cooldown and any(
+        implements(m, op)
+        for op in (Operations.install, Operations.upgrade, Operations.upgrade_all)
+    ):
+        parts.append(
+            "With `--cooldown` set, `mpm` skips this manager's install and "
+            "upgrade operations rather than run them unguarded (fail-closed); "
+            "`--allow-unsupported-managers` opts back in.",
+        )
+    return "\n\n".join(parts)
+
+
+def manager_traces(manager_id: str) -> str:
+    """Produce the reference-traces section of a manager's documentation page.
+
+    The raw native outputs captured in the bundled TOML definition's
+    ``[samples]`` fixtures, replayed as terminal transcripts: the reference
+    ``mpm``'s parsers were written against. Surfacing them lets users seasoned
+    in the native tool spot wrong assumptions, or output formats a newer
+    release has since changed. Empty for managers without operation samples
+    (the section is then omitted from the stub); the version probe transcript
+    stays in the command-line section, next to the regexes consuming it.
+    """
+    m = pool[manager_id]
+    source = getattr(m, "definition_source", None)
+    if not source:
+        return ""
+    doc = _toml_definition(source)
+    samples = doc.get("samples", {})
+    operations = doc["mpm"]["managers"][manager_id].get("operations", {})
+    fences = []
+    for op in Operations:
+        spec = operations.get(op.name, {})
+        for sample in samples.get(op.name, ()):
+            command = " ".join((
+                spec.get("cli", m.cli_names[0]),
+                *spec.get("args", ()),
+            ))
+            output = sample["output"].strip("\n")
+            fences.append(_fenced(f"$ {command}\n{output}", "shell-session"))
+    if not fences:
+        return ""
+    intro = (
+        "Raw native outputs captured in the "
+        f"[bundled definition]({manager_source_url(manager_id)}): the reference "
+        f"`mpm`'s parsers were written against. If you know {m.name} well and a "
+        "transcript below looks wrong, or a newer release changed its output "
+        "format, [report it]"
+        "(https://github.com/kdeldycke/meta-package-manager/issues)."
+    )
+    return "\n\n".join((intro, *fences))
 
 
 def managers_index_table() -> str:
@@ -841,12 +1002,16 @@ def manager_page_stub(manager_id: str) -> str:
     The stub carries the page title and the section headings from
     :data:`MANAGER_SECTIONS`; every section body is a ``{python:render}`` block
     so the content renders live at Sphinx build time and never drifts from the
-    pool. The block formatting mirrors ``docs/benchmark.md`` so the stubs are an
-    ``mdformat`` fixpoint.
+    pool. A section whose generator produces nothing for this manager (like
+    reference traces for class-based managers) is left out. The block
+    formatting mirrors ``docs/benchmark.md`` so the stubs are an ``mdformat``
+    fixpoint.
     """
     m = pool[manager_id]
     blocks = [f"# {{octicon}}`package` {m.name}"]
     for title, func_name in MANAGER_SECTIONS:
+        if not globals()[func_name](manager_id).strip():
+            continue
         if title:
             blocks.append(f"## {title}")
         blocks.append(

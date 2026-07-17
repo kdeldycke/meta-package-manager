@@ -4,6 +4,13 @@
 # package manager of embedded Linux distributions (OpenWrt, Yocto). See
 # docs/overrides.md ("Define a new manager") for the schema and
 # meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# opkg has no search verb, so mpm lists the whole catalog (`opkg list`, whose
+# rows are `name - version - description`) and refilters it against the query;
+# the description column is dropped, since the definition DSL captures only ids
+# and versions. The other listings are `name - version` (`list-installed`) and
+# `name - installed - latest` (`list-upgradable`) rows. No operation is marked
+# sudo: opkg's embedded targets run as root.
 
 [mpm.managers.opkg]
 name = "opkg"

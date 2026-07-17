@@ -32,7 +32,29 @@ if TYPE_CHECKING:
 
 
 class Pipx(PackageManager):
-    """pipx installs Python CLI applications, each in its own isolated venv."""
+    """pipx installs Python CLI applications, each in its own isolated venv.
+
+    Installed applications come from ``pipx list --json``; only each venv's main
+    package is tracked, never the packages injected beside it. There is no
+    ``search`` operation: the request was closed as not planned, since PyPI
+    exposes no search API and custom search is out of pipx's scope (see `pipx
+    issue 777 <https://github.com/pypa/pipx/issues/777#issuecomment-990919047>`__).
+
+    .. note::
+
+        The outdated query prefers pipx ``1.16.0``'s native
+        ``pipx list --outdated``, which checks every venv in one call, each
+        against its own backend (pip or uv). An older pipx falls back to probing
+        each venv with its embedded pip, one call per application. The version
+        floor stays at ``1.0.0`` so an older pipx remains fully usable: only the
+        outdated path degrades.
+
+    .. note::
+
+        The supply-chain cooldown rides on the underlying pip and needs that pip
+        to be at least ``26.1``, the first release to honor
+        ``--uploaded-prior-to``; older pip silently ignores the release-age gate.
+    """
 
     name = "Python pipx"
 

@@ -31,11 +31,24 @@ if TYPE_CHECKING:
 
 
 class Guix(PackageManager):
-    """GNU Guix functional package manager.
+    """GNU Guix, GNU's functional package manager.
 
     .. note::
         All operations target the current user's default profile. Declarative
         system configuration (Guix System ``config.scm``) is not covered.
+
+    Guix is a rolling release with no upstream semver to pin against:
+    ``guix --version`` reports a release tag, a ``git describe`` string, or the
+    bare commit hash of an in-tree checkout. No ``requirement`` floor is
+    enforced, since any working ``guix`` will do.
+
+    .. warning::
+        ``search`` evaluates every package definition to match the query, so its
+        cost scales with the size of the package set, not the result count: tens
+        of seconds on a freshly pulled Guix, longer still from an in-tree
+        development checkout. The call is bounded by ``mpm --timeout`` (120s by
+        default), past which it is killed with no results returned, so a slow
+        search can look like a hang.
     """
 
     name = "GNU Guix"

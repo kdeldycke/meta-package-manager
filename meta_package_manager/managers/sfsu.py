@@ -37,11 +37,21 @@ if TYPE_CHECKING:
 
 
 class SFSU(PackageManager):
-    """sfsu wraps the Scoop package ecosystem with a fast Rust implementation.
+    """sfsu (Scoop For Speed and Usability) is a Rust reimplementation of
+    Scoop's slower read paths, working against the same buckets and ``~/scoop``
+    install tree.
 
-    Read-only operations (list, search, outdated) use sfsu with ``--json`` for
-    structured output. Mutating operations (install, upgrade, remove) delegate
-    to ``scoop`` because sfsu does not implement them.
+    mpm reaches for sfsu only where it is both faster than Scoop and speaks
+    JSON: ``installed``, ``outdated`` and ``search`` all pass ``--json`` and are
+    parsed as structured objects instead of the whitespace tables Scoop prints.
+
+    .. note::
+        sfsu implements no mutating verbs, so ``install``, ``remove`` and both
+        upgrade commands are bound straight to
+        :class:`~meta_package_manager.managers.scoop.Scoop` through the
+        :class:`~meta_package_manager.capabilities.Delegate` descriptor: those
+        operations run the ``scoop`` binary, and a host with sfsu but no Scoop
+        cannot mutate anything.
     """
 
     # Mutating operations delegate to the Scoop CLI.

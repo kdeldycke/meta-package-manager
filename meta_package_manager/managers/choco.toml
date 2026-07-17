@@ -5,12 +5,15 @@
 # meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # Parsing notes:
-#   - Every operation passes --limit-output, whose pipe-delimited rows are the
-#     machine-readable format; --no-progress, --no-color and --retry-count ride
-#     along as post_args on every invocation.
+#   - Every operation passes `--limit-output`, whose pipe-delimited rows are the
+#     machine-readable format; `--no-progress`, `--no-color` and `--retry-count`
+#     ride along as post_args on every invocation.
 #   - `choco search` reaches into all package metadata by default: the
 #     {id_name_only_args} template narrows it to package IDs for mpm's default
-#     --id-name-only mode, and {exact_args} maps --exact.
+#     `--id-name-only` mode, and {exact_args} maps `--exact`.
+#
+# mpm requires Chocolatey 2.0.0 or newer, the first release where `choco list`
+# reports installed packages without the removed `--local-only` flag.
 
 [mpm.managers.choco]
 name = "Chocolatey"

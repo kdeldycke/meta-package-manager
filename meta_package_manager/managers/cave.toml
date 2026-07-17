@@ -8,13 +8,13 @@
 # Parsing notes, verified against the cave man pages (paludis.exherbo.org/clients/):
 #   - `print-ids` is the only machine-parseable listing ("No formatting is used,
 #     making the output suitable for parsing by scripts"), with a caller-controlled
-#     --format; the '*/*::installed' spec selects the installed repository.
+#     `--format`; the '*/*::installed' spec selects the installed repository.
 #   - No `search`: `cave search` emits multi-line human records with no format
 #     control, and `print-ids --matching` needs an exact spec rather than a fuzzy
 #     query. No `outdated` either: the `cave resolve` plan is human-oriented.
 #   - `resolve` never prompts (it refuses risky transactions instead, wanting
-#     explicit --permit-* flags), so no assume-yes flag exists or is needed.
-#   - Execute phases (--execute) and sync need root; plan-only and print-ids calls
+#     explicit `--permit-*` flags), so no assume-yes flag exists or is needed.
+#   - Execute phases (`--execute`) and sync need root; plan-only and print-ids calls
 #     do not.
 
 [mpm.managers.cave]

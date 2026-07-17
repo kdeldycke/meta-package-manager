@@ -10,9 +10,9 @@
 #   - crew must NOT run as root: bin/crew hard-aborts when Process.uid is zero, so no
 #     operation is marked sudo.
 #   - Output is colorized through HighLine (.lightgreen and friends) and crew does not
-#     honor the NO_COLOR environment variable: every operation passes its --no-color
+#     honor the NO_COLOR environment variable: every operation passes its `--no-color`
 #     flag, which sits after the subcommand in crew's docopt grammar.
-#   - `crew list installed` is name-only; the --verbose form adds the version column
+#   - `crew list installed` is name-only; the `--verbose` form adds the version column
 #     but injects a "Package"/"Version" header row and a "=======" separator. The
 #     installed regex requires a digit-led version so both decorations fall through.
 #   - No `outdated`: `crew list` states are available/compatible/incompatible/

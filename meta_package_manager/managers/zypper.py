@@ -42,14 +42,27 @@ if TYPE_CHECKING:
 
 
 class Zypper(PackageManager):
-    """Zypper package manager.
+    """openSUSE's package manager.
+
+    ``mpm`` drives zypper in XML mode (``--xmlout``) and parses the result with
+    ``xmltodict``: the most stable machine-readable output zypper offers. Every
+    call is pinned with ``--no-color`` and ``--no-abbrev`` (untruncated columns),
+    ``--non-interactive`` for unattended runs, and ``--no-cd --no-refresh`` so it
+    never touches removable media or auto-refreshes metadata (``mpm`` refreshes
+    explicitly through ``sync``).
+
+    .. note::
+        Both ``installed`` and ``search`` run ``search --details --type package``:
+        ``--details`` is the only mode exposing versions, but it returns one row
+        per source package, architecture and past release. ``mpm`` drops
+        ``other-version`` rows and keeps the highest edition per package name to
+        collapse those duplicates.
 
     Documentation:
 
     - https://en.opensuse.org/Portal:Zypper
     - https://documentation.suse.com/smart/systems-management/html/concept-zypper/index.html
-
-    See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
+    - https://wiki.archlinux.org/title/Pacman/Rosetta (command equivalences)
     """
 
     name = "openSUSE Zypper"

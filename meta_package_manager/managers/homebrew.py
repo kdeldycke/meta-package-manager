@@ -47,9 +47,14 @@ if TYPE_CHECKING:
 
 
 class Homebrew(PackageManager):
-    """Virtual package manager shared by brew and cask CLI defined below.
+    """Virtual base shared by the :py:class:`Brew` and :py:class:`Cask` managers.
 
-    Homebrew is the umbrella project providing both brew and brew cask commands.
+    Homebrew is the umbrella project behind the ``brew`` CLI. mpm exposes it as
+    two managers over that single binary: :py:class:`Brew` for formulae built
+    from recipes, and :py:class:`Cask` for pre-built macOS applications, each
+    pinning its half with a ``--formula`` or ``--cask`` selector. This base
+    holds the shared query, mutation and metadata logic; the concrete classes
+    carry the manager-level narrative.
     """
 
     platforms = LINUX_LIKE, MACOS
@@ -848,7 +853,37 @@ class Homebrew(PackageManager):
 
 
 class Brew(Homebrew):
-    """The formula half of Homebrew, installing CLI tools built from recipes."""
+    """The formula half of Homebrew: command-line tools built from recipes.
+
+    Homebrew is the umbrella project behind the ``brew`` CLI. mpm splits it into
+    two managers over the same binary, this one for formulae and :py:class:`Cask`
+    for macOS applications; a forced ``--formula`` selector keeps every call on
+    the formula side. Homebrew core runs on macOS and on `Linux and WSL
+    <https://docs.brew.sh/Homebrew-on-Linux>`_.
+
+    mpm drives ``brew`` non-interactively and pins its environment: analytics and
+    setup hints are silenced, and ``HOMEBREW_NO_AUTO_UPDATE`` keeps ``brew`` from
+    folding a metadata refresh into every command, since mpm runs that as a
+    separate ``sync`` (`asked for since mpm's early days
+    <https://github.com/kdeldycke/meta-package-manager/issues/36>`_). Outdated
+    packages come from ``--json=v2``; the installed and search listings are
+    parsed from their plain-text columns.
+
+    .. note::
+
+        The ``>=6.0.0`` requirement is the release where ask mode became the
+        default for ``brew install`` and ``brew upgrade``, and where the
+        ``--yes`` opt-out mpm relies on for unattended runs first shipped. It is
+        also where Homebrew began rejecting third-party taps until trusted, so
+        installing a fully-qualified ``user/tap/name`` package taps and trusts it
+        first (see :py:meth:`Homebrew.trust_tap`).
+
+    .. caution::
+
+        A pinned formula still appears in ``mpm outdated`` output, yet
+        ``brew upgrade`` silently skips it: mpm discards Homebrew's ``pinned``
+        fields today.
+    """
 
     name = "Homebrew Formulae"
 
@@ -862,7 +897,35 @@ class Brew(Homebrew):
 
 
 class Cask(Homebrew):
-    """The cask half of Homebrew, installing pre-built macOS applications."""
+    """The cask half of Homebrew: pre-built macOS applications.
+
+    Homebrew is the umbrella project behind the ``brew`` CLI. mpm splits it into
+    two managers over the same binary, this one for casks and :py:class:`Brew`
+    for formulae; a forced ``--cask`` selector keeps every call on the cask side.
+    Casks ship macOS ``.app`` bundles and ``.pkg`` installers, so this manager is
+    macOS-only.
+
+    mpm drives ``brew`` non-interactively with the same environment pins as
+    :py:class:`Brew` (analytics and hints off, ``HOMEBREW_NO_AUTO_UPDATE`` so the
+    metadata refresh stays a separate ``sync``) and the same ``>=6.0.0`` floor
+    (ask mode default, the ``--yes`` opt-out, and the tap-trust gate that
+    :py:meth:`Homebrew.trust_tap` clears for ``user/tap/name`` packages).
+
+    .. note::
+
+        Casks self-escalate: their artifacts (``.pkg`` installers, kernel
+        extensions) invoke ``sudo`` from inside ``brew``, so mpm never wraps a
+        cask command in its own ``sudo``.
+
+    .. caution::
+
+        Casks flagged ``auto_updates true`` or ``version :latest`` update
+        themselves, and ``brew upgrade`` skips them unless ``--greedy`` is
+        passed. mpm supplies ``--greedy`` (to ``outdated`` and to
+        ``upgrade --all``) unless auto-updating packages are being ignored.
+        ``--greedy`` conflicts with ``--formula``, so this handling is cask-only
+        and cannot fold into the base shared with :py:class:`Brew`.
+    """
 
     name = "Homebrew Cask"
 

@@ -32,8 +32,22 @@ if TYPE_CHECKING:
 class FWUPD(PackageManager):
     """fwupd manages device firmware, treating each updatable device as a package.
 
-    Inventory and upgrades come from the LVFS (Linux Vendor Firmware Service),
-    with devices identified by their GUIDs.
+    Firmware inventory and updates come from the LVFS (Linux Vendor Firmware
+    Service). Each package is keyed by its fwupd ``DeviceId``, carrying the device
+    name and current firmware version. mpm drives ``fwupdmgr`` in JSON mode
+    (``get-devices --json``, ``get-updates --json``), which sets the version floor
+    at ``1.9.5``: the first release to emit JSON for ``get-devices``.
+
+    .. note::
+        ``installed`` and ``outdated`` report only devices carrying the
+        ``updatable`` flag: fixed or unsupported hardware is skipped even though
+        ``fwupdmgr`` still lists it.
+
+    .. note::
+        No ``search`` (firmware has no name catalog to query) and no ``remove``
+        (firmware cannot be uninstalled). Flashing runs as root and is forced
+        non-interactive: no confirmation prompt, no reboot check, no
+        device-selection prompt.
     """
 
     name = "Linux fwupd"

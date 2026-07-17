@@ -6,6 +6,10 @@
 # new manager") for the schema and meta_package_manager/definitions.py
 # (build_bundled_managers) for the loader.
 #
+# Homebrew Bundle has no `vscodium` entry type, and its `vscode` entry installs to
+# VS Code only, so `mpm dump --brewfile` skips VSCodium extensions rather than
+# silently misrouting them (see brewfile_skip_warning below).
+#
 # No version_regexes: `codium --version` prints the bare version, then the commit
 # hash and the arch on their own lines, and the default regex picks the first
 # token up.

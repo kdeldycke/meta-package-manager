@@ -5,6 +5,10 @@
 # goes through, dogfooding the configuration-defined-manager feature on a genuine
 # cross-platform CLI. See docs/overrides.md ("Define a new manager") for the schema,
 # and meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# mpm identifies each extension by its `owner/repo` slug: it is the only id both
+# reported by `gh extension list` and accepted by every extension subcommand, so ids
+# round-trip cleanly through install, remove, upgrade and backup/restore.
 
 [mpm.managers.gh-ext]
 name = "GitHub CLI extensions"

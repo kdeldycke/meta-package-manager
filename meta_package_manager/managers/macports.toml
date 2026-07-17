@@ -1,8 +1,9 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# MacPorts (https://www.macports.org) installs into /opt/local by default; the
-# `port` binary lives at /opt/local/bin/port. See docs/overrides.md ("Define a new
-# manager") for the schema and meta_package_manager/definitions.py
+# MacPorts (https://www.macports.org) is a source-based ports system for macOS: it
+# builds and installs packages under its own /opt/local prefix (the `port` binary
+# lives at /opt/local/bin/port), isolated from the system. See docs/overrides.md
+# ("Define a new manager") for the schema and meta_package_manager/definitions.py
 # (build_bundled_managers) for the loader.
 #
 # Parsing notes:
@@ -10,9 +11,12 @@
 #     installed regex skips the inactive versions MacPorts keeps around, and the
 #     version capture stops at the first "+" so variant suffixes
 #     ("@3.12.3_0+lzma+optimizations") stay out of the version.
+#   - `port -q outdated` prints `name installed < latest` rows; the `<` arrow
+#     separates the current version from the available one.
 #   - `port search --line` prints tab-separated "name version category description"
-#     rows; the {extended_args} template maps mpm's --extended to --description and
-#     {exact_args} maps --exact, both sitting before the trailing "--line {query}".
+#     rows; the {extended_args} template maps mpm's `--extended` to `--description`
+#     and {exact_args} maps `--exact`, both sitting before the trailing
+#     `--line {query}`.
 
 [mpm.managers.macports]
 name = "MacPorts"

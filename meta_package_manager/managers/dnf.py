@@ -31,9 +31,27 @@ if TYPE_CHECKING:
 
 
 class DNF(PackageManager):
-    """Documentation: https://dnf.readthedocs.io/en/latest/command_ref.html.
+    """Fedora's RPM package manager.
 
-    See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
+    ``mpm`` reads the inventory through ``repoquery`` rather than the human-facing
+    listing: ``--userinstalled`` for packages installed on request (dependencies
+    pulled in automatically are skipped) and ``--upgrades`` for pending updates,
+    both with a ``--queryformat`` that joins the fields on a private ``___MPM___``
+    delimiter so summaries containing spaces stay splittable. Every call is forced
+    ``--color=never`` and ``--quiet`` for parseable output.
+
+    .. note::
+        ``remove`` runs ``autoremove``, so removing a package also drops the
+        dependencies it leaves orphaned. ``search`` matches names only, with no
+        exact or extended mode.
+
+    The ``DNF5`` and ``YUM`` subclasses reuse everything here, differing only in
+    the binary and forced arguments.
+
+    Documentation:
+
+    - https://dnf.readthedocs.io/en/latest/command_ref.html
+    - https://wiki.archlinux.org/title/Pacman/Rosetta (command equivalences)
     """
 
     name = "Fedora DNF"
@@ -224,7 +242,12 @@ class DNF(PackageManager):
 
 
 class DNF5(DNF):
-    """The dnf5 rewrite of DNF, reference package manager as of Fedora 41."""
+    """The ``dnf5`` rewrite of DNF, Fedora's reference package manager since
+    Fedora 41.
+
+    Inherits every operation and parser from ``DNF``. Its forced arguments drop
+    ``--color=never`` (``dnf5`` rejects that option), keeping only ``--quiet``.
+    """
 
     name = "Fedora DNF5"
 
@@ -243,7 +266,11 @@ class DNF5(DNF):
 
 
 class YUM(DNF):
-    """Yum is dnf is yum."""
+    """YUM, the package manager DNF superseded.
+
+    On current Fedora and RHEL the ``yum`` binary is a wrapper around ``dnf``.
+    ``mpm`` drives it exactly as ``DNF``, only the binary name differs.
+    """
 
     name = "Fedora YUM"
 

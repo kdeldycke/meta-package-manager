@@ -30,13 +30,7 @@ if TYPE_CHECKING:
 
 
 class UVBase(PackageManager):
-    """Virtual package manager shared by ``UV`` and ``UVX`` CLI defined below.
-
-    .. hint::
-        Package spec are not quoted anywhere here to `workaround issues
-        <https://github.com/kdeldycke/meta-package-manager/issues/1653>`_ with how `uv`
-        fails to parses them sometimes.
-    """
+    """Virtual base shared by the ``UV`` and ``UVX`` managers defined below."""
 
     homepage_url = "https://docs.astral.sh/uv"
 
@@ -95,7 +89,21 @@ class UVBase(PackageManager):
 
 
 class UV(UVBase):
-    """Python package manager using uv pip commands."""
+    """Python packages managed with uv's ``uv pip`` interface.
+
+    Installed and outdated packages are read with ``uv pip list`` (adding
+    ``--outdated`` and ``--format=json``), acting on whatever environment uv
+    resolves, exactly as a bare ``uv pip`` call in the same shell would. The
+    ``--outdated`` listing sets the ``>=0.5.0`` version floor, the first uv
+    release to ship it. The release-age cooldown rides on uv's
+    ``--exclude-newer`` resolver option, which every resolving subcommand
+    honors, so one cutoff covers install, upgrade and outdated together.
+
+    .. hint::
+        Package specs are passed unquoted, working around `uv parse failures on
+        quoted specs
+        <https://github.com/kdeldycke/meta-package-manager/issues/1653>`_.
+    """
 
     name = "Python uv"
 
@@ -220,9 +228,20 @@ class UV(UVBase):
 
 
 class UVX(UVBase):
-    """UV tool manager for isolated Python tools.
+    """uv's tool manager for isolated Python applications, like ``pipx``.
 
-    Like ``pipx``, but uses ``uv tool`` commands.
+    mpm drives the ``uv tool`` subcommands; each application lives in its own
+    venv. Installed and outdated tools are parsed from the plain-text
+    ``tool list`` and ``tool list --outdated`` output: unlike the ``uv pip``
+    interface, ``uv tool`` emits no JSON. The ``--outdated`` listing sets the
+    ``>=0.10.10`` version floor, the first uv release to ship it. The
+    release-age cooldown rides on uv's ``--exclude-newer`` resolver option,
+    covering install, upgrade and outdated through one cutoff.
+
+    .. hint::
+        Package specs are passed unquoted, working around `uv parse failures on
+        quoted specs
+        <https://github.com/kdeldycke/meta-package-manager/issues/1653>`_.
     """
 
     name = "Python uvx"

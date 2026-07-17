@@ -33,10 +33,16 @@ if TYPE_CHECKING:
 
 
 class Yarn(PackageManager):
-    """Virtual package manager shared by Yarn Classic and Yarn Berry.
+    """Virtual base shared by Yarn Classic and Yarn Berry.
 
-    See command equivalences at:
-    https://github.com/antfu-collective/ni?tab=readme-ov-file#ni
+    The two Yarn lines grew incompatible CLIs, so mpm models them as separate
+    managers, :py:class:`YarnClassic` and :py:class:`YarnBerry`, both invoking the
+    same ``yarn`` binary. The reported version decides which one is active: Classic
+    claims the ``1.x`` range, Berry ``2.x`` and later. Only the shared cache-cleanup
+    operation lives on this base.
+
+    Command equivalences with the sibling JS managers are listed at
+    https://github.com/antfu-collective/ni?tab=readme-ov-file#ni.
     """
 
     homepage_url = "https://yarnpkg.com"
@@ -61,14 +67,24 @@ class Yarn(PackageManager):
 
 
 class YarnClassic(Yarn):
-    """Yarn Classic (1.x) package manager.
+    """Yarn Classic, the ``1.x`` line.
+
+    mpm claims this class for any ``yarn`` binary reporting a ``1.x`` version and
+    drives it through the ``yarn global`` command family, so installs, upgrades and
+    removals target the global prefix. Its ``--json`` output is a stream of one JSON
+    object per line, not a single document, so every query is parsed line by line.
 
     .. warning::
-        Yarn Classic has been in maintenance mode since January 2020. Only
-        critical and security patches are accepted. Yarn Berry (2.x+) is
-        the actively developed line but uses a fundamentally different CLI
-        surface, so it is handled by a separate
-        :py:class:`YarnBerry` manager.
+        Yarn Classic has been in maintenance mode since January 2020, taking only
+        critical and security patches. Yarn Berry (``2.x`` and later) is the
+        actively developed line but exposes a different CLI surface, so mpm handles
+        it through a separate :py:class:`YarnBerry` manager.
+
+    .. note::
+        Yarn has `no dedicated search command
+        <https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299>`_ by
+        maintainer decision, so ``search`` is simulated with ``yarn info`` and only
+        resolves exact package names.
     """
 
     id = "yarn"
@@ -380,12 +396,20 @@ class YarnClassic(Yarn):
 
 
 class YarnBerry(Yarn):
-    """Yarn Berry (2.x+) package manager.
+    """Yarn Berry, the ``2.x`` and later line.
+
+    mpm claims this class for any ``yarn`` binary reporting a ``2.x`` or newer
+    version.
 
     .. warning::
-        Yarn Berry removed ``yarn global`` commands entirely. There is no concept
-        of globally installed packages, so ``installed``, ``outdated``, ``install``,
-        ``upgrade``, and ``remove`` operations are not available.
+        Yarn Berry removed the ``yarn global`` command family entirely: it has no
+        notion of globally installed packages. Only ``search`` is available, while
+        ``installed``, ``outdated``, ``install``, ``upgrade`` and ``remove`` are all
+        unsupported.
+
+    .. note::
+        ``search`` is simulated with ``yarn npm info`` and only resolves exact
+        package names.
     """
 
     id = "yarn-berry"

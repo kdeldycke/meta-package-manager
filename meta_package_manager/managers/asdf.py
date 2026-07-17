@@ -35,6 +35,11 @@ class ASDF(PackageManager):
     Ruby, Python, Erlang, ...) through a plugin ecosystem, exposing all of
     them behind a single CLI.
 
+    mpm targets the ``0.16.0`` Go rewrite and later: it calls the space-separated
+    subcommands (``asdf list all``, ``asdf plugin add``) that replaced the
+    hyphenated forms (``list-all``, ``plugin-add``) of the older Bash asdf, which
+    is unsupported.
+
     .. note::
         asdf is plugin-driven: every tool the user can install is gated
         behind a plugin (``asdf plugin add nodejs``). ``mpm install`` does

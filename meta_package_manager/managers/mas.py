@@ -31,9 +31,32 @@ if TYPE_CHECKING:
 
 
 class MAS(PackageManager):
-    """mas drives the Mac App Store from the command line.
+    """``mas`` drives the Mac App Store from the command line.
 
-    Packages are App Store applications, identified by their numeric adamID.
+    Packages are Mac App Store applications, keyed by the numeric adamID Apple
+    assigns each title (the ``id`` in an App Store link). mpm reads and writes
+    that ID; the display name rides along only as a label.
+
+    Every query reads ``--json`` output, the supported programmatic interface
+    since the ``>=7.0.0`` floor added ``--json`` to ``list``, ``outdated`` and
+    ``search``. It sidesteps the column-alignment ambiguities of the tabular
+    listing, where an app name carrying parentheses or padding whitespace would
+    derail a positional parser.
+
+    .. note::
+
+        ``mas`` prints one JSON object per app, concatenated rather than wrapped
+        in an array, and leaves control characters (embedded newlines,
+        ``U+2028``) unescaped inside name and description strings (`upstream bug
+        <https://github.com/mas-cli/mas/issues/1248>`_). mpm decodes the buffer
+        one object at a time with ``strict=False`` so each object ends at its own
+        closing brace instead of splitting on those bytes.
+
+    .. note::
+
+        ``mas`` self-escalates: it asks for root itself when a store mutation
+        needs it, so mpm never wraps ``install``, ``upgrade`` or ``uninstall`` in
+        its own ``sudo``.
     """
 
     name = "Mac App Store"

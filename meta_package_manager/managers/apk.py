@@ -34,6 +34,15 @@ class APK(PackageManager):
     """Alpine Package Keeper (``apk``) used by Alpine Linux.
 
     Documentation: https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
+
+    .. note::
+        ``installed`` and ``outdated`` both parse the ``list`` applet, so the
+        version floor is ``2.10.0``: the release that introduced it. Progress
+        output is disabled on every call to keep the parsed lines stable.
+
+    .. caution::
+        ``outdated`` reads the local repository cache rather than the remote, so
+        ``sync`` must run first for an accurate upgrade list.
     """
 
     name = "Alpine apk"

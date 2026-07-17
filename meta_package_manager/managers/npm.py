@@ -32,14 +32,31 @@ if TYPE_CHECKING:
 
 
 class NPM(PackageManager):
-    """See command equivalences at: https://github.com/antfu-collective/ni?tab=readme-ov-file#ni.
+    """The Node.js package manager.
+
+    mpm drives npm in global mode: every call forces ``--global`` so packages land
+    in the shared prefix instead of the current working directory. Per-scope
+    targeting and multi-binary discovery (several node versions through nvm) are
+    tracked in `#1725
+    <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__. Command
+    equivalences with the sibling JS managers are listed at
+    https://github.com/antfu-collective/ni?tab=readme-ov-file#ni.
+
+    Queries parse npm's ``--json`` output. Mutating operations are marked
+    privileged so ``--sudo`` can escalate writes into a root-owned global prefix,
+    though escalation stays dormant unless requested.
 
     .. note::
+        npm enforces a supply-chain cooldown through its ``min-release-age``
+        resolver option, refusing to resolve any release younger than the
+        configured age. The version floor exists for it: ``min-release-age`` first
+        shipped in ``11.10.0``, and older releases silently ignore the setting.
 
-        All operations target the global scope via ``--global``. Per-scope targeting
-        and multi-binary discovery (e.g. multiple node versions via nvm) are tracked
-        in `#1725
-        <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
+    .. caution::
+        A fatal npm error (usually a local node version out of sync) is reported
+        both on ``<stderr>`` and as a JSON blob on ``<stdout>``. The ``run_cli``
+        override blanks that JSON so the failure surfaces once, through
+        ``<stderr>``, rather than being parsed as a package listing.
     """
 
     name = "Node npm"

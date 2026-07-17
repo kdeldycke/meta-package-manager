@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class Emerge(PackageManager):
-    """The Gentoo package manager.
+    """Portage's ``emerge``, Gentoo's source-based package manager.
 
     Documentation:
 
@@ -39,6 +39,24 @@ class Emerge(PackageManager):
     - https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
+
+    The outdated listing and the whole-system upgrade operate against the
+    ``@world`` set. The progress spinner and ANSI coloring are disabled on every
+    call, leaving output the regexes can parse.
+
+    .. note::
+        Two operations lean on companion Portage tools rather than ``emerge``
+        itself: ``installed`` reads the package list through ``qlist`` and
+        ``cleanup`` trims distfiles through ``eclean``. Neither is resolved
+        through :py:attr:`cli_path
+        <meta_package_manager.execution.CLIExecutor.cli_path>` the way the
+        reference ``emerge`` binary is; both are expected on the ``PATH``.
+
+    .. warning::
+        ``cleanup`` forces a full ``@world`` upgrade before running
+        ``--depclean``: Portage refuses to remove packages until every
+        dependency is resolved, so depcleaning a partially-upgraded system
+        could drop still-needed packages.
     """
 
     name = "Gentoo emerge"
@@ -116,8 +134,8 @@ class Emerge(PackageManager):
         .. warning::
             This suppose the ``qlist`` binary is available and present on the system. We
             do not search for it or try to resolves its canonical path with
-            :py:attr:`PackageManager.cli_path
-            <meta_package_manager.manager.PackageManager.cli_path>`, as we do for the
+            :py:attr:`cli_path
+            <meta_package_manager.execution.CLIExecutor.cli_path>`, as we do for the
             reference ``emerge`` binary.
 
         .. code-block:: shell-session
@@ -310,8 +328,8 @@ class Emerge(PackageManager):
         .. warning::
             This suppose the ``eclean`` binary is available and present on the system.
             We do not search for it or try to resolves its canonical path with
-            :py:attr:`PackageManager.cli_path
-            <meta_package_manager.manager.PackageManager.cli_path>`, as we do for the
+            :py:attr:`cli_path
+            <meta_package_manager.execution.CLIExecutor.cli_path>`, as we do for the
             reference ``emerge`` binary.
 
         .. code-block:: shell-session

@@ -31,7 +31,33 @@ if TYPE_CHECKING:
 
 
 class Scoop(PackageManager):
-    """Scoop is a user-level installer for Windows, unpacking into ``~/scoop``."""
+    """Scoop is a user-level command-line installer for Windows.
+
+    Apps unpack under ``~/scoop`` without elevation, so no operation is marked
+    ``sudo``.
+
+    Documentation:
+
+    - https://scoop.sh
+    - https://github.com/ScoopInstaller/Scoop
+
+    .. note::
+        The ``installed``, ``outdated`` and ``search`` listings are column
+        tables introduced by a ``---`` separator line: mpm drops everything up
+        to that separator, then splits each row positionally on whitespace.
+
+    .. attention::
+        ``scoop --version`` does not reliably print a clean version: it often
+        emits the raw ``git log`` line of the checkout instead. The probe
+        therefore carries fallbacks that recover the version from a
+        ``tag: vX.Y.Z`` ref or a ``Bump to version`` commit subject. See
+        `Scoop's own version-reporting issue
+        <https://github.com/ScoopInstaller/Scoop/issues/6457>`_.
+
+    .. caution::
+        ``remove`` uninstalls with ``--purge``, so a package's persisted data
+        directory is deleted with it rather than kept for a later reinstall.
+    """
 
     name = "Scoop"
 

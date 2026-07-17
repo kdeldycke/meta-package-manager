@@ -10,9 +10,9 @@
 #     Distro-packaged TeX Live (Debian, Fedora) is dpkg/rpm-owned and disables
 #     tlmgr's mutating commands.
 #   - `info --data name,localrev` prints headerless CSV, one "name,revision" record
-#     per line; both fields are bare and comma-free. The --data option appeared in
+#     per line; both fields are bare and comma-free. The `--data` option appeared in
 #     TeX Live 2018, hence the version floor.
-#   - The outdated listing runs in --machine-readable mode: tab-separated records
+#   - The outdated listing runs in `--machine-readable` mode: tab-separated records
 #     between an "end-of-header" and an "end-of-updates" line, with a one-char
 #     status in field 2 ("u" = updatable). Diagnostics move to stderr in that mode.
 #   - TeX Live versions are years. The version regex deliberately matches only the

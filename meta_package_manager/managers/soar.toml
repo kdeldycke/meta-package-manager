@@ -4,6 +4,10 @@
 # binaries and AppImages. See docs/overrides.md ("Define a new manager") for the schema
 # and meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
+# soar is pre-1.0 and makes no cross-minor compatibility promise, so the `>=0.12.0`
+# floor tracks the 0.12 CLI surface parsed below (`list-installed`, `search`, `-y`,
+# `--no-color`) rather than an older release.
+#
 # Parsing notes, verified against the soar-cli 0.12.6 source:
 #   - `soar --json` emits newline-delimited log records, not one JSON array, so the DSL's
 #     flat-JSON parser cannot consume it; the readable text output is parsed instead.
@@ -11,6 +15,8 @@
 #     regexes see clean text.
 #   - `install` and `remove` block on an interactive prompt unless `-y` is passed, which
 #     would hang mpm's non-interactive subprocess.
+#   - No `outdated`: soar has no non-mutating "list upgradable" command, so mpm
+#     auto-skips that operation.
 
 [mpm.managers.soar]
 name = "Soar"

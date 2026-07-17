@@ -31,7 +31,32 @@ if TYPE_CHECKING:
 
 
 class WinGet(PackageManager):
-    """Microsoft's official Windows package manager."""
+    """Microsoft's official Windows package manager.
+
+    mpm reads inventory from ``winget list --details``, whose ``Key: Value``
+    blocks carry the installed version and an ``Available Upgrades`` section,
+    and reads ``search`` from winget's fixed-width column table.
+
+    .. note::
+        ``installed`` and ``outdated`` keep only rows whose ``Origin Source`` is
+        ``winget``, dropping packages winget merely tracks (sideloaded, portable
+        or Microsoft Store). Store entries still surface in ``search``, but their
+        real version cannot be queried through ``winget``, so mpm tags them with
+        an ``msstore`` sentinel version and sorts them below winget-native ones.
+
+    .. warning::
+        Two Windows-only, process-level workarounds keep winget from taking the
+        calling process down with it:
+
+        - winget is spawned with ``DETACHED_PROCESS``. Its COM server and
+          installer children call ``GenerateConsoleCtrlEvent`` as they shut
+          down, broadcasting a ``CTRL_C_EVENT`` to every process sharing their
+          console: detaching removes winget from that console, so the signal
+          never reaches the caller.
+        - ``WindowsPackageManagerServer.exe`` is killed by image name after each
+          call. This COM server is activated out-of-process, so it never
+          inherits mpm's pipes and is never reaped by ``communicate()``.
+    """
 
     homepage_url = "https://github.com/microsoft/winget-cli"
 
@@ -59,8 +84,9 @@ class WinGet(PackageManager):
     ``--disable-interactivity``:
         Disable interactive prompts.
 
-    ..todo::
+    .. todo::
         Add the ``--no-progress`` option once it is available in the stable release:
+
         - https://github.com/microsoft/winget-cli/pull/6049
         - https://github.com/microsoft/winget-cli/issues/3494#issuecomment-3921618377
     """

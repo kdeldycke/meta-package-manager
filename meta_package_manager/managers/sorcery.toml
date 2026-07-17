@@ -22,7 +22,7 @@
 #     ends on an interactive "edit the queue?" prompt, so there is no cleanly
 #     non-mutating upgradable listing.
 #   - `cast` compiles from source and may prompt on a spell's first cast (optional
-#     dependencies, configuration); sorcery has no universal --yes flag.
+#     dependencies, configuration); sorcery has no universal `--yes` flag.
 
 [mpm.managers.sorcery]
 name = "Sorcery"

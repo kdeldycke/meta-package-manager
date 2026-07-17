@@ -43,12 +43,18 @@ class SDKMAN(PackageManager):
     Unix-based systems.
 
     .. note::
-        SDKMAN! primarily serves the JVM ecosystem: Java, Gradle, Maven,
-        Kotlin, Scala, and ~115 other candidates.
+        SDKMAN! primarily serves the JVM ecosystem: Java, Gradle, Maven, Kotlin,
+        Scala, and ~115 other candidates. Each candidate is treated as a package.
 
     .. caution::
-        The ``sdk`` command is a shell function, not a standalone binary. Every
-        invocation is wrapped in ``bash -c 'source <init> && sdk <args>'``.
+        The ``sdk`` command is a shell function, not a standalone binary, so mpm
+        detects SDKMAN by its init script (``sdkman-init.sh``) rather than a binary
+        on ``PATH`` and wraps every invocation in
+        ``bash -c 'source <init> && sdk <args>'``.
+
+    .. note::
+        SDKMAN has no read-only "outdated" verb, so ``outdated`` pipes ``n`` into
+        ``sdk upgrade`` to capture the candidate list without applying any upgrade.
     """
 
     homepage_url = "https://sdkman.io"

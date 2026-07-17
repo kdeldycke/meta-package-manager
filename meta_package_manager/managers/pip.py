@@ -82,19 +82,47 @@ def _split_dep_spec(spec: str) -> tuple[str, str, str]:
 
 
 class Pip(PackageManager):
-    """We will use the Python binary to call out ``pip`` as a module instead of a CLI.
+    """The pip package installer for Python, driven as a module (``python -m pip``)
+    rather than through the ``pip`` executable.
 
-    This is a more robust way of managing packages: "if you're on Windows there
-    is an added benefit to using `python -m pip` as it lets `pip` update itself."
-    Source: https://snarky.ca/why-you-should-use-python-m-pip/
+    Calling the module through the interpreter lets ``pip`` upgrade itself, an
+    advantage on Windows in particular
+    (https://snarky.ca/why-you-should-use-python-m-pip/).
+
+    Installed and outdated packages are read from pip's ``list --format=json``
+    output. The ``outdated`` query adds ``--not-required`` to report only
+    top-level packages, since upgrading a transitive dependency can break its
+    parent's version constraints (`#1214
+    <https://github.com/kdeldycke/meta-package-manager/issues/1214>`__). There is
+    no ``search``: PyPI disabled its server-side search API in 2020 under
+    unmanageable load, so ``pip search`` no longer works (see `pip issue 5216
+    <https://github.com/pypa/pip/issues/5216#issuecomment-744605466>`__).
 
     .. note::
 
         All operations target the default pip scope (system site-packages, or the
         active virtualenv). Per-scope targeting (system vs user vs venv) and
-        multi-binary discovery (e.g. multiple pythons via pyenv) are tracked in
+        multi-binary discovery (multiple pythons via pyenv) are tracked in
         `#1725
         <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
+
+    .. note::
+
+        Interpreter discovery probes the running Python first, so an ``mpm``
+        installed inside a virtualenv manages that virtualenv, then the Python(s)
+        on ``PATH``. Two kinds are skipped so the manager only targets a scope
+        the user can install into: ``mpm``'s own distributor-managed bundle
+        (Homebrew stages it under a ``Cellar`` prefix) and any
+        externally-managed, non-virtualenv interpreter that :pep:`668` forbids
+        ``pip install`` into. When every candidate is skipped, the manager
+        reports as unavailable.
+
+    .. note::
+
+        Installs, upgrades and removals are marked privileged, so a global
+        install can escalate with ``--sudo``, but escalation is off by default.
+        The supply-chain cooldown needs pip ``26.1``, the first release to honor
+        ``--uploaded-prior-to``; older pip silently ignores the release-age gate.
     """
 
     name = "Python pip"

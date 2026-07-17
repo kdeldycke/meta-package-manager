@@ -31,14 +31,30 @@ if TYPE_CHECKING:
 
 
 class Flatpak(PackageManager):
-    """Flatpak package manager.
+    """Flatpak manages sandboxed desktop applications pulled from remotes like
+    Flathub.
+
+    mpm covers applications only: every listing passes ``--app``, so runtimes
+    and SDKs stay out of scope. Listings are requested with
+    ``--columns=name,application,version --ostree-verbose`` and parsed as
+    tab-separated rows.
 
     .. note::
-
         All operations target the system-wide scope except ``cleanup`` which only
         repairs the user installation. Per-scope targeting (system vs user) is
         tracked in `#1725
         <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
+
+    .. caution::
+        ``outdated`` reads each pending update's latest version from
+        ``remote-ls --updates``, then runs one ``flatpak info`` per package to
+        recover its installed version: a follow-up CLI call for every outdated
+        app.
+
+    .. note::
+        Brewfile backups emit the bare ``flatpak "id"`` form: mpm does not
+        capture each app's origin remote, so ``brew bundle install`` restores
+        through Flathub and non-Flathub apps must be edited in by hand.
     """
 
     homepage_url = "https://flatpak.org"

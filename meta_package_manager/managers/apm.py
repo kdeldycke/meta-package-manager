@@ -29,7 +29,19 @@ if TYPE_CHECKING:
 
 
 class APM(PackageManager):
-    """Atom's apm, the package manager of the sunset Atom editor."""
+    """Atom's package manager, from the sunset Atom editor.
+
+    apm installed packages and themes for GitHub's Atom editor, exposing an
+    npm-style CLI whose queries mpm parses from ``--json`` output.
+
+    Atom was `sunset on December 15, 2022
+    <https://github.blog/2022-06-08-sunsetting-atom/>`_, so apm is flagged
+    deprecated here. mpm keeps the wrapper while doing so stays cheap: the
+    community fork `atom-community/apm <https://github.com/atom-community/apm>`_
+    has been floated but never produced a usable drop-in, and per the project's
+    stability policy a deprecated manager may be dropped without notice once it
+    becomes a burden to maintain.
+    """
 
     deprecated = True
     deprecation_url = "https://github.blog/2022-06-08-sunsetting-atom/"

@@ -37,6 +37,17 @@ class Deb_Get(PackageManager):
     .. note::
         ``deb-get`` wraps ``apt`` under the hood for actual package installation
         and removal, so all operations that modify the system require ``sudo``.
+
+    .. caution::
+        ``deb-get list --installed`` prints bare package names with no versions,
+        so the installed inventory carries no version. ``search`` is likewise
+        version-less and offers no exact or extended mode, so mpm refilters its
+        results.
+
+    .. note::
+        There is no read-only ``outdated``: detection runs ``deb-get update``,
+        which also refreshes the package index, so the probe escalates through
+        ``sudo`` like a sync.
     """
 
     name = "deb-get"

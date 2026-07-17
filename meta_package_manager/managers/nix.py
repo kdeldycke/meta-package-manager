@@ -31,12 +31,16 @@ if TYPE_CHECKING:
 
 
 class Nix(PackageManager):
-    """Nix package manager.
+    """Nix, the functional package manager.
 
     .. note::
         All operations use the imperative ``nix-env`` interface, which manages
         a per-user package profile. Declarative approaches (NixOS modules,
         home-manager) are not covered.
+
+    Channel refresh (``sync``) and store garbage collection (``cleanup``) shell
+    out to the sibling ``nix-channel`` and ``nix-collect-garbage`` binaries
+    installed alongside ``nix-env``, not to ``nix-env`` itself.
     """
 
     homepage_url = "https://nixos.org"

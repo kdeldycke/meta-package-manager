@@ -31,10 +31,13 @@ if TYPE_CHECKING:
 
 
 class Composer(PackageManager):
-    """Composer manages the global PHP packages of a user.
+    """Dependency manager for PHP, driven in global mode.
 
-    Operations run in global mode, targeting the user-wide ``~/.composer``
-    project rather than a working tree.
+    Every operation is prefixed with ``global`` so it targets the user-wide
+    Composer project (``~/.composer``) rather than a working tree. ``installed`` and
+    ``outdated`` parse Composer's ``--format=json`` output, while ``search`` reads
+    its plain-text listing; ``--no-ansi`` is forced on every call to strip color
+    codes.
     """
 
     name = "PHP Composer"

@@ -26,6 +26,7 @@ the same on-disk install database:
   back to ``pkg``.
 
 References:
+
 - https://man.freebsd.org/cgi/man.cgi?pkg(8)
 - https://docs.freebsd.org/en/books/handbook/ports/
 - https://man.freebsd.org/cgi/man.cgi?ports(7)
@@ -61,7 +62,24 @@ it, but every tool and consumer in the wild assumes this default.
 
 class PKG(PackageManager):
     """FreeBSD's binary pkg frontend, fetching pre-compiled artifacts from the
-    official repository."""
+    official FreeBSD repository.
+
+    .. note::
+        ``installed`` reports only explicitly-requested packages: the query
+        filters on pkg's automatic flag (``%a = 0``), so dependencies pulled in
+        automatically are left out.
+
+    .. note::
+        ``outdated`` parses ``pkg upgrade --dry-run`` rather than ``pkg version``,
+        because only the dry-run names the target version each package would move
+        to.
+
+    .. caution::
+        ``sync`` forces ``IGNORE_OSVERSION=yes``: a package built for a newer
+        FreeBSD than the running kernel would otherwise trigger an interactive
+        confirmation that hangs the subprocess. Honoring that variable is also why
+        the version floor is ``1.11``.
+    """
 
     name = "FreeBSD pkg"
 
@@ -486,23 +504,28 @@ class PKG(PackageManager):
 
 
 class Ports(PackageManager):
-    """FreeBSD ports tree (source-build) manager.
+    """FreeBSD ports tree: the source-build workflow rooted at ``/usr/ports``.
 
     .. note::
+        Coexists with :py:class:`PKG` on the same system: both share the install
+        database maintained by ``pkg``. ``Ports`` builds and tracks ports compiled
+        from source under ``/usr/ports``, while ``PKG`` handles binary packages
+        from the FreeBSD repository. Listing operations may overlap because ``pkg``
+        does not distinguish ports-built from binary-installed packages once they
+        are registered.
 
-        Coexists with :py:class:`PKG` on the same system: both share the
-        install database maintained by ``pkg``. ``Ports`` is concerned with
-        building and tracking ports installed from source under
-        ``/usr/ports``, while ``PKG`` handles binary packages from the
-        FreeBSD repository. Listing operations may overlap because ``pkg``
-        does not distinguish between ports-built and binary-installed
-        packages once they are registered in the database.
+    .. note::
+        ``installed`` and ``outdated`` delegate to the sibling ``pkg`` binary,
+        since the ports tree keeps no registry of its own. Builds drive FreeBSD's
+        ``make`` directly with ``BATCH=yes`` to accept default build options
+        without prompting. Upgrades shell out to the third-party ``portmaster``:
+        the ports tree ships no batch upgrader. ``sync`` refreshes the tree with
+        ``git`` (``portsnap`` was removed after FreeBSD 13).
 
     .. caution::
-
-        Mutating operations require root privileges and a populated ports
-        tree at ``/usr/ports``. The manager flags itself unavailable when
-        the tree is missing.
+        Mutating operations require root privileges and a populated ports tree at
+        ``/usr/ports``. The manager flags itself unavailable when the tree is
+        missing.
     """
 
     # Removal goes through the shared install database, identical to PKG.

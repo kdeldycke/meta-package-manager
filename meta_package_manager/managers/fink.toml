@@ -18,7 +18,7 @@
 #     defaults to sudo) and no-op when already root. mpm must therefore NOT mark
 #     operations sudo itself; unattended runs need a cached or NOPASSWD sudo
 #     ticket since fink's own sudo prompt targets the controlling terminal.
-#   - The global --yes flag precedes the command word and auto-answers fink's own
+#   - The global `--yes` flag precedes the command word and auto-answers fink's own
 #     prompts.
 
 [mpm.managers.fink]

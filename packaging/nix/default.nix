@@ -11,8 +11,14 @@
 
 let
   python3 = pkgs.python3.override {
-    packageOverrides = self: _super: {
+    packageOverrides = self: super: {
       click-extra = self.callPackage ./click-extra.nix { };
+      # nixpkgs' cloup wheel leaks the ``setuptools_scm<10`` pin from its
+      # ``setup_requires`` into Requires-Dist, which then fails
+      # pythonRuntimeDepsCheck. Strip the bogus runtime dependency.
+      cloup = super.cloup.overridePythonAttrs (old: {
+        pythonRemoveDeps = (old.pythonRemoveDeps or [ ]) ++ [ "setuptools-scm" ];
+      });
       extra-platforms = self.callPackage ./extra-platforms.nix { };
     };
   };

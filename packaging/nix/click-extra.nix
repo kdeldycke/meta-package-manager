@@ -2,84 +2,94 @@
   lib,
   buildPythonPackage,
   fetchFromGitHub,
+  gitMinimal,
   pytestCheckHook,
+  hjson,
+  jsonschema,
+  myst-parser,
+  pygments,
+  pytest-httpserver,
+  pyyaml,
+  requests,
+  sphinx,
+  tomlkit,
+  xmltodict,
   uv-build,
   boltons,
   click,
   cloup,
   deepmerge,
   extra-platforms,
-  hjson,
-  pygments,
-  pytest-httpserver,
-  pyyaml,
-  requests,
   tabulate,
-  tomlkit,
   wcmatch,
-  xmltodict,
+  wcwidth,
 }:
 
 buildPythonPackage (finalAttrs: {
   pname = "click-extra";
-  version = "7.15.0";
+  version = "8.4.0";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";
     repo = "click-extra";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-Hof1SFh8XXBoQ9Pr4qI/7jNlBDMpUi7+qs1QcT042tY=";
+    hash = "sha256-msQCQVmLET5WZtRK3r2T6c0VGW/d7FbD7IUvgx3zb2Q=";
   };
 
   build-system = [ uv-build ];
 
+  # wcwidth backs the ``tabulate[widechars]`` extra pinned in pyproject.toml
+  # and is also a direct runtime dependency since 8.4.
   dependencies = [
     boltons
     click
     cloup
     deepmerge
     extra-platforms
-    requests
     tabulate
     wcmatch
-  ]
-  # click-extra's pyproject.toml pins ``tabulate[widechars]``; the ``widechars``
-  # extra adds ``wcwidth`` for correct column padding around wide Unicode
-  # characters like emoji. Without it, ``tests/test_table.py`` rendering
-  # assertions fail across most table formats.
-  ++ tabulate.optional-dependencies.widechars;
+    wcwidth
+  ];
 
-  # Optional libraries imported at module-level by various test files:
-  # tests/test_table.py needs hjson, pyyaml, tomlkit and xmltodict (the
-  # [hjson], [yaml], [toml] and [xml] extras declared in pyproject.toml);
-  # tests/test_pygments.py needs pygments; tests/test_config.py uses the
-  # httpserver fixture from pytest-httpserver to test remote config loading.
   nativeCheckInputs = [
     pytestCheckHook
+    # Optional libraries imported at module level by the test files:
+    # ``test_table.py`` needs hjson, tomlkit, xmltodict and yaml;
+    # ``test_pygments.py`` needs pygments; ``test_carapace.py`` gates its
+    # completion-spec validation tests behind jsonschema;
+    # ``test_config.py`` drives remote configuration loading through
+    # pytest-httpserver's ``httpserver`` fixture; ``tests/sphinx`` builds
+    # documents with sphinx and myst-parser and its matrix tests assemble
+    # synthetic git repositories; ``requests`` is imported at module level
+    # by tests whose network-marked cases are deselected below.
+    gitMinimal
     hjson
+    jsonschema
+    myst-parser
     pygments
     pytest-httpserver
     pyyaml
+    requests
+    sphinx
     tomlkit
     xmltodict
   ];
 
-  # Tests marked ``network`` make HTTPS requests; the build sandbox has
-  # no system TLS CA bundle.
+  # Tests marked ``network`` make HTTPS requests; the build sandbox has no
+  # system TLS CA bundle.
   disabledTestMarks = [ "network" ];
 
   disabledTestPaths = [
-    # tests/sphinx requires the Sphinx ecosystem (myst-parser, furo, etc.).
-    "tests/sphinx"
-    # tests/mkdocs requires mkdocs-click.
+    # tests/mkdocs requires mkdocs-click, not packaged in nixpkgs.
     "tests/mkdocs"
   ];
 
-  # These tests assert against debug output that should not include the
-  # build sandbox's ``$HOME``: click-extra logs the search pattern using
-  # the runtime environment HOME instead of the test fixture's tmp_path.
   disabledTests = [
+    # The four integration tests below assert against debug output that
+    # should not include the test sandbox's ``$HOME``; click-extra logs
+    # the search pattern using the runtime environment HOME instead of
+    # the test fixture's ``tmp_path``.
     "test_integrated_color_option"
     "test_required_command"
     "test_unset_conf_debug_message"

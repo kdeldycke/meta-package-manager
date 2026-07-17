@@ -3,39 +3,39 @@
   buildPythonPackage,
   fetchFromGitHub,
   pytestCheckHook,
-  requests,
   uv-build,
 }:
 
 buildPythonPackage (finalAttrs: {
   pname = "extra-platforms";
-  version = "12.0.3";
+  version = "13.3.1";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";
     repo = "extra-platforms";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-OJ5ch1dfAnblC+3UCJ9I9P9sw8taGp8yBg//ZraunRo=";
+    hash = "sha256-uNapgmmducyLcSBF7wiEkyho/IMD9jutXpx6aHcCQFg=";
   };
 
   build-system = [ uv-build ];
 
-  nativeCheckInputs = [
-    pytestCheckHook
-    requests
-  ];
+  nativeCheckInputs = [ pytestCheckHook ];
 
-  # Tests marked ``network`` fetch from PyPI.
+  # Tests marked ``network`` reach out to PyPI; the build sandbox has no
+  # system TLS CA bundle.
   disabledTestMarks = [ "network" ];
 
-  # test_sphinx_crossrefs.py shells out to ``uv``, unavailable in the build sandbox.
-  disabledTestPaths = [ "tests/test_sphinx_crossrefs.py" ];
+  disabledTestPaths = [
+    # Shells out to ``uv`` to render the docs as a side effect; not
+    # available in the build sandbox.
+    "tests/test_sphinx_crossrefs.py"
+  ];
 
-  # These tests assume the CI runner environment (the ``GITHUB_RUNNER_OS``
-  # env var, expected number of detected platform traits per runner image).
-  # Neither is available inside the Nix build sandbox.
   disabledTests = [
+    # Both tests assume the CI runner environment (the ``GITHUB_RUNNER_OS``
+    # env var, the expected number of detected platform traits per runner
+    # image). Neither is available inside a hermetic build sandbox.
     "test_platform_detection"
     "test_current_funcs"
   ];

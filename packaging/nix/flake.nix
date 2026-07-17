@@ -25,8 +25,13 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
           python3 = pkgs.python3.override {
-            packageOverrides = self: _super: {
+            packageOverrides = self: super: {
               click-extra = self.callPackage ./click-extra.nix { };
+              # Same cloup workaround as default.nix: strip the
+              # ``setuptools_scm<10`` pin leaked into Requires-Dist.
+              cloup = super.cloup.overridePythonAttrs (old: {
+                pythonRemoveDeps = (old.pythonRemoveDeps or [ ]) ++ [ "setuptools-scm" ];
+              });
               extra-platforms = self.callPackage ./extra-platforms.nix { };
             };
           };

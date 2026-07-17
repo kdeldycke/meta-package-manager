@@ -28,8 +28,17 @@ python3Packages.buildPythonApplication (finalAttrs: {
     xmltodict
   ];
 
-  # Tests require network access and system package managers.
-  doCheck = false;
+  nativeCheckInputs = with python3Packages; [
+    pytestCheckHook
+    # tests/test_docs.py parses the GitHub workflow YAML files.
+    pyyaml
+  ];
+
+  # The hermetic unit layer runs in full. The integration layer
+  # (tests/test_manager_*.py, tests/test_cli*.py) spawns real package manager
+  # binaries and auto-skips when ``$HOME`` is ``/homeless-shelter``, the
+  # hermetic-builder convention shared by Guix and Nix. See the "Note for
+  # downstream packagers" section of the project's CLAUDE.md.
 
   pythonImportsCheck = [ "meta_package_manager" ];
 

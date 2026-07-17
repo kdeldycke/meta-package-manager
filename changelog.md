@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [mpm] Every supported package manager gets a dedicated documentation page detailing its platforms, operations and backfilled capabilities, CLI invocation and version probe, escalation and cooldown behaviors, purl types, usage examples and the captured native outputs its parsers were written against, all rendered live from the manager declarations at Sphinx build time. A new hub page indexes the 72 pages, and manager IDs in the readme's operation matrix, the benchmark table and the augmentations table now link to them.
+- [mpm] Add a MacPorts Portfile overlay under `packaging/macports`, carrying the port plus the dependency ports missing from the official tree, tested by a new `macports-source` job.
 - [pacaur,paru,yay] The AUR helpers are no longer wrapped in `sudo`: they refuse or break under root (`makepkg` rejects root builds, paru aborts AUR transactions, pacaur aborts its sync operations) and escalate through their own internal `sudo pacman` calls, which `mpm` now tracks with the `internal_sudo` marker (warm credential-cache keepalive, hidden-prompt watchdog). This also lets yay's cooldown environment overlay reach the process, where the `sudo` wrap used to strip it.
 - [pkg] `installed` now lists every package registered in the pkg database instead of only explicitly-requested ones: the `%a = 0` automatic-flag filter is dropped, and the query invocation loses the literal quote characters it carried, aligning it with the `ports` invocation reading the same database.
 

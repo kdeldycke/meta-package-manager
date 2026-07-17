@@ -8,12 +8,14 @@ name: 🏪 Test distributors
       - .github/workflows/tests-install.yaml
       - packaging/choco/**
       - packaging/guix/**
+      - packaging/macports/**
       - packaging/nix/**
   pull_request:
     paths:
       - .github/workflows/tests-install.yaml
       - packaging/choco/**
       - packaging/guix/**
+      - packaging/macports/**
       - packaging/nix/**
   workflow_dispatch:
   schedule:
@@ -183,6 +185,64 @@ jobs:
           chmod +x guix-install.sh
           yes | sudo ./guix-install.sh
       - run: guix install --load-path=./packaging/guix meta-package-manager
+      - run: mpm --version
+
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports
+  # Build and install from the in-repo Portfile overlay: a local ports tree
+  # providing meta-package-manager plus the dependency ports missing from the
+  # official macports-ports tree (py-click-extra, py-cloup, py-deepmerge,
+  # py-extra-platforms, py-packageurl-python) and a py-boltons version bump
+  # (the official port is stuck below mpm's boltons >= 25 floor). Pending
+  # submission to https://github.com/macports/macports-ports.
+  # MacPorts installer pkgs are built per macOS version, so the asset is
+  # resolved from the runner's major version (15 -> Sequoia, 26 -> Tahoe).
+  # The overlay is served from /Users/Shared because the unprivileged macports
+  # build user cannot read the runner workspace under /Users/runner.
+  macports-source:
+    name: "⁉️ macports-source (${{ matrix.os }})"
+    # Unproven setup: keep advisory until the overlay is validated in CI.
+    continue-on-error: true
+    strategy:
+      matrix:
+        os:
+          - macos-15-intel
+          - macos-26
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Install MacPorts
+        run: |
+          MACOS_MAJOR="$(sw_vers -productVersion | cut -d . -f 1)"
+          gh release download \
+            --repo macports/macports-base \
+            --pattern "MacPorts-*-${MACOS_MAJOR}-*.pkg" \
+            --output macports.pkg
+          sudo installer -pkg macports.pkg -target /
+          echo "/opt/local/bin" >> "$GITHUB_PATH"
+          echo "/opt/local/sbin" >> "$GITHUB_PATH"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Sync official ports tree
+        run: sudo port -v sync
+      - name: Register overlay ports tree
+        run: |
+          cp -R ./packaging/macports /Users/Shared/mpm-ports
+          chmod -R a+rX /Users/Shared/mpm-ports
+          portindex /Users/Shared/mpm-ports
+          { echo "file:///Users/Shared/mpm-ports"; cat /opt/local/etc/macports/sources.conf; } > sources.conf
+          sudo cp sources.conf /opt/local/etc/macports/sources.conf
+      - name: Lint ports
+        run: >
+          port lint --nitpick
+          meta-package-manager
+          py-boltons
+          py-click-extra
+          py-cloup
+          py-deepmerge
+          py-extra-platforms
+          py-packageurl-python
+      - name: Install mpm
+        run: sudo port -v install meta-package-manager
       - run: mpm --version
 
   # https://search.nixos.org/packages?query=meta-package-manager

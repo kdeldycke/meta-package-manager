@@ -150,6 +150,29 @@ $ zb install meta-package-manager
 ````
 `````
 
+`````{tab-item} MacPorts
+While the port is pending submission to [`macports-ports`](https://github.com/macports/macports-ports), build and install from [the Portfile overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports):
+
+```{code-block} shell-session
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ portindex ./meta-package-manager/packaging/macports
+```
+
+Then register the overlay as your first ports tree, by adding its absolute path at the top of `/opt/local/etc/macports/sources.conf`:
+
+```{code-block} text
+file:///path/to/meta-package-manager/packaging/macports
+```
+
+Finally:
+
+```{code-block} shell-session
+$ sudo port install meta-package-manager
+```
+
+The overlay carries the 5 dependency ports missing from the official tree (`py-click-extra`, `py-cloup`, `py-deepmerge`, `py-extra-platforms`, `py-packageurl-python`), plus a `py-boltons` version bump.
+`````
+
 `````{tab-item} Scoop
 Meta Package Manager is available in the `main` repository of [Scoop](https://scoop.sh), so you just need to:
 

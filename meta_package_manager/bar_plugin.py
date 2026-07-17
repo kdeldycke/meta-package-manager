@@ -292,8 +292,9 @@ class MPMPlugin:
         runnable = False
         version = None
         up_to_date = False
-        # Is mpm runnable as-is with provided CLI arguments?
-        if not process.returncode and not error:
+        # Is mpm runnable as-is with provided CLI arguments? Check the error
+        # first: on a FileNotFoundError probe, ``process`` was never assigned.
+        if not error and not process.returncode:
             runnable = True
             # This regular expression is designed to extract the version number,
             # whether it is surrounded by ANSI color escape sequence or not.

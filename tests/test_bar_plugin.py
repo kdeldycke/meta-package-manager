@@ -65,6 +65,21 @@ def test_normalize_params(param_string, results):
     assert bar_plugin.MPMPlugin.normalize_params(param_string) == results
 
 
+def test_check_mpm_missing_binary():
+    """A probe whose binary does not exist must report the error, not crash.
+
+    Regression test for the ``UnboundLocalError`` on the ``FileNotFoundError``
+    path of ``check_mpm()``, where ``process`` is never assigned.
+    """
+    runnable, up_to_date, version, error = bar_plugin.MPMPlugin().check_mpm(
+        ("/nonexistent/mpm-binary",),
+    )
+    assert runnable is False
+    assert up_to_date is False
+    assert version is None
+    assert isinstance(error, FileNotFoundError)
+
+
 def _invocation_matrix(*iterables):
     """Pre-compute a matrix of all possible options for invocation."""
     for args in product(*iterables):

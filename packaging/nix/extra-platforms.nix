@@ -3,6 +3,8 @@
   buildPythonPackage,
   fetchFromGitHub,
   pytestCheckHook,
+  pytest-cov-stub,
+  pytest-xdist,
   uv-build,
 }:
 
@@ -20,7 +22,13 @@ buildPythonPackage (finalAttrs: {
 
   build-system = [ uv-build ];
 
-  nativeCheckInputs = [ pytestCheckHook ];
+  nativeCheckInputs = [
+    pytestCheckHook
+    # The pyproject ``addopts`` pass --cov and --numprocesses/--dist flags,
+    # so the coverage and xdist plugins must resolve for pytest to start.
+    pytest-cov-stub
+    pytest-xdist
+  ];
 
   # Tests marked ``network`` reach out to PyPI; the build sandbox has no
   # system TLS CA bundle.

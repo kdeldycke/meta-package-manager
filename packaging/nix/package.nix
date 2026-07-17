@@ -2,6 +2,7 @@
   lib,
   python3Packages,
   fetchFromGitHub,
+  zsh,
 }:
 
 python3Packages.buildPythonApplication (finalAttrs: {
@@ -44,7 +45,10 @@ python3Packages.buildPythonApplication (finalAttrs: {
     platformdirs
     respx
     spdx-tools
-  ];
+  ]
+  # The Xbar/SwiftBar plugin tests only run on macOS and drive the plugin
+  # through the login shells it targets.
+  ++ lib.optionals python3Packages.python.stdenv.hostPlatform.isDarwin [ zsh ];
 
   # The hermetic unit layer runs in full. The integration layer
   # (tests/test_manager_*.py, tests/test_cli*.py) spawns real package manager

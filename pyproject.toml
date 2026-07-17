@@ -508,12 +508,6 @@ glob = "./**/__init__.py"
 ignore_missing_version = true
 
 [[tool.bumpversion.files]]
-# Update the version advertised in the Xbar/SwiftBar plugin header.
-filename = "./meta_package_manager/bar_plugin.py"
-search = "<xbar.version>{current_version}</xbar.version>"
-replace = "<xbar.version>{new_version}</xbar.version>"
-
-[[tool.bumpversion.files]]
 # Update version in [project] section. Anchored to a line start (regex) so it
 # does not also match version-suffixed keys like file-version/product-version
 # under [tool.nuitka], which contain `version = "X"` as a substring (their
@@ -548,9 +542,13 @@ search = "## [`{current_version}` (unreleased)]("
 replace = "## [`{new_version}` (unreleased)]("
 
 [[tool.bumpversion.files]]
-# Update the version in the citation file.
+# Update the version in the citation file. Anchored to a line start (regex) so
+# it does not also match the `cff-version:` schema field, which would otherwise
+# be overwritten with the package version on every bump as soon as the two
+# values coincide once.
 filename = "./citation.cff"
-search = "version: {current_version}"
+regex = true
+search = "(?m)^version: {current_version}"
 replace = "version: {new_version}"
 
 [[tool.bumpversion.files]]
@@ -559,6 +557,12 @@ filename = "./citation.cff"
 regex = true
 search = "date-released: \\d{{4}}-\\d{{2}}-\\d{{2}}"
 replace = "date-released: {utcnow:%Y-%m-%d}"
+
+[[tool.bumpversion.files]]
+# Update the version advertised in the Xbar/SwiftBar plugin header.
+filename = "./meta_package_manager/bar_plugin.py"
+search = "<xbar.version>{current_version}</xbar.version>"
+replace = "<xbar.version>{new_version}</xbar.version>"
 
 [tool.lychee]
 # ref: https://github.com/lycheeverse/lychee/blob/master/lychee.example.toml

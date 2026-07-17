@@ -102,7 +102,7 @@ jobs:
       - name: Update package definition to latest release
         if: steps.check.outputs.skip != 'true'
         run: python3 packaging/guix/update.py
-      - uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         if: steps.check.outputs.skip != 'true'
       - name: Render PR body
         if: steps.check.outputs.skip != 'true'
@@ -181,7 +181,7 @@ jobs:
       - name: Update package definition to latest release
         if: steps.check.outputs.skip != 'true'
         run: python3 packaging/nix/update.py
-      - uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         if: steps.check.outputs.skip != 'true'
       - name: Render PR body
         if: steps.check.outputs.skip != 'true'

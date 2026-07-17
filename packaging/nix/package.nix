@@ -52,6 +52,13 @@ python3Packages.buildPythonApplication (finalAttrs: {
   # hermetic-builder convention shared by Guix and Nix. See the "Note for
   # downstream packagers" section of the project's CLAUDE.md.
 
+  disabledTests = [
+    # Asserts the committed issue template matches a regeneration from the
+    # installed extra-platforms, whose platform groups evolve between
+    # releases: a repo-maintenance sync guard, not a packaging invariant.
+    "test_new_package_manager_issue_template"
+  ];
+
   pythonImportsCheck = [ "meta_package_manager" ];
 
   meta = {

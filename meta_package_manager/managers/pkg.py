@@ -65,11 +65,6 @@ class PKG(PackageManager):
     official FreeBSD repository.
 
     .. note::
-        ``installed`` reports only explicitly-requested packages: the query
-        filters on pkg's automatic flag (``%a = 0``), so dependencies pulled in
-        automatically are left out.
-
-    .. note::
         ``outdated`` parses ``pkg upgrade --dry-run`` rather than ``pkg version``,
         because only the dry-run names the target version each package would move
         to.
@@ -107,7 +102,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pkg query -e "%a = 0" "%n %v %c"
+            $ pkg query "%n %v %c"
             7-zip 21.07_2 Console version of the 7-Zip file archiver
             ap24-mod_mpm_itk 2.4.7_2 Run each vhost under a separate uid and gid
             apache24 2.4.57 Version 2.4.x of Apache web server
@@ -118,7 +113,7 @@ class PKG(PackageManager):
             bash 5.1.12 GNU Project's Bourne Again SHell
             beadm 1.4_1 Solaris-like utility to manage Boot Environments on ZFS
         """
-        output = self.run_cli("query", "-e", r'"%a = 0"', r'"%n %v %c"')
+        output = self.run_cli("query", "%n %v %c")
 
         for package in output.splitlines():
             match = self._INSTALLED_REGEXP.match(package)

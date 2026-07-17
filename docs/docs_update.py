@@ -455,9 +455,11 @@ def _cooldown_status(manager_id: str) -> tuple[str, str, str] | None:
 
     The "Supported managers" table of ``docs/cooldown.md`` is the hand-curated
     source of truth for release-age gating: per manager, a status glyph, the
-    native mechanism and an upstream reference. Returns the three cells with
-    their markdown preserved (``—`` marks an empty cell), or ``None`` when the
-    table has no row for the manager yet.
+    native mechanism and an upstream reference. A row may cover several managers
+    at once, its id cell listing each as a backticked code span (like the shared
+    ``uv``/``uvx`` row). Returns the three cells with their markdown preserved
+    (``—`` marks an empty cell), or ``None`` when the table has no row for the
+    manager yet.
     """
     text = (PROJECT_ROOT / "docs" / "cooldown.md").read_text(encoding="UTF-8")
     section = text.partition("## Supported managers")[2].partition("\n## ")[0]
@@ -467,8 +469,7 @@ def _cooldown_status(manager_id: str) -> tuple[str, str, str] | None:
         cells = [cell.strip() for cell in line.strip("|").split("|")]
         if len(cells) < 4:
             continue
-        row_id = cells[0].strip("*` ").split(" ")[0].strip("*`")
-        if row_id == manager_id:
+        if manager_id in re.findall(r"`([^`]+)`", cells[0]):
             return cells[1], cells[2], cells[3]
     return None
 
@@ -510,7 +511,7 @@ def _toml_definition_intro(definition_source: str) -> str | None:
     def autolink(match: re.Match) -> str:
         # Keep trailing punctuation out of the link target.
         url = match.group(0).rstrip(".,;:")
-        return f"<{url}>{match.group(0)[len(url):]}"
+        return f"<{url}>{match.group(0)[len(url) :]}"
 
     # MyST's linkify extension is off: turn bare URLs into explicit autolinks.
     return re.sub(r"https?://[^\s)>]+", autolink, intro)

@@ -13,14 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""sfsu (Scoop For Speed and Usability) is a fast Rust-based replacement for
-slow Scoop operations.
-
-It leverages the same Scoop package ecosystem but provides native JSON output
-and significantly faster execution for listing, searching, and status checks.
-Install and upgrade operations are delegated to Scoop.
-"""
-
 from __future__ import annotations
 
 from extra_platforms import WINDOWS

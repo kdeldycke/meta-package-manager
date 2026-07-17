@@ -290,11 +290,26 @@ class Pacaur(Pacman):
     Inherits every operation, parser and forced argument from ``Pacman``; only
     the binary and version probe differ. Routing through ``pacaur`` is what lets
     ``--query --upgrades`` report AUR updates on top of the official repositories.
+
+    Unlike ``pacman``, the helper must run as the regular user: it aborts under
+    root (``you cannot perform this operation as root``) because ``makepkg``
+    refuses to build as root, and it invokes ``sudo pacman`` itself for the
+    privileged steps. ``mpm`` therefore never wraps it in ``sudo``.
     """
 
     name = "Arch Linux pacaur"
 
     homepage_url = "https://github.com/E5ten/pacaur"
+
+    default_sudo = False
+    """pacaur aborts its sync-class operations under root and runs ``sudo pacman``
+    itself, so the escalation default inherited from ``Pacman`` must not wrap it.
+    """
+
+    internal_sudo = True
+    """pacaur calls ``sudo pacman`` from inside its own commands for the install,
+    upgrade and removal steps.
+    """
 
     requirement = ">=4.0.0"
 
@@ -316,11 +331,26 @@ class Paru(Pacman):
     AUR updates on top of the official repositories. The ``>=1.9.3`` floor is the
     first ``paru`` release to implement ``--sysupgrade``, the flag the inherited
     ``upgrade_all_cli`` builds.
+
+    Unlike ``pacman``, the helper must run as the regular user: any transaction
+    building AUR packages aborts under root (``can't install AUR package as
+    root``), and paru invokes ``sudo pacman`` itself for the privileged steps.
+    ``mpm`` therefore never wraps it in ``sudo``.
     """
 
     name = "Arch Linux paru"
 
     homepage_url = "https://github.com/Morganamilo/paru"
+
+    default_sudo = False
+    """paru refuses to build AUR packages under root and runs ``sudo pacman``
+    itself, so the escalation default inherited from ``Pacman`` must not wrap it.
+    """
+
+    internal_sudo = True
+    """paru calls ``sudo`` from inside its own commands (the ``Sudo``/``SudoFlags``
+    settings of ``paru.conf``) for the install, upgrade and removal steps.
+    """
 
     # v1.9.3 is the first version implementing the --sysupgrade option.
     requirement = ">=1.9.3"
@@ -343,6 +373,14 @@ class Yay(Pacman):
     own ``--query --upgrades`` reports AUR updates on top of the official
     repositories.
 
+    Unlike ``pacman``, the helper must run as the regular user: yay warns under
+    root (``Avoid running yay as root/sudo.``) and any AUR build then dies in
+    ``makepkg``, which refuses to run as root. yay drives ``sudo`` itself for the
+    privileged steps (its ``--sudo``, ``--sudoflags`` and ``--sudoloop`` options),
+    so ``mpm`` never wraps it in ``sudo``. That also keeps the injected
+    ``XDG_CONFIG_HOME`` cooldown overlay below visible to yay, where a ``sudo``
+    wrap would have reset the environment.
+
     .. note::
         yay exposes no release-age flag, so mpm enforces the supply-chain
         :py:attr:`cooldown <meta_package_manager.execution.CLIExecutor.cooldown>` by
@@ -356,6 +394,18 @@ class Yay(Pacman):
     name = "Arch Linux yay"
 
     homepage_url = "https://github.com/Jguer/yay"
+
+    default_sudo = False
+    """yay discourages root runs (``makepkg`` hard-refuses them for AUR builds) and
+    drives ``sudo`` itself, so the escalation default inherited from ``Pacman`` must
+    not wrap it. A wrap would also strip the ``XDG_CONFIG_HOME`` cooldown overlay
+    through ``sudo``'s environment reset.
+    """
+
+    internal_sudo = True
+    """yay calls the escalation binary from inside its own commands, configurable
+    through its ``--sudo``, ``--sudoflags`` and ``--sudoloop`` options.
+    """
 
     requirement = ">=11.0.0"
 

@@ -399,10 +399,13 @@ class CLIExecutor:
     internal_sudo: bool = False
     """Marks a manager whose CLI invokes ``sudo`` itself mid-run.
 
-    Homebrew ``cask`` runs it from installer artifacts and ``fink`` re-execs its
-    root commands through it. mpm never wraps such a manager's commands: none of
-    its operations carry a ``build_cli(..., sudo=True)`` marker, and running the
-    tool under ``sudo`` is often forbidden outright (``brew`` refuses root).
+    Homebrew ``cask`` runs it from installer artifacts, ``fink`` re-execs its
+    root commands through it, and the AUR helpers call ``sudo pacman`` for their
+    install steps. mpm never wraps such a manager's commands: either none of its
+    operations carry a ``build_cli(..., sudo=True)`` marker (``cask``, ``fink``),
+    or its ``default_sudo = False`` policy leaves the markers it inherits
+    unescalated (the AUR helpers). Running the tool under ``sudo`` is often
+    forbidden outright (``brew`` refuses root, ``makepkg`` refuses to build).
     Consumed by :py:func:`~meta_package_manager.sudo.prime_sudo`, whose
     opportunistic probe keeps an already-warm credential cache alive for these
     internal escalations, and by the silent-call notice in :py:meth:`run`, which

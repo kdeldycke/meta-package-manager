@@ -34,7 +34,9 @@ class Composer(PackageManager):
     """Dependency manager for PHP, driven in global mode.
 
     Every operation is prefixed with ``global`` so it targets the user-wide
-    Composer project (``~/.composer``) rather than a working tree. ``installed`` and
+    Composer project under ``COMPOSER_HOME`` (``$XDG_CONFIG_HOME/composer`` on
+    XDG systems, ``~/.composer`` on macOS and other Unixes,
+    ``%APPDATA%\\Composer`` on Windows) rather than a working tree. ``installed`` and
     ``outdated`` parse Composer's ``--format=json`` output, while ``search`` reads
     its plain-text listing; ``--no-ansi`` is forced on every call to strip color
     codes.

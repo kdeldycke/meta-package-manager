@@ -311,11 +311,11 @@ Binaries are compiled at each release, so you can skip the installation process 
 
 This is the preferred way of testing `mpm` without polluting your machine. They also offer the possibility of running the CLI on older systems not supporting the minimal Python version required by `mpm`.
 
-| Platform    | `arm64`                                                                                                                              | `x86_64`                                                                                                                         |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Linux**   | [Download `mpm-linux-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-arm64.bin)     | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
-| **macOS**   | [Download `mpm-macos-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-arm64.bin)     | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
-| **Windows** | [Download `mpm-windows-arm64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-arm64.exe) | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
+```{python:render}
+from docs_update import binaries_download_table
+
+print(binaries_download_table())
+```
 
 All links above points to the latest released version of `mpm`.
 
@@ -331,13 +331,13 @@ Look at the [list of latest binary builds](https://github.com/kdeldycke/meta-pac
 
 ````{note} ABI targets
 ```{code-block} shell-session
-$ file ./mpm*
-./mpm-linux-arm64.bin:   ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=520bfc6f2bb21f48ad568e46752888236552b26a, for GNU/Linux 3.7.0, stripped
-./mpm-linux-x64.bin:     ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=56ba24bccfa917e6ce9009223e4e83924f616d46, for GNU/Linux 3.2.0, stripped
-./mpm-macos-arm64.bin:   Mach-O 64-bit executable arm64
-./mpm-macos-x64.bin:     Mach-O 64-bit executable x86_64
-./mpm-windows-arm64.exe: PE32+ executable (console) Aarch64, for MS Windows
-./mpm-windows-x64.exe:   PE32+ executable (console) x86-64, for MS Windows
+$ file ./meta-package-manager-*
+./meta-package-manager-7.3.0-linux-arm64.bin:   ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=520bfc6f2bb21f48ad568e46752888236552b26a, for GNU/Linux 3.7.0, stripped
+./meta-package-manager-7.3.0-linux-x64.bin:     ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=56ba24bccfa917e6ce9009223e4e83924f616d46, for GNU/Linux 3.2.0, stripped
+./meta-package-manager-7.3.0-macos-arm64.bin:   Mach-O 64-bit executable arm64
+./meta-package-manager-7.3.0-macos-x64.bin:     Mach-O 64-bit executable x86_64
+./meta-package-manager-7.3.0-windows-arm64.exe: PE32+ executable (console) Aarch64, for MS Windows
+./meta-package-manager-7.3.0-windows-x64.exe:   PE32+ executable (console) x86-64, for MS Windows
 ```
 ````
 
@@ -359,8 +359,8 @@ The more independent reports a vendor receives, the more likely a detection gets
 All release artifacts (Python packages and compiled binaries) are signed with [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds) providing [SLSA v1 provenance](https://slsa.dev/spec/v1.0/). You can verify any downloaded artifact with the [GitHub CLI](https://cli.github.com):
 
 ```{code-block} shell-session
-$ gh attestation verify ./mpm-macos-arm64.bin --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
-Loaded digest sha256:... for file://mpm-macos-arm64.bin
+$ gh attestation verify ./meta-package-manager-7.3.0-macos-arm64.bin --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+Loaded digest sha256:... for file://meta-package-manager-7.3.0-macos-arm64.bin
 Loaded 1 attestation from GitHub API
 ✓ Verification succeeded!
 ```

@@ -419,6 +419,27 @@ def test_benchmark_table_renders():
     assert sum(line.count("](managers/") for line in lines) == len(pool)
 
 
+def test_binaries_download_table_renders():
+    """Check the latest-release binaries table generator still produces a
+    well-formed table from the binaries catalog.
+
+    The table is rendered live at Sphinx build time by the ``{python:render}``
+    block in ``docs/install.md``, so there is no checked-in copy to compare
+    against: this test only guards the generator against crashes and drift in
+    the ``docs/assets/binaries.csv`` cell markup it parses.
+    """
+    table = docs_update.binaries_download_table()
+    lines = table.splitlines()
+    assert len(lines) == 5
+    assert lines[0].startswith("| Platform")
+    for os_label in ("Linux", "macOS", "Windows"):
+        assert any(f"**{os_label}**" in line for line in lines)
+    # The release pipeline builds one binary per OS/arch pair: every cell
+    # must carry a versioned download link.
+    assert sum(line.count("releases/download/") for line in lines) == 6
+    assert "latest/download" not in table
+
+
 def test_augmentations_table_renders():
     """Check the augmentations table generator still produces a well-formed
     table from the current pool.

@@ -42,6 +42,7 @@ build-time.
 
 from __future__ import annotations
 
+import csv
 import inspect
 import re
 import sys
@@ -425,6 +426,54 @@ def augmentations_table() -> str:
         headers=["Manager", "Full `upgrade --all`", "Exact search", "Extended search"],
         table_format=TableFormat.GITHUB,
         colalign=["left", "center", "center", "center"],
+        disable_numparse=True,
+    )
+
+
+def binaries_download_table() -> str:
+    """Produce the per-platform download table of the latest release binaries.
+
+    Rendered live at Sphinx build time by the ``{python:render}`` block in
+    ``docs/install.md``. Binaries carry the version in their filename
+    (``meta-package-manager-7.3.0-linux-arm64.bin``), so no stable
+    ``releases/latest/download`` URL can exist: the table is regenerated from
+    ``docs/assets/binaries.csv``, which the release pipeline extends at each
+    release with the exact asset URLs, newest first.
+    """
+    csv_path = Path(__file__).parent / "assets" / "binaries.csv"
+    # Cells are markdown: the version cell starts with [`7.3.0` ...] and the
+    # platform cell embeds the download link as
+    # [... `linux-arm64`](https://github.com/.../meta-package-manager-7.3.0-linux-arm64.bin).
+    version_regexp = re.compile(r"\[`(?P<version>[^`]+)`")
+    link_regexp = re.compile(r"`(?P<target>[a-z0-9]+-[a-z0-9]+)`\]\((?P<url>[^)]+)\)")
+    downloads = {}
+    latest_version = None
+    with csv_path.open(encoding="UTF-8") as csv_file:
+        for row in csv.DictReader(csv_file):
+            version_match = version_regexp.search(row["Version"])
+            link_match = link_regexp.search(row["Platform"])
+            if not version_match or not link_match:
+                continue
+            if latest_version is None:
+                latest_version = version_match["version"]
+            if version_match["version"] != latest_version:
+                break
+            downloads[link_match["target"]] = link_match["url"]
+
+    table = []
+    for os_label, os_id in (("Linux", "linux"), ("macOS", "macos"), ("Windows", "windows")):
+        cells = [f"**{os_label}**"]
+        for arch in ("arm64", "x64"):
+            url = downloads.get(f"{os_id}-{arch}")
+            filename = url.rsplit("/", 1)[-1] if url else None
+            cells.append(f"[Download `{filename}`]({url})" if url else "")
+        table.append(cells)
+
+    return render_table(
+        table,
+        headers=["Platform", "`arm64`", "`x86_64`"],
+        table_format=TableFormat.GITHUB,
+        colalign=["left", "left", "left"],
         disable_numparse=True,
     )
 

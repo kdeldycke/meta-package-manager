@@ -231,6 +231,12 @@ linkcheck_ignore = [
     # versioned `mpm-<version>-<platform>-<arch>.<ext>` artifacts do exist on
     # every release.
     r"https://github\.com/kdeldycke/meta-package-manager/releases/latest/download/.*",
+    # The per-manager source links generated into the benchmark and augmentations
+    # tables (one `blob/main` link per manager) are guarded by the table-render
+    # tests and re-verified authenticated by lychee in the same CI job. Sphinx's
+    # unauthenticated crawl gets throttled by GitHub to ~1 request per minute,
+    # which overruns the link-check job budget.
+    r"https://github\.com/kdeldycke/meta-package-manager/blob/",
 ]
 
 # Footer content.

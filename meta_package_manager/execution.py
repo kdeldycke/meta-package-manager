@@ -77,9 +77,9 @@ from .sudo import (
     _STALL_NOTICE_OPERATIONS,
     _SUDO_CACHE_WARM,
     _SUDO_ESCALATION_PREFIX,
-    _StallWatchdog,
     _is_sudo_auth_failure,
     _resolved_sudo,
+    _StallWatchdog,
 )
 from .version import parse_version
 

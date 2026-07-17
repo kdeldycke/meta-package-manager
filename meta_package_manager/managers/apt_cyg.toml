@@ -2,7 +2,7 @@
 #
 # apt-cyg (https://github.com/transcode-open/apt-cyg) is a single bash script
 # wrapping Cygwin's package repository. See docs/overrides.md ("Define a new
-# manager") for the schema and meta_package_manager/config.py
+# manager") for the schema and meta_package_manager/definitions.py
 # (build_bundled_managers) for the loader.
 #
 # Cygwin has no root/sudo concept: every operation runs as the invoking user.

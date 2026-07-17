@@ -17,7 +17,6 @@
 
 from __future__ import annotations
 
-
 import pytest
 from extra_platforms.pytest import skip_github_ci, unless_macos
 

@@ -3,7 +3,7 @@
 # OpenBSD's pkg tools are the base system's package suite, spanning three binaries:
 # pkg_info (queries), pkg_add (install/upgrade) and pkg_delete (remove/cleanup). See
 # docs/overrides.md ("Define a new manager") for the schema and
-# meta_package_manager/config.py (build_bundled_managers) for the loader.
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # Parsing notes, verified against the pkg_add/pkg_info/pkg_delete man pages
 # (man.openbsd.org), the OpenBSD FAQ 15, and the OpenBSD::PkgInfo/Update Perl source:

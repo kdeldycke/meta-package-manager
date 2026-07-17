@@ -76,7 +76,7 @@ def assert_valid_cyclonedx(content: str, export_format: ExportFormat | str) -> N
     """Assert a CycloneDX export validates against its schema.
 
     This guarantee used to live in
-    :py:meth:`meta_package_manager.sbom.CycloneDX.export` at runtime. It moved
+    :py:meth:`meta_package_manager.sbom.cyclonedx.CycloneDX.export` at runtime. It moved
     here so the ``jsonschema``-based validation stack (``rfc3987-syntax``,
     ``lark``, ``lxml``) stays out of ``mpm``'s runtime dependencies. See
     :py:mod:`meta_package_manager.sbom`.
@@ -575,12 +575,10 @@ def test_shared_advisory_deduplicated_in_cyclonedx():
     c.add_package(manager, django, EMPTY_METADATA)
     c.add_package(manager, flask, EMPTY_METADATA)
     vuln = _sample_vulnerability()
-    c.attach_vulnerabilities(
-        {
-            django.purl.to_string(): (vuln,),
-            flask.purl.to_string(): (vuln,),
-        }
-    )
+    c.attach_vulnerabilities({
+        django.purl.to_string(): (vuln,),
+        flask.purl.to_string(): (vuln,),
+    })
     c.finalize()
     doc = json.loads(c.export())
     vulns = doc.get("vulnerabilities", [])

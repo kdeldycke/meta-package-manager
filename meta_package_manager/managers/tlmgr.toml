@@ -2,7 +2,7 @@
 #
 # tlmgr is TeX Live's native package manager (https://www.tug.org/texlive/). See
 # docs/overrides.md ("Define a new manager") for the schema and
-# meta_package_manager/config.py (build_bundled_managers) for the loader.
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # Parsing notes, verified against the tlmgr.pl source (TeX-Live/texlive-infra) and
 # real captures:

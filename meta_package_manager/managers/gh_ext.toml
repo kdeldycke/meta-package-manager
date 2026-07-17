@@ -4,7 +4,7 @@
 # through the very same schema and parser a user's own [mpm.managers.<id>] section
 # goes through, dogfooding the configuration-defined-manager feature on a genuine
 # cross-platform CLI. See docs/overrides.md ("Define a new manager") for the schema,
-# and meta_package_manager/config.py (build_bundled_managers) for the loader.
+# and meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 
 [mpm.managers.gh-ext]
 name = "GitHub CLI extensions"

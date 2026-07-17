@@ -27,7 +27,7 @@ import pytest
 
 # Shared version-gated TOML reader, re-exported for the whole test suite.
 if sys.version_info >= (3, 11):
-    import tomllib  # noqa: F401
+    import tomllib
 else:
     import tomli as tomllib  # type: ignore[import-not-found]  # noqa: F401
 

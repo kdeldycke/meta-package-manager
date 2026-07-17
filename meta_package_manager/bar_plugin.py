@@ -428,7 +428,7 @@ class MPMPlugin:
             if mpm_args and mpm_args[-1] == "meta_package_manager":
                 python_path = mpm_args[0]
             self.pp(
-                f"{action_msg} mpm >= v{min_version_str}",
+                f"{action_msg} mpm >= {min_version_str}",
                 f"shell={python_path}",
                 "param1=-m",
                 "param2=pip",

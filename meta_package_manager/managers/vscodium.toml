@@ -3,7 +3,7 @@
 # VSCodium (https://vscodium.com) is the telemetry-free community build of Visual
 # Studio Code; its `codium` CLI exposes the exact same extension command surface as
 # `code`, so this definition mirrors vscode.toml. See docs/overrides.md ("Define a
-# new manager") for the schema and meta_package_manager/config.py
+# new manager") for the schema and meta_package_manager/definitions.py
 # (build_bundled_managers) for the loader.
 #
 # No version_regexes: `codium --version` prints the bare version, then the commit

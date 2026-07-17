@@ -39,8 +39,7 @@ from meta_package_manager.config import (
 from meta_package_manager.definitions import OVERRIDABLE_FIELDS
 from meta_package_manager.pool import pool
 
-from .conftest import tomllib, all_manager_ids
-
+from .conftest import all_manager_ids, tomllib
 
 OVERRIDE_TARGET = "pip"
 """Manager ID used as a fixture target for override tests.

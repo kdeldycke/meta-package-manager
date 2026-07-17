@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-
 from extra_platforms import BSD, LINUX_LIKE, MACOS, WINDOWS
 
 from ..capabilities import search_capabilities, version_not_implemented

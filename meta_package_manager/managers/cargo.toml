@@ -2,7 +2,7 @@
 #
 # Rust's cargo (https://doc.rust-lang.org/cargo/), covering the binaries installed
 # with `cargo install`. See docs/overrides.md ("Define a new manager") for the
-# schema and meta_package_manager/config.py (build_bundled_managers) for the
+# schema and meta_package_manager/definitions.py (build_bundled_managers) for the
 # loader.
 #
 # cargo has no outdated listing and no upgrade command for installed binaries:

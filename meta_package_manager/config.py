@@ -198,15 +198,13 @@ values. Safe to pop even if nothing was cached.
 """
 
 
-CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset(
-    {
-        "cli_names",
-        "cli_search_path",
-        "requirement",
-        "version_cli_options",
-        "version_regexes",
-    }
-)
+CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset({
+    "cli_names",
+    "cli_search_path",
+    "requirement",
+    "version_cli_options",
+    "version_regexes",
+})
 """Subset of :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` whose override probably reflects a real
 upstream detection bug rather than a personal preference.
 
@@ -342,19 +340,15 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
     ]
     for hint in hints:
         url = _build_issue_url(hint)
-        lines.extend(
-            (
-                f"  - {theme().invoked_command(hint.manager_id)}: "
-                f"override on `{hint.field}`",
-                f"    File a report: {url}",
-            )
-        )
-    lines.extend(
-        (
-            "",
-            "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
-        )
-    )
+        lines.extend((
+            f"  - {theme().invoked_command(hint.manager_id)}: "
+            f"override on `{hint.field}`",
+            f"    File a report: {url}",
+        ))
+    lines.extend((
+        "",
+        "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
+    ))
     return "\n".join(lines)
 
 

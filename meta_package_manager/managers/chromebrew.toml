@@ -2,8 +2,8 @@
 #
 # Chromebrew (https://chromebrew.github.io) is the package manager for ChromeOS,
 # installing into /usr/local as the regular user. See docs/overrides.md ("Define a new
-# manager") for the schema and meta_package_manager/config.py (build_bundled_managers)
-# for the loader.
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
 #
 # Parsing notes, verified against the chromebrew master source (bin/crew,
 # commands/list.rb, commands/search.rb, lib/const.rb):

@@ -3,7 +3,7 @@
 # pkgin (https://pkgin.net) is the binary package manager for pkgsrc, NetBSD's
 # portable package collection (also used on illumos/SmartOS, macOS and Linux). See
 # docs/overrides.md ("Define a new manager") for the schema and
-# meta_package_manager/config.py (build_bundled_managers) for the loader.
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # Parsing notes, verified against the pkgin 26.4.0 source (main.c, pkglist.c,
 # messages.h) and its man page:

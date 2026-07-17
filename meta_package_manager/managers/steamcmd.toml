@@ -2,7 +2,7 @@
 #
 # Valve's SteamCMD (https://developer.valvesoftware.com/wiki/SteamCMD) drives the
 # Steam content system from the command line. See docs/overrides.md ("Define a new
-# manager") for the schema and meta_package_manager/config.py
+# manager") for the schema and meta_package_manager/definitions.py
 # (build_bundled_managers) for the loader.
 #
 # SteamCMD exposes no inventory: there is no way to list installed titles, pending

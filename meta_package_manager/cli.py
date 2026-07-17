@@ -841,18 +841,16 @@ def managers(ctx):
                 if not manager.fresh:
                     version_infos += f" {manager.requirement}"
 
-        table.append(
-            {
-                "manager_id": getattr(theme(), "success" if manager.fresh else "error")(
-                    manager.id
-                ),
-                "manager_name": manager.name,
-                "supported": os_infos,
-                "cli": cli_infos,
-                "executable": theme().success(OK_GLYPH) if manager.executable else "",
-                "version": version_infos,
-            }
-        )
+        table.append({
+            "manager_id": getattr(theme(), "success" if manager.fresh else "error")(
+                manager.id
+            ),
+            "manager_name": manager.name,
+            "supported": os_infos,
+            "cli": cli_infos,
+            "executable": theme().success(OK_GLYPH) if manager.executable else "",
+            "version": version_infos,
+        })
 
     print_projected_table(ctx, MANAGERS_COLUMNS, table)
 
@@ -1172,17 +1170,13 @@ def outdated(ctx, exact, plugin_output, query):
                 info["installed_version"] if info["installed_version"] else "?",
                 info["latest_version"],
             )
-            table.append(
-                {
-                    "package_id": highlight_query(info["id"]) if info["id"] else "",
-                    "package_name": highlight_query(info["name"])
-                    if info["name"]
-                    else "",
-                    "manager_id": manager_id,
-                    "installed_version": installed_version,
-                    "latest_version": latest_version,
-                }
-            )
+            table.append({
+                "package_id": highlight_query(info["id"]) if info["id"] else "",
+                "package_name": highlight_query(info["name"]) if info["name"] else "",
+                "manager_id": manager_id,
+                "installed_version": installed_version,
+                "latest_version": latest_version,
+            })
 
     print_projected_table(ctx, OUTDATED_COLUMNS, table)
 
@@ -1268,19 +1262,17 @@ def search(ctx, extended, exact, refilter, query):
     table: list[dict[str, str | None]] = []
     for manager_id, matching_pkg in matches.items():
         for pkg in matching_pkg["packages"]:
-            table.append(
-                {
-                    "package_id": highlight_query(pkg["id"]) if pkg["id"] else "",
-                    "package_name": highlight_query(pkg["name"]) if pkg["name"] else "",
-                    "manager_id": manager_id,
-                    "latest_version": str(pkg["latest_version"])
-                    if pkg["latest_version"]
-                    else "?",
-                    "description": highlight_query(pkg.get("description"))
-                    if pkg.get("description")
-                    else "",
-                }
-            )
+            table.append({
+                "package_id": highlight_query(pkg["id"]) if pkg["id"] else "",
+                "package_name": highlight_query(pkg["name"]) if pkg["name"] else "",
+                "manager_id": manager_id,
+                "latest_version": str(pkg["latest_version"])
+                if pkg["latest_version"]
+                else "?",
+                "description": highlight_query(pkg.get("description"))
+                if pkg.get("description")
+                else "",
+            })
 
     default_ids = tuple(
         spec.id
@@ -1332,14 +1324,12 @@ def which(ctx, cli_names):
                 resolved = highlight_cli_name(found_cli.resolve(), cli_names)
                 assert resolved is not None
                 symlink = f"→ {resolved}"
-            table.append(
-                {
-                    "manager_id": manager.id,
-                    "priority": str(priority),
-                    "cli_path": highlight_cli_name(found_cli, cli_names),
-                    "symlink": symlink,
-                }
-            )
+            table.append({
+                "manager_id": manager.id,
+                "priority": str(priority),
+                "cli_path": highlight_cli_name(found_cli, cli_names),
+                "symlink": symlink,
+            })
     print_projected_table(ctx, WHICH_COLUMNS, table)
 
 
@@ -1604,21 +1594,19 @@ def _dispatch_sourced_operation(
             manager = pool.get(manager_id)
             if apply_cooldown and not cooldown_permits(manager):
                 continue
-            tasks.append(
-                (
+            tasks.append((
+                manager,
+                _package_task(
                     manager,
-                    _package_task(
-                        manager,
-                        spec,
-                        failures_lock,
-                        action=action,
-                        verb=verb,
-                        past=past,
-                        prep=prep,
-                        record_failure=lambda s: failures.append(s.package_id),
-                    ),
-                )
-            )
+                    spec,
+                    failures_lock,
+                    action=action,
+                    verb=verb,
+                    past=past,
+                    prep=prep,
+                    record_failure=lambda s: failures.append(s.package_id),
+                ),
+            ))
 
     # The sourcing selection above re-stamped `_active_operation = "installed"` on the
     # shared manager singletons. Restore the real operation before the mutating fan-out
@@ -2223,7 +2211,7 @@ def _dump_toml(
     content = ""
     if include_header:
         content = (
-            f"# Generated by mpm v{__version__}.\n"
+            f"# Generated by mpm {__version__}.\n"
             f"# Timestamp: {datetime.now(tz=timezone.utc).isoformat()}.\n\n"
         )
 
@@ -2405,25 +2393,19 @@ def restore(ctx, toml_files):
                     manager_id=manager.id,
                     version=str(version),
                 )
-                tasks.append(
-                    (
+                tasks.append((
+                    manager,
+                    _package_task(
                         manager,
-                        _package_task(
-                            manager,
-                            spec,
-                            failures_lock,
-                            action=lambda m, s: m.install(
-                                s.package_id, version=s.version
-                            ),
-                            verb="install",
-                            past="installed",
-                            prep="with",
-                            record_failure=lambda s: restore_failures.append(
-                                s.package_id
-                            ),
-                        ),
-                    )
-                )
+                        spec,
+                        failures_lock,
+                        action=lambda m, s: m.install(s.package_id, version=s.version),
+                        verb="install",
+                        past="installed",
+                        prep="with",
+                        record_failure=lambda s: restore_failures.append(s.package_id),
+                    ),
+                ))
 
     collect_per_package("Restoring", "Restored", tasks)
 

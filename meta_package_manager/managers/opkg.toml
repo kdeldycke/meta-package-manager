@@ -3,7 +3,7 @@
 # opkg (https://git.yoctoproject.org/cgit/cgit.cgi/opkg/) is the lightweight
 # package manager of embedded Linux distributions (OpenWrt, Yocto). See
 # docs/overrides.md ("Define a new manager") for the schema and
-# meta_package_manager/config.py (build_bundled_managers) for the loader.
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 
 [mpm.managers.opkg]
 name = "opkg"

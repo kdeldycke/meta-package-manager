@@ -36,7 +36,7 @@ from meta_package_manager.labels import (
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 
-from .conftest import tomllib, all_managers
+from .conftest import all_managers, tomllib
 
 
 def _load_docs_update():

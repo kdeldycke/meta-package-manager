@@ -48,7 +48,6 @@ from meta_package_manager.pool import pool
 
 from .conftest import tomllib
 
-
 skip_windows = pytest.mark.skipif(
     not hasattr(os, "getuid"),
     reason="POSIX-only: needs a shell fake CLI and POSIX file ownership.",
@@ -758,8 +757,8 @@ def test_factory_search_refinements(monkeypatch, extended, exact, expected_args)
     list(manager.search("vim", extended=extended, exact=exact))
     assert captured["args"] == expected_args
     search_func = type(manager).search
-    assert search_func.exact_support is True
-    assert search_func.extended_support is True
+    assert search_func.exact_support is True  # type: ignore[attr-defined]
+    assert search_func.extended_support is True  # type: ignore[attr-defined]
 
 
 def test_factory_search_without_refinements_relies_on_refiltering():
@@ -774,8 +773,8 @@ def test_factory_search_without_refinements_relies_on_refiltering():
         ),
     )()
     search_func = type(manager).search
-    assert search_func.exact_support is False
-    assert search_func.extended_support is False
+    assert search_func.exact_support is False  # type: ignore[attr-defined]
+    assert search_func.extended_support is False  # type: ignore[attr-defined]
 
 
 def test_factory_json_array_field(monkeypatch):
@@ -796,13 +795,11 @@ def test_factory_json_array_field(monkeypatch):
     monkeypatch.setattr(
         manager,
         "run_cli",
-        lambda *a, **k: json.dumps(
-            [
-                {"name": "jq", "installed_versions": ["1.7.1", "1.6"]},
-                {"name": "empty", "installed_versions": []},
-                {"name": "scalar", "installed_versions": "oops"},
-            ]
-        ),
+        lambda *a, **k: json.dumps([
+            {"name": "jq", "installed_versions": ["1.7.1", "1.6"]},
+            {"name": "empty", "installed_versions": []},
+            {"name": "scalar", "installed_versions": "oops"},
+        ]),
     )
     packages = {p.id: p.installed_version for p in manager.installed}
     assert str(packages["jq"]) == "1.7.1"

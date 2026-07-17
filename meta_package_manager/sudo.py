@@ -365,7 +365,12 @@ class _StallWatchdog(logging.Handler):
         # Activity timestamp of the silence episode already noticed, so each
         # episode warns at most once. Touched by the notice thread only.
         self._noticed: float | None = None
-        self.tee = logging.Logger(f"mpm-stall-tee-{manager_id}", logging.DEBUG)
+        # Instantiated directly, not via getLogger: the tee must stay out of the
+        # registry (re-arming would reuse it, stacking handlers) and have no
+        # parent, so this handler is its only sink and nothing double-emits.
+        self.tee = logging.Logger(  # noqa: LOG001
+            f"mpm-stall-tee-{manager_id}", logging.DEBUG
+        )
         self.tee.addHandler(self)
         self._stop = threading.Event()
         self._thread = threading.Thread(target=self._watch, daemon=True)
@@ -392,7 +397,7 @@ class _StallWatchdog(logging.Handler):
             else:
                 self._activity = (time.monotonic(), message)
                 root.log(record.levelno, message, extra={"label": label})
-        except Exception:
+        except Exception:  # noqa: BLE001
             self.handleError(record)
 
     def _watch(self) -> None:

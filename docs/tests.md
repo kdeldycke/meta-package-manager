@@ -27,6 +27,15 @@
    :undoc-members:
 ```
 
+## tests.test_brewfile module
+
+```{eval-rst}
+.. automodule:: tests.test_brewfile
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_cli module
 
 ```{eval-rst}
@@ -144,6 +153,15 @@
    :undoc-members:
 ```
 
+## tests.test_dispatch module
+
+```{eval-rst}
+.. automodule:: tests.test_dispatch
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_docs module
 
 ```{eval-rst}
@@ -189,10 +207,28 @@
    :undoc-members:
 ```
 
+## tests.test_sbom module
+
+```{eval-rst}
+.. automodule:: tests.test_sbom
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_specifier module
 
 ```{eval-rst}
 .. automodule:: tests.test_specifier
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_sudo module
+
+```{eval-rst}
+.. automodule:: tests.test_sudo
    :members:
    :show-inheritance:
    :undoc-members:

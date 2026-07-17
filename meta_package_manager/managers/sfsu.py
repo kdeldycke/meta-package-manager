@@ -23,7 +23,6 @@ Install and upgrade operations are delegated to Scoop.
 
 from __future__ import annotations
 
-
 from extra_platforms import WINDOWS
 
 from ..capabilities import Delegate, search_capabilities

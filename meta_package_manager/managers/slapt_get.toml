@@ -2,7 +2,7 @@
 #
 # slapt-get (https://software.jaos.org/) is an apt-get-style front-end to Slackware's
 # pkgtools. See docs/overrides.md ("Define a new manager") for the schema and
-# meta_package_manager/config.py (build_bundled_managers) for the loader.
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # Parsing notes, verified against the slapt-get 0.11.12 C source (src/main.c,
 # src/transaction.c) and its man page:

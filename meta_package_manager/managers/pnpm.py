@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-
 from extra_platforms import ALL_PLATFORMS
 
 from ..capabilities import search_capabilities, version_not_implemented

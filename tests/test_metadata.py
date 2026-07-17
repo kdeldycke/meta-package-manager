@@ -38,7 +38,6 @@ from extra_platforms.pytest import skip_guix_build
 
 from .conftest import tomllib
 
-
 PROJECT_ROOT = Path(__file__).parent.parent
 
 PYTHON_CLASSIFIER_PREFIX = "Programming Language :: Python :: "

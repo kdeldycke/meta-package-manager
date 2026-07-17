@@ -32,6 +32,7 @@ from extra_platforms import ALL_PLATFORMS, Platform, is_windows
 from meta_package_manager import cli
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
+from meta_package_manager.execution import CLIExecutor
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
@@ -377,8 +378,6 @@ def collect_props_ref():
     the operations). The curated attribute list is cross-checked against the
     base classes so a new base attribute cannot silently escape governance.
     """
-    from meta_package_manager.execution import CLIExecutor
-
     pm_attrs, pm_methods = _collect_class_members(PackageManager, "PackageManager")
     exec_attrs, exec_methods = _collect_class_members(CLIExecutor, "CLIExecutor")
 

@@ -2,7 +2,7 @@
 #
 # The cpan client of the Comprehensive Perl Archive Network (https://www.cpan.org).
 # See docs/overrides.md ("Define a new manager") for the schema and
-# meta_package_manager/config.py (build_bundled_managers) for the loader.
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # Installs may require sudo when using the system Perl; local::lib gives user-local
 # installs instead. cpan cannot uninstall a module, so no remove operation is

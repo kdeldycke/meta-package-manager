@@ -4,7 +4,7 @@
 # manages *bundles* (collections of files), not individually-versioned packages:
 # bundles carry no version of their own and follow the single whole-system OS
 # version. See docs/overrides.md ("Define a new manager") for the schema and
-# meta_package_manager/config.py (build_bundled_managers) for the loader.
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # --quiet is swupd's blessed machine channel: data flows through its print()
 # helper while decorations (headers, "-" prefixes, "Total:" footers) flow through

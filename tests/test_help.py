@@ -33,7 +33,6 @@ from meta_package_manager.cli import mpm
 
 from .conftest import tomllib
 
-
 PLAN_PATH = Path(__file__).parent / "cli-test-plan.toml"
 
 

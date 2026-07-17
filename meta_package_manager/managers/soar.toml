@@ -2,7 +2,7 @@
 #
 # soar (https://github.com/pkgforge/soar) is a fast package manager for portable Linux
 # binaries and AppImages. See docs/overrides.md ("Define a new manager") for the schema
-# and meta_package_manager/config.py (build_bundled_managers) for the loader.
+# and meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # Parsing notes, verified against the soar-cli 0.12.6 source:
 #   - `soar --json` emits newline-delimited log records, not one JSON array, so the DSL's

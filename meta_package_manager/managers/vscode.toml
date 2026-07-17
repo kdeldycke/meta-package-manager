@@ -2,7 +2,7 @@
 #
 # Visual Studio Code's extension manager (https://code.visualstudio.com), driven
 # through the `code` CLI. See docs/overrides.md ("Define a new manager") for the
-# schema and meta_package_manager/config.py (build_bundled_managers) for the
+# schema and meta_package_manager/definitions.py (build_bundled_managers) for the
 # loader.
 #
 # The Marketplace cannot be queried from the CLI: no search, outdated or upgrade

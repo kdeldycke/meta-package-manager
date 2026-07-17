@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
 
 from ..capabilities import search_capabilities

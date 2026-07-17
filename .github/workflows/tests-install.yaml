@@ -106,17 +106,17 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04-arm
-            asset_pattern: mpm-*-linux-arm64.bin
+            asset_pattern: meta-package-manager-*-linux-arm64.bin
           - os: ubuntu-slim
-            asset_pattern: mpm-*-linux-x64.bin
+            asset_pattern: meta-package-manager-*-linux-x64.bin
           - os: macos-15-intel
-            asset_pattern: mpm-*-macos-x64.bin
+            asset_pattern: meta-package-manager-*-macos-x64.bin
           - os: macos-26
-            asset_pattern: mpm-*-macos-arm64.bin
+            asset_pattern: meta-package-manager-*-macos-arm64.bin
           - os: windows-11-arm
-            asset_pattern: mpm-*-windows-arm64.exe
+            asset_pattern: meta-package-manager-*-windows-arm64.exe
           - os: windows-2025
-            asset_pattern: mpm-*-windows-x64.exe
+            asset_pattern: meta-package-manager-*-windows-x64.exe
     runs-on: ${{ matrix.os }}
     steps:
       - name: Download mpm binary

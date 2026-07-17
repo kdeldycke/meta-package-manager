@@ -12,27 +12,86 @@ flowchart LR
         tomli_w{{"`tomli-w`"}}
     end
 
+    jsonschema(["`jsonschema`"])
+    referencing(["`referencing`"])
     typing_extensions(["`typing-extensions`"])
+    pygments(["`pygments`"])
+    requests(["`requests`"])
+    anyio(["`anyio`"])
     click_0(["`click`"])
+    idna(["`idna`"])
+    jinja2(["`jinja2`"])
+    arrow(["`arrow`"])
+    beautifulsoup4(["`beautifulsoup4`"])
+    certifi(["`certifi`"])
     cloup(["`cloup`"])
     colorama(["`colorama`"])
+    docutils(["`docutils`"])
+    exceptiongroup(["`exceptiongroup`"])
+    httpcore(["`httpcore`"])
+    license_expression(["`license-expression`"])
+    markdown_it_py(["`markdown-it-py`"])
+    packaging(["`packaging`"])
+    rdflib(["`rdflib`"])
+    accessible_pygments(["`accessible-pygments`"])
+    attrs(["`attrs`"])
+    isoduration(["`isoduration`"])
+    jsonschema_specifications(["`jsonschema-specifications`"])
+    mdit_py_plugins(["`mdit-py-plugins`"])
+    pluggy(["`pluggy`"])
+    py_serializable(["`py-serializable`"])
+    python_dateutil(["`python-dateutil`"])
+    rfc3339_validator(["`rfc3339-validator`"])
+    rfc3987_syntax(["`rfc3987-syntax`"])
+    rpds_py(["`rpds-py`"])
+    six(["`six`"])
+    sphinx_basic_ng(["`sphinx-basic-ng`"])
+    sphinxcontrib_jquery(["`sphinxcontrib-jquery`"])
     tabulate(["`tabulate`"])
     wcmatch(["`wcmatch`"])
     wcwidth(["`wcwidth`"])
+    alabaster(["`alabaster`"])
+    babel(["`babel`"])
+    beartype(["`beartype`"])
+    boolean_py(["`boolean-py`"])
     bracex(["`bracex`"])
+    charset_normalizer(["`charset-normalizer`"])
     deepmerge(["`deepmerge`"])
-
-    subgraph ext_hjson [--extra hjson]
-        hjson(["`hjson`"])
-    end
-
-    subgraph ext_json5 [--extra json5]
-        json5(["`json5`"])
-    end
-
-    subgraph ext_jsonc [--extra jsonc]
-        json_with_comments(["`json-with-comments`"])
-    end
+    defusedxml(["`defusedxml`"])
+    execnet(["`execnet`"])
+    fqdn(["`fqdn`"])
+    h11(["`h11`"])
+    hjson(["`hjson`"])
+    imagesize(["`imagesize`"])
+    iniconfig(["`iniconfig`"])
+    isodate(["`isodate`"])
+    json_with_comments(["`json-with-comments`"])
+    json5(["`json5`"])
+    jsonpointer(["`jsonpointer`"])
+    lark(["`lark`"])
+    lxml(["`lxml`"])
+    markupsafe(["`markupsafe`"])
+    mdurl(["`mdurl`"])
+    ply(["`ply`"])
+    psutil(["`psutil`"])
+    pyparsing(["`pyparsing`"])
+    rfc3986_validator(["`rfc3986-validator`"])
+    roman_numerals(["`roman-numerals`"])
+    semantic_version(["`semantic-version`"])
+    snowballstemmer(["`snowballstemmer`"])
+    sortedcontainers(["`sortedcontainers`"])
+    soupsieve(["`soupsieve`"])
+    sphinxcontrib_applehelp(["`sphinxcontrib-applehelp`"])
+    sphinxcontrib_devhelp(["`sphinxcontrib-devhelp`"])
+    sphinxcontrib_htmlhelp(["`sphinxcontrib-htmlhelp`"])
+    sphinxcontrib_jsmath(["`sphinxcontrib-jsmath`"])
+    sphinxcontrib_qthelp(["`sphinxcontrib-qthelp`"])
+    sphinxcontrib_serializinghtml(["`sphinxcontrib-serializinghtml`"])
+    tzdata(["`tzdata`"])
+    uri_template(["`uri-template`"])
+    uritools(["`uritools`"])
+    urllib3(["`urllib3`"])
+    webcolors(["`webcolors`"])
 
     subgraph ext_sbom-offline [--extra sbom-offline]
         ext_sbom-offline_spdx_tools{{"`spdx-tools >=0.8.2`"}}
@@ -48,95 +107,28 @@ flowchart LR
         sphinx{{"`sphinx >=8`"}}
         myst_parser{{"`myst-parser >=4`"}}
         furo{{"`furo >=2025.9.25`"}}
-        pygments(["`pygments`"])
-        requests(["`requests`"])
-        idna(["`idna`"])
-        jinja2(["`jinja2`"])
         sphinx_datatables{{"`sphinx-datatables >=1`"}}
         sphinxcontrib_mermaid{{"`sphinxcontrib-mermaid >=1.2.3`"}}
-        beautifulsoup4(["`beautifulsoup4`"])
-        certifi(["`certifi`"])
-        docutils(["`docutils`"])
-        markdown_it_py(["`markdown-it-py`"])
-        packaging(["`packaging`"])
-        accessible_pygments(["`accessible-pygments`"])
-        mdit_py_plugins(["`mdit-py-plugins`"])
         sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
-        sphinx_basic_ng(["`sphinx-basic-ng`"])
         sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
         sphinx_design{{"`sphinx-design >=0.6`"}}
-        sphinxcontrib_jquery(["`sphinxcontrib-jquery`"])
         sphinxext_opengraph{{"`sphinxext-opengraph >=0.13`"}}
         tomlkit{{"`tomlkit >=0.13`"}}
-        alabaster(["`alabaster`"])
-        babel(["`babel`"])
-        charset_normalizer(["`charset-normalizer`"])
-        imagesize(["`imagesize`"])
-        markupsafe(["`markupsafe`"])
-        mdurl(["`mdurl`"])
-        roman_numerals(["`roman-numerals`"])
-        snowballstemmer(["`snowballstemmer`"])
-        soupsieve(["`soupsieve`"])
-        sphinxcontrib_applehelp(["`sphinxcontrib-applehelp`"])
-        sphinxcontrib_devhelp(["`sphinxcontrib-devhelp`"])
-        sphinxcontrib_htmlhelp(["`sphinxcontrib-htmlhelp`"])
-        sphinxcontrib_jsmath(["`sphinxcontrib-jsmath`"])
-        sphinxcontrib_qthelp(["`sphinxcontrib-qthelp`"])
-        sphinxcontrib_serializinghtml(["`sphinxcontrib-serializinghtml`"])
-        urllib3(["`urllib3`"])
     end
 
     subgraph grp_test [--group test]
-        jsonschema(["`jsonschema`"])
         pytest{{"`pytest >=9`"}}
         spdx_tools{{"`spdx-tools`"}}
         cyclonedx_python_lib{{"`cyclonedx-python-lib`"}}
         httpx{{"`httpx >=0.27`"}}
-        referencing(["`referencing`"])
         pyyaml{{"`pyyaml >=6`"}}
-        anyio(["`anyio`"])
         pytest_cov{{"`pytest-cov >=7`"}}
         pytest_xdist{{"`pytest-xdist >=3.7`"}}
-        arrow(["`arrow`"])
         coverage{{"`coverage >=7.11`"}}
-        exceptiongroup(["`exceptiongroup`"])
-        httpcore(["`httpcore`"])
-        license_expression(["`license-expression`"])
-        rdflib(["`rdflib`"])
-        attrs(["`attrs`"])
-        isoduration(["`isoduration`"])
-        jsonschema_specifications(["`jsonschema-specifications`"])
-        pluggy(["`pluggy`"])
-        py_serializable(["`py-serializable`"])
         pytest_github_actions_annotate_failures{{"`pytest-github-actions-annotate-failures >=0.3`"}}
         pytest_randomly{{"`pytest-randomly >=4.0.1`"}}
-        python_dateutil(["`python-dateutil`"])
         respx{{"`respx >=0.22`"}}
-        rfc3339_validator(["`rfc3339-validator`"])
-        rfc3987_syntax(["`rfc3987-syntax`"])
-        rpds_py(["`rpds-py`"])
-        six(["`six`"])
-        beartype(["`beartype`"])
-        boolean_py(["`boolean-py`"])
-        defusedxml(["`defusedxml`"])
-        execnet(["`execnet`"])
-        fqdn(["`fqdn`"])
-        h11(["`h11`"])
-        iniconfig(["`iniconfig`"])
-        isodate(["`isodate`"])
-        jsonpointer(["`jsonpointer`"])
-        lark(["`lark`"])
-        lxml(["`lxml`"])
-        ply(["`ply`"])
-        psutil(["`psutil`"])
-        pyparsing(["`pyparsing`"])
-        rfc3986_validator(["`rfc3986-validator`"])
-        semantic_version(["`semantic-version`"])
-        sortedcontainers(["`sortedcontainers`"])
-        tzdata(["`tzdata`"])
-        uri_template(["`uri-template`"])
-        uritools(["`uritools`"])
-        webcolors(["`webcolors`"])
+        pyproject_fmt{{"`pyproject-fmt >=2.25.1`"}}
     end
 
     subgraph grp_typing [--group typing]
@@ -145,7 +137,7 @@ flowchart LR
         types_xmltodict{{"`types-xmltodict >=1.0.1.20250920`"}}
     end
 
-    meta_package_manager ==>|" >=8.3 "| click_extra
+    meta_package_manager ==>|" >=8.4 "| click_extra
     meta_package_manager ==>|" >=2 "| tomli
     meta_package_manager ==>|" >=0.12 "| xmltodict
     meta_package_manager ==>|" >=25 "| boltons
@@ -182,14 +174,14 @@ flowchart LR
     click_extra --> xmltodict
     click_extra --> boltons
     click_extra --> extra_platforms
-    click_extra --> hjson
-    click_extra --> json_with_comments
-    click_extra --> json5
     click_extra --> tabulate
     click_extra --> tomlkit
     click_extra --> wcmatch
     click_extra --> wcwidth
     click_extra --> deepmerge
+    click_extra --> hjson
+    click_extra --> json_with_comments
+    click_extra --> json5
     pytest --> pygments
     pytest --> tomli
     pytest --> colorama
@@ -299,9 +291,6 @@ flowchart LR
     arrow --> python_dateutil
     arrow --> tzdata
     python_dateutil --> six
-    meta_package_manager -.-> ext_hjson
-    meta_package_manager -.-> ext_json5
-    meta_package_manager -.-> ext_jsonc
     meta_package_manager -.-> ext_sbom-offline
     meta_package_manager -.-> ext_sbom-online
     meta_package_manager -.-> grp_docs
@@ -372,6 +361,7 @@ flowchart LR
     click py_serializable "https://pypi.org/project/py-serializable/" _blank
     click pygments "https://pypi.org/project/pygments/" _blank
     click pyparsing "https://pypi.org/project/pyparsing/" _blank
+    click pyproject_fmt "https://pypi.org/project/pyproject-fmt/" _blank
     click pytest "https://pypi.org/project/pytest/" _blank
     click pytest_cov "https://pypi.org/project/pytest-cov/" _blank
     click pytest_github_actions_annotate_failures "https://pypi.org/project/pytest-github-actions-annotate-failures/" _blank
@@ -441,6 +431,7 @@ flowchart LR
     style myst_parser stroke-width:3px
     style packageurl_python stroke-width:3px
     style platformdirs stroke-width:3px
+    style pyproject_fmt stroke-width:3px
     style pytest stroke-width:3px
     style pytest_cov stroke-width:3px
     style pytest_github_actions_annotate_failures stroke-width:3px
@@ -468,9 +459,6 @@ flowchart LR
     style ext_sbom-online_httpx stroke-width:3px,stroke-dasharray:5 5
 
     style primary-deps fill:#1565C020,stroke:#42A5F5
-    style ext_hjson fill:#7B1FA220,stroke:#BA68C8
-    style ext_json5 fill:#7B1FA220,stroke:#BA68C8
-    style ext_jsonc fill:#7B1FA220,stroke:#BA68C8
     style ext_sbom-offline fill:#7B1FA220,stroke:#BA68C8
     style ext_sbom-online fill:#7B1FA220,stroke:#BA68C8
     style grp_docs fill:#546E7A20,stroke:#90A4AE

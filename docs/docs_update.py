@@ -510,7 +510,7 @@ def _toml_definition_intro(definition_source: str) -> str | None:
     def autolink(match: re.Match) -> str:
         # Keep trailing punctuation out of the link target.
         url = match.group(0).rstrip(".,;:")
-        return f"<{url}>{match.group(0)[len(url):]}"
+        return f"<{url}>{match.group(0)[len(url) :]}"
 
     # MyST's linkify extension is off: turn bare URLs into explicit autolinks.
     return re.sub(r"https?://[^\s)>]+", autolink, intro)

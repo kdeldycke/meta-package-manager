@@ -486,6 +486,7 @@ Workflows and CLI commands must be safe to re-run. Running the same command or w
 ### Common maintenance pitfalls
 
 - **Documentation drift** is the most frequent issue. CLI output, version references, and workflow job descriptions in `readme.md` go stale after every release or refactor. Always verify docs against actual output after changes.
+- **Module refactors strand fully-qualified docstring cross-refs.** Moving an attribute between classes or modules (like the `7.3.0` split that moved `cli_path` and `version` onto `execution.CLIExecutor`) silently breaks every `` :py:attr:`x <old.path>` `` pointing at the old home, and the docs build only warns, never fails. After a move, grep the whole tree for the old dotted path. The same sweep rule applies when docstrings gain a new rendering surface (like the manager pages): one malformed directive (`..tip::`), glued bullet list, or stale ref found means the whole corpus needs a sweep for that defect class, not a spot fix.
 - **CI debugging starts from the URL.** When a workflow fails, fetch the run logs first (`gh run view --log-failed`). Do not guess at the cause.
 - **Type-checking divergence.** Code that passes `mypy` locally may fail in CI where `--python-version 3.10` is used. Always consider the minimum supported Python version.
 - **Simplify before adding.** When asked to improve something, first ask whether existing code or tools already cover the case. Remove dead code and unused abstractions before introducing new ones.

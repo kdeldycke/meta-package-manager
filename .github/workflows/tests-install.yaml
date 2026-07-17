@@ -279,7 +279,7 @@ jobs:
           - windows-2025
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run CLI via pip
@@ -302,7 +302,7 @@ jobs:
           - windows-2025
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI via pipx
@@ -354,7 +354,7 @@ jobs:
           - windows-2025
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI

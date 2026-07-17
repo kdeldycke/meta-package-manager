@@ -30,8 +30,20 @@ python3Packages.buildPythonApplication (finalAttrs: {
 
   nativeCheckInputs = with python3Packages; [
     pytestCheckHook
-    # tests/test_docs.py parses the GitHub workflow YAML files.
+    # tests/test_docs.py parses the GitHub workflow YAML files and loads
+    # docs/docs_update.py, which round-trips pyproject.toml with tomlkit.
     pyyaml
+    tomlkit
+    # The SBOM unit tests import the CycloneDX renderer and its JSON/XML
+    # schema validators, the SPDX writers, and the mocked HTTP client of
+    # the OSV adapter.
+    cyclonedx-python-lib
+    httpx
+    jsonschema
+    lxml
+    platformdirs
+    respx
+    spdx-tools
   ];
 
   # The hermetic unit layer runs in full. The integration layer

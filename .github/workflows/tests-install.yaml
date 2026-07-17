@@ -247,6 +247,7 @@ jobs:
 
   # https://search.nixos.org/packages?query=meta-package-manager
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/me/meta-package-manager/package.nix
+  # No macos-15-intel entry: nixpkgs 26.11 dropped x86_64-darwin support.
   nix:
     name: "⁉️ nix (${{ matrix.os }})"
     # Not yet accepted in nixpkgs.
@@ -256,7 +257,6 @@ jobs:
         os:
           - ubuntu-24.04-arm
           - ubuntu-slim
-          - macos-15-intel
           - macos-26
     runs-on: ${{ matrix.os }}
     steps:
@@ -269,6 +269,7 @@ jobs:
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix
   # Install from the in-repo Nix definition, mirroring the documented build
   # instructions while NixOS/nixpkgs#506145 is pending review.
+  # No macos-15-intel entry: nixpkgs 26.11 dropped x86_64-darwin support.
   nix-source:
     name: "✅ nix-source (${{ matrix.os }})"
     strategy:
@@ -276,7 +277,6 @@ jobs:
         os:
           - ubuntu-24.04-arm
           - ubuntu-slim
-          - macos-15-intel
           - macos-26
     runs-on: ${{ matrix.os }}
     steps:

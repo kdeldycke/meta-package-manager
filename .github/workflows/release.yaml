@@ -109,7 +109,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress 'repomatic==7.1.0' pr-body
+          uvx --no-progress 'repomatic==7.2.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
@@ -188,7 +188,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress 'repomatic==7.1.0' pr-body
+          uvx --no-progress 'repomatic==7.2.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"

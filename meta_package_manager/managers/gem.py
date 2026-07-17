@@ -42,12 +42,13 @@ class Gem(PackageManager):
         is tracked in `#1725
         <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
 
-    ..tip::
+    .. tip::
 
         Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something
         like:
 
         .. code-block:: shell-session
+
             $ sudo dseditgroup -o edit -a -t user wheel
 
         And then do ``visudo`` to make it so the ``wheel`` group does not require

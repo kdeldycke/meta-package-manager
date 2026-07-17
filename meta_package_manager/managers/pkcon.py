@@ -35,6 +35,7 @@ class Pkcon(PackageManager):
     """PackageKit's console client.
 
     Documentation:
+
     - https://www.freedesktop.org/software/PackageKit/
     - https://github.com/PackageKit/PackageKit
 

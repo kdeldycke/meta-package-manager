@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Every supported package manager gets a dedicated documentation page detailing its platforms, operations and backfilled capabilities, CLI invocation and version probe, escalation and cooldown behaviors, purl types and usage examples, all rendered live from the manager declarations at Sphinx build time. A new hub page indexes the 72 pages, and manager IDs in the readme's operation matrix, the benchmark table and the augmentations table now link to them.
+
 ## [`7.3.0` (2026-07-17)](https://github.com/kdeldycke/meta-package-manager/compare/v7.2.0...v7.3.0)
 
 - **Breaking:** [mpm] Move the declarative-manager schema, validation and class factory into the new `meta_package_manager.definitions` module, out of `meta_package_manager.config` (which keeps the loading policy: trust gate, override application, registration passes) and `meta_package_manager.manager` (which keeps the base class only).

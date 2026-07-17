@@ -20,12 +20,17 @@ checked into ``readme.md`` (which GitHub renders as static markdown), plus the
 pool-derived blocks of ``pyproject.toml``: the ``[project]`` keywords, the label
 registry and the labeller rules.
 
-The Sphinx-only pages need no regeneration script: ``docs/benchmark.md`` and
-``docs/augmentations.md`` render their per-manager tables live at build time
+The Sphinx-only pages need no content regeneration script: ``docs/benchmark.md``
+and ``docs/augmentations.md`` render their per-manager tables live at build time
 through ``{python:render}`` directives calling :func:`benchmark_managers_table`
-and :func:`augmentations_table`, and the ``<!-- matrix ... -->`` compatibility
-blocks of ``docs/install.md`` are refreshed by ``update-docs``'s own
-directive-refresh phase (``click-extra refresh-directives``).
+and :func:`augmentations_table`, each ``docs/managers/<id>.md`` page renders its
+sections the same way through the ``manager_*`` generators, and the
+``<!-- matrix ... -->`` compatibility blocks of ``docs/install.md`` are refreshed
+by ``update-docs``'s own directive-refresh phase
+(``click-extra refresh-directives``). Only the stub *file set* of
+``docs/managers/`` is committed: :func:`update_manager_stubs` creates and deletes
+stubs as managers join or leave the pool, while the page content stays
+build-time.
 
 .. warning::
     The generated Mermaid syntax targets the version bundled with
@@ -38,6 +43,8 @@ directive-refresh phase (``click-extra refresh-directives``).
 from __future__ import annotations
 
 import inspect
+import re
+import sys
 from pathlib import Path
 from textwrap import dedent
 
@@ -58,11 +65,26 @@ from meta_package_manager.labels import (
 )
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
+from meta_package_manager.specifier import PURL_MAP
+
+# Version-gated TOML reader, following the same pattern as ``tests/conftest.py``.
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
 BENCHMARK_COMPETITORS = ("topgrade", "pacaptr", "pacapt", "sysget", "whohas")
 """Competing tools shown alongside ``mpm`` in the benchmark page, in column order."""
+
+DOCS_SITE_URL = "https://kdeldycke.github.io/meta-package-manager"
+"""Base URL of the published documentation site.
+
+Used by :func:`operation_matrix` to link each manager ID of ``readme.md`` to its
+documentation page: the readme renders on GitHub and PyPI, where relative Sphinx
+links cannot resolve, so the links must be absolute.
+"""
 
 GITHUB_BLOB_URL = "https://github.com/kdeldycke/meta-package-manager/blob/main"
 """Base URL for linking to source files in the benchmark table.
@@ -137,6 +159,23 @@ for free from the pool: :func:`update_keywords` merges both sets into
 differs from its ID (like ``gh-ext`` and ``github cli``), add the alias here.
 """
 
+MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
+    (None, "manager_intro"),
+    ("Platforms", "manager_platforms"),
+    ("Operations", "manager_operations"),
+    ("Command line", "manager_cli"),
+    ("Ecosystem", "manager_ecosystem"),
+    ("Usage", "manager_usage"),
+)
+"""Layout of a per-manager documentation page: section title, generator function.
+
+Single source of truth for :func:`manager_page_stub` and the structural tests. The
+headings live in the committed stubs, never in the generated content: the
+``{python:render}`` directive nested-parses its output into the surrounding
+document, where MyST headings rely on fragile section reparenting. Every
+generator listed here must therefore emit heading-free MyST.
+"""
+
 
 def managers_sankey() -> str:
     """Produce a sankey diagram to map ``mpm`` to all its supported managers.
@@ -163,7 +202,12 @@ def managers_sankey() -> str:
 
 
 def operation_matrix() -> tuple[str, str]:
-    """Produce a table of managers' metadata and supported operations."""
+    """Produce a table of managers' metadata and supported operations.
+
+    Each manager ID links to its dedicated documentation page (absolute URL:
+    the readme renders on GitHub and PyPI, where relative Sphinx links cannot
+    resolve). Home pages are listed on the manager pages themselves.
+    """
     # Build up the column titles.
     headers = [
         "Package manager",
@@ -197,7 +241,7 @@ def operation_matrix() -> tuple[str, str]:
     table = []
     for mid, m in sorted(pool.items()):
         line = [
-            f"[`{mid}`]({m.homepage_url})"
+            f"[`{mid}`]({DOCS_SITE_URL}/managers/{mid}.html)"
             + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
             (m.requirement or "").replace("<", r"\<"),
             "✓" if m.supports_cooldown else "",
@@ -259,11 +303,10 @@ def benchmark_managers_table() -> str:
     ``docs/benchmark.yaml``, which only encodes what the *other* tools
     support.
 
-    Each manager identifier in the first column is rendered as a link to its
-    homepage when one is known: from the mpm class's ``homepage_url`` for
-    implemented managers, or from the YAML's ``homepages`` mapping for
-    competitor-only managers. IDs without any known URL render as plain
-    ``\\`code\\```.
+    Each manager identifier in the first column is rendered as a link: to its
+    dedicated documentation page for implemented managers, or to its homepage
+    from the YAML's ``homepages`` mapping for competitor-only managers. IDs
+    without any known URL render as plain ``\\`code\\```.
 
     Support cells are normally ``✅``, but render as ``[🟡](url)`` when the
     ``(manager_id, competitor)`` pair is listed in the YAML's
@@ -294,10 +337,10 @@ def benchmark_managers_table() -> str:
     table = []
     for mid in all_ids:
         if mid in pool_ids:
-            url: str | None = pool[mid].homepage_url
+            label = f"[`{mid}`](managers/{mid}.md)"
         else:
             url = homepages.get(mid)
-        label = f"[`{mid}`]({url})" if url else f"`{mid}`"
+            label = f"[`{mid}`]({url})" if url else f"`{mid}`"
         row = [label]
         if mid in pool_ids:
             row.append(f"[✅]({manager_source_url(mid)})")
@@ -350,7 +393,8 @@ def augmentations_table() -> str:
       :func:`meta_package_manager.capabilities.search_capabilities` and the
       config-defined manager builder).
 
-    Managers needing no backfill at all are left out of the table.
+    Managers needing no backfill at all are left out of the table. Each listed
+    manager links to its dedicated documentation page.
     """
     table = []
     for mid, manager in sorted(pool.items()):
@@ -362,7 +406,7 @@ def augmentations_table() -> str:
         if not (upgrade_all or exact or extended):
             continue
         table.append([
-            f"`{mid}`",
+            f"[`{mid}`](managers/{mid}.md)",
             "✅" if upgrade_all else "",
             "✅" if exact else "",
             "✅" if extended else "",
@@ -375,6 +419,443 @@ def augmentations_table() -> str:
         colalign=["left", "center", "center", "center"],
         disable_numparse=True,
     )
+
+
+def _fenced(content: str, language: str) -> str:
+    """Wrap content in a fenced code block, lengthening the fence as needed.
+
+    Sample outputs are arbitrary text: a fence one backtick longer than the
+    longest backtick run in the content can never be terminated early.
+    """
+    longest = max(
+        (len(run.group(0)) for run in re.finditer(r"`+", content)),
+        default=0,
+    )
+    fence = "`" * max(3, longest + 1)
+    return f"{fence}{language}\n{content}\n{fence}"
+
+
+def _toml_definition(definition_source: str) -> dict:
+    """Parse a bundled TOML definition file into its raw document."""
+    return tomllib.loads(
+        (PROJECT_ROOT / definition_source).read_text(encoding="UTF-8"),
+    )
+
+
+def _toml_definition_intro(definition_source: str) -> str | None:
+    """Extract the description comment atop a bundled TOML definition.
+
+    The TOML counterpart of a manager class docstring: each bundled file opens
+    with a comment block describing the manager and its quirks. The boilerplate
+    is stripped (the "Bundled package-manager definition" tag line and the
+    schema/loader pointer), bare URLs are wrapped into autolinks, and paragraph
+    breaks (lone ``#`` lines) are preserved. Returns ``None`` when nothing but
+    boilerplate is found.
+    """
+    lines = []
+    for line in (
+        (PROJECT_ROOT / definition_source).read_text(encoding="UTF-8").splitlines()
+    ):
+        if line == "#":
+            lines.append("")
+        elif line.startswith("# "):
+            lines.append(line[2:])
+        else:
+            break
+
+    text = "\n".join(lines)
+    # The schema/loader pointer spans reflowed lines, so strip it before
+    # splitting paragraphs.
+    text = re.sub(r"(?s)\s*See\s+docs/overrides\.md.*?for\s+the\s+loader\.", "", text)
+    paragraphs = [
+        p.strip("\n")
+        for p in text.split("\n\n")
+        if p.strip() and not p.startswith("Bundled package-manager definition")
+    ]
+    if not paragraphs:
+        return None
+    intro = "\n\n".join(paragraphs)
+    # MyST's linkify extension is off: turn bare URLs into explicit autolinks.
+    return re.sub(r"https?://[^\s)>]+", lambda url: f"<{url.group(0)}>", intro)
+
+
+def manager_intro(manager_id: str) -> str:
+    """Produce the lede of a manager's documentation page.
+
+    Rendered live at Sphinx build time by the first ``{python:render}`` block of
+    ``docs/managers/<id>.md``. Stacks, in order: a deprecation warning when the
+    manager is deprecated, the manager class's own docstring (whose caveats and
+    notes are otherwise only surfaced by the API docs), and a facts list (home
+    page, source, version requirement).
+
+    The class docstring is reST, so it is wrapped in an ``{eval-rst}`` block
+    opened with a ``py:currentmodule`` directive so module-sibling
+    cross-references resolve outside their autodoc context. Config-defined
+    managers get the description comment atop their bundled TOML definition
+    (:func:`_toml_definition_intro`) instead of their synthesized class
+    docstring, with a pointer to the file as fallback.
+    """
+    m = pool[manager_id]
+    blocks = []
+
+    if m.deprecated:
+        blocks.append(
+            "```{warning}\n"
+            f"`{manager_id}` is deprecated. See the "
+            f"[deprecation notice]({m.deprecation_url}).\n"
+            "```",
+        )
+
+    source_url = manager_source_url(manager_id)
+    source_path = source_url.removeprefix(f"{GITHUB_BLOB_URL}/").partition("#")[0]
+
+    if getattr(m, "definition_source", None):
+        blocks.append(
+            _toml_definition_intro(m.definition_source)
+            or f"Defined as a [bundled TOML configuration]({source_url}) rather "
+            "than a Python class.",
+        )
+    else:
+        docstring = type(m).__dict__.get("__doc__")
+        assert docstring, f"Manager class of {manager_id} has no docstring."
+        blocks.append(
+            "````{eval-rst}\n"
+            f".. py:currentmodule:: {type(m).__module__}\n\n"
+            f"{inspect.cleandoc(docstring)}\n"
+            "````",
+        )
+
+    facts = [
+        f"- Home page: <{m.homepage_url}>",
+        f"- Source: [`{source_path}`]({source_url})",
+    ]
+    if m.requirement:
+        facts.append(f"- Version requirement: `{m.requirement}`")
+    blocks.append("\n".join(facts))
+
+    return "\n\n".join(blocks)
+
+
+def _platform_coverage(p_obj, platforms: frozenset) -> tuple[str, str | None] | None:
+    """Return the icon and partial-coverage annotation of a platform entry.
+
+    ``None`` when the manager covers no member of the entry. The annotation is
+    ``None`` on full coverage, and otherwise spells out whichever side is
+    shorter: the covered members (``Exherbo Linux only``) or the missing ones
+    (``except WSL1, WSL2``), so a manager backing most of a large group stays
+    readable.
+    """
+    members = set(extract_members(p_obj))
+    covered = members & platforms
+    if not covered:
+        return None
+    annotation = None
+    if covered != members:
+        missing = members - covered
+        side, template = (
+            (missing, "except {}")
+            if len(missing) < len(covered)
+            else (covered, "{} only")
+        )
+        names = ", ".join(sorted((p.name for p in side), key=str.casefold))
+        annotation = template.format(names)
+    return p_obj.icon, annotation
+
+
+def manager_platforms(manager_id: str) -> str:
+    """Produce the platform bullet list of a manager's documentation page.
+
+    One line per supported :data:`~meta_package_manager.platforms.MAIN_PLATFORMS`
+    entry, with :func:`_platform_coverage`'s annotation when the manager only
+    backs part of a multi-platform group: the readme's operation matrix renders
+    an all-or-nothing icon, this list is where partial support is spelled out.
+    """
+    m = pool[manager_id]
+    lines = []
+    for p_obj in MAIN_PLATFORMS:
+        coverage = _platform_coverage(p_obj, m.platforms)
+        if coverage is None:
+            continue
+        icon, annotation = coverage
+        line = f"- {icon} {p_obj.name}"
+        if annotation:
+            line += f" ({annotation})"
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def manager_operations(manager_id: str) -> str:
+    """Produce the operations table of a manager's documentation page.
+
+    One row per member of :class:`~meta_package_manager.capabilities.Operations`,
+    in enum order. The *Notes* column points out the capabilities ``mpm``
+    synthesizes on top of the native CLI, mirroring the introspection of
+    :func:`augmentations_table`, and is dropped entirely for the managers
+    needing no backfill.
+    """
+    m = pool[manager_id]
+    search_func = getattr(type(m), "search", None)
+    table = []
+    for op in Operations:
+        supported = implements(m, op)
+        note = ""
+        if supported and op is Operations.upgrade_all and upgrade_all_is_synthesized(m):
+            note = "[backfilled by `mpm`](../augmentations.md)"
+        elif supported and op is Operations.search:
+            missing = [
+                label
+                for label, native in (
+                    ("exact", getattr(search_func, "exact_support", True)),
+                    ("extended", getattr(search_func, "extended_support", True)),
+                )
+                if not native
+            ]
+            if missing:
+                note = (
+                    f"{' and '.join(missing)} search "
+                    "[backfilled by `mpm`](../augmentations.md)"
+                )
+        table.append([f"`{op.name}`", "✓" if supported else "", note])
+
+    headers = ["Operation", "Supported", "Notes"]
+    colalign = ["left", "center", "left"]
+    if not any(row[2] for row in table):
+        table = [row[:2] for row in table]
+        headers = headers[:2]
+        colalign = colalign[:2]
+
+    return render_table(
+        table,
+        headers=headers,
+        table_format=TableFormat.GITHUB,
+        colalign=colalign,
+        disable_numparse=True,
+    )
+
+
+def _python_regex_literal(pattern: str) -> str:
+    """Render a regex as the Python raw-string literal it is declared as in source.
+
+    Gives the version-probe block of the manager pages ``python`` highlighting
+    (Pygments ships no standalone regex lexer). Falls back to ``repr()`` —
+    escaped, non-raw — for the rare pattern a raw literal cannot express: one
+    containing both quote characters, or ending with a backslash.
+    """
+    if not pattern.endswith("\\"):
+        if '"' not in pattern:
+            return f'r"{pattern}"'
+        if "'" not in pattern:
+            return f"r'{pattern}'"
+    return repr(pattern)
+
+
+def manager_cli(manager_id: str) -> str:
+    """Produce the command-line section of a manager's documentation page.
+
+    Documents how ``mpm`` drives the manager: binary names and lookup tweaks,
+    the arguments and environment forced on every call, the escalation and
+    cooldown behaviors, then the version probe and its parsing regexes. Beyond
+    the always-shown CLI names and version probe, only non-default facts are
+    listed. The argv fragments (pre-commands, forced arguments) are collated
+    into single code spans, matching how they appear on the command line.
+
+    Bundled TOML managers additionally surface their ``[samples]`` fixtures:
+    the version probe shows its captured output as a terminal transcript, and
+    each sampled operation shows the native command and the raw output ``mpm``
+    parses.
+    """
+    m = pool[manager_id]
+
+    def code_list(values) -> str:
+        return ", ".join(f"`{v}`" for v in values)
+
+    lines = [f"- CLI names, in lookup order: {code_list(m.cli_names)}"]
+    if m.cli_search_path:
+        lines.append(f"- Extra CLI search paths: {code_list(m.cli_search_path)}")
+    if m.pre_cmds:
+        lines.append(f"- Pre-commands: `{' '.join(m.pre_cmds)}`")
+    if m.pre_args:
+        lines.append(f"- Arguments forced before each call: `{' '.join(m.pre_args)}`")
+    if m.post_args:
+        lines.append(f"- Arguments forced after each call: `{' '.join(m.post_args)}`")
+    if m.extra_env:
+        lines.append("- Environment forced on each call:")
+        lines.extend(f"  - `{k}={v}`" for k, v in sorted(m.extra_env.items()))
+    if m.timeout is not None:
+        lines.append(f"- Call timeout: {m.timeout} seconds")
+    if m.default_sudo:
+        lines.append(
+            "- Privileged operations run through [`sudo`](../sudo.md)",
+        )
+    if m.internal_sudo:
+        lines.append(
+            "- Runs `sudo` from inside its own commands, never wrapped by `mpm` "
+            "(see [privilege escalation](../sudo.md))",
+        )
+    if m.supports_cooldown:
+        lines.append(
+            f"- Native [cooldown](../cooldown.md) support through the "
+            f"`{m.cooldown_env_var}` environment variable",
+        )
+
+    version_sample = None
+    op_samples = []
+    source = getattr(m, "definition_source", None)
+    if source:
+        doc = _toml_definition(source)
+        samples = doc.get("samples", {})
+        version_sample = samples.get("version", {}).get("output")
+        operations = doc["mpm"]["managers"][manager_id].get("operations", {})
+        for op in Operations:
+            spec = operations.get(op.name, {})
+            for sample in samples.get(op.name, ()):
+                command = " ".join((
+                    spec.get("cli", m.cli_names[0]),
+                    *spec.get("args", ()),
+                ))
+                output = sample["output"].strip("\n")
+                op_samples.append(
+                    _fenced(f"$ {command}\n{output}", "shell-session"),
+                )
+
+    probe = " ".join(((m.version_cli or m.cli_names[0]), *m.version_cli_options))
+    regex_suffix = (
+        " the first of these regular expressions to match"
+        if len(m.version_regexes) > 1
+        else ""
+    )
+    regex_fence = _fenced(
+        "\n".join(_python_regex_literal(regex) for regex in m.version_regexes),
+        "python",
+    )
+
+    parts = ["\n".join(lines)]
+    if version_sample:
+        transcript = version_sample.strip("\n")
+        parts.append("The version is probed by running:")
+        parts.append(_fenced(f"$ {probe}\n{transcript}", "shell-session"))
+        parts.append(f"and extracted with{regex_suffix}:")
+    else:
+        parts.append(
+            f"The version is extracted from the output of `{probe}` "
+            f"with{regex_suffix}:",
+        )
+    parts.append(regex_fence)
+
+    if op_samples:
+        parts.append(
+            "Native outputs `mpm` parses, as captured in the "
+            f"[bundled definition]({manager_source_url(manager_id)}):",
+        )
+        parts.extend(op_samples)
+
+    return "\n\n".join(parts)
+
+
+def manager_ecosystem(manager_id: str) -> str:
+    """Produce the ecosystem section of a manager's documentation page.
+
+    Lists the [purl](https://github.com/package-url/purl-spec) types the manager
+    responds to (its own ID plus the ecosystem types mapped to it by
+    :data:`~meta_package_manager.specifier.PURL_MAP`), and its Brewfile entry
+    type when Homebrew Bundle's DSL covers it.
+    """
+    m = pool[manager_id]
+    purl_types = sorted(
+        {manager_id} | {t for t, ids in PURL_MAP.items() if ids and manager_id in ids},
+    )
+    types_list = ", ".join(f"`pkg:{t}`" for t in purl_types)
+    lines = [
+        "- Accepted [purl](https://github.com/package-url/purl-spec) types: "
+        f"{types_list}",
+    ]
+    if m.brewfile_entry_type:
+        lines.append(
+            f"- Maps to `{m.brewfile_entry_type}` entries in "
+            "[Brewfile backups](../dump.md)",
+        )
+    return "\n".join(lines)
+
+
+def manager_usage(manager_id: str) -> str:
+    """Produce the usage section of a manager's documentation page.
+
+    A few ready-to-paste invocations targeting this manager alone, each gated on
+    the operation being implemented, followed by pointers to the selection and
+    configuration levers.
+    """
+    m = pool[manager_id]
+    examples = [f"$ mpm --{manager_id} installed"]
+    if implements(m, Operations.search):
+        examples.append(f'$ mpm --{manager_id} search "query"')
+    if implements(m, Operations.upgrade_all):
+        examples.append(f"$ mpm --{manager_id} upgrade --all")
+    if implements(m, Operations.install):
+        examples.append(f"$ mpm install pkg:{manager_id}/hello")
+    fence = "```shell-session\n" + "\n".join(examples) + "\n```"
+
+    outro = (
+        f"Deselect the manager for a single run with `--no-{manager_id}`, disable "
+        "it from your [configuration](../configuration.md), or tune its invocation "
+        "attributes with [per-manager overrides](../overrides.md)."
+    )
+    return f"{fence}\n\n{outro}"
+
+
+def managers_index_table() -> str:
+    """Produce the manager index table of ``docs/managers.md``.
+
+    Rendered live at Sphinx build time. Each manager links to its dedicated
+    documentation page, deprecated managers carry the same ``⚠️`` marker as the
+    readme's operation matrix, and platform icons follow the same coverage
+    reading as the manager pages: a partially-backed group keeps its icon with
+    :func:`_platform_coverage`'s annotation (``🐧 (Exherbo Linux only)``)
+    instead of disappearing, as it does in the readme's all-or-nothing matrix.
+    """
+    table = []
+    for mid, m in sorted(pool.items()):
+        id_cell = f"`{mid}`" + (
+            "" if not m.deprecated else f" [⚠️]({m.deprecation_url})"
+        )
+        parts = []
+        for p_obj in MAIN_PLATFORMS:
+            coverage = _platform_coverage(p_obj, m.platforms)
+            if coverage is None:
+                continue
+            icon, annotation = coverage
+            parts.append(f"{icon} ({annotation})" if annotation else icon)
+        table.append([f"[{m.name}](managers/{mid}.md)", id_cell, " ".join(parts)])
+    rendered = render_table(
+        table,
+        headers=["Manager", "ID", "Platforms"],
+        table_format=TableFormat.GITHUB,
+        colalign=["left", "left", "center"],
+        disable_numparse=True,
+    )
+    return f"`mpm` can drive {len(pool)} package managers:\n\n{rendered}"
+
+
+def manager_page_stub(manager_id: str) -> str:
+    """Produce the committed stub of a manager's documentation page.
+
+    The stub carries the page title and the section headings from
+    :data:`MANAGER_SECTIONS`; every section body is a ``{python:render}`` block
+    so the content renders live at Sphinx build time and never drifts from the
+    pool. The block formatting mirrors ``docs/benchmark.md`` so the stubs are an
+    ``mdformat`` fixpoint.
+    """
+    m = pool[manager_id]
+    blocks = [f"# {{octicon}}`package` {m.name}"]
+    for title, func_name in MANAGER_SECTIONS:
+        if title:
+            blocks.append(f"## {title}")
+        blocks.append(
+            "```{python:render}\n"
+            f"from docs_update import {func_name}\n\n"
+            f'print({func_name}("{manager_id}"))\n'
+            "```",
+        )
+    return "\n\n".join(blocks) + "\n"
 
 
 def replace_content(
@@ -556,7 +1037,32 @@ def update_readme() -> None:
     )
 
 
+def update_manager_stubs() -> None:
+    """Sync the committed page stubs of ``docs/managers/``.
+
+    The directory is wholly owned by this function: one ``<id>.md`` stub per
+    pool manager, nothing else. A stub is only rewritten when its content
+    differs (keeping ``update-docs`` autofix diffs minimal), and stubs whose
+    manager left the pool are deleted. ``test_manager_stubs_in_sync`` guards
+    the contract.
+    """
+    stub_dir = PROJECT_ROOT / "docs" / "managers"
+    stub_dir.mkdir(parents=True, exist_ok=True)
+
+    expected = {mid: manager_page_stub(mid) for mid in pool.all_manager_ids}
+
+    for stub in stub_dir.glob("*.md"):
+        if stub.stem not in expected:
+            stub.unlink()
+
+    for mid, content in expected.items():
+        stub = stub_dir / f"{mid}.md"
+        if not stub.exists() or stub.read_text(encoding="UTF-8") != content:
+            stub.write_text(content, encoding="UTF-8")
+
+
 if __name__ == "__main__":
     update_keywords()
     update_labels()
+    update_manager_stubs()
     update_readme()

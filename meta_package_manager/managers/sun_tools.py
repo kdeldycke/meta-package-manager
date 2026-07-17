@@ -33,6 +33,7 @@ class Sun_Tools(PackageManager):
     """Solaris' legacy System V Release 4 packaging tools.
 
     Documentation:
+
     - https://docs.oracle.com/cd/E86824_01/html/E54763/pkginfo-1.html
     - https://docs.oracle.com/cd/E26502_01/html/E29031/pkgadd-1m.html
     - https://docs.oracle.com/cd/E26502_01/html/E29031/pkgrm-1m.html

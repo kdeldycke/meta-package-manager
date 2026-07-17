@@ -7,7 +7,7 @@
 #
 # Parsing notes, verified against the fink Perl source (Fink/Engine.pm, Fink/CLI.pm,
 # Fink/Config.pm) and its man page:
-#   - `fink list --tab` prints one "status<TAB>name<TAB>version<TAB>description"
+#   - `fink list --tab` prints one `status<TAB>name<TAB>version<TAB>description`
 #     record per line, no header or footer. The 3-char status is " i " (installed,
 #     current), "(i)" (installed, newer exists), "*i*" (newer than fink knows),
 #     " p " (virtual, empty version) or "   " (not installed).

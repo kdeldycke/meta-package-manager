@@ -26,6 +26,7 @@ import pytest
 from extra_platforms import Group, extract_members
 from yaml import Loader, load, safe_load
 
+from meta_package_manager.capabilities import Operations
 from meta_package_manager.labels import (
     LABELS,
     MANAGER_PREFIX,
@@ -412,8 +413,10 @@ def test_benchmark_table_renders():
     assert "`mpm`" in header
     for competitor in docs_update.BENCHMARK_COMPETITORS:
         assert f"`{competitor}`" in header
-    # Every pool manager must land one row backed by a source link.
+    # Every pool manager must land one row backed by a source link, its
+    # identifier linking to its dedicated documentation page.
     assert sum(line.count("[✅](") for line in lines) == len(pool)
+    assert sum(line.count("](managers/") for line in lines) == len(pool)
 
 
 def test_augmentations_table_renders():
@@ -434,8 +437,73 @@ def test_augmentations_table_renders():
     assert 0 < len(rows) < len(pool)
     assert all(line.count("✅") >= 1 for line in rows)
     # The one-by-one upgrade fallback backfills pip, the canonical example
-    # narrated in the page's prose.
-    assert any(line.startswith("| `pip` ") and "✅" in line for line in rows)
+    # narrated in the page's prose. Its identifier links to its documentation
+    # page.
+    assert any(
+        line.startswith("| [`pip`](managers/pip.md) ") and "✅" in line for line in rows
+    )
+
+
+def test_manager_stubs_in_sync():
+    """Check the committed page stubs of ``docs/managers/`` match a fresh
+    generation from the pool.
+
+    The directory is wholly owned by ``update_manager_stubs()``: one stub per
+    pool manager, nothing else, each byte-identical to its template. Drift
+    means a manager was added or removed without running
+    ``docs/docs_update.py`` (repomatic's ``update-docs`` job self-heals this
+    on the next push).
+    """
+    stub_dir = PROJECT_ROOT / "docs" / "managers"
+    stubs = {path.stem: path for path in stub_dir.glob("*.md")}
+    assert set(stubs) == set(pool.all_manager_ids)
+    for mid, path in stubs.items():
+        assert path.read_text(encoding="utf-8") == docs_update.manager_page_stub(mid)
+
+
+@all_managers
+def test_manager_page_sections_render(manager):
+    """Check every section generator of the per-manager pages produces
+    non-empty, heading-free MyST.
+
+    The sections are rendered live at Sphinx build time by the
+    ``{python:render}`` blocks of ``docs/managers/<id>.md``, so there is no
+    checked-in copy to compare against: this test guards the generators
+    against crashes and locks the heading-free invariant documented on
+    ``MANAGER_SECTIONS`` (headings belong to the committed stubs).
+    """
+    heading = re.compile(r"^#{1,6} ", re.MULTILINE)
+    fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
+    for _title, func_name in docs_update.MANAGER_SECTIONS:
+        output = getattr(docs_update, func_name)(manager.id)
+        assert output.strip()
+        # Fenced blocks (code samples, eval-rst) cannot produce MyST headings:
+        # only the prose between them must stay heading-free.
+        assert not heading.search(fence.sub("", output))
+
+    assert manager.homepage_url in docs_update.manager_intro(manager.id)
+    # Header, separator, then one row per operation.
+    operations = docs_update.manager_operations(manager.id)
+    assert len(operations.splitlines()) == 2 + len(Operations)
+    assert f"mpm --{manager.id} installed" in docs_update.manager_usage(manager.id)
+
+
+def test_managers_index_table_renders():
+    """Check the manager index generator still produces a well-formed table
+    linking every pool manager to its documentation page.
+
+    The table is rendered live at Sphinx build time by the ``{python:render}``
+    block in ``docs/managers.md``, so there is no checked-in copy to compare
+    against.
+    """
+    table = docs_update.managers_index_table()
+    lines = table.splitlines()
+    assert lines[0] == f"`mpm` can drive {len(pool)} package managers:"
+    assert lines[2].startswith("| Manager")
+    for mid, manager in pool.items():
+        assert f"](managers/{mid}.md)" in table
+        if manager.deprecated:
+            assert f"[⚠️]({manager.deprecation_url})" in table
 
 
 def test_matrix_blocks_in_sync():

@@ -39,7 +39,7 @@ class XBPS(PackageManager):
         upgrades, and ``xbps-remove`` for uninstalls and cache cleanup.
         ``mpm`` resolves the siblings from the same directory as
         :py:attr:`cli_path
-        <meta_package_manager.manager.PackageManager.cli_path>`.
+        <meta_package_manager.execution.CLIExecutor.cli_path>`.
     """
 
     name = "Void XBPS"
@@ -63,7 +63,7 @@ class XBPS(PackageManager):
     The other XBPS binaries (``xbps-query``, ``xbps-remove``) are looked up
     in the same directory as ``xbps-install`` via
     :py:attr:`cli_path
-    <meta_package_manager.manager.PackageManager.cli_path>`.
+    <meta_package_manager.execution.CLIExecutor.cli_path>`.
     """
 
     _INSTALLED_REGEXP = re.compile(

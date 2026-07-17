@@ -309,7 +309,7 @@ class Yay(Pacman):
         yay exposes no release-age flag, so mpm enforces the supply-chain
         :py:attr:`cooldown <meta_package_manager.execution.CLIExecutor.cooldown>` by
         overlaying a generated ``init.lua`` through a private ``XDG_CONFIG_HOME`` (see
-        :py:meth:`cooldown_env`). This needs yay >= 13.0.0, when the Lua
+        :py:meth:`Yay.cooldown_env`). This needs yay >= 13.0.0, when the Lua
         ``UpgradeSelect``/``AURPreInstall`` hooks landed; an older yay stays a usable
         manager but cannot honor a cooldown. The upstream request for a less invasive
         injection point is https://github.com/Jguer/yay/issues/2883.

@@ -35,6 +35,7 @@ class Tazpkg(PackageManager):
     """SliTaz GNU/Linux's package manager.
 
     Documentation:
+
     - https://doc.slitaz.org/en:handbook:tazpkg
     - https://github.com/SliTaz-official/tazpkg
 

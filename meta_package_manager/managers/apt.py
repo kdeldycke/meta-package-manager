@@ -34,6 +34,7 @@ class APT(PackageManager):
     """Base package manager shared by variation of the apt command.
 
     Documentation:
+
     - https://wiki.debian.org/AptCLI
     - http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
 

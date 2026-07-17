@@ -34,6 +34,7 @@ class Emerge(PackageManager):
     """The Gentoo package manager.
 
     Documentation:
+
     - https://wiki.gentoo.org/wiki/Portage#emerge
     - https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html
 

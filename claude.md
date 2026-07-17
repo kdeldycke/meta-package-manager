@@ -206,6 +206,16 @@ The benchmark compares `mpm` against related tools. It mixes one generated table
 
 Documents capabilities `mpm` backfills on top of native tools. Two classes: *selective* — only some managers need it (full `upgrade --all`, exact/extended search), shown in the per-manager table — and *universal* — every managed tool gains it (`--dry-run` simulation, cross-scheme version parsing, purl identifiers, uniform sudo). The per-manager table renders live at Sphinx build time through the `{python:render}` block calling `augmentations_table()` from `docs/docs_update.py`, derived from the capability declarations (`upgrade_all_is_synthesized()` and the `search_capabilities` flags in `meta_package_manager/capabilities.py`), so it never drifts from the code. `test_augmentations_table_renders` guards the generator.
 
+### Per-manager pages (`docs/managers/`)
+
+One documentation page per pool manager, plus the `docs/managers.md` hub. The invariants:
+
+- **Stubs are generated — never hand-edit them.** Each `docs/managers/<id>.md` is written by `update_manager_stubs()` in `docs/docs_update.py` (run by repomatic's `update-docs` job), which owns the whole directory: it creates a stub per pool manager, rewrites drifted ones and deletes orphans. Adding or removing a manager needs no manual page work. `test_manager_stubs_in_sync` enforces byte-identity with the template.
+- **Headings live only in the stubs.** Every section body is a `{python:render}` block calling a `manager_*` generator, and those generators must emit heading-free MyST: the directive nested-parses its output into the surrounding document, where MyST headings rely on fragile section reparenting. The `MANAGER_SECTIONS` tuple in `docs_update.py` is the single source of truth for the page layout; `test_manager_page_sections_render` locks the heading-free invariant.
+- **Generators read static declarations only** — class attributes and the bundled TOML files (description comment, operation specs, `[samples]` fixtures). Never touch host-probing properties (`cli_path`, `version`, `available`, installed packages): the pages must be identical on any build host.
+- **Manager class docstrings render outside autodoc.** `manager_intro()` embeds the class docstring in an `{eval-rst}` block opened with `py:currentmodule`, so cross-references in those docstrings must be fully-qualified or module-sibling (`` :py:class:`PKG` ``, `` :py:meth:`Yay.cooldown_env` ``) — a bare class-member short ref resolves in the API docs but breaks on the manager page. The malformed-reST failure modes differ too: a broken directive or a list glued to its intro renders as garbled prose on both pages. TOML managers render their file's top description comment as the intro instead.
+- **Manager IDs link to the pages.** The readme operation matrix (absolute `https://kdeldycke.github.io/meta-package-manager/managers/<id>.html` URLs, exempted from linkcheck in `conf.py`), the benchmark first column (pool managers only) and the augmentations table all link manager IDs to their page; home pages are listed on the pages themselves. The benchmark `mpm` `✅` keeps its source-line link.
+
 ## File naming conventions
 
 ### Extensions: prefer long form

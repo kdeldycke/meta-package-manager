@@ -27,10 +27,13 @@
           python3 = pkgs.python3.override {
             packageOverrides = self: super: {
               click-extra = self.callPackage ./click-extra.nix { };
-              # Same cloup workaround as default.nix: strip the
-              # ``setuptools_scm<10`` pin leaked into Requires-Dist.
+              # Same cloup workaround as default.nix: relax the
+              # ``setuptools_scm<10`` build pin, unsatisfiable in nixpkgs.
               cloup = super.cloup.overridePythonAttrs (old: {
-                pythonRemoveDeps = (old.pythonRemoveDeps or [ ]) ++ [ "setuptools-scm" ];
+                postPatch = (old.postPatch or "") + ''
+                  substituteInPlace setup.py \
+                    --replace-fail "setuptools_scm<10" "setuptools_scm"
+                '';
               });
               extra-platforms = self.callPackage ./extra-platforms.nix { };
             };

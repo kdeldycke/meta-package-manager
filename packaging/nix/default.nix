@@ -13,11 +13,15 @@ let
   python3 = pkgs.python3.override {
     packageOverrides = self: super: {
       click-extra = self.callPackage ./click-extra.nix { };
-      # nixpkgs' cloup wheel leaks the ``setuptools_scm<10`` pin from its
-      # ``setup_requires`` into Requires-Dist, which then fails
-      # pythonRuntimeDepsCheck. Strip the bogus runtime dependency.
+      # cloup pins its setuptools-scm build requirement below 10, which
+      # nixpkgs no longer ships, so pypa/build's --no-isolation dependency
+      # check fails. Relax the pin: version detection is bypassed anyway
+      # through SETUPTOOLS_SCM_PRETEND_VERSION.
       cloup = super.cloup.overridePythonAttrs (old: {
-        pythonRemoveDeps = (old.pythonRemoveDeps or [ ]) ++ [ "setuptools-scm" ];
+        postPatch = (old.postPatch or "") + ''
+          substituteInPlace setup.py \
+            --replace-fail "setuptools_scm<10" "setuptools_scm"
+        '';
       });
       extra-platforms = self.callPackage ./extra-platforms.nix { };
     };

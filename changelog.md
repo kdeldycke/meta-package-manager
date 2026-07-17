@@ -1,9 +1,6 @@
 # Changelog
 
-## [`7.3.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.2.0...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`7.3.0` (2026-07-17)](https://github.com/kdeldycke/meta-package-manager/compare/v7.2.0...v7.3.0)
 
 - **Breaking:** [mpm] Move the declarative-manager schema, validation and class factory into the new `meta_package_manager.definitions` module, out of `meta_package_manager.config` (which keeps the loading policy: trust gate, override application, registration passes) and `meta_package_manager.manager` (which keeps the base class only).
 - **Breaking:** [mpm] Move the cross-manager fan-out machinery (`collect_from_managers`, `collect_per_package`, `OperationTrail`, the shared-lock families and the jobs policy) into the new `meta_package_manager.dispatch` module, out of `meta_package_manager.execution` (which keeps the single-subprocess engine).

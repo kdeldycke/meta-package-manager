@@ -18,6 +18,13 @@ python3Packages.buildPythonApplication (finalAttrs: {
     hash = "sha256-QyDUGwTSgYLe3EpUYre1KzvhnbH4i7vcpATS8wyeRYc=";
   };
 
+  patches = [
+    # Backport the bar-plugin fix for the UnboundLocalError crash when a
+    # probed binary does not exist, merged upstream after 7.3.0:
+    # https://github.com/kdeldycke/meta-package-manager/commit/6e21daa3
+    ./check-mpm-missing-binary.patch
+  ];
+
   build-system = with python3Packages; [ uv-build ];
 
   dependencies = with python3Packages; [

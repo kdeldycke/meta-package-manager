@@ -68,6 +68,10 @@ python3Packages.buildPythonApplication (finalAttrs: {
     # installed extra-platforms, whose platform groups evolve between
     # releases: a repo-maintenance sync guard, not a packaging invariant.
     "test_new_package_manager_issue_template"
+    # Drives the Xbar/SwiftBar plugin end-to-end through mpm, which needs at
+    # least one live package manager on the host: the build sandbox has none,
+    # so mpm exits with "critical: No manager selected."
+    "test_rendering"
   ];
 
   pythonImportsCheck = [ "meta_package_manager" ];

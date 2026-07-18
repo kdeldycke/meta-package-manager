@@ -60,8 +60,8 @@ python3Packages.buildPythonApplication (finalAttrs: {
   # The hermetic unit layer runs in full. The integration layer
   # (tests/test_manager_*.py, tests/test_cli*.py) spawns real package manager
   # binaries and auto-skips when ``$HOME`` is ``/homeless-shelter``, the
-  # hermetic-builder convention shared by Guix and Nix. See the "Note for
-  # downstream packagers" section of the project's CLAUDE.md.
+  # hermetic-builder convention shared by Guix and Nix. See
+  # https://kdeldycke.github.io/meta-package-manager/install.html#downstream-packaging
 
   disabledTests = [
     # Asserts the committed issue template matches a regeneration from the

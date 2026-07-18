@@ -784,3 +784,22 @@ When working from a cloned repository, [`uv sync`](https://docs.astral.sh/uv/ref
 $ uv sync --all-extras --all-groups
 ```
 ````
+
+## Downstream packaging
+
+Guidance for distribution packagers wiring `mpm`'s test suite into a package build. The suite has two layers:
+
+- A **hermetic unit layer** (`test_cooldown`, `test_docs`, `test_docstring_corpus`, `test_help`, `test_managers`, `test_pool`, `test_specifier`, `test_version`) that needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox; its only extra build dependency is `pyyaml`, imported by `tests/test_docs.py` (`pyproject-fmt` is optional there: the formatting-fixpoint test auto-skips when it is missing).
+- An **integration layer** (`tests/test_manager_*.py`, `tests/test_cli*.py`) that drives the ~70 real package managers (`apt`, `brew`, `pip`, `npm`, and more) and the `mpm` CLI end-to-end. These cannot run in a hermetic builder.
+
+As of mpm > `6.6.0`, the integration layer **auto-skips when `$HOME` is `/homeless-shelter`** — the build-sandbox convention shared by Guix and Nix — via `extra_platforms.pytest.skip_guix_build` (wired up in `tests/conftest.py`). Those distributors can therefore run the whole `pytest` suite unmodified: just make `pyyaml` available and **do not override `$HOME`** in the package definition, or the auto-skip stops firing and the integration tests fail.
+
+Builders that keep a writable `$HOME` (Alpine's abuild, Debian buildd, RPM mock, etc.) must either disable the suite (`nocheck`, `doCheck = false`, and similar) or ignore the integration modules with `pytest --ignore-glob='tests/test_manager_*.py' --ignore-glob='tests/test_cli*.py'`.
+
+Running only the `sanity-check` phase (or its equivalent) stays a valid minimal option: it confirms the package imports cleanly and its declared dependencies resolve. Full functional verification of the integration layer is covered by [the project's own GitHub Actions CI](https://github.com/kdeldycke/meta-package-manager/actions), where the package managers are pre-installed.
+
+The `--skip-destructive` and `pytest -m "not destructive"` markers exist for *developer* environments where some package managers are present but mutating them would be undesirable. They do not make the suite hermetic.
+
+```{note}
+The PyPI sdist ships no tests: builds that want to run the suite must start from [the GitHub tag tarballs](https://github.com/kdeldycke/meta-package-manager/tags), which carry `tests/`, `docs/` and the workflow files the docs tests parse.
+```

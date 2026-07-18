@@ -40,8 +40,8 @@ check() {
 	.testenv/bin/mpm --version
 	# Run the hermetic unit layer only: the integration modules
 	# (tests/test_manager_*.py, tests/test_cli*.py) drive the ~70 real package
-	# managers end-to-end and are covered by the project's own CI. See the
-	# "Note for downstream packagers" section of the project's CLAUDE.md.
+	# managers end-to-end and are covered by the project's own CI. See
+	# https://kdeldycke.github.io/meta-package-manager/install.html#downstream-packaging
 	# test_new_package_manager_issue_template is deselected as it asserts a
 	# repo-maintenance sync against the installed extra-platforms release, not
 	# a packaging invariant.

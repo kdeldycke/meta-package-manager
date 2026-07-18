@@ -153,15 +153,6 @@ def _fixtures():
             )
 
 
-def _parse_version_output(version_regexes: tuple[str, ...], output: str) -> str | None:
-    """Extract a version from ``--version`` output, mirroring ``execution.py``."""
-    for regex in version_regexes:
-        match = re.compile(regex, re.MULTILINE).search(output)
-        if match and match.groupdict().get("version"):
-            return match["version"]
-    return None
-
-
 @pytest.mark.parametrize("manager, member, output", list(_fixtures()))
 def test_documented_output_still_parses(manager, member, output, monkeypatch):
     """The output documented next to a parser must still parse through it."""
@@ -172,9 +163,18 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
     )
 
     if member == "version_regexes":
-        version = _parse_version_output(manager.version_regexes, output)
-        assert version, "version_regexes matched nothing in the documented output"
-        assert parse_version(version), f"{version!r} is not a parseable version"
+        # Drive the real version probe (PackageManager.version) with the
+        # documented output instead of re-implementing its regex loop: stub the
+        # two host gates and the CLI call so the extraction runs unchanged. Both
+        # gates are cached properties the shared pool instance may already have
+        # cached (a Linux-only manager is unsupported here), so patch the
+        # instance to shadow that cache, not the class.
+        monkeypatch.setattr(manager, "supported", True)
+        monkeypatch.setattr(manager, "executable", True)
+        monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+        assert manager.version is not None, (
+            "version_regexes matched no parseable version in the documented output"
+        )
         return
 
     if member == "outdated":

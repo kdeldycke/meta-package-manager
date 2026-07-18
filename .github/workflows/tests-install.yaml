@@ -64,13 +64,17 @@ jobs:
       - name: Install build tooling
         run: apk add --no-cache alpine-sdk
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - name: Generate signing key
-        # --append registers the private key in abuild.conf. The public half
-        # is copied by hand from abuild's XDG config directory: abuild-keygen
-        # --install shells out to doas, which the container does not have.
+      - name: Configure abuild
+        # abuild-keygen --append registers the private key in abuild.conf; the
+        # public half is copied by hand, as --install shells out to doas,
+        # which the container does not have. REPODEST is pinned in the user
+        # conf (sourced last) because its default follows abuild's XDG
+        # migrations (~/packages, now ~/.local/share/abuild) and the install
+        # step below must know the path.
         run: |
           abuild-keygen --append -n
           cp "$HOME"/.config/abuild/*.rsa.pub /etc/apk/keys/
+          echo "REPODEST=$HOME/packages" >> "$HOME"/.config/abuild/abuild.conf
       # abuild has no long-form options: -F builds as the container's root
       # user, -r installs missing build dependencies.
       - name: Build py3-cloup

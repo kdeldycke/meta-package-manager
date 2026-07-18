@@ -280,10 +280,10 @@ $ abuild -C ./py3-extra-platforms -r
 $ abuild -C ./py3-packageurl -r
 $ abuild -C ./py3-click-extra -r
 $ abuild -C ./meta-package-manager -r
-$ doas apk add --repository ~/packages/alpine meta-package-manager
+$ doas apk add --repository ~/.local/share/abuild/alpine meta-package-manager
 ```
 
-Each `abuild` run drops its packages in `~/packages/alpine`, where the next builds and the final `apk add` pick them up.
+Each `abuild` run drops its packages in `~/.local/share/abuild/alpine` (abuild's default `REPODEST`), where the next builds and the final `apk add` pick them up.
 
 The overlay carries the 4 dependency packages missing from the official aports tree (`py3-click-extra`, `py3-cloup`, `py3-extra-platforms`, `py3-packageurl`).
 `````

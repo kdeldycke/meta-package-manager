@@ -193,7 +193,7 @@ jobs:
   # official macports-ports tree (py-click-extra, py-cloup, py-deepmerge,
   # py-extra-platforms, py-packageurl-python) and a py-boltons version bump
   # (the official port is stuck below mpm's boltons >= 25 floor). Pending
-  # submission to https://github.com/macports/macports-ports.
+  # review at https://github.com/macports/macports-ports/pull/33609.
   # MacPorts installer pkgs are built per macOS version, so the asset is
   # resolved from the runner's major version (15 -> Sequoia, 26 -> Tahoe).
   # The overlay is served from /Users/Shared because the unprivileged macports

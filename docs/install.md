@@ -151,7 +151,7 @@ $ zb install meta-package-manager
 `````
 
 `````{tab-item} MacPorts
-While the port is pending submission to [`macports-ports`](https://github.com/macports/macports-ports), build and install from [the Portfile overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports):
+While the port is pending review, build and install from [the Portfile overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports):
 
 ```{code-block} shell-session
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
@@ -171,6 +171,17 @@ $ sudo port install meta-package-manager
 ```
 
 The overlay carries the 5 dependency ports missing from the official tree (`py-click-extra`, `py-cloup`, `py-deepmerge`, `py-extra-platforms`, `py-packageurl-python`), plus a `py-boltons` version bump.
+
+````{admonition} Help land it in MacPorts
+:class: important
+The port is pending review at [macports/macports-ports#33609](https://github.com/macports/macports-ports/pull/33609). Once merged, installation will be a one-liner:
+
+```{code-block} shell-session
+$ sudo port install meta-package-manager
+```
+
+You can help move it forward by showing your support on [the pull request](https://github.com/macports/macports-ports/pull/33609).
+````
 `````
 
 `````{tab-item} Scoop

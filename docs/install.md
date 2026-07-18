@@ -265,6 +265,29 @@ $ guix install --load-path=./meta-package-manager/packaging/guix meta-package-ma
 ```
 `````
 
+`````{tab-item} Alpine Linux
+Build and install from [the APKBUILD overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine). It targets Alpine edge, the only branch shipping `py3-uv-build` (`mpm`'s build backend) and `py3-boltons` >= `25`.
+
+As a member of the `abuild` group, with a signing key set up:
+
+```{code-block} shell-session
+$ doas apk add alpine-sdk
+$ abuild-keygen --append --install -n
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ cd ./meta-package-manager/packaging/alpine
+$ abuild -C ./py3-cloup -r
+$ abuild -C ./py3-extra-platforms -r
+$ abuild -C ./py3-packageurl -r
+$ abuild -C ./py3-click-extra -r
+$ abuild -C ./meta-package-manager -r
+$ doas apk add --repository ~/packages/alpine meta-package-manager
+```
+
+Each `abuild` run drops its packages in `~/packages/alpine`, where the next builds and the final `apk add` pick them up.
+
+The overlay carries the 4 dependency packages missing from the official aports tree (`py3-click-extra`, `py3-cloup`, `py3-extra-platforms`, `py3-packageurl`).
+`````
+
 `````{tab-item} Void Linux
 While the package is pending upstream review, build and install it from my fork's [`mpm` branch](https://github.com/kdeldycke/void-packages/tree/mpm):
 

@@ -1,0 +1,36 @@
+# Maintainer: Kevin Deldycke <kevin@deldycke.com>
+pkgname=py3-extra-platforms
+pkgver=13.3.1
+pkgrel=0
+pkgdesc="Detect platforms, OSes, distributions and group them by family"
+url="https://github.com/kdeldycke/extra-platforms"
+arch="noarch"
+license="GPL-2.0-or-later"
+depends="python3"
+makedepends="py3-gpep517 py3-installer py3-uv-build"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/e/extra-platforms/extra_platforms-$pkgver.tar.gz"
+builddir="$srcdir/extra_platforms-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	# The PyPI sdist ships no tests: smoke-test the wheel and its import
+	# instead.
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -c "import extra_platforms"
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+46a744cc373a6c339148c697c5207d0d193e811172a4669caf4738a5ed26f6f5ff55739c085c111ca3e8b32a9df3e1ed4f0bc8b3c11c76e3e35a2feeb72bd229  extra_platforms-13.3.1.tar.gz
+"

@@ -6,6 +6,7 @@ name: 🏪 Test distributors
       - main
     paths:
       - .github/workflows/tests-install.yaml
+      - packaging/alpine/**
       - packaging/choco/**
       - packaging/guix/**
       - packaging/macports/**
@@ -13,6 +14,7 @@ name: 🏪 Test distributors
   pull_request:
     paths:
       - .github/workflows/tests-install.yaml
+      - packaging/alpine/**
       - packaging/choco/**
       - packaging/guix/**
       - packaging/macports/**
@@ -31,12 +33,61 @@ concurrency:
 # Test that mpm is installable from each distribution channel. Most jobs
 # install the released artifact from external feeds (PyPI, Homebrew, Scoop,
 # GitHub Releases, etc.). The `*-source` jobs install from the in-repo
-# packaging specs (packaging/choco/, packaging/nix/, packaging/guix/) and
-# validate the build instructions documented in docs/install.md.
+# packaging specs (packaging/alpine/, packaging/choco/, packaging/guix/,
+# packaging/nix/) and validate the build instructions documented in
+# docs/install.md.
 #
 # Keep in sync with the "Installation methods" section in docs/install.md.
 
 jobs:
+
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine
+  # Build and install from the in-repo APKBUILD overlay: meta-package-manager
+  # plus the dependency packages missing from the official aports tree
+  # (py3-click-extra, py3-cloup, py3-extra-platforms, py3-packageurl).
+  # Targets Alpine edge, the only branch shipping py3-uv-build (mpm's build
+  # backend) and py3-boltons >= 25. Packages are built in dependency order:
+  # abuild resolves the previously-built ones from the local ~/packages
+  # repository, whose signing key is trusted system-wide by the keygen step.
+  # Container jobs require Docker, which ubuntu-slim does not provide.
+  apk-source:
+    name: "⁉️ apk-source"
+    # Advisory while the job proves itself; promote to ✅ once stable.
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    container:
+      image: alpine:edge
+    steps:
+      - name: Install build tooling
+        run: apk add --no-cache alpine-sdk
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Generate signing key
+        # --append registers the private key in abuild.conf. The public half
+        # is copied by hand: abuild-keygen --install shells out to doas, which
+        # the container does not have.
+        run: |
+          abuild-keygen --append -n
+          cp "$HOME"/.abuild/*.rsa.pub /etc/apk/keys/
+      # abuild has no long-form options: -F builds as the container's root
+      # user, -r installs missing build dependencies.
+      - name: Build py3-cloup
+        working-directory: packaging/alpine/py3-cloup
+        run: abuild -F -r
+      - name: Build py3-extra-platforms
+        working-directory: packaging/alpine/py3-extra-platforms
+        run: abuild -F -r
+      - name: Build py3-packageurl
+        working-directory: packaging/alpine/py3-packageurl
+        run: abuild -F -r
+      - name: Build py3-click-extra
+        working-directory: packaging/alpine/py3-click-extra
+        run: abuild -F -r
+      - name: Build meta-package-manager
+        working-directory: packaging/alpine/meta-package-manager
+        run: abuild -F -r
+      - name: Install mpm
+        run: apk add --repository "$HOME/packages/alpine" meta-package-manager
+      - run: mpm --version
 
   # https://formulae.brew.sh/formula/meta-package-manager
   # https://github.com/Homebrew/homebrew-core/blob/main/Formula/m/meta-package-manager.rb

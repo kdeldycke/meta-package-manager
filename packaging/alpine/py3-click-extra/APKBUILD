@@ -1,0 +1,48 @@
+# Maintainer: Kevin Deldycke <kevin@deldycke.com>
+pkgname=py3-click-extra
+pkgver=8.4.0
+pkgrel=0
+pkgdesc="Drop-in replacement for Click to build user-friendly and colorful CLIs"
+url="https://github.com/kdeldycke/click-extra"
+arch="noarch"
+license="GPL-2.0-or-later"
+# tabulate's widechars extra resolves to wcwidth, listed explicitly. tomli is
+# omitted: it is a Python < 3.11 marker and edge's python3 is newer.
+depends="
+	python3
+	py3-boltons
+	py3-click
+	py3-cloup
+	py3-deepmerge
+	py3-extra-platforms
+	py3-tabulate
+	py3-wcmatch
+	py3-wcwidth
+	"
+makedepends="py3-gpep517 py3-installer py3-uv-build"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/c/click-extra/click_extra-$pkgver.tar.gz"
+builddir="$srcdir/click_extra-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	# The PyPI sdist ships no tests: smoke-test the wheel and its full
+	# import chain instead.
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -c "import click_extra"
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+37ad013d04172575cfab061b8a9bdb7979785b1c1c59882bdf1f2c970860acf218c5bb21f6fb6da87fd387cdc5c4d306c2c555e4bce3e2374b08d76f209c55b0  click_extra-8.4.0.tar.gz
+"

@@ -1,0 +1,67 @@
+# Maintainer: Kevin Deldycke <kevin@deldycke.com>
+
+# Targets Alpine edge: py3-uv-build (mpm's native build backend) and the
+# py3-boltons >= 25 floor are not available in the stable branches.
+# backports-strenum and tomli are omitted from depends: both are
+# Python < 3.11 markers and edge's python3 is newer.
+pkgname=meta-package-manager
+pkgver=7.3.0
+pkgrel=0
+pkgdesc="Wraps all package managers with a unifying CLI"
+url="https://kdeldycke.github.io/meta-package-manager/"
+arch="noarch"
+license="GPL-2.0-or-later"
+depends="
+	python3
+	py3-boltons
+	py3-click-extra
+	py3-extra-platforms
+	py3-packageurl
+	py3-tomli-w
+	py3-xmltodict
+	"
+makedepends="py3-gpep517 py3-installer py3-uv-build"
+checkdepends="py3-pytest py3-tomlkit py3-yaml"
+subpackages="$pkgname-pyc"
+# The PyPI sdist ships no tests: build from the GitHub tag tarball instead,
+# so check() can exercise the test suite.
+source="https://github.com/kdeldycke/meta-package-manager/archive/v$pkgver/meta-package-manager-v$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/mpm --version
+	# Run the hermetic unit layer only: the integration modules
+	# (tests/test_manager_*.py, tests/test_cli*.py) drive the ~70 real package
+	# managers end-to-end and are covered by the project's own CI. See the
+	# "Note for downstream packagers" section of the project's CLAUDE.md.
+	# test_new_package_manager_issue_template is deselected as it asserts a
+	# repo-maintenance sync against the installed extra-platforms release, not
+	# a packaging invariant.
+	.testenv/bin/python3 -m pytest \
+		--deselect tests/test_docs.py::test_new_package_manager_issue_template \
+		tests/test_cooldown.py \
+		tests/test_docs.py \
+		tests/test_docstring_corpus.py \
+		tests/test_help.py \
+		tests/test_managers.py \
+		tests/test_pool.py \
+		tests/test_specifier.py \
+		tests/test_version.py
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+76386b50fd2e2498a490194f88aa8f76205762e8b6b78a3fdae2f18ede0d1675340afe4eb67cec53ae9018bb64b8ffe3c3a3f8f41ee86a9b8c130ccecad46aa5  meta-package-manager-v7.3.0.tar.gz
+"

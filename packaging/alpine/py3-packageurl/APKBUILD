@@ -1,0 +1,41 @@
+# Maintainer: Kevin Deldycke <kevin@deldycke.com>
+
+# Named after the packageurl module it provides, following the py3-yaml
+# precedent: the PyPI project is distributed as packageurl-python.
+pkgname=py3-packageurl
+pkgver=0.17.6
+pkgrel=0
+pkgdesc="Parser and builder for purl aka Package URLs"
+url="https://github.com/package-url/packageurl-python"
+arch="noarch"
+license="MIT"
+depends="python3"
+makedepends="py3-gpep517 py3-installer py3-setuptools py3-wheel"
+checkdepends="py3-pytest"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/p/packageurl-python/packageurl_python-$pkgver.tar.gz"
+builddir="$srcdir/packageurl_python-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	# test_purl_spec.py loads the purl-spec git submodule, absent from the
+	# PyPI sdist.
+	.testenv/bin/python3 -m pytest tests \
+		--ignore tests/test_purl_spec.py
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+b8445aeae85fd517a7ded1772592b51358fc9a71963c5d4e9a36fb33e20e1b37ccd6bd6761b19caa370e6be2756c645cfedc02e4404f98479a4ec2792d12b6a1  packageurl_python-0.17.6.tar.gz
+"

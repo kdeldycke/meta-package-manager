@@ -1,0 +1,39 @@
+# Maintainer: Kevin Deldycke <kevin@deldycke.com>
+pkgname=py3-cloup
+pkgver=3.1.0
+pkgrel=0
+pkgdesc="Click extension with option groups, constraints, aliases and themed help"
+url="https://github.com/janluke/cloup"
+arch="noarch"
+license="BSD-3-Clause"
+depends="
+	python3
+	py3-click
+	py3-typing-extensions
+	"
+makedepends="py3-gpep517 py3-installer py3-setuptools py3-wheel"
+checkdepends="py3-pytest"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/c/cloup/cloup-$pkgver.tar.gz"
+builddir="$srcdir/cloup-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest tests
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+949ef0a65219db3dd90667d561f5ba499631f8b9fe1aab4ad90f0431ed80183477883176175b4904fd35b02cb30ed888aa009dcf5081ec7d51c6ac00a7ccd9e1  cloup-3.1.0.tar.gz
+"

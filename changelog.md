@@ -7,6 +7,7 @@
 
 - [mpm] Every supported package manager gets a dedicated documentation page detailing its platforms, operations and backfilled capabilities, CLI invocation and version probe, escalation and cooldown behaviors, purl types, usage examples and the captured native outputs its parsers were written against, all rendered live from the manager declarations at Sphinx build time. A new hub page indexes the 72 pages, and manager IDs in the readme's operation matrix, the benchmark table and the augmentations table now link to them.
 - [mpm] Add a MacPorts Portfile overlay under `packaging/macports`, carrying the port plus the dependency ports missing from the official tree, tested by a new `macports-source` job.
+- [mpm] Add an Alpine Linux APKBUILD overlay under `packaging/alpine`, carrying the package plus the 4 dependency packages missing from the official aports tree, tested by a new `apk-source` job.
 - [mpm] Bump the Nix packaging pins of click-extra to `8.4.0` and extra-platforms to `13.3.1` to match mpm's dependency floors.
 - [mpm] The binaries download table of the install page is now generated from the binaries catalog at Sphinx build time, restoring working links after binary assets gained versioned filenames.
 - [bar-plugin] Fix a crash when probing an `mpm` invocation whose binary does not exist: the failed probe now reports the error instead of raising `UnboundLocalError`.

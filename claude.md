@@ -123,7 +123,7 @@ Sequential order is recommended as most package managers don't support concurren
 
 ### Note for downstream packagers
 
-The canonical guidance for distribution packagers (test-suite layers, `/homeless-shelter` auto-skip, ignore-globs for writable-`$HOME` builders, dependency constraints, per-channel build instructions) lives in [`docs/packaging.md`](docs/packaging.md), published at <https://kdeldycke.github.io/meta-package-manager/packaging.html>. Packaging specs (`packaging/nix/`, `packaging/alpine/`, and their upstream submissions) must reference that URL, never this file.
+The canonical guidance for distribution packagers (test-suite layers, `/homeless-shelter` auto-skip, ignore-globs for writable-`$HOME` builders, dependency constraints, per-channel build instructions) lives in `docs/packaging.md`, published at <https://kdeldycke.github.io/meta-package-manager/packaging.html>. Packaging specs (`packaging/nix/`, `packaging/alpine/`, and their upstream submissions) must reference that URL, never this file.
 
 ### Type checking
 
@@ -204,6 +204,10 @@ One documentation page per pool manager, plus the `docs/managers.md` hub. The in
 - **Generators read static declarations only** — class attributes, the bundled TOML files (description comment, operation specs, `[samples]` fixtures), the `shell-session` samples documented in class/attribute docstrings (harvested via `meta_package_manager.docstring_corpus`, shared with the corpus round-trip test, in terminal-facing `class_display_blocks` form for the reference traces) and the hand-curated "Supported managers" table of `docs/cooldown.md`, whose per-manager row `manager_cooldown()` extracts (keep its `mpm` id column in sync with the pool; a missing row degrades to a "not yet assessed" line). Never touch host-probing properties (`cli_path`, `version`, `available`, installed packages): the pages must be identical on any build host.
 - **Manager class docstrings render outside autodoc.** `manager_intro()` embeds the class docstring in an `{eval-rst}` block opened with `py:currentmodule`, so cross-references in those docstrings must be fully-qualified or module-sibling (`` :py:class:`PKG` ``, `` :py:meth:`Yay.cooldown_env` ``) — a bare class-member short ref resolves in the API docs but breaks on the manager page. The malformed-reST failure modes differ too: a broken directive or a list glued to its intro renders as garbled prose on both pages. TOML managers render their file's top description comment as the intro instead.
 - **Manager IDs link to the pages.** The readme operation matrix (absolute `https://kdeldycke.github.io/meta-package-manager/managers/<id>.html` URLs, exempted from linkcheck in `conf.py`), the benchmark first column (pool managers only) and the augmentations table all link manager IDs to their page; home pages are listed on the pages themselves. The benchmark `mpm` `✅` keeps its source-line link.
+
+### Installation and packaging pages (`docs/install.md`, `docs/packaging.md`)
+
+`docs/install.md` is for end users installing `mpm`: it holds installation methods only, never build-from-source or build-from-spec instructions. Everything for distribution packagers and anyone building from the in-repo `packaging/*/` specs lives in `docs/packaging.md`: the test-suite wiring, the dependency graph and `click-extra` compatibility matrix, and the per-channel catalog with its build walkthroughs. A channel still pending upstream review keeps only a stub tab in `install.md` (status line, post-landing one-liner, link into its `packaging.md` section); its full build steps live in `packaging.md` alone. Packaging specs and their upstream submissions cite the page URL `https://kdeldycke.github.io/meta-package-manager/packaging.html`, never `CLAUDE.md`. The end-to-end procedure for adding a channel is the playbook at `docs/add-packaging-channel.md`; the three-file sync it enforces is the *Distributor sync* rule below.
 
 ## File naming conventions
 

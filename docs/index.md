@@ -35,6 +35,7 @@ benchmark
 :hidden:
 contributing
 add-new-manager
+add-packaging-channel
 API <meta_package_manager>
 tests
 packaging

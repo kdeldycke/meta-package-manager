@@ -209,14 +209,25 @@ class Zypper(PackageManager):
                                 edition-old="2.26.2-3.34.1" arch="x86_64">
                             <summary>Fast, scalable revision control system</summary>
                             <description>
-                                Blah blah blah...
+                                Git is a fast, scalable, distributed revision
+                                control system.
                             </description>
                             <license/>
                             <source
                                 url="http://download.opensuse.org/updata/leap/15.3/sle"
                                 alias="repo-sle-update"/>
                         </update>
-                        (...)
+                        <update name="vim" kind="package" edition="9.0.1234-1.1"
+                                edition-old="8.2.4956-1.1" arch="x86_64">
+                            <summary>Vi IMproved text editor</summary>
+                            <description>
+                                Highly configurable text editor.
+                            </description>
+                            <license/>
+                            <source
+                                url="http://download.opensuse.org/update/leap/15.3/sle"
+                                alias="repo-sle-update"/>
+                        </update>
                     </update-list>
                 </update-status>
             </stream>

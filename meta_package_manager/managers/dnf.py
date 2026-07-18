@@ -85,11 +85,9 @@ class DNF(PackageManager):
         .. code-block:: shell-session
 
             $ dnf repoquery --userinstalled --qf FORMAT
-            Installed Packages
-            acl 2.2.53-1.el8 annaconda_dummary x86_64
-            audit 2.2.53-1.el8 audit_dummary x86_64
-            audit-libs 2.2.53-1.el8 audit_libs_dummary x86_64
-            (...)
+            acl___MPM___2.2.53-1.el8___MPM___Access control list utilities___MPM___x86_64
+            audit___MPM___3.0.7-4.el9___MPM___User space auditing tools___MPM___x86_64
+            audit-libs___MPM___3.0.7-4.el9___MPM___Dynamic auditing library___MPM___x86_64
         """
         qf = ["%{name}", "%{version}", "%{summary}", "%{arch}\n"]
         output = self.run_cli(
@@ -117,11 +115,9 @@ class DNF(PackageManager):
         .. code-block:: shell-session
 
             $ dnf repoquery --upgrades --qf FORMAT
-            Installed Packages
-            acl 2.2.53-1.el8 2.6.53-1.el8 annaconda_dummary x86_64
-            audit 2.2.53-1.el8 2.5.53-1.el8 audit_dummary x86_64
-            audit-libs 2.2.53-1.el8 2.6.53-1.el8 audit_libs_dummary x86_64
-            (...)
+            acl___MPM___2.2.53-1.el8___MPM___2.6.53-1.el8___MPM___Access control list utilities___MPM___x86_64
+            audit___MPM___2.2.53-1.el8___MPM___2.5.53-1.el8___MPM___User space auditing tools___MPM___x86_64
+            audit-libs___MPM___2.2.53-1.el8___MPM___2.6.53-1.el8___MPM___Dynamic auditing library___MPM___x86_64
         """
         qf = ["%{name}", "%{version}", "%{evr}", "%{summary}", "%{arch}\n"]
         output = self.run_cli("repoquery", "--upgrades", "--qf", DNF.DELIMITER.join(qf))

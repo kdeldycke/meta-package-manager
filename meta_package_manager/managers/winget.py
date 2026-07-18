@@ -285,7 +285,7 @@ class WinGet(PackageManager):
             (2/7) Git [Git.Git]
             Version: 2.37.3
             Publisher: The Git Development Community
-            ...
+            Origin Source: winget
 
         Only returns packages with Origin Source: winget to exclude packages
         installed via other sources (e.g., sideload, portable).
@@ -311,14 +311,14 @@ class WinGet(PackageManager):
             (1/4) Git [Git.Git]
             Version: 2.37.3
             Publisher: The Git Development Community
-            ...
+            Origin Source: winget
             Available Upgrades:
               winget [2.45.1]
 
             (2/4) Microsoft Edge [Microsoft.Edge]
             Version: 109.0.1518.70
             Publisher: Microsoft
-            ...
+            Origin Source: winget
             Available Upgrades:
               winget [125.0.2535.51]
 

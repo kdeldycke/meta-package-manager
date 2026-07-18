@@ -782,7 +782,7 @@ def manager_cli(manager_id: str) -> str:
         doc = _toml_definition(source)
         version_sample = doc.get("samples", {}).get("version", {}).get("output")
     else:
-        version_sample = version_trace(type(m), manager_id)
+        version_sample = version_trace(type(m))
 
     probe = " ".join(((m.version_cli or m.cli_names[0]), *m.version_cli_options))
     regex_suffix = (
@@ -1015,9 +1015,7 @@ def manager_traces(manager_id: str) -> str:
     else:
         fences = [
             _fenced(block, block_language(block))
-            for _, _, block in literal_blocks(
-                type(m), manager_id, ("installed", "outdated")
-            )
+            for _, _, block in literal_blocks(type(m), ("installed", "outdated"))
         ]
         source_label = "manager source"
     if not fences:

@@ -66,7 +66,6 @@ class SFSU(PackageManager):
         > sfsu --version
         sfsu 1.17.2
         sprinkles 0.22.0 (crates.io published version)
-        ...
     """
 
     @property
@@ -84,7 +83,13 @@ class SFSU(PackageManager):
                 "updated": "2026-03-18 17:54:32",
                 "notes": ""
               },
-              ...
+              {
+                "name": "git",
+                "version": "2.53.0.3",
+                "source": "main",
+                "updated": "2026-03-15 09:12:04",
+                "notes": ""
+              }
             ]
         """
         output = self.run_cli("list", "--json")
@@ -114,8 +119,7 @@ class SFSU(PackageManager):
                   "available": "2.53.0.3",
                   "missing_dependencies": [],
                   "info": null
-                },
-                ...
+                }
               ]
             }
         """

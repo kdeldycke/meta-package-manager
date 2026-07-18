@@ -95,9 +95,10 @@ class Composer(PackageManager):
                 {
                   "name": "guzzlehttp/psr7",
                   "version": "1.4.2",
-                  "description": "PSR-7 message (...) methods"
-                },
-            (...)
+                  "description": "PSR-7 message implementation"
+                }
+              ]
+            }
         """
         output = self.run_cli("show", "--format=json", must_succeed=True)
         package_list = self.parse_json(output)

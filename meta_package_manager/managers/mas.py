@@ -133,9 +133,9 @@ class MAS(PackageManager):
         .. code-block:: shell-session
 
             $ mas list --json
-            {"adamID":1569813296,"bundleID":"com.1password.1password-safari","name":"1Password for Safari","version":"2.3.5",...}
-            {"adamID":1295203466,"bundleID":"com.microsoft.rdc.macos","name":"Microsoft Remote Desktop","version":"10.7.6",...}
-            {"adamID":409183694,"bundleID":"com.apple.iWork.Keynote","name":"Keynote","version":"12.0",...}
+            {"adamID":1569813296,"bundleID":"com.1password.1password-safari","name":"1Password for Safari","version":"2.3.5"}
+            {"adamID":1295203466,"bundleID":"com.microsoft.rdc.macos","name":"Microsoft Remote Desktop","version":"10.7.6"}
+            {"adamID":409183694,"bundleID":"com.apple.iWork.Keynote","name":"Keynote","version":"12.0"}
         """
         output = self.run_cli("list", "--json")
 
@@ -153,8 +153,8 @@ class MAS(PackageManager):
         .. code-block:: shell-session
 
             $ mas outdated --json
-            {"adamID":409183694,"name":"Keynote","newVersion":"12.0","version":"11.0",...}
-            {"adamID":1176895641,"name":"Spark","newVersion":"2.11.21","version":"2.11.20",...}
+            {"adamID":409183694,"name":"Keynote","newVersion":"12.0","version":"11.0"}
+            {"adamID":1176895641,"name":"Spark","newVersion":"2.11.21","version":"2.11.20"}
         """
         output = self.run_cli("outdated", "--json")
 
@@ -179,11 +179,11 @@ class MAS(PackageManager):
         .. code-block:: shell-session
 
             $ mas search python --json
-            {"adamID":689176796,"name":"Python Runner","version":"1.3",...}
-            {"adamID":630736088,"name":"Learning Python","version":"1.0",...}
-            {"adamID":945397020,"name":"Run Python","version":"1.0",...}
-            {"adamID":1164498373,"name":"PythonGames","version":"1.0",...}
-            {"adamID":1400050251,"name":"Pythonic","version":"1.0.0",...}
+            {"adamID":689176796,"name":"Python Runner","version":"1.3"}
+            {"adamID":630736088,"name":"Learning Python","version":"1.0"}
+            {"adamID":945397020,"name":"Run Python","version":"1.0"}
+            {"adamID":1164498373,"name":"PythonGames","version":"1.0"}
+            {"adamID":1400050251,"name":"Pythonic","version":"1.0.0"}
         """
         output = self.run_cli("search", query, "--json")
 

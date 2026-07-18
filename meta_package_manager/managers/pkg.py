@@ -714,7 +714,7 @@ class Ports(PackageManager):
     ) -> tuple[str, ...]:
         """Generate the CLI to upgrade one port via ``portmaster``.
 
-        .. code-block:: shell-session
+        .. code-block:: console
 
             $ sudo portmaster --no-confirm --no-term-title www/nginx
         """

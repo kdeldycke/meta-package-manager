@@ -527,7 +527,7 @@ def test_manager_traces_render_literal_blocks():
         if getattr(manager, "definition_source", None):
             continue
         traces = docs_update.manager_traces(mid)
-        blocks = literal_blocks(type(manager), mid, ("installed", "outdated"))
+        blocks = literal_blocks(type(manager), ("installed", "outdated"))
         assert bool(traces) == bool(blocks), mid
         for _member, _index, block in blocks:
             assert block in traces, mid

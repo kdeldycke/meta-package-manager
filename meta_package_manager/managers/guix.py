@@ -110,8 +110,8 @@ class Guix(PackageManager):
         .. code-block:: shell-session
 
             $ guix package --list-installed
-            hello	2.10	out	/gnu/store/...-hello-2.10
-            python	3.10.7	out	/gnu/store/...-python-3.10.7
+            hello	2.10	out	/gnu/store/k74skdjjb9c9zqjv9nmgd6zi92wpf3q0-hello-2.10
+            python	3.10.7	out	/gnu/store/2n3g8n7d5xkp6h4qz1v8m0rjc9wf5aby-python-3.10.7
         """
         output = self.run_cli("package", "--list-installed")
 

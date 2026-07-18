@@ -43,7 +43,6 @@ from __future__ import annotations
 
 import ast
 import inspect
-import re
 import textwrap
 from functools import cache
 from pathlib import Path
@@ -56,40 +55,16 @@ DIRECTIVES = (
 
 PowerShell sessions use ``> `` as their prompt, which the dissector already
 recognizes, so both flavors share one extraction path.
-"""
 
-ELISION = re.compile(r"\(\.\.\.\)|\.\.\.|…")
-"""Marks output a docstring abbreviated: an illustration, not a literal fixture."""
-
-NON_LITERAL_BLOCKS: dict[str, str] = {
-    "yarn-installed-1": (
-        "Second block illustrates the human-readable `yarn global list`, not the "
-        "`--json` stream installed() parses."
-    ),
-    "flatpak-outdated": (
-        "`remote-ls --ostree-verbose` appends branch/arch columns whose exact tab "
-        "layout is unverified without a live capture."
-    ),
-    "ports-upgrade_one_cli": (
-        "upgrade_one_cli resolves the package's port origin through a live pkg "
-        "query the stubbed CLI cannot answer."
-    ),
-    "scoop-sync": (
-        "sync's docstring is a narrative before/after transcript: the `scoop "
-        "status` blocks illustrate the state around the one `scoop update` the "
-        "method actually runs."
-    ),
-    "sdkman-outdated": (
-        "`sdk` is a shell builtin driven via `echo n | sdk upgrade`; outdated never "
-        "routes through `run_cli` and the sample is an interactive prompt."
-    ),
-}
-"""Harvested blocks that are **not** literal, single-call fixtures.
-
-Keyed by the block id ``{manager_id}-{member}[-{index}]`` (see :func:`block_id`).
-Each is an illustration or a harness limitation: skipped by the corpus
-round-trip tests and excluded from the rendered reference traces. The reason is
-kept as the value so both consumers can surface it.
+.. important::
+    These two directives are the *fixture* directives: every ``installed`` /
+    ``outdated`` / ``version_regexes`` block written under one is a complete
+    sample that must parse (the corpus round-trip enforces it) and is rendered
+    as a reference trace. An illustration that is not a literal fixture (a
+    human-readable variant, an interactive prompt, a narrative before/after
+    transcript) uses a non-harvested directive instead, ``.. code-block::
+    console``, so it stays out of the corpus and the traces while still
+    rendering in the API docs.
 """
 
 
@@ -343,55 +318,42 @@ def class_display_blocks(cls: type) -> dict[str, list[str]]:
 
 
 def is_fixture(output: str) -> bool:
-    """A block is a literal fixture only if it carries non-elided sample output."""
-    return bool(output.strip()) and not ELISION.search(output)
+    """A block is a fixture when it carries sample output to parse.
 
-
-def block_id(manager_id: str, member: str, index: int) -> str:
-    """Return the corpus id of a harvested block.
-
-    ``outdated`` may cross-reference two commands, so its docstring is validated
-    as one whole (``{manager_id}-outdated``); every other member is validated
-    block by block (``{manager_id}-{member}-{index}``). The ids key
-    :data:`NON_LITERAL_BLOCKS` and the corpus test's parametrize marks alike.
+    A ``shell-session`` block showing only a command (no output, an empty
+    system) illustrates an invocation but has nothing for a parser to consume,
+    so it is not a fixture.
     """
-    if member == "outdated":
-        return f"{manager_id}-outdated"
-    return f"{manager_id}-{member}-{index}"
+    return bool(output.strip())
 
 
 def literal_blocks(
-    cls: type, manager_id: str, members: tuple[str, ...]
+    cls: type, members: tuple[str, ...]
 ) -> list[tuple[str, int, str]]:
-    """Return ``(member, index, block)`` for a class's literal, replayable blocks.
+    """Return ``(member, index, block)`` for a class's replayable fixture blocks.
 
-    A block qualifies when its output is a non-elided fixture (:func:`is_fixture`)
-    and its id is not flagged in :data:`NON_LITERAL_BLOCKS`. The index is the
-    position within the member's full block list, so it matches the ids the
-    corpus test derives. Blocks come in compiled, terminal-facing form
-    (:func:`class_display_blocks`): the escape/tab differences from the raw
-    corpus form never touch a directive or an elision marker, so the same blocks
-    are selected either way.
+    A block qualifies when it carries sample output (:func:`is_fixture`). The
+    index is its position within the member's full block list. Blocks come in
+    compiled, terminal-facing form (:func:`class_display_blocks`): the escape/tab
+    differences from the raw corpus form never touch a directive, so the same
+    blocks are selected either way.
     """
     results = []
     blocks_by_member = class_display_blocks(cls)
     for member in members:
         for index, block in enumerate(blocks_by_member.get(member, ())):
-            if not is_fixture(split_session(block)):
-                continue
-            if block_id(manager_id, member, index) in NON_LITERAL_BLOCKS:
-                continue
-            results.append((member, index, block))
+            if is_fixture(split_session(block)):
+                results.append((member, index, block))
     return results
 
 
-def version_trace(cls: type, manager_id: str) -> str | None:
+def version_trace(cls: type) -> str | None:
     """Return the raw ``--version`` output documented for a class, or ``None``.
 
-    The first literal ``version_regexes`` block's output, mirroring the version
+    The first ``version_regexes`` block's output, mirroring the version
     ``[samples]`` fixture a :abbr:`TOML`-defined manager ships.
     """
-    blocks = literal_blocks(cls, manager_id, ("version_regexes",))
+    blocks = literal_blocks(cls, ("version_regexes",))
     if not blocks:
         return None
     return split_session(blocks[0][2])

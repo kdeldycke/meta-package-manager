@@ -122,7 +122,6 @@ class YarnClassic(Yarn):
             {"type":"activityTick","data":{"id":0,"name":"arrify@^2.0.1"}}
             {"type":"activityTick","data":{"id":0,"name":"case@^1.6.3"}}
             {"type":"activityTick","data":{"id":0,"name":"emoji-regex@^9.2.0"}}
-            (...)
             {"type":"activityEnd","data":{"id":0}}
             {"type":"progressStart","data":{"id":0,"total":327}}
             {"type":"progressTick","data":{"id":0,"current":1}}
@@ -130,12 +129,11 @@ class YarnClassic(Yarn):
             {"type":"progressTick","data":{"id":0,"current":3}}
             {"type":"progressTick","data":{"id":0,"current":4}}
             {"type":"progressTick","data":{"id":0,"current":5}}
-            (...)
             {"type":"progressFinish","data":{"id":0}}
             {"type":"info","data":"\"awesome-lint@0.18.0\" has binaries:"}
             {"type":"list","data":{"type":"bins-awesome-lint","items":["awesome-lint"]}}
 
-        .. code-block:: shell-session
+        .. code-block:: console
 
             $ yarn global list --depth 0
             yarn global v1.22.19
@@ -175,7 +173,7 @@ class YarnClassic(Yarn):
             {"type":"warning","data":"package.json: No license field"}
             {"type":"table","data":{"head":["Package","Current","Wanted","Latest","Package Type","URL"],"body":[["markdown","0.4.0","0.4.0","0.5.0","dependencies","git://github.com/evilstreak/markdown-js.git"]]}}
 
-        .. code-block:: shell-session
+        .. code-block:: console
 
             $ yarn outdated --cwd ~/.config/yarn/global
             yarn outdated v1.22.19

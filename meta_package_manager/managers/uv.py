@@ -127,8 +127,7 @@ class UV(UVBase):
               {
                 "name": "myst-parser",
                 "version": "3.0.1"
-              },
-              (...)
+              }
             ]
         """
         output = self.run_cli("pip", "list", "--format=json", must_succeed=True)

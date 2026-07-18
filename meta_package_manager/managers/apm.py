@@ -86,89 +86,17 @@ class APM(PackageManager):
             {
               "core": [
                 {
-                  "_args": [
-                    [
-                      {
-                        "raw": "/private/var/folders/(...)/package.tgz",
-                        "scope": null,
-                        "escapedName": null,
-                        "name": null,
-                        "rawSpec": "/private/var/folders/(...)/package.tgz",
-                        "spec": "/private/var/folders/(...)/package.tgz",
-                        "type": "local"
-                      },
-                      "/Users/distiller/atom"
-                    ]
-                  ],
-                  "_inCache": true,
-                  "_installable": true,
-                  "_location": "/background-tips",
-                  "_phantomChildren": {},
-                  "_requested": {
-                    "raw": "/private/var/folders/(...)/package.tgz",
-                    "scope": null,
-                    "escapedName": null,
-                    "name": null,
-                    "rawSpec": "/private/var/folders/(...)/package.tgz",
-                    "spec": "/private/var/folders/(...)/package.tgz",
-                    "type": "local"
-                  },
-                  "_requiredBy": [
-                    "#USER"
-                  ],
-                  "_resolved": "file:../../../private/var/(...)/package.tgz",
-                  "_shasum": "7978e4fdab3b162d93622fc64d012df7a92aa569",
-                  "_shrinkwrap": null,
-                  "_spec": "/private/var/folders/(...)/package.tgz",
-                  "_where": "/Users/distiller/atom",
-                  "bugs": {
-                    "url": "https://github.com/atom/background-tips/issues"
-                  },
-                  "dependencies": {
-                    "underscore-plus": "1.x"
-                  },
-                  "description": "Displays tips about Atom in the background.",
-                  "devDependencies": {
-                    "coffeelint": "^1.9.7"
-                  },
-                  "engines": {
-                    "atom": ">0.42.0"
-                  },
-                  "homepage": "https://github.com/atom/background-tips#readme",
-                  "license": "MIT",
-                  "main": "./lib/background-tips",
                   "name": "background-tips",
-                  "optionalDependencies": {},
-                  "private": true,
-                  "repository": {
-                    "type": "git",
-                    "url": "https://github.com/atom/background-tips.git"
-                  },
                   "version": "0.26.1",
-                  "_atomModuleCache": {
-                    "version": 1,
-                    "dependencies": [],
-                    "extensions": {
-                      ".js": [
-                        "lib/background-tips-view.js",
-                        "lib/background-tips.js",
-                        "lib/tips.js"
-                      ]
-                    },
-                    "folders": [
-                      {
-                        "paths": [
-                          "lib",
-                          ""
-                        ],
-                        "dependencies": {
-                          "underscore-plus": "1.x"
-                        }
-                      }
-                    ]
-                  }
-                },
-                (...)
+                  "description": "Displays tips about Atom in the background."
+                }
+              ],
+              "user": [
+                {
+                  "name": "file-icons",
+                  "version": "2.0.9",
+                  "description": "Assign file extension icons"
+                }
               ]
             }
         """
@@ -193,145 +121,10 @@ class APM(PackageManager):
             $ apm outdated --compatible --json | jq
             [
               {
-                "_args": [
-                  [
-                    {
-                      "raw": "/private/var/folders/(...)/package.tgz",
-                      "scope": null,
-                      "escapedName": null,
-                      "name": null,
-                      "rawSpec": "/private/var/folders/(...)/package.tgz",
-                      "spec": "/private/var/folders/(...)/package.tgz",
-                      "type": "local"
-                    },
-                    "/private/var/folders/(...)/apm-install-dir-117017"
-                  ]
-                ],
-                "_from": "../d-117017-63877-vcgh4t/package.tgz",
-                "_id": "file-icons@2.0.9",
-                "_inCache": true,
-                "_installable": true,
-                "_location": "/file-icons",
-                "_phantomChildren": {},
-                "_requested": {
-                  "raw": "/private/var/folders/(...)/package.tgz",
-                  "scope": null,
-                  "escapedName": null,
-                  "name": null,
-                  "rawSpec": "/private/var/folders/(...)/package.tgz",
-                  "spec": "/private/var/folders/(...)/package.tgz",
-                  "type": "local"
-                },
-                "_requiredBy": [
-                  "#USER"
-                ],
-                "_resolved": "file:../d-117017-63877-vcgh4t/package.tgz",
-                "_shasum": "8b2df93ad752af1676d91c12afa068f2000b864c",
-                "_shrinkwrap": null,
-                "_spec": "/private/var/folders/(...)/package.tgz",
-                "_where": "/private/var/folders/(...)/apm-install-dir-117017",
-                "atom-mocha": {
-                  "interactive": {
-                    "mocha": {
-                      "bail": true
-                    }
-                  }
-                },
-                "atomTestRunner": "./node_modules/.bin/atom-mocha",
-                "bugs": {
-                  "url": "https://github.com/file-icons/atom/issues"
-                },
-                "configSchema": {
-                  "coloured": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Untick this for colourless icons",
-                    "order": 1
-                  },
-                  "onChanges": {
-                    "type": "boolean",
-                    "default": false,
-                    "title": "Only colour when changed",
-                    "description": "Show different icon.",
-                    "order": 2
-                  },
-                  "tabPaneIcon": {
-                    "type": "boolean",
-                    "default": true,
-                    "title": "Show icons in file tabs",
-                    "order": 3
-                  },
-                  "defaultIconClass": {
-                    "type": "string",
-                    "default": "default-icon",
-                    "title": "Default icon class",
-                    "description": "CSS added to files that lack an icon.",
-                    "order": 4
-                  },
-                  "strategies": {
-                    "type": "object",
-                    "title": "Match strategies",
-                    "description": "Advanced settings for icon assignment.",
-                    "order": 5,
-                    "properties": {
-                      "grammar": {
-                        "type": "boolean",
-                        "default": true,
-                        "order": 1,
-                        "title": "Change on grammar override",
-                        "description": "Change a file's icon when setting."
-                      },
-                      "hashbangs": {
-                        "type": "boolean",
-                        "default": true,
-                        "order": 2,
-                        "title": "Check hashbangs",
-                        "description": "Allow lines like `#!/usr/bin/perl`."
-                      }
-                    }
-                  }
-                },
-                "dependencies": {
-                  "micromatch": "*"
-                },
-                "description": "Assign file extension icons",
-                "devDependencies": {
-                  "atom-mocha": "*",
-                  "coffee-script": "*",
-                  "get-options": "*",
-                  "rimraf": "*",
-                  "tmp": "*",
-                  "unzip": "*"
-                },
-                "engines": {
-                  "atom": ">1.11.0"
-                },
-                "homepage": "https://github.com/file-icons/atom",
-                "license": "MIT",
-                "main": "lib/main.js",
                 "name": "file-icons",
-                "optionalDependencies": {},
-                "private": true,
-                "providedServices": {
-                  "file-icons.element-icons": {
-                    "versions": {
-                      "1.0.0": "provideService"
-                    }
-                  },
-                  "atom.file-icons": {
-                    "versions": {
-                      "1.0.0": "suppressFOUC"
-                    }
-                  }
-                },
-                "readme": "Blah blah",
-                "readmeFilename": "README.md",
-                "repository": {
-                  "type": "git",
-                  "url": "git+https://github.com/file-icons/atom.git"
-                },
                 "version": "2.0.9",
-                "latestVersion": "2.0.10"
+                "latestVersion": "2.0.10",
+                "description": "Assign file extension icons"
               }
             ]
         """

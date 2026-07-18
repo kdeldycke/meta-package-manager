@@ -135,7 +135,8 @@ class Flatpak(PackageManager):
 
             $ flatpak remote-ls --app --updates --columns=name,application,version \
                 --ostree-verbose
-            GNOME Dictionary    org.gnome.Dictionary    3.26.0  stable  x86_64
+            GNOME Dictionary	org.gnome.Dictionary	3.26.0
+            Files	org.gnome.Nautilus	42.2
         """
         output = self.run_cli(
             "remote-ls",

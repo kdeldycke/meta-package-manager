@@ -33,9 +33,10 @@ docstrings.
 It covers ``installed``, ``outdated`` and ``--version`` blocks. ``installed`` and
 ``--version`` are single-source (one CLI call), fed straight through.
 ``outdated`` may cross-reference two commands (``list`` + ``latest``), so its
-calls are routed to the right block by a command-dispatching stub. A few blocks
-that are not literal, single-call fixtures are flagged, with reasons, in
-:data:`~meta_package_manager.docstring_corpus.NON_LITERAL_BLOCKS`. See
+calls are routed to the right block by a command-dispatching stub. Every
+``shell-session`` block of these members is a complete fixture that must parse:
+illustrations (a human-readable variant, an interactive prompt, a narrative)
+live in a non-harvested directive instead. See
 https://github.com/kdeldycke/meta-package-manager/issues/1023.
 """
 
@@ -49,10 +50,7 @@ from pathlib import Path
 import pytest
 
 from meta_package_manager.docstring_corpus import (
-    ELISION,
-    NON_LITERAL_BLOCKS,
     block_commands,
-    block_id,
     class_blocks,
     class_display_blocks,
     dissect,
@@ -61,14 +59,6 @@ from meta_package_manager.docstring_corpus import (
 )
 from meta_package_manager.pool import pool
 from meta_package_manager.version import parse_version
-
-# The corpus's non-literal blocks (illustrations, harness limitations) are
-# declared, with reasons, in the shared module. Each becomes a ``skip`` mark on
-# the matching parametrize id so the round-trip leaves it untouched.
-KNOWN_EXCEPTIONS = {
-    corpus_id: pytest.mark.skip(reason=reason)
-    for corpus_id, reason in NON_LITERAL_BLOCKS.items()
-}
 
 
 def _query_commands(cls: type, members: tuple[str, ...]) -> list[tuple[list[str], str]]:
@@ -132,24 +122,14 @@ def _fixtures():
                 output = split_session(block)
                 if not is_fixture(output):
                     continue
-                param_id = block_id(manager.id, member, index)
                 yield pytest.param(
-                    manager,
-                    member,
-                    output,
-                    id=param_id,
-                    marks=KNOWN_EXCEPTIONS.get(param_id, ()),
+                    manager, member, output, id=f"{manager.id}-{member}-{index}"
                 )
         if any(
             is_fixture(split_session(b)) for b in blocks_by_member.get("outdated", ())
         ):
-            param_id = block_id(manager.id, "outdated", 0)
             yield pytest.param(
-                manager,
-                "outdated",
-                None,
-                id=param_id,
-                marks=KNOWN_EXCEPTIONS.get(param_id, ()),
+                manager, "outdated", None, id=f"{manager.id}-outdated"
             )
 
 
@@ -165,22 +145,33 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
     if member == "version_regexes":
         # Drive the real version probe (PackageManager.version) with the
         # documented output instead of re-implementing its regex loop: stub the
-        # two host gates and the CLI call so the extraction runs unchanged. Both
-        # gates are cached properties the shared pool instance may already have
-        # cached (a Linux-only manager is unsupported here), so patch the
-        # instance to shadow that cache, not the class.
+        # two host gates and the CLI call so the extraction runs unchanged. All
+        # three (``supported``, ``executable``, ``version``) are cached
+        # properties on the shared pool instance, so patch the two gates on the
+        # instance to shadow any host-cached value, and drop ``version`` from the
+        # instance cache before and after so it recomputes with the stubs here
+        # and does not leak the stubbed result to another test.
         monkeypatch.setattr(manager, "supported", True)
         monkeypatch.setattr(manager, "executable", True)
         monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
-        assert manager.version is not None, (
-            "version_regexes matched no parseable version in the documented output"
-        )
+        manager.__dict__.pop("version", None)
+        try:
+            assert manager.version is not None, (
+                "version_regexes matched no parseable version in the documented "
+                "output"
+            )
+        finally:
+            manager.__dict__.pop("version", None)
         return
 
     if member == "outdated":
         command_map = _query_commands(type(manager), ("installed", "outdated"))
         default = _member_output(type(manager), "outdated")
         monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
+        # A few managers read their outdated stream through ``run`` rather than
+        # ``run_cli`` (sdkman shells out to ``bash -c "... | sdk upgrade"``); feed
+        # those the documented output too.
+        monkeypatch.setattr(manager, "run", lambda *args, **kwargs: default)
         packages = list(manager.outdated)
     else:  # installed.
         monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
@@ -201,10 +192,9 @@ def test_display_blocks_align_with_raw():
     replays must agree on structure.
 
     ``docs/docs_update.py`` selects reference-trace blocks by (member, index)
-    from :func:`class_display_blocks`, keyed against the same
-    :data:`NON_LITERAL_BLOCKS` ids this test derives from :func:`class_blocks`.
-    Their per-member block counts must match, or an index would point at a
-    different block on the two sides.
+    from :func:`class_display_blocks`, while this test replays the same blocks
+    from :func:`class_blocks`. Their per-member block counts must match, or an
+    index would point at a different block on the two sides.
     """
     for manager in pool.values():
         raw = class_blocks(type(manager))  # type: ignore[arg-type]
@@ -212,6 +202,22 @@ def test_display_blocks_align_with_raw():
         assert raw.keys() == display.keys(), manager.id
         for member, blocks in raw.items():
             assert len(blocks) == len(display[member]), f"{manager.id}:{member}"
+
+
+def test_fixtures_carry_no_truncation_marker():
+    """A harvested fixture block must document its output in full.
+
+    ``installed``/``outdated``/``version_regexes`` blocks are complete samples,
+    so none may abbreviate its output with a ``(...)`` marker (an illustration
+    that would truncate belongs under a non-harvested ``console`` directive). A
+    bare ``...`` is left alone: real CLI output legitimately contains it, like
+    apt's ``Listing...`` header or a `guix` store path.
+    """
+    for manager in pool.values():
+        blocks_by_member = class_blocks(type(manager))  # type: ignore[arg-type]
+        for member in ("installed", "outdated", "version_regexes"):
+            for index, block in enumerate(blocks_by_member.get(member, ())):
+                assert "(...)" not in block, f"{manager.id}-{member}-{index}"
 
 
 # --- Mutation commands: the documented invocation must be the constructed one. ---
@@ -258,12 +264,11 @@ def _documented_commands(
 ) -> list[list[str]]:
     """Every literal command documented for a mutation member, normalized.
 
-    A command piped into another program or elided with ``...`` is an
-    illustration. A leading ``sudo`` (and its ``-n``) is dropped on both the
-    documented and constructed sides: escalation depends on platform and
-    per-manager policy, not on the command's shape. Tokens restating the
-    manager's ``extra_env`` (``BATCH=yes`` for Ports) document environment
-    variables, not argv, and are dropped too.
+    A command piped into another program is an illustration. A leading ``sudo``
+    (and its ``-n``) is dropped on both the documented and constructed sides:
+    escalation depends on platform and per-manager policy, not on the command's
+    shape. Tokens restating the manager's ``extra_env`` (``BATCH=yes`` for Ports)
+    document environment variables, not argv, and are dropped too.
     """
     env_tokens = {f"{key}={value}" for key, value in (extra_env or {}).items()}
     commands = []
@@ -272,17 +277,12 @@ def _documented_commands(
             # Re-tokenize with shell quoting rules so a quoted argument (a
             # PowerShell ``-Command "..."`` payload) stays one token, matching
             # the constructed argv. Unbalanced quotes mean the command is an
-            # illustration, like a pipe or an elision.
+            # illustration, like a pipe.
             try:
                 tokens = shlex.split(" ".join(raw_tokens))
             except ValueError:
                 continue
-            if (
-                not tokens
-                or "|" in tokens
-                or "&&" in tokens
-                or any(ELISION.search(t) for t in tokens)
-            ):
+            if not tokens or "|" in tokens or "&&" in tokens:
                 continue
             tokens = [token for token in tokens if token not in env_tokens]
             # A leading VAR=VALUE is a shell environment prefix, not argv
@@ -341,13 +341,8 @@ def _mutation_fixtures():
                 type(manager), member, getattr(manager, "extra_env", None)
             )
             if documented:
-                param_id = f"{manager.id}-{member}"
                 yield pytest.param(
-                    manager,
-                    member,
-                    documented,
-                    id=param_id,
-                    marks=KNOWN_EXCEPTIONS.get(param_id, ()),
+                    manager, member, documented, id=f"{manager.id}-{member}"
                 )
 
 

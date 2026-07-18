@@ -61,3 +61,11 @@ from docs_update import manager_cooldown
 
 print(manager_cooldown("dnf"))
 ```
+
+## Reference traces
+
+```{python:render}
+from docs_update import manager_traces
+
+print(manager_traces("dnf"))
+```

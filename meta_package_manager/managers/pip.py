@@ -364,8 +364,7 @@ class Pip(PackageManager):
                 "name": "Jinja2",
                 "location": "/usr/local/lib/python3.7/site-packages",
                 "installer": ""
-              },
-              (...)
+              }
             ]
         """
         # --quiet is required here to silence warning and error messages

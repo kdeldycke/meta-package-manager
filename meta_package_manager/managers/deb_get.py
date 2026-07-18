@@ -109,7 +109,7 @@ class Deb_Get(PackageManager):
         .. code-block:: shell-session
 
             $ sudo deb-get update
-            (...)
+            Checking for updates to deb-get installed packages
               [+] ipscan (3.9.2) has an update pending. 3.9.3 is available.
 
         .. note::

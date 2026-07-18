@@ -217,7 +217,7 @@ class NPM(PackageManager):
                 "current": "0.0.0-development",
                 "wanted": "linked",
                 "latest": "linked",
-                "location": "/Users/..."
+                "location": "/Users/kev/dev/my-linked-package"
               },
               "npm": {
                 "current": "3.10.3",

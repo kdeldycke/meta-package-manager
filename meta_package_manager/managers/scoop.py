@@ -303,7 +303,7 @@ class Scoop(PackageManager):
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: pwsh-session
+        .. code-block:: console
 
             > scoop status
             WARN  Scoop out of date. Run 'scoop update' to get the latest changes.
@@ -318,7 +318,7 @@ class Scoop(PackageManager):
             The main bucket was added successfully.
             Scoop was updated successfully!
 
-        .. code-block:: pwsh-session
+        .. code-block:: console
 
             > scoop status
             Scoop is up to date.

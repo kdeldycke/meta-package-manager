@@ -51,9 +51,7 @@ jobs:
   # repository, whose signing key is trusted system-wide by the keygen step.
   # Container jobs require Docker, which ubuntu-slim does not provide.
   apk-source:
-    name: "⁉️ apk-source"
-    # Advisory while the job proves itself; promote to ✅ once stable.
-    continue-on-error: true
+    name: "✅ apk-source"
     runs-on: ubuntu-24.04
     container:
       image: alpine:edge

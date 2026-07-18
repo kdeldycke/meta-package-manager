@@ -198,10 +198,11 @@ jobs:
   # resolved from the runner's major version (15 -> Sequoia, 26 -> Tahoe).
   # The overlay is served from /Users/Shared because the unprivileged macports
   # build user cannot read the runner workspace under /Users/runner.
+  # The macos-26 leg can run ~2 hours while MacPorts' darwin_25/arm64 binary
+  # archives lag behind: without a rust/cargo/uv archive, the py-uv-build
+  # dependency chain compiles the Rust toolchain from source.
   macports-source:
-    name: "⁉️ macports-source (${{ matrix.os }})"
-    # Unproven setup: keep advisory until the overlay is validated in CI.
-    continue-on-error: true
+    name: "✅ macports-source (${{ matrix.os }})"
     strategy:
       matrix:
         os:

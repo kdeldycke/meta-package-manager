@@ -35,9 +35,10 @@ concurrency:
 # GitHub Releases, etc.). The `*-source` jobs install from the in-repo
 # packaging specs (packaging/alpine/, packaging/choco/, packaging/guix/,
 # packaging/nix/) and validate the build instructions documented in
-# docs/install.md.
+# docs/packaging.md.
 #
-# Keep in sync with the "Installation methods" section in docs/install.md.
+# Keep in sync with the "Installation methods" tabs in docs/install.md and
+# the per-channel catalog and build instructions in docs/packaging.md.
 
 jobs:
 

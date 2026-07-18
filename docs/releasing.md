@@ -15,7 +15,7 @@ The release PR must be merged via "Rebase and merge" (never squash). See the `re
 
 ## Chocolatey
 
-The Chocolatey package definition is maintained in-tree at `packaging/choco/meta-package-manager/`, but is no longer pushed to the [Chocolatey community repository](https://community.chocolatey.org/packages/meta-package-manager) (see [Impact on Chocolatey](binaries.md#impact-on-chocolatey) for the rejection rationale). The automated `chocolatey` job has been removed from `release.yaml`; only the in-tree nuspec remains, so users can build and install locally (see [`install.md`](install.md)) and the `choco-source` job in `tests-install.yaml` keeps the build instructions exercised.
+The Chocolatey package definition is maintained in-tree at `packaging/choco/meta-package-manager/`, but is no longer pushed to the [Chocolatey community repository](https://community.chocolatey.org/packages/meta-package-manager) (see [Impact on Chocolatey](binaries.md#impact-on-chocolatey) for the rejection rationale). The automated `chocolatey` job has been removed from `release.yaml`; only the in-tree nuspec remains, so users can [build and install locally](packaging.md#chocolatey) and the `choco-source` job in `tests-install.yaml` keeps the build instructions exercised.
 
 The package directory name must match the nuspec basename: this is enforced by [Chocolatey-AU's `AUPackage`](https://github.com/chocolatey-community/Chocolatey-AU/blob/develop/src/Private/AUPackage.ps1), which derives the nuspec path from `Split-Path -Leaf $pwd`.
 
@@ -28,6 +28,10 @@ The package directory name must match the nuspec basename: this is enforced by [
 The Nix package definition is maintained in-tree at `packaging/nix/` while [NixOS/nixpkgs#506145](https://github.com/NixOS/nixpkgs/pull/506145) is pending review. The `nix` job in `release.yaml` runs after the main release, computes the SRI hash of the GitHub source tarball using `nix-prefetch-url`, and updates `package.nix`. The job opens a PR to this repository with the updated definition, which can then be pushed to the nixpkgs PR branch.
 
 Two dependencies (`click-extra` and `extra-platforms`) are also bundled in `packaging/nix/` since they are not yet in nixpkgs. A `default.nix` wrapper overlays them into the Python package set, and a `flake.nix` provides flake-based access. Once the nixpkgs PR lands, the overlay and bundled dependencies become unnecessary.
+
+## MacPorts and Alpine
+
+The MacPorts Portfile overlay (`packaging/macports/`) and the Alpine APKBUILD overlay (`packaging/alpine/`) have no automated bump job: they pin the released version and its source checksums, and must be refreshed by hand as part of each release. Their build instructions and upstream submission statuses are catalogued on the [packaging page](packaging.md#channels).
 
 ## Antivirus false positives on Windows binaries
 

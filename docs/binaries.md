@@ -1,7 +1,3 @@
----
-orphan: true
----
-
 # Binaries
 
 All standalone executables published by this repository, one row per binary, newest release first. The version links to its GitHub release, the platform to the direct binary download, and the VirusTotal cell to the file's public analysis.
@@ -87,6 +83,20 @@ The table is searchable and sortable on the documentation site; the raw data liv
 :file: assets/binaries.csv
 :header-rows: 1
 :class: sphinx-datatable
+```
+
+## ABI targets
+
+What `file(1)` reports for each published binary:
+
+```{code-block} shell-session
+$ file ./meta-package-manager-*
+./meta-package-manager-7.3.0-linux-arm64.bin:   ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=520bfc6f2bb21f48ad568e46752888236552b26a, for GNU/Linux 3.7.0, stripped
+./meta-package-manager-7.3.0-linux-x64.bin:     ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=56ba24bccfa917e6ce9009223e4e83924f616d46, for GNU/Linux 3.2.0, stripped
+./meta-package-manager-7.3.0-macos-arm64.bin:   Mach-O 64-bit executable arm64
+./meta-package-manager-7.3.0-macos-x64.bin:     Mach-O 64-bit executable x86_64
+./meta-package-manager-7.3.0-windows-arm64.exe: PE32+ executable (console) Aarch64, for MS Windows
+./meta-package-manager-7.3.0-windows-x64.exe:   PE32+ executable (console) x86-64, for MS Windows
 ```
 
 ## Antivirus false positives on Windows binaries

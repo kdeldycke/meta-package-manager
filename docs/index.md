@@ -9,7 +9,6 @@ hide-toc: true
 :maxdepth: 2
 :hidden:
 install
-binaries
 managers
 augmentations
 duplicates
@@ -38,6 +37,8 @@ contributing
 add-new-manager
 API <meta_package_manager>
 tests
+packaging
+binaries
 releasing
 genindex
 modindex

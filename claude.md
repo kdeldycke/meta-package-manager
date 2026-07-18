@@ -123,7 +123,7 @@ Sequential order is recommended as most package managers don't support concurren
 
 ### Note for downstream packagers
 
-The canonical guidance for distribution packagers (test-suite layers, `/homeless-shelter` auto-skip, ignore-globs for writable-`$HOME` builders) lives in the ["Downstream packaging" section of `docs/install.md`](docs/install.md#downstream-packaging), published at <https://kdeldycke.github.io/meta-package-manager/install.html#downstream-packaging>. Packaging specs (`packaging/nix/`, `packaging/alpine/`, and their upstream submissions) must reference that URL, never this file.
+The canonical guidance for distribution packagers (test-suite layers, `/homeless-shelter` auto-skip, ignore-globs for writable-`$HOME` builders, dependency constraints, per-channel build instructions) lives in [`docs/packaging.md`](docs/packaging.md), published at <https://kdeldycke.github.io/meta-package-manager/packaging.html>. Packaging specs (`packaging/nix/`, `packaging/alpine/`, and their upstream submissions) must reference that URL, never this file.
 
 ### Type checking
 
@@ -328,7 +328,7 @@ Each job that tests a third-party distributor must have a comment above it with 
 
 ### Distributor sync
 
-`docs/install.md` (the "Installation methods" tab-set) and `.github/workflows/tests-install.yaml` must stay in sync. Both files contain cross-reference comments. When adding or removing a distributor, update both.
+`docs/install.md` (the "Installation methods" tab-set), `docs/packaging.md` (the per-channel catalog and build instructions) and `.github/workflows/tests-install.yaml` must stay in sync. All three carry cross-reference comments. When adding or removing a distributor, update them together: released channels get a full install tab, channels pending upstream review get a stub tab pointing to their `packaging.md` section.
 
 ### Schedule-only workflows
 

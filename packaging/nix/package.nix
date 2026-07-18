@@ -61,7 +61,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
   # (tests/test_manager_*.py, tests/test_cli*.py) spawns real package manager
   # binaries and auto-skips when ``$HOME`` is ``/homeless-shelter``, the
   # hermetic-builder convention shared by Guix and Nix. See
-  # https://kdeldycke.github.io/meta-package-manager/install.html#downstream-packaging
+  # https://kdeldycke.github.io/meta-package-manager/packaging.html
 
   disabledTests = [
     # Asserts the committed issue template matches a regeneration from the

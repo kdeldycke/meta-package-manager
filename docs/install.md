@@ -1,9 +1,5 @@
 # {octicon}`download` Installation
 
-```{sidebar}
-[![Packaging status](https://repology.org/badge/vertical-allrepos/meta-package-manager.svg)](https://repology.org/project/meta-package-manager/versions)
-```
-
 Meta Package Manager is [distributed on PyPI](https://pypi.org/project/meta-package-manager/).
 
 So you can install the latest stable release [with `uv`](https://docs.astral.sh/uv/):
@@ -151,37 +147,13 @@ $ zb install meta-package-manager
 `````
 
 `````{tab-item} MacPorts
-While the port is pending review, build and install from [the Portfile overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports):
-
-```{code-block} shell-session
-$ git clone https://github.com/kdeldycke/meta-package-manager.git
-$ portindex ./meta-package-manager/packaging/macports
-```
-
-Then register the overlay as your first ports tree, by adding its absolute path at the top of `/opt/local/etc/macports/sources.conf`:
-
-```{code-block} text
-file:///path/to/meta-package-manager/packaging/macports
-```
-
-Finally:
+The port is pending review at [macports/macports-ports#33609](https://github.com/macports/macports-ports/pull/33609), which you can help move forward by showing your support. Once merged, installation will be a one-liner:
 
 ```{code-block} shell-session
 $ sudo port install meta-package-manager
 ```
 
-The overlay carries the 5 dependency ports missing from the official tree (`py-click-extra`, `py-cloup`, `py-deepmerge`, `py-extra-platforms`, `py-packageurl-python`), plus a `py-boltons` version bump.
-
-````{admonition} Help land it in MacPorts
-:class: important
-The port is pending review at [macports/macports-ports#33609](https://github.com/macports/macports-ports/pull/33609). Once merged, installation will be a one-liner:
-
-```{code-block} shell-session
-$ sudo port install meta-package-manager
-```
-
-You can help move it forward by showing your support on [the pull request](https://github.com/macports/macports-ports/pull/33609).
-````
+Until then, build it from [the Portfile overlay maintained in the repository](packaging.md#macports).
 `````
 
 `````{tab-item} Scoop
@@ -193,57 +165,17 @@ Meta Package Manager is available in the `main` repository of [Scoop](https://sc
 `````
 
 `````{tab-item} Chocolatey
-Build and install from [the specs maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager):
-
-```{code-block} pwsh-session
-> git clone https://github.com/kdeldycke/meta-package-manager.git
-> cd meta-package-manager\packaging\choco\meta-package-manager
-> choco pack
-> choco install meta-package-manager --source .
-```
-
-````{admonition} Not available on the Chocolatey community repository
-:class: warning
-[Submission `6.4.2`](https://community.chocolatey.org/packages/meta-package-manager/6.4.2) was rejected: the Windows x64 binary trips too many antivirus engines on VirusTotal for community-repository moderation to clear it. See [Antivirus false positives](#antivirus-false-positives) below for the full background, and please [report the detection to your antivirus vendor](#antivirus-false-positives) if it affects you: enough reports may eventually bring the detection count back under Chocolatey's cutoff.
-````
+The package is not distributed on the Chocolatey community repository: [submission `6.4.2` was rejected](binaries.md#impact-on-chocolatey) over antivirus false positives on the bundled Windows binary (see [Antivirus false positives](#antivirus-false-positives) below, and please report the detection to your vendor if it affects you). Build and install it from [the nuspec maintained in the repository](packaging.md#chocolatey) instead.
 `````
 
 `````{tab-item} Nix
-Build and install from [the definition maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix):
-
-```{code-block} shell-session
-$ git clone https://github.com/kdeldycke/meta-package-manager.git
-$ nix-env -f ./meta-package-manager/packaging/nix -i
-```
-
-On flake-enabled systems:
-
-```{code-block} shell-session
-$ nix run github:kdeldycke/meta-package-manager?dir=packaging/nix -- --version
-```
-
-````{admonition} Help land it in nixpkgs
-:class: important
-The nixpkgs package is pending review at [NixOS/nixpkgs#506145](https://github.com/NixOS/nixpkgs/pull/506145). Once merged, installation will be a one-liner:
+The nixpkgs package is pending review at [NixOS/nixpkgs#506145](https://github.com/NixOS/nixpkgs/pull/506145), which you can help move forward by showing your support. Once merged, installation will be a one-liner:
 
 ```{code-block} shell-session
 $ nix-env --install --attr nixpkgs.meta-package-manager
 ```
 
-Or, without installing:
-
-```{code-block} shell-session
-$ nix-shell -p meta-package-manager --run "mpm --version"
-```
-
-On flake-enabled systems:
-
-```{code-block} shell-session
-$ nix run nixpkgs#meta-package-manager -- --version
-```
-
-You can help move it forward by showing your support on [the pull request](https://github.com/NixOS/nixpkgs/pull/506145).
-````
+Until then, build it from [the definition maintained in the repository](packaging.md#nix).
 `````
 
 `````{tab-item} Guix
@@ -257,60 +189,21 @@ $ guix install meta-package-manager
 The package [landed in Guix on 2026-06-28](https://codeberg.org/guix/guix/pulls/8047). If `guix install` cannot find it yet, refresh your channels first with `guix pull`.
 ```
 
-To build the bleeding-edge version instead, install from [the definition maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix):
-
-```{code-block} shell-session
-$ git clone https://github.com/kdeldycke/meta-package-manager.git
-$ guix install --load-path=./meta-package-manager/packaging/guix meta-package-manager
-```
+To build the bleeding-edge version instead, install from [the definition maintained in the repository](packaging.md#guix).
 `````
 
 `````{tab-item} Alpine Linux
-Build and install from [the APKBUILD overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine). It targets Alpine edge, the only branch shipping `py3-uv-build` (`mpm`'s build backend) and `py3-boltons` >= `25`.
-
-As a member of the `abuild` group, with a signing key set up:
-
-```{code-block} shell-session
-$ doas apk add alpine-sdk
-$ abuild-keygen --append --install -n
-$ git clone https://github.com/kdeldycke/meta-package-manager.git
-$ cd ./meta-package-manager/packaging/alpine
-$ abuild -C ./py3-cloup -r
-$ abuild -C ./py3-extra-platforms -r
-$ abuild -C ./py3-packageurl -r
-$ abuild -C ./py3-click-extra -r
-$ abuild -C ./meta-package-manager -r
-$ doas apk add --repository ~/.local/share/abuild/alpine meta-package-manager
-```
-
-Each `abuild` run drops its packages in `~/.local/share/abuild/alpine` (abuild's default `REPODEST`), where the next builds and the final `apk add` pick them up.
-
-The overlay carries the 4 dependency packages missing from the official aports tree (`py3-click-extra`, `py3-cloup`, `py3-extra-platforms`, `py3-packageurl`).
+The package is being submitted to Alpine's aports tree. Until it lands there, build it from [the APKBUILD overlay maintained in the repository](packaging.md#alpine-linux).
 `````
 
 `````{tab-item} Void Linux
-While the package is pending upstream review, build and install it from my fork's [`mpm` branch](https://github.com/kdeldycke/void-packages/tree/mpm):
-
-```{code-block} shell-session
-$ git clone --depth 1 --branch mpm https://github.com/kdeldycke/void-packages.git
-$ cd ./void-packages
-$ ./xbps-src binary-bootstrap
-$ ./xbps-src pkg mpm
-$ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
-```
-
-`./xbps-src pkg mpm` cascades through and builds the 16 dependency packages introduced by the fork (15 new Python packages plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0` for Python 3.14 compatibility).
-
-````{admonition} Help land it in void-packages
-:class: important
-The Void package is pending review at [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532). Once merged, installation will be a one-liner:
+The package is pending review at [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532), which you can help move forward by showing your support. Once merged, installation will be a one-liner:
 
 ```{code-block} shell-session
 $ xbps-install --sync mpm
 ```
 
-You can help move it forward by showing your support on [the pull request](https://github.com/void-linux/void-packages/pull/60532).
-````
+Until then, build it from [my `void-packages` fork](packaging.md#void-linux).
 `````
 
 `````{tab-item} Arch Linux
@@ -354,26 +247,10 @@ print(binaries_download_table())
 All links above points to the latest released version of `mpm`.
 
 ```{seealso}
-If you need to test previous versions for regression, compatibility or general troubleshooting, you'll find the old binaries attached as assets to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).
+- To test previous versions for regression, compatibility or general troubleshooting, the old binaries are attached as assets to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).
+- To test the bleeding-edge version, fresh binaries are compiled from every push to the `main` branch: grab them from the [development builds](binaries.md#development-builds).
+- The exact executable format each binary targets is listed in the [ABI targets](binaries.md#abi-targets) section of the catalog.
 ```
-
-```{caution}
-Each commit to the development branch triggers the compilation of binaries. This way you can easily test the bleeding edge version of `mpm` and report any issue.
-
-Look at the [list of latest binary builds](https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml?query=branch%3Amain+is%3Asuccess). Then select the latest `Build & release`/`release.yaml` workflow run and download the binary artifact corresponding to your platform and architecture.
-```
-
-````{note} ABI targets
-```{code-block} shell-session
-$ file ./meta-package-manager-*
-./meta-package-manager-7.3.0-linux-arm64.bin:   ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=520bfc6f2bb21f48ad568e46752888236552b26a, for GNU/Linux 3.7.0, stripped
-./meta-package-manager-7.3.0-linux-x64.bin:     ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=56ba24bccfa917e6ce9009223e4e83924f616d46, for GNU/Linux 3.2.0, stripped
-./meta-package-manager-7.3.0-macos-arm64.bin:   Mach-O 64-bit executable arm64
-./meta-package-manager-7.3.0-macos-x64.bin:     Mach-O 64-bit executable x86_64
-./meta-package-manager-7.3.0-windows-arm64.exe: PE32+ executable (console) Aarch64, for MS Windows
-./meta-package-manager-7.3.0-windows-x64.exe:   PE32+ executable (console) x86-64, for MS Windows
-```
-````
 
 (antivirus-false-positives)=
 
@@ -571,29 +448,6 @@ The table below shows which Python versions each `mpm` release range supports. F
 
 <!-- matrix-end -->
 
-## click-extra compatibility
-
-`mpm` builds its CLI on [click-extra](https://github.com/kdeldycke/click-extra), and the two evolve in lockstep: most `mpm` releases raise their click-extra floor to pick up features and fixes. The table below shows which click-extra versions each `mpm` release range accepts at install time, derived from the click-extra requirement specifier across release tags. Columns are minor-grouped where the specifiers only distinguish minors, and split per patch where a floor pins a specific patch; the right edge is the click-extra version currently resolved in `uv.lock`. Rows start at `6.0.0` to keep the column set readable, and the table is regenerated by the same [`matrix` mechanism](https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive) as the Python one:
-
-<!-- matrix click-extra package=mpm version-floor=6.0.0 show-spec -->
-
-| `mpm`             | Released   | Spec       | `7.2` | `7.5.0` | `7.5.1` | `7.6.0` | `7.6.2` | `7.7` | `7.11` | `7.15` | `7.16.0` | `7.16.1` | `7.19` | `8.1.0` | `8.1.1` | `8.2` | `8.3` | `8.4` |
-| :---------------- | :--------- | :--------- | :---: | :-----: | :-----: | :-----: | :-----: | :---: | :----: | :----: | :------: | :------: | :----: | :-----: | :-----: | :---: | :---: | :---: |
-| `7.3.0`           | 2026-07-17 | `>=8.4`    |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ❌   |   ❌    |   ❌    |  ❌   |  ❌   |  ✅   |
-| `7.2.0`           | 2026-07-09 | `>=8.3`    |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ❌   |   ❌    |   ❌    |  ❌   |  ✅   |  ✅   |
-| `7.1.0`           | 2026-07-07 | `>=8.2`    |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ❌   |   ❌    |   ❌    |  ✅   |  ✅   |  ✅   |
-| `7.0.x`           | 2026-06-26 | `>=8.1.1`  |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ❌   |   ❌    |   ✅    |  ✅   |  ✅   |  ✅   |
-| `6.6.0`           | 2026-06-17 | `>=7.19`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ❌    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |  ✅   |
-| `6.5.x`           | 2026-05-25 | `>=7.16.1` |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ❌   |    ❌    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |  ✅   |
-| `6.4.x`           | 2026-05-04 | `>=7.15`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ❌   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |  ✅   |
-| `6.4.0`           | 2026-04-27 | `>=7.11`   |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ❌   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |  ✅   |
-| `6.2.x` → `6.3.x` | 2026-03-26 | `>=7.7.0`  |  ❌   |   ❌    |   ❌    |   ❌    |   ❌    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |  ✅   |
-| `6.2.0`           | 2026-03-25 | `>=7.6.2`  |  ❌   |   ❌    |   ❌    |   ❌    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |  ✅   |
-| `6.1.1`           | 2026-02-05 | `>=7.5.1`  |  ❌   |   ❌    |   ✅    |   ✅    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |  ✅   |
-| `6.0.x` → `6.1.x` | 2025-12-08 | `>=7.2.0`  |  ✅   |   ✅    |   ✅    |   ✅    |   ✅    |  ✅   |   ✅   |   ✅   |    ✅    |    ✅    |   ✅   |   ✅    |   ✅    |  ✅   |  ✅   |  ✅   |
-
-<!-- matrix-end -->
-
 ## Shell completion
 
 Completion for popular shell [rely on Click feature](https://click.palletsprojects.com/en/stable/shell-completion/).
@@ -702,14 +556,6 @@ $ click-extra wrap --man --output-dir /usr/share/man/man1/ meta_package_manager.
 
 The `module:function` notation skips the `mpm` console-script entry point (which dispatches through `__main__:main` and hides the Click command behind a lazy import). The generator honors `SOURCE_DATE_EPOCH` for reproducible builds. See the [`click-extra` man-page reference](https://kdeldycke.github.io/click-extra/man-page.html#generating-man-pages) for other invocation forms (uvx for build sandboxes, `.py` file paths, and the programmatic API).
 
-## Default dependencies
-
-This is a graph of the default, main dependencies of the Python package:
-
-```mermaid assets/dependencies.mmd
-:align: center
-```
-
 ## Extra dependencies
 
 By default, `mpm` supports TOML [configuration files](configuration.md) and all standard [table formats](https://kdeldycke.github.io/click-extra/table.html#table-formats). Optional extras unlock additional configuration file formats, table output formats, and SBOM generation:
@@ -784,22 +630,3 @@ When working from a cloned repository, [`uv sync`](https://docs.astral.sh/uv/ref
 $ uv sync --all-extras --all-groups
 ```
 ````
-
-## Downstream packaging
-
-Guidance for distribution packagers wiring `mpm`'s test suite into a package build. The suite has two layers:
-
-- A **hermetic unit layer** (`test_cooldown`, `test_docs`, `test_docstring_corpus`, `test_help`, `test_managers`, `test_pool`, `test_specifier`, `test_version`) that needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox; its only extra build dependency is `pyyaml`, imported by `tests/test_docs.py` (`pyproject-fmt` is optional there: the formatting-fixpoint test auto-skips when it is missing).
-- An **integration layer** (`tests/test_manager_*.py`, `tests/test_cli*.py`) that drives the ~70 real package managers (`apt`, `brew`, `pip`, `npm`, and more) and the `mpm` CLI end-to-end. These cannot run in a hermetic builder.
-
-As of mpm > `6.6.0`, the integration layer **auto-skips when `$HOME` is `/homeless-shelter`** — the build-sandbox convention shared by Guix and Nix — via `extra_platforms.pytest.skip_guix_build` (wired up in `tests/conftest.py`). Those distributors can therefore run the whole `pytest` suite unmodified: just make `pyyaml` available and **do not override `$HOME`** in the package definition, or the auto-skip stops firing and the integration tests fail.
-
-Builders that keep a writable `$HOME` (Alpine's abuild, Debian buildd, RPM mock, etc.) must either disable the suite (`nocheck`, `doCheck = false`, and similar) or ignore the integration modules with `pytest --ignore-glob='tests/test_manager_*.py' --ignore-glob='tests/test_cli*.py'`.
-
-Running only the `sanity-check` phase (or its equivalent) stays a valid minimal option: it confirms the package imports cleanly and its declared dependencies resolve. Full functional verification of the integration layer is covered by [the project's own GitHub Actions CI](https://github.com/kdeldycke/meta-package-manager/actions), where the package managers are pre-installed.
-
-The `--skip-destructive` and `pytest -m "not destructive"` markers exist for *developer* environments where some package managers are present but mutating them would be undesirable. They do not make the suite hermetic.
-
-```{note}
-The PyPI sdist ships no tests: builds that want to run the suite must start from [the GitHub tag tarballs](https://github.com/kdeldycke/meta-package-manager/tags), which carry `tests/`, `docs/` and the workflow files the docs tests parse.
-```

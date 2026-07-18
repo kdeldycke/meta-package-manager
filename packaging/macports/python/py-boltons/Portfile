@@ -27,5 +27,5 @@ checksums           rmd160  60fa03be3d9c9037bab930b984aca67f55930fb5 \
                     sha256  5764468aba493b15995ed17f46a16789023f123ca2a62d491a9ce825c1cbe26c \
                     size    227393
 
-python.versions     310 311 312 313
+python.versions     310 311 312 313 314
 python.pep517_backend flit

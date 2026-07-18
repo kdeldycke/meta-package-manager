@@ -27,6 +27,7 @@ from extra_platforms import Group, extract_members
 from yaml import Loader, load, safe_load
 
 from meta_package_manager.capabilities import Operations
+from meta_package_manager.docstring_corpus import literal_blocks
 from meta_package_manager.labels import (
     LABELS,
     MANAGER_PREFIX,
@@ -497,9 +498,9 @@ def test_manager_page_sections_render(manager):
     fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
     for _title, func_name in docs_update.MANAGER_SECTIONS:
         output = getattr(docs_update, func_name)(manager.id)
-        # Reference traces only exist for bundled managers carrying operation
-        # samples; every other section renders for every manager (a section
-        # with no output is omitted from the stub by manager_page_stub).
+        # Reference traces are omitted for managers documenting no literal
+        # output samples; every other section renders for every manager (a
+        # section with no output is omitted from the stub by manager_page_stub).
         if func_name != "manager_traces":
             assert output.strip()
         # Fenced blocks (code samples, eval-rst) cannot produce MyST headings:
@@ -511,6 +512,25 @@ def test_manager_page_sections_render(manager):
     operations = docs_update.manager_operations(manager.id)
     assert len(operations.splitlines()) == 2 + len(Operations)
     assert f"mpm --{manager.id} installed" in docs_update.manager_usage(manager.id)
+
+
+def test_manager_traces_render_literal_blocks():
+    """A class-based manager's reference traces surface exactly the literal
+    installed/outdated blocks the corpus validates, in terminal-facing form.
+
+    ``manager_traces`` and the corpus round-trip both read
+    :func:`~meta_package_manager.docstring_corpus.literal_blocks`, so the
+    rendered traces never drift from what the parsers are tested against. TOML
+    managers keep their ``[samples]`` traces, covered by ``test_bundled_parsing``.
+    """
+    for mid, manager in pool.items():
+        if getattr(manager, "definition_source", None):
+            continue
+        traces = docs_update.manager_traces(mid)
+        blocks = literal_blocks(type(manager), mid, ("installed", "outdated"))
+        assert bool(traces) == bool(blocks), mid
+        for _member, _index, block in blocks:
+            assert block in traces, mid
 
 
 def test_managers_index_table_renders():

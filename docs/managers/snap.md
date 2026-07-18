@@ -61,3 +61,11 @@ from docs_update import manager_cooldown
 
 print(manager_cooldown("snap"))
 ```
+
+## Reference traces
+
+```{python:render}
+from docs_update import manager_traces
+
+print(manager_traces("snap"))
+```

@@ -61,3 +61,11 @@ from docs_update import manager_cooldown
 
 print(manager_cooldown("deb-get"))
 ```
+
+## Reference traces
+
+```{python:render}
+from docs_update import manager_traces
+
+print(manager_traces("deb-get"))
+```

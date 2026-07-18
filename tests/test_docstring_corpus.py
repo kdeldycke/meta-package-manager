@@ -18,9 +18,11 @@
 
 Every query method documents a sample invocation and its output in a
 ``.. code-block:: shell-session`` block sitting right next to the regex (or JSON
-parser) that consumes it. This module harvests those blocks straight from the
-source and feeds each one back through the parser it illustrates, asserting the
-documented example still yields well-formed packages.
+parser) that consumes it. This module feeds each harvested block back through
+the parser it illustrates, asserting the documented example still yields
+well-formed packages. The harvesting itself lives in
+:mod:`meta_package_manager.docstring_corpus`, shared with the reference-traces
+documentation generator.
 
 It is a *Tier-1* guard: it proves the documented output **still parses** (which
 catches a regex that silently stops matching after an upstream format change, or
@@ -31,286 +33,61 @@ docstrings.
 It covers ``installed``, ``outdated`` and ``--version`` blocks. ``installed`` and
 ``--version`` are single-source (one CLI call), fed straight through.
 ``outdated`` may cross-reference two commands (``list`` + ``latest``), so its
-calls are routed to the right block by a command-dispatching stub. Blocks are
-harvested from raw source, not the escape-processed ``__doc__``: ``cleandoc``
-expands tabs and the compiler collapses ``\\``, either of which would rewrite a
-tab-delimited or escaped-JSON fixture into something the parser rejects. A few
-methods that neither of these mechanisms can reach are listed, with reasons, in
-:data:`KNOWN_EXCEPTIONS`. See
+calls are routed to the right block by a command-dispatching stub. A few blocks
+that are not literal, single-call fixtures are flagged, with reasons, in
+:data:`~meta_package_manager.docstring_corpus.NON_LITERAL_BLOCKS`. See
 https://github.com/kdeldycke/meta-package-manager/issues/1023.
 """
 
 from __future__ import annotations
 
-import ast
-import inspect
 import re
 import shlex
-import textwrap
 from contextlib import suppress
-from functools import cache
 from pathlib import Path
 
 import pytest
 
+from meta_package_manager.docstring_corpus import (
+    ELISION,
+    NON_LITERAL_BLOCKS,
+    block_commands,
+    block_id,
+    class_blocks,
+    class_display_blocks,
+    dissect,
+    is_fixture,
+    split_session,
+)
 from meta_package_manager.pool import pool
 from meta_package_manager.version import parse_version
 
-DIRECTIVES = (
-    ".. code-block:: shell-session",
-    ".. code-block:: pwsh-session",
-)
-"""reStructuredText directives introducing a captured CLI session.
-
-PowerShell sessions use ``> `` as their prompt, which the dissector already
-recognizes, so both flavors share one extraction path.
-"""
-
-ELISION = re.compile(r"\(\.\.\.\)|\.\.\.|…")
-"""Marks output a docstring abbreviated: an illustration, not a literal fixture."""
-
-# Blocks that are not literal, single-call fixtures. Keyed by the parametrize id
-# ``{manager_id}-{member}-{block_index}``. ``skip`` marks a block that can never
-# round-trip here (an illustration, or a harness limitation); ``xfail`` marks a
-# genuine documentation drift we still intend to fix, so repairing the docstring
-# flips the test to XPASS and flags the stale marker for removal.
+# The corpus's non-literal blocks (illustrations, harness limitations) are
+# declared, with reasons, in the shared module. Each becomes a ``skip`` mark on
+# the matching parametrize id so the round-trip leaves it untouched.
 KNOWN_EXCEPTIONS = {
-    "yarn-installed-1": pytest.mark.skip(
-        reason="Second block illustrates the human-readable `yarn global list`, "
-        "not the `--json` stream installed() parses.",
-    ),
-    "flatpak-outdated": pytest.mark.skip(
-        reason="`remote-ls --ostree-verbose` appends branch/arch columns whose "
-        "exact tab layout is unverified without a live capture.",
-    ),
-    "ports-upgrade_one_cli": pytest.mark.skip(
-        reason="upgrade_one_cli resolves the package's port origin through a "
-        "live pkg query the stubbed CLI cannot answer.",
-    ),
-    "scoop-sync": pytest.mark.skip(
-        reason="sync's docstring is a narrative before/after transcript: the "
-        "`scoop status` blocks illustrate the state around the one `scoop "
-        "update` the method actually runs.",
-    ),
-    "sdkman-outdated": pytest.mark.skip(
-        reason="`sdk` is a shell builtin driven via `echo n | sdk upgrade`; "
-        "outdated never routes through `run_cli` and the sample is an interactive "
-        "prompt.",
-    ),
+    corpus_id: pytest.mark.skip(reason=reason)
+    for corpus_id, reason in NON_LITERAL_BLOCKS.items()
 }
-
-
-def extract_blocks(docstring: str | None) -> list[str]:
-    """Return the dedented body of every ``shell-session`` block in a docstring."""
-    if not docstring:
-        return []
-    lines = docstring.splitlines()
-    blocks = []
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        if line.strip() in DIRECTIVES:
-            directive_indent = len(line) - len(line.lstrip())
-            i += 1
-            body = []
-            while i < len(lines):
-                candidate = lines[i]
-                if candidate.strip() == "":
-                    body.append("")
-                    i += 1
-                    continue
-                indent = len(candidate) - len(candidate.lstrip())
-                if indent > directive_indent:
-                    body.append(candidate)
-                    i += 1
-                else:
-                    break
-            blocks.append(textwrap.dedent("\n".join(body)).strip("\n"))
-        else:
-            i += 1
-    return blocks
-
-
-def _dissect(block: str) -> tuple[list[str], str]:
-    """Split a shell-session block into its command tokens and its output.
-
-    ``$`` starts a command and ``>`` continues it (the shell's secondary prompt).
-    A command may also continue onto unprefixed lines via a trailing backslash, so
-    those are absorbed too. Every remaining line is output.
-    """
-    tokens, output, in_command = [], [], False
-    for line in block.splitlines():
-        stripped = line.lstrip()
-        if stripped.startswith(("$ ", "> ")) or in_command:
-            in_command = stripped.rstrip().endswith("\\")
-            text = stripped[2:] if stripped.startswith(("$ ", "> ")) else stripped
-            tokens.extend(text.rstrip(" \\").split())
-        else:
-            output.append(line)
-    return tokens, "\n".join(output)
-
-
-def split_session(block: str) -> str:
-    """Return just the command output of a shell-session block."""
-    return _dissect(block)[1]
-
-
-def _block_commands(block: str) -> list[list[str]]:
-    """Return each documented command of a block as its own token list.
-
-    Unlike :func:`_dissect`, which pools every command of a block, this keeps
-    commands separate so a block documenting several invocations (an ``apt``
-    cleanup running ``autoremove`` then ``autoclean``) yields one list each.
-    Prompt flavor is per-block: ``$``-primary with ``>`` continuations for
-    shell sessions, ``>``-primary for PowerShell sessions.
-    """
-    lines = block.splitlines()
-    primary = "$ " if any(line.lstrip().startswith("$ ") for line in lines) else "> "
-    commands: list[list[str]] = []
-    continuing = False
-    for line in lines:
-        stripped = line.lstrip()
-        starts = stripped.startswith(primary)
-        continues = continuing and (
-            stripped.startswith("> ") or not stripped.startswith(("$ ", "> "))
-        )
-        if starts:
-            commands.append([])
-        elif not continues:
-            continuing = False
-            continue
-        text = stripped[2:] if stripped.startswith(("$ ", "> ")) else stripped
-        commands[-1].extend(text.rstrip(" \\").split())
-        continuing = stripped.rstrip().endswith("\\")
-    return commands
-
-
-def _string_node(node: ast.AST) -> ast.Constant | None:
-    """Return the leading docstring literal node of a class or function, if any."""
-    body = getattr(node, "body", None)
-    if (
-        body
-        and isinstance(body[0], ast.Expr)
-        and isinstance(body[0].value, ast.Constant)
-        and isinstance(body[0].value.value, str)
-    ):
-        return body[0].value
-    return None
-
-
-def _raw_literal(node: ast.Constant, source: str) -> str | None:
-    """Inner text of a string literal read straight from source.
-
-    Reading the raw segment instead of the compiled ``__doc__`` keeps tab
-    delimiters and backslash escapes verbatim. ``ast.get_docstring`` routes
-    through ``inspect.cleandoc``, which expands tabs, and the compiler collapses
-    ``\\\\`` to a single backslash: either silently rewrites a fixture into
-    something the manager's own parser then rejects (tab-delimited `cpan`,
-    escaped-JSON `fwupd`).
-    """
-    segment = ast.get_source_segment(source, node)
-    if segment is None:
-        return None
-    start = 0
-    while start < len(segment) and segment[start] not in "\"'":
-        start += 1  # Skip a string prefix (r, u, ...).
-    body = segment[start:]
-    for quote in ('"""', "'''", '"', "'"):
-        if (
-            len(body) >= 2 * len(quote)
-            and body.startswith(quote)
-            and body.endswith(quote)
-        ):
-            return body[len(quote) : -len(quote)]
-    return None
-
-
-def _dedent_doc(text: str) -> str:
-    """Strip a docstring's common indentation like ``cleandoc``, but keep tabs.
-
-    Only leading spaces count as indentation (source here is space-indented), so
-    tabs inside the sample output survive to reach the parser.
-    """
-    lines = text.split("\n")
-    margin = None
-    for line in lines[1:]:
-        stripped = line.lstrip(" ")
-        if stripped:
-            indent = len(line) - len(stripped)
-            margin = indent if margin is None else min(margin, indent)
-    cleaned = [lines[0].lstrip(" ")]
-    cleaned += [line[margin:] if margin else line for line in lines[1:]]
-    while cleaned and not cleaned[0].strip():
-        cleaned.pop(0)
-    while cleaned and not cleaned[-1].strip():
-        cleaned.pop()
-    return "\n".join(cleaned)
-
-
-@cache
-def _class_blocks(cls: type) -> dict[str, list[str]]:
-    """Map ``{member: [blocks]}`` harvested from a manager class's own body.
-
-    Covers both method docstrings and attribute docstrings (the string literal
-    that follows ``version_regexes = (...)``), the latter being invisible at
-    runtime and only reachable through the source AST.
-    """
-    source = Path(inspect.getsourcefile(cls)).read_text(encoding="UTF-8")  # type: ignore[arg-type]
-    tree = ast.parse(source)
-    members: dict[str, list[str]] = {}
-    for node in ast.walk(tree):
-        if not (isinstance(node, ast.ClassDef) and node.name == cls.__name__):
-            continue
-        prev_target: str | None = None
-        for child in node.body:
-            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                docstring = _string_node(child)
-                raw = _raw_literal(docstring, source) if docstring else None
-                blocks = extract_blocks(_dedent_doc(raw)) if raw else []
-                if blocks:
-                    members[child.name] = blocks
-                prev_target = None
-            elif (
-                isinstance(child, ast.Expr)
-                and isinstance(child.value, ast.Constant)
-                and isinstance(child.value.value, str)
-                and prev_target
-            ):
-                raw = _raw_literal(child.value, source)
-                blocks = extract_blocks(_dedent_doc(raw)) if raw else []
-                if blocks:
-                    members[prev_target] = blocks
-                prev_target = None
-            elif isinstance(child, ast.Assign) and len(child.targets) == 1:
-                target = child.targets[0]
-                prev_target = target.id if isinstance(target, ast.Name) else None
-            else:
-                prev_target = None
-    return members
-
-
-def _is_fixture(output: str) -> bool:
-    """A block is a literal fixture only if it carries non-elided sample output."""
-    return bool(output.strip()) and not ELISION.search(output)
 
 
 def _query_commands(cls: type, members: tuple[str, ...]) -> list[tuple[list[str], str]]:
     """Collect ``(command_tokens, output)`` for a class's literal query blocks."""
     pairs = []
-    blocks_by_member = _class_blocks(cls)
+    blocks_by_member = class_blocks(cls)
     for member in members:
         for block in blocks_by_member.get(member, ()):
-            tokens, output = _dissect(block)
-            if tokens and _is_fixture(output):
+            tokens, output = dissect(block)
+            if tokens and is_fixture(output):
                 pairs.append((tokens, output))
     return pairs
 
 
 def _member_output(cls: type, member: str) -> str:
     """First literal block output documented for a member, or empty string."""
-    for block in _class_blocks(cls).get(member, ()):
+    for block in class_blocks(cls).get(member, ()):
         output = split_session(block)
-        if _is_fixture(output):
+        if is_fixture(output):
             return output
     return ""
 
@@ -349,13 +126,13 @@ def _fixtures():
     for manager in pool.values():
         # The pool yields untyped instances, and mypy cannot match type[Any]
         # against the cache wrapper's Hashable parameter.
-        blocks_by_member = _class_blocks(type(manager))  # type: ignore[arg-type]
+        blocks_by_member = class_blocks(type(manager))  # type: ignore[arg-type]
         for member in ("installed", "version_regexes"):
             for index, block in enumerate(blocks_by_member.get(member, ())):
                 output = split_session(block)
-                if not _is_fixture(output):
+                if not is_fixture(output):
                     continue
-                param_id = f"{manager.id}-{member}-{index}"
+                param_id = block_id(manager.id, member, index)
                 yield pytest.param(
                     manager,
                     member,
@@ -364,9 +141,9 @@ def _fixtures():
                     marks=KNOWN_EXCEPTIONS.get(param_id, ()),
                 )
         if any(
-            _is_fixture(split_session(b)) for b in blocks_by_member.get("outdated", ())
+            is_fixture(split_session(b)) for b in blocks_by_member.get("outdated", ())
         ):
-            param_id = f"{manager.id}-outdated"
+            param_id = block_id(manager.id, "outdated", 0)
             yield pytest.param(
                 manager,
                 "outdated",
@@ -417,6 +194,24 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         for version in (package.installed_version, package.latest_version):
             if version:
                 assert parse_version(str(version))
+
+
+def test_display_blocks_align_with_raw():
+    """The compiled harvest the docs render and the raw harvest this test
+    replays must agree on structure.
+
+    ``docs/docs_update.py`` selects reference-trace blocks by (member, index)
+    from :func:`class_display_blocks`, keyed against the same
+    :data:`NON_LITERAL_BLOCKS` ids this test derives from :func:`class_blocks`.
+    Their per-member block counts must match, or an index would point at a
+    different block on the two sides.
+    """
+    for manager in pool.values():
+        raw = class_blocks(type(manager))  # type: ignore[arg-type]
+        display = class_display_blocks(type(manager))  # type: ignore[arg-type]
+        assert raw.keys() == display.keys(), manager.id
+        for member, blocks in raw.items():
+            assert len(blocks) == len(display[member]), f"{manager.id}:{member}"
 
 
 # --- Mutation commands: the documented invocation must be the constructed one. ---
@@ -472,8 +267,8 @@ def _documented_commands(
     """
     env_tokens = {f"{key}={value}" for key, value in (extra_env or {}).items()}
     commands = []
-    for block in _class_blocks(cls).get(member, ()):
-        for raw_tokens in _block_commands(block):
+    for block in class_blocks(cls).get(member, ()):
+        for raw_tokens in block_commands(block):
             # Re-tokenize with shell quoting rules so a quoted argument (a
             # PowerShell ``-Command "..."`` payload) stays one token, matching
             # the constructed argv. Unbalanced quotes mean the command is an

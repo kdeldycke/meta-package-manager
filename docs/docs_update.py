@@ -59,6 +59,11 @@ from meta_package_manager.capabilities import (
     implements,
     upgrade_all_is_synthesized,
 )
+from meta_package_manager.docstring_corpus import (
+    block_language,
+    literal_blocks,
+    version_trace,
+)
 from meta_package_manager.labels import (
     LABELS,
     generate_content_rules,
@@ -747,9 +752,10 @@ def manager_cli(manager_id: str) -> str:
     appear on the command line. Escalation and cooldown each have their own
     section (:func:`manager_sudo`, :func:`manager_cooldown`).
 
-    Bundled TOML managers additionally show the version probe's captured
-    ``[samples]`` output as a terminal transcript; the per-operation samples
-    render in the reference-traces section (:func:`manager_traces`).
+    The version probe additionally shows its captured output as a terminal
+    transcript, from the ``[samples.version]`` fixture of a bundled TOML manager
+    or the ``version_regexes`` docstring of a class-based one; the per-operation
+    samples render in the reference-traces section (:func:`manager_traces`).
     """
     m = pool[manager_id]
 
@@ -771,11 +777,12 @@ def manager_cli(manager_id: str) -> str:
     if m.timeout is not None:
         lines.append(f"- Call timeout: {m.timeout} seconds")
 
-    version_sample = None
     source = getattr(m, "definition_source", None)
     if source:
         doc = _toml_definition(source)
         version_sample = doc.get("samples", {}).get("version", {}).get("output")
+    else:
+        version_sample = version_trace(type(m), manager_id)
 
     probe = " ".join(((m.version_cli or m.cli_names[0]), *m.version_cli_options))
     regex_suffix = (
@@ -975,36 +982,49 @@ def manager_cooldown(manager_id: str) -> str:
 def manager_traces(manager_id: str) -> str:
     """Produce the reference-traces section of a manager's documentation page.
 
-    The raw native outputs captured in the bundled TOML definition's
-    ``[samples]`` fixtures, replayed as terminal transcripts: the reference
-    ``mpm``'s parsers were written against. Surfacing them lets users seasoned
-    in the native tool spot wrong assumptions, or output formats a newer
-    release has since changed. Empty for managers without operation samples
-    (the section is then omitted from the stub); the version probe transcript
-    stays in the command-line section, next to the regexes consuming it.
+    Raw native outputs replayed as terminal transcripts: the reference ``mpm``'s
+    parsers were written against. Surfacing them lets users seasoned in the
+    native tool spot wrong assumptions, or output formats a newer release has
+    since changed. The captures come from the bundled TOML definition's
+    ``[samples]`` fixtures for a config-defined manager, or from the
+    ``shell-session`` blocks documented in a class-based manager's
+    ``installed``/``outdated`` docstrings (harvested by
+    :func:`~meta_package_manager.docstring_corpus.literal_blocks`, the same
+    literal blocks the corpus test round-trips). Empty for managers without such
+    samples (the section is then omitted from the stub); the version probe
+    transcript stays in the command-line section, next to the regexes consuming
+    it.
     """
     m = pool[manager_id]
     source = getattr(m, "definition_source", None)
-    if not source:
-        return ""
-    doc = _toml_definition(source)
-    samples = doc.get("samples", {})
-    operations = doc["mpm"]["managers"][manager_id].get("operations", {})
-    fences = []
-    for op in Operations:
-        spec = operations.get(op.name, {})
-        for sample in samples.get(op.name, ()):
-            command = " ".join((
-                spec.get("cli", m.cli_names[0]),
-                *spec.get("args", ()),
-            ))
-            output = sample["output"].strip("\n")
-            fences.append(_fenced(f"$ {command}\n{output}", "shell-session"))
+    if source:
+        doc = _toml_definition(source)
+        samples = doc.get("samples", {})
+        operations = doc["mpm"]["managers"][manager_id].get("operations", {})
+        fences = []
+        for op in Operations:
+            spec = operations.get(op.name, {})
+            for sample in samples.get(op.name, ()):
+                command = " ".join((
+                    spec.get("cli", m.cli_names[0]),
+                    *spec.get("args", ()),
+                ))
+                output = sample["output"].strip("\n")
+                fences.append(_fenced(f"$ {command}\n{output}", "shell-session"))
+        source_label = "bundled definition"
+    else:
+        fences = [
+            _fenced(block, block_language(block))
+            for _, _, block in literal_blocks(
+                type(m), manager_id, ("installed", "outdated")
+            )
+        ]
+        source_label = "manager source"
     if not fences:
         return ""
     intro = (
         "Raw native outputs captured in the "
-        f"[bundled definition]({manager_source_url(manager_id)}): the reference "
+        f"[{source_label}]({manager_source_url(manager_id)}): the reference "
         f"`mpm`'s parsers were written against. If you know {m.name} well and a "
         "transcript below looks wrong, or a newer release changed its output "
         "format, [report it]"
@@ -1053,7 +1073,8 @@ def manager_page_stub(manager_id: str) -> str:
     :data:`MANAGER_SECTIONS`; every section body is a ``{python:render}`` block
     so the content renders live at Sphinx build time and never drifts from the
     pool. A section whose generator produces nothing for this manager (like
-    reference traces for class-based managers) is left out. The block
+    reference traces for a manager documenting no literal output samples) is
+    left out. The block
     formatting mirrors ``docs/benchmark.md`` so the stubs are an ``mdformat``
     fixpoint.
     """

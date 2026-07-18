@@ -17,6 +17,7 @@ let
       # nixpkgs no longer ships, so pypa/build's --no-isolation dependency
       # check fails. Relax the pin: version detection is bypassed anyway
       # through SETUPTOOLS_SCM_PRETEND_VERSION.
+      # Reported at https://github.com/janluke/cloup/issues/206.
       cloup = super.cloup.overridePythonAttrs (old: {
         postPatch = (old.postPatch or "") + ''
           substituteInPlace setup.py \

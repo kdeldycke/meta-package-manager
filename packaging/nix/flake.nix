@@ -29,6 +29,7 @@
               click-extra = self.callPackage ./click-extra.nix { };
               # Same cloup workaround as default.nix: relax the
               # ``setuptools_scm<10`` build pin, unsatisfiable in nixpkgs.
+              # Reported at https://github.com/janluke/cloup/issues/206.
               cloup = super.cloup.overridePythonAttrs (old: {
                 postPatch = (old.postPatch or "") + ''
                   substituteInPlace setup.py \

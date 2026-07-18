@@ -494,7 +494,7 @@ def _fenced(content: str, language: str) -> str:
 
 def _toml_definition(definition_source: str) -> dict:
     """Parse a bundled TOML definition file into its raw document."""
-    return tomllib.loads(
+    return tomllib.loads(  # type: ignore[no-any-return]
         (PROJECT_ROOT / definition_source).read_text(encoding="UTF-8"),
     )
 

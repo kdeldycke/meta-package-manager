@@ -113,7 +113,7 @@ class UV(UVBase):
 
         .. code-block:: shell-session
 
-            $ uv --color never --no-progress pip list --format=json | jq
+            $ uv --color never --no-progress pip list --format=json
             [
               {
                 "name": "markupsafe",
@@ -146,7 +146,7 @@ class UV(UVBase):
 
         .. code-block:: shell-session
 
-            $ uv --color never --no-progress pip list --outdated --format=json | jq
+            $ uv --color never --no-progress pip list --outdated --format=json
             [
               {
                 "name": "lark-parser",

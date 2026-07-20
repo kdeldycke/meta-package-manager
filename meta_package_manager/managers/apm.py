@@ -82,7 +82,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apm list --json | jq
+            $ apm list --json
             {
               "core": [
                 {
@@ -118,7 +118,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apm outdated --compatible --json | jq
+            $ apm outdated --compatible --json
             [
               {
                 "name": "file-icons",

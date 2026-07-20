@@ -102,7 +102,7 @@ class Pipx(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pipx list --json | jq
+            $ pipx list --json
             {
               "pipx_spec_version": "0.1",
               "venvs": {
@@ -161,7 +161,7 @@ class Pipx(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pipx list --outdated --output=json | jq
+            $ pipx list --outdated --output=json
             {
               "command": ["list"],
               "data": {
@@ -192,7 +192,7 @@ class Pipx(PackageManager):
         .. code-block:: shell-session
 
             $ pipx runpip pycowsay list --no-color --format=json --outdated \
-            > --verbose --quiet | jq
+            > --verbose --quiet
             [
               {
                 "name": "pycowsay",

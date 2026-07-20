@@ -74,7 +74,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global show --format=json | jq
+            $ composer global show --format=json
             {
               "installed": [
                 {

@@ -97,7 +97,7 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            $ fwupdmgr --assume-yes --no-reboot-check --no-device-prompt get-devices --json | jq
+            $ fwupdmgr --assume-yes --no-reboot-check --no-device-prompt get-devices --json
             {
               "Devices": [
                 {
@@ -354,7 +354,7 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            $ fwupdmgr --assume-yes --no-reboot-check --no-device-prompt get-updates --json | jq
+            $ fwupdmgr --assume-yes --no-reboot-check --no-device-prompt get-updates --json
             {
               "Devices" : [
                 {

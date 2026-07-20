@@ -165,10 +165,6 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         command_map = _query_commands(type(manager), ("installed", "outdated"))
         default = _member_output(type(manager), "outdated")
         monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
-        # A few managers read their outdated stream through ``run`` rather than
-        # ``run_cli`` (sdkman shells out to ``bash -c "... | sdk upgrade"``); feed
-        # those the documented output too.
-        monkeypatch.setattr(manager, "run", lambda *args, **kwargs: default)
         packages = list(manager.outdated)
     else:  # installed.
         monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
@@ -215,6 +211,33 @@ def test_fixtures_carry_no_truncation_marker():
         for member in ("installed", "outdated", "version_regexes"):
             for index, block in enumerate(blocks_by_member.get(member, ())):
                 assert "(...)" not in block, f"{manager.id}-{member}-{index}"
+
+
+def test_query_fixtures_run_verbatim():
+    """A harvested query fixture must show the exact command mpm runs.
+
+    ``installed``/``outdated``/``version_regexes`` invocations go through
+    ``run_cli``, which executes an argv directly with no shell, so a documented
+    command joined to another by a shell pipe (``| jq`` to pretty-print JSON,
+    ``echo n |`` to feed an interactive prompt) shows an invocation mpm never
+    makes and would render a misleading reference trace. Such a block is an
+    illustration and belongs under a non-harvested ``console`` directive.
+
+    Re-tokenized with :func:`shlex.split` like :func:`_documented_commands` does
+    for the mutation members, so a pipe *inside* a quoted argument (PowerShell's
+    ``-Command "... | ..."``, which mpm passes as a single token for pwsh to run
+    internally) stays one token and is not a shell pipe at mpm's level.
+    """
+    for manager in pool.values():
+        blocks_by_member = class_blocks(type(manager))  # type: ignore[arg-type]
+        for member in ("installed", "outdated", "version_regexes"):
+            for index, block in enumerate(blocks_by_member.get(member, ())):
+                for raw_tokens in block_commands(block):
+                    try:
+                        tokens = shlex.split(" ".join(raw_tokens))
+                    except ValueError:
+                        continue
+                    assert "|" not in tokens, f"{manager.id}-{member}-{index}"
 
 
 # --- Mutation commands: the documented invocation must be the constructed one. ---

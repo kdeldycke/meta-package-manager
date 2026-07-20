@@ -338,8 +338,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ python -m pip --no-color list --format=json --verbose --quiet \
-            > | jq
+            $ python -m pip --no-color list --format=json --verbose --quiet
             [
              {
                 "version": "1.3",
@@ -540,7 +539,7 @@ class Pip(PackageManager):
         .. code-block:: shell-session
 
             $ python -m pip --no-color list --format=json --outdated \
-            > --not-required --verbose --quiet | jq
+            > --not-required --verbose --quiet
             [
               {
                 "latest_filetype": "wheel",

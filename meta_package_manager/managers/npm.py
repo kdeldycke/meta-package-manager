@@ -159,7 +159,7 @@ class NPM(PackageManager):
         .. code-block:: shell-session
 
             $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                --json --depth 0 list | jq
+                --json --depth 0 list
             {
               "name": "lib",
               "dependencies": {
@@ -211,7 +211,7 @@ class NPM(PackageManager):
         .. code-block:: shell-session
 
             $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                --json outdated | jq
+                --json outdated
             {
               "my-linked-package": {
                 "current": "0.0.0-development",

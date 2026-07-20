@@ -135,7 +135,7 @@ class SDKMAN(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        .. code-block:: console
 
             $ echo n | sdk upgrade
             Available defaults:

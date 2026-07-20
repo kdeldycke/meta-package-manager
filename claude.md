@@ -123,7 +123,7 @@ Sequential order is recommended as most package managers don't support concurren
 
 ### Note for downstream packagers
 
-The canonical guidance for distribution packagers (test-suite layers, `/homeless-shelter` auto-skip, ignore-globs for writable-`$HOME` builders, dependency constraints, per-channel build instructions) lives in `docs/packaging.md`, published at <https://kdeldycke.github.io/meta-package-manager/packaging.html>. Packaging specs (`packaging/nix/`, `packaging/alpine/`, and their upstream submissions) must reference that URL, never this file.
+The canonical guidance for distribution packagers (test-suite layers, `/homeless-shelter` auto-skip, ignore-globs for writable-`$HOME` builders, dependency constraints, per-channel build instructions) lives in `docs/packaging.md`, published at [https://kdeldycke.github.io/meta-package-manager/packaging.html](https://kdeldycke.github.io/meta-package-manager/packaging.html). Packaging specs (`packaging/nix/`, `packaging/alpine/`, and their upstream submissions) must reference that URL, never this file.
 
 ### Type checking
 

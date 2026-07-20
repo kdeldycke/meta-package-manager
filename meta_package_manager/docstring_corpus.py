@@ -327,9 +327,7 @@ def is_fixture(output: str) -> bool:
     return bool(output.strip())
 
 
-def literal_blocks(
-    cls: type, members: tuple[str, ...]
-) -> list[tuple[str, int, str]]:
+def literal_blocks(cls: type, members: tuple[str, ...]) -> list[tuple[str, int, str]]:
     """Return ``(member, index, block)`` for a class's replayable fixture blocks.
 
     A block qualifies when it carries sample output (:func:`is_fixture`). The

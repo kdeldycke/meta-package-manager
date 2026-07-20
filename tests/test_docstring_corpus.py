@@ -128,9 +128,7 @@ def _fixtures():
         if any(
             is_fixture(split_session(b)) for b in blocks_by_member.get("outdated", ())
         ):
-            yield pytest.param(
-                manager, "outdated", None, id=f"{manager.id}-outdated"
-            )
+            yield pytest.param(manager, "outdated", None, id=f"{manager.id}-outdated")
 
 
 @pytest.mark.parametrize("manager, member, output", list(_fixtures()))
@@ -157,8 +155,7 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         manager.__dict__.pop("version", None)
         try:
             assert manager.version is not None, (
-                "version_regexes matched no parseable version in the documented "
-                "output"
+                "version_regexes matched no parseable version in the documented output"
             )
         finally:
             manager.__dict__.pop("version", None)

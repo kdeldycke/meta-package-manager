@@ -466,7 +466,11 @@ def binaries_download_table() -> str:
             downloads[link_match["target"]] = link_match["url"]
 
     table = []
-    for os_label, os_id in (("Linux", "linux"), ("macOS", "macos"), ("Windows", "windows")):
+    for os_label, os_id in (
+        ("Linux", "linux"),
+        ("macOS", "macos"),
+        ("Windows", "windows"),
+    ):
         cells = [f"**{os_label}**"]
         for arch in ("arm64", "x64"):
             url = downloads.get(f"{os_id}-{arch}")

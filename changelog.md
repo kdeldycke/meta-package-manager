@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Add a `--plan`/`-p` option that prints the exact package-manager commands each state-changing operation would run, without running them. Read-only queries (`installed`, `outdated`, `search`) still execute, so `install`, `remove` and `upgrade --all` resolve to the commands they would actually run; the plan prints to stdout, one copy-pasteable command per line.
 - [mpm] Every supported package manager gets a dedicated documentation page detailing its platforms, operations and backfilled capabilities, CLI invocation and version probe, escalation and cooldown behaviors, purl types, usage examples and the captured native outputs its parsers were written against, all rendered live from the manager declarations at Sphinx build time. A new hub page indexes the 72 pages, and manager IDs in the readme's operation matrix, the benchmark table and the augmentations table now link to them.
 - [mpm] Add a MacPorts Portfile overlay under `packaging/macports`, carrying the port plus the dependency ports missing from the official tree, tested by a new `macports-source` job.
 - [mpm] Add an Alpine Linux APKBUILD overlay under `packaging/alpine`, carrying the package plus the 4 dependency packages missing from the official aports tree, tested by a new `apk-source` job.

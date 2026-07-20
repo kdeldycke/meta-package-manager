@@ -48,10 +48,12 @@ import logging
 import math
 import os
 import re
+import shlex
 import shutil
 import stat
 import subprocess
 import sys
+import threading
 from contextlib import nullcontext
 from datetime import datetime, timezone
 from functools import cached_property
@@ -128,6 +130,81 @@ class CLIError(Exception):
             placeholder="(...)",
         )
         return f"<{self.__class__.__name__}({self.code}, {error_excerpt!r})>"
+
+
+_MUTATING_OPERATIONS: Final[frozenset[str]] = frozenset(
+    {"install", "upgrade", "upgrade_all", "remove", "sync", "cleanup"},
+)
+"""State-changing operations, matched against :py:attr:`CLIExecutor._active_operation`.
+
+Under ``mpm --plan`` their CLI calls are captured into :py:data:`PLAN_RECORDER`
+instead of being executed, while the read-only queries (``installed``, ``outdated``,
+``search``) still run so the plan resolves against real system state. ``restore``
+re-stamps ``install`` on the manager, so it is covered here.
+"""
+
+
+def format_plan_command(
+    cmd_args: Iterable[str],
+    extra_env: TEnvVars | None = None,
+) -> str:
+    """Render a captured ``mpm --plan`` command as a copy-pasteable shell line.
+
+    Unlike :py:func:`click_extra.execution.format_cli_prompt` (styled, and prefixed
+    with a ``$`` prompt sigil for logs and dry-runs), this returns a plain, unstyled,
+    shell-quoted line: the forced environment assignments followed by the resolved
+    binary and its arguments, ready to paste into a terminal or pipe into a shell.
+    See the plan-mode branch of :py:meth:`CLIExecutor.run`.
+    """
+    env_prefix = "".join(
+        f"{name}={shlex.quote(str(value))} "
+        for name, value in (extra_env or {}).items()
+    )
+    command = " ".join(shlex.quote(str(arg)) for arg in cmd_args)
+    return f"{env_prefix}{command}"
+
+
+class _PlanRecorder:
+    """Thread-safe sink for the mutating commands captured under ``mpm --plan``.
+
+    :py:meth:`CLIExecutor.run` records into it from the fan-out's worker threads
+    (hence the lock); the CLI drains it once, on the main thread, when the context
+    closes (see the plan-mode wiring in :py:func:`meta_package_manager.cli.mpm`).
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._commands: list[tuple[str, str]] = []
+
+    def reset(self) -> None:
+        """Drop any commands left over from a previous in-process invocation."""
+        with self._lock:
+            self._commands.clear()
+
+    def record(self, manager_id: str, command: str) -> None:
+        """Store one captured ``command`` attributed to ``manager_id``."""
+        with self._lock:
+            self._commands.append((manager_id, command))
+
+    def render(self) -> tuple[str, ...]:
+        """Return the captured commands grouped by manager ID.
+
+        The sort is stable, so each manager keeps the order its commands were
+        captured in (a manager runs its own commands serially), while the managers
+        themselves are ordered deterministically regardless of the concurrent
+        capture order across the fan-out.
+        """
+        with self._lock:
+            ordered = sorted(self._commands, key=lambda entry: entry[0])
+        return tuple(command for _manager_id, command in ordered)
+
+
+PLAN_RECORDER: Final = _PlanRecorder()
+"""Process-wide sink for :py:meth:`CLIExecutor.run`'s plan-mode captures.
+
+A module-level singleton because ``run`` executes in the fan-out's worker threads,
+where the click context is not reliably reachable. See :py:class:`_PlanRecorder`.
+"""
 
 
 def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | None:
@@ -319,6 +396,16 @@ class CLIExecutor:
 
     dry_run: bool = False
     """Do not actually perform any action, just simulate CLI calls."""
+
+    plan: bool = False
+    """Capture state-changing CLI calls for inspection instead of running them.
+
+    Set by ``mpm --plan``. Unlike :py:attr:`dry_run` (which simulates *every* call,
+    read-only queries included), plan mode lets the read-only queries (``installed``,
+    ``outdated``, ``search``) run for real so the resolved plan reflects actual
+    system state, and records only the state-changing commands (see
+    :py:data:`_MUTATING_OPERATIONS`) into :py:data:`PLAN_RECORDER`.
+    """
 
     timeout: int | None = None
     """Maximum number of seconds to wait for a CLI call to complete.
@@ -871,7 +958,15 @@ class CLIExecutor:
             # manager shows no prompt line of its own.
             code, output, error = cached
             logging.info(f"Reuse lock-family peer result: {cli_msg}")
-        elif self.dry_run:
+        elif self.plan and self._active_operation in _MUTATING_OPERATIONS:
+            # Plan mode: record the state-changing command for inspection instead of
+            # running it. Read-only queries (and force_exec calls, which patch plan
+            # off) fall through to real execution below, so the plan resolves against
+            # actual system state. See _MUTATING_OPERATIONS and PLAN_RECORDER.
+            # ``id`` is declared on the ``PackageManager`` subclass, not this mixin.
+            plan_command = format_plan_command(clean_args, extra_env)
+            PLAN_RECORDER.record(self.id, plan_command)  # type: ignore[attr-defined]
+        elif self.dry_run and not self.plan:
             logging.warning(f"Dry-run: {cli_msg}")
         else:
             # ``id`` is declared on the ``PackageManager`` subclass, not this mixin.
@@ -1168,9 +1263,11 @@ class CLIExecutor:
         * ``auto_extra_env=False`` to skip the automatic addition of
           :py:attr:`self.extra_env <meta_package_manager.manager.PackageManager.extra_env>`
         * ``override_extra_env=dict()`` to locally overrides the later
-        * ``force_exec`` ignores the ``mpm --dry-run`` and
-          ``mpm --stop-on-error`` options to force the execution and
-          completion of the command.
+        * ``force_exec`` ignores the ``mpm --dry-run``, ``mpm --stop-on-error``
+          and ``mpm --plan`` options to force the execution and completion of the
+          command. It is used for reads whose output is needed regardless (version
+          detection, ``yarn global dir``), which must run for real even when the
+          user asked to simulate or to only plan mutations.
         * ``must_succeed`` raises on non-zero exit regardless of
           ``mpm --stop-on-error``. See :py:meth:`run` for details.
         """
@@ -1193,13 +1290,17 @@ class CLIExecutor:
         elif auto_extra_env:
             extra_env = self.extra_env
 
-        # No-op context manager without any effects.
+        # No-op context managers without any effects.
         local_option1: AbstractContextManager = nullcontext()
         local_option2: AbstractContextManager = nullcontext()
-        # Temporarily replace --dry-run and --stop-on-error user options with our own.
+        local_option3: AbstractContextManager = nullcontext()
+        # Temporarily replace the --dry-run, --stop-on-error and --plan user options
+        # with our own to force this read to run and complete (see the force_exec note
+        # in the docstring above).
         if force_exec:
             local_option1 = patch.object(self, "dry_run", False)
             local_option2 = patch.object(self, "stop_on_error", False)
+            local_option3 = patch.object(self, "plan", False)
         # Execute the command with eventual local options.
-        with local_option1, local_option2:
+        with local_option1, local_option2, local_option3:
             return self.run(*cli, extra_env=extra_env, must_succeed=must_succeed)

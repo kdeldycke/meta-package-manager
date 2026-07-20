@@ -95,7 +95,7 @@ from .dispatch import (
     collect_per_package,
     warn_jobs_ignored,
 )
-from .execution import CLIError, highlight_cli_name
+from .execution import PLAN_RECORDER, CLIError, highlight_cli_name
 from .manager import PackageManager
 from .package import packages_asdict
 from .platforms import MAIN_PLATFORMS
@@ -442,6 +442,17 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         help="Do not actually perform any action, just simulate CLI calls.",
     ),
     option(
+        "-p",
+        "--plan",
+        is_flag=True,
+        default=False,
+        help="Print the exact package-manager commands each state-changing operation "
+        "would run, without running them. Read-only queries (installed, outdated, "
+        "search) still run, so install, remove and upgrade --all resolve to the "
+        "commands they would actually execute against real system state. The plan "
+        "prints to stdout, one copy-pasteable command per line.",
+    ),
+    option(
         "-t",
         "--timeout",
         type=IntRange(min=0),
@@ -559,6 +570,7 @@ def mpm(
     stop_on_error,
     sudo,
     dry_run,
+    plan,
     timeout,
     cooldown,
     require_cooldown_support,
@@ -573,6 +585,19 @@ def mpm(
     # worker threads whose children survived the terminal signal. Restored on close.
     # See meta_package_manager.execution for the full rationale.
     install_interrupt_handler(ctx)
+
+    # Plan mode collects the state-changing commands it would run (see
+    # CLIExecutor.run) into a process-wide recorder, then prints them to stdout at
+    # close, one copy-pasteable line each. Reset first so a previous in-process
+    # invocation (the test suite drives the CLI repeatedly) cannot leak into this one.
+    if plan:
+        PLAN_RECORDER.reset()
+
+        def flush_plan():
+            for command in PLAN_RECORDER.render():
+                echo(command)
+
+        ctx.call_on_close(flush_plan)
 
     # Silence all log messages for serialization rendering unless in debug mode.
     if (
@@ -706,6 +731,7 @@ def mpm(
             stop_on_error=stop_on_error,
             sudo=sudo,
             dry_run=dry_run,
+            plan=plan,
             timeout=timeout,
             progress=show_progress,
             # Minimum release age gate and its fail-open escape hatch.

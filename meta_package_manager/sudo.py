@@ -218,7 +218,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
 
     - Windows (no ``sudo``) or the process is already root,
     - no selected manager escalates, through mpm or internally,
-    - a dry run (no real CLI is executed),
+    - a dry run or a plan run (no state-changing CLI is executed),
     - already primed once this invocation (idempotent),
     - the ``sudo`` executable is missing (one warning is logged),
     - the probe finds the cache already warm (keepalive only, fully silent),
@@ -236,7 +236,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     internal = any(m.internal_sudo for m in managers)
     if not escalating and not internal:
         return
-    if any(manager.dry_run for manager in managers):
+    if any(manager.dry_run or manager.plan for manager in managers):
         return
     if ctx.meta.get(_SUDO_PRIMED):
         return

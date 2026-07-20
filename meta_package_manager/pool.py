@@ -146,6 +146,7 @@ class ManagerPool:
             "cooldown",
             "dry_run",
             "ignore_auto_updates",
+            "plan",
             "progress",
             "require_cooldown_support",
             "stop_on_error",

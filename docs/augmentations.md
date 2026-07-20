@@ -60,6 +60,17 @@ $ mpm --dry-run --apt upgrade --all
 warning: Dry-run: (...)
 ```
 
+### Inspect the plan before running
+
+`mpm --plan <operation>` prints the exact package-manager commands a state-changing operation would run, without running them. Unlike `--dry-run`, which simulates *every* call and so leaves `install`, `remove` and `upgrade --all` unable to resolve what they would do, plan mode still runs the read-only lookups those operations need, then captures only the mutations, one copy-pasteable line per command on stdout:
+
+```shell-session
+$ mpm --plan --brew upgrade --all
+HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_ENV_HINTS=1 HOMEBREW_NO_AUTO_UPDATE=1 /opt/homebrew/bin/brew upgrade --quiet --yes --formula
+```
+
+Each line carries the resolved binary path and the forced environment, so the plan doubles as an audit trail and pipes straight into a shell.
+
 ### Comparable versions across schemes
 
 Package managers report versions in mutually incompatible schemes: semver, PEP 440, calendar versioning, Debian epochs, Gentoo suffixes, and more. Rather than a parser per format, `mpm` runs every version through a single tokenizer that yields a good-enough ordering, so `outdated` shows a meaningful installed-to-latest comparison even for managers whose native output never could.

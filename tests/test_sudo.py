@@ -66,9 +66,7 @@ def test_default_sudo_matches_system_managers():
         "emerge",
         "eopkg",
         "fwupd",
-        "pacaur",
         "pacman",
-        "paru",
         "pkg-tools",
         "pkgin",
         "ports",
@@ -79,7 +77,6 @@ def test_default_sudo_matches_system_managers():
         "tazpkg",
         "urpmi",
         "xbps",
-        "yay",
         "yum",
         "zypper",
     }
@@ -91,7 +88,7 @@ def test_internal_sudo_matches_internal_escalators():
     """Exactly the managers whose CLI runs ``sudo`` itself mid-run are marked, and
     none of them escalates through mpm (an internal escalator is never wrapped)."""
     internal = {mid for mid, manager in pool.items() if type(manager).internal_sudo}
-    assert internal == {"cask", "fink"}
+    assert internal == {"cask", "fink", "pacaur", "paru", "yay"}
     for mid in sorted(internal):
         assert pool[mid].default_sudo is False
 
@@ -173,10 +170,13 @@ def test_prime_sudo_skips_when_root():
     run.assert_not_called()
 
 
-def test_prime_sudo_skips_on_dry_run():
+@pytest.mark.parametrize("simulation_flag", ("dry_run", "plan"))
+def test_prime_sudo_skips_on_simulation(simulation_flag):
+    """Neither a dry run nor a plan run executes a state-changing CLI, so both skip
+    the sudo prompt."""
     ctx = click.Context(click.Command("mpm"))
     manager = _escalating_manager()
-    manager.dry_run = True
+    setattr(manager, simulation_flag, True)
     with prime_sudo_env() as run:
         prime_sudo(ctx, [manager])
     run.assert_not_called()

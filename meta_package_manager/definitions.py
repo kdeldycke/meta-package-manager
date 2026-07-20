@@ -133,6 +133,7 @@ OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "dry_run": _to_bool,
     "extra_env": _to_str_dict,
     "ignore_auto_updates": _to_bool,
+    "plan": _to_bool,
     "post_args": _to_str_tuple,
     "pre_args": _to_str_tuple,
     "pre_cmds": _to_str_tuple,
@@ -198,8 +199,8 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
 converters.
 
 The runtime-preference fields (``deprecated``, ``dry_run``, ``ignore_auto_updates``,
-``stop_on_error``) are excluded: they are command-line/global concerns, not part of a
-manager's identity, and resolve through the usual option precedence.
+``plan``, ``stop_on_error``) are excluded: they are command-line/global concerns, not
+part of a manager's identity, and resolve through the usual option precedence.
 
 Five fields are definition-only:
 

@@ -31,9 +31,11 @@ from meta_package_manager.execution import (
     DEFAULT_TIMEOUT,
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
+    PLAN_RECORDER,
     READ_ONLY_TIMEOUT,
     SPINNER_DELAY,
     CLIError,
+    format_plan_command,
 )
 from meta_package_manager.pool import pool
 
@@ -274,6 +276,69 @@ def test_run_cache_collapses_dry_run(caplog):
     assert len(dry_run_lines) == 1
     # The first dry-run still seeded the cache, so the peer had something to reuse.
     assert len(cache) == 1
+
+
+def test_format_plan_command_shell_quotes_env_and_args():
+    """A captured plan command renders as a plain, shell-quoted, runnable line."""
+    line = format_plan_command(
+        ("/opt/homebrew/bin/brew", "install", "my package"),
+        {"HOMEBREW_NO_AUTO_UPDATE": "1"},
+    )
+    assert (
+        line == "HOMEBREW_NO_AUTO_UPDATE=1 /opt/homebrew/bin/brew install 'my package'"
+    )
+
+
+def test_plan_captures_mutating_command_without_running_it(tmp_path):
+    """Plan mode records a state-changing command instead of executing it."""
+    PLAN_RECORDER.reset()
+    marker = tmp_path / "runs.log"
+    script = _append_script(marker)
+    manager = FakeManager()
+    manager.plan = True
+    manager._active_operation = "install"
+
+    output = manager.run_cli("-c", script)
+
+    # The subprocess never ran, yet the command was captured for the plan.
+    assert not marker.exists()
+    assert output == ""
+    captured = PLAN_RECORDER.render()
+    assert len(captured) == 1
+    assert str(manager.cli_path) in captured[0]
+    assert "-c" in captured[0]
+
+
+def test_plan_runs_read_only_operations(tmp_path):
+    """Plan mode executes read-only queries so the plan resolves against real state."""
+    PLAN_RECORDER.reset()
+    marker = tmp_path / "runs.log"
+    script = _append_script(marker)
+    manager = FakeManager()
+    manager.plan = True
+    manager._active_operation = "search"
+
+    manager.run_cli("-c", script)
+
+    # The read ran for real, and nothing was captured as a mutation.
+    assert marker.read_text() == "x"
+    assert PLAN_RECORDER.render() == ()
+
+
+def test_plan_ignores_force_exec(tmp_path):
+    """A force_exec read runs for real even under plan mode (version probes, etc.)."""
+    PLAN_RECORDER.reset()
+    marker = tmp_path / "runs.log"
+    script = _append_script(marker)
+    manager = FakeManager()
+    manager.plan = True
+    # A mutating active operation, but force_exec must still run the command.
+    manager._active_operation = "install"
+
+    manager.run_cli("-c", script, force_exec=True)
+
+    assert marker.read_text() == "x"
+    assert PLAN_RECORDER.render() == ()
 
 
 # Interrupt handling: the live-subprocess registry and the SIGINT handler live in

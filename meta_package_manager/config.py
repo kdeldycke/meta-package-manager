@@ -118,6 +118,12 @@ class MpmConfig:
     )
     """Simulate CLI calls without performing any action."""
 
+    plan: bool = field(
+        default=False,
+        metadata={CONFIG_PATH_METADATA_KEY: "plan"},
+    )
+    """Capture the state-changing CLI calls for inspection instead of running them."""
+
     sudo: bool | None = None
     """Force privileged manager operations with (``True``) or without (``False``)
     ``sudo``. Unset by default: system managers escalate, user-level managers do

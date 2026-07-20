@@ -22,6 +22,14 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
+
+# The CycloneDX and SPDX writer stacks are optional (the [sbom-offline] extra),
+# and their imports are guarded in meta_package_manager.sbom. Skip the whole
+# module when they are absent so a hermetic packager build collects it cleanly
+# instead of crashing on the direct writer imports below.
+pytest.importorskip("cyclonedx")
+pytest.importorskip("spdx_tools")
+
 from cyclonedx.schema import OutputFormat, SchemaVersion
 from cyclonedx.validation import make_schemabased_validator
 from cyclonedx.validation.json import JsonStrictValidator

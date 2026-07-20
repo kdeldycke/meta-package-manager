@@ -183,6 +183,12 @@ def _subcmd_args(
     return args_cleanup(raw_args)
 
 
+# The plugin suite drives mpm end-to-end and needs at least one live package
+# manager on the host, so it belongs to the integration layer even though its
+# module name does not match the ``test_cli*`` / ``test_manager_*`` convention
+# conftest keys on. The marker makes ``-m "not integration"`` and the hermetic-
+# build auto-skip cover it too.
+@pytest.mark.integration
 @unless_macos
 class TestBarPlugin:
     common_checklist: ClassVar[list] = [

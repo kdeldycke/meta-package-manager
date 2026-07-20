@@ -26,8 +26,15 @@ from __future__ import annotations
 
 import json
 
-import httpx
 import pytest
+
+# httpx and respx back the opt-in online SBOM layer (the [sbom-online] extra).
+# importorskip skips the whole module when they are absent so a hermetic
+# packager build collects it cleanly instead of crashing on the imports below.
+pytest.importorskip("httpx")
+pytest.importorskip("respx")
+
+import httpx
 import respx
 
 from meta_package_manager.sbom._network import (

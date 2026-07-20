@@ -34,11 +34,10 @@
         (base32 "11s5kq6g7lh4lkfbp2zqn6fy2frbnnvn4m2avkg850fj0hdx8823"))))
     (build-system pyproject-build-system)
     ;; Upstream builds with uv-build, which is not yet packaged for Guix; fall
-    ;; back to setuptools.  Skip the SBOM CLI test, which pulls heavy optional
-    ;; dependencies that are not declared here.
+    ;; back to setuptools.
+    ;; See https://kdeldycke.github.io/meta-package-manager/packaging.html
     (arguments
-     (list #:build-backend "setuptools.build_meta"
-           #:test-flags #~(list "--ignore=tests/test_cli_sbom.py")))
+     (list #:build-backend "setuptools.build_meta"))
     (native-inputs
      (list python-pytest
            python-pyyaml

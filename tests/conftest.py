@@ -21,6 +21,7 @@ import subprocess
 import sys
 from functools import partial
 from operator import attrgetter
+from pathlib import Path
 from shutil import which
 
 import pytest
@@ -45,9 +46,12 @@ from .fake_manager import FakeManager, TimingOutFakeManager
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from pathlib import Path
 
     from _pytest.config import Config
+
+PROJECT_ROOT = Path(__file__).parent.parent
+"""Repository root, holding the committed artifacts the ``test_docs`` guards
+check and the ``.git`` directory whose presence marks a developer checkout."""
 
 
 def pytest_addoption(parser):
@@ -94,6 +98,18 @@ def pytest_configure(config):
         "destructive: mark test as being destructive, "
         "i.e. modifying the system they run on.",
     )
+    config.addinivalue_line(
+        "markers",
+        "integration: mark test as driving a real package manager or the mpm "
+        "CLI end-to-end. It cannot run in a hermetic build sandbox; writable-"
+        '$HOME builders select the hermetic layer with -m "not integration".',
+    )
+    config.addinivalue_line(
+        "markers",
+        "repo_maintenance: mark test as a sync guard comparing a committed "
+        "artifact against a regeneration from the installed tooling. Only "
+        "meaningful in a git checkout of the repository, not a packager build.",
+    )
 
 
 def solve_destructive_options(config: Config) -> tuple[bool, bool]:
@@ -117,8 +133,14 @@ def solve_destructive_options(config: Config) -> tuple[bool, bool]:
 
 
 def pytest_collection_modifyitems(config, items):
-    """Apply collection-time skips: destructive-test selection from the command
-    line, plus a Guix-build skip for the manager and CLI integration tests."""
+    """Apply collection-time markers and skips.
+
+    On top of the command-line destructive-test selection, this classifies the
+    integration layer and quarantines the repo-maintenance guards, so a
+    downstream packager can run the suite with a single selection and no
+    per-module ignore list. See
+    https://kdeldycke.github.io/meta-package-manager/packaging.html
+    """
     run_destructive, run_non_destructive = solve_destructive_options(config)
 
     # Skip destructive tests.
@@ -135,14 +157,34 @@ def pytest_collection_modifyitems(config, items):
             if "destructive" not in item.keywords:
                 item.add_marker(skip_non_destructive)
 
-    # Integration tests drive real package managers (``test_manager_*``) or the
-    # ``mpm`` CLI end-to-end (``test_cli*``), neither of which exists in a
-    # hermetic build sandbox. Mark them to skip inside a Guix build (detected by
-    # ``extra_platforms`` via ``HOME=/homeless-shelter``) so downstream
-    # packagers can run the whole suite instead of ignoring entire modules.
+    # Repo-maintenance guards regenerate a committed artifact from the installed
+    # tooling and compare: only meaningful while developing mpm, where the
+    # tooling versions are pinned. A ``.git`` directory marks that checkout; a
+    # packager building from a tarball or sdist has none.
+    in_git_checkout = (PROJECT_ROOT / ".git").exists()
+
     for item in items:
+        # Tag the integration layer: tests driving a real package manager
+        # (``test_manager_*``) or the ``mpm`` CLI end-to-end (``test_cli*``). The
+        # bar-plugin suite carries the marker in its own module. A machine-
+        # readable marker lets writable-$HOME builders (Alpine, Debian, RPM mock)
+        # select ``-m "not integration"`` instead of hand-listing modules, and
+        # frees the classification from the module-naming convention.
         if item.path.name.startswith(("test_manager_", "test_cli")):
+            item.add_marker(pytest.mark.integration)
+
+        # The integration layer has no package managers to drive in a hermetic
+        # build sandbox. Auto-skip it inside a Guix/Nix build (detected by
+        # ``extra_platforms`` through ``HOME=/homeless-shelter``) so those
+        # distributors run a plain ``pytest`` with no ignores.
+        if item.get_closest_marker("integration"):
             item.add_marker(skip_guix_build)
+
+        # Drop the repo-maintenance guards outside a developer checkout.
+        if item.get_closest_marker("repo_maintenance") and not in_git_checkout:
+            item.add_marker(
+                pytest.mark.skip(reason="repo-maintenance guard: not a git checkout"),
+            )
 
 
 def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:

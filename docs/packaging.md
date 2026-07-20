@@ -10,21 +10,29 @@ To install `mpm` on your own system, head to the [installation methods](install.
 
 ## Test suite
 
-The `mpm` test suite has two layers:
+The `mpm` test suite splits into two layers, separated by the `integration` pytest marker:
 
-- A **hermetic unit layer** (`test_cooldown`, `test_docs`, `test_docstring_corpus`, `test_help`, `test_managers`, `test_pool`, `test_specifier`, `test_version`) that needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox; its only extra build dependency is `pyyaml`, imported by `tests/test_docs.py` (`pyproject-fmt` is optional there: the formatting-fixpoint test auto-skips when it is missing).
-- An **integration layer** (`tests/test_manager_*.py`, `tests/test_cli*.py`) that drives the ~70 real package managers (`apt`, `brew`, `pip`, `npm`, and more) and the `mpm` CLI end-to-end. These cannot run in a hermetic builder.
+- A **hermetic layer** (everything not marked `integration`) needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox. Beyond `pytest` it imports `pyyaml` and `tomlkit` (both pulled in by `tests/test_docs.py`); the SBOM tests additionally want the `[sbom-offline]` and `[sbom-online]` extras but **skip themselves when those are absent**, so a lean build never has to ignore them. `pyproject-fmt` stays optional too, its formatting-fixpoint test auto-skipping when missing.
+- An **integration layer** (marked `integration`: `tests/test_manager_*.py`, `tests/test_cli*.py` and the Xbar/SwiftBar plugin suite) drives the ~70 real package managers (`apt`, `brew`, `pip`, `npm`, and more) and the `mpm` CLI end-to-end. It cannot run in a hermetic builder.
 
-As of mpm > `6.6.0`, the integration layer **auto-skips when `$HOME` is `/homeless-shelter`** — the build-sandbox convention shared by Guix and Nix — via `extra_platforms.pytest.skip_guix_build` (wired up in `tests/conftest.py`). Those distributors can therefore run the whole `pytest` suite unmodified: just make `pyyaml` available and **do not override `$HOME`** in the package definition, or the auto-skip stops firing and the integration tests fail.
+Pick the skip path that fits the builder. Either way no per-module ignore list is needed, and the selection stays correct as test modules are added:
 
-Builders that keep a writable `$HOME` (Alpine's abuild, Debian buildd, RPM mock, etc.) must either disable the suite (`nocheck`, `doCheck = false`, and similar) or ignore the integration modules with `pytest --ignore-glob='tests/test_manager_*.py' --ignore-glob='tests/test_cli*.py'`.
+- **Writable-`$HOME` builders** (Alpine's abuild, Debian buildd, RPM mock, and similar) select the hermetic layer explicitly:
+
+  ```{code-block} shell-session
+  $ pytest -m "not integration"
+  ```
+
+- **Sandbox builders that set `HOME=/homeless-shelter`** (Guix, Nix) get the integration layer **auto-skipped** through `extra_platforms.pytest.skip_guix_build` (wired up in `tests/conftest.py`), so a plain `pytest` already runs only the hermetic layer. Do **not** override `$HOME` back to a writable path, or the auto-skip stops firing and the integration tests fail.
+
+Repo-maintenance sync guards (which regenerate a committed artifact from the installed tooling and compare) skip automatically outside a git checkout, so a tarball or sdist build never trips on a tooling-version mismatch. A builder that packages the SBOM extras can install `[sbom-offline]` / `[sbom-online]` to exercise the SBOM tests instead of skipping them.
 
 Running only the `sanity-check` phase (or its equivalent) stays a valid minimal option: it confirms the package imports cleanly and its declared dependencies resolve. Full functional verification of the integration layer is covered by [the project's own GitHub Actions CI](https://github.com/kdeldycke/meta-package-manager/actions), where the package managers are pre-installed.
 
-The `--skip-destructive` and `pytest -m "not destructive"` markers exist for *developer* environments where some package managers are present but mutating them would be undesirable. They do not make the suite hermetic.
+The `--skip-destructive` and `pytest -m "not destructive"` selectors exist for *developer* environments where some package managers are present but mutating them would be undesirable. They do not make the suite hermetic.
 
 ```{note}
-The PyPI sdist ships no tests: builds that want to run the suite must start from [the GitHub tag tarballs](https://github.com/kdeldycke/meta-package-manager/tags), which carry `tests/`, `docs/` and the workflow files the docs tests parse.
+As of mpm > `7.3.0`, the PyPI sdist ships `tests/`, `docs/` and the `.github/` workflow files the docs tests parse, so a build can run the suite straight from the sdist. Earlier releases shipped no tests: those builds must start from [the GitHub tag tarballs](https://github.com/kdeldycke/meta-package-manager/tags) instead.
 ```
 
 ## Dependencies

@@ -144,8 +144,15 @@ def test_labels():
         assert len(description) <= 100
 
 
+@pytest.mark.repo_maintenance
 def test_new_package_manager_issue_template():
-    """Check all platforms groups are referenced in the issue template."""
+    """Check all platforms groups are referenced in the issue template.
+
+    Repo-maintenance guard: the reference set is regenerated from the installed
+    ``extra_platforms`` release, whose platform groups a downstream packager
+    cannot be expected to match, so ``conftest`` skips it outside a git
+    checkout. It also reads ``.github/``, absent from a wheel install.
+    """
     content = PROJECT_ROOT.joinpath(
         ".github/ISSUE_TEMPLATE/new-package-manager.yml",
     ).read_text(encoding="utf-8")

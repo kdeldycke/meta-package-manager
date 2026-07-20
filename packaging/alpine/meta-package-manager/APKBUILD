@@ -38,23 +38,10 @@ check() {
 	python3 -m venv --clear --without-pip --system-site-packages .testenv
 	.testenv/bin/python3 -m installer .dist/*.whl
 	.testenv/bin/mpm --version
-	# Run the hermetic unit layer only: the integration modules
-	# (tests/test_manager_*.py, tests/test_cli*.py) drive the ~70 real package
-	# managers end-to-end and are covered by the project's own CI. See
-	# https://kdeldycke.github.io/meta-package-manager/packaging.html
-	# test_new_package_manager_issue_template is deselected as it asserts a
-	# repo-maintenance sync against the installed extra-platforms release, not
-	# a packaging invariant.
-	.testenv/bin/python3 -m pytest \
-		--deselect tests/test_docs.py::test_new_package_manager_issue_template \
-		tests/test_cooldown.py \
-		tests/test_docs.py \
-		tests/test_docstring_corpus.py \
-		tests/test_help.py \
-		tests/test_managers.py \
-		tests/test_pool.py \
-		tests/test_specifier.py \
-		tests/test_version.py
+	# Run the integration tests (marked "integration") which drive the
+	# mpm CLI end-to-end.
+	# See: https://kdeldycke.github.io/meta-package-manager/packaging.html
+	.testenv/bin/python3 -m pytest -m "not integration"
 }
 
 package() {

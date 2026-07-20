@@ -605,6 +605,23 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
+    def remove_orphan(self, package_id: str) -> str:
+        """Remove one package together with the dependencies it alone pulled in.
+
+        The opt-in counterpart to
+        :py:meth:`meta_package_manager.manager.PackageManager.remove`, surfaced as
+        ``mpm remove --orphans``. It maps to the manager's native "remove and drop
+        now-unneeded dependencies" verb (``apt remove --auto-remove``,
+        ``pacman --remove --recursive``, ``dnf autoremove``, ...), so :program:`mpm`
+        builds no dependency graph of its own.
+
+        Optional. A manager with no such native verb leaves this
+        :py:exc:`NotImplementedError`; ``mpm remove --orphans`` then falls back to
+        :py:meth:`meta_package_manager.manager.PackageManager.remove` and logs one
+        ``INFO`` capability-skip.
+        """
+        raise NotImplementedError
+
     def sync(self) -> None:
         """Refresh package metadata from remote repositories.
 

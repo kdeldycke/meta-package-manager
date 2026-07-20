@@ -334,6 +334,19 @@ class Zypper(PackageManager):
         """
         return self.run_cli("remove", package_id, sudo=True)
 
+    def remove_orphan(self, package_id: str) -> str:
+        """Remove one package, dropping dependencies it alone pulled in.
+
+        ``--clean-deps`` additionally removes the dependencies that were
+        installed with the package and are no longer needed.
+
+        .. code-block:: shell-session
+
+            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+                --no-refresh remove --clean-deps kopete
+        """
+        return self.run_cli("remove", "--clean-deps", package_id, sudo=True)
+
     def sync(self) -> None:
         """Sync package metadata.
 

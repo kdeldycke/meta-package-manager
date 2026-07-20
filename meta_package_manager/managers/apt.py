@@ -278,6 +278,18 @@ class APT(PackageManager):
         """
         return self.run_cli("--yes", "remove", package_id, sudo=True)
 
+    def remove_orphan(self, package_id: str) -> str:
+        """Remove one package, then drop dependencies it alone pulled in.
+
+        ``--auto-remove`` clears the packages that were installed as
+        dependencies and are no longer needed after the removal.
+
+        .. code-block:: shell-session
+
+            $ sudo apt --quiet --yes remove --auto-remove git
+        """
+        return self.run_cli("--yes", "remove", "--auto-remove", package_id, sudo=True)
+
     def sync(self) -> None:
         """Sync package metadata.
 

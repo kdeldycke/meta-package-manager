@@ -346,6 +346,7 @@ CANONICAL_ATTRS = (
     "ignore_auto_updates",
     "stop_on_error",
     "dry_run",
+    "plan",
     "timeout",
     "_active_operation",
     "progress",

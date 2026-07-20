@@ -265,6 +265,18 @@ class Pacman(PackageManager):
         """
         return self.run_cli("--remove", package_id, sudo=True)
 
+    def remove_orphan(self, package_id: str) -> str:
+        """Remove a package together with its now-orphaned dependencies.
+
+        ``--recursive`` (``-s``) additionally removes the dependencies the
+        package pulled in that no other installed package needs.
+
+        .. code-block:: shell-session
+
+            $ sudo pacman --noconfirm --color never --remove --recursive firefox
+        """
+        return self.run_cli("--remove", "--recursive", package_id, sudo=True)
+
     def sync(self) -> None:
         """Sync package metadata.
 

@@ -1980,6 +1980,14 @@ def upgrade(ctx, all, packages_specs):
 
 
 @mpm.command(aliases=["uninstall"], short_help="Remove a package.", section=MAINTENANCE)
+@option(
+    "--orphans",
+    is_flag=True,
+    default=False,
+    help="Also remove the dependencies the package pulled in that no other package "
+    "needs, using each manager's native cascade verb. Managers without one remove the "
+    "package only.",
+)
 @argument(
     "packages_specs",
     type=STRING,
@@ -1989,7 +1997,7 @@ def upgrade(ctx, all, packages_specs):
     "<pkg:npm/left-pad> purls.",
 )
 @pass_context
-def remove(ctx, packages_specs):
+def remove(ctx, orphans, packages_specs):
     """Remove one or more packages.
 
     Packages recognized by multiple managers will be remove with each of them. You can
@@ -1997,12 +2005,33 @@ def remove(ctx, packages_specs):
     tighter selection of managers.
 
     Packages unrecognized by any selected manager will be skipped.
+
+    With ``--orphans``, each package is removed together with the dependencies it alone
+    pulled in, mapped to the manager's native cascade verb (``apt remove
+    --auto-remove``, ``pacman --remove --recursive``, ``dnf autoremove``, ...). Managers
+    with no such verb remove the package only.
     """
+
+    def remove_action(manager: PackageManager, spec: Specifier) -> str | None:
+        # --orphans routes to the native cascade verb, falling back to the plain
+        # removal (with an INFO capability-skip) for managers that lack one. The
+        # NotImplementedError is caught here so it never reaches _package_task, which
+        # would otherwise record the package as a failure.
+        if orphans:
+            try:
+                return manager.remove_orphan(spec.package_id)
+            except NotImplementedError:
+                logging.info(
+                    "Does not implement orphan removal, removing the package only.",
+                    extra={"label": manager.id},
+                )
+        return manager.remove(spec.package_id)
+
     _dispatch_sourced_operation(
         ctx,
         packages_specs,
         operation=Operations.remove,
-        action=lambda m, s: m.remove(s.package_id),
+        action=remove_action,
         verb="remove",
         past="removed",
         prep="from",

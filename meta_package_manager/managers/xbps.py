@@ -218,6 +218,20 @@ class XBPS(PackageManager):
         return self.build_cli("--update", "--yes", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
+        """Remove one package and one only.
+
+        .. code-block:: shell-session
+
+            $ sudo xbps-remove --yes firefox
+        """
+        return self.run_cli(
+            "--yes",
+            package_id,
+            override_cli_path=self.sibling_cli("xbps-remove", same_dir=True),
+            sudo=True,
+        )
+
+    def remove_orphan(self, package_id: str) -> str:
         """Remove one package, recursively dropping orphaned dependencies.
 
         .. code-block:: shell-session

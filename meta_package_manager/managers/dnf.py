@@ -211,9 +211,20 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo dnf --color=never --quiet --assumeyes autoremove package_id
+            $ sudo dnf --color=never --quiet --assumeyes remove pip
         """
+        return self.run_cli("--assumeyes", "remove", package_id, sudo=True)
 
+    def remove_orphan(self, package_id: str) -> str:
+        """Remove one package, dropping dependencies it alone pulled in.
+
+        ``autoremove`` targets the package plus the dependencies that were
+        installed to satisfy it and are no longer required by anything else.
+
+        .. code-block:: shell-session
+
+            $ sudo dnf --color=never --quiet --assumeyes autoremove pip
+        """
         return self.run_cli("--assumeyes", "autoremove", package_id, sudo=True)
 
     def sync(self) -> None:

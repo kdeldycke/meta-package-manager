@@ -450,6 +450,25 @@ class PKG(PackageManager):
         """
         return self.run_cli("delete", "--yes", package_id)
 
+    def remove_orphan(self, package_id: str) -> str:
+        """Remove one package, then autoremove dependencies left orphaned.
+
+        .. caution::
+            ``pkg autoremove`` is a system-wide sweep: it drops every package
+            installed as a dependency and no longer required, not only those
+            orphaned by this particular removal.
+
+        .. code-block:: shell-session
+
+            $ pkg --quiet delete --yes dmg2img
+            $ pkg --quiet autoremove --yes
+        """
+        outputs = (
+            self.run_cli("delete", "--yes", package_id),
+            self.run_cli("autoremove", "--yes"),
+        )
+        return "\n".join(output for output in outputs if output)
+
     def sync(self) -> None:
         """Sync package metadata.
 

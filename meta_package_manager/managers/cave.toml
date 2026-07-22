@@ -34,6 +34,13 @@ version_regexes = ['(?P<version>\d+\.\d+\.\d+)']
 args = ["print-ids", "--matching", "*/*::installed", "--format", '%c/%p %v\n']
 regex = '^(?P<package_id>\S+) (?P<installed_version>\S+)$'
 
+# `purge` without `--execute` displays the resolution without acting (Paludis
+# refuses to act unless --execute is given), listing each would-be uninstall as a
+# `<   category/name-version:slot::repo` line of the plan.
+[mpm.managers.cave.operations.orphans]
+args = ["purge"]
+regex = '^<\s+(?P<package_id>[^\s:]+)-(?P<installed_version>\d[^\s:]*):'
+
 [mpm.managers.cave.operations.install]
 args = ["resolve", "--execute", "{package_id}"]
 sudo = true
@@ -79,4 +86,24 @@ sys-apps/sed 4.9"""
 packages = [
   { id = "app-arch/gzip", version = "1.14" },
   { id = "sys-apps/sed", version = "4.9" },
+]
+
+[[samples.orphans]]
+output = """
+Done: 156 metadata, 42 steps
+
+These are the actions I will take, in order:
+
+<   dev-libs/libpcre-8.45:0::installed
+    Reasons: purge
+
+<   app-misc/tmux-3.3a:0::installed
+    Reasons: purge
+
+Total: 2 uninstalls
+
+Use --execute to perform the actions I described."""
+packages = [
+  { id = "dev-libs/libpcre", version = "8.45" },
+  { id = "app-misc/tmux", version = "3.3a" },
 ]

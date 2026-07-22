@@ -109,6 +109,13 @@ class Emerge(PackageManager):
         """,
         re.VERBOSE,
     )
+    _ORPHANS_REGEXP = re.compile(
+        r"^All selected packages:\s+(?P<atoms>.+)$",
+        re.MULTILINE,
+    )
+    """Match ``--depclean --pretend``'s one-line summary of the packages it would
+    unmerge, each an ``=<category/name>-<version>`` atom split downstream through
+    :py:meth:`~meta_package_manager.manager.PackageManager.split_name_version`."""
     _SEARCH_REGEXP = re.compile(
         r"""
         ^\*\s+(?P<package_id>\S+)\n
@@ -196,6 +203,47 @@ class Emerge(PackageManager):
                     latest_version=latest_version,
                     installed_version=installed_version,
                 )
+
+    @property
+    def orphans(self) -> Iterator[Package]:
+        """Fetch packages installed as dependencies that nothing requires anymore.
+
+        ``--pretend`` turns ``--depclean`` into a read-only report of the packages
+        it would unmerge, summarized on its ``All selected packages:`` line as
+        ``=<category/name>-<version>`` atoms. Runs without root, and without the
+        pre-depclean world upgrade :py:meth:`cleanup_orphan` performs before a real
+        sweep.
+
+        .. code-block:: shell-session
+
+            $ emerge --quiet --color n --nospinner --depclean --pretend
+            Calculating dependencies... done!
+            >>> These are the packages that would be unmerged:
+
+             dev-libs/libpcre
+                selected: 8.45-r1
+               protected: none
+                 omitted: none
+
+             app-misc/tmux
+                selected: 3.3a
+               protected: none
+                 omitted: none
+
+            All selected packages: =dev-libs/libpcre-8.45-r1 =app-misc/tmux-3.3a
+
+            >>> 'Selected' packages are slated for removal.
+            >>> 'Protected' and 'omitted' packages will not be removed.
+        """
+        output = self.run_cli("--depclean", "--pretend")
+
+        match = self._ORPHANS_REGEXP.search(output)
+        if not match:
+            return
+        for atom in match.group("atoms").split():
+            if split := self.split_name_version(atom.lstrip("=")):
+                package_id, version = split
+                yield self.package(id=package_id, installed_version=version)
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.

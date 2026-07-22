@@ -322,6 +322,26 @@ libfoo-1.0.2-3.el9.x86_64
 python3-extra-0:3.9.18-3.el9.noarch
 """
 
+_EMERGE_ORPHANS_OUTPUT = """\
+Calculating dependencies... done!
+>>> These are the packages that would be unmerged:
+
+ dev-libs/libpcre
+    selected: 8.45-r1
+   protected: none
+     omitted: none
+
+ app-misc/tmux
+    selected: 3.3a
+   protected: none
+     omitted: none
+
+All selected packages: =dev-libs/libpcre-8.45-r1 =app-misc/tmux-3.3a
+
+>>> 'Selected' packages are slated for removal.
+>>> 'Protected' and 'omitted' packages will not be removed.
+"""
+
 _PACMAN_ORPHANS_OUTPUT = """\
 gtest 1.14.0-1
 libwlroots 0.16.2-2
@@ -370,6 +390,11 @@ i+ | openSUSE   | libbar  | 0.9-2.4   | noarch
             "dnf",
             _DNF_ORPHANS_OUTPUT,
             {("libfoo", "1.0.2-3.el9"), ("python3-extra", "3.9.18-3.el9")},
+        ),
+        (
+            "emerge",
+            _EMERGE_ORPHANS_OUTPUT,
+            {("dev-libs/libpcre", "8.45-r1"), ("app-misc/tmux", "3.3a")},
         ),
         (
             "pacman",
@@ -425,7 +450,20 @@ def test_orphans_query_unsupported(manager_id):
 
 @pytest.mark.parametrize(
     "manager_id",
-    ("apt", "brew", "dnf", "dnf5", "pacman", "pkg", "xbps", "yum", "zypper"),
+    (
+        "apt",
+        "brew",
+        "cave",
+        "dnf",
+        "dnf5",
+        "emerge",
+        "pacman",
+        "pkg",
+        "pkg-tools",
+        "xbps",
+        "yum",
+        "zypper",
+    ),
 )
 def test_orphans_query_supported(manager_id):
     assert implements(pool[manager_id], Operations.orphans) is True

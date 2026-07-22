@@ -40,6 +40,13 @@ version_regexes = ['^(?P<version>[\d.]+)']
 args = ["-I", "-a"]
 regex = '^(?P<package_id>\S+)-(?P<installed_version>\d\S*)\s'
 
+# `-n` dry-runs the unused-dependencies deletion, announcing each candidate the
+# way a real run does.
+[mpm.managers.pkg-tools.operations.orphans]
+cli = "pkg_delete"
+args = ["-a", "-I", "-n"]
+regex = '^(?P<package_id>\S+)-(?P<installed_version>\d[^\s:]*): ok$'
+
 # -Q searches the remote repository by substring and prints bare "stem-version"
 # lines; an exactly-installed match gets " (installed)" appended, which falls
 # outside the captured tokens.
@@ -90,6 +97,15 @@ lunzip-1.14p0       Lzip decompressor"""
 packages = [
   { id = "unzip", version = "6.0p17" },
   { id = "lunzip", version = "1.14p0" },
+]
+
+[[samples.orphans]]
+output = """
+autoconf-2.71p2: ok
+automake-1.16.5: ok"""
+packages = [
+  { id = "autoconf", version = "2.71p2" },
+  { id = "automake", version = "1.16.5" },
 ]
 
 [[samples.search]]

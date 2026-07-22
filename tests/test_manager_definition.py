@@ -1170,12 +1170,12 @@ def test_bundled_registered(toml_path):
 
     # Validate the shape of the sample fixtures consumed by the tests below.
     samples = data.get("samples", {})
-    assert set(samples) <= {"version", "installed", "outdated", "search"}
+    assert set(samples) <= {"version", "installed", "outdated", "orphans", "search"}
     assert "version" in samples, (
         f"{toml_path.name} must ship a [samples.version] fixture"
     )
     assert set(samples["version"]) == {"output", "expected"}
-    for operation in ("installed", "outdated", "search"):
+    for operation in ("installed", "outdated", "orphans", "search"):
         for sample in samples.get(operation, ()):
             assert set(sample) == {"output", "packages"}
             assert sample["packages"], "a sample must expect at least one package"
@@ -1274,7 +1274,7 @@ def _parsing_sample_params():
     for data in BUNDLED_FILE_DATA.values():
         manager_id = next(iter(data["mpm"]["managers"]))
         samples = data.get("samples", {})
-        for operation in ("installed", "outdated", "search"):
+        for operation in ("installed", "outdated", "orphans", "search"):
             op_samples = samples.get(operation, ())
             for index, sample in enumerate(op_samples):
                 expected = [
@@ -1311,7 +1311,11 @@ def test_bundled_parsing(manager_id, operation, output, expected):
         packages = manager.search("query", False, False)
     else:
         packages = getattr(manager, operation)
-    role = "installed_version" if operation == "installed" else "latest_version"
+    role = (
+        "installed_version"
+        if operation in ("installed", "orphans")
+        else "latest_version"
+    )
     results = [
         (p.id, str(version) if (version := getattr(p, role)) else None)
         for p in packages

@@ -80,7 +80,7 @@ from extra_platforms import current_architecture, current_platform, reduce
 from . import __version__, bar_plugin
 from .bar_plugin_renderer import BarPluginRenderer
 from .brewfile import build_brewfile
-from .capabilities import Operations, implements_method
+from .capabilities import Operations, supports_cleanup_orphan
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,
@@ -2135,7 +2135,8 @@ def sync(ctx):
     default=False,
     help="Only remove orphaned packages (those nothing depends on anymore) using each "
     "manager's native system-wide sweep, and skip the cache and temporary-file "
-    "pruning. Managers with no such sweep are skipped.",
+    "pruning. Managers with no native sweep get one synthesized from their orphan "
+    "listing; those with no orphan support at all are skipped.",
 )
 @pass_context
 def cleanup(ctx, orphans):
@@ -2143,14 +2144,17 @@ def cleanup(ctx, orphans):
 
     With ``--orphans``, narrow the run to the system-wide orphan sweep only (``apt
     autoremove``, ``brew autoremove``, ``flatpak uninstall --unused``, ...), leaving
-    caches and temporary artifacts untouched. Managers with no native orphan sweep are
-    skipped rather than fully cleaned up.
+    caches and temporary artifacts untouched. A manager with no native sweep verb but
+    a native orphan listing gets the sweep synthesized: list the orphans, remove them
+    one by one, and repeat until none are left. Managers with no orphan support at all
+    are skipped rather than fully cleaned up.
     """
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
     if orphans:
         # cleanup_orphan is a refinement of cleanup, not a routable Operations member,
-        # so narrow the already-cleanup-capable selection to the managers overriding it.
-        managers = [m for m in managers if implements_method(m, "cleanup_orphan")]
+        # so narrow the already-cleanup-capable selection to the managers that can run
+        # the sweep: natively, or through the synthesized orphans+remove fallback.
+        managers = [m for m in managers if supports_cleanup_orphan(m)]
     prime_sudo(ctx, managers)
     announce = _announce_level(ctx)
 

@@ -36,6 +36,16 @@ Successfully installed graphviz-0.14
 
 The *Full `upgrade --all`* column above lists the managers relying on this backfill.
 
+## Free orphan sweep
+
+Some managers can list their orphaned dependencies but have no verb to remove them all in one go. `pacman` is the canonical case: Arch users chain the two native primitives by hand, with the classic `pacman -Rns $(pacman -Qtdq)` idiom. When a manager implements the `orphans` listing and per-package removal but no native sweep, `mpm cleanup --orphans` synthesizes the sweep in-process: list the orphans, remove each one (recursively where the manager supports it, so every listed root takes its own now-orphaned subtree along), then re-query and repeat until the listing settles, since removing an orphan can orphan its own dependencies.
+
+```shell-session
+$ mpm --pacman cleanup --orphans
+```
+
+The *Orphan sweep* column above lists the managers relying on this backfill.
+
 ## Better search
 
 `mpm` normalizes search across managers. Its `--exact` and `--extended` flags work against every manager, even those whose native search cannot filter that way: `mpm` runs the closest native query, then refilters the raw results itself to honor the flag. The *Exact search* and *Extended search* columns above list which managers rely on this.

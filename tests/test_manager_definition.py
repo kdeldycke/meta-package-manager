@@ -32,6 +32,7 @@ from click_extra import ValidationError
 import meta_package_manager
 from meta_package_manager.capabilities import (
     Operations,
+    cleanup_orphan_is_synthesized,
     implements,
     implements_method,
 )
@@ -682,6 +683,7 @@ def test_factory_orphans_query(monkeypatch):
                 parse_mode="regex",
                 regex=r"^(?P<package_id>\S+) (?P<installed_version>\S+)$",
             ),
+            remove=OperationSpec(args=("remove", "{package_id}")),
         ),
     )()
     monkeypatch.setattr(
@@ -692,6 +694,9 @@ def test_factory_orphans_query(monkeypatch):
     assert implements(manager, Operations.orphans) is True
     packages = {(p.id, str(p.installed_version)) for p in manager.orphans}
     assert packages == {("libfoo", "1.2"), ("libbar", "3.4")}
+    # With orphans + remove declared and no native sweep, the synthesized
+    # system-wide sweep of ``cleanup --orphans`` kicks in for free.
+    assert cleanup_orphan_is_synthesized(manager) is True
 
 
 def test_factory_orphan_operations(monkeypatch):

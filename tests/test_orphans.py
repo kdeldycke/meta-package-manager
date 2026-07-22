@@ -28,7 +28,13 @@ from pathlib import Path
 
 import pytest
 
-from meta_package_manager.capabilities import Operations, implements, implements_method
+from meta_package_manager.capabilities import (
+    Operations,
+    cleanup_orphan_is_synthesized,
+    implements,
+    implements_method,
+    supports_cleanup_orphan,
+)
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.pool import pool
 
@@ -153,12 +159,86 @@ def test_cleanup_still_runs_orphan_sweep(
     assert cache_token in tokens
 
 
-@pytest.mark.parametrize("manager_id", ("npm", "pacman", "pip", "snap", "zypper"))
+@pytest.mark.parametrize("manager_id", ("npm", "pip", "snap"))
 def test_cleanup_orphan_unsupported_raises_not_implemented(manager_id):
-    """A manager with no system-wide sweep leaves ``cleanup_orphan`` unimplemented, so
-    ``cleanup --orphans`` simply skips it (pacman and zypper do scoped removal only)."""
+    """A manager with neither a native sweep nor an ``orphans`` query propagates
+    ``NotImplementedError`` from the base sweep, so ``cleanup --orphans`` skips it."""
     with pytest.raises(NotImplementedError):
         pool[manager_id].cleanup_orphan()
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "synthesized", "supported"),
+    (
+        # Native sweep verb: supported, nothing to synthesize.
+        ("apt", False, True),
+        ("brew", False, True),
+        ("cask", False, True),
+        ("dnf", False, True),
+        ("flatpak", False, True),
+        ("pkg", False, True),
+        ("xbps", False, True),
+        # No native verb, but orphans + remove: mpm synthesizes the sweep.
+        ("pacaur", True, True),
+        ("pacman", True, True),
+        ("paru", True, True),
+        ("yay", True, True),
+        ("zypper", True, True),
+        # No orphan support at all.
+        ("npm", False, False),
+        ("pip", False, False),
+        ("snap", False, False),
+    ),
+)
+def test_cleanup_orphan_capability_matrix(manager_id, synthesized, supported):
+    """The synthesized sweep covers exactly the managers with an orphan listing and
+    per-package removal but no native sweep verb, mirroring ``upgrade --all``."""
+    manager = pool[manager_id]
+    assert cleanup_orphan_is_synthesized(manager) is synthesized
+    assert supports_cleanup_orphan(manager) is supported
+
+
+def test_synthesized_sweep_fixpoint(monkeypatch):
+    """The synthesized sweep re-queries between rounds and stops when the listing
+    settles: removing an orphan can orphan its own dependencies."""
+    manager = pool["pacman"]
+    rounds = iter((
+        "liborphan 1.0-1\nlibleaf 2.0-1",
+        "libnewly-orphaned 0.5-1",
+        "",
+    ))
+    removed = []
+
+    def fake_run_cli(*args, **kwargs):
+        if "--query" in args:
+            return next(rounds)
+        removed.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    manager.cleanup_orphan()
+    assert removed == [
+        ("--remove", "--recursive", "liborphan"),
+        ("--remove", "--recursive", "libleaf"),
+        ("--remove", "--recursive", "libnewly-orphaned"),
+    ]
+
+
+def test_synthesized_sweep_stops_without_progress(monkeypatch):
+    """A removal that keeps failing cannot spin the loop: two identical consecutive
+    listings end the sweep."""
+    manager = pool["pacman"]
+    removed = []
+
+    def fake_run_cli(*args, **kwargs):
+        if "--query" in args:
+            return "libstuck 1.0-1"
+        removed.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    manager.cleanup_orphan()
+    assert removed == [("--remove", "--recursive", "libstuck")]
 
 
 # orphans query: native read-only listings parsed into packages.
@@ -354,6 +434,16 @@ class OrphanCleanupFakeManager(CleanupFakeManager):
         self.calls.append("cleanup_orphan")
 
 
+class SweepSynthesizingFakeManager(CleanupFakeManager):
+    """Fake manager with cleanup, an orphan listing (inherited) and removal, but no
+    native sweep verb: ``cleanup --orphans`` must go through the synthesized base
+    sweep, never the full ``cleanup``."""
+
+    def remove(self, package_id: str) -> str:
+        self.calls.append(f"remove:{package_id}")
+        return ""
+
+
 @pytest.fixture
 def removable_fake_pool(monkeypatch):
     fake = _patch_pool_with(monkeypatch, RemovableFakeManager())
@@ -391,9 +481,18 @@ def test_cleanup_without_orphans_runs_full_cleanup(invoke, monkeypatch):
 
 
 def test_cleanup_orphans_skips_manager_without_sweep(invoke, monkeypatch):
-    """A cleanup-capable manager with no orphan sweep is skipped by ``--orphans``,
-    not fully cleaned up."""
+    """A cleanup-capable manager with no orphan sweep at all (an orphan listing but
+    no removal) is skipped by ``--orphans``, not fully cleaned up."""
     fake = _patch_pool_with(monkeypatch, CleanupFakeManager())
     result = invoke("cleanup", "--orphans")
     assert result.exit_code == 0
     assert fake.calls == []
+
+
+def test_cleanup_orphans_runs_synthesized_sweep(invoke, monkeypatch):
+    """``cleanup --orphans`` on a manager without a native sweep verb synthesizes it:
+    the listed orphans are removed one by one, and the full ``cleanup`` never runs."""
+    fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
+    result = invoke("cleanup", "--orphans")
+    assert result.exit_code == 0
+    assert fake.calls == ["remove:fake-orphan-alpha"]

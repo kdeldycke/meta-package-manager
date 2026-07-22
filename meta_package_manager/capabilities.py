@@ -161,9 +161,9 @@ def implements_method(
     The orphan refinements ``remove_orphan`` and ``cleanup_orphan`` are optional
     variants of the ``remove`` and ``cleanup`` commands rather than standalone
     :class:`Operations`, so :func:`implements` cannot route them. This reports whether a
-    manager overrides the base's :py:exc:`NotImplementedError` stub for one, walking the
-    MRO ``__dict__`` exactly as :func:`upgrade_all_is_synthesized` does, so it works for
-    config-defined managers (whose methods live on the synthesized subclass) too.
+    manager overrides the base's stub for one, walking the MRO ``__dict__`` exactly as
+    :func:`upgrade_all_is_synthesized` does, so it works for config-defined managers
+    (whose methods live on the synthesized subclass) too.
     """
     cls = manager if isinstance(manager, type) else type(manager)
     for klass in cls.mro():
@@ -172,6 +172,42 @@ def implements_method(
         if method_name in klass.__dict__:
             return True
     return False
+
+
+def cleanup_orphan_is_synthesized(
+    manager: PackageManager | type[PackageManager],
+) -> bool:
+    """Whether ``mpm`` backfills the manager's system-wide orphan sweep.
+
+    ``True`` when no class in the manager's hierarchy overrides ``cleanup_orphan``
+    with a native sweep, but the manager implements both the ``orphans`` query and
+    ``remove``: the base
+    :py:meth:`meta_package_manager.manager.PackageManager.cleanup_orphan` then
+    synthesizes the sweep by listing the orphans and removing them one by one, the
+    exact pattern of the synthesized full ``upgrade --all``. ``False`` when a native
+    sweep exists, or when the manager lacks the building blocks.
+
+    Feeds the per-manager table of ``docs/augmentations.md``, rendered live by
+    ``docs/docs_update.py``.
+    """
+    if implements_method(manager, "cleanup_orphan"):
+        return False
+    return implements(manager, Operations.orphans) and implements(
+        manager, Operations.remove
+    )
+
+
+def supports_cleanup_orphan(
+    manager: PackageManager | type[PackageManager],
+) -> bool:
+    """Whether ``mpm cleanup --orphans`` can drive the manager at all.
+
+    Either through a native sweep verb (``implements_method``) or through the
+    synthesized fallback (:func:`cleanup_orphan_is_synthesized`).
+    """
+    return implements_method(
+        manager, "cleanup_orphan"
+    ) or cleanup_orphan_is_synthesized(manager)
 
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):

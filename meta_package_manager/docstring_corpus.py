@@ -58,10 +58,10 @@ recognizes, so both flavors share one extraction path.
 
 .. important::
     These two directives are the *fixture* directives: every ``installed`` /
-    ``outdated`` / ``version_regexes`` block written under one is a complete
-    sample that must parse (the corpus round-trip enforces it) and is rendered
-    as a reference trace. An illustration that is not a literal fixture (a
-    human-readable variant, an interactive prompt, a narrative before/after
+    ``outdated`` / ``orphans`` / ``version_regexes`` block written under one is a
+    complete sample that must parse (the corpus round-trip enforces it) and is
+    rendered as a reference trace. An illustration that is not a literal fixture
+    (a human-readable variant, an interactive prompt, a narrative before/after
     transcript) uses a non-harvested directive instead, ``.. code-block::
     console``, so it stays out of the corpus and the traces while still
     rendering in the API docs.

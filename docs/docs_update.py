@@ -56,6 +56,7 @@ from extra_platforms import Group, extract_members
 
 from meta_package_manager.capabilities import (
     Operations,
+    cleanup_orphan_is_synthesized,
     implements,
     implements_method,
     upgrade_all_is_synthesized,
@@ -402,6 +403,10 @@ def augmentations_table() -> str:
     - *Full* ``upgrade --all``: the manager only reaches the operation through
       the one-by-one fallback
       (:func:`meta_package_manager.capabilities.upgrade_all_is_synthesized`).
+    - *Orphan sweep*: the manager has no native "remove every orphan" verb, so
+      ``mpm cleanup --orphans`` synthesizes it from the manager's orphan listing
+      and per-package removal
+      (:func:`meta_package_manager.capabilities.cleanup_orphan_is_synthesized`).
     - *Exact search* and *Extended search*: the manager's native search cannot
       filter that way, so ``mpm`` refilters the raw results itself (the
       ``exact_support``/``extended_support`` flags set by
@@ -414,24 +419,32 @@ def augmentations_table() -> str:
     table = []
     for mid, manager in sorted(pool.items()):
         upgrade_all = upgrade_all_is_synthesized(manager)
+        orphan_sweep = cleanup_orphan_is_synthesized(manager)
         search_func = getattr(type(manager), "search", None)
         has_search = implements(manager, Operations.search)
         exact = has_search and not getattr(search_func, "exact_support", True)
         extended = has_search and not getattr(search_func, "extended_support", True)
-        if not (upgrade_all or exact or extended):
+        if not (upgrade_all or orphan_sweep or exact or extended):
             continue
         table.append([
             f"[`{mid}`](managers/{mid}.md)",
             "✅" if upgrade_all else "",
+            "✅" if orphan_sweep else "",
             "✅" if exact else "",
             "✅" if extended else "",
         ])
 
     return render_table(
         table,
-        headers=["Manager", "Full `upgrade --all`", "Exact search", "Extended search"],
+        headers=[
+            "Manager",
+            "Full `upgrade --all`",
+            "Orphan sweep",
+            "Exact search",
+            "Extended search",
+        ],
         table_format=TableFormat.GITHUB,
-        colalign=["left", "center", "center", "center"],
+        colalign=["left", "center", "center", "center", "center"],
         disable_numparse=True,
     )
 
@@ -718,12 +731,11 @@ def manager_operations(manager_id: str) -> str:
             and implements_method(m, "remove_orphan")
         ):
             note = "`--orphans` also drops the package's orphaned dependencies"
-        elif (
-            supported
-            and op is Operations.cleanup
-            and implements_method(m, "cleanup_orphan")
-        ):
-            note = "`--orphans` limits the run to the system-wide orphan sweep"
+        elif supported and op is Operations.cleanup:
+            if implements_method(m, "cleanup_orphan"):
+                note = "`--orphans` limits the run to the system-wide orphan sweep"
+            elif cleanup_orphan_is_synthesized(m):
+                note = "`--orphans` sweep [backfilled by `mpm`](../augmentations.md)"
         table.append([f"`{op.name}`", "✓" if supported else "", note])
 
     headers = ["Operation", "Supported", "Notes"]
@@ -1032,7 +1044,9 @@ def manager_traces(manager_id: str) -> str:
     else:
         fences = [
             _fenced(block, block_language(block))
-            for _, _, block in literal_blocks(type(m), ("installed", "outdated"))
+            for _, _, block in literal_blocks(
+                type(m), ("installed", "outdated", "orphans")
+            )
         ]
         source_label = "manager source"
     if not fences:

@@ -665,10 +665,38 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         scoped to one package's own orphaned dependencies. As with :py:meth:`cleanup`,
         :program:`mpm` builds no dependency graph: the manager decides what is orphaned.
 
-        Optional. A manager with no native orphan sweep leaves this
-        :py:exc:`NotImplementedError`, and ``mpm cleanup --orphans`` simply skips it.
+        A manager with no native sweep verb is backfilled by this base implementation
+        when it supports both the :py:attr:`orphans` query and package removal: list
+        the orphans, remove each one (with :py:meth:`remove_orphan` when available, so
+        every listed root takes its own now-orphaned subtree along), then re-query and
+        repeat until the listing settles, since removing an orphan can orphan its own
+        dependencies. The exact pattern of the synthesized full ``upgrade --all``, and
+        the in-process equivalent of Arch's classic ``pacman -Rns $(pacman -Qtdq)``
+        idiom. The re-query loop stops as soon as a round makes no progress, so
+        removal failures cannot spin it forever.
+
+        A manager implementing neither a native sweep nor the :py:attr:`orphans`
+        query propagates :py:exc:`NotImplementedError`, and ``mpm cleanup --orphans``
+        simply skips it.
         """
-        raise NotImplementedError
+        logging.debug(
+            "No native orphan sweep. Remove listed orphans one by one.",
+            extra={"label": self.id},
+        )
+        previous: frozenset[str] = frozenset()
+        while True:
+            # Raises NotImplementedError right here when the manager has no orphans
+            # query, keeping the operation's optional contract.
+            orphan_ids = [package.id for package in self.orphans]
+            current = frozenset(orphan_ids)
+            if not current or current == previous:
+                break
+            previous = current
+            for package_id in orphan_ids:
+                try:
+                    self.remove_orphan(package_id)
+                except NotImplementedError:
+                    self.remove(package_id)
 
     def discover_projects(self) -> Iterator[Path]:
         """Locate project trees this manager governs by scanning the filesystem.

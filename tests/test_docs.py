@@ -523,7 +523,8 @@ def test_manager_page_sections_render(manager):
 
 def test_manager_traces_render_literal_blocks():
     """A class-based manager's reference traces surface exactly the literal
-    installed/outdated blocks the corpus validates, in terminal-facing form.
+    installed/outdated/orphans blocks the corpus validates, in terminal-facing
+    form.
 
     ``manager_traces`` and the corpus round-trip both read
     :func:`~meta_package_manager.docstring_corpus.literal_blocks`, so the
@@ -534,7 +535,7 @@ def test_manager_traces_render_literal_blocks():
         if getattr(manager, "definition_source", None):
             continue
         traces = docs_update.manager_traces(mid)
-        blocks = literal_blocks(type(manager), ("installed", "outdated"))
+        blocks = literal_blocks(type(manager), ("installed", "outdated", "orphans"))
         assert bool(traces) == bool(blocks), mid
         for _member, _index, block in blocks:
             assert block in traces, mid

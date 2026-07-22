@@ -30,11 +30,12 @@ a docstring that has drifted from the code beside it), not that every field is
 captured correctly. It authors no fixtures of its own: the corpus is the
 docstrings.
 
-It covers ``installed``, ``outdated`` and ``--version`` blocks. ``installed`` and
-``--version`` are single-source (one CLI call), fed straight through.
-``outdated`` may cross-reference two commands (``list`` + ``latest``), so its
-calls are routed to the right block by a command-dispatching stub. Every
-``shell-session`` block of these members is a complete fixture that must parse:
+It covers ``installed``, ``outdated``, ``orphans`` and ``--version`` blocks.
+``installed``, ``orphans`` and ``--version`` are single-source (one CLI call), fed
+straight through. ``outdated`` may cross-reference two commands (``list`` +
+``latest``), so its calls are routed to the right block by a command-dispatching
+stub. Every ``shell-session`` block of these members is a complete fixture that
+must parse:
 illustrations (a human-readable variant, an interactive prompt, a narrative)
 live in a non-harvested directive instead. See
 https://github.com/kdeldycke/meta-package-manager/issues/1023.
@@ -109,15 +110,16 @@ def _dispatch(command_map: list[tuple[list[str], str]], default: str = ""):
 def _fixtures():
     """Yield a ``pytest.param`` per documented block worth replaying.
 
-    ``installed`` and ``version_regexes`` are single-source: one param per literal
-    block, fed straight through. ``outdated`` is one param per manager, driven by a
-    command-dispatching stub so its (possibly two-command) path is exercised whole.
+    ``installed``, ``orphans`` and ``version_regexes`` are single-source: one param
+    per literal block, fed straight through. ``outdated`` is one param per manager,
+    driven by a command-dispatching stub so its (possibly two-command) path is
+    exercised whole.
     """
     for manager in pool.values():
         # The pool yields untyped instances, and mypy cannot match type[Any]
         # against the cache wrapper's Hashable parameter.
         blocks_by_member = class_blocks(type(manager))  # type: ignore[arg-type]
-        for member in ("installed", "version_regexes"):
+        for member in ("installed", "orphans", "version_regexes"):
             for index, block in enumerate(blocks_by_member.get(member, ())):
                 output = split_session(block)
                 if not is_fixture(output):
@@ -166,9 +168,9 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         default = _member_output(type(manager), "outdated")
         monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
         packages = list(manager.outdated)
-    else:  # installed.
+    else:  # installed or orphans.
         monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
-        packages = list(manager.installed)
+        packages = list(getattr(manager, member))
 
     assert packages, "documented output parsed to zero packages"
     for package in packages:
@@ -200,15 +202,15 @@ def test_display_blocks_align_with_raw():
 def test_fixtures_carry_no_truncation_marker():
     """A harvested fixture block must document its output in full.
 
-    ``installed``/``outdated``/``version_regexes`` blocks are complete samples,
-    so none may abbreviate its output with a ``(...)`` marker (an illustration
-    that would truncate belongs under a non-harvested ``console`` directive). A
-    bare ``...`` is left alone: real CLI output legitimately contains it, like
-    apt's ``Listing...`` header or a `guix` store path.
+    ``installed``/``outdated``/``orphans``/``version_regexes`` blocks are complete
+    samples, so none may abbreviate its output with a ``(...)`` marker (an
+    illustration that would truncate belongs under a non-harvested ``console``
+    directive). A bare ``...`` is left alone: real CLI output legitimately
+    contains it, like apt's ``Listing...`` header or a `guix` store path.
     """
     for manager in pool.values():
         blocks_by_member = class_blocks(type(manager))  # type: ignore[arg-type]
-        for member in ("installed", "outdated", "version_regexes"):
+        for member in ("installed", "outdated", "orphans", "version_regexes"):
             for index, block in enumerate(blocks_by_member.get(member, ())):
                 assert "(...)" not in block, f"{manager.id}-{member}-{index}"
 
@@ -216,12 +218,13 @@ def test_fixtures_carry_no_truncation_marker():
 def test_query_fixtures_run_verbatim():
     """A harvested query fixture must show the exact command mpm runs.
 
-    ``installed``/``outdated``/``version_regexes`` invocations go through
-    ``run_cli``, which executes an argv directly with no shell, so a documented
-    command joined to another by a shell pipe (``| jq`` to pretty-print JSON,
-    ``echo n |`` to feed an interactive prompt) shows an invocation mpm never
-    makes and would render a misleading reference trace. Such a block is an
-    illustration and belongs under a non-harvested ``console`` directive.
+    ``installed``/``outdated``/``orphans``/``version_regexes`` invocations go
+    through ``run_cli``, which executes an argv directly with no shell, so a
+    documented command joined to another by a shell pipe (``| jq`` to
+    pretty-print JSON, ``echo n |`` to feed an interactive prompt) shows an
+    invocation mpm never makes and would render a misleading reference trace.
+    Such a block is an illustration and belongs under a non-harvested
+    ``console`` directive.
 
     Re-tokenized with :func:`shlex.split` like :func:`_documented_commands` does
     for the mutation members, so a pipe *inside* a quoted argument (PowerShell's
@@ -230,7 +233,7 @@ def test_query_fixtures_run_verbatim():
     """
     for manager in pool.values():
         blocks_by_member = class_blocks(type(manager))  # type: ignore[arg-type]
-        for member in ("installed", "outdated", "version_regexes"):
+        for member in ("installed", "outdated", "orphans", "version_regexes"):
             for index, block in enumerate(blocks_by_member.get(member, ())):
                 for raw_tokens in block_commands(block):
                     try:
@@ -244,8 +247,10 @@ def test_query_fixtures_run_verbatim():
 
 MUTATION_MEMBERS = (
     "cleanup",
+    "cleanup_orphan",
     "install",
     "remove",
+    "remove_orphan",
     "sync",
     "upgrade_all_cli",
     "upgrade_one_cli",
@@ -422,7 +427,9 @@ def test_documented_command_matches_construction(
             manager.install(PID_SENTINEL, version=PID_SENTINEL)
     elif member == "remove":
         manager.remove(PID_SENTINEL)
-    elif member in ("sync", "cleanup"):
+    elif member == "remove_orphan":
+        manager.remove_orphan(PID_SENTINEL)
+    elif member in ("sync", "cleanup", "cleanup_orphan"):
         getattr(manager, member)()
     elif member == "upgrade_all_cli":
         constructed.append(manager.upgrade_all_cli())

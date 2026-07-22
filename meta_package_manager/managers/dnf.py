@@ -244,8 +244,17 @@ class DNF(PackageManager):
             $ sudo dnf --color=never --quiet --assumeyes autoremove
             $ dnf --color=never --quiet clean all
         """
-        self.run_cli("--assumeyes", "autoremove", sudo=True)
+        self.cleanup_orphan()
         self.run_cli("clean", "all")
+
+    def cleanup_orphan(self) -> None:
+        """Remove every package installed as a dependency and no longer required.
+
+        .. code-block:: shell-session
+
+            $ sudo dnf --color=never --quiet --assumeyes autoremove
+        """
+        self.run_cli("--assumeyes", "autoremove", sudo=True)
 
 
 class DNF5(DNF):

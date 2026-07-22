@@ -151,6 +151,28 @@ def upgrade_all_is_synthesized(
     return True
 
 
+def implements_method(
+    manager: PackageManager | type[PackageManager],
+    method_name: str,
+) -> bool:
+    """Whether a non-base class in the manager's MRO defines ``method_name``.
+
+    The orphan refinements ``remove_orphan`` and ``cleanup_orphan`` are optional
+    variants of the ``remove`` and ``cleanup`` commands rather than standalone
+    :class:`Operations`, so :func:`implements` cannot route them. This reports whether a
+    manager overrides the base's :py:exc:`NotImplementedError` stub for one, walking the
+    MRO ``__dict__`` exactly as :func:`upgrade_all_is_synthesized` does, so it works for
+    config-defined managers (whose methods live on the synthesized subclass) too.
+    """
+    cls = manager if isinstance(manager, type) else type(manager)
+    for klass in cls.mro():
+        if klass is PackageManager:
+            return False
+        if method_name in klass.__dict__:
+            return True
+    return False
+
+
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):
     """Decorator factory to be used on ``search()`` operations to signal ``mpm``
     framework manager's capabilities.

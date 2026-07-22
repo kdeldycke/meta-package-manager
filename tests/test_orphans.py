@@ -1,0 +1,263 @@
+# Copyright Kevin Deldycke <kevin@deldycke.com> and contributors.
+#
+# This program is Free Software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+"""Checks for the two orphan features and their native-command mappings.
+
+``remove --orphans`` (scoped, :py:meth:`PackageManager.remove_orphan`) drops one
+package's own orphaned dependencies; ``cleanup --orphans`` (system-wide,
+:py:meth:`PackageManager.cleanup_orphan`) sweeps every orphaned package. The argv
+assertions stub ``run_cli`` on the pooled manager singleton to capture command tokens
+without spawning a subprocess, so they run identically on any host.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from meta_package_manager.capabilities import implements_method
+from meta_package_manager.manager import PackageManager
+from meta_package_manager.pool import pool
+
+from .conftest import _patch_pool_with
+from .fake_manager import FakeManager
+
+
+def _capture_run_cli(monkeypatch, manager_id, call):
+    """Invoke ``call(manager)`` with ``run_cli`` and ``sibling_cli`` stubbed.
+
+    ``run_cli`` records the positional argv of every invocation instead of executing
+    it, and ``sibling_cli`` is neutralized because its ``same_dir`` resolution asserts
+    on a ``cli_path`` that is absent on a host lacking the manager (xbps). Returns the
+    flat list of every captured token across all invocations.
+    """
+    manager = pool[manager_id]
+    calls: list[tuple[str, ...]] = []
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: calls.append(args) or "",
+    )
+    monkeypatch.setattr(
+        manager,
+        "sibling_cli",
+        lambda name, **kwargs: Path("/fake/bin") / name,
+    )
+    call(manager)
+    return [token for args in calls for token in args]
+
+
+# remove --orphans: scoped cascade verbs (one package's own orphaned dependencies).
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "cascade_token"),
+    (
+        ("apt", "--auto-remove"),
+        ("dnf", "autoremove"),
+        ("dnf5", "autoremove"),
+        ("pacman", "--recursive"),
+        ("xbps", "--recursive"),
+        ("yum", "autoremove"),
+        ("zypper", "--clean-deps"),
+    ),
+)
+def test_remove_orphan_uses_native_cascade(monkeypatch, manager_id, cascade_token):
+    """``remove --orphans`` maps to each manager's native remove-plus-orphans verb."""
+    tokens = _capture_run_cli(
+        monkeypatch, manager_id, lambda m: m.remove_orphan("firefox")
+    )
+    assert cascade_token in tokens
+    assert "firefox" in tokens
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "cascade_token"),
+    (
+        ("dnf", "autoremove"),
+        ("dnf5", "autoremove"),
+        ("xbps", "--recursive"),
+        ("yum", "autoremove"),
+    ),
+)
+def test_plain_remove_no_longer_cascades(monkeypatch, manager_id, cascade_token):
+    """Plain ``remove`` keeps orphaned dependencies: dnf and xbps used to cascade."""
+    tokens = _capture_run_cli(monkeypatch, manager_id, lambda m: m.remove("firefox"))
+    assert cascade_token not in tokens
+    assert "firefox" in tokens
+
+
+@pytest.mark.parametrize(
+    "manager_id",
+    ("brew", "cask", "flatpak", "npm", "pip", "pkg", "snap"),
+)
+def test_remove_orphan_unsupported_raises_not_implemented(manager_id):
+    """A manager with no scoped cascade leaves ``remove_orphan`` unimplemented, so the
+    CLI action catches the ``NotImplementedError`` and falls back to a plain removal."""
+    with pytest.raises(NotImplementedError):
+        pool[manager_id].remove_orphan("firefox")
+
+
+# cleanup --orphans: system-wide orphan sweeps (every orphaned package).
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "sweep_token"),
+    (
+        ("apt", "autoremove"),
+        ("brew", "autoremove"),
+        ("cask", "autoremove"),
+        ("dnf", "autoremove"),
+        ("dnf5", "autoremove"),
+        ("flatpak", "--unused"),
+        ("pkg", "autoremove"),
+        ("xbps", "--remove-orphans"),
+        ("yum", "autoremove"),
+    ),
+)
+def test_cleanup_orphan_uses_native_sweep(monkeypatch, manager_id, sweep_token):
+    """``cleanup --orphans`` maps to each manager's system-wide orphan sweep."""
+    tokens = _capture_run_cli(monkeypatch, manager_id, lambda m: m.cleanup_orphan())
+    assert sweep_token in tokens
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "sweep_token", "cache_token"),
+    (
+        ("apt", "autoremove", "clean"),
+        ("brew", "autoremove", "cleanup"),
+        ("dnf", "autoremove", "clean"),
+        ("pkg", "autoremove", "clean"),
+    ),
+)
+def test_cleanup_still_runs_orphan_sweep(
+    monkeypatch, manager_id, sweep_token, cache_token
+):
+    """Plain ``cleanup`` keeps doing both the orphan sweep and the cache pruning: the
+    sweep step now routes through ``cleanup_orphan`` but the behavior is unchanged."""
+    tokens = _capture_run_cli(monkeypatch, manager_id, lambda m: m.cleanup())
+    assert sweep_token in tokens
+    assert cache_token in tokens
+
+
+@pytest.mark.parametrize("manager_id", ("npm", "pacman", "pip", "snap", "zypper"))
+def test_cleanup_orphan_unsupported_raises_not_implemented(manager_id):
+    """A manager with no system-wide sweep leaves ``cleanup_orphan`` unimplemented, so
+    ``cleanup --orphans`` simply skips it (pacman and zypper do scoped removal only)."""
+    with pytest.raises(NotImplementedError):
+        pool[manager_id].cleanup_orphan()
+
+
+# Capability introspection shared by the CLI selection and the documentation.
+
+
+def test_implements_method_introspection():
+    """``implements_method`` reports overrides of the base ``NotImplementedError``
+    stubs, the same MRO walk the CLI and the docs generator rely on."""
+    assert implements_method(pool["apt"], "remove_orphan") is True
+    assert implements_method(pool["apt"], "cleanup_orphan") is True
+    assert implements_method(pool["pacman"], "remove_orphan") is True
+    assert implements_method(pool["pacman"], "cleanup_orphan") is False
+    assert implements_method(pool["brew"], "remove_orphan") is False
+    assert implements_method(pool["brew"], "cleanup_orphan") is True
+    # Inherited overrides count (dnf5 and yum inherit from dnf).
+    assert implements_method(pool["dnf5"], "remove_orphan") is True
+
+
+def test_base_orphan_operations_not_implemented():
+    """Both operations are optional, exactly like ``remove`` and ``cleanup``."""
+    with pytest.raises(NotImplementedError):
+        PackageManager().remove_orphan("firefox")
+    with pytest.raises(NotImplementedError):
+        PackageManager().cleanup_orphan()
+
+
+# CLI plumbing, driven through deterministic fakes.
+
+
+class RemovableFakeManager(FakeManager):
+    """Fake manager that removes packages but has no scoped orphan-cascade verb.
+
+    Exercises the ``remove --orphans`` fallback: ``remove_orphan`` stays unimplemented
+    (base ``NotImplementedError``) while ``remove`` succeeds, so the CLI must catch the
+    former and fall back to the latter.
+    """
+
+    def remove(self, package_id: str) -> str:
+        return f"Removed {package_id}."
+
+
+class CleanupFakeManager(FakeManager):
+    """Fake manager that supports plain cleanup but no system-wide orphan sweep."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.calls: list[str] = []
+
+    def cleanup(self) -> None:
+        self.calls.append("cleanup")
+
+
+class OrphanCleanupFakeManager(CleanupFakeManager):
+    """Fake manager that additionally supports the system-wide orphan sweep."""
+
+    def cleanup_orphan(self) -> None:
+        self.calls.append("cleanup_orphan")
+
+
+@pytest.fixture
+def removable_fake_pool(monkeypatch):
+    fake = _patch_pool_with(monkeypatch, RemovableFakeManager())
+    # _dispatch_sourced_operation resolves each source manager via pool.get(id), which
+    # reads pool.register. _patch_pool_with only stubs select_managers, so register the
+    # fake as well for the per-package dispatch to find it.
+    monkeypatch.setitem(pool.register, fake.id, fake)
+    return fake
+
+
+def test_remove_orphans_falls_back_to_plain_removal(invoke, removable_fake_pool):
+    """``remove --orphans`` on a manager without a cascade verb removes the package
+    only, narrating the skip at ``INFO`` and still exiting cleanly."""
+    result = invoke("--verbosity", "INFO", "remove", "--orphans", "fake-pkg-alpha")
+    assert result.exit_code == 0
+    assert "Does not implement orphan removal, removing the package only." in (
+        result.stderr
+    )
+
+
+def test_cleanup_orphans_runs_only_the_sweep(invoke, monkeypatch):
+    """``cleanup --orphans`` runs ``cleanup_orphan``, not the full ``cleanup``."""
+    fake = _patch_pool_with(monkeypatch, OrphanCleanupFakeManager())
+    result = invoke("cleanup", "--orphans")
+    assert result.exit_code == 0
+    assert fake.calls == ["cleanup_orphan"]
+
+
+def test_cleanup_without_orphans_runs_full_cleanup(invoke, monkeypatch):
+    """Plain ``cleanup`` runs the full ``cleanup``, not the narrowed sweep."""
+    fake = _patch_pool_with(monkeypatch, OrphanCleanupFakeManager())
+    result = invoke("cleanup")
+    assert result.exit_code == 0
+    assert fake.calls == ["cleanup"]
+
+
+def test_cleanup_orphans_skips_manager_without_sweep(invoke, monkeypatch):
+    """A cleanup-capable manager with no orphan sweep is skipped by ``--orphans``,
+    not fully cleaned up."""
+    fake = _patch_pool_with(monkeypatch, CleanupFakeManager())
+    result = invoke("cleanup", "--orphans")
+    assert result.exit_code == 0
+    assert fake.calls == []

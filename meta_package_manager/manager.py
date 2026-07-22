@@ -636,6 +636,25 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
+    def cleanup_orphan(self) -> None:
+        """Remove every orphaned package on the system, sparing the caches.
+
+        The opt-in ``mpm cleanup --orphans`` variant of
+        :py:meth:`meta_package_manager.manager.PackageManager.cleanup`, narrowed to the
+        system-wide "remove all packages nothing depends on anymore" sweep and skipping
+        the cache and temporary-file pruning that plain :py:meth:`cleanup` also performs
+        (``apt autoremove``, ``brew autoremove``, ``flatpak uninstall --unused``, ...).
+
+        Distinct from
+        :py:meth:`meta_package_manager.manager.PackageManager.remove_orphan`, which is
+        scoped to one package's own orphaned dependencies. As with :py:meth:`cleanup`,
+        :program:`mpm` builds no dependency graph: the manager decides what is orphaned.
+
+        Optional. A manager with no native orphan sweep leaves this
+        :py:exc:`NotImplementedError`, and ``mpm cleanup --orphans`` simply skips it.
+        """
+        raise NotImplementedError
+
     def discover_projects(self) -> Iterator[Path]:
         """Locate project trees this manager governs by scanning the filesystem.
 

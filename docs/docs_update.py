@@ -57,6 +57,7 @@ from extra_platforms import Group, extract_members
 from meta_package_manager.capabilities import (
     Operations,
     implements,
+    implements_method,
     upgrade_all_is_synthesized,
 )
 from meta_package_manager.docstring_corpus import (
@@ -711,6 +712,18 @@ def manager_operations(manager_id: str) -> str:
                     f"{' and '.join(missing)} search "
                     "[backfilled by `mpm`](../augmentations.md)"
                 )
+        elif (
+            supported
+            and op is Operations.remove
+            and implements_method(m, "remove_orphan")
+        ):
+            note = "`--orphans` also drops the package's orphaned dependencies"
+        elif (
+            supported
+            and op is Operations.cleanup
+            and implements_method(m, "cleanup_orphan")
+        ):
+            note = "`--orphans` limits the run to the system-wide orphan sweep"
         table.append([f"`{op.name}`", "✓" if supported else "", note])
 
     headers = ["Operation", "Supported", "Notes"]

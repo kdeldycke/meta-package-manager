@@ -259,3 +259,12 @@ class Flatpak(PackageManager):
             $ flatpak repair --user
         """
         self.run_cli("repair", "--user")
+
+    def cleanup_orphan(self) -> None:
+        """Uninstall runtimes and extensions no longer used by any installed app.
+
+        .. code-block:: shell-session
+
+            $ flatpak uninstall --unused --noninteractive
+        """
+        self.run_cli("uninstall", "--unused", "--noninteractive")

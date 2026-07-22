@@ -237,7 +237,16 @@ QUERY_OPERATIONS: Final[frozenset[str]] = frozenset(
 
 
 COMMAND_OPERATIONS: Final[frozenset[str]] = frozenset(
-    {"install", "remove", "sync", "cleanup", "upgrade_one", "upgrade_all"},
+    {
+        "install",
+        "remove",
+        "remove_orphan",
+        "sync",
+        "cleanup",
+        "cleanup_orphan",
+        "upgrade_one",
+        "upgrade_all",
+    },
 )
 """Operations that only run a command and produce no inventory to parse."""
 
@@ -270,6 +279,7 @@ capture stays mandatory.
 OPERATION_ARG_PLACEHOLDER: Final[Mapping[str, str]] = {
     "install": "package_id",
     "remove": "package_id",
+    "remove_orphan": "package_id",
     "upgrade_one": "package_id",
 }
 """Placeholder each operation's ``args`` must reference, so a value is actually passed
@@ -308,6 +318,7 @@ refines the results client-side either way, exactly as for the built-in managers
 ALLOWED_ARG_PLACEHOLDERS: Final[Mapping[str, frozenset[str]]] = {
     "install": frozenset({"package_id"}),
     "remove": frozenset({"package_id"}),
+    "remove_orphan": frozenset({"package_id"}),
     "search": frozenset({"query"}) | SEARCH_REFINEMENT_KEYS,
     "upgrade_one": frozenset({"package_id"}),
 }
@@ -1092,6 +1103,19 @@ def _make_remove(spec: OperationSpec) -> Callable[..., str]:
     return remove
 
 
+def _make_remove_orphan(spec: OperationSpec) -> Callable[..., str]:
+    """Build a ``remove_orphan`` method substituting ``{package_id}`` into the args."""
+
+    def remove_orphan(self: PackageManager, package_id: str) -> str:
+        return self.run_cli(
+            *_render_args(spec.args, package_id=package_id),
+            override_cli_path=_op_cli_path(self, spec),
+            sudo=spec.sudo,
+        )
+
+    return remove_orphan
+
+
 def _make_void(spec: OperationSpec) -> Callable[..., None]:
     """Build a ``sync``/``cleanup`` method that runs the CLI and discards its output."""
 
@@ -1174,7 +1198,9 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
             namespace["install"] = _make_install(spec)
         elif op_name == "remove":
             namespace["remove"] = _make_remove(spec)
-        elif op_name in ("sync", "cleanup"):
+        elif op_name == "remove_orphan":
+            namespace["remove_orphan"] = _make_remove_orphan(spec)
+        elif op_name in ("sync", "cleanup", "cleanup_orphan"):
             namespace[op_name] = _make_void(spec)
         elif op_name == "upgrade_one":
             namespace["upgrade_one_cli"] = _make_upgrade_one_cli(spec)

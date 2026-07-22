@@ -30,7 +30,11 @@ import pytest
 from click_extra import ValidationError
 
 import meta_package_manager
-from meta_package_manager.capabilities import Operations, implements
+from meta_package_manager.capabilities import (
+    Operations,
+    implements,
+    implements_method,
+)
 from meta_package_manager.config import (
     config_file_is_trusted,
     register_config_managers,
@@ -121,6 +125,38 @@ def test_parse_definition_returns_dataclass():
     assert set(definition.operations) == {"installed", "install"}
     assert definition.operations["installed"].parse_mode == "regex"
     assert definition.operations["install"].parse_mode == "none"
+
+
+def test_parse_definition_accepts_orphan_operations():
+    """The schema recognizes the ``remove_orphan`` and ``cleanup_orphan`` refinements;
+    ``remove_orphan`` requires its ``{package_id}`` placeholder like ``remove``."""
+    definition = parse_manager_definition(
+        "mytool",
+        {
+            "platforms": ["all_platforms"],
+            "cli_names": ["mytool"],
+            "operations": {
+                "remove_orphan": {"args": ["remove", "--cascade", "{package_id}"]},
+                "cleanup_orphan": {"args": ["autoremove"]},
+            },
+        },
+    )
+    assert set(definition.operations) == {"remove_orphan", "cleanup_orphan"}
+    assert definition.operations["remove_orphan"].parse_mode == "none"
+    assert definition.operations["cleanup_orphan"].parse_mode == "none"
+
+
+def test_parse_definition_remove_orphan_requires_package_id():
+    """``remove_orphan`` targets nothing without ``{package_id}``, so it is rejected."""
+    with pytest.raises(ValidationError, match="package_id"):
+        parse_manager_definition(
+            "mytool",
+            {
+                "platforms": ["all_platforms"],
+                "cli_names": ["mytool"],
+                "operations": {"remove_orphan": {"args": ["remove", "--cascade"]}},
+            },
+        )
 
 
 def test_parse_definition_versionless_catalog_manager():
@@ -634,6 +670,30 @@ def test_factory_operation_cli(monkeypatch):
     monkeypatch.setattr(manager, "which", lambda name: None)
     with pytest.raises(FileNotFoundError, match="urpme not found"):
         manager.remove("jq")
+
+
+def test_factory_orphan_operations(monkeypatch):
+    """A config-defined manager can declare the orphan refinements: ``remove_orphan``
+    substitutes ``{package_id}`` like ``remove``, ``cleanup_orphan`` runs a bare command
+    like ``cleanup``. Both register as implemented capabilities."""
+    manager = build_manager_class(
+        _definition(
+            remove_orphan=OperationSpec(args=("remove", "--recursive", "{package_id}")),
+            cleanup_orphan=OperationSpec(args=("autoremove", "--yes")),
+        ),
+    )()
+    captured: list[tuple[str, ...]] = []
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: captured.append(args) or "",
+    )
+    manager.remove_orphan("jq")
+    assert captured[-1] == ("remove", "--recursive", "jq")
+    manager.cleanup_orphan()
+    assert captured[-1] == ("autoremove", "--yes")
+    assert implements_method(manager, "remove_orphan") is True
+    assert implements_method(manager, "cleanup_orphan") is True
 
 
 def test_factory_operation_sudo(monkeypatch):

@@ -807,10 +807,9 @@ class Homebrew(PackageManager):
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
-        Scrub the cache, including latest version's downloads. Also remove unused
-        dependencies.
-
-        Downloads for all installed formulae and casks will not be deleted.
+        First remove unused dependencies (see :py:meth:`cleanup_orphan`), then scrub
+        the cache, including latest version's downloads. Downloads for all installed
+        formulae and casks will not be deleted.
 
         .. code-block:: shell-session
 
@@ -824,6 +823,12 @@ class Homebrew(PackageManager):
             Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
 
         More doc at: https://docs.brew.sh/Manpage#cleanup
+        """
+        self.cleanup_orphan()
+        self.run_cli("cleanup", "--quiet", "-s", "--prune=all", auto_post_args=False)
+
+    def cleanup_orphan(self) -> None:
+        """Uninstall every formula installed as a dependency and no longer needed.
 
         .. code-block:: shell-session
 
@@ -849,7 +854,6 @@ class Homebrew(PackageManager):
             Uninstalling /usr/local/Cellar/nasm/2.15.05... (29 files, 2.9MB)
         """
         self.run_cli("autoremove", "--quiet", auto_post_args=False)
-        self.run_cli("cleanup", "--quiet", "-s", "--prune=all", auto_post_args=False)
 
 
 class Brew(Homebrew):

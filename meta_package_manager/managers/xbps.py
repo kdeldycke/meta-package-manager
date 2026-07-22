@@ -269,3 +269,17 @@ class XBPS(PackageManager):
             override_cli_path=self.sibling_cli("xbps-remove", same_dir=True),
             sudo=True,
         )
+
+    def cleanup_orphan(self) -> None:
+        """Remove installed packages no longer required by any other, sparing the cache.
+
+        .. code-block:: shell-session
+
+            $ sudo xbps-remove --remove-orphans --yes
+        """
+        self.run_cli(
+            "--remove-orphans",
+            "--yes",
+            override_cli_path=self.sibling_cli("xbps-remove", same_dir=True),
+            sudo=True,
+        )

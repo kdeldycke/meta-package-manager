@@ -80,7 +80,7 @@ from extra_platforms import current_architecture, current_platform, reduce
 from . import __version__, bar_plugin
 from .bar_plugin_renderer import BarPluginRenderer
 from .brewfile import build_brewfile
-from .capabilities import Operations
+from .capabilities import Operations, implements_method
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,
@@ -2060,12 +2060,35 @@ def sync(ctx):
 
 
 @mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
+@option(
+    "--orphans",
+    is_flag=True,
+    default=False,
+    help="Only remove orphaned packages (those nothing depends on anymore) using each "
+    "manager's native system-wide sweep, and skip the cache and temporary-file "
+    "pruning. Managers with no such sweep are skipped.",
+)
 @pass_context
-def cleanup(ctx):
-    """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
+def cleanup(ctx, orphans):
+    """Cleanup local data, temporary artifacts and removes orphaned dependencies.
+
+    With ``--orphans``, narrow the run to the system-wide orphan sweep only (``apt
+    autoremove``, ``brew autoremove``, ``flatpak uninstall --unused``, ...), leaving
+    caches and temporary artifacts untouched. Managers with no native orphan sweep are
+    skipped rather than fully cleaned up.
+    """
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
+    if orphans:
+        # cleanup_orphan is a refinement of cleanup, not a routable Operations member,
+        # so narrow the already-cleanup-capable selection to the managers overriding it.
+        managers = [m for m in managers if implements_method(m, "cleanup_orphan")]
     prime_sudo(ctx, managers)
     announce = _announce_level(ctx)
+
+    operation = (
+        (lambda m: m.cleanup_orphan()) if orphans else (lambda m: m.cleanup())
+    )
+    message = "Remove orphaned packages..." if orphans else "Cleanup..."
 
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✗ trail
     # and a success-count finisher (see collect_from_managers).
@@ -2073,7 +2096,7 @@ def cleanup(ctx):
         "Cleaning up",
         "Cleaned",
         managers,
-        _maintenance_work(announce, "Cleanup...", lambda m: m.cleanup()),
+        _maintenance_work(announce, message, operation),
         report_state=True,
     )
 

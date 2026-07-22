@@ -315,8 +315,17 @@ class APT(PackageManager):
             $ sudo apt --quiet --yes autoremove
             $ sudo apt --quiet --yes clean
         """
-        for command in ("autoremove", "clean"):
-            self.run_cli("--yes", command, sudo=True)
+        self.cleanup_orphan()
+        self.run_cli("--yes", "clean", sudo=True)
+
+    def cleanup_orphan(self) -> None:
+        """Remove every package installed as a dependency and no longer required.
+
+        .. code-block:: shell-session
+
+            $ sudo apt --quiet --yes autoremove
+        """
+        self.run_cli("--yes", "autoremove", sudo=True)
 
 
 class APT_Mint(APT):

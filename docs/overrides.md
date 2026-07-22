@@ -112,14 +112,16 @@ Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every 
 
 **Command operations** run a CLI and need nothing else. Any operation may add `sudo = true` to mark itself privileged, mirroring the escalation flag built-in managers set in code: whether it actually escalates follows the usual policy (the definition's `default_sudo`, then the global `--sudo`/`--no-sudo` flag). Command operations are the usual bearers; a query may also carry it, for the rare tool that gates even its read-only listings behind root (`deb-get`'s upgradable check).
 
-| Operation     | Required placeholder | Maps to                                              |
-| :------------ | :------------------- | :--------------------------------------------------- |
-| `install`     | `{package_id}`       | `mpm install`                                        |
-| `remove`      | `{package_id}`       | `mpm remove`                                         |
-| `upgrade_one` | `{package_id}`       | single-package `mpm upgrade` (needs `installed` too) |
-| `upgrade_all` | none                 | `mpm upgrade --all`                                  |
-| `sync`        | none                 | `mpm sync`                                           |
-| `cleanup`     | none                 | `mpm cleanup`                                        |
+| Operation        | Required placeholder | Maps to                                              |
+| :--------------- | :------------------- | :--------------------------------------------------- |
+| `install`        | `{package_id}`       | `mpm install`                                        |
+| `remove`         | `{package_id}`       | `mpm remove`                                         |
+| `remove_orphan`  | `{package_id}`       | `mpm remove --orphans`                               |
+| `upgrade_one`    | `{package_id}`       | single-package `mpm upgrade` (needs `installed` too) |
+| `upgrade_all`    | none                 | `mpm upgrade --all`                                  |
+| `sync`           | none                 | `mpm sync`                                           |
+| `cleanup`        | none                 | `mpm cleanup`                                        |
+| `cleanup_orphan` | none                 | `mpm cleanup --orphans`                              |
 
 **Query operations** (`installed`, `outdated`, `search`) parse the command's output. `search` may embed the `{query}` placeholder in its `args`; omitting it is also valid for tools with no real search command, whose `search` then lists the whole catalog (`opkg list`, `swupd bundle-list --all`) and relies on `mpm`'s client-side refiltering to narrow the results. Provide *either* a `regex` matched against each output line, *or* a JSON parser (`format = "json"` with a `fields` mapping and optional `list_path`). Both map these recognized fields to a package:
 

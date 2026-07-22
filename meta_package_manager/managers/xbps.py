@@ -151,6 +151,26 @@ class XBPS(PackageManager):
                     latest_version=version,
                 )
 
+    @property
+    def orphans(self) -> Iterator[Package]:
+        """Fetch packages installed as dependencies that nothing requires anymore.
+
+        .. code-block:: shell-session
+
+            $ xbps-query --list-orphans
+            libglvnd-1.7.0_1
+            orc-0.4.34_1
+        """
+        output = self.run_cli(
+            "--list-orphans",
+            override_cli_path=self.sibling_cli("xbps-query", same_dir=True),
+        )
+
+        for token in output.splitlines():
+            if split := self.split_name_version(token.strip()):
+                package_id, version = split
+                yield self.package(id=package_id, installed_version=version)
+
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.

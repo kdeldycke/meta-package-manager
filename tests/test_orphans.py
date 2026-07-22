@@ -28,7 +28,7 @@ from pathlib import Path
 
 import pytest
 
-from meta_package_manager.capabilities import implements_method
+from meta_package_manager.capabilities import Operations, implements, implements_method
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.pool import pool
 
@@ -159,6 +159,142 @@ def test_cleanup_orphan_unsupported_raises_not_implemented(manager_id):
     ``cleanup --orphans`` simply skips it (pacman and zypper do scoped removal only)."""
     with pytest.raises(NotImplementedError):
         pool[manager_id].cleanup_orphan()
+
+
+# orphans query: native read-only listings parsed into packages.
+
+
+_APT_ORPHANS_OUTPUT = """\
+NOTE: This is only a simulation!
+      apt needs root privileges for real execution.
+Reading package lists...
+The following packages will be REMOVED:
+  libx11-dev libxcb1-dev
+0 upgraded, 0 newly installed, 2 to remove and 0 not upgraded.
+Remv libx11-dev [2:1.8.7-1]
+Remv libxcb1-dev [1.15-1]
+"""
+
+_BREW_ORPHANS_OUTPUT = """\
+==> Would autoremove 3 unneeded formulae:
+libpng
+little-cms2
+openjpeg
+Warning: some warning to ignore
+"""
+
+_DNF_ORPHANS_OUTPUT = """\
+libfoo-1.0.2-3.el9.x86_64
+python3-extra-0:3.9.18-3.el9.noarch
+"""
+
+_PACMAN_ORPHANS_OUTPUT = """\
+gtest 1.14.0-1
+libwlroots 0.16.2-2
+"""
+
+_PKG_ORPHANS_OUTPUT = """\
+Checking integrity... done (0 conflicting)
+Deinstallation has been requested for the following 2 packages:
+
+Installed packages to be REMOVED:
+\tlibiconv: 1.17
+\tpcre: 8.45_3
+
+Number of packages to be removed: 2
+"""
+
+_XBPS_ORPHANS_OUTPUT = """\
+libglvnd-1.7.0_1
+orc-0.4.34_1
+"""
+
+_ZYPPER_ORPHANS_OUTPUT = """\
+Loading repository data...
+Reading installed packages...
+S  | Repository | Name    | Version   | Arch
+---+------------+---------+-----------+-------
+i  | @System    | libfoo  | 1.2.3-1.1 | x86_64
+i+ | openSUSE   | libbar  | 0.9-2.4   | noarch
+"""
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "output", "expected"),
+    (
+        (
+            "apt",
+            _APT_ORPHANS_OUTPUT,
+            {("libx11-dev", "2:1.8.7-1"), ("libxcb1-dev", "1.15-1")},
+        ),
+        (
+            "brew",
+            _BREW_ORPHANS_OUTPUT,
+            {("libpng", None), ("little-cms2", None), ("openjpeg", None)},
+        ),
+        (
+            "dnf",
+            _DNF_ORPHANS_OUTPUT,
+            {("libfoo", "1.0.2-3.el9"), ("python3-extra", "3.9.18-3.el9")},
+        ),
+        (
+            "pacman",
+            _PACMAN_ORPHANS_OUTPUT,
+            {("gtest", "1.14.0-1"), ("libwlroots", "0.16.2-2")},
+        ),
+        (
+            "pkg",
+            _PKG_ORPHANS_OUTPUT,
+            {("libiconv", "1.17"), ("pcre", "8.45_3")},
+        ),
+        (
+            "xbps",
+            _XBPS_ORPHANS_OUTPUT,
+            {("libglvnd", "1.7.0_1"), ("orc", "0.4.34_1")},
+        ),
+        (
+            "zypper",
+            _ZYPPER_ORPHANS_OUTPUT,
+            {("libfoo", "1.2.3-1.1"), ("libbar", "0.9-2.4")},
+        ),
+    ),
+)
+def test_orphans_parsing(monkeypatch, manager_id, output, expected):
+    """Each manager's ``orphans`` query parses its native listing into packages.
+
+    The canned outputs mirror the ``shell-session`` samples of the ``orphans``
+    docstrings, so the documented format and the tested format cannot drift apart.
+    """
+    manager = pool[manager_id]
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    monkeypatch.setattr(
+        manager,
+        "sibling_cli",
+        lambda name, **kwargs: Path("/fake/bin") / name,
+    )
+    packages = {
+        (
+            package.id,
+            str(package.installed_version) if package.installed_version else None,
+        )
+        for package in manager.orphans
+    }
+    assert packages == expected
+
+
+@pytest.mark.parametrize("manager_id", ("cask", "npm", "pip", "snap"))
+def test_orphans_query_unsupported(manager_id):
+    """Managers without a native read-only orphan listing (including cask: casks are
+    never installed as dependencies) do not advertise the ``orphans`` operation."""
+    assert implements(pool[manager_id], Operations.orphans) is False
+
+
+@pytest.mark.parametrize(
+    "manager_id",
+    ("apt", "brew", "dnf", "dnf5", "pacman", "pkg", "xbps", "yum", "zypper"),
+)
+def test_orphans_query_supported(manager_id):
+    assert implements(pool[manager_id], Operations.orphans) is True
 
 
 # Capability introspection shared by the CLI selection and the documentation.

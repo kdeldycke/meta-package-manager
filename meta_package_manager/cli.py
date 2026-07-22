@@ -1210,6 +1210,75 @@ def outdated(ctx, exact, plugin_output, query):
         print_summary(package_counts(outdated_data))
 
 
+@mpm.command(short_help="List orphaned packages.", section=EXPLORE)
+@exact_match_option
+@columns_option(columns=column_specs(INSTALLED_COLUMNS))
+@argument("query", type=STRING, required=False)
+@pass_context
+def orphans(ctx, exact, query):
+    """List packages installed as dependencies that no package requires anymore.
+
+    Each manager reports its orphans through its own native read-only query
+    (``pacman --query --deps --unrequired``, ``brew autoremove --dry-run``,
+    ``dnf repoquery --unneeded``, ...): ``mpm`` builds no dependency graph of its
+    own. Review the list here, then act on it with ``mpm cleanup --orphans``.
+
+    With an optional ``QUERY``, restrict the listing to orphaned packages whose ID
+    or name matches it. The match is fuzzy by default (case-insensitive, tokenized);
+    ``--exact`` requires a verbatim match on the package ID or name.
+    """
+    # Build-up a global list of orphaned packages per manager.
+    fields = (
+        "id",
+        "name",
+        "installed_version",
+    )
+
+    managers = list(
+        ctx.obj.selected_managers(implements_operation=Operations.orphans),
+    )
+
+    def fetch(manager: PackageManager) -> tuple[str, dict]:
+        packages = _safe_packages(
+            manager,
+            lambda: _filter_matches(manager.orphans, query, exact=exact),
+            fields,
+            "list orphaned packages",
+        )
+        return _manager_result(manager, packages)
+
+    orphans_data = {
+        manager_id: data
+        for manager_id, data in collect_from_managers(
+            "Listing", "Listed", managers, fetch
+        )
+    }
+
+    # Machine-friendly data rendering.
+    print_serialized_and_exit(ctx, orphans_data)
+
+    # Human-friendly content rendering, highlighting the query matches (if any).
+    highlight_query = _query_highlighter(query)
+    table: list[dict[str, str | None]] = []
+    for manager_id, orphan_pkg in orphans_data.items():
+        table += [
+            {
+                "package_id": highlight_query(info["id"]) if info["id"] else "",
+                "package_name": highlight_query(info["name"]) if info["name"] else "",
+                "manager_id": manager_id,
+                "installed_version": str(info["installed_version"])
+                if info["installed_version"]
+                else "?",
+            }
+            for info in orphan_pkg["packages"]
+        ]
+
+    print_projected_table(ctx, INSTALLED_COLUMNS, table)
+
+    if ctx.obj.summary:
+        print_summary(package_counts(orphans_data))
+
+
 # TODO: make it a --search-strategy=[exact, fuzzy, extended]
 # Add details helps => exact: is case-sensitive, and keep all non-alnum chars
 # fuzzy: query is case-insensitive, stripped-out of non-alnum chars and

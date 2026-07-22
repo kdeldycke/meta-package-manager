@@ -184,6 +184,27 @@ class Pacman(PackageManager):
                     installed_version=installed_version,
                 )
 
+    @property
+    def orphans(self) -> Iterator[Package]:
+        """Fetch packages installed as dependencies that nothing requires anymore.
+
+        Same ``<name> <version>`` listing shape as :py:meth:`installed`, narrowed
+        by ``--deps --unrequired`` (``-Qtd``) to the orphan set.
+
+        .. code-block:: shell-session
+
+            $ pacman --noconfirm --color never --query --deps --unrequired
+            gtest 1.14.0-1
+            libwlroots 0.16.2-2
+        """
+        output = self.run_cli("--query", "--deps", "--unrequired")
+
+        for package in output.splitlines():
+            match = self._INSTALLED_REGEXP.match(package)
+            if match:
+                package_id, installed_version = match.groups()
+                yield self.package(id=package_id, installed_version=installed_version)
+
     @search_capabilities(extended_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.

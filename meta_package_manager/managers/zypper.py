@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import re
 from itertools import groupby
 from operator import itemgetter
 
@@ -253,6 +254,42 @@ class Zypper(PackageManager):
                 description=package.get("description"),
                 latest_version=package["@edition"],
                 installed_version=package["@edition-old"],
+            )
+
+    _ORPHANS_REGEXP = re.compile(
+        r"^i\+?\s+\|[^|]+\|\s*(?P<package_id>\S+)\s*\|\s*(?P<installed_version>\S+)"
+        r"\s*\|\s*(?P<arch>\S+)",
+        re.MULTILINE,
+    )
+    """Extract the installed rows of ``zypper packages``' plain-text table.
+
+    ``packages --unneeded`` has no XML rendering, so unlike the other queries this
+    one parses the human-readable table: ``status | repository | name | version |
+    arch`` columns, keeping only the rows flagged installed (``i`` or ``i+``).
+    """
+
+    @property
+    def orphans(self) -> Iterator[Package]:
+        """Fetch packages installed as dependencies that nothing requires anymore.
+
+        .. code-block:: shell-session
+
+            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+                packages --unneeded
+            Loading repository data...
+            Reading installed packages...
+            S  | Repository | Name    | Version   | Arch
+            ---+------------+---------+-----------+-------
+            i  | @System    | libfoo  | 1.2.3-1.1 | x86_64
+            i+ | openSUSE   | libbar  | 0.9-2.4   | noarch
+        """
+        output = self.run_cli("packages", "--unneeded")
+
+        for match in self._ORPHANS_REGEXP.finditer(output):
+            yield self.package(
+                id=match.group("package_id"),
+                installed_version=match.group("installed_version"),
+                arch=match.group("arch"),
             )
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

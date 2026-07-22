@@ -231,7 +231,7 @@ DEFINITION_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
 
 
 QUERY_OPERATIONS: Final[frozenset[str]] = frozenset(
-    {"installed", "outdated", "search"},
+    {"installed", "outdated", "orphans", "search"},
 )
 """Operations that parse the command's stdout into packages."""
 
@@ -264,6 +264,7 @@ RECOGNIZED_PARSE_FIELDS: Final[frozenset[str]] = frozenset(
 REQUIRED_PARSE_FIELDS: Final[Mapping[str, frozenset[str]]] = {
     "installed": frozenset({"package_id"}),
     "outdated": frozenset({"package_id", "latest_version"}),
+    "orphans": frozenset({"package_id"}),
     "search": frozenset({"package_id"}),
 }
 """Parse fields each query operation must extract to be useful.
@@ -1192,6 +1193,8 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
             namespace["installed"] = _make_query_property(spec, compiled)
         elif op_name == "outdated":
             namespace["outdated"] = _make_query_property(spec, compiled)
+        elif op_name == "orphans":
+            namespace["orphans"] = _make_query_property(spec, compiled)
         elif op_name == "search":
             namespace["search"] = _make_search(spec, compiled)
         elif op_name == "install":

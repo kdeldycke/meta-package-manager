@@ -61,6 +61,7 @@ class Operations(Enum):
 
     installed = "installed"
     outdated = "outdated"
+    orphans = "orphans"
     search = "search"
     install = "install"
     upgrade = "upgrade"

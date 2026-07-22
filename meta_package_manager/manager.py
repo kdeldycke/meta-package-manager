@@ -482,6 +482,21 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             ):
                 yield pkg
 
+    @property
+    def orphans(self) -> Iterator[Package]:
+        """List packages installed as dependencies that nothing requires anymore.
+
+        The read-only counterpart of the ``--orphans`` action flags: where
+        ``mpm cleanup --orphans`` removes the orphans, this query only reports them,
+        through the manager's native listing (``pacman --query --deps --unrequired``,
+        ``brew autoremove --dry-run``, ``dnf repoquery --unneeded``, ...).
+        :program:`mpm` builds no dependency graph: the manager decides what is
+        orphaned.
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        """
+        raise NotImplementedError
+
     @classmethod
     def query_parts(cls, query: str) -> set[str]:
         """Returns a set of all contiguous alphanumeric string segments.

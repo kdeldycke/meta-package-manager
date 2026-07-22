@@ -72,6 +72,10 @@ class APT(PackageManager):
     pre_args = ("--quiet",)
 
     _INSTALLED_REGEXP = re.compile(r"(\S+)\/\S+ (\S+) (\S+) .*")
+    _ORPHANS_REGEXP = re.compile(
+        r"^Remv (?P<package_id>\S+) \[(?P<installed_version>[^\]]+)\]",
+        re.MULTILINE,
+    )
     _OUTDATED_REGEXP = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
     _SEARCH_REGEXP = re.compile(
         r"""
@@ -155,6 +159,38 @@ class APT(PackageManager):
                     latest_version=latest_version,
                     installed_version=installed_version,
                 )
+
+    @property
+    def orphans(self) -> Iterator[Package]:
+        """Fetch packages installed as dependencies that nothing requires anymore.
+
+        ``--simulate`` turns ``autoremove`` into a read-only report of the
+        would-be-removed packages, printed as ``Remv <name> [<version>]`` lines.
+        It needs no root: apt only prints a notice that the run is a simulation.
+
+        .. code-block:: shell-session
+
+            $ apt --quiet autoremove --simulate
+            NOTE: This is only a simulation!
+                  apt needs root privileges for real execution.
+                  Keep also in mind that locking is deactivated,
+                  so don't depend on the relevance to the real current situation!
+            Reading package lists...
+            Building dependency tree...
+            Reading state information...
+            The following packages will be REMOVED:
+              libx11-dev libxcb1-dev
+            0 upgraded, 0 newly installed, 2 to remove and 0 not upgraded.
+            Remv libx11-dev [2:1.8.7-1]
+            Remv libxcb1-dev [1.15-1]
+        """
+        output = self.run_cli("autoremove", "--simulate")
+
+        for match in self._ORPHANS_REGEXP.finditer(output):
+            yield self.package(
+                id=match.group("package_id"),
+                installed_version=match.group("installed_version"),
+            )
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.

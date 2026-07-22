@@ -94,6 +94,13 @@ class PKG(PackageManager):
     pre_args = ("--quiet",)
 
     _INSTALLED_REGEXP = re.compile(r"(\S+) (\S+) (.+)")
+
+    _ORPHANS_REGEXP = re.compile(
+        r"^\s+(?P<package_id>\S+): (?P<installed_version>\S+)$",
+        re.MULTILINE,
+    )
+    """Extract the indented ``<name>: <version>`` lines of ``autoremove``'s
+    removal manifest, skipping the flush-left narration around them."""
     _OUTDATED_REGEXP = re.compile(r"(\S+): (\S+) -> (\S+) .+")
 
     @property
@@ -186,6 +193,33 @@ class PKG(PackageManager):
                     latest_version=latest_version,
                     installed_version=installed_version,
                 )
+
+    @property
+    def orphans(self) -> Iterator[Package]:
+        """Fetch packages installed as dependencies that nothing requires anymore.
+
+        ``--dry-run`` turns ``autoremove`` into a read-only report of the
+        would-be-removed packages.
+
+        .. code-block:: shell-session
+
+            $ pkg --quiet autoremove --dry-run
+            Checking integrity... done (0 conflicting)
+            Deinstallation has been requested for the following 2 packages:
+
+            Installed packages to be REMOVED:
+                libiconv: 1.17
+                pcre: 8.45_3
+
+            Number of packages to be removed: 2
+        """
+        output = self.run_cli("autoremove", "--dry-run")
+
+        for match in self._ORPHANS_REGEXP.finditer(output):
+            yield self.package(
+                id=match.group("package_id"),
+                installed_version=match.group("installed_version"),
+            )
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.

@@ -899,6 +899,34 @@ class Brew(Homebrew):
 
     post_args = ("--formula",)
 
+    @property
+    def orphans(self) -> Iterator[Package]:
+        """Fetch formulae installed as dependencies that nothing requires anymore.
+
+        ``--dry-run`` turns ``autoremove`` into a read-only report of the
+        would-be-removed formulae. Defined on the formula manager only: casks are
+        never installed as dependencies, so they cannot be orphaned. Like
+        ``autoremove`` itself, the call drops the ``--formula`` selector the other
+        formula operations force.
+
+        .. code-block:: shell-session
+
+            $ brew autoremove --dry-run --quiet
+            ==> Would autoremove 3 unneeded formulae:
+            libpng
+            little-cms2
+            openjpeg
+        """
+        output = self.run_cli(
+            "autoremove", "--dry-run", "--quiet", auto_post_args=False
+        )
+
+        for line in output.splitlines():
+            line = line.strip()
+            if not line or line.startswith(("==>", "Warning:")):
+                continue
+            yield self.package(id=line)
+
 
 class Cask(Homebrew):
     """The cask half of Homebrew: pre-built macOS applications.

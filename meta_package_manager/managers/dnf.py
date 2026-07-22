@@ -74,6 +74,18 @@ class DNF(PackageManager):
 
     pre_args: tuple[str, ...] = ("--color=never", "--quiet")
 
+    _ORPHANS_REGEXP = re.compile(
+        r"^(?P<package_id>\S+)-(?:\d+:)?(?P<installed_version>[^-\s]+-[^-\s]+)"
+        r"\.(?P<arch>[^.\s]+)$",
+        re.MULTILINE,
+    )
+    """Split ``repoquery``'s NEVRA lines (``name-[epoch:]version-release.arch``).
+
+    RPM forbids dashes in the version and release fields, so the last two
+    dash-separated fields before the ``.arch`` suffix are unambiguously
+    ``version-release``, dashes in the package name notwithstanding.
+    """
+
     _SEARCH_REGEXP = re.compile(r"(\S+)\.\S+\s:\s(\S+)")
 
     DELIMITER = "___MPM___"
@@ -135,6 +147,25 @@ class DNF(PackageManager):
                 installed_version=installed_version,
                 arch=arch,
                 latest_version=last_version,
+            )
+
+    @property
+    def orphans(self) -> Iterator[Package]:
+        """Fetch packages installed as dependencies that nothing requires anymore.
+
+        .. code-block:: shell-session
+
+            $ dnf --color=never --quiet repoquery --unneeded
+            libfoo-1.0.2-3.el9.x86_64
+            python3-extra-0:3.9.18-3.el9.noarch
+        """
+        output = self.run_cli("repoquery", "--unneeded")
+
+        for match in self._ORPHANS_REGEXP.finditer(output):
+            yield self.package(
+                id=match.group("package_id"),
+                installed_version=match.group("installed_version"),
+                arch=match.group("arch"),
             )
 
     @search_capabilities(extended_support=False, exact_support=False)

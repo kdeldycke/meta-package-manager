@@ -672,6 +672,28 @@ def test_factory_operation_cli(monkeypatch):
         manager.remove("jq")
 
 
+def test_factory_orphans_query(monkeypatch):
+    """A config-defined manager can declare the ``orphans`` read-only query, parsed
+    like ``installed`` and advertised as a routable operation."""
+    manager = build_manager_class(
+        _definition(
+            orphans=OperationSpec(
+                args=("list", "--orphaned"),
+                parse_mode="regex",
+                regex=r"^(?P<package_id>\S+) (?P<installed_version>\S+)$",
+            ),
+        ),
+    )()
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: "libfoo 1.2\nlibbar 3.4",
+    )
+    assert implements(manager, Operations.orphans) is True
+    packages = {(p.id, str(p.installed_version)) for p in manager.orphans}
+    assert packages == {("libfoo", "1.2"), ("libbar", "3.4")}
+
+
 def test_factory_orphan_operations(monkeypatch):
     """A config-defined manager can declare the orphan refinements: ``remove_orphan``
     substitutes ``{package_id}`` like ``remove``, ``cleanup_orphan`` runs a bare command

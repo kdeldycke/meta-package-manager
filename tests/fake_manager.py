@@ -90,6 +90,10 @@ class FakeManager(PackageManager):
             latest_version="1.1.0",
         )
 
+    @property
+    def orphans(self) -> Iterator[Package]:
+        yield self.package(id="fake-orphan-alpha", installed_version="0.9.1")
+
     def search(
         self,
         query: str,

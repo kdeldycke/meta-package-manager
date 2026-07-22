@@ -123,7 +123,7 @@ Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every 
 | `cleanup`        | none                 | `mpm cleanup`                                        |
 | `cleanup_orphan` | none                 | `mpm cleanup --orphans`                              |
 
-**Query operations** (`installed`, `outdated`, `search`) parse the command's output. `search` may embed the `{query}` placeholder in its `args`; omitting it is also valid for tools with no real search command, whose `search` then lists the whole catalog (`opkg list`, `swupd bundle-list --all`) and relies on `mpm`'s client-side refiltering to narrow the results. Provide *either* a `regex` matched against each output line, *or* a JSON parser (`format = "json"` with a `fields` mapping and optional `list_path`). Both map these recognized fields to a package:
+**Query operations** (`installed`, `outdated`, `orphans`, `search`) parse the command's output. `orphans` backs `mpm orphans`, the read-only listing of packages installed as dependencies that nothing requires anymore. `search` may embed the `{query}` placeholder in its `args`; omitting it is also valid for tools with no real search command, whose `search` then lists the whole catalog (`opkg list`, `swupd bundle-list --all`) and relies on `mpm`'s client-side refiltering to narrow the results. Provide *either* a `regex` matched against each output line, *or* a JSON parser (`format = "json"` with a `fields` mapping and optional `list_path`). Both map these recognized fields to a package:
 
 - `package_id` (always required),
 - `installed_version` (optional: some tools track no per-package version, like `swupd`'s Clear Linux bundles),

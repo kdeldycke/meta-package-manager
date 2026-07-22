@@ -428,7 +428,7 @@ The shared-lock families that make within-family concurrency unsafe (`brew`/`cas
 
 Trail conventions:
 
-- Two shapes: **package-keyed** (`✓ foo installed with brew`, for `install`/`remove`/`upgrade <packages>`/`restore`) and **manager-keyed** (`✓ brew`, `✓ Synced N/M managers`, for `sync`/`cleanup`/`upgrade --all`).
+- Two shapes: **package-keyed** (`✓ foo installed with brew`, for `install`/`remove`/`upgrade <packages>`/`restore`) and **manager-keyed** (`✓ brew`, `✓ Synced N/M managers`, for `sync`/`cleanup`/`upgrade --all`). `cleanup` suffixes each manager line with the categories dispatched to it (`✓ brew (cache)`), since the per-manager subsets differ.
 - The finisher counts **per (package, manager) attempt**, matching the trail lines: a package acted on by two managers is `2/2`, not `1/1`.
 - A `✗` line is TTY-only, so failures also emit a `critical: Could not ...` (shown everywhere) as the durable record and the non-zero-exit rationale. Keep both despite the overlap on a TTY.
 

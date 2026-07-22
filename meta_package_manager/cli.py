@@ -2157,26 +2157,27 @@ def _cleanup_steps(
     manager: PackageManager,
     selected: frozenset[str],
     explicit_orphans: bool,
-) -> list[Callable[[], None]]:
-    """The cleanup steps ``manager`` runs for the ``selected`` categories.
+) -> list[tuple[str, Callable[[], None]]]:
+    """The ``(category, step)`` pairs ``manager`` runs for the ``selected`` categories.
 
     A manager runs exactly the category methods it natively overrides, in category
-    order: the full selection reproduces the base ``cleanup`` composer. The
-    synthesized orphan sweep engages only on an explicit positive ``--orphans``
-    (``explicit_orphans``): a skip flag subtracts from the native categories and
-    must never make a manager remove packages its plain ``cleanup`` would have
-    left alone.
+    order. The synthesized orphan sweep engages only on an explicit positive
+    ``--orphans`` (``explicit_orphans``): a skip flag subtracts from the native
+    categories and must never make a manager remove packages its plain ``cleanup``
+    would have left alone. The category names feed the per-manager narration and
+    the ``✓``/``✗`` trail labels, so the run discloses which categories each
+    manager was dispatched.
     """
-    steps: list[Callable[[], None]] = []
+    steps: list[tuple[str, Callable[[], None]]] = []
     if "orphans" in selected and (
         implements_method(manager, "cleanup_orphan")
         or (explicit_orphans and cleanup_orphan_is_synthesized(manager))
     ):
-        steps.append(manager.cleanup_orphan)
+        steps.append(("orphans", manager.cleanup_orphan))
     if "cache" in selected and implements_method(manager, "cleanup_cache"):
-        steps.append(manager.cleanup_cache)
+        steps.append(("cache", manager.cleanup_cache))
     if "repair" in selected and implements_method(manager, "cleanup_repair"):
-        steps.append(manager.cleanup_repair)
+        steps.append(("repair", manager.cleanup_repair))
     return steps
 
 
@@ -2259,19 +2260,25 @@ def cleanup(ctx, orphans, cache, repair):
     # skipped by the non-destructive default and reached through --orphans.
     managers = [m for m in managers if _cleanup_steps(m, selected, explicit_orphans)]
 
-    def operation(m: PackageManager) -> object:
-        for step in _cleanup_steps(m, selected, explicit_orphans):
-            step()
-        return None
-
-    if positives or skips:
-        ordered = ", ".join(c for c in CLEANUP_CATEGORIES if c in selected)
-        message = f"Cleanup ({ordered})..."
-    else:
-        message = "Cleanup..."
-
     prime_sudo(ctx, managers)
     announce = _announce_level(ctx)
+
+    def cleanup_work(manager: PackageManager) -> tuple[str, dict]:
+        # A bespoke variant of _maintenance_work: managers run different category
+        # subsets, so both the narration and the trail label disclose each
+        # manager's own dispatch (`✓ brew (cache)`).
+        steps = _cleanup_steps(manager, selected, explicit_orphans)
+        categories = ", ".join(category for category, _step in steps)
+        logging.log(
+            announce, f"Cleanup ({categories})...", extra={"label": manager.id}
+        )
+        before = len(manager.cli_errors)
+        for _category, step in steps:
+            step()
+        return manager.id, {
+            "errors": manager.cli_errors[before:],
+            "label": f"{theme().invoked_command(manager.id)} ({categories})",
+        }
 
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✗ trail
     # and a success-count finisher (see collect_from_managers).
@@ -2279,7 +2286,7 @@ def cleanup(ctx, orphans, cache, repair):
         "Cleaning up",
         "Cleaned",
         managers,
-        _maintenance_work(announce, message, operation),
+        cleanup_work,
         report_state=True,
     )
 

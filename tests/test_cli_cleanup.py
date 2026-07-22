@@ -30,4 +30,4 @@ def subcmd():
 class TestCleanup(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
-        yield from (f":{mid}: Cleanup..." in stderr,)
+        yield from (f":{mid}: Cleanup" in stderr,)

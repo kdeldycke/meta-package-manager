@@ -625,6 +625,16 @@ def test_cleanup_skip_orphans_keeps_native_categories(invoke, monkeypatch):
     assert fake.calls == ["cleanup_cache"]
 
 
+def test_cleanup_narration_names_categories(invoke, monkeypatch):
+    """The per-manager narration names the categories dispatched to it, matching
+    the ``✓``/``✗`` trail labels."""
+    fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
+    result = invoke("--verbosity", "DEBUG", "cleanup", "--orphans", "--cache")
+    assert result.exit_code == 0
+    assert "Cleanup (orphans, cache)..." in result.stderr
+    assert fake.calls == ["cleanup_orphan", "cleanup_cache"]
+
+
 def test_cleanup_all_categories_skipped_errors(invoke, monkeypatch):
     """Skipping every default category is a usage error, not a silent no-op:
     ``--skip-orphans`` is not needed, as orphans is not in the default set."""

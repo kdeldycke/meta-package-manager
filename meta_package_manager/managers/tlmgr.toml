@@ -78,6 +78,11 @@ sudo = true
 args = ["backup", "--clean", "--all"]
 sudo = true
 
+# `check all` runs every consistency check (files, dependencies, executes,
+# runfiles), reporting problems and exiting non-zero. Read-only, so no sudo.
+[mpm.managers.tlmgr.operations.doctor]
+args = ["check", "all"]
+
 # Output samples locking the version probe and the declared parsers, derived
 # from the upstream tool's own source code or documentation. Consumed by
 # tests/test_manager_definition.py; ignored by mpm's loader.

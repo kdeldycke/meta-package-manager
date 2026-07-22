@@ -681,3 +681,16 @@ class Pip(PackageManager):
             $ python -m pip --no-color cache purge
         """
         self.run_cli("cache", "purge")
+
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``check`` verifies that installed packages have compatible dependencies,
+        reporting conflicts on ``<stdout>`` and exiting non-zero on any.
+
+        .. code-block:: shell-session
+
+            $ python -m pip --no-color check
+            No broken requirements found.
+        """
+        return self.build_cli("check")

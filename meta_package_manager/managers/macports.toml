@@ -63,6 +63,11 @@ args = ["sync"]
 [mpm.managers.macports.operations.cleanup_cache]
 args = ["clean", "--all", "installed"]
 
+# `diagnose --quiet` checks for common problems and only prints errors, exiting
+# non-zero when any is found. Read-only, so no sudo.
+[mpm.managers.macports.operations.doctor]
+args = ["diagnose", "--quiet"]
+
 # Output samples locking the version probe and the declared parsers, derived
 # from the upstream tool's own source code or documentation. Consumed by
 # tests/test_manager_definition.py; ignored by mpm's loader.

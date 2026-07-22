@@ -750,6 +750,51 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Returns the complete CLI running the manager's native self-diagnosis.
+
+        The invocation must be read-only (``brew doctor``, ``pip check``,
+        ``pacman --database --check``, ...): :py:meth:`doctor` runs it, never mpm's
+        mutating machinery. The surveyed doctor verbs share one convention this
+        contract leans on: a non-zero exit code means problems were found.
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        """
+        raise NotImplementedError
+
+    def doctor(self) -> tuple[bool, str]:
+        """Run the native self-diagnosis, returning ``(healthy, report)``.
+
+        Runs :py:meth:`doctor_cli` and interprets the outcome with a contract of
+        its own, distinct from every other operation:
+
+        - **Health is the exit code alone.** :py:meth:`run`'s failure gate
+          tolerates a non-zero exit with a silent ``<stderr>`` (a benign status
+          for query parsers), but for a diagnosis that exit *is* the verdict:
+          ``pip check`` reports its conflicts on ``<stdout>`` only and would
+          read as healthy under the gate.
+        - **The report merges both streams.** The tools split their findings
+          across them (``brew doctor`` warns on ``<stderr>``), and the report is
+          relayed verbatim to the user: there is nothing to parse.
+        - **The diagnosis is not an error.** The failure-gate entry an unhealthy
+          exit may have accumulated is reclaimed from
+          :py:attr:`~meta_package_manager.execution.CLIExecutor.cli_errors`, so
+          the end-of-run error summary is not inflated by a verdict ``mpm
+          doctor`` already reports on its own. A run that never completed
+          (timeout, interrupt, missing binary) keeps its entry: that is a
+          genuine plumbing error, and the manager reports unhealthy.
+        """
+        cli = self.doctor_cli()
+        before = len(self.cli_errors)
+        output = self.run(cli, extra_env=self.extra_env)
+        last = self._last_run
+        if last is None:
+            return False, output
+        code, _output, error = last
+        del self.cli_errors[before:]
+        report = "\n".join(part for part in (output, error) if part)
+        return code == 0, report
+
     def discover_projects(self) -> Iterator[Path]:
         """Locate project trees this manager governs by scanning the filesystem.
 

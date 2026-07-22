@@ -285,6 +285,18 @@ class DNF(PackageManager):
         """
         self.run_cli("clean", "all")
 
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``check`` examines the rpm database for problems (duplicates, obsoleted
+        packages, unsatisfied dependencies) and exits non-zero when any is found.
+
+        .. code-block:: shell-session
+
+            $ dnf --color=never --quiet check
+        """
+        return self.build_cli("check")
+
 
 class DNF5(DNF):
     """The ``dnf5`` rewrite of DNF, Fedora's reference package manager since

@@ -2292,6 +2292,64 @@ def cleanup(ctx, orphans, cache, repair):
 
 
 @mpm.command(
+    aliases=["check", "diagnose"],
+    short_help="Diagnose managers health.",
+    section=MAINTENANCE,
+)
+@pass_context
+def doctor(ctx):
+    """Run each manager's native self-diagnosis and relay its report.
+
+    Read-only: nothing is modified. Each manager runs its own diagnostic verb
+    (``brew doctor``, ``pip check``, ``pacman --database --check``, ``npm doctor``,
+    ...), its health is read from that command's exit code, and its report — the
+    diagnosis being the product, not something ``mpm`` can parse — is relayed
+    verbatim to ``<stdout>``, one section per manager with findings.
+
+    The trail marks each manager ``✓`` (healthy) or ``✗`` (problems found), and the
+    run exits non-zero when any manager reports problems, so the command can gate a
+    CI job. ``-0``/``--zero-exit`` keeps the exit code at ``0``. Managers with no
+    diagnostic verb are skipped.
+    """
+    managers = list(ctx.obj.selected_managers(implements_operation=Operations.doctor))
+    prime_sudo(ctx, managers)
+    announce = _announce_level(ctx)
+
+    def doctor_work(manager: PackageManager) -> tuple[str, dict]:
+        logging.log(announce, "Diagnose...", extra={"label": manager.id})
+        healthy, report = manager.doctor()
+        return manager.id, {"failed": not healthy, "report": report}
+
+    # The diagnosis is independent per manager, so fan out concurrently with a
+    # ✓/✗ trail and a success-count finisher; reports are relayed afterwards, in
+    # manager order, so concurrent runs never interleave their output.
+    results = collect_from_managers(
+        "Diagnosing", "Diagnosed", managers, doctor_work, report_state=True
+    )
+
+    unhealthy = []
+    for manager_id, data in results:
+        # A skipped manager leaves its input-order slot empty.
+        if not manager_id:
+            continue
+        if data.get("failed"):
+            unhealthy.append(manager_id)
+        report = (data.get("report") or "").strip()
+        if report:
+            echo(f"{theme().invoked_command(manager_id)}:")
+            echo(report)
+            echo()
+
+    if unhealthy:
+        logging.critical(
+            f"{len(unhealthy)} managers reported problems "
+            f"({', '.join(sorted(unhealthy))})."
+        )
+        if not ctx.meta.get(ZERO_EXIT):
+            ctx.exit(1)
+
+
+@mpm.command(
     aliases=["backup", "lock", "freeze", "snapshot"],
     short_help="Snapshot installed packages to a TOML manifest or a Brewfile.",
     section=SNAPSHOTS,

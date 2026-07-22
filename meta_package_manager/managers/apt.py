@@ -361,6 +361,23 @@ class APT(PackageManager):
         """
         self.run_cli("--yes", "clean", sudo=True)
 
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``apt`` itself has no stable check verb, so the diagnosis goes through the
+        ``apt-get`` sibling: ``check`` verifies the package cache and dependency
+        integrity, prints the broken state and exits non-zero on problems. Runs
+        unprivileged.
+
+        .. code-block:: shell-session
+
+            $ apt-get --quiet check
+        """
+        return self.build_cli(
+            "check",
+            override_cli_path=self.sibling_cli("apt-get"),
+        )
+
 
 class APT_Mint(APT):
     """Linux Mint's ``apt``, a wrapper script that shadows Debian's ``apt``.

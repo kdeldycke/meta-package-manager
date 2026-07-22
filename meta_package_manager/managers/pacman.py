@@ -316,6 +316,18 @@ class Pacman(PackageManager):
         """
         self.run_cli("--sync", "--clean", "--clean", sudo=True)
 
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``--database --check`` (``-Dk``) verifies the consistency of the local
+        package database, silent and exit-``0`` when everything is fine.
+
+        .. code-block:: shell-session
+
+            $ pacman --noconfirm --color never --database --check
+        """
+        return self.build_cli("--database", "--check")
+
 
 class Pacaur(Pacman):
     """AUR helper wrapping ``pacman``, driven through the ``pacaur`` binary.

@@ -434,7 +434,7 @@ Trail conventions:
 
 ### Exit codes
 
-Action commands (`install`, `remove`, `upgrade <packages>`, `restore`) collect per-package failures and exit non-zero with a `critical:` summary. `-0`/`--zero-exit` opts out of that gate (see `exit_on_failures` in `cli.py`): the summary still prints but the exit stays `0`; usage and configuration errors keep exiting `2` regardless. Maintenance commands (`sync`, `cleanup`, `upgrade --all`) are best-effort: they mark a failed manager `✗` but stay exit-`0`.
+Action commands (`install`, `remove`, `upgrade <packages>`, `restore`) collect per-package failures and exit non-zero with a `critical:` summary. `-0`/`--zero-exit` opts out of that gate (see `exit_on_failures` in `cli.py`): the summary still prints but the exit stays `0`; usage and configuration errors keep exiting `2` regardless. Maintenance commands (`sync`, `cleanup`, `upgrade --all`) are best-effort: they mark a failed manager `✗` but stay exit-`0`. `doctor` is the third contract: read-only, it relays each manager's native diagnosis verbatim to stdout (the one deliberate exception to the raw-output-at-`DEBUG` rule, as the report is the product and cannot be parsed), reads health from the diagnostic command's exit code alone, and exits `1` when any manager reports problems (`-0` opts out).
 
 ## Testing guidelines
 

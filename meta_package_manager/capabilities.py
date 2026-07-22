@@ -69,6 +69,7 @@ class Operations(Enum):
     remove = "remove"
     sync = "sync"
     cleanup = "cleanup"
+    doctor = "doctor"
 
     def __str__(self) -> str:
         """Render as the bare operation name (``outdated``), not the enum repr."""
@@ -107,6 +108,11 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
     # support of the operation.
     elif op == Operations.cleanup:
         method_deps = ({"cleanup_orphan"}, {"cleanup_cache"}, {"cleanup_repair"})
+
+    # For `doctor`: managers declare the diagnostic invocation only; the base
+    # `doctor()` orchestrator runs it and interprets exit code and streams.
+    elif op == Operations.doctor:
+        method_deps = ({"doctor_cli"},)
 
     # If none of the classes in the inheritance hierarchy up to the base one
     # implements the operation, then we can be certain the manager doesn't implement

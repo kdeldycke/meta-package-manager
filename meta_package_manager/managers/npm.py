@@ -398,3 +398,17 @@ class NPM(PackageManager):
                 cache clean --force
         """
         self.run_cli("cache", "clean", "--force")
+
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``doctor`` checks the registry connectivity, the node and npm versions,
+        the ownership of the global folders and the cache checksums, exiting
+        non-zero when any check fails.
+
+        .. code-block:: shell-session
+
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+                doctor
+        """
+        return self.build_cli("doctor")

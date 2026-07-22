@@ -245,6 +245,7 @@ COMMAND_OPERATIONS: Final[frozenset[str]] = frozenset(
         "cleanup_orphan",
         "cleanup_cache",
         "cleanup_repair",
+        "doctor",
         "upgrade_one",
         "upgrade_all",
     },
@@ -1160,6 +1161,19 @@ def _make_upgrade_one_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]
     return upgrade_one_cli
 
 
+def _make_doctor_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
+    """Build a ``doctor_cli`` returning the read-only diagnostic command line."""
+
+    def doctor_cli(self: PackageManager) -> tuple[str, ...]:
+        return self.build_cli(
+            *spec.args,
+            override_cli_path=_op_cli_path(self, spec),
+            sudo=spec.sudo,
+        )
+
+    return doctor_cli
+
+
 def _make_upgrade_all_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
     """Build an ``upgrade_all_cli`` returning the upgrade-everything command line."""
 
@@ -1224,6 +1238,8 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
             "cleanup_repair",
         ):
             namespace[op_name] = _make_void(spec)
+        elif op_name == "doctor":
+            namespace["doctor_cli"] = _make_doctor_cli(spec)
         elif op_name == "upgrade_one":
             namespace["upgrade_one_cli"] = _make_upgrade_one_cli(spec)
         elif op_name == "upgrade_all":

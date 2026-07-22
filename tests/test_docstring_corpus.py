@@ -249,6 +249,8 @@ MUTATION_MEMBERS = (
     "cleanup_cache",
     "cleanup_orphan",
     "cleanup_repair",
+    # Not a mutation, but its docstring documents the exact CLI it builds too.
+    "doctor_cli",
     "install",
     "remove",
     "remove_orphan",
@@ -440,6 +442,8 @@ def test_documented_command_matches_construction(
         "cleanup_repair",
     ):
         getattr(manager, member)()
+    elif member == "doctor_cli":
+        constructed.append(manager.doctor_cli())
     elif member == "upgrade_all_cli":
         constructed.append(manager.upgrade_all_cli())
     else:  # upgrade_one_cli.

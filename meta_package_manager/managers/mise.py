@@ -250,3 +250,12 @@ class Mise(PackageManager):
             $ mise cache clear
         """
         self.run_cli("cache", "clear")
+
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        .. code-block:: shell-session
+
+            $ mise doctor
+        """
+        return self.build_cli("doctor")

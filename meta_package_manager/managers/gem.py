@@ -291,3 +291,15 @@ class Gem(PackageManager):
             Clean up complete
         """
         self.run_cli("cleanup")
+
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``check`` verifies the integrity of every installed gem, exiting non-zero
+        on problems.
+
+        .. code-block:: shell-session
+
+            $ gem check --quiet
+        """
+        return self.build_cli("check")

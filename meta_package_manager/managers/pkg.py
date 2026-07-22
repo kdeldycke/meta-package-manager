@@ -535,6 +535,18 @@ class PKG(PackageManager):
         """
         self.run_cli("clean", "--yes", "--all")
 
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``check --checksums`` validates every installed package's files against
+        their recorded checksums, exiting non-zero on mismatches.
+
+        .. code-block:: shell-session
+
+            $ pkg --quiet check --checksums --all
+        """
+        return self.build_cli("check", "--checksums", "--all")
+
 
 class Ports(PackageManager):
     """FreeBSD ports tree: the source-build workflow rooted at ``/usr/ports``.

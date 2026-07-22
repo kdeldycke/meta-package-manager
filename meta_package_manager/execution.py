@@ -539,6 +539,18 @@ class CLIExecutor:
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package manager."""
 
+    _last_run: tuple[int, str, str] | None = None
+    """``(exit code, <stdout>, <stderr>)`` of the most recent completed :py:meth:`run`.
+
+    ``None`` until a run completes, and reset to ``None`` at the start of each run, so
+    a spawn that never finished (timeout, interrupt, missing binary) leaves no stale
+    result behind. Consumed by
+    :py:meth:`meta_package_manager.manager.PackageManager.doctor`, whose health verdict
+    is the exit code alone and whose report merges both streams: the return value of
+    :py:meth:`run` carries neither. Safe to read right after the call under mpm's
+    dispatch model, where a manager never runs two of its own invocations at once.
+    """
+
     run_cache: dict[tuple, tuple[int, str, str]] | None = None
     """Optional cache that de-duplicates identical CLI runs within a lock family.
 
@@ -929,6 +941,9 @@ class CLIExecutor:
             under a patched :py:attr:`stop_on_error`, treat every non-zero exit
             as a failure. See the failure gate below for details.
         """
+        # Reset the last-run snapshot so an early return (timeout, interrupt,
+        # missing binary) cannot leave a stale result for the consumers below.
+        self._last_run = None
         # Casting to string helps serialize Path and Version objects.
         clean_args = args_cleanup(*args)
         # Enforce the release-age cooldown by injecting the manager's dedicated
@@ -1081,6 +1096,10 @@ class CLIExecutor:
             error = dedent(strip_ansi(error).strip())
         if output:
             output = dedent(strip_ansi(output).strip())
+
+        # Snapshot the completed run for consumers needing more than the returned
+        # <stdout>: the exit code and <stderr> (see the attribute docstring).
+        self._last_run = (code, output, error)
 
         # Detect a failed run.
         #

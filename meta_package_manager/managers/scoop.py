@@ -335,3 +335,17 @@ class Scoop(PackageManager):
             Everything is shiny now!
         """
         self.run_cli("cleanup", "--all", "--cache")
+
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        .. caution::
+            ``checkup`` prints its suggestions but is optimistic with its exit
+            code, so an unhealthy setup may still report as ``✓``: the relayed
+            report is the signal to read.
+
+        .. code-block:: pwsh-session
+
+            > scoop checkup
+        """
+        return self.build_cli("checkup")

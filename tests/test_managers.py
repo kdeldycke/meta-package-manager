@@ -355,6 +355,7 @@ CANONICAL_ATTRS = (
     "windows_creation_flags",
     "windows_processes_to_cleanup",
     "cli_errors",
+    "_last_run",
     "run_cache",
     # Parsing constants.
     "_NAME_VERSION_REGEXP",

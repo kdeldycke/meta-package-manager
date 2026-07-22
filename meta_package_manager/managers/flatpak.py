@@ -268,3 +268,15 @@ class Flatpak(PackageManager):
             $ flatpak repair --user
         """
         self.run_cli("repair", "--user")
+
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        The read-only twin of :py:meth:`cleanup_repair`: ``--dry-run`` reports
+        what a repair of the per-user installation would fix without touching it.
+
+        .. code-block:: shell-session
+
+            $ flatpak repair --user --dry-run
+        """
+        return self.build_cli("repair", "--user", "--dry-run")

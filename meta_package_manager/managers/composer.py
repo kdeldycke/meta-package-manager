@@ -251,3 +251,15 @@ class Composer(PackageManager):
             $ composer global --no-ansi clear-cache
         """
         self.run_cli("clear-cache")
+
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``diagnose`` checks the platform, the connectivity to the repositories
+        and the composer setup, exiting non-zero on failures.
+
+        .. code-block:: shell-session
+
+            $ composer global --no-ansi diagnose
+        """
+        return self.build_cli("diagnose")

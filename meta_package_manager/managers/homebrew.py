@@ -852,6 +852,20 @@ class Homebrew(PackageManager):
         """
         self.run_cli("cleanup", "--quiet", "-s", "--prune=all", auto_post_args=False)
 
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``brew doctor`` exits non-zero when it finds anything to warn about, and
+        prints its findings on ``<stderr>``. Like ``autoremove`` and ``cleanup``,
+        it takes no ``--formula``/``--cask`` selector.
+
+        .. code-block:: shell-session
+
+            $ brew doctor
+            Your system is ready to brew.
+        """
+        return self.build_cli("doctor", auto_post_args=False)
+
 
 class Brew(Homebrew):
     """The formula half of Homebrew: command-line tools built from recipes.

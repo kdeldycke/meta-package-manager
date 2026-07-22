@@ -302,3 +302,18 @@ class XBPS(PackageManager):
             override_cli_path=self.sibling_cli("xbps-remove", same_dir=True),
             sudo=True,
         )
+
+    def doctor_cli(self) -> tuple[str, ...]:
+        """Generates the CLI running the native self-diagnosis.
+
+        ``xbps-pkgdb --all`` checks the integrity of the package database and of
+        every installed package, exiting non-zero on errors.
+
+        .. code-block:: shell-session
+
+            $ xbps-pkgdb --all
+        """
+        return self.build_cli(
+            "--all",
+            override_cli_path=self.sibling_cli("xbps-pkgdb", same_dir=True),
+        )

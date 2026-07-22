@@ -123,6 +123,7 @@ Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every 
 | `cleanup_orphan` | none                 | `mpm cleanup --orphans`                              |
 | `cleanup_cache`  | none                 | `mpm cleanup --cache`                                |
 | `cleanup_repair` | none                 | `mpm cleanup --repair`                               |
+| `doctor`         | none                 | `mpm doctor` (read-only diagnosis)                   |
 
 There is no `cleanup` operation to declare: a plain `mpm cleanup` runs the declared `cleanup_cache` and `cleanup_repair` categories, and `mpm cleanup --orphans` the declared `cleanup_orphan`, so a definition carrying the old monolithic `cleanup` key is rejected with an error naming the three category keys. Declare `cleanup_cache` for a cache-pruning command, `cleanup_orphan` for an orphan sweep.
 

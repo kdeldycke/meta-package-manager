@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+import logging
+import os
 import re
 
 from extra_platforms import ALL_PLATFORMS
@@ -211,6 +213,15 @@ class UV(UVBase):
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
+        .. warning::
+            Skipped when ``mpm`` itself was launched by ``uv run`` or ``uvx``: the
+            parent ``uv`` process keeps a lock on its cache for as long as its child
+            lives, so each cache command below would wait on its own ancestor for
+            ``UV_LOCK_TIMEOUT`` (300 seconds by default), fail, and stall the whole
+            cleanup for ten minutes. ``uv`` advertises itself to its children
+            through the ``UV`` environment variable, which is the marker detected
+            here.
+
         .. code-block:: shell-session
 
             $ uv --color never --no-progress cache clean
@@ -222,6 +233,12 @@ class UV(UVBase):
             $ uv --color never --no-progress cache prune
             No cache found at: /Users/kde/.cache/uv
         """
+        if os.environ.get("UV"):
+            logging.warning(
+                "mpm runs under uv, which locks its own cache: skip cache cleanup.",
+                extra={"label": self.id},
+            )
+            return
         self.run_cli("cache", "clean")
         self.run_cli("cache", "prune")
 

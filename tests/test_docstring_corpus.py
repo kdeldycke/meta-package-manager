@@ -381,6 +381,9 @@ def test_documented_command_matches_construction(
     monkeypatch.setattr(
         manager, "cli_path", Path("/usr/bin") / manager.cli_names[0], raising=False
     )
+    # Neutralize the launcher marker: run under `uv run pytest`, the UV variable
+    # would trip uv's launched-by-uv guard and skip its documented cache commands.
+    monkeypatch.delenv("UV", raising=False)
 
     constructed = []
 

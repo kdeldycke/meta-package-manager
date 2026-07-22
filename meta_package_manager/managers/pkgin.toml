@@ -73,7 +73,7 @@ sudo = true
 
 # Empties the download cache (/var/db/pkgin/cache). Orphan removal is the separate
 # `pkgin autoremove`, which -y does not auto-confirm, so it is not mapped.
-[mpm.managers.pkgin.operations.cleanup]
+[mpm.managers.pkgin.operations.cleanup_cache]
 args = ["clean"]
 sudo = true
 

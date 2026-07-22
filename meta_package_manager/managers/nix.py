@@ -204,7 +204,7 @@ class Nix(PackageManager):
             override_cli_path=self.sibling_cli("nix-channel", same_dir=True),
         )
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Remove old generations and garbage-collect the Nix store.
 
         .. code-block:: shell-session

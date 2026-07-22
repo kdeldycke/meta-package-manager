@@ -226,7 +226,7 @@ class APK(PackageManager):
         """
         self.run_cli("update", sudo=True)
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Drop the local package cache.
 
         .. code-block:: shell-session

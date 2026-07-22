@@ -343,17 +343,6 @@ class APT(PackageManager):
         """
         self.run_cli("--yes", "update", sudo=True)
 
-    def cleanup(self) -> None:
-        """Removes things we don't need anymore.
-
-        .. code-block:: shell-session
-
-            $ sudo apt --quiet --yes autoremove
-            $ sudo apt --quiet --yes clean
-        """
-        self.cleanup_orphan()
-        self.run_cli("--yes", "clean", sudo=True)
-
     def cleanup_orphan(self) -> None:
         """Remove every package installed as a dependency and no longer required.
 
@@ -362,6 +351,15 @@ class APT(PackageManager):
             $ sudo apt --quiet --yes autoremove
         """
         self.run_cli("--yes", "autoremove", sudo=True)
+
+    def cleanup_cache(self) -> None:
+        """Clear out the local repository of retrieved package files.
+
+        .. code-block:: shell-session
+
+            $ sudo apt --quiet --yes clean
+        """
+        self.run_cli("--yes", "clean", sudo=True)
 
 
 class APT_Mint(APT):

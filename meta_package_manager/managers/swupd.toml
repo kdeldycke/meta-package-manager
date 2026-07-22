@@ -51,7 +51,7 @@ args = ["update", "--assume=yes"]
 sudo = true
 
 # Removes cached update content from the state directory.
-[mpm.managers.swupd.operations.cleanup]
+[mpm.managers.swupd.operations.cleanup_cache]
 args = ["clean"]
 sudo = true
 

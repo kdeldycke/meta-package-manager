@@ -389,7 +389,7 @@ class NPM(PackageManager):
         """
         return self.run_cli("uninstall", package_id, sudo=True)
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
         .. code-block:: shell-session

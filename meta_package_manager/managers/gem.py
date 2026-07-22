@@ -273,7 +273,7 @@ class Gem(PackageManager):
         """
         self.run_cli("sources", "--update")
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
         .. code-block:: shell-session

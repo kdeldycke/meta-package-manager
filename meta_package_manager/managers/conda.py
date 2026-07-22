@@ -333,7 +333,7 @@ class Conda(PackageManager):
         """
         return self.run_cli("remove", "--yes", package_id)
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Removes tarballs, unused packages and index caches.
 
         .. code-block:: shell-session

@@ -259,7 +259,7 @@ class Guix(PackageManager):
         """
         self.run_cli("pull")
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Collect garbage in the store.
 
         .. code-block:: shell-session

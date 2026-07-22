@@ -248,8 +248,17 @@ class Flatpak(PackageManager):
         """
         return self.run_cli("uninstall", "--noninteractive", package_id)
 
-    def cleanup(self) -> None:
-        """Removes things we don't need anymore.
+    def cleanup_orphan(self) -> None:
+        """Uninstall runtimes and extensions no longer used by any installed app.
+
+        .. code-block:: shell-session
+
+            $ flatpak uninstall --unused --noninteractive
+        """
+        self.run_cli("uninstall", "--unused", "--noninteractive")
+
+    def cleanup_repair(self) -> None:
+        """Verify and repair the per-user installation.
 
         See:
         https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-repair
@@ -259,12 +268,3 @@ class Flatpak(PackageManager):
             $ flatpak repair --user
         """
         self.run_cli("repair", "--user")
-
-    def cleanup_orphan(self) -> None:
-        """Uninstall runtimes and extensions no longer used by any installed app.
-
-        .. code-block:: shell-session
-
-            $ flatpak uninstall --unused --noninteractive
-        """
-        self.run_cli("uninstall", "--unused", "--noninteractive")

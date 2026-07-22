@@ -242,7 +242,7 @@ class Mise(PackageManager):
         """
         self.run_cli("plugins", "update")
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Clear ``mise``'s download and metadata caches.
 
         .. code-block:: shell-session

@@ -197,7 +197,7 @@ class Deb_Get(PackageManager):
         """
         self.run_cli("update", sudo=True)
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Remove cached downloads.
 
         .. code-block:: shell-session

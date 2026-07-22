@@ -60,7 +60,7 @@ args = ["--update"]
 sudo = true
 
 # Purges the package download cache.
-[mpm.managers.slapt-get.operations.cleanup]
+[mpm.managers.slapt-get.operations.cleanup_cache]
 args = ["--clean"]
 sudo = true
 

@@ -338,7 +338,7 @@ class EOPKG(PackageManager):
         """
         self.run_cli("update-repo", sudo=True)
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Removes things we don't need anymore:
         - orphaned packages,
         - outdated package locks

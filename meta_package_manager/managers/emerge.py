@@ -314,16 +314,28 @@ class Emerge(PackageManager):
         """
         self.run_cli("--sync", sudo=True)
 
-    def cleanup(self) -> None:
-        """Removes things we don't need anymore.
+    def cleanup_orphan(self) -> None:
+        """Remove every package not required by the world set anymore.
 
-        An update is forced before calling the clean commands, as `pointed to by the
-        emerge documentation
-        <https://wiki.gentoo.org/wiki/Gentoo_Cheat_Sheet>`_:
+        An update is forced before depcleaning, as `pointed to by the emerge
+        documentation <https://wiki.gentoo.org/wiki/Gentoo_Cheat_Sheet>`_:
 
         > As a safety measure, depclean will not remove any packages unless *all*
         > required dependencies have been resolved. As a consequence, it is often
         > necessary to run `emerge --update --newuse --deep @world` prior to depclean.
+
+        .. code-block:: shell-session
+
+            $ sudo emerge --quiet --color n --nospinner --update --newuse --deep @world
+            $ sudo emerge --quiet --color n --nospinner --depclean
+        """
+        # Forces an upgrade first, as recommended by emerge documentation.
+        self.upgrade()
+
+        self.run_cli("--depclean", sudo=True)
+
+    def cleanup_cache(self) -> None:
+        """Trim the source distfiles through ``eclean``.
 
         .. warning::
             This suppose the ``eclean`` binary is available and present on the system.
@@ -334,15 +346,8 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo emerge --quiet --color n --nospinner --update --newuse --deep @world
-            $ sudo emerge --quiet --color n --nospinner --depclean
             $ sudo eclean distfiles
         """
-        # Forces an upgrade first, as recommended by emerge documentation.
-        self.upgrade()
-
-        self.run_cli("--depclean", sudo=True)
-
         eclean_path = self.which("eclean")
         if eclean_path:
             self.run_cli(

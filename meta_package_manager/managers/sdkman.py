@@ -223,7 +223,7 @@ class SDKMAN(PackageManager):
         """
         self.run_cli("update")
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Clear SDKMAN caches.
 
         .. code-block:: shell-session

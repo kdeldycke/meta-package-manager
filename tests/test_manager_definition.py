@@ -147,6 +147,20 @@ def test_parse_definition_accepts_orphan_operations():
     assert definition.operations["cleanup_orphan"].parse_mode == "none"
 
 
+def test_parse_definition_rejects_legacy_cleanup():
+    """The monolithic ``cleanup`` operation is gone from the schema: declaring it
+    names the category keys that replaced it."""
+    with pytest.raises(ValidationError, match="cleanup_orphan, cleanup_cache"):
+        parse_manager_definition(
+            "mytool",
+            {
+                "platforms": ["all_platforms"],
+                "cli_names": ["mytool"],
+                "operations": {"cleanup": {"args": ["clean"]}},
+            },
+        )
+
+
 def test_parse_definition_remove_orphan_requires_package_id():
     """``remove_orphan`` targets nothing without ``{package_id}``, so it is rejected."""
     with pytest.raises(ValidationError, match="package_id"):
@@ -707,6 +721,8 @@ def test_factory_orphan_operations(monkeypatch):
         _definition(
             remove_orphan=OperationSpec(args=("remove", "--recursive", "{package_id}")),
             cleanup_orphan=OperationSpec(args=("autoremove", "--yes")),
+            cleanup_cache=OperationSpec(args=("clean", "--cache")),
+            cleanup_repair=OperationSpec(args=("repair",)),
         ),
     )()
     captured: list[tuple[str, ...]] = []
@@ -719,8 +735,14 @@ def test_factory_orphan_operations(monkeypatch):
     assert captured[-1] == ("remove", "--recursive", "jq")
     manager.cleanup_orphan()
     assert captured[-1] == ("autoremove", "--yes")
+    manager.cleanup_cache()
+    assert captured[-1] == ("clean", "--cache")
+    manager.cleanup_repair()
+    assert captured[-1] == ("repair",)
     assert implements_method(manager, "remove_orphan") is True
     assert implements_method(manager, "cleanup_orphan") is True
+    assert implements_method(manager, "cleanup_cache") is True
+    assert implements_method(manager, "cleanup_repair") is True
 
 
 def test_factory_operation_sudo(monkeypatch):

@@ -242,13 +242,20 @@ COMMAND_OPERATIONS: Final[frozenset[str]] = frozenset(
         "remove",
         "remove_orphan",
         "sync",
-        "cleanup",
         "cleanup_orphan",
+        "cleanup_cache",
+        "cleanup_repair",
         "upgrade_one",
         "upgrade_all",
     },
 )
-"""Operations that only run a command and produce no inventory to parse."""
+"""Operations that only run a command and produce no inventory to parse.
+
+``cleanup`` itself is deliberately absent: it is not an operation a manager
+defines anymore, but the fixed composition of the declared cleanup categories
+(see :py:meth:`meta_package_manager.manager.PackageManager.cleanup`). A
+definition declaring it is rejected with a targeted error.
+"""
 
 
 ALL_DEFINITION_OPERATIONS: Final[frozenset[str]] = QUERY_OPERATIONS | COMMAND_OPERATIONS
@@ -622,6 +629,13 @@ def _parse_operations(
         )
     operations = {}
     for op_name, op_section in raw.items():
+        if op_name == "cleanup":
+            raise ValidationError(
+                f"{manager_id}.operations.cleanup",
+                "the cleanup operation was split into categories: declare "
+                "cleanup_orphan, cleanup_cache and/or cleanup_repair instead.",
+                code="unknown_operation",
+            )
         if op_name not in ALL_DEFINITION_OPERATIONS:
             raise ValidationError(
                 f"{manager_id}.operations.{op_name}",
@@ -1203,7 +1217,12 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
             namespace["remove"] = _make_remove(spec)
         elif op_name == "remove_orphan":
             namespace["remove_orphan"] = _make_remove_orphan(spec)
-        elif op_name in ("sync", "cleanup", "cleanup_orphan"):
+        elif op_name in (
+            "sync",
+            "cleanup_orphan",
+            "cleanup_cache",
+            "cleanup_repair",
+        ):
             namespace[op_name] = _make_void(spec)
         elif op_name == "upgrade_one":
             namespace["upgrade_one_cli"] = _make_upgrade_one_cli(spec)

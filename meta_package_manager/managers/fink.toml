@@ -62,7 +62,7 @@ args = ["--yes", "update-all"]
 args = ["--yes", "selfupdate"]
 
 # Default scope purges obsolete .deb archives and source tarballs.
-[mpm.managers.fink.operations.cleanup]
+[mpm.managers.fink.operations.cleanup_cache]
 args = ["--yes", "cleanup"]
 
 # Output samples locking the version probe and the declared parsers, derived

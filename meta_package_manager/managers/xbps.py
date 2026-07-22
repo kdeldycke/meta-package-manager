@@ -275,21 +275,6 @@ class XBPS(PackageManager):
         """
         self.run_cli("--sync", "--yes", sudo=True)
 
-    def cleanup(self) -> None:
-        """Remove orphaned packages and clean the binary package cache.
-
-        .. code-block:: shell-session
-
-            $ sudo xbps-remove --remove-orphans --clean-cache --yes
-        """
-        self.run_cli(
-            "--remove-orphans",
-            "--clean-cache",
-            "--yes",
-            override_cli_path=self.sibling_cli("xbps-remove", same_dir=True),
-            sudo=True,
-        )
-
     def cleanup_orphan(self) -> None:
         """Remove installed packages no longer required by any other, sparing the cache.
 
@@ -299,6 +284,20 @@ class XBPS(PackageManager):
         """
         self.run_cli(
             "--remove-orphans",
+            "--yes",
+            override_cli_path=self.sibling_cli("xbps-remove", same_dir=True),
+            sudo=True,
+        )
+
+    def cleanup_cache(self) -> None:
+        """Clean the binary package cache, sparing the orphans.
+
+        .. code-block:: shell-session
+
+            $ sudo xbps-remove --clean-cache --yes
+        """
+        self.run_cli(
+            "--clean-cache",
             "--yes",
             override_cli_path=self.sibling_cli("xbps-remove", same_dir=True),
             sudo=True,

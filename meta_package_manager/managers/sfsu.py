@@ -187,7 +187,7 @@ class SFSU(PackageManager):
         """
         self.run_cli("update")
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Removes old versions of all installed apps and clears the cache.
 
         .. code-block:: pwsh-session

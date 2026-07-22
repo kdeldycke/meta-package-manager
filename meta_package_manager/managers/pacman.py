@@ -307,7 +307,7 @@ class Pacman(PackageManager):
         """
         self.run_cli("--sync", "--refresh")
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
         .. code-block:: shell-session

@@ -78,7 +78,7 @@ args = ["-a"]
 sudo = true
 
 # Removes all packages from the /var/cache/urpmi/rpms cache.
-[mpm.managers.urpmi.operations.cleanup]
+[mpm.managers.urpmi.operations.cleanup_cache]
 args = ["--clean"]
 sudo = true
 

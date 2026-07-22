@@ -68,8 +68,9 @@ cli = "pkg_add"
 args = ["-u", "-I"]
 sudo = true
 
-# `pkg_delete -a` deletes unused dependencies (orphans).
-[mpm.managers.pkg-tools.operations.cleanup]
+# `pkg_delete -a` deletes unused dependencies: the whole cleanup is an orphan
+# sweep, declared as such.
+[mpm.managers.pkg-tools.operations.cleanup_orphan]
 cli = "pkg_delete"
 args = ["-a", "-I"]
 sudo = true

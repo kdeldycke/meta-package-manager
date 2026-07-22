@@ -246,8 +246,9 @@ def test_query_fixtures_run_verbatim():
 # --- Mutation commands: the documented invocation must be the constructed one. ---
 
 MUTATION_MEMBERS = (
-    "cleanup",
+    "cleanup_cache",
     "cleanup_orphan",
+    "cleanup_repair",
     "install",
     "remove",
     "remove_orphan",
@@ -429,7 +430,12 @@ def test_documented_command_matches_construction(
         manager.remove(PID_SENTINEL)
     elif member == "remove_orphan":
         manager.remove_orphan(PID_SENTINEL)
-    elif member in ("sync", "cleanup", "cleanup_orphan"):
+    elif member in (
+        "sync",
+        "cleanup_orphan",
+        "cleanup_cache",
+        "cleanup_repair",
+    ):
         getattr(manager, member)()
     elif member == "upgrade_all_cli":
         constructed.append(manager.upgrade_all_cli())

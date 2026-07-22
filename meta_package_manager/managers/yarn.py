@@ -51,7 +51,7 @@ class Yarn(PackageManager):
 
     virtual = True
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
         See: https://yarnpkg.com/cli/cache/clean

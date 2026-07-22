@@ -64,7 +64,7 @@ args = ["update"]
 [mpm.managers.soar.operations.sync]
 args = ["sync"]
 
-[mpm.managers.soar.operations.cleanup]
+[mpm.managers.soar.operations.cleanup_cache]
 args = ["clean", "--cache"]
 
 # No `outdated`: soar has no non-mutating "list upgradable" command, so mpm auto-skips it.

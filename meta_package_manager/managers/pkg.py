@@ -514,23 +514,6 @@ class PKG(PackageManager):
         """
         self.run_cli("update", override_extra_env={"IGNORE_OSVERSION": "yes"})
 
-    def cleanup(self) -> None:
-        """Removes things we don't need anymore.
-
-        .. code-block:: shell-session
-
-            $ pkg --quiet autoremove --yes
-            Checking integrity... done (0 conflicting)
-            Nothing to do.
-
-        .. code-block:: shell-session
-
-            $ pkg --quiet clean --yes --all
-            Nothing to do.
-        """
-        self.cleanup_orphan()
-        self.run_cli("clean", "--yes", "--all")
-
     def cleanup_orphan(self) -> None:
         """Remove every package installed as a dependency and no longer required.
 
@@ -541,6 +524,16 @@ class PKG(PackageManager):
             Nothing to do.
         """
         self.run_cli("autoremove", "--yes")
+
+    def cleanup_cache(self) -> None:
+        """Delete every cached package from the local cache directory.
+
+        .. code-block:: shell-session
+
+            $ pkg --quiet clean --yes --all
+            Nothing to do.
+        """
+        self.run_cli("clean", "--yes", "--all")
 
 
 class Ports(PackageManager):
@@ -803,7 +796,7 @@ class Ports(PackageManager):
             sudo=True,
         )
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Remove cached build artifacts from the ports tree.
 
         Walks the tree once and invokes :command:`make clean` at the root,

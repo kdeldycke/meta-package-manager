@@ -74,7 +74,7 @@ args = ["update", "--self"]
 sudo = true
 
 # Prunes old package backups down to the configured autobackup count.
-[mpm.managers.tlmgr.operations.cleanup]
+[mpm.managers.tlmgr.operations.cleanup_cache]
 args = ["backup", "--clean", "--all"]
 sudo = true
 

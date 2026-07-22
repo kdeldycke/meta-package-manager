@@ -102,6 +102,12 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
     elif op == Operations.upgrade_all:
         method_deps = ({"upgrade_all_cli"}, {"outdated", "upgrade_one_cli"})
 
+    # For `cleanup`: managers define category methods, never `cleanup()` itself
+    # (the base class composes the overridden categories). Any category implies
+    # support of the operation.
+    elif op == Operations.cleanup:
+        method_deps = ({"cleanup_orphan"}, {"cleanup_cache"}, {"cleanup_repair"})
+
     # If none of the classes in the inheritance hierarchy up to the base one
     # implements the operation, then we can be certain the manager doesn't implement
     # the operation at all.
@@ -161,17 +167,13 @@ def implements_method(
     The orphan refinements ``remove_orphan`` and ``cleanup_orphan`` are optional
     variants of the ``remove`` and ``cleanup`` commands rather than standalone
     :class:`Operations`, so :func:`implements` cannot route them. This reports whether a
-    manager overrides the base's stub for one, walking the MRO ``__dict__`` exactly as
-    :func:`upgrade_all_is_synthesized` does, so it works for config-defined managers
-    (whose methods live on the synthesized subclass) too.
+    manager overrides the base's stub for one, delegating the MRO walk to
+    :py:meth:`meta_package_manager.manager.PackageManager._defines` (shared with the
+    base ``cleanup`` composer), so it works for config-defined managers (whose methods
+    live on the synthesized subclass) too.
     """
     cls = manager if isinstance(manager, type) else type(manager)
-    for klass in cls.mro():
-        if klass is PackageManager:
-            return False
-        if method_name in klass.__dict__:
-            return True
-    return False
+    return cls._defines(method_name)
 
 
 def cleanup_orphan_is_synthesized(
@@ -208,6 +210,20 @@ def supports_cleanup_orphan(
     return implements_method(
         manager, "cleanup_orphan"
     ) or cleanup_orphan_is_synthesized(manager)
+
+
+def supports_cleanup_cache(
+    manager: PackageManager | type[PackageManager],
+) -> bool:
+    """Whether ``mpm cleanup --cache`` can drive the manager."""
+    return implements_method(manager, "cleanup_cache")
+
+
+def supports_cleanup_repair(
+    manager: PackageManager | type[PackageManager],
+) -> bool:
+    """Whether ``mpm cleanup --repair`` can drive the manager."""
+    return implements_method(manager, "cleanup_repair")
 
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):

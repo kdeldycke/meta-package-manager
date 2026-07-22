@@ -80,7 +80,11 @@ from extra_platforms import current_architecture, current_platform, reduce
 from . import __version__, bar_plugin
 from .bar_plugin_renderer import BarPluginRenderer
 from .brewfile import build_brewfile
-from .capabilities import Operations, supports_cleanup_orphan
+from .capabilities import (
+    Operations,
+    cleanup_orphan_is_synthesized,
+    implements_method,
+)
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,
@@ -2128,40 +2132,118 @@ def sync(ctx):
     )
 
 
+CLEANUP_CATEGORIES = ("orphans", "cache", "repair")
+"""Cumulative categories the ``cleanup`` subcommand decomposes into.
+
+Each category has a two-sided ``--<category>/--skip-<category>`` flag pair.
+Positive flags narrow the run to exactly the listed categories; skip flags
+subtract categories; with no flag at all, every manager runs its full native
+``cleanup`` bundle, exactly as before the categories existed.
+"""
+
+
+def _cleanup_steps(
+    manager: PackageManager,
+    selected: frozenset[str],
+    explicit_orphans: bool,
+) -> list[Callable[[], None]]:
+    """The cleanup steps ``manager`` runs for the ``selected`` categories.
+
+    A manager runs exactly the category methods it natively overrides, in category
+    order: the full selection reproduces the base ``cleanup`` composer. The
+    synthesized orphan sweep engages only on an explicit positive ``--orphans``
+    (``explicit_orphans``): a skip flag subtracts from the native categories and
+    must never make a manager remove packages its plain ``cleanup`` would have
+    left alone.
+    """
+    steps: list[Callable[[], None]] = []
+    if "orphans" in selected and (
+        implements_method(manager, "cleanup_orphan")
+        or (explicit_orphans and cleanup_orphan_is_synthesized(manager))
+    ):
+        steps.append(manager.cleanup_orphan)
+    if "cache" in selected and implements_method(manager, "cleanup_cache"):
+        steps.append(manager.cleanup_cache)
+    if "repair" in selected and implements_method(manager, "cleanup_repair"):
+        steps.append(manager.cleanup_repair)
+    return steps
+
+
 @mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
 @option(
-    "--orphans",
-    is_flag=True,
-    default=False,
-    help="Only remove orphaned packages (those nothing depends on anymore) using each "
-    "manager's native system-wide sweep, and skip the cache and temporary-file "
-    "pruning. Managers with no native sweep get one synthesized from their orphan "
-    "listing; those with no orphan support at all are skipped.",
+    "--orphans/--skip-orphans",
+    "orphans",
+    default=None,
+    help="Remove orphaned packages (those nothing depends on anymore) using each "
+    "manager's system-wide sweep, native or synthesized from its orphan listing. "
+    "The skip side subtracts the sweep from managers whose cleanup performs one "
+    "natively.",
+)
+@option(
+    "--cache/--skip-cache",
+    "cache",
+    default=None,
+    help="Prune caches, downloads and other left-over artifacts. The broadest "
+    "category: for most managers the whole cleanup amounts to it.",
+)
+@option(
+    "--repair/--skip-repair",
+    "repair",
+    default=None,
+    help="Verify and repair the manager's local installation state (like "
+    "`flatpak repair`).",
 )
 @pass_context
-def cleanup(ctx, orphans):
+def cleanup(ctx, orphans, cache, repair):
     """Cleanup local data, temporary artifacts and removes orphaned dependencies.
 
-    With ``--orphans``, narrow the run to the system-wide orphan sweep only (``apt
-    autoremove``, ``brew autoremove``, ``flatpak uninstall --unused``, ...), leaving
-    caches and temporary artifacts untouched. A manager with no native sweep verb but
-    a native orphan listing gets the sweep synthesized: list the orphans, remove them
-    one by one, and repeat until none are left. Managers with no orphan support at all
-    are skipped rather than fully cleaned up.
+    The work decomposes into cumulative categories, each with a two-sided flag pair:
+    ``--orphans/--skip-orphans`` (system-wide orphan sweep), ``--cache/--skip-cache``
+    (caches, downloads and left-overs) and ``--repair/--skip-repair`` (local state
+    verification). Positive flags narrow the run to exactly the listed categories;
+    skip flags subtract from the rest; with no flag, every manager runs all the
+    categories it natively implements.
+
+    A manager with no native sweep verb but a native orphan listing gets the sweep
+    synthesized under an explicit ``--orphans``: list the orphans, remove them one by
+    one, and repeat until none are left. A skip flag never engages the synthesized
+    sweep: subtracting from the native bundle cannot remove packages a plain
+    ``cleanup`` would have left alone. Managers supporting none of the selected
+    categories are skipped.
     """
+    flags = {"orphans": orphans, "cache": cache, "repair": repair}
+    # Each two-sided pair resolves to one value (the last flag wins in click), so
+    # positives and skips are disjoint by construction.
+    positives = {category for category, value in flags.items() if value is True}
+    skips = {category for category, value in flags.items() if value is False}
+    if positives:
+        selected = frozenset(positives)
+    else:
+        selected = frozenset(CLEANUP_CATEGORIES) - skips
+        if not selected:
+            ctx.fail("Every cleanup category is skipped.")
+
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
-    if orphans:
-        # cleanup_orphan is a refinement of cleanup, not a routable Operations member,
-        # so narrow the already-cleanup-capable selection to the managers that can run
-        # the sweep: natively, or through the synthesized orphans+remove fallback.
-        managers = [m for m in managers if supports_cleanup_orphan(m)]
+
+    explicit_orphans = "orphans" in positives
+    # Keep only the managers with at least one step to run for the selection. On the
+    # full default selection this matches the operation-implements filter above, as
+    # any implemented category is a step.
+    managers = [m for m in managers if _cleanup_steps(m, selected, explicit_orphans)]
+
+    def operation(m: PackageManager) -> object:
+        for step in _cleanup_steps(m, selected, explicit_orphans):
+            step()
+        return None
+
+    if positives or skips:
+        ordered = ", ".join(c for c in CLEANUP_CATEGORIES if c in selected)
+        message = f"Cleanup ({ordered})..."
+    else:
+        message = "Cleanup..."
+
     prime_sudo(ctx, managers)
     announce = _announce_level(ctx)
-
-    operation = (
-        (lambda m: m.cleanup_orphan()) if orphans else (lambda m: m.cleanup())
-    )
-    message = "Remove orphaned packages..." if orphans else "Cleanup..."
 
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✗ trail
     # and a success-count finisher (see collect_from_managers).

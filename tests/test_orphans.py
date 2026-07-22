@@ -33,7 +33,9 @@ from meta_package_manager.capabilities import (
     cleanup_orphan_is_synthesized,
     implements,
     implements_method,
+    supports_cleanup_cache,
     supports_cleanup_orphan,
+    supports_cleanup_repair,
 )
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.pool import pool
@@ -43,12 +45,13 @@ from .fake_manager import FakeManager
 
 
 def _capture_run_cli(monkeypatch, manager_id, call):
-    """Invoke ``call(manager)`` with ``run_cli`` and ``sibling_cli`` stubbed.
+    """Invoke ``call(manager)`` with the binary-resolution seams stubbed.
 
     ``run_cli`` records the positional argv of every invocation instead of executing
-    it, and ``sibling_cli`` is neutralized because its ``same_dir`` resolution asserts
-    on a ``cli_path`` that is absent on a host lacking the manager (xbps). Returns the
-    flat list of every captured token across all invocations.
+    it; ``sibling_cli`` is neutralized because its ``same_dir`` resolution asserts on
+    a ``cli_path`` that is absent on a host lacking the manager (xbps); ``which`` is
+    stubbed for the operations probing helper binaries (emerge's ``eclean``). Returns
+    the flat list of every captured token across all invocations.
     """
     manager = pool[manager_id]
     calls: list[tuple[str, ...]] = []
@@ -61,6 +64,11 @@ def _capture_run_cli(monkeypatch, manager_id, call):
         manager,
         "sibling_cli",
         lambda name, **kwargs: Path("/fake/bin") / name,
+    )
+    monkeypatch.setattr(
+        manager,
+        "which",
+        lambda name: Path("/fake/bin") / name,
     )
     call(manager)
     return [token for args in calls for token in args]
@@ -178,6 +186,10 @@ def test_cleanup_orphan_unsupported_raises_not_implemented(manager_id):
         ("flatpak", False, True),
         ("pkg", False, True),
         ("xbps", False, True),
+        # Native sweep declared by their bundled TOML definition or class split.
+        ("cave", False, True),
+        ("emerge", False, True),
+        ("pkg-tools", False, True),
         # No native verb, but orphans + remove: mpm synthesizes the sweep.
         ("pacaur", True, True),
         ("pacman", True, True),
@@ -196,6 +208,50 @@ def test_cleanup_orphan_capability_matrix(manager_id, synthesized, supported):
     manager = pool[manager_id]
     assert cleanup_orphan_is_synthesized(manager) is synthesized
     assert supports_cleanup_orphan(manager) is supported
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "cache_support", "repair_support"),
+    (
+        ("apt", True, False),
+        ("brew", True, False),
+        ("cave", False, False),
+        ("dnf", True, False),
+        ("emerge", True, False),
+        ("flatpak", False, True),
+        ("npm", True, False),
+        ("pacman", True, False),
+        ("pkg", True, False),
+        ("pkg-tools", False, False),
+        ("xbps", True, False),
+        ("zypper", True, False),
+    ),
+)
+def test_cleanup_category_support(manager_id, cache_support, repair_support):
+    """Category support is a plain method-override check: every manager declares
+    its cleanup work through category methods, never a monolithic ``cleanup``."""
+    manager = pool[manager_id]
+    assert implements_method(manager, "cleanup") is False
+    assert supports_cleanup_cache(manager) is cache_support
+    assert supports_cleanup_repair(manager) is repair_support
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "method", "token"),
+    (
+        ("apt", "cleanup_cache", "clean"),
+        ("brew", "cleanup_cache", "cleanup"),
+        ("dnf", "cleanup_cache", "clean"),
+        ("emerge", "cleanup_cache", "distfiles"),
+        ("flatpak", "cleanup_repair", "repair"),
+        ("pkg", "cleanup_cache", "clean"),
+        ("xbps", "cleanup_cache", "--clean-cache"),
+    ),
+)
+def test_cleanup_category_argv(monkeypatch, manager_id, method, token):
+    """The extracted category steps run their native commands."""
+    tokens = _capture_run_cli(monkeypatch, manager_id, lambda m: getattr(m, method)())
+    assert token in tokens
 
 
 def test_synthesized_sweep_fixpoint(monkeypatch):
@@ -417,14 +473,14 @@ class RemovableFakeManager(FakeManager):
 
 
 class CleanupFakeManager(FakeManager):
-    """Fake manager that supports plain cleanup but no system-wide orphan sweep."""
+    """Fake manager with a cache category only: no system-wide orphan sweep."""
 
     def __init__(self) -> None:
         super().__init__()
         self.calls: list[str] = []
 
-    def cleanup(self) -> None:
-        self.calls.append("cleanup")
+    def cleanup_cache(self) -> None:
+        self.calls.append("cleanup_cache")
 
 
 class OrphanCleanupFakeManager(CleanupFakeManager):
@@ -442,6 +498,13 @@ class SweepSynthesizingFakeManager(CleanupFakeManager):
     def remove(self, package_id: str) -> str:
         self.calls.append(f"remove:{package_id}")
         return ""
+
+
+class DecomposedCleanupFakeManager(CleanupFakeManager):
+    """Fake manager with both orphan and cache category steps."""
+
+    def cleanup_orphan(self) -> None:
+        self.calls.append("cleanup_orphan")
 
 
 @pytest.fixture
@@ -472,12 +535,12 @@ def test_cleanup_orphans_runs_only_the_sweep(invoke, monkeypatch):
     assert fake.calls == ["cleanup_orphan"]
 
 
-def test_cleanup_without_orphans_runs_full_cleanup(invoke, monkeypatch):
-    """Plain ``cleanup`` runs the full ``cleanup``, not the narrowed sweep."""
+def test_cleanup_without_orphans_runs_all_categories(invoke, monkeypatch):
+    """Plain ``cleanup`` composes every natively implemented category, in order."""
     fake = _patch_pool_with(monkeypatch, OrphanCleanupFakeManager())
     result = invoke("cleanup")
     assert result.exit_code == 0
-    assert fake.calls == ["cleanup"]
+    assert fake.calls == ["cleanup_orphan", "cleanup_cache"]
 
 
 def test_cleanup_orphans_skips_manager_without_sweep(invoke, monkeypatch):
@@ -496,3 +559,64 @@ def test_cleanup_orphans_runs_synthesized_sweep(invoke, monkeypatch):
     result = invoke("cleanup", "--orphans")
     assert result.exit_code == 0
     assert fake.calls == ["remove:fake-orphan-alpha"]
+
+
+@pytest.mark.parametrize(
+    ("args", "expected_calls"),
+    (
+        # No flag: every natively implemented category, in category order.
+        ((), ["cleanup_orphan", "cleanup_cache"]),
+        # Positive flags narrow the run to exactly the listed categories.
+        (("--orphans",), ["cleanup_orphan"]),
+        (("--cache",), ["cleanup_cache"]),
+        (("--orphans", "--cache"), ["cleanup_orphan", "cleanup_cache"]),
+        # Skip flags subtract categories from the rest.
+        (("--skip-orphans",), ["cleanup_cache"]),
+        (("--skip-cache",), ["cleanup_orphan"]),
+        # An unsupported selected category is simply not run.
+        (("--repair",), []),
+    ),
+)
+def test_cleanup_category_selection(invoke, monkeypatch, args, expected_calls):
+    """The tri-state category flags compose on a decomposed manager."""
+    fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
+    result = invoke("cleanup", *args)
+    assert result.exit_code == 0
+    assert fake.calls == expected_calls
+
+
+def test_cleanup_cache_category_alone(invoke, monkeypatch):
+    """A cache-only manager runs its single category under ``--cache`` and under a
+    plain ``cleanup`` alike."""
+    fake = _patch_pool_with(monkeypatch, CleanupFakeManager())
+    result = invoke("cleanup", "--cache")
+    assert result.exit_code == 0
+    assert fake.calls == ["cleanup_cache"]
+
+
+def test_cleanup_skip_never_engages_synthesized_sweep(invoke, monkeypatch):
+    """A skip flag subtracts from the native bundle only: on a monolithic manager
+    with a synthesizable sweep, ``--skip-cache`` must not surprise-remove packages,
+    so the manager is skipped entirely."""
+    fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
+    result = invoke("cleanup", "--skip-cache")
+    assert result.exit_code == 0
+    assert fake.calls == []
+
+
+def test_cleanup_skip_orphans_keeps_native_categories(invoke, monkeypatch):
+    """``--skip-orphans`` on a manager with a synthesizable-but-not-native sweep
+    keeps its native categories running: only the sweep is subtracted."""
+    fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
+    result = invoke("cleanup", "--skip-orphans")
+    assert result.exit_code == 0
+    assert fake.calls == ["cleanup_cache"]
+
+
+def test_cleanup_all_categories_skipped_errors(invoke, monkeypatch):
+    """Skipping every category is a usage error, not a silent no-op."""
+    fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
+    result = invoke("cleanup", "--skip-orphans", "--skip-cache", "--skip-repair")
+    assert result.exit_code == 2
+    assert "Every cleanup category is skipped." in result.stderr
+    assert fake.calls == []

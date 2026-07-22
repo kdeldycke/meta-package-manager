@@ -206,7 +206,7 @@ class Tazpkg(PackageManager):
         """
         self.run_cli("recharge", sudo=True)
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Delete every downloaded package from the cache.
 
         .. code-block:: shell-session

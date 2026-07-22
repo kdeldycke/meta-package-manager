@@ -644,12 +644,41 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
-    def cleanup(self) -> None:
-        """Prune left-overs, remove orphaned dependencies and clear caches.
+    @classmethod
+    def _defines(cls, method_name: str) -> bool:
+        """Whether a non-base class in the manager's MRO defines ``method_name``.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        The introspection primitive behind
+        :py:func:`meta_package_manager.capabilities.implements_method` (which
+        delegates here) and the :py:meth:`cleanup` composer below, hosted on the
+        class to stay importable from both sides without a cycle.
         """
-        raise NotImplementedError
+        for klass in cls.mro():
+            if klass is PackageManager:
+                return False
+            if method_name in klass.__dict__:
+                return True
+        return False
+
+    def cleanup(self) -> None:
+        """Run every cleanup category the manager natively implements.
+
+        Not an operation managers define anymore: ``cleanup`` is the fixed
+        composition of the category methods a manager overrides
+        (:py:meth:`cleanup_orphan`, :py:meth:`cleanup_cache`,
+        :py:meth:`cleanup_repair`), run in that order. The synthesized orphan sweep
+        never joins in: it only engages on an explicit ``mpm cleanup --orphans``,
+        so a plain ``cleanup`` cannot remove packages the native tool would have
+        kept.
+
+        A manager overriding no category method does not advertise the ``cleanup``
+        operation at all (see
+        :py:func:`meta_package_manager.capabilities.implements`) and this composer
+        is then a no-op.
+        """
+        for method_name in ("cleanup_orphan", "cleanup_cache", "cleanup_repair"):
+            if self._defines(method_name):
+                getattr(self, method_name)()
 
     def cleanup_orphan(self) -> None:
         """Remove every orphaned package on the system, sparing the caches.
@@ -697,6 +726,29 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                     self.remove_orphan(package_id)
                 except NotImplementedError:
                     self.remove(package_id)
+
+    def cleanup_cache(self) -> None:
+        """Prune the manager's caches, downloads and other left-over artifacts.
+
+        The cache category of :py:meth:`cleanup`, surfaced as
+        ``mpm cleanup --cache`` and subtracted by ``--skip-cache`` (``apt clean``,
+        ``dnf clean all``, ``brew cleanup``, ``npm cache clean``, ...). The broadest
+        category: for most managers the whole cleanup amounts to it.
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        """
+        raise NotImplementedError
+
+    def cleanup_repair(self) -> None:
+        """Verify and repair the manager's local installation state.
+
+        The repair category of :py:meth:`cleanup`, surfaced as
+        ``mpm cleanup --repair`` and subtracted by ``--skip-repair``
+        (``flatpak repair --user``).
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        """
+        raise NotImplementedError
 
     def discover_projects(self) -> Iterator[Path]:
         """Locate project trees this manager governs by scanning the filesystem.

@@ -247,7 +247,7 @@ class PNPM(PackageManager):
         """
         return self.run_cli("remove", "--global", package_id)
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Remove orphan packages from the global content-addressable store.
 
         .. code-block:: shell-session

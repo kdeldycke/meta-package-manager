@@ -208,7 +208,7 @@ class UV(UVBase):
         """
         return self.run_cli("pip", "uninstall", package_id)
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
         .. code-block:: shell-session

@@ -804,29 +804,6 @@ class Homebrew(PackageManager):
         """
         self.run_cli("update", "--quiet", auto_post_args=False)
 
-    def cleanup(self) -> None:
-        """Removes things we don't need anymore.
-
-        First remove unused dependencies (see :py:meth:`cleanup_orphan`), then scrub
-        the cache, including latest version's downloads. Downloads for all installed
-        formulae and casks will not be deleted.
-
-        .. code-block:: shell-session
-
-            $ brew cleanup -s --prune=all
-            Removing: ~/Library/Caches/Homebrew/node--1.bottle.tar.gz... (9MB)
-            Warning: Skipping sdl2: most recent version 2.0.12_1 not installed
-            Removing: ~/Library/Caches/Homebrew/Cask/aerial--1.8.1.zip... (5MB)
-            Removing: ~/Library/Caches/Homebrew/Cask/prey--1.9.pkg... (19.9MB)
-            Removing: ~/Library/Logs/Homebrew/readline... (64B)
-            Removing: ~/Library/Logs/Homebrew/libfido2... (64B)
-            Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
-
-        More doc at: https://docs.brew.sh/Manpage#cleanup
-        """
-        self.cleanup_orphan()
-        self.run_cli("cleanup", "--quiet", "-s", "--prune=all", auto_post_args=False)
-
     def cleanup_orphan(self) -> None:
         """Uninstall every formula installed as a dependency and no longer needed.
 
@@ -854,6 +831,26 @@ class Homebrew(PackageManager):
             Uninstalling /usr/local/Cellar/nasm/2.15.05... (29 files, 2.9MB)
         """
         self.run_cli("autoremove", "--quiet", auto_post_args=False)
+
+    def cleanup_cache(self) -> None:
+        """Scrub the cache, including latest version's downloads.
+
+        Downloads for all installed formulae and casks will not be deleted.
+
+        .. code-block:: shell-session
+
+            $ brew cleanup -s --prune=all
+            Removing: ~/Library/Caches/Homebrew/node--1.bottle.tar.gz... (9MB)
+            Warning: Skipping sdl2: most recent version 2.0.12_1 not installed
+            Removing: ~/Library/Caches/Homebrew/Cask/aerial--1.8.1.zip... (5MB)
+            Removing: ~/Library/Caches/Homebrew/Cask/prey--1.9.pkg... (19.9MB)
+            Removing: ~/Library/Logs/Homebrew/readline... (64B)
+            Removing: ~/Library/Logs/Homebrew/libfido2... (64B)
+            Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
+
+        More doc at: https://docs.brew.sh/Manpage#cleanup
+        """
+        self.run_cli("cleanup", "--quiet", "-s", "--prune=all", auto_post_args=False)
 
 
 class Brew(Homebrew):

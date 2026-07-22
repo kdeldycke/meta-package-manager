@@ -59,9 +59,9 @@ sudo = true
 args = ["sync"]
 sudo = true
 
-# Uninstalls any package that is neither in 'world' nor a dependency of it (orphan
-# removal).
-[mpm.managers.cave.operations.cleanup]
+# Uninstalls any package that is neither in 'world' nor a dependency of it: cave's
+# whole cleanup is an orphan sweep, declared as such.
+[mpm.managers.cave.operations.cleanup_orphan]
 args = ["purge", "--execute"]
 sudo = true
 

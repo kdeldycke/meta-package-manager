@@ -78,7 +78,7 @@ sudo = true
 
 # `cleanse --sweep` deletes unnecessary sources and binary caches (the documented
 # replacement for the old `gaze prune`).
-[mpm.managers.sorcery.operations.cleanup]
+[mpm.managers.sorcery.operations.cleanup_cache]
 cli = "cleanse"
 args = ["--sweep"]
 sudo = true

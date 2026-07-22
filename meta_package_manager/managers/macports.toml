@@ -60,7 +60,7 @@ args = ["upgrade", "outdated"]
 args = ["sync"]
 
 # Remove work directories, distfiles and logs for installed ports.
-[mpm.managers.macports.operations.cleanup]
+[mpm.managers.macports.operations.cleanup_cache]
 args = ["clean", "--all", "installed"]
 
 # Output samples locking the version probe and the declared parsers, derived

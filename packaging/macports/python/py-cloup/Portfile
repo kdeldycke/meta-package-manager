@@ -29,6 +29,8 @@ checksums           rmd160  5026a77b425664f46e216f22e1a165faf793b5fe \
 python.versions     311 312 313 314
 
 if {${name} ne ${subport}} {
+    depends_build-append \
+                    port:py${python.version}-setuptools_scm
     depends_lib-append \
                     port:py${python.version}-click
 }

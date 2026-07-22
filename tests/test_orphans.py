@@ -157,13 +157,11 @@ def test_cleanup_orphan_uses_native_sweep(monkeypatch, manager_id, sweep_token):
         ("pkg", "autoremove", "clean"),
     ),
 )
-def test_cleanup_still_runs_orphan_sweep(
-    monkeypatch, manager_id, sweep_token, cache_token
-):
-    """Plain ``cleanup`` keeps doing both the orphan sweep and the cache pruning: the
-    sweep step now routes through ``cleanup_orphan`` but the behavior is unchanged."""
+def test_plain_cleanup_never_sweeps(monkeypatch, manager_id, sweep_token, cache_token):
+    """The ``cleanup`` composer runs the non-destructive categories only: the orphan
+    sweep stays behind an explicit ``--orphans``, even where a native sweep exists."""
     tokens = _capture_run_cli(monkeypatch, manager_id, lambda m: m.cleanup())
-    assert sweep_token in tokens
+    assert sweep_token not in tokens
     assert cache_token in tokens
 
 
@@ -535,12 +533,13 @@ def test_cleanup_orphans_runs_only_the_sweep(invoke, monkeypatch):
     assert fake.calls == ["cleanup_orphan"]
 
 
-def test_cleanup_without_orphans_runs_all_categories(invoke, monkeypatch):
-    """Plain ``cleanup`` composes every natively implemented category, in order."""
+def test_cleanup_without_flags_runs_default_categories(invoke, monkeypatch):
+    """Plain ``cleanup`` runs the non-destructive default categories only: a native
+    orphan sweep does not join in without an explicit ``--orphans``."""
     fake = _patch_pool_with(monkeypatch, OrphanCleanupFakeManager())
     result = invoke("cleanup")
     assert result.exit_code == 0
-    assert fake.calls == ["cleanup_orphan", "cleanup_cache"]
+    assert fake.calls == ["cleanup_cache"]
 
 
 def test_cleanup_orphans_skips_manager_without_sweep(invoke, monkeypatch):
@@ -564,15 +563,17 @@ def test_cleanup_orphans_runs_synthesized_sweep(invoke, monkeypatch):
 @pytest.mark.parametrize(
     ("args", "expected_calls"),
     (
-        # No flag: every natively implemented category, in category order.
-        ((), ["cleanup_orphan", "cleanup_cache"]),
+        # No flag: the non-destructive default categories only.
+        ((), ["cleanup_cache"]),
+        # --skip-orphans is a harmless no-op: orphans is not in the default.
+        (("--skip-orphans",), ["cleanup_cache"]),
         # Positive flags narrow the run to exactly the listed categories.
         (("--orphans",), ["cleanup_orphan"]),
         (("--cache",), ["cleanup_cache"]),
         (("--orphans", "--cache"), ["cleanup_orphan", "cleanup_cache"]),
-        # Skip flags subtract categories from the rest.
-        (("--skip-orphans",), ["cleanup_cache"]),
-        (("--skip-cache",), ["cleanup_orphan"]),
+        # Skip flags subtract categories from the default selection: skipping cache
+        # leaves nothing, since orphans never joins without a positive flag.
+        (("--skip-cache",), []),
         # An unsupported selected category is simply not run.
         (("--repair",), []),
     ),
@@ -590,6 +591,17 @@ def test_cleanup_cache_category_alone(invoke, monkeypatch):
     plain ``cleanup`` alike."""
     fake = _patch_pool_with(monkeypatch, CleanupFakeManager())
     result = invoke("cleanup", "--cache")
+    assert result.exit_code == 0
+    assert fake.calls == ["cleanup_cache"]
+
+
+def test_plain_cleanup_never_engages_synthesized_sweep(invoke, monkeypatch):
+    """Plain ``cleanup`` runs native categories only: the flag pairs default to
+    ``True`` (so ``--help`` renders each default as its positive side), and only a
+    flag the user actually set may count as a positive and engage the synthesized
+    sweep."""
+    fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
+    result = invoke("cleanup")
     assert result.exit_code == 0
     assert fake.calls == ["cleanup_cache"]
 
@@ -614,9 +626,10 @@ def test_cleanup_skip_orphans_keeps_native_categories(invoke, monkeypatch):
 
 
 def test_cleanup_all_categories_skipped_errors(invoke, monkeypatch):
-    """Skipping every category is a usage error, not a silent no-op."""
+    """Skipping every default category is a usage error, not a silent no-op:
+    ``--skip-orphans`` is not needed, as orphans is not in the default set."""
     fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
-    result = invoke("cleanup", "--skip-orphans", "--skip-cache", "--skip-repair")
+    result = invoke("cleanup", "--skip-cache", "--skip-repair")
     assert result.exit_code == 2
     assert "Every cleanup category is skipped." in result.stderr
     assert fake.calls == []

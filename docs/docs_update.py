@@ -733,7 +733,7 @@ def manager_operations(manager_id: str) -> str:
             note = "`--orphans` also drops the package's orphaned dependencies"
         elif supported and op is Operations.cleanup:
             if implements_method(m, "cleanup_orphan"):
-                note = "`--orphans` limits the run to the system-wide orphan sweep"
+                note = "`--orphans` runs the system-wide orphan sweep"
             elif cleanup_orphan_is_synthesized(m):
                 note = "`--orphans` sweep [backfilled by `mpm`](../augmentations.md)"
         table.append([f"`{op.name}`", "✓" if supported else "", note])

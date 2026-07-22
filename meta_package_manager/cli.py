@@ -47,6 +47,7 @@ from click_extra import (
     EnumChoice,
     File,
     IntRange,
+    ParameterSource,
     Section,
     UsageError,
     VersionOption,
@@ -2137,8 +2138,18 @@ CLEANUP_CATEGORIES = ("orphans", "cache", "repair")
 
 Each category has a two-sided ``--<category>/--skip-<category>`` flag pair.
 Positive flags narrow the run to exactly the listed categories; skip flags
-subtract categories; with no flag at all, every manager runs its full native
-``cleanup`` bundle, exactly as before the categories existed.
+subtract categories from the default selection.
+"""
+
+
+DEFAULT_CLEANUP_CATEGORIES = frozenset({"cache", "repair"})
+"""Categories a plain ``cleanup`` (no category flag) runs.
+
+The orphan sweep is deliberately absent: it removes packages, where cache
+pruning and state repair only reclaim disk and fix metadata. Keeping it
+strictly behind an explicit ``--orphans`` makes the default non-destructive
+and identical on every manager, native sweep or not, mirroring how ``remove``
+keeps its cascade behind the same flag.
 """
 
 
@@ -2173,62 +2184,79 @@ def _cleanup_steps(
 @option(
     "--orphans/--skip-orphans",
     "orphans",
-    default=None,
+    default=False,
     help="Remove orphaned packages (those nothing depends on anymore) using each "
     "manager's system-wide sweep, native or synthesized from its orphan listing. "
-    "The skip side subtracts the sweep from managers whose cleanup performs one "
-    "natively.",
+    "The only category removing packages, so it never runs unless requested.",
 )
 @option(
     "--cache/--skip-cache",
     "cache",
-    default=None,
+    default=True,
     help="Prune caches, downloads and other left-over artifacts. The broadest "
     "category: for most managers the whole cleanup amounts to it.",
 )
 @option(
     "--repair/--skip-repair",
     "repair",
-    default=None,
+    default=True,
     help="Verify and repair the manager's local installation state (like "
     "`flatpak repair`).",
 )
 @pass_context
 def cleanup(ctx, orphans, cache, repair):
-    """Cleanup local data, temporary artifacts and removes orphaned dependencies.
+    """Cleanup local data and temporary artifacts.
 
     The work decomposes into cumulative categories, each with a two-sided flag pair:
     ``--orphans/--skip-orphans`` (system-wide orphan sweep), ``--cache/--skip-cache``
     (caches, downloads and left-overs) and ``--repair/--skip-repair`` (local state
     verification). Positive flags narrow the run to exactly the listed categories;
-    skip flags subtract from the rest; with no flag, every manager runs all the
-    categories it natively implements.
+    skip flags subtract from the default selection.
 
-    A manager with no native sweep verb but a native orphan listing gets the sweep
-    synthesized under an explicit ``--orphans``: list the orphans, remove them one by
-    one, and repeat until none are left. A skip flag never engages the synthesized
-    sweep: subtracting from the native bundle cannot remove packages a plain
-    ``cleanup`` would have left alone. Managers supporting none of the selected
-    categories are skipped.
+    A plain ``cleanup`` runs the cache and repair categories and never removes a
+    package: the orphan sweep is the one destructive category, so it only runs on an
+    explicit ``--orphans``, uniformly across managers, just as ``remove`` keeps its
+    dependency cascade behind the same flag. A manager with no native sweep verb but
+    a native orphan listing gets the sweep synthesized: list the orphans, remove them
+    one by one, and repeat until none are left. Managers supporting none of the
+    selected categories are skipped.
     """
     flags = {"orphans": orphans, "cache": cache, "repair": repair}
-    # Each two-sided pair resolves to one value (the last flag wins in click), so
-    # positives and skips are disjoint by construction.
-    positives = {category for category, value in flags.items() if value is True}
-    skips = {category for category, value in flags.items() if value is False}
+    # The cache and repair pairs default to True so --help renders their default as
+    # the positive flag name ([default: cache]), while the destructive orphans pair
+    # defaults to False and renders [default: skip-orphans]. Whether the user
+    # actually touched a flag is recovered from its parameter source: an untouched
+    # pair follows the collective selection rule instead of counting as a positive
+    # or a skip. A value from the command line, an environment variable or a
+    # configuration file all count as explicit. Each two-sided pair resolves to one
+    # value (the last flag wins in click), so positives and skips are disjoint by
+    # construction.
+    explicit = {
+        category
+        for category in flags
+        if ctx.get_parameter_source(category) is not ParameterSource.DEFAULT
+    }
+    positives = {
+        category for category, value in flags.items() if value and category in explicit
+    }
+    skips = {
+        category
+        for category, value in flags.items()
+        if not value and category in explicit
+    }
     if positives:
         selected = frozenset(positives)
     else:
-        selected = frozenset(CLEANUP_CATEGORIES) - skips
+        selected = DEFAULT_CLEANUP_CATEGORIES - skips
         if not selected:
             ctx.fail("Every cleanup category is skipped.")
 
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
 
     explicit_orphans = "orphans" in positives
-    # Keep only the managers with at least one step to run for the selection. On the
-    # full default selection this matches the operation-implements filter above, as
-    # any implemented category is a step.
+    # Keep only the managers with at least one step to run for the selection: a
+    # manager implementing solely the orphan category (cave, pkg-tools) is thus
+    # skipped by the non-destructive default and reached through --orphans.
     managers = [m for m in managers if _cleanup_steps(m, selected, explicit_orphans)]
 
     def operation(m: PackageManager) -> object:

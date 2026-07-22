@@ -124,7 +124,7 @@ Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every 
 | `cleanup_cache`  | none                 | `mpm cleanup --cache`                                |
 | `cleanup_repair` | none                 | `mpm cleanup --repair`                               |
 
-There is no `cleanup` operation to declare: `mpm cleanup` runs every declared cleanup category, so a definition carrying the old monolithic `cleanup` key is rejected with an error naming the three category keys. Declare `cleanup_cache` for a cache-pruning command, `cleanup_orphan` for an orphan sweep.
+There is no `cleanup` operation to declare: a plain `mpm cleanup` runs the declared `cleanup_cache` and `cleanup_repair` categories, and `mpm cleanup --orphans` the declared `cleanup_orphan`, so a definition carrying the old monolithic `cleanup` key is rejected with an error naming the three category keys. Declare `cleanup_cache` for a cache-pruning command, `cleanup_orphan` for an orphan sweep.
 
 **Query operations** (`installed`, `outdated`, `orphans`, `search`) parse the command's output. `orphans` backs `mpm orphans`, the read-only listing of packages installed as dependencies that nothing requires anymore. `search` may embed the `{query}` placeholder in its `args`; omitting it is also valid for tools with no real search command, whose `search` then lists the whole catalog (`opkg list`, `swupd bundle-list --all`) and relies on `mpm`'s client-side refiltering to narrow the results. Provide *either* a `regex` matched against each output line, *or* a JSON parser (`format = "json"` with a `fields` mapping and optional `list_path`). Both map these recognized fields to a package:
 

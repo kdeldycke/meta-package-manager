@@ -661,33 +661,33 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         return False
 
     def cleanup(self) -> None:
-        """Run every cleanup category the manager natively implements.
+        """Run the manager's non-destructive cleanup categories.
 
         Not an operation managers define anymore: ``cleanup`` is the fixed
-        composition of the category methods a manager overrides
-        (:py:meth:`cleanup_orphan`, :py:meth:`cleanup_cache`,
-        :py:meth:`cleanup_repair`), run in that order. The synthesized orphan sweep
-        never joins in: it only engages on an explicit ``mpm cleanup --orphans``,
-        so a plain ``cleanup`` cannot remove packages the native tool would have
-        kept.
+        composition of the non-destructive category methods a manager overrides
+        (:py:meth:`cleanup_cache`, then :py:meth:`cleanup_repair`). The orphan
+        sweep never joins in, native or synthesized: it is the one category that
+        removes packages, so it only runs on an explicit ``mpm cleanup --orphans``
+        (or a direct :py:meth:`cleanup_orphan` call), keeping a plain ``cleanup``
+        package-preserving on every manager.
 
         A manager overriding no category method does not advertise the ``cleanup``
         operation at all (see
         :py:func:`meta_package_manager.capabilities.implements`) and this composer
         is then a no-op.
         """
-        for method_name in ("cleanup_orphan", "cleanup_cache", "cleanup_repair"):
+        for method_name in ("cleanup_cache", "cleanup_repair"):
             if self._defines(method_name):
                 getattr(self, method_name)()
 
     def cleanup_orphan(self) -> None:
         """Remove every orphaned package on the system, sparing the caches.
 
-        The opt-in ``mpm cleanup --orphans`` variant of
-        :py:meth:`meta_package_manager.manager.PackageManager.cleanup`, narrowed to the
-        system-wide "remove all packages nothing depends on anymore" sweep and skipping
-        the cache and temporary-file pruning that plain :py:meth:`cleanup` also performs
+        The system-wide "remove all packages nothing depends on anymore" sweep
         (``apt autoremove``, ``brew autoremove``, ``flatpak uninstall --unused``, ...).
+        The one cleanup category that removes packages, so it is deliberately kept out
+        of the plain :py:meth:`cleanup` composition and only runs on an explicit
+        ``mpm cleanup --orphans``.
 
         Distinct from
         :py:meth:`meta_package_manager.manager.PackageManager.remove_orphan`, which is

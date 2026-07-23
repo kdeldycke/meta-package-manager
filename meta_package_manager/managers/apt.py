@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class APT(PackageManager):
-    """Base class for Debian's ``apt`` front-end and its variants.
+    """Base class for Debian's `apt` front-end and its variants.
 
     Documentation:
 
@@ -40,23 +40,25 @@ class APT(PackageManager):
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
 
-    mpm drives the high-level ``apt`` binary, not ``apt-get`` or ``apt-cache``,
-    over system-wide packages. Mutations escalate through ``sudo`` and force
-    ``--yes`` to stay non-interactive. :py:class:`APT_Mint` retargets Linux
-    Mint's same-named but differently-behaved ``apt``.
+    mpm drives the high-level `apt` binary, not `apt-get` or `apt-cache`,
+    over system-wide packages. Mutations escalate through `sudo` and force
+    `--yes` to stay non-interactive. {class}`APT_Mint` retargets Linux
+    Mint's same-named but differently-behaved `apt`.
 
-    .. note::
-        apt's listing and search commands emit ``Listing...``, ``Sorting...``
-        and ``Full Text Search...`` preambles plus progress indicators.
-        ``--quiet`` drops the progress bars, and each parser anchors on the
-        ``name/suite version arch`` row shape, so the preamble lines fall
-        through.
+    ```{note}
+    apt's listing and search commands emit `Listing...`, `Sorting...`
+    and `Full Text Search...` preambles plus progress indicators.
+    `--quiet` drops the progress bars, and each parser anchors on the
+    `name/suite version arch` row shape, so the preamble lines fall
+    through.
+    ```
 
-    .. note::
-        ``search`` matches names only by default. An exact query is wrapped as
-        the ``^query$`` regex apt supports natively; an extended query switches
-        to ``--full`` to pull descriptions into the output for mpm to
-        post-filter.
+    ```{note}
+    `search` matches names only by default. An exact query is wrapped as
+    the `^query$` regex apt supports natively; an extended query switches
+    to `--full` to pull descriptions into the output for mpm to
+    post-filter.
+    ```
     """
 
     name = "Debian apt"
@@ -91,41 +93,43 @@ class APT(PackageManager):
         re.MULTILINE | re.VERBOSE,
     )
     """
-    ``--quiet``: produces output suitable for logging, omitting progress indicators.
+    `--quiet`: produces output suitable for logging, omitting progress indicators.
 
     Source: https://manpages.org/apt-get/8#options
     """
 
     version_regexes = (r"apt\s+(?P<version>\S+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ apt --version
-        apt 2.0.6 (amd64)
+    $ apt --version
+    apt 2.0.6 (amd64)
+    ```
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apt --quiet list --installed
-            Listing...
-            adduser/xenial,now 3.113+nmu3ubuntu4 all [installed]
-            bc/xenial,now 1.06.95-9build1 amd64 [installed]
-            bsdmainutils/xenial,now 9.0.6ubuntu3 amd64 [installed,automatic]
-            ca-certificates/xenial,now 20160104ubuntu1 all [installed]
-            cron/xenial,now 3.0pl1-128ubuntu2 amd64 [installed]
-            debconf/xenial,now 1.5.58ubuntu1 all [installed]
-            debianutils/xenial,now 4.7 amd64 [installed]
-            diffutils/xenial,now 1:3.3-3 amd64 [installed]
-            e2fsprogs/xenial,now 1.42.13-1ubuntu1 amd64 [installed]
-            ethstatus/xenial,now 0.4.3ubuntu2 amd64 [installed]
-            file/xenial,now 1:5.25-2ubuntu1 amd64 [installed]
-            findutils/xenial,now 4.6.0+git+20160126-2 amd64 [installed]
-            libidn2-0/jammy,now 2.3.2-2build1 amd64 [installed,automatic]
-            libidn2-0/jammy,now 2.3.2-2build1 i386 [installed,automatic]
+        $ apt --quiet list --installed
+        Listing...
+        adduser/xenial,now 3.113+nmu3ubuntu4 all [installed]
+        bc/xenial,now 1.06.95-9build1 amd64 [installed]
+        bsdmainutils/xenial,now 9.0.6ubuntu3 amd64 [installed,automatic]
+        ca-certificates/xenial,now 20160104ubuntu1 all [installed]
+        cron/xenial,now 3.0pl1-128ubuntu2 amd64 [installed]
+        debconf/xenial,now 1.5.58ubuntu1 all [installed]
+        debianutils/xenial,now 4.7 amd64 [installed]
+        diffutils/xenial,now 1:3.3-3 amd64 [installed]
+        e2fsprogs/xenial,now 1.42.13-1ubuntu1 amd64 [installed]
+        ethstatus/xenial,now 0.4.3ubuntu2 amd64 [installed]
+        file/xenial,now 1:5.25-2ubuntu1 amd64 [installed]
+        findutils/xenial,now 4.6.0+git+20160126-2 amd64 [installed]
+        libidn2-0/jammy,now 2.3.2-2build1 amd64 [installed,automatic]
+        libidn2-0/jammy,now 2.3.2-2build1 i386 [installed,automatic]
+        ```
         """
         output = self.run_cli("list", "--installed")
 
@@ -141,12 +145,13 @@ class APT(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apt --quiet list --upgradable
-            Listing...
-            apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
-            nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
+        $ apt --quiet list --upgradable
+        Listing...
+        apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
+        nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
+        ```
         """
         output = self.run_cli("list", "--upgradable")
 
@@ -164,25 +169,26 @@ class APT(PackageManager):
     def orphans(self) -> Iterator[Package]:
         """Fetch packages installed as dependencies that nothing requires anymore.
 
-        ``--simulate`` turns ``autoremove`` into a read-only report of the
-        would-be-removed packages, printed as ``Remv <name> [<version>]`` lines.
+        `--simulate` turns `autoremove` into a read-only report of the
+        would-be-removed packages, printed as `Remv <name> [<version>]` lines.
         It needs no root: apt only prints a notice that the run is a simulation.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apt --quiet autoremove --simulate
-            NOTE: This is only a simulation!
-                  apt needs root privileges for real execution.
-                  Keep also in mind that locking is deactivated,
-                  so don't depend on the relevance to the real current situation!
-            Reading package lists...
-            Building dependency tree...
-            Reading state information...
-            The following packages will be REMOVED:
-              libx11-dev libxcb1-dev
-            0 upgraded, 0 newly installed, 2 to remove and 0 not upgraded.
-            Remv libx11-dev [2:1.8.7-1]
-            Remv libxcb1-dev [1.15-1]
+        $ apt --quiet autoremove --simulate
+        NOTE: This is only a simulation!
+              apt needs root privileges for real execution.
+              Keep also in mind that locking is deactivated,
+              so don't depend on the relevance to the real current situation!
+        Reading package lists...
+        Building dependency tree...
+        Reading state information...
+        The following packages will be REMOVED:
+          libx11-dev libxcb1-dev
+        0 upgraded, 0 newly installed, 2 to remove and 0 not upgraded.
+        Remv libx11-dev [2:1.8.7-1]
+        Remv libxcb1-dev [1.15-1]
+        ```
         """
         output = self.run_cli("autoremove", "--simulate")
 
@@ -195,57 +201,60 @@ class APT(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apt --quiet search abc --names-only
-            Sorting...
-            Full Text Search...
-            abcde/xenial 2.7.1-1 all
-              A Better CD Encoder
+        $ apt --quiet search abc --names-only
+        Sorting...
+        Full Text Search...
+        abcde/xenial 2.7.1-1 all
+          A Better CD Encoder
 
-            abcmidi/xenial 20160103-1 amd64
-              converter from ABC to MIDI format and back
+        abcmidi/xenial 20160103-1 amd64
+          converter from ABC to MIDI format and back
 
-            berkeley-abc/xenial 1.01+20150706hgc3698e0+dfsg-2 amd64
-              ABC - A System for Sequential Synthesis and Verification
+        berkeley-abc/xenial 1.01+20150706hgc3698e0+dfsg-2 amd64
+          ABC - A System for Sequential Synthesis and Verification
 
-            fuse-overlayfs/jammy,now 1.7.1-1 amd64 [installed]
-              implementation of overlay+shiftfs in FUSE for rootless containers
+        fuse-overlayfs/jammy,now 1.7.1-1 amd64 [installed]
+          implementation of overlay+shiftfs in FUSE for rootless containers
 
-            grabcd-rip/xenial 0009-1 all
-              rip and encode audio CDs - ripper
+        grabcd-rip/xenial 0009-1 all
+          rip and encode audio CDs - ripper
 
-            libakonadi-kabc4/xenial 4:4.14.10-1ubuntu2 amd64
-              Akonadi address book access library
+        libakonadi-kabc4/xenial 4:4.14.10-1ubuntu2 amd64
+          Akonadi address book access library
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apt --quiet search ^sed$ --names-only
-            Sorting...
-            Full Text Search...
-            sed/xenial 2.1.9-3 all
-              Blah blah blah
+        $ apt --quiet search ^sed$ --names-only
+        Sorting...
+        Full Text Search...
+        sed/xenial 2.1.9-3 all
+          Blah blah blah
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apt --quiet search abc --full
-            Sorting...
-            Full Text Search...
-            abcde/xenial 2.7.1-1 all
-              This package contains the essential basic system utilities.
-              .
-              Specifically, this package includes:
-              basename cat chgrp chmod chown chroot cksum comm cp csplit cut
-              dircolors dirname du echo env expand expr factor false fmt
-              hostid id install join link ln logname ls md5sum mkdir mkfifo
-              nohup od paste pathchk pinky pr printenv printf ptx pwd
-              sha1sum seq shred sleep sort split stat stty sum sync tac tail
-              tr true tsort tty uname unexpand uniq unlink users vdir wc who
+        $ apt --quiet search abc --full
+        Sorting...
+        Full Text Search...
+        abcde/xenial 2.7.1-1 all
+          This package contains the essential basic system utilities.
+          .
+          Specifically, this package includes:
+          basename cat chgrp chmod chown chroot cksum comm cp csplit cut
+          dircolors dirname du echo env expand expr factor false fmt
+          hostid id install join link ln logname ls md5sum mkdir mkfifo
+          nohup od paste pathchk pinky pr printenv printf ptx pwd
+          sha1sum seq shred sleep sort split stat stty sum sync tac tail
+          tr true tsort tty uname unexpand uniq unlink users vdir wc who
 
-            (...)
+        (...)
 
-            midi/xenial 20160103-1 amd64
-              converter from ABC to MIDI format and back
+        midi/xenial 20160103-1 amd64
+          converter from ABC to MIDI format and back
+        ```
         """
         search_arg = "--names-only"
         if exact:
@@ -270,18 +279,20 @@ class APT(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apt --quiet --yes install git
+        $ sudo apt --quiet --yes install git
+        ```
         """
         return self.run_cli("--yes", "install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apt --quiet --yes upgrade
+        $ sudo apt --quiet --yes upgrade
+        ```
         """
         return self.build_cli("--yes", "upgrade", sudo=True)
 
@@ -293,9 +304,10 @@ class APT(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apt --quiet --yes install --only-upgrade git
+        $ sudo apt --quiet --yes install --only-upgrade git
+        ```
         """
         return self.build_cli(
             "--yes",
@@ -308,70 +320,76 @@ class APT(PackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apt --quiet --yes remove git
+        $ sudo apt --quiet --yes remove git
+        ```
         """
         return self.run_cli("--yes", "remove", package_id, sudo=True)
 
     def remove_orphan(self, package_id: str) -> str:
         """Remove one package, then drop dependencies it alone pulled in.
 
-        ``--auto-remove`` clears the packages that were installed as
+        `--auto-remove` clears the packages that were installed as
         dependencies and are no longer needed after the removal.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apt --quiet --yes remove --auto-remove git
+        $ sudo apt --quiet --yes remove --auto-remove git
+        ```
         """
         return self.run_cli("--yes", "remove", "--auto-remove", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apt --quiet --yes update
-            Hit:1 http://archive.ubuntu.com xenial InRelease
-            Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
-            Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
-            Get:4 http://archive.ubuntu.com xenial/main Translation-en [568 kB]
-            Fetched 6,868 kB in 2s (2,680 kB/s)
-            Reading package lists...
-            Building dependency tree...
-            Reading state information...
+        $ sudo apt --quiet --yes update
+        Hit:1 http://archive.ubuntu.com xenial InRelease
+        Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
+        Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
+        Get:4 http://archive.ubuntu.com xenial/main Translation-en [568 kB]
+        Fetched 6,868 kB in 2s (2,680 kB/s)
+        Reading package lists...
+        Building dependency tree...
+        Reading state information...
+        ```
         """
         self.run_cli("--yes", "update", sudo=True)
 
     def cleanup_orphan(self) -> None:
         """Remove every package installed as a dependency and no longer required.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apt --quiet --yes autoremove
+        $ sudo apt --quiet --yes autoremove
+        ```
         """
         self.run_cli("--yes", "autoremove", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Clear out the local repository of retrieved package files.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apt --quiet --yes clean
+        $ sudo apt --quiet --yes clean
+        ```
         """
         self.run_cli("--yes", "clean", sudo=True)
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
 
-        ``apt`` itself has no stable check verb, so the diagnosis goes through the
-        ``apt-get`` sibling: ``check`` verifies the package cache and dependency
+        `apt` itself has no stable check verb, so the diagnosis goes through the
+        `apt-get` sibling: `check` verifies the package cache and dependency
         integrity, prints the broken state and exits non-zero on problems. Runs
         unprivileged.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apt-get --quiet check
+        $ apt-get --quiet check
+        ```
         """
         return self.build_cli(
             "check",
@@ -380,21 +398,23 @@ class APT(PackageManager):
 
 
 class APT_Mint(APT):
-    """Linux Mint's ``apt``, a wrapper script that shadows Debian's ``apt``.
+    """Linux Mint's `apt`, a wrapper script that shadows Debian's `apt`.
 
-    Mint ships its own ``apt`` command reusing the name but not the behavior of
-    :py:class:`APT`, so only version probing and search parsing are overridden
+    Mint ships its own `apt` command reusing the name but not the behavior of
+    {class}`APT`, so only version probing and search parsing are overridden
     here; every other operation is inherited.
 
-    .. note::
-        Mint's ``apt --version`` prints no ``apt <version>`` line, so the
-        version is read from ``apt version apt``: the version of the apt package
-        itself.
+    ```{note}
+    Mint's `apt --version` prints no `apt <version>` line, so the
+    version is read from `apt version apt`: the version of the apt package
+    itself.
+    ```
 
-    .. caution::
-        Search rows are ``<status> <name> - <description>`` with no version
-        column and no ``--full`` mode, so extended matching is unsupported and
-        results carry no version.
+    ```{caution}
+    Search rows are `<status> <name> - <description>` with no version
+    column and no `--full` mode, so extended matching is unsupported and
+    results carry no version.
+    ```
     """
 
     name = "Linux Mint apt"
@@ -419,32 +439,36 @@ class APT_Mint(APT):
 
     version_cli_options = ("version", "apt")
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ apt version apt
-        1.6.11
+    $ apt version apt
+    1.6.11
+    ```
     """
 
     @search_capabilities(extended_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not supports extended matching.
+        ```{caution}
+        Search does not supports extended matching.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ /usr/local/bin/apt --quiet search sed
-            v   librust-slog-2.5+erased-serde-dev  -
-            p   python3-blessed                    - Practical wrapper
-            i   sed                                - GNU stream editor
-            p   sed:i386                           - GNU stream editor
+        $ /usr/local/bin/apt --quiet search sed
+        v   librust-slog-2.5+erased-serde-dev  -
+        p   python3-blessed                    - Practical wrapper
+        i   sed                                - GNU stream editor
+        p   sed:i386                           - GNU stream editor
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ /usr/local/bin/apt --quiet search ^sed$
-            i   sed              - GNU stream editor
-            p   sed:i386         - GNU stream editor
+        $ /usr/local/bin/apt --quiet search ^sed$
+        i   sed              - GNU stream editor
+        p   sed:i386         - GNU stream editor
+        ```
         """
         if exact:
             # Rely on apt regexp support to speed-up exact match.

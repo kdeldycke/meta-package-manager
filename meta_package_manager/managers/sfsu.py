@@ -30,20 +30,21 @@ if TYPE_CHECKING:
 
 class SFSU(PackageManager):
     """sfsu (Scoop For Speed and Usability) is a Rust reimplementation of
-    Scoop's slower read paths, working against the same buckets and ``~/scoop``
+    Scoop's slower read paths, working against the same buckets and `~/scoop`
     install tree.
 
     mpm reaches for sfsu only where it is both faster than Scoop and speaks
-    JSON: ``installed``, ``outdated`` and ``search`` all pass ``--json`` and are
+    JSON: `installed`, `outdated` and `search` all pass `--json` and are
     parsed as structured objects instead of the whitespace tables Scoop prints.
 
-    .. note::
-        sfsu implements no mutating verbs, so ``install``, ``remove`` and both
-        upgrade commands are bound straight to
-        :class:`~meta_package_manager.managers.scoop.Scoop` through the
-        :class:`~meta_package_manager.capabilities.Delegate` descriptor: those
-        operations run the ``scoop`` binary, and a host with sfsu but no Scoop
-        cannot mutate anything.
+    ```{note}
+    sfsu implements no mutating verbs, so `install`, `remove` and both
+    upgrade commands are bound straight to
+    {class}`~meta_package_manager.managers.scoop.Scoop` through the
+    {class}`~meta_package_manager.capabilities.Delegate` descriptor: those
+    operations run the `scoop` binary, and a host with sfsu but no Scoop
+    cannot mutate anything.
+    ```
     """
 
     # Mutating operations delegate to the Scoop CLI.
@@ -61,36 +62,38 @@ class SFSU(PackageManager):
 
     version_regexes = (r"sfsu\s+(?P<version>\S+)",)
     """
-    .. code-block:: pwsh-session
+    ```{code-block} pwsh-session
 
-        > sfsu --version
-        sfsu 1.17.2
-        sprinkles 0.22.0 (crates.io published version)
+    > sfsu --version
+    sfsu 1.17.2
+    sprinkles 0.22.0 (crates.io published version)
+    ```
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > sfsu list --json
-            [
-              {
-                "name": "7zip",
-                "version": "26.00",
-                "source": "main",
-                "updated": "2026-03-18 17:54:32",
-                "notes": ""
-              },
-              {
-                "name": "git",
-                "version": "2.53.0.3",
-                "source": "main",
-                "updated": "2026-03-15 09:12:04",
-                "notes": ""
-              }
-            ]
+        > sfsu list --json
+        [
+          {
+            "name": "7zip",
+            "version": "26.00",
+            "source": "main",
+            "updated": "2026-03-18 17:54:32",
+            "notes": ""
+          },
+          {
+            "name": "git",
+            "version": "2.53.0.3",
+            "source": "main",
+            "updated": "2026-03-15 09:12:04",
+            "notes": ""
+          }
+        ]
+        ```
         """
         output = self.run_cli("list", "--json")
         data = self.parse_json(output)
@@ -105,23 +108,24 @@ class SFSU(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        Uses ``sfsu status --only apps --json`` which returns packages with
+        Uses `sfsu status --only apps --json` which returns packages with
         available updates.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > sfsu status --only apps --json
+        > sfsu status --only apps --json
+        {
+          "packages": [
             {
-              "packages": [
-                {
-                  "name": "git",
-                  "current": "2.53.0.2",
-                  "available": "2.53.0.3",
-                  "missing_dependencies": [],
-                  "info": null
-                }
-              ]
+              "name": "git",
+              "current": "2.53.0.2",
+              "available": "2.53.0.3",
+              "missing_dependencies": [],
+              "info": null
             }
+          ]
+        }
+        ```
         """
         output = self.run_cli("status", "--only", "apps", "--json")
         data = self.parse_json(output)
@@ -137,27 +141,29 @@ class SFSU(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not support extended or exact matching. Results are
-            refiltered by
-            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`.
+        ```{caution}
+        Search does not support extended or exact matching. Results are
+        refiltered by
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search`.
+        ```
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > sfsu search --json git
+        > sfsu search --json git
+        {
+          "main": [
             {
-              "main": [
-                {
-                  "name": "git",
-                  "bucket": "main",
-                  "version": "2.53.0.3",
-                  "installed": true,
-                  "bins": []
-                },
-                ...
-              ],
-              ...
-            }
+              "name": "git",
+              "bucket": "main",
+              "version": "2.53.0.3",
+              "installed": true,
+              "bins": []
+            },
+            ...
+          ],
+          ...
+        }
+        ```
         """
         output = self.run_cli("search", "--json", query)
         data = self.parse_json(output)
@@ -178,20 +184,22 @@ class SFSU(PackageManager):
     def sync(self) -> None:
         """Sync package metadata.
 
-        Uses sfsu's native ``update`` command which updates Scoop and all
+        Uses sfsu's native `update` command which updates Scoop and all
         buckets.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > sfsu update --no-color
+        > sfsu update --no-color
+        ```
         """
         self.run_cli("update")
 
     def cleanup_cache(self) -> None:
         """Removes old versions of all installed apps and clears the cache.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > sfsu cleanup --all --cache --no-color
+        > sfsu cleanup --all --cache --no-color
+        ```
         """
         self.run_cli("cleanup", "--all", "--cache")

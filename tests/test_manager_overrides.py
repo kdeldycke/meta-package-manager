@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 """Tests for the per-manager override mechanism driven by the
-``[mpm.managers.<id>]`` configuration section."""
+`[mpm.managers.<id>]` configuration section."""
 
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ from .conftest import all_manager_ids, tomllib
 OVERRIDE_TARGET = "pip"
 """Manager ID used as a fixture target for override tests.
 
-``pip`` is portable across all test platforms and never deprecated, so its presence in
+`pip` is portable across all test platforms and never deprecated, so its presence in
 the pool is stable.
 """
 
@@ -63,10 +63,10 @@ def _clean_override_target() -> None:
 def reset_overrides():
     """Restore the override target's instance state before and after each test.
 
-    The ``pool`` is a module-level singleton: any attribute we shadow on a manager
-    instance via ``apply_manager_overrides()`` would leak to the next test. This
+    The `pool` is a module-level singleton: any attribute we shadow on a manager
+    instance via `apply_manager_overrides()` would leak to the next test. This
     fixture pops every overridable field and every cache-invalidated property from
-    the instance ``__dict__``, and clears the pool's overridden-fields tracking dict
+    the instance `__dict__`, and clears the pool's overridden-fields tracking dict
     so the next test starts from class defaults.
 
     Cleanup runs both before (in case a prior test in the same xdist worker left the
@@ -78,10 +78,10 @@ def reset_overrides():
 
 
 def test_overridable_fields_match_base_attributes():
-    """Every overridable field must exist on the ``PackageManager`` base class.
+    """Every overridable field must exist on the `PackageManager` base class.
 
-    Drift between :data:`OVERRIDABLE_FIELDS` and the base class is silent at runtime
-    (``setattr`` happily creates new attributes) so this test acts as the safety net.
+    Drift between {data}`OVERRIDABLE_FIELDS` and the base class is silent at runtime
+    (`setattr` happily creates new attributes) so this test acts as the safety net.
     """
     from meta_package_manager.manager import PackageManager
 
@@ -169,8 +169,8 @@ def test_int_override(reset_overrides):
 
 
 def test_int_override_rejects_bool(reset_overrides):
-    """A boolean is not an acceptable integer override even though ``bool`` subclasses
-    ``int`` in Python."""
+    """A boolean is not an acceptable integer override even though `bool` subclasses
+    `int` in Python."""
     with pytest.raises(ValidationError, match=r"expected an integer"):
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": True}})
 
@@ -234,8 +234,8 @@ def test_cached_property_evicted_on_override(reset_overrides):
 
 
 def test_per_manager_timeout_beats_global_default(reset_overrides):
-    """A per-manager ``timeout`` override must survive the global ``setattr`` loop in
-    ``_select_managers``: the most specific value wins."""
+    """A per-manager `timeout` override must survive the global `setattr` loop in
+    `_select_managers`: the most specific value wins."""
     apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": 42}})
     selected = list(
         pool._select_managers(
@@ -258,8 +258,8 @@ def test_per_manager_timeout_beats_global_default(reset_overrides):
 def test_timeout_binds_detection_phase(
     reset_overrides, monkeypatch, override, expected
 ):
-    """``_select_managers`` binds the version-detection probes to the resolved timeout
-    *before* ``warm_availability`` runs them: the global ``--timeout`` reaches a plain
+    """`_select_managers` binds the version-detection probes to the resolved timeout
+    *before* `warm_availability` runs them: the global `--timeout` reaches a plain
     candidate, while a per-manager override still keeps precedence."""
     if override is not None:
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": override}})
@@ -329,8 +329,8 @@ def test_sudo_override_rejects_int(reset_overrides):
 
 
 def test_per_manager_sudo_beats_global_default(reset_overrides):
-    """A per-manager ``sudo`` override survives the global ``setattr`` loop, so a
-    manager can opt out of (or into) escalation regardless of the global ``--sudo``."""
+    """A per-manager `sudo` override survives the global `setattr` loop, so a
+    manager can opt out of (or into) escalation regardless of the global `--sudo`."""
     apply_manager_overrides(pool, {OVERRIDE_TARGET: {"sudo": False}})
     selected = list(
         pool._select_managers(
@@ -356,8 +356,8 @@ CONFIG_TEMPLATE = dedent("""\
 
 
 def test_cli_loads_manager_overrides(invoke, create_config, reset_overrides):
-    """End-to-end: ``mpm --config <path>`` applies overrides from
-    ``[mpm.managers.<id>]``."""
+    """End-to-end: `mpm --config <path>` applies overrides from
+    `[mpm.managers.<id>]`."""
     conf_path = create_config(
         "conf.toml", CONFIG_TEMPLATE.format(manager_id=OVERRIDE_TARGET)
     )
@@ -369,7 +369,7 @@ def test_cli_loads_manager_overrides(invoke, create_config, reset_overrides):
 def test_cli_fails_on_unknown_manager_in_config(invoke, create_config):
     """A typo'd manager ID in the config aborts the CLI with a precise dotted
     path. Permissive warn-and-skip behavior was removed: the same validator
-    that powers ``--validate-config`` runs at normal load time."""
+    that powers `--validate-config` runs at normal load time."""
     conf_path = create_config(
         "conf.toml",
         dedent("""\
@@ -572,7 +572,7 @@ def test_cli_no_hint_for_preference_override(invoke, create_config, reset_overri
 
 
 def test_cli_opt_out_suppresses_hint(invoke, create_config, reset_overrides):
-    """``--no-suggest-contribs`` silences the hint output."""
+    """`--no-suggest-contribs` silences the hint output."""
     conf_path = create_config(
         "conf.toml",
         dedent("""\
@@ -592,7 +592,7 @@ def test_cli_opt_out_suppresses_hint(invoke, create_config, reset_overrides):
 
 
 def test_cli_opt_out_via_config(invoke, create_config, reset_overrides):
-    """The ``[mpm] suggest_contribs = false`` config also silences
+    """The `[mpm] suggest_contribs = false` config also silences
     the hint."""
     conf_path = create_config(
         "conf.toml",
@@ -614,7 +614,7 @@ def test_cli_opt_out_via_config(invoke, create_config, reset_overrides):
 
 
 def test_dump_manager_overrides_skips_none_values():
-    """Attributes whose current value is ``None`` are omitted from the dump."""
+    """Attributes whose current value is `None` are omitted from the dump."""
     manager = pool[OVERRIDE_TARGET]
     # Force one overridable field to None to confirm it gets skipped.
     manager.__dict__["requirement"] = None
@@ -626,7 +626,7 @@ def test_dump_manager_overrides_skips_none_values():
 
 
 def test_dump_manager_overrides_converts_tuples_to_lists():
-    """Tuples are converted to lists so :py:mod:`tomli_w` can serialize them."""
+    """Tuples are converted to lists so {mod}`tomli_w` can serialize them."""
     manager = pool[OVERRIDE_TARGET]
     dumped = dump_manager_overrides(manager)
     # cli_names is always set (the metaclass populates it from the manager ID).
@@ -644,7 +644,7 @@ def test_dump_manager_overrides_keys_are_alphabetical():
 @all_manager_ids
 def test_config_template_round_trips(manager_id):
     """For every manager, dump → tomli_w → tomllib → converter yields the same
-    value. Catches schema drift between :data:`OVERRIDABLE_FIELDS` converters
+    value. Catches schema drift between {data}`OVERRIDABLE_FIELDS` converters
     and the live attribute types."""
     manager = pool[manager_id]
     dumped = dump_manager_overrides(manager)

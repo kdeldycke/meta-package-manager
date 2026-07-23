@@ -33,28 +33,30 @@ if TYPE_CHECKING:
 class Snap(PackageManager):
     """Canonical's snap installs sandboxed, self-updating packages.
 
-    snaps refresh themselves on a schedule, so ``upgrade`` merely forces a
-    ``snap refresh`` sooner. Mutating operations escalate through ``sudo`` by
-    default: the privileged work happens in the ``snapd`` daemon, but the daemon
-    refuses state changes from an unprivileged client (``snap install`` as a
-    plain user is denied with a hint to retry with ``sudo``), which is why the
-    Snap store documents ``sudo snap install`` as the canonical invocation. A
-    host authenticated against the store with ``snap login`` (or granted a
-    polkit rule) can drop the wrap with ``--no-sudo`` or a
-    ``[mpm.managers.snap] sudo = false`` override.
+    snaps refresh themselves on a schedule, so `upgrade` merely forces a
+    `snap refresh` sooner. Mutating operations escalate through `sudo` by
+    default: the privileged work happens in the `snapd` daemon, but the daemon
+    refuses state changes from an unprivileged client (`snap install` as a
+    plain user is denied with a hint to retry with `sudo`), which is why the
+    Snap store documents `sudo snap install` as the canonical invocation. A
+    host authenticated against the store with `snap login` (or granted a
+    polkit rule) can drop the wrap with `--no-sudo` or a
+    `[mpm.managers.snap] sudo = false` override.
 
-    .. note::
-        snap localizes and colorizes its table headers with no terminal
-        detection. mpm pins nothing to English: ``--color=never`` strips the
-        ANSI, the header row is dropped, and every row is split on whitespace
-        and read by column position, so the translated headers never reach the
-        parser.
+    ```{note}
+    snap localizes and colorizes its table headers with no terminal
+    detection. mpm pins nothing to English: `--color=never` strips the
+    ANSI, the header row is dropped, and every row is split on whitespace
+    and read by column position, so the translated headers never reach the
+    parser.
+    ```
 
-    .. note::
-        ``snap refresh --list`` reports only the available version, so
-        ``outdated`` looks each installed version up by ID from the cached
-        installed set. ``search`` runs ``snap find``, which matches summaries as
-        well as names, so mpm refilters the results.
+    ```{note}
+    `snap refresh --list` reports only the available version, so
+    `outdated` looks each installed version up by ID from the cached
+    installed set. `search` runs `snap find`, which matches summaries as
+    well as names, so mpm refilters the results.
+    ```
     """
 
     homepage_url = "https://snapcraft.io"
@@ -74,27 +76,29 @@ class Snap(PackageManager):
 
     version_regexes = (r"snap\s+(?P<version>\S+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ snap --version
-        snap       2.44.1
-        snapd      2.44.1
-        series     16
-        linuxmint  19.3
-        kernel     4.15.0-91-generic
+    $ snap --version
+    snap       2.44.1
+    snapd      2.44.1
+    series     16
+    linuxmint  19.3
+    kernel     4.15.0-91-generic
+    ```
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ snap list --color=never
-            Name    Version    Rev   Aufzeichnung   Herausgeber     Hinweise
-            core    16-2.44.1  8935  latest/stable  canonical✓      core
-            wechat  2.0        7     latest/stable  ubuntu-dawndiy  -
-            pdftk   2.02-4     9     latest/stable  smoser          -
+        $ snap list --color=never
+        Name    Version    Rev   Aufzeichnung   Herausgeber     Hinweise
+        core    16-2.44.1  8935  latest/stable  canonical✓      core
+        wechat  2.0        7     latest/stable  ubuntu-dawndiy  -
+        pdftk   2.02-4     9     latest/stable  smoser          -
+        ```
         """
         output = self.run_cli("list")
 
@@ -106,11 +110,12 @@ class Snap(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ snap refresh --list --color=never
-            Name            Version  Rev  Herausgeber     Hinweise
-            standard-notes  3.3.5    8    standardnotes✓  -
+        $ snap refresh --list --color=never
+        Name            Version  Rev  Herausgeber     Hinweise
+        standard-notes  3.3.5    8    standardnotes✓  -
+        ```
         """
         output = self.run_cli("refresh", "--list")
 
@@ -129,18 +134,20 @@ class Snap(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search is extended by default. So we return the best subset of results and
-            let :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
-            refine them.
+        ```{caution}
+        Search is extended by default. So we return the best subset of results and
+        let {meth}`meta_package_manager.manager.PackageManager.refiltered_search`
+        refine them.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ snap find doc --color=never
-            Name       Version      Herausgeber  Hinweise  Zusammenfassung
-            journey    2.14.3       2appstudio   -         Your private diary.
-            nextcloud  17.0.5snap1  nextcloud✓   -         Nextcloud Server
-            skype      8.58.0.93    skype✓       classic   One Skype for all.
+        $ snap find doc --color=never
+        Name       Version      Herausgeber  Hinweise  Zusammenfassung
+        journey    2.14.3       2appstudio   -         Your private diary.
+        nextcloud  17.0.5snap1  nextcloud✓   -         Nextcloud Server
+        skype      8.58.0.93    skype✓       classic   One Skype for all.
+        ```
         """
         output = self.run_cli("find", query)
         headerless_table = None
@@ -163,18 +170,20 @@ class Snap(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo snap install standard-notes --color=never
+        $ sudo snap install standard-notes --color=never
+        ```
         """
         return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo snap refresh --color=never
+        $ sudo snap refresh --color=never
+        ```
         """
         return self.build_cli("refresh", sudo=True)
 
@@ -186,17 +195,19 @@ class Snap(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo snap refresh standard-notes --color=never
+        $ sudo snap refresh standard-notes --color=never
+        ```
         """
         return self.build_cli("refresh", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo snap remove standard-notes --color=never
+        $ sudo snap remove standard-notes --color=never
+        ```
         """
         return self.run_cli("remove", package_id, sudo=True)

@@ -15,17 +15,17 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Abstract base class tying together every package manager definition.
 
-Defines :py:class:`meta_package_manager.manager.PackageManager`, the class each concrete
-manager in :py:mod:`meta_package_manager.managers` inherits from, together with its
-:py:class:`meta_package_manager.manager.MetaPackageManager` metaclass and the
-:py:class:`meta_package_manager.manager.ManagerScope` classification.
+Defines {class}`meta_package_manager.manager.PackageManager`, the class each concrete
+manager in {mod}`meta_package_manager.managers` inherits from, together with its
+{class}`meta_package_manager.manager.MetaPackageManager` metaclass and the
+{class}`meta_package_manager.manager.ManagerScope` classification.
 
 A subclass declares its identity (supported platforms, version requirement, deprecation
-status) and implements the operations it supports (``installed``, ``outdated``,
-``install``, ``upgrade``, ...). The CLI-execution engine it inherits lives in
-:py:mod:`meta_package_manager.execution`, the operation vocabulary in
-:py:mod:`meta_package_manager.capabilities`, and the package objects operations yield in
-:py:mod:`meta_package_manager.package`. On top of the engine, this module adds the
+status) and implements the operations it supports (`installed`, `outdated`,
+`install`, `upgrade`, ...). The CLI-execution engine it inherits lives in
+{mod}`meta_package_manager.execution`, the operation vocabulary in
+{mod}`meta_package_manager.capabilities`, and the package objects operations yield in
+{mod}`meta_package_manager.package`. On top of the engine, this module adds the
 availability policy: whether the manager is supported, fresh, and ready to use.
 """
 
@@ -71,15 +71,15 @@ class ManagerScope(Enum):
     """Manages dependencies confined to a project's working tree.
 
     Not supported yet. See
-    :py:meth:`meta_package_manager.manager.PackageManager.discover_projects`.
+    {meth}`meta_package_manager.manager.PackageManager.discover_projects`.
 
-    .. seealso::
-        Microsoft's `Python Environment Tools (PET)
-        <https://github.com/microsoft/python-environment-tools>`_ is a Rust tool
-        that locates Python environments (venv, conda, pyenv, pipenv, Poetry, uv,
-        ...) across a machine. It only discovers environments and does not
-        inventory their packages, but is a useful reference and benchmark for
-        implementing Python project-scope discovery.
+    ```{seealso}
+    Microsoft's [Python Environment Tools (PET)](https://github.com/microsoft/python-environment-tools) is a Rust tool
+    that locates Python environments (venv, conda, pyenv, pipenv, Poetry, uv,
+    ...) across a machine. It only discovers environments and does not
+    inventory their packages, but is a useful reference and benchmark for
+    implementing Python project-scope discovery.
+    ```
     """
 
 
@@ -119,7 +119,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """Whether the manager operates on globally-installed software or project-local
     dependencies.
 
-    Defaults to :py:attr:`ManagerScope.SYSTEM`, which covers every manager maintained
+    Defaults to {attr}`ManagerScope.SYSTEM`, which covers every manager maintained
     today: they install and query software machine-wide. Project-scoped managers (Poetry,
     Bundler, Maven, ...) resolve dependencies confined to a working tree and are not
     supported yet.
@@ -133,7 +133,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     A deprecated manager is exempt from the project stability policy: it may be dropped,
     in part or in full, in any release and without notice, once keeping it working
     becomes too burdensome. Every deprecation must be documented through
-    :py:attr:`deprecation_url`.
+    {attr}`deprecation_url`.
 
     Deprecated managers are kept out of the functional and integration test matrices, so
     an unreliable or flaky deprecated manager never blocks a release. The cheap static
@@ -144,18 +144,18 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     deprecation_url: str | None = None
     """Announcement from the official project, or evidence of abandonment of maintenance.
 
-    Required for every manager whose :py:attr:`deprecated` flag is set, and only
-    meaningful on such managers. Enforced by ``test_deprecated``.
+    Required for every manager whose {attr}`deprecated` flag is set, and only
+    meaningful on such managers. Enforced by `test_deprecated`.
     """
 
     id: str
     """Package manager's ID.
 
-    Derived by defaults from the lower-cased class name in which underscores ``_`` are
-    replaced by dashes ``-``.
+    Derived by defaults from the lower-cased class name in which underscores `_` are
+    replaced by dashes `-`.
 
     This ID must be unique among all package manager definitions and lower-case, as
-    they're used as feature flags for the :program:`mpm` CLI.
+    they're used as feature flags for the {program}`mpm` CLI.
     """
 
     name: str
@@ -168,13 +168,13 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """Home page of the project, only used in documentation for reference."""
 
     brewfile_entry_type: ClassVar[str | None] = None
-    """Name of the Brewfile DSL entry type this manager maps to, or ``None`` if the
+    """Name of the Brewfile DSL entry type this manager maps to, or `None` if the
     manager has no Brewfile equivalent.
 
-    Set by the subset of managers covered by Homebrew Bundle's DSL (``brew``, ``cask``,
-    ``mas``, ``vscode``, ``npm``, ``cargo``, ``uv``, ``winget``, ``flatpak``). Consumed
-    by :py:mod:`meta_package_manager.brewfile` when rendering the output of
-    ``mpm dump --brewfile``.
+    Set by the subset of managers covered by Homebrew Bundle's DSL (`brew`, `cask`,
+    `mas`, `vscode`, `npm`, `cargo`, `uv`, `winget`, `flatpak`). Consumed
+    by {mod}`meta_package_manager.brewfile` when rendering the output of
+    `mpm dump --brewfile`.
     """
 
     brewfile_skip_warning: ClassVar[str | None] = None
@@ -191,18 +191,18 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """List of platforms supported by the manager.
 
     Allows for a mishmash of platforms and groups of platforms. Will be normalized into a
-    `frozenset` of ``Platform`` instances at instantiation.
+    `frozenset` of `Platform` instances at instantiation.
     """
 
     requirement: str | None = None
     """Version requirement specifier.
 
-    Supports a comma-separated range of constraints (e.g. ``">=1.20.0,<2.0.0"``).
-    A bare version string like ``"1.20.0"`` is treated as ``>=1.20.0``.
+    Supports a comma-separated range of constraints (e.g. `">=1.20.0,<2.0.0"`).
+    A bare version string like `"1.20.0"` is treated as `>=1.20.0`.
 
-    Parsed by :py:class:`meta_package_manager.version.VersionRange`.
+    Parsed by {class}`meta_package_manager.version.VersionRange`.
 
-    Defaults to ``None``, which deactivates version check entirely.
+    Defaults to `None`, which deactivates version check entirely.
     """
 
     virtual: bool
@@ -219,22 +219,22 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     _NAME_VERSION_REGEXP: ClassVar[re.Pattern[str]] = re.compile(
         r"^(?P<package_id>.+)-(?P<version>\d\S*)$",
     )
-    """Default ``<package_id>-<version>`` splitter for managers whose listings pack the
-    name and version into one dash-joined token (``apk``, ``nix``, ``xbps``), consumed
-    through :py:meth:`split_name_version`.
+    """Default `<package_id>-<version>` splitter for managers whose listings pack the
+    name and version into one dash-joined token (`apk`, `nix`, `xbps`), consumed
+    through {meth}`split_name_version`.
 
-    The ``.+`` name segment is greedy, so the version starts at the *last* hyphen
-    followed by a digit: dashes inside the name (``python3``) stay with the name, while
-    trailing ecosystem suffixes (Alpine ``-r<release>``, XBPS ``_<revision>``) stay with
-    the version. Managers with a different layout override it (``pkg`` allows a
-    non-numeric version lead, ``pkcon`` a non-greedy name).
+    The `.+` name segment is greedy, so the version starts at the *last* hyphen
+    followed by a digit: dashes inside the name (`python3`) stay with the name, while
+    trailing ecosystem suffixes (Alpine `-r<release>`, XBPS `_<revision>`) stay with
+    the version. Managers with a different layout override it (`pkg` allows a
+    non-numeric version lead, `pkcon` a non-greedy name).
     """
 
     def split_name_version(self, token: str) -> tuple[str, str] | None:
-        """Split a dash-joined ``<package_id>-<version>`` token into its two parts.
+        """Split a dash-joined `<package_id>-<version>` token into its two parts.
 
-        Matches ``token`` against :data:`_NAME_VERSION_REGEXP` (or the subclass's
-        override of it) and returns the ``(package_id, version)`` pair, or ``None``
+        Matches `token` against {data}`_NAME_VERSION_REGEXP` (or the subclass's
+        override of it) and returns the `(package_id, version)` pair, or `None`
         when the token carries no recognizable version. Shared by every manager
         whose listings glue the name and version together.
         """
@@ -244,11 +244,11 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         return match.group("package_id"), match.group("version")
 
     def parse_json(self, output: str) -> Any | None:
-        """Parse a query's JSON ``output``, tolerating empty and malformed captures.
+        """Parse a query's JSON `output`, tolerating empty and malformed captures.
 
         The shared first step of every JSON-emitting query, for built-in managers
         and config-defined operations alike (see
-        :py:func:`meta_package_manager.definitions._iter_parsed`). Returns ``None``
+        {func}`meta_package_manager.definitions._iter_parsed`). Returns `None`
         when the command produced no output (a manager with nothing to report often
         prints nothing at all), and when the output is not valid JSON, which logs
         one warning tagged with the manager ID instead of raising: a query that
@@ -256,9 +256,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         swallow a failed CLI call into an empty result.
 
         Queries whose failure semantics differ keep their own parsing: a per-line
-        NDJSON stream (``pkg search``), a hard :py:exc:`CLIError` on malformed
-        payloads (``pwsh-gallery``), a best-effort metadata enrichment logging at
-        ``DEBUG`` (``brew info``).
+        NDJSON stream (`pkg search`), a hard {exc}`CLIError` on malformed
+        payloads (`pwsh-gallery`), a best-effort metadata enrichment logging at
+        `DEBUG` (`brew info`).
         """
         if not output:
             return None
@@ -272,9 +272,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             return None
 
     def package(self, **kwargs) -> Package:
-        """Instantiate a ``Package`` object from the manager.
+        """Instantiate a `Package` object from the manager.
 
-        Sets its ``manage_id`` to the manager it belongs to.
+        Sets its `manage_id` to the manager it belongs to.
         """
         kwargs.setdefault("manager_id", self.id)
         return Package(**kwargs)
@@ -282,13 +282,13 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def brewfile_entry(
         self, package: Package
     ) -> tuple[str, dict[str, object] | None] | None:
-        """Return ``(entry_name, entry_options)`` for a Brewfile line, or ``None``
+        """Return `(entry_name, entry_options)` for a Brewfile line, or `None`
         to skip the package.
 
-        Default: emit :py:attr:`meta_package_manager.package.Package.id` as the entry name with no options.
+        Default: emit {attr}`meta_package_manager.package.Package.id` as the entry name with no options.
         Override on managers whose Brewfile DSL counterpart expects a different
-        shape: ``mas`` uses the app name with ``id: ADAM_ID``, ``flatpak`` adds
-        ``with: ["remote"]``. Only called when :py:attr:`brewfile_entry_type` is
+        shape: `mas` uses the app name with `id: ADAM_ID`, `flatpak` adds
+        `with: ["remote"]`. Only called when {attr}`brewfile_entry_type` is
         set.
         """
         return package.id, None
@@ -319,15 +319,15 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def available(self) -> bool:
         """Is the package manager available and ready-to-use on the system?
 
-        Returns ``True`` only if the main CLI:
+        Returns `True` only if the main CLI:
 
-        1. is :py:attr:`supported on the current platform
+        1. is {attr}`supported on the current platform
            <meta_package_manager.manager.PackageManager.supported>`,
-        2. was :py:attr:`found on the system
+        2. was {attr}`found on the system
            <meta_package_manager.execution.CLIExecutor.cli_path>`,
-        3. is :py:attr:`executable
+        3. is {attr}`executable
            <meta_package_manager.execution.CLIExecutor.executable>`, and
-        4. :py:attr:`match the version requirement
+        4. {attr}`match the version requirement
            <meta_package_manager.manager.PackageManager.fresh>`.
         """
         logging.debug(
@@ -342,8 +342,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     @property
     def unavailable_reason(self) -> str | None:
-        """Short, human-readable explanation of why :py:attr:`available` is
-        ``False``, or ``None`` if the manager is available.
+        """Short, human-readable explanation of why {attr}`available` is
+        `False`, or `None` if the manager is available.
 
         Returned in priority order so the most actionable cause is reported
         first: platform support, then CLI lookup, then executable bit, then
@@ -369,18 +369,18 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def installed(self) -> Iterator[Package]:
         """List packages currently installed on the system.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
         """
         raise NotImplementedError
 
     def installed_or_empty(self) -> tuple[Package, ...]:
-        """Materialized :py:attr:`installed`, or an empty tuple on CLI failure.
+        """Materialized {attr}`installed`, or an empty tuple on CLI failure.
 
-        Best-effort inventory snapshot for the ``installed``, ``dump`` and
-        ``sbom`` subcommands: each wants "give me what's installed, and just
+        Best-effort inventory snapshot for the `installed`, `dump` and
+        `sbom` subcommands: each wants "give me what's installed, and just
         skip this manager if its CLI blew up" rather than re-implementing the
-        same :py:class:`meta_package_manager.execution.CLIError` swallow. Logs
-        one canonical warning on error and returns ``()`` so the caller carries
+        same {class}`meta_package_manager.execution.CLIError` swallow. Logs
+        one canonical warning on error and returns `()` so the caller carries
         on with the other managers.
         """
         try:
@@ -394,19 +394,19 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     @cached_property
     def installed_ids(self) -> frozenset[str]:
-        """Installed package IDs, materialized once from :py:meth:`installed`."""
+        """Installed package IDs, materialized once from {meth}`installed`."""
         return frozenset(pkg.id for pkg in self.installed)
 
     @cached_property
     def installed_version_map(self) -> dict[str, TokenizedString | str | None]:
         """Installed versions keyed by package ID, materialized once from
-        :py:meth:`installed`.
+        {meth}`installed`.
 
-        Convenience for ``outdated`` parsers that report each package's latest version
+        Convenience for `outdated` parsers that report each package's latest version
         but not its currently-installed one, and so must look the latter up by ID
-        (``snap``, ``xbps``). The value mirrors
-        :py:attr:`meta_package_manager.package.Package.installed_version`, whose declared
-        type still carries the transient ``str`` it normalizes away in ``__post_init__``.
+        (`snap`, `xbps`). The value mirrors
+        {attr}`meta_package_manager.package.Package.installed_version`, whose declared
+        type still carries the transient `str` it normalizes away in `__post_init__`.
         """
         return {pkg.id: pkg.installed_version for pkg in self.installed}
 
@@ -414,45 +414,46 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         self,
         packages: Iterable[Package],
     ) -> Iterator[tuple[Package, PackageMetadata]]:
-        """Yield ``(package, metadata)`` pairs enriched with whatever rich
+        """Yield `(package, metadata)` pairs enriched with whatever rich
         per-package data this manager can surface.
 
-        Called by ``mpm sbom`` in ``--bundled`` mode to populate licenses,
+        Called by `mpm sbom` in `--bundled` mode to populate licenses,
         checksums, download URLs, supplier/originator, and the declared
         dependency graph. The base implementation yields
-        :py:data:`meta_package_manager.package.EMPTY_METADATA` for each package and stays compatible
+        {data}`meta_package_manager.package.EMPTY_METADATA` for each package and stays compatible
         with managers that do not (yet) expose richer metadata: their SBOM
-        entries stay at the minimal ``Package`` level, matching the
-        historical and ``--minimal`` modes.
+        entries stay at the minimal `Package` level, matching the
+        historical and `--minimal` modes.
 
         Manager subclasses override this with their native query path:
 
         - bulk shell-outs when the CLI accepts a package list
-          (``brew info --json=v2 --installed``, ``dpkg-query -W``,
-          ``apt-cache show``);
+          (`brew info --json=v2 --installed`, `dpkg-query -W`,
+          `apt-cache show`);
         - on-disk parsing when the metadata already lives on the filesystem
-          (pip's ``.dist-info`` directories, Homebrew's per-formula
-          ``sbom.spdx.json``, dpkg's ``.md5sums``).
+          (pip's `.dist-info` directories, Homebrew's per-formula
+          `sbom.spdx.json`, dpkg's `.md5sums`).
 
         The yielded pairs do not need to preserve the input order; the SBOM
-        renderer matches by ``Package`` identity. Implementations are
+        renderer matches by `Package` identity. Implementations are
         expected to swallow per-package extraction errors and yield
-        :py:data:`meta_package_manager.package.EMPTY_METADATA` for the affected packages rather than
+        {data}`meta_package_manager.package.EMPTY_METADATA` for the affected packages rather than
         failing the whole scan: a single misbehaving formula must not abort
         an enrichment pass spanning hundreds of packages.
 
-        .. todo::
-            Today every extractor is local-only (shell-outs to the
-            manager's CLI, plus on-disk reads). When extractors start
-            reaching for network resources (PyPI's JSON API, npm's
-            registry, crates.io, GitHub's security advisories) the
-            ``--bundled`` flag will no longer be a fine-grained enough
-            knob: some users will want enrichment but not network
-            traffic (offline scans, CI without egress). The natural
-            split is a future ``--network/--no-network`` flag layered
-            under ``--bundled`` to gate the network-touching code paths
-            specifically, leaving local enrichment always-on for
-            ``--bundled``.
+        ```{todo}
+        Today every extractor is local-only (shell-outs to the
+        manager's CLI, plus on-disk reads). When extractors start
+        reaching for network resources (PyPI's JSON API, npm's
+        registry, crates.io, GitHub's security advisories) the
+        `--bundled` flag will no longer be a fine-grained enough
+        knob: some users will want enrichment but not network
+        traffic (offline scans, CI without egress). The natural
+        split is a future `--network/--no-network` flag layered
+        under `--bundled` to gate the network-touching code paths
+        specifically, leaving local enrichment always-on for
+        `--bundled`.
+        ```
         """
         for package in packages:
             yield package, EMPTY_METADATA
@@ -461,18 +462,18 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def outdated(self) -> Iterator[Package]:
         """List installed packages with available upgrades.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
         """
         raise NotImplementedError
 
     @property
     def refiltered_outdated(self) -> Iterator[Package]:
-        """Wraps :py:meth:`outdated` with a version-equality filter.
+        """Wraps {meth}`outdated` with a version-equality filter.
 
         Some package managers report packages as outdated when the version
         strings differ at the character level but are numerically equal after
-        parsing (e.g., Perl floating-point versions ``2.0000`` vs
-        ``2.000000``). This filter drops those false positives.
+        parsing (e.g., Perl floating-point versions `2.0000` vs
+        `2.000000`). This filter drops those false positives.
         """
         for pkg in self.outdated:
             if (
@@ -486,14 +487,14 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def orphans(self) -> Iterator[Package]:
         """List packages installed as dependencies that nothing requires anymore.
 
-        The read-only counterpart of the ``--orphans`` action flags: where
-        ``mpm cleanup --orphans`` removes the orphans, this query only reports them,
-        through the manager's native listing (``pacman --query --deps --unrequired``,
-        ``brew autoremove --dry-run``, ``dnf repoquery --unneeded``, ...).
-        :program:`mpm` builds no dependency graph: the manager decides what is
+        The read-only counterpart of the `--orphans` action flags: where
+        `mpm cleanup --orphans` removes the orphans, this query only reports them,
+        through the manager's native listing (`pacman --query --deps --unrequired`,
+        `brew autoremove --dry-run`, `dnf repoquery --unneeded`, ...).
+        {program}`mpm` builds no dependency graph: the manager decides what is
         orphaned.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -502,7 +503,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Returns a set of all contiguous alphanumeric string segments.
 
         Thin delegator to
-        :py:meth:`meta_package_manager.package.Package.query_parts`, the canonical
+        {meth}`meta_package_manager.package.Package.query_parts`, the canonical
         tokenizer, kept here as a convenience for manager-side search code.
         """
         return Package.query_parts(query)
@@ -510,14 +511,14 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Search packages available for install.
 
-        There is no need for this method to be perfect and sensitive to ``extended`` and
-        ``exact`` parameters. If the package manager is not supporting these kind of
+        There is no need for this method to be perfect and sensitive to `extended` and
+        `exact` parameters. If the package manager is not supporting these kind of
         options out of the box, just returns the closest subset of matching package you
         can come up with. Finer refiltering will happens in the
-        :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` method
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search` method
         below.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -532,21 +533,22 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
         Some package managers returns unbounded results, and/or don't support fine
         search criterions. In which case we use this method to manually refilters
-        :py:meth:`meta_package_manager.manager.PackageManager.search` results to either
+        {meth}`meta_package_manager.manager.PackageManager.search` results to either
         exclude non-extended or non-exact matches.
 
         Returns a generator producing the same data as the
-        :py:meth:`meta_package_manager.manager.PackageManager.search` method above.
+        {meth}`meta_package_manager.manager.PackageManager.search` method above.
 
-        .. tip::
+        ```{tip}
 
-            If you are implementing a package manager definition, do not waste time to
-            filter CLI results. Let this method do this job.
+        If you are implementing a package manager definition, do not waste time to
+        filter CLI results. Let this method do this job.
 
-            Instead, just implement the core
-            :py:meth:`meta_package_manager.manager.PackageManager.search` method above and
-            try to produce results as precise as possible using the native filtering
-            capabilities of the package manager CLI.
+        Instead, just implement the core
+        {meth}`meta_package_manager.manager.PackageManager.search` method above and
+        try to produce results as precise as possible using the native filtering
+        capabilities of the package manager CLI.
+        ```
         """
         for match in self.search(query, extended, exact):
             # The per-package match decision lives on the data model, shared with
@@ -557,7 +559,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package and one only.
 
-        Allows a specific ``version`` to be provided.
+        Allows a specific `version` to be provided.
         """
         raise NotImplementedError
 
@@ -572,7 +574,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     ) -> tuple[str, ...]:
         """Returns the complete CLI to upgrade one package and one only.
 
-        Allows a specific ``version`` to be provided.
+        Allows a specific `version` to be provided.
         """
         raise NotImplementedError
 
@@ -580,18 +582,18 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Perform an upgrade of either all or one package.
 
         Executes the CLI provided by either
-        :py:meth:`meta_package_manager.manager.PackageManager.upgrade_all_cli` or
-        :py:meth:`meta_package_manager.manager.PackageManager.upgrade_one_cli`.
+        {meth}`meta_package_manager.manager.PackageManager.upgrade_all_cli` or
+        {meth}`meta_package_manager.manager.PackageManager.upgrade_one_cli`.
 
         If the manager doesn't provides a full upgrade one-liner (i.e. if
-        :py:meth:`meta_package_manager.manager.PackageManager.upgrade_all_cli` raises
-        :py:exc:`NotImplementedError`), then the list of all outdated packages will be
-        fetched (via :py:meth:`meta_package_manager.manager.PackageManager.outdated`) and
+        {meth}`meta_package_manager.manager.PackageManager.upgrade_all_cli` raises
+        {exc}`NotImplementedError`), then the list of all outdated packages will be
+        fetched (via {meth}`meta_package_manager.manager.PackageManager.outdated`) and
         each package will be updated one by one by calling
-        :py:meth:`meta_package_manager.manager.PackageManager.upgrade_one_cli`.
+        {meth}`meta_package_manager.manager.PackageManager.upgrade_one_cli`.
 
         See for example the case of
-        :py:meth:`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.
+        {meth}`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.
         """
         if package_id:
             cli = self.upgrade_one_cli(package_id, version=version)
@@ -616,7 +618,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -624,33 +626,33 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Remove one package together with the dependencies it alone pulled in.
 
         The opt-in counterpart to
-        :py:meth:`meta_package_manager.manager.PackageManager.remove`, surfaced as
-        ``mpm remove --orphans``. It maps to the manager's native "remove and drop
-        now-unneeded dependencies" verb (``apt remove --auto-remove``,
-        ``pacman --remove --recursive``, ``dnf autoremove``, ...), so :program:`mpm`
+        {meth}`meta_package_manager.manager.PackageManager.remove`, surfaced as
+        `mpm remove --orphans`. It maps to the manager's native "remove and drop
+        now-unneeded dependencies" verb (`apt remove --auto-remove`,
+        `pacman --remove --recursive`, `dnf autoremove`, ...), so {program}`mpm`
         builds no dependency graph of its own.
 
         Optional. A manager with no such native verb leaves this
-        :py:exc:`NotImplementedError`; ``mpm remove --orphans`` then falls back to
-        :py:meth:`meta_package_manager.manager.PackageManager.remove` and logs one
-        ``INFO`` capability-skip.
+        {exc}`NotImplementedError`; `mpm remove --orphans` then falls back to
+        {meth}`meta_package_manager.manager.PackageManager.remove` and logs one
+        `INFO` capability-skip.
         """
         raise NotImplementedError
 
     def sync(self) -> None:
         """Refresh package metadata from remote repositories.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
         """
         raise NotImplementedError
 
     @classmethod
     def _defines(cls, method_name: str) -> bool:
-        """Whether a non-base class in the manager's MRO defines ``method_name``.
+        """Whether a non-base class in the manager's MRO defines `method_name`.
 
         The introspection primitive behind
-        :py:func:`meta_package_manager.capabilities.implements_method` (which
-        delegates here) and the :py:meth:`cleanup` composer below, hosted on the
+        {func}`meta_package_manager.capabilities.implements_method` (which
+        delegates here) and the {meth}`cleanup` composer below, hosted on the
         class to stay importable from both sides without a cycle.
         """
         for klass in cls.mro():
@@ -663,17 +665,17 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def cleanup(self) -> None:
         """Run the manager's non-destructive cleanup categories.
 
-        Not an operation managers define anymore: ``cleanup`` is the fixed
+        Not an operation managers define anymore: `cleanup` is the fixed
         composition of the non-destructive category methods a manager overrides
-        (:py:meth:`cleanup_cache`, then :py:meth:`cleanup_repair`). The orphan
+        ({meth}`cleanup_cache`, then {meth}`cleanup_repair`). The orphan
         sweep never joins in, native or synthesized: it is the one category that
-        removes packages, so it only runs on an explicit ``mpm cleanup --orphans``
-        (or a direct :py:meth:`cleanup_orphan` call), keeping a plain ``cleanup``
+        removes packages, so it only runs on an explicit `mpm cleanup --orphans`
+        (or a direct {meth}`cleanup_orphan` call), keeping a plain `cleanup`
         package-preserving on every manager.
 
-        A manager overriding no category method does not advertise the ``cleanup``
+        A manager overriding no category method does not advertise the `cleanup`
         operation at all (see
-        :py:func:`meta_package_manager.capabilities.implements`) and this composer
+        {func}`meta_package_manager.capabilities.implements`) and this composer
         is then a no-op.
         """
         for method_name in ("cleanup_cache", "cleanup_repair"):
@@ -684,28 +686,28 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Remove every orphaned package on the system, sparing the caches.
 
         The system-wide "remove all packages nothing depends on anymore" sweep
-        (``apt autoremove``, ``brew autoremove``, ``flatpak uninstall --unused``, ...).
+        (`apt autoremove`, `brew autoremove`, `flatpak uninstall --unused`, ...).
         The one cleanup category that removes packages, so it is deliberately kept out
-        of the plain :py:meth:`cleanup` composition and only runs on an explicit
-        ``mpm cleanup --orphans``.
+        of the plain {meth}`cleanup` composition and only runs on an explicit
+        `mpm cleanup --orphans`.
 
         Distinct from
-        :py:meth:`meta_package_manager.manager.PackageManager.remove_orphan`, which is
-        scoped to one package's own orphaned dependencies. As with :py:meth:`cleanup`,
-        :program:`mpm` builds no dependency graph: the manager decides what is orphaned.
+        {meth}`meta_package_manager.manager.PackageManager.remove_orphan`, which is
+        scoped to one package's own orphaned dependencies. As with {meth}`cleanup`,
+        {program}`mpm` builds no dependency graph: the manager decides what is orphaned.
 
         A manager with no native sweep verb is backfilled by this base implementation
-        when it supports both the :py:attr:`orphans` query and package removal: list
-        the orphans, remove each one (with :py:meth:`remove_orphan` when available, so
+        when it supports both the {attr}`orphans` query and package removal: list
+        the orphans, remove each one (with {meth}`remove_orphan` when available, so
         every listed root takes its own now-orphaned subtree along), then re-query and
         repeat until the listing settles, since removing an orphan can orphan its own
-        dependencies. The exact pattern of the synthesized full ``upgrade --all``, and
-        the in-process equivalent of Arch's classic ``pacman -Rns $(pacman -Qtdq)``
+        dependencies. The exact pattern of the synthesized full `upgrade --all`, and
+        the in-process equivalent of Arch's classic `pacman -Rns $(pacman -Qtdq)`
         idiom. The re-query loop stops as soon as a round makes no progress, so
         removal failures cannot spin it forever.
 
-        A manager implementing neither a native sweep nor the :py:attr:`orphans`
-        query propagates :py:exc:`NotImplementedError`, and ``mpm cleanup --orphans``
+        A manager implementing neither a native sweep nor the {attr}`orphans`
+        query propagates {exc}`NotImplementedError`, and `mpm cleanup --orphans`
         simply skips it.
         """
         logging.debug(
@@ -730,57 +732,57 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def cleanup_cache(self) -> None:
         """Prune the manager's caches, downloads and other left-over artifacts.
 
-        The cache category of :py:meth:`cleanup`, surfaced as
-        ``mpm cleanup --cache`` and subtracted by ``--skip-cache`` (``apt clean``,
-        ``dnf clean all``, ``brew cleanup``, ``npm cache clean``, ...). The broadest
+        The cache category of {meth}`cleanup`, surfaced as
+        `mpm cleanup --cache` and subtracted by `--skip-cache` (`apt clean`,
+        `dnf clean all`, `brew cleanup`, `npm cache clean`, ...). The broadest
         category: for most managers the whole cleanup amounts to it.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
         """
         raise NotImplementedError
 
     def cleanup_repair(self) -> None:
         """Verify and repair the manager's local installation state.
 
-        The repair category of :py:meth:`cleanup`, surfaced as
-        ``mpm cleanup --repair`` and subtracted by ``--skip-repair``
-        (``flatpak repair --user``).
+        The repair category of {meth}`cleanup`, surfaced as
+        `mpm cleanup --repair` and subtracted by `--skip-repair`
+        (`flatpak repair --user`).
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
         """
         raise NotImplementedError
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Returns the complete CLI running the manager's native self-diagnosis.
 
-        The invocation must be read-only (``brew doctor``, ``pip check``,
-        ``pacman --database --check``, ...): :py:meth:`doctor` runs it, never mpm's
+        The invocation must be read-only (`brew doctor`, `pip check`,
+        `pacman --database --check`, ...): {meth}`doctor` runs it, never mpm's
         mutating machinery. The surveyed doctor verbs share one convention this
         contract leans on: a non-zero exit code means problems were found.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
         """
         raise NotImplementedError
 
     def doctor(self) -> tuple[bool, str]:
-        """Run the native self-diagnosis, returning ``(healthy, report)``.
+        """Run the native self-diagnosis, returning `(healthy, report)`.
 
-        Runs :py:meth:`doctor_cli` and interprets the outcome with a contract of
+        Runs {meth}`doctor_cli` and interprets the outcome with a contract of
         its own, distinct from every other operation:
 
-        - **Health is the exit code alone.** :py:meth:`run`'s failure gate
-          tolerates a non-zero exit with a silent ``<stderr>`` (a benign status
+        - **Health is the exit code alone.** {meth}`run`'s failure gate
+          tolerates a non-zero exit with a silent `<stderr>` (a benign status
           for query parsers), but for a diagnosis that exit *is* the verdict:
-          ``pip check`` reports its conflicts on ``<stdout>`` only and would
+          `pip check` reports its conflicts on `<stdout>` only and would
           read as healthy under the gate.
         - **The report merges both streams.** The tools split their findings
-          across them (``brew doctor`` warns on ``<stderr>``), and the report is
+          across them (`brew doctor` warns on `<stderr>`), and the report is
           relayed verbatim to the user: there is nothing to parse.
         - **The diagnosis is not an error.** The failure-gate entry an unhealthy
           exit may have accumulated is reclaimed from
-          :py:attr:`~meta_package_manager.execution.CLIExecutor.cli_errors`, so
-          the end-of-run error summary is not inflated by a verdict ``mpm
-          doctor`` already reports on its own. A run that never completed
+          {attr}`~meta_package_manager.execution.CLIExecutor.cli_errors`, so
+          the end-of-run error summary is not inflated by a verdict `mpm
+          doctor` already reports on its own. A run that never completed
           (timeout, interrupt, missing binary) keeps its entry: that is a
           genuine plumbing error, and the manager reports unhealthy.
         """
@@ -798,39 +800,41 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def discover_projects(self) -> Iterator[Path]:
         """Locate project trees this manager governs by scanning the filesystem.
 
-        Extension point reserved for :py:attr:`ManagerScope.PROJECT` managers: detecting
+        Extension point reserved for {attr}`ManagerScope.PROJECT` managers: detecting
         virtual environments, lockfiles, or project manifests scattered across the
         filesystem.
 
-        .. caution::
-            Not implemented for any manager yet. System-scoped managers (the default) own
-            no project trees to discover.
+        ```{caution}
+        Not implemented for any manager yet. System-scoped managers (the default) own
+        no project trees to discover.
+        ```
 
-        .. todo::
-            Candidate ecosystems for project-scope discovery. Listed with the
-            project files that signal each, grouped by whether ``mpm`` already
-            ships a system-scoped manager that could grow a project mode.
+        ```{todo}
+        Candidate ecosystems for project-scope discovery. Listed with the
+        project files that signal each, grouped by whether `mpm` already
+        ships a system-scoped manager that could grow a project mode.
 
-            Already covered by a manager (``npm``, ``yarn``, ``pnpm``, ``pip``,
-            ``uv``, ``cargo``, ``gem``, ``composer``, ``cpan``):
+        Already covered by a manager (`npm`, `yarn`, `pnpm`, `pip`,
+        `uv`, `cargo`, `gem`, `composer`, `cpan`):
 
-            - JavaScript: ``package.json``, ``package-lock.json``, ``yarn.lock``,
-              ``pnpm-lock.yaml``
-            - Python: ``requirements.txt``, ``pyproject.toml``, ``poetry.lock``,
-              ``uv.lock``
-            - Rust: ``Cargo.toml``, ``Cargo.lock``
-            - Ruby: ``Gemfile``, ``Gemfile.lock``
-            - PHP: ``composer.json``, ``composer.lock``
-            - Perl: ``cpanfile``
+        - JavaScript: `package.json`, `package-lock.json`, `yarn.lock`,
+          `pnpm-lock.yaml`
+        - Python: `requirements.txt`, `pyproject.toml`, `poetry.lock`,
+          `uv.lock`
+        - Rust: `Cargo.toml`, `Cargo.lock`
+        - Ruby: `Gemfile`, `Gemfile.lock`
+        - PHP: `composer.json`, `composer.lock`
+        - Perl: `cpanfile`
 
-            No manager yet:
+        No manager yet:
 
-            - Java: ``pom.xml`` (Maven), ``build.gradle`` (Gradle), ``ivy.xml``
-            - Go: ``go.mod``, ``go.sum``
-            - .NET: ``*.csproj``, ``packages.config`` (NuGet)
-            - Swift: ``Package.swift``, ``Package.resolved``
-            - CocoaPods: ``Podfile``, ``Podfile.lock``
-            - C/C++: ``conanfile.txt`` (Conan), ``vcpkg.json`` (vcpkg)
-            - Conda: ``conda-lock.yml``
+        - Java: `pom.xml` (Maven), `build.gradle` (Gradle), `ivy.xml`
+        - Go: `go.mod`, `go.sum`
+        - .NET: `*.csproj`, `packages.config` (NuGet)
+        - Swift: `Package.swift`, `Package.resolved`
+        - CocoaPods: `Podfile`, `Podfile.lock`
+        - C/C++: `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)
+        - Conda: `conda-lock.yml`
+        ```
         """
         raise NotImplementedError

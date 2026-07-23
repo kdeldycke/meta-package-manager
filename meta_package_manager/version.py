@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Helpers and utilities to parse and compare version numbers.
 
-``mpm`` wraps dozens of package managers, each with its own versioning
+`mpm` wraps dozens of package managers, each with its own versioning
 scheme: semver, PEP 440, calendar versioning, Debian epochs, Gentoo
 suffixes, and others. Rather than implementing format-specific parsers,
 this module provides a universal tokenizer that produces good-enough
@@ -28,44 +28,44 @@ The tokenizer splits version strings into alternating **digit** and
 **letter** tokens at every digit/letter boundary and every
 non-alphanumeric separator. Tokens that parse as integers are compared
 numerically; the rest are compared as lowercase strings. This gives
-natural sort order where ``(2019, 0, 1) > (9, 3)`` — something neither
+natural sort order where `(2019, 0, 1) > (9, 3)` — something neither
 pure-string nor pure-numeric comparison achieves.
 
 Key rules:
 
-- **Epochs dominate.** A leading integer joined by ``:`` (Debian, RPM,
-  pacman) or ``!`` (PEP 440) is an *epoch*: a version-space reset that
-  outranks the rest of the string. ``2:1.0 > 9.0`` and ``1!1.0 > 2.0``
-  because epoch ``2``/``1`` beats the implicit epoch ``0``. Versions
-  without an epoch default to ``0``, so they compare unchanged.
+- **Epochs dominate.** A leading integer joined by `:` (Debian, RPM,
+  pacman) or `!` (PEP 440) is an *epoch*: a version-space reset that
+  outranks the rest of the string. `2:1.0 > 9.0` and `1!1.0 > 2.0`
+  because epoch `2`/`1` beats the implicit epoch `0`. Versions
+  without an epoch default to `0`, so they compare unchanged.
 
 - **Integers outrank strings.** A numeric token always sorts higher than
-  a string token at the same position. This makes ``3.12.0 > 3.12.0a4``
-  (release beats alpha) and ``0.1 > 0.beta2`` work without
+  a string token at the same position. This makes `3.12.0 > 3.12.0a4`
+  (release beats alpha) and `0.1 > 0.beta2` work without
   understanding PEP 440 or semver pre-release semantics.
 
-- **Trailing zeros are padding.** ``6.2`` and ``6.2.0`` compare equal.
+- **Trailing zeros are padding.** `6.2` and `6.2.0` compare equal.
   When one token tuple is a prefix of the other and all extra tokens are
   zero integers, the versions are equivalent.
 
 - **Pre-release suffixes lose.** When a release version is a prefix of a
   longer version whose first significant extra token is a string (e.g.,
-  ``"alpha"``, ``"git"``), the shorter release is considered greater.
+  `"alpha"`, `"git"`), the shorter release is considered greater.
 
 - **Hex hashes stay whole.** A contiguous run of 7+ hex characters with
   interleaved digits and letters (at least one letter-then-digit and one
   digit-then-letter adjacency) is kept as a single opaque token.
-  Without this, ``g6cd4c31`` would shatter into
-  ``("g", 6, "cd", 4, "c", 31)``. The 7-character floor matches
-  ``git``'s default abbreviated hash length (``core.abbrev``, the de
+  Without this, `g6cd4c31` would shatter into
+  `("g", 6, "cd", 4, "c", 31)`. The 7-character floor matches
+  `git`'s default abbreviated hash length (`core.abbrev`, the de
   facto standard on GitHub/GitLab/Bitbucket). The interleaving
   requirement rejects coincidental hex strings like asciified Unicode
-  (``eeaccee231``), that have only one transition direction.
+  (`eeaccee231`), that have only one transition direction.
 
-- **Digit/letter splitting is essential.** Splitting ``ubuntu1`` into
-  ``("ubuntu", 1)`` enables natural numeric ordering of embedded version
-  numbers: ``a4 < a10`` compares correctly because ``4`` and ``10``
-  become integer tokens. Without this split, ``"a4" > "a10"``
+- **Digit/letter splitting is essential.** Splitting `ubuntu1` into
+  `("ubuntu", 1)` enables natural numeric ordering of embedded version
+  numbers: `a4 < a10` compares correctly because `4` and `10`
+  become integer tokens. Without this split, `"a4" > "a10"`
   lexicographically.
 
 Limitations
@@ -73,42 +73,40 @@ Limitations
 
 This is a heuristic comparator, not a format-specific parser.
 
-- **PEP 440 ordering** is richer than what we implement. ``.devN``
+- **PEP 440 ordering** is richer than what we implement. `.devN`
   ordering relative to pre-releases is not handled. Use
-  ``packaging.version`` for strict PEP 440 compliance. Epochs (``1!``)
+  `packaging.version` for strict PEP 440 compliance. Epochs (`1!`)
   *are* handled — see the epoch rule above.
 
-- **Perl floating-point versions** (``1.1 == 1.10``) are treated as
-  ``(1, 1)`` vs ``(1, 10)`` — not equal. The Gentoo three-digit-group
+- **Perl floating-point versions** (`1.1 == 1.10`) are treated as
+  `(1, 1)` vs `(1, 10)` — not equal. The Gentoo three-digit-group
   conversion scheme is not implemented.
 
-- **Format-specific separators** like Java build metadata (``,``) or
-  Perl-style floats (``.``) are treated as plain delimiters, which can
+- **Format-specific separators** like Java build metadata (`,`) or
+  Perl-style floats (`.`) are treated as plain delimiters, which can
   produce wrong comparison results when the separator carries structural
-  meaning. The epoch separators ``:`` and ``!`` *are* recognized.
+  meaning. The epoch separators `:` and `!` *are* recognized.
 
 References
 ----------
 
-- `PEP 440 <https://peps.python.org/pep-0440/>`_ — Python's version
-  identification spec. Defines ``a``/``b``/``rc`` suffix ordering that
+- [PEP 440](https://peps.python.org/pep-0440/) — Python's version
+  identification spec. Defines `a`/`b`/`rc` suffix ordering that
   our integer-outranks-string rule approximates.
 
-- `Falsehoods about versions
-  <https://github.com/xenoterracide/falsehoods/blob/master/versions.md>`_
+- [Falsehoods about versions](https://github.com/xenoterracide/falsehoods/blob/master/versions.md)
   — 25 assumptions that break in practice. Validates our approach of not
   assuming any single format (falsehoods 4, 8, 13) and handling mixed
   numeric/string tokens (falsehoods 2, 3).
 
-- `Gentoo Perl version scheme
-  <https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme>`_ —
+- [Gentoo Perl version scheme](https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme) —
   illustrates how two incompatible formats (dotted-decimal and
   floating-point) require careful mapping. A reminder that version
   comparison cannot be reduced to "split on dots, compare integers."
 
-- `univers <https://github.com/aboutcode-org/univers>`_ — scheme-aware
+- [univers](https://github.com/aboutcode-org/univers) — scheme-aware
   version parsing and comparison (PEP 440, semver, Debian, RPM, Gentoo
-  ebuild, and more) plus the ``vers`` range spec, from the same AboutCode
+  ebuild, and more) plus the `vers` range spec, from the same AboutCode
   team maintaining purl. The reference implementation to evaluate if this
   heuristic comparator ever needs per-scheme accuracy.
 """
@@ -142,13 +140,13 @@ _ALNUM_PATTERN = r"""(
 2. Digit sequence.
 3. Letter sequence.
 
-The 7-character floor matches ``git``'s default abbreviated hash length
-(``core.abbrev``), the de facto standard on GitHub, GitLab, and
+The 7-character floor matches `git`'s default abbreviated hash length
+(`core.abbrev`), the de facto standard on GitHub, GitLab, and
 Bitbucket. The two lookaheads require both a letter-then-digit and a
 digit-then-letter adjacency, ensuring at least two transitions. This
-keeps real hashes (``c79e264``, ``d4173c...``) whole while still
-splitting version qualifiers (``ubuntu1``, ``beta5``) and rejecting
-coincidental hex strings (``eeaccee231``) that have only one transition.
+keeps real hashes (`c79e264`, `d4173c...`) whole while still
+splitting version qualifiers (`ubuntu1`, `beta5`) and rejecting
+coincidental hex strings (`eeaccee231`) that have only one transition.
 """
 
 ALNUM_EXTRACTOR = re.compile(_ALNUM_PATTERN, re.VERBOSE)
@@ -164,26 +162,26 @@ TOKEN_ALIASES: dict[str, str] = {
 }
 """Canonical short forms for pre-release tag spellings.
 
-PEP 440 defines ``alpha``/``a``, ``beta``/``b``, and ``c``/``rc``/``preview``
-as equivalent aliases. These appear across ecosystems: Debian uses ``~alpha``,
-npm uses ``-alpha``, Homebrew uses ``alpha``/``beta``. The long forms are
+PEP 440 defines `alpha`/`a`, `beta`/`b`, and `c`/`rc`/`preview`
+as equivalent aliases. These appear across ecosystems: Debian uses `~alpha`,
+npm uses `-alpha`, Homebrew uses `alpha`/`beta`. The long forms are
 always interchangeable with the short forms, so normalizing at tokenization
 time is safe. Normalization only affects comparison tokens, not the original
-string or ``pretty_print()`` output.
+string or `pretty_print()` output.
 """
 
 POST_RELEASE_TAGS: frozenset[str] = frozenset({"patch", "post"})
 """Suffixes that indicate a version *newer* than the base release.
 
-PEP 440 defines ``.postN`` as a post-release. ``patch`` carries the same
-semantics in some ecosystems (e.g., ``1.0-patch1``). Without this set,
+PEP 440 defines `.postN` as a post-release. `patch` carries the same
+semantics in some ecosystems (e.g., `1.0-patch1`). Without this set,
 the prefix-comparison rule treats all string suffixes as pre-release
-indicators, which wrongly makes ``1.0 > 1.0.post1``.
+indicators, which wrongly makes `1.0 > 1.0.post1`.
 
 This set is deliberately small. Only tags with unambiguous "newer than
 release" semantics across multiple ecosystems belong here. Candidates like
-``rev`` or ``p`` are excluded because they can also mean "revision" (Gentoo
-``-r0``) or "pre-release patchlevel" (FreeBSD ``p1``), depending on context.
+`rev` or `p` are excluded because they can also mean "revision" (Gentoo
+`-r0`) or "pre-release patchlevel" (FreeBSD `p1`), depending on context.
 """
 
 
@@ -191,7 +189,7 @@ release" semantics across multiple ecosystems belong here. Candidates like
 class Token:
     """A normalized word, persisting its lossless integer variant.
 
-    Supports natural comparison with ``str`` and ``int`` types.
+    Supports natural comparison with `str` and `int` types.
     Used to compare versions and package IDs.
     """
 
@@ -204,11 +202,11 @@ class Token:
 
     @staticmethod
     def str_to_int(value: str | int) -> tuple[str, int | None]:
-        """Convert a ``str`` or an ``int`` to a ``(string, integer)`` couple.
+        """Convert a `str` or an `int` to a `(string, integer)` couple.
 
         Returns together the original string and its integer representation if
         conversion is successful and lossless. Else, returns the original value and
-        ``None``.
+        `None`.
         """
         try:
             integer = int(value)
@@ -227,7 +225,7 @@ class Token:
         return value, integer
 
     def __init__(self, value: str | int) -> None:
-        """Instantiates a ``Token`` from an alphanumeric string or a non-negative
+        """Instantiates a `Token` from an alphanumeric string or a non-negative
         integer."""
         # Check provided value.
         if isinstance(value, str):
@@ -265,14 +263,14 @@ class Token:
 
     @property
     def isint(self) -> bool:
-        """Does the ``Token`` got an equivalent pure integer representation?"""
+        """Does the `Token` got an equivalent pure integer representation?"""
         return self.integer is not None
 
     # Compare as integers if both can be losslessly interpreted as pure
     # integers. Otherwise fall back to string comparison. When one Token
     # is an integer and the other a pure string, the integer always sorts
     # higher: numeric version segments outrank alphabetic pre-release
-    # tags (e.g., ``1 > "beta"``).
+    # tags (e.g., `1 > "beta"`).
 
     def _match_type(self, other):
         """Returns the safe type with which we can compare the two values."""
@@ -284,10 +282,10 @@ class Token:
         return str
 
     def _mixed_type_order(self, other: object) -> int:
-        """Return ordering hint for mixed integer/string ``Token`` pairs.
+        """Return ordering hint for mixed integer/string `Token` pairs.
 
-        Returns ``1`` if ``self`` should sort higher (int vs str), ``-1`` if lower
-        (str vs int), or ``0`` when both are the same kind and normal comparison
+        Returns `1` if `self` should sort higher (int vs str), `-1` if lower
+        (str vs int), or `0` when both are the same kind and normal comparison
         applies.
         """
         if not isinstance(other, Token):
@@ -317,37 +315,38 @@ class Token:
 class TokenizedString:
     """Tokenize a string for user-friendly sorting.
 
-    Essentially a wrapper around a list of ``Token`` instances.
+    Essentially a wrapper around a list of `Token` instances.
     """
 
     string: str
     tokens: tuple[Token, ...] = ()
     separators: tuple[str, ...] = ()
     original_segments: tuple[str, ...] = ()
-    """Original-case token strings for lossless ``pretty_print()``."""
+    """Original-case token strings for lossless `pretty_print()`."""
     epoch: int = 0
-    """Leading epoch (``N:`` or ``N!``); dominates comparison, ``0`` when absent."""
+    """Leading epoch (`N:` or `N!`); dominates comparison, `0` when absent."""
     release: tuple[Token, ...] = ()
-    """Comparison tokens with the epoch removed. See ``_split_epoch()``."""
+    """Comparison tokens with the epoch removed. See `_split_epoch()`."""
 
     def __hash__(self):
-        """A ``TokenizedString`` is made unique by its original string and tuple of
+        """A `TokenizedString` is made unique by its original string and tuple of
         parsed tokens."""
         return hash((self.string, self.separators, self.tokens))
 
     def __new__(cls, value, *args, **kwargs):
-        """Return same object if a ``TokenizedString`` parameter is used at
+        """Return same object if a `TokenizedString` parameter is used at
         instantiation.
 
-        .. hint::
+        ```{hint}
 
-            If :py:meth:`object.__new__` returns an instance of ``cls``, then the new
-            instance's :py:meth:`object.__init__` method will be invoked.
+        If {meth}`object.__new__` returns an instance of `cls`, then the new
+        instance's {meth}`object.__init__` method will be invoked.
+        ```
 
-        .. seealso::
+        ```{seealso}
 
-            An alternative would be to `merge __init__ with __new__
-            <https://stackoverflow.com/a/53482003>`_.
+        An alternative would be to [merge __init__ with __new__](https://stackoverflow.com/a/53482003).
+        ```
         """
         if value is None:
             return None
@@ -359,7 +358,7 @@ class TokenizedString:
         return super().__new__(cls)
 
     def __init__(self, value: str | int) -> None:
-        """Parse and tokenize the provided raw ``value``."""
+        """Parse and tokenize the provided raw `value`."""
         if isinstance(value, TokenizedString):
             # Skip initialization for instance of the class, as this __init__() gets
             # called auto-magiccaly eveytime the __new__() method above returns a
@@ -381,14 +380,15 @@ class TokenizedString:
     def __deepcopy__(self, memo):
         """Generic recursive deep copy of the current instance.
 
-        This is required to make the :py:meth:`copy.deepcopy` called within
-        :py:meth:`dataclasses.asdict` working, because the defaults implementation
-        doesn't know how to handle the ``value`` parameter provided in the
-        :py:meth:`meta_package_manager.version.TokenizedString.__init__` method above.
+        This is required to make the {meth}`copy.deepcopy` called within
+        {meth}`dataclasses.asdict` working, because the defaults implementation
+        doesn't know how to handle the `value` parameter provided in the
+        {meth}`meta_package_manager.version.TokenizedString.__init__` method above.
 
-        .. seealso::
+        ```{seealso}
 
-            https://stackoverflow.com/a/57181955
+        https://stackoverflow.com/a/57181955
+        ```
         """
         # Extract the class of the object
         cls = self.__class__
@@ -428,10 +428,10 @@ class TokenizedString:
     ) -> tuple[tuple[Token, ...], tuple[str, ...], tuple[str, ...]]:
         """Tokenize a string: ignore case and split at each non-alphanumeric characters.
 
-        Returns a tuple of ``Token`` instances, separator strings between consecutive
+        Returns a tuple of `Token` instances, separator strings between consecutive
         tokens, and original-case segment strings for lossless display.
 
-        ``re.split()`` with a capturing group alternates non-matching segments (even
+        `re.split()` with a capturing group alternates non-matching segments (even
         indices) and captured matches (odd indices)::
 
             ALNUM_EXTRACTOR.split("4.2.1-5666.3")
@@ -442,7 +442,7 @@ class TokenizedString:
         parts = ALNUM_EXTRACTOR.split(normalized_str)
 
         # Normalize well-known pre-release aliases to their canonical short
-        # form so that ``1.0alpha1`` and ``1.0a1`` compare equal. The
+        # form so that `1.0alpha1` and `1.0a1` compare equal. The
         # replacement happens on the lowered split parts, before Token
         # creation. original_segments (used by pretty_print) are unaffected.
         tokens = tuple(
@@ -470,20 +470,20 @@ class TokenizedString:
     # nor pure-integer tuple comparison achieves.
 
     def __iter__(self):
-        """``TokenizedString`` are essentially a wrapper around a tuple of ``Token``
+        """`TokenizedString` are essentially a wrapper around a tuple of `Token`
         objects."""
         return iter(self.tokens)
 
     @staticmethod
     def _strip_v(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
-        """Strip a cosmetic ``v`` prefix for comparison.
+        """Strip a cosmetic `v` prefix for comparison.
 
-        The ``v`` prefix is a universal convention (git tags, Go modules,
-        semver tooling) that carries no version semantics. A bare ``"v"``
-        token immediately followed by an integer token (e.g., ``v1.0``)
+        The `v` prefix is a universal convention (git tags, Go modules,
+        semver tooling) that carries no version semantics. A bare `"v"`
+        token immediately followed by an integer token (e.g., `v1.0`)
         is always cosmetic. We only strip when the next token is an
-        integer to avoid touching strings like ``"voodoo"`` or a lone
-        ``"v"`` token.
+        integer to avoid touching strings like `"voodoo"` or a lone
+        `"v"` token.
         """
         if len(tokens) >= 2 and tokens[0].string == "v" and tokens[1].isint:
             return tokens[1:]
@@ -497,19 +497,19 @@ class TokenizedString:
         """Split a leading epoch from the comparison tokens.
 
         An *epoch* is a leading integer joined to the rest of the version by
-        ``:`` (Debian, RPM, pacman) or ``!`` (PEP 440). It encodes a deliberate
+        `:` (Debian, RPM, pacman) or `!` (PEP 440). It encodes a deliberate
         version-space reset and therefore outranks every component after it.
 
         This is the one format-specific separator safe to special-case in an
-        otherwise format-agnostic comparator: a leading ``<int>:`` or
-        ``<int>!`` means an epoch in every scheme that uses it, and schemes
-        that don't never start that way. Contrast the ``-`` revision, whose
+        otherwise format-agnostic comparator: a leading `<int>:` or
+        `<int>!` means an epoch in every scheme that uses it, and schemes
+        that don't never start that way. Contrast the `-` revision, whose
         meaning flips between schemes (Debian revision makes a version *newer*,
         a semver pre-release makes it *older*) and so cannot be resolved here.
 
-        Returns the epoch value (``0`` when absent) and the remaining tokens.
+        Returns the epoch value (`0` when absent) and the remaining tokens.
         The epoch token is stripped from the release so that an explicit
-        ``0:`` compares equal to an absent epoch.
+        `0:` compares equal to an absent epoch.
         """
         if tokens and separators and separators[0] in {":", "!"}:
             epoch = tokens[0].integer
@@ -524,18 +524,18 @@ class TokenizedString:
     ) -> int:
         """Compare two token tuples with version-aware semantics.
 
-        Returns ``-1``, ``0``, or ``1``.
+        Returns `-1`, `0`, or `1`.
 
         When one tuple is a prefix of the other, the first *significant* (non-zero)
         extra token in the longer tuple decides the outcome:
 
-        - **Post-release tag** (``post``, ``patch``): the longer tuple is greater.
+        - **Post-release tag** (`post`, `patch`): the longer tuple is greater.
         - **Other string token** (pre-release tag): the shorter tuple is greater.
         - **Integer token** (additional version component): the longer tuple is greater.
-        - **All trailing zeros**: the tuples are equal (trailing ``.0`` is padding).
+        - **All trailing zeros**: the tuples are equal (trailing `.0` is padding).
         """
-        # Strip cosmetic ``v`` prefix before comparison so that
-        # ``v1.0`` and ``1.0`` compare equal.
+        # Strip cosmetic `v` prefix before comparison so that
+        # `v1.0` and `1.0` compare equal.
         a = TokenizedString._strip_v(a)
         b = TokenizedString._strip_v(b)
 
@@ -564,14 +564,14 @@ class TokenizedString:
             # Additional numeric component: longer version is greater.
             longer_wins = 1
         elif first_significant.string in POST_RELEASE_TAGS:
-            # Post-release suffix (e.g., ``post``, ``patch``): the
+            # Post-release suffix (e.g., `post`, `patch`): the
             # longer version is a post-release of the shorter, so
             # longer is greater. Without this, all string suffixes
             # would be treated as pre-release indicators.
             longer_wins = 1
         else:
-            # Pre-release suffix (e.g., ``alpha``, ``beta``, ``rc``,
-            # ``dev``, ``git``): the shorter version is the actual
+            # Pre-release suffix (e.g., `alpha`, `beta`, `rc`,
+            # `dev`, `git`): the shorter version is the actual
             # release, so shorter is greater.
             longer_wins = -1
         return -longer_wins if len(a) < len(b) else longer_wins
@@ -579,19 +579,19 @@ class TokenizedString:
     def _cmp(self, other: TokenizedString) -> int:
         """Three-way comparison with epoch dominance.
 
-        Returns ``-1``, ``0``, or ``1``.
+        Returns `-1`, `0`, or `1`.
 
-        The ``epoch`` is compared first: a higher epoch always wins, regardless
+        The `epoch` is compared first: a higher epoch always wins, regardless
         of the rest of the version. Only when epochs are equal does the
-        comparison fall through to the epoch-stripped ``release`` tokens via
-        ``_compare_tuples()``.
+        comparison fall through to the epoch-stripped `release` tokens via
+        `_compare_tuples()`.
         """
         if self.epoch != other.epoch:
             return -1 if self.epoch < other.epoch else 1
         return self._compare_tuples(self.release, other.release)
 
     # Only __eq__ and __lt__ are defined; @total_ordering fills in the ordering
-    # operators, and Python derives __ne__ from __eq__. ``None`` sorts below every
+    # operators, and Python derives __ne__ from __eq__. `None` sorts below every
     # version (an absent version is older than any present one).
 
     def __eq__(self, other: object) -> bool:
@@ -612,7 +612,7 @@ class TokenizedString:
 
 
 parse_version = TokenizedString
-"""Alias for ``TokenizedString`` used in version-comparison contexts."""
+"""Alias for `TokenizedString` used in version-comparison contexts."""
 
 
 OPERATOR_MAP: dict[str, Callable[[TokenizedString, TokenizedString], bool]] = {
@@ -625,9 +625,9 @@ OPERATOR_MAP: dict[str, Callable[[TokenizedString, TokenizedString], bool]] = {
 }
 """Comparison operators recognized in a version range, mapped to their callable."""
 
-# Alternation built longest-first so two-character operators (``>=``) win over their
-# one-character prefixes (``>``). Derived from OPERATOR_MAP so the regex and the lookup
-# table can never drift: a bare ``=`` or ``!`` no longer matches and then KeyErrors.
+# Alternation built longest-first so two-character operators (`>=`) win over their
+# one-character prefixes (`>`). Derived from OPERATOR_MAP so the regex and the lookup
+# table can never drift: a bare `=` or `!` no longer matches and then KeyErrors.
 _OPERATORS_PATTERN = "|".join(
     re.escape(op) for op in sorted(OPERATOR_MAP, key=len, reverse=True)
 )
@@ -638,10 +638,10 @@ RANGE_OPERATOR = re.compile(rf"(?P<op>{_OPERATORS_PATTERN})\s*(?P<version>.+)")
 class VersionRange:
     """A set of version constraints parsed from a comma-separated specifier string.
 
-    Each constraint is an ``(operator, version)`` pair. A version satisfies the
+    Each constraint is an `(operator, version)` pair. A version satisfies the
     range only if it satisfies every constraint.
 
-    Bare version strings (no operator prefix) are treated as ``>=``.
+    Bare version strings (no operator prefix) are treated as `>=`.
     """
 
     def __init__(self, spec: str) -> None:
@@ -654,7 +654,7 @@ class VersionRange:
     ) -> Iterator[
         tuple[Callable[[TokenizedString, TokenizedString], bool], TokenizedString]
     ]:
-        """Yield ``(operator, version)`` pairs from a comma-separated specifier."""
+        """Yield `(operator, version)` pairs from a comma-separated specifier."""
         for part in spec.split(","):
             part = part.strip()
             if not part:
@@ -670,7 +670,7 @@ class VersionRange:
             yield op, version
 
     def __contains__(self, version: TokenizedString) -> bool:
-        """Return ``True`` if *version* satisfies all constraints."""
+        """Return `True` if *version* satisfies all constraints."""
         return all(op(version, ver) for op, ver in self.constraints)
 
     def __repr__(self) -> str:
@@ -678,7 +678,7 @@ class VersionRange:
 
 
 def is_version(string: str) -> bool:
-    """Returns ``True`` if the string looks like a version.
+    """Returns `True` if the string looks like a version.
 
     Heuristics: at least one token is an integer, or there is only one
     non-integer token.
@@ -701,8 +701,8 @@ def diff_versions(
 
     The split point snaps to the nearest separator boundary so the full
     diverging token and its preceding separator are highlighted. For
-    ``2.1.1774638290`` vs ``2.1.1774896198``, the common part is ``2.1``
-    and the diff includes ``.1774638290`` / ``.1774896198``.
+    `2.1.1774638290` vs `2.1.1774896198`, the common part is `2.1`
+    and the diff includes `.1774638290` / `.1774896198`.
     """
     old = str(old)
     new = str(new)

@@ -42,19 +42,22 @@ class SDKMAN(PackageManager):
     """SDKMAN! manages parallel versions of multiple Software Development Kits on
     Unix-based systems.
 
-    .. note::
-        SDKMAN! primarily serves the JVM ecosystem: Java, Gradle, Maven, Kotlin,
-        Scala, and ~115 other candidates. Each candidate is treated as a package.
+    ```{note}
+    SDKMAN! primarily serves the JVM ecosystem: Java, Gradle, Maven, Kotlin,
+    Scala, and ~115 other candidates. Each candidate is treated as a package.
+    ```
 
-    .. caution::
-        The ``sdk`` command is a shell function, not a standalone binary, so mpm
-        detects SDKMAN by its init script (``sdkman-init.sh``) rather than a binary
-        on ``PATH`` and wraps every invocation in
-        ``bash -c 'source <init> && sdk <args>'``.
+    ```{caution}
+    The `sdk` command is a shell function, not a standalone binary, so mpm
+    detects SDKMAN by its init script (`sdkman-init.sh`) rather than a binary
+    on `PATH` and wraps every invocation in
+    `bash -c 'source <init> && sdk <args>'`.
+    ```
 
-    .. note::
-        SDKMAN has no read-only "outdated" verb, so ``outdated`` pipes ``n`` into
-        ``sdk upgrade`` to capture the candidate list without applying any upgrade.
+    ```{note}
+    SDKMAN has no read-only "outdated" verb, so `outdated` pipes `n` into
+    `sdk upgrade` to capture the candidate list without applying any upgrade.
+    ```
     """
 
     homepage_url = "https://sdkman.io"
@@ -78,12 +81,13 @@ class SDKMAN(PackageManager):
 
     version_regexes = (r"script:\s+(?P<version>\S+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ sdk version
-        SDKMAN!
-        script: 5.18.2
-        native: 0.4.6
+    $ sdk version
+    SDKMAN!
+    script: 5.18.2
+    native: 0.4.6
+    ```
     """
 
     _INSTALLED_REGEXP = re.compile(
@@ -101,11 +105,12 @@ class SDKMAN(PackageManager):
     def build_cli(self, *args, **kwargs) -> tuple[str, ...]:
         """Wrap all CLI invocations to source the SDKMAN init script in bash.
 
-        .. note::
-            The ``**kwargs`` accepted by the base class (``auto_pre_args``,
-            ``sudo``, etc.) are accepted but ignored because every invocation
-            goes through the ``bash -c`` wrapper and SDKMAN never requires
-            elevated privileges.
+        ```{note}
+        The `**kwargs` accepted by the base class (`auto_pre_args`,
+        `sudo`, etc.) are accepted but ignored because every invocation
+        goes through the `bash -c` wrapper and SDKMAN never requires
+        elevated privileges.
+        ```
         """
         clean_args = args_cleanup(*args)
         sdk_cmd = " ".join(shlex.quote(a) for a in clean_args)
@@ -116,13 +121,14 @@ class SDKMAN(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sdk current
-            Using:
-            groovy: 4.0.22
-            java: 21.0.4-tem
-            scala: 3.4.2
+        $ sdk current
+        Using:
+        groovy: 4.0.22
+        java: 21.0.4-tem
+        scala: 3.4.2
+        ```
         """
         output = self.run_cli("current")
         for match in self._INSTALLED_REGEXP.finditer(output):
@@ -135,20 +141,22 @@ class SDKMAN(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: console
+        ```{code-block} console
 
-            $ echo n | sdk upgrade
-            Available defaults:
-            gradle (local: 2.3, 1.11; default: 8.9)
-            java (local: 21.0.4-tem; default: 25.0.2-tem)
+        $ echo n | sdk upgrade
+        Available defaults:
+        gradle (local: 2.3, 1.11; default: 8.9)
+        java (local: 21.0.4-tem; default: 25.0.2-tem)
 
-            Use prescribed default version(s)? (Y/n):
+        Use prescribed default version(s)? (Y/n):
+        ```
 
-        .. note::
-            Pipes ``n`` to ``sdk upgrade`` to obtain the outdated list without
-            actually performing the upgrade. Overrides ``sdkman_auto_answer``
-            to ``false`` so the command prints the candidate list before
-            prompting.
+        ```{note}
+        Pipes `n` to `sdk upgrade` to obtain the outdated list without
+        actually performing the upgrade. Overrides `sdkman_auto_answer`
+        to `false` so the command prints the candidate list before
+        prompting.
+        ```
         """
         init_path = shlex.quote(str(self.cli_path))
         output = self.run(
@@ -170,18 +178,20 @@ class SDKMAN(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sdk install java 21.0.4-tem
+        $ sdk install java 21.0.4-tem
+        ```
         """
         return self.run_cli("install", package_id, version)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sdk upgrade
+        $ sdk upgrade
+        ```
         """
         return self.build_cli("upgrade")
 
@@ -192,22 +202,24 @@ class SDKMAN(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sdk upgrade java
+        $ sdk upgrade java
+        ```
         """
         return self.build_cli("upgrade", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        SDKMAN's ``uninstall`` command requires both the candidate and a specific
+        SDKMAN's `uninstall` command requires both the candidate and a specific
         version. The currently installed version is looked up from
-        :py:meth:`installed` and passed to the CLI.
+        {meth}`installed` and passed to the CLI.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sdk uninstall java 21.0.4-tem
+        $ sdk uninstall java 21.0.4-tem
+        ```
         """
         for pkg in self.installed:
             if pkg.id == package_id:
@@ -217,17 +229,19 @@ class SDKMAN(PackageManager):
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sdk update
+        $ sdk update
+        ```
         """
         self.run_cli("update")
 
     def cleanup_cache(self) -> None:
         """Clear SDKMAN caches.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sdk flush
+        $ sdk flush
+        ```
         """
         self.run_cli("flush")

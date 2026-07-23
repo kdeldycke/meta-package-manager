@@ -44,9 +44,9 @@ class TestOutdated(CLISubCommandTests, CLITableTests, CLIQueryTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # The glued ``:<mid>:`` label form matches whatever level the
+            # The glued `:<mid>:` label form matches whatever level the
             # message lands at: demoted to DEBUG for implicit selection
-            # (``mpm outdated``), INFO for explicit ones.
+            # (`mpm outdated`), INFO for explicit ones.
             f":{mid}: Does not implement {Operations.outdated}" in stderr,
             f":{mid}: Skipped:" in stderr,
             # Stats line at the end of output.

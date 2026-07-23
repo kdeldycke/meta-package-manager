@@ -16,8 +16,8 @@
 """Format-agnostic SBOM base class and export-format enum.
 
 Kept deliberately free of SPDX or CycloneDX dependencies: instantiating
-:py:class:`SBOM` directly is meaningless, but importing the symbols here
-is safe even when the optional ``[sbom-offline]`` extra is not installed.
+{class}`SBOM` directly is meaningless, but importing the symbols here
+is safe even when the optional `[sbom-offline]` extra is not installed.
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
 
 class ExportFormat(StrEnum):
-    """A user-friendly version of ``spdx_tools.spdx.formats.FileFormat``.
+    """A user-friendly version of `spdx_tools.spdx.formats.FileFormat`.
 
     Map format to user-friendly IDs.
     """
@@ -55,12 +55,13 @@ class ExportFormat(StrEnum):
 class SBOM:
     """Utilities shared by all SBOM classes.
 
-    .. seealso::
-        Anchore's `Syft <https://github.com/anchore/syft>`_ and Microsoft's
-        `sbom-tool <https://github.com/microsoft/sbom-tool>`_ are mature SPDX
-        and CycloneDX emitters, useful references for field-population
-        conventions. Both inventory packages by parsing on-disk databases and
-        lockfiles, whereas ``mpm`` queries the live managers directly.
+    ```{seealso}
+    Anchore's [Syft](https://github.com/anchore/syft) and Microsoft's
+    [sbom-tool](https://github.com/microsoft/sbom-tool) are mature SPDX
+    and CycloneDX emitters, useful references for field-population
+    conventions. Both inventory packages by parsing on-disk databases and
+    lockfiles, whereas `mpm` queries the live managers directly.
+    ```
     """
 
     def __init__(
@@ -70,22 +71,22 @@ class SBOM:
         """Defaults to JSON export format."""
         logging.debug(f"Set export format to {export_format}")
         self.export_format = export_format
-        # ``manager_id -> count`` of unique packages the renderer admitted
-        # into the document. Populated by :py:meth:`_track_addition` so
+        # `manager_id -> count` of unique packages the renderer admitted
+        # into the document. Populated by {meth}`_track_addition` so
         # subclasses' format-specific dedup is reflected here.
         self.packages_per_manager: dict[str, int] = {}
-        # ``manager_id -> count`` of admitted packages whose metadata was
+        # `manager_id -> count` of admitted packages whose metadata was
         # non-empty (i.e. the manager's extractor produced something).
         self.enriched_per_manager: dict[str, int] = {}
-        # Keys used to dedup ``_track_addition`` calls across subclasses
+        # Keys used to dedup `_track_addition` calls across subclasses
         # that may invoke it more than once per (manager, package) pair.
         self._tracked_additions: set[tuple[str, str]] = set()
-        # ``purl string -> vulnerabilities`` attached post-hoc by the
-        # network layer (``mpm --network sbom``). Distinct from
+        # `purl string -> vulnerabilities` attached post-hoc by the
+        # network layer (`mpm --network sbom`). Distinct from
         # PackageMetadata, which the local extractor produces: this is
         # data fetched after the fact from OSV and bound to the document
-        # via :py:meth:`attach_vulnerabilities`. Renderers consume it in
-        # their ``finalize`` override.
+        # via {meth}`attach_vulnerabilities`. Renderers consume it in
+        # their `finalize` override.
         self.vulnerabilities_by_purl: dict[str, tuple[Vulnerability, ...]] = {}
 
     def all_purls(self) -> Iterator[str]:
@@ -103,11 +104,11 @@ class SBOM:
     ) -> None:
         """Bind cross-package vulnerability data to the document.
 
-        Called by the CLI between the per-package ``add_package`` loop and
-        ``finalize``, only in ``--network`` mode. Renderers read the
-        stored data in their ``finalize`` override and project it into the
-        format-native vulnerability surface (CycloneDX ``vulnerabilities``
-        array, SPDX security ``externalRefs``).
+        Called by the CLI between the per-package `add_package` loop and
+        `finalize`, only in `--network` mode. Renderers read the
+        stored data in their `finalize` override and project it into the
+        format-native vulnerability surface (CycloneDX `vulnerabilities`
+        array, SPDX security `externalRefs`).
         """
         self.vulnerabilities_by_purl.update(vulnerabilities)
 
@@ -119,10 +120,10 @@ class SBOM:
     ) -> None:
         """Record that one package entered the document.
 
-        Called by :py:meth:`add_package` subclass implementations after
+        Called by {meth}`add_package` subclass implementations after
         their own dedup check so the renderer-level counters reflect
         what actually got serialized, not the number of inbound calls.
-        Idempotent on ``(manager_id, package_id)`` to stay robust against
+        Idempotent on `(manager_id, package_id)` to stay robust against
         future refactors that might double-call.
         """
         key = (manager_id, package_id)
@@ -163,23 +164,24 @@ class SBOM:
         }
 
     def finalize(self) -> None:
-        """Resolve any deferred state before ``export()``.
+        """Resolve any deferred state before `export()`.
 
-        Some constructs cannot be emitted at ``add_package()`` time
+        Some constructs cannot be emitted at `add_package()` time
         because they reference packages that may not have been added yet:
         a Homebrew formula's runtime dependency on another formula listed
         later in the scan, for example. Subclasses queue those during
-        ``add_package`` and flush them here. The base implementation is a
+        `add_package` and flush them here. The base implementation is a
         no-op so subclasses can rely on it being called exactly once.
         """
 
     @staticmethod
     def autodetect_export_format(file_path: Path) -> ExportFormat | None:
-        """Better version of ``spdx_tools.spdx.formats.file_name_to_format`` which is
-        based on ``Path`` objects and is case-insensitive.
+        """Better version of `spdx_tools.spdx.formats.file_name_to_format` which is
+        based on `Path` objects and is case-insensitive.
 
-        .. todo::
-            Contribute generic autodetection method to Click Extra?
+        ```{todo}
+        Contribute generic autodetection method to Click Extra?
+        ```
         """
         suffixes = tuple(s.lower() for s in file_path.suffixes[-2:])
         export_format = None

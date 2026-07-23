@@ -49,7 +49,7 @@ _NON_UNIX_PLATFORM = next(p for p in ALL_PLATFORMS if p not in UNIX)
 
 def test_operation_timeouts_cover_all_operations():
     """Every routable operation must have a per-operation timeout default, so the
-    map and the ``Operations`` enum never drift apart."""
+    map and the `Operations` enum never drift apart."""
     for operation in Operations:
         assert operation.name in OPERATION_TIMEOUTS
 
@@ -63,7 +63,7 @@ def test_read_only_tier_is_shorter_than_mutating_tier():
 
 @pytest.mark.parametrize("active_operation", (None, "version", "search", "install"))
 def test_resolve_timeout_explicit_wins(active_operation):
-    """An explicit timeout (``--timeout`` or per-manager override) wins for every
+    """An explicit timeout (`--timeout` or per-manager override) wins for every
     operation, including unknown ones."""
     manager = FakeManager()
     manager.timeout = 42
@@ -135,13 +135,13 @@ def test_make_spinner_uses_configured_delay():
 
 
 # Tiny cross-platform CLIs that exit non-zero, differing only in which stream
-# carries the diagnostic. ``FakeManager`` runs the Python interpreter as its
-# binary, so ``run_cli("-c", ...)`` executes these directly.
+# carries the diagnostic. `FakeManager` runs the Python interpreter as its
+# binary, so `run_cli("-c", ...)` executes these directly.
 FAIL_ON_STDOUT = "import sys; sys.stdout.write('boom'); sys.exit(8)"
-"""Fails the steamcmd way: a non-zero exit with its message on ``<stdout>`` and an
-empty ``<stderr>``."""
+"""Fails the steamcmd way: a non-zero exit with its message on `<stdout>` and an
+empty `<stderr>`."""
 FAIL_ON_STDERR = "import sys; sys.stderr.write('boom'); sys.exit(8)"
-"""Fails the conventional way: a non-zero exit with its message on ``<stderr>``."""
+"""Fails the conventional way: a non-zero exit with its message on `<stderr>`."""
 
 
 @pytest.mark.parametrize(
@@ -168,7 +168,7 @@ FAIL_ON_STDERR = "import sys; sys.stderr.write('boom'); sys.exit(8)"
 )
 def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
     """The failure gate decides raise / accumulate / tolerate from the exit code,
-    the ``<stderr>`` content, and the ``stop_on_error``/``must_succeed`` context."""
+    the `<stderr>` content, and the `stop_on_error`/`must_succeed` context."""
     manager = FakeManager()
     manager.stop_on_error = stop_on_error
 
@@ -191,7 +191,7 @@ def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
 
 
 def _append_script(marker, payload="x", tail=""):
-    """A one-liner that appends ``payload`` to ``marker``, then runs ``tail``."""
+    """A one-liner that appends `payload` to `marker`, then runs `tail`."""
     return f"open({str(marker)!r}, 'a').write({payload!r}); {tail}"
 
 
@@ -351,7 +351,7 @@ def test_run_registers_live_process_then_discards_it():
     """run() tracks its subprocess while it runs, and drops it once done.
 
     A background call parks in a real subprocess. Once it is registered,
-    terminate_live_processes() unblocks it, and run_cli()'s ``finally`` clears the
+    terminate_live_processes() unblocks it, and run_cli()'s `finally` clears the
     registry: this is the exact path the SIGINT handler drives on Ctrl+C.
     """
     manager = FakeManager()
@@ -451,7 +451,7 @@ def test_npm_sudo_marker_dormant_until_opted_in():
 def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
     """A real `sudo --non-interactive` that cannot authenticate triggers the actionable hint.
 
-    A fake `sudo` on ``PATH`` mimics "no cached credentials", so the whole
+    A fake `sudo` on `PATH` mimics "no cached credentials", so the whole
     build_cli → subprocess → failure-gate → hint path runs for real, without root.
     """
     fake_sudo = tmp_path / "sudo"
@@ -516,18 +516,18 @@ def test_read_subcommand_does_not_prime_sudo(invoke, fake_pool):
 def test_sourced_operation_restamps_active_operation(
     invoke, fake_pool, monkeypatch, args, expected_operation
 ):
-    """A sourced ``remove``/``upgrade <packages>`` restores the real operation stamp
+    """A sourced `remove`/`upgrade <packages>` restores the real operation stamp
     before its mutating fan-out.
 
-    Source discovery re-selects the managers with ``installed``, which re-stamps
-    ``_active_operation = "installed"`` on the shared singletons. Left uncorrected, the
+    Source discovery re-selects the managers with `installed`, which re-stamps
+    `_active_operation = "installed"` on the shared singletons. Left uncorrected, the
     mutating commands would resolve the read-only timeout and skip the escalator stall
-    watchdog (both keyed on ``_active_operation``). This drives the real selection flow,
+    watchdog (both keyed on `_active_operation`). This drives the real selection flow,
     unlike the watchdog unit tests that stamp the attribute by hand: it fails if the
     dispatch stops restoring the stamp.
     """
-    # The sourced dispatch fetches the acting manager through ``pool.get``; return the
-    # fake so a real task is built. ``fake-pkg-alpha`` is in the fake's installed set,
+    # The sourced dispatch fetches the acting manager through `pool.get`; return the
+    # fake so a real task is built. `fake-pkg-alpha` is in the fake's installed set,
     # so an untied spec resolves to it without touching a real binary.
     monkeypatch.setattr(pool, "get", lambda manager_id: fake_pool)
     # Cooldown gating is host-dependent; permit unconditionally so the task is built.
@@ -541,12 +541,12 @@ def test_sourced_operation_restamps_active_operation(
 def test_untied_install_search_runs_under_read_only_stamp(
     invoke, fake_pool, monkeypatch
 ):
-    """The untied-install priority search runs under the ``search`` stamp, not
-    ``install``.
+    """The untied-install priority search runs under the `search` stamp, not
+    `install`.
 
     The search is read-only and can never escalate, so it must not resolve the mutating
     timeout nor arm the internal-escalator stall watchdog (both keyed on
-    ``_active_operation``). Without the stamp, a slow ``brew search`` of a cask would be
+    `_active_operation`). Without the stamp, a slow `brew search` of a cask would be
     misread as a hidden password prompt.
     """
     recorded = {}

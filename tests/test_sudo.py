@@ -15,15 +15,15 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Unit tests for the privilege-escalation machinery.
 
-These exercise :func:`meta_package_manager.sudo.prime_sudo` and its keepalive with
-a mocked ``subprocess.run`` (no test ever launches a real ``sudo``), the escalation
+These exercise {func}`meta_package_manager.sudo.prime_sudo` and its keepalive with
+a mocked `subprocess.run` (no test ever launches a real `sudo`), the escalation
 policy inventories across the manager pool, and the
-:class:`meta_package_manager.sudo._StallWatchdog` end to end through
-:class:`tests.fake_manager.FakeManager` (whose CLI is the Python interpreter, so
-its subprocesses are real but harmless). The ``sudo --non-interactive`` command
+{class}`meta_package_manager.sudo._StallWatchdog` end to end through
+{class}`tests.fake_manager.FakeManager` (whose CLI is the Python interpreter, so
+its subprocesses are real but harmless). The `sudo --non-interactive` command
 wrapping of
-``build_cli()``, the authentication-failure hint of ``run()`` and the CLI wiring
-of ``prime_sudo`` stay in :mod:`tests.test_execution`.
+`build_cli()`, the authentication-failure hint of `run()` and the CLI wiring
+of `prime_sudo` stay in {mod}`tests.test_execution`.
 """
 
 from __future__ import annotations
@@ -100,7 +100,7 @@ def test_default_sudo_matches_system_managers():
 
 
 def test_internal_sudo_matches_internal_escalators():
-    """Exactly the managers whose CLI runs ``sudo`` itself mid-run are marked, and
+    """Exactly the managers whose CLI runs `sudo` itself mid-run are marked, and
     none of them escalates through mpm (an internal escalator is never wrapped)."""
     internal = {mid for mid, manager in pool.items() if type(manager).internal_sudo}
     assert internal == {"cask", "fink", "pacaur", "pacstall", "paru", "topgrade", "yay"}
@@ -122,7 +122,7 @@ def _escalating_manager() -> FakeManager:
 
 def _internal_manager() -> FakeManager:
     """A fake manager that escalates internally (like cask and fink): mpm never
-    wraps it in ``sudo``, so prime_sudo only probes on its behalf."""
+    wraps it in `sudo`, so prime_sudo only probes on its behalf."""
     manager = FakeManager()
     manager.internal_sudo = True
     return manager
@@ -136,12 +136,12 @@ def prime_sudo_env(
     stdin_tty: bool | None = None,
     stderr_tty: bool | None = None,
 ):
-    """Patch the whole environment ``prime_sudo`` probes, yielding the ``run`` mock.
+    """Patch the whole environment `prime_sudo` probes, yielding the `run` mock.
 
-    Pins the platform (``windows``), the effective user (``root``) and the terminal
-    state (``None`` leaves the real descriptor unpatched, for tests that never reach
-    the TTY check), and replaces ``subprocess.run`` so no test ever launches a real
-    ``sudo``. Callers set the mock's ``return_value``/``side_effect`` to shape the
+    Pins the platform (`windows`), the effective user (`root`) and the terminal
+    state (`None` leaves the real descriptor unpatched, for tests that never reach
+    the TTY check), and replaces `subprocess.run` so no test ever launches a real
+    `sudo`. Callers set the mock's `return_value`/`side_effect` to shape the
     probe and prompt outcomes.
     """
     with ExitStack() as stack:
@@ -406,12 +406,12 @@ def test_prime_sudo_notice_names_managers_and_subcommand(
     ),
 )
 def test_sudo_prompt_respects_sudo_constraints(manager_ids):
-    """Whatever the prompt copy becomes, the ``--prompt`` argument handed to ``sudo``
+    """Whatever the prompt copy becomes, the `--prompt` argument handed to `sudo`
     must stay within sudo's constraints.
 
     Locks the properties rather than the wording, so a future rewording trips here
-    only if it breaks sudo: every ``%`` must be doubled (``sudo --prompt`` expands
-    ``%h``/``%H``/``%p``/``%u``/``%U``, and a lone ``%`` is undefined), the prompt
+    only if it breaks sudo: every `%` must be doubled (`sudo --prompt` expands
+    `%h`/`%H`/`%p`/`%u`/`%U`, and a lone `%` is undefined), the prompt
     must be a single line (a newline would detach the ask from the input cursor),
     and it must end with a space so the typed password is not glued to the text.
     """
@@ -461,7 +461,7 @@ def test_is_sudo_auth_failure(error, expected):
 
 
 def _stalling_script(line: str, sleep: float) -> str:
-    """A one-liner that prints ``line``, flushes, then stays silent for ``sleep``
+    """A one-liner that prints `line`, flushes, then stays silent for `sleep`
     seconds, mimicking an installer blocked on a hidden prompt."""
     return f"import sys, time; print({line!r}); sys.stdout.flush(); time.sleep({sleep})"
 

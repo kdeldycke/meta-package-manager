@@ -18,18 +18,18 @@
 A concrete manager advertises what it can do by implementing operation methods and
 annotating them with the helpers defined here:
 
-- :py:func:`meta_package_manager.capabilities.search_capabilities` and
-  :py:func:`meta_package_manager.capabilities.version_not_implemented` flag the
+- {func}`meta_package_manager.capabilities.search_capabilities` and
+  {func}`meta_package_manager.capabilities.version_not_implemented` flag the
   refinements an operation does *not* natively support, letting the framework
   compensate (refiltering search results, warning about ignored version pins).
-- :py:class:`meta_package_manager.capabilities.Delegate` and
-  :py:class:`meta_package_manager.capabilities.DelegatedMethod` let a manager reuse
+- {class}`meta_package_manager.capabilities.Delegate` and
+  {class}`meta_package_manager.capabilities.DelegatedMethod` let a manager reuse
   another manager's CLI for an operation instead of reimplementing it.
 
 Together they expose a uniform capability surface that
-:py:func:`meta_package_manager.capabilities.implements` introspects and the CLI uses to
+{func}`meta_package_manager.capabilities.implements` introspects and the CLI uses to
 route each command only to the managers that support it. The
-:py:class:`meta_package_manager.capabilities.Operations` enum is the vocabulary of those
+{class}`meta_package_manager.capabilities.Operations` enum is the vocabulary of those
 routable actions.
 """
 
@@ -72,7 +72,7 @@ class Operations(Enum):
     doctor = "doctor"
 
     def __str__(self) -> str:
-        """Render as the bare operation name (``outdated``), not the enum repr."""
+        """Render as the bare operation name (`outdated`), not the enum repr."""
         return self.name
 
     def __format__(self, format_spec: str) -> str:
@@ -84,8 +84,8 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
     """Inspect a manager's implementation to check for proper support of an operation.
 
     Accepts either a manager instance or its class; support is determined from the
-    class hierarchy. The verdict is narrated as a single answered ``DEBUG`` line
-    (``brew implements installed.``), keyed on the manager ID rather than the raw
+    class hierarchy. The verdict is narrated as a single answered `DEBUG` line
+    (`brew implements installed.`), keyed on the manager ID rather than the raw
     class repr.
     """
     cls = manager if isinstance(manager, type) else type(manager)
@@ -142,16 +142,16 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
 def upgrade_all_is_synthesized(
     manager: PackageManager | type[PackageManager],
 ) -> bool:
-    """Whether ``mpm`` backfills the manager's ``upgrade --all``.
+    """Whether `mpm` backfills the manager's `upgrade --all`.
 
-    ``True`` when the manager supports the operation only through the one-by-one
-    fallback of :py:meth:`meta_package_manager.manager.PackageManager.upgrade`:
-    it implements ``outdated`` and ``upgrade_one_cli`` but no class in its
-    hierarchy provides a native ``upgrade_all_cli``. ``False`` when a native
+    `True` when the manager supports the operation only through the one-by-one
+    fallback of {meth}`meta_package_manager.manager.PackageManager.upgrade`:
+    it implements `outdated` and `upgrade_one_cli` but no class in its
+    hierarchy provides a native `upgrade_all_cli`. `False` when a native
     one-shot command exists, or when the operation is not supported at all.
 
-    Feeds the per-manager table of ``docs/augmentations.md``, rendered live by
-    ``docs/docs_update.py``.
+    Feeds the per-manager table of `docs/augmentations.md`, rendered live by
+    `docs/docs_update.py`.
     """
     if not implements(manager, Operations.upgrade_all):
         return False
@@ -168,14 +168,14 @@ def implements_method(
     manager: PackageManager | type[PackageManager],
     method_name: str,
 ) -> bool:
-    """Whether a non-base class in the manager's MRO defines ``method_name``.
+    """Whether a non-base class in the manager's MRO defines `method_name`.
 
-    The orphan refinements ``remove_orphan`` and ``cleanup_orphan`` are optional
-    variants of the ``remove`` and ``cleanup`` commands rather than standalone
-    :class:`Operations`, so :func:`implements` cannot route them. This reports whether a
+    The orphan refinements `remove_orphan` and `cleanup_orphan` are optional
+    variants of the `remove` and `cleanup` commands rather than standalone
+    {class}`Operations`, so {func}`implements` cannot route them. This reports whether a
     manager overrides the base's stub for one, delegating the MRO walk to
-    :py:meth:`meta_package_manager.manager.PackageManager._defines` (shared with the
-    base ``cleanup`` composer), so it works for config-defined managers (whose methods
+    {meth}`meta_package_manager.manager.PackageManager._defines` (shared with the
+    base `cleanup` composer), so it works for config-defined managers (whose methods
     live on the synthesized subclass) too.
     """
     cls = manager if isinstance(manager, type) else type(manager)
@@ -185,18 +185,18 @@ def implements_method(
 def cleanup_orphan_is_synthesized(
     manager: PackageManager | type[PackageManager],
 ) -> bool:
-    """Whether ``mpm`` backfills the manager's system-wide orphan sweep.
+    """Whether `mpm` backfills the manager's system-wide orphan sweep.
 
-    ``True`` when no class in the manager's hierarchy overrides ``cleanup_orphan``
-    with a native sweep, but the manager implements both the ``orphans`` query and
-    ``remove``: the base
-    :py:meth:`meta_package_manager.manager.PackageManager.cleanup_orphan` then
+    `True` when no class in the manager's hierarchy overrides `cleanup_orphan`
+    with a native sweep, but the manager implements both the `orphans` query and
+    `remove`: the base
+    {meth}`meta_package_manager.manager.PackageManager.cleanup_orphan` then
     synthesizes the sweep by listing the orphans and removing them one by one, the
-    exact pattern of the synthesized full ``upgrade --all``. ``False`` when a native
+    exact pattern of the synthesized full `upgrade --all`. `False` when a native
     sweep exists, or when the manager lacks the building blocks.
 
-    Feeds the per-manager table of ``docs/augmentations.md``, rendered live by
-    ``docs/docs_update.py``.
+    Feeds the per-manager table of `docs/augmentations.md`, rendered live by
+    `docs/docs_update.py`.
     """
     if implements_method(manager, "cleanup_orphan"):
         return False
@@ -208,10 +208,10 @@ def cleanup_orphan_is_synthesized(
 def supports_cleanup_orphan(
     manager: PackageManager | type[PackageManager],
 ) -> bool:
-    """Whether ``mpm cleanup --orphans`` can drive the manager at all.
+    """Whether `mpm cleanup --orphans` can drive the manager at all.
 
-    Either through a native sweep verb (``implements_method``) or through the
-    synthesized fallback (:func:`cleanup_orphan_is_synthesized`).
+    Either through a native sweep verb (`implements_method`) or through the
+    synthesized fallback ({func}`cleanup_orphan_is_synthesized`).
     """
     return implements_method(
         manager, "cleanup_orphan"
@@ -221,25 +221,25 @@ def supports_cleanup_orphan(
 def supports_cleanup_cache(
     manager: PackageManager | type[PackageManager],
 ) -> bool:
-    """Whether ``mpm cleanup --cache`` can drive the manager."""
+    """Whether `mpm cleanup --cache` can drive the manager."""
     return implements_method(manager, "cleanup_cache")
 
 
 def supports_cleanup_repair(
     manager: PackageManager | type[PackageManager],
 ) -> bool:
-    """Whether ``mpm cleanup --repair`` can drive the manager."""
+    """Whether `mpm cleanup --repair` can drive the manager."""
     return implements_method(manager, "cleanup_repair")
 
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):
-    """Decorator factory to be used on ``search()`` operations to signal ``mpm``
+    """Decorator factory to be used on `search()` operations to signal `mpm`
     framework manager's capabilities.
 
-    The flags are exposed as ``extended_support`` and ``exact_support`` attributes
+    The flags are exposed as `extended_support` and `exact_support` attributes
     on the wrapped method, so the documentation can derive which managers rely on
-    :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` to
-    honor the ``--exact`` and ``--extended`` flags. An undecorated ``search``
+    {meth}`meta_package_manager.manager.PackageManager.refiltered_search` to
+    honor the `--exact` and `--extended` flags. An undecorated `search`
     carries no attribute and is read as natively supporting both refinements.
     """
 
@@ -277,7 +277,7 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
 
 
 def version_not_implemented(func: Callable[P, T]) -> Callable[P, T]:
-    """Decorator to be used on ``install()`` or ``upgrade_one_cli()`` operations to
+    """Decorator to be used on `install()` or `upgrade_one_cli()` operations to
     signal that a particular operation does not implement (yet) the version specifier
     parameter."""
 
@@ -297,7 +297,7 @@ class DelegatedMethod:
     """Descriptor that delegates a method call to another manager's CLI.
 
     When accessed on an instance, returns a wrapper that sets
-    ``_delegate_cli_path`` on the instance so that ``build_cli`` uses the
+    `_delegate_cli_path` on the instance so that `build_cli` uses the
     target manager's binary instead of the host manager's own CLI.
     """
 
@@ -332,18 +332,19 @@ class DelegatedMethod:
 
 
 class Delegate:
-    """Factory that creates :class:`DelegatedMethod` descriptors for delegating
+    """Factory that creates {class}`DelegatedMethod` descriptors for delegating
     operations to another package manager's CLI.
 
     Typical usage in a manager class body:
 
-    .. code-block:: python
+    ```{code-block} python
 
-        from .scoop import Scoop
+    from .scoop import Scoop
 
-        _scoop = Delegate(Scoop)
-        install = _scoop.install
-        remove = _scoop.remove
+    _scoop = Delegate(Scoop)
+    install = _scoop.install
+    remove = _scoop.remove
+    ```
     """
 
     def __init__(self, source_class: type[PackageManager]) -> None:

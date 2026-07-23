@@ -13,37 +13,38 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""End-of-run summary printing for :command:`mpm` subcommands.
+"""End-of-run summary printing for {command}`mpm` subcommands.
 
-Every long-running subcommand (``installed``, ``outdated``, ``search``,
-``dump``, ``sbom``) closes with a one-line summary written to stderr:
+Every long-running subcommand (`installed`, `outdated`, `search`,
+`dump`, `sbom`) closes with a one-line summary written to stderr:
 
-.. code-block:: text
+```{code-block} text
 
-    223 packages total (brew: 223).
+223 packages total (brew: 223).
+```
 
 Plus optional follow-up lines specific to that subcommand (the SBOM
 writer surfaces upstream-document merge counts and dependency-graph
 edge counts here). The whole summary is gated by the global
-``--summary/--no-summary`` flag and respects the user's choice across
+`--summary/--no-summary` flag and respects the user's choice across
 every subcommand uniformly.
 
 Vocabulary note: "summary" describes the rendered text that lands on
 stderr. "Stats" describes the raw numbers fed into it
-(:py:meth:`meta_package_manager.sbom.base.SBOM.stats` returns a dict of
+({meth}`meta_package_manager.sbom.base.SBOM.stats` returns a dict of
 counts). The two terms stay distinct deliberately: the
 flag/module/function name reflects what the user sees; the data-side
-method keeps the unambiguous ``stats`` name.
+method keeps the unambiguous `stats` name.
 
 This module is the single home of the summary contract:
 
-- :py:func:`print_summary` is the renderer.
-- :py:func:`package_counts` collapses the boilerplate
+- {func}`print_summary` is the renderer.
+- {func}`package_counts` collapses the boilerplate
   ``Counter({manager_id: len(payload[manager_id]["packages"]) for ...})``
-  pattern that ``installed``, ``outdated``, and ``search`` all share.
-- :py:func:`sbom_summary` adapts
-  :py:meth:`meta_package_manager.sbom.base.SBOM.stats` to the
-  ``(counter, notes)`` shape :py:func:`print_summary` consumes, conditional
+  pattern that `installed`, `outdated`, and `search` all share.
+- {func}`sbom_summary` adapts
+  {meth}`meta_package_manager.sbom.base.SBOM.stats` to the
+  `(counter, notes)` shape {func}`print_summary` consumes, conditional
   on what the run actually did.
 
 The renderer stays in this module rather than scattered across each
@@ -73,21 +74,22 @@ def print_summary(
 ) -> None:
     """Print a one-line per-category count to stderr, plus optional follow-up notes.
 
-    ``counts`` is a :py:class:`collections.Counter` keyed by an opaque
+    `counts` is a {class}`collections.Counter` keyed by an opaque
     category label. The label is usually a package manager id, but the
-    ``dump --brewfile`` subcommand uses Brewfile entry types and any
+    `dump --brewfile` subcommand uses Brewfile entry types and any
     future caller is free to use whatever bucket makes sense. The
-    parameter is named ``counts`` rather than ``manager_stats`` to
+    parameter is named `counts` rather than `manager_stats` to
     avoid lying about the key's meaning.
 
     Prints something like:
 
-    .. code-block:: text
+    ```{code-block} text
 
-        10 packages total (brew: 2, pip: 2, gem: 2, vscode: 2, npm: 2, composer: 0).
+    10 packages total (brew: 2, pip: 2, gem: 2, vscode: 2, npm: 2, composer: 0).
+    ```
 
-    ``notes`` is an iterable of follow-up lines printed verbatim under
-    the count line. ``mpm sbom`` uses it to surface facts that don't
+    `notes` is an iterable of follow-up lines printed verbatim under
+    the count line. `mpm sbom` uses it to surface facts that don't
     fit the per-category-Counter shape: number of upstream SBOM
     documents merged into the aggregate, enrichment ratios,
     dependency-graph edge counts. Other subcommands today pass no
@@ -96,7 +98,7 @@ def print_summary(
     Always writes to stderr so the call site is free to pipe stdout
     elsewhere (a generated SBOM document, a TOML manifest, a Brewfile)
     without the summary polluting the output. Gated upstream by the
-    global ``--summary/--no-summary`` flag; this function itself is
+    global `--summary/--no-summary` flag; this function itself is
     unconditional once called.
     """
     per_category = ""
@@ -110,32 +112,32 @@ def print_summary(
 
 
 def package_counts(payload: Mapping[str, Mapping]) -> Counter[str]:
-    """Build a per-manager ``Counter`` from a typical subcommand payload.
+    """Build a per-manager `Counter` from a typical subcommand payload.
 
-    ``installed``, ``outdated``, and ``search`` all stash their results
+    `installed`, `outdated`, and `search` all stash their results
     in a ``{manager_id: {"packages": [...]}}`` dict. This helper turns
-    that into the count-by-manager-id ``Counter`` that
-    :py:func:`print_summary` accepts, eliminating the
+    that into the count-by-manager-id `Counter` that
+    {func}`print_summary` accepts, eliminating the
     ``Counter({k: len(v["packages"]) for k, v in payload.items()})``
     boilerplate that appeared verbatim at three CLI call sites.
 
     Mismatched payloads (an extractor that stashes packages under a
-    different key, the ``dump --brewfile`` line-counter pass) build
-    their ``Counter`` inline rather than wedging this helper into
+    different key, the `dump --brewfile` line-counter pass) build
+    their `Counter` inline rather than wedging this helper into
     serving every shape.
     """
     return Counter({k: len(v["packages"]) for k, v in payload.items()})
 
 
 def sbom_summary(sbom: SBOM, bundled: bool) -> tuple[Counter, list[str]]:
-    """Adapt :py:meth:`meta_package_manager.sbom.base.SBOM.stats` to the
-    :py:func:`print_summary` shape.
+    """Adapt {meth}`meta_package_manager.sbom.base.SBOM.stats` to the
+    {func}`print_summary` shape.
 
     SBOM stats live on the renderer because the renderer knows what
     actually landed in the document (after dedup, after merge). This
     adapter flattens that structured dict into the count-line +
-    follow-up-notes shape :py:func:`print_summary` consumes, conditioning
-    each note on what the run actually did so ``--minimal`` scans,
+    follow-up-notes shape {func}`print_summary` consumes, conditioning
+    each note on what the run actually did so `--minimal` scans,
     casks-only runs, and formats without a merge concept all stay
     tidy.
 

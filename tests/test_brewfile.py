@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Unit tests of the Brewfile renderer (:py:mod:`meta_package_manager.brewfile`).
+"""Unit tests of the Brewfile renderer ({mod}`meta_package_manager.brewfile`).
 
 Pure-function tests over duck-typed manager stubs: no CLI invocation, no real
-manager pool iteration. The ``mpm dump`` command driving the renderer is
-exercised in :mod:`tests.test_cli_dump`.
+manager pool iteration. The `mpm dump` command driving the renderer is
+exercised in {mod}`tests.test_cli_dump`.
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ from meta_package_manager.pool import pool
 
 @dataclass
 class _StubManager:
-    """Minimal manager stand-in for ``build_brewfile`` unit tests.
+    """Minimal manager stand-in for `build_brewfile` unit tests.
 
     Avoids spinning up the full manager class hierarchy (CLI discovery, version
     parsing, ...) for what is a pure-function rendering test.
@@ -60,17 +60,17 @@ class _StubManager:
         return iter(self.installed_packages)
 
     def brewfile_entry(self, package: Package):
-        """Default-shape hook matching :py:meth:`PackageManager.brewfile_entry`."""
+        """Default-shape hook matching {meth}`PackageManager.brewfile_entry`."""
         return package.id, None
 
 
 def _as_managers(*stubs: _StubManager) -> list[PackageManager]:
-    """Cast a list of duck-typed stubs to satisfy ``build_brewfile``'s typed signature.
+    """Cast a list of duck-typed stubs to satisfy `build_brewfile`'s typed signature.
 
-    The stubs implement the subset of the :py:class:`PackageManager` API
-    ``build_brewfile`` actually exercises (``id``, ``brewfile_entry_type``,
-    ``installed``, ``brewfile_entry``). The cast keeps the test surface concise
-    without weakening :py:func:`build_brewfile`'s signature.
+    The stubs implement the subset of the {class}`PackageManager` API
+    `build_brewfile` actually exercises (`id`, `brewfile_entry_type`,
+    `installed`, `brewfile_entry`). The cast keeps the test surface concise
+    without weakening {func}`build_brewfile`'s signature.
     """
     return cast("list[PackageManager]", list(stubs))
 
@@ -228,7 +228,7 @@ def test_build_brewfile_header_records_skipped_counts():
 
 
 def test_mas_brewfile_entry_uses_name_and_numeric_id():
-    """``mas`` Brewfile entries take the app display name + ``id:`` keyword."""
+    """`mas` Brewfile entries take the app display name + `id:` keyword."""
     package = Package(
         id="497799835",
         manager_id="mas",
@@ -264,8 +264,8 @@ def test_mas_brewfile_entry_falls_back_to_id_when_name_missing():
 
 
 def test_vscodium_brewfile_skip_warning_set():
-    """VSCodium's definition declares no ``brewfile_entry_type`` so its extensions
-    are not silently emitted as ``vscode`` (which would install to VS Code instead
+    """VSCodium's definition declares no `brewfile_entry_type` so its extensions
+    are not silently emitted as `vscode` (which would install to VS Code instead
     of VSCodium). The warning is the audible signal."""
     assert pool["vscode"].brewfile_entry_type == "vscode"
     assert pool["vscodium"].brewfile_entry_type is None
@@ -274,7 +274,7 @@ def test_vscodium_brewfile_skip_warning_set():
 
 
 def test_phase_2_to_4_managers_have_brewfile_entry_types():
-    """Every brew-bundle-supported manager except ``go`` and ``krew`` has a
+    """Every brew-bundle-supported manager except `go` and `krew` has a
     mapping. Catches regressions if a manager's class is reorganized (or converted
     to a bundled definition) and the attribute is dropped."""
     expected_entry_types = {
@@ -296,9 +296,9 @@ def test_phase_2_to_4_managers_have_brewfile_entry_types():
 
 
 def test_build_brewfile_round_trip_format_is_parseable_by_ruby_inspect():
-    """The emitted lines should round-trip through Ruby ``String#inspect`` rules.
+    """The emitted lines should round-trip through Ruby `String#inspect` rules.
 
-    ``quote`` uses ``json.dumps(ensure_ascii=False)`` which produces double-quoted
+    `quote` uses `json.dumps(ensure_ascii=False)` which produces double-quoted
     strings with backslash escapes for control chars: a subset of what Ruby's
     inspect emits, accepted as a valid Ruby literal.
     """
@@ -327,7 +327,7 @@ def test_build_brewfile_round_trip_format_is_parseable_by_ruby_inspect():
     reason="`brew` not on PATH; cannot validate Brewfile round-trip.",
 )
 def test_brew_bundle_check_parses_generated_brewfile(tmp_path):
-    """Pipe :py:func:`build_brewfile` output through ``brew bundle check`` to
+    """Pipe {func}`build_brewfile` output through `brew bundle check` to
     catch DSL drift early.
 
     Uses a synthetic package set so the test runs in milliseconds rather than

@@ -16,7 +16,7 @@
 """WinGet-specific parsing tests.
 
 These tests cover the pure-Python parsing/regex logic. They do not invoke
-``winget.exe`` and are platform-agnostic.
+`winget.exe` and are platform-agnostic.
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ def test_store_id_re_matches(package_id):
         # Wrong length: 11 and 13 chars.
         "9PF4QZKKRZ7",
         "9PF4QZKKRZ7NN",
-        # ``XP``-prefixed but wrong length (not 12 or 14 chars total).
+        # `XP`-prefixed but wrong length (not 12 or 14 chars total).
         "XP123456789012345",
         # Empty.
         "",
@@ -74,7 +74,7 @@ def test_store_id_re_rejects(package_id):
 
 def test_parse_details_ignores_indented_upgrade_line(winget):
     """Regression test: the package-block split must not fire on indented
-    ``  winget [version]`` lines under ``Available Upgrades``."""
+    `  winget [version]` lines under `Available Upgrades`."""
     output = dedent("""\
         (1/1) Git [Git.Git]
         Version: 2.37.3
@@ -119,8 +119,8 @@ def test_parse_table_handles_short_header_line(winget):
     # Build a table where the header line is intentionally one char shorter
     # than the separator (last column lacks a trailing space) but data rows
     # match the separator length. Pre-fix code computed
-    # ``table_width = len(lines[0])`` and tripped the
-    # ``len(line) <= table_width`` assertion on the data row.
+    # `table_width = len(lines[0])` and tripped the
+    # `len(line) <= table_width` assertion on the data row.
     header = "Name              Id                Version      Source"
     data = "VSCodium          VSCodium.VSCodium 1.89.1.24130 winget "
     separator = "-" * len(data)
@@ -170,7 +170,7 @@ def test_search_orders_native_before_store(winget, monkeypatch):
 
     results = list(winget.search("vscode", extended=True, exact=False))
     ids = [p.id for p in results]
-    # Native package first, Store packages last. ``sorted`` is stable so the
+    # Native package first, Store packages last. `sorted` is stable so the
     # relative order within each group matches the input.
     assert ids == ["Alex313031.Codium", "XP99BNH2JZBBQR", "9PF4QZKKRZ7N"]
     assert str(results[0].latest_version) == "1.86.0"

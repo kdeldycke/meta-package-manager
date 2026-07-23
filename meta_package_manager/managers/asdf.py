@@ -35,27 +35,30 @@ class ASDF(PackageManager):
     Ruby, Python, Erlang, ...) through a plugin ecosystem, exposing all of
     them behind a single CLI.
 
-    mpm targets the ``0.16.0`` Go rewrite and later: it calls the space-separated
-    subcommands (``asdf list all``, ``asdf plugin add``) that replaced the
-    hyphenated forms (``list-all``, ``plugin-add``) of the older Bash asdf, which
+    mpm targets the `0.16.0` Go rewrite and later: it calls the space-separated
+    subcommands (`asdf list all`, `asdf plugin add`) that replaced the
+    hyphenated forms (`list-all`, `plugin-add`) of the older Bash asdf, which
     is unsupported.
 
-    .. note::
-        asdf is plugin-driven: every tool the user can install is gated
-        behind a plugin (``asdf plugin add nodejs``). ``mpm install`` does
-        not auto-add plugins; the user is expected to register them first
-        with ``asdf plugin add``.
+    ```{note}
+    asdf is plugin-driven: every tool the user can install is gated
+    behind a plugin (`asdf plugin add nodejs`). `mpm install` does
+    not auto-add plugins; the user is expected to register them first
+    with `asdf plugin add`.
+    ```
 
-    .. note::
-        Each ``(plugin, installed_version)`` pair is reported as a
-        distinct package, so a tool installed at multiple versions yields
-        multiple entries sharing the same ID.
+    ```{note}
+    Each `(plugin, installed_version)` pair is reported as a
+    distinct package, so a tool installed at multiple versions yields
+    multiple entries sharing the same ID.
+    ```
 
-    .. caution::
-        ``mpm outdated`` only reports tools that have a currently-active
-        version (marked with ``*`` in ``asdf list``) different from their
-        latest stable release. A tool installed without being activated
-        through a ``.tool-versions`` file does not surface as outdated.
+    ```{caution}
+    `mpm outdated` only reports tools that have a currently-active
+    version (marked with `*` in `asdf list`) different from their
+    latest stable release. A tool installed without being activated
+    through a `.tool-versions` file does not surface as outdated.
+    ```
     """
 
     name = "asdf"
@@ -65,10 +68,10 @@ class ASDF(PackageManager):
     platforms = LINUX_LIKE, MACOS
 
     requirement = ">=0.16.0"
-    """The Go rewrite shipped in ``0.16.0`` on 2025-01-30 replaced the
-    hyphenated subcommands (``asdf list-all``, ``asdf plugin-add``, ...)
+    """The Go rewrite shipped in `0.16.0` on 2025-01-30 replaced the
+    hyphenated subcommands (`asdf list-all`, `asdf plugin-add`, ...)
     with their space-separated equivalents this wrapper depends on
-    (``asdf list all``, ``asdf plugin add``, ...). Older Bash-based
+    (`asdf list all`, `asdf plugin add`, ...). Older Bash-based
     releases are not supported.
     """
 
@@ -76,10 +79,11 @@ class ASDF(PackageManager):
 
     version_regexes = (r"v?(?P<version>\d+\.\d+\.\d+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ asdf version
-        v0.19.0-83adfe6
+    $ asdf version
+    v0.19.0-83adfe6
+    ```
     """
 
     _LATEST_REGEXP = re.compile(
@@ -93,12 +97,12 @@ class ASDF(PackageManager):
     )
 
     def _parse_list(self) -> Iterator[tuple[str, str, bool]]:
-        """Parse ``asdf list`` output into ``(plugin, version, is_current)``
+        """Parse `asdf list` output into `(plugin, version, is_current)`
         tuples.
 
         Non-indented lines are plugin headers. Lines that start with two
         spaces are installed-but-not-current versions; lines that start
-        with a space and ``*`` are the active version.
+        with a space and `*` are the active version.
         """
         output = self.run_cli("list")
         current_plugin: str | None = None
@@ -119,18 +123,19 @@ class ASDF(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        Emits one :py:class:`meta_package_manager.package.Package` per
-        ``(plugin, installed_version)`` pair, so a tool installed at
+        Emits one {class}`meta_package_manager.package.Package` per
+        `(plugin, installed_version)` pair, so a tool installed at
         multiple versions yields multiple entries sharing the same ID.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ asdf list
-            nodejs
-              18.20.4
-             *20.10.0
-            ruby
-             *3.2.0
+        $ asdf list
+        nodejs
+          18.20.4
+         *20.10.0
+        ruby
+         *3.2.0
+        ```
         """
         for plugin, version, _ in self._parse_list():
             yield self.package(id=plugin, installed_version=version)
@@ -140,15 +145,16 @@ class ASDF(PackageManager):
         """Fetch outdated packages.
 
         Cross-references the currently-active version per plugin (the
-        entry marked with ``*`` in ``asdf list``) with the latest stable
-        version (``asdf latest --all``). Only plugins whose active
+        entry marked with `*` in `asdf list`) with the latest stable
+        version (`asdf latest --all`). Only plugins whose active
         version differs from the latest are yielded.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ asdf latest --all
-            nodejs    20.10.0    missing
-            ruby      3.3.0      missing
+        $ asdf latest --all
+        nodejs    20.10.0    missing
+        ruby      3.3.0      missing
+        ```
         """
         current_versions: dict[str, str] = {
             plugin: version
@@ -172,17 +178,18 @@ class ASDF(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        ``asdf plugin list all`` enumerates the entire short-name plugin
+        `asdf plugin list all` enumerates the entire short-name plugin
         catalogue. The framework's
-        :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search`
         narrows the listing down to entries that contain the query.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ asdf plugin list all
-            1password-cli   https://github.com/NeoHsu/asdf-1password-cli.git
-            act             https://github.com/grimoh/asdf-act.git
-            nodejs          https://github.com/asdf-vm/asdf-nodejs.git
+        $ asdf plugin list all
+        1password-cli   https://github.com/NeoHsu/asdf-1password-cli.git
+        act             https://github.com/grimoh/asdf-act.git
+        nodejs          https://github.com/asdf-vm/asdf-nodejs.git
+        ```
         """
         output = self.run_cli("plugin", "list", "all")
         for match in self._PLUGIN_LIST_ALL_REGEXP.finditer(output):
@@ -194,13 +201,14 @@ class ASDF(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        ``asdf install <plugin>`` requires the plugin to have been added
-        beforehand with ``asdf plugin add <plugin>``. This wrapper does
+        `asdf install <plugin>` requires the plugin to have been added
+        beforehand with `asdf plugin add <plugin>`. This wrapper does
         not auto-add plugins.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ asdf install nodejs 20.10.0
+        $ asdf install nodejs 20.10.0
+        ```
         """
         return self.run_cli("install", package_id, version or "latest")
 
@@ -212,36 +220,39 @@ class ASDF(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade one package.
 
-        asdf has no native upgrade verb: installing the ``latest`` alias
+        asdf has no native upgrade verb: installing the `latest` alias
         downloads the newest stable release alongside any older versions
         already on disk. The user is responsible for switching the
-        active version with ``asdf set`` if desired.
+        active version with `asdf set` if desired.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ asdf install nodejs latest
+        $ asdf install nodejs latest
+        ```
         """
         return self.build_cli("install", package_id, "latest")
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        ``asdf plugin remove`` deletes the plugin and every version of
-        the tool installed through it, which matches ``mpm``'s
+        `asdf plugin remove` deletes the plugin and every version of
+        the tool installed through it, which matches `mpm`'s
         "remove this package" contract more cleanly than iterating
-        ``asdf uninstall`` per installed version.
+        `asdf uninstall` per installed version.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ asdf plugin remove nodejs
+        $ asdf plugin remove nodejs
+        ```
         """
         return self.run_cli("plugin", "remove", package_id)
 
     def sync(self) -> None:
         """Refresh plugin metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ asdf plugin update --all
+        $ asdf plugin update --all
+        ```
         """
         self.run_cli("plugin", "update", "--all")

@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""The :command:`mpm` command-line interface.
+"""The {command}`mpm` command-line interface.
 
 Defines the Click command group and its subcommands. Each operation subcommand
-(``installed``, ``outdated``, ``install``, ``upgrade``, ``remove``, ...) selects the
-managers from :py:mod:`meta_package_manager.pool` that implement the matching
-:py:class:`meta_package_manager.capabilities.Operations` action, runs it across all
+(`installed`, `outdated`, `install`, `upgrade`, `remove`, ...) selects the
+managers from {mod}`meta_package_manager.pool` that implement the matching
+{class}`meta_package_manager.capabilities.Operations` action, runs it across all
 of them, and renders the aggregated, multi-manager result.
 """
 
@@ -147,20 +147,18 @@ SBOM_SECTION = Section("SBOM subcommands")
 
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
-"""Sequence of package managers as defined by `XKCD #1654: Universal Install Script
-<https://xkcd.com/1654/>`_.
+"""Sequence of package managers as defined by [XKCD #1654: Universal Install Script](https://xkcd.com/1654/).
 
-See the corresponding `implementation rationale in issue #10
-<https://github.com/kdeldycke/meta-package-manager/issues/10>`__.
+See the corresponding [implementation rationale in issue #10](https://github.com/kdeldycke/meta-package-manager/issues/10).
 """
 
 COOLDOWN_SUPPORTED_MANAGERS = tuple(
     sorted(mid for mid, manager in pool.items() if manager.supports_cooldown)
 )
-"""IDs of the managers that natively enforce a release-age ``mpm --cooldown``.
+"""IDs of the managers that natively enforce a release-age `mpm --cooldown`.
 
-Derived from the pool so the ``--cooldown`` help text never drifts from the set of
-managers that actually carry a :py:attr:`cooldown_env_var
+Derived from the pool so the `--cooldown` help text never drifts from the set of
+managers that actually carry a {attr}`cooldown_env_var
 <meta_package_manager.execution.CLIExecutor.cooldown_env_var>`: adding cooldown
 support to a manager surfaces it here automatically.
 """
@@ -169,7 +167,7 @@ support to a manager surfaces it here automatically.
 def is_stdout(filepath: Path) -> bool:
     """Check if a file path is set to stdout.
 
-    Prevents the creation of a ``-`` file in the current directory.
+    Prevents the creation of a `-` file in the current directory.
     """
     return str(filepath) == "-"
 
@@ -182,10 +180,10 @@ def prep_path(filepath: Path) -> IO | None:
 
 
 def guard_existing_output(ctx: Context, output_path: Path, *, overwrite: bool) -> None:
-    """Block clobbering an existing output file unless ``overwrite`` is set.
+    """Block clobbering an existing output file unless `overwrite` is set.
 
-    Warns and exits with code 2 when ``output_path`` already exists and the user
-    did not pass ``--overwrite``/``--force``/``--replace``. No-op when the file
+    Warns and exits with code 2 when `output_path` already exists and the user
+    did not pass `--overwrite`/`--force`/`--replace`. No-op when the file
     is absent. Callers handle the stdout case separately.
     """
     if output_path.exists():
@@ -300,19 +298,18 @@ def single_manager_selectors():
 
 
 def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
-    """Print the location of the :doc:`Xbar/SwiftBar plugin <bar-plugin>`.
+    """Print the location of the {doc}`Xbar/SwiftBar plugin <bar-plugin>`.
 
-    Returns the normalized path of the standalone `bar_plugin.py
-    <https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/bar_plugin.py>`_
+    Returns the normalized path of the standalone [bar_plugin.py](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/bar_plugin.py)
     script that is distributed with this Python module. This
-    is made available under the ``mpm --bar-plugin-path`` option.
+    is made available under the `mpm --bar-plugin-path` option.
 
     Notice that the fully-qualified home directory get replaced by its
-    shorthand (``~``) if applicable:
+    shorthand (`~`) if applicable:
 
-    - the full ``/home/user/.python/site-packages/mpm/bar_plugin.py`` path is
-      simplified to ``~/.python/site-packages/mpm/bar_plugin.py``,
-    - but ``/usr/bin/python3.10/mpm/bar_plugin.py`` is returned as-is.
+    - the full `/home/user/.python/site-packages/mpm/bar_plugin.py` path is
+      simplified to `~/.python/site-packages/mpm/bar_plugin.py`,
+    - but `/usr/bin/python3.10/mpm/bar_plugin.py` is returned as-is.
     """
     # Option has not been called.
     if not value:
@@ -614,7 +611,7 @@ def mpm(
         def remove_logging_override():
             """Reset the logging override to its default state.
 
-            ``logging.disable()`` mess with the logging module internals at the root
+            `logging.disable()` mess with the logging module internals at the root
             level. We need to restore the default behavior when the context is closed,
             otherwise the logging module will be stuck in a disabled state.
 
@@ -656,13 +653,13 @@ def mpm(
         """End-of-run hint when underlying CLIs reported errors.
 
         Captured stderr is logged at DEBUG (see
-        :py:func:`CLIExecutor.run_cli`) so a default-verbosity run no longer
+        {func}`CLIExecutor.run_cli`) so a default-verbosity run no longer
         floods the table with gem extension warnings, mas Spotlight chatter,
         etc. This summary preserves the "something went sideways" signal in
         one line, without replicating the noise.
 
         Skipped at DEBUG verbosity (the stderr already appeared inline) and
-        in serialization formats (logging is disabled and ``cli_errors``
+        in serialization formats (logging is disabled and `cli_errors`
         ships in the structured payload anyway).
         """
         if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
@@ -698,17 +695,17 @@ def mpm(
     def selected_managers(**kwargs):
         """Select the subset of managers to target, and apply manager-level options.
 
-        The selection summary is logged at ``DEBUG`` on the first call only. The
-        ``✓``-trailed spinner from
-        :py:func:`meta_package_manager.dispatch.collect_from_managers` already names every
+        The selection summary is logged at `DEBUG` on the first call only. The
+        `✓`-trailed spinner from
+        {func}`meta_package_manager.dispatch.collect_from_managers` already names every
         manager that ran, so this summary is redundant at default verbosity for
         read-only commands; it is kept for troubleshooting, where it also surfaces
         config-driven drops that never appear in the trail. Logging on the first call
-        only keeps subcommands that never resolve the pool (like ``--help``) silent.
+        only keeps subcommands that never resolve the pool (like `--help`) silent.
 
-        Callers may pass ``keep=<ids>`` to narrow the selection to a specific
+        Callers may pass `keep=<ids>` to narrow the selection to a specific
         subset (for example, the managers that implement a given operation).
-        When provided it overrides the global ``user_selection`` for that call.
+        When provided it overrides the global `user_selection` for that call.
         """
         nonlocal selection_logged
         if not selection_logged:
@@ -795,13 +792,13 @@ def managers(ctx):
     """List every package manager detected on the system.
 
     Only reports by default all managers supported on the current platform. To include
-    unsupported and deprecated managers in the report, use the ``--all-managers``
+    unsupported and deprecated managers in the report, use the `--all-managers`
     flag.
 
     User's own selection configuration are intentionally ignored, so a manager dropped
     from regular operations is still visible here for troubleshooting. To narrow down the
     report to a subset of managers, pass the same selectors as for other subcommands (e.g.
-    ``--pip`` or ``--no-apt``).
+    `--pip` or `--no-apt`).
     """
     if ctx.obj.user_drops:
         dropped = ", ".join(map(theme().invoked_command, sorted(ctx.obj.user_drops)))
@@ -893,12 +890,12 @@ def managers(ctx):
 
 
 def _cli_errors(manager: PackageManager) -> list[str]:
-    """Serialize the distinct CLI errors ``manager`` accumulated so far.
+    """Serialize the distinct CLI errors `manager` accumulated so far.
 
     Collected at the last minute — after the manager's query ran — so the list
     gathers everything the run produced. A non-empty list marks the manager's
-    ``✗`` in the concurrent spinner trail (see
-    :py:func:`meta_package_manager.dispatch.collect_from_managers`) and ships in
+    `✗` in the concurrent spinner trail (see
+    {func}`meta_package_manager.dispatch.collect_from_managers`) and ships in
     the serialized payloads.
     """
     return list({expt.error for expt in manager.cli_errors})
@@ -910,13 +907,13 @@ def _snapshot_installed(
     *,
     exact: bool,
 ) -> tuple[Package, ...]:
-    """Materialize the manager's installed inventory, filtered by ``query``.
+    """Materialize the manager's installed inventory, filtered by `query`.
 
-    The shared fetch of every inventory consumer (``installed``, ``dump``,
-    ``dump --brewfile``, ``sbom``): a best-effort
-    :py:meth:`~meta_package_manager.manager.PackageManager.installed_or_empty`
+    The shared fetch of every inventory consumer (`installed`, `dump`,
+    `dump --brewfile`, `sbom`): a best-effort
+    {meth}`~meta_package_manager.manager.PackageManager.installed_or_empty`
     snapshot (a broken manager yields no packages instead of aborting the batch),
-    post-filtered through :py:func:`_filter_matches`.
+    post-filtered through {func}`_filter_matches`.
     """
     return tuple(_filter_matches(manager.installed_or_empty(), query, exact=exact))
 
@@ -924,10 +921,10 @@ def _snapshot_installed(
 def _manager_result(
     manager: PackageManager, packages: tuple[dict, ...]
 ) -> tuple[str, dict]:
-    """Build the standard ``(id, payload)`` result for a read-only manager query.
+    """Build the standard `(id, payload)` result for a read-only manager query.
 
-    The payload shape — ``id``, ``name``, ``packages``, ``errors`` — is shared by
-    the ``installed``, ``outdated`` and ``search`` subcommands, their serialized
+    The payload shape — `id`, `name`, `packages`, `errors` — is shared by
+    the `installed`, `outdated` and `search` subcommands, their serialized
     output and their table rendering.
     """
     return manager.id, {
@@ -944,9 +941,9 @@ def _safe_packages(
     fields: tuple[str, ...],
     action: str,
 ) -> tuple[dict, ...]:
-    """Materialize ``source()`` into package dicts, tolerating a CLI failure.
+    """Materialize `source()` into package dicts, tolerating a CLI failure.
 
-    On :py:class:`meta_package_manager.execution.CLIError` (the manager's query
+    On {class}`meta_package_manager.execution.CLIError` (the manager's query
     subprocess failed), log a one-line ``"Could not {action} from {manager}"``
     warning and return no packages, so one broken manager never aborts the batch.
     """
@@ -963,15 +960,15 @@ def _filter_matches(
     *,
     exact: bool,
 ) -> Iterator[Package]:
-    """Yield only the packages matching ``query`` on their ID or name.
+    """Yield only the packages matching `query` on their ID or name.
 
-    A transparent pass-through when ``query`` is ``None`` (no positional query was
-    given). Shared by the ``installed`` and ``outdated`` subcommands to post-filter
-    the fully-materialized package list each manager returns: unlike ``search``,
+    A transparent pass-through when `query` is `None` (no positional query was
+    given). Shared by the `installed` and `outdated` subcommands to post-filter
+    the fully-materialized package list each manager returns: unlike `search`,
     these operations already hold the complete inventory, so the query is a local
-    refinement rather than a manager-side lookup. Mirrors the fuzzy/``--exact``
-    semantics of ``search`` through
-    :py:meth:`meta_package_manager.package.Package.matches`.
+    refinement rather than a manager-side lookup. Mirrors the fuzzy/`--exact`
+    semantics of `search` through
+    {meth}`meta_package_manager.package.Package.matches`.
     """
     for package in packages:
         if query is None or package.matches(query, exact=exact):
@@ -979,13 +976,13 @@ def _filter_matches(
 
 
 def _query_highlighter(query: str | None) -> Callable[[str], str]:
-    """Build a highlighter that emphasizes ``query`` matches in table cells.
+    """Build a highlighter that emphasizes `query` matches in table cells.
 
     Returns a cached, case-insensitive callable that wraps each occurrence of the
-    query (and its alphanumeric parts) in the active theme's ``search`` style, so
+    query (and its alphanumeric parts) in the active theme's `search` style, so
     the matched substring stands out in the rendered table. When no query was
     given, returns an identity function instead, leaving cells untouched. Shared by
-    the ``search``, ``installed`` and ``outdated`` renderers.
+    the `search`, `installed` and `outdated` renderers.
     """
     if not query:
         return lambda value: value
@@ -1011,8 +1008,8 @@ exact_match_option = option(
     "instead of the default case-insensitive, tokenized (fuzzy) match. No effect "
     "without a QUERY.",
 )
-"""``--exact`` refinement of the optional positional ``QUERY`` of ``installed`` and
-``outdated``."""
+"""`--exact` refinement of the optional positional `QUERY` of `installed` and
+`outdated`."""
 
 query_option = option(
     "--query",
@@ -1022,7 +1019,7 @@ query_option = option(
     help="Only keep installed packages whose ID or name matches QUERY. Fuzzy "
     "by default (case-insensitive, tokenized); see --exact.",
 )
-"""``--query`` filter of the inventory exporters (``dump``, ``sbom``)."""
+"""`--query` filter of the inventory exporters (`dump`, `sbom`)."""
 
 query_exact_option = option(
     "--exact/--fuzzy",
@@ -1030,7 +1027,7 @@ query_exact_option = option(
     help="With --query, require a verbatim match on the package ID or name instead "
     "of the default fuzzy match. No effect without --query.",
 )
-"""``--exact`` refinement of :data:`query_option`."""
+"""`--exact` refinement of {data}`query_option`."""
 
 overwrite_option = option(
     "--overwrite",
@@ -1040,8 +1037,8 @@ overwrite_option = option(
     default=False,
     help="Allow the target file to be silently wiped out if it already exists.",
 )
-"""Opt-in clobbering of an existing output file (``dump``, ``sbom``); see
-:func:`guard_existing_output`."""
+"""Opt-in clobbering of an existing output file (`dump`, `sbom`); see
+{func}`guard_existing_output`."""
 
 
 @mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
@@ -1060,9 +1057,9 @@ overwrite_option = option(
 def installed(ctx, exact, duplicates, query):
     """List all packages installed on the system by each manager.
 
-    With an optional ``QUERY``, restrict the listing to installed packages whose ID
+    With an optional `QUERY`, restrict the listing to installed packages whose ID
     or name matches it. The match is fuzzy by default (case-insensitive, tokenized);
-    ``--exact`` requires a verbatim match on the package ID or name.
+    `--exact` requires a verbatim match on the package ID or name.
     """
     # Build-up a global dict of installed packages per manager.
     fields = (
@@ -1158,9 +1155,9 @@ def installed(ctx, exact, duplicates, query):
 def outdated(ctx, exact, plugin_output, query):
     """List available package upgrades and their versions for each manager.
 
-    With an optional ``QUERY``, restrict the listing to outdated packages whose ID
+    With an optional `QUERY`, restrict the listing to outdated packages whose ID
     or name matches it. The match is fuzzy by default (case-insensitive, tokenized);
-    ``--exact`` requires a verbatim match on the package ID or name.
+    `--exact` requires a verbatim match on the package ID or name.
     """
     # Build-up a global list of outdated packages per manager.
     fields = (
@@ -1230,13 +1227,13 @@ def orphans(ctx, exact, query):
     """List packages installed as dependencies that no package requires anymore.
 
     Each manager reports its orphans through its own native read-only query
-    (``pacman --query --deps --unrequired``, ``brew autoremove --dry-run``,
-    ``dnf repoquery --unneeded``, ...): ``mpm`` builds no dependency graph of its
-    own. Review the list here, then act on it with ``mpm cleanup --orphans``.
+    (`pacman --query --deps --unrequired`, `brew autoremove --dry-run`,
+    `dnf repoquery --unneeded`, ...): `mpm` builds no dependency graph of its
+    own. Review the list here, then act on it with `mpm cleanup --orphans`.
 
-    With an optional ``QUERY``, restrict the listing to orphaned packages whose ID
+    With an optional `QUERY`, restrict the listing to orphaned packages whose ID
     or name matches it. The match is fuzzy by default (case-insensitive, tokenized);
-    ``--exact`` requires a verbatim match on the package ID or name.
+    `--exact` requires a verbatim match on the package ID or name.
     """
     # Build-up a global list of orphaned packages per manager.
     fields = (
@@ -1454,8 +1451,8 @@ def config_template(ctx, manager_ids):
     """Print the overridable attributes of one or more managers as a TOML config
     template.
 
-    Each block is a valid ``[mpm.managers.<id>]`` section ready to paste into a
-    standalone config file or a ``[tool.mpm]`` ``pyproject.toml`` block. The output
+    Each block is a valid `[mpm.managers.<id>]` section ready to paste into a
+    standalone config file or a `[tool.mpm]` `pyproject.toml` block. The output
     lists every overridable field with its current value so it doubles as the
     canonical reference for what each manager exposes: prune the rows that don't
     apply and customize the rest.
@@ -1469,11 +1466,11 @@ def config_template(ctx, manager_ids):
 
 
 def cooldown_permits(manager: PackageManager) -> bool:
-    """Decide whether a release-introducing operation may run on ``manager``.
+    """Decide whether a release-introducing operation may run on `manager`.
 
-    Returns ``True`` when no cooldown is active, when the manager can enforce it
+    Returns `True` when no cooldown is active, when the manager can enforce it
     natively, or when the user opted out of the requirement with
-    ``--allow-unsupported-managers``. Returns ``False`` (after logging the skip)
+    `--allow-unsupported-managers`. Returns `False` (after logging the skip)
     when an active cooldown cannot be enforced and the requirement still holds, so
     the caller leaves the manager alone rather than letting a freshly-published
     version slip in.
@@ -1496,7 +1493,7 @@ def cooldown_permits(manager: PackageManager) -> bool:
 
 
 def package_label(spec: Specifier) -> str:
-    """Render a spec as ``package_id`` or ``package_id@version`` for trail output."""
+    """Render a spec as `package_id` or `package_id@version` for trail output."""
     if spec.version:
         return f"{spec.package_id}{VERSION_SEP}{spec.version}"
     return spec.package_id
@@ -1513,18 +1510,18 @@ def _package_task(
     prep: str,
     record_failure: Callable[[Specifier], None],
 ) -> Callable[[], tuple[bool, str]]:
-    """Build one per-package task for :func:`collect_per_package`.
+    """Build one per-package task for {func}`collect_per_package`.
 
-    Runs ``action(manager, spec)`` with the manager forced to raise on failure (so a
-    botched operation is recorded, not swallowed), narrates the outcome at ``INFO``,
-    and returns ``(ok, message)`` for the ``✓``/``✗`` trail. On failure it appends the
-    spec to a caller-owned list through ``record_failure`` (under ``lock``, since the
-    list is shared across the concurrent lanes) and reports ``✗``. Shared by
-    ``install``, ``remove``, ``upgrade <packages>`` and ``restore``, whose tasks differ
+    Runs `action(manager, spec)` with the manager forced to raise on failure (so a
+    botched operation is recorded, not swallowed), narrates the outcome at `INFO`,
+    and returns `(ok, message)` for the `✓`/`✗` trail. On failure it appends the
+    spec to a caller-owned list through `record_failure` (under `lock`, since the
+    list is shared across the concurrent lanes) and reports `✗`. Shared by
+    `install`, `remove`, `upgrade <packages>` and `restore`, whose tasks differ
     only in the action, the verb forms, and which failure list they feed.
 
-    :param action: performs the manager operation, returning its CLI output (or ``None``).
-    :param verb: present-tense operation name ("install"), for the ``INFO`` lines and
+    :param action: performs the manager operation, returning its CLI output (or `None`).
+    :param verb: present-tense operation name ("install"), for the `INFO` lines and
         the "failed to {verb}" trail.
     :param past: past participle ("installed"), for the success trail.
     :param prep: preposition joining the package and the manager ("with", "from").
@@ -1560,10 +1557,10 @@ def _package_task(
 def _announce_level(ctx: Context) -> int:
     """Log level for a maintenance command's per-manager announcement.
 
-    An explicit ``--<id>`` selection announces loudly at ``INFO``; an implicit
-    "run everything" stays at ``DEBUG`` so the default view shows only the trail
-    (matching the explicit/implicit levels ``select_managers`` already uses for
-    its skip messages). Shared by ``sync``, ``cleanup`` and ``upgrade --all``.
+    An explicit `--<id>` selection announces loudly at `INFO`; an implicit
+    "run everything" stays at `DEBUG` so the default view shows only the trail
+    (matching the explicit/implicit levels `select_managers` already uses for
+    its skip messages). Shared by `sync`, `cleanup` and `upgrade --all`.
     """
     return logging.INFO if ctx.obj.user_selection else logging.DEBUG
 
@@ -1573,12 +1570,12 @@ def _maintenance_work(
     message: str,
     operation: Callable[[PackageManager], object],
 ) -> Callable[[PackageManager], tuple[str, dict]]:
-    """Build a ``work`` callable for a maintenance command's fan-out.
+    """Build a `work` callable for a maintenance command's fan-out.
 
-    Logs ``message`` at the ``announce`` level, tagged with the manager ID (rendered
-    into the level prefix, ``info:brew:``), runs ``operation(manager)``, and returns
+    Logs `message` at the `announce` level, tagged with the manager ID (rendered
+    into the level prefix, `info:brew:`), runs `operation(manager)`, and returns
     ``(id, {"errors": <CLI errors raised during the run>})`` so a manager that grows
-    its error list is marked ``✗`` in the trail. Shared by ``sync`` and ``cleanup``,
+    its error list is marked `✗` in the trail. Shared by `sync` and `cleanup`,
     whose work differs only in the message and the manager method.
     """
 
@@ -1592,16 +1589,16 @@ def _maintenance_work(
 
 
 def exit_on_failures(ctx: Context, verb: str, failures: Iterable[object]) -> None:
-    """Report the per-package ``failures`` collected this run and exit non-zero.
+    """Report the per-package `failures` collected this run and exit non-zero.
 
-    A no-op when ``failures`` is empty. Otherwise prints the durable
+    A no-op when `failures` is empty. Otherwise prints the durable
     ``critical: Could not {verb}: ...`` summary (deduplicated and sorted), then
-    exits with code ``1``, following the linter convention where findings gate
-    automation. The user opts out of that gate with ``-0``/``--zero-exit``: the
-    run then keeps its ``0`` exit code, the printed summary staying the durable
-    record. Usage and configuration errors are unaffected: they exit ``2``
+    exits with code `1`, following the linter convention where findings gate
+    automation. The user opts out of that gate with `-0`/`--zero-exit`: the
+    run then keeps its `0` exit code, the printed summary staying the durable
+    record. Usage and configuration errors are unaffected: they exit `2`
     regardless, as genuine execution failures. Shared by every action command
-    (``install``, ``remove``, ``upgrade <packages>``, ``restore``).
+    (`install`, `remove`, `upgrade <packages>`, `restore`).
     """
     items = sorted({str(failure) for failure in failures})
     if not items:
@@ -1624,19 +1621,19 @@ def _dispatch_sourced_operation(
     done_label: str,
     apply_cooldown: bool = False,
 ) -> None:
-    """Resolve each package spec to its source managers, then fan ``action`` out.
+    """Resolve each package spec to its source managers, then fan `action` out.
 
-    The shared engine behind ``upgrade <packages>`` and ``remove``. Both resolve every
+    The shared engine behind `upgrade <packages>` and `remove`. Both resolve every
     spec to the managers that can act on it — the manager named in the spec, or every
-    selected manager that reports the package installed — then run ``action`` per
+    selected manager that reports the package installed — then run `action` per
     (package, manager) concurrently across managers and serially within each (see
-    :func:`meta_package_manager.dispatch.collect_per_package`). A package no manager
+    {func}`meta_package_manager.dispatch.collect_per_package`). A package no manager
     recognizes is skipped with an error; any genuine failure exits non-zero with a
-    ``critical`` summary, matching ``install``.
+    `critical` summary, matching `install`.
 
-    ``apply_cooldown`` gates each manager through :func:`cooldown_permits` first, so a
-    release-introducing ``upgrade`` skips a manager that cannot honor an active cooldown;
-    ``remove`` (which introduces nothing) leaves it ``False``.
+    `apply_cooldown` gates each manager through {func}`cooldown_permits` first, so a
+    release-introducing `upgrade` skips a manager that cannot honor an active cooldown;
+    `remove` (which introduces nothing) leaves it `False`.
     """
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=operation),
@@ -1728,12 +1725,12 @@ def _dispatch_sourced_operation(
 
 
 def _attempt_install(manager: PackageManager, spec: Specifier) -> bool:
-    """Try installing one ``spec`` with one ``manager``, returning success.
+    """Try installing one `spec` with one `manager`, returning success.
 
     Forces the manager to raise on failure (so a botched install is recorded by the
-    caller rather than silently swallowed), narrates the per-attempt reason at ``INFO``,
-    and logs the CLI output on success. Returns ``True`` only when the install ran
-    cleanly. The caller maps the result onto its ``✓``/``✗`` ledger and decides the
+    caller rather than silently swallowed), narrates the per-attempt reason at `INFO`,
+    and logs the CLI output on success. Returns `True` only when the install ran
+    cleanly. The caller maps the result onto its `✓`/`✗` ledger and decides the
     retry/stop semantics (the tied loop records every miss; the untied priority search
     falls through to the next manager). Shared by both sequential install paths.
     """
@@ -1863,9 +1860,9 @@ def install(ctx, packages_specs):
     installed_count = 0
 
     def trail(spec: Specifier, manager_id: str, status: str) -> None:
-        """Map an install attempt to a ``✓``/``✗`` ledger line through ``op``.
+        """Map an install attempt to a `✓`/`✗` ledger line through `op`.
 
-        ``status`` is ``installed`` (✓), or ``not_found`` / ``failed`` / ``cooldown``
+        `status` is `installed` (✓), or `not_found` / `failed` / `cooldown`
         (✗).
         """
         mgr = theme().invoked_command(manager_id)
@@ -2086,9 +2083,9 @@ def remove(ctx, orphans, packages_specs):
 
     Packages unrecognized by any selected manager will be skipped.
 
-    With ``--orphans``, each package is removed together with the dependencies it alone
+    With `--orphans`, each package is removed together with the dependencies it alone
     pulled in, mapped to the manager's native cascade verb (``apt remove
-    --auto-remove``, ``pacman --remove --recursive``, ``dnf autoremove``, ...). Managers
+    --auto-remove`, `pacman --remove --recursive`, `dnf autoremove``, ...). Managers
     with no such verb remove the package only.
     """
 
@@ -2140,21 +2137,21 @@ def sync(ctx):
 
 
 CLEANUP_CATEGORIES = ("orphans", "cache", "repair")
-"""Cumulative categories the ``cleanup`` subcommand decomposes into.
+"""Cumulative categories the `cleanup` subcommand decomposes into.
 
-Each category has a two-sided ``--<category>/--skip-<category>`` flag pair.
+Each category has a two-sided `--<category>/--skip-<category>` flag pair.
 Positive flags narrow the run to exactly the listed categories; skip flags
 subtract categories from the default selection.
 """
 
 
 DEFAULT_CLEANUP_CATEGORIES = frozenset({"cache", "repair"})
-"""Categories a plain ``cleanup`` (no category flag) runs.
+"""Categories a plain `cleanup` (no category flag) runs.
 
 The orphan sweep is deliberately absent: it removes packages, where cache
 pruning and state repair only reclaim disk and fix metadata. Keeping it
-strictly behind an explicit ``--orphans`` makes the default non-destructive
-and identical on every manager, native sweep or not, mirroring how ``remove``
+strictly behind an explicit `--orphans` makes the default non-destructive
+and identical on every manager, native sweep or not, mirroring how `remove`
 keeps its cascade behind the same flag.
 """
 
@@ -2164,14 +2161,14 @@ def _cleanup_steps(
     selected: frozenset[str],
     explicit_orphans: bool,
 ) -> list[tuple[str, Callable[[], None]]]:
-    """The ``(category, step)`` pairs ``manager`` runs for the ``selected`` categories.
+    """The `(category, step)` pairs `manager` runs for the `selected` categories.
 
     A manager runs exactly the category methods it natively overrides, in category
     order. The synthesized orphan sweep engages only on an explicit positive
-    ``--orphans`` (``explicit_orphans``): a skip flag subtracts from the native
-    categories and must never make a manager remove packages its plain ``cleanup``
+    `--orphans` (`explicit_orphans`): a skip flag subtracts from the native
+    categories and must never make a manager remove packages its plain `cleanup`
     would have left alone. The category names feed the per-manager narration and
-    the ``✓``/``✗`` trail labels, so the run discloses which categories each
+    the `✓`/`✗` trail labels, so the run discloses which categories each
     manager was dispatched.
     """
     steps: list[tuple[str, Callable[[], None]]] = []
@@ -2215,14 +2212,14 @@ def cleanup(ctx, orphans, cache, repair):
     """Cleanup local data and temporary artifacts.
 
     The work decomposes into cumulative categories, each with a two-sided flag pair:
-    ``--orphans/--skip-orphans`` (system-wide orphan sweep), ``--cache/--skip-cache``
-    (caches, downloads and left-overs) and ``--repair/--skip-repair`` (local state
+    `--orphans/--skip-orphans` (system-wide orphan sweep), `--cache/--skip-cache`
+    (caches, downloads and left-overs) and `--repair/--skip-repair` (local state
     verification). Positive flags narrow the run to exactly the listed categories;
     skip flags subtract from the default selection.
 
-    A plain ``cleanup`` runs the cache and repair categories and never removes a
+    A plain `cleanup` runs the cache and repair categories and never removes a
     package: the orphan sweep is the one destructive category, so it only runs on an
-    explicit ``--orphans``, uniformly across managers, just as ``remove`` keeps its
+    explicit `--orphans`, uniformly across managers, just as `remove` keeps its
     dependency cascade behind the same flag. A manager with no native sweep verb but
     a native orphan listing gets the sweep synthesized: list the orphans, remove them
     one by one, and repeat until none are left. Managers supporting none of the
@@ -2307,14 +2304,14 @@ def doctor(ctx):
     """Run each manager's native self-diagnosis and relay its report.
 
     Read-only: nothing is modified. Each manager runs its own diagnostic verb
-    (``brew doctor``, ``pip check``, ``pacman --database --check``, ``npm doctor``,
+    (`brew doctor`, `pip check`, `pacman --database --check`, `npm doctor`,
     ...), its health is read from that command's exit code, and its report — the
-    diagnosis being the product, not something ``mpm`` can parse — is relayed
-    verbatim to ``<stdout>``, one section per manager with findings.
+    diagnosis being the product, not something `mpm` can parse — is relayed
+    verbatim to `<stdout>`, one section per manager with findings.
 
-    The trail marks each manager ``✓`` (healthy) or ``✗`` (problems found), and the
+    The trail marks each manager `✓` (healthy) or `✗` (problems found), and the
     run exits non-zero when any manager reports problems, so the command can gate a
-    CI job. ``-0``/``--zero-exit`` keeps the exit code at ``0``. Managers with no
+    CI job. `-0`/`--zero-exit` keeps the exit code at `0`. Managers with no
     diagnostic verb are skipped.
     """
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.doctor))
@@ -2422,17 +2419,17 @@ def dump(
     """Dump installed packages to a TOML manifest or a Brewfile.
 
     By default emits TOML, one section per manager (one entry per package, keyed
-    by package ID, with the installed version as the value). Pass ``--brewfile``
-    to emit a Brewfile compatible with ``brew bundle install``.
+    by package ID, with the installed version as the value). Pass `--brewfile`
+    to emit a Brewfile compatible with `brew bundle install`.
 
     With no [OUTPUT_PATH] argument, writes to stdout. TOML files are readable by
-    ``mpm restore``.
+    `mpm restore`.
 
-    With ``--query``, restrict the snapshot to installed packages whose ID or name
-    matches it (fuzzy by default, verbatim with ``--exact``).
+    With `--query`, restrict the snapshot to installed packages whose ID or name
+    matches it (fuzzy by default, verbatim with `--exact`).
 
-    ``--merge`` and ``--update-version`` operate on an existing TOML file; both
-    require the [OUTPUT_PATH] argument and neither is valid with ``--brewfile``.
+    `--merge` and `--update-version` operate on an existing TOML file; both
+    require the [OUTPUT_PATH] argument and neither is valid with `--brewfile`.
     """
     # --merge / --update-version are TOML-only.
     if output_format == "brewfile" and (merge or update_version):
@@ -2528,9 +2525,9 @@ def _dump_toml(
 ) -> None:
     """Render the installed inventory as a TOML manifest.
 
-    Supports the same three modes the historical ``mpm backup`` exposed: a
-    one-shot dump, ``--merge`` (add new entries to an existing file), and
-    ``--update-version`` (refresh the version of entries already in the file).
+    Supports the same three modes the historical `mpm backup` exposed: a
+    one-shot dump, `--merge` (add new entries to an existing file), and
+    `--update-version` (refresh the version of entries already in the file).
     Callers are expected to have validated flag combinations and output-path
     constraints upstream.
     """
@@ -2604,10 +2601,10 @@ def _dump_brewfile(
     """Render the installed inventory as a Brewfile.
 
     Filters selected managers down to those with a configured
-    :py:attr:`PackageManager.brewfile_entry_type`. Counts packages from skipped
+    {attr}`PackageManager.brewfile_entry_type`. Counts packages from skipped
     managers so the header can show what was dropped, and emits a stderr
-    warning for any skipped manager that defines :py:attr:`brewfile_skip_warning`
-    (used by ``vscodium`` to flag the silent-misinstall risk).
+    warning for any skipped manager that defines {attr}`brewfile_skip_warning`
+    (used by `vscodium` to flag the silent-misinstall risk).
     """
     managers = list(
         ctx.obj.selected_managers(implements_operation=Operations.installed)
@@ -2788,8 +2785,8 @@ def restore(ctx, toml_files):
 def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path):
     """Export list of installed packages to a SPDX or CycloneDX file.
 
-    With ``--query``, restrict the export to installed packages whose ID or name
-    matches it (fuzzy by default, verbatim with ``--exact``).
+    With `--query`, restrict the export to installed packages whose ID or name
+    matches it (fuzzy by default, verbatim with `--exact`).
     """
     standard = "SPDX" if spdx else "CycloneDX"
 
@@ -2811,9 +2808,9 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
         guessed_format = SBOM.autodetect_export_format(export_path)
         if not export_format:
             if not guessed_format:
-                # On Python 3.10, ``ExportFormat`` extends ``backports.strenum.StrEnum``
-                # whose typeshed stub omits ``__iter__``; iteration is provided by the
-                # ``EnumMeta`` metaclass at runtime.
+                # On Python 3.10, `ExportFormat` extends `backports.strenum.StrEnum`
+                # whose typeshed stub omits `__iter__`; iteration is provided by the
+                # `EnumMeta` metaclass at runtime.
                 supported = ", ".join(
                     f.value
                     for f in ExportFormat  # type: ignore[attr-defined]
@@ -2903,8 +2900,8 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
 def _scan_and_attach_vulnerabilities(sbom: SBOM) -> None:
     """Query OSV for the SBOM's packages and attach the results.
 
-    Runs only in ``--network`` mode. Failures degrade gracefully: a
-    missing ``[sbom-online]`` extra or any network error logs a warning
+    Runs only in `--network` mode. Failures degrade gracefully: a
+    missing `[sbom-online]` extra or any network error logs a warning
     and leaves the document without vulnerability data rather than
     aborting the export. The heavy network imports are deferred to here
     so the offline path never pays for them.

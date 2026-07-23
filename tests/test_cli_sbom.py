@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""``mpm sbom`` CLI tests.
+"""`mpm sbom` CLI tests.
 
 Drives the subcommand end to end: format resolution, per-standard exports to
-console and file, the ``--query`` filter and ``--minimal`` mode. The SPDX and
-CycloneDX renderers it delegates to are unit-tested in :mod:`tests.test_sbom`.
+console and file, the `--query` filter and `--minimal` mode. The SPDX and
+CycloneDX renderers it delegates to are unit-tested in {mod}`tests.test_sbom`.
 """
 
 from __future__ import annotations
@@ -39,9 +39,9 @@ from .test_sbom import assert_valid_cyclonedx
 
 @pytest.fixture
 def subcmd():
-    # ``DEBUG`` level is required so that ``check_manager_selection`` can detect
+    # `DEBUG` level is required so that `check_manager_selection` can detect
     # skip/does-not-implement signals for implicitly selected managers. Those
-    # messages are demoted to DEBUG when no explicit ``--<id>`` flag is passed
+    # messages are demoted to DEBUG when no explicit `--<id>` flag is passed
     # (to avoid flooding the output). INFO messages are a subset of DEBUG, so
     # everything logged at INFO still appears.
     return "--verbosity", "DEBUG", "sbom"
@@ -51,9 +51,9 @@ class TestSBOM(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # The glued ``:<mid>:`` label form matches whatever level the
+            # The glued `:<mid>:` label form matches whatever level the
             # message lands at: demoted to DEBUG for implicit selection,
-            # WARNING/INFO for explicit ones (``mpm --<mid> sbom``).
+            # WARNING/INFO for explicit ones (`mpm --<mid> sbom`).
             f":{mid}: Export packages..." in stderr,
             f":{mid}: Does not implement {Operations.installed}" in stderr,
             f":{mid}: Skipped:" in stderr,
@@ -61,9 +61,9 @@ class TestSBOM(CLISubCommandTests):
         )
 
     def test_default_spdx_json_output_to_console(self, invoke, subcmd):
-        # ``--verbosity DEBUG`` makes the per-manager skip/does-not-implement
+        # `--verbosity DEBUG` makes the per-manager skip/does-not-implement
         # messages reach stderr: at default verbosity they stay quiet because
-        # this invocation makes no explicit ``--<id>`` selection.
+        # this invocation makes no explicit `--<id>` selection.
         result = invoke("--verbosity", "DEBUG", subcmd)
         assert result.exit_code == 0
         assert "Print SPDX export to <stdout>" in result.stderr
@@ -75,7 +75,7 @@ class TestSBOM(CLISubCommandTests):
     def test_unrecognized_extension_without_format(self, invoke, subcmd):
         """A target path with no recognized extension must fail before any
         package collection happens, with an actionable message pointing at
-        ``--format``.
+        `--format`.
         """
         result = invoke(subcmd, "help")
         assert result.exit_code == 2
@@ -89,7 +89,7 @@ class TestSBOM(CLISubCommandTests):
     def test_unrecognized_extension_with_explicit_format(
         self, invoke, subcmd, tmp_path
     ):
-        """An explicit ``--format`` overrides extension auto-detection, even when
+        """An explicit `--format` overrides extension auto-detection, even when
         the filename carries no recognizable suffix.
         """
         target = tmp_path / "help"
@@ -101,7 +101,7 @@ class TestSBOM(CLISubCommandTests):
     @pytest.mark.parametrize("export_format", (None, *ExportFormat))
     @pytest.mark.parametrize("standard_name", ("SPDX", "CycloneDX"))
     def test_output_to_file(self, invoke, subcmd, export_format, standard_name):
-        # Let the CLI auto-detect the format. ``--verbosity DEBUG`` makes the
+        # Let the CLI auto-detect the format. `--verbosity DEBUG` makes the
         # per-manager skip messages reach stderr for check_manager_selection.
         file_name = f"export.{export_format.value}" if export_format else "-"
         result = invoke(
@@ -178,7 +178,7 @@ class TestSBOM(CLISubCommandTests):
 
 
 def test_sbom_query_filter_narrows_to_matches(invoke, fake_pool):
-    """``sbom --query`` keeps only installed packages matching the query."""
+    """`sbom --query` keeps only installed packages matching the query."""
     result = invoke("sbom", "--query", "alpha", "--minimal")
     assert result.exit_code == 0
     assert "fake-pkg-alpha" in result.stdout
@@ -186,7 +186,7 @@ def test_sbom_query_filter_narrows_to_matches(invoke, fake_pool):
 
 
 def test_sbom_without_query_lists_all(invoke, fake_pool):
-    """Without a query, ``sbom`` exports the full installed inventory."""
+    """Without a query, `sbom` exports the full installed inventory."""
     result = invoke("sbom", "--minimal")
     assert result.exit_code == 0
     assert "fake-pkg-alpha" in result.stdout
@@ -194,7 +194,7 @@ def test_sbom_without_query_lists_all(invoke, fake_pool):
 
 
 def test_minimal_mode_skips_metadata_extractor(invoke):
-    """``--minimal`` must avoid the rich-metadata code path so the
+    """`--minimal` must avoid the rich-metadata code path so the
     export matches the historical bare shape even for managers that
     implement an extractor (Homebrew, pip).
     """

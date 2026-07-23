@@ -42,7 +42,7 @@ from .conftest import all_managers, tomllib
 
 
 def _load_docs_update():
-    """Load ``docs/docs_update.py`` as a module without requiring ``docs`` to
+    """Load `docs/docs_update.py` as a module without requiring `docs` to
     be a package.
 
     The script lives next to the docs but is not part of any importable
@@ -149,9 +149,9 @@ def test_new_package_manager_issue_template():
     """Check all platforms groups are referenced in the issue template.
 
     Repo-maintenance guard: the reference set is regenerated from the installed
-    ``extra_platforms`` release, whose platform groups a downstream packager
-    cannot be expected to match, so ``conftest`` skips it outside a git
-    checkout. It also reads ``.github/``, absent from a wheel install.
+    `extra_platforms` release, whose platform groups a downstream packager
+    cannot be expected to match, so `conftest` skips it outside a git
+    checkout. It also reads `.github/`, absent from a wheel install.
     """
     content = PROJECT_ROOT.joinpath(
         ".github/ISSUE_TEMPLATE/new-package-manager.yml",
@@ -174,8 +174,8 @@ def test_new_package_manager_issue_template():
 
 
 def test_extra_labels_in_pyproject():
-    """Check the generated ``[tool.repomatic.labels.extra]`` block in
-    ``pyproject.toml`` is consistent with the ``LABELS`` registry."""
+    """Check the generated `[tool.repomatic.labels.extra]` block in
+    `pyproject.toml` is consistent with the `LABELS` registry."""
     pyproject = PROJECT_ROOT / "pyproject.toml"
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
     extra_labels = data["tool"]["repomatic"]["labels"]["extra"]
@@ -209,11 +209,11 @@ def test_extra_labels_in_pyproject():
 
 def test_label_rules_reference_known_labels():
     """Every file- and content-rule must target a label that exists in the
-    generated ``[tool.repomatic.labels.extra]`` block.
+    generated `[tool.repomatic.labels.extra]` block.
 
     A rule naming an unknown label silently applies a label the repository does not
-    have: the stale ``dnf-based`` rules left behind when the ``labels.py`` group was
-    renamed ``rpm-based``, or per-manager rules (``zypper``, ``pacstall``) outliving
+    have: the stale `dnf-based` rules left behind when the `labels.py` group was
+    renamed `rpm-based`, or per-manager rules (`zypper`, `pacstall`) outliving
     the manager's absorption into an ecosystem group.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
@@ -230,11 +230,11 @@ def test_label_rules_reference_known_labels():
 
 
 def test_label_rules_in_pyproject():
-    """Check the generated ``[tool.repomatic.labels.*]`` rule blocks in
-    ``pyproject.toml`` match a fresh generation from the pool.
+    """Check the generated `[tool.repomatic.labels.*]` rule blocks in
+    `pyproject.toml` match a fresh generation from the pool.
 
-    Drift means a manager was added without running ``docs/docs_update.py``
-    (repomatic's ``update-docs`` job self-heals this on the next push).
+    Drift means a manager was added without running `docs/docs_update.py`
+    (repomatic's `update-docs` job self-heals this on the next push).
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
@@ -254,9 +254,9 @@ def test_label_rules_in_pyproject():
 
 
 def test_pyproject_updates_are_pyproject_fmt_fixpoint(monkeypatch, tmp_path):
-    """The ``pyproject.toml`` writers must emit ``pyproject-fmt``-canonical style.
+    """The `pyproject.toml` writers must emit `pyproject-fmt`-canonical style.
 
-    Any deviation makes the ``update-docs`` and ``format-pyproject`` autofix
+    Any deviation makes the `update-docs` and `format-pyproject` autofix
     jobs endlessly rewrite each other's output. The committed file is
     canonicalized first, so the assertion only judges the writers' own output,
     whatever formatting state the working tree is in.
@@ -277,7 +277,7 @@ def test_pyproject_updates_are_pyproject_fmt_fixpoint(monkeypatch, tmp_path):
 
 
 def test_benchmark_yaml_well_formed():
-    """Check ``docs/benchmark.yaml`` only encodes flags from the known
+    """Check `docs/benchmark.yaml` only encodes flags from the known
     competitor set and homepage URLs for non-pool managers."""
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
     data = safe_load(yaml_path.read_text(encoding="utf-8"))
@@ -364,11 +364,11 @@ def test_benchmark_yaml_well_formed():
 
 
 def test_benchmark_homepages_cover_non_pool_managers():
-    """Every non-pool manager listed in ``benchmark.yaml`` must have a
-    matching ``homepages`` entry so the table can link the identifier.
+    """Every non-pool manager listed in `benchmark.yaml` must have a
+    matching `homepages` entry so the table can link the identifier.
 
     Pool-implemented managers are excluded: their URL is sourced from the
-    class's ``homepage_url`` attribute, and a redundant entry in the YAML
+    class's `homepage_url` attribute, and a redundant entry in the YAML
     would create two sources of truth.
     """
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
@@ -405,11 +405,11 @@ def test_manager_homepage_url(manager):
 
 
 def test_benchmark_table_renders():
-    """Check the ``Package manager support`` table generator still produces a
+    """Check the `Package manager support` table generator still produces a
     well-formed table from the current pool and YAML.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
-    block in ``docs/benchmark.md``, so there is no checked-in copy to compare
+    block in `docs/benchmark.md`, so there is no checked-in copy to compare
     against: this test only guards the generator against crashes and structural
     regressions (a broken YAML entry, a manager without a source file).
     """
@@ -432,9 +432,9 @@ def test_binaries_download_table_renders():
     well-formed table from the binaries catalog.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
-    block in ``docs/install.md``, so there is no checked-in copy to compare
+    block in `docs/install.md`, so there is no checked-in copy to compare
     against: this test only guards the generator against crashes and drift in
-    the ``docs/assets/binaries.csv`` cell markup it parses.
+    the `docs/assets/binaries.csv` cell markup it parses.
     """
     table = docs_update.binaries_download_table()
     lines = table.splitlines()
@@ -453,7 +453,7 @@ def test_augmentations_table_renders():
     table from the current pool.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
-    block in ``docs/augmentations.md``, so there is no checked-in copy to compare
+    block in `docs/augmentations.md`, so there is no checked-in copy to compare
     against: this test only guards the generator against crashes and structural
     regressions.
     """
@@ -474,13 +474,13 @@ def test_augmentations_table_renders():
 
 
 def test_manager_stubs_in_sync():
-    """Check the committed page stubs of ``docs/managers/`` match a fresh
+    """Check the committed page stubs of `docs/managers/` match a fresh
     generation from the pool.
 
-    The directory is wholly owned by ``update_manager_stubs()``: one stub per
+    The directory is wholly owned by `update_manager_stubs()`: one stub per
     pool manager, nothing else, each byte-identical to its template. Drift
     means a manager was added or removed without running
-    ``docs/docs_update.py`` (repomatic's ``update-docs`` job self-heals this
+    `docs/docs_update.py` (repomatic's `update-docs` job self-heals this
     on the next push).
     """
     stub_dir = PROJECT_ROOT / "docs" / "managers"
@@ -496,10 +496,10 @@ def test_manager_page_sections_render(manager):
     non-empty, heading-free MyST.
 
     The sections are rendered live at Sphinx build time by the
-    ``{python:render}`` blocks of ``docs/managers/<id>.md``, so there is no
+    ``{python:render}`` blocks of `docs/managers/<id>.md`, so there is no
     checked-in copy to compare against: this test guards the generators
     against crashes and locks the heading-free invariant documented on
-    ``MANAGER_SECTIONS`` (headings belong to the committed stubs).
+    `MANAGER_SECTIONS` (headings belong to the committed stubs).
     """
     heading = re.compile(r"^#{1,6} ", re.MULTILINE)
     fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
@@ -526,10 +526,10 @@ def test_manager_traces_render_literal_blocks():
     installed/outdated/orphans blocks the corpus validates, in terminal-facing
     form.
 
-    ``manager_traces`` and the corpus round-trip both read
-    :func:`~meta_package_manager.docstring_corpus.literal_blocks`, so the
+    `manager_traces` and the corpus round-trip both read
+    {func}`~meta_package_manager.docstring_corpus.literal_blocks`, so the
     rendered traces never drift from what the parsers are tested against. TOML
-    managers keep their ``[samples]`` traces, covered by ``test_bundled_parsing``.
+    managers keep their `[samples]` traces, covered by `test_bundled_parsing`.
     """
     for mid, manager in pool.items():
         if getattr(manager, "definition_source", None):
@@ -546,7 +546,7 @@ def test_managers_index_table_renders():
     linking every pool manager to its documentation page.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
-    block in ``docs/managers.md``, so there is no checked-in copy to compare
+    block in `docs/managers.md`, so there is no checked-in copy to compare
     against.
     """
     table = docs_update.managers_index_table()
@@ -564,10 +564,10 @@ def test_matrix_blocks_in_sync():
     regeneration from the git tags.
 
     Drift here means a release changed the Python classifiers or the
-    click-extra requirement before repomatic's ``update-docs`` job refreshed
+    click-extra requirement before repomatic's `update-docs` job refreshed
     the embedded blocks.
 
-    Skipped when click-extra's ``[sphinx]`` extra (pulled by the ``docs``
+    Skipped when click-extra's `[sphinx]` extra (pulled by the `docs`
     dependency group) is missing, as in the hermetic unit-test environment.
     Without the full tag history (shallow clone, sdist build), regeneration
     leaves every block untouched and the test passes vacuously.

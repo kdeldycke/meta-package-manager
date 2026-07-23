@@ -7,10 +7,68 @@ Package managers are not comparable: some ship advanced features others lack. Ra
 Each ✅ below is a capability `mpm` synthesizes for a manager that does not provide it natively. The table renders straight from the capability declarations in the manager implementations, so it never drifts from the code. The rest of this page explains each column.
 
 ```{python:render}
+:mirror:
 from docs_update import augmentations_table
 
 print(augmentations_table())
 ```
+
+<!-- mirror -->
+
+| Manager                                    | Full `upgrade --all` | Orphan sweep | Exact search | Extended search |
+| :----------------------------------------- | :------------------: | :----------: | :----------: | :-------------: |
+| [`apk`](managers/apk.md)                   |                      |              |      ✅      |                 |
+| [`apm`](managers/apm.md)                   |                      |              |      ✅      |                 |
+| [`apt-cyg`](managers/apt-cyg.md)           |                      |              |      ✅      |       ✅        |
+| [`apt-mint`](managers/apt-mint.md)         |                      |              |              |       ✅        |
+| [`asdf`](managers/asdf.md)                 |          ✅          |              |      ✅      |       ✅        |
+| [`cargo`](managers/cargo.md)               |                      |              |      ✅      |       ✅        |
+| [`chromebrew`](managers/chromebrew.md)     |                      |              |      ✅      |       ✅        |
+| [`composer`](managers/composer.md)         |                      |              |      ✅      |                 |
+| [`conda`](managers/conda.md)               |                      |              |      ✅      |       ✅        |
+| [`deb-get`](managers/deb-get.md)           |                      |              |      ✅      |       ✅        |
+| [`dnf`](managers/dnf.md)                   |                      |              |      ✅      |       ✅        |
+| [`dnf5`](managers/dnf5.md)                 |                      |              |      ✅      |       ✅        |
+| [`eopkg`](managers/eopkg.md)               |                      |              |      ✅      |                 |
+| [`fink`](managers/fink.md)                 |                      |              |      ✅      |       ✅        |
+| [`flatpak`](managers/flatpak.md)           |                      |              |      ✅      |       ✅        |
+| [`gem`](managers/gem.md)                   |                      |              |              |       ✅        |
+| [`gh-ext`](managers/gh-ext.md)             |                      |              |      ✅      |       ✅        |
+| [`guix`](managers/guix.md)                 |                      |              |      ✅      |       ✅        |
+| [`mas`](managers/mas.md)                   |                      |              |      ✅      |       ✅        |
+| [`mise`](managers/mise.md)                 |                      |              |      ✅      |                 |
+| [`nix`](managers/nix.md)                   |                      |              |      ✅      |       ✅        |
+| [`npm`](managers/npm.md)                   |                      |              |      ✅      |                 |
+| [`opkg`](managers/opkg.md)                 |                      |              |      ✅      |       ✅        |
+| [`pacaur`](managers/pacaur.md)             |                      |      ✅      |              |       ✅        |
+| [`pacman`](managers/pacman.md)             |                      |      ✅      |              |       ✅        |
+| [`pacstall`](managers/pacstall.md)         |                      |              |      ✅      |       ✅        |
+| [`paru`](managers/paru.md)                 |                      |      ✅      |              |       ✅        |
+| [`pip`](managers/pip.md)                   |          ✅          |              |              |                 |
+| [`pkcon`](managers/pkcon.md)               |                      |              |      ✅      |       ✅        |
+| [`pkg-tools`](managers/pkg-tools.md)       |                      |              |      ✅      |       ✅        |
+| [`pkgin`](managers/pkgin.md)               |                      |              |      ✅      |       ✅        |
+| [`pnpm`](managers/pnpm.md)                 |                      |              |      ✅      |                 |
+| [`pwsh-gallery`](managers/pwsh-gallery.md) |                      |              |              |       ✅        |
+| [`scoop`](managers/scoop.md)               |                      |              |      ✅      |       ✅        |
+| [`sfsu`](managers/sfsu.md)                 |                      |              |      ✅      |       ✅        |
+| [`slapt-get`](managers/slapt-get.md)       |                      |              |      ✅      |       ✅        |
+| [`snap`](managers/snap.md)                 |                      |              |      ✅      |       ✅        |
+| [`soar`](managers/soar.md)                 |                      |              |      ✅      |       ✅        |
+| [`sorcery`](managers/sorcery.md)           |                      |              |      ✅      |       ✅        |
+| [`swupd`](managers/swupd.md)               |                      |              |      ✅      |       ✅        |
+| [`tazpkg`](managers/tazpkg.md)             |                      |              |      ✅      |       ✅        |
+| [`tlmgr`](managers/tlmgr.md)               |                      |              |      ✅      |       ✅        |
+| [`urpmi`](managers/urpmi.md)               |                      |              |      ✅      |       ✅        |
+| [`uv`](managers/uv.md)                     |          ✅          |              |              |                 |
+| [`xbps`](managers/xbps.md)                 |                      |              |      ✅      |       ✅        |
+| [`yarn`](managers/yarn.md)                 |                      |              |      ✅      |       ✅        |
+| [`yarn-berry`](managers/yarn-berry.md)     |                      |              |      ✅      |       ✅        |
+| [`yay`](managers/yay.md)                   |                      |      ✅      |              |       ✅        |
+| [`yum`](managers/yum.md)                   |                      |              |      ✅      |       ✅        |
+| [`zypper`](managers/zypper.md)             |                      |      ✅      |              |                 |
+
+<!-- mirror-end -->
 
 ## Free `upgrade --all`
 

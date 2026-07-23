@@ -50,15 +50,14 @@ if TYPE_CHECKING:
     from _pytest.config import Config
 
 PROJECT_ROOT = Path(__file__).parent.parent
-"""Repository root, holding the committed artifacts the ``test_docs`` guards
-check and the ``.git`` directory whose presence marks a developer checkout."""
+"""Repository root, holding the committed artifacts the `test_docs` guards
+check and the `.git` directory whose presence marks a developer checkout."""
 
 
 def pytest_addoption(parser):
     """Add custom command line options.
 
-    Based on `Pytest's documentation examples
-    <https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option>`_.
+    Based on [Pytest's documentation examples](https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option).
 
     By default, runs non-destructive tests and skips destructive ones.
     """
@@ -159,24 +158,24 @@ def pytest_collection_modifyitems(config, items):
 
     # Repo-maintenance guards regenerate a committed artifact from the installed
     # tooling and compare: only meaningful while developing mpm, where the
-    # tooling versions are pinned. A ``.git`` directory marks that checkout; a
+    # tooling versions are pinned. A `.git` directory marks that checkout; a
     # packager building from a tarball or sdist has none.
     in_git_checkout = (PROJECT_ROOT / ".git").exists()
 
     for item in items:
         # Tag the integration layer: tests driving a real package manager
-        # (``test_manager_*``) or the ``mpm`` CLI end-to-end (``test_cli*``). The
+        # (`test_manager_*`) or the `mpm` CLI end-to-end (`test_cli*`). The
         # bar-plugin suite carries the marker in its own module. A machine-
         # readable marker lets writable-$HOME builders (Alpine, Debian, RPM mock)
-        # select ``-m "not integration"`` instead of hand-listing modules, and
+        # select `-m "not integration"` instead of hand-listing modules, and
         # frees the classification from the module-naming convention.
         if item.path.name.startswith(("test_manager_", "test_cli")):
             item.add_marker(pytest.mark.integration)
 
         # The integration layer has no package managers to drive in a hermetic
         # build sandbox. Auto-skip it inside a Guix/Nix build (detected by
-        # ``extra_platforms`` through ``HOME=/homeless-shelter``) so those
-        # distributors run a plain ``pytest`` with no ignores.
+        # `extra_platforms` through `HOME=/homeless-shelter`) so those
+        # distributors run a plain `pytest` with no ignores.
         if item.get_closest_marker("integration"):
             item.add_marker(skip_guix_build)
 
@@ -206,18 +205,18 @@ def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:
 
 @fixture(autouse=True)
 def isolate_user_config(isolated_app_dir):
-    """Hide the developer's real ``mpm`` configuration from the test suite.
+    """Hide the developer's real `mpm` configuration from the test suite.
 
-    Any ``config.toml`` in the host configuration folder bleeds into every
-    in-process CLI invocation: a local ``cpan = false``, for instance, silently
-    drops the manager from the default selection, so ``check_manager_selection``
+    Any `config.toml` in the host configuration folder bleeds into every
+    in-process CLI invocation: a local `cpan = false`, for instance, silently
+    drops the manager from the default selection, so `check_manager_selection`
     assertions that expect the full default set fail locally while passing in
     CI, which has no such file.
 
     Autouse alias of click-extra's
-    :func:`~click_extra.pytest.isolated_app_dir` fixture, which repoints
-    :func:`click.get_app_dir`-based config discovery at a fresh empty
-    directory. ``HOME`` is left intact so the integration layer keeps
+    {func}`~click_extra.pytest.isolated_app_dir` fixture, which repoints
+    {func}`click.get_app_dir`-based config discovery at a fresh empty
+    directory. `HOME` is left intact so the integration layer keeps
     detecting the real package managers, and the override does not propagate
     to subprocesses. Tests that exercise config loading pass ``--config
     <path>`` explicitly, which bypasses the default search pattern and is
@@ -233,12 +232,12 @@ def invoke(runner):  # noqa: F811
 
 @fixture
 def stub_run_cli(monkeypatch):
-    """Replace a manager's ``run_cli`` with a canned-output stub.
+    """Replace a manager's `run_cli` with a canned-output stub.
 
-    Returns a ``stub(manager, output)`` callable: every ``run_cli`` call on
-    ``manager`` then returns ``output`` without spawning a subprocess. The
-    workhorse of the output-parsing tests (``test_manager_*``). To assert on
-    the arguments a manager builds instead, see :func:`capture_run_cli`.
+    Returns a `stub(manager, output)` callable: every `run_cli` call on
+    `manager` then returns `output` without spawning a subprocess. The
+    workhorse of the output-parsing tests (`test_manager_*`). To assert on
+    the arguments a manager builds instead, see {func}`capture_run_cli`.
     """
 
     def stub(manager, output: str) -> None:
@@ -249,9 +248,9 @@ def stub_run_cli(monkeypatch):
 
 @fixture
 def capture_run_cli(monkeypatch):
-    """Replace a manager's ``run_cli`` with a positional-argument recorder.
+    """Replace a manager's `run_cli` with a positional-argument recorder.
 
-    Returns a ``capture(manager, output="")`` callable, which patches the
+    Returns a `capture(manager, output="")` callable, which patches the
     manager and hands back the list every call's positional arguments are
     appended to, so a test can assert on the exact CLI the manager builds.
     """
@@ -270,11 +269,11 @@ def capture_run_cli(monkeypatch):
 
 
 def _patch_pool_with(monkeypatch, fake):
-    """Replace ``pool.select_managers`` with a generator yielding ``fake``.
+    """Replace `pool.select_managers` with a generator yielding `fake`.
 
     Mirrors the runtime knobs (timeout, stop_on_error, dry_run,
     ignore_auto_updates) that
-    :py:meth:`meta_package_manager.pool.ManagerPool._select_managers` would
+    {meth}`meta_package_manager.pool.ManagerPool._select_managers` would
     forward, so the CLI exercises the same code path it does against real
     managers.
     """
@@ -295,7 +294,7 @@ def _patch_pool_with(monkeypatch, fake):
 
 @fixture
 def fake_pool(monkeypatch):
-    """Yield a single deterministic :class:`FakeManager` from the pool.
+    """Yield a single deterministic {class}`FakeManager` from the pool.
 
     Use for CLI plumbing tests (stats lines, table rendering, exit codes)
     that need a stable package set regardless of host PATH.
@@ -305,21 +304,21 @@ def fake_pool(monkeypatch):
 
 @fixture
 def slow_fake_pool(monkeypatch):
-    """Yield a :class:`TimingOutFakeManager` whose ``outdated`` exceeds ``--timeout``.
+    """Yield a {class}`TimingOutFakeManager` whose `outdated` exceeds `--timeout`.
 
     Use only for tests that need to verify
-    :py:meth:`meta_package_manager.execution.CLIExecutor.run` catches
-    :py:exc:`subprocess.TimeoutExpired` and logs the expected warning.
+    {meth}`meta_package_manager.execution.CLIExecutor.run` catches
+    {exc}`subprocess.TimeoutExpired` and logs the expected warning.
     """
     return _patch_pool_with(monkeypatch, TimingOutFakeManager())
 
 
 @fixture
 def subcmd():
-    """Fixture used in ``test_cli_*.py`` files to set the subcommand arguments in all
+    """Fixture used in `test_cli_*.py` files to set the subcommand arguments in all
     CLI calls.
 
-    Must returns a string or an iterable of strings. Defaults to ``None``, which allows
+    Must returns a string or an iterable of strings. Defaults to `None`, which allows
     tests relying on this fixture to selectively skip running.
     """
     return
@@ -404,46 +403,48 @@ PACKAGE_IDS = {
 }
 """Package IDs used by the destructive install/remove tests, one per manager.
 
-Each entry is fed to ``mpm --<manager_id> install <package_id>`` immediately followed
-by ``mpm --<manager_id> remove <package_id>``, so the package is both added to and
+Each entry is fed to `mpm --<manager_id> install <package_id>` immediately followed
+by `mpm --<manager_id> remove <package_id>`, so the package is both added to and
 removed from the host running the test. Each ID is picked to keep that round-trip cheap
 and free of side effects:
 
 - Tiny and quick to install, with no dependency tree, no services or daemons, and no
-  ``/etc`` configuration: just a self-contained binary.
+  `/etc` configuration: just a self-contained binary.
 - Not a tool the OS, the manager itself, or common scripts are likely to depend on.
-  Ubiquitous utilities (``wget``, ``curl``, ``git``, ``jq``, ...) are avoided: they are
+  Ubiquitous utilities (`wget`, `curl`, `git`, `jq`, ...) are avoided: they are
   usually already installed (so the install step is a no-op) and removing them can break
   the host.
 - Preferably from the Rust or Go ecosystems, which rarely pull in extra dependencies.
 
 Wherever a manager exposes general-purpose binaries the same low-impact tools are reused
-for consistency: ``nyancat`` (a single-file C binary packaged by nearly every Linux
-distro, Homebrew, FreeBSD as ``net/nyancat``, OpenBSD and pkgsrc as ``misc/nyancat``),
-GNU ``hello`` for the functional managers (Guix, Nix) and ``hyperfine`` for the Windows
-binary stores and ``stew``. Distros that lack ``nyancat`` fall back to ``sl``
-(Chromebrew, Solus, Void), ``figlet`` (another tiny dependency-free C binary, for
-Exherbo, Fink, Mageia and Source Mage), ``lolcat`` (OpenWrt) or ``nano`` (Slackware's
-official tree carries none of the above, so ``slapt-get`` mirrors ``tazpkg``).
+for consistency: `nyancat` (a single-file C binary packaged by nearly every Linux
+distro, Homebrew, FreeBSD as `net/nyancat`, OpenBSD and pkgsrc as `misc/nyancat`),
+GNU `hello` for the functional managers (Guix, Nix) and `hyperfine` for the Windows
+binary stores and `stew`. Distros that lack `nyancat` fall back to `sl`
+(Chromebrew, Solus, Void), `figlet` (another tiny dependency-free C binary, for
+Exherbo, Fink, Mageia and Source Mage), `lolcat` (OpenWrt) or `nano` (Slackware's
+official tree carries none of the above, so `slapt-get` mirrors `tazpkg`).
 Language and application managers use the smallest inert package native to their
-ecosystem (``ms`` for npm and Yarn, ``pycowsay`` for the pipx-style installers that
+ecosystem (`ms` for npm and Yarn, `pycowsay` for the pipx-style installers that
 require a console-script entry point, ...).
 
-.. warning::
+```{warning}
 
-    ``fwupd`` flashes real firmware. Its ID is a release with no matching device on CI
-    runners, where the install is therefore a no-op. Never run the destructive ``fwupd``
-    test on hardware that the ID actually targets.
+`fwupd` flashes real firmware. Its ID is a release with no matching device on CI
+runners, where the install is therefore a no-op. Never run the destructive `fwupd`
+test on hardware that the ID actually targets.
+```
 
-.. note::
+```{note}
 
-    A few managers cannot offer a small binary: ``sdkman`` only ships full SDKs
-    (``jbang`` is its lightest candidate), and ``mas`` needs a signed App Store app (its
-    test is skipped anyway). ``deb-get`` has no real per-package install, so it
-    references itself, and ``topgrade`` declares no install operation at all, so its
-    round-trip auto-skips. ``gh-ext`` references its extension by the ``owner/repo``
-    slug: the only id ``gh extension install`` accepts, and the id scheme its
-    ``installed`` operation reports.
+A few managers cannot offer a small binary: `sdkman` only ships full SDKs
+(`jbang` is its lightest candidate), and `mas` needs a signed App Store app (its
+test is skipped anyway). `deb-get` has no real per-package install, so it
+references itself, and `topgrade` declares no install operation at all, so its
+round-trip auto-skips. `gh-ext` references its extension by the `owner/repo`
+slug: the only id `gh extension install` accepts, and the id scheme its
+`installed` operation reports.
+```
 
 Only to be used for destructive tests.
 """
@@ -478,9 +479,9 @@ manager_classes_params = pytest.mark.parametrize(
 SHORT_FAILURE_TIMEOUT = 10
 """Seconds to cap a destructive install that is *expected* to fail.
 
-The managers in :py:data:`INSTALL_REMOVE_BLOCKERS` cannot complete a real install in the
+The managers in {data}`INSTALL_REMOVE_BLOCKERS` cannot complete a real install in the
 test environment. Most fail within a second (a permission error, a missing remote, an
-empty search), but a few (``scoop`` and ``sfsu`` on Windows, ``pwsh-gallery`` on macOS)
+empty search), but a few (`scoop` and `sfsu` on Windows, `pwsh-gallery` on macOS)
 hang with no error until the state-change timeout would otherwise elapse. Capping their
 CLI calls keeps the doomed attempts cheap: long enough for the fast failures to surface,
 short enough that the genuine hangs do not dominate the destructive job's wall-clock.
@@ -488,12 +489,12 @@ short enough that the genuine hangs do not dominate the destructive job's wall-c
 
 
 def gh_unauthenticated() -> bool:
-    """Whether the ``gh`` CLI is present but holds no usable credentials.
+    """Whether the `gh` CLI is present but holds no usable credentials.
 
-    ``gh`` refuses to run ``extension install`` unauthenticated, so the gh-ext
+    `gh` refuses to run `extension install` unauthenticated, so the gh-ext
     destructive round-trip can only succeed where it resolves a token. ``gh auth
-    token`` probes the resolved credentials (stored logins and ``GH_TOKEN``-style
-    environment variables alike) without any network call. A missing ``gh`` is not
+    token` probes the resolved credentials (stored logins and `GH_TOKEN``-style
+    environment variables alike) without any network call. A missing `gh` is not
     flagged: selection then finds no available manager and the test already exits on
     its "No manager selected" path.
     """
@@ -554,25 +555,26 @@ predicate that is True where the manager is known to be uninstallable.
 
 Rather than skip these managers (which would also drop their dispatch coverage and any
 signal that they still fail the *expected* way), the destructive install/remove test drives
-each one's ``install`` anyway, caps the doomed CLI call with
-:py:data:`SHORT_FAILURE_TIMEOUT`, and asserts that mpm reports the stable failure: exit code
-``1`` and a ``Could not install: {package}`` critical message. The follow-up ``remove`` is
+each one's `install` anyway, caps the doomed CLI call with
+{data}`SHORT_FAILURE_TIMEOUT`, and asserts that mpm reports the stable failure: exit code
+`1` and a ``Could not install: {package}`` critical message. The follow-up `remove` is
 skipped, since the failed install left nothing to remove and the working managers already
 cover the removal path.
 
-The predicate is a zero-argument callable: ``is_linux`` for the unprivileged Linux runner,
-``is_github_ci`` for GitHub Actions only (a configured local box can still install),
-``lambda: True`` for managers no environment can install, or a live probe like
-``gh_unauthenticated`` when installability hinges on host state rather than platform.
+The predicate is a zero-argument callable: `is_linux` for the unprivileged Linux runner,
+`is_github_ci` for GitHub Actions only (a configured local box can still install),
+`lambda: True` for managers no environment can install, or a live probe like
+`gh_unauthenticated` when installability hinges on host state rather than platform.
 
-.. note::
+```{note}
 
-    The assertion deliberately targets mpm's own ``Could not install:`` message rather than
-    the underlying tool's error. The raw tool output is not a stable contract: it is
-    platform-specific (``pwsh-gallery`` times out on macOS but hits a name-case mismatch on
-    Linux), stage-specific (``dnf``/``zypper``/``flatpak`` fail at the search step, never
-    reaching their privileged install errors), and drifts across tool versions, OS images,
-    and locales. mpm's failure message is identical everywhere, so the test stays robust.
+The assertion deliberately targets mpm's own `Could not install:` message rather than
+the underlying tool's error. The raw tool output is not a stable contract: it is
+platform-specific (`pwsh-gallery` times out on macOS but hits a name-case mismatch on
+Linux), stage-specific (`dnf`/`zypper`/`flatpak` fail at the search step, never
+reaching their privileged install errors), and drifts across tool versions, OS images,
+and locales. mpm's failure message is identical everywhere, so the test stays robust.
+```
 """
 
 # Deprecated managers are excluded: their upstreams are unreliable or gone, so a real

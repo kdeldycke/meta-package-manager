@@ -59,7 +59,7 @@ def test_purl_map():
 def props(spec: Specifier):
     """Utility to help compares specifiers between themselves.
 
-    I.e. all properties of specifiers are the same but the ``raw_specs`` property.
+    I.e. all properties of specifiers are the same but the `raw_specs` property.
     """
     return sorted((k, v) for k, v in asdict(spec).items() if k != "raw_spec")
 

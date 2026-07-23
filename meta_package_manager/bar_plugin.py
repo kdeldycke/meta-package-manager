@@ -13,19 +13,17 @@
 # <!--xbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</xbar.var-->
 # <!--xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Font parameters for monospace text. Used for table rendering and error messages.</xbar.var-->
 # <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: font=Menlo size=12]</swiftbar.environment>
-"""Xbar and SwiftBar plugin for Meta Package Manager (the :command:`mpm` CLI).
+"""Xbar and SwiftBar plugin for Meta Package Manager (the {command}`mpm` CLI).
 
 Default update cycle should be set to several hours so we have a chance to get
 user's attention once a day. Higher frequency might ruin the system as all
 checks are quite resource intensive, and Homebrew might hit GitHub's API calls
 quota.
 
-- `Xbar automatically bridge plugin options
-  <https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html>`_ between its UI
+- [Xbar automatically bridge plugin options](https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html) between its UI
   and environment variable on script execution.
 
-- This is `in progress for SwiftBar
-  <https://github.com/swiftbar/SwiftBar/issues/160>`_.
+- This is [in progress for SwiftBar](https://github.com/swiftbar/SwiftBar/issues/160).
 """
 
 from __future__ import annotations
@@ -61,25 +59,24 @@ MPM_MIN_VERSION = (5, 0, 0)
 """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
 MPM_TIMEOUT = 60
-"""Maximum duration in seconds the plugin lets any single ``mpm`` call run.
+"""Maximum duration in seconds the plugin lets any single `mpm` call run.
 
-Passed as ``--timeout`` to every ``mpm`` invocation so the plugin is never at the
+Passed as `--timeout` to every `mpm` invocation so the plugin is never at the
 mercy of mpm's own per-operation defaults, which are tuned for interactive CLI use
 and far too long for a background menubar refresh (120s for read-only queries, 500s
-for state-changing operations like ``sync``). A wedged package manager then fails
+for state-changing operations like `sync`). A wedged package manager then fails
 the whole refresh in a minute instead of freezing the menubar for several.
 """
 
 
 class MPMPlugin:
-    """Implements the minimal code necessary to locate and call the ``mpm`` CLI on the
+    """Implements the minimal code necessary to locate and call the `mpm` CLI on the
     system.
 
-    Once ``mpm`` is located, we can rely on it to produce the main output of the plugin.
+    Once `mpm` is located, we can rely on it to produce the main output of the plugin.
 
-    The output must supports both `Xbar dialect
-    <https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api>`_
-    and `SwiftBar dialect <https://github.com/swiftbar/SwiftBar#plugin-api>`_.
+    The output must supports both [Xbar dialect](https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api)
+    and [SwiftBar dialect](https://github.com/swiftbar/SwiftBar#plugin-api).
     """
 
     @staticmethod
@@ -98,7 +95,7 @@ class MPMPlugin:
     def getenv_bool(var, default: bool = False) -> bool:
         """Utility to normalize boolean environment variables.
 
-        Relies on ``configparser.RawConfigParser.BOOLEAN_STATES`` to translate strings
+        Relies on `configparser.RawConfigParser.BOOLEAN_STATES` to translate strings
         into boolean. See:
         https://github.com/python/cpython/blob/3c298e2e385fc6f462abaada2fd680deb1a2b58e/Lib/configparser.py#L596-L597
         """
@@ -114,8 +111,8 @@ class MPMPlugin:
         The string is expected to be a space-separated list of parameters, each
         parameter being a key/value pair separated by an equal sign.
 
-        Only keeps the parameters that are in the ``valid_ids`` set and ignores the
-        rest. By default, only ``color``, ``font`` and ``size`` are kept.
+        Only keeps the parameters that are in the `valid_ids` set and ignores the
+        rest. By default, only `color`, `font` and `size` are kept.
 
         Multiple values for the same parameter will be deduplicated, and the last one
         will be kept.
@@ -166,7 +163,7 @@ class MPMPlugin:
     def table_rendering(self) -> bool:
         """Aligns package names and versions, like a table, for easier visual parsing.
 
-        If ``True``, will aligns all items using a fixed-width font.
+        If `True`, will aligns all items using a fixed-width font.
         """
         return self.getenv_bool("VAR_TABLE_RENDERING", True)
 
@@ -198,13 +195,11 @@ class MPMPlugin:
     def search_venv(folder: Path) -> tuple[str, ...] | None:
         """Search for signs of a virtual env in the provided folder.
 
-        Returns CLI arguments that can be used to run ``mpm`` from the virtualenv
-        context, or ``None`` if the folder is not a venv.
+        Returns CLI arguments that can be used to run `mpm` from the virtualenv
+        context, or `None` if the folder is not a venv.
 
-        Inspired by `autoswitch_virtualenv.plugin.zsh
-        <https://github.com/MichaelAquilina/zsh-autoswitch-virtualenv/blob/master/autoswitch_virtualenv.plugin.zsh#L50>`_
-        and `uv's get_interpreter_info.py
-        <https://github.com/astral-sh/uv/blob/f770b25/crates/uv-python/python/get_interpreter_info.py>`_.
+        Inspired by [autoswitch_virtualenv.plugin.zsh](https://github.com/MichaelAquilina/zsh-autoswitch-virtualenv/blob/master/autoswitch_virtualenv.plugin.zsh#L50)
+        and [uv's get_interpreter_info.py](https://github.com/astral-sh/uv/blob/f770b25/crates/uv-python/python/get_interpreter_info.py).
         """
         if (folder / "Pipfile").is_file():
             return (f"PIPENV_PIPFILE='{folder}'", "pipenv", "run", "mpm")
@@ -226,13 +221,13 @@ class MPMPlugin:
         return None
 
     def search_mpm(self) -> Generator[tuple[str, ...], None, None]:
-        """Iterate over possible CLI commands to execute ``mpm``.
+        """Iterate over possible CLI commands to execute `mpm`.
 
         Should be able to produce the full spectrum of alternative commands we can use
-        to invoke ``mpm`` over different context.
+        to invoke `mpm` over different context.
 
         The order in which the candidates are returned by this method is conserved by
-        the ``ranked_mpm()`` method below.
+        the `ranked_mpm()` method below.
 
         We prioritize venv-based findings first, as they're more likely to have all
         dependencies installed and sorted out. They're also our prime candidates in
@@ -293,7 +288,7 @@ class MPMPlugin:
         version = None
         up_to_date = False
         # Is mpm runnable as-is with provided CLI arguments? Check the error
-        # first: on a FileNotFoundError probe, ``process`` was never assigned.
+        # first: on a FileNotFoundError probe, `process` was never assigned.
         if not error and not process.returncode:
             runnable = True
             # This regular expression is designed to extract the version number,
@@ -335,7 +330,7 @@ class MPMPlugin:
         - version number
         - error
 
-        On tie, the order from ``search_mpm`` is respected.
+        On tie, the order from `search_mpm` is respected.
         """
         all_mpm = (
             (mpm_candidate, self.check_mpm(mpm_candidate))

@@ -43,9 +43,9 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # The glued ``:<mid>:`` label form matches whatever level the
+            # The glued `:<mid>:` label form matches whatever level the
             # message lands at: demoted to DEBUG for implicit selection
-            # (``mpm search``), INFO for explicit ones.
+            # (`mpm search`), INFO for explicit ones.
             f":{mid}: Does not implement {Operations.search}." in stderr,
             f":{mid}: Skipped:" in stderr,
             # Stats line at the end of output.
@@ -53,8 +53,8 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         )
 
     def test_description_column_selection(self, invoke, fake_pool):
-        """The description column hides by default, appears with ``--description``,
-        and an explicit ``--columns`` selection is authoritative either way."""
+        """The description column hides by default, appears with `--description`,
+        and an explicit `--columns` selection is authoritative either way."""
         # Hidden by default.
         result = invoke("search", "match-me", color=False)
         assert result.exit_code == 0
@@ -93,26 +93,28 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @unless_macos
     @skip_github_ci
     def test_unicode_search(self, invoke):
-        """Check ``mpm`` is accepting unicode as search query.
+        """Check `mpm` is accepting unicode as search query.
 
-        ``mas`` is the only manager we have that is accepting unicode characters for
-        its package names. We perform a search with it so we can prove ``mpm`` is
+        `mas` is the only manager we have that is accepting unicode characters for
+        its package names. We perform a search with it so we can prove `mpm` is
         supporting it too:
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ mpm --mas search 钉
-            ╭────────────┬───────────────────┬─────────┬────────────────╮
-            │ Package ID │ Name              │ Manager │ Latest version │
-            ├────────────┼───────────────────┼─────────┼────────────────┤
-            │ 1435447041 │ 钉钉 - 让进步发生 │ mas     │ 7.6.57         │
-            ╰────────────┴───────────────────┴─────────┴────────────────╯
+        $ mpm --mas search 钉
+        ╭────────────┬───────────────────┬─────────┬────────────────╮
+        │ Package ID │ Name              │ Manager │ Latest version │
+        ├────────────┼───────────────────┼─────────┼────────────────┤
+        │ 1435447041 │ 钉钉 - 让进步发生 │ mas     │ 7.6.57         │
+        ╰────────────┴───────────────────┴─────────┴────────────────╯
+        ```
 
         Test originates from #16.
 
-        .. caution::
-            Test is skipped on GitHub Actions as ``mas`` does not have access there
-            to a registered account on the App Store. So the search returns no results.
+        ```{caution}
+        Test is skipped on GitHub Actions as `mas` does not have access there
+        to a registered account on the App Store. So the search returns no results.
+        ```
         """
         result = invoke("--color", "--mas", "search", "钉")
         assert result.exit_code == 0
@@ -124,8 +126,8 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     def test_search_highlight(self, invoke):
         """We search on cargo as it is available on all platforms.
 
-        The search on the small ``co`` string is producing all variations of multiple
-        ``co`` substring matches and highlights.
+        The search on the small `co` string is producing all variations of multiple
+        `co` substring matches and highlights.
         """
         result = invoke("--color", "--cargo", "search", "co")
         assert result.exit_code == 0

@@ -37,10 +37,10 @@ if TYPE_CHECKING:
 
 
 VERSION_SEP: Final = "@"
-"""Separator used by ``mpm`` to split package's ID from its version:
+"""Separator used by `mpm` to split package's ID from its version:
 
 This has been chosen as a separator because it is shared by popular package managers
-(like ``npm``) and pURLs.
+(like `npm`) and pURLs.
 
 ..code-block::
 
@@ -131,20 +131,19 @@ PURL_MAP: dict[str, set[str] | None] = {
 Keys are recognized pURL's types, and values are the set of MPM's manager IDs that can
 handle the package type.
 
-.. warning::
+```{warning}
 
-    There is no official list of ``pkg:<type>/...`` prefixes defined in the pURL
-    specification.
+There is no official list of `pkg:<type>/...` prefixes defined in the pURL
+specification.
 
-    The only source we found lying around in the pURL literature is this `list of
-    diverse aliases, examples and libraries
-    <https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst>`_. We use
-    this document to compile the keys of this ``PURL_MAP`` mapping.
+The only source we found lying around in the pURL literature is this [list of diverse aliases, examples and libraries](https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst). We use
+this document to compile the keys of this `PURL_MAP` mapping.
+```
 
-.. todo::
+```{todo}
 
-    Reuse the mapping that is proposed upstream to the `package-url Python
-    project <https://github.com/package-url/packageurl-python/pull/188>`_.
+Reuse the mapping that is proposed upstream to the [package-url Python project](https://github.com/package-url/packageurl-python/pull/188).
+```
 """
 
 
@@ -170,7 +169,7 @@ class Specifier:
     def parse_purl(cls, spec_str: str) -> tuple[Specifier, ...] | None:
         """Resolve a pURL into its corresponding manager candidates.
 
-        Yields ``Specifier`` objects or returns ``None``.
+        Yields `Specifier` objects or returns `None`.
         """
         # Try to parse specifier as a pURL.
         try:
@@ -206,16 +205,16 @@ class Specifier:
         """Parse a string into a package specifier.
 
         Supports various formats:
-        - plain ``package_id``
-        - simple package ID with version: ``package_id@version``
-        - package with multiple version separators: ``@eslint/json@0.9.0``
-        - pURL: ``pkg:npm/left-pad@3.7``
+        - plain `package_id`
+        - simple package ID with version: `package_id@version`
+        - package with multiple version separators: `@eslint/json@0.9.0`
+        - pURL: `pkg:npm/left-pad@3.7`
 
         If a specifier resolves to multiple constraints (as it might be the case for
-        pURL), we produce and returns all variations. That way the ``Solver`` below has
+        pURL), we produce and returns all variations. That way the `Solver` below has
         all necessary details to resolve the constraints.
 
-        Returns a tuple of ``Specifier``.
+        Returns a tuple of `Specifier`.
         """
         specs = cls.parse_purl(spec_str)
         if specs:
@@ -268,7 +267,7 @@ class EmptyReduction(Exception):
 
 
 class Solver:
-    """Combine a set of ``Specifier`` and allow for the solving of the constraints they
+    """Combine a set of `Specifier` and allow for the solving of the constraints they
     represent."""
 
     manager_priority: Sequence[str] = []
@@ -297,7 +296,7 @@ class Solver:
     ) -> str | None:
         """Returns the top priority manager configured on the solver.
 
-        ``keep_managers`` allows for filtering by discarding managers not in that list.
+        `keep_managers` allows for filtering by discarding managers not in that list.
         """
         for manager_id in self.manager_priority:
             # Returns the first manager in the priority list if no filtering needs to
@@ -308,14 +307,14 @@ class Solver:
         return None
 
     def reduce_specs(self, specs: Iterable[Specifier]) -> Specifier:
-        """Reduce a collection of ``Specifier`` to its essential, minimal and unique
+        """Reduce a collection of `Specifier` to its essential, minimal and unique
         form.
 
-        This method assumes that all provided ``specs`` are of the same package (like
-        ``resolve_package_specs()`` does).
+        This method assumes that all provided `specs` are of the same package (like
+        `resolve_package_specs()` does).
 
         The reduction process consist of several steps. At each step, as soon as we
-        managed to reduce the constraints to one ``Specifier``, we returns it.
+        managed to reduce the constraints to one `Specifier`, we returns it.
 
         Filtering steps:
 
@@ -392,19 +391,19 @@ class Solver:
 
         Each package ID yields one reduced spec *per distinct target manager*. A
         package therefore produces several specs when the user explicitly names several
-        managers for it (``pkg:uv/rich pkg:brew/rich`` → one spec each). In contrast, a
-        single alias pURL that expands to several managers (``pkg:rpm/ping`` →
-        ``dnf``/``yum``/``zypper``) is a set of *alternatives*, reduced to the
+        managers for it (`pkg:uv/rich pkg:brew/rich` → one spec each). In contrast, a
+        single alias pURL that expands to several managers (`pkg:rpm/ping` →
+        `dnf`/`yum`/`zypper`) is a set of *alternatives*, reduced to the
         top-priority one.
         """
 
         def manager_key(spec: Specifier) -> str:
-            """Group key tolerating the ``None`` manager (sorts it first)."""
+            """Group key tolerating the `None` manager (sorts it first)."""
             return spec.manager_id or ""
 
-        # Collapse alias expansions first: specs sharing a single ``raw_spec`` that
+        # Collapse alias expansions first: specs sharing a single `raw_spec` that
         # resolved to several managers are alternatives, reduced to the top-priority
-        # one. Distinct ``raw_spec`` strings stay distinct, so each explicitly-listed
+        # one. Distinct `raw_spec` strings stay distinct, so each explicitly-listed
         # manager survives as its own target.
         raw_key = attrgetter("raw_spec")
         collapsed: list[Specifier] = []

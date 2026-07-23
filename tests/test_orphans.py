@@ -15,10 +15,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Checks for the two orphan features and their native-command mappings.
 
-``remove --orphans`` (scoped, :py:meth:`PackageManager.remove_orphan`) drops one
-package's own orphaned dependencies; ``cleanup --orphans`` (system-wide,
-:py:meth:`PackageManager.cleanup_orphan`) sweeps every orphaned package. The argv
-assertions stub ``run_cli`` on the pooled manager singleton to capture command tokens
+`remove --orphans` (scoped, {meth}`PackageManager.remove_orphan`) drops one
+package's own orphaned dependencies; `cleanup --orphans` (system-wide,
+{meth}`PackageManager.cleanup_orphan`) sweeps every orphaned package. The argv
+assertions stub `run_cli` on the pooled manager singleton to capture command tokens
 without spawning a subprocess, so they run identically on any host.
 """
 
@@ -45,12 +45,12 @@ from .fake_manager import FakeManager
 
 
 def _capture_run_cli(monkeypatch, manager_id, call):
-    """Invoke ``call(manager)`` with the binary-resolution seams stubbed.
+    """Invoke `call(manager)` with the binary-resolution seams stubbed.
 
-    ``run_cli`` records the positional argv of every invocation instead of executing
-    it; ``sibling_cli`` is neutralized because its ``same_dir`` resolution asserts on
-    a ``cli_path`` that is absent on a host lacking the manager (xbps); ``which`` is
-    stubbed for the operations probing helper binaries (emerge's ``eclean``). Returns
+    `run_cli` records the positional argv of every invocation instead of executing
+    it; `sibling_cli` is neutralized because its `same_dir` resolution asserts on
+    a `cli_path` that is absent on a host lacking the manager (xbps); `which` is
+    stubbed for the operations probing helper binaries (emerge's `eclean`). Returns
     the flat list of every captured token across all invocations.
     """
     manager = pool[manager_id]
@@ -90,7 +90,7 @@ def _capture_run_cli(monkeypatch, manager_id, call):
     ),
 )
 def test_remove_orphan_uses_native_cascade(monkeypatch, manager_id, cascade_token):
-    """``remove --orphans`` maps to each manager's native remove-plus-orphans verb."""
+    """`remove --orphans` maps to each manager's native remove-plus-orphans verb."""
     tokens = _capture_run_cli(
         monkeypatch, manager_id, lambda m: m.remove_orphan("firefox")
     )
@@ -108,7 +108,7 @@ def test_remove_orphan_uses_native_cascade(monkeypatch, manager_id, cascade_toke
     ),
 )
 def test_plain_remove_no_longer_cascades(monkeypatch, manager_id, cascade_token):
-    """Plain ``remove`` keeps orphaned dependencies: dnf and xbps used to cascade."""
+    """Plain `remove` keeps orphaned dependencies: dnf and xbps used to cascade."""
     tokens = _capture_run_cli(monkeypatch, manager_id, lambda m: m.remove("firefox"))
     assert cascade_token not in tokens
     assert "firefox" in tokens
@@ -119,8 +119,8 @@ def test_plain_remove_no_longer_cascades(monkeypatch, manager_id, cascade_token)
     ("brew", "cask", "flatpak", "npm", "pip", "pkg", "snap"),
 )
 def test_remove_orphan_unsupported_raises_not_implemented(manager_id):
-    """A manager with no scoped cascade leaves ``remove_orphan`` unimplemented, so the
-    CLI action catches the ``NotImplementedError`` and falls back to a plain removal."""
+    """A manager with no scoped cascade leaves `remove_orphan` unimplemented, so the
+    CLI action catches the `NotImplementedError` and falls back to a plain removal."""
     with pytest.raises(NotImplementedError):
         pool[manager_id].remove_orphan("firefox")
 
@@ -143,7 +143,7 @@ def test_remove_orphan_unsupported_raises_not_implemented(manager_id):
     ),
 )
 def test_cleanup_orphan_uses_native_sweep(monkeypatch, manager_id, sweep_token):
-    """``cleanup --orphans`` maps to each manager's system-wide orphan sweep."""
+    """`cleanup --orphans` maps to each manager's system-wide orphan sweep."""
     tokens = _capture_run_cli(monkeypatch, manager_id, lambda m: m.cleanup_orphan())
     assert sweep_token in tokens
 
@@ -158,8 +158,8 @@ def test_cleanup_orphan_uses_native_sweep(monkeypatch, manager_id, sweep_token):
     ),
 )
 def test_plain_cleanup_never_sweeps(monkeypatch, manager_id, sweep_token, cache_token):
-    """The ``cleanup`` composer runs the non-destructive categories only: the orphan
-    sweep stays behind an explicit ``--orphans``, even where a native sweep exists."""
+    """The `cleanup` composer runs the non-destructive categories only: the orphan
+    sweep stays behind an explicit `--orphans`, even where a native sweep exists."""
     tokens = _capture_run_cli(monkeypatch, manager_id, lambda m: m.cleanup())
     assert sweep_token not in tokens
     assert cache_token in tokens
@@ -167,8 +167,8 @@ def test_plain_cleanup_never_sweeps(monkeypatch, manager_id, sweep_token, cache_
 
 @pytest.mark.parametrize("manager_id", ("npm", "pip", "snap"))
 def test_cleanup_orphan_unsupported_raises_not_implemented(manager_id):
-    """A manager with neither a native sweep nor an ``orphans`` query propagates
-    ``NotImplementedError`` from the base sweep, so ``cleanup --orphans`` skips it."""
+    """A manager with neither a native sweep nor an `orphans` query propagates
+    `NotImplementedError` from the base sweep, so `cleanup --orphans` skips it."""
     with pytest.raises(NotImplementedError):
         pool[manager_id].cleanup_orphan()
 
@@ -202,7 +202,7 @@ def test_cleanup_orphan_unsupported_raises_not_implemented(manager_id):
 )
 def test_cleanup_orphan_capability_matrix(manager_id, synthesized, supported):
     """The synthesized sweep covers exactly the managers with an orphan listing and
-    per-package removal but no native sweep verb, mirroring ``upgrade --all``."""
+    per-package removal but no native sweep verb, mirroring `upgrade --all`."""
     manager = pool[manager_id]
     assert cleanup_orphan_is_synthesized(manager) is synthesized
     assert supports_cleanup_orphan(manager) is supported
@@ -227,7 +227,7 @@ def test_cleanup_orphan_capability_matrix(manager_id, synthesized, supported):
 )
 def test_cleanup_category_support(manager_id, cache_support, repair_support):
     """Category support is a plain method-override check: every manager declares
-    its cleanup work through category methods, never a monolithic ``cleanup``."""
+    its cleanup work through category methods, never a monolithic `cleanup`."""
     manager = pool[manager_id]
     assert implements_method(manager, "cleanup") is False
     assert supports_cleanup_cache(manager) is cache_support
@@ -419,9 +419,9 @@ i+ | openSUSE   | libbar  | 0.9-2.4   | noarch
     ),
 )
 def test_orphans_parsing(monkeypatch, manager_id, output, expected):
-    """Each manager's ``orphans`` query parses its native listing into packages.
+    """Each manager's `orphans` query parses its native listing into packages.
 
-    The canned outputs mirror the ``shell-session`` samples of the ``orphans``
+    The canned outputs mirror the `shell-session` samples of the `orphans`
     docstrings, so the documented format and the tested format cannot drift apart.
     """
     manager = pool[manager_id]
@@ -444,7 +444,7 @@ def test_orphans_parsing(monkeypatch, manager_id, output, expected):
 @pytest.mark.parametrize("manager_id", ("cask", "npm", "pip", "snap"))
 def test_orphans_query_unsupported(manager_id):
     """Managers without a native read-only orphan listing (including cask: casks are
-    never installed as dependencies) do not advertise the ``orphans`` operation."""
+    never installed as dependencies) do not advertise the `orphans` operation."""
     assert implements(pool[manager_id], Operations.orphans) is False
 
 
@@ -473,7 +473,7 @@ def test_orphans_query_supported(manager_id):
 
 
 def test_implements_method_introspection():
-    """``implements_method`` reports overrides of the base ``NotImplementedError``
+    """`implements_method` reports overrides of the base `NotImplementedError`
     stubs, the same MRO walk the CLI and the docs generator rely on."""
     assert implements_method(pool["apt"], "remove_orphan") is True
     assert implements_method(pool["apt"], "cleanup_orphan") is True
@@ -486,7 +486,7 @@ def test_implements_method_introspection():
 
 
 def test_base_orphan_operations_not_implemented():
-    """Both operations are optional, exactly like ``remove`` and ``cleanup``."""
+    """Both operations are optional, exactly like `remove` and `cleanup`."""
     with pytest.raises(NotImplementedError):
         PackageManager().remove_orphan("firefox")
     with pytest.raises(NotImplementedError):
@@ -499,8 +499,8 @@ def test_base_orphan_operations_not_implemented():
 class RemovableFakeManager(FakeManager):
     """Fake manager that removes packages but has no scoped orphan-cascade verb.
 
-    Exercises the ``remove --orphans`` fallback: ``remove_orphan`` stays unimplemented
-    (base ``NotImplementedError``) while ``remove`` succeeds, so the CLI must catch the
+    Exercises the `remove --orphans` fallback: `remove_orphan` stays unimplemented
+    (base `NotImplementedError`) while `remove` succeeds, so the CLI must catch the
     former and fall back to the latter.
     """
 
@@ -528,8 +528,8 @@ class OrphanCleanupFakeManager(CleanupFakeManager):
 
 class SweepSynthesizingFakeManager(CleanupFakeManager):
     """Fake manager with cleanup, an orphan listing (inherited) and removal, but no
-    native sweep verb: ``cleanup --orphans`` must go through the synthesized base
-    sweep, never the full ``cleanup``."""
+    native sweep verb: `cleanup --orphans` must go through the synthesized base
+    sweep, never the full `cleanup`."""
 
     def remove(self, package_id: str) -> str:
         self.calls.append(f"remove:{package_id}")
@@ -554,8 +554,8 @@ def removable_fake_pool(monkeypatch):
 
 
 def test_remove_orphans_falls_back_to_plain_removal(invoke, removable_fake_pool):
-    """``remove --orphans`` on a manager without a cascade verb removes the package
-    only, narrating the skip at ``INFO`` and still exiting cleanly."""
+    """`remove --orphans` on a manager without a cascade verb removes the package
+    only, narrating the skip at `INFO` and still exiting cleanly."""
     result = invoke("--verbosity", "INFO", "remove", "--orphans", "fake-pkg-alpha")
     assert result.exit_code == 0
     assert "Does not implement orphan removal, removing the package only." in (
@@ -564,7 +564,7 @@ def test_remove_orphans_falls_back_to_plain_removal(invoke, removable_fake_pool)
 
 
 def test_cleanup_orphans_runs_only_the_sweep(invoke, monkeypatch):
-    """``cleanup --orphans`` runs ``cleanup_orphan``, not the full ``cleanup``."""
+    """`cleanup --orphans` runs `cleanup_orphan`, not the full `cleanup`."""
     fake = _patch_pool_with(monkeypatch, OrphanCleanupFakeManager())
     result = invoke("cleanup", "--orphans")
     assert result.exit_code == 0
@@ -572,8 +572,8 @@ def test_cleanup_orphans_runs_only_the_sweep(invoke, monkeypatch):
 
 
 def test_cleanup_without_flags_runs_default_categories(invoke, monkeypatch):
-    """Plain ``cleanup`` runs the non-destructive default categories only: a native
-    orphan sweep does not join in without an explicit ``--orphans``."""
+    """Plain `cleanup` runs the non-destructive default categories only: a native
+    orphan sweep does not join in without an explicit `--orphans`."""
     fake = _patch_pool_with(monkeypatch, OrphanCleanupFakeManager())
     result = invoke("cleanup")
     assert result.exit_code == 0
@@ -582,7 +582,7 @@ def test_cleanup_without_flags_runs_default_categories(invoke, monkeypatch):
 
 def test_cleanup_orphans_skips_manager_without_sweep(invoke, monkeypatch):
     """A cleanup-capable manager with no orphan sweep at all (an orphan listing but
-    no removal) is skipped by ``--orphans``, not fully cleaned up."""
+    no removal) is skipped by `--orphans`, not fully cleaned up."""
     fake = _patch_pool_with(monkeypatch, CleanupFakeManager())
     result = invoke("cleanup", "--orphans")
     assert result.exit_code == 0
@@ -590,8 +590,8 @@ def test_cleanup_orphans_skips_manager_without_sweep(invoke, monkeypatch):
 
 
 def test_cleanup_orphans_runs_synthesized_sweep(invoke, monkeypatch):
-    """``cleanup --orphans`` on a manager without a native sweep verb synthesizes it:
-    the listed orphans are removed one by one, and the full ``cleanup`` never runs."""
+    """`cleanup --orphans` on a manager without a native sweep verb synthesizes it:
+    the listed orphans are removed one by one, and the full `cleanup` never runs."""
     fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
     result = invoke("cleanup", "--orphans")
     assert result.exit_code == 0
@@ -625,8 +625,8 @@ def test_cleanup_category_selection(invoke, monkeypatch, args, expected_calls):
 
 
 def test_cleanup_cache_category_alone(invoke, monkeypatch):
-    """A cache-only manager runs its single category under ``--cache`` and under a
-    plain ``cleanup`` alike."""
+    """A cache-only manager runs its single category under `--cache` and under a
+    plain `cleanup` alike."""
     fake = _patch_pool_with(monkeypatch, CleanupFakeManager())
     result = invoke("cleanup", "--cache")
     assert result.exit_code == 0
@@ -634,8 +634,8 @@ def test_cleanup_cache_category_alone(invoke, monkeypatch):
 
 
 def test_plain_cleanup_never_engages_synthesized_sweep(invoke, monkeypatch):
-    """Plain ``cleanup`` runs native categories only: the flag pairs default to
-    ``True`` (so ``--help`` renders each default as its positive side), and only a
+    """Plain `cleanup` runs native categories only: the flag pairs default to
+    `True` (so `--help` renders each default as its positive side), and only a
     flag the user actually set may count as a positive and engage the synthesized
     sweep."""
     fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
@@ -646,7 +646,7 @@ def test_plain_cleanup_never_engages_synthesized_sweep(invoke, monkeypatch):
 
 def test_cleanup_skip_never_engages_synthesized_sweep(invoke, monkeypatch):
     """A skip flag subtracts from the native bundle only: on a monolithic manager
-    with a synthesizable sweep, ``--skip-cache`` must not surprise-remove packages,
+    with a synthesizable sweep, `--skip-cache` must not surprise-remove packages,
     so the manager is skipped entirely."""
     fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
     result = invoke("cleanup", "--skip-cache")
@@ -655,7 +655,7 @@ def test_cleanup_skip_never_engages_synthesized_sweep(invoke, monkeypatch):
 
 
 def test_cleanup_skip_orphans_keeps_native_categories(invoke, monkeypatch):
-    """``--skip-orphans`` on a manager with a synthesizable-but-not-native sweep
+    """`--skip-orphans` on a manager with a synthesizable-but-not-native sweep
     keeps its native categories running: only the sweep is subtracted."""
     fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
     result = invoke("cleanup", "--skip-orphans")
@@ -665,7 +665,7 @@ def test_cleanup_skip_orphans_keeps_native_categories(invoke, monkeypatch):
 
 def test_cleanup_narration_names_categories(invoke, monkeypatch):
     """The per-manager narration names the categories dispatched to it, matching
-    the ``✓``/``✗`` trail labels."""
+    the `✓`/`✗` trail labels."""
     fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
     result = invoke("--verbosity", "DEBUG", "cleanup", "--orphans", "--cache")
     assert result.exit_code == 0
@@ -675,7 +675,7 @@ def test_cleanup_narration_names_categories(invoke, monkeypatch):
 
 def test_cleanup_all_categories_skipped_errors(invoke, monkeypatch):
     """Skipping every default category is a usage error, not a silent no-op:
-    ``--skip-orphans`` is not needed, as orphans is not in the default set."""
+    `--skip-orphans` is not needed, as orphans is not in the default set."""
     fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
     result = invoke("cleanup", "--skip-cache", "--skip-repair")
     assert result.exit_code == 2

@@ -15,8 +15,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """pipx output-parsing and CLI-construction tests.
 
-These tests stub ``run_cli`` and exercise the pure-Python branches of the
-``Pipx`` manager. They do not invoke the real ``pipx`` binary.
+These tests stub `run_cli` and exercise the pure-Python branches of the
+`Pipx` manager. They do not invoke the real `pipx` binary.
 """
 
 from __future__ import annotations

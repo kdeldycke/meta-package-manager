@@ -39,17 +39,19 @@ class Tazpkg(PackageManager):
     - https://doc.slitaz.org/en:handbook:tazpkg
     - https://github.com/SliTaz-official/tazpkg
 
-    .. note::
-        tazpkg decorates every listing with localized, colorized titles, separators
-        and count footers, with no terminal detection: ``LC_ALL=C`` pins the text to
-        English, ``--output=raw`` switches the decorations to plain text, and any
-        remaining ANSI sequence is stripped before parsing. Data rows are then
-        matched by their digit-led version column, which no decoration line carries.
+    ```{note}
+    tazpkg decorates every listing with localized, colorized titles, separators
+    and count footers, with no terminal detection: `LC_ALL=C` pins the text to
+    English, `--output=raw` switches the decorations to plain text, and any
+    remaining ANSI sequence is stripped before parsing. Data rows are then
+    matched by their digit-led version column, which no decoration line carries.
+    ```
 
-    .. note::
-        No ``outdated`` operation: ``tazpkg up --check`` requires root and recharges
-        the package lists from the mirror even when only listing, so there is no
-        cleanly read-only upgradable listing.
+    ```{note}
+    No `outdated` operation: `tazpkg up --check` requires root and recharges
+    the package lists from the mirror even when only listing, so there is no
+    cleanly read-only upgradable listing.
+    ```
     """
 
     name = "TazPkg"
@@ -68,8 +70,8 @@ class Tazpkg(PackageManager):
 
     version_cli = "awk"
     """tazpkg has no version command at all: its own version only exists as the
-    ``tazpkg`` row of the installed-packages database. This probe mirrors, verbatim,
-    how tazpkg resolves its ``VERSION`` variable for itself::
+    `tazpkg` row of the installed-packages database. This probe mirrors, verbatim,
+    how tazpkg resolves its `VERSION` variable for itself::
 
         export VERSION=$(awk -F$'\\t' '$1=="tazpkg"{print $2}' \\
             "$PKGS_DB/installed.info")
@@ -82,8 +84,8 @@ class Tazpkg(PackageManager):
     )
 
     version_regexes = (r"^(?P<version>[\d.]+)$",)
-    """A bare integer Mercurial revision on cooking releases (``944``) or a dotted
-    version on stable ones (``4.9.2``)."""
+    """A bare integer Mercurial revision on cooking releases (`944`) or a dotted
+    version on stable ones (`4.9.2`)."""
 
     _ANSI_REGEXP = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 
@@ -91,11 +93,11 @@ class Tazpkg(PackageManager):
         r"^(?P<package_id>\S+)\s+(?P<version>\d\S*)\s+\S+\s*$",
     )
     """Data rows are "name version category" triples whose version starts with a
-    digit: titles, ``===``/``---`` separators and "N packages ..." footers all fail
+    digit: titles, `===`/`---` separators and "N packages ..." footers all fail
     that shape."""
 
     def _parse_listing(self, output: str) -> Iterator[tuple[str, str]]:
-        """Yield ``(package_id, version)`` from a decorated tazpkg listing."""
+        """Yield `(package_id, version)` from a decorated tazpkg listing."""
         for line in self._ANSI_REGEXP.sub("", output).splitlines():
             match = self._PACKAGE_LINE_REGEXP.match(line)
             if match:
@@ -105,15 +107,16 @@ class Tazpkg(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ tazpkg list --output=raw
-            List of all installed packages
-            ================================================================================
-            busybox                            1.36.0            base-system
-            nano                               6.2               editors
-            ================================================================================
-            2 packages installed.
+        $ tazpkg list --output=raw
+        List of all installed packages
+        ================================================================================
+        busybox                            1.36.0            base-system
+        nano                               6.2               editors
+        ================================================================================
+        2 packages installed.
+        ```
         """
         output = self.run_cli("list")
 
@@ -125,16 +128,17 @@ class Tazpkg(PackageManager):
         """Fetch matching packages.
 
         tazpkg matches the query as a case-insensitive substring of
-        ``name-version``, over installed then mirrored packages.
+        `name-version`, over installed then mirrored packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ tazpkg search nano --output=raw
-            Installed packages
-            --------------------------------------------------------------------------------
-            nano                    6.2               editors
-            --------------------------------------------------------------------------------
-            1 installed package found for: nano
+        $ tazpkg search nano --output=raw
+        Installed packages
+        --------------------------------------------------------------------------------
+        nano                    6.2               editors
+        --------------------------------------------------------------------------------
+        1 installed package found for: nano
+        ```
         """
         output = self.run_cli("search", query)
 
@@ -145,24 +149,26 @@ class Tazpkg(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package from the mirror.
 
-        ``--forced`` skips the already-installed guard, keeping the call
+        `--forced` skips the already-installed guard, keeping the call
         non-interactive.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo tazpkg get-install nano --forced --output=raw
+        $ sudo tazpkg get-install nano --forced --output=raw
+        ```
         """
         return self.run_cli("get-install", package_id, "--forced", sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 
-        ``-i`` (no long form) auto-confirms, upgrading every outdated package; the
+        `-i` (no long form) auto-confirms, upgrading every outdated package; the
         command recharges the package lists first.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo tazpkg up -i --output=raw
+        $ sudo tazpkg up -i --output=raw
+        ```
         """
         return self.build_cli("up", "-i", sudo=True)
 
@@ -175,42 +181,46 @@ class Tazpkg(PackageManager):
         """Generates the CLI to upgrade one package.
 
         tazpkg has no per-package upgrade verb: its own upgrade loop re-runs
-        ``get-install --forced`` on each outdated package.
+        `get-install --forced` on each outdated package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo tazpkg get-install nano --forced --output=raw
+        $ sudo tazpkg get-install nano --forced --output=raw
+        ```
         """
         return self.build_cli("get-install", package_id, "--forced", sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        No ``--auto`` on purpose: it would also auto-confirm the "remove
+        No `--auto` on purpose: it would also auto-confirm the "remove
         dependents?" follow-up and cascade. On a non-terminal stdout (mpm's
-        subprocess pipe) the ``(y/N)`` prompt is skipped and only the target
+        subprocess pipe) the `(y/N)` prompt is skipped and only the target
         package is removed.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo tazpkg remove nano --output=raw
+        $ sudo tazpkg remove nano --output=raw
+        ```
         """
         return self.run_cli("remove", package_id, sudo=True)
 
     def sync(self) -> None:
         """Recharge the package lists from the mirror.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo tazpkg recharge --output=raw
+        $ sudo tazpkg recharge --output=raw
+        ```
         """
         self.run_cli("recharge", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Delete every downloaded package from the cache.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo tazpkg clean-cache --output=raw
+        $ sudo tazpkg clean-cache --output=raw
+        ```
         """
         self.run_cli("clean-cache", sudo=True)

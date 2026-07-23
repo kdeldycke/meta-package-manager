@@ -34,29 +34,30 @@ if TYPE_CHECKING:
 class NPM(PackageManager):
     """The Node.js package manager.
 
-    mpm drives npm in global mode: every call forces ``--global`` so packages land
+    mpm drives npm in global mode: every call forces `--global` so packages land
     in the shared prefix instead of the current working directory. Per-scope
     targeting and multi-binary discovery (several node versions through nvm) are
-    tracked in `#1725
-    <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__. Command
+    tracked in [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725). Command
     equivalences with the sibling JS managers are listed at
     https://github.com/antfu-collective/ni?tab=readme-ov-file#ni.
 
-    Queries parse npm's ``--json`` output. Mutating operations are marked
-    privileged so ``--sudo`` can escalate writes into a root-owned global prefix,
+    Queries parse npm's `--json` output. Mutating operations are marked
+    privileged so `--sudo` can escalate writes into a root-owned global prefix,
     though escalation stays dormant unless requested.
 
-    .. note::
-        npm enforces a supply-chain cooldown through its ``min-release-age``
-        resolver option, refusing to resolve any release younger than the
-        configured age. The version floor exists for it: ``min-release-age`` first
-        shipped in ``11.10.0``, and older releases silently ignore the setting.
+    ```{note}
+    npm enforces a supply-chain cooldown through its `min-release-age`
+    resolver option, refusing to resolve any release younger than the
+    configured age. The version floor exists for it: `min-release-age` first
+    shipped in `11.10.0`, and older releases silently ignore the setting.
+    ```
 
-    .. caution::
-        A fatal npm error (usually a local node version out of sync) is reported
-        both on ``<stderr>`` and as a JSON blob on ``<stdout>``. The ``run_cli``
-        override blanks that JSON so the failure surfaces once, through
-        ``<stderr>``, rather than being parsed as a package listing.
+    ```{caution}
+    A fatal npm error (usually a local node version out of sync) is reported
+    both on `<stderr>` and as a JSON blob on `<stdout>`. The `run_cli`
+    override blanks that JSON so the failure surfaces once, through
+    `<stderr>`, rather than being parsed as a package listing.
+    ```
     """
 
     name = "Node npm"
@@ -68,27 +69,27 @@ class NPM(PackageManager):
     platforms = ALL_PLATFORMS
 
     requirement = ">=11.10.0"
-    """`11.10.0 <https://github.com/npm/cli/releases/tag/v11.10.0>`_ is the first
-    version to ship ``min-release-age``, the purpose-built release-age gate mpm uses
-    for the supply-chain cooldown (see :py:attr:`cooldown_env_var`). Older npm
+    """[11.10.0](https://github.com/npm/cli/releases/tag/v11.10.0) is the first
+    version to ship `min-release-age`, the purpose-built release-age gate mpm uses
+    for the supply-chain cooldown (see {attr}`cooldown_env_var`). Older npm
     releases silently ignore the env var, so the floor avoids advertising a gate that
     does nothing.
     """
 
     cooldown_env_var = "npm_config_min-release-age"
-    """npm honors a release-age cooldown through its ``min-release-age`` resolver
+    """npm honors a release-age cooldown through its `min-release-age` resolver
     option.
 
-    npm maps any ``npm_config_<key>`` environment variable to a config setting, so
-    ``npm_config_min-release-age`` sets ``min-release-age`` without touching the
-    user's ``.npmrc``. Once set, npm refuses to resolve any package version younger
-    than the configured age, which covers ``install`` and ``update`` along with their
+    npm maps any `npm_config_<key>` environment variable to a config setting, so
+    `npm_config_min-release-age` sets `min-release-age` without touching the
+    user's `.npmrc`. Once set, npm refuses to resolve any package version younger
+    than the configured age, which covers `install` and `update` along with their
     transitive dependencies. The hyphenated env var passes cleanly through Python's
-    :py:class:`subprocess.Popen` ``env=`` mapping (shells that reject ``export
-    foo-bar=baz`` are not involved).
+    {class}`subprocess.Popen` `env=` mapping (shells that reject `export
+    foo-bar=baz` are not involved).
 
-    The ``cooldown_env_value()`` method below is overridden to emit an integer number of
-    days, the unit ``min-release-age`` expects.
+    The `cooldown_env_value()` method below is overridden to emit an integer number of
+    days, the unit `min-release-age` expects.
 
     See https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age.
     """
@@ -109,18 +110,19 @@ class NPM(PackageManager):
         "--no-audit",
     )
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ npm --version
-        6.13.7
+    $ npm --version
+    6.13.7
+    ```
     """
 
     def cooldown_env_value(self) -> str:
-        """Render :py:attr:`meta_package_manager.execution.CLIExecutor.cooldown` as an
-        integer day count for npm's ``min-release-age``.
+        """Render {attr}`meta_package_manager.execution.CLIExecutor.cooldown` as an
+        integer day count for npm's `min-release-age`.
 
         Sub-day cooldowns round up so the gate over-protects rather than silently
-        collapses to ``0`` (the "no cooldown" sentinel).
+        collapses to `0` (the "no cooldown" sentinel).
         """
         return self.cooldown_rounded_up(86400)
 
@@ -129,17 +131,18 @@ class NPM(PackageManager):
 
         NPM is prone to breakage if local node version is not in sync:
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                --json outdated
-            {
-              "error": {
-                "code": "ERR_OUT_OF_RANGE",
-                "summary": "The value of \"err\" is out of range. Received 536870212",
-                "detail": ""
-              }
-            }
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            --json outdated
+        {
+          "error": {
+            "code": "ERR_OUT_OF_RANGE",
+            "summary": "The value of \"err\" is out of range. Received 536870212",
+            "detail": ""
+          }
+        }
+        ```
         """
         output = super().run_cli(*args, **kwargs)
 
@@ -156,43 +159,44 @@ class NPM(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                --json --depth 0 list
-            {
-              "name": "lib",
-              "dependencies": {
-                "@eslint/json": {
-                  "version": "0.9.0",
-                  "overridden": false
-                },
-                "@mermaid-js/mermaid-cli": {
-                  "version": "10.8.0",
-                  "overridden": false
-                },
-                "corepack": {
-                  "version": "0.30.0",
-                  "overridden": false
-                },
-                "google-closure-compiler": {
-                  "version": "20240317.0.0",
-                  "overridden": false
-                },
-                "npm": {
-                  "version": "10.9.2",
-                  "overridden": false
-                },
-                "raven": {
-                  "version": "2.6.4",
-                  "overridden": false
-                },
-                "wrangler": {
-                  "version": "3.51.2",
-                  "overridden": false
-                }
-              }
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            --json --depth 0 list
+        {
+          "name": "lib",
+          "dependencies": {
+            "@eslint/json": {
+              "version": "0.9.0",
+              "overridden": false
+            },
+            "@mermaid-js/mermaid-cli": {
+              "version": "10.8.0",
+              "overridden": false
+            },
+            "corepack": {
+              "version": "0.30.0",
+              "overridden": false
+            },
+            "google-closure-compiler": {
+              "version": "20240317.0.0",
+              "overridden": false
+            },
+            "npm": {
+              "version": "10.9.2",
+              "overridden": false
+            },
+            "raven": {
+              "version": "2.6.4",
+              "overridden": false
+            },
+            "wrangler": {
+              "version": "3.51.2",
+              "overridden": false
             }
+          }
+        }
+        ```
         """
         output = self.run_cli("--json", "--depth", "0", "list", must_succeed=True)
 
@@ -208,24 +212,25 @@ class NPM(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                --json outdated
-            {
-              "my-linked-package": {
-                "current": "0.0.0-development",
-                "wanted": "linked",
-                "latest": "linked",
-                "location": "/Users/kev/dev/my-linked-package"
-              },
-              "npm": {
-                "current": "3.10.3",
-                "wanted": "3.10.5",
-                "latest": "3.10.5",
-                "location": "/opt/homebrew/lib/node_modules/npm"
-              }
-            }
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            --json outdated
+        {
+          "my-linked-package": {
+            "current": "0.0.0-development",
+            "wanted": "linked",
+            "latest": "linked",
+            "location": "/Users/kev/dev/my-linked-package"
+          },
+          "npm": {
+            "current": "3.10.3",
+            "wanted": "3.10.5",
+            "latest": "3.10.5",
+            "location": "/opt/homebrew/lib/node_modules/npm"
+          }
+        }
+        ```
         """
         output = self.run_cli("--json", "outdated", must_succeed=True)
 
@@ -247,82 +252,85 @@ class NPM(PackageManager):
 
         Doc: https://docs.npmjs.com/cli/search.html
 
-        .. caution::
-            Search does not supports exact matching.
+        ```{caution}
+        Search does not supports exact matching.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                search --json python | jq
-            [
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            search --json python | jq
+        [
+          {
+            "name": "python",
+            "description": "Interact with a python child process",
+            "maintainers": [
               {
-                "name": "python",
-                "description": "Interact with a python child process",
-                "maintainers": [
-                  {
-                    "username": "drderidder",
-                    "email": "drderidder@gmail.com"
-                  }
-                ],
-                "version": "0.0.4",
-                "date": "2015-01-25T02:48:07.820Z"
+                "username": "drderidder",
+                "email": "drderidder@gmail.com"
+              }
+            ],
+            "version": "0.0.4",
+            "date": "2015-01-25T02:48:07.820Z"
+          },
+          {
+            "name": "raven",
+            "description": "A standalone (Node.js) client for Sentry",
+            "maintainers": [
+              {
+                "username": "benvinegar",
+                "email": "ben@benv.ca"
               },
               {
-                "name": "raven",
-                "description": "A standalone (Node.js) client for Sentry",
-                "maintainers": [
-                  {
-                    "username": "benvinegar",
-                    "email": "ben@benv.ca"
-                  },
-                  {
-                    "username": "lewisjellis",
-                    "email": "me@lewisjellis.com"
-                  },
-                  {
-                    "username": "mattrobenolt",
-                    "email": "m@robenolt.com"
-                  },
-                  {
-                    "username": "zeeg",
-                    "email": "dcramer@gmail.com"
-                  }
-                ],
-                "keywords": [
-                  "raven",
-                  "sentry",
-                  "python",
-                  "errors",
-                  "debugging",
-                  "exceptions"
-                ],
-                "version": "1.1.2",
-                "date": "2017-02-09T02:54:07.723Z"
+                "username": "lewisjellis",
+                "email": "me@lewisjellis.com"
               },
               {
-                "name": "brush-python",
-                "description": "Python brush module for SyntaxHighlighter.",
-                "maintainers": [
-                  {
-                    "username": "alexgorbatchev",
-                    "email": "alex.gorbatchev@gmail.com"
-                  }
-                ],
-                "keywords": [
-                  "syntaxhighlighter",
-                  "brush",
-                  "python"
-                ],
-                "version": "4.0.0",
-                "date": "2016-02-07T21:32:39.597Z"
+                "username": "mattrobenolt",
+                "email": "m@robenolt.com"
               },
-              (...)
-            ]
+              {
+                "username": "zeeg",
+                "email": "dcramer@gmail.com"
+              }
+            ],
+            "keywords": [
+              "raven",
+              "sentry",
+              "python",
+              "errors",
+              "debugging",
+              "exceptions"
+            ],
+            "version": "1.1.2",
+            "date": "2017-02-09T02:54:07.723Z"
+          },
+          {
+            "name": "brush-python",
+            "description": "Python brush module for SyntaxHighlighter.",
+            "maintainers": [
+              {
+                "username": "alexgorbatchev",
+                "email": "alex.gorbatchev@gmail.com"
+              }
+            ],
+            "keywords": [
+              "syntaxhighlighter",
+              "brush",
+              "python"
+            ],
+            "version": "4.0.0",
+            "date": "2016-02-07T21:32:39.597Z"
+          },
+          (...)
+        ]
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                search --json --no-description python | jq
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            search --json --no-description python | jq
+        ```
         """
         search_args = []
         if not extended:
@@ -343,12 +351,13 @@ class NPM(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                install markdown
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            install markdown
 
-            added 3 packages in 3s
+        added 3 packages in 3s
+        ```
         """
         # Marked privileged so --sudo / `[mpm.managers.npm] sudo = true` can escalate
         # global installs; dormant by default (npm's default_sudo is False).
@@ -357,10 +366,11 @@ class NPM(PackageManager):
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                update
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            update
+        ```
         """
         return self.build_cli("update", sudo=True)
 
@@ -372,43 +382,47 @@ class NPM(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                upgrade raven
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            upgrade raven
+        ```
         """
         return self.build_cli("upgrade", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                uninstall raven
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            uninstall raven
+        ```
         """
         return self.run_cli("uninstall", package_id, sudo=True)
 
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                cache clean --force
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            cache clean --force
+        ```
         """
         self.run_cli("cache", "clean", "--force")
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
 
-        ``doctor`` checks the registry connectivity, the node and npm versions,
+        `doctor` checks the registry connectivity, the node and npm versions,
         the ownership of the global folders and the cache checksums, exiting
         non-zero when any check fails.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-                doctor
+        $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            doctor
+        ```
         """
         return self.build_cli("doctor")

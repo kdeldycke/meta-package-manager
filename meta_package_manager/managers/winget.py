@@ -33,29 +33,31 @@ if TYPE_CHECKING:
 class WinGet(PackageManager):
     """Microsoft's official Windows package manager.
 
-    mpm reads inventory from ``winget list --details``, whose ``Key: Value``
-    blocks carry the installed version and an ``Available Upgrades`` section,
-    and reads ``search`` from winget's fixed-width column table.
+    mpm reads inventory from `winget list --details`, whose `Key: Value`
+    blocks carry the installed version and an `Available Upgrades` section,
+    and reads `search` from winget's fixed-width column table.
 
-    .. note::
-        ``installed`` and ``outdated`` keep only rows whose ``Origin Source`` is
-        ``winget``, dropping packages winget merely tracks (sideloaded, portable
-        or Microsoft Store). Store entries still surface in ``search``, but their
-        real version cannot be queried through ``winget``, so mpm tags them with
-        an ``msstore`` sentinel version and sorts them below winget-native ones.
+    ```{note}
+    `installed` and `outdated` keep only rows whose `Origin Source` is
+    `winget`, dropping packages winget merely tracks (sideloaded, portable
+    or Microsoft Store). Store entries still surface in `search`, but their
+    real version cannot be queried through `winget`, so mpm tags them with
+    an `msstore` sentinel version and sorts them below winget-native ones.
+    ```
 
-    .. warning::
-        Two Windows-only, process-level workarounds keep winget from taking the
-        calling process down with it:
+    ```{warning}
+    Two Windows-only, process-level workarounds keep winget from taking the
+    calling process down with it:
 
-        - winget is spawned with ``DETACHED_PROCESS``. Its COM server and
-          installer children call ``GenerateConsoleCtrlEvent`` as they shut
-          down, broadcasting a ``CTRL_C_EVENT`` to every process sharing their
-          console: detaching removes winget from that console, so the signal
-          never reaches the caller.
-        - ``WindowsPackageManagerServer.exe`` is killed by image name after each
-          call. This COM server is activated out-of-process, so it never
-          inherits mpm's pipes and is never reaped by ``communicate()``.
+    - winget is spawned with `DETACHED_PROCESS`. Its COM server and
+      installer children call `GenerateConsoleCtrlEvent` as they shut
+      down, broadcasting a `CTRL_C_EVENT` to every process sharing their
+      console: detaching removes winget from that console, so the signal
+      never reaches the caller.
+    - `WindowsPackageManagerServer.exe` is killed by image name after each
+      call. This COM server is activated out-of-process, so it never
+      inherits mpm's pipes and is never reaped by `communicate()`.
+    ```
     """
 
     homepage_url = "https://github.com/microsoft/winget-cli"
@@ -68,50 +70,53 @@ class WinGet(PackageManager):
 
     post_args = ("--accept-source-agreements", "--disable-interactivity")
     """
-    ``--accept-source-agreements``:
+    `--accept-source-agreements`:
         Used to accept the source license agreement, and avoid the following prompt:
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget list
-            The "msstore' source requires that you view the following agreements before using.
-            Terms of Transaction: https://aka.ms/microsoft-store-terms-of-transaction
-            The source requires the current machine's 2-letter geographic region to be sent to the backend service to function prope rly (ex. "US").
+        PS C:\\Users\\kev> winget list
+        The "msstore' source requires that you view the following agreements before using.
+        Terms of Transaction: https://aka.ms/microsoft-store-terms-of-transaction
+        The source requires the current machine's 2-letter geographic region to be sent to the backend service to function prope rly (ex. "US").
 
-            Do you agree to all the source agreements terms?
-            [Y] Yes [N] No:
+        Do you agree to all the source agreements terms?
+        [Y] Yes [N] No:
+        ```
 
-    ``--disable-interactivity``:
+    `--disable-interactivity`:
         Disable interactive prompts.
 
-    .. todo::
-        Add the ``--no-progress`` option once it is available in the stable release:
+    ```{todo}
+    Add the `--no-progress` option once it is available in the stable release:
 
-        - https://github.com/microsoft/winget-cli/pull/6049
-        - https://github.com/microsoft/winget-cli/issues/3494#issuecomment-3921618377
+    - https://github.com/microsoft/winget-cli/pull/6049
+    - https://github.com/microsoft/winget-cli/issues/3494#issuecomment-3921618377
+    ```
     """
 
     version_regexes = (r"v(?P<version>\S+)",)
     """
-    .. code-block:: pwsh-session
+    ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget --version
-        v1.28.220
+    PS C:\\Users\\kev> winget --version
+    v1.28.220
+    ```
     """
 
     windows_creation_flags = getattr(subprocess, "DETACHED_PROCESS", 0)
     """Detach winget from the calling process's console.
 
     When winget runs, the Windows COM infrastructure activates
-    ``WindowsPackageManagerServer.exe`` as a separate process. Installer EXEs
-    launched by ``winget upgrade`` or ``winget install`` are also spawned as
+    `WindowsPackageManagerServer.exe` as a separate process. Installer EXEs
+    launched by `winget upgrade` or `winget install` are also spawned as
     grandchildren. Both the COM server and any installer EXEs call
-    ``GenerateConsoleCtrlEvent(0)`` during their own shutdown, which broadcasts
-    a ``CTRL_C_EVENT`` to every process sharing the same console — including the
+    `GenerateConsoleCtrlEvent(0)` during their own shutdown, which broadcasts
+    a `CTRL_C_EVENT` to every process sharing the same console — including the
     Python test runner — causing it to exit with code 1 even after all tests
     pass.
 
-    ``DETACHED_PROCESS`` breaks the shared-console link: winget has no console,
+    `DETACHED_PROCESS` breaks the shared-console link: winget has no console,
     so neither the COM server nor any installer EXE can broadcast console events
     that reach us. Output is still captured because stdout and stderr are
     redirected to pipes, which are independent of console attachment.
@@ -120,18 +125,18 @@ class WinGet(PackageManager):
     windows_processes_to_cleanup = ("WindowsPackageManagerServer.exe",)
     """Kill winget's COM server after each call.
 
-    ``WindowsPackageManagerServer.exe`` is activated by the Windows COM
+    `WindowsPackageManagerServer.exe` is activated by the Windows COM
     infrastructure when winget runs, not as a direct child process. It therefore
-    does not inherit our pipe handles and is not reaped by ``communicate()``.
+    does not inherit our pipe handles and is not reaped by `communicate()`.
     Kill it by image name after each call to avoid accumulating orphan COM
     server processes.
     """
 
     # Microsoft Store IDs are either 12-char product IDs or 14-char extension
-    # IDs prefixed with ``XP`` (like ``XP99BNH2JZBBQR``).
+    # IDs prefixed with `XP` (like `XP99BNH2JZBBQR`).
     _store_id_re = re.compile(r"^(?:[0-9A-Z]{12}|XP[0-9A-Z]{12})$")
 
-    # Header line pattern. The ``(N/M)`` prefix is present only when multiple
+    # Header line pattern. The `(N/M)` prefix is present only when multiple
     # packages are listed; a single result omits it.
     _header_re = re.compile(
         r"^(?:\(\d+/\d+\)\s+)?(.+)\s+\[([^\]]+)\]\s*$",
@@ -140,26 +145,27 @@ class WinGet(PackageManager):
     def _parse_details(
         self, output: str, filter_by_source: bool = False
     ) -> Iterator[tuple[str, str, str, str | None]]:
-        """Parse ``--details`` output from ``winget list``.
+        """Parse `--details` output from `winget list`.
 
         Each package block starts with a header line and is followed by
-        ``Key: Value`` metadata lines:
+        `Key: Value` metadata lines:
 
-        .. code-block:: text
+        ```{code-block} text
 
-            (N/M) <Name> [<Id>]
-            Version: <version>
-            Publisher: <publisher>
-            Origin Source: winget
-            Available Upgrades:
-              winget [<latest_version>]
+        (N/M) <Name> [<Id>]
+        Version: <version>
+        Publisher: <publisher>
+        Origin Source: winget
+        Available Upgrades:
+          winget [<latest_version>]
+        ```
 
-        :param filter_by_source: If ``True``, only yield packages whose
-            ``Origin Source`` is ``winget``.
+        :param filter_by_source: If `True`, only yield packages whose
+            `Origin Source` is `winget`.
         """
         # Split output into per-package blocks on the header line.
         # The \S anchor after the optional (N/M) prefix prevents the split from
-        # firing on indented upgrade lines like ``  winget [1.2.3]``, which also
+        # firing on indented upgrade lines like `  winget [1.2.3]`, which also
         # end with a bracketed token but are not package headers.
         blocks = re.split(
             r"(?=^(?:\(\d+/\d+\)\s+)?\S.+\[[^\]]+\]\s*$)",
@@ -195,7 +201,7 @@ class WinGet(PackageManager):
                 continue
 
             # Extract latest version from the "Available Upgrades" section.
-            # The upgrade line looks like ``  winget [1.2.3]``.
+            # The upgrade line looks like `  winget [1.2.3]`.
             latest_version = None
             upgrade_match = re.search(
                 r"^Available Upgrades:\s*\n\s+\S+\s+\[([^\]]+)\]",
@@ -252,11 +258,11 @@ class WinGet(PackageManager):
             yield (line[start:end].strip() for start, end in col_ranges)
 
     def _build_package(self, name: str, package_id: str, version: str) -> Package:
-        """Build a :class:`Package` from a search result row.
+        """Build a {class}`Package` from a search result row.
 
-        Microsoft Store packages have their ``latest_version`` set to the
-        ``msstore`` sentinel because their real version cannot be queried via
-        ``winget``. The sentinel is later used by :meth:`search` to push Store
+        Microsoft Store packages have their `latest_version` set to the
+        `msstore` sentinel because their real version cannot be queried via
+        `winget`. The sentinel is later used by {meth}`search` to push Store
         results below winget-native ones.
         """
         if self._store_id_re.match(package_id):
@@ -267,25 +273,26 @@ class WinGet(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget list --details --accept-source-agreements --disable-interactivity
-            (1/7) CCleaner [CCleaner]
-            Version: 6.08
-            Publisher: Piriform Software Ltd
-            Local Identifier: ARP\\Machine\\X64\\CCleaner
-            Product Code: CCleaner
-            Installer Category: exe
-            Installed Scope: Machine
-            Installed Architecture: X64
-            Installed Locale: en-US
-            Origin Source: winget
-            Available Upgrades:
+        PS C:\\Users\\kev> winget list --details --accept-source-agreements --disable-interactivity
+        (1/7) CCleaner [CCleaner]
+        Version: 6.08
+        Publisher: Piriform Software Ltd
+        Local Identifier: ARP\\Machine\\X64\\CCleaner
+        Product Code: CCleaner
+        Installer Category: exe
+        Installed Scope: Machine
+        Installed Architecture: X64
+        Installed Locale: en-US
+        Origin Source: winget
+        Available Upgrades:
 
-            (2/7) Git [Git.Git]
-            Version: 2.37.3
-            Publisher: The Git Development Community
-            Origin Source: winget
+        (2/7) Git [Git.Git]
+        Version: 2.37.3
+        Publisher: The Git Development Community
+        Origin Source: winget
+        ```
 
         Only returns packages with Origin Source: winget to exclude packages
         installed via other sources (e.g., sideload, portable).
@@ -305,22 +312,23 @@ class WinGet(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget list --upgrade-available --details --accept-source-agreements --disable-interactivity
-            (1/4) Git [Git.Git]
-            Version: 2.37.3
-            Publisher: The Git Development Community
-            Origin Source: winget
-            Available Upgrades:
-              winget [2.45.1]
+        PS C:\\Users\\kev> winget list --upgrade-available --details --accept-source-agreements --disable-interactivity
+        (1/4) Git [Git.Git]
+        Version: 2.37.3
+        Publisher: The Git Development Community
+        Origin Source: winget
+        Available Upgrades:
+          winget [2.45.1]
 
-            (2/4) Microsoft Edge [Microsoft.Edge]
-            Version: 109.0.1518.70
-            Publisher: Microsoft
-            Origin Source: winget
-            Available Upgrades:
-              winget [125.0.2535.51]
+        (2/4) Microsoft Edge [Microsoft.Edge]
+        Version: 109.0.1518.70
+        Publisher: Microsoft
+        Origin Source: winget
+        Available Upgrades:
+          winget [125.0.2535.51]
+        ```
 
         Only returns packages with Origin Source: winget to exclude packages
         installed via other sources (e.g., sideload, portable).
@@ -340,69 +348,75 @@ class WinGet(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget search --query vscode --accept-source-agreements --disable-interactivity
-            Name                             Id                               Version      Match               Source
-            ---------------------------------------------------------------------------------------------------------
-            Microsoft Visual Studio Code     Microsoft.VisualStudioCode       1.89.1       Moniker: vscode     winget
-            MrCode                           zokugun.MrCode                   1.82.0.23253 Tag: vscode         winget
-            VSCodium Insiders                VSCodium.VSCodium.Insiders       1.88.0.24095 Tag: vscode         winget
-            VSCodium                         VSCodium.VSCodium                1.89.1.24130 Tag: vscode         winget
-            Upgit                            pluveto.Upgit                    0.2.18       Tag: vscode         winget
-            vscli                            michidk.vscli                    0.3.0        Tag: vscode         winget
-            Huawei QuickApp IDE              Huawei.QuickAppIde               14.0.1       Tag: vscode         winget
-            TheiaBlueprint                   EclipseFoundation.TheiaBlueprint 1.44.0       Tag: vscode         winget
-            Codium                           Alex313031.Codium                1.86.2.24053 Tag: vscode         winget
-            Cursor Editor                    CursorAI,Inc.Cursor              latest       Tag: vscode         winget
-            Microsoft Visual Studio Code CLI Microsoft.VisualStudioCode.CLI   1.89.1       Moniker: vscode-cli winget
+        PS C:\\Users\\kev> winget search --query vscode --accept-source-agreements --disable-interactivity
+        Name                             Id                               Version      Match               Source
+        ---------------------------------------------------------------------------------------------------------
+        Microsoft Visual Studio Code     Microsoft.VisualStudioCode       1.89.1       Moniker: vscode     winget
+        MrCode                           zokugun.MrCode                   1.82.0.23253 Tag: vscode         winget
+        VSCodium Insiders                VSCodium.VSCodium.Insiders       1.88.0.24095 Tag: vscode         winget
+        VSCodium                         VSCodium.VSCodium                1.89.1.24130 Tag: vscode         winget
+        Upgit                            pluveto.Upgit                    0.2.18       Tag: vscode         winget
+        vscli                            michidk.vscli                    0.3.0        Tag: vscode         winget
+        Huawei QuickApp IDE              Huawei.QuickAppIde               14.0.1       Tag: vscode         winget
+        TheiaBlueprint                   EclipseFoundation.TheiaBlueprint 1.44.0       Tag: vscode         winget
+        Codium                           Alex313031.Codium                1.86.2.24053 Tag: vscode         winget
+        Cursor Editor                    CursorAI,Inc.Cursor              latest       Tag: vscode         winget
+        Microsoft Visual Studio Code CLI Microsoft.VisualStudioCode.CLI   1.89.1       Moniker: vscode-cli winget
+        ```
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget search --query vscode --exact --accept-source-agreements --disable-interactivity
-            Name                         Id                               Version      Match           Source
-            -------------------------------------------------------------------------------------------------
-            Microsoft Visual Studio Code Microsoft.VisualStudioCode       1.89.1       Moniker: vscode winget
-            MrCode                       zokugun.MrCode                   1.82.0.23253 Tag: vscode     winget
-            VSCodium Insiders            VSCodium.VSCodium.Insiders       1.88.0.24095 Tag: vscode     winget
-            VSCodium                     VSCodium.VSCodium                1.89.1.24130 Tag: vscode     winget
-            Upgit                        pluveto.Upgit                    0.2.18       Tag: vscode     winget
-            vscli                        michidk.vscli                    0.3.0        Tag: vscode     winget
-            Huawei QuickApp IDE          Huawei.QuickAppIde               14.0.1       Tag: vscode     winget
-            TheiaBlueprint               EclipseFoundation.TheiaBlueprint 1.44.0       Tag: vscode     winget
-            Codium                       Alex313031.Codium                1.86.2.24053 Tag: vscode     winget
-            Cursor Editor                CursorAI,Inc.Cursor              latest       Tag: vscode     winget
+        PS C:\\Users\\kev> winget search --query vscode --exact --accept-source-agreements --disable-interactivity
+        Name                         Id                               Version      Match           Source
+        -------------------------------------------------------------------------------------------------
+        Microsoft Visual Studio Code Microsoft.VisualStudioCode       1.89.1       Moniker: vscode winget
+        MrCode                       zokugun.MrCode                   1.82.0.23253 Tag: vscode     winget
+        VSCodium Insiders            VSCodium.VSCodium.Insiders       1.88.0.24095 Tag: vscode     winget
+        VSCodium                     VSCodium.VSCodium                1.89.1.24130 Tag: vscode     winget
+        Upgit                        pluveto.Upgit                    0.2.18       Tag: vscode     winget
+        vscli                        michidk.vscli                    0.3.0        Tag: vscode     winget
+        Huawei QuickApp IDE          Huawei.QuickAppIde               14.0.1       Tag: vscode     winget
+        TheiaBlueprint               EclipseFoundation.TheiaBlueprint 1.44.0       Tag: vscode     winget
+        Codium                       Alex313031.Codium                1.86.2.24053 Tag: vscode     winget
+        Cursor Editor                CursorAI,Inc.Cursor              latest       Tag: vscode     winget
+        ```
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget search --id VSCodium.VSCodium --accept-source-agreements --disable-interactivity
-            Name              Id                         Version      Source
-            ----------------------------------------------------------------
-            VSCodium Insiders VSCodium.VSCodium.Insiders 1.88.0.24095 winget
-            VSCodium          VSCodium.VSCodium          1.89.1.24130 winget
+        PS C:\\Users\\kev> winget search --id VSCodium.VSCodium --accept-source-agreements --disable-interactivity
+        Name              Id                         Version      Source
+        ----------------------------------------------------------------
+        VSCodium Insiders VSCodium.VSCodium.Insiders 1.88.0.24095 winget
+        VSCodium          VSCodium.VSCodium          1.89.1.24130 winget
+        ```
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget search --name Codium --accept-source-agreements --disable-interactivity
-            Name              Id                         Version      Source
-            ----------------------------------------------------------------
-            Codium            Alex313031.Codium          1.86.2.24053 winget
-            VSCodium Insiders VSCodium.VSCodium.Insiders 1.88.0.24095 winget
-            VSCodium          VSCodium.VSCodium          1.89.1.24130 winget
+        PS C:\\Users\\kev> winget search --name Codium --accept-source-agreements --disable-interactivity
+        Name              Id                         Version      Source
+        ----------------------------------------------------------------
+        Codium            Alex313031.Codium          1.86.2.24053 winget
+        VSCodium Insiders VSCodium.VSCodium.Insiders 1.88.0.24095 winget
+        VSCodium          VSCodium.VSCodium          1.89.1.24130 winget
+        ```
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget search --id VSCodium.VSCodium  --exact --accept-source-agreements --disable-interactivity
-            Name     Id                Version      Source
-            ----------------------------------------------
-            VSCodium VSCodium.VSCodium 1.89.1.24130 winget
+        PS C:\\Users\\kev> winget search --id VSCodium.VSCodium  --exact --accept-source-agreements --disable-interactivity
+        Name     Id                Version      Source
+        ----------------------------------------------
+        VSCodium VSCodium.VSCodium 1.89.1.24130 winget
+        ```
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget search --name Codium --exact --accept-source-agreements --disable-interactivity
-            Name   Id                Version      Source
-            --------------------------------------------
-            Codium Alex313031.Codium 1.86.2.24053 winget
+        PS C:\\Users\\kev> winget search --name Codium --exact --accept-source-agreements --disable-interactivity
+        Name   Id                Version      Source
+        --------------------------------------------
+        Codium Alex313031.Codium 1.86.2.24053 winget
+        ```
         """
         results: list[Package] = []
 
@@ -432,16 +446,17 @@ class WinGet(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget install --id Microsoft.PowerToys --accept-package-agreements --version 0.15.2 --accept-source-agreements --disable-interactivity
-            Found Power Toys [Microsoft.PowerToys] Version 0.15.2
-            This application is licensed to you by its owner.
-            Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
-            Successfully verified installer hash
-            Starting package install...
-              ██████████████████████████████  100%
-            Successfully installed
+        PS C:\\Users\\kev> winget install --id Microsoft.PowerToys --accept-package-agreements --version 0.15.2 --accept-source-agreements --disable-interactivity
+        Found Power Toys [Microsoft.PowerToys] Version 0.15.2
+        This application is licensed to you by its owner.
+        Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+        Successfully verified installer hash
+        Starting package install...
+          ██████████████████████████████  100%
+        Successfully installed
+        ```
         """
         args = ["install", "--id", package_id, "--accept-package-agreements"]
         if version:
@@ -451,31 +466,32 @@ class WinGet(PackageManager):
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget upgrade --all --accept-package-agreements --accept-source-agreements --disable-interactivity
-            Name                            Id                            Version       Available     Source
-            ------------------------------------------------------------------------------------------------
-            Microsoft Edge                  Microsoft.Edge                109.0.1518.70 125.0.2535.51 winget
-            Microsoft Edge WebView2 Runtime Microsoft.EdgeWebView2Runtime 109.0.1518.70 125.0.2535.51 winget
-            Python Launcher                 Python.Launchez               < 3.12.0      3.12.0        winget
-            Microsoft Visual C++ (x86)...   Microsoft.VCRedist.2015+.X86  14.34.31931.0 14.38.33135.0 winget
-            4 upgrades available.
+        PS C:\\Users\\kev> winget upgrade --all --accept-package-agreements --accept-source-agreements --disable-interactivity
+        Name                            Id                            Version       Available     Source
+        ------------------------------------------------------------------------------------------------
+        Microsoft Edge                  Microsoft.Edge                109.0.1518.70 125.0.2535.51 winget
+        Microsoft Edge WebView2 Runtime Microsoft.EdgeWebView2Runtime 109.0.1518.70 125.0.2535.51 winget
+        Python Launcher                 Python.Launchez               < 3.12.0      3.12.0        winget
+        Microsoft Visual C++ (x86)...   Microsoft.VCRedist.2015+.X86  14.34.31931.0 14.38.33135.0 winget
+        4 upgrades available.
 
-            Installing dependencies:
-            This package requires the following dependencies:
-              - Packages
-                  Microsoft.UI.Xaml.2.8 [>= 8.2306.22001.0]
-            (1/3) Found Microsoft Edge WebView2 Runtime [Microsoft.EdgeWebView2Runtime] Version 125. 0.2535.51
-            This application is licensed to you by its owner.
-            Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
-            Downloading https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/e5dd841e-17ff-43b7-a2c0-ff759f55c202/MicrosoftEdgeWebView2RuntimeInstallerARM64.exe
-              ██████████████████████████████  166 MB /  166 MB
-            Successfully verified installer hash
-            Starting package install...
-            Successfully installed
+        Installing dependencies:
+        This package requires the following dependencies:
+          - Packages
+              Microsoft.UI.Xaml.2.8 [>= 8.2306.22001.0]
+        (1/3) Found Microsoft Edge WebView2 Runtime [Microsoft.EdgeWebView2Runtime] Version 125. 0.2535.51
+        This application is licensed to you by its owner.
+        Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+        Downloading https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/e5dd841e-17ff-43b7-a2c0-ff759f55c202/MicrosoftEdgeWebView2RuntimeInstallerARM64.exe
+          ██████████████████████████████  166 MB /  166 MB
+        Successfully verified installer hash
+        Starting package install...
+        Successfully installed
 
-            (...)
+        (...)
+        ```
         """
         return self.build_cli("update", "--all", "--accept-package-agreements")
 
@@ -484,26 +500,29 @@ class WinGet(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget upgrade --id Git.Git --accept-package-agreements --accept-source-agreements --disable-interactivity
-            Found Git [Git.Git] Version 2.45.1
-            This application is licensed to you by its owner.
-            Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
-            Downloading https://github.com/git-for-windows/git/releases/download/v2.45.1.windows.1/Git-2.45.1-64-bit.exe
-              ██████████████████████████████  64.7 MB / 64.7 MB
-            Successfully verified installer hash
-            Starting package install...
-            Successfully installed
+        PS C:\\Users\\kev> winget upgrade --id Git.Git --accept-package-agreements --accept-source-agreements --disable-interactivity
+        Found Git [Git.Git] Version 2.45.1
+        This application is licensed to you by its owner.
+        Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+        Downloading https://github.com/git-for-windows/git/releases/download/v2.45.1.windows.1/Git-2.45.1-64-bit.exe
+          ██████████████████████████████  64.7 MB / 64.7 MB
+        Successfully verified installer hash
+        Starting package install...
+        Successfully installed
+        ```
 
-        .. todo::
+        :::{todo}
 
-            Automatically uninstall the package if the technology is different:
+        Automatically uninstall the package if the technology is different:
 
-            .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-                PS C:\\Users\\kev> winget upgrade --id Microsoft.Edge
-                A newer version was found, but the install technology is different from the current version installed. Please uninstall the package and install the newer version.
+        PS C:\\Users\\kev> winget upgrade --id Microsoft.Edge
+        A newer version was found, but the install technology is different from the current version installed. Please uninstall the package and install the newer version.
+        ```
+        :::
         """
         args = ["install", "--id", package_id, "--accept-package-agreements"]
         if version:
@@ -513,21 +532,23 @@ class WinGet(PackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget uninstall --id Microsoft.PowerToys --source winget --accept-source-agreements --disable-interactivity
-            Found PowerToys (Preview) [Microsoft.PowerToys]
-            Starting package uninstall...
-              ██████████████████████████████  100%
-            Successfully uninstalled
+        PS C:\\Users\\kev> winget uninstall --id Microsoft.PowerToys --source winget --accept-source-agreements --disable-interactivity
+        Found PowerToys (Preview) [Microsoft.PowerToys]
+        Starting package uninstall...
+          ██████████████████████████████  100%
+        Successfully uninstalled
+        ```
         """
         return self.run_cli("uninstall", "--id", package_id, "--source", "winget")
 
     def sync(self) -> None:
         """Sync package metadata from remote sources.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            PS C:\\Users\\kev> winget source update --accept-source-agreements --disable-interactivity
+        PS C:\\Users\\kev> winget source update --accept-source-agreements --disable-interactivity
+        ```
         """
         self.run_cli("source", "update")

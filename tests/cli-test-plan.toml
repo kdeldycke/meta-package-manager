@@ -368,6 +368,12 @@ strip_ansi = true
 stdout_contains = "Usage: mpm config-template"
 
 [[cases]]
+cli_parameters = "doctor --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm doctor"
+
+[[cases]]
 cli_parameters = "dump --help"
 exit_code = 0
 strip_ansi = true
@@ -396,6 +402,12 @@ cli_parameters = "managers --help"
 exit_code = 0
 strip_ansi = true
 stdout_contains = "Usage: mpm managers"
+
+[[cases]]
+cli_parameters = "orphans --help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm orphans"
 
 [[cases]]
 cli_parameters = "outdated --help"

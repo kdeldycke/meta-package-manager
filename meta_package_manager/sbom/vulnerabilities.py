@@ -13,13 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Vulnerability lookup against `OSV.dev <https://osv.dev>`_.
+"""Vulnerability lookup against [OSV.dev](https://osv.dev).
 
-The :py:func:`scan_vulnerabilities` entry point takes the set of purls a
+The {func}`scan_vulnerabilities` entry point takes the set of purls a
 rendered SBOM holds and returns the advisories affecting each, normalized
-into the source-agnostic :py:class:`Vulnerability` dataclass. The SBOM
-renderers consume that mapping in their ``finalize`` step (CycloneDX into
-``Bom.vulnerabilities``, SPDX into per-package security ``externalRefs``).
+into the source-agnostic {class}`Vulnerability` dataclass. The SBOM
+renderers consume that mapping in their `finalize` step (CycloneDX into
+`Bom.vulnerabilities`, SPDX into per-package security `externalRefs`).
 
 OSV is the single source for this first iteration because it indexes by
 ecosystem coordinates directly, sidestepping the fuzzy package-name to
@@ -28,34 +28,35 @@ ecosystems (PyPI, npm, crates.io, RubyGems, Packagist); system package
 managers like Homebrew are not in OSV, so their packages come back with
 no advisories rather than an error.
 
-.. note::
-   Covering system package managers (``brew``, ``apt``, ``macports``,
-   ``mas``, ...) means going through NVD, which indexes by CPE
-   (vendor/product plus version ranges) rather than by ecosystem
-   coordinate. That route is deliberately deferred: mapping a package
-   name to its CPE is fuzzy and the main source of false positives,
-   and NVD offers no batch coordinate lookup to match OSV's
-   ``querybatch``. Until that lands, system-package coverage means
-   pointing a CPE-based scanner (OSV-Scanner, Grype, Trivy, or Intel's
-   cve-bin-tool) directly at the host. Feeding them the rendered
-   CycloneDX/SPDX is not enough: the exported components carry purls
-   but no CPEs, so a ``pkg:brew/...`` entry decodes as an
-   unknown-ecosystem package and silently matches nothing (verified
-   against Grype ``0.115.0``).
+```{note}
+Covering system package managers (`brew`, `apt`, `macports`,
+`mas`, ...) means going through NVD, which indexes by CPE
+(vendor/product plus version ranges) rather than by ecosystem
+coordinate. That route is deliberately deferred: mapping a package
+name to its CPE is fuzzy and the main source of false positives,
+and NVD offers no batch coordinate lookup to match OSV's
+`querybatch`. Until that lands, system-package coverage means
+pointing a CPE-based scanner (OSV-Scanner, Grype, Trivy, or Intel's
+cve-bin-tool) directly at the host. Feeding them the rendered
+CycloneDX/SPDX is not enough: the exported components carry purls
+but no CPEs, so a `pkg:brew/...` entry decodes as an
+unknown-ecosystem package and silently matches nothing (verified
+against Grype `0.115.0`).
+```
 
-.. seealso::
-   `VulnerableCode <https://github.com/aboutcode-org/vulnerablecode>`_
-   is the candidate second source: it aggregates OSV, GitHub and the
-   Linux distro trackers (Debian, Arch, Gentoo, Red Hat, SUSE, Ubuntu)
-   plus project-specific feeds behind a purl-keyed API, with a public
-   instance at `public.vulnerablecode.io
-   <https://public.vulnerablecode.io>`_. That would widen coverage
-   beyond OSV's language ecosystems without mpm taking on CPE mapping
-   itself.
+```{seealso}
+[VulnerableCode](https://github.com/aboutcode-org/vulnerablecode)
+is the candidate second source: it aggregates OSV, GitHub and the
+Linux distro trackers (Debian, Arch, Gentoo, Red Hat, SUSE, Ubuntu)
+plus project-specific feeds behind a purl-keyed API, with a public
+instance at [public.vulnerablecode.io](https://public.vulnerablecode.io). That would widen coverage
+beyond OSV's language ecosystems without mpm taking on CPE mapping
+itself.
+```
 
 Two-stage protocol:
 
-1. A batched ``POST /v1/querybatch`` maps each queried coordinate to a
+1. A batched `POST /v1/querybatch` maps each queried coordinate to a
    list of advisory IDs (the batch response carries IDs only).
 2. A per-ID ``GET /v1/vulns/{id}`` fetches the full record. These
    records are immutable once published, so they cache effectively
@@ -63,7 +64,7 @@ Two-stage protocol:
    can appear.
 
 Network transport, retries, and caching are handled by
-:py:class:`meta_package_manager.sbom._network.NetworkClient`.
+{class}`meta_package_manager.sbom._network.NetworkClient`.
 """
 
 from __future__ import annotations
@@ -92,18 +93,18 @@ OSV_VULN_ENDPOINT = f"{OSV_BASE_URL}/v1/vulns"
 OSV_ADVISORY_URL = "https://osv.dev/vulnerability"
 """Prefix of the human-facing OSV advisory page.
 
-Deliberately the web host (``osv.dev``), distinct from the API host
-(``api.osv.dev``) that :data:`OSV_BASE_URL` anchors.
+Deliberately the web host (`osv.dev`), distinct from the API host
+(`api.osv.dev`) that {data}`OSV_BASE_URL` anchors.
 """
 
 OSV_BATCH_LIMIT = 1000
-"""Maximum number of queries OSV accepts in a single ``querybatch`` call."""
+"""Maximum number of queries OSV accepts in a single `querybatch` call."""
 
 VULN_DETAIL_TTL = 30 * 86400
 """Cache TTL for per-advisory detail records (30 days).
 
 OSV advisory records are effectively immutable once published (the
-``modified`` field changes rarely), so a long TTL avoids re-fetching the
+`modified` field changes rarely), so a long TTL avoids re-fetching the
 same record on every scan while still picking up the occasional
 correction within a month.
 """
@@ -124,8 +125,7 @@ OSV_ECOSYSTEMS: dict[str, str] = {
     "pipx": "PyPI",
     "yarn": "npm",
 }
-"""Maps mpm manager ids to `OSV ecosystem names
-<https://ossf.github.io/osv-schema/#defined-ecosystems>`_."""
+"""Maps mpm manager ids to [OSV ecosystem names](https://ossf.github.io/osv-schema/#defined-ecosystems)."""
 
 _SEVERITY_ALIASES = {
     "LOW": "low",
@@ -136,9 +136,9 @@ _SEVERITY_ALIASES = {
 }
 """Maps GHSA/OSV severity labels onto mpm's coarse vocabulary.
 
-Keyed by the upper-cased source label; the values are the ``low`` / ``medium`` /
-``high`` / ``critical`` labels the renderers expect. See
-:py:func:`_normalize_severity`.
+Keyed by the upper-cased source label; the values are the `low` / `medium` /
+`high` / `critical` labels the renderers expect. See
+{func}`_normalize_severity`.
 """
 
 
@@ -151,19 +151,19 @@ class Vulnerability:
     """
 
     id: str
-    """Primary advisory identifier (``GHSA-...``, ``CVE-...``, ``OSV-...``)."""
+    """Primary advisory identifier (`GHSA-...`, `CVE-...`, `OSV-...`)."""
 
     source: str = "OSV"
-    """Origin database. Only ``OSV`` is produced today."""
+    """Origin database. Only `OSV` is produced today."""
 
     summary: str | None = None
     description: str | None = None
     severity: str | None = None
-    """Coarse label: ``low`` / ``medium`` / ``high`` / ``critical``, or
-    ``None`` when the source provides no rating."""
+    """Coarse label: `low` / `medium` / `high` / `critical`, or
+    `None` when the source provides no rating."""
 
     cvss_vector: str | None = None
-    """Raw CVSS vector string when present (e.g. ``CVSS:3.1/AV:N/...``).
+    """Raw CVSS vector string when present (e.g. `CVSS:3.1/AV:N/...`).
 
     The numeric base score is intentionally not computed here: deriving
     it requires the full CVSS formula, which is out of scope for this
@@ -187,7 +187,7 @@ class Vulnerability:
 class _OSVQuery:
     """One coordinate to look up, paired with the purls it answers for.
 
-    A single ecosystem coordinate (like ``PyPI / django / 1.0.0``) can be
+    A single ecosystem coordinate (like `PyPI / django / 1.0.0`) can be
     referenced by more than one purl string when the inventory lists the
     same package twice, so the mapping back to purls is a list.
     """
@@ -198,7 +198,7 @@ class _OSVQuery:
     purls: list[str] = field(default_factory=list)
 
     def as_osv_payload(self) -> dict:
-        """Render the OSV ``query`` object for this coordinate."""
+        """Render the OSV `query` object for this coordinate."""
         return {
             "package": {"ecosystem": self.ecosystem, "name": self.name},
             "version": self.version,
@@ -248,7 +248,7 @@ def _parse_purls(purls: Iterable[str]) -> dict[str, _OSVQuery]:
 
 
 def _chunked(items: list, size: int) -> Iterator[list]:
-    """Yield successive ``size``-length slices of ``items``."""
+    """Yield successive `size`-length slices of `items`."""
     for start in range(0, len(items), size):
         yield items[start : start + size]
 
@@ -257,9 +257,9 @@ def _batch_query(
     queries: list[_OSVQuery],
     client: NetworkClient,
 ) -> dict[int, list[str]]:
-    """Run OSV ``querybatch`` over the coordinates, in chunks.
+    """Run OSV `querybatch` over the coordinates, in chunks.
 
-    Returns a mapping from each query's index (into ``queries``) to the
+    Returns a mapping from each query's index (into `queries`) to the
     list of advisory IDs OSV reported for it. OSV preserves query order
     within each batch response, which is how results map back to inputs.
     """
@@ -280,7 +280,7 @@ def _batch_query(
 def _enumerate_chunks(
     queries: list[_OSVQuery],
 ) -> Iterator[tuple[int, list[_OSVQuery]]]:
-    """Yield ``(absolute_start_index, chunk)`` for each OSV batch slice."""
+    """Yield `(absolute_start_index, chunk)` for each OSV batch slice."""
     index = 0
     for chunk in _chunked(queries, OSV_BATCH_LIMIT):
         yield index, chunk
@@ -290,7 +290,7 @@ def _enumerate_chunks(
 def _fetch_detail(vuln_id: str, client: NetworkClient) -> Vulnerability | None:
     """Fetch and normalize one advisory by its OSV id.
 
-    Returns ``None`` (with a debug log) when the record cannot be fetched
+    Returns `None` (with a debug log) when the record cannot be fetched
     or parsed, so one bad advisory never sinks the whole scan.
     """
     try:
@@ -304,7 +304,7 @@ def _fetch_detail(vuln_id: str, client: NetworkClient) -> Vulnerability | None:
 
 
 def _normalize_osv_record(raw: dict) -> Vulnerability:
-    """Map a raw OSV advisory dict into a :py:class:`Vulnerability`."""
+    """Map a raw OSV advisory dict into a {class}`Vulnerability`."""
     vuln_id = raw.get("id", "")
 
     cvss_vector = None
@@ -354,7 +354,7 @@ def _normalize_severity(label: str | None) -> str | None:
 
 
 def _extract_fixed_versions(affected: list) -> tuple[str, ...]:
-    """Pull the ``fixed`` events out of an OSV ``affected`` block."""
+    """Pull the `fixed` events out of an OSV `affected` block."""
     fixed: list[str] = []
     for entry in affected:
         for rng in entry.get("ranges", []) or []:
@@ -367,7 +367,7 @@ def _extract_fixed_versions(affected: list) -> tuple[str, ...]:
 
 
 def _parse_timestamp(value: str | None) -> datetime | None:
-    """Parse an OSV RFC 3339 timestamp, tolerating a trailing ``Z``."""
+    """Parse an OSV RFC 3339 timestamp, tolerating a trailing `Z`."""
     if not value:
         return None
     try:
@@ -385,7 +385,7 @@ def scan_vulnerabilities(
     Returns a mapping from purl string to the tuple of vulnerabilities
     affecting it. Purls with no advisories (or no OSV coverage) are
     simply absent from the result. A network failure on the batch query
-    propagates as :py:class:`NetworkError` for the caller to handle;
+    propagates as {class}`NetworkError` for the caller to handle;
     per-advisory detail failures are swallowed so a single bad record
     only drops itself.
     """

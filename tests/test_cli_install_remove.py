@@ -39,11 +39,11 @@ class TestInstallRemove(CLISubCommandTests):
     """Install and remove operations are siblings and sensible, so we regroup them under
     the same test suite.
 
-    .. tip::
+    ```{tip}
 
-        Where we can, we invoke the ``install`` subcommand to install ``mpm`` with
-        itself, so we can `test externally contributed packaging
-        <https://github.com/kdeldycke/meta-package-manager/issues/527>`_.
+    Where we can, we invoke the `install` subcommand to install `mpm` with
+    itself, so we can [test externally contributed packaging](https://github.com/kdeldycke/meta-package-manager/issues/527).
+    ```
     """
 
     @staticmethod
@@ -76,7 +76,7 @@ class TestInstallRemove(CLISubCommandTests):
         """install exits non-zero when no manager can provide the requested package.
 
         Guards against a regression where a failed install was swallowed and the
-        command still exited ``0`` (see the ``install`` command in ``cli.py``).
+        command still exited `0` (see the `install` command in `cli.py`).
         """
         result = invoke("install", "package-provided-by-no-manager")
         assert result.exit_code == 1
@@ -92,7 +92,7 @@ class TestInstallRemove(CLISubCommandTests):
     def test_remove_absent_package_is_idempotent(self, invoke, fake_pool):
         """Removing a package no manager has installed is a no-op, not a failure.
 
-        ``remove`` only fails when a manager that *has* the package fails to remove it.
+        `remove` only fails when a manager that *has* the package fails to remove it.
         """
         result = invoke("remove", "package-installed-by-no-manager")
         assert result.exit_code == 0
@@ -102,27 +102,29 @@ class TestInstallRemove(CLISubCommandTests):
     def test_single_manager_install_and_remove(self, invoke, manager_id, package_id):
         """Test the installation and removal of a package with each manager.
 
-        .. caution::
+        ```{caution}
 
-            ``strict_selection_match`` is set to ``False`` because the ``install``
-            subcommand will not try all managers selected by default. So a strict
-            match is not possible.
+        `strict_selection_match` is set to `False` because the `install`
+        subcommand will not try all managers selected by default. So a strict
+        match is not possible.
 
-            That's because ``install`` subcommand try each user-selected manager until
-            it find one providing the package we seek to install, after which the
-            process stop.
+        That's because `install` subcommand try each user-selected manager until
+        it find one providing the package we seek to install, after which the
+        process stop.
+        ```
 
-        .. note::
+        ```{note}
 
-            Managers that cannot complete a real install in a given environment are not
-            skipped: they are listed in ``INSTALL_REMOVE_BLOCKERS`` (``conftest.py``) and
-            driven anyway. The blocked ``install`` is capped at ``SHORT_FAILURE_TIMEOUT``
-            and asserted to fail the stable mpm way (exit ``1`` plus a ``Could not
-            install:`` message). It runs at ``--verbosity INFO``: the minimum level at
-            which the ``Installation priority`` dispatch signal is visible (the default
-            ``WARNING`` would hide it and make :py:meth:`check_manager_selection` pass
-            vacuously). No follow-up ``remove``: the failed install left nothing to
-            remove, and the working managers already cover the removal path.
+        Managers that cannot complete a real install in a given environment are not
+        skipped: they are listed in `INSTALL_REMOVE_BLOCKERS` (`conftest.py`) and
+        driven anyway. The blocked `install` is capped at `SHORT_FAILURE_TIMEOUT`
+        and asserted to fail the stable mpm way (exit `1` plus a ``Could not
+        install:` message). It runs at `--verbosity INFO``: the minimum level at
+        which the `Installation priority` dispatch signal is visible (the default
+        `WARNING` would hide it and make {meth}`check_manager_selection` pass
+        vacuously). No follow-up `remove`: the failed install left nothing to
+        remove, and the working managers already cover the removal path.
+        ```
         """
         blocker = INSTALL_REMOVE_BLOCKERS.get(manager_id)
         if blocker and blocker():

@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Checks for the ``doctor`` operation and its dedicated contract.
+"""Checks for the `doctor` operation and its dedicated contract.
 
 Health comes from the diagnostic command's exit code alone, the report merges
-``<stdout>`` and ``<stderr>``, and the diagnosis never inflates the end-of-run
+`<stdout>` and `<stderr>`, and the diagnosis never inflates the end-of-run
 error tally. The argv assertions monkeypatch the binary-resolution seams on the
 pooled manager singletons, so they run identically on any host.
 """
@@ -85,12 +85,12 @@ def test_doctor_unsupported(manager_id):
 
 
 def _doctor_with_stubbed_run(monkeypatch, *, code, stdout, stderr, completed=True):
-    """Run ``doctor()`` on a manager whose ``run`` mimics one executor outcome.
+    """Run `doctor()` on a manager whose `run` mimics one executor outcome.
 
-    Reproduces ``run()``'s observable surface: sets ``_last_run`` on completion
-    (or leaves it ``None`` for a spawn that never finished), applies the failure
-    gate's default tolerance (a non-zero exit only accumulates a ``CLIError``
-    when ``<stderr>`` is non-empty), and returns ``<stdout>``.
+    Reproduces `run()`'s observable surface: sets `_last_run` on completion
+    (or leaves it `None` for a spawn that never finished), applies the failure
+    gate's default tolerance (a non-zero exit only accumulates a `CLIError`
+    when `<stderr>` is non-empty), and returns `<stdout>`.
     """
     manager = pool["mise"]
     monkeypatch.setattr(manager, "doctor_cli", lambda: ("doctor",))
@@ -117,7 +117,7 @@ def test_doctor_healthy_merges_streams(monkeypatch):
 
 
 def test_doctor_unhealthy_from_stdout_only_exit(monkeypatch):
-    """A non-zero exit with silent ``<stderr>`` (the pip check shape) is tolerated
+    """A non-zero exit with silent `<stderr>` (the pip check shape) is tolerated
     by the failure gate but must still read as unhealthy: the exit code is the
     verdict."""
     manager = _doctor_with_stubbed_run(
@@ -129,7 +129,7 @@ def test_doctor_unhealthy_from_stdout_only_exit(monkeypatch):
 
 def test_doctor_reclaims_failure_gate_entry(monkeypatch):
     """The unhealthy exit is the diagnosis, not a plumbing error: the gate's
-    ``CLIError`` is reclaimed so the end-of-run summary is not inflated."""
+    `CLIError` is reclaimed so the end-of-run summary is not inflated."""
     manager = _doctor_with_stubbed_run(
         monkeypatch, code=1, stdout="", stderr="Warning: broken linkage."
     )
@@ -139,7 +139,7 @@ def test_doctor_reclaims_failure_gate_entry(monkeypatch):
 
 def test_doctor_incomplete_run_stays_an_error(monkeypatch):
     """A spawn that never completed (timeout, interrupt) is a genuine plumbing
-    error: unhealthy, and its ``CLIError`` stays in the tally."""
+    error: unhealthy, and its `CLIError` stays in the tally."""
     manager = _doctor_with_stubbed_run(
         monkeypatch, code=0, stdout="", stderr="", completed=False
     )
@@ -148,7 +148,7 @@ def test_doctor_incomplete_run_stays_an_error(monkeypatch):
 
 
 def test_base_doctor_not_implemented():
-    """A manager without a diagnostic verb propagates ``NotImplementedError``."""
+    """A manager without a diagnostic verb propagates `NotImplementedError`."""
     with pytest.raises(NotImplementedError):
         pool["uv"].doctor()
 

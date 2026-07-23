@@ -36,31 +36,33 @@ class Gem(PackageManager):
 
     gem emits no machine-readable format, so installed, outdated and search
     listings are parsed from its text output. A gem can keep several versions
-    installed side by side (``molinillo (0.5.4, 0.4.5, 0.2.3)``); mpm reports
+    installed side by side (`molinillo (0.5.4, 0.4.5, 0.2.3)`); mpm reports
     the highest as the installed version.
 
-    .. note::
+    ```{note}
 
-        All operations target the default gem scope (controlled by ``GEM_HOME``).
-        On system Ruby this means system-level gems, which may require elevated
-        privileges for write operations: those carry dormant privileged markers,
-        so ``mpm --sudo`` or a ``[mpm.managers.gem] sudo = true`` override
-        escalates them, while nothing escalates by default. Per-scope targeting
-        (system vs user gems) is tracked in `#1725
-        <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
+    All operations target the default gem scope (controlled by `GEM_HOME`).
+    On system Ruby this means system-level gems, which may require elevated
+    privileges for write operations: those carry dormant privileged markers,
+    so `mpm --sudo` or a `[mpm.managers.gem] sudo = true` override
+    escalates them, while nothing escalates by default. Per-scope targeting
+    (system vs user gems) is tracked in [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725).
+    ```
 
-    .. tip::
+    :::{tip}
 
-        Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something
-        like:
+    Installs require `sudo` on system ruby. I (@tresni) recommend doing something
+    like:
 
-        .. code-block:: shell-session
+    ```{code-block} shell-session
 
-            $ sudo dseditgroup -o edit -a -t user wheel
+    $ sudo dseditgroup -o edit -a -t user wheel
+    ```
 
-        And then do ``visudo`` to make it so the ``wheel`` group does not require
-        a password. There is a line already there for it, you just need to
-        uncomment it and save.
+    And then do `visudo` to make it so the `wheel` group does not require
+    a password. There is a line already there for it, you just need to
+    uncomment it and save.
+    :::
     """
 
     name = "RubyGems"
@@ -73,10 +75,11 @@ class Gem(PackageManager):
     # macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
     requirement = ">=2.5.0"
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ gem --version
-        3.0.3
+    $ gem --version
+    3.0.3
+    ```
     """
 
     post_args = ("--quiet",)  # Silence command progress meter
@@ -100,25 +103,26 @@ class Gem(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem list --quiet
-            bigdecimal (default: 1.4.1)
-            bundler (default: 1.17.2)
-            CFPropertyList (2.3.6)
-            cmath (default: 1.0.0)
-            csv (default: 3.0.9)
-            date (default: 2.0.0)
-            fileutils (1.4.1, default: 1.1.0)
-            io-console (0.5.6, default: 0.4.7)
-            ipaddr (default: 1.2.2)
-            molinillo (0.5.4, 0.4.5, 0.2.3)
-            nokogiri (1.5.6)
-            psych (2.0.0)
-            rake (0.9.6)
-            rdoc (4.0.0)
-            sqlite3 (1.3.7)
-            test-unit (2.0.0.0)
+        $ gem list --quiet
+        bigdecimal (default: 1.4.1)
+        bundler (default: 1.17.2)
+        CFPropertyList (2.3.6)
+        cmath (default: 1.0.0)
+        csv (default: 3.0.9)
+        date (default: 2.0.0)
+        fileutils (1.4.1, default: 1.1.0)
+        io-console (0.5.6, default: 0.4.7)
+        ipaddr (default: 1.2.2)
+        molinillo (0.5.4, 0.4.5, 0.2.3)
+        nokogiri (1.5.6)
+        psych (2.0.0)
+        rake (0.9.6)
+        rdoc (4.0.0)
+        sqlite3 (1.3.7)
+        test-unit (2.0.0.0)
+        ```
         """
         output = self.run_cli("list")
 
@@ -138,15 +142,16 @@ class Gem(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem outdated --quiet
-            did_you_mean (1.0.0 < 1.0.2)
-            io-console (0.4.5 < 0.4.6)
-            json (1.8.3 < 2.0.1)
-            minitest (5.8.3 < 5.9.0)
-            power_assert (0.2.6 < 0.3.0)
-            psych (2.0.17 < 2.1.0)
+        $ gem outdated --quiet
+        did_you_mean (1.0.0 < 1.0.2)
+        io-console (0.4.5 < 0.4.6)
+        json (1.8.3 < 2.0.1)
+        minitest (5.8.3 < 5.9.0)
+        power_assert (0.2.6 < 0.3.0)
+        psych (2.0.17 < 2.1.0)
+        ```
         """
         output = self.run_cli("outdated")
 
@@ -164,26 +169,29 @@ class Gem(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not supports extended mode.
+        ```{caution}
+        Search does not supports extended mode.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem search python --versions --quiet
-            at_coder_friends-generator-python_ref (0.2.0)
-            bee_python (0.2.3)
-            dependabot-python (0.117.5)
-            logstash-filter-python (0.0.1 java)
-            python (0.0.1)
-            python-generator (1.1.0)
-            python_with_git_test (2.499.8)
-            rabbit-slide-niku-erlangvm-for-pythonista (2015.09.12)
-            RubyToPython (0.0)
+        $ gem search python --versions --quiet
+        at_coder_friends-generator-python_ref (0.2.0)
+        bee_python (0.2.3)
+        dependabot-python (0.117.5)
+        logstash-filter-python (0.0.1 java)
+        python (0.0.1)
+        python-generator (1.1.0)
+        python_with_git_test (2.499.8)
+        rabbit-slide-niku-erlangvm-for-pythonista (2015.09.12)
+        RubyToPython (0.0)
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem search python --versions --exact --quiet
-            python (0.0.1)
+        $ gem search python --versions --exact --quiet
+        python (0.0.1)
+        ```
         """
         search_arg = []
         if exact:
@@ -198,24 +206,25 @@ class Gem(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem install --quiet markdown
-            Fetching kramdown-2.3.1.gem
-            Fetching concurrent-ruby-1.1.9.gem
-            (...)
-            Fetching rubyzip-2.3.2.gem
-            Fetching logutils-0.6.1.gem
-            Fetching markdown-1.2.0.gem
-            Successfully installed kramdown-2.3.1
-            Successfully installed rubyzip-2.3.2
-            (...)
-            Successfully installed markdown-1.2.0
-            (...)
-            Parsing documentation for markdown-1.2.0
-            Installing ri documentation for markdown-1.2.0
-            Done installing documentation for (...) markdown after 19 seconds
-            12 gems installed
+        $ gem install --quiet markdown
+        Fetching kramdown-2.3.1.gem
+        Fetching concurrent-ruby-1.1.9.gem
+        (...)
+        Fetching rubyzip-2.3.2.gem
+        Fetching logutils-0.6.1.gem
+        Fetching markdown-1.2.0.gem
+        Successfully installed kramdown-2.3.1
+        Successfully installed rubyzip-2.3.2
+        (...)
+        Successfully installed markdown-1.2.0
+        (...)
+        Parsing documentation for markdown-1.2.0
+        Installing ri documentation for markdown-1.2.0
+        Done installing documentation for (...) markdown after 19 seconds
+        12 gems installed
+        ```
         """
         # Marked privileged so --sudo / `[mpm.managers.gem] sudo = true` can escalate
         # system-Ruby installs; dormant by default (gem's default_sudo is False).
@@ -230,9 +239,10 @@ class Gem(PackageManager):
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem update --quiet
+        $ gem update --quiet
+        ```
         """
         return self.build_cli(
             "update",
@@ -249,9 +259,10 @@ class Gem(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem update --quiet markdown
+        $ gem update --quiet markdown
+        ```
         """
         return self.build_cli(
             "update",
@@ -264,38 +275,41 @@ class Gem(PackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem uninstall left-pad --quiet
-            Successfully uninstalled left-pad-1.1.0
+        $ gem uninstall left-pad --quiet
+        Successfully uninstalled left-pad-1.1.0
+        ```
         """
         return self.run_cli("uninstall", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem sources --update --quiet
+        $ gem sources --update --quiet
+        ```
         """
         self.run_cli("sources", "--update")
 
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem cleanup --quiet
-            Cleaning up installed gems...
-            Attempting to uninstall test-unit-3.2.9
-            Unable to uninstall test-unit-3.2.9:
-                Gem::FilePermissionError: You don't have write permissions \
-                for the /Library/Ruby/Gems/2.6.0 directory.
-            Attempting to uninstall did_you_mean-1.3.0
-            Unable to uninstall did_you_mean-1.3.0:
-                Gem::FilePermissionError: You don't have write permissions \
-                for the /Library/Ruby/Gems/2.6.0 directory.
-            Clean up complete
+        $ gem cleanup --quiet
+        Cleaning up installed gems...
+        Attempting to uninstall test-unit-3.2.9
+        Unable to uninstall test-unit-3.2.9:
+            Gem::FilePermissionError: You don't have write permissions \
+            for the /Library/Ruby/Gems/2.6.0 directory.
+        Attempting to uninstall did_you_mean-1.3.0
+        Unable to uninstall did_you_mean-1.3.0:
+            Gem::FilePermissionError: You don't have write permissions \
+            for the /Library/Ruby/Gems/2.6.0 directory.
+        Clean up complete
+        ```
         """
         # The sample above shows the system-Ruby permission failure the dormant
         # privileged marker addresses: --sudo / a config override escalates it.
@@ -304,11 +318,12 @@ class Gem(PackageManager):
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
 
-        ``check`` verifies the integrity of every installed gem, exiting non-zero
+        `check` verifies the integrity of every installed gem, exiting non-zero
         on problems.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ gem check --quiet
+        $ gem check --quiet
+        ```
         """
         return self.build_cli("check")

@@ -16,7 +16,7 @@
 """PowerShell Gallery parsing tests.
 
 These tests cover the pure-Python parsing/quoting logic. They do not invoke
-``pwsh`` and are platform-agnostic.
+`pwsh` and are platform-agnostic.
 """
 
 from __future__ import annotations
@@ -59,7 +59,7 @@ def test_pwsh_quote(value, expected):
     (
         ("", []),
         ("   \n\n  ", []),
-        # ``ConvertTo-Json -AsArray`` always emits a JSON array, even for one item.
+        # `ConvertTo-Json -AsArray` always emits a JSON array, even for one item.
         (
             '[{"Name":"PSReadLine","Version":"2.3.6"}]',
             [{"Name": "PSReadLine", "Version": "2.3.6"}],
@@ -103,7 +103,7 @@ def test_outdated_yields_only_upgrades(manager, stub_run_cli):
 
 
 def test_search_passes_wildcard_pattern(manager, capture_run_cli):
-    """Fuzzy search wraps the query with ``*`` wildcards in the expression."""
+    """Fuzzy search wraps the query with `*` wildcards in the expression."""
     captured = capture_run_cli(manager, "[]")
     list(manager.search("readline", extended=False, exact=False))
     assert "'*readline*'" in captured[0][0]
@@ -179,7 +179,7 @@ def test_remove_quotes_package_id(manager, capture_run_cli):
 
 
 def test_install_escapes_embedded_single_quote(manager, capture_run_cli):
-    """A package ID with a literal ``'`` is doubled inside the quoted string."""
+    """A package ID with a literal `'` is doubled inside the quoted string."""
     captured = capture_run_cli(manager)
     manager.install("O'Brien")
     expression = captured[0][0]

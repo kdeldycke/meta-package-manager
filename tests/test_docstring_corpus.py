@@ -16,12 +16,12 @@
 
 """Replay documented CLI output back through each manager's own parser.
 
-Every query method documents a sample invocation and its output in a
-``.. code-block:: shell-session`` block sitting right next to the regex (or JSON
-parser) that consumes it. This module feeds each harvested block back through
-the parser it illustrates, asserting the documented example still yields
-well-formed packages. The harvesting itself lives in
-:mod:`meta_package_manager.docstring_corpus`, shared with the reference-traces
+Every query method documents a sample invocation and its output in a MyST
+` ```{code-block} shell-session ` fence sitting right next to the regex (or
+JSON parser) that consumes it. This module feeds each harvested block back
+through the parser it illustrates, asserting the documented example still
+yields well-formed packages. The harvesting itself lives in
+{mod}`meta_package_manager.docstring_corpus`, shared with the reference-traces
 documentation generator.
 
 It is a *Tier-1* guard: it proves the documented output **still parses** (which
@@ -30,14 +30,14 @@ a docstring that has drifted from the code beside it), not that every field is
 captured correctly. It authors no fixtures of its own: the corpus is the
 docstrings.
 
-It covers ``installed``, ``outdated``, ``orphans`` and ``--version`` blocks.
-``installed``, ``orphans`` and ``--version`` are single-source (one CLI call), fed
-straight through. ``outdated`` may cross-reference two commands (``list`` +
-``latest``), so its calls are routed to the right block by a command-dispatching
-stub. Every ``shell-session`` block of these members is a complete fixture that
+It covers `installed`, `outdated`, `orphans` and `--version` blocks.
+`installed`, `orphans` and `--version` are single-source (one CLI call), fed
+straight through. `outdated` may cross-reference two commands (`list` +
+`latest`), so its calls are routed to the right block by a command-dispatching
+stub. Every `shell-session` block of these members is a complete fixture that
 must parse:
 illustrations (a human-readable variant, an interactive prompt, a narrative)
-live in a non-harvested directive instead. See
+live in a non-harvested `console` fence instead. See
 https://github.com/kdeldycke/meta-package-manager/issues/1023.
 """
 
@@ -63,7 +63,7 @@ from meta_package_manager.version import parse_version
 
 
 def _query_commands(cls: type, members: tuple[str, ...]) -> list[tuple[list[str], str]]:
-    """Collect ``(command_tokens, output)`` for a class's literal query blocks."""
+    """Collect `(command_tokens, output)` for a class's literal query blocks."""
     pairs = []
     blocks_by_member = class_blocks(cls)
     for member in members:
@@ -84,14 +84,14 @@ def _member_output(cls: type, member: str) -> str:
 
 
 def _dispatch(command_map: list[tuple[list[str], str]], default: str = ""):
-    """A ``run_cli`` stub returning the output whose documented command best
+    """A `run_cli` stub returning the output whose documented command best
     matches the invocation.
 
-    An ``outdated`` that cross-references two commands (`list` + `latest`) gets
+    An `outdated` that cross-references two commands (`list` + `latest`) gets
     each call routed to its own block: the match is the documented command
     containing every invocation argument, preferring the most specific (fewest
     extra tokens). A call matching nothing (a whole-script argument, a per-item
-    subcommand whose name differs from the example) falls back to ``default``.
+    subcommand whose name differs from the example) falls back to `default`.
     """
 
     def stub(*args, **kwargs) -> str:
@@ -108,10 +108,10 @@ def _dispatch(command_map: list[tuple[list[str], str]], default: str = ""):
 
 
 def _fixtures():
-    """Yield a ``pytest.param`` per documented block worth replaying.
+    """Yield a `pytest.param` per documented block worth replaying.
 
-    ``installed``, ``orphans`` and ``version_regexes`` are single-source: one param
-    per literal block, fed straight through. ``outdated`` is one param per manager,
+    `installed`, `orphans` and `version_regexes` are single-source: one param
+    per literal block, fed straight through. `outdated` is one param per manager,
     driven by a command-dispatching stub so its (possibly two-command) path is
     exercised whole.
     """
@@ -146,9 +146,9 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         # Drive the real version probe (PackageManager.version) with the
         # documented output instead of re-implementing its regex loop: stub the
         # two host gates and the CLI call so the extraction runs unchanged. All
-        # three (``supported``, ``executable``, ``version``) are cached
+        # three (`supported`, `executable`, `version`) are cached
         # properties on the shared pool instance, so patch the two gates on the
-        # instance to shadow any host-cached value, and drop ``version`` from the
+        # instance to shadow any host-cached value, and drop `version` from the
         # instance cache before and after so it recomputes with the stubs here
         # and does not leak the stubbed result to another test.
         monkeypatch.setattr(manager, "supported", True)
@@ -186,9 +186,9 @@ def test_display_blocks_align_with_raw():
     """The compiled harvest the docs render and the raw harvest this test
     replays must agree on structure.
 
-    ``docs/docs_update.py`` selects reference-trace blocks by (member, index)
-    from :func:`class_display_blocks`, while this test replays the same blocks
-    from :func:`class_blocks`. Their per-member block counts must match, or an
+    `docs/docs_update.py` selects reference-trace blocks by (member, index)
+    from {func}`class_display_blocks`, while this test replays the same blocks
+    from {func}`class_blocks`. Their per-member block counts must match, or an
     index would point at a different block on the two sides.
     """
     for manager in pool.values():
@@ -202,11 +202,11 @@ def test_display_blocks_align_with_raw():
 def test_fixtures_carry_no_truncation_marker():
     """A harvested fixture block must document its output in full.
 
-    ``installed``/``outdated``/``orphans``/``version_regexes`` blocks are complete
-    samples, so none may abbreviate its output with a ``(...)`` marker (an
-    illustration that would truncate belongs under a non-harvested ``console``
-    directive). A bare ``...`` is left alone: real CLI output legitimately
-    contains it, like apt's ``Listing...`` header or a `guix` store path.
+    `installed`/`outdated`/`orphans`/`version_regexes` blocks are complete
+    samples, so none may abbreviate its output with a `(...)` marker (an
+    illustration that would truncate belongs under a non-harvested `console`
+    fence). A bare `...` is left alone: real CLI output legitimately
+    contains it, like apt's `Listing...` header or a `guix` store path.
     """
     for manager in pool.values():
         blocks_by_member = class_blocks(type(manager))  # type: ignore[arg-type]
@@ -218,17 +218,17 @@ def test_fixtures_carry_no_truncation_marker():
 def test_query_fixtures_run_verbatim():
     """A harvested query fixture must show the exact command mpm runs.
 
-    ``installed``/``outdated``/``orphans``/``version_regexes`` invocations go
-    through ``run_cli``, which executes an argv directly with no shell, so a
-    documented command joined to another by a shell pipe (``| jq`` to
-    pretty-print JSON, ``echo n |`` to feed an interactive prompt) shows an
+    `installed`/`outdated`/`orphans`/`version_regexes` invocations go
+    through `run_cli`, which executes an argv directly with no shell, so a
+    documented command joined to another by a shell pipe (`| jq` to
+    pretty-print JSON, `echo n |` to feed an interactive prompt) shows an
     invocation mpm never makes and would render a misleading reference trace.
     Such a block is an illustration and belongs under a non-harvested
-    ``console`` directive.
+    `console` fence.
 
-    Re-tokenized with :func:`shlex.split` like :func:`_documented_commands` does
+    Re-tokenized with {func}`shlex.split` like {func}`_documented_commands` does
     for the mutation members, so a pipe *inside* a quoted argument (PowerShell's
-    ``-Command "... | ..."``, which mpm passes as a single token for pwsh to run
+    `-Command "... | ..."`, which mpm passes as a single token for pwsh to run
     internally) stays one token and is not a shell pipe at mpm's level.
     """
     for manager in pool.values():
@@ -273,13 +273,13 @@ BUILD_CLI_KWARGS = frozenset((
     "override_pre_args",
     "override_pre_cmds",
 ))
-"""``run_cli`` kwargs forwarded to ``build_cli`` when reconstructing the full
-command. ``sudo`` is deliberately not forwarded: escalation depends on platform
-and policy, so documented ``sudo`` prefixes are stripped on the other side."""
+"""`run_cli` kwargs forwarded to `build_cli` when reconstructing the full
+command. `sudo` is deliberately not forwarded: escalation depends on platform
+and policy, so documented `sudo` prefixes are stripped on the other side."""
 
 
 def _strip_sudo(tokens: list[str]) -> list[str]:
-    """Drop a leading ``sudo`` (and its ``-n``) from a command."""
+    """Drop a leading `sudo` (and its `-n`) from a command."""
     if tokens and tokens[0] == "sudo":
         if tokens[1:2] in (["-n"], ["--non-interactive"]):
             return tokens[2:]
@@ -292,10 +292,10 @@ def _documented_commands(
 ) -> list[list[str]]:
     """Every literal command documented for a mutation member, normalized.
 
-    A command piped into another program is an illustration. A leading ``sudo``
-    (and its ``-n``) is dropped on both the documented and constructed sides:
+    A command piped into another program is an illustration. A leading `sudo`
+    (and its `-n`) is dropped on both the documented and constructed sides:
     escalation depends on platform and per-manager policy, not on the command's
-    shape. Tokens restating the manager's ``extra_env`` (``BATCH=yes`` for Ports)
+    shape. Tokens restating the manager's `extra_env` (`BATCH=yes` for Ports)
     document environment variables, not argv, and are dropped too.
     """
     env_tokens = {f"{key}={value}" for key, value in (extra_env or {}).items()}
@@ -303,7 +303,7 @@ def _documented_commands(
     for block in class_blocks(cls).get(member, ()):
         for raw_tokens in block_commands(block):
             # Re-tokenize with shell quoting rules so a quoted argument (a
-            # PowerShell ``-Command "..."`` payload) stays one token, matching
+            # PowerShell `-Command "..."` payload) stays one token, matching
             # the constructed argv. Unbalanced quotes mean the command is an
             # illustration, like a pipe.
             try:
@@ -314,7 +314,7 @@ def _documented_commands(
                 continue
             tokens = [token for token in tokens if token not in env_tokens]
             # A leading VAR=VALUE is a shell environment prefix, not argv
-            # (``IGNORE_OSVERSION=yes pkg update``).
+            # (`IGNORE_OSVERSION=yes pkg update`).
             while tokens and re.match(r"[A-Za-z_][A-Za-z0-9_]*=", tokens[0]):
                 tokens.pop(0)
             commands.append(_strip_sudo(tokens))
@@ -324,7 +324,7 @@ def _documented_commands(
 def _normalize_constructed(command: tuple, cli_names: tuple[str, ...]) -> list[str]:
     """Shape a constructed command like its documented counterpart.
 
-    Drops the ``sudo --non-interactive`` escalation prefix, unwraps the ``bash -c
+    Drops the `sudo --non-interactive` escalation prefix, unwraps the ``bash -c
     "source ...
     && <command>"`` indirection used for shell-function managers (sdkman), and
     reduces the absolute binary path to its basename.
@@ -345,7 +345,7 @@ def _matches(
     Wherever the constructed command carries the sentinel, the documented one
     may carry any non-flag token (the example package id, possibly with a
     pinned version). The leading binary may be documented under any of the
-    manager's CLI names (``python`` for a ``python3`` binary).
+    manager's CLI names (`python` for a `python3` binary).
     """
     if len(documented) != len(constructed):
         return False
@@ -361,7 +361,7 @@ def _matches(
 
 
 def _mutation_fixtures():
-    """Yield one ``pytest.param`` per manager mutation member with literal
+    """Yield one `pytest.param` per manager mutation member with literal
     documented commands."""
     for manager in pool.values():
         for member in MUTATION_MEMBERS:
@@ -395,9 +395,9 @@ def test_documented_command_matches_construction(
         return ""
 
     def record_run(*args, **kwargs) -> str:
-        # ``run`` takes the full, already-built command as a nested structure
-        # (emerge's cleanup calls ``self.upgrade()``, which executes
-        # ``upgrade_all_cli()`` through ``run``): flatten it like ``run`` does.
+        # `run` takes the full, already-built command as a nested structure
+        # (emerge's cleanup calls `self.upgrade()`, which executes
+        # `upgrade_all_cli()` through `run`): flatten it like `run` does.
         def flatten(items):
             for item in items:
                 if isinstance(item, (list, tuple)):
@@ -413,7 +413,7 @@ def test_documented_command_matches_construction(
     monkeypatch.setattr(manager, "run_cli", record_run_cli)
     monkeypatch.setattr(manager, "run", record_run)
     # A method may consult the inventory first (sdkman's remove looks up the
-    # installed version to pass to ``uninstall``): feed it one sentinel package.
+    # installed version to pass to `uninstall`): feed it one sentinel package.
     monkeypatch.setattr(
         type(manager),
         "installed",
@@ -427,7 +427,7 @@ def test_documented_command_matches_construction(
     if member == "install":
         manager.install(PID_SENTINEL)
         # A second, version-pinned invocation covers docstrings whose example
-        # pins a version (``asdf install nodejs 20.10.0``). Managers without
+        # pins a version (`asdf install nodejs 20.10.0`). Managers without
         # version support may balk: the unpinned record is enough for them.
         with suppress(Exception):
             manager.install(PID_SENTINEL, version=PID_SENTINEL)
@@ -448,7 +448,7 @@ def test_documented_command_matches_construction(
         constructed.append(manager.upgrade_all_cli())
     else:  # upgrade_one_cli.
         constructed.append(manager.upgrade_one_cli(PID_SENTINEL))
-        # Same version-pinned second pass as ``install`` above.
+        # Same version-pinned second pass as `install` above.
         with suppress(Exception):
             constructed.append(
                 manager.upgrade_one_cli(PID_SENTINEL, version=PID_SENTINEL)

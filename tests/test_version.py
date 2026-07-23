@@ -197,7 +197,7 @@ def test_token_int(value, expected):
 
 @pytest.mark.parametrize("value", ("abc", "ABC", "123abc"))
 def test_token_int_none_for_non_integers(value):
-    """``Token.integer`` is ``None`` for non-integer tokens."""
+    """`Token.integer` is `None` for non-integer tokens."""
     assert Token(value).integer is None
 
 
@@ -343,7 +343,7 @@ def test_tokenized_string_empty_tokens(value):
 
 
 def test_tokenized_string_comparison_edge_cases():
-    """Comparison with ``None`` and unsupported types."""
+    """Comparison with `None` and unsupported types."""
     v = TokenizedString("1.0")
     # None is handled explicitly by every operator.
     assert v > None
@@ -497,11 +497,11 @@ version_list = (
     ("5.15.90.1-2", (5, 15, 90, 1, 2)),
     # Snap revision style.
     ("2.60.4+git2.e7f88a7", (2, 60, 4, "git", 2, "e7f88a7")),
-    # PEP 440 epoch — the ``!`` is a plain separator, epoch semantics lost.
+    # PEP 440 epoch — the `!` is a plain separator, epoch semantics lost.
     ("1!1.0", (1, 1, 0)),
-    # PEP 440 local version — ``+`` is a plain separator.
+    # PEP 440 local version — `+` is a plain separator.
     ("1.0+local", (1, 0, "local")),
-    # Semver build metadata — ``+`` is a plain separator.
+    # Semver build metadata — `+` is a plain separator.
     ("1.0.0+build.123", (1, 0, 0, "build", 123)),
     # Semver pre-release with mixed identifiers.
     ("1.0.0-alpha.beta", (1, 0, 0, "a", "b")),
@@ -588,7 +588,7 @@ compared_gt = (
     ("1.0.0-alpha.1", "1.0.0-alpha"),
     # RPM release bump.
     ("1.0-2.fc38", "1.0-1.fc38"),
-    # Epochs dominate: a leading ``N:`` (Debian, RPM, pacman) or ``N!`` (PEP
+    # Epochs dominate: a leading `N:` (Debian, RPM, pacman) or `N!` (PEP
     # 440) outranks the rest of the version, and an absent epoch counts as 0.
     ("1!1.0", "2.0"),
     ("2:1.0-1", "9.0"),
@@ -636,13 +636,13 @@ compared_eq = (
     ("4.2.1", "4-2-1"),
     # PEP 440 implicit zero on pre-release tag.
     ("1.0a", "1.0a0"),
-    # Cosmetic ``v`` prefix ignored in comparison.
+    # Cosmetic `v` prefix ignored in comparison.
     ("v1.0", "1.0"),
     ("v0.9.4.3", "0.9.4.3"),
     # PEP 440 alias normalization.
     ("1.0alpha1", "1.0a1"),
     ("1.0c1", "1.0rc1"),
-    # Epoch: an explicit ``0:`` equals an absent epoch; padding still applies.
+    # Epoch: an explicit `0:` equals an absent epoch; padding still applies.
     ("0:1.0", "1.0"),
     ("1:1.0", "1:1.0.0"),
 )
@@ -799,7 +799,7 @@ def test_version_range_repr(spec, expected):
 
 
 def test_parse_version_is_tokenized_string():
-    """``parse_version`` is an alias for ``TokenizedString``."""
+    """`parse_version` is an alias for `TokenizedString`."""
     assert parse_version is TokenizedString
     v = parse_version("1.2.3")
     assert isinstance(v, TokenizedString)
@@ -858,15 +858,15 @@ def test_diff_versions(old, new, expected_common, expected_old, expected_new):
 #
 # These tests document comparisons that the heuristic tokenizer gets wrong
 # because it does not implement format-specific semantics. Each test is
-# ``xfail(strict=True)`` so it fails loudly if the limitation is removed,
+# `xfail(strict=True)` so it fails loudly if the limitation is removed,
 # letting us claim the fix.
 
 
 @pytest.mark.parametrize(
     ("ver1", "ver2"),
     (
-        # Debian: the revision (after the last ``-``) makes a version newer,
-        # but ``-`` also introduces a semver pre-release, which makes a version
+        # Debian: the revision (after the last `-`) makes a version newer,
+        # but `-` also introduces a semver pre-release, which makes a version
         # older. A format-agnostic comparator cannot tell the two apart and
         # treats the string suffix as a pre-release. Unlike epochs, this
         # separator is genuinely ambiguous, so it stays unhandled.
@@ -910,7 +910,7 @@ def test_version_comparison_lt_known_failures(ver1, ver2):
             "1.0.0+build.124",
             id="semver-build-metadata-diff",
         ),
-        # Perl: floating-point versions treat ``1.1`` as ``1.100``.
+        # Perl: floating-point versions treat `1.1` as `1.100`.
         pytest.param("1.1", "1.10", id="perl-float-equal"),
         # Gentoo: three-digit-group conversion of Perl versions.
         pytest.param("1.020030", "1.20.30", id="gentoo-3digit-group"),

@@ -54,9 +54,9 @@ def test_xkcd_set():
 
 @all_managers
 def test_deprecated(manager):
-    """A deprecated manager must document itself with a valid ``deprecation_url``.
+    """A deprecated manager must document itself with a valid `deprecation_url`.
 
-    Conversely, a ``deprecation_url`` is only meaningful on a deprecated manager.
+    Conversely, a `deprecation_url` is only meaningful on a deprecated manager.
     """
     if manager.deprecated:
         assert manager.deprecation_url is not None, (
@@ -112,7 +112,7 @@ def test_platforms(manager):
 
 @all_managers
 def test_requirement(manager):
-    """Each manager is required to specify a version requirement or ``None``."""
+    """Each manager is required to specify a version requirement or `None`."""
     if manager.requirement is not None:
         assert set(manager.requirement).issubset(digits + ".>=<!, ")
         # Check each version component is lossless once passed via TokenizedString.
@@ -178,7 +178,7 @@ def test_version_cli_options(manager):
 def test_version_regexes(manager):
     """Version regex is required.
 
-    Check it compiles and match has a ``<version>`` group.
+    Check it compiles and match has a `<version>` group.
     """
     assert isinstance(manager.version_regexes, tuple)
     for version_regex in manager.version_regexes:
@@ -209,10 +209,10 @@ def test_version_regexes(manager):
     ),
 )
 def test_version_regex_matches_sample(manager_id, sample_output, expected_version):
-    """Each manager's ``version_regexes`` parses the documented ``--version`` output.
+    """Each manager's `version_regexes` parses the documented `--version` output.
 
-    Regression guard for the case where ``re.VERBOSE`` silently swallowed literal
-    spaces in patterns like ``guix \\(GNU Guix\\) ...``, leaving the manager
+    Regression guard for the case where `re.VERBOSE` silently swallowed literal
+    spaces in patterns like `guix \\(GNU Guix\\) ...`, leaving the manager
     unable to detect its own version.
     """
     manager = pool[manager_id]
@@ -290,9 +290,9 @@ def test_package_matches(pkg_id, pkg_name, query, extended, exact, expected):
 
 
 def _collect_class_members(klass: type, name: str) -> tuple[list[str], list[str]]:
-    """Collect a base class's ``(attributes, methods)`` in declaration order.
+    """Collect a base class's `(attributes, methods)` in declaration order.
 
-    Parses the AST so naked type annotations (``AnnAssign``) are collected
+    Parses the AST so naked type annotations (`AnnAssign`) are collected
     alongside plain assignments and function definitions.
     """
     tree = ast.parse(Path(inspect.getfile(klass)).read_bytes())
@@ -364,9 +364,9 @@ CANONICAL_ATTRS = (
 
 The documented convention every manager module follows: identity first, then the
 escalation policy, the version requirement, the CLI plumbing, the version probe,
-and the rarely-overridden toggles. Manager-specific constants (the ``_*_REGEXP``
+and the rarely-overridden toggles. Manager-specific constants (the `_*_REGEXP`
 parsers) are not governed and conventionally sit between the attributes and the
-operations. Consumed by ``test_content_order``, which checks each manager's
+operations. Consumed by `test_content_order`, which checks each manager's
 relative declaration order against this sequence.
 """
 
@@ -374,9 +374,9 @@ relative declaration order against this sequence.
 def collect_props_ref():
     """Build the canonical member-order reference for manager classes.
 
-    Attributes follow :data:`CANONICAL_ATTRS`; methods follow the base classes'
-    own declaration order, ``CLIExecutor``'s (binary discovery, version probe,
-    execution engine) before ``PackageManager``'s (helpers, availability, then
+    Attributes follow {data}`CANONICAL_ATTRS`; methods follow the base classes'
+    own declaration order, `CLIExecutor`'s (binary discovery, version probe,
+    execution engine) before `PackageManager`'s (helpers, availability, then
     the operations). The curated attribute list is cross-checked against the
     base classes so a new base attribute cannot silently escape governance.
     """
@@ -418,8 +418,8 @@ def test_operation_order():
 def test_content_order(manager_class):
     """Lint each manager class to check its members follow the canonical order.
 
-    Attributes must follow :data:`CANONICAL_ATTRS` and methods the base classes'
-    own declaration order (see :func:`collect_props_ref`); ungoverned names
+    Attributes must follow {data}`CANONICAL_ATTRS` and methods the base classes'
+    own declaration order (see {func}`collect_props_ref`); ungoverned names
     (manager-specific parsing constants and helpers) may sit anywhere.
     """
     # Collect in order the IDs of all attributes (plain and annotated

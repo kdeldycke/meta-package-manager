@@ -14,10 +14,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Keeps the CLI test plan's per-command ``--help`` roster in sync.
+"""Keeps the CLI test plan's per-command `--help` roster in sync.
 
-The ``--help`` invocations themselves live as ``[[cases]]`` entries in
-``tests/cli-test-plan.toml``, executed by ``click-extra test-suite`` in CI and
+The `--help` invocations themselves live as `[[cases]]` entries in
+`tests/cli-test-plan.toml`, executed by `click-extra test-suite` in CI and
 against the compiled binaries during releases. A static roster drifts as
 commands are added or removed, so this conformance test compares it against
 the live command tree and fails naming the missing or orphaned entries.
@@ -53,9 +53,9 @@ def _collect_commands(
 
 
 def _plan_help_paths() -> set[tuple[str, ...]]:
-    """Extract the command path of each ``--help`` case in the test plan.
+    """Extract the command path of each `--help` case in the test plan.
 
-    A ``--help`` case is one whose ``cli_parameters`` end with ``--help``; the
+    A `--help` case is one whose `cli_parameters` end with `--help`; the
     words before it are the command path (empty for the root CLI).
     """
     plan = tomllib.loads(PLAN_PATH.read_text(encoding="UTF-8"))
@@ -70,7 +70,7 @@ def _plan_help_paths() -> set[tuple[str, ...]]:
 
 
 def test_plan_covers_all_commands():
-    """Every command and subcommand must have a ``--help`` case in the plan."""
+    """Every command and subcommand must have a `--help` case in the plan."""
     tree = set(_collect_commands(mpm))
     plan_paths = _plan_help_paths()
     missing = sorted(tree - plan_paths)

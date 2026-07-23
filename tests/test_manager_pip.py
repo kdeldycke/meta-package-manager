@@ -34,7 +34,7 @@ PATCH_RUN = "meta_package_manager.managers.pip.subprocess.run"
 
 
 def _installer_dist(installer):
-    """Mock distribution exposing the given ``INSTALLER`` dist-info record."""
+    """Mock distribution exposing the given `INSTALLER` dist-info record."""
     dist = MagicMock()
     dist.read_text = lambda name: f"{installer}\n" if name == "INSTALLER" else None
     return dist
@@ -44,7 +44,7 @@ def _installer_dist(installer):
 
 
 def test_bundled_app_detected_under_cellar():
-    """A ``sys.prefix`` under a Homebrew Cellar is conclusive on its own."""
+    """A `sys.prefix` under a Homebrew Cellar is conclusive on its own."""
     cellar = "/opt/homebrew/Cellar/meta-package-manager/7.0.0/libexec"
     with (
         patch(PATCH_PREFIX, cellar),
@@ -59,7 +59,7 @@ def test_bundled_app_detected_under_cellar():
     ["/usr", "/home/kde/.venv", "/opt/homebrew", "/opt/homebrew/opt/python@3.14"],
 )
 def test_bundled_app_detected_by_brew_installer(prefix):
-    """Outside Cellar, an ``INSTALLER`` of ``brew`` still flags the bundle."""
+    """Outside Cellar, an `INSTALLER` of `brew` still flags the bundle."""
     with (
         patch(PATCH_PREFIX, prefix),
         patch(PATCH_DIST, return_value=_installer_dist("brew")),
@@ -68,7 +68,7 @@ def test_bundled_app_detected_by_brew_installer(prefix):
 
 
 def test_brew_installer_case_and_whitespace_insensitive():
-    """The ``INSTALLER`` tag is matched case- and whitespace-insensitively."""
+    """The `INSTALLER` tag is matched case- and whitespace-insensitively."""
     with (
         patch(PATCH_PREFIX, "/usr"),
         patch(PATCH_DIST, return_value=_installer_dist("  Brew  ")),
@@ -87,7 +87,7 @@ def test_user_install_not_flagged(installer):
 
 
 def test_bundled_app_false_when_mpm_absent():
-    """Running from source (``mpm`` not installed) is not a bundle."""
+    """Running from source (`mpm` not installed) is not a bundle."""
     with (
         patch(PATCH_PREFIX, "/home/kde/project/.venv"),
         patch(PATCH_DIST, side_effect=importlib.metadata.PackageNotFoundError("x")),
@@ -99,7 +99,7 @@ def test_bundled_app_false_when_mpm_absent():
 
 
 def _completed(stdout):
-    """Mock a ``subprocess.run`` result carrying the given stdout."""
+    """Mock a `subprocess.run` result carrying the given stdout."""
     result = MagicMock()
     result.stdout = stdout
     return result
@@ -110,7 +110,7 @@ def _completed(stdout):
     [("1\n", True), ("1", True), ("0\n", False), ("", False), ("oops", False)],
 )
 def test_pip_install_blocked_parses_probe(stdout, expected):
-    """The probe's ``1``/``0`` output maps to blocked/not-blocked."""
+    """The probe's `1`/`0` output maps to blocked/not-blocked."""
     candidate = Path("/usr/bin/python3")
     with patch(PATCH_RUN, return_value=_completed(stdout)) as run:
         assert Pip()._pip_install_blocked(candidate) is expected
@@ -137,7 +137,7 @@ def test_pip_install_blocked_keeps_candidate_on_error(error):
 
 
 def _fake_base_search(self, cli_names, env=None):
-    """Stand-in for the base ``PATH`` search yielding two fixed interpreters."""
+    """Stand-in for the base `PATH` search yielding two fixed interpreters."""
     yield Path("/usr/bin/python3")
     yield Path("/usr/local/bin/python3")
 

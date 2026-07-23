@@ -32,12 +32,11 @@ class APM(PackageManager):
     """Atom's package manager, from the sunset Atom editor.
 
     apm installed packages and themes for GitHub's Atom editor, exposing an
-    npm-style CLI whose queries mpm parses from ``--json`` output.
+    npm-style CLI whose queries mpm parses from `--json` output.
 
-    Atom was `sunset on December 15, 2022
-    <https://github.blog/2022-06-08-sunsetting-atom/>`_, so apm is flagged
+    Atom was [sunset on December 15, 2022](https://github.blog/2022-06-08-sunsetting-atom/), so apm is flagged
     deprecated here. mpm keeps the wrapper while doing so stays cheap: the
-    community fork `atom-community/apm <https://github.com/atom-community/apm>`_
+    community fork [atom-community/apm](https://github.com/atom-community/apm)
     has been floated but never produced a usable drop-in, and per the project's
     stability policy a deprecated manager may be dropped without notice once it
     becomes a burden to maintain.
@@ -65,40 +64,42 @@ class APM(PackageManager):
 
     version_regexes = (r"apm\s+(?P<version>\S+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ apm --version
-        apm  2.6.2
-        npm  6.14.13
-        node 12.14.1 x64
-        atom 1.58.0
-        python 2.7.16
-        git 2.33.0
+    $ apm --version
+    apm  2.6.2
+    npm  6.14.13
+    node 12.14.1 x64
+    atom 1.58.0
+    python 2.7.16
+    git 2.33.0
+    ```
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apm list --json
+        $ apm list --json
+        {
+          "core": [
             {
-              "core": [
-                {
-                  "name": "background-tips",
-                  "version": "0.26.1",
-                  "description": "Displays tips about Atom in the background."
-                }
-              ],
-              "user": [
-                {
-                  "name": "file-icons",
-                  "version": "2.0.9",
-                  "description": "Assign file extension icons"
-                }
-              ]
+              "name": "background-tips",
+              "version": "0.26.1",
+              "description": "Displays tips about Atom in the background."
             }
+          ],
+          "user": [
+            {
+              "name": "file-icons",
+              "version": "2.0.9",
+              "description": "Assign file extension icons"
+            }
+          ]
+        }
+        ```
         """
         output = self.run_cli("list", "--json", must_succeed=True)
 
@@ -116,17 +117,18 @@ class APM(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apm outdated --compatible --json
-            [
-              {
-                "name": "file-icons",
-                "version": "2.0.9",
-                "latestVersion": "2.0.10",
-                "description": "Assign file extension icons"
-              }
-            ]
+        $ apm outdated --compatible --json
+        [
+          {
+            "name": "file-icons",
+            "version": "2.0.9",
+            "latestVersion": "2.0.10",
+            "description": "Assign file extension icons"
+          }
+        ]
+        ```
         """
         output = self.run_cli("outdated", "--compatible", "--json", must_succeed=True)
 
@@ -144,89 +146,92 @@ class APM(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not supports exact matching.
+        ```{caution}
+        Search does not supports exact matching.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apm search --json python | jq
-            [
-              {
-                "name": "atom-python-run",
-                "main": "./lib/atom-python-run.js",
-                "version": "0.7.3",
-                "description": "Run a python source file.",
-                "keywords": [
-                  "python"
-                ],
-                "repository": "https://github.com/foreshadow/atom-python-run",
-                "license": "MIT",
-                "engines": {
-                  "atom": ">=1.0.0 <2.0.0"
-                },
-                "dependencies": {},
-                "readme": "Blah blah",
-                "downloads": 41379,
-                "stargazers_count": 16
-              },
-              {
-                "name": "build-python",
-                "version": "0.6.3",
-                "description": "Atom Build provider for python/python3",
-                "repository": "https://github.com/idleberg/atom-build-python",
-                "license": "MIT",
-                "keywords": [
-                  "buildprovider",
-                  "compile",
-                  "python",
-                  "python3",
-                  "linter",
-                  "lint"
-                ],
-                "main": "lib/provider.js",
-                "engines": {
-                  "atom": ">=1.0.0 <2.0.0"
-                },
-                "providedServices": {
-                  "builder": {
-                    "description": "Compiles Python",
-                    "versions": {
-                      "2.0.0": "provideBuilder"
-                    }
-                  }
-                },
-                "package-deps": [
-                  "build"
-                ],
-                "dependencies": {
-                  "atom-package-deps": "^4.3.1"
-                },
-                "devDependencies": {
-                  "babel-eslint": "^7.1.1",
-                  "coffeelint-stylish": "^0.1.2",
-                  "eslint": "^3.13.1",
-                  "eslint-config-atom-build": "^4.0.0",
-                  "gulp": "github:gulpjs/gulp#4.0",
-                  "gulp-coffeelint": "^0.6.0",
-                  "gulp-debug": "^3.0.0",
-                  "gulp-jshint": "^2.0.4",
-                  "gulp-jsonlint": "^1.2.0",
-                  "gulp-lesshint": "^2.1.0",
-                  "jshint": "^2.9.4"
-                },
-                "scripts": {
-                  "test": "gulp lint"
-                },
-                "readme": "Blah blah",
-                "downloads": 2838,
-                "stargazers_count": 0
-              },
-              (...)
-            ]
+        $ apm search --json python | jq
+        [
+          {
+            "name": "atom-python-run",
+            "main": "./lib/atom-python-run.js",
+            "version": "0.7.3",
+            "description": "Run a python source file.",
+            "keywords": [
+              "python"
+            ],
+            "repository": "https://github.com/foreshadow/atom-python-run",
+            "license": "MIT",
+            "engines": {
+              "atom": ">=1.0.0 <2.0.0"
+            },
+            "dependencies": {},
+            "readme": "Blah blah",
+            "downloads": 41379,
+            "stargazers_count": 16
+          },
+          {
+            "name": "build-python",
+            "version": "0.6.3",
+            "description": "Atom Build provider for python/python3",
+            "repository": "https://github.com/idleberg/atom-build-python",
+            "license": "MIT",
+            "keywords": [
+              "buildprovider",
+              "compile",
+              "python",
+              "python3",
+              "linter",
+              "lint"
+            ],
+            "main": "lib/provider.js",
+            "engines": {
+              "atom": ">=1.0.0 <2.0.0"
+            },
+            "providedServices": {
+              "builder": {
+                "description": "Compiles Python",
+                "versions": {
+                  "2.0.0": "provideBuilder"
+                }
+              }
+            },
+            "package-deps": [
+              "build"
+            ],
+            "dependencies": {
+              "atom-package-deps": "^4.3.1"
+            },
+            "devDependencies": {
+              "babel-eslint": "^7.1.1",
+              "coffeelint-stylish": "^0.1.2",
+              "eslint": "^3.13.1",
+              "eslint-config-atom-build": "^4.0.0",
+              "gulp": "github:gulpjs/gulp#4.0",
+              "gulp-coffeelint": "^0.6.0",
+              "gulp-debug": "^3.0.0",
+              "gulp-jshint": "^2.0.4",
+              "gulp-jsonlint": "^1.2.0",
+              "gulp-lesshint": "^2.1.0",
+              "jshint": "^2.9.4"
+            },
+            "scripts": {
+              "test": "gulp lint"
+            },
+            "readme": "Blah blah",
+            "downloads": 2838,
+            "stargazers_count": 0
+          },
+          (...)
+        ]
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apm search --no-description --json python | jq
+        $ apm search --no-description --json python | jq
+        ```
         """
         search_args = []
         if not extended:
@@ -247,22 +252,24 @@ class APM(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apm install image-view
-            The image-view package is bundled with Atom and should not be explicitly
-            installed. You can run `apm uninstall image-view` to uninstall it and then
-            the version bundled with Atom will be used.
-            Installing image-view to /Users/kde/.atom/packages ✓
+        $ apm install image-view
+        The image-view package is bundled with Atom and should not be explicitly
+        installed. You can run `apm uninstall image-view` to uninstall it and then
+        the version bundled with Atom will be used.
+        Installing image-view to /Users/kde/.atom/packages ✓
+        ```
         """
         return self.run_cli("install", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apm update --no-confirm
+        $ apm update --no-confirm
+        ```
         """
         return self.build_cli("update", "--no-confirm")
 
@@ -274,26 +281,29 @@ class APM(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apm update --no-confirm image-view
+        $ apm update --no-confirm image-view
+        ```
         """
         return self.build_cli("update", "--no-confirm", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apm uninstall image-view
+        $ apm uninstall image-view
+        ```
         """
         return self.run_cli("uninstall", package_id)
 
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apm clean
+        $ apm clean
+        ```
         """
         self.run_cli("clean")

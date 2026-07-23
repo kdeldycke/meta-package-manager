@@ -15,11 +15,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """CycloneDX 1.7 writer.
 
-Heavy ``cyclonedx-python-lib`` imports are guarded behind a ``try/except``
-block; ``cyclonedx_support`` reports whether the
-:py:class:`CycloneDX` class can actually be used.
+Heavy `cyclonedx-python-lib` imports are guarded behind a `try/except`
+block; `cyclonedx_support` reports whether the
+{class}`CycloneDX` class can actually be used.
 
-The license-normalization helper is shared with :py:mod:`.spdx` and is
+The license-normalization helper is shared with {mod}`.spdx` and is
 imported from there rather than duplicated: SPDX license expressions are
 the lingua franca CycloneDX builds on, so the dependency direction is
 intentional and acyclic.
@@ -87,9 +87,9 @@ if TYPE_CHECKING:
     from ..package import Package
 
 
-# ``Any``-valued map to avoid cascading mypy errors at every call site: the
-# values are typed ``HashAlgorithm`` instances but the conditional
-# ``try/except`` import above hides that fact from the type checker.
+# `Any`-valued map to avoid cascading mypy errors at every call site: the
+# values are typed `HashAlgorithm` instances but the conditional
+# `try/except` import above hides that fact from the type checker.
 _CYCLONEDX_HASH_MAP: dict[str, Any] = {}
 _CYCLONEDX_SEVERITY_MAP: dict[str, Any] = {}
 if cyclonedx_support:
@@ -116,7 +116,7 @@ if cyclonedx_support:
 class CycloneDX(SBOM):
     """Generates a CycloneDX document from a list of packages.
 
-    `CycloneDX 1.7 specifications <https://cyclonedx.org/docs/1.7>`_.
+    [CycloneDX 1.7 specifications](https://cyclonedx.org/docs/1.7).
     """
 
     document: Bom
@@ -125,17 +125,16 @@ class CycloneDX(SBOM):
 
     def init_doc(self) -> None:
         """
-        `CycloneDX document metadata specifications
-        <https://cyclonedx.org/docs/1.7/json/#metadata>`_.
+        [CycloneDX document metadata specifications](https://cyclonedx.org/docs/1.7/json/#metadata).
         """
         gh_url = "https://github.com/kdeldycke/meta-package-manager"
         doc_url = "https://kdeldycke.github.io/meta-package-manager"
         self.document = Bom()
-        # ``(manager_id, package_id) -> Component`` lookup, used by
-        # :py:meth:`finalize` to wire declared-dependency edges to their
+        # `(manager_id, package_id) -> Component` lookup, used by
+        # {meth}`finalize` to wire declared-dependency edges to their
         # already-emitted Component instances.
         self.component_index = {}
-        # ``(source_component, manager_id, target_id)`` queue: dependency
+        # `(source_component, manager_id, target_id)` queue: dependency
         # edges deferred because the target may not have been added yet.
         self.pending_dependencies = []
 
@@ -229,7 +228,7 @@ class CycloneDX(SBOM):
         manager: PackageManager, metadata: PackageMetadata
     ) -> OrganizationalEntity:
         """Map metadata's supplier (or the manager itself) to a CycloneDX
-        ``OrganizationalEntity``.
+        `OrganizationalEntity`.
         """
         if metadata.supplier:
             urls = [XsUri(metadata.supplier.url)] if metadata.supplier.url else None
@@ -238,8 +237,8 @@ class CycloneDX(SBOM):
 
     @staticmethod
     def _hashes_for(metadata: PackageMetadata) -> list:
-        """Build CycloneDX ``HashType`` objects from the portable
-        ``Checksum`` list, dropping algorithms unsupported by 1.7.
+        """Build CycloneDX `HashType` objects from the portable
+        `Checksum` list, dropping algorithms unsupported by 1.7.
         """
         out = []
         for c in metadata.checksums:
@@ -253,12 +252,12 @@ class CycloneDX(SBOM):
         """Translate license metadata into CycloneDX license objects.
 
         Tries the parsed SPDX expression first (handles compound
-        expressions like ``MIT AND Apache-2.0``). Falls back to a named
-        ``DisjunctiveLicense`` for free-text strings the SPDX parser
+        expressions like `MIT AND Apache-2.0`). Falls back to a named
+        `DisjunctiveLicense` for free-text strings the SPDX parser
         rejects.
         """
-        # ``list[Any]`` because the function appends two different concrete
-        # license-object types (``DisjunctiveLicense`` and ``LicenseExpression``)
+        # `list[Any]` because the function appends two different concrete
+        # license-object types (`DisjunctiveLicense` and `LicenseExpression`)
         # whose common ancestor is not exposed in CycloneDX's public API.
         out: list[Any] = []
         candidate = metadata.license_concluded or metadata.license_declared
@@ -278,12 +277,12 @@ class CycloneDX(SBOM):
                 return out
         if parsed is not None:
             # Attach SPDX canonical URLs to each identifier inside the
-            # expression. ``_parse_license_expression`` has already
-            # rejected every ``LicenseRef-`` and unknown-symbol case, so
+            # expression. `_parse_license_expression` has already
+            # rejected every `LicenseRef-` and unknown-symbol case, so
             # every leaf yielded here is a known SPDX identifier (license
-            # or exception). Sorting by key keeps the emitted ``details``
+            # or exception). Sorting by key keeps the emitted `details`
             # order deterministic across runs, independent of CycloneDX's
-            # internal ``SortedSet``.
+            # internal `SortedSet`.
             identifiers = sorted(set(CycloneDX._iter_spdx_identifiers(parsed)))
             details = tuple(
                 LicenseExpressionDetails(
@@ -299,18 +298,18 @@ class CycloneDX(SBOM):
 
     @staticmethod
     def _iter_spdx_identifiers(node) -> Iterator[str]:
-        """Walk a ``license_expression`` AST and yield each leaf SPDX
+        """Walk a `license_expression` AST and yield each leaf SPDX
         identifier as a string.
 
-        ``parsed.symbols`` on the top-level expression collapses a
-        ``LicenseWithExceptionSymbol`` into a single symbol whose key is
-        the full ``"<license> WITH <exception>"`` string, which is not
+        `parsed.symbols` on the top-level expression collapses a
+        `LicenseWithExceptionSymbol` into a single symbol whose key is
+        the full `"<license> WITH <exception>"` string, which is not
         the SPDX identifier of either component. Walk the AST instead:
-        ``LicenseWithExceptionSymbol`` exposes the license and exception
-        symbols separately; boolean nodes (``AND``/``OR``) expose
-        children via ``args``; bare ``LicenseSymbol`` instances expose
-        their identifier via ``key``. Duck-typed so this module does not
-        need an explicit import of ``license_expression``'s class
+        `LicenseWithExceptionSymbol` exposes the license and exception
+        symbols separately; boolean nodes (`AND`/`OR`) expose
+        children via `args`; bare `LicenseSymbol` instances expose
+        their identifier via `key`. Duck-typed so this module does not
+        need an explicit import of `license_expression`'s class
         hierarchy.
         """
         if hasattr(node, "license_symbol") and hasattr(node, "exception_symbol"):
@@ -324,7 +323,7 @@ class CycloneDX(SBOM):
 
     @staticmethod
     def _external_references_for(metadata: PackageMetadata) -> list:
-        """Map metadata URLs to CycloneDX ``externalReferences``."""
+        """Map metadata URLs to CycloneDX `externalReferences`."""
         refs = []
         if metadata.homepage:
             refs.append(
@@ -373,9 +372,9 @@ class CycloneDX(SBOM):
 
     @staticmethod
     def _properties_for(metadata: PackageMetadata) -> list:
-        """Encode manager-native ``extras`` as CycloneDX ``properties``.
+        """Encode manager-native `extras` as CycloneDX `properties`.
 
-        Properties are namespaced under ``mpm:`` so consumers can filter
+        Properties are namespaced under `mpm:` so consumers can filter
         them away when they only care about the standard fields.
         """
         out = []
@@ -392,8 +391,7 @@ class CycloneDX(SBOM):
         metadata: PackageMetadata = EMPTY_METADATA,
     ) -> None:
         """
-        `CycloneDX package metadata specifications
-        <https://cyclonedx.org/docs/1.7/json/#components>`_.
+        [CycloneDX package metadata specifications](https://cyclonedx.org/docs/1.7/json/#components).
         """
         authors = None
         if metadata.originator and not metadata.originator.is_organization:
@@ -435,9 +433,9 @@ class CycloneDX(SBOM):
     def all_purls(self) -> Iterator[str]:
         """Yield every component purl in insertion order.
 
-        Each component's ``bom_ref`` is its purl string, so the same
-        values double as the vulnerability ``affects`` targets in
-        :py:meth:`finalize`.
+        Each component's `bom_ref` is its purl string, so the same
+        values double as the vulnerability `affects` targets in
+        {meth}`finalize`.
         """
         for component in self.component_index.values():
             if component.purl is not None:
@@ -446,15 +444,15 @@ class CycloneDX(SBOM):
     def finalize(self) -> None:
         """Resolve queued dependency edges and attach vulnerability records.
 
-        Mirrors :py:meth:`meta_package_manager.sbom.spdx.SPDX.finalize`.
+        Mirrors {meth}`meta_package_manager.sbom.spdx.SPDX.finalize`.
         Dangling references (the dependency target is not in the inventory)
         are dropped silently.
 
         Vulnerability data bound via
-        :py:meth:`meta_package_manager.sbom.base.SBOM.attach_vulnerabilities`
-        is projected into the CycloneDX ``vulnerabilities`` array. Each
+        {meth}`meta_package_manager.sbom.base.SBOM.attach_vulnerabilities`
+        is projected into the CycloneDX `vulnerabilities` array. Each
         advisory is described once at the document level with an
-        ``affects`` list pointing at every component (by ``bom_ref``,
+        `affects` list pointing at every component (by `bom_ref`,
         which equals the purl) it impacts.
         """
         for source, manager_id, target_id in self.pending_dependencies:
@@ -466,10 +464,10 @@ class CycloneDX(SBOM):
         self._attach_vulnerability_records()
 
     def _attach_vulnerability_records(self) -> None:
-        """Build CycloneDX ``Vulnerability`` objects from attached data.
+        """Build CycloneDX `Vulnerability` objects from attached data.
 
         Deduplicates by advisory id: an advisory that hits several
-        components is emitted once with multiple ``affects`` targets.
+        components is emitted once with multiple `affects` targets.
         """
         if not self.vulnerabilities_by_purl:
             return
@@ -490,12 +488,12 @@ class CycloneDX(SBOM):
 
     @staticmethod
     def _build_cyclonedx_vuln(vuln) -> Any:
-        """Translate a portable ``Vulnerability`` into a CycloneDX one.
+        """Translate a portable `Vulnerability` into a CycloneDX one.
 
-        ``vuln`` is a
-        :py:class:`meta_package_manager.sbom.vulnerabilities.Vulnerability`;
+        `vuln` is a
+        {class}`meta_package_manager.sbom.vulnerabilities.Vulnerability`;
         left untyped so this module need not import the network-side
-        module when the ``[sbom-online]`` extra is absent.
+        module when the `[sbom-online]` extra is absent.
         """
         source = VulnerabilitySource(
             name=vuln.source,
@@ -538,11 +536,11 @@ class CycloneDX(SBOM):
         """Extend the base stats with CycloneDX-specific counters.
 
         CycloneDX has no merge-content equivalent: per-package upstream
-        SBOMs are linked through ``externalReferences[type=bom]`` rather
+        SBOMs are linked through `externalReferences[type=bom]` rather
         than spliced in. The merged-document count therefore reports the
         number of components carrying a BOM external reference. The
         dependency-edge total walks the registered dependency graph and
-        sums the ``dependsOn`` collection size across every entry.
+        sums the `dependsOn` collection size across every entry.
         """
         base = super().stats()
         components_with_bom = sum(
@@ -564,15 +562,16 @@ class CycloneDX(SBOM):
     def export(self) -> str:
         """Serialize the document to its string representation.
 
-        .. note::
+        ```{note}
 
-            Unlike :py:meth:`meta_package_manager.sbom.spdx.SPDX.export`, the generated document is not
-            validated against its schema here. CycloneDX schema validation
-            relies on ``cyclonedx-python-lib``'s ``[validation]`` extra, which
-            pulls in ``jsonschema`` and, transitively, ``rfc3987-syntax``,
-            ``lark``, and ``lxml``. To keep that stack out of ``mpm``'s runtime
-            dependencies, the validation runs in the test suite instead. See
-            ``tests/test_cli_sbom.py``.
+        Unlike {meth}`meta_package_manager.sbom.spdx.SPDX.export`, the generated document is not
+        validated against its schema here. CycloneDX schema validation
+        relies on `cyclonedx-python-lib`'s `[validation]` extra, which
+        pulls in `jsonschema` and, transitively, `rfc3987-syntax`,
+        `lark`, and `lxml`. To keep that stack out of `mpm`'s runtime
+        dependencies, the validation runs in the test suite instead. See
+        `tests/test_cli_sbom.py`.
+        ```
         """
         if self.export_format == ExportFormat.JSON:
             return str(JsonV1Dot7(self.document).output_as_string(indent=2))

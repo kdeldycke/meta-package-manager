@@ -31,23 +31,26 @@ if TYPE_CHECKING:
 
 
 class Deb_Get(PackageManager):
-    """``deb-get`` installs third-party software on Debian and Ubuntu via ``.deb``
+    """`deb-get` installs third-party software on Debian and Ubuntu via `.deb`
     packages sourced from GitHub releases, direct URLs, and PPAs.
 
-    .. note::
-        ``deb-get`` wraps ``apt`` under the hood for actual package installation
-        and removal, so all operations that modify the system require ``sudo``.
+    ```{note}
+    `deb-get` wraps `apt` under the hood for actual package installation
+    and removal, so all operations that modify the system require `sudo`.
+    ```
 
-    .. caution::
-        ``deb-get list --installed`` prints bare package names with no versions,
-        so the installed inventory carries no version. ``search`` is likewise
-        version-less and offers no exact or extended mode, so mpm refilters its
-        results.
+    ```{caution}
+    `deb-get list --installed` prints bare package names with no versions,
+    so the installed inventory carries no version. `search` is likewise
+    version-less and offers no exact or extended mode, so mpm refilters its
+    results.
+    ```
 
-    .. note::
-        There is no read-only ``outdated``: detection runs ``deb-get update``,
-        which also refreshes the package index, so the probe escalates through
-        ``sudo`` like a sync.
+    ```{note}
+    There is no read-only `outdated`: detection runs `deb-get update`,
+    which also refreshes the package index, so the probe escalates through
+    `sudo` like a sync.
+    ```
     """
 
     name = "deb-get"
@@ -60,10 +63,11 @@ class Deb_Get(PackageManager):
 
     version_cli_options = ("version",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ deb-get version
-        0.4.5
+    $ deb-get version
+    0.4.5
+    ```
     """
 
     version_regexes = (r"(?P<version>\d+\.\d+\.\d+)",)
@@ -79,22 +83,24 @@ class Deb_Get(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ deb-get list --installed
-            activitywatch
-            anydesk
-            bitwarden
-            deb-get
-            freeplane
-            google-chrome-stable
-            ipscan
-            protonvpn
-            zoom
+        $ deb-get list --installed
+        activitywatch
+        anydesk
+        bitwarden
+        deb-get
+        freeplane
+        google-chrome-stable
+        ipscan
+        protonvpn
+        zoom
+        ```
 
-        .. note::
-            ``deb-get list --installed`` only outputs bare package names without
-            version information.
+        ```{note}
+        `deb-get list --installed` only outputs bare package names without
+        version information.
+        ```
         """
         output = self.run_cli("list", "--installed")
         for line in output.splitlines():
@@ -106,15 +112,17 @@ class Deb_Get(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo deb-get update
-            Checking for updates to deb-get installed packages
-              [+] ipscan (3.9.2) has an update pending. 3.9.3 is available.
+        $ sudo deb-get update
+        Checking for updates to deb-get installed packages
+          [+] ipscan (3.9.2) has an update pending. 3.9.3 is available.
+        ```
 
-        .. note::
-            Outdated detection piggybacks on ``deb-get update`` which also
-            refreshes the package index.
+        ```{note}
+        Outdated detection piggybacks on `deb-get update` which also
+        refreshes the package index.
+        ```
         """
         output = self.run_cli("update", sudo=True)
         for match in self._OUTDATED_REGEXP.finditer(output):
@@ -128,17 +136,19 @@ class Deb_Get(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not support extended or exact matching, and does not
-            provide version information. Returns the best subset of results and
-            lets
-            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
-            refine them.
+        ```{caution}
+        Search does not support extended or exact matching, and does not
+        provide version information. Returns the best subset of results and
+        lets
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search`
+        refine them.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ deb-get search zoom
-            zoom
+        $ deb-get search zoom
+        zoom
+        ```
         """
         output = self.run_cli("search", query)
         for line in output.splitlines():
@@ -150,18 +160,20 @@ class Deb_Get(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo deb-get install ipscan
+        $ sudo deb-get install ipscan
+        ```
         """
         return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo deb-get upgrade
+        $ sudo deb-get upgrade
+        ```
         """
         return self.build_cli("upgrade", sudo=True)
 
@@ -173,35 +185,39 @@ class Deb_Get(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade one package by reinstalling it.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo deb-get install ipscan
+        $ sudo deb-get install ipscan
+        ```
         """
         return self.build_cli("install", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo deb-get remove ipscan
+        $ sudo deb-get remove ipscan
+        ```
         """
         return self.run_cli("remove", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo deb-get update
+        $ sudo deb-get update
+        ```
         """
         self.run_cli("update", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Remove cached downloads.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo deb-get clean
+        $ sudo deb-get clean
+        ```
         """
         self.run_cli("clean", sudo=True)

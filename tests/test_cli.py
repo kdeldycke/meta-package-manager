@@ -77,29 +77,28 @@ class InspectCLIOutput:
     ):
         """Check that user-selected managers are found in CLI's output.
 
-        To establish that ``mpm`` CLI is properly selecting managers, we search for
-        signals in CLI logs, by matching regular expressions against ``<stdout>`` and
-        ``<stderr>``. This strategy close the gap of testing internal code testing and
+        To establish that `mpm` CLI is properly selecting managers, we search for
+        signals in CLI logs, by matching regular expressions against `<stdout>` and
+        `<stderr>`. This strategy close the gap of testing internal code testing and
         end user experience.
 
         Signals are expected to be implemented for each subcommand by the
-        ``evaluate_signals()`` method.
+        `evaluate_signals()` method.
 
-        ``strict_selection_match`` check that all selected managers are properly
+        `strict_selection_match` check that all selected managers are properly
         reported in CLI output and none are missing.
 
-        .. caution::
+        ```{caution}
 
-            At this stage of the CLI execution, the order in which the managers are
-            reported doesn't matter because:
+        At this stage of the CLI execution, the order in which the managers are
+        reported doesn't matter because:
 
-            - ``<stdout>`` and ``<stderr>`` gets mangled
-            - `paging is async
-                <https://github.com/kdeldycke/meta-package-manager/issues/528>`_
-            - we may introduce `parallel execution of managers in the future
-                <https://github.com/kdeldycke/meta-package-manager/issues/529>`_
+        - `<stdout>` and `<stderr>` gets mangled
+        - [paging is async](https://github.com/kdeldycke/meta-package-manager/issues/528)
+        - we may introduce [parallel execution of managers in the future](https://github.com/kdeldycke/meta-package-manager/issues/529)
 
-            This explain the use of ``set()`` everywhere in this method.
+        This explain the use of `set()` everywhere in this method.
+        ```
         """
         found_managers = set()
         skipped_managers = set()
@@ -129,7 +128,7 @@ class InspectCLIOutput:
 
 
 # CLI behavior shared by all subcommands is exercised once, on a single
-# non-destructive subcommand (like ``mpm installed`` or ``mpm managers``): the
+# non-destructive subcommand (like `mpm installed` or `mpm managers`): the
 # selection logic and code path is the same for all of them, so repeating the
 # test per subcommand would only slow the suite down.
 
@@ -148,12 +147,12 @@ def test_executable_module():
     )
     assert process.returncode == 0
     assert not process.stderr
-    # click_extra appends ``+<git_short_hash>`` to ``.dev`` versions at
+    # click_extra appends `+<git_short_hash>` to `.dev` versions at
     # runtime, so accept the optional local version identifier suffix.
     # Newer versions of click_extra also append a Python version/platform
     # line, so match that optional trailing line too.
     assert re.fullmatch(
-        # click-extra 8.0's --color defaults to the tri-state ``auto``, which
+        # click-extra 8.0's --color defaults to the tri-state `auto`, which
         # strips ANSI codes for non-interactive output. subprocess.run captures
         # via pipes (non-TTY), so the version screen comes through uncolored.
         rf"mpm, version {re.escape(__version__)}(\+[0-9a-f]+)?\n"
@@ -190,10 +189,10 @@ def test_summary(invoke, fake_pool, summary_arg, active_summary):
 
 
 def managers_table_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
-    """Signals telling whether ``mid`` shows up in the ``mpm managers`` table.
+    """Signals telling whether `mid` shows up in the `mpm managers` table.
 
     Lives at module level so both the selection tests below and the dedicated
-    ``managers`` subcommand suite (``tests.test_cli_managers``) share it through
+    `managers` subcommand suite (`tests.test_cli_managers`) share it through
     downward imports, instead of one test module importing the other sideways.
     """
     yield from (
@@ -210,13 +209,13 @@ def managers_table_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]
 class TestManagerSelection(InspectCLIOutput):
     """Test selection of package managers to use.
 
-    Tests are performed here on the ``mpm managers`` subcommand, as it is a safe
+    Tests are performed here on the `mpm managers` subcommand, as it is a safe
     read-only operation that is supposed to work on all platforms, whatever the
     environment.
 
     There is not need to test all subcommands, as the selection logic and code path is
     shared by all of them. See the implementation in
-    ``meta_package_manager.pool.ManagerPool.select_managers()``.
+    `meta_package_manager.pool.ManagerPool.select_managers()`.
     """
 
     @staticmethod
@@ -288,29 +287,29 @@ class TestManagerSelection(InspectCLIOutput):
 
 
 class TestSelectorPrecedence(InspectCLIOutput):
-    """Verify how ``-m``/``--<id>`` (keep) and ``-x``/``--no-<id>`` (drop) compose
+    """Verify how `-m`/`--<id>` (keep) and `-x`/`--no-<id>` (drop) compose
     and override each other for operational subcommands.
 
-    Uses ``installed --dry-run`` as the stub: it is read-only, fast (the per-
+    Uses `installed --dry-run` as the stub: it is read-only, fast (the per-
     manager list invocation is replaced by a printed command line), works on
     every platform, and crucially still honors both keep and drop selectors.
-    The ``managers`` subcommand intentionally ignores drops for the diagnostic
+    The `managers` subcommand intentionally ignores drops for the diagnostic
     inventory view, so it cannot stand in for general selection-precedence
     tests anymore.
     """
 
     @staticmethod
     def evaluate_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
-        """Detect whether ``mpm`` reached a manager during the invocation.
+        """Detect whether `mpm` reached a manager during the invocation.
 
-        Available managers appear in the ``N package total (brew: 0, ...)``
-        stats line; the manager id is matched by its ``<mid>: <count>`` slice
-        instead of by tailing the stream because at ``--verbosity DEBUG`` a
-        few ``Reset <logger> to WARNING`` lines trail the stats line.
-        Unavailable ones surface as ``Skipped: ...`` lines tagged with the
-        manager ID in their level prefix (``debug:<mid>:``): that message is
+        Available managers appear in the `N package total (brew: 0, ...)`
+        stats line; the manager id is matched by its `<mid>: <count>` slice
+        instead of by tailing the stream because at `--verbosity DEBUG` a
+        few `Reset <logger> to WARNING` lines trail the stats line.
+        Unavailable ones surface as `Skipped: ...` lines tagged with the
+        manager ID in their level prefix (`debug:<mid>:`): that message is
         demoted to DEBUG for implicit selection, so test invocations pass
-        ``--verbosity DEBUG`` to keep both signals visible.
+        `--verbosity DEBUG` to keep both signals visible.
         """
         yield from (
             bool(re.search(rf"\b{re.escape(mid)}: \d+", stderr)),
@@ -392,9 +391,9 @@ class TestSelectorPrecedence(InspectCLIOutput):
         if expected is None:
             assert result.exit_code == 2
             assert not result.stdout
-            # ``critical: No manager selected.`` is checked anywhere in the
-            # stream, not at the end: ``--verbosity DEBUG`` makes click_extra
-            # append a couple of ``Reset <logger>`` trailing lines. ANSI codes
+            # `critical: No manager selected.` is checked anywhere in the
+            # stream, not at the end: `--verbosity DEBUG` makes click_extra
+            # append a couple of `Reset <logger>` trailing lines. ANSI codes
             # are stripped because color presence depends on the runner.
             assert "critical: No manager selected." in strip_ansi(result.stderr)
         else:
@@ -405,11 +404,11 @@ class TestSelectorPrecedence(InspectCLIOutput):
 def check_packages_payload(result, optional_keys: frozenset[str] = frozenset()) -> None:
     """Validate the serialized ``{manager: {id, name, errors, packages}}`` payload.
 
-    The shared shape check of the package-reporting subcommands (``installed``,
-    ``outdated``, ``search``) in ``--table-format json`` mode: every manager entry
-    carries the standard keys (plus the subcommand's ``optional_keys``, like
-    ``outdated``'s ``upgrade_all_cli``), and every package serializes a subset of
-    the :class:`~meta_package_manager.package.Package` fields as strings.
+    The shared shape check of the package-reporting subcommands (`installed`,
+    `outdated`, `search`) in `--table-format json` mode: every manager entry
+    carries the standard keys (plus the subcommand's `optional_keys`, like
+    `outdated`'s `upgrade_all_cli`), and every package serializes a subset of
+    the {class}`~meta_package_manager.package.Package` fields as strings.
     """
     assert result.exit_code == 0
     data = json.loads(result.stdout)
@@ -457,7 +456,7 @@ class CLISubCommandTests(InspectCLIOutput):
 
     @staticmethod
     def assert_no_manager_selected(result) -> None:
-        """Assert the run stopped on the ``No manager selected.`` exit-``2`` guard.
+        """Assert the run stopped on the `No manager selected.` exit-`2` guard.
 
         Shared by every subcommand test that deselects all managers (or selects
         only managers lacking the operation) and expects the run to refuse to
@@ -475,9 +474,9 @@ class CLITableTests:
     """
 
     columns_registry: tuple = ()
-    """The subcommand's column registry (a ``tables.py`` ``*_COLUMNS`` constant).
+    """The subcommand's column registry (a `tables.py` `*_COLUMNS` constant).
 
-    Set by each subclass so the generic ``--columns`` tests below resolve column
+    Set by each subclass so the generic `--columns` tests below resolve column
     IDs to their header labels from the same source of truth the CLI uses.
     """
 
@@ -487,7 +486,7 @@ class CLITableTests:
     registry has no package columns."""
 
     def test_columns_projection(self, invoke, subcmd, fake_pool):
-        """``--columns`` restricts and reorders the table, SQL-SELECT-style."""
+        """`--columns` restricts and reorders the table, SQL-SELECT-style."""
         first, second = self.columns_test_pair
         labels = {spec.id: spec.label for spec, _ in self.columns_registry}
         result = invoke(subcmd, "--columns", f"{first},{second}", color=False)
@@ -510,7 +509,7 @@ class CLITableTests:
         assert result.exit_code == 0
 
     def test_json_output(self, invoke, subcmd):
-        """JSON output is expected to be parseable if read from ``<stdout>``.
+        """JSON output is expected to be parseable if read from `<stdout>`.
 
         Debug level messages are redirected to <stderr> and are not supposed to interfere
         with this behavior.
@@ -531,9 +530,9 @@ class CLITableTests:
         ids=lambda f: f.value,
     )
     def test_serialized_output(self, invoke, subcmd, fmt):
-        """All serialization formats produce parseable output on ``<stdout>``.
+        """All serialization formats produce parseable output on `<stdout>`.
 
-        Debug messages go to ``<stderr>`` and must not leak into the structured output.
+        Debug messages go to `<stderr>` and must not leak into the structured output.
         Formats whose optional dependency is not installed are skipped.
         """
         result = invoke("--table-format", fmt, "--verbosity", "DEBUG", subcmd)
@@ -551,17 +550,17 @@ class CLITableTests:
 
 
 class CLIQueryTests:
-    """Template for inventory subcommands taking an optional positional ``QUERY``.
+    """Template for inventory subcommands taking an optional positional `QUERY`.
 
-    Runs against the deterministic ``fake_pool`` package set. Subclasses keep
-    their own ``test_query_filter`` parametrize — the case data *is* the
+    Runs against the deterministic `fake_pool` package set. Subclasses keep
+    their own `test_query_filter` parametrize — the case data *is* the
     per-command filtering semantics — and delegate each case's assertions to
-    :meth:`check_filtered_ids`.
+    {meth}`check_filtered_ids`.
     """
 
     @staticmethod
     def check_filtered_ids(result, expected_ids: set[str]) -> None:
-        """Assert the serialized payload reports exactly ``expected_ids``."""
+        """Assert the serialized payload reports exactly `expected_ids`."""
         assert result.exit_code == 0
         data = json.loads(result.stdout)
         package_ids = {pkg["id"] for info in data.values() for pkg in info["packages"]}

@@ -15,14 +15,14 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """SPDX 2.3 writer plus the per-package upstream-SBOM merge logic.
 
-Heavy ``spdx_tools`` imports are guarded behind a ``try/except`` block so
-this module is importable even when the optional ``[sbom-offline]`` extra is
-not installed; in that case ``spdx_support`` is ``False`` and the
-:py:class:`SPDX` class is still defined for type-hint compatibility but
+Heavy `spdx_tools` imports are guarded behind a `try/except` block so
+this module is importable even when the optional `[sbom-offline]` extra is
+not installed; in that case `spdx_support` is `False` and the
+{class}`SPDX` class is still defined for type-hint compatibility but
 will not function (every public method depends on the missing imports).
 
-``_parse_license_expression`` and ``_coerce_spdx_string`` live here
-because they both touch ``spdx_tools`` types; :py:mod:`.cyclonedx`
+`_parse_license_expression` and `_coerce_spdx_string` live here
+because they both touch `spdx_tools` types; {mod}`.cyclonedx`
 imports the former for its own license normalization, which is one-way
 and acyclic.
 """
@@ -96,9 +96,9 @@ if TYPE_CHECKING:
     from ..package import Package
 
 
-# ``Any``-valued maps to dodge cascading mypy errors at every call site: the
-# values are typed instances of ``spdx_tools`` enums but the conditional
-# ``try/except`` import above hides that fact from the type checker.
+# `Any`-valued maps to dodge cascading mypy errors at every call site: the
+# values are typed instances of `spdx_tools` enums but the conditional
+# `try/except` import above hides that fact from the type checker.
 _SPDX_CHECKSUM_MAP: dict[str, Any] = {}
 _SPDX_RELATIONSHIP_MAP: dict[str, Any] = {}
 if spdx_support:
@@ -125,17 +125,17 @@ if spdx_support:
 def _parse_license_expression(expression: str):
     """Best-effort parse of a free-text license string.
 
-    Returns a ``LicenseExpression`` from the ``license_expression``
+    Returns a `LicenseExpression` from the `license_expression`
     library when the string parses *and* uses only symbols known to
-    ``spdx_licensing`` (the SPDX license list plus declared
-    exceptions). Returns ``None`` when the string is missing, fails
-    parsing, or references unknown ``LicenseRef-`` identifiers. Why
+    `spdx_licensing` (the SPDX license list plus declared
+    exceptions). Returns `None` when the string is missing, fails
+    parsing, or references unknown `LicenseRef-` identifiers. Why
     reject parseable-but-unknown symbols: SPDX validation requires every
-    ``LicenseRef-Xxx`` symbol to be declared in the document's
-    ``hasExtractedLicensingInfos`` block. Brew's per-formula files emit
-    ``LicenseRef-Homebrew-public-domain`` and similar without that
+    `LicenseRef-Xxx` symbol to be declared in the document's
+    `hasExtractedLicensingInfos` block. Brew's per-formula files emit
+    `LicenseRef-Homebrew-public-domain` and similar without that
     declaration; passing them through would trip the validator. Falling
-    back to ``SpdxNoAssertion`` at the call site keeps the export valid
+    back to `SpdxNoAssertion` at the call site keeps the export valid
     at the cost of one bit of information per package.
     """
     if not spdx_support or not expression:
@@ -158,11 +158,11 @@ def _parse_license_expression(expression: str):
 def _coerce_spdx_string(raw):
     """Map upstream SPDX sentinel strings to their typed counterparts.
 
-    SPDX JSON files serialize ``NOASSERTION`` and ``NONE`` as plain
-    strings; the ``spdx_tools`` validator rejects those at the Python
+    SPDX JSON files serialize `NOASSERTION` and `NONE` as plain
+    strings; the `spdx_tools` validator rejects those at the Python
     layer and demands the typed singletons. The merge path runs every
     string field that allows the union through this helper before
-    handing it to the typed ``Package`` constructor.
+    handing it to the typed `Package` constructor.
     """
     if not isinstance(raw, str):
         return raw
@@ -175,14 +175,14 @@ def _coerce_spdx_string(raw):
 
 
 def _vuln_comment(vuln) -> str:
-    """Render a one-line human summary for an SPDX security ``externalRef``.
+    """Render a one-line human summary for an SPDX security `externalRef`.
 
     SPDX 2.3 cannot model severity, CWE, or fixed versions structurally,
     so the most useful per-advisory facts are folded into the ref's free-
-    text comment. ``vuln`` is a
-    :py:class:`meta_package_manager.sbom.vulnerabilities.Vulnerability`;
+    text comment. `vuln` is a
+    {class}`meta_package_manager.sbom.vulnerabilities.Vulnerability`;
     the parameter is untyped to avoid importing the network-side module
-    at runtime when the ``[sbom-online]`` extra is absent.
+    at runtime when the `[sbom-online]` extra is absent.
     """
     parts = [vuln.id]
     if vuln.severity:
@@ -199,7 +199,7 @@ def _vuln_comment(vuln) -> str:
 class SPDX(SBOM):
     """Generates an SPDX document from a list of packages.
 
-    `SPDX 2.3 specifications <https://spdx.github.io/spdx-spec/v2.3/>`_.
+    [SPDX 2.3 specifications](https://spdx.github.io/spdx-spec/v2.3/).
     """
 
     DOC_ID = "SPDXRef-DOCUMENT"
@@ -208,20 +208,19 @@ class SPDX(SBOM):
     document: Document
     seen_ids: set[str]
     name_index: dict[tuple[str, str], str]
-    # 4th tuple slot is a ``RelationshipType`` instance; typed as ``Any``
-    # because that enum is only importable when the ``[sbom-offline]`` extra is.
+    # 4th tuple slot is a `RelationshipType` instance; typed as `Any`
+    # because that enum is only importable when the `[sbom-offline]` extra is.
     pending_relationships: list[tuple[str, str, str, Any]]
     merged_docs: dict[str, str]
 
     @classmethod
     def normalize_spdx_id(cls, value: str) -> str:
-        """SPDX IDs must only contain letters, numbers, ``.`` and ``-``."""
+        """SPDX IDs must only contain letters, numbers, `.` and `-`."""
         return "-".join(s for s in re.split(r"[^a-zA-Z0-9\.]", value) if s)
 
     def init_doc(self) -> None:
         """
-        `SPDX document metadata specifications
-        <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/>`_.
+        [SPDX document metadata specifications](https://spdx.github.io/spdx-spec/v2.3/document-creation-information/).
         """
         profile = get_profile()
         system_id = self.normalize_spdx_id(
@@ -236,26 +235,26 @@ class SPDX(SBOM):
         )
 
         self.seen_ids = set()
-        # ``(manager_id, package_id) -> SPDX docid`` lookup used by
-        # :py:meth:`finalize` to resolve declared dependencies into
-        # ``Relationship`` entries. Populated by every :py:meth:`add_package`
+        # `(manager_id, package_id) -> SPDX docid` lookup used by
+        # {meth}`finalize` to resolve declared dependencies into
+        # `Relationship` entries. Populated by every {meth}`add_package`
         # call so cross-package edges can be wired up at the end of the scan
         # regardless of the order managers report their packages in.
         self.name_index = {}
-        # ``purl string -> docid`` and ``docid -> SPDXPackage`` indexes used
+        # `purl string -> docid` and `docid -> SPDXPackage` indexes used
         # to attach vulnerability data (keyed by purl) onto the right
-        # package object during :py:meth:`finalize`.
+        # package object during {meth}`finalize`.
         self.purl_index: dict[str, str] = {}
         self.package_by_docid: dict[str, Any] = {}
-        # Each entry is ``(source_docid, manager_id, target_id, relationship_type)``.
+        # Each entry is `(source_docid, manager_id, target_id, relationship_type)`.
         # The renderer cannot turn declared dependencies into relationships
         # immediately because the dependency target may not have been added
-        # yet. Resolved in :py:meth:`finalize`.
+        # yet. Resolved in {meth}`finalize`.
         self.pending_relationships = []
-        # ``document_ref_id -> SHA1`` for every per-package upstream SPDX file
-        # we merged. Drives the ``externalDocumentRefs`` document section so
+        # `document_ref_id -> SHA1` for every per-package upstream SPDX file
+        # we merged. Drives the `externalDocumentRefs` document section so
         # consumers can trace which slice of our aggregate doc came from
-        # which Homebrew formula's ``sbom.spdx.json``.
+        # which Homebrew formula's `sbom.spdx.json`.
         self.merged_docs = {}
         self.document = Document(
             CreationInfo(
@@ -280,14 +279,14 @@ class SPDX(SBOM):
         )
 
     def _supplier_for(self, manager: PackageManager, metadata: PackageMetadata) -> Any:
-        """Build the SPDX supplier ``Actor``.
+        """Build the SPDX supplier `Actor`.
 
         The manager name is the fallback (Homebrew, PyPI, ...). If the
         metadata extractor surfaces a more specific supplier (a tap, a
         downstream redistributor) it wins.
 
-        Returns ``Any`` rather than ``Actor`` because ``Actor`` is conditionally
-        imported behind the ``[sbom-offline]`` extra: annotating with it would make this
+        Returns `Any` rather than `Actor` because `Actor` is conditionally
+        imported behind the `[sbom-offline]` extra: annotating with it would make this
         module fail type-checking when the extra is not installed.
         """
         if metadata.supplier:
@@ -296,7 +295,7 @@ class SPDX(SBOM):
 
     @staticmethod
     def _originator_for(metadata: PackageMetadata):
-        """Build the SPDX originator ``Actor`` from upstream metadata."""
+        """Build the SPDX originator `Actor` from upstream metadata."""
         if metadata.originator is None:
             return None
         actor_type = (
@@ -308,7 +307,7 @@ class SPDX(SBOM):
 
     @staticmethod
     def _checksums_for(metadata: PackageMetadata) -> list:
-        """Translate ``PackageMetadata`` checksums into SPDX ``Checksum`` objects.
+        """Translate `PackageMetadata` checksums into SPDX `Checksum` objects.
 
         Algorithms unsupported by SPDX 2.3 are silently dropped: the
         renderer never emits an invalid checksum entry.
@@ -324,11 +323,11 @@ class SPDX(SBOM):
     def _license_or_noassertion(expression: str | None):
         """Coerce a free-text license string into the SPDX license union.
 
-        Returns a ``LicenseExpression`` on success, ``SpdxNoAssertion()``
-        when the string is missing, an upstream ``NOASSERTION`` sentinel,
+        Returns a `LicenseExpression` on success, `SpdxNoAssertion()`
+        when the string is missing, an upstream `NOASSERTION` sentinel,
         or fails strict parsing. The validator rejects a literal
-        ``LicenseSymbol('NOASSERTION')``, so we hand back the typed
-        ``SpdxNoAssertion()`` directly: same intent, validation-clean.
+        `LicenseSymbol('NOASSERTION')`, so we hand back the typed
+        `SpdxNoAssertion()` directly: same intent, validation-clean.
         """
         if not expression:
             return None
@@ -347,10 +346,10 @@ class SPDX(SBOM):
         package: Package,
         metadata: PackageMetadata,
     ) -> list:
-        """Assemble the SPDX ``externalRefs`` block.
+        """Assemble the SPDX `externalRefs` block.
 
         Always includes the package's primary purl. CPE strings (when
-        provided) land as a security-category ``cpe23Type`` ref. Extra
+        provided) land as a security-category `cpe23Type` ref. Extra
         purls (multi-arch or multi-origin variants) become additional
         package-manager refs.
         """
@@ -386,8 +385,7 @@ class SPDX(SBOM):
         metadata: PackageMetadata = EMPTY_METADATA,
     ) -> None:
         """
-        `SPDX package metadata specifications
-        <https://spdx.github.io/spdx-spec/v2.3/package-information/>`_.
+        [SPDX package metadata specifications](https://spdx.github.io/spdx-spec/v2.3/package-information/).
         """
         # pURL string, by its virtue of containing all important metadata of a package,
         # makes perfect unique IDs.
@@ -403,12 +401,12 @@ class SPDX(SBOM):
 
         download_location = metadata.download_url or SpdxNoAssertion()
         homepage = metadata.homepage or None
-        # SPDX requires ``files_analyzed=True`` only when the renderer also
-        # emits per-file entries. We keep it ``False`` for inventory-level
+        # SPDX requires `files_analyzed=True` only when the renderer also
+        # emits per-file entries. We keep it `False` for inventory-level
         # snapshots: any extractor that captures file lists today (pip
-        # ``RECORD``, dpkg ``.md5sums``) stores them in
-        # ``PackageMetadata.files``, but the SPDX File model is not wired
-        # in yet. Promoting to ``True`` is safe to do later when that
+        # `RECORD`, dpkg `.md5sums`) stores them in
+        # `PackageMetadata.files`, but the SPDX File model is not wired
+        # in yet. Promoting to `True` is safe to do later when that
         # writer lands.
         files_analyzed = metadata.files_analyzed
 
@@ -484,8 +482,8 @@ class SPDX(SBOM):
     ) -> None:
         """Splice a per-package upstream SPDX file into the aggregate document.
 
-        Brew formulae installed with ``HOMEBREW_SBOM=1`` write
-        ``<prefix>/sbom.spdx.json`` per formula. The document carries the
+        Brew formulae installed with `HOMEBREW_SBOM=1` write
+        `<prefix>/sbom.spdx.json` per formula. The document carries the
         full upstream dependency closure with real download URLs, real
         checksums, real licenses. We adopt its child packages (transitive
         deps), prefix their SPDX IDs with the manager/formula namespace
@@ -495,7 +493,7 @@ class SPDX(SBOM):
         added; we drop it from the merge (its slot in the aggregate doc
         is already taken by the entry the inventory pass produced) and
         rewire any relationships that pointed at it so they point at our
-        already-emitted ``package_docid``.
+        already-emitted `package_docid`.
 
         Errors are caught one level up: a single malformed upstream file
         must not abort the entire scan.
@@ -585,8 +583,8 @@ class SPDX(SBOM):
             self.document.relationships.append(Relationship(src, rel_type, tgt))
 
         # Record the upstream document for traceability. The
-        # ``documentNamespace`` copied through from Homebrew points at
-        # ``https://formulae.brew.sh/spdx/<name>-<version>.json``, which
+        # `documentNamespace` copied through from Homebrew points at
+        # `https://formulae.brew.sh/spdx/<name>-<version>.json`, which
         # 404s because nothing is published there; tracked upstream at
         # https://github.com/Homebrew/brew/issues/22741. Carrying the
         # value verbatim keeps the aggregate document consistent with the
@@ -604,7 +602,7 @@ class SPDX(SBOM):
         """Yield every inventory package purl in insertion order.
 
         Only the directly-installed packages carry a purl in
-        ``purl_index``; transitive packages spliced in from merged
+        `purl_index`; transitive packages spliced in from merged
         upstream SBOMs are not queried for vulnerabilities (their own
         upstream document already carries that provenance, and they are
         not what the user installed).
@@ -614,16 +612,16 @@ class SPDX(SBOM):
     def finalize(self) -> None:
         """Emit pending dependency relationships and vulnerability refs.
 
-        Walks the queue built by :py:meth:`add_package` and emits each
+        Walks the queue built by {meth}`add_package` and emits each
         relationship only when both ends resolve to packages we actually
         included in the document. Dangling references (the target package
         is not installed) are dropped silently: the SBOM only describes
         what is on the system, not what could be.
 
         Then attaches any vulnerability data bound via
-        :py:meth:`attach_vulnerabilities`. SPDX 2.3 has no first-class
+        {meth}`attach_vulnerabilities`. SPDX 2.3 has no first-class
         vulnerability section, so each advisory becomes a
-        SECURITY-category ``ExternalPackageRef`` of type ``advisory`` on
+        SECURITY-category `ExternalPackageRef` of type `advisory` on
         the affected package, pointing at the advisory URL.
         """
         for source_docid, manager_id, target_id, rel_type in self.pending_relationships:
@@ -658,8 +656,8 @@ class SPDX(SBOM):
         the count of transitive packages those upstream documents
         contributed (over and above the inventory pass), and the total
         relationship count partitioned into dependency vs descriptive
-        edges. ``packages_total`` from the base reports inventory
-        packages only; ``packages_in_document`` here is the full count
+        edges. `packages_total` from the base reports inventory
+        packages only; `packages_in_document` here is the full count
         after merge, which is what consumers of the file actually see.
         """
         base = super().stats()
@@ -680,7 +678,7 @@ class SPDX(SBOM):
         return base
 
     def export(self) -> str:
-        """Similar to ``spdx_tools.spdx.writer.write_anything.write_file`` but write
+        """Similar to `spdx_tools.spdx.writer.write_anything.write_file` but write
         directly to provided stream instead of file path.
         """
         stream = io.StringIO()

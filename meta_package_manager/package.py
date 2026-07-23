@@ -13,30 +13,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Manager-agnostic :py:class:`meta_package_manager.package.Package` data model
-and the :py:class:`meta_package_manager.package.PackageMetadata` companion
+"""Manager-agnostic {class}`meta_package_manager.package.Package` data model
+and the {class}`meta_package_manager.package.PackageMetadata` companion
 that augments it with data pulled from sources outside the package manager
 itself.
 
 Defines the lightweight representation of a package (ID, name, installed and latest
 versions, architecture) that every manager operation yields, plus
-:py:func:`meta_package_manager.package.packages_asdict` to serialize a subset of its
+{func}`meta_package_manager.package.packages_asdict` to serialize a subset of its
 fields for output.
 
-:py:class:`Package` is the inventory plane: what the package manager itself
+{class}`Package` is the inventory plane: what the package manager itself
 reports through its native query commands. It backs every operation in
-:py:mod:`meta_package_manager.manager`.
+{mod}`meta_package_manager.manager`.
 
-:py:class:`PackageMetadata` is the enrichment plane: licenses, supplier,
+{class}`PackageMetadata` is the enrichment plane: licenses, supplier,
 checksums, declared dependency graph, on-disk per-package SBOMs, and other
 facts gathered through extra queries (CLI sub-commands, on-disk parsers,
 upstream registries). Populated by
-:py:meth:`meta_package_manager.manager.PackageManager.package_metadata_batch`,
-consumed by :py:mod:`meta_package_manager.sbom` today and reserved for any
+{meth}`meta_package_manager.manager.PackageManager.package_metadata_batch`,
+consumed by {mod}`meta_package_manager.sbom` today and reserved for any
 future caller that wants more than the bare inventory.
 
 Kept deliberately free of manager logic, so it can be imported without pulling in the
-manager engine (:py:mod:`meta_package_manager.manager`).
+manager engine ({mod}`meta_package_manager.manager`).
 """
 
 from __future__ import annotations
@@ -74,7 +74,7 @@ class Package:
     """
 
     name: str | None = None
-    """Optional human-readable display name. Falls back to ``id`` in output rendering,
+    """Optional human-readable display name. Falls back to `id` in output rendering,
     so only set this when the manager provides a name that differs from the package ID.
     """
 
@@ -85,9 +85,9 @@ class Package:
     """Installed and latest versions are optional: they're not always provided by the
     package manager.
 
-    ``installed_version`` and ``latest_version`` are allowed to temporarily be strings
-    between ``__init__`` and ``__post_init__``. Once they reach the later, they're
-    parsed and normalized into either ``TokenizedString`` or `None`. They can't be
+    `installed_version` and `latest_version` are allowed to temporarily be strings
+    between `__init__` and `__post_init__`. Once they reach the later, they're
+    parsed and normalized into either `TokenizedString` or `None`. They can't be
     strings beyond that point, i.e. after the Package instance has been fully
     instantiated. We don't know how to declare this transient state with type hints,
     so we're just going to allow string type.
@@ -115,14 +115,14 @@ class Package:
 
     @staticmethod
     def query_parts(query: str) -> set[str]:
-        """Split ``query`` into its contiguous alphanumeric segments.
+        """Split `query` into its contiguous alphanumeric segments.
 
-        Contrary to :py:class:`meta_package_manager.version.TokenizedString`,
+        Contrary to {class}`meta_package_manager.version.TokenizedString`,
         does not split on collated number/alphabetic junctions.
 
-        Canonical tokenizer behind :py:meth:`matches` and the
-        ``search``/``installed``/``outdated`` query matching.
-        :py:meth:`meta_package_manager.manager.PackageManager.query_parts`
+        Canonical tokenizer behind {meth}`matches` and the
+        `search`/`installed`/`outdated` query matching.
+        {meth}`meta_package_manager.manager.PackageManager.query_parts`
         delegates here.
         """
         return {p for p in re.split(r"\W+", query) if p}
@@ -133,19 +133,19 @@ class Package:
         extended: bool = False,
         exact: bool = False,
     ) -> bool:
-        """Tell whether this package matches the free-form ``query``.
+        """Tell whether this package matches the free-form `query`.
 
-        Shared predicate behind the ``search``, ``installed`` and ``outdated``
+        Shared predicate behind the `search`, `installed` and `outdated`
         subcommands, so all three honor the same matching semantics:
 
         - **Fuzzy** (default): a case-insensitive, tokenized substring match.
-          Any alphanumeric segment of ``query`` (see :py:meth:`query_parts`)
+          Any alphanumeric segment of `query` (see {meth}`query_parts`)
           found in the package ID or name counts as a match.
-        - **Exact** (``exact=True``): the raw ``query`` must equal the package
+        - **Exact** (`exact=True`): the raw `query` must equal the package
           ID or name verbatim (case-sensitive, whole-string).
-        - **Extended** (``extended=True``): also look into the package
-          ``description``. Only meaningful when the description is populated,
-          as it is for ``search`` results.
+        - **Extended** (`extended=True`): also look into the package
+          `description`. Only meaningful when the description is populated,
+          as it is for `search` results.
 
         A query with no alphanumeric segment (empty or punctuation-only) never
         matches.
@@ -168,17 +168,17 @@ class Package:
 
 
 def packages_asdict(packages: Iterable[Package], keep_fields: tuple[str, ...]):
-    """Returns a list of packages casted to a ``dict`` with only a subset of its
+    """Returns a list of packages casted to a `dict` with only a subset of its
     fields."""
     return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
 
 
 class DependencyScope(str, Enum):
-    """Maps loosely onto SPDX ``RelationshipType`` variants.
+    """Maps loosely onto SPDX `RelationshipType` variants.
 
-    SBOM renderers translate these into ``RUNTIME_DEPENDENCY_OF``,
-    ``BUILD_DEPENDENCY_OF``, etc.; CycloneDX collapses everything to its
-    flat ``dependencies`` graph. Future non-SBOM consumers can apply
+    SBOM renderers translate these into `RUNTIME_DEPENDENCY_OF`,
+    `BUILD_DEPENDENCY_OF`, etc.; CycloneDX collapses everything to its
+    flat `dependencies` graph. Future non-SBOM consumers can apply
     their own mapping or just expose the raw scope label.
     """
 
@@ -193,7 +193,7 @@ class DependencyScope(str, Enum):
 class ChecksumAlgorithm(str, Enum):
     """Subset of algorithms shared by SPDX and CycloneDX schemas.
 
-    Used by :py:class:`Checksum` to identify a content hash without
+    Used by {class}`Checksum` to identify a content hash without
     coupling the data model to any specific SBOM library's enum.
     """
 
@@ -209,7 +209,7 @@ class ChecksumAlgorithm(str, Enum):
 
 @dataclass(frozen=True)
 class Checksum:
-    """A single ``(algorithm, value)`` pair."""
+    """A single `(algorithm, value)` pair."""
 
     algorithm: ChecksumAlgorithm
     value: str
@@ -240,8 +240,8 @@ class Originator:
 class Dependency:
     """A single edge in the package's declared dependency graph.
 
-    ``target_id`` is the dependency's manager-native identifier (e.g.
-    ``openssl@3`` for Homebrew). Renderers match it against the inventory's
+    `target_id` is the dependency's manager-native identifier (e.g.
+    `openssl@3` for Homebrew). Renderers match it against the inventory's
     installed packages to decide whether to emit a relationship.
     """
 
@@ -255,8 +255,8 @@ class FileEntry:
     """An installed file shipped by the package.
 
     Only populated for managers that can cheaply enumerate file contents and
-    hashes (dpkg ``.md5sums``, pip ``RECORD``). Omitted otherwise; the SBOM
-    renderer leaves ``filesAnalyzed=False`` on the SPDX Package.
+    hashes (dpkg `.md5sums`, pip `RECORD`). Omitted otherwise; the SBOM
+    renderer leaves `filesAnalyzed=False` on the SPDX Package.
     """
 
     path: str
@@ -269,19 +269,19 @@ class FileEntry:
 class PackageMetadata:
     """Maximalist metadata collected for a single installed package.
 
-    Distinct from :py:class:`Package` in scope: where ``Package`` carries
+    Distinct from {class}`Package` in scope: where `Package` carries
     only what the package manager itself surfaces through its inventory
-    commands (id, name, version, arch), ``PackageMetadata`` carries the
+    commands (id, name, version, arch), `PackageMetadata` carries the
     augmentations gathered through extra queries (richer CLI sub-commands,
     on-disk parsing of dist-info or per-package SBOMs, upstream registry
-    lookups). Today it powers the maximalist ``mpm sbom --bundled``
+    lookups). Today it powers the maximalist `mpm sbom --bundled`
     output; the structure is deliberately generic so a future search,
     audit, or info display can reuse it.
 
-    All fields are optional. ``extras`` is the escape hatch for manager-
+    All fields are optional. `extras` is the escape hatch for manager-
     native fields that don't fit the portable model: a Homebrew tap, a pip
-    classifier list, an apt ``Section``. SBOM renderers consult known
-    keys and surface the rest as CycloneDX ``properties``.
+    classifier list, an apt `Section`. SBOM renderers consult known
+    keys and surface the rest as CycloneDX `properties`.
     """
 
     download_url: str | None = None
@@ -313,8 +313,8 @@ class PackageMetadata:
     external_sbom_path: Path | None = None
     """Path to an on-disk upstream SBOM document for this package.
 
-    Brew formulae installed with ``HOMEBREW_SBOM=1`` write a per-formula
-    SPDX 2.3 file at ``<prefix>/sbom.spdx.json``. The Homebrew extractor
+    Brew formulae installed with `HOMEBREW_SBOM=1` write a per-formula
+    SPDX 2.3 file at `<prefix>/sbom.spdx.json`. The Homebrew extractor
     sets this so the SBOM renderer can merge the upstream document into
     the aggregate output (or attach it by reference).
     """
@@ -325,11 +325,11 @@ class PackageMetadata:
 
     extras: dict[str, object] = field(default_factory=dict)
     """Manager-native metadata that does not map cleanly to portable
-    fields. SBOM renderers may surface entries as CycloneDX ``properties``.
+    fields. SBOM renderers may surface entries as CycloneDX `properties`.
     """
 
     def is_empty(self) -> bool:
-        """``True`` if the extractor produced no meaningful metadata.
+        """`True` if the extractor produced no meaningful metadata.
 
         Used by the SBOM renderers to short-circuit field-by-field gating
         and by the CLI to log which managers contributed enrichment.
@@ -362,7 +362,7 @@ class PackageMetadata:
 
 EMPTY_METADATA = PackageMetadata()
 """Sentinel returned by the default no-op extractor on the base
-:py:class:`meta_package_manager.manager.PackageManager`. Consumers (the SBOM
-renderers today) treat ``EMPTY_METADATA`` exactly like ``--minimal`` mode for
+{class}`meta_package_manager.manager.PackageManager`. Consumers (the SBOM
+renderers today) treat `EMPTY_METADATA` exactly like `--minimal` mode for
 the package: no enrichment, no placeholders.
 """

@@ -16,16 +16,16 @@
 """mpm-side renderer that builds Xbar/SwiftBar plugin output.
 
 Lives in its own module rather than in
-:py:mod:`meta_package_manager.bar_plugin` because that module is
+{mod}`meta_package_manager.bar_plugin` because that module is
 intentionally stdlib-only: the
-:py:class:`meta_package_manager.bar_plugin.MPMPlugin` class is the
+{class}`meta_package_manager.bar_plugin.MPMPlugin` class is the
 script that gets installed as the user's actual bar plugin and must
 stay light on dependencies.
 
 This module is the heavier mpm-side companion that augments the
 shippable plugin code with click_extra, boltons, the manager pool, and
 the theme system to produce the final rendered output from
-``mpm outdated --plugin-output``.
+`mpm outdated --plugin-output`.
 """
 
 from __future__ import annotations
@@ -51,8 +51,8 @@ class BarPluginRenderer(MPMPlugin):
     """All utilities used to render output compatible with both Xbar and SwiftBar plugin
     dialect.
 
-    The minimal code to locate ``mpm``, then call it and print its output resides in the
-    plugin itself at :py:meth:`meta_package_manager.bar_plugin.MPMPlugin.best_mpm`.
+    The minimal code to locate `mpm`, then call it and print its output resides in the
+    plugin itself at {meth}`meta_package_manager.bar_plugin.MPMPlugin.best_mpm`.
 
     All other stuff, especially the rendering code, is managed here, to allow for more
     complex layouts relying on external Python dependencies. This also limits the number
@@ -63,10 +63,10 @@ class BarPluginRenderer(MPMPlugin):
     def submenu_layout(self) -> bool:
         """Group packages into manager sub-menus.
 
-        If ``True``, will replace the default flat layout with an alternative structure
+        If `True`, will replace the default flat layout with an alternative structure
         where actions are grouped into submenus, one for each manager.
 
-        Value is sourced from the ``VAR_SUBMENU_LAYOUT`` environment variable.
+        Value is sourced from the `VAR_SUBMENU_LAYOUT` environment variable.
         """
         return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)
 
@@ -76,8 +76,8 @@ class BarPluginRenderer(MPMPlugin):
 
         Value is sourced from two environment variables depending on the plugin:
 
-        - ``OS_APPEARANCE`` for SwiftBar
-        - ``XBARDarkMode`` for XBar
+        - `OS_APPEARANCE` for SwiftBar
+        - `XBARDarkMode` for XBar
         """
         if self.is_swiftbar:
             return self.getenv_str("OS_APPEARANCE", "light") == "dark"
@@ -89,9 +89,10 @@ class BarPluginRenderer(MPMPlugin):
 
         I.e. a string with this schema:
 
-        .. code-block::
+        ```{code-block}
 
-            shell=cmd_args[0] param1=cmd_args[1] param2=cmd_args[2] ...
+        shell=cmd_args[0] param1=cmd_args[1] param2=cmd_args[2] ...
+        ```
         """
         plugin_params = []
         # Serialize Path into string.
@@ -104,7 +105,7 @@ class BarPluginRenderer(MPMPlugin):
         """Print two CLI entries:
 
         - one that opens a visible terminal so the user can follow the execution
-        - a second one, reachable by holding the ``Option`` key, that runs silently
+        - a second one, reachable by holding the `Option` key, that runs silently
         """
         self.pp(*args, "terminal=true")
         self.pp(*args, "terminal=false", "alternate=true")
@@ -126,12 +127,11 @@ class BarPluginRenderer(MPMPlugin):
         dialect.
 
         Version columns carry the ANSI colors produced by
-        :py:func:`meta_package_manager.version.diff_versions`: common prefix
+        {func}`meta_package_manager.version.diff_versions`: common prefix
         gray, old suffix red, new suffix green. Table alignment survives the
-        escape codes thanks to ``tabulate``'s ANSI-aware layout
-        (`astanin/python-tabulate#184
-        <https://github.com/astanin/python-tabulate/pull/184>`_), and package
-        menu lines opt into rendering them with the ``ansi=true`` parameter.
+        escape codes thanks to `tabulate`'s ANSI-aware layout
+        ([astanin/python-tabulate#184](https://github.com/astanin/python-tabulate/pull/184)), and package
+        menu lines opt into rendering them with the `ansi=true` parameter.
         """
         managers = outdated_data.values()
         font = self.monospace_font if self.table_rendering else self.default_font
@@ -214,7 +214,7 @@ class BarPluginRenderer(MPMPlugin):
                 self.print_error(error_msg, submenu)
 
     def render(self, outdated_data) -> str:
-        """Wraps the ``_render()`` method above to capture all ``print``
+        """Wraps the `_render()` method above to capture all `print`
         statements."""
         capture = StringIO()
         print_capture = partial(print, file=capture)
@@ -223,7 +223,7 @@ class BarPluginRenderer(MPMPlugin):
         return capture.getvalue()
 
     def add_upgrade_cli(self, outdated_data):
-        """Augment the outdated data from ``mpm outdated`` subcommand with upgrade CLI
+        """Augment the outdated data from `mpm outdated` subcommand with upgrade CLI
         fields for bar plugin consumption."""
         for manager_id, manager_data in outdated_data.items():
             if manager_data.get("packages"):
@@ -268,10 +268,10 @@ class BarPluginRenderer(MPMPlugin):
         return outdated_data
 
     def print(self, outdated_data) -> None:
-        """Print the final plugin rendering to ``<stdout>``.
+        """Print the final plugin rendering to `<stdout>`.
 
         Capturing the output of the plugin and re-printing it will introduce an extra
-        line return, hence the extra call to ``rstrip()``.
+        line return, hence the extra call to `rstrip()`.
         """
         outdated_data = self.add_upgrade_cli(outdated_data)
         echo(self.render(outdated_data).rstrip())

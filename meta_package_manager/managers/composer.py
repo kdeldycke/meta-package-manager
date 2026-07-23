@@ -33,12 +33,12 @@ if TYPE_CHECKING:
 class Composer(PackageManager):
     """Dependency manager for PHP, driven in global mode.
 
-    Every operation is prefixed with ``global`` so it targets the user-wide
-    Composer project under ``COMPOSER_HOME`` (``$XDG_CONFIG_HOME/composer`` on
-    XDG systems, ``~/.composer`` on macOS and other Unixes,
-    ``%APPDATA%\\Composer`` on Windows) rather than a working tree. ``installed`` and
-    ``outdated`` parse Composer's ``--format=json`` output, while ``search`` reads
-    its plain-text listing; ``--no-ansi`` is forced on every call to strip color
+    Every operation is prefixed with `global` so it targets the user-wide
+    Composer project under `COMPOSER_HOME` (`$XDG_CONFIG_HOME/composer` on
+    XDG systems, `~/.composer` on macOS and other Unixes,
+    `%APPDATA%\\Composer` on Windows) rather than a working tree. `installed` and
+    `outdated` parse Composer's `--format=json` output, while `search` reads
+    its plain-text listing; `--no-ansi` is forced on every call to strip color
     codes.
     """
 
@@ -62,43 +62,45 @@ class Composer(PackageManager):
 
     version_regexes = (r"Composer\s+version\s+(?P<version>\S+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ composer --version
-        Composer version 2.1.8 2021-09-15 13:55:14
+    $ composer --version
+    Composer version 2.1.8 2021-09-15 13:55:14
+    ```
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global show --format=json
+        $ composer global show --format=json
+        {
+          "installed": [
             {
-              "installed": [
-                {
-                  "name": "carbondate/carbon",
-                  "version": "1.33.0",
-                  "description": "A simple API extension for DateTime."
-                },
-                {
-                  "name": "guzzlehttp/guzzle",
-                  "version": "6.3.3",
-                  "description": "Guzzle is a PHP HTTP client library"
-                },
-                {
-                  "name": "guzzlehttp/promises",
-                  "version": "v1.3.1",
-                  "description": "Guzzle promises library"
-                },
-                {
-                  "name": "guzzlehttp/psr7",
-                  "version": "1.4.2",
-                  "description": "PSR-7 message implementation"
-                }
-              ]
+              "name": "carbondate/carbon",
+              "version": "1.33.0",
+              "description": "A simple API extension for DateTime."
+            },
+            {
+              "name": "guzzlehttp/guzzle",
+              "version": "6.3.3",
+              "description": "Guzzle is a PHP HTTP client library"
+            },
+            {
+              "name": "guzzlehttp/promises",
+              "version": "v1.3.1",
+              "description": "Guzzle promises library"
+            },
+            {
+              "name": "guzzlehttp/psr7",
+              "version": "1.4.2",
+              "description": "PSR-7 message implementation"
             }
+          ]
+        }
+        ```
         """
         output = self.run_cli("show", "--format=json", must_succeed=True)
         package_list = self.parse_json(output)
@@ -111,27 +113,28 @@ class Composer(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global outdated --format=json
-            {
-                "installed": [
-                    {
-                        "name": "illuminate/contracts",
-                        "version": "v5.7.2",
-                        "latest": "v5.7.3",
-                        "latest-status": "semver-safe-update",
-                        "description": "The Illuminate Contracts package."
-                    },
-                    {
-                        "name": "illuminate/support",
-                        "version": "v5.7.2",
-                        "latest": "v5.7.3",
-                        "latest-status": "semver-safe-update",
-                        "description": "The Illuminate Support package."
-                    }
-                ]
-            }
+        $ composer global outdated --format=json
+        {
+            "installed": [
+                {
+                    "name": "illuminate/contracts",
+                    "version": "v5.7.2",
+                    "latest": "v5.7.3",
+                    "latest-status": "semver-safe-update",
+                    "description": "The Illuminate Contracts package."
+                },
+                {
+                    "name": "illuminate/support",
+                    "version": "v5.7.2",
+                    "latest": "v5.7.3",
+                    "latest-status": "semver-safe-update",
+                    "description": "The Illuminate Support package."
+                }
+            ]
+        }
+        ```
         """
         output = self.run_cli("outdated", "--format=json", must_succeed=True)
 
@@ -149,44 +152,48 @@ class Composer(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not supports exact matching.
+        ```{caution}
+        Search does not supports exact matching.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global search symfony
-            symfony/symfony The Symfony PHP framework
-            symfony/yaml Symfony Yaml Component
-            symfony/var-dumper Symfony (...) dumping PHP variables
-            symfony/translation Symfony Translation Component
-            symfony/routing Symfony Routing Component
-            symfony/process Symfony Process Component
-            symfony/polyfill-php70 Symfony (...) features to lower PHP versions
-            symfony/polyfill-mbstring Symfony (...) Mbstring extension
-            symfony/polyfill-ctype Symfony polyfill for ctype functions
-            symfony/http-kernel Symfony HttpKernel Component
-            symfony/http-foundation Symfony HttpFoundation Component
-            symfony/finder Symfony Finder Component
-            symfony/event-dispatcher Symfony EventDispatcher Component
-            symfony/debug Symfony Debug Component
-            symfony/css-selector Symfony CssSelector Component
+        $ composer global search symfony
+        symfony/symfony The Symfony PHP framework
+        symfony/yaml Symfony Yaml Component
+        symfony/var-dumper Symfony (...) dumping PHP variables
+        symfony/translation Symfony Translation Component
+        symfony/routing Symfony Routing Component
+        symfony/process Symfony Process Component
+        symfony/polyfill-php70 Symfony (...) features to lower PHP versions
+        symfony/polyfill-mbstring Symfony (...) Mbstring extension
+        symfony/polyfill-ctype Symfony polyfill for ctype functions
+        symfony/http-kernel Symfony HttpKernel Component
+        symfony/http-foundation Symfony HttpFoundation Component
+        symfony/finder Symfony Finder Component
+        symfony/event-dispatcher Symfony EventDispatcher Component
+        symfony/debug Symfony Debug Component
+        symfony/css-selector Symfony CssSelector Component
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global search --only-name python
-            hiqdev/hidev-python
-            aanro/pythondocx
-            laravel-admin-ext/python-editor
-            pythonphp/pythonphp
-            blyxxyz/python-server
-            nim-development/python-domotics
-            rakshitbharat/pythoninphp
-            tequilarapido/python-bridge
+        $ composer global search --only-name python
+        hiqdev/hidev-python
+        aanro/pythondocx
+        laravel-admin-ext/python-editor
+        pythonphp/pythonphp
+        blyxxyz/python-server
+        nim-development/python-domotics
+        rakshitbharat/pythoninphp
+        tequilarapido/python-bridge
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ search global --only-name pythonphp/pythonphp
-            pythonphp/pythonphp
+        $ search global --only-name pythonphp/pythonphp
+        pythonphp/pythonphp
+        ```
         """
         search_args = []
         if not extended:
@@ -203,18 +210,20 @@ class Composer(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global --no-ansi require illuminate/contracts
+        $ composer global --no-ansi require illuminate/contracts
+        ```
         """
         return self.run_cli("require", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global --no-ansi update
+        $ composer global --no-ansi update
+        ```
         """
         return self.build_cli("update")
 
@@ -226,18 +235,20 @@ class Composer(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global --no-ansi update illuminate/contracts
+        $ composer global --no-ansi update illuminate/contracts
+        ```
         """
         return self.build_cli("update", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global --no-ansi remove illuminate/contracts
+        $ composer global --no-ansi remove illuminate/contracts
+        ```
         """
         return self.run_cli("remove", package_id)
 
@@ -246,20 +257,22 @@ class Composer(PackageManager):
 
         See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global --no-ansi clear-cache
+        $ composer global --no-ansi clear-cache
+        ```
         """
         self.run_cli("clear-cache")
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
 
-        ``diagnose`` checks the platform, the connectivity to the repositories
+        `diagnose` checks the platform, the connectivity to the repositories
         and the composer setup, exiting non-zero on failures.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ composer global --no-ansi diagnose
+        $ composer global --no-ansi diagnose
+        ```
         """
         return self.build_cli("diagnose")

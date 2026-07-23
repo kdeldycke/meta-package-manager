@@ -15,8 +15,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """mise output-parsing and CLI-construction tests.
 
-These tests stub ``run_cli`` and exercise the pure-Python branches of the
-``Mise`` manager. They do not invoke the real ``mise`` binary.
+These tests stub `run_cli` and exercise the pure-Python branches of the
+`Mise` manager. They do not invoke the real `mise` binary.
 """
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ def test_installed_yields_one_package_per_version(manager, stub_run_cli):
 
 
 def test_installed_preserves_backend_prefix(manager, stub_run_cli):
-    """Backend-prefixed IDs like ``pipx:ruff`` round-trip without rewriting."""
+    """Backend-prefixed IDs like `pipx:ruff` round-trip without rewriting."""
     output = (
         '{"pipx:ruff": [{"version": "0.6.9", "install_path": "/x/pipx-ruff/0.6.9"}]}'
     )
@@ -149,8 +149,8 @@ def test_upgrade_one_cli_builds_spec(manager, version, expected_spec):
 
 
 def test_remove_uses_all_flag(manager, capture_run_cli):
-    """``--all`` matches mpm's "remove the package, full stop" contract even
-    when ``mise`` has multiple versions of the same tool installed."""
+    """`--all` matches mpm's "remove the package, full stop" contract even
+    when `mise` has multiple versions of the same tool installed."""
     captured = capture_run_cli(manager)
     manager.remove("node")
     assert captured == [("uninstall", "--all", "node")]

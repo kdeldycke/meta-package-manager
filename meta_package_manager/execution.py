@@ -16,30 +16,31 @@
 """CLI-execution engine shared by every package manager.
 
 Runs *one* manager's CLI in one subprocess: the
-:py:class:`meta_package_manager.execution.CLIExecutor` mixin (which
-:py:class:`meta_package_manager.manager.PackageManager` inherits) locates the binary
-and runs it, the :py:class:`meta_package_manager.execution.CLIError` exception carries
-a failed call's result, and :py:func:`meta_package_manager.execution.highlight_cli_name`
+{class}`meta_package_manager.execution.CLIExecutor` mixin (which
+{class}`meta_package_manager.manager.PackageManager` inherits) locates the binary
+and runs it, the {class}`meta_package_manager.execution.CLIError` exception carries
+a failed call's result, and {func}`meta_package_manager.execution.highlight_cli_name`
 themes a binary's name.
 
 Scheduling *many* managers at once is the next altitude up, and lives in
-:py:mod:`meta_package_manager.dispatch`: the concurrent fan-out primitives, the
-lock families and the shared ``✓``/``✗`` trail. The ``sudo`` machinery that cuts
+{mod}`meta_package_manager.dispatch`: the concurrent fan-out primitives, the
+lock families and the shared `✓`/`✗` trail. The `sudo` machinery that cuts
 across both altitudes (credential priming, the keepalive, the hidden-prompt stall
-watchdog) lives in :py:mod:`meta_package_manager.sudo`: this module only consumes
+watchdog) lives in {mod}`meta_package_manager.sudo`: this module only consumes
 it, to wrap escalated commands and diagnose their failures.
 
-.. note::
-    The name and intent mirror :py:mod:`click_extra.execution` from the sibling
-    `click-extra <https://github.com/kdeldycke/click-extra>`_ project, where the
-    generic layers now live: the concurrency primitives (``run_jobs``/``run_lanes``
-    driven by ``mpm --jobs``), the single-subprocess engine
-    (:py:func:`click_extra.execution.run_cli`, which disclosed invocations and
-    streams output to the logs), and the Ctrl+C machinery
-    (:py:func:`click_extra.execution.install_interrupt_handler` terminating the
-    in-flight children registered by ``run_cli``). This module keeps what is
-    package-manager policy: per-operation timeouts, sudo escalation, cooldown
-    enforcement and dry-run.
+```{note}
+The name and intent mirror {mod}`click_extra.execution` from the sibling
+[click-extra](https://github.com/kdeldycke/click-extra) project, where the
+generic layers now live: the concurrency primitives (`run_jobs`/`run_lanes`
+driven by `mpm --jobs`), the single-subprocess engine
+({func}`click_extra.execution.run_cli`, which disclosed invocations and
+streams output to the logs), and the Ctrl+C machinery
+({func}`click_extra.execution.install_interrupt_handler` terminating the
+in-flight children registered by `run_cli`). This module keeps what is
+package-manager policy: per-operation timeouts, sudo escalation, cooldown
+enforcement and dry-run.
+```
 """
 
 from __future__ import annotations
@@ -135,12 +136,12 @@ class CLIError(Exception):
 _MUTATING_OPERATIONS: Final[frozenset[str]] = frozenset(
     {"install", "upgrade", "upgrade_all", "remove", "sync", "cleanup"},
 )
-"""State-changing operations, matched against :py:attr:`CLIExecutor._active_operation`.
+"""State-changing operations, matched against {attr}`CLIExecutor._active_operation`.
 
-Under ``mpm --plan`` their CLI calls are captured into :py:data:`PLAN_RECORDER`
-instead of being executed, while the read-only queries (``installed``, ``outdated``,
-``search``) still run so the plan resolves against real system state. ``restore``
-re-stamps ``install`` on the manager, so it is covered here.
+Under `mpm --plan` their CLI calls are captured into {data}`PLAN_RECORDER`
+instead of being executed, while the read-only queries (`installed`, `outdated`,
+`search`) still run so the plan resolves against real system state. `restore`
+re-stamps `install` on the manager, so it is covered here.
 """
 
 
@@ -148,13 +149,13 @@ def format_plan_command(
     cmd_args: Iterable[str],
     extra_env: TEnvVars | None = None,
 ) -> str:
-    """Render a captured ``mpm --plan`` command as a copy-pasteable shell line.
+    """Render a captured `mpm --plan` command as a copy-pasteable shell line.
 
-    Unlike :py:func:`click_extra.execution.format_cli_prompt` (styled, and prefixed
-    with a ``$`` prompt sigil for logs and dry-runs), this returns a plain, unstyled,
+    Unlike {func}`click_extra.execution.format_cli_prompt` (styled, and prefixed
+    with a `$` prompt sigil for logs and dry-runs), this returns a plain, unstyled,
     shell-quoted line: the forced environment assignments followed by the resolved
     binary and its arguments, ready to paste into a terminal or pipe into a shell.
-    See the plan-mode branch of :py:meth:`CLIExecutor.run`.
+    See the plan-mode branch of {meth}`CLIExecutor.run`.
     """
     env_prefix = "".join(
         f"{name}={shlex.quote(str(value))} "
@@ -165,11 +166,11 @@ def format_plan_command(
 
 
 class _PlanRecorder:
-    """Thread-safe sink for the mutating commands captured under ``mpm --plan``.
+    """Thread-safe sink for the mutating commands captured under `mpm --plan`.
 
-    :py:meth:`CLIExecutor.run` records into it from the fan-out's worker threads
+    {meth}`CLIExecutor.run` records into it from the fan-out's worker threads
     (hence the lock); the CLI drains it once, on the main thread, when the context
-    closes (see the plan-mode wiring in :py:func:`meta_package_manager.cli.mpm`).
+    closes (see the plan-mode wiring in {func}`meta_package_manager.cli.mpm`).
     """
 
     def __init__(self) -> None:
@@ -182,7 +183,7 @@ class _PlanRecorder:
             self._commands.clear()
 
     def record(self, manager_id: str, command: str) -> None:
-        """Store one captured ``command`` attributed to ``manager_id``."""
+        """Store one captured `command` attributed to `manager_id`."""
         with self._lock:
             self._commands.append((manager_id, command))
 
@@ -200,24 +201,24 @@ class _PlanRecorder:
 
 
 PLAN_RECORDER: Final = _PlanRecorder()
-"""Process-wide sink for :py:meth:`CLIExecutor.run`'s plan-mode captures.
+"""Process-wide sink for {meth}`CLIExecutor.run`'s plan-mode captures.
 
-A module-level singleton because ``run`` executes in the fan-out's worker threads,
-where the click context is not reliably reachable. See :py:class:`_PlanRecorder`.
+A module-level singleton because `run` executes in the fan-out's worker threads,
+where the click context is not reliably reachable. See {class}`_PlanRecorder`.
 """
 
 
 def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | None:
-    """Highlight the binary name in the provided ``path``.
+    """Highlight the binary name in the provided `path`.
 
     The name is only highlighted when it matches one of the recognized
-    ``match_names``, so an unrecognized binary stays plain. Matching is
+    `match_names`, so an unrecognized binary stays plain. Matching is
     insensitive to case on Windows and case-sensitive on other platforms, thanks
-    to ``os.path.normcase``.
+    to `os.path.normcase`.
 
     The rendering is delegated to
-    :py:func:`click_extra.execution.highlight_bin_name`, the same helper behind
-    the ``$``-prompt and spawn-trace log lines, so the ``mpm managers`` table and
+    {func}`click_extra.execution.highlight_bin_name`, the same helper behind
+    the `$`-prompt and spawn-trace log lines, so the `mpm managers` table and
     the logs can never drift apart.
     """
     if path is None:
@@ -236,8 +237,8 @@ READ_ONLY_TIMEOUT: Final = 120
 
 These operations only inspect state, so a short cap lets a wedged binary fail fast
 instead of stalling the whole run. The value is generous enough for legitimately
-slow scans (a freshly-pulled ``guix search`` walking every package's metadata)
-while still being far below :py:data:`MUTATING_TIMEOUT`.
+slow scans (a freshly-pulled `guix search` walking every package's metadata)
+while still being far below {data}`MUTATING_TIMEOUT`.
 """
 
 MUTATING_TIMEOUT: Final = 500
@@ -246,13 +247,13 @@ MUTATING_TIMEOUT: Final = 500
 Installs, upgrades, removals, channel syncs and cleanups routinely build from
 source, download large archives or pull entire channels, so they need a long cap.
 Kept identical to the historical global default so these operations behave exactly
-as before when no explicit ``--timeout`` is given.
+as before when no explicit `--timeout` is given.
 """
 
 DEFAULT_TIMEOUT: Final = MUTATING_TIMEOUT
 """Fallback timeout (seconds) for a CLI call whose operation is unknown.
 
-Defaults to the conservative :py:data:`MUTATING_TIMEOUT`: when in doubt, wait
+Defaults to the conservative {data}`MUTATING_TIMEOUT`: when in doubt, wait
 rather than risk killing a legitimate long-running command.
 """
 
@@ -273,29 +274,29 @@ OPERATION_TIMEOUTS: Final[dict[str, int]] = {
     "doctor": MUTATING_TIMEOUT,
 }
 """Per-operation timeout defaults, applied only when the user has set no explicit
-``--timeout`` (or per-manager ``timeout`` override).
+`--timeout` (or per-manager `timeout` override).
 
-Keyed by the :py:class:`meta_package_manager.capabilities.Operations` member name,
-plus the special ``"version"`` detection probe. The keys are validated against the
-``Operations`` enum by the test suite so the two never drift apart. An operation
-absent from this map resolves to :py:data:`DEFAULT_TIMEOUT`.
+Keyed by the {class}`meta_package_manager.capabilities.Operations` member name,
+plus the special `"version"` detection probe. The keys are validated against the
+`Operations` enum by the test suite so the two never drift apart. An operation
+absent from this map resolves to {data}`DEFAULT_TIMEOUT`.
 """
 
 SPINNER_DELAY: Final = 0.1
 """Seconds a CLI call must run before its progress spinner appears.
 
 Kept short so the spinner surfaces almost immediately on any call that is not
-instant: prompt feedback makes ``mpm`` feel responsive from the start rather than
+instant: prompt feedback makes `mpm` feel responsive from the start rather than
 stalled during the first second. Only the quickest calls (cached version probes,
 trivial metadata queries) finish within this delay and stay silent; anything
-slower (a ``guix search``, a source build) shows the spinner right away.
+slower (a `guix search`, a source build) shows the spinner right away.
 """
 
 
 class CLIExecutor:
     """Locate a manager's CLI on the system and run it.
 
-    Mixin inherited by :py:class:`meta_package_manager.manager.PackageManager`. Owns the
+    Mixin inherited by {class}`meta_package_manager.manager.PackageManager`. Owns the
     CLI-invocation configuration (names, search paths, environment, arguments, timeout)
     and the engine that searches for the binary, executes it, captures and normalizes its
     output, accumulates errors, and parses its self-reported version.
@@ -309,19 +310,19 @@ class CLIExecutor:
 
     ..hint::
         This was helpful in the case of the Python transition from 2.x to 3.x, where
-        multiple versions of the same executable were named ``python`` or ``python3``.
+        multiple versions of the same executable were named `python` or `python3`.
 
     By default, this property's value is derived from the manager's ID (see the
-    ``MetaPackageManager.__init__`` method above).
+    `MetaPackageManager.__init__` method above).
     """
 
     cli_search_path: tuple[str, ...] = ()
-    """List of additional path to help :program:`mpm` hunt down the package manager CLI.
+    """List of additional path to help {program}`mpm` hunt down the package manager CLI.
 
     Must be a list of strings whose order dictates the search sequence.
 
     Most of the time unnecessary:
-    :py:func:`meta_package_manager.manager.PackageManager.cli_path` works well on all
+    {func}`meta_package_manager.manager.PackageManager.cli_path` works well on all
     platforms.
     """
 
@@ -329,16 +330,16 @@ class CLIExecutor:
     """Additional environment variables to add to the current context.
 
     Automatically applied on each
-    :py:func:`meta_package_manager.manager.PackageManager.run_cli` calls.
+    {func}`meta_package_manager.manager.PackageManager.run_cli` calls.
     """
 
     pre_cmds: tuple[str, ...] = ()
     """Global list of pre-commands to add before before invoked CLI.
 
     Automatically added to each
-    :py:func:`meta_package_manager.manager.PackageManager.run_cli` call.
+    {func}`meta_package_manager.manager.PackageManager.run_cli` call.
 
-    Used to prepend `sudo <https://www.sudo.ws>`_ or other system utilities.
+    Used to prepend [sudo](https://www.sudo.ws) or other system utilities.
     """
 
     pre_args: tuple[str, ...] = ()
@@ -346,7 +347,7 @@ class CLIExecutor:
     """Global list of options used before and after the invoked package manager CLI.
 
     Automatically added to each
-    :py:func:`meta_package_manager.manager.PackageManager.run_cli` call.
+    {func}`meta_package_manager.manager.PackageManager.run_cli` call.
 
     Essentially used to force silencing, low verbosity or no-color output.
     """
@@ -355,7 +356,7 @@ class CLIExecutor:
     """CLI options used to produce the version of the package manager.
 
     The raw output produced by the package manager CLI will be parsed with the
-    :py:attr:`version_regexes <meta_package_manager.manager.PackageManager.version_regexes>`
+    {attr}`version_regexes <meta_package_manager.manager.PackageManager.version_regexes>`
     below to extract the version number.
     """
 
@@ -363,14 +364,14 @@ class CLIExecutor:
     """Alternate binary probed for the manager's version, instead of the main CLI.
 
     Some manager suites expose no version flag on any of their own binaries (OpenBSD's
-    ``pkg_add``/``pkg_info``, Solaris' ``pkgadd``/``pkginfo``): they ship with the base
-    system and are versioned with the OS itself. Naming a ``version_cli`` (like
-    ``uname``) makes the version probe run that binary with
-    :py:attr:`version_cli_options` and parse its output with
-    :py:attr:`version_regexes`, while every operation keeps using the manager's own
-    :py:attr:`cli_path`. The binary is resolved with
-    :py:meth:`~meta_package_manager.manager.PackageManager.which`; the version resolves
-    to ``None`` (manager not :py:attr:`fresh
+    `pkg_add`/`pkg_info`, Solaris' `pkgadd`/`pkginfo`): they ship with the base
+    system and are versioned with the OS itself. Naming a `version_cli` (like
+    `uname`) makes the version probe run that binary with
+    {attr}`version_cli_options` and parse its output with
+    {attr}`version_regexes`, while every operation keeps using the manager's own
+    {attr}`cli_path`. The binary is resolved with
+    {meth}`~meta_package_manager.manager.PackageManager.which`; the version resolves
+    to `None` (manager not {attr}`fresh
     <meta_package_manager.manager.PackageManager.fresh>`) when it is not found.
     """
 
@@ -378,21 +379,21 @@ class CLIExecutor:
     """Regular expressions used to extract the version number.
 
     This property must be a tuple of strings, each of which is a valid regular
-    expression that must contain a `group
-    <https://docs.python.org/3/library/re.html#index-18>`_ named ``<version>``.
+    expression that must contain a [group](https://docs.python.org/3/library/re.html#index-18) named `<version>`.
 
-    The first of these regexes producing a match and returning non-empty ``<version>``
+    The first of these regexes producing a match and returning non-empty `<version>`
     group will be used as the version string of the package manager.
 
     That version string will then be sanitized and normalized by
-    :py:func:`meta_package_manager.manager.PackageManager.version`.
+    {func}`meta_package_manager.manager.PackageManager.version`.
 
     By default match the first part that is space-separated.
 
-    .. caution::
-        These regexes are compiled with :py:data:`re.MULTILINE` only. They are
-        *not* compiled with :py:data:`re.VERBOSE`, so literal whitespace in the
-        pattern is significant and matches whitespace in the CLI output.
+    ```{caution}
+    These regexes are compiled with {data}`re.MULTILINE` only. They are
+    *not* compiled with {data}`re.VERBOSE`, so literal whitespace in the
+    pattern is significant and matches whitespace in the CLI output.
+    ```
     """
 
     stop_on_error: bool = False
@@ -404,37 +405,37 @@ class CLIExecutor:
     plan: bool = False
     """Capture state-changing CLI calls for inspection instead of running them.
 
-    Set by ``mpm --plan``. Unlike :py:attr:`dry_run` (which simulates *every* call,
-    read-only queries included), plan mode lets the read-only queries (``installed``,
-    ``outdated``, ``search``) run for real so the resolved plan reflects actual
+    Set by `mpm --plan`. Unlike {attr}`dry_run` (which simulates *every* call,
+    read-only queries included), plan mode lets the read-only queries (`installed`,
+    `outdated`, `search`) run for real so the resolved plan reflects actual
     system state, and records only the state-changing commands (see
-    :py:data:`_MUTATING_OPERATIONS`) into :py:data:`PLAN_RECORDER`.
+    {data}`_MUTATING_OPERATIONS`) into {data}`PLAN_RECORDER`.
     """
 
     timeout: int | None = None
     """Maximum number of seconds to wait for a CLI call to complete.
 
-    ``None`` means the user expressed no explicit preference: the effective cap is
-    then resolved per-operation by ``_resolve_timeout()`` from
-    :py:data:`OPERATION_TIMEOUTS`. A non-``None`` value (the ``--timeout`` flag or a
+    `None` means the user expressed no explicit preference: the effective cap is
+    then resolved per-operation by `_resolve_timeout()` from
+    {data}`OPERATION_TIMEOUTS`. A non-`None` value (the `--timeout` flag or a
     per-manager override) wins for every operation.
     """
 
     _active_operation: str | None = None
     """Name of the operation this manager is currently performing.
 
-    Stamped by :py:meth:`meta_package_manager.pool.ManagerPool._select_managers`
-    just before the manager is handed to a subcommand, and by the :py:attr:`version`
-    probe. Consumed by :py:meth:`_resolve_timeout` to pick a per-operation default.
-    ``None`` (no known operation) falls back to :py:data:`DEFAULT_TIMEOUT`.
+    Stamped by {meth}`meta_package_manager.pool.ManagerPool._select_managers`
+    just before the manager is handed to a subcommand, and by the {attr}`version`
+    probe. Consumed by {meth}`_resolve_timeout` to pick a per-operation default.
+    `None` (no known operation) falls back to {data}`DEFAULT_TIMEOUT`.
     """
 
     progress: bool = False
     """Whether CLI calls may show a progress spinner while they block.
 
     Set by the CLI to an interactive, human-facing run only (a TTY, no serialized
-    output, not at DEBUG verbosity). Even when ``True`` the spinner still
-    self-suppresses off a TTY: see ``_make_spinner()``. Defaults to ``False`` so
+    output, not at DEBUG verbosity). Even when `True` the spinner still
+    self-suppresses off a TTY: see `_make_spinner()`. Defaults to `False` so
     programmatic use stays silent.
     """
 
@@ -442,100 +443,100 @@ class CLIExecutor:
     """Minimum age a release must have before it can be installed or upgraded.
 
     When set, the manager refuses to bring in any package version published more
-    recently than ``cooldown`` ago. This is a mitigation against supply-chain
+    recently than `cooldown` ago. This is a mitigation against supply-chain
     attacks: a malicious release is typically detected and pulled within days of
     publication, so a waiting period keeps freshly-published (and potentially
-    compromised) versions out of the system. ``None`` disables the gate.
+    compromised) versions out of the system. `None` disables the gate.
 
     Only managers able to natively enforce a release-age limit honor this; see
-    :py:attr:`cooldown_env_var` and :py:attr:`supports_cooldown`.
+    {attr}`cooldown_env_var` and {attr}`supports_cooldown`.
     """
 
     require_cooldown_support: bool = True
-    """Require native :py:attr:`cooldown` support to run install/upgrade.
+    """Require native {attr}`cooldown` support to run install/upgrade.
 
-    By default (``True``, fail-closed), when a :py:attr:`cooldown` is requested,
+    By default (`True`, fail-closed), when a {attr}`cooldown` is requested,
     install and upgrade operations are skipped for managers lacking native
-    release-age support, so nothing slips in unguarded. Setting this to ``False``
+    release-age support, so nothing slips in unguarded. Setting this to `False`
     opts into running those operations anyway, without the safeguard.
     """
 
     sudo: bool | None = None
-    """User escalation policy: run this manager's privileged commands with ``sudo``.
+    """User escalation policy: run this manager's privileged commands with `sudo`.
 
-    ``None`` (the default) means the user expressed no preference, so the built-in
-    :py:attr:`default_sudo` decides. ``True``/``False`` force escalation on or off for
-    every operation this manager marks privileged (a ``build_cli(..., sudo=True)`` call).
-    Set globally by ``mpm --sudo`` / ``mpm --no-sudo`` and per manager by the
-    ``[mpm.managers.<id>] sudo`` config key, the latter winning (see
-    :py:meth:`meta_package_manager.pool.ManagerPool._select_managers`).
+    `None` (the default) means the user expressed no preference, so the built-in
+    {attr}`default_sudo` decides. `True`/`False` force escalation on or off for
+    every operation this manager marks privileged (a `build_cli(..., sudo=True)` call).
+    Set globally by `mpm --sudo` / `mpm --no-sudo` and per manager by the
+    `[mpm.managers.<id>] sudo` config key, the latter winning (see
+    {meth}`meta_package_manager.pool.ManagerPool._select_managers`).
 
     Only privileged operations on UNIX are ever escalated. A manager that escalates
-    *internally* (:py:attr:`internal_sudo`) has no such markers and is never wrapped
-    in ``sudo`` by ``mpm``: its own ``sudo`` reuses the credential cache when
-    :py:func:`~meta_package_manager.sudo.prime_sudo` finds it already warm, and is
-    otherwise covered by the silent-call notice in :py:meth:`run`.
+    *internally* ({attr}`internal_sudo`) has no such markers and is never wrapped
+    in `sudo` by `mpm`: its own `sudo` reuses the credential cache when
+    {func}`~meta_package_manager.sudo.prime_sudo` finds it already warm, and is
+    otherwise covered by the silent-call notice in {meth}`run`.
     """
 
     default_sudo: bool = False
-    """Built-in escalation default, used when :py:attr:`sudo` is ``None``.
+    """Built-in escalation default, used when {attr}`sudo` is `None`.
 
-    ``False`` on the base: most managers install into user-writable trees and never need
-    root. The system package managers whose privileged operations require root (``apt``,
-    ``dnf``, ``pacman``, ``zypper``, ...) set this to ``True`` so their
-    ``build_cli(..., sudo=True)`` operations escalate out of the box, while staying
-    switchable off through :py:attr:`sudo` (``--no-sudo`` or config) for rootless setups.
+    `False` on the base: most managers install into user-writable trees and never need
+    root. The system package managers whose privileged operations require root (`apt`,
+    `dnf`, `pacman`, `zypper`, ...) set this to `True` so their
+    `build_cli(..., sudo=True)` operations escalate out of the box, while staying
+    switchable off through {attr}`sudo` (`--no-sudo` or config) for rootless setups.
     """
 
     internal_sudo: bool = False
-    """Marks a manager whose CLI invokes ``sudo`` itself mid-run.
+    """Marks a manager whose CLI invokes `sudo` itself mid-run.
 
-    Homebrew ``cask`` runs it from installer artifacts, ``fink`` re-execs its
-    root commands through it, and the AUR helpers call ``sudo pacman`` for their
+    Homebrew `cask` runs it from installer artifacts, `fink` re-execs its
+    root commands through it, and the AUR helpers call `sudo pacman` for their
     install steps. mpm never wraps such a manager's commands: either none of its
-    operations carry a ``build_cli(..., sudo=True)`` marker (``cask``, ``fink``),
-    or its ``default_sudo = False`` policy leaves the markers it inherits
-    unescalated (the AUR helpers). Running the tool under ``sudo`` is often
-    forbidden outright (``brew`` refuses root, ``makepkg`` refuses to build).
-    Consumed by :py:func:`~meta_package_manager.sudo.prime_sudo`, whose
+    operations carry a `build_cli(..., sudo=True)` marker (`cask`, `fink`),
+    or its `default_sudo = False` policy leaves the markers it inherits
+    unescalated (the AUR helpers). Running the tool under `sudo` is often
+    forbidden outright (`brew` refuses root, `makepkg` refuses to build).
+    Consumed by {func}`~meta_package_manager.sudo.prime_sudo`, whose
     opportunistic probe keeps an already-warm credential cache alive for these
-    internal escalations, and by the silent-call notice in :py:meth:`run`, which
+    internal escalations, and by the silent-call notice in {meth}`run`, which
     flags a possibly-hidden password prompt on a cold cache.
 
-    Forcing ``sudo = true`` on such a manager (config key or ``--sudo``) still
+    Forcing `sudo = true` on such a manager (config key or `--sudo`) still
     never wraps its commands, but does promote it into the up-front prompt path of
-    :py:func:`~meta_package_manager.sudo.prime_sudo`.
+    {func}`~meta_package_manager.sudo.prime_sudo`.
     """
 
     cooldown_env_var: ClassVar[str | None] = None
-    """Environment variable this manager reads to honor a :py:attr:`cooldown`.
+    """Environment variable this manager reads to honor a {attr}`cooldown`.
 
-    ``None`` (the default) means the manager has no native release-age mechanism and
+    `None` (the default) means the manager has no native release-age mechanism and
     cannot honor a cooldown. A subclass that sets this string advertises support (see
-    :py:attr:`supports_cooldown`); the value produced by :py:meth:`cooldown_env_value`
+    {attr}`supports_cooldown`); the value produced by {meth}`cooldown_env_value`
     is then injected into the environment of every CLI call.
     """
 
     windows_creation_flags: int = 0
-    """Additional Windows process creation flags OR-ed with ``CREATE_NO_WINDOW``.
+    """Additional Windows process creation flags OR-ed with `CREATE_NO_WINDOW`.
 
     Use this on individual managers to control how their subprocess is attached
     to the calling process's console. For example, setting this to
-    ``subprocess.DETACHED_PROCESS`` (``0x8``) fully detaches the child from the
+    `subprocess.DETACHED_PROCESS` (`0x8`) fully detaches the child from the
     parent's console. Any grandchild process (like a COM server or installer EXE)
-    that calls ``GenerateConsoleCtrlEvent(0)`` on exit will then fail silently
+    that calls `GenerateConsoleCtrlEvent(0)` on exit will then fail silently
     because there is no console to broadcast to.
 
-    No-op on non-Windows platforms (``getattr`` returns ``0`` for Windows-only flags).
+    No-op on non-Windows platforms (`getattr` returns `0` for Windows-only flags).
     """
 
     windows_processes_to_cleanup: tuple[str, ...] = ()
     """Windows process image names to forcibly terminate after each CLI call.
 
     When a package manager spawns grandchild processes that outlive the direct
-    subprocess (like winget's ``WindowsPackageManagerServer.exe`` COM server),
+    subprocess (like winget's `WindowsPackageManagerServer.exe` COM server),
     those orphans can linger and consume resources. List the image names here so
-    they are killed after ``communicate()`` returns.
+    they are killed after `communicate()` returns.
 
     No-op on non-Windows platforms.
     """
@@ -544,43 +545,43 @@ class CLIExecutor:
     """Accumulate all CLI errors encountered by the package manager."""
 
     _last_run: tuple[int, str, str] | None = None
-    """``(exit code, <stdout>, <stderr>)`` of the most recent completed :py:meth:`run`.
+    """`(exit code, <stdout>, <stderr>)` of the most recent completed {meth}`run`.
 
-    ``None`` until a run completes, and reset to ``None`` at the start of each run, so
+    `None` until a run completes, and reset to `None` at the start of each run, so
     a spawn that never finished (timeout, interrupt, missing binary) leaves no stale
     result behind. Consumed by
-    :py:meth:`meta_package_manager.manager.PackageManager.doctor`, whose health verdict
+    {meth}`meta_package_manager.manager.PackageManager.doctor`, whose health verdict
     is the exit code alone and whose report merges both streams: the return value of
-    :py:meth:`run` carries neither. Safe to read right after the call under mpm's
+    {meth}`run` carries neither. Safe to read right after the call under mpm's
     dispatch model, where a manager never runs two of its own invocations at once.
     """
 
     run_cache: dict[tuple, tuple[int, str, str]] | None = None
     """Optional cache that de-duplicates identical CLI runs within a lock family.
 
-    ``None`` by default, which disables caching: every :py:meth:`run` call spawns its own
-    subprocess. :func:`meta_package_manager.dispatch.dispatch` injects one shared dict
+    `None` by default, which disables caching: every {meth}`run` call spawns its own
+    subprocess. {func}`meta_package_manager.dispatch.dispatch` injects one shared dict
     into all the managers of a multi-manager lock-family lane (see
-    :data:`meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`) for the duration of
-    that lane, so members resolving to a byte-identical command (``brew`` and ``cask``
-    both running ``brew update`` for :command:`mpm sync`) run the subprocess once and
-    replay the cached ``(code, output, error)`` for the rest. The replay still walks
-    :py:meth:`run`'s logging and failure gate, so a failed shared command is attributed
+    {data}`meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`) for the duration of
+    that lane, so members resolving to a byte-identical command (`brew` and `cask`
+    both running `brew update` for {command}`mpm sync`) run the subprocess once and
+    replay the cached `(code, output, error)` for the rest. The replay still walks
+    {meth}`run`'s logging and failure gate, so a failed shared command is attributed
     to every member. Keyed on the resolved command line and its environment, so only
     genuinely identical invocations collapse.
     """
 
     def __init__(self) -> None:
-        """Initialize ``cli_errors`` list."""
+        """Initialize `cli_errors` list."""
         self.cli_errors = []
 
     @property
     def supports_cooldown(self) -> bool:
-        """Whether this manager can natively enforce a release-age :py:attr:`cooldown`."""
+        """Whether this manager can natively enforce a release-age {attr}`cooldown`."""
         return self.cooldown_env_var is not None
 
     def cooldown_env_value(self) -> str:
-        """Render :py:attr:`cooldown` as the value of :py:attr:`cooldown_env_var`.
+        """Render {attr}`cooldown` as the value of {attr}`cooldown_env_var`.
 
         Defaults to the RFC 3339 timestamp of the most recent release date still
         allowed, i.e. now minus the cooldown. Managers whose environment variable
@@ -592,23 +593,23 @@ class CLIExecutor:
         return cutoff.isoformat()
 
     def cooldown_rounded_up(self, unit_seconds: int) -> str:
-        """Render :py:attr:`cooldown` as an integer count of ``unit_seconds``-long
+        """Render {attr}`cooldown` as an integer count of `unit_seconds`-long
         units, rounded up.
 
-        Helper for the :py:meth:`cooldown_env_value` overrides of managers whose native
+        Helper for the {meth}`cooldown_env_value` overrides of managers whose native
         release-age knob expects a unit count rather than the default RFC 3339 timestamp
-        (npm's day-based ``min-release-age``, pnpm's minute-based ``minimumReleaseAge``).
+        (npm's day-based `min-release-age`, pnpm's minute-based `minimumReleaseAge`).
         Sub-unit cooldowns round up so the gate over-protects rather than silently
-        collapsing to ``0`` (the "no cooldown" sentinel).
+        collapsing to `0` (the "no cooldown" sentinel).
         """
         assert self.cooldown is not None
         return str(math.ceil(self.cooldown.total_seconds() / unit_seconds))
 
     def cooldown_env(self) -> TEnvVars:
-        """Environment fragment enforcing the :py:attr:`cooldown`, empty when inactive.
+        """Environment fragment enforcing the {attr}`cooldown`, empty when inactive.
 
-        Returns an empty mapping unless a :py:attr:`cooldown` is set *and* the manager
-        supports it. Merged into the environment of every :py:meth:`run` call.
+        Returns an empty mapping unless a {attr}`cooldown` is set *and* the manager
+        supports it. Merged into the environment of every {meth}`run` call.
         """
         if self.cooldown is None or self.cooldown_env_var is None:
             return {}
@@ -621,28 +622,27 @@ class CLIExecutor:
     ) -> Generator[Path, None, None]:
         """Search for all binary files matching the CLI names, in all environment path.
 
-        This is like our own implementation of ``shutil.which()``, with the difference
+        This is like our own implementation of `shutil.which()`, with the difference
         that it is capable of returning all the possible paths of the provided file
         names, in all environment path, not just the first one that match. And on
         Windows, prevents matching of CLI in the current directory, which takes
         precedence on other paths.
 
-        Returns all files matching any ``cli_names``, by iterating over all folders in
+        Returns all files matching any `cli_names`, by iterating over all folders in
         this order:
 
-        * folders provided by :py:attr:`cli_search_path
+        * folders provided by {attr}`cli_search_path
           <meta_package_manager.manager.PackageManager.cli_search_path>`,
         * then in all the default places specified by the environment variable (i.e.
-          ``os.getenv("PATH")``).
+          `os.getenv("PATH")`).
 
         Only returns files that exists and are not empty.
 
-        .. caution::
+        ```{caution}
 
-            Symlinks are not resolved, because some manager like `Homebrew on Linux
-            relies on some sort of symlink-based trickery
-            <https://github.com/kdeldycke/meta-package-manager/pull/188>`_ to set
-            environment variables.
+        Symlinks are not resolved, because some manager like [Homebrew on Linux relies on some sort of symlink-based trickery](https://github.com/kdeldycke/meta-package-manager/pull/188) to set
+        environment variables.
+        ```
         """
         # Check CLI names are not path, but plain filenames.
         for cli_name in cli_names:
@@ -659,10 +659,10 @@ class CLIExecutor:
 
         # By default, the filename to search for is the case-sensitive CLI name.
         search_filenames = list(cli_names)
-        # But on Windows, there is this special ``PATHEXT`` environment variable to
+        # But on Windows, there is this special `PATHEXT` environment variable to
         # tell you what file suffixes are executable. We have to search for any
         # variation of the CLI name with any of these suffixes.
-        # Code below is inspired by the original implementation of ``shutil.which()``:
+        # Code below is inspired by the original implementation of `shutil.which()`:
         # https://github.com/python/cpython/blob/8d46c7e/Lib/shutil.py#L1478-L1491
         if is_any_windows():
             win_pathext = shutil._WIN_DEFAULT_PATHEXT  # type: ignore[attr-defined]
@@ -683,13 +683,13 @@ class CLIExecutor:
         def normalize_path(path: Path) -> str:
             """Resolves symlinks and produces a normalized absolute path string.
 
-            Additonnaly use ``os.path.normcase`` on Windows to exclude duplicates
+            Additonnaly use `os.path.normcase` on Windows to exclude duplicates
             produced by case-insensitive filesystems.
             """
             return os.path.normcase(path.resolve())
 
         # Deduplicate search paths while keeping their order and original value, as the
-        # normalization process happens with the ``key`` lookup.
+        # normalization process happens with the `key` lookup.
         search_path_list: list[Path] = unique(
             # Manager-specific search path takes precedence over default environment.
             (Path(p) for p in (*self.cli_search_path, *os.get_exec_path(env=env))),
@@ -732,9 +732,9 @@ class CLIExecutor:
                 yield file
 
     def which(self, cli_name: str) -> Path | None:
-        """Emulates the ``which`` command.
+        """Emulates the `which` command.
 
-        Based on the ``search_all_cli()`` method.
+        Based on the `search_all_cli()` method.
         """
         for cli_path_found in self.search_all_cli([cli_name]):
             return cli_path_found
@@ -743,15 +743,15 @@ class CLIExecutor:
     def sibling_cli(self, name: str, *, same_dir: bool = False) -> Path:
         """Resolve the path of a sibling binary of the manager's main CLI.
 
-        Some managers ship as a suite of binaries (``xbps-install``/``xbps-query``,
-        ``pkg_add``/``pkg_info``, emerge's ``qlist``): an operation then runs a
+        Some managers ship as a suite of binaries (`xbps-install`/`xbps-query`,
+        `pkg_add`/`pkg_info`, emerge's `qlist`): an operation then runs a
         sibling instead of the main CLI. By default the sibling is searched like the
-        main CLI itself (:py:meth:`which`, honoring :py:attr:`cli_search_path`), and
-        a missing binary raises :py:exc:`FileNotFoundError` rather than silently
+        main CLI itself ({meth}`which`, honoring {attr}`cli_search_path`), and
+        a missing binary raises {exc}`FileNotFoundError` rather than silently
         falling back to the wrong program.
 
-        ``same_dir=True`` instead takes the sibling from the directory of
-        :py:attr:`cli_path`, without an existence probe: suites installing all
+        `same_dir=True` instead takes the sibling from the directory of
+        {attr}`cli_path`, without an existence probe: suites installing all
         their binaries side by side (XBPS, Nix) guarantee the neighbor, and
         resolving it from the same directory can never mix two installations. A
         genuinely missing file then surfaces at spawn time.
@@ -769,14 +769,14 @@ class CLIExecutor:
     def cli_path(self) -> Path | None:
         """Fully qualified path to the canonical package manager binary.
 
-        Try each CLI names provided by :py:attr:`cli_names
+        Try each CLI names provided by {attr}`cli_names
         <meta_package_manager.manager.PackageManager.cli_names>`, in each system path
-        provided by :py:attr:`cli_search_path
+        provided by {attr}`cli_search_path
         <meta_package_manager.manager.PackageManager.cli_search_path>`. In that order.
         Then returns the first match.
 
         Executability of the CLI will be separately assessed later by the
-        :py:func:`meta_package_manager.manager.PackageManager.executable` method below.
+        {func}`meta_package_manager.manager.PackageManager.executable` method below.
         """
         if self.cli_names is not None:
             for cli_path in self.search_all_cli(self.cli_names):
@@ -788,16 +788,16 @@ class CLIExecutor:
         """Invoke the manager and extract its own reported version string.
 
         Returns a parsed and normalized version in the form of a
-        :py:class:`meta_package_manager.version.TokenizedString` instance.
+        {class}`meta_package_manager.version.TokenizedString` instance.
 
         Skipped on platforms where the manager is not supported, even if
-        :py:attr:`cli_path` resolved to an executable: that binary almost
+        {attr}`cli_path` resolved to an executable: that binary almost
         certainly belongs to a different tool that happens to share the
-        same name (e.g. GNU ``make`` on macOS getting matched by the
-        FreeBSD ``ports`` manager), so probing it would either misreport
+        same name (e.g. GNU `make` on macOS getting matched by the
+        FreeBSD `ports` manager), so probing it would either misreport
         the version or surface confusing error output.
         """
-        # ``supported`` is declared on the ``PackageManager`` subclass, not on
+        # `supported` is declared on the `PackageManager` subclass, not on
         # this mixin: mypy does not see it, but every concrete instance does.
         if not self.supported:  # type: ignore[attr-defined]
             return None
@@ -811,9 +811,9 @@ class CLIExecutor:
                     return None
             # Version detection is a fast liveness probe, so tag it as a read-only
             # operation: a wedged binary then trips the short timeout instead of the
-            # long mutating one. Safe to leave set: ``_select_managers`` re-stamps the
-            # real operation before any subcommand runs, and an explicit ``--timeout``
-            # still wins inside ``_resolve_timeout``.
+            # long mutating one. Safe to leave set: `_select_managers` re-stamps the
+            # real operation before any subcommand runs, and an explicit `--timeout`
+            # still wins inside `_resolve_timeout`.
             self._active_operation = "version"
             output = self.run_cli(
                 self.version_cli_options,
@@ -856,11 +856,11 @@ class CLIExecutor:
 
         Precedence, most specific first:
 
-        1. An explicit :py:attr:`timeout` (the user's ``--timeout`` flag or a
-           per-manager ``timeout`` override) wins for every operation.
-        2. Otherwise the per-operation default keyed on :py:attr:`_active_operation`
-           (see :py:data:`OPERATION_TIMEOUTS`).
-        3. An unknown operation falls back to :py:data:`DEFAULT_TIMEOUT`.
+        1. An explicit {attr}`timeout` (the user's `--timeout` flag or a
+           per-manager `timeout` override) wins for every operation.
+        2. Otherwise the per-operation default keyed on {attr}`_active_operation`
+           (see {data}`OPERATION_TIMEOUTS`).
+        3. An unknown operation falls back to {data}`DEFAULT_TIMEOUT`.
         """
         if self.timeout is not None:
             return self.timeout
@@ -872,15 +872,15 @@ class CLIExecutor:
         """Build a (not-yet-started) progress spinner for the current CLI call.
 
         The label combines the manager ID and the active operation, so a slow call
-        reads like the command it runs (``guix search``, ``brew install``). The
-        spinner is disabled unless :py:attr:`progress` is set; even then it only
-        animates on a TTY (see :py:class:`click_extra.Spinner`), so it stays silent
+        reads like the command it runs (`guix search`, `brew install`). The
+        spinner is disabled unless {attr}`progress` is set; even then it only
+        animates on a TTY (see {class}`click_extra.Spinner`), so it stays silent
         when output is piped or captured.
         """
         manager_id = self.id  # type: ignore[attr-defined]
         operation = self._active_operation
         label = f"{manager_id} {operation}" if operation else str(manager_id)
-        # Append the elapsed time so a long call (a slow ``guix search``) reads as
+        # Append the elapsed time so a long call (a slow `guix search`) reads as
         # "⠙ guix search (12.3s)" rather than looking stuck.
         return Spinner(
             label,
@@ -891,7 +891,7 @@ class CLIExecutor:
 
     def _cleanup_windows_processes(self) -> None:
         """Forcibly terminate the lingering grandchildren this manager is known to
-        leave behind on Windows (see :py:attr:`windows_processes_to_cleanup`).
+        leave behind on Windows (see {attr}`windows_processes_to_cleanup`).
 
         No-op on non-Windows platforms and for managers with no cleanup list.
         """
@@ -913,41 +913,41 @@ class CLIExecutor:
     ) -> str:
         """Run a shell command, return the output and accumulate error messages.
 
-        ``args`` is allowed to be a nested structure of iterables, in which case it will
-        be recursively flatten, then ``None`` will be discarded, and finally each item
+        `args` is allowed to be a nested structure of iterables, in which case it will
+        be recursively flatten, then `None` will be discarded, and finally each item
         casted to strings.
 
         Running commands with that method takes care of:
-          * disclosing the invocation at ``INFO`` (the reproducible ``$``-prompt
+          * disclosing the invocation at `INFO` (the reproducible `$`-prompt
             line with forced environment variables) and streaming the raw output
-            live to ``DEBUG``, prefixed with the manager ID, via
-            :py:func:`click_extra.execution.run_cli`
+            live to `DEBUG`, prefixed with the manager ID, via
+            {func}`click_extra.execution.run_cli`
           * flagging, on a terminal, the mutating call of an internal escalator
             that goes silent on a cold credential cache and may be blocked on a
             hidden password prompt (see
-            :py:class:`~meta_package_manager.sudo._StallWatchdog`)
+            {class}`~meta_package_manager.sudo._StallWatchdog`)
           * detaching every other call into its own POSIX session and process
             group, so a timeout or Ctrl+C reaps the whole process tree and a
             wedged grandchild cannot linger as an orphan; the flagged call
-            above keeps the controlling terminal so its ``sudo`` prompt stays
+            above keeps the controlling terminal so its `sudo` prompt stays
             answerable
           * removing ANSI escape codes from
-            :py:attr:`subprocess.CompletedProcess.stdout` and
-            :py:attr:`subprocess.CompletedProcess.stderr`
+            {attr}`subprocess.CompletedProcess.stdout` and
+            {attr}`subprocess.CompletedProcess.stderr`
           * returning ready-to-use normalized strings (dedented and stripped)
-          * letting ``mpm --dry-run`` and ``mpm --stop-on-error`` have
+          * letting `mpm --dry-run` and `mpm --stop-on-error` have
             expected effect on execution
 
-        :param must_succeed: if ``True``, raise
-            :py:class:`meta_package_manager.manager.CLIError` when the command
-            fails, regardless of the user-facing :py:attr:`stop_on_error`
+        :param must_succeed: if `True`, raise
+            {class}`meta_package_manager.manager.CLIError` when the command
+            fails, regardless of the user-facing {attr}`stop_on_error`
             preference, rather than accumulating the error for an end-of-run
             summary. Use for calls whose output is parsed (JSON, XML, regex),
             where a swallowed failure would be indistinguishable from empty
-            results. A non-zero exit that leaves ``<stderr>`` empty is tolerated
-            as a benign status code (``npm`` and ``pnpm outdated`` exit ``1``
+            results. A non-zero exit that leaves `<stderr>` empty is tolerated
+            as a benign status code (`npm` and `pnpm outdated` exit `1`
             when updates exist); only the per-package state changers, which run
-            under a patched :py:attr:`stop_on_error`, treat every non-zero exit
+            under a patched {attr}`stop_on_error`, treat every non-zero exit
             as a failure. See the failure gate below for details.
         """
         # Reset the last-run snapshot so an early return (timeout, interrupt,
@@ -987,13 +987,13 @@ class CLIExecutor:
             # running it. Read-only queries (and force_exec calls, which patch plan
             # off) fall through to real execution below, so the plan resolves against
             # actual system state. See _MUTATING_OPERATIONS and PLAN_RECORDER.
-            # ``id`` is declared on the ``PackageManager`` subclass, not this mixin.
+            # `id` is declared on the `PackageManager` subclass, not this mixin.
             plan_command = format_plan_command(clean_args, extra_env)
             PLAN_RECORDER.record(self.id, plan_command)  # type: ignore[attr-defined]
         elif self.dry_run and not self.plan:
             logging.warning(f"Dry-run: {cli_msg}")
         else:
-            # ``id`` is declared on the ``PackageManager`` subclass, not this mixin.
+            # `id` is declared on the `PackageManager` subclass, not this mixin.
             manager_id: str = self.id  # type: ignore[attr-defined]
             # The invocation is disclosed at INFO so `--verbosity INFO` shows (and
             # lets the user reproduce) every CLI mpm runs on the system. The
@@ -1005,7 +1005,7 @@ class CLIExecutor:
             effective_timeout = self._resolve_timeout()
             spinner = self._make_spinner()
             # A mutating command of an internal escalator (cask, fink) may block
-            # on a hidden ``sudo`` password prompt when prime_sudo() found no warm
+            # on a hidden `sudo` password prompt when prime_sudo() found no warm
             # credential cache to keep alive. Arm the stall watchdog around the
             # spawn so the silence is flagged, on the terminal where the prompt
             # waits, while it can still be answered.
@@ -1044,7 +1044,7 @@ class CLIExecutor:
                             # they always detach. No-op on Windows.
                             start_new_session=watchdog is None,
                             # The tee routes each streamed record through the
-                            # armed watchdog before the root logger. ``None`` is
+                            # armed watchdog before the root logger. `None` is
                             # run_cli's default, the untouched root-logger path.
                             log=watchdog.tee if watchdog is not None else None,
                         )
@@ -1126,13 +1126,13 @@ class CLIExecutor:
         # By default a non-zero exit code is only treated as a failure when the
         # command *also* wrote to <stderr>. Many read-only CLIs use a non-zero
         # code as a status while writing their payload to <stdout> and leaving
-        # <stderr> empty: ``npm`` and ``pnpm outdated`` exit 1 when updates
+        # <stderr> empty: `npm` and `pnpm outdated` exit 1 when updates
         # exist. Flagging those would break the parsing of their output, so a
         # silent <stderr> earns the benefit of the doubt.
         #
         # The per-package state changers (install/remove/upgrade <packages>/
         # restore) cannot afford that tolerance. They run under a patched
-        # ``stop_on_error`` with ``must_succeed`` left False, and there a
+        # `stop_on_error` with `must_succeed` left False, and there a
         # non-zero exit is a genuine failure even when the tool reported it on
         # <stdout> and left <stderr> empty: steamcmd prints "not logged in to
         # Steam" this way on Windows, so a failed install was mistaken for a
@@ -1173,54 +1173,55 @@ class CLIExecutor:
         override_post_args: TNestedArgs | None = None,
         sudo: bool = False,
     ) -> tuple[str, ...]:
-        """Build the package manager CLI by combining the custom ``*args`` with the
+        """Build the package manager CLI by combining the custom `*args` with the
         package manager's global parameters.
 
         Returns a tuple of strings.
 
         Helps the construction of CLI's repeating patterns and makes the code easier to
-        read. Just pass the specific ``*args`` and the full CLI string will be composed
+        read. Just pass the specific `*args` and the full CLI string will be composed
         out of the globals, following this schema:
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ [<pre_cmds>|sudo --non-interactive] <cli_path> <pre_args> <*args> <post_args>
+        $ [<pre_cmds>|sudo --non-interactive] <cli_path> <pre_args> <*args> <post_args>
+        ```
 
-        * :py:attr:`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
+        * {attr}`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
           is added before the CLI path.
 
-        * :py:attr:`self.cli_path <meta_package_manager.manager.PackageManager.cli_path>`
+        * {attr}`self.cli_path <meta_package_manager.manager.PackageManager.cli_path>`
           is used as the main binary to execute.
 
-        * :py:attr:`self.pre_args <meta_package_manager.manager.PackageManager.pre_args>`
-          and :py:attr:`self.post_args
+        * {attr}`self.pre_args <meta_package_manager.manager.PackageManager.pre_args>`
+          and {attr}`self.post_args
           <meta_package_manager.manager.PackageManager.post_args>`  globals are added
-          before and after the provided ``*args``.
+          before and after the provided `*args`.
 
         Each additional set of elements can be disabled with their respective flag:
 
-        * ``auto_pre_cmds=False``  to skip the automatic addition of
-          :py:attr:`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
-        * ``auto_pre_args=False``  to skip the automatic addition of
-          :py:attr:`self.pre_args <meta_package_manager.manager.PackageManager.pre_args>`
-        * ``auto_post_args=False`` to skip the automatic addition of
-          :py:attr:`self.post_args <meta_package_manager.manager.PackageManager.post_args>`
+        * `auto_pre_cmds=False`  to skip the automatic addition of
+          {attr}`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
+        * `auto_pre_args=False`  to skip the automatic addition of
+          {attr}`self.pre_args <meta_package_manager.manager.PackageManager.pre_args>`
+        * `auto_post_args=False` to skip the automatic addition of
+          {attr}`self.post_args <meta_package_manager.manager.PackageManager.post_args>`
 
         Each global set of elements can be locally overridden with:
 
-        * ``override_pre_cmds=tuple()``
-        * ``override_cli_path=str``
-        * ``override_pre_args=tuple()``
-        * ``override_post_args=tuple()``
+        * `override_pre_cmds=tuple()`
+        * `override_cli_path=str`
+        * `override_pre_args=tuple()`
+        * `override_post_args=tuple()`
 
-        On UNIX, an operation marked privileged (``sudo=True``) is escalated only when
-        the per-manager policy opts in (:py:attr:`sudo`, falling back to
-        :py:attr:`default_sudo`). It is then run through `sudo <https://www.sudo.ws>`_
-        with ``--non-interactive`` (it spends the credential cache warmed by
-        :py:func:`~meta_package_manager.sudo.prime_sudo` and fails fast rather than
+        On UNIX, an operation marked privileged (`sudo=True`) is escalated only when
+        the per-manager policy opts in ({attr}`sudo`, falling back to
+        {attr}`default_sudo`). It is then run through [sudo](https://www.sudo.ws)
+        with `--non-interactive` (it spends the credential cache warmed by
+        {func}`~meta_package_manager.sudo.prime_sudo` and fails fast rather than
         blocking on a password prompt).
-        When escalation applies, ``override_pre_cmds`` is not allowed to be set and
-        ``auto_pre_cmds`` is forced to ``False``. A non-UNIX host never escalates.
+        When escalation applies, `override_pre_cmds` is not allowed to be set and
+        `auto_pre_cmds` is forced to `False`. A non-UNIX host never escalates.
         """
         # Apply delegation overrides if set by a DelegatedMethod descriptor.
         delegate_path = getattr(self, "_delegate_cli_path", None)
@@ -1231,12 +1232,12 @@ class CLIExecutor:
         params: list[TArg | TNestedArgs] = []
 
         # Resolve whether this privileged operation is actually escalated: the caller
-        # marks the operation as needing root (``sudo``), the per-manager policy opts in
-        # (the ``sudo`` override, else ``default_sudo``), and the platform has ``sudo``.
+        # marks the operation as needing root (`sudo`), the per-manager policy opts in
+        # (the `sudo` override, else `default_sudo`), and the platform has `sudo`.
         # A non-UNIX host simply does not escalate rather than raising.
         escalate = bool(sudo and _resolved_sudo(self) and current_platform() in UNIX)
         # Sudo replaces any pre-command, be it overridden or automatic.
-        # ``--non-interactive`` spends the credential cache warmed up front by
+        # `--non-interactive` spends the credential cache warmed up front by
         # prime_sudo() and fails fast instead of blocking on an invisible /dev/tty
         # password prompt buried in the concurrent fan-out.
         if escalate:
@@ -1287,28 +1288,28 @@ class CLIExecutor:
         must_succeed: bool = False,
         sudo: bool = False,
     ) -> str:
-        """Build and run the package manager CLI by combining the custom ``*args`` with
+        """Build and run the package manager CLI by combining the custom `*args` with
         the package manager's global parameters.
 
         After the CLI is built with the
-        :py:meth:`meta_package_manager.manager.PackageManager.build_cli` method, it is
-        executed with the :py:meth:`meta_package_manager.manager.PackageManager.run`
-        method, augmented with environment variables from :py:attr:`self.extra_env
+        {meth}`meta_package_manager.manager.PackageManager.build_cli` method, it is
+        executed with the {meth}`meta_package_manager.manager.PackageManager.run`
+        method, augmented with environment variables from {attr}`self.extra_env
         <meta_package_manager.manager.PackageManager.extra_env>`.
 
         All parameters are the same as
-        :py:meth:`meta_package_manager.manager.PackageManager.build_cli`, plus:
+        {meth}`meta_package_manager.manager.PackageManager.build_cli`, plus:
 
-        * ``auto_extra_env=False`` to skip the automatic addition of
-          :py:attr:`self.extra_env <meta_package_manager.manager.PackageManager.extra_env>`
-        * ``override_extra_env=dict()`` to locally overrides the later
-        * ``force_exec`` ignores the ``mpm --dry-run``, ``mpm --stop-on-error``
-          and ``mpm --plan`` options to force the execution and completion of the
+        * `auto_extra_env=False` to skip the automatic addition of
+          {attr}`self.extra_env <meta_package_manager.manager.PackageManager.extra_env>`
+        * `override_extra_env=dict()` to locally overrides the later
+        * `force_exec` ignores the `mpm --dry-run`, `mpm --stop-on-error`
+          and `mpm --plan` options to force the execution and completion of the
           command. It is used for reads whose output is needed regardless (version
-          detection, ``yarn global dir``), which must run for real even when the
+          detection, `yarn global dir`), which must run for real even when the
           user asked to simulate or to only plan mutations.
-        * ``must_succeed`` raises on non-zero exit regardless of
-          ``mpm --stop-on-error``. See :py:meth:`run` for details.
+        * `must_succeed` raises on non-zero exit regardless of
+          `mpm --stop-on-error`. See {meth}`run` for details.
         """
         cli = self.build_cli(
             *args,

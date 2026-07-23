@@ -15,29 +15,29 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Dynamic documentation content generation.
 
-Called by repomatic's ``update-docs`` job to regenerate the tables and diagrams
-checked into ``readme.md`` (which GitHub renders as static markdown), plus the
-pool-derived blocks of ``pyproject.toml``: the ``[project]`` keywords, the label
+Called by repomatic's `update-docs` job to regenerate the tables and diagrams
+checked into `readme.md` (which GitHub renders as static markdown), plus the
+pool-derived blocks of `pyproject.toml`: the `[project]` keywords, the label
 registry and the labeller rules.
 
-The Sphinx-only pages need no content regeneration script: ``docs/benchmark.md``
-and ``docs/augmentations.md`` render their per-manager tables live at build time
-through ``{python:render}`` directives calling :func:`benchmark_managers_table`
-and :func:`augmentations_table`, each ``docs/managers/<id>.md`` page renders its
-sections the same way through the ``manager_*`` generators, and the
-``<!-- matrix ... -->`` compatibility blocks of ``docs/install.md`` are refreshed
-by ``update-docs``'s own directive-refresh phase
-(``click-extra refresh-directives``). Only the stub *file set* of
-``docs/managers/`` is committed: :func:`update_manager_stubs` creates and deletes
+The Sphinx-only pages need no content regeneration script: `docs/benchmark.md`
+and `docs/augmentations.md` render their per-manager tables live at build time
+through ``{python:render}`` directives calling {func}`benchmark_managers_table`
+and {func}`augmentations_table`, each `docs/managers/<id>.md` page renders its
+sections the same way through the `manager_*` generators, and the
+`<!-- matrix ... -->` compatibility blocks of `docs/install.md` are refreshed
+by `update-docs`'s own directive-refresh phase
+(`click-extra refresh-directives`). Only the stub *file set* of
+`docs/managers/` is committed: {func}`update_manager_stubs` creates and deletes
 stubs as managers join or leave the pool, while the page content stays
 build-time.
 
-.. warning::
-    The generated Mermaid syntax targets the version bundled with
-    ``sphinxcontrib-mermaid``, currently ``11.12.1``. See the hard-coded
-    ``MERMAID_VERSION`` constant in `sphinxcontrib-mermaid's source
-    <https://github.com/mgaitan/sphinxcontrib-mermaid/blob/master/sphinxcontrib/mermaid/__init__.py>`_.
-    Avoid using Mermaid features introduced after that version.
+```{warning}
+The generated Mermaid syntax targets the version bundled with
+`sphinxcontrib-mermaid`, currently `11.12.1`. See the hard-coded
+`MERMAID_VERSION` constant in [sphinxcontrib-mermaid's source](https://github.com/mgaitan/sphinxcontrib-mermaid/blob/master/sphinxcontrib/mermaid/__init__.py).
+Avoid using Mermaid features introduced after that version.
+```
 """
 
 from __future__ import annotations
@@ -75,7 +75,7 @@ from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import PURL_MAP
 
-# Version-gated TOML reader, following the same pattern as ``tests/conftest.py``.
+# Version-gated TOML reader, following the same pattern as `tests/conftest.py`.
 if sys.version_info >= (3, 11):
     import tomllib
 else:
@@ -84,12 +84,12 @@ else:
 PROJECT_ROOT = Path(__file__).parent.parent
 
 BENCHMARK_COMPETITORS = ("topgrade", "pacaptr", "pacapt", "sysget", "whohas")
-"""Competing tools shown alongside ``mpm`` in the benchmark page, in column order."""
+"""Competing tools shown alongside `mpm` in the benchmark page, in column order."""
 
 DOCS_SITE_URL = "https://kdeldycke.github.io/meta-package-manager"
 """Base URL of the published documentation site.
 
-Used by :func:`operation_matrix` to link each manager ID of ``readme.md`` to its
+Used by {func}`operation_matrix` to link each manager ID of `readme.md` to its
 documentation page: the readme renders on GitHub and PyPI, where relative Sphinx
 links cannot resolve, so the links must be absolute.
 """
@@ -97,7 +97,7 @@ links cannot resolve, so the links must be absolute.
 GITHUB_BLOB_URL = "https://github.com/kdeldycke/meta-package-manager/blob/main"
 """Base URL for linking to source files in the benchmark table.
 
-Pinned to the ``main`` branch so the generated artifact references the same
+Pinned to the `main` branch so the generated artifact references the same
 revision the docs are built from.
 """
 
@@ -162,9 +162,9 @@ KEYWORDS_EXTRAS = (
 """Curated PyPI keywords beyond the manager IDs themselves.
 
 Ecosystem names, platform names and generic discovery terms. The manager IDs come
-for free from the pool: :func:`update_keywords` merges both sets into
-``pyproject.toml``. When a new manager brings a well-known ecosystem name that
-differs from its ID (like ``gh-ext`` and ``github cli``), add the alias here.
+for free from the pool: {func}`update_keywords` merges both sets into
+`pyproject.toml`. When a new manager brings a well-known ecosystem name that
+differs from its ID (like `gh-ext` and `github cli`), add the alias here.
 """
 
 MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
@@ -180,8 +180,8 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
 )
 """Layout of a per-manager documentation page: section title, generator function.
 
-Single source of truth for :func:`manager_page_stub` and the structural tests.
-Sections promote ``mpm`` usage first, then document ``mpm``'s preconceptions
+Single source of truth for {func}`manager_page_stub` and the structural tests.
+Sections promote `mpm` usage first, then document `mpm`'s preconceptions
 about the native tool (its invocation, then the captured traces backing the
 parsers). A section whose generator produces nothing for a given manager is
 omitted from its stub.
@@ -194,11 +194,12 @@ generator listed here must therefore emit heading-free MyST.
 
 
 def managers_sankey() -> str:
-    """Produce a sankey diagram to map ``mpm`` to all its supported managers.
+    """Produce a sankey diagram to map `mpm` to all its supported managers.
 
-    .. warning::
-        Output must stay compatible with the Mermaid version bundled in
-        ``sphinxcontrib-mermaid``. See module docstring for details.
+    ```{warning}
+    Output must stay compatible with the Mermaid version bundled in
+    `sphinxcontrib-mermaid`. See module docstring for details.
+    ```
     """
     table = []
     for mid, m in sorted(pool.items()):
@@ -288,10 +289,10 @@ def operation_matrix() -> tuple[str, str]:
 def manager_source_url(manager_id: str) -> str:
     """Return a GitHub URL pointing to the class definition of a manager.
 
-    Resolves the manager class via :py:data:`meta_package_manager.pool.pool`,
-    then uses :py:mod:`inspect` to derive the source file and line number of
-    the class declaration. Used by the benchmark page to back each ``✅`` in
-    the ``mpm`` column with a link to its implementation.
+    Resolves the manager class via {data}`meta_package_manager.pool.pool`,
+    then uses {mod}`inspect` to derive the source file and line number of
+    the class declaration. Used by the benchmark page to back each `✅` in
+    the `mpm` column with a link to its implementation.
     """
     manager = pool[manager_id]
     # A config-defined manager (built from a shipped TOML file, not a class body) has no
@@ -307,30 +308,30 @@ def manager_source_url(manager_id: str) -> str:
 
 
 def benchmark_managers_table() -> str:
-    """Produce the ``Package manager support`` table of the benchmark page.
+    """Produce the `Package manager support` table of the benchmark page.
 
     Rendered live at Sphinx build time by the ``{python:render}`` block in
-    ``docs/benchmark.md``, so the table (and its source-line anchors) always
+    `docs/benchmark.md`, so the table (and its source-line anchors) always
     matches the code being documented without a checked-in copy.
 
-    The ``mpm`` column is auto-derived from the live pool: each implemented
-    manager renders as ``[✅](source_url)``, linking to the class definition
+    The `mpm` column is auto-derived from the live pool: each implemented
+    manager renders as `[✅](source_url)`, linking to the class definition
     that proves the support. Competitor columns are filled from
-    ``docs/benchmark.yaml``, which only encodes what the *other* tools
+    `docs/benchmark.yaml`, which only encodes what the *other* tools
     support.
 
     Each manager identifier in the first column is rendered as a link: to its
     dedicated documentation page for implemented managers, or to its homepage
-    from the YAML's ``homepages`` mapping for competitor-only managers. IDs
+    from the YAML's `homepages` mapping for competitor-only managers. IDs
     without any known URL render as plain ``\\`code\\```.
 
-    Support cells are normally ``✅``, but render as ``[🟡](url)`` when the
-    ``(manager_id, competitor)`` pair is listed in the YAML's
-    ``coarse_support`` map, with the URL pointing to the maintainer's own
-    acknowledgement of the bundling. ``🟡`` means the competitor can only
+    Support cells are normally `✅`, but render as `[🟡](url)` when the
+    `(manager_id, competitor)` pair is listed in the YAML's
+    `coarse_support` map, with the URL pointing to the maintainer's own
+    acknowledgement of the bundling. `🟡` means the competitor can only
     reach this manager through a coarser umbrella step (topgrade's
-    ``--only shell`` or ``--only vim``), never in isolation. Refused
-    managers (from the ``refused`` map) render as ``[❌](url)`` where the
+    `--only shell` or `--only vim`), never in isolation. Refused
+    managers (from the `refused` map) render as `[❌](url)` where the
     URL is the specific decision or refusal that documents the declined
     support.
 
@@ -394,23 +395,23 @@ def augmentations_table() -> str:
     """Produce the per-manager table of the augmentations page.
 
     Rendered live at Sphinx build time by the ``{python:render}`` block in
-    ``docs/augmentations.md``, so the table always matches the code being
+    `docs/augmentations.md`, so the table always matches the code being
     documented without a checked-in copy.
 
-    Each ``✅`` marks a capability ``mpm`` synthesizes for a manager that lacks
+    Each `✅` marks a capability `mpm` synthesizes for a manager that lacks
     it natively, straight from the capability introspection helpers:
 
-    - *Full* ``upgrade --all``: the manager only reaches the operation through
+    - *Full* `upgrade --all`: the manager only reaches the operation through
       the one-by-one fallback
-      (:func:`meta_package_manager.capabilities.upgrade_all_is_synthesized`).
+      ({func}`meta_package_manager.capabilities.upgrade_all_is_synthesized`).
     - *Orphan sweep*: the manager has no native "remove every orphan" verb, so
-      ``mpm cleanup --orphans`` synthesizes it from the manager's orphan listing
+      `mpm cleanup --orphans` synthesizes it from the manager's orphan listing
       and per-package removal
-      (:func:`meta_package_manager.capabilities.cleanup_orphan_is_synthesized`).
+      ({func}`meta_package_manager.capabilities.cleanup_orphan_is_synthesized`).
     - *Exact search* and *Extended search*: the manager's native search cannot
-      filter that way, so ``mpm`` refilters the raw results itself (the
-      ``exact_support``/``extended_support`` flags set by
-      :func:`meta_package_manager.capabilities.search_capabilities` and the
+      filter that way, so `mpm` refilters the raw results itself (the
+      `exact_support`/`extended_support` flags set by
+      {func}`meta_package_manager.capabilities.search_capabilities` and the
       config-defined manager builder).
 
     Managers needing no backfill at all are left out of the table. Each listed
@@ -453,10 +454,10 @@ def binaries_download_table() -> str:
     """Produce the per-platform download table of the latest release binaries.
 
     Rendered live at Sphinx build time by the ``{python:render}`` block in
-    ``docs/install.md``. Binaries carry the version in their filename
-    (``meta-package-manager-7.3.0-linux-arm64.bin``), so no stable
-    ``releases/latest/download`` URL can exist: the table is regenerated from
-    ``docs/assets/binaries.csv``, which the release pipeline extends at each
+    `docs/install.md`. Binaries carry the version in their filename
+    (`meta-package-manager-7.3.0-linux-arm64.bin`), so no stable
+    `releases/latest/download` URL can exist: the table is regenerated from
+    `docs/assets/binaries.csv`, which the release pipeline extends at each
     release with the exact asset URLs, newest first.
     """
     csv_path = Path(__file__).parent / "assets" / "binaries.csv"
@@ -525,12 +526,12 @@ def _toml_definition(definition_source: str) -> dict:
 def _cooldown_status(manager_id: str) -> tuple[str, str, str] | None:
     """Extract a manager's row from the cooldown support table.
 
-    The "Supported managers" table of ``docs/cooldown.md`` is the hand-curated
+    The "Supported managers" table of `docs/cooldown.md` is the hand-curated
     source of truth for release-age gating: per manager, a status glyph, the
     native mechanism and an upstream reference. A row may cover several managers
     at once, its id cell listing each as a backticked code span (like the shared
-    ``uv``/``uvx`` row). Returns the three cells with their markdown preserved
-    (``—`` marks an empty cell), or ``None`` when the table has no row for the
+    `uv`/`uvx` row). Returns the three cells with their markdown preserved
+    (`—` marks an empty cell), or `None` when the table has no row for the
     manager yet.
     """
     text = (PROJECT_ROOT / "docs" / "cooldown.md").read_text(encoding="UTF-8")
@@ -553,7 +554,7 @@ def _toml_definition_intro(definition_source: str) -> str | None:
     with a comment block describing the manager and its quirks. The boilerplate
     is stripped (the "Bundled package-manager definition" tag line and the
     schema/loader pointer), bare URLs are wrapped into autolinks, and paragraph
-    breaks (lone ``#`` lines) are preserved. Returns ``None`` when nothing but
+    breaks (lone `#` lines) are preserved. Returns `None` when nothing but
     boilerplate is found.
     """
     lines = []
@@ -593,16 +594,16 @@ def manager_intro(manager_id: str) -> str:
     """Produce the lede of a manager's documentation page.
 
     Rendered live at Sphinx build time by the first ``{python:render}`` block of
-    ``docs/managers/<id>.md``. Stacks, in order: a deprecation warning when the
+    `docs/managers/<id>.md`. Stacks, in order: a deprecation warning when the
     manager is deprecated, the manager class's own docstring (whose caveats and
     notes are otherwise only surfaced by the API docs), and a facts list (home
     page, source, version requirement).
 
-    The class docstring is reST, so it is wrapped in an ``{eval-rst}`` block
-    opened with a ``py:currentmodule`` directive so module-sibling
-    cross-references resolve outside their autodoc context. Config-defined
-    managers get the description comment atop their bundled TOML definition
-    (:func:`_toml_definition_intro`) instead of their synthesized class
+    The class docstring is MyST, so it inlines straight into the page, after a
+    `{py:currentmodule}` directive letting module-sibling cross-references
+    resolve outside their autodoc context. Config-defined managers get the
+    description comment atop their bundled TOML definition
+    ({func}`_toml_definition_intro`) instead of their synthesized class
     docstring, with a pointer to the file as fallback.
     """
     m = pool[manager_id]
@@ -629,10 +630,8 @@ def manager_intro(manager_id: str) -> str:
         docstring = type(m).__dict__.get("__doc__")
         assert docstring, f"Manager class of {manager_id} has no docstring."
         blocks.append(
-            "````{eval-rst}\n"
-            f".. py:currentmodule:: {type(m).__module__}\n\n"
-            f"{inspect.cleandoc(docstring)}\n"
-            "````",
+            f"```{{py:currentmodule}} {type(m).__module__}\n```\n\n"
+            f"{inspect.cleandoc(docstring)}",
         )
 
     facts = [
@@ -649,10 +648,10 @@ def manager_intro(manager_id: str) -> str:
 def _platform_coverage(p_obj, platforms: frozenset) -> tuple[str, str | None] | None:
     """Return the icon and partial-coverage annotation of a platform entry.
 
-    ``None`` when the manager covers no member of the entry. The annotation is
-    ``None`` on full coverage, and otherwise spells out whichever side is
-    shorter: the covered members (``Exherbo Linux only``) or the missing ones
-    (``except WSL1, WSL2``), so a manager backing most of a large group stays
+    `None` when the manager covers no member of the entry. The annotation is
+    `None` on full coverage, and otherwise spells out whichever side is
+    shorter: the covered members (`Exherbo Linux only`) or the missing ones
+    (`except WSL1, WSL2`), so a manager backing most of a large group stays
     readable.
     """
     members = set(extract_members(p_obj))
@@ -675,8 +674,8 @@ def _platform_coverage(p_obj, platforms: frozenset) -> tuple[str, str | None] | 
 def manager_platforms(manager_id: str) -> str:
     """Produce the platform bullet list of a manager's documentation page.
 
-    One line per supported :data:`~meta_package_manager.platforms.MAIN_PLATFORMS`
-    entry, with :func:`_platform_coverage`'s annotation when the manager only
+    One line per supported {data}`~meta_package_manager.platforms.MAIN_PLATFORMS`
+    entry, with {func}`_platform_coverage`'s annotation when the manager only
     backs part of a multi-platform group: the readme's operation matrix renders
     an all-or-nothing icon, this list is where partial support is spelled out.
     """
@@ -697,10 +696,10 @@ def manager_platforms(manager_id: str) -> str:
 def manager_operations(manager_id: str) -> str:
     """Produce the operations table of a manager's documentation page.
 
-    One row per member of :class:`~meta_package_manager.capabilities.Operations`,
-    in enum order. The *Notes* column points out the capabilities ``mpm``
+    One row per member of {class}`~meta_package_manager.capabilities.Operations`,
+    in enum order. The *Notes* column points out the capabilities `mpm`
     synthesizes on top of the native CLI, mirroring the introspection of
-    :func:`augmentations_table`, and is dropped entirely for the managers
+    {func}`augmentations_table`, and is dropped entirely for the managers
     needing no backfill.
     """
     m = pool[manager_id]
@@ -757,8 +756,8 @@ def manager_operations(manager_id: str) -> str:
 def _python_regex_literal(pattern: str) -> str:
     """Render a regex as the Python raw-string literal it is declared as in source.
 
-    Gives the version-probe block of the manager pages ``python`` highlighting
-    (Pygments ships no standalone regex lexer). Falls back to ``repr()`` —
+    Gives the version-probe block of the manager pages `python` highlighting
+    (Pygments ships no standalone regex lexer). Falls back to `repr()` —
     escaped, non-raw — for the rare pattern a raw literal cannot express: one
     containing both quote characters, or ending with a backslash.
     """
@@ -773,18 +772,18 @@ def _python_regex_literal(pattern: str) -> str:
 def manager_cli(manager_id: str) -> str:
     """Produce the command-line section of a manager's documentation page.
 
-    Documents how ``mpm`` drives the manager: binary names and lookup tweaks,
+    Documents how `mpm` drives the manager: binary names and lookup tweaks,
     the arguments and environment forced on every call, then the version probe
     and its parsing regexes. Beyond the always-shown CLI names and version
     probe, only non-default facts are listed. The argv fragments (pre-commands,
     forced arguments) are collated into single code spans, matching how they
     appear on the command line. Escalation and cooldown each have their own
-    section (:func:`manager_sudo`, :func:`manager_cooldown`).
+    section ({func}`manager_sudo`, {func}`manager_cooldown`).
 
     The version probe additionally shows its captured output as a terminal
-    transcript, from the ``[samples.version]`` fixture of a bundled TOML manager
-    or the ``version_regexes`` docstring of a class-based one; the per-operation
-    samples render in the reference-traces section (:func:`manager_traces`).
+    transcript, from the `[samples.version]` fixture of a bundled TOML manager
+    or the `version_regexes` docstring of a class-based one; the per-operation
+    samples render in the reference-traces section ({func}`manager_traces`).
     """
     m = pool[manager_id]
 
@@ -845,7 +844,7 @@ def manager_ecosystem(manager_id: str) -> str:
 
     Lists the [purl](https://github.com/package-url/purl-spec) types the manager
     responds to (its own ID plus the ecosystem types mapped to it by
-    :data:`~meta_package_manager.specifier.PURL_MAP`), and its Brewfile entry
+    {data}`~meta_package_manager.specifier.PURL_MAP`), and its Brewfile entry
     type when Homebrew Bundle's DSL covers it.
     """
     m = pool[manager_id]
@@ -869,7 +868,7 @@ def manager_usage(manager_id: str) -> str:
     """Produce the usage section of a manager's documentation page.
 
     A few ready-to-paste invocations targeting this manager alone, each gated on
-    the operation being implemented, a ``--dry-run`` variant to try ``mpm``
+    the operation being implemented, a `--dry-run` variant to try `mpm`
     without touching the system, and pointers to the selection and configuration
     levers.
     """
@@ -904,11 +903,11 @@ def manager_usage(manager_id: str) -> str:
 def manager_sudo(manager_id: str) -> str:
     """Produce the privilege-escalation section of a manager's documentation page.
 
-    States which escalation policy applies (system-wide ``sudo`` wrapping,
+    States which escalation policy applies (system-wide `sudo` wrapping,
     internal escalation, or none) and how to flip it, deriving everything from
     the escalation attributes so the page can never contradict the code. For
     config-defined managers that do not escalate internally, the operations
-    marked ``sudo = true`` in the bundled TOML definition are listed by name.
+    marked `sudo = true` in the bundled TOML definition are listed by name.
     """
     m = pool[manager_id]
     if m.internal_sudo:
@@ -962,10 +961,10 @@ def manager_cooldown(manager_id: str) -> str:
     """Produce the cooldown section of a manager's documentation page.
 
     Reuses the manager's row from the hand-curated "Supported managers" table
-    of ``docs/cooldown.md`` (status, native mechanism, upstream reference), so
+    of `docs/cooldown.md` (status, native mechanism, upstream reference), so
     the page and the cooldown overview can never diverge. Tops it with the
     enforcement facts derived from the manager's declarations: the injected
-    environment variable when ``mpm`` drives a native gate, or the fail-closed
+    environment variable when `mpm` drives a native gate, or the fail-closed
     skip applying to everyone else.
     """
     m = pool[manager_id]
@@ -1011,14 +1010,14 @@ def manager_cooldown(manager_id: str) -> str:
 def manager_traces(manager_id: str) -> str:
     """Produce the reference-traces section of a manager's documentation page.
 
-    Raw native outputs replayed as terminal transcripts: the reference ``mpm``'s
+    Raw native outputs replayed as terminal transcripts: the reference `mpm`'s
     parsers were written against. Surfacing them lets users seasoned in the
     native tool spot wrong assumptions, or output formats a newer release has
     since changed. The captures come from the bundled TOML definition's
-    ``[samples]`` fixtures for a config-defined manager, or from the
-    ``shell-session`` blocks documented in a class-based manager's
-    ``installed``/``outdated`` docstrings (harvested by
-    :func:`~meta_package_manager.docstring_corpus.literal_blocks`, the same
+    `[samples]` fixtures for a config-defined manager, or from the
+    `shell-session` blocks documented in a class-based manager's
+    `installed`/`outdated` docstrings (harvested by
+    {func}`~meta_package_manager.docstring_corpus.literal_blocks`, the same
     literal blocks the corpus test round-trips). Empty for managers without such
     samples (the section is then omitted from the stub); the version probe
     transcript stays in the command-line section, next to the regexes consuming
@@ -1063,13 +1062,13 @@ def manager_traces(manager_id: str) -> str:
 
 
 def managers_index_table() -> str:
-    """Produce the manager index table of ``docs/managers.md``.
+    """Produce the manager index table of `docs/managers.md`.
 
     Rendered live at Sphinx build time. Each manager links to its dedicated
-    documentation page, deprecated managers carry the same ``⚠️`` marker as the
+    documentation page, deprecated managers carry the same `⚠️` marker as the
     readme's operation matrix, and platform icons follow the same coverage
     reading as the manager pages: a partially-backed group keeps its icon with
-    :func:`_platform_coverage`'s annotation (``🐧 (Exherbo Linux only)``)
+    {func}`_platform_coverage`'s annotation (`🐧 (Exherbo Linux only)`)
     instead of disappearing, as it does in the readme's all-or-nothing matrix.
     """
     table = []
@@ -1099,12 +1098,12 @@ def manager_page_stub(manager_id: str) -> str:
     """Produce the committed stub of a manager's documentation page.
 
     The stub carries the page title and the section headings from
-    :data:`MANAGER_SECTIONS`; every section body is a ``{python:render}`` block
+    {data}`MANAGER_SECTIONS`; every section body is a ``{python:render}`` block
     so the content renders live at Sphinx build time and never drifts from the
     pool. A section whose generator produces nothing for this manager (like
     reference traces for a manager documenting no literal output samples) is
     left out. The block
-    formatting mirrors ``docs/benchmark.md`` so the stubs are an ``mdformat``
+    formatting mirrors `docs/benchmark.md` so the stubs are an `mdformat`
     fixpoint.
     """
     m = pool[manager_id]
@@ -1131,9 +1130,9 @@ def replace_content(
 ) -> None:
     """Replace in a file the content between start and end tags.
 
-    The ``new_content`` payload is wrapped with a blank line on both sides so
-    the resulting region is format-stable through ``mdformat``. ``mdformat``
-    treats the surrounding ``<!-- ... -->`` markers as block-level HTML and
+    The `new_content` payload is wrapped with a blank line on both sides so
+    the resulting region is format-stable through `mdformat`. `mdformat`
+    treats the surrounding `<!-- ... -->` markers as block-level HTML and
     inserts blank lines around them on every pass: emitting them up front
     avoids a generator/formatter ping-pong on every CI run.
     """
@@ -1162,14 +1161,14 @@ def replace_content(
 
 
 def _string_array(values: tuple[str, ...], multiline: bool = False):
-    """Render strings as a ``tomlkit`` array, one item per line when asked or long.
+    """Render strings as a `tomlkit` array, one item per line when asked or long.
 
-    Both layouts replicate ``pyproject-fmt``'s canonical style: inline arrays
+    Both layouts replicate `pyproject-fmt`'s canonical style: inline arrays
     are padded with spaces inside the brackets, exploded arrays get a 2-space
-    indent (``tomlkit``'s own ``multiline()`` hard-codes 4) and a trailing
-    comma. Any deviation is churn: the ``format-pyproject`` autofix job would
-    endlessly rewrite what the ``update-docs`` job regenerates.
-    ``test_pyproject_updates_are_pyproject_fmt_fixpoint`` guards the match.
+    indent (`tomlkit`'s own `multiline()` hard-codes 4) and a trailing
+    comma. Any deviation is churn: the `format-pyproject` autofix job would
+    endlessly rewrite what the `update-docs` job regenerates.
+    `test_pyproject_updates_are_pyproject_fmt_fixpoint` guards the match.
     """
     items = [tomlkit.item(value).as_string() for value in values]
     inline = f"[ {', '.join(items)} ]"
@@ -1181,7 +1180,7 @@ def _string_array(values: tuple[str, ...], multiline: bool = False):
 
 
 def _rules_aot(rules: list[tuple[str, tuple[str, ...]]], field: str):
-    """Render labeller rules as a ``tomlkit`` array-of-tables.
+    """Render labeller rules as a `tomlkit` array-of-tables.
 
     Each rule becomes a ``{label, <field>}`` table. The pattern array switches to
     one-item-per-line when its inline form would run long.
@@ -1196,20 +1195,21 @@ def _rules_aot(rules: list[tuple[str, tuple[str, ...]]], field: str):
 
 
 def update_labels() -> None:
-    """Sync the label registry and labeller rules into ``pyproject.toml``.
+    """Sync the label registry and labeller rules into `pyproject.toml`.
 
-    Regenerates the three ``[tool.repomatic.labels.*]`` arrays from
-    :mod:`meta_package_manager.labels`: ``extra`` (from
-    :data:`~meta_package_manager.labels.LABELS`), ``content-rules`` and
-    ``file-rules`` (from the pool-derived rule generators). repomatic's
-    ``sync-labels`` and labeller jobs read these inline definitions at run time.
+    Regenerates the three `[tool.repomatic.labels.*]` arrays from
+    {mod}`meta_package_manager.labels`: `extra` (from
+    {data}`~meta_package_manager.labels.LABELS`), `content-rules` and
+    `file-rules` (from the pool-derived rule generators). repomatic's
+    `sync-labels` and labeller jobs read these inline definitions at run time.
 
-    .. note::
-        The edit is done with ``tomlkit`` round-trip so the rest of
-        ``pyproject.toml`` (comments, key order, formatting) is preserved: only
-        the three label arrays are regenerated. The per-entry layout matches what
-        ``pyproject-fmt`` emits, so the result survives the autofix formatting
-        pass without churn.
+    ```{note}
+    The edit is done with `tomlkit` round-trip so the rest of
+    `pyproject.toml` (comments, key order, formatting) is preserved: only
+    the three label arrays are regenerated. The per-entry layout matches what
+    `pyproject-fmt` emits, so the result survives the autofix formatting
+    pass without churn.
+    ```
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
@@ -1248,11 +1248,11 @@ def update_labels() -> None:
 
 
 def update_keywords() -> None:
-    """Sync the ``[project]`` keywords of ``pyproject.toml``.
+    """Sync the `[project]` keywords of `pyproject.toml`.
 
     The keyword set is the pool's manager IDs merged with the curated
-    :data:`KEYWORDS_EXTRAS`, so a new manager advertises itself on PyPI without
-    a hand edit. Same ``tomlkit`` round-trip as :func:`update_labels`.
+    {data}`KEYWORDS_EXTRAS`, so a new manager advertises itself on PyPI without
+    a hand edit. Same `tomlkit` round-trip as {func}`update_labels`.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
@@ -1268,7 +1268,7 @@ def update_keywords() -> None:
 
 
 def update_readme() -> None:
-    """Update ``readme.md`` with implementation table for each manager we support."""
+    """Update `readme.md` with implementation table for each manager we support."""
     readme = PROJECT_ROOT / "readme.md"
 
     replace_content(
@@ -1303,12 +1303,12 @@ def update_readme() -> None:
 
 
 def update_manager_stubs() -> None:
-    """Sync the committed page stubs of ``docs/managers/``.
+    """Sync the committed page stubs of `docs/managers/`.
 
-    The directory is wholly owned by this function: one ``<id>.md`` stub per
+    The directory is wholly owned by this function: one `<id>.md` stub per
     pool manager, nothing else. A stub is only rewritten when its content
-    differs (keeping ``update-docs`` autofix diffs minimal), and stubs whose
-    manager left the pool are deleted. ``test_manager_stubs_in_sync`` guards
+    differs (keeping `update-docs` autofix diffs minimal), and stubs whose
+    manager left the pool are deleted. `test_manager_stubs_in_sync` guards
     the contract.
     """
     stub_dir = PROJECT_ROOT / "docs" / "managers"

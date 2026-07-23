@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Registration, indexing and caching of package manager supported by ``mpm``."""
+"""Registration, indexing and caching of package manager supported by `mpm`."""
 
 from __future__ import annotations
 
@@ -128,11 +128,11 @@ manager_classes = (
 
 Is considered valid package manager, definitions classes which:
 
-#. are located in the :py:attr:`meta_package_manager.pool.ManagerPool.manager_subfolder`
+#. are located in the {attr}`meta_package_manager.pool.ManagerPool.manager_subfolder`
     subfolder, and
-#. are sub-classes of :py:class:`meta_package_manager.manager.PackageManager`, and
-#. are not :py:attr:`meta_package_manager.manager.PackageManager.virtual` (i.e. have a
-    non-null :py:attr:`meta_package_manager.manager.PackageManager.cli_names` property).
+#. are sub-classes of {class}`meta_package_manager.manager.PackageManager`, and
+#. are not {attr}`meta_package_manager.manager.PackageManager.virtual` (i.e. have a
+    non-null {attr}`meta_package_manager.manager.PackageManager.cli_names` property).
 
 These properties are checked and enforced in unittests.
 """
@@ -155,7 +155,7 @@ class ManagerPool:
         },
     )
     """List of extra options that are allowed to be set on managers during the use of
-    the :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper
+    the {func}`meta_package_manager.pool.ManagerPool.select_managers` helper
     below."""
 
     @cached_property
@@ -163,9 +163,9 @@ class ManagerPool:
         """Instantiate all supported package managers.
 
         Built-in classes first, then mpm's bundled configuration-defined managers
-        (built from shipped ``*.toml`` package data). Both land here at construction
+        (built from shipped `*.toml` package data). Both land here at construction
         time, so the augmented pool is complete before the CLI enumerates it to build
-        the dynamic ``--<id>`` flags, in every context including the test runner.
+        the dynamic `--<id>` flags, in every context including the test runner.
         """
         register: dict[str, PackageManager] = {}
         for klass in manager_classes:
@@ -177,14 +177,14 @@ class ManagerPool:
 
     @cached_property
     def builtin_manager_ids(self) -> frozenset[str]:
-        """IDs of the managers shipped with mpm, taken from :data:`manager_classes`.
+        """IDs of the managers shipped with mpm, taken from {data}`manager_classes`.
 
-        Computed from the classes (their ``id`` is set by the metaclass at class
+        Computed from the classes (their `id` is set by the metaclass at class
         creation, no instantiation needed). Lets the configuration layer tell a
         built-in *override* apart from a brand-new manager *definition*: a
-        ``[mpm.managers.<id>]`` section whose ID is in this set tunes a built-in,
+        `[mpm.managers.<id>]` section whose ID is in this set tunes a built-in,
         any other ID defines a new manager. See
-        :py:func:`meta_package_manager.config.validate_manager_overrides_section`.
+        {func}`meta_package_manager.config.validate_manager_overrides_section`.
         """
         return frozenset(klass.id for klass in manager_classes)
 
@@ -192,8 +192,8 @@ class ManagerPool:
     def config_defined_ids(self) -> set[str]:
         """IDs of managers added at runtime from configuration definitions.
 
-        Populated by :py:meth:`add_manager`. Disjoint from
-        :py:attr:`builtin_manager_ids`.
+        Populated by {meth}`add_manager`. Disjoint from
+        {attr}`builtin_manager_ids`.
         """
         return set()
 
@@ -201,9 +201,9 @@ class ManagerPool:
     def bundled_manager_ids(self) -> frozenset[str]:
         """IDs of the managers mpm ships as bundled configuration definitions.
 
-        Config-defined (built from shipped ``*.toml`` package data, not a Python
-        class) yet always present in :py:attr:`register` like the built-ins. Disjoint
-        from :py:attr:`builtin_manager_ids` and :py:attr:`config_defined_ids`.
+        Config-defined (built from shipped `*.toml` package data, not a Python
+        class) yet always present in {attr}`register` like the built-ins. Disjoint
+        from {attr}`builtin_manager_ids` and {attr}`config_defined_ids`.
         """
         return definitions.bundled_manager_ids()
 
@@ -211,23 +211,23 @@ class ManagerPool:
     def known_manager_ids(self) -> frozenset[str]:
         """Every manager ID mpm ships: built-in classes plus bundled definitions.
 
-        A ``[mpm.managers.<id>]`` section keyed by one of these tunes a shipped
+        A `[mpm.managers.<id>]` section keyed by one of these tunes a shipped
         manager (an override); any other ID defines a brand-new one. The configuration
         layer routes override-versus-definition on this set. See
-        :py:func:`meta_package_manager.config.validate_manager_overrides_section`.
+        {func}`meta_package_manager.config.validate_manager_overrides_section`.
         """
         return self.builtin_manager_ids | self.bundled_manager_ids
 
     @cached_property
     def overridden_fields(self) -> dict[str, set[str]]:
         """Per-manager attribute names that the user explicitly overrode via
-        ``[mpm.managers.<id>]``.
+        `[mpm.managers.<id>]`.
 
-        Populated by :py:func:`meta_package_manager.config.apply_manager_overrides`.
-        Read by ``_select_managers`` to skip the global ``--<flag>`` defaults
+        Populated by {func}`meta_package_manager.config.apply_manager_overrides`.
+        Read by `_select_managers` to skip the global `--<flag>` defaults
         for fields the user has explicitly set per manager. Tracked separately from
-        instance ``__dict__`` membership so the global defaults can still refresh
-        fields that were previously set by an earlier ``_select_managers`` call but
+        instance `__dict__` membership so the global defaults can still refresh
+        fields that were previously set by an earlier `_select_managers` call but
         were never user-overridden.
         """
         return {}
@@ -274,9 +274,9 @@ class ManagerPool:
 
         Inserts the instance and evicts the cached ID lists so the new manager is
         picked up by selection, default-set computation and the dynamic CLI flags.
-        Built into the pool (rather than mutating ``register`` from outside) so the
+        Built into the pool (rather than mutating `register` from outside) so the
         cache invalidation stays in one place. Applied by
-        :py:func:`meta_package_manager.config.register_config_managers`.
+        {func}`meta_package_manager.config.register_config_managers`.
         """
         self.register[manager.id] = manager
         self.config_defined_ids.add(manager.id)
@@ -305,7 +305,7 @@ class ManagerPool:
         """All manager IDs supported on the current platform and not deprecated.
 
         Must keep the same order defined by
-        :py:attr:`meta_package_manager.pool.ManagerPool.all_manager_ids`.
+        {attr}`meta_package_manager.pool.ManagerPool.all_manager_ids`.
         """
         return tuple(
             mid for mid in self.maintained_manager_ids if self.register[mid].supported
@@ -335,34 +335,34 @@ class ManagerPool:
         **extra_options: bool | int,
     ) -> Iterator[PackageManager]:
         """Utility method to extract a subset of the manager pool based on selection
-        list (``keep`` parameter) and exclusion list (``drop`` parameter) criterion.
+        list (`keep` parameter) and exclusion list (`drop` parameter) criterion.
 
         By default, only the managers supported by the current platform are selected.
-        Unless ``keep_unsupported`` is set to ``True``, in which case all managers
-        implemented by ``mpm`` are selected, regardless of their supported platform.
+        Unless `keep_unsupported` is set to `True`, in which case all managers
+        implemented by `mpm` are selected, regardless of their supported platform.
 
-        Deprecated managers are also excluded by default, unless ``keep_deprecated`` is
-        ``True``.
+        Deprecated managers are also excluded by default, unless `keep_deprecated` is
+        `True`.
 
-        ``drop_not_found`` filters out managers whose CLI was not found on the system.
+        `drop_not_found` filters out managers whose CLI was not found on the system.
 
-        ``implements_operation`` filters out managers which do not implements the
+        `implements_operation` filters out managers which do not implements the
         provided operation.
 
-        Finally, ``extra_options`` parameters are fed to manager objects to set some
+        Finally, `extra_options` parameters are fed to manager objects to set some
         additional options.
 
         Returns a generator producing a manager instance one after the other.
         """
         # Track whether the caller passed an explicit keep list so we can pick
         # informative log levels for downstream skip messages: explicit picks
-        # the user made (``--<id>`` flags) get loud levels; implicit defaults
-        # (``mpm outdated`` with no flags) get demoted to DEBUG to avoid
+        # the user made (`--<id>` flags) get loud levels; implicit defaults
+        # (`mpm outdated` with no flags) get demoted to DEBUG to avoid
         # flooding the output with one line per platform-default manager.
         explicit_selection = keep is not None
 
         # Produce the default set of managers to consider if none have been
-        # provided by the ``keep`` parameter.
+        # provided by the `keep` parameter.
         if keep is None:
             if keep_deprecated:
                 keep = self.all_manager_ids
@@ -386,7 +386,7 @@ class ManagerPool:
         # Probes fire eagerly in the parallel warm-up round right after, or lazily
         # at rendering time for the callers keeping unavailable managers (`mpm
         # managers` builds its version column from the yielded instances), so the
-        # binding must precede the ``drop_not_found`` branch. Only timeout is
+        # binding must precede the `drop_not_found` branch. Only timeout is
         # pre-applied: the rest of extra_options (notably dry_run, which would turn
         # detection into a no-op simulation) must wait for the loop. A per-manager
         # [mpm.managers.<id>] timeout override keeps precedence, just as it does in
@@ -458,7 +458,7 @@ class ManagerPool:
             yield manager
 
     def select_managers(self, *args, **kwargs) -> Iterator[PackageManager]:
-        """Wraps ``_select_managers()`` to stop CLI execution if no manager are selected."""
+        """Wraps `_select_managers()` to stop CLI execution if no manager are selected."""
         managers = self._select_managers(*args, **kwargs)
         first = next(managers, None)
         if first is None:

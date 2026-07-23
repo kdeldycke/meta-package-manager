@@ -43,9 +43,9 @@ class TestRestore(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # The glued ``:<mid>:`` label form matches whatever level the
+            # The glued `:<mid>:` label form matches whatever level the
             # message lands at: demoted to DEBUG for implicit selection,
-            # WARNING/INFO for explicit ones (``mpm --<mid> restore``).
+            # WARNING/INFO for explicit ones (`mpm --<mid> restore`).
             f":{mid}: Does not implement {Operations.install}." in stderr,
             f"No [{mid}] section found." in stderr,
             f":{mid}: Restore packages..." in stderr,
@@ -65,7 +65,7 @@ class TestRestore(CLISubCommandTests):
             ),
         )
 
-        # ``--verbosity DEBUG`` surfaces the skip/does-not-implement messages
+        # `--verbosity DEBUG` surfaces the skip/does-not-implement messages
         # for managers covered by the config but absent from the system.
         result = invoke("--verbosity", "DEBUG", "restore", str(toml_path))
         # Accept exit code 1: the bogus "blah" packages fail to install on any

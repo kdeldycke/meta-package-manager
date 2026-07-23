@@ -34,17 +34,18 @@ def subcmd():
 class TestUpgrade(CLISubCommandTests):
     """Test the system-wide upgrade sub-command.
 
-    .. danger::
-        All tests here should me marked as destructive unless --dry-run parameter is
-        passed.
+    ```{danger}
+    All tests here should me marked as destructive unless --dry-run parameter is
+    passed.
+    ```
     """
 
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # The glued ``:<mid>:`` label form matches whatever level the
+            # The glued `:<mid>:` label form matches whatever level the
             # message lands at: demoted to DEBUG for implicit selection,
-            # WARNING/INFO for explicit ones (``mpm --<mid> upgrade``).
+            # WARNING/INFO for explicit ones (`mpm --<mid> upgrade`).
             f":{mid}: Does not implement upgrade_all_cli." in stderr,
             f":{mid}: Does not implement {Operations.upgrade_all}." in stderr,
             f":{mid}: Upgrade all outdated packages..." in stderr,
@@ -54,9 +55,9 @@ class TestUpgrade(CLISubCommandTests):
 
     @pytest.mark.parametrize("all_option", ("--all", None))
     def test_all_managers_dry_run_upgrade_all(self, invoke, all_option):
-        # ``--verbosity DEBUG`` makes the per-manager skip/does-not-implement
+        # `--verbosity DEBUG` makes the per-manager skip/does-not-implement
         # messages reach stderr: at default verbosity they stay quiet because
-        # this invocation makes no explicit ``--<id>`` selection.
+        # this invocation makes no explicit `--<id>` selection.
         result = invoke("--verbosity", "DEBUG", "--dry-run", "upgrade", all_option)
         assert result.exit_code == 0
         if not all_option:

@@ -33,19 +33,20 @@ if TYPE_CHECKING:
 class DNF(PackageManager):
     """Fedora's RPM package manager.
 
-    ``mpm`` reads the inventory through ``repoquery`` rather than the human-facing
-    listing: ``--userinstalled`` for packages installed on request (dependencies
-    pulled in automatically are skipped) and ``--upgrades`` for pending updates,
-    both with a ``--queryformat`` that joins the fields on a private ``___MPM___``
+    `mpm` reads the inventory through `repoquery` rather than the human-facing
+    listing: `--userinstalled` for packages installed on request (dependencies
+    pulled in automatically are skipped) and `--upgrades` for pending updates,
+    both with a `--queryformat` that joins the fields on a private `___MPM___`
     delimiter so summaries containing spaces stay splittable. Every call is forced
-    ``--color=never`` and ``--quiet`` for parseable output.
+    `--color=never` and `--quiet` for parseable output.
 
-    .. note::
-        ``remove`` runs ``autoremove``, so removing a package also drops the
-        dependencies it leaves orphaned. ``search`` matches names only, with no
-        exact or extended mode.
+    ```{note}
+    `remove` runs `autoremove`, so removing a package also drops the
+    dependencies it leaves orphaned. `search` matches names only, with no
+    exact or extended mode.
+    ```
 
-    The ``DNF5`` and ``YUM`` subclasses reuse everything here, differing only in
+    The `DNF5` and `YUM` subclasses reuse everything here, differing only in
     the binary and forced arguments.
 
     Documentation:
@@ -66,10 +67,11 @@ class DNF(PackageManager):
 
     cli_names: tuple[str, ...] = ("dnf", "dnf4")
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ dnf --version
-        4.9.0
+    $ dnf --version
+    4.9.0
+    ```
     """
 
     pre_args: tuple[str, ...] = ("--color=never", "--quiet")
@@ -79,11 +81,11 @@ class DNF(PackageManager):
         r"\.(?P<arch>[^.\s]+)$",
         re.MULTILINE,
     )
-    """Split ``repoquery``'s NEVRA lines (``name-[epoch:]version-release.arch``).
+    """Split `repoquery`'s NEVRA lines (`name-[epoch:]version-release.arch`).
 
     RPM forbids dashes in the version and release fields, so the last two
-    dash-separated fields before the ``.arch`` suffix are unambiguously
-    ``version-release``, dashes in the package name notwithstanding.
+    dash-separated fields before the `.arch` suffix are unambiguously
+    `version-release`, dashes in the package name notwithstanding.
     """
 
     _SEARCH_REGEXP = re.compile(r"(\S+)\.\S+\s:\s(\S+)")
@@ -94,12 +96,13 @@ class DNF(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ dnf repoquery --userinstalled --qf FORMAT
-            acl___MPM___2.2.53-1.el8___MPM___Access control list utilities___MPM___x86_64
-            audit___MPM___3.0.7-4.el9___MPM___User space auditing tools___MPM___x86_64
-            audit-libs___MPM___3.0.7-4.el9___MPM___Dynamic auditing library___MPM___x86_64
+        $ dnf repoquery --userinstalled --qf FORMAT
+        acl___MPM___2.2.53-1.el8___MPM___Access control list utilities___MPM___x86_64
+        audit___MPM___3.0.7-4.el9___MPM___User space auditing tools___MPM___x86_64
+        audit-libs___MPM___3.0.7-4.el9___MPM___Dynamic auditing library___MPM___x86_64
+        ```
         """
         qf = ["%{name}", "%{version}", "%{summary}", "%{arch}\n"]
         output = self.run_cli(
@@ -124,12 +127,13 @@ class DNF(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ dnf repoquery --upgrades --qf FORMAT
-            acl___MPM___2.2.53-1.el8___MPM___2.6.53-1.el8___MPM___Access control list utilities___MPM___x86_64
-            audit___MPM___2.2.53-1.el8___MPM___2.5.53-1.el8___MPM___User space auditing tools___MPM___x86_64
-            audit-libs___MPM___2.2.53-1.el8___MPM___2.6.53-1.el8___MPM___Dynamic auditing library___MPM___x86_64
+        $ dnf repoquery --upgrades --qf FORMAT
+        acl___MPM___2.2.53-1.el8___MPM___2.6.53-1.el8___MPM___Access control list utilities___MPM___x86_64
+        audit___MPM___2.2.53-1.el8___MPM___2.5.53-1.el8___MPM___User space auditing tools___MPM___x86_64
+        audit-libs___MPM___2.2.53-1.el8___MPM___2.6.53-1.el8___MPM___Dynamic auditing library___MPM___x86_64
+        ```
         """
         qf = ["%{name}", "%{version}", "%{evr}", "%{summary}", "%{arch}\n"]
         output = self.run_cli("repoquery", "--upgrades", "--qf", DNF.DELIMITER.join(qf))
@@ -153,11 +157,12 @@ class DNF(PackageManager):
     def orphans(self) -> Iterator[Package]:
         """Fetch packages installed as dependencies that nothing requires anymore.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ dnf --color=never --quiet repoquery --unneeded
-            libfoo-1.0.2-3.el9.x86_64
-            python3-extra-0:3.9.18-3.el9.noarch
+        $ dnf --color=never --quiet repoquery --unneeded
+        libfoo-1.0.2-3.el9.x86_64
+        python3-extra-0:3.9.18-3.el9.noarch
+        ```
         """
         output = self.run_cli("repoquery", "--unneeded")
 
@@ -172,24 +177,26 @@ class DNF(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not support extended or exact matching. So we return the best
-            subset of results and let
-            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` refine
-            them.
+        ```{caution}
+        Search does not support extended or exact matching. So we return the best
+        subset of results and let
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search` refine
+        them.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ dnf --color=never search usd
-            Last metadata expiration check: 0:06:37 ago on Sun 03 Apr 2022.
-            =================== Name Exactly Matched: usd =====================
-            usd.aarch64 : 3D VFX pipeline interchange file format
-            =================== Name & Summary Matched: usd ===================
-            python3-usd.aarch64 : Development files for USD
-            usd-devel.aarch64 : Development files for USD
-            ======================= Name Matched: usd =========================
-            lvm2-dbusd.noarch : LVM2 D-Bus daemon
-            usd-libs.aarch64 : Universal Scene Description library
+        $ dnf --color=never search usd
+        Last metadata expiration check: 0:06:37 ago on Sun 03 Apr 2022.
+        =================== Name Exactly Matched: usd =====================
+        usd.aarch64 : 3D VFX pipeline interchange file format
+        =================== Name & Summary Matched: usd ===================
+        python3-usd.aarch64 : Development files for USD
+        usd-devel.aarch64 : Development files for USD
+        ======================= Name Matched: usd =========================
+        lvm2-dbusd.noarch : LVM2 D-Bus daemon
+        usd-libs.aarch64 : Universal Scene Description library
+        ```
         """
         output = self.run_cli("search", query)
 
@@ -208,18 +215,20 @@ class DNF(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo dnf --color=never --quiet --assumeyes install pip
+        $ sudo dnf --color=never --quiet --assumeyes install pip
+        ```
         """
         return self.run_cli("--assumeyes", "install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo dnf --color=never --quiet --assumeyes upgrade
+        $ sudo dnf --color=never --quiet --assumeyes upgrade
+        ```
         """
         return self.build_cli("--assumeyes", "upgrade", sudo=True)
 
@@ -231,79 +240,86 @@ class DNF(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo dnf --color=never --quiet --assumeyes upgrade pip
+        $ sudo dnf --color=never --quiet --assumeyes upgrade pip
+        ```
         """
         return self.build_cli("--assumeyes", "upgrade", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo dnf --color=never --quiet --assumeyes remove pip
+        $ sudo dnf --color=never --quiet --assumeyes remove pip
+        ```
         """
         return self.run_cli("--assumeyes", "remove", package_id, sudo=True)
 
     def remove_orphan(self, package_id: str) -> str:
         """Remove one package, dropping dependencies it alone pulled in.
 
-        ``autoremove`` targets the package plus the dependencies that were
+        `autoremove` targets the package plus the dependencies that were
         installed to satisfy it and are no longer required by anything else.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo dnf --color=never --quiet --assumeyes autoremove pip
+        $ sudo dnf --color=never --quiet --assumeyes autoremove pip
+        ```
         """
         return self.run_cli("--assumeyes", "autoremove", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ dnf --color=never --quiet check-update
+        $ dnf --color=never --quiet check-update
+        ```
         """
         self.run_cli("check-update")
 
     def cleanup_orphan(self) -> None:
         """Remove every package installed as a dependency and no longer required.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo dnf --color=never --quiet --assumeyes autoremove
+        $ sudo dnf --color=never --quiet --assumeyes autoremove
+        ```
         """
         self.run_cli("--assumeyes", "autoremove", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Clear the cached packages and repository metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ dnf --color=never --quiet clean all
+        $ dnf --color=never --quiet clean all
+        ```
         """
         self.run_cli("clean", "all")
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
 
-        ``check`` examines the rpm database for problems (duplicates, obsoleted
+        `check` examines the rpm database for problems (duplicates, obsoleted
         packages, unsatisfied dependencies) and exits non-zero when any is found.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ dnf --color=never --quiet check
+        $ dnf --color=never --quiet check
+        ```
         """
         return self.build_cli("check")
 
 
 class DNF5(DNF):
-    """The ``dnf5`` rewrite of DNF, Fedora's reference package manager since
+    """The `dnf5` rewrite of DNF, Fedora's reference package manager since
     Fedora 41.
 
-    Inherits every operation and parser from ``DNF``. Its forced arguments drop
-    ``--color=never`` (``dnf5`` rejects that option), keeping only ``--quiet``.
+    Inherits every operation and parser from `DNF`. Its forced arguments drop
+    `--color=never` (`dnf5` rejects that option), keeping only `--quiet`.
     """
 
     name = "Fedora DNF5"
@@ -325,8 +341,8 @@ class DNF5(DNF):
 class YUM(DNF):
     """YUM, the package manager DNF superseded.
 
-    On current Fedora and RHEL the ``yum`` binary is a wrapper around ``dnf``.
-    ``mpm`` drives it exactly as ``DNF``, only the binary name differs.
+    On current Fedora and RHEL the `yum` binary is a wrapper around `dnf`.
+    `mpm` drives it exactly as `DNF`, only the binary name differs.
     """
 
     name = "Fedora YUM"

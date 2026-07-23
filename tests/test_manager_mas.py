@@ -16,7 +16,7 @@
 """Mac App Store parsing tests.
 
 These tests cover the pure-Python JSON-stream parser. They do not invoke
-``mas`` and are platform-agnostic.
+`mas` and are platform-agnostic.
 """
 
 from __future__ import annotations
@@ -46,9 +46,9 @@ from meta_package_manager.managers.mas import MAS
             [{"adamID": 1, "name": "Foo"}, {"adamID": 2, "name": "Bar"}],
             id="extra_whitespace",
         ),
-        # Regression: ``mas`` does not escape literal newlines inside string
-        # fields, so the previous ``splitlines()``-based parser raised
-        # ``JSONDecodeError: Unterminated string`` on records like this one.
+        # Regression: `mas` does not escape literal newlines inside string
+        # fields, so the previous `splitlines()`-based parser raised
+        # `JSONDecodeError: Unterminated string` on records like this one.
         pytest.param(
             '{"adamID":1,"name":"Multi\nLine","version":"1.0"}\n'
             '{"adamID":2,"name":"Bar","version":"2.0"}',

@@ -68,8 +68,8 @@ def test_normalize_params(param_string, results):
 def test_check_mpm_missing_binary():
     """A probe whose binary does not exist must report the error, not crash.
 
-    Regression test for the ``UnboundLocalError`` on the ``FileNotFoundError``
-    path of ``check_mpm()``, where ``process`` is never assigned.
+    Regression test for the `UnboundLocalError` on the `FileNotFoundError`
+    path of `check_mpm()`, where `process` is never assigned.
     """
     runnable, up_to_date, version, error = bar_plugin.MPMPlugin().check_mpm(
         ("/nonexistent/mpm-binary",),
@@ -94,26 +94,27 @@ def _shell_invocation_matrix():
 
     Returns
     -------
-    .. code-block:: python
-        (
-            ("bash", "-c"),
-            ("bash", "--login", "-c"),
-            ("/bin/bash", "-c"),
-            ("/bin/bash", "--login", "-c"),
-            ("zsh", "-c"),
-            ("zsh", "--login", "-c"),
-            ("/bin/zsh", "-c"),
-            ("/bin/zsh", "--login", "-c"),
-            ("/usr/bin/env", "bash", "-c"),
-            ("/usr/bin/env", "bash", "--login", "-c"),
-            ("/usr/bin/env", "/bin/bash", "-c"),
-            ("/usr/bin/env", "/bin/bash", "--login", "-c"),
-            ("/usr/bin/env", "zsh", "-c"),
-            ("/usr/bin/env", "zsh", "--login", "-c"),
-            ("/usr/bin/env", "/bin/zsh", "-c"),
-            ("/usr/bin/env", "/bin/zsh", "--login", "-c"),
-            None,
-        )
+    ```{code-block} python
+    (
+        ("bash", "-c"),
+        ("bash", "--login", "-c"),
+        ("/bin/bash", "-c"),
+        ("/bin/bash", "--login", "-c"),
+        ("zsh", "-c"),
+        ("zsh", "--login", "-c"),
+        ("/bin/zsh", "-c"),
+        ("/bin/zsh", "--login", "-c"),
+        ("/usr/bin/env", "bash", "-c"),
+        ("/usr/bin/env", "bash", "--login", "-c"),
+        ("/usr/bin/env", "/bin/bash", "-c"),
+        ("/usr/bin/env", "/bin/bash", "--login", "-c"),
+        ("/usr/bin/env", "zsh", "-c"),
+        ("/usr/bin/env", "zsh", "--login", "-c"),
+        ("/usr/bin/env", "/bin/zsh", "-c"),
+        ("/usr/bin/env", "/bin/zsh", "--login", "-c"),
+        None,
+    )
+    ```
     """
     return list(
         _invocation_matrix(
@@ -132,13 +133,14 @@ def _python_invocation_matrix():
 
     Returns
     -------
-    .. code-block:: python
-        (
-            ("python",),
-            ("python3",),
-            ("/usr/bin/env", "python"),
-            ("/usr/bin/env", "python3"),
-        )
+    ```{code-block} python
+    (
+        ("python",),
+        ("python3",),
+        ("/usr/bin/env", "python"),
+        ("/usr/bin/env", "python3"),
+    )
+    ```
     """
     return _invocation_matrix(
         # Env prefixes.
@@ -171,9 +173,9 @@ shell_python_args = pytest.mark.parametrize(
 def _subcmd_args(
     invoke_args: tuple[str, ...] | None, *subcmd_args: str
 ) -> tuple[str, ...]:
-    """Cleanup args and eventually concatenate all ``subcmd_args`` items to a space
-    separated string if ``invoke_args`` is defined and its last argument is equal to
-    ``-c``."""
+    """Cleanup args and eventually concatenate all `subcmd_args` items to a space
+    separated string if `invoke_args` is defined and its last argument is equal to
+    `-c`."""
     raw_args: list[str] = []
     if invoke_args:
         raw_args.extend(invoke_args)
@@ -185,8 +187,8 @@ def _subcmd_args(
 
 # The plugin suite drives mpm end-to-end and needs at least one live package
 # manager on the host, so it belongs to the integration layer even though its
-# module name does not match the ``test_cli*`` / ``test_manager_*`` convention
-# conftest keys on. The marker makes ``-m "not integration"`` and the hermetic-
+# module name does not match the `test_cli*` / `test_manager_*` convention
+# conftest keys on. The marker makes `-m "not integration"` and the hermetic-
 # build auto-skip cover it too.
 @pytest.mark.integration
 @unless_macos

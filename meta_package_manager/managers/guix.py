@@ -33,22 +33,24 @@ if TYPE_CHECKING:
 class Guix(PackageManager):
     """GNU Guix, GNU's functional package manager.
 
-    .. note::
-        All operations target the current user's default profile. Declarative
-        system configuration (Guix System ``config.scm``) is not covered.
+    ```{note}
+    All operations target the current user's default profile. Declarative
+    system configuration (Guix System `config.scm`) is not covered.
+    ```
 
     Guix is a rolling release with no upstream semver to pin against:
-    ``guix --version`` reports a release tag, a ``git describe`` string, or the
-    bare commit hash of an in-tree checkout. No ``requirement`` floor is
-    enforced, since any working ``guix`` will do.
+    `guix --version` reports a release tag, a `git describe` string, or the
+    bare commit hash of an in-tree checkout. No `requirement` floor is
+    enforced, since any working `guix` will do.
 
-    .. warning::
-        ``search`` evaluates every package definition to match the query, so its
-        cost scales with the size of the package set, not the result count: tens
-        of seconds on a freshly pulled Guix, longer still from an in-tree
-        development checkout. The call is bounded by ``mpm --timeout`` (120s by
-        default), past which it is killed with no results returned, so a slow
-        search can look like a hang.
+    ```{warning}
+    `search` evaluates every package definition to match the query, so its
+    cost scales with the size of the package set, not the result count: tens
+    of seconds on a freshly pulled Guix, longer still from an in-tree
+    development checkout. The call is bounded by `mpm --timeout` (120s by
+    default), past which it is killed with no results returned, so a slow
+    search can look like a hang.
+    ```
     """
 
     name = "GNU Guix"
@@ -58,41 +60,42 @@ class Guix(PackageManager):
     platforms = LINUX_LIKE
 
     # Guix is a rolling-release distribution: the only "version" it
-    # exposes for ``guix pull``-managed installs and in-tree dev wrappers
-    # (``./pre-inst-env guix``, ``./scripts/guix``) is a git commit hash.
+    # exposes for `guix pull`-managed installs and in-tree dev wrappers
+    # (`./pre-inst-env guix`, `./scripts/guix`) is a git commit hash.
     # No upstream tag/semver is guaranteed to be reachable, so capturing
-    # whatever ``guix --version`` reports and *not* enforcing a
-    # ``requirement`` specifier is the only honest option: any working
-    # ``guix`` is fine.
+    # whatever `guix --version` reports and *not* enforcing a
+    # `requirement` specifier is the only honest option: any working
+    # `guix` is fine.
     version_regexes = (
-        # Stable release or ``git describe`` output:
-        #   ``guix (GNU Guix) 1.4.0``
-        #   ``guix (GNU Guix) 1.4.0-7-gabc1234``
+        # Stable release or `git describe` output:
+        #   `guix (GNU Guix) 1.4.0`
+        #   `guix (GNU Guix) 1.4.0-7-gabc1234`
         r"guix \(GNU Guix\) (?P<version>\d[\w.\-+]*)",
         # Bare git-hash output from an in-tree dev wrapper whose
-        # ``git describe`` had no nearby tag:
-        #   ``guix (GNU Guix) abc1234``
+        # `git describe` had no nearby tag:
+        #   `guix (GNU Guix) abc1234`
         # Restrict to a 7–40 hex run so corrupted output isn't accepted
         # as a "version".
         r"guix \(GNU Guix\) (?P<version>[0-9a-f]{7,40})\b",
     )
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ guix --version
-        guix (GNU Guix) 1.4.0
+    $ guix --version
+    guix (GNU Guix) 1.4.0
+    ```
     """
 
     _SEARCH_FIELD_REGEXP = re.compile(
         r"^(?P<field>\w[\w-]*):\s+(?P<value>.+)$",
     )
-    """Match a single recutils field line (``name: value``)."""
+    """Match a single recutils field line (`name: value`)."""
 
     _OUTDATED_REGEXP = re.compile(
         r"^\s+(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+→\s+(?P<latest_version>\S+)\s*$",
         re.MULTILINE,
     )
-    """Match an upgrade line from ``guix upgrade --dry-run``.
+    """Match an upgrade line from `guix upgrade --dry-run`.
 
     Sample output::
 
@@ -107,11 +110,12 @@ class Guix(PackageManager):
 
         Output is tab-separated: name, version, output, store path.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ guix package --list-installed
-            hello	2.10	out	/gnu/store/k74skdjjb9c9zqjv9nmgd6zi92wpf3q0-hello-2.10
-            python	3.10.7	out	/gnu/store/2n3g8n7d5xkp6h4qz1v8m0rjc9wf5aby-python-3.10.7
+        $ guix package --list-installed
+        hello	2.10	out	/gnu/store/k74skdjjb9c9zqjv9nmgd6zi92wpf3q0-hello-2.10
+        python	3.10.7	out	/gnu/store/2n3g8n7d5xkp6h4qz1v8m0rjc9wf5aby-python-3.10.7
+        ```
         """
         output = self.run_cli("package", "--list-installed")
 
@@ -127,15 +131,16 @@ class Guix(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        Relies on ``guix upgrade --dry-run`` which lists every package that
+        Relies on `guix upgrade --dry-run` which lists every package that
         would be upgraded without modifying the user profile.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ guix upgrade --dry-run
-            The following packages would be upgraded:
-               hello 2.12.1 → 2.12.3
-               sed   4.8 → 4.9
+        $ guix upgrade --dry-run
+        The following packages would be upgraded:
+           hello 2.12.1 → 2.12.3
+           sed   4.8 → 4.9
+        ```
         """
         output = self.run_cli("upgrade", "--dry-run")
 
@@ -150,43 +155,46 @@ class Guix(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not support extended or exact matching. So we return
-            the best subset of results and let
-            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
-            refine them.
+        ```{caution}
+        Search does not support extended or exact matching. So we return
+        the best subset of results and let
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search`
+        refine them.
+        ```
 
-        .. caution::
-            ``guix search`` loads and evaluates every package definition to
-            match the query against each package's name, synopsis, and
-            description, so it is inherently slow: its cost scales with the
-            size of the package set, not the number of results. A single
-            search runs for tens of seconds on a freshly pulled Guix, and far
-            longer from an in-tree dev checkout that recompiles modules on the
-            fly. The call is bounded by ``mpm --timeout``; when that is
-            unset, ``search`` uses the 120s read-only default, past which the
-            process is killed and no results are returned, so a slow search can
-            look like a hang.
+        ```{caution}
+        `guix search` loads and evaluates every package definition to
+        match the query against each package's name, synopsis, and
+        description, so it is inherently slow: its cost scales with the
+        size of the package set, not the number of results. A single
+        search runs for tens of seconds on a freshly pulled Guix, and far
+        longer from an in-tree dev checkout that recompiles modules on the
+        fly. The call is bounded by `mpm --timeout`; when that is
+        unset, `search` uses the 120s read-only default, past which the
+        process is killed and no results are returned, so a slow search can
+        look like a hang.
+        ```
 
         Results are printed in recutils format with records separated by blank
         lines.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ guix search hello
-            name: hello
-            version: 2.10
-            outputs: out
-            systems: x86_64-linux i686-linux
-            dependencies: glibc@2.35 ...
-            location: gnu/packages/base.scm:86:2
-            homepage: https://www.gnu.org/software/hello/
-            license: GPL 3+
-            synopsis: Hello, GNU world: an example GNU package
-            description: GNU Hello prints the message "Hello, world!"
-            + and then exits.  It serves as an example of standard
-            + GNU coding practices.
-            relevance: 10
+        $ guix search hello
+        name: hello
+        version: 2.10
+        outputs: out
+        systems: x86_64-linux i686-linux
+        dependencies: glibc@2.35 ...
+        location: gnu/packages/base.scm:86:2
+        homepage: https://www.gnu.org/software/hello/
+        license: GPL 3+
+        synopsis: Hello, GNU world: an example GNU package
+        description: GNU Hello prints the message "Hello, world!"
+        + and then exits.  It serves as an example of standard
+        + GNU coding practices.
+        relevance: 10
+        ```
 
         """
         output = self.run_cli("search", query)
@@ -197,7 +205,7 @@ class Guix(PackageManager):
                 match = self._SEARCH_FIELD_REGEXP.match(line)
                 if match:
                     fields[match.group("field")] = match.group("value")
-                # Continuation lines (``+ ...``) are ignored; we only need the
+                # Continuation lines (`+ ...`) are ignored; we only need the
                 # first line of multi-line fields like description.
 
             name = fields.get("name")
@@ -212,18 +220,20 @@ class Guix(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ guix install hello
+        $ guix install hello
+        ```
         """
         return self.run_cli("install", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ guix upgrade
+        $ guix upgrade
+        ```
         """
         return self.build_cli("upgrade")
 
@@ -235,35 +245,39 @@ class Guix(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ guix upgrade hello
+        $ guix upgrade hello
+        ```
         """
         return self.build_cli("upgrade", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ guix remove hello
+        $ guix remove hello
+        ```
         """
         return self.run_cli("remove", package_id)
 
     def sync(self) -> None:
         """Fetch the latest Guix channel revisions.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ guix pull
+        $ guix pull
+        ```
         """
         self.run_cli("pull")
 
     def cleanup_cache(self) -> None:
         """Collect garbage in the store.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ guix gc
+        $ guix gc
+        ```
         """
         self.run_cli("gc")

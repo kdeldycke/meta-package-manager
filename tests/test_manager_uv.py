@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""``uv``-specific behaviors, starting with the launched-by-uv cache guard.
+"""`uv`-specific behaviors, starting with the launched-by-uv cache guard.
 
-A parent ``uv run`` (or ``uvx``) process keeps a lock on the uv cache for as long
-as its child lives, so an ``mpm`` launched through it must not attempt ``uv cache
-clean``: the command would wait on its own ancestor for ``UV_LOCK_TIMEOUT`` and
-fail. ``uv`` marks its children with the ``UV`` environment variable.
+A parent `uv run` (or `uvx`) process keeps a lock on the uv cache for as long
+as its child lives, so an `mpm` launched through it must not attempt ``uv cache
+clean`: the command would wait on its own ancestor for `UV_LOCK_TIMEOUT`` and
+fail. `uv` marks its children with the `UV` environment variable.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ from meta_package_manager.pool import pool
 
 @pytest.fixture
 def capture_uv_run_cli(monkeypatch):
-    """Record the ``uv`` manager's ``run_cli`` invocations instead of executing."""
+    """Record the `uv` manager's `run_cli` invocations instead of executing."""
     manager = pool["uv"]
     calls: list[tuple[str, ...]] = []
     monkeypatch.setattr(
@@ -44,8 +44,8 @@ def capture_uv_run_cli(monkeypatch):
 
 
 def test_cleanup_cache_skipped_under_uv(monkeypatch, caplog, capture_uv_run_cli):
-    """Launched by ``uv run``, the cache commands are skipped with a warning: they
-    would deadlock on the parent's cache lock until ``UV_LOCK_TIMEOUT``."""
+    """Launched by `uv run`, the cache commands are skipped with a warning: they
+    would deadlock on the parent's cache lock until `UV_LOCK_TIMEOUT`."""
     monkeypatch.setenv("UV", "/fake/bin/uv")
     with caplog.at_level(logging.WARNING):
         pool["uv"].cleanup_cache()
@@ -54,7 +54,7 @@ def test_cleanup_cache_skipped_under_uv(monkeypatch, caplog, capture_uv_run_cli)
 
 
 def test_cleanup_cache_runs_outside_uv(monkeypatch, capture_uv_run_cli):
-    """Outside a ``uv`` launcher, the cache clean and prune both run."""
+    """Outside a `uv` launcher, the cache clean and prune both run."""
     monkeypatch.delenv("UV", raising=False)
     pool["uv"].cleanup_cache()
     assert capture_uv_run_cli == [("cache", "clean"), ("cache", "prune")]

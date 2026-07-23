@@ -70,8 +70,8 @@ def test_trust_tap_qualified_package(manager_class, package_id, tap_id):
 def test_upgrade_all_cli_greedy_is_cask_only(manager_class, ignore_auto_updates):
     """--include-auto-updates adds --greedy to cask's upgrade-all command only.
 
-    ``brew upgrade`` rejects ``--greedy`` alongside ``--formula`` (mutually
-    exclusive options), so ``brew`` must never grow the flag.
+    `brew upgrade` rejects `--greedy` alongside `--formula` (mutually
+    exclusive options), so `brew` must never grow the flag.
     """
     manager = manager_class()
     manager.ignore_auto_updates = ignore_auto_updates

@@ -36,6 +36,11 @@ extensions = [
     "sphinxext.opengraph",
     "myst_parser",
     "sphinx.ext.autosectionlabel",
+    # Docstrings are written in MyST markdown, transparently converted back to
+    # reST at build time so sphinx.ext.autodoc and sphinx_autodoc_typehints
+    # keep working unmodified. Must be listed before sphinx_autodoc_typehints:
+    # both hook autodoc-process-docstring, and the conversion must run first.
+    "click_extra.sphinx.myst_docstrings",
     "sphinx_autodoc_typehints",
     "click_extra.sphinx",
     "sphinxcontrib.mermaid",
@@ -248,7 +253,7 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css", "table-crosshair.css"]
 html_js_files = ["table-crosshair.js"]
 
-# Opt into click_extra.sphinx's executable directives. Enables the ``click:run``
+# Opt into click_extra.sphinx's executable directives. Enables the `click:run`
 # blocks in docs/cli-parameters.md and docs/configuration.md, which run mpm's CLI
 # at build time to render live --help and --params output. These directives
 # execute Python during the build; mpm's own docs are the only trusted source, so
@@ -264,7 +269,7 @@ click_extra_manpages = [
     {"script": "meta_package_manager.cli:mpm", "prog_name": "mpm"},
 ]
 
-# Wire Sphinx's standard :manpage: role to the HTML siblings generated above.
-# Lets docstrings reference subcommands as ``:manpage:`mpm-install(1)``` and
+# Wire Sphinx's standard manpage role to the HTML siblings generated above.
+# Lets docstrings reference subcommands as {manpage}`mpm-install(1)` and
 # render them as proper hyperlinks in the docs.
 manpages_url = "man/{page}.{section}.html"

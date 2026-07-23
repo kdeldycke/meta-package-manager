@@ -31,18 +31,20 @@ if TYPE_CHECKING:
 
 
 class APK(PackageManager):
-    """Alpine Package Keeper (``apk``) used by Alpine Linux.
+    """Alpine Package Keeper (`apk`) used by Alpine Linux.
 
     Documentation: https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
 
-    .. note::
-        ``installed`` and ``outdated`` both parse the ``list`` applet, so the
-        version floor is ``2.10.0``: the release that introduced it. Progress
-        output is disabled on every call to keep the parsed lines stable.
+    ```{note}
+    `installed` and `outdated` both parse the `list` applet, so the
+    version floor is `2.10.0`: the release that introduced it. Progress
+    output is disabled on every call to keep the parsed lines stable.
+    ```
 
-    .. caution::
-        ``outdated`` reads the local repository cache rather than the remote, so
-        ``sync`` must run first for an accurate upgrade list.
+    ```{caution}
+    `outdated` reads the local repository cache rather than the remote, so
+    `sync` must run first for an accurate upgrade list.
+    ```
     """
 
     name = "Alpine apk"
@@ -54,21 +56,21 @@ class APK(PackageManager):
     default_sudo = True
 
     requirement = ">=2.10.0"
-    """The ``list`` applet, used by :py:meth:`installed` and :py:meth:`outdated`,
-    was introduced in version ``2.10.0``.
+    """The `list` applet, used by {meth}`installed` and {meth}`outdated`,
+    was introduced in version `2.10.0`.
     """
 
     pre_args = ("--no-progress",)
     """Suppress progress indicators so log lines are stable when parsing.
 
-    Source: ``apk(8)`` global options.
+    Source: `apk(8)` global options.
     """
 
     _INSTALLED_REGEXP = re.compile(
         r"^(?P<pkgver>\S+)\s.+\[installed\]\s*$",
         re.MULTILINE,
     )
-    """Match installed entries from ``apk list --installed`` output.
+    """Match installed entries from `apk list --installed` output.
 
     Each line has the format
     ``<pkgver> <arch> {<origin>} (<license>) [installed]``.
@@ -78,7 +80,7 @@ class APK(PackageManager):
         r"^(?P<pkgver>\S+)\s.+\[upgradable from:\s+(?P<from_pkgver>\S+)\]\s*$",
         re.MULTILINE,
     )
-    """Match upgradable entries from ``apk list --upgradable`` output.
+    """Match upgradable entries from `apk list --upgradable` output.
 
     Each line has the format
     ``<pkgver> <arch> {<origin>} (<license>) [upgradable from: <pkgver>]``.
@@ -86,24 +88,26 @@ class APK(PackageManager):
 
     version_regexes = (r"apk-tools\s+(?P<version>[^\s,]+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ apk --version
-        apk-tools 2.14.10, compiled for x86_64.
+    $ apk --version
+    apk-tools 2.14.10, compiled for x86_64.
+    ```
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apk --no-progress list --installed
-            acl-2.2.53-r0 x86_64 {acl} (LGPL-2.1-or-later AND GPL-2.0-or-later) [installed]
-            alpine-baselayout-3.4.3-r1 x86_64 {alpine-baselayout} (GPL-2.0-only) [installed]
-            apk-tools-2.14.0-r5 x86_64 {apk-tools} (GPL-2.0-only) [installed]
-            busybox-1.36.1-r5 x86_64 {busybox} (GPL-2.0-only) [installed]
-            python3-3.11.6-r0 x86_64 {python3} (PSF-2.0) [installed]
+        $ apk --no-progress list --installed
+        acl-2.2.53-r0 x86_64 {acl} (LGPL-2.1-or-later AND GPL-2.0-or-later) [installed]
+        alpine-baselayout-3.4.3-r1 x86_64 {alpine-baselayout} (GPL-2.0-only) [installed]
+        apk-tools-2.14.0-r5 x86_64 {apk-tools} (GPL-2.0-only) [installed]
+        busybox-1.36.1-r5 x86_64 {busybox} (GPL-2.0-only) [installed]
+        python3-3.11.6-r0 x86_64 {python3} (PSF-2.0) [installed]
+        ```
         """
         output = self.run_cli("list", "--installed")
 
@@ -116,15 +120,17 @@ class APK(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. caution::
-            Reads from the local repository cache. Run :py:meth:`sync` first
-            to refresh the index.
+        ```{caution}
+        Reads from the local repository cache. Run {meth}`sync` first
+        to refresh the index.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apk --no-progress list --upgradable
-            acl-2.3.1-r0 x86_64 {acl} (LGPL-2.1-or-later) [upgradable from: acl-2.2.53-r0]
-            python3-3.11.7-r0 x86_64 {python3} (PSF-2.0) [upgradable from: python3-3.11.6-r0]
+        $ apk --no-progress list --upgradable
+        acl-2.3.1-r0 x86_64 {acl} (LGPL-2.1-or-later) [upgradable from: acl-2.2.53-r0]
+        python3-3.11.7-r0 x86_64 {python3} (PSF-2.0) [upgradable from: python3-3.11.6-r0]
+        ```
         """
         output = self.run_cli("list", "--upgradable")
 
@@ -142,27 +148,30 @@ class APK(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            ``apk search`` matches package names with case-insensitive
-            substring globbing. Exact matching is not supported and is
-            handled by
-            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`.
-            Extended search adds the ``--description`` flag so the query is
-            also matched against package descriptions.
+        ```{caution}
+        `apk search` matches package names with case-insensitive
+        substring globbing. Exact matching is not supported and is
+        handled by
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search`.
+        Extended search adds the `--description` flag so the query is
+        also matched against package descriptions.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apk --no-progress search --verbose firefox
-            firefox-120.0-r0
-            firefox-esr-115.5.0-r0
-            firefox-langpack-de-120.0-r0
+        $ apk --no-progress search --verbose firefox
+        firefox-120.0-r0
+        firefox-esr-115.5.0-r0
+        firefox-langpack-de-120.0-r0
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ apk --no-progress search --verbose --description ntp
-            chrony-4.4-r1
-            ntp-4.2.8_p17-r0
-            openntpd-6.8_p1-r1
+        $ apk --no-progress search --verbose --description ntp
+        chrony-4.4-r1
+        ntp-4.2.8_p17-r0
+        openntpd-6.8_p1-r1
+        ```
         """
         args = ["search", "--verbose"]
         if extended:
@@ -179,18 +188,20 @@ class APK(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apk --no-progress add firefox
+        $ sudo apk --no-progress add firefox
+        ```
         """
         return self.run_cli("add", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apk --no-progress upgrade
+        $ sudo apk --no-progress upgrade
+        ```
         """
         return self.build_cli("upgrade", sudo=True)
 
@@ -202,35 +213,39 @@ class APK(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apk --no-progress upgrade firefox
+        $ sudo apk --no-progress upgrade firefox
+        ```
         """
         return self.build_cli("upgrade", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apk --no-progress del firefox
+        $ sudo apk --no-progress del firefox
+        ```
         """
         return self.run_cli("del", package_id, sudo=True)
 
     def sync(self) -> None:
         """Synchronize the local package index from remote repositories.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apk --no-progress update
+        $ sudo apk --no-progress update
+        ```
         """
         self.run_cli("update", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Drop the local package cache.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo apk --no-progress cache clean
+        $ sudo apk --no-progress cache clean
+        ```
         """
         self.run_cli("cache", "clean", sudo=True)

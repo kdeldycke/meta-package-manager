@@ -15,15 +15,15 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Render the installed-package inventory as a Brewfile.
 
-Defines :py:func:`build_brewfile` and the helpers used by ``mpm dump --brewfile``
-to emit a Brewfile that ``brew bundle install`` can consume.
+Defines {func}`build_brewfile` and the helpers used by `mpm dump --brewfile`
+to emit a Brewfile that `brew bundle install` can consume.
 
-.. note::
+```{note}
 
-    Brewfile is a Ruby DSL. The format reference is the Homebrew Bundle source at
-    ``Library/Homebrew/bundle/dsl.rb`` and the extensions under
-    ``Library/Homebrew/bundle/extensions/`` (``brew`` `6.0.0+
-    <https://brew.sh/2026/06/11/homebrew-6.0.0/>`_).
+Brewfile is a Ruby DSL. The format reference is the Homebrew Bundle source at
+`Library/Homebrew/bundle/dsl.rb` and the extensions under
+`Library/Homebrew/bundle/extensions/` (`brew` [6.0.0+](https://brew.sh/2026/06/11/homebrew-6.0.0/)).
+```
 """
 
 from __future__ import annotations
@@ -57,9 +57,9 @@ BUNDLE_ENTRY_TYPES: tuple[str, ...] = (
 )
 """Canonical emission order of Brewfile sections.
 
-Mirrors the registration order of ``Homebrew::Bundle.dump_package_types`` and the
-extensions under ``Library/Homebrew/bundle/extensions/``. ``tap`` always comes first
-so that any third-party tap a downstream ``brew`` or ``cask`` entry references is
+Mirrors the registration order of `Homebrew::Bundle.dump_package_types` and the
+extensions under `Library/Homebrew/bundle/extensions/`. `tap` always comes first
+so that any third-party tap a downstream `brew` or `cask` entry references is
 registered before the install step runs.
 """
 
@@ -67,14 +67,14 @@ DEFAULT_TAPS: frozenset[tuple[str, str]] = frozenset({
     ("homebrew", "core"),
     ("homebrew", "cask"),
 })
-"""Taps that ``brew`` enables by default. Never emitted as explicit ``tap`` lines."""
+"""Taps that `brew` enables by default. Never emitted as explicit `tap` lines."""
 
 
 def quote(value: str) -> str:
     """Ruby-compatible double-quoted string literal.
 
-    ``brew bundle dump`` uses Ruby's ``String#inspect``: double quotes with backslash
-    escapes for control characters and unicode. ``json.dumps(..., ensure_ascii=False)``
+    `brew bundle dump` uses Ruby's `String#inspect`: double quotes with backslash
+    escapes for control characters and unicode. `json.dumps(..., ensure_ascii=False)`
     produces the same output for ASCII content and a Ruby-parseable double-quoted
     string for non-ASCII codepoints.
     """
@@ -88,12 +88,12 @@ def format_entry(
 ) -> str:
     """Render a single Brewfile DSL line.
 
-    Supports the two shapes ``Homebrew::Bundle::Extensions::Extension.dump_entry``
+    Supports the two shapes `Homebrew::Bundle::Extensions::Extension.dump_entry`
     emits:
 
-    - bare: ``brew "git"``
-    - with options: ``mas "Xcode", id: 497799835`` or
-      ``flatpak "org.mozilla.firefox", with: ["flathub"]``
+    - bare: `brew "git"`
+    - with options: `mas "Xcode", id: 497799835` or
+      `flatpak "org.mozilla.firefox", with: ["flathub"]`
     """
     line = f"{entry_type} {quote(name)}"
     if not options:
@@ -144,10 +144,10 @@ def format_header(
 
 
 def tap_from_package_id(package_id: str) -> str | None:
-    """Return ``user/tap`` if ``package_id`` is tap-qualified, else ``None``.
+    """Return `user/tap` if `package_id` is tap-qualified, else `None`.
 
-    Default taps in :py:data:`DEFAULT_TAPS` are filtered out: those are always
-    enabled by ``brew`` and emitting ``tap`` lines for them would be noise.
+    Default taps in {data}`DEFAULT_TAPS` are filtered out: those are always
+    enabled by `brew` and emitting `tap` lines for them would be noise.
     """
     if package_id.count("/") != 2:
         return None
@@ -167,17 +167,17 @@ def build_brewfile(
 ) -> str:
     """Render a Brewfile from the given managers' installed packages.
 
-    Only managers whose :py:attr:`~meta_package_manager.manager.PackageManager.brewfile_entry_type`
+    Only managers whose {attr}`~meta_package_manager.manager.PackageManager.brewfile_entry_type`
     is set contribute output; the caller is expected to have filtered the iterable
     accordingly, but managers without a configured entry type are silently skipped
     as a defensive measure.
 
-    ``packages_by_manager`` (keyed by manager id) supplies each manager's installed
+    `packages_by_manager` (keyed by manager id) supplies each manager's installed
     packages so the caller can fetch them concurrently up front. When omitted, each
-    manager's :py:attr:`~meta_package_manager.manager.PackageManager.installed` is
+    manager's {attr}`~meta_package_manager.manager.PackageManager.installed` is
     queried inline instead (the path the unit tests exercise).
 
-    ``skipped_counts`` is a per-manager-id tally of packages excluded because their
+    `skipped_counts` is a per-manager-id tally of packages excluded because their
     manager has no Brewfile mapping; it is rendered in the header for visibility.
     """
     buckets: dict[str, list[tuple[str, Mapping[str, object] | None]]] = {

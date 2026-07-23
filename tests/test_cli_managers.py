@@ -106,8 +106,8 @@ class TestManagers(CLISubCommandTests, CLITableTests):
 
 def test_managers_stamps_global_timeout(invoke):
     """The version probes behind the table's detection columns fire lazily at
-    rendering time, after selection, so the ``managers`` subcommand must forward
-    the global ``--timeout`` for the pool to bind it on each selected instance.
+    rendering time, after selection, so the `managers` subcommand must forward
+    the global `--timeout` for the pool to bind it on each selected instance.
     An unstamped instance falls back to the 120-second read-only default,
     letting a wedged binary hold its table row for that long.
     """

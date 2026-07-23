@@ -36,9 +36,9 @@ class Yarn(PackageManager):
     """Virtual base shared by Yarn Classic and Yarn Berry.
 
     The two Yarn lines grew incompatible CLIs, so mpm models them as separate
-    managers, :py:class:`YarnClassic` and :py:class:`YarnBerry`, both invoking the
-    same ``yarn`` binary. The reported version decides which one is active: Classic
-    claims the ``1.x`` range, Berry ``2.x`` and later. Only the shared cache-cleanup
+    managers, {class}`YarnClassic` and {class}`YarnBerry`, both invoking the
+    same `yarn` binary. The reported version decides which one is active: Classic
+    claims the `1.x` range, Berry `2.x` and later. Only the shared cache-cleanup
     operation lives on this base.
 
     Command equivalences with the sibling JS managers are listed at
@@ -56,35 +56,37 @@ class Yarn(PackageManager):
 
         See: https://yarnpkg.com/cli/cache/clean
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn cache clean --all
-            yarn cache v1.22.19
-            success Cleared cache.
-            ✨  Done in 0.35s.
+        $ yarn cache clean --all
+        yarn cache v1.22.19
+        success Cleared cache.
+        ✨  Done in 0.35s.
+        ```
         """
         self.run_cli("cache", "clean", "--all")
 
 
 class YarnClassic(Yarn):
-    """Yarn Classic, the ``1.x`` line.
+    """Yarn Classic, the `1.x` line.
 
-    mpm claims this class for any ``yarn`` binary reporting a ``1.x`` version and
-    drives it through the ``yarn global`` command family, so installs, upgrades and
-    removals target the global prefix. Its ``--json`` output is a stream of one JSON
+    mpm claims this class for any `yarn` binary reporting a `1.x` version and
+    drives it through the `yarn global` command family, so installs, upgrades and
+    removals target the global prefix. Its `--json` output is a stream of one JSON
     object per line, not a single document, so every query is parsed line by line.
 
-    .. warning::
-        Yarn Classic has been in maintenance mode since January 2020, taking only
-        critical and security patches. Yarn Berry (``2.x`` and later) is the
-        actively developed line but exposes a different CLI surface, so mpm handles
-        it through a separate :py:class:`YarnBerry` manager.
+    ```{warning}
+    Yarn Classic has been in maintenance mode since January 2020, taking only
+    critical and security patches. Yarn Berry (`2.x` and later) is the
+    actively developed line but exposes a different CLI surface, so mpm handles
+    it through a separate {class}`YarnBerry` manager.
+    ```
 
-    .. note::
-        Yarn has `no dedicated search command
-        <https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299>`_ by
-        maintainer decision, so ``search`` is simulated with ``yarn info`` and only
-        resolves exact package names.
+    ```{note}
+    Yarn has [no dedicated search command](https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299) by
+    maintainer decision, so `search` is simulated with `yarn info` and only
+    resolves exact package names.
+    ```
     """
 
     id = "yarn"
@@ -104,42 +106,45 @@ class YarnClassic(Yarn):
     )
 
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ yarn --version
-        1.22.11
+    $ yarn --version
+    1.22.11
+    ```
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn global --json list --depth 0
-            {"type":"activityStart","data":{"id":0}}
-            {"type":"activityTick","data":{"id":0,"name":"awesome-lint@^0.18.0"}}
-            {"type":"activityTick","data":{"id":0,"name":"arrify@^2.0.1"}}
-            {"type":"activityTick","data":{"id":0,"name":"case@^1.6.3"}}
-            {"type":"activityTick","data":{"id":0,"name":"emoji-regex@^9.2.0"}}
-            {"type":"activityEnd","data":{"id":0}}
-            {"type":"progressStart","data":{"id":0,"total":327}}
-            {"type":"progressTick","data":{"id":0,"current":1}}
-            {"type":"progressTick","data":{"id":0,"current":2}}
-            {"type":"progressTick","data":{"id":0,"current":3}}
-            {"type":"progressTick","data":{"id":0,"current":4}}
-            {"type":"progressTick","data":{"id":0,"current":5}}
-            {"type":"progressFinish","data":{"id":0}}
-            {"type":"info","data":"\"awesome-lint@0.18.0\" has binaries:"}
-            {"type":"list","data":{"type":"bins-awesome-lint","items":["awesome-lint"]}}
+        $ yarn global --json list --depth 0
+        {"type":"activityStart","data":{"id":0}}
+        {"type":"activityTick","data":{"id":0,"name":"awesome-lint@^0.18.0"}}
+        {"type":"activityTick","data":{"id":0,"name":"arrify@^2.0.1"}}
+        {"type":"activityTick","data":{"id":0,"name":"case@^1.6.3"}}
+        {"type":"activityTick","data":{"id":0,"name":"emoji-regex@^9.2.0"}}
+        {"type":"activityEnd","data":{"id":0}}
+        {"type":"progressStart","data":{"id":0,"total":327}}
+        {"type":"progressTick","data":{"id":0,"current":1}}
+        {"type":"progressTick","data":{"id":0,"current":2}}
+        {"type":"progressTick","data":{"id":0,"current":3}}
+        {"type":"progressTick","data":{"id":0,"current":4}}
+        {"type":"progressTick","data":{"id":0,"current":5}}
+        {"type":"progressFinish","data":{"id":0}}
+        {"type":"info","data":"\"awesome-lint@0.18.0\" has binaries:"}
+        {"type":"list","data":{"type":"bins-awesome-lint","items":["awesome-lint"]}}
+        ```
 
-        .. code-block:: console
+        ```{code-block} console
 
-            $ yarn global list --depth 0
-            yarn global v1.22.19
-            info "awesome-lint@0.18.0" has binaries:
-               - awesome-lint
-            ✨  Done in 0.13s.
+        $ yarn global list --depth 0
+        yarn global v1.22.19
+        info "awesome-lint@0.18.0" has binaries:
+           - awesome-lint
+        ✨  Done in 0.13s.
+        ```
         """
         output = self.run_cli(
             "global", "--json", "list", "--depth", "0", must_succeed=True
@@ -152,10 +157,11 @@ class YarnClassic(Yarn):
     def global_dir(self) -> str:
         """Locate the global directory.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn global dir
-            ~/.config/yarn/global
+        $ yarn global dir
+        ~/.config/yarn/global
+        ```
         """
         return self.run_cli("global", "dir", force_exec=True).rstrip()
 
@@ -163,28 +169,30 @@ class YarnClassic(Yarn):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        Yarn emits its ``--json`` output as a stream of one JSON object per line
-        (the sample below elides the ``info`` color-legend object; the
+        Yarn emits its `--json` output as a stream of one JSON object per line
+        (the sample below elides the `info` color-legend object; the
         human-readable transcript further down shows it):
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn --json outdated --cwd ~/.config/yarn/global
-            {"type":"warning","data":"package.json: No license field"}
-            {"type":"table","data":{"head":["Package","Current","Wanted","Latest","Package Type","URL"],"body":[["markdown","0.4.0","0.4.0","0.5.0","dependencies","git://github.com/evilstreak/markdown-js.git"]]}}
+        $ yarn --json outdated --cwd ~/.config/yarn/global
+        {"type":"warning","data":"package.json: No license field"}
+        {"type":"table","data":{"head":["Package","Current","Wanted","Latest","Package Type","URL"],"body":[["markdown","0.4.0","0.4.0","0.5.0","dependencies","git://github.com/evilstreak/markdown-js.git"]]}}
+        ```
 
-        .. code-block:: console
+        ```{code-block} console
 
-            $ yarn outdated --cwd ~/.config/yarn/global
-            yarn outdated v1.22.19
-            warning package.json: No license field
-            info Color legend :
-            "<red>"    : Major Update backward-incompatible updates
-            "<yellow>" : Minor Update backward-compatible features
-            "<green>"  : Patch Update backward-compatible bug fixes
-            Package  Current Wanted Latest Package Type URL
-            markdown 0.4.0   0.4.0  0.5.0  dependencies git://github.com/.../md-js.git
-            ✨  Done in 0.95s.
+        $ yarn outdated --cwd ~/.config/yarn/global
+        yarn outdated v1.22.19
+        warning package.json: No license field
+        info Color legend :
+        "<red>"    : Major Update backward-incompatible updates
+        "<yellow>" : Minor Update backward-compatible features
+        "<green>"  : Patch Update backward-compatible bug fixes
+        Package  Current Wanted Latest Package Type URL
+        markdown 0.4.0   0.4.0  0.5.0  dependencies git://github.com/.../md-js.git
+        ✨  Done in 0.95s.
+        ```
         """
         output = self.run_cli(
             "--json", "outdated", "--cwd", self.global_dir, must_succeed=True
@@ -208,84 +216,85 @@ class YarnClassic(Yarn):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. warning::
-            Yarn maintainers have `decided to not implement a dedicated search command
-            <https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299>`_.
+        ```{warning}
+        Yarn maintainers have [decided to not implement a dedicated search command](https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299).
 
-            Search is simulated by a direct call to ``yarn info``, and as a result only
-            works for exact match.
+        Search is simulated by a direct call to `yarn info`, and as a result only
+        works for exact match.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn --json info python | jq
-            {
-              "type": "inspect",
-              "data": {
-                "name": "python",
-                "description": "Interact with python child process",
-                "dist-tags": {
-                  "latest": "0.0.4"
-                },
-                "versions": [
-                  "0.0.0",
-                  "0.0.1",
-                  "0.0.2",
-                  "0.0.3",
-                  "0.0.4"
-                ],
-                "maintainers": [
-                  {
-                    "name": "drderidder",
-                    "email": "drderidder@gmail.com"
-                  }
-                ],
-                "time": {
-                  "modified": "2017-09-16T05:26:13.151Z",
-                  "created": "2011-07-11T01:59:04.362Z",
-                  "0.0.0": "2011-07-11T01:59:05.137Z",
-                  "0.0.1": "2011-07-17T05:23:33.166Z",
-                  "0.0.2": "2011-07-20T03:42:50.379Z",
-                  "0.0.3": "2014-06-08T00:39:08.562Z",
-                  "0.0.4": "2015-01-25T02:48:07.820Z"
-                },
-                "author": {
-                  "name": "Darren DeRidder"
-                },
-                "repository": {
-                  "type": "git",
-                  "url": "git://github.com/73rhodes/node-python.git"
-                },
-                "homepage": "https://github.com/73rhodes/node-python",
-                "bugs": {
-                  "url": "https://github.com/73rhodes/node-python/issues"
-                },
-                "readmeFilename": "README.md",
-                "users": {
-                  "dewang-mistry": true,
-                  "goliatone": true,
-                  "sapanbhuta": true,
-                  "aditcmarix": true,
-                  "imlucas": true,
-                  "heyderpd": true,
-                  "ukuli": true,
-                  "chbardel": true,
-                  "asaupup": true,
-                  "nuwaio": true
-                },
-                "version": "0.0.4",
-                "main": "./lib/python.js",
-                "engines": {
-                  "node": ">= 0.4.1"
-                },
-                "gitHead": "69754aaa57658193916a1bf5fc391198098f74f6",
-                "scripts": {},
-                "dist": {
-                  "shasum": "3094e898ef17a33aa9c3e973b3848a38e47d1818",
-                  "tarball": "https://registry.npmjs.org/python/-/python-1.tgz"
-                },
-                "directories": {}
+        $ yarn --json info python | jq
+        {
+          "type": "inspect",
+          "data": {
+            "name": "python",
+            "description": "Interact with python child process",
+            "dist-tags": {
+              "latest": "0.0.4"
+            },
+            "versions": [
+              "0.0.0",
+              "0.0.1",
+              "0.0.2",
+              "0.0.3",
+              "0.0.4"
+            ],
+            "maintainers": [
+              {
+                "name": "drderidder",
+                "email": "drderidder@gmail.com"
               }
-            }
+            ],
+            "time": {
+              "modified": "2017-09-16T05:26:13.151Z",
+              "created": "2011-07-11T01:59:04.362Z",
+              "0.0.0": "2011-07-11T01:59:05.137Z",
+              "0.0.1": "2011-07-17T05:23:33.166Z",
+              "0.0.2": "2011-07-20T03:42:50.379Z",
+              "0.0.3": "2014-06-08T00:39:08.562Z",
+              "0.0.4": "2015-01-25T02:48:07.820Z"
+            },
+            "author": {
+              "name": "Darren DeRidder"
+            },
+            "repository": {
+              "type": "git",
+              "url": "git://github.com/73rhodes/node-python.git"
+            },
+            "homepage": "https://github.com/73rhodes/node-python",
+            "bugs": {
+              "url": "https://github.com/73rhodes/node-python/issues"
+            },
+            "readmeFilename": "README.md",
+            "users": {
+              "dewang-mistry": true,
+              "goliatone": true,
+              "sapanbhuta": true,
+              "aditcmarix": true,
+              "imlucas": true,
+              "heyderpd": true,
+              "ukuli": true,
+              "chbardel": true,
+              "asaupup": true,
+              "nuwaio": true
+            },
+            "version": "0.0.4",
+            "main": "./lib/python.js",
+            "engines": {
+              "node": ">= 0.4.1"
+            },
+            "gitHead": "69754aaa57658193916a1bf5fc391198098f74f6",
+            "scripts": {},
+            "dist": {
+              "shasum": "3094e898ef17a33aa9c3e973b3848a38e47d1818",
+              "tarball": "https://registry.npmjs.org/python/-/python-1.tgz"
+            },
+            "directories": {}
+          }
+        }
+        ```
         """
         output = self.run_cli("--json", "info", query, must_succeed=True)
 
@@ -306,48 +315,50 @@ class YarnClassic(Yarn):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn --silent global add awesome-lint
-            yarn global v1.22.19
-            [1/4] 🔍  Resolving packages...
-            [2/4] 🚚  Fetching packages...
-            [3/4] 🔗  Linking dependencies...
-            [4/4] 🔨  Building fresh packages...
+        $ yarn --silent global add awesome-lint
+        yarn global v1.22.19
+        [1/4] 🔍  Resolving packages...
+        [2/4] 🚚  Fetching packages...
+        [3/4] 🔗  Linking dependencies...
+        [4/4] 🔨  Building fresh packages...
 
-            success Installed "awesome-lint@0.18.0" with binaries:
-                - awesome-lint
-            ✨  Done in 16.15s.
+        success Installed "awesome-lint@0.18.0" with binaries:
+            - awesome-lint
+        ✨  Done in 16.15s.
+        ```
         """
         return self.run_cli("global", "add", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn --silent global upgrade --latest
-            yarn global v1.22.19
-            [1/4] 🔍  Resolving packages...
-            [2/4] 🚚  Fetching packages...
-            [3/4] 🔗  Linking dependencies...
-            [4/4] 🔨  Rebuilding all packages...
-            success Saved lockfile.
-            success Saved 271 new dependencies.
-            info Direct dependencies
-            ├─ awesome-lint@0.18.0
-            └─ markdown@0.5.0
-            info All dependencies
-            ├─ @babel/code-frame@7.18.6
-            ├─ @babel/helper-validator-identifier@7.18.6
-            ├─ @nodelib/fs.scandir@2.1.5
-            ├─ array-to-sentence@1.1.0
-            ├─ array-union@2.1.0
-            ├─ awesome-lint@0.18.0
-            ├─ fs.realpath@1.0.0
-            (...)
-            └─ zwitch@1.0.5
-            ✨  Done in 19.89s.
+        $ yarn --silent global upgrade --latest
+        yarn global v1.22.19
+        [1/4] 🔍  Resolving packages...
+        [2/4] 🚚  Fetching packages...
+        [3/4] 🔗  Linking dependencies...
+        [4/4] 🔨  Rebuilding all packages...
+        success Saved lockfile.
+        success Saved 271 new dependencies.
+        info Direct dependencies
+        ├─ awesome-lint@0.18.0
+        └─ markdown@0.5.0
+        info All dependencies
+        ├─ @babel/code-frame@7.18.6
+        ├─ @babel/helper-validator-identifier@7.18.6
+        ├─ @nodelib/fs.scandir@2.1.5
+        ├─ array-to-sentence@1.1.0
+        ├─ array-union@2.1.0
+        ├─ awesome-lint@0.18.0
+        ├─ fs.realpath@1.0.0
+        (...)
+        └─ zwitch@1.0.5
+        ✨  Done in 19.89s.
+        ```
         """
         return self.build_cli("global", "upgrade", "--latest")
 
@@ -359,55 +370,59 @@ class YarnClassic(Yarn):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn --silent global upgrade markdown --latest
-            yarn global v1.22.19
-            [1/4] 🔍  Resolving packages...
-            [2/4] 🚚  Fetching packages...
-            [3/4] 🔗  Linking dependencies...
-            [4/4] 🔨  Rebuilding all packages...
-            success Saved lockfile.
-            success Saved 2 new dependencies.
-            info Direct dependencies
-            └─ markdown@0.5.0
-            info All dependencies
-            ├─ markdown@0.5.0
-            └─ nopt@2.1.2
-            ✨  Done in 1.77s.
+        $ yarn --silent global upgrade markdown --latest
+        yarn global v1.22.19
+        [1/4] 🔍  Resolving packages...
+        [2/4] 🚚  Fetching packages...
+        [3/4] 🔗  Linking dependencies...
+        [4/4] 🔨  Rebuilding all packages...
+        success Saved lockfile.
+        success Saved 2 new dependencies.
+        info Direct dependencies
+        └─ markdown@0.5.0
+        info All dependencies
+        ├─ markdown@0.5.0
+        └─ nopt@2.1.2
+        ✨  Done in 1.77s.
+        ```
         """
         return self.build_cli("global", "upgrade", package_id, "--latest")
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn --silent global remove awesome-lint
-            yarn global v1.22.19
-            [1/2] 🗑  Removing module awesome-lint...
-            [2/2] 🔨  Regenerating lockfile and installing missing dependencies...
-            success Uninstalled packages.
-            ✨  Done in 0.21s.
+        $ yarn --silent global remove awesome-lint
+        yarn global v1.22.19
+        [1/2] 🗑  Removing module awesome-lint...
+        [2/2] 🔨  Regenerating lockfile and installing missing dependencies...
+        success Uninstalled packages.
+        ✨  Done in 0.21s.
+        ```
         """
         return self.run_cli("global", "remove", package_id)
 
 
 class YarnBerry(Yarn):
-    """Yarn Berry, the ``2.x`` and later line.
+    """Yarn Berry, the `2.x` and later line.
 
-    mpm claims this class for any ``yarn`` binary reporting a ``2.x`` or newer
+    mpm claims this class for any `yarn` binary reporting a `2.x` or newer
     version.
 
-    .. warning::
-        Yarn Berry removed the ``yarn global`` command family entirely: it has no
-        notion of globally installed packages. Only ``search`` is available, while
-        ``installed``, ``outdated``, ``install``, ``upgrade`` and ``remove`` are all
-        unsupported.
+    ```{warning}
+    Yarn Berry removed the `yarn global` command family entirely: it has no
+    notion of globally installed packages. Only `search` is available, while
+    `installed`, `outdated`, `install`, `upgrade` and `remove` are all
+    unsupported.
+    ```
 
-    .. note::
-        ``search`` is simulated with ``yarn npm info`` and only resolves exact
-        package names.
+    ```{note}
+    `search` is simulated with `yarn npm info` and only resolves exact
+    package names.
+    ```
     """
 
     id = "yarn-berry"
@@ -422,29 +437,31 @@ class YarnBerry(Yarn):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. warning::
-            Search is simulated by a direct call to ``yarn npm info``, and as a
-            result only works for exact match.
+        ```{warning}
+        Search is simulated by a direct call to `yarn npm info`, and as a
+        result only works for exact match.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ yarn npm info python --json | jq
-            {
-              "name": "python",
-              "description": "Interact with python child process",
-              "dist-tags": {
-                "latest": "0.0.4"
-              },
-              "versions": [
-                "0.0.0",
-                "0.0.1",
-                "0.0.2",
-                "0.0.3",
-                "0.0.4"
-              ],
-              "version": "0.0.4",
-              (...)
-            }
+        $ yarn npm info python --json | jq
+        {
+          "name": "python",
+          "description": "Interact with python child process",
+          "dist-tags": {
+            "latest": "0.0.4"
+          },
+          "versions": [
+            "0.0.0",
+            "0.0.1",
+            "0.0.2",
+            "0.0.3",
+            "0.0.4"
+          ],
+          "version": "0.0.4",
+          (...)
+        }
+        ```
         """
         output = self.run_cli("npm", "info", query, "--json")
 

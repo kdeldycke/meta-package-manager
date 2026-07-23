@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Top-level platform classification shared across ``mpm``.
+"""Top-level platform classification shared across `mpm`.
 
-Defines :py:data:`MAIN_PLATFORMS`, the curated platform groups (BSD, Linux, macOS,
-Unix, Windows) used to label managers in the CLI ``managers`` matrix, in the GitHub
+Defines {data}`MAIN_PLATFORMS`, the curated platform groups (BSD, Linux, macOS,
+Unix, Windows) used to label managers in the CLI `managers` matrix, in the GitHub
 issue/PR platform labels, and in the documentation tables.
 """
 
@@ -49,7 +49,7 @@ MAIN_PLATFORMS: tuple[Group | Platform, ...] = (
 )
 """Top-level classification of platforms.
 
-This is the local reference used to classify the execution targets of ``mpm``.
+This is the local reference used to classify the execution targets of `mpm`.
 
 Each entry of this list will have its own dedicated column in the matrix. This list is
 manually maintained with tweaked IDs and names to minimize the matrix verbosity and

@@ -376,12 +376,17 @@ packages.find.include = [ "meta_package_manager*" ]
 
 [tool.uv]
 required-version = ">=0.11.23,<0.12"
+# Track click-extra's main branch, which carries the unreleased mirror-block fix:
+# `click-extra refresh-directives` executes `python:render` `:mirror:` blocks with
+# the page's directory on sys.path, so the `from docs_update import ...` generator
+# imports of docs/benchmark.md and docs/augmentations.md work offline. The lockfile
+# pins the exact commit; refresh it with `uv lock --upgrade-package click-extra`.
+# Drop this override once the fix is published, and re-add the dated
+# exclude-newer-package pin for click-extra to pull the fresh release through the
+# cooldown below.
+sources.click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
-# Per-package overrides for freshly-published dependencies we want to pull in
-# before the global cooldown would normally let them through. Date format
-# uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-07-23T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

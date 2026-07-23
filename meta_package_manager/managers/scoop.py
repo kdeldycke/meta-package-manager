@@ -33,30 +33,32 @@ if TYPE_CHECKING:
 class Scoop(PackageManager):
     """Scoop is a user-level command-line installer for Windows.
 
-    Apps unpack under ``~/scoop`` without elevation, so no operation is marked
-    ``sudo``.
+    Apps unpack under `~/scoop` without elevation, so no operation is marked
+    `sudo`.
 
     Documentation:
 
     - https://scoop.sh
     - https://github.com/ScoopInstaller/Scoop
 
-    .. note::
-        The ``installed``, ``outdated`` and ``search`` listings are column
-        tables introduced by a ``---`` separator line: mpm drops everything up
-        to that separator, then splits each row positionally on whitespace.
+    ```{note}
+    The `installed`, `outdated` and `search` listings are column
+    tables introduced by a `---` separator line: mpm drops everything up
+    to that separator, then splits each row positionally on whitespace.
+    ```
 
-    .. attention::
-        ``scoop --version`` does not reliably print a clean version: it often
-        emits the raw ``git log`` line of the checkout instead. The probe
-        therefore carries fallbacks that recover the version from a
-        ``tag: vX.Y.Z`` ref or a ``Bump to version`` commit subject. See
-        `Scoop's own version-reporting issue
-        <https://github.com/ScoopInstaller/Scoop/issues/6457>`_.
+    ```{attention}
+    `scoop --version` does not reliably print a clean version: it often
+    emits the raw `git log` line of the checkout instead. The probe
+    therefore carries fallbacks that recover the version from a
+    `tag: vX.Y.Z` ref or a `Bump to version` commit subject. See
+    [Scoop's own version-reporting issue](https://github.com/ScoopInstaller/Scoop/issues/6457).
+    ```
 
-    .. caution::
-        ``remove`` uninstalls with ``--purge``, so a package's persisted data
-        directory is deleted with it rather than kept for a later reinstall.
+    ```{caution}
+    `remove` uninstalls with `--purge`, so a package's persisted data
+    directory is deleted with it rather than kept for a later reinstall.
+    ```
     """
 
     name = "Scoop"
@@ -109,39 +111,42 @@ class Scoop(PackageManager):
     )
     """Search version at the start of a line.
 
-    .. code-block:: pwsh-session
+    ```{code-block} pwsh-session
 
-        > scoop --version
-        Current Scoop version:
-        v0.2.4 - Released at 2022-08-08
+    > scoop --version
+    Current Scoop version:
+    v0.2.4 - Released at 2022-08-08
 
-        'main' bucket:
-        5a5b13b6c (HEAD -> master, origin/HEAD) oh-my-posh: Update to version 11.1.1
+    'main' bucket:
+    5a5b13b6c (HEAD -> master, origin/HEAD) oh-my-posh: Update to version 11.1.1
+    ```
 
-    .. attention::
+    :::{attention}
 
-        `Scoop does not always provide a clean version string
-        <https://github.com/ScoopInstaller/Scoop/issues/6457>`_.
+    [Scoop does not always provide a clean version string](https://github.com/ScoopInstaller/Scoop/issues/6457).
 
-        So we fallback on parsing various ``git log`` output:
+    So we fallback on parsing various `git log` output:
 
-        .. code-block:: pwsh-session
+    ```{code-block} pwsh-session
 
-            > scoop --version
-            Current Scoop version:
-            b588a06e (HEAD -> master, tag: v0.5.3, origin/master, origin/HEAD) Bump 0.5.3
+    > scoop --version
+    Current Scoop version:
+    b588a06e (HEAD -> master, tag: v0.5.3, origin/master, origin/HEAD) Bump 0.5.3
 
-            'main' bucket:
-            46c50c6b0 (HEAD -> master, origin/master, origin/HEAD) fix arm64 version
+    'main' bucket:
+    46c50c6b0 (HEAD -> master, origin/master, origin/HEAD) fix arm64 version
+    ```
 
-        .. code-block:: pwsh-session
+    ```{code-block} pwsh-session
 
-            > scoop --version
-            Current Scoop version:
-            b588a06e chore(release): Bump to version 0.5.3 (resync) (#6436)
+    > scoop --version
+    Current Scoop version:
+    b588a06e chore(release): Bump to version 0.5.3 (resync) (#6436)
 
-            'main' bucket:
-            46c50c6b0 aqua: fix arm64 version (#7071)
+    'main' bucket:
+    46c50c6b0 aqua: fix arm64 version (#7071)
+    ```
+    :::
     """
 
     @staticmethod
@@ -155,17 +160,18 @@ class Scoop(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            >  scoop list
-            Installed apps:
+        >  scoop list
+        Installed apps:
 
-            Name   Version          Source Updated             Info
-            ----   -------          ------ -------             ----
-            7zip   22.01            main   2022-09-27 08:03:30
-            dark   3.11.2           main   2022-09-27 08:04:26
-            git    2.37.3.windows.1 main   2022-09-27 08:03:58
-            python 3.10.7           main   2022-09-27 08:04:53
+        Name   Version          Source Updated             Info
+        ----   -------          ------ -------             ----
+        7zip   22.01            main   2022-09-27 08:03:30
+        dark   3.11.2           main   2022-09-27 08:04:26
+        git    2.37.3.windows.1 main   2022-09-27 08:03:58
+        python 3.10.7           main   2022-09-27 08:04:53
+        ```
         """
         output = self.run_cli("list")
 
@@ -178,15 +184,16 @@ class Scoop(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > scoop status
-            Name           Installed Version Latest Version Missing Dependencies Info
-            ----           ----------------- -------------- -------------------- ----
-            demulshooter   16.7.2            18.7.3
-            eduke32        20220611-10112    20220709-10115
-            Teracopy-np
-            yuzu-pineapple EA-2804           EA-2830
+        > scoop status
+        Name           Installed Version Latest Version Missing Dependencies Info
+        ----           ----------------- -------------- -------------------- ----
+        demulshooter   16.7.2            18.7.3
+        eduke32        20220611-10112    20220709-10115
+        Teracopy-np
+        yuzu-pineapple EA-2804           EA-2830
+        ```
         """
         output = self.run_cli("status")
 
@@ -207,28 +214,30 @@ class Scoop(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not support extended or exact matching. So we return the best
-            subset of results and let
-            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` refine
-            them.
+        ```{caution}
+        Search does not support extended or exact matching. So we return the best
+        subset of results and let
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search` refine
+        them.
+        ```
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > scoop search zip
-            Results from local buckets...
+        > scoop search zip
+        Results from local buckets...
 
-            Name             Version         Source Binaries
-            ----             -------         ------ --------
-            7zip             22.01           main
-            7zip19.00-helper 19.00           main
-            busybox          4716-g31467ddfc main   bunzip2 | gunzip | gzip | unzip
-            bzip2            1.0.8.0         main
-            gow              0.8.0           main   bunzip2.exe | bzip2.exe | zip.exe
-            gzip             1.3.12          main
-            lzip             1.20            main
-            unzip            6.00            main
-            zip              3.0             main
+        Name             Version         Source Binaries
+        ----             -------         ------ --------
+        7zip             22.01           main
+        7zip19.00-helper 19.00           main
+        busybox          4716-g31467ddfc main   bunzip2 | gunzip | gzip | unzip
+        bzip2            1.0.8.0         main
+        gow              0.8.0           main   bunzip2.exe | bzip2.exe | zip.exe
+        gzip             1.3.12          main
+        lzip             1.20            main
+        unzip            6.00            main
+        zip              3.0             main
+        ```
         """
         output = self.run_cli("search", query)
 
@@ -241,33 +250,35 @@ class Scoop(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > scoop install 7zip
-            Installing '7zip' (22.01) [64bit] from main bucket
-            7z2201-x64.msi (1.8 MB) [====================] 100%
-            Checking hash of 7z2201-x64.msi ... ok.
-            Extracting 7z2201-x64.msi ... done.
-            Linking ~\\scoop\apps\7zip\\current => ~\\scoop\apps\7zip\22.01
-            Creating shim for '7z'.
-            Creating shortcut for 7-Zip (7zFM.exe)
-            Persisting Codecs
-            Persisting Formats
-            Running post_install script...
-            '7zip' (22.01) was installed successfully!
+        > scoop install 7zip
+        Installing '7zip' (22.01) [64bit] from main bucket
+        7z2201-x64.msi (1.8 MB) [====================] 100%
+        Checking hash of 7z2201-x64.msi ... ok.
+        Extracting 7z2201-x64.msi ... done.
+        Linking ~\\scoop\apps\7zip\\current => ~\\scoop\apps\7zip\22.01
+        Creating shim for '7z'.
+        Creating shortcut for 7-Zip (7zFM.exe)
+        Persisting Codecs
+        Persisting Formats
+        Running post_install script...
+        '7zip' (22.01) was installed successfully!
 
-            Notes
-            -----
-            Add 7-Zip as a context menu by running: "C:\\scoop\\...install-context.reg"
+        Notes
+        -----
+        Add 7-Zip as a context menu by running: "C:\\scoop\\...install-context.reg"
+        ```
         """
         return self.run_cli("install", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > scoop update --all
+        > scoop update --all
+        ```
         """
         return self.build_cli("update", "--all")
 
@@ -279,73 +290,81 @@ class Scoop(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > scoop update 7zip
+        > scoop update 7zip
+        ```
         """
         return self.build_cli("update", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > scoop uninstall 7zip --purge
-            Uninstalling '7zip' (22.01).
-            Removing shim '7z.shim'.
-            Removing shim '7z.exe'.
-            Removing shortcut ~\\AppData\\Roaming\\Scoop Apps\7-Zip.lnk
-            Unlinking ~\\scoop\apps\7zip\\current
-            '7zip' was uninstalled.
+        > scoop uninstall 7zip --purge
+        Uninstalling '7zip' (22.01).
+        Removing shim '7z.shim'.
+        Removing shim '7z.exe'.
+        Removing shortcut ~\\AppData\\Roaming\\Scoop Apps\7-Zip.lnk
+        Unlinking ~\\scoop\apps\7zip\\current
+        '7zip' was uninstalled.
+        ```
         """
         return self.run_cli("uninstall", package_id, "--purge")
 
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: console
+        ```{code-block} console
 
-            > scoop status
-            WARN  Scoop out of date. Run 'scoop update' to get the latest changes.
+        > scoop status
+        WARN  Scoop out of date. Run 'scoop update' to get the latest changes.
+        ```
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > scoop update
-            Updating Scoop...
-            Updating 'main' bucket...
-            Converting 'main' bucket to git repo...
-            Checking repo... OK
-            The main bucket was added successfully.
-            Scoop was updated successfully!
+        > scoop update
+        Updating Scoop...
+        Updating 'main' bucket...
+        Converting 'main' bucket to git repo...
+        Checking repo... OK
+        The main bucket was added successfully.
+        Scoop was updated successfully!
+        ```
 
-        .. code-block:: console
+        ```{code-block} console
 
-            > scoop status
-            Scoop is up to date.
-            Everything is ok!
+        > scoop status
+        Scoop is up to date.
+        Everything is ok!
+        ```
         """
         self.run_cli("update")
 
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > scoop cleanup --all --cache
-            Everything is shiny now!
+        > scoop cleanup --all --cache
+        Everything is shiny now!
+        ```
         """
         self.run_cli("cleanup", "--all", "--cache")
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
 
-        .. caution::
-            ``checkup`` prints its suggestions but is optimistic with its exit
-            code, so an unhealthy setup may still report as ``✓``: the relayed
-            report is the signal to read.
+        ```{caution}
+        `checkup` prints its suggestions but is optimistic with its exit
+        code, so an unhealthy setup may still report as `✓`: the relayed
+        report is the signal to read.
+        ```
 
-        .. code-block:: pwsh-session
+        ```{code-block} pwsh-session
 
-            > scoop checkup
+        > scoop checkup
+        ```
         """
         return self.build_cli("checkup")

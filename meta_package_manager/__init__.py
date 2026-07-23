@@ -15,8 +15,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Meta Package Manager: a unified CLI wrapping many package managers.
 
-Root package. Holds the canonical :py:data:`__version__`; the :command:`mpm` entry
-point lives in :py:mod:`meta_package_manager.cli`.
+Root package. Holds the canonical {data}`__version__`; the {command}`mpm` entry
+point lives in {mod}`meta_package_manager.cli`.
 """
 
 from __future__ import annotations

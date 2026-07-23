@@ -138,12 +138,12 @@ def test_extra_option_allowlist():
 
 
 selection_cases = {
-    # Selection-logic cases pass ``drop_not_found=False`` so they test only
-    # how ``keep``/``drop`` plumbing handles ordering, deduplication and
+    # Selection-logic cases pass `drop_not_found=False` so they test only
+    # how `keep`/`drop` plumbing handles ordering, deduplication and
     # collection types, without depending on whether the named managers
     # have a real binary on PATH.  Hermetic builders (Guix, Nixpkgs, etc.)
-    # otherwise see these cases return empty tuples because ``uv`` and
-    # ``gem`` are not installed.
+    # otherwise see these cases return empty tuples because `uv` and
+    # `gem` are not installed.
     "single_selector": (
         {"keep": ("uv",), "drop_not_found": False},
         ("uv",),
@@ -278,11 +278,11 @@ def test_select_managers(kwargs, expected):
 
 
 def test_select_managers_timeout_stamping():
-    """The user's ``--timeout`` lands on every selected manager even when
-    unavailable ones are kept (``mpm managers``), whose version probes fire
+    """The user's `--timeout` lands on every selected manager even when
+    unavailable ones are kept (`mpm managers`), whose version probes fire
     lazily at rendering time, after selection: an unstamped instance would fall
     back to the read-only default and let a wedged binary hold each table row
-    for 120 seconds. A per-manager ``[mpm.managers.<id>]`` override keeps
+    for 120 seconds. A per-manager `[mpm.managers.<id>]` override keeps
     precedence over the global option.
     """
     originals = {mid: pool[mid].timeout for mid in ("gem", "uv")}
@@ -310,7 +310,7 @@ def test_select_managers_timeout_stamping():
 
 
 class _RecordingManager:
-    """Stand-in whose ``available`` probe records the thread it ran on."""
+    """Stand-in whose `available` probe records the thread it ran on."""
 
     def __init__(self, log: list) -> None:
         self._log = log

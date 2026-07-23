@@ -19,11 +19,11 @@
 Two managers share this module because they share the FreeBSD ecosystem and
 the same on-disk install database:
 
-- :py:class:`PKG` wraps the binary ``pkg`` frontend, which fetches
+- {class}`PKG` wraps the binary `pkg` frontend, which fetches
   pre-compiled artifacts from the official FreeBSD repository.
-- :py:class:`Ports` wraps the source-build workflow rooted at ``/usr/ports``,
-  driving :command:`make` recipes directly and delegating registry queries
-  back to ``pkg``.
+- {class}`Ports` wraps the source-build workflow rooted at `/usr/ports`,
+  driving {command}`make` recipes directly and delegating registry queries
+  back to `pkg`.
 
 References:
 
@@ -55,7 +55,7 @@ if TYPE_CHECKING:
 PORTS_TREE = Path("/usr/ports")
 """Canonical location of the FreeBSD ports tree.
 
-The Handbook documents this path as the convention; ``PORTSDIR`` can override
+The Handbook documents this path as the convention; `PORTSDIR` can override
 it, but every tool and consumer in the wild assumes this default.
 """
 
@@ -65,20 +65,22 @@ class PKG(PackageManager):
     official FreeBSD repository.
 
     Only root may modify the package database, so mutating operations escalate
-    through ``sudo`` by default, like the :py:class:`Ports` sibling.
+    through `sudo` by default, like the {class}`Ports` sibling.
 
-    .. note::
-        ``outdated`` parses ``pkg upgrade --dry-run`` rather than ``pkg version``,
-        because only the dry-run names the target version each package would move
-        to.
+    ```{note}
+    `outdated` parses `pkg upgrade --dry-run` rather than `pkg version`,
+    because only the dry-run names the target version each package would move
+    to.
+    ```
 
-    .. caution::
-        ``sync`` forces ``IGNORE_OSVERSION=yes``: a package built for a newer
-        FreeBSD than the running kernel would otherwise trigger an interactive
-        confirmation that hangs the subprocess. It is passed as a ``-o``
-        command-line option rather than an environment variable, which sudo's
-        environment reset would strip from the escalated call. Support for that
-        setting is also why the version floor is ``1.11``.
+    ```{caution}
+    `sync` forces `IGNORE_OSVERSION=yes`: a package built for a newer
+    FreeBSD than the running kernel would otherwise trigger an interactive
+    confirmation that hangs the subprocess. It is passed as a `-o`
+    command-line option rather than an environment variable, which sudo's
+    environment reset would strip from the escalated call. Support for that
+    setting is also why the version floor is `1.11`.
+    ```
     """
 
     name = "FreeBSD pkg"
@@ -90,12 +92,13 @@ class PKG(PackageManager):
     default_sudo = True
 
     requirement = ">=1.11"
-    """1.11 is the first version to support the ``IGNORE_OSVERSION`` setting.
+    """1.11 is the first version to support the `IGNORE_OSVERSION` setting.
 
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ pkg --version
-        1.20.9
+    $ pkg --version
+    1.20.9
+    ```
     """
 
     pre_args = ("--quiet",)
@@ -106,7 +109,7 @@ class PKG(PackageManager):
         r"^\s+(?P<package_id>\S+): (?P<installed_version>\S+)$",
         re.MULTILINE,
     )
-    """Extract the indented ``<name>: <version>`` lines of ``autoremove``'s
+    """Extract the indented `<name>: <version>` lines of `autoremove`'s
     removal manifest, skipping the flush-left narration around them."""
     _OUTDATED_REGEXP = re.compile(r"(\S+): (\S+) -> (\S+) .+")
 
@@ -114,18 +117,19 @@ class PKG(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkg query "%n %v %c"
-            7-zip 21.07_2 Console version of the 7-Zip file archiver
-            ap24-mod_mpm_itk 2.4.7_2 Run each vhost under a separate uid and gid
-            apache24 2.4.57 Version 2.4.x of Apache web server
-            aquantia-atlantic-kmod 0.0.5_1 Aquantia AQtion (Atlantic) Network Driver
-            arcconf 3.07.23971,1 Adaptec SCSI/SAS RAID administration tool
-            areca-cli-amd64 1.14.7.150519,1 Command Line Interface for ARC-xxxx RAID
-            base64 1.5_1 Utility to encode and decode base64 files
-            bash 5.1.12 GNU Project's Bourne Again SHell
-            beadm 1.4_1 Solaris-like utility to manage Boot Environments on ZFS
+        $ pkg query "%n %v %c"
+        7-zip 21.07_2 Console version of the 7-Zip file archiver
+        ap24-mod_mpm_itk 2.4.7_2 Run each vhost under a separate uid and gid
+        apache24 2.4.57 Version 2.4.x of Apache web server
+        aquantia-atlantic-kmod 0.0.5_1 Aquantia AQtion (Atlantic) Network Driver
+        arcconf 3.07.23971,1 Adaptec SCSI/SAS RAID administration tool
+        areca-cli-amd64 1.14.7.150519,1 Command Line Interface for ARC-xxxx RAID
+        base64 1.5_1 Utility to encode and decode base64 files
+        bash 5.1.12 GNU Project's Bourne Again SHell
+        beadm 1.4_1 Solaris-like utility to manage Boot Environments on ZFS
+        ```
         """
         output = self.run_cli("query", "%n %v %c")
 
@@ -143,49 +147,52 @@ class PKG(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkg upgrade --dry-run
-            Updating FreeBSD repository catalogue...
-            FreeBSD repository is up to date.
-            All repositories are up to date.
-            Checking for upgrades (312 candidates): 100%
-            Processing candidates (312 candidates): 100%
-            The following 466 package(s) will be affected (of 0 checked):
+        $ pkg upgrade --dry-run
+        Updating FreeBSD repository catalogue...
+        FreeBSD repository is up to date.
+        All repositories are up to date.
+        Checking for upgrades (312 candidates): 100%
+        Processing candidates (312 candidates): 100%
+        The following 466 package(s) will be affected (of 0 checked):
 
-            Installed packages to be REMOVED:
-                freenas-files: 13.0_1700495253
-                py39-midcli: 20190509171453
-                py39-middlewared: 13.0_1700495253
+        Installed packages to be REMOVED:
+            freenas-files: 13.0_1700495253
+            py39-midcli: 20190509171453
+            py39-middlewared: 13.0_1700495253
 
-            New packages to be INSTALLED:
-                abseil: 20230125.3 [FreeBSD]
-                argp-standalone: 1.5.0 [FreeBSD]
-                brotli: 1.1.0,1 [FreeBSD]
+        New packages to be INSTALLED:
+            abseil: 20230125.3 [FreeBSD]
+            argp-standalone: 1.5.0 [FreeBSD]
+            brotli: 1.1.0,1 [FreeBSD]
 
-            Installed packages to be UPGRADED:
-                7-zip: 21.07_2 -> 23.01 [FreeBSD]
-                apache24: 2.4.57 -> 2.4.58_1 [FreeBSD]
-                apr: 1.7.0.1.6.1_1 -> 1.7.3.1.6.3_1 [FreeBSD]
-                aquantia-atlantic-kmod: 0.0.5_1 -> 0.0.5_2 [FreeBSD]
-                bash: 5.1.12 -> 5.2.21 [FreeBSD]
+        Installed packages to be UPGRADED:
+            7-zip: 21.07_2 -> 23.01 [FreeBSD]
+            apache24: 2.4.57 -> 2.4.58_1 [FreeBSD]
+            apr: 1.7.0.1.6.1_1 -> 1.7.3.1.6.3_1 [FreeBSD]
+            aquantia-atlantic-kmod: 0.0.5_1 -> 0.0.5_2 [FreeBSD]
+            bash: 5.1.12 -> 5.2.21 [FreeBSD]
+        ```
 
-        .. note::
+        :::{note}
 
-            We rely on ``pkg upgrade`` instead of ``pkg version`` because the latter
-            does not provides the new version:
+        We rely on `pkg upgrade` instead of `pkg version` because the latter
+        does not provides the new version:
 
-            .. code-block:: shell-session
+        ```{code-block} shell-session
 
-                $ pkg version --like "<"
-                Updating FreeBSD repository catalogue...
-                FreeBSD repository is up to date.
-                All repositories are up to date.
-                7-zip-21.07_2                      <
-                apache24-2.4.57                    <
-                apr-1.7.0.1.6.1_1                  <
-                aquantia-atlantic-kmod-0.0.5_1     <
-                bash-5.1.12                        <
+        $ pkg version --like "<"
+        Updating FreeBSD repository catalogue...
+        FreeBSD repository is up to date.
+        All repositories are up to date.
+        7-zip-21.07_2                      <
+        apache24-2.4.57                    <
+        apr-1.7.0.1.6.1_1                  <
+        aquantia-atlantic-kmod-0.0.5_1     <
+        bash-5.1.12                        <
+        ```
+        :::
         """
         output = self.run_cli("upgrade", "--dry-run")
 
@@ -205,20 +212,21 @@ class PKG(PackageManager):
     def orphans(self) -> Iterator[Package]:
         """Fetch packages installed as dependencies that nothing requires anymore.
 
-        ``--dry-run`` turns ``autoremove`` into a read-only report of the
+        `--dry-run` turns `autoremove` into a read-only report of the
         would-be-removed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkg --quiet autoremove --dry-run
-            Checking integrity... done (0 conflicting)
-            Deinstallation has been requested for the following 2 packages:
+        $ pkg --quiet autoremove --dry-run
+        Checking integrity... done (0 conflicting)
+        Deinstallation has been requested for the following 2 packages:
 
-            Installed packages to be REMOVED:
-                libiconv: 1.17
-                pcre: 8.45_3
+        Installed packages to be REMOVED:
+            libiconv: 1.17
+            pcre: 8.45_3
 
-            Number of packages to be removed: 2
+        Number of packages to be removed: 2
+        ```
         """
         output = self.run_cli("autoremove", "--dry-run")
 
@@ -233,183 +241,186 @@ class PKG(PackageManager):
 
         Default search on ID substring:
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkg search --raw --raw-format json-compact --search name nginx
-            {
-                "name": "nginx",
-                "version": "1.24.0_14,3",
-                "comment": "Robust and small WWW server",
-                (...)
-            }
-            {
-                "name": "nginx-devel",
-                "version": "1.25.3_9",
-                "comment": "Robust and small WWW server",
-                (...)
-            }
-            {
-                "name": "nginx-ultimate-bad-bot-blocker",
-                "version": "4.2020.03.2005_1",
-                "comment": "Nginx bad bot and other things blocker",
-                (...)
-            }
-            {
-                "name": "p5-Nginx-ReadBody",
-                "version": "0.07_1",
-                "comment": "Nginx embedded perl module to read a request",
-                (...)
-            }
+        $ pkg search --raw --raw-format json-compact --search name nginx
+        {
+            "name": "nginx",
+            "version": "1.24.0_14,3",
+            "comment": "Robust and small WWW server",
             (...)
+        }
+        {
+            "name": "nginx-devel",
+            "version": "1.25.3_9",
+            "comment": "Robust and small WWW server",
+            (...)
+        }
+        {
+            "name": "nginx-ultimate-bad-bot-blocker",
+            "version": "4.2020.03.2005_1",
+            "comment": "Nginx bad bot and other things blocker",
+            (...)
+        }
+        {
+            "name": "p5-Nginx-ReadBody",
+            "version": "0.07_1",
+            "comment": "Nginx embedded perl module to read a request",
+            (...)
+        }
+        (...)
+        ```
 
         Exact search on ID:
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkg search --raw --raw-format json-compact --search name --exact nginx
-            {
-                "name": "nginx",
-                "origin": "www/nginx",
-                "version": "1.24.0_14,3",
-                "comment": "Robust and small WWW server",
-                "maintainer": "joneum@FreeBSD.org",
-                "www": "https://nginx.com/",
-                "abi": "FreeBSD:13:amd64",
-                "arch": "freebsd:13:x86:64",
-                "prefix": "/usr/local",
-                "sum": "c39a7696e6eda7bfedba251e4480e50d4c65c520d5a783a584b19b3ef883",
-                "flatsize": 1464332,
-                "path": "All/nginx-1.24.0_14,3.pkg",
-                "repopath": "All/nginx-1.24.0_14,3.pkg",
-                "licenselogic": "single",
-                "licenses": [
-                    "BSD2CLAUSE"
-                ],
-                "pkgsize": 473632,
-                "desc": "NGINX is a high performance edge web server with the (...)",
-                "deps": {
-                    "pcre2": {
-                        "origin": "devel/pcre2",
-                        "version": "10.42"
-                    }
-                },
-                "categories": [
-                    "www"
-                ],
-                "shlibs_required": [
-                    "libpcre2-8.so.0"
-                ],
-                "options": {
-                    "AJP": "off",
-                    "ARRAYVAR": "off",
-                    "AWS_AUTH": "off",
-                    "BROTLI": "off",
-                    "CACHE_PURGE": "off",
-                    "CLOJURE": "off",
-                    "COOKIE_FLAG": "off",
-                    "CT": "off",
-                    "DEBUG": "off",
-                    "DEBUGLOG": "off",
-                    "DEVEL_KIT": "off",
-                    "DRIZZLE": "off",
-                    "DSO": "on",
-                    "DYNAMIC_UPSTREAM": "off",
-                    "ECHO": "off",
-                    "ENCRYPTSESSION": "off",
-                    "FILE_AIO": "on",
-                    "FIPS_CHECK": "off",
-                    "FORMINPUT": "off",
-                    "GOOGLE_PERFTOOLS": "off",
-                    "GRIDFS": "off",
-                    "GSSAPI_HEIMDAL": "off",
-                    "GSSAPI_MIT": "off",
-                    "HEADERS_MORE": "off",
-                    "HTTP": "on",
-                    "HTTPV2": "on",
-                    "HTTPV3": "off",
-                    "HTTPV3_BORING": "off",
-                    "HTTPV3_LSSL": "off",
-                    "HTTPV3_QTLS": "off",
-                    "HTTP_ACCEPT_LANGUAGE": "off",
-                    "HTTP_ADDITION": "on",
-                    "HTTP_AUTH_DIGEST": "off",
-                    "HTTP_AUTH_KRB5": "off",
-                    "HTTP_AUTH_LDAP": "off",
-                    "HTTP_AUTH_PAM": "off",
-                    "HTTP_AUTH_REQ": "on",
-                    "HTTP_CACHE": "on",
-                    "HTTP_DAV": "on",
-                    "HTTP_DAV_EXT": "off",
-                    "HTTP_DEGRADATION": "off",
-                    "HTTP_EVAL": "off",
-                    "HTTP_FANCYINDEX": "off",
-                    "HTTP_SUBS_FILTER": "off",
-                    "HTTP_TARANTOOL": "off",
-                    "HTTP_UPLOAD": "off",
-                    "HTTP_UPLOAD_PROGRESS": "off",
-                    "HTTP_UPSTREAM_CHECK": "off",
-                    "HTTP_UPSTREAM_FAIR": "off",
-                    "HTTP_UPSTREAM_STICKY": "off",
-                    "HTTP_VIDEO_THUMBEXTRACTOR": "off",
-                    "HTTP_XSLT": "off",
-                    "HTTP_ZIP": "off",
-                    "ICONV": "off",
-                    "IPV6": "on",
-                    "LET": "off",
-                    "LINK": "off",
-                    "LUA": "off",
-                    "MAIL": "on",
-                    "MAIL_IMAP": "off",
-                    "MAIL_POP3": "off",
-                    "MAIL_SMTP": "off",
-                    "MAIL_SSL": "on",
-                    "MEMC": "off",
-                    "MODSECURITY3": "off",
-                    "NAXSI": "off",
-                    "NJS": "off",
-                    "NJS_XML": "off",
-                    "OPENTRACING": "off",
-                    "PASSENGER": "off",
-                    "POSTGRES": "off",
-                    "RDS_CSV": "off",
-                    "RDS_JSON": "off",
-                    "REDIS2": "off",
-                    "RTMP": "off",
-                    "SET_MISC": "off",
-                    "SFLOW": "off",
-                    "SHIBBOLETH": "off",
-                    "SLOWFS_CACHE": "off",
-                    "SRCACHE": "off",
-                    "STREAM": "on",
-                    "STREAM_REALIP": "on",
-                    "STREAM_SSL": "on",
-                    "STREAM_SSL_PREREAD": "on",
-                    "STS": "off",
-                    "THREADS": "on",
-                    "VOD": "off",
-                    "VTS": "off",
-                    "WEBSOCKIFY": "off",
-                    "WWW": "on",
-                    "XSS": "off"
-                },
-                "annotations": {
-                    "FreeBSD_version": "1302001",
-                    "build_timestamp": "2024-01-07T10:41:34+0000",
-                    "built_by": "poudriere-git-3.4.0",
-                    "cpe": "cpe:2.3:a:f5:nginx:1.24.0:::::freebsd13:x64:14",
-                    "port_checkout_unclean": "no",
-                    "port_git_hash": "756e18783",
-                    "ports_top_checkout_unclean": "no",
-                    "ports_top_git_hash": "756e18783"
+        $ pkg search --raw --raw-format json-compact --search name --exact nginx
+        {
+            "name": "nginx",
+            "origin": "www/nginx",
+            "version": "1.24.0_14,3",
+            "comment": "Robust and small WWW server",
+            "maintainer": "joneum@FreeBSD.org",
+            "www": "https://nginx.com/",
+            "abi": "FreeBSD:13:amd64",
+            "arch": "freebsd:13:x86:64",
+            "prefix": "/usr/local",
+            "sum": "c39a7696e6eda7bfedba251e4480e50d4c65c520d5a783a584b19b3ef883",
+            "flatsize": 1464332,
+            "path": "All/nginx-1.24.0_14,3.pkg",
+            "repopath": "All/nginx-1.24.0_14,3.pkg",
+            "licenselogic": "single",
+            "licenses": [
+                "BSD2CLAUSE"
+            ],
+            "pkgsize": 473632,
+            "desc": "NGINX is a high performance edge web server with the (...)",
+            "deps": {
+                "pcre2": {
+                    "origin": "devel/pcre2",
+                    "version": "10.42"
                 }
+            },
+            "categories": [
+                "www"
+            ],
+            "shlibs_required": [
+                "libpcre2-8.so.0"
+            ],
+            "options": {
+                "AJP": "off",
+                "ARRAYVAR": "off",
+                "AWS_AUTH": "off",
+                "BROTLI": "off",
+                "CACHE_PURGE": "off",
+                "CLOJURE": "off",
+                "COOKIE_FLAG": "off",
+                "CT": "off",
+                "DEBUG": "off",
+                "DEBUGLOG": "off",
+                "DEVEL_KIT": "off",
+                "DRIZZLE": "off",
+                "DSO": "on",
+                "DYNAMIC_UPSTREAM": "off",
+                "ECHO": "off",
+                "ENCRYPTSESSION": "off",
+                "FILE_AIO": "on",
+                "FIPS_CHECK": "off",
+                "FORMINPUT": "off",
+                "GOOGLE_PERFTOOLS": "off",
+                "GRIDFS": "off",
+                "GSSAPI_HEIMDAL": "off",
+                "GSSAPI_MIT": "off",
+                "HEADERS_MORE": "off",
+                "HTTP": "on",
+                "HTTPV2": "on",
+                "HTTPV3": "off",
+                "HTTPV3_BORING": "off",
+                "HTTPV3_LSSL": "off",
+                "HTTPV3_QTLS": "off",
+                "HTTP_ACCEPT_LANGUAGE": "off",
+                "HTTP_ADDITION": "on",
+                "HTTP_AUTH_DIGEST": "off",
+                "HTTP_AUTH_KRB5": "off",
+                "HTTP_AUTH_LDAP": "off",
+                "HTTP_AUTH_PAM": "off",
+                "HTTP_AUTH_REQ": "on",
+                "HTTP_CACHE": "on",
+                "HTTP_DAV": "on",
+                "HTTP_DAV_EXT": "off",
+                "HTTP_DEGRADATION": "off",
+                "HTTP_EVAL": "off",
+                "HTTP_FANCYINDEX": "off",
+                "HTTP_SUBS_FILTER": "off",
+                "HTTP_TARANTOOL": "off",
+                "HTTP_UPLOAD": "off",
+                "HTTP_UPLOAD_PROGRESS": "off",
+                "HTTP_UPSTREAM_CHECK": "off",
+                "HTTP_UPSTREAM_FAIR": "off",
+                "HTTP_UPSTREAM_STICKY": "off",
+                "HTTP_VIDEO_THUMBEXTRACTOR": "off",
+                "HTTP_XSLT": "off",
+                "HTTP_ZIP": "off",
+                "ICONV": "off",
+                "IPV6": "on",
+                "LET": "off",
+                "LINK": "off",
+                "LUA": "off",
+                "MAIL": "on",
+                "MAIL_IMAP": "off",
+                "MAIL_POP3": "off",
+                "MAIL_SMTP": "off",
+                "MAIL_SSL": "on",
+                "MEMC": "off",
+                "MODSECURITY3": "off",
+                "NAXSI": "off",
+                "NJS": "off",
+                "NJS_XML": "off",
+                "OPENTRACING": "off",
+                "PASSENGER": "off",
+                "POSTGRES": "off",
+                "RDS_CSV": "off",
+                "RDS_JSON": "off",
+                "REDIS2": "off",
+                "RTMP": "off",
+                "SET_MISC": "off",
+                "SFLOW": "off",
+                "SHIBBOLETH": "off",
+                "SLOWFS_CACHE": "off",
+                "SRCACHE": "off",
+                "STREAM": "on",
+                "STREAM_REALIP": "on",
+                "STREAM_SSL": "on",
+                "STREAM_SSL_PREREAD": "on",
+                "STS": "off",
+                "THREADS": "on",
+                "VOD": "off",
+                "VTS": "off",
+                "WEBSOCKIFY": "off",
+                "WWW": "on",
+                "XSS": "off"
+            },
+            "annotations": {
+                "FreeBSD_version": "1302001",
+                "build_timestamp": "2024-01-07T10:41:34+0000",
+                "built_by": "poudriere-git-3.4.0",
+                "cpe": "cpe:2.3:a:f5:nginx:1.24.0:::::freebsd13:x64:14",
+                "port_checkout_unclean": "no",
+                "port_git_hash": "756e18783",
+                "ports_top_checkout_unclean": "no",
+                "ports_top_git_hash": "756e18783"
             }
+        }
+        ```
 
         Extended search:
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkg search --raw --raw-format json-compact \
-              --search name --search comment --search description nginx
+        $ pkg search --raw --raw-format json-compact \
+          --search name --search comment --search description nginx
+        ```
         """
         search_args = ["--raw", "--raw-format", "json-compact", "--search", "name"]
         if exact:
@@ -431,30 +442,32 @@ class PKG(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pkg --quiet install --yes dmg2img
-            Updating FreeBSD repository catalogue...
-            FreeBSD repository is up to date.
-            All repositories are up to date.
-            Checking integrity... done (0 conflicting)
-            The following 1 package(s) will be affected (of 0 checked):
+        $ sudo pkg --quiet install --yes dmg2img
+        Updating FreeBSD repository catalogue...
+        FreeBSD repository is up to date.
+        All repositories are up to date.
+        Checking integrity... done (0 conflicting)
+        The following 1 package(s) will be affected (of 0 checked):
 
-            New packages to be INSTALLED:
-                dmg2img: 1.6.7 [FreeBSD]
+        New packages to be INSTALLED:
+            dmg2img: 1.6.7 [FreeBSD]
 
-            Number of packages to be installed: 1
-            [1/1] Installing dmg2img-1.6.7...
-            [1/1] Extracting dmg2img-1.6.7: 100%
+        Number of packages to be installed: 1
+        [1/1] Installing dmg2img-1.6.7...
+        [1/1] Extracting dmg2img-1.6.7: 100%
+        ```
         """
         return self.run_cli("install", "--yes", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pkg --quiet upgrade --yes
+        $ sudo pkg --quiet upgrade --yes
+        ```
         """
         return self.build_cli("upgrade", "--yes", sudo=True)
 
@@ -466,58 +479,62 @@ class PKG(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pkg --quiet upgrade --yes dmg2img
+        $ sudo pkg --quiet upgrade --yes dmg2img
+        ```
         """
         return self.build_cli("upgrade", "--yes", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pkg --quiet delete --yes dmg2img
-            Checking integrity... done (0 conflicting)
-            Deinstallation has been requested for the following 1 packages:
+        $ sudo pkg --quiet delete --yes dmg2img
+        Checking integrity... done (0 conflicting)
+        Deinstallation has been requested for the following 1 packages:
 
-            Installed packages to be REMOVED:
-                dmg2img: 1.6.7
+        Installed packages to be REMOVED:
+            dmg2img: 1.6.7
 
-            Number of packages to be removed: 1
-            [1/1] Deinstalling dmg2img-1.6.7...
-            [1/1] Deleting files for dmg2img-1.6.7: 100%
-            pkg: Package database is busy while closing!
+        Number of packages to be removed: 1
+        [1/1] Deinstalling dmg2img-1.6.7...
+        [1/1] Deleting files for dmg2img-1.6.7: 100%
+        pkg: Package database is busy while closing!
+        ```
         """
         return self.run_cli("delete", "--yes", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pkg --quiet -o IGNORE_OSVERSION=yes update
-            Updating FreeBSD repository catalogue...
-            Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
-            Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
-            Processing entries: 100%
-            FreeBSD repository update completed. 33804 packages processed.
-            All repositories are up to date.
+        $ sudo pkg --quiet -o IGNORE_OSVERSION=yes update
+        Updating FreeBSD repository catalogue...
+        Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
+        Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
+        Processing entries: 100%
+        FreeBSD repository update completed. 33804 packages processed.
+        All repositories are up to date.
+        ```
 
-        The ``IGNORE_OSVERSION=yes`` prevents blocking update:
+        The `IGNORE_OSVERSION=yes` prevents blocking update:
 
-        .. code-block:: console
+        ```{code-block} console
 
-            $ pkg --quiet update
-            Updating FreeBSD repository catalogue...
-            Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
-            Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
-            Processing entries:   0%
-            Newer FreeBSD version for package zziplib:
-            To ignore this error set IGNORE_OSVERSION=yes
-            - package: 1302001
-            - running kernel: 1301000
-            Ignore the mismatch and continue? [y/N]:
+        $ pkg --quiet update
+        Updating FreeBSD repository catalogue...
+        Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
+        Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
+        Processing entries:   0%
+        Newer FreeBSD version for package zziplib:
+        To ignore this error set IGNORE_OSVERSION=yes
+        - package: 1302001
+        - running kernel: 1301000
+        Ignore the mismatch and continue? [y/N]:
+        ```
         """
         # The -o command-line form survives sudo's environment reset, which would
         # strip an IGNORE_OSVERSION passed as a plain environment variable.
@@ -526,60 +543,66 @@ class PKG(PackageManager):
     def cleanup_orphan(self) -> None:
         """Remove every package installed as a dependency and no longer required.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pkg --quiet autoremove --yes
-            Checking integrity... done (0 conflicting)
-            Nothing to do.
+        $ sudo pkg --quiet autoremove --yes
+        Checking integrity... done (0 conflicting)
+        Nothing to do.
+        ```
         """
         self.run_cli("autoremove", "--yes", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Delete every cached package from the local cache directory.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pkg --quiet clean --yes --all
-            Nothing to do.
+        $ sudo pkg --quiet clean --yes --all
+        Nothing to do.
+        ```
         """
         self.run_cli("clean", "--yes", "--all", sudo=True)
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
 
-        ``check --checksums`` validates every installed package's files against
+        `check --checksums` validates every installed package's files against
         their recorded checksums, exiting non-zero on mismatches.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkg --quiet check --checksums --all
+        $ pkg --quiet check --checksums --all
+        ```
         """
         return self.build_cli("check", "--checksums", "--all")
 
 
 class Ports(PackageManager):
-    """FreeBSD ports tree: the source-build workflow rooted at ``/usr/ports``.
+    """FreeBSD ports tree: the source-build workflow rooted at `/usr/ports`.
 
-    .. note::
-        Coexists with :py:class:`PKG` on the same system: both share the install
-        database maintained by ``pkg``. ``Ports`` builds and tracks ports compiled
-        from source under ``/usr/ports``, while ``PKG`` handles binary packages
-        from the FreeBSD repository. Listing operations may overlap because ``pkg``
-        does not distinguish ports-built from binary-installed packages once they
-        are registered.
+    ```{note}
+    Coexists with {class}`PKG` on the same system: both share the install
+    database maintained by `pkg`. `Ports` builds and tracks ports compiled
+    from source under `/usr/ports`, while `PKG` handles binary packages
+    from the FreeBSD repository. Listing operations may overlap because `pkg`
+    does not distinguish ports-built from binary-installed packages once they
+    are registered.
+    ```
 
-    .. note::
-        ``installed`` and ``outdated`` delegate to the sibling ``pkg`` binary,
-        since the ports tree keeps no registry of its own. Builds drive FreeBSD's
-        ``make`` directly with ``BATCH=yes`` to accept default build options
-        without prompting. Upgrades shell out to the third-party ``portmaster``:
-        the ports tree ships no batch upgrader. ``sync`` refreshes the tree with
-        ``git`` (``portsnap`` was removed after FreeBSD 13).
+    ```{note}
+    `installed` and `outdated` delegate to the sibling `pkg` binary,
+    since the ports tree keeps no registry of its own. Builds drive FreeBSD's
+    `make` directly with `BATCH=yes` to accept default build options
+    without prompting. Upgrades shell out to the third-party `portmaster`:
+    the ports tree ships no batch upgrader. `sync` refreshes the tree with
+    `git` (`portsnap` was removed after FreeBSD 13).
+    ```
 
-    .. caution::
-        Mutating operations require root privileges and a populated ports tree at
-        ``/usr/ports``. The manager flags itself unavailable when the tree is
-        missing.
+    ```{caution}
+    Mutating operations require root privileges and a populated ports tree at
+    `/usr/ports`. The manager flags itself unavailable when the tree is
+    missing.
+    ```
     """
 
     # Removal goes through the shared install database, identical to PKG.
@@ -594,54 +617,54 @@ class Ports(PackageManager):
     default_sudo = True
 
     cli_names = ("make",)
-    """The ports tree is driven by FreeBSD's :command:`make`.
+    """The ports tree is driven by FreeBSD's {command}`make`.
 
-    No dedicated frontend exists; each port is a directory whose ``Makefile``
+    No dedicated frontend exists; each port is a directory whose `Makefile`
     targets are invoked directly.
     """
 
     extra_env: ClassVar = {"BATCH": "yes"}
     """Force non-interactive builds.
 
-    Many ports prompt for build option dialogs by default. ``BATCH=yes``
+    Many ports prompt for build option dialogs by default. `BATCH=yes`
     accepts the saved or default options without user interaction, which is
-    the only sensible behavior for an automated tool. See ``ports(7)``.
+    the only sensible behavior for an automated tool. See `ports(7)`.
     """
 
     version_cli_options = ("-V", ".MAKE.VERSION")
-    """FreeBSD ``make`` exposes its version via internal variable expansion.
+    """FreeBSD `make` exposes its version via internal variable expansion.
 
-    GNU Make's ``--version`` flag does not work on BSD make; using
-    ``-V .MAKE.VERSION`` keeps the probe portable and avoids accidentally
+    GNU Make's `--version` flag does not work on BSD make; using
+    `-V .MAKE.VERSION` keeps the probe portable and avoids accidentally
     matching a GNU Make installation shadowing the BSD binary.
     """
 
     version_regexes = (r"(?P<version>\d{8,})",)
-    """BSD make reports its version as a date-like integer (e.g. ``20240218``)."""
+    """BSD make reports its version as a date-like integer (e.g. `20240218`)."""
 
     _OUTDATED_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\s+<\s+needs updating\s+\(port has (?P<latest_version>\S+)\)",
         re.MULTILINE,
     )
-    """Match outdated entries from ``pkg version -vIPL=`` output.
+    """Match outdated entries from `pkg version -vIPL=` output.
 
     Format per line:
-    ``<pkgname-pkgver>  <op>  needs updating (port has <latest_version>)``
+    `<pkgname-pkgver>  <op>  needs updating (port has <latest_version>)`
     """
 
     _NAME_VERSION_REGEXP = re.compile(r"^(?P<package_id>.+)-(?P<version>[^-]+)$")
-    """Split ``<name>-<version>`` strings reported by ``pkg version``.
+    """Split `<name>-<version>` strings reported by `pkg version`.
 
     The version starts at the last hyphen; everything before it is the
-    package name, including embedded hyphens (e.g. ``py311-pip-23.2``).
+    package name, including embedded hyphens (e.g. `py311-pip-23.2`).
     """
 
     @cached_property
     def available(self) -> bool:
-        """Available only when ``make`` is found *and* the ports tree exists.
+        """Available only when `make` is found *and* the ports tree exists.
 
-        The :command:`make` binary alone is not enough: without a populated
-        ``/usr/ports`` directory, every operation would fail. Treat the tree
+        The {command}`make` binary alone is not enough: without a populated
+        `/usr/ports` directory, every operation would fail. Treat the tree
         as part of the manager's runtime requirement.
         """
         if not (self.supported and self.cli_path and self.executable and self.fresh):
@@ -652,15 +675,16 @@ class Ports(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch packages currently registered as installed.
 
-        Delegates to ``pkg query`` because the ports tree itself maintains
+        Delegates to `pkg query` because the ports tree itself maintains
         no registry: ports installs are recorded in the same database as
-        binary ``pkg`` installs.
+        binary `pkg` installs.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkg query "%n %v %o %c"
-            curl 8.7.1 ftp/curl Non-interactive tool to get files from FTP/HTTP servers
-            python311 3.11.9 lang/python311 Interpreted object-oriented programming language
+        $ pkg query "%n %v %o %c"
+        curl 8.7.1 ftp/curl Non-interactive tool to get files from FTP/HTTP servers
+        python311 3.11.9 lang/python311 Interpreted object-oriented programming language
+        ```
         """
         pkg_path = self.sibling_cli("pkg")
 
@@ -687,16 +711,17 @@ class Ports(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch packages whose installed version lags the ports tree.
 
-        Uses ``pkg version`` in ports-comparison mode (``-PL=``): it walks
+        Uses `pkg version` in ports-comparison mode (`-PL=`): it walks
         the local tree for each installed package and reports those with a
-        newer ``Makefile`` version available.
+        newer `Makefile` version available.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkg version -vIPL=
-            curl-8.7.1                         <   needs updating (port has 8.8.0)
-            python311-3.11.9                   <   needs updating (port has 3.11.10)
-            vim-9.1.0                          =   up-to-date with port
+        $ pkg version -vIPL=
+        curl-8.7.1                         <   needs updating (port has 8.8.0)
+        python311-3.11.9                   <   needs updating (port has 3.11.10)
+        vim-9.1.0                          =   up-to-date with port
+        ```
         """
         pkg_path = self.sibling_cli("pkg")
 
@@ -723,14 +748,15 @@ class Ports(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Build and install a port from source.
 
-        ``package_id`` may be either a bare port name (e.g. ``nginx``) or
-        its full origin (e.g. ``www/nginx``). When given a bare name, the
-        origin is resolved through ``pkg search -o`` against the active
+        `package_id` may be either a bare port name (e.g. `nginx`) or
+        its full origin (e.g. `www/nginx`). When given a bare name, the
+        origin is resolved through `pkg search -o` against the active
         repository.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ cd /usr/ports/www/nginx && sudo make BATCH=yes install clean
+        $ cd /usr/ports/www/nginx && sudo make BATCH=yes install clean
+        ```
         """
         origin = self._resolve_origin(package_id)
         port_dir = PORTS_TREE / origin
@@ -746,14 +772,15 @@ class Ports(PackageManager):
         """Generate the CLI to upgrade every outdated port.
 
         The ports tree has no first-party batch upgrader; the workflow
-        relies on the third-party ``portmaster`` tool. We build the command
-        line without checking that ``portmaster`` is installed, because
+        relies on the third-party `portmaster` tool. We build the command
+        line without checking that `portmaster` is installed, because
         upgrade commands are typically printed for the user to inspect
         before running.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo portmaster --no-confirm --no-term-title -a
+        $ sudo portmaster --no-confirm --no-term-title -a
+        ```
         """
         portmaster = self.which("portmaster") or Path("portmaster")
         return self.build_cli(
@@ -771,11 +798,12 @@ class Ports(PackageManager):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generate the CLI to upgrade one port via ``portmaster``.
+        """Generate the CLI to upgrade one port via `portmaster`.
 
-        .. code-block:: console
+        ```{code-block} console
 
-            $ sudo portmaster --no-confirm --no-term-title www/nginx
+        $ sudo portmaster --no-confirm --no-term-title www/nginx
+        ```
         """
         origin = self._resolve_origin(package_id)
         portmaster = self.which("portmaster") or Path("portmaster")
@@ -789,7 +817,7 @@ class Ports(PackageManager):
         )
 
     remove = _pkg.remove
-    """Reuses :py:meth:`PKG.remove`: the ports tree has no native uninstaller,
+    """Reuses {meth}`PKG.remove`: the ports tree has no native uninstaller,
     and removal goes through the shared install database regardless of how the
     package was originally built.
     """
@@ -797,13 +825,14 @@ class Ports(PackageManager):
     def sync(self) -> None:
         """Refresh the local ports tree from upstream.
 
-        Modern FreeBSD distributes the ports tree via Git; ``portsnap`` was
+        Modern FreeBSD distributes the ports tree via Git; `portsnap` was
         deprecated and removed after FreeBSD 13. We pull from whatever
         remote the tree was checked out from.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo git -C /usr/ports pull --ff-only
+        $ sudo git -C /usr/ports pull --ff-only
+        ```
         """
         git_path = self.sibling_cli("git")
         self.run_cli(
@@ -820,13 +849,14 @@ class Ports(PackageManager):
     def cleanup_cache(self) -> None:
         """Remove cached build artifacts from the ports tree.
 
-        Walks the tree once and invokes :command:`make clean` at the root,
+        Walks the tree once and invokes {command}`make clean` at the root,
         which recursively cleans every port's work directory.
-        ``DISTCLEAN=yes`` also removes downloaded distfiles.
+        `DISTCLEAN=yes` also removes downloaded distfiles.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo make -C /usr/ports clean DISTCLEAN=yes BATCH=yes
+        $ sudo make -C /usr/ports clean DISTCLEAN=yes BATCH=yes
+        ```
         """
         self.run_cli(
             "-C",
@@ -837,10 +867,10 @@ class Ports(PackageManager):
         )
 
     def _resolve_origin(self, package_id: str) -> str:
-        """Resolve a port name to its ``category/portname`` origin.
+        """Resolve a port name to its `category/portname` origin.
 
         Accepts either form and returns the origin verbatim when already
-        slashed. Otherwise queries the ``pkg`` binary to look up the origin
+        slashed. Otherwise queries the `pkg` binary to look up the origin
         from the configured repository.
         """
         if "/" in package_id:

@@ -45,19 +45,20 @@ if TYPE_CHECKING:
 class Zypper(PackageManager):
     """openSUSE's package manager.
 
-    ``mpm`` drives zypper in XML mode (``--xmlout``) and parses the result with
-    ``xmltodict``: the most stable machine-readable output zypper offers. Every
-    call is pinned with ``--no-color`` and ``--no-abbrev`` (untruncated columns),
-    ``--non-interactive`` for unattended runs, and ``--no-cd --no-refresh`` so it
-    never touches removable media or auto-refreshes metadata (``mpm`` refreshes
-    explicitly through ``sync``).
+    `mpm` drives zypper in XML mode (`--xmlout`) and parses the result with
+    `xmltodict`: the most stable machine-readable output zypper offers. Every
+    call is pinned with `--no-color` and `--no-abbrev` (untruncated columns),
+    `--non-interactive` for unattended runs, and `--no-cd --no-refresh` so it
+    never touches removable media or auto-refreshes metadata (`mpm` refreshes
+    explicitly through `sync`).
 
-    .. note::
-        Both ``installed`` and ``search`` run ``search --details --type package``:
-        ``--details`` is the only mode exposing versions, but it returns one row
-        per source package, architecture and past release. ``mpm`` drops
-        ``other-version`` rows and keeps the highest edition per package name to
-        collapse those duplicates.
+    ```{note}
+    Both `installed` and `search` run `search --details --type package`:
+    `--details` is the only mode exposing versions, but it returns one row
+    per source package, architecture and past release. `mpm` drops
+    `other-version` rows and keeps the highest edition per package name to
+    collapse those duplicates.
+    ```
 
     Documentation:
 
@@ -86,57 +87,59 @@ class Zypper(PackageManager):
 
     version_regexes = (r"zypper\s+(?P<version>\S+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ zypper --version
-        zypper 1.14.11
+    $ zypper --version
+    zypper 1.14.11
+    ```
     """
 
     def _search(self, *args: str) -> Iterator[SearchResult]:
-        """Utility method to parse and interpret results of the ``zypper search``
+        """Utility method to parse and interpret results of the `zypper search`
         command.
 
-        This is reused by the ``installed`` and ``search`` operations.
+        This is reused by the `installed` and `search` operations.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
-                --xmlout search --details --type package [*args]
-            <?xml version='1.0'?>
-            <stream>
-                <message type="info">Loading repository data...</message>
-                <message type="info">Reading installed packages...</message>
+        $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            --xmlout search --details --type package [*args]
+        <?xml version='1.0'?>
+        <stream>
+            <message type="info">Loading repository data...</message>
+            <message type="info">Reading installed packages...</message>
 
-                <search-result version="0.0">
-                    <solvable-list>
-                        <solvable status="installed" name="aaa_base" kind="package"
-                            edition="12.12-bp12.3.1" arch="x86_64"/>
+            <search-result version="0.0">
+                <solvable-list>
+                    <solvable status="installed" name="aaa_base" kind="package"
+                        edition="12.12-bp12.3.1" arch="x86_64"/>
 
-                        <solvable status="installed" name="adwaita-icon-theme"
-                            kind="package" edition="1.0.3-bp153.1.1" arch="x86_64"/>
-                        <solvable status="other-version" name="adwaita-icon-theme"
-                            kind="package" edition="1.0.1-bp153.1.1" arch="x86_64"/>
+                    <solvable status="installed" name="adwaita-icon-theme"
+                        kind="package" edition="1.0.3-bp153.1.1" arch="x86_64"/>
+                    <solvable status="other-version" name="adwaita-icon-theme"
+                        kind="package" edition="1.0.1-bp153.1.1" arch="x86_64"/>
 
-                        <solvable status="not-installed" name="kopete-devel"
-                            kind="package" edition="20.04.2-bp153.2.5.1" arch="x86_64"
-                            repository="Update"/>
-                        <solvable status="not-installed" name="kopete-devel"
-                            kind="package" edition="20.04.2-bp153.2.2.1" arch="x86_64"
-                            repository="Update"/>
-                        <solvable status="not-installed" name="kopete-devel"
-                            kind="package" edition="20.04.2-bp153.2.2.1" arch="x86_64"
-                            repository="Debug"/>
-                        <solvable status="not-installed" name="kopete-devel"
-                            kind="package" edition="20.04.2-bp153.2.5.1" arch="i586"
-                            repository="Update"/>
-                        <solvable status="not-installed" name="kopete-devel"
-                            kind="package" edition="20.04.2-bp153.2.2.1" arch="i586"
-                            repository="Update"/>
+                    <solvable status="not-installed" name="kopete-devel"
+                        kind="package" edition="20.04.2-bp153.2.5.1" arch="x86_64"
+                        repository="Update"/>
+                    <solvable status="not-installed" name="kopete-devel"
+                        kind="package" edition="20.04.2-bp153.2.2.1" arch="x86_64"
+                        repository="Update"/>
+                    <solvable status="not-installed" name="kopete-devel"
+                        kind="package" edition="20.04.2-bp153.2.2.1" arch="x86_64"
+                        repository="Debug"/>
+                    <solvable status="not-installed" name="kopete-devel"
+                        kind="package" edition="20.04.2-bp153.2.5.1" arch="i586"
+                        repository="Update"/>
+                    <solvable status="not-installed" name="kopete-devel"
+                        kind="package" edition="20.04.2-bp153.2.2.1" arch="i586"
+                        repository="Update"/>
 
-                        (...)
-                    </solvable-list>
-                </search-result>
-            </stream>
+                    (...)
+                </solvable-list>
+            </search-result>
+        </stream>
+        ```
         """
         output = self.run_cli(
             "--xmlout",
@@ -184,10 +187,11 @@ class Zypper(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
-                --xmlout search --details --type package --installed-only
+        $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            --xmlout search --details --type package --installed-only
+        ```
         """
         for package in self._search("--installed-only"):
             yield self.package(id=package["id"], installed_version=package["version"])
@@ -196,42 +200,43 @@ class Zypper(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
-                --xmlout list-updates
-            <?xml version='1.0'?>
-            <stream>
-                <message type="info">Loading repository data...</message>
-                <message type="info">Reading installed packages...</message>
-                <update-status version="0.6">
-                    <update-list>
-                        <update name="git" kind="package" edition="2.34.1-10.9.1"
-                                edition-old="2.26.2-3.34.1" arch="x86_64">
-                            <summary>Fast, scalable revision control system</summary>
-                            <description>
-                                Git is a fast, scalable, distributed revision
-                                control system.
-                            </description>
-                            <license/>
-                            <source
-                                url="http://download.opensuse.org/updata/leap/15.3/sle"
-                                alias="repo-sle-update"/>
-                        </update>
-                        <update name="vim" kind="package" edition="9.0.1234-1.1"
-                                edition-old="8.2.4956-1.1" arch="x86_64">
-                            <summary>Vi IMproved text editor</summary>
-                            <description>
-                                Highly configurable text editor.
-                            </description>
-                            <license/>
-                            <source
-                                url="http://download.opensuse.org/update/leap/15.3/sle"
-                                alias="repo-sle-update"/>
-                        </update>
-                    </update-list>
-                </update-status>
-            </stream>
+        $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            --xmlout list-updates
+        <?xml version='1.0'?>
+        <stream>
+            <message type="info">Loading repository data...</message>
+            <message type="info">Reading installed packages...</message>
+            <update-status version="0.6">
+                <update-list>
+                    <update name="git" kind="package" edition="2.34.1-10.9.1"
+                            edition-old="2.26.2-3.34.1" arch="x86_64">
+                        <summary>Fast, scalable revision control system</summary>
+                        <description>
+                            Git is a fast, scalable, distributed revision
+                            control system.
+                        </description>
+                        <license/>
+                        <source
+                            url="http://download.opensuse.org/updata/leap/15.3/sle"
+                            alias="repo-sle-update"/>
+                    </update>
+                    <update name="vim" kind="package" edition="9.0.1234-1.1"
+                            edition-old="8.2.4956-1.1" arch="x86_64">
+                        <summary>Vi IMproved text editor</summary>
+                        <description>
+                            Highly configurable text editor.
+                        </description>
+                        <license/>
+                        <source
+                            url="http://download.opensuse.org/update/leap/15.3/sle"
+                            alias="repo-sle-update"/>
+                    </update>
+                </update-list>
+            </update-status>
+        </stream>
+        ```
         """
         output = self.run_cli("--xmlout", "list-updates", must_succeed=True)
         if not output:
@@ -261,27 +266,28 @@ class Zypper(PackageManager):
         r"\s*\|\s*(?P<arch>\S+)",
         re.MULTILINE,
     )
-    """Extract the installed rows of ``zypper packages``' plain-text table.
+    """Extract the installed rows of `zypper packages`' plain-text table.
 
-    ``packages --unneeded`` has no XML rendering, so unlike the other queries this
+    `packages --unneeded` has no XML rendering, so unlike the other queries this
     one parses the human-readable table: ``status | repository | name | version |
-    arch`` columns, keeping only the rows flagged installed (``i`` or ``i+``).
+    arch` columns, keeping only the rows flagged installed (`i` or `i+``).
     """
 
     @property
     def orphans(self) -> Iterator[Package]:
         """Fetch packages installed as dependencies that nothing requires anymore.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
-                packages --unneeded
-            Loading repository data...
-            Reading installed packages...
-            S  | Repository | Name    | Version   | Arch
-            ---+------------+---------+-----------+-------
-            i  | @System    | libfoo  | 1.2.3-1.1 | x86_64
-            i+ | openSUSE   | libbar  | 0.9-2.4   | noarch
+        $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            packages --unneeded
+        Loading repository data...
+        Reading installed packages...
+        S  | Repository | Name    | Version   | Arch
+        ---+------------+---------+-----------+-------
+        i  | @System    | libfoo  | 1.2.3-1.1 | x86_64
+        i+ | openSUSE   | libbar  | 0.9-2.4   | noarch
+        ```
         """
         output = self.run_cli("packages", "--unneeded")
 
@@ -295,26 +301,30 @@ class Zypper(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
-                --xmlout search --details --type package kopete
+        $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            --xmlout search --details --type package kopete
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
-                --xmlout search --details --type package --search-description kopete
+        $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            --xmlout search --details --type package --search-description kopete
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
-                --xmlout search --details --type package --match-exact kopete
+        $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            --xmlout search --details --type package --match-exact kopete
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
-                --xmlout search --details --type package --search-description \
-                --match-exact kopete
+        $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            --xmlout search --details --type package --search-description \
+            --match-exact kopete
+        ```
         """
         search_param = []
         if extended:
@@ -329,20 +339,22 @@ class Zypper(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
-                --no-refresh install kopete
+        $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            --no-refresh install kopete
+        ```
         """
         return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
-                --no-refresh update
+        $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            --no-refresh update
+        ```
         """
         return self.build_cli("update", sudo=True)
 
@@ -354,52 +366,57 @@ class Zypper(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
-                --no-refresh update kopete
+        $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            --no-refresh update kopete
+        ```
         """
         return self.build_cli("update", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
-                --no-refresh remove kopete
+        $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            --no-refresh remove kopete
+        ```
         """
         return self.run_cli("remove", package_id, sudo=True)
 
     def remove_orphan(self, package_id: str) -> str:
         """Remove one package, dropping dependencies it alone pulled in.
 
-        ``--clean-deps`` additionally removes the dependencies that were
+        `--clean-deps` additionally removes the dependencies that were
         installed with the package and are no longer needed.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
-                --no-refresh remove --clean-deps kopete
+        $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            --no-refresh remove --clean-deps kopete
+        ```
         """
         return self.run_cli("remove", "--clean-deps", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
-                --no-refresh refresh
+        $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            --no-refresh refresh
+        ```
         """
         self.run_cli("refresh", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
-                --no-refresh clean
+        $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            --no-refresh clean
+        ```
         """
         self.run_cli("clean", sudo=True)

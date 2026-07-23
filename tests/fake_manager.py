@@ -16,14 +16,14 @@
 """In-memory package manager for CLI plumbing tests.
 
 Real-manager iteration leaks the host environment into the test suite: a
-runner without ``apk`` skips it, a runner without ``brew`` skips it, and
+runner without `apk` skips it, a runner without `brew` skips it, and
 assertions about package counts or table rendering become a function of which
-binaries happen to be on PATH. The :py:class:`FakeManager` below sidesteps
+binaries happen to be on PATH. The {class}`FakeManager` below sidesteps
 that by reporting as available on every platform and yielding a fixed catalog
 of packages without ever invoking a subprocess.
 
-Tests opt in via the ``fake_pool`` fixture in :mod:`tests.conftest`, which
-monkeypatches :py:meth:`meta_package_manager.pool.ManagerPool.select_managers`
+Tests opt in via the `fake_pool` fixture in {mod}`tests.conftest`, which
+monkeypatches {meth}`meta_package_manager.pool.ManagerPool.select_managers`
 to yield a single fake instead of the real-manager iteration.
 """
 
@@ -50,8 +50,8 @@ class FakeManager(PackageManager):
     """Always-available manager with deterministic outputs.
 
     Reports as supported on every platform and short-circuits the
-    discovery properties (:py:attr:`cli_path`, :py:attr:`executable`,
-    :py:attr:`fresh`, :py:attr:`version`) so the pool never tries to
+    discovery properties ({attr}`cli_path`, {attr}`executable`,
+    {attr}`fresh`, {attr}`version`) so the pool never tries to
     introspect a real binary. Subcommand methods yield fixed package
     sets so tests can assert on counts and ordering.
     """
@@ -105,14 +105,14 @@ class FakeManager(PackageManager):
 
 
 class TimingOutFakeManager(FakeManager):
-    """Variant that runs a real subprocess long enough to trip ``--timeout``.
+    """Variant that runs a real subprocess long enough to trip `--timeout`.
 
-    Used by :func:`tests.test_cli.test_timeout` to exercise the
-    :py:exc:`subprocess.TimeoutExpired` branch in
-    :py:meth:`meta_package_manager.manager.PackageManager.run`. The Python
+    Used by {func}`tests.test_cli.test_timeout` to exercise the
+    {exc}`subprocess.TimeoutExpired` branch in
+    {meth}`meta_package_manager.manager.PackageManager.run`. The Python
     interpreter is invoked as the manager's CLI so the test stays
     cross-platform; the sleep duration is derived from
-    :py:attr:`timeout` so the call is guaranteed to overshoot.
+    {attr}`timeout` so the call is guaranteed to overshoot.
     """
 
     @property

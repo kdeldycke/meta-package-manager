@@ -34,45 +34,48 @@ class Flatpak(PackageManager):
     """Flatpak manages sandboxed desktop applications pulled from remotes like
     Flathub.
 
-    mpm covers applications only: every listing passes ``--app``, so runtimes
+    mpm covers applications only: every listing passes `--app`, so runtimes
     and SDKs stay out of scope. Listings are requested with
-    ``--columns=name,application,version --ostree-verbose`` and parsed as
+    `--columns=name,application,version --ostree-verbose` and parsed as
     tab-separated rows.
 
-    .. note::
-        All operations target the system-wide scope except ``cleanup`` which only
-        repairs the user installation. Per-scope targeting (system vs user) is
-        tracked in `#1725
-        <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
+    ```{note}
+    All operations target the system-wide scope except `cleanup` which only
+    repairs the user installation. Per-scope targeting (system vs user) is
+    tracked in [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725).
+    ```
 
-    .. note::
-        Escalation is polkit's job, so no operation is marked ``sudo``: flatpak
-        hands system-scope mutations to its privileged system helper over D-Bus,
-        which authorizes them through polkit (Flathub documents plain
-        ``flatpak install``). Under a strict polkit policy, unattended mutations
-        need a rule permitting them without interactive authentication.
+    ```{note}
+    Escalation is polkit's job, so no operation is marked `sudo`: flatpak
+    hands system-scope mutations to its privileged system helper over D-Bus,
+    which authorizes them through polkit (Flathub documents plain
+    `flatpak install`). Under a strict polkit policy, unattended mutations
+    need a rule permitting them without interactive authentication.
+    ```
 
-    .. caution::
-        ``outdated`` reads each pending update's latest version from
-        ``remote-ls --updates``, then runs one ``flatpak info`` per package to
-        recover its installed version: a follow-up CLI call for every outdated
-        app.
+    ```{caution}
+    `outdated` reads each pending update's latest version from
+    `remote-ls --updates`, then runs one `flatpak info` per package to
+    recover its installed version: a follow-up CLI call for every outdated
+    app.
+    ```
 
-    .. note::
-        Brewfile backups emit the bare ``flatpak "id"`` form: mpm does not
-        capture each app's origin remote, so ``brew bundle install`` restores
-        through Flathub and non-Flathub apps must be edited in by hand.
+    ```{note}
+    Brewfile backups emit the bare `flatpak "id"` form: mpm does not
+    capture each app's origin remote, so `brew bundle install` restores
+    through Flathub and non-Flathub apps must be edited in by hand.
+    ```
     """
 
     homepage_url = "https://flatpak.org"
 
     brewfile_entry_type = "flatpak"
-    """Mapped to Homebrew Bundle's ``flatpak`` extension.
+    """Mapped to Homebrew Bundle's `flatpak` extension.
 
-    The Brewfile ``flatpak`` entry supports a ``with: ["remote"]`` keyword for
-    non-default remotes. mpm's :py:meth:`installed` does not currently capture the
-    origin remote per package, so the dump emits the bare ``flatpak "id"`` form;
-    ``brew bundle install`` then resolves through the default ``flathub`` remote.
+    The Brewfile `flatpak` entry supports a `with: ["remote"]` keyword for
+    non-default remotes. mpm's {meth}`installed` does not currently capture the
+    origin remote per package, so the dump emits the bare `flatpak "id"` form;
+    `brew bundle install` then resolves through the default `flathub` remote.
     Non-flathub flatpaks need to be edited in by hand after the dump.
     """
 
@@ -97,25 +100,27 @@ class Flatpak(PackageManager):
 
     version_regexes = (r"Flatpak\s+(?P<version>\S+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ flatpak --version
-        Flatpak 1.4.2
+    $ flatpak --version
+    Flatpak 1.4.2
+    ```
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak list --app --columns=name,application,version \
-            > --ostree-verbose
-            Peek	com.uploadedlobster.peek	1.3.1
-            Fragments	de.haeckerfelix.Fragments	1.4
-            GNOME MPV	io.github.GnomeMpv	0.16
-            Syncthing GTK	me.kozec.syncthingtk	v0.9.4.3
-            Builder	org.flatpak.Builder
+        $ flatpak list --app --columns=name,application,version \
+        > --ostree-verbose
+        Peek	com.uploadedlobster.peek	1.3.1
+        Fragments	de.haeckerfelix.Fragments	1.4
+        GNOME MPV	io.github.GnomeMpv	0.16
+        Syncthing GTK	me.kozec.syncthingtk	v0.9.4.3
+        Builder	org.flatpak.Builder
+        ```
         """
         output = self.run_cli(
             "list",
@@ -138,12 +143,13 @@ class Flatpak(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak remote-ls --app --updates --columns=name,application,version \
-                --ostree-verbose
-            GNOME Dictionary	org.gnome.Dictionary	3.26.0
-            Files	org.gnome.Nautilus	42.2
+        $ flatpak remote-ls --app --updates --columns=name,application,version \
+            --ostree-verbose
+        GNOME Dictionary	org.gnome.Dictionary	3.26.0
+        Files	org.gnome.Nautilus	42.2
+        ```
         """
         output = self.run_cli(
             "remote-ls",
@@ -185,16 +191,18 @@ class Flatpak(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not support extended or exact matching. So we return the best
-            subset of results and let
-            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` refine
-            them.
+        ```{caution}
+        Search does not support extended or exact matching. So we return the best
+        subset of results and let
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search` refine
+        them.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak search gitg --ostree-verbose
-            gitg    GUI for git        org.gnome.gitg  3.32.1  stable  flathub
+        $ flatpak search gitg --ostree-verbose
+        gitg    GUI for git        org.gnome.gitg  3.32.1  stable  flathub
+        ```
         """
         output = self.run_cli("search", query, "--ostree-verbose")
 
@@ -217,18 +225,20 @@ class Flatpak(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak install --noninteractive org.gnome.Dictionary
+        $ flatpak install --noninteractive org.gnome.Dictionary
+        ```
         """
         return self.run_cli("install", "--noninteractive", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak update --noninteractive
+        $ flatpak update --noninteractive
+        ```
         """
         return self.build_cli("update", "--noninteractive")
 
@@ -240,27 +250,30 @@ class Flatpak(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the provided package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak update --noninteractive org.gnome.Dictionary
+        $ flatpak update --noninteractive org.gnome.Dictionary
+        ```
         """
         return self.build_cli("update", "--noninteractive", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak uninstall --noninteractive org.gnome.Dictionary
+        $ flatpak uninstall --noninteractive org.gnome.Dictionary
+        ```
         """
         return self.run_cli("uninstall", "--noninteractive", package_id)
 
     def cleanup_orphan(self) -> None:
         """Uninstall runtimes and extensions no longer used by any installed app.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak uninstall --unused --noninteractive
+        $ flatpak uninstall --unused --noninteractive
+        ```
         """
         self.run_cli("uninstall", "--unused", "--noninteractive")
 
@@ -270,20 +283,22 @@ class Flatpak(PackageManager):
         See:
         https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-repair
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak repair --user
+        $ flatpak repair --user
+        ```
         """
         self.run_cli("repair", "--user")
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
 
-        The read-only twin of :py:meth:`cleanup_repair`: ``--dry-run`` reports
+        The read-only twin of {meth}`cleanup_repair`: `--dry-run` reports
         what a repair of the per-user installation would fix without touching it.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ flatpak repair --user --dry-run
+        $ flatpak repair --user --dry-run
+        ```
         """
         return self.build_cli("repair", "--user", "--dry-run")

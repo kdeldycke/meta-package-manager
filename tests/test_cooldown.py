@@ -36,10 +36,10 @@ from meta_package_manager.version import parse_version
 
 """Test the supply-chain release-age cooldown feature.
 
-Parsing of the ``--cooldown`` value itself (friendly, ISO 8601 and RFC 3339
+Parsing of the `--cooldown` value itself (friendly, ISO 8601 and RFC 3339
 shapes, calendar-unit rejection, zero / future-timestamp disabling) is covered
-upstream by click-extra's ``Duration`` test suite: only the cooldown semantics
-built on top of the parsed ``timedelta`` are exercised here."""
+upstream by click-extra's `Duration` test suite: only the cooldown semantics
+built on top of the parsed `timedelta` are exercised here."""
 
 
 @pytest.mark.parametrize(
@@ -127,7 +127,7 @@ def test_timestamp_based_managers_inject_cutoff(manager_class):
     ),
 )
 def test_npm_injects_integer_days(cooldown, expected_days):
-    """npm's ``min-release-age`` expects an integer count of days, not a timestamp."""
+    """npm's `min-release-age` expects an integer count of days, not a timestamp."""
     manager = NPM()
     assert manager.cooldown_env() == {}
     manager.cooldown = cooldown
@@ -137,8 +137,8 @@ def test_npm_injects_integer_days(cooldown, expected_days):
 def test_yay_advertises_cooldown_while_idle():
     """While idle, yay reports its structural capability without a version probe.
 
-    The import-time ``COOLDOWN_SUPPORTED_MANAGERS`` help text reads this for every
-    manager, so it must never shell out to ``yay --version``.
+    The import-time `COOLDOWN_SUPPORTED_MANAGERS` help text reads this for every
+    manager, so it must never shell out to `yay --version`.
     """
     manager = Yay()
     assert manager.cooldown is None
@@ -259,8 +259,8 @@ def test_yay_cooldown_overlay_without_user_config(tmp_path, monkeypatch):
 def test_yay_cooldown_overlay_survives_manager_gc(tmp_path, monkeypatch):
     """The overlay must outlive the Yay instance's garbage collection.
 
-    Cleanup is registered with ``atexit``, not ``weakref.finalize(self, ...)``: yay
-    re-reads ``init.lua`` mid-run, so a GC-tied removal could delete the overlay before
+    Cleanup is registered with `atexit`, not `weakref.finalize(self, ...)`: yay
+    re-reads `init.lua` mid-run, so a GC-tied removal could delete the overlay before
     yay finishes and silently fail the gate open.
     """
     monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
@@ -295,9 +295,9 @@ def test_yay_cooldown_epoch_clamped_to_zero(tmp_path, monkeypatch):
 def test_yay_cooldown_no_recursion_when_version_resolved_lazily(tmp_path, monkeypatch):
     """Resolving the version lazily under an active cooldown must not recurse.
 
-    ``version`` runs ``yay --version`` through ``run()``, which injects
-    ``cooldown_env()``, which consults ``supports_cooldown`` -> ``version``. The
-    re-entrancy guard must break that loop. Regression for a live ``RecursionError``
+    `version` runs `yay --version` through `run()`, which injects
+    `cooldown_env()`, which consults `supports_cooldown` -> `version`. The
+    re-entrancy guard must break that loop. Regression for a live `RecursionError`
     the pre-seeded-version tests above could not catch.
     """
     monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)

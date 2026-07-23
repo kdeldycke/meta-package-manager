@@ -15,9 +15,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Allow the module to be run as a CLI:
 
-.. code-block:: shell-session
+```{code-block} shell-session
 
-    $ python -m meta_package_manager
+$ python -m meta_package_manager
+```
 """
 
 from __future__ import annotations
@@ -26,17 +27,17 @@ from __future__ import annotations
 def main():
     """Execute the CLI but force its name to not let Click defaults to:
 
-    .. code-block:: shell-session
-        $ python -m meta_package_manager --version
-        python -m meta_package_manager, version 7.2.0
+    ```{code-block} shell-session
+    $ python -m meta_package_manager --version
+    python -m meta_package_manager, version 7.2.0
+    ```
 
-    Indirection via this ``main()`` method was `required to reconcile
-    <https://github.com/python-poetry/poetry/issues/5981>`_:
+    Indirection via this `main()` method was [required to reconcile](https://github.com/python-poetry/poetry/issues/5981):
 
-        - plain inline package call: ``python -m meta_package_manager``,
-        - ``pyproject.toml`` entry point: ``mpm = 'meta_package_manager.__main__:main``,
+        - plain inline package call: `python -m meta_package_manager`,
+        - `pyproject.toml` entry point: `mpm = 'meta_package_manager.__main__:main`,
         - Nuitka's main module invocation requirement:
-          ``python -m nuitka (...) meta_package_manager/__main__.py``
+          `python -m nuitka (...) meta_package_manager/__main__.py`
 
     That way we can deduce all three cases from the entry point.
     """

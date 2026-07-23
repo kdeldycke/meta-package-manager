@@ -57,8 +57,8 @@ class _StubManager:
 
     Hermetic: pure-function tests over duck-typed manager stubs, covering export
     format autodetection, the SPDX and CycloneDX writers, upstream-document
-    merging, stats and vulnerability rendering. The ``mpm sbom`` command driving
-    these renderers is exercised in :mod:`tests.test_cli_sbom`.
+    merging, stats and vulnerability rendering. The `mpm sbom` command driving
+    these renderers is exercised in {mod}`tests.test_cli_sbom`.
     """
 
     def __init__(self, manager_id: str, name: str) -> None:
@@ -67,9 +67,9 @@ class _StubManager:
 
 
 def _as_manager(stub: _StubManager) -> PackageManager:
-    """Cast a duck-typed stub to the typed :py:class:`PackageManager` API.
+    """Cast a duck-typed stub to the typed {class}`PackageManager` API.
 
-    The SBOM renderers only read ``id`` and ``name`` from the manager, which is
+    The SBOM renderers only read `id` and `name` from the manager, which is
     why instantiating real concrete managers (with CLI discovery, version
     parsing) is sidestepped here.
     """
@@ -84,10 +84,10 @@ def assert_valid_cyclonedx(content: str, export_format: ExportFormat | str) -> N
     """Assert a CycloneDX export validates against its schema.
 
     This guarantee used to live in
-    :py:meth:`meta_package_manager.sbom.cyclonedx.CycloneDX.export` at runtime. It moved
-    here so the ``jsonschema``-based validation stack (``rfc3987-syntax``,
-    ``lark``, ``lxml``) stays out of ``mpm``'s runtime dependencies. See
-    :py:mod:`meta_package_manager.sbom`.
+    {meth}`meta_package_manager.sbom.cyclonedx.CycloneDX.export` at runtime. It moved
+    here so the `jsonschema`-based validation stack (`rfc3987-syntax`,
+    `lark`, `lxml`) stays out of `mpm`'s runtime dependencies. See
+    {mod}`meta_package_manager.sbom`.
     """
     validator: Any
     if export_format == ExportFormat.JSON:
@@ -210,8 +210,8 @@ def _rich_metadata() -> PackageMetadata:
 
 def test_minimal_mode_emits_bare_spdx_payload():
     """Minimal mode must reproduce the legacy bare output: rich
-    metadata is ignored, no relationships beyond ``DESCRIBES`` are
-    emitted, and ``download_location`` falls back to ``NOASSERTION``.
+    metadata is ignored, no relationships beyond `DESCRIBES` are
+    emitted, and `download_location` falls back to `NOASSERTION`.
     """
     s = SPDX()
     s.init_doc()
@@ -228,9 +228,9 @@ def test_minimal_mode_emits_bare_spdx_payload():
 
 
 def test_bundled_mode_spdx_populates_rich_fields():
-    """A populated :py:class:`PackageMetadata` flows into the SPDX
+    """A populated {class}`PackageMetadata` flows into the SPDX
     document: license, supplier override, originator, checksum, and a
-    dependency relationship resolved at :py:meth:`finalize` time.
+    dependency relationship resolved at {meth}`finalize` time.
     """
     s = SPDX()
     s.init_doc()
@@ -292,14 +292,14 @@ def test_bundled_mode_cyclonedx_populates_rich_fields():
             "MIT OR (Apache-2.0 AND BSD-3-Clause)",
             ("Apache-2.0", "BSD-3-Clause", "MIT"),
         ),
-        # Duplicates in the source collapse to a single ``details`` entry.
+        # Duplicates in the source collapse to a single `details` entry.
         ("MIT AND MIT", ("MIT",)),
     ),
 )
 def test_cyclonedx_compound_license_expression_details(
     expression, expected_identifiers
 ):
-    """Compound expressions emit ``LicenseExpression.details`` with a
+    """Compound expressions emit `LicenseExpression.details` with a
     canonical SPDX URL per identifier, deduped and sorted by identifier.
     """
     c = CycloneDX()
@@ -362,10 +362,10 @@ def test_spdx_license_normalization(declared, expected_present):
 
 def test_spdx_merges_external_per_package_sbom(tmp_path):
     """The renderer adopts transitive deps from a per-package upstream
-    SPDX file and records the merge in ``externalDocumentRefs``.
+    SPDX file and records the merge in `externalDocumentRefs`.
 
     The fixture mirrors the shape of Homebrew's
-    ``<prefix>/Cellar/<formula>/<version>/sbom.spdx.json``.
+    `<prefix>/Cellar/<formula>/<version>/sbom.spdx.json`.
     """
     upstream = {
         "SPDXID": "SPDXRef-DOCUMENT",
@@ -417,7 +417,7 @@ def test_spdx_merges_external_per_package_sbom(tmp_path):
 
 
 def test_stats_track_per_manager_and_merge_counts(tmp_path):
-    """``SBOM.stats()`` must reflect what landed in the document.
+    """`SBOM.stats()` must reflect what landed in the document.
 
     Two packages from a single manager land normally; one of them
     carries an external SBOM file containing one transitive dep, which
@@ -510,7 +510,7 @@ def test_cyclonedx_stats_count_external_bom_refs(tmp_path):
 
 
 def _sample_vulnerability():
-    """Build a sample ``Vulnerability`` for the render tests."""
+    """Build a sample `Vulnerability` for the render tests."""
     return Vulnerability(
         id="GHSA-aaaa-bbbb-cccc",
         source="OSV",

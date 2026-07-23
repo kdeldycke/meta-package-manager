@@ -44,9 +44,10 @@ LABELS: list[tuple[str, str, str]] = [
 
 Structure:
 
-.. code-block:: python
+```{code-block} python
 
-    ("label_name", "color", "optional_description")
+("label_name", "color", "optional_description")
+```
 """
 
 
@@ -58,13 +59,13 @@ def generate_labels(
 ) -> tuple[dict[str, str], list[tuple[str, str, str]]]:
     """Generate labels.
 
-    A dedicated label is produced for each entry of the ``all_labels`` parameter,
-    unless it is part of a ``group``. In which case a dedicated label for that group
+    A dedicated label is produced for each entry of the `all_labels` parameter,
+    unless it is part of a `group`. In which case a dedicated label for that group
     will be created.
 
     Returns the ``{label_id: label_name}`` map and the list of
-    ``(label_name, color, description)`` rows to register, leaving the caller to fold
-    them into the global :data:`LABELS` registry. Kept pure (no global mutation) so it
+    `(label_name, color, description)` rows to register, leaving the caller to fold
+    them into the global {data}`LABELS` registry. Kept pure (no global mutation) so it
     can be called repeatedly without double-populating the registry.
     """
     # Check all labels to group are referenced in the full label set.
@@ -129,7 +130,7 @@ from source rather than fetching pre-built binaries.
 """
 
 all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
-"""Adds ``mpm`` as its own manager alongside all those implemented."""
+"""Adds `mpm` as its own manager alongside all those implemented."""
 
 # Check group IDs do not collide with original labels.
 assert all_manager_label_ids.isdisjoint(MANAGER_LABEL_GROUPS.keys())
@@ -194,7 +195,7 @@ FILE_RULES_STATIC: TLabelRules = [
 ]
 """File rules for labels that are not derived from the pool.
 
-``mpm`` gets no content rule: as the project's own name it would match nearly
+`mpm` gets no content rule: as the project's own name it would match nearly
 every issue and PR.
 """
 
@@ -275,10 +276,10 @@ assert set(PLATFORM_CONTENT_KEYWORDS) == {p_obj.name for p_obj in MAIN_PLATFORMS
 
 
 def _label_members() -> dict[str, set[str]]:
-    """Regroup :data:`MANAGER_LABELS` by label: ``{label_name: {manager_id, ...}}``.
+    """Regroup {data}`MANAGER_LABELS` by label: ``{label_name: {manager_id, ...}}``.
 
-    The ``mpm`` pseudo-manager is left out: it maps to no pool entry and its label
-    is ruled by :data:`FILE_RULES_STATIC`.
+    The `mpm` pseudo-manager is left out: it maps to no pool entry and its label
+    is ruled by {data}`FILE_RULES_STATIC`.
     """
     members: dict[str, set[str]] = {}
     for manager_id, label_name in MANAGER_LABELS.items():
@@ -301,7 +302,7 @@ def generate_content_rules() -> TLabelRules:
     """Build every content rule: static ones plus one per manager and platform label.
 
     A manager label's patterns are its member IDs plus the curated
-    :data:`MANAGER_CONTENT_KEYWORDS` synonyms. Rules are sorted by label, patterns
+    {data}`MANAGER_CONTENT_KEYWORDS` synonyms. Rules are sorted by label, patterns
     alphabetically, both case-insensitively.
     """
     rules = list(CONTENT_RULES_STATIC)
@@ -318,8 +319,8 @@ def generate_file_rules() -> TLabelRules:
     """Build every file rule: static ones plus one per manager label.
 
     A manager label matches its members' definition files (Python modules and
-    bundled TOML files alike, anchored on the full stem so ``pkg.*`` never swallows
-    ``pkgin.toml`` or ``pkcon.py``) and any test file carrying a member's stem or
+    bundled TOML files alike, anchored on the full stem so `pkg.*` never swallows
+    `pkgin.toml` or `pkcon.py`) and any test file carrying a member's stem or
     ID. Platform labels have no file rule: no file is platform-specific.
     """
     rules = list(FILE_RULES_STATIC)

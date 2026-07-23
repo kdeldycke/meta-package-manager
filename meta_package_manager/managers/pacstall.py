@@ -36,27 +36,29 @@ class Pacstall(PackageManager):
     distributions.
 
     Pacstall builds packages from "pacscripts" and installs the results as
-    ``.deb`` archives through ``dpkg``. ``mpm`` forces ``NO_COLOR`` and
-    ``DISABLE_PROMPTS`` so output is uncolored and every call stays
+    `.deb` archives through `dpkg`. `mpm` forces `NO_COLOR` and
+    `DISABLE_PROMPTS` so output is uncolored and every call stays
     non-interactive.
 
     pacstall self-escalates: every privileged subcommand re-execs the script
-    through ``sudo pacstall`` (its ``elevate()`` function), and its documented
-    invocation is unprefixed (``pacstall -I foo``). ``mpm`` therefore never
-    wraps it and marks it :py:attr:`internal_sudo
+    through `sudo pacstall` (its `elevate()` function), and its documented
+    invocation is unprefixed (`pacstall -I foo`). `mpm` therefore never
+    wraps it and marks it {attr}`internal_sudo
     <meta_package_manager.execution.CLIExecutor.internal_sudo>` instead: a warm
-    ``sudo`` credential cache is kept alive for its mid-run re-exec, and the
+    `sudo` credential cache is kept alive for its mid-run re-exec, and the
     hidden-prompt watchdog covers the cold-cache case.
 
-    .. note::
-        Listing installed packages is a two-step probe: piped ``--list`` prints
-        bare names with no versions, so ``mpm`` follows each with a
-        ``--cache-info <pkg> version`` call to recover its version.
+    ```{note}
+    Listing installed packages is a two-step probe: piped `--list` prints
+    bare names with no versions, so `mpm` follows each with a
+    `--cache-info <pkg> version` call to recover its version.
+    ```
 
-    .. note::
-        ``--search`` matches names only and reports no versions. There is no
-        per-package upgrade verb either, so upgrading one package reinstalls it
-        through ``--install``.
+    ```{note}
+    `--search` matches names only and reports no versions. There is no
+    per-package upgrade verb either, so upgrading one package reinstalls it
+    through `--install`.
+    ```
     """
 
     homepage_url = "https://pacstall.dev"
@@ -72,10 +74,11 @@ class Pacstall(PackageManager):
 
     version_regexes = (r"(?P<version>\d+\.\d+\.\d+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ pacstall --version
-        6.3.7 Vanilla
+    $ pacstall --version
+    6.3.7 Vanilla
+    ```
     """
 
     # Upgrade rows are indented (a tab in real pacstall output); the header line
@@ -97,16 +100,18 @@ class Pacstall(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacstall --list
-            neofetch
-            neovim
+        $ pacstall --list
+        neofetch
+        neovim
+        ```
 
-        .. note::
-            When piped, ``pacstall --list`` outputs bare package names without
-            versions. A follow-up ``pacstall --cache-info <pkg> version`` call
-            retrieves the installed version per package.
+        ```{note}
+        When piped, `pacstall --list` outputs bare package names without
+        versions. A follow-up `pacstall --cache-info <pkg> version` call
+        retrieves the installed version per package.
+        ```
         """
         output = self.run_cli("--list")
         for line in output.splitlines():
@@ -124,12 +129,13 @@ class Pacstall(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacstall --list-upgrades
-            Upgradable: 2
-                neofetch @ pacstall-programs#master ( 7.1.0-2 -> 7.2.0-1 )
-                neovim @ pacstall-programs#master ( 0.9.4-1 -> 0.10.0-1 )
+        $ pacstall --list-upgrades
+        Upgradable: 2
+            neofetch @ pacstall-programs#master ( 7.1.0-2 -> 7.2.0-1 )
+            neovim @ pacstall-programs#master ( 0.9.4-1 -> 0.10.0-1 )
+        ```
         """
         output = self.run_cli("--list-upgrades")
         for match in self._OUTDATED_REGEXP.finditer(output):
@@ -143,18 +149,20 @@ class Pacstall(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not support extended or exact matching, and does not
-            provide version information. Returns the best subset of results and
-            lets
-            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
-            refine them.
+        ```{caution}
+        Search does not support extended or exact matching, and does not
+        provide version information. Returns the best subset of results and
+        lets
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search`
+        refine them.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacstall --search neovim
-            neovim @ pacstall-programs
-            neovim-git @ pacstall-programs
+        $ pacstall --search neovim
+        neovim @ pacstall-programs
+        neovim-git @ pacstall-programs
+        ```
         """
         output = self.run_cli("--search", query)
         for match in self._SEARCH_REGEXP.finditer(output):
@@ -164,18 +172,20 @@ class Pacstall(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacstall --install neofetch
+        $ pacstall --install neofetch
+        ```
         """
         return self.run_cli("--install", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacstall --upgrade
+        $ pacstall --upgrade
+        ```
         """
         return self.build_cli("--upgrade")
 
@@ -187,26 +197,29 @@ class Pacstall(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade one package by reinstalling it.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacstall --install neofetch
+        $ pacstall --install neofetch
+        ```
         """
         return self.build_cli("--install", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacstall --remove neofetch
+        $ pacstall --remove neofetch
+        ```
         """
         return self.run_cli("--remove", package_id)
 
     def sync(self) -> None:
         """Sync package metadata from remote repositories.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacstall --update
+        $ pacstall --update
+        ```
         """
         self.run_cli("--update")

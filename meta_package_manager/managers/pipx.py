@@ -34,26 +34,27 @@ if TYPE_CHECKING:
 class Pipx(PackageManager):
     """pipx installs Python CLI applications, each in its own isolated venv.
 
-    Installed applications come from ``pipx list --json``; only each venv's main
+    Installed applications come from `pipx list --json`; only each venv's main
     package is tracked, never the packages injected beside it. There is no
-    ``search`` operation: the request was closed as not planned, since PyPI
-    exposes no search API and custom search is out of pipx's scope (see `pipx
-    issue 777 <https://github.com/pypa/pipx/issues/777#issuecomment-990919047>`__).
+    `search` operation: the request was closed as not planned, since PyPI
+    exposes no search API and custom search is out of pipx's scope (see [pipx issue 777](https://github.com/pypa/pipx/issues/777#issuecomment-990919047)).
 
-    .. note::
+    ```{note}
 
-        The outdated query prefers pipx ``1.16.0``'s native
-        ``pipx list --outdated``, which checks every venv in one call, each
-        against its own backend (pip or uv). An older pipx falls back to probing
-        each venv with its embedded pip, one call per application. The version
-        floor stays at ``1.0.0`` so an older pipx remains fully usable: only the
-        outdated path degrades.
+    The outdated query prefers pipx `1.16.0`'s native
+    `pipx list --outdated`, which checks every venv in one call, each
+    against its own backend (pip or uv). An older pipx falls back to probing
+    each venv with its embedded pip, one call per application. The version
+    floor stays at `1.0.0` so an older pipx remains fully usable: only the
+    outdated path degrades.
+    ```
 
-    .. note::
+    ```{note}
 
-        The supply-chain cooldown rides on the underlying pip and needs that pip
-        to be at least ``26.1``, the first release to honor
-        ``--uploaded-prior-to``; older pip silently ignores the release-age gate.
+    The supply-chain cooldown rides on the underlying pip and needs that pip
+    to be at least `26.1`, the first release to honor
+    `--uploaded-prior-to`; older pip silently ignores the release-age gate.
+    ```
     """
 
     name = "Python pipx"
@@ -64,25 +65,27 @@ class Pipx(PackageManager):
 
     requirement = ">=1.0.0"
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ pipx --version
-        1.0.0
+    $ pipx --version
+    1.0.0
+    ```
     """
 
     cooldown_env_var = "PIP_UPLOADED_PRIOR_TO"
-    """pipx defers resolution to pip, so it honors pip's ``--uploaded-prior-to``
+    """pipx defers resolution to pip, so it honors pip's `--uploaded-prior-to`
     gate through the same environment variable.
 
-    Setting ``PIP_UPLOADED_PRIOR_TO`` on a pipx invocation propagates to the pip
+    Setting `PIP_UPLOADED_PRIOR_TO` on a pipx invocation propagates to the pip
     subprocess pipx spawns to install the application and its dependencies, so the
     cutoff applies to the whole resolution. mpm injects the RFC 3339 timestamp from
-    the default :py:meth:`meta_package_manager.execution.CLIExecutor.cooldown_env_value`.
+    the default {meth}`meta_package_manager.execution.CLIExecutor.cooldown_env_value`.
 
-    .. caution::
-        Same caveat as :py:class:`meta_package_manager.managers.pip.Pip`: the
-        underlying pip must be at least ``26.1`` for the gate to take effect. Older
-        pip releases silently ignore the env var.
+    ```{caution}
+    Same caveat as {class}`meta_package_manager.managers.pip.Pip`: the
+    underlying pip must be at least `26.1` for the gate to take effect. Older
+    pip releases silently ignore the env var.
+    ```
 
     See https://github.com/pypa/pipx/issues/1811.
     """
@@ -90,52 +93,53 @@ class Pipx(PackageManager):
     outdated_requirement = ">=1.16.0"
     """Minimum pipx version providing the native outdated query.
 
-    `1.16.0 <https://github.com/pypa/pipx/releases/tag/1.16.0>`_ introduced
-    ``pipx list --outdated`` (see https://github.com/pypa/pipx/issues/149). Kept
-    apart from :py:attr:`requirement` (``>=1.0.0``) so an older pipx stays fully
-    usable, :py:attr:`outdated` falling back to one pip probe per venv.
+    [1.16.0](https://github.com/pypa/pipx/releases/tag/1.16.0) introduced
+    `pipx list --outdated` (see https://github.com/pypa/pipx/issues/149). Kept
+    apart from {attr}`requirement` (`>=1.0.0`) so an older pipx stays fully
+    usable, {attr}`outdated` falling back to one pip probe per venv.
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pipx list --json
-            {
-              "pipx_spec_version": "0.1",
-              "venvs": {
-                  "pycowsay": {
-                    "metadata": {
-                      "injected_packages": {},
-                      "main_package": {
-                        "app_paths": [
-                          {
-                            "__Path__": "~/.local/pipx/venvs/pycowsay/bin/pycowsay",
-                            "__type__": "Path"
-                          }
-                        ],
-                        "app_paths_of_dependencies": {},
-                        "apps": [
-                          "pycowsay"
-                        ],
-                        "apps_of_dependencies": [],
-                        "include_apps": true,
-                        "include_dependencies": false,
-                        "package": "pycowsay",
-                        "package_or_url": "pycowsay",
-                        "package_version": "0.0.0.1",
-                        "pip_args": [],
-                        "suffix": ""
-                      },
-                    "pipx_metadata_version": "0.2",
-                    "python_version": "Python 3.10.4",
-                    "venv_args": []
-                  }
-                }
+        $ pipx list --json
+        {
+          "pipx_spec_version": "0.1",
+          "venvs": {
+              "pycowsay": {
+                "metadata": {
+                  "injected_packages": {},
+                  "main_package": {
+                    "app_paths": [
+                      {
+                        "__Path__": "~/.local/pipx/venvs/pycowsay/bin/pycowsay",
+                        "__type__": "Path"
+                      }
+                    ],
+                    "app_paths_of_dependencies": {},
+                    "apps": [
+                      "pycowsay"
+                    ],
+                    "apps_of_dependencies": [],
+                    "include_apps": true,
+                    "include_dependencies": false,
+                    "package": "pycowsay",
+                    "package_or_url": "pycowsay",
+                    "package_version": "0.0.0.1",
+                    "pip_args": [],
+                    "suffix": ""
+                  },
+                "pipx_metadata_version": "0.2",
+                "python_version": "Python 3.10.4",
+                "venv_args": []
               }
             }
+          }
+        }
+        ```
         """
         output = self.run_cli("list", "--json", must_succeed=True)
 
@@ -153,61 +157,64 @@ class Pipx(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        pipx ``1.16.0`` introduced a native outdated query, which checks all
+        pipx `1.16.0` introduced a native outdated query, which checks all
         venvs in a single call, each against its own backend (pip or uv).
         Injected packages are excluded by default, so only each venv's main
         package is reported. Pinned packages are kept: a newer release exists,
-        even if ``pipx upgrade`` skips them.
+        even if `pipx upgrade` skips them.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pipx list --outdated --output=json
-            {
-              "command": ["list"],
-              "data": {
-                "packages_checked": 1,
-                "packages": [
-                  {
-                    "environment": "pycowsay",
-                    "package": "pycowsay",
-                    "version": "0.0.0.1",
-                    "latest_version": "0.0.0.2",
-                    "injected": false,
-                    "pinned": false
-                  }
-                ],
-                "skipped": []
-              },
-              "errors": [],
-              "exit_code": 0,
-              "pipx_result_version": "1",
-              "status": "success"
-            }
+        $ pipx list --outdated --output=json
+        {
+          "command": ["list"],
+          "data": {
+            "packages_checked": 1,
+            "packages": [
+              {
+                "environment": "pycowsay",
+                "package": "pycowsay",
+                "version": "0.0.0.1",
+                "latest_version": "0.0.0.2",
+                "injected": false,
+                "pinned": false
+              }
+            ],
+            "skipped": []
+          },
+          "errors": [],
+          "exit_code": 0,
+          "pipx_result_version": "1",
+          "status": "success"
+        }
+        ```
 
-        A pipx older than :py:attr:`outdated_requirement` falls back to probing
+        A pipx older than {attr}`outdated_requirement` falls back to probing
         each venv with its embedded pip, one call per package. Only the venv's
         main package is reported; its dependencies also show up in
-        ``pip list --outdated`` but are silenced:
+        `pip list --outdated` but are silenced:
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pipx runpip pycowsay list --no-color --format=json --outdated \
-            > --verbose --quiet
-            [
-              {
-                "name": "pycowsay",
-                "version": "0.0.0.1",
-                "location": "~/.local/pipx/venvs/pycowsay/lib/python3.10/site-packages",
-                "installer": "pip",
-                "latest_version": "0.0.0.2",
-                "latest_filetype": "wheel"
-              }
-            ]
+        $ pipx runpip pycowsay list --no-color --format=json --outdated \
+        > --verbose --quiet
+        [
+          {
+            "name": "pycowsay",
+            "version": "0.0.0.1",
+            "location": "~/.local/pipx/venvs/pycowsay/lib/python3.10/site-packages",
+            "installer": "pip",
+            "latest_version": "0.0.0.2",
+            "latest_filetype": "wheel"
+          }
+        ]
+        ```
 
-        .. todo::
+        ```{todo}
 
-            Drop the fallback, which mimics ``Pip.outdated()``, once pipx
-            ``1.16.0`` is old enough to be required outright.
+        Drop the fallback, which mimics `Pip.outdated()`, once pipx
+        `1.16.0` is old enough to be required outright.
+        ```
         """
         if self.version is not None and self.version in VersionRange(
             self.outdated_requirement
@@ -261,13 +268,14 @@ class Pipx(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pipx install pycowsay
-            installed package pycowsay 0.0.0.1, installed using Python 3.10.4
-            These apps are now globally available
-                - pycowsay
-            done! ✨ 🌟 ✨
+        $ pipx install pycowsay
+        installed package pycowsay 0.0.0.1, installed using Python 3.10.4
+        These apps are now globally available
+            - pycowsay
+        done! ✨ 🌟 ✨
+        ```
         """
         return self.run_cli("install", package_id)
 
@@ -287,9 +295,10 @@ class Pipx(PackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pipx uninstall pycowsay
-            uninstalled pycowsay! ✨ 🌟 ✨
+        $ pipx uninstall pycowsay
+        uninstalled pycowsay! ✨ 🌟 ✨
+        ```
         """
         return self.run_cli("uninstall", package_id)

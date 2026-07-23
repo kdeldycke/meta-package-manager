@@ -47,15 +47,15 @@ _YAY_COOLDOWN_INIT_LUA = (
     .joinpath("yay_cooldown.lua")
     .read_text(encoding="UTF-8")
 )
-"""Lua policy mpm drops into the overlay's ``init.lua`` to express the release-age
-:py:attr:`cooldown <meta_package_manager.execution.CLIExecutor.cooldown>` for yay.
+"""Lua policy mpm drops into the overlay's `init.lua` to express the release-age
+{attr}`cooldown <meta_package_manager.execution.CLIExecutor.cooldown>` for yay.
 
-The policy itself lives in the sibling ``yay_cooldown.lua`` file and is read here
-through :py:mod:`importlib.resources` so it stays editable and syntax-highlightable as
-real Lua. Static on purpose: the only per-run input is the ``MPM_COOLDOWN_EPOCH``
+The policy itself lives in the sibling `yay_cooldown.lua` file and is read here
+through {mod}`importlib.resources` so it stays editable and syntax-highlightable as
+real Lua. Static on purpose: the only per-run input is the `MPM_COOLDOWN_EPOCH`
 environment variable, so the file never has to be regenerated. It registers two hooks
-(both keyed off the same cutoff) and first chains the user's real ``init.lua`` so
-nothing in their config is lost. See :py:meth:`Yay.cooldown_env` for how it is
+(both keyed off the same cutoff) and first chains the user's real `init.lua` so
+nothing in their config is lost. See {meth}`Yay.cooldown_env` for how it is
 delivered.
 """
 
@@ -63,25 +63,26 @@ delivered.
 class Pacman(PackageManager):
     """Arch Linux's native package manager, covering the official repositories.
 
-    ``mpm`` forces ``--noconfirm`` and ``--color never`` on every call so pacman
+    `mpm` forces `--noconfirm` and `--color never` on every call so pacman
     runs unattended and prints uncolored text the regexes can parse. Installed
-    packages come from ``--query`` and upgradable ones from
-    ``--query --upgrades``; searches hit the sync databases via
-    ``--sync --search``.
+    packages come from `--query` and upgradable ones from
+    `--query --upgrades`; searches hit the sync databases via
+    `--sync --search`.
 
-    The ``Pacaur``, ``Paru`` and ``Yay`` subclasses are AUR helpers that reuse
+    The `Pacaur`, `Paru` and `Yay` subclasses are AUR helpers that reuse
     every parser and forced argument here unchanged, overriding only the binary
-    (and, for ``yay``, adding a release-age cooldown).
+    (and, for `yay`, adding a release-age cooldown).
 
     See command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta.
 
-    .. caution::
-        ``--query --upgrades`` only reports updates for packages tracked in a
-        sync database, so foreign packages (installed with ``pacman -U``, as AUR
-        helpers do) stay invisible to the base ``pacman`` binary. The subclasses
-        escape this because their own binary also queries the AUR RPC. This
-        upstream behavior is not confirmed on a live Arch box: see
-        :py:meth:`Pacman.outdated`.
+    ```{caution}
+    `--query --upgrades` only reports updates for packages tracked in a
+    sync database, so foreign packages (installed with `pacman -U`, as AUR
+    helpers do) stay invisible to the base `pacman` binary. The subclasses
+    escape this because their own binary also queries the AUR RPC. This
+    upstream behavior is not confirmed on a live Arch box: see
+    {meth}`Pacman.outdated`.
+    ```
     """
 
     name = "Arch Linux pacman"
@@ -104,35 +105,37 @@ class Pacman(PackageManager):
     )
 
     version_regexes = (r".*Pacman\s+v(?P<version>\S+)",)
-    r"""Search version right after the ``Pacman `` string.
+    r"""Search version right after the `Pacman ` string.
 
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ pacman --version
+    $ pacman --version
 
-         .--.                  Pacman v6.0.1 - libalpm v13.0.1
-        / _.-' .-.  .-.  .-.   Copyright (C) 2006-2021 Pacman Development Team
-        \  '-. '-'  '-'  '-'   Copyright (C) 2002-2006 Judd Vinet
-         '--'
-                            This program may be freely redistributed under
-                            the terms of the GNU General Public License.
+     .--.                  Pacman v6.0.1 - libalpm v13.0.1
+    / _.-' .-.  .-.  .-.   Copyright (C) 2006-2021 Pacman Development Team
+    \  '-. '-'  '-'  '-'   Copyright (C) 2002-2006 Judd Vinet
+     '--'
+                        This program may be freely redistributed under
+                        the terms of the GNU General Public License.
+    ```
     """
 
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacman --noconfirm --query
-            a52dec 0.7.4-11
-            aalib 1.4rc5-14
-            abseil-cpp 20211102.0-2
-            accountsservice 22.08.8-2
-            acl 2.3.1-2
-            acme.sh 3.0.2-1
-            acpi 1.7-3
-            acpid 2.0.33-1
+        $ pacman --noconfirm --query
+        a52dec 0.7.4-11
+        aalib 1.4rc5-14
+        abseil-cpp 20211102.0-2
+        accountsservice 22.08.8-2
+        acl 2.3.1-2
+        acme.sh 3.0.2-1
+        acpi 1.7-3
+        acpid 2.0.33-1
+        ```
         """
         output = self.run_cli("--query")
 
@@ -146,31 +149,34 @@ class Pacman(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacman --noconfirm --query --upgrades
-            linux 4.19.1.arch1-1 -> 4.19.2.arch1-1
-            linux-headers 4.19.1.arch1-1 -> 4.19.2.arch1-1
+        $ pacman --noconfirm --query --upgrades
+        linux 4.19.1.arch1-1 -> 4.19.2.arch1-1
+        linux-headers 4.19.1.arch1-1 -> 4.19.2.arch1-1
+        ```
 
-        .. note::
-            ``pacman --query --upgrades`` (``-Qu``) only reports updates for
-            packages tracked in a sync database (official repos, plus any
-            local repo configured in ``pacman.conf``). Foreign packages, those
-            installed with ``pacman -U`` as most AUR helpers do, are invisible
-            to ``-Qu`` and surface only under ``-Qm``.
+        :::{note}
+        `pacman --query --upgrades` (`-Qu`) only reports updates for
+        packages tracked in a sync database (official repos, plus any
+        local repo configured in `pacman.conf`). Foreign packages, those
+        installed with `pacman -U` as most AUR helpers do, are invisible
+        to `-Qu` and surface only under `-Qm`.
 
-            The ``Pacaur``, ``Paru`` and ``Yay`` subclasses inherit this method
-            verbatim, yet still see AUR updates because their own binary's
-            ``-Qu`` additionally queries the AUR RPC for foreign packages. The
-            per-subclass binary override is therefore load-bearing: routing
-            these helpers through ``pacman`` directly would silently drop every
-            AUR update from the results.
+        The `Pacaur`, `Paru` and `Yay` subclasses inherit this method
+        verbatim, yet still see AUR updates because their own binary's
+        `-Qu` additionally queries the AUR RPC for foreign packages. The
+        per-subclass binary override is therefore load-bearing: routing
+        these helpers through `pacman` directly would silently drop every
+        AUR update from the results.
 
-            .. caution::
-                This follows upstream ``-Qu`` semantics but has not been
-                confirmed on a live Arch box. Before relying on it, verify that
-                ``yay --query --upgrades`` invoked through mpm actually surfaces
-                a pending AUR update.
+        ```{caution}
+        This follows upstream `-Qu` semantics but has not been
+        confirmed on a live Arch box. Before relying on it, verify that
+        `yay --query --upgrades` invoked through mpm actually surfaces
+        a pending AUR update.
+        ```
+        :::
         """
         output = self.run_cli("--query", "--upgrades")
 
@@ -188,14 +194,15 @@ class Pacman(PackageManager):
     def orphans(self) -> Iterator[Package]:
         """Fetch packages installed as dependencies that nothing requires anymore.
 
-        Same ``<name> <version>`` listing shape as :py:meth:`installed`, narrowed
-        by ``--deps --unrequired`` (``-Qtd``) to the orphan set.
+        Same `<name> <version>` listing shape as {meth}`installed`, narrowed
+        by `--deps --unrequired` (`-Qtd`) to the orphan set.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacman --noconfirm --color never --query --deps --unrequired
-            gtest 1.14.0-1
-            libwlroots 0.16.2-2
+        $ pacman --noconfirm --color never --query --deps --unrequired
+        gtest 1.14.0-1
+        libwlroots 0.16.2-2
+        ```
         """
         output = self.run_cli("--query", "--deps", "--unrequired")
 
@@ -209,26 +216,28 @@ class Pacman(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not supports extended matching.
+        ```{caution}
+        Search does not supports extended matching.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacman --noconfirm --sync --search fire
-            extra/dump_syms 0.0.7-1
-                Symbol dumper for Firefox
-            extra/firefox 99.0-1
-                Standalone web browser from mozilla.org
-            extra/firefox-i18n-ach 99.0-1
-                Acholi language pack for Firefox
-            extra/firefox-i18n-af 99.0-1
-                Afrikaans language pack for Firefox
-            extra/firefox-i18n-an 99.0-1
-                Aragonese language pack for Firefox
-            extra/firefox-i18n-ar 99.0-1
-                Arabic language pack for Firefox
-            extra/firefox-i18n-ast 99.0-1
-                Asturian language pack for Firefox
+        $ pacman --noconfirm --sync --search fire
+        extra/dump_syms 0.0.7-1
+            Symbol dumper for Firefox
+        extra/firefox 99.0-1
+            Standalone web browser from mozilla.org
+        extra/firefox-i18n-ach 99.0-1
+            Acholi language pack for Firefox
+        extra/firefox-i18n-af 99.0-1
+            Afrikaans language pack for Firefox
+        extra/firefox-i18n-an 99.0-1
+            Aragonese language pack for Firefox
+        extra/firefox-i18n-ar 99.0-1
+            Arabic language pack for Firefox
+        extra/firefox-i18n-ast 99.0-1
+            Asturian language pack for Firefox
+        ```
         """
         if exact:
             query = f"^{query}$"
@@ -248,18 +257,20 @@ class Pacman(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pacman --noconfirm --color never --sync firefox
+        $ sudo pacman --noconfirm --color never --sync firefox
+        ```
         """
         return self.run_cli("--sync", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pacman --noconfirm --color never --sync --refresh --sysupgrade
+        $ sudo pacman --noconfirm --color never --sync --refresh --sysupgrade
+        ```
         """
         return self.build_cli("--sync", "--refresh", "--sysupgrade", sudo=True)
 
@@ -271,75 +282,81 @@ class Pacman(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pacman --noconfirm --color never --sync firefox
+        $ sudo pacman --noconfirm --color never --sync firefox
+        ```
         """
         return self.build_cli("--sync", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Removes a package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pacman --noconfirm --color never --remove firefox
+        $ sudo pacman --noconfirm --color never --remove firefox
+        ```
         """
         return self.run_cli("--remove", package_id, sudo=True)
 
     def remove_orphan(self, package_id: str) -> str:
         """Remove a package together with its now-orphaned dependencies.
 
-        ``--recursive`` (``-s``) additionally removes the dependencies the
+        `--recursive` (`-s`) additionally removes the dependencies the
         package pulled in that no other installed package needs.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pacman --noconfirm --color never --remove --recursive firefox
+        $ sudo pacman --noconfirm --color never --remove --recursive firefox
+        ```
         """
         return self.run_cli("--remove", "--recursive", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacman --noconfirm --color never --sync --refresh
+        $ pacman --noconfirm --color never --sync --refresh
+        ```
         """
         self.run_cli("--sync", "--refresh")
 
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pacman --noconfirm --color never --sync --clean --clean
+        $ sudo pacman --noconfirm --color never --sync --clean --clean
+        ```
         """
         self.run_cli("--sync", "--clean", "--clean", sudo=True)
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
 
-        ``--database --check`` (``-Dk``) verifies the consistency of the local
-        package database, silent and exit-``0`` when everything is fine.
+        `--database --check` (`-Dk`) verifies the consistency of the local
+        package database, silent and exit-`0` when everything is fine.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pacman --noconfirm --color never --database --check
+        $ pacman --noconfirm --color never --database --check
+        ```
         """
         return self.build_cli("--database", "--check")
 
 
 class Pacaur(Pacman):
-    """AUR helper wrapping ``pacman``, driven through the ``pacaur`` binary.
+    """AUR helper wrapping `pacman`, driven through the `pacaur` binary.
 
-    Inherits every operation, parser and forced argument from ``Pacman``; only
-    the binary and version probe differ. Routing through ``pacaur`` is what lets
-    ``--query --upgrades`` report AUR updates on top of the official repositories.
+    Inherits every operation, parser and forced argument from `Pacman`; only
+    the binary and version probe differ. Routing through `pacaur` is what lets
+    `--query --upgrades` report AUR updates on top of the official repositories.
 
-    Unlike ``pacman``, the helper must run as the regular user: it aborts under
-    root (``you cannot perform this operation as root``) because ``makepkg``
-    refuses to build as root, and it invokes ``sudo pacman`` itself for the
-    privileged steps. ``mpm`` therefore never wraps it in ``sudo``.
+    Unlike `pacman`, the helper must run as the regular user: it aborts under
+    root (`you cannot perform this operation as root`) because `makepkg`
+    refuses to build as root, and it invokes `sudo pacman` itself for the
+    privileged steps. `mpm` therefore never wraps it in `sudo`.
     """
 
     name = "Arch Linux pacaur"
@@ -347,40 +364,41 @@ class Pacaur(Pacman):
     homepage_url = "https://github.com/E5ten/pacaur"
 
     default_sudo = False
-    """pacaur aborts its sync-class operations under root and runs ``sudo pacman``
-    itself, so the escalation default inherited from ``Pacman`` must not wrap it.
+    """pacaur aborts its sync-class operations under root and runs `sudo pacman`
+    itself, so the escalation default inherited from `Pacman` must not wrap it.
     """
 
     internal_sudo = True
-    """pacaur calls ``sudo pacman`` from inside its own commands for the install,
+    """pacaur calls `sudo pacman` from inside its own commands for the install,
     upgrade and removal steps.
     """
 
     requirement = ">=4.0.0"
 
     version_regexes = (r"pacaur\s+(?P<version>\S+)",)
-    r"""Search version right after the ``pacaur`` string.
+    r"""Search version right after the `pacaur` string.
 
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ pacaur --version
-        pacaur 4.8.6
+    $ pacaur --version
+    pacaur 4.8.6
+    ```
     """
 
 
 class Paru(Pacman):
-    """AUR helper wrapping ``pacman``, driven through the ``paru`` binary.
+    """AUR helper wrapping `pacman`, driven through the `paru` binary.
 
-    Inherits every operation, parser and forced argument from ``Pacman``; only
-    the binary and version probe differ. Its own ``--query --upgrades`` reports
-    AUR updates on top of the official repositories. The ``>=1.9.3`` floor is the
-    first ``paru`` release to implement ``--sysupgrade``, the flag the inherited
-    ``upgrade_all_cli`` builds.
+    Inherits every operation, parser and forced argument from `Pacman`; only
+    the binary and version probe differ. Its own `--query --upgrades` reports
+    AUR updates on top of the official repositories. The `>=1.9.3` floor is the
+    first `paru` release to implement `--sysupgrade`, the flag the inherited
+    `upgrade_all_cli` builds.
 
-    Unlike ``pacman``, the helper must run as the regular user: any transaction
+    Unlike `pacman`, the helper must run as the regular user: any transaction
     building AUR packages aborts under root (``can't install AUR package as
-    root``), and paru invokes ``sudo pacman`` itself for the privileged steps.
-    ``mpm`` therefore never wraps it in ``sudo``.
+    root`), and paru invokes `sudo pacman`` itself for the privileged steps.
+    `mpm` therefore never wraps it in `sudo`.
     """
 
     name = "Arch Linux paru"
@@ -388,52 +406,54 @@ class Paru(Pacman):
     homepage_url = "https://github.com/Morganamilo/paru"
 
     default_sudo = False
-    """paru refuses to build AUR packages under root and runs ``sudo pacman``
-    itself, so the escalation default inherited from ``Pacman`` must not wrap it.
+    """paru refuses to build AUR packages under root and runs `sudo pacman`
+    itself, so the escalation default inherited from `Pacman` must not wrap it.
     """
 
     internal_sudo = True
-    """paru calls ``sudo`` from inside its own commands (the ``Sudo``/``SudoFlags``
-    settings of ``paru.conf``) for the install, upgrade and removal steps.
+    """paru calls `sudo` from inside its own commands (the `Sudo`/`SudoFlags`
+    settings of `paru.conf`) for the install, upgrade and removal steps.
     """
 
     # v1.9.3 is the first version implementing the --sysupgrade option.
     requirement = ">=1.9.3"
 
     version_regexes = (r"paru\s+v(?P<version>\S+)",)
-    r"""Search version right after the ``paru`` string.
+    r"""Search version right after the `paru` string.
 
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ paru --version
-        paru v1.10.0 - libalpm v13.0.1
+    $ paru --version
+    paru v1.10.0 - libalpm v13.0.1
+    ```
     """
 
 
 class Yay(Pacman):
-    """AUR helper wrapping ``pacman``, driven through the ``yay`` binary.
+    """AUR helper wrapping `pacman`, driven through the `yay` binary.
 
-    Inherits every operation, parser and forced argument from ``Pacman``; the
+    Inherits every operation, parser and forced argument from `Pacman`; the
     binary, version probe and the release-age cooldown below are what differ. Its
-    own ``--query --upgrades`` reports AUR updates on top of the official
+    own `--query --upgrades` reports AUR updates on top of the official
     repositories.
 
-    Unlike ``pacman``, the helper must run as the regular user: yay warns under
-    root (``Avoid running yay as root/sudo.``) and any AUR build then dies in
-    ``makepkg``, which refuses to run as root. yay drives ``sudo`` itself for the
-    privileged steps (its ``--sudo``, ``--sudoflags`` and ``--sudoloop`` options),
-    so ``mpm`` never wraps it in ``sudo``. That also keeps the injected
-    ``XDG_CONFIG_HOME`` cooldown overlay below visible to yay, where a ``sudo``
+    Unlike `pacman`, the helper must run as the regular user: yay warns under
+    root (`Avoid running yay as root/sudo.`) and any AUR build then dies in
+    `makepkg`, which refuses to run as root. yay drives `sudo` itself for the
+    privileged steps (its `--sudo`, `--sudoflags` and `--sudoloop` options),
+    so `mpm` never wraps it in `sudo`. That also keeps the injected
+    `XDG_CONFIG_HOME` cooldown overlay below visible to yay, where a `sudo`
     wrap would have reset the environment.
 
-    .. note::
-        yay exposes no release-age flag, so mpm enforces the supply-chain
-        :py:attr:`cooldown <meta_package_manager.execution.CLIExecutor.cooldown>` by
-        overlaying a generated ``init.lua`` through a private ``XDG_CONFIG_HOME`` (see
-        :py:meth:`Yay.cooldown_env`). This needs yay >= 13.0.0, when the Lua
-        ``UpgradeSelect``/``AURPreInstall`` hooks landed; an older yay stays a usable
-        manager but cannot honor a cooldown. The upstream request for a less invasive
-        injection point is https://github.com/Jguer/yay/issues/2883.
+    ```{note}
+    yay exposes no release-age flag, so mpm enforces the supply-chain
+    {attr}`cooldown <meta_package_manager.execution.CLIExecutor.cooldown>` by
+    overlaying a generated `init.lua` through a private `XDG_CONFIG_HOME` (see
+    {meth}`Yay.cooldown_env`). This needs yay >= 13.0.0, when the Lua
+    `UpgradeSelect`/`AURPreInstall` hooks landed; an older yay stays a usable
+    manager but cannot honor a cooldown. The upstream request for a less invasive
+    injection point is https://github.com/Jguer/yay/issues/2883.
+    ```
     """
 
     name = "Arch Linux yay"
@@ -441,54 +461,55 @@ class Yay(Pacman):
     homepage_url = "https://github.com/Jguer/yay"
 
     default_sudo = False
-    """yay discourages root runs (``makepkg`` hard-refuses them for AUR builds) and
-    drives ``sudo`` itself, so the escalation default inherited from ``Pacman`` must
-    not wrap it. A wrap would also strip the ``XDG_CONFIG_HOME`` cooldown overlay
-    through ``sudo``'s environment reset.
+    """yay discourages root runs (`makepkg` hard-refuses them for AUR builds) and
+    drives `sudo` itself, so the escalation default inherited from `Pacman` must
+    not wrap it. A wrap would also strip the `XDG_CONFIG_HOME` cooldown overlay
+    through `sudo`'s environment reset.
     """
 
     internal_sudo = True
     """yay calls the escalation binary from inside its own commands, configurable
-    through its ``--sudo``, ``--sudoflags`` and ``--sudoloop`` options.
+    through its `--sudo`, `--sudoflags` and `--sudoloop` options.
     """
 
     requirement = ">=11.0.0"
 
     cooldown_env_var = "XDG_CONFIG_HOME"
-    """yay reads no release-age option of its own, so mpm repurposes ``XDG_CONFIG_HOME``
-    to point yay at the throwaway config overlay built by :py:meth:`cooldown_env`.
+    """yay reads no release-age option of its own, so mpm repurposes `XDG_CONFIG_HOME`
+    to point yay at the throwaway config overlay built by {meth}`cooldown_env`.
 
     Unlike the single-value variables of pip/uv/npm, the value is a *directory*; the
-    cutoff itself rides alongside it in ``MPM_COOLDOWN_EPOCH``. Set so the structural
-    ``supports_cooldown`` check (and the ``--cooldown`` help text) still recognize yay
+    cutoff itself rides alongside it in `MPM_COOLDOWN_EPOCH`. Set so the structural
+    `supports_cooldown` check (and the `--cooldown` help text) still recognize yay
     as cooldown-capable.
     """
 
     version_regexes = (r"yay\s+v(?P<version>\S+)",)
-    r"""Search version right after the ``yay`` string.
+    r"""Search version right after the `yay` string.
 
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ yay --version
-        yay v11.1.2 - libalpm v13.0.1
+    $ yay --version
+    yay v11.1.2 - libalpm v13.0.1
+    ```
     """
 
     cooldown_requirement = ">=13.0.0"
     """Minimum yay version whose Lua hooks the cooldown overlay relies on.
 
-    `v13.0.0 <https://github.com/Jguer/yay/releases/tag/v13.0.0>`_ introduced
-    ``yay.create_autocmd`` and the ``UpgradeSelect``/``AURPreInstall`` events. Kept
-    apart from :py:attr:`requirement` (``>=11.0.0``) so a v11/v12 yay stays fully
+    [v13.0.0](https://github.com/Jguer/yay/releases/tag/v13.0.0) introduced
+    `yay.create_autocmd` and the `UpgradeSelect`/`AURPreInstall` events. Kept
+    apart from {attr}`requirement` (`>=11.0.0`) so a v11/v12 yay stays fully
     usable for everything except the cooldown.
     """
 
     _resolving_cooldown_env = False
-    """Re-entrancy guard for :py:meth:`cooldown_env`.
+    """Re-entrancy guard for {meth}`cooldown_env`.
 
-    Held while :py:meth:`cooldown_env` resolves :py:attr:`supports_cooldown`, whose
-    :py:attr:`version <meta_package_manager.execution.CLIExecutor.version>` lookup runs
-    ``yay --version`` through :py:meth:`run`, which calls straight back into
-    :py:meth:`cooldown_env`. The nested call returns early so the probe runs without a
+    Held while {meth}`cooldown_env` resolves {attr}`supports_cooldown`, whose
+    {attr}`version <meta_package_manager.execution.CLIExecutor.version>` lookup runs
+    `yay --version` through {meth}`run`, which calls straight back into
+    {meth}`cooldown_env`. The nested call returns early so the probe runs without a
     cooldown env instead of recursing until the stack overflows.
     """
 
@@ -496,11 +517,11 @@ class Yay(Pacman):
     def supports_cooldown(self) -> bool:
         """Whether this yay can natively enforce a release-age cooldown.
 
-        Reports the structural capability while idle (``cooldown is None``) so the
-        import-time ``COOLDOWN_SUPPORTED_MANAGERS`` help text stays I/O-free, and only
+        Reports the structural capability while idle (`cooldown is None`) so the
+        import-time `COOLDOWN_SUPPORTED_MANAGERS` help text stays I/O-free, and only
         probes the manager
-        :py:attr:`version <meta_package_manager.execution.CLIExecutor.version>` once a
-        cooldown is active, gating on :py:attr:`cooldown_requirement`. A yay older than
+        {attr}`version <meta_package_manager.execution.CLIExecutor.version>` once a
+        cooldown is active, gating on {attr}`cooldown_requirement`. A yay older than
         that (or undetectable) reports no support, so the fail-closed default skips
         install/upgrade rather than running them unguarded.
         """
@@ -511,18 +532,18 @@ class Yay(Pacman):
         return self.version in VersionRange(self.cooldown_requirement)
 
     def cooldown_env(self) -> TEnvVars:
-        """Deliver the release-age cooldown through a private ``XDG_CONFIG_HOME``.
+        """Deliver the release-age cooldown through a private `XDG_CONFIG_HOME`.
 
         yay has no release-age option, so rather than injecting a single value mpm
-        points yay at :py:attr:`_cooldown_overlay_dir`: a throwaway config tree whose
-        generated ``init.lua`` (:py:data:`_YAY_COOLDOWN_INIT_LUA`) registers the
-        cooldown Lua hooks. The cutoff travels as ``MPM_COOLDOWN_EPOCH`` (Unix seconds
-        of ``now - cooldown``), keeping the ``init.lua`` asset static, and
-        ``MPM_YAY_USER_DIR`` lets it chain the user's real config so the redirect stays
+        points yay at {attr}`_cooldown_overlay_dir`: a throwaway config tree whose
+        generated `init.lua` ({data}`_YAY_COOLDOWN_INIT_LUA`) registers the
+        cooldown Lua hooks. The cutoff travels as `MPM_COOLDOWN_EPOCH` (Unix seconds
+        of `now - cooldown`), keeping the `init.lua` asset static, and
+        `MPM_YAY_USER_DIR` lets it chain the user's real config so the redirect stays
         lossless.
 
         Returns an empty mapping when no cooldown is set or the installed yay predates
-        the Lua hooks (see :py:attr:`supports_cooldown`).
+        the Lua hooks (see {attr}`supports_cooldown`).
         """
         if self.cooldown is None:
             return {}
@@ -557,14 +578,15 @@ class Yay(Pacman):
     def _user_yay_config_dir() -> Path | None:
         """Resolve the user's real yay config directory using yay's own precedence.
 
-        Mirrors ``GetConfigPath``/``GetLuaConfigPath`` in yay's
-        ``pkg/settings/dirs.go``: ``$XDG_CONFIG_HOME/yay`` wins over
-        ``$HOME/.config/yay``. Returns ``None`` when neither variable is set, matching
+        Mirrors `GetConfigPath`/`GetLuaConfigPath` in yay's
+        `pkg/settings/dirs.go`: `$XDG_CONFIG_HOME/yay` wins over
+        `$HOME/.config/yay`. Returns `None` when neither variable is set, matching
         yay falling back to its built-in defaults.
 
-        .. caution::
-            Read from :py:data:`os.environ` *before* mpm overrides ``XDG_CONFIG_HOME``
-            for the child, so it resolves the user's genuine directory, not the overlay.
+        ```{caution}
+        Read from {data}`os.environ` *before* mpm overrides `XDG_CONFIG_HOME`
+        for the child, so it resolves the user's genuine directory, not the overlay.
+        ```
         """
         xdg_config = os.environ.get("XDG_CONFIG_HOME")
         if xdg_config:
@@ -579,28 +601,29 @@ class Yay(Pacman):
         """Materialize the private config tree mpm points yay at for the cooldown.
 
         Built once per manager instance and removed at interpreter exit. The tree holds
-        two entries under ``<root>/yay/``:
+        two entries under `<root>/yay/`:
 
-        - ``init.lua``: the static :py:data:`_YAY_COOLDOWN_INIT_LUA` policy.
-        - ``config.json``: a symlink to the user's real config, so the
-          ``XDG_CONFIG_HOME`` redirect stays lossless. yay's ``init.lua`` only
-          *overlays* ``config.json``; it does not replace it, so the user's settings are
+        - `init.lua`: the static {data}`_YAY_COOLDOWN_INIT_LUA` policy.
+        - `config.json`: a symlink to the user's real config, so the
+          `XDG_CONFIG_HOME` redirect stays lossless. yay's `init.lua` only
+          *overlays* `config.json`; it does not replace it, so the user's settings are
           preserved.
 
         Only those two paths are placed here because they are the sole files yay derives
-        from ``XDG_CONFIG_HOME`` (per ``dirs.go``); its cache, build dir and
-        ``vcs.json`` follow ``XDG_CACHE_HOME``/``HOME`` and are untouched by the
+        from `XDG_CONFIG_HOME` (per `dirs.go`); its cache, build dir and
+        `vcs.json` follow `XDG_CACHE_HOME`/`HOME` and are untouched by the
         redirect.
 
-        .. warning::
-            Cleanup is registered with :py:func:`atexit`, **not**
-            ``weakref.finalize(self, ...)``. The overlay must outlive every yay
-            subprocess that reads it, and yay re-reads ``init.lua`` mid-run (it re-execs
-            during an install that pulls dependencies). Tying removal to this instance's
-            garbage collection raced that re-read: if the manager was collected after
-            :py:meth:`cooldown_env` but before yay finished, the overlay vanished and
-            the gate silently failed *open*: the worst outcome for a supply-chain
-            control. Process-lifetime cleanup is a safe upper bound; the tree is tiny.
+        ```{warning}
+        Cleanup is registered with {func}`atexit`, **not**
+        `weakref.finalize(self, ...)`. The overlay must outlive every yay
+        subprocess that reads it, and yay re-reads `init.lua` mid-run (it re-execs
+        during an install that pulls dependencies). Tying removal to this instance's
+        garbage collection raced that re-read: if the manager was collected after
+        {meth}`cooldown_env` but before yay finished, the overlay vanished and
+        the gate silently failed *open*: the worst outcome for a supply-chain
+        control. Process-lifetime cleanup is a safe upper bound; the tree is tiny.
+        ```
         """
         root = Path(tempfile.mkdtemp(prefix="mpm-yay-cooldown-"))
         atexit.register(shutil.rmtree, root, ignore_errors=True)

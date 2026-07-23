@@ -33,14 +33,15 @@ if TYPE_CHECKING:
 class Nix(PackageManager):
     """Nix, the functional package manager.
 
-    .. note::
-        All operations use the imperative ``nix-env`` interface, which manages
-        a per-user package profile. Declarative approaches (NixOS modules,
-        home-manager) are not covered.
+    ```{note}
+    All operations use the imperative `nix-env` interface, which manages
+    a per-user package profile. Declarative approaches (NixOS modules,
+    home-manager) are not covered.
+    ```
 
-    Channel refresh (``sync``) and store garbage collection (``cleanup``) shell
-    out to the sibling ``nix-channel`` and ``nix-collect-garbage`` binaries
-    installed alongside ``nix-env``, not to ``nix-env`` itself.
+    Channel refresh (`sync`) and store garbage collection (`cleanup`) shell
+    out to the sibling `nix-channel` and `nix-collect-garbage` binaries
+    installed alongside `nix-env`, not to `nix-env` itself.
     """
 
     homepage_url = "https://nixos.org"
@@ -53,10 +54,11 @@ class Nix(PackageManager):
 
     version_regexes = (r"nix-env \(Nix\) (?P<version>\S+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ nix-env --version
-        nix-env (Nix) 2.18.1
+    $ nix-env --version
+    nix-env (Nix) 2.18.1
+    ```
     """
 
     _OUTDATED_REGEXP = re.compile(
@@ -68,12 +70,13 @@ class Nix(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ nix-env --query --installed
-            hello-2.12.1
-            nix-2.18.1
-            python3-3.11.6
+        $ nix-env --query --installed
+        hello-2.12.1
+        nix-2.18.1
+        python3-3.11.6
+        ```
         """
         output = self.run_cli("--query", "--installed")
 
@@ -86,11 +89,12 @@ class Nix(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ nix-env --query --upgradeable --compare-versions
-            hello-2.12.1 < 2.13.0
-            python3-3.11.6 < 3.12.0
+        $ nix-env --query --upgradeable --compare-versions
+        hello-2.12.1 < 2.13.0
+        python3-3.11.6 < 3.12.0
+        ```
         """
         output = self.run_cli(
             "--query",
@@ -111,20 +115,23 @@ class Nix(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        .. caution::
-            Search does not support extended or exact matching. So we return
-            the best subset of results and let
-            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
-            refine them.
+        ```{caution}
+        Search does not support extended or exact matching. So we return
+        the best subset of results and let
+        {meth}`meta_package_manager.manager.PackageManager.refiltered_search`
+        refine them.
+        ```
 
-        .. caution::
-            ``nix-env --query --available`` evaluates the full nixpkgs set and
-            can be slow on first invocation.
+        ```{caution}
+        `nix-env --query --available` evaluates the full nixpkgs set and
+        can be slow on first invocation.
+        ```
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ nix-env --query --available --attr-path --description 'hello'
-            nixpkgs.hello  hello-2.12.1  A program that produces a friendly greeting
+        $ nix-env --query --available --attr-path --description 'hello'
+        nixpkgs.hello  hello-2.12.1  A program that produces a friendly greeting
+        ```
         """
         output = self.run_cli(
             "--query",
@@ -154,18 +161,20 @@ class Nix(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ nix-env --install hello
+        $ nix-env --install hello
+        ```
         """
         return self.run_cli("--install", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ nix-env --upgrade
+        $ nix-env --upgrade
+        ```
         """
         return self.build_cli("--upgrade")
 
@@ -177,27 +186,30 @@ class Nix(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ nix-env --upgrade hello
+        $ nix-env --upgrade hello
+        ```
         """
         return self.build_cli("--upgrade", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ nix-env --uninstall hello
+        $ nix-env --uninstall hello
+        ```
         """
         return self.run_cli("--uninstall", package_id)
 
     def sync(self) -> None:
         """Update Nix channel metadata.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ nix-channel --update
+        $ nix-channel --update
+        ```
         """
         self.run_cli(
             "--update",
@@ -207,9 +219,10 @@ class Nix(PackageManager):
     def cleanup_cache(self) -> None:
         """Remove old generations and garbage-collect the Nix store.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ nix-collect-garbage --delete-old
+        $ nix-collect-garbage --delete-old
+        ```
         """
         self.run_cli(
             "--delete-old",

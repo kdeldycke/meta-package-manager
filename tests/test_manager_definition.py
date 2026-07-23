@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Tests for brand-new package managers defined from the ``[mpm.managers.<id>]``
+"""Tests for brand-new package managers defined from the `[mpm.managers.<id>]`
 configuration section."""
 
 from __future__ import annotations
@@ -72,8 +72,8 @@ def reset_definitions():
     """Drop config-defined managers from the singleton pool before and after a test.
 
     The pool is a module-level singleton, so a manager registered by one test would
-    otherwise leak into the next. Mirrors ``reset_overrides`` in
-    :mod:`tests.test_manager_overrides`.
+    otherwise leak into the next. Mirrors `reset_overrides` in
+    {mod}`tests.test_manager_overrides`.
     """
     _clean_definitions()
     yield
@@ -129,8 +129,8 @@ def test_parse_definition_returns_dataclass():
 
 
 def test_parse_definition_accepts_orphan_operations():
-    """The schema recognizes the ``remove_orphan`` and ``cleanup_orphan`` refinements;
-    ``remove_orphan`` requires its ``{package_id}`` placeholder like ``remove``."""
+    """The schema recognizes the `remove_orphan` and `cleanup_orphan` refinements;
+    `remove_orphan` requires its ``{package_id}`` placeholder like `remove`."""
     definition = parse_manager_definition(
         "mytool",
         {
@@ -148,7 +148,7 @@ def test_parse_definition_accepts_orphan_operations():
 
 
 def test_parse_definition_rejects_legacy_cleanup():
-    """The monolithic ``cleanup`` operation is gone from the schema: declaring it
+    """The monolithic `cleanup` operation is gone from the schema: declaring it
     names the category keys that replaced it."""
     with pytest.raises(ValidationError, match="cleanup_orphan, cleanup_cache"):
         parse_manager_definition(
@@ -162,7 +162,7 @@ def test_parse_definition_rejects_legacy_cleanup():
 
 
 def test_parse_definition_remove_orphan_requires_package_id():
-    """``remove_orphan`` targets nothing without ``{package_id}``, so it is rejected."""
+    """`remove_orphan` targets nothing without ``{package_id}``, so it is rejected."""
     with pytest.raises(ValidationError, match="package_id"):
         parse_manager_definition(
             "mytool",
@@ -177,9 +177,9 @@ def test_parse_definition_remove_orphan_requires_package_id():
 def test_parse_definition_versionless_catalog_manager():
     """A tool with no per-package versions, no search command and a Brewfile mapping.
 
-    Locks three schema affordances at once: an ``installed`` regex may capture only
+    Locks three schema affordances at once: an `installed` regex may capture only
     the package ID (Clear Linux bundles and Cygwin listings carry no version), a
-    ``search`` may omit ``{query}`` to list the whole catalog and rely on
+    `search` may omit ``{query}`` to list the whole catalog and rely on
     client-side refiltering, and the Brewfile export fields land on the built class.
     """
     definition = parse_manager_definition(
@@ -663,7 +663,7 @@ def test_factory_command_substitution(monkeypatch):
 
 
 def test_factory_operation_cli(monkeypatch):
-    """An operation carrying its own ``cli`` resolves the sibling binary and routes
+    """An operation carrying its own `cli` resolves the sibling binary and routes
     the call through it; a missing sibling is an error, not a silent fallback."""
     manager = build_manager_class(
         _definition(
@@ -688,8 +688,8 @@ def test_factory_operation_cli(monkeypatch):
 
 
 def test_factory_orphans_query(monkeypatch):
-    """A config-defined manager can declare the ``orphans`` read-only query, parsed
-    like ``installed`` and advertised as a routable operation."""
+    """A config-defined manager can declare the `orphans` read-only query, parsed
+    like `installed` and advertised as a routable operation."""
     manager = build_manager_class(
         _definition(
             orphans=OperationSpec(
@@ -709,14 +709,14 @@ def test_factory_orphans_query(monkeypatch):
     packages = {(p.id, str(p.installed_version)) for p in manager.orphans}
     assert packages == {("libfoo", "1.2"), ("libbar", "3.4")}
     # With orphans + remove declared and no native sweep, the synthesized
-    # system-wide sweep of ``cleanup --orphans`` kicks in for free.
+    # system-wide sweep of `cleanup --orphans` kicks in for free.
     assert cleanup_orphan_is_synthesized(manager) is True
 
 
 def test_factory_orphan_operations(monkeypatch):
-    """A config-defined manager can declare the orphan refinements: ``remove_orphan``
-    substitutes ``{package_id}`` like ``remove``, ``cleanup_orphan`` runs a bare command
-    like ``cleanup``. Both register as implemented capabilities."""
+    """A config-defined manager can declare the orphan refinements: `remove_orphan`
+    substitutes ``{package_id}`` like `remove`, `cleanup_orphan` runs a bare command
+    like `cleanup`. Both register as implemented capabilities."""
     manager = build_manager_class(
         _definition(
             remove_orphan=OperationSpec(args=("remove", "--recursive", "{package_id}")),
@@ -746,7 +746,7 @@ def test_factory_orphan_operations(monkeypatch):
 
 
 def test_factory_operation_sudo(monkeypatch):
-    """A ``sudo = true`` operation is built privileged; unmarked ones are not."""
+    """A `sudo = true` operation is built privileged; unmarked ones are not."""
     manager = build_manager_class(
         _definition(
             install=OperationSpec(args=("--auto", "{package_id}"), sudo=True),
@@ -761,7 +761,7 @@ def test_factory_operation_sudo(monkeypatch):
         lambda *args, **kwargs: captured.update(kwargs) or "",
     )
     # Each phase clears the dict so its assert reads the state its own call
-    # captured, and reads through a local: mypy narrows the ``captured["sudo"]``
+    # captured, and reads through a local: mypy narrows the `captured["sudo"]`
     # subscript on each assert and cannot see the monkeypatched methods mutate
     # the dict, so re-asserting the same subscript with alternating values
     # would mark the later phases unreachable.
@@ -784,7 +784,7 @@ def test_factory_operation_sudo(monkeypatch):
 
 
 def test_factory_query_sudo(monkeypatch):
-    """A query marked ``sudo = true`` runs privileged, for tools that gate even
+    """A query marked `sudo = true` runs privileged, for tools that gate even
     their read-only listings behind root (deb-get's upgradable check)."""
     manager = build_manager_class(
         _definition(
@@ -887,7 +887,7 @@ def test_factory_search_without_refinements_relies_on_refiltering():
 
 
 def test_factory_json_array_field(monkeypatch):
-    """A ``key[N]`` selector picks one element out of a list-valued JSON field,
+    """A `key[N]` selector picks one element out of a list-valued JSON field,
     and resolves to nothing on non-list values or out-of-range indexes."""
     manager = build_manager_class(
         _definition(
@@ -1017,7 +1017,7 @@ def test_factory_functional(tmp_path, fake_tool, reset_definitions):
 
 @skip_windows
 def test_factory_functional_version_cli(tmp_path, fake_tool, reset_definitions):
-    """The version probe runs the ``version_cli`` binary instead of the main CLI,
+    """The version probe runs the `version_cli` binary instead of the main CLI,
     like OS-versioned tool suites exposing no version flag of their own."""
     probe = tmp_path / "myuname"
     probe.write_text("#!/bin/sh\necho '7.7'\n")
@@ -1096,17 +1096,17 @@ BUNDLED_FILE_DATA = {
     toml_path: tomllib.loads(toml_path.read_text(encoding="UTF-8"))
     for toml_path in BUNDLED_DEFINITION_FILES
 }
-"""Parsed content of each shipped file: the definition and its ``[samples]``.
+"""Parsed content of each shipped file: the definition and its `[samples]`.
 
 The samples are the source-derived output fixtures feeding
-``test_bundled_version_regex`` and ``test_bundled_parsing``, so adding a bundled
+`test_bundled_version_regex` and `test_bundled_parsing`, so adding a bundled
 manager (with its samples) extends those tests without touching this module.
 """
 
 
 def _fresh_bundled(manager_id):
     """Build a throwaway config-defined manager instance so parsing tests can
-    monkeypatch ``run_cli`` without mutating the shared pool singleton."""
+    monkeypatch `run_cli` without mutating the shared pool singleton."""
     for definition, _ in load_bundled_definitions():
         if definition.manager_id == manager_id:
             return build_manager_class(definition)()
@@ -1203,7 +1203,7 @@ def test_gh_ext_capabilities(operation, expected):
 
 
 def _version_sample_params():
-    """One param per shipped definition file, from its ``[samples.version]`` fixture."""
+    """One param per shipped definition file, from its `[samples.version]` fixture."""
     params = []
     for data in BUNDLED_FILE_DATA.values():
         manager_id = next(iter(data["mpm"]["managers"]))
@@ -1264,7 +1264,7 @@ def test_soar_capabilities(operation, expected):
 )
 def test_steamcmd_capabilities(operation, expected):
     """SteamCMD exposes no inventory: only install and per-title upgrade exist,
-    both mapping to the same idempotent ``+app_update`` command."""
+    both mapping to the same idempotent `+app_update` command."""
     assert implements(pool["steamcmd"], operation) is expected
 
 
@@ -1301,8 +1301,8 @@ def test_bundled_parsing(manager_id, operation, output, expected):
     TOML file, derived from the upstream tools' own source code or documentation.
 
     Versions are compared as raw captured strings (omitted from the sample when
-    the regex captures no version group). ``which`` is stubbed so operations
-    declaring a sibling ``cli`` resolve without the real binary installed.
+    the regex captures no version group). `which` is stubbed so operations
+    declaring a sibling `cli` resolve without the real binary installed.
     """
     manager = _fresh_bundled(manager_id)
     manager.which = lambda name: Path("/fake/bin") / name

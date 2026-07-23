@@ -16,12 +16,12 @@
 
 """Unit tests for the concurrent operation dispatch helpers.
 
-These exercise :func:`meta_package_manager.dispatch.collect_from_managers`,
-:func:`meta_package_manager.dispatch.collect_per_package` and the
-:class:`meta_package_manager.dispatch.OperationTrail` they share, in isolation with
+These exercise {func}`meta_package_manager.dispatch.collect_from_managers`,
+{func}`meta_package_manager.dispatch.collect_per_package` and the
+{class}`meta_package_manager.dispatch.OperationTrail` they share, in isolation with
 lightweight stand-ins for the click context and managers, so they need no real package
-managers and stay hermetic. The context is passed explicitly as ``ctx=`` (the helpers
-otherwise default to :func:`click_extra.get_current_context`).
+managers and stay hermetic. The context is passed explicitly as `ctx=` (the helpers
+otherwise default to {func}`click_extra.get_current_context`).
 """
 
 from __future__ import annotations
@@ -44,7 +44,7 @@ from meta_package_manager.dispatch import (
 
 
 class FakeContext:
-    """Minimal stand-in exposing only the ``meta`` keys the helper reads."""
+    """Minimal stand-in exposing only the `meta` keys the helper reads."""
 
     def __init__(self, jobs: int, verbosity: str = "INFO") -> None:
         self.meta = {
@@ -54,7 +54,7 @@ class FakeContext:
 
 
 class StubManager:
-    """Minimal stand-in exposing only ``id``, ``progress`` and ``run_cache``."""
+    """Minimal stand-in exposing only `id`, `progress` and `run_cache`."""
 
     run_cache = None
 
@@ -71,7 +71,7 @@ class TTYStringIO(io.StringIO):
 
 
 def _record_thread(threads, lock):
-    """Build a ``work`` callable that records the thread each call runs on."""
+    """Build a `work` callable that records the thread each call runs on."""
 
     def work(manager):
         with lock:
@@ -185,7 +185,7 @@ def test_empty_manager_list_returns_empty():
 def test_no_finisher_line_off_terminal(capsys):
     """Off a terminal the aggregate spinner never draws, so no finisher leaks.
 
-    ``Spinner.ok()`` emits its line unconditionally, so the gate must keep it out
+    `Spinner.ok()` emits its line unconditionally, so the gate must keep it out
     of pipes, captured output and serialized runs.
     """
     ctx = FakeContext(jobs=4)
@@ -261,7 +261,7 @@ def test_failure_trail_marks_errored_managers(monkeypatch):
 def test_trail_includes_managers_that_finish_before_the_spinner_shows(monkeypatch):
     """Managers that complete within the show delay still get a trail line.
 
-    Regression: the per-manager echo was gated on the live ``shown`` state, so a
+    Regression: the per-manager echo was gated on the live `shown` state, so a
     manager that finished before the spinner first drew was dropped from the trail
     (a 6-manager batch where the quick ones beat the 1s delay showed only the 3
     slow ones, above a "Checked 6 managers" finisher). Outcomes are now buffered
@@ -449,7 +449,7 @@ def test_per_package_no_finisher_off_terminal(capsys):
 
 
 def _thread_recorder():
-    """Build a ``(work, threads_by_id)`` pair recording each manager's thread."""
+    """Build a `(work, threads_by_id)` pair recording each manager's thread."""
     threads_by_id: dict = {}
     lock = threading.Lock()
 

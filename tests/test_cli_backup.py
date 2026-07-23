@@ -27,9 +27,9 @@ from .test_cli import CLISubCommandTests
 
 @pytest.fixture
 def subcmd():
-    # ``DEBUG`` level is required so that ``check_manager_selection`` can detect
+    # `DEBUG` level is required so that `check_manager_selection` can detect
     # skip/does-not-implement signals for implicitly selected managers. Those
-    # messages are demoted to DEBUG when no explicit ``--<id>`` flag is passed.
+    # messages are demoted to DEBUG when no explicit `--<id>` flag is passed.
     # INFO messages are a subset of DEBUG, so everything logged at INFO still
     # appears.
     return "--verbosity", "DEBUG", "backup"
@@ -40,9 +40,9 @@ class TestBackup(CLISubCommandTests):
     def evaluate_signals(mid, stdout, stderr):
         yield from (
             f":{mid}: Dumping packages..." in stderr,
-            # The glued ``:<mid>:`` label form matches whatever level the
+            # The glued `:<mid>:` label form matches whatever level the
             # message lands at: demoted to DEBUG for implicit selection
-            # (``mpm backup``), INFO for explicit ones (``mpm --<mid> backup``).
+            # (`mpm backup`), INFO for explicit ones (`mpm --<mid> backup`).
             f":{mid}: Does not implement {Operations.installed}" in stderr,
             f":{mid}: Skipped:" in stderr,
         )

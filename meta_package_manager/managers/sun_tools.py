@@ -38,15 +38,16 @@ class Sun_Tools(PackageManager):
     - https://docs.oracle.com/cd/E26502_01/html/E29031/pkgadd-1m.html
     - https://docs.oracle.com/cd/E26502_01/html/E29031/pkgrm-1m.html
 
-    The suite spans several binaries: ``pkginfo`` (the read-only query tool, used as
-    the main CLI), ``pkgadd`` and ``pkgrm``.
+    The suite spans several binaries: `pkginfo` (the read-only query tool, used as
+    the main CLI), `pkgadd` and `pkgrm`.
 
-    .. note::
-        SVR4 packages come from local media or datastream files, not a network
-        repository: there is no catalog to search, refresh or diff against, and
-        ``pkgadd`` installs a specific local artifact rather than resolving a name.
-        Only ``installed`` and ``remove`` are therefore implemented; Solaris 11's
-        modern repository-based interface is IPS (``pkg``), a different manager.
+    ```{note}
+    SVR4 packages come from local media or datastream files, not a network
+    repository: there is no catalog to search, refresh or diff against, and
+    `pkgadd` installs a specific local artifact rather than resolving a name.
+    Only `installed` and `remove` are therefore implemented; Solaris 11's
+    modern repository-based interface is IPS (`pkg`), a different manager.
+    ```
     """
 
     name = "Solaris SVR4 package tools"
@@ -63,20 +64,21 @@ class Sun_Tools(PackageManager):
     cli_search_path = ("/usr/sbin",)
 
     version_cli = "uname"
-    """None of the SVR4 tools has a version flag: ``pkginfo -v`` matches a package
-    *version* and ``pkgadd``/``pkgrm`` only take ``-v`` as verbose. The suite ships
-    with the base system, so its version is the OS release reported by ``uname -r``
-    (``5.11`` on Solaris 11).
+    """None of the SVR4 tools has a version flag: `pkginfo -v` matches a package
+    *version* and `pkgadd`/`pkgrm` only take `-v` as verbose. The suite ships
+    with the base system, so its version is the OS release reported by `uname -r`
+    (`5.11` on Solaris 11).
     """
 
     version_cli_options = ("-r",)
 
     version_regexes = (r"(?P<version>[\d.]+)",)
     """
-    .. code-block:: shell-session
+    ```{code-block} shell-session
 
-        $ uname -r
-        5.11
+    $ uname -r
+    5.11
+    ```
     """
 
     _PKGINFO_FIELD_REGEXP = re.compile(
@@ -87,22 +89,23 @@ class Sun_Tools(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        Plain ``pkginfo`` prints no version column (only category, package instance
-        and name), so the long ``-l`` listing is parsed instead: each package is a
-        multi-line block carrying ``PKGINST:``, ``VERSION:`` and ``STATUS:`` fields.
+        Plain `pkginfo` prints no version column (only category, package instance
+        and name), so the long `-l` listing is parsed instead: each package is a
+        multi-line block carrying `PKGINST:`, `VERSION:` and `STATUS:` fields.
         Only completely-installed packages are yielded.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ pkginfo -l
-              PKGINST:  SUNWcar
-                  NAME:  Core Architecture, (Root)
-              CATEGORY:  system
-                  ARCH:  i386.i86pc
-               VERSION:  11.10.0,REV=2005.01.21.16.34
-               BASEDIR:  /
-                VENDOR:  Oracle Corporation
-                STATUS:  completely installed
+        $ pkginfo -l
+          PKGINST:  SUNWcar
+              NAME:  Core Architecture, (Root)
+          CATEGORY:  system
+              ARCH:  i386.i86pc
+           VERSION:  11.10.0,REV=2005.01.21.16.34
+           BASEDIR:  /
+            VENDOR:  Oracle Corporation
+            STATUS:  completely installed
+        ```
         """
         output = self.run_cli("-l")
 
@@ -131,13 +134,14 @@ class Sun_Tools(PackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        ``-n`` runs non-interactively: pkgrm exits instead of prompting, so a
+        `-n` runs non-interactively: pkgrm exits instead of prompting, so a
         removal requiring interaction (like a dependency confirmation) fails fast
         rather than hanging mpm's subprocess.
 
-        .. code-block:: shell-session
+        ```{code-block} shell-session
 
-            $ sudo pkgrm -n SUNWzlib
+        $ sudo pkgrm -n SUNWzlib
+        ```
         """
         pkgrm_path = self.sibling_cli("pkgrm")
         return self.run_cli(

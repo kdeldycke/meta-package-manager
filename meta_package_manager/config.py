@@ -14,21 +14,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Configuration utilities for ``mpm``.
+"""Configuration utilities for `mpm`.
 
-Hosts the schema of the ``[mpm]`` configuration section consumed by
-:py:mod:`click_extra` and the runtime policy around the ``[mpm.managers.<id>]``
+Hosts the schema of the `[mpm]` configuration section consumed by
+{mod}`click_extra` and the runtime policy around the `[mpm.managers.<id>]`
 sections of the same configuration file: applying attribute overrides to shipped
 managers, gating manager definitions on the trust of their source, and registering
 them into the pool.
 
 The concerns stay separate across three modules:
-:py:class:`meta_package_manager.pool.ManagerPool` owns the live manager instances
-and the per-manager ``overridden_fields`` tracking dict;
-:py:mod:`meta_package_manager.definitions` owns the declarative schema (which
+{class}`meta_package_manager.pool.ManagerPool` owns the live manager instances
+and the per-manager `overridden_fields` tracking dict;
+{mod}`meta_package_manager.definitions` owns the declarative schema (which
 fields a section may set, how to coerce values) and the class factory; this module
 owns the loading policy and mutates the pool through the
-:py:func:`apply_manager_overrides` and :py:func:`register_config_managers` helpers.
+{func}`apply_manager_overrides` and {func}`register_config_managers` helpers.
 """
 
 from __future__ import annotations
@@ -73,25 +73,27 @@ if TYPE_CHECKING:
 
 @dataclass
 class MpmConfig:
-    """Schema for ``mpm`` configuration files.
+    """Schema for `mpm` configuration files.
 
-    Defines the recognized options for the ``[mpm]`` (or ``[tool.mpm]``)
+    Defines the recognized options for the `[mpm]` (or `[tool.mpm]`)
     configuration section.  Each field corresponds to a CLI option on the root
-    ``mpm`` group.
+    `mpm` group.
 
-    .. note::
-        Dynamic manager selectors (``brew = true``, ``pip = false``, etc.),
-        click-extra built-in options (``verbosity``, ``table_format``) and
-        one-shot utility flags (``--bar-plugin-path``, ``--xkcd``) are handled
-        by the ``default_map`` pipeline and do not appear here.
+    ```{note}
+    Dynamic manager selectors (`brew = true`, `pip = false`, etc.),
+    click-extra built-in options (`verbosity`, `table_format`) and
+    one-shot utility flags (`--bar-plugin-path`, `--xkcd`) are handled
+    by the `default_map` pipeline and do not appear here.
+    ```
 
-    .. note::
-        Multi-word fields pin their config path through
-        ``CONFIG_PATH_METADATA_KEY``: mpm's configuration convention is
-        underscored keys (matching Click parameter names, the
-        ``--validate-config`` checks and every documented example), while
-        click-extra would otherwise kebab-case field names in the rendered
-        ``click:config`` reference.
+    ```{note}
+    Multi-word fields pin their config path through
+    `CONFIG_PATH_METADATA_KEY`: mpm's configuration convention is
+    underscored keys (matching Click parameter names, the
+    `--validate-config` checks and every documented example), while
+    click-extra would otherwise kebab-case field names in the rendered
+    `click:config` reference.
+    ```
     """
 
     all_managers: bool = field(
@@ -125,23 +127,23 @@ class MpmConfig:
     """Capture the state-changing CLI calls for inspection instead of running them."""
 
     sudo: bool | None = None
-    """Force privileged manager operations with (``True``) or without (``False``)
-    ``sudo``. Unset by default: system managers escalate, user-level managers do
-    not. Overridden per manager by a ``sudo`` entry in ``[mpm.managers.<id>]``."""
+    """Force privileged manager operations with (`True`) or without (`False`)
+    `sudo`. Unset by default: system managers escalate, user-level managers do
+    not. Overridden per manager by a `sudo` entry in `[mpm.managers.<id>]`."""
 
     timeout: int | None = None
     """Maximum duration in seconds for each manager CLI call. When unset, a
-    per-operation default applies: ``120`` for read-only queries (``installed``,
-    ``outdated``, ``search``) and ``500`` for state-changing operations. A set
+    per-operation default applies: `120` for read-only queries (`installed`,
+    `outdated`, `search`) and `500` for state-changing operations. A set
     value overrides every operation."""
 
     jobs: int | str = "auto"
     """Maximum number of managers to run concurrently. Accepts an integer, or the
-    keywords ``auto`` (one fewer than the logical CPU count, the default) and
-    ``max`` (every logical CPU); set ``1`` to run sequentially."""
+    keywords `auto` (one fewer than the logical CPU count, the default) and
+    `max` (every logical CPU); set `1` to run sequentially."""
 
     cooldown: str = ""
-    """Minimum release age (like ``7 days`` or ``1 week``) a package version must
+    """Minimum release age (like `7 days` or `1 week`) a package version must
     reach before it can be installed or upgraded. Empty disables the gate."""
 
     require_cooldown_support: bool = field(
@@ -149,7 +151,7 @@ class MpmConfig:
         metadata={CONFIG_PATH_METADATA_KEY: "require_cooldown_support"},
     )
     """Require managers to natively support a requested cooldown to run
-    install/upgrade: skip those that cannot (fail-closed). Set to ``False`` to run
+    install/upgrade: skip those that cannot (fail-closed). Set to `False` to run
     them anyway, without the safeguard."""
 
     description: bool = False
@@ -167,7 +169,7 @@ class MpmConfig:
 
     network: bool = False
     """Opt into network calls during the run. Today this only affects
-    ``mpm sbom``, which queries OSV.dev for vulnerability data."""
+    `mpm sbom`, which queries OSV.dev for vulnerability data."""
 
     suggest_contribs: bool = field(
         default=True,
@@ -179,11 +181,11 @@ class MpmConfig:
     managers: dict[str, dict] = field(default_factory=dict)
     """Per-manager attribute overrides keyed by manager ID.
 
-    Typed as ``dict[str, dict]`` so click-extra treats the sub-tree as opaque:
+    Typed as `dict[str, dict]` so click-extra treats the sub-tree as opaque:
     its keys are manager IDs (data, not flag names) and its leaf entries are
-    validated by :py:func:`validate_manager_overrides_section` registered as a
-    :class:`click_extra.ConfigValidator`. The field carries no CLI flag — it
-    only exists in the schema to declare opacity and to enable ``--validate-config``
+    validated by {func}`validate_manager_overrides_section` registered as a
+    {class}`click_extra.ConfigValidator`. The field carries no CLI flag — it
+    only exists in the schema to declare opacity and to enable `--validate-config`
     coverage of the override block."""
 
 
@@ -195,10 +197,10 @@ INVALIDATED_CACHED_PROPS: Final[tuple[str, ...]] = (
     "supported",
     "version",
 )
-"""Cached properties on :py:class:`meta_package_manager.manager.PackageManager` that may
-have been computed from attributes covered by :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`.
+"""Cached properties on {class}`meta_package_manager.manager.PackageManager` that may
+have been computed from attributes covered by {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`.
 
-Any pre-computed values are popped from the manager instance's ``__dict__`` after an
+Any pre-computed values are popped from the manager instance's `__dict__` after an
 override is applied so the next access recomputes them against the new attribute
 values. Safe to pop even if nothing was cached.
 """
@@ -211,12 +213,12 @@ CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset({
     "version_cli_options",
     "version_regexes",
 })
-"""Subset of :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` whose override probably reflects a real
+"""Subset of {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` whose override probably reflects a real
 upstream detection bug rather than a personal preference.
 
 When the user overrides one of these, mpm did not find the binary, used the wrong
 binary name, rejected a valid version, or failed to parse one. The other overridable
-fields (``timeout``, ``ignore_auto_updates``, ``pre_args``, etc.) are user
+fields (`timeout`, `ignore_auto_updates`, `pre_args`, etc.) are user
 preferences and do not warrant a contribution invitation.
 """
 
@@ -240,7 +242,7 @@ class ContributionHint:
     """A user override of a detection-related field, candidate for upstream
     contribution.
 
-    Captured at override time by :py:func:`apply_manager_overrides` so the user can
+    Captured at override time by {func}`apply_manager_overrides` so the user can
     later be invited to file an upstream issue with a pre-filled bug-report URL.
     """
 
@@ -248,7 +250,7 @@ class ContributionHint:
     """ID of the manager whose attribute was overridden."""
 
     field: str
-    """Name of the overridden :py:class:`~meta_package_manager.manager.PackageManager`
+    """Name of the overridden {class}`~meta_package_manager.manager.PackageManager`
     attribute."""
 
     user_value: Any
@@ -256,21 +258,21 @@ class ContributionHint:
 
     detected_cli_path: str | None
     """The CLI path mpm resolved with the built-in defaults, before the override
-    took effect. ``None`` when mpm could not find the binary, which is itself a
+    took effect. `None` when mpm could not find the binary, which is itself a
     strong signal that the upstream search heuristics need help."""
 
 
 def _build_issue_url(hint: ContributionHint) -> str:
     """Build a GitHub new-issue URL targeting the bug-report template, with the
-    relevant fields pre-filled from ``hint``.
+    relevant fields pre-filled from `hint`.
 
     Returns the URL only: it's the caller's job to render and surface it. Length
     stays well under GitHub's URL-length cap because the body summarizes the
-    override and asks the user to paste their full ``mpm --verbosity DEBUG``
+    override and asks the user to paste their full `mpm --verbosity DEBUG`
     output rather than embedding it.
 
     A pathological override value could still blow past
-    :data:`MAX_ISSUE_URL_LENGTH`; the assertion below catches that in tests
+    {data}`MAX_ISSUE_URL_LENGTH`; the assertion below catches that in tests
     rather than letting the user click a URL GitHub will truncate.
     """
     detected = (
@@ -363,25 +365,25 @@ def validate_manager_overrides_section(
     *,
     pool: ManagerPool,
 ) -> None:
-    """Strict validator for the ``[mpm.managers.<id>]`` configuration sub-tree.
+    """Strict validator for the `[mpm.managers.<id>]` configuration sub-tree.
 
-    Pure function: inspects ``section`` against the pool's registered managers
-    and :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`, raises the first
-    :class:`click_extra.ValidationError` it encounters, never mutates the pool.
-    Suitable for registration as a :class:`click_extra.ConfigValidator` and for
-    direct invocation by :py:func:`apply_manager_overrides` so both the
-    ``--validate-config`` path and the runtime application path enforce the
+    Pure function: inspects `section` against the pool's registered managers
+    and {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`, raises the first
+    {class}`click_extra.ValidationError` it encounters, never mutates the pool.
+    Suitable for registration as a {class}`click_extra.ConfigValidator` and for
+    direct invocation by {func}`apply_manager_overrides` so both the
+    `--validate-config` path and the runtime application path enforce the
     same rules.
 
     A section keyed by a built-in manager ID is validated as an *override* (its
-    fields must be a subset of :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`). A section keyed by any
+    fields must be a subset of {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`). A section keyed by any
     other ID is validated as a brand-new manager *definition* via
-    :py:func:`~meta_package_manager.definitions.parse_manager_definition`.
+    {func}`~meta_package_manager.definitions.parse_manager_definition`.
 
-    :raises click_extra.ValidationError: when ``section`` is not a mapping, an
+    :raises click_extra.ValidationError: when `section` is not a mapping, an
         override sets an unknown field or a wrong-typed value, or a definition is
-        malformed. The ``path`` of the raised error is relative to the
-        ``[mpm.managers]`` section root (e.g. ``"winget.cli_searchpath"``);
+        malformed. The `path` of the raised error is relative to the
+        `[mpm.managers]` section root (e.g. `"winget.cli_searchpath"`);
         click-extra prepends the app prefix when surfacing the error.
     """
     if not section:
@@ -410,10 +412,10 @@ def validate_manager_overrides_section(
 
 
 def _validate_override_fields(manager_id: str, fields: Any) -> None:
-    """Validate one ``[mpm.managers.<built-in id>]`` override section.
+    """Validate one `[mpm.managers.<built-in id>]` override section.
 
-    Each field must be a known :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` attribute and carry a
-    value its converter accepts. Raises :class:`click_extra.ValidationError` on the
+    Each field must be a known {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` attribute and carry a
+    value its converter accepts. Raises {class}`click_extra.ValidationError` on the
     first problem.
     """
     if not isinstance(fields, dict):
@@ -446,30 +448,30 @@ def apply_manager_overrides(
 ) -> list[ContributionHint]:
     """Apply per-manager attribute overrides parsed from the user's config file.
 
-    Expects ``overrides`` to be a mapping of manager ID to a mapping of attribute
-    name to its new value, as returned by ``conf["mpm"]["managers"]``. ``None``
+    Expects `overrides` to be a mapping of manager ID to a mapping of attribute
+    name to its new value, as returned by `conf["mpm"]["managers"]`. `None`
     and empty mappings are accepted as no-op shortcuts so callers can
     unconditionally forward whatever was parsed from the config file.
 
     Validation is delegated to
-    :py:func:`validate_manager_overrides_section`, which raises
-    :class:`click_extra.ValidationError` on the first issue. Both the
-    runtime config-loading path and the explicit ``--validate-config`` path
+    {func}`validate_manager_overrides_section`, which raises
+    {class}`click_extra.ValidationError` on the first issue. Both the
+    runtime config-loading path and the explicit `--validate-config` path
     enforce the same rules through that single validator, so a config that
     survives one survives the other.
 
     After validation succeeds, every override is applied as an instance
     attribute (shadowing the class default for the lifetime of the process),
-    recorded in :py:attr:`ManagerPool.overridden_fields` so
-    :py:meth:`ManagerPool._select_managers` skips the matching global
-    ``--<flag>`` defaults for that manager, and the cached properties derived
+    recorded in {attr}`ManagerPool.overridden_fields` so
+    {meth}`ManagerPool._select_managers` skips the matching global
+    `--<flag>` defaults for that manager, and the cached properties derived
     from the affected attributes are evicted so the next access recomputes
     them. List-valued fields use *replace* semantics: the override fully
     supersedes the built-in default.
 
-    Returns a list of :class:`ContributionHint` entries, one per accepted
-    override that targets a :data:`CONTRIBUTION_HINT_FIELDS` field. Each hint
-    captures the pre-override ``cli_path`` so the contribution invitation can
+    Returns a list of {class}`ContributionHint` entries, one per accepted
+    override that targets a {data}`CONTRIBUTION_HINT_FIELDS` field. Each hint
+    captures the pre-override `cli_path` so the contribution invitation can
     show what mpm would have detected without the user's intervention.
     """
     if not overrides:
@@ -521,14 +523,14 @@ def apply_manager_overrides(
 
 
 def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
-    """Construct a :class:`click_extra.ConfigValidator` for the
-    ``[mpm.managers]`` sub-tree, bound to a specific :class:`ManagerPool`.
+    """Construct a {class}`click_extra.ConfigValidator` for the
+    `[mpm.managers]` sub-tree, bound to a specific {class}`ManagerPool`.
 
-    Used by the CLI bootstrap (``@group`` decorator) to register a validator
-    against the live pool. Wrapping :py:func:`validate_manager_overrides_section`
+    Used by the CLI bootstrap (`@group` decorator) to register a validator
+    against the live pool. Wrapping {func}`validate_manager_overrides_section`
     in a closure satisfies the
-    :py:attr:`click_extra.ConfigValidator.validator` signature
-    (``Callable[[dict], None]``) while keeping the underlying validator pool-agnostic
+    {attr}`click_extra.ConfigValidator.validator` signature
+    (`Callable[[dict], None]`) while keeping the underlying validator pool-agnostic
     and testable in isolation.
     """
 
@@ -543,14 +545,14 @@ def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
 
 
 def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
-    """Return the current overridable attributes of ``manager`` as a TOML-ready
+    """Return the current overridable attributes of `manager` as a TOML-ready
     dict.
 
-    Walks :data:`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` in alphabetical order, reads each attribute
-    from the manager instance, and converts tuples to lists so :py:mod:`tomli_w`
+    Walks {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` in alphabetical order, reads each attribute
+    from the manager instance, and converts tuples to lists so {mod}`tomli_w`
     can serialize the result without translation. Attributes whose value is
-    ``None`` are skipped: TOML cannot express ``None`` and the user cannot
-    override a field *to* ``None`` either, so emitting the key would be
+    `None` are skipped: TOML cannot express `None` and the user cannot
+    override a field *to* `None` either, so emitting the key would be
     misleading.
 
     Every other overridable field is emitted, including ones still at the class
@@ -569,19 +571,19 @@ def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
 
 
 CTX_HINTS_KEY: Final[str] = "mpm.contribution_hints"
-"""``ctx.meta`` key under which collected :class:`ContributionHint` entries are
-accumulated between :py:func:`apply_manager_overrides_from_context` and
-:py:func:`print_contribution_hints`."""
+"""`ctx.meta` key under which collected {class}`ContributionHint` entries are
+accumulated between {func}`apply_manager_overrides_from_context` and
+{func}`print_contribution_hints`."""
 
 
 def _managers_section(ctx: click.Context) -> Mapping[str, Any] | None:
-    """Return the ``[mpm.managers]`` mapping from the loaded config, or ``None``.
+    """Return the `[mpm.managers]` mapping from the loaded config, or `None`.
 
-    Reads the full parsed config :py:mod:`click_extra` exposes under
-    :data:`~click_extra.context.CONF_FULL` and drills into ``["mpm"]["managers"]``,
+    Reads the full parsed config {mod}`click_extra` exposes under
+    {data}`~click_extra.context.CONF_FULL` and drills into `["mpm"]["managers"]`,
     tolerating a missing or malformed layer at each step. Shared by
-    :py:func:`apply_manager_overrides_from_context` (the override pass) and
-    :py:func:`register_config_managers_from_context` (the definition pass).
+    {func}`apply_manager_overrides_from_context` (the override pass) and
+    {func}`register_config_managers_from_context` (the definition pass).
     """
     conf_full = ctx.meta.get(CONF_FULL) or {}
     mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
@@ -592,17 +594,17 @@ def apply_manager_overrides_from_context(
     ctx: click.Context,
     pool: ManagerPool,
 ) -> None:
-    """Read the ``[mpm.managers.<id>]`` sections from the loaded config and apply
-    them to ``pool``.
+    """Read the `[mpm.managers.<id>]` sections from the loaded config and apply
+    them to `pool`.
 
-    Reads the full parsed config that :py:mod:`click_extra` exposes under
-    :data:`~click_extra.context.CONF_FULL` after configuration discovery and
-    forwards the ``["mpm"]["managers"]`` subtree to
-    :py:func:`apply_manager_overrides`. Returns silently when no configuration
+    Reads the full parsed config that {mod}`click_extra` exposes under
+    {data}`~click_extra.context.CONF_FULL` after configuration discovery and
+    forwards the `["mpm"]["managers"]` subtree to
+    {func}`apply_manager_overrides`. Returns silently when no configuration
     file was loaded or when the section is absent.
 
-    Any :class:`ContributionHint` returned by :py:func:`apply_manager_overrides` is
-    stashed under :data:`CTX_HINTS_KEY` for :py:func:`print_contribution_hints` to
+    Any {class}`ContributionHint` returned by {func}`apply_manager_overrides` is
+    stashed under {data}`CTX_HINTS_KEY` for {func}`print_contribution_hints` to
     surface at the end of the run.
     """
     overrides = _managers_section(ctx)
@@ -620,10 +622,10 @@ def _warn_risky_overrides_from_untrusted_source(
     """Warn when a command-redirecting override is read from an untrusted config source.
 
     Overrides on built-in managers still apply (for backward compatibility), but a
-    :data:`RISKY_OVERRIDE_FIELDS` override (``pre_cmds``, ``cli_names``,
-    ``cli_search_path``, ``sudo``) sourced from a remote URL or an unsafe-permission file
+    {data}`RISKY_OVERRIDE_FIELDS` override (`pre_cmds`, `cli_names`,
+    `cli_search_path`, `sudo`) sourced from a remote URL or an unsafe-permission file
     can make mpm run an arbitrary binary, or run one as root, so it earns a loud
-    heads-up. See ``docs/security.md``.
+    heads-up. See `docs/security.md`.
     """
     if not overrides:
         return
@@ -644,13 +646,13 @@ def _warn_risky_overrides_from_untrusted_source(
 
 
 def print_contribution_hints(ctx: click.Context) -> None:
-    """Print the collected contribution hints to ``<stderr>``.
+    """Print the collected contribution hints to `<stderr>`.
 
-    Reads from :data:`CTX_HINTS_KEY` and writes via :py:func:`click_extra.echo`
+    Reads from {data}`CTX_HINTS_KEY` and writes via {func}`click_extra.echo`
     rather than the logging module, so the message survives ``--verbosity
-    CRITICAL`` and the ``logging.disable()`` block that suppresses log output for
+    CRITICAL` and the `logging.disable()`` block that suppresses log output for
     serialization formats. Caller is expected to gate this on the user's
-    ``suggest_contribs`` preference.
+    `suggest_contribs` preference.
     """
     hints = ctx.meta.get(CTX_HINTS_KEY) or []
     message = format_contribution_hints(hints)
@@ -661,18 +663,18 @@ def print_contribution_hints(ctx: click.Context) -> None:
 # Brand-new manager definitions.
 #
 # Everything below is the *policy* half of config-defined managers: where a
-# ``[mpm.managers.<id>]`` section may be loaded from, whether its source is trusted,
+# `[mpm.managers.<id>]` section may be loaded from, whether its source is trusted,
 # and the registration passes wired into the CLI. The schema, validation and
-# class-building machinery lives in :py:mod:`meta_package_manager.definitions`.
+# class-building machinery lives in {mod}`meta_package_manager.definitions`.
 
 
 RISKY_OVERRIDE_FIELDS: Final[frozenset[str]] = frozenset(
     {"pre_cmds", "cli_names", "cli_search_path", "sudo"},
 )
-"""Override fields that can redirect mpm to run an arbitrary binary (or ``sudo``).
+"""Override fields that can redirect mpm to run an arbitrary binary (or `sudo`).
 
 When such an override is read from an untrusted config source,
-:py:func:`apply_manager_overrides_from_context` logs a warning. See ``docs/security.md``.
+{func}`apply_manager_overrides_from_context` logs a warning. See `docs/security.md`.
 """
 
 
@@ -680,12 +682,12 @@ def config_file_is_trusted(path: Path) -> bool:
     """Whether a config file is safe to load executable manager definitions from.
 
     Trusted on POSIX when both the file and its parent directory are owned by the
-    current user or root and are not group- or world-writable, mirroring how ``ssh``,
-    ``git`` and ``sudo`` reason about config-file trust: a writable file (or a writable
+    current user or root and are not group- or world-writable, mirroring how `ssh`,
+    `git` and `sudo` reason about config-file trust: a writable file (or a writable
     directory that lets an attacker swap the file) could inject arbitrary commands.
 
-    On platforms without ``os.getuid`` (Windows), the POSIX ownership model does not
-    apply and the check is skipped (returns ``True``); see ``docs/security.md`` for the
+    On platforms without `os.getuid` (Windows), the POSIX ownership model does not
+    apply and the check is skipped (returns `True`); see `docs/security.md` for the
     rationale and the residual risk.
     """
     if not hasattr(os, "getuid"):
@@ -700,7 +702,7 @@ def config_file_is_trusted(path: Path) -> bool:
             return False
         writable_by_others = stats.st_mode & (stat.S_IWGRP | stat.S_IWOTH)
         sticky = stats.st_mode & stat.S_ISVTX
-        # A group/world-writable directory is safe only if sticky (like ``/tmp``):
+        # A group/world-writable directory is safe only if sticky (like `/tmp`):
         # the sticky bit stops others renaming or replacing the config file. A
         # group/world-writable file is always unsafe.
         if writable_by_others and not (is_dir and sticky):
@@ -714,12 +716,12 @@ def _is_remote_url(location: str) -> bool:
 
 
 def _config_source(ctx: click.Context) -> tuple[Path | None, bool]:
-    """Return ``(local_path, is_url)`` for the config file click-extra loaded.
+    """Return `(local_path, is_url)` for the config file click-extra loaded.
 
     Reads the location click-extra records under
-    :data:`~click_extra.config.CONFIG_PATH_METADATA_KEY`. A remote URL yields
-    ``(None, True)``; a local file yields ``(Path, False)``; nothing loaded yields
-    ``(None, False)``.
+    {data}`~click_extra.config.CONFIG_PATH_METADATA_KEY`. A remote URL yields
+    `(None, True)`; a local file yields `(Path, False)`; nothing loaded yields
+    `(None, False)`.
     """
     raw = ctx.meta.get(CONFIG_PATH_METADATA_KEY)
     if not raw:
@@ -737,11 +739,11 @@ def register_config_managers(
     source: Path | None = None,
     source_is_url: bool = False,
 ) -> list[str]:
-    """Build and register config-defined managers into ``pool``, applying the trust gate.
+    """Build and register config-defined managers into `pool`, applying the trust gate.
 
     A definition is skipped (with a warning) when its ID collides with a built-in, when
     it comes from a remote URL config, or when its local config file fails
-    :py:func:`config_file_is_trusted`. Returns the IDs actually registered. Definitions
+    {func}`config_file_is_trusted`. Returns the IDs actually registered. Definitions
     whose ID is already in the pool (e.g. registered by the eager pre-load) are silently
     skipped so the eager and callback passes are idempotent.
     """
@@ -780,7 +782,7 @@ def _collect_definitions(
     pool: ManagerPool,
     sections: Mapping[str, Any],
 ) -> dict[str, ManagerDefinition]:
-    """Parse the non-built-in sections of ``[mpm.managers]`` into definitions.
+    """Parse the non-built-in sections of `[mpm.managers]` into definitions.
 
     Sections keyed by a built-in ID (overrides) and any that fail to parse are skipped:
     parse failures were already surfaced by the load-time validator, so re-raising here
@@ -803,9 +805,9 @@ def register_config_managers_from_context(
 ) -> None:
     """Register config-defined managers from the loaded config (authoritative pass).
 
-    Reads the parsed config under :data:`~click_extra.context.CONF_FULL`, parses the
-    non-built-in ``[mpm.managers.<id>]`` sections, and registers them through
-    :py:func:`register_config_managers`. This is the source of truth for *availability*:
+    Reads the parsed config under {data}`~click_extra.context.CONF_FULL`, parses the
+    non-built-in `[mpm.managers.<id>]` sections, and registers them through
+    {func}`register_config_managers`. This is the source of truth for *availability*:
     a manager defined in a config the eager pre-load could not reach (a URL, a custom
     path) still works from here, it just does not get a dedicated CLI flag.
     """
@@ -826,8 +828,8 @@ def _candidate_config_path() -> tuple[Path | None, bool]:
 
     Mirrors click-extra's default discovery enough to find new-manager definitions
     before the CLI is built, without re-implementing all of it: an explicit
-    ``MPM_CONFIG`` env var or ``--config`` argument wins, otherwise the first config
-    file in the default application directory is used. Returns ``(path, is_url)``;
+    `MPM_CONFIG` env var or `--config` argument wins, otherwise the first config
+    file in the default application directory is used. Returns `(path, is_url)`;
     URLs are reported but not read here (the authoritative pass handles them).
     """
     raw = os.environ.get("MPM_CONFIG")
@@ -858,9 +860,9 @@ def discover_config_definitions(
 
     Best-effort and local-only: any error (no config, parse failure, missing reader)
     yields no definitions so CLI startup never breaks. URL configs are deferred to the
-    authoritative :py:func:`register_config_managers_from_context` pass. Supports both
-    the standalone ``[mpm.managers]`` layout and ``[tool.mpm.managers]`` in
-    ``pyproject.toml``.
+    authoritative {func}`register_config_managers_from_context` pass. Supports both
+    the standalone `[mpm.managers]` layout and `[tool.mpm.managers]` in
+    `pyproject.toml`.
     """
     try:
         path, is_url = _candidate_config_path()
@@ -883,8 +885,8 @@ def discover_config_definitions(
 def register_eager_config_managers(pool: ManagerPool) -> None:
     """Register config-defined managers before the CLI group is constructed.
 
-    Called from ``__main__.main()`` ahead of importing the Click group, so the dynamic
-    ``--<id>`` / ``--no-<id>`` selectors enumerate the augmented pool and config-defined
+    Called from `__main__.main()` ahead of importing the Click group, so the dynamic
+    `--<id>` / `--no-<id>` selectors enumerate the augmented pool and config-defined
     managers become first-class flags alongside the built-ins.
     """
     definitions, source = discover_config_definitions(pool)

@@ -380,6 +380,22 @@ class ManagerPool:
         # Reduce the set to the user's constraints.
         selected_ids = [mid for mid in unique(keep) if mid not in drop]
 
+        # Bind the version-detection probes to the user's --timeout before any can
+        # fire, so a wedged binary cannot outlast the cap during detection the way
+        # it could when the timeout was applied only to the operation loop below.
+        # Probes fire eagerly in the parallel warm-up round right after, or lazily
+        # at rendering time for the callers keeping unavailable managers (`mpm
+        # managers` builds its version column from the yielded instances), so the
+        # binding must precede the ``drop_not_found`` branch. Only timeout is
+        # pre-applied: the rest of extra_options (notably dry_run, which would turn
+        # detection into a no-op simulation) must wait for the loop. A per-manager
+        # [mpm.managers.<id>] timeout override keeps precedence, just as it does in
+        # the loop.
+        if "timeout" in extra_options:
+            for manager_id in selected_ids:
+                if "timeout" not in self.overridden_fields.get(manager_id, set()):
+                    self.register[manager_id].timeout = extra_options["timeout"]
+
         # Probe every candidate's availability (its --version detection) up front
         # and in parallel, so the sequential string of probes below becomes a single
         # round capped at the slowest manager. This shaves startup latency off any
@@ -392,17 +408,6 @@ class ManagerPool:
                 if not implements_operation
                 or implements(self.register[manager_id], implements_operation)
             ]
-            # Bind the version-detection probes to the user's --timeout before they
-            # run, so a wedged binary cannot outlast the cap during detection the way
-            # it could when the timeout was applied only to the operation below. Only
-            # timeout is pre-applied: the rest of extra_options (notably dry_run, which
-            # would turn detection into a no-op simulation) must wait for the loop. A
-            # per-manager [mpm.managers.<id>] timeout override keeps precedence, just
-            # as it does in the loop.
-            if "timeout" in extra_options:
-                for manager in candidates:
-                    if "timeout" not in self.overridden_fields.get(manager.id, set()):
-                        manager.timeout = extra_options["timeout"]
             warm_availability(candidates)
 
         # Deduplicate managers IDs while preserving order, then remove excluded

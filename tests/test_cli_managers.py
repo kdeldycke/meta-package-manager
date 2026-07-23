@@ -102,3 +102,19 @@ class TestManagers(CLISubCommandTests, CLITableTests):
                 assert isinstance(info["version"], str)
 
             assert info["id"] == manager_id
+
+
+def test_managers_stamps_global_timeout(invoke):
+    """The version probes behind the table's detection columns fire lazily at
+    rendering time, after selection, so the ``managers`` subcommand must forward
+    the global ``--timeout`` for the pool to bind it on each selected instance.
+    An unstamped instance falls back to the 120-second read-only default,
+    letting a wedged binary hold its table row for that long.
+    """
+    original = pool["pip"].timeout
+    try:
+        result = invoke("--timeout", "987", "managers")
+        assert result.exit_code == 0
+        assert pool["pip"].timeout == 987
+    finally:
+        pool["pip"].timeout = original

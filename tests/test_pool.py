@@ -277,6 +277,38 @@ def test_select_managers(kwargs, expected):
     assert tuple(m.id for m in selection) == expected
 
 
+def test_select_managers_timeout_stamping():
+    """The user's ``--timeout`` lands on every selected manager even when
+    unavailable ones are kept (``mpm managers``), whose version probes fire
+    lazily at rendering time, after selection: an unstamped instance would fall
+    back to the read-only default and let a wedged binary hold each table row
+    for 120 seconds. A per-manager ``[mpm.managers.<id>]`` override keeps
+    precedence over the global option.
+    """
+    originals = {mid: pool[mid].timeout for mid in ("gem", "uv")}
+    try:
+        selection = pool._select_managers(
+            keep=("gem", "uv"),
+            drop_not_found=False,
+            timeout=987,
+        )
+        assert [manager.timeout for manager in selection] == [987, 987]
+
+        pool.overridden_fields.setdefault("gem", set()).add("timeout")
+        try:
+            selection = pool._select_managers(
+                keep=("gem", "uv"),
+                drop_not_found=False,
+                timeout=123,
+            )
+            assert [manager.timeout for manager in selection] == [987, 123]
+        finally:
+            pool.overridden_fields["gem"].discard("timeout")
+    finally:
+        for mid, value in originals.items():
+            pool[mid].timeout = value
+
+
 class _RecordingManager:
     """Stand-in whose ``available`` probe records the thread it ran on."""
 

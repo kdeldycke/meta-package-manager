@@ -756,6 +756,7 @@ def mpm(
             "description",
             "summary",
             "network",
+            "timeout",
         ),
         defaults=(
             all_managers,
@@ -765,6 +766,7 @@ def mpm(
             description,
             summary,
             network,
+            timeout,
         ),
     )()
 
@@ -812,6 +814,10 @@ def managers(ctx):
         # Keep managers whose CLI was not found, to show how mpm reacts to the
         # local platform.
         drop_not_found=False,
+        # The version probes feeding the table fire lazily at column-render time,
+        # after selection: pass the global --timeout so the pool binds it to them,
+        # or a wedged binary would hold each row at the read-only default cap.
+        timeout=ctx.obj.timeout,
     )
 
     # Machine-friendly data rendering.

@@ -189,9 +189,15 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.4.0 is the floor mpm targets, the first version shipping the
-  # subprocess-execution primitives meta_package_manager.execution now delegates
-  # to:
+  # click-extra 8.5.0 is the floor mpm targets. It renames the --show-params
+  # introspection flag to --params (the name the bug-report template, the
+  # documentation and the binary test plan now reference), ships run_cli's
+  # start_new_session mode (the manager invocation leads its own POSIX session
+  # and process group, so timeouts and Ctrl+C reap wedged grandchildren) and
+  # promotes print_table / render_table to Context methods reading
+  # --table-format and --sort-by from the shared meta.
+  # The 8.4.0 series brought the subprocess-execution primitives
+  # meta_package_manager.execution delegates to:
   #   - run_cli, the spawn/stream/timeout engine disclosing invocations at INFO
   #     and streaming their output live to DEBUG logs.
   #   - install_interrupt_handler / terminate_live_processes, the Ctrl+C child
@@ -210,8 +216,8 @@ dependencies = [
   # the split click_extra.highlight module, the ConfigValidator /
   # ValidationError import move to click_extra.config, print_table()'s
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
-  # default; 8.4.0 covers them all.
-  "click-extra>=8.4",
+  # default; 8.5.0 covers them all.
+  "click-extra>=8.5",
   # extra-platforms 13.1.0 adds the ChromeOS, Clear Linux, SliTaz and Source Mage
   # detections that the chromebrew, swupd, tazpkg and sorcery managers declare.
   "extra-platforms>=13.1",
@@ -372,6 +378,10 @@ packages.find.include = [ "meta_package_manager*" ]
 required-version = ">=0.11.23,<0.12"
 # Cooldown period.
 exclude-newer = "1 week"
+# Per-package overrides for freshly-published dependencies we want to pull in
+# before the global cooldown would normally let them through. Date format
+# uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
+exclude-newer-package = { click-extra = "2026-07-23T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

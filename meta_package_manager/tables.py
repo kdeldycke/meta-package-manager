@@ -234,17 +234,17 @@ def print_projected_table(
 
     Sorting stays on mpm's global ``--sort-by``: each header pairs its label
     with the sortable field the column carries, and click-extra's
-    :py:func:`~click_extra.table.print_table` resolves the selection per
-    table. A sort field whose column is projected out is simply skipped, and a
-    table carrying none of the selected fields keeps its original row order.
+    :py:meth:`~click_extra.context.Context.print_table` reads the selection
+    (with the ``--table-format`` one) from the shared context ``meta`` and
+    resolves it per table. A sort field whose column is projected out is simply
+    skipped, and a table carrying none of the selected fields keeps its
+    original row order.
     """
     selected = ctx.meta.get(COLUMNS) or tuple(default_ids or ())
     projected = select_columns(column_specs(columns), selected)
     sort_field = {spec.id: field for spec, field in columns}
     ids = tuple(spec.id for spec in projected)
-    # print_table renders through the table format resolved at group setup: a
-    # dynamic attribute mypy cannot see.
-    ctx.find_root().print_table(  # type: ignore[attr-defined]
+    ctx.print_table(
         [select_row(row, ids, ids) for row in rows],
         tuple((spec.label, sort_field[spec.id]) for spec in projected),
     )

@@ -284,7 +284,7 @@ stdout_contains = "<cargo>"
 # Globals introduced this cycle. `--man` exercises the roff renderer click-extra
 # 7.19 ships and its embedded data files; `--summary` replaces the old
 # `--stats`; `--accessible` swaps to the plain renderer; `--cooldown DURATION`
-# parses a duration string. The introspection flags `--show-params` and
+# parses a duration string. The introspection flags `--params` and
 # `--man` print and exit 0 without contacting any package manager.
 [[cases]]
 cli_parameters = "--man"
@@ -292,7 +292,7 @@ exit_code = 0
 stdout_contains = ".TH \"MPM\""
 
 [[cases]]
-cli_parameters = "--show-params"
+cli_parameters = "--params"
 skip_platforms = "windows"
 exit_code = 0
 strip_ansi = true

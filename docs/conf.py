@@ -250,7 +250,7 @@ html_js_files = ["table-crosshair.js"]
 
 # Opt into click_extra.sphinx's executable directives. Enables the ``click:run``
 # blocks in docs/cli-parameters.md and docs/configuration.md, which run mpm's CLI
-# at build time to render live --help and --show-params output. These directives
+# at build time to render live --help and --params output. These directives
 # execute Python during the build; mpm's own docs are the only trusted source, so
 # the opt-in stays scoped to this project.
 click_extra_enable_exec_directives = True

@@ -17,7 +17,7 @@ body:
         a single `--<manager_id>`/`--manager <manager_id>` option.
 
 
-        Once isolated to a specific manager, run `mpm --show-params` to make sure the CLI is run under a sane
+        Once isolated to a specific manager, run `mpm --params` to make sure the CLI is run under a sane
         configuration and environment.
 
 
@@ -62,9 +62,9 @@ body:
     id: mpm-config
     attributes:
       label: Meta Package Manager configuration
-      description: Provide the current configuration via `mpm --show-params`.
+      description: Provide the current configuration via `mpm --params`.
       render: shell-session
-      placeholder: mpm --show-params
+      placeholder: mpm --params
 
   - type: textarea
     id: package-manager-list

@@ -926,6 +926,11 @@ class CLIExecutor:
             that goes silent on a cold credential cache and may be blocked on a
             hidden password prompt (see
             :py:class:`~meta_package_manager.sudo._StallWatchdog`)
+          * detaching every other call into its own POSIX session and process
+            group, so a timeout or Ctrl+C reaps the whole process tree and a
+            wedged grandchild cannot linger as an orphan; the flagged call
+            above keeps the controlling terminal so its ``sudo`` prompt stays
+            answerable
           * removing ANSI escape codes from
             :py:attr:`subprocess.CompletedProcess.stdout` and
             :py:attr:`subprocess.CompletedProcess.stderr`
@@ -1028,6 +1033,16 @@ class CLIExecutor:
                             label=manager_id,
                             command_level=command_level,
                             windows_creation_flags=self.windows_creation_flags,
+                            # Detach the child into its own POSIX session and
+                            # process group, so timeout and Ctrl+C kill the
+                            # whole tree and a wedged grandchild (mas) cannot
+                            # linger as an orphan. The armed watchdog marks the
+                            # one call that may legitimately prompt: it keeps
+                            # the controlling terminal, or the internal sudo
+                            # could not reach /dev/tty. mpm's own escalations
+                            # run sudo --non-interactive and never prompt, so
+                            # they always detach. No-op on Windows.
+                            start_new_session=watchdog is None,
                             # The tee routes each streamed record through the
                             # armed watchdog before the root logger. ``None`` is
                             # run_cli's default, the untouched root-logger path.
@@ -1063,7 +1078,8 @@ class CLIExecutor:
             except subprocess.TimeoutExpired:
                 # The spinner was stopped by the `with` teardown as the exception
                 # propagated, so the warning below lands on a clean line. run_cli
-                # already killed the child (and its whole tree on Windows).
+                # already killed the child: its whole POSIX process group when
+                # detached into its own session, its whole tree on Windows.
                 self._cleanup_windows_processes()
                 msg = f"Timed out after {effective_timeout}s."
                 logging.warning(msg, extra={"label": manager_id})

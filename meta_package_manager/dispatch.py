@@ -23,38 +23,35 @@ the two spinner-wrapped fan-out primitives the CLI subcommands drive
 ({func}`collect_from_managers`, {func}`collect_per_package`) with their shared
 {func}`dispatch` engine, the backend-lock catalog that serializes conflicting
 managers ({data}`SHARED_LOCK_FAMILIES` and {func}`merge_into_lock_lanes`), and
-the shared `✓`/`✗` ledger ({class}`OperationTrail` plus the
-{func}`trail_line` atom) that the concurrent and sequential paths both report
-through.
+the manager-bound `✓`/`✗` ledger ({class}`OperationTrail`) that the
+concurrent and sequential paths both report through.
 
-The generic concurrency primitives live upstream in
+The generic layers live upstream in click-extra: the concurrency primitives in
 {mod}`click_extra.execution` (`run_jobs`/`run_lanes` driven by
-`mpm --jobs`); this module keeps what is package-manager policy: which
-managers must never overlap, how the trail narrates a batch, and when a batch
-collapses to a sequential pass.
+`mpm --jobs`) and the batch-reporting trail in {mod}`click_extra.spinner`
+({class}`~click_extra.spinner.OperationTrail` with its
+`trail_glyph`/`trail_line` atoms). This module keeps what is package-manager
+policy: which managers must never overlap, how the trail binds to the pool's
+`--progress` state, and when a batch collapses to a sequential pass.
 """
 
 from __future__ import annotations
 
 import logging
-import sys
-import threading
-import time
 from typing import Final
 
 from click.core import ParameterSource
-from click_extra import echo, get_current_context
+from click_extra import get_current_context
 from click_extra.context import JOBS
 from click_extra.execution import resolve_jobs, run_jobs, run_lanes
-from click_extra.spinner import Spinner
-from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
+from click_extra.spinner import OperationTrail as _OperationTrail
+from click_extra.theme import get_current_theme as theme
 
 from .execution import SPINNER_DELAY
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
-    from types import TracebackType
 
     from click import Context
     from typing_extensions import Self
@@ -150,16 +147,6 @@ def warm_availability(managers: Iterable[PackageManager]) -> None:
     list(run_jobs(lambda manager: manager.available, candidates, jobs=jobs))
 
 
-def trail_glyph(ok: bool) -> str:
-    """Return the themed `✓` or `✗` glyph for a trail line or finisher."""
-    return theme().success(OK_GLYPH) if ok else theme().error(KO_GLYPH)
-
-
-def trail_line(ok: bool, message: str) -> str:
-    """Format one `✓`/`✗` trail line: a status glyph followed by `message`."""
-    return f"{trail_glyph(ok)} {message}"
-
-
 def _state_failed(data: dict) -> bool:
     """Whether a manager's result fails its `✓`/`✗` trail line.
 
@@ -170,43 +157,36 @@ def _state_failed(data: dict) -> bool:
     return bool(data.get("errors") or data.get("failed"))
 
 
-class OperationTrail:
-    """A `✓`/`✗` progress trail and finisher for a batch of operations.
+class OperationTrail(_OperationTrail):
+    """{class}`click_extra.spinner.OperationTrail` bound to the manager pool.
 
-    The single report surface for every fan-out command, rendered one of two ways
-    depending on concurrency:
+    The upstream class owns the two renderings (sequential echoed lines, or one
+    aggregate spinner with buffered-then-streamed lines) and the interactive
+    gating; this subclass supplies mpm's policy around it:
 
-    - **sequential** (`jobs <= 1`): echo each outcome between the managers' own
-      per-call spinners, with no aggregate spinner. The ordering-bound state changers
-      (`install`/`remove`/`upgrade <packages>`/`restore`) drive this directly,
-      since they chain managers by priority (a hit in the first manager skips the
-      rest) and so cannot fan out; it is also every {func}`dispatch` fallback at
-      `mpm --jobs` `1` or `DEBUG` verbosity.
-    - **concurrent** (`jobs > 1`): suppress the per-manager spinners (which would
-      collide on stderr) and drive one aggregate spinner, buffering outcomes until it
-      first draws, then streaming the rest live.
+    - **Enablement follows `--progress`**, folded into each manager's
+      `progress` flag by the CLI (a TTY, no serialized output, not at `DEBUG`
+      verbosity): any enabled manager turns the trail on, auto-gated on an
+      interactive stderr.
+    - **A concurrent batch mutes the managers' own per-call spinners** (which
+      would collide on stderr) for the duration of the aggregate one.
+    - **`coverage` keeps the read-command semantics**: their result *table* is
+      the real output and each manager keeps its per-call spinner, so the
+      sequential rendering stays silent (upstream's `echo_sequential=False`).
 
-    Both are gated on `--progress` (folded into each manager's `progress`) plus an
-    interactive stderr, so pipes, CI, serialized and `DEBUG` runs stay silent. A read
-    command whose result *table* is the real output stays silent in sequential mode too
-    (`coverage=True`): the per-call spinners already narrate progress, so the trail
-    would be noise. The running `✓`/total tally is kept as outcomes land, so a caller
-    computes no counts of its own.
+    The ordering-bound sequential state changers (`install`'s priority search)
+    construct it bare; every {func}`dispatch` batch drives it as a context
+    manager.
 
-    Thread-safe: {meth}`mark` may be called from worker threads. Use it as a context
-    manager whenever it may run concurrently, to bound the aggregate spinner's life; a
-    purely sequential caller (`install`'s priority search) may construct it bare.
-
-    :param managers: the batch's managers, read for the `--progress` gate and (when
-        concurrent) to mute their per-call spinners.
+    :param managers: the batch's managers, read for the `--progress` gate and
+        (when concurrent) to mute their per-call spinners.
     :param label: present-tense verb for the running spinner ("Searching").
-    :param done_label: past-tense verb for the finisher ("Searched").
-    :param unit: the noun counted in the spinner and finisher ("managers", "packages").
+    :param unit: the noun counted in the spinner tally ("managers", "packages").
     :param total: how many outcomes are expected, for the `done/total` count.
     :param jobs: the worker count from {func}`effective_jobs`; `> 1` selects the
         concurrent rendering.
-    :param coverage: when set, a sequential run stays silent (the caller has another
-        output, its result table). Unused when concurrent.
+    :param coverage: when set, a sequential run stays silent (the caller has
+        another output, its result table). Unused when concurrent.
     """
 
     def __init__(
@@ -214,96 +194,30 @@ class OperationTrail:
         managers: Iterable[PackageManager],
         *,
         label: str = "",
-        done_label: str = "",
         unit: str = "",
         total: int = 0,
         jobs: int = 1,
         coverage: bool = False,
     ) -> None:
-        self.label = label
-        self.done_label = done_label
-        self.unit = unit
-        self.total = total
-        self.concurrent = jobs > 1
         self._managers = tuple(managers)
-        self._lock = threading.Lock()
-        self._done = 0
-        self._ok = 0
-        self._start = time.monotonic()
-        self._spinner: Spinner | None = None
-        self._buffer: list[str] = []
         progress = any(manager.progress for manager in self._managers)
-        # Sequential read commands stay silent: their result table is the output and
-        # each manager keeps its own per-call spinner, so the trail would be noise.
-        self._echo = (
-            progress and not self.concurrent and not coverage and sys.stderr.isatty()
+        super().__init__(
+            label=label,
+            unit=unit,
+            total=total,
+            jobs=jobs,
+            # Progress off forces full silence; on, the upstream TTY gate decides.
+            enabled=None if progress else False,
+            echo_sequential=not coverage,
+            delay=SPINNER_DELAY,
         )
-        # Concurrent: a single aggregate spinner stands in for the muted per-call ones.
-        self._enabled = None if progress else False
 
     def __enter__(self) -> Self:
+        # A single aggregate spinner stands in for the muted per-call ones.
         if self.concurrent:
             for manager in self._managers:
                 manager.progress = False
-            self._spinner = Spinner(
-                f"{self.label} 0/{self.total} {self.unit}",
-                delay=SPINNER_DELAY,
-                enabled=self._enabled,
-                timer=True,
-            )
-            self._spinner.__enter__()
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        if self._spinner is not None:
-            self._spinner.__exit__(exc_type, exc_val, exc_tb)
-            self._spinner = None
-
-    @property
-    def ok_count(self) -> int:
-        """How many marked outcomes have succeeded so far."""
-        return self._ok
-
-    def mark(self, ok: bool, message: str) -> None:
-        """Record one `✓`/`✗` outcome: tally it and render its trail line."""
-        with self._lock:
-            self._done += 1
-            if ok:
-                self._ok += 1
-            if self._spinner is not None:
-                self._buffer.append(trail_line(ok, message))
-                self._spinner.label = (
-                    f"{self.label} {self._done}/{self.total} {self.unit}"
-                )
-                self._flush()
-            elif self._echo:
-                echo(trail_line(ok, message), err=True)
-
-    def _flush(self) -> None:
-        # Caller holds the lock. Drain buffered lines once the spinner is drawing;
-        # before that, echo() would write unconditionally and leak into a pipe.
-        if self._spinner is None or not self._spinner.shown:
-            return
-        for text in self._buffer:
-            self._spinner.echo(text)
-        self._buffer.clear()
-
-    def finish(self, ok: bool, summary: str) -> None:
-        """Render the persistent `✓`/`✗` ``{summary}`` finisher."""
-        if self._spinner is not None:
-            with self._lock:
-                self._flush()
-            if self._spinner.shown:
-                self._spinner.label = summary
-                (self._spinner.ok if ok else self._spinner.fail)()
-        elif self._echo:
-            elapsed = time.monotonic() - self._start
-            echo(trail_line(ok, f"{summary} ({elapsed:.1f}s)"), err=True)
+        return super().__enter__()
 
 
 def dispatch(
@@ -372,7 +286,6 @@ def dispatch(
         with OperationTrail(
             managers,
             label=label,
-            done_label=done_label,
             unit=unit,
             total=total,
             jobs=jobs,

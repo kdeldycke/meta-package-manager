@@ -196,6 +196,10 @@ dependencies = [
   # and process group, so timeouts and Ctrl+C reap wedged grandchildren) and
   # promotes print_table / render_table to Context methods reading
   # --table-format and --sort-by from the shared meta.
+  # meta_package_manager.dispatch additionally rides click-extra git main for
+  # OperationTrail (the batch ✓/✗ trail upstreamed from mpm's dispatch layer):
+  # when the next click-extra release ships it, bump this floor accordingly
+  # while dropping the [tool.uv.sources] git override below.
   # The 8.4.0 series brought the subprocess-execution primitives
   # meta_package_manager.execution delegates to:
   #   - run_cli, the spawn/stream/timeout engine disclosing invocations at INFO

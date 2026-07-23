@@ -372,10 +372,6 @@ packages.find.include = [ "meta_package_manager*" ]
 required-version = ">=0.11.23,<0.12"
 # Cooldown period.
 exclude-newer = "1 week"
-# Per-package overrides for freshly-published dependencies we want to pull in
-# before the global cooldown would normally let them through. Date format
-# uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-07-17T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # Ship the test suite and the docs/CI files it reads in the sdist, so

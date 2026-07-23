@@ -64,6 +64,9 @@ class PKG(PackageManager):
     """FreeBSD's binary pkg frontend, fetching pre-compiled artifacts from the
     official FreeBSD repository.
 
+    Only root may modify the package database, so mutating operations escalate
+    through ``sudo`` by default, like the :py:class:`Ports` sibling.
+
     .. note::
         ``outdated`` parses ``pkg upgrade --dry-run`` rather than ``pkg version``,
         because only the dry-run names the target version each package would move
@@ -72,8 +75,10 @@ class PKG(PackageManager):
     .. caution::
         ``sync`` forces ``IGNORE_OSVERSION=yes``: a package built for a newer
         FreeBSD than the running kernel would otherwise trigger an interactive
-        confirmation that hangs the subprocess. Honoring that variable is also why
-        the version floor is ``1.11``.
+        confirmation that hangs the subprocess. It is passed as a ``-o``
+        command-line option rather than an environment variable, which sudo's
+        environment reset would strip from the escalated call. Support for that
+        setting is also why the version floor is ``1.11``.
     """
 
     name = "FreeBSD pkg"
@@ -82,8 +87,10 @@ class PKG(PackageManager):
 
     platforms = FREEBSD
 
+    default_sudo = True
+
     requirement = ">=1.11"
-    """1.11 is the first version to support ``IGNORE_OSVERSION`` environment variable.
+    """1.11 is the first version to support the ``IGNORE_OSVERSION`` setting.
 
     .. code-block:: shell-session
 
@@ -426,7 +433,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pkg --quiet install --yes dmg2img
+            $ sudo pkg --quiet install --yes dmg2img
             Updating FreeBSD repository catalogue...
             FreeBSD repository is up to date.
             All repositories are up to date.
@@ -440,16 +447,16 @@ class PKG(PackageManager):
             [1/1] Installing dmg2img-1.6.7...
             [1/1] Extracting dmg2img-1.6.7: 100%
         """
-        return self.run_cli("install", "--yes", package_id)
+        return self.run_cli("install", "--yes", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
         .. code-block:: shell-session
 
-            $ pkg --quiet upgrade --yes
+            $ sudo pkg --quiet upgrade --yes
         """
-        return self.build_cli("upgrade", "--yes")
+        return self.build_cli("upgrade", "--yes", sudo=True)
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -461,16 +468,16 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pkg --quiet upgrade --yes dmg2img
+            $ sudo pkg --quiet upgrade --yes dmg2img
         """
-        return self.build_cli("upgrade", "--yes", package_id)
+        return self.build_cli("upgrade", "--yes", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
         .. code-block:: shell-session
 
-            $ pkg --quiet delete --yes dmg2img
+            $ sudo pkg --quiet delete --yes dmg2img
             Checking integrity... done (0 conflicting)
             Deinstallation has been requested for the following 1 packages:
 
@@ -482,14 +489,14 @@ class PKG(PackageManager):
             [1/1] Deleting files for dmg2img-1.6.7: 100%
             pkg: Package database is busy while closing!
         """
-        return self.run_cli("delete", "--yes", package_id)
+        return self.run_cli("delete", "--yes", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
 
         .. code-block:: shell-session
 
-            $ IGNORE_OSVERSION=yes pkg --quiet update
+            $ sudo pkg --quiet -o IGNORE_OSVERSION=yes update
             Updating FreeBSD repository catalogue...
             Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
             Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
@@ -499,7 +506,7 @@ class PKG(PackageManager):
 
         The ``IGNORE_OSVERSION=yes`` prevents blocking update:
 
-        .. code-block:: shell-session
+        .. code-block:: console
 
             $ pkg --quiet update
             Updating FreeBSD repository catalogue...
@@ -512,28 +519,30 @@ class PKG(PackageManager):
             - running kernel: 1301000
             Ignore the mismatch and continue? [y/N]:
         """
-        self.run_cli("update", override_extra_env={"IGNORE_OSVERSION": "yes"})
+        # The -o command-line form survives sudo's environment reset, which would
+        # strip an IGNORE_OSVERSION passed as a plain environment variable.
+        self.run_cli("-o", "IGNORE_OSVERSION=yes", "update", sudo=True)
 
     def cleanup_orphan(self) -> None:
         """Remove every package installed as a dependency and no longer required.
 
         .. code-block:: shell-session
 
-            $ pkg --quiet autoremove --yes
+            $ sudo pkg --quiet autoremove --yes
             Checking integrity... done (0 conflicting)
             Nothing to do.
         """
-        self.run_cli("autoremove", "--yes")
+        self.run_cli("autoremove", "--yes", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Delete every cached package from the local cache directory.
 
         .. code-block:: shell-session
 
-            $ pkg --quiet clean --yes --all
+            $ sudo pkg --quiet clean --yes --all
             Nothing to do.
         """
-        self.run_cli("clean", "--yes", "--all")
+        self.run_cli("clean", "--yes", "--all", sudo=True)
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.

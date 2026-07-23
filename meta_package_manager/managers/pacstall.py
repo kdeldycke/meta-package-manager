@@ -40,6 +40,14 @@ class Pacstall(PackageManager):
     ``DISABLE_PROMPTS`` so output is uncolored and every call stays
     non-interactive.
 
+    pacstall self-escalates: every privileged subcommand re-execs the script
+    through ``sudo pacstall`` (its ``elevate()`` function), and its documented
+    invocation is unprefixed (``pacstall -I foo``). ``mpm`` therefore never
+    wraps it and marks it :py:attr:`internal_sudo
+    <meta_package_manager.execution.CLIExecutor.internal_sudo>` instead: a warm
+    ``sudo`` credential cache is kept alive for its mid-run re-exec, and the
+    hidden-prompt watchdog covers the cold-cache case.
+
     .. note::
         Listing installed packages is a two-step probe: piped ``--list`` prints
         bare names with no versions, so ``mpm`` follows each with a
@@ -54,6 +62,8 @@ class Pacstall(PackageManager):
     homepage_url = "https://pacstall.dev"
 
     platforms = LINUX_LIKE
+
+    internal_sudo = True
 
     requirement = ">=6.0.0"
 

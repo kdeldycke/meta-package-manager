@@ -43,8 +43,10 @@ class Gem(PackageManager):
 
         All operations target the default gem scope (controlled by ``GEM_HOME``).
         On system Ruby this means system-level gems, which may require elevated
-        privileges for write operations. Per-scope targeting (system vs user gems)
-        is tracked in `#1725
+        privileges for write operations: those carry dormant privileged markers,
+        so ``mpm --sudo`` or a ``[mpm.managers.gem] sudo = true`` override
+        escalates them, while nothing escalates by default. Per-scope targeting
+        (system vs user gems) is tracked in `#1725
         <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
 
     .. tip::
@@ -215,11 +217,14 @@ class Gem(PackageManager):
             Done installing documentation for (...) markdown after 19 seconds
             12 gems installed
         """
+        # Marked privileged so --sudo / `[mpm.managers.gem] sudo = true` can escalate
+        # system-Ruby installs; dormant by default (gem's default_sudo is False).
         return self.run_cli(
             "install",
             *self.post_args,
             package_id,
             auto_post_args=False,
+            sudo=True,
         )
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
@@ -233,6 +238,7 @@ class Gem(PackageManager):
             "update",
             *self.post_args,
             auto_post_args=False,
+            sudo=True,
         )
 
     @version_not_implemented
@@ -252,6 +258,7 @@ class Gem(PackageManager):
             *self.post_args,
             package_id,
             auto_post_args=False,
+            sudo=True,
         )
 
     def remove(self, package_id: str) -> str:
@@ -262,7 +269,7 @@ class Gem(PackageManager):
             $ gem uninstall left-pad --quiet
             Successfully uninstalled left-pad-1.1.0
         """
-        return self.run_cli("uninstall", package_id)
+        return self.run_cli("uninstall", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
@@ -290,7 +297,9 @@ class Gem(PackageManager):
                 for the /Library/Ruby/Gems/2.6.0 directory.
             Clean up complete
         """
-        self.run_cli("cleanup")
+        # The sample above shows the system-Ruby permission failure the dormant
+        # privileged marker addresses: --sudo / a config override escalates it.
+        self.run_cli("cleanup", sudo=True)
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.

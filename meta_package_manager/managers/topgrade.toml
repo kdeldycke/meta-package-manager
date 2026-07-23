@@ -27,6 +27,13 @@ name = "Topgrade"
 homepage_url = "https://github.com/topgrade-rs/topgrade"
 platforms = ["bsd", "linux_like", "macos", "all_windows"]
 cli_names = ["topgrade"]
+# topgrade self-escalates: it runs each privileged step through its own sudo (its
+# opt-in `pre_sudo`/`sudo_loop` settings pre-acquire and keep the credential), and
+# running topgrade itself as root draws a warning plus an interactive "Continue?"
+# prompt unless `allow_root = true`, then downgrades every step to run directly as
+# root. mpm therefore never wraps it: internal_sudo keeps a warm credential cache
+# alive for its mid-run sudo calls and arms the hidden-prompt watchdog.
+internal_sudo = true
 # Pinned to the 17.x series, which matches the topgrade revision the benchmark
 # page is calibrated against (see docs/benchmark.md).
 requirement = ">=17.0.0"

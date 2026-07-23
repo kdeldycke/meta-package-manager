@@ -45,9 +45,16 @@ class FWUPD(PackageManager):
 
     .. note::
         No ``search`` (firmware has no name catalog to query) and no ``remove``
-        (firmware cannot be uninstalled). Flashing runs as root and is forced
-        non-interactive: no confirmation prompt, no reboot check, no
-        device-selection prompt.
+        (firmware cannot be uninstalled). Flashing is forced non-interactive:
+        no confirmation prompt, no reboot check, no device-selection prompt.
+
+    .. note::
+        Escalation is polkit's job, so no operation is marked ``sudo``:
+        ``fwupdmgr`` is an unprivileged client handing requests to the ``fwupd``
+        daemon over D-Bus, which authorizes firmware writes through polkit, like
+        ``pkcon`` and ``flatpak``. Under a strict polkit policy, unattended
+        mutations need a rule permitting them without interactive
+        authentication.
     """
 
     name = "Linux fwupd"
@@ -55,8 +62,6 @@ class FWUPD(PackageManager):
     homepage_url = "https://fwupd.org"
 
     platforms = LINUX_LIKE
-
-    default_sudo = True
 
     requirement = ">=1.9.5"
     """Version `1.9.5 is the first supporting --json parameter for get-devices command
@@ -534,7 +539,7 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo fwupdmgr  --assume-yes --no-reboot-check --no-device-prompt install 362301da643102b9f38477387e2193e57abaa590
+            $ fwupdmgr --assume-yes --no-reboot-check --no-device-prompt install 362301da643102b9f38477387e2193e57abaa590
             WARNING: UEFI capsule updates not available or enabled in firmware setup
             See https://github.com/fwupd/fwupd/wiki/PluginFlag:capsules-unsupported for more information.
             0.	Cancel
@@ -545,7 +550,7 @@ class FWUPD(PackageManager):
             Scheduling…              [***************************************]
             Successfully installed firmware
 
-            $ sudo fwupdmgr --assume-yes --no-reboot-check --no-device-prompt install 362301da643102b9f38477387e2193e57abaa590 21
+            $ fwupdmgr --assume-yes --no-reboot-check --no-device-prompt install 362301da643102b9f38477387e2193e57abaa590 21
             WARNING: UEFI capsule updates not available or enabled in firmware setup
             See https://github.com/fwupd/fwupd/wiki/PluginFlag:capsules-unsupported for more information.
             Scheduling…              [***************************************]
@@ -553,16 +558,16 @@ class FWUPD(PackageManager):
         """
         # A None version is discarded by the args-flattening pipeline, so the
         # device ID and the release version each stay their own argv element.
-        return self.run_cli("install", package_id, version, sudo=True)
+        return self.run_cli("install", package_id, version)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
         .. code-block:: shell-session
 
-            $ sudo fwupdmgr --assume-yes --no-reboot-check --no-device-prompt update
+            $ fwupdmgr --assume-yes --no-reboot-check --no-device-prompt update
         """
-        return self.build_cli("update", sudo=True)
+        return self.build_cli("update")
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -574,13 +579,13 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo fwupdmgr --assume-yes --no-reboot-check --no-device-prompt update 362301da643102b9f38477387e2193e57abaa590
+            $ fwupdmgr --assume-yes --no-reboot-check --no-device-prompt update 362301da643102b9f38477387e2193e57abaa590
             WARNING: UEFI capsule updates not available or enabled in firmware setup
             See https://github.com/fwupd/fwupd/wiki/PluginFlag:capsules-unsupported for more information.
             Scheduling…              [ -                                     ]
             362301da643102b9f38477387e2193e57abaa590 is already scheduled to be updated
         """
-        return self.build_cli("update", package_id, sudo=True)
+        return self.build_cli("update", package_id)
 
     def sync(self) -> None:
         """Sync package metadata.

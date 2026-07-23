@@ -52,8 +52,10 @@ from .fake_manager import FakeManager
 
 def test_default_sudo_matches_system_managers():
     """Exactly the system package managers (classes, their subclasses and bundled
-    definitions alike) escalate by default; user-level managers and pkg (which has
-    no sudo markers) do not."""
+    definitions alike) escalate by default; user-level managers do not, the
+    dual-scope language managers (npm, pip, gem, cpan) keep their privileged
+    markers dormant, and the polkit-native daemon clients (flatpak, fwupd, pkcon)
+    never mark an operation at all."""
     escalating = {mid for mid, manager in pool.items() if type(manager).default_sudo}
     assert escalating == {
         "apk",
@@ -65,12 +67,14 @@ def test_default_sudo_matches_system_managers():
         "dnf5",
         "emerge",
         "eopkg",
-        "fwupd",
+        "macports",
         "pacman",
+        "pkg",
         "pkg-tools",
         "pkgin",
         "ports",
         "slapt-get",
+        "snap",
         "sorcery",
         "sun-tools",
         "swupd",
@@ -80,7 +84,18 @@ def test_default_sudo_matches_system_managers():
         "yum",
         "zypper",
     }
-    for mid in ("pkg", "brew", "cask", "npm", "pip", "cargo"):
+    for mid in (
+        "brew",
+        "cask",
+        "npm",
+        "pip",
+        "gem",
+        "cpan",
+        "cargo",
+        "flatpak",
+        "fwupd",
+        "pkcon",
+    ):
         assert pool[mid].default_sudo is False
 
 
@@ -88,7 +103,7 @@ def test_internal_sudo_matches_internal_escalators():
     """Exactly the managers whose CLI runs ``sudo`` itself mid-run are marked, and
     none of them escalates through mpm (an internal escalator is never wrapped)."""
     internal = {mid for mid, manager in pool.items() if type(manager).internal_sudo}
-    assert internal == {"cask", "fink", "pacaur", "paru", "yay"}
+    assert internal == {"cask", "fink", "pacaur", "pacstall", "paru", "topgrade", "yay"}
     for mid in sorted(internal):
         assert pool[mid].default_sudo is False
 

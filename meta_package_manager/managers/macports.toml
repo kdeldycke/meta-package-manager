@@ -17,6 +17,11 @@
 #     rows; the {extended_args} template maps mpm's `--extended` to `--description`
 #     and {exact_args} maps `--exact`, both sitting before the trailing
 #     `--line {query}`.
+#   - The standard MacPorts install owns /opt/local as root and `port` does not
+#     self-escalate: mutating operations fail with "Insufficient privileges" as a
+#     plain user, so they escalate through sudo by default (`sudo port install`,
+#     the invocation every MacPorts guide documents). A user-prefix (non-root)
+#     MacPorts build can opt out with `--no-sudo` or a `sudo = false` override.
 
 [mpm.managers.macports]
 name = "MacPorts"
@@ -24,6 +29,7 @@ homepage_url = "https://www.macports.org"
 platforms = ["macos"]
 cli_names = ["port"]
 cli_search_path = ["/opt/local/bin"]
+default_sudo = true
 requirement = ">=2.0.0"
 # `port version` prints "Version: 2.12.4".
 version_cli_options = ["version"]
@@ -45,23 +51,30 @@ regex = '^(?P<package_id>[^\t]+)\t(?P<latest_version>[^\t]+)\t[^\t]+\t.+$'
 
 [mpm.managers.macports.operations.install]
 args = ["install", "{package_id}"]
+sudo = true
 
 [mpm.managers.macports.operations.remove]
 args = ["uninstall", "{package_id}"]
+sudo = true
 
 [mpm.managers.macports.operations.upgrade_one]
 args = ["upgrade", "{package_id}"]
+sudo = true
 
 [mpm.managers.macports.operations.upgrade_all]
 args = ["upgrade", "outdated"]
+sudo = true
 
-# `port sync` refreshes the local ports tree from the remote repositories.
+# `port sync` refreshes the local ports tree from the remote repositories,
+# writing under root-owned /opt/local/var/macports.
 [mpm.managers.macports.operations.sync]
 args = ["sync"]
+sudo = true
 
 # Remove work directories, distfiles and logs for installed ports.
 [mpm.managers.macports.operations.cleanup_cache]
 args = ["clean", "--all", "installed"]
+sudo = true
 
 # `diagnose --quiet` checks for common problems and only prints errors, exiting
 # non-zero when any is found. Read-only, so no sudo.

@@ -34,8 +34,14 @@ class Snap(PackageManager):
     """Canonical's snap installs sandboxed, self-updating packages.
 
     snaps refresh themselves on a schedule, so ``upgrade`` merely forces a
-    ``snap refresh`` sooner. No operation is marked ``sudo``: the ``snapd``
-    daemon performs the privileged work.
+    ``snap refresh`` sooner. Mutating operations escalate through ``sudo`` by
+    default: the privileged work happens in the ``snapd`` daemon, but the daemon
+    refuses state changes from an unprivileged client (``snap install`` as a
+    plain user is denied with a hint to retry with ``sudo``), which is why the
+    Snap store documents ``sudo snap install`` as the canonical invocation. A
+    host authenticated against the store with ``snap login`` (or granted a
+    polkit rule) can drop the wrap with ``--no-sudo`` or a
+    ``[mpm.managers.snap] sudo = false`` override.
 
     .. note::
         snap localizes and colorizes its table headers with no terminal
@@ -54,6 +60,8 @@ class Snap(PackageManager):
     homepage_url = "https://snapcraft.io"
 
     platforms = UNIX_WITHOUT_MACOS
+
+    default_sudo = True
 
     requirement = ">=2.0.0"
 
@@ -157,18 +165,18 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            $ snap install standard-notes --color=never
+            $ sudo snap install standard-notes --color=never
         """
-        return self.run_cli("install", package_id)
+        return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
         .. code-block:: shell-session
 
-            $ snap refresh --color=never
+            $ sudo snap refresh --color=never
         """
-        return self.build_cli("refresh")
+        return self.build_cli("refresh", sudo=True)
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -180,15 +188,15 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            $ snap refresh standard-notes --color=never
+            $ sudo snap refresh standard-notes --color=never
         """
-        return self.build_cli("refresh", package_id)
+        return self.build_cli("refresh", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
         .. code-block:: shell-session
 
-            $ snap remove standard-notes --color=never
+            $ sudo snap remove standard-notes --color=never
         """
-        return self.run_cli("remove", package_id)
+        return self.run_cli("remove", package_id, sudo=True)

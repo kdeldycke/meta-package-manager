@@ -260,6 +260,7 @@ OPERATION_TIMEOUTS: Final[dict[str, int]] = {
     "version": READ_ONLY_TIMEOUT,
     "installed": READ_ONLY_TIMEOUT,
     "outdated": READ_ONLY_TIMEOUT,
+    "orphans": READ_ONLY_TIMEOUT,
     "search": READ_ONLY_TIMEOUT,
     "install": MUTATING_TIMEOUT,
     "upgrade": MUTATING_TIMEOUT,
@@ -267,6 +268,9 @@ OPERATION_TIMEOUTS: Final[dict[str, int]] = {
     "remove": MUTATING_TIMEOUT,
     "sync": MUTATING_TIMEOUT,
     "cleanup": MUTATING_TIMEOUT,
+    # Read-only by contract, but deep integrity scans (`pkg check --checksums`)
+    # outlast the read-only cap, and a timeout kill would misreport as ill health.
+    "doctor": MUTATING_TIMEOUT,
 }
 """Per-operation timeout defaults, applied only when the user has set no explicit
 ``--timeout`` (or per-manager ``timeout`` override).

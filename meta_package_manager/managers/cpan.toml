@@ -8,8 +8,9 @@
 # printed on the same line.
 #
 # Installs may require sudo when using the system Perl; local::lib gives user-local
-# installs instead. cpan cannot uninstall a module, so no remove operation is
-# declared.
+# installs instead. The write operations carry dormant privileged markers: `--sudo`
+# or a `sudo = true` override escalates them, while nothing escalates by default.
+# cpan cannot uninstall a module, so no remove operation is declared.
 
 [mpm.managers.cpan]
 name = "Perl CPAN"
@@ -41,12 +42,15 @@ regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+(?P<latest_version>
 # A bare module name installs it.
 [mpm.managers.cpan.operations.install]
 args = ["{package_id}"]
+sudo = true
 
 [mpm.managers.cpan.operations.upgrade_one]
 args = ["-i", "{package_id}"]
+sudo = true
 
 [mpm.managers.cpan.operations.upgrade_all]
 args = ["-u"]
+sudo = true
 
 # Output samples locking the version probe and the declared parsers, derived
 # from the upstream tool's own source code or documentation. Consumed by

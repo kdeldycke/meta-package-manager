@@ -45,6 +45,13 @@ class Flatpak(PackageManager):
         tracked in `#1725
         <https://github.com/kdeldycke/meta-package-manager/issues/1725>`__.
 
+    .. note::
+        Escalation is polkit's job, so no operation is marked ``sudo``: flatpak
+        hands system-scope mutations to its privileged system helper over D-Bus,
+        which authorizes them through polkit (Flathub documents plain
+        ``flatpak install``). Under a strict polkit policy, unattended mutations
+        need a rule permitting them without interactive authentication.
+
     .. caution::
         ``outdated`` reads each pending update's latest version from
         ``remote-ls --updates``, then runs one ``flatpak info`` per package to

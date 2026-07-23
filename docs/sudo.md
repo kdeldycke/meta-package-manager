@@ -22,7 +22,7 @@ Password:
 
 ## Escalation policy
 
-Which managers escalate is decided per manager. System package managers (`apt`, `dnf`, `pacman`, `zypper`, `xbps`, and the like) run their state-changing operations through `sudo` by default; user-level managers (`brew`, `npm`, `pip`, ...) do not.
+Which managers escalate is decided per manager. System package managers (`apt`, `dnf`, `pacman`, `zypper`, `xbps`, `macports`, `snap`, and the like) run their state-changing operations through `sudo` by default; user-level managers (`brew`, `npm`, `pip`, ...) do not, and daemon-backed managers authorizing through polkit (`flatpak`, `fwupd`, `pkcon`) need no wrap at all.
 
 ## Controlling escalation
 
@@ -54,7 +54,7 @@ Off a terminal (a pipe, CI, the menubar plugin), `mpm` cannot prompt: a warning 
 
 ## Managers escalating internally
 
-Some managers run `sudo` from inside their own commands: on macOS, `brew` escalates while installing a cask with a privileged payload (the `macfuse` example above), and `fink` re-execs its root commands through `sudo`. `mpm` never wraps these managers in `sudo` (`brew` even refuses to run as root), and most of their runs never escalate, so a stock `mpm upgrade` does not pre-authenticate for them: prompting on every run would be worse than the rare mid-run prompt it avoids.
+Some managers run `sudo` from inside their own commands: on macOS, `brew` escalates while installing a cask with a privileged payload (the `macfuse` example above) and `fink` re-execs its root commands through `sudo`, while on Linux the AUR helpers call `sudo pacman` for their privileged phases, `pacstall` re-execs itself through `sudo pacstall`, and `topgrade` drives each privileged step through its own per-step `sudo`. `mpm` never wraps these managers in `sudo` (`brew` even refuses to run as root, and `topgrade` warns and prompts when launched as root), and most of their runs never escalate, so a stock `mpm upgrade` does not pre-authenticate for them: prompting on every run would be worse than the rare mid-run prompt it avoids.
 
 Two mechanisms cover that rare prompt instead. When the up-front probe finds the credential cache already warm, the keepalive is armed for internal escalators too, so their mid-run `sudo` spends the cache silently. And on a cold cache, a mutating call of such a manager that stays silent for 30 seconds on a terminal draws a warning, while there is still time to answer the prompt:
 
@@ -71,7 +71,7 @@ For a guaranteed one-prompt experience, opt the manager into up-front authentica
 sudo = true # Authenticate up front before any privileged cask payload.
 ```
 
-or scope the global flag to the manager: `mpm --cask --sudo upgrade`. Prefer these to a bare `mpm --sudo upgrade`, which is broader than it looks: the global flag covers every selected manager, and also activates dormant privileged markers like `pip`'s and `npm`'s, wrapping their global installs in `sudo`.
+or scope the global flag to the manager: `mpm --cask --sudo upgrade`. Prefer these to a bare `mpm --sudo upgrade`, which is broader than it looks: the global flag covers every selected manager, and also activates dormant privileged markers like those of `pip`, `npm`, `gem` and `cpan`, wrapping their system-scope installs in `sudo`.
 
 ## Running `mpm` itself as root
 

@@ -147,13 +147,17 @@ $ zb install meta-package-manager
 `````
 
 `````{tab-item} MacPorts
-The port is pending review at [macports/macports-ports#33609](https://github.com/macports/macports-ports/pull/33609), which you can help move forward by showing your support. Once merged, installation will be a one-liner:
+Meta Package Manager is [available on MacPorts](https://ports.macports.org/port/meta-package-manager/), so you just need to:
 
 ```{code-block} shell-session
 $ sudo port install meta-package-manager
 ```
 
-Until then, build it from [the Portfile overlay maintained in the repository](packaging.md#macports).
+```{tip}
+The port [landed in MacPorts on 2026-07-22](https://github.com/macports/macports-ports/pull/33609). If `port install` cannot find it yet, refresh your ports tree first with `sudo port sync`.
+```
+
+You can also install it from [the Portfile overlay maintained in the repository](packaging.md#macports).
 `````
 
 `````{tab-item} Scoop
@@ -362,6 +366,10 @@ $ mpm --brew install meta-package-manager
 
 ```{code-block} shell-session
 $ mpm --guix install meta-package-manager
+```
+
+```{code-block} shell-session
+$ sudo mpm --macports install meta-package-manager
 ```
 
 ```{code-block} shell-session

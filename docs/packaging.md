@@ -80,7 +80,7 @@ Where `mpm` stands on each distribution channel whose packaging is maintained fr
 | Arch Linux (AUR) | [community-maintained](https://aur.archlinux.org/packages/meta-package-manager)                                        | released                                                                         | `pacaur`, `paru`, `yay` | n/a          |
 | Chocolatey       | [`packaging/choco/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager) | [community repository rejected the submission](binaries.md#impact-on-chocolatey) | `choco-source`          | manual       |
 | Guix             | [`packaging/guix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix)                        | [landed upstream on 2026-06-28](https://codeberg.org/guix/guix/pulls/8047)       | `guix-source`           | automated    |
-| MacPorts         | [`packaging/macports/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports)                | [pending review](https://github.com/macports/macports-ports/pull/33609)          | `macports-source`       | manual       |
+| MacPorts         | [`packaging/macports/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports)                | [landed upstream on 2026-07-22](https://github.com/macports/macports-ports/pull/33609) | `macports-source`       | manual       |
 | Nix              | [`packaging/nix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix)                          | [pending review](https://github.com/NixOS/nixpkgs/pull/506145)                   | `nix-source`            | automated    |
 | Void Linux       | [`void-packages` fork](https://github.com/kdeldycke/void-packages/tree/mpm)                                            | [pending review](https://github.com/void-linux/void-packages/pull/60532)         | —                       | manual       |
 
@@ -133,6 +133,8 @@ $ guix install --load-path=./meta-package-manager/packaging/guix meta-package-ma
 
 ### MacPorts
 
+`mpm` [landed in MacPorts](https://ports.macports.org/port/meta-package-manager/) on 2026-07-22, along with [its full dependency closure](https://github.com/macports/macports-ports/pull/33609): 5 new dependency ports (`py-click-extra`, `py-cloup`, `py-deepmerge`, `py-extra-platforms`, `py-packageurl-python`) and a `py-boltons` version bump. The in-repo overlay is now only needed to stage version bumps ahead of their upstream submission.
+
 Build and install from [the Portfile overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports):
 
 ```{code-block} shell-session
@@ -151,19 +153,6 @@ Finally:
 ```{code-block} shell-session
 $ sudo port install meta-package-manager
 ```
-
-The overlay carries the 5 dependency ports missing from the official tree (`py-click-extra`, `py-cloup`, `py-deepmerge`, `py-extra-platforms`, `py-packageurl-python`), plus a `py-boltons` version bump.
-
-````{admonition} Help land it in MacPorts
-:class: important
-The port is pending review at [macports/macports-ports#33609](https://github.com/macports/macports-ports/pull/33609). Once merged, installation will be a one-liner:
-
-```{code-block} shell-session
-$ sudo port install meta-package-manager
-```
-
-You can help move it forward by showing your support on [the pull request](https://github.com/macports/macports-ports/pull/33609).
-````
 
 ### Nix
 

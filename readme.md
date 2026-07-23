@@ -248,6 +248,12 @@ All [installation methods](https://kdeldycke.github.io/meta-package-manager/inst
 $ brew install meta-package-manager
 ```
 
+It is also [available on MacPorts](https://ports.macports.org/port/meta-package-manager/):
+
+```shell-session
+$ sudo port install meta-package-manager
+```
+
 ### Windows
 
 `mpm` is available in the `main` repository of [Scoop](https://scoop.sh), so you just need to:

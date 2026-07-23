@@ -34,8 +34,8 @@ concurrency:
 # install the released artifact from external feeds (PyPI, Homebrew, Scoop,
 # GitHub Releases, etc.). The `*-source` jobs install from the in-repo
 # packaging specs (packaging/alpine/, packaging/choco/, packaging/guix/,
-# packaging/nix/) and validate the build instructions documented in
-# docs/packaging.md.
+# packaging/macports/, packaging/nix/) and validate the build instructions
+# documented in docs/packaging.md.
 #
 # Keep in sync with the "Installation methods" tabs in docs/install.md and
 # the per-channel catalog and build instructions in docs/packaging.md.
@@ -244,13 +244,54 @@ jobs:
       - run: guix install --load-path=./packaging/guix meta-package-manager
       - run: mpm --version
 
+  # https://ports.macports.org/port/meta-package-manager/
+  # https://github.com/macports/macports-ports/blob/master/sysutils/meta-package-manager/Portfile
+  # meta-package-manager and its dependency ports landed in the official
+  # macports-ports tree on 2026-07-22 via
+  # https://github.com/macports/macports-ports/pull/33609. `port sync`
+  # refreshes the ports tree bundled with the installer pkg so the
+  # recently-landed ports resolve. Keep it continue-on-error until the
+  # buildbot binary archives for the new ports are proven to be picked up
+  # across the macOS matrix: without them, the install falls back to a source
+  # build (~2 hours on macos-26, see macports-source below).
+  macports:
+    name: "⁉️ macports (${{ matrix.os }})"
+    continue-on-error: true
+    strategy:
+      matrix:
+        os:
+          - macos-15-intel
+          - macos-26
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install MacPorts
+        run: |
+          MACOS_MAJOR="$(sw_vers -productVersion | cut -d . -f 1)"
+          gh release download \
+            --repo macports/macports-base \
+            --pattern "MacPorts-*-${MACOS_MAJOR}-*.pkg" \
+            --output macports.pkg
+          sudo installer -pkg macports.pkg -target /
+          echo "/opt/local/bin" >> "$GITHUB_PATH"
+          echo "/opt/local/sbin" >> "$GITHUB_PATH"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Sync official ports tree
+        run: sudo port -v sync
+      - name: Install mpm
+        run: sudo port -v install meta-package-manager
+      - run: mpm --version
+
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports
   # Build and install from the in-repo Portfile overlay: a local ports tree
-  # providing meta-package-manager plus the dependency ports missing from the
-  # official macports-ports tree (py-click-extra, py-cloup, py-deepmerge,
-  # py-extra-platforms, py-packageurl-python) and a py-boltons version bump
-  # (the official port is stuck below mpm's boltons >= 25 floor). Pending
-  # review at https://github.com/macports/macports-ports/pull/33609.
+  # providing meta-package-manager plus its dependency ports (py-click-extra,
+  # py-cloup, py-deepmerge, py-extra-platforms, py-packageurl-python) and a
+  # py-boltons version bump (the official port was stuck below mpm's
+  # boltons >= 25 floor). All of them landed in the official macports-ports
+  # tree via https://github.com/macports/macports-ports/pull/33609; the
+  # overlay is kept to validate the documented build instructions and to
+  # stage version bumps ahead of their upstream submission. Listed first in
+  # sources.conf, it shadows the official tree for the ports it carries.
   # MacPorts installer pkgs are built per macOS version, so the asset is
   # resolved from the runner's major version (15 -> Sequoia, 26 -> Tahoe).
   # The overlay is served from /Users/Shared because the unprivileged macports

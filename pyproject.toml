@@ -378,6 +378,15 @@ exclude-newer = "1 week"
 exclude-newer-package = { click-extra = "2026-07-17T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
+# source-include does not honor .gitignore, so prune the build output and caches
+# it would otherwise sweep in. source-exclude wins over source-include and also
+# applies to the wheel, dropping the stray .DS_Store files from both artifacts.
+build-backend.source-exclude = [
+  "**/.DS_Store",
+  "**/__pycache__",
+  "docs/_build",
+  "tests/.coverage",
+]
 # Ship the test suite and the docs/CI files it reads in the sdist, so
 # distribution packagers can build and test straight from the PyPI sdist instead
 # of fetching a GitHub tag tarball. source-include feeds the sdist only: the
@@ -389,15 +398,6 @@ build-backend.source-include = [
   "changelog.md",
   "docs/**",
   "tests/**",
-]
-# source-include does not honor .gitignore, so prune the build output and caches
-# it would otherwise sweep in. source-exclude wins over source-include and also
-# applies to the wheel, dropping the stray .DS_Store files from both artifacts.
-build-backend.source-exclude = [
-  "**/.DS_Store",
-  "**/__pycache__",
-  "docs/_build",
-  "tests/.coverage",
 ]
 
 [tool.nuitka]

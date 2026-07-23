@@ -28,7 +28,7 @@ concurrency:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@7336863d9f3f5faea26f887211f3f745dc963fb5 # v7.2.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@2b89c62f0953d8ef59d0d023085a9323f6c32f1d # v7.3.0
 
   publish-pypi:
     name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
@@ -53,12 +53,12 @@ jobs:
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@7336863d9f3f5faea26f887211f3f745dc963fb5 # v7.2.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@2b89c62f0953d8ef59d0d023085a9323f6c32f1d # v7.3.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@7336863d9f3f5faea26f887211f3f745dc963fb5 # v7.2.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@2b89c62f0953d8ef59d0d023085a9323f6c32f1d # v7.3.0
     needs: build
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

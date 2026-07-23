@@ -2272,9 +2272,7 @@ def cleanup(ctx, orphans, cache, repair):
         # manager's own dispatch (`✓ brew (cache)`).
         steps = _cleanup_steps(manager, selected, explicit_orphans)
         categories = ", ".join(category for category, _step in steps)
-        logging.log(
-            announce, f"Cleanup ({categories})...", extra={"label": manager.id}
-        )
+        logging.log(announce, f"Cleanup ({categories})...", extra={"label": manager.id})
         before = len(manager.cli_errors)
         for _category, step in steps:
             step()

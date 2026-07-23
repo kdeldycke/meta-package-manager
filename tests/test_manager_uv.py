@@ -31,16 +31,9 @@ from meta_package_manager.pool import pool
 
 
 @pytest.fixture
-def capture_uv_run_cli(monkeypatch):
+def capture_uv_run_cli(capture_run_cli):
     """Record the `uv` manager's `run_cli` invocations instead of executing."""
-    manager = pool["uv"]
-    calls: list[tuple[str, ...]] = []
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *args, **kwargs: calls.append(args) or "",
-    )
-    return calls
+    return capture_run_cli(pool["uv"])
 
 
 def test_cleanup_cache_skipped_under_uv(monkeypatch, caplog, capture_uv_run_cli):

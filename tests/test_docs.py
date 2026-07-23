@@ -38,7 +38,7 @@ from meta_package_manager.labels import (
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 
-from .conftest import all_managers, tomllib
+from .conftest import PROJECT_ROOT, all_managers, tomllib
 
 
 def _load_docs_update():
@@ -70,8 +70,6 @@ Covers:
 These tests are mainly there to remind us keep extra stuff in sync on new
 platform or manager addition.
 """
-
-PROJECT_ROOT = Path(__file__).parent.parent
 
 
 def test_unique_local_group_ids():

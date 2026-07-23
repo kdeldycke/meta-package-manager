@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import pytest
 
-from meta_package_manager.capabilities import Operations
 from meta_package_manager.tables import OUTDATED_COLUMNS
 
 from .test_cli import (
@@ -40,18 +39,6 @@ BAR_PLUGIN_KEYWORDS = frozenset({"shell"}.union({f"param{i}" for i in range(1, 1
 
 class TestOutdated(CLISubCommandTests, CLITableTests, CLIQueryTests):
     columns_registry = OUTDATED_COLUMNS
-
-    @staticmethod
-    def evaluate_signals(mid, stdout, stderr):
-        yield from (
-            # The glued `:<mid>:` label form matches whatever level the
-            # message lands at: demoted to DEBUG for implicit selection
-            # (`mpm outdated`), INFO for explicit ones.
-            f":{mid}: Does not implement {Operations.outdated}" in stderr,
-            f":{mid}: Skipped:" in stderr,
-            # Stats line at the end of output.
-            f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
-        )
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--table-format", "json", subcmd)

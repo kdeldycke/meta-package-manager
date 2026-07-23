@@ -51,11 +51,60 @@ from .version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Iterable, Iterator, Mapping
     from pathlib import Path
     from typing import Any
 
     from .version import TokenizedString
+
+
+JSON_FIELD_SELECTOR_REGEX = re.compile(
+    r"^(?P<key>[^\[\]]+?)(?:\[(?P<index>\d+)\])?$",
+)
+"""Parse a JSON field selector: a key name with an optional `[N]` list index.
+
+A bare `version` maps the package field to the item's `version` key. A
+`versions[0]` selector additionally picks one element out of a list-valued key
+(zerobrew reports each package's installed versions as an array). Anything more
+nested stays out on purpose: a query needing real JSON traversal is better served
+by a custom parser. Shared by {meth}`PackageManager.parse_json_items` and the
+declarative-manager validation in {mod}`meta_package_manager.definitions`.
+"""
+
+
+def _navigate_json(data: object, list_path: str | None) -> list:
+    """Walk `list_path` into a parsed JSON document and return the package array.
+
+    Returns an empty list when the path does not resolve to a list, so a malformed or
+    unexpected payload yields no packages rather than raising.
+    """
+    if list_path:
+        for key in list_path.split("."):
+            if not isinstance(data, dict):
+                return []
+            data = data.get(key)
+    return data if isinstance(data, list) else []
+
+
+def _json_field(item: dict, selector: str) -> Any:
+    """Resolve a field `selector` against one JSON package `item`.
+
+    A bare key returns the key's value; a `key[N]` selector picks the `N`-th
+    element out of a list-valued key (see {data}`JSON_FIELD_SELECTOR_REGEX`).
+    Anything that does not resolve — missing key, non-list value under an indexed
+    selector, out-of-range index — returns `None`, so an unexpected payload
+    yields incomplete packages rather than raising.
+    """
+    match = JSON_FIELD_SELECTOR_REGEX.match(selector)
+    assert match is not None, f"unvalidated selector {selector!r}"
+    value = item.get(match.group("key"))
+    index = match.group("index")
+    if index is None:
+        return value
+    if not isinstance(value, list):
+        return None
+    position = int(index)
+    return value[position] if position < len(value) else None
 
 
 class ManagerScope(Enum):
@@ -271,6 +320,78 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             )
             return None
 
+    def parse_regex_lines(
+        self,
+        pattern: re.Pattern[str],
+        output: str,
+    ) -> Iterator[Package]:
+        """Yield one package per line of `output` matching `pattern`.
+
+        The shared engine of every line-oriented text listing, for built-in
+        managers and config-defined operations alike (see
+        {func}`meta_package_manager.definitions._make_query_property`). The
+        pattern is searched in each line, and its named groups map straight onto
+        the package fields: `package_id` (required: a match without one is
+        skipped), `installed_version`, `latest_version`, `name`,
+        `description` and `arch`, empty and absent groups being dropped.
+
+        Managers whose listings need per-line post-processing (multi-version
+        reduction, name/version splitting, cross-query joins) keep their own
+        loop and this stays their reference semantics.
+        """
+        for line in output.splitlines():
+            match = pattern.search(line)
+            if not match:
+                continue
+            groups = match.groupdict()
+            package_id = groups.pop("package_id", None)
+            if not package_id:
+                continue
+            yield self.package(
+                id=package_id,
+                **{field: value for field, value in groups.items() if value},
+            )
+
+    def parse_json_items(
+        self,
+        output: str,
+        *,
+        list_path: str | None = None,
+        fields: Mapping[str, str],
+    ) -> Iterator[Package]:
+        """Yield one package per item of a JSON listing.
+
+        The shared engine of every flat-JSON query, for built-in managers and
+        config-defined operations alike (see
+        {func}`meta_package_manager.definitions._make_query_property`). The
+        document is parsed through {meth}`parse_json` (so a malformed payload
+        warns and yields nothing), the package array is reached by walking the
+        dotted `list_path` (`None` when the document is itself the array), and
+        `fields` maps each package field (`package_id`, required, plus any of
+        `installed_version`, `latest_version`, `name`, `description`,
+        `arch`) to its JSON selector: a key name with an optional `[N]` list
+        index, like `version` or `versions[0]` (see
+        {data}`JSON_FIELD_SELECTOR_REGEX`). Items missing their `package_id`
+        and fields resolving to `None` are dropped.
+        """
+        data = self.parse_json(output)
+        if data is None:
+            return
+        for item in _navigate_json(data, list_path):
+            if not isinstance(item, dict):
+                continue
+            raw_id = _json_field(item, fields["package_id"])
+            if not raw_id:
+                continue
+            kwargs = {"id": str(raw_id)}
+            for field, selector in fields.items():
+                if field == "package_id":
+                    continue
+                value = _json_field(item, selector)
+                if value is not None:
+                    kwargs[field] = str(value)
+            yield self.package(**kwargs)
+
     def package(self, **kwargs) -> Package:
         """Instantiate a `Package` object from the manager.
 
@@ -338,7 +459,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             f"fresh? {self.fresh}.",
             extra={"label": self.id},
         )
-        return bool(self.supported and self.cli_path and self.executable and self.fresh)
+        # Derived from unavailable_reason so the two can never drift: the reason
+        # enumerates the same conditions, in the same priority order.
+        return self.unavailable_reason is None
 
     @property
     def unavailable_reason(self) -> str | None:
@@ -498,16 +621,6 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
-    @classmethod
-    def query_parts(cls, query: str) -> set[str]:
-        """Returns a set of all contiguous alphanumeric string segments.
-
-        Thin delegator to
-        {meth}`meta_package_manager.package.Package.query_parts`, the canonical
-        tokenizer, kept here as a convenience for manager-side search code.
-        """
-        return Package.query_parts(query)
-
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Search packages available for install.
 
@@ -606,8 +719,14 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                     "upgrade_all_cli operation not implemented. "
                     "Call single upgrade operation on each package, one-by-one.",
                 )
+                # The listing is a read-only query, so it runs under the
+                # `outdated` stamp: it resolves the short read-only timeout, and
+                # `mpm --plan` executes it for real instead of capturing it, so
+                # the plan lists the actual per-package upgrade commands.
+                with self.acting_as("outdated"):
+                    outdated_packages = tuple(self.refiltered_outdated)
                 logs = []
-                for package in self.refiltered_outdated:
+                for package in outdated_packages:
                     output = self.upgrade(package.id)
                     if output:
                         logs.append(output)
@@ -717,8 +836,12 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         previous: frozenset[str] = frozenset()
         while True:
             # Raises NotImplementedError right here when the manager has no orphans
-            # query, keeping the operation's optional contract.
-            orphan_ids = [package.id for package in self.orphans]
+            # query, keeping the operation's optional contract. The listing is a
+            # read-only query, so it runs under the `orphans` stamp: it resolves
+            # the short read-only timeout, and `mpm --plan` executes it for real
+            # instead of capturing it, so the plan lists the actual removals.
+            with self.acting_as("orphans"):
+                orphan_ids = [package.id for package in self.orphans]
             current = frozenset(orphan_ids)
             if not current or current == previous:
                 break

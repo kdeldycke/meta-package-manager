@@ -864,7 +864,7 @@ class Homebrew(PackageManager):
 
         ```{code-block} shell-session
 
-        $ brew cleanup -s --prune=all
+        $ brew cleanup --quiet --scrub --prune=all
         Removing: ~/Library/Caches/Homebrew/node--1.bottle.tar.gz... (9MB)
         Warning: Skipping sdl2: most recent version 2.0.12_1 not installed
         Removing: ~/Library/Caches/Homebrew/Cask/aerial--1.8.1.zip... (5MB)
@@ -876,7 +876,9 @@ class Homebrew(PackageManager):
 
         More doc at: https://docs.brew.sh/Manpage#cleanup
         """
-        self.run_cli("cleanup", "--quiet", "-s", "--prune=all", auto_post_args=False)
+        self.run_cli(
+            "cleanup", "--quiet", "--scrub", "--prune=all", auto_post_args=False
+        )
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.

@@ -134,14 +134,10 @@ class UV(UVBase):
         ```
         """
         output = self.run_cli("pip", "list", "--format=json", must_succeed=True)
-
-        data = self.parse_json(output)
-        if data:
-            for package in data:
-                yield self.package(
-                    id=package["name"],
-                    installed_version=package["version"],
-                )
+        yield from self.parse_json_items(
+            output,
+            fields={"package_id": "name", "installed_version": "version"},
+        )
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -169,15 +165,14 @@ class UV(UVBase):
         output = self.run_cli(
             "pip", "list", "--outdated", "--format=json", must_succeed=True
         )
-
-        data = self.parse_json(output)
-        if data:
-            for package in data:
-                yield self.package(
-                    id=package["name"],
-                    installed_version=package["version"],
-                    latest_version=package["latest_version"],
-                )
+        yield from self.parse_json_items(
+            output,
+            fields={
+                "package_id": "name",
+                "installed_version": "version",
+                "latest_version": "latest_version",
+            },
+        )
 
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.

@@ -118,14 +118,10 @@ class Conda(PackageManager):
         ```
         """
         output = self.run_cli("list", "--json", must_succeed=True)
-
-        data = self.parse_json(output)
-        if data:
-            for package in data:
-                yield self.package(
-                    id=package["name"],
-                    installed_version=package["version"],
-                )
+        yield from self.parse_json_items(
+            output,
+            fields={"package_id": "name", "installed_version": "version"},
+        )
 
     @property
     def outdated(self) -> Iterator[Package]:

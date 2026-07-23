@@ -37,17 +37,6 @@ def subcmd():
 class TestOrphans(CLISubCommandTests, CLITableTests, CLIQueryTests):
     columns_registry = INSTALLED_COLUMNS
 
-    @staticmethod
-    def evaluate_signals(mid, stdout, stderr):
-        yield from (
-            # The glued `:<mid>:` label form matches whatever level the
-            # message lands at: demoted to DEBUG for implicit selection
-            # (`mpm orphans`), INFO for explicit ones.
-            f":{mid}: Skipped:" in stderr,
-            # Stats line at the end of output.
-            f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
-        )
-
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--table-format", "json", subcmd)
         check_packages_payload(result)

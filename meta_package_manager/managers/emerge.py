@@ -80,7 +80,7 @@ class Emerge(PackageManager):
             (?!-r)             # ...if not directly followed by the "-r" string.
         )
         -                      # A dash.
-        (?P<version>           # Named group must not split (?P< across lines.
+        (?P<installed_version> # Named group must not split (?P< across lines.
             [^\s-]+            # Any non-whitespace/non-dash string.
             (?:-r\d+)?         # Optional revision suffix led by a -, non-grouped.
         )
@@ -170,11 +170,7 @@ class Emerge(PackageManager):
             auto_pre_args=False,
         )
 
-        for package in output.splitlines():
-            match = self._INSTALLED_REGEXP.match(package)
-            if match:
-                package_id, installed_version = match.groups()
-                yield self.package(id=package_id, installed_version=installed_version)
+        yield from self.parse_regex_lines(self._INSTALLED_REGEXP, output)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -200,15 +196,7 @@ class Emerge(PackageManager):
             "@world",
         )
 
-        for package in output.splitlines():
-            match = self._OUTDATED_REGEXP.match(package)
-            if match:
-                package_id, latest_version, installed_version = match.groups()
-                yield self.package(
-                    id=package_id,
-                    latest_version=latest_version,
-                    installed_version=installed_version,
-                )
+        yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
 
     @property
     def orphans(self) -> Iterator[Package]:

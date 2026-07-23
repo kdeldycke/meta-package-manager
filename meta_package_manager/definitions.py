@@ -54,7 +54,7 @@ from typing import cast
 from click_extra.config import ValidationError
 from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS, traits_from_ids
 
-from .manager import MetaPackageManager, PackageManager
+from .manager import JSON_FIELD_SELECTOR_REGEX, MetaPackageManager, PackageManager
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -344,17 +344,9 @@ ARG_PLACEHOLDER_REGEX: Final = re.compile(r"\{([a-z_]+)\}")
 """Match ``{placeholder}`` tokens in an operation's args, for validation."""
 
 
-JSON_FIELD_SELECTOR_REGEX: Final = re.compile(
-    r"^(?P<key>[^\[\]]+?)(?:\[(?P<index>\d+)\])?$",
-)
-"""Parse a JSON field selector: a key name with an optional `[N]` list index.
-
-A bare `version` maps the package field to the item's `version` key. A
-`versions[0]` selector additionally picks one element out of a list-valued key
-(zerobrew reports each package's installed versions as an array). Anything more
-nested stays out of the DSL on purpose: a manager needing real JSON traversal is
-better served by a Python class.
-"""
+# The JSON selector syntax is owned by the shared parse engine (see
+# JSON_FIELD_SELECTOR_REGEX in meta_package_manager.manager): the validation
+# below and the synthesized queries both lean on it.
 
 
 QUERY_OPERATION_KEYS: Final[frozenset[str]] = frozenset(
@@ -907,92 +899,28 @@ def _render_args(args: tuple[str, ...], **substitutions: str) -> list[str]:
     return rendered
 
 
-def _navigate_json(data: object, list_path: str | None) -> list:
-    """Walk `list_path` into a parsed JSON document and return the package array.
-
-    Returns an empty list when the path does not resolve to a list, so a malformed or
-    unexpected payload yields no packages rather than raising.
-    """
-    if list_path:
-        for key in list_path.split("."):
-            if not isinstance(data, dict):
-                return []
-            data = data.get(key)
-    return data if isinstance(data, list) else []
-
-
-def _json_field(item: dict, selector: str) -> Any:
-    """Resolve a field `selector` against one JSON package `item`.
-
-    A bare key returns the key's value; a `key[N]` selector picks the `N`-th
-    element out of a list-valued key (see {data}`JSON_FIELD_SELECTOR_REGEX`,
-    which validated the syntax at parse time). Anything that does not resolve —
-    missing key, non-list value under an indexed selector, out-of-range index —
-    returns `None`, so an unexpected payload yields incomplete packages rather
-    than raising.
-    """
-    match = JSON_FIELD_SELECTOR_REGEX.match(selector)
-    assert match is not None, f"unvalidated selector {selector!r}"
-    value = item.get(match.group("key"))
-    index = match.group("index")
-    if index is None:
-        return value
-    if not isinstance(value, list):
-        return None
-    position = int(index)
-    return value[position] if position < len(value) else None
-
-
-def _iter_parsed(
+def _parse_spec_output(
     manager: PackageManager,
     output: str,
     spec: OperationSpec,
     compiled: re.Pattern[str] | None,
-) -> Iterator[dict[str, str]]:
-    """Yield `Package` keyword dicts extracted from a query command's `output`.
+) -> Iterator[Package]:
+    """Parse a query command's `output` through the shared base-class engines.
 
-    Honors {attr}`OperationSpec.parse_mode`: per-line named-group matching for
-    `"regex"`, key lookups under {attr}`OperationSpec.list_path` for `"json"`
-    (parsed through the shared
-    {meth}`~meta_package_manager.manager.PackageManager.parse_json`, so a
-    malformed payload warns and yields nothing, exactly like the built-in
-    managers). Skips entries with no `package_id` and version values that are
-    absent or null.
+    Honors {attr}`OperationSpec.parse_mode`: per-line named-group matching
+    through {meth}`~meta_package_manager.manager.PackageManager.parse_regex_lines`
+    for `"regex"`, selector lookups under {attr}`OperationSpec.list_path`
+    through {meth}`~meta_package_manager.manager.PackageManager.parse_json_items`
+    for `"json"`. Both are the exact engines the built-in managers use, so a
+    declarative query and a hand-written one parse identically.
     """
     if spec.parse_mode == "regex":
         assert compiled is not None
-        for line in output.splitlines():
-            match = compiled.search(line)
-            if not match:
-                continue
-            groups = match.groupdict()
-            package_id = groups.get("package_id")
-            if not package_id:
-                continue
-            kwargs = {"id": package_id}
-            for role in ("installed_version", "latest_version"):
-                if groups.get(role):
-                    kwargs[role] = groups[role]
-            yield kwargs
-    elif spec.parse_mode == "json":
-        assert spec.fields is not None
-        data = manager.parse_json(output)
-        if data is None:
-            return
-        for item in _navigate_json(data, spec.list_path):
-            if not isinstance(item, dict):
-                continue
-            raw_id = _json_field(item, spec.fields["package_id"])
-            if not raw_id:
-                continue
-            kwargs = {"id": str(raw_id)}
-            for role in ("installed_version", "latest_version"):
-                selector = spec.fields.get(role)
-                if selector is not None:
-                    value = _json_field(item, selector)
-                    if value is not None:
-                        kwargs[role] = str(value)
-            yield kwargs
+        return manager.parse_regex_lines(compiled, output)
+    assert spec.parse_mode == "json" and spec.fields is not None
+    return manager.parse_json_items(
+        output, list_path=spec.list_path, fields=spec.fields
+    )
 
 
 def _op_cli_path(manager: PackageManager, spec: OperationSpec) -> Path | None:
@@ -1019,8 +947,7 @@ def _make_query_property(
             override_cli_path=_op_cli_path(self, spec),
             sudo=spec.sudo,
         )
-        for kwargs in _iter_parsed(self, output, spec, compiled):
-            yield self.package(**kwargs)
+        yield from _parse_spec_output(self, output, spec, compiled)
 
     return property(query)
 
@@ -1069,8 +996,7 @@ def _make_search(
             override_cli_path=_op_cli_path(self, spec),
             sudo=spec.sudo,
         )
-        for kwargs in _iter_parsed(self, output, spec, compiled):
-            yield self.package(**kwargs)
+        yield from _parse_spec_output(self, output, spec, compiled)
 
     # Same introspection surface as the search_capabilities decorator on class
     # managers: a declared refinement template advertises native support, its
@@ -1107,30 +1033,22 @@ def _make_install(spec: OperationSpec) -> Callable[..., str]:
     return install
 
 
-def _make_remove(spec: OperationSpec) -> Callable[..., str]:
-    """Build a `remove` method substituting ``{package_id}`` into the args."""
+def _make_package_command(spec: OperationSpec) -> Callable[..., str]:
+    """Build a per-package command method substituting ``{package_id}`` into the
+    args.
 
-    def remove(self: PackageManager, package_id: str) -> str:
+    Serves both `remove` and `remove_orphan`, whose synthesized methods are
+    identical: only the namespace key they land under differs.
+    """
+
+    def package_command(self: PackageManager, package_id: str) -> str:
         return self.run_cli(
             *_render_args(spec.args, package_id=package_id),
             override_cli_path=_op_cli_path(self, spec),
             sudo=spec.sudo,
         )
 
-    return remove
-
-
-def _make_remove_orphan(spec: OperationSpec) -> Callable[..., str]:
-    """Build a `remove_orphan` method substituting ``{package_id}`` into the args."""
-
-    def remove_orphan(self: PackageManager, package_id: str) -> str:
-        return self.run_cli(
-            *_render_args(spec.args, package_id=package_id),
-            override_cli_path=_op_cli_path(self, spec),
-            sudo=spec.sudo,
-        )
-
-    return remove_orphan
+    return package_command
 
 
 def _make_void(spec: OperationSpec) -> Callable[..., None]:
@@ -1162,30 +1080,24 @@ def _make_upgrade_one_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]
     return upgrade_one_cli
 
 
-def _make_doctor_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
-    """Build a `doctor_cli` returning the read-only diagnostic command line."""
+def _make_cli_builder(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
+    """Build a no-argument `*_cli` method returning the operation's command line.
 
-    def doctor_cli(self: PackageManager) -> tuple[str, ...]:
+    Serves both `doctor_cli` (the read-only diagnostic invocation) and
+    `upgrade_all_cli` (the upgrade-everything invocation), whose synthesized
+    methods are identical: only the namespace key they land under differs. The
+    base class then drives them through its own {meth}`~meta_package_manager.manager.PackageManager.doctor` and
+    {meth}`~meta_package_manager.manager.PackageManager.upgrade` orchestrators.
+    """
+
+    def cli_builder(self: PackageManager) -> tuple[str, ...]:
         return self.build_cli(
             *spec.args,
             override_cli_path=_op_cli_path(self, spec),
             sudo=spec.sudo,
         )
 
-    return doctor_cli
-
-
-def _make_upgrade_all_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
-    """Build an `upgrade_all_cli` returning the upgrade-everything command line."""
-
-    def upgrade_all_cli(self: PackageManager) -> tuple[str, ...]:
-        return self.build_cli(
-            *spec.args,
-            override_cli_path=_op_cli_path(self, spec),
-            sudo=spec.sudo,
-        )
-
-    return upgrade_all_cli
+    return cli_builder
 
 
 def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManager]:
@@ -1228,10 +1140,8 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
             namespace["search"] = _make_search(spec, compiled)
         elif op_name == "install":
             namespace["install"] = _make_install(spec)
-        elif op_name == "remove":
-            namespace["remove"] = _make_remove(spec)
-        elif op_name == "remove_orphan":
-            namespace["remove_orphan"] = _make_remove_orphan(spec)
+        elif op_name in ("remove", "remove_orphan"):
+            namespace[op_name] = _make_package_command(spec)
         elif op_name in (
             "sync",
             "cleanup_orphan",
@@ -1240,11 +1150,11 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
         ):
             namespace[op_name] = _make_void(spec)
         elif op_name == "doctor":
-            namespace["doctor_cli"] = _make_doctor_cli(spec)
+            namespace["doctor_cli"] = _make_cli_builder(spec)
         elif op_name == "upgrade_one":
             namespace["upgrade_one_cli"] = _make_upgrade_one_cli(spec)
         elif op_name == "upgrade_all":
-            namespace["upgrade_all_cli"] = _make_upgrade_all_cli(spec)
+            namespace["upgrade_all_cli"] = _make_cli_builder(spec)
 
     class_name = "Config_" + definition.manager_id.replace("-", "_")
     return cast(

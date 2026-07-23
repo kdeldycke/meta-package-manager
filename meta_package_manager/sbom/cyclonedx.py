@@ -553,7 +553,6 @@ class CycloneDX(SBOM):
             len(dep.dependencies) for dep in self.document.dependencies
         )
         base.update({
-            "components_in_document": len(self.document.components),
             "external_bom_references": components_with_bom,
             "dependency_edges": dependency_edges,
         })

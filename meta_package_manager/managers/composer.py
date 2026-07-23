@@ -103,11 +103,11 @@ class Composer(PackageManager):
         ```
         """
         output = self.run_cli("show", "--format=json", must_succeed=True)
-        package_list = self.parse_json(output)
-        if package_list:
-            for package in package_list["installed"]:
-                package_id = package["name"]
-                yield self.package(id=package_id, installed_version=package["version"])
+        yield from self.parse_json_items(
+            output,
+            list_path="installed",
+            fields={"package_id": "name", "installed_version": "version"},
+        )
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -137,16 +137,15 @@ class Composer(PackageManager):
         ```
         """
         output = self.run_cli("outdated", "--format=json", must_succeed=True)
-
-        package_list = self.parse_json(output)
-        if package_list:
-            for package in package_list["installed"]:
-                package_id = package["name"]
-                yield self.package(
-                    id=package_id,
-                    installed_version=package["version"],
-                    latest_version=package["latest"],
-                )
+        yield from self.parse_json_items(
+            output,
+            list_path="installed",
+            fields={
+                "package_id": "name",
+                "installed_version": "version",
+                "latest_version": "latest",
+            },
+        )
 
     @search_capabilities(exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

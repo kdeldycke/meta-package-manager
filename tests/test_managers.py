@@ -29,7 +29,7 @@ from boltons.iterutils import unique
 from boltons.urlutils import URL
 from extra_platforms import ALL_PLATFORMS, Platform, is_windows
 
-from meta_package_manager import cli
+from meta_package_manager import cli_explore, cli_maintenance
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
 from meta_package_manager.execution import CLIExecutor
@@ -250,8 +250,6 @@ def test_cli_path(manager):
     ),
 )
 def test_query_parts(query, query_parts):
-    # PackageManager.query_parts delegates to the canonical Package.query_parts.
-    assert PackageManager.query_parts(query) == query_parts
     assert Package.query_parts(query) == query_parts
 
 
@@ -398,18 +396,25 @@ props_ref = tuple(collect_props_ref())
 
 def test_operation_order():
     """Double check operation IDs are ordered and aligned to the base manager class and
-    CLI implementation."""
+    CLI implementation.
+
+    The subcommands span two section modules: the read-only queries in
+    `cli_explore`, the state changers and diagnostics in `cli_maintenance`.
+    Walked in that order, their definitions must follow the enum order.
+    """
     direct_operation_ids = [op for op in Operations.__members__ if op != "upgrade_all"]
 
     base_operations = [p for p in props_ref if p in direct_operation_ids]
     assert list(direct_operation_ids) == list(base_operations)
 
-    cli_tree = ast.parse(Path(inspect.getfile(cli)).read_bytes())
-    implemented_operations = [
-        n.name
-        for n in cli_tree.body
-        if isinstance(n, ast.FunctionDef) and n.name in direct_operation_ids
-    ]
+    implemented_operations = []
+    for cli_module in (cli_explore, cli_maintenance):
+        cli_tree = ast.parse(Path(inspect.getfile(cli_module)).read_bytes())
+        implemented_operations.extend(
+            n.name
+            for n in cli_tree.body
+            if isinstance(n, ast.FunctionDef) and n.name in direct_operation_ids
+        )
     assert list(direct_operation_ids) == list(implemented_operations)
 
 

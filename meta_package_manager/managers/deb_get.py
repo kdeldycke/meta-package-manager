@@ -125,12 +125,7 @@ class Deb_Get(PackageManager):
         ```
         """
         output = self.run_cli("update", sudo=True)
-        for match in self._OUTDATED_REGEXP.finditer(output):
-            yield self.package(
-                id=match.group("package_id"),
-                installed_version=match.group("installed_version"),
-                latest_version=match.group("latest_version"),
-            )
+        yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

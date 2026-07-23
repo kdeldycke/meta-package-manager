@@ -28,7 +28,7 @@ from typing import cast
 from extra_platforms import ALL_PLATFORMS
 
 from ..capabilities import version_not_implemented
-from ..execution import READ_ONLY_TIMEOUT
+from ..execution import READ_ONLY_TIMEOUT, VERSION_PROBE
 from ..manager import PackageManager
 from ..package import (
     EMPTY_METADATA,
@@ -321,7 +321,7 @@ class Pip(PackageManager):
             # Tag this as a version probe so it inherits the short read-only timeout
             # rather than the long mutating default, matching the base `version`
             # property. `python --version` should never need the conservative cap.
-            self._active_operation = "version"
+            self._active_operation = VERSION_PROBE
             self.run_cli(
                 ("--version", "--version"),
                 auto_pre_cmds=False,

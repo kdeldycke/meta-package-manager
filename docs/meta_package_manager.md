@@ -64,6 +64,42 @@
    :undoc-members:
 ```
 
+## meta_package_manager.cli_explore module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.cli_explore
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.cli_maintenance module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.cli_maintenance
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.cli_sbom module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.cli_sbom
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.cli_snapshots module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.cli_snapshots
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.config module
 
 ```{eval-rst}

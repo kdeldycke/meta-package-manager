@@ -55,13 +55,12 @@ import stat
 import subprocess
 import sys
 import threading
-from contextlib import nullcontext
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
 from typing import ClassVar, Final
-from unittest.mock import patch
 
 from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
@@ -88,8 +87,7 @@ from .version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable
-    from contextlib import AbstractContextManager
+    from collections.abc import Generator, Iterable, Iterator
     from datetime import timedelta
 
     from click_extra.envvar import TEnvVars
@@ -142,6 +140,17 @@ Under `mpm --plan` their CLI calls are captured into {data}`PLAN_RECORDER`
 instead of being executed, while the read-only queries (`installed`, `outdated`,
 `search`) still run so the plan resolves against real system state. `restore`
 re-stamps `install` on the manager, so it is covered here.
+"""
+
+VERSION_PROBE: Final = "version"
+"""Pseudo-operation stamped on {attr}`CLIExecutor._active_operation` during
+version detection.
+
+Not a member of {class}`meta_package_manager.capabilities.Operations` (no
+subcommand routes it), but it participates in the same per-operation machinery:
+{data}`OPERATION_TIMEOUTS` binds it to the short read-only cap, and
+{meth}`CLIExecutor.run` demotes its command disclosure to `DEBUG` so the
+per-candidate probes cannot drown the `INFO` narration.
 """
 
 
@@ -258,7 +267,7 @@ rather than risk killing a legitimate long-running command.
 """
 
 OPERATION_TIMEOUTS: Final[dict[str, int]] = {
-    "version": READ_ONLY_TIMEOUT,
+    VERSION_PROBE: READ_ONLY_TIMEOUT,
     "installed": READ_ONLY_TIMEOUT,
     "outdated": READ_ONLY_TIMEOUT,
     "orphans": READ_ONLY_TIMEOUT,
@@ -814,7 +823,7 @@ class CLIExecutor:
             # long mutating one. Safe to leave set: `_select_managers` re-stamps the
             # real operation before any subcommand runs, and an explicit `--timeout`
             # still wins inside `_resolve_timeout`.
-            self._active_operation = "version"
+            self._active_operation = VERSION_PROBE
             output = self.run_cli(
                 self.version_cli_options,
                 override_cli_path=version_cli_path,
@@ -850,6 +859,38 @@ class CLIExecutor:
             )
             return False
         return True
+
+    @contextmanager
+    def acting_as(
+        self,
+        operation: str | None = None,
+        *,
+        stop_on_error: bool | None = None,
+    ) -> Iterator[None]:
+        """Temporarily adjust the manager's execution state, restoring it on exit.
+
+        `operation` re-stamps {attr}`_active_operation` (the per-operation
+        timeout and watchdog key) for the duration of the block; `None` leaves
+        the current stamp untouched. `stop_on_error` likewise overrides the
+        failure policy when set: the per-package state changers run their action
+        under `stop_on_error=True` so a botched operation raises and is recorded
+        by the caller instead of being silently accumulated.
+
+        The public seam for callers needing a scoped state override: the CLI
+        layer must never poke {attr}`_active_operation` or {attr}`stop_on_error`
+        directly.
+        """
+        previous_operation = self._active_operation
+        previous_stop = self.stop_on_error
+        if operation is not None:
+            self._active_operation = operation
+        if stop_on_error is not None:
+            self.stop_on_error = stop_on_error
+        try:
+            yield
+        finally:
+            self._active_operation = previous_operation
+            self.stop_on_error = previous_stop
 
     def _resolve_timeout(self) -> int:
         """Resolve the timeout (in seconds) for the current CLI call.
@@ -1000,7 +1041,9 @@ class CLIExecutor:
             # version-detection probes stay at DEBUG: they are discovery, fired
             # for every candidate manager, and would drown the narration.
             command_level = (
-                logging.DEBUG if self._active_operation == "version" else logging.INFO
+                logging.DEBUG
+                if self._active_operation == VERSION_PROBE
+                else logging.INFO
             )
             effective_timeout = self._resolve_timeout()
             spinner = self._make_spinner()
@@ -1330,17 +1373,15 @@ class CLIExecutor:
         elif auto_extra_env:
             extra_env = self.extra_env
 
-        # No-op context managers without any effects.
-        local_option1: AbstractContextManager = nullcontext()
-        local_option2: AbstractContextManager = nullcontext()
-        local_option3: AbstractContextManager = nullcontext()
-        # Temporarily replace the --dry-run, --stop-on-error and --plan user options
-        # with our own to force this read to run and complete (see the force_exec note
-        # in the docstring above).
+        # Temporarily lift the --dry-run, --stop-on-error and --plan user options
+        # to force this read to run and complete (see the force_exec note in the
+        # docstring above), restoring them right after.
         if force_exec:
-            local_option1 = patch.object(self, "dry_run", False)
-            local_option2 = patch.object(self, "stop_on_error", False)
-            local_option3 = patch.object(self, "plan", False)
-        # Execute the command with eventual local options.
-        with local_option1, local_option2, local_option3:
-            return self.run(*cli, extra_env=extra_env, must_succeed=must_succeed)
+            previous = (self.dry_run, self.stop_on_error, self.plan)
+            self.dry_run = self.stop_on_error = self.plan = False
+            try:
+                return self.run(*cli, extra_env=extra_env, must_succeed=must_succeed)
+            finally:
+                self.dry_run, self.stop_on_error, self.plan = previous
+
+        return self.run(*cli, extra_env=extra_env, must_succeed=must_succeed)

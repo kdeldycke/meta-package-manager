@@ -73,12 +73,17 @@ class APT(PackageManager):
 
     pre_args = ("--quiet",)
 
-    _INSTALLED_REGEXP = re.compile(r"(\S+)\/\S+ (\S+) (\S+) .*")
+    _INSTALLED_REGEXP = re.compile(
+        r"(?P<package_id>\S+)\/\S+ (?P<installed_version>\S+) (?P<arch>\S+) .*"
+    )
     _ORPHANS_REGEXP = re.compile(
         r"^Remv (?P<package_id>\S+) \[(?P<installed_version>[^\]]+)\]",
         re.MULTILINE,
     )
-    _OUTDATED_REGEXP = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
+    _OUTDATED_REGEXP = re.compile(
+        r"(?P<package_id>\S+)\/\S+ (?P<latest_version>\S+)"
+        r".*\[upgradable from: (?P<installed_version>\S+)\]"
+    )
     _SEARCH_REGEXP = re.compile(
         r"""
         ^(?P<package_id>\S+)  # A string with a char at least.
@@ -132,14 +137,7 @@ class APT(PackageManager):
         ```
         """
         output = self.run_cli("list", "--installed")
-
-        for package in output.splitlines():
-            match = self._INSTALLED_REGEXP.match(package)
-            if match:
-                package_id, installed_version, arch = match.groups()
-                yield self.package(
-                    id=package_id, installed_version=installed_version, arch=arch
-                )
+        yield from self.parse_regex_lines(self._INSTALLED_REGEXP, output)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -154,16 +152,7 @@ class APT(PackageManager):
         ```
         """
         output = self.run_cli("list", "--upgradable")
-
-        for package in output.splitlines():
-            match = self._OUTDATED_REGEXP.match(package)
-            if match:
-                package_id, latest_version, installed_version = match.groups()
-                yield self.package(
-                    id=package_id,
-                    latest_version=latest_version,
-                    installed_version=installed_version,
-                )
+        yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
 
     @property
     def orphans(self) -> Iterator[Package]:
@@ -191,12 +180,7 @@ class APT(PackageManager):
         ```
         """
         output = self.run_cli("autoremove", "--simulate")
-
-        for match in self._ORPHANS_REGEXP.finditer(output):
-            yield self.package(
-                id=match.group("package_id"),
-                installed_version=match.group("installed_version"),
-            )
+        yield from self.parse_regex_lines(self._ORPHANS_REGEXP, output)
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.

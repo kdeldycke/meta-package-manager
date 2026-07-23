@@ -97,8 +97,10 @@ class Pacman(PackageManager):
 
     pre_args = ("--noconfirm", "--color", "never")
 
-    _INSTALLED_REGEXP = re.compile(r"(\S+) (\S+)")
-    _OUTDATED_REGEXP = re.compile(r"(\S+) (\S+) -> (\S+)")
+    _INSTALLED_REGEXP = re.compile(r"(?P<package_id>\S+) (?P<installed_version>\S+)")
+    _OUTDATED_REGEXP = re.compile(
+        r"(?P<package_id>\S+) (?P<installed_version>\S+) -> (?P<latest_version>\S+)"
+    )
     _SEARCH_REGEXP = re.compile(
         r"(?P<repo_id>\S+?)/(?P<package_id>\S+)\s+(?P<version>\S+).*\n\s+(?P<description>.+)",
         re.MULTILINE | re.VERBOSE,
@@ -138,12 +140,7 @@ class Pacman(PackageManager):
         ```
         """
         output = self.run_cli("--query")
-
-        for package in output.splitlines():
-            match = self._INSTALLED_REGEXP.match(package)
-            if match:
-                package_id, installed_version = match.groups()
-                yield self.package(id=package_id, installed_version=installed_version)
+        yield from self.parse_regex_lines(self._INSTALLED_REGEXP, output)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -179,16 +176,7 @@ class Pacman(PackageManager):
         :::
         """
         output = self.run_cli("--query", "--upgrades")
-
-        for package in output.splitlines():
-            match = self._OUTDATED_REGEXP.match(package)
-            if match:
-                package_id, installed_version, latest_version = match.groups()
-                yield self.package(
-                    id=package_id,
-                    latest_version=latest_version,
-                    installed_version=installed_version,
-                )
+        yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
 
     @property
     def orphans(self) -> Iterator[Package]:
@@ -205,12 +193,7 @@ class Pacman(PackageManager):
         ```
         """
         output = self.run_cli("--query", "--deps", "--unrequired")
-
-        for package in output.splitlines():
-            match = self._INSTALLED_REGEXP.match(package)
-            if match:
-                package_id, installed_version = match.groups()
-                yield self.package(id=package_id, installed_version=installed_version)
+        yield from self.parse_regex_lines(self._INSTALLED_REGEXP, output)
 
     @search_capabilities(extended_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

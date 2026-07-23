@@ -46,6 +46,7 @@ import csv
 import inspect
 import re
 import sys
+from functools import cache
 from pathlib import Path
 from textwrap import dedent
 
@@ -57,6 +58,8 @@ from extra_platforms import Group, extract_members
 from meta_package_manager.capabilities import (
     Operations,
     cleanup_orphan_is_synthesized,
+    exact_search_is_synthesized,
+    extended_search_is_synthesized,
     implements,
     implements_method,
     upgrade_all_is_synthesized,
@@ -421,10 +424,8 @@ def augmentations_table() -> str:
     for mid, manager in sorted(pool.items()):
         upgrade_all = upgrade_all_is_synthesized(manager)
         orphan_sweep = cleanup_orphan_is_synthesized(manager)
-        search_func = getattr(type(manager), "search", None)
-        has_search = implements(manager, Operations.search)
-        exact = has_search and not getattr(search_func, "exact_support", True)
-        extended = has_search and not getattr(search_func, "extended_support", True)
+        exact = exact_search_is_synthesized(manager)
+        extended = extended_search_is_synthesized(manager)
         if not (upgrade_all or orphan_sweep or exact or extended):
             continue
         table.append([
@@ -516,8 +517,13 @@ def _fenced(content: str, language: str) -> str:
     return f"{fence}{language}\n{content}\n{fence}"
 
 
+@cache
 def _toml_definition(definition_source: str) -> dict:
-    """Parse a bundled TOML definition file into its raw document."""
+    """Parse a bundled TOML definition file into its raw document.
+
+    Cached: rendering one config-defined manager's page reads the same file
+    from several section generators.
+    """
     return tomllib.loads(  # type: ignore[no-any-return]
         (PROJECT_ROOT / definition_source).read_text(encoding="UTF-8"),
     )
@@ -703,7 +709,6 @@ def manager_operations(manager_id: str) -> str:
     needing no backfill.
     """
     m = pool[manager_id]
-    search_func = getattr(type(m), "search", None)
     table = []
     for op in Operations:
         supported = implements(m, op)
@@ -713,11 +718,11 @@ def manager_operations(manager_id: str) -> str:
         elif supported and op is Operations.search:
             missing = [
                 label
-                for label, native in (
-                    ("exact", getattr(search_func, "exact_support", True)),
-                    ("extended", getattr(search_func, "extended_support", True)),
+                for label, synthesized in (
+                    ("exact", exact_search_is_synthesized(m)),
+                    ("extended", extended_search_is_synthesized(m)),
                 )
-                if not native
+                if synthesized
             ]
             if missing:
                 note = (

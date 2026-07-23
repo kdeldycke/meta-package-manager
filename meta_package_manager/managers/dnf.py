@@ -106,7 +106,7 @@ class DNF(PackageManager):
         """
         qf = ["%{name}", "%{version}", "%{summary}", "%{arch}\n"]
         output = self.run_cli(
-            "repoquery", "--userinstalled", "--qf", DNF.DELIMITER.join(qf)
+            "repoquery", "--userinstalled", "--qf", self.DELIMITER.join(qf)
         )
 
         for line_package in output.splitlines():
@@ -114,7 +114,7 @@ class DNF(PackageManager):
             if not line_package:
                 continue
             package_id, installed_version, summary, arch = line_package.split(
-                DNF.DELIMITER
+                self.DELIMITER
             )
             yield self.package(
                 id=package_id,
@@ -136,14 +136,16 @@ class DNF(PackageManager):
         ```
         """
         qf = ["%{name}", "%{version}", "%{evr}", "%{summary}", "%{arch}\n"]
-        output = self.run_cli("repoquery", "--upgrades", "--qf", DNF.DELIMITER.join(qf))
+        output = self.run_cli(
+            "repoquery", "--upgrades", "--qf", self.DELIMITER.join(qf)
+        )
 
         for line_package in output.splitlines():
             # remove empty new line
             if not line_package:
                 continue
             package_id, installed_version, last_version, summary, arch = (
-                line_package.split(DNF.DELIMITER)
+                line_package.split(self.DELIMITER)
             )
             yield self.package(
                 id=package_id,

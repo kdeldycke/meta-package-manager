@@ -193,7 +193,7 @@ def test_doctor_unhealthy_exits_nonzero(invoke, monkeypatch):
     result = invoke("doctor")
     assert result.exit_code == 1
     assert "Broken linkage found." in result.stdout
-    assert f"1 managers reported problems ({fake.id})." in result.stderr
+    assert f"1 manager reported problems ({fake.id})." in result.stderr
 
 
 @pytest.mark.parametrize("flag", ("--zero-exit", "-0"))
@@ -203,7 +203,7 @@ def test_doctor_zero_exit_opt_out(invoke, monkeypatch, flag):
     fake = _patch_pool_with(monkeypatch, SickDoctorFakeManager())
     result = invoke(flag, "doctor")
     assert result.exit_code == 0
-    assert f"1 managers reported problems ({fake.id})." in result.stderr
+    assert f"1 manager reported problems ({fake.id})." in result.stderr
 
 
 def test_doctor_silent_healthy_prints_no_section(invoke, monkeypatch):

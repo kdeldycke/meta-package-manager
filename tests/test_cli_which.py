@@ -17,8 +17,6 @@
 
 from __future__ import annotations
 
-import re
-
 import pytest
 
 from meta_package_manager.tables import WHICH_COLUMNS
@@ -34,15 +32,3 @@ def subcmd():
 class TestWhich(CLISubCommandTests, CLITableTests):
     columns_registry = WHICH_COLUMNS
     columns_test_pair = ("manager_id", "cli_path")
-
-    @staticmethod
-    def evaluate_signals(mid, stdout, stderr):
-        yield from (
-            # Match in printed table.
-            bool(
-                re.search(
-                    rf"│\s+{mid}\s+│\s+\d+\s+│.+│.+│",
-                    stdout,
-                ),
-            ),
-        )

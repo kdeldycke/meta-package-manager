@@ -96,13 +96,10 @@ class SFSU(PackageManager):
         ```
         """
         output = self.run_cli("list", "--json")
-        data = self.parse_json(output)
-        if data:
-            for pkg in data:
-                yield self.package(
-                    id=pkg["name"],
-                    installed_version=pkg["version"],
-                )
+        yield from self.parse_json_items(
+            output,
+            fields={"package_id": "name", "installed_version": "version"},
+        )
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -128,14 +125,15 @@ class SFSU(PackageManager):
         ```
         """
         output = self.run_cli("status", "--only", "apps", "--json")
-        data = self.parse_json(output)
-        if data:
-            for pkg in data.get("packages", []):
-                yield self.package(
-                    id=pkg["name"],
-                    installed_version=pkg["current"],
-                    latest_version=pkg["available"],
-                )
+        yield from self.parse_json_items(
+            output,
+            list_path="packages",
+            fields={
+                "package_id": "name",
+                "installed_version": "current",
+                "latest_version": "available",
+            },
+        )
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

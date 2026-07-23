@@ -24,7 +24,7 @@ from pathlib import Path
 import pytest
 from click_extra import Duration
 
-from meta_package_manager.cli import cooldown_permits
+from meta_package_manager.cli_maintenance import cooldown_permits
 from meta_package_manager.managers.gem import Gem
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM

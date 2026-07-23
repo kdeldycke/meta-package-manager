@@ -20,7 +20,6 @@ from __future__ import annotations
 import pytest
 from extra_platforms.pytest import skip_github_ci, unless_macos
 
-from meta_package_manager.capabilities import Operations
 from meta_package_manager.tables import SEARCH_COLUMNS
 
 from .test_cli import CLISubCommandTests, CLITableTests, check_packages_payload
@@ -39,18 +38,6 @@ def subcmd():
 
 class TestSearch(CLISubCommandTests, CLITableTests):
     columns_registry = SEARCH_COLUMNS
-
-    @staticmethod
-    def evaluate_signals(mid, stdout, stderr):
-        yield from (
-            # The glued `:<mid>:` label form matches whatever level the
-            # message lands at: demoted to DEBUG for implicit selection
-            # (`mpm search`), INFO for explicit ones.
-            f":{mid}: Does not implement {Operations.search}." in stderr,
-            f":{mid}: Skipped:" in stderr,
-            # Stats line at the end of output.
-            f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
-        )
 
     def test_description_column_selection(self, invoke, fake_pool):
         """The description column hides by default, appears with `--description`,

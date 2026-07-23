@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import threading
 import time
 from unittest.mock import patch
@@ -28,17 +29,21 @@ from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
+    _MUTATING_OPERATIONS,
     DEFAULT_TIMEOUT,
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
     PLAN_RECORDER,
     READ_ONLY_TIMEOUT,
     SPINNER_DELAY,
+    VERSION_PROBE,
     CLIError,
     format_plan_command,
 )
 from meta_package_manager.pool import pool
+from meta_package_manager.sudo import _STALL_NOTICE_OPERATIONS
 
+from .conftest import _patch_pool_with
 from .fake_manager import FakeManager
 
 # A UNIX and a non-UNIX platform to force build_cli's platform gate deterministically,
@@ -52,6 +57,21 @@ def test_operation_timeouts_cover_all_operations():
     map and the `Operations` enum never drift apart."""
     for operation in Operations:
         assert operation.name in OPERATION_TIMEOUTS
+
+
+def test_operation_name_sets_match_enum():
+    """The literal operation-name sets stay subsets of the `Operations` vocabulary.
+
+    `_MUTATING_OPERATIONS` (plan-mode capture) and `_STALL_NOTICE_OPERATIONS`
+    (watchdog arming) are spelled as string literals: renaming an `Operations`
+    member would otherwise silently desync them, stopping plan capture or
+    watchdog arming for the renamed operation.
+    """
+    operation_names = {operation.name for operation in Operations}
+    assert _MUTATING_OPERATIONS <= operation_names
+    assert _STALL_NOTICE_OPERATIONS <= operation_names
+    # The timeout map covers nothing outside the enum plus the version probe.
+    assert set(OPERATION_TIMEOUTS) <= operation_names | {VERSION_PROBE}
 
 
 def test_read_only_tier_is_shorter_than_mutating_tier():
@@ -325,6 +345,47 @@ def test_plan_runs_read_only_operations(tmp_path):
     assert PLAN_RECORDER.render() == ()
 
 
+class _SynthesizedUpgradeFakeManager(FakeManager):
+    """Fake with a per-package upgrade CLI but no one-shot upgrade-all.
+
+    `upgrade --all` then exercises the synthesized one-by-one fallback of
+    `PackageManager.upgrade`, and its `outdated` listing runs a real (instant)
+    subprocess, so the packages only materialize if the read truly executed.
+    """
+
+    _OUTDATED_REGEXP = re.compile(
+        r"(?P<package_id>\S+) (?P<installed_version>\S+) (?P<latest_version>\S+)"
+    )
+
+    @property
+    def outdated(self):
+        output = self.run_cli("-c", "print('fake-pkg-alpha 1.0.0 1.1.0')")
+        yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
+
+    def upgrade_one_cli(self, package_id, version=None):
+        return self.build_cli("upgrade", package_id)
+
+
+def test_plan_synthesized_upgrade_all_resolves_reads(invoke, monkeypatch):
+    """`mpm --plan upgrade` on a synthesized upgrade-all prints the per-package
+    upgrade commands, resolved against a really-executed `outdated` read.
+
+    Guards the read-stamp of the synthesized fallback in
+    `PackageManager.upgrade`: the whole run is stamped `upgrade_all` (a
+    mutating operation), so without re-stamping the inner listing as
+    `outdated`, plan mode captured the read itself — leaving the plan without
+    the actual mutating commands it exists to disclose.
+    """
+    _patch_pool_with(monkeypatch, _SynthesizedUpgradeFakeManager())
+    result = invoke("--plan", "upgrade", "--all")
+    assert result.exit_code == 0
+    plan_lines = result.stdout.splitlines()
+    # The outdated read resolved one package, planned as its upgrade command.
+    assert any("upgrade fake-pkg-alpha" in line for line in plan_lines)
+    # The read itself was executed, never captured into the plan.
+    assert not any("print(" in line for line in plan_lines)
+
+
 def test_plan_ignores_force_exec(tmp_path):
     """A force_exec read runs for real even under plan mode (version probes, etc.)."""
     PLAN_RECORDER.reset()
@@ -485,7 +546,7 @@ def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
 def test_mutating_subcommands_prime_sudo(invoke, fake_pool, args):
     """Every mutating subcommand authenticates sudo up front, so a future command
     cannot silently skip the priming."""
-    with patch("meta_package_manager.cli.prime_sudo") as prime:
+    with patch("meta_package_manager.cli_maintenance.prime_sudo") as prime:
         invoke("--dry-run", *args)
     assert prime.called, f"`mpm {args[0]}` did not call prime_sudo"
 
@@ -494,14 +555,18 @@ def test_restore_primes_sudo(invoke, fake_pool, tmp_path):
     """`restore` fans installs out too, so it also primes sudo up front."""
     toml_file = tmp_path / "backup.toml"
     toml_file.write_text("")
-    with patch("meta_package_manager.cli.prime_sudo") as prime:
+    with patch("meta_package_manager.cli_snapshots.prime_sudo") as prime:
         invoke("--dry-run", "restore", str(toml_file))
     assert prime.called
 
 
 def test_read_subcommand_does_not_prime_sudo(invoke, fake_pool):
-    """A read-only command never escalates, so it must not prompt for sudo."""
-    with patch("meta_package_manager.cli.prime_sudo") as prime:
+    """A read-only command never escalates, so it must not prompt for sudo.
+
+    Patched at the source module: the explore subcommands import no sudo
+    machinery at all, so any priming would have to reach it there.
+    """
+    with patch("meta_package_manager.sudo.prime_sudo") as prime:
         invoke("--dry-run", "installed")
     assert not prime.called
 
@@ -513,18 +578,19 @@ def test_read_subcommand_does_not_prime_sudo(invoke, fake_pool):
         pytest.param(("upgrade", "fake-pkg-alpha"), "upgrade", id="upgrade-packages"),
     ),
 )
-def test_sourced_operation_restamps_active_operation(
+def test_sourced_operation_stamps_active_operation(
     invoke, fake_pool, monkeypatch, args, expected_operation
 ):
-    """A sourced `remove`/`upgrade <packages>` restores the real operation stamp
-    before its mutating fan-out.
+    """A sourced `remove`/`upgrade <packages>` runs its mutating action under the
+    real operation stamp.
 
-    Source discovery re-selects the managers with `installed`, which re-stamps
-    `_active_operation = "installed"` on the shared singletons. Left uncorrected, the
-    mutating commands would resolve the read-only timeout and skip the escalator stall
-    watchdog (both keyed on `_active_operation`). This drives the real selection flow,
-    unlike the watchdog unit tests that stamp the attribute by hand: it fails if the
-    dispatch stops restoring the stamp.
+    Source discovery re-selects the managers with `installed`, which stamps
+    `_active_operation = "installed"` on the shared singletons. Each per-package
+    task must therefore re-stamp the mutating operation for the duration of its
+    own attempt (through `CLIExecutor.acting_as`), or the command would resolve
+    the read-only timeout and skip the escalator stall watchdog (both keyed on
+    `_active_operation`). This drives the real selection flow and observes the
+    stamp from inside the action itself: it fails if the dispatch stops stamping.
     """
     # The sourced dispatch fetches the acting manager through `pool.get`; return the
     # fake so a real task is built. `fake-pkg-alpha` is in the fake's installed set,
@@ -532,10 +598,17 @@ def test_sourced_operation_restamps_active_operation(
     monkeypatch.setattr(pool, "get", lambda manager_id: fake_pool)
     # Cooldown gating is host-dependent; permit unconditionally so the task is built.
     monkeypatch.setattr(
-        "meta_package_manager.cli.cooldown_permits", lambda manager: True
+        "meta_package_manager.cli_maintenance.cooldown_permits", lambda manager: True
     )
+    recorded = {}
+
+    def record_operation(*args, **kwargs):
+        recorded["operation"] = fake_pool._active_operation
+        return ""
+
+    monkeypatch.setattr(fake_pool, expected_operation, record_operation)
     invoke("--dry-run", *args)
-    assert fake_pool._active_operation == expected_operation
+    assert recorded.get("operation") == expected_operation
 
 
 def test_untied_install_search_runs_under_read_only_stamp(

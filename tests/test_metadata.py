@@ -30,14 +30,11 @@ import json
 import re
 import shutil
 import subprocess
-from pathlib import Path
 
 import pytest
 from extra_platforms.pytest import skip_guix_build
 
-from .conftest import tomllib
-
-PROJECT_ROOT = Path(__file__).parent.parent
+from .conftest import PROJECT_ROOT, tomllib
 
 PYTHON_CLASSIFIER_PREFIX = "Programming Language :: Python :: "
 """Prefix of the trove classifiers enumerating supported Python versions."""

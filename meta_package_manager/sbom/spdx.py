@@ -331,11 +331,10 @@ class SPDX(SBOM):
         """
         if not expression:
             return None
-        upper = expression.strip().upper()
-        if upper == "NOASSERTION":
-            return SpdxNoAssertion()
-        if upper == "NONE":
-            return SpdxNone()
+        # Route the NOASSERTION/NONE sentinels through the shared coercion.
+        coerced = _coerce_spdx_string(expression)
+        if not isinstance(coerced, str):
+            return coerced
         parsed = _parse_license_expression(expression)
         if parsed is None:
             return SpdxNoAssertion()
@@ -672,7 +671,6 @@ class SPDX(SBOM):
             "packages_in_document": in_doc,
             "transitive_packages_merged": in_doc - inventory_count,
             "merged_documents": len(self.merged_docs),
-            "relationships_total": len(self.document.relationships),
             "dependency_relationships": dependency_count,
         })
         return base

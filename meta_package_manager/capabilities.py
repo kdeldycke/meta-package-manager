@@ -93,7 +93,9 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
     # General case: the operation and the method implementing it shares the same ID.
     method_deps: tuple[set[str], ...] = ({op.name},)
 
-    # Special case for single-package `upgrade`: we depend on `upgrade_one_cli()`.
+    # Special case for single-package `upgrade`: we depend on `upgrade_one_cli()`,
+    # plus `installed()` since resolving which manager sources a package requires
+    # querying its inventory.
     if op == Operations.upgrade:
         method_deps = ({"installed", "upgrade_one_cli"},)
 
@@ -155,13 +157,7 @@ def upgrade_all_is_synthesized(
     """
     if not implements(manager, Operations.upgrade_all):
         return False
-    cls = manager if isinstance(manager, type) else type(manager)
-    for klass in cls.mro():
-        if klass is PackageManager:
-            break
-        if "upgrade_all_cli" in klass.__dict__:
-            return False
-    return True
+    return not implements_method(manager, "upgrade_all_cli")
 
 
 def implements_method(
@@ -230,6 +226,50 @@ def supports_cleanup_repair(
 ) -> bool:
     """Whether `mpm cleanup --repair` can drive the manager."""
     return implements_method(manager, "cleanup_repair")
+
+
+def _search_refinement_is_synthesized(
+    manager: PackageManager | type[PackageManager],
+    flag_name: str,
+) -> bool:
+    """Whether `mpm` backfills one of the manager's search refinements.
+
+    Reads the `exact_support`/`extended_support` introspection attribute the
+    {func}`search_capabilities` decorator (or the config-defined manager builder)
+    sets on the `search` method. An undecorated `search` carries no attribute
+    and is read as natively supporting the refinement. `False` when the manager
+    has no search operation at all.
+    """
+    if not implements(manager, Operations.search):
+        return False
+    cls = manager if isinstance(manager, type) else type(manager)
+    return not getattr(getattr(cls, "search", None), flag_name, True)
+
+
+def exact_search_is_synthesized(
+    manager: PackageManager | type[PackageManager],
+) -> bool:
+    """Whether `mpm` backfills the manager's `search --exact` refinement.
+
+    `True` when the manager's native search cannot filter exact matches, so
+    {meth}`meta_package_manager.manager.PackageManager.refiltered_search` does the
+    narrowing itself. Feeds the per-manager table of `docs/augmentations.md` and
+    the per-manager operation tables, rendered live by `docs/docs_update.py`.
+    """
+    return _search_refinement_is_synthesized(manager, "exact_support")
+
+
+def extended_search_is_synthesized(
+    manager: PackageManager | type[PackageManager],
+) -> bool:
+    """Whether `mpm` backfills the manager's `search --extended` refinement.
+
+    `True` when the manager's native search cannot reach descriptions, so
+    {meth}`meta_package_manager.manager.PackageManager.refiltered_search` does the
+    filtering itself. Feeds the per-manager table of `docs/augmentations.md` and
+    the per-manager operation tables, rendered live by `docs/docs_update.py`.
+    """
+    return _search_refinement_is_synthesized(manager, "extended_support")
 
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):

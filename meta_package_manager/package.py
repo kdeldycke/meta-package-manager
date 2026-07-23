@@ -122,8 +122,6 @@ class Package:
 
         Canonical tokenizer behind {meth}`matches` and the
         `search`/`installed`/`outdated` query matching.
-        {meth}`meta_package_manager.manager.PackageManager.query_parts`
-        delegates here.
         """
         return {p for p in re.split(r"\W+", query) if p}
 

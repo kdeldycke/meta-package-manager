@@ -30,13 +30,11 @@ the theme system to produce the final rendered output from
 
 from __future__ import annotations
 
-import builtins
 import contextlib
 import logging
-from functools import cached_property, partial
+from functools import cached_property
 from io import StringIO
 from pathlib import Path
-from unittest.mock import patch
 
 from boltons.iterutils import flatten
 from click_extra import echo
@@ -214,11 +212,14 @@ class BarPluginRenderer(MPMPlugin):
                 self.print_error(error_msg, submenu)
 
     def render(self, outdated_data) -> str:
-        """Wraps the `_render()` method above to capture all `print`
-        statements."""
+        """Wraps the `_render()` method above to capture its `<stdout>` output.
+
+        Every producer down the `_render` path (the inherited `pp` and
+        `print_error` included) writes through bare `print` calls, so
+        redirecting `<stdout>` captures the whole rendering.
+        """
         capture = StringIO()
-        print_capture = partial(print, file=capture)
-        with patch.object(builtins, "print", new=print_capture):
+        with contextlib.redirect_stdout(capture):
             self._render(outdated_data)
         return capture.getvalue()
 

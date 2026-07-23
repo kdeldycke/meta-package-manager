@@ -270,7 +270,7 @@ class Solver:
     """Combine a set of `Specifier` and allow for the solving of the constraints they
     represent."""
 
-    manager_priority: Sequence[str] = []
+    manager_priority: Sequence[str] = ()
 
     def __init__(
         self,
@@ -454,9 +454,5 @@ class Solver:
         """Resolves package specs, and returns them grouped by managers."""
         packages_per_managers: dict[str | None, set[Specifier]] = {}
         for _package_id, spec in self.resolve_package_specs():
-            manager_id = None
-            if spec:
-                manager_id = spec.manager_id
-            packages_per_managers.setdefault(manager_id, set()).add(spec)
-
+            packages_per_managers.setdefault(spec.manager_id, set()).add(spec)
         return packages_per_managers

@@ -641,15 +641,19 @@ def mpm(
     initial_error_counts = {mid: len(m.cli_errors) for mid, m in pool.register.items()}
 
     def summarize_cli_errors():
-        """End-of-run hint when underlying CLIs reported errors.
+        """End-of-run record when underlying CLIs reported errors.
 
-        Captured stderr is logged at DEBUG (see
-        {func}`CLIExecutor.run_cli`) so a default-verbosity run no longer
-        floods the table with gem extension warnings, mas Spotlight chatter,
-        etc. This summary preserves the "something went sideways" signal in
-        one line, without replicating the noise.
+        Each failed run already relayed its own diagnosis at `WARNING` the
+        moment it happened (see the failure gate in
+        {meth}`~meta_package_manager.execution.CLIExecutor.run`), so this
+        closing line is the aggregated durable record: the one-liner to grep
+        in scrollback or CI logs. A successful command's stderr chatter (gem
+        extension warnings, mas Spotlight noise) still stays out of the
+        default view: only failures relay. The `DEBUG` pointer remains for
+        the full transcript (raw streams, timings, environment), which no
+        post-hoc excerpt reproduces.
 
-        Skipped at DEBUG verbosity (the stderr already appeared inline) and
+        Skipped at DEBUG verbosity (the raw streams appeared inline) and
         in serialization formats (logging is disabled and `cli_errors`
         ships in the structured payload anyway).
         """
@@ -666,7 +670,7 @@ def mpm(
         plural = "managers" if len(failed) > 1 else "manager"
         logging.warning(
             f"{len(failed)} {plural} reported errors during this run "
-            f"({ids}); re-run with --verbosity DEBUG for details.",
+            f"({ids}); full transcript at --verbosity DEBUG.",
         )
 
     ctx.call_on_close(summarize_cli_errors)

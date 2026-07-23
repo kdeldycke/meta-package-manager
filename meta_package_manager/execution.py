@@ -95,6 +95,15 @@ if TYPE_CHECKING:
 
     from .version import TokenizedString
 
+DIAGNOSIS_TAIL_LINES: Final = 10
+"""Trailing lines of a failed command's report relayed at `WARNING`.
+
+CLIs conclude with their actual error, so the tail is where the diagnosis
+lives; the cap keeps a verbose failure (a source build's compiler spew) from
+flooding the default view. The raw streams are always available in full, live,
+at `DEBUG`.
+"""
+
 
 class CLIError(Exception):
     """An error occurred when running package manager CLI."""
@@ -130,6 +139,29 @@ class CLIError(Exception):
         )
         return f"<{self.__class__.__name__}({self.code}, {error_excerpt!r})>"
 
+    @property
+    def diagnosis(self) -> str:
+        """The command's own account of its failure, capped for log relay.
+
+        Prefers `<stderr>`, the conventional stream for error reporting, and
+        falls back on `<stdout>` for the tools that report failures there
+        (steamcmd); a command that died silently is reduced to its exit code.
+        Only the last {data}`DIAGNOSIS_TAIL_LINES` lines are kept, behind a
+        counter of the truncated ones: errors conclude streams.
+        """
+        report = self.error.strip() or self.output.strip()
+        if not report:
+            return f"Exited {self.code} with no output."
+        lines = report.splitlines()
+        hidden = len(lines) - DIAGNOSIS_TAIL_LINES
+        if hidden > 0:
+            plural = "lines" if hidden > 1 else "line"
+            lines = [
+                f"(...) {hidden} earlier {plural} truncated.",
+                *lines[-DIAGNOSIS_TAIL_LINES:],
+            ]
+        return "\n".join(lines)
+
 
 _MUTATING_OPERATIONS: Final[frozenset[str]] = frozenset(
     {"install", "upgrade", "upgrade_all", "remove", "sync", "cleanup"},
@@ -151,6 +183,19 @@ subcommand routes it), but it participates in the same per-operation machinery:
 {data}`OPERATION_TIMEOUTS` binds it to the short read-only cap, and
 {meth}`CLIExecutor.run` demotes its command disclosure to `DEBUG` so the
 per-candidate probes cannot drown the `INFO` narration.
+"""
+
+_DIAGNOSIS_EXEMPT_OPERATIONS: Final[frozenset[str]] = frozenset(
+    {"doctor", VERSION_PROBE},
+)
+"""Operations whose failed runs skip the `WARNING` diagnosis relay.
+
+Version probes fire for every candidate manager on selection, so a broken
+binary would otherwise warn on every single run: their failures stay at
+`DEBUG` with the rest of the discovery narration. `doctor` relays each
+manager's full report verbatim on its own terms and reclaims the failure-gate
+entry (see {meth}`meta_package_manager.manager.PackageManager.doctor`): the
+relay would print the same findings twice.
 """
 
 
@@ -1188,13 +1233,31 @@ class CLIExecutor:
             # A non-interactive escalation that could not authenticate is a
             # missing-credential problem, not a real command failure. Point the user
             # at the fix, naming the manager (this also answers "which one just asked
-            # for my password?").
+            # for my password?"). The tailored message stands in for the generic
+            # diagnosis relay below: the raw "password is required" tail carries
+            # less than the fix.
             is_escalation = clean_args[:2] == _SUDO_ESCALATION_PREFIX
             if is_escalation and _is_sudo_auth_failure(error):
                 logging.warning(
                     "Needs administrator rights but sudo has no cached "
                     "credentials; re-run in a terminal, or with `mpm --sudo` to "
                     "authenticate once up front.",
+                    extra={"label": self.id},  # type: ignore[attr-defined]
+                )
+            # Relay the command's own account of the failure at WARNING, the
+            # moment it happened: the diagnosis is in hand right here, and a
+            # mutating operation cannot be re-run at DEBUG to regenerate it (the
+            # failed run may have half-applied its changes, and a cooldown may
+            # block the retry). Only a *failed* run earns the relay: a successful
+            # command's <stderr> chatter stays at DEBUG. Also skipped at DEBUG
+            # verbosity, where run_cli already streamed the raw output inline.
+            # See https://github.com/kdeldycke/meta-package-manager/issues/1968.
+            elif (
+                self._active_operation not in _DIAGNOSIS_EXEMPT_OPERATIONS
+                and logging.getLogger().getEffectiveLevel() > logging.DEBUG
+            ):
+                logging.warning(
+                    exception.diagnosis,
                     extra={"label": self.id},  # type: ignore[attr-defined]
                 )
             if must_succeed or self.stop_on_error:

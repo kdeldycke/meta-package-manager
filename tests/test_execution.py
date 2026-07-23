@@ -29,8 +29,10 @@ from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
+    _DIAGNOSIS_EXEMPT_OPERATIONS,
     _MUTATING_OPERATIONS,
     DEFAULT_TIMEOUT,
+    DIAGNOSIS_TAIL_LINES,
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
     PLAN_RECORDER,
@@ -203,6 +205,106 @@ def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
         output = manager.run_cli("-c", script, must_succeed=must_succeed)
         assert output == "boom"
         assert manager.cli_errors == []
+
+
+# Diagnosis relay: a failed run promotes its own error report to WARNING at the
+# failure gate, so the default verbosity carries the "why" and not just the ✗
+# signal (issue 1968). Successful chatter, tolerated exits, DEBUG-level runs and
+# exempt operations stay silent.
+
+
+@pytest.mark.parametrize(
+    ("error", "output", "expected"),
+    (
+        pytest.param("boom-err", "boom-out", "boom-err", id="stderr-first"),
+        pytest.param("", "boom-out", "boom-out", id="stdout-fallback"),
+        pytest.param(" \n ", "", "Exited 8 with no output.", id="silent-death"),
+        pytest.param(
+            "\n".join(f"line-{i}" for i in range(DIAGNOSIS_TAIL_LINES)),
+            "",
+            "\n".join(f"line-{i}" for i in range(DIAGNOSIS_TAIL_LINES)),
+            id="cap-boundary-untouched",
+        ),
+        pytest.param(
+            "\n".join(f"line-{i}" for i in range(DIAGNOSIS_TAIL_LINES + 1)),
+            "",
+            "(...) 1 earlier line truncated.\n"
+            + "\n".join(f"line-{i}" for i in range(1, DIAGNOSIS_TAIL_LINES + 1)),
+            id="cap-overflow-tail",
+        ),
+        pytest.param(
+            "\n".join(f"line-{i}" for i in range(DIAGNOSIS_TAIL_LINES + 2)),
+            "",
+            "(...) 2 earlier lines truncated.\n"
+            + "\n".join(f"line-{i}" for i in range(2, DIAGNOSIS_TAIL_LINES + 2)),
+            id="cap-overflow-plural",
+        ),
+    ),
+)
+def test_cli_error_diagnosis(error, output, expected):
+    """`CLIError.diagnosis` prefers `<stderr>`, falls back on `<stdout>`, states a
+    silent death, and tail-caps with a truncation counter."""
+    assert CLIError(8, output, error).diagnosis == expected
+
+
+@pytest.mark.parametrize(
+    ("stop_on_error", "script", "expected"),
+    (
+        # The conventional failure relays its <stderr> tail.
+        pytest.param(False, FAIL_ON_STDERR, "boom", id="accumulated-stderr"),
+        # The action context relays the steamcmd-style <stdout> report.
+        pytest.param(True, FAIL_ON_STDOUT, "boom", id="raised-stdout-fallback"),
+    ),
+)
+def test_failed_run_relays_diagnosis(stop_on_error, script, expected, caplog):
+    """The failure gate logs the diagnosis at WARNING, tagged with the manager ID,
+    for accumulated and raised failures alike."""
+    manager = FakeManager()
+    manager.stop_on_error = stop_on_error
+    with caplog.at_level(logging.INFO):
+        if stop_on_error:
+            with pytest.raises(CLIError):
+                manager.run_cli("-c", script)
+        else:
+            manager.run_cli("-c", script)
+    warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
+    assert [r.getMessage() for r in warnings] == [expected]
+    assert warnings[0].label == manager.id
+
+
+@pytest.mark.parametrize(
+    ("script", "level"),
+    (
+        # A tolerated non-zero exit (empty <stderr>) is not a failure.
+        pytest.param(FAIL_ON_STDOUT, logging.INFO, id="tolerated-exit"),
+        # A successful command's <stderr> chatter stays at DEBUG.
+        pytest.param(
+            "import sys; sys.stderr.write('chatter')",
+            logging.INFO,
+            id="success-chatter",
+        ),
+        # At DEBUG verbosity the raw output was already streamed inline.
+        pytest.param(FAIL_ON_STDERR, logging.DEBUG, id="debug-streams-inline"),
+    ),
+)
+def test_no_diagnosis_relay(script, level, caplog):
+    """No WARNING relay without a genuine failure, nor when DEBUG already streamed
+    the raw output inline."""
+    manager = FakeManager()
+    with caplog.at_level(level):
+        manager.run_cli("-c", script)
+    assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
+
+
+@pytest.mark.parametrize("operation", sorted(_DIAGNOSIS_EXEMPT_OPERATIONS))
+def test_exempt_operations_skip_diagnosis_relay(operation, caplog):
+    """Version probes (fired per candidate on selection) and doctor (which relays
+    its report verbatim) fail without the WARNING relay."""
+    manager = FakeManager()
+    with caplog.at_level(logging.INFO), manager.acting_as(operation):
+        manager.run_cli("-c", FAIL_ON_STDERR)
+    assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
+    assert [error.code for error in manager.cli_errors] == [8]
 
 
 # CLIExecutor.run_cache: lock-family peers replay a byte-identical command instead of

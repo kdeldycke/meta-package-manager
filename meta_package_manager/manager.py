@@ -905,7 +905,10 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
           exit may have accumulated is reclaimed from
           {attr}`~meta_package_manager.execution.CLIExecutor.cli_errors`, so
           the end-of-run error summary is not inflated by a verdict `mpm
-          doctor` already reports on its own. A run that never completed
+          doctor` already reports on its own. The gate's `WARNING` diagnosis
+          relay is skipped for the same reason (`doctor` sits in the gate's
+          `_DIAGNOSIS_EXEMPT_OPERATIONS`): the findings land in the report,
+          verbatim. A run that never completed
           (timeout, interrupt, missing binary) keeps its entry: that is a
           genuine plumbing error, and the manager reports unhealthy.
         """

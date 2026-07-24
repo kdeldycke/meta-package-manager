@@ -348,10 +348,10 @@ print(benchmark_managers_table())
 | Version benchmarked | `7.4.0`                                                                                                                                           | `17.8.0`                                                                                                                                | `0.23.1`                                                                                                                          |                                                             `6.0.12`                                                             |
 | Benchmark date      | 2026-07                                                                                                                                           | 2026-07                                                                                                                                 | 2026-07                                                                                                                           |                                                             2026-07                                                              |
 
-:::{admonition} Coming from `pacapt`, `sysget` or `whohas`?
-:class: tip
+\:::\{admonition} Coming from `pacapt`, `sysget` or `whohas`?
+\:class: tip
 These three were `mpm`'s closest peers: single-command wrappers that ran search, install, remove and upgrade across whatever package manager was on the host. All three are now unmaintained — [`pacapt`](https://github.com/icy/pacapt) last released in 2022, [`sysget`](https://github.com/cvengler/sysget) in 2019 and [`whohas`](https://github.com/whohas/whohas) in 2015. `mpm` covers the same cross-manager operations — search, install, remove, upgrade, sync and cleanup — across many more backends, so their users can retire them and switch to `mpm`.
-:::
+\:::
 
 ## Project's URL
 

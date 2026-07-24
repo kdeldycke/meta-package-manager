@@ -300,10 +300,10 @@ class Pacman(PackageManager):
 
         ```{code-block} shell-session
 
-        $ pacman --noconfirm --color never --sync --refresh
+        $ sudo pacman --noconfirm --color never --sync --refresh
         ```
         """
-        self.run_cli("--sync", "--refresh")
+        self.run_cli("--sync", "--refresh", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.

@@ -34,7 +34,6 @@ from meta_package_manager.capabilities import (
     implements,
     implements_method,
     supports_cleanup_cache,
-    supports_cleanup_orphan,
     supports_cleanup_repair,
 )
 from meta_package_manager.manager import PackageManager
@@ -206,7 +205,10 @@ def test_cleanup_orphan_capability_matrix(manager_id, synthesized, supported):
     per-package removal but no native sweep verb, mirroring `upgrade --all`."""
     manager = pool[manager_id]
     assert cleanup_orphan_is_synthesized(manager) is synthesized
-    assert supports_cleanup_orphan(manager) is supported
+    assert (
+        implements_method(manager, "cleanup_orphan")
+        or cleanup_orphan_is_synthesized(manager)
+    ) is supported
 
 
 @pytest.mark.parametrize(

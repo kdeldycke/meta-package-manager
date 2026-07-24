@@ -48,7 +48,9 @@ $ uvx meta-package-manager
 - [Install a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-install).
 - [Remove a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-remove).
 - [List outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-outdated).
+- [List orphaned packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-orphans).
 - [Sync local package infos](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-sync).
+- [Diagnose the health of package managers](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-doctor).
 - [Upgrade all outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-upgrade).
 - [Mitigate supply-chain attacks](https://kdeldycke.github.io/meta-package-manager/cooldown.html) with a release-age cooldown that refuses too-recent versions: `mpm --cooldown "7 days" upgrade --all`.
 - [Snapshot installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-dump) to a TOML manifest or a Brewfile.

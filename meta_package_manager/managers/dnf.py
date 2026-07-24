@@ -291,10 +291,10 @@ class DNF(PackageManager):
 
         ```{code-block} shell-session
 
-        $ dnf --color=never --quiet clean all
+        $ sudo dnf --color=never --quiet clean all
         ```
         """
-        self.run_cli("clean", "all")
+        self.run_cli("clean", "all", sudo=True)
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.

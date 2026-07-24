@@ -201,19 +201,6 @@ def cleanup_orphan_is_synthesized(
     )
 
 
-def supports_cleanup_orphan(
-    manager: PackageManager | type[PackageManager],
-) -> bool:
-    """Whether `mpm cleanup --orphans` can drive the manager at all.
-
-    Either through a native sweep verb (`implements_method`) or through the
-    synthesized fallback ({func}`cleanup_orphan_is_synthesized`).
-    """
-    return implements_method(
-        manager, "cleanup_orphan"
-    ) or cleanup_orphan_is_synthesized(manager)
-
-
 def supports_cleanup_cache(
     manager: PackageManager | type[PackageManager],
 ) -> bool:

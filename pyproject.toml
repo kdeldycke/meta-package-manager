@@ -189,17 +189,24 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.5.0 is the floor mpm targets. It renames the --show-params
-  # introspection flag to --params (the name the bug-report template, the
-  # documentation and the binary test plan now reference), ships run_cli's
-  # start_new_session mode (the manager invocation leads its own POSIX session
-  # and process group, so timeouts and Ctrl+C reap wedged grandchildren) and
-  # promotes print_table / render_table to Context methods reading
-  # --table-format and --sort-by from the shared meta.
-  # meta_package_manager.dispatch additionally rides click-extra git main for
-  # OperationTrail (the batch ✓/✗ trail upstreamed from mpm's dispatch layer):
-  # when the next click-extra release ships it, bump this floor accordingly
-  # while dropping the [tool.uv.sources] git override below.
+  # click-extra 8.6.0 is the floor mpm targets. It ships OperationTrail, the
+  # batch ✓/✗ trail upstreamed from mpm's own dispatch layer, which
+  # meta_package_manager.dispatch now subclasses (with the trail_glyph /
+  # trail_line atoms), plus the mirror-block fix making `click-extra
+  # refresh-directives` run `python:render` `:mirror:` blocks with the page's
+  # directory on sys.path (the offline docs regen of benchmark.md and
+  # augmentations.md relies on it), the newest-first `column-order` /
+  # `row-order` defaults of the `{matrix}` directive behind the compatibility
+  # tables of docs/install.md and docs/packaging.md, and the test-suite fix
+  # keeping a venv's symlinked interpreter unresolved (so the binary test plan
+  # sees the venv's own packages).
+  # The 8.5.0 series renamed the --show-params introspection flag to --params
+  # (the name the bug-report template, the documentation and the binary test
+  # plan reference), shipped run_cli's start_new_session mode (the manager
+  # invocation leads its own POSIX session and process group, so timeouts and
+  # Ctrl+C reap wedged grandchildren) and promoted print_table / render_table
+  # to Context methods reading --table-format and --sort-by from the shared
+  # meta.
   # The 8.4.0 series brought the subprocess-execution primitives
   # meta_package_manager.execution delegates to:
   #   - run_cli, the spawn/stream/timeout engine disclosing invocations at INFO
@@ -220,8 +227,8 @@ dependencies = [
   # the split click_extra.highlight module, the ConfigValidator /
   # ValidationError import move to click_extra.config, print_table()'s
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
-  # default; 8.5.0 covers them all.
-  "click-extra>=8.5",
+  # default; 8.6.0 covers them all.
+  "click-extra>=8.6",
   # extra-platforms 13.1.0 adds the ChromeOS, Clear Linux, SliTaz and Source Mage
   # detections that the chromebrew, swupd, tazpkg and sorcery managers declare.
   "extra-platforms>=13.1",
@@ -380,17 +387,12 @@ packages.find.include = [ "meta_package_manager*" ]
 
 [tool.uv]
 required-version = ">=0.11.23,<0.12"
-# Track click-extra's main branch, which carries the unreleased mirror-block fix:
-# `click-extra refresh-directives` executes `python:render` `:mirror:` blocks with
-# the page's directory on sys.path, so the `from docs_update import ...` generator
-# imports of docs/benchmark.md and docs/augmentations.md work offline. The lockfile
-# pins the exact commit; refresh it with `uv lock --upgrade-package click-extra`.
-# Drop this override once the fix is published, and re-add the dated
-# exclude-newer-package pin for click-extra to pull the fresh release through the
-# cooldown below.
-sources.click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
+# Per-package overrides for freshly-published dependencies we want to pull in
+# before the global cooldown would normally let them through. Date format
+# uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
+exclude-newer-package = { click-extra = "2026-07-25T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

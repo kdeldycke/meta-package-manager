@@ -5,6 +5,9 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Raise the click-extra floor from `8.5.0` to `8.6.0`, the release shipping the `OperationTrail` batch `✓`/`✗` trail upstreamed from mpm's own dispatch layer, which mpm now consumes from the published package instead of a git checkout.
+- [mpm] The Python and click-extra compatibility tables of the documentation read newest-first on both axes, following click-extra `8.6.0`'s `{matrix}` ordering defaults: the most recent compatibility information sits in the upper-left corner.
+- [mpm] Bump the packaging pins of click-extra to `8.6.0` across the Nix, MacPorts and Alpine overlays, to match mpm's dependency floor.
 - **Breaking:** [mpm] Remove the `PackageManager.query_parts` class method: `Package.query_parts` is the canonical query tokenizer.
 - **Breaking:** [mpm] The SBOM `stats()` dictionaries drop the `components_in_document` (CycloneDX) and `relationships_total` (SPDX) keys, which no consumer read.
 - [mpm] Package managers gain shared `parse_regex_lines` and `parse_json_items` engines on the base class: configuration-defined operations and built-in managers now parse their listings through the same code path.

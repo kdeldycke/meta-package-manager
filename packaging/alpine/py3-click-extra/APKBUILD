@@ -1,6 +1,6 @@
 # Maintainer: Kevin Deldycke <kevin@deldycke.com>
 pkgname=py3-click-extra
-pkgver=8.5.0
+pkgver=8.6.0
 pkgrel=0
 pkgdesc="Drop-in replacement for Click to build user-friendly and colorful CLIs"
 url="https://github.com/kdeldycke/click-extra"
@@ -44,5 +44,5 @@ package() {
 }
 
 sha512sums="
-3f279f6aa4d803c769c75162b327b0fe6cb1e31a1df7d09dc48e04f3bbfc8a644752e46a5fb363efd81fe8e612c802f539e822c452af5f61f8c11d3e2983ef88  click_extra-8.5.0.tar.gz
+8b6b902d5bb3dcbd1a33b9b9e88f1f99dd0b0c143fc25b29e018d7d4e28faa197d35056d1af3a3838f5b717266e05796dd09118c8a85645c81ffce999231c914  click_extra-8.6.0.tar.gz
 "

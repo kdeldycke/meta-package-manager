@@ -1,4 +1,4 @@
-# {octicon}`download` Snapshot and export
+# {octicon}`file-moved` Snapshot and export
 
 `mpm` can capture the installed-package inventory in two complementary formats:
 

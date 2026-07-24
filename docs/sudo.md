@@ -1,4 +1,4 @@
-# {octicon}`passkey-fill` Privilege escalation and `sudo`
+# {octicon}`key` Privilege escalation and `sudo`
 
 Most Linux package managers need `sudo` to perform system-wide operations, and on other OSes you may be prompted for your password to install privileged payloads (a macOS cask shipping a kernel extension or a `.pkg` installer, for example):
 

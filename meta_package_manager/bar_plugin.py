@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # <xbar.title>Meta Package Manager</xbar.title>
-# <xbar.version>7.4.0.dev0</xbar.version>
+# <xbar.version>8.0.0.dev0</xbar.version>
 # <xbar.author>Kevin Deldycke</xbar.author>
 # <xbar.author.github>kdeldycke</xbar.author.github>
 # <xbar.desc>List outdated packages and manage upgrades.</xbar.desc>

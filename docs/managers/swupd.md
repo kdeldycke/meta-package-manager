@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("swupd"))
 ```
 
+## What `mpm` adds to `swupd`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("swupd"))
+```
+
+## Your `swupd` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("swupd"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("swupd"))
 from docs_update import manager_usage
 
 print(manager_usage("swupd"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("swupd"))
 ```
 
 ## Command line

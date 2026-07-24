@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("macports"))
 ```
 
+## What `mpm` adds to `macports`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("macports"))
+```
+
+## Your `macports` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("macports"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("macports"))
 from docs_update import manager_usage
 
 print(manager_usage("macports"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("macports"))
 ```
 
 ## Command line

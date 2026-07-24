@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("xbps"))
 ```
 
+## What `mpm` adds to `xbps`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("xbps"))
+```
+
+## Your `xbps` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("xbps"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("xbps"))
 from docs_update import manager_usage
 
 print(manager_usage("xbps"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("xbps"))
 ```
 
 ## Command line

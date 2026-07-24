@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("gh-ext"))
 ```
 
+## What `mpm` adds to `gh-ext`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("gh-ext"))
+```
+
+## Your `gh-ext` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("gh-ext"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("gh-ext"))
 from docs_update import manager_usage
 
 print(manager_usage("gh-ext"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("gh-ext"))
 ```
 
 ## Command line

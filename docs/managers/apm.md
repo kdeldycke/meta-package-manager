@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("apm"))
 ```
 
+## What `mpm` adds to `apm`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("apm"))
+```
+
+## Your `apm` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("apm"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("apm"))
 from docs_update import manager_usage
 
 print(manager_usage("apm"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("apm"))
 ```
 
 ## Command line

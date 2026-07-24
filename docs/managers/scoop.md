@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("scoop"))
 ```
 
+## What `mpm` adds to `scoop`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("scoop"))
+```
+
+## Your `scoop` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("scoop"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("scoop"))
 from docs_update import manager_usage
 
 print(manager_usage("scoop"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("scoop"))
 ```
 
 ## Command line

@@ -6,6 +6,14 @@ from docs_update import manager_intro
 print(manager_intro("yarn-berry"))
 ```
 
+## What `mpm` adds to `yarn-berry`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("yarn-berry"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +44,14 @@ print(manager_ecosystem("yarn-berry"))
 from docs_update import manager_usage
 
 print(manager_usage("yarn-berry"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("yarn-berry"))
 ```
 
 ## Command line

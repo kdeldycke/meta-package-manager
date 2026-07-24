@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("fink"))
 ```
 
+## What `mpm` adds to `fink`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("fink"))
+```
+
+## Your `fink` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("fink"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("fink"))
 from docs_update import manager_usage
 
 print(manager_usage("fink"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("fink"))
 ```
 
 ## Command line

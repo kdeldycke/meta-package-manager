@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("apt-cyg"))
 ```
 
+## What `mpm` adds to `apt-cyg`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("apt-cyg"))
+```
+
+## Your `apt-cyg` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("apt-cyg"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("apt-cyg"))
 from docs_update import manager_usage
 
 print(manager_usage("apt-cyg"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("apt-cyg"))
 ```
 
 ## Command line

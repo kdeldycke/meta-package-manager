@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("slapt-get"))
 ```
 
+## What `mpm` adds to `slapt-get`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("slapt-get"))
+```
+
+## Your `slapt-get` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("slapt-get"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("slapt-get"))
 from docs_update import manager_usage
 
 print(manager_usage("slapt-get"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("slapt-get"))
 ```
 
 ## Command line

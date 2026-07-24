@@ -6,6 +6,14 @@ from docs_update import manager_intro
 print(manager_intro("winget"))
 ```
 
+## What `mpm` adds to `winget`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("winget"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +44,14 @@ print(manager_ecosystem("winget"))
 from docs_update import manager_usage
 
 print(manager_usage("winget"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("winget"))
 ```
 
 ## Command line

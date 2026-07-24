@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("chromebrew"))
 ```
 
+## What `mpm` adds to `chromebrew`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("chromebrew"))
+```
+
+## Your `chromebrew` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("chromebrew"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("chromebrew"))
 from docs_update import manager_usage
 
 print(manager_usage("chromebrew"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("chromebrew"))
 ```
 
 ## Command line

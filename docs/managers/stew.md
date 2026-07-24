@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("stew"))
 ```
 
+## What `mpm` adds to `stew`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("stew"))
+```
+
+## Your `stew` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("stew"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("stew"))
 from docs_update import manager_usage
 
 print(manager_usage("stew"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("stew"))
 ```
 
 ## Command line

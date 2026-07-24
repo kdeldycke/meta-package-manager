@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("pacstall"))
 ```
 
+## What `mpm` adds to `pacstall`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("pacstall"))
+```
+
+## Your `pacstall` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("pacstall"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("pacstall"))
 from docs_update import manager_usage
 
 print(manager_usage("pacstall"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("pacstall"))
 ```
 
 ## Command line

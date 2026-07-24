@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("pip"))
 ```
 
+## What `mpm` adds to `pip`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("pip"))
+```
+
+## Your `pip` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("pip"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("pip"))
 from docs_update import manager_usage
 
 print(manager_usage("pip"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("pip"))
 ```
 
 ## Command line

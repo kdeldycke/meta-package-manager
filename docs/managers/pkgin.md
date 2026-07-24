@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("pkgin"))
 ```
 
+## What `mpm` adds to `pkgin`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("pkgin"))
+```
+
+## Your `pkgin` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("pkgin"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("pkgin"))
 from docs_update import manager_usage
 
 print(manager_usage("pkgin"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("pkgin"))
 ```
 
 ## Command line

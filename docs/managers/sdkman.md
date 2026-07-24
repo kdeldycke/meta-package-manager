@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("sdkman"))
 ```
 
+## What `mpm` adds to `sdkman`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("sdkman"))
+```
+
+## Your `sdkman` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("sdkman"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("sdkman"))
 from docs_update import manager_usage
 
 print(manager_usage("sdkman"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("sdkman"))
 ```
 
 ## Command line

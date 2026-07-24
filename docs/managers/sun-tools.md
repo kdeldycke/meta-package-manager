@@ -6,6 +6,14 @@ from docs_update import manager_intro
 print(manager_intro("sun-tools"))
 ```
 
+## What `mpm` adds to `sun-tools`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("sun-tools"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +44,14 @@ print(manager_ecosystem("sun-tools"))
 from docs_update import manager_usage
 
 print(manager_usage("sun-tools"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("sun-tools"))
 ```
 
 ## Command line

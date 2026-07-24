@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("vscode"))
 ```
 
+## What `mpm` adds to `vscode`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("vscode"))
+```
+
+## Your `vscode` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("vscode"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("vscode"))
 from docs_update import manager_usage
 
 print(manager_usage("vscode"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("vscode"))
 ```
 
 ## Command line

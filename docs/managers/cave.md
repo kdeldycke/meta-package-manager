@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("cave"))
 ```
 
+## What `mpm` adds to `cave`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("cave"))
+```
+
+## Your `cave` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("cave"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("cave"))
 from docs_update import manager_usage
 
 print(manager_usage("cave"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("cave"))
 ```
 
 ## Command line

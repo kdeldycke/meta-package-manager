@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("yarn"))
 ```
 
+## What `mpm` adds to `yarn`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("yarn"))
+```
+
+## Your `yarn` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("yarn"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("yarn"))
 from docs_update import manager_usage
 
 print(manager_usage("yarn"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("yarn"))
 ```
 
 ## Command line

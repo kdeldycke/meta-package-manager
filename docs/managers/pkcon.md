@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("pkcon"))
 ```
 
+## What `mpm` adds to `pkcon`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("pkcon"))
+```
+
+## Your `pkcon` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("pkcon"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("pkcon"))
 from docs_update import manager_usage
 
 print(manager_usage("pkcon"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("pkcon"))
 ```
 
 ## Command line

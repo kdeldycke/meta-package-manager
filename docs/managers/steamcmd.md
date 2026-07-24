@@ -6,6 +6,14 @@ from docs_update import manager_intro
 print(manager_intro("steamcmd"))
 ```
 
+## What `mpm` adds to `steamcmd`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("steamcmd"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +44,14 @@ print(manager_ecosystem("steamcmd"))
 from docs_update import manager_usage
 
 print(manager_usage("steamcmd"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("steamcmd"))
 ```
 
 ## Command line

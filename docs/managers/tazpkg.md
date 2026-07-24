@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("tazpkg"))
 ```
 
+## What `mpm` adds to `tazpkg`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("tazpkg"))
+```
+
+## Your `tazpkg` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("tazpkg"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("tazpkg"))
 from docs_update import manager_usage
 
 print(manager_usage("tazpkg"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("tazpkg"))
 ```
 
 ## Command line

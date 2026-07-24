@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("pwsh-gallery"))
 ```
 
+## What `mpm` adds to `pwsh-gallery`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("pwsh-gallery"))
+```
+
+## Your `pwsh-gallery` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("pwsh-gallery"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("pwsh-gallery"))
 from docs_update import manager_usage
 
 print(manager_usage("pwsh-gallery"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("pwsh-gallery"))
 ```
 
 ## Command line

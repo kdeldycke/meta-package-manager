@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("conda"))
 ```
 
+## What `mpm` adds to `conda`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("conda"))
+```
+
+## Your `conda` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("conda"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("conda"))
 from docs_update import manager_usage
 
 print(manager_usage("conda"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("conda"))
 ```
 
 ## Command line

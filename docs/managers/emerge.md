@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("emerge"))
 ```
 
+## What `mpm` adds to `emerge`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("emerge"))
+```
+
+## Your `emerge` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("emerge"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("emerge"))
 from docs_update import manager_usage
 
 print(manager_usage("emerge"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("emerge"))
 ```
 
 ## Command line

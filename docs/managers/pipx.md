@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("pipx"))
 ```
 
+## What `mpm` adds to `pipx`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("pipx"))
+```
+
+## Your `pipx` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("pipx"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("pipx"))
 from docs_update import manager_usage
 
 print(manager_usage("pipx"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("pipx"))
 ```
 
 ## Command line

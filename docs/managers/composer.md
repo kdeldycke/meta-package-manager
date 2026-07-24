@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("composer"))
 ```
 
+## What `mpm` adds to `composer`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("composer"))
+```
+
+## Your `composer` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("composer"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("composer"))
 from docs_update import manager_usage
 
 print(manager_usage("composer"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("composer"))
 ```
 
 ## Command line

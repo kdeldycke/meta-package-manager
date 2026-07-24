@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("yum"))
 ```
 
+## What `mpm` adds to `yum`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("yum"))
+```
+
+## Your `yum` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("yum"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("yum"))
 from docs_update import manager_usage
 
 print(manager_usage("yum"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("yum"))
 ```
 
 ## Command line

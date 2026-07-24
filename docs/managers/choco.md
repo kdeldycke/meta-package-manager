@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("choco"))
 ```
 
+## What `mpm` adds to `choco`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("choco"))
+```
+
+## Your `choco` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("choco"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("choco"))
 from docs_update import manager_usage
 
 print(manager_usage("choco"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("choco"))
 ```
 
 ## Command line

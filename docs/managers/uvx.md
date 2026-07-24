@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("uvx"))
 ```
 
+## What `mpm` adds to `uvx`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("uvx"))
+```
+
+## Your `uvx` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("uvx"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("uvx"))
 from docs_update import manager_usage
 
 print(manager_usage("uvx"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("uvx"))
 ```
 
 ## Command line

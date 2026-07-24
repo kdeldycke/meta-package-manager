@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("zypper"))
 ```
 
+## What `mpm` adds to `zypper`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("zypper"))
+```
+
+## Your `zypper` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("zypper"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("zypper"))
 from docs_update import manager_usage
 
 print(manager_usage("zypper"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("zypper"))
 ```
 
 ## Command line

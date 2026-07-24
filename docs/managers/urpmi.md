@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("urpmi"))
 ```
 
+## What `mpm` adds to `urpmi`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("urpmi"))
+```
+
+## Your `urpmi` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("urpmi"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("urpmi"))
 from docs_update import manager_usage
 
 print(manager_usage("urpmi"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("urpmi"))
 ```
 
 ## Command line

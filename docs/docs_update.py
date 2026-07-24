@@ -65,7 +65,9 @@ from meta_package_manager.capabilities import (
     upgrade_all_is_synthesized,
 )
 from meta_package_manager.docstring_corpus import (
+    block_commands,
     block_language,
+    class_display_blocks,
     literal_blocks,
     version_trace,
 )
@@ -172,10 +174,13 @@ differs from its ID (like `gh-ext` and `github cli`), add the alias here.
 
 MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     (None, "manager_intro"),
+    ("What `mpm` adds to `{manager_id}`", "manager_augments"),
+    ("Your `{manager_id}` commands, in `mpm`", "manager_rosetta"),
     ("Platforms", "manager_platforms"),
     ("Operations", "manager_operations"),
     ("Ecosystem", "manager_ecosystem"),
     ("Usage", "manager_usage"),
+    ("Recipes", "manager_recipes"),
     ("Command line", "manager_cli"),
     ("Privilege escalation", "manager_sudo"),
     ("Cooldown", "manager_cooldown"),
@@ -184,10 +189,13 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
 """Layout of a per-manager documentation page: section title, generator function.
 
 Single source of truth for {func}`manager_page_stub` and the structural tests.
-Sections promote `mpm` usage first, then document `mpm`'s preconceptions
-about the native tool (its invocation, then the captured traces backing the
-parsers). A section whose generator produces nothing for a given manager is
-omitted from its stub.
+Sections lead with the `mpm` pitch (what it adds to the native tool) and its
+usage, then document `mpm`'s preconceptions about the tool (its invocation,
+then the captured traces backing the parsers). A section whose generator
+produces nothing for a given manager is omitted from its stub.
+
+Each title is a `str.format` template receiving the manager ID, so a heading
+can name its manager; a title with no replacement field renders unchanged.
 
 The headings live in the committed stubs, never in the generated content: the
 ``{python:render}`` directive nested-parses its output into the surrounding
@@ -651,6 +659,266 @@ def manager_intro(manager_id: str) -> str:
     return "\n\n".join(blocks)
 
 
+def _ecosystem_siblings(manager_id: str) -> list[str]:
+    """Pool managers sharing a purl ecosystem with the given one.
+
+    Two managers are siblings when {data}`~meta_package_manager.specifier.PURL_MAP`
+    maps them to at least one common purl type: `uv`, `pip` and `pipx` all
+    resolve `pkg:pypi`, so they surface each other. Used by
+    {func}`manager_augments` to name the relatable neighbors a single-ecosystem
+    user already juggles. Sorted, self excluded; empty for a manager whose purl
+    types no other pool manager shares (`cargo`, `gem`).
+    """
+    pool_ids = set(pool.all_manager_ids)
+    types = {t for t, ids in PURL_MAP.items() if ids and manager_id in ids}
+    siblings: set[str] = set()
+    for purl_type, ids in PURL_MAP.items():
+        if purl_type in types and ids:
+            siblings |= set(ids) & pool_ids
+    return sorted(siblings - {manager_id})
+
+
+def _augment_gains(manager_id: str) -> list[str]:
+    """List the capabilities `mpm` backfills for this manager specifically.
+
+    One entry per selective augmentation the manager relies on, read from the
+    same capability introspection that feeds {func}`augmentations_table`:
+    synthesized full `upgrade --all`, synthesized orphan sweep, and refiltered
+    `--exact`/`--extended` search. Each is phrased as what `mpm` adds, never as
+    a native limitation: the introspection proves `mpm` synthesizes the
+    operation for the interface it drives, not that the tool as a whole lacks it
+    (the `uv` id drives uv's `pip` interface, while `uvx` drives `uv tool`,
+    which does ship a native `upgrade --all`). Empty for a feature-complete
+    manager.
+    """
+    m = pool[manager_id]
+    gains = []
+    if upgrade_all_is_synthesized(m):
+        gains.append(
+            "a one-command `upgrade --all` that refreshes every outdated package "
+            "in a single run",
+        )
+    if cleanup_orphan_is_synthesized(m):
+        gains.append(
+            "a one-command `cleanup --orphans` that removes every orphaned "
+            "dependency at once",
+        )
+    exact = exact_search_is_synthesized(m)
+    extended = extended_search_is_synthesized(m)
+    if exact and extended:
+        gains.append(
+            "`--exact` and `--extended` search, to narrow to exact names or match "
+            "descriptions",
+        )
+    elif exact:
+        gains.append("`--exact` search, to narrow results to exact names")
+    elif extended:
+        gains.append("`--extended` search, to match against package descriptions")
+    return gains
+
+
+def manager_augments(manager_id: str) -> str:
+    """Produce the "What `mpm` adds" section of a manager's documentation page.
+
+    Rendered live at Sphinx build time by the second ``{python:render}`` block
+    of `docs/managers/<id>.md`, right after the intro: the pitch for a reader
+    who already knows the native tool. Stacks the manager-specific backfills
+    ({func}`_augment_gains`), the cross-manager reach naming the ecosystem
+    neighbors the reader already juggles ({func}`_ecosystem_siblings`), and the
+    universal augmentations shared by every managed tool. Every claim describes
+    what `mpm` does, derived from the capability introspection, so the section
+    can neither overstate a native limitation nor drift from the code. Points at
+    `docs/augmentations.md` for the full, cross-manager treatment.
+    """
+    gains = _augment_gains(manager_id)
+
+    siblings = _ecosystem_siblings(manager_id)
+    peers = (
+        ", ".join(f"`{sibling}`" for sibling in siblings)
+        + " and any other manager you run"
+        if siblings
+        else "every other manager you run"
+    )
+    reach_body = (
+        f"`mpm installed` and `mpm outdated` cover `{manager_id}` alongside {peers} "
+        "in one table, `mpm upgrade --all` updates them together, and `mpm sbom` "
+        "exports the whole machine as one bill of materials."
+    )
+    universal = (
+        "Every `mpm` command also gains `--dry-run` and `--plan` previews, "
+        "cross-scheme version comparison and purl identifiers. See "
+        "[manager augmentations](../augmentations.md) for how each one is built."
+    )
+
+    if gains:
+        lede = f"Through `mpm`, `{manager_id}` gains:"
+        bullets = "\n".join(f"- {gain}" for gain in gains)
+        reach = (
+            f"Bigger still, `mpm` reaches across every manager at once: {reach_body}"
+        )
+        return "\n\n".join((lede, bullets, reach, universal))
+    reach = (
+        f"`mpm` reaches across every manager at once, not `{manager_id}` alone: "
+        f"{reach_body}"
+    )
+    return "\n\n".join((reach, universal))
+
+
+ROSETTA_OPERATIONS: tuple[tuple[str, str, str, bool], ...] = (
+    # (manager method, task label, mpm-command template, whether it takes an operand).
+    ("installed", "List what's installed", "mpm --{id} installed", False),
+    ("outdated", "List outdated packages", "mpm --{id} outdated", False),
+    ("search", "Search for a package", "mpm --{id} search {op}", True),
+    ("install", "Install a package", "mpm install pkg:{id}/{op}", True),
+    ("upgrade_one_cli", "Upgrade one package", "mpm --{id} upgrade {op}", True),
+    ("upgrade_all_cli", "Upgrade everything", "mpm --{id} upgrade --all", False),
+    ("remove", "Remove a package", "mpm remove pkg:{id}/{op}", True),
+    ("orphans", "List orphaned dependencies", "mpm --{id} orphans", False),
+    ("cleanup_cache", "Clear caches", "mpm --{id} cleanup --cache", False),
+    ("doctor_cli", "Run health checks", "mpm --{id} doctor", False),
+)
+"""Rows of the Rosetta table, in display order.
+
+Each tuple is the native operation method, its task label, the `mpm` command
+template and whether the command takes a package operand. The native call is
+harvested from the method's own documented sample; a row is dropped when
+nothing is harvestable (see {func}`manager_rosetta`).
+"""
+
+_ROSETTA_TOML_MEMBER = {
+    "upgrade_one_cli": "upgrade_one",
+    "upgrade_all_cli": "upgrade_all",
+    "doctor_cli": "doctor",
+}
+"""Methods whose name differs from their operation key in a bundled TOML definition."""
+
+
+def _native_invocation(manager, member: str) -> tuple[list[str], str | None] | None:
+    """Return the native command tokens and operand documented for an operation.
+
+    The command is read from the manager's own captured sample, so it is exactly
+    what the tool is invoked with: a bundled TOML manager's operation spec
+    (`cli` plus `args`), or the first documented `shell-session` block of a
+    class-based manager's method. The MRO is walked so an operation defined on a
+    shared base (`Homebrew` for `brew`/`cask`) is found, not just the leaf class
+    body. The forced arguments {func}`manager_cli` documents separately are
+    stripped to leave the recognizable native form, a trailing `| jq`-style
+    illustration is dropped, and the operand is the last non-flag token. `None`
+    when the operation documents no command.
+    """
+    forced = set(manager.pre_args) | set(manager.post_args)
+
+    tokens = None
+    source = getattr(manager, "definition_source", None)
+    if source:
+        operations = _toml_definition(source)["mpm"]["managers"][manager.id].get(
+            "operations",
+            {},
+        )
+        spec = operations.get(_ROSETTA_TOML_MEMBER.get(member, member))
+        if spec:
+            tokens = [spec.get("cli", manager.cli_names[0]), *spec.get("args", ())]
+    else:
+        for klass in type(manager).__mro__:
+            try:
+                blocks = class_display_blocks(klass).get(member, ())
+            except (TypeError, OSError):
+                continue  # A built-in base (object) has no source to harvest.
+            commands = block_commands(blocks[0]) if blocks else []
+            if commands:
+                tokens = commands[0]
+                break
+
+    if not tokens:
+        return None
+    if "|" in tokens:  # Drop a `... | jq` illustration, keep the real command.
+        tokens = tokens[: tokens.index("|")]
+    core = [t for t in tokens if t not in forced]
+    if not core:
+        return None
+    operand = next((t for t in reversed(core) if not t.startswith("-")), None)
+    return core, operand
+
+
+def manager_rosetta(manager_id: str) -> str:
+    """Produce the command-mapping section of a manager's documentation page.
+
+    A Rosetta table for a reader fluent in the native tool: each operation as
+    the native call `mpm` makes (harvested by {func}`_native_invocation`) beside
+    the uniform `mpm` command. Native DSL placeholders (`{package_id}`) are
+    rewritten to `<pkg>`-style angle brackets, and a manager documenting fewer
+    than three operations yields nothing (the section is then omitted from its
+    stub), so the table appears only where it is useful.
+    """
+    m = pool[manager_id]
+    rows = []
+    for member, task, mpm_template, has_operand in ROSETTA_OPERATIONS:
+        native = _native_invocation(m, member)
+        if native:
+            core, operand = native
+            native_cell = "`" + " ".join(core) + "`"
+        elif member == "upgrade_all_cli" and upgrade_all_is_synthesized(m):
+            native_cell, operand = "—", None  # No single native command.
+        else:
+            continue
+        operand = operand if (has_operand and operand) else "<pkg>"
+        mpm_cell = "`" + mpm_template.format(id=manager_id, op=operand) + "`"
+        # Rewrite DSL operand placeholders (`{package_id}`) to angle brackets.
+        native_cell = re.sub(r"\{(\w+)\}", r"<\1>", native_cell)
+        mpm_cell = re.sub(r"\{(\w+)\}", r"<\1>", mpm_cell)
+        rows.append([task, native_cell, mpm_cell])
+
+    if len(rows) < 3:
+        return ""
+
+    table = render_table(
+        rows,
+        headers=["To…", f"With `{manager_id}`", "With `mpm`"],
+        table_format=TableFormat.GITHUB,
+        colalign=["left", "left", "left"],
+        disable_numparse=True,
+    )
+    intro = (
+        f"You already know `{manager_id}`: each operation maps one-to-one onto "
+        "`mpm`, in an interface shared by every manager."
+    )
+    return f"{intro}\n\n{table}"
+
+
+def manager_recipes(manager_id: str) -> str:
+    """Produce the recipes section of a manager's documentation page.
+
+    A few copy-paste jobs a reader would otherwise script around the native
+    tool: snapshot and restore, an SBOM export, and (when the manager implements
+    it) a CI health gate. Each is a real `mpm` invocation, gated on the
+    operation being available so no unsupported command is shown.
+    """
+    m = pool[manager_id]
+    lines = [
+        f"- Snapshot and clone a machine: `mpm --{manager_id} dump "
+        f"{manager_id}.toml`, then `mpm restore {manager_id}.toml` on the next one.",
+    ]
+    if m.brewfile_entry_type:
+        lines.append(
+            f"- Export a Brewfile entry instead: `mpm --{manager_id} dump "
+            "--brewfile Brewfile`.",
+        )
+    lines.append(
+        f"- Export a compliance SBOM: `mpm --{manager_id} sbom` (CycloneDX by "
+        "default, `--spdx` for SPDX).",
+    )
+    if implements(m, Operations.doctor):
+        lines.append(
+            f"- Gate CI on health: `mpm --{manager_id} doctor` relays {m.name}'s "
+            "own diagnosis and exits non-zero on trouble.",
+        )
+    intro = (
+        f"A few jobs you would otherwise script around `{manager_id}`, one `mpm` "
+        "command each:"
+    )
+    return f"{intro}\n\n" + "\n".join(lines)
+
+
 def _platform_coverage(p_obj, platforms: frozenset) -> tuple[str, str | None] | None:
     """Return the icon and partial-coverage annotation of a platform entry.
 
@@ -829,6 +1097,12 @@ def manager_cli(manager_id: str) -> str:
     )
 
     parts = ["\n".join(lines)]
+    if m.pre_args or m.post_args or m.extra_env:
+        parts.append(
+            "`mpm` forces those arguments and variables on every call, so runs "
+            "stay quiet, non-interactive and reproducible: the defaults you would "
+            "set in CI anyway.",
+        )
     if version_sample:
         transcript = version_sample.strip("\n")
         parts.append("The version is probed by running:")
@@ -980,7 +1254,10 @@ def manager_cooldown(manager_id: str) -> str:
         parts.append(
             "`mpm` natively enforces its [release-age cooldown](../cooldown.md) "
             f"on {m.name}, injecting the `{m.cooldown_env_var}` environment "
-            "variable on every call.",
+            "variable on every call. Point it at a window "
+            f"(`mpm --cooldown 7 --{manager_id} upgrade --all`) to skip anything "
+            "published in the last 7 days: a guard against a compromised or "
+            "yanked fresh release landing before anyone notices.",
         )
     elif row:
         parts.append(
@@ -1063,7 +1340,14 @@ def manager_traces(manager_id: str) -> str:
         "format, [report it]"
         "(https://github.com/kdeldycke/meta-package-manager/issues)."
     )
-    return "\n\n".join((intro, *fences))
+    outro = (
+        "Feed any of these through `mpm` and the raw output becomes one uniform "
+        "table, the same shape for every manager: filter it, project columns, or "
+        f"export it (`mpm --{manager_id} installed --output json`, or `csv`, "
+        "`toml`, `yaml`), each package carrying a purl and a version comparable "
+        "across managers."
+    )
+    return "\n\n".join((intro, *fences, outro))
 
 
 def managers_index_table() -> str:
@@ -1117,7 +1401,7 @@ def manager_page_stub(manager_id: str) -> str:
         if not globals()[func_name](manager_id).strip():
             continue
         if title:
-            blocks.append(f"## {title}")
+            blocks.append(f"## {title.format(manager_id=manager_id)}")
         blocks.append(
             "```{python:render}\n"
             f"from docs_update import {func_name}\n\n"

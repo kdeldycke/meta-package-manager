@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("brew"))
 ```
 
+## What `mpm` adds to `brew`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("brew"))
+```
+
+## Your `brew` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("brew"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("brew"))
 from docs_update import manager_usage
 
 print(manager_usage("brew"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("brew"))
 ```
 
 ## Command line

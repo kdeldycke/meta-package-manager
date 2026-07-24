@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("cpan"))
 ```
 
+## What `mpm` adds to `cpan`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("cpan"))
+```
+
+## Your `cpan` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("cpan"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("cpan"))
 from docs_update import manager_usage
 
 print(manager_usage("cpan"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("cpan"))
 ```
 
 ## Command line

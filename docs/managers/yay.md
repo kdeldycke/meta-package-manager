@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("yay"))
 ```
 
+## What `mpm` adds to `yay`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("yay"))
+```
+
+## Your `yay` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("yay"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("yay"))
 from docs_update import manager_usage
 
 print(manager_usage("yay"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("yay"))
 ```
 
 ## Command line

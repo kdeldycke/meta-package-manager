@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("cargo"))
 ```
 
+## What `mpm` adds to `cargo`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("cargo"))
+```
+
+## Your `cargo` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("cargo"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("cargo"))
 from docs_update import manager_usage
 
 print(manager_usage("cargo"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("cargo"))
 ```
 
 ## Command line

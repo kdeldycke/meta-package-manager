@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("asdf"))
 ```
 
+## What `mpm` adds to `asdf`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("asdf"))
+```
+
+## Your `asdf` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("asdf"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("asdf"))
 from docs_update import manager_usage
 
 print(manager_usage("asdf"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("asdf"))
 ```
 
 ## Command line

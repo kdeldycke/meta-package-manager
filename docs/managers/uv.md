@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("uv"))
 ```
 
+## What `mpm` adds to `uv`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("uv"))
+```
+
+## Your `uv` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("uv"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("uv"))
 from docs_update import manager_usage
 
 print(manager_usage("uv"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("uv"))
 ```
 
 ## Command line

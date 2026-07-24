@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("guix"))
 ```
 
+## What `mpm` adds to `guix`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("guix"))
+```
+
+## Your `guix` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("guix"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("guix"))
 from docs_update import manager_usage
 
 print(manager_usage("guix"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("guix"))
 ```
 
 ## Command line

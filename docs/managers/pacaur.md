@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("pacaur"))
 ```
 
+## What `mpm` adds to `pacaur`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("pacaur"))
+```
+
+## Your `pacaur` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("pacaur"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("pacaur"))
 from docs_update import manager_usage
 
 print(manager_usage("pacaur"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("pacaur"))
 ```
 
 ## Command line

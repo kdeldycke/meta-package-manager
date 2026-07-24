@@ -503,10 +503,12 @@ def test_manager_page_sections_render(manager):
     fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
     for _title, func_name in docs_update.MANAGER_SECTIONS:
         output = getattr(docs_update, func_name)(manager.id)
-        # Reference traces are omitted for managers documenting no literal
-        # output samples; every other section renders for every manager (a
-        # section with no output is omitted from the stub by manager_page_stub).
-        if func_name != "manager_traces":
+        # Two sections are omitted for some managers (a section with no output is
+        # dropped from the stub by manager_page_stub): reference traces for a
+        # manager documenting no literal output samples, and the Rosetta table
+        # for one documenting fewer than three harvestable native commands. Every
+        # other section renders for every manager.
+        if func_name not in ("manager_traces", "manager_rosetta"):
             assert output.strip()
         # Fenced blocks (code samples, eval-rst) cannot produce MyST headings:
         # only the prose between them must stay heading-free.

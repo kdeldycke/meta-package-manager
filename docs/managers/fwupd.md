@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("fwupd"))
 ```
 
+## What `mpm` adds to `fwupd`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("fwupd"))
+```
+
+## Your `fwupd` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("fwupd"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("fwupd"))
 from docs_update import manager_usage
 
 print(manager_usage("fwupd"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("fwupd"))
 ```
 
 ## Command line

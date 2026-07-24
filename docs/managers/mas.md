@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("mas"))
 ```
 
+## What `mpm` adds to `mas`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("mas"))
+```
+
+## Your `mas` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("mas"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("mas"))
 from docs_update import manager_usage
 
 print(manager_usage("mas"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("mas"))
 ```
 
 ## Command line

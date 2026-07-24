@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("soar"))
 ```
 
+## What `mpm` adds to `soar`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("soar"))
+```
+
+## Your `soar` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("soar"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("soar"))
 from docs_update import manager_usage
 
 print(manager_usage("soar"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("soar"))
 ```
 
 ## Command line

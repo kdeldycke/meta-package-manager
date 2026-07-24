@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("vscodium"))
 ```
 
+## What `mpm` adds to `vscodium`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("vscodium"))
+```
+
+## Your `vscodium` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("vscodium"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("vscodium"))
 from docs_update import manager_usage
 
 print(manager_usage("vscodium"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("vscodium"))
 ```
 
 ## Command line

@@ -6,6 +6,14 @@ from docs_update import manager_intro
 print(manager_intro("topgrade"))
 ```
 
+## What `mpm` adds to `topgrade`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("topgrade"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +44,14 @@ print(manager_ecosystem("topgrade"))
 from docs_update import manager_usage
 
 print(manager_usage("topgrade"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("topgrade"))
 ```
 
 ## Command line

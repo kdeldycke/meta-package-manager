@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("deb-get"))
 ```
 
+## What `mpm` adds to `deb-get`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("deb-get"))
+```
+
+## Your `deb-get` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("deb-get"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("deb-get"))
 from docs_update import manager_usage
 
 print(manager_usage("deb-get"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("deb-get"))
 ```
 
 ## Command line

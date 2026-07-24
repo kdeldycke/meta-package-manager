@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("ports"))
 ```
 
+## What `mpm` adds to `ports`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("ports"))
+```
+
+## Your `ports` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("ports"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("ports"))
 from docs_update import manager_usage
 
 print(manager_usage("ports"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("ports"))
 ```
 
 ## Command line

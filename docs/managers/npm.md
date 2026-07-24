@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("npm"))
 ```
 
+## What `mpm` adds to `npm`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("npm"))
+```
+
+## Your `npm` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("npm"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("npm"))
 from docs_update import manager_usage
 
 print(manager_usage("npm"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("npm"))
 ```
 
 ## Command line

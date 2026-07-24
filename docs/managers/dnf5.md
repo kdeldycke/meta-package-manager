@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("dnf5"))
 ```
 
+## What `mpm` adds to `dnf5`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("dnf5"))
+```
+
+## Your `dnf5` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("dnf5"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("dnf5"))
 from docs_update import manager_usage
 
 print(manager_usage("dnf5"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("dnf5"))
 ```
 
 ## Command line

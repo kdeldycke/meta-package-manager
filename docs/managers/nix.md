@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("nix"))
 ```
 
+## What `mpm` adds to `nix`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("nix"))
+```
+
+## Your `nix` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("nix"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("nix"))
 from docs_update import manager_usage
 
 print(manager_usage("nix"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("nix"))
 ```
 
 ## Command line

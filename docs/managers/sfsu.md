@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("sfsu"))
 ```
 
+## What `mpm` adds to `sfsu`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("sfsu"))
+```
+
+## Your `sfsu` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("sfsu"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("sfsu"))
 from docs_update import manager_usage
 
 print(manager_usage("sfsu"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("sfsu"))
 ```
 
 ## Command line

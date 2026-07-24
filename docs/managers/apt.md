@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("apt"))
 ```
 
+## What `mpm` adds to `apt`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("apt"))
+```
+
+## Your `apt` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("apt"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("apt"))
 from docs_update import manager_usage
 
 print(manager_usage("apt"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("apt"))
 ```
 
 ## Command line

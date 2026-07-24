@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("mise"))
 ```
 
+## What `mpm` adds to `mise`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("mise"))
+```
+
+## Your `mise` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("mise"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("mise"))
 from docs_update import manager_usage
 
 print(manager_usage("mise"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("mise"))
 ```
 
 ## Command line

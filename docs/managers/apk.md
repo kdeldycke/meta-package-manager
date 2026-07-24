@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("apk"))
 ```
 
+## What `mpm` adds to `apk`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("apk"))
+```
+
+## Your `apk` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("apk"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("apk"))
 from docs_update import manager_usage
 
 print(manager_usage("apk"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("apk"))
 ```
 
 ## Command line

@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("pnpm"))
 ```
 
+## What `mpm` adds to `pnpm`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("pnpm"))
+```
+
+## Your `pnpm` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("pnpm"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("pnpm"))
 from docs_update import manager_usage
 
 print(manager_usage("pnpm"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("pnpm"))
 ```
 
 ## Command line

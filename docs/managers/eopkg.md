@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("eopkg"))
 ```
 
+## What `mpm` adds to `eopkg`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("eopkg"))
+```
+
+## Your `eopkg` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("eopkg"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("eopkg"))
 from docs_update import manager_usage
 
 print(manager_usage("eopkg"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("eopkg"))
 ```
 
 ## Command line

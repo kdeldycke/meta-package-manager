@@ -6,6 +6,22 @@ from docs_update import manager_intro
 print(manager_intro("pkg"))
 ```
 
+## What `mpm` adds to `pkg`
+
+```{python:render}
+from docs_update import manager_augments
+
+print(manager_augments("pkg"))
+```
+
+## Your `pkg` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("pkg"))
+```
+
 ## Platforms
 
 ```{python:render}
@@ -36,6 +52,14 @@ print(manager_ecosystem("pkg"))
 from docs_update import manager_usage
 
 print(manager_usage("pkg"))
+```
+
+## Recipes
+
+```{python:render}
+from docs_update import manager_recipes
+
+print(manager_recipes("pkg"))
 ```
 
 ## Command line

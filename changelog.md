@@ -1,9 +1,6 @@
 # Changelog
 
-## [`7.4.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.3.0...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`7.4.0` (2026-07-24)](https://github.com/kdeldycke/meta-package-manager/compare/v7.3.0...v7.4.0)
 
 - [mpm] Raise the click-extra floor from `8.4.0` to `8.6.0`, the release shipping the `OperationTrail` batch `✓`/`✗` trail upstreamed from mpm's own dispatch layer, which mpm now consumes from the published package instead of a git checkout.
 - [mpm] The Python and click-extra compatibility tables of the documentation read newest-first on both axes, following click-extra `8.6.0`'s `{matrix}` ordering defaults: the most recent compatibility information sits in the upper-left corner.

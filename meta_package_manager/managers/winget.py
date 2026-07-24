@@ -73,9 +73,9 @@ class WinGet(PackageManager):
     `--accept-source-agreements`:
         Used to accept the source license agreement, and avoid the following prompt:
 
-        ```{code-block} pwsh-session
+        ```{code-block} console
 
-        PS C:\\Users\\kev> winget list
+        > winget list
         The "msstore' source requires that you view the following agreements before using.
         Terms of Transaction: https://aka.ms/microsoft-store-terms-of-transaction
         The source requires the current machine's 2-letter geographic region to be sent to the backend service to function prope rly (ex. "US").
@@ -99,7 +99,7 @@ class WinGet(PackageManager):
     """
     ```{code-block} pwsh-session
 
-    PS C:\\Users\\kev> winget --version
+    > winget --version
     v1.28.220
     ```
     """
@@ -275,7 +275,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget list --details --accept-source-agreements --disable-interactivity
+        > winget list --details --accept-source-agreements --disable-interactivity
         (1/7) CCleaner [CCleaner]
         Version: 6.08
         Publisher: Piriform Software Ltd
@@ -314,7 +314,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget list --upgrade-available --details --accept-source-agreements --disable-interactivity
+        > winget list --upgrade-available --details --accept-source-agreements --disable-interactivity
         (1/4) Git [Git.Git]
         Version: 2.37.3
         Publisher: The Git Development Community
@@ -350,7 +350,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget search --query vscode --accept-source-agreements --disable-interactivity
+        > winget search --query vscode --accept-source-agreements --disable-interactivity
         Name                             Id                               Version      Match               Source
         ---------------------------------------------------------------------------------------------------------
         Microsoft Visual Studio Code     Microsoft.VisualStudioCode       1.89.1       Moniker: vscode     winget
@@ -368,7 +368,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget search --query vscode --exact --accept-source-agreements --disable-interactivity
+        > winget search --query vscode --exact --accept-source-agreements --disable-interactivity
         Name                         Id                               Version      Match           Source
         -------------------------------------------------------------------------------------------------
         Microsoft Visual Studio Code Microsoft.VisualStudioCode       1.89.1       Moniker: vscode winget
@@ -385,7 +385,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget search --id VSCodium.VSCodium --accept-source-agreements --disable-interactivity
+        > winget search --id VSCodium.VSCodium --accept-source-agreements --disable-interactivity
         Name              Id                         Version      Source
         ----------------------------------------------------------------
         VSCodium Insiders VSCodium.VSCodium.Insiders 1.88.0.24095 winget
@@ -394,7 +394,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget search --name Codium --accept-source-agreements --disable-interactivity
+        > winget search --name Codium --accept-source-agreements --disable-interactivity
         Name              Id                         Version      Source
         ----------------------------------------------------------------
         Codium            Alex313031.Codium          1.86.2.24053 winget
@@ -404,7 +404,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget search --id VSCodium.VSCodium  --exact --accept-source-agreements --disable-interactivity
+        > winget search --id VSCodium.VSCodium --exact --accept-source-agreements --disable-interactivity
         Name     Id                Version      Source
         ----------------------------------------------
         VSCodium VSCodium.VSCodium 1.89.1.24130 winget
@@ -412,7 +412,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget search --name Codium --exact --accept-source-agreements --disable-interactivity
+        > winget search --name Codium --exact --accept-source-agreements --disable-interactivity
         Name   Id                Version      Source
         --------------------------------------------
         Codium Alex313031.Codium 1.86.2.24053 winget
@@ -448,7 +448,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget install --id Microsoft.PowerToys --accept-package-agreements --version 0.15.2 --accept-source-agreements --disable-interactivity
+        > winget install --id Microsoft.PowerToys --accept-package-agreements --accept-source-agreements --disable-interactivity
         Found Power Toys [Microsoft.PowerToys] Version 0.15.2
         This application is licensed to you by its owner.
         Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
@@ -468,7 +468,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget upgrade --all --accept-package-agreements --accept-source-agreements --disable-interactivity
+        > winget update --all --accept-package-agreements --accept-source-agreements --disable-interactivity
         Name                            Id                            Version       Available     Source
         ------------------------------------------------------------------------------------------------
         Microsoft Edge                  Microsoft.Edge                109.0.1518.70 125.0.2535.51 winget
@@ -502,7 +502,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget upgrade --id Git.Git --accept-package-agreements --accept-source-agreements --disable-interactivity
+        > winget install --id Git.Git --accept-package-agreements --accept-source-agreements --disable-interactivity
         Found Git [Git.Git] Version 2.45.1
         This application is licensed to you by its owner.
         Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
@@ -517,9 +517,9 @@ class WinGet(PackageManager):
 
         Automatically uninstall the package if the technology is different:
 
-        ```{code-block} pwsh-session
+        ```{code-block} console
 
-        PS C:\\Users\\kev> winget upgrade --id Microsoft.Edge
+        > winget upgrade --id Microsoft.Edge
         A newer version was found, but the install technology is different from the current version installed. Please uninstall the package and install the newer version.
         ```
         :::
@@ -534,7 +534,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget uninstall --id Microsoft.PowerToys --source winget --accept-source-agreements --disable-interactivity
+        > winget uninstall --id Microsoft.PowerToys --source winget --accept-source-agreements --disable-interactivity
         Found PowerToys (Preview) [Microsoft.PowerToys]
         Starting package uninstall...
           ██████████████████████████████  100%
@@ -548,7 +548,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        PS C:\\Users\\kev> winget source update --accept-source-agreements --disable-interactivity
+        > winget source update --accept-source-agreements --disable-interactivity
         ```
         """
         self.run_cli("source", "update")

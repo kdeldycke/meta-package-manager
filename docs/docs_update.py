@@ -836,8 +836,44 @@ def _native_invocation(manager, member: str) -> tuple[list[str], str | None] | N
     core = [t for t in tokens if t not in forced]
     if not core:
         return None
-    operand = next((t for t in reversed(core) if not t.startswith("-")), None)
-    return core, operand
+    return core, _example_operand(manager, core)
+
+
+def _example_operand(manager, core: list[str]) -> str | None:
+    """Pick the example package operand out of a documented command.
+
+    Best-effort heuristics over the audited failure classes; `None` (rendered as
+    a placeholder) whenever the guess would mislead:
+
+    - Candidates are the non-flag tokens, stripped of shell quoting, skipping
+      `sudo`, the binary and any token restating the manager itself (winget's
+      `--source winget` would otherwise shadow the package id).
+    - Two candidates sitting in flag-value position means the package id cannot
+      be told from the other value (PowerShell's `-Name X -Scope CurrentUser`).
+    - The operand is the last candidate, except a version-looking tail hands
+      over to the token before it (`asdf install nodejs 20.10.0`) when that one
+      is not the leading subcommand: `mas install 945397020` keeps its numeric
+      id.
+    - A glob or quote residue is never a usable example (conda's `"*pytz*"`).
+    """
+    excluded = set(manager.cli_names) | {manager.id, "sudo"}
+    candidates = []
+    for position, token in enumerate(core):
+        cleaned = token.strip("'\"")
+        if not cleaned or cleaned.startswith("-") or cleaned in excluded:
+            continue
+        flag_value = position > 0 and core[position - 1].startswith("-")
+        candidates.append((cleaned, flag_value))
+    if not candidates:
+        return None
+    if sum(flag_value for _, flag_value in candidates) >= 2:
+        return None
+    operand = candidates[-1][0]
+    if operand[0].isdigit() and len(candidates) >= 3:
+        operand = candidates[-2][0]
+    if any(char in operand for char in "*?\"'"):
+        return None
+    return operand
 
 
 def manager_rosetta(manager_id: str) -> str:

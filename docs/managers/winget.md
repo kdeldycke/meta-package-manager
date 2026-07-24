@@ -14,6 +14,14 @@ from docs_update import manager_augments
 print(manager_augments("winget"))
 ```
 
+## Your `winget` commands, in `mpm`
+
+```{python:render}
+from docs_update import manager_rosetta
+
+print(manager_rosetta("winget"))
+```
+
 ## Platforms
 
 ```{python:render}

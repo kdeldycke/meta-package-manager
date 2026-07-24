@@ -756,12 +756,12 @@ def manager_augments(manager_id: str) -> str:
         reach = (
             f"Bigger still, `mpm` reaches across every manager at once: {reach_body}"
         )
-        return "\n\n".join((lede, bullets, reach, universal))
+        return f"{lede}\n\n{bullets}\n\n{reach}\n\n{universal}"
     reach = (
         f"`mpm` reaches across every manager at once, not `{manager_id}` alone: "
         f"{reach_body}"
     )
-    return "\n\n".join((reach, universal))
+    return f"{reach}\n\n{universal}"
 
 
 ROSETTA_OPERATIONS: tuple[tuple[str, str, str, bool], ...] = (

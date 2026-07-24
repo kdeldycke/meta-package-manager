@@ -195,7 +195,6 @@ class Guix(PackageManager):
         + GNU coding practices.
         relevance: 10
         ```
-
         """
         output = self.run_cli("search", query)
 

@@ -218,26 +218,24 @@ def _dispatch_sourced_operation(
             manager = pool.get(manager_id)
             if apply_cooldown and not cooldown_permits(manager):
                 continue
-            tasks.append(
-                (
+            tasks.append((
+                manager,
+                _package_task(
                     manager,
-                    _package_task(
-                        manager,
-                        spec,
-                        failures_lock,
-                        action=action,
-                        verb=verb,
-                        past=past,
-                        prep=prep,
-                        # Each task re-stamps the mutating operation for its own
-                        # attempt: the sourcing selection above stamped `installed` on
-                        # the shared manager singletons, and the timeout and stall
-                        # watchdog are keyed on the active operation.
-                        operation=operation.name,
-                        record_failure=lambda s: failures.append(package_label(s)),
-                    ),
-                )
-            )
+                    spec,
+                    failures_lock,
+                    action=action,
+                    verb=verb,
+                    past=past,
+                    prep=prep,
+                    # Each task re-stamps the mutating operation for its own
+                    # attempt: the sourcing selection above stamped `installed` on
+                    # the shared manager singletons, and the timeout and stall
+                    # watchdog are keyed on the active operation.
+                    operation=operation.name,
+                    record_failure=lambda s: failures.append(package_label(s)),
+                ),
+            ))
 
     collect_per_package(label, done_label, tasks)
 

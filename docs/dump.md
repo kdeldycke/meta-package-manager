@@ -135,7 +135,7 @@ Brewfile's `flatpak` entry accepts a `with: ["remote_name"]` keyword for non-def
 
 ## See also
 
-- {doc}`output-formats` — JSON and CSV table exports for ad-hoc piping of `installed`, `outdated`, and `search` results.
+- {doc}`output-formats` — JSON and CSV table exports for ad-hoc piping of `installed`, `outdated`, `orphans`, and `search` results.
 - {doc}`sbom` — SPDX and CycloneDX SBOM exports for supply-chain inventory work.
 - {doc}`overrides` — per-manager `[mpm.managers.<id>]` config blocks and how to generate them with `mpm config-template`.
 - {doc}`cooldown` — release-age gates that complement the snapshot workflow on the install side.

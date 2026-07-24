@@ -407,7 +407,7 @@ def test_operation_order():
     base_operations = [p for p in props_ref if p in direct_operation_ids]
     assert list(direct_operation_ids) == list(base_operations)
 
-    implemented_operations = []
+    implemented_operations: list[str] = []
     for cli_module in (cli_explore, cli_maintenance):
         cli_tree = ast.parse(Path(inspect.getfile(cli_module)).read_bytes())
         implemented_operations.extend(

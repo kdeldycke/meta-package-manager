@@ -974,7 +974,7 @@ def exit_on_failures(ctx: Context, verb: str, failures: Iterable[object]) -> Non
 # `mpm` group and the shared helpers above exist by the time each module's
 # `@mpm.command` decorators run; the imports are for their registration
 # side effect only.
-from . import (  # noqa: E402
+from . import (
     cli_explore,  # noqa: F401
     cli_maintenance,  # noqa: F401
     cli_sbom,  # noqa: F401

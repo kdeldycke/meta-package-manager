@@ -45,10 +45,10 @@ from .cli import (
     guard_existing_output,
     is_stdout,
     mpm,
+    overwrite_option,
     prep_path,
     query_exact_option,
     query_option,
-    overwrite_option,
 )
 from .dispatch import collect_from_managers
 from .sbom.base import SBOM, ExportFormat
@@ -245,3 +245,5 @@ def _scan_and_attach_vulnerabilities(sbom: SBOM) -> None:
             "vulnerability data. Re-run later or drop --network to silence.",
         )
         return
+
+    sbom.attach_vulnerabilities(vulnerabilities)

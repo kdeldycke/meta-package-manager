@@ -33,7 +33,7 @@ Usage: mpm [OPTIONS] COMMAND [ARGS]...
 
 `````{tab-item} Specific version
 ```shell-session
-$ uvx meta-package-manager@6.6.0
+$ uvx meta-package-manager@7.3.0
 Installed 21 packages in 42ms
 Usage: mpm [OPTIONS] COMMAND [ARGS]...
 ```
@@ -287,7 +287,7 @@ The `--signer-repo kdeldycke/repomatic` flag is required because the release wor
 For Python packages from PyPI:
 
 ```{code-block} shell-session
-$ gh attestation verify ./meta_package_manager-6.2.1-py3-none-any.whl --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+$ gh attestation verify ./meta_package_manager-7.3.0-py3-none-any.whl --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
 ```
 
 Attestation bundles are also attached to each [GitHub release](https://github.com/kdeldycke/meta-package-manager/releases) for offline verification.
@@ -314,7 +314,7 @@ $ chmod +x ./mpm-macos-x64.bin
 
 ```{code-block} shell-session
 $ ./mpm-macos-x64.bin --version
-mpm, version 5.7.0
+mpm, version 7.3.0
 ```
 
 Then let `mpm` discovers which package managers are available on your machine and choose the one providing a path to `mpm` installation:
@@ -334,11 +334,11 @@ warning: pip does not implement search operation.
 meta-package-manager existence unconfirmed, try to directly install it...
 Install meta-package-manager package with pip...
 Collecting meta-package-manager
-  Downloading meta_package_manager-5.11.1-py3-none-any.whl (161 kB)
+  Downloading meta_package_manager-7.3.0-py3-none-any.whl (161 kB)
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 161.5/161.5 kB 494.7 kB/s eta 0:00:00
 (...)
 Installing collected packages: (...) meta-package-manager
-Successfully installed (...) meta-package-manager-5.11.1
+Successfully installed (...) meta-package-manager-7.3.0
 ```
 
 And now you can remove the local binary and enjoy the system-wide `mpm` that was installed by itself:
@@ -354,7 +354,7 @@ $ which mpm
 
 ```{code-block} shell-session
 $ mpm --version
-mpm, version 5.11.1
+mpm, version 7.3.0
 ```
 
 ````{tip}

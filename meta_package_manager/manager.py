@@ -297,7 +297,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
         The shared first step of every JSON-emitting query, for built-in managers
         and config-defined operations alike (see
-        {func}`meta_package_manager.definitions._iter_parsed`). Returns `None`
+        {func}`meta_package_manager.definitions._parse_spec_output`). Returns `None`
         when the command produced no output (a manager with nothing to report often
         prints nothing at all), and when the output is not valid JSON, which logs
         one warning tagged with the manager ID instead of raising: a query that

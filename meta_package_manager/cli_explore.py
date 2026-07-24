@@ -178,18 +178,16 @@ def managers(ctx):
                 if not manager.fresh:
                     version_infos += f" {manager.requirement}"
 
-        table.append(
-            {
-                "manager_id": getattr(theme(), "success" if manager.fresh else "error")(
-                    manager.id
-                ),
-                "manager_name": manager.name,
-                "supported": os_infos,
-                "cli": cli_infos,
-                "executable": theme().success(OK_GLYPH) if manager.executable else "",
-                "version": version_infos,
-            }
-        )
+        table.append({
+            "manager_id": getattr(theme(), "success" if manager.fresh else "error")(
+                manager.id
+            ),
+            "manager_name": manager.name,
+            "supported": os_infos,
+            "cli": cli_infos,
+            "executable": theme().success(OK_GLYPH) if manager.executable else "",
+            "version": version_infos,
+        })
 
     print_projected_table(ctx, MANAGERS_COLUMNS, table)
 
@@ -450,17 +448,13 @@ def outdated(ctx, exact, plugin_output, query):
                 info["installed_version"] if info["installed_version"] else "?",
                 info["latest_version"],
             )
-            table.append(
-                {
-                    "package_id": highlight_query(info["id"]) if info["id"] else "",
-                    "package_name": highlight_query(info["name"])
-                    if info["name"]
-                    else "",
-                    "manager_id": manager_id,
-                    "installed_version": installed_version,
-                    "latest_version": latest_version,
-                }
-            )
+            table.append({
+                "package_id": highlight_query(info["id"]) if info["id"] else "",
+                "package_name": highlight_query(info["name"]) if info["name"] else "",
+                "manager_id": manager_id,
+                "installed_version": installed_version,
+                "latest_version": latest_version,
+            })
 
     print_projected_table(ctx, OUTDATED_COLUMNS, table)
 
@@ -589,19 +583,17 @@ def search(ctx, extended, exact, refilter, query):
     table: list[dict[str, str | None]] = []
     for manager_id, matching_pkg in matches.items():
         for pkg in matching_pkg["packages"]:
-            table.append(
-                {
-                    "package_id": highlight_query(pkg["id"]) if pkg["id"] else "",
-                    "package_name": highlight_query(pkg["name"]) if pkg["name"] else "",
-                    "manager_id": manager_id,
-                    "latest_version": str(pkg["latest_version"])
-                    if pkg["latest_version"]
-                    else "?",
-                    "description": highlight_query(pkg.get("description"))
-                    if pkg.get("description")
-                    else "",
-                }
-            )
+            table.append({
+                "package_id": highlight_query(pkg["id"]) if pkg["id"] else "",
+                "package_name": highlight_query(pkg["name"]) if pkg["name"] else "",
+                "manager_id": manager_id,
+                "latest_version": str(pkg["latest_version"])
+                if pkg["latest_version"]
+                else "?",
+                "description": highlight_query(pkg.get("description"))
+                if pkg.get("description")
+                else "",
+            })
 
     default_ids = tuple(
         spec.id
@@ -653,14 +645,12 @@ def which(ctx, cli_names):
                 resolved = highlight_cli_name(found_cli.resolve(), cli_names)
                 assert resolved is not None
                 symlink = f"→ {resolved}"
-            table.append(
-                {
-                    "manager_id": manager.id,
-                    "priority": str(priority),
-                    "cli_path": highlight_cli_name(found_cli, cli_names),
-                    "symlink": symlink,
-                }
-            )
+            table.append({
+                "manager_id": manager.id,
+                "priority": str(priority),
+                "cli_path": highlight_cli_name(found_cli, cli_names),
+                "symlink": symlink,
+            })
     print_projected_table(ctx, WHICH_COLUMNS, table)
 
 

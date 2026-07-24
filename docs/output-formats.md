@@ -1,10 +1,10 @@
 # {octicon}`table` JSON & CSV exports
 
-The `installed`, `outdated`, and `search` subcommands render their results as a configurable table. The default is a Unicode-bordered box (`rounded`), but the `--table-format` global option lets you swap in any [serialization format supported by click-extra](https://kdeldycke.github.io/click-extra/table.html#table-formats), including JSON and CSV for downstream piping.
+The `installed`, `outdated`, `orphans`, and `search` subcommands render their results as a configurable table. The default is a Unicode-bordered box (`rounded`), but the `--table-format` global option lets you swap in any [serialization format supported by click-extra](https://kdeldycke.github.io/click-extra/table.html#table-formats), including JSON and CSV for downstream piping.
 
 `--table-format` is the ad-hoc piping corner of `mpm`'s data exports. For snapshotting the installed inventory in a re-installable shape, see {doc}`dump`; for a supply-chain inventory in SPDX or CycloneDX, see {doc}`sbom`.
 
-`installed` and `outdated` also accept an optional `QUERY` argument to restrict the listing to packages whose ID or name matches it (`mpm installed rich`). The match is fuzzy by default (case-insensitive, tokenized), reusing `mpm search`'s semantics; pass `--exact` for a verbatim match.
+`installed`, `outdated`, and `orphans` also accept an optional `QUERY` argument to restrict the listing to packages whose ID or name matches it (`mpm installed rich`). The match is fuzzy by default (case-insensitive, tokenized), reusing `mpm search`'s semantics; pass `--exact` for a verbatim match.
 
 ## JSON
 

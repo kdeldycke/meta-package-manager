@@ -726,19 +726,20 @@ def test_factory_orphan_operations(monkeypatch):
         ),
     )()
     captured: list[tuple[str, ...]] = []
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *args, **kwargs: captured.append(args) or "",
-    )
+
+    def record_run_cli(*args, **kwargs):
+        captured.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", record_run_cli)
     manager.remove_orphan("jq")
-    assert captured[-1] == ("remove", "--recursive", "jq")
+    assert captured.pop() == ("remove", "--recursive", "jq")
     manager.cleanup_orphan()
-    assert captured[-1] == ("autoremove", "--yes")
+    assert captured.pop() == ("autoremove", "--yes")
     manager.cleanup_cache()
-    assert captured[-1] == ("clean", "--cache")
+    assert captured.pop() == ("clean", "--cache")
     manager.cleanup_repair()
-    assert captured[-1] == ("repair",)
+    assert captured.pop() == ("repair",)
     assert implements_method(manager, "remove_orphan") is True
     assert implements_method(manager, "cleanup_orphan") is True
     assert implements_method(manager, "cleanup_cache") is True

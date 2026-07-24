@@ -55,11 +55,12 @@ def _capture_run_cli(monkeypatch, manager_id, call):
     """
     manager = pool[manager_id]
     calls: list[tuple[str, ...]] = []
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *args, **kwargs: calls.append(args) or "",
-    )
+
+    def record_run_cli(*args, **kwargs):
+        calls.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", record_run_cli)
     monkeypatch.setattr(
         manager,
         "sibling_cli",

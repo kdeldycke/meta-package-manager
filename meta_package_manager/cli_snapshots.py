@@ -445,24 +445,22 @@ def restore(ctx, toml_files):
                     manager_id=manager.id,
                     version=str(version),
                 )
-                tasks.append(
-                    (
+                tasks.append((
+                    manager,
+                    _package_task(
                         manager,
-                        _package_task(
-                            manager,
-                            spec,
-                            failures_lock,
-                            action=_install_action,
-                            verb="install",
-                            past="installed",
-                            prep="with",
-                            operation=Operations.install.name,
-                            record_failure=lambda s: restore_failures.append(
-                                package_label(s)
-                            ),
+                        spec,
+                        failures_lock,
+                        action=_install_action,
+                        verb="install",
+                        past="installed",
+                        prep="with",
+                        operation=Operations.install.name,
+                        record_failure=lambda s: restore_failures.append(
+                            package_label(s)
                         ),
-                    )
-                )
+                    ),
+                ))
 
     collect_per_package("Restoring", "Restored", tasks)
 

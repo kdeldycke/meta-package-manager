@@ -467,6 +467,10 @@ class _SynthesizedUpgradeFakeManager(FakeManager):
     def upgrade_one_cli(self, package_id, version=None):
         return self.build_cli("upgrade", package_id)
 
+    def upgrade_all_cli(self):
+        """No one-shot upgrade-all: force the synthesized per-package fallback."""
+        raise NotImplementedError
+
 
 def test_plan_synthesized_upgrade_all_resolves_reads(invoke, monkeypatch):
     """`mpm --plan upgrade` on a synthesized upgrade-all prints the per-package

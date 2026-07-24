@@ -54,15 +54,6 @@
    :undoc-members:
 ```
 
-## tests.test_cli_cleanup module
-
-```{eval-rst}
-.. automodule:: tests.test_cli_cleanup
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## tests.test_cli_install_remove module
 
 ```{eval-rst}
@@ -85,6 +76,15 @@
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_managers
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_cli_orphans module
+
+```{eval-rst}
+.. automodule:: tests.test_cli_orphans
    :members:
    :show-inheritance:
    :undoc-members:
@@ -126,15 +126,6 @@
    :undoc-members:
 ```
 
-## tests.test_cli_sync module
-
-```{eval-rst}
-.. automodule:: tests.test_cli_sync
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## tests.test_cli_upgrade module
 
 ```{eval-rst}
@@ -171,6 +162,15 @@
    :undoc-members:
 ```
 
+## tests.test_doctor module
+
+```{eval-rst}
+.. automodule:: tests.test_doctor
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_manager_apt module
 
 ```{eval-rst}
@@ -193,6 +193,15 @@
 
 ```{eval-rst}
 .. automodule:: tests.test_managers
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_orphans module
+
+```{eval-rst}
+.. automodule:: tests.test_orphans
    :members:
    :show-inheritance:
    :undoc-members:

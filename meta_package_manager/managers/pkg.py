@@ -229,12 +229,7 @@ class PKG(PackageManager):
         ```
         """
         output = self.run_cli("autoremove", "--dry-run")
-
-        for match in self._ORPHANS_REGEXP.finditer(output):
-            yield self.package(
-                id=match.group("package_id"),
-                installed_version=match.group("installed_version"),
-            )
+        yield from self.parse_regex_lines(self._ORPHANS_REGEXP, output)
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.

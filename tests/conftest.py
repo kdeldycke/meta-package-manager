@@ -289,6 +289,10 @@ def _patch_pool_with(monkeypatch, fake):
         yield fake
 
     monkeypatch.setattr(pool, "select_managers", fake_select_managers)
+    # Expose the fake in the registry too: code paths re-resolving a manager
+    # from its ID (like the bar-plugin renderer's upgrade-CLI augmentation)
+    # go through `pool.get()` instead of the selection generator.
+    monkeypatch.setitem(pool.register, fake.id, fake)
     return fake
 
 

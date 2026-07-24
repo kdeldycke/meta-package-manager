@@ -37,12 +37,24 @@ from io import StringIO
 from pathlib import Path
 
 from boltons.iterutils import flatten
-from click_extra import echo
+from boltons.strutils import strip_ansi
+from click_extra import echo, get_current_context
 from click_extra.table import TableFormat, render_table
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
 from .version import diff_versions
+
+VERSION_PREFIX_COLOR = 245
+"""Xterm-256 palette index coloring the unchanged version prefix in menu lines.
+
+The CLI table keeps {func}`meta_package_manager.version.diff_versions`'s default
+`bright_black` (SGR `90`), which terminals remap to their own theme. SwiftBar
+instead hard-maps SGR `90` to a fixed `NSColor.darkGray`, near-invisible on a
+dark-mode menu, while its 256-color support renders palette index `245` as a
+theme-neutral mid-gray (`#8a8a8a`), legible on both appearances. Xbar strips
+the ANSI codes it does not render, so the choice is inert there.
+"""
 
 
 class BarPluginRenderer(MPMPlugin):
@@ -67,19 +79,6 @@ class BarPluginRenderer(MPMPlugin):
         Value is sourced from the `VAR_SUBMENU_LAYOUT` environment variable.
         """
         return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)
-
-    @cached_property
-    def dark_mode(self) -> bool:
-        """Detect dark mode by inspecting environment variables.
-
-        Value is sourced from two environment variables depending on the plugin:
-
-        - `OS_APPEARANCE` for SwiftBar
-        - `XBARDarkMode` for XBar
-        """
-        if self.is_swiftbar:
-            return self.getenv_str("OS_APPEARANCE", "light") == "dark"
-        return self.getenv_bool("XBARDarkMode")
 
     @staticmethod
     def render_cli(cmd_args: tuple[str | Path, ...]) -> str:
@@ -126,8 +125,9 @@ class BarPluginRenderer(MPMPlugin):
 
         Version columns carry the ANSI colors produced by
         {func}`meta_package_manager.version.diff_versions`: common prefix
-        gray, old suffix red, new suffix green. Table alignment survives the
-        escape codes thanks to `tabulate`'s ANSI-aware layout
+        gray ({data}`VERSION_PREFIX_COLOR`), old suffix red, new suffix
+        green. Table alignment survives the escape codes thanks to
+        `tabulate`'s ANSI-aware layout
         ([astanin/python-tabulate#184](https://github.com/astanin/python-tabulate/pull/184)), and package
         menu lines opt into rendering them with the `ansi=true` parameter.
         """
@@ -156,6 +156,7 @@ class BarPluginRenderer(MPMPlugin):
                 installed, latest = diff_versions(
                     p["installed_version"] if p["installed_version"] else "?",
                     p["latest_version"],
+                    prefix_fg=VERSION_PREFIX_COLOR,
                 )
                 table.append((
                     (p.get("name") or p.get("id"), installed, "→", latest),
@@ -209,7 +210,10 @@ class BarPluginRenderer(MPMPlugin):
 
             for error_msg in manager.get("errors", []):
                 print("-----" if self.submenu_layout else "---")
-                self.print_error(error_msg, submenu)
+                # Error lines are marked ansi=false, and plugin output is
+                # echoed with colors forced, so any ANSI code captured from a
+                # manager's own output would reach the bar app as raw text.
+                self.print_error(strip_ansi(error_msg), submenu)
 
     def render(self, outdated_data) -> str:
         """Wraps the `_render()` method above to capture its `<stdout>` output.
@@ -273,6 +277,19 @@ class BarPluginRenderer(MPMPlugin):
 
         Capturing the output of the plugin and re-printing it will introduce an extra
         line return, hence the extra call to `rstrip()`.
+
+        Colors are forced on `echo`'s auto-detection: the bar plugin captures
+        `mpm outdated --plugin-output` through a pipe, where `echo` would
+        strip every ANSI code and the version-diff colors would never reach
+        SwiftBar or Xbar. TTY detection is meaningless for this dialect, which
+        flags ANSI rendering per line with the `ansi=true`/`ansi=false`
+        parameters. An explicit opt-out (`--color=never`, `NO_COLOR`) is still
+        honored: only the automatic (`None`) state is overridden.
         """
         outdated_data = self.add_upgrade_cli(outdated_data)
-        echo(self.render(outdated_data).rstrip())
+        ctx = get_current_context(silent=True)
+        color = ctx.color if ctx else None
+        echo(
+            self.render(outdated_data).rstrip(),
+            color=True if color is None else color,
+        )

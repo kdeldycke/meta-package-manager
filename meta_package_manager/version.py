@@ -696,6 +696,7 @@ def is_version(string: str) -> bool:
 def diff_versions(
     old: str | TokenizedString,
     new: str | TokenizedString,
+    prefix_fg: str | int = "bright_black",
 ) -> tuple[str, str]:
     """Color the common prefix gray, the old suffix red, the new suffix green.
 
@@ -703,6 +704,11 @@ def diff_versions(
     diverging token and its preceding separator are highlighted. For
     `2.1.1774638290` vs `2.1.1774896198`, the common part is `2.1`
     and the diff includes `.1774638290` / `.1774896198`.
+
+    `prefix_fg` overrides the common-prefix color, in any form accepted by
+    {func}`click_extra.style` (a named ANSI color or an xterm-256 palette
+    index). Renderers whose consumer maps `bright_black` poorly, like the
+    bar plugin, pass their own.
     """
     old = str(old)
     new = str(new)
@@ -725,7 +731,7 @@ def diff_versions(
             snap -= 1
         common = snap
 
-    prefix = style(old[:common], fg="bright_black") if common else ""
+    prefix = style(old[:common], fg=prefix_fg) if common else ""
     return (
         prefix + style(old[common:], fg="red") if old else "",
         prefix + style(new[common:], fg="green") if new else "",

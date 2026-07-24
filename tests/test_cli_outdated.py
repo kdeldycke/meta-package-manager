@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import pytest
+from click_extra.color import color_envvars
 
 from meta_package_manager.tables import OUTDATED_COLUMNS
 
@@ -43,6 +44,28 @@ class TestOutdated(CLISubCommandTests, CLITableTests, CLIQueryTests):
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--table-format", "json", subcmd)
         check_packages_payload(result, optional_keys=frozenset({"upgrade_all_cli"}))
+
+    def test_plugin_output_keeps_ansi(self, invoke, subcmd, fake_pool, monkeypatch):
+        """Plugin output keeps its version-diff colors on a non-TTY stream.
+
+        The bar plugin captures `mpm outdated --plugin-output` through a
+        pipe, where `echo`'s TTY auto-detection would strip every ANSI code:
+        the renderer forces colors so they actually reach SwiftBar and Xbar.
+        """
+        # Neutralize the ambient color opt-outs (`NO_COLOR`, `LLM`,
+        # `TERM=dumb`, ...) leaking from the developer shell or the CI
+        # runner: the point is precisely the automatic color state, where the
+        # renderer must force colors on its own.
+        for var in (*color_envvars, "TERM"):
+            monkeypatch.delenv(var, raising=False)
+        result = invoke(subcmd, "--plugin-output")
+        assert result.exit_code == 0
+        package_lines = [
+            line for line in result.stdout.splitlines() if "ansi=true" in line
+        ]
+        assert package_lines
+        for line in package_lines:
+            assert "\x1b[" in line
 
     @pytest.mark.parametrize(
         ("args", "expected_ids"),

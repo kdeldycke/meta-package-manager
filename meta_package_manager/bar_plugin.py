@@ -350,13 +350,15 @@ class MPMPlugin:
         return self.ranked_mpm[0]
 
     @staticmethod
-    def pp(label: str, *args: str) -> None:
+    def pp(label: str, *args: str | None) -> None:
         """Print one menu-line with the Xbar/SwiftBar dialect.
 
         First argument is the menu-line label, separated by a pipe to all other non-
         empty parameters, themselves separated by a space.
 
-        Skip printing of the line if label is empty.
+        Skip printing of the line if label is empty. A `None` parameter renders
+        nothing, so a package without an upgrade CLI still gets its label-only
+        menu line.
         """
         if label.strip():
             print(
@@ -364,7 +366,7 @@ class MPMPlugin:
                 # table rendering and Python tracebacks.
                 label,
                 "|",
-                *(line for line in map(methodcaller("strip"), args) if line),
+                *(arg.strip() for arg in args if arg and arg.strip()),
                 sep=" ",
             )
 

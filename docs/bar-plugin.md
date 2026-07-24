@@ -5,6 +5,8 @@ The Meta Package Manager project is actively maintaining a plugin that is both c
 
 The plugin is written in Python and is a small wrapper around the `mpm` CLI.
 
+Each outdated package has its version diff colored with the same convention as `mpm outdated`: unchanged prefix in gray, installed-version suffix in red, latest-version suffix in green. SwiftBar renders these colors natively (package lines carry the `ansi=true` parameter); Xbar strips the color codes and shows plain text.
+
 ```{hint}
 I recommend SwiftBar, because Xbar has 2 outstanding issues:
 - [`=` not allowed in variables defaults](https://github.com/matryer/xbar/issues/832)

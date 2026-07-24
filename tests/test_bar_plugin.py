@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from collections import Counter
@@ -24,11 +25,16 @@ from typing import ClassVar, cast
 
 import pytest
 from boltons.iterutils import flatten
-from click_extra.envvar import env_copy
+from boltons.strutils import strip_ansi
+from click_extra.color import color_envvars
 from click_extra.execution import args_cleanup
 from extra_platforms.pytest import unless_macos
 
 from meta_package_manager import bar_plugin
+from meta_package_manager.bar_plugin_renderer import (
+    VERSION_PREFIX_COLOR,
+    BarPluginRenderer,
+)
 from meta_package_manager.version import parse_version
 
 TYPE_CHECKING = False
@@ -78,6 +84,94 @@ def test_check_mpm_missing_binary():
     assert up_to_date is False
     assert version is None
     assert isinstance(error, FileNotFoundError)
+
+
+def _pin_plugin_env(monkeypatch, table_rendering: bool) -> None:
+    """Pin the plugin environment variables so host values never leak in."""
+    monkeypatch.setenv("VAR_TABLE_RENDERING", str(table_rendering))
+    for var in ("VAR_SUBMENU_LAYOUT", "VAR_DEFAULT_FONT", "VAR_MONOSPACE_FONT"):
+        monkeypatch.delenv(var, raising=False)
+
+
+def _outdated_fixture(errors: list[str] | None = None) -> dict:
+    """Deterministic outdated data in the shape `mpm outdated` produces.
+
+    Version pairs share a common prefix so all three diff segments (gray
+    prefix, red installed suffix, green latest suffix) are exercised. The
+    second package carries no upgrade CLI, like a manager without a
+    single-package upgrade command.
+    """
+    return {
+        "fakemanager": {
+            "id": "fakemanager",
+            "name": "Fake Manager",
+            "packages": [
+                {
+                    "id": "pkg-one",
+                    "name": "pkg-one",
+                    "installed_version": "8.2.1",
+                    "latest_version": "8.3.0",
+                    "upgrade_cli": "shell=/bin/fake param1=upgrade param2=pkg-one",
+                },
+                {
+                    "id": "another-long-package",
+                    "name": "another-long-package",
+                    "installed_version": "2.0.0",
+                    "latest_version": "2.0.1",
+                    "upgrade_cli": None,
+                },
+            ],
+            "errors": errors or [],
+            "upgrade_all_cli": "shell=/bin/fake param1=upgrade param2=--all",
+        },
+    }
+
+
+@pytest.mark.parametrize("table_rendering", (True, False))
+def test_renderer_colors_version_diff(monkeypatch, table_rendering):
+    """Package lines carry the version-diff ANSI colors they declare with
+    `ansi=true`; every other line stays free of escape codes."""
+    _pin_plugin_env(monkeypatch, table_rendering)
+    output = BarPluginRenderer().render(_outdated_fixture())
+
+    package_lines = [line for line in output.splitlines() if "ansi=true" in line]
+    # 2 packages, each rendered twice (terminal and alternate menu entries).
+    assert len(package_lines) == 4
+    for line in package_lines:
+        assert f"\x1b[38;5;{VERSION_PREFIX_COLOR}m" in line
+        assert "\x1b[31m" in line
+        assert "\x1b[32m" in line
+        assert "\x1b[0m" in line
+
+    for line in output.splitlines():
+        if "ansi=true" not in line:
+            assert "\x1b[" not in line
+
+
+def test_renderer_table_alignment_survives_ansi(monkeypatch):
+    """Column alignment is computed on visible widths, not raw string lengths."""
+    _pin_plugin_env(monkeypatch, table_rendering=True)
+    output = BarPluginRenderer().render(_outdated_fixture())
+
+    arrow_lines = [line for line in strip_ansi(output).splitlines() if "→" in line]
+    assert len(arrow_lines) == 4
+    assert len({line.index("→") for line in arrow_lines}) == 1
+    assert len({line.index(" | ") for line in arrow_lines}) == 1
+
+
+def test_renderer_sanitizes_error_lines(monkeypatch):
+    """ANSI codes captured from a manager's output are stripped from error
+    lines, which are marked `ansi=false` and would render them as raw text."""
+    _pin_plugin_env(monkeypatch, table_rendering=True)
+    output = BarPluginRenderer().render(
+        _outdated_fixture(errors=["\x1b[31mboom\x1b[0m went wrong"]),
+    )
+
+    error_lines = [line for line in output.splitlines() if "boom" in line]
+    assert error_lines
+    for line in error_lines:
+        assert "ansi=false" in line
+        assert "\x1b[" not in line
 
 
 def _invocation_matrix(*iterables):
@@ -221,12 +315,22 @@ class TestBarPlugin:
     ]
 
     def _plugin_output_checks(self, checklist, extra_env: TEnvVars | None = None):
-        """Run the plugin script and check its output against the checklist."""
+        """Run the plugin script and check its output against the checklist.
+
+        The ambient color knobs (`NO_COLOR`, `LLM`, `TERM=dumb`, ...) are
+        scrubbed from the subprocess environment so the run reflects a real
+        bar app launch: exported by the developer shell or the CI runner,
+        they would otherwise disable the version-diff colors mpm forces for
+        plugin output.
+        """
+        env = {**os.environ, **(extra_env or {})}
+        for var in (*color_envvars, "TERM"):
+            env.pop(var, None)
         process = subprocess.run(
             bar_plugin.__file__,
             capture_output=True,
             encoding="utf-8",
-            env=cast("subprocess._ENV", env_copy(extra_env)),
+            env=cast("subprocess._ENV", env),
             check=False,
         )
 
@@ -256,6 +360,14 @@ class TestBarPlugin:
                 print(process.stdout)
                 msg = f"{regex!r} regex did not match any plugin output line."
                 raise Exception(msg)  # noqa: TRY002
+
+        # A package line declaring ansi=true must back it with actual escape
+        # codes: the version-diff colors survive the non-TTY pipe the plugin
+        # captures mpm's output through. Opportunistic, as the host may have
+        # no outdated package to render.
+        for line in process.stdout.splitlines():
+            if "ansi=true" in line and "→" in line:
+                assert "\x1b[" in line
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
     @pytest.mark.parametrize("submenu_layout", (True, False, None))

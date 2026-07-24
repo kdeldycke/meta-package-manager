@@ -103,6 +103,23 @@ class FakeManager(PackageManager):
         if "match" in query:
             yield self.package(id=f"matched-{query}", latest_version="1.0.0")
 
+    def upgrade_all_cli(self) -> tuple[str, ...]:
+        """Static upgrade CLIs keep the bar-plugin rendering hermetic.
+
+        Without them
+        {meth}`meta_package_manager.bar_plugin_renderer.BarPluginRenderer.add_upgrade_cli`
+        falls back to probing the host for `mpm` candidates, running real
+        subprocesses.
+        """
+        return (str(self.cli_path), "upgrade", "--all")
+
+    def upgrade_one_cli(
+        self,
+        package_id: str,
+        version: str | None = None,
+    ) -> tuple[str, ...]:
+        return (str(self.cli_path), "upgrade", package_id)
+
 
 class TimingOutFakeManager(FakeManager):
     """Variant that runs a real subprocess long enough to trip `--timeout`.

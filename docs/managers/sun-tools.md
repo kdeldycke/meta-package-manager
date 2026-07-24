@@ -38,12 +38,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("sun-tools"))
 ```
 
-## Usage
+## Selecting and configuring `sun-tools`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("sun-tools"))
+print(manager_selection("sun-tools"))
 ```
 
 ## Recipes
@@ -54,7 +54,7 @@ from docs_update import manager_recipes
 print(manager_recipes("sun-tools"))
 ```
 
-## Command line
+## How `mpm` drives `sun-tools`
 
 ```{python:render}
 from docs_update import manager_cli

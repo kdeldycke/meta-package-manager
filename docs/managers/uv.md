@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("uv"))
 ```
 
-## Usage
+## Selecting and configuring `uv`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("uv"))
+print(manager_selection("uv"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("uv"))
 ```
 
-## Command line
+## How `mpm` drives `uv`
 
 ```{python:render}
 from docs_update import manager_cli

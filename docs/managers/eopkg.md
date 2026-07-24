@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("eopkg"))
 ```
 
-## Usage
+## Selecting and configuring `eopkg`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("eopkg"))
+print(manager_selection("eopkg"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("eopkg"))
 ```
 
-## Command line
+## How `mpm` drives `eopkg`
 
 ```{python:render}
 from docs_update import manager_cli

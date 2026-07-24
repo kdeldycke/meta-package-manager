@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("pnpm"))
 ```
 
-## Usage
+## Selecting and configuring `pnpm`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("pnpm"))
+print(manager_selection("pnpm"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("pnpm"))
 ```
 
-## Command line
+## How `mpm` drives `pnpm`
 
 ```{python:render}
 from docs_update import manager_cli

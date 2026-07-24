@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("tlmgr"))
 ```
 
-## Usage
+## Selecting and configuring `tlmgr`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("tlmgr"))
+print(manager_selection("tlmgr"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("tlmgr"))
 ```
 
-## Command line
+## How `mpm` drives `tlmgr`
 
 ```{python:render}
 from docs_update import manager_cli

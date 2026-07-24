@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("pacstall"))
 ```
 
-## Usage
+## Selecting and configuring `pacstall`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("pacstall"))
+print(manager_selection("pacstall"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("pacstall"))
 ```
 
-## Command line
+## How `mpm` drives `pacstall`
 
 ```{python:render}
 from docs_update import manager_cli

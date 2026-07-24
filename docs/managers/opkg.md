@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("opkg"))
 ```
 
-## Usage
+## Selecting and configuring `opkg`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("opkg"))
+print(manager_selection("opkg"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("opkg"))
 ```
 
-## Command line
+## How `mpm` drives `opkg`
 
 ```{python:render}
 from docs_update import manager_cli

@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("pipx"))
 ```
 
-## Usage
+## Selecting and configuring `pipx`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("pipx"))
+print(manager_selection("pipx"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("pipx"))
 ```
 
-## Command line
+## How `mpm` drives `pipx`
 
 ```{python:render}
 from docs_update import manager_cli

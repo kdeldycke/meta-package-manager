@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("npm"))
 ```
 
-## Usage
+## Selecting and configuring `npm`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("npm"))
+print(manager_selection("npm"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("npm"))
 ```
 
-## Command line
+## How `mpm` drives `npm`
 
 ```{python:render}
 from docs_update import manager_cli

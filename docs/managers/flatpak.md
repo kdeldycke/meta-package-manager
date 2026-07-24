@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("flatpak"))
 ```
 
-## Usage
+## Selecting and configuring `flatpak`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("flatpak"))
+print(manager_selection("flatpak"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("flatpak"))
 ```
 
-## Command line
+## How `mpm` drives `flatpak`
 
 ```{python:render}
 from docs_update import manager_cli

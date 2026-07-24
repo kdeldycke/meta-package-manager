@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("dnf5"))
 ```
 
-## Usage
+## Selecting and configuring `dnf5`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("dnf5"))
+print(manager_selection("dnf5"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("dnf5"))
 ```
 
-## Command line
+## How `mpm` drives `dnf5`
 
 ```{python:render}
 from docs_update import manager_cli

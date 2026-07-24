@@ -38,12 +38,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("steamcmd"))
 ```
 
-## Usage
+## Selecting and configuring `steamcmd`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("steamcmd"))
+print(manager_selection("steamcmd"))
 ```
 
 ## Recipes
@@ -54,7 +54,7 @@ from docs_update import manager_recipes
 print(manager_recipes("steamcmd"))
 ```
 
-## Command line
+## How `mpm` drives `steamcmd`
 
 ```{python:render}
 from docs_update import manager_cli

@@ -518,7 +518,9 @@ def test_manager_page_sections_render(manager):
     # Header, separator, then one row per operation.
     operations = docs_update.manager_operations(manager.id)
     assert len(operations.splitlines()) == 2 + len(Operations)
-    assert f"mpm --{manager.id} installed" in docs_update.manager_usage(manager.id)
+    selection = docs_update.manager_selection(manager.id)
+    assert f"--no-{manager.id}" in selection
+    assert f"[mpm.managers.{manager.id}]" in selection
 
 
 def test_manager_traces_render_literal_blocks():

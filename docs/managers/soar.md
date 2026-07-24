@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("soar"))
 ```
 
-## Usage
+## Selecting and configuring `soar`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("soar"))
+print(manager_selection("soar"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("soar"))
 ```
 
-## Command line
+## How `mpm` drives `soar`
 
 ```{python:render}
 from docs_update import manager_cli

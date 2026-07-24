@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("tazpkg"))
 ```
 
-## Usage
+## Selecting and configuring `tazpkg`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("tazpkg"))
+print(manager_selection("tazpkg"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("tazpkg"))
 ```
 
-## Command line
+## How `mpm` drives `tazpkg`
 
 ```{python:render}
 from docs_update import manager_cli

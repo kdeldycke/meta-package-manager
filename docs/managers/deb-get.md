@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("deb-get"))
 ```
 
-## Usage
+## Selecting and configuring `deb-get`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("deb-get"))
+print(manager_selection("deb-get"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("deb-get"))
 ```
 
-## Command line
+## How `mpm` drives `deb-get`
 
 ```{python:render}
 from docs_update import manager_cli

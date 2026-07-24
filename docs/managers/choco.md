@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("choco"))
 ```
 
-## Usage
+## Selecting and configuring `choco`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("choco"))
+print(manager_selection("choco"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("choco"))
 ```
 
-## Command line
+## How `mpm` drives `choco`
 
 ```{python:render}
 from docs_update import manager_cli

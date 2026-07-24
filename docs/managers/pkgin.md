@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("pkgin"))
 ```
 
-## Usage
+## Selecting and configuring `pkgin`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("pkgin"))
+print(manager_selection("pkgin"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("pkgin"))
 ```
 
-## Command line
+## How `mpm` drives `pkgin`
 
 ```{python:render}
 from docs_update import manager_cli

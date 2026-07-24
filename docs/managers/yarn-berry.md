@@ -38,12 +38,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("yarn-berry"))
 ```
 
-## Usage
+## Selecting and configuring `yarn-berry`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("yarn-berry"))
+print(manager_selection("yarn-berry"))
 ```
 
 ## Recipes
@@ -54,7 +54,7 @@ from docs_update import manager_recipes
 print(manager_recipes("yarn-berry"))
 ```
 
-## Command line
+## How `mpm` drives `yarn-berry`
 
 ```{python:render}
 from docs_update import manager_cli

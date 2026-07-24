@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("fwupd"))
 ```
 
-## Usage
+## Selecting and configuring `fwupd`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("fwupd"))
+print(manager_selection("fwupd"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("fwupd"))
 ```
 
-## Command line
+## How `mpm` drives `fwupd`
 
 ```{python:render}
 from docs_update import manager_cli

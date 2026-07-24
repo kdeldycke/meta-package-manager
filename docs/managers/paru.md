@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("paru"))
 ```
 
-## Usage
+## Selecting and configuring `paru`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("paru"))
+print(manager_selection("paru"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("paru"))
 ```
 
-## Command line
+## How `mpm` drives `paru`
 
 ```{python:render}
 from docs_update import manager_cli

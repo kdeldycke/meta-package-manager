@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("yum"))
 ```
 
-## Usage
+## Selecting and configuring `yum`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("yum"))
+print(manager_selection("yum"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("yum"))
 ```
 
-## Command line
+## How `mpm` drives `yum`
 
 ```{python:render}
 from docs_update import manager_cli

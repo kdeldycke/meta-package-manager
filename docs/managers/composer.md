@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("composer"))
 ```
 
-## Usage
+## Selecting and configuring `composer`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("composer"))
+print(manager_selection("composer"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("composer"))
 ```
 
-## Command line
+## How `mpm` drives `composer`
 
 ```{python:render}
 from docs_update import manager_cli

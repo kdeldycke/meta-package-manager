@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("pacaur"))
 ```
 
-## Usage
+## Selecting and configuring `pacaur`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("pacaur"))
+print(manager_selection("pacaur"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("pacaur"))
 ```
 
-## Command line
+## How `mpm` drives `pacaur`
 
 ```{python:render}
 from docs_update import manager_cli

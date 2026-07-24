@@ -38,12 +38,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("topgrade"))
 ```
 
-## Usage
+## Selecting and configuring `topgrade`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("topgrade"))
+print(manager_selection("topgrade"))
 ```
 
 ## Recipes
@@ -54,7 +54,7 @@ from docs_update import manager_recipes
 print(manager_recipes("topgrade"))
 ```
 
-## Command line
+## How `mpm` drives `topgrade`
 
 ```{python:render}
 from docs_update import manager_cli

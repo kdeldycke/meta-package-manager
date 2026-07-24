@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("cask"))
 ```
 
-## Usage
+## Selecting and configuring `cask`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("cask"))
+print(manager_selection("cask"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("cask"))
 ```
 
-## Command line
+## How `mpm` drives `cask`
 
 ```{python:render}
 from docs_update import manager_cli

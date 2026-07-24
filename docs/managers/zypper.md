@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("zypper"))
 ```
 
-## Usage
+## Selecting and configuring `zypper`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("zypper"))
+print(manager_selection("zypper"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("zypper"))
 ```
 
-## Command line
+## How `mpm` drives `zypper`
 
 ```{python:render}
 from docs_update import manager_cli

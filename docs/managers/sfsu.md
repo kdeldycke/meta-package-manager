@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("sfsu"))
 ```
 
-## Usage
+## Selecting and configuring `sfsu`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("sfsu"))
+print(manager_selection("sfsu"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("sfsu"))
 ```
 
-## Command line
+## How `mpm` drives `sfsu`
 
 ```{python:render}
 from docs_update import manager_cli

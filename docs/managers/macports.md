@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("macports"))
 ```
 
-## Usage
+## Selecting and configuring `macports`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("macports"))
+print(manager_selection("macports"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("macports"))
 ```
 
-## Command line
+## How `mpm` drives `macports`
 
 ```{python:render}
 from docs_update import manager_cli

@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("yarn"))
 ```
 
-## Usage
+## Selecting and configuring `yarn`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("yarn"))
+print(manager_selection("yarn"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("yarn"))
 ```
 
-## Command line
+## How `mpm` drives `yarn`
 
 ```{python:render}
 from docs_update import manager_cli

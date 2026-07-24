@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("apm"))
 ```
 
-## Usage
+## Selecting and configuring `apm`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("apm"))
+print(manager_selection("apm"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("apm"))
 ```
 
-## Command line
+## How `mpm` drives `apm`
 
 ```{python:render}
 from docs_update import manager_cli

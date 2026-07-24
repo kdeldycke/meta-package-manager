@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("apt-cyg"))
 ```
 
-## Usage
+## Selecting and configuring `apt-cyg`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("apt-cyg"))
+print(manager_selection("apt-cyg"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("apt-cyg"))
 ```
 
-## Command line
+## How `mpm` drives `apt-cyg`
 
 ```{python:render}
 from docs_update import manager_cli

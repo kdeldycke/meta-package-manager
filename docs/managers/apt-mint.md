@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("apt-mint"))
 ```
 
-## Usage
+## Selecting and configuring `apt-mint`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("apt-mint"))
+print(manager_selection("apt-mint"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("apt-mint"))
 ```
 
-## Command line
+## How `mpm` drives `apt-mint`
 
 ```{python:render}
 from docs_update import manager_cli

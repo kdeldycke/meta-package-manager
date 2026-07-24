@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("winget"))
 ```
 
-## Usage
+## Selecting and configuring `winget`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("winget"))
+print(manager_selection("winget"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("winget"))
 ```
 
-## Command line
+## How `mpm` drives `winget`
 
 ```{python:render}
 from docs_update import manager_cli

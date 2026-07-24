@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("swupd"))
 ```
 
-## Usage
+## Selecting and configuring `swupd`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("swupd"))
+print(manager_selection("swupd"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("swupd"))
 ```
 
-## Command line
+## How `mpm` drives `swupd`
 
 ```{python:render}
 from docs_update import manager_cli

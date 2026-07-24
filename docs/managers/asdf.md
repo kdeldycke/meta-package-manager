@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("asdf"))
 ```
 
-## Usage
+## Selecting and configuring `asdf`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("asdf"))
+print(manager_selection("asdf"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("asdf"))
 ```
 
-## Command line
+## How `mpm` drives `asdf`
 
 ```{python:render}
 from docs_update import manager_cli

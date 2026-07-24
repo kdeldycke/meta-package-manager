@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("apk"))
 ```
 
-## Usage
+## Selecting and configuring `apk`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("apk"))
+print(manager_selection("apk"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("apk"))
 ```
 
-## Command line
+## How `mpm` drives `apk`
 
 ```{python:render}
 from docs_update import manager_cli

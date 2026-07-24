@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("pwsh-gallery"))
 ```
 
-## Usage
+## Selecting and configuring `pwsh-gallery`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("pwsh-gallery"))
+print(manager_selection("pwsh-gallery"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("pwsh-gallery"))
 ```
 
-## Command line
+## How `mpm` drives `pwsh-gallery`
 
 ```{python:render}
 from docs_update import manager_cli

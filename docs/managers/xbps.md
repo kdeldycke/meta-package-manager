@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("xbps"))
 ```
 
-## Usage
+## Selecting and configuring `xbps`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("xbps"))
+print(manager_selection("xbps"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("xbps"))
 ```
 
-## Command line
+## How `mpm` drives `xbps`
 
 ```{python:render}
 from docs_update import manager_cli

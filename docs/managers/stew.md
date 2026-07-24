@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("stew"))
 ```
 
-## Usage
+## Selecting and configuring `stew`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("stew"))
+print(manager_selection("stew"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("stew"))
 ```
 
-## Command line
+## How `mpm` drives `stew`
 
 ```{python:render}
 from docs_update import manager_cli

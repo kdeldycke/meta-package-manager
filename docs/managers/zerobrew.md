@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("zerobrew"))
 ```
 
-## Usage
+## Selecting and configuring `zerobrew`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("zerobrew"))
+print(manager_selection("zerobrew"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("zerobrew"))
 ```
 
-## Command line
+## How `mpm` drives `zerobrew`
 
 ```{python:render}
 from docs_update import manager_cli

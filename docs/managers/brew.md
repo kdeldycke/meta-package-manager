@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("brew"))
 ```
 
-## Usage
+## Selecting and configuring `brew`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("brew"))
+print(manager_selection("brew"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("brew"))
 ```
 
-## Command line
+## How `mpm` drives `brew`
 
 ```{python:render}
 from docs_update import manager_cli

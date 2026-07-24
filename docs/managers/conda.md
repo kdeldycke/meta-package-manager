@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("conda"))
 ```
 
-## Usage
+## Selecting and configuring `conda`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("conda"))
+print(manager_selection("conda"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("conda"))
 ```
 
-## Command line
+## How `mpm` drives `conda`
 
 ```{python:render}
 from docs_update import manager_cli

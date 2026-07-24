@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("sdkman"))
 ```
 
-## Usage
+## Selecting and configuring `sdkman`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("sdkman"))
+print(manager_selection("sdkman"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("sdkman"))
 ```
 
-## Command line
+## How `mpm` drives `sdkman`
 
 ```{python:render}
 from docs_update import manager_cli

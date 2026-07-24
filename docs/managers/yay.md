@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("yay"))
 ```
 
-## Usage
+## Selecting and configuring `yay`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("yay"))
+print(manager_selection("yay"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("yay"))
 ```
 
-## Command line
+## How `mpm` drives `yay`
 
 ```{python:render}
 from docs_update import manager_cli

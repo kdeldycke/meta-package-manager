@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("slapt-get"))
 ```
 
-## Usage
+## Selecting and configuring `slapt-get`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("slapt-get"))
+print(manager_selection("slapt-get"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("slapt-get"))
 ```
 
-## Command line
+## How `mpm` drives `slapt-get`
 
 ```{python:render}
 from docs_update import manager_cli

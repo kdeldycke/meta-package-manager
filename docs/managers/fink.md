@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("fink"))
 ```
 
-## Usage
+## Selecting and configuring `fink`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("fink"))
+print(manager_selection("fink"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("fink"))
 ```
 
-## Command line
+## How `mpm` drives `fink`
 
 ```{python:render}
 from docs_update import manager_cli

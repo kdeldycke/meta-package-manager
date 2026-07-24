@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("cpan"))
 ```
 
-## Usage
+## Selecting and configuring `cpan`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("cpan"))
+print(manager_selection("cpan"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("cpan"))
 ```
 
-## Command line
+## How `mpm` drives `cpan`
 
 ```{python:render}
 from docs_update import manager_cli

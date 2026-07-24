@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("scoop"))
 ```
 
-## Usage
+## Selecting and configuring `scoop`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("scoop"))
+print(manager_selection("scoop"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("scoop"))
 ```
 
-## Command line
+## How `mpm` drives `scoop`
 
 ```{python:render}
 from docs_update import manager_cli

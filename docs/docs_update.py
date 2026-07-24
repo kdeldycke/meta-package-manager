@@ -179,9 +179,9 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     ("Platforms", "manager_platforms"),
     ("Operations", "manager_operations"),
     ("Ecosystem", "manager_ecosystem"),
-    ("Usage", "manager_usage"),
+    ("Selecting and configuring `{manager_id}`", "manager_selection"),
     ("Recipes", "manager_recipes"),
-    ("Command line", "manager_cli"),
+    ("How `mpm` drives `{manager_id}`", "manager_cli"),
     ("Privilege escalation", "manager_sudo"),
     ("Cooldown", "manager_cooldown"),
     ("Reference traces", "manager_traces"),
@@ -884,7 +884,8 @@ def manager_rosetta(manager_id: str) -> str:
     the uniform `mpm` command. Native DSL placeholders (`{package_id}`) are
     rewritten to `<pkg>`-style angle brackets, and a manager documenting fewer
     than three operations yields nothing (the section is then omitted from its
-    stub), so the table appears only where it is useful.
+    stub), so the table appears only where it is useful. A closing note points
+    at `--dry-run`, since the table lists every invocation the flag applies to.
     """
     m = pool[manager_id]
     rows = []
@@ -918,7 +919,12 @@ def manager_rosetta(manager_id: str) -> str:
         f"You already know `{manager_id}`: each operation maps one-to-one onto "
         "`mpm`, in an interface shared by every manager."
     )
-    return f"{intro}\n\n{table}"
+    dry_run = (
+        "Prefix any command above with [`--dry-run`](../augmentations.md) to "
+        "simulate the underlying manager calls without touching the system: the "
+        "safe way to watch what `mpm` would do before trusting it."
+    )
+    return f"{intro}\n\n{table}\n\n{dry_run}"
 
 
 def manager_recipes(manager_id: str) -> str:
@@ -1079,7 +1085,7 @@ def _python_regex_literal(pattern: str) -> str:
 
 
 def manager_cli(manager_id: str) -> str:
-    """Produce the command-line section of a manager's documentation page.
+    """Produce the invocation section of a manager's documentation page.
 
     Documents how `mpm` drives the manager: binary names and lookup tweaks,
     the arguments and environment forced on every call, then the version probe
@@ -1179,40 +1185,32 @@ def manager_ecosystem(manager_id: str) -> str:
     return "\n".join(lines)
 
 
-def manager_usage(manager_id: str) -> str:
-    """Produce the usage section of a manager's documentation page.
+def manager_selection(manager_id: str) -> str:
+    """Produce the selection-and-configuration section of a manager's page.
 
-    A few ready-to-paste invocations targeting this manager alone, each gated on
-    the operation being implemented, a `--dry-run` variant to try `mpm`
-    without touching the system, and pointers to the selection and configuration
-    levers.
+    The levers to control this manager's participation: the one-run
+    `--no-<id>` deselector, the persistent selection toggle in the
+    configuration file, and a per-manager override block for tuning how `mpm`
+    drives it. The command-to-command mapping lives in the Rosetta section
+    ({func}`manager_rosetta`); this one points at the fuller
+    [configuration](configuration.md) and [overrides](overrides.md) references
+    rather than restating them.
     """
-    m = pool[manager_id]
-    examples = [f"$ mpm --{manager_id} installed"]
-    if implements(m, Operations.search):
-        examples.append(f'$ mpm --{manager_id} search "query"')
-    if implements(m, Operations.upgrade_all):
-        examples.append(f"$ mpm --{manager_id} upgrade --all")
-    if implements(m, Operations.install):
-        examples.append(f"$ mpm install pkg:{manager_id}/hello")
-    if implements(m, Operations.upgrade_all):
-        examples.append(f"$ mpm --dry-run --{manager_id} upgrade --all")
-    elif implements(m, Operations.install):
-        examples.append(f"$ mpm --dry-run install pkg:{manager_id}/hello")
-    fence = "```shell-session\n" + "\n".join(examples) + "\n```"
-
-    dry_run = (
-        "Every example above accepts [`--dry-run`](../augmentations.md), which "
-        "simulates the underlying manager calls without touching the system: the "
-        "safe way to watch what `mpm` would do before trusting it."
+    select = (
+        f"Deselect `{manager_id}` for a single run with `--no-{manager_id}`, or "
+        "persist the choice in your [configuration](../configuration.md):"
     )
-
-    outro = (
-        f"Deselect the manager for a single run with `--no-{manager_id}`, disable "
-        "it from your [configuration](../configuration.md), or tune its invocation "
-        "attributes with [per-manager overrides](../overrides.md)."
+    select_toml = _fenced(f"[mpm]\n{manager_id} = false", "toml")
+    tune = (
+        "Keep it enabled but tune how `mpm` drives it with a "
+        "[per-manager override](../overrides.md):"
     )
-    return f"{fence}\n\n{dry_run}\n\n{outro}"
+    tune_toml = _fenced(f"[mpm.managers.{manager_id}]\ntimeout = 900", "toml")
+    template = (
+        f"`mpm config-template {manager_id}` prints every overridable attribute "
+        "as a ready-to-paste block."
+    )
+    return "\n\n".join([select, select_toml, tune, tune_toml, template])
 
 
 def manager_sudo(manager_id: str) -> str:

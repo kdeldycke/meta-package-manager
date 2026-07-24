@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("ports"))
 ```
 
-## Usage
+## Selecting and configuring `ports`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("ports"))
+print(manager_selection("ports"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("ports"))
 ```
 
-## Command line
+## How `mpm` drives `ports`
 
 ```{python:render}
 from docs_update import manager_cli

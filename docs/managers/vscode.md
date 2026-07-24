@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("vscode"))
 ```
 
-## Usage
+## Selecting and configuring `vscode`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("vscode"))
+print(manager_selection("vscode"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("vscode"))
 ```
 
-## Command line
+## How `mpm` drives `vscode`
 
 ```{python:render}
 from docs_update import manager_cli

@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("guix"))
 ```
 
-## Usage
+## Selecting and configuring `guix`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("guix"))
+print(manager_selection("guix"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("guix"))
 ```
 
-## Command line
+## How `mpm` drives `guix`
 
 ```{python:render}
 from docs_update import manager_cli

@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("uvx"))
 ```
 
-## Usage
+## Selecting and configuring `uvx`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("uvx"))
+print(manager_selection("uvx"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("uvx"))
 ```
 
-## Command line
+## How `mpm` drives `uvx`
 
 ```{python:render}
 from docs_update import manager_cli

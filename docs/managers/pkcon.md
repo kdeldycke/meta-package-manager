@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("pkcon"))
 ```
 
-## Usage
+## Selecting and configuring `pkcon`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("pkcon"))
+print(manager_selection("pkcon"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("pkcon"))
 ```
 
-## Command line
+## How `mpm` drives `pkcon`
 
 ```{python:render}
 from docs_update import manager_cli

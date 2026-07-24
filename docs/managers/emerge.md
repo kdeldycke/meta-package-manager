@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("emerge"))
 ```
 
-## Usage
+## Selecting and configuring `emerge`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("emerge"))
+print(manager_selection("emerge"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("emerge"))
 ```
 
-## Command line
+## How `mpm` drives `emerge`
 
 ```{python:render}
 from docs_update import manager_cli

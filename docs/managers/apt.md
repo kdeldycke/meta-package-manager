@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("apt"))
 ```
 
-## Usage
+## Selecting and configuring `apt`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("apt"))
+print(manager_selection("apt"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("apt"))
 ```
 
-## Command line
+## How `mpm` drives `apt`
 
 ```{python:render}
 from docs_update import manager_cli

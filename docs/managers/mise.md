@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("mise"))
 ```
 
-## Usage
+## Selecting and configuring `mise`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("mise"))
+print(manager_selection("mise"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("mise"))
 ```
 
-## Command line
+## How `mpm` drives `mise`
 
 ```{python:render}
 from docs_update import manager_cli

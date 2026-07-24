@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("urpmi"))
 ```
 
-## Usage
+## Selecting and configuring `urpmi`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("urpmi"))
+print(manager_selection("urpmi"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("urpmi"))
 ```
 
-## Command line
+## How `mpm` drives `urpmi`
 
 ```{python:render}
 from docs_update import manager_cli

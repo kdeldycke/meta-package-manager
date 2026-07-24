@@ -46,12 +46,12 @@ from docs_update import manager_ecosystem
 print(manager_ecosystem("snap"))
 ```
 
-## Usage
+## Selecting and configuring `snap`
 
 ```{python:render}
-from docs_update import manager_usage
+from docs_update import manager_selection
 
-print(manager_usage("snap"))
+print(manager_selection("snap"))
 ```
 
 ## Recipes
@@ -62,7 +62,7 @@ from docs_update import manager_recipes
 print(manager_recipes("snap"))
 ```
 
-## Command line
+## How `mpm` drives `snap`
 
 ```{python:render}
 from docs_update import manager_cli

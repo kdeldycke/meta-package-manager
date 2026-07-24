@@ -49,7 +49,6 @@ class APM(PackageManager):
         "community fork (such as [atom-community/apm]"
         "(https://github.com/atom-community/apm)) has produced a usable drop-in."
     )
-    """Evidence and rationale for the unmaintained flag."""
 
     name = "Atom apm"
 

@@ -229,7 +229,9 @@ selection_cases = {
         tuple(
             mid
             for mid in pool.all_manager_ids
-            if not pool[mid].unmaintained and pool[mid].supported and pool[mid].available
+            if not pool[mid].unmaintained
+            and pool[mid].supported
+            and pool[mid].available
         ),
     ),
     "keep_unsupported": (
@@ -249,7 +251,9 @@ selection_cases = {
         tuple(
             mid
             for mid in pool.all_manager_ids
-            if not pool[mid].unmaintained and pool[mid].supported and pool[mid].available
+            if not pool[mid].unmaintained
+            and pool[mid].supported
+            and pool[mid].available
         ),
     ),
     "keep_not_found": (

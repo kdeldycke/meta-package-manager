@@ -636,9 +636,7 @@ def manager_intro(manager_id: str) -> str:
         )
     elif m.maintenance_note:
         blocks.append(
-            "```{note}\n"
-            f"{m.maintenance_note}\n"
-            "```",
+            f"```{{note}}\n{m.maintenance_note}\n```",
         )
 
     source_url = manager_source_url(manager_id)
@@ -1220,7 +1218,8 @@ def manager_selection(manager_id: str) -> str:
         f"`mpm config-template {manager_id}` prints every overridable attribute "
         "as a ready-to-paste block."
     )
-    return "\n\n".join([select, select_toml, tune, tune_toml, template])
+    parts = [select, select_toml, tune, tune_toml, template]
+    return "\n\n".join(parts)
 
 
 def manager_sudo(manager_id: str) -> str:

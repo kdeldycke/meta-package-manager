@@ -17,7 +17,7 @@
 #
 # ``managers`` keys must be lower-case manager identifiers. Each value is a
 # list (possibly empty) of competing tools that support that manager, chosen
-# from: topgrade, pacaptr, pacapt, sysget, whohas.
+# from: topgrade, pacaptr.
 #
 # ``homepages`` only needs to contain URLs for managers that mpm does not
 # implement. For mpm-implemented managers the homepage is sourced from the

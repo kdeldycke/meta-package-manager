@@ -5,7 +5,7 @@ requires = [ "uv-build>=0.9,<0.12" ]
 [project]
 # Docs: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 name = "meta-package-manager"
-version = "7.4.0"
+version = "7.4.1.dev0"
 description = "🎁 wraps all package managers with a unifying CLI"
 readme = "readme.md"
 keywords = [
@@ -292,7 +292,7 @@ optional-dependencies.toml = [ "click-extra[toml]" ]
 optional-dependencies.xml = [ "click-extra[xml]" ]
 optional-dependencies.yaml = [ "click-extra[yaml]" ]
 urls.Changelog = "https://github.com/kdeldycke/meta-package-manager/blob/main/changelog.md"
-urls.Download = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.4.0"
+urls.Download = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.4.1.dev0"
 urls.Funding = "https://github.com/sponsors/kdeldycke"
 urls.Homepage = "https://github.com/kdeldycke/meta-package-manager"
 urls.Issues = "https://github.com/kdeldycke/meta-package-manager/issues"
@@ -421,8 +421,8 @@ build-backend.source-include = [
 product-name = "Meta Package Manager"
 file-description = "🎁 wraps all package managers with a unifying CLI"
 copyright = "Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
-file-version = "7.4.0"
-product-version = "7.4.0"
+file-version = "7.4.1"
+product-version = "7.4.1"
 # Each platform needs its native icon format (all rendered from icon.svg):
 # .icns for macOS, .ico for Windows, .png for Linux. Passing a non-native
 # image (like a PNG to --windows-icon-from-ico) makes Nuitka require the
@@ -525,7 +525,7 @@ run.source = [ "meta_package_manager" ]
 report.precision = 2
 
 [tool.bumpversion]
-current_version = "7.4.0"
+current_version = "7.4.1.dev0"
 # Parse versions with an optional .devN suffix (PEP 440).
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.dev(?P<dev>\\d+))?"
 serialize = [

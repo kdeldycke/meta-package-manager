@@ -10,7 +10,6 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 | :-------------------- | :--------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `cli_names`           | list of strings  | CLI binary names to look for, in order of priority.                                                                                                                                  |
 | `cli_search_path`     | list of strings  | Extra directories searched **before** `$PATH` for the binary.                                                                                                                        |
-| `deprecated`          | boolean          | Mark a manager as deprecated, hiding it from default selection.                                                                                                                      |
 | `dry_run`             | boolean          | Simulate CLI calls without performing any action, only for this manager.                                                                                                             |
 | `extra_env`           | table of strings | Additional environment variables passed to every CLI call.                                                                                                                           |
 | `ignore_auto_updates` | boolean          | Exclude auto-updating packages from outdated/upgrade results, only for this manager.                                                                                                 |
@@ -21,6 +20,7 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 | `stop_on_error`       | boolean          | Stop on the first CLI error from this manager instead of continuing.                                                                                                                 |
 | `sudo`                | boolean          | Run this manager's privileged operations through `sudo` (overrides its built-in default: system managers escalate, user-level managers do not). See [privilege escalation](sudo.md). |
 | `timeout`             | integer          | Maximum duration in seconds for each CLI call from this manager.                                                                                                                     |
+| `unmaintained`        | boolean          | Mark a manager as unmaintained, hiding it from default selection.                                                                                                                    |
 | `version_cli_options` | list of strings  | CLI options used to extract the manager's reported version.                                                                                                                          |
 | `version_regexes`     | list of strings  | Regular expressions tried in order to extract the version from CLI output.                                                                                                           |
 

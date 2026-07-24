@@ -19,6 +19,7 @@
 name = "stew"
 homepage_url = "https://github.com/marwanhawari/stew"
 platforms = ["linux_like", "macos", "all_windows"]
+maintenance_note = "[stew](https://github.com/marwanhawari/stew) is a single-maintainer project; its last release was `0.6.0` (April 2025) and issues have since accumulated, though it is not archived."
 requirement = ">=0.3.0"
 # `stew --version` prints "stew version v0.6.0".
 version_regexes = ['stew version v(?P<version>\S+)']

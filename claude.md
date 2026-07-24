@@ -53,13 +53,22 @@ Which boils down to the following these rules of thumb regarding stability:
   Make no promises about backwards-compatibility. Any API change requires a new
   major release.
 
-- **Deprecated managers**: managers whose `deprecated` flag is set
+- **Unmaintained managers**: managers whose `unmaintained` flag is set
 
-  Are exempt from the rules above. A deprecated manager may be removed, in part or in
-  full, in any release and without notice, once keeping it working becomes too
-  burdensome. Each deprecation is documented via the manager's `deprecation_url`, and
-  deprecated managers are kept out of the functional test matrices. See the `deprecated`
-  attribute in `meta_package_manager/manager.py` for the full policy.
+  Are exempt from the rules above. A manager is flagged `unmaintained` when its upstream
+  project is officially retired **or** we infer it is abandoned: archived on its forge,
+  left without a release or commit for years (~3+), formally superseded by a successor,
+  or part of a discontinued platform. A superseded-but-still-maintained tool (like a
+  compatibility alias its upstream keeps shipping, such as `yum` fronting `dnf`) is
+  *not* unmaintained.
+
+  The commitment is to keep the wrapper for as long as that stays cheap: an unmaintained
+  manager may still be removed, in part or in full, in any release and without notice,
+  once keeping it working becomes too burdensome. Each flag is documented via the
+  manager's `unmaintained_message` (a markdown block rendered into the docs), and
+  unmaintained managers are kept out of the functional and integration test matrices to
+  save CI resources. See the `unmaintained` attribute in
+  `meta_package_manager/manager.py` for the full policy.
 
 ## Build status
 

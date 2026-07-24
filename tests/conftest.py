@@ -581,8 +581,8 @@ and locales. mpm's failure message is identical everywhere, so the test stays ro
 ```
 """
 
-# Deprecated managers are excluded: their upstreams are unreliable or gone, so a real
-# install/remove would only contribute flakiness (see PackageManager.deprecated).
+# Unmaintained managers are excluded: their upstreams are unreliable or gone, so a real
+# install/remove would only contribute flakiness (see PackageManager.unmaintained).
 maintained_manager_ids_and_dummy_package = pytest.mark.parametrize(
     "manager_id,package_id",
     tuple(param(mid, PACKAGE_IDS[mid], id=mid) for mid in pool.maintained_manager_ids),

@@ -25,6 +25,7 @@
 name = "Fink"
 homepage_url = "https://www.finkproject.org"
 platforms = ["macos"]
+maintenance_note = "[Fink](https://github.com/fink/fink) is in deep maintenance mode: no engine release since `0.45.6` (February 2022), though its package tree still receives occasional commits."
 cli_names = ["fink"]
 # fink self-escalates through /usr/bin/sudo: see the parsing notes above.
 internal_sudo = true

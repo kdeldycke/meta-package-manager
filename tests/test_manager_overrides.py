@@ -44,7 +44,7 @@ from .conftest import all_manager_ids, tomllib
 OVERRIDE_TARGET = "pip"
 """Manager ID used as a fixture target for override tests.
 
-`pip` is portable across all test platforms and never deprecated, so its presence in
+`pip` is portable across all test platforms and never unmaintained, so its presence in
 the pool is stable.
 """
 

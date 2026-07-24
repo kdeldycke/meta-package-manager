@@ -21,6 +21,7 @@
 name = "cave"
 homepage_url = "https://exherbo.org"
 platforms = ["exherbo"]
+maintenance_note = "[Paludis / cave](https://exherbo.org) is slow-moving: its last release (`3.0.2`) and commits date to around March 2025, though the project is not archived and carries no retirement notice."
 cli_names = ["cave"]
 # Global flag, placed before the subcommand: disables color on every call.
 pre_args = ["--colour", "no"]

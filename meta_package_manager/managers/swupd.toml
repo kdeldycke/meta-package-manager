@@ -20,6 +20,8 @@
 name = "Clear Linux Software Updater"
 homepage_url = "https://github.com/clearlinux/swupd-client"
 platforms = ["clearlinux"]
+unmaintained = true
+unmaintained_message = "Intel discontinued Clear Linux OS in July 2025 and the [swupd-client repository](https://github.com/clearlinux/swupd-client) is archived read-only, so `swupd` no longer receives updates."
 default_sudo = true
 # `swupd --version` prints "swupd 7.0.0", then an indented copyright line.
 version_regexes = ['swupd (?P<version>\S+)']

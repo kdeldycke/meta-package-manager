@@ -102,7 +102,7 @@ def test_cached_pool():
 
 @maintained_manager_ids
 def test_maintained_managers(manager_id):
-    assert pool[manager_id].deprecated is False
+    assert pool[manager_id].unmaintained is False
 
 
 @default_manager_ids
@@ -220,16 +220,16 @@ selection_cases = {
             if pool[mid].supported and pool[mid].available
         ),
     ),
-    "keep_deprecated": (
-        {"keep_deprecated": True},
+    "keep_unmaintained": (
+        {"keep_unmaintained": True},
         tuple(mid for mid in pool.all_manager_ids if pool[mid].available),
     ),
-    "drop_deprecated": (
-        {"keep_deprecated": False},
+    "drop_unmaintained": (
+        {"keep_unmaintained": False},
         tuple(
             mid
             for mid in pool.all_manager_ids
-            if not pool[mid].deprecated and pool[mid].supported and pool[mid].available
+            if not pool[mid].unmaintained and pool[mid].supported and pool[mid].available
         ),
     ),
     "keep_unsupported": (
@@ -249,7 +249,7 @@ selection_cases = {
         tuple(
             mid
             for mid in pool.all_manager_ids
-            if not pool[mid].deprecated and pool[mid].supported and pool[mid].available
+            if not pool[mid].unmaintained and pool[mid].supported and pool[mid].available
         ),
     ),
     "keep_not_found": (
@@ -257,7 +257,7 @@ selection_cases = {
         tuple(
             mid
             for mid in pool.all_manager_ids
-            if not pool[mid].deprecated and pool[mid].supported
+            if not pool[mid].unmaintained and pool[mid].supported
         ),
     ),
 }

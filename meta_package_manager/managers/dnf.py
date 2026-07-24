@@ -55,6 +55,13 @@ class DNF(PackageManager):
     - https://wiki.archlinux.org/title/Pacman/Rosetta (command equivalences)
     """
 
+    maintenance_note: str | None = (
+        "DNF 4 is superseded by "
+        "[dnf5](https://github.com/rpm-software-management/dnf5) (Fedora's default "
+        "since Fedora 41) but stays maintained for the RHEL 8/9 family; mpm wraps "
+        "`dnf5` as a separate manager."
+    )
+
     name = "Fedora DNF"
 
     homepage_url = "https://github.com/rpm-software-management/dnf"
@@ -318,6 +325,9 @@ class DNF5(DNF):
     `--color=never` (`dnf5` rejects that option), keeping only `--quiet`.
     """
 
+    # dnf5 is actively developed: clear the maintenance note inherited from DNF.
+    maintenance_note = None
+
     name = "Fedora DNF5"
 
     homepage_url = "https://github.com/rpm-software-management/dnf5"
@@ -340,6 +350,13 @@ class YUM(DNF):
     On current Fedora and RHEL the `yum` binary is a wrapper around `dnf`.
     `mpm` drives it exactly as `DNF`, only the binary name differs.
     """
+
+    maintenance_note = (
+        "The standalone [yum project is archived]"
+        "(https://github.com/rpm-software-management/yum); on modern RHEL and Fedora "
+        "the `yum` command is a maintained compatibility alias for "
+        "[dnf](https://github.com/rpm-software-management/dnf)."
+    )
 
     name = "Fedora YUM"
 

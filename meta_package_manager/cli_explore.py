@@ -95,7 +95,7 @@ def managers(ctx):
     """List every package manager detected on the system.
 
     Only reports by default all managers supported on the current platform. To include
-    unsupported and deprecated managers in the report, use the `--all-managers`
+    unsupported and unmaintained managers in the report, use the `--all-managers`
     flag.
 
     User's own selection configuration are intentionally ignored, so a manager dropped
@@ -110,7 +110,7 @@ def managers(ctx):
         pool.select_managers,
         keep=ctx.obj.user_selection,
         drop=None,
-        keep_deprecated=ctx.obj.all_managers,
+        keep_unmaintained=ctx.obj.all_managers,
         # Keep managers whose CLI was not found, to show how mpm reacts to the
         # local platform.
         drop_not_found=False,
@@ -154,8 +154,8 @@ def managers(ctx):
                     sorted(p.name for p in reduce(manager.platforms, MAIN_PLATFORMS))
                 ),
             )
-        if manager.deprecated:
-            os_infos += f" {theme().warning('(deprecated)')}"
+        if manager.unmaintained:
+            os_infos += f" {theme().warning('(unmaintained)')}"
 
         # Build up the CLI path column content.
         cli_infos = "{} {}".format(
@@ -675,8 +675,8 @@ def config_template(ctx, manager_ids):
     canonical reference for what each manager exposes: prune the rows that don't
     apply and customize the rest.
 
-    With no positional arguments, every maintained (non-deprecated) manager is
-    dumped. Pass one or more manager IDs to restrict the output.
+    With no positional arguments, every maintained manager (those not flagged
+    unmaintained) is dumped. Pass one or more manager IDs to restrict the output.
     """
     target_ids = manager_ids or pool.maintained_manager_ids
     overrides = {mid: dump_manager_overrides(pool[mid]) for mid in target_ids}

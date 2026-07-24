@@ -100,7 +100,7 @@ class MpmConfig:
         default=False,
         metadata={CONFIG_PATH_METADATA_KEY: "all_managers"},
     )
-    """Force evaluation of all managers, including unsupported and deprecated."""
+    """Force evaluation of all managers, including unsupported and unmaintained."""
 
     ignore_auto_updates: bool = field(
         default=True,

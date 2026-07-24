@@ -35,24 +35,21 @@ class APM(PackageManager):
     npm-style CLI whose queries mpm parses from `--json` output.
 
     Atom was [sunset on December 15, 2022](https://github.blog/2022-06-08-sunsetting-atom/), so apm is flagged
-    deprecated here. mpm keeps the wrapper while doing so stays cheap: the
+    unmaintained here. mpm keeps the wrapper while doing so stays cheap: the
     community fork [atom-community/apm](https://github.com/atom-community/apm)
     has been floated but never produced a usable drop-in, and per the project's
-    stability policy a deprecated manager may be dropped without notice once it
+    stability policy an unmaintained manager may be dropped without notice once it
     becomes a burden to maintain.
     """
 
-    deprecated = True
-    deprecation_url = "https://github.blog/2022-06-08-sunsetting-atom/"
-    """GitHub announced the end of the project for December 15, 2022.
-    Source: https://github.blog/2022-06-08-sunsetting-atom/
-
-    There is a tentative community fork being discussed. See:
-    https://github.com/atom-community/apm
-
-    In the mean time, as long as no apm alternative is useable, it is safe to tag this
-    manager as deprecated.
-    """
+    unmaintained = True
+    unmaintained_message = (
+        "Atom was [sunset on 2022-12-15]"
+        "(https://github.blog/2022-06-08-sunsetting-atom/); `apm` is archived and no "
+        "community fork (such as [atom-community/apm]"
+        "(https://github.com/atom-community/apm)) has produced a usable drop-in."
+    )
+    """Evidence and rationale for the unmaintained flag."""
 
     name = "Atom apm"
 

@@ -120,7 +120,7 @@ class GlobalOptions:
     """
 
     all_managers: bool
-    """Include unsupported and deprecated managers in the selection."""
+    """Include unsupported and unmaintained managers in the selection."""
 
     user_selection: list[str] | None
     """Managers explicitly selected by the user, in priority order, or `None`."""
@@ -270,7 +270,7 @@ def single_manager_selectors():
                 flag_value=manager_id,
                 default=None,
                 help=f"Select {manager.name}.",
-                deprecated=manager.deprecated,
+                deprecated=manager.unmaintained,
                 expose_value=False,
                 callback=update_manager_selection,
             )
@@ -281,7 +281,7 @@ def single_manager_selectors():
                 flag_value=manager_id,
                 default=None,
                 help=f"Deselect {manager.name}.",
-                deprecated=manager.deprecated,
+                deprecated=manager.unmaintained,
                 expose_value=False,
                 callback=update_manager_selection,
             )
@@ -368,7 +368,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         is_flag=True,
         default=False,
         help="Force evaluation of all managers implemented by mpm, including those "
-        "not supported by the current platform or deprecated. Still applies filtering "
+        "not supported by the current platform or unmaintained. Still applies filtering "
         "by --<manager-id> / --no-<manager-id> options before calling the subcommand.",
     ),
     option(
@@ -721,7 +721,7 @@ def mpm(
         return pool.select_managers(
             keep=keep,
             drop=managers_to_remove,
-            keep_deprecated=all_managers,
+            keep_unmaintained=all_managers,
             # Should we include auto-update packages or not?
             ignore_auto_updates=ignore_auto_updates,
             # Does the manager should raise on error or not.

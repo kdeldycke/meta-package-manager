@@ -18,6 +18,8 @@
 name = "apt-cyg"
 homepage_url = "https://github.com/transcode-open/apt-cyg"
 platforms = ["cygwin"]
+unmaintained = true
+unmaintained_message = "The author [stopped maintaining apt-cyg in 2017](https://github.com/transcode-open/apt-cyg/blob/master/status.md), stating 'I am no longer working on apt-cyg' and directing users to fork it instead."
 # apt-cyg is effectively unversioned: the only version signal is the hardcoded
 # literal in its usage text, which has always reported "1":
 #   $ apt-cyg --version

@@ -342,6 +342,14 @@ class Pacaur(Pacman):
     privileged steps. `mpm` therefore never wraps it in `sudo`.
     """
 
+    unmaintained = True
+    unmaintained_message = (
+        "The [original pacaur repository is archived]"
+        "(https://github.com/rmarquis/pacaur) (last commit 2018) and the "
+        "[E5ten fork](https://github.com/E5ten/pacaur) has had no commits since 2021; "
+        "migrate to `paru` or `yay`."
+    )
+
     name = "Arch Linux pacaur"
 
     homepage_url = "https://github.com/E5ten/pacaur"

@@ -50,6 +50,13 @@ class Sun_Tools(PackageManager):
     ```
     """
 
+    maintenance_note = (
+        "The SVR4 packaging commands are legacy, superseded by IPS since Solaris 11, "
+        "but still shipped and supported on [Oracle Solaris 11.4]"
+        "(https://docs.oracle.com/cd/E37838_01/html/E61051/pkgsvr4.html), whose "
+        "support runs through 2037."
+    )
+
     name = "Solaris SVR4 package tools"
 
     homepage_url = "https://docs.oracle.com/cd/E86824_01/html/E54763/pkginfo-1.html"

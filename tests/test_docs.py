@@ -557,8 +557,8 @@ def test_managers_index_table_renders():
     assert lines[2].startswith("| Manager")
     for mid, manager in pool.items():
         assert f"](managers/{mid}.md)" in table
-        if manager.deprecated:
-            assert f"[⚠️]({manager.deprecation_url})" in table
+        if manager.unmaintained:
+            assert f"[⚠️](managers/{mid}.md)" in table
 
 
 def test_matrix_blocks_in_sync():

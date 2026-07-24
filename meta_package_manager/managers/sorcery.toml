@@ -28,6 +28,7 @@
 name = "Sorcery"
 homepage_url = "https://sourcemage.org"
 platforms = ["sourcemage"]
+maintenance_note = "[Source Mage](https://sourcemage.org) is a small, slow-moving distribution; its `sorcery` scripts still receive commits but formal releases are rare."
 cli_names = ["sorcery"]
 default_sudo = true
 # `sorcery --version` prints the bare content of /etc/sorcery/version, a datestamp

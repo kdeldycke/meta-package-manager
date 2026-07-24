@@ -129,7 +129,6 @@ def _to_str_dict(value: Any) -> dict[str, str]:
 OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "cli_names": _to_str_tuple,
     "cli_search_path": _to_str_tuple,
-    "deprecated": _to_bool,
     "dry_run": _to_bool,
     "extra_env": _to_str_dict,
     "ignore_auto_updates": _to_bool,
@@ -141,6 +140,7 @@ OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "stop_on_error": _to_bool,
     "sudo": _to_bool,
     "timeout": _to_int,
+    "unmaintained": _to_bool,
     "version_cli_options": _to_str_tuple,
     "version_regexes": _to_str_tuple,
 }
@@ -183,6 +183,7 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
             "pre_cmds",
             "requirement",
             "timeout",
+            "unmaintained",
             "version_cli_options",
             "version_regexes",
         )
@@ -194,16 +195,20 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "brewfile_skip_warning": _to_str,
     "default_sudo": _to_bool,
     "internal_sudo": _to_bool,
+    "maintenance_note": _to_str,
+    "unmaintained_message": _to_str,
     "version_cli": _to_str,
 }
 """CLI-execution attributes a definition may set, mostly reusing the override
 converters.
 
-The runtime-preference fields (`deprecated`, `dry_run`, `ignore_auto_updates`,
-`plan`, `stop_on_error`) are excluded: they are command-line/global concerns, not
-part of a manager's identity, and resolve through the usual option precedence.
+The runtime-preference fields (`dry_run`, `ignore_auto_updates`, `plan`,
+`stop_on_error`) are excluded: they are command-line/global concerns, not part of a
+manager's identity, and resolve through the usual option precedence. `unmaintained`
+is reused from the override converters so a TOML-defined manager can flag its own
+upstream as abandoned (see `docs/cooldown.md` for the affected managers).
 
-Five fields are definition-only:
+Seven fields are definition-only:
 
 - `brewfile_entry_type` maps the manager onto a Homebrew Bundle DSL entry so its
   installed packages join `mpm dump --brewfile` exports (see
@@ -219,6 +224,12 @@ Five fields are definition-only:
   {attr}`~meta_package_manager.execution.CLIExecutor.internal_sudo`). mpm never
   wraps its commands in `sudo`; priming instead reuses a warm credential cache
   for these internal escalations. See `docs/sudo.md`.
+- `maintenance_note` renders a ``{note}`` admonition atop the manager's page for a
+  still-maintained upstream under watch (see
+  {attr}`~meta_package_manager.manager.PackageManager.maintenance_note`).
+- `unmaintained_message` documents an abandoned upstream, rendering a ``{warning}``
+  admonition and the `⚠️` table markers (see
+  {attr}`~meta_package_manager.manager.PackageManager.unmaintained_message`).
 - `version_cli` names an alternate binary for the version probe (see
   {attr}`~meta_package_manager.execution.CLIExecutor.version_cli`), for suites
   whose own binaries expose no version flag (OpenBSD's `pkg_add`).

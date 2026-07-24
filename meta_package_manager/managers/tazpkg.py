@@ -54,6 +54,12 @@ class Tazpkg(PackageManager):
     ```
     """
 
+    maintenance_note = (
+        "[SliTaz](https://slitaz.org) has published no stable ISO since 5.0 (2023) "
+        "but shows active development into 2026; `tazpkg` remains its native package "
+        "manager."
+    )
+
     name = "TazPkg"
 
     homepage_url = "https://slitaz.org"

@@ -88,7 +88,7 @@ else:
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
-BENCHMARK_COMPETITORS = ("topgrade", "pacaptr", "pacapt", "sysget", "whohas")
+BENCHMARK_COMPETITORS = ("topgrade", "pacaptr")
 """Competing tools shown alongside `mpm` in the benchmark page, in column order."""
 
 DOCS_SITE_URL = "https://kdeldycke.github.io/meta-package-manager"
@@ -270,7 +270,11 @@ def operation_matrix() -> tuple[str, str]:
     for mid, m in sorted(pool.items()):
         line = [
             f"[`{mid}`]({DOCS_SITE_URL}/managers/{mid}.html)"
-            + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
+            + (
+                ""
+                if not m.unmaintained
+                else f" [⚠️]({DOCS_SITE_URL}/managers/{mid}.html)"
+            ),
             (m.requirement or "").replace("<", r"\<"),
             "✓" if m.supports_cooldown else "",
         ]
@@ -608,8 +612,9 @@ def manager_intro(manager_id: str) -> str:
     """Produce the lede of a manager's documentation page.
 
     Rendered live at Sphinx build time by the first ``{python:render}`` block of
-    `docs/managers/<id>.md`. Stacks, in order: a deprecation warning when the
-    manager is deprecated, the manager class's own docstring (whose caveats and
+    `docs/managers/<id>.md`. Stacks, in order: an unmaintained-project warning when
+    the manager is unmaintained (or a maintenance-watch note for a still-maintained
+    but slowing upstream), the manager class's own docstring (whose caveats and
     notes are otherwise only surfaced by the API docs), and a facts list (home
     page, source, version requirement).
 
@@ -623,11 +628,16 @@ def manager_intro(manager_id: str) -> str:
     m = pool[manager_id]
     blocks = []
 
-    if m.deprecated:
+    if m.unmaintained:
         blocks.append(
             "```{warning}\n"
-            f"`{manager_id}` is deprecated. See the "
-            f"[deprecation notice]({m.deprecation_url}).\n"
+            f"`{manager_id}` is unmaintained. {m.unmaintained_message}\n"
+            "```",
+        )
+    elif m.maintenance_note:
+        blocks.append(
+            "```{note}\n"
+            f"{m.maintenance_note}\n"
             "```",
         )
 
@@ -1388,7 +1398,7 @@ def managers_index_table() -> str:
     """Produce the manager index table of `docs/managers.md`.
 
     Rendered live at Sphinx build time. Each manager links to its dedicated
-    documentation page, deprecated managers carry the same `⚠️` marker as the
+    documentation page, unmaintained managers carry the same `⚠️` marker as the
     readme's operation matrix, and platform icons follow the same coverage
     reading as the manager pages: a partially-backed group keeps its icon with
     {func}`_platform_coverage`'s annotation (`🐧 (Exherbo Linux only)`)
@@ -1397,7 +1407,7 @@ def managers_index_table() -> str:
     table = []
     for mid, m in sorted(pool.items()):
         id_cell = f"`{mid}`" + (
-            "" if not m.deprecated else f" [⚠️]({m.deprecation_url})"
+            "" if not m.unmaintained else f" [⚠️](managers/{mid}.md)"
         )
         parts = []
         for p_obj in MAIN_PLATFORMS:

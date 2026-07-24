@@ -295,14 +295,14 @@ class ManagerPool:
 
     @cached_property
     def maintained_manager_ids(self) -> tuple[str, ...]:
-        """All manager IDs which are not deprecated."""
+        """All manager IDs which are not unmaintained."""
         return tuple(
-            mid for mid in self.all_manager_ids if not self.register[mid].deprecated
+            mid for mid in self.all_manager_ids if not self.register[mid].unmaintained
         )
 
     @cached_property
     def default_manager_ids(self) -> tuple[str, ...]:
-        """All manager IDs supported on the current platform and not deprecated.
+        """All manager IDs supported on the current platform and not unmaintained.
 
         Must keep the same order defined by
         {attr}`meta_package_manager.pool.ManagerPool.all_manager_ids`.
@@ -328,7 +328,7 @@ class ManagerPool:
         self,
         keep: Iterable[str] | None = None,
         drop: Iterable[str] | None = None,
-        keep_deprecated: bool = False,
+        keep_unmaintained: bool = False,
         keep_unsupported: bool = False,
         drop_not_found: bool = True,
         implements_operation: Operations | None = None,
@@ -341,8 +341,8 @@ class ManagerPool:
         Unless `keep_unsupported` is set to `True`, in which case all managers
         implemented by `mpm` are selected, regardless of their supported platform.
 
-        Deprecated managers are also excluded by default, unless `keep_deprecated` is
-        `True`.
+        Unmaintained managers are also excluded by default, unless `keep_unmaintained`
+        is `True`.
 
         `drop_not_found` filters out managers whose CLI was not found on the system.
 
@@ -364,7 +364,7 @@ class ManagerPool:
         # Produce the default set of managers to consider if none have been
         # provided by the `keep` parameter.
         if keep is None:
-            if keep_deprecated:
+            if keep_unmaintained:
                 keep = self.all_manager_ids
             elif keep_unsupported:
                 keep = self.maintained_manager_ids

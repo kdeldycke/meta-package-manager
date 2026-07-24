@@ -20,7 +20,7 @@ manager in {mod}`meta_package_manager.managers` inherits from, together with its
 {class}`meta_package_manager.manager.MetaPackageManager` metaclass and the
 {class}`meta_package_manager.manager.ManagerScope` classification.
 
-A subclass declares its identity (supported platforms, version requirement, deprecation
+A subclass declares its identity (supported platforms, version requirement, maintenance
 status) and implements the operations it supports (`installed`, `outdated`,
 `install`, `upgrade`, ...). The CLI-execution engine it inherits lives in
 {mod}`meta_package_manager.execution`, the operation vocabulary in
@@ -174,27 +174,53 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     supported yet.
     """
 
-    deprecated: bool = False
-    """A manager marked as deprecated is hidden from package selection by default.
+    unmaintained: bool = False
+    """A manager whose upstream project is no longer maintained.
 
-    You can still use it by explicitly calling for it on the command line.
+    Covers projects that are officially retired and those we infer are abandoned:
+    archived on their forge, left without a release or commit for years, formally
+    superseded by a successor, or part of a discontinued platform. See the
+    stability policy in `CLAUDE.md` for the full criteria.
 
-    A deprecated manager is exempt from the project stability policy: it may be dropped,
-    in part or in full, in any release and without notice, once keeping it working
-    becomes too burdensome. Every deprecation must be documented through
-    {attr}`deprecation_url`.
+    An unmaintained manager is hidden from package selection by default (you can
+    still use it by explicitly calling for it on the command line), and is exempt
+    from the project stability policy: it may be dropped, in part or in full, in
+    any release and without notice, once keeping it working becomes too
+    burdensome.
 
-    Deprecated managers are kept out of the functional and integration test matrices, so
-    an unreliable or flaky deprecated manager never blocks a release. The cheap static
-    invariants (ID format, attribute ordering, ...) still apply for as long as the
-    manager's code lives in the source tree, to keep that code valid.
+    Unmaintained managers are kept out of the functional and integration test
+    matrices, so an unreliable or flaky one never blocks a release and we save CI
+    resources. The commitment is to keep the wrapper for as long as that stays
+    cheap: the cheap static invariants (ID format, attribute ordering, ...) still
+    apply for as long as the manager's code lives in the source tree, to keep that
+    code valid.
+
+    Every unmaintained manager must document itself through
+    {attr}`unmaintained_message`.
     """
 
-    deprecation_url: str | None = None
-    """Announcement from the official project, or evidence of abandonment of maintenance.
+    unmaintained_message: str | None = None
+    """Evidence and rationale for the {attr}`unmaintained` flag, as a MyST
+    markdown block.
 
-    Required for every manager whose {attr}`deprecated` flag is set, and only
-    meaningful on such managers. Enforced by `test_deprecated`.
+    Rendered into the documentation (the manager's page, and a `⚠️` marker in the
+    manager tables). May embed markdown links to the archival notice, the successor
+    project, or the discontinuation announcement. Required for every manager whose
+    {attr}`unmaintained` flag is set, and only meaningful on such managers.
+    Enforced by `test_unmaintained`.
+    """
+
+    maintenance_note: str | None = None
+    """A watch note about a still-maintained upstream whose activity is slowing or
+    whose status is ambiguous, as a MyST markdown block.
+
+    Unlike {attr}`unmaintained`, this is purely informational: the manager stays in
+    the default selection and in the test matrices. It renders as a ``{note}``
+    admonition atop the manager's documentation page, flagging upstreams worth
+    keeping an eye on (a slow release cadence, superseded-but-still-shipped tools, a
+    discontinued platform still under vendor support). May embed markdown links.
+    Mutually exclusive with {attr}`unmaintained`: a confirmed-dead manager carries an
+    {attr}`unmaintained_message` instead. Enforced by `test_maintenance_note`.
     """
 
     id: str
@@ -452,7 +478,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
            <meta_package_manager.manager.PackageManager.fresh>`.
         """
         logging.debug(
-            f"Deprecated? {self.deprecated}; "
+            f"Unmaintained? {self.unmaintained}; "
             f"supported? {self.supported}; "
             f"found at: {highlight_cli_name(self.cli_path, self.cli_names)}; "
             f"executable? {self.executable}; "

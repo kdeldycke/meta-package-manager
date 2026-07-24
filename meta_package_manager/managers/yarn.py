@@ -75,19 +75,19 @@ class YarnClassic(Yarn):
     removals target the global prefix. Its `--json` output is a stream of one JSON
     object per line, not a single document, so every query is parsed line by line.
 
-    ```{warning}
-    Yarn Classic has been in maintenance mode since January 2020, taking only
-    critical and security patches. Yarn Berry (`2.x` and later) is the
-    actively developed line but exposes a different CLI surface, so mpm handles
-    it through a separate {class}`YarnBerry` manager.
-    ```
-
     ```{note}
     Yarn has [no dedicated search command](https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299) by
     maintainer decision, so `search` is simulated with `yarn info` and only
     resolves exact package names.
     ```
     """
+
+    maintenance_note = (
+        "Yarn Classic (`1.x`) is [frozen](https://github.com/yarnpkg/yarn), taking "
+        "only security fixes; the actively developed "
+        "[Yarn Berry](https://github.com/yarnpkg/berry) line has a different CLI and "
+        "is wrapped separately as the `yarn-berry` manager."
+    )
 
     id = "yarn"
 

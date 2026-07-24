@@ -53,18 +53,44 @@ def test_xkcd_set():
 
 
 @all_managers
-def test_deprecated(manager):
-    """A deprecated manager must document itself with a valid `deprecation_url`.
+def test_unmaintained(manager):
+    """An unmaintained manager must document itself with a non-empty
+    `unmaintained_message`, and any URL embedded in that markdown message must be a
+    well-formed `http(s)` link.
 
-    Conversely, a `deprecation_url` is only meaningful on a deprecated manager.
+    Conversely, an `unmaintained_message` is only meaningful on an unmaintained
+    manager.
     """
-    if manager.deprecated:
-        assert manager.deprecation_url is not None, (
-            f"Deprecated manager {manager.id!r} must set a deprecation_url."
+    if manager.unmaintained:
+        assert manager.unmaintained_message, (
+            f"Unmaintained manager {manager.id!r} must set an unmaintained_message."
         )
-    if manager.deprecation_url is not None:
-        assert manager.deprecated is True
-        location = URL(manager.deprecation_url)
+    if manager.unmaintained_message is not None:
+        assert manager.unmaintained is True
+        assert manager.unmaintained_message.strip()
+        for url in re.findall(r"https?://[^\s)]+", manager.unmaintained_message):
+            location = URL(url)
+            assert location
+            assert location.scheme.lower() in ("http", "https")
+
+
+@all_managers
+def test_maintenance_note(manager):
+    """A `maintenance_note` is a MyST markdown block whose embedded URLs must be
+    well-formed `http(s)` links.
+
+    It is mutually exclusive with the `unmaintained` flag: a confirmed-dead manager
+    documents itself with an `unmaintained_message` instead of a watch note.
+    """
+    if manager.maintenance_note is None:
+        return
+    assert manager.maintenance_note.strip()
+    assert manager.unmaintained is False, (
+        f"Manager {manager.id!r} cannot be both unmaintained and carry a "
+        "maintenance_note."
+    )
+    for url in re.findall(r"https?://[^\s)]+", manager.maintenance_note):
+        location = URL(url)
         assert location
         assert location.scheme.lower() in ("http", "https")
 
@@ -312,8 +338,9 @@ def _collect_class_members(klass: type, name: str) -> tuple[list[str], list[str]
 CANONICAL_ATTRS = (
     # Identity.
     "scope",
-    "deprecated",
-    "deprecation_url",
+    "unmaintained",
+    "unmaintained_message",
+    "maintenance_note",
     "id",
     "name",
     "homepage_url",

@@ -1,13 +1,14 @@
 /*
- * Crosshair hover highlight for the benchmark page's wide comparison tables.
+ * Crosshair hover highlight for the wide comparison tables on the benchmark,
+ * SBOM, cooldown and augmentations pages.
  *
  * On pointer-over of any cell, highlights that cell's whole row and whole
  * column (including the column header and the row label), plus the cell
  * itself, so a reader can trace an entry back to its (feature, tool) pair
  * without counting columns. Styling lives in table-crosshair.css.
  *
- * Scoped to benchmark.html so it never touches tables on other pages. The
- * benchmark tables are plain grids (no colspan/rowspan), so cellIndex maps
+ * Scoped by pathname to those pages so it never touches tables elsewhere.
+ * Every table on them is a plain grid (no colspan/rowspan), so cellIndex maps
  * cleanly to a visual column.
  */
 (function () {
@@ -20,7 +21,11 @@
   }
 
   ready(function () {
-    if (!/\/benchmark\.html?$/.test(window.location.pathname)) {
+    if (
+      !/\/(benchmark|sbom|cooldown|augmentations)\.html?$/.test(
+        window.location.pathname
+      )
+    ) {
       return;
     }
 

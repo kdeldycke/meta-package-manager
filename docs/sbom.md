@@ -10,11 +10,11 @@ As a response to this crisis, [SBOM tools have now became a category of their ow
 
 | Standard  | [SPDX](https://spdx.dev) | [CycloneDX](https://cyclonedx.org) |
 | --------- | :----------------------: | :--------------------------------: |
-| JSON      |            ✓             |                 ✓                  |
-| XML       |            ✓             |                 ✓                  |
-| YAML      |            ✓             |                                    |
-| RDF XML   |            ✓             |                                    |
-| TAG VALUE |            ✓             |                                    |
+| JSON      |            ✅            |                 ✅                 |
+| XML       |            ✅            |                 ✅                 |
+| YAML      |            ✅            |                                    |
+| RDF XML   |            ✅            |                                    |
+| TAG VALUE |            ✅            |                                    |
 
 SBOM export is the compliance corner of `mpm`'s inventory exports: for re-installable snapshots see {doc}`dump`, and for ad-hoc JSON or CSV piping of a listing see {doc}`output-formats`.
 
@@ -131,15 +131,15 @@ $ mpm --brew sbom > deep.spdx.json
 
 ## Coverage matrix
 
-| Manager  | License | Homepage | Download URL | Checksums | Dependency graph | Per-package SBOM | Vulnerabilities |
-| -------- | :-----: | :------: | :----------: | :-------: | :--------------: | :--------------: | :-------------: |
-| Homebrew |    ✓    |    ✓     |      ✓       |     ✓     |        ✓         |    ✓ (opt-in)    |                 |
-| pip      |    ✓    |    ✓     |              |           |        ✓         |                  | ✓ (`--network`) |
-| npm      |         |          |              |           |                  |                  | ✓ (`--network`) |
-| cargo    |         |          |              |           |                  |                  | ✓ (`--network`) |
-| gem      |         |          |              |           |                  |                  | ✓ (`--network`) |
-| composer |         |          |              |           |                  |                  | ✓ (`--network`) |
-| Others   |         |          |              |           |                  |                  |                 |
+| Manager                            | License | Homepage | Download URL | Checksums | Dependency graph | Per-package SBOM | Vulnerabilities  |
+| :--------------------------------- | :-----: | :------: | :----------: | :-------: | :--------------: | :--------------: | :--------------: |
+| [`brew`](managers/brew.md)         |   ✅    |    ✅    |      ✅      |    ✅     |        ✅        |   ✅ (opt-in)    |                  |
+| [`pip`](managers/pip.md)           |   ✅    |    ✅    |              |           |        ✅        |                  | ✅ (`--network`) |
+| [`npm`](managers/npm.md)           |         |          |              |           |                  |                  | ✅ (`--network`) |
+| [`cargo`](managers/cargo.md)       |         |          |              |           |                  |                  | ✅ (`--network`) |
+| [`gem`](managers/gem.md)           |         |          |              |           |                  |                  | ✅ (`--network`) |
+| [`composer`](managers/composer.md) |         |          |              |           |                  |                  | ✅ (`--network`) |
+| Others                             |         |          |              |           |                  |                  |                  |
 
 Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time. The vulnerability column tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems); a manager OSV does not index (Homebrew, `mas`, the distro managers OSV needs a release qualifier for) gets no advisories rather than an error.
 
@@ -149,15 +149,15 @@ For the `license` column specifically, [Tern](https://github.com/tern-tools/tern
 
 `mpm` is not the only tool that emits an SBOM. The widely-used ones each occupy a different spot in the supply-chain landscape:
 
-| Tool                                                                    | By              | Language   | License          | What it reads                                              |     SPDX      | CycloneDX | purl       |
-| :---------------------------------------------------------------------- | :-------------- | :--------- | :--------------- | :--------------------------------------------------------- | :-----------: | :-------: | :--------- |
-| [`mpm`](https://github.com/kdeldycke/meta-package-manager)              | this project    | Python     | GPL-2.0-or-later | the live package managers on a host, queried directly      |     ✓ 2.3     |   ✓ 1.7   | ✓          |
-| [Syft](https://github.com/anchore/syft)                                 | Anchore         | Go         | Apache-2.0       | container images and filesystems (package DBs, lockfiles)  |     ✓ 2.3     |   ✓ 1.6   | ✓          |
-| [Trivy](https://github.com/aquasecurity/trivy)                          | Aqua Security   | Go         | Apache-2.0       | images, filesystems, repositories, VMs, clusters           |     ✓ 2.3     |   ✓ 1.5   | ✓          |
-| [Tern](https://github.com/tern-tools/tern)                              | tern-tools      | Python     | BSD-2-Clause     | container image layers (runs package managers in a chroot) |       ✓       |     ✓     |            |
-| [cdxgen](https://github.com/CycloneDX/cdxgen)                           | OWASP CycloneDX | JavaScript | Apache-2.0       | project manifests and lockfiles; a live host via `obom`    |     ✓ 3.0     |   ✓ 1.7   | ✓          |
-| [component-detection](https://github.com/microsoft/component-detection) | Microsoft       | C#         | MIT              | source-tree manifests and lockfiles (~30 detectors)        | via sbom-tool |           | own schema |
-| [sbom-tool](https://github.com/microsoft/sbom-tool)                     | Microsoft       | C#         | MIT              | build output and source tree (wraps component-detection)   |  ✓ 2.2, 3.0   |           |            |
+| Tool                                      | By              | Language   | License          | What it reads                                              |     SPDX      | CycloneDX |    purl    |
+| :---------------------------------------- | :-------------- | :--------- | :--------------- | :--------------------------------------------------------- | :-----------: | :-------: | :--------: |
+| `mpm`[^mpm]                               | this project    | Python     | GPL-2.0-or-later | the live package managers on a host, queried directly      |    ✅ 2.3     |  ✅ 1.7   |     ✅     |
+| Syft[^syft]                               | Anchore         | Go         | Apache-2.0       | container images and filesystems (package DBs, lockfiles)  |    ✅ 2.3     |  ✅ 1.6   |     ✅     |
+| Trivy[^trivy]                             | Aqua Security   | Go         | Apache-2.0       | images, filesystems, repositories, VMs, clusters           |    ✅ 2.3     |  ✅ 1.5   |     ✅     |
+| Tern[^tern]                               | tern-tools      | Python     | BSD-2-Clause     | container image layers (runs package managers in a chroot) |      ✅       |    ✅     |            |
+| cdxgen[^cdxgen]                           | OWASP CycloneDX | JavaScript | Apache-2.0       | project manifests and lockfiles; a live host via `obom`    |    ✅ 3.0     |  ✅ 1.7   |     ✅     |
+| component-detection[^component-detection] | Microsoft       | C#         | MIT              | source-tree manifests and lockfiles (~30 detectors)        | via sbom-tool |           | own schema |
+| sbom-tool[^sbom-tool]                     | Microsoft       | C#         | MIT              | build output and source tree (wraps component-detection)   |  ✅ 2.2, 3.0  |           |            |
 
 Versions shown are each tool's current default; Syft and cdxgen can also emit older spec revisions on request. `mpm` is on the newest CycloneDX (1.7), and cdxgen and sbom-tool reach the newest SPDX (3.0). Tern's README states no spec versions or purl support for its output.
 
@@ -240,3 +240,17 @@ Without `[sbom-offline]`, `mpm sbom` exits with an explanatory error pointing at
    :show-inheritance:
    :undoc-members:
 ```
+
+[^mpm]: [https://github.com/kdeldycke/meta-package-manager](https://github.com/kdeldycke/meta-package-manager)
+
+[^syft]: [https://github.com/anchore/syft](https://github.com/anchore/syft)
+
+[^trivy]: [https://github.com/aquasecurity/trivy](https://github.com/aquasecurity/trivy)
+
+[^tern]: [https://github.com/tern-tools/tern](https://github.com/tern-tools/tern)
+
+[^cdxgen]: [https://github.com/CycloneDX/cdxgen](https://github.com/CycloneDX/cdxgen)
+
+[^component-detection]: [https://github.com/microsoft/component-detection](https://github.com/microsoft/component-detection)
+
+[^sbom-tool]: [https://github.com/microsoft/sbom-tool](https://github.com/microsoft/sbom-tool)

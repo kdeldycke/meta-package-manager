@@ -1,9 +1,10 @@
 /*
- * Crosshair hover highlight for wide comparison tables (benchmark page).
+ * Crosshair hover highlight for wide comparison tables (benchmark, SBOM,
+ * cooldown and augmentations pages).
  *
- * The classes are only ever applied by table-crosshair.js, and only on the
- * benchmark page, so these rules are inert everywhere else. Colors come from
- * furo's own CSS variables, so the highlight adapts to light and dark themes.
+ * The classes are only ever applied by table-crosshair.js, and only on those
+ * pages, so these rules are inert everywhere else. Colors come from furo's own
+ * CSS variables, so the highlight adapts to light and dark themes.
  */
 
 /* Hovered row and column: subtle wash. */

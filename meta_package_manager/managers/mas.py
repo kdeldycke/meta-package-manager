@@ -49,7 +49,9 @@ class MAS(PackageManager):
     in an array, and leaves control characters (embedded newlines,
     `U+2028`) unescaped inside name and description strings ([upstream bug](https://github.com/mas-cli/mas/issues/1248)). mpm decodes the buffer
     one object at a time with `strict=False` so each object ends at its own
-    closing brace instead of splitting on those bytes.
+    closing brace instead of splitting on those bytes. The bug is fixed
+    upstream for the (still unreleased) `7.1.0`, so this workaround can be
+    retired once the `requirement` floor rises to `>=7.1.0`.
     ```
 
     ```{note}

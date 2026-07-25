@@ -648,5 +648,65 @@
 		"suspicious": 0,
 		"tag": "v7.3.0",
 		"undetected": 51
+	},
+	{
+		"filename": "meta-package-manager-7.4.0-linux-arm64.bin",
+		"harmless": 0,
+		"malicious": 0,
+		"scanned": "2026-07-25",
+		"sha256": "5fcbebe1ece6fcfb1a6404eb1afb0e578c833f32cfc1e59be4541817a099a371",
+		"suspicious": 0,
+		"tag": "v7.4.0",
+		"undetected": 63
+	},
+	{
+		"filename": "meta-package-manager-7.4.0-linux-x64.bin",
+		"harmless": 0,
+		"malicious": 1,
+		"scanned": "2026-07-25",
+		"sha256": "a3e1e41922637c782d12e2a440f170e243ecc7f1e5a3e23800f28be4149f3a82",
+		"suspicious": 0,
+		"tag": "v7.4.0",
+		"undetected": 63
+	},
+	{
+		"filename": "meta-package-manager-7.4.0-macos-arm64.bin",
+		"harmless": 0,
+		"malicious": 1,
+		"scanned": "2026-07-25",
+		"sha256": "776295da541ff59db4774875531a51bf1d44709a72cf89c6dd53e49301b133cb",
+		"suspicious": 0,
+		"tag": "v7.4.0",
+		"undetected": 60
+	},
+	{
+		"filename": "meta-package-manager-7.4.0-macos-x64.bin",
+		"harmless": 0,
+		"malicious": 0,
+		"scanned": "2026-07-25",
+		"sha256": "5f19e4aafd042b28796a03617fe1d147213a88bc7fae056251c2300ffdb072ca",
+		"suspicious": 0,
+		"tag": "v7.4.0",
+		"undetected": 61
+	},
+	{
+		"filename": "meta-package-manager-7.4.0-windows-arm64.exe",
+		"harmless": 0,
+		"malicious": 3,
+		"scanned": "2026-07-25",
+		"sha256": "52b4ee21d24118e4481f73a55e0c44064f177f9c47c54bda8155cfd9ce3f9ef2",
+		"suspicious": 0,
+		"tag": "v7.4.0",
+		"undetected": 63
+	},
+	{
+		"filename": "meta-package-manager-7.4.0-windows-x64.exe",
+		"harmless": 0,
+		"malicious": 19,
+		"scanned": "2026-07-25",
+		"sha256": "c87b928e917ef7ae3f0d8b0f09c5a4fd56cfbf021f41b901733655df9d9cd8b1",
+		"suspicious": 0,
+		"tag": "v7.4.0",
+		"undetected": 50
 	}
 ]

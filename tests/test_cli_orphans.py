@@ -34,12 +34,23 @@ def subcmd():
     return "orphans"
 
 
+@pytest.mark.usefixtures("fake_pool")
 class TestOrphans(CLISubCommandTests, CLITableTests, CLIQueryTests):
+    """Pin the whole class to `fake_pool`.
+
+    Unlike the other `CLITableTests` subcommands, `orphans` is implemented by
+    only a subset of managers (all Linux, BSD or macOS tools), so no
+    default-selected manager implements it on every platform: Windows has
+    none. The inherited real-pool template tests would resolve there to
+    `No manager selected.` instead of the `0` exit they assert, so the
+    deterministic fake pool stands in on every host.
+    """
+
     columns_registry = INSTALLED_COLUMNS
 
-    def test_json_parsing(self, invoke, subcmd):
+    def test_json_parsing(self, invoke, subcmd, fake_pool):
         result = invoke("--table-format", "json", subcmd)
-        check_packages_payload(result)
+        check_packages_payload(result, reference_set={fake_pool.id})
 
     @pytest.mark.parametrize(
         ("args", "expected_ids"),

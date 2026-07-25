@@ -401,7 +401,11 @@ class TestSelectorPrecedence(InspectCLIOutput):
             self.check_manager_selection(result, expected)
 
 
-def check_packages_payload(result, optional_keys: frozenset[str] = frozenset()) -> None:
+def check_packages_payload(
+    result,
+    optional_keys: frozenset[str] = frozenset(),
+    reference_set: Collection[str] = pool.default_manager_ids,
+) -> None:
     """Validate the serialized ``{manager: {id, name, errors, packages}}`` payload.
 
     The shared shape check of the package-reporting subcommands (`installed`,
@@ -409,13 +413,17 @@ def check_packages_payload(result, optional_keys: frozenset[str] = frozenset()) 
     carries the standard keys (plus the subcommand's `optional_keys`, like
     `outdated`'s `upgrade_all_cli`), and every package serializes a subset of
     the {class}`~meta_package_manager.package.Package` fields as strings.
+
+    `reference_set` defaults to the platform's real default managers, but a
+    caller pinned to `fake_pool` (like `orphans`, with no implementing
+    manager on every platform) overrides it to match.
     """
     assert result.exit_code == 0
     data = json.loads(result.stdout)
 
     assert data
     assert isinstance(data, dict)
-    assert set(data).issubset(pool.default_manager_ids)
+    assert set(data).issubset(reference_set)
 
     for manager_id, info in data.items():
         assert isinstance(manager_id, str)

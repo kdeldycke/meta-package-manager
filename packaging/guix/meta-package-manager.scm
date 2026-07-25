@@ -22,7 +22,7 @@
 (define-public meta-package-manager
   (package
     (name "meta-package-manager")
-    (version "7.3.0")
+    (version "7.4.0")
     (source
      (origin
        (method git-fetch)
@@ -31,7 +31,7 @@
              (commit (string-append "v" version))))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "11s5kq6g7lh4lkfbp2zqn6fy2frbnnvn4m2avkg850fj0hdx8823"))))
+        (base32 "0wp93lz47mg38g85fd5c71bmy5aqdrgn1qlczshrzcissnzhjh8l"))))
     (build-system pyproject-build-system)
     ;; Upstream builds with uv-build, which is not yet packaged for Guix; fall
     ;; back to setuptools.

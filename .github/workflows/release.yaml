@@ -77,6 +77,10 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Full history so the redundant-PR check can compute the merge base
+          # between main and the open release branch (see the reconcile step below).
+          fetch-depth: 0
       - name: Check for new release
         id: check
         env:
@@ -91,21 +95,29 @@ jobs:
             grep --only-matching --perl-regexp '\(version "\K[^"]+' \
               packaging/guix/meta-package-manager.scm
           )
+          # Number of an already-open PR on the release branch, empty when none.
+          existing=$(
+            gh pr list --head guix/release --state open --json number \
+              --jq '.[0].number'
+          )
+          {
+            echo "version=${latest}"
+            echo "existing=${existing}"
+          } >> "${GITHUB_OUTPUT}"
           if [ "${latest}" = "${current}" ]; then
-            echo "Latest release ${latest} already matches definition. Skipping."
-            echo "skip=true" >> "${GITHUB_OUTPUT}"
+            echo "Definition already at ${latest}; no version bump needed."
+            echo "needs_update=false" >> "${GITHUB_OUTPUT}"
           else
             echo "New release found: ${latest} (definition has ${current})."
-            echo "skip=false" >> "${GITHUB_OUTPUT}"
-            echo "version=${latest}" >> "${GITHUB_OUTPUT}"
+            echo "needs_update=true" >> "${GITHUB_OUTPUT}"
           fi
       - name: Update package definition to latest release
-        if: steps.check.outputs.skip != 'true'
+        if: steps.check.outputs.needs_update == 'true'
         run: python3 packaging/guix/update.py
       - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
-        if: steps.check.outputs.skip != 'true'
+        if: steps.check.outputs.needs_update == 'true'
       - name: Render PR body
-        if: steps.check.outputs.skip != 'true'
+        if: steps.check.outputs.needs_update == 'true'
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
@@ -116,7 +128,7 @@ jobs:
           --template-arg spec_path=packaging/guix/
           --output body.md
       - name: Open PR with updated packaging files
-        if: steps.check.outputs.skip != 'true'
+        if: steps.check.outputs.needs_update == 'true'
         env:
           VERSION: ${{ steps.check.outputs.version }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -140,6 +152,29 @@ jobs:
               --body-file body.md \
               --label "📦 manager: guix"
           fi
+      # Reconcile an already-open release PR that a direct commit (or an earlier
+      # merge) has made redundant: main already carries the latest release, so the
+      # PR would change nothing. Close it, but only after proving the merge is a
+      # genuine no-op, so a still-pending PR is never discarded.
+      - name: Close the release PR when it became redundant
+        if: steps.check.outputs.needs_update != 'true' && steps.check.outputs.existing != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXISTING: ${{ steps.check.outputs.existing }}
+          VERSION: ${{ steps.check.outputs.version }}
+        run: |
+          branch="guix/release"
+          git fetch --no-tags origin "${branch}"
+          # Merge the PR branch into main in memory: an identical resulting tree
+          # means merging changes nothing, so the PR is redundant. A non-zero exit
+          # means the merge conflicts, so leave the PR for manual review.
+          if merged=$(git merge-tree --write-tree HEAD FETCH_HEAD) \
+            && [ "${merged}" = "$(git rev-parse 'HEAD^{tree}')" ]; then
+            msg="Superseded: \`main\` already matches \`v${VERSION}\`, so merging this would change nothing."
+            gh pr close "${EXISTING}" --delete-branch --comment "${msg}"
+          else
+            echo "PR #${EXISTING} still carries changes not on main; leaving it open."
+          fi
 
   # Prepare a Nix package definition after the release job. Unlike Homebrew, Scoop,
   # and AUR, the Nix definition is maintained in this repo (see packaging/nix/) while
@@ -154,6 +189,10 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Full history so the redundant-PR check can compute the merge base
+          # between main and the open release branch (see the reconcile step below).
+          fetch-depth: 0
       - uses: cachix/install-nix-action@v31
       - name: Check for new release
         id: check
@@ -170,21 +209,29 @@ jobs:
               packaging/nix/package.nix \
             | head --lines=1
           )
+          # Number of an already-open PR on the release branch, empty when none.
+          existing=$(
+            gh pr list --head nix/release --state open --json number \
+              --jq '.[0].number'
+          )
+          {
+            echo "version=${latest}"
+            echo "existing=${existing}"
+          } >> "${GITHUB_OUTPUT}"
           if [ "${latest}" = "${current}" ]; then
-            echo "Latest release ${latest} already matches definition. Skipping."
-            echo "skip=true" >> "${GITHUB_OUTPUT}"
+            echo "Definition already at ${latest}; no version bump needed."
+            echo "needs_update=false" >> "${GITHUB_OUTPUT}"
           else
             echo "New release found: ${latest} (definition has ${current})."
-            echo "skip=false" >> "${GITHUB_OUTPUT}"
-            echo "version=${latest}" >> "${GITHUB_OUTPUT}"
+            echo "needs_update=true" >> "${GITHUB_OUTPUT}"
           fi
       - name: Update package definition to latest release
-        if: steps.check.outputs.skip != 'true'
+        if: steps.check.outputs.needs_update == 'true'
         run: python3 packaging/nix/update.py
       - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
-        if: steps.check.outputs.skip != 'true'
+        if: steps.check.outputs.needs_update == 'true'
       - name: Render PR body
-        if: steps.check.outputs.skip != 'true'
+        if: steps.check.outputs.needs_update == 'true'
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
@@ -195,7 +242,7 @@ jobs:
           --template-arg spec_path=packaging/nix/
           --output body.md
       - name: Open PR with updated packaging files
-        if: steps.check.outputs.skip != 'true'
+        if: steps.check.outputs.needs_update == 'true'
         env:
           VERSION: ${{ steps.check.outputs.version }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -218,4 +265,27 @@ jobs:
               --title "Update Nix package definition to v${VERSION}" \
               --body-file body.md \
               --label "📦 manager: nix"
+          fi
+      # Reconcile an already-open release PR that a direct commit (or an earlier
+      # merge) has made redundant: main already carries the latest release, so the
+      # PR would change nothing. Close it, but only after proving the merge is a
+      # genuine no-op, so a still-pending PR is never discarded.
+      - name: Close the release PR when it became redundant
+        if: steps.check.outputs.needs_update != 'true' && steps.check.outputs.existing != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXISTING: ${{ steps.check.outputs.existing }}
+          VERSION: ${{ steps.check.outputs.version }}
+        run: |
+          branch="nix/release"
+          git fetch --no-tags origin "${branch}"
+          # Merge the PR branch into main in memory: an identical resulting tree
+          # means merging changes nothing, so the PR is redundant. A non-zero exit
+          # means the merge conflicts, so leave the PR for manual review.
+          if merged=$(git merge-tree --write-tree HEAD FETCH_HEAD) \
+            && [ "${merged}" = "$(git rev-parse 'HEAD^{tree}')" ]; then
+            msg="Superseded: \`main\` already matches \`v${VERSION}\`, so merging this would change nothing."
+            gh pr close "${EXISTING}" --delete-branch --comment "${msg}"
+          else
+            echo "PR #${EXISTING} still carries changes not on main; leaving it open."
           fi

@@ -147,11 +147,16 @@ Distro and system managers (`apt`, `dnf`, `pacman`, `brew`, ...) generally have 
 
 The `outdated` report is not filtered by the cooldown on unsupported managers, so it may list versions that the subsequent `upgrade` would skip. For supported managers the same environment variable also affects `outdated`, so the report and the upgrade stay consistent.
 
+### The stateless-gate trade-off
+
+`mpm` reads each release's current age at run time and injects the cutoff: it keeps no ledger of past observations. That is safe (a fresh push looks fresh and is held back) but coarse. A package that publishes faster than the cooldown is held back wholesale until its newest version ages in, whereas a stateful tool can still install the most recent version that has *already* cleared the window. Because `mpm` trusts the age reported at the moment of the run, it also cannot cross-check that age against earlier observations the way [aur-cooldown](https://github.com/adrinjalali/aur-cooldown)'s persisted version-to-commit ledger does. Both capabilities need the durable state `mpm` deliberately forgoes.
+
 ## Possible future directions
 
 - **Detect `pipx`'s internal pip (or uv) at runtime.** `mpm`'s `pip` manager has a hard `>=26.1.0` floor, but `pipx` maintains its own virtualenvs whose pip may be older or whose resolution may be routed through `uv` (where the right env var is `UV_EXCLUDE_NEWER` instead of `PIP_UPLOADED_PRIOR_TO`). Probing the resolver per venv would let `mpm` refuse to advertise enforcement when the underlying pip is stale.
 - **Onboard mechanisms as they ship upstream.** Several managers have active work that would slot into the [`cooldown_env_var`](#how-it-works) framework as a one-line addition once released: Composer ([#12692](https://github.com/composer/composer/pull/12692)), Bundler / RubyGems ([#9576](https://github.com/ruby/rubygems/pull/9576)), Cargo (stabilization of `-Zmin-publish-age`, [#17009](https://github.com/rust-lang/cargo/issues/17009)), dnf5 ([#2743](https://github.com/rpm-software-management/dnf5/issues/2743)), Scoop ([#6513](https://github.com/ScoopInstaller/Scoop/issues/6513)), winget ([#6178](https://github.com/microsoft/winget-cli/issues/6178)), VS Code ([#316867](https://github.com/microsoft/vscode/issues/316867)).
 - **Advisory mode for `outdated` on unsupported managers.** `mpm` could query each package registry directly (PyPI, RubyGems, crates.io, ...) to annotate `outdated` with a "safe latest" column: purely informational, no install-side enforcement. This avoids the transitive-resolution trap while still being useful. It requires a new HTTP client surface and a state directory for date caching, neither of which `mpm` has today.
+- **Consult a curated compromise-window denylist.** aur-cooldown pairs its age gate with [aur-malware-check](https://github.com/lenucksi/aur-malware-check)'s `campaigns.json`, denying only the versions pushed inside a dated compromise window rather than freezing a package by name. This is orthogonal to release age: a version can be old enough to clear the cooldown yet still sit inside a known-bad window. Wiring such a feed into `mpm` would lean on the same HTTP client and state directory the advisory mode above already calls for.
 - **Block-mode for bundled-artifact managers** (`snap`, `flatpak`, `vscode`, `mas`). These install self-contained artifacts with no separate transitive resolution at install time, so a "refuse if fresher than the cutoff" check would be sound without a resolver. The bottleneck is per-store API support for per-version publish dates.
 
 ## Prior art
@@ -159,4 +164,6 @@ The `outdated` report is not filtered by the cooldown on unsupported managers, s
 - [uv `exclude-newer`](https://docs.astral.sh/uv/reference/settings/#exclude-newer) — the model for the Python ecosystem.
 - [npm `min-release-age`](https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age), shipped in `npm` 11.10.
 - [Renovate `minimumReleaseAge`](https://docs.renovatebot.com/configuration-options/#minimumreleaseage) — delays dependency PRs by a configurable period.
+- [aur-cooldown](https://github.com/adrinjalali/aur-cooldown) brings the same release-age delay to the Arch AUR, gating on the server-set `LastModified` age that `mpm`'s yay overlay also reads.
+- [aur-malware-check](https://github.com/lenucksi/aur-malware-check) publishes `campaigns.json`, a community feed of dated AUR compromise windows that aur-cooldown consults to reject versions pushed during a known incident.
 - William Woodruff, [*We should all be using dependency cooldowns*](https://blog.yossarian.net/2025/11/21/We-should-all-be-using-dependency-cooldowns).

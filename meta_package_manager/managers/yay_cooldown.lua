@@ -22,6 +22,11 @@ if user_dir and user_dir ~= "" then
 end
 
 if cutoff then
+  -- Both hooks gate on last_modified: the push timestamp the AUR server stamps
+  -- (yay surfaces it as pkg.last_modified / event.data.last_modified). It is the
+  -- one release-age signal an attacker cannot forge. A package's git commit dates
+  -- are client-set (GIT_COMMITTER_DATE) and trivially backdated to disguise a
+  -- fresh malicious push as an aged release, so they are never consulted here.
   -- Upgrades (yay -Syu): pre-exclude AUR packages still inside the cooldown window.
   -- Exclude lists from multiple UpgradeSelect hooks are unioned, so this composes
   -- with any hook the user's own init.lua registered.

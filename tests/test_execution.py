@@ -19,6 +19,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+import sys
 import threading
 import time
 from unittest.mock import patch
@@ -621,8 +622,16 @@ def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
     A fake `sudo` on `PATH` mimics "no cached credentials", so the whole
     build_cli → subprocess → failure-gate → hint path runs for real, without root.
     """
+    # A Python shebang keeps the fake sudo runnable in hermetic build
+    # sandboxes that ship no /bin/sh (Guix, etc.), where a "#!/bin/sh" script
+    # cannot exec.
     fake_sudo = tmp_path / "sudo"
-    fake_sudo.write_text("#!/bin/sh\necho 'sudo: a password is required' >&2\nexit 1\n")
+    fake_sudo.write_text(
+        f"#!{sys.executable}\n"
+        "import sys\n"
+        "sys.stderr.write('sudo: a password is required\\n')\n"
+        "sys.exit(1)\n",
+    )
     fake_sudo.chmod(0o755)
     monkeypatch.setenv("PATH", f"{tmp_path}{os.pathsep}{os.environ['PATH']}")
 

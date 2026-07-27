@@ -48,8 +48,8 @@ class Gem(PackageManager):
     escalates them, while nothing escalates by default. On recent macOS that
     default scope lives on the sealed, read-only system volume, so the gems
     Ruby bundles there surface as outdated yet cannot be upgraded in place,
-    not even with `sudo`: install a user-controlled Ruby (Homebrew, `rbenv`
-    or `rvm`) to manage them. Per-scope targeting (system vs user gems) is
+    not even with `sudo`: point mpm at a writable, user-controlled Ruby
+    earlier on your `PATH` instead. Per-scope targeting (system vs user gems) is
     tracked in [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725).
     ```
 

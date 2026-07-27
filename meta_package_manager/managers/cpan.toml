@@ -21,10 +21,12 @@
 # can never upgrade them, since only a newer Perl carries newer core modules. On
 # the frozen system Perl that list never clears.
 #
-# If you do not manage Perl modules with the system Perl, disable this manager
-# with `cpan = false` in your mpm configuration. To actually track and upgrade
-# Perl modules, install a user-controlled Perl instead (Homebrew's `perl`,
-# `perlbrew`, or `plenv`), which `cpan` can write to and you can upgrade. See
+# If you do not manage Perl modules with the system Perl,
+# [disable the manager entirely](#selecting-and-configuring-cpan): set
+# `cpan = false` in your mpm config, or pass `--no-cpan`. To actually track and
+# upgrade Perl modules, put a writable, user-controlled Perl ahead of the system
+# one on your `PATH`, for instance with `brew install perl`: `mpm` drives
+# whichever `cpan` comes first on `PATH`. See
 # [#1983](https://github.com/kdeldycke/meta-package-manager/issues/1983) for the
 # original report.
 # ```

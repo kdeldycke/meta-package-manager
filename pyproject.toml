@@ -229,9 +229,11 @@ dependencies = [
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
   # default; 8.6.0 covers them all.
   "click-extra>=8.6",
-  # extra-platforms 13.1.0 adds the ChromeOS, Clear Linux, SliTaz and Source Mage
-  # detections that the chromebrew, swupd, tazpkg and sorcery managers declare.
-  "extra-platforms>=13.1",
+  # extra-platforms 13.4.0 ships the write_fake_executable() test helper and the
+  # skip_hermetic_build marker alias that the test suite consumes; it also carries
+  # (since 13.1.0) the ChromeOS, Clear Linux, SliTaz and Source Mage detections
+  # that the chromebrew, swupd, tazpkg and sorcery managers declare.
+  "extra-platforms>=13.4",
   # Required at runtime by meta_package_manager.package and
   # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
   # cross-manager package identification, independent of SBOM features. That API
@@ -392,7 +394,7 @@ exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-07-25T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-07-25T00:00:00Z", extra-platforms = "2026-07-28T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

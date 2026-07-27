@@ -13,6 +13,7 @@ exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
 click-extra = "2026-07-25T00:00:00Z"
+extra-platforms = "2026-07-28T00:00:00Z"
 
 [[package]]
 name = "accessible-pygments"
@@ -511,11 +512,11 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "13.3.1"
+version = "13.4.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/77/c5/fae67f4681a664ad855b0cc219b89459f2144e144966b56abc2c63af2921/extra_platforms-13.3.1.tar.gz", hash = "sha256:1efefa780f0b97dce5d352f7873065988f7f23938af70456182b20474849d1c2", size = 86205, upload-time = "2026-07-17T14:02:38.235Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/be/e3/b04ca89a5b48424fc7df7dc4131ea4ffd8efa8788590163c2f777a02b959/extra_platforms-13.4.0.tar.gz", hash = "sha256:d3d07e1afeaa9cdd9c6c4b716e81c2b18c7af1b6d68c157c1b339b31f6597903", size = 465364, upload-time = "2026-07-27T05:57:56.714Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c9/77/aa1591668c391444dd4c30e29936cfaf42177ac9cc6073a681ca510bab02/extra_platforms-13.3.1-py3-none-any.whl", hash = "sha256:ffec89f6f5a983ea2be29970ee7144b2fa53a0fab381ce2b1ed447f4ad63d7a0", size = 89802, upload-time = "2026-07-17T14:02:36.684Z" },
+    { url = "https://files.pythonhosted.org/packages/19/85/ad68e8005e13f6aef1a30fa7e535266815a62d3da44797618703d6a6bc23/extra_platforms-13.4.0-py3-none-any.whl", hash = "sha256:1e96d0b016f7c9cd85f682cf8fe43a1148780a00e4aa284e65937a16e8d1b927", size = 90892, upload-time = "2026-07-27T05:57:54.921Z" },
 ]
 
 [[package]]
@@ -1093,7 +1094,7 @@ requires-dist = [
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
-    { name = "extra-platforms", specifier = ">=13.1" },
+    { name = "extra-platforms", specifier = ">=13.4" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
     { name = "packageurl-python", specifier = ">=0.11" },
     { name = "platformdirs", marker = "extra == 'sbom-online'", specifier = ">=4" },

@@ -35,7 +35,7 @@ else:
 # Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.pytest import create_config, runner  # noqa: F401
 from extra_platforms import is_github_ci, is_linux
-from extra_platforms.pytest import skip_guix_build
+from extra_platforms.pytest import skip_hermetic_build
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
@@ -173,11 +173,11 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.integration)
 
         # The integration layer has no package managers to drive in a hermetic
-        # build sandbox. Auto-skip it inside a Guix/Nix build (detected by
-        # `extra_platforms` through `HOME=/homeless-shelter`) so those
-        # distributors run a plain `pytest` with no ignores.
+        # build sandbox. Auto-skip it inside one (detected by `extra_platforms`
+        # through `HOME=/homeless-shelter`, as Guix and Nixpkgs both set) so
+        # those distributors run a plain `pytest` with no ignores.
         if item.get_closest_marker("integration"):
-            item.add_marker(skip_guix_build)
+            item.add_marker(skip_hermetic_build)
 
         # Drop the repo-maintenance guards outside a developer checkout.
         if item.get_closest_marker("repo_maintenance") and not in_git_checkout:

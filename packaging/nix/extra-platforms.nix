@@ -3,50 +3,32 @@
   buildPythonPackage,
   fetchFromGitHub,
   pytestCheckHook,
-  pytest-cov-stub,
-  pytest-xdist,
   uv-build,
 }:
 
 buildPythonPackage (finalAttrs: {
   pname = "extra-platforms";
-  version = "13.3.1";
+  version = "13.4.0";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";
     repo = "extra-platforms";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-uNapgmmducyLcSBF7wiEkyho/IMD9jutXpx6aHcCQFg=";
+    hash = "sha256-gSEFscji1ecBOsYW+HV0X4Q6vzCkJUJYTfTfb7HEJms=";
   };
 
   build-system = [ uv-build ];
 
-  nativeCheckInputs = [
-    pytestCheckHook
-    # The pyproject ``addopts`` pass --cov and --numprocesses/--dist flags,
-    # so the coverage and xdist plugins must resolve for pytest to start.
-    pytest-cov-stub
-    pytest-xdist
-  ];
+  nativeCheckInputs = [ pytestCheckHook ];
 
   # Tests marked ``network`` reach out to PyPI; the build sandbox has no
-  # system TLS CA bundle.
+  # system TLS CA bundle. No per-test ignore list is needed beyond that:
+  # since 13.4.0 the environment-detection tests self-skip in the
+  # ``HOME=/homeless-shelter`` sandbox, the Sphinx cross-reference test skips
+  # when ``uv`` is absent, and ``addopts`` no longer forces the coverage or
+  # xdist plugins, so a plain ``pytest`` starts with neither installed.
   disabledTestMarks = [ "network" ];
-
-  disabledTestPaths = [
-    # Shells out to ``uv`` to render the docs as a side effect; not
-    # available in the build sandbox.
-    "tests/test_sphinx_crossrefs.py"
-  ];
-
-  disabledTests = [
-    # Both tests assume the CI runner environment (the ``GITHUB_RUNNER_OS``
-    # env var, the expected number of detected platform traits per runner
-    # image). Neither is available inside a hermetic build sandbox.
-    "test_platform_detection"
-    "test_current_funcs"
-  ];
 
   pythonImportsCheck = [ "extra_platforms" ];
 

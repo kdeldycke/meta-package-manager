@@ -19,7 +19,6 @@ from __future__ import annotations
 import logging
 import os
 import re
-import sys
 import threading
 import time
 from unittest.mock import patch
@@ -27,6 +26,7 @@ from unittest.mock import patch
 import pytest
 from click_extra.execution import _LIVE_PROCESSES, terminate_live_processes
 from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
+from extra_platforms.pytest import write_fake_executable
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
@@ -622,17 +622,14 @@ def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
     A fake `sudo` on `PATH` mimics "no cached credentials", so the whole
     build_cli → subprocess → failure-gate → hint path runs for real, without root.
     """
-    # A Python shebang keeps the fake sudo runnable in hermetic build
-    # sandboxes that ship no /bin/sh (Guix, etc.), where a "#!/bin/sh" script
-    # cannot exec.
-    fake_sudo = tmp_path / "sudo"
-    fake_sudo.write_text(
-        f"#!{sys.executable}\n"
-        "import sys\n"
-        "sys.stderr.write('sudo: a password is required\\n')\n"
-        "sys.exit(1)\n",
+    # write_fake_executable() writes a Python-shebang stand-in (not "#!/bin/sh"),
+    # so it still execs in hermetic build sandboxes that ship no /bin/sh (Guix,
+    # etc.). It mimics "no cached credentials": a diagnostic on <stderr>, exit 1.
+    write_fake_executable(
+        tmp_path / "sudo",
+        stderr="sudo: a password is required\n",
+        returncode=1,
     )
-    fake_sudo.chmod(0o755)
     monkeypatch.setenv("PATH", f"{tmp_path}{os.pathsep}{os.environ['PATH']}")
 
     manager = FakeManager()

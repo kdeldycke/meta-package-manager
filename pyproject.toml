@@ -233,11 +233,13 @@ dependencies = [
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
   # default; 8.6.1 covers them all.
   "click-extra>=8.6.1",
-  # extra-platforms 13.4.0 ships the write_fake_executable() test helper and the
-  # skip_hermetic_build marker alias that the test suite consumes; it also carries
-  # (since 13.1.0) the ChromeOS, Clear Linux, SliTaz and Source Mage detections
-  # that the chromebrew, swupd, tazpkg and sorcery managers declare.
-  "extra-platforms>=13.4",
+  # extra-platforms 13.5.0 renamed the GUIX_BUILD trait to HERMETIC_BUILD and
+  # made skip_hermetic_build the primary marker mpm's test suite consumes,
+  # deprecating the skip_guix_build alias; 13.5.1 is the current release. It also
+  # ships (since 13.4.0) the write_fake_executable() helper the suite consumes
+  # and (since 13.1.0) the ChromeOS, Clear Linux, SliTaz and Source Mage
+  # detections that the chromebrew, swupd, tazpkg and sorcery managers declare.
+  "extra-platforms>=13.5.1",
   # Required at runtime by meta_package_manager.package and
   # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
   # cross-manager package identification, independent of SBOM features. That API

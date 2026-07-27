@@ -512,11 +512,11 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "13.4.0"
+version = "13.5.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/be/e3/b04ca89a5b48424fc7df7dc4131ea4ffd8efa8788590163c2f777a02b959/extra_platforms-13.4.0.tar.gz", hash = "sha256:d3d07e1afeaa9cdd9c6c4b716e81c2b18c7af1b6d68c157c1b339b31f6597903", size = 465364, upload-time = "2026-07-27T05:57:56.714Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/27/4d/85b286ccdffdb9c93f537428dbab9616f15f89ed40f9217ac21bc21e01b6/extra_platforms-13.5.1.tar.gz", hash = "sha256:89100acdf8aa28f8c589981b653e9f42a5bd68ce932c33cbd6faa7a81731c7c6", size = 465562, upload-time = "2026-07-27T19:28:20.5Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/19/85/ad68e8005e13f6aef1a30fa7e535266815a62d3da44797618703d6a6bc23/extra_platforms-13.4.0-py3-none-any.whl", hash = "sha256:1e96d0b016f7c9cd85f682cf8fe43a1148780a00e4aa284e65937a16e8d1b927", size = 90892, upload-time = "2026-07-27T05:57:54.921Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/03/4d65c1bb5064cc895bac491ee34e50a23058dc5b80e718e9f4ad386c7eb4/extra_platforms-13.5.1-py3-none-any.whl", hash = "sha256:b6fd87f13933a19f073eb329848b0722c8037b657bc519befc19cdd56384a5bc", size = 91123, upload-time = "2026-07-27T19:28:18.606Z" },
 ]
 
 [[package]]
@@ -1094,7 +1094,7 @@ requires-dist = [
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
-    { name = "extra-platforms", specifier = ">=13.4" },
+    { name = "extra-platforms", specifier = ">=13.5.1" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
     { name = "packageurl-python", specifier = ">=0.11" },
     { name = "platformdirs", marker = "extra == 'sbom-online'", specifier = ">=4" },

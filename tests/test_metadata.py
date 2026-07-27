@@ -32,7 +32,7 @@ import shutil
 import subprocess
 
 import pytest
-from extra_platforms.pytest import skip_guix_build
+from extra_platforms.pytest import skip_hermetic_build
 
 from .conftest import PROJECT_ROOT, tomllib
 
@@ -105,7 +105,7 @@ def test_requires_python_floor_in_classifiers():
     assert classifier_versions[0] == _requires_python_floor(pyproject)
 
 
-@skip_guix_build
+@skip_hermetic_build
 def test_matrix_python_floor_matches_requires_python():
     """The generated matrix's lowest Python equals the `requires-python` floor.
 

@@ -52,10 +52,15 @@ check() {
 	# wheel, excluding the network tests (no outbound network in the build
 	# sandbox). The MkDocs tests self-skip without mkdocs-click, and the runner
 	# fixture pins $HOME so the config-search tests do not leak the build HOME.
+	# The two process-group tests are deselected: they kill a session leader and
+	# assert its grandchild is reaped, which the build container (no PID 1 init
+	# to reap orphans) cannot guarantee.
 	# See: https://kdeldycke.github.io/click-extra/packaging.html
 	python3 -m venv --clear --without-pip --system-site-packages .testenv
 	.testenv/bin/python3 -m installer .dist/*.whl
-	.testenv/bin/python3 -m pytest -m "not network"
+	.testenv/bin/python3 -m pytest -m "not network" \
+		--deselect tests/test_execution.py::test_run_cli_timeout_new_session_kills_grandchildren \
+		--deselect tests/test_execution.py::test_terminate_live_processes_signals_whole_group
 }
 
 package() {

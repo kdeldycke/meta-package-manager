@@ -24,9 +24,14 @@ check() {
 	# installed wheel. Exclude the network tests (no outbound network in the
 	# build sandbox); the environment-detection tests adapt to the sandbox and
 	# the Sphinx cross-reference test self-skips when uv is absent.
+	# GITHUB_ACTIONS/GITHUB_RUN_ID/CI are unset because abuild inherits them
+	# when the package build itself runs in GitHub CI: extra-platforms would
+	# then detect GitHub CI and its test_github_runner_detection would demand
+	# EXTRA_PLATFORMS_TEST_MATRIX, which only its own matrix workflow sets.
 	# See: https://kdeldycke.github.io/extra-platforms/packaging.html
 	python3 -m venv --clear --without-pip --system-site-packages .testenv
 	.testenv/bin/python3 -m installer .dist/*.whl
+	unset GITHUB_ACTIONS GITHUB_RUN_ID CI
 	.testenv/bin/python3 -m pytest -m "not network"
 }
 

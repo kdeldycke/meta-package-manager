@@ -189,8 +189,12 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.6.0 is the floor mpm targets. It ships OperationTrail, the
-  # batch ✓/✗ trail upstreamed from mpm's own dispatch layer, which
+  # click-extra 8.6.1 is the floor mpm targets. It ships the test suite in the
+  # PyPI sdist (so downstream packagers build and test without a Git checkout),
+  # a setuptools package-data shim, and a fix for the source line reported in
+  # `click:run` directive errors (mpm drives that directive in
+  # docs/configuration.md). The 8.6.0 series shipped OperationTrail, the batch
+  # ✓/✗ trail upstreamed from mpm's own dispatch layer, which
   # meta_package_manager.dispatch now subclasses (with the trail_glyph /
   # trail_line atoms), plus the mirror-block fix making `click-extra
   # refresh-directives` run `python:render` `:mirror:` blocks with the page's
@@ -227,8 +231,8 @@ dependencies = [
   # the split click_extra.highlight module, the ConfigValidator /
   # ValidationError import move to click_extra.config, print_table()'s
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
-  # default; 8.6.0 covers them all.
-  "click-extra>=8.6",
+  # default; 8.6.1 covers them all.
+  "click-extra>=8.6.1",
   # extra-platforms 13.4.0 ships the write_fake_executable() test helper and the
   # skip_hermetic_build marker alias that the test suite consumes; it also carries
   # (since 13.1.0) the ChromeOS, Clear Linux, SliTaz and Source Mage detections
@@ -394,7 +398,7 @@ exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-07-25T00:00:00Z", extra-platforms = "2026-07-28T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-07-28T00:00:00Z", extra-platforms = "2026-07-28T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

@@ -4,7 +4,7 @@ PortSystem          1.0
 PortGroup           python 1.0
 
 name                py-click-extra
-version             8.6.0
+version             8.6.1
 revision            0
 
 categories-append   devel
@@ -25,9 +25,9 @@ homepage            https://github.com/kdeldycke/click-extra
 
 python.rootname     click_extra
 
-checksums           rmd160  968cb49e195ba6ee960796d50a8b5dc98a49d054 \
-                    sha256  63f739447522a6aa2d64d656aeb0f967826f2dfba774fc76e117b84717853733 \
-                    size    384509
+checksums           rmd160  a286fc23d8780e6fd7d4d472d37a0835b608d47c \
+                    sha256  54c5e52dd6c25bfb840e3d5b30829d25d6631fd9f91eda6b79cfec5e7ff5d4bf \
+                    size    1219636
 
 python.versions     311 312 313 314
 python.pep517_backend uv

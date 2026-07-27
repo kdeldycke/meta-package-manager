@@ -1,6 +1,6 @@
 # Maintainer: Kevin Deldycke <kevin@deldycke.com>
 pkgname=py3-click-extra
-pkgver=8.6.0
+pkgver=8.6.1
 pkgrel=0
 pkgdesc="Drop-in replacement for Click to build user-friendly and colorful CLIs"
 url="https://github.com/kdeldycke/click-extra"
@@ -20,6 +20,23 @@ depends="
 	py3-wcwidth
 	"
 makedepends="py3-gpep517 py3-installer py3-uv-build"
+# Optional libraries the test modules import at collection time (git backs the
+# matrix tests' synthetic repositories; httpserver drives remote config loading;
+# sphinx and myst-parser build the documentation fixtures).
+checkdepends="
+	git
+	py3-hjson
+	py3-jsonschema
+	py3-myst-parser
+	py3-pygments
+	py3-pytest
+	py3-pytest-httpserver
+	py3-requests
+	py3-sphinx
+	py3-tomlkit
+	py3-xmltodict
+	py3-yaml
+	"
 subpackages="$pkgname-pyc"
 source="https://files.pythonhosted.org/packages/source/c/click-extra/click_extra-$pkgver.tar.gz"
 builddir="$srcdir/click_extra-$pkgver"
@@ -31,11 +48,14 @@ build() {
 }
 
 check() {
-	# The PyPI sdist ships no tests: smoke-test the wheel and its full
-	# import chain instead.
+	# The sdist ships the test suite since 8.6.1. Run it against the installed
+	# wheel, excluding the network tests (no outbound network in the build
+	# sandbox). The MkDocs tests self-skip without mkdocs-click, and the runner
+	# fixture pins $HOME so the config-search tests do not leak the build HOME.
+	# See: https://kdeldycke.github.io/click-extra/packaging.html
 	python3 -m venv --clear --without-pip --system-site-packages .testenv
 	.testenv/bin/python3 -m installer .dist/*.whl
-	.testenv/bin/python3 -c "import click_extra"
+	.testenv/bin/python3 -m pytest -m "not network"
 }
 
 package() {
@@ -44,5 +64,5 @@ package() {
 }
 
 sha512sums="
-8b6b902d5bb3dcbd1a33b9b9e88f1f99dd0b0c143fc25b29e018d7d4e28faa197d35056d1af3a3838f5b717266e05796dd09118c8a85645c81ffce999231c914  click_extra-8.6.0.tar.gz
+73fdad3c1f3c7ef95405b2a304271a1fdd836e820d656c81016565136eb74c9783158d1621188120602bdb7100ccc0702122a059f0383b0a3c49706708d2a056  click_extra-8.6.1.tar.gz
 "

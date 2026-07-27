@@ -27,14 +27,14 @@
 
 buildPythonPackage (finalAttrs: {
   pname = "click-extra";
-  version = "8.6.0";
+  version = "8.6.1";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";
     repo = "click-extra";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-Qbk/TmNtqjgA2lRim0NtWdl980k0j1kSt+sgRVWiJSY=";
+    hash = "sha256-S1NcLW7nB7qoodEn2XYxhOjK64i8MVrVTPWk4/Wqf2o=";
   };
 
   build-system = [ uv-build ];
@@ -77,24 +77,11 @@ buildPythonPackage (finalAttrs: {
   ];
 
   # Tests marked ``network`` make HTTPS requests; the build sandbox has no
-  # system TLS CA bundle.
+  # system TLS CA bundle. Nothing else needs disabling: since 8.6.1 the MkDocs
+  # test tree self-skips when mkdocs-click is absent, and the runner fixture
+  # pins ``$HOME`` and its platform equivalents, so the config-search debug
+  # tests no longer leak the sandbox HOME.
   disabledTestMarks = [ "network" ];
-
-  disabledTestPaths = [
-    # tests/mkdocs requires mkdocs-click, not packaged in nixpkgs.
-    "tests/mkdocs"
-  ];
-
-  disabledTests = [
-    # The four integration tests below assert against debug output that
-    # should not include the test sandbox's ``$HOME``; click-extra logs
-    # the search pattern using the runtime environment HOME instead of
-    # the test fixture's ``tmp_path``.
-    "test_integrated_color_option"
-    "test_required_command"
-    "test_unset_conf_debug_message"
-    "test_integrated_verbosity_options"
-  ];
 
   pythonImportsCheck = [ "click_extra" ];
 

@@ -11,6 +11,23 @@
 # installs instead. The write operations carry dormant privileged markers: `--sudo`
 # or a `sudo = true` override escalates them, while nothing escalates by default.
 # cpan cannot uninstall a module, so no remove operation is declared.
+#
+# ```{caution}
+# On macOS, `cpan` drives the system Perl at `/usr/bin/perl`, whose core modules
+# sit on the sealed, read-only system volume and cannot be changed even with
+# `sudo`. Those core modules (`warnings`, `feature`, `POSIX`, `B`, and the like)
+# ship only inside Perl itself, with no standalone CPAN distribution: `cpan -O`
+# keeps reporting them as outdated against the newest released Perl, yet `cpan -u`
+# can never upgrade them, since only a newer Perl carries newer core modules. On
+# the frozen system Perl that list never clears.
+#
+# If you do not manage Perl modules with the system Perl, disable this manager
+# with `cpan = false` in your mpm configuration. To actually track and upgrade
+# Perl modules, install a user-controlled Perl instead (Homebrew's `perl`,
+# `perlbrew`, or `plenv`), which `cpan` can write to and you can upgrade. See
+# [#1983](https://github.com/kdeldycke/meta-package-manager/issues/1983) for the
+# original report.
+# ```
 
 [mpm.managers.cpan]
 name = "Perl CPAN"

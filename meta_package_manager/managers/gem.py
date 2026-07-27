@@ -45,8 +45,12 @@ class Gem(PackageManager):
     On system Ruby this means system-level gems, which may require elevated
     privileges for write operations: those carry dormant privileged markers,
     so `mpm --sudo` or a `[mpm.managers.gem] sudo = true` override
-    escalates them, while nothing escalates by default. Per-scope targeting
-    (system vs user gems) is tracked in [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725).
+    escalates them, while nothing escalates by default. On recent macOS that
+    default scope lives on the sealed, read-only system volume, so the gems
+    Ruby bundles there surface as outdated yet cannot be upgraded in place,
+    not even with `sudo`: install a user-controlled Ruby (Homebrew, `rbenv`
+    or `rvm`) to manage them. Per-scope targeting (system vs user gems) is
+    tracked in [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725).
     ```
 
     :::{tip}

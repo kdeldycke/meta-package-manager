@@ -695,238 +695,175 @@ manpages.asset-name = "mpm-manpages"
 # Content-based labeller rules. See repomatic's labels.content-rules schema.
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: apk"
-patterns = [ "alpine", "alpine linux", "apk" ]
+patterns = [ "/\\balpine\\b|\\balpine\\ linux\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: apm"
-patterns = [ "apm", "atom" ]
+patterns = [ "/\\batom\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: apt-cyg"
-patterns = [ "apt-cyg", "cygwin" ]
+patterns = [ "/\\bcygwin\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: asdf"
-patterns = [ "asdf", "asdf-vm", "version manager" ]
+patterns = [ "/\\basdf\\-vm\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: cargo"
-patterns = [ "cargo", "crate", "rust" ]
+patterns = [ "/\\bcrate\\b|\\brust\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: cave"
-patterns = [ "cave", "exherbo", "paludis" ]
+patterns = [ "/\\bexherbo\\b|\\bpaludis\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: choco"
-patterns = [ "choco", "chocolatey" ]
+patterns = [ "/\\bchocolatey\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: chromebrew"
-patterns = [ "chrome os", "chromebrew", "chromeos" ]
+patterns = [ "/\\bchrome\\ os\\b|\\bchromeos\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: composer"
-patterns = [ "composer", "php" ]
+patterns = [ "/\\bphp\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: conda"
-patterns = [ "anaconda", "conda", "conda-forge", "miniconda" ]
+patterns = [ "/\\banaconda\\b|\\bconda\\-forge\\b|\\bminiconda\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: cpan"
-patterns = [ "cpan", "perl" ]
+patterns = [ "/\\bperl\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: dpkg-based"
-patterns = [
-  "apt",
-  "apt-mint",
-  "aptitude",
-  "deb-get",
-  "debian",
-  "dpkg",
-  "mint",
-  "opkg",
-  "pacstall",
-  "ubuntu",
-]
+patterns = [ "/\\baptitude\\b|\\bdebian\\b|\\bdpkg\\b|\\bubuntu\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: emerge"
-patterns = [ "emerge", "gentoo", "portage" ]
+patterns = [ "/\\bgentoo\\b|\\bportage\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: eopkg"
-patterns = [ "eopkg", "solus" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: fink"
-patterns = [ "fink" ]
+patterns = [ "/\\bsolus\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: flatpak"
-patterns = [ "flat", "flatpak" ]
+patterns = [ "/\\bflathub\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: fwupd"
-patterns = [ "fwupd", "fwupdmgr", "lvfs" ]
+patterns = [ "/\\blvfs\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: gem"
-patterns = [ "gem", "ruby" ]
+patterns = [ "/\\bruby\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: gh-ext"
-patterns = [ "gh extension", "gh-ext", "github cli" ]
+patterns = [ "/\\bgh\\ extension\\b|\\bgithub\\ cli\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: guix"
-patterns = [ "gnu guix", "guix" ]
+patterns = [ "/\\bgnu\\ guix\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: homebrew"
-patterns = [ "brew", "cask", "formula", "homebrew", "tap", "zb", "zerobrew" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: macports"
-patterns = [ "macports", "port" ]
+patterns = [ "/\\bhomebrew\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: mas"
-patterns = [ "app store", "app-store", "mas" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: mise"
-patterns = [ "mise" ]
+patterns = [ "/\\bapp\\ store\\b|\\bapp\\-store\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: nix"
-patterns = [ "nix", "nixos", "nixpkgs" ]
+patterns = [ "/\\bnixos\\b|\\bnixpkgs\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: npm-based"
-patterns = [ "node", "npm", "pnpm", "yarn", "yarn-berry" ]
+patterns = [ "/\\bnode\\.js\\b|\\bnodejs\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pacman-based"
-patterns = [ "arch", "pacaur", "pacman", "paru", "yay" ]
+patterns = [ "/\\barch\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pip-based"
-patterns = [ "pip", "pipx" ]
+patterns = [ "/\\bpypi\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pkcon"
-patterns = [ "packagekit", "pkcon" ]
+patterns = [ "/\\bpackagekit\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pkg-based"
-patterns = [ "freebsd", "freebsd ports", "pkg", "ports" ]
+patterns = [ "/\\bfreebsd\\b|\\bfreebsd\\ ports\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pkg-tools"
-patterns = [ "openbsd", "pkg-tools", "pkg_add" ]
+patterns = [ "/\\bopenbsd\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pkgin"
-patterns = [ "netbsd", "pkgin", "pkgsrc" ]
+patterns = [ "/\\bnetbsd\\b|\\bpkgsrc\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pwsh-gallery"
 patterns = [
-  "powershell",
-  "powershell gallery",
-  "psgallery",
-  "psresourceget",
-  "pwsh",
-  "pwsh-gallery",
+  "/\\bpowershell\\b|\\bpowershell\\ gallery\\b|\\bpsgallery\\b|\\bpsresourceget\\b/i",
 ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: rpm-based"
 patterns = [
-  "dnf",
-  "dnf5",
-  "fedora",
-  "mageia",
-  "opensuse",
-  "redhat",
-  "rhel",
-  "rpm",
-  "suse",
-  "urpmi",
-  "yum",
-  "zypper",
+  "/\\bfedora\\b|\\bmageia\\b|\\bopensuse\\b|\\bredhat\\b|\\brhel\\b|\\brpm\\b|\\bsuse\\b/i",
 ]
 
 [[tool.repomatic.labels.content-rules]]
-label = "📦 manager: scoop-based"
-patterns = [ "scoop", "sfsu" ]
-
-[[tool.repomatic.labels.content-rules]]
 label = "📦 manager: sdkman"
-patterns = [ "sdk man", "sdkman" ]
+patterns = [ "/\\bsdk\\ man\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: slapt-get"
-patterns = [ "slackware", "slapt-get" ]
+patterns = [ "/\\bslackware\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: snap"
-patterns = [ "snap" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: soar"
-patterns = [ "soar" ]
+patterns = [ "/\\bsnapcraft\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: sorcery"
-patterns = [ "sorcery", "source mage" ]
+patterns = [ "/\\bsource\\ mage\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: steamcmd"
-patterns = [ "steam", "steamcmd", "valve" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: stew"
-patterns = [ "stew" ]
+patterns = [ "/\\bvalve\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: sun-tools"
-patterns = [ "pkgadd", "pkgrm", "solaris", "sun-tools", "svr4" ]
+patterns = [ "/\\bsolaris\\b|\\bsvr4\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: swupd"
-patterns = [ "clear linux", "clearlinux", "swupd" ]
+patterns = [ "/\\bclear\\ linux\\b|\\bclearlinux\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: tazpkg"
-patterns = [ "slitaz", "tazpkg" ]
+patterns = [ "/\\bslitaz\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: tlmgr"
-patterns = [ "ctan", "tex live", "texlive", "tlmgr" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: topgrade"
-patterns = [ "topgrade" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: uv-based"
-patterns = [ "uv", "uvx" ]
+patterns = [ "/\\bctan\\b|\\btex\\ live\\b|\\btexlive\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: vscode-based"
-patterns = [ "visual studio", "visual studio code", "vscode", "vscodium" ]
-
-[[tool.repomatic.labels.content-rules]]
-label = "📦 manager: winget"
-patterns = [ "winget" ]
+patterns = [ "/\\bvisual\\ studio\\b|\\bvisual\\ studio\\ code\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: xbps"
-patterns = [ "void", "void linux", "xbps" ]
+patterns = [ "/\\bvoid\\ linux\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🔌 bar-plugin"
@@ -934,23 +871,29 @@ patterns = [ "plugin", "swiftbar", "xbar" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: BSD"
-patterns = [ "bsd" ]
+patterns = [ "/\\bbsd\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: Linux"
-patterns = [ "linux" ]
+patterns = [ "/\\blinux\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: macOS"
-patterns = [ "apple", "mac os", "macos", "os x", "osx" ]
+patterns = [
+  "/\\bapple\\b/i",
+  "/\\bmac\\ os\\b/i",
+  "/\\bmacos\\b/i",
+  "/\\bos\\ x\\b/i",
+  "/\\bosx\\b/i",
+]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: Unix"
-patterns = [ "unix" ]
+patterns = [ "/\\bunix\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: Windows"
-patterns = [ "c:", "microsoft", "windows" ]
+patterns = [ "/\\bc:/i", "/\\bmicrosoft\\b/i", "/\\bwindows\\b/i" ]
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: apk"

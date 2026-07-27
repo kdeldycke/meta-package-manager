@@ -8,6 +8,7 @@
 - [mpm] Drop the Nix bar-plugin backport patch, now that its fix ships in the release, and bump the in-repo Alpine, Guix, MacPorts and Nix packaging specs to build from `7.4.0`.
 - [mpm] Raise the extra-platforms floor from `13.1` to `13.4`.
 - [mpm] Bump the in-repo Alpine, MacPorts and Nix packaging specs to build extra-platforms from `13.4.0`: the Nix spec drops its coverage and xdist test plugins and per-test skips now that the release runs a plain `pytest` in a hermetic sandbox, and the Alpine build runs the test suite the sdist now ships. The Alpine spec's license metadata is corrected from `GPL-2.0-or-later` to the actual `Apache-2.0`.
+- [mpm] The GitHub issue and PR content-labeller no longer derives `📦 manager:` labels from bare manager IDs: a pasted `mpm` trace that lists every installed manager no longer tags an issue with all of them. Labels now match only the curated, word-anchored ecosystem keywords (distro, language and brand names) a human types, which `mpm` never prints itself. Managers with no such keyword are labelled by hand.
 
 ## [`7.4.0` (2026-07-25)](https://github.com/kdeldycke/meta-package-manager/compare/v7.3.0...v7.4.0)
 

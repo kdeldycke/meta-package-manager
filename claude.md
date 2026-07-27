@@ -487,6 +487,15 @@ Workflows and CLI commands must be safe to re-run. Running the same command or w
 
 **In practice:** use `--skip-existing`, check for existing state before writing, prefer upsert semantics, make file-modifying operations convergent.
 
+### Issue and PR labelling
+
+The content and file rules generated into `pyproject.toml` from `meta_package_manager/labels.py` only *pre-label* a freshly filed issue or PR: they save the maintainer a first pass, never replace the manual review and classification, and nothing downstream treats them as authoritative. Tune for **precision, not recall** — encode a rule only when the signal is unambiguous, and none when it is not (that manager is then labelled by hand).
+
+- **Content rules** come only from `MANAGER_CONTENT_KEYWORDS`: ecosystem, distro, language or brand names that unambiguously name the manager *and* never appear in mpm's own output. Never the manager ID or a CLI name — mpm prints those for every installed manager (the `✓ <id>` trail, the `<id>: <count>` summary, the `managers` table), so a pasted trace would tag the issue with every manager on the user's system. A manager whose only name is its ID gets no content rule.
+- **File rules** map each manager's own module and test paths to its label; keep them narrow enough that only that manager's files match.
+
+The `generate_content_rules` docstring covers the regex mechanics (anchoring, case-folding, why a label's keywords are OR-joined into one pattern). This is the local instance of the labeller principle in repomatic's `claude.md`.
+
 ### Common maintenance pitfalls
 
 - **Documentation drift** is the most frequent issue. CLI output, version references, and workflow job descriptions in `readme.md` go stale after every release or refactor. Always verify docs against actual output after changes.

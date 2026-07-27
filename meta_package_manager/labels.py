@@ -13,11 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Utilities to generate extra labels to use for GitHub issues and PRs."""
+"""Utilities to generate the extra labels and labeller rules for GitHub issues
+and PRs.
+
+The content and file rules produced here are a convenience: they pre-label a
+freshly filed issue or PR to save the maintainer a first pass. They never replace
+the manual review and classification, and nothing downstream treats them as
+authoritative. They are therefore tuned for precision over recall: a rule is
+encoded only when its signal is unambiguous (see {func}`generate_content_rules`
+and {func}`generate_file_rules`), and a manager with no unambiguous term simply
+gets no content rule and is labelled by hand.
+"""
 
 from __future__ import annotations
 
 import inspect
+import re
 from pathlib import Path
 
 from boltons.iterutils import flatten
@@ -175,9 +186,10 @@ LABELS = sorted(
 # repomatic's PR/issue labeller consumes two rule sets from pyproject.toml:
 # content-rules (keyword patterns matched against issue and PR text) and file-rules
 # (globs matched against a PR's changed files). Both are synced into
-# [tool.repomatic.labels.*] by docs/docs_update.py. The mechanical parts (manager IDs,
-# definition-file globs) derive from the pool; only the ecosystem synonyms below are
-# curated by hand.
+# [tool.repomatic.labels.*] by docs/docs_update.py. File rules derive their globs
+# from the pool (each manager's definition-file paths); content rules are driven
+# solely by the hand-curated ecosystem keywords below, never by bare manager IDs
+# (see generate_content_rules for why).
 
 
 CONTENT_RULES_STATIC: TLabelRules = [
@@ -204,7 +216,7 @@ MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "apk": ("alpine", "alpine linux"),
     "apm": ("atom",),
     "apt-cyg": ("cygwin",),
-    "asdf": ("asdf-vm", "version manager"),
+    "asdf": ("asdf-vm",),
     "cargo": ("crate", "rust"),
     "cave": ("exherbo", "paludis"),
     "choco": ("chocolatey",),
@@ -212,48 +224,58 @@ MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "composer": ("php",),
     "conda": ("anaconda", "conda-forge", "miniconda"),
     "cpan": ("perl",),
-    "dpkg-based": ("aptitude", "debian", "dpkg", "mint", "ubuntu"),
+    "dpkg-based": ("aptitude", "debian", "dpkg", "ubuntu"),
     "emerge": ("gentoo", "portage"),
     "eopkg": ("solus",),
-    "flatpak": ("flat",),
-    "fwupd": ("fwupdmgr", "lvfs"),
+    "flatpak": ("flathub",),
+    "fwupd": ("lvfs",),
     "gem": ("ruby",),
     "gh-ext": ("gh extension", "github cli"),
     "guix": ("gnu guix",),
-    "homebrew": ("formula", "homebrew", "tap", "zb"),
-    "macports": ("port",),
+    "homebrew": ("homebrew",),
     "mas": ("app store", "app-store"),
     "nix": ("nixos", "nixpkgs"),
-    "npm-based": ("node",),
+    "npm-based": ("node.js", "nodejs"),
     "pacman-based": ("arch",),
+    "pip-based": ("pypi",),
     "pkcon": ("packagekit",),
     "pkg-based": ("freebsd", "freebsd ports"),
-    "pkg-tools": ("openbsd", "pkg_add"),
+    "pkg-tools": ("openbsd",),
     "pkgin": ("netbsd", "pkgsrc"),
     "pwsh-gallery": (
         "powershell",
         "powershell gallery",
         "psgallery",
         "psresourceget",
-        "pwsh",
     ),
     "rpm-based": ("fedora", "mageia", "opensuse", "redhat", "rhel", "rpm", "suse"),
     "sdkman": ("sdk man",),
     "slapt-get": ("slackware",),
+    "snap": ("snapcraft",),
     "sorcery": ("source mage",),
-    "steamcmd": ("steam", "valve"),
-    "sun-tools": ("pkgadd", "pkgrm", "solaris", "svr4"),
+    "steamcmd": ("valve",),
+    "sun-tools": ("solaris", "svr4"),
     "swupd": ("clear linux", "clearlinux"),
     "tazpkg": ("slitaz",),
     "tlmgr": ("ctan", "tex live", "texlive"),
     "vscode-based": ("visual studio", "visual studio code"),
-    "xbps": ("void", "void linux"),
+    "xbps": ("void linux",),
 }
-"""Curated ecosystem synonyms feeding each manager label's content rule.
+"""Curated ecosystem keywords feeding each manager label's content rule.
 
-Keyed by the manager or group ID the label derives from. The rule's baseline
-patterns (the member manager IDs) come for free from the pool: only add here the
-distro names, language names and aliases users actually type in issues.
+Keyed by the manager or group ID the label derives from. These are the *only*
+content patterns a manager label gets: the bare manager IDs are deliberately left
+out (see {func}`generate_content_rules`). Add only terms that are both
+unambiguously about this manager and absent from anything mpm prints itself: the
+`✓ <id>` trail, the `<id>: <count>` summary line, the `managers` table (which
+lists every manager's ID and CLI binary) and the `$`-prompt command disclosure.
+That rules out manager IDs and CLI names (`fwupdmgr`, `pwsh`), leaving the distro,
+language and brand names a human types in an issue. A manager with no such term
+gets no content rule and is labelled by hand.
+
+Skip anything that doubles as a common word even once word-anchored (`port`,
+`flat`, `mint`, `void`): dropping the ID removed the implicit AND-guard those
+leaned on, so on their own they match unrelated prose.
 """
 
 # Check synonym keys against the label registry: a key matching no manager label is
@@ -298,20 +320,74 @@ def _definition_stem(manager_id: str) -> str:
     return Path(inspect.getfile(type(manager))).stem
 
 
-def generate_content_rules() -> TLabelRules:
-    """Build every content rule: static ones plus one per manager and platform label.
+def _anchored(keyword: str) -> str:
+    r"""Anchor a keyword to whole-token matches with `\b` boundaries.
 
-    A manager label's patterns are its member IDs plus the curated
-    {data}`MANAGER_CONTENT_KEYWORDS` synonyms. Rules are sorted by label, patterns
-    alphabetically, both case-insensitively.
+    `github/issue-labeler` matches each pattern as an unanchored regex, so a bare
+    keyword also matches inside a larger word (`arch` in `search`). A boundary is
+    added only on an edge that closes on a word character, so a keyword ending in
+    punctuation (`c:`) stays unanchored there.
+    """
+    escaped = re.escape(keyword)
+    prefix = r"\b" if keyword[:1].isalnum() else ""
+    suffix = r"\b" if keyword[-1:].isalnum() else ""
+    return f"{prefix}{escaped}{suffix}"
+
+
+def _content_pattern(keyword: str) -> str:
+    """Render one keyword as a case-insensitive labeller regex (`/…/i`).
+
+    Case-insensitive because users capitalize ecosystem names (`Perl`, `PyPI`),
+    which a lowercase keyword would miss under the labeller's case-sensitive
+    default.
+    """
+    return f"/{_anchored(keyword)}/i"
+
+
+def _keyword_alternation(keywords: tuple[str, ...]) -> str:
+    """OR-join a label's keywords into one case-insensitive `/…/i` regex.
+
+    `github/issue-labeler` requires *every* pattern in a label's list to match, so
+    a raw keyword list reads as "all of these" rather than "any of these": a label
+    carrying both `node.js` and `nodejs` would fire only when both appear at once.
+    Collapsing the keywords into a single alternation restores "any keyword wins".
+    """
+    alternatives = "|".join(_anchored(kw) for kw in sorted(keywords, key=str.casefold))
+    return f"/{alternatives}/i"
+
+
+def generate_content_rules() -> TLabelRules:
+    r"""Build every content rule: the static ones plus one per manager or platform
+    label that has curated keywords.
+
+    Manager labels are driven solely by {data}`MANAGER_CONTENT_KEYWORDS`, never by
+    the bare manager IDs or CLI names. mpm enumerates every installed manager in its
+    own output (the `✓ <id>` trail, the `<id>: <count>` summary line, the `managers`
+    table), so a pasted trace would otherwise make every manager on the user's
+    system match at once: a `cpan`-only report came back tagged `mise`, `pip` and
+    `uv` merely because they sat in the trace. The keywords are the distro, language
+    and brand names a human types, which mpm never prints.
+
+    A manager label's keywords are OR-joined into a single case-insensitive pattern
+    by {func}`_keyword_alternation`, since the labeller demands that every pattern
+    in a list match. Platform labels instead keep a per-keyword list under that
+    same all-of semantics: their names surface in every bug report's `mpm --version`
+    block, so requiring several at once stops the platform labels from tagging every
+    issue. A label with no keyword is skipped: that manager gets no content rule,
+    only its file rule. Rules are sorted by label, both cases folded.
     """
     rules = list(CONTENT_RULES_STATIC)
-    for label_name, manager_ids in _label_members().items():
+    for label_name in _label_members():
         key = label_name.removeprefix(MANAGER_PREFIX)
-        patterns = set(manager_ids) | set(MANAGER_CONTENT_KEYWORDS.get(key, ()))
-        rules.append((label_name, tuple(sorted(patterns, key=str.casefold))))
-    for platform_name, platform_patterns in PLATFORM_CONTENT_KEYWORDS.items():
-        rules.append((f"{PLATFORM_PREFIX}{platform_name}", platform_patterns))
+        keywords = MANAGER_CONTENT_KEYWORDS.get(key, ())
+        if not keywords:
+            continue
+        rules.append((label_name, (_keyword_alternation(keywords),)))
+    for platform_name, platform_keywords in PLATFORM_CONTENT_KEYWORDS.items():
+        patterns = tuple(
+            _content_pattern(kw) for kw in sorted(platform_keywords, key=str.casefold)
+        )
+        rules.append((f"{PLATFORM_PREFIX}{platform_name}", patterns))
     return sorted(rules, key=lambda rule: str.casefold(rule[0]))
 
 

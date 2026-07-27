@@ -56,26 +56,29 @@ theme-neutral mid-gray (`#8a8a8a`), legible on both appearances. Xbar strips
 the ANSI codes it does not render, so the choice is inert there.
 """
 
-LIGHT_MENU_OLD_COLOR = 160
-"""Xterm-256 palette index recoloring the old-version suffix on a light-mode menu.
+LIGHT_MENU_OLD_COLOR = 124
+"""Palette index for the old-version (red) suffix on a light-appearance menu.
 
-{func}`meta_package_manager.version.diff_versions` defaults the version-diff
-suffixes to SGR `31`/`32` (red/green), which SwiftBar maps to the *adaptive*
-`NSColor.systemRed`/`systemGreen`. On macOS Tahoe's translucent light "Liquid
-Glass" menu their light variants wash out against the pale material: the
-rendered green measures a `1.9:1` contrast ratio, well under the `4.5:1`
-readability floor. These fixed, darker palette entries render at full strength
-instead: `160` is `#d70000` (`4.7:1` on the cream menu), {data}`LIGHT_MENU_NEW_COLOR`
-`28` is `#008700` (`4.1:1`). The dark-mode menu keeps the system colors, which
-read well there, so the override is gated on `OS_APPEARANCE` in
-{meth}`BarPluginRenderer.light_menu_diff_colors`. Xbar strips these codes, so
-the choice is inert there.
+`#af0000`, a `6.5:1` contrast ratio on the cream material. See
+{meth}`BarPluginRenderer.menu_diff_colors` for why the override exists.
 """
 
-LIGHT_MENU_NEW_COLOR = 28
-"""Xterm-256 palette index recoloring the new-version suffix on a light-mode menu.
+LIGHT_MENU_NEW_COLOR = 23
+"""Palette index for the new-version (green) suffix on a light-appearance menu.
 
-See {data}`LIGHT_MENU_OLD_COLOR` for the rationale.
+`#006600`, a `6.3:1` contrast ratio on the cream material. See
+{meth}`BarPluginRenderer.menu_diff_colors`.
+"""
+
+DARK_MENU_NEW_COLOR = 46
+"""Palette index for the new-version (green) suffix on a dark-appearance menu.
+
+`#00ff00`, lifting the worst-case contrast from `4.0:1` (the adaptive
+`NSColor.systemGreen`) to `5.8:1` over a bright wallpaper showing through the
+translucent menu. The old-version (red) suffix keeps `systemRed`: it is already
+the most readable recognizable red the xterm-256 palette can express (a pure
+`#ff0000` scores lower, and brighter options read as orange). See
+{meth}`BarPluginRenderer.menu_diff_colors`.
 """
 
 
@@ -103,20 +106,33 @@ class BarPluginRenderer(MPMPlugin):
         return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)
 
     @cached_property
-    def light_menu_diff_colors(self) -> dict[str, int]:
-        """Version-diff suffix color overrides for a light-appearance menu.
+    def menu_diff_colors(self) -> dict[str, int]:
+        """Appearance-adaptive version-diff suffix colors for the menu.
 
-        SwiftBar exports the menu's appearance in the `OS_APPEARANCE`
-        environment variable, which propagates to the `mpm outdated
-        --plugin-output` subprocess. On a light menu the adaptive system
-        red/green wash out, so return the fixed {data}`LIGHT_MENU_OLD_COLOR`
-        and {data}`LIGHT_MENU_NEW_COLOR` palette indices for
-        {func}`meta_package_manager.version.diff_versions` to use. On a dark
-        menu (or when the variable is absent, like under Xbar) return an empty
-        mapping, keeping the function's system-color defaults.
+        SwiftBar maps {func}`meta_package_manager.version.diff_versions`'s
+        default SGR `31`/`32` suffixes to the *adaptive*
+        `NSColor.systemRed`/`systemGreen`, and exports the menu appearance in
+        the `OS_APPEARANCE` environment variable (which propagates to the `mpm
+        outdated --plugin-output` subprocess). On the translucent "Liquid
+        Glass" menus of recent macOS releases these system colors lose contrast
+        against the material, so override them per appearance:
+
+        - A **light** menu washes out both suffixes (the green measured
+          `1.9:1`), so darken them to {data}`LIGHT_MENU_OLD_COLOR` and
+          {data}`LIGHT_MENU_NEW_COLOR`.
+        - A **dark** menu over a bright wallpaper dims the green to `4.0:1`, so
+          brighten it to {data}`DARK_MENU_NEW_COLOR`; the red keeps `systemRed`,
+          already the most readable red the palette allows.
+
+        The result is returned as `diff_versions` keyword arguments. When the
+        variable is absent (a consumer like Xbar, which strips these codes
+        anyway) return an empty mapping, keeping the system-color defaults.
         """
-        if self.getenv_str("OS_APPEARANCE") == "light":
+        appearance = self.getenv_str("OS_APPEARANCE")
+        if appearance == "light":
             return {"old_fg": LIGHT_MENU_OLD_COLOR, "new_fg": LIGHT_MENU_NEW_COLOR}
+        if appearance == "dark":
+            return {"new_fg": DARK_MENU_NEW_COLOR}
         return {}
 
     @staticmethod
@@ -165,8 +181,8 @@ class BarPluginRenderer(MPMPlugin):
         Version columns carry the ANSI colors produced by
         {func}`meta_package_manager.version.diff_versions`: common prefix
         gray ({data}`VERSION_PREFIX_COLOR`), old suffix red, new suffix
-        green, the two suffixes recolored for a light-appearance menu by
-        {meth}`light_menu_diff_colors`. Table alignment survives the escape
+        green, the suffixes recolored per menu appearance by
+        {meth}`menu_diff_colors`. Table alignment survives the escape
         codes thanks to `tabulate`'s ANSI-aware layout
         ([astanin/python-tabulate#184](https://github.com/astanin/python-tabulate/pull/184)), and package
         menu lines opt into rendering them with the `ansi=true` parameter.
@@ -197,7 +213,7 @@ class BarPluginRenderer(MPMPlugin):
                     p["installed_version"] if p["installed_version"] else "?",
                     p["latest_version"],
                     prefix_fg=VERSION_PREFIX_COLOR,
-                    **self.light_menu_diff_colors,
+                    **self.menu_diff_colors,
                 )
                 table.append((
                     (p.get("name") or p.get("id"), installed, "→", latest),

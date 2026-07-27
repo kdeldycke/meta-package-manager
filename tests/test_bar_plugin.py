@@ -32,6 +32,7 @@ from extra_platforms.pytest import unless_macos
 
 from meta_package_manager import bar_plugin
 from meta_package_manager.bar_plugin_renderer import (
+    DARK_MENU_NEW_COLOR,
     LIGHT_MENU_NEW_COLOR,
     LIGHT_MENU_OLD_COLOR,
     VERSION_PREFIX_COLOR,
@@ -140,13 +141,36 @@ def _outdated_fixture(errors: list[str] | None = None) -> dict:
 
 
 @pytest.mark.parametrize("table_rendering", (True, False))
-def test_renderer_colors_version_diff(monkeypatch, table_rendering):
-    """Package lines carry the version-diff ANSI colors they declare with
-    `ansi=true`; every other line stays free of escape codes.
-
-    Without `OS_APPEARANCE` (dark or non-SwiftBar consumer), the suffixes keep
-    the system red/green defaults (SGR `31`/`32`)."""
-    _pin_plugin_env(monkeypatch, table_rendering)
+@pytest.mark.parametrize(
+    ("os_appearance", "present", "absent"),
+    (
+        # No OS_APPEARANCE (dark-agnostic consumer like Xbar): keep the system
+        # red/green (SGR 31/32); no palette override leaks in.
+        (None, ("\x1b[31m", "\x1b[32m"), (f"\x1b[38;5;{DARK_MENU_NEW_COLOR}m",)),
+        # Light menu: both suffixes darkened; no system red/green survives.
+        (
+            "Light",
+            (
+                f"\x1b[38;5;{LIGHT_MENU_OLD_COLOR}m",
+                f"\x1b[38;5;{LIGHT_MENU_NEW_COLOR}m",
+            ),
+            ("\x1b[31m", "\x1b[32m"),
+        ),
+        # Dark menu: green brightened, red kept as the system red.
+        (
+            "Dark",
+            (f"\x1b[38;5;{DARK_MENU_NEW_COLOR}m", "\x1b[31m"),
+            ("\x1b[32m",),
+        ),
+    ),
+)
+def test_renderer_version_diff_colors_by_appearance(
+    monkeypatch, table_rendering, os_appearance, present, absent
+):
+    """Package lines carry the appearance-appropriate version-diff colors with
+    `ansi=true`; the prefix gray is constant and non-package lines stay free of
+    escape codes."""
+    _pin_plugin_env(monkeypatch, table_rendering, os_appearance=os_appearance)
     output = BarPluginRenderer().render(_outdated_fixture())
 
     package_lines = [line for line in output.splitlines() if "ansi=true" in line]
@@ -154,31 +178,15 @@ def test_renderer_colors_version_diff(monkeypatch, table_rendering):
     assert len(package_lines) == 4
     for line in package_lines:
         assert f"\x1b[38;5;{VERSION_PREFIX_COLOR}m" in line
-        assert "\x1b[31m" in line
-        assert "\x1b[32m" in line
         assert "\x1b[0m" in line
+        for code in present:
+            assert code in line
+        for code in absent:
+            assert code not in line
 
     for line in output.splitlines():
         if "ansi=true" not in line:
             assert "\x1b[" not in line
-
-
-@pytest.mark.parametrize("table_rendering", (True, False))
-def test_renderer_recolors_version_diff_on_light_menu(monkeypatch, table_rendering):
-    """A light-appearance SwiftBar menu swaps the washed-out system red/green
-    for the fixed, higher-contrast palette indices; the prefix gray is
-    unchanged and no system red/green (SGR `31`/`32`) leaks through."""
-    _pin_plugin_env(monkeypatch, table_rendering, os_appearance="Light")
-    output = BarPluginRenderer().render(_outdated_fixture())
-
-    package_lines = [line for line in output.splitlines() if "ansi=true" in line]
-    assert len(package_lines) == 4
-    for line in package_lines:
-        assert f"\x1b[38;5;{VERSION_PREFIX_COLOR}m" in line
-        assert f"\x1b[38;5;{LIGHT_MENU_OLD_COLOR}m" in line
-        assert f"\x1b[38;5;{LIGHT_MENU_NEW_COLOR}m" in line
-        assert "\x1b[31m" not in line
-        assert "\x1b[32m" not in line
 
 
 def test_renderer_table_alignment_survives_ansi(monkeypatch):

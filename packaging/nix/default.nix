@@ -15,13 +15,15 @@ let
       click-extra = self.callPackage ./click-extra.nix { };
       # cloup pins its setuptools-scm build requirement below 10, which
       # nixpkgs no longer ships, so pypa/build's --no-isolation dependency
-      # check fails. Relax the pin: version detection is bypassed anyway
-      # through SETUPTOOLS_SCM_PRETEND_VERSION.
+      # check fails. Relax the pin when present: version detection is bypassed
+      # anyway through SETUPTOOLS_SCM_PRETEND_VERSION. Use --replace-quiet, not
+      # --replace-fail: recent nixpkgs cloup revisions strip the pin in their
+      # own postPatch (which runs first), so ours must no-op rather than error.
       # Reported at https://github.com/janluke/cloup/issues/206.
       cloup = super.cloup.overridePythonAttrs (old: {
         postPatch = (old.postPatch or "") + ''
           substituteInPlace setup.py \
-            --replace-fail "setuptools_scm<10" "setuptools_scm"
+            --replace-quiet "setuptools_scm<10" "setuptools_scm"
         '';
       });
       extra-platforms = self.callPackage ./extra-platforms.nix { };

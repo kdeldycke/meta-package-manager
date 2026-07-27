@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [bar-plugin] Recolor the version-diff suffixes on a light-appearance SwiftBar menu: the default adaptive system red and green wash out against the pale translucent material of recent macOS releases, so a light menu now renders them as fixed, darker, higher-contrast shades. The dark menu keeps the system colors.
 - [mpm] Drop the Nix bar-plugin backport patch, now that its fix ships in the release, and bump the in-repo Alpine, Guix, MacPorts and Nix packaging specs to build from `7.4.0`.
 - [mpm] Raise the extra-platforms floor from `13.1` to `13.4`.
 - [mpm] Bump the in-repo Alpine, MacPorts and Nix packaging specs to build extra-platforms from `13.4.0`: the Nix spec drops its coverage and xdist test plugins and per-test skips now that the release runs a plain `pytest` in a hermetic sandbox, and the Alpine build runs the test suite the sdist now ships. The Alpine spec's license metadata is corrected from `GPL-2.0-or-later` to the actual `Apache-2.0`.

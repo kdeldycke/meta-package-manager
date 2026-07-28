@@ -1,9 +1,6 @@
 # Changelog
 
-## [`7.4.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.0...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`7.4.1` (2026-07-28)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.0...v7.4.1)
 
 - [bar-plugin] Recolor the version-diff suffixes to match the SwiftBar menu appearance (from `OS_APPEARANCE`): the adaptive system red and green lose contrast on recent macOS's translucent menus, so a light menu darkens both and a dark menu brightens the green.
 - [mpm] Raise the click-extra floor from `8.6` to `8.6.1` and the extra-platforms floor from `13.1` to `13.5.1`.

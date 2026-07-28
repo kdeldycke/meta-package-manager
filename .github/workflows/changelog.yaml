@@ -16,7 +16,7 @@ name: 🆙 Changelog & versions
       - "docs/**"
   workflow_run:
     workflows:
-      - "Build & release"
+      - "🚀 Build & release"
     types:
       - completed
     branches:
@@ -25,6 +25,6 @@ name: 🆙 Changelog & versions
 jobs:
 
   changelog:
-    uses: kdeldycke/repomatic/.github/workflows/changelog.yaml@2b89c62f0953d8ef59d0d023085a9323f6c32f1d # v7.3.0
+    uses: kdeldycke/repomatic/.github/workflows/changelog.yaml@c81fb2e6fa884cb62ef46e69b8c8db44fa6fad15 # v7.3.1
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

@@ -1,6 +1,6 @@
 # Maintainer: Kevin Deldycke <kevin@deldycke.com>
 pkgname=py3-click-extra
-pkgver=8.6.1
+pkgver=8.6.2
 pkgrel=0
 pkgdesc="Drop-in replacement for Click to build user-friendly and colorful CLIs"
 url="https://github.com/kdeldycke/click-extra"
@@ -52,15 +52,12 @@ check() {
 	# wheel, excluding the network tests (no outbound network in the build
 	# sandbox). The MkDocs tests self-skip without mkdocs-click, and the runner
 	# fixture pins $HOME so the config-search tests do not leak the build HOME.
-	# The two process-group tests are deselected: they kill a session leader and
-	# assert its grandchild is reaped, which the build container (no PID 1 init
-	# to reap orphans) cannot guarantee.
+	# Since 8.6.2 the process-group teardown tests count an unreaped zombie as
+	# dead, so they pass in this init-less container without being deselected.
 	# See: https://kdeldycke.github.io/click-extra/packaging.html
 	python3 -m venv --clear --without-pip --system-site-packages .testenv
 	.testenv/bin/python3 -m installer .dist/*.whl
-	.testenv/bin/python3 -m pytest -m "not network" \
-		--deselect tests/test_execution.py::test_run_cli_timeout_new_session_kills_grandchildren \
-		--deselect tests/test_execution.py::test_terminate_live_processes_signals_whole_group
+	.testenv/bin/python3 -m pytest -m "not network"
 }
 
 package() {
@@ -69,5 +66,5 @@ package() {
 }
 
 sha512sums="
-73fdad3c1f3c7ef95405b2a304271a1fdd836e820d656c81016565136eb74c9783158d1621188120602bdb7100ccc0702122a059f0383b0a3c49706708d2a056  click_extra-8.6.1.tar.gz
+e760e55362baf7c72f57c98cb50ea39753d7ef1249f230ca7903eeee7cfa837c8b9f0dae82bdd8b57309af7d2bf4a41d21b04a594fdd04cae3d51e14c36476f6  click_extra-8.6.2.tar.gz
 "

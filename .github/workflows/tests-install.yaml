@@ -62,7 +62,7 @@ jobs:
     steps:
       - name: Install build tooling
         run: apk add --no-cache alpine-sdk
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Configure abuild
         # abuild-keygen --append registers the private key in abuild.conf; the
         # public half is copied by hand, as --install shells out to doas,
@@ -140,7 +140,7 @@ jobs:
           - windows-11-arm
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Pack
         shell: pwsh
         working-directory: packaging/choco/meta-package-manager
@@ -232,7 +232,7 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Guix
         run: >
           wget --quiet --output-document=guix-install.sh
@@ -308,7 +308,7 @@ jobs:
           - macos-26
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install MacPorts
         run: |
           MACOS_MAJOR="$(sw_vers -productVersion | cut -d . -f 1)"
@@ -379,7 +379,7 @@ jobs:
           - macos-26
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: cachix/install-nix-action@v31
         with:
           nix_path: nixpkgs=channel:nixos-unstable

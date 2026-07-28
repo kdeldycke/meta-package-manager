@@ -60,7 +60,7 @@ jobs:
     outputs:
       metadata: ${{ steps.metadata.outputs.metadata }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
       - name: Run repomatic metadata
         id: metadata
@@ -97,7 +97,7 @@ jobs:
       # See: meta_package_manager/test_manager_homebrew.py::TestCask test.
       HOMEBREW_NO_INSTALL_FROM_API: "1"
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-tags: true
 

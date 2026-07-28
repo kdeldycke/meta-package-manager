@@ -7,6 +7,9 @@
 
 ## [`7.4.1` (2026-07-28)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.0...v7.4.1)
 
+> [!NOTE]
+> `7.4.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/7.4.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.4.1).
+
 - [bar-plugin] Recolor the version-diff suffixes to match the SwiftBar menu appearance (from `OS_APPEARANCE`): the adaptive system red and green lose contrast on recent macOS's translucent menus, so a light menu darkens both and a dark menu brightens the green.
 - [mpm] Raise the click-extra floor from `8.6` to `8.6.1` and the extra-platforms floor from `13.1` to `13.5.1`.
 - [mpm] Drop the now-upstreamed Nix bar-plugin backport patch and bump the in-repo Alpine, Guix, MacPorts and Nix packaging specs to build from `7.4.0`.

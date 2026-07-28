@@ -13,20 +13,31 @@
 # cpan cannot uninstall a module, so no remove operation is declared.
 #
 # ```{caution}
-# On macOS, `cpan` drives the system Perl at `/usr/bin/perl`, whose core modules
-# sit on the sealed, read-only system volume and cannot be changed even with
-# `sudo`. Those core modules (`warnings`, `feature`, `POSIX`, `B`, and the like)
-# ship only inside Perl itself, with no standalone CPAN distribution: `cpan -O`
-# keeps reporting them as outdated against the newest released Perl, yet `cpan -u`
-# can never upgrade them, since only a newer Perl carries newer core modules. On
-# the frozen system Perl that list never clears.
+# Perl's core modules (`warnings`, `feature`, `POSIX`, `B`, and the like) exist
+# only inside Perl itself, with no standalone CPAN distribution, so their
+# versions are tied to whichever Perl you run. `cpan -O` reports them as outdated
+# whenever that Perl trails the newest one CPAN has indexed, yet `cpan -u` can
+# never upgrade them in place, since only a newer Perl carries newer core
+# modules. `mpm` relays both faithfully. This holds for any Perl, whether the
+# macOS system one or a Homebrew install.
 #
-# If you do not manage Perl modules with the system Perl,
+# On the macOS system Perl at `/usr/bin/perl`, that Perl sits on the sealed,
+# read-only system volume and cannot be replaced even with `sudo`, so the list
+# never clears.
+#
+# With a writable, user-controlled Perl ahead on your `PATH` (via
+# `brew install perl`, since `mpm` drives whichever `cpan` comes first), the
+# list does clear, but on a recurring delay: each yearly Perl release reaches
+# CPAN before Homebrew publishes its bottle, so for a few weeks `cpan -O` flags
+# the new release's core modules as outdated against your current ones. Perl
+# `5.44.0`, released 2026-07-15, opened one such window against the `5.42`
+# series Homebrew still bottled. Running `brew upgrade perl` once the new bottle
+# lands moves your core modules to the new set and clears the list, until the
+# next release reopens the window.
+#
+# If you do not track Perl modules with `cpan` at all,
 # [disable the manager entirely](#selecting-and-configuring-cpan): set
-# `cpan = false` in your mpm config, or pass `--no-cpan`. To actually track and
-# upgrade Perl modules, put a writable, user-controlled Perl ahead of the system
-# one on your `PATH`, for instance with `brew install perl`: `mpm` drives
-# whichever `cpan` comes first on `PATH`. See
+# `cpan = false` in your mpm config, or pass `--no-cpan`. See
 # [#1983](https://github.com/kdeldycke/meta-package-manager/issues/1983) for the
 # original report.
 # ```

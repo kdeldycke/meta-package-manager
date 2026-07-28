@@ -23,11 +23,7 @@ buildPythonPackage (finalAttrs: {
   nativeCheckInputs = [ pytestCheckHook ];
 
   # Tests marked ``network`` reach out to PyPI; the build sandbox has no
-  # system TLS CA bundle. No per-test ignore list is needed beyond that:
-  # since 13.4.0 the environment-detection tests self-skip in the
-  # ``HOME=/homeless-shelter`` sandbox, the Sphinx cross-reference test skips
-  # when ``uv`` is absent, and ``addopts`` no longer forces the coverage or
-  # xdist plugins, so a plain ``pytest`` starts with neither installed.
+  # system TLS CA bundle.
   disabledTestMarks = [ "network" ];
 
   pythonImportsCheck = [ "extra_platforms" ];

@@ -20,13 +20,8 @@ build() {
 }
 
 check() {
-	# The sdist ships the test suite since 13.4.0, so run it against the
-	# installed wheel. Exclude the network tests (no outbound network in the
-	# build sandbox); the environment-detection tests adapt to the sandbox and
-	# the Sphinx cross-reference test self-skips when uv is absent. Since 13.5.1
-	# the GitHub-runner test self-skips outside its own matrix job, so the CI
-	# environment abuild inherits no longer needs scrubbing here.
-	# See: https://kdeldycke.github.io/extra-platforms/packaging.html
+	# Run the sdist's test suite against the installed wheel, minus the network
+	# tests (the build sandbox has no outbound network).
 	python3 -m venv --clear --without-pip --system-site-packages .testenv
 	.testenv/bin/python3 -m installer .dist/*.whl
 	.testenv/bin/python3 -m pytest -m "not network"

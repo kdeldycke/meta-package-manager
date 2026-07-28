@@ -77,10 +77,7 @@ buildPythonPackage (finalAttrs: {
   ];
 
   # Tests marked ``network`` make HTTPS requests; the build sandbox has no
-  # system TLS CA bundle. Nothing else needs disabling: since 8.6.1 the MkDocs
-  # test tree self-skips when mkdocs-click is absent, and the runner fixture
-  # pins ``$HOME`` and its platform equivalents, so the config-search debug
-  # tests no longer leak the sandbox HOME.
+  # system TLS CA bundle.
   disabledTestMarks = [ "network" ];
 
   pythonImportsCheck = [ "click_extra" ];

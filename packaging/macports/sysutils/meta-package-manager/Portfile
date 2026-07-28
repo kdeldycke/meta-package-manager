@@ -43,12 +43,8 @@ depends_test-append port:py${python.version}-pytest \
                     port:py${python.version}-tomlkit \
                     port:py${python.version}-yaml
 
-# Run the hermetic layer from the unpacked sdist (mpm is pure Python, so it
-# imports straight from the source tree). The integration tests (marked
-# "integration") drive real package managers and the mpm CLI end-to-end and are
-# excluded here; the repo-maintenance guards auto-skip outside a git checkout,
-# and the SBOM tests auto-skip without their optional extras. See
-# https://kdeldycke.github.io/meta-package-manager/packaging.html
+# Run the hermetic layer from the unpacked sdist, excluding the integration
+# tests (marked "integration") that drive real package managers.
 test.run            yes
 test.cmd            ${python.bin} -m pytest
 test.args           -m "not integration"

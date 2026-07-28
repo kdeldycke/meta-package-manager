@@ -423,7 +423,7 @@ Meta Package Manager should now be available system-wide:
 
 ```shell-session
 $ mpm --version
-mpm, version 4.13.0
+mpm, version 7.4.0
 (...)
 ```
 
@@ -431,7 +431,7 @@ If not, you can directly execute the module from Python:
 
 ```shell-session
 $ python -m meta_package_manager --version
-mpm, version 4.13.0
+mpm, version 7.4.0
 (...)
 ```
 

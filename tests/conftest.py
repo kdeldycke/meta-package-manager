@@ -548,8 +548,12 @@ INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
     # scoop install hangs until the timeout on the GitHub Windows runners; sfsu wraps it.
     "scoop": is_github_ci,
     "sfsu": is_github_ci,
-    # snap install requires root; mpm does not elevate, so it fails as the test user.
-    "snap": is_linux,
+    # mpm sudo-escalates snap now (snapd rejects unprivileged state changes), so the
+    # blocker turns on whether that sudo runs unattended. A typical Linux host
+    # password-gates sudo, failing the non-interactive install; GitHub's Ubuntu runners
+    # grant passwordless sudo, so snap completes a real install+remove of hello-world
+    # and is not a blocker there.
+    "snap": lambda: is_linux() and not is_github_ci(),
     # steamcmd can only install titles owned by an authenticated account; the runners'
     # anonymous session is not logged in, so the install fails. No environment satisfies it.
     "steamcmd": lambda: True,

@@ -94,7 +94,7 @@ Install package in editable mode with all development dependencies:
 $ python -m pip install uv
 $ uv venv
 $ source .venv/bin/activate
-$ uv sync --all-extras
+$ uv sync --all-extras --all-groups
 ```
 
 ### Test `mpm` development version
@@ -112,7 +112,7 @@ mpm, version 4.13.0
 Run unit-tests with:
 
 ```shell-session
-$ uv sync --extra test
+$ uv sync --group test
 $ uv run -- pytest
 ```
 
@@ -145,7 +145,7 @@ $ uv run --group typing mypy meta_package_manager
 Build Sphinx documentation locally:
 
 ```shell-session
-$ uv sync --extra docs
+$ uv sync --group docs
 $ uv run -- sphinx-build -b html ./docs ./docs/html
 ```
 

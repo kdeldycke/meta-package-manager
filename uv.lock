@@ -132,11 +132,11 @@ wheels = [
 
 [[package]]
 name = "bracex"
-version = "3.0"
+version = "3.0.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d0/f5/4473ad9b48cd0420a2d762a3750fa0e078e23e060b1af72662e5987e5530/bracex-3.0.tar.gz", hash = "sha256:b73f718d6bd98d8419e45df02426c86e9967c179949f779340d6c3a8c83b9111", size = 43162, upload-time = "2026-06-30T00:43:35.279Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ac/01/5f394b8bcd6e5b92f73130990960423bbb19711f906bd9fe9ea5557c667c/bracex-3.0.1.tar.gz", hash = "sha256:4e38e32392e4a4780fe15d644bfc7c8514057cfc3861e060b11814ce829c25e4", size = 44019, upload-time = "2026-07-20T13:43:00.335Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f5/2e/68781b78e764e5ccc4af1e3d27e060069c73af90234853fa80000e7ee79d/bracex-3.0-py3-none-any.whl", hash = "sha256:3833e61c2f092d5aa0468fa2e6c6e990a306185abf763b6d122f0158e59c58a5", size = 11738, upload-time = "2026-06-30T00:43:34.196Z" },
+    { url = "https://files.pythonhosted.org/packages/b8/8f/6f7273a7adb8d73fc8d21ede4376a3e475e52f98435c6007f69100dec8ca/bracex-3.0.1-py3-none-any.whl", hash = "sha256:6523ad83aeb5098a4ee597cff0f964442ff74e460bd3fafaffab6a013ff2288c", size = 11940, upload-time = "2026-07-20T13:42:59.268Z" },
 ]
 
 [[package]]
@@ -249,7 +249,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "8.6.1"
+version = "8.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -262,9 +262,9 @@ dependencies = [
     { name = "wcmatch" },
     { name = "wcwidth" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/08/49/1eb4abd551f682a8e9cf85cad07a29278d0e90c5a9b3348854e2f647831b/click_extra-8.6.1.tar.gz", hash = "sha256:54c5e52dd6c25bfb840e3d5b30829d25d6631fd9f91eda6b79cfec5e7ff5d4bf", size = 1219636, upload-time = "2026-07-27T15:58:07.957Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/59/33/d17b2f156113404649c6ed16311b6983a89d1ad7ad3a8033164a94eebf93/click_extra-8.6.2.tar.gz", hash = "sha256:f21ec082021c09a2977e3320ff2c189ac2216e1a6f71a3297f4d0347582b53e0", size = 1220753, upload-time = "2026-07-27T20:15:27.39Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ba/78/d3e3249b3a61de75b70f632c69a64af306fa071ca2f668de1190107400e5/click_extra-8.6.1-py3-none-any.whl", hash = "sha256:947e0cca8d90363d479c3f882b50a9234bbad742460b938cee083e24ee822215", size = 419663, upload-time = "2026-07-27T15:58:06.225Z" },
+    { url = "https://files.pythonhosted.org/packages/14/17/28b6408d31c6d40b14c7ad7b4eba1ecac9a699dcac323b0281f8d5f9e342/click_extra-8.6.2-py3-none-any.whl", hash = "sha256:67eb7231f0de025ca95392390cafcf46d69d58e68538b5ec5b3303563e613f14", size = 419663, upload-time = "2026-07-27T20:15:25.536Z" },
 ]
 
 [package.optional-dependencies]

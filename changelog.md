@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [volta] Add Volta package manager with `installed`, `install`, `upgrade` and `remove` support, flagged unmaintained (upstream retired in November 2025 in favor of `mise`). `pkg:npm/` purls now also resolve to it. Addresses [#1995](https://github.com/kdeldycke/meta-package-manager/issues/1995).
+
 ## [`7.4.1` (2026-07-28)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.0...v7.4.1)
 
 > [!NOTE]

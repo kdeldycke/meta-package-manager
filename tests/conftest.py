@@ -394,6 +394,9 @@ PACKAGE_IDS = {
     "urpmi": "figlet",
     "uv": "pytz",
     "uvx": "pycowsay",
+    # Zero-dependency and ships a bin: Volta manages CLI tools, so the usual
+    # bin-less npm pick (ms) is out.
+    "volta": "nanoid",
     "vscode": "tamasfe.even-better-toml",
     "vscodium": "tamasfe.even-better-toml",
     "winget": "sharkdp.hyperfine",

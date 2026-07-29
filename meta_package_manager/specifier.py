@@ -100,7 +100,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "mlflow": None,
     "nim": None,
     "nix": {"nix"},
-    "npm": {"npm", "pnpm", "yarn", "yarn-berry"},
+    "npm": {"npm", "pnpm", "volta", "yarn", "yarn-berry"},
     "nuget": None,
     "oci": None,
     "opam": None,

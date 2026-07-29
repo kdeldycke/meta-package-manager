@@ -210,7 +210,7 @@ managers:
   vagrant: [topgrade]
   vcpkg: [topgrade]
   vim: [topgrade]
-  volta-packages: [topgrade]
+  volta: [topgrade]
   voom: [topgrade]
   vscode: [topgrade]
   vscodium: [topgrade]
@@ -336,7 +336,6 @@ homepages:
   vagrant: https://www.vagrantup.com
   vcpkg: https://vcpkg.io
   vim: https://www.vim.org
-  volta-packages: https://volta.sh
   voom: https://www.vim.org/scripts/script.php?script_id=2657
   vundle: https://github.com/VundleVim/Vundle.vim
   waydroid: https://waydro.id

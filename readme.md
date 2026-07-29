@@ -138,6 +138,7 @@ Meta Package Manager,topgrade,1
 Meta Package Manager,urpmi,1
 Meta Package Manager,uv,1
 Meta Package Manager,uvx,1
+Meta Package Manager,volta,1
 Meta Package Manager,vscode,1
 Meta Package Manager,vscodium,1
 Meta Package Manager,winget,1
@@ -220,6 +221,7 @@ Meta Package Manager,zypper,1
 | [`urpmi`](https://kdeldycke.github.io/meta-package-manager/managers/urpmi.html)                                                                                  |                  |          |           |               |       |             |         |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`uv`](https://kdeldycke.github.io/meta-package-manager/managers/uv.html)                                                                                        | >=0.5.0          |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`uvx`](https://kdeldycke.github.io/meta-package-manager/managers/uvx.html)                                                                                      | >=0.10.10        |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`volta`](https://kdeldycke.github.io/meta-package-manager/managers/volta.html) [⚠️](https://kdeldycke.github.io/meta-package-manager/managers/volta.html)       | >=1.0.2          |          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |            |           |          |     ✓     |     ✓     |               |    ✓     |        |           |          |
 | [`vscode`](https://kdeldycke.github.io/meta-package-manager/managers/vscode.html)                                                                                | >=1.60.0         |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |           |          |     ✓     |           |               |    ✓     |        |           |          |
 | [`vscodium`](https://kdeldycke.github.io/meta-package-manager/managers/vscodium.html)                                                                            | >=1.60.0         |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |           |          |     ✓     |           |               |    ✓     |        |           |          |
 | [`winget`](https://kdeldycke.github.io/meta-package-manager/managers/winget.html)                                                                                | >=1.28.190       |          |           |               |       |             |   🪟    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |

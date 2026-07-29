@@ -60,6 +60,7 @@ from .managers.snap import Snap
 from .managers.sun_tools import Sun_Tools
 from .managers.tazpkg import Tazpkg
 from .managers.uv import UV, UVX
+from .managers.volta import Volta
 from .managers.winget import WinGet
 from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
@@ -116,6 +117,7 @@ manager_classes = (
     Tazpkg,
     UV,
     UVX,
+    Volta,
     WinGet,
     XBPS,
     YarnBerry,

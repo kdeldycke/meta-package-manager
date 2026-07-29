@@ -47,4 +47,4 @@ depends_test-append port:py${python.version}-pytest \
 # tests (marked "integration") that drive real package managers.
 test.run            yes
 test.cmd            ${python.bin} -m pytest
-test.args           -m "not integration"
+test.args           -o addopts="-m 'not integration'"

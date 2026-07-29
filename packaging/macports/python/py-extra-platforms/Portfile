@@ -37,5 +37,5 @@ if {${name} ne ${subport}} {
 
     test.run            yes
     test.cmd            ${python.bin} -m pytest
-    test.args           -m "not network"
+    test.args           -o addopts="-m 'not network'"
 }

@@ -1,0 +1,99 @@
+---
+name: 🧪 Validate MacPorts packages
+"on":
+  workflow_dispatch:
+
+# Temporary workflow to validate the MacPorts ports staged in
+# packaging/macports/: meta-package-manager 7.4.1 plus its py-click-extra 8.6.2,
+# py-cloup 3.1.0, py-deepmerge 2.1.0, py-extra-platforms 13.5.1,
+# py-packageurl-python 0.17.6 and py-boltons 26.1.0 dependencies. Installs
+# MacPorts on a macOS runner, registers the overlay as a local port source, then
+# lints every port and runs meta-package-manager's `port test` phase.
+# That test phase is the one thing the upstream submission cannot cover on its
+# own: the macports-ports PR CI builds and installs the ports but never runs
+# `port test`, and no local machine here has MacPorts.
+# Mirrors the upstream submission:
+# https://github.com/macports/macports-ports/pull/33746
+# Delete after the ports land upstream.
+
+permissions: {}
+
+jobs:
+
+  validate:
+    name: Lint, test and install the MacPorts overlay
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        timeout-minutes: 5
+
+      - name: Install MacPorts base
+        # Resolve the .pkg matching the runner's macOS major at run time, so the
+        # pin never goes stale as the runner image or MacPorts base advances.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          osmajor="$(sw_vers -productVersion | cut -d. -f1)"
+          url="$(gh api repos/macports/macports-base/releases/latest \
+            | jq -r --arg os "$osmajor" \
+                '.assets[] | select(.name | test("-\($os)-[A-Za-z]+[.]pkg$")) | .browser_download_url')"
+          test -n "$url"
+          echo "Installing MacPorts from $url"
+          curl -fsSLO "$url"
+          sudo installer -pkg MacPorts-*.pkg -target /
+          echo "/opt/local/bin" >> "$GITHUB_PATH"
+          echo "/opt/local/sbin" >> "$GITHUB_PATH"
+
+      - name: Sync the MacPorts port tree
+        # selfupdate pulls the rsync ports tree so the overlay's own dependencies
+        # (python314, py314-pytest, ...) resolve against upstream MacPorts.
+        timeout-minutes: 20
+        run: sudo port -v selfupdate
+
+      - name: Register the overlay as a local port source
+        # A file:// source ahead of the rsync tree makes the overlay's newer
+        # versions win; portindex builds the index MacPorts reads it through.
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          overlay="${GITHUB_WORKSPACE}/packaging/macports"
+          conf=/opt/local/etc/macports/sources.conf
+          { printf 'file://%s [nosync]\n' "${overlay}"; cat "${conf}"; } \
+            | sudo tee "${conf}.new" >/dev/null
+          sudo mv "${conf}.new" "${conf}"
+          (cd "${overlay}" && portindex)
+          # Confirm the overlay Portfile wins over the rsync tree.
+          port file meta-package-manager
+
+      - name: Lint every overlay port
+        timeout-minutes: 10
+        run: |
+          set -uo pipefail
+          fail=0
+          for port in py-boltons py-deepmerge py-packageurl-python \
+                      py-extra-platforms py-cloup py-click-extra \
+                      meta-package-manager; do
+            echo "::group::port lint ${port}"
+            port -q lint "${port}" || fail=1
+            echo "::endgroup::"
+          done
+          exit "${fail}"
+
+      - name: Build the stack and run meta-package-manager's test phase
+        # `port test` builds mpm and all its overlay dependencies, then runs the
+        # port's test.cmd (pytest -m "not integration"). This is the phase the
+        # macports-ports PR CI skips.
+        timeout-minutes: 90
+        run: sudo port -v test meta-package-manager
+
+      - name: Install and smoke-test the CLI
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          sudo port -v install meta-package-manager
+          mpm --version
+          mpm --help >/dev/null

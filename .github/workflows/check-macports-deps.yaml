@@ -94,14 +94,15 @@ jobs:
         # its test.cmd (pytest). The library ports set test.run inside the
         # `if {${name} ne ${subport}}` guard, so their test phase lives on the
         # versioned subport (py314-*), not the py-* stub, which no-ops. mpm is an
-        # application, tested directly. Continue on failure so one port's result
-        # doesn't mask the others.
+        # application, tested directly. click-extra's test deps (hjson,
+        # myst-parser) exist only up to py311 in MacPorts, so it tests there.
+        # Continue on failure so one port's result doesn't mask the others.
         timeout-minutes: 90
         run: |
           set -uo pipefail
           fail=0
           for port in py314-extra-platforms py314-cloup py314-packageurl-python \
-                      py314-click-extra meta-package-manager; do
+                      py311-click-extra meta-package-manager; do
             echo "::group::port test ${port}"
             sudo port -v test "${port}" || fail=1
             echo "::endgroup::"

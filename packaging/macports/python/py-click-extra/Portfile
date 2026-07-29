@@ -45,9 +45,7 @@ if {${name} ne ${subport}} {
 
     depends_test-append \
                     port:git \
-                    port:py${python.version}-hjson \
                     port:py${python.version}-jsonschema \
-                    port:py${python.version}-myst-parser \
                     port:py${python.version}-pygments \
                     port:py${python.version}-pytest \
                     port:py${python.version}-pytest-httpserver \

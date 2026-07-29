@@ -134,6 +134,8 @@ Sequential order is recommended as most package managers don't support concurren
 
 The canonical guidance for distribution packagers (test-suite layers, `/homeless-shelter` auto-skip, ignore-globs for writable-`$HOME` builders, dependency constraints, per-channel build instructions) lives in `docs/packaging.md`, published at [https://kdeldycke.github.io/meta-package-manager/packaging.html](https://kdeldycke.github.io/meta-package-manager/packaging.html). Packaging specs (`packaging/nix/`, `packaging/alpine/`, and their upstream submissions) must reference that URL, never this file.
 
+Keep the comments in those specs tight. Their audience is each channel's own maintainers, who already know their build-sandbox conventions (the `/homeless-shelter` auto-skip, standard `make_check` / test-phase behavior): drop those, drop doc-link pointers, and collapse verbose per-dependency breakdowns to a single line. Keep only non-obvious, spec-specific rationale: a live workaround still needed, or why a particular test or dependency is excluded. When unsure, favor the tighter comment. This holds for both the in-repo `packaging/*` specs and their downstream branch copies.
+
 ### Type checking
 
 ```shell-session

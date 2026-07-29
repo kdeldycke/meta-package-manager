@@ -23,9 +23,8 @@ depends="
 makedepends="py3-gpep517 py3-installer py3-uv-build"
 checkdepends="py3-pytest py3-tomlkit py3-yaml"
 subpackages="$pkgname-pyc"
-# The GitHub tag tarball carries the test suite check() runs below.
-source="https://github.com/kdeldycke/meta-package-manager/archive/v$pkgver/meta-package-manager-v$pkgver.tar.gz"
-builddir="$srcdir/$pkgname-$pkgver"
+source="https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-$pkgver.tar.gz"
+builddir="$srcdir/meta_package_manager-$pkgver"
 
 build() {
 	gpep517 build-wheel \
@@ -48,5 +47,5 @@ package() {
 }
 
 sha512sums="
-723d40258fc8ed893f8cee53b83a064e1e64b9d96390c301e585ca14418f4c88227413a8163d564a50555b7a8422757069e083cfb270e6cebfb53c2455f4c74f  meta-package-manager-v7.4.1.tar.gz
+822676eb23a05bd2d5a053d5ab67e122a4b7af2371d586c7cdd8c29d8201f069149a76c02ec53a1ed9ad3b3c27601433ff43903b5847806e3d5cac569b443e22  meta_package_manager-7.4.1.tar.gz
 "

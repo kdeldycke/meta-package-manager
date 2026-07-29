@@ -89,12 +89,22 @@ jobs:
           done
           exit "${fail}"
 
-      - name: Build the stack and run meta-package-manager's test phase
-        # `port test` builds mpm and all its overlay dependencies, then runs the
-        # port's test.cmd (pytest -m "not integration"). This is the phase the
-        # macports-ports PR CI skips.
+      - name: Run every port's test phase
+        # `port test` builds each port with its overlay dependencies, then runs
+        # its test.cmd (pytest). Testing each of the five exercises all the test
+        # phases the macports-ports PR CI skips. Continue on failure so one
+        # port's result doesn't mask the others.
         timeout-minutes: 90
-        run: sudo port -v test meta-package-manager
+        run: |
+          set -uo pipefail
+          fail=0
+          for port in py-extra-platforms py-cloup py-packageurl-python \
+                      py-click-extra meta-package-manager; do
+            echo "::group::port test ${port}"
+            sudo port -v test "${port}" || fail=1
+            echo "::endgroup::"
+          done
+          exit "${fail}"
 
       - name: Install and smoke-test the CLI
         timeout-minutes: 20

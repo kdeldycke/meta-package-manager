@@ -91,15 +91,17 @@ jobs:
 
       - name: Run every port's test phase
         # `port test` builds each port with its overlay dependencies, then runs
-        # its test.cmd (pytest). Testing each of the five exercises all the test
-        # phases the macports-ports PR CI skips. Continue on failure so one
-        # port's result doesn't mask the others.
+        # its test.cmd (pytest). The library ports set test.run inside the
+        # `if {${name} ne ${subport}}` guard, so their test phase lives on the
+        # versioned subport (py314-*), not the py-* stub, which no-ops. mpm is an
+        # application, tested directly. Continue on failure so one port's result
+        # doesn't mask the others.
         timeout-minutes: 90
         run: |
           set -uo pipefail
           fail=0
-          for port in py-extra-platforms py-cloup py-packageurl-python \
-                      py-click-extra meta-package-manager; do
+          for port in py314-extra-platforms py314-cloup py314-packageurl-python \
+                      py314-click-extra meta-package-manager; do
             echo "::group::port test ${port}"
             sudo port -v test "${port}" || fail=1
             echo "::endgroup::"

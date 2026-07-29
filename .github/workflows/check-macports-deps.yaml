@@ -55,17 +55,23 @@ jobs:
         run: sudo port -v selfupdate
 
       - name: Register the overlay as a local port source
-        # A file:// source ahead of the rsync tree makes the overlay's newer
-        # versions win; portindex builds the index MacPorts reads it through.
+        # Copy the overlay out of the runner's 0700 home into a world-readable
+        # path first: MacPorts privilege-drops to the `macports` user for build
+        # and test, which otherwise cannot read Portfiles under /Users/runner
+        # ("Permission denied" opening the Portfile). A file:// source ahead of
+        # the rsync tree makes the overlay's newer versions win.
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          overlay="${GITHUB_WORKSPACE}/packaging/macports"
+          overlay=/opt/local/var/macports/overlay
+          sudo mkdir -p "${overlay}"
+          sudo cp -R "${GITHUB_WORKSPACE}/packaging/macports/." "${overlay}/"
           conf=/opt/local/etc/macports/sources.conf
           { printf 'file://%s [nosync]\n' "${overlay}"; cat "${conf}"; } \
             | sudo tee "${conf}.new" >/dev/null
           sudo mv "${conf}.new" "${conf}"
-          (cd "${overlay}" && portindex)
+          (cd "${overlay}" && sudo portindex)
+          sudo chmod -R a+rX "${overlay}"
           # Confirm the overlay Portfile wins over the rsync tree.
           port file meta-package-manager
 

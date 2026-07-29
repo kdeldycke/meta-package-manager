@@ -42,4 +42,22 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-tabulate \
                     port:py${python.version}-wcmatch \
                     port:py${python.version}-wcwidth
+
+    depends_test-append \
+                    port:git \
+                    port:py${python.version}-hjson \
+                    port:py${python.version}-jsonschema \
+                    port:py${python.version}-myst-parser \
+                    port:py${python.version}-pygments \
+                    port:py${python.version}-pytest \
+                    port:py${python.version}-pytest-httpserver \
+                    port:py${python.version}-requests \
+                    port:py${python.version}-sphinx \
+                    port:py${python.version}-tomlkit \
+                    port:py${python.version}-xmltodict \
+                    port:py${python.version}-yaml
+
+    test.run            yes
+    test.cmd            ${python.bin} -m pytest
+    test.args           -m "not network"
 }

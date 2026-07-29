@@ -33,4 +33,11 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-setuptools_scm
     depends_lib-append \
                     port:py${python.version}-click
+
+    depends_test-append \
+                    port:py${python.version}-pytest
+
+    test.run            yes
+    test.cmd            ${python.bin} -m pytest
+    test.args           tests
 }

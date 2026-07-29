@@ -54,15 +54,7 @@ buildPythonPackage (finalAttrs: {
 
   nativeCheckInputs = [
     pytestCheckHook
-    # Optional libraries imported at module level by the test files:
-    # ``test_table.py`` needs hjson, tomlkit, xmltodict and yaml;
-    # ``test_pygments.py`` needs pygments; ``test_carapace.py`` gates its
-    # completion-spec validation tests behind jsonschema;
-    # ``test_config.py`` drives remote configuration loading through
-    # pytest-httpserver's ``httpserver`` fixture; ``tests/sphinx`` builds
-    # documents with sphinx and myst-parser and its matrix tests assemble
-    # synthetic git repositories; ``requests`` is imported at module level
-    # by tests whose network-marked cases are deselected below.
+    # Optional libraries imported at module level by the test files.
     gitMinimal
     hjson
     jsonschema

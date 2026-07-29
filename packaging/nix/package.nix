@@ -50,14 +50,6 @@ python3Packages.buildPythonApplication (finalAttrs: {
   # through the login shells it targets.
   ++ lib.optionals python3Packages.python.stdenv.hostPlatform.isDarwin [ zsh ];
 
-  # The hermetic unit layer runs in full. The integration layer (marked
-  # "integration": the manager, CLI and bar-plugin tests) spawns real package
-  # manager binaries and auto-skips when ``$HOME`` is ``/homeless-shelter``, the
-  # hermetic-builder convention shared by Guix and Nix. The repo-maintenance sync
-  # guards auto-skip too, since ``fetchFromGitHub`` yields no ``.git`` directory,
-  # so no test needs disabling by hand. See
-  # https://kdeldycke.github.io/meta-package-manager/packaging.html
-
   pythonImportsCheck = [ "meta_package_manager" ];
 
   meta = {

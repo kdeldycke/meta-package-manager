@@ -35,7 +35,6 @@
     (build-system pyproject-build-system)
     ;; Upstream builds with uv-build, which is not yet packaged for Guix; fall
     ;; back to setuptools.
-    ;; See https://kdeldycke.github.io/meta-package-manager/packaging.html
     (arguments
      (list #:build-backend "setuptools.build_meta"))
     (native-inputs

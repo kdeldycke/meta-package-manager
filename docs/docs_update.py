@@ -16,28 +16,27 @@
 
 """Regenerate the committed, pool-derived artifacts that Sphinx does not own.
 
-Called by repomatic's `update-docs` job. Writes the tables and diagrams checked
-into `readme.md` (GitHub renders it as static markdown), the pool-derived blocks
-of `pyproject.toml` (the `[project]` keywords, the label registry and the
-labeller rules), and the stub *file set* of `docs/managers/` (one `<id>.md` per
-pool manager, created and deleted as managers join or leave the pool).
+Called by repomatic's `update-docs` job. Writes the pool-derived blocks of
+`pyproject.toml` (the `[project]` keywords, the label registry and the labeller
+rules), the operation-matrix platform footnotes spliced into `readme.md`, and the
+stub *file set* of `docs/managers/` (one `<id>.md` per pool manager, created and
+deleted as managers join or leave the pool).
 
 Everything that renders live at Sphinx build time -- the benchmark, augmentations
 and per-manager tables, and the `<!-- matrix ... -->` compatibility blocks -- is
 produced by the generators in {mod}`meta_package_manager._docs` and needs no
-regeneration step here.
+regeneration step here. The readme's Sankey diagram and operation matrix call
+those same generators from `<!-- mirror-src -->` blocks, refreshed by
+`click-extra refresh-directives` in the same `update-docs` job.
 """
 
 from __future__ import annotations
-
-from pathlib import Path
 
 import tomlkit
 
 from meta_package_manager._docs import (
     PROJECT_ROOT,
     manager_page_stub,
-    managers_sankey,
     operation_matrix,
 )
 from meta_package_manager.labels import (
@@ -112,44 +111,6 @@ for free from the pool: {func}`update_keywords` merges both sets into
 `pyproject.toml`. When a new manager brings a well-known ecosystem name that
 differs from its ID (like `gh-ext` and `github cli`), add the alias here.
 """
-
-
-def replace_content(
-    filepath: Path,
-    new_content: str,
-    start_tag: str,
-    end_tag: str | None = None,
-) -> None:
-    """Replace in a file the content between start and end tags.
-
-    The `new_content` payload is wrapped with a blank line on both sides so
-    the resulting region is format-stable through `mdformat`. `mdformat`
-    treats the surrounding `<!-- ... -->` markers as block-level HTML and
-    inserts blank lines around them on every pass: emitting them up front
-    avoids a generator/formatter ping-pong on every CI run.
-    """
-    filepath = filepath.resolve()
-    assert filepath.exists(), f"File {filepath} does not exist."
-    assert filepath.is_file(), f"File {filepath} is not a file."
-
-    orig_content = filepath.read_text(encoding="UTF-8")
-
-    assert start_tag in orig_content, (
-        f"Start tag {start_tag!r} not found in {filepath}."
-    )
-    pre_content, table_start = orig_content.split(start_tag, 1)
-
-    if end_tag:
-        _, post_content = table_start.split(end_tag, 1)
-    else:
-        end_tag = ""
-        post_content = ""
-
-    wrapped = f"\n\n{new_content.strip()}\n\n" if new_content.strip() else "\n\n"
-    filepath.write_text(
-        f"{pre_content}{start_tag}{wrapped}{end_tag}{post_content}",
-        encoding="UTF-8",
-    )
 
 
 def _string_array(values: tuple[str, ...], multiline: bool = False):
@@ -259,30 +220,20 @@ def update_keywords() -> None:
     pyproject.write_text(tomlkit.dumps(doc), encoding="UTF-8")
 
 
-def update_readme() -> None:
-    """Update `readme.md` with implementation table for each manager we support."""
+def update_readme_footnotes() -> None:
+    """Splice the operation-matrix platform footnotes into `readme.md`.
+
+    The manager Sankey diagram and the operation matrix are `<!-- mirror-src -->`
+    blocks refreshed by `click-extra refresh-directives`, so this owns only the
+    footnote definitions, which cannot use that mechanism: `mdformat-footnote`
+    strips an HTML comment placed on its own line after a footnote definition
+    (https://github.com/executablebooks/mdformat-footnote/issues/11), so the
+    closing marker is wedged against the tail of the last footnote (no leading
+    newline) and the region is spliced by hand.
+    """
     readme = PROJECT_ROOT / "readme.md"
+    _, footnotes = operation_matrix()
 
-    replace_content(
-        readme,
-        managers_sankey(),
-        "<!-- managers-sankey-start -->",
-        "<!-- managers-sankey-end -->",
-    )
-
-    matrix, footnotes = operation_matrix()
-    replace_content(
-        readme,
-        matrix,
-        "<!-- operation-matrix-start -->",
-        "<!-- operation-matrix-end -->",
-    )
-    # mdformat-footnote strips HTML comments after footnote definitions
-    # (https://github.com/executablebooks/mdformat-footnote/issues/11), so the
-    # end tag has to be wedged against the tail of the last footnote line (no
-    # leading newline) to survive a format pass. That breaks the trailing-blank
-    # convention of replace_content(), so the footnote section is written
-    # inline.
     start_tag = "<!-- operation-footnotes-start -->\n\n"
     end_tag = "<!-- operation-footnotes-end -->\n"
     orig_content = readme.read_text(encoding="UTF-8")
@@ -322,4 +273,4 @@ if __name__ == "__main__":
     update_keywords()
     update_labels()
     update_manager_stubs()
-    update_readme()
+    update_readme_footnotes()

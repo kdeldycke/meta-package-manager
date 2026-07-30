@@ -584,3 +584,26 @@ def test_matrix_blocks_in_sync():
         check=True,
     )
     assert not stale
+
+
+def test_mirror_blocks_in_sync():
+    """Check the `<!-- mirror-src -->` and `:mirror:` blocks embedded in the docs
+    and readme match a fresh regeneration from their generators.
+
+    Drift here means a generator's output changed (a manager joined or left the
+    pool, a class moved so the benchmark source-line anchors shifted) before
+    repomatic's `update-docs` job refreshed the embedded blocks with
+    `click-extra refresh-directives`.
+
+    Skipped when click-extra's `[sphinx]` extra (pulled by the `docs`
+    dependency group) is missing, as in the hermetic unit-test environment.
+    """
+    try:
+        from click_extra.sphinx.python import update_mirror_blocks
+    except ImportError:
+        pytest.skip("needs the docs dependency group (click-extra[sphinx])")
+    stale = update_mirror_blocks(
+        (PROJECT_ROOT / "docs", PROJECT_ROOT / "readme.md"),
+        check=True,
+    )
+    assert not stale

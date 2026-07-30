@@ -190,11 +190,19 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.6.1 is the floor mpm targets. It ships the test suite in the
-  # PyPI sdist (so downstream packagers build and test without a Git checkout),
-  # a setuptools package-data shim, and a fix for the source line reported in
-  # `click:run` directive errors (mpm drives that directive in
-  # docs/configuration.md). The 8.6.0 series shipped OperationTrail, the batch
+  # click-extra 8.7.0 is the floor mpm targets. It ships the `<!-- mirror-src -->`
+  # comment form of the `python:render` `:mirror:` block, where the generator
+  # Python hides inside an HTML comment while its output still renders on GitHub
+  # and PyPI: the readme's manager Sankey diagram and operation matrix now ride
+  # it, refreshed offline by `click-extra refresh-directives` instead of baked in
+  # by docs/docs_update.py. It also scopes the strict configuration check to
+  # mpm's own section when reading a shared `pyproject.toml`, and fixes
+  # `DO_NOT_TRACK` so a truthy value forces telemetry off instead of feeding the
+  # flag verbatim. The 8.6.1 release shipped the test suite in the PyPI sdist (so
+  # downstream packagers build and test without a Git checkout), a setuptools
+  # package-data shim, and a fix for the source line reported in `click:run`
+  # directive errors (mpm drives that directive in docs/configuration.md). The
+  # 8.6.0 series shipped OperationTrail, the batch
   # ✓/✗ trail upstreamed from mpm's own dispatch layer, which
   # meta_package_manager.dispatch now subclasses (with the trail_glyph /
   # trail_line atoms), plus the mirror-block fix making `click-extra
@@ -232,8 +240,8 @@ dependencies = [
   # the split click_extra.highlight module, the ConfigValidator /
   # ValidationError import move to click_extra.config, print_table()'s
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
-  # default; 8.6.1 covers them all.
-  "click-extra>=8.6.1",
+  # default; 8.7.0 covers them all.
+  "click-extra>=8.7.0",
   # extra-platforms 13.5.0 renamed the GUIX_BUILD trait to HERMETIC_BUILD and
   # made skip_hermetic_build the primary marker mpm's test suite consumes,
   # deprecating the skip_guix_build alias; 13.5.1 is the current release. It also
@@ -409,7 +417,7 @@ exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-07-28T00:00:00Z", extra-platforms = "2026-07-28T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-07-31T00:00:00Z", extra-platforms = "2026-07-28T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

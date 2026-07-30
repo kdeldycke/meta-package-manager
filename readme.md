@@ -72,7 +72,11 @@ $ uvx meta-package-manager
 
 One CLI to rule them all:
 
-<!-- managers-sankey-start -->
+<!-- mirror-src
+from meta_package_manager._docs import managers_sankey
+
+print(managers_sankey())
+-->
 
 ```mermaid
 ---
@@ -155,11 +159,15 @@ Meta Package Manager,zerobrew,1
 Meta Package Manager,zypper,1
 ```
 
-<!-- managers-sankey-end -->
+<!-- mirror-src-end -->
 
 ## Metadata and operations
 
-<!-- operation-matrix-start -->
+<!-- mirror-src
+from meta_package_manager._docs import operation_matrix
+
+print(operation_matrix()[0])
+-->
 
 | Package manager                                                                                                                                                  | Version          | Cooldown | BSD[^bsd] | Linux[^linux] | macOS | Unix[^unix] | Windows | `installed` | `outdated` | `orphans` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` | `doctor` |
 | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------- | :------: | :-------: | :-----------: | :---: | :---------: | :-----: | :---------: | :--------: | :-------: | :------: | :-------: | :-------: | :-----------: | :------: | :----: | :-------: | :------: |
@@ -237,7 +245,7 @@ Meta Package Manager,zypper,1
 | [`zerobrew`](https://kdeldycke.github.io/meta-package-manager/managers/zerobrew.html)                                                                            | >=0.3.0          |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`zypper`](https://kdeldycke.github.io/meta-package-manager/managers/zypper.html)                                                                                | >=1.14.0         |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 
-<!-- operation-matrix-end -->
+<!-- mirror-src-end -->
 
 > [!NOTE]
 > If your favorite manager is missing or does not support an operation, you can influence its implementation: [open a ticket to document its output](https://github.com/kdeldycke/meta-package-manager/issues/new?assignees=&labels=%F0%9F%8E%81+feature+request&template=new-package-manager.yaml) or [read the contribution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html) and submit a pull request.

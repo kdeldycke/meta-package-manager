@@ -355,12 +355,13 @@ docs = [
   "click-extra[sphinx]",
   # furo 2025.9.25 is a recent CalVer release supporting Sphinx 8.
   "furo>=2025.9.25",
-  # myst-parser 4.0 targets Sphinx 8 / Python 3.10+ and ships the attrs_block,
-  # attrs_inline and colon_fence extensions enabled in docs/conf.py. The floor
-  # stays at 4 so the lock still resolves on Python 3.10 (where uv caps at
-  # 4.0.1); the `alert` extension also enabled in conf.py needs 5.1, which uv
-  # resolves on 3.11+, and the docs build runs on >= 3.12.
-  "myst-parser>=4",
+  # attrs_block, attrs_inline and colon_fence (enabled in docs/conf.py) ship in
+  # myst-parser 4.0+; the `alert` extension also enabled there needs 5.1, which
+  # requires Python 3.11+. Split the floor by marker: >= 5.1 where the docs
+  # actually build (3.11+), >= 4 on 3.10 so the lock still resolves (uv caps
+  # myst-parser at 4.0.1 there; the docs build itself runs on 3.12+).
+  "myst-parser>=4; python_version < '3.11'",
+  "myst-parser>=5.1; python_version >= '3.11'",
   # Sphinx 8.0.0 is the first version to drop Python 3.9, matching requires-python.
   "sphinx>=8",
   # sphinx-autodoc-typehints 2.4.0 is the first release aligned to Python >= 3.10.
@@ -372,6 +373,10 @@ docs = [
   "sphinx-datatables>=1",
   # sphinx-design 0.6 introduced the card/grid/tab directive syntax used in docs.
   "sphinx-design>=0.6",
+  # sphinxcontrib-jquery is loaded explicitly in docs/conf.py (sphinx-datatables
+  # activates it too late to register jquery.js on its own); declare it so the
+  # build never relies on it arriving only transitively via sphinx-datatables.
+  "sphinxcontrib-jquery>=4",
   # sphinxcontrib-mermaid 1.2.3 fixed mermaid_d3_zoom support, enabled in docs/conf.py.
   "sphinxcontrib-mermaid>=1.2.3",
   # sphinxext-opengraph 0.13 stabilized OpenGraph metadata generation for Sphinx 8+.

@@ -1,7 +1,7 @@
 # {octicon}`package` Linux fwupd
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("fwupd"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("fwupd"))
 ## What `mpm` adds to `fwupd`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("fwupd"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("fwupd"))
 ## Your `fwupd` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("fwupd"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("fwupd"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("fwupd"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("fwupd"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("fwupd"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("fwupd"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("fwupd"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("fwupd"))
 ## Selecting and configuring `fwupd`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("fwupd"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("fwupd"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("fwupd"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("fwupd"))
 ## How `mpm` drives `fwupd`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("fwupd"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("fwupd"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("fwupd"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("fwupd"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("fwupd"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("fwupd"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("fwupd"))
 ```

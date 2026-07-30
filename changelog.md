@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [docs] Add a tight-cropped `favicon.svg` and a social-card `banner-social.svg` with light and dark PNG exports, wire them into the Sphinx docs as the browser-tab icon and OpenGraph `og:image`, re-export the square and banner logos under the `-light`/`-dark` naming scheme, and make the readme banner adapt to GitHub's dark mode through a `<picture>` element.
 - [volta] Add Volta package manager with `installed`, `install`, `upgrade` and `remove` support, flagged unmaintained (upstream retired in November 2025 in favor of `mise`). `pkg:npm/` purls now also resolve to it. Addresses [#1995](https://github.com/kdeldycke/meta-package-manager/issues/1995).
 
 ## [`7.4.1` (2026-07-28)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.0...v7.4.1)

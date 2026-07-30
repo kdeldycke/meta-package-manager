@@ -186,7 +186,7 @@ def test_display_blocks_align_with_raw():
     """The compiled harvest the docs render and the raw harvest this test
     replays must agree on structure.
 
-    `docs/docs_update.py` selects reference-trace blocks by (member, index)
+    `meta_package_manager/_docs.py` selects reference-trace blocks by (member, index)
     from {func}`class_display_blocks`, while this test replays the same blocks
     from {func}`class_blocks`. Their per-member block counts must match, or an
     index would point at a different block on the two sides.

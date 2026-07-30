@@ -1,7 +1,7 @@
 # {octicon}`package` OpenBSD pkg tools
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("pkg-tools"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("pkg-tools"))
 ## What `mpm` adds to `pkg-tools`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("pkg-tools"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("pkg-tools"))
 ## Your `pkg-tools` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("pkg-tools"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("pkg-tools"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("pkg-tools"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("pkg-tools"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("pkg-tools"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("pkg-tools"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("pkg-tools"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("pkg-tools"))
 ## Selecting and configuring `pkg-tools`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("pkg-tools"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("pkg-tools"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("pkg-tools"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("pkg-tools"))
 ## How `mpm` drives `pkg-tools`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("pkg-tools"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("pkg-tools"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("pkg-tools"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("pkg-tools"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("pkg-tools"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("pkg-tools"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("pkg-tools"))
 ```

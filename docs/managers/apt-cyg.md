@@ -1,7 +1,7 @@
 # {octicon}`package` apt-cyg
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("apt-cyg"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("apt-cyg"))
 ## What `mpm` adds to `apt-cyg`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("apt-cyg"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("apt-cyg"))
 ## Your `apt-cyg` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("apt-cyg"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("apt-cyg"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("apt-cyg"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("apt-cyg"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("apt-cyg"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("apt-cyg"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("apt-cyg"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("apt-cyg"))
 ## Selecting and configuring `apt-cyg`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("apt-cyg"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("apt-cyg"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("apt-cyg"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("apt-cyg"))
 ## How `mpm` drives `apt-cyg`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("apt-cyg"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("apt-cyg"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("apt-cyg"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("apt-cyg"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("apt-cyg"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("apt-cyg"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("apt-cyg"))
 ```

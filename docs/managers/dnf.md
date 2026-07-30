@@ -1,7 +1,7 @@
 # {octicon}`package` Fedora DNF
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("dnf"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("dnf"))
 ## What `mpm` adds to `dnf`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("dnf"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("dnf"))
 ## Your `dnf` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("dnf"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("dnf"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("dnf"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("dnf"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("dnf"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("dnf"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("dnf"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("dnf"))
 ## Selecting and configuring `dnf`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("dnf"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("dnf"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("dnf"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("dnf"))
 ## How `mpm` drives `dnf`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("dnf"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("dnf"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("dnf"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("dnf"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("dnf"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("dnf"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("dnf"))
 ```

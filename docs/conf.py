@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import tomllib  # type: ignore[import-not-found]  # stdlib >=3.11; docs require >=3.12.
 
 project_path = Path(__file__).parent.parent.resolve()
-
-# Make this docs directory importable so the `{python:render}` block in
-# benchmark.md can call the table generator in docs_update.py at build time.
-sys.path.insert(0, str(Path(__file__).parent))
 
 # Fetch general information about the project from pyproject.toml.
 toml_path = project_path / "pyproject.toml"
@@ -176,14 +171,20 @@ autosectionlabel_prefix_document = True
 html_theme = "furo"
 html_title = project
 html_logo = "assets/logo-square.svg"
-# Browser-tab icon. Points at the existing square icon for now; run
-# /brand-assets to generate the canonical favicon.svg and the social banner
-# that ogp_image wants.
-html_favicon = "assets/icon.svg"
+# Browser-tab icon: the icon-only, tight-cropped favicon (no wordmark).
+html_favicon = "assets/favicon.svg"
 # Absolute base URL for OpenGraph. sphinxext.opengraph resolves og:image
 # against it, so social crawlers can follow the image instead of a relative
 # path they cannot resolve.
 ogp_site_url = f"https://kdeldycke.github.io/{project_id}/"
+# Social-card image (og:image), served from the GitHub raw host like the readme
+# banner and screenshots: docs/assets/ is not copied verbatim into the built
+# site, so a site-relative path would 404 for crawlers.
+ogp_image = (
+    "https://raw.githubusercontent.com/kdeldycke/"
+    f"{project_id}/main/docs/assets/banner-social-light.png"
+)
+ogp_image_alt = project
 html_theme_options = {
     "sidebar_hide_name": True,
     # Activates edit links.

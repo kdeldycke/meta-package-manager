@@ -1,7 +1,7 @@
 # {octicon}`package` RubyGems
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("gem"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("gem"))
 ## What `mpm` adds to `gem`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("gem"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("gem"))
 ## Your `gem` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("gem"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("gem"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("gem"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("gem"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("gem"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("gem"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("gem"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("gem"))
 ## Selecting and configuring `gem`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("gem"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("gem"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("gem"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("gem"))
 ## How `mpm` drives `gem`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("gem"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("gem"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("gem"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("gem"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("gem"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("gem"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("gem"))
 ```

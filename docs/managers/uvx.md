@@ -1,7 +1,7 @@
 # {octicon}`package` Python uvx
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("uvx"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("uvx"))
 ## What `mpm` adds to `uvx`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("uvx"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("uvx"))
 ## Your `uvx` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("uvx"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("uvx"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("uvx"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("uvx"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("uvx"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("uvx"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("uvx"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("uvx"))
 ## Selecting and configuring `uvx`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("uvx"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("uvx"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("uvx"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("uvx"))
 ## How `mpm` drives `uvx`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("uvx"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("uvx"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("uvx"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("uvx"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("uvx"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("uvx"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("uvx"))
 ```

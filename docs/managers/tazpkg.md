@@ -1,7 +1,7 @@
 # {octicon}`package` TazPkg
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("tazpkg"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("tazpkg"))
 ## What `mpm` adds to `tazpkg`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("tazpkg"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("tazpkg"))
 ## Your `tazpkg` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("tazpkg"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("tazpkg"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("tazpkg"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("tazpkg"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("tazpkg"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("tazpkg"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("tazpkg"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("tazpkg"))
 ## Selecting and configuring `tazpkg`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("tazpkg"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("tazpkg"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("tazpkg"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("tazpkg"))
 ## How `mpm` drives `tazpkg`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("tazpkg"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("tazpkg"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("tazpkg"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("tazpkg"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("tazpkg"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("tazpkg"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("tazpkg"))
 ```

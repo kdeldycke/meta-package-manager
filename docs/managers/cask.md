@@ -1,7 +1,7 @@
 # {octicon}`package` Homebrew Cask
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("cask"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("cask"))
 ## What `mpm` adds to `cask`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("cask"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("cask"))
 ## Your `cask` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("cask"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("cask"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("cask"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("cask"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("cask"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("cask"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("cask"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("cask"))
 ## Selecting and configuring `cask`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("cask"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("cask"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("cask"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("cask"))
 ## How `mpm` drives `cask`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("cask"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("cask"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("cask"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("cask"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("cask"))
 ```

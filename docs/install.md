@@ -247,7 +247,7 @@ Binaries are compiled at each release, so you can skip the installation process 
 This is the preferred way of testing `mpm` without polluting your machine. They also offer the possibility of running the CLI on older systems not supporting the minimal Python version required by `mpm`.
 
 ```{python:render}
-from docs_update import binaries_download_table
+from meta_package_manager._docs import binaries_download_table
 
 print(binaries_download_table())
 ```

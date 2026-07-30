@@ -1,7 +1,7 @@
 # {octicon}`package` Volta
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("volta"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("volta"))
 ## What `mpm` adds to `volta`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("volta"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("volta"))
 ## Your `volta` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("volta"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("volta"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("volta"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("volta"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("volta"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("volta"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("volta"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("volta"))
 ## Selecting and configuring `volta`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("volta"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("volta"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("volta"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("volta"))
 ## How `mpm` drives `volta`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("volta"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("volta"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("volta"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("volta"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("volta"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("volta"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("volta"))
 ```

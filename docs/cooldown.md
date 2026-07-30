@@ -41,7 +41,7 @@ The choice to delegate to each manager's own resolver rather than reimplement th
 
 ## Supported managers
 
-<!-- Each manager's documentation page (docs/managers/) reuses its row below, extracted by manager_cooldown() in docs/docs_update.py: keep the mpm id column in sync with the pool. -->
+<!-- Each manager's documentation page (docs/managers/) reuses its row below, extracted by manager_cooldown() in meta_package_manager/_docs.py: keep the mpm id column in sync with the pool. -->
 
 The table below is the source of truth for which managers `mpm` can gate today and the state of the upstream effort everywhere else. Statuses:
 

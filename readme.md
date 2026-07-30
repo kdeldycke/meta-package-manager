@@ -1,6 +1,10 @@
 <p align="center">
   <a href="https://github.com/kdeldycke/meta-package-manager/">
-    <img src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/logo-banner.svg" alt="Meta Package Manager">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/logo-banner-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/logo-banner-light.png">
+      <img src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/logo-banner-light.png" alt="Meta Package Manager">
+    </picture>
   </a>
 </p>
 

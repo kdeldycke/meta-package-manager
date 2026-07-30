@@ -1,7 +1,7 @@
 # {octicon}`package` deb-get
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("deb-get"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("deb-get"))
 ## What `mpm` adds to `deb-get`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("deb-get"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("deb-get"))
 ## Your `deb-get` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("deb-get"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("deb-get"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("deb-get"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("deb-get"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("deb-get"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("deb-get"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("deb-get"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("deb-get"))
 ## Selecting and configuring `deb-get`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("deb-get"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("deb-get"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("deb-get"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("deb-get"))
 ## How `mpm` drives `deb-get`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("deb-get"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("deb-get"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("deb-get"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("deb-get"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("deb-get"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("deb-get"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("deb-get"))
 ```

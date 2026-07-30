@@ -1,7 +1,7 @@
 # {octicon}`package` Node pnpm
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("pnpm"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("pnpm"))
 ## What `mpm` adds to `pnpm`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("pnpm"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("pnpm"))
 ## Your `pnpm` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("pnpm"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("pnpm"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("pnpm"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("pnpm"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("pnpm"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("pnpm"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("pnpm"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("pnpm"))
 ## Selecting and configuring `pnpm`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("pnpm"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("pnpm"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("pnpm"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("pnpm"))
 ## How `mpm` drives `pnpm`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("pnpm"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("pnpm"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("pnpm"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("pnpm"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("pnpm"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("pnpm"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("pnpm"))
 ```

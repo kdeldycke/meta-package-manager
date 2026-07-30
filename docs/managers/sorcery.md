@@ -1,7 +1,7 @@
 # {octicon}`package` Sorcery
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("sorcery"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("sorcery"))
 ## What `mpm` adds to `sorcery`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("sorcery"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("sorcery"))
 ## Your `sorcery` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("sorcery"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("sorcery"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("sorcery"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("sorcery"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("sorcery"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("sorcery"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("sorcery"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("sorcery"))
 ## Selecting and configuring `sorcery`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("sorcery"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("sorcery"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("sorcery"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("sorcery"))
 ## How `mpm` drives `sorcery`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("sorcery"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("sorcery"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("sorcery"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("sorcery"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("sorcery"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("sorcery"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("sorcery"))
 ```

@@ -89,7 +89,7 @@ but [there might be a greater need for such tools](augmentations.md) out there. 
 
 ```{python:render}
 :mirror:
-from docs_update import benchmark_managers_table
+from meta_package_manager._docs import benchmark_managers_table
 
 print(benchmark_managers_table())
 ```

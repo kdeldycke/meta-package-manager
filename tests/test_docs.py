@@ -26,6 +26,7 @@ import pytest
 from extra_platforms import Group, extract_members
 from yaml import Loader, load, safe_load
 
+from meta_package_manager import _docs
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.docstring_corpus import literal_blocks
 from meta_package_manager.labels import (
@@ -281,14 +282,14 @@ def test_benchmark_yaml_well_formed():
     data = safe_load(yaml_path.read_text(encoding="utf-8"))
     assert set(data) == {"managers", "homepages", "coarse_support", "refused"}
 
-    competitors = set(docs_update.BENCHMARK_COMPETITORS)
+    competitors = set(_docs.BENCHMARK_COMPETITORS)
     for mid, flags in data["managers"].items():
         assert mid == mid.lower()
         assert isinstance(flags, list)
         # Flags are valid competitor names, unique, and sorted in column order.
         assert set(flags).issubset(competitors)
         assert len(flags) == len(set(flags))
-        assert flags == sorted(flags, key=docs_update.BENCHMARK_COMPETITORS.index)
+        assert flags == sorted(flags, key=_docs.BENCHMARK_COMPETITORS.index)
 
     # Homepages mapping: lowercase IDs pointing to HTTPS URLs, sorted
     # alphabetically.
@@ -411,13 +412,13 @@ def test_benchmark_table_renders():
     against: this test only guards the generator against crashes and structural
     regressions (a broken YAML entry, a manager without a source file).
     """
-    table = docs_update.benchmark_managers_table()
+    table = _docs.benchmark_managers_table()
     lines = table.splitlines()
     assert len(lines) > 2
     header = lines[0]
     assert header.startswith("| Manager")
     assert "`mpm`" in header
-    for competitor in docs_update.BENCHMARK_COMPETITORS:
+    for competitor in _docs.BENCHMARK_COMPETITORS:
         assert f"`{competitor}`" in header
     # Every pool manager must land one row backed by a source link, its
     # identifier linking to its dedicated documentation page.
@@ -434,7 +435,7 @@ def test_binaries_download_table_renders():
     against: this test only guards the generator against crashes and drift in
     the `docs/assets/binaries.csv` cell markup it parses.
     """
-    table = docs_update.binaries_download_table()
+    table = _docs.binaries_download_table()
     lines = table.splitlines()
     assert len(lines) == 5
     assert lines[0].startswith("| Platform")
@@ -455,7 +456,7 @@ def test_augmentations_table_renders():
     against: this test only guards the generator against crashes and structural
     regressions.
     """
-    table = docs_update.augmentations_table()
+    table = _docs.augmentations_table()
     lines = table.splitlines()
     assert len(lines) > 2
     assert lines[0].startswith("| Manager")
@@ -485,7 +486,7 @@ def test_manager_stubs_in_sync():
     stubs = {path.stem: path for path in stub_dir.glob("*.md")}
     assert set(stubs) == set(pool.all_manager_ids)
     for mid, path in stubs.items():
-        assert path.read_text(encoding="utf-8") == docs_update.manager_page_stub(mid)
+        assert path.read_text(encoding="utf-8") == _docs.manager_page_stub(mid)
 
 
 @all_managers
@@ -501,8 +502,8 @@ def test_manager_page_sections_render(manager):
     """
     heading = re.compile(r"^#{1,6} ", re.MULTILINE)
     fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
-    for _title, func_name in docs_update.MANAGER_SECTIONS:
-        output = getattr(docs_update, func_name)(manager.id)
+    for _title, func_name in _docs.MANAGER_SECTIONS:
+        output = getattr(_docs, func_name)(manager.id)
         # Two sections are omitted for some managers (a section with no output is
         # dropped from the stub by manager_page_stub): reference traces for a
         # manager documenting no literal output samples, and the Rosetta table
@@ -514,11 +515,11 @@ def test_manager_page_sections_render(manager):
         # only the prose between them must stay heading-free.
         assert not heading.search(fence.sub("", output))
 
-    assert manager.homepage_url in docs_update.manager_intro(manager.id)
+    assert manager.homepage_url in _docs.manager_intro(manager.id)
     # Header, separator, then one row per operation.
-    operations = docs_update.manager_operations(manager.id)
+    operations = _docs.manager_operations(manager.id)
     assert len(operations.splitlines()) == 2 + len(Operations)
-    selection = docs_update.manager_selection(manager.id)
+    selection = _docs.manager_selection(manager.id)
     assert f"--no-{manager.id}" in selection
     assert f"[mpm.managers.{manager.id}]" in selection
 
@@ -536,7 +537,7 @@ def test_manager_traces_render_literal_blocks():
     for mid, manager in pool.items():
         if getattr(manager, "definition_source", None):
             continue
-        traces = docs_update.manager_traces(mid)
+        traces = _docs.manager_traces(mid)
         blocks = literal_blocks(type(manager), ("installed", "outdated", "orphans"))
         assert bool(traces) == bool(blocks), mid
         for _member, _index, block in blocks:
@@ -551,7 +552,7 @@ def test_managers_index_table_renders():
     block in `docs/managers.md`, so there is no checked-in copy to compare
     against.
     """
-    table = docs_update.managers_index_table()
+    table = _docs.managers_index_table()
     lines = table.splitlines()
     assert lines[0] == f"`mpm` can drive {len(pool)} package managers:"
     assert lines[2].startswith("| Manager")

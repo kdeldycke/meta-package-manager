@@ -8,7 +8,7 @@ Each ✅ below is a capability `mpm` synthesizes for a manager that does not pro
 
 ```{python:render}
 :mirror:
-from docs_update import augmentations_table
+from meta_package_manager._docs import augmentations_table
 
 print(augmentations_table())
 ```

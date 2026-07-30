@@ -1,7 +1,7 @@
 # {octicon}`package` FreeBSD Ports Collection
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("ports"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("ports"))
 ## What `mpm` adds to `ports`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("ports"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("ports"))
 ## Your `ports` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("ports"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("ports"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("ports"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("ports"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("ports"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("ports"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("ports"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("ports"))
 ## Selecting and configuring `ports`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("ports"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("ports"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("ports"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("ports"))
 ## How `mpm` drives `ports`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("ports"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("ports"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("ports"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("ports"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("ports"))
 ```
@@ -89,7 +89,7 @@ print(manager_cooldown("ports"))
 ## Reference traces
 
 ```{python:render}
-from docs_update import manager_traces
+from meta_package_manager._docs import manager_traces
 
 print(manager_traces("ports"))
 ```

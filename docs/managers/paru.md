@@ -1,7 +1,7 @@
 # {octicon}`package` Arch Linux paru
 
 ```{python:render}
-from docs_update import manager_intro
+from meta_package_manager._docs import manager_intro
 
 print(manager_intro("paru"))
 ```
@@ -9,7 +9,7 @@ print(manager_intro("paru"))
 ## What `mpm` adds to `paru`
 
 ```{python:render}
-from docs_update import manager_augments
+from meta_package_manager._docs import manager_augments
 
 print(manager_augments("paru"))
 ```
@@ -17,7 +17,7 @@ print(manager_augments("paru"))
 ## Your `paru` commands, in `mpm`
 
 ```{python:render}
-from docs_update import manager_rosetta
+from meta_package_manager._docs import manager_rosetta
 
 print(manager_rosetta("paru"))
 ```
@@ -25,7 +25,7 @@ print(manager_rosetta("paru"))
 ## Platforms
 
 ```{python:render}
-from docs_update import manager_platforms
+from meta_package_manager._docs import manager_platforms
 
 print(manager_platforms("paru"))
 ```
@@ -33,7 +33,7 @@ print(manager_platforms("paru"))
 ## Operations
 
 ```{python:render}
-from docs_update import manager_operations
+from meta_package_manager._docs import manager_operations
 
 print(manager_operations("paru"))
 ```
@@ -41,7 +41,7 @@ print(manager_operations("paru"))
 ## Ecosystem
 
 ```{python:render}
-from docs_update import manager_ecosystem
+from meta_package_manager._docs import manager_ecosystem
 
 print(manager_ecosystem("paru"))
 ```
@@ -49,7 +49,7 @@ print(manager_ecosystem("paru"))
 ## Selecting and configuring `paru`
 
 ```{python:render}
-from docs_update import manager_selection
+from meta_package_manager._docs import manager_selection
 
 print(manager_selection("paru"))
 ```
@@ -57,7 +57,7 @@ print(manager_selection("paru"))
 ## Recipes
 
 ```{python:render}
-from docs_update import manager_recipes
+from meta_package_manager._docs import manager_recipes
 
 print(manager_recipes("paru"))
 ```
@@ -65,7 +65,7 @@ print(manager_recipes("paru"))
 ## How `mpm` drives `paru`
 
 ```{python:render}
-from docs_update import manager_cli
+from meta_package_manager._docs import manager_cli
 
 print(manager_cli("paru"))
 ```
@@ -73,7 +73,7 @@ print(manager_cli("paru"))
 ## Privilege escalation
 
 ```{python:render}
-from docs_update import manager_sudo
+from meta_package_manager._docs import manager_sudo
 
 print(manager_sudo("paru"))
 ```
@@ -81,7 +81,7 @@ print(manager_sudo("paru"))
 ## Cooldown
 
 ```{python:render}
-from docs_update import manager_cooldown
+from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("paru"))
 ```

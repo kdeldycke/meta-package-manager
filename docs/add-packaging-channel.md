@@ -1,4 +1,4 @@
-# {octicon}`package` Add a packaging channel
+# {octicon}`git-merge` Add a packaging channel
 
 A *channel* is a route by which users install `mpm`: a Linux distribution's package manager, a language package manager, or a cross-distribution installer. The [packaging page](packaging.md) catalogs the ones already wired up. This page is the playbook for adding another.
 

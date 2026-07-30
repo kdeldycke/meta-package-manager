@@ -1,5 +1,9 @@
 # {octicon}`download` Installation
 
+```{sidebar}
+[![Packaging status](https://repology.org/badge/vertical-allrepos/meta-package-manager.svg)](https://repology.org/project/meta-package-manager/versions)
+```
+
 Meta Package Manager is [distributed on PyPI](https://pypi.org/project/meta-package-manager/).
 
 So you can install the latest stable release [with `uv`](https://docs.astral.sh/uv/):

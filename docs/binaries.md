@@ -1,4 +1,4 @@
-# Binaries
+# {octicon}`desktop-download` Binaries
 
 All standalone executables published by this repository, one row per binary, newest release first. The version links to its GitHub release, the platform to the direct binary download, and the VirusTotal cell to the file's public analysis.
 

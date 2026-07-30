@@ -27,15 +27,15 @@ project = " ".join(word.title() for word in project_id.split("-"))
 # Addons.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.todo",
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
     "sphinx.ext.viewcode",
     # Adds a copy button to code blocks.
     "sphinx_copybutton",
     "sphinx_design",
     "sphinxext.opengraph",
     "myst_parser",
-    "sphinx.ext.autosectionlabel",
     # Docstrings are written in MyST markdown, transparently converted back to
     # reST at build time so sphinx.ext.autodoc and sphinx_autodoc_typehints
     # keep working unmodified. Must be listed before sphinx_autodoc_typehints:
@@ -53,16 +53,21 @@ extensions = [
 
 # https://myst-parser.readthedocs.io/en/latest/syntax/optional.html
 myst_enable_extensions = [
+    # Render GitHub-style alerts (`> [!NOTE]`, `> [!WARNING]`, ...) as
+    # admonitions. Native to myst-parser >= 5.1, which click-extra's converter
+    # defers to from that version on; uv resolves 5.1 on Python 3.11+ and the
+    # docs build runs on >= 3.12.
+    "alert",
     "attrs_block",
     "attrs_inline",
+    # Lets admonitions nest inside backtick-fenced directives (like `{tab-item}`
+    # in `install.md`) without escalating fence backtick counts.
+    "colon_fence",
     "deflist",
     "replacements",
     "smartquotes",
     "strikethrough",
     "tasklist",
-    # Lets admonitions nest inside backtick-fenced directives (like `{tab-item}`
-    # in `install.md`) without escalating fence backtick counts.
-    "colon_fence",
 ]
 # Allow ```mermaid``` directive to be used without curly braces (```{mermaid}```), see:
 # https://github.com/mgaitan/sphinxcontrib-mermaid/issues/99#issuecomment-2339587001
@@ -138,7 +143,7 @@ datatables_options = r"""
 }
 """
 
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "_linkcheck", "html", "Thumbs.db", ".DS_Store"]
 
 nitpicky = True
 
@@ -171,6 +176,14 @@ autosectionlabel_prefix_document = True
 html_theme = "furo"
 html_title = project
 html_logo = "assets/logo-square.svg"
+# Browser-tab icon. Points at the existing square icon for now; run
+# /brand-assets to generate the canonical favicon.svg and the social banner
+# that ogp_image wants.
+html_favicon = "assets/icon.svg"
+# Absolute base URL for OpenGraph. sphinxext.opengraph resolves og:image
+# against it, so social crawlers can follow the image instead of a relative
+# path they cannot resolve.
+ogp_site_url = f"https://kdeldycke.github.io/{project_id}/"
 html_theme_options = {
     "sidebar_hide_name": True,
     # Activates edit links.
@@ -243,6 +256,10 @@ linkcheck_ignore = [
     # which overruns the link-check job budget.
     r"https://github\.com/kdeldycke/meta-package-manager/blob/",
 ]
+
+# Retry transiently-unreachable hosts before reporting them broken, so a flaky
+# but valid link stays checked instead of being moved to linkcheck_ignore.
+linkcheck_retries = 3
 
 # Footer content.
 html_last_updated_fmt = "%Y-%m-%d"

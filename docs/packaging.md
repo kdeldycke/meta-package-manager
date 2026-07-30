@@ -1,4 +1,4 @@
-# {octicon}`package` Downstream packaging
+# {octicon}`package-dependents` Downstream packaging
 
 ```{sidebar}
 [![Packaging status](https://repology.org/badge/vertical-allrepos/meta-package-manager.svg)](https://repology.org/project/meta-package-manager/versions)

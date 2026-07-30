@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "uv_build"
-requires = [ "uv-build>=0.9,<0.12" ]
+requires = [ "uv-build>=0.9,<0.13" ]
 
 [project]
 # Docs: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
@@ -356,7 +356,10 @@ docs = [
   # furo 2025.9.25 is a recent CalVer release supporting Sphinx 8.
   "furo>=2025.9.25",
   # myst-parser 4.0 targets Sphinx 8 / Python 3.10+ and ships the attrs_block,
-  # attrs_inline and colon_fence extensions enabled in docs/conf.py.
+  # attrs_inline and colon_fence extensions enabled in docs/conf.py. The floor
+  # stays at 4 so the lock still resolves on Python 3.10 (where uv caps at
+  # 4.0.1); the `alert` extension also enabled in conf.py needs 5.1, which uv
+  # resolves on 3.11+, and the docs build runs on >= 3.12.
   "myst-parser>=4",
   # Sphinx 8.0.0 is the first version to drop Python 3.9, matching requires-python.
   "sphinx>=8",
@@ -395,7 +398,7 @@ typing = [
 packages.find.include = [ "meta_package_manager*" ]
 
 [tool.uv]
-required-version = ">=0.11.23,<0.12"
+required-version = ">=0.11.23,<0.13"
 # Cooldown period.
 exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in

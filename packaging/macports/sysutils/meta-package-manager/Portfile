@@ -39,12 +39,10 @@ depends_lib-append  port:py${python.version}-boltons \
                     port:py${python.version}-tomli-w \
                     port:py${python.version}-xmltodict
 
-depends_test-append port:py${python.version}-pytest \
-                    port:py${python.version}-tomlkit \
+depends_test-append port:py${python.version}-tomlkit \
                     port:py${python.version}-yaml
 
 # Run the hermetic layer from the unpacked sdist, excluding the integration
 # tests (marked "integration") that drive real package managers.
 test.run            yes
-test.cmd            ${python.bin} -m pytest
-test.args           -o addopts="-m 'not integration'"
+test.args-append    -o addopts="-m 'not integration'"

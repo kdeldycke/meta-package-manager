@@ -31,10 +31,6 @@ checksums           rmd160  62b8e5aaca38615e0db899017516e43eebe34cce \
 python.versions     311 312 313 314
 
 if {${name} ne ${subport}} {
-    depends_test-append \
-                    port:py${python.version}-pytest
-
     test.run            yes
-    test.cmd            ${python.bin} -m pytest
-    test.args           tests --ignore tests/test_purl_spec.py
+    test.args-append    tests --ignore tests/test_purl_spec.py
 }

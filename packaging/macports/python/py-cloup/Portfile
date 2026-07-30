@@ -34,10 +34,6 @@ if {${name} ne ${subport}} {
     depends_lib-append \
                     port:py${python.version}-click
 
-    depends_test-append \
-                    port:py${python.version}-pytest
-
     test.run            yes
-    test.cmd            ${python.bin} -m pytest
-    test.args           tests
+    test.args-append    tests
 }

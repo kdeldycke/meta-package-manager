@@ -42,6 +42,13 @@ if {${name} ne ${subport}} {
                         port:py${python.version}-sphinx \
                         port:py${python.version}-yaml
 
-    # No test phase: 5.0.0's suite pulls py-pytest-param-files and
-    # py-sphinx-pytest via its conftest, neither packaged in MacPorts yet.
+    depends_test-append \
+                        port:py${python.version}-beautifulsoup4 \
+                        port:py${python.version}-defusedxml \
+                        port:py${python.version}-linkify-it-py \
+                        port:py${python.version}-pytest-param-files \
+                        port:py${python.version}-pytest-regressions \
+                        port:py${python.version}-sphinx-pytest
+
+    test.run            yes
 }

@@ -43,12 +43,23 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-wcmatch \
                     port:py${python.version}-wcwidth
 
-    # No test phase: click-extra cannot get a green `port test` here. Its
-    # optional hjson-config and MyST-doc tests need py-hjson and py-myst-parser,
-    # which have no py314 subport (py-hjson is 3.10/3.11, py-myst-parser
-    # 3.10/3.11/3.12), so `port test` on the py314 subport aborts at "Dependency
-    # py314-hjson not found". On py311, where both resolve, the suite runs but 75
-    # tests fail on the exact sphinx/pygments and version-dump output that
-    # click-extra pins to its own CI. It builds and installs fine, and the suite
-    # passes on the Linux port channels.
+    # Diagnostic test phase, overlay-only (the macports-ports submission keeps
+    # this OFF). Now that py314-hjson and py314-myst-parser exist, click-extra's
+    # test deps resolve on py314, so `port test` runs and surfaces the ~75
+    # CI-coupled sphinx/pygments/version-dump failures for inspection.
+    depends_test-append \
+                    port:git \
+                    port:py${python.version}-hjson \
+                    port:py${python.version}-jsonschema \
+                    port:py${python.version}-myst-parser \
+                    port:py${python.version}-pygments \
+                    port:py${python.version}-pytest-httpserver \
+                    port:py${python.version}-requests \
+                    port:py${python.version}-sphinx \
+                    port:py${python.version}-tomlkit \
+                    port:py${python.version}-xmltodict \
+                    port:py${python.version}-yaml
+
+    test.run            yes
+    test.args-append    -o addopts="-m 'not network'"
 }

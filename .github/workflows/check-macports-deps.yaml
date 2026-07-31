@@ -7,8 +7,9 @@ name: 🧪 Validate MacPorts packages
 # packaging/macports/: meta-package-manager 7.4.1 plus its py-click-extra 8.6.2,
 # py-cloup 3.1.0, py-deepmerge 2.1.0, py-extra-platforms 13.5.1,
 # py-packageurl-python 0.17.6 and py-boltons 26.1.0 dependencies, plus the
-# py-hjson (312/313/314) and py-myst-parser (5.0.0, 311-314) updates that add
-# the py314 subports click-extra's test suite needs. Installs
+# py-hjson (312/313/314) and py-myst-parser (5.0.0, 311-314) updates and the new
+# py-pytest-param-files / py-sphinx-pytest ports that let py-myst-parser test
+# again and click-extra's suite resolve on py314. Installs
 # MacPorts on a macOS runner, registers the overlay as a local port source, then
 # lints every port and runs meta-package-manager's `port test` phase.
 # That test phase is the one thing the upstream submission cannot cover on its
@@ -84,7 +85,8 @@ jobs:
           fail=0
           for port in py-boltons py-deepmerge py-packageurl-python \
                       py-extra-platforms py-cloup py-click-extra \
-                      py-hjson py-myst-parser meta-package-manager; do
+                      py-hjson py-myst-parser py-pytest-param-files \
+                      py-sphinx-pytest meta-package-manager; do
             echo "::group::port lint ${port}"
             port -q lint "${port}" || fail=1
             echo "::endgroup::"
@@ -96,30 +98,37 @@ jobs:
         # its test.cmd (pytest). The library ports set test.run inside the
         # `if {${name} ne ${subport}}` guard, so their test phase lives on the
         # versioned subport (py314-*), not the py-* stub, which no-ops. mpm is an
-        # application, tested directly. click-extra is excluded: its suite is too
-        # coupled to its CI's dependency versions to pass in MacPorts (it builds
-        # and installs, just no test phase). Continue on failure so one port's
-        # result doesn't mask the others.
+        # application, tested directly. py-myst-parser 5.0.0 is tested here now
+        # that py-pytest-param-files + py-sphinx-pytest exist. click-extra is
+        # exercised separately below (non-fatal): its CI-coupled suite can't pass
+        # here. Continue on failure so one port's result doesn't mask the others.
         timeout-minutes: 90
         run: |
           set -uo pipefail
           fail=0
           for port in py314-extra-platforms py314-cloup py314-packageurl-python \
-                      meta-package-manager; do
+                      py314-myst-parser meta-package-manager; do
             echo "::group::port test ${port}"
             sudo port -v test "${port}" || fail=1
             echo "::endgroup::"
           done
           exit "${fail}"
 
-      - name: Build the 3.14-updated test-dep ports
-        # py-hjson keeps 3.1.0 and adds 312/313/314; py-myst-parser is bumped
-        # 3.0.1 -> 5.0.0 (311-314). Neither runs a test phase, so build and
-        # install the py314 subports to prove they fetch, resolve and compile on
-        # Python 3.14: this clears the "Dependency py314-hjson not found" wall
-        # from the click-extra test-dep discussion.
+      - name: Build the test-only dependency ports
+        # These carry no test phase of their own, so build+install the py314
+        # subports to prove they fetch, resolve and compile on 3.14: py-hjson
+        # (3.1.0 + 312/313/314) and the two new py-pytest-param-files /
+        # py-sphinx-pytest ports that let py-myst-parser (and click-extra) test.
         timeout-minutes: 30
-        run: sudo port -v install py314-hjson py314-myst-parser
+        run: sudo port -v install py314-hjson py314-pytest-param-files py314-sphinx-pytest
+
+      - name: "Diagnostic: click-extra test phase (known CI-coupled failures)"
+        # Overlay-only (the macports-ports submission keeps click-extra tests
+        # off). With py314-hjson/py314-myst-parser present, click-extra's deps
+        # resolve on py314 and its suite runs, surfacing the ~75 CI-coupled
+        # sphinx/pygments/version-dump failures. Non-fatal: for inspection only.
+        timeout-minutes: 30
+        run: sudo port -v test py314-click-extra || true
 
       - name: Install and smoke-test the CLI
         timeout-minutes: 20

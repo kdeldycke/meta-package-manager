@@ -43,10 +43,6 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-wcmatch \
                     port:py${python.version}-wcwidth
 
-    # Diagnostic test phase, overlay-only (the macports-ports submission keeps
-    # this OFF). Now that py314-hjson and py314-myst-parser exist, click-extra's
-    # test deps resolve on py314, so `port test` runs and surfaces the ~75
-    # CI-coupled sphinx/pygments/version-dump failures for inspection.
     depends_test-append \
                     port:git \
                     port:py${python.version}-hjson \
@@ -60,6 +56,7 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-xmltodict \
                     port:py${python.version}-yaml
 
+    # Exclude the network tests (marked "network") that reach external services.
     test.run            yes
     test.args-append    -o addopts="-m 'not network'"
 }

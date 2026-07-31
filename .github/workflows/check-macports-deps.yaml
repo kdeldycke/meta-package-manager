@@ -122,11 +122,12 @@ jobs:
         timeout-minutes: 30
         run: sudo port -v install py314-hjson py314-pytest-param-files py314-sphinx-pytest
 
-      - name: "Diagnostic: click-extra test phase (known CI-coupled failures)"
-        # Overlay-only (the macports-ports submission keeps click-extra tests
-        # off). With py314-hjson/py314-myst-parser present, click-extra's deps
-        # resolve on py314 and its suite runs, surfacing the ~75 CI-coupled
-        # sphinx/pygments/version-dump failures. Non-fatal: for inspection only.
+      - name: Test click-extra (non-fatal, CI-coupled suite)
+        # click-extra's deps now resolve on py314 and its suite passes there
+        # (3881 passed, 0 failed), so the submission enables this test phase too.
+        # Kept non-fatal here because the suite pins exact sphinx/pygments/version
+        # output to click-extra's CI, so a later MacPorts dep bump could
+        # reintroduce failures without meaning the packaging is broken.
         timeout-minutes: 30
         run: sudo port -v test py314-click-extra || true
 

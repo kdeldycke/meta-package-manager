@@ -51,4 +51,7 @@ if {${name} ne ${subport}} {
                         port:py${python.version}-sphinx-pytest
 
     test.run            yes
+    # Put the unpacked source on PYTHONPATH: the nested tests import myst_parser
+    # from it, which is not installed during the test phase.
+    test.env-append     PYTHONPATH=${worksrcpath}
 }

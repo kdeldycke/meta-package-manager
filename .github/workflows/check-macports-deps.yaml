@@ -6,7 +6,9 @@ name: 🧪 Validate MacPorts packages
 # Temporary workflow to validate the MacPorts ports staged in
 # packaging/macports/: meta-package-manager 7.4.1 plus its py-click-extra 8.6.2,
 # py-cloup 3.1.0, py-deepmerge 2.1.0, py-extra-platforms 13.5.1,
-# py-packageurl-python 0.17.6 and py-boltons 26.1.0 dependencies. Installs
+# py-packageurl-python 0.17.6 and py-boltons 26.1.0 dependencies, plus the
+# py-hjson (312/313/314) and py-myst-parser (5.0.0, 311-314) updates that add
+# the py314 subports click-extra's test suite needs. Installs
 # MacPorts on a macOS runner, registers the overlay as a local port source, then
 # lints every port and runs meta-package-manager's `port test` phase.
 # That test phase is the one thing the upstream submission cannot cover on its
@@ -82,7 +84,7 @@ jobs:
           fail=0
           for port in py-boltons py-deepmerge py-packageurl-python \
                       py-extra-platforms py-cloup py-click-extra \
-                      meta-package-manager; do
+                      py-hjson py-myst-parser meta-package-manager; do
             echo "::group::port lint ${port}"
             port -q lint "${port}" || fail=1
             echo "::endgroup::"
@@ -109,6 +111,15 @@ jobs:
             echo "::endgroup::"
           done
           exit "${fail}"
+
+      - name: Build the 3.14-updated test-dep ports
+        # py-hjson keeps 3.1.0 and adds 312/313/314; py-myst-parser is bumped
+        # 3.0.1 -> 5.0.0 (311-314). Neither runs a test phase, so build and
+        # install the py314 subports to prove they fetch, resolve and compile on
+        # Python 3.14: this clears the "Dependency py314-hjson not found" wall
+        # from the click-extra test-dep discussion.
+        timeout-minutes: 30
+        run: sudo port -v install py314-hjson py314-myst-parser
 
       - name: Install and smoke-test the CLI
         timeout-minutes: 20

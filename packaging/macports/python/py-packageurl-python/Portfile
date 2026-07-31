@@ -32,5 +32,5 @@ python.versions     311 312 313 314
 
 if {${name} ne ${subport}} {
     test.run            yes
-    test.args-append    tests --ignore tests/test_purl_spec.py
+    test.args-append    --ignore tests/test_purl_spec.py
 }

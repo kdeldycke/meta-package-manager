@@ -43,8 +43,12 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-wcmatch \
                     port:py${python.version}-wcwidth
 
-    # No test phase: click-extra's suite asserts on exact sphinx/pygments and
-    # version-dump output that differs between its pinned CI and MacPorts'
-    # dependency versions, so dozens of tests fail spuriously. It builds and
-    # installs fine.
+    # No test phase: click-extra cannot get a green `port test` here. Its
+    # optional hjson-config and MyST-doc tests need py-hjson and py-myst-parser,
+    # which have no py314 subport (py-hjson is 3.10/3.11, py-myst-parser
+    # 3.10/3.11/3.12), so `port test` on the py314 subport aborts at "Dependency
+    # py314-hjson not found". On py311, where both resolve, the suite runs but 75
+    # tests fail on the exact sphinx/pygments and version-dump output that
+    # click-extra pins to its own CI. It builds and installs fine, and the suite
+    # passes on the Linux port channels.
 }

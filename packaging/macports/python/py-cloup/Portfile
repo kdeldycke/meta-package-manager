@@ -35,5 +35,4 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-click
 
     test.run            yes
-    test.args-append    tests
 }

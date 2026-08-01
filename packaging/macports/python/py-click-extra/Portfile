@@ -44,7 +44,7 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-wcwidth
 
     depends_test-append \
-                    port:git \
+                    path:bin/git:git \
                     port:py${python.version}-hjson \
                     port:py${python.version}-jsonschema \
                     port:py${python.version}-myst-parser \

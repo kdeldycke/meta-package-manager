@@ -19,6 +19,10 @@ author = ", ".join(author["name"] for author in toml_config["project"]["authors"
 # Title-case each word of the project ID.
 project = " ".join(word.title() for word in project_id.split("-"))
 
+# GitHub account owning the project. Factored out so a rename touches one line
+# instead of every URL built from it below (repository, sponsors, social card).
+github_user = "kdeldycke"
+
 # Addons.
 extensions = [
     "sphinx.ext.autodoc",
@@ -176,29 +180,29 @@ html_favicon = "assets/favicon.svg"
 # Absolute base URL for OpenGraph. sphinxext.opengraph resolves og:image
 # against it, so social crawlers can follow the image instead of a relative
 # path they cannot resolve.
-ogp_site_url = f"https://kdeldycke.github.io/{project_id}/"
+ogp_site_url = f"https://{github_user}.github.io/{project_id}/"
 # Social-card image (og:image), served from the GitHub raw host like the readme
 # banner and screenshots: docs/assets/ is not copied verbatim into the built
 # site, so a site-relative path would 404 for crawlers.
 ogp_image = (
-    "https://raw.githubusercontent.com/kdeldycke/"
+    f"https://raw.githubusercontent.com/{github_user}/"
     f"{project_id}/main/docs/assets/banner-social-light.png"
 )
 ogp_image_alt = project
 html_theme_options = {
     "sidebar_hide_name": True,
     # Activates edit links.
-    "source_repository": f"https://github.com/kdeldycke/{project_id}",
+    "source_repository": f"https://github.com/{github_user}/{project_id}",
     "source_branch": "main",
     "source_directory": "docs/",
     "announcement": (
         f"{project} works fine, but is <em>maintained by only one person</em> "
         "😶‍🌫️.<br/>You can help if you "
         "<strong><a class='reference external' "
-        "href='https://github.com/sponsors/kdeldycke'>"
+        f"href='https://github.com/sponsors/{github_user}'>"
         "purchase business support 🤝</a></strong> or "
         "<strong><a class='reference external' "
-        "href='https://github.com/sponsors/kdeldycke'>"
+        f"href='https://github.com/sponsors/{github_user}'>"
         "sponsor the project 🫶</a></strong>."
     ),
 }

@@ -241,7 +241,7 @@ dependencies = [
   # ValidationError import move to click_extra.config, print_table()'s
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
   # default; 8.7.0 covers them all.
-  "click-extra>=8.7.0",
+  "click-extra>=8.7",
   # extra-platforms 13.5.0 renamed the GUIX_BUILD trait to HERMETIC_BUILD and
   # made skip_hermetic_build the primary marker mpm's test suite consumes,
   # deprecating the skip_guix_build alias; 13.5.1 is the current release. It also
@@ -368,8 +368,8 @@ docs = [
   # requires Python 3.11+. Split the floor by marker: >= 5.1 where the docs
   # actually build (3.11+), >= 4 on 3.10 so the lock still resolves (uv caps
   # myst-parser at 4.0.1 there; the docs build itself runs on 3.12+).
-  "myst-parser>=4; python_version < '3.11'",
-  "myst-parser>=5.1; python_version >= '3.11'",
+  "myst-parser>=4; python_version<'3.11'",
+  "myst-parser>=5.1; python_version>='3.11'",
   # Sphinx 8.0.0 is the first version to drop Python 3.9, matching requires-python.
   "sphinx>=8",
   # sphinx-autodoc-typehints 2.4.0 is the first release aligned to Python >= 3.10.

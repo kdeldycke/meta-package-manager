@@ -360,15 +360,13 @@ def augmentations_table() -> str:
         extended = extended_search_is_synthesized(manager)
         if not (upgrade_all or orphan_sweep or exact or extended):
             continue
-        table.append(
-            [
-                f"[`{mid}`](managers/{mid}.md)",
-                "✅" if upgrade_all else "",
-                "✅" if orphan_sweep else "",
-                "✅" if exact else "",
-                "✅" if extended else "",
-            ]
-        )
+        table.append([
+            f"[`{mid}`](managers/{mid}.md)",
+            "✅" if upgrade_all else "",
+            "✅" if orphan_sweep else "",
+            "✅" if exact else "",
+            "✅" if extended else "",
+        ])
 
     return render_table(
         table,
@@ -1284,12 +1282,10 @@ def manager_traces(manager_id: str) -> str:
         for op in Operations:
             spec = operations.get(op.name, {})
             for sample in samples.get(op.name, ()):
-                command = " ".join(
-                    (
-                        spec.get("cli", m.cli_names[0]),
-                        *spec.get("args", ()),
-                    )
-                )
+                command = " ".join((
+                    spec.get("cli", m.cli_names[0]),
+                    *spec.get("args", ()),
+                ))
                 output = sample["output"].strip("\n")
                 fences.append(_fenced(f"$ {command}\n{output}", "shell-session"))
         source_label = "bundled definition"

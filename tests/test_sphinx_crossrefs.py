@@ -59,7 +59,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 
 
 @pytest.fixture(scope="module")
-def built_docs(tmp_path_factory) -> Path:
+def built_docs(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Build the HTML documentation once and return its output directory.
 
     Builds into a throwaway directory (rather than `docs/_build`) so the run is

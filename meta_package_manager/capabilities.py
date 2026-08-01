@@ -153,7 +153,7 @@ def upgrade_all_is_synthesized(
     one-shot command exists, or when the operation is not supported at all.
 
     Feeds the per-manager table of `docs/augmentations.md`, rendered live by
-    `docs/docs_update.py`.
+    `meta_package_manager._docs`.
     """
     if not implements(manager, Operations.upgrade_all):
         return False
@@ -192,7 +192,7 @@ def cleanup_orphan_is_synthesized(
     sweep exists, or when the manager lacks the building blocks.
 
     Feeds the per-manager table of `docs/augmentations.md`, rendered live by
-    `docs/docs_update.py`.
+    `meta_package_manager._docs`.
     """
     if implements_method(manager, "cleanup_orphan"):
         return False
@@ -241,7 +241,7 @@ def exact_search_is_synthesized(
     `True` when the manager's native search cannot filter exact matches, so
     {meth}`meta_package_manager.manager.PackageManager.refiltered_search` does the
     narrowing itself. Feeds the per-manager table of `docs/augmentations.md` and
-    the per-manager operation tables, rendered live by `docs/docs_update.py`.
+    the per-manager operation tables, rendered live by `meta_package_manager._docs`.
     """
     return _search_refinement_is_synthesized(manager, "exact_support")
 
@@ -254,7 +254,7 @@ def extended_search_is_synthesized(
     `True` when the manager's native search cannot reach descriptions, so
     {meth}`meta_package_manager.manager.PackageManager.refiltered_search` does the
     filtering itself. Feeds the per-manager table of `docs/augmentations.md` and
-    the per-manager operation tables, rendered live by `docs/docs_update.py`.
+    the per-manager operation tables, rendered live by `meta_package_manager._docs`.
     """
     return _search_refinement_is_synthesized(manager, "extended_support")
 

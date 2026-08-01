@@ -27,7 +27,7 @@ It has two consumers:
 - {mod}`tests.test_docstring_corpus` replays each literal block back through the
   parser it illustrates, asserting the documented example still yields
   well-formed packages.
-- `docs/docs_update.py` renders the literal blocks as the *reference traces*
+- `meta_package_manager._docs` renders the literal blocks as the *reference traces*
   of a class-based manager's documentation page, the config-defined twin of the
   `[samples]` fixtures shipped alongside {abbr}`TOML`-defined managers.
 

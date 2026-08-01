@@ -28,7 +28,7 @@ concurrency:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@730a6caca5226f9b3c80c238504310c5dad86993 # v7.4.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@f3fd0341a6ffbe9f948e78e3270ca30faf2b2459 # v7.4.1
     permissions:
       id-token: write
       issues: write
@@ -56,12 +56,12 @@ jobs:
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@730a6caca5226f9b3c80c238504310c5dad86993 # v7.4.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@f3fd0341a6ffbe9f948e78e3270ca30faf2b2459 # v7.4.1
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@730a6caca5226f9b3c80c238504310c5dad86993 # v7.4.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@f3fd0341a6ffbe9f948e78e3270ca30faf2b2459 # v7.4.1
     needs: build
     permissions:
       attestations: write

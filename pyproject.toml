@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "uv_build"
-requires = [ "uv-build>=0.9" ]
+requires = [ "uv-build>=0.8" ]
 
 [project]
 # Docs: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
@@ -411,7 +411,7 @@ typing = [
 packages.find.include = [ "meta_package_manager*" ]
 
 [tool.uv]
-required-version = ">=0.12"
+required-version = ">=0.11.15"
 # Cooldown period.
 exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in

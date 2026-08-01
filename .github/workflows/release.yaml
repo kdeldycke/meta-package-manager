@@ -28,7 +28,10 @@ concurrency:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@c81fb2e6fa884cb62ef46e69b8c8db44fa6fad15 # v7.3.1
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@730a6caca5226f9b3c80c238504310c5dad86993 # v7.4.0
+    permissions:
+      id-token: write
+      issues: write
 
   publish-pypi:
     name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
@@ -53,13 +56,17 @@ jobs:
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@c81fb2e6fa884cb62ef46e69b8c8db44fa6fad15 # v7.3.1
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@730a6caca5226f9b3c80c238504310c5dad86993 # v7.4.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@c81fb2e6fa884cb62ef46e69b8c8db44fa6fad15 # v7.3.1
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@730a6caca5226f9b3c80c238504310c5dad86993 # v7.4.0
     needs: build
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}

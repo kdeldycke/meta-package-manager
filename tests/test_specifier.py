@@ -152,6 +152,11 @@ def props(spec: Specifier):
                 },
                 {
                     "package_id": "left-pad",
+                    "manager_id": "volta",
+                    "version": "2011-04.gamma",
+                },
+                {
+                    "package_id": "left-pad",
                     "manager_id": "yarn",
                     "version": "2011-04.gamma",
                 },

@@ -205,9 +205,14 @@ class Snap(PackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
+        Unlike `list`, `find`, `refresh` and `install`, snap's `remove`
+        subcommand rejects the global `--color` flag (`error: unknown flag
+        'color'`). Its output is not parsed, so the `--color=never` post-arg
+        is dropped here with `auto_post_args=False`.
+
         ```{code-block} shell-session
 
-        $ sudo snap remove standard-notes --color=never
+        $ sudo snap remove standard-notes
         ```
         """
-        return self.run_cli("remove", package_id, sudo=True)
+        return self.run_cli("remove", package_id, sudo=True, auto_post_args=False)

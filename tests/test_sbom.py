@@ -30,6 +30,18 @@ import pytest
 pytest.importorskip("cyclonedx")
 pytest.importorskip("spdx_tools")
 
+# The top-level spdx_tools package can import while the deeper submodules mpm
+# actually needs (spdx_tools.spdx.model, the writers) fail to — for instance on
+# a brand-new Python like 3.15 whose wheels are still incomplete. mpm records
+# that real availability in its own spdx_support sentinel, so gate on it rather
+# than the coarse package import above, which would let a partial install
+# through and crash the SPDX tests with a NameError. A fully-absent extra is
+# already handled by the importorskip calls; this only catches partial installs.
+from meta_package_manager.sbom.spdx import spdx_support
+
+if not spdx_support:
+    pytest.skip("spdx-tools writer stack not fully importable", allow_module_level=True)
+
 from cyclonedx.schema import OutputFormat, SchemaVersion
 from cyclonedx.validation import make_schemabased_validator
 from cyclonedx.validation.json import JsonStrictValidator

@@ -17,7 +17,7 @@
 """Harvest the CLI-session samples documented in manager source docstrings.
 
 Every query method (and the `version_regexes` attribute) documents a sample
-invocation and its output in a MyST ` ```{code-block} shell-session ` fence
+invocation and its output in a MyST `{code-block} shell-session` fence
 sitting right next to the regex (or JSON parser) that consumes it. This module
 reads those blocks straight from the source and exposes them, with a shared
 notion of which ones are literal, replayable fixtures.

@@ -1,9 +1,6 @@
 # Changelog
 
-## [`7.5.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.1...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`7.5.0` (2026-08-03)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.1...v7.5.0)
 
 - [volta] Add Volta package manager (`installed`, `install`, `upgrade`, `remove`), flagged unmaintained since its November 2025 retirement in favor of `mise`. `pkg:npm/` purls now also resolve to it. Addresses [#1995](https://github.com/kdeldycke/meta-package-manager/issues/1995).
 - [mpm] Raise the click-extra floor from `8.6.1` to `8.7.0`, scoping mpm's strict-config check to its own `pyproject.toml` section and forcing telemetry off on a truthy `DO_NOT_TRACK`.

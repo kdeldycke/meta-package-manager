@@ -81,7 +81,11 @@ cli_parameters = "--color --table-format csv --all-managers managers"
 skip_platforms = "windows"
 exit_code = 0
 strip_ansi = true
-stdout_regex_matches = "cargo,Rust cargo,✓,✓ \\S+,✓,✓ \\S+\\n"
+# cargo is fully detected on macOS runners, but the Linux binary is built and
+# tested inside a minimal manylinux container that has never shipped a Rust
+# toolchain: accept dnf (confirmed present with version there) as the Linux
+# stand-in example of a fully-detected manager.
+stdout_regex_matches = "(cargo,Rust cargo|dnf,Fedora DNF),✓,✓ \\S+,✓,✓ \\S+\\n"
 
 # Same as above, but without colors.
 # XXX Windows has issues with ANSI colors, so we skip this test on Windows:
@@ -138,8 +142,9 @@ exit_code = 0
 # XXX --no-color does not apply to CSV export: https://github.com/kdeldycke/meta-package-manager/issues/1004
 # So we force the ANSI stripping.
 strip_ansi = true
+# See the color variant above for why dnf is accepted alongside cargo.
 stdout_regex_matches = [
-    "cargo,Rust cargo,✓,✓ \\S+,✓,✓ \\S+\\n",
+    "(cargo,Rust cargo|dnf,Fedora DNF),✓,✓ \\S+,✓,✓ \\S+\\n",
 ]
 
 # Check some common packages are reported as installed in CSV format (Linux).

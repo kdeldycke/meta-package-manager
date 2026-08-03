@@ -143,12 +143,15 @@ stdout_regex_matches = [
 ]
 
 # Check some common packages are reported as installed in CSV format (Linux).
+# extra-platforms 13.6.0 recognizes the manylinux_2_28 test container as
+# AlmaLinux/Fedora-family, so tzdata is now correctly attributed to dnf/yum
+# there instead of falling through to apt/uv.
 [[cases]]
 cli_parameters = "--table-format csv installed"
 only_platforms = "linux"
 exit_code = 0
 stdout_regex_matches = [
-    "tzdata,,(apt|uv),\\S+\\n",
+    "tzdata,,(apt|dnf|uv|yum),\\S+\\n",
 ]
 
 # Check some common packages are reported as installed in CSV format (macOS).

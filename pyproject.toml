@@ -1194,7 +1194,7 @@ description = "DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
 [[tool.repomatic.labels.extra]]
 name = "🖥 platform: Linux"
 color = "bfd4f2"
-description = "Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, ChromeOS, …"
+description = "AlmaLinux, Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, …"
 
 [[tool.repomatic.labels.extra]]
 name = "🖥 platform: macOS"

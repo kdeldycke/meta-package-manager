@@ -46,7 +46,6 @@ flowchart LR
     rpds_py(["`rpds-py`"])
     six(["`six`"])
     sphinx_basic_ng(["`sphinx-basic-ng`"])
-    sphinxcontrib_jquery(["`sphinxcontrib-jquery`"])
     tabulate(["`tabulate`"])
     wcmatch(["`wcmatch`"])
     wcwidth(["`wcwidth`"])
@@ -105,10 +104,11 @@ flowchart LR
 
     subgraph grp_docs [--group docs]
         sphinx{{"`sphinx >=8`"}}
-        myst_parser{{"`myst-parser >=4`"}}
+        myst_parser{{"`myst-parser >=5.1`"}}
         furo{{"`furo >=2025.9.25`"}}
         sphinx_datatables{{"`sphinx-datatables >=1`"}}
         sphinxcontrib_mermaid{{"`sphinxcontrib-mermaid >=1.2.3`"}}
+        sphinxcontrib_jquery{{"`sphinxcontrib-jquery >=4`"}}
         sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
         sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
         sphinx_design{{"`sphinx-design >=0.6`"}}
@@ -137,11 +137,11 @@ flowchart LR
         types_xmltodict{{"`types-xmltodict >=1.0.1.20250920`"}}
     end
 
-    meta_package_manager ==>|" >=8.6.1 "| click_extra
+    meta_package_manager ==>|" >=8.7 "| click_extra
     meta_package_manager ==>|" >=2 "| tomli
     meta_package_manager ==>|" >=0.12 "| xmltodict
     meta_package_manager ==>|" >=25 "| boltons
-    meta_package_manager ==>|" >=13.5.1 "| extra_platforms
+    meta_package_manager ==>|" >=13.6 "| extra_platforms
     meta_package_manager ==>|" >=0.11 "| packageurl_python
     meta_package_manager ==>|" >=1 "| backports_strenum
     meta_package_manager ==>|" >=1 "| tomli_w
@@ -234,6 +234,7 @@ flowchart LR
     sphinxcontrib_mermaid --> pyyaml
     sphinxcontrib_mermaid --> jinja2
     coverage --> tomli
+    sphinxcontrib_jquery --> sphinx
     pytest_github_actions_annotate_failures --> pytest
     pytest_randomly --> pytest
     respx --> httpx
@@ -281,7 +282,6 @@ flowchart LR
     mdit_py_plugins --> markdown_it_py
     py_serializable --> defusedxml
     sphinx_basic_ng --> sphinx
-    sphinxcontrib_jquery --> sphinx
     tabulate --> wcwidth
     wcmatch --> bracex
     isoduration --> arrow
@@ -445,6 +445,7 @@ flowchart LR
     style sphinx_copybutton stroke-width:3px
     style sphinx_datatables stroke-width:3px
     style sphinx_design stroke-width:3px
+    style sphinxcontrib_jquery stroke-width:3px
     style sphinxcontrib_mermaid stroke-width:3px
     style sphinxext_opengraph stroke-width:3px
     style tomli stroke-width:3px

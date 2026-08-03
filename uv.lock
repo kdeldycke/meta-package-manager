@@ -13,7 +13,7 @@ exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
 click-extra = "2026-07-31T00:00:00Z"
-extra-platforms = "2026-07-28T00:00:00Z"
+extra-platforms = "2026-08-04T00:00:00Z"
 
 [[package]]
 name = "accessible-pygments"
@@ -512,11 +512,11 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "13.5.1"
+version = "13.6.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/27/4d/85b286ccdffdb9c93f537428dbab9616f15f89ed40f9217ac21bc21e01b6/extra_platforms-13.5.1.tar.gz", hash = "sha256:89100acdf8aa28f8c589981b653e9f42a5bd68ce932c33cbd6faa7a81731c7c6", size = 465562, upload-time = "2026-07-27T19:28:20.5Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d0/20/3d7ba1bd9cd9235eda78a143adcb2a710c6117f5b3f500237bc2f240808c/extra_platforms-13.6.0.tar.gz", hash = "sha256:92b5800c0ca9767820ae2cf3d48b7037432c1360055ed1804bc43a8269a2a090", size = 464011, upload-time = "2026-08-03T07:27:46.482Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a7/03/4d65c1bb5064cc895bac491ee34e50a23058dc5b80e718e9f4ad386c7eb4/extra_platforms-13.5.1-py3-none-any.whl", hash = "sha256:b6fd87f13933a19f073eb329848b0722c8037b657bc519befc19cdd56384a5bc", size = 91123, upload-time = "2026-07-27T19:28:18.606Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/c4/3e562dc1fe2df78a16699a59ea76dda82474feefe6bed78929644b342925/extra_platforms-13.6.0-py3-none-any.whl", hash = "sha256:1ddfca538dd89fd5e1132ed5eca8b80ecb15f8ac7faa22ad232d4a6ff1a71f26", size = 98540, upload-time = "2026-08-03T07:27:44.994Z" },
 ]
 
 [[package]]
@@ -1087,7 +1087,7 @@ typing = [
 requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1" },
     { name = "boltons", specifier = ">=25" },
-    { name = "click-extra", specifier = ">=8.7.0" },
+    { name = "click-extra", specifier = ">=8.7" },
     { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
     { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
     { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },
@@ -1095,7 +1095,7 @@ requires-dist = [
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
-    { name = "extra-platforms", specifier = ">=13.5.1" },
+    { name = "extra-platforms", specifier = ">=13.6" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
     { name = "packageurl-python", specifier = ">=0.11" },
     { name = "platformdirs", marker = "extra == 'sbom-online'", specifier = ">=4" },

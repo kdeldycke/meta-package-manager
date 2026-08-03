@@ -7,6 +7,7 @@
 
 - [volta] Add Volta package manager (`installed`, `install`, `upgrade`, `remove`), flagged unmaintained since its November 2025 retirement in favor of `mise`. `pkg:npm/` purls now also resolve to it. Addresses [#1995](https://github.com/kdeldycke/meta-package-manager/issues/1995).
 - [mpm] Raise the click-extra floor from `8.6.1` to `8.7.0`, scoping mpm's strict-config check to its own `pyproject.toml` section and forcing telemetry off on a truthy `DO_NOT_TRACK`.
+- [mpm] Raise the extra-platforms floor from `13.5.1` to `13.6.0`, whose new AlmaLinux detection stops the spurious unrecognized-platform warning `mpm` printed on AlmaLinux hosts.
 - [mpm] Bump the in-repo Alpine, Guix, MacPorts and Nix packaging specs to build from `7.4.1`, switching Alpine to the PyPI sdist instead of the GitHub tag tarball.
 - [mpm] Add `favicon.svg` and `banner-social.svg` (light/dark PNG exports) as the Sphinx browser-tab icon and OpenGraph image, and switch the readme banner to a dark-mode-aware `<picture>` element.
 - [mpm] Refresh the readme's manager Sankey diagram and operation matrix via `<!-- mirror-src -->` blocks and `click-extra refresh-directives`, replacing hand-rolled marker splicing in `docs/docs_update.py`.

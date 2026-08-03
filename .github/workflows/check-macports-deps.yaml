@@ -4,8 +4,8 @@ name: 🧪 Validate MacPorts packages
   workflow_dispatch:
 
 # Temporary workflow to validate the MacPorts ports staged in
-# packaging/macports/: meta-package-manager 7.4.1 plus its py-click-extra 8.6.2,
-# py-cloup 3.1.0, py-deepmerge 2.1.0, py-extra-platforms 13.5.1,
+# packaging/macports/: meta-package-manager 7.4.1 plus its py-click-extra 8.8.1,
+# py-cloup 3.1.0, py-deepmerge 2.1.0, py-extra-platforms 13.6.0,
 # py-packageurl-python 0.17.6 and py-boltons 26.1.0 dependencies, plus the
 # py-hjson (312/313/314) and py-myst-parser (5.0.0, 311-314) updates and the new
 # py-pytest-param-files / py-sphinx-pytest ports that let py-myst-parser test
@@ -100,8 +100,8 @@ jobs:
         # versioned subport (py314-*), not the py-* stub, which no-ops. mpm is an
         # application, tested directly. py-myst-parser 5.0.0 is tested here now
         # that py-pytest-param-files + py-sphinx-pytest exist. click-extra is
-        # exercised separately below (non-fatal): its CI-coupled suite can't pass
-        # here. Continue on failure so one port's result doesn't mask the others.
+        # exercised separately below, kept non-fatal because its suite is CI-coupled.
+        # Continue on failure so one port's result doesn't mask the others.
         timeout-minutes: 90
         run: |
           set -uo pipefail

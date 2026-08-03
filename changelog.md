@@ -7,6 +7,9 @@
 
 ## [`7.5.0` (2026-08-03)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.1...v7.5.0)
 
+> [!NOTE]
+> `7.5.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/7.5.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.5.0).
+
 - [volta] Add Volta package manager (`installed`, `install`, `upgrade`, `remove`), flagged unmaintained since its November 2025 retirement in favor of `mise`. `pkg:npm/` purls now also resolve to it. Addresses [#1995](https://github.com/kdeldycke/meta-package-manager/issues/1995).
 - [mpm] Raise the click-extra floor from `8.6.1` to `8.7.0`, scoping mpm's strict-config check to its own `pyproject.toml` section and forcing telemetry off on a truthy `DO_NOT_TRACK`.
 - [mpm] Raise the extra-platforms floor from `13.5.1` to `13.6.0`, whose new AlmaLinux detection stops the spurious unrecognized-platform warning `mpm` printed on AlmaLinux hosts.

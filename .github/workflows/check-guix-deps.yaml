@@ -4,8 +4,8 @@ name: 🧪 Validate Guix packages
   workflow_dispatch:
 
 # Temporary workflow to validate the Guix package updates on the mpm-updates fork
-# branch: meta-package-manager 7.4.1 plus the python-click-extra 8.6.2 and
-# python-extra-platforms 13.5.1 bumps it requires. Pulls Guix from the fork
+# branch: meta-package-manager 7.5.0 plus the python-click-extra 8.8.1 and
+# python-extra-platforms 13.6.0 bumps it requires. Pulls Guix from the fork
 # channel, then lints and builds the changed packages.
 # Propose upstream: https://codeberg.org/guix/guix/compare/master...kdeldycke:mpm-updates
 # Delete after the MR is merged upstream.

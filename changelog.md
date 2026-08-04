@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [guix] Fix `guix install --load-path=packaging/guix` failing on unbound `python-pytest` and `python-xmltodict`, whose modules were not imported, and align the definition with the upstream Guix stanza.
+
 ## [`7.5.0` (2026-08-03)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.1...v7.5.0)
 
 > [!NOTE]

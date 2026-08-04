@@ -246,17 +246,15 @@ jobs:
 
   # https://ports.macports.org/port/meta-package-manager/
   # https://github.com/macports/macports-ports/blob/master/sysutils/meta-package-manager/Portfile
-  # meta-package-manager and its dependency ports landed in the official
-  # macports-ports tree on 2026-07-22 via
-  # https://github.com/macports/macports-ports/pull/33609. `port sync`
-  # refreshes the ports tree bundled with the installer pkg so the
-  # recently-landed ports resolve. Keep it continue-on-error until the
-  # buildbot binary archives for the new ports are proven to be picked up
-  # across the macOS matrix: without them, the install falls back to a source
-  # build (~2 hours on macos-26, see macports-source below).
+  # meta-package-manager landed in the official macports-ports tree on
+  # 2026-07-22 via https://github.com/macports/macports-ports/pull/33609.
+  # `port sync` refreshes the ports tree bundled with the installer pkg so the
+  # port resolves. The port and its whole Python dependency closure are noarch
+  # (darwin_any), so the buildbot publishes a single archive that serves every
+  # runner and `port install` fetches it in seconds instead of compiling from
+  # source.
   macports:
-    name: "⁉️ macports (${{ matrix.os }})"
-    continue-on-error: true
+    name: "✅ macports (${{ matrix.os }})"
     strategy:
       matrix:
         os:

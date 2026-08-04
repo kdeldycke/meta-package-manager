@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [guix] Fix `guix install --load-path=packaging/guix` failing on unbound `python-pytest` and `python-xmltodict`, whose modules were not imported, and align the definition with the upstream Guix stanza.
+- [nix] Fix `nix-env --file packaging/nix` failing its runtime-dependency check on the stale `click-extra` `8.6.2` and `extra-platforms` `13.5.1` pins, bumping them to `8.8.1` and `13.6.0` to satisfy mpm `7.5.0`'s raised floors.
 
 ## [`7.5.0` (2026-08-03)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.1...v7.5.0)
 

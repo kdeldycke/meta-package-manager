@@ -1240,8 +1240,9 @@ class CLIExecutor:
             if is_escalation and _is_sudo_auth_failure(error):
                 logging.warning(
                     "Needs administrator rights but sudo has no cached "
-                    "credentials; re-run in a terminal, or with `mpm --sudo` to "
-                    "authenticate once up front.",
+                    "credentials; re-run in a terminal, or with `mpm --sudo` "
+                    "(or a `[mpm] sudo = true` entry in your configuration file) "
+                    "to authenticate once up front.",
                     extra={"label": self.id},  # type: ignore[attr-defined]
                 )
             # Relay the command's own account of the failure at WARNING, the

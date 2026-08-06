@@ -24,6 +24,16 @@ The plugin is configurable with these environment variables:
 | `VAR_DEFAULT_FONT`    | Font parameters for regular text.                                                | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
 | `VAR_MONOSPACE_FONT`  | Font parameters for monospace text. Used for table rendering and error messages. | String  | `font=Menlo size=12` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
 
+These variables only drive the menu layout. Everything else comes from `mpm`'s own configuration file: the plugin passes no option beyond the ones it decides itself, so the file found at its default location on the system applies to every run it triggers. See {doc}`configuration` for the search paths and the full schema.
+
+## Menu actions
+
+Clicking a package runs `mpm --<manager-id> upgrade <package-id>`, and a section's *Upgrade all* entry runs `mpm --<manager-id> upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
+
+That last one is the visible consequence: with a `cooldown` set, clicking a package of a manager that cannot enforce it natively skips it with a warning instead of upgrading it ungated. Set `require_cooldown_support = false` to let those managers run anyway, without the safeguard.
+
+Both variants of each entry go through `mpm`: a plain click opens a terminal so the run can be followed, and holding the `Option` key runs it silently.
+
 ## Screenshots
 
 ### SwiftBar

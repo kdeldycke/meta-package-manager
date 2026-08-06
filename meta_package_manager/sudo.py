@@ -271,7 +271,8 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
                 f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
                 "rights, but no terminal is available to prompt for a password: "
                 "they may fail. Re-run in a terminal, pre-authenticate with "
-                "`sudo --validate`, or drop them with --no-sudo.",
+                "`sudo --validate`, or drop escalation with `--no-sudo` or a "
+                "`[mpm] sudo = false` entry in your configuration file.",
             )
         # An internal-only selection stays silent: each manager's own sudo fails
         # fast and surfaces through its error path.

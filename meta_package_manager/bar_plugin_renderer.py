@@ -31,7 +31,7 @@ the theme system to produce the final rendered output from
 from __future__ import annotations
 
 import contextlib
-import logging
+import sys
 from functools import cached_property
 from io import StringIO
 from pathlib import Path
@@ -42,6 +42,7 @@ from click_extra import echo, get_current_context
 from click_extra.table import TableFormat, render_table
 
 from .bar_plugin import MPMPlugin
+from .capabilities import Operations, implements
 from .pool import pool
 from .version import diff_versions
 
@@ -134,6 +135,30 @@ class BarPluginRenderer(MPMPlugin):
         if appearance == "dark":
             return {"new_fg": DARK_MENU_NEW_COLOR}
         return {}
+
+    @cached_property
+    def mpm_cli(self) -> tuple[str, ...]:
+        """Absolute `mpm` invocation the menu actions are routed through.
+
+        Re-enters the very interpreter rendering the menu, so a click runs the
+        `mpm` the plugin called and resolves the same configuration file. Derived
+        from {data}`sys.executable` rather than `sys.argv[0]`: the former is always
+        an absolute path to a runnable entry point, while the latter degrades to a
+        console script, a `__main__.py` or a bare `-c` depending on how `mpm` was
+        started. A Nuitka-compiled `mpm` is its own interpreter, so it is invoked
+        directly instead of through the module.
+
+        ```{note}
+        The candidates
+        {meth}`meta_package_manager.bar_plugin.MPMPlugin.search_mpm` produces are
+        deliberately not reused here. The venv ones lead with a bare `uv` /
+        `pipenv` / `poetry` command name, while a bar app spawns a menu action
+        with the bare `launchd` `PATH`, where such a name does not resolve.
+        ```
+        """
+        if "__compiled__" in globals():
+            return (sys.executable,)
+        return (sys.executable, "-m", "meta_package_manager")
 
     @staticmethod
     def render_cli(cmd_args: tuple[str | Path, ...]) -> str:
@@ -286,46 +311,45 @@ class BarPluginRenderer(MPMPlugin):
 
     def add_upgrade_cli(self, outdated_data):
         """Augment the outdated data from `mpm outdated` subcommand with upgrade CLI
-        fields for bar plugin consumption."""
+        fields for bar plugin consumption.
+
+        Every menu action is an {attr}`mpm_cli` invocation restricted to the manager
+        owning the section (`mpm --brew upgrade wget`), never that manager's own
+        native command. Going back through `mpm` is what subjects a click to the
+        same policy as the run that rendered the menu: the configuration file found
+        on the system, and with it the release-age cooldown, the manager
+        selection, the sudo policy and the per-manager overrides. A native command
+        escapes all of them, silently upgrading a package `mpm` itself would have
+        held back.
+
+        Only the manager selector and the operation are passed, so every other
+        setting is resolved from the user's configuration at click time.
+
+        A manager is offered the action only when it
+        {func}`~meta_package_manager.capabilities.implements` it, which is the same
+        predicate `mpm` uses to route the subcommand: a manager it would skip gets
+        a `None` CLI and renders as a label-only menu line.
+        """
         for manager_id, manager_data in outdated_data.items():
-            if manager_data.get("packages"):
-                manager = pool.get(manager_id)
+            if not manager_data.get("packages"):
+                continue
+            manager = pool.get(manager_id)
+            selector = f"--{manager_id}"
 
-                # Produce the full-upgrade CLI.
-                try:
-                    upgrade_all_cli = manager.upgrade_all_cli()
-                except NotImplementedError:
-                    # Fallback on mpm itself which is capable of simulating a full
-                    # upgrade.
-                    logging.info(
-                        "Does not implement upgrade_all_cli.",
-                        extra={"label": manager_id},
-                    )
-                    mpm_args, _runnable, _up_to_date, _version, _error = self.best_mpm
-                    upgrade_all_cli = (
-                        *mpm_args,
-                        f"--{manager_id}",
-                        "upgrade",
-                        "--all",
-                    )
-                    logging.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
-
-                # Update outdated data with the full-upgrade CLI.
-                outdated_data[manager_id]["upgrade_all_cli"] = self.render_cli(
-                    upgrade_all_cli,
+            manager_data["upgrade_all_cli"] = None
+            if implements(manager, Operations.upgrade_all):
+                manager_data["upgrade_all_cli"] = self.render_cli(
+                    (*self.mpm_cli, selector, "upgrade", "--all"),
                 )
 
-                # Add for each package its upgrade CLI.
-                for package in manager_data["packages"]:
-                    # Generate the version-less upgrade CLI to be used by the *bar
-                    # plugin.
-                    upgrade_cli = None
-                    with contextlib.suppress(NotImplementedError):
-                        upgrade_cli = self.render_cli(
-                            manager.upgrade_one_cli(package["id"]),
-                        )
-
-                    package["upgrade_cli"] = upgrade_cli
+            # Add for each package its version-less upgrade CLI.
+            upgrades_one = implements(manager, Operations.upgrade)
+            for package in manager_data["packages"]:
+                package["upgrade_cli"] = None
+                if upgrades_one:
+                    package["upgrade_cli"] = self.render_cli(
+                        (*self.mpm_cli, selector, "upgrade", package["id"]),
+                    )
 
         return outdated_data
 

@@ -29,12 +29,17 @@ Which managers escalate is decided per manager. System package managers (`apt`, 
 Override the default globally with `--sudo` / `--no-sudo`, or per manager with the `sudo` key of a [`[mpm.managers.<id>]`](overrides.md) section:
 
 ```toml
+[mpm]
+sudo = false # Same as passing --no-sudo on every run.
+
 [mpm.managers.npm]
 sudo = true # Run global npm installs through sudo.
 
 [mpm.managers.pacman]
 sudo = false # Rootless setup: never escalate pacman.
 ```
+
+The global flag has its own `[mpm] sudo` key, so a standing policy needs no flag on the command line.
 
 A per-manager `sudo` value wins over the global flag, so you can escalate everything with `--sudo` while keeping a single manager rootless, or the reverse.
 

@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] The warnings proposing a CLI flag as their remedy now also name the configuration key that makes it stick: the cooldown skip points at `[mpm] require_cooldown_support = false`, and the two `sudo` credential warnings at `[mpm] sudo = true` and `[mpm] sudo = false`. Opting out of a safeguard is a standing policy, not a flag to re-type on every run.
+- [bar-plugin] Menu actions run `mpm` itself (`mpm --brew upgrade wget`) instead of the manager's native upgrade command, so a click is governed by the configuration file found at its default location on the system: manager selection, sudo policy, per-manager overrides and the release-age cooldown all apply. A manager that cannot natively enforce an active `cooldown` is now skipped with a warning instead of upgrading the package ungated.
 - [guix] Fix `guix install --load-path=packaging/guix` failing on unbound `python-pytest` and `python-xmltodict`, whose modules were not imported, and align the definition with the upstream Guix stanza.
 - [nix] Fix `nix-env --file packaging/nix` failing its runtime-dependency check on the stale `click-extra` `8.6.2` and `extra-platforms` `13.5.1` pins, bumping them to `8.8.1` and `13.6.0` to satisfy mpm `7.5.0`'s raised floors.
 

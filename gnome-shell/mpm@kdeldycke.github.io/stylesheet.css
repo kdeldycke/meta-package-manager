@@ -1,0 +1,52 @@
+/* All classes are namespaced under .mpm- and referenced from extension.js:
+   tests/test_gnome_extension.py enforces the mapping in both directions. */
+
+/* Panel indicator: icon + count label. */
+.mpm-indicator .panel-status-menu-box {
+  padding: 0 4px;
+}
+
+.mpm-count-label {
+  margin-left: 4px;
+}
+
+/* Scrollable package list container. The max-height is what makes the
+   ScrollView's automatic scrollbar engage: without it, nothing constrains a
+   popup menu's height and a big report overflows the screen. */
+.mpm-updates-list {
+  max-height: 30em;
+  padding: 0.8em;
+}
+
+/* Per-manager section header: "brew - 3 packages". */
+.mpm-manager-header {
+  font-weight: bold;
+}
+
+/* Package rows: name stretches left, versions align right. */
+.mpm-package-name {
+  padding-right: 1em;
+}
+
+/* Version diff, mirroring the Xbar/SwiftBar convention: common prefix dimmed,
+   installed suffix red, latest suffix green. Mid-luminance picks read on both
+   the light and dark shell themes. */
+.mpm-version-prefix,
+.mpm-version-arrow {
+  color: #9a9996;
+}
+
+.mpm-version-old {
+  color: #ed333b;
+}
+
+.mpm-version-new {
+  color: #2ec27e;
+}
+
+/* Manager error lines: the monospace red error font of the bar plugin. */
+.mpm-error-line {
+  color: #ed333b;
+  font-family: monospace;
+  font-size: 90%;
+}

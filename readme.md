@@ -66,6 +66,8 @@ $ uvx meta-package-manager
 - [Shell auto-completion](https://kdeldycke.github.io/meta-package-manager/install.html) for Bash, Zsh and Fish.
 - Provides a [Xbar/SwiftBar plugin](https://kdeldycke.github.io/meta-package-manager/bar-plugin.html) for
   friendly macOS integration.
+- Provides a [GNOME Shell extension](https://kdeldycke.github.io/meta-package-manager/gnome-shell.html) for
+  friendly Linux desktop integration.
 - Because `mpm` try to wrap all other package managers, it became another pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
 
 ## Supported package managers

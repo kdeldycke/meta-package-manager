@@ -5,6 +5,8 @@ The Meta Package Manager project is actively maintaining a plugin that is both c
 
 The plugin is written in Python and is a small wrapper around the `mpm` CLI.
 
+For Linux desktops, the {doc}`GNOME Shell extension <gnome-shell>` provides the same menu from the top bar.
+
 Each outdated package has its version diff colored with the same convention as `mpm outdated`: unchanged prefix in gray, installed-version suffix in red, latest-version suffix in green. SwiftBar renders these colors natively (package lines carry the `ansi=true` parameter); Xbar strips the color codes and shows plain text. On the translucent menus of recent macOS releases the suffixes adapt to the menu appearance, since the default system colors lose contrast against the material: a light menu darkens both suffixes, and a dark menu brightens the green.
 
 ```{hint}

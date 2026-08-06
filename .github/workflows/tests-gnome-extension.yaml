@@ -1,0 +1,71 @@
+---
+name: 🐚 Test GNOME Shell extension
+"on":
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/tests-gnome-extension.yaml
+      - gnome-shell/**
+      - tests/gnome/**
+      - tests/test_gnome_extension.py
+  pull_request:
+    paths:
+      - .github/workflows/tests-gnome-extension.yaml
+      - gnome-shell/**
+      - tests/gnome/**
+      - tests/test_gnome_extension.py
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Exercise the GNOME Shell extension outside a GNOME session: its shell-free
+# mpm.js module runs under a bare gjs interpreter (see tests/gnome/run-tests.js
+# for the rationale), and the GSettings schema compiles with the same strict
+# checks `gnome-extensions install` applies. The static invariants
+# (tests/test_gnome_extension.py) ride the main test matrix and need no job
+# here. Visual QA needs a real GNOME session and stays manual: install the zip
+# artifact packed below with `gnome-extensions install --force <zip>`.
+
+jobs:
+
+  gjs-tests:
+    name: gjs unit suite
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install gjs and GLib tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes gjs libglib2.0-bin
+      - name: Validate GSettings schema
+        run: >
+          glib-compile-schemas --strict --dry-run
+          "gnome-shell/mpm@kdeldycke.github.io/schemas/"
+      - name: Run gjs unit suite
+        run: gjs -m tests/gnome/run-tests.js
+
+  pack:
+    name: Pack installable zip
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install GLib tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes libglib2.0-bin
+      # Ship the compiled schema like `gnome-extensions pack` does, so a manual
+      # unzip into ~/.local/share/gnome-shell/extensions/ works as-is.
+      - name: Compile GSettings schema
+        run: glib-compile-schemas "gnome-shell/mpm@kdeldycke.github.io/schemas/"
+      - name: Pack the extension
+        run: >
+          cd "gnome-shell/mpm@kdeldycke.github.io" &&
+          zip --recurse-paths
+          "$RUNNER_TEMP/mpm@kdeldycke.github.io.shell-extension.zip" .
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gnome-shell-extension
+          path: ${{ runner.temp }}/mpm@kdeldycke.github.io.shell-extension.zip

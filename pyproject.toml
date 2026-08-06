@@ -47,6 +47,9 @@ keywords = [
   "gem",
   "gh-ext",
   "github cli",
+  "gnome",
+  "gnome-shell",
+  "gnome-shell-extension",
   "gnu guix",
   "guix",
   "homebrew",
@@ -442,6 +445,9 @@ build-backend.source-include = [
   ".github/**",
   "changelog.md",
   "docs/**",
+  # The GNOME Shell extension: sdist-only, so distribution packagers can ship
+  # it from the same tarball as mpm itself.
+  "gnome-shell/**",
   "tests/**",
 ]
 
@@ -629,6 +635,12 @@ replace = "date-released: {utcnow:%Y-%m-%d}"
 filename = "./meta_package_manager/bar_plugin.py"
 search = "<xbar.version>{current_version}</xbar.version>"
 replace = "<xbar.version>{new_version}</xbar.version>"
+
+[[tool.bumpversion.files]]
+# Update the version advertised by the GNOME Shell extension.
+filename = "./gnome-shell/mpm@kdeldycke.github.io/metadata.json"
+search = "\"version-name\": \"{current_version}\""
+replace = "\"version-name\": \"{new_version}\""
 
 [tool.lychee]
 # ref: https://github.com/lycheeverse/lychee/blob/master/lychee.example.toml
@@ -893,7 +905,7 @@ patterns = [ "/\\bvoid\\ linux\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🔌 bar-plugin"
-patterns = [ "plugin", "swiftbar", "xbar" ]
+patterns = [ "gnome shell", "gnome-shell", "plugin", "swiftbar", "xbar" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: BSD"
@@ -1184,7 +1196,7 @@ description = "xbps"
 [[tool.repomatic.labels.extra]]
 name = "🔌 bar-plugin"
 color = "fef2c0"
-description = "Xbar/SwiftBar plugin code, documentation and features"
+description = "Xbar/SwiftBar/GNOME Shell plugin code, documentation and features"
 
 [[tool.repomatic.labels.extra]]
 name = "🖥 platform: BSD"
@@ -1478,7 +1490,13 @@ any-glob-to-any-file = [ "meta_package_manager/managers/xbps.*", "tests/*xbps*" 
 
 [[tool.repomatic.labels.file-rules]]
 label = "🔌 bar-plugin"
-any-glob-to-any-file = [ "meta_package_manager/bar_plugin*", "tests/*bar_plugin*" ]
+any-glob-to-any-file = [
+  "gnome-shell/**",
+  "meta_package_manager/bar_plugin*",
+  "tests/*bar_plugin*",
+  "tests/*gnome*",
+  "tests/gnome/**",
+]
 
 [tool.gitleaks]
 allowlist.description = "False positives"

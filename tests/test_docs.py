@@ -120,6 +120,7 @@ def test_changelog():
         *(p.id for p in MAIN_PLATFORMS),
         "mpm",
         "bar-plugin",
+        "gnome-shell",
     }
 
     for line in content.splitlines():

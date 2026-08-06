@@ -1,0 +1,16 @@
+{
+  "description": "List outdated packages and manage upgrades from the top bar, for all package managers at once: apt, dnf, pacman, zypper, flatpak, snap, brew, pip, npm, cargo, gem and dozens more.\n\nThis extension is a frontend to the mpm CLI, which must be installed separately: https://kdeldycke.github.io/meta-package-manager/install.html",
+  "gettext-domain": "meta-package-manager",
+  "name": "Meta Package Manager",
+  "settings-schema": "org.gnome.shell.extensions.mpm",
+  "shell-version": [
+    "46",
+    "47",
+    "48",
+    "49",
+    "50"
+  ],
+  "url": "https://github.com/kdeldycke/meta-package-manager",
+  "uuid": "mpm@kdeldycke.github.io",
+  "version-name": "7.5.1.dev0"
+}

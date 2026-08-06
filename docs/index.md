@@ -22,6 +22,7 @@ cooldown
 sudo
 security
 bar-plugin
+gnome-shell
 falsehoods
 benchmark
 ```

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sealed parcel with an exclamation mark: a check failed or a manager reported
+     errors (the ⚠️ state of the Xbar/SwiftBar plugin title). Recolored by the
+     shell symbolic pipeline. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <path fill="#bebebe" d="M2.5 3h4.7v3.2H1.5V4a1 1 0 0 1 1-1zM8.8 3h4.7a1 1 0 0 1 1 1v2.2H8.8z"/>
+  <path fill="#bebebe" fill-rule="evenodd" d="M2.2 7.4h11.6v5.8a1 1 0 0 1-1 1H3.2a1 1 0 0 1-1-1zM7.2 8.4h1.6v3.2H7.2zM7.2 12.5h1.6v1.4H7.2z"/>
+</svg>

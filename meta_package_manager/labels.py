@@ -48,7 +48,7 @@ LABELS: list[tuple[str, str, str]] = [
     (
         "🔌 bar-plugin",
         "#fef2c0",
-        "Xbar/SwiftBar plugin code, documentation and features",
+        "Xbar/SwiftBar/GNOME Shell plugin code, documentation and features",
     ),
 ]
 """Global registry of all labels used in the project.
@@ -193,16 +193,26 @@ LABELS = sorted(
 
 
 CONTENT_RULES_STATIC: TLabelRules = [
-    ("🔌 bar-plugin", ("plugin", "swiftbar", "xbar")),
+    ("🔌 bar-plugin", ("gnome shell", "gnome-shell", "plugin", "swiftbar", "xbar")),
 ]
 """Content rules for labels that are not derived from the pool."""
 
 
 FILE_RULES_STATIC: TLabelRules = [
-    # The plugin spans two sibling modules: the stdlib-only bar_plugin.py script and
-    # its mpm-side bar_plugin_renderer.py companion. No trailing slash: they are
-    # modules, not a package directory.
-    ("🔌 bar-plugin", ("meta_package_manager/bar_plugin*", "tests/*bar_plugin*")),
+    # The label covers every menubar/panel integration: the stdlib-only
+    # bar_plugin.py script, its mpm-side bar_plugin_renderer.py companion (no
+    # trailing slash: they are modules, not a package directory), and the GNOME
+    # Shell extension tree with its gjs test runner.
+    (
+        "🔌 bar-plugin",
+        (
+            "gnome-shell/**",
+            "meta_package_manager/bar_plugin*",
+            "tests/*bar_plugin*",
+            "tests/*gnome*",
+            "tests/gnome/**",
+        ),
+    ),
     (f"{MANAGER_PREFIX}mpm", ("meta_package_manager/*",)),
 ]
 """File rules for labels that are not derived from the pool.

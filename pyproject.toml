@@ -904,7 +904,7 @@ label = "📦 manager: xbps"
 patterns = [ "/\\bvoid\\ linux\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
-label = "🔌 bar-plugin"
+label = "🔌 plugin"
 patterns = [ "gnome shell", "gnome-shell", "plugin", "swiftbar", "xbar" ]
 
 [[tool.repomatic.labels.content-rules]]
@@ -1194,7 +1194,7 @@ color = "bfdadc"
 description = "xbps"
 
 [[tool.repomatic.labels.extra]]
-name = "🔌 bar-plugin"
+name = "🔌 plugin"
 color = "fef2c0"
 description = "Xbar/SwiftBar/GNOME Shell plugin code, documentation and features"
 
@@ -1489,7 +1489,7 @@ label = "📦 manager: xbps"
 any-glob-to-any-file = [ "meta_package_manager/managers/xbps.*", "tests/*xbps*" ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "🔌 bar-plugin"
+label = "🔌 plugin"
 any-glob-to-any-file = [
   "gnome-shell/**",
   "meta_package_manager/bar_plugin*",

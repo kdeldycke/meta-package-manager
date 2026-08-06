@@ -46,7 +46,7 @@ if TYPE_CHECKING:
 
 LABELS: list[tuple[str, str, str]] = [
     (
-        "🔌 bar-plugin",
+        "🔌 plugin",
         "#fef2c0",
         "Xbar/SwiftBar/GNOME Shell plugin code, documentation and features",
     ),
@@ -193,7 +193,7 @@ LABELS = sorted(
 
 
 CONTENT_RULES_STATIC: TLabelRules = [
-    ("🔌 bar-plugin", ("gnome shell", "gnome-shell", "plugin", "swiftbar", "xbar")),
+    ("🔌 plugin", ("gnome shell", "gnome-shell", "plugin", "swiftbar", "xbar")),
 ]
 """Content rules for labels that are not derived from the pool."""
 
@@ -204,7 +204,7 @@ FILE_RULES_STATIC: TLabelRules = [
     # trailing slash: they are modules, not a package directory), and the GNOME
     # Shell extension tree with its gjs test runner.
     (
-        "🔌 bar-plugin",
+        "🔌 plugin",
         (
             "gnome-shell/**",
             "meta_package_manager/bar_plugin*",

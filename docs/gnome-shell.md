@@ -1,6 +1,6 @@
 # {octicon}`plug` GNOME Shell extension
 
-The Meta Package Manager project maintains a GNOME Shell extension, the Linux desktop counterpart of the {doc}`Xbar/SwiftBar plugin <bar-plugin>`.
+The Meta Package Manager project maintains a GNOME Shell extension.
 
 A top bar indicator lists the outdated packages reported by `mpm outdated` across every package manager on the system, and lets you upgrade them one by one or per manager. Each outdated package has its version diff colored with the same convention as `mpm outdated`: unchanged prefix in gray, installed-version suffix in red, latest-version suffix in green.
 
@@ -20,14 +20,22 @@ The extension is pending review on [extensions.gnome.org](https://extensions.gno
 
 ### From a release zip
 
-Each change to the extension produces an installable zip artifact via the [`tests-gnome-extension.yaml` workflow](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests-gnome-extension.yaml). Download it, then:
+Every [GitHub release](https://github.com/kdeldycke/meta-package-manager/releases/latest) carries the packed extension as a `mpm-gnome-shell-extension.zip` asset, next to the `mpm` binaries. Its provenance is attested, so you can verify it was built by this project's release pipeline before installing:
 
 ```shell-session
-$ gnome-extensions install --force mpm@kdeldycke.github.io.shell-extension.zip
+$ gh attestation verify mpm-gnome-shell-extension.zip --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+```
+
+Then install and enable it:
+
+```shell-session
+$ gnome-extensions install --force mpm-gnome-shell-extension.zip
 $ gnome-extensions enable mpm@kdeldycke.github.io
 ```
 
 Log out and back in (or restart GNOME Shell) for the extension to load.
+
+Between releases, the bleeding-edge equivalent is produced on each extension change as a workflow artifact of [`tests-gnome-extension.yaml`](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests-gnome-extension.yaml).
 
 ### From a source checkout
 
@@ -41,29 +49,27 @@ $ gnome-extensions enable mpm@kdeldycke.github.io
 
 ## Configuration
 
-Settings live in the extension preferences window (also reachable from the indicator menu) and mirror the {doc}`Xbar/SwiftBar plugin variables <bar-plugin>` where an equivalent exists:
+Settings live in the extension preferences window, also reachable from the indicator menu:
 
-| Setting                | Description                                                     | Type    | Default | Xbar/SwiftBar equivalent       |
-| ---------------------- | --------------------------------------------------------------- | ------- | ------- | ------------------------------ |
-| `submenu-layout`       | Group packages into a sub-menu for each manager.                | Boolean | `false` | `VAR_SUBMENU_LAYOUT`           |
-| `check-interval`       | Minutes between two package checks.                             | Integer | `420`   | The `mpm.7h.py` filename cycle |
-| `boot-wait`            | Seconds before the first check after login.                     | Integer | `30`    | :                              |
-| `timeout`              | Seconds passed to `mpm --timeout` for background checks.        | Integer | `60`    | Hard-coded to the same `60`    |
-| `mpm-command`          | Custom `mpm` launcher, empty to autodetect.                     | String  | Empty   | The `search_mpm` tiers         |
-| `always-visible`       | Show the indicator even when everything is up to date.          | Boolean | `true`  | :                              |
-| `show-count`           | Show the outdated package count next to the icon.               | Boolean | `true`  | The `🎁↑N` title counter       |
-| `notify`               | Desktop notification when new outdated packages appear.         | Boolean | `false` | :                              |
-| `upgrade-in-terminal`  | Run upgrades in a terminal window.                              | Boolean | `true`  | `terminal=true` menu items     |
-| `terminal-command`     | Custom terminal emulator, empty to autodetect.                  | String  | Empty   | :                              |
-| `post-upgrade-recheck` | Seconds before refreshing the list after an upgrade is started. | Integer | `300`   | The bar apps' `refresh=true`   |
-
-`VAR_TABLE_RENDERING` and the font variables have no equivalent: the GNOME menu is built from native widgets, already aligned in columns and styled by the shell theme.
+| Setting                | Description                                                     | Type    | Default |
+| ---------------------- | --------------------------------------------------------------- | ------- | ------- |
+| `submenu-layout`       | Group packages into a sub-menu for each manager.                | Boolean | `false` |
+| `check-interval`       | Minutes between two package checks.                             | Integer | `420`   |
+| `boot-wait`            | Seconds before the first check after login.                     | Integer | `30`    |
+| `timeout`              | Seconds passed to `mpm --timeout` for background checks.        | Integer | `60`    |
+| `mpm-command`          | Custom `mpm` launcher, empty to autodetect.                     | String  | Empty   |
+| `always-visible`       | Show the indicator even when everything is up to date.          | Boolean | `true`  |
+| `show-count`           | Show the outdated package count next to the icon.               | Boolean | `true`  |
+| `notify`               | Desktop notification when new outdated packages appear.         | Boolean | `false` |
+| `upgrade-in-terminal`  | Run upgrades in a terminal window.                              | Boolean | `true`  |
+| `terminal-command`     | Custom terminal emulator, empty to autodetect.                  | String  | Empty   |
+| `post-upgrade-recheck` | Seconds before refreshing the list after an upgrade is started. | Integer | `300`   |
 
 These settings only drive the menu layout and check cadence. Everything else comes from `mpm`'s own configuration file: the extension passes no option beyond the ones it decides itself, so the file found at its default location on the system applies to every run it triggers. See {doc}`configuration` for the search paths and the full schema.
 
 ## Menu actions
 
-Clicking a package runs `mpm --{manager-id} upgrade {package-id}`, and a section's *Upgrade all* entry runs `mpm --{manager-id} upgrade --all`, exactly like the {doc}`Xbar/SwiftBar plugin menu <bar-plugin>`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
+Clicking a package runs `mpm --{manager-id} upgrade {package-id}`, and a section's *Upgrade all* entry runs `mpm --{manager-id} upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
 
 By default the command opens in a terminal window, so the run can be followed and `sudo` can prompt for a password. Turning `upgrade-in-terminal` off runs upgrades silently in the background: system package managers then need passwordless escalation, as `mpm` cannot prompt without a terminal. See the `NOPASSWD` guidance in {doc}`sudo`.
 
@@ -73,7 +79,7 @@ Since a terminal window detaches from the process actually running the upgrade, 
 
 The extension lives in the [`gnome-shell/` directory](https://github.com/kdeldycke/meta-package-manager/tree/main/gnome-shell) of the `mpm` repository and shares its version, release cycle and issue tracker.
 
-Its logic is split like the bar plugin's: `extension.js` owns the widgetry while `mpm.js` is shell-free (it never imports `resource:///org/gnome/shell/*` modules), so the latter runs under a bare `gjs` interpreter:
+Its logic is split in two: `extension.js` owns the widgetry while `mpm.js` is shell-free (it never imports `resource:///org/gnome/shell/*` modules), so the latter runs under a bare `gjs` interpreter:
 
 ```shell-session
 $ gjs -m tests/gnome/run-tests.js
@@ -81,7 +87,7 @@ ok 1 - parseVersion nominal
 (...)
 ```
 
-Static invariants (metadata, GSettings schema, stylesheet and icon drift) are enforced by `tests/test_gnome_extension.py` in the regular Python test suite. Both run in CI via the [`tests-gnome-extension.yaml` workflow](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests-gnome-extension.yaml), which also packs the installable zip.
+Static invariants (metadata, GSettings schema, stylesheet and icon drift) are enforced by `tests/test_gnome_extension.py` in the regular Python test suite. The JavaScript follows GNOME Shell's own coding style, checked by ESLint with the [`eslint-config-gnome`](https://gitlab.gnome.org/World/javascript/eslint-config-gnome) rules: `eslint.config.js` at the repository root declares them, `package.json` pins them, and the Lint workflow runs `npx eslint .` whenever a JavaScript file changes. The [`tests-gnome-extension.yaml` workflow](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests-gnome-extension.yaml) runs the gjs suite, packs the installable zip with `gnome-extensions pack`, and proves it installs with a `gnome-extensions install` round-trip.
 
 To exercise the extension in a real session, install it from your checkout (see above), then run a nested GNOME Shell so crashes and reloads stay contained:
 
@@ -97,6 +103,6 @@ $ journalctl --follow --output=cat /usr/bin/gnome-shell
 
 ## Release process
 
-The extension version is advertised through the `version-name` field of `metadata.json`, kept in lockstep with the `mpm` version by `bump-my-version` (like the `<xbar.version>` header of the bar plugin).
+The extension version is advertised through the `version-name` field of `metadata.json`, kept in lockstep with the `mpm` version by `bump-my-version`.
 
 If the extension changed between releases, a fresh zip is uploaded to [extensions.gnome.org](https://extensions.gnome.org) for review. Reviews there are manual and can take a while.

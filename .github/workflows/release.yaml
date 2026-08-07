@@ -33,6 +33,40 @@ jobs:
       id-token: write
       issues: write
 
+  # Pack the GNOME Shell extension and hand it to the release engine's extra-assets
+  # job as a `release-asset-*` run artifact (see `release-assets` in [tool.repomatic]).
+  # Unconditional like the build lane: `release` needs this job, and a skip here
+  # would cascade into skipping the whole engine on regular pushes.
+  build-gnome-extension:
+    name: 🐚 Pack GNOME Shell extension
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The gnome-extensions CLI lives in the gnome-shell package; skipping the
+      # recommends keeps the desktop stack out of the runner.
+      - name: Install gnome-extensions CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends gnome-shell
+      # The canonical packer: validates metadata.json, compiles the schemas, and
+      # packs from an explicit file whitelist so stray files never leak into the
+      # zip. Non-standard files must be declared via --extra-source.
+      - name: Pack the extension
+        run: >
+          gnome-extensions pack --force
+          --extra-source=mpm.js
+          --extra-source=icons
+          --out-dir "$RUNNER_TEMP"
+          "gnome-shell/mpm@kdeldycke.github.io"
+      - name: Rename to the release asset name
+        run: >
+          mv "$RUNNER_TEMP/mpm@kdeldycke.github.io.shell-extension.zip"
+          "$RUNNER_TEMP/mpm-gnome-shell-extension.zip"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-asset-mpm-gnome-shell-extension.zip
+          path: ${{ runner.temp }}/mpm-gnome-shell-extension.zip
+
   publish-pypi:
     name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
     needs: build
@@ -62,7 +96,9 @@ jobs:
 
   release:
     uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@f3fd0341a6ffbe9f948e78e3270ca30faf2b2459 # v7.4.1
-    needs: build
+    needs:
+      - build
+      - build-gnome-extension
     permissions:
       attestations: write
       contents: write

@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [gnome-shell] Add a GNOME Shell extension (GNOME 46 to 50) mirroring the Xbar/SwiftBar plugin: a top bar indicator lists outdated packages per manager, and every menu action runs `mpm` itself (`mpm --brew upgrade wget`) in a terminal so the configuration file, `sudo` prompts and the release-age cooldown all apply. Addresses [#809](https://github.com/kdeldycke/meta-package-manager/issues/809).
+- [gnome-shell] Attach the packed extension to every GitHub release as an attested `mpm-gnome-shell-extension.zip` asset, built with `gnome-extensions pack`.
 - [gnome-shell] Lint the extension and its gjs test runner with ESLint, against GNOME Shell's own [`eslint-config-gnome`](https://gitlab.gnome.org/World/javascript/eslint-config-gnome) ruleset pinned to the commit `gnome-shell` itself pins, in a new `eslint` job of the extension's test workflow. No `package.json` or lockfile is committed: the stack is installed behind a 7-day `npm --min-release-age` cooldown, which gates the whole resolved dependency tree on public exposure the way `mpm --cooldown` gates the packages `mpm` installs.
 - [mpm] Document that `--cooldown` replaces a stricter release-age policy already configured natively, instead of tightening it.
 - [mpm] Rename the `🔌 bar-plugin` GitHub label to `🔌 plugin`, now covering the Xbar/SwiftBar plugin and the GNOME Shell extension alike.

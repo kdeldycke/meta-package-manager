@@ -34,6 +34,7 @@ runs:
         # _render_publish_pypi_job in repomatic/github/workflow_sync.py), so the empty workdir
         # is by design and setup-uv's warning about it is noise.
         ignore-empty-workdir: true
+        version: "0.12.0"
 
     - name: Download build artifact
       id: download
@@ -53,3 +54,36 @@ runs:
           args+=(--publish-url "${REPOSITORY_URL}")
         fi
         uv "${args[@]}" "${DOWNLOAD_PATH}"/*
+
+    # `uv publish` above only confirms the upload was accepted; PyPI's index/CDN
+    # can take up to a few minutes to make the new version resolvable everywhere.
+    # Downstream automation that reacts immediately to this workflow completing
+    # (a caller bumping a pin to the version just published, or a
+    # self-referential project like repomatic syncing its own workflow refs
+    # against itself) can race that propagation window and fail with a spurious
+    # "no version of X==Y" resolution error. Block here until the published
+    # version is actually visible, so nothing downstream inherits the race.
+    - name: Wait for PyPI propagation
+      if: inputs.repository-url == ''
+      env:
+        DOWNLOAD_PATH: ${{ steps.download.outputs.download-path }}
+      shell: bash
+      run: |
+        sdist=$(ls "${DOWNLOAD_PATH}"/*.tar.gz | head -1)
+        base=$(basename "${sdist}" .tar.gz)
+        pkg_version="${base##*-}"
+        pkg_name="${base%-*}"
+        echo "Waiting for ${pkg_name} ${pkg_version} to become visible on PyPI..."
+        for attempt in $(seq 1 20); do
+          if curl --fail --silent --show-error --output /dev/null \
+              "https://pypi.org/pypi/${pkg_name}/${pkg_version}/json"; then
+            echo "Visible after ${attempt} attempt(s) (~$(( (attempt - 1) * 15 ))s)."
+            exit 0
+          fi
+          sleep 15
+        done
+        msg="${pkg_name} ${pkg_version} was not visible on PyPI within 5 minutes of publishing."
+        msg="${msg} Downstream automation pinning to this version may fail transiently"
+        msg="${msg} until propagation catches up."
+        echo "::error::${msg}" >&2
+        exit 1

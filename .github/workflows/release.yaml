@@ -25,18 +25,77 @@ concurrency:
     }}
   cancel-in-progress: true
 
+# Supply-chain cooldown: no package published within the window can be resolved by
+# any command in this workflow. Set here, not per command, so it also covers the
+# `metadata` bootstrap and any step added later; a workflow-level `env:` cannot
+# reference `needs`, so the window is a literal that tests/test_workflows.py holds
+# equal to `[tool.repomatic] minimum-release-age`. Deliberate bypasses are
+# per-package CLI flags (`--exclude-newer-package`, `--min-release-age-exclude`).
+# See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@f3fd0341a6ffbe9f948e78e3270ca30faf2b2459 # v7.4.1
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@ef51d27ea435bf5368112791288130134bd02142 # v7.5.0
     permissions:
       id-token: write
       issues: write
+
+  publish-pypi:
+    name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
+    needs: build
+    # Gate decoupled from the run's overall result: always() lets this job run even when an unrelated job (like binary
+    # tests in the engine lane) failed the run, and package_built confirms the wheel actually built, so a cleanly-built
+    # wheel still publishes. Both signals come from the build lane (_release-build.yaml).
+    if: >-
+      always()
+      && needs.build.outputs.package_built == 'true'
+      && needs.build.outputs.release_commits_matrix
+    strategy:
+      # GitHub evaluates `strategy.matrix` during job setup even when `if:` will skip the job. On a non-release push
+      # the build lane emits an empty string for `release_commits_matrix` (not "null": see its output description for
+      # why). A bare `fromJSON('')` aborts the whole run with "Unexpected value ''", so we fall back to an empty
+      # `{"include":[]}` matrix, which expands the job to zero runs and skips it cleanly.
+      matrix: ${{ fromJSON(needs.build.outputs.release_commits_matrix || '{"include":[]}') }}
+    runs-on: ubuntu-slim
+    permissions:
+      # OIDC only: the PyPI Trusted Publishing token. The GitHub release notes
+      # (with their PyPI admonition) are owned end to end by the engine lane's
+      # create-release job, so this lane needs no write access to the repo.
+      id-token: write
+    steps:
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@ef51d27ea435bf5368112791288130134bd02142 # v7.5.0
+        with:
+          artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
+
+  release:
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@ef51d27ea435bf5368112791288130134bd02142 # v7.5.0
+    # `build-gnome-extension` is a downstream addition to the canonical `needs: build`:
+    # the engine's extra-assets job downloads the packed zip from this run, so the packing
+    # job must be gated upstream of the engine. `repomatic init` regenerates this caller
+    # from its own template and resets the list to a bare `build`, so re-add the edge after
+    # every sync until the engine grows a hook for it.
+    needs:
+      - build
+      - build-gnome-extension
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+    secrets:
+      REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
+      VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
 
   # Pack the GNOME Shell extension and hand it to the release engine's extra-assets
   # job as a `release-asset-*` run artifact (see `release-assets` in [tool.repomatic]).
   # Unconditional like the build lane: `release` needs this job, and a skip here
   # would cascade into skipping the whole engine on regular pushes.
+  # Placed after the `release` caller on purpose: `repomatic init` treats the last
+  # job referencing the upstream repo as the boundary and discards anything above it,
+  # so a downstream job declared earlier in the file is silently dropped on every sync.
   build-gnome-extension:
     name: 🐚 Pack GNOME Shell extension
     runs-on: ubuntu-24.04
@@ -66,46 +125,6 @@ jobs:
         with:
           name: release-asset-mpm-gnome-shell-extension.zip
           path: ${{ runner.temp }}/mpm-gnome-shell-extension.zip
-
-  publish-pypi:
-    name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
-    needs: build
-    # Gate decoupled from the run's overall result: always() lets this job run even when an unrelated job (like binary
-    # tests in the engine lane) failed the run, and package_built confirms the wheel actually built, so a cleanly-built
-    # wheel still publishes. Both signals come from the build lane (_release-build.yaml).
-    if: >-
-      always()
-      && needs.build.outputs.package_built == 'true'
-      && needs.build.outputs.release_commits_matrix
-    strategy:
-      # GitHub evaluates `strategy.matrix` during job setup even when `if:` will skip the job. On a non-release push
-      # the build lane emits an empty string for `release_commits_matrix` (not "null": see its output description for
-      # why). A bare `fromJSON('')` aborts the whole run with "Unexpected value ''", so we fall back to an empty
-      # `{"include":[]}` matrix, which expands the job to zero runs and skips it cleanly.
-      matrix: ${{ fromJSON(needs.build.outputs.release_commits_matrix || '{"include":[]}') }}
-    runs-on: ubuntu-slim
-    permissions:
-      # OIDC only: the PyPI Trusted Publishing token. The GitHub release notes
-      # (with their PyPI admonition) are owned end to end by the engine lane's
-      # create-release job, so this lane needs no write access to the repo.
-      id-token: write
-    steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@f3fd0341a6ffbe9f948e78e3270ca30faf2b2459 # v7.4.1
-        with:
-          artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
-
-  release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@f3fd0341a6ffbe9f948e78e3270ca30faf2b2459 # v7.4.1
-    needs:
-      - build
-      - build-gnome-extension
-    permissions:
-      attestations: write
-      contents: write
-      id-token: write
-    secrets:
-      REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
-      VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
 
   # Prepare a Guix package definition after the release job. Unlike Homebrew, Scoop,
   # NixOS, and AUR, the Guix definition is maintained in this repo (see packaging/guix/).

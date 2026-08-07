@@ -55,6 +55,27 @@ class UVBase(PackageManager):
     outdated at once. uv accepts an RFC 3339 timestamp, which is exactly what the
     default {meth}`meta_package_manager.execution.CLIExecutor.cooldown_env_value` produces.
 
+    ```{note}
+    The environment variable is the only mechanism that reaches these
+    subcommands, which is why the cutoff is injected rather than written to a
+    config file. [`uv pip` and `uv tool` operate at the user level and ignore
+    project-local configuration](https://docs.astral.sh/uv/concepts/configuration-files/):
+    a `[tool.uv]` table in the `pyproject.toml` of whatever directory the user
+    happens to stand in is never consulted. Only user-level and system-level
+    `uv.toml` are, and `UV_EXCLUDE_NEWER` outranks both.
+    ```
+
+    ```{caution}
+    Because the variable outranks those files, injecting it *replaces* any
+    standing `exclude-newer` the user configured rather than tightening it: a
+    cooldown looser than their own policy silently widens it for the duration of
+    the run. See {doc}`/cooldown`, section "The cooldown is authoritative, not a
+    floor".
+    ```
+
+    uv exposes no environment variable for the companion `--exclude-newer-package`
+    flag, so a per-package exemption cannot be injected the way this cutoff is.
+
     See https://docs.astral.sh/uv/reference/settings/#exclude-newer.
     """
 

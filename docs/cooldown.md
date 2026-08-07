@@ -144,6 +144,27 @@ The table below is the source of truth for which managers `mpm` can gate today a
 
 Distro and system managers (`apt`, `dnf`, `pacman`, `brew`, ...) generally have no per-upstream publish date attached to a package version: their version string is the distro maintainer's package build, not the upstream release, and the threat model differs (curated repositories with their own staging and review). The concept does not cleanly map. These managers are listed in the support table as N/A.
 
+### The cooldown is authoritative, not a floor
+
+`mpm` computes the cutoff from the requested `--cooldown` alone and injects it. It never reads the standing policy a user may already have configured natively, and the injected variable *outranks* that configuration in every supported ecosystem: `UV_EXCLUDE_NEWER` beats both user-level and project-level `exclude-newer`, and `npm_config_min-release-age` beats `.npmrc`.
+
+So a `--cooldown` **shorter** than the user's own setting silently relaxes it for the duration of the run:
+
+```shell-session
+$ cat ~/.config/uv/uv.toml
+exclude-newer = "7 days"
+
+$ uv pip install --dry-run "click-extra>=8.8.1"
+hint: `click-extra` was filtered by `exclude-newer` […] v8.8.1, published 2026-08-02
+
+$ UV_EXCLUDE_NEWER="1 day" uv pip install --dry-run "click-extra>=8.8.1"
+ + click-extra==8.8.1
+```
+
+The word "cooldown" invites reading the option as a safety minimum, so the surprise runs in the unsafe direction. This is a second fail-open path, distinct from the fail-closed treatment of unsupported managers described above: there, `mpm` refuses to act; here it acts with a weaker gate than the user asked the manager for.
+
+Treating the option as a floor instead (taking the stricter of the two, or warning when `--cooldown` would relax a native setting) means reading each manager's own configuration: `uv.toml` at two levels for uv, `.npmrc` at four for npm, each with its own format and precedence rules. That is the durable, manager-specific state [the stateless gate](#the-stateless-gate-trade-off) deliberately forgoes, so for now the behavior is documented rather than changed. Users who rely on a strict standing policy should pass a `--cooldown` at least as long, or omit it and let the native setting apply untouched.
+
 ### Read-only consistency
 
 The `outdated` report is not filtered by the cooldown on unsupported managers, so it may list versions that the subsequent `upgrade` would skip. For supported managers the same environment variable also affects `outdated`, so the report and the upgrade stay consistent.
@@ -155,6 +176,7 @@ The `outdated` report is not filtered by the cooldown on unsupported managers, s
 ## Possible future directions
 
 - **Detect `pipx`'s internal pip (or uv) at runtime.** `mpm`'s `pip` manager has a hard `>=26.1.0` floor, but `pipx` maintains its own virtualenvs whose pip may be older or whose resolution may be routed through `uv` (where the right env var is `UV_EXCLUDE_NEWER` instead of `PIP_UPLOADED_PRIOR_TO`). Probing the resolver per venv would let `mpm` refuse to advertise enforcement when the underlying pip is stale.
+- **Per-package exemptions (`--cooldown-exclude`).** The gate is currently all-or-nothing per run, so one legitimately-fresh package (a security fix, a package the user publishes themselves) forces the cooldown off for the whole tree. Both enforcing managers already expose the escape hatch natively: uv's [`--exclude-newer-package`](https://docs.astral.sh/uv/reference/settings/#exclude-newer-package) takes a `PACKAGE=DATE` pair, npm's [`min-release-age-exclude`](https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age-exclude) takes names or `minimatch` globs. The catch is that this would not fit the uniform [`cooldown_env_var`](#how-it-works) injection: uv publishes **no** environment variable for `--exclude-newer-package` (only the plain `--exclude-newer` carries a `UV_EXCLUDE_NEWER` binding), so uv needs the exemption appended to the command line while npm can keep taking it through `npm_config_min-release-age-exclude`. Supporting it therefore means a per-manager hook alongside the env var rather than a one-line addition, which is worth knowing before the option is designed.
 - **Onboard mechanisms as they ship upstream.** Several managers have active work that would slot into the [`cooldown_env_var`](#how-it-works) framework as a one-line addition once released: Composer ([#12692](https://github.com/composer/composer/pull/12692)), Bundler / RubyGems ([#9576](https://github.com/ruby/rubygems/pull/9576)), Cargo (stabilization of `-Zmin-publish-age`, [#17009](https://github.com/rust-lang/cargo/issues/17009)), dnf5 ([#2743](https://github.com/rpm-software-management/dnf5/issues/2743)), Scoop ([#6513](https://github.com/ScoopInstaller/Scoop/issues/6513)), winget ([#6178](https://github.com/microsoft/winget-cli/issues/6178)), VS Code ([#316867](https://github.com/microsoft/vscode/issues/316867)).
 - **Advisory mode for `outdated` on unsupported managers.** `mpm` could query each package registry directly (PyPI, RubyGems, crates.io, ...) to annotate `outdated` with a "safe latest" column: purely informational, no install-side enforcement. This avoids the transitive-resolution trap while still being useful. It requires a new HTTP client surface and a state directory for date caching, neither of which `mpm` has today.
 - **Consult a curated compromise-window denylist.** aur-cooldown pairs its age gate with [aur-malware-check](https://github.com/lenucksi/aur-malware-check)'s `campaigns.json`, denying only the versions pushed inside a dated compromise window rather than freezing a package by name. This is orthogonal to release age: a version can be old enough to clear the cooldown yet still sit inside a known-bad window. Wiring such a feed into `mpm` would lean on the same HTTP client and state directory the advisory mode above already calls for.

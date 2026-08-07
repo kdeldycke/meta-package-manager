@@ -639,8 +639,8 @@ replace = "<xbar.version>{new_version}</xbar.version>"
 [[tool.bumpversion.files]]
 # Update the version advertised by the GNOME Shell extension.
 filename = "./gnome-shell/mpm@kdeldycke.github.io/metadata.json"
-search = "\"version-name\": \"{current_version}\""
-replace = "\"version-name\": \"{new_version}\""
+search = '"version-name": "{current_version}"'
+replace = '"version-name": "{new_version}"'
 
 [tool.lychee]
 # ref: https://github.com/lycheeverse/lychee/blob/master/lychee.example.toml

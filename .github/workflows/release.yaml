@@ -6,6 +6,8 @@ name: 🚀 Build & release
     branches:
       - main
 
+permissions: {}
+
 concurrency:
   # Declared on this push-triggered entry, not the reusable _release-engine.yaml it
   # calls: GitHub decides run cancellation from the entry workflow's group, and a
@@ -25,15 +27,13 @@ concurrency:
     }}
   cancel-in-progress: true
 
-# Deny by default: every job below grants itself the scopes it needs.
-permissions: {}
-
 # Supply-chain cooldown: no package published within the window can be resolved by
 # any command in this workflow. Set here, not per command, so it also covers the
 # `metadata` bootstrap and any step added later; a workflow-level `env:` cannot
-# reference `needs`, so the window is a literal kept equal to the
-# `[tool.uv] exclude-newer` of pyproject.toml. Deliberate bypasses are per-package
-# CLI flags (`--exclude-newer-package`, `--min-release-age-exclude`).
+# reference `needs`, so the window is a literal that tests/test_workflows.py holds
+# equal to `[tool.repomatic] minimum-release-age`. Deliberate bypasses are
+# per-package CLI flags (`--exclude-newer-package`, `--min-release-age-exclude`).
+# See claude.md for the rationale.
 env:
   NPM_CONFIG_MIN_RELEASE_AGE: 7
   UV_EXCLUDE_NEWER: "1 week"
@@ -74,14 +74,8 @@ jobs:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    # `build-gnome-extension` is a downstream addition to the canonical `needs: build`:
-    # the engine's extra-assets job downloads the packed zip from this run, so the packing
-    # job must be gated upstream of the engine. `repomatic init` carries the edge across a
-    # sync since repomatic 7.6.0.
-    needs:
-      - build
-      - build-gnome-extension
     uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@07e3ef8ae5685c7dfc4af43001b6fc67501396b1 # v7.6.0
+    needs: build
     permissions:
       attestations: write
       contents: write
@@ -89,6 +83,7 @@ jobs:
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+
 
   # Pack the GNOME Shell extension and hand it to the release engine's extra-assets
   # job as a `release-asset-*` run artifact (see `release-assets` in [tool.repomatic]).

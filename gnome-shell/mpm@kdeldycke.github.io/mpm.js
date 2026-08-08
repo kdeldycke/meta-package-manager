@@ -88,7 +88,7 @@ export function findMpm(override = '') {
  * Extract a version tuple from `mpm --no-color --version` output.
  *
  * @param {string} text - The command's stdout.
- * @returns {number[]|null} version components, or null when unparseable.
+ * @returns {number[]|null} version components, or null when unparsable.
  */
 export function parseVersion(text) {
     const match = VERSION_REGEX.exec(text ?? '');

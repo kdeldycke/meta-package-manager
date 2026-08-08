@@ -14,7 +14,6 @@ exclude-newer-span = "P1W"
 [options.exclude-newer-package]
 click-extra = "2026-08-03T00:00:00Z"
 extra-platforms = "2026-08-04T00:00:00Z"
-repomatic = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
 
 [[package]]
 name = "accessible-pygments"
@@ -1000,7 +999,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "7.6.0.dev0"
+version = "7.6.1.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'" },

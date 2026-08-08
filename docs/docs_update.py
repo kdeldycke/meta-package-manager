@@ -28,9 +28,17 @@ produced by the generators in {mod}`meta_package_manager._docs` and needs no
 regeneration step here. The readme's Sankey diagram and operation matrix call
 those same generators from `<!-- mirror-src -->` blocks, refreshed by
 `click-extra refresh-directives` in the same `update-docs` job.
+
+`--check` reports which artifacts are out of date and exits non-zero without
+touching the tree, so `repomatic update-docs --check` can detect drift in CI.
+repomatic forwards the flag to this script; a script that silently ignored it
+would keep writing and report a clean tree.
 """
 
 from __future__ import annotations
+
+import argparse
+import sys
 
 import tomlkit
 
@@ -45,6 +53,10 @@ from meta_package_manager.labels import (
     generate_file_rules,
 )
 from meta_package_manager.pool import pool
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from pathlib import Path
 
 KEYWORDS_EXTRAS = (
     "alpine linux",
@@ -150,7 +162,25 @@ def _rules_aot(rules: list[tuple[str, tuple[str, ...]]], field: str):
     return aot
 
 
-def update_labels() -> None:
+def _sync_file(path: Path, content: str, *, check: bool) -> bool:
+    """Write *content* to *path*, or only report whether it would change.
+
+    The single write gate of this module: every generator renders its target in
+    full, then hands it here, so `--check` cannot drift from what a real run
+    would produce.
+
+    :param check: Report only, leaving the file untouched.
+    :return: `True` when the file is out of date.
+    """
+    current = path.read_text(encoding="UTF-8") if path.exists() else None
+    if current == content:
+        return False
+    if not check:
+        path.write_text(content, encoding="UTF-8")
+    return True
+
+
+def update_labels(*, check: bool = False) -> bool:
     """Sync the label registry and labeller rules into `pyproject.toml`.
 
     Regenerates the three `[tool.repomatic.labels.*]` arrays from
@@ -166,6 +196,9 @@ def update_labels() -> None:
     `pyproject-fmt` emits, so the result survives the autofix formatting
     pass without churn.
     ```
+
+    :param check: Report only, leaving `pyproject.toml` untouched.
+    :return: `True` when the label arrays are out of date.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
@@ -200,15 +233,18 @@ def update_labels() -> None:
             f"\n\n[[tool.repomatic.labels.{key}]]",
             1,
         )
-    pyproject.write_text(content, encoding="UTF-8")
+    return _sync_file(pyproject, content, check=check)
 
 
-def update_keywords() -> None:
+def update_keywords(*, check: bool = False) -> bool:
     """Sync the `[project]` keywords of `pyproject.toml`.
 
     The keyword set is the pool's manager IDs merged with the curated
     {data}`KEYWORDS_EXTRAS`, so a new manager advertises itself on PyPI without
     a hand edit. Same `tomlkit` round-trip as {func}`update_labels`.
+
+    :param check: Report only, leaving `pyproject.toml` untouched.
+    :return: `True` when the keywords are out of date.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
@@ -220,10 +256,10 @@ def update_keywords() -> None:
         multiline=True,
     )
 
-    pyproject.write_text(tomlkit.dumps(doc), encoding="UTF-8")
+    return _sync_file(pyproject, tomlkit.dumps(doc), check=check)
 
 
-def update_readme_footnotes() -> None:
+def update_readme_footnotes(*, check: bool = False) -> bool:
     """Splice the operation-matrix platform footnotes into `readme.md`.
 
     The manager Sankey diagram and the operation matrix are `<!-- mirror-src -->`
@@ -233,6 +269,9 @@ def update_readme_footnotes() -> None:
     (https://github.com/executablebooks/mdformat-footnote/issues/11), so the
     closing marker is wedged against the tail of the last footnote (no leading
     newline) and the region is spliced by hand.
+
+    :param check: Report only, leaving `readme.md` untouched.
+    :return: `True` when the footnotes are out of date.
     """
     readme = PROJECT_ROOT / "readme.md"
     _, footnotes = operation_matrix()
@@ -242,13 +281,14 @@ def update_readme_footnotes() -> None:
     orig_content = readme.read_text(encoding="UTF-8")
     pre_content, rest = orig_content.split(start_tag, 1)
     _, post_content = rest.split(end_tag, 1)
-    readme.write_text(
+    return _sync_file(
+        readme,
         f"{pre_content}{start_tag}{footnotes}{end_tag}{post_content}",
-        encoding="UTF-8",
+        check=check,
     )
 
 
-def update_manager_stubs() -> None:
+def update_manager_stubs(*, check: bool = False) -> bool:
     """Sync the committed page stubs of `docs/managers/`.
 
     The directory is wholly owned by this function: one `<id>.md` stub per
@@ -256,24 +296,59 @@ def update_manager_stubs() -> None:
     differs (keeping `update-docs` autofix diffs minimal), and stubs whose
     manager left the pool are deleted. `test_manager_stubs_in_sync` guards
     the contract.
+
+    :param check: Report only, leaving `docs/managers/` untouched.
+    :return: `True` when a stub is missing, stale or orphaned.
     """
     stub_dir = PROJECT_ROOT / "docs" / "managers"
-    stub_dir.mkdir(parents=True, exist_ok=True)
+    if not check:
+        stub_dir.mkdir(parents=True, exist_ok=True)
 
     expected = {mid: manager_page_stub(mid) for mid in pool.all_manager_ids}
 
+    stale = False
     for stub in stub_dir.glob("*.md"):
         if stub.stem not in expected:
-            stub.unlink()
+            stale = True
+            if not check:
+                stub.unlink()
 
     for mid, content in expected.items():
-        stub = stub_dir / f"{mid}.md"
-        if not stub.exists() or stub.read_text(encoding="UTF-8") != content:
-            stub.write_text(content, encoding="UTF-8")
+        if _sync_file(stub_dir / f"{mid}.md", content, check=check):
+            stale = True
+
+    return stale
+
+
+def main() -> int:
+    """Regenerate every artifact, or report which ones are out of date.
+
+    :return: Process exit code, non-zero under `--check` when anything drifted.
+    """
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Report out-of-date artifacts and exit non-zero without writing.",
+    )
+    args = parser.parse_args()
+
+    # Keywords before labels: both rewrite `pyproject.toml`, and a real run
+    # needs the second read to see what the first one wrote.
+    updaters = {
+        "pyproject.toml [project] keywords": update_keywords,
+        "pyproject.toml [tool.repomatic.labels] arrays": update_labels,
+        "docs/managers/ page stubs": update_manager_stubs,
+        "readme.md operation-matrix footnotes": update_readme_footnotes,
+    }
+    drifted = [name for name, updater in updaters.items() if updater(check=args.check)]
+
+    if not args.check:
+        return 0
+    for name in drifted:
+        print(f"Out of date: {name}")
+    return 1 if drifted else 0
 
 
 if __name__ == "__main__":
-    update_keywords()
-    update_labels()
-    update_manager_stubs()
-    update_readme_footnotes()
+    sys.exit(main())

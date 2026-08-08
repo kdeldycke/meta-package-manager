@@ -73,6 +73,11 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.12.0"
       - name: Run repomatic metadata
         id: metadata
         run: >
@@ -152,15 +157,15 @@ jobs:
       - name: APT - Linux upgrade
         if: runner.os == 'Linux'
         run: |
-          sudo apt --quiet --yes update
+          sudo apt-get --quiet --yes update
           # lxml has no pre-built wheel for development Python (3.15+), so it
           # must compile from source, which needs libxml2 and libxslt headers.
-          sudo apt --quiet --yes install libxml2-dev libxslt-dev
+          sudo apt-get --quiet --yes install libxml2-dev libxslt-dev
 
       # PackageKit
       - name: PackageKit - Linux install
         if: runner.os == 'Linux'
-        run: sudo apt --quiet --yes install packagekit
+        run: sudo apt-get --quiet --yes install packagekit
 
       # Chocolatey
       - name: Chocolatey - Windows self-upgrade
@@ -189,7 +194,7 @@ jobs:
       - name: NPM - Linux install
         if: runner.os == 'Linux'
         run: |
-          sudo apt --quiet --yes install npm
+          sudo apt-get --quiet --yes install npm
           sudo npm install --global npm@latest
       - name: NPM - macOS install
         if: runner.os == 'macOS'
@@ -213,7 +218,7 @@ jobs:
       - name: Cargo - Linux install
         if: runner.os == 'Linux'
         run: |
-          sudo apt --quiet --yes install cargo
+          sudo apt-get --quiet --yes install cargo
       - name: Cargo - Windows install
         if: runner.os == 'Windows'
         run: |
@@ -248,7 +253,7 @@ jobs:
       - name: Flatpak - Linux install
         if: runner.os == 'Linux'
         run: |
-          sudo apt --quiet --yes install flatpak
+          sudo apt-get --quiet --yes install flatpak
 
       # PowerShell Gallery
       - name: PowerShell Gallery - macOS install
@@ -306,19 +311,19 @@ jobs:
       - name: DNF - Linux install
         if: runner.os == 'Linux'
         run: |
-          sudo apt --quiet --yes install dnf
+          sudo apt-get --quiet --yes install dnf
 
       # Zypper
       - name: Zypper - Linux install
         if: runner.os == 'Linux'
         run: |
-          sudo apt --quiet --yes install zypper
+          sudo apt-get --quiet --yes install zypper
 
       # Snap
       - name: Snap - Linux upgrade
         if: runner.os == 'Linux'
         run: |
-          sudo apt --quiet --yes install snapd
+          sudo apt-get --quiet --yes install snapd
 
       # VSCode
       - name: VSCode - macOS install
@@ -363,7 +368,7 @@ jobs:
         # As of Ubuntu 21.04, RubyGems is exclusively managed by APT; "gem update --system" is unsupported.
         if: runner.os == 'Linux'
         run: |
-          sudo apt --quiet --yes install ruby-rubygems
+          sudo apt-get --quiet --yes install ruby-rubygems
 
       # SteamCMD
       - name: SteamCMD - macOS install
@@ -378,15 +383,15 @@ jobs:
         run: |
           sudo add-apt-repository --yes multiverse
           sudo dpkg --add-architecture i386
-          sudo apt --quiet --yes update
+          sudo apt-get --quiet --yes update
           # Accept Steam license.
           # Source: https://askubuntu.com/a/1017487
           echo steam steam/question select "I AGREE" | sudo debconf-set-selections
           echo steam steam/license note '' | sudo debconf-set-selections
           sudo debconf-show steam
-          sudo apt --quiet --yes install libgcc-s1:i386 libstdc++6:i386 libatomic1:i386
-          sudo apt --quiet --yes install steam
-          sudo apt --quiet --yes install steamcmd
+          sudo apt-get --quiet --yes install libgcc-s1:i386 libstdc++6:i386 libatomic1:i386
+          sudo apt-get --quiet --yes install steam
+          sudo apt-get --quiet --yes install steamcmd
       - name: SteamCMD - Windows install
         if: runner.os == 'Windows'
         run: |
@@ -416,6 +421,11 @@ jobs:
 
       - name: Install UV
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.12.0"
       - name: Force native ARM64 Python on Windows ARM64
         # Workaround for https://github.com/astral-sh/uv/issues/12906: uv defaults to x86_64 Python on ARM64 Windows,
         # relying on transparent emulation. Native extensions with Rust (e.g., test-results-parser from codecov-cli)

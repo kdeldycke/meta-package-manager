@@ -91,7 +91,6 @@ from .tables import SortableField
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
-    from typing import IO
 
     from click_extra import Context, Parameter
 
@@ -154,21 +153,6 @@ managers that actually carry a {attr}`cooldown_env_var
 <meta_package_manager.execution.CLIExecutor.cooldown_env_var>`: adding cooldown
 support to a manager surfaces it here automatically.
 """
-
-
-def is_stdout(filepath: Path) -> bool:
-    """Check if a file path is set to stdout.
-
-    Prevents the creation of a `-` file in the current directory.
-    """
-    return str(filepath) == "-"
-
-
-def prep_path(filepath: Path) -> IO | None:
-    """Prepare the output file parameter for Click's echo function."""
-    if is_stdout(filepath):
-        return None
-    return filepath.open("w", encoding="UTF-8")
 
 
 def guard_existing_output(ctx: Context, output_path: Path, *, overwrite: bool) -> None:

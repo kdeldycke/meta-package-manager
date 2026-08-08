@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from meta_package_manager.capabilities import Operations
@@ -64,6 +66,18 @@ class TestBackup(CLISubCommandTests):
         assert result.exit_code == 0
         assert "mpm-packages.toml" in result.stderr
         self.check_manager_selection(result)
+
+    def test_output_to_file_creates_missing_parents(self, invoke, subcmd):
+        """A destination whose directory does not exist yet is created, not an error.
+
+        Regression: mpm used to open the target directly, so a path into a
+        missing directory died on an unhandled `FileNotFoundError`. Adopting
+        click-extra's `prep_path` brought the `mkdir -p` with it.
+        """
+        target = Path("snapshots") / "2026" / "mpm-packages.toml"
+        result = invoke(subcmd, str(target))
+        assert result.exit_code == 0
+        assert target.is_file()
 
     @default_manager_ids
     def test_single_manager_file_output(self, manager_id, invoke, subcmd):

@@ -33,8 +33,10 @@ from click_extra import (
     argument,
     echo,
     file_path,
+    is_stdout,
     option,
     pass_context,
+    prep_path,
 )
 
 from .capabilities import Operations
@@ -43,10 +45,8 @@ from .cli import (
     _cli_errors,
     _snapshot_installed,
     guard_existing_output,
-    is_stdout,
     mpm,
     overwrite_option,
-    prep_path,
     query_exact_option,
     query_option,
 )
@@ -213,7 +213,8 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     sbom.finalize()
     if ctx.obj.summary:
         print_summary(*sbom_summary(sbom, bundled))
-    echo(sbom.export(), file=prep_path(export_path))
+    with prep_path(export_path) as stream:
+        echo(sbom.export(), file=stream)
 
 
 def _scan_and_attach_vulnerabilities(sbom: SBOM) -> None:

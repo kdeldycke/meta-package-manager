@@ -34,7 +34,16 @@ from io import TextIOWrapper
 from pathlib import Path
 
 import tomli_w
-from click_extra import File, argument, echo, file_path, option, pass_context
+from click_extra import (
+    File,
+    argument,
+    echo,
+    file_path,
+    is_stdout,
+    option,
+    pass_context,
+    prep_path,
+)
 from click_extra.theme import get_current_theme as theme
 from extra_platforms import current_platform
 
@@ -49,11 +58,9 @@ from .cli import (
     _snapshot_installed,
     exit_on_failures,
     guard_existing_output,
-    is_stdout,
     mpm,
     overwrite_option,
     package_label,
-    prep_path,
     query_exact_option,
     query_option,
 )
@@ -307,7 +314,8 @@ def _dump_toml(
         for manager_id, packages in installed_data.items()
     )
 
-    echo(content, file=prep_path(output_path))
+    with prep_path(output_path) as stream:
+        echo(content, file=stream)
 
     if ctx.obj.summary:
         print_summary(Counter({k: len(v) for k, v in installed_data.items()}))
@@ -370,7 +378,8 @@ def _dump_brewfile(
         platform=current_platform().name,
     )
 
-    echo(content, file=prep_path(output_path), nl=False)
+    with prep_path(output_path) as stream:
+        echo(content, file=stream, nl=False)
 
     if ctx.obj.summary:
         section_counts: Counter[str] = Counter()

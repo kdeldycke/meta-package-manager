@@ -193,7 +193,21 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.7.0 is the floor mpm targets. It ships the `<!-- mirror-src -->`
+  # click-extra 8.8.1 is the floor mpm targets. The 8.8.0 release ships the
+  # click_extra.output helpers (is_stdout / prep_path / STDOUT_SENTINEL) that
+  # meta_package_manager.cli used to carry private copies of: the upstream
+  # prep_path creates missing parent directories, so `mpm backup a/b/c.toml` no
+  # longer dies on FileNotFoundError, and returns a UTF-8 stream for stdout
+  # instead of None. It also adds OperationTrail's determinate `progress_bar`
+  # rendering, which meta_package_manager.dispatch selects for every concurrent
+  # batch (each one counts its work up front, so the bar always has a length),
+  # and gates the trail's elapsed times on a `timer` argument following --time
+  # rather than always clocking the finisher. The 8.8.1 patch widens
+  # click-extra's own uv-build floor to >=0.8 and drops its `required-version`
+  # upper cap: mpm uncapped both in 7.5.0, and a still-capped dependency would
+  # re-break the distribution builds (MacPorts' py-uv-build 0.12) that uncap
+  # was meant to unblock.
+  # The 8.7.0 release ships the `<!-- mirror-src -->`
   # comment form of the `python:render` `:mirror:` block, where the generator
   # Python hides inside an HTML comment while its output still renders on GitHub
   # and PyPI: the readme's manager Sankey diagram and operation matrix now ride
@@ -243,8 +257,8 @@ dependencies = [
   # the split click_extra.highlight module, the ConfigValidator /
   # ValidationError import move to click_extra.config, print_table()'s
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
-  # default; 8.7.0 covers them all.
-  "click-extra>=8.7",
+  # default; 8.8.1 covers them all.
+  "click-extra>=8.8.1",
   # extra-platforms 13.6.0 adds AlmaLinux detection, silencing the "unrecognized
   # platform, please report" warning that 13.5.x printed to stdout on AlmaLinux
   # hosts (the release workflow's RHEL-family test containers), which corrupted
@@ -423,7 +437,7 @@ exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { extra-platforms = "2026-08-04T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-08-03T00:00:00Z", extra-platforms = "2026-08-04T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

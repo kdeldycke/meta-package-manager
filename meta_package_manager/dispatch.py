@@ -19,7 +19,7 @@ Where {mod}`meta_package_manager.execution` runs *one* manager's CLI in one
 subprocess, this module schedules *many* managers concurrently: the job-count
 policy that decides sequential-vs-concurrent ({func}`effective_jobs`), the
 up-front availability probe used during selection ({func}`warm_availability`),
-the two spinner-wrapped fan-out primitives the CLI subcommands drive
+the two progress-wrapped fan-out primitives the CLI subcommands drive
 ({func}`collect_from_managers`, {func}`collect_per_package`) with their shared
 {func}`dispatch` engine, the backend-lock catalog that serializes conflicting
 managers ({data}`SHARED_LOCK_FAMILIES` and {func}`merge_into_lock_lanes`), and
@@ -161,7 +161,7 @@ class OperationTrail(_OperationTrail):
     """{class}`click_extra.spinner.OperationTrail` bound to the manager pool.
 
     The upstream class owns the two renderings (sequential echoed lines, or one
-    aggregate spinner with buffered-then-streamed lines) and the interactive
+    aggregate indicator with buffered-then-streamed lines) and the interactive
     gating; this subclass supplies mpm's policy around it:
 
     - **Enablement follows `--progress`**, folded into each manager's
@@ -170,6 +170,10 @@ class OperationTrail(_OperationTrail):
       interactive stderr.
     - **A concurrent batch mutes the managers' own per-call spinners** (which
       would collide on stderr) for the duration of the aggregate one.
+    - **A concurrent batch's aggregate indicator is a determinate progress
+      bar**, not an indeterminate spinner: every {func}`dispatch` batch counts
+      its work up front (one task per manager, or per package-manager pair), so
+      the bar always has a length to render against.
     - **`coverage` keeps the read-command semantics**: their result *table* is
       the real output and each manager keeps its per-call spinner, so the
       sequential rendering stays silent (upstream's `echo_sequential=False`).
@@ -180,9 +184,11 @@ class OperationTrail(_OperationTrail):
 
     :param managers: the batch's managers, read for the `--progress` gate and
         (when concurrent) to mute their per-call spinners.
-    :param label: present-tense verb for the running spinner ("Searching").
-    :param unit: the noun counted in the spinner tally ("managers", "packages").
-    :param total: how many outcomes are expected, for the `done/total` count.
+    :param label: present-tense verb for the running indicator ("Searching").
+    :param unit: the noun counted in the indicator tally ("managers",
+        "packages").
+    :param total: how many outcomes are expected, for the `done/total` count and
+        the progress bar's length.
     :param jobs: the worker count from {func}`effective_jobs`; `> 1` selects the
         concurrent rendering.
     :param coverage: when set, a sequential run stays silent (the caller has
@@ -206,6 +212,9 @@ class OperationTrail(_OperationTrail):
             unit=unit,
             total=total,
             jobs=jobs,
+            # A determinate bar needs a length, so fall back to the indeterminate
+            # spinner for the (unused) concurrent-without-a-total case.
+            progress_bar=jobs > 1 and total > 0,
             # Progress off forces full silence; on, the upstream TTY gate decides.
             enabled=None if progress else False,
             echo_sequential=not coverage,
@@ -213,7 +222,7 @@ class OperationTrail(_OperationTrail):
         )
 
     def __enter__(self) -> Self:
-        # A single aggregate spinner stands in for the muted per-call ones.
+        # A single aggregate indicator stands in for the muted per-call spinners.
         if self.concurrent:
             for manager in self._managers:
                 manager.progress = False
@@ -245,8 +254,8 @@ def dispatch(
     Each callable does its work, records its own outcome (output to `INFO`, failures
     into a caller-owned list) and returns `(ok, message)` for the trail. The whole
     batch reports through one {class}`OperationTrail`: a per-outcome `✓`/`✗` line
-    plus a finisher, behind a single aggregate spinner when concurrent (a slow batch on
-    a terminal) and silent otherwise.
+    plus a finisher, behind a single aggregate progress bar when concurrent (a slow
+    batch on a terminal) and silent otherwise.
 
     Concurrency is sized by {func}`effective_jobs` (driven by `mpm --jobs`): it
     collapses to a sequential pass — preserving each manager's own per-call spinner —

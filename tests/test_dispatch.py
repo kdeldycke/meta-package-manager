@@ -27,6 +27,7 @@ otherwise default to {func}`click_extra.get_current_context`).
 from __future__ import annotations
 
 import io
+import re
 import threading
 import time
 
@@ -68,6 +69,17 @@ class TTYStringIO(io.StringIO):
 
     def isatty(self) -> bool:
         return True
+
+
+def _squeeze(output: str) -> str:
+    """Collapse the progress bar's column padding to single spaces.
+
+    A concurrent batch renders its aggregate indicator as a determinate bar,
+    which click lays out as ``{label}  [###---]  {done}/{total}  {unit}`` with
+    two-space gutters. Squeezing them lets the tally assertions read the way the
+    label was written, without pinning click's internal spacing.
+    """
+    return re.sub(r" {2,}", " ", output)
 
 
 def _record_thread(threads, lock):
@@ -183,10 +195,10 @@ def test_empty_manager_list_returns_empty():
 
 
 def test_no_finisher_line_off_terminal(capsys):
-    """Off a terminal the aggregate spinner never draws, so no finisher leaks.
+    """Off a terminal the aggregate progress bar never draws, so no finisher leaks.
 
-    `Spinner.ok()` emits its line unconditionally, so the gate must keep it out
-    of pipes, captured output and serialized runs.
+    The indicator emits its kept line unconditionally, so the gate must keep it
+    out of pipes, captured output and serialized runs.
     """
     ctx = FakeContext(jobs=4)
     managers = [StubManager(f"m{i}", progress=True) for i in range(4)]
@@ -200,9 +212,9 @@ def test_no_finisher_line_off_terminal(capsys):
     assert "Searched" not in capsys.readouterr().err
 
 
-def test_finisher_line_when_spinner_shown(monkeypatch):
+def test_finisher_line_when_progress_bar_shown(monkeypatch):
     """A slow batch on a terminal shows the running count, a ✓ trail and a finisher."""
-    # Zero the show-delay so the spinner draws at once, and point it at a fake TTY.
+    # Zero the show-delay so the bar draws at once, and point it at a fake TTY.
     monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.0)
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
@@ -211,7 +223,7 @@ def test_finisher_line_when_spinner_shown(monkeypatch):
     managers = [StubManager(f"m{i}", progress=True) for i in range(4)]
 
     def slow_work(manager):
-        time.sleep(0.1)  # Outlast the zeroed delay so the spinner draws a frame.
+        time.sleep(0.1)  # Outlast the zeroed delay so the bar draws a frame.
         return manager.id, {}
 
     collect_from_managers(
@@ -221,9 +233,12 @@ def test_finisher_line_when_spinner_shown(monkeypatch):
         slow_work,
         ctx=ctx,  # type: ignore[arg-type]
     )
-    output = tty.getvalue()
-    # The spinner draws its seeded running count before any manager lands...
-    assert "Searching 0/4 managers" in output
+    output = _squeeze(tty.getvalue())
+    # The bar draws its label and seeded running count before any manager lands...
+    assert "Searching [" in output
+    assert "0/4 managers" in output
+    # ...and fills to its full length as they land.
+    assert "4/4 managers" in output
     # ...leaves a ✓ trail line naming every manager as it completes (no errors)...
     assert all(f"m{i}" in output for i in range(4))
     assert OK_GLYPH in output
@@ -241,7 +256,7 @@ def test_failure_trail_marks_errored_managers(monkeypatch):
     managers = [StubManager(f"m{i}", progress=True) for i in range(4)]
 
     def work(manager):
-        time.sleep(0.1)  # Outlast the zeroed delay so the spinner draws a frame.
+        time.sleep(0.1)  # Outlast the zeroed delay so the bar draws a frame.
         # A non-empty "errors" list marks a manager as failed in the trail.
         errors = ["boom"] if manager.id == "m2" else []
         return manager.id, {"errors": errors}
@@ -258,16 +273,16 @@ def test_failure_trail_marks_errored_managers(monkeypatch):
     assert OK_GLYPH in output  # The success glyph, for the other managers.
 
 
-def test_trail_includes_managers_that_finish_before_the_spinner_shows(monkeypatch):
+def test_trail_includes_managers_that_finish_before_the_indicator_shows(monkeypatch):
     """Managers that complete within the show delay still get a trail line.
 
     Regression: the per-manager echo was gated on the live `shown` state, so a
-    manager that finished before the spinner first drew was dropped from the trail
-    (a 6-manager batch where the quick ones beat the 1s delay showed only the 3
-    slow ones, above a "Checked 6 managers" finisher). Outcomes are now buffered
-    and flushed once the spinner appears, so the ledger stays complete.
+    manager that finished before the indicator first drew was dropped from the
+    trail (a 6-manager batch where the quick ones beat the 1s delay showed only
+    the 3 slow ones, above a "Checked 6 managers" finisher). Outcomes are now
+    buffered and flushed once the indicator appears, so the ledger stays complete.
     """
-    # A show delay the fast managers beat but the slow ones outlast (so the spinner
+    # A show delay the fast managers beat but the slow ones outlast (so the bar
     # still draws and the trail surfaces at all).
     monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.2)
     tty = TTYStringIO()
@@ -383,7 +398,7 @@ def test_per_package_empty_is_a_noop():
     collect_per_package("Doing", "Done", [], ctx=ctx)  # type: ignore[arg-type]
 
 
-def test_per_package_finisher_when_spinner_shown(monkeypatch):
+def test_per_package_finisher_when_progress_bar_shown(monkeypatch):
     """A slow concurrent batch shows the running count, a ✓ trail and a finisher."""
     monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.0)
     tty = TTYStringIO()
@@ -393,7 +408,7 @@ def test_per_package_finisher_when_spinner_shown(monkeypatch):
 
     def make_task(manager_id, k):
         def task():
-            time.sleep(0.1)  # Outlast the zeroed delay so the spinner draws a frame.
+            time.sleep(0.1)  # Outlast the zeroed delay so the bar draws a frame.
             return True, f"pkg{k} done with {manager_id}"
 
         return task
@@ -401,8 +416,9 @@ def test_per_package_finisher_when_spinner_shown(monkeypatch):
     managers = [StubManager(f"m{i}", progress=True) for i in range(3)]
     tasks = [(m, make_task(m.id, k)) for m in managers for k in range(2)]
     collect_per_package("Removing", "Removed", tasks, ctx=ctx)  # type: ignore[arg-type]
-    output = tty.getvalue()
-    assert "Removing 0/6 packages" in output  # 3 managers × 2 packages.
+    output = _squeeze(tty.getvalue())
+    assert "Removing [" in output
+    assert "0/6 packages" in output  # 3 managers × 2 packages.
     assert OK_GLYPH in output
     assert "Removed 6/6 packages" in output
 
@@ -433,7 +449,7 @@ def test_per_package_failure_trail_marks_failed_tasks(monkeypatch):
 
 
 def test_per_package_no_finisher_off_terminal(capsys):
-    """Off a terminal nothing leaks (the trail and finisher are spinner-gated)."""
+    """Off a terminal nothing leaks (the trail and finisher are indicator-gated)."""
     ctx = FakeContext(jobs=4)
     managers = [StubManager(f"m{i}", progress=True) for i in range(4)]
     tasks = [(m, lambda mid=m.id: (True, f"{mid} ok")) for m in managers]
@@ -577,7 +593,12 @@ def test_lock_family_lane_shares_a_run_cache():
 
 
 def test_operation_trail_echoes_marks_and_finisher_on_tty(monkeypatch):
-    """On a TTY the ledger echoes a ✓/✗ line per mark, plus a timed finisher."""
+    """On a TTY the ledger echoes a ✓/✗ line per mark, plus a finisher.
+
+    The finisher carries an elapsed time only under `--time`: upstream gates it
+    on `OperationTrail`'s `timer` argument, which mpm leaves at its `None`
+    default so the flag decides. It used to clock unconditionally.
+    """
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
     trail = OperationTrail([StubManager("brew", progress=True)])  # type: ignore[list-item]

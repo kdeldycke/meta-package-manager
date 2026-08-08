@@ -15,11 +15,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Checks for the two orphan features and their native-command mappings.
 
-`remove --orphans` (scoped, {meth}`PackageManager.remove_orphan`) drops one
+`remove --orphans` (scoped,
+{meth}`~meta_package_manager.manager.PackageManager.remove_orphan`) drops one
 package's own orphaned dependencies; `cleanup --orphans` (system-wide,
-{meth}`PackageManager.cleanup_orphan`) sweeps every orphaned package. The argv
-assertions stub `run_cli` on the pooled manager singleton to capture command tokens
-without spawning a subprocess, so they run identically on any host.
+{meth}`~meta_package_manager.manager.PackageManager.cleanup_orphan`) sweeps every
+orphaned package. The argv assertions stub `run_cli` on the pooled manager
+singleton to capture command tokens without spawning a subprocess, so they run
+identically on any host.
 """
 
 from __future__ import annotations

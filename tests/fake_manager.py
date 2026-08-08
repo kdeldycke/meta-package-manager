@@ -128,10 +128,11 @@ class TimingOutFakeManager(FakeManager):
 
     Used by {func}`tests.test_cli.test_timeout` to exercise the
     {exc}`subprocess.TimeoutExpired` branch in
-    {meth}`meta_package_manager.manager.PackageManager.run`. The Python
+    {meth}`meta_package_manager.execution.CLIExecutor.run`. The Python
     interpreter is invoked as the manager's CLI so the test stays
     cross-platform; the sleep duration is derived from
-    {attr}`timeout` so the call is guaranteed to overshoot.
+    {attr}`~meta_package_manager.execution.CLIExecutor.timeout` so the call is
+    guaranteed to overshoot.
     """
 
     @property

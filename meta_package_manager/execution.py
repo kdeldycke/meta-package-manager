@@ -376,7 +376,7 @@ class CLIExecutor:
     Must be a list of strings whose order dictates the search sequence.
 
     Most of the time unnecessary:
-    {func}`meta_package_manager.manager.PackageManager.cli_path` works well on all
+    {attr}`meta_package_manager.execution.CLIExecutor.cli_path` works well on all
     platforms.
     """
 
@@ -384,14 +384,14 @@ class CLIExecutor:
     """Additional environment variables to add to the current context.
 
     Automatically applied on each
-    {func}`meta_package_manager.manager.PackageManager.run_cli` calls.
+    {meth}`meta_package_manager.execution.CLIExecutor.run_cli` calls.
     """
 
     pre_cmds: tuple[str, ...] = ()
     """Global list of pre-commands to add before before invoked CLI.
 
     Automatically added to each
-    {func}`meta_package_manager.manager.PackageManager.run_cli` call.
+    {meth}`meta_package_manager.execution.CLIExecutor.run_cli` call.
 
     Used to prepend [sudo](https://www.sudo.ws) or other system utilities.
     """
@@ -401,7 +401,7 @@ class CLIExecutor:
     """Global list of options used before and after the invoked package manager CLI.
 
     Automatically added to each
-    {func}`meta_package_manager.manager.PackageManager.run_cli` call.
+    {meth}`meta_package_manager.execution.CLIExecutor.run_cli` call.
 
     Essentially used to force silencing, low verbosity or no-color output.
     """
@@ -410,7 +410,7 @@ class CLIExecutor:
     """CLI options used to produce the version of the package manager.
 
     The raw output produced by the package manager CLI will be parsed with the
-    {attr}`version_regexes <meta_package_manager.manager.PackageManager.version_regexes>`
+    {attr}`version_regexes <meta_package_manager.execution.CLIExecutor.version_regexes>`
     below to extract the version number.
     """
 
@@ -424,7 +424,7 @@ class CLIExecutor:
     {attr}`version_cli_options` and parse its output with
     {attr}`version_regexes`, while every operation keeps using the manager's own
     {attr}`cli_path`. The binary is resolved with
-    {meth}`~meta_package_manager.manager.PackageManager.which`; the version resolves
+    {meth}`~meta_package_manager.execution.CLIExecutor.which`; the version resolves
     to `None` (manager not {attr}`fresh
     <meta_package_manager.manager.PackageManager.fresh>`) when it is not found.
     """
@@ -439,7 +439,7 @@ class CLIExecutor:
     group will be used as the version string of the package manager.
 
     That version string will then be sanitized and normalized by
-    {func}`meta_package_manager.manager.PackageManager.version`.
+    {attr}`meta_package_manager.execution.CLIExecutor.version`.
 
     By default match the first part that is space-separated.
 
@@ -686,7 +686,7 @@ class CLIExecutor:
         this order:
 
         * folders provided by {attr}`cli_search_path
-          <meta_package_manager.manager.PackageManager.cli_search_path>`,
+          <meta_package_manager.execution.CLIExecutor.cli_search_path>`,
         * then in all the default places specified by the environment variable (i.e.
           `os.getenv("PATH")`).
 
@@ -826,11 +826,11 @@ class CLIExecutor:
         Try each CLI names provided by {attr}`cli_names
         <meta_package_manager.manager.PackageManager.cli_names>`, in each system path
         provided by {attr}`cli_search_path
-        <meta_package_manager.manager.PackageManager.cli_search_path>`. In that order.
+        <meta_package_manager.execution.CLIExecutor.cli_search_path>`. In that order.
         Then returns the first match.
 
         Executability of the CLI will be separately assessed later by the
-        {func}`meta_package_manager.manager.PackageManager.executable` method below.
+        {attr}`meta_package_manager.execution.CLIExecutor.executable` property below.
         """
         if self.cli_names is not None:
             for cli_path in self.search_all_cli(self.cli_names):
@@ -1294,25 +1294,25 @@ class CLIExecutor:
         $ [<pre_cmds>|sudo --non-interactive] <cli_path> <pre_args> <*args> <post_args>
         ```
 
-        * {attr}`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
+        * {attr}`self.pre_cmds <meta_package_manager.execution.CLIExecutor.pre_cmds>`
           is added before the CLI path.
 
-        * {attr}`self.cli_path <meta_package_manager.manager.PackageManager.cli_path>`
+        * {attr}`self.cli_path <meta_package_manager.execution.CLIExecutor.cli_path>`
           is used as the main binary to execute.
 
-        * {attr}`self.pre_args <meta_package_manager.manager.PackageManager.pre_args>`
+        * {attr}`self.pre_args <meta_package_manager.execution.CLIExecutor.pre_args>`
           and {attr}`self.post_args
-          <meta_package_manager.manager.PackageManager.post_args>`  globals are added
+          <meta_package_manager.execution.CLIExecutor.post_args>`  globals are added
           before and after the provided `*args`.
 
         Each additional set of elements can be disabled with their respective flag:
 
         * `auto_pre_cmds=False`  to skip the automatic addition of
-          {attr}`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
+          {attr}`self.pre_cmds <meta_package_manager.execution.CLIExecutor.pre_cmds>`
         * `auto_pre_args=False`  to skip the automatic addition of
-          {attr}`self.pre_args <meta_package_manager.manager.PackageManager.pre_args>`
+          {attr}`self.pre_args <meta_package_manager.execution.CLIExecutor.pre_args>`
         * `auto_post_args=False` to skip the automatic addition of
-          {attr}`self.post_args <meta_package_manager.manager.PackageManager.post_args>`
+          {attr}`self.post_args <meta_package_manager.execution.CLIExecutor.post_args>`
 
         Each global set of elements can be locally overridden with:
 
@@ -1399,16 +1399,16 @@ class CLIExecutor:
         the package manager's global parameters.
 
         After the CLI is built with the
-        {meth}`meta_package_manager.manager.PackageManager.build_cli` method, it is
-        executed with the {meth}`meta_package_manager.manager.PackageManager.run`
+        {meth}`meta_package_manager.execution.CLIExecutor.build_cli` method, it is
+        executed with the {meth}`meta_package_manager.execution.CLIExecutor.run`
         method, augmented with environment variables from {attr}`self.extra_env
-        <meta_package_manager.manager.PackageManager.extra_env>`.
+        <meta_package_manager.execution.CLIExecutor.extra_env>`.
 
         All parameters are the same as
-        {meth}`meta_package_manager.manager.PackageManager.build_cli`, plus:
+        {meth}`meta_package_manager.execution.CLIExecutor.build_cli`, plus:
 
         * `auto_extra_env=False` to skip the automatic addition of
-          {attr}`self.extra_env <meta_package_manager.manager.PackageManager.extra_env>`
+          {attr}`self.extra_env <meta_package_manager.execution.CLIExecutor.extra_env>`
         * `override_extra_env=dict()` to locally overrides the later
         * `force_exec` ignores the `mpm --dry-run`, `mpm --stop-on-error`
           and `mpm --plan` options to force the execution and completion of the

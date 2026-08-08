@@ -31,10 +31,9 @@ permissions: {}
 # Supply-chain cooldown: no package published within the window can be resolved by
 # any command in this workflow. Set here, not per command, so it also covers the
 # `metadata` bootstrap and any step added later; a workflow-level `env:` cannot
-# reference `needs`, so the window is a literal that tests/test_workflows.py holds
-# equal to `[tool.repomatic] minimum-release-age`. Deliberate bypasses are
-# per-package CLI flags (`--exclude-newer-package`, `--min-release-age-exclude`).
-# See claude.md for the rationale.
+# reference `needs`, so the window is a literal kept equal to the
+# `[tool.uv] exclude-newer` of pyproject.toml. Deliberate bypasses are per-package
+# CLI flags (`--exclude-newer-package`, `--min-release-age-exclude`).
 env:
   NPM_CONFIG_MIN_RELEASE_AGE: 7
   UV_EXCLUDE_NEWER: "1 week"
@@ -90,7 +89,6 @@ jobs:
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
-
 
   # Pack the GNOME Shell extension and hand it to the release engine's extra-assets
   # job as a `release-asset-*` run artifact (see `release-assets` in [tool.repomatic]).

@@ -50,8 +50,8 @@ SCHEMA_ID = "org.gnome.shell.extensions.mpm"
 GJS_RUNNER = PROJECT_ROOT / "tests" / "gnome" / "run-tests.js"
 
 EXPECTED_ICON_STATES = frozenset({"error", "unknown", "updates", "uptodate"})
-"""Values of the ``State`` mapping in ``extension.js``, each backed by a
-``mpm-<state>-symbolic.svg`` icon."""
+"""Values of the `State` mapping in `extension.js`, each backed by a
+`mpm-<state>-symbolic.svg` icon."""
 
 
 def _extension_source(*names: str) -> str:
@@ -61,13 +61,17 @@ def _extension_source(*names: str) -> str:
     )
 
 
+def _gschema() -> ElementTree.Element:
+    """The `<schema>` element of the bundled GSettings schema."""
+    schema_file = EXTENSION_DIR / "schemas" / f"{SCHEMA_ID}.gschema.xml"
+    schema = ElementTree.parse(schema_file).getroot().find("schema")
+    assert schema is not None
+    return schema
+
+
 def _gschema_keys() -> list[str]:
     """Key names declared in the GSettings schema, in file order."""
-    schema_file = EXTENSION_DIR / "schemas" / f"{SCHEMA_ID}.gschema.xml"
-    tree = ElementTree.parse(schema_file)
-    schema = tree.getroot().find("schema")
-    assert schema is not None
-    return [key.attrib["name"] for key in schema.findall("key")]
+    return [key.attrib["name"] for key in _gschema().findall("key")]
 
 
 def test_metadata_well_formed():
@@ -86,10 +90,7 @@ def test_metadata_well_formed():
 
 
 def test_gschema_well_formed():
-    schema_file = EXTENSION_DIR / "schemas" / f"{SCHEMA_ID}.gschema.xml"
-    tree = ElementTree.parse(schema_file)
-    schema = tree.getroot().find("schema")
-    assert schema is not None
+    schema = _gschema()
     assert schema.attrib["id"] == SCHEMA_ID
     # The path is the schema ID with dots-to-slashes, per GSettings convention.
     assert schema.attrib["path"] == "/org/gnome/shell/extensions/mpm/"

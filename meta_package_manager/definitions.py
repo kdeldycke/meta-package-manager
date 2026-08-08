@@ -408,7 +408,7 @@ class OperationSpec:
     """Alternate binary name for this operation, or `None` for the manager's main
     {attr}`~meta_package_manager.execution.CLIExecutor.cli_path`.
 
-    Resolved with {meth}`~meta_package_manager.manager.PackageManager.which` at
+    Resolved with {meth}`~meta_package_manager.execution.CLIExecutor.which` at
     call time, so one definition can span sibling binaries (`urpmi`/`urpme`/
     `urpmq`, `cast`/`dispel`/`gaze`). The operation fails with
     {exc}`FileNotFoundError` when the binary is missing rather than silently

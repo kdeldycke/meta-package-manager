@@ -195,7 +195,11 @@ LABELS = sorted(
 CONTENT_RULES_STATIC: TLabelRules = [
     ("🔌 plugin", ("gnome shell", "gnome-shell", "plugin", "swiftbar", "xbar")),
 ]
-"""Content rules for labels that are not derived from the pool."""
+"""Curated keywords feeding the content rules of labels not derived from the pool.
+
+Holds keywords, not finished patterns: {func}`generate_content_rules` runs them
+through `_keyword_alternation()` like every other content rule.
+"""
 
 
 FILE_RULES_STATIC: TLabelRules = [
@@ -344,23 +348,18 @@ def _anchored(keyword: str) -> str:
     return f"{prefix}{escaped}{suffix}"
 
 
-def _content_pattern(keyword: str) -> str:
-    """Render one keyword as a case-insensitive labeller regex (`/…/i`).
-
-    Case-insensitive because users capitalize ecosystem names (`Perl`, `PyPI`),
-    which a lowercase keyword would miss under the labeller's case-sensitive
-    default.
-    """
-    return f"/{_anchored(keyword)}/i"
-
-
 def _keyword_alternation(keywords: tuple[str, ...]) -> str:
     """OR-join a label's keywords into one case-insensitive `/…/i` regex.
 
-    `github/issue-labeler` requires *every* pattern in a label's list to match, so
-    a raw keyword list reads as "all of these" rather than "any of these": a label
-    carrying both `node.js` and `nodejs` would fire only when both appear at once.
-    Collapsing the keywords into a single alternation restores "any keyword wins".
+    The single encoder for every content rule: `github/issue-labeler` requires
+    *every* pattern in a label's list to match, so a raw keyword list reads as "all
+    of these" rather than "any of these": a label carrying both `node.js` and
+    `nodejs` would fire only when both appear at once. Collapsing the keywords into
+    a single alternation restores "any keyword wins".
+
+    The `/…/i` wrapper makes the match case-insensitive, because users capitalize
+    the names they type (`Perl`, `PyPI`, `SwiftBar`), which a lowercase keyword
+    would miss under the labeller's case-sensitive default.
     """
     alternatives = "|".join(_anchored(kw) for kw in sorted(keywords, key=str.casefold))
     return f"/{alternatives}/i"
@@ -378,15 +377,17 @@ def generate_content_rules() -> TLabelRules:
     `uv` merely because they sat in the trace. The keywords are the distro, language
     and brand names a human types, which mpm never prints.
 
-    A manager label's keywords are OR-joined into a single case-insensitive pattern
-    by {func}`_keyword_alternation`, since the labeller demands that every pattern
-    in a list match. Platform labels instead keep a per-keyword list under that
-    same all-of semantics: their names surface in every bug report's `mpm --version`
-    block, so requiring several at once stops the platform labels from tagging every
-    issue. A label with no keyword is skipped: that manager gets no content rule,
-    only its file rule. Rules are sorted by label, both cases folded.
+    Every rule — static, manager and platform alike — emits exactly one pattern,
+    built by `_keyword_alternation()`. A rule listing its keywords raw would
+    read as "all of these" under the labeller's all-of semantics, which no issue
+    ever satisfies: a multi-keyword label encoded that way is silently dead. A label
+    with no keyword is skipped: that manager gets no content rule, only its file
+    rule. Rules are sorted by label, both cases folded.
     """
-    rules = list(CONTENT_RULES_STATIC)
+    rules = [
+        (label_name, (_keyword_alternation(keywords),))
+        for label_name, keywords in CONTENT_RULES_STATIC
+    ]
     for label_name in _label_members():
         key = label_name.removeprefix(MANAGER_PREFIX)
         keywords = MANAGER_CONTENT_KEYWORDS.get(key, ())
@@ -394,10 +395,10 @@ def generate_content_rules() -> TLabelRules:
             continue
         rules.append((label_name, (_keyword_alternation(keywords),)))
     for platform_name, platform_keywords in PLATFORM_CONTENT_KEYWORDS.items():
-        patterns = tuple(
-            _content_pattern(kw) for kw in sorted(platform_keywords, key=str.casefold)
-        )
-        rules.append((f"{PLATFORM_PREFIX}{platform_name}", patterns))
+        rules.append((
+            f"{PLATFORM_PREFIX}{platform_name}",
+            (_keyword_alternation(platform_keywords),),
+        ))
     return sorted(rules, key=lambda rule: str.casefold(rule[0]))
 
 

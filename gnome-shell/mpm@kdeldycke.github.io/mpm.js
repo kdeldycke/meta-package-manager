@@ -56,6 +56,20 @@ export const TERMINAL_CANDIDATES = [
     ['gnome-terminal', '--'],
 ];
 
+/* Shared by both command-override settings: a non-empty value is parsed with
+ * shell syntax, and anything unparsable or empty resolves to null rather than
+ * silently falling back to autodetection. */
+function parseOverride(override) {
+    try {
+        const [ok, argv] = GLib.shell_parse_argv(override);
+        if (ok && argv.length > 0)
+            return argv;
+    } catch {
+        return null;
+    }
+    return null;
+}
+
 /**
  * Resolve the mpm invocation to use, as an argv array.
  *
@@ -64,16 +78,8 @@ export const TERMINAL_CANDIDATES = [
  * @returns {string[]|null} argv, or null when nothing is found.
  */
 export function findMpm(override = '') {
-    if (override) {
-        try {
-            const [ok, argv] = GLib.shell_parse_argv(override);
-            if (ok && argv.length > 0)
-                return argv;
-        } catch {
-            return null;
-        }
-        return null;
-    }
+    if (override)
+        return parseOverride(override);
     const onPath = GLib.find_program_in_path('mpm');
     if (onPath)
         return [onPath];
@@ -294,16 +300,8 @@ export function diffVersions(installed, latest) {
  * @returns {string[]|null} terminal argv prefix, or null when none found.
  */
 export function findTerminal(override = '') {
-    if (override) {
-        try {
-            const [ok, argv] = GLib.shell_parse_argv(override);
-            if (ok && argv.length > 0)
-                return argv;
-        } catch {
-            return null;
-        }
-        return null;
-    }
+    if (override)
+        return parseOverride(override);
     for (const candidate of TERMINAL_CANDIDATES) {
         if (GLib.find_program_in_path(candidate[0]))
             return candidate;

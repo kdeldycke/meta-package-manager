@@ -194,7 +194,7 @@ dependencies = [
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
   # click-extra 8.8.1 is the floor mpm targets. The 8.8.0 release ships the
-  # click_extra.output helpers (is_stdout / prep_path / STDOUT_SENTINEL) that
+  # click_extra.output helpers (is_stdout / prep_path) that
   # meta_package_manager.cli used to carry private copies of: the upstream
   # prep_path creates missing parent directories, so `mpm backup a/b/c.toml` no
   # longer dies on FileNotFoundError, and returns a UTF-8 stream for stdout
@@ -922,7 +922,9 @@ patterns = [ "/\\bvoid\\ linux\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🔌 plugin"
-patterns = [ "gnome shell", "gnome-shell", "plugin", "swiftbar", "xbar" ]
+patterns = [
+  "/\\bgnome\\ shell\\b|\\bgnome\\-shell\\b|\\bplugin\\b|\\bswiftbar\\b|\\bxbar\\b/i",
+]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: BSD"
@@ -934,13 +936,7 @@ patterns = [ "/\\blinux\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: macOS"
-patterns = [
-  "/\\bapple\\b/i",
-  "/\\bmac\\ os\\b/i",
-  "/\\bmacos\\b/i",
-  "/\\bos\\ x\\b/i",
-  "/\\bosx\\b/i",
-]
+patterns = [ "/\\bapple\\b|\\bmac\\ os\\b|\\bmacos\\b|\\bos\\ x\\b|\\bosx\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: Unix"
@@ -948,7 +944,7 @@ patterns = [ "/\\bunix\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: Windows"
-patterns = [ "/\\bc:/i", "/\\bmicrosoft\\b/i", "/\\bwindows\\b/i" ]
+patterns = [ "/\\bc:|\\bmicrosoft\\b|\\bwindows\\b/i" ]
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: apk"

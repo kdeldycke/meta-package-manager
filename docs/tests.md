@@ -18,6 +18,15 @@
    :undoc-members:
 ```
 
+## tests.fake_manager module
+
+```{eval-rst}
+.. automodule:: tests.fake_manager
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_bar_plugin module
 
 ```{eval-rst}
@@ -49,6 +58,15 @@
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_backup
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_cli_dump module
+
+```{eval-rst}
+.. automodule:: tests.test_cli_dump
    :members:
    :show-inheritance:
    :undoc-members:
@@ -144,6 +162,15 @@
    :undoc-members:
 ```
 
+## tests.test_cooldown module
+
+```{eval-rst}
+.. automodule:: tests.test_cooldown
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_dispatch module
 
 ```{eval-rst}
@@ -162,10 +189,46 @@
    :undoc-members:
 ```
 
+## tests.test_docstring_corpus module
+
+```{eval-rst}
+.. automodule:: tests.test_docstring_corpus
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_doctor module
 
 ```{eval-rst}
 .. automodule:: tests.test_doctor
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_execution module
+
+```{eval-rst}
+.. automodule:: tests.test_execution
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_gnome_extension module
+
+```{eval-rst}
+.. automodule:: tests.test_gnome_extension
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_help module
+
+```{eval-rst}
+.. automodule:: tests.test_help
    :members:
    :show-inheritance:
    :undoc-members:
@@ -180,6 +243,15 @@
    :undoc-members:
 ```
 
+## tests.test_manager_definition module
+
+```{eval-rst}
+.. automodule:: tests.test_manager_definition
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_manager_homebrew module
 
 ```{eval-rst}
@@ -189,10 +261,91 @@
    :undoc-members:
 ```
 
+## tests.test_manager_mas module
+
+```{eval-rst}
+.. automodule:: tests.test_manager_mas
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_manager_mise module
+
+```{eval-rst}
+.. automodule:: tests.test_manager_mise
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_manager_overrides module
+
+```{eval-rst}
+.. automodule:: tests.test_manager_overrides
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_manager_pip module
+
+```{eval-rst}
+.. automodule:: tests.test_manager_pip
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_manager_pipx module
+
+```{eval-rst}
+.. automodule:: tests.test_manager_pipx
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_manager_pwsh_gallery module
+
+```{eval-rst}
+.. automodule:: tests.test_manager_pwsh_gallery
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_manager_uv module
+
+```{eval-rst}
+.. automodule:: tests.test_manager_uv
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_manager_winget module
+
+```{eval-rst}
+.. automodule:: tests.test_manager_winget
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_managers module
 
 ```{eval-rst}
 .. automodule:: tests.test_managers
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_metadata module
+
+```{eval-rst}
+.. automodule:: tests.test_metadata
    :members:
    :show-inheritance:
    :undoc-members:
@@ -225,10 +378,28 @@
    :undoc-members:
 ```
 
+## tests.test_sbom_vulnerabilities module
+
+```{eval-rst}
+.. automodule:: tests.test_sbom_vulnerabilities
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## tests.test_specifier module
 
 ```{eval-rst}
 .. automodule:: tests.test_specifier
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## tests.test_sphinx_crossrefs module
+
+```{eval-rst}
+.. automodule:: tests.test_sphinx_crossrefs
    :members:
    :show-inheritance:
    :undoc-members:

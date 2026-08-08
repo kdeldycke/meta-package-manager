@@ -17,8 +17,9 @@
 """Tests for the opt-in online SBOM layer: HTTP cache and OSV adapter.
 
 All network traffic is mocked with `respx`; nothing here touches the
-real OSV API. The {class}`NetworkClient` is constructed with
-`trust_env=False` so an ambient proxy in the test environment cannot
+real OSV API. The
+{class}`~meta_package_manager.sbom._network.NetworkClient` is constructed
+with `trust_env=False` so an ambient proxy in the test environment cannot
 interfere.
 """
 

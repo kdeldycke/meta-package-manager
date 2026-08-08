@@ -17,7 +17,7 @@
 """Replay documented CLI output back through each manager's own parser.
 
 Every query method documents a sample invocation and its output in a MyST
-` ```{code-block} shell-session ` fence sitting right next to the regex (or
+`{code-block} shell-session` fence sitting right next to the regex (or
 JSON parser) that consumes it. This module feeds each harvested block back
 through the parser it illustrates, asserting the documented example still
 yields well-formed packages. The harvesting itself lives in
@@ -187,9 +187,11 @@ def test_display_blocks_align_with_raw():
     replays must agree on structure.
 
     `meta_package_manager/_docs.py` selects reference-trace blocks by (member, index)
-    from {func}`class_display_blocks`, while this test replays the same blocks
-    from {func}`class_blocks`. Their per-member block counts must match, or an
-    index would point at a different block on the two sides.
+    from {func}`~meta_package_manager.docstring_corpus.class_display_blocks`, while
+    this test replays the same blocks from
+    {func}`~meta_package_manager.docstring_corpus.class_blocks`. Their per-member
+    block counts must match, or an index would point at a different block on the
+    two sides.
     """
     for manager in pool.values():
         raw = class_blocks(type(manager))  # type: ignore[arg-type]
@@ -226,7 +228,7 @@ def test_query_fixtures_run_verbatim():
     Such a block is an illustration and belongs under a non-harvested
     `console` fence.
 
-    Re-tokenized with {func}`shlex.split` like {func}`_documented_commands` does
+    Re-tokenized with {func}`shlex.split` like `_documented_commands` does
     for the mutation members, so a pipe *inside* a quoted argument (PowerShell's
     `-Command "... | ..."`, which mpm passes as a single token for pwsh to run
     internally) stays one token and is not a shell pipe at mpm's level.

@@ -6,12 +6,17 @@ The release process is automated via reusable workflows from [`kdeldycke/repomat
 
 - Python source distributions (`.whl`, `.tar.gz`) uploaded to [PyPI](https://pypi.org/project/meta-package-manager/)
 - Nuitka-compiled standalone binaries for Linux, macOS, and Windows (x64 and ARM64) attached to [GitHub Releases](https://github.com/kdeldycke/meta-package-manager/releases)
+- The packed [GNOME Shell extension](gnome-shell.md), as an `mpm-gnome-shell-extension.zip` asset on the same releases
 - A [Guix package definition](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix) for GNU Guix
 - A [Nix package definition](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix) for NixOS/Nix
 
 All release artifacts are signed with [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds) providing [SLSA v1 provenance](https://slsa.dev/spec/v1.0/).
 
 The release PR must be merged via "Rebase and merge" (never squash). See the `repomatic-release` skill for the full mechanics.
+
+## GNOME Shell extension
+
+The `build-gnome-extension` job of `release.yaml` packs `gnome-shell/mpm@kdeldycke.github.io` with `gnome-extensions pack` and hands the zip to the release engine, which attaches it to the release and attests it like every other artifact. Publishing it on [extensions.gnome.org](https://extensions.gnome.org) stays manual, and is only needed when the extension actually changed: see the [extension's release process](gnome-shell.md#release-process).
 
 ## Chocolatey
 

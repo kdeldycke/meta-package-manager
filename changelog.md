@@ -5,19 +5,20 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
-- [gnome-shell] Add a GNOME Shell extension (GNOME 46 to 50) mirroring the Xbar/SwiftBar plugin: a top bar indicator lists outdated packages per manager, and every menu action runs `mpm` itself (`mpm --brew upgrade wget`) in a terminal so the configuration file, `sudo` prompts and the release-age cooldown all apply. Addresses [#809](https://github.com/kdeldycke/meta-package-manager/issues/809).
+- [gnome-shell] Add a GNOME Shell extension (GNOME 46 to 50) mirroring the Xbar/SwiftBar plugin: a top bar indicator lists outdated packages per manager, and every menu action runs `mpm` itself. Addresses [#809](https://github.com/kdeldycke/meta-package-manager/issues/809).
 - [gnome-shell] Attach the packed extension to every GitHub release as an attested `mpm-gnome-shell-extension.zip` asset, built with `gnome-extensions pack`.
-- [gnome-shell] Lint the extension and its gjs test runner with ESLint, against GNOME Shell's own [`eslint-config-gnome`](https://gitlab.gnome.org/World/javascript/eslint-config-gnome) ruleset pinned to the commit `gnome-shell` itself pins, in a new `eslint` job of the extension's test workflow. No `package.json` or lockfile is committed: the stack is installed behind a 7-day `npm --min-release-age` cooldown, which gates the whole resolved dependency tree on public exposure the way `mpm --cooldown` gates the packages `mpm` installs.
-- [mpm] Raise the click-extra floor from `8.7.0` to `8.8.1`, dropping mpm's own `is_stdout` and `prep_path` helpers for the `click_extra.output` originals and inheriting click-extra's own uncapped `uv-build` requirement.
-- [mpm] Fix `backup`, `dump` and `sbom` dying on an unhandled `FileNotFoundError` when the output path points into a directory that does not exist yet. Missing parent directories are now created, and the written stream is closed instead of being left to the garbage collector.
+- [bar-plugin] Menu actions run `mpm` itself instead of the manager's native upgrade command, so manager selection, sudo policy, overrides and the cooldown all apply. A manager that cannot enforce an active `cooldown` is now skipped with a warning.
 - [mpm] A batch of managers running concurrently reports through a determinate progress bar (`Searching [####----] 3/6 managers`) instead of an indeterminate spinner. Each manager's own CLI call keeps its per-call spinner when it runs alone.
 - [mpm] The `✓`/`✗` trail's finisher carries an elapsed time only under `--time`, where it previously always showed one.
-- [mpm] Document that `--cooldown` replaces a stricter release-age policy already configured natively, instead of tightening it.
+- [mpm] The warnings proposing a CLI flag as their remedy now also name the configuration key that makes it stick: `[mpm] require_cooldown_support` for the cooldown skip, and `[mpm] sudo` for the two credential warnings.
+- [mpm] Raise the click-extra floor from `8.7.0` to `8.8.1`, dropping mpm's own `is_stdout` and `prep_path` helpers for the `click_extra.output` originals and inheriting click-extra's own uncapped `uv-build` requirement.
 - [mpm] Rename the `🔌 bar-plugin` GitHub label to `🔌 plugin`, now covering the Xbar/SwiftBar plugin and the GNOME Shell extension alike.
-- [mpm] The warnings proposing a CLI flag as their remedy now also name the configuration key that makes it stick: the cooldown skip points at `[mpm] require_cooldown_support = false`, and the two `sudo` credential warnings at `[mpm] sudo = true` and `[mpm] sudo = false`. Opting out of a safeguard is a standing policy, not a flag to re-type on every run.
-- [bar-plugin] Menu actions run `mpm` itself (`mpm --brew upgrade wget`) instead of the manager's native upgrade command, so a click is governed by the configuration file found at its default location on the system: manager selection, sudo policy, per-manager overrides and the release-age cooldown all apply. A manager that cannot natively enforce an active `cooldown` is now skipped with a warning instead of upgrading the package ungated.
+- [mpm] Fix the `🔌 plugin`, `🖥 platform: macOS` and `🖥 platform: Windows` labels never being applied to issues: their keywords are now OR-joined into one case-insensitive pattern instead of all being required at once.
+- [mpm] Fix `backup`, `dump` and `sbom` dying on an unhandled `FileNotFoundError` when the output path points into a directory that does not exist yet: missing parent directories are now created.
 - [guix] Fix `guix install --load-path=packaging/guix` failing on unbound `python-pytest` and `python-xmltodict`, whose modules were not imported, and align the definition with the upstream Guix stanza.
 - [nix] Fix `nix-env --file packaging/nix` failing its runtime-dependency check on the stale `click-extra` `8.6.2` and `extra-platforms` `13.5.1` pins, bumping them to `8.8.1` and `13.6.0` to satisfy mpm `7.5.0`'s raised floors.
+- [mpm] Document that `--cooldown` replaces a stricter release-age policy already configured natively, instead of tightening it.
+- [gnome-shell] Lint the extension and its gjs test runner with ESLint against GNOME Shell's own [`eslint-config-gnome`](https://gitlab.gnome.org/World/javascript/eslint-config-gnome) ruleset, in a new `eslint` job installing the stack behind a 7-day `npm --min-release-age` cooldown.
 
 ## [`7.5.0` (2026-08-03)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.1...v7.5.0)
 

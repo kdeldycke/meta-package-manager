@@ -16,7 +16,7 @@ The extension is a frontend to the `mpm` CLI, which must be installed separately
 
 ### From extensions.gnome.org
 
-The extension is pending review on [extensions.gnome.org](https://extensions.gnome.org). Once published, it will be installable with one click from the site.
+The extension is not yet published on [extensions.gnome.org](https://extensions.gnome.org). Once it lands there, it will be installable with one click from the site. Until then, use one of the methods below.
 
 ### From a release zip
 
@@ -69,7 +69,7 @@ These settings only drive the menu layout and check cadence. Everything else com
 
 ## Menu actions
 
-Clicking a package runs `mpm --{manager-id} upgrade {package-id}`, and a section's *Upgrade all* entry runs `mpm --{manager-id} upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
+Clicking a package runs `mpm --<manager-id> upgrade <package-id>`, and a section's *Upgrade all* entry runs `mpm --<manager-id> upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
 
 By default the command opens in a terminal window, so the run can be followed and `sudo` can prompt for a password. Turning `upgrade-in-terminal` off runs upgrades silently in the background: system package managers then need passwordless escalation, as `mpm` cannot prompt without a terminal. See the `NOPASSWD` guidance in {doc}`sudo`.
 
@@ -87,7 +87,9 @@ ok 1 - parseVersion nominal
 (...)
 ```
 
-Static invariants (metadata, GSettings schema, stylesheet and icon drift) are enforced by `tests/test_gnome_extension.py` in the regular Python test suite. The JavaScript follows GNOME Shell's own coding style, checked by ESLint with the [`eslint-config-gnome`](https://gitlab.gnome.org/World/javascript/eslint-config-gnome) rules: `eslint.config.js` at the repository root declares them, `package.json` pins them, and the Lint workflow runs `npx eslint .` whenever a JavaScript file changes. The [`tests-gnome-extension.yaml` workflow](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests-gnome-extension.yaml) runs the gjs suite, packs the installable zip with `gnome-extensions pack`, and proves it installs with a `gnome-extensions install` round-trip.
+Static invariants (metadata, GSettings schema, stylesheet and icon drift) are enforced by `tests/test_gnome_extension.py` in the regular Python test suite. The [`tests-gnome-extension.yaml` workflow](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests-gnome-extension.yaml) runs the gjs suite, packs the installable zip with `gnome-extensions pack`, and proves it installs with a `gnome-extensions install` round-trip.
+
+Its `eslint` job holds the JavaScript to GNOME Shell's own coding style, with the [`eslint-config-gnome`](https://gitlab.gnome.org/World/javascript/eslint-config-gnome) rules declared by `gnome-shell/eslint.config.mjs` and pinned to the commit `gnome-shell` itself pins. No `package.json` or lockfile is committed: nobody would keep one refreshed, so the ESLint stack floats and a 7-day `npm --min-release-age` window gates the whole resolved tree, the same supply-chain guard `mpm --cooldown` applies to the packages `mpm` installs.
 
 To exercise the extension in a real session, install it from your checkout (see above), then run a nested GNOME Shell so crashes and reloads stay contained:
 

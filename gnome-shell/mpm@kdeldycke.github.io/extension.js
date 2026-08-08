@@ -153,7 +153,6 @@ class MpmIndicator extends PanelMenu.Button {
 
     /* Panel icon, count label and indicator visibility for a given state. */
     _setPanelState(state, count = 0) {
-        this._state = state;
         this._icon.gicon = this._stateIcon(state);
         const showCount = this._settings.get_boolean('show-count');
         this._countLabel.text = showCount && count > 0 ? String(count) : '';

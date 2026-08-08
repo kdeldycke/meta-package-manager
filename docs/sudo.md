@@ -55,7 +55,7 @@ apt, deb-get need administrator rights to upgrade: enter your password.
 [mpm] password for apt, deb-get:
 ```
 
-Off a terminal (a pipe, CI, the menubar plugin), `mpm` cannot prompt: a warning names the managers needing root, and they fail fast with a clear error instead of hanging. To escalate unattended, configure a `NOPASSWD` rule for the managers' commands: the probe then finds the cache warm and keeps it alive. A prior `sudo --validate` also works, but only from the same terminal session `mpm` runs in: under sudo's default terminal-keyed timestamps, credentials cached in one terminal do not carry to a `mpm` launched without one (a menubar plugin, a CI step), so `NOPASSWD` is the robust choice there.
+Off a terminal (a pipe, CI, a desktop frontend like the {doc}`menubar plugin <bar-plugin>` or the {doc}`GNOME Shell extension <gnome-shell>`), `mpm` cannot prompt: a warning names the managers needing root, and they fail fast with a clear error instead of hanging. To escalate unattended, configure a `NOPASSWD` rule for the managers' commands: the probe then finds the cache warm and keeps it alive. A prior `sudo --validate` also works, but only from the same terminal session `mpm` runs in: under sudo's default terminal-keyed timestamps, credentials cached in one terminal do not carry to a `mpm` launched without one (a desktop frontend, a CI step), so `NOPASSWD` is the robust choice there.
 
 ## Managers escalating internally
 

@@ -80,8 +80,9 @@ def reset_overrides():
 def test_overridable_fields_match_base_attributes():
     """Every overridable field must exist on the `PackageManager` base class.
 
-    Drift between {data}`OVERRIDABLE_FIELDS` and the base class is silent at runtime
-    (`setattr` happily creates new attributes) so this test acts as the safety net.
+    Drift between {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` and
+    the base class is silent at runtime (`setattr` happily creates new attributes)
+    so this test acts as the safety net.
     """
     from meta_package_manager.manager import PackageManager
 
@@ -626,7 +627,7 @@ def test_dump_manager_overrides_skips_none_values():
 
 
 def test_dump_manager_overrides_converts_tuples_to_lists():
-    """Tuples are converted to lists so {mod}`tomli_w` can serialize them."""
+    """Tuples are converted to lists so `tomli_w` can serialize them."""
     manager = pool[OVERRIDE_TARGET]
     dumped = dump_manager_overrides(manager)
     # cli_names is always set (the metaclass populates it from the manager ID).
@@ -644,8 +645,9 @@ def test_dump_manager_overrides_keys_are_alphabetical():
 @all_manager_ids
 def test_config_template_round_trips(manager_id):
     """For every manager, dump → tomli_w → tomllib → converter yields the same
-    value. Catches schema drift between {data}`OVERRIDABLE_FIELDS` converters
-    and the live attribute types."""
+    value. Catches schema drift between
+    {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` converters and
+    the live attribute types."""
     manager = pool[manager_id]
     dumped = dump_manager_overrides(manager)
     serialized = tomli_w.dumps(dumped)

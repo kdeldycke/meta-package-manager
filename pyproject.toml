@@ -695,7 +695,7 @@ exclude = [
 ]
 
 [tool.repomatic]
-exclude = [ "labels", "skills" ]
+exclude = [ "skills" ]
 # Extension zip packed by release.yaml's build-gnome-extension job and attached
 # to every GitHub release by the engine's extra-assets job (repomatic >= 7.4.2).
 release-assets = [ "mpm-gnome-shell-extension.zip" ]

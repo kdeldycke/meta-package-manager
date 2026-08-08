@@ -46,7 +46,7 @@ jobs:
       # pins in its own tools/package.json: a release-age window cannot gate a
       # git reference, and a frozen style ruleset ages harmlessly.
       - name: Install ESLint and GNOME Shell's ruleset
-        run: >
+        run: > # zizmor: ignore[adhoc-packages]
           npm install --no-save --no-package-lock --no-audit --no-fund
           --min-release-age=7
           eslint

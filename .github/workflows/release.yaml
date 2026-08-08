@@ -25,10 +25,7 @@ concurrency:
     }}
   cancel-in-progress: true
 
-# Deny by default: every job below grants itself the scopes it needs. The canonical
-# release.yaml carries this block, but `repomatic init` synthesizes the downstream
-# header through `_generate_release_caller()`, which skips it, so re-add it after
-# every sync until the generator emits it.
+# Deny by default: every job below grants itself the scopes it needs.
 permissions: {}
 
 # Supply-chain cooldown: no package published within the window can be resolved by
@@ -80,9 +77,8 @@ jobs:
   release:
     # `build-gnome-extension` is a downstream addition to the canonical `needs: build`:
     # the engine's extra-assets job downloads the packed zip from this run, so the packing
-    # job must be gated upstream of the engine. `repomatic init` regenerates this caller
-    # from its own template and resets the list to a bare `build`, so re-add the edge after
-    # every sync until the engine grows a hook for it.
+    # job must be gated upstream of the engine. `repomatic init` carries the edge across a
+    # sync since repomatic 7.6.0.
     needs:
       - build
       - build-gnome-extension
@@ -200,7 +196,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress 'repomatic==7.4.1' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.6.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
@@ -320,7 +316,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress 'repomatic==7.4.1' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.6.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"

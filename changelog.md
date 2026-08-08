@@ -1,5 +1,10 @@
 # Changelog
 
+## [`7.6.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`7.6.0` (2026-08-08)](https://github.com/kdeldycke/meta-package-manager/compare/v7.5.0...v7.6.0)
 
 - [gnome-shell] Add a GNOME Shell extension (GNOME 46 to 50) mirroring the Xbar/SwiftBar plugin: a top bar indicator lists outdated packages per manager, and every menu action runs `mpm` itself. Addresses [#809](https://github.com/kdeldycke/meta-package-manager/issues/809).

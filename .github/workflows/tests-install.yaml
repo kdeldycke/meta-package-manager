@@ -385,12 +385,22 @@ jobs:
       - run: mpm --version
 
   # AUR builds from source with full test suites. Upstream PKGBUILD check()
-  # failures in transitive dependencies (beartype, boltons, etc.) cause
-  # cascading build errors that are not fixable from this project. See:
+  # failures in transitive dependencies cascade to every downstream package and
+  # are not fixable from this project, hence the continue-on-error below. See:
   # https://aur.archlinux.org/packages/meta-package-manager#comment-1065663
   # https://aur.archlinux.org/packages/python-boltons#comment-1065664
   # https://aur.archlinux.org/packages/python-beartype#comment-1065661
-  # https://github.com/beartype/beartype/issues/631
+  #
+  # Blocked on beartype since 2026-04. First cause was test non-idempotence,
+  # tripped only when aur-install retries a layer. Fixed upstream in ee167cf294cf
+  # but still unreleased: 0.22.9 predates it, 0.23.0rc0 (2026-08-08) is the first
+  # artifact carrying it. https://github.com/beartype/beartype/issues/631
+  #
+  # Current cause is a different one, and fails on the first run: beartype 0.22.9
+  # expects a bare numpy NDArray to be a PEP 585 subscripted builtin, which numpy
+  # 2.5 no longer makes true, failing 12 of its tests on Python 3.14. Also fixed
+  # in 0.23.0rc0, so unblocking needs stable 0.23.0 and an AUR python-beartype
+  # bump. Nothing to report upstream.
 
   # https://aur.archlinux.org/packages/meta-package-manager
   # https://aur.archlinux.org/packages/meta-package-manager-bin

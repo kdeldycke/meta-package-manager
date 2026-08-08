@@ -85,6 +85,15 @@ documentation page: the readme renders on GitHub and PyPI, where relative Sphinx
 links cannot resolve, so the links must be absolute.
 """
 
+EMPTY_CELLS = frozenset({"", "—", "➖"})
+"""Hand-curated table cells carrying no reusable content.
+
+The tables of `docs/cooldown.md` are reused verbatim on the per-manager pages
+({func}`manager_cooldown`). A cell holding nothing, an em dash or a bare
+not-applicable marker has nothing to say there and is dropped rather than
+rendered as an empty fact.
+"""
+
 GITHUB_BLOB_URL = "https://github.com/kdeldycke/meta-package-manager/blob/main"
 """Base URL for linking to source files in the benchmark table.
 
@@ -461,6 +470,28 @@ def _toml_definition(definition_source: str) -> dict:
     )
 
 
+@cache
+def _cooldown_table(section_title: str) -> tuple[tuple[str, ...], ...]:
+    """Parse one hand-curated table of `docs/cooldown.md` into its rows.
+
+    Both tables of the page are reused on the per-manager pages, so both are
+    read the same way: the section is delimited by its own title and the next
+    `##` heading, and every pipe-prefixed line of at least four cells is kept
+    with its markdown preserved. The header and separator lines come along
+    harmlessly, as no manager ID ever matches them.
+    """
+    text = (PROJECT_ROOT / "docs" / "cooldown.md").read_text(encoding="UTF-8")
+    section = text.partition(section_title)[2].partition("\n## ")[0]
+    rows: list[tuple[str, ...]] = []
+    for line in section.splitlines():
+        if not line.startswith("| "):
+            continue
+        cells = tuple(cell.strip() for cell in line.strip("|").split("|"))
+        if len(cells) >= 4:
+            rows.append(cells)
+    return tuple(rows)
+
+
 def _cooldown_status(manager_id: str) -> tuple[str, str, str] | None:
     """Extract a manager's row from the cooldown support table.
 
@@ -472,16 +503,32 @@ def _cooldown_status(manager_id: str) -> tuple[str, str, str] | None:
     (`—` marks an empty cell), or `None` when the table has no row for the
     manager yet.
     """
-    text = (PROJECT_ROOT / "docs" / "cooldown.md").read_text(encoding="UTF-8")
-    section = text.partition("## Supported managers")[2].partition("\n## ")[0]
-    for line in section.splitlines():
-        if not line.startswith("| "):
-            continue
-        cells = [cell.strip() for cell in line.strip("|").split("|")]
-        if len(cells) < 4:
-            continue
+    for cells in _cooldown_table("## Supported managers"):
         if manager_id in re.findall(r"`([^`]+)`", cells[0]):
             return cells[1], cells[2], cells[3]
+    return None
+
+
+def _retraction_status(manager_id: str) -> tuple[str, str, str] | None:
+    """Extract a manager's registry row from the retraction table.
+
+    The "Retraction paths by registry" table of `docs/cooldown.md` records
+    whether a compromised release can be withdrawn from the registry a manager
+    resolves against, and whether that registry publishes a per-version release
+    date. Both are properties of the registry rather than of the manager CLI, so
+    the table is keyed by registry and lists its managers in the second cell,
+    each as a linked code span. Returns the registry name, the retraction shape
+    and the publish-date cell, or `None` when no row covers the manager.
+
+    ```{note}
+    Every pool manager belongs to exactly one row, and the reused cells link
+    absolutely so they survive the move to `docs/managers/`. Both invariants
+    are guarded by `test_retraction_table_well_formed`.
+    ```
+    """
+    for cells in _cooldown_table("## Retraction paths by registry"):
+        if manager_id in re.findall(r"\[`([^`]+)`\]", cells[1]):
+            return cells[0], cells[2], cells[3]
     return None
 
 
@@ -1212,6 +1259,12 @@ def manager_cooldown(manager_id: str) -> str:
     enforcement facts derived from the manager's declarations: the injected
     environment variable when `mpm` drives a native gate, or the fail-closed
     skip applying to everyone else.
+
+    Closes on the registry the manager resolves against, from the same page's
+    "Retraction paths by registry" table. A gate that no withdrawal ever
+    follows delays a compromised release instead of avoiding it, so whether
+    the registry can pull a bad version belongs next to whether `mpm` can gate
+    the manager at all.
     """
     m = pool[manager_id]
     row = _cooldown_status(manager_id)
@@ -1239,11 +1292,28 @@ def manager_cooldown(manager_id: str) -> str:
     if row:
         status, mechanism, reference = row
         facts = [f"- Status: {status}"]
-        if mechanism != "—":
+        if mechanism not in EMPTY_CELLS:
             facts.append(f"- Mechanism: {mechanism}")
-        if reference != "—":
+        if reference not in EMPTY_CELLS:
             facts.append(f"- Reference: {reference}")
         parts.append("\n".join(facts))
+
+    retraction = _retraction_status(manager_id)
+    if retraction:
+        registry, withdrawal, publish_date = retraction
+        parts.append(
+            "A cooldown only pays off where a compromised release can be "
+            "withdrawn while the clock runs, and can only be emulated where the "
+            "registry dates its releases. From the [retraction table]"
+            "(../cooldown.md#retraction-paths-by-registry):",
+        )
+        facts = [f"- Registry: {registry}"]
+        if withdrawal not in EMPTY_CELLS:
+            facts.append(f"- Retraction: {withdrawal}")
+        if publish_date not in EMPTY_CELLS:
+            facts.append(f"- Publish date: {publish_date}")
+        parts.append("\n".join(facts))
+
     if not m.supports_cooldown and any(
         implements(m, op)
         for op in (Operations.install, Operations.upgrade, Operations.upgrade_all)

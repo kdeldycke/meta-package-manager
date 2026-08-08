@@ -608,3 +608,46 @@ def test_mirror_blocks_in_sync():
         check=True,
     )
     assert not stale
+
+
+def test_retraction_table_well_formed():
+    """Check the retraction table partitions the pool and travels intact.
+
+    The "Retraction paths by registry" table of `docs/cooldown.md` is
+    hand-curated, and `manager_cooldown()` reuses each row on the pages of the
+    managers listed in it. Two invariants follow. A manager missing from the
+    table silently loses the section on its page and one listed twice would
+    resolve to whichever registry comes first, so the mapping must be a
+    partition of the pool. And a reused cell renders from `docs/managers/`,
+    one directory below `docs/cooldown.md`, so any relative target or same-page
+    anchor it carries would resolve against the manager page instead: the
+    reused cells must link absolutely or not at all.
+    """
+    registries = {}
+    relative = []
+    for cells in _docs._cooldown_table("## Retraction paths by registry"):
+        for mid in re.findall(r"\[`([^`]+)`\]", cells[1]):
+            registries.setdefault(mid, []).append(cells[0])
+        # The managers cell (index 1) stays behind on the cooldown page: only
+        # the registry, retraction and publish-date cells get reused.
+        for cell in (cells[0], cells[2], cells[3]):
+            relative += [
+                target
+                for target in re.findall(r"]\(([^)]+)\)", cell)
+                if not target.startswith("https://")
+            ]
+
+    assert set(registries) == set(pool.all_manager_ids)
+    assert not {mid: rows for mid, rows in registries.items() if len(rows) > 1}
+    assert not relative
+
+
+@all_managers
+def test_retraction_status_reuses_table_row(manager):
+    """Check each manager's page surfaces its own registry row verbatim."""
+    registry, withdrawal, publish_date = _docs._retraction_status(manager.id)
+    section = _docs.manager_cooldown(manager.id)
+    assert f"- Registry: {registry}" in section
+    for label, cell in (("Retraction", withdrawal), ("Publish date", publish_date)):
+        line = f"- {label}: {cell}"
+        assert (line in section) is (cell not in _docs.EMPTY_CELLS)

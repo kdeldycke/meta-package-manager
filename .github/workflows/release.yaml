@@ -45,7 +45,7 @@ env:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@ef51d27ea435bf5368112791288130134bd02142 # v7.5.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@07e3ef8ae5685c7dfc4af43001b6fc67501396b1 # v7.6.0
     permissions:
       id-token: write
       issues: write
@@ -73,12 +73,11 @@ jobs:
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@ef51d27ea435bf5368112791288130134bd02142 # v7.5.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@07e3ef8ae5685c7dfc4af43001b6fc67501396b1 # v7.6.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@ef51d27ea435bf5368112791288130134bd02142 # v7.5.0
     # `build-gnome-extension` is a downstream addition to the canonical `needs: build`:
     # the engine's extra-assets job downloads the packed zip from this run, so the packing
     # job must be gated upstream of the engine. `repomatic init` regenerates this caller
@@ -87,6 +86,7 @@ jobs:
     needs:
       - build
       - build-gnome-extension
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@07e3ef8ae5685c7dfc4af43001b6fc67501396b1 # v7.6.0
     permissions:
       attestations: write
       contents: write
@@ -94,6 +94,7 @@ jobs:
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+
 
   # Pack the GNOME Shell extension and hand it to the release engine's extra-assets
   # job as a `release-asset-*` run artifact (see `release-assets` in [tool.repomatic]).

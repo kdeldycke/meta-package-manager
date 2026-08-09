@@ -100,7 +100,7 @@ class Vim_Pack(PackageManager):
 
     ```{caution}
     Neovim exits `0` even when a `-c` command raises, which would hide every
-    failure from mpm. {attr}`post_args` therefore closes each invocation with
+    failure from mpm. {attr}`Vim_Pack.post_args` therefore closes each invocation with
     `-c 'cquit'`: on success the Lua payload has already called
     `os.exit(0)`, and on error control falls through to that gate and Neovim
     exits `1`.
@@ -115,8 +115,8 @@ class Vim_Pack(PackageManager):
 
     ```{note}
     Packages are keyed on their `src` URL. `vim.pack` accepts no registry
-    shorthand: {meth}`install` needs a URL while {meth}`remove` and
-    {meth}`upgrade_one_cli` address plugins by the short name Neovim derives
+    shorthand: {meth}`Vim_Pack.install` needs a URL while {meth}`Vim_Pack.remove` and
+    {meth}`Vim_Pack.upgrade_one_cli` address plugins by the short name Neovim derives
     from it, so the URL is the only identifier mpm can feed back into every
     operation. Package ids therefore round-trip through install, remove,
     upgrade and backup/restore.

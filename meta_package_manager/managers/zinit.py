@@ -85,7 +85,7 @@ class Zinit(PackageManager):
     ```
 
     ```{caution}
-    {meth}`installed` is the one operation that cannot use that wrapper.
+    {meth}`Zinit.installed` is the one operation that cannot use that wrapper.
     Zinit tracks plugins in shell state populated by the `zinit load` calls of
     the user's `.zshrc`, so a freshly sourced non-interactive shell knows of
     none. That query therefore runs `zsh --interactive`, paying a full shell
@@ -114,7 +114,7 @@ class Zinit(PackageManager):
 
     requirement = ">=3.10.0"
     """First release of the `zdharma-continuum` fork whose confirmation prompt,
-    and thus the `--yes` flag {meth}`remove` depends on, behaves."""
+    and thus the `--yes` flag {meth}`Zinit.remove` depends on, behaves."""
 
     cli_names = ("zsh",)
     """Zsh is the binary mpm actually executes.
@@ -152,25 +152,22 @@ class Zinit(PackageManager):
         """Wrap all CLI invocations in the Zsh shell Zinit needs.
 
         Three subcommands need a shell of their own shape, so the wrapper is
-        chosen from the subcommand rather than being uniform:
+        chosen from the subcommand rather than being uniform.
 
-        `plugins`
-        : Reads the plugin registry out of shell state that the `zinit load`
-          calls of the user's `.zshrc` populate, so it runs
-          `zsh --interactive` and lets that file do the sourcing. Sourcing
-          `zinit.zsh` again on top would reset the registry and report nothing.
+        `plugins` reads the plugin registry out of shell state that the
+        `zinit load` calls of the user's `.zshrc` populate, so it runs
+        `zsh --interactive` and lets that file do the sourcing. Sourcing
+        `zinit.zsh` again on top would reset the registry and report nothing.
 
-        `load`
-        : Prefixed with the `cloneonly` ice, which stops Zinit right after the
-          clone. Installing a plugin otherwise sources it, running third-party
-          shell code inside the process mpm drives.
+        `load` is prefixed with the `cloneonly` ice, which stops Zinit right
+        after the clone. Installing a plugin otherwise sources it, running
+        third-party shell code inside the process mpm drives.
 
-        `version`
-        : Guarded by a readability test that exits successfully when
-          `zinit.zsh` is absent. Zsh is the default shell on macOS and near
-          ubiquitous elsewhere, so an unguarded probe would turn every host
-          that merely has Zsh into a manager reporting errors. A `zinit.zsh`
-          that is present but broken still fails loudly.
+        `version` is guarded by a readability test that exits successfully
+        when `zinit.zsh` is absent. Zsh is the default shell on macOS and near
+        ubiquitous elsewhere, so an unguarded probe would turn every host that
+        merely has Zsh into a manager reporting errors. A `zinit.zsh` that is
+        present but broken still fails loudly.
 
         ```{note}
         The `**kwargs` accepted by the base class (`auto_pre_args`, `sudo`,
@@ -229,7 +226,7 @@ class Zinit(PackageManager):
         """Install one package.
 
         Zinit conflates installing a plugin with sourcing it, so
-        {meth}`build_cli` sets the `cloneonly` ice ahead of this call.
+        {meth}`Zinit.build_cli` sets the `cloneonly` ice ahead of this call.
 
         ```{code-block} shell-session
 

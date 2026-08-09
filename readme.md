@@ -445,7 +445,7 @@ $ mpm --all-managers managers
 ╰────────────┴────────────────────┴────────────────┴──────────────────────────────┴────────────┴───────────╯
 ```
 
-If your favorite manager is not supported yet, you can help! See the [contribution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html).
+If your favorite manager is not supported yet, you can help! See the [contribution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html). A handful of tools are deliberately left out, each with its rationale: they are catalogued in [unsupported managers](https://kdeldycke.github.io/meta-package-manager/unsupported.html).
 
 ## Used in
 

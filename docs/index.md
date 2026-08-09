@@ -23,8 +23,9 @@ sudo
 security
 bar-plugin
 gnome-shell
-falsehoods
 benchmark
+unsupported
+falsehoods
 ```
 
 % XXX Furo doesn't support icons in toctree entries natively.

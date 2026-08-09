@@ -119,16 +119,10 @@ class ManagerScope(Enum):
     PROJECT = "project"
     """Manages dependencies confined to a project's working tree.
 
-    Not supported yet. See
+    Not supported yet. The user-facing rationale, the ecosystems this would
+    cover and the architectural work it waits on are catalogued once in
+    {doc}`/unsupported`; the extension point is
     {meth}`meta_package_manager.manager.PackageManager.discover_projects`.
-
-    ```{seealso}
-    Microsoft's [Python Environment Tools (PET)](https://github.com/microsoft/python-environment-tools) is a Rust tool
-    that locates Python environments (venv, conda, pyenv, pipenv, Poetry, uv,
-    ...) across a machine. It only discovers environments and does not
-    inventory their packages, but is a useful reference and benchmark for
-    implementing Python project-scope discovery.
-    ```
     """
 
 
@@ -962,31 +956,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         ```
 
         ```{todo}
-        Candidate ecosystems for project-scope discovery. Listed with the
-        project files that signal each, grouped by whether `mpm` already
-        ships a system-scoped manager that could grow a project mode.
-
-        Already covered by a manager (`npm`, `yarn`, `pnpm`, `pip`,
-        `uv`, `cargo`, `gem`, `composer`, `cpan`):
-
-        - JavaScript: `package.json`, `package-lock.json`, `yarn.lock`,
-          `pnpm-lock.yaml`
-        - Python: `requirements.txt`, `pyproject.toml`, `poetry.lock`,
-          `uv.lock`
-        - Rust: `Cargo.toml`, `Cargo.lock`
-        - Ruby: `Gemfile`, `Gemfile.lock`
-        - PHP: `composer.json`, `composer.lock`
-        - Perl: `cpanfile`
-
-        No manager yet:
-
-        - Java: `pom.xml` (Maven), `build.gradle` (Gradle), `ivy.xml`
-        - Go: `go.mod`, `go.sum`
-        - .NET: `*.csproj`, `packages.config` (NuGet)
-        - Swift: `Package.swift`, `Package.resolved`
-        - CocoaPods: `Podfile`, `Podfile.lock`
-        - C/C++: `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)
-        - Conda: `conda-lock.yml`
+        Implement project-scope discovery. The candidate ecosystems, the
+        project files that signal each and the architecture this waits on are
+        catalogued in {doc}`/unsupported`.
         ```
         """
         raise NotImplementedError

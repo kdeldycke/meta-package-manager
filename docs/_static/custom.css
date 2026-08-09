@@ -1,3 +1,18 @@
+/* Hide the readme banner on the Sphinx front page: index.md includes readme.md
+ * verbatim, and the banner duplicates the sidebar logo (light_logo/dark_logo in
+ * conf.py).
+ *
+ * Beyond the duplication, the banner cannot agree with the page it sits on. Its
+ * <picture> switches on prefers-color-scheme, which reports the OS setting,
+ * while Furo's theme is a three-state toggle of its own. Pin Furo to light under
+ * a dark OS and the browser serves logo-banner-dark.png onto a white page, where
+ * its pale wordmark reads at 1.18:1. GitHub, where the readme has no such
+ * toggle to disagree with, is the only surface the <picture> is meant for.
+ */
+article p[align="center"]:has(img[alt="Meta Package Manager"]) {
+  display: none;
+}
+
 /* Extend Furo's --icon-* convention with octicons for sidebar toctree entries.
  * SVG paths from sphinx-design's octicons.json (mark-github is also the same
  * icon Furo uses in its own page.html footer).

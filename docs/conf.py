@@ -174,7 +174,6 @@ autosectionlabel_prefix_document = True
 # Theme config.
 html_theme = "furo"
 html_title = project
-html_logo = "assets/logo-square.svg"
 # Browser-tab icon: the icon-only, tight-cropped favicon (no wordmark).
 html_favicon = "assets/favicon.svg"
 # Absolute base URL for OpenGraph. sphinxext.opengraph resolves og:image
@@ -190,6 +189,14 @@ ogp_image = (
 )
 ogp_image_alt = project
 html_theme_options = {
+    # Sidebar logo. Furo renders this pair as .only-light/.only-dark images
+    # driven by its own theme state, so the logo follows the toggle. A single
+    # html_logo cannot: assets/logo-square.svg is light-only by convention, and
+    # its dark navy wordmark drops to a 1.35:1 contrast ratio on the dark theme.
+    # Both files are 640x640 exports of that SVG, so the swap holds geometry.
+    # Furo resolves them against _static/, hence their html_static_path entries.
+    "light_logo": "logo-square-light.png",
+    "dark_logo": "logo-square-dark.png",
     "sidebar_hide_name": True,
     # Activates edit links.
     "source_repository": f"https://github.com/{github_user}/{project_id}",
@@ -275,7 +282,14 @@ html_last_updated_fmt = "%Y-%m-%d"
 copyright = f"{author} and contributors"
 html_show_sphinx = False
 
-html_static_path = ["_static"]
+# Individual files are copied to the root of _static/, which is where Furo looks
+# for the light_logo/dark_logo pair. Listing docs/assets/ wholesale would drag
+# the screenshots, the dependency graph and the binary scan reports along.
+html_static_path = [
+    "_static",
+    "assets/logo-square-dark.png",
+    "assets/logo-square-light.png",
+]
 html_css_files = ["custom.css", "table-crosshair.css"]
 html_js_files = ["table-crosshair.js"]
 

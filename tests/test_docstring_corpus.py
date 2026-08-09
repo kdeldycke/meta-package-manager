@@ -328,11 +328,18 @@ def _normalize_constructed(command: tuple, cli_names: tuple[str, ...]) -> list[s
 
     Drops the `sudo --non-interactive` escalation prefix, unwraps the ``bash -c
     "source ...
-    && <command>"`` indirection used for shell-function managers (sdkman), and
-    reduces the absolute binary path to its basename.
+    && <command>"`` indirection used for shell-function managers (sdkman in
+    Bash, zinit in Zsh), and reduces the absolute binary path to its basename.
+    Only the segment after the last `&&` is kept, so a wrapper chaining a
+    setup command before the real one (zinit's `ice` modifier) still reduces
+    to the invocation its docstring documents.
     """
     tokens = _strip_sudo([str(token) for token in command])
-    if tokens[:2] == ["bash", "-c"] and len(tokens) == 3 and " && " in tokens[2]:
+    if (
+        tokens[:2] in (["bash", "-c"], ["zsh", "-c"])
+        and len(tokens) == 3
+        and " && " in tokens[2]
+    ):
         tokens = shlex.split(tokens[2].rsplit(" && ", 1)[1])
     if tokens:
         tokens[0] = Path(tokens[0]).name

@@ -315,6 +315,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.vim_pack module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.vim_pack
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.volta module
 
 ```{eval-rst}
@@ -346,6 +355,15 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.yarn
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.zinit module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.zinit
    :members:
    :show-inheritance:
    :undoc-members:

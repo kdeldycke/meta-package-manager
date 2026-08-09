@@ -60,10 +60,12 @@ from .managers.snap import Snap
 from .managers.sun_tools import Sun_Tools
 from .managers.tazpkg import Tazpkg
 from .managers.uv import UV, UVX
+from .managers.vim_pack import Vim_Pack
 from .managers.volta import Volta
 from .managers.winget import WinGet
 from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
+from .managers.zinit import Zinit
 from .managers.zypper import Zypper
 
 TYPE_CHECKING = False
@@ -117,6 +119,7 @@ manager_classes = (
     Tazpkg,
     UV,
     UVX,
+    Vim_Pack,
     Volta,
     WinGet,
     XBPS,
@@ -124,6 +127,7 @@ manager_classes = (
     YarnClassic,
     Yay,
     YUM,
+    Zinit,
     Zypper,
 )
 """The list of all classes implementing the specific package managers.

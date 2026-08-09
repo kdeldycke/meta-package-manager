@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [vim-pack] Add Neovim's built-in `vim.pack` plugin manager (Neovim `0.12` and above) with installed, install, remove and upgrade support. Plugins are keyed on their source URL, and each operation is a Lua one-liner run by a `--clean --headless` Neovim.
+- [zinit] Add the Zinit Zsh plugin manager with installed, install, remove and upgrade support. Zsh is the CLI mpm executes, and the plugin inventory is read from an interactive shell since Zinit tracks plugins in state the user's `.zshrc` populates.
 - [gnome-shell] Add a GNOME Shell extension (GNOME 46 to 50) mirroring the Xbar/SwiftBar plugin: a top bar indicator lists outdated packages per manager, and every menu action runs `mpm` itself. Addresses [#809](https://github.com/kdeldycke/meta-package-manager/issues/809).
 - [gnome-shell] Attach the packed extension to every GitHub release as an attested `mpm-gnome-shell-extension.zip` asset, built with `gnome-extensions pack`.
 - [bar-plugin] Menu actions run `mpm` itself instead of the manager's native upgrade command, so manager selection, sudo policy, overrides and the cooldown all apply. A manager that cannot enforce an active `cooldown` is now skipped with a warning.

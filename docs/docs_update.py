@@ -81,6 +81,7 @@ KEYWORDS_EXTRAS = (
     "macos",
     "mageia",
     "meta-package-manager",
+    "neovim",
     "netbsd",
     "nixpkgs",
     "node",
@@ -118,6 +119,7 @@ KEYWORDS_EXTRAS = (
     "xbar",
     "xbar-plugin",
     "zb",
+    "zsh",
 )
 """Curated PyPI keywords beyond the manager IDs themselves.
 

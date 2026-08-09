@@ -60,6 +60,7 @@ keywords = [
   "mas",
   "meta-package-manager",
   "mise",
+  "neovim",
   "netbsd",
   "nix",
   "nixpkgs",
@@ -125,6 +126,7 @@ keywords = [
   "urpmi",
   "uv",
   "uvx",
+  "vim-pack",
   "visual studio code",
   "void linux",
   "volta",
@@ -140,6 +142,8 @@ keywords = [
   "yum",
   "zb",
   "zerobrew",
+  "zinit",
+  "zsh",
   "zypper",
 ]
 license = "GPL-2.0-or-later"
@@ -1192,6 +1196,11 @@ color = "bfdadc"
 description = "uv, uvx"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: vim-pack"
+color = "bfdadc"
+description = "vim-pack"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: vscode-based"
 color = "bfdadc"
 description = "vscode, vscodium"
@@ -1205,6 +1214,11 @@ description = "winget"
 name = "📦 manager: xbps"
 color = "bfdadc"
 description = "xbps"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: zinit"
+color = "bfdadc"
+description = "zinit"
 
 [[tool.repomatic.labels.extra]]
 name = "🔌 plugin"
@@ -1485,6 +1499,10 @@ label = "📦 manager: uv-based"
 any-glob-to-any-file = [ "meta_package_manager/managers/uv.*", "tests/*uv*", "tests/*uvx*" ]
 
 [[tool.repomatic.labels.file-rules]]
+label = "📦 manager: vim-pack"
+any-glob-to-any-file = [ "meta_package_manager/managers/vim_pack.*", "tests/*vim_pack*" ]
+
+[[tool.repomatic.labels.file-rules]]
 label = "📦 manager: vscode-based"
 any-glob-to-any-file = [
   "meta_package_manager/managers/vscode.*",
@@ -1500,6 +1518,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/winget.*", "tests/*winge
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: xbps"
 any-glob-to-any-file = [ "meta_package_manager/managers/xbps.*", "tests/*xbps*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: zinit"
+any-glob-to-any-file = [ "meta_package_manager/managers/zinit.*", "tests/*zinit*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "🔌 plugin"

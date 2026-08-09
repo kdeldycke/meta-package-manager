@@ -210,6 +210,7 @@ managers:
   vagrant: [topgrade]
   vcpkg: [topgrade]
   vim: [topgrade]
+  vim-pack: [topgrade]
   volta: [topgrade]
   voom: [topgrade]
   vscode: [topgrade]
@@ -347,7 +348,6 @@ homepages:
   zgenom: https://github.com/jandamm/zgenom
   zigup: https://github.com/marler8997/zigup
   zim: https://zimfw.sh
-  zinit: https://github.com/zdharma-continuum/zinit
   zplug: https://github.com/zplug/zplug
   zr: https://github.com/jedahan/zr
   zvm: https://github.com/tristanisham/zvm
@@ -400,6 +400,8 @@ coarse_support:
     topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
   plug:
     topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
+  vim-pack:
+    topgrade: https://github.com/topgrade-rs/topgrade/pull/2010
   voom:
     topgrade: https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279
   vundle:

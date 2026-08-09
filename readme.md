@@ -148,6 +148,7 @@ Meta Package Manager,topgrade,1
 Meta Package Manager,urpmi,1
 Meta Package Manager,uv,1
 Meta Package Manager,uvx,1
+Meta Package Manager,vim-pack,1
 Meta Package Manager,volta,1
 Meta Package Manager,vscode,1
 Meta Package Manager,vscodium,1
@@ -158,6 +159,7 @@ Meta Package Manager,yarn-berry,1
 Meta Package Manager,yay,1
 Meta Package Manager,yum,1
 Meta Package Manager,zerobrew,1
+Meta Package Manager,zinit,1
 Meta Package Manager,zypper,1
 ```
 
@@ -235,6 +237,7 @@ print(operation_matrix()[0])
 | [`urpmi`](https://kdeldycke.github.io/meta-package-manager/managers/urpmi.html)                                                                                  |                  |          |           |               |       |             |         |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`uv`](https://kdeldycke.github.io/meta-package-manager/managers/uv.html)                                                                                        | >=0.5.0          |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`uvx`](https://kdeldycke.github.io/meta-package-manager/managers/uvx.html)                                                                                      | >=0.10.10        |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`vim-pack`](https://kdeldycke.github.io/meta-package-manager/managers/vim-pack.html)                                                                            | >=0.12.0         |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`volta`](https://kdeldycke.github.io/meta-package-manager/managers/volta.html) [⚠️](https://kdeldycke.github.io/meta-package-manager/managers/volta.html)       | >=1.0.2          |          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |            |           |          |     ✓     |     ✓     |               |    ✓     |        |           |          |
 | [`vscode`](https://kdeldycke.github.io/meta-package-manager/managers/vscode.html)                                                                                | >=1.60.0         |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |           |          |     ✓     |           |               |    ✓     |        |           |          |
 | [`vscodium`](https://kdeldycke.github.io/meta-package-manager/managers/vscodium.html)                                                                            | >=1.60.0         |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |           |          |     ✓     |           |               |    ✓     |        |           |          |
@@ -245,6 +248,7 @@ print(operation_matrix()[0])
 | [`yay`](https://kdeldycke.github.io/meta-package-manager/managers/yay.html)                                                                                      | >=11.0.0         |    ✓     |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`yum`](https://kdeldycke.github.io/meta-package-manager/managers/yum.html)                                                                                      | >=4.0.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`zerobrew`](https://kdeldycke.github.io/meta-package-manager/managers/zerobrew.html)                                                                            | >=0.3.0          |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`zinit`](https://kdeldycke.github.io/meta-package-manager/managers/zinit.html)                                                                                  | >=3.10.0         |          |           |      🐧       |  🍎   |             |         |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`zypper`](https://kdeldycke.github.io/meta-package-manager/managers/zypper.html)                                                                                | >=1.14.0         |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 
 <!-- mirror-src-end -->

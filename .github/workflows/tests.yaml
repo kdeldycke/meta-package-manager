@@ -347,6 +347,15 @@ jobs:
         run: |
           choco install vscode --no-progress --yes --retry-count=3
 
+      # vim-pack
+      # https://formulae.brew.sh/formula/neovim
+      # vim.pack ships in Neovim's core since 0.12, and the Homebrew formula tracks the
+      # latest release. Other runners package an older Neovim that falls below mpm's
+      # >=0.12.0 requirement, which just reports the manager unavailable there.
+      - name: Neovim - macOS install
+        if: runner.os == 'macOS'
+        run: brew install neovim
+
       # Gem
       - name: Ruby & Gem - Windows upgrade
         if: runner.os == 'Windows'

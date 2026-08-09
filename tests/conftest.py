@@ -394,6 +394,9 @@ PACKAGE_IDS = {
     "urpmi": "figlet",
     "uv": "pytz",
     "uvx": "pycowsay",
+    # A single-file Vim plugin with no dependencies. vim.pack keys packages on
+    # their source URL, the only id it accepts for an install.
+    "vim-pack": "https://github.com/tpope/vim-sensible",
     # Zero-dependency and ships a bin: Volta manages CLI tools, so the usual
     # bin-less npm pick (ms) is out.
     "volta": "nanoid",
@@ -406,6 +409,9 @@ PACKAGE_IDS = {
     "yay": "nyancat",
     "yum": "nyancat",
     "zerobrew": "nyancat",
+    # Zinit's own do-nothing plugin: an empty repository it documents for
+    # ice-only usage, so loading and deleting it runs no third-party code.
+    "zinit": "zdharma-continuum/null",
     "zypper": "nyancat",
 }
 """Package IDs used by the destructive install/remove tests, one per manager.

@@ -117,8 +117,7 @@ committed files, so the guard survives a hand edit.
 def raw_url(path: str, version: str = SIMPLE_ICONS_VERSION) -> str:
     """Build a `raw.githubusercontent.com` URL for a Simple Icons tag."""
     return (
-        "https://raw.githubusercontent.com/simple-icons/simple-icons/"
-        f"{version}/{path}"
+        f"https://raw.githubusercontent.com/simple-icons/simple-icons/{version}/{path}"
     )
 
 

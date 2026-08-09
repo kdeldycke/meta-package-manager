@@ -697,8 +697,7 @@ def manager_logo(manager_id: str, *, inline: bool = False) -> str:
     style = f' style="--manager-logo-color: #{hex_color}"'
     label = f"{icon['title']} logo"
     return (
-        f'<{tag} class="{classes}"{style} role="img" '
-        f'aria-label="{label}">{svg}</{tag}>'
+        f'<{tag} class="{classes}"{style} role="img" aria-label="{label}">{svg}</{tag}>'
     )
 
 

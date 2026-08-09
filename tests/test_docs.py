@@ -598,7 +598,8 @@ def test_manager_card_renders(manager):
         # brackets escaped: a leading `>` would otherwise open a blockquote and
         # swallow itself, and a `<` would open a tag.
         requirement = (
-            _docs._format_requirement(manager.requirement)
+            _docs
+            ._format_requirement(manager.requirement)
             .replace("<", r"\<")
             .replace(">", r"\>")
         )

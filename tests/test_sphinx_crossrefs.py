@@ -33,9 +33,10 @@ from pathlib import Path
 
 import pytest
 
-# The docs toolchain needs Python >= 3.12 (see docs/conf.py) and only pulls
-# myst-parser 5.1 on 3.11+. Build once, on the newest supported Python, to keep
-# this to a single full docs build across the CI matrix.
+# The `docs` group declares `requires-python = ">= 3.14"` (see [tool.uv]), so it
+# resolves nowhere else: below that, `uv run --group docs` installs nothing and
+# `sphinx-build` is not on PATH. Building once on the newest supported Python
+# also keeps this to a single full docs build across the CI matrix.
 pytestmark = [
     pytest.mark.skipif(
         not sys.platform.startswith("linux"),

@@ -388,12 +388,11 @@ docs = [
   # furo 2025.9.25 is a recent CalVer release supporting Sphinx 8.
   "furo>=2025.9.25",
   # attrs_block, attrs_inline and colon_fence (enabled in docs/conf.py) ship in
-  # myst-parser 4.0+; the `alert` extension also enabled there needs 5.1, which
-  # requires Python 3.11+. Split the floor by marker: >= 5.1 where the docs
-  # actually build (3.11+), >= 4 on 3.10 so the lock still resolves (uv caps
-  # myst-parser at 4.0.1 there; the docs build itself runs on 3.12+).
-  "myst-parser>=4; python_version<'3.11'",
-  "myst-parser>=5.1; python_version>='3.11'",
+  # myst-parser 4.0+; the `alert` extension also enabled there needs 5.1. A flat
+  # floor is only resolvable because this group declares its own
+  # requires-python (see [tool.uv]); on the project's 3.10 floor uv caps
+  # myst-parser at 4.0.1 and a >= 5.1 requirement has no solution.
+  "myst-parser>=5.1",
   # Sphinx 8.0.0 is the first version to drop Python 3.9, matching requires-python.
   "sphinx>=8",
   # sphinx-autodoc-typehints 2.4.0 is the first release aligned to Python >= 3.10.
@@ -436,6 +435,13 @@ packages.find.include = [ "meta_package_manager*" ]
 
 [tool.uv]
 required-version = ">=0.11.15"
+# The docs group resolves for 3.14 alone, well above the project's own 3.10
+# floor. Nothing builds the documentation below it: docs.yaml, the logo audit
+# and tests/test_sphinx_crossrefs.py all run on the newest supported Python.
+# Narrowing the group is what lets its members carry a flat floor instead of a
+# marker split holding a second, older resolution alive for a 3.10 interpreter
+# that never renders a page (myst-parser is the case in point: 5.1 needs 3.11+).
+dependency-groups.docs = { requires-python = ">= 3.14" }
 # Cooldown period.
 exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in

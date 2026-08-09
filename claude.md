@@ -208,6 +208,8 @@ $ uv sync --group docs
 $ uv run -- sphinx-build -b html ./docs ./docs/html
 ```
 
+The `docs` group declares `requires-python = ">= 3.14"` of its own, above the project's `3.10` floor, so a venv built on an older interpreter resolves the group to nothing and `sphinx-build` is simply absent rather than broken. Narrowing it is what lets the documentation dependencies carry flat version floors: see the comment on `dependency-groups.docs` in `[tool.uv]`.
+
 The generation of API documentation is
 [covered by a dedicated workflow](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs.yaml).
 

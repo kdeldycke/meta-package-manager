@@ -181,8 +181,9 @@ html_favicon = "assets/favicon.svg"
 # path they cannot resolve.
 ogp_site_url = f"https://{github_user}.github.io/{project_id}/"
 # Social-card image (og:image), served from the GitHub raw host like the readme
-# banner and screenshots: docs/assets/ is not copied verbatim into the built
-# site, so a site-relative path would 404 for crawlers.
+# banner and screenshots: docs/assets/ is not copied into the built site (only
+# the two sidebar logos are named in html_static_path), so a site-relative path
+# would 404 for crawlers.
 ogp_image = (
     f"https://raw.githubusercontent.com/{github_user}/"
     f"{project_id}/main/docs/assets/banner-social-light.png"

@@ -36,6 +36,7 @@
 - [mpm] Declare the supply-chain cooldown window on the GNOME Shell extension workflow, and an explicit zero-length window on the distributor workflow, whose subject is the freshly published artifact.
 - [mpm] Drop the full Homebrew cask tap clone and the `HOMEBREW_NO_INSTALL_FROM_API` override from the test matrix, both left behind by a cask-version-checkout test that no longer exists.
 - [mpm] Fix the test matrix's drift guard silently skipping for a week after every upstream toolkit bump: it resolved `repomatic` without the per-package cooldown exemption, so the workflow's release-age window left the pinned version unresolvable and the failed run landed in the test's skip branch.
+- [mpm] Scope the `docs` dependency group to Python `3.14` and above, the only interpreter that ever renders a page. Its members drop their marker-split floors for flat ones, and the lockfile stops carrying a second, older resolution of the documentation toolchain (`myst-parser`, `sphinx`, `docutils`, `markdown-it-py`, `sphinx-autodoc-typehints`, `sphinx-design`) for interpreters that never build the site.
 
 ## [`7.5.0` (2026-08-03)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.1...v7.5.0)
 

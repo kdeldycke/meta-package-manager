@@ -76,7 +76,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.0"
+          version: "0.12.1"
       - name: Run repomatic metadata
         id: metadata
         run: >
@@ -433,7 +433,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.0"
+          version: "0.12.1"
       - name: Force native ARM64 Python on Windows ARM64
         # Workaround for https://github.com/astral-sh/uv/issues/12906: uv defaults to x86_64 Python on ARM64 Windows,
         # relying on transparent emulation. Native extensions with Rust (e.g., test-results-parser from codecov-cli)

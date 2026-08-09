@@ -451,7 +451,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.0"
+          version: "0.12.1"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run CLI via pip
@@ -479,7 +479,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.0"
+          version: "0.12.1"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI via pipx
@@ -536,7 +536,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.0"
+          version: "0.12.1"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI

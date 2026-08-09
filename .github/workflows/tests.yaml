@@ -14,10 +14,13 @@ name: 🔬 Tests
   pull_request:
     branches-ignore:
       # This filter matches the PR's *base* branch (always `main`), not its
-      # head, so it does not actually exclude these PRs — see
-      # https://github.com/actions/runner/issues/1591. The real skip is the
-      # `github.head_ref` check in the `metadata` job's `if:` below. Kept
-      # here as documentation of intent.
+      # head, so it does not actually exclude these PRs: see
+      # https://github.com/actions/runner/issues/1591. Kept here as
+      # documentation of intent, since the skip only becomes real through a
+      # `github.head_ref` check on a job's `if:`, propagated through `needs:`.
+      # Named no more precisely than that because `repomatic init
+      # workflows/tests.yaml` copies this header into downstream repos, which
+      # own their jobs and carry no `metadata` job for it to point at.
       - major-version-increment
       - minor-version-increment
       - prepare-release
@@ -40,9 +43,10 @@ concurrency:
 # Supply-chain cooldown: no package published within the window can be resolved by
 # any command in this workflow. Set here, not per command, so it also covers the
 # `metadata` bootstrap and any step added later; a workflow-level `env:` cannot
-# reference `needs`, so the window is a literal kept equal to the
-# `[tool.uv] exclude-newer` of pyproject.toml. Deliberate bypasses are per-package
-# CLI flags (`--exclude-newer-package`, `--min-release-age-exclude`).
+# reference `needs`, so the window is a literal that tests/test_workflows.py holds
+# equal to `[tool.repomatic] minimum-release-age`. Deliberate bypasses are
+# per-package CLI flags (`--exclude-newer-package`, `--min-release-age-exclude`).
+# See claude.md for the rationale.
 env:
   NPM_CONFIG_MIN_RELEASE_AGE: 7
   UV_EXCLUDE_NEWER: "1 week"

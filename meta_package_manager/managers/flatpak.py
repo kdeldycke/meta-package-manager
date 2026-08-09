@@ -281,8 +281,7 @@ class Flatpak(PackageManager):
     def cleanup_repair(self) -> None:
         """Verify and repair the per-user installation.
 
-        See:
-        https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-repair
+        See the [`flatpak repair` reference](https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-repair).
 
         ```{code-block} shell-session
 

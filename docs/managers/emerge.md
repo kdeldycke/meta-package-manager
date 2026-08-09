@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("emerge"))
 ```
 
-## How `mpm` drives `emerge`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("emerge"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("emerge"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("emerge"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("emerge"))
 ```
 
 ## Reference traces

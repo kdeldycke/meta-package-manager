@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("gh-ext"))
 ```
 
-## How `mpm` drives `gh-ext`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("gh-ext"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("gh-ext"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("gh-ext"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("gh-ext"))
 ```
 
 ## Reference traces

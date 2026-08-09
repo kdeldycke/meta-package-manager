@@ -63,10 +63,10 @@ class Volta(PackageManager):
     requirement = ">=1.0.2"
     """[`1.0.2`](https://github.com/volta-cli/volta/blob/main/RELEASES.md#version-102)
     ships the fixes making `volta list` report correct information
-    (https://github.com/volta-cli/volta/issues/778 and
-    https://github.com/volta-cli/volta/issues/926), the listing this backend
-    parses. The plain output format itself is stable from `1.0` through the
-    final `2.0.2` release.
+    ([volta-cli/volta#778](https://github.com/volta-cli/volta/issues/778) and
+    [volta-cli/volta#926](https://github.com/volta-cli/volta/issues/926)), the
+    listing this backend parses. The plain output format itself is stable from
+    `1.0` through the final `2.0.2` release.
     """
 
     cli_search_path = ("~/.volta/bin",)

@@ -47,7 +47,7 @@ class MAS(PackageManager):
 
     `mas` prints one JSON object per app, concatenated rather than wrapped
     in an array, and leaves control characters (embedded newlines,
-    `U+2028`) unescaped inside name and description strings ([upstream bug](https://github.com/mas-cli/mas/issues/1248)). mpm decodes the buffer
+    `U+2028`) unescaped inside name and description strings ([mas-cli/mas#1248](https://github.com/mas-cli/mas/issues/1248)). mpm decodes the buffer
     one object at a time with `strict=False` so each object ends at its own
     closing brace instead of splitting on those bytes. The bug is fixed
     upstream for the (still unreleased) `7.1.0`, so this workaround can be
@@ -117,8 +117,8 @@ class MAS(PackageManager):
         the buffer with {meth}`json.JSONDecoder.raw_decode` instead lets
         each object terminate at its own closing brace, and `strict=False`
         permits the embedded control characters that the upstream output
-        actually contains. Upstream bug:
-        https://github.com/mas-cli/mas/issues/1248
+        actually contains. See
+        [mas-cli/mas#1248](https://github.com/mas-cli/mas/issues/1248).
         ```
         """
         decoder = json.JSONDecoder(strict=False)

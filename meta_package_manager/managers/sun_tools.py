@@ -34,8 +34,8 @@ class Sun_Tools(PackageManager):
 
     Documentation:
 
-    - https://docs.oracle.com/cd/E26502_01/html/E29031/pkgadd-1m.html
-    - https://docs.oracle.com/cd/E26502_01/html/E29031/pkgrm-1m.html
+    - [`pkgadd(1M)` man page](https://docs.oracle.com/cd/E26502_01/html/E29031/pkgadd-1m.html)
+    - [`pkgrm(1M)` man page](https://docs.oracle.com/cd/E26502_01/html/E29031/pkgrm-1m.html)
 
     The suite spans several binaries: `pkginfo` (the read-only query tool, used as
     the main CLI), `pkgadd` and `pkgrm`.

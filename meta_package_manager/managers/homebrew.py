@@ -170,10 +170,8 @@ class Homebrew(PackageManager):
         ```{todo}
 
         Use the `removed` variable to detect removed packages (which are
-        reported with a `(!)` flag). See:
-        https://github.com/caskroom/homebrew-cask/blob/master/doc
-        /reporting_bugs/uninstall_wrongly_reports_cask_as_not_installed.md
-        and https://github.com/kdeldycke/meta-package-manager/issues/17 .
+        reported with a `(!)` flag). See
+        [#17](https://github.com/kdeldycke/meta-package-manager/issues/17).
         ```
         """
         output = self.run_cli("list", "--quiet", "--versions")
@@ -622,7 +620,7 @@ class Homebrew(PackageManager):
         tetrio: (TETR.IO) Free-to-play Tetris clone
         ```
 
-        More doc at: https://docs.brew.sh/Manpage#search
+        More doc in [`brew search`](https://docs.brew.sh/Manpage#search).
         """
         # Keep track of package IDs already matched by the first extended search pass.
         matched_ids = set()
@@ -874,7 +872,7 @@ class Homebrew(PackageManager):
         Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
         ```
 
-        More doc at: https://docs.brew.sh/Manpage#cleanup
+        More doc in [`brew cleanup`](https://docs.brew.sh/Manpage#cleanup).
         """
         self.run_cli(
             "cleanup", "--quiet", "--scrub", "--prune=all", auto_post_args=False

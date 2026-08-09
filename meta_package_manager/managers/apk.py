@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 class APK(PackageManager):
     """Alpine Package Keeper (`apk`) used by Alpine Linux.
 
-    Documentation: https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
+    Documentation: [Alpine Package Keeper](https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper).
 
     ```{note}
     `installed` and `outdated` both parse the `list` applet, so the

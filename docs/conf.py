@@ -260,6 +260,10 @@ linkcheck_ignore = [
     # unauthenticated crawl gets throttled by GitHub to ~1 request per minute,
     # which overruns the link-check job budget.
     r"https://github\.com/kdeldycke/meta-package-manager/blob/",
+    # Same budget, same guard: the tracker search each manager card links its
+    # label to. A label search always answers 200, empty or not, so there is
+    # nothing for linkcheck to catch here anyway.
+    r"https://github\.com/kdeldycke/meta-package-manager/issues\?q=",
 ]
 
 # Retry transiently-unreachable hosts before reporting them broken, so a flaky

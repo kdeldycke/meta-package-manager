@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("sdkman"))
 ```
 
-## How `mpm` drives `sdkman`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("sdkman"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("sdkman"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("sdkman"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("sdkman"))
 ```
 
 ## Reference traces

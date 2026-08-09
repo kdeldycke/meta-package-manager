@@ -36,9 +36,7 @@ class Scoop(PackageManager):
     Apps unpack under `~/scoop` without elevation, so no operation is marked
     `sudo`.
 
-    Documentation:
-
-    - https://github.com/ScoopInstaller/Scoop
+    Documentation: [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop).
 
     ```{note}
     The `installed`, `outdated` and `search` listings are column

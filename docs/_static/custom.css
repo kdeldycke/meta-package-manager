@@ -106,6 +106,21 @@
 .manager-card dl {
   margin-bottom: 0;
 }
+/* The tracker label wears the color GitHub paints it with (MANAGER_LABEL_COLOR
+ * in labels.py, kept in step by test_manager_label_badge_color), so the badge
+ * reads as the label itself rather than as one more link. The pale chip carries
+ * dark ink on both themes, the way GitHub renders a label everywhere.
+ */
+.manager-card a.sd-badge {
+  background-color: #bfdadc;
+  border-color: #bfdadc;
+  color: #1c1c1c;
+  text-decoration: none;
+  white-space: normal;
+}
+.manager-card a.sd-badge:hover {
+  filter: brightness(1.07);
+}
 
 /* Furo's content column is about 46rem, so anything narrower than that leaves
  * the prose beside an 18rem box a useless ribbon: stack them instead.

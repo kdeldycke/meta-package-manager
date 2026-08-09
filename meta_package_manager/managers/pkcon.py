@@ -34,9 +34,7 @@ if TYPE_CHECKING:
 class Pkcon(PackageManager):
     """PackageKit's console client.
 
-    Documentation:
-
-    - https://github.com/PackageKit/PackageKit
+    Documentation: [PackageKit/PackageKit](https://github.com/PackageKit/PackageKit).
 
     pkcon is an unprivileged client handing transactions to the `packagekitd`
     daemon over D-Bus, with the distro's native backend (apt, dnf, zypp, alpm, ...)

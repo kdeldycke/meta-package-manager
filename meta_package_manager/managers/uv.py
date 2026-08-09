@@ -77,7 +77,7 @@ class UVBase(PackageManager):
     uv exposes no environment variable for the companion `--exclude-newer-package`
     flag, so a per-package exemption cannot be injected the way this cutoff is.
 
-    See https://docs.astral.sh/uv/reference/settings/#exclude-newer.
+    See uv's [`exclude-newer` setting](https://docs.astral.sh/uv/reference/settings/#exclude-newer).
     """
 
     pre_args = ("--color", "never", "--no-progress")

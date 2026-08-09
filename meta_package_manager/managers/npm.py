@@ -38,8 +38,8 @@ class NPM(PackageManager):
     in the shared prefix instead of the current working directory. Per-scope
     targeting and multi-binary discovery (several node versions through nvm) are
     tracked in [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725). Command
-    equivalences with the sibling JS managers are listed at
-    https://github.com/antfu-collective/ni?tab=readme-ov-file#ni.
+    equivalences with the sibling JS managers are listed in
+    [antfu-collective/ni](https://github.com/antfu-collective/ni?tab=readme-ov-file#ni).
 
     Queries parse npm's `--json` output. Mutating operations are marked
     privileged so `--sudo` can escalate writes into a root-owned global prefix,
@@ -92,7 +92,7 @@ class NPM(PackageManager):
     The `cooldown_env_value()` method below is overridden to emit an integer number of
     days, the unit `min-release-age` expects.
 
-    See https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age.
+    See npm's [`min-release-age` config](https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age).
     """
 
     pre_args = (
@@ -251,7 +251,7 @@ class NPM(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        Doc: https://docs.npmjs.com/cli/search.html
+        Doc: [`npm search`](https://docs.npmjs.com/cli/search.html).
 
         ```{caution}
         Search does not supports exact matching.

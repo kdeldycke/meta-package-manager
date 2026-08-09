@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("composer"))
 ```
 
-## How `mpm` drives `composer`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("composer"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("composer"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("composer"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("composer"))
 ```
 
 ## Reference traces

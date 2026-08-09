@@ -41,8 +41,8 @@ class Yarn(PackageManager):
     claims the `1.x` range, Berry `2.x` and later. Only the shared cache-cleanup
     operation lives on this base.
 
-    Command equivalences with the sibling JS managers are listed at
-    https://github.com/antfu-collective/ni?tab=readme-ov-file#ni.
+    Command equivalences with the sibling JS managers are listed in
+    [antfu-collective/ni](https://github.com/antfu-collective/ni?tab=readme-ov-file#ni).
     """
 
     homepage_url = "https://yarnpkg.com"
@@ -55,7 +55,7 @@ class Yarn(PackageManager):
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
-        See: https://yarnpkg.com/cli/cache/clean
+        See [`yarn cache clean`](https://yarnpkg.com/cli/cache/clean).
 
         ```{code-block} shell-session
 

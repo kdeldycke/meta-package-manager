@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("yay"))
 ```
 
-## How `mpm` drives `yay`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("yay"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("yay"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("yay"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("yay"))
 ```
 
 ## Changelog

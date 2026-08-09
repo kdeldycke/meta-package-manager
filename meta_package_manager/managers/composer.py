@@ -255,7 +255,7 @@ class Composer(PackageManager):
     def cleanup_cache(self) -> None:
         """Removes things we don't need anymore.
 
-        See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
+        See [`clear-cache`](https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc).
 
         ```{code-block} shell-session
 

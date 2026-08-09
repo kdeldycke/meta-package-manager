@@ -33,11 +33,10 @@ if TYPE_CHECKING:
 class APT(PackageManager):
     """Base class for Debian's `apt` front-end and its variants.
 
-    Documentation:
+    Documentation: [`apt(8)` man page](https://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html).
 
-    - http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
-
-    See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
+    Command equivalences with other managers are listed in
+    [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
 
     mpm drives the high-level `apt` binary, not `apt-get` or `apt-cache`,
     over system-wide packages. Mutations escalate through `sudo` and force
@@ -100,7 +99,7 @@ class APT(PackageManager):
     """
     `--quiet`: produces output suitable for logging, omitting progress indicators.
 
-    Source: https://manpages.org/apt-get/8#options
+    Source: [`apt-get(8)` options](https://manpages.org/apt-get/8#options).
     """
 
     version_regexes = (r"apt\s+(?P<version>\S+)",)

@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("apt-mint"))
 ```
 
-## How `mpm` drives `apt-mint`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("apt-mint"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("apt-mint"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("apt-mint"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("apt-mint"))
 ```
 
 ## Changelog

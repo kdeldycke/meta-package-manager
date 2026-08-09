@@ -43,6 +43,7 @@ from itertools import groupby
 from pathlib import Path
 from textwrap import dedent
 from typing import NamedTuple
+from urllib.parse import quote
 
 import yaml
 from click_extra.table import TableFormat, render_table
@@ -64,6 +65,7 @@ from meta_package_manager.docstring_corpus import (
     literal_blocks,
     version_trace,
 )
+from meta_package_manager.labels import MANAGER_LABELS
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import PURL_MAP
@@ -137,6 +139,13 @@ Pinned to the `main` branch so the generated artifact references the same
 revision the docs are built from.
 """
 
+GITHUB_ISSUES_URL = "https://github.com/kdeldycke/meta-package-manager/issues"
+"""Base URL of the tracker, queried by label from each manager's infobox.
+
+The `issues` endpoint rather than `pulls`: a search there returns issues *and*
+pull requests, while `pulls` silently restricts itself to the latter.
+"""
+
 MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     (None, "manager_intro"),
     ("What `mpm` adds to `{manager_id}`", "manager_augments"),
@@ -144,9 +153,9 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     ("Operations", "manager_operations"),
     ("Selecting and configuring `{manager_id}`", "manager_selection"),
     ("Recipes", "manager_recipes"),
-    ("How `mpm` drives `{manager_id}`", "manager_cli"),
     ("Privilege escalation", "manager_sudo"),
     ("Cooldown", "manager_cooldown"),
+    ("Version probe", "manager_version_probe"),
     ("Reference traces", "manager_traces"),
     ("Changelog", "manager_changelog"),
 )
@@ -154,10 +163,15 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
 
 Single source of truth for {func}`manager_page_stub` and the structural tests.
 Sections lead with the `mpm` pitch (what it adds to the native tool) and its
-usage, then document `mpm`'s preconceptions about the tool (its invocation,
-then the captured traces backing the parsers), and close on the release
-history of that support. A section whose generator produces nothing for a
-given manager is omitted from its stub.
+usage, then document `mpm`'s preconceptions about the tool (the captured
+transcripts backing the version probe and the parsers), and close on the
+release history of that support. A section whose generator produces nothing for
+a given manager is omitted from its stub.
+
+How `mpm` invokes the tool (binary names and lookup paths, the arguments and
+environment forced on every call) has no section of its own: those are one-line
+facts rather than prose, so they read better as rows of the page's infobox
+({func}`manager_card`).
 
 Each title is a `str.format` template receiving the manager ID, so a heading
 can name its manager; a title with no replacement field renders unchanged.
@@ -702,14 +716,55 @@ def manager_logo(manager_id: str, *, inline: bool = False) -> str:
     )
 
 
+def manager_label_url(manager_id: str) -> str:
+    """Produce the tracker search listing everything filed about a manager.
+
+    Managers sharing an ecosystem share a single label
+    ({data}`~meta_package_manager.labels.MANAGER_LABEL_GROUPS`), so the five
+    RPM-based wrappers all point at the same `📦 manager: rpm-based` search.
+
+    Only the ASCII specials of the query are percent-encoded, the way GitHub's
+    own label links are: escaping the emoji too would triple the length of an
+    otherwise readable URL. `quote()` cannot express that on its own, since its
+    `safe` set is ASCII-only, so it is applied character by character.
+    """
+    label = MANAGER_LABELS[manager_id]
+    query = "".join(
+        char if not char.isascii() else quote(char, safe="")
+        for char in f'label:"{label}"'
+    )
+    return f"{GITHUB_ISSUES_URL}?q={query}"
+
+
+def _collapse_home(path: str) -> str:
+    """Rewrite a path under the builder's home directory as `~`-prefixed.
+
+    SDKMAN resolves its CLI search path from `$SDKMAN_DIR`, defaulting to the
+    current user's home: rendering it raw would bake whichever account built the
+    docs into the published page.
+    """
+    home = str(Path.home())
+    return f"~{path[len(home) :]}" if path.startswith(home) else path
+
+
 def manager_card(manager_id: str) -> str:
     """Produce the infobox of a manager's page: its mark atop its key facts.
 
     A `{card}` floated to the side of the intro prose, in the shape an
-    encyclopaedia gives a subject: identity first, then the handful of facts a
-    reader wants without scrolling. Everything else the page knows (platforms in
-    full, operations, ecosystem identifiers) keeps its own section below, so the
+    encyclopaedia gives a subject: identity first, then what the manager can do,
+    then how `mpm` invokes it, and the two ways off the page last, its tracker
+    label and its source file. Everything needing more than a line (platforms in
+    full, the operation caveats, transcripts) keeps its own section below, so the
     box stays a summary rather than a second copy of the page.
+
+    The invocation rows are the whole of what used to be a *How `mpm` drives
+    <id>* section: binary names and lookup paths, the arguments and environment
+    forced on every call. They are one-line facts, so a box row states each one
+    more plainly than a bulleted section could, and the rationale for forcing
+    them sits next to the lever that overrides them
+    ({func}`manager_selection`). What did not fit — the version probe and the
+    regexes reading it — kept a section of its own
+    ({func}`manager_version_probe`).
 
     The mark rides in the card's *header* rather than its `:img-top:` option,
     which takes a URI and would emit an `<img>`: an externally referenced SVG
@@ -727,7 +782,6 @@ def manager_card(manager_id: str) -> str:
     facts = [
         ("ID", f"`{manager_id}`"),
         ("Home page", f"<{m.homepage_url}>"),
-        ("Source", f"[`{source_path}`]({source_url})"),
     ]
     if m.requirement:
         # Unstyled, like the readme matrix's own Version column: a table cell is
@@ -766,6 +820,45 @@ def manager_card(manager_id: str) -> str:
             "Brewfile entry",
             f"`{m.brewfile_entry_type}`, in [Brewfile backups](../dump.md)",
         ))
+
+    # How mpm invokes the tool. Only the CLI names are unconditional: the rest is
+    # listed when the manager departs from the plain "run the binary" default.
+    cli_label = "CLI names (lookup order)" if len(m.cli_names) > 1 else "CLI name"
+    facts.append((
+        cli_label,
+        FACT_SEPARATOR.join(f"`{name}`" for name in m.cli_names),
+    ))
+    if m.cli_search_path:
+        facts.append((
+            "Extra search paths",
+            FACT_SEPARATOR.join(f"`{_collapse_home(p)}`" for p in m.cli_search_path),
+        ))
+    if m.pre_cmds:
+        facts.append(("Pre-commands", f"`{' '.join(m.pre_cmds)}`"))
+    if m.pre_args or m.post_args:
+        # The shape of every invocation, not the bare fragments: one row then
+        # shows arguments forced before the command, after it, or both, with no
+        # ambiguity about which side each lands on. The placeholder is spelled
+        # out, an ellipsis having read as truncated output.
+        argv = " ".join((m.cli_names[0], *m.pre_args, "<command>", *m.post_args))
+        facts.append(("Every call", f"`{argv}`"))
+    if m.extra_env:
+        facts.append((
+            "Forced environment",
+            FACT_SEPARATOR.join(f"`{k}={v}`" for k, v in sorted(m.extra_env.items())),
+        ))
+    if m.timeout is not None:
+        facts.append(("Call timeout", f"{m.timeout} seconds"))
+
+    # Last, the two ways out of the page: the tracker and the code. The label
+    # renders as a `{bdg-link}` badge, the pill shape GitHub itself gives it,
+    # repainted its own color by the stylesheet.
+    badge = (
+        f"{{bdg-link-secondary}}`{MANAGER_LABELS[manager_id]} "
+        f"<{manager_label_url(manager_id)}>`"
+    )
+    facts.append(("Issues and PRs", badge))
+    facts.append(("Source", f"[`{source_path}`]({source_url})"))
 
     # A definition list, so each fact reads as a labelled row of the box.
     rows = "\n\n".join(f"**{label}**\n: {value}" for label, value in facts)
@@ -965,12 +1058,17 @@ def manager_augments(manager_id: str) -> str:
     )
 
     if gains:
-        lede = f"Through `mpm`, `{manager_id}` gains:"
-        bullets = "\n".join(f"- {gain}" for gain in gains)
+        # A lone gain reads as a sentence: a bulleted list of one item is a list
+        # in shape only, and the bullet claims a plurality that is not there.
+        if len(gains) == 1:
+            lede = f"Through `mpm`, `{manager_id}` gains {gains[0]}."
+        else:
+            bullets = "\n".join(f"- {gain}" for gain in gains)
+            lede = f"Through `mpm`, `{manager_id}` gains:\n\n{bullets}"
         reach = (
             f"Bigger still, `mpm` reaches across every manager at once: {reach_body}"
         )
-        return f"{lede}\n\n{bullets}\n\n{reach}\n\n{universal}"
+        return f"{lede}\n\n{reach}\n\n{universal}"
     reach = (
         f"`mpm` reaches across every manager at once, not `{manager_id}` alone: "
         f"{reach_body}"
@@ -1015,7 +1113,7 @@ def _native_invocation(manager, member: str) -> tuple[list[str], str | None] | N
     (`cli` plus `args`), or the first documented `shell-session` block of a
     class-based manager's method. The MRO is walked so an operation defined on a
     shared base (`Homebrew` for `brew`/`cask`) is found, not just the leaf class
-    body. The forced arguments {func}`manager_cli` documents separately are
+    body. The forced arguments {func}`manager_card` lists separately are
     stripped to leave the recognizable native form, a trailing `| jq`-style
     illustration is dropped, and the operand is the last non-flag token. `None`
     when the operation documents no command.
@@ -1307,41 +1405,21 @@ def _python_regex_literal(pattern: str) -> str:
     return repr(pattern)
 
 
-def manager_cli(manager_id: str) -> str:
-    """Produce the invocation section of a manager's documentation page.
+def manager_version_probe(manager_id: str) -> str:
+    """Produce the version-probe section of a manager's documentation page.
 
-    Documents how `mpm` drives the manager: binary names and lookup tweaks,
-    the arguments and environment forced on every call, then the version probe
-    and its parsing regexes. Beyond the always-shown CLI names and version
-    probe, only non-default facts are listed. The argv fragments (pre-commands,
-    forced arguments) are collated into single code spans, matching how they
-    appear on the command line. Escalation and cooldown each have their own
-    section ({func}`manager_sudo`, {func}`manager_cooldown`).
+    The command `mpm` runs to read the manager's version, the output that
+    command was captured producing, and the regexes pulling the version out of
+    it. The transcript comes from the `[samples.version]` fixture of a bundled
+    TOML manager or the `version_regexes` docstring of a class-based one; the
+    per-operation samples render in the reference-traces section
+    ({func}`manager_traces`).
 
-    The version probe additionally shows its captured output as a terminal
-    transcript, from the `[samples.version]` fixture of a bundled TOML manager
-    or the `version_regexes` docstring of a class-based one; the per-operation
-    samples render in the reference-traces section ({func}`manager_traces`).
+    The rest of the invocation plumbing (binary names and lookup paths, forced
+    arguments and environment) reads as one-line facts, so it sits in the page's
+    infobox ({func}`manager_card`) rather than in a section here.
     """
     m = pool[manager_id]
-
-    def code_list(values) -> str:
-        return ", ".join(f"`{v}`" for v in values)
-
-    lines = [f"- CLI names, in lookup order: {code_list(m.cli_names)}"]
-    if m.cli_search_path:
-        lines.append(f"- Extra CLI search paths: {code_list(m.cli_search_path)}")
-    if m.pre_cmds:
-        lines.append(f"- Pre-commands: `{' '.join(m.pre_cmds)}`")
-    if m.pre_args:
-        lines.append(f"- Arguments forced before each call: `{' '.join(m.pre_args)}`")
-    if m.post_args:
-        lines.append(f"- Arguments forced after each call: `{' '.join(m.post_args)}`")
-    if m.extra_env:
-        lines.append("- Environment forced on each call:")
-        lines.extend(f"  - `{k}={v}`" for k, v in sorted(m.extra_env.items()))
-    if m.timeout is not None:
-        lines.append(f"- Call timeout: {m.timeout} seconds")
 
     source = getattr(m, "definition_source", None)
     if source:
@@ -1361,13 +1439,7 @@ def manager_cli(manager_id: str) -> str:
         "python",
     )
 
-    parts = ["\n".join(lines)]
-    if m.pre_args or m.post_args or m.extra_env:
-        parts.append(
-            "`mpm` forces those arguments and variables on every call, so runs "
-            "stay quiet, non-interactive and reproducible: the defaults you would "
-            "set in CI anyway.",
-        )
+    parts = []
     if version_sample:
         transcript = version_sample.strip("\n")
         parts.append("The version is probed by running:")
@@ -1393,12 +1465,25 @@ def manager_selection(manager_id: str) -> str:
     ({func}`manager_rosetta`); this one points at the fuller
     [configuration](configuration.md) and [overrides](overrides.md) references
     rather than restating them.
+
+    A manager whose calls carry forced arguments or environment variables
+    (listed in the infobox by {func}`manager_card`) gets the rationale for them
+    here, where the lever that overrides them is.
     """
+    m = pool[manager_id]
     select = (
         f"Deselect `{manager_id}` for a single run with `--no-{manager_id}`, or "
         "persist the choice in your [configuration](../configuration.md):"
     )
     select_toml = _fenced(f"[mpm]\n{manager_id} = false", "toml")
+    forced = (
+        "The arguments and environment variables listed in the box atop this "
+        f"page are forced on every `{manager_id}` call, so runs stay quiet, "
+        "non-interactive and reproducible: the defaults you would set in CI "
+        "anyway."
+        if m.pre_args or m.post_args or m.extra_env
+        else ""
+    )
     tune = (
         "Keep it enabled but tune how `mpm` drives it with a "
         "[per-manager override](../overrides.md):"
@@ -1408,8 +1493,8 @@ def manager_selection(manager_id: str) -> str:
         f"`mpm config-template {manager_id}` prints every overridable attribute "
         "as a ready-to-paste block."
     )
-    parts = [select, select_toml, tune, tune_toml, template]
-    return "\n\n".join(parts)
+    parts = [select, select_toml, forced, tune, tune_toml, template]
+    return "\n\n".join(filter(None, parts))
 
 
 def manager_sudo(manager_id: str) -> str:
@@ -1469,6 +1554,18 @@ def manager_sudo(manager_id: str) -> str:
     return "\n\n".join(parts)
 
 
+def _fact_block(facts: list[str]) -> str:
+    """Render labelled facts as a bullet list, or as a plain line when alone.
+
+    A list of one item is a list in shape only: the bullet promises siblings
+    that never come. A manager whose cooldown row holds nothing but a status
+    gets that status as a line of its own instead.
+    """
+    if len(facts) == 1:
+        return facts[0]
+    return "\n".join(f"- {fact}" for fact in facts)
+
+
 def manager_cooldown(manager_id: str) -> str:
     """Produce the cooldown section of a manager's documentation page.
 
@@ -1510,12 +1607,12 @@ def manager_cooldown(manager_id: str) -> str:
         )
     if row:
         status, mechanism, reference = row
-        facts = [f"- Status: {status}"]
+        facts = [f"Status: {status}"]
         if mechanism not in EMPTY_CELLS:
-            facts.append(f"- Mechanism: {mechanism}")
+            facts.append(f"Mechanism: {mechanism}")
         if reference not in EMPTY_CELLS:
-            facts.append(f"- Reference: {reference}")
-        parts.append("\n".join(facts))
+            facts.append(f"Reference: {reference}")
+        parts.append(_fact_block(facts))
 
     retraction = _retraction_status(manager_id)
     if retraction:
@@ -1526,12 +1623,12 @@ def manager_cooldown(manager_id: str) -> str:
             "registry dates its releases. From the [retraction table]"
             "(../cooldown.md#retraction-paths-by-registry):",
         )
-        facts = [f"- Registry: {registry}"]
+        facts = [f"Registry: {registry}"]
         if withdrawal not in EMPTY_CELLS:
-            facts.append(f"- Retraction: {withdrawal}")
+            facts.append(f"Retraction: {withdrawal}")
         if publish_date not in EMPTY_CELLS:
-            facts.append(f"- Publish date: {publish_date}")
-        parts.append("\n".join(facts))
+            facts.append(f"Publish date: {publish_date}")
+        parts.append(_fact_block(facts))
 
     if not m.supports_cooldown and any(
         implements(m, op)
@@ -1558,8 +1655,8 @@ def manager_traces(manager_id: str) -> str:
     {func}`~meta_package_manager.docstring_corpus.literal_blocks`, the same
     literal blocks the corpus test round-trips). Empty for managers without such
     samples (the section is then omitted from the stub); the version probe
-    transcript stays in the command-line section, next to the regexes consuming
-    it.
+    transcript keeps its own section ({func}`manager_version_probe`), next to
+    the regexes consuming it.
     """
     m = pool[manager_id]
     source = getattr(m, "definition_source", None)
@@ -1657,6 +1754,12 @@ def _changelog_entries() -> dict[str, tuple[ChangelogEntry, ...]]:
     entries: dict[str, list[ChangelogEntry]] = {}
     version = date = url = ""
     changelog = (PROJECT_ROOT / "changelog.md").read_text(encoding="UTF-8")
+    # The older releases hard-wrap their bullets, so an entry's text can span
+    # several lines. Fold every continuation back into its own bullet before
+    # matching, or the entry lands on the manager page cut mid-sentence. An
+    # indented line opening a nested bullet is a sub-item, not a continuation:
+    # it stays out, as it always has.
+    changelog = re.sub(r"\n[ \t]+(?![-*+] )(?=\S)", " ", changelog)
     for line in changelog.splitlines():
         heading = release.match(line)
         if heading:

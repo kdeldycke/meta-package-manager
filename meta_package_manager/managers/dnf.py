@@ -51,8 +51,8 @@ class DNF(PackageManager):
 
     Documentation:
 
-    - https://dnf.readthedocs.io/en/latest/command_ref.html
-    - https://wiki.archlinux.org/title/Pacman/Rosetta (command equivalences)
+    - [DNF command reference](https://dnf.readthedocs.io/en/latest/command_ref.html)
+    - [Command equivalences with other managers](https://wiki.archlinux.org/title/Pacman/Rosetta)
     """
 
     maintenance_note: str | None = (

@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import re
 import shutil
@@ -31,6 +32,8 @@ from meta_package_manager.capabilities import Operations
 from meta_package_manager.docstring_corpus import literal_blocks
 from meta_package_manager.labels import (
     LABELS,
+    MANAGER_LABEL_COLOR,
+    MANAGER_LABELS,
     MANAGER_PREFIX,
     PLATFORM_PREFIX,
     generate_content_rules,
@@ -570,11 +573,48 @@ def test_manager_card_renders(manager):
     assert card in _docs.manager_intro(manager.id)
 
     # Every fact is a definition-list row, so it reads as a labelled entry.
-    for label in ("ID", "Home page", "Source", "Platforms"):
+    for label in ("ID", "Home page", "Issues and PRs", "Source", "Platforms"):
         assert f"**{label}**\n: " in card
     # The former Platforms and Ecosystem sections now live here.
     assert "**purl types**\n: `pkg:" in card
     assert ("**Brewfile entry**" in card) is bool(manager.brewfile_entry_type)
+
+    # The tracker link and the source file close the box, in that order: a
+    # reader after either has read everything else first. Managers sharing an
+    # ecosystem share one label, hence one search.
+    label_name = MANAGER_LABELS[manager.id]
+    assert label_name.startswith(MANAGER_PREFIX)
+    url = _docs.manager_label_url(manager.id)
+    badge = f"{{bdg-link-secondary}}`{label_name} <{url}>`"
+    assert f"**Issues and PRs**\n: {badge}\n\n**Source**\n: " in card
+    assert "**" not in card.partition("**Source**\n: ")[2]
+
+    # Only the ASCII specials are escaped, the way GitHub's own label links are.
+    quoted = label_name.replace(" ", "%20").replace(":", "%3A")
+    assert url == f"{_docs.GITHUB_ISSUES_URL}?q=label%3A%22{quoted}%22"
+
+    # How mpm invokes the tool, the whole of what used to be a section of its own.
+    cli_row = "CLI names (lookup order)" if len(manager.cli_names) > 1 else "CLI name"
+    assert f"**{cli_row}**\n: " in card
+    for name in manager.cli_names:
+        assert f"`{name}`" in card
+    assert ("**Extra search paths**" in card) is bool(manager.cli_search_path)
+    assert ("**Forced environment**" in card) is bool(manager.extra_env)
+    # A single row states arguments forced before the command, after it, or
+    # both, as the shape of every invocation.
+    forced = card.partition("**Every call**\n: ")[2].partition("\n")[0]
+    assert bool(forced) is bool(manager.pre_args or manager.post_args)
+    if forced:
+        argv = " ".join((
+            manager.cli_names[0],
+            *manager.pre_args,
+            "<command>",
+            *manager.post_args,
+        ))
+        assert forced == f"`{argv}`"
+
+    # No path leaks the home directory of whoever built the docs.
+    assert str(Path.home()) not in card
 
     # The glue holding a separator to the value before it, and an icon to its
     # label, is a non-breaking space. It survives no formatter that mistakes it
@@ -614,6 +654,20 @@ def test_manager_card_renders(manager):
     header, _, body = card.partition("^^^")
     assert ("manager-logo" in header) is bool(manager.logo)
     assert "manager-logo" not in body
+
+
+def test_manager_label_badge_color():
+    """Check the stylesheet paints the label badge the color GitHub gives it.
+
+    A stylesheet cannot read `labels.py`, so the hex is written twice: here is
+    where the copy is caught drifting from
+    {data}`~meta_package_manager.labels.MANAGER_LABEL_COLOR`.
+    """
+    css = (PROJECT_ROOT / "docs" / "_static" / "custom.css").read_text(
+        encoding="utf-8",
+    )
+    rule = css.partition(".manager-card a.sd-badge {")[2].partition("}")[0]
+    assert rule.count(MANAGER_LABEL_COLOR) == 2, "background and border color"
 
 
 def test_manager_logo_credits_renders():
@@ -686,6 +740,90 @@ def test_manager_page_sections_render(manager):
     assert f"[mpm.managers.{manager.id}]" in selection
 
 
+DOCSTRING_FENCE = re.compile(
+    r"(?ms)^([ \t]*)(`{3,})(?P<info>[^\n]*)\n.*?^[ \t]*\2[ \t]*$"
+)
+"""Backtick-fenced block of a docstring, whatever its indentation.
+
+The info string stops at the newline: `.` spans lines under `re.DOTALL`, so a
+greedy one would swallow every fence of the docstring into a single match.
+"""
+
+PROSE_DIRECTIVES = re.compile(r"\{(?!code-block|literalinclude|eval-rst)")
+"""Fence info string of a directive whose body is prose, not code.
+
+An admonition fence (note, warning, caution, seealso, todo) renders its content
+as regular MyST, so its links matter as much as the surrounding paragraphs'.
+Only a code block escapes the prose rules.
+"""
+
+BARE_URL = re.compile(r"(?<!\]\()(?<!\]\(<)(?<!<)https?://[^\s>)\]`,;\'\"]+")
+"""A URL that is neither a markdown link target nor an autolink."""
+
+
+def _strip_code_fences(docstring: str) -> str:
+    """Drop the code blocks of a docstring, keeping every prose directive.
+
+    A captured CLI transcript is data and escapes the prose rules; an
+    admonition's body does not, so its own fence stays in.
+    """
+    return DOCSTRING_FENCE.sub(
+        lambda match: (
+            match.group(0)
+            if PROSE_DIRECTIVES.match(match.group("info").strip())
+            else ""
+        ),
+        docstring,
+    )
+
+
+def _prose_docstrings():
+    """Yield every docstring of the package, code fences stripped out.
+
+    Covers the four kinds `autodoc` renders: module, class, function and
+    attribute docstrings (a bare string expression trailing an assignment).
+    """
+    for path in sorted((PROJECT_ROOT / "meta_package_manager").rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="UTF-8"))
+        for node in ast.walk(tree):
+            if isinstance(
+                node,
+                (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef),
+            ):
+                doc = ast.get_docstring(node, clean=False)
+                if doc:
+                    yield path, node.body[0].lineno, _strip_code_fences(doc)
+            previous = None
+            # `body` is a single expression on a lambda or a ternary, not a block.
+            body = getattr(node, "body", None)
+            for child in body if isinstance(body, list) else ():
+                if (
+                    isinstance(child, ast.Expr)
+                    and isinstance(child.value, ast.Constant)
+                    and isinstance(child.value.value, str)
+                    and isinstance(previous, (ast.Assign, ast.AnnAssign))
+                ):
+                    doc = _strip_code_fences(child.value.value)
+                    yield path, child.lineno, doc
+                previous = child
+
+
+def test_docstrings_carry_no_bare_url():
+    """Every URL in docstring prose must be a link.
+
+    MyST's `linkify` extension is off, so a bare URL renders as dead plain
+    text, both in the API docs and in the manager pages inlining the class
+    docstrings. URLs inside a fenced block are captured CLI output (fwupd's
+    `See https://…` warnings) and are left alone.
+    """
+    bare = [
+        f"{path.relative_to(PROJECT_ROOT)}:{lineno}: {match.group()}"
+        for path, lineno, doc in _prose_docstrings()
+        for match in BARE_URL.finditer(doc)
+    ]
+    assert not bare, "Bare URLs in docstrings:\n" + "\n".join(bare)
+
+
 def test_manager_traces_render_literal_blocks():
     """A class-based manager's reference traces surface exactly the literal
     installed/outdated/orphans blocks the corpus validates, in terminal-facing
@@ -720,7 +858,10 @@ def test_manager_changelog_entries():
     index = _docs._changelog_entries()
     assert set(index) == set(pool.all_manager_ids)
 
-    changelog = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
+    raw = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
+    # The older releases hard-wrap their bullets, so an entry spans several
+    # source lines: compare against the same folded copy the index reads.
+    changelog = re.sub(r"\n[ \t]+(?![-*+] )(?=\S)", " ", raw)
     heading = re.compile(r"^## \[`([^`]+)` \(([^)]+)\)\]\(([^)]+)\)", re.MULTILINE)
     releases = set(heading.findall(changelog))
 
@@ -740,6 +881,9 @@ def test_manager_changelog_entries():
             flag = f"**{entry.flag}:** " if entry.flag else ""
             assert entry.text in changelog
             assert f"  - {flag}{entry.text}" in rendered
+            # Every bullet is a full sentence, so an entry stopping short of
+            # its period is one whose wrapped tail never made it in.
+            assert entry.text.endswith("."), entry.text
             assert f"- [`{entry.version}`]({entry.url}) ({entry.date})" in rendered
 
     # Independent recount: every bullet scoped to a pool manager lands on that
@@ -871,10 +1015,18 @@ def test_retraction_table_well_formed():
 
 @all_managers
 def test_retraction_status_reuses_table_row(manager):
-    """Check each manager's page surfaces its own registry row verbatim."""
+    """Check each manager's page surfaces its own registry row verbatim.
+
+    A registry documenting neither a retraction path nor a publish date leaves
+    the row alone: it renders as a plain line rather than a one-item list.
+    """
     registry, withdrawal, publish_date = _docs._retraction_status(manager.id)
     section = _docs.manager_cooldown(manager.id)
-    assert f"- Registry: {registry}" in section
+    cells = [
+        cell for cell in (withdrawal, publish_date) if cell not in _docs.EMPTY_CELLS
+    ]
+    bullet = "- " if cells else ""
+    assert f"{bullet}Registry: {registry}" in section
     for label, cell in (("Retraction", withdrawal), ("Publish date", publish_date)):
         line = f"- {label}: {cell}"
         assert (line in section) is (cell not in _docs.EMPTY_CELLS)

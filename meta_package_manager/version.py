@@ -387,7 +387,7 @@ class TokenizedString:
 
         ```{seealso}
 
-        https://stackoverflow.com/a/57181955
+        [Stack Overflow answer](https://stackoverflow.com/a/57181955)
         ```
         """
         # Extract the class of the object

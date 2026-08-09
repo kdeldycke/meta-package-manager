@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("apt"))
 ```
 
-## How `mpm` drives `apt`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("apt"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("apt"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("apt"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("apt"))
 ```
 
 ## Reference traces

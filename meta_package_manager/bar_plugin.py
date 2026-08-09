@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 SWIFTBAR_MIN_VERSION = (2, 1, 2)
 """SwiftBar v2.1.2 fix an issue with multiple parameters in the font strings.
 
-See: https://github.com/swiftbar/SwiftBar/issues/445
+See [swiftbar/SwiftBar#445](https://github.com/swiftbar/SwiftBar/issues/445).
 """
 
 XBAR_MIN_VERSION = (2, 1, 7)
@@ -95,9 +95,8 @@ class MPMPlugin:
     def getenv_bool(var, default: bool = False) -> bool:
         """Utility to normalize boolean environment variables.
 
-        Relies on `configparser.RawConfigParser.BOOLEAN_STATES` to translate strings
-        into boolean. See:
-        https://github.com/python/cpython/blob/3c298e2e385fc6f462abaada2fd680deb1a2b58e/Lib/configparser.py#L596-L597
+        Relies on [`configparser.RawConfigParser.BOOLEAN_STATES`](https://github.com/python/cpython/blob/3c298e2e385fc6f462abaada2fd680deb1a2b58e/Lib/configparser.py#L596-L597)
+        to translate strings into boolean.
         """
         value = MPMPlugin.getenv_str(var)
         if value is None:
@@ -117,9 +116,10 @@ class MPMPlugin:
         Multiple values for the same parameter will be deduplicated, and the last one
         will be kept.
 
-        Available parameters are:
-        - https://github.com/swiftbar/SwiftBar?tab=readme-ov-file#parameters
-        - https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#parameters
+        Available parameters are documented by both hosts:
+
+        - [SwiftBar](https://github.com/swiftbar/SwiftBar?tab=readme-ov-file#parameters)
+        - [Xbar](https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#parameters)
         """
         if not valid_ids:
             valid_ids = {"color", "font", "size"}

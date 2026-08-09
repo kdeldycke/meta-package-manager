@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("slapt-get"))
 ```
 
-## How `mpm` drives `slapt-get`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("slapt-get"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("slapt-get"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("slapt-get"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("slapt-get"))
 ```
 
 ## Reference traces

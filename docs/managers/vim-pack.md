@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("vim-pack"))
 ```
 
-## How `mpm` drives `vim-pack`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("vim-pack"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("vim-pack"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("vim-pack"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("vim-pack"))
 ```
 
 ## Reference traces

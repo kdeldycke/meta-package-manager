@@ -86,15 +86,15 @@ class Pip(PackageManager):
     rather than through the `pip` executable.
 
     Calling the module through the interpreter lets `pip` upgrade itself, an
-    advantage on Windows in particular
-    (https://snarky.ca/why-you-should-use-python-m-pip/).
+    advantage on Windows in particular: see
+    [why you should use `python -m pip`](https://snarky.ca/why-you-should-use-python-m-pip/).
 
     Installed and outdated packages are read from pip's `list --format=json`
     output. The `outdated` query adds `--not-required` to report only
     top-level packages, since upgrading a transitive dependency can break its
     parent's version constraints ([#1214](https://github.com/kdeldycke/meta-package-manager/issues/1214)). There is
     no `search`: PyPI disabled its server-side search API in 2020 under
-    unmanageable load, so `pip search` no longer works (see [pip issue 5216](https://github.com/pypa/pip/issues/5216#issuecomment-744605466)).
+    unmanageable load, so `pip search` no longer works (see [pypa/pip#5216](https://github.com/pypa/pip/issues/5216#issuecomment-744605466)).
 
     ```{note}
 
@@ -151,7 +151,7 @@ class Pip(PackageManager):
     pip parses the RFC 3339 timestamp produced by the default
     {meth}`meta_package_manager.execution.CLIExecutor.cooldown_env_value`.
 
-    See https://github.com/pypa/pip/issues/13674.
+    See [pypa/pip#13674](https://github.com/pypa/pip/issues/13674).
     """
 
     # Targets `python3` CLI first to allow for some systems (like macOS) to keep the
@@ -668,7 +668,7 @@ class Pip(PackageManager):
         Pip lacks support of a proper full upgrade command. Raising an error let the
         parent class upgrade packages one by one.
 
-        See: https://github.com/pypa/pip/issues/59
+        See [pypa/pip#59](https://github.com/pypa/pip/issues/59).
         ```
         """
         return self.build_cli("install", "--upgrade", package_id, sudo=True)

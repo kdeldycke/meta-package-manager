@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("ports"))
 ```
 
-## How `mpm` drives `ports`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("ports"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("ports"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("ports"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("ports"))
 ```
 
 ## Reference traces

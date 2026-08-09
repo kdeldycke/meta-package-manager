@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("npm"))
 ```
 
-## How `mpm` drives `npm`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("npm"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("npm"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("npm"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("npm"))
 ```
 
 ## Reference traces

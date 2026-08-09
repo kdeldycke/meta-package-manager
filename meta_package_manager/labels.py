@@ -118,6 +118,14 @@ def generate_labels(
     return dict(sorted(label_map.items(), key=lambda i: str.casefold(i[1]))), rows
 
 
+MANAGER_LABEL_COLOR = "#bfdadc"
+"""Color GitHub paints every `📦 manager: *` label with.
+
+Also the color of the badge each manager's documentation page links its label
+with, hard-coded in `docs/_static/custom.css` since a stylesheet cannot read
+this module; `test_manager_label_badge_color` keeps the two in step.
+"""
+
 MANAGER_PREFIX = "📦 manager: "
 
 MANAGER_LABEL_GROUPS: TLabelGroup = {
@@ -150,7 +158,7 @@ MANAGER_LABELS, _manager_label_rows = generate_labels(
     all_manager_label_ids,
     MANAGER_LABEL_GROUPS,
     MANAGER_PREFIX,
-    "#bfdadc",
+    MANAGER_LABEL_COLOR,
 )
 """Maps all manager IDs to their labels."""
 

@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("uvx"))
 ```
 
-## How `mpm` drives `uvx`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("uvx"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("uvx"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("uvx"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("uvx"))
 ```
 
 ## Reference traces

@@ -33,11 +33,10 @@ if TYPE_CHECKING:
 class Emerge(PackageManager):
     """Portage's `emerge`, Gentoo's source-based package manager.
 
-    Documentation:
+    Documentation: [`emerge(1)` man page](https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html).
 
-    - https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html
-
-    See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
+    Command equivalences with other managers are listed in
+    [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
 
     The outdated listing and the whole-system upgrade operate against the
     `@world` set. The progress spinner and ANSI coloring are disabled on every

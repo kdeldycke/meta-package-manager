@@ -590,7 +590,7 @@ def mpm(
             level. We need to restore the default behavior when the context is closed,
             otherwise the logging module will be stuck in a disabled state.
 
-            See: https://docs.python.org/3/library/logging.html?highlight=logging#logging.disable
+            See {func}`logging.disable`.
             """
             logging.disable(logging.NOTSET)
 

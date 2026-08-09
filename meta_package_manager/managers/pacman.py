@@ -73,7 +73,8 @@ class Pacman(PackageManager):
     every parser and forced argument here unchanged, overriding only the binary
     (and, for `yay`, adding a release-age cooldown).
 
-    See command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta.
+    Command equivalences with other managers are listed in
+    [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
 
     ```{caution}
     `--query --upgrades` only reports updates for packages tracked in a
@@ -389,8 +390,8 @@ class Paru(Pacman):
     `upgrade_all_cli` builds.
 
     Unlike `pacman`, the helper must run as the regular user: any transaction
-    building AUR packages aborts under root (``can't install AUR package as
-    root`), and paru invokes `sudo pacman`` itself for the privileged steps.
+    building AUR packages aborts under root (`can't install AUR package as
+    root`), and paru invokes `sudo pacman` itself for the privileged steps.
     `mpm` therefore never wraps it in `sudo`.
     """
 
@@ -446,7 +447,7 @@ class Yay(Pacman):
     {meth}`Yay.cooldown_env`). This needs yay >= 13.0.0, when the Lua
     `UpgradeSelect`/`AURPreInstall` hooks landed; an older yay stays a usable
     manager but cannot honor a cooldown. The upstream request for a less invasive
-    injection point is https://github.com/Jguer/yay/issues/2883.
+    injection point is [Jguer/yay#2883](https://github.com/Jguer/yay/issues/2883).
     ```
     """
 

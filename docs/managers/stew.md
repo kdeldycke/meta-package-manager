@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("stew"))
 ```
 
-## How `mpm` drives `stew`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("stew"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("stew"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("stew"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("stew"))
 ```
 
 ## Reference traces

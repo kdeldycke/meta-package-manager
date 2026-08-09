@@ -37,7 +37,7 @@ class Pipx(PackageManager):
     Installed applications come from `pipx list --json`; only each venv's main
     package is tracked, never the packages injected beside it. There is no
     `search` operation: the request was closed as not planned, since PyPI
-    exposes no search API and custom search is out of pipx's scope (see [pipx issue 777](https://github.com/pypa/pipx/issues/777#issuecomment-990919047)).
+    exposes no search API and custom search is out of pipx's scope (see [pypa/pipx#777](https://github.com/pypa/pipx/issues/777#issuecomment-990919047)).
 
     ```{note}
 
@@ -88,14 +88,15 @@ class Pipx(PackageManager):
     pip releases silently ignore the env var.
     ```
 
-    See https://github.com/pypa/pipx/issues/1811.
+    See [pypa/pipx#1811](https://github.com/pypa/pipx/issues/1811).
     """
 
     outdated_requirement = ">=1.16.0"
     """Minimum pipx version providing the native outdated query.
 
     [1.16.0](https://github.com/pypa/pipx/releases/tag/1.16.0) introduced
-    `pipx list --outdated` (see https://github.com/pypa/pipx/issues/149). Kept
+    `pipx list --outdated` (see
+    [pypa/pipx#149](https://github.com/pypa/pipx/issues/149)). Kept
     apart from {attr}`requirement` (`>=1.0.0`) so an older pipx stays fully
     usable, {attr}`outdated` falling back to one pip probe per venv.
     """

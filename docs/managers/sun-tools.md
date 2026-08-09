@@ -38,14 +38,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("sun-tools"))
 ```
 
-## How `mpm` drives `sun-tools`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("sun-tools"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -60,6 +52,14 @@ print(manager_sudo("sun-tools"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("sun-tools"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("sun-tools"))
 ```
 
 ## Reference traces

@@ -33,8 +33,8 @@ class PNPM(PackageManager):
 
     Like {class}`meta_package_manager.managers.npm.NPM`, mpm drives pnpm in
     global mode (`--global` on every operation) and parses its `--json` output.
-    Command equivalences with the sibling JS managers are listed at
-    https://github.com/antfu-collective/ni?tab=readme-ov-file#ni.
+    Command equivalences with the sibling JS managers are listed in
+    [antfu-collective/ni](https://github.com/antfu-collective/ni?tab=readme-ov-file#ni).
 
     ```{note}
     pnpm enforces a supply-chain cooldown through its `minimumReleaseAge`
@@ -82,7 +82,7 @@ class PNPM(PackageManager):
     `minimumReleaseAge` is expressed in minutes, so {meth}`cooldown_env_value`
     is overridden to emit a minute count.
 
-    See https://pnpm.io/settings#minimumreleaseage.
+    See pnpm's [`minimumReleaseAge` setting](https://pnpm.io/settings#minimumreleaseage).
     """
 
     def cooldown_env_value(self) -> str:

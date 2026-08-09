@@ -46,14 +46,6 @@ from meta_package_manager._docs import manager_recipes
 print(manager_recipes("volta"))
 ```
 
-## How `mpm` drives `volta`
-
-```{python:render}
-from meta_package_manager._docs import manager_cli
-
-print(manager_cli("volta"))
-```
-
 ## Privilege escalation
 
 ```{python:render}
@@ -68,6 +60,14 @@ print(manager_sudo("volta"))
 from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("volta"))
+```
+
+## Version probe
+
+```{python:render}
+from meta_package_manager._docs import manager_version_probe
+
+print(manager_version_probe("volta"))
 ```
 
 ## Reference traces

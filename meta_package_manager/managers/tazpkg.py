@@ -36,8 +36,8 @@ class Tazpkg(PackageManager):
 
     Documentation:
 
-    - https://doc.slitaz.org/en:handbook:tazpkg
-    - https://github.com/SliTaz-official/tazpkg
+    - [tazpkg handbook](https://doc.slitaz.org/en:handbook:tazpkg)
+    - [SliTaz-official/tazpkg](https://github.com/SliTaz-official/tazpkg)
 
     ```{note}
     tazpkg decorates every listing with localized, colorized titles, separators

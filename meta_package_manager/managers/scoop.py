@@ -38,7 +38,6 @@ class Scoop(PackageManager):
 
     Documentation:
 
-    - https://scoop.sh
     - https://github.com/ScoopInstaller/Scoop
 
     ```{note}

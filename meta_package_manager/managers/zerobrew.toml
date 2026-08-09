@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# ZeroBrew (https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible
+# ZeroBrew is a fast, Homebrew-compatible
 # package manager written in Rust, reusing Homebrew's formula ecosystem but storing
 # packages in a content-addressable store at /opt/zerobrew. See docs/overrides.md
 # ("Define a new manager") for the schema and meta_package_manager/definitions.py

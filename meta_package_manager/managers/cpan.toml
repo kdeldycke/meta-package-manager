@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# The cpan client of the Comprehensive Perl Archive Network (https://www.cpan.org).
+# The cpan client of the Comprehensive Perl Archive Network.
 # See docs/overrides.md ("Define a new manager") for the schema and
 # meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #

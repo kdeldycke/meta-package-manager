@@ -36,7 +36,6 @@ class Pkcon(PackageManager):
 
     Documentation:
 
-    - https://www.freedesktop.org/software/PackageKit/
     - https://github.com/PackageKit/PackageKit
 
     pkcon is an unprivileged client handing transactions to the `packagekitd`

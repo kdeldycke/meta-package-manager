@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# Stew (https://github.com/marwanhawari/stew) installs pre-compiled binaries from
+# Stew installs pre-compiled binaries from
 # GitHub Releases. See docs/overrides.md ("Define a new manager") for the schema and
 # meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #

@@ -62,7 +62,6 @@ class Zypper(PackageManager):
 
     Documentation:
 
-    - https://en.opensuse.org/Portal:Zypper
     - https://documentation.suse.com/smart/systems-management/html/concept-zypper/index.html
     - https://wiki.archlinux.org/title/Pacman/Rosetta (command equivalences)
     """

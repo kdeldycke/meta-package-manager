@@ -115,12 +115,17 @@ theme still falls back to `currentColor`, which is about legibility against a
 near-black background rather than about contrast ratios.
 """
 
-FACT_SEPARATOR = " · "
+FACT_SEPARATOR = "\u00a0· "
 """Separator between the repeated values of an infobox row.
 
 A middle dot rather than a comma: the values are code spans whose own boxes
 already read as separate tokens, and a comma between them adds a mark the eye
-has to skip. The platform row needs none at all, its icons doing the same job.
+has to skip.
+
+The leading space is a non-breaking one, so the dot cannot start a line on its
+own. The box is narrow enough to wrap most rows, and a separator orphaned at the
+head of a line reads as a bullet for the value that follows it. Breaking after
+the dot is fine, hence the ordinary space on that side.
 """
 
 GITHUB_BLOB_URL = "https://github.com/kdeldycke/meta-package-manager/blob/main"
@@ -1214,7 +1219,9 @@ def manager_platforms(manager_id: str) -> str:
         if coverage is None:
             continue
         icon, annotation = coverage
-        entry = f"{icon} {p_obj.name}"
+        # Non-breaking too: an icon stranded at the end of a line, with its name
+        # starting the next, reads as two separate platforms.
+        entry = f"{icon}\u00a0{p_obj.name}"
         if annotation:
             entry += f" ({annotation})"
         entries.append(entry)

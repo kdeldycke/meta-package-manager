@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# Fink (https://www.finkproject.org) brings Debian tools (dpkg, apt) to macOS,
+# Fink brings Debian tools (dpkg, apt) to macOS,
 # compiling or installing packages under its own prefix. See docs/overrides.md
 # ("Define a new manager") for the schema and meta_package_manager/definitions.py
 # (build_bundled_managers) for the loader.

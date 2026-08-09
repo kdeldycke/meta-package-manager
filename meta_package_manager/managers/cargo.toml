@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# Rust's cargo (https://doc.rust-lang.org/cargo/), covering the binaries installed
+# Rust's cargo, covering the binaries installed
 # with `cargo install`. See docs/overrides.md ("Define a new manager") for the
 # schema and meta_package_manager/definitions.py (build_bundled_managers) for the
 # loader.

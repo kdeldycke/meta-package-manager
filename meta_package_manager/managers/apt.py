@@ -35,7 +35,6 @@ class APT(PackageManager):
 
     Documentation:
 
-    - https://wiki.debian.org/AptCLI
     - http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta

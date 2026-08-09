@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# Chocolatey (https://chocolatey.org) is the community package manager for Windows.
+# Chocolatey is the community package manager for Windows.
 # See docs/overrides.md ("Define a new manager") for the schema and
 # meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
@@ -12,8 +12,8 @@
 #     {id_name_only_args} template narrows it to package IDs for mpm's default
 #     `--id-name-only` mode, and {exact_args} maps `--exact`.
 #
-# mpm requires Chocolatey 2.0.0 or newer, the first release where `choco list`
-# reports installed packages without the removed `--local-only` flag.
+# The version floor is the first release where `choco list` reports installed
+# packages without the removed `--local-only` flag.
 
 [mpm.managers.choco]
 name = "Chocolatey"

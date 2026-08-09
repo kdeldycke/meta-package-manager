@@ -35,7 +35,6 @@ class Emerge(PackageManager):
 
     Documentation:
 
-    - https://wiki.gentoo.org/wiki/Portage#emerge
     - https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta

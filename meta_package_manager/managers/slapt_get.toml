@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# slapt-get (https://software.jaos.org/) is an apt-get-style front-end to Slackware's
+# slapt-get is an apt-get-style front-end to Slackware's
 # pkgtools. See docs/overrides.md ("Define a new manager") for the schema and
 # meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #

@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# MacPorts (https://www.macports.org) is a source-based ports system for macOS: it
+# MacPorts is a source-based ports system for macOS: it
 # builds and installs packages under its own /opt/local prefix (the `port` binary
 # lives at /opt/local/bin/port), isolated from the system. See docs/overrides.md
 # ("Define a new manager") for the schema and meta_package_manager/definitions.py

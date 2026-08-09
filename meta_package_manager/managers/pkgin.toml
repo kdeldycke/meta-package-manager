@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# pkgin (https://pkgin.net) is the binary package manager for pkgsrc, NetBSD's
+# pkgin is the binary package manager for pkgsrc, NetBSD's
 # portable package collection (also used on illumos/SmartOS, macOS and Linux). See
 # docs/overrides.md ("Define a new manager") for the schema and
 # meta_package_manager/definitions.py (build_bundled_managers) for the loader.

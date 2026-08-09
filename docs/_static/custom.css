@@ -153,16 +153,30 @@ body[data-theme="dark"] .manager-logo svg {
  *
  * Scoped with the child combinator so a tab-set nested inside a pane keeps the
  * default horizontal layout.
+ *
+ * Upstream has no orientation option: it is requested in
+ * https://github.com/executablebooks/sphinx-design/issues/219 and carried on their
+ * roadmap at https://github.com/executablebooks/sphinx-design/issues/265, with no
+ * implementation so far. The thread concluded a vertical mode would need
+ * sphinx-design to emit a different HTML structure, since its labels and panes
+ * alternate as siblings rather than being grouped. Grid placement makes that
+ * unnecessary: it decouples visual position from source order, so the same markup
+ * lays out either way. Drop this block if an orientation option ever ships.
  */
 .sd-tab-set.tabs-vertical {
   display: grid;
   grid-template-columns: minmax(7rem, max-content) 1fr;
-  column-gap: 1.5rem;
   align-items: start;
 }
+
+/* No column-gap: the rail and the pane must share an edge for the active
+ * label's marker to sit on the pane's own rule, the way the horizontal tabs
+ * merge an underline into an overline. Padding does the spacing instead.
+ */
 .sd-tab-set.tabs-vertical > label {
   grid-column: 1;
   text-align: left;
+  padding-right: 1rem;
   border-bottom: none;
   border-right: 0.125rem solid transparent;
 }
@@ -171,25 +185,50 @@ body[data-theme="dark"] .manager-logo svg {
 }
 .sd-tab-set.tabs-vertical > .sd-tab-content {
   grid-column: 2;
-  grid-row: 1 / -1;
-  padding-left: 1.5rem;
-  border-top: none;
-  border-left: 0.125rem solid var(--sd-color-tabs-overline);
+  /* Span every row rather than sit in the first one, or the pane's full height
+   * inflates that single row and shoves the labels below it down the rail.
+   * `1 / -1` cannot express it here: `-1` counts back from the last *explicit*
+   * row, and this grid declares columns only, so it would collapse to row 1.
+   * The span overshoots any real tab count instead; surplus rows are empty, and
+   * with no row-gap they take no height.
+   */
+  grid-row: 1 / span 99;
+  /* Stretch across every spanned row, or the rule runs only as deep as the
+   * pane's own content instead of the full rail. `align-items: start` on the
+   * container would otherwise shrink it to fit.
+   */
+  align-self: stretch;
+  padding: 0 0 0 1.5rem;
+  /* sphinx-design rules the pane with a box-shadow, not a border: one hairline
+   * above and one below. Rotate that a quarter turn into a single hairline down
+   * the left edge, which the active label's marker then merges into. Overriding
+   * `border-*` alone left the original shadow boxing the pane.
+   */
+  box-shadow: -0.0625rem 0 var(--sd-color-tabs-overline);
 }
 
-/* Too narrow for two columns: fall back to the stock horizontal layout. */
+/* Too narrow for two columns: hand every overridden property back to the stock
+ * horizontal layout, restating sphinx-design's own values (a shorthand cannot
+ * be un-set back to another stylesheet's).
+ */
 @media (max-width: 50em) {
   .sd-tab-set.tabs-vertical {
     display: flex;
     flex-wrap: wrap;
   }
   .sd-tab-set.tabs-vertical > label {
+    padding: 1em 1.25em 0.5em;
     border-right: none;
     border-bottom: 0.125rem solid transparent;
   }
+  .sd-tab-set.tabs-vertical > input:checked + label {
+    border-bottom-color: var(--sd-color-tabs-underline-active);
+  }
   .sd-tab-set.tabs-vertical > .sd-tab-content {
-    padding-left: 0;
-    border-left: none;
-    border-top: 0.125rem solid var(--sd-color-tabs-overline);
+    align-self: auto;
+    padding: 0.75rem 0;
+    box-shadow:
+      0 -0.0625rem var(--sd-color-tabs-overline),
+      0 0.0625rem var(--sd-color-tabs-underline);
   }
 }

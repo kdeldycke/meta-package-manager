@@ -1,6 +1,6 @@
 # Bundled package-manager definition shipped with mpm.
 #
-# Clear Linux's software updater (https://github.com/clearlinux/swupd-client)
+# Clear Linux's software updater
 # manages *bundles* (collections of files), not individually-versioned packages:
 # bundles carry no version of their own and follow the single whole-system OS
 # version. See docs/overrides.md ("Define a new manager") for the schema and

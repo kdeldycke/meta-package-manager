@@ -576,6 +576,13 @@ def test_manager_card_renders(manager):
     assert "**purl types**\n: `pkg:" in card
     assert ("**Brewfile entry**" in card) is bool(manager.brewfile_entry_type)
 
+    # The glue holding a separator to the value before it, and an icon to its
+    # label, is a non-breaking space. It survives no formatter that mistakes it
+    # for whitespace, so assert it rather than trust it.
+    assert _docs.FACT_SEPARATOR.startswith("\u00a0")
+    platforms = _docs.manager_platforms(manager.id)
+    assert "\u00a0" in platforms or not platforms
+
     # Every repeated value in the box reads through the same separator. A
     # coverage annotation carries commas of its own (`Mageia, Mandriva Linux
     # only`), so only what sits between entries is checked.

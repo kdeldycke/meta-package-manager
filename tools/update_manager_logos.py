@@ -50,6 +50,7 @@ import re
 import sys
 import time
 import unicodedata
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -77,6 +78,32 @@ which is the applicable rule for a graphical object. Marks failing it (OpenBSD's
 yellow, Homebrew's amber) render in `currentColor` instead of their brand color.
 """
 
+GENERIC_HOSTS = frozenset({
+    "bitbucket",
+    "codeberg",
+    "docs",
+    "gitee",
+    "github",
+    "gitlab",
+    "launchpad",
+    "readthedocs",
+    "sourceforge",
+    "wiki",
+    "wikipedia",
+    "www",
+})
+"""Home page hosts naming a forge or a doc site rather than the brand itself.
+
+{func}`candidate_slugs` mines home page domains for brand names, where these would
+all resolve to the same handful of marks: every manager hosted on GitHub would
+otherwise be reported as matching GitHub's own icon.
+"""
+
+LATEST_RELEASE_API = (
+    "https://api.github.com/repos/simple-icons/simple-icons/releases/latest"
+)
+"""Where `--scan-gaps` reads the newest upstream release, ahead of the local pin."""
+
 SIMPLE_ICONS_REPO = "https://github.com/simple-icons/simple-icons"
 
 SIMPLE_ICONS_VERSION = "16.28.0"
@@ -94,11 +121,11 @@ committed files, so the guard survives a hand edit.
 """
 
 
-def raw_url(path: str) -> str:
-    """Build a `raw.githubusercontent.com` URL for the pinned Simple Icons tag."""
+def raw_url(path: str, version: str = SIMPLE_ICONS_VERSION) -> str:
+    """Build a `raw.githubusercontent.com` URL for a Simple Icons tag."""
     return (
         "https://raw.githubusercontent.com/simple-icons/simple-icons/"
-        f"{SIMPLE_ICONS_VERSION}/{path}"
+        f"{version}/{path}"
     )
 
 
@@ -149,6 +176,31 @@ def slugify(title: str) -> str:
     text = unicodedata.normalize("NFD", text)
     text = "".join(c for c in text if unicodedata.category(c) != "Mn")
     return re.sub(r"[^a-z\d]", "", text)
+
+
+def catalog(ref: str = SIMPLE_ICONS_VERSION) -> dict[str, dict]:
+    """Load the Simple Icons metadata at a git ref, keyed by slug.
+
+    Upstream keys its own data by title and derives the slug, so the mapping is
+    rebuilt here to look marks up the way a manager declares them.
+    """
+    data = json.loads(fetch(raw_url("data/simple-icons.json", version=ref)))
+    entries = data["icons"] if isinstance(data, dict) else data
+
+    by_slug: dict[str, dict] = {}
+    for entry in entries:
+        # An explicit `slug` disambiguates brands sharing a title (two "Spring",
+        # two "Graphite") and rescues titles the derivation mangles ("F#"). Upstream
+        # reads it first, and so must this, or the loser of each pair silently
+        # overwrites the winner's metadata under the derived slug.
+        slug = entry.get("slug") or slugify(entry["title"])
+        if slug in by_slug:
+            raise ValueError(
+                f"{slug!r} maps to both {by_slug[slug]['title']!r} and "
+                f"{entry['title']!r}: the slug derivation drifted from upstream's."
+            )
+        by_slug[slug] = entry
+    return by_slug
 
 
 def relative_luminance(hex_color: str) -> float:
@@ -212,11 +264,7 @@ def collect(slugs: dict[str, list[str]]) -> tuple[dict[str, str], dict]:
     :param slugs: Manager IDs to render, keyed by the slug they declare.
     :return: The SVG of each slug, and the manifest as a plain mapping.
     """
-    catalog = json.loads(fetch(raw_url("data/simple-icons.json")))
-    entries = {}
-    for entry in catalog["icons"] if isinstance(catalog, dict) else catalog:
-        slug = (entry.get("aliases") or {}).get("slug") or slugify(entry["title"])
-        entries[slug] = entry
+    entries = catalog()
 
     svgs = {}
     icons = {}
@@ -249,6 +297,86 @@ def collect(slugs: dict[str, list[str]]) -> tuple[dict[str, str], dict]:
     return svgs, manifest
 
 
+def candidate_slugs(manager) -> set[str]:
+    """Guess the Simple Icons slugs a manager's mark could be filed under.
+
+    Built from what the manager already declares: its ID, its name whole and word
+    by word, and the labels of its home page domain. That last one carries most of
+    the weight, since a tool is often named after neither its brand nor its distro
+    (`urpmi` lives under `mageia.org`, `sorcery` under `sourcemage.org`).
+
+    Deliberately not exhaustive: run against the marks already declared, it
+    rediscovers about three in five. The rest are editorial stand-ins no heuristic
+    can guess, where the mark belongs to a different brand than the tool (`pip`
+    under PyPI's, `swupd` under Intel's, `yay` under Arch's), and a brand sharing
+    nothing with the manager's ID, name or home page (Cygwin, for `apt-cyg` hosted
+    on GitHub) is invisible here. That is why each pending request is also linked
+    from the manager's own source.
+    """
+    candidates = {slugify(manager.id), slugify(manager.name)}
+    candidates.update(slugify(word) for word in manager.name.split())
+
+    if manager.homepage_url:
+        host = urllib.parse.urlparse(manager.homepage_url).hostname or ""
+        # Drop the public suffix, then the forge and doc-site hosts.
+        for label in host.split(".")[:-1]:
+            slug = slugify(label)
+            if slug not in GENERIC_HOSTS:
+                candidates.add(slug)
+
+    # Matching is exact against the catalog, so a short slug is no noisier than a
+    # long one, and dropping them would hide the likes of `uv`.
+    return {slug for slug in candidates if slug}
+
+
+def scan_gaps() -> int:
+    """Report upstream marks that would fill a gap, and pinned ones about to go.
+
+    Answers, on demand and against the newest upstream release, the question the
+    tracking comments in the manager sources can only answer by hand: has a mark
+    appeared for a manager still doing without one? The reverse check comes free
+    from the same catalog, and warns that a declared slug is about to vanish
+    before a version bump turns it into a failed refresh.
+    """
+    latest = json.loads(fetch(LATEST_RELEASE_API))["tag_name"]
+    released = catalog(latest)
+    # `develop` carries what the next release will: a mark landing there is the
+    # earliest signal that a request went through.
+    upcoming = catalog("develop")
+
+    print(
+        f"Pinned at {SIMPLE_ICONS_VERSION}. Scanning release {latest} "
+        f"({len(released)} marks) and develop ({len(upcoming)})."
+    )
+
+    found = []
+    for manager_id, manager in sorted(pool.items()):
+        if manager.logo:
+            continue
+        for slug in sorted(candidate_slugs(manager)):
+            if slug in released:
+                found.append((manager_id, slug, released[slug]["title"], latest))
+            elif slug in upcoming:
+                found.append((manager_id, slug, upcoming[slug]["title"], "unreleased"))
+
+    if found:
+        print(f"\n{len(found)} mark(s) available for a manager without one:")
+        for manager_id, slug, title, where in found:
+            print(f"  {manager_id:14} -> {slug} ({title}) in {where}")
+        print("\nDeclare `logo` on the manager, then re-run without --scan-gaps.")
+    else:
+        print("\nNo mark to pick up for the managers still missing one.")
+
+    vanished = sorted(
+        {manager.logo for manager in pool.values() if manager.logo} - set(released)
+    )
+    if vanished:
+        print(f"\nGone from {latest}, and will break a refresh pinned there:")
+        for slug in vanished:
+            print(f"  {slug}")
+    return 0
+
+
 def render_manifest(manifest: dict) -> str:
     """Serialize the manifest with its provenance header."""
     header = (
@@ -264,12 +392,21 @@ def render_manifest(manifest: dict) -> str:
 def main() -> int:
     """Refresh every vendored mark, or report what a refresh would change."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument(
         "--check",
         action="store_true",
         help="Report out-of-date marks and exit non-zero without writing.",
     )
+    modes.add_argument(
+        "--scan-gaps",
+        action="store_true",
+        help="Report marks the newest upstream release has for logo-less managers.",
+    )
     args = parser.parse_args()
+
+    if args.scan_gaps:
+        return scan_gaps()
 
     slugs: dict[str, list[str]] = {}
     for manager_id, manager in pool.items():

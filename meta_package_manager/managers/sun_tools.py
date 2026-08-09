@@ -61,6 +61,10 @@ class Sun_Tools(PackageManager):
 
     homepage_url = "https://docs.oracle.com/cd/E86824_01/html/E54763/pkginfo-1.html"
 
+    # No `logo`, and there never will be: Oracle's marks were pulled from Simple
+    # Icons, so do not file a request, and do not vendor one by hand:
+    # https://github.com/simple-icons/simple-icons/issues/11441
+
     platforms = SOLARIS
 
     default_sudo = True

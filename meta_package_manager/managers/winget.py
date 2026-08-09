@@ -62,6 +62,12 @@ class WinGet(PackageManager):
 
     homepage_url = "https://github.com/microsoft/winget-cli"
 
+    # No `logo`, and there never will be: Simple Icons dropped every Microsoft mark
+    # in its `13.0.0`, after Microsoft's legal team restricted them to four approved
+    # sources, usable without edits. Re-requests are auto-closed as duplicates of
+    # the removal, so do not file one, and do not vendor the mark by hand:
+    # https://github.com/simple-icons/simple-icons/issues/11236
+
     brewfile_entry_type = "winget"
 
     platforms = WINDOWS

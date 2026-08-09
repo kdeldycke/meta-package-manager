@@ -65,6 +65,11 @@ class Scoop(PackageManager):
 
     homepage_url = "https://scoop.sh"
 
+    # No `logo`: Simple Icons carries no Scoop mark yet. Of the marks missing from
+    # the pool, this request is the likeliest to land, now that
+    # https://scoop.sh/logo/scoop.svg gives them an official vector to redraw from:
+    # https://github.com/simple-icons/simple-icons/issues/13589
+
     platforms = WINDOWS
 
     requirement = ">=0.2.4"

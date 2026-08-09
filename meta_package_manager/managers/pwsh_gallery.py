@@ -84,6 +84,14 @@ class PWSH_Gallery(PackageManager):
 
     homepage_url = "https://www.powershellgallery.com"
 
+    # No `logo`: Simple Icons dropped every Microsoft mark in its `13.0.0`, after
+    # Microsoft's legal team restricted them to four approved sources, usable
+    # without edits, which rules out the redrawn 24x24 marks the set is made of:
+    # https://github.com/simple-icons/simple-icons/issues/11236
+    # A PowerShell request is still open in `permissions in review`, but PowerShell
+    # is not one of those four sources, so do not count on it:
+    # https://github.com/simple-icons/simple-icons/issues/14846
+
     platforms = LINUX_LIKE, MACOS, WINDOWS
 
     requirement = ">=7.4.0"

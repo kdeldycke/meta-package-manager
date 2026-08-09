@@ -62,6 +62,11 @@ class Mise(PackageManager):
 
     homepage_url = "https://mise.jdx.dev"
 
+    # No `logo`: Simple Icons carries no mise mark yet. Their request sits in the
+    # `permissions in review` stage, where they check with the trademark owner
+    # before drawing anything:
+    # https://github.com/simple-icons/simple-icons/issues/14747
+
     platforms = ALL_PLATFORMS
 
     requirement = ">=2025.5.10"

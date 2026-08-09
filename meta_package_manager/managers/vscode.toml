@@ -16,6 +16,11 @@
 [mpm.managers.vscode]
 name = "Visual Studio Code"
 homepage_url = "https://code.visualstudio.com"
+# No logo, and there never will be: Simple Icons dropped every Microsoft mark in its
+# 13.0.0, after Microsoft's legal team restricted them to four approved sources,
+# usable without edits. Re-requests are auto-closed as duplicates of the removal, so
+# do not file one, and do not vendor the mark by hand:
+# https://github.com/simple-icons/simple-icons/issues/11236
 platforms = ["all_platforms"]
 cli_names = ["code"]
 requirement = ">=1.60.0"

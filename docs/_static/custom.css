@@ -156,12 +156,16 @@ body[data-theme="dark"] .manager-logo svg {
  *
  * Upstream has no orientation option: it is requested in
  * https://github.com/executablebooks/sphinx-design/issues/219 and carried on their
- * roadmap at https://github.com/executablebooks/sphinx-design/issues/265, with no
- * implementation so far. The thread concluded a vertical mode would need
- * sphinx-design to emit a different HTML structure, since its labels and panes
- * alternate as siblings rather than being grouped. Grid placement makes that
- * unnecessary: it decouples visual position from source order, so the same markup
- * lays out either way. Drop this block if an orientation option ever ships.
+ * roadmap at https://github.com/executablebooks/sphinx-design/issues/265. That
+ * thread concluded a vertical mode would need sphinx-design to emit a different
+ * HTML structure, since its labels and panes alternate as siblings rather than
+ * being grouped. Grid placement makes that unnecessary: it decouples visual
+ * position from source order, so the same markup lays out either way.
+ *
+ * This block is proposed upstream, generalised into an `:orientation: vertical`
+ * option, in https://github.com/executablebooks/sphinx-design/pull/304. Once that
+ * lands and ships in a release, drop everything below and set the option on the
+ * tab-set in docs/install.md instead.
  */
 .sd-tab-set.tabs-vertical {
   display: grid;

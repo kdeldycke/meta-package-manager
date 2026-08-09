@@ -6,6 +6,63 @@
 Absence is usually not a decision. Most tools missing from `mpm` were never assessed at all: they are unwritten, not refused. See [Not a decision, just unwritten](#not-a-decision-just-unwritten) before reading a gap as a refusal.
 ```
 
+## Deliberate exclusions
+
+### Retired tools
+
+A tool whose upstream is already dead is not a candidate. The [stability policy](https://github.com/kdeldycke/meta-package-manager/blob/main/CLAUDE.md) treats an abandoned upstream as grounds for flagging a manager `unmaintained`, hiding it from default selection, dropping it from the test matrices and eventually removing it altogether. A wrapper written for a tool that is already retired starts at the end of that lifecycle, so it is not written.
+
+Seven of the tools below are tracked by the [benchmark](benchmark.md) because a competitor still drives them. The other three (`pacapt`, `sysget` and `whohas`) are `mpm`'s own closest peers: single-command wrappers that ran search, install, remove and upgrade across whatever package manager was on the host. All ten were audited on 2026-08-09:
+
+| Tool                                                       | Kind                          | Upstream status                                                                                                                                                                      |
+| :--------------------------------------------------------- | :---------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`antibody`](https://github.com/getantibody/antibody)      | Zsh plugin manager            | Archived on 2022-05-27, superseded by [`antidote`](https://github.com/mattmc3/antidote).                                                                                             |
+| [`dein`](https://github.com/Shougo/dein.vim)               | Vim and Neovim plugin manager | Development stopped, superseded by [dpp.vim](https://github.com/Shougo/dpp.vim), last commit on 2025-09-13. Also fails [two of the three requirements](#what-a-manager-must-expose). |
+| [`fundle`](https://github.com/danhper/fundle)              | Fish plugin manager           | No commit since 2023-01-05.                                                                                                                                                          |
+| [`jetpack`](https://github.com/3ofcoins/jetpack)           | FreeBSD jail runtime          | Self-described prototype, no commit since 2018-10-25. Not a package manager to begin with.                                                                                           |
+| [`neobundle`](https://github.com/Shougo/neobundle.vim)     | Vim plugin manager            | No commit since 2018-07-26, superseded by `dein`, itself superseded by dpp.vim.                                                                                                      |
+| [`pacapt`](https://github.com/icy/pacapt)                  | Cross-manager wrapper         | Retired in 2022. All 19 of the package managers it drove are shipped by `mpm`.                                                                                                       |
+| [`pacdef`](https://github.com/steven-omaha/pacdef)         | Arch meta package manager     | Archived on 2025-08-05.                                                                                                                                                              |
+| [`packer-nvim`](https://github.com/wbthomason/packer.nvim) | Neovim plugin manager         | README has declared it unmaintained since August 2023, pointing at [lazy.nvim](https://github.com/folke/lazy.nvim) and [pckr.nvim](https://github.com/lewis6991/pckr.nvim).          |
+| [`sysget`](https://github.com/cvengler/sysget)             | Cross-manager wrapper         | Retired in 2019. All 21 of the package managers it drove are shipped by `mpm`.                                                                                                       |
+| [`whohas`](https://github.com/whohas/whohas)               | Cross-distribution search     | Retired in 2015. All 16 of the distribution archives it queried have a manager in `mpm`.                                                                                             |
+
+Two lineages are worth reading as a whole, because `mpm` wraps their live end and skips the dead one. Shougo's Vim managers run `neobundle` → `dein` → `dpp.vim`, and Neovim has since absorbed the job into core, which is what [`vim-pack`](managers/vim-pack.md) wraps. On the Zsh side `antibody` gave way to `antidote`, and `mpm` wraps [`zinit`](managers/zinit.md).
+
+:::{admonition} Coming from `pacapt`, `sysget` or `whohas`?
+:class: tip
+`mpm` covers the same cross-manager operations these three offered — search, install, remove, upgrade, sync and cleanup — across every backend they drove and many more, so their users can retire them and switch to `mpm`.
+:::
+
+One caveat for `whohas` users, since it worked differently from the other two: it queried the *remote* package archives of sixteen distributions at once, to answer "how does every other distribution package this?". `mpm` ships a manager for each of those distributions, but it searches the managers installed on the host, not the archives of distributions you do not run. The backends line up; that particular cross-distribution comparison does not.
+
+A retired tool is not automatically removed from the [benchmark](benchmark.md): the comparison is a map of the territory, and a competitor that still drives a dead tool is a fact about the competitor.
+
+### Project-scoped dependency managers
+
+Tools that resolve dependencies inside a working tree are out of scope today, per the [system scope](#what-mpm-manages) rule below. This covers Poetry, Bundler, Maven, Gradle, NuGet, CocoaPods, Conan, vcpkg, Cabal and Stack, along with the project side of ecosystems `mpm` already wraps globally.
+
+This is the one exclusion on this page that is a *not yet* rather than a *no*. {attr}`~meta_package_manager.manager.ManagerScope.PROJECT` reserves the concept, {meth}`~meta_package_manager.manager.PackageManager.discover_projects` reserves the extension point, and [issue #1725](https://github.com/kdeldycke/meta-package-manager/issues/1725) tracks the architectural work that would have to land first: a manager is currently a singleton with exactly one CLI path and one implicit scope.
+
+Candidate ecosystems are catalogued below with the project files that signal each. Where `mpm` already ships a system-scoped manager, that manager is the one that would grow a project mode; a `—` marks an ecosystem that would need a brand new manager.
+
+| Ecosystem             | Project files                                                                        | `mpm` manager         |
+| :-------------------- | :----------------------------------------------------------------------------------- | :-------------------- |
+| C/C++                 | `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)                                        | —                     |
+| Conda                 | `conda-lock.yml`                                                                     | `conda`               |
+| Go                    | `go.mod`, `go.sum`                                                                   | —                     |
+| Java                  | `pom.xml` (Maven), `build.gradle` (Gradle), `ivy.xml`                                | —                     |
+| JavaScript            | `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`                   | `npm`, `yarn`, `pnpm` |
+| .NET                  | `*.csproj`, `packages.config` (NuGet)                                                | —                     |
+| Perl                  | `cpanfile`                                                                           | `cpan`                |
+| PHP                   | `composer.json`, `composer.lock`                                                     | `composer`            |
+| Python                | `requirements.txt`, `pyproject.toml`, `poetry.lock`, `uv.lock`                       | `pip`, `uv`           |
+| Ruby                  | `Gemfile`, `Gemfile.lock`                                                            | `gem`                 |
+| Rust                  | `Cargo.toml`, `Cargo.lock`                                                           | `cargo`               |
+| Swift and Objective-C | `Package.swift`, `Package.resolved` (SwiftPM), `Podfile`, `Podfile.lock` (CocoaPods) | —                     |
+
+Microsoft's [Python Environment Tools](https://github.com/microsoft/python-environment-tools) is a useful reference for the discovery half of the problem: it locates Python environments (venv, conda, pyenv, pipenv, Poetry, uv, ...) across a machine, though it does not inventory their packages.
+
 ## What `mpm` manages
 
 Every manager `mpm` ships is *system-scoped*: it installs and queries software machine-wide, so a single inventory can be taken of everything installed on a host and compared across managers. That is the property the whole tool is built on, and it is what decides whether a candidate belongs.
@@ -24,100 +81,13 @@ Three requirements are enforced in code. They are not preferences: a tool that c
 
 The first two have an escape hatch worth knowing before declaring a tool impossible. A shell-function manager can be keyed on the interpreter that runs it instead of on its own sources: [`zinit`](managers/zinit.md) is wrapped that way, with Zsh as its CLI and its version probe doubling as the presence check. And a manager whose own binaries expose no version can name a companion binary through {attr}`~meta_package_manager.execution.CLIExecutor.version_cli`.
 
-## Deliberate exclusions
-
-### `dein.vim`
-
-[dein.vim](https://github.com/Shougo/dein.vim) is a Vim and Neovim plugin manager. Editor plugin managers are in scope, and `mpm` ships two of them ([`vim-pack`](managers/vim-pack.md) and [`zinit`](managers/zinit.md) for the Zsh side), so the exclusion is specific to dein rather than to its category.
-
-It fails two of the three requirements above at once:
-
-- **No executable CLI.** dein is Vimscript. It ships `autoload/*.vim` files, mode `644`, and no binary at all, so nothing resolves as an executable `cli_path`. The interpreter escape hatch that rescues `zinit` does not apply either: keying dein on `nvim` or `vim` would mark it available on every machine that merely has an editor installed, and would collide with `vim-pack`, which legitimately keys on `nvim`.
-- **No reportable version.** dein exposes no version at runtime. The only version-shaped value in its source is `g:dein#_cache_version`, an internal state-format counter, not a release number. Its releases are Git tags on a checkout whose location the user picks freely.
-
-Two further limits would remain even if those were solved. `dein#get_updated_plugins()` only works once the user sets `g:dein#install_github_api_token`, so `outdated` is unavailable by default. And dein has no per-plugin uninstall: plugins are declared in the user's `vimrc`, and `dein#check_clean()` merely reports orphaned directories.
-
-Upstream is also frozen. The README states that *"Active developement on dein.vim has stopped. The only future changes will be bug fixes"*, the project is superseded by [dpp.vim](https://github.com/Shougo/dpp.vim), and the last commit landed on 2025-09-13. Under the [stability policy](https://github.com/kdeldycke/meta-package-manager/blob/main/CLAUDE.md) that makes it `unmaintained` on arrival: hidden from default selection and kept out of the test matrices. Wrapping it would mean shipping a manager that misdetects, misreports its version, and is invisible by default.
-
-Neovim users are covered by [`vim-pack`](managers/vim-pack.md), the plugin manager built into Neovim since `0.12`.
-
-### Retired upstreams
-
-A tool whose upstream is already dead is not a candidate. The [stability policy](https://github.com/kdeldycke/meta-package-manager/blob/main/CLAUDE.md) treats an abandoned upstream as grounds for flagging a manager `unmaintained`, hiding it from default selection, dropping it from the test matrices and eventually removing it altogether. A wrapper written for a tool that is already retired starts at the end of that lifecycle, so it is not written.
-
-The [benchmark](benchmark.md) tracks these tools because a competitor still drives them. Their upstream status was audited on 2026-08-09:
-
-| Tool                                                       | Kind                          | Upstream status                                                                                                                                                             |
-| :--------------------------------------------------------- | :---------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`antibody`](https://github.com/getantibody/antibody)      | Zsh plugin manager            | Archived on 2022-05-27, superseded by [`antidote`](https://github.com/mattmc3/antidote).                                                                                    |
-| [`dein`](https://github.com/Shougo/dein.vim)               | Vim and Neovim plugin manager | Development stopped, superseded by [dpp.vim](https://github.com/Shougo/dpp.vim). See [above](#dein-vim).                                                                    |
-| [`fundle`](https://github.com/danhper/fundle)              | Fish plugin manager           | No commit since 2023-01-05.                                                                                                                                                 |
-| [`jetpack`](https://github.com/3ofcoins/jetpack)           | FreeBSD jail runtime          | Self-described prototype, no commit since 2018-10-25. Not a package manager to begin with.                                                                                  |
-| [`neobundle`](https://github.com/Shougo/neobundle.vim)     | Vim plugin manager            | No commit since 2018-07-26, superseded by `dein`, itself superseded by dpp.vim.                                                                                             |
-| [`packer-nvim`](https://github.com/wbthomason/packer.nvim) | Neovim plugin manager         | README has declared it unmaintained since August 2023, pointing at [lazy.nvim](https://github.com/folke/lazy.nvim) and [pckr.nvim](https://github.com/lewis6991/pckr.nvim). |
-| [`pacdef`](https://github.com/steven-omaha/pacdef)         | Arch meta package manager     | Archived on 2025-08-05.                                                                                                                                                     |
-
-Two lineages are worth reading as a whole, because `mpm` wraps their live end and skips the dead one. Shougo's Vim managers run `neobundle` → `dein` → `dpp.vim`, and Neovim has since absorbed the job into core, which is what [`vim-pack`](managers/vim-pack.md) wraps. On the Zsh side `antibody` gave way to `antidote`, and `mpm` wraps [`zinit`](managers/zinit.md).
-
-A retired tool is not automatically removed from the [benchmark](benchmark.md): the comparison is a map of the territory, and a competitor that still drives a dead tool is a fact about the competitor.
-
-### Retired peers
-
-`pacapt`, `sysget` and `whohas` were `mpm`'s closest peers: single-command wrappers that ran search, install, remove and upgrade across whatever package manager was on the host. All three are retired, so the rule above applies to them too and `mpm` does not wrap them.
-
-Their backend coverage was surveyed on 2026-08-09 against the manager pool, and every backend the three drove is a manager `mpm` ships today:
-
-| Peer                                           | Retired since | Backends                 | Shipped by `mpm` |
-| :--------------------------------------------- | :------------ | :----------------------- | ---------------: |
-| [`pacapt`](https://github.com/icy/pacapt)      | 2022          | 19 package managers      |         19 of 19 |
-| [`sysget`](https://github.com/cvengler/sysget) | 2019          | 21 package managers      |         21 of 21 |
-| [`whohas`](https://github.com/whohas/whohas)   | 2015          | 16 distribution archives |         16 of 16 |
-
-:::\{admonition} Coming from `pacapt`, `sysget` or `whohas`?
-:class: tip
-`mpm` covers the same cross-manager operations these three offered — search, install, remove, upgrade, sync and cleanup — across every backend they drove and many more, so their users can retire them and switch to `mpm`.
-:::
-
-One caveat for `whohas` users, since it worked differently from the other two: it queried the *remote* package archives of sixteen distributions at once, to answer "how does every other distribution package this?". `mpm` ships a manager for each of those distributions, but it searches the managers installed on the host, not the archives of distributions you do not run. The backends line up; that particular cross-distribution comparison does not.
-
-### Project-scoped dependency managers
-
-Tools that resolve dependencies inside a working tree are out of scope today, per the system-scope rule above. This covers Poetry, Bundler, Maven, Gradle, NuGet, CocoaPods, Conan, vcpkg, Cabal and Stack, along with the project side of ecosystems `mpm` already wraps globally.
-
-This is the one exclusion on this page that is a *not yet* rather than a *no*. {attr}`~meta_package_manager.manager.ManagerScope.PROJECT` reserves the concept, {meth}`~meta_package_manager.manager.PackageManager.discover_projects` reserves the extension point, and [issue #1725](https://github.com/kdeldycke/meta-package-manager/issues/1725) tracks the architectural work that would have to land first: a manager is currently a singleton with exactly one CLI path and one implicit scope.
-
-Candidate ecosystems are catalogued below with the project files that signal each, split by whether `mpm` already ships a system-scoped manager that could grow a project mode or a brand new manager would be needed.
-
-Ecosystems that would extend an existing manager:
-
-| Ecosystem  | Manager               | Project files                                                      |
-| :--------- | :-------------------- | :----------------------------------------------------------------- |
-| JavaScript | `npm`, `yarn`, `pnpm` | `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml` |
-| PHP        | `composer`            | `composer.json`, `composer.lock`                                   |
-| Perl       | `cpan`                | `cpanfile`                                                         |
-| Python     | `pip`, `uv`           | `requirements.txt`, `pyproject.toml`, `poetry.lock`, `uv.lock`     |
-| Ruby       | `gem`                 | `Gemfile`, `Gemfile.lock`                                          |
-| Rust       | `cargo`               | `Cargo.toml`, `Cargo.lock`                                         |
-
-Ecosystems that would need a new manager:
-
-| Ecosystem | Project files                                         |
-| :-------- | :---------------------------------------------------- |
-| C/C++     | `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)         |
-| Conda     | `conda-lock.yml`                                      |
-| Go        | `go.mod`, `go.sum`                                    |
-| Java      | `pom.xml` (Maven), `build.gradle` (Gradle), `ivy.xml` |
-| .NET      | `*.csproj`, `packages.config` (NuGet)                 |
-| CocoaPods | `Podfile`, `Podfile.lock`                             |
-| Swift     | `Package.swift`, `Package.resolved`                   |
-
-Microsoft's [Python Environment Tools](https://github.com/microsoft/python-environment-tools) is a useful reference for the discovery half of the problem: it locates Python environments (venv, conda, pyenv, pipenv, Poetry, uv, ...) across a machine, though it does not inventory their packages.
+[dein.vim](https://github.com/Shougo/dein.vim) is the worked example of both escape hatches failing. It is Vimscript: `autoload/*.vim` files, mode `644`, no binary anywhere. Keying it on `nvim` or `vim` would mark it available on every machine that merely has an editor installed, and would collide with [`vim-pack`](managers/vim-pack.md), which legitimately keys on `nvim`. It reports no version either: the only version-shaped value in its source is `g:dein#_cache_version`, an internal state-format counter, and its releases are Git tags on a checkout whose location the user picks freely. Editor plugin managers are otherwise in scope, and `mpm` ships two of them: `vim-pack`, built into Neovim since `0.12`, covers dein's users.
 
 ## Not a decision, just unwritten
 
 Everything else missing from `mpm` is missing because nobody has written it, not because it was weighed and rejected. No manager has ever been removed from `mpm`, no manager proposal has been declined, and no manager request has been closed as not-planned.
 
-The [benchmark](benchmark.md) table is the honest map of that territory: it lists every manager `mpm` or one of its peers supports, so a blank in the `mpm` column marks a gap rather than a refusal. Of the 113 tools it tracks that `mpm` does not wrap, the 2026-08-09 audit found only the seven [retired upstreams](#retired-upstreams) above to be dead: the rest are alive and simply unwrapped.
+The [benchmark](benchmark.md) table is the honest map of that territory: it lists every manager `mpm` or one of its peers supports, so a blank in the `mpm` column marks a gap rather than a refusal. Of the 113 tools it tracks that `mpm` does not wrap, the 2026-08-09 audit found only seven to be dead: the plugin and meta managers listed under [retired tools](#retired-tools) above. The rest are alive and simply unwrapped.
 
 Two large groups of entries there are worth reading correctly:
 

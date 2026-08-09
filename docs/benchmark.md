@@ -351,7 +351,7 @@ print(benchmark_managers_table())
 
 :::{admonition} Coming from `pacapt`, `sysget` or `whohas`?
 :class: tip
-`mpm`'s three closest peers are all retired. See [retired peers](unsupported.md#retired-peers) for what happened to each and how their backend coverage maps onto `mpm`.
+`mpm`'s three closest peers are all retired. See [retired tools](unsupported.md#retired-tools) for what happened to each and how their backend coverage maps onto `mpm`.
 :::
 
 ## Project's URL

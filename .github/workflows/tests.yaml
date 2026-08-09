@@ -440,9 +440,9 @@ jobs:
           version: "0.12.0"
       - name: Force native ARM64 Python on Windows ARM64
         # Workaround for https://github.com/astral-sh/uv/issues/12906: uv defaults to x86_64 Python on ARM64 Windows,
-        # relying on transparent emulation. Native extensions with Rust (e.g., test-results-parser from codecov-cli)
-        # fail to compile because the ARM64 Rust toolchain lacks the x86_64-pc-windows-msvc target. Setting UV_PYTHON
-        # to an architecture-qualified specifier forces uv (and uvx) to use native ARM64 Python for all steps.
+        # relying on transparent emulation. Rust-backed native extensions then fail to compile, because the ARM64 Rust
+        # toolchain lacks the x86_64-pc-windows-msvc target. Setting UV_PYTHON to an architecture-qualified specifier
+        # forces uv (and uvx) to use native ARM64 Python for all steps.
         if: runner.os == 'Windows' && runner.arch == 'ARM64'
         shell: bash
         run: echo "UV_PYTHON=cpython-${PYTHON_VERSION}-aarch64" >> "$GITHUB_ENV"
@@ -480,20 +480,23 @@ jobs:
         run: uv --no-progress run --frozen -- ./meta_package_manager/bar_plugin.py
 
       # Test suite runs.
+      # This is the slice that holds the `[tool.coverage] report.fail_under`
+      # ratchet: it walks the whole suite, so its number is the one worth
+      # gating on. No `--cov-fail-under` is passed here, as the flag would
+      # outrank the config and shadow the floor declared in pyproject.toml.
       - name: Parallel non-destructive tests
         run: >
           uv --no-progress run --frozen --
           pytest --exitfirst
           --cov
           --cov-report=term
-          --cov-report=xml
-          --junitxml=junit.xml
-          --override-ini=junit_family=legacy
           --numprocesses=auto --dist=loadgroup --maxschedchunk=1
           --run-non-destructive --skip-destructive
           --ignore=./tests/test_bar_plugin.py
 
       # Bar plugin calls way too many external commands to be run in parallel.
+      # `--cov-fail-under=0` opts this slice out of the coverage ratchet: a
+      # single test module covers ~33% of the package on its own by design.
       - name: Sequential, bar plugin tests - macOS
         if: runner.os == 'macOS'
         run: >
@@ -501,9 +504,7 @@ jobs:
           pytest --exitfirst
           --cov
           --cov-report=term
-          --cov-report=xml
-          --junitxml=junit.xml
-          --override-ini=junit_family=legacy
+          --cov-fail-under=0
           --numprocesses=0 --run-non-destructive --run-destructive
           ./tests/test_bar_plugin.py
 
@@ -511,15 +512,15 @@ jobs:
       # This run omits --exitfirst on purpose: walking every manager surfaces all
       # newly CI-unsupported managers in a single run instead of one per push cycle.
       # --maxfail=10 still caps a wholesale breakage. The runs above keep --exitfirst.
+      # `--cov-fail-under=0` opts this slice out of the coverage ratchet: the
+      # destructive subset covers ~48% of the package on its own by design.
       - name: Sequential random destructive tests
         run: >
           uv --no-progress run --frozen --
           pytest --maxfail=10
           --cov
           --cov-report=term
-          --cov-report=xml
-          --junitxml=junit.xml
-          --override-ini=junit_family=legacy
+          --cov-fail-under=0
           --numprocesses=0 --skip-non-destructive --run-destructive
           --ignore=./tests/test_bar_plugin.py
         env:
@@ -527,34 +528,3 @@ jobs:
           # without credentials. Feed it the workflow token so the gh-ext destructive
           # install/remove round-trip runs for real (see conftest.py's PACKAGE_IDS).
           GH_TOKEN: ${{ github.token }}
-
-      - name: Upload coverage to Codecov
-        # Skip on prepare-release PRs (Codecov cannot create commits on protected
-        # branches) and fork PRs (secrets are not available).
-        if: >
-          github.head_ref != 'prepare-release'
-          && env.CODECOV_TOKEN != ''
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        shell: bash
-        run: >
-          uvx --no-progress 'codecov-cli==11.3.1'
-          --auto-load-params-from githubactions
-          upload-process
-          --git-service github
-          --report-type coverage
-          --token "${CODECOV_TOKEN}"
-      - name: Upload test results to Codecov
-        if: >
-          github.head_ref != 'prepare-release'
-          && env.CODECOV_TOKEN != ''
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        shell: bash
-        run: >
-          uvx --no-progress 'codecov-cli==11.3.1'
-          --auto-load-params-from githubactions
-          upload-process
-          --git-service github
-          --report-type test_results
-          --token "${CODECOV_TOKEN}"

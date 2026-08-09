@@ -574,6 +574,17 @@ xfail_strict = true
 # https://coverage.readthedocs.io/en/latest/config.html
 run.branch = true
 run.source = [ "meta_package_manager" ]
+# Coverage ratchet: the suite fails below this percentage. Only the parallel
+# non-destructive run of tests.yaml is expected to clear it; the bar-plugin and
+# destructive slices cover a fraction of the package by design and opt out with
+# an explicit --cov-fail-under=0. Set the floor here and nowhere else: a
+# --cov-fail-under flag outranks this value and would silently shadow it.
+#
+# The stable matrix floor sits at 84.3%. The binding constraint is the
+# prerelease 3.15 cell at 79.4%, which skips a slice of the suite: the floor
+# stays under it so an interpreter-compat cell never reports a coverage failure.
+# Raise this to 82 once 3.15 leaves the prerelease matrix.
+report.fail_under = 78
 report.precision = 2
 
 [tool.bumpversion]

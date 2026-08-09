@@ -29,6 +29,7 @@
 - [mpm] Document that `--cooldown` replaces a stricter release-age policy already configured natively, instead of tightening it.
 - [mpm] Document the retraction path behind each package registry (yank, unpublish, relabel, index revert, flag only) and the per-version publish-date metadata it exposes, since a cooldown only protects where a compromised release can actually be withdrawn. Without one the gate can even prefer a malicious version over the fix that superseded it. Every pool manager is mapped to its registry, and its cooldown documentation page now closes on that registry's row.
 - [gnome-shell] Lint the extension and its gjs test runner with ESLint against GNOME Shell's own [`eslint-config-gnome`](https://gitlab.gnome.org/World/javascript/eslint-config-gnome) ruleset, in a new `eslint` job installing the stack behind a 7-day `npm --min-release-age` cooldown.
+- [mpm] Drop the Codecov integration, its coverage badge and the XML report artifacts that fed it. Coverage is now gated in CI by the `[tool.coverage] report.fail_under` ratchet, cleared by the parallel non-destructive run; the bar-plugin and destructive slices opt out with `--cov-fail-under=0`.
 
 ## [`7.5.0` (2026-08-03)](https://github.com/kdeldycke/meta-package-manager/compare/v7.4.1...v7.5.0)
 

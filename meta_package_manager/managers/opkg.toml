@@ -15,6 +15,7 @@
 [mpm.managers.opkg]
 name = "opkg"
 homepage_url = "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/"
+logo = "openwrt"
 platforms = ["unix_without_macos"]
 requirement = ">=0.2.0"
 # `opkg --version` prints "opkg version 0.3.6 (libsolv 0.7.5)".

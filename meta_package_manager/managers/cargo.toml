@@ -12,6 +12,7 @@
 [mpm.managers.cargo]
 name = "Rust cargo"
 homepage_url = "https://doc.rust-lang.org/cargo/"
+logo = "rust"
 platforms = ["all_platforms"]
 requirement = ">=1.0.0"
 # --color never suppresses colored output, --quiet the cargo log messages.

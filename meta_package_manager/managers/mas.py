@@ -65,6 +65,7 @@ class MAS(PackageManager):
     name = "Mac App Store"
 
     homepage_url = "https://github.com/mas-cli/mas"
+    logo = "appstore"
 
     brewfile_entry_type = "mas"
 

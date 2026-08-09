@@ -65,6 +65,7 @@ class DNF(PackageManager):
     name = "Fedora DNF"
 
     homepage_url = "https://github.com/rpm-software-management/dnf"
+    logo = "fedora"
 
     platforms = UNIX_WITHOUT_MACOS
 
@@ -331,6 +332,7 @@ class DNF5(DNF):
     name = "Fedora DNF5"
 
     homepage_url = "https://github.com/rpm-software-management/dnf5"
+    logo = "fedora"
 
     requirement = ">=5.0.0"
     """dnf5 is the new reference package manager as of Fedora 41."""
@@ -361,5 +363,6 @@ class YUM(DNF):
     name = "Fedora YUM"
 
     homepage_url = "http://yum.baseurl.org"
+    logo = "fedora"
 
     cli_names = ("yum",)

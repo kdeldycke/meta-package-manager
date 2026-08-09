@@ -94,6 +94,25 @@ not-applicable marker has nothing to say there and is dropped rather than
 rendered as an empty fact.
 """
 
+LOGO_DIR = PROJECT_ROOT / "docs" / "assets" / "managers"
+"""Vendored brand marks and their `logos.yaml` manifest.
+
+Wholly owned by `tools/update_manager_logos.py`, which is run by hand: the artwork
+is committed so a docs build stays hermetic and never depends on an upstream icon
+set still serving the same files.
+"""
+
+MIN_LOGO_CONTRAST = 3.0
+"""Lowest contrast ratio a brand color may have against the light theme.
+
+The 3:1 floor [WCAG 2.2 sets for non-text
+contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html).
+A mark below it (Homebrew's amber on white) renders in `currentColor` like it
+already does on the dark theme, rather than washed out in its own brand color.
+The ratio of every mark is precomputed into the manifest, so retuning this
+threshold needs no refetch.
+"""
+
 GITHUB_BLOB_URL = "https://github.com/kdeldycke/meta-package-manager/blob/main"
 """Base URL for linking to source files in the benchmark table.
 
@@ -575,6 +594,96 @@ def _toml_definition_intro(definition_source: str) -> str | None:
     return re.sub(r"https?://[^\s)>]+", autolink, intro)
 
 
+@cache
+def logo_manifest() -> dict:
+    """Read the provenance manifest of the vendored brand marks."""
+    manifest: dict = yaml.safe_load(
+        (LOGO_DIR / "logos.yaml").read_text(encoding="UTF-8"),
+    )
+    return manifest
+
+
+def manager_logo(manager_id: str, *, inline: bool = False) -> str:
+    """Produce the inlined brand mark of a manager, or nothing when it has none.
+
+    The SVG is injected verbatim into the page instead of being referenced as an
+    image file, which is what lets CSS recolor it: the vendored marks carry no
+    `fill`, so they inherit `currentColor` and stay legible on both themes. The
+    brand color is passed as a custom property and the stylesheet applies it on
+    the light theme only, and only for marks clearing {data}`MIN_LOGO_CONTRAST`.
+
+    Raw HTML is invisible to the linkcheck builder, which reads a raw node's
+    `source` attribute rather than its content, so 75 pages of inlined artwork
+    cost the link-check budget nothing.
+
+    :param inline: Render the small variant sitting in a table cell, rather than
+        the mark floated atop a manager's own page.
+    """
+    slug = pool[manager_id].logo
+    if not slug:
+        return ""
+    icon = logo_manifest()["icons"][slug]
+    svg = (LOGO_DIR / f"{slug}.svg").read_text(encoding="UTF-8").strip()
+
+    # A table cell wraps its content in a paragraph, where a <div> would be
+    # invalid markup: the inline variant is a <span>.
+    tag = "span" if inline else "div"
+    classes = "manager-logo manager-logo-inline" if inline else "manager-logo"
+    style = ""
+    if icon["contrast_on_light"] >= MIN_LOGO_CONTRAST:
+        hex_color = icon["hex"]
+        style = f' style="--manager-logo-color: #{hex_color}"'
+    label = f"{icon['title']} logo"
+    return (
+        f'<{tag} class="{classes}"{style} role="img" '
+        f'aria-label="{label}">{svg}</{tag}>'
+    )
+
+
+def manager_logo_credits() -> str:
+    """Produce the attribution block for every vendored brand mark.
+
+    Rendered into the *Package manager logos* section of `docs/license.md`, the
+    project's legal sink, rather than next to the artwork it credits. Twelve of
+    the marks carry an attribution-bearing license (Debian's `CC-BY-SA-3.0`,
+    NixOS' `CC-BY-4.0`, Fedora's own brand policy, ...), so crediting them is a
+    license condition rather than a courtesy. Generating the block from the
+    manifest keeps the credit exhaustive on its own, with no hand-maintained
+    list to forget when a manager joins or leaves the pool.
+    """
+    manifest = logo_manifest()
+    upstream = manifest["upstream"]
+
+    table = []
+    for icon in sorted(manifest["icons"].values(), key=lambda i: i["title"].casefold()):
+        license_id = icon["license"]
+        license_cell = (
+            f"[custom]({license_id})"
+            if license_id.startswith("http")
+            else f"`{license_id}`"
+        )
+        table.append([
+            f"[{icon['title']}]({icon['source']})",
+            ", ".join(f"[`{mid}`](managers/{mid}.md)" for mid in icon["managers"]),
+            license_cell,
+        ])
+
+    rendered = render_table(
+        table,
+        headers=["Mark", "Stands for", "License"],
+        table_format=TableFormat.GITHUB,
+        colalign=["left", "left", "center"],
+        disable_numparse=True,
+    )
+    return (
+        f"Brand marks come from [{upstream['name']}]({upstream['url']}) "
+        f"`{upstream['version']}`, whose set is `{upstream['license']}` except "
+        "where a mark declares otherwise below. Each one is inlined atop its "
+        "manager's own page and in the [manager index](managers.md).\n\n"
+        f"{rendered}"
+    )
+
+
 def manager_intro(manager_id: str) -> str:
     """Produce the lede of a manager's documentation page.
 
@@ -605,6 +714,12 @@ def manager_intro(manager_id: str) -> str:
         blocks.append(
             f"```{{note}}\n{m.maintenance_note}\n```",
         )
+
+    # After the admonition, never before: the mark floats, and a float placed
+    # above an admonition overlaps its background box instead of clearing it.
+    logo = manager_logo(manager_id)
+    if logo:
+        blocks.append(logo)
 
     source_url = manager_source_url(manager_id)
     source_path = source_url.removeprefix(f"{GITHUB_BLOB_URL}/").partition("#")[0]
@@ -1409,14 +1524,25 @@ def managers_index_table() -> str:
                 continue
             icon, annotation = coverage
             parts.append(f"{icon} ({annotation})" if annotation else icon)
-        table.append([f"[{m.name}](managers/{mid}.md)", id_cell, " ".join(parts)])
+        # The artwork is spliced in after rendering: a multi-kilobyte SVG in a
+        # cell would pad every other row of the column to its own width.
+        table.append([
+            f"%logo:{mid}%",
+            f"[{m.name}](managers/{mid}.md)",
+            id_cell,
+            " ".join(parts),
+        ])
     rendered = render_table(
         table,
-        headers=["Manager", "ID", "Platforms"],
+        # The mark column is headerless: the artwork labels itself, and the
+        # managers whose upstream has no usable mark leave the cell empty.
+        headers=["", "Manager", "ID", "Platforms"],
         table_format=TableFormat.GITHUB,
-        colalign=["left", "left", "center"],
+        colalign=["center", "left", "left", "center"],
         disable_numparse=True,
     )
+    for mid in pool:
+        rendered = rendered.replace(f"%logo:{mid}%", manager_logo(mid, inline=True))
     return f"`mpm` can drive {len(pool)} package managers:\n\n{rendered}"
 
 

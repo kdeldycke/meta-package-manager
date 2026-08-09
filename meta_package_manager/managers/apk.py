@@ -50,6 +50,7 @@ class APK(PackageManager):
     name = "Alpine apk"
 
     homepage_url = "https://gitlab.alpinelinux.org/alpine/apk-tools"
+    logo = "alpinelinux"
 
     platforms = LINUX_LIKE
 

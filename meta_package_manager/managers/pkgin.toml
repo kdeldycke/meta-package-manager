@@ -25,6 +25,7 @@
 [mpm.managers.pkgin]
 name = "Pkgin"
 homepage_url = "https://pkgin.net"
+logo = "netbsd"
 platforms = ["netbsd"]
 cli_names = ["pkgin"]
 default_sudo = true

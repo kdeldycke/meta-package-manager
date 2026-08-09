@@ -94,7 +94,7 @@ A manager definition makes `mpm` run the commands you declare. Definitions are o
 | `platforms`  | list of strings | Platform or group IDs the manager runs on (like `linux`, `macos`, `all_platforms`, or a specific `ubuntu`). |
 | `operations` | table           | At least one operation (see below). A manager with no operations does nothing.                              |
 
-Every [overridable field](#overridable-fields) (`cli_names`, `cli_search_path`, `requirement`, `version_regexes`, `pre_args`, `extra_env`, `timeout`, ...) may also be set, plus `name` and `homepage_url`. When `cli_names` is omitted it defaults to the manager ID.
+Every [overridable field](#overridable-fields) (`cli_names`, `cli_search_path`, `requirement`, `version_regexes`, `pre_args`, `extra_env`, `timeout`, ...) may also be set, plus `name`, `homepage_url` and `logo` (the slug of a brand mark vendored under `docs/assets/managers/`, inlined at the top of the manager's documentation page). When `cli_names` is omitted it defaults to the manager ID.
 
 Five definition-only fields have no override counterpart:
 

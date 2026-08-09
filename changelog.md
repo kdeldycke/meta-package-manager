@@ -7,6 +7,8 @@
 
 - [vim-pack] Add Neovim's built-in `vim.pack` plugin manager (Neovim `0.12` and above) with installed, install, remove and upgrade support. Plugins are keyed on their source URL, and each operation is a Lua one-liner run by a `--clean --headless` Neovim.
 - [zinit] Add the Zinit Zsh plugin manager with installed, install, remove and upgrade support. Zsh is the CLI mpm executes, and the plugin inventory is read from an interactive shell since Zinit tracks plugins in state the user's `.zshrc` populates.
+- [mpm] Show each manager's brand mark on its documentation page and in the manager index, from a new `logo` attribute naming an SVG vendored under `docs/assets/managers/`. 54 of the 75 managers carry one; the rest keep the default package glyph. Marks are inlined so they follow the light and dark themes.
+- [mpm] Turn the license page into the project's legal sink: it now also carries the trademark notice, the credits for every vendored brand mark, the documentation artwork attributions and a pointer to where dependency licenses live.
 - [gnome-shell] Add a GNOME Shell extension (GNOME 46 to 50) mirroring the Xbar/SwiftBar plugin: a top bar indicator lists outdated packages per manager, and every menu action runs `mpm` itself. Addresses [#809](https://github.com/kdeldycke/meta-package-manager/issues/809).
 - [gnome-shell] Attach the packed extension to every GitHub release as an attested `mpm-gnome-shell-extension.zip` asset, built with `gnome-extensions pack`.
 - [bar-plugin] Menu actions run `mpm` itself instead of the manager's native upgrade command, so manager selection, sudo policy, overrides and the cooldown all apply. A manager that cannot enforce an active `cooldown` is now skipped with a warning.

@@ -72,6 +72,7 @@ class Gem(PackageManager):
     name = "RubyGems"
 
     homepage_url = "https://rubygems.org"
+    logo = "rubygems"
 
     platforms = ALL_PLATFORMS
 

@@ -63,6 +63,7 @@ class NPM(PackageManager):
     name = "Node npm"
 
     homepage_url = "https://www.npmjs.com"
+    logo = "npm"
 
     brewfile_entry_type = "npm"
 

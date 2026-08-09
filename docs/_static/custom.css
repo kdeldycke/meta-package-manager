@@ -73,3 +73,48 @@
 .sidebar-tree a.reference.external[href="https://github.com/sponsors/kdeldycke"]::after {
   content: none;
 }
+
+/* Brand marks of the per-manager pages and the manager index, inlined as SVG
+ * by meta_package_manager._docs.manager_logo. The vendored artwork carries no
+ * fill, so it inherits the color set here.
+ *
+ * The brand color is applied on the light theme only, and only for marks whose
+ * contrast clears the 3:1 WCAG floor: the generator omits the custom property
+ * below that threshold, leaving currentColor to take over. The dark theme always
+ * uses currentColor, which spares each near-black mark (Rust, Steam, Slackware,
+ * OpenJDK, GitHub) from disappearing into the background.
+ */
+.manager-logo {
+  float: right;
+  margin: 0 0 1rem 1.5rem;
+}
+.manager-logo svg {
+  width: 4.5rem;
+  height: 4.5rem;
+  fill: var(--manager-logo-color, currentColor);
+}
+
+/* Keep a floated mark from spilling over the next section's heading. */
+article h2 {
+  clear: right;
+}
+
+/* Small variant sitting in the manager index table. */
+.manager-logo-inline {
+  float: none;
+  margin: 0;
+}
+.manager-logo-inline svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  vertical-align: middle;
+}
+
+body[data-theme="dark"] .manager-logo svg {
+  fill: currentColor;
+}
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) .manager-logo svg {
+    fill: currentColor;
+  }
+}

@@ -23,6 +23,7 @@
 [mpm.managers.chromebrew]
 name = "Chromebrew"
 homepage_url = "https://chromebrew.github.io"
+logo = "googlechrome"
 platforms = ["chromeos"]
 cli_names = ["crew"]
 # Chromebrew is a rolling release with no meaningful floor: the whole CLI surface used

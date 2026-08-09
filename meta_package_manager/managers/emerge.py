@@ -64,6 +64,7 @@ class Emerge(PackageManager):
     name = "Gentoo emerge"
 
     homepage_url = "https://wiki.gentoo.org/wiki/Portage#emerge"
+    logo = "gentoo"
 
     platforms = UNIX_WITHOUT_MACOS
 

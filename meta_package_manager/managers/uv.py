@@ -35,6 +35,7 @@ class UVBase(PackageManager):
     """Virtual base shared by the `UV` and `UVX` managers defined below."""
 
     homepage_url = "https://docs.astral.sh/uv"
+    logo = "uv"
 
     requirement = ">=0.5.0"
     """[0.5.0](https://github.com/astral-sh/uv/releases/tag/0.5.0) is the first

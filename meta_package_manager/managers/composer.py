@@ -45,6 +45,7 @@ class Composer(PackageManager):
     name = "PHP Composer"
 
     homepage_url = "https://getcomposer.org"
+    logo = "composer"
 
     platforms = ALL_PLATFORMS
 

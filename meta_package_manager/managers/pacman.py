@@ -88,6 +88,7 @@ class Pacman(PackageManager):
     name = "Arch Linux pacman"
 
     homepage_url = "https://wiki.archlinux.org/title/pacman"
+    logo = "archlinux"
 
     platforms = UNIX_WITHOUT_MACOS
 
@@ -353,6 +354,7 @@ class Pacaur(Pacman):
     name = "Arch Linux pacaur"
 
     homepage_url = "https://github.com/E5ten/pacaur"
+    logo = "archlinux"
 
     default_sudo = False
     """pacaur aborts its sync-class operations under root and runs `sudo pacman`
@@ -395,6 +397,7 @@ class Paru(Pacman):
     name = "Arch Linux paru"
 
     homepage_url = "https://github.com/Morganamilo/paru"
+    logo = "archlinux"
 
     default_sudo = False
     """paru refuses to build AUR packages under root and runs `sudo pacman`
@@ -450,6 +453,7 @@ class Yay(Pacman):
     name = "Arch Linux yay"
 
     homepage_url = "https://github.com/Jguer/yay"
+    logo = "archlinux"
 
     default_sudo = False
     """yay discourages root runs (`makepkg` hard-refuses them for AUR builds) and

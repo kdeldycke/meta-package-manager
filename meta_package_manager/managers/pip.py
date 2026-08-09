@@ -128,6 +128,7 @@ class Pip(PackageManager):
     name = "Python pip"
 
     homepage_url = "https://pip.pypa.io"
+    logo = "pypi"
 
     platforms = ALL_PLATFORMS
 

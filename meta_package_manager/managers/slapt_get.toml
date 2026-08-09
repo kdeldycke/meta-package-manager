@@ -21,6 +21,7 @@
 [mpm.managers.slapt-get]
 name = "slapt-get"
 homepage_url = "https://software.jaos.org/"
+logo = "slackware"
 platforms = ["slackware"]
 cli_names = ["slapt-get"]
 default_sudo = true

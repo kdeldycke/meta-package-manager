@@ -63,6 +63,7 @@ class FWUPD(PackageManager):
     name = "Linux fwupd"
 
     homepage_url = "https://fwupd.org"
+    logo = "linuxfoundation"
 
     platforms = LINUX_LIKE
 

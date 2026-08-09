@@ -932,6 +932,7 @@ class Brew(Homebrew):
     name = "Homebrew Formulae"
 
     homepage_url = "https://brew.sh"
+    logo = "homebrew"
 
     brewfile_entry_type = "brew"
 
@@ -1005,6 +1006,7 @@ class Cask(Homebrew):
     name = "Homebrew Cask"
 
     homepage_url = "https://github.com/Homebrew/homebrew-cask"
+    logo = "homebrew"
 
     brewfile_entry_type = "cask"
 

@@ -45,6 +45,7 @@ class EOPKG(PackageManager):
     name = "Solus eopkg"
 
     homepage_url = "https://github.com/getsolus/eopkg/"
+    logo = "solus"
 
     platforms = LINUX_LIKE
 

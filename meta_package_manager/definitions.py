@@ -237,7 +237,7 @@ Seven fields are definition-only:
 
 
 DEFINITION_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
-    {"name", "platforms", "homepage_url", "operations"},
+    {"name", "platforms", "homepage_url", "logo", "operations"},
 )
 """Top-level keys of a definition section that are not CLI-execution fields."""
 
@@ -490,6 +490,9 @@ class ManagerDefinition:
     homepage_url: str | None
     """Project home page, for documentation reference only."""
 
+    logo: str | None
+    """Slug of the brand mark vendored under `docs/assets/managers/`, or `None`."""
+
     cli_fields: dict[str, object]
     """Overridable CLI-execution attributes (`cli_names`, `requirement`,
     `version_regexes`, ...), pre-coerced to their runtime types."""
@@ -590,6 +593,14 @@ def parse_manager_definition(
             raise ValidationError(
                 f"{manager_id}.homepage_url", str(ex), code="invalid_type"
             ) from ex
+    logo = None
+    if "logo" in section:
+        try:
+            logo = _to_str(section["logo"])
+        except TypeError as ex:
+            raise ValidationError(
+                f"{manager_id}.logo", str(ex), code="invalid_type"
+            ) from ex
 
     cli_fields: dict[str, Any] = {}
     for key, value in section.items():
@@ -616,6 +627,7 @@ def parse_manager_definition(
         name=name,
         platforms=platforms,
         homepage_url=homepage_url,
+        logo=logo,
         cli_fields=cli_fields,
         operations=operations,
     )
@@ -1129,6 +1141,7 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
         "id": definition.manager_id,
         "name": definition.name,
         "homepage_url": definition.homepage_url,
+        "logo": definition.logo,
         "platforms": traits_from_ids(*definition.platforms),
         "__module__": __name__,
         "__doc__": (

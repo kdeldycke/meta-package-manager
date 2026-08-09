@@ -61,6 +61,7 @@ class SDKMAN(PackageManager):
     """
 
     homepage_url = "https://sdkman.io"
+    logo = "openjdk"
 
     platforms = LINUX_LIKE, MACOS
 

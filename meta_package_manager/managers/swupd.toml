@@ -19,6 +19,7 @@
 [mpm.managers.swupd]
 name = "Clear Linux Software Updater"
 homepage_url = "https://github.com/clearlinux/swupd-client"
+logo = "intel"
 platforms = ["clearlinux"]
 unmaintained = true
 unmaintained_message = "Intel discontinued Clear Linux OS in July 2025 and the [swupd-client repository](https://github.com/clearlinux/swupd-client) is archived read-only, so `swupd` no longer receives updates."

@@ -46,6 +46,7 @@ class Yarn(PackageManager):
     """
 
     homepage_url = "https://yarnpkg.com"
+    logo = "yarn"
 
     platforms = ALL_PLATFORMS
 

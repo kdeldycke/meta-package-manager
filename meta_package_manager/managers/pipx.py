@@ -60,6 +60,7 @@ class Pipx(PackageManager):
     name = "Python pipx"
 
     homepage_url = "https://pipx.pypa.io"
+    logo = "pypi"
 
     platforms = ALL_PLATFORMS
 

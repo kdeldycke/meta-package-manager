@@ -56,6 +56,7 @@ class Deb_Get(PackageManager):
     name = "deb-get"
 
     homepage_url = "https://github.com/wimpysworld/deb-get"
+    logo = "debian"
 
     platforms = LINUX_LIKE
 

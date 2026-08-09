@@ -27,6 +27,7 @@
 [mpm.managers.tlmgr]
 name = "TeX Live Manager"
 homepage_url = "https://www.tug.org/texlive/"
+logo = "latex"
 platforms = ["unix", "windows"]
 cli_names = ["tlmgr"]
 requirement = ">=2018"

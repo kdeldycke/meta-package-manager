@@ -473,6 +473,112 @@ def test_augmentations_table_renders():
     )
 
 
+def test_manager_logo_assets():
+    """Check every vendored brand mark is normalized, safe and accounted for.
+
+    The SVGs are inlined verbatim into the built pages, so this is what keeps a
+    hand edit (or a compromised upstream) from smuggling a script or a remote
+    reference into the documentation. `tools/update_manager_logos.py` produces
+    this shape; the directory holds nothing else.
+    """
+    manifest = _docs.logo_manifest()
+    assert set(manifest) == {"icons", "upstream"}
+    assert list(manifest["icons"]) == sorted(manifest["icons"])
+
+    assets = {path.stem for path in _docs.LOGO_DIR.glob("*.svg")}
+    assert assets == set(manifest["icons"]), "manifest and assets drifted apart"
+
+    for slug, icon in manifest["icons"].items():
+        assert set(icon) == {
+            "contrast_on_light",
+            "hex",
+            "license",
+            "managers",
+            "source",
+            "title",
+        }
+        assert icon["managers"] == sorted(icon["managers"])
+        assert re.fullmatch(r"[0-9A-F]{6}", icon["hex"])
+        assert icon["source"].startswith("https://")
+
+        svg = (_docs.LOGO_DIR / f"{slug}.svg").read_text(encoding="utf-8")
+        # One line, so the raw HTML block survives its injection into MyST: a
+        # blank line would end the block and leak markup into the page.
+        assert svg.count("\n") == 1
+        assert svg.endswith("\n")
+        assert svg.startswith('<svg viewBox="0 0 24 24">')
+        assert f"<title>{icon['title']}</title>" in svg
+        # No hard-coded color, so the mark inherits the theme's currentColor.
+        assert 'fill="' not in svg
+        assert not re.search(r"<(script|image|foreignObject)\b|xlink:href|url\(", svg)
+
+
+def test_manager_logos_resolve():
+    """Check the `logo` slug of every manager points at a vendored mark.
+
+    Also enforces the reverse: a mark nobody claims is dead weight, mirroring
+    the orphan sweep `update_manager_stubs` performs on `docs/managers/`.
+    """
+    icons = _docs.logo_manifest()["icons"]
+    claimed: dict[str, list[str]] = {}
+    for mid, manager in pool.items():
+        if manager.logo:
+            assert manager.logo in icons, f"{mid} declares an unvendored logo"
+            claimed.setdefault(manager.logo, []).append(mid)
+
+    assert claimed, "no manager declares a logo anymore"
+    for slug, icon in icons.items():
+        assert icon["managers"] == sorted(claimed.get(slug, [])), (
+            f"the {slug} mark is credited to the wrong managers"
+        )
+
+
+@all_managers
+def test_manager_logo_renders(manager):
+    """Check the brand mark of each manager renders as inlinable raw HTML."""
+    mark = _docs.manager_logo(manager.id)
+    if not manager.logo:
+        assert mark == ""
+        # A manager with no mark keeps the page's default package glyph.
+        assert "manager-logo" not in _docs.manager_intro(manager.id)
+        return
+
+    assert mark.startswith('<div class="manager-logo"')
+    assert mark.endswith("</div>")
+    assert "\n" not in mark
+    assert mark in _docs.manager_intro(manager.id)
+
+    # The brand color rides on a custom property, and only when it clears the
+    # contrast floor of the light theme.
+    icon = _docs.logo_manifest()["icons"][manager.logo]
+    faded = icon["contrast_on_light"] < _docs.MIN_LOGO_CONTRAST
+    assert ("--manager-logo-color" in mark) is not faded
+
+    # The index table embeds the small variant, as a span: a table cell wraps
+    # its content in a paragraph, where a <div> would be invalid markup.
+    assert _docs.manager_logo(manager.id, inline=True).startswith(
+        '<span class="manager-logo manager-logo-inline"'
+    )
+
+
+def test_manager_logo_credits_renders():
+    """Check every vendored mark is credited with its license and source.
+
+    Twelve marks carry an attribution-bearing license, so a missing row is a
+    license violation rather than a cosmetic gap.
+    """
+    credits = _docs.manager_logo_credits()
+    assert credits.startswith("Brand marks come from [Simple Icons]")
+
+    rows = [line for line in credits.splitlines() if line.startswith("| [")]
+    icons = _docs.logo_manifest()["icons"]
+    assert len(rows) == len(icons)
+    for icon in icons.values():
+        assert f"[{icon['title']}]({icon['source']})" in credits
+        for mid in icon["managers"]:
+            assert f"[`{mid}`](managers/{mid}.md)" in credits
+
+
 def test_manager_stubs_in_sync():
     """Check the committed page stubs of `docs/managers/` match a fresh
     generation from the pool.
@@ -556,11 +662,16 @@ def test_managers_index_table_renders():
     table = _docs.managers_index_table()
     lines = table.splitlines()
     assert lines[0] == f"`mpm` can drive {len(pool)} package managers:"
-    assert lines[2].startswith("| Manager")
+    # The leading column carries the brand marks and is headerless.
+    assert re.fullmatch(r"\|\s+\| Manager\s+\| ID\s+\|\s+Platforms\s+\|", lines[2])
     for mid, manager in pool.items():
         assert f"](managers/{mid}.md)" in table
         if manager.unmaintained:
             assert f"[⚠️](managers/{mid}.md)" in table
+        if manager.logo:
+            assert _docs.manager_logo(mid, inline=True) in table
+    # Every placeholder was substituted by the artwork it stands for.
+    assert "%logo:" not in table
 
 
 def test_matrix_blocks_in_sync():

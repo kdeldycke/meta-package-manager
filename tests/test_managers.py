@@ -344,6 +344,7 @@ CANONICAL_ATTRS = (
     "id",
     "name",
     "homepage_url",
+    "logo",
     # Export mappings.
     "brewfile_entry_type",
     "brewfile_skip_warning",

@@ -13,6 +13,7 @@
 [mpm.managers.steamcmd]
 name = "Valve SteamCMD"
 homepage_url = "https://developer.valvesoftware.com/wiki/SteamCMD"
+logo = "steam"
 platforms = ["all_platforms"]
 cli_names = ["steamcmd"]
 # Every invocation must end with +quit or SteamCMD stays in its interactive prompt.

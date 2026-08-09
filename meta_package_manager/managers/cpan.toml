@@ -45,6 +45,7 @@
 [mpm.managers.cpan]
 name = "Perl CPAN"
 homepage_url = "https://www.cpan.org"
+logo = "perl"
 platforms = ["all_platforms"]
 requirement = ">=1.64"
 # PERL_MM_USE_DEFAULT suppresses the interactive configuration cpan may launch on

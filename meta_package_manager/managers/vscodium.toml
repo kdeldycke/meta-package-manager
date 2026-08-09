@@ -17,6 +17,7 @@
 [mpm.managers.vscodium]
 name = "VSCodium"
 homepage_url = "https://vscodium.com"
+logo = "vscodium"
 platforms = ["all_platforms"]
 cli_names = ["codium"]
 requirement = ">=1.60.0"

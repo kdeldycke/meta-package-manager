@@ -68,6 +68,7 @@ class Flatpak(PackageManager):
     """
 
     homepage_url = "https://flatpak.org"
+    logo = "flatpak"
 
     brewfile_entry_type = "flatpak"
     """Mapped to Homebrew Bundle's `flatpak` extension.

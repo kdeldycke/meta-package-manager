@@ -18,6 +18,7 @@
 [mpm.managers.choco]
 name = "Chocolatey"
 homepage_url = "https://chocolatey.org"
+logo = "chocolatey"
 platforms = ["windows"]
 cli_names = ["choco"]
 # 2.0.0 is the first version not requiring the --local-only option on `choco list`,

@@ -56,6 +56,7 @@ class Guix(PackageManager):
     name = "GNU Guix"
 
     homepage_url = "https://guix.gnu.org"
+    logo = "gnu"
 
     platforms = LINUX_LIKE
 

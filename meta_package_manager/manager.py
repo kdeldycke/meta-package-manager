@@ -236,6 +236,20 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
+    logo: str | None = None
+    """Slug of the brand mark standing for this manager in the documentation.
+
+    Names an SVG vendored under `docs/assets/managers/`, whose provenance and license
+    are recorded in `docs/assets/managers/logos.yaml`. Inlined at the top of the
+    manager's page by {func}`meta_package_manager._docs.manager_logo`; a manager
+    leaving it unset keeps the page's default package glyph.
+
+    Several managers legitimately share one slug, either because they wrap the same
+    upstream (`brew` and `cask`) or because the tool has no mark of its own and its
+    ecosystem's stands in (`apt` under Debian's swirl, `cargo` under Rust's gear).
+    Documentation-only, like {attr}`homepage_url`: no CLI output reads it.
+    """
+
     brewfile_entry_type: ClassVar[str | None] = None
     """Name of the Brewfile DSL entry type this manager maps to, or `None` if the
     manager has no Brewfile equivalent.

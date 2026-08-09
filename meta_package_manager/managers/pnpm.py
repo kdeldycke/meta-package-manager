@@ -56,6 +56,7 @@ class PNPM(PackageManager):
     name = "Node pnpm"
 
     homepage_url = "https://pnpm.io"
+    logo = "pnpm"
 
     platforms = ALL_PLATFORMS
 

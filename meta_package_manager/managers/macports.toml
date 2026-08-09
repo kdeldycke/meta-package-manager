@@ -26,6 +26,7 @@
 [mpm.managers.macports]
 name = "MacPorts"
 homepage_url = "https://www.macports.org"
+logo = "macports"
 platforms = ["macos"]
 cli_names = ["port"]
 cli_search_path = ["/opt/local/bin"]

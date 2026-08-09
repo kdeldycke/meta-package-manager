@@ -57,6 +57,7 @@ class Pkcon(PackageManager):
     name = "PackageKit"
 
     homepage_url = "https://www.freedesktop.org/software/PackageKit/"
+    logo = "freedesktopdotorg"
 
     platforms = LINUX
 

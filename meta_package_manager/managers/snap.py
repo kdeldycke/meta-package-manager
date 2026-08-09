@@ -60,6 +60,7 @@ class Snap(PackageManager):
     """
 
     homepage_url = "https://snapcraft.io"
+    logo = "snapcraft"
 
     platforms = UNIX_WITHOUT_MACOS
 

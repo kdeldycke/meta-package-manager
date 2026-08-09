@@ -64,6 +64,7 @@ class APT(PackageManager):
     name = "Debian apt"
 
     homepage_url = "https://wiki.debian.org/AptCLI"
+    logo = "debian"
 
     platforms = UNIX_WITHOUT_MACOS
 
@@ -404,6 +405,7 @@ class APT_Mint(APT):
     name = "Linux Mint apt"
 
     homepage_url = "https://github.com/kdeldycke/meta-package-manager/issues/52"
+    logo = "linuxmint"
 
     _MINT_SEARCH_REGEXP = re.compile(
         r"""

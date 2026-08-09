@@ -62,6 +62,7 @@ class Conda(PackageManager):
     name = "Conda"
 
     homepage_url = "https://conda.org"
+    logo = "anaconda"
 
     platforms = LINUX_LIKE, MACOS, WINDOWS
 

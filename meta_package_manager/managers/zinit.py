@@ -109,6 +109,7 @@ class Zinit(PackageManager):
     """
 
     homepage_url = "https://github.com/zdharma-continuum/zinit"
+    logo = "zsh"
 
     platforms = LINUX_LIKE, MACOS
 

@@ -536,6 +536,7 @@ def _definition(**operations):
         name="My Tool",
         platforms=("all_platforms",),
         homepage_url=None,
+        logo=None,
         cli_fields={"cli_names": ("mytool",)},
         operations=operations,
     )
@@ -960,6 +961,7 @@ def test_register_rejects_builtin_collision(reset_definitions, caplog):
         name="Fake Pip",
         platforms=("all_platforms",),
         homepage_url=None,
+        logo=None,
         cli_fields={},
         operations={"sync": OperationSpec(args=("update",))},
     )
@@ -989,6 +991,7 @@ def test_factory_functional(tmp_path, fake_tool, reset_definitions):
         name="My Tool",
         platforms=("all_platforms",),
         homepage_url=None,
+        logo=None,
         cli_fields={
             "cli_names": ("mytool",),
             "cli_search_path": (str(tmp_path),),
@@ -1028,6 +1031,7 @@ def test_factory_functional_version_cli(tmp_path, fake_tool, reset_definitions):
         name="My Tool",
         platforms=("all_platforms",),
         homepage_url=None,
+        logo=None,
         cli_fields={
             "cli_names": ("mytool",),
             "cli_search_path": (str(tmp_path),),

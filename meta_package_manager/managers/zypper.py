@@ -70,6 +70,7 @@ class Zypper(PackageManager):
     name = "openSUSE Zypper"
 
     homepage_url = "https://en.opensuse.org/Portal:Zypper"
+    logo = "opensuse"
 
     platforms = UNIX_WITHOUT_MACOS
 

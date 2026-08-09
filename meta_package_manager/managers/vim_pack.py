@@ -137,6 +137,7 @@ class Vim_Pack(PackageManager):
     verbatim."""
 
     homepage_url = "https://neovim.io/doc/user/pack.html"
+    logo = "neovim"
 
     platforms = ALL_PLATFORMS
 

@@ -567,6 +567,11 @@ addopts = [
   # https://github.com/pytest-dev/pytest/issues/9311 (see above), it is not currently present in ``addopts``.
   # "--run-non-destructive",
 ]
+markers = [
+  "once: Tests that only need to run once, not across the full CI matrix.",
+]
+# Only tests/ holds test modules; keep a bare `pytest` from walking docs/ and packaging/.
+testpaths = [ "tests" ]
 # Make sure tests that are expected to fail do not resurect and start working all of a sudden.
 xfail_strict = true
 
@@ -716,6 +721,24 @@ exclude = [ "skills" ]
 release-assets = [ "mpm-gnome-shell-extension.zip" ]
 # Source paths for workflow trigger filters.
 workflow.source-paths = [ "meta_package_manager" ]
+# Wholesale replacement of tests.yaml's `paths:` filter (this override is
+# authoritative and ignores source-paths). The canonical filter covers only the
+# package and tests/, but the suite also asserts on files outside both:
+# test_docs.py holds changelog.md, readme.md and the whole docs/ tree to
+# byte-identity with their generators, and test_gnome_extension.py holds the
+# static invariants of gnome-shell/. Without these entries a hand-edit to any of
+# them never runs the test that guards it.
+workflow.paths."tests.yaml" = [
+  ".github/workflows/tests.yaml",
+  "changelog.md",
+  "docs/**",
+  "gnome-shell/**",
+  "meta_package_manager/**",
+  "pyproject.toml",
+  "readme.md",
+  "tests/**",
+  "uv.lock",
+]
 # Tests install system packages (apt, brew, etc.) and need a full runner image.
 test-matrix.replace.os = { ubuntu-slim = "ubuntu-24.04" }
 # lxml cannot compile on Windows ARM64.

@@ -6,11 +6,15 @@ name: 🔬 Tests
     branches:
       - main
     paths:
-      - meta_package_manager/**
-      - tests/**
-      - pyproject.toml
-      - uv.lock
       - .github/workflows/tests.yaml
+      - changelog.md
+      - docs/**
+      - gnome-shell/**
+      - meta_package_manager/**
+      - pyproject.toml
+      - readme.md
+      - tests/**
+      - uv.lock
   pull_request:
     branches-ignore:
       # This filter matches the PR's *base* branch (always `main`), not its
@@ -25,11 +29,15 @@ name: 🔬 Tests
       - minor-version-increment
       - prepare-release
     paths:
-      - meta_package_manager/**
-      - tests/**
-      - pyproject.toml
-      - uv.lock
       - .github/workflows/tests.yaml
+      - changelog.md
+      - docs/**
+      - gnome-shell/**
+      - meta_package_manager/**
+      - pyproject.toml
+      - readme.md
+      - tests/**
+      - uv.lock
   schedule:
     # Run tests monthly to catch regressions from dependency or environment changes.
     - cron: "17 9 1 * *"
@@ -84,7 +92,7 @@ jobs:
       - name: Run repomatic metadata
         id: metadata
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.6.0' metadata
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.8.0' metadata
           --format github-json --output "$GITHUB_OUTPUT"
           test_matrix test_matrix_pr
 
@@ -110,11 +118,6 @@ jobs:
       # Deactivate Homebrew verbose output and auto-update.
       HOMEBREW_NO_ENV_HINTS: "1"
       HOMEBREW_NO_AUTO_UPDATE: "1"
-      # Do not let brew use its live API to fetch the latest version.
-      # This variable forces brew to use the local repository instead (which we need in destructive tests to checkout
-      # formulas from the past): https://github.com/Homebrew/brew/blob/10845a1/Library/Homebrew/env_config.rb#L314-L317
-      # See: meta_package_manager/test_manager_homebrew.py::TestCask test.
-      HOMEBREW_NO_INSTALL_FROM_API: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -139,12 +142,6 @@ jobs:
         run: |
           brew upgrade
           brew update
-      - name: Homebrew - macOS cask repository copy
-        if: runner.os == 'macOS'
-        # Clone the full copy of the cask repository, so tests on macOS can locally checkout past versions of casks.
-        # This is performed by the destructive meta_package_manager/test_manager_homebrew.py::TestCask test.
-        run: |
-          brew tap homebrew/cask
       - name: Homebrew - Linux install
         if: runner.os == 'Linux'
         run: |
@@ -484,10 +481,16 @@ jobs:
       # ratchet: it walks the whole suite, so its number is the one worth
       # gating on. No `--cov-fail-under` is passed here, as the flag would
       # outrank the config and shadow the floor declared in pyproject.toml.
+      #
+      # `once`-marked tests are excluded from every matrix cell: the dedicated
+      # `once-tests` job below runs them on a single runner instead. They
+      # import no package code beyond `__version__`, so dropping them here
+      # cannot move the coverage floor.
       - name: Parallel non-destructive tests
         run: >
           uv --no-progress run --frozen --
           pytest --exitfirst
+          -m "not once"
           --cov
           --cov-report=term
           --numprocesses=auto --dist=loadgroup --maxschedchunk=1
@@ -528,3 +531,33 @@ jobs:
           # without credentials. Feed it the workflow token so the gh-ext destructive
           # install/remove round-trip runs for real (see conftest.py's PACKAGE_IDS).
           GH_TOKEN: ${{ github.token }}
+
+  once-tests:
+    name: 1️⃣ Run-once tests
+    # `needs: metadata` is not for its outputs but for its skip gate: the
+    # version-bump branches it filters out must skip this job too.
+    needs:
+      - metadata
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-tags: true
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.12.1"
+      - name: Install Python
+        run: uv --no-progress venv --python 3.14
+      - name: Install project
+        run: uv --no-progress sync --frozen --all-extras --group test
+      - name: Run-once unittests
+        # `once`-marked tests assert on static project metadata and on the
+        # GNOME Shell extension sources. They behave identically on every OS
+        # and Python, so the matrix `tests` job excludes them and this single
+        # runner is their only executor. No `--cov` here: they import no
+        # package code beyond `__version__`, so measuring them is pointless
+        # and would only invite a spurious floor check.
+        run: uv --no-progress run --frozen -- pytest -m once

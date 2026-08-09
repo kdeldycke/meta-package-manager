@@ -26,9 +26,20 @@ concurrency:
 # under a bare gjs interpreter (see tests/gnome/run-tests.js for the
 # rationale), and the GSettings schema compiles with the same strict checks
 # `gnome-extensions install` applies. The static invariants
-# (tests/test_gnome_extension.py) ride the main test matrix and need no job
-# here. Visual QA needs a real GNOME session and stays manual: install the zip
+# (tests/test_gnome_extension.py) are `once`-marked and need no job here: the
+# `once-tests` job of tests.yaml is their single executor.
+# Visual QA needs a real GNOME session and stays manual: install the zip
 # artifact packed below with `gnome-extensions install --force <zip>`.
+
+# Supply-chain cooldown: no package published within the window can be resolved
+# by any command in this workflow. Set here, not per command, so it also covers
+# the `npx` invocation below and any step added later; the explicit
+# `--min-release-age` on the install step is kept as documentation of what the
+# floating stack is gated on. Held equal to `[tool.repomatic]
+# minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
 
 jobs:
 

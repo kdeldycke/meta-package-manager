@@ -20,8 +20,10 @@ The extension is GJS code the Python suite cannot import, so these tests pin the
 contracts that keep its moving parts in sync: the `metadata.json` identity, the
 GSettings schema, the stylesheet classes, the icon set and the argv builders.
 The behavioral coverage lives in `tests/gnome/run-tests.js`, executed under a
-bare `gjs` interpreter by {func}`test_gjs_unit_suite` when one is installed (CI
-always has one, via the `tests-gnome-extension.yaml` workflow).
+bare `gjs` interpreter by {func}`test_gjs_unit_suite` when one is installed.
+No CI runner running pytest installs `gjs`, so that wrapper is a convenience for
+a developer who has one: in CI the same script is driven directly by the `gjs`
+job of the `tests-gnome-extension.yaml` workflow.
 """
 
 from __future__ import annotations
@@ -38,6 +40,10 @@ from xml.etree import ElementTree
 import pytest
 
 from meta_package_manager import __version__
+
+pytestmark = pytest.mark.once
+"""These assert on checked-in extension sources, not on the host: the
+`once-tests` job runs them on a single runner instead of every matrix cell."""
 
 PROJECT_ROOT = Path(__file__).parent.parent
 

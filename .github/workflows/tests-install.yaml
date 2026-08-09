@@ -40,6 +40,20 @@ concurrency:
 # Keep in sync with the "Installation methods" tabs in docs/install.md and
 # the per-channel catalog and build instructions in docs/packaging.md.
 
+# The one workflow that opts out of the supply-chain cooldown every other
+# workflow sets, by declaring a zero-length window. Its subject IS the freshly
+# published artifact: it answers "does the release that shipped install and
+# run from each channel?", which a cooldown makes unanswerable, since neither a
+# new release nor a dependency floor raised to a recent version can resolve
+# until the window elapses. Declared here rather than left to uv's default so
+# the opt-out reads as a decision. Safe to scope this wide: every job inherits
+# `permissions: {}`, takes no secrets, and only runs `--version` on a throwaway
+# runner. The distro-archive jobs (apk, macports, nix, choco) are unaffected
+# either way, their archives staging releases on their own. See claude.md
+# § Cooldown on every install.
+env:
+  UV_EXCLUDE_NEWER: P0D
+
 jobs:
 
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine

@@ -70,6 +70,64 @@ Which boils down to the following these rules of thumb regarding stability:
   save CI resources. See the `unmaintained` attribute in
   `meta_package_manager/manager.py` for the full policy.
 
+## Cooldown on every install
+
+**Every command that resolves a package from a live registry carries a cooldown, except where this section names otherwise.** A cooldown refuses any version published more recently than a fixed window, so a compromised release has to survive that window before it can enter a build. Most malicious releases (stolen publishing credentials, dependency confusion, account takeover) are caught and pulled within days of publication, which is what makes a window of days worth the delay it costs.
+
+`mpm --cooldown` applies the same idea to a different subject, and the two are easy to conflate here. That flag is a user-facing feature, gating the packages `mpm` installs on the user's machine, and `docs/cooldown.md` is its documentation. This section covers what CI resolves onto a runner while building `mpm` itself. A comment or changelog entry naming one should not read as the other.
+
+The rule has no scratch exemption. It binds reusable workflows, one-off CI steps, test scripts, local reproduction commands and throwaway experiments equally: an uncooled `uvx` in a five-minute debugging step resolves the same tree from the same registry onto the same runner as a production job.
+
+### A cooldown is not a pin, and neither is a checksum
+
+The three guarantees are independent, and most of what CI installs has only one or two of them. Know which one you are relying on before calling something verified.
+
+| Guarantee | What it proves                                                      | Where this repo has it                                        |
+| :-------- | :------------------------------------------------------------------ | :------------------------------------------------------------ |
+| Cooldown  | The version has been public long enough for a compromise to surface | Every `uvx`, `uv pip`, `uv tool`, `npm` and `npx` invocation  |
+| Pin       | Everyone resolves the same version                                  | Action SHAs, the inline `repomatic==X.Y.Z` literal, `uv.lock` |
+| Checksum  | The bytes are the bytes that version shipped                        | `uv.lock` hashes                                              |
+
+The gap worth naming: a `uvx`-resolved tree is gated by publication age but never checked against a known digest, because a `uvx` environment has no lockfile. `uv.lock` is the only place a Python dependency is hash-pinned, so anything resolved outside it trades hash verification for the cooldown alone.
+
+### Where the window comes from
+
+`[tool.repomatic] minimum-release-age` is the single source of truth, left at its `1 week` default here. Never hard-code a duration next to an install command: read it from config, or from the `npm_min_release_age_days` output `repomatic metadata` derives from it.
+
+Two places carry the duration as a literal instead, and both must be kept equal to that source by hand:
+
+- **Every workflow that installs anything**, because YAML cannot read Python: each sets `NPM_CONFIG_MIN_RELEASE_AGE` and `UV_EXCLUDE_NEWER` in a **workflow-level `env:` block**. Job-level would not cover the bootstrap, since `metadata` resolves packages before any other job's output exists and a workflow-level `env:` cannot reference `needs`. The literal covers every job, including that bootstrap and any step added later by someone who never read this section.
+- **`[tool.uv] exclude-newer`**, because uv reads its own config and knows nothing of `[tool.repomatic]`. The two must not merely be close: a lock window wider than the install window resolves versions those installs then refuse, leaving a package pinned in `uv.lock` that CI cannot install.
+
+That makes the cooldown the one place an environment variable beats an explicit flag, inverting [§ `uv` flags in CI workflows](#uv-flags-in-ci-workflows): a flag only protects the command someone remembered to write it on, and the commands that most need protecting are the ones nobody thought about.
+
+### Per-ecosystem knobs
+
+| Ecosystem                                                                  | Cooldown                                                           | Per-package exemption                                   |
+| :------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------------ |
+| uv: `uvx`, `uv pip install`, `uv run --with`, `uv tool install`, `uv lock` | `--exclude-newer`, or `UV_EXCLUDE_NEWER`                           | `--exclude-newer-package pkg=YYYY-MM-DD`, CLI flag only |
+| npm, `npx`                                                                 | `--min-release-age` in whole days, or `NPM_CONFIG_MIN_RELEASE_AGE` | `--min-release-age-exclude` taking a name or glob       |
+
+uv accepts a friendly duration (`1 week`), an ISO 8601 span (`P7D`), or an absolute date; npm counts whole days and needs 11.10.0 or newer. Both knobs gate the whole resolved tree, transitive dependencies included, which is the point: the compromised package is rarely the one named on the command line.
+
+For every other package manager, `docs/cooldown.md` is the inventory, and it is this project's own: which managers enforce a cooldown natively, which have support proposed upstream, which have none, and which are N/A because their archive already stages releases on its own.
+
+### Distro archives are out of scope, not an exception
+
+`apk`, `pacman`, `xbps` and their peers are not live registries, and this rule was never about them. A stable archive is frozen at release and moves only through the distro's own staging, which is a cooldown implemented one layer down. Nobody self-publishes into it, which is the property the window exists to compensate for everywhere else. A distro version string is also the maintainer's package build, not an upstream publish date, so a publish-date filter would have nothing to filter on. That is why `tests-yay-cooldown.yaml`, `check-void-deps.yaml` and the `*-source` jobs of `tests-install.yaml` carry no window: they drive `pacman`, `xbps-src`, `abuild` and `nix-build` inside their own distro containers.
+
+The exception is a repository added by hand. A PPA or a vendor's `.repo` file is a live, single-publisher registry wearing apt's clothes, with none of the distro staging behind it. Pin the version there, or fetch a checksummed artifact instead.
+
+### Documented exemptions
+
+Three installs deliberately bypass the window. Two are per-package and never widen to the rest of the tree; the third is a whole workflow, and says why it has to be.
+
+- **The upstream toolkit's own pin.** `repomatic` runs from a pin that moves in lockstep with the `uses:` refs pointing at it, so a release must be installable the minute it is published. Every `uvx` call carrying it passes `--exclude-newer-package repomatic=P0D` beside the pin.
+- **A dependency held at a known-good version.** `[tool.uv] exclude-newer-package` holds `extra-platforms` at a fixed date, which keeps `uv lock --upgrade` on that version instead of tracking newer releases.
+- **The `tests-install.yaml` workflow.** Its subject *is* the freshly published artifact, so a cooldown would make the question it exists to answer unanswerable. It declares `UV_EXCLUDE_NEWER: P0D` at workflow level rather than relying on uv's default, so the opt-out reads as a decision.
+
+A fourth exemption is a bug until proven otherwise. Anything claiming one carries a comment naming what breaks without it, and the narrowest scope that still works: a package, not a job; a job, not a workflow.
+
 ## Build status
 
 [`main` branch](https://github.com/kdeldycke/meta-package-manager/tree/main):
@@ -175,6 +233,12 @@ Each piece of knowledge has one canonical home, chosen by audience. Other locati
 | Contributors / Claude | `CLAUDE.md`               | Conventions, policies, non-obvious rules.         |
 
 **YAML to Python distillation:** When workflow YAML files contain lengthy "why" explanations, migrate the rationale to Python module, class, or constant docstrings (using MyST admonition fences like ```` ```{note} ```` and ```` ```{warning} ````). Trim the YAML comment to a one-line "what" plus a pointer.
+
+### Example data
+
+Invented example data (docs, docstrings, comments, test fixtures) must be domain-neutral: cities, weather, fruits, animals, recipes. Do not reach for software-engineering or packaging vocabulary for a placeholder, and never invent a plausible-looking package or manager name: this project's whole domain is package metadata, so a made-up `foo-lib 1.2.3` in a docstring is indistinguishable from a real fixture and will eventually be read as one.
+
+The exception is the material that must be real to be correct: the `[samples]` fixtures of the bundled TOML definitions and the `shell-session` blocks harvested into the docstring corpus are captured CLI output, held to byte-accuracy by `test_documented_output_still_parses`. Those are not examples, they are data.
 
 ### Changelog and readme updates
 
@@ -293,6 +357,16 @@ The version string is always bare (e.g., `1.2.3`). The `v` prefix is a **tag nam
 3. **Always backtick-escape versions in prose.** Both `v1.2.3` (tag) and `1.2.3` (package) are identifiers, not natural language. In markdown and in MyST docstrings alike, wrap them in single backticks: `` `v1.2.3` ``, `` `1.2.3` ``.
 4. **Development versions** follow PEP 440: `1.2.3.dev0` with optional `+{short_sha}` local identifier.
 
+### Commit messages
+
+Default to a subject line and nothing else, when there is no context to link. A commit message is a log entry, not a design document.
+
+- **Subject.** One line under 72 characters, imperative mood, capitalized, no trailing period, every identifier backticked. Name what changed, not the category it falls in: `` Sync `uv.lock` ``, `` Fix `yay` cooldown overlay on Arch ``. Avoid the bare one-word subject (`Typo`, `Lint`, `Fix`): it costs the next reader a `git show` to learn anything. Say what the typo was in, what the lint fixed.
+- **No decorative prefixes.** This is not [Conventional Commits](https://www.conventionalcommits.org): no `feat:`, `chore:`, `fix:`. A `[bracketed]` prefix is reserved for a mechanism that parses it back, and only `[changelog] …` qualifies, matched literally by repomatic's auto-tagging job. Do not confuse it with the `[scope]` tags that open every `changelog.md` bullet: those name a manager or platform, live in the changelog file rather than in git, and are indexed by `manager_changelog()`. The two vocabularies are unrelated. Never write a GitHub skip token (`[skip ci]` and its aliases) in any message, including a body: they match anywhere and leave a required check "Pending" rather than failing.
+- **Body: link the context.** Omit it when the subject says everything. Write one short paragraph when the *why* is not evident from the diff, and especially when the decision was made somewhere public: the upstream manager's issue tracker, the distro packaging PR, the spec page that forced the behavior. Forges render commit messages as HTML, so a link is the cheapest route from `git log` to the full story. Format every cross-repository reference as `[owner/repo#N](https://github.com/owner/repo/issues/N)`.
+
+Never narrate the work in sequence or enumerate the files touched: `git log --stat` lists the files and the diff shows the order. Rationale needing more room than a paragraph belongs somewhere durable instead, per [§ Knowledge placement](#knowledge-placement).
+
 ### Comments and docstrings
 
 - All comments in Python files must end with a period.
@@ -328,6 +402,10 @@ Omit type annotations on local variables, loop variables, and assignments when m
 **When to annotate:** Add an explicit annotation only when mypy cannot infer the correct type and reports an error — e.g., empty collections that need a specific element type (`items: list[Package] = []`), `None` initializations where the intended type isn't obvious from later usage, or narrowing a union that mypy doesn't resolve on its own.
 
 **Function signatures are unaffected.** Always annotate function parameters and return types — those are part of the public API and cannot be inferred.
+
+### Named constants
+
+Do not inline a named constant during a refactor. It exists for readability and grep-ability, and in this codebase the grep is usually the point: `SHARED_LOCK_FAMILIES`, `CANONICAL_ATTRS`, `MANAGER_SECTIONS` and `MANAGER_LABELS` are each the single place a reader can enumerate a rule that is otherwise scattered across managers. When moving code between modules, carry the constant with it rather than replacing it with a literal at the call site.
 
 ### Python 3.10 compatibility
 
@@ -463,15 +541,41 @@ Action commands (`install`, `remove`, `upgrade <packages>`, `restore`) collect p
 - Test coverage is measured with `pytest-cov` and gated by the `[tool.coverage] report.fail_under` ratchet, which the parallel non-destructive run of `tests.yaml` is the one slice expected to clear. Declare the floor there and nowhere else: a `--cov-fail-under` flag outranks the config, so the partial slices opt out with an explicit `--cov-fail-under=0` rather than the full run passing a value. Coverage is off by default locally, since `--cov` is passed by the workflow rather than sitting in `addopts`: a focused local `pytest` never trips the floor, and only a deliberate local `--cov` does.
 - Do not use classes for grouping tests. Write test functions as top-level module functions. Only use test classes when they provide shared fixtures, setup/teardown methods, or class-level state.
 - **The CLI template-class hierarchy is a deliberate exception, kept by decision.** `tests/test_cli.py`'s `CLISubCommandTests`/`CLITableTests`/`CLIQueryTests` templates give each `test_cli_*.py` subclass a battery of inherited behavior tests (`--columns` projection, serialization across every format, query filtering) for the price of a `subcmd` fixture. Only the subclasses that assert manager selection (`install`/`remove`, `upgrade`, `backup`, `restore`, `sbom`, `managers`) additionally implement an `evaluate_signals()` strategy for `check_manager_selection()`: the per-subcommand selection battery itself was retired (selection is exercised once, on a single subcommand, since the logic is shared), so a query-only subclass carries no `evaluate_signals()` and a subcommand with no subclass-specific behavior needs no `test_cli_*.py` file at all. Dissolving the hierarchy into a command×behavior parametrize was assessed and rejected: it would trade colocated per-command specifics for a cross-product harder to read and extend. Shared assertion logic goes on the template classes (or module helpers like `check_packages_payload`), while per-command parametrize data stays in the subcommand's own file.
-- **`@pytest.mark.once` for run-once tests.** Define a custom `once` marker (in `[tool.pytest].markers`) to tag tests that only need to run once — not across the full CI matrix. Typical candidates: CLI entry point invocability, plugin registration, package metadata checks. The main test matrix filters them out with `pytest -m "not once"`, while a dedicated `once-tests` job runs them on a single runner.
+- **`@pytest.mark.once` for run-once tests.** The `once` marker (declared in `[tool.pytest].markers`) tags tests that only need to run once, not across the full CI matrix. The matrix `tests` job filters them out with `pytest -m "not once"`, and the `once-tests` job of `tests.yaml` runs them on a single runner. Two modules carry it today, both via a module-level `pytestmark`: `tests/test_metadata.py` (which reads `pyproject.toml` and the generated matrix) and `tests/test_gnome_extension.py` (which asserts on checked-in extension sources). The admission test is coverage, not just OS-independence: a `once` module must import no package code beyond `__version__`, so moving it off the matrix cannot lower the slice that holds the coverage floor. A test that both covers `meta_package_manager` and reads only static files stays on the matrix.
+- **Write conformance tests when fixing a class of bugs.** For a bug that is a *category* rather than a one-off, add a generic test locking in the invariant: enumerate every member of the set (pool managers, generators, bundled TOML files, docstring corpus entries) and assert the property uniformly, failing with the violator's name. This is why `test_content_order`, `test_manager_changelog_entries` and `test_documented_output_still_parses` exist. Applies when the bug stems from a shared convention checkable from the codebase alone, with no fixtures or mocks.
 - **CI-only pytest flags belong in workflow steps, not `[tool.pytest].addopts`.** Flags that emit CI-only artifacts (`--cov-report=xml`, `--junitxml=junit.xml`) pollute local runs when placed in `addopts`: keep `addopts` for flags that apply everywhere and pass CI-specific ones in the workflow `run:` step. Coverage settings (`run.branch`, `run.source`, `report.precision`) belong in `[tool.coverage]`, not in `--cov-*` flags.
 - **Pass `encoding="UTF-8"` to `subprocess.run(..., text=True)` when output may contain non-ASCII bytes** (emoji in a workflow `name:`, accented author names, translated strings). `text=True` alone decodes with the platform default (`cp1252` on Windows), so such output raises `UnicodeDecodeError` only in Windows CI while passing on macOS and Linux. Test helpers shelling out to package managers or `git` are the usual offenders.
+- **Pass an explicit encoding to every text-mode `open()`, `read_text()` and `write_text()` in tests, same as production.** The same Windows `cp1252` default applies to file I/O, and the failure stays hidden until the content grows its first non-ASCII character, which manager output and docstring samples do constantly. When a change touches file I/O, run the suite once with `PYTHONWARNDEFAULTENCODING=1` ([PEP 597](https://peps.python.org/pep-0597/)) to surface every bare call at runtime, on any platform: a linter misses the unannotated `Path` locals.
 - **TTY-gated output needs a pseudo-terminal to test.** The `✓`/`✗` trail, finishers and spinners only render on an interactive terminal, so click-extra's `CliRunner` (non-TTY) never emits them — drive the CLI under `pty.openpty()` to exercise them. Most CLI tests instead assert on the stdout table, exit code, or an explicit `--verbosity`, none of which are TTY-gated.
 - **`--dry-run` simulates read CLIs too.** It dry-runs *every* manager invocation, including the installed-package lookup that `remove`/`upgrade` use to find their source managers — so a dry-run of those reports "not recognized" and cannot exercise their multi-manager path. Reach for purls (which carry the manager and bypass the lookup) or unit fixtures instead.
 - **`--plan` runs reads but captures writes.** The complement of `--dry-run`: plan mode executes the read-only queries (so `install`/`remove`/`upgrade --all` resolve their real source managers and targets), then records only the state-changing commands (`_MUTATING_OPERATIONS`) into `execution.PLAN_RECORDER` and prints them to stdout at context close, without running them. `force_exec` reads (version probes, `yarn global dir`) patch `plan` off and run for real. Test it against real reads or purls, and assert on stdout: the plan is plain `echo`, not the TTY-gated trail.
 - **The suite is hermetic with respect to the host `mpm` config.** click-extra's default `--config` search resolves to the host config folder (`~/Library/Application Support/mpm` on macOS, `~/.config/mpm` on Unix). Any `config.toml` there would otherwise leak into every in-process CLI invocation: a local `cpan = false` drops the manager, so `check_manager_selection` assertions expecting the full default set fail locally while passing in CI. The `isolate_user_config` autouse fixture in `tests/conftest.py` repoints config discovery at an empty temp directory, so host config never reaches the suite. Tests that exercise config loading pass `--config <path>` explicitly, which overrides the default and is left unaffected.
 
+### Choosing test-matrix targets
+
+`repomatic metadata` builds the full and PR matrices from `[tool.repomatic.test-matrix.*]`, whose every deviation from the defaults is commented in `pyproject.toml`. `tests/test_metadata.py` turns a matrix that drifts from `requires-python` into a failing check. The selection conventions:
+
+- **Cover the shipped config broadly, probe unreleased axes narrowly, and let the OS spread pay for itself.** Released dependencies on stable Python get the full cross-platform spread, since `mpm` drives a different set of managers on each OS and that spread is the product. Prerelease Python (`3.15`) keeps repomatic's `unstable` flag and runs on one runner; a released free-threaded build (`3.14t`) runs stable, also on one runner, because interpreter-level compatibility is OS-independent.
+- **Pin the dependency floor, and any release a workaround targets.** The floor of a supported range belongs in the matrix as an explicit value, along with any mid-range release a shim works around: that is the version that catches the shim regressing.
+- **Select runners by measured speed and workload, not architecture.** Where one fast runner suffices, `ubuntu-24.04-arm` is the cheapest tier and hosted macOS bills about ten times Linux, so macOS and Windows cells are reserved for the manager coverage only they add. `remove.os` drops the slower twin of an OS pair, and `replace.os` swaps `ubuntu-slim` for a full image wherever a job installs system packages: the lean image ships too little for the destructive suite.
+
 ## Design principles
+
+### Keep logic in Python, not workflow YAML
+
+Push anything beyond trivial wiring out of workflow YAML and into the package or its tests. Rather than duplicating an `if:` condition across steps, compute it once and reference the result. Rather than asserting a project invariant with `grep` in a `run:` block, write the test: `tests/test_docs.py` and `tests/test_metadata.py` hold contracts that a shell one-liner would have expressed worse and silently stopped checking. A tested generator that fails loudly beats a static artifact that can drift.
+
+The corollary bounds how much a workflow may know: `tests-install.yaml` is long because each distribution channel genuinely needs its own install incantation, not because logic accumulated there.
+
+### Defensive workflow design
+
+GitHub Actions workflows face race conditions, eventual consistency and partial failures, and this project adds a second layer of flakiness on top: every job drives real package managers against live third-party feeds. Prefer belt-and-suspenders, several independent correctness mechanisms over one guarantee. When a step depends on external state (a CDN, an upstream release, a snap store), add a retry or a graceful default and say in a comment what transient failure it absorbs. The `choco upgrade all` and `snap install code` steps of `tests.yaml` are the models.
+
+Distinguish absorbing a flake from hiding a failure: a forced `exit 0` belongs on setup that is best-effort by nature, never on the assertion the job exists to make.
+
+### Single source of truth for defaults
+
+Every configurable default lives in exactly one place, and all other code derives it rather than repeating the literal. When adding one, grep for the value and point every other occurrence at the source. The cases already carrying this weight are worth knowing, since each has a test holding it: the coverage floor in `[tool.coverage] report.fail_under`, the cooldown window in `[tool.repomatic] minimum-release-age`, the manager pool in `meta_package_manager/pool.py`, and the page layout in `MANAGER_SECTIONS`.
 
 ### Linting and formatting
 

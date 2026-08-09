@@ -36,6 +36,10 @@ from extra_platforms.pytest import skip_hermetic_build
 
 from .conftest import PROJECT_ROOT, tomllib
 
+pytestmark = pytest.mark.once
+"""These read `pyproject.toml` and the generated matrix, so they answer the same
+on every OS and Python: the `once-tests` job runs them on a single runner."""
+
 PYTHON_CLASSIFIER_PREFIX = "Programming Language :: Python :: "
 """Prefix of the trove classifiers enumerating supported Python versions."""
 
@@ -112,6 +116,15 @@ def test_matrix_python_floor_matches_requires_python():
     Drives the real `repomatic` CLI, the same one CI invokes, so the assertion
     reflects what is actually tested rather than a re-derivation. Skips, instead
     of failing, when the tool cannot be fetched (offline or sandboxed builds).
+
+    The `--exclude-newer-package` escape hatch is the documented per-package
+    exemption every `uvx` call carrying this pin needs. The workflow sets
+    `UV_EXCLUDE_NEWER` for all of its jobs, so a pin just moved to a release
+    published inside that window is unresolvable without it, and uvx exits
+    non-zero. That lands in the `skip` branch below rather than a failure, which
+    is the worse outcome: this guard would go quiet for a full cooldown period
+    after every upstream bump, exactly when the matrix is most likely to have
+    drifted from `requires-python`.
     """
     uvx = shutil.which("uvx")
     if uvx is None:
@@ -121,6 +134,8 @@ def test_matrix_python_floor_matches_requires_python():
             (
                 uvx,
                 "--no-progress",
+                "--exclude-newer-package",
+                "repomatic=P0D",
                 f"repomatic=={_pinned_repomatic()}",
                 "metadata",
                 "--format",

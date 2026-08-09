@@ -478,7 +478,7 @@ def test_manager_logo_assets():
 
     The SVGs are inlined verbatim into the built pages, so this is what keeps a
     hand edit (or a compromised upstream) from smuggling a script or a remote
-    reference into the documentation. `tools/update_manager_logos.py` produces
+    reference into the documentation. `docs/logos_update.py` produces
     this shape; the directory holds nothing else.
     """
     manifest = _docs.logo_manifest()

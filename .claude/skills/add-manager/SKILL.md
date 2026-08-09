@@ -117,7 +117,7 @@ Typical manager modules range from 140 to 260 lines. Larger implementations (350
 
 Create `meta_package_manager/managers/<name>.py`. Follow the import pattern, class structure, and `TYPE_CHECKING` block from your template exactly.
 
-Class-level attributes and methods must follow the canonical order defined in `PackageManager` (enforced by `test_content_order`). The order is: `homepage_url`, `platforms`, `requirement`, `cli_names`, `cli_search_path`, `extra_env`, `pre_cmds`, `pre_args`, `post_args`, `version_cli_options`, `version_regexes`, then operations (`installed`, `outdated`, `search`, `install`, `upgrade_all_cli`, `upgrade_one_cli`, `remove`, `sync`, `cleanup`).
+Class-level attributes and methods must follow the canonical order defined in `PackageManager` (enforced by `test_content_order`). The order is: `homepage_url`, `logo`, `platforms`, `requirement`, `cli_names`, `cli_search_path`, `extra_env`, `pre_cmds`, `pre_args`, `post_args`, `version_cli_options`, `version_regexes`, then operations (`installed`, `outdated`, `search`, `install`, `upgrade_all_cli`, `upgrade_one_cli`, `remove`, `sync`, `cleanup`).
 
 ### Class attributes
 
@@ -128,6 +128,7 @@ Required:
 
 Common optional:
 
+- `logo`: slug of the brand mark shown atop the manager's documentation page, naming an SVG vendored under `docs/assets/managers/`. Run `uv run -- python docs/logos_update.py --scan-gaps` to see whether Simple Icons carries one; if it does, declare the slug and re-run the tool without the flag to vendor the file and refresh `logos.yaml`. Leave it unset when there is none, which is the right outcome for roughly a fifth of the pool: the page keeps its generic package glyph, and no placeholder is invented. Managers wrapping the same upstream share one slug (`brew` and `cask` are both `homebrew`), declared once on their virtual base when they have one. A tool with no mark of its own takes its ecosystem's (`apt` under Debian's, `cargo` under Rust's). Never hand-vendor a mark whose brand had its icons pulled from Simple Icons after a legal request: see the comments in `winget.py` and `sun_tools.py`.
 - `requirement`: minimum version specifier (e.g., `">=2.0.0"`). Set this to the earliest version that supports all features the implementation depends on. If the code parses `--json` output, check the upstream release history to find when that flag was introduced. Do not default to `>=1.0.0` without verification.
 - `cli_names`: tuple of binary names to search for. Defaults to `(lowercase_class_name,)`. Set explicitly when the binary name differs from the class name (e.g., `cli_names = ("nix-env",)` for class `Nix`).
 - `version_regexes`: tuple of regex strings with a `(?P<version>...)` named group.
@@ -249,6 +250,7 @@ Every new manager touches the same set of files. This list is derived from all 3
 | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `.github/workflows/tests.yaml`                             | Manager can be installed on CI runners. Check if it's available via an existing package manager (like Scoop, apt, brew) on the target OS. | Add an install step in the manager setup section, near related managers.                             |
 | `docs/benchmark.yaml`                                      | Manager already appears in the comparison table.                                                                                          | Delete its `homepages:` entry: the homepage now comes from the class (a sync test enforces the set). |
+| `docs/assets/managers/`                                    | Manager declares a `logo` whose slug is not vendored yet.                                                                                 | Run `python docs/logos_update.py` to fetch the mark and refresh `logos.yaml`. Never hand-edit either: the SVG is normalized and the manifest feeds the credits block of {doc}`/license`. |
 | `.github/workflows/tests-install.yaml` + `docs/install.md` | Manager is a *distributor of mpm itself* (like Homebrew, Scoop, Nix, or an AUR helper). Most managers are not.                            | Add a CI job testing `mpm` installation via the new channel, and a matching tab in the install docs. |
 
 ## Validate
@@ -264,6 +266,7 @@ Common validation failures after adding a manager:
 
 - **`test_manager_count`**: forgot to increment the count in `test_pool.py`.
 - **`test_content_order`**: class attributes are not in the canonical order (like `version_regexes` before `post_args`).
+- **`test_manager_logos_resolve`** (in `tests/test_docs.py`, so the `Validate` command above does not catch it): a declared `logo` slug with no vendored SVG, or a vendored mark no manager claims. Run `docs/logos_update.py`.
 - **Label group collision**: the group name in `labels.py` collides with a manager ID. Use the `-based` suffix (like `scoop-based`, `pip-based`).
 - **Whole-suite collection abort**: `tests/conftest.py` asserts `PACKAGE_IDS` covers exactly the class managers at import time; a missing class entry (or a stray bundled one) kills every test, not one.
 - **`test_docstring_corpus`**: the `$ ...` shell-session samples in operation docstrings are checked against the real CLI construction. Write them in build order: binary, `pre_args`, the declared arguments with the package ID exactly where the code puts it, `post_args` last (`pkcon install --noninteractive hello --plain`, not `pkcon install hello --noninteractive --plain`).

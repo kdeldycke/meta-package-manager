@@ -1,0 +1,64 @@
+---
+name: 🎨 Manager logos
+"on":
+  workflow_dispatch:
+  schedule:
+    # Monthly: brand marks move on nobody's schedule, and both findings are
+    # advisory. Deliberately not on push, as every run hits the network and the
+    # committed artwork is what the docs build reads.
+    - cron: "17 6 5 * *"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Watch the upstream icon set the per-manager pages draw from. Two questions the
+# hermetic unit suite cannot answer, since it never touches the network:
+#
+#   - has a mark appeared for one of the managers still doing without one, or has
+#     one we already declare vanished upstream (`--scan-gaps`);
+#   - does the committed artwork still match the pinned release (`--check`), which
+#     catches a hand-edited SVG or an upstream retag.
+#
+# Adopting a new mark stays a human call: it needs a `logo` declaration on the
+# manager, so this job reports and never commits.
+
+jobs:
+
+  # https://github.com/simple-icons/simple-icons/releases
+  logos:
+    name: "Audit vendored brand marks"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.12.0"
+
+      # PyYAML lives in the `test` group and click-extra in the main dependencies,
+      # both of which meta_package_manager._docs imports: sync everything rather
+      # than track that closure in a monthly job.
+      - name: Install project
+        run: uv --no-progress sync --frozen --all-extras --all-groups
+
+      # Reported into the run summary, so a monthly notification is readable
+      # without opening the logs. Never fails: a mark the pool could adopt is an
+      # opportunity, and a red run for one only teaches people to ignore red runs.
+      - name: Scan for adoptable and vanished marks
+        run: |
+          {
+            echo '## Brand mark scan'
+            echo '```'
+            uv --no-progress run --frozen -- python docs/logos_update.py --scan-gaps
+            echo '```'
+          } | tee --append "$GITHUB_STEP_SUMMARY"
+
+      # This one does fail the job: a mismatch against the pinned release means the
+      # committed artwork was hand-edited, or upstream moved a tag under us.
+      - name: Verify the committed marks against the pinned release
+        run: uv --no-progress run --frozen -- python docs/logos_update.py --check

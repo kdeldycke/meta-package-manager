@@ -97,7 +97,7 @@ rendered as an empty fact.
 LOGO_DIR = PROJECT_ROOT / "docs" / "assets" / "managers"
 """Vendored brand marks and their `logos.yaml` manifest.
 
-Wholly owned by `tools/update_manager_logos.py`, which is run by hand: the artwork
+Wholly owned by `docs/logos_update.py`, which is run by hand: the artwork
 is committed so a docs build stays hermetic and never depends on an upstream icon
 set still serving the same files.
 """

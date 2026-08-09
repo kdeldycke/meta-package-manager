@@ -706,6 +706,57 @@ def test_manager_traces_render_literal_blocks():
             assert block in traces, mid
 
 
+def test_manager_changelog_entries():
+    """Check every changelog bullet reaches the manager pages it is scoped to.
+
+    The release-history section is rendered live at Sphinx build time, so there
+    is no checked-in copy to compare against: this recounts the (manager, entry)
+    pairs straight from `changelog.md` and matches them against the index, which
+    catches an entry silently dropped by a scope the parser fails to resolve.
+
+    Every pool manager is asserted to have at least one entry, which makes the
+    section double as the lint for a manager shipped without its changelog line.
+    """
+    index = _docs._changelog_entries()
+    assert set(index) == set(pool.all_manager_ids)
+
+    changelog = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
+    heading = re.compile(r"^## \[`([^`]+)` \(([^)]+)\)\]\(([^)]+)\)", re.MULTILINE)
+    releases = set(heading.findall(changelog))
+
+    pairs = 0
+    for mid, entries in index.items():
+        rendered = _docs.manager_changelog(mid)
+        # The page opens straight on the newest release that touched it.
+        newest = entries[0]
+        assert rendered.startswith(
+            f"- [`{newest.version}`]({newest.url}) ({newest.date})\n",
+        )
+        for entry in entries:
+            pairs += 1
+            assert (entry.version, entry.date, entry.url) in releases
+            # Entry text is reproduced verbatim, flag included, under a release
+            # linking to the comparison URL of its own changelog heading.
+            flag = f"**{entry.flag}:** " if entry.flag else ""
+            assert entry.text in changelog
+            assert f"  - {flag}{entry.text}" in rendered
+            assert f"- [`{entry.version}`]({entry.url}) ({entry.date})" in rendered
+
+    # Independent recount: every bullet scoped to a pool manager lands on that
+    # manager's page, exactly once.
+    expected = sum(
+        1
+        for scopes in re.findall(
+            r"^- (?:\*\*[A-Za-z]+:\*\* )?\[([a-z0-9,\-]+)\]",
+            changelog,
+            re.MULTILINE,
+        )
+        for scope in scopes.split(",")
+        if scope in pool
+    )
+    assert pairs == expected
+
+
 def test_managers_index_table_renders():
     """Check the manager index generator still produces a well-formed table
     linking every pool manager to its documentation page.

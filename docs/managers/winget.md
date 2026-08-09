@@ -77,3 +77,11 @@ from meta_package_manager._docs import manager_traces
 
 print(manager_traces("winget"))
 ```
+
+## Changelog
+
+```{python:render}
+from meta_package_manager._docs import manager_changelog
+
+print(manager_changelog("winget"))
+```

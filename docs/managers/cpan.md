@@ -77,3 +77,11 @@ from meta_package_manager._docs import manager_traces
 
 print(manager_traces("cpan"))
 ```
+
+## Changelog
+
+```{python:render}
+from meta_package_manager._docs import manager_changelog
+
+print(manager_changelog("cpan"))
+```

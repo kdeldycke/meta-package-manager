@@ -39,8 +39,10 @@ import inspect
 import re
 import sys
 from functools import cache
+from itertools import groupby
 from pathlib import Path
 from textwrap import dedent
+from typing import NamedTuple
 
 import yaml
 from click_extra.table import TableFormat, render_table
@@ -146,14 +148,16 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     ("Privilege escalation", "manager_sudo"),
     ("Cooldown", "manager_cooldown"),
     ("Reference traces", "manager_traces"),
+    ("Changelog", "manager_changelog"),
 )
 """Layout of a per-manager documentation page: section title, generator function.
 
 Single source of truth for {func}`manager_page_stub` and the structural tests.
 Sections lead with the `mpm` pitch (what it adds to the native tool) and its
 usage, then document `mpm`'s preconceptions about the tool (its invocation,
-then the captured traces backing the parsers). A section whose generator
-produces nothing for a given manager is omitted from its stub.
+then the captured traces backing the parsers), and close on the release
+history of that support. A section whose generator produces nothing for a
+given manager is omitted from its stub.
 
 Each title is a `str.format` template receiving the manager ID, so a heading
 can name its manager; a title with no replacement field renders unchanged.
@@ -1600,6 +1604,110 @@ def manager_traces(manager_id: str) -> str:
         "across managers."
     )
     return "\n\n".join((intro, *fences, outro))
+
+
+class ChangelogEntry(NamedTuple):
+    """One changelog bullet, resolved to the release that shipped it."""
+
+    version: str
+    """Package version of the release the entry sits under."""
+
+    date: str
+    """Release date, or `unreleased` for the development section."""
+
+    url: str
+    """Comparison URL carried by the release heading."""
+
+    flag: str | None
+    """Bold marker opening the entry (`Breaking`), or `None` for a plain one."""
+
+    text: str
+    """Entry body, verbatim from the changelog."""
+
+
+@cache
+def _changelog_entries() -> dict[str, tuple[ChangelogEntry, ...]]:
+    """Index `changelog.md` by the managers each of its entries is scoped to.
+
+    Every changelog bullet opens with a comma-separated scope tag, and
+    `test_changelog` already enforces that vocabulary: tags are sorted,
+    deduplicated and drawn from the pool IDs plus the platform IDs and the
+    `mpm`, `bar-plugin` and `gnome-shell` scopes. So the changelog needs no
+    heuristic mining, only a read: scopes naming a pool manager are kept, the
+    project-wide ones dropped, and a multi-scope entry is filed under each
+    manager it names.
+
+    Entries keep their changelog order, which is newest release first and
+    curated within a release. Cached: one parse feeds all the manager pages.
+
+    ```{note}
+    A scope whose manager left the pool silently drops its entries here, but
+    `test_changelog` fails on it first, since the same vocabulary check builds
+    its allowed set from the live pool.
+    ```
+    """
+    release = re.compile(
+        r"^## \[`(?P<version>[^`]+)` \((?P<date>[^)]+)\)\]\((?P<url>[^)]+)\)",
+    )
+    bullet = re.compile(
+        r"^- (?:\*\*(?P<flag>[A-Za-z]+):\*\* )?"
+        r"\[(?P<scopes>[a-z0-9,\-]+)\] (?P<text>.+)$",
+    )
+
+    entries: dict[str, list[ChangelogEntry]] = {}
+    version = date = url = ""
+    changelog = (PROJECT_ROOT / "changelog.md").read_text(encoding="UTF-8")
+    for line in changelog.splitlines():
+        heading = release.match(line)
+        if heading:
+            version, date, url = heading.group("version", "date", "url")
+            continue
+        match = bullet.match(line)
+        if not match:
+            continue
+        for manager_id in match["scopes"].split(","):
+            if manager_id not in pool:
+                continue
+            entries.setdefault(manager_id, []).append(
+                ChangelogEntry(version, date, url, match["flag"], match["text"]),
+            )
+    return {mid: tuple(items) for mid, items in entries.items()}
+
+
+def manager_changelog(manager_id: str) -> str:
+    """Produce the release-history section of a manager's documentation page.
+
+    Every change `mpm` shipped for this manager, grouped by the release that
+    carried it, newest first. The entry text is reproduced verbatim: the
+    changelog is the curated wording, and rewriting it here would be one more
+    thing to drift. Reproducing it is only safe because every link it carries
+    is absolute, so nothing breaks one directory deeper in `docs/managers/`.
+
+    A change scoped to several managers is repeated verbatim on each of their
+    pages, carrying no marker of the others: a reader is on one manager's page
+    to read about that manager.
+
+    ```{note}
+    Released headings are not linkable: `myst_heading_slug_func` is
+    `docutils.nodes.make_id`, which strips a heading holding no letter down to
+    the empty string, so `` `7.5.0` (2026-08-03) `` yields no anchor at all.
+    Each version therefore links to the comparison URL its own heading
+    carries, which is parsed rather than guessed, exists for every release, and
+    costs `linkcheck` nothing since the changelog page already cites it.
+    ```
+    """
+    entries = _changelog_entries().get(manager_id, ())
+    if not entries:
+        return ""
+
+    lines: list[str] = []
+    releases = groupby(entries, key=lambda e: (e.version, e.date, e.url))
+    for (version, date, url), shipped in releases:
+        lines.append(f"- [`{version}`]({url}) ({date})")
+        for entry in shipped:
+            flag = f"**{entry.flag}:** " if entry.flag else ""
+            lines.append(f"  - {flag}{entry.text}")
+    return "\n".join(lines)
 
 
 def managers_index_table() -> str:

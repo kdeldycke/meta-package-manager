@@ -61,3 +61,11 @@ from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("topgrade"))
 ```
+
+## Changelog
+
+```{python:render}
+from meta_package_manager._docs import manager_changelog
+
+print(manager_changelog("topgrade"))
+```

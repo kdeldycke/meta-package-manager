@@ -69,3 +69,11 @@ from meta_package_manager._docs import manager_cooldown
 
 print(manager_cooldown("yay"))
 ```
+
+## Changelog
+
+```{python:render}
+from meta_package_manager._docs import manager_changelog
+
+print(manager_changelog("yay"))
+```

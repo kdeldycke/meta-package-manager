@@ -22,28 +22,12 @@ from meta_package_manager._docs import manager_rosetta
 print(manager_rosetta("vim-pack"))
 ```
 
-## Platforms
-
-```{python:render}
-from meta_package_manager._docs import manager_platforms
-
-print(manager_platforms("vim-pack"))
-```
-
 ## Operations
 
 ```{python:render}
 from meta_package_manager._docs import manager_operations
 
 print(manager_operations("vim-pack"))
-```
-
-## Ecosystem
-
-```{python:render}
-from meta_package_manager._docs import manager_ecosystem
-
-print(manager_ecosystem("vim-pack"))
 ```
 
 ## Selecting and configuring `vim-pack`

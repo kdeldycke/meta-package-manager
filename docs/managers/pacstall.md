@@ -22,28 +22,12 @@ from meta_package_manager._docs import manager_rosetta
 print(manager_rosetta("pacstall"))
 ```
 
-## Platforms
-
-```{python:render}
-from meta_package_manager._docs import manager_platforms
-
-print(manager_platforms("pacstall"))
-```
-
 ## Operations
 
 ```{python:render}
 from meta_package_manager._docs import manager_operations
 
 print(manager_operations("pacstall"))
-```
-
-## Ecosystem
-
-```{python:render}
-from meta_package_manager._docs import manager_ecosystem
-
-print(manager_ecosystem("pacstall"))
 ```
 
 ## Selecting and configuring `pacstall`

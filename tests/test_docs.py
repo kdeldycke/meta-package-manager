@@ -548,17 +548,65 @@ def test_manager_logo_renders(manager):
     assert "\n" not in mark
     assert mark in _docs.manager_intro(manager.id)
 
-    # The brand color rides on a custom property, and only when it clears the
-    # contrast floor of the light theme.
+    # The brand color always rides on a custom property: WCAG exempts logotypes
+    # from contrast requirements, so a pale mark keeps its own color rather than
+    # being repainted a flat black.
     icon = _docs.logo_manifest()["icons"][manager.logo]
-    faded = icon["contrast_on_light"] < _docs.MIN_LOGO_CONTRAST
-    assert ("--manager-logo-color" in mark) is not faded
+    assert f"--manager-logo-color: #{icon['hex']}" in mark
 
     # The index table embeds the small variant, as a span: a table cell wraps
     # its content in a paragraph, where a <div> would be invalid markup.
     assert _docs.manager_logo(manager.id, inline=True).startswith(
         '<span class="manager-logo manager-logo-inline"'
     )
+
+
+@all_managers
+def test_manager_card_renders(manager):
+    """Check each manager's infobox carries its facts, and its mark when it has one."""
+    card = _docs.manager_card(manager.id)
+    assert card.startswith("```{card}\n:class-card: manager-card")
+    assert card.endswith("```")
+    assert card in _docs.manager_intro(manager.id)
+
+    # Every fact is a definition-list row, so it reads as a labelled entry.
+    for label in ("ID", "Home page", "Source", "Platforms"):
+        assert f"**{label}**\n: " in card
+    # The former Platforms and Ecosystem sections now live here.
+    assert "**purl types**\n: `pkg:" in card
+    assert ("**Brewfile entry**" in card) is bool(manager.brewfile_entry_type)
+
+    # Every repeated value in the box reads through the same separator. A
+    # coverage annotation carries commas of its own (`Mageia, Mandriva Linux
+    # only`), so only what sits between entries is checked.
+    for row in ("Platforms", "Operations", "purl types"):
+        value = card.partition(f"**{row}**\n: ")[2].partition("\n")[0]
+        assert ", " not in re.sub(r"\([^)]*\)", "", value), (
+            f"{row} must not fall back to commas"
+        )
+    assert f": `{manager.id}`" in card
+    assert manager.homepage_url in card
+    if manager.requirement:
+        # Unstyled like the readme matrix's own Version column, with both angle
+        # brackets escaped: a leading `>` would otherwise open a blockquote and
+        # swallow itself, and a `<` would open a tag.
+        requirement = (
+            _docs._format_requirement(manager.requirement)
+            .replace("<", r"\<")
+            .replace(">", r"\>")
+        )
+        assert f"**Version requirement**\n: {requirement}" in card
+        assert "\n: >" not in card
+        # Spaced out for reading, the same way the readme matrix renders it: no
+        # comparison operator stays glued to the version it applies to.
+        assert not re.search(r"[<>=!~]\d", requirement)
+        assert f": `{manager.requirement}`" not in card
+    assert ("**Cooldown**\n: ✓" in card) is bool(manager.supports_cooldown)
+
+    # The mark rides in the card header, above the `^^^` separator.
+    header, _, body = card.partition("^^^")
+    assert ("manager-logo" in header) is bool(manager.logo)
+    assert "manager-logo" not in body
 
 
 def test_manager_logo_credits_renders():
@@ -663,13 +711,23 @@ def test_managers_index_table_renders():
     lines = table.splitlines()
     assert lines[0] == f"`mpm` can drive {len(pool)} package managers:"
     # The leading column carries the brand marks and is headerless.
-    assert re.fullmatch(r"\|\s+\| Manager\s+\| ID\s+\|\s+Platforms\s+\|", lines[2])
+    assert re.fullmatch(
+        r"\|\s+\| Manager\s+\| ID\s+\|\s+Unmaintained\s+\|\s+Platforms\s+\|",
+        lines[2],
+    )
+    unmaintained = 0
     for mid, manager in pool.items():
-        assert f"](managers/{mid}.md)" in table
+        # Both the name and the identifier link to the manager's page.
+        assert f"[{manager.name}](managers/{mid}.md)" in table
+        assert f"[`{mid}`](managers/{mid}.md)" in table
         if manager.unmaintained:
-            assert f"[⚠️](managers/{mid}.md)" in table
+            unmaintained += 1
         if manager.logo:
             assert _docs.manager_logo(mid, inline=True) in table
+    # The marker moved out of the ID cell into a column of its own.
+    assert unmaintained
+    assert table.count("⚠️") == unmaintained
+    assert "⚠️](managers/" not in table
     # Every placeholder was substituted by the artwork it stands for.
     assert "%logo:" not in table
 

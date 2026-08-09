@@ -22,28 +22,12 @@ from meta_package_manager._docs import manager_rosetta
 print(manager_rosetta("guix"))
 ```
 
-## Platforms
-
-```{python:render}
-from meta_package_manager._docs import manager_platforms
-
-print(manager_platforms("guix"))
-```
-
 ## Operations
 
 ```{python:render}
 from meta_package_manager._docs import manager_operations
 
 print(manager_operations("guix"))
-```
-
-## Ecosystem
-
-```{python:render}
-from meta_package_manager._docs import manager_ecosystem
-
-print(manager_ecosystem("guix"))
 ```
 
 ## Selecting and configuring `guix`

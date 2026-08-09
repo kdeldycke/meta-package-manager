@@ -14,28 +14,12 @@ from meta_package_manager._docs import manager_augments
 print(manager_augments("sun-tools"))
 ```
 
-## Platforms
-
-```{python:render}
-from meta_package_manager._docs import manager_platforms
-
-print(manager_platforms("sun-tools"))
-```
-
 ## Operations
 
 ```{python:render}
 from meta_package_manager._docs import manager_operations
 
 print(manager_operations("sun-tools"))
-```
-
-## Ecosystem
-
-```{python:render}
-from meta_package_manager._docs import manager_ecosystem
-
-print(manager_ecosystem("sun-tools"))
 ```
 
 ## Selecting and configuring `sun-tools`

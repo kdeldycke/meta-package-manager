@@ -22,28 +22,12 @@ from meta_package_manager._docs import manager_rosetta
 print(manager_rosetta("brew"))
 ```
 
-## Platforms
-
-```{python:render}
-from meta_package_manager._docs import manager_platforms
-
-print(manager_platforms("brew"))
-```
-
 ## Operations
 
 ```{python:render}
 from meta_package_manager._docs import manager_operations
 
 print(manager_operations("brew"))
-```
-
-## Ecosystem
-
-```{python:render}
-from meta_package_manager._docs import manager_ecosystem
-
-print(manager_ecosystem("brew"))
 ```
 
 ## Selecting and configuring `brew`

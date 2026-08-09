@@ -22,28 +22,12 @@ from meta_package_manager._docs import manager_rosetta
 print(manager_rosetta("pkg-tools"))
 ```
 
-## Platforms
-
-```{python:render}
-from meta_package_manager._docs import manager_platforms
-
-print(manager_platforms("pkg-tools"))
-```
-
 ## Operations
 
 ```{python:render}
 from meta_package_manager._docs import manager_operations
 
 print(manager_operations("pkg-tools"))
-```
-
-## Ecosystem
-
-```{python:render}
-from meta_package_manager._docs import manager_ecosystem
-
-print(manager_ecosystem("pkg-tools"))
 ```
 
 ## Selecting and configuring `pkg-tools`

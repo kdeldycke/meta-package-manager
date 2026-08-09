@@ -103,14 +103,24 @@ set still serving the same files.
 """
 
 MIN_LOGO_CONTRAST = 3.0
-"""Lowest contrast ratio a brand color may have against the light theme.
+"""Contrast ratio below which a brand color reads as pale on the light theme.
 
-The 3:1 floor [WCAG 2.2 sets for non-text
-contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html).
-A mark below it (Homebrew's amber on white) renders in `currentColor` like it
-already does on the dark theme, rather than washed out in its own brand color.
-The ratio of every mark is precomputed into the manifest, so retuning this
-threshold needs no refetch.
+Advisory only, reported by `docs/logos_update.py` and never enforced at render
+time. Gating on it was tried and dropped: [WCAG 2.2 exempts logotypes from
+contrast requirements](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)
+precisely because a brand's own color is not the author's to correct, and the
+guard was repainting recognisable marks (Fedora's blue, Homebrew's amber) a flat
+black. Marks keep their color on the light theme whatever this says; the dark
+theme still falls back to `currentColor`, which is about legibility against a
+near-black background rather than about contrast ratios.
+"""
+
+FACT_SEPARATOR = " · "
+"""Separator between the repeated values of an infobox row.
+
+A middle dot rather than a comma: the values are code spans whose own boxes
+already read as separate tokens, and a comma between them adds a mark the eye
+has to skip. The platform row needs none at all, its icons doing the same job.
 """
 
 GITHUB_BLOB_URL = "https://github.com/kdeldycke/meta-package-manager/blob/main"
@@ -124,9 +134,7 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     (None, "manager_intro"),
     ("What `mpm` adds to `{manager_id}`", "manager_augments"),
     ("Your `{manager_id}` commands, in `mpm`", "manager_rosetta"),
-    ("Platforms", "manager_platforms"),
     ("Operations", "manager_operations"),
-    ("Ecosystem", "manager_ecosystem"),
     ("Selecting and configuring `{manager_id}`", "manager_selection"),
     ("Recipes", "manager_recipes"),
     ("How `mpm` drives `{manager_id}`", "manager_cli"),
@@ -194,12 +202,17 @@ def operation_matrix() -> tuple[str, str]:
     # Footnotes are used to details the OSes covered by each platform group.
     footnotes = []
 
+    # One platform column, with the legend its cells need set below the table: a
+    # column per platform labelled each icon, a single one cannot. The footnote
+    # naming a group's members hangs off the icon it belongs to, which is also
+    # what keeps those definitions referenced instead of orphaned.
+    legend = []
     for p_obj in MAIN_PLATFORMS:
-        header_title = p_obj.name
+        entry = f"{p_obj.icon} {p_obj.name}"
         # Add footnote for groups with more than one platform.
         if isinstance(p_obj, Group) and len(p_obj) > 1:
             footnote_tag = f"[^{p_obj.id}]"
-            header_title += footnote_tag
+            entry += footnote_tag
             platforms_string = ", ".join(
                 sorted(
                     (
@@ -210,7 +223,8 @@ def operation_matrix() -> tuple[str, str]:
                 ),
             )
             footnotes.append(f"{footnote_tag}: {p_obj.name}: {platforms_string}.")
-        headers.append(header_title)
+        legend.append(entry)
+    headers.append("Platforms")
 
     headers.extend(f"`{op.name}`" for op in Operations)
 
@@ -223,19 +237,21 @@ def operation_matrix() -> tuple[str, str]:
                 if not m.unmaintained
                 else f" [⚠️]({DOCS_SITE_URL}/managers/{mid}.html)"
             ),
-            (m.requirement or "").replace("<", r"\<"),
+            _format_requirement(m.requirement or "").replace("<", r"\<"),
             "✓" if m.supports_cooldown else "",
         ]
-        line.extend(
-            p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else ""
-            for p_obj in MAIN_PLATFORMS
+        line.append(
+            " ".join(
+                p_obj.icon
+                for p_obj in MAIN_PLATFORMS
+                if m.platforms.issuperset(extract_members(p_obj))
+            ),
         )
         line.extend("✓" if implements(m, op) else "" for op in Operations)
         table.append(line)
 
     # Set each column alignment.
-    alignments = ["left", "left", "center"]
-    alignments.extend(["center"] * len(MAIN_PLATFORMS))
+    alignments = ["left", "left", "center", "center"]
     alignments.extend(["center"] * len(Operations))
 
     rendered_table = render_table(
@@ -246,7 +262,39 @@ def operation_matrix() -> tuple[str, str]:
         disable_numparse=True,
     )
 
-    return rendered_table, "\n\n".join(footnotes)
+    # The legend decodes the Platforms column, so it travels with the table
+    # rather than with the footnote definitions parked at the end of the readme.
+    return (
+        f"{rendered_table}\nPlatforms: {FACT_SEPARATOR.join(legend)}",
+        "\n\n".join(footnotes),
+    )
+
+
+def _format_requirement(requirement: str) -> str:
+    """Render a version specifier for reading: `>=2.10.0` becomes `>= 2.10`.
+
+    Two cosmetic passes: the comparison operator is split from the version it
+    applies to, and trailing zero components are dropped, since `2.10.0` and
+    `2.10` pin the same floor while only one of them is worth reading.
+
+    Shared by the readme's operation matrix and the manager infoboxes, so both
+    render a requirement the same way. Display only: what the runtime parses is
+    the manager's own
+    {attr}`~meta_package_manager.manager.PackageManager.requirement`, which keeps
+    the exact upstream release it was verified against.
+    """
+
+    def trim(match: re.Match) -> str:
+        components = match.group(0).split(".")
+        while len(components) > 1 and components[-1] == "0":
+            components.pop()
+        return ".".join(components)
+
+    trimmed = re.sub(r"\d+(?:\.\d+)*", trim, requirement)
+    # Split the comparison operator from the version it applies to, then give a
+    # comma-joined range room to breathe.
+    spaced = re.sub(r"(?<=[<>=!~])(?=[\d])", " ", trimmed)
+    return re.sub(r",\s*", ", ", spaced)
 
 
 def manager_source_url(manager_id: str) -> str:
@@ -625,19 +673,97 @@ def manager_logo(manager_id: str, *, inline: bool = False) -> str:
     icon = logo_manifest()["icons"][slug]
     svg = (LOGO_DIR / f"{slug}.svg").read_text(encoding="UTF-8").strip()
 
+    # Size the tag itself, on top of the stylesheet's own rules. The vendored
+    # marks carry a `viewBox` and nothing else, so they have no intrinsic size:
+    # anywhere the stylesheet does not reach, an unsized one balloons to fill its
+    # container instead of rendering as an icon.
+    size = 24 if inline else 96
+    svg = svg.replace("<svg ", f'<svg width="{size}" height="{size}" ', 1)
+
     # A table cell wraps its content in a paragraph, where a <div> would be
     # invalid markup: the inline variant is a <span>.
     tag = "span" if inline else "div"
     classes = "manager-logo manager-logo-inline" if inline else "manager-logo"
-    style = ""
-    if icon["contrast_on_light"] >= MIN_LOGO_CONTRAST:
-        hex_color = icon["hex"]
-        style = f' style="--manager-logo-color: #{hex_color}"'
+    hex_color = icon["hex"]
+    style = f' style="--manager-logo-color: #{hex_color}"'
     label = f"{icon['title']} logo"
     return (
         f'<{tag} class="{classes}"{style} role="img" '
         f'aria-label="{label}">{svg}</{tag}>'
     )
+
+
+def manager_card(manager_id: str) -> str:
+    """Produce the infobox of a manager's page: its mark atop its key facts.
+
+    A `{card}` floated to the side of the intro prose, in the shape an
+    encyclopaedia gives a subject: identity first, then the handful of facts a
+    reader wants without scrolling. Everything else the page knows (platforms in
+    full, operations, ecosystem identifiers) keeps its own section below, so the
+    box stays a summary rather than a second copy of the page.
+
+    The mark rides in the card's *header* rather than its `:img-top:` option,
+    which takes a URI and would emit an `<img>`: an externally referenced SVG
+    cannot inherit `currentColor`, so the unfilled marks would render black and
+    disappear on the dark theme. The header takes arbitrary content, so the
+    inlined SVG of {func}`manager_logo` keeps adapting to both themes.
+
+    A manager with no mark still gets the box, headerless: the facts are the
+    point, and the artwork is the bonus.
+    """
+    m = pool[manager_id]
+    source_url = manager_source_url(manager_id)
+    source_path = source_url.removeprefix(f"{GITHUB_BLOB_URL}/").partition("#")[0]
+
+    facts = [
+        ("ID", f"`{manager_id}`"),
+        ("Home page", f"<{m.homepage_url}>"),
+        ("Source", f"[`{source_path}`]({source_url})"),
+    ]
+    if m.requirement:
+        # Unstyled, like the readme matrix's own Version column: a table cell is
+        # data, not the prose the backtick-the-version rule governs. Both angle
+        # brackets need escaping here, where that column needs only one: a `<`
+        # opens a tag anywhere, but the `>` of a floor requirement also opens a
+        # blockquote when it leads a definition, swallowing itself and boxing the
+        # version in a quote.
+        requirement = (
+            _format_requirement(m.requirement).replace("<", r"\<").replace(">", r"\>")
+        )
+        facts.append(("Version requirement", requirement))
+    if m.supports_cooldown:
+        facts.append(("Cooldown", "✓"))
+
+    platforms = manager_platforms(manager_id)
+    if platforms:
+        facts.append(("Platforms", platforms))
+
+    # The same reading as the readme matrix's operation columns, folded into one
+    # row: what this manager can do. The Operations section below keeps the full
+    # table, with the caveats each one carries.
+    supported = [f"`{op.name}`" for op in Operations if implements(m, op)]
+    if supported:
+        facts.append(("Operations", FACT_SEPARATOR.join(supported)))
+
+    purl_types = sorted(
+        {manager_id} | {t for t, ids in PURL_MAP.items() if ids and manager_id in ids},
+    )
+    facts.append((
+        "purl types",
+        FACT_SEPARATOR.join(f"`pkg:{t}`" for t in purl_types),
+    ))
+    if m.brewfile_entry_type:
+        facts.append((
+            "Brewfile entry",
+            f"`{m.brewfile_entry_type}`, in [Brewfile backups](../dump.md)",
+        ))
+
+    # A definition list, so each fact reads as a labelled row of the box.
+    rows = "\n\n".join(f"**{label}**\n: {value}" for label, value in facts)
+
+    logo = manager_logo(manager_id)
+    header = f"{logo}\n^^^\n" if logo else ""
+    return f"```{{card}}\n:class-card: manager-card\n\n{header}{rows}\n```"
 
 
 def manager_logo_credits() -> str:
@@ -715,14 +841,11 @@ def manager_intro(manager_id: str) -> str:
             f"```{{note}}\n{m.maintenance_note}\n```",
         )
 
-    # After the admonition, never before: the mark floats, and a float placed
+    # After the admonition, never before: the card floats, and a float placed
     # above an admonition overlaps its background box instead of clearing it.
-    logo = manager_logo(manager_id)
-    if logo:
-        blocks.append(logo)
+    blocks.append(manager_card(manager_id))
 
     source_url = manager_source_url(manager_id)
-    source_path = source_url.removeprefix(f"{GITHUB_BLOB_URL}/").partition("#")[0]
 
     if getattr(m, "definition_source", None):
         blocks.append(
@@ -737,14 +860,6 @@ def manager_intro(manager_id: str) -> str:
             f"```{{py:currentmodule}} {type(m).__module__}\n```\n\n"
             f"{inspect.cleandoc(docstring)}",
         )
-
-    facts = [
-        f"- Home page: <{m.homepage_url}>",
-        f"- Source: [`{source_path}`]({source_url})",
-    ]
-    if m.requirement:
-        facts.append(f"- Version requirement: `{m.requirement}`")
-    blocks.append("\n".join(facts))
 
     return "\n\n".join(blocks)
 
@@ -1080,25 +1195,30 @@ def _platform_coverage(p_obj, platforms: frozenset) -> tuple[str, str | None] | 
 
 
 def manager_platforms(manager_id: str) -> str:
-    """Produce the platform bullet list of a manager's documentation page.
+    """Produce the platform row of a manager's infobox.
 
-    One line per supported {data}`~meta_package_manager.platforms.MAIN_PLATFORMS`
-    entry, with {func}`_platform_coverage`'s annotation when the manager only
-    backs part of a multi-platform group: the readme's operation matrix renders
-    an all-or-nothing icon, this list is where partial support is spelled out.
+    Every supported {data}`~meta_package_manager.platforms.MAIN_PLATFORMS` entry
+    on one line, with {func}`_platform_coverage`'s annotation when the manager
+    only backs part of a multi-platform group: the readme's operation matrix
+    renders an all-or-nothing icon, this row is where partial support is spelled
+    out.
+
+    Entries are separated the same way as every other repeated infobox value,
+    which also keeps a coverage annotation from running into the platform that
+    follows it.
     """
     m = pool[manager_id]
-    lines = []
+    entries = []
     for p_obj in MAIN_PLATFORMS:
         coverage = _platform_coverage(p_obj, m.platforms)
         if coverage is None:
             continue
         icon, annotation = coverage
-        line = f"- {icon} {p_obj.name}"
+        entry = f"{icon} {p_obj.name}"
         if annotation:
-            line += f" ({annotation})"
-        lines.append(line)
-    return "\n".join(lines)
+            entry += f" ({annotation})"
+        entries.append(entry)
+    return FACT_SEPARATOR.join(entries)
 
 
 def manager_operations(manager_id: str) -> str:
@@ -1250,33 +1370,6 @@ def manager_cli(manager_id: str) -> str:
     parts.append(regex_fence)
 
     return "\n\n".join(parts)
-
-
-def manager_ecosystem(manager_id: str) -> str:
-    """Produce the ecosystem section of a manager's documentation page.
-
-    Lists the [purl](https://github.com/package-url/purl-spec) types the manager
-    responds to (its own ID plus the ecosystem types mapped to it by
-    {data}`~meta_package_manager.specifier.PURL_MAP`), and its Brewfile entry
-    type when Homebrew Bundle's DSL covers it.
-    """
-    m = pool[manager_id]
-    purl_types = sorted(
-        {manager_id} | {t for t, ids in PURL_MAP.items() if ids and manager_id in ids},
-    )
-    types_list = ", ".join(f"`pkg:{t}`" for t in purl_types)
-    lines = [
-        (
-            "- Accepted [purl](https://github.com/package-url/purl-spec) types: "
-            f"{types_list}"
-        ),
-    ]
-    if m.brewfile_entry_type:
-        lines.append(
-            f"- Maps to `{m.brewfile_entry_type}` entries in "
-            "[Brewfile backups](../dump.md)",
-        )
-    return "\n".join(lines)
 
 
 def manager_selection(manager_id: str) -> str:
@@ -1505,18 +1598,18 @@ def manager_traces(manager_id: str) -> str:
 def managers_index_table() -> str:
     """Produce the manager index table of `docs/managers.md`.
 
-    Rendered live at Sphinx build time. Each manager links to its dedicated
-    documentation page, unmaintained managers carry the same `⚠️` marker as the
-    readme's operation matrix, and platform icons follow the same coverage
-    reading as the manager pages: a partially-backed group keeps its icon with
-    {func}`_platform_coverage`'s annotation (`🐧 (Exherbo Linux only)`)
+    Rendered live at Sphinx build time. Both the name and the ID link to the
+    manager's dedicated page, since a reader scanning for `apt-mint` looks at the
+    identifier column, not the prose name. The `⚠️` marker of the readme's
+    operation matrix gets a column of its own rather than trailing the ID, which
+    kept a sort-worthy fact glued to an identifier. Platform icons follow the same
+    coverage reading as the manager pages: a partially-backed group keeps its icon
+    with {func}`_platform_coverage`'s annotation (`🐧 (Exherbo Linux only)`)
     instead of disappearing, as it does in the readme's all-or-nothing matrix.
     """
     table = []
     for mid, m in sorted(pool.items()):
-        id_cell = f"`{mid}`" + (
-            "" if not m.unmaintained else f" [⚠️](managers/{mid}.md)"
-        )
+        id_cell = f"[`{mid}`](managers/{mid}.md)"
         parts = []
         for p_obj in MAIN_PLATFORMS:
             coverage = _platform_coverage(p_obj, m.platforms)
@@ -1530,15 +1623,16 @@ def managers_index_table() -> str:
             f"%logo:{mid}%",
             f"[{m.name}](managers/{mid}.md)",
             id_cell,
+            "⚠️" if m.unmaintained else "",
             " ".join(parts),
         ])
     rendered = render_table(
         table,
         # The mark column is headerless: the artwork labels itself, and the
         # managers whose upstream has no usable mark leave the cell empty.
-        headers=["", "Manager", "ID", "Platforms"],
+        headers=["", "Manager", "ID", "Unmaintained", "Platforms"],
         table_format=TableFormat.GITHUB,
-        colalign=["center", "left", "left", "center"],
+        colalign=["center", "left", "left", "center", "center"],
         disable_numparse=True,
     )
     for mid in pool:

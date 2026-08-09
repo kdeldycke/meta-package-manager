@@ -14,28 +14,12 @@ from meta_package_manager._docs import manager_augments
 print(manager_augments("topgrade"))
 ```
 
-## Platforms
-
-```{python:render}
-from meta_package_manager._docs import manager_platforms
-
-print(manager_platforms("topgrade"))
-```
-
 ## Operations
 
 ```{python:render}
 from meta_package_manager._docs import manager_operations
 
 print(manager_operations("topgrade"))
-```
-
-## Ecosystem
-
-```{python:render}
-from meta_package_manager._docs import manager_ecosystem
-
-print(manager_ecosystem("topgrade"))
 ```
 
 ## Selecting and configuring `topgrade`

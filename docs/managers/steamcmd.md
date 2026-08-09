@@ -14,28 +14,12 @@ from meta_package_manager._docs import manager_augments
 print(manager_augments("steamcmd"))
 ```
 
-## Platforms
-
-```{python:render}
-from meta_package_manager._docs import manager_platforms
-
-print(manager_platforms("steamcmd"))
-```
-
 ## Operations
 
 ```{python:render}
 from meta_package_manager._docs import manager_operations
 
 print(manager_operations("steamcmd"))
-```
-
-## Ecosystem
-
-```{python:render}
-from meta_package_manager._docs import manager_ecosystem
-
-print(manager_ecosystem("steamcmd"))
 ```
 
 ## Selecting and configuring `steamcmd`

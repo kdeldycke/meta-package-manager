@@ -81,9 +81,8 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 `mpm` is available on several popular package managers:
 
-![Yo dawg, I herd you like package managers...](assets/yo-dawg-meta-package-manager.jpg){align=center}
-
 ``````{tab-set}
+:class: tabs-vertical
 
 `````{tab-item} uv
 Easiest way is to [install `uv`](https://docs.astral.sh/uv/getting-started/installation/), then install `meta-package-manager` system-wide with the [`uv tool`](https://docs.astral.sh/uv/guides/tools/#installing-tools) command:
@@ -299,6 +298,8 @@ Attestation bundles are also attached to each [GitHub release](https://github.co
 ## Self-bootstrapping
 
 In a funny twist, `mpm` can be installed with itself.
+
+![Yo dawg, I herd you like package managers...](assets/yo-dawg-meta-package-manager.jpg){align=center}
 
 Which means there is a way to bootstrap its deployment on an unknown system. Just [download the binary](#binaries) corresponding to your platform and architecture:
 

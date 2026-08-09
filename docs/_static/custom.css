@@ -78,23 +78,47 @@
  * by meta_package_manager._docs.manager_logo. The vendored artwork carries no
  * fill, so it inherits the color set here.
  *
- * The brand color is applied on the light theme only, and only for marks whose
- * contrast clears the 3:1 WCAG floor: the generator omits the custom property
- * below that threshold, leaving currentColor to take over. The dark theme always
- * uses currentColor, which spares each near-black mark (Rust, Steam, Slackware,
+ * Every mark keeps its own brand color on the light theme, WCAG exempting
+ * logotypes from contrast requirements. The dark theme falls back to
+ * currentColor, which spares each near-black mark (Rust, Steam, Slackware,
  * OpenJDK, GitHub) from disappearing into the background.
  */
-.manager-logo {
-  float: right;
-  margin: 0 0 1rem 1.5rem;
-}
 .manager-logo svg {
-  width: 4.5rem;
-  height: 4.5rem;
   fill: var(--manager-logo-color, currentColor);
 }
 
-/* Keep a floated mark from spilling over the next section's heading. */
+/* Manager infobox: the mark over the page's key facts, set beside the intro the
+ * way an encyclopaedia sets one. Only the card floats, so the mark inside it
+ * just centres itself in the header.
+ */
+.manager-card {
+  float: right;
+  width: 18rem;
+  max-width: 100%;
+  margin: 0 0 1.5rem 2rem;
+}
+.manager-card .manager-logo svg {
+  display: block;
+  width: 6rem;
+  height: 6rem;
+  margin: 0 auto;
+}
+.manager-card dl {
+  margin-bottom: 0;
+}
+
+/* Furo's content column is about 46rem, so anything narrower than that leaves
+ * the prose beside an 18rem box a useless ribbon: stack them instead.
+ */
+@media (max-width: 46em) {
+  .manager-card {
+    float: none;
+    width: auto;
+    margin-left: 0;
+  }
+}
+
+/* Keep the floated box from spilling over the next section's heading. */
 article h2 {
   clear: right;
 }
@@ -116,5 +140,56 @@ body[data-theme="dark"] .manager-logo svg {
 @media (prefers-color-scheme: dark) {
   body:not([data-theme="light"]) .manager-logo svg {
     fill: currentColor;
+  }
+}
+
+/* Vertical tab-set, opted into with `:class: tabs-vertical`.
+ *
+ * A dozen-plus install channels wrap into an unreadable strip of labels when laid
+ * out horizontally. sphinx-design keeps the radio inputs, their labels and the
+ * panes as flat siblings of a flex container, so switching that container to a
+ * two-column grid is enough: labels stack down the left rail, and the single pane
+ * that is not `display: none` claims the right one across every row.
+ *
+ * Scoped with the child combinator so a tab-set nested inside a pane keeps the
+ * default horizontal layout.
+ */
+.sd-tab-set.tabs-vertical {
+  display: grid;
+  grid-template-columns: minmax(7rem, max-content) 1fr;
+  column-gap: 1.5rem;
+  align-items: start;
+}
+.sd-tab-set.tabs-vertical > label {
+  grid-column: 1;
+  text-align: left;
+  border-bottom: none;
+  border-right: 0.125rem solid transparent;
+}
+.sd-tab-set.tabs-vertical > input:checked + label {
+  border-right-color: var(--sd-color-tabs-underline-active);
+}
+.sd-tab-set.tabs-vertical > .sd-tab-content {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  padding-left: 1.5rem;
+  border-top: none;
+  border-left: 0.125rem solid var(--sd-color-tabs-overline);
+}
+
+/* Too narrow for two columns: fall back to the stock horizontal layout. */
+@media (max-width: 50em) {
+  .sd-tab-set.tabs-vertical {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .sd-tab-set.tabs-vertical > label {
+    border-right: none;
+    border-bottom: 0.125rem solid transparent;
+  }
+  .sd-tab-set.tabs-vertical > .sd-tab-content {
+    padding-left: 0;
+    border-left: none;
+    border-top: 0.125rem solid var(--sd-color-tabs-overline);
   }
 }

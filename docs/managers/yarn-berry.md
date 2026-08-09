@@ -14,28 +14,12 @@ from meta_package_manager._docs import manager_augments
 print(manager_augments("yarn-berry"))
 ```
 
-## Platforms
-
-```{python:render}
-from meta_package_manager._docs import manager_platforms
-
-print(manager_platforms("yarn-berry"))
-```
-
 ## Operations
 
 ```{python:render}
 from meta_package_manager._docs import manager_operations
 
 print(manager_operations("yarn-berry"))
-```
-
-## Ecosystem
-
-```{python:render}
-from meta_package_manager._docs import manager_ecosystem
-
-print(manager_ecosystem("yarn-berry"))
 ```
 
 ## Selecting and configuring `yarn-berry`

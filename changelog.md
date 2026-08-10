@@ -10,6 +10,9 @@
 
 ## [`7.6.0` (2026-08-10)](https://github.com/kdeldycke/meta-package-manager/compare/v7.5.0...v7.6.0)
 
+> [!NOTE]
+> `7.6.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/7.6.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.6.0).
+
 - [vim-pack] Add Neovim's built-in `vim.pack` plugin manager (Neovim `0.12` and above) with installed, install, remove and upgrade support. Plugins are keyed on their source URL, and each operation is a Lua one-liner run by a `--clean --headless` Neovim.
 - [zinit] Add the Zinit Zsh plugin manager with installed, install, remove and upgrade support. Zsh is the CLI mpm executes, and the plugin inventory is read from an interactive shell since Zinit tracks plugins in state the user's `.zshrc` populates.
 - [mpm] Show each manager's brand mark on its documentation page and in the manager index, from a new `logo` attribute naming an SVG vendored under `docs/assets/managers/`. 54 of the 75 managers carry one; the rest keep the default package glyph. Marks are inlined so they follow the light and dark themes.

@@ -1,9 +1,6 @@
 # Changelog
 
-## [`7.6.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.5.0...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`7.6.0` (2026-08-10)](https://github.com/kdeldycke/meta-package-manager/compare/v7.5.0...v7.6.0)
 
 - [vim-pack] Add Neovim's built-in `vim.pack` plugin manager (Neovim `0.12` and above) with installed, install, remove and upgrade support. Plugins are keyed on their source URL, and each operation is a Lua one-liner run by a `--clean --headless` Neovim.
 - [zinit] Add the Zinit Zsh plugin manager with installed, install, remove and upgrade support. Zsh is the CLI mpm executes, and the plugin inventory is read from an interactive shell since Zinit tracks plugins in state the user's `.zshrc` populates.

@@ -5,6 +5,8 @@ name: 🚀 Build & release
   push:
     branches:
       - main
+  schedule:
+    - cron: "43 0 * * 1"
 
 permissions: {}
 
@@ -15,9 +17,17 @@ concurrency:
   # to cancel queued or building runs. Regular commits share a per-branch group and
   # cancel each other; release commits ([changelog] Release / Post-release) get a
   # unique SHA-based group so an in-flight release is never cancelled by a later push.
+  # Scheduled and manually dispatched runs get a run-scoped group: they build the
+  # full target fleet on purpose, so neither a later push nor another run should
+  # cancel them (a dispatch sharing the branch group was observed cancelled mid-build
+  # by the next push), and they never cancel a push run either.
   group: >-
     ${{ github.workflow }}-${{
-      github.event.pull_request.number
+      (
+        (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        && github.run_id
+      )
+      || github.event.pull_request.number
       || (
         (startsWith(github.event.head_commit.message, '[changelog] Release')
         || startsWith(github.event.head_commit.message, '[changelog] Post-release'))
@@ -30,10 +40,11 @@ concurrency:
 # Supply-chain cooldown: no package published within the window can be resolved by
 # any command in this workflow. Set here, not per command, so it also covers the
 # `metadata` bootstrap and any step added later; a workflow-level `env:` cannot
-# reference `needs`, so the window is a literal held equal to `[tool.repomatic]
-# minimum-release-age` by hand. Deliberate bypasses are per-package CLI flags
-# (`--exclude-newer-package`, `--min-release-age-exclude`). See claude.md for the
-# rationale.
+# reference `needs`, so the window is a literal kept equal to `[tool.repomatic]
+# minimum-release-age`. repomatic's own test suite enforces that upstream; a
+# synced copy is kept in step by hand. Deliberate bypasses are per-package CLI
+# flags (`--exclude-newer-package`, `--min-release-age-exclude`).
+# See claude.md for the rationale.
 env:
   NPM_CONFIG_MIN_RELEASE_AGE: 7
   UV_EXCLUDE_NEWER: "1 week"

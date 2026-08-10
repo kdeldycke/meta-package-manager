@@ -521,7 +521,7 @@ default.extend-ignore-re = [
   # typos reads embedded letter runs as misspellings (`BA` to `BY`), which would
   # corrupt both the color and the contrast figure derived from it. Anchored on
   # the field so ordinary prose keeps being checked.
-  'hex: [0-9A-Fa-f]{6}',
+  "hex: [0-9A-Fa-f]{6}",
 ]
 default.extend-ignore-identifiers-re = [
   # error: `buildd` should be `build`, `builds`

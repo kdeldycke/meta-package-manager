@@ -6,7 +6,9 @@
 > This version is **not released yet** and is under active development.
 
 - [mpm] Fix `upgrade <packages>` and `remove` dying on an unhandled `CLIError` traceback when any selected manager's installed-package query failed. The manager is now skipped with a warning, and the packages the other managers carry are still acted on.
-- [mpm] Count a manager whose failed command was raised to its caller in the end-of-run error summary, the serialized `errors` payload and the `✓`/`✗` trail. A manager reporting `Could not list installed packages.` was scored `✓` and left out of the closing count.
+- [mpm] Count a manager whose failed command was raised to its caller in the end-of-run error summary, the serialized `errors` payload and the `✓`/`✗` trail. One reporting `Could not list installed packages.` was previously scored `✓`.
+- [mpm] Fix the readme's six standalone-binary download links, which pointed at `mpm-<platform>.<ext>` asset names no release has ever published. They now target the unversioned `meta-package-manager-<platform>.<ext>` aliases attached to every release since `7.4.0`.
+- [mpm] Fix the configuration documentation claiming the `--exclude` parameter is advertised in the help message, where it is hidden like the `--manager` parameter documented beside it.
 
 ## [`7.6.0` (2026-08-10)](https://github.com/kdeldycke/meta-package-manager/compare/v7.5.0...v7.6.0)
 

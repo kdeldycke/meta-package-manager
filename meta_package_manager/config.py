@@ -466,7 +466,7 @@ def apply_manager_overrides(
 
     After validation succeeds, every override is applied as an instance
     attribute (shadowing the class default for the lifetime of the process),
-    recorded in {attr}`ManagerPool.overridden_fields` so
+    recorded in {attr}`~meta_package_manager.pool.ManagerPool.overridden_fields` so
     {meth}`ManagerPool._select_managers` skips the matching global
     `--<flag>` defaults for that manager, and the cached properties derived
     from the affected attributes are evicted so the next access recomputes

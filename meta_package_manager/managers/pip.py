@@ -192,8 +192,9 @@ class Pip(PackageManager):
           forbid `pip install` into (see {meth}`_pip_install_blocked`).
 
         When every candidate is skipped the manager is left with no
-        {attr}`cli_path` and reports as unavailable, which is correct: there
-        is no user-managed pip environment to act on.
+        {attr}`~meta_package_manager.execution.CLIExecutor.cli_path` and reports as
+        unavailable, which is correct: there is no user-managed pip environment to
+        act on.
 
         ```{todo}
 

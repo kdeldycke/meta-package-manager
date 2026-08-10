@@ -618,8 +618,8 @@ class SPDX(SBOM):
         what is on the system, not what could be.
 
         Then attaches any vulnerability data bound via
-        {meth}`attach_vulnerabilities`. SPDX 2.3 has no first-class
-        vulnerability section, so each advisory becomes a
+        {meth}`~meta_package_manager.sbom.base.SBOM.attach_vulnerabilities`. SPDX 2.3
+        has no first-class vulnerability section, so each advisory becomes a
         SECURITY-category `ExternalPackageRef` of type `advisory` on
         the affected package, pointing at the advisory URL.
         """

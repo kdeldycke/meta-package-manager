@@ -29,9 +29,14 @@ from .fake_manager import FakeManager
 from .test_cli import CLISubCommandTests
 
 
-def raise_cli_error(manager):
-    """Stand-in for a query property whose CLI failed, like a misconfigured `pnpm`."""
-    raise CLIError(1, "", "Global bin directory is not in PATH.")
+@pytest.fixture
+def failing_installed_query(monkeypatch):
+    """Break `FakeManager.installed`, like a misconfigured `pnpm` breaks its own."""
+
+    def raise_cli_error(manager):
+        raise CLIError(1, "", "Global bin directory is not in PATH.")
+
+    monkeypatch.setattr(FakeManager, "installed", property(raise_cli_error))
 
 
 @pytest.fixture
@@ -119,13 +124,10 @@ class TestUpgrade(CLISubCommandTests):
             self.check_manager_selection(result, {manager_id})
 
 
-def test_installed_ids_tolerates_a_failing_cli(fake_pool, monkeypatch, caplog):
+def test_installed_ids_tolerates_a_failing_cli(
+    fake_pool, failing_installed_query, caplog
+):
     """A manager whose `installed` CLI fails reports no IDs instead of raising."""
-    monkeypatch.setattr(
-        FakeManager,
-        "installed",
-        property(raise_cli_error),
-    )
     with caplog.at_level(logging.WARNING):
         assert fake_pool.installed_ids == frozenset()
     assert "Could not list installed packages." in caplog.text
@@ -137,13 +139,8 @@ def test_installed_ids_tolerates_a_failing_cli(fake_pool, monkeypatch, caplog):
 # with a traceback before the managers that do have the package were ever tried.
 @pytest.mark.parametrize("subcommand", ("upgrade", "remove"))
 def test_sourcing_survives_a_failing_manager(
-    invoke, fake_pool, monkeypatch, subcommand
+    invoke, fake_pool, failing_installed_query, subcommand
 ):
-    monkeypatch.setattr(
-        FakeManager,
-        "installed",
-        property(raise_cli_error),
-    )
     result = invoke("--dry-run", subcommand, "fake-pkg-alpha")
     assert result.exit_code == 0
     assert "Traceback" not in result.stderr

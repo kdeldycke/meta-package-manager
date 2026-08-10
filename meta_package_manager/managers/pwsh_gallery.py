@@ -315,9 +315,9 @@ class PWSH_Gallery(PackageManager):
         when `Get-InstalledPSResource` returns nothing on a fresh install, so
         the empty-string guard is kept for safety.
 
-        Raises {class}`~meta_package_manager.manager.CLIError` when the output
+        Raises {class}`~meta_package_manager.execution.CLIError` when the output
         is non-empty but not valid JSON. This propagates through the caller's
-        generator so that {func}`~meta_package_manager.cli.installed` (and
+        generator so that {func}`~meta_package_manager.cli_explore.installed` (and
         similar) can catch it and skip the manager gracefully.
         """
         if not output.strip():

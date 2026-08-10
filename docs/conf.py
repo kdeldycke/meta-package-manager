@@ -257,10 +257,10 @@ linkcheck_ignore = [
     r"https://github\.com/kdeldycke/click-extra#",
     # GitHub README tab fragments are rendered client-side.
     r"https://github\.com/.+\?tab=readme-ov-file#",
-    # The unversioned `releases/latest/download/<file>` URLs in the Executables
-    # table 404 until the release workflow publishes unversioned aliases. The
-    # versioned `mpm-<version>-<platform>-<arch>.<ext>` artifacts do exist on
-    # every release.
+    # The unversioned `releases/latest/download/<file>` URLs of the readme's
+    # Executables table do resolve: every release publishes those aliases beside
+    # the versioned `meta-package-manager-<version>-<platform>-<arch>.<ext>`
+    # artifacts. They are skipped for the throttling budget described below.
     r"https://github\.com/kdeldycke/meta-package-manager/releases/latest/download/.*",
     # The per-manager source links generated into the benchmark and augmentations
     # tables (one `blob/main` link per manager) are guarded by the table-render

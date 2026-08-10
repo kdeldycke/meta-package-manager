@@ -90,8 +90,9 @@ family's members into a single {func}`dispatch` lane, so they run serially while
 distinct families still run in parallel. The read-only queries
 (`installed`/`outdated`/`search`) take no backend lock, so they keep one lane per
 manager and stay fully concurrent. Members of a lane also share a command cache (see
-{attr}`CLIExecutor.run_cache`), so two that resolve to a byte-identical invocation
-(`brew` and `cask` for `sync` and `cleanup`) run the subprocess once.
+{attr}`~meta_package_manager.execution.CLIExecutor.run_cache`), so two that resolve
+to a byte-identical invocation (`brew` and `cask` for `sync` and `cleanup`) run the
+subprocess once.
 
 Adding a newly-conflicting set of managers is a one-line edit here: append a
 `frozenset` of their ids and both the serialization and the cache pick it up.
@@ -249,7 +250,8 @@ def dispatch(
     once, nor can two managers sharing a backend lock (see {data}`SHARED_LOCK_FAMILIES`).
     A lane usually wraps a single manager; {func}`merge_into_lock_lanes` is what bundles
     a whole lock family into one, and such a lane also gets a shared command cache (see
-    {attr}`CLIExecutor.run_cache`) so its members collapse identical invocations.
+    {attr}`~meta_package_manager.execution.CLIExecutor.run_cache`) so its members
+    collapse identical invocations.
 
     Each callable does its work, records its own outcome (output to `INFO`, failures
     into a caller-owned list) and returns `(ok, message)` for the trail. The whole

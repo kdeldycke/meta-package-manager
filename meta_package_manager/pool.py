@@ -134,11 +134,11 @@ manager_classes = (
 
 Is considered valid package manager, definitions classes which:
 
-#. are located in the {attr}`meta_package_manager.pool.ManagerPool.manager_subfolder`
-    subfolder, and
+#. are located in the {mod}`meta_package_manager.managers` subpackage, and
 #. are sub-classes of {class}`meta_package_manager.manager.PackageManager`, and
-#. are not {attr}`meta_package_manager.manager.PackageManager.virtual` (i.e. have a
-    non-null {attr}`meta_package_manager.manager.PackageManager.cli_names` property).
+#. are not {attr}`meta_package_manager.manager.PackageManager.virtual`, meaning they
+    have a non-null {attr}`meta_package_manager.manager.PackageManager.cli_names`
+    property.
 
 These properties are checked and enforced in unittests.
 """

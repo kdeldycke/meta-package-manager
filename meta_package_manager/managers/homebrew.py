@@ -666,7 +666,7 @@ class Homebrew(PackageManager):
         `homebrew/cask` taps. The tap itself is registered first (idempotent
         if already tapped) so `brew trust` can resolve the formula or cask.
         The `--formula` and `--cask` flag is supplied by the subclass's
-        {attr}`post_args`.
+        {attr}`~meta_package_manager.execution.CLIExecutor.post_args`.
 
         ```{code-block} shell-session
 

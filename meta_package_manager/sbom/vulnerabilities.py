@@ -385,9 +385,9 @@ def scan_vulnerabilities(
     Returns a mapping from purl string to the tuple of vulnerabilities
     affecting it. Purls with no advisories (or no OSV coverage) are
     simply absent from the result. A network failure on the batch query
-    propagates as {class}`NetworkError` for the caller to handle;
-    per-advisory detail failures are swallowed so a single bad record
-    only drops itself.
+    propagates as {class}`~meta_package_manager.sbom._network.NetworkError` for the
+    caller to handle; per-advisory detail failures are swallowed so a single bad
+    record only drops itself.
     """
     queries = _parse_purls(purls)
     if not queries:

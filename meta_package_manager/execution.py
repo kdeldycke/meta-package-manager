@@ -533,13 +533,15 @@ class CLIExecutor:
     """
 
     default_sudo: bool = False
-    """Built-in escalation default, used when {attr}`sudo` is `None`.
+    """Built-in escalation default, used when
+    {attr}`~meta_package_manager.execution.CLIExecutor.sudo` is `None`.
 
     `False` on the base: most managers install into user-writable trees and never need
     root. The system package managers whose privileged operations require root (`apt`,
     `dnf`, `pacman`, `zypper`, ...) set this to `True` so their
     `build_cli(..., sudo=True)` operations escalate out of the box, while staying
-    switchable off through {attr}`sudo` (`--no-sudo` or config) for rootless setups.
+    switchable off through {attr}`~meta_package_manager.execution.CLIExecutor.sudo`
+    (`--no-sudo` or config) for rootless setups.
     """
 
     internal_sudo: bool = False
@@ -554,8 +556,9 @@ class CLIExecutor:
     forbidden outright (`brew` refuses root, `makepkg` refuses to build).
     Consumed by {func}`~meta_package_manager.sudo.prime_sudo`, whose
     opportunistic probe keeps an already-warm credential cache alive for these
-    internal escalations, and by the silent-call notice in {meth}`run`, which
-    flags a possibly-hidden password prompt on a cold cache.
+    internal escalations, and by the silent-call notice in
+    {meth}`~meta_package_manager.execution.CLIExecutor.run`, which flags a
+    possibly-hidden password prompt on a cold cache.
 
     Forcing `sudo = true` on such a manager (config key or `--sudo`) still
     never wraps its commands, but does promote it into the up-front prompt path of
@@ -596,7 +599,20 @@ class CLIExecutor:
     """
 
     cli_errors: list[CLIError]
-    """Accumulate all CLI errors encountered by the package manager."""
+    """Accumulate all CLI errors encountered by the package manager.
+
+    Every {class}`CLIError` produced by {meth}`run` lands here, whether or not it
+    is also raised: a failure the caller goes on to swallow
+    ({meth}`~meta_package_manager.manager.PackageManager.installed_or_empty` and
+    its peers) is still a failure this manager committed, and the end-of-run
+    summary, the serialized `errors` payload and the ✓/✗ trail all read this list
+    to say so.
+
+    Recording only the non-raising half made a manager's visibility hinge on
+    whether its query happened to pass `must_succeed`: {command}`mpm list` printed
+    "Could not list installed packages." and still scored the manager ✓, leaving
+    it out of the closing count.
+    """
 
     _last_run: tuple[int, str, str] | None = None
     """`(exit code, <stdout>, <stderr>)` of the most recent completed {meth}`run`.
@@ -1025,7 +1041,7 @@ class CLIExecutor:
             expected effect on execution
 
         :param must_succeed: if `True`, raise
-            {class}`meta_package_manager.manager.CLIError` when the command
+            {class}`meta_package_manager.execution.CLIError` when the command
             fails, regardless of the user-facing {attr}`stop_on_error`
             preference, rather than accumulating the error for an end-of-run
             summary. Use for calls whose output is parsed (JSON, XML, regex),
@@ -1261,15 +1277,8 @@ class CLIExecutor:
                     exception.diagnosis,
                     extra={"label": self.id},  # type: ignore[attr-defined]
                 )
-            # Accumulate errors before deciding whether to raise: a failure the
-            # caller goes on to swallow (installed_or_empty and its peers) is
-            # still a failure this manager committed, and the end-of-run summary,
-            # the serialized `errors` payload and the ✓/✗ trail all read this list
-            # to say so. Recording only the non-raising half made a manager's
-            # visibility hinge on whether its query happened to pass
-            # `must_succeed`: `mpm list` printed "Could not list installed
-            # packages." and still scored the manager ✓, leaving it out of the
-            # closing count.
+            # Accumulate before deciding whether to raise: the error is recorded
+            # whether or not it also propagates (see the `cli_errors` docstring).
             self.cli_errors.append(exception)
             if must_succeed or self.stop_on_error:
                 raise exception

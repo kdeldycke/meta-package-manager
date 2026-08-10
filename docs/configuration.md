@@ -243,7 +243,7 @@ exclude = ["pip", "pipx"]
 
 It calls `mpm` with the `--exclude pip` and `--exclude pipx` parameters, which is the equivalent of `--no-pip` and `--no-pipx` options.
 
-The `--exclude` parameter is advertised in the help message as it is less user-friendly than single `--no-<manager>` flags.
+The `--exclude` parameter is not shown in the help message, as it is less user-friendly than the single `--no-<manager>` flags.
 
 You can still mix both syntax in the same configuration file, as well as on the command line.
 ````

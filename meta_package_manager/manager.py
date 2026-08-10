@@ -208,13 +208,17 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """A watch note about a still-maintained upstream whose activity is slowing or
     whose status is ambiguous, as a MyST markdown block.
 
-    Unlike {attr}`unmaintained`, this is purely informational: the manager stays in
-    the default selection and in the test matrices. It renders as a ``{note}``
+    Unlike {attr}`~meta_package_manager.manager.PackageManager.unmaintained`, this is
+    purely informational: the manager stays in the default selection and in the test
+    matrices. It renders as a ``{note}``
     admonition atop the manager's documentation page, flagging upstreams worth
     keeping an eye on (a slow release cadence, superseded-but-still-shipped tools, a
     discontinued platform still under vendor support). May embed markdown links.
-    Mutually exclusive with {attr}`unmaintained`: a confirmed-dead manager carries an
-    {attr}`unmaintained_message` instead. Enforced by `test_maintenance_note`.
+    Mutually exclusive with
+    {attr}`~meta_package_manager.manager.PackageManager.unmaintained`: a
+    confirmed-dead manager carries an
+    {attr}`~meta_package_manager.manager.PackageManager.unmaintained_message`
+    instead. Enforced by `test_maintenance_note`.
     """
 
     id: str
@@ -339,7 +343,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         swallow a failed CLI call into an empty result.
 
         Queries whose failure semantics differ keep their own parsing: a per-line
-        NDJSON stream (`pkg search`), a hard {exc}`CLIError` on malformed
+        NDJSON stream (`pkg search`), a hard
+        {exc}`~meta_package_manager.execution.CLIError` on malformed
         payloads (`pwsh-gallery`), a best-effort metadata enrichment logging at
         `DEBUG` (`brew info`).
         """
@@ -941,7 +946,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         Runs {meth}`doctor_cli` and interprets the outcome with a contract of
         its own, distinct from every other operation:
 
-        - **Health is the exit code alone.** {meth}`run`'s failure gate
+        - **Health is the exit code alone.**
+          {meth}`~meta_package_manager.execution.CLIExecutor.run`'s failure gate
           tolerates a non-zero exit with a silent `<stderr>` (a benign status
           for query parsers), but for a diagnosis that exit *is* the verdict:
           `pip check` reports its conflicts on `<stdout>` only and would

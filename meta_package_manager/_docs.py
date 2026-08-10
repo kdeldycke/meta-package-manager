@@ -491,11 +491,14 @@ def binaries_download_table() -> str:
     """Produce the per-platform download table of the latest release binaries.
 
     Rendered live at Sphinx build time by the ``{python:render}`` block in
-    `docs/install.md`. Binaries carry the version in their filename
-    (`meta-package-manager-7.3.0-linux-arm64.bin`), so no stable
-    `releases/latest/download` URL can exist: the table is regenerated from
-    `docs/assets/binaries.csv`, which the release pipeline extends at each
-    release with the exact asset URLs, newest first.
+    `docs/install.md`, from `docs/assets/binaries.csv`, which the release pipeline
+    extends at each release with the exact asset URLs, newest first.
+
+    Every release publishes an unversioned `releases/latest/download` alias beside
+    each versioned artifact, but the table links the versioned one
+    (`meta-package-manager-7.3.0-linux-arm64.bin`): the alias moves on to the next
+    release while the table's version column stays put, so only the versioned URL
+    keeps delivering the bytes its row claims.
     """
     csv_path = PROJECT_ROOT / "docs" / "assets" / "binaries.csv"
     # Cells are markdown: the version cell starts with [`7.3.0` ...] and the

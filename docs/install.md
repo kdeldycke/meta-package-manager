@@ -303,28 +303,28 @@ In a funny twist, `mpm` can be installed with itself.
 Which means there is a way to bootstrap its deployment on an unknown system. Just [download the binary](#binaries) corresponding to your platform and architecture:
 
 ```{code-block} shell-session
-$ curl --fail --remote-name https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin
+$ curl --fail --remote-name https://github.com/kdeldycke/meta-package-manager/releases/latest/download/meta-package-manager-macos-x64.bin
 ################################################### 100.0%
 ```
 
 ```{code-block} shell-session
-$ file ./mpm-macos-x64.bin
-./mpm-macos-x64.bin: Mach-O 64-bit executable x86_64
+$ file ./meta-package-manager-macos-x64.bin
+./meta-package-manager-macos-x64.bin: Mach-O 64-bit executable x86_64
 ```
 
 ```{code-block} shell-session
-$ chmod +x ./mpm-macos-x64.bin
+$ chmod +x ./meta-package-manager-macos-x64.bin
 ```
 
 ```{code-block} shell-session
-$ ./mpm-macos-x64.bin --version
+$ ./meta-package-manager-macos-x64.bin --version
 mpm, version 7.5.0
 ```
 
 Then let `mpm` discovers which package managers are available on your machine and choose the one providing a path to `mpm` installation:
 
 ```{code-block} shell-session
-$ ./mpm-macos-x64.bin install meta-package-manager
+$ ./meta-package-manager-macos-x64.bin install meta-package-manager
 warning: Skip unavailable cargo manager.
 warning: Skip unavailable steamcmd manager.
 Installation priority: brew > cask > composer > gem > mas > npm > pip > pipx > vscode > yarn
@@ -348,7 +348,7 @@ Successfully installed (...) meta-package-manager-7.5.0
 And now you can remove the local binary and enjoy the system-wide `mpm` that was installed by itself:
 
 ```{code-block} shell-session
-$ rm -f ./mpm-macos-x64.bin
+$ rm -f ./meta-package-manager-macos-x64.bin
 ```
 
 ```{code-block} shell-session

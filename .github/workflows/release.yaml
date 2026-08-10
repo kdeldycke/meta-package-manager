@@ -52,7 +52,7 @@ env:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@ab43527b67361553b1c8539e8f3d9e6e2013b98c # v7.8.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@292c4e8438249adeb269808d485409c9b56b49bd # v7.9.0
     permissions:
       id-token: write
       issues: write
@@ -80,12 +80,12 @@ jobs:
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@ab43527b67361553b1c8539e8f3d9e6e2013b98c # v7.8.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@292c4e8438249adeb269808d485409c9b56b49bd # v7.9.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@ab43527b67361553b1c8539e8f3d9e6e2013b98c # v7.8.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@292c4e8438249adeb269808d485409c9b56b49bd # v7.9.0
     needs:
       - build
       - build-gnome-extension
@@ -205,7 +205,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.8.0' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.9.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
@@ -325,7 +325,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.8.0' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.9.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"

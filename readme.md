@@ -249,7 +249,8 @@ print(operation_matrix()[0])
 | [`zerobrew`](https://kdeldycke.github.io/meta-package-manager/managers/zerobrew.html)                                                                            | >= 0.3       |          |     🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`zinit`](https://kdeldycke.github.io/meta-package-manager/managers/zinit.html)                                                                                  | >= 3.10      |          |     🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`zypper`](https://kdeldycke.github.io/meta-package-manager/managers/zypper.html)                                                                                | >= 1.14      |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| Platforms: 🅱️ BSD[^bsd] · 🐧 Linux[^linux] · 🍎 macOS · ⨂ Unix[^unix] · 🪟 Windows                                                                               |              |          |               |             |            |           |          |           |           |               |          |        |           |          |
+
+Platforms: 🅱️ BSD[^bsd] · 🐧 Linux[^linux] · 🍎 macOS · ⨂ Unix[^unix] · 🪟 Windows
 
 <!-- mirror-src-end -->
 

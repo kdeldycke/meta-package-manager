@@ -260,7 +260,7 @@ def operation_matrix() -> tuple[str, str]:
                 if not m.unmaintained
                 else f" [⚠️]({DOCS_SITE_URL}/managers/{mid}.html)"
             ),
-            _format_requirement(m.requirement or "").replace("<", r"\<"),
+            _format_requirement(m.requirement or ""),
             "✓" if m.supports_cooldown else "",
         ]
         line.append(
@@ -287,8 +287,13 @@ def operation_matrix() -> tuple[str, str]:
 
     # The legend decodes the Platforms column, so it travels with the table
     # rather than with the footnote definitions parked at the end of the readme.
+    # The blank line before it is load-bearing: this output is mirrored into a
+    # raw Markdown region that `mdformat` reformats in the autofix pipeline, and
+    # a line abutting the table is parsed as one more table row, which the
+    # formatter then rewrites into an explicit `| … |` row. That desynchronizes
+    # the region from this generator and reddens `test_mirror_blocks_in_sync`.
     return (
-        f"{rendered_table}\nPlatforms: {FACT_SEPARATOR.join(legend)}",
+        f"{rendered_table}\n\nPlatforms: {FACT_SEPARATOR.join(legend)}",
         "\n\n".join(footnotes),
     )
 

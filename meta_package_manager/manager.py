@@ -241,8 +241,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     Names an SVG vendored under `docs/assets/managers/`, whose provenance and license
     are recorded in `docs/assets/managers/logos.yaml`. Inlined at the top of the
-    manager's page by {func}`meta_package_manager._docs.manager_logo`; a manager
-    leaving it unset keeps the page's default package glyph.
+    manager's page by `meta_package_manager._docs`; a manager leaving it unset
+    keeps the page's default package glyph.
 
     Several managers legitimately share one slug, either because they wrap the same
     upstream (`brew` and `cask`) or because the tool has no mark of its own and its

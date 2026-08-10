@@ -113,7 +113,7 @@ Advisory only, reported by `docs/logos_update.py` and never enforced at render
 time. Gating on it was tried and dropped: [WCAG 2.2 exempts logotypes from
 contrast requirements](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)
 precisely because a brand's own color is not the author's to correct, and the
-guard was repainting recognisable marks (Fedora's blue, Homebrew's amber) a flat
+guard was repainting recognizable marks (Fedora's blue, Homebrew's amber) a flat
 black. Marks keep their color on the light theme whatever this says; the dark
 theme still falls back to `currentColor`, which is about legibility against a
 near-black background rather than about contrast ratios.
@@ -681,7 +681,8 @@ def manager_logo(manager_id: str, *, inline: bool = False) -> str:
     image file, which is what lets CSS recolor it: the vendored marks carry no
     `fill`, so they inherit `currentColor` and stay legible on both themes. The
     brand color is passed as a custom property and the stylesheet applies it on
-    the light theme only, and only for marks clearing {data}`MIN_LOGO_CONTRAST`.
+    the light theme only, for every mark: {data}`MIN_LOGO_CONTRAST` is reported
+    by `docs/logos_update.py` but never gates a render.
 
     Raw HTML is invisible to the linkcheck builder, which reads a raw node's
     `source` attribute rather than its content, so 75 pages of inlined artwork
@@ -1689,8 +1690,7 @@ def manager_traces(manager_id: str) -> str:
         f"[{source_label}]({manager_source_url(manager_id)}): the reference "
         f"`mpm`'s parsers were written against. If you know {m.name} well and a "
         "transcript below looks wrong, or a newer release changed its output "
-        "format, [report it]"
-        "(https://github.com/kdeldycke/meta-package-manager/issues)."
+        f"format, [report it]({GITHUB_ISSUES_URL})."
     )
     outro = (
         "Feed any of these through `mpm` and the raw output becomes one uniform "

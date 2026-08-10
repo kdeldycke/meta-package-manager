@@ -995,7 +995,7 @@ def test_retraction_table_well_formed():
     anchor it carries would resolve against the manager page instead: the
     reused cells must link absolutely or not at all.
     """
-    registries = {}
+    registries: dict[str, list[str]] = {}
     relative = []
     for cells in _docs._cooldown_table("## Retraction paths by registry"):
         for mid in re.findall(r"\[`([^`]+)`\]", cells[1]):
@@ -1021,7 +1021,11 @@ def test_retraction_status_reuses_table_row(manager):
     A registry documenting neither a retraction path nor a publish date leaves
     the row alone: it renders as a plain line rather than a one-item list.
     """
-    registry, withdrawal, publish_date = _docs._retraction_status(manager.id)
+    row = _docs._retraction_status(manager.id)
+    # No row is a legitimate return for an unknown ID, but never for a pool
+    # manager: test_retraction_table_well_formed holds the table to a partition.
+    assert row, f"No retraction row covers {manager.id}."
+    registry, withdrawal, publish_date = row
     section = _docs.manager_cooldown(manager.id)
     cells = [
         cell for cell in (withdrawal, publish_date) if cell not in _docs.EMPTY_CELLS

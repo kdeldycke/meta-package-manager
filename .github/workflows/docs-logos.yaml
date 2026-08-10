@@ -25,6 +25,15 @@ concurrency:
 # Adopting a new mark stays a human call: it needs a `logo` declaration on the
 # manager, so this job reports and never commits.
 
+# Supply-chain cooldown: no package published within the window can be resolved by
+# any command in this workflow. The sync below is `--frozen` and resolves nothing,
+# so this binds no install today; it is set anyway, at workflow level, so any step
+# added later is covered without its author having to know the rule. Held equal to
+# `[tool.repomatic] minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
 jobs:
 
   # https://github.com/simple-icons/simple-icons/releases

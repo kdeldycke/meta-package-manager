@@ -65,8 +65,10 @@ def test_pwsh_quote(value, expected):
             [{"Name": "PSReadLine", "Version": "2.3.6"}],
         ),
         (
-            '[{"Name":"PSReadLine","Version":"2.3.6"},'
-            '{"Name":"Pester","Version":"5.5.0"}]',
+            (
+                '[{"Name":"PSReadLine","Version":"2.3.6"},'
+                '{"Name":"Pester","Version":"5.5.0"}]'
+            ),
             [
                 {"Name": "PSReadLine", "Version": "2.3.6"},
                 {"Name": "Pester", "Version": "5.5.0"},

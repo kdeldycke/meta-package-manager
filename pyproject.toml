@@ -210,8 +210,7 @@ dependencies = [
   # click-extra's own uv-build floor to >=0.8 and drops its `required-version`
   # upper cap: mpm uncapped both in 7.5.0, and a still-capped dependency would
   # re-break the distribution builds (MacPorts' py-uv-build 0.12) that uncap
-  # was meant to unblock.
-  # The 8.7.0 release ships the `<!-- mirror-src -->`
+  # was meant to unblock. The 8.7.0 release ships the `<!-- mirror-src -->`
   # comment form of the `python:render` `:mirror:` block, where the generator
   # Python hides inside an HTML comment while its output still renders on GitHub
   # and PyPI: the readme's manager Sankey diagram and operation matrix now ride
@@ -223,17 +222,16 @@ dependencies = [
   # downstream packagers build and test without a Git checkout), a setuptools
   # package-data shim, and a fix for the source line reported in `click:run`
   # directive errors (mpm drives that directive in docs/configuration.md). The
-  # 8.6.0 series shipped OperationTrail, the batch
-  # ✓/✗ trail upstreamed from mpm's own dispatch layer, which
-  # meta_package_manager.dispatch now subclasses (with the trail_glyph /
-  # trail_line atoms), plus the mirror-block fix making `click-extra
-  # refresh-directives` run `python:render` `:mirror:` blocks with the page's
-  # directory on sys.path (the offline docs regen of benchmark.md and
-  # augmentations.md relies on it), the newest-first `column-order` /
-  # `row-order` defaults of the `{matrix}` directive behind the compatibility
-  # tables of docs/install.md and docs/packaging.md, and the test-suite fix
-  # keeping a venv's symlinked interpreter unresolved (so the binary test plan
-  # sees the venv's own packages).
+  # 8.6.0 series shipped OperationTrail, the batch ✓/✗ trail upstreamed from
+  # mpm's own dispatch layer, which meta_package_manager.dispatch now
+  # subclasses (with the trail_glyph / trail_line atoms), plus the mirror-block
+  # fix making `click-extra refresh-directives` run `python:render` `:mirror:`
+  # blocks with the page's directory on sys.path (the offline docs regen of
+  # benchmark.md and augmentations.md relies on it), the newest-first
+  # `column-order` / `row-order` defaults of the `{matrix}` directive behind the
+  # compatibility tables of docs/install.md and docs/packaging.md, and the
+  # test-suite fix keeping a venv's symlinked interpreter unresolved (so the
+  # binary test plan sees the venv's own packages).
   # The 8.5.0 series renamed the --show-params introspection flag to --params
   # (the name the bug-report template, the documentation and the binary test
   # plan reference), shipped run_cli's start_new_session mode (the manager
@@ -519,6 +517,11 @@ default.extend-ignore-re = [
   # Guix base32 source hashes are random strings; typos otherwise mangles embedded
   # letter runs (`adn` to `and`), corrupting the hash.
   'base32 "[0-9a-z]{52}"',
+  # Brand color hex triplets in the generated docs/assets/managers/logos.yaml:
+  # typos reads embedded letter runs as misspellings (`BA` to `BY`), which would
+  # corrupt both the color and the contrast figure derived from it. Anchored on
+  # the field so ordinary prose keeps being checked.
+  'hex: [0-9A-Fa-f]{6}',
 ]
 default.extend-ignore-identifiers-re = [
   # error: `buildd` should be `build`, `builds`
@@ -1582,6 +1585,18 @@ allowlist.commits = [
   "745247e5c74122de9ec2dd95cbd3b8510fe224d5",
   "e31111be719406940519f52c9d4406e97fb368a3",
 ]
+
+[tool.yamllint]
+# Restates repomatic's bundled default, plus one delta: the generated
+# docs/assets/managers/logos.yaml records each brand mark's provenance as a
+# commit-pinned upstream URL, which pushes a `source:` line past the cap with no
+# whitespace to wrap at. `allow-non-breakable-words` does not cover it, as the
+# long token sits in an inline mapping rather than alone on its line. Flagging a
+# line no edit can shorten only yields unfixable errors, and the generator would
+# re-emit one on the next long URL. Prose and comments still wrap at 120.
+rules.line-length.max = 120
+rules.line-length.allow-non-breakable-words = true
+rules.line-length.allow-non-breakable-inline-mappings = true
 
 [tool.click-extra]
 # Declarative CLI test suite for binary testing. Repomatic's test and release

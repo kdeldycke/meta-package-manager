@@ -30,10 +30,10 @@ concurrency:
 # Supply-chain cooldown: no package published within the window can be resolved by
 # any command in this workflow. Set here, not per command, so it also covers the
 # `metadata` bootstrap and any step added later; a workflow-level `env:` cannot
-# reference `needs`, so the window is a literal that tests/test_workflows.py holds
-# equal to `[tool.repomatic] minimum-release-age`. Deliberate bypasses are
-# per-package CLI flags (`--exclude-newer-package`, `--min-release-age-exclude`).
-# See claude.md for the rationale.
+# reference `needs`, so the window is a literal held equal to `[tool.repomatic]
+# minimum-release-age` by hand. Deliberate bypasses are per-package CLI flags
+# (`--exclude-newer-package`, `--min-release-age-exclude`). See claude.md for the
+# rationale.
 env:
   NPM_CONFIG_MIN_RELEASE_AGE: 7
   UV_EXCLUDE_NEWER: "1 week"
@@ -93,6 +93,10 @@ jobs:
   # Placed after the `release` caller on purpose: `repomatic init` treats the last
   # job referencing the upstream repo as the boundary and discards anything above it,
   # so a downstream job declared earlier in the file is silently dropped on every sync.
+  # The pack invocation below is duplicated from the `pack` job of
+  # tests-gnome-extension.yaml, which round-trips the same zip through
+  # `gnome-extensions install`. Keep the `--extra-source` whitelist identical in
+  # both, or the released artifact stops being the one that was tested.
   build-gnome-extension:
     name: 🐚 Pack GNOME Shell extension
     runs-on: ubuntu-24.04

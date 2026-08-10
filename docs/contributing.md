@@ -12,9 +12,9 @@ Good candidates for new package manager:
 
 Not a coder? No problem.
 
-You can still provides invaluable information. [Open a new issue](https://github.com/kdeldycke/meta-package-manager/issues/new/choose) and fill in the form with raw output of CLI calls to your manager. Armed with this critical data, a contributor or maintainer can attempt a blind implementation. From there we'll collectively iterate until we reach a usable level.
+You can still provide invaluable information. [Open a new issue](https://github.com/kdeldycke/meta-package-manager/issues/new/choose) and fill in the form with raw output of CLI calls to your manager. Armed with this critical data, a contributor or maintainer can attempt a blind implementation. From there we'll collectively iterate until we reach a usable level.
 
-This is often the best approach as it sometimes hard to create the same environment as the users.
+This is often the best approach, as it is sometimes hard to create the same environment as the users.
 
 ## Code support for a new package manager
 

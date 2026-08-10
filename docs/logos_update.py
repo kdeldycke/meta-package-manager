@@ -36,10 +36,10 @@ has no `logo` and keeps the default package glyph on its page.
 ```{note}
 Every mark is stored monochrome and unfilled, so the page inherits `currentColor`
 and adapts to the light and dark themes. The brand color is applied on the light
-theme only, and only when it clears
-{data}`~meta_package_manager._docs.MIN_LOGO_CONTRAST` against a white background: a
-pale yellow mark is dropped back to `currentColor` rather than rendered nearly
-invisible.
+theme only, for every mark. Contrast against a white background is measured and
+reported against {data}`~meta_package_manager._docs.MIN_LOGO_CONTRAST`, but never
+gates a render: WCAG exempts logotypes, and dropping a pale mark back to
+`currentColor` was repainting recognizable brands a flat black.
 ```
 """
 
@@ -67,8 +67,8 @@ MANIFEST = LOGO_DIR / "logos.yaml"
 """Provenance of each vendored mark, consumed by the documentation generators.
 
 {data}`~meta_package_manager._docs.LOGO_DIR` and the contrast floor are imported
-from the renderer rather than restated here: where the marks live and when a brand
-color is legible are its calls, and this script only has to agree with them.
+from the renderer rather than restated here: where the marks live and what counts
+as a pale brand color are its calls, and this script only has to agree with them.
 """
 
 GENERIC_HOSTS = frozenset({
@@ -438,7 +438,7 @@ def main() -> int:
         if icon["contrast_on_light"] < MIN_LOGO_CONTRAST
     )
     print(f"{len(svgs)} marks for {sum(len(m) for m in slugs.values())} managers.")
-    print(f"{len(faded)} below the {MIN_LOGO_CONTRAST}:1 floor, drawn in currentColor:")
+    print(f"{len(faded)} below the {MIN_LOGO_CONTRAST}:1 floor, reported only:")
     print(f"  {', '.join(faded)}")
     return 0
 

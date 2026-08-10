@@ -67,7 +67,7 @@ $ uvx meta-package-manager
   friendly macOS integration.
 - Provides a [GNOME Shell extension](https://kdeldycke.github.io/meta-package-manager/gnome-shell.html) for
   friendly Linux desktop integration.
-- Because `mpm` try to wrap all other package managers, it became another pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
+- Because `mpm` tries to wrap all other package managers, it became another pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
 
 ## Supported package managers
 
@@ -405,7 +405,7 @@ You still pick up older security fixes promptly, while sitting out the risky fir
 
 ### List managers
 
-If you wonder why your package manager doesn't seems to be identified, you can list all those recognized by `mpm` with:
+If you wonder why your package manager doesn't seem to be identified, you can list all those recognized by `mpm` with:
 
 ```shell-session
 $ mpm --all-managers managers

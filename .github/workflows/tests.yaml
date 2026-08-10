@@ -51,10 +51,10 @@ concurrency:
 # Supply-chain cooldown: no package published within the window can be resolved by
 # any command in this workflow. Set here, not per command, so it also covers the
 # `metadata` bootstrap and any step added later; a workflow-level `env:` cannot
-# reference `needs`, so the window is a literal that tests/test_workflows.py holds
-# equal to `[tool.repomatic] minimum-release-age`. Deliberate bypasses are
-# per-package CLI flags (`--exclude-newer-package`, `--min-release-age-exclude`).
-# See claude.md for the rationale.
+# reference `needs`, so the window is a literal held equal to `[tool.repomatic]
+# minimum-release-age` by hand. Deliberate bypasses are per-package CLI flags
+# (`--exclude-newer-package`, `--min-release-age-exclude`). See claude.md for the
+# rationale.
 env:
   NPM_CONFIG_MIN_RELEASE_AGE: 7
   UV_EXCLUDE_NEWER: "1 week"

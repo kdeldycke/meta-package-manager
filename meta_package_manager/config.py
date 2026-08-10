@@ -341,16 +341,20 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
 
     arrow = theme().invoked_command("↗")
     lines = [
-        f"{arrow} Detected user override(s) on fields that often indicate an "
-        f"upstream detection bug.",
+        (
+            f"{arrow} Detected user override(s) on fields that often indicate an "
+            "upstream detection bug."
+        ),
         "  Filing an issue helps improve mpm's detection heuristics for everyone:",
         "",
     ]
     for hint in hints:
         url = _build_issue_url(hint)
         lines.extend((
-            f"  - {theme().invoked_command(hint.manager_id)}: "
-            f"override on `{hint.field}`",
+            (
+                f"  - {theme().invoked_command(hint.manager_id)}: "
+                f"override on `{hint.field}`"
+            ),
             f"    File a report: {url}",
         ))
     lines.extend((

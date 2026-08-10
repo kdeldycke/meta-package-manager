@@ -343,14 +343,18 @@ class TestBarPlugin:
         #     cask - 0 package | font=Menlo size=12
         #     ...
         (
-            r"(--)?🆙 Upgrade all \S+ packages? \| shell=\S+( param\d+=\S+)+ "
-            r"refresh=true terminal=(true|false alternate=true)$",
+            (
+                r"(--)?🆙 Upgrade all \S+ packages? \| shell=\S+( param\d+=\S+)+ "
+                r"refresh=true terminal=(true|false alternate=true)$"
+            ),
             False,
         ),
         # Error line. Optional.
         (
-            r"(--)?.+ \| font=[Mm]enlo size=10 color=red trim=false "
-            r"ansi=false emojize=false( symbolize=false)?$",
+            (
+                r"(--)?.+ \| font=[Mm]enlo size=10 color=red trim=false "
+                r"ansi=false emojize=false( symbolize=false)?$"
+            ),
             False,
         ),
     ]
@@ -430,8 +434,11 @@ class TestBarPlugin:
                     (r"(⚠️ )?\d+ outdated .+ packages?", True),
                     # Package upgrade line.
                     (
-                        r"(--)?[\S ]+ \S+ → \S+ \| shell=\S+( param\d+=\S+)+ "
-                        r"ansi=true refresh=true terminal=(true|false alternate=true)$",
+                        (
+                            r"(--)?[\S ]+ \S+ → \S+ \| shell=\S+( param\d+=\S+)+ "
+                            r"ansi=true refresh=true "
+                            r"terminal=(true|false alternate=true)$"
+                        ),
                         False,
                     ),
                 ),
@@ -444,9 +451,11 @@ class TestBarPlugin:
                     (r"(⚠️ )?\S+ - \d+ packages?\s+\| font=[Mm]enlo size=12", True),
                     # Package upgrade line.
                     (
-                        r"(--)?[\S ]+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ "
-                        r"font=[Mm]enlo size=12 ansi=true refresh=true "
-                        r"terminal=(true|false alternate=true)?$",
+                        (
+                            r"(--)?[\S ]+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ "
+                            r"font=[Mm]enlo size=12 ansi=true refresh=true "
+                            r"terminal=(true|false alternate=true)?$"
+                        ),
                         False,
                     ),
                 ),

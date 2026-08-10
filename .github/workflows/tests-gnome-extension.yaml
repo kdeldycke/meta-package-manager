@@ -86,6 +86,9 @@ jobs:
       - name: Run gjs unit suite
         run: gjs -m tests/gnome/run-tests.js
 
+  # Mirrors the `build-gnome-extension` job of release.yaml, which packs the zip
+  # attached to every release: the `--extra-source` whitelist must stay identical
+  # in both, or this job stops testing the artifact users download.
   pack:
     name: Pack installable zip
     runs-on: ubuntu-24.04

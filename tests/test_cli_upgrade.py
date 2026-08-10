@@ -136,7 +136,9 @@ def test_installed_ids_tolerates_a_failing_cli(fake_pool, monkeypatch, caplog):
 # untied package. A manager whose query CLI is broken used to abort the whole command
 # with a traceback before the managers that do have the package were ever tried.
 @pytest.mark.parametrize("subcommand", ("upgrade", "remove"))
-def test_sourcing_survives_a_failing_manager(invoke, fake_pool, monkeypatch, subcommand):
+def test_sourcing_survives_a_failing_manager(
+    invoke, fake_pool, monkeypatch, subcommand
+):
     monkeypatch.setattr(
         FakeManager,
         "installed",

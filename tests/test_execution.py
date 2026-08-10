@@ -199,6 +199,10 @@ def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
         with pytest.raises(CLIError) as excinfo:
             manager.run_cli("-c", script, must_succeed=must_succeed)
         assert excinfo.value.code == 8
+        # A raised failure is accumulated too, so a caller that swallows it
+        # (installed_or_empty) still leaves the manager visible to the ✓/✗ trail,
+        # the serialized `errors` payload and the end-of-run summary.
+        assert [error.code for error in manager.cli_errors] == [8]
     elif expectation == "accumulate":
         manager.run_cli("-c", script, must_succeed=must_succeed)
         assert [error.code for error in manager.cli_errors] == [8]

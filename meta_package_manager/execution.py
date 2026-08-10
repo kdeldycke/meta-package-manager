@@ -1172,9 +1172,9 @@ class CLIExecutor:
                 msg = f"Timed out after {effective_timeout}s."
                 logging.warning(msg, extra={"label": manager_id})
                 exception = CLIError(None, "", msg)
+                self.cli_errors.append(exception)
                 if must_succeed or self.stop_on_error:
                     raise exception
-                self.cli_errors.append(exception)
                 return ""
             except KeyboardInterrupt:
                 # run_cli killed the child before re-raising; the spinner was
@@ -1261,10 +1261,18 @@ class CLIExecutor:
                     exception.diagnosis,
                     extra={"label": self.id},  # type: ignore[attr-defined]
                 )
+            # Accumulate errors before deciding whether to raise: a failure the
+            # caller goes on to swallow (installed_or_empty and its peers) is
+            # still a failure this manager committed, and the end-of-run summary,
+            # the serialized `errors` payload and the ✓/✗ trail all read this list
+            # to say so. Recording only the non-raising half made a manager's
+            # visibility hinge on whether its query happened to pass
+            # `must_succeed`: `mpm list` printed "Could not list installed
+            # packages." and still scored the manager ✓, leaving it out of the
+            # closing count.
+            self.cli_errors.append(exception)
             if must_succeed or self.stop_on_error:
                 raise exception
-            # Accumulate errors.
-            self.cli_errors.append(exception)
 
         return output
 

@@ -551,8 +551,22 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     @cached_property
     def installed_ids(self) -> frozenset[str]:
-        """Installed package IDs, materialized once from {meth}`installed`."""
-        return frozenset(pkg.id for pkg in self.installed)
+        """Installed package IDs, materialized once from {meth}`installed_or_empty`.
+
+        Routed through the tolerant {meth}`installed_or_empty` rather than
+        {meth}`installed` because its callers ask a *discovery* question: which
+        managers have this package? A manager whose CLI just failed has no answer
+        to give, which is not the same as a fatal error. Sourcing a spec for
+        `remove` and `upgrade <packages>` reads this for every selected manager,
+        so a single broken CLI would otherwise abort the whole command before the
+        managers that do have the package are ever tried.
+
+        Contrast {attr}`installed_version_map`, which deliberately keeps raising:
+        it is read from inside an `outdated` parser, where an empty map does not
+        mean "no answer" but silently reports every outdated package with an
+        unknown installed version.
+        """
+        return frozenset(pkg.id for pkg in self.installed_or_empty())
 
     @cached_property
     def installed_version_map(self) -> dict[str, TokenizedString | str | None]:

@@ -5,6 +5,9 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Fix `upgrade <packages>` and `remove` dying on an unhandled `CLIError` traceback when any selected manager's installed-package query failed. The manager is now skipped with a warning, and the packages the other managers carry are still acted on.
+- [mpm] Count a manager whose failed command was raised to its caller in the end-of-run error summary, the serialized `errors` payload and the `✓`/`✗` trail. A manager reporting `Could not list installed packages.` was scored `✓` and left out of the closing count.
+
 ## [`7.6.0` (2026-08-10)](https://github.com/kdeldycke/meta-package-manager/compare/v7.5.0...v7.6.0)
 
 - [vim-pack] Add Neovim's built-in `vim.pack` plugin manager (Neovim `0.12` and above) with installed, install, remove and upgrade support. Plugins are keyed on their source URL, and each operation is a Lua one-liner run by a `--clean --headless` Neovim.

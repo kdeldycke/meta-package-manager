@@ -1,5 +1,10 @@
 # Changelog
 
+## [`7.6.2.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 
 - [mpm] Fix `upgrade <packages>` and `remove` dying on an unhandled `CLIError` traceback when any selected manager's installed-package query failed. The manager is now skipped with a warning, and the packages the other managers carry are still acted on.

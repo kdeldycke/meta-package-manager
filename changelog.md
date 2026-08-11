@@ -7,6 +7,9 @@
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 
+> [!NOTE]
+> `7.6.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/7.6.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.6.1).
+
 - [mpm] Fix `upgrade <packages>` and `remove` dying on an unhandled `CLIError` traceback when any selected manager's installed-package query failed. The manager is now skipped with a warning, and the packages the other managers carry are still acted on.
 - [mpm] Count a manager whose failed command was raised to its caller in the end-of-run error summary, the serialized `errors` payload and the `✓`/`✗` trail. One reporting `Could not list installed packages.` was previously scored `✓`.
 - [bar-plugin] Fix the `uv` launch candidate silently re-locking whatever project the plugin's working directory landed in: it now runs frozen, pinned to the folder its lockfile was found in.

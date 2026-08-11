@@ -758,8 +758,23 @@ as regular MyST, so its links matter as much as the surrounding paragraphs'.
 Only a code block escapes the prose rules.
 """
 
-BARE_URL = re.compile(r"(?<!\]\()(?<!\]\(<)(?<!<)https?://[^\s>)\]`,;\'\"]+")
-"""A URL that is neither a markdown link target nor an autolink."""
+BARE_URL = re.compile(r"(?<!\]\()(?<!<)https?://[^\s>)\]`,;\'\"]+")
+"""A URL that is neither a markdown link target nor an autolink.
+
+The single `<` lookbehind covers autolinks (`<https://…>`) and, incidentally,
+angle-bracketed link destinations (`](<https://…>)`); the latter are rejected
+outright by `ANGLE_LINK_DEST` below, so they never need blessing here.
+"""
+
+ANGLE_LINK_DEST = re.compile(r"\]\(<")
+"""A markdown link whose destination hides in angle brackets.
+
+CommonMark allows the form, but the MyST docstring converter reads a
+destination only up to the first closing parenthesis, so `](<…>)` renders as
+broken markup — worse than a bare URL. Rewrite the URL to a parenthesis-free
+variant instead (the man-page query form, say). Lift this ban only when the
+click-extra floor rises to a release whose converter takes the bracketed form.
+"""
 
 
 def _strip_code_fences(docstring: str) -> str:
@@ -823,6 +838,18 @@ def test_docstrings_carry_no_bare_url():
         for match in BARE_URL.finditer(doc)
     ]
     assert not bare, "Bare URLs in docstrings:\n" + "\n".join(bare)
+
+
+def test_docstrings_carry_no_angle_bracket_link_destination():
+    """The `](<url>)` destination form renders as broken markup: see
+    `ANGLE_LINK_DEST` for the converter limitation and the rewrite to apply.
+    """
+    hits = [
+        f"{path.relative_to(PROJECT_ROOT)}:{lineno}: {match.group()}"
+        for path, lineno, doc in _prose_docstrings()
+        for match in ANGLE_LINK_DEST.finditer(doc)
+    ]
+    assert not hits, "Angle-bracketed link destinations:\n" + "\n".join(hits)
 
 
 def test_manager_traces_render_literal_blocks():

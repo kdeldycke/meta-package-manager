@@ -138,14 +138,14 @@ Meta Package Manager is [available as a Homebrew formula](https://formulae.brew.
 ```{code-block} shell-session
 $ brew install meta-package-manager
 ```
+`````
 
-````{tip}
-[ZeroBrew](https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible package manager written in Rust. It consumes the same formula and installs `mpm` with:
+`````{tab-item} ZeroBrew
+[ZeroBrew](https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible package manager written in Rust. It consumes the [same formula as Homebrew](https://formulae.brew.sh/formula/meta-package-manager), so on Linux and macOS you just need to:
 
 ```{code-block} shell-session
 $ zb install meta-package-manager
 ```
-````
 `````
 
 `````{tab-item} MacPorts

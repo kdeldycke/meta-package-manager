@@ -29,7 +29,6 @@ Brewfile is a Ruby DSL. The format reference is the Homebrew Bundle source at
 from __future__ import annotations
 
 import json
-import logging
 from collections import Counter
 from datetime import datetime, timezone
 
@@ -191,14 +190,7 @@ def build_brewfile(
         if entry_type is None:
             continue
         if packages_by_manager is None:
-            try:
-                packages: tuple[Package, ...] = tuple(manager.installed)
-            except Exception:  # noqa: BLE001
-                logging.warning(
-                    "Could not list installed packages.",
-                    extra={"label": manager.id},
-                )
-                continue
+            packages = manager.installed_or_empty()
         else:
             packages = packages_by_manager.get(manager.id, ())
         for pkg in packages:

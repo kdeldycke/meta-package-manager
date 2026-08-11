@@ -8,9 +8,11 @@
 - [mpm] Fix `upgrade <packages>` and `remove` dying on an unhandled `CLIError` traceback when any selected manager's installed-package query failed. The manager is now skipped with a warning, and the packages the other managers carry are still acted on.
 - [mpm] Count a manager whose failed command was raised to its caller in the end-of-run error summary, the serialized `errors` payload and the `✓`/`✗` trail. One reporting `Could not list installed packages.` was previously scored `✓`.
 - [bar-plugin] Fix the `uv` launch candidate silently re-locking whatever project the plugin's working directory landed in: it now runs frozen, pinned to the folder its lockfile was found in.
+- [mpm] Fix the Brewfile export swallowing every failure of a manager's installed-package listing: only CLI errors are now tolerated, and unexpected crashes propagate.
 - [mpm] Fix the readme's six standalone-binary download links and the self-installation walkthrough's commands, which pointed at `mpm-<platform>.<ext>` asset names no release has published since `6.1.1`. They now target the unversioned `meta-package-manager-<platform>.<ext>` aliases attached to every release since `7.4.0`.
 - [mpm] Fix the configuration documentation claiming the `--exclude` parameter is advertised in the help message, where it is hidden like the `--manager` parameter documented beside it.
 - [pkg] Fix the `pkg(8)` and `ports(7)` man-page references rendering as broken markup on the manager's documentation page.
+- [mpm] Give ZeroBrew its own tab in the installation methods.
 
 ## [`7.6.0` (2026-08-10)](https://github.com/kdeldycke/meta-package-manager/compare/v7.5.0...v7.6.0)
 

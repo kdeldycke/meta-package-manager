@@ -304,27 +304,29 @@ List all packages installed on current system:
 
 ```shell-session
 $ mpm installed
-╭─────────────────────────────┬─────────────────────────────┬─────────┬────────────────────╮
-│ Package name                │ ID                          │ Manager │ Installed version  │
-├─────────────────────────────┼─────────────────────────────┼─────────┼────────────────────┤
-│ github                      │ github                      │ apm     │ 0.36.9             │
-│ update-package-dependencies │ update-package-dependencies │ apm     │ 0.13.1             │
-│ rust                        │ rust                        │ brew    │ 1.55.0             │
-│ x264                        │ x264                        │ brew    │ r3060              │
-│ atom                        │ atom                        │ cask    │ 1.58.0             │
-│ visual-studio-code          │ visual-studio-code          │ cask    │ 1.52.0             │
-│ nokogiri                    │ nokogiri                    │ gem     │ x86_64-darwin      │
-│ rake                        │ rake                        │ gem     │ 13.0.3             │
-│ iMovie                      │ 408981434                   │ mas     │ 10.2.5             │
-│ Telegram                    │ 747648890                   │ mas     │ 8.1                │
-│ npm                         │ npm                         │ npm     │ 7.24.0             │
-│ raven                       │ raven                       │ npm     │ 2.6.4              │
-│ jupyterlab                  │ jupyterlab                  │ pip     │ 3.1.14             │
-│ Sphinx                      │ Sphinx                      │ pip     │ 4.2.0              │
-│ ms-python.python            │ ms-python.python            │ vscode  │ 2021.10.1317843341 │
-│ ms-toolsai.jupyter          │ ms-toolsai.jupyter          │ vscode  │ 2021.9.1001312534  │
-╰─────────────────────────────┴─────────────────────────────┴─────────┴────────────────────╯
-16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
+╭──────────────────────────────────────────────┬─────────┬──────────┬──────────────────────────────────────────╮
+│ Package ID                                   │ Name    │ Manager  │ Installed version                        │
+├──────────────────────────────────────────────┼─────────┼──────────┼──────────────────────────────────────────┤
+│ curl                                         │         │ brew     │ 8.21.0                                   │
+│ git                                          │         │ brew     │ 2.55.0                                   │
+│ aerial                                       │         │ cask     │ 3.6.3                                    │
+│ amethyst                                     │         │ cask     │ 0.24.3                                   │
+│ bigdecimal                                   │         │ gem      │ 3.1.4                                    │
+│ bundler                                      │         │ gem      │ 2.4.22                                   │
+│ 361285480                                    │ Keynote │ mas      │ 15.3.1                                   │
+│ 408981434                                    │ iMovie  │ mas      │ 10.4.4                                   │
+│ @mermaid-js/mermaid-cli                      │         │ npm      │ 11.12.0                                  │
+│ npm                                          │         │ npm      │ 11.19.0                                  │
+│ cyclonedx-python-lib                         │         │ uv       │ 11.11.0                                  │
+│ packageurl-python                            │         │ uv       │ 0.17.6                                   │
+│ https://github.com/nvim-lualine/lualine.nvim │         │ vim-pack │ 221ce6b2d999187044529f49da6554a92f740a96 │
+│ charliermarsh.ruff                           │         │ vscode   │ 2026.70.0                                │
+│ ms-python.python                             │         │ vscode   │ 2026.4.0                                 │
+│ zsh-users/zsh-autosuggestions                │         │ zinit    │ ?                                        │
+│ zsh-users/zsh-completions                    │         │ zinit    │ ?                                        │
+│ (...)                                        │         │          │                                          │
+╰──────────────────────────────────────────────┴─────────┴──────────┴──────────────────────────────────────────╯
+483 packages total (brew: 246, uv: 75, gem: 62, cask: 52, vscode: 16, vim-pack: 9, zinit: 9, mas: 7, npm: 6, cargo: 1, gh-ext: 0, pnpm: 0, uvx: 0, yarn: 0).
 ```
 
 Narrow the listing to packages whose ID or name matches a query by passing it as an argument. The match is fuzzy by default (case-insensitive and tokenized); add `--exact` to require a verbatim match on the package ID or name:
@@ -405,45 +407,50 @@ You still pick up older security fixes promptly, while sitting out the risky fir
 
 ### List managers
 
-If you wonder why your package manager doesn't seem to be identified, you can list all those recognized by `mpm` with:
+If you wonder why your package manager doesn't seem to be identified, you can list all those recognized by `mpm` on the current platform:
 
 ```shell-session
-$ mpm --all-managers managers
-╭────────────┬────────────────────┬────────────────┬──────────────────────────────┬────────────┬───────────╮
-│ Manager ID │ Name               │ Supported      │ CLI                          │ Executable │ Version   │
-├────────────┼────────────────────┼────────────────┼──────────────────────────────┼────────────┼───────────┤
-│ apm        │ Atom apm           │ ✓              │ ✘ apm not found              │            │           │
-│ apt        │ Debian apt         │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
-│ apt-mint   │ Linux Mint apt     │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
-│ brew       │ Homebrew Formulae  │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
-│ cargo      │ Rust cargo         │ ✓              │ ✓ /opt/homebrew/bin/cargo    │ ✓          │ ✓ 1.64.0  │
-│ cask       │ Homebrew Cask      │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
-│ choco      │ Chocolatey         │ ✘ Windows only │ ✘ choco not found            │            │           │
-│ composer   │ PHP Composer       │ ✓              │ ✓ /opt/homebrew/bin/composer │ ✓          │ ✓ 2.4.2   │
-│ dnf        │ Fedora DNF         │ ✘ Linux only   │ ✘ dnf not found              │            │           │
-│ emerge     │ Gentoo emerge      │ ✘ Linux only   │ ✘ emerge not found           │            │           │
-│ flatpak    │ Flatpak            │ ✘ Linux only   │ ✘ flatpak not found          │            │           │
-│ gem        │ RubyGems           │ ✓              │ ✓ /usr/bin/gem               │ ✓          │ ✓ 3.0.3.1 │
-│ mas        │ Mac App Store      │ ✓              │ ✓ /opt/homebrew/bin/mas      │ ✓          │ ✓ 1.8.6   │
-│ npm        │ Node npm           │ ✓              │ ✓ /opt/homebrew/bin/npm      │ ✓          │ ✓ 8.19.2  │
-│ opkg       │ opkg               │ ✘ Linux only   │ ✘ opkg not found             │            │           │
-│ pacman     │ Arch Linux pacman  │ ✘ Linux only   │ ✘ pacman not found           │            │           │
-│ pacstall   │ Pacstall           │ ✘ Linux only   │ ✘ pacstall not found         │            │           │
-│ paru       │ Arch Linux paru    │ ✘ Linux only   │ ✘ paru not found             │            │           │
-│ pip        │ Python pip         │ ✓              │ ✓ ~/.pyenv/shims/python3     │ ✓          │ ✓ 22.2.2  │
-│ pipx       │ Python pipx        │ ✓              │ ✓ /opt/homebrew/bin/pipx     │ ✓          │ ✓ 1.1.0   │
-│ scoop      │ Scoop              │ ✘ Windows only │ ✘ scoop not found            │            │           │
-│ sdkman     │ SDKMAN             │ ✓              │ ✘ sdkman-init.sh not found   │            │           │
-│ snap       │ Snap               │ ✘ Linux only   │ ✘ snap not found             │            │           │
-│ steamcmd   │ Valve SteamCMD     │ ✓              │ ✘ steamcmd not found         │            │           │
-│ vscode     │ Visual Studio Code │ ✓              │ ✓ /opt/homebrew/bin/code     │ ✓          │ ✓ 1.71.2  │
-│ yarn       │ Yarn Classic       │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✓ 1.22.19 │
-│ yarn-berry │ Yarn Berry         │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✗ 1.22.19 │
-│ yay        │ Arch Linux yay     │ ✘ Linux only   │ ✘ yay not found              │            │           │
-│ yum        │ Fedora YUM         │ ✘ Linux only   │ ✘ yum not found              │            │           │
-│ zypper     │ openSUSE Zypper    │ ✘ Linux only   │ ✘ zypper not found           │            │           │
-╰────────────┴────────────────────┴────────────────┴──────────────────────────────┴────────────┴───────────╯
+$ mpm managers
+╭──────────────┬───────────────────────┬───────────┬────────────────────────────────────────────────────────────────────────┬────────────┬─────────────────────╮
+│ Manager ID   │ Name                  │ Supported │ CLI                                                                    │ Executable │ Version             │
+├──────────────┼───────────────────────┼───────────┼────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────────┤
+│ asdf         │ asdf                  │ ✓         │ ✘ asdf not found                                                       │            │                     │
+│ brew         │ Homebrew Formulae     │ ✓         │ ✓ /opt/homebrew/bin/brew                                               │ ✓          │ ✓ 6.0.16-2-g007333f │
+│ cargo        │ Rust cargo            │ ✓         │ ✓ /opt/homebrew/bin/cargo                                              │ ✓          │ ✓ 1.97.1            │
+│ cask         │ Homebrew Cask         │ ✓         │ ✓ /opt/homebrew/bin/brew                                               │ ✓          │ ✓ 6.0.16-2-g007333f │
+│ composer     │ PHP Composer          │ ✓         │ ✘ composer not found                                                   │            │                     │
+│ conda        │ Conda                 │ ✓         │ ✘ conda not found                                                      │            │                     │
+│ cpan         │ Perl CPAN             │ ✓         │ ✓ /usr/bin/cpan                                                        │ ✓          │ ✓ 2.28              │
+│ fink         │ Fink                  │ ✓         │ ✘ fink not found                                                       │            │                     │
+│ gem          │ RubyGems              │ ✓         │ ✓ /usr/bin/gem                                                         │ ✓          │ ✓ 3.4.5             │
+│ gh-ext       │ GitHub CLI extensions │ ✓         │ ✓ /opt/homebrew/bin/gh                                                 │ ✓          │ ✓ 2.97.0            │
+│ macports     │ MacPorts              │ ✓         │ ✘ port not found                                                       │            │                     │
+│ mas          │ Mac App Store         │ ✓         │ ✓ /opt/homebrew/bin/mas                                                │ ✓          │ ✓ 7.0.0             │
+│ mise         │ mise                  │ ✓         │ ✘ mise not found                                                       │            │                     │
+│ nix          │ Nix                   │ ✓         │ ✘ nix-env not found                                                    │            │                     │
+│ npm          │ Node npm              │ ✓         │ ✓ /opt/homebrew/bin/npm                                                │ ✓          │ ✓ 11.19.0           │
+│ pip          │ Python pip            │ ✓         │ ✓ /Users/kde/code/meta-package-manager/.venv/bin/python3               │ ✓          │ ✘                   │
+│ pipx         │ Python pipx           │ ✓         │ ✘ pipx not found                                                       │            │                     │
+│ pnpm         │ Node pnpm             │ ✓         │ ✓ /opt/homebrew/bin/pnpm                                               │ ✓          │ ✓ 11.20.0           │
+│ pwsh-gallery │ PowerShell Gallery    │ ✓         │ ✘ pwsh not found                                                       │            │                     │
+│ sdkman       │ SDKMAN                │ ✓         │ ✘ sdkman-init.sh not found                                             │            │                     │
+│ steamcmd     │ Valve SteamCMD        │ ✓         │ ✘ steamcmd not found                                                   │            │                     │
+│ stew         │ stew                  │ ✓         │ ✘ stew not found                                                       │            │                     │
+│ tlmgr        │ TeX Live Manager      │ ✓         │ ✘ tlmgr not found                                                      │            │                     │
+│ topgrade     │ Topgrade              │ ✓         │ ✓ /opt/homebrew/bin/topgrade                                           │ ✓          │ ✓ 17.9.0            │
+│ uv           │ Python uv             │ ✓         │ ✓ /opt/homebrew/bin/uv                                                 │ ✓          │ ✓ 0.12.3            │
+│ uvx          │ Python uvx            │ ✓         │ ✓ /opt/homebrew/bin/uv                                                 │ ✓          │ ✓ 0.12.3            │
+│ vim-pack     │ Neovim vim-pack       │ ✓         │ ✓ /opt/homebrew/bin/nvim                                               │ ✓          │ ✓ 0.12.4            │
+│ vscode       │ Visual Studio Code    │ ✓         │ ✓ /Applications/Visual Studio Code.app/Contents/Resources/app/bin/code │ ✓          │ ✓ 1.132.0           │
+│ vscodium     │ VSCodium              │ ✓         │ ✘ codium not found                                                     │            │                     │
+│ yarn         │ Yarn Classic          │ ✓         │ ✓ /opt/homebrew/bin/yarn                                               │ ✓          │ ✓ 1.22.22           │
+│ yarn-berry   │ Yarn Berry            │ ✓         │ ✓ /opt/homebrew/bin/yarn                                               │ ✓          │ ✘ 1.22.22 >=2.0.0   │
+│ zerobrew     │ zerobrew              │ ✓         │ ✘ zb not found                                                         │            │                     │
+│ zinit        │ Zinit                 │ ✓         │ ✓ /opt/homebrew/bin/zsh                                                │ ✓          │ ✓ 3.15.0            │
+╰──────────────┴───────────────────────┴───────────┴────────────────────────────────────────────────────────────────────────┴────────────┴─────────────────────╯
 ```
+
+Unmaintained managers sit out of this default selection, and managers tied to other platforms are hidden: pass `--all-managers` to widen the table to every manager `mpm` knows.
 
 If your favorite manager is not supported yet, you can help! See the [contribution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html). A handful of tools are deliberately left out, each with its rationale: they are catalogued in [unsupported managers](https://kdeldycke.github.io/meta-package-manager/unsupported.html).
 

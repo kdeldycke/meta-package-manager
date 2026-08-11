@@ -59,6 +59,10 @@ class _StubManager:
     def installed(self):
         return iter(self.installed_packages)
 
+    def installed_or_empty(self) -> tuple[Package, ...]:
+        """Mirror of {meth}`PackageManager.installed_or_empty`: a stub never fails."""
+        return tuple(self.installed)
+
     def brewfile_entry(self, package: Package):
         """Default-shape hook matching {meth}`PackageManager.brewfile_entry`."""
         return package.id, None

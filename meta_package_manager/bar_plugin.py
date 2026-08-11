@@ -205,7 +205,10 @@ class MPMPlugin:
             return (f"PIPENV_PIPFILE='{folder}'", "pipenv", "run", "mpm")
 
         if (folder / "uv.lock").is_file():
-            return ("uv", "run", "mpm")
+            # Frozen, and pinned to the folder the lockfile was found in: a bare
+            # `uv run` would bind to the process cwd instead, and re-lock that
+            # project (with the user-level uv config folded in) on every launch.
+            return ("uv", "run", "--frozen", "--project", str(folder), "mpm")
 
         if (folder / "poetry.lock").is_file():
             return ("poetry", "run", "--directory", str(folder), "mpm")

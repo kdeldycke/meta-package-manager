@@ -6,5 +6,5 @@
 	"shell-version": ["46", "47", "48", "49", "50"],
 	"url": "https://github.com/kdeldycke/meta-package-manager",
 	"uuid": "mpm@kdeldycke.github.io",
-	"version-name": "7.6.1"
+	"version-name": "7.6.2.dev0"
 }

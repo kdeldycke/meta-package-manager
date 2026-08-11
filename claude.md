@@ -66,9 +66,15 @@ Which boils down to the following these rules of thumb regarding stability:
   manager may still be removed, in part or in full, in any release and without notice,
   once keeping it working becomes too burdensome. Each flag is documented via the
   manager's `unmaintained_message` (a markdown block rendered into the docs), and
-  unmaintained managers are kept out of the functional and integration test matrices to
-  save CI resources. See the `unmaintained` attribute in
+  unmaintained managers are hidden from default selection and kept out of the functional
+  and integration test matrices to save CI resources. An upstream that is merely slowing
+  down does not earn the flag: it carries an informational maintenance note instead. Both
+  render on the manager's own page. See the `unmaintained` attribute in
   `meta_package_manager/manager.py` for the full policy.
+
+  Being flagged is a different axis from being *unsupported*: an unmaintained manager is
+  still wrapped and usable, whereas the tools in `docs/unsupported.md` were never wrapped
+  at all.
 
 ## Cooldown on every install
 
@@ -257,7 +263,14 @@ The benchmark compares `mpm` against related tools. It mixes one generated table
 
 **Generated vs hand-maintained.** Only the "Package manager support" table is generated: it renders live at Sphinx build time through the `{python:render}` block in `docs/benchmark.md`, which calls `benchmark_managers_table()` from `meta_package_manager/_docs.py`, fed by `docs/benchmark.yaml`; its competitor set is the `BENCHMARK_COMPETITORS` tuple. Every other table (Features, Operations, OS, Distribution, Activity, Popularity, Metadata) is edited by hand. The block carries the `:mirror:` flag: a generated copy of the table is checked in right below the fence, between `<!-- mirror -->`/`<!-- mirror-end -->` markers, so it is reviewable in raw diffs and renders on GitHub. Never hand-edit the mirrored region: `click-extra refresh-directives` (run by repomatic's `update-docs` job, or by hand from the repository root) regenerates it. Sphinx builds keep rendering the live output in memory and never read the mirror, so the published table cannot drift even when the checked-in copy is stale; the mpm-column ✅ links (class source-line anchors) are computed at render time, so the mirror legitimately churns whenever manager source lines shift. `test_benchmark_table_renders` guards the generator against crashes and structural regressions.
 
-**Cell glyphs.** The `✅`/`❌`/`🟡` set is shared by the docs' comparison and capability tables: the benchmark tables, the SBOM page's coverage matrix and tool-comparison table, the cooldown support table (with its own extended `🚧`/`➖` legend) and the augmentations table. Only the dense per-manager operation grids keep plain `✓`: `readme.md`'s operation matrix and each manager page's own operations table. The evidence-link discipline below is benchmark-specific.
+**Cell glyphs.** `✅`/`❌` are shared by the docs' comparison and capability tables: the benchmark tables, the SBOM page's coverage matrix and tool-comparison table, the cooldown support table and the augmentations table.
+
+A dead upstream gets two glyphs, and the split is the point — it encodes whether `mpm` ships code for the tool:
+
+- `⚠️` — **wrapped, but at risk.** The upstream is abandoned and the manager carries the `unmaintained` flag, yet it stays wrapped and usable. Marks the `Unmaintained` column of the manager index and the same fact in `readme.md`'s operation matrix.
+- `☠️` — **never wrapped.** The upstream is dead, so `mpm` declined to write the manager at all. Marks the `Status` column of `docs/unsupported.md` and the benchmark's `mpm` column (see the `unsupported` key below), alongside `❌` for a *live* tool declined on its own merits.
+
+Never swap one for the other: a reader scanning for something they can still install today needs `⚠️` to mean "works, may go away" and `☠️` to mean "was never there". Two tables add glyphs that do not travel: the benchmark's `🟡` for coarse support a competitor cannot invoke in isolation, and the cooldown table's `🔜` (gate shipped upstream, not yet plugged into `mpm`), `🚧` (proposed upstream) and `➖` (not applicable). Only the dense per-manager operation grids keep plain `✓`: `readme.md`'s operation matrix and each manager page's own operations table. The bar plugin's `⚠️` is unrelated, counting runtime errors rather than upstream health. The evidence-link discipline below is benchmark-specific.
 
 - `✅` — supported. The `mpm` `✅` is always a link: to the manager class's source line in the generated table, to the feature's user documentation in the Features table. A competitor's `✅` is a bare glyph.
 - `❌` — not supported, **and only ever written with a link to explicit, verifiable evidence** that the project lacks or rejects the feature: an issue/PR closed not-planned, a maintainer "out of scope" / "won't add" comment, a still-open unaddressed feature request, or an official doc/man-page stating the limitation. **Absence of the feature is never sufficient** — if no citable source exists, leave the cell blank. Verify every URL (`gh issue view`, `gh api`, or WebFetch) and keep the exact supporting quote before committing the link; prefer a precise `#issuecomment-<id>` anchor when a maintainer states the position. This mirrors the "Concurrent multi-PM execution" row.
@@ -265,7 +278,11 @@ The benchmark compares `mpm` against related tools. It mixes one generated table
 
 **`docs/benchmark.yaml`** has five alphabetically-sorted keys: `managers` (which competitor supports each manager), `homepages` (URLs for non-pool managers only), `coarse_support` (`{manager: {competitor: url}}`), `refused` (`{manager: {competitor: url}}` for competitors that explicitly declined a manager `mpm` wraps), and `unsupported` (a flat list of managers `mpm` itself declined). `test_benchmark_yaml_well_formed` enforces the shape plus the no-orphan and no-conflict invariants (a `(manager, competitor)` pair cannot be in both `managers` and `refused`; an `unsupported` manager must have a `managers` row and must not be in the pool).
 
-**The table is a coverage map, so a manager no tool wraps still earns a row.** A competitor's backend that `mpm` lacks is exactly what the table exists to surface: leaving it out hides the gap. The `mpm` column then distinguishes the two kinds of absence, which is what `unsupported` is for — `❌` links to the decision in `docs/unsupported.md`, while a blank cell means the tool was never assessed. Only settled decisions belong in `unsupported`: a tool the page frames as a *not yet* (`lazy`, the project-scoped ecosystems) keeps its blank cell, since `❌` would overstate it. The link target lives once in `_docs.py`'s `UNSUPPORTED_DOCS_URL`, never repeated per manager.
+**The table is a coverage map, so a manager no tool wraps still earns a row.** A competitor's backend that `mpm` lacks is exactly what the table exists to surface: leaving it out hides the gap. By the same logic a retired tool is never dropped from the table — a competitor that still drives a dead tool is a fact about the competitor. The `mpm` column then distinguishes the two kinds of absence, which is what `unsupported` is for — `❌` links to the decision in `docs/unsupported.md`, while a blank cell means the tool was never assessed. Only settled decisions belong in `unsupported`: a tool framed as a *not yet* (`lazy`, the project-scoped ecosystems) keeps its blank cell, since `❌` would overstate it. The link target lives once in `_docs.py`'s `UNSUPPORTED_DOCS_URL`, never repeated per manager.
+
+**`docs/unsupported.md` is the user-facing record, not the reasoning.** It carries the table of excluded tools and the reason per row, and nothing else. Every guideline behind it — why a dead upstream or a registry-less wrapper is disqualified, how to pick the live end of a lineage, the unattended-entry-point test, the three requirements enforced in code and their escape hatches — lives in the `add-manager` skill, where someone deciding whether to wrap a tool will actually read it. Keep it that way: the page is a record, and rationale added to it belongs in the skill instead.
+
+**Two groups of benchmark rows are easy to misread**, and neither is a refusal. Competitors like `topgrade` also drive system updaters, dotfile managers and single-application updaters, which are outside `mpm`'s domain by definition. And `mpm` wraps `asdf`, `mise` and `volta` for what they install globally, so their rows say nothing about the per-project pinning that is the separate project-scope question.
 
 **Scope and competitor set.** Feature/Operation rows cover only capabilities in `mpm`'s domain (cross-manager package operations, output, config, distribution). Do not add rows for a competitor's out-of-domain features (a runtime version manager's shims, task runner, env-var management, per-project version files). Columns are the wrapper peer group (`topgrade`, `pacaptr`, `pacapt`, `sysget`, `whohas`) plus `brew` (its Brewfile is a declarative multi-backend installer); `mise`/`asdf` were removed as out-of-scope version managers, kept only as managers `mpm` wraps in the generated table.
 

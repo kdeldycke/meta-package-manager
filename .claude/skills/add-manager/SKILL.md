@@ -8,6 +8,31 @@ disable-model-invocation: true
 
 Implement support for a new package manager in `mpm`, or complete an incomplete integration. If adding a manager requested via a GitHub issue, extract CLI output samples from the issue body to guide the implementation.
 
+## Confirm the tool is a candidate
+
+Not everything that installs software is one. Two grounds disqualify a tool outright, whatever its popularity, and neither is a judgement about effort:
+
+- **A dead upstream.** The stability policy flags an abandoned manager `unmaintained`, hides it from default selection, drops it from the test matrices and eventually removes it altogether. A wrapper written for an already-retired tool starts at the end of that lifecycle, so it is not written.
+- **No registry of its own.** A tool that merely unifies syntax or declarations across other package managers reaches no package `mpm` cannot already reach through the backend it wraps directly, so wrapping it buys a translation or reconciliation layer and not one extra package. This is what rules out the declarative multi-backend managers (`metapac`, `decman`, `declaro`) and the syntax shims (`upt`) — several of them actively developed. Such a tool may still deserve a *benchmark column* as a peer of `mpm`; that is a separate question from wrapping it.
+
+Target the live end of a lineage rather than whichever name is most familiar. Shougo's Vim managers ran `neobundle` → `dein` → `dpp.vim` before Neovim absorbed the job into core, which is why `mpm` wraps `vim-pack`; on the Zsh side `antibody` gave way to `antidote`, and `mpm` wraps `zinit`. A lineage can fork instead of running in a line, and then each successor is judged separately: packer.nvim's unmaintained notice names both lazy.nvim and pckr.nvim.
+
+That fork is also the worked example of the criterion that decides an editor or shell plugin manager, since neither ships a package database `mpm` can query directly. Ask whether the tool can be driven to completion with nobody at the keyboard. lazy.nvim can (`nvim --headless "+Lazy! sync" +qa`, plus a JSON lockfile that lists installed plugins without starting the editor), which makes it a *not yet* — what is missing is a decision on which operations a plugin manager can support when it cannot install a plugin absent from the user's own config. pckr.nvim cannot: no documented completion signal, a confirmation prompt that blocks by default, and a maintainer declining synchronous behavior ([lewis6991/pckr.nvim#12](https://github.com/lewis6991/pckr.nvim/issues/12)). Design that entry point in from the start when proposing a manager upstream; retrofitting one meets resistance.
+
+Three further requirements are enforced in code. They are not preferences: a tool that cannot clear them cannot be wrapped in the current architecture, however much work is thrown at it.
+
+| Requirement          | Enforced by                                | What it rules out                                                                                                     |
+| :------------------- | :----------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| An executable CLI    | `CLIExecutor.executable`                   | A tool shipped only as a file meant to be *sourced*, with no binary anywhere and no interpreter to key the manager on. |
+| A reportable version | `PackageManager.fresh`                     | A tool that reports no version through any binary: without one the manager is never considered available.             |
+| System scope         | `ManagerScope.SYSTEM`                      | A tool whose packages live inside one project tree rather than on the machine.                                         |
+
+The first two have escape hatches worth trying before declaring a tool impossible. A shell-function manager can key on the interpreter that runs it instead of on its own sources: `zinit` is wrapped that way, with Zsh as its CLI and its version probe doubling as the presence check. A manager whose own binaries expose no version can name a companion binary through `CLIExecutor.version_cli`.
+
+dein.vim is the worked example of both hatches failing, and the shape to compare a candidate against. It is Vimscript with no binary anywhere, so keying it on `nvim` or `vim` would mark it available on every machine that merely has an editor installed, and would collide with `vim-pack`, which legitimately keys on `nvim`. It reports no version either: `g:dein#_cache_version` is an internal state-format counter, and its releases are Git tags on a checkout the user places freely.
+
+When a tool is rejected, record the decision rather than leaving it implicit: add a row to `docs/unsupported.md` and its id to the `unsupported` list of `docs/benchmark.yaml`. The benchmark then renders a `❌` linking to the reason instead of a blank cell, which is reserved for tools nobody has assessed yet. Nothing has ever been *removed* from the pool, and no manager request has been closed as not-planned, so a gap in the benchmark is nearly always unwritten rather than refused.
+
 ## Choose an implementation strategy: class-based or config-based
 
 Before writing anything, decide how the manager will be implemented. `mpm` supports two paths:

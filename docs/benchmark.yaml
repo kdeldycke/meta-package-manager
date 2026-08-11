@@ -155,6 +155,7 @@ managers:
   opam: [topgrade]
   opencode: []
   opkg: [upt]
+  pacapt: []
   pacaur: []
   pacdef: [topgrade]
   packer-nvim: [topgrade]
@@ -214,6 +215,7 @@ managers:
   stew: [topgrade]
   sun-tools: []
   swupd: []
+  sysget: []
   system: [topgrade]
   tazpkg: []
   tldr: [topgrade]
@@ -238,6 +240,7 @@ managers:
   vscodium: [topgrade, metapac]
   vundle: [topgrade]
   waydroid: [topgrade]
+  whohas: []
   winget: [topgrade, upt, pacaptr, metapac]
   wsl: [topgrade]
   xbps: [topgrade, upt, pacaptr, metapac]
@@ -322,6 +325,7 @@ homepages:
   ollama: https://ollama.com
   opam: https://opam.ocaml.org
   opencode: https://github.com/sst/opencode
+  pacapt: https://github.com/icy/pacapt
   pacdef: https://github.com/steven-omaha/pacdef
   packer-nvim: https://github.com/wbthomason/packer.nvim
   pamac: https://gitlab.manjaro.org/applications/pamac
@@ -358,6 +362,7 @@ homepages:
   sparkle: https://sparkle-project.org
   spicetify: https://spicetify.app
   stack: https://docs.haskellstack.org
+  sysget: https://github.com/cvengler/sysget
   system: https://github.com/topgrade-rs/topgrade
   tldr: https://tldr.sh
   tmux: https://github.com/tmux-plugins/tpm
@@ -371,6 +376,7 @@ homepages:
   voom: https://www.vim.org/scripts/script.php?script_id=2657
   vundle: https://github.com/VundleVim/Vundle.vim
   waydroid: https://waydro.id
+  whohas: https://github.com/whohas/whohas
   wsl: https://learn.microsoft.com/windows/wsl/
   xcodes: https://github.com/XcodesOrg/xcodes
   yadm: https://yadm.io
@@ -466,22 +472,31 @@ refused:
     topgrade: https://github.com/topgrade-rs/topgrade/issues/2003
 
 unsupported:
-  # Managers left unwrapped by decision, each carrying its reason in the
-  # `Deliberate exclusions` section of `docs/unsupported.md`. Three families:
-  # tools whose upstream is retired (`antibody`, `dein`, `fundle`, `jetpack`,
-  # `neobundle`, `pacdef`, `packer-nvim`), tools that own no package registry
-  # and merely orchestrate backends mpm already wraps (`declaro`, `decman`,
-  # `metapac`, `upt`), and `pckr-nvim`, which is alive but exposes no
-  # unattended entry point to drive. Sorted alphabetically.
-  - antibody
-  - declaro
-  - decman
-  - dein
-  - fundle
-  - jetpack
-  - metapac
-  - neobundle
-  - pacdef
-  - packer-nvim
-  - pckr-nvim
-  - upt
+  # Managers left unwrapped by decision, each carrying its reason in the table
+  # of `docs/unsupported.md`. The value is the tool's own status, which picks
+  # the glyph rendered in the `mpm` column (see `UNSUPPORTED_GLYPHS` in
+  # `_docs.py`):
+  #
+  #   archived: upstream is retired, so the tool is dead whatever mpm does.
+  #   excluded: upstream is alive; mpm declined it on its own merits, either
+  #             because it owns no package registry (`declaro`, `decman`,
+  #             `metapac`, `upt`) or because it exposes no unattended entry
+  #             point to drive (`pckr-nvim`).
+  #
+  # Keys are sorted alphabetically, and every key needs a matching row in
+  # `docs/unsupported.md`: the glyph links there for the reason.
+  antibody: archived
+  declaro: excluded
+  decman: excluded
+  dein: archived
+  fundle: archived
+  jetpack: archived
+  metapac: excluded
+  neobundle: archived
+  pacapt: archived
+  pacdef: archived
+  packer-nvim: archived
+  pckr-nvim: excluded
+  sysget: archived
+  upt: excluded
+  whohas: archived

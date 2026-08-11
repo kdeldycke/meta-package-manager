@@ -371,19 +371,22 @@ def test_benchmark_yaml_well_formed():
                 f"refused[{mid!r}][{competitor!r}] URL must be an http(s) link"
             )
 
-    # unsupported: flat list of managers mpm deliberately does not wrap. Their
-    # mpm cell links to the recorded decision instead of rendering blank.
+    # unsupported: ``{manager_id: status}`` for managers mpm deliberately does
+    # not wrap. Their mpm cell renders the status glyph linked to the recorded
+    # decision, instead of a blank cell.
     unsupported = data["unsupported"]
-    assert isinstance(unsupported, list)
-    assert unsupported == sorted(unsupported), (
-        "unsupported entries must be sorted alphabetically"
-    )
-    assert len(unsupported) == len(set(unsupported)), (
-        "unsupported must not repeat a manager"
+    assert isinstance(unsupported, dict)
+    assert list(unsupported) == sorted(unsupported), (
+        "unsupported keys must be sorted alphabetically"
     )
     pool_ids = set(pool.all_manager_ids)
-    for mid in unsupported:
+    for mid, status in unsupported.items():
         assert mid == mid.lower()
+        # Each status must map to a glyph the generator knows how to render.
+        assert status in _docs.UNSUPPORTED_GLYPHS, (
+            f"unsupported[{mid!r}] has unknown status {status!r}; "
+            f"expected one of {sorted(_docs.UNSUPPORTED_GLYPHS)}"
+        )
         # No-orphan invariant: the row must exist for the cell to render into.
         assert mid in data["managers"], (
             f"unsupported[{mid!r}] has no matching entry in managers"
@@ -982,7 +985,9 @@ def test_managers_index_table_renders():
             unmaintained += 1
         if manager.logo:
             assert _docs.manager_logo(mid, inline=True) in table
-    # The marker moved out of the ID cell into a column of its own.
+    # The marker moved out of the ID cell into a column of its own. It stays ⚠️
+    # rather than the ☠️ of the unsupported page: these managers are wrapped and
+    # usable, only their upstream is gone.
     assert unmaintained
     assert table.count("⚠️") == unmaintained
     assert "⚠️](managers/" not in table

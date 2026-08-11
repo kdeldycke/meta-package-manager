@@ -81,14 +81,24 @@ PROJECT_ROOT = Path(__file__).parent.parent
 BENCHMARK_COMPETITORS = ("topgrade", "upt", "pacaptr", "metapac")
 """Competing tools shown alongside `mpm` in the benchmark page, in column order."""
 
-UNSUPPORTED_DOCS_URL = "unsupported.md#deliberate-exclusions"
+UNSUPPORTED_GLYPHS = {"archived": "☠️", "excluded": "❌"}
+"""Glyph rendered in the `mpm` column for each `unsupported` status.
+
+A skull marks a tool whose upstream is retired: the wrapper is not missing, its
+subject is gone. A cross marks a live tool `mpm` declined on its own merits.
+Both link to {data}`UNSUPPORTED_DOCS_URL`, whose table carries the reason and
+repeats the same glyph in its own status column.
+"""
+
+UNSUPPORTED_DOCS_URL = "unsupported.md"
 """Link target of the `mpm` cell for managers deliberately left unwrapped.
 
 Relative to `docs/`, so it resolves in the Sphinx build and in the checked-in
 mirror rendered on GitHub alike. Held as a single constant because every
 manager listed in `benchmark.yaml`'s `unsupported` key points at the same
-section: renaming that heading is then a one-line fix here, instead of an edit
-per manager in the YAML.
+place: retargeting it is then a one-line fix here, instead of an edit per
+manager in the YAML. Deliberately fragment-less, since the page opens on the
+table of excluded tools.
 """
 
 DOCS_SITE_URL = "https://kdeldycke.github.io/meta-package-manager"
@@ -366,11 +376,11 @@ def benchmark_managers_table() -> str:
     The `mpm` column is auto-derived from the live pool: each implemented
     manager renders as `[✅](source_url)`, linking to the class definition
     that proves the support. A manager listed in the YAML's `unsupported`
-    key instead renders as `[❌]({data}`UNSUPPORTED_DOCS_URL`)`, pointing at
-    the recorded decision, which keeps a deliberate refusal distinct from a
-    blank cell meaning nobody has assessed the tool yet. Competitor columns
-    are filled from `docs/benchmark.yaml`, which only encodes what the
-    *other* tools support.
+    mapping instead renders the {data}`UNSUPPORTED_GLYPHS` entry for its
+    status, linked to {data}`UNSUPPORTED_DOCS_URL`, which keeps a deliberate
+    refusal distinct from a blank cell meaning nobody has assessed the tool
+    yet. Competitor columns are filled from `docs/benchmark.yaml`, which only
+    encodes what the *other* tools support.
 
     Each manager identifier in the first column is rendered as a link: to its
     dedicated documentation page for implemented managers, or to its homepage
@@ -396,10 +406,12 @@ def benchmark_managers_table() -> str:
     homepages: dict[str, str] = data.get("homepages", {})
     coarse_support: dict[str, dict[str, str]] = data.get("coarse_support", {})
     refused: dict[str, dict[str, str]] = data.get("refused", {})
-    unsupported: set[str] = set(data.get("unsupported", ()))
+    unsupported: dict[str, str] = data.get("unsupported", {})
 
     pool_ids = set(pool.all_manager_ids)
-    all_ids = sorted(pool_ids | competitor_data.keys() | refused.keys() | unsupported)
+    all_ids = sorted(
+        pool_ids | competitor_data.keys() | refused.keys() | unsupported.keys()
+    )
 
     headers = ["Manager", "`mpm`"]
     headers.extend(f"`{name}`[^{name}]" for name in BENCHMARK_COMPETITORS)
@@ -415,7 +427,8 @@ def benchmark_managers_table() -> str:
         if mid in pool_ids:
             row.append(f"[✅]({manager_source_url(mid)})")
         elif mid in unsupported:
-            row.append(f"[❌]({UNSUPPORTED_DOCS_URL})")
+            glyph = UNSUPPORTED_GLYPHS[unsupported[mid]]
+            row.append(f"[{glyph}]({UNSUPPORTED_DOCS_URL})")
         else:
             row.append("")
         flags = set(competitor_data.get(mid, []))
@@ -1843,7 +1856,10 @@ def managers_index_table() -> str:
     manager's dedicated page, since a reader scanning for `apt-mint` looks at the
     identifier column, not the prose name. The `⚠️` marker of the readme's
     operation matrix gets a column of its own rather than trailing the ID, which
-    kept a sort-worthy fact glued to an identifier. Platform icons follow the same
+    kept a sort-worthy fact glued to an identifier. `⚠️` is deliberately not the
+    `☠️` of the benchmark and unsupported pages: both mark a dead upstream, but a
+    `⚠️` manager is still wrapped and usable, where `☠️` marks one `mpm` declined
+    to wrap at all. Platform icons follow the same
     coverage reading as the manager pages: a partially-backed group keeps its icon
     with {func}`_platform_coverage`'s annotation (`🐧 (Exherbo Linux only)`)
     instead of disappearing, as it does in the readme's all-or-nothing matrix.

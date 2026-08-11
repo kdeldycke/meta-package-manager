@@ -78,8 +78,18 @@ else:
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
-BENCHMARK_COMPETITORS = ("topgrade", "pacaptr")
+BENCHMARK_COMPETITORS = ("topgrade", "upt", "pacaptr", "metapac")
 """Competing tools shown alongside `mpm` in the benchmark page, in column order."""
+
+UNSUPPORTED_DOCS_URL = "unsupported.md#deliberate-exclusions"
+"""Link target of the `mpm` cell for managers deliberately left unwrapped.
+
+Relative to `docs/`, so it resolves in the Sphinx build and in the checked-in
+mirror rendered on GitHub alike. Held as a single constant because every
+manager listed in `benchmark.yaml`'s `unsupported` key points at the same
+section: renaming that heading is then a one-line fix here, instead of an edit
+per manager in the YAML.
+"""
 
 DOCS_SITE_URL = "https://kdeldycke.github.io/meta-package-manager"
 """Base URL of the published documentation site.
@@ -355,9 +365,12 @@ def benchmark_managers_table() -> str:
 
     The `mpm` column is auto-derived from the live pool: each implemented
     manager renders as `[✅](source_url)`, linking to the class definition
-    that proves the support. Competitor columns are filled from
-    `docs/benchmark.yaml`, which only encodes what the *other* tools
-    support.
+    that proves the support. A manager listed in the YAML's `unsupported`
+    key instead renders as `[❌]({data}`UNSUPPORTED_DOCS_URL`)`, pointing at
+    the recorded decision, which keeps a deliberate refusal distinct from a
+    blank cell meaning nobody has assessed the tool yet. Competitor columns
+    are filled from `docs/benchmark.yaml`, which only encodes what the
+    *other* tools support.
 
     Each manager identifier in the first column is rendered as a link: to its
     dedicated documentation page for implemented managers, or to its homepage
@@ -383,9 +396,10 @@ def benchmark_managers_table() -> str:
     homepages: dict[str, str] = data.get("homepages", {})
     coarse_support: dict[str, dict[str, str]] = data.get("coarse_support", {})
     refused: dict[str, dict[str, str]] = data.get("refused", {})
+    unsupported: set[str] = set(data.get("unsupported", ()))
 
     pool_ids = set(pool.all_manager_ids)
-    all_ids = sorted(pool_ids | competitor_data.keys() | refused.keys())
+    all_ids = sorted(pool_ids | competitor_data.keys() | refused.keys() | unsupported)
 
     headers = ["Manager", "`mpm`"]
     headers.extend(f"`{name}`[^{name}]" for name in BENCHMARK_COMPETITORS)
@@ -400,6 +414,8 @@ def benchmark_managers_table() -> str:
         row = [label]
         if mid in pool_ids:
             row.append(f"[✅]({manager_source_url(mid)})")
+        elif mid in unsupported:
+            row.append(f"[❌]({UNSUPPORTED_DOCS_URL})")
         else:
             row.append("")
         flags = set(competitor_data.get(mid, []))

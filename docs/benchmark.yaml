@@ -17,7 +17,7 @@
 #
 # ``managers`` keys must be lower-case manager identifiers. Each value is a
 # list (possibly empty) of competing tools that support that manager, chosen
-# from: topgrade, pacaptr.
+# from: topgrade, upt, pacaptr, metapac.
 #
 # ``homepages`` only needs to contain URLs for managers that mpm does not
 # implement. For mpm-implemented managers the homepage is sourced from the
@@ -38,6 +38,17 @@
 # also exist in ``managers`` (you cannot be coarse-only-supported without
 # being supported at all).
 #
+# ``unsupported`` is a flat, alphabetically-sorted list of managers ``mpm``
+# deliberately does not wrap. Their ``mpm`` cell renders as ``[❌](url)``
+# pointing at the decision recorded in ``docs/unsupported.md``, so a refusal
+# reads differently from a blank cell, which means nobody has assessed the
+# tool yet. The link target is not repeated here: it lives once in
+# ``_docs.py``'s ``UNSUPPORTED_DOCS_URL``, so renaming that section is a
+# one-line fix rather than an edit per manager. Only settled decisions belong
+# here. A tool the page frames as a *not yet* (``lazy``, and the
+# project-scoped ecosystems) keeps a blank cell, since ``❌`` would overstate
+# it. A manager cannot be both wrapped and unsupported.
+#
 # ``refused`` records ``(manager_id, competitor, evidence_url)`` triples where
 # the competitor has *explicitly declined* to support the manager, with a
 # link to the specific issue, PR, or comment carrying the refusal. Cells in
@@ -55,10 +66,10 @@ managers:
   antibody: [topgrade]
   antidote: [topgrade]
   antigen: [topgrade]
-  apk: [topgrade, pacaptr]
+  apk: [topgrade, upt, pacaptr]
   apm: [topgrade]
   app-man: [topgrade]
-  apt: [topgrade, pacaptr]
+  apt: [topgrade, upt, pacaptr, metapac]
   apt-cyg: []
   apt-mint: []
   aqua: [topgrade]
@@ -67,36 +78,39 @@ managers:
   aura: [topgrade]
   bash-it: [topgrade]
   bin: [topgrade]
-  brew: [topgrade, pacaptr]
-  bun: [topgrade]
+  brew: [topgrade, upt, pacaptr, metapac]
+  bun: [topgrade, metapac]
   cabal: []
-  cargo: [topgrade]
+  cards: [upt]
+  cargo: [topgrade, metapac]
   cask: [topgrade, pacaptr]
   cave: []
   certbot: [topgrade]
   chezmoi: [topgrade]
-  choco: [topgrade, pacaptr]
+  choco: [topgrade, upt, pacaptr]
   choosenim: [topgrade]
   chromebrew: []
   composer: [topgrade]
   conda: [topgrade, pacaptr]
   containers: [topgrade]
   deb-get: [topgrade]
+  declaro: []
+  decman: []
   dein: [topgrade]
   deno: [topgrade]
   distrobox: [topgrade]
   dkp-pacman: [topgrade]
-  dnf: [topgrade, pacaptr]
+  dnf: [topgrade, upt, pacaptr, metapac]
   dnf5: []
   dotnet: [topgrade]
   emacs: [topgrade]
-  emerge: [topgrade, pacaptr]
-  eopkg: [topgrade]
+  emerge: [topgrade, upt, pacaptr]
+  eopkg: [topgrade, upt]
   etc-update: [topgrade]
   fink: []
   fish-plug: [topgrade]
   fisher: [topgrade]
-  flatpak: [topgrade]
+  flatpak: [topgrade, upt, metapac]
   flutter: [topgrade]
   fossil: [topgrade]
   fundle: [topgrade]
@@ -109,7 +123,7 @@ managers:
   git: [topgrade]
   gnome-shell: [topgrade]
   go: [topgrade]
-  guix: [topgrade]
+  guix: [topgrade, upt]
   haxelib: [topgrade]
   helm: [topgrade]
   home-manager: [topgrade]
@@ -123,54 +137,59 @@ managers:
   macos: [topgrade]
   macports: [topgrade, pacaptr]
   mamba: [topgrade]
-  mas: [topgrade]
+  mas: [topgrade, metapac]
   mason: [topgrade]
+  metapac: []
   micro: [topgrade]
   miktex: [topgrade]
-  mise: [topgrade]
+  mise: [topgrade, metapac]
   myrepos: [topgrade]
-  nala: [topgrade]
+  nala: [topgrade, upt]
   neobundle: [topgrade]
-  nix: [topgrade]
-  npm: [topgrade]
+  nix: [topgrade, upt, metapac]
+  npm: [topgrade, metapac]
   oh-my-bash: [topgrade]
   oh-my-fish: [topgrade]
   oh-my-zsh: [topgrade]
   ollama: [topgrade]
   opam: [topgrade]
   opencode: []
-  opkg: []
+  opkg: [upt]
   pacaur: []
   pacdef: [topgrade]
   packer-nvim: [topgrade]
-  pacman: [topgrade]
+  pacman: [topgrade, upt, metapac]
   pacstall: [topgrade]
-  pamac: [topgrade]
+  pamac: [topgrade, metapac]
   paq: [topgrade]
-  paru: [topgrade]
+  paru: [topgrade, metapac]
+  pckr-nvim: []
   pearl: [topgrade]
   pihole: [topgrade]
-  pikaur: [topgrade]
+  pikaur: [topgrade, metapac]
   pip: [topgrade, pacaptr]
   pip-review: [topgrade]
   pipupgrade: [topgrade]
-  pipx: [topgrade]
+  pipx: [topgrade, metapac]
   pipxu: [topgrade]
   pixi: [topgrade]
   # PackageKit's CLI. pacaptr only reaches it through its explicit
   # ``--using pkcon`` syntax, never by auto-detection.
   pkcon: [pacaptr]
-  pkg: [topgrade]
+  pkg: [topgrade, upt]
+  pkg-termux: [upt]
   pkg-tools: []
   pkgfile: [topgrade]
   pkgin: [topgrade]
+  pkgman: [upt]
   platformio-core: [topgrade]
   plug: [topgrade]
-  pnpm: [topgrade]
+  pnpm: [topgrade, metapac]
   podman: [topgrade]
   poetry: [topgrade]
   protonplus: [topgrade]
   protonup: [topgrade]
+  prt-get: [upt]
   pwsh-gallery: [topgrade]
   pyenv: [topgrade]
   raco: [topgrade]
@@ -180,11 +199,12 @@ managers:
   rtcl: [topgrade]
   rustup: [topgrade]
   rye: [topgrade]
-  scoop: [topgrade, pacaptr]
+  scoop: [topgrade, upt, pacaptr, metapac]
   sdkman: [topgrade]
   sheldon: [topgrade]
+  slackpkg: [upt]
   slapt-get: []
-  snap: [topgrade]
+  snap: [topgrade, upt, metapac]
   sorcery: []
   spack: []
   sparkle: [topgrade]
@@ -205,29 +225,30 @@ managers:
   toolbx: [topgrade]
   trizen: [topgrade]
   typst: [topgrade]
-  urpmi: []
-  uv: [topgrade]
+  upt: []
+  urpmi: [upt]
+  uv: [topgrade, metapac]
   vagrant: [topgrade]
   vcpkg: [topgrade]
   vim: [topgrade]
   vim-pack: [topgrade]
   volta: [topgrade]
   voom: [topgrade]
-  vscode: [topgrade]
-  vscodium: [topgrade]
+  vscode: [topgrade, metapac]
+  vscodium: [topgrade, metapac]
   vundle: [topgrade]
   waydroid: [topgrade]
-  winget: [topgrade, pacaptr]
+  winget: [topgrade, upt, pacaptr, metapac]
   wsl: [topgrade]
-  xbps: [topgrade, pacaptr]
+  xbps: [topgrade, upt, pacaptr, metapac]
   xcodes: [topgrade]
   yadm: [topgrade]
-  yarn: [topgrade]
+  yarn: [topgrade, metapac]
   yarn-berry: [topgrade]
-  yay: [topgrade]
+  yay: [topgrade, upt, metapac]
   yazi: [topgrade]
   yt-dlp: []
-  yum: [topgrade]
+  yum: [topgrade, upt]
   zgenom: [topgrade]
   zigup: [topgrade]
   zim: [topgrade]
@@ -235,7 +256,7 @@ managers:
   zplug: [topgrade]
   zr: [topgrade]
   zvm: [topgrade]
-  zypper: [topgrade, pacaptr]
+  zypper: [topgrade, upt, pacaptr, metapac]
 
 homepages:
   0install: https://0install.net
@@ -251,10 +272,13 @@ homepages:
   bin: https://github.com/marcosnils/bin
   bun: https://bun.sh
   cabal: https://www.haskell.org/cabal/
+  cards: https://nutyx.org
   certbot: https://certbot.eff.org
   chezmoi: https://www.chezmoi.io
   choosenim: https://github.com/dom96/choosenim
   containers: https://github.com/containers/podman
+  declaro: https://github.com/mantinhas/declaro
+  decman: https://github.com/kiviktnm/decman
   dein: https://github.com/Shougo/dein.vim
   deno: https://deno.com
   distrobox: https://distrobox.it
@@ -286,6 +310,7 @@ homepages:
   macos: https://www.apple.com/macos/
   mamba: https://mamba.readthedocs.io
   mason: https://github.com/williamboman/mason.nvim
+  metapac: https://github.com/ripytide/metapac
   micro: https://micro-editor.github.io
   miktex: https://miktex.org
   myrepos: https://myrepos.branchable.com
@@ -301,6 +326,7 @@ homepages:
   packer-nvim: https://github.com/wbthomason/packer.nvim
   pamac: https://gitlab.manjaro.org/applications/pamac
   paq: https://github.com/savq/paq-nvim
+  pckr-nvim: https://github.com/lewis6991/pckr.nvim
   pearl: https://github.com/pearl-core/pearl
   pihole: https://pi-hole.net
   pikaur: https://github.com/actionless/pikaur
@@ -308,13 +334,16 @@ homepages:
   pipupgrade: https://github.com/achillesrasquinha/pipupgrade
   pipxu: https://github.com/bulletmark/pipxu
   pixi: https://pixi.sh
+  pkg-termux: https://github.com/termux/termux-tools
   pkgfile: https://github.com/falconindy/pkgfile
+  pkgman: https://www.haiku-os.org
   platformio-core: https://platformio.org
   plug: https://github.com/junegunn/vim-plug
   podman: https://podman.io
   poetry: https://python-poetry.org
   protonplus: https://github.com/Vysp3r/ProtonPlus
   protonup: https://github.com/AUNaseef/protonup
+  prt-get: https://crux.nu
   pyenv: https://github.com/pyenv/pyenv
   raco: https://docs.racket-lang.org/raco/
   rcm: https://github.com/thoughtbot/rcm
@@ -324,6 +353,7 @@ homepages:
   rustup: https://rustup.rs
   rye: https://rye.astral.sh
   sheldon: https://sheldon.cli.rs
+  slackpkg: https://slackpkg.org
   spack: https://spack.io
   sparkle: https://sparkle-project.org
   spicetify: https://spicetify.app
@@ -334,6 +364,7 @@ homepages:
   toolbx: https://containertoolbx.org
   trizen: https://github.com/trizen/trizen
   typst: https://typst.app
+  upt: https://github.com/sigoden/upt
   vagrant: https://www.vagrantup.com
   vcpkg: https://vcpkg.io
   vim: https://www.vim.org
@@ -433,3 +464,24 @@ refused:
     topgrade: https://github.com/topgrade-rs/topgrade/issues/1764
   zerobrew:
     topgrade: https://github.com/topgrade-rs/topgrade/issues/2003
+
+unsupported:
+  # Managers left unwrapped by decision, each carrying its reason in the
+  # `Deliberate exclusions` section of `docs/unsupported.md`. Three families:
+  # tools whose upstream is retired (`antibody`, `dein`, `fundle`, `jetpack`,
+  # `neobundle`, `pacdef`, `packer-nvim`), tools that own no package registry
+  # and merely orchestrate backends mpm already wraps (`declaro`, `decman`,
+  # `metapac`, `upt`), and `pckr-nvim`, which is alive but exposes no
+  # unattended entry point to drive. Sorted alphabetically.
+  - antibody
+  - declaro
+  - decman
+  - dein
+  - fundle
+  - jetpack
+  - metapac
+  - neobundle
+  - pacdef
+  - packer-nvim
+  - pckr-nvim
+  - upt

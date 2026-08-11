@@ -284,7 +284,13 @@ def test_benchmark_yaml_well_formed():
     competitor set and homepage URLs for non-pool managers."""
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
     data = safe_load(yaml_path.read_text(encoding="utf-8"))
-    assert set(data) == {"managers", "homepages", "coarse_support", "refused"}
+    assert set(data) == {
+        "managers",
+        "homepages",
+        "coarse_support",
+        "refused",
+        "unsupported",
+    }
 
     competitors = set(_docs.BENCHMARK_COMPETITORS)
     for mid, flags in data["managers"].items():
@@ -364,6 +370,28 @@ def test_benchmark_yaml_well_formed():
             assert url.startswith(("http://", "https://")), (
                 f"refused[{mid!r}][{competitor!r}] URL must be an http(s) link"
             )
+
+    # unsupported: flat list of managers mpm deliberately does not wrap. Their
+    # mpm cell links to the recorded decision instead of rendering blank.
+    unsupported = data["unsupported"]
+    assert isinstance(unsupported, list)
+    assert unsupported == sorted(unsupported), (
+        "unsupported entries must be sorted alphabetically"
+    )
+    assert len(unsupported) == len(set(unsupported)), (
+        "unsupported must not repeat a manager"
+    )
+    pool_ids = set(pool.all_manager_ids)
+    for mid in unsupported:
+        assert mid == mid.lower()
+        # No-orphan invariant: the row must exist for the cell to render into.
+        assert mid in data["managers"], (
+            f"unsupported[{mid!r}] has no matching entry in managers"
+        )
+        # No-contradiction invariant: a wrapped manager cannot be refused.
+        assert mid not in pool_ids, (
+            f"unsupported lists {mid!r}, which mpm actually wraps"
+        )
 
 
 def test_benchmark_homepages_cover_non_pool_managers():

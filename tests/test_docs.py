@@ -1042,6 +1042,98 @@ def test_mirror_blocks_in_sync():
     assert not stale
 
 
+def test_unsupported_page_matches_benchmark():
+    """Check `docs/unsupported.md`'s table is exactly the benchmark's
+    `unsupported` set, with matching glyphs, sorted by ID.
+
+    The benchmark renders each `unsupported` manager as a glyph linking to that
+    page for the reason, so the two must stay in lockstep. A manager listed on
+    one side only produces either a link into a page that never explains it, or
+    a row nothing points at. Both happened while the mechanism was being
+    introduced, hence this test.
+
+    The glyph must agree too: `☠️` and `❌` are read side by side across the two
+    pages, and `⚠️` is reserved for the *wrapped* managers of the index, so it
+    must never leak onto a page listing what `mpm` refused to wrap.
+    """
+    yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
+    statuses = safe_load(yaml_path.read_text(encoding="utf-8"))["unsupported"]
+
+    page = (PROJECT_ROOT / "docs" / "unsupported.md").read_text(encoding="utf-8")
+    # Rows are ``| [`id`](url) | glyph | kind | why |``.
+    rows = re.findall(r"^\| \[`([^`]+)`\]\([^)]*\) \| (\S+) \|", page, re.MULTILINE)
+    assert rows, "no manager rows found in docs/unsupported.md"
+
+    ids = [mid for mid, _ in rows]
+    assert ids == sorted(ids), "unsupported.md rows must be sorted by manager ID"
+    assert len(ids) == len(set(ids)), "unsupported.md repeats a manager row"
+
+    assert set(ids) == set(statuses), (
+        "docs/unsupported.md and benchmark.yaml's unsupported key disagree; "
+        f"page-only: {sorted(set(ids) - set(statuses))}, "
+        f"benchmark-only: {sorted(set(statuses) - set(ids))}"
+    )
+
+    for mid, glyph in rows:
+        expected = _docs.UNSUPPORTED_GLYPHS[statuses[mid]]
+        assert glyph == expected, (
+            f"unsupported.md row {mid!r} shows {glyph!r} but benchmark.yaml "
+            f"declares it {statuses[mid]!r}, which renders {expected!r}"
+        )
+
+    # ⚠️ marks a manager that is wrapped but unmaintained: it has no business
+    # on the page cataloguing the tools that were never wrapped.
+    assert "⚠️" not in page, (
+        "⚠️ is reserved for wrapped-but-unmaintained managers; "
+        "docs/unsupported.md must use ☠️ or ❌"
+    )
+
+
+def test_cooldown_support_statuses_known():
+    """Check every row of the cooldown support table carries a legend glyph.
+
+    The "Supported managers" table of `docs/cooldown.md` is hand-curated and
+    reused on the per-manager pages, so a typo'd or invented status glyph would
+    travel silently. Only the five glyphs its own legend defines are allowed.
+    """
+    legend = {"✅", "🔜", "🚧", "❌", "➖"}
+    rows = _docs._cooldown_table("## Supported managers")
+    seen = set()
+    for cells in rows:
+        # Skip the header and separator lines, which carry no manager link.
+        if not cells[0].startswith("| ") and not cells[0].startswith("["):
+            continue
+        glyph = cells[1][:2].strip()
+        assert any(cells[1].startswith(g) for g in legend), (
+            f"cooldown row {cells[0]!r} opens with {glyph!r}, "
+            f"which is not one of the legend glyphs {sorted(legend)}"
+        )
+        seen.add(next(g for g in legend if cells[1].startswith(g)))
+    assert seen, "no manager rows parsed from the cooldown support table"
+
+
+def test_benchmark_operations_rows_have_support():
+    """Check no row of the benchmark's Operations table is entirely blank.
+
+    A row no tool supports carries no information and is usually a leftover
+    from a competitor column that was dropped: the `Latest filter`, `Reshim`
+    and `Import from external tool` rows outlived the `mise`/`asdf` columns
+    they were written for. The table is hand-maintained, so nothing else
+    catches it.
+    """
+    page = (PROJECT_ROOT / "docs" / "benchmark.md").read_text(encoding="utf-8")
+    section = page.partition("## Operations")[2].partition("\n## ")[0]
+    rows = [line for line in section.splitlines() if line.startswith("|")]
+    assert len(rows) > 2, "Operations table not found"
+    for line in rows[2:]:
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        label, tools = cells[0], cells[1:]
+        assert any("✅" in cell or "🟡" in cell for cell in tools), (
+            f"Operations row {label!r} shows no support from any tool; "
+            "drop the row or fill in the tool that provides it"
+        )
+
+
 def test_retraction_table_well_formed():
     """Check the retraction table partitions the pool and travels intact.
 

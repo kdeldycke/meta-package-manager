@@ -203,12 +203,12 @@ This is equivalent to always passing `--flatpak --pipx` on the command line.
 
 ```shell-session
 $ mpm managers
-╭────────────┬─────────┬────────────────────┬──────────────────────────┬────────────┬─────────╮
-│ Manager ID │ Name    │ Supported          │ CLI                      │ Executable │ Version │
-├────────────┼─────────┼────────────────────┼──────────────────────────┼────────────┼─────────┤
-│ flatpak    │ Flatpak │ ✘ BSD, Linux, Unix │ ✘ flatpak not found      │            │         │
-│ pipx       │ Pipx    │ ✓                  │ ✓ /opt/homebrew/bin/pipx │ ✓          │ ✓ 1.7.1 │
-╰────────────┴─────────┴────────────────────┴──────────────────────────┴────────────┴─────────╯
+╭────────────┬─────────────┬────────────────────┬──────────────────────────┬────────────┬─────────╮
+│ Manager ID │ Name        │ Supported          │ CLI                      │ Executable │ Version │
+├────────────┼─────────────┼────────────────────┼──────────────────────────┼────────────┼─────────┤
+│ flatpak    │ Flatpak     │ ✘ BSD, Linux, Unix │ ✘ flatpak not found      │            │         │
+│ pipx       │ Python pipx │ ✓                  │ ✓ /opt/homebrew/bin/pipx │ ✓          │ ✓ 1.7.1 │
+╰────────────┴─────────────┴────────────────────┴──────────────────────────┴────────────┴─────────╯
 ```
 
 ````{hint}

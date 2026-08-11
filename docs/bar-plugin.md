@@ -1,7 +1,6 @@
 # {octicon}`plug` Xbar and SwiftBar plugin
 
-The Meta Package Manager project is actively maintaining a plugin that is both compatible with
-[Xbar](https://github.com/matryer/xbar) and [SwiftBar](https://github.com/swiftbar/SwiftBar).
+The Meta Package Manager project is actively maintaining a plugin that is both compatible with [Xbar](https://github.com/matryer/xbar) and [SwiftBar](https://github.com/swiftbar/SwiftBar).
 
 The plugin is written in Python and is a small wrapper around the `mpm` CLI.
 
@@ -88,12 +87,9 @@ Both variants of each entry go through `mpm`: a plain click opens a terminal so 
 
 ## Location
 
-A copy of the latest stable version of the plugin is
-[available on Xbar website](https://xbarapp.com/docs/plugins/Dev/meta_package_manager.7h.py.html)
-and
-[plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
+A copy of the latest stable version of the plugin is [available on Xbar website](https://xbarapp.com/docs/plugins/Dev/meta_package_manager.7h.py.html) and [plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
 
-Once `mpm` is installed on your system, it can dynamiccaly be located with the dedicated `--bar-plugin-path` option:
+Once `mpm` is installed on your system, it can dynamically be located with the dedicated `--bar-plugin-path` option:
 
 ```shell-session
 $ mpm --bar-plugin-path
@@ -130,25 +126,17 @@ xcode-select: note: no developer tools were found at '/Applications/Xcode.app', 
 
 ## Development workflow
 
-Active development of the plugin is happening here, as a side-project of
-{command}`mpm` itself.
+Active development of the plugin is happening here, as a side-project of {command}`mpm` itself.
 
-Releases of the plugin is synchronized with the package. Both share the exact
-same version to simplify management. This explain why the plugin could appears
-jumping ahead a couple of major/minor versions while providing tiny or no
-changes at all.
+Releases of the plugin are synchronized with the package. Both share the exact same version to simplify management. This explains why the plugin can appear to jump ahead a couple of major/minor versions while providing tiny or no changes at all.
 
 A release is ready when both the package and the plugin reach a stable state.
 
-If the plugin has been changed between releases, a
-[copy of the plugin is pushed](https://github.com/matryer/xbar-plugins/pulls?q=is%3Apr%20%22Meta%20Package%20Manager%22)
-under the name `meta_package_manager.7h.py`, to the
-[official Xbar plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
+If the plugin has been changed between releases, a [copy of the plugin is pushed](https://github.com/matryer/xbar-plugins/pulls?q=is%3Apr%20%22Meta%20Package%20Manager%22) under the name `meta_package_manager.7h.py`, to the [official Xbar plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
 
 ## Release process
 
-1. [Fork](https://help.github.com/articles/fork-a-repo/) the official
-   [Xbar plugin repository](https://github.com/matryer/xbar-plugins).
+1. [Fork](https://help.github.com/articles/fork-a-repo/) the official [Xbar plugin repository](https://github.com/matryer/xbar-plugins).
 
 2. Fetch a local copy of the fork:
 
@@ -160,14 +148,14 @@ under the name `meta_package_manager.7h.py`, to the
 3. Create a new branch and switch to it:
 
    ```shell-session
-   $ git branch "meta-package-manager-v4.13.1"
-   $ git checkout "meta-package-manager-v4.13.1"
+   $ git branch "meta-package-manager-v7.6.0"
+   $ git checkout "meta-package-manager-v7.6.0"
    ```
 
 4. Replace existing copy of the plugin with the latest tagged version:
 
    ```shell-session
-   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v4.13.1/meta_package_manager/bar_plugin.py
+   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v7.6.0/meta_package_manager/bar_plugin.py
    $ mv ./bar_plugin.py ./Dev/meta_package_manager.7h.py
    $ chmod 755 ./Dev/meta_package_manager.7h.py
    ```
@@ -176,17 +164,16 @@ under the name `meta_package_manager.7h.py`, to the
 
    ```shell-session
    $ git add ./Dev/meta_package_manager.7h.py
-   $ git commit -m "Upgrade to Meta Package Manager plugin v4.13.1"
+   $ git commit -m "Upgrade to Meta Package Manager plugin v7.6.0"
    ```
 
 6. Push new branch:
 
    ```shell-session
-   $ git push --set-upstream origin "meta-package-manager-v4.13.1"
+   $ git push --set-upstream origin "meta-package-manager-v7.6.0"
    ```
 
-7. [Create a pull-request](https://help.github.com/articles/creating-a-pull-request/)
-   in the original repository.
+7. [Create a pull-request](https://help.github.com/articles/creating-a-pull-request/) in the original repository.
 
 ## `meta_package_manager.bar_plugin` API
 

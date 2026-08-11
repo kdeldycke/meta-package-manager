@@ -27,9 +27,9 @@ the same on-disk install database:
 
 References:
 
-- [`pkg(8)` man page](<https://man.freebsd.org/cgi/man.cgi?pkg(8)>)
+- [`pkg(8)` man page](https://man.freebsd.org/cgi/man.cgi?query=pkg&sektion=8)
 - [FreeBSD handbook on ports](https://docs.freebsd.org/en/books/handbook/ports/)
-- [`ports(7)` man page](<https://man.freebsd.org/cgi/man.cgi?ports(7)>)
+- [`ports(7)` man page](https://man.freebsd.org/cgi/man.cgi?query=ports&sektion=7)
 """
 
 from __future__ import annotations

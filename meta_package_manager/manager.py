@@ -539,11 +539,13 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Materialized {attr}`installed`, or an empty tuple on CLI failure.
 
         Best-effort inventory snapshot for the `installed`, `dump` and
-        `sbom` subcommands: each wants "give me what's installed, and just
-        skip this manager if its CLI blew up" rather than re-implementing the
-        same {class}`meta_package_manager.execution.CLIError` swallow. Logs
-        one canonical warning on error and returns `()` so the caller carries
-        on with the other managers.
+        `sbom` subcommands, and for the {attr}`installed_ids` lookup behind
+        `remove` and `upgrade <packages>`: each wants "give me what's
+        installed, and just skip this manager if its CLI blew up" rather than
+        re-implementing the same
+        {class}`meta_package_manager.execution.CLIError` swallow. Logs one
+        canonical warning on error and returns `()` so the caller carries on
+        with the other managers.
         """
         try:
             return tuple(self.installed)

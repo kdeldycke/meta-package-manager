@@ -38,16 +38,19 @@
 # also exist in ``managers`` (you cannot be coarse-only-supported without
 # being supported at all).
 #
-# ``unsupported`` is a flat, alphabetically-sorted list of managers ``mpm``
-# deliberately does not wrap. Their ``mpm`` cell renders as ``[❌](url)``
-# pointing at the decision recorded in ``docs/unsupported.md``, so a refusal
-# reads differently from a blank cell, which means nobody has assessed the
-# tool yet. The link target is not repeated here: it lives once in
-# ``_docs.py``'s ``UNSUPPORTED_DOCS_URL``, so renaming that section is a
-# one-line fix rather than an edit per manager. Only settled decisions belong
-# here. A tool the page frames as a *not yet* (``lazy``, and the
-# project-scoped ecosystems) keeps a blank cell, since ``❌`` would overstate
-# it. A manager cannot be both wrapped and unsupported.
+# ``unsupported`` is an alphabetically-sorted ``{manager-id: status}`` mapping
+# of the managers ``mpm`` deliberately does not wrap, the status picking the
+# glyph its ``mpm`` cell renders (see ``UNSUPPORTED_GLYPHS`` in ``_docs.py``).
+# The glyph links to the decision recorded in ``docs/unsupported.md``, so a
+# refusal reads differently from a blank cell, which means nobody has assessed
+# the tool yet. The link target is not repeated here: it lives once in
+# ``_docs.py``'s ``UNSUPPORTED_DOCS_URL``. Only settled decisions belong here.
+# A tool framed as a *not yet* (``lazy``, and the project-scoped ecosystems)
+# keeps a blank cell, since a glyph would overstate it. A manager cannot be
+# both wrapped and unsupported: the wrapped-but-abandoned ones render ``⚠️``
+# from their ``unmaintained`` flag instead, and stay out of this mapping.
+# ``test_unsupported_page_matches_benchmark`` holds every key in lockstep with
+# a row of ``docs/unsupported.md``.
 #
 # ``refused`` records ``(manager_id, competitor, evidence_url)`` triples where
 # the competitor has *explicitly declined* to support the manager, with a
@@ -158,12 +161,14 @@ managers:
   pacapt: []
   pacaur: []
   pacdef: [topgrade]
+  packer-aur: []
   packer-nvim: [topgrade]
   pacman: [topgrade, upt, metapac]
   pacstall: [topgrade]
   pamac: [topgrade, metapac]
   paq: [topgrade]
   paru: [topgrade, metapac]
+  pathogen: []
   pckr-nvim: []
   pearl: [topgrade]
   pihole: [topgrade]
@@ -205,6 +210,7 @@ managers:
   sheldon: [topgrade]
   slackpkg: [upt]
   slapt-get: []
+  smart: []
   snap: [topgrade, upt, metapac]
   sorcery: []
   spack: []
@@ -246,6 +252,7 @@ managers:
   xbps: [topgrade, upt, pacaptr, metapac]
   xcodes: [topgrade]
   yadm: [topgrade]
+  yaourt: []
   yarn: [topgrade, metapac]
   yarn-berry: [topgrade]
   yay: [topgrade, upt, metapac]
@@ -327,9 +334,11 @@ homepages:
   opencode: https://github.com/sst/opencode
   pacapt: https://github.com/icy/pacapt
   pacdef: https://github.com/steven-omaha/pacdef
+  packer-aur: https://github.com/keenerd/packer
   packer-nvim: https://github.com/wbthomason/packer.nvim
   pamac: https://gitlab.manjaro.org/applications/pamac
   paq: https://github.com/savq/paq-nvim
+  pathogen: https://github.com/tpope/vim-pathogen
   pckr-nvim: https://github.com/lewis6991/pckr.nvim
   pearl: https://github.com/pearl-core/pearl
   pihole: https://pi-hole.net
@@ -358,6 +367,7 @@ homepages:
   rye: https://rye.astral.sh
   sheldon: https://sheldon.cli.rs
   slackpkg: https://slackpkg.org
+  smart: https://github.com/smartpm/smart
   spack: https://spack.io
   sparkle: https://sparkle-project.org
   spicetify: https://spicetify.app
@@ -380,6 +390,7 @@ homepages:
   wsl: https://learn.microsoft.com/windows/wsl/
   xcodes: https://github.com/XcodesOrg/xcodes
   yadm: https://yadm.io
+  yaourt: https://github.com/archlinuxfr/yaourt
   yazi: https://yazi-rs.github.io
   yt-dlp: https://github.com/yt-dlp/yt-dlp
   zgenom: https://github.com/jandamm/zgenom
@@ -495,8 +506,12 @@ unsupported:
   neobundle: archived
   pacapt: archived
   pacdef: archived
+  packer-aur: archived
   packer-nvim: archived
+  pathogen: archived
   pckr-nvim: excluded
+  smart: archived
   sysget: archived
   upt: excluded
   whohas: archived
+  yaourt: archived

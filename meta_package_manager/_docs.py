@@ -375,7 +375,9 @@ def benchmark_managers_table() -> str:
 
     The `mpm` column is auto-derived from the live pool: each implemented
     manager renders as `[✅](source_url)`, linking to the class definition
-    that proves the support. A manager listed in the YAML's `unsupported`
+    that proves the support, or `[⚠️](source_url)` when that manager carries
+    the `unmaintained` flag, matching the manager index. A manager listed in
+    the YAML's `unsupported`
     mapping instead renders the {data}`UNSUPPORTED_GLYPHS` entry for its
     status, linked to {data}`UNSUPPORTED_DOCS_URL`, which keeps a deliberate
     refusal distinct from a blank cell meaning nobody has assessed the tool
@@ -425,7 +427,11 @@ def benchmark_managers_table() -> str:
             label = f"[`{mid}`]({url})" if url else f"`{mid}`"
         row = [label]
         if mid in pool_ids:
-            row.append(f"[✅]({manager_source_url(mid)})")
+            # A wrapped manager whose upstream died keeps the ⚠️ of the manager
+            # index: still usable, but on notice. Never ☠️, which is reserved
+            # for the tools mpm declined to wrap at all.
+            glyph = "⚠️" if pool[mid].unmaintained else "✅"
+            row.append(f"[{glyph}]({manager_source_url(mid)})")
         elif mid in unsupported:
             glyph = UNSUPPORTED_GLYPHS[unsupported[mid]]
             row.append(f"[{glyph}]({UNSUPPORTED_DOCS_URL})")

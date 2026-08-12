@@ -579,14 +579,46 @@ unsupported:
   #
   # Keys are sorted alphabetically, and every key needs a matching row in
   # `docs/unsupported.md`: the glyph links there for the reason.
+  android-studio: excluded
   antibody: archived
+  atuin: excluded
+  chezmoi: excluded
+  clam-av-db: excluded
+  containers: excluded
   declaro: excluded
   decman: excluded
   dein: archived
+  deno: excluded
+  distrobox: excluded
   dpp: excluded
+  etc-update: excluded
+  flutter: excluded
+  fossil: excluded
   fundle: archived
+  git: excluded
+  jetbrains-aqua: excluded
+  jetbrains-clion: excluded
+  jetbrains-datagrip: excluded
+  jetbrains-dataspell: excluded
+  jetbrains-gateway: excluded
+  jetbrains-goland: excluded
+  jetbrains-idea: excluded
+  jetbrains-mps: excluded
+  jetbrains-phpstorm: excluded
+  jetbrains-pycharm: excluded
+  jetbrains-rider: excluded
+  jetbrains-rubymine: excluded
+  jetbrains-rustrover: excluded
+  jetbrains-toolbox: excluded
+  jetbrains-webstorm: excluded
   jetpack: archived
+  lensfun: excluded
+  mandb: excluded
+  maza: excluded
   metapac: excluded
+  microsoft-office: excluded
+  microsoft-store: excluded
+  myrepos: excluded
   neobundle: archived
   pacapt: archived
   pacdef: archived
@@ -594,10 +626,25 @@ unsupported:
   packer-nvim: archived
   pathogen: archived
   pckr-nvim: excluded
+  pihole: excluded
+  podman: excluded
+  rcm: excluded
+  remotes: excluded
+  restarts: excluded
+  rtcl: excluded
   smart: archived
+  spicetify: excluded
   sysget: archived
+  system: excluded
+  tldr: excluded
+  toolbx: excluded
+  typst: excluded
   upt: excluded
+  waydroid: excluded
   whohas: archived
+  wsl: excluded
+  wsl-update: excluded
+  yadm: excluded
   yaourt: archived
   zgenom: excluded
   zr: excluded

@@ -1194,3 +1194,107 @@ def test_retraction_status_reuses_table_row(manager):
     for label, cell in (("Retraction", withdrawal), ("Publish date", publish_date)):
         line = f"- {label}: {cell}"
         assert (line in section) is (cell not in _docs.EMPTY_CELLS)
+
+
+SKILL_SPEC_FIELDS = frozenset({
+    "allowed-tools",
+    "compatibility",
+    "description",
+    "license",
+    "metadata",
+    "name",
+})
+"""The six frontmatter fields the [Agent Skills
+spec](https://agentskills.io/specification) defines."""
+
+SKILL_CLAUDE_CODE_EXTENSIONS = frozenset({"argument-hint"})
+"""The only non-spec frontmatter field a skill may carry.
+
+Mirrors the set `kdeldycke/repomatic` pins in its own `tests/test_skills.py`:
+no spec field expresses an autocomplete hint, and the key degrades to a no-op
+wherever it is not understood. Do not grow this set. In particular there is no
+`model:` (the recommended model rides in `compatibility`) and no
+`disable-model-invocation:`: every skill is model-invocable by design, and what
+it may actually do is gated by the permission layer, not by frontmatter.
+"""
+
+SKILL_MODEL_HINT = re.compile(r"Recommended model: \w+\.")
+"""Shape of the model recommendation carried by `compatibility`."""
+
+
+def _skill_frontmatter(path):
+    """Split a `SKILL.md` into its parsed frontmatter and its body lines."""
+    lines = path.read_text(encoding="utf-8").split("\n")
+    assert lines[0] == "---", f"{path} does not open with a frontmatter fence"
+    closing = lines.index("---", 1)
+    return safe_load("\n".join(lines[1:closing])), lines
+
+
+def test_add_manager_skill_frontmatter():
+    """Check the bundled skill conforms to the Agent Skills specification.
+
+    The frontmatter contract is the one `kdeldycke/repomatic` enforces on its
+    own skills, kept here so this repository's single local skill cannot drift
+    away from the upstream convention it was aligned to.
+
+    A comma-separated `allowed-tools` is the trap worth pinning: Claude Code
+    accepts it, so the skill keeps working locally while silently failing the
+    spec, which wants a space-separated string.
+    """
+    skill_dir = PROJECT_ROOT / ".claude" / "skills" / "add-manager"
+    meta, _lines = _skill_frontmatter(skill_dir / "SKILL.md")
+
+    unknown = set(meta) - SKILL_SPEC_FIELDS - SKILL_CLAUDE_CODE_EXTENSIONS
+    assert not unknown, f"unknown frontmatter fields: {sorted(unknown)}"
+
+    assert meta["name"] == skill_dir.name, "name must match its directory"
+    assert re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", meta["name"])
+    assert 0 < len(meta["description"]) <= 1024
+    assert len(meta["compatibility"]) <= 500
+    assert SKILL_MODEL_HINT.search(meta["compatibility"]), (
+        f"compatibility names no recommended model: {meta['compatibility']!r}"
+    )
+    assert "," not in meta["allowed-tools"], (
+        f"allowed-tools must be space-separated: {meta['allowed-tools']!r}"
+    )
+
+
+def test_add_manager_skill_include_offset():
+    """Check `docs/add-new-manager.md` slices the skill at its human body.
+
+    The page is a bare `{include}` of the skill, so the two files share one
+    source and can only disagree through the hard-coded `:start-line:`. That
+    offset silently absorbs any line added to or removed from the skill's
+    preamble: too low republishes the frontmatter, the skill's own `#` heading
+    or its `$ARGUMENTS` line, and too high eats the opening paragraph. Neither
+    fails a docs build, which is why it is pinned here instead.
+    """
+    skill = PROJECT_ROOT / ".claude" / "skills" / "add-manager" / "SKILL.md"
+    _meta, lines = _skill_frontmatter(skill)
+
+    # Walk past the frontmatter, then drop every leading paragraph that is
+    # addressed to Claude alone: the `#` title the page supplies itself, and
+    # the `$ARGUMENTS` line that means nothing to a reader of the rendered page.
+    cursor = lines.index("---", 1) + 1
+    while cursor < len(lines) and (
+        not lines[cursor]
+        or lines[cursor].startswith("# ")
+        or "$ARGUMENTS" in lines[cursor]
+    ):
+        cursor += 1
+
+    page = (PROJECT_ROOT / "docs" / "add-new-manager.md").read_text(encoding="utf-8")
+    declared = re.search(r"^:start-line: (\d+)$", page, re.MULTILINE)
+    assert declared, "docs/add-new-manager.md declares no :start-line:"
+    assert int(declared.group(1)) == cursor, (
+        f"docs/add-new-manager.md must declare `:start-line: {cursor}` to open "
+        f"on {lines[cursor]!r}"
+    )
+
+    rendered = lines[cursor:]
+    assert "$ARGUMENTS" not in "\n".join(rendered), (
+        "$ARGUMENTS leaked into the rendered page: keep it in the preamble"
+    )
+    assert not [line for line in rendered if line.startswith("# ")], (
+        "the rendered slice carries a second H1: the page supplies its own"
+    )

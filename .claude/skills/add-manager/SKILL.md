@@ -1,10 +1,14 @@
 ---
 name: add-manager
-description: Add a new package manager to mpm
-disable-model-invocation: true
+description: Implement support for a new package manager in mpm, or complete a partial integration. Covers vetting the candidate, choosing between a Python class and a declarative definition, mapping operations, the cross-file checklist, and validation. Use when wrapping a new tool, finishing a half-wired manager, or recording why a tool was declined.
+compatibility: 'Designed for Claude Code. Recommended model: Opus.'
+allowed-tools: Bash Read Write Edit Grep Glob WebFetch WebSearch Agent
+argument-hint: '[manager name or GitHub issue URL]'
 ---
 
 # Add a new package manager
+
+`$ARGUMENTS` names the manager to wrap, or the GitHub issue requesting it.
 
 Implement support for a new package manager in `mpm`, or complete an incomplete integration. If adding a manager requested via a GitHub issue, extract CLI output samples from the issue body to guide the implementation.
 

@@ -2,8 +2,6 @@
 
 Everything needed to rebuild the documentation site's hosting from nothing, and the reasoning behind each deviation from a stock GitHub Pages setup.
 
-No account, zone or token identifier is recorded here. This repository is public, and those are resolvable at runtime from the credential itself: `wrangler whoami`, or any dashboard URL. The Cloudflare account backing these zones also carries unrelated domains and their mail records, none of which is needed to rebuild this site and none of which belongs in a public repository; that lives in a private infrastructure knowledge base instead.
-
 ## What the site runs on
 
 | Piece | Where | Notes |
@@ -11,11 +9,11 @@ No account, zone or token identifier is recorded here. This repository is public
 | Canonical host | `mpm.run` | Everything the site publishes lives here |
 | Hosting | GitHub Pages, `gh-pages` branch | Custom domain set in the repository's Pages settings, not a `CNAME` file |
 | Build | GitHub Actions, `.github/workflows/docs.yaml` | Sphinx, then deploy, then link check |
-| DNS | Cloudflare, Free plan | Apex and `www` are **DNS-only**; only the wildcard and the alias are proxied |
+| DNS | Cloudflare | Apex and `www` are **DNS-only**; only the wildcard is proxied |
 | Vanity redirects | Cloudflare Single Redirect, `http_request_dynamic_redirect` phase | `<manager>.mpm.run` to that manager's page |
 | Certificates | GitHub for the apex and `www`, Cloudflare Universal SSL for the wildcard | Neither is managed by us |
 
-There are no Workers, no KV namespaces and no Pages project involved. The whole edge configuration is four DNS record types and two redirect rules.
+There are no Workers, no KV namespaces and no Pages project involved. The whole edge configuration is a handful of DNS records and a single redirect rule.
 
 ## The apex is deliberately not proxied
 
@@ -65,7 +63,7 @@ The origin is declared once, as `[project.urls] Documentation` in `pyproject.tom
 
 ## What crawlers get
 
-`html_baseurl` makes every page emit a `<link rel="canonical">`, which is what tells a crawler that the vanity redirect, the alias and the former `kdeldycke.github.io` URL are all the same page. `sphinx-sitemap` writes `sitemap.xml` from the same value, and `docs/robots.txt` (copied to the site root by `html_extra_path`, since `_static/` is not a location `robots.txt` can be served from) points at it.
+`html_baseurl` makes every page emit a `<link rel="canonical">`, which is what tells a crawler that the vanity redirect and the former `kdeldycke.github.io` URL both land on the same page. `sphinx-sitemap` writes `sitemap.xml` from the same value, and `docs/robots.txt` (copied to the site root by `html_extra_path`, since `_static/` is not a location `robots.txt` can be served from) points at it.
 
 `sitemap_url_scheme` is set to `{link}`. The extension's default assumes a site publishing several languages or versions side by side; anything but the bare link here produces sitemap entries that 404.
 

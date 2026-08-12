@@ -585,6 +585,8 @@ unsupported:
   chezmoi: excluded
   clam-av-db: excluded
   containers: excluded
+  cursor: excluded
+  cursor-agent: excluded
   declaro: excluded
   decman: excluded
   dein: archived

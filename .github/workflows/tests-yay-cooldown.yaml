@@ -28,7 +28,7 @@ jobs:
   # https://github.com/Jguer/yay/releases/latest
   yay-cooldown:
     name: "yay --cooldown on Arch Linux"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     container:
       image: archlinux:base-devel
     steps:

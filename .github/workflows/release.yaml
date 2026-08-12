@@ -111,7 +111,7 @@ jobs:
   # both, or the released artifact stops being the one that was tested.
   build-gnome-extension:
     name: 🐚 Pack GNOME Shell extension
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       # Checkout only. The packed zip leaves as a run artifact, which rides the
       # Actions runtime token and needs no scope of its own.
@@ -150,7 +150,7 @@ jobs:
   guix:
     name: 🐂 Guix
     needs: release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
       pull-requests: write
@@ -268,7 +268,7 @@ jobs:
   nix:
     name: ❄️ Nix
     needs: release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
       pull-requests: write
@@ -278,7 +278,7 @@ jobs:
           # Full history so the redundant-PR check can compute the merge base
           # between main and the open release branch (see the reconcile step below).
           fetch-depth: 0
-      - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31
+      - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31.11.0
       - name: Check for new release
         id: check
         env:

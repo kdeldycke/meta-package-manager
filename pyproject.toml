@@ -511,9 +511,10 @@ include-package = [ "cyclonedx", "hjson", "json5", "jsonc", "spdx_tools", "yaml"
 [tool.typos]
 # Correct capitalization for proper nouns.
 default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PyPi = "PyPI", Typescript = "TypeScript" }
-# Non-typo words flagged by default: `astroid` (the Python AST library) and
-# `oject` (a "project" fragment surfaced when CLI-help output wraps a line).
-default.extend-words = { astroid = "astroid", oject = "oject" }
+# Non-typo words flagged by default: `astroid` (the Python AST library),
+# `oject` (a "project" fragment surfaced when CLI-help output wraps a line)
+# and `sur` (macOS 11 Big Sur and Homebrew's `big_sur` bottle tag).
+default.extend-words = { astroid = "astroid", oject = "oject", sur = "sur" }
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
 default.extend-ignore-re = [
   "(?s)<!-- typos:off -->.*?<!-- typos:on -->",
@@ -577,6 +578,10 @@ overrides = [
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
 addopts = [
   "--durations=10",
+  # Import test modules via importlib instead of prepending their root dir to
+  # sys.path. Avoids "import file mismatch" collection errors when an installed
+  # copy of the package coexists with the source tree, as in distro builds.
+  "--import-mode=importlib",
   # XXX --run-non-destructiveis not required as this is the default behavior.
   # We would love to add it to the command line to make sure pytest is properly recognizing it and loads our
   # customization from ``./tests/conftest.py``. But because of issue
@@ -755,24 +760,21 @@ workflow.paths."tests.yaml" = [
   "tests/**",
   "uv.lock",
 ]
-# Tests install system packages (apt, brew, etc.) and need a full runner image.
-test-matrix.replace.os = { ubuntu-slim = "ubuntu-24.04" }
 # lxml cannot compile on Windows ARM64.
 # See: https://bugs.launchpad.net/lxml/+bug/2004481
 test-matrix.remove.os = [ "windows-11-arm" ]
 # Free-threaded 3.14t and prerelease 3.15 exercise interpreter-level
 # compatibility, which is OS-independent: the shipped-config slice (3.10,
 # 3.14) already covers every OS, so these two only need the single fastest
-# runner (ubuntu-24.04-arm), not the full spread. 3.14t runs stable (3.14's
+# runner (ubuntu-26.04-arm), not the full spread. 3.14t runs stable (3.14's
 # free-threaded build is supported); 3.15 keeps repomatic's built-in
-# prerelease `unstable` flag. Excludes name post-replace OS values, since
-# replace runs before exclude. See repomatic's test-matrix guide.
+# prerelease `unstable` flag. See repomatic's test-matrix guide.
 test-matrix.exclude = [
-  { os = "ubuntu-24.04", python-version = "3.14t" },
+  { os = "ubuntu-26.04", python-version = "3.14t" },
   { os = "macos-26", python-version = "3.14t" },
   { os = "macos-26-intel", python-version = "3.14t" },
   { os = "windows-2025", python-version = "3.14t" },
-  { os = "ubuntu-24.04", python-version = "3.15" },
+  { os = "ubuntu-26.04", python-version = "3.15" },
   { os = "macos-26", python-version = "3.15" },
   { os = "macos-26-intel", python-version = "3.15" },
   { os = "windows-2025", python-version = "3.15" },
@@ -1607,7 +1609,24 @@ any-glob-to-any-file = [
   "tests/gnome/**",
 ]
 
+[tool.actionlint]
+# actionlint reads no pyproject section of its own: repomatic serializes this
+# one to a temporary YAML config and passes it via `--config-file`. actionlint
+# validates a literal `runs-on:` against a built-in label list that does not
+# yet carry GitHub's Ubuntu 26.04 preview images, so it rejects them as
+# unknown. Declaring them here is the mechanism actionlint's own error message
+# points to. They are ordinary GitHub-hosted images, not self-hosted runners:
+# that key is simply where actionlint accepts a label it does not ship. Drop
+# this section once rhysd/actionlint#682 ships in a release. Meanwhile it opens
+# no hole: a typo'd runner is still caught by `lint-repo`'s own check against
+# KNOWN_RUNNERS.
+self-hosted-runner.labels = [ "ubuntu-26.04", "ubuntu-26.04-arm" ]
+
 [tool.gitleaks]
+# Extend gitleaks' built-in ruleset instead of replacing it: this section is
+# bridged to a standalone .gitleaks.toml, and without `useDefault` a custom
+# config carries only the allowlist below and zero detection rules.
+extend.useDefault = true
 allowlist.description = "False positives"
 allowlist.commits = [
   # Old Travis CI HOMEBREW_GITHUB_API_TOKEN (revoked).

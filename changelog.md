@@ -21,6 +21,9 @@
 - [mpm] Add ten features to the benchmark's matrix: accessible output, skipping auto-updating packages, exact and fuzzy search, SBOM export, vulnerability scan, per-manager overrides, command plan, per-call timeout, offline by default and man pages.
 - [mpm] Link every manager named in the documentation pages to its own page, at most once per paragraph.
 - [mpm] Back 75 competitor cells of the benchmark's feature matrix with a link to the documentation, configuration example, CLI declaration or issue that proves the verdict. Six cells found nothing citable and keep a bare glyph.
+- [mpm] Back 102 of the 105 competitor cells of the benchmark's operations table with a link to the documentation, CLI declaration, source line or maintainer decision that proves the verdict. 46 operations a tool rules out by design are now marked ❌, most of them `topgrade`'s, whose steps are upgrade routines by definition. Three cells found nothing citable and stay blank.
+- [mpm] Link every ✅ of the benchmark's operations table `mpm` column to the subcommand implementing it, as the feature matrix already did.
+- [mpm] Credit `pacaptr`'s `-Qo` file-ownership lookup and `metapac`'s `unmanaged` listing in the benchmark's operations table. `topgrade`'s package-index refresh and `metapac`'s orphan sweep drop to 🟡: both only run bundled inside another operation.
 - [mpm] Record `dpp.vim` as an unsupported manager: it is drivable only from inside the editor, and reports neither a binary nor a version.
 - [pikaur] Add the pikaur AUR helper with the full operation set inherited from `pacman`.
 - [trizen] Add the trizen AUR helper with the full operation set inherited from `pacman`.

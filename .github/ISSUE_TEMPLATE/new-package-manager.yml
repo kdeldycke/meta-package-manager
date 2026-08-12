@@ -1,6 +1,6 @@
 name: New package manager
 description: You would like to see a new package manager supported by `mpm`
-labels: ["🎁 feature request"]
+labels: ["✨ enhancement"]
 body:
 
   - type: markdown

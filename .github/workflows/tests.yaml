@@ -69,17 +69,21 @@ jobs:
     # branch (always `main`), not its head branch (see
     # https://github.com/actions/runner/issues/1591), so the version-bump
     # PRs slip through it and must be filtered here via `github.head_ref`.
+    # The branch list mirrors `repomatic.binary.VERSION_BUMP_BRANCHES` and
+    # is pinned by repomatic's own test suite.
     #
     # The `[changelog] Post-release bump ` commit prefix is intentionally
     # *not* in this list: that push also carries the release commit, and
     # the post-release-bump head commit is our only post-merge test of the
-    # release-frozen tree.
+    # release-frozen tree. The commit-prefix list mirrors
+    # `MANUAL_VERSION_BUMP_COMMIT_PREFIXES` and is pinned by repomatic's own
+    # test suite.
     if: >
       !contains(fromJSON('["major-version-increment","minor-version-increment","prepare-release"]'),
       github.head_ref)
-      && !startsWith(github.event.head_commit.message || '', 'Bump major version to ')
-      && !startsWith(github.event.head_commit.message || '', 'Bump minor version to ')
-    runs-on: ubuntu-slim
+      && !startsWith(github.event.head_commit.message || '', '[changelog] Bump major version to ')
+      && !startsWith(github.event.head_commit.message || '', '[changelog] Bump minor version to ')
+    runs-on: ubuntu-26.04
     outputs:
       metadata: ${{ steps.metadata.outputs.metadata }}
     steps:
@@ -129,13 +133,11 @@ jobs:
 
       # Pip
       - name: Pip & Setuptools - Upgrade
-        run: |
-          python -m pip install --upgrade setuptools pip
+        run: python -m pip install --upgrade setuptools pip
 
       # Pipx
       - name: Pipx - Install
-        run: |
-          python -m pip install --upgrade pipx
+        run: python -m pip install --upgrade pipx
 
       # Homebrew
       - name: Homebrew - macOS upgrade
@@ -171,8 +173,7 @@ jobs:
       # Chocolatey
       - name: Chocolatey - Windows self-upgrade
         if: runner.os == 'Windows'
-        run: |
-          choco upgrade chocolatey --no-progress --yes --retry-count=3
+        run: choco upgrade chocolatey --no-progress --yes --retry-count=3
       - name: Chocolatey - Pin un-upgradeable packages
         if: runner.os == 'Windows'
         # XXX The "choco upgrade all" step below fails for some packages (strawberryperl MSI error, rtools, nginx
@@ -199,8 +200,7 @@ jobs:
           sudo npm install --global npm@latest
       - name: NPM - macOS install
         if: runner.os == 'macOS'
-        run: |
-          brew install npm
+        run: brew install npm
       - name: NPM - Windows upgrade
         if: runner.os == 'Windows'
         run: npm install --global npm # zizmor: ignore[adhoc-packages]
@@ -214,22 +214,18 @@ jobs:
       # Cargo
       - name: Cargo - macOS install
         if: runner.os == 'macOS'
-        run: |
-          brew install rust
+        run: brew install rust
       - name: Cargo - Linux install
         if: runner.os == 'Linux'
-        run: |
-          sudo apt-get --quiet --yes install cargo
+        run: sudo apt-get --quiet --yes install cargo
       - name: Cargo - Windows install
         if: runner.os == 'Windows'
-        run: |
-          choco install rust --no-progress --yes --retry-count=3
+        run: choco install rust --no-progress --yes --retry-count=3
 
       # Yarn
       - name: Yarn - macOS install
         if: runner.os == 'macOS'
-        run: |
-          brew install yarn
+        run: brew install yarn
 
       # XXX Yarn is only installed on macOS. On Linux and Windows, Yarn's post-install binary path is not registered
       # in PATH within the same GitHub Actions shell session, causing FileNotFoundError during mpm upgrade tests.
@@ -237,24 +233,20 @@ jobs:
       # Composer
       - name: Composer - macOS install
         if: runner.os == 'macOS'
-        run: |
-          brew install composer
+        run: brew install composer
       - name: Composer - Windows upgrade
         if: runner.os == 'Windows'
-        run: |
-          choco upgrade composer --no-progress --yes --retry-count=3
+        run: choco upgrade composer --no-progress --yes --retry-count=3
 
       # MAS
       - name: MAS - macOS install
         if: runner.os == 'macOS'
-        run: |
-          brew install mas
+        run: brew install mas
 
       # Flatpak
       - name: Flatpak - Linux install
         if: runner.os == 'Linux'
-        run: |
-          sudo apt-get --quiet --yes install flatpak
+        run: sudo apt-get --quiet --yes install flatpak
 
       # PowerShell Gallery
       - name: PowerShell Gallery - macOS install
@@ -277,8 +269,7 @@ jobs:
         shell: pwsh
         # pwsh 7.4+ is pre-installed on windows-latest runners. Refresh PSResourceGet to the latest published version so
         # the bundled copy does not lag behind the version mpm exercises in tests.
-        run: |
-          Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser
+        run: Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser
 
       # Scoop
       - name: Scoop - Windows install
@@ -311,26 +302,22 @@ jobs:
       # DNF
       - name: DNF - Linux install
         if: runner.os == 'Linux'
-        run: |
-          sudo apt-get --quiet --yes install dnf
+        run: sudo apt-get --quiet --yes install dnf
 
       # Zypper
       - name: Zypper - Linux install
         if: runner.os == 'Linux'
-        run: |
-          sudo apt-get --quiet --yes install zypper
+        run: sudo apt-get --quiet --yes install zypper
 
       # Snap
       - name: Snap - Linux upgrade
         if: runner.os == 'Linux'
-        run: |
-          sudo apt-get --quiet --yes install snapd
+        run: sudo apt-get --quiet --yes install snapd
 
       # VSCode
       - name: VSCode - macOS install
         if: runner.os == 'macOS'
-        run: |
-          brew install --cask visual-studio-code
+        run: brew install --cask visual-studio-code
       - name: VSCode - Linux install
         # XXX VS Code snap is only available for amd64, not arm64.
         # The snap store is intermittently flaky on Ubuntu 24.04 runners, so retry a few times before giving up.
@@ -346,8 +333,7 @@ jobs:
           exit 1
       - name: VSCode - Windows install
         if: runner.os == 'Windows'
-        run: |
-          choco install vscode --no-progress --yes --retry-count=3
+        run: choco install vscode --no-progress --yes --retry-count=3
 
       # vim-pack
       # https://formulae.brew.sh/formula/neovim
@@ -372,19 +358,16 @@ jobs:
           gem update --quiet --system
       - name: Ruby & Gem - macOS
         if: runner.os == 'macOS'
-        run: |
-          sudo gem update --quiet --system
+        run: sudo gem update --quiet --system
       - name: Ruby & Gem - Ubuntu
         # As of Ubuntu 21.04, RubyGems is exclusively managed by APT; "gem update --system" is unsupported.
         if: runner.os == 'Linux'
-        run: |
-          sudo apt-get --quiet --yes install ruby-rubygems
+        run: sudo apt-get --quiet --yes install ruby-rubygems
 
       # SteamCMD
       - name: SteamCMD - macOS install
         if: runner.os == 'macOS'
-        run: |
-          brew install --cask steamcmd
+        run: brew install --cask steamcmd
       - name: SteamCMD - Linux install
         # XXX Steam and SteamCMD packages are only available for x86, not arm64.
         if: runner.os == 'Linux' && runner.arch == 'X64'
@@ -404,8 +387,7 @@ jobs:
           sudo apt-get --quiet --yes install steamcmd
       - name: SteamCMD - Windows install
         if: runner.os == 'Windows'
-        run: |
-          choco install steamcmd --no-progress --yes --retry-count=3
+        run: choco install steamcmd --no-progress --yes --retry-count=3
 
       # Conda
       # Miniconda ships pre-installed on GitHub-hosted runners at $CONDA but is kept off
@@ -457,13 +439,11 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
       - name: Install project
-        run: |
-          uv --no-progress sync --frozen --all-extras --group test
+        run: uv --no-progress sync --frozen --all-extras --group test
 
       # mpm CLI runs.
       - name: Run local CLI
-        run: |
-          uv run -- mpm --version
+        run: uv run -- mpm --version
       - name: Run CLI from module
         run: |
           uv run        -m meta_package_manager --version
@@ -539,7 +519,7 @@ jobs:
     # version-bump branches it filters out must skip this job too.
     needs:
       - metadata
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

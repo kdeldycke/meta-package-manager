@@ -64,10 +64,9 @@ jobs:
   # backend) and py3-boltons >= 25. Packages are built in dependency order:
   # abuild resolves the previously-built ones from the local ~/packages
   # repository, whose signing key is trusted system-wide by the keygen step.
-  # Container jobs require Docker, which ubuntu-slim does not provide.
   apk-source:
     name: "✅ apk-source"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     container:
       image: alpine:edge
     env:
@@ -125,8 +124,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-24.04-arm
-          - ubuntu-slim
+          - ubuntu-26.04-arm
+          - ubuntu-26.04
           - macos-15-intel
           - macos-26
     runs-on: ${{ matrix.os }}
@@ -176,9 +175,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             asset_pattern: meta-package-manager-*-linux-arm64.bin
-          - os: ubuntu-slim
+          - os: ubuntu-26.04
             asset_pattern: meta-package-manager-*-linux-x64.bin
           - os: macos-15-intel
             asset_pattern: meta-package-manager-*-macos-x64.bin
@@ -215,7 +214,7 @@ jobs:
   guix:
     name: ⁉️ guix
     continue-on-error: true
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Install Guix
         run: >
@@ -244,7 +243,7 @@ jobs:
   guix-source:
     name: ⁉️ guix-source
     continue-on-error: true
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Guix
@@ -366,12 +365,12 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-24.04-arm
-          - ubuntu-slim
+          - ubuntu-26.04-arm
+          - ubuntu-26.04
           - macos-26
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31
+      - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31.11.0
         with:
           nix_path: nixpkgs=channel:nixos-unstable
       - run: nix-env --install --attr nixpkgs.meta-package-manager
@@ -386,13 +385,13 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-24.04-arm
-          - ubuntu-slim
+          - ubuntu-26.04-arm
+          - ubuntu-26.04
           - macos-26
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31
+      - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31.11.0
         with:
           nix_path: nixpkgs=channel:nixos-unstable
       - run: nix-env --file ./packaging/nix --install
@@ -420,8 +419,7 @@ jobs:
   # https://aur.archlinux.org/packages/meta-package-manager-bin
   aur:
     name: "⁉️ ${{ matrix.helper }}"
-    # Container jobs require Docker, which ubuntu-slim does not provide.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     continue-on-error: true
     strategy:
       matrix:
@@ -452,8 +450,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-24.04-arm
-          - ubuntu-slim
+          - ubuntu-26.04-arm
+          - ubuntu-26.04
           - macos-15-intel
           - macos-26
           - windows-11-arm
@@ -480,8 +478,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-24.04-arm
-          - ubuntu-slim
+          - ubuntu-26.04-arm
+          - ubuntu-26.04
           - macos-15-intel
           - macos-26
           - windows-11-arm
@@ -537,8 +535,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-24.04-arm
-          - ubuntu-slim
+          - ubuntu-26.04-arm
+          - ubuntu-26.04
           - macos-15-intel
           - macos-26
           - windows-11-arm
@@ -587,9 +585,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             asset: zb-linux-arm64
-          - os: ubuntu-slim
+          - os: ubuntu-26.04
             asset: zb-linux-x64
           - os: macos-15-intel
             asset: zb-darwin-x64

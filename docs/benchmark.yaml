@@ -581,6 +581,7 @@ unsupported:
   # `docs/unsupported.md`: the glyph links there for the reason.
   android-studio: excluded
   antibody: archived
+  antigravity: excluded
   atuin: excluded
   chezmoi: excluded
   clam-av-db: excluded
@@ -644,6 +645,7 @@ unsupported:
   upt: excluded
   waydroid: excluded
   whohas: archived
+  windsurf: excluded
   wsl: excluded
   wsl-update: excluded
   yadm: excluded

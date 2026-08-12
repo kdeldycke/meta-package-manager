@@ -62,6 +62,7 @@ def test_default_sudo_matches_system_managers():
         "apt",
         "apt-mint",
         "cave",
+        "dkp-pacman",
         "deb-get",
         "dnf",
         "dnf5",
@@ -103,7 +104,17 @@ def test_internal_sudo_matches_internal_escalators():
     """Exactly the managers whose CLI runs `sudo` itself mid-run are marked, and
     none of them escalates through mpm (an internal escalator is never wrapped)."""
     internal = {mid for mid, manager in pool.items() if type(manager).internal_sudo}
-    assert internal == {"cask", "fink", "pacaur", "pacstall", "paru", "topgrade", "yay"}
+    assert internal == {
+        "cask",
+        "fink",
+        "pacaur",
+        "pacstall",
+        "paru",
+        "pikaur",
+        "topgrade",
+        "trizen",
+        "yay",
+    }
     for mid in sorted(internal):
         assert pool[mid].default_sudo is False
 

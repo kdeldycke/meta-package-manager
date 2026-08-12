@@ -241,9 +241,16 @@ $ doas apk add --repository ~/.local/share/abuild/alpine meta-package-manager
 
 The 4 intermediate `abuild` runs produce the dependency packages missing from the official aports tree.
 
-```{note}
-The package is being submitted to Alpine's aports tree. Once it lands there, installation will be a one-liner: `apk add meta-package-manager`.
+````{admonition} Help land it in aports
+:class: important
+The package is pending review at [alpine/aports!105566](https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566). Once merged, installation will be a one-liner:
+
+```{code-block} shell-session
+$ apk add meta-package-manager
 ```
+
+You can help move it forward by showing your support on [the merge request](https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566).
+````
 `````
 
 `````{tab-item} Void Linux

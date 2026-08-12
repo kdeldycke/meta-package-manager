@@ -57,8 +57,10 @@ env:
 jobs:
 
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine
-  # Build and install from the in-repo APKBUILD overlay: meta-package-manager
-  # plus the dependency packages missing from the official aports tree
+  # https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566
+  # Build and install from the in-repo APKBUILD overlay while the aports merge
+  # request above is pending review: meta-package-manager plus the dependency
+  # packages missing from the official aports tree
   # (py3-click-extra, py3-cloup, py3-extra-platforms, py3-packageurl).
   # Targets Alpine edge, the only branch shipping py3-uv-build (mpm's build
   # backend) and py3-boltons >= 25. Packages are built in dependency order:

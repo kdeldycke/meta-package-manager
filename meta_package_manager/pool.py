@@ -27,6 +27,7 @@ from . import definitions
 from .capabilities import implements
 from .dispatch import warm_availability
 from .managers.antidote import Antidote
+from .managers.antigen import Antigen
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
@@ -86,6 +87,7 @@ if TYPE_CHECKING:
 
 manager_classes = (
     Antidote,
+    Antigen,
     APK,
     APM,
     APT,

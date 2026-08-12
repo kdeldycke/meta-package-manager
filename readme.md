@@ -85,6 +85,7 @@ config: {"sankey": {"showValues": false, "width": 800, "height": 400}}
 sankey-beta
 
 Meta Package Manager,antidote,1
+Meta Package Manager,antigen,1
 Meta Package Manager,apk,1
 Meta Package Manager,apm,1
 Meta Package Manager,apt,1
@@ -184,6 +185,7 @@ print(operation_matrix()[0])
 | Package manager                                                                                                                                                  | Version      | Cooldown |   Platforms   | `installed` | `outdated` | `orphans` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` | `doctor` |
 | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------- | :------: | :-----------: | :---------: | :--------: | :-------: | :------: | :-------: | :-------: | :-----------: | :------: | :----: | :-------: | :------: |
 | [`antidote`](https://kdeldycke.github.io/meta-package-manager/managers/antidote.html)                                                                            | >= 2.2       |          |     🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |           |       ✓       |    ✓     |        |           |          |
+| [`antigen`](https://kdeldycke.github.io/meta-package-manager/managers/antigen.html)                                                                              | >= 2         |          |     🐧 🍎     |      ✓      |            |           |          |           |           |       ✓       |    ✓     |        |           |          |
 | [`apk`](https://kdeldycke.github.io/meta-package-manager/managers/apk.html)                                                                                      | >= 2.10      |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`apm`](https://kdeldycke.github.io/meta-package-manager/managers/apm.html) [⚠️](https://kdeldycke.github.io/meta-package-manager/managers/apm.html)             | >= 1         |          |  🅱️ 🐧 🍎 🪟  |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`apt`](https://kdeldycke.github.io/meta-package-manager/managers/apt.html)                                                                                      | >= 1         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |

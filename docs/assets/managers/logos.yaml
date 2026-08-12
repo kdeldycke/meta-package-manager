@@ -359,6 +359,7 @@ icons:
     license: CC0-1.0
     managers:
     - antidote
+    - antigen
     - zim
     - zinit
     - zplug

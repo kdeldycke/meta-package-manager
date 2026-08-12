@@ -12,6 +12,7 @@ keywords = [
   "alpine linux",
   "anaconda",
   "antidote",
+  "antigen",
   "apk",
   "apm",
   "appimage",
@@ -1266,7 +1267,7 @@ description = "xbps"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: zsh-based"
 color = "bfdadc"
-description = "antidote, zim, zinit, zplug"
+description = "antidote, antigen, zim, zinit, zplug"
 
 [[tool.repomatic.labels.extra]]
 name = "🔌 plugin"
@@ -1590,10 +1591,12 @@ any-glob-to-any-file = [ "meta_package_manager/managers/xbps.*", "tests/*xbps*" 
 label = "📦 manager: zsh-based"
 any-glob-to-any-file = [
   "meta_package_manager/managers/antidote.*",
+  "meta_package_manager/managers/antigen.*",
   "meta_package_manager/managers/zim.*",
   "meta_package_manager/managers/zinit.*",
   "meta_package_manager/managers/zplug.*",
   "tests/*antidote*",
+  "tests/*antigen*",
   "tests/*zim*",
   "tests/*zinit*",
   "tests/*zplug*",

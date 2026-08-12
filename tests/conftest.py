@@ -332,6 +332,8 @@ PACKAGE_IDS = {
     # Purpose-built empty Zsh plugin, shared with zinit below: nothing to source,
     # nothing to break, and it is the ecosystem's established inert package.
     "antidote": "zdharma-continuum/null",
+    # Declares no install operation: the round-trip auto-skips.
+    "antigen": "zdharma-continuum/null",
     "apk": "nyancat",
     "apm": "markdown-pdf",
     "apt": "nyancat",

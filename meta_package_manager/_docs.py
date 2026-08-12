@@ -95,7 +95,7 @@ table that turns "not supported" into "not wrapped, still upgradable", which is
 a different answer to the only question the page exists to settle.
 
 Derived, never hand-written: membership is `topgrade` appearing in the manager's
-`docs/benchmark.yaml` competitor list, so the marker cannot drift from the data
+`docs/benchmark.toml` competitor list, so the marker cannot drift from the data
 it summarizes. Deliberately orthogonal to
 {data}`UNSUPPORTED_GLYPHS`, since all four combinations occur: a dead upstream
 `topgrade` still drives (`antibody`), a live refusal it drives (`zr`), and
@@ -133,9 +133,9 @@ UNSUPPORTED_DOCS_URL = "unsupported.md"
 
 Relative to `docs/`, so it resolves in the Sphinx build and in the checked-in
 mirror rendered on GitHub alike. Held as a single constant because every
-manager listed in `benchmark.yaml`'s `unsupported` key points at the same
+manager listed in `benchmark.toml`'s `unsupported` key points at the same
 place: retargeting it is then a one-line fix here, instead of an edit per
-manager in the YAML. Deliberately fragment-less, since the page opens on the
+manager in the TOML. Deliberately fragment-less, since the page opens on the
 table of excluded tools.
 """
 
@@ -418,24 +418,22 @@ def benchmark_managers_table() -> str:
     `docs/benchmark.md`, so the table (and its source-line anchors) always
     matches the code being documented without a checked-in copy.
 
-    The `mpm` column is auto-derived from the live pool: each implemented
-    manager renders as `[✅](source_url)`, linking to the class definition
-    that proves the support, or `[⚠️](source_url)` when that manager carries
-    the `unmaintained` flag, matching the manager index. A manager listed in
-    the YAML's `unsupported`
-    mapping instead renders the {data}`UNSUPPORTED_GLYPHS` entry for its
-    status, linked to {data}`UNSUPPORTED_DOCS_URL`, which keeps a deliberate
-    refusal distinct from a blank cell meaning nobody has assessed the tool
-    yet. Competitor columns are filled from `docs/benchmark.yaml`, which only
-    encodes what the *other* tools support.
+    The `mpm` column is auto-derived from the live pool: each implemented manager
+    renders as `[✅](source_url)`, linking to the class definition that proves the
+    support, or `[⚠️](source_url)` when that manager carries the `unmaintained` flag,
+    matching the manager index. A manager listed in the TOML's `unsupported` mapping
+    instead renders the {data}`UNSUPPORTED_GLYPHS` entry for its status, linked to
+    {data}`UNSUPPORTED_DOCS_URL`, which keeps a deliberate refusal distinct from a blank
+    cell meaning nobody has assessed the tool yet. Competitor columns are filled from
+    `docs/benchmark.toml`, which only encodes what the *other* tools support.
 
     Each manager identifier in the first column is rendered as a link: to its
     dedicated documentation page for implemented managers, or to its homepage
-    from the YAML's `homepages` mapping for competitor-only managers. IDs
+    from the TOML's `homepages` mapping for competitor-only managers. IDs
     without any known URL render as plain ``\\`code\\```.
 
     Support cells are normally `✅`, but render as `[🟡](url)` when the
-    `(manager_id, competitor)` pair is listed in the YAML's
+    `(manager_id, competitor)` pair is listed in the TOML's
     `coarse_support` map, with the URL pointing to the maintainer's own
     acknowledgement of the bundling. `🟡` means the competitor can only
     reach this manager through a coarser umbrella step (topgrade's
@@ -444,11 +442,11 @@ def benchmark_managers_table() -> str:
     URL is the specific decision or refusal that documents the declined
     support.
 
-    Manager rows are the sorted union of pool IDs and YAML keys, so a new
+    Manager rows are the sorted union of pool IDs and TOML keys, so a new
     entry on either side appears in the table without manual edits.
     """
-    yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
-    data = yaml.safe_load(yaml_path.read_text(encoding="UTF-8"))
+    toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
+    data = tomllib.loads(toml_path.read_text(encoding="UTF-8"))
     competitor_data: dict[str, list[str]] = data["managers"]
     homepages: dict[str, str] = data.get("homepages", {})
     coarse_support: dict[str, dict[str, str]] = data.get("coarse_support", {})

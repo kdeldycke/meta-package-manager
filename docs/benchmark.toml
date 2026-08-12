@@ -1,0 +1,676 @@
+# Per-manager competitor support flags and homepage URLs for the benchmark
+# page.
+#
+# This file encodes which managers each *competing* tool supports. The mpm
+# column on the page is auto-derived from the live pool of supported managers
+# (see `meta_package_manager/pool.py`). When adding a new manager to mpm, its
+# row appears automatically: only competitor data needs to be tracked here.
+#
+# Schema:
+#
+#   [managers]
+#   <manager-id> = [<competitor>, ...]
+#
+#   [homepages]
+#   <manager-id> = "<https-url>"
+#
+# `managers` keys must be lower-case manager identifiers. Each value is an
+# array (possibly empty) of competing tools that support that manager, chosen
+# from: topgrade, upt, pacaptr, metapac.
+#
+# `homepages` only needs to contain URLs for managers that mpm does not
+# implement. For mpm-implemented managers the homepage is sourced from the
+# class's `homepage_url` attribute. Cross-tool naming differences are
+# resolved by using mpm's identifier as the canonical row key: a flag means
+# "this competitor supports the manager identified by this row", even if the
+# competitor internally calls it something else (like topgrade's
+# `brew_formula` for our `brew`).
+#
+# `coarse_support` is a third table with entries shaped like `managers`.
+# Entries record (manager_id, competitor) pairs where the competitor can only
+# upgrade the manager as part of a coarser umbrella step, never in isolation.
+# Topgrade's `Step::Shell` and `Step::Vim` are the canonical examples:
+# `--only shell` runs *every* zsh/bash/fish plugin manager the host has
+# installed, so asking topgrade to upgrade just `antibody` (or just
+# `vundle`) is impossible. Cells in the support table render as `≈[^coarse]`
+# instead of `✓` for these pairs. Every coarse entry must also exist in
+# `managers` (you cannot be coarse-only-supported without being supported at
+# all).
+#
+# `unsupported` is an alphabetically-sorted table mapping manager id to
+# status, for the managers `mpm` deliberately does not wrap, the status
+# picking the glyph its `mpm` cell renders (see `UNSUPPORTED_GLYPHS` in
+# `_docs.py`). The glyph links to the decision recorded in
+# `docs/unsupported.md`, so a refusal reads differently from a blank cell,
+# which means nobody has assessed the tool yet. The link target is not
+# repeated here: it lives once in `_docs.py`'s `UNSUPPORTED_DOCS_URL`. Only
+# settled decisions belong here. A tool framed as a *not yet* (the
+# project-scoped ecosystems) keeps a blank cell, since a glyph would
+# overstate it. A manager cannot be both wrapped and unsupported: the
+# wrapped-but-abandoned ones render `⚠️` from their `unmaintained` flag
+# instead, and stay out of this mapping.
+# `test_unsupported_page_matches_benchmark` holds every key in lockstep with
+# a row of `docs/unsupported.md`.
+#
+# `refused` records (manager_id, competitor, evidence_url) triples where the
+# competitor has *explicitly declined* to support the manager, with a link to
+# the specific issue, PR, or comment carrying the refusal. Cells in the
+# support table render as `[❌](url)` for these pairs, letting readers audit
+# each claim against the upstream decision. The evidence link must point to a
+# concrete refusal (a maintainer comment, a `NOT_PLANNED` closure, a rejected
+# PR), not a generic repo homepage: absence of support without a documented
+# decision stays a blank cell. A (manager_id, competitor) pair cannot appear
+# in both `managers` and `refused` for the same competitor.
+#
+# A duplicate manager-id row anywhere in this file (in any table) is a TOML
+# parse error, not a silently-overwritten value: unlike the YAML this file
+# used to be, `tomllib` rejects a repeated key outright.
+
+[managers]
+0install = []
+am = ["topgrade"]
+android-studio = ["topgrade"]
+antibody = ["topgrade"]
+antidote = ["topgrade"]
+antigen = ["topgrade"]
+antigravity = ["topgrade"]
+apk = ["topgrade", "upt", "pacaptr"]
+apm = ["topgrade"]
+app-man = ["topgrade"]
+apt = ["topgrade", "upt", "pacaptr", "metapac"]
+apt-cyg = []
+apt-mint = []
+aqua = ["topgrade"]
+asdf = ["topgrade"]
+atuin = ["topgrade"]
+aura = ["topgrade"]
+auto-cpufreq = ["topgrade"]
+bash-it = ["topgrade"]
+bin = ["topgrade"]
+bob = ["topgrade"]
+brew = ["topgrade", "upt", "pacaptr", "metapac"]
+bun = ["topgrade", "metapac"]
+cabal = []
+cards = ["upt"]
+cargo = ["topgrade", "metapac"]
+cask = ["topgrade", "pacaptr"]
+cave = []
+certbot = ["topgrade"]
+chezmoi = ["topgrade"]
+choco = ["topgrade", "upt", "pacaptr"]
+choosenim = ["topgrade"]
+chromebrew = []
+cinnamon-spices = ["topgrade"]
+clam-av-db = ["topgrade"]
+claude-code = ["topgrade"]
+claude-code-plugins = ["topgrade"]
+codex = ["topgrade"]
+colima = ["topgrade"]
+composer = ["topgrade"]
+conda = ["topgrade", "pacaptr"]
+containers = ["topgrade"]
+cursor = ["topgrade"]
+cursor-agent = ["topgrade"]
+deb-get = ["topgrade"]
+declaro = []
+decman = []
+dein = ["topgrade"]
+deno = ["topgrade"]
+distrobox = ["topgrade"]
+dkp-pacman = ["topgrade"]
+dnf = ["topgrade", "upt", "pacaptr", "metapac"]
+dnf5 = []
+dotnet = ["topgrade"]
+dpp = []
+elan = ["topgrade"]
+emacs = ["topgrade"]
+emerge = ["topgrade", "upt", "pacaptr"]
+eopkg = ["topgrade", "upt"]
+etc-update = ["topgrade"]
+falconf = ["topgrade"]
+fink = []
+fish-plug = ["topgrade"]
+fisher = ["topgrade"]
+flatpak = ["topgrade", "upt", "metapac"]
+flutter = ["topgrade"]
+fossil = ["topgrade"]
+fundle = ["topgrade"]
+fwupd = ["topgrade"]
+gcloud = ["topgrade"]
+gearlever = ["topgrade"]
+gem = ["topgrade"]
+getnf = ["topgrade"]
+gh-ext = ["topgrade"]
+ghcup = ["topgrade"]
+git = ["topgrade"]
+gnome-shell = ["topgrade"]
+go = ["topgrade"]
+guix = ["topgrade", "upt"]
+haxelib = ["topgrade"]
+helix = ["topgrade"]
+helix-db = ["topgrade"]
+helm = ["topgrade"]
+home-manager = ["topgrade"]
+hyprpm = ["topgrade"]
+install-release = ["topgrade"]
+jetbrains-aqua = ["topgrade"]
+jetbrains-clion = ["topgrade"]
+jetbrains-datagrip = ["topgrade"]
+jetbrains-dataspell = ["topgrade"]
+jetbrains-gateway = ["topgrade"]
+jetbrains-goland = ["topgrade"]
+jetbrains-idea = ["topgrade"]
+jetbrains-mps = ["topgrade"]
+jetbrains-phpstorm = ["topgrade"]
+jetbrains-pycharm = ["topgrade"]
+jetbrains-rider = ["topgrade"]
+jetbrains-rubymine = ["topgrade"]
+jetbrains-rustrover = ["topgrade"]
+jetbrains-toolbox = ["topgrade"]
+jetbrains-webstorm = ["topgrade"]
+jetpack = ["topgrade"]
+julia = ["topgrade"]
+juliaup = ["topgrade"]
+kakoune = ["topgrade"]
+krew = ["topgrade"]
+lazy = ["topgrade"]
+lensfun = ["topgrade"]
+lure = ["topgrade"]
+macos = ["topgrade"]
+macports = ["topgrade", "pacaptr"]
+mamba = ["topgrade"]
+mandb = ["topgrade"]
+mas = ["topgrade", "metapac"]
+mason = ["topgrade"]
+maza = ["topgrade"]
+metapac = []
+micro = ["topgrade"]
+microsoft-office = ["topgrade"]
+microsoft-store = ["topgrade"]
+miktex = ["topgrade"]
+mise = ["topgrade", "metapac"]
+myrepos = ["topgrade"]
+nala = ["topgrade", "upt"]
+neobundle = ["topgrade"]
+nix = ["topgrade", "upt", "metapac"]
+npm = ["topgrade", "metapac"]
+oh-my-bash = ["topgrade"]
+oh-my-fish = ["topgrade"]
+oh-my-zsh = ["topgrade"]
+ollama = ["topgrade"]
+opam = ["topgrade"]
+opencode = ["topgrade"]
+opkg = ["upt"]
+pacapt = []
+pacaur = []
+pacdef = ["topgrade"]
+packer-aur = []
+packer-nvim = ["topgrade"]
+pacman = ["topgrade", "upt", "metapac"]
+pacstall = ["topgrade"]
+pamac = ["topgrade", "metapac"]
+paq = ["topgrade"]
+paru = ["topgrade", "metapac"]
+pathogen = []
+pckr-nvim = []
+pearl = ["topgrade"]
+pi = ["topgrade"]
+pihole = ["topgrade"]
+pikaur = ["topgrade", "metapac"]
+pip = ["topgrade", "pacaptr"]
+pip-review = ["topgrade"]
+pipupgrade = ["topgrade"]
+pipx = ["topgrade", "metapac"]
+pipxu = ["topgrade"]
+pixi = ["topgrade"]
+# PackageKit's CLI. pacaptr only reaches it through its explicit
+# `--using pkcon` syntax, never by auto-detection.
+pkcon = ["pacaptr"]
+pkg = ["topgrade", "upt"]
+pkg-termux = ["upt"]
+pkg-tools = []
+pkgfile = ["topgrade"]
+pkgin = ["topgrade"]
+pkgit = ["topgrade"]
+pkgman = ["upt"]
+platformio-core = ["topgrade"]
+plug = ["topgrade"]
+pnpm = ["topgrade", "metapac"]
+podman = ["topgrade"]
+poetry = ["topgrade"]
+protonplus = ["topgrade"]
+protonup = ["topgrade"]
+prt-get = ["upt"]
+pwsh-gallery = ["topgrade"]
+pyenv = ["topgrade"]
+raco = ["topgrade"]
+rcm = ["topgrade"]
+remotes = ["topgrade"]
+restarts = ["topgrade"]
+rtcl = ["topgrade"]
+rustup = ["topgrade"]
+rye = ["topgrade"]
+scoop = ["topgrade", "upt", "pacaptr", "metapac"]
+sdkman = ["topgrade"]
+sera = ["topgrade"]
+sheldon = ["topgrade"]
+skills = ["topgrade"]
+slackpkg = ["upt"]
+slapt-get = []
+smart = []
+snap = ["topgrade", "upt", "metapac"]
+soar = ["topgrade"]
+sorcery = []
+spack = []
+sparkle = ["topgrade"]
+spicetify = ["topgrade"]
+stack = ["topgrade"]
+steamcmd = []
+stew = ["topgrade"]
+sun-tools = []
+swupd = []
+sysget = []
+system = ["topgrade"]
+tazpkg = []
+tldr = ["topgrade"]
+tlmgr = ["topgrade", "pacaptr"]
+tmux = ["topgrade"]
+# `topgrade` is now wrapped by `mpm` itself. `topgrade` updates its own
+# binary through its `self_update` step, hence the self-referential flag.
+topgrade = ["topgrade"]
+toolbx = ["topgrade"]
+tpack = ["topgrade"]
+trizen = ["topgrade"]
+typst = ["topgrade"]
+upt = []
+urpmi = ["upt"]
+uv = ["topgrade", "metapac"]
+vagrant = ["topgrade"]
+vcpkg = ["topgrade"]
+vim = ["topgrade"]
+vim-pack = ["topgrade"]
+vite-plus = ["topgrade"]
+volta = ["topgrade"]
+voom = ["topgrade"]
+vscode = ["topgrade", "metapac"]
+vscodium = ["topgrade", "metapac"]
+vundle = ["topgrade"]
+waydroid = ["topgrade"]
+whohas = []
+windsurf = ["topgrade"]
+winget = ["topgrade", "upt", "pacaptr", "metapac"]
+wsl = ["topgrade"]
+wsl-update = ["topgrade"]
+xbps = ["topgrade", "upt", "pacaptr", "metapac"]
+xcodes = ["topgrade"]
+yadm = ["topgrade"]
+yaourt = []
+yarn = ["topgrade", "metapac"]
+yarn-berry = ["topgrade"]
+yay = ["topgrade", "upt", "metapac"]
+yazi = ["topgrade"]
+yt-dlp = []
+yum = ["topgrade", "upt"]
+zerobrew = ["topgrade"]
+zgenom = ["topgrade"]
+zigup = ["topgrade"]
+zim = ["topgrade"]
+zinit = ["topgrade"]
+zplug = ["topgrade"]
+zr = ["topgrade"]
+zvm = ["topgrade"]
+zypper = ["topgrade", "upt", "pacaptr", "metapac"]
+
+[homepages]
+0install = "https://0install.net"
+am = "https://github.com/ivan-hc/AM"
+android-studio = "https://developer.android.com/studio"
+antibody = "https://getantibody.github.io"
+antigravity = "https://antigravity.google"
+app-man = "https://github.com/ivan-hc/AppMan"
+aqua = "https://aquaproj.github.io"
+atuin = "https://atuin.sh"
+aura = "https://github.com/fosskers/aura"
+auto-cpufreq = "https://github.com/AdnanHodzic/auto-cpufreq"
+bash-it = "https://bash-it.readthedocs.io"
+bin = "https://github.com/marcosnils/bin"
+bob = "https://github.com/MordechaiHadad/bob"
+bun = "https://bun.sh"
+cabal = "https://www.haskell.org/cabal/"
+cards = "https://nutyx.org"
+certbot = "https://certbot.eff.org"
+chezmoi = "https://www.chezmoi.io"
+choosenim = "https://github.com/dom96/choosenim"
+cinnamon-spices = "https://cinnamon-spices.linuxmint.com"
+clam-av-db = "https://www.clamav.net"
+claude-code = "https://claude.com/product/claude-code"
+claude-code-plugins = "https://docs.claude.com/en/docs/claude-code/plugins"
+codex = "https://github.com/openai/codex"
+colima = "https://colima.run"
+containers = "https://github.com/containers/podman"
+cursor = "https://cursor.com"
+cursor-agent = "https://cursor.com/cli"
+declaro = "https://github.com/mantinhas/declaro"
+decman = "https://github.com/kiviktnm/decman"
+dein = "https://github.com/Shougo/dein.vim"
+deno = "https://deno.com"
+distrobox = "https://distrobox.it"
+dpp = "https://github.com/Shougo/dpp.vim"
+elan = "https://github.com/leanprover/elan"
+emacs = "https://www.gnu.org/software/emacs/"
+etc-update = "https://wiki.gentoo.org/wiki/Etc-update"
+falconf = "https://github.com/GideonBear/falconf"
+fish-plug = "https://github.com/kidonng/fish-plug"
+flutter = "https://flutter.dev"
+fossil = "https://fossil-scm.org"
+fundle = "https://github.com/danhper/fundle"
+gcloud = "https://cloud.google.com/sdk/gcloud"
+gearlever = "https://gearlever.mijorus.it"
+getnf = "https://github.com/getnf/getnf"
+ghcup = "https://www.haskell.org/ghcup/"
+git = "https://git-scm.com"
+gnome-shell = "https://extensions.gnome.org"
+go = "https://go.dev"
+haxelib = "https://lib.haxe.org"
+helix = "https://helix-editor.com"
+helix-db = "https://helix-db.com"
+helm = "https://helm.sh"
+home-manager = "https://github.com/nix-community/home-manager"
+hyprpm = "https://hypr.land"
+install-release = "https://github.com/Rishang/install-release"
+jetbrains-aqua = "https://www.jetbrains.com/aqua/"
+jetbrains-clion = "https://www.jetbrains.com/clion/"
+jetbrains-datagrip = "https://www.jetbrains.com/datagrip/"
+jetbrains-dataspell = "https://www.jetbrains.com/dataspell/"
+jetbrains-gateway = "https://www.jetbrains.com/remote-development/gateway/"
+jetbrains-goland = "https://www.jetbrains.com/go/"
+jetbrains-idea = "https://www.jetbrains.com/idea/"
+jetbrains-mps = "https://www.jetbrains.com/mps/"
+jetbrains-phpstorm = "https://www.jetbrains.com/phpstorm/"
+jetbrains-pycharm = "https://www.jetbrains.com/pycharm/"
+jetbrains-rider = "https://www.jetbrains.com/rider/"
+jetbrains-rubymine = "https://www.jetbrains.com/ruby/"
+jetbrains-rustrover = "https://www.jetbrains.com/rust/"
+jetbrains-toolbox = "https://www.jetbrains.com/toolbox-app/"
+jetbrains-webstorm = "https://www.jetbrains.com/webstorm/"
+jetpack = "https://github.com/3ofcoins/jetpack"
+julia = "https://julialang.org"
+juliaup = "https://github.com/JuliaLang/juliaup"
+kakoune = "https://kakoune.org"
+lensfun = "https://lensfun.github.io"
+lure = "https://lure.sh"
+macos = "https://www.apple.com/macos/"
+mamba = "https://mamba.readthedocs.io"
+mandb = "https://man-db.gitlab.io/man-db"
+mason = "https://github.com/williamboman/mason.nvim"
+maza = "https://github.com/tanrax/maza-ad-blocking"
+metapac = "https://github.com/ripytide/metapac"
+micro = "https://micro-editor.github.io"
+microsoft-office = "https://www.microsoft.com/microsoft-365"
+microsoft-store = "https://apps.microsoft.com"
+miktex = "https://miktex.org"
+myrepos = "https://myrepos.branchable.com"
+nala = "https://gitlab.com/volian/nala"
+neobundle = "https://github.com/Shougo/neobundle.vim"
+oh-my-bash = "https://ohmybash.nntoan.com"
+oh-my-zsh = "https://ohmyz.sh"
+ollama = "https://ollama.com"
+opencode = "https://github.com/sst/opencode"
+pacapt = "https://github.com/icy/pacapt"
+pacdef = "https://github.com/steven-omaha/pacdef"
+packer-aur = "https://github.com/keenerd/packer"
+packer-nvim = "https://github.com/wbthomason/packer.nvim"
+pamac = "https://gitlab.manjaro.org/applications/pamac"
+paq = "https://github.com/savq/paq-nvim"
+pathogen = "https://github.com/tpope/vim-pathogen"
+pckr-nvim = "https://github.com/lewis6991/pckr.nvim"
+pearl = "https://github.com/pearl-core/pearl"
+pi = "https://pi.dev"
+pihole = "https://pi-hole.net"
+pip-review = "https://github.com/jgonggrijp/pip-review"
+pipupgrade = "https://github.com/achillesrasquinha/pipupgrade"
+pipxu = "https://github.com/bulletmark/pipxu"
+pkg-termux = "https://github.com/termux/termux-tools"
+pkgfile = "https://github.com/falconindy/pkgfile"
+pkgit = "https://git.symlinx.net/pkgit/about/"
+pkgman = "https://www.haiku-os.org"
+platformio-core = "https://platformio.org"
+plug = "https://github.com/junegunn/vim-plug"
+podman = "https://podman.io"
+poetry = "https://python-poetry.org"
+protonplus = "https://github.com/Vysp3r/ProtonPlus"
+protonup = "https://github.com/AUNaseef/protonup"
+prt-get = "https://crux.nu"
+pyenv = "https://github.com/pyenv/pyenv"
+raco = "https://docs.racket-lang.org/raco/"
+rcm = "https://github.com/thoughtbot/rcm"
+remotes = "https://github.com/topgrade-rs/topgrade"
+restarts = "https://github.com/liske/needrestart"
+rtcl = "https://github.com/topgrade-rs/topgrade"
+rustup = "https://rustup.rs"
+rye = "https://rye.astral.sh"
+sera = "https://gitlab.com/cscs/sera"
+skills = "https://skills.sh"
+slackpkg = "https://slackpkg.org"
+smart = "https://github.com/smartpm/smart"
+spack = "https://spack.io"
+sparkle = "https://sparkle-project.org"
+spicetify = "https://spicetify.app"
+stack = "https://docs.haskellstack.org"
+sysget = "https://github.com/cvengler/sysget"
+system = "https://github.com/topgrade-rs/topgrade"
+tldr = "https://tldr.sh"
+tmux = "https://github.com/tmux-plugins/tpm"
+toolbx = "https://containertoolbx.org"
+tpack = "https://github.com/tmuxpack/tpack"
+typst = "https://typst.app"
+upt = "https://github.com/sigoden/upt"
+vagrant = "https://www.vagrantup.com"
+vcpkg = "https://vcpkg.io"
+vim = "https://www.vim.org"
+vite-plus = "https://viteplus.dev"
+voom = "https://www.vim.org/scripts/script.php?script_id=2657"
+vundle = "https://github.com/VundleVim/Vundle.vim"
+waydroid = "https://waydro.id"
+whohas = "https://github.com/whohas/whohas"
+windsurf = "https://windsurf.com"
+wsl = "https://learn.microsoft.com/windows/wsl/"
+wsl-update = "https://learn.microsoft.com/windows/wsl/"
+xcodes = "https://github.com/XcodesOrg/xcodes"
+yadm = "https://yadm.io"
+yaourt = "https://github.com/archlinuxfr/yaourt"
+yazi = "https://yazi-rs.github.io"
+yt-dlp = "https://github.com/yt-dlp/yt-dlp"
+zgenom = "https://github.com/jandamm/zgenom"
+zigup = "https://github.com/marler8997/zigup"
+zr = "https://github.com/jedahan/zr"
+zvm = "https://github.com/tristanisham/zvm"
+
+# Two clusters share this table, both topgrade-driven:
+#   - Zsh/Bash/Fish plugin managers under `Step::Shell` (`antibody`,
+#     `antidote`, `antigen`, `bash-it`, `fish-plug`, `fisher`, `fundle`,
+#     `oh-my-bash`, `oh-my-fish`, `oh-my-zsh`, `zgenom`, `zim`, `zinit`,
+#     `zplug`, `zr`). `topgrade --only shell` runs all of them.
+#   - Vim/Neovim plugin managers under `Step::Vim` (`dein`, `lazy`, `mason`,
+#     `neobundle`, `packer-nvim`, `paq`, `plug`, `voom`, `vundle`).
+#     `topgrade --only vim` runs all of them.
+# Entries are sorted alphabetically rather than grouped by cluster so the
+# well-formedness test stays simple. Each maps competitor to url, linking to
+# the maintainer's own confirmation of the coarse bundling (like the
+# `Step::Shell` / `Step::Vim` acknowledgement in topgrade discussion #961).
+# Cells render as `[🟡](url)`.
+[coarse_support.antibody]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.antidote]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.antigen]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.bash-it]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.dein]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.fish-plug]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.fisher]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.fundle]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.lazy]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.mason]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.neobundle]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.oh-my-bash]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.oh-my-fish]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.oh-my-zsh]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.packer-nvim]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.paq]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.plug]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.vim-pack]
+topgrade = "https://github.com/topgrade-rs/topgrade/pull/2010"
+
+[coarse_support.voom]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.vundle]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.zgenom]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.zim]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.zinit]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.zplug]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+[coarse_support.zr]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+# Each entry records a manager the competitor explicitly declined to
+# implement, keyed by manager-id then by competitor, with the value being the
+# URL of the refusal (issue closed as NOT_PLANNED, maintainer comment,
+# rejected PR). Procedural closures (like "please reopen using the correct
+# template" that never got a followup) count as refusals here too: the
+# request was made, the issue was closed, no support followed. Entries and
+# their nested keys are sorted alphabetically.
+[refused.cabal]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/320"
+
+[refused.yt-dlp]
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/1764"
+
+# Managers left unwrapped by decision, each carrying its reason in the table
+# of `docs/unsupported.md`. The value is the tool's own status, which picks
+# the glyph rendered in the `mpm` column (see `UNSUPPORTED_GLYPHS` in
+# `_docs.py`):
+#
+#   archived: upstream is retired, so the tool is dead whatever mpm does.
+#   excluded: upstream is alive; mpm declined it on its own merits, either
+#             because it owns no package registry (`declaro`, `decman`,
+#             `metapac`, `upt`) or because it exposes no unattended entry
+#             point to drive (`pckr-nvim`).
+#
+# Keys are sorted alphabetically, and every key needs a matching row in
+# `docs/unsupported.md`: the glyph links there for the reason.
+[unsupported]
+android-studio = "excluded"
+antibody = "archived"
+antigravity = "excluded"
+atuin = "excluded"
+chezmoi = "excluded"
+clam-av-db = "excluded"
+containers = "excluded"
+cursor = "excluded"
+cursor-agent = "excluded"
+declaro = "excluded"
+decman = "excluded"
+dein = "archived"
+deno = "excluded"
+distrobox = "excluded"
+dpp = "excluded"
+etc-update = "excluded"
+flutter = "excluded"
+fossil = "excluded"
+fundle = "archived"
+git = "excluded"
+jetbrains-aqua = "excluded"
+jetbrains-clion = "excluded"
+jetbrains-datagrip = "excluded"
+jetbrains-dataspell = "excluded"
+jetbrains-gateway = "excluded"
+jetbrains-goland = "excluded"
+jetbrains-idea = "excluded"
+jetbrains-mps = "excluded"
+jetbrains-phpstorm = "excluded"
+jetbrains-pycharm = "excluded"
+jetbrains-rider = "excluded"
+jetbrains-rubymine = "excluded"
+jetbrains-rustrover = "excluded"
+jetbrains-toolbox = "excluded"
+jetbrains-webstorm = "excluded"
+jetpack = "archived"
+lensfun = "excluded"
+mandb = "excluded"
+maza = "excluded"
+metapac = "excluded"
+microsoft-office = "excluded"
+microsoft-store = "excluded"
+myrepos = "excluded"
+neobundle = "archived"
+pacapt = "archived"
+pacdef = "archived"
+packer-aur = "archived"
+packer-nvim = "archived"
+pathogen = "archived"
+pckr-nvim = "excluded"
+pihole = "excluded"
+podman = "excluded"
+rcm = "excluded"
+remotes = "excluded"
+restarts = "excluded"
+rtcl = "excluded"
+smart = "archived"
+spicetify = "excluded"
+sysget = "archived"
+system = "excluded"
+tldr = "excluded"
+toolbx = "excluded"
+typst = "excluded"
+upt = "excluded"
+waydroid = "excluded"
+whohas = "archived"
+windsurf = "excluded"
+wsl = "excluded"
+wsl-update = "excluded"
+yadm = "excluded"
+yaourt = "archived"
+zgenom = "excluded"
+zr = "excluded"

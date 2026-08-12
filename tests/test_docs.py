@@ -297,11 +297,16 @@ def test_pyproject_updates_are_pyproject_fmt_fixpoint(monkeypatch, tmp_path):
     assert pyproject_fmt.run(["--check", str(scratch)]) == 0
 
 
-def test_benchmark_yaml_well_formed():
-    """Check `docs/benchmark.yaml` only encodes flags from the known
-    competitor set and homepage URLs for non-pool managers."""
-    yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
-    data = safe_load(yaml_path.read_text(encoding="utf-8"))
+def test_benchmark_toml_well_formed():
+    """Check `docs/benchmark.toml` only encodes flags from the known
+    competitor set and homepage URLs for non-pool managers.
+
+    A duplicate manager-id row anywhere in the file (in any table) is a
+    `tomllib.TOMLDecodeError` at load time, below, rather than a silently
+    overwritten value: no separate assertion is needed to hold that invariant.
+    """
+    toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
+    data = tomllib.loads(toml_path.read_text(encoding="UTF-8"))
     assert set(data) == {
         "managers",
         "homepages",
@@ -416,30 +421,30 @@ def test_benchmark_yaml_well_formed():
 
 
 def test_benchmark_homepages_cover_non_pool_managers():
-    """Every non-pool manager listed in `benchmark.yaml` must have a
+    """Every non-pool manager listed in `benchmark.toml` must have a
     matching `homepages` entry so the table can link the identifier.
 
     Pool-implemented managers are excluded: their URL is sourced from the
-    class's `homepage_url` attribute, and a redundant entry in the YAML
+    class's `homepage_url` attribute, and a redundant entry in the TOML
     would create two sources of truth.
     """
-    yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
-    data = safe_load(yaml_path.read_text(encoding="utf-8"))
+    toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
+    data = tomllib.loads(toml_path.read_text(encoding="UTF-8"))
 
     pool_ids = set(pool.all_manager_ids)
-    yaml_ids = set(data["managers"])
+    benchmark_ids = set(data["managers"])
     homepage_ids = set(data["homepages"])
 
-    # Every non-pool YAML manager must have a homepage URL.
-    missing = (yaml_ids - pool_ids) - homepage_ids
-    assert not missing, f"Missing homepage URLs in benchmark.yaml: {sorted(missing)}"
+    # Every non-pool TOML manager must have a homepage URL.
+    missing = (benchmark_ids - pool_ids) - homepage_ids
+    assert not missing, f"Missing homepage URLs in benchmark.toml: {sorted(missing)}"
 
     # Homepages must not duplicate pool managers (those come from the class).
     overlap = homepage_ids & pool_ids
     assert not overlap, f"Pool managers must not appear in homepages: {sorted(overlap)}"
 
     # Homepages must not include unknown manager IDs.
-    extra = homepage_ids - yaml_ids
+    extra = homepage_ids - benchmark_ids
     assert not extra, f"Unknown manager IDs in homepages: {sorted(extra)}"
 
 
@@ -1084,8 +1089,8 @@ def test_unsupported_page_matches_benchmark():
     fallback marker is derived rather than written, so the page is held to what
     `unsupported_status()` computes from the competitor data.
     """
-    yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
-    benchmark = safe_load(yaml_path.read_text(encoding="utf-8"))
+    toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
+    benchmark = tomllib.loads(toml_path.read_text(encoding="UTF-8"))
     statuses = benchmark["unsupported"]
     competitors = benchmark["managers"]
 
@@ -1104,7 +1109,7 @@ def test_unsupported_page_matches_benchmark():
     assert len(ids) == len(set(ids)), "unsupported.md repeats a manager row"
 
     assert set(ids) == set(statuses), (
-        "docs/unsupported.md and benchmark.yaml's unsupported key disagree; "
+        "docs/unsupported.md and benchmark.toml's unsupported key disagree; "
         f"page-only: {sorted(set(ids) - set(statuses))}, "
         f"benchmark-only: {sorted(set(statuses) - set(ids))}"
     )
@@ -1114,7 +1119,7 @@ def test_unsupported_page_matches_benchmark():
             mid, statuses[mid], competitors.get(mid, [])
         )
         assert glyph == expected, (
-            f"unsupported.md row {mid!r} shows {glyph!r} but benchmark.yaml "
+            f"unsupported.md row {mid!r} shows {glyph!r} but benchmark.toml "
             f"declares it {statuses[mid]!r}, which renders {expected!r}"
         )
 

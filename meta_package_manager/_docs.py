@@ -139,12 +139,19 @@ manager in the YAML. Deliberately fragment-less, since the page opens on the
 table of excluded tools.
 """
 
-DOCS_SITE_URL = "https://kdeldycke.github.io/meta-package-manager"
+DOCS_SITE_URL = "https://mpm.run"
 """Base URL of the published documentation site.
 
 Used by {func}`operation_matrix` to link each manager ID of `readme.md` to its
 documentation page: the readme renders on GitHub and PyPI, where relative Sphinx
 links cannot resolve, so the links must be absolute.
+
+Duplicates `[project.urls] Documentation` of `pyproject.toml`, which is the
+declared source and what `docs/conf.py` reads for `html_baseurl`. The value is
+repeated here because runtime code cannot read `pyproject.toml`, which is not
+shipped in the wheel; `test_docs_site_url_matches_pyproject` fails if the two
+drift apart. Carries no trailing slash, since every consumer appends a rooted
+path.
 """
 
 EMPTY_CELLS = frozenset({"", "—", "➖"})

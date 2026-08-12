@@ -21,7 +21,7 @@ long_description    mpm is a unifying command line interface on top of the \
                     packages across all of them at once, with table, JSON, \
                     CSV and SBOM outputs.
 
-homepage            https://kdeldycke.github.io/meta-package-manager/
+homepage            https://mpm.run/
 
 python.rootname     meta_package_manager
 

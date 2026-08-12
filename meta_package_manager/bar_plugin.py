@@ -6,7 +6,7 @@
 # <xbar.desc>List outdated packages and manage upgrades.</xbar.desc>
 # <xbar.dependencies>python,mpm</xbar.dependencies>
 # <xbar.image>https://raw.githubusercontent.com/kdeldycke/meta-package-manager/refs/heads/main/docs/assets/xbar-submenu-table-rendering.png</xbar.image>
-# <xbar.abouturl>https://kdeldycke.github.io/meta-package-manager/bar-plugin.html</xbar.abouturl>
+# <xbar.abouturl>https://mpm.run/bar-plugin.html</xbar.abouturl>
 # XXX Quotes around default values are required by SwiftBar, and optional in Xbar, which
 # strips them. Unquoted, the variable is silently ignored by SwiftBar and never reaches
 # its settings UI.

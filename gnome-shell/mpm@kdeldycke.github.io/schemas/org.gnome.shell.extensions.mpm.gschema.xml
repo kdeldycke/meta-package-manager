@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Settings mirror the Xbar/SwiftBar plugin variables where an equivalent exists:
-     see https://kdeldycke.github.io/meta-package-manager/gnome-shell.html for the
+     see https://mpm.run/gnome-shell.html for the
      full parity table. Keys are sorted alphabetically. -->
 <schemalist>
   <schema id="org.gnome.shell.extensions.mpm" path="/org/gnome/shell/extensions/mpm/">
@@ -61,7 +61,7 @@
     <key name="upgrade-in-terminal" type="b">
       <default>true</default>
       <summary>Run upgrades in a terminal</summary>
-      <description>Open a terminal window for upgrade commands so their progress can be followed and sudo can prompt for a password. When disabled, upgrades run silently in the background, which requires passwordless escalation for system package managers: see https://kdeldycke.github.io/meta-package-manager/sudo.html</description>
+      <description>Open a terminal window for upgrade commands so their progress can be followed and sudo can prompt for a password. When disabled, upgrades run silently in the background, which requires passwordless escalation for system package managers: see https://mpm.run/sudo.html</description>
     </key>
   </schema>
 </schemalist>

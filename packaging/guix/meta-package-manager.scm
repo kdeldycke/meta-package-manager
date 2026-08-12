@@ -48,7 +48,7 @@
            python-packageurl
            python-tomli-w
            python-xmltodict))
-    (home-page "https://kdeldycke.github.io/meta-package-manager/")
+    (home-page "https://mpm.run/")
     (synopsis "Package managers abstraction and unification tool")
     (description
      "Meta Package Manager (mpm) is a @acronym{Command Line Interface, CLI}

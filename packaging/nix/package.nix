@@ -54,7 +54,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
 
   meta = {
     description = "Package managers abstraction and unification tool";
-    homepage = "https://kdeldycke.github.io/meta-package-manager/";
+    homepage = "https://mpm.run/";
     changelog = "https://github.com/kdeldycke/meta-package-manager/blob/v${finalAttrs.version}/changelog.md";
     license = lib.licenses.gpl2Plus;
     # Add: maintainers = with lib.maintainers; [ kdeldycke ];

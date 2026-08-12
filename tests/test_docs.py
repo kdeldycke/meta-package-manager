@@ -110,6 +110,24 @@ def test_project_metadata():
     assert set(pool.all_manager_ids).issubset(toml_config["project"]["keywords"])
 
 
+def test_docs_site_url_matches_pyproject():
+    """The canonical docs origin is declared once, in `pyproject.toml`.
+
+    `docs/conf.py` reads it from there for `html_baseurl`, but runtime code
+    cannot: `pyproject.toml` is not shipped in the wheel, so
+    {data}`_docs.DOCS_SITE_URL` repeats the literal. A drift would point the
+    readme's manager links at a different origin than the canonical tags,
+    which is exactly the split-indexing the custom domain exists to avoid.
+    """
+    toml_path = PROJECT_ROOT.joinpath("pyproject.toml").resolve()
+    toml_config = tomllib.loads(toml_path.read_text(encoding="utf-8"))
+    declared = toml_config["project"]["urls"]["Documentation"]
+    assert _docs.DOCS_SITE_URL == declared.rstrip("/")
+    # Consumers append rooted paths, so a trailing slash would double the
+    # separator on every generated link.
+    assert not _docs.DOCS_SITE_URL.endswith("/")
+
+
 def test_changelog():
     content = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
     assert content.startswith("# Changelog\n")

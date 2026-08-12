@@ -128,7 +128,7 @@ class CycloneDX(SBOM):
         [CycloneDX document metadata specifications](https://cyclonedx.org/docs/1.7/json/#metadata).
         """
         gh_url = "https://github.com/kdeldycke/meta-package-manager"
-        doc_url = "https://kdeldycke.github.io/meta-package-manager"
+        doc_url = "https://mpm.run"
         self.document = Bom()
         # `(manager_id, package_id) -> Component` lookup, used by
         # {meth}`finalize` to wire declared-dependency edges to their

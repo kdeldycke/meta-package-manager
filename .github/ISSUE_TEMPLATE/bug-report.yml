@@ -32,13 +32,13 @@ body:
 
         The issue you are trying to report might already be fixed upstream. Check your current version with `mpm
         --version` and compare it with [the
-        changelog](https://kdeldycke.github.io/meta-package-manager/changelog.html).
+        changelog](https://mpm.run/changelog.html).
 
 
         You might then try to run the latest development version of `mpm` by:
 
         - [installing it from its source
-        code](https://kdeldycke.github.io/meta-package-manager/development.html#setup-environment)
+        code](https://mpm.run/development.html#setup-environment)
 
         - [running the latest binary
         build](https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml?query=branch%3Amain+is%3Asuccess)

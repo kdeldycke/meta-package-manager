@@ -16,6 +16,13 @@ version = release = toml_config["project"]["version"]
 url = toml_config["project"]["urls"]["Homepage"]
 author = ", ".join(author["name"] for author in toml_config["project"]["authors"])
 
+# Canonical origin of the published site, read from the one place that declares
+# it. Sphinx wants a trailing slash: it joins page paths onto this verbatim to
+# build the <link rel="canonical"> of every page, and sphinx-sitemap builds the
+# sitemap URLs the same way. The declaration itself stays slash-less so runtime
+# consumers can append rooted paths.
+docs_site_url = toml_config["project"]["urls"]["Documentation"].rstrip("/") + "/"
+
 # Title-case each word of the project ID.
 project = " ".join(word.title() for word in project_id.split("-"))
 
@@ -33,6 +40,9 @@ extensions = [
     # Adds a copy button to code blocks.
     "sphinx_copybutton",
     "sphinx_design",
+    # Emits sitemap.xml from html_baseurl, so crawlers get the 81 manager pages
+    # as a list instead of having to discover them by following links.
+    "sphinx_sitemap",
     "sphinxext.opengraph",
     "myst_parser",
     # Docstrings are written in MyST markdown, transparently converted back to
@@ -176,10 +186,16 @@ html_theme = "furo"
 html_title = project
 # Browser-tab icon: the icon-only, tight-cropped favicon (no wordmark).
 html_favicon = "assets/favicon.svg"
+# Emits <link rel="canonical"> on every page, and is what sphinx-sitemap builds
+# its URLs from. Without it each manager page is reachable at both the
+# github.io origin and the custom domain with nothing telling crawlers which
+# one counts, and the vanity `<manager>.mpm.run` redirects would land on pages
+# that fail to name their own canonical.
+html_baseurl = docs_site_url
 # Absolute base URL for OpenGraph. sphinxext.opengraph resolves og:image
 # against it, so social crawlers can follow the image instead of a relative
 # path they cannot resolve.
-ogp_site_url = f"https://{github_user}.github.io/{project_id}/"
+ogp_site_url = docs_site_url
 # Social-card image (og:image), served from the GitHub raw host like the readme
 # banner and screenshots: docs/assets/ is not copied into the built site (only
 # the two sidebar logos are named in html_static_path), so a site-relative path
@@ -291,6 +307,13 @@ html_static_path = [
     "assets/logo-square-dark.png",
     "assets/logo-square-light.png",
 ]
+# Copied verbatim to the site root, where crawlers expect it. `html_static_path`
+# would bury it under `_static/`, which robots.txt cannot be served from.
+html_extra_path = ["robots.txt"]
+# sphinx-sitemap defaults to a `{lang}{version}{link}` layout meant for sites
+# publishing several translations or versions side by side. This one publishes a
+# single tree, so anything but the bare link yields sitemap entries that 404.
+sitemap_url_scheme = "{link}"
 html_css_files = ["custom.css", "table-crosshair.css"]
 html_js_files = ["table-crosshair.js"]
 
@@ -305,7 +328,7 @@ click_extra_enable_exec_directives = True
 # Picked up by click_extra.sphinx, which writes one page per (sub)command into
 # <outdir>/man/, and (when mandoc or groff is on PATH) a browser-viewable
 # .html sibling next to each .1. See
-# https://kdeldycke.github.io/meta-package-manager/man/.
+# https://mpm.run/man/.
 click_extra_manpages = [
     {"script": "meta_package_manager.cli:mpm", "prog_name": "mpm"},
 ]

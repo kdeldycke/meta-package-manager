@@ -345,6 +345,13 @@ optional-dependencies.toml = [ "click-extra[toml]" ]
 optional-dependencies.xml = [ "click-extra[xml]" ]
 optional-dependencies.yaml = [ "click-extra[yaml]" ]
 urls.Changelog = "https://github.com/kdeldycke/meta-package-manager/blob/main/changelog.md"
+# Canonical host of the documentation site, and the single source `docs/conf.py`
+# reads to set `html_baseurl`. `package-manager.org` is a registered alias that
+# 301s here; it must never be published as a second live origin, or every page
+# ends up with two indexable URLs. `meta_package_manager._docs.DOCS_SITE_URL`
+# repeats the value because runtime code cannot read this file; a test in
+# `tests/test_docs.py` keeps the two in step.
+urls.Documentation = "https://mpm.run"
 urls.Download = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.7.0.dev0"
 urls.Funding = "https://github.com/sponsors/kdeldycke"
 urls.Homepage = "https://github.com/kdeldycke/meta-package-manager"
@@ -416,6 +423,8 @@ docs = [
   "sphinx-datatables>=1",
   # sphinx-design 0.6 introduced the card/grid/tab directive syntax used in docs.
   "sphinx-design>=0.6",
+  # sphinx-sitemap 2.6.0 is the first release supporting Sphinx 8.
+  "sphinx-sitemap>=2.6",
   # sphinxcontrib-jquery is loaded explicitly in docs/conf.py (sphinx-datatables
   # activates it too late to register jquery.js on its own); declare it so the
   # build never relies on it arriving only transitively via sphinx-datatables.
@@ -472,7 +481,7 @@ build-backend.source-exclude = [
 # of fetching a GitHub tag tarball. source-include feeds the sdist only: the
 # wheel stays module-only, since uv-build packs just the module-root. Git-ignored
 # build output (docs/_build/, __pycache__/) is left out automatically. See
-# https://kdeldycke.github.io/meta-package-manager/packaging.html
+# https://mpm.run/packaging.html
 build-backend.source-include = [
   ".github/**",
   "changelog.md",

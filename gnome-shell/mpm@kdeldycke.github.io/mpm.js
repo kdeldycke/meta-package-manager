@@ -27,7 +27,7 @@ export const MPM_TIMEOUT = 60;
  * are tuned for interactive runs and are too long for a background refresh. */
 
 export const INSTALL_DOCS_URL =
-    'https://kdeldycke.github.io/meta-package-manager/install.html';
+    'https://mpm.run/install.html';
 
 const VERSION_REGEX = /\bversion\s+(\d+(?:\.\d+)+)/;
 
@@ -349,7 +349,7 @@ export function terminalArgv(terminal, argv) {
 /**
  * Fire-and-forget spawn of an action command, either wrapped in a terminal
  * or silenced in the background (the NOPASSWD path documented at
- * https://kdeldycke.github.io/meta-package-manager/sudo.html).
+ * https://mpm.run/sudo.html).
  *
  * @param {string[]} argv - Command to spawn.
  * @returns {Gio.Subprocess} the spawned process handle.

@@ -1,0 +1,6 @@
+# Copied to the site root by `html_extra_path` in docs/conf.py.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://mpm.run/sitemap.xml

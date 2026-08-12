@@ -24,12 +24,12 @@ mpm search python
 
 ## Documentation
 
-Full documentation at https://kdeldycke.github.io/meta-package-manager/
+Full documentation at https://mpm.run/
 ]]></description>
     <projectUrl>https://github.com/kdeldycke/meta-package-manager</projectUrl>
     <packageSourceUrl>https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager</packageSourceUrl>
     <projectSourceUrl>https://github.com/kdeldycke/meta-package-manager</projectSourceUrl>
-    <docsUrl>https://kdeldycke.github.io/meta-package-manager/</docsUrl>
+    <docsUrl>https://mpm.run/</docsUrl>
     <bugTrackerUrl>https://github.com/kdeldycke/meta-package-manager/issues</bugTrackerUrl>
     <licenseUrl>https://github.com/kdeldycke/meta-package-manager/blob/main/license</licenseUrl>
     <iconUrl>https://cdn.jsdelivr.net/gh/kdeldycke/meta-package-manager@v6.2.1/docs/assets/icon.png</iconUrl>

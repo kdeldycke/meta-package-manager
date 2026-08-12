@@ -25,6 +25,16 @@ That fork is the worked example of the criterion that decides an editor or shell
 
 **A candidate is not required to support every operation.** Inventorying and updating are enough on their own, and a missing `install` disqualifies nothing. That pair already beats what the competing wrappers do for the same tools, which is a coarse upgrade of a whole category with no listing at all, so wrapping at that level turns an opaque bulk update into something a user can inspect. `topgrade` is wrapped on `upgrade_all` alone, and `lazy` on inventory plus update: lazy.nvim materializes only the plugin set the user's own Lua configuration names, so an `install` would mean `mpm` editing configuration it does not own. Declare the operations the tool genuinely supports, let `mpm` auto-skip the rest, and record in the class docstring why each absent one is absent. Never fake an operation with a mutating command.
 
+**There is a floor under that, and `topgrade` is where everything below it goes.** `topgrade` sits in the pool precisely as the catch-all for tools too thin to wrap on their own: it auto-detects and upgrades whatever it finds on the host, so every tool it drives is already reachable through `mpm upgrade --topgrade` without `mpm` learning any of them. That makes it the sinkhole, and it changes what a marginal candidate has to prove.
+
+Apply the test in this order:
+
+1. **Does the candidate offer an inventory?** If it can list what it has installed, wrap it. That is the one thing `topgrade` categorically cannot do for any tool, having no listing at all, so the inventory is the whole gain and a missing `install`/`remove`/`outdated` does not diminish it. This is why [`lazy`](managers/lazy.md), [`vim-pack`](managers/vim-pack.md), [`zim`](managers/zim.md) and [`zplug`](managers/zplug.md) are wrapped on inventory plus update.
+2. **If not, does it offer any per-package operation?** A tool with no listing but real `install` or `remove` verbs still reaches packages one at a time, which `topgrade` cannot. [`steamcmd`](managers/steamcmd.md) is wrapped on `install` alone on those grounds, and [`sheldon`](managers/sheldon.md) on `remove` plus update.
+3. **If neither, and `topgrade` already drives it, decline.** A wrapper whose entire honest surface is `upgrade_all` buys one more way to run an upgrade `mpm` already reaches, at the cost of a full manager's checklist and its ongoing maintenance. `zr` is the worked example: plugins are the arguments you hand it, so it owns no inventory, and `zr --update` is already inside `topgrade`'s catalog.
+
+Check `docs/benchmark.yaml` before leaning on step 3: it is only an argument for tools `topgrade` actually covers. A thin tool `topgrade` does *not* drive reaches nobody, and is judged on its own merits.
+
 Three further requirements are enforced in code. They are not preferences: a tool that cannot clear them cannot be wrapped in the current architecture, however much work is thrown at it.
 
 | Requirement          | Enforced by                                | What it rules out                                                                                                     |

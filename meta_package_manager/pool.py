@@ -60,6 +60,7 @@ from .managers.pwsh_gallery import PWSH_Gallery
 from .managers.scoop import Scoop
 from .managers.sdkman import SDKMAN
 from .managers.sfsu import SFSU
+from .managers.sheldon import Sheldon
 from .managers.snap import Snap
 from .managers.sun_tools import Sun_Tools
 from .managers.tazpkg import Tazpkg
@@ -126,6 +127,7 @@ manager_classes = (
     Scoop,
     SDKMAN,
     SFSU,
+    Sheldon,
     Snap,
     Sun_Tools,
     Tazpkg,

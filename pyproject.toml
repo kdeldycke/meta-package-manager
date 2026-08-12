@@ -110,6 +110,7 @@ keywords = [
   "scoop",
   "sdkman",
   "sfsu",
+  "sheldon",
   "slackware",
   "slapt-get",
   "slitaz",
@@ -1181,6 +1182,11 @@ color = "bfdadc"
 description = "sdkman"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: sheldon"
+color = "bfdadc"
+description = "sheldon"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: slapt-get"
 color = "bfdadc"
 description = "slapt-get"
@@ -1503,6 +1509,10 @@ any-glob-to-any-file = [
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: sdkman"
 any-glob-to-any-file = [ "meta_package_manager/managers/sdkman.*", "tests/*sdkman*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: sheldon"
+any-glob-to-any-file = [ "meta_package_manager/managers/sheldon.*", "tests/*sheldon*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: slapt-get"

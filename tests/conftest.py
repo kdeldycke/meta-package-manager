@@ -395,6 +395,8 @@ PACKAGE_IDS = {
     "scoop": "main/hyperfine",
     "sdkman": "jbang",
     "sfsu": "main/hyperfine",
+    # Declares no install operation: the round-trip auto-skips.
+    "sheldon": "zsh-autosuggestions",
     "slapt-get": "nano",
     "snap": "hello-world",
     "soar": "bat",  # Single-file static binary from the soarpkgs registry.

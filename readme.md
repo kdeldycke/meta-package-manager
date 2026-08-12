@@ -138,6 +138,7 @@ Meta Package Manager,pwsh-gallery,1
 Meta Package Manager,scoop,1
 Meta Package Manager,sdkman,1
 Meta Package Manager,sfsu,1
+Meta Package Manager,sheldon,1
 Meta Package Manager,slapt-get,1
 Meta Package Manager,snap,1
 Meta Package Manager,soar,1
@@ -236,6 +237,7 @@ print(operation_matrix()[0])
 | [`scoop`](https://kdeldycke.github.io/meta-package-manager/managers/scoop.html)                                                                                  | >= 0.2.4     |          |      🪟       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`sdkman`](https://kdeldycke.github.io/meta-package-manager/managers/sdkman.html)                                                                                | >= 5         |          |     🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`sfsu`](https://kdeldycke.github.io/meta-package-manager/managers/sfsu.html)                                                                                    | >= 1.16      |          |      🪟       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
+| [`sheldon`](https://kdeldycke.github.io/meta-package-manager/managers/sheldon.html)                                                                              | >= 0.6       |          |     🐧 🍎     |             |            |           |          |           |           |       ✓       |    ✓     |        |           |          |
 | [`slapt-get`](https://kdeldycke.github.io/meta-package-manager/managers/slapt-get.html)                                                                          |              |          |               |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`snap`](https://kdeldycke.github.io/meta-package-manager/managers/snap.html)                                                                                    | >= 2         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`soar`](https://kdeldycke.github.io/meta-package-manager/managers/soar.html)                                                                                    | >= 0.12      |          |      🐧       |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |

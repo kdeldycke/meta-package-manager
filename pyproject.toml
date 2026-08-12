@@ -1688,6 +1688,12 @@ allowlist.commits = [
   # Example brew cask output containing API_KEY="abcdef123456".
   "745247e5c74122de9ec2dd95cbd3b8510fe224d5",
   "e31111be719406940519f52c9d4406e97fb368a3",
+  # Self-referential: the comment two lines above quotes that same example key,
+  # so the commit that introduced this allowlist trips the rule it declares, and
+  # the later lint pass that reformatted the line trips it again. Do not restate
+  # the key when adding an entry here, or the new commit joins this list too.
+  "59964752fbec127082c1eec606e1d21ea2610554",
+  "2cd5a08e24d1fbe6519c82fb1846066c3b0d446d",
 ]
 
 [tool.yamllint]

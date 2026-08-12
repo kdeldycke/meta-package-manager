@@ -41,6 +41,7 @@ print(augmentations_table())
 | [`mise`](managers/mise.md)                 |                      |              |      ✅      |                 |
 | [`nix`](managers/nix.md)                   |                      |              |      ✅      |       ✅        |
 | [`npm`](managers/npm.md)                   |                      |              |      ✅      |                 |
+| [`opam`](managers/opam.md)                 |                      |              |      ✅      |       ✅        |
 | [`opkg`](managers/opkg.md)                 |                      |              |      ✅      |       ✅        |
 | [`pacaur`](managers/pacaur.md)             |                      |      ✅      |              |       ✅        |
 | [`pacman`](managers/pacman.md)             |                      |      ✅      |              |       ✅        |

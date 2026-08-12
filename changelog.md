@@ -8,6 +8,7 @@
 - [antidote] Add the Antidote Zsh plugin manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support. Zsh is the CLI mpm executes, since Antidote ships as a sourced shell function rather than an executable.
 - [mpm] Record `zgenom` as an unsupported manager: it reports no version through any binary, and its `list` prints the generated `init.zsh` rather than an inventory.
 - [mpm] Record `zr` as an unsupported manager: plugins are the arguments handed to it, so it owns no inventory to report.
+- [opam] Add the OCaml opam package manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support. Listings go through `--short --columns=name,version`, which drops the header and joins columns with a space.
 - [krew] Add the krew kubectl plugin manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support. Its piped listing carries no version, which is an upstream branch on whether stdout is a terminal.
 - [mpm] Record `windsurf` and `antigravity` as unsupported managers: neither vendor documents the extension-management flags of its VS Code fork. Google ships the `agy` plugin CLI as a separate product from the Antigravity IDE.
 - [mpm] Record `cursor` and `cursor-agent` as unsupported managers. Cursor forked VS Code without inheriting a working `--list-extensions`: it opens the editor window instead of listing, and its own CLI documentation never covers the extension flags.

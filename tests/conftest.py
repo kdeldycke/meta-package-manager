@@ -380,6 +380,7 @@ PACKAGE_IDS = {
     "npm": "ms",
     # Tiny single-function plugin of Oh My Fish's own package index.
     "oh-my-fish": "bak",
+    "opam": "zarith",  # Small pure-OCaml-adjacent leaf library.
     "opkg": "lolcat",
     "pacaur": "nyancat",
     "pacman": "nyancat",

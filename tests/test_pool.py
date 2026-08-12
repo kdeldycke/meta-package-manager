@@ -75,7 +75,7 @@ def test_manager_count():
     # macports, opkg, pkg-tools, pkgin, slapt-get, soar, sorcery, steamcmd, stew,
     # swupd, tlmgr, topgrade, urpmi, vscode, vscodium, zerobrew), shipped as
     # package data and loaded into the pool at construction.
-    assert len(pool) == 87
+    assert len(pool) == 88
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))
 

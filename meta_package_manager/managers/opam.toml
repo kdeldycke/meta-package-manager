@@ -1,0 +1,87 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# opam is the OCaml package manager (https://opam.ocaml.org). See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# Every listing goes through `--short --columns=name,version`, which opam
+# documents as dropping the header and joining columns with a space, giving one
+# `name version` pair per line with no alignment to strip.
+#
+# No outdated: `opam list --upgradable` reports what would move, but naming both
+# the installed and the candidate version in one listing needs a column set this
+# definition cannot verify against an upstream sample, so the operation is left
+# undeclared and `upgrade --all` still works.
+#
+# Every operation targets opam's *currently active* switch, which is whatever
+# `OPAMSWITCH` or the current directory resolves to, exactly as a bare `opam`
+# call in the same shell would. Per-switch targeting is not supported yet.
+
+[mpm.managers.opam]
+name = "OCaml opam"
+homepage_url = "https://opam.ocaml.org"
+logo = "ocaml"
+platforms = ["bsd", "linux_like", "macos"]
+cli_names = ["opam"]
+requirement = ">=2.0.0"
+# --color=never keeps the output plain, --yes runs the mutating operations
+# unattended. Both are global options opam accepts on every subcommand.
+pre_args = ["--color=never", "--yes"]
+# `opam --version` prints the bare version and nothing else.
+version_regexes = ['(?P<version>\d+(?:\.\d+)+\S*)']
+
+[mpm.managers.opam.operations.installed]
+args = ["list", "--installed", "--short", "--columns=name,version"]
+regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)$'
+
+[mpm.managers.opam.operations.search]
+args = ["list", "--search", "{query}", "--short", "--columns=name,version"]
+regex = '^(?P<package_id>\S+)\s+(?P<latest_version>\S+)$'
+
+[mpm.managers.opam.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.opam.operations.remove]
+args = ["remove", "{package_id}"]
+
+[mpm.managers.opam.operations.upgrade_one]
+args = ["upgrade", "{package_id}"]
+
+[mpm.managers.opam.operations.upgrade_all]
+args = ["upgrade"]
+
+[mpm.managers.opam.operations.sync]
+args = ["update"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own documentation. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "2.1.5"
+expected = "2.1.5"
+
+[[samples.installed]]
+output = """
+base-bigarray base
+base-threads base
+dune 3.11.1
+ocaml 4.14.1
+ocamlfind 1.9.6"""
+packages = [
+  { id = "base-bigarray", version = "base" },
+  { id = "base-threads", version = "base" },
+  { id = "dune", version = "3.11.1" },
+  { id = "ocaml", version = "4.14.1" },
+  { id = "ocamlfind", version = "1.9.6" },
+]
+
+[[samples.search]]
+output = """
+lwt 5.7.0
+lwt_ppx 2.1.0
+lwt_ssl 1.2.0"""
+packages = [
+  { id = "lwt", version = "5.7.0" },
+  { id = "lwt_ppx", version = "2.1.0" },
+  { id = "lwt_ssl", version = "1.2.0" },
+]

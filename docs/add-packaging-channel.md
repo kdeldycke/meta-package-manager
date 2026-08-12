@@ -39,7 +39,7 @@ Add a `{channel}-source` job to [`tests-install.yaml`](https://github.com/kdeldy
 Three files plus the workflow move together (the *Distributor sync* set):
 
 - [`docs/packaging.md`](packaging.md): add a row to the channels table and a build-from-spec section.
-- [`docs/install.md`](install.md): add a tab. A released channel gets full instructions; a channel still pending upstream review gets a stub tab (status line, the post-landing one-liner, and a link into its `packaging.md` section), with the build steps living in `packaging.md` alone.
+- [`docs/install.md`](install.md): add a tab opening with commands that work today. A released channel gets its one-liner; a channel still pending upstream review gets the condensed build recipe from its `packaging.md` section, followed by an admonition naming the upstream pull request and inviting the reader to +1 it.
 - `changelog.md`: one entry naming the channel and its `{channel}-source` job.
 
 ## 6. Prepare the upstream submission

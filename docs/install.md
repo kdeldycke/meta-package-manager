@@ -171,17 +171,42 @@ Meta Package Manager is available in the `main` repository of [Scoop](https://sc
 `````
 
 `````{tab-item} Chocolatey
-The package is not distributed on the Chocolatey community repository: [submission `6.4.2` was rejected](binaries.md#impact-on-chocolatey) over antivirus false positives on the bundled Windows binary (see [Antivirus false positives](#antivirus-false-positives) below, and please report the detection to your vendor if it affects you). Build and install it from [the nuspec maintained in the repository](packaging.md#chocolatey) instead.
+Build and install from [the nuspec maintained in the repository](packaging.md#chocolatey):
+
+```{code-block} pwsh-session
+> git clone https://github.com/kdeldycke/meta-package-manager.git
+> cd meta-package-manager\packaging\choco\meta-package-manager
+> choco pack
+> choco install meta-package-manager --source .
+```
+
+This is the only supported route: the package is not distributed on the Chocolatey community repository, as [submission `6.4.2` was rejected](binaries.md#impact-on-chocolatey) over antivirus false positives on the bundled Windows binary. See [Antivirus false positives](#antivirus-false-positives) below, and please report the detection to your vendor if it affects you.
 `````
 
 `````{tab-item} Nix
-The nixpkgs package is pending review at [NixOS/nixpkgs#506145](https://github.com/NixOS/nixpkgs/pull/506145), which you can help move forward by showing your support. Once merged, installation will be a one-liner:
+Build and install from [the definition maintained in the repository](packaging.md#nix):
+
+```{code-block} shell-session
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ nix-env -f ./meta-package-manager/packaging/nix -i
+```
+
+On flake-enabled systems, you can run it without installing:
+
+```{code-block} shell-session
+$ nix run github:kdeldycke/meta-package-manager?dir=packaging/nix -- --version
+```
+
+````{admonition} Help land it in nixpkgs
+:class: important
+The nixpkgs package is pending review at [NixOS/nixpkgs#506145](https://github.com/NixOS/nixpkgs/pull/506145). Once merged, installation will be a one-liner:
 
 ```{code-block} shell-session
 $ nix-env --install --attr nixpkgs.meta-package-manager
 ```
 
-Until then, build it from [the definition maintained in the repository](packaging.md#nix).
+You can help move it forward by showing your support on [the pull request](https://github.com/NixOS/nixpkgs/pull/506145).
+````
 `````
 
 `````{tab-item} Guix
@@ -199,17 +224,51 @@ To build the bleeding-edge version instead, install from [the definition maintai
 `````
 
 `````{tab-item} Alpine Linux
-The package is being submitted to Alpine's aports tree. Until it lands there, build it from [the APKBUILD overlay maintained in the repository](packaging.md#alpine-linux).
+Build and install from [the APKBUILD overlay maintained in the repository](packaging.md#alpine-linux), as a member of the `abuild` group with a signing key set up. It targets Alpine edge, the only branch shipping `mpm`'s build backend:
+
+```{code-block} shell-session
+$ doas apk add alpine-sdk
+$ abuild-keygen --append --install -n
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ cd ./meta-package-manager/packaging/alpine
+$ abuild -C ./py3-cloup -r
+$ abuild -C ./py3-extra-platforms -r
+$ abuild -C ./py3-packageurl -r
+$ abuild -C ./py3-click-extra -r
+$ abuild -C ./meta-package-manager -r
+$ doas apk add --repository ~/.local/share/abuild/alpine meta-package-manager
+```
+
+The 4 intermediate `abuild` runs produce the dependency packages missing from the official aports tree.
+
+```{note}
+The package is being submitted to Alpine's aports tree. Once it lands there, installation will be a one-liner: `apk add meta-package-manager`.
+```
 `````
 
 `````{tab-item} Void Linux
-The package is pending review at [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532), which you can help move forward by showing your support. Once merged, installation will be a one-liner:
+Build and install from the [`mpm` branch of my `void-packages` fork](https://github.com/kdeldycke/void-packages/tree/mpm):
+
+```{code-block} shell-session
+$ git clone --depth 1 --branch mpm https://github.com/kdeldycke/void-packages.git
+$ cd ./void-packages
+$ ./xbps-src binary-bootstrap
+$ ./xbps-src pkg mpm
+$ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
+```
+
+The `pkg` step cascades through the 16 dependency packages the fork introduces, as detailed on [the packaging page](packaging.md#void-linux).
+
+````{admonition} Help land it in void-packages
+:class: important
+The package is pending review at [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532). Once merged, installation will be a one-liner:
 
 ```{code-block} shell-session
 $ xbps-install --sync mpm
 ```
 
-Until then, build it from [my `void-packages` fork](packaging.md#void-linux).
+You can help move it forward by showing your support on [the pull request](https://github.com/void-linux/void-packages/pull/60532).
+````
 `````
 
 `````{tab-item} Arch Linux

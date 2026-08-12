@@ -309,7 +309,7 @@ One documentation page per pool manager, plus the `docs/managers.md` hub. The in
 
 ### Installation and packaging pages (`docs/install.md`, `docs/packaging.md`)
 
-`docs/install.md` is for end users installing `mpm`: it holds installation methods only, never build-from-source or build-from-spec instructions. Everything for distribution packagers and anyone building from the in-repo `packaging/*/` specs lives in `docs/packaging.md`: the test-suite wiring, the dependency graph and `click-extra` compatibility matrix, and the per-channel catalog with its build walkthroughs. A channel still pending upstream review keeps only a stub tab in `install.md` (status line, post-landing one-liner, link into its `packaging.md` section); its full build steps live in `packaging.md` alone. Packaging specs and their upstream submissions cite the page URL `https://kdeldycke.github.io/meta-package-manager/packaging.html`, never `CLAUDE.md`. The end-to-end procedure for adding a channel is the playbook at `docs/add-packaging-channel.md`; the three-file sync it enforces is the *Distributor sync* rule below.
+`docs/install.md` is for end users installing `mpm`: every tab of its "Installation methods" tab-set opens with commands that work **today**, on the reader's machine, whatever the channel's upstream status. Everything aimed at distribution packagers lives in `docs/packaging.md`: the test-suite wiring, the dependency graph and `click-extra` compatibility matrix, and the per-channel catalog with its build walkthroughs and packaging rationale. A channel not yet released through its distro therefore carries the condensed build recipe from its `packaging.md` section, copied into the tab and trimmed to the commands, followed by a `{admonition}` naming the upstream pull request and inviting the reader to +1 it for native inclusion. Never demote such a tab to a status line plus a pointer: a one-liner the reader cannot run yet, sending them to another page for the one they can, is the shape this rule exists to forbid. The copy is the accepted cost of that: when a channel's build steps change, update both pages. Packaging specs and their upstream submissions cite the page URL `https://kdeldycke.github.io/meta-package-manager/packaging.html`, never `CLAUDE.md`. The end-to-end procedure for adding a channel is the playbook at `docs/add-packaging-channel.md`; the three-file sync it enforces is the *Distributor sync* rule below.
 
 ### Legal notices (`docs/license.md`)
 
@@ -454,7 +454,7 @@ Each job that tests a third-party distributor must have a comment above it with 
 
 ### Distributor sync
 
-`docs/install.md` (the "Installation methods" tab-set), `docs/packaging.md` (the per-channel catalog and build instructions) and `.github/workflows/tests-install.yaml` must stay in sync. All three carry cross-reference comments. When adding or removing a distributor, update them together: released channels get a full install tab, channels pending upstream review get a stub tab pointing to their `packaging.md` section.
+`docs/install.md` (the "Installation methods" tab-set), `docs/packaging.md` (the per-channel catalog and build instructions) and `.github/workflows/tests-install.yaml` must stay in sync. All three carry cross-reference comments. When adding or removing a distributor, update them together: every channel gets a full install tab, whose commands are the released one-liner once the channel ships and the condensed build recipe until then.
 
 ### Schedule-only workflows
 

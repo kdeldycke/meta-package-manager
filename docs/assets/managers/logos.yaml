@@ -222,6 +222,14 @@ icons:
     - npm
     source: https://www.npmjs.com
     title: npm
+  ocaml:
+    contrast_on_light: 3.2
+    hex: EC6813
+    license: Unlicense
+    managers:
+    - opam
+    source: https://ocaml.org/logo
+    title: OCaml
   openbsd:
     contrast_on_light: 1.58
     hex: F2CA30

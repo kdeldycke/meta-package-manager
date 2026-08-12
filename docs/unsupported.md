@@ -2,6 +2,10 @@
 
 `mpm` wraps [a long list of package managers](managers.md), but not everything that installs software.
 
+Two reasons put a tool in the table below:
+- ☠️ Its upstream is dead.
+- ❌ Or it lacks critical features required by `mpm`.
+
 | Tool | Status | Kind | Why? |
 | :--- | :---: | :--- | :--- |
 | [`antibody`](https://github.com/getantibody/antibody) | ☠️ | Zsh plugin manager | Archived on 2022-05-27, superseded by [`antidote`](managers/antidote.md), which `mpm` wraps. |
@@ -25,15 +29,9 @@
 | [`whohas`](https://github.com/whohas/whohas) | ☠️ | Cross-distribution search | Retired in 2015. All 16 of the distribution archives it queried have a manager in `mpm`. |
 | [`yaourt`](https://github.com/archlinuxfr/yaourt) | ☠️ | Arch AUR helper | Archived, and self-described `[unmaintained]` in its own repository description, with no commit since 2018-12. The dominant AUR helper before `yay`; `mpm` wraps its successors [`yay`](managers/yay.md) and [`paru`](managers/paru.md). |
 
-```{important}
-Absence is usually not a decision. Most tools missing from `mpm` were never assessed at all: they are unwritten, not refused. Only this table records a refusal, and it is what the ☠️ and ❌ cells of the [benchmark](benchmark.md) link to; a blank cell there marks a tool nobody has looked at yet, very likely [available for the writing](add-new-manager.md).
+```{hint}
+None of these verdicts are permanent. If a tool here looks misjudged, make the case in a [new manager request](https://github.com/kdeldycke/meta-package-manager/issues/new?template=new-package-manager.yml) and the entry will be reassessed.
 ```
-
-Two reasons put a tool in the table above:
-- ☠️ Its upstream is dead.
-- ❌ Or `mpm` declined a live tool, most often because it owns no registry of its own.
-
-None of these verdicts is permanent. If a tool here looks misjudged — its upstream revived, a successor took over, or the reasoning simply does not hold — make the case in a [new manager request](https://github.com/kdeldycke/meta-package-manager/issues/new?template=new-package-manager.yml) and the entry will be reassessed.
 
 ## Project-scoped dependency managers
 

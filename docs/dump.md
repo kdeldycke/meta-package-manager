@@ -98,7 +98,7 @@ $ mpm dump --brewfile Brewfile
 $ brew bundle install --file=Brewfile
 ```
 
-Only the managers natively supported by Homebrew Bundle make it into the file: `brew`, `cask`, `mas`, `vscode`, `npm`, `cargo`, `uvx`, `winget`, and `flatpak`. Everything else (`apt`, `dnf`, `pacman`, `pip`, `pipx`, `gem`, `snap`, `scoop`, `chocolatey`, `sdkman`, ...) gets tallied in the header but excluded from the body.
+Only the managers natively supported by Homebrew Bundle make it into the file: [`brew`](managers/brew.md), [`cask`](managers/cask.md), [`mas`](managers/mas.md), [`vscode`](managers/vscode.md), [`npm`](managers/npm.md), [`cargo`](managers/cargo.md), [`uvx`](managers/uvx.md), [`winget`](managers/winget.md), and [`flatpak`](managers/flatpak.md). Everything else ([`apt`](managers/apt.md), [`dnf`](managers/dnf.md), [`pacman`](managers/pacman.md), [`pip`](managers/pip.md), [`pipx`](managers/pipx.md), [`gem`](managers/gem.md), [`snap`](managers/snap.md), [`scoop`](managers/scoop.md), `chocolatey`, [`sdkman`](managers/sdkman.md), ...) gets tallied in the header but excluded from the body.
 
 The header carries a deliberate warning:
 
@@ -114,7 +114,7 @@ The Brewfile output is a complementary view, not a replacement for the TOML snap
 
 ### VSCodium extensions are skipped
 
-`vscodium` extensions are deliberately omitted from the Brewfile output. Homebrew Bundle's `vscode` entry installs into VS Code only; emitting VSCodium-installed extensions as `vscode` entries would silently misroute them. `mpm` warns on stderr when this happens:
+[`vscodium`](managers/vscodium.md) extensions are deliberately omitted from the Brewfile output. Homebrew Bundle's [`vscode`](managers/vscode.md) entry installs into VS Code only; emitting VSCodium-installed extensions as `vscode` entries would silently misroute them. `mpm` warns on stderr when this happens:
 
 ```shell-session
 $ mpm dump --brewfile Brewfile
@@ -127,11 +127,11 @@ Edit the file by hand to add VSCodium entries through a separate channel if you 
 
 ### `uv` mapping
 
-The Brewfile `uv` entry installs through `uv tool install`, the same path `mpm`'s `uvx` manager wraps. `uvx` packages are included; the pip-style `uv` manager intentionally has no Brewfile mapping because its packages live inside a Python environment and would not round-trip through `brew bundle`.
+The Brewfile [`uv`](managers/uv.md) entry installs through `uv tool install`, the same path `mpm`'s [`uvx`](managers/uvx.md) manager wraps. `uvx` packages are included; the pip-style `uv` manager intentionally has no Brewfile mapping because its packages live inside a Python environment and would not round-trip through `brew bundle`.
 
 ### Flatpak remote
 
-Brewfile's `flatpak` entry accepts a `with: ["remote_name"]` keyword for non-default remotes. `mpm` does not currently track the origin remote per installed flatpak, so the dump emits bare `flatpak "id"` lines; `brew bundle install` then resolves through `flathub`. Non-flathub flatpaks need to be edited in by hand after the dump.
+Brewfile's [`flatpak`](managers/flatpak.md) entry accepts a `with: ["remote_name"]` keyword for non-default remotes. `mpm` does not currently track the origin remote per installed flatpak, so the dump emits bare `flatpak "id"` lines; `brew bundle install` then resolves through `flathub`. Non-flathub flatpaks need to be edited in by hand after the dump.
 
 ## See also
 

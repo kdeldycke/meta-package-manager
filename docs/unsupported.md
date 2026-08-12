@@ -43,17 +43,17 @@ This is a big feature for the future, but is already delimited by the {attr}`~me
 
 `mpm` already covers the system-scoped part of these managers:
 
-| Ecosystem             | Project files                                                                        | `mpm` manager         |
-| :-------------------- | :----------------------------------------------------------------------------------- | :-------------------- |
-| C/C++                 | `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)                                        | —                     |
-| Conda                 | `conda-lock.yml`                                                                     | `conda`               |
-| Go                    | `go.mod`, `go.sum`                                                                   | —                     |
-| Java                  | `pom.xml` (Maven), `build.gradle` (Gradle), `ivy.xml`                                | —                     |
-| JavaScript            | `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`                   | `npm`, `yarn`, `pnpm` |
-| .NET                  | `*.csproj`, `packages.config` (NuGet)                                                | —                     |
-| Perl                  | `cpanfile`                                                                           | `cpan`                |
-| PHP                   | `composer.json`, `composer.lock`                                                     | `composer`            |
-| Python                | `requirements.txt`, `pyproject.toml`, `poetry.lock`, `uv.lock`                       | `pip`, `uv`           |
-| Ruby                  | `Gemfile`, `Gemfile.lock`                                                            | `gem`                 |
-| Rust                  | `Cargo.toml`, `Cargo.lock`                                                           | `cargo`               |
-| Swift and Objective-C | `Package.swift`, `Package.resolved` (SwiftPM), `Podfile`, `Podfile.lock` (CocoaPods) | —                     |
+| Ecosystem             | Project files                                                                        | `mpm` manager                                                                    |
+| :-------------------- | :----------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
+| C/C++                 | `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)                                        | —                                                                                |
+| Conda                 | `conda-lock.yml`                                                                     | [`conda`](managers/conda.md)                                                     |
+| Go                    | `go.mod`, `go.sum`                                                                   | —                                                                                |
+| Java                  | `pom.xml` (Maven), `build.gradle` (Gradle), `ivy.xml`                                | —                                                                                |
+| JavaScript            | `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`                   | [`npm`](managers/npm.md), [`yarn`](managers/yarn.md), [`pnpm`](managers/pnpm.md) |
+| .NET                  | `*.csproj`, `packages.config` (NuGet)                                                | —                                                                                |
+| Perl                  | `cpanfile`                                                                           | [`cpan`](managers/cpan.md)                                                       |
+| PHP                   | `composer.json`, `composer.lock`                                                     | [`composer`](managers/composer.md)                                               |
+| Python                | `requirements.txt`, `pyproject.toml`, `poetry.lock`, `uv.lock`                       | [`pip`](managers/pip.md), [`uv`](managers/uv.md)                                 |
+| Ruby                  | `Gemfile`, `Gemfile.lock`                                                            | [`gem`](managers/gem.md)                                                         |
+| Rust                  | `Cargo.toml`, `Cargo.lock`                                                           | [`cargo`](managers/cargo.md)                                                     |
+| Swift and Objective-C | `Package.swift`, `Package.resolved` (SwiftPM), `Podfile`, `Podfile.lock` (CocoaPods) | —                                                                                |

@@ -51,7 +51,7 @@ The `[tool.mpm]` section maps directly to `[mpm]` in a standalone config file. T
 
 ## Available options
 
-Every CLI option on the root `mpm` group and its subcommands can be set in the configuration file. The TOML key is the option name with leading dashes removed and remaining dashes replaced by underscores (or kept as-is for manager IDs like `apt-mint`).
+Every CLI option on the root `mpm` group and its subcommands can be set in the configuration file. The TOML key is the option name with leading dashes removed and remaining dashes replaced by underscores (or kept as-is for manager IDs like [`apt-mint`](managers/apt-mint.md)).
 
 ### Global options
 
@@ -75,7 +75,7 @@ Click-extra's built-in options ride the same configuration pipeline. The most us
 
 `cooldown` is a supply-chain safeguard: it refuses to install or upgrade any package version published more recently than the given age, giving a freshly-published (and possibly compromised) release time to be caught and pulled before it reaches the system.
 
-`mpm` enforces the cooldown through each manager's own release-age mechanism, so coverage is limited to the managers `mpm` can gate: `uv` and `uvx` (via `exclude-newer`), `npm` (via `min-release-age`), `pnpm` (via `minimumReleaseAge`), `pip` (via `--uploaded-prior-to`), `pipx` (which inherits the pip setting), and `yay` (through a generated Lua-hook overlay, since yay ships no release-age option of its own). Managers without native support cannot honor the gate. By default they are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Pass `--allow-unsupported-managers` (or set `require_cooldown_support = false`) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
+`mpm` enforces the cooldown through each manager's own release-age mechanism, so coverage is limited to the managers `mpm` can gate: [`uv`](managers/uv.md) and [`uvx`](managers/uvx.md) (via `exclude-newer`), [`npm`](managers/npm.md) (via `min-release-age`), [`pnpm`](managers/pnpm.md) (via `minimumReleaseAge`), [`pip`](managers/pip.md) (via `--uploaded-prior-to`), [`pipx`](managers/pipx.md) (which inherits the pip setting), and [`yay`](managers/yay.md) (through a generated Lua-hook overlay, since yay ships no release-age option of its own). Managers without native support cannot honor the gate. By default they are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Pass `--allow-unsupported-managers` (or set `require_cooldown_support = false`) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
 
 See {doc}`cooldown` for the full support matrix and the rationale.
 
@@ -227,7 +227,7 @@ You can still mix both syntax in the same configuration file, as well as on the 
 
 ### Ignore a manager
 
-Setting a manager to `false` excludes it. [This user](https://github.com/matryer/xbar/issues/777) wanted `mpm` to always ignore `pip` to speed up execution:
+Setting a manager to `false` excludes it. [This user](https://github.com/matryer/xbar/issues/777) wanted `mpm` to always ignore [`pip`](managers/pip.md) to speed up execution:
 
 ```toml
 [mpm]
@@ -250,11 +250,11 @@ You can still mix both syntax in the same configuration file, as well as on the 
 
 ### Overlapping managers
 
-`mpm` supports some overlapping package managers. Take for instance `pacman` and its collection of AUR helpers like `paru` and `yay`. All of these alternatives have the same source of packages as `pacman`. So updates to a single package may show up multiple times, because AUR helpers depends on `pacman` (which is always installed on the system).
+`mpm` supports some overlapping package managers. Take for instance [`pacman`](managers/pacman.md) and its collection of AUR helpers like [`paru`](managers/paru.md) and [`yay`](managers/yay.md). All of these alternatives have the same source of packages as `pacman`. So updates to a single package may show up multiple times, because AUR helpers depends on `pacman` (which is always installed on the system).
 
 You can fine-tune this behaviour by simply excluding redundant managers depending on your preferences.
 
-For instance, if `yay` is your preferred helper and `pacman` and `paru` are polluting your entries, you can setup a configuration file in `~/.config/mpm/config.toml` to exclude the other AUR helpers by default:
+For instance, if [`yay`](managers/yay.md) is your preferred helper and [`pacman`](managers/pacman.md) and [`paru`](managers/paru.md) are polluting your entries, you can setup a configuration file in `~/.config/mpm/config.toml` to exclude the other AUR helpers by default:
 
 ```toml
 [mpm]

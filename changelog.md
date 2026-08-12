@@ -12,6 +12,9 @@
 - [lazy] Add the lazy.nvim Neovim plugin manager with `installed` and `upgrade` support. It declares no `install` or `remove`: lazy.nvim materializes only the plugin set the user's own Lua configuration names.
 - [mpm] Add the GNOME Shell extension to the benchmark's feature matrix.
 - [mpm] Link every feature label of the benchmark's matrix to the same page its `mpm` cell points at, a convention only the Xbar/SwiftBar plugin row followed. The `purl` row now points at the augmentation section describing purls, instead of the generated `install` help.
+- [mpm] Add ten features to the benchmark's matrix: accessible output, skipping auto-updating packages, exact and fuzzy search, SBOM export, vulnerability scan, per-manager overrides, command plan, per-call timeout, offline by default and man pages.
+- [mpm] Link every manager named in the documentation pages to its own page, at most once per paragraph.
+- [mpm] Back 75 competitor cells of the benchmark's feature matrix with a link to the documentation, configuration example, CLI declaration or issue that proves the verdict. Six cells found nothing citable and keep a bare glyph.
 - [mpm] Record `dpp.vim` as an unsupported manager: it is drivable only from inside the editor, and reports neither a binary nor a version.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)

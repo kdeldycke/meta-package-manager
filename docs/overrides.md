@@ -41,7 +41,7 @@ The output lists every overridable field with its current value, so it doubles a
 
 ## Example: bypass a Windows app-store placeholder
 
-Modern Windows ships placeholder executables under `%LOCALAPPDATA%\Microsoft\WindowsApps\` that, when invoked, open the Microsoft Store rather than running the real CLI. If you have installed the genuine `winget` somewhere else, point `cli_search_path` at that directory so `mpm` finds it first:
+Modern Windows ships placeholder executables under `%LOCALAPPDATA%\Microsoft\WindowsApps\` that, when invoked, open the Microsoft Store rather than running the real CLI. If you have installed the genuine [`winget`](managers/winget.md) somewhere else, point `cli_search_path` at that directory so `mpm` finds it first:
 
 ```toml
 [mpm.managers.winget]
@@ -103,14 +103,14 @@ Five definition-only fields have no override counterpart:
 | `brewfile_entry_type`   | string  | Name of the [Homebrew Bundle DSL](https://docs.brew.sh/Brew-Bundle-and-Brewfile) entry this manager maps to (`vscode`, `cargo`, ...), so its installed packages join `mpm dump --brewfile` exports. Omit it for managers with no Brewfile equivalent. |
 | `brewfile_skip_warning` | string  | Warning emitted when this manager's installed packages are deliberately left out of a Brewfile export, where staying silent would mislead. Supports a `{count}` placeholder for the number of packages skipped.                                       |
 | `default_sudo`          | boolean | The manager's built-in escalation policy: operations marked `sudo = true` escalate by default. The user's global `--sudo`/`--no-sudo` flag or a `sudo` override still win. See [privilege escalation](sudo.md).                                       |
-| `internal_sudo`         | boolean | Marks a manager whose CLI invokes `sudo` itself mid-run, like `fink`: `mpm` never wraps its commands, and instead reuses a warm credential cache or warns when a silent call may be hiding a password prompt. See [privilege escalation](sudo.md).    |
+| `internal_sudo`         | boolean | Marks a manager whose CLI invokes `sudo` itself mid-run, like [`fink`](managers/fink.md): `mpm` never wraps its commands, and instead reuses a warm credential cache or warns when a silent call may be hiding a password prompt. See [privilege escalation](sudo.md).    |
 | `version_cli`           | string  | Alternate binary probed for the manager's version, for tool suites whose own binaries report none (OpenBSD's `pkg_add`: the suite is versioned with the OS, so `uname` reports it). Probed with `version_cli_options`, parsed with `version_regexes`. |
 
 ### Operations
 
-Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every operation takes an `args` list appended after the resolved binary. An operation may also name its own `cli` (a sibling binary resolved on the same search path), so one definition can span a multi-binary suite: `urpmq` searching while `urpmi` installs and `urpme` removes. Without `cli`, the operation runs the manager's main binary.
+Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every operation takes an `args` list appended after the resolved binary. An operation may also name its own `cli` (a sibling binary resolved on the same search path), so one definition can span a multi-binary suite: `urpmq` searching while [`urpmi`](managers/urpmi.md) installs and `urpme` removes. Without `cli`, the operation runs the manager's main binary.
 
-**Command operations** run a CLI and need nothing else. Any operation may add `sudo = true` to mark itself privileged, mirroring the escalation flag built-in managers set in code: whether it actually escalates follows the usual policy (the definition's `default_sudo`, then the global `--sudo`/`--no-sudo` flag). Command operations are the usual bearers; a query may also carry it, for the rare tool that gates even its read-only listings behind root (`deb-get`'s upgradable check).
+**Command operations** run a CLI and need nothing else. Any operation may add `sudo = true` to mark itself privileged, mirroring the escalation flag built-in managers set in code: whether it actually escalates follows the usual policy (the definition's `default_sudo`, then the global `--sudo`/`--no-sudo` flag). Command operations are the usual bearers; a query may also carry it, for the rare tool that gates even its read-only listings behind root ([`deb-get`](managers/deb-get.md)'s upgradable check).
 
 | Operation        | Required placeholder | Maps to                                              |
 | :--------------- | :------------------- | :--------------------------------------------------- |
@@ -130,7 +130,7 @@ There is no `cleanup` operation to declare: a plain `mpm cleanup` runs the decla
 **Query operations** (`installed`, `outdated`, `orphans`, `search`) parse the command's output. `orphans` backs `mpm orphans`, the read-only listing of packages installed as dependencies that nothing requires anymore. `search` may embed the `{query}` placeholder in its `args`; omitting it is also valid for tools with no real search command, whose `search` then lists the whole catalog (`opkg list`, `swupd bundle-list --all`) and relies on `mpm`'s client-side refiltering to narrow the results. Provide *either* a `regex` matched against each output line, *or* a JSON parser (`format = "json"` with a `fields` mapping and optional `list_path`). Both map these recognized fields to a package:
 
 - `package_id` (always required),
-- `installed_version` (optional: some tools track no per-package version, like `swupd`'s Clear Linux bundles),
+- `installed_version` (optional: some tools track no per-package version, like [`swupd`](managers/swupd.md)'s Clear Linux bundles),
 - `latest_version` (required by `outdated`).
 
 A JSON field maps to a key name, optionally suffixed with a `[N]` list index to pick one element out of a list-valued key: `installed_version = "installed_versions[0]"` reads the first entry of each package's version array.

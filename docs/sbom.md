@@ -141,7 +141,7 @@ $ mpm --brew sbom > deep.spdx.json
 | [`composer`](managers/composer.md) |         |          |              |           |                  |                  | ✅ (`--network`) |
 | Others                             |         |          |              |           |                  |                  |                  |
 
-Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time. The vulnerability column tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems); a manager OSV does not index (Homebrew, `mas`, the distro managers OSV needs a release qualifier for) gets no advisories rather than an error.
+Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time. The vulnerability column tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems); a manager OSV does not index (Homebrew, [`mas`](managers/mas.md), the distro managers OSV needs a release qualifier for) gets no advisories rather than an error.
 
 For the `license` column specifically, [Tern](https://github.com/tern-tools/tern) is a useful reference: a Python tool that derives per-package licenses across OS package managers and integrates ScanCode for file-level license detection, the data `mpm` would need to fill licenses beyond Homebrew and pip.
 
@@ -161,9 +161,9 @@ For the `license` column specifically, [Tern](https://github.com/tern-tools/tern
 
 Versions shown are each tool's current default; Syft and cdxgen can also emit older spec revisions on request. `mpm` is on the newest CycloneDX (1.7), and cdxgen and sbom-tool reach the newest SPDX (3.0). Tern's README states no spec versions or purl support for its output.
 
-`mpm` differs from these tools in its data source, not its output format. Syft and Trivy read packages at rest: they parse the package databases already written into a container image or filesystem (the `dpkg`, `apk`, or `rpm` database, or a committed lockfile). cdxgen, component-detection, and sbom-tool parse a project's declared manifests and lockfiles.
+`mpm` differs from these tools in its data source, not its output format. Syft and Trivy read packages at rest: they parse the package databases already written into a container image or filesystem (the `dpkg`, [`apk`](managers/apk.md), or `rpm` database, or a committed lockfile). cdxgen, component-detection, and sbom-tool parse a project's declared manifests and lockfiles.
 
-`mpm` invokes the package managers' own command-line tools. It shells out to `brew`, `apt`, `pip`, `npm`, `cargo`, and the rest, and records what they report on the running host. That covers managers the file scanners do not model: Homebrew casks, `mas`, `flatpak`, `snap`, `mise`, and the others listed in {doc}`benchmark`. The trade-off is symmetric: `mpm` needs the managers installed and runnable, while Syft or Trivy can scan an image or directory the host never executed.
+`mpm` invokes the package managers' own command-line tools. It shells out to [`brew`](managers/brew.md), [`apt`](managers/apt.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), [`cargo`](managers/cargo.md), and the rest, and records what they report on the running host. That covers managers the file scanners do not model: Homebrew casks, [`mas`](managers/mas.md), [`flatpak`](managers/flatpak.md), [`snap`](managers/snap.md), [`mise`](managers/mise.md), and the others listed in {doc}`benchmark`. The trade-off is symmetric: `mpm` needs the managers installed and runnable, while Syft or Trivy can scan an image or directory the host never executed.
 
 This invoke-the-real-tool approach is not unique to `mpm`. CycloneDX's own [cargo-cyclonedx](https://github.com/CycloneDX/cyclonedx-rust-cargo) invokes Cargo rather than only parsing `Cargo.lock`, and [Tern](https://github.com/tern-tools/tern) runs each container layer's package manager in a chroot rather than reading its on-disk database. Both reflect what the manager itself resolves. `mpm` applies that principle across every manager it drives, on the live host.
 

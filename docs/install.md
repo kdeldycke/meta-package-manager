@@ -180,7 +180,12 @@ Build and install from [the nuspec maintained in the repository](packaging.md#ch
 > choco install meta-package-manager --source .
 ```
 
-This is the only supported route: the package is not distributed on the Chocolatey community repository, as [submission `6.4.2` was rejected](binaries.md#impact-on-chocolatey) over antivirus false positives on the bundled Windows binary. See [Antivirus false positives](#antivirus-false-positives) below, and please report the detection to your vendor if it affects you.
+````{admonition} Help unblock the community-repository submission
+:class: important
+The build above is the only supported route: [submission `6.4.2` was rejected](binaries.md#impact-on-chocolatey) over antivirus false positives on the bundled Windows binary.
+
+You can help move it forward by [reporting the detection to your antivirus vendor](#antivirus-false-positives), the only practical path back to a community-repository submission.
+````
 `````
 
 `````{tab-item} Nix

@@ -1,0 +1,101 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# krew is the plugin manager of kubectl (https://krew.sigs.k8s.io), installed as
+# the `kubectl-krew` binary and driven either directly or as `kubectl krew`. See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# `krew list` branches on whether stdout is a terminal: piped, as mpm always runs
+# it, it prints the sorted plugin names one per line and nothing else, while an
+# interactive run gets a PLUGIN/VERSION table instead. The parser below reads the
+# piped form, so installed plugins carry no version. That is a deliberate upstream
+# choice (the `!isTerminal(os.Stdout)` branch of cmd/krew/cmd/list.go), not a
+# limitation mpm can work around.
+#
+# No outdated: krew compares nothing against its index short of running the
+# upgrade, so the operation is left undeclared and `upgrade --all` still works.
+
+[mpm.managers.krew]
+name = "kubectl krew"
+homepage_url = "https://krew.sigs.k8s.io"
+logo = "kubernetes"
+platforms = ["all_platforms"]
+# krew installs itself as `kubectl-krew`, which is what makes `kubectl krew` work
+# as a subcommand. The bare `krew` name is the symlink its own installation
+# instructions put on the PATH.
+cli_names = ["kubectl-krew", "krew"]
+requirement = ">=0.4.0"
+# NO_COLOR keeps the tabwriter output free of styling.
+extra_env = { NO_COLOR = "1" }
+# `krew version` prints an OPTION/VALUE table whose GitTag row carries the
+# release. The other rows are paths and URIs, so anchoring on the label is what
+# keeps the probe off them.
+version_regexes = ['GitTag\s+v?(?P<version>\S+)']
+
+[mpm.managers.krew.operations.installed]
+args = ["list"]
+regex = '^(?P<package_id>[a-z0-9][a-z0-9-]*)$'
+
+# `krew search` prints a NAME/DESCRIPTION/INSTALLED table. Only the first column
+# is captured: the DSL recognizes no description field, and INSTALLED is a
+# yes/no marker rather than a version.
+[mpm.managers.krew.operations.search]
+args = ["search", "{query}"]
+regex = '^(?P<package_id>[a-z0-9][a-z0-9-]*)\s{2,}\S'
+
+[mpm.managers.krew.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.krew.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+[mpm.managers.krew.operations.upgrade_one]
+args = ["upgrade", "{package_id}"]
+
+[mpm.managers.krew.operations.upgrade_all]
+args = ["upgrade"]
+
+[mpm.managers.krew.operations.sync]
+args = ["update"]
+
+# Output samples locking the version probe and the declared parsers, derived
+# from the upstream tool's own source code. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = """
+OPTION            VALUE
+GitTag            v0.4.4
+GitCommit         343e657
+IndexURI          https://github.com/kubernetes-sigs/krew-index.git
+BasePath          /home/kev/.krew
+IndexPath         /home/kev/.krew/index/default
+InstallPath       /home/kev/.krew/store
+BinPath           /home/kev/.krew/bin
+DetectedPlatform  linux/amd64"""
+expected = "0.4.4"
+
+# The piped form of `krew list`: sorted names, one per line, no header.
+[[samples.installed]]
+output = """
+access-matrix
+ctx
+ns
+tree"""
+packages = [
+  { id = "access-matrix" },
+  { id = "ctx" },
+  { id = "ns" },
+  { id = "tree" },
+]
+
+[[samples.search]]
+output = """
+NAME           DESCRIPTION                                          INSTALLED
+access-matrix  Show an RBAC access matrix for server resources      yes
+ktop           A top-like tool for your Kubernetes clusters         no
+tree           Show sub-resources of the Kubernetes object          yes"""
+packages = [
+  { id = "access-matrix" },
+  { id = "ktop" },
+  { id = "tree" },
+]

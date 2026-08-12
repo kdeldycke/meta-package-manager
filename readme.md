@@ -114,6 +114,7 @@ Meta Package Manager,fwupd,1
 Meta Package Manager,gem,1
 Meta Package Manager,gh-ext,1
 Meta Package Manager,guix,1
+Meta Package Manager,krew,1
 Meta Package Manager,lazy,1
 Meta Package Manager,macports,1
 Meta Package Manager,mas,1
@@ -214,6 +215,7 @@ print(operation_matrix()[0])
 | [`gem`](https://kdeldycke.github.io/meta-package-manager/managers/gem.html)                                                                                      | >= 2.5       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`gh-ext`](https://kdeldycke.github.io/meta-package-manager/managers/gh-ext.html)                                                                                | >= 2         |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`guix`](https://kdeldycke.github.io/meta-package-manager/managers/guix.html)                                                                                    |              |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
+| [`krew`](https://kdeldycke.github.io/meta-package-manager/managers/krew.html)                                                                                    | >= 0.4       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`lazy`](https://kdeldycke.github.io/meta-package-manager/managers/lazy.html)                                                                                    | >= 11        |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
 | [`macports`](https://kdeldycke.github.io/meta-package-manager/managers/macports.html)                                                                            | >= 2         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`mas`](https://kdeldycke.github.io/meta-package-manager/managers/mas.html)                                                                                      | >= 7         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |

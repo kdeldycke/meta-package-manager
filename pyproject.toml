@@ -57,6 +57,7 @@ keywords = [
   "gnu guix",
   "guix",
   "homebrew",
+  "krew",
   "lazy",
   "lazy.nvim",
   "mac app store",
@@ -1109,6 +1110,11 @@ color = "bfdadc"
 description = "brew, cask, zerobrew"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: krew"
+color = "bfdadc"
+description = "krew"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: macports"
 color = "bfdadc"
 description = "macports"
@@ -1411,6 +1417,10 @@ any-glob-to-any-file = [
   "tests/*homebrew*",
   "tests/*zerobrew*",
 ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: krew"
+any-glob-to-any-file = [ "meta_package_manager/managers/krew.*", "tests/*krew*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: macports"

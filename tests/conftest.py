@@ -371,6 +371,7 @@ PACKAGE_IDS = {
     "guix": "hello",
     # Declares no install operation: the round-trip auto-skips. lazy.nvim manages
     # itself, so it is a real entry of its own inventory.
+    "krew": "ctx",  # Tiny context-switcher plugin of krew's own index.
     "lazy": "lazy.nvim",
     "macports": "hello",
     "mas": "747648890",  # Telegram (test is always skipped).

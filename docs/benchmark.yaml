@@ -66,9 +66,11 @@
 managers:
   0install: []
   am: [topgrade]
+  android-studio: [topgrade]
   antibody: [topgrade]
   antidote: [topgrade]
   antigen: [topgrade]
+  antigravity: [topgrade]
   apk: [topgrade, upt, pacaptr]
   apm: [topgrade]
   app-man: [topgrade]
@@ -79,8 +81,10 @@ managers:
   asdf: [topgrade]
   atuin: [topgrade]
   aura: [topgrade]
+  auto-cpufreq: [topgrade]
   bash-it: [topgrade]
   bin: [topgrade]
+  bob: [topgrade]
   brew: [topgrade, upt, pacaptr, metapac]
   bun: [topgrade, metapac]
   cabal: []
@@ -93,9 +97,17 @@ managers:
   choco: [topgrade, upt, pacaptr]
   choosenim: [topgrade]
   chromebrew: []
+  cinnamon-spices: [topgrade]
+  clam-av-db: [topgrade]
+  claude-code: [topgrade]
+  claude-code-plugins: [topgrade]
+  codex: [topgrade]
+  colima: [topgrade]
   composer: [topgrade]
   conda: [topgrade, pacaptr]
   containers: [topgrade]
+  cursor: [topgrade]
+  cursor-agent: [topgrade]
   deb-get: [topgrade]
   declaro: []
   decman: []
@@ -107,10 +119,12 @@ managers:
   dnf5: []
   dotnet: [topgrade]
   dpp: []
+  elan: [topgrade]
   emacs: [topgrade]
   emerge: [topgrade, upt, pacaptr]
   eopkg: [topgrade, upt]
   etc-update: [topgrade]
+  falconf: [topgrade]
   fink: []
   fish-plug: [topgrade]
   fisher: [topgrade]
@@ -120,6 +134,7 @@ managers:
   fundle: [topgrade]
   fwupd: [topgrade]
   gcloud: [topgrade]
+  gearlever: [topgrade]
   gem: [topgrade]
   getnf: [topgrade]
   gh-ext: [topgrade]
@@ -129,22 +144,46 @@ managers:
   go: [topgrade]
   guix: [topgrade, upt]
   haxelib: [topgrade]
+  helix: [topgrade]
+  helix-db: [topgrade]
   helm: [topgrade]
   home-manager: [topgrade]
+  hyprpm: [topgrade]
+  install-release: [topgrade]
+  jetbrains-aqua: [topgrade]
+  jetbrains-clion: [topgrade]
+  jetbrains-datagrip: [topgrade]
+  jetbrains-dataspell: [topgrade]
+  jetbrains-gateway: [topgrade]
+  jetbrains-goland: [topgrade]
+  jetbrains-idea: [topgrade]
+  jetbrains-mps: [topgrade]
+  jetbrains-phpstorm: [topgrade]
+  jetbrains-pycharm: [topgrade]
+  jetbrains-rider: [topgrade]
+  jetbrains-rubymine: [topgrade]
+  jetbrains-rustrover: [topgrade]
+  jetbrains-toolbox: [topgrade]
+  jetbrains-webstorm: [topgrade]
   jetpack: [topgrade]
   julia: [topgrade]
   juliaup: [topgrade]
   kakoune: [topgrade]
   krew: [topgrade]
   lazy: [topgrade]
+  lensfun: [topgrade]
   lure: [topgrade]
   macos: [topgrade]
   macports: [topgrade, pacaptr]
   mamba: [topgrade]
+  mandb: [topgrade]
   mas: [topgrade, metapac]
   mason: [topgrade]
+  maza: [topgrade]
   metapac: []
   micro: [topgrade]
+  microsoft-office: [topgrade]
+  microsoft-store: [topgrade]
   miktex: [topgrade]
   mise: [topgrade, metapac]
   myrepos: [topgrade]
@@ -157,7 +196,7 @@ managers:
   oh-my-zsh: [topgrade]
   ollama: [topgrade]
   opam: [topgrade]
-  opencode: []
+  opencode: [topgrade]
   opkg: [upt]
   pacapt: []
   pacaur: []
@@ -172,6 +211,7 @@ managers:
   pathogen: []
   pckr-nvim: []
   pearl: [topgrade]
+  pi: [topgrade]
   pihole: [topgrade]
   pikaur: [topgrade, metapac]
   pip: [topgrade, pacaptr]
@@ -188,6 +228,7 @@ managers:
   pkg-tools: []
   pkgfile: [topgrade]
   pkgin: [topgrade]
+  pkgit: [topgrade]
   pkgman: [upt]
   platformio-core: [topgrade]
   plug: [topgrade]
@@ -208,11 +249,14 @@ managers:
   rye: [topgrade]
   scoop: [topgrade, upt, pacaptr, metapac]
   sdkman: [topgrade]
+  sera: [topgrade]
   sheldon: [topgrade]
+  skills: [topgrade]
   slackpkg: [upt]
   slapt-get: []
   smart: []
   snap: [topgrade, upt, metapac]
+  soar: [topgrade]
   sorcery: []
   spack: []
   sparkle: [topgrade]
@@ -232,6 +276,7 @@ managers:
   # binary through its ``self_update`` step, hence the self-referential flag.
   topgrade: [topgrade]
   toolbx: [topgrade]
+  tpack: [topgrade]
   trizen: [topgrade]
   typst: [topgrade]
   upt: []
@@ -241,6 +286,7 @@ managers:
   vcpkg: [topgrade]
   vim: [topgrade]
   vim-pack: [topgrade]
+  vite-plus: [topgrade]
   volta: [topgrade]
   voom: [topgrade]
   vscode: [topgrade, metapac]
@@ -248,8 +294,10 @@ managers:
   vundle: [topgrade]
   waydroid: [topgrade]
   whohas: []
+  windsurf: [topgrade]
   winget: [topgrade, upt, pacaptr, metapac]
   wsl: [topgrade]
+  wsl-update: [topgrade]
   xbps: [topgrade, upt, pacaptr, metapac]
   xcodes: [topgrade]
   yadm: [topgrade]
@@ -260,6 +308,7 @@ managers:
   yazi: [topgrade]
   yt-dlp: []
   yum: [topgrade, upt]
+  zerobrew: [topgrade]
   zgenom: [topgrade]
   zigup: [topgrade]
   zim: [topgrade]
@@ -272,21 +321,33 @@ managers:
 homepages:
   0install: https://0install.net
   am: https://github.com/ivan-hc/AM
+  android-studio: https://developer.android.com/studio
   antibody: https://getantibody.github.io
   antigen: https://github.com/zsh-users/antigen
+  antigravity: https://antigravity.google
   app-man: https://github.com/ivan-hc/AppMan
   aqua: https://aquaproj.github.io
   atuin: https://atuin.sh
   aura: https://github.com/fosskers/aura
+  auto-cpufreq: https://github.com/AdnanHodzic/auto-cpufreq
   bash-it: https://bash-it.readthedocs.io
   bin: https://github.com/marcosnils/bin
+  bob: https://github.com/MordechaiHadad/bob
   bun: https://bun.sh
   cabal: https://www.haskell.org/cabal/
   cards: https://nutyx.org
   certbot: https://certbot.eff.org
   chezmoi: https://www.chezmoi.io
   choosenim: https://github.com/dom96/choosenim
+  cinnamon-spices: https://cinnamon-spices.linuxmint.com
+  clam-av-db: https://www.clamav.net
+  claude-code: https://claude.com/product/claude-code
+  claude-code-plugins: https://docs.claude.com/en/docs/claude-code/plugins
+  codex: https://github.com/openai/codex
+  colima: https://colima.run
   containers: https://github.com/containers/podman
+  cursor: https://cursor.com
+  cursor-agent: https://cursor.com/cli
   declaro: https://github.com/mantinhas/declaro
   decman: https://github.com/kiviktnm/decman
   dein: https://github.com/Shougo/dein.vim
@@ -295,33 +356,60 @@ homepages:
   dkp-pacman: https://devkitpro.org
   dotnet: https://learn.microsoft.com/dotnet/core/tools/
   dpp: https://github.com/Shougo/dpp.vim
+  elan: https://github.com/leanprover/elan
   emacs: https://www.gnu.org/software/emacs/
   etc-update: https://wiki.gentoo.org/wiki/Etc-update
+  falconf: https://github.com/GideonBear/falconf
   fish-plug: https://github.com/kidonng/fish-plug
   fisher: https://github.com/jorgebucaran/fisher
   flutter: https://flutter.dev
   fossil: https://fossil-scm.org
   fundle: https://github.com/danhper/fundle
   gcloud: https://cloud.google.com/sdk/gcloud
+  gearlever: https://gearlever.mijorus.it
   getnf: https://github.com/getnf/getnf
   ghcup: https://www.haskell.org/ghcup/
   git: https://git-scm.com
   gnome-shell: https://extensions.gnome.org
   go: https://go.dev
   haxelib: https://lib.haxe.org
+  helix: https://helix-editor.com
+  helix-db: https://helix-db.com
   helm: https://helm.sh
   home-manager: https://github.com/nix-community/home-manager
+  hyprpm: https://hypr.land
+  install-release: https://github.com/Rishang/install-release
+  jetbrains-aqua: https://www.jetbrains.com/aqua/
+  jetbrains-clion: https://www.jetbrains.com/clion/
+  jetbrains-datagrip: https://www.jetbrains.com/datagrip/
+  jetbrains-dataspell: https://www.jetbrains.com/dataspell/
+  jetbrains-gateway: https://www.jetbrains.com/remote-development/gateway/
+  jetbrains-goland: https://www.jetbrains.com/go/
+  jetbrains-idea: https://www.jetbrains.com/idea/
+  jetbrains-mps: https://www.jetbrains.com/mps/
+  jetbrains-phpstorm: https://www.jetbrains.com/phpstorm/
+  jetbrains-pycharm: https://www.jetbrains.com/pycharm/
+  jetbrains-rider: https://www.jetbrains.com/rider/
+  jetbrains-rubymine: https://www.jetbrains.com/ruby/
+  jetbrains-rustrover: https://www.jetbrains.com/rust/
+  jetbrains-toolbox: https://www.jetbrains.com/toolbox-app/
+  jetbrains-webstorm: https://www.jetbrains.com/webstorm/
   jetpack: https://github.com/3ofcoins/jetpack
   julia: https://julialang.org
   juliaup: https://github.com/JuliaLang/juliaup
   kakoune: https://kakoune.org
   krew: https://krew.sigs.k8s.io
+  lensfun: https://lensfun.github.io
   lure: https://lure.sh
   macos: https://www.apple.com/macos/
   mamba: https://mamba.readthedocs.io
+  mandb: https://man-db.gitlab.io/man-db
   mason: https://github.com/williamboman/mason.nvim
+  maza: https://github.com/tanrax/maza-ad-blocking
   metapac: https://github.com/ripytide/metapac
   micro: https://micro-editor.github.io
+  microsoft-office: https://www.microsoft.com/microsoft-365
+  microsoft-store: https://apps.microsoft.com
   miktex: https://miktex.org
   myrepos: https://myrepos.branchable.com
   nala: https://gitlab.com/volian/nala
@@ -341,6 +429,7 @@ homepages:
   pathogen: https://github.com/tpope/vim-pathogen
   pckr-nvim: https://github.com/lewis6991/pckr.nvim
   pearl: https://github.com/pearl-core/pearl
+  pi: https://pi.dev
   pihole: https://pi-hole.net
   pikaur: https://github.com/actionless/pikaur
   pip-review: https://github.com/jgonggrijp/pip-review
@@ -349,6 +438,7 @@ homepages:
   pixi: https://pixi.sh
   pkg-termux: https://github.com/termux/termux-tools
   pkgfile: https://github.com/falconindy/pkgfile
+  pkgit: https://git.symlinx.net/pkgit/about/
   pkgman: https://www.haiku-os.org
   platformio-core: https://platformio.org
   plug: https://github.com/junegunn/vim-plug
@@ -365,7 +455,9 @@ homepages:
   rtcl: https://github.com/topgrade-rs/topgrade
   rustup: https://rustup.rs
   rye: https://rye.astral.sh
+  sera: https://gitlab.com/cscs/sera
   sheldon: https://sheldon.cli.rs
+  skills: https://skills.sh
   slackpkg: https://slackpkg.org
   smart: https://github.com/smartpm/smart
   spack: https://spack.io
@@ -377,17 +469,21 @@ homepages:
   tldr: https://tldr.sh
   tmux: https://github.com/tmux-plugins/tpm
   toolbx: https://containertoolbx.org
+  tpack: https://github.com/tmuxpack/tpack
   trizen: https://github.com/trizen/trizen
   typst: https://typst.app
   upt: https://github.com/sigoden/upt
   vagrant: https://www.vagrantup.com
   vcpkg: https://vcpkg.io
   vim: https://www.vim.org
+  vite-plus: https://viteplus.dev
   voom: https://www.vim.org/scripts/script.php?script_id=2657
   vundle: https://github.com/VundleVim/Vundle.vim
   waydroid: https://waydro.id
   whohas: https://github.com/whohas/whohas
+  windsurf: https://windsurf.com
   wsl: https://learn.microsoft.com/windows/wsl/
+  wsl-update: https://learn.microsoft.com/windows/wsl/
   xcodes: https://github.com/XcodesOrg/xcodes
   yadm: https://yadm.io
   yaourt: https://github.com/archlinuxfr/yaourt
@@ -475,12 +571,8 @@ refused:
   # nested keys are sorted alphabetically.
   cabal:
     topgrade: https://github.com/topgrade-rs/topgrade/issues/320
-  opencode:
-    topgrade: https://github.com/topgrade-rs/topgrade/issues/1688
   yt-dlp:
     topgrade: https://github.com/topgrade-rs/topgrade/issues/1764
-  zerobrew:
-    topgrade: https://github.com/topgrade-rs/topgrade/issues/2003
 
 unsupported:
   # Managers left unwrapped by decision, each carrying its reason in the table

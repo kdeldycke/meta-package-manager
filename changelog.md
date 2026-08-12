@@ -16,6 +16,9 @@
 - [mpm] Link every manager named in the documentation pages to its own page, at most once per paragraph.
 - [mpm] Back 75 competitor cells of the benchmark's feature matrix with a link to the documentation, configuration example, CLI declaration or issue that proves the verdict. Six cells found nothing citable and keep a bare glyph.
 - [mpm] Record `dpp.vim` as an unsupported manager: it is drivable only from inside the editor, and reports neither a binary nor a version.
+- [mpm] Add 47 managers to the benchmark's support table, covering every tool `topgrade` drives that had no row yet: the Android Studio, Antigravity, Cursor, Windsurf and fifteen JetBrains plugin managers, plus `bob`, `colima`, `elan`, `gearlever`, `helix-db`, `hyprpm`, `install-release`, `skills`, `tpack`, `vite-plus` and eighteen others.
+- [mpm] Flag `topgrade`'s support for `soar` and `zerobrew` in the benchmark, which was left blank.
+- [mpm] Drop the `topgrade` refusals recorded against `opencode` and `zerobrew`: both requests were closed as not-planned, then implemented anyway.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

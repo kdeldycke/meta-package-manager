@@ -76,10 +76,31 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import-not-found]
 
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
 PROJECT_ROOT = Path(__file__).parent.parent
 
 BENCHMARK_COMPETITORS = ("topgrade", "upt", "pacaptr", "metapac")
 """Competing tools shown alongside `mpm` in the benchmark page, in column order."""
+
+TOPGRADE_FALLBACK_GLYPH = "🛟"
+"""Marker appended to an unsupported manager that `topgrade` still reaches.
+
+`topgrade` is the pool's deliberate sinkhole: it auto-detects and upgrades
+whatever it finds on the host, so a tool `mpm` declined to wrap directly stays
+reachable through `mpm upgrade --topgrade`. For the majority of the unsupported
+table that turns "not supported" into "not wrapped, still upgradable", which is
+a different answer to the only question the page exists to settle.
+
+Derived, never hand-written: membership is `topgrade` appearing in the manager's
+`docs/benchmark.yaml` competitor list, so the marker cannot drift from the data
+it summarizes. Deliberately orthogonal to
+{data}`UNSUPPORTED_GLYPHS`, since all four combinations occur: a dead upstream
+`topgrade` still drives (`antibody`), a live refusal it drives (`zr`), and
+either one it does not (`yaourt`, `upt`).
+"""
 
 UNSUPPORTED_GLYPHS = {"archived": "☠️", "excluded": "❌"}
 """Glyph rendered in the `mpm` column for each `unsupported` status.
@@ -87,8 +108,25 @@ UNSUPPORTED_GLYPHS = {"archived": "☠️", "excluded": "❌"}
 A skull marks a tool whose upstream is retired: the wrapper is not missing, its
 subject is gone. A cross marks a live tool `mpm` declined on its own merits.
 Both link to {data}`UNSUPPORTED_DOCS_URL`, whose table carries the reason and
-repeats the same glyph in its own status column.
+repeats the same glyph in its own status column, followed by
+{data}`TOPGRADE_FALLBACK_GLYPH` where it applies.
 """
+
+
+def unsupported_status(mid: str, status: str, competitors: Iterable[str]) -> str:
+    """Status glyphs of an unsupported manager: its verdict, then its fallback.
+
+    Returns the {data}`UNSUPPORTED_GLYPHS` entry for `status`, suffixed with
+    {data}`TOPGRADE_FALLBACK_GLYPH` when `topgrade` is among the manager's
+    `competitors`. Shared by the benchmark's `mpm` column and the sync test
+    guarding `docs/unsupported.md`, so the two can never disagree on what a row
+    should show.
+    """
+    glyph = UNSUPPORTED_GLYPHS[status]
+    if "topgrade" in competitors:
+        return f"{glyph} {TOPGRADE_FALLBACK_GLYPH}"
+    return glyph
+
 
 UNSUPPORTED_DOCS_URL = "unsupported.md"
 """Link target of the `mpm` cell for managers deliberately left unwrapped.
@@ -433,8 +471,13 @@ def benchmark_managers_table() -> str:
             glyph = "⚠️" if pool[mid].unmaintained else "✅"
             row.append(f"[{glyph}]({manager_source_url(mid)})")
         elif mid in unsupported:
-            glyph = UNSUPPORTED_GLYPHS[unsupported[mid]]
-            row.append(f"[{glyph}]({UNSUPPORTED_DOCS_URL})")
+            # Only the verdict links to its reason; the fallback marker rides
+            # alongside it, explained once by the page's legend.
+            verdict = UNSUPPORTED_GLYPHS[unsupported[mid]]
+            cell = f"[{verdict}]({UNSUPPORTED_DOCS_URL})"
+            if "topgrade" in competitor_data.get(mid, []):
+                cell += f" {TOPGRADE_FALLBACK_GLYPH}"
+            row.append(cell)
         else:
             row.append("")
         flags = set(competitor_data.get(mid, []))
@@ -499,13 +542,15 @@ def augmentations_table() -> str:
         extended = extended_search_is_synthesized(manager)
         if not (upgrade_all or orphan_sweep or exact or extended):
             continue
-        table.append([
-            f"[`{mid}`](managers/{mid}.md)",
-            "✅" if upgrade_all else "",
-            "✅" if orphan_sweep else "",
-            "✅" if exact else "",
-            "✅" if extended else "",
-        ])
+        table.append(
+            [
+                f"[`{mid}`](managers/{mid}.md)",
+                "✅" if upgrade_all else "",
+                "✅" if orphan_sweep else "",
+                "✅" if exact else "",
+                "✅" if extended else "",
+            ]
+        )
 
     return render_table(
         table,
@@ -854,28 +899,38 @@ def manager_card(manager_id: str) -> str:
     purl_types = sorted(
         {manager_id} | {t for t, ids in PURL_MAP.items() if ids and manager_id in ids},
     )
-    facts.append((
-        "purl types",
-        FACT_SEPARATOR.join(f"`pkg:{t}`" for t in purl_types),
-    ))
+    facts.append(
+        (
+            "purl types",
+            FACT_SEPARATOR.join(f"`pkg:{t}`" for t in purl_types),
+        )
+    )
     if m.brewfile_entry_type:
-        facts.append((
-            "Brewfile entry",
-            f"`{m.brewfile_entry_type}`, in [Brewfile backups](../dump.md)",
-        ))
+        facts.append(
+            (
+                "Brewfile entry",
+                f"`{m.brewfile_entry_type}`, in [Brewfile backups](../dump.md)",
+            )
+        )
 
     # How mpm invokes the tool. Only the CLI names are unconditional: the rest is
     # listed when the manager departs from the plain "run the binary" default.
     cli_label = "CLI names (lookup order)" if len(m.cli_names) > 1 else "CLI name"
-    facts.append((
-        cli_label,
-        FACT_SEPARATOR.join(f"`{name}`" for name in m.cli_names),
-    ))
+    facts.append(
+        (
+            cli_label,
+            FACT_SEPARATOR.join(f"`{name}`" for name in m.cli_names),
+        )
+    )
     if m.cli_search_path:
-        facts.append((
-            "Extra search paths",
-            FACT_SEPARATOR.join(f"`{_collapse_home(p)}`" for p in m.cli_search_path),
-        ))
+        facts.append(
+            (
+                "Extra search paths",
+                FACT_SEPARATOR.join(
+                    f"`{_collapse_home(p)}`" for p in m.cli_search_path
+                ),
+            )
+        )
     if m.pre_cmds:
         facts.append(("Pre-commands", f"`{' '.join(m.pre_cmds)}`"))
     if m.pre_args or m.post_args:
@@ -886,10 +941,14 @@ def manager_card(manager_id: str) -> str:
         argv = " ".join((m.cli_names[0], *m.pre_args, "<command>", *m.post_args))
         facts.append(("Every call", f"`{argv}`"))
     if m.extra_env:
-        facts.append((
-            "Forced environment",
-            FACT_SEPARATOR.join(f"`{k}={v}`" for k, v in sorted(m.extra_env.items())),
-        ))
+        facts.append(
+            (
+                "Forced environment",
+                FACT_SEPARATOR.join(
+                    f"`{k}={v}`" for k, v in sorted(m.extra_env.items())
+                ),
+            )
+        )
     if m.timeout is not None:
         facts.append(("Call timeout", f"{m.timeout} seconds"))
 
@@ -933,11 +992,13 @@ def manager_logo_credits() -> str:
             if license_id.startswith("http")
             else f"`{license_id}`"
         )
-        table.append([
-            f"[{icon['title']}]({icon['source']})",
-            ", ".join(f"[`{mid}`](managers/{mid}.md)" for mid in icon["managers"]),
-            license_cell,
-        ])
+        table.append(
+            [
+                f"[{icon['title']}]({icon['source']})",
+                ", ".join(f"[`{mid}`](managers/{mid}.md)" for mid in icon["managers"]),
+                license_cell,
+            ]
+        )
 
     rendered = render_table(
         table,
@@ -1711,10 +1772,12 @@ def manager_traces(manager_id: str) -> str:
         for op in Operations:
             spec = operations.get(op.name, {})
             for sample in samples.get(op.name, ()):
-                command = " ".join((
-                    spec.get("cli", m.cli_names[0]),
-                    *spec.get("args", ()),
-                ))
+                command = " ".join(
+                    (
+                        spec.get("cli", m.cli_names[0]),
+                        *spec.get("args", ()),
+                    )
+                )
                 output = sample["output"].strip("\n")
                 fences.append(_fenced(f"$ {command}\n{output}", "shell-session"))
         source_label = "bundled definition"
@@ -1882,13 +1945,15 @@ def managers_index_table() -> str:
             parts.append(f"{icon} ({annotation})" if annotation else icon)
         # The artwork is spliced in after rendering: a multi-kilobyte SVG in a
         # cell would pad every other row of the column to its own width.
-        table.append([
-            f"%logo:{mid}%",
-            f"[{m.name}](managers/{mid}.md)",
-            id_cell,
-            "⚠️" if m.unmaintained else "",
-            " ".join(parts),
-        ])
+        table.append(
+            [
+                f"%logo:{mid}%",
+                f"[{m.name}](managers/{mid}.md)",
+                id_cell,
+                "⚠️" if m.unmaintained else "",
+                " ".join(parts),
+            ]
+        )
     rendered = render_table(
         table,
         # The mark column is headerless: the artwork labels itself, and the

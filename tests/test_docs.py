@@ -643,12 +643,14 @@ def test_manager_card_renders(manager):
     forced = card.partition("**Every call**\n: ")[2].partition("\n")[0]
     assert bool(forced) is bool(manager.pre_args or manager.post_args)
     if forced:
-        argv = " ".join((
-            manager.cli_names[0],
-            *manager.pre_args,
-            "<command>",
-            *manager.post_args,
-        ))
+        argv = " ".join(
+            (
+                manager.cli_names[0],
+                *manager.pre_args,
+                "<command>",
+                *manager.post_args,
+            )
+        )
         assert forced == f"`{argv}`"
 
     # No path leaks the home directory of whoever built the docs.
@@ -676,8 +678,7 @@ def test_manager_card_renders(manager):
         # brackets escaped: a leading `>` would otherwise open a blockquote and
         # swallow itself, and a `<` would open a tag.
         requirement = (
-            _docs
-            ._format_requirement(manager.requirement)
+            _docs._format_requirement(manager.requirement)
             .replace("<", r"\<")
             .replace(">", r"\>")
         )
@@ -1061,14 +1062,23 @@ def test_unsupported_page_matches_benchmark():
 
     The glyph must agree too: `☠️` and `❌` are read side by side across the two
     pages, and `⚠️` is reserved for the *wrapped* managers of the index, so it
-    must never leak onto a page listing what `mpm` refused to wrap.
+    must never leak onto a page listing what `mpm` refused to wrap. The `🛟`
+    fallback marker is derived rather than written, so the page is held to what
+    `unsupported_status()` computes from the competitor data.
     """
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
-    statuses = safe_load(yaml_path.read_text(encoding="utf-8"))["unsupported"]
+    benchmark = safe_load(yaml_path.read_text(encoding="utf-8"))
+    statuses = benchmark["unsupported"]
+    competitors = benchmark["managers"]
 
     page = (PROJECT_ROOT / "docs" / "unsupported.md").read_text(encoding="utf-8")
     # Rows are ``| [`id`](url) | glyph | kind | why |``.
-    rows = re.findall(r"^\| \[`([^`]+)`\]\([^)]*\) \| (\S+) \|", page, re.MULTILINE)
+    rows = [
+        (mid, glyphs.strip())
+        for mid, glyphs in re.findall(
+            r"^\| \[`([^`]+)`\]\([^)]*\) \| ([^|]+) \|", page, re.MULTILINE
+        )
+    ]
     assert rows, "no manager rows found in docs/unsupported.md"
 
     ids = [mid for mid, _ in rows]
@@ -1082,7 +1092,9 @@ def test_unsupported_page_matches_benchmark():
     )
 
     for mid, glyph in rows:
-        expected = _docs.UNSUPPORTED_GLYPHS[statuses[mid]]
+        expected = _docs.unsupported_status(
+            mid, statuses[mid], competitors.get(mid, [])
+        )
         assert glyph == expected, (
             f"unsupported.md row {mid!r} shows {glyph!r} but benchmark.yaml "
             f"declares it {statuses[mid]!r}, which renders {expected!r}"
@@ -1196,14 +1208,16 @@ def test_retraction_status_reuses_table_row(manager):
         assert (line in section) is (cell not in _docs.EMPTY_CELLS)
 
 
-SKILL_SPEC_FIELDS = frozenset({
-    "allowed-tools",
-    "compatibility",
-    "description",
-    "license",
-    "metadata",
-    "name",
-})
+SKILL_SPEC_FIELDS = frozenset(
+    {
+        "allowed-tools",
+        "compatibility",
+        "description",
+        "license",
+        "metadata",
+        "name",
+    }
+)
 """The six frontmatter fields the [Agent Skills
 spec](https://agentskills.io/specification) defines."""
 

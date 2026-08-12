@@ -8,6 +8,7 @@
 - [antidote] Add the Antidote Zsh plugin manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support. Zsh is the CLI mpm executes, since Antidote ships as a sourced shell function rather than an executable.
 - [mpm] Record `zgenom` as an unsupported manager: it reports no version through any binary, and its `list` prints the generated `init.zsh` rather than an inventory.
 - [mpm] Record `zr` as an unsupported manager: plugins are the arguments handed to it, so it owns no inventory to report.
+- [mpm] Mark with 🛟 the unsupported managers `topgrade` still reaches, on both the unsupported page and the benchmark. 56 of the 69 are upgradable through `mpm upgrade --topgrade` despite not being wrapped. The marker is derived from the benchmark data, never hand-written.
 - [mpm] Record 47 more unsupported managers, covering the JetBrains IDE plugin updaters, the dotfile syncers, the self-updating applications, the container runtimes and the system-database refreshers. Every tool assessed now lands either in the pool or on the unsupported page.
 - [antigen] Add the Antigen Zsh plugin manager with `installed`, `upgrade` and `remove` support. It declares no `install`: `antigen bundle` loads a bundle for the current shell only, writing nothing back.
 - [sheldon] Add the Sheldon shell plugin manager with `upgrade` and `remove` support. It declares no `installed` (Sheldon prints no listing) and no `install` (`sheldon add` needs both a local name and a source flag).

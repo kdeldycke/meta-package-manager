@@ -99,6 +99,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.dotnet module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.dotnet
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.emerge module
 
 ```{eval-rst}
@@ -256,6 +265,15 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.pipx
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.pixi module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.pixi
    :members:
    :show-inheritance:
    :undoc-members:

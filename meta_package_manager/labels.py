@@ -130,6 +130,7 @@ MANAGER_PREFIX = "📦 manager: "
 
 MANAGER_LABEL_GROUPS: TLabelGroup = {
     "asdf-based": frozenset({"asdf", "mise"}),
+    "conda-based": frozenset({"conda", "pixi"}),
     "rpm-based": frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
     "dpkg-based": frozenset({"apt", "apt-mint", "deb-get", "fink", "opkg", "pacstall"}),
     "fish-based": frozenset({"fisher", "oh-my-fish"}),
@@ -177,6 +178,11 @@ Vim ones, and a report about either belongs nowhere near the editor label.
 its `asdf:` backend, so the two share one plugin ecosystem and one class of report.
 `volta` stays under `npm-based` despite also managing a runtime, because what it
 installs is npm packages.
+
+`conda-based` follows `pypi-based`: `pixi` shares no code with `conda`, reimplementing
+resolution and installation on top of rattler, but both resolve conda packages from the
+same channels, `conda-forge` by default. The registry is the level a report lands at, so
+the two share one label even though their CLIs have nothing else in common.
 """
 
 all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
@@ -221,6 +227,7 @@ LABELS = sorted(
 
 
 LABEL_RENAMES: dict[str, tuple[str, ...]] = {
+    f"{MANAGER_PREFIX}conda-based": (f"{MANAGER_PREFIX}conda",),
     f"{MANAGER_PREFIX}pypi-based": (f"{MANAGER_PREFIX}pip-based",),
 }
 """Labels a renamed one supersedes, emitted as labelmaker's `rename-from`.
@@ -238,7 +245,11 @@ exists. An N-to-1 fold therefore names the *single* source carrying the most
 history, leaving the remainder to a hand migration, and a fold whose target
 label already exists names none at all.
 
-That is why only `pypi-based` appears here. `dpkg-based`, `vim-based`,
+`conda-based` is the same lossless shape: only `conda` carries history, `pixi` arrives
+with no label of its own, and the target does not exist yet, so the fold is genuinely
+one-to-one.
+
+`dpkg-based`, `vim-based`,
 `zsh-based` and `asdf-based` were all synced into existence before their
 predecessors were retired, so a declared rename would only error; their
 orphans (`fink`, `vim-pack`, `zinit`, `asdf`, `mise`) carry no issue or pull
@@ -301,8 +312,9 @@ MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "choco": ("chocolatey",),
     "chromebrew": ("chrome os", "chromeos"),
     "composer": ("php",),
-    "conda": ("anaconda", "conda-forge", "miniconda"),
+    "conda-based": ("anaconda", "conda-forge", "miniconda", "prefix.dev"),
     "cpan": ("perl",),
+    "dotnet": ("nuget",),
     "dpkg-based": ("aptitude", "debian", "dpkg", "ubuntu"),
     "emerge": ("gentoo", "portage"),
     "eopkg": ("solus",),

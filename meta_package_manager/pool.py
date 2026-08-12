@@ -36,6 +36,7 @@ from .managers.composer import Composer
 from .managers.conda import Conda
 from .managers.deb_get import Deb_Get
 from .managers.dnf import DNF, DNF5, YUM
+from .managers.dotnet import DotNet
 from .managers.emerge import Emerge
 from .managers.eopkg import EOPKG
 from .managers.fisher import Fisher
@@ -54,6 +55,7 @@ from .managers.pacman import DkpPacman, Pacaur, Pacman, Paru, Pikaur, Trizen, Ya
 from .managers.pacstall import Pacstall
 from .managers.pip import Pip
 from .managers.pipx import Pipx
+from .managers.pixi import Pixi
 from .managers.pkcon import Pkcon
 from .managers.pkg import PKG, Ports
 from .managers.pnpm import PNPM
@@ -101,6 +103,7 @@ manager_classes = (
     DkpPacman,
     DNF,
     DNF5,
+    DotNet,
     Emerge,
     EOPKG,
     Fisher,
@@ -121,6 +124,7 @@ manager_classes = (
     Pikaur,
     Pip,
     Pipx,
+    Pixi,
     Pkcon,
     PKG,
     PNPM,

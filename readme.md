@@ -105,6 +105,7 @@ Meta Package Manager,deb-get,1
 Meta Package Manager,dkp-pacman,1
 Meta Package Manager,dnf,1
 Meta Package Manager,dnf5,1
+Meta Package Manager,dotnet,1
 Meta Package Manager,emerge,1
 Meta Package Manager,eopkg,1
 Meta Package Manager,fink,1
@@ -131,6 +132,7 @@ Meta Package Manager,paru,1
 Meta Package Manager,pikaur,1
 Meta Package Manager,pip,1
 Meta Package Manager,pipx,1
+Meta Package Manager,pixi,1
 Meta Package Manager,pkcon,1
 Meta Package Manager,pkg,1
 Meta Package Manager,pkg-tools,1
@@ -207,6 +209,7 @@ print(operation_matrix()[0])
 | [`dkp-pacman`](https://mpm.run/managers/dkp-pacman.html)                                       | >= 6         |          |     🐧 🍎     |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`dnf`](https://mpm.run/managers/dnf.html)                                                     | >= 4         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`dnf5`](https://mpm.run/managers/dnf5.html)                                                   | >= 5         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
+| [`dotnet`](https://mpm.run/managers/dotnet.html)                                               | >= 8.0.400   |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`emerge`](https://mpm.run/managers/emerge.html)                                               | >= 3         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`eopkg`](https://mpm.run/managers/eopkg.html)                                                 | >= 3.2       |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`fink`](https://mpm.run/managers/fink.html)                                                   |              |          |      🍎       |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
@@ -233,6 +236,7 @@ print(operation_matrix()[0])
 | [`pikaur`](https://mpm.run/managers/pikaur.html)                                               | >= 1         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`pip`](https://mpm.run/managers/pip.html)                                                     | >= 26.1      |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
 | [`pipx`](https://mpm.run/managers/pipx.html)                                                   | >= 1         |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`pixi`](https://mpm.run/managers/pixi.html)                                                   | >= 0.65      |          |   🐧 🍎 🪟    |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`pkcon`](https://mpm.run/managers/pkcon.html)                                                 | >= 0.7       |          |               |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`pkg`](https://mpm.run/managers/pkg.html)                                                     | >= 1.11      |          |               |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`pkg-tools`](https://mpm.run/managers/pkg-tools.html)                                         |              |          |               |      ✓      |            |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |

@@ -34,6 +34,7 @@ keywords = [
   "cli-tools",
   "composer",
   "conda",
+  "conda-forge",
   "cpan",
   "cyclonedx",
   "cygwin",
@@ -41,6 +42,7 @@ keywords = [
   "dkp-pacman",
   "dnf",
   "dnf5",
+  "dotnet",
   "emerge",
   "eopkg",
   "exherbo",
@@ -73,6 +75,7 @@ keywords = [
   "nixpkgs",
   "node",
   "npm",
+  "nuget",
   "oh-my-fish",
   "opam",
   "openbsd",
@@ -91,6 +94,7 @@ keywords = [
   "pikaur",
   "pip",
   "pipx",
+  "pixi",
   "pkcon",
   "pkg",
   "pkg-tools",
@@ -875,12 +879,16 @@ label = "📦 manager: composer"
 patterns = [ "/\\bphp\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
-label = "📦 manager: conda"
-patterns = [ "/\\banaconda\\b|\\bconda\\-forge\\b|\\bminiconda\\b/i" ]
+label = "📦 manager: conda-based"
+patterns = [ "/\\banaconda\\b|\\bconda\\-forge\\b|\\bminiconda\\b|\\bprefix\\.dev\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: cpan"
 patterns = [ "/\\bperl\\b/i" ]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: dotnet"
+patterns = [ "/\\bnuget\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: dpkg-based"
@@ -1082,14 +1090,20 @@ color = "bfdadc"
 description = "composer"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: conda"
+name = "📦 manager: conda-based"
 color = "bfdadc"
-description = "conda"
+description = "conda, pixi"
+rename-from = [ "📦 manager: conda" ]
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: cpan"
 color = "bfdadc"
 description = "cpan"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: dotnet"
+color = "bfdadc"
+description = "dotnet"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: dpkg-based"
@@ -1384,12 +1398,21 @@ label = "📦 manager: composer"
 any-glob-to-any-file = [ "meta_package_manager/managers/composer.*", "tests/*composer*" ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: conda"
-any-glob-to-any-file = [ "meta_package_manager/managers/conda.*", "tests/*conda*" ]
+label = "📦 manager: conda-based"
+any-glob-to-any-file = [
+  "meta_package_manager/managers/conda.*",
+  "meta_package_manager/managers/pixi.*",
+  "tests/*conda*",
+  "tests/*pixi*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: cpan"
 any-glob-to-any-file = [ "meta_package_manager/managers/cpan.*", "tests/*cpan*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: dotnet"
+any-glob-to-any-file = [ "meta_package_manager/managers/dotnet.*", "tests/*dotnet*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: dpkg-based"

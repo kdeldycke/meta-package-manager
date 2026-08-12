@@ -30,6 +30,7 @@ print(augmentations_table())
 | [`dkp-pacman`](managers/dkp-pacman.md)     |                      |      ✅      |              |       ✅        |
 | [`dnf`](managers/dnf.md)                   |                      |              |      ✅      |       ✅        |
 | [`dnf5`](managers/dnf5.md)                 |                      |              |      ✅      |       ✅        |
+| [`dotnet`](managers/dotnet.md)             |                      |              |      ✅      |       ✅        |
 | [`eopkg`](managers/eopkg.md)               |                      |              |      ✅      |                 |
 | [`fink`](managers/fink.md)                 |                      |              |      ✅      |       ✅        |
 | [`flatpak`](managers/flatpak.md)           |                      |              |      ✅      |       ✅        |

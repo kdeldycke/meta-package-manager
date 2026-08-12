@@ -65,6 +65,14 @@ icons:
     - deb-get
     source: https://www.debian.org/logos
     title: Debian
+  dotnet:
+    contrast_on_light: 7.94
+    hex: 512BD4
+    license: CC0-1.0
+    managers:
+    - dotnet
+    source: https://github.com/dotnet/brand/blob/c7d0f51b8ec59531332d05fb27a5b758a7a3d689/logo/dotnet-logo.svg
+    title: .NET
   fedora:
     contrast_on_light: 2.79
     hex: 51A2DA

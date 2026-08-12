@@ -411,6 +411,23 @@ jobs:
             "$env:CONDA\condabin" | Out-File -Append -FilePath $env:GITHUB_PATH
           }
 
+      # Pixi
+      # https://formulae.brew.sh/formula/pixi
+      # https://github.com/ScoopInstaller/Main/blob/master/bucket/pixi.json
+      # Not preinstalled on any runner image. Homebrew covers macOS and Linux (the
+      # formula is bottled for both), Scoop covers Windows; both were bootstrapped
+      # by earlier steps of this job.
+      - name: Pixi - Linux & macOS install
+        if: runner.os != 'Windows'
+        run: brew install pixi
+      - name: Pixi - Windows install
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: scoop install main/pixi
+
+      # The .NET SDK is preinstalled on every runner image this matrix uses, so
+      # `dotnet tool` needs no setup step.
+
       - name: Install UV
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:

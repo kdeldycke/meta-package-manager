@@ -356,6 +356,10 @@ PACKAGE_IDS = {
     "dkp-pacman": "gba-examples",
     "dnf": "nyancat",
     "dnf5": "nyancat",
+    # Microsoft's canonical sample .NET tool: a 26 KB, zero-dependency ASCII bot
+    # that only writes to stdout. It opts into `RollForward=LatestMajor`, so it
+    # still runs on a machine carrying no .NET 8 runtime.
+    "dotnet": "dotnetsay",
     "emerge": "games-misc/nyancat",
     "eopkg": "sl",
     "fink": "figlet",
@@ -369,9 +373,9 @@ PACKAGE_IDS = {
     # A tiny script-based extension (a bare git clone), from a GitHub CLI maintainer.
     "gh-ext": "mislav/gh-branch",
     "guix": "hello",
+    "krew": "ctx",  # Tiny context-switcher plugin of krew's own index.
     # Declares no install operation: the round-trip auto-skips. lazy.nvim manages
     # itself, so it is a real entry of its own inventory.
-    "krew": "ctx",  # Tiny context-switcher plugin of krew's own index.
     "lazy": "lazy.nvim",
     "macports": "hello",
     "mas": "747648890",  # Telegram (test is always skipped).
@@ -389,6 +393,9 @@ PACKAGE_IDS = {
     "pikaur": "nyancat",
     "pip": "pytz",
     "pipx": "pycowsay",
+    # conda-forge ships no nyancat, so pixi reuses the binary-store pick. It is a
+    # single self-contained Rust binary, built for every platform pixi runs on.
+    "pixi": "hyperfine",
     "pkcon": "hello",
     "pkg": "nyancat",
     "pkg-tools": "nyancat",

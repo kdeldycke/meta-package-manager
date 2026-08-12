@@ -129,6 +129,7 @@ this module; `test_manager_label_badge_color` keeps the two in step.
 MANAGER_PREFIX = "📦 manager: "
 
 MANAGER_LABEL_GROUPS: TLabelGroup = {
+    "asdf-based": frozenset({"asdf", "mise"}),
     "rpm-based": frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
     "dpkg-based": frozenset({"apt", "apt-mint", "deb-get", "opkg", "pacstall"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
@@ -138,7 +139,9 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "pkg-based": frozenset({"pkg", "ports"}),
     "scoop-based": frozenset({"scoop", "sfsu"}),
     "uv-based": frozenset({"uv", "uvx"}),
+    "vim-based": frozenset({"lazy", "vim-pack"}),
     "vscode-based": frozenset({"vscode", "vscodium"}),
+    "zsh-based": frozenset({"antidote", "zinit"}),
 }
 """Managers sharing the same ecosystem are grouped together under the same label.
 
@@ -146,6 +149,19 @@ Grouping is by ecosystem (the underlying packaging system), not by installation
 paradigm. For example, source-based helpers like Pacstall and AUR helpers are grouped
 with their ecosystem (dpkg-based and pacman-based respectively), even though they build
 from source rather than fetching pre-built binaries.
+
+`vim-based` and `zsh-based` widen that reading, and deliberately so: plugin managers
+share no backend at all, each cloning straight from upstream Git into its own tree. What
+they share is the host program a report is about, which is what the label has to answer.
+An issue mentioning a Vim plugin is about the same corner of `mpm` whether it arrives
+through `vim-pack` or `lazy`, so both carry one label and one tracker search. The two
+groups stay separate along that same line: `zinit` and `antidote` host Zsh plugins, not
+Vim ones, and a report about either belongs nowhere near the editor label.
+
+`asdf-based` is the plain reading again: `mise` resolves asdf's plugins directly through
+its `asdf:` backend, so the two share one plugin ecosystem and one class of report.
+`volta` stays under `npm-based` despite also managing a runtime, because what it
+installs is npm packages.
 """
 
 all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
@@ -238,7 +254,7 @@ MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "apk": ("alpine", "alpine linux"),
     "apm": ("atom",),
     "apt-cyg": ("cygwin",),
-    "asdf": ("asdf-vm",),
+    "asdf-based": ("asdf-vm", "mise-en-place"),
     "cargo": ("crate", "rust"),
     "cave": ("exherbo", "paludis"),
     "choco": ("chocolatey",),

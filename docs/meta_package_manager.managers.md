@@ -9,6 +9,15 @@
 
 ## Submodules
 
+## meta_package_manager.managers.antidote module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.antidote
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.apk module
 
 ```{eval-rst}
@@ -139,6 +148,15 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.homebrew
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.lazy module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.lazy
    :members:
    :show-inheritance:
    :undoc-members:

@@ -26,6 +26,7 @@ from click_extra import get_current_context
 from . import definitions
 from .capabilities import implements
 from .dispatch import warm_availability
+from .managers.antidote import Antidote
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
@@ -41,6 +42,7 @@ from .managers.fwupd import FWUPD
 from .managers.gem import Gem
 from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
+from .managers.lazy import Lazy
 from .managers.mas import MAS
 from .managers.mise import Mise
 from .managers.nix import Nix
@@ -78,6 +80,7 @@ if TYPE_CHECKING:
 
 
 manager_classes = (
+    Antidote,
     APK,
     APM,
     APT,
@@ -96,6 +99,7 @@ manager_classes = (
     FWUPD,
     Gem,
     Guix,
+    Lazy,
     MAS,
     Mise,
     Nix,

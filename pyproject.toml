@@ -11,6 +11,7 @@ readme = "readme.md"
 keywords = [
   "alpine linux",
   "anaconda",
+  "antidote",
   "apk",
   "apm",
   "appimage",
@@ -53,6 +54,8 @@ keywords = [
   "gnu guix",
   "guix",
   "homebrew",
+  "lazy",
+  "lazy.nvim",
   "mac app store",
   "macos",
   "macports",
@@ -804,8 +807,8 @@ label = "📦 manager: apt-cyg"
 patterns = [ "/\\bcygwin\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
-label = "📦 manager: asdf"
-patterns = [ "/\\basdf\\-vm\\b/i" ]
+label = "📦 manager: asdf-based"
+patterns = [ "/\\basdf\\-vm\\b|\\bmise\\-en\\-place\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: cargo"
@@ -1005,9 +1008,9 @@ color = "bfdadc"
 description = "apt-cyg"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: asdf"
+name = "📦 manager: asdf-based"
 color = "bfdadc"
-description = "asdf"
+description = "asdf, mise"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: cargo"
@@ -1103,11 +1106,6 @@ description = "macports"
 name = "📦 manager: mas"
 color = "bfdadc"
 description = "mas"
-
-[[tool.repomatic.labels.extra]]
-name = "📦 manager: mise"
-color = "bfdadc"
-description = "mise"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: mpm"
@@ -1235,9 +1233,9 @@ color = "bfdadc"
 description = "uv, uvx"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: vim-pack"
+name = "📦 manager: vim-based"
 color = "bfdadc"
-description = "vim-pack"
+description = "lazy, vim-pack"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: vscode-based"
@@ -1255,9 +1253,9 @@ color = "bfdadc"
 description = "xbps"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: zinit"
+name = "📦 manager: zsh-based"
 color = "bfdadc"
-description = "zinit"
+description = "antidote, zinit"
 
 [[tool.repomatic.labels.extra]]
 name = "🔌 plugin"
@@ -1302,8 +1300,13 @@ label = "📦 manager: apt-cyg"
 any-glob-to-any-file = [ "meta_package_manager/managers/apt_cyg.*", "tests/*apt_cyg*" ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: asdf"
-any-glob-to-any-file = [ "meta_package_manager/managers/asdf.*", "tests/*asdf*" ]
+label = "📦 manager: asdf-based"
+any-glob-to-any-file = [
+  "meta_package_manager/managers/asdf.*",
+  "meta_package_manager/managers/mise.*",
+  "tests/*asdf*",
+  "tests/*mise*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: cargo"
@@ -1397,10 +1400,6 @@ any-glob-to-any-file = [ "meta_package_manager/managers/macports.*", "tests/*mac
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mas"
 any-glob-to-any-file = [ "meta_package_manager/managers/mas.*", "tests/*mas*" ]
-
-[[tool.repomatic.labels.file-rules]]
-label = "📦 manager: mise"
-any-glob-to-any-file = [ "meta_package_manager/managers/mise.*", "tests/*mise*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mpm"
@@ -1538,8 +1537,13 @@ label = "📦 manager: uv-based"
 any-glob-to-any-file = [ "meta_package_manager/managers/uv.*", "tests/*uv*", "tests/*uvx*" ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: vim-pack"
-any-glob-to-any-file = [ "meta_package_manager/managers/vim_pack.*", "tests/*vim_pack*" ]
+label = "📦 manager: vim-based"
+any-glob-to-any-file = [
+  "meta_package_manager/managers/lazy.*",
+  "meta_package_manager/managers/vim_pack.*",
+  "tests/*lazy*",
+  "tests/*vim_pack*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: vscode-based"
@@ -1559,8 +1563,13 @@ label = "📦 manager: xbps"
 any-glob-to-any-file = [ "meta_package_manager/managers/xbps.*", "tests/*xbps*" ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: zinit"
-any-glob-to-any-file = [ "meta_package_manager/managers/zinit.*", "tests/*zinit*" ]
+label = "📦 manager: zsh-based"
+any-glob-to-any-file = [
+  "meta_package_manager/managers/antidote.*",
+  "meta_package_manager/managers/zinit.*",
+  "tests/*antidote*",
+  "tests/*zinit*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "🔌 plugin"

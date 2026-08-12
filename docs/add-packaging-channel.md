@@ -32,7 +32,7 @@ Keep the load-bearing comments that explain a non-obvious choice (why the tag ta
 
 ## 4. Add an advisory CI job
 
-Add a `{channel}-source` job to [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) that builds and installs from the in-repo recipe, then runs `mpm --version`. Start it advisory: name it `⁉️ {channel}-source` with `continue-on-error: true`, and promote it to `✅` (dropping `continue-on-error`) only once it has gone green end-to-end, the way `macports-source` and `apk-source` did. Update the workflow's `paths:` filters and its header comment, and add the source-URL comment the *Workflow source URLs* rule requires. Containerized distributions need `runs-on: ubuntu-24.04`: the `ubuntu-slim` image has no Docker.
+Add a `{channel}-source` job to [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) that builds and installs from the in-repo recipe, then runs `mpm --version`. Start it advisory: name it `⁉️ {channel}-source` with `continue-on-error: true`, and promote it to ✅ (dropping `continue-on-error`) only once it has gone green end-to-end, the way `macports-source` and `apk-source` did. Update the workflow's `paths:` filters and its header comment, and add the source-URL comment the *Workflow source URLs* rule requires. Containerized distributions need `runs-on: ubuntu-24.04`: the `ubuntu-slim` image has no Docker.
 
 ## 5. Wire the docs
 

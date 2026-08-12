@@ -45,8 +45,8 @@
 # refusal reads differently from a blank cell, which means nobody has assessed
 # the tool yet. The link target is not repeated here: it lives once in
 # ``_docs.py``'s ``UNSUPPORTED_DOCS_URL``. Only settled decisions belong here.
-# A tool framed as a *not yet* (``lazy``, and the project-scoped ecosystems)
-# keeps a blank cell, since a glyph would overstate it. A manager cannot be
+# A tool framed as a *not yet* (the project-scoped ecosystems) keeps a blank
+# cell, since a glyph would overstate it. A manager cannot be
 # both wrapped and unsupported: the wrapped-but-abandoned ones render ``⚠️``
 # from their ``unmaintained`` flag instead, and stay out of this mapping.
 # ``test_unsupported_page_matches_benchmark`` holds every key in lockstep with
@@ -106,6 +106,7 @@ managers:
   dnf: [topgrade, upt, pacaptr, metapac]
   dnf5: []
   dotnet: [topgrade]
+  dpp: []
   emacs: [topgrade]
   emerge: [topgrade, upt, pacaptr]
   eopkg: [topgrade, upt]
@@ -272,7 +273,6 @@ homepages:
   0install: https://0install.net
   am: https://github.com/ivan-hc/AM
   antibody: https://getantibody.github.io
-  antidote: https://getantidote.github.io
   antigen: https://github.com/zsh-users/antigen
   app-man: https://github.com/ivan-hc/AppMan
   aqua: https://aquaproj.github.io
@@ -294,6 +294,7 @@ homepages:
   distrobox: https://distrobox.it
   dkp-pacman: https://devkitpro.org
   dotnet: https://learn.microsoft.com/dotnet/core/tools/
+  dpp: https://github.com/Shougo/dpp.vim
   emacs: https://www.gnu.org/software/emacs/
   etc-update: https://wiki.gentoo.org/wiki/Etc-update
   fish-plug: https://github.com/kidonng/fish-plug
@@ -315,7 +316,6 @@ homepages:
   juliaup: https://github.com/JuliaLang/juliaup
   kakoune: https://kakoune.org
   krew: https://krew.sigs.k8s.io
-  lazy: https://github.com/folke/lazy.nvim
   lure: https://lure.sh
   macos: https://www.apple.com/macos/
   mamba: https://mamba.readthedocs.io
@@ -500,6 +500,7 @@ unsupported:
   declaro: excluded
   decman: excluded
   dein: archived
+  dpp: excluded
   fundle: archived
   jetpack: archived
   metapac: excluded

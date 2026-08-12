@@ -77,6 +77,7 @@ KEYWORDS_EXTRAS = (
     "gnome-shell-extension",
     "gnu guix",
     "homebrew",
+    "lazy.nvim",
     "mac app store",
     "macos",
     "mageia",

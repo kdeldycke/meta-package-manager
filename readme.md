@@ -84,6 +84,7 @@ config: {"sankey": {"showValues": false, "width": 800, "height": 400}}
 ---
 sankey-beta
 
+Meta Package Manager,antidote,1
 Meta Package Manager,apk,1
 Meta Package Manager,apm,1
 Meta Package Manager,apt,1
@@ -110,6 +111,7 @@ Meta Package Manager,fwupd,1
 Meta Package Manager,gem,1
 Meta Package Manager,gh-ext,1
 Meta Package Manager,guix,1
+Meta Package Manager,lazy,1
 Meta Package Manager,macports,1
 Meta Package Manager,mas,1
 Meta Package Manager,mise,1
@@ -173,6 +175,7 @@ print(operation_matrix()[0])
 
 | Package manager                                                                                                                                                  | Version      | Cooldown |   Platforms   | `installed` | `outdated` | `orphans` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` | `doctor` |
 | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------- | :------: | :-----------: | :---------: | :--------: | :-------: | :------: | :-------: | :-------: | :-----------: | :------: | :----: | :-------: | :------: |
+| [`antidote`](https://kdeldycke.github.io/meta-package-manager/managers/antidote.html)                                                                            | >= 2.2       |          |     🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |           |       ✓       |    ✓     |        |           |          |
 | [`apk`](https://kdeldycke.github.io/meta-package-manager/managers/apk.html)                                                                                      | >= 2.10      |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`apm`](https://kdeldycke.github.io/meta-package-manager/managers/apm.html) [⚠️](https://kdeldycke.github.io/meta-package-manager/managers/apm.html)             | >= 1         |          |  🅱️ 🐧 🍎 🪟  |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`apt`](https://kdeldycke.github.io/meta-package-manager/managers/apt.html)                                                                                      | >= 1         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
@@ -199,6 +202,7 @@ print(operation_matrix()[0])
 | [`gem`](https://kdeldycke.github.io/meta-package-manager/managers/gem.html)                                                                                      | >= 2.5       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`gh-ext`](https://kdeldycke.github.io/meta-package-manager/managers/gh-ext.html)                                                                                | >= 2         |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`guix`](https://kdeldycke.github.io/meta-package-manager/managers/guix.html)                                                                                    |              |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
+| [`lazy`](https://kdeldycke.github.io/meta-package-manager/managers/lazy.html)                                                                                    | >= 11        |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
 | [`macports`](https://kdeldycke.github.io/meta-package-manager/managers/macports.html)                                                                            | >= 2         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`mas`](https://kdeldycke.github.io/meta-package-manager/managers/mas.html)                                                                                      | >= 7         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`mise`](https://kdeldycke.github.io/meta-package-manager/managers/mise.html)                                                                                    | >= 2025.5.10 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |

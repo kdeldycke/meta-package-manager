@@ -329,6 +329,9 @@ def subcmd():
 
 
 PACKAGE_IDS = {
+    # Purpose-built empty Zsh plugin, shared with zinit below: nothing to source,
+    # nothing to break, and it is the ecosystem's established inert package.
+    "antidote": "zdharma-continuum/null",
     "apk": "nyancat",
     "apm": "markdown-pdf",
     "apt": "nyancat",
@@ -356,6 +359,9 @@ PACKAGE_IDS = {
     # A tiny script-based extension (a bare git clone), from a GitHub CLI maintainer.
     "gh-ext": "mislav/gh-branch",
     "guix": "hello",
+    # Declares no install operation: the round-trip auto-skips. lazy.nvim manages
+    # itself, so it is a real entry of its own inventory.
+    "lazy": "lazy.nvim",
     "macports": "hello",
     "mas": "747648890",  # Telegram (test is always skipped).
     "mise": "jq",

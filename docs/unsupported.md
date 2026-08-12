@@ -2,6 +2,10 @@
 
 `mpm` wraps [a long list of package managers](managers.md), but not everything that installs software.
 
+Every tool that installs software belongs in one of exactly two places: the [supported list](managers.md), or the table below. There is no third state, and absence from both is a gap to be closed rather than a verdict of its own. The goal is total coverage: if it installs software and anyone has heard of it, `mpm` either wraps it or records here why it does not. A blank cell in the [benchmark](benchmark.md) is therefore a to-do, not an answer.
+
+That is a deliberate change of policy. Curating which tools were worth an opinion left readers unable to tell "we looked and declined" apart from "nobody looked", which are very different answers to the only question this page exists to settle.
+
 Two reasons put a tool in the table below:
 - ☠️ Its upstream is dead.
 - ❌ Or it lacks critical features required by `mpm`.

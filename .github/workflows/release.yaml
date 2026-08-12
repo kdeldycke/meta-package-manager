@@ -52,7 +52,7 @@ env:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@292c4e8438249adeb269808d485409c9b56b49bd # v7.9.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@c4538934003ce3d0e306d13c0605bdc3c75bfa05 # v7.10.0
     permissions:
       id-token: write
       issues: write
@@ -73,19 +73,19 @@ jobs:
       # why). A bare `fromJSON('')` aborts the whole run with "Unexpected value ''", so we fall back to an empty
       # `{"include":[]}` matrix, which expands the job to zero runs and skips it cleanly.
       matrix: ${{ fromJSON(needs.build.outputs.release_commits_matrix || '{"include":[]}') }}
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-26.04
     permissions:
       # OIDC only: the PyPI Trusted Publishing token. The GitHub release notes
       # (with their PyPI admonition) are owned end to end by the engine lane's
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@292c4e8438249adeb269808d485409c9b56b49bd # v7.9.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@c4538934003ce3d0e306d13c0605bdc3c75bfa05 # v7.10.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@292c4e8438249adeb269808d485409c9b56b49bd # v7.9.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@c4538934003ce3d0e306d13c0605bdc3c75bfa05 # v7.10.0
     needs:
       - build
       - build-gnome-extension
@@ -93,6 +93,7 @@ jobs:
       attestations: write
       contents: write
       id-token: write
+      pull-requests: write
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
@@ -205,7 +206,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.9.0' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.10.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
@@ -325,7 +326,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.9.0' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.10.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"

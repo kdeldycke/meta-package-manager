@@ -47,7 +47,7 @@ from .managers.mas import MAS
 from .managers.mise import Mise
 from .managers.nix import Nix
 from .managers.npm import NPM
-from .managers.pacman import Pacaur, Pacman, Paru, Yay
+from .managers.pacman import DkpPacman, Pacaur, Pacman, Paru, Pikaur, Trizen, Yay
 from .managers.pacstall import Pacstall
 from .managers.pip import Pip
 from .managers.pipx import Pipx
@@ -91,6 +91,7 @@ manager_classes = (
     Composer,
     Conda,
     Deb_Get,
+    DkpPacman,
     DNF,
     DNF5,
     Emerge,
@@ -108,6 +109,7 @@ manager_classes = (
     Pacman,
     Pacstall,
     Paru,
+    Pikaur,
     Pip,
     Pipx,
     Pkcon,
@@ -121,6 +123,7 @@ manager_classes = (
     Snap,
     Sun_Tools,
     Tazpkg,
+    Trizen,
     UV,
     UVX,
     Vim_Pack,

@@ -26,7 +26,7 @@ from functools import cached_property
 from importlib import resources
 from pathlib import Path
 
-from extra_platforms import UNIX_WITHOUT_MACOS
+from extra_platforms import LINUX_LIKE, MACOS, UNIX_WITHOUT_MACOS
 
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
@@ -34,9 +34,10 @@ from ..version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
 
     from click_extra.envvar import TEnvVars
+    from extra_platforms import Group, Platform
 
     from ..package import Package
 
@@ -89,9 +90,18 @@ class Pacman(PackageManager):
     name = "Arch Linux pacman"
 
     homepage_url = "https://wiki.archlinux.org/title/pacman"
-    logo = "archlinux"
 
-    platforms = UNIX_WITHOUT_MACOS
+    logo: str | None = "archlinux"
+    """Annotated so a subclass may drop the mark: `DkpPacman` is a pacman fork
+    that Arch's logo would misattribute.
+    """
+
+    platforms: frozenset[Platform] | Group | Platform | Iterable[Platform | Group] = (
+        UNIX_WITHOUT_MACOS
+    )
+    """Annotated with the base class's own union so a subclass may widen it:
+    `DkpPacman` ships for macOS too.
+    """
 
     default_sudo = True
 
@@ -331,6 +341,56 @@ class Pacman(PackageManager):
         return self.build_cli("--database", "--check")
 
 
+class DkpPacman(Pacman):
+    """devkitPro's `pacman` fork, covering the console homebrew toolchains.
+
+    devkitPro ships its own pacman build under the `dkp-pacman` name so it can
+    sit beside a distribution's own `pacman` without colliding, pointed at the
+    devkitPro repositories holding the devkitARM, devkitA64 and devkitPPC
+    toolchains and the libraries built against them.
+
+    Every operation, parser and forced argument is inherited from `Pacman`
+    unchanged: the fork tracks upstream closely enough that its version banner
+    still comes from the same `printf(" .--.    Pacman v%s - libalpm v%s")`
+    call, so the inherited {attr}`Pacman.version_regexes` reads it as-is.
+
+    Unlike the AUR helpers below this one is not a helper at all but pacman
+    itself, so it keeps the `default_sudo` inherited from `Pacman`.
+
+    Documentation: [devkitPro pacman](https://github.com/devkitPro/pacman).
+    """
+
+    id = "dkp-pacman"
+
+    name = "devkitPro pacman"
+
+    homepage_url = "https://github.com/devkitPro/pacman"
+
+    logo = None
+    """No mark of its own, and Arch's would misattribute a devkitPro tool: the
+    manager page keeps the default package glyph instead.
+    """
+
+    platforms = LINUX_LIKE, MACOS
+    """devkitPro publishes `dkp-pacman` for Linux and for macOS, the latter
+    through the `devkitpro-pacman-installer.pkg` of its releases. Its Windows
+    path installs the toolchains through MSYS2's own `pacman` instead, which is
+    a different binary this manager does not claim.
+    """
+
+    requirement = ">=6.0.0"
+    """The series aligned with upstream pacman 6, which every parser inherited
+    here was written against. devkitPro's own `v1.0.x` releases of 2020 predate
+    that alignment and are excluded deliberately.
+    """
+
+    cli_names = ("dkp-pacman",)
+    """The binary is deliberately prefixed upstream so it never shadows a
+    distribution's own `pacman`; the class name would otherwise resolve to
+    `dkppacman`.
+    """
+
+
 class Pacaur(Pacman):
     """AUR helper wrapping `pacman`, driven through the `pacaur` binary.
 
@@ -420,6 +480,132 @@ class Paru(Pacman):
 
     $ paru --version
     paru v1.10.0 - libalpm v13.0.1
+    ```
+    """
+
+
+class Pikaur(Pacman):
+    """AUR helper wrapping `pacman`, driven through the `pikaur` binary.
+
+    Inherits every operation, parser and forced argument from `Pacman`; the
+    binary, the version probe and the release floor are what differ. Its own
+    `--query --upgrades` reports AUR updates on top of the official
+    repositories.
+
+    Like the other helpers, pikaur must run as the regular user: `makepkg`
+    refuses to build as root, and pikaur drives `sudo pacman` itself for the
+    privileged steps. `mpm` therefore never wraps it in `sudo`.
+
+    ```{note}
+    pikaur wraps pacman's options faithfully except `--sync --refresh
+    --sysupgrade` (`-Syu`), which it splits into a refresh pass and an upgrade
+    pass so a user can amend the package selection in between. The inherited
+    {meth}`Pacman.upgrade_all_cli` still builds the combined form, and the
+    `--noconfirm` forced by {attr}`Pacman.pre_args` is what keeps that split
+    unattended.
+    ```
+
+    Documentation: [pikaur](https://github.com/actionless/pikaur).
+    """
+
+    name = "Arch Linux pikaur"
+
+    homepage_url = "https://github.com/actionless/pikaur"
+    logo = "archlinux"
+
+    default_sudo = False
+    """pikaur builds AUR packages through `makepkg`, which hard-refuses to run
+    as root, and calls `sudo pacman` itself, so the escalation default inherited
+    from `Pacman` must not wrap it.
+    """
+
+    internal_sudo = True
+    """pikaur calls `sudo pacman` from inside its own commands for the install,
+    upgrade and removal steps.
+    """
+
+    requirement = ">=1.0.0"
+    """pikaur versions independently of pacman, so the inherited `>=5.0.0`
+    would reject every release it has ever made.
+
+    The floor sits at the start of the `1.x` series because nothing this class
+    relies on is newer than it: the wrapped pacman option set and the `Pikaur v`
+    version banner both predate it, and the parsers are pacman's own.
+    """
+
+    version_regexes = (r".*Pikaur\s+v(?P<version>\S+)",)
+    r"""Search version right after the `Pikaur ` string.
+
+    Anchoring on `Pikaur` rather than the inherited `Pacman` pattern is
+    load-bearing: pikaur reports *both* versions, embedding the second line of
+    `pacman --version` in its own output, so the inherited regex would silently
+    report the version of pacman instead.
+
+    ```{code-block} console
+
+    $ pikaur --version
+    Pikaur v1.33.3
+    Pacman v6.0.2 - libalpm v13.0.2 - pyalpm v0.10.6
+    ```
+
+    The real banner side-joins those lines with an ASCII-art mascot, which is
+    why the block above is an illustration rather than a harvested fixture: the
+    `.*` prefix is what absorbs the art. Both forms are emitted by the same
+    `print_version()` of `pikaur/print_department.py`, the quiet one verbatim.
+    """
+
+
+class Trizen(Pacman):
+    """AUR helper wrapping `pacman`, driven through the `trizen` binary.
+
+    Inherits every operation, parser and forced argument from `Pacman`; the
+    binary, the version probe and the release floor are what differ. Its own
+    `--query --upgrades` reports AUR updates on top of the official
+    repositories.
+
+    Like the other helpers, trizen must run as the regular user: `makepkg`
+    refuses to build as root, and trizen calls `sudo pacman` itself for the
+    privileged steps. `mpm` therefore never wraps it in `sudo`.
+
+    ```{note}
+    Upstream is slow rather than stopped: commits continue, but `1.68` of
+    December 2022 is still the newest release. It stays unflagged here because
+    the stability policy keys `unmaintained` on an abandoned upstream, not on a
+    quiet release cadence.
+    ```
+
+    Documentation: [trizen](https://github.com/trizen/trizen).
+    """
+
+    name = "Arch Linux trizen"
+
+    homepage_url = "https://github.com/trizen/trizen"
+    logo = "archlinux"
+
+    default_sudo = False
+    """trizen builds AUR packages through `makepkg`, which hard-refuses to run
+    as root, and calls `sudo pacman` itself, so the escalation default inherited
+    from `Pacman` must not wrap it.
+    """
+
+    internal_sudo = True
+    """trizen calls `sudo pacman` from inside its own commands for the install,
+    upgrade and removal steps.
+    """
+
+    requirement = ">=1.0.0"
+    """trizen versions independently of pacman, so the inherited `>=5.0.0`
+    would reject every release it has ever made. Nothing this class relies on is
+    newer than the `1.x` series: the parsers are pacman's own.
+    """
+
+    version_regexes = (r"trizen\s+(?P<version>\S+)",)
+    r"""Search version right after the `trizen` string.
+
+    ```{code-block} shell-session
+
+    $ trizen --version
+    trizen 1.68
     ```
     """
 

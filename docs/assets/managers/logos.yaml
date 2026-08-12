@@ -35,6 +35,8 @@ icons:
     - pacaur
     - pacman
     - paru
+    - pikaur
+    - trizen
     - yay
     source: https://www.archlinux.org/art
     title: Arch Linux

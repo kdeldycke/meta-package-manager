@@ -353,7 +353,6 @@ homepages:
   dein: https://github.com/Shougo/dein.vim
   deno: https://deno.com
   distrobox: https://distrobox.it
-  dkp-pacman: https://devkitpro.org
   dotnet: https://learn.microsoft.com/dotnet/core/tools/
   dpp: https://github.com/Shougo/dpp.vim
   elan: https://github.com/leanprover/elan
@@ -431,7 +430,6 @@ homepages:
   pearl: https://github.com/pearl-core/pearl
   pi: https://pi.dev
   pihole: https://pi-hole.net
-  pikaur: https://github.com/actionless/pikaur
   pip-review: https://github.com/jgonggrijp/pip-review
   pipupgrade: https://github.com/achillesrasquinha/pipupgrade
   pipxu: https://github.com/bulletmark/pipxu
@@ -470,7 +468,6 @@ homepages:
   tmux: https://github.com/tmux-plugins/tpm
   toolbx: https://containertoolbx.org
   tpack: https://github.com/tmuxpack/tpack
-  trizen: https://github.com/trizen/trizen
   typst: https://typst.app
   upt: https://github.com/sigoden/upt
   vagrant: https://www.vagrantup.com

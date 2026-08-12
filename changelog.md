@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [antidote] Add the Antidote Zsh plugin manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support. Zsh is the CLI mpm executes, since Antidote ships as a sourced shell function rather than an executable.
+- [dkp-pacman] Add devkitPro's `pacman` fork, covering the console homebrew toolchains, with the full operation set inherited from `pacman`.
 - [bar-plugin] Fix the plugin rendering a version error instead of its menu on every released SwiftBar. The minimum requirement was pinned on an unreleased `2.1.2` test build, while the fix it targets shipped in `2.1.0`.
 - [bar-plugin] Quote the default values of the plugin variables, so SwiftBar `2.1.0` and above parses them and exposes them in its settings UI. Xbar still trims the quotes.
 - [bar-plugin] Declare the font variables as `swiftbar.var` and drop the `swiftbar.environment` block they were hidden in, so all four variables are editable from SwiftBar's UI.
@@ -16,6 +17,8 @@
 - [mpm] Link every manager named in the documentation pages to its own page, at most once per paragraph.
 - [mpm] Back 75 competitor cells of the benchmark's feature matrix with a link to the documentation, configuration example, CLI declaration or issue that proves the verdict. Six cells found nothing citable and keep a bare glyph.
 - [mpm] Record `dpp.vim` as an unsupported manager: it is drivable only from inside the editor, and reports neither a binary nor a version.
+- [pikaur] Add the pikaur AUR helper with the full operation set inherited from `pacman`.
+- [trizen] Add the trizen AUR helper with the full operation set inherited from `pacman`.
 - [mpm] Add 47 managers to the benchmark's support table, covering every tool `topgrade` drives that had no row yet: the Android Studio, Antigravity, Cursor, Windsurf and fifteen JetBrains plugin managers, plus `bob`, `colima`, `elan`, `gearlever`, `helix-db`, `hyprpm`, `install-release`, `skills`, `tpack`, `vite-plus` and eighteen others.
 - [mpm] Flag `topgrade`'s support for `soar` and `zerobrew` in the benchmark, which was left blank.
 - [mpm] Drop the `topgrade` refusals recorded against `opencode` and `zerobrew`: both requests were closed as not-planned, then implemented anyway.

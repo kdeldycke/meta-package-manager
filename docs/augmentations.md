@@ -27,6 +27,7 @@ print(augmentations_table())
 | [`composer`](managers/composer.md)         |                      |              |      ✅      |                 |
 | [`conda`](managers/conda.md)               |                      |              |      ✅      |       ✅        |
 | [`deb-get`](managers/deb-get.md)           |                      |              |      ✅      |       ✅        |
+| [`dkp-pacman`](managers/dkp-pacman.md)     |                      |      ✅      |              |       ✅        |
 | [`dnf`](managers/dnf.md)                   |                      |              |      ✅      |       ✅        |
 | [`dnf5`](managers/dnf5.md)                 |                      |              |      ✅      |       ✅        |
 | [`eopkg`](managers/eopkg.md)               |                      |              |      ✅      |                 |
@@ -44,6 +45,7 @@ print(augmentations_table())
 | [`pacman`](managers/pacman.md)             |                      |      ✅      |              |       ✅        |
 | [`pacstall`](managers/pacstall.md)         |                      |              |      ✅      |       ✅        |
 | [`paru`](managers/paru.md)                 |                      |      ✅      |              |       ✅        |
+| [`pikaur`](managers/pikaur.md)             |                      |      ✅      |              |       ✅        |
 | [`pip`](managers/pip.md)                   |          ✅          |              |              |                 |
 | [`pkcon`](managers/pkcon.md)               |                      |              |      ✅      |       ✅        |
 | [`pkg-tools`](managers/pkg-tools.md)       |                      |              |      ✅      |       ✅        |
@@ -59,6 +61,7 @@ print(augmentations_table())
 | [`swupd`](managers/swupd.md)               |                      |              |      ✅      |       ✅        |
 | [`tazpkg`](managers/tazpkg.md)             |                      |              |      ✅      |       ✅        |
 | [`tlmgr`](managers/tlmgr.md)               |                      |              |      ✅      |       ✅        |
+| [`trizen`](managers/trizen.md)             |                      |      ✅      |              |       ✅        |
 | [`urpmi`](managers/urpmi.md)               |                      |              |      ✅      |       ✅        |
 | [`uv`](managers/uv.md)                     |          ✅          |              |              |                 |
 | [`xbps`](managers/xbps.md)                 |                      |              |      ✅      |       ✅        |

@@ -37,6 +37,7 @@ keywords = [
   "cyclonedx",
   "cygwin",
   "deb-get",
+  "dkp-pacman",
   "dnf",
   "dnf5",
   "emerge",
@@ -82,6 +83,7 @@ keywords = [
   "paludis",
   "paru",
   "php composer",
+  "pikaur",
   "pip",
   "pipx",
   "pkcon",
@@ -126,6 +128,7 @@ keywords = [
   "tex live",
   "tlmgr",
   "topgrade",
+  "trizen",
   "urpmi",
   "uv",
   "uvx",
@@ -1120,7 +1123,7 @@ description = "npm, pnpm, volta, yarn, yarn-berry"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pacman-based"
 color = "bfdadc"
-description = "pacaur, pacman, paru, yay"
+description = "dkp-pacman, pacaur, pacman, paru, pikaur, trizen, yay"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pkcon"
@@ -1416,9 +1419,12 @@ any-glob-to-any-file = [
 label = "📦 manager: pacman-based"
 any-glob-to-any-file = [
   "meta_package_manager/managers/pacman.*",
+  "tests/*dkp_pacman*",
   "tests/*pacaur*",
   "tests/*pacman*",
   "tests/*paru*",
+  "tests/*pikaur*",
+  "tests/*trizen*",
   "tests/*yay*",
 ]
 

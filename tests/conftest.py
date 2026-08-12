@@ -348,6 +348,10 @@ PACKAGE_IDS = {
     "conda": "pytz",  # Pure-Python, zero-dependency leaf on the default channel.
     "cpan": "Try::Tiny",
     "deb-get": "deb-get",
+    # devkitPro's repositories carry console toolchains and their libraries, not
+    # the usual distro fare: no nyancat. The GBA example sources are the lightest
+    # leaf package, and nothing depends on them.
+    "dkp-pacman": "gba-examples",
     "dnf": "nyancat",
     "dnf5": "nyancat",
     "emerge": "games-misc/nyancat",
@@ -372,6 +376,7 @@ PACKAGE_IDS = {
     "pacman": "nyancat",
     "pacstall": "hello",
     "paru": "nyancat",
+    "pikaur": "nyancat",
     "pip": "pytz",
     "pipx": "pycowsay",
     "pkcon": "hello",
@@ -397,6 +402,7 @@ PACKAGE_IDS = {
     "tazpkg": "nano",  # Used by tazpkg's own test suite.
     "tlmgr": "lipsum",  # Pure dummy-text package: a leaf with no style dependencies.
     "topgrade": "topgrade",  # Declares no install operation: the round-trip auto-skips.
+    "trizen": "nyancat",
     "urpmi": "figlet",
     "uv": "pytz",
     "uvx": "pycowsay",

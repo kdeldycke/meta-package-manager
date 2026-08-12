@@ -101,6 +101,7 @@ Meta Package Manager,composer,1
 Meta Package Manager,conda,1
 Meta Package Manager,cpan,1
 Meta Package Manager,deb-get,1
+Meta Package Manager,dkp-pacman,1
 Meta Package Manager,dnf,1
 Meta Package Manager,dnf5,1
 Meta Package Manager,emerge,1
@@ -122,6 +123,7 @@ Meta Package Manager,pacaur,1
 Meta Package Manager,pacman,1
 Meta Package Manager,pacstall,1
 Meta Package Manager,paru,1
+Meta Package Manager,pikaur,1
 Meta Package Manager,pip,1
 Meta Package Manager,pipx,1
 Meta Package Manager,pkcon,1
@@ -145,6 +147,7 @@ Meta Package Manager,swupd,1
 Meta Package Manager,tazpkg,1
 Meta Package Manager,tlmgr,1
 Meta Package Manager,topgrade,1
+Meta Package Manager,trizen,1
 Meta Package Manager,urpmi,1
 Meta Package Manager,uv,1
 Meta Package Manager,uvx,1
@@ -192,6 +195,7 @@ print(operation_matrix()[0])
 | [`conda`](https://kdeldycke.github.io/meta-package-manager/managers/conda.html)                                                                                  | >= 4.6       |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`cpan`](https://kdeldycke.github.io/meta-package-manager/managers/cpan.html)                                                                                    | >= 1.64      |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |          |        |           |          |
 | [`deb-get`](https://kdeldycke.github.io/meta-package-manager/managers/deb-get.html)                                                                              |              |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
+| [`dkp-pacman`](https://kdeldycke.github.io/meta-package-manager/managers/dkp-pacman.html)                                                                        | >= 6         |          |     🐧 🍎     |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`dnf`](https://kdeldycke.github.io/meta-package-manager/managers/dnf.html)                                                                                      | >= 4         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`dnf5`](https://kdeldycke.github.io/meta-package-manager/managers/dnf5.html)                                                                                    | >= 5         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`emerge`](https://kdeldycke.github.io/meta-package-manager/managers/emerge.html)                                                                                | >= 3         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
@@ -213,6 +217,7 @@ print(operation_matrix()[0])
 | [`pacman`](https://kdeldycke.github.io/meta-package-manager/managers/pacman.html)                                                                                | >= 5         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`pacstall`](https://kdeldycke.github.io/meta-package-manager/managers/pacstall.html)                                                                            | >= 6         |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`paru`](https://kdeldycke.github.io/meta-package-manager/managers/paru.html)                                                                                    | >= 1.9.3     |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
+| [`pikaur`](https://kdeldycke.github.io/meta-package-manager/managers/pikaur.html)                                                                                | >= 1         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`pip`](https://kdeldycke.github.io/meta-package-manager/managers/pip.html)                                                                                      | >= 26.1      |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
 | [`pipx`](https://kdeldycke.github.io/meta-package-manager/managers/pipx.html)                                                                                    | >= 1         |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`pkcon`](https://kdeldycke.github.io/meta-package-manager/managers/pkcon.html)                                                                                  | >= 0.7       |          |               |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
@@ -236,6 +241,7 @@ print(operation_matrix()[0])
 | [`tazpkg`](https://kdeldycke.github.io/meta-package-manager/managers/tazpkg.html)                                                                                |              |          |               |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`tlmgr`](https://kdeldycke.github.io/meta-package-manager/managers/tlmgr.html)                                                                                  | >= 2018      |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`topgrade`](https://kdeldycke.github.io/meta-package-manager/managers/topgrade.html)                                                                            | >= 17        |          |  🅱️ 🐧 🍎 🪟  |             |            |           |          |           |           |       ✓       |          |        |           |          |
+| [`trizen`](https://kdeldycke.github.io/meta-package-manager/managers/trizen.html)                                                                                | >= 1         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`urpmi`](https://kdeldycke.github.io/meta-package-manager/managers/urpmi.html)                                                                                  |              |          |               |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`uv`](https://kdeldycke.github.io/meta-package-manager/managers/uv.html)                                                                                        | >= 0.5       |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`uvx`](https://kdeldycke.github.io/meta-package-manager/managers/uvx.html)                                                                                      | >= 0.10.10   |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |

@@ -150,6 +150,7 @@ keywords = [
   "yum",
   "zb",
   "zerobrew",
+  "zim",
   "zinit",
   "zplug",
   "zsh",
@@ -1257,7 +1258,7 @@ description = "xbps"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: zsh-based"
 color = "bfdadc"
-description = "antidote, zinit, zplug"
+description = "antidote, zim, zinit, zplug"
 
 [[tool.repomatic.labels.extra]]
 name = "🔌 plugin"
@@ -1577,9 +1578,11 @@ any-glob-to-any-file = [ "meta_package_manager/managers/xbps.*", "tests/*xbps*" 
 label = "📦 manager: zsh-based"
 any-glob-to-any-file = [
   "meta_package_manager/managers/antidote.*",
+  "meta_package_manager/managers/zim.*",
   "meta_package_manager/managers/zinit.*",
   "meta_package_manager/managers/zplug.*",
   "tests/*antidote*",
+  "tests/*zim*",
   "tests/*zinit*",
   "tests/*zplug*",
 ]

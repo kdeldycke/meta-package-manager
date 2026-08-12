@@ -164,6 +164,7 @@ Meta Package Manager,yarn-berry,1
 Meta Package Manager,yay,1
 Meta Package Manager,yum,1
 Meta Package Manager,zerobrew,1
+Meta Package Manager,zim,1
 Meta Package Manager,zinit,1
 Meta Package Manager,zplug,1
 Meta Package Manager,zypper,1
@@ -261,6 +262,7 @@ print(operation_matrix()[0])
 | [`yay`](https://kdeldycke.github.io/meta-package-manager/managers/yay.html)                                                                                      | >= 11        |    ✓     |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`yum`](https://kdeldycke.github.io/meta-package-manager/managers/yum.html)                                                                                      | >= 4         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`zerobrew`](https://kdeldycke.github.io/meta-package-manager/managers/zerobrew.html)                                                                            | >= 0.3       |          |     🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`zim`](https://kdeldycke.github.io/meta-package-manager/managers/zim.html)                                                                                      | >= 1         |          |     🐧 🍎     |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
 | [`zinit`](https://kdeldycke.github.io/meta-package-manager/managers/zinit.html)                                                                                  | >= 3.10      |          |     🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`zplug`](https://kdeldycke.github.io/meta-package-manager/managers/zplug.html)                                                                                  | >= 2         |          |     🐧 🍎     |      ✓      |            |           |          |           |     ✓     |       ✓       |          |        |           |          |
 | [`zypper`](https://kdeldycke.github.io/meta-package-manager/managers/zypper.html)                                                                                | >= 1.14      |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |

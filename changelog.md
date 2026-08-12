@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [antidote] Add the Antidote Zsh plugin manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support. Zsh is the CLI mpm executes, since Antidote ships as a sourced shell function rather than an executable.
+- [zim] Add the Zim Zsh module manager with `installed` and `upgrade` support. It declares no `install` or `remove`: Zim materializes only the module set the user's own `.zimrc` names.
 - [oh-my-fish] Add the Oh My Fish framework with `installed`, `install`, `upgrade` and `remove` support. Fish is the CLI mpm executes, since Oh My Fish ships as a sourced shell function rather than an executable.
 - [zplug] Add the zplug Zsh plugin manager with `installed` and `upgrade` support. It declares no `install` or `remove`: zplug materializes only the plugin set the user's own `.zshrc` names.
 - [fisher] Add the Fisher Fish plugin manager with `installed`, `install`, `upgrade` and `remove` support. Fish is the CLI mpm executes, since Fisher ships as an autoloaded shell function rather than an executable.

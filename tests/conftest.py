@@ -429,6 +429,8 @@ PACKAGE_IDS = {
     "zerobrew": "nyancat",
     # Zinit's own do-nothing plugin: an empty repository it documents for
     # ice-only usage, so loading and deleting it runs no third-party code.
+    # Declares no install operation: the round-trip auto-skips.
+    "zim": "zsh-users/zsh-completions",
     "zinit": "zdharma-continuum/null",
     # Declares no install operation: the round-trip auto-skips.
     "zplug": "zdharma-continuum/null",

@@ -69,6 +69,7 @@ from .managers.volta import Volta
 from .managers.winget import WinGet
 from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
+from .managers.zim import Zim
 from .managers.zinit import Zinit
 from .managers.zplug import Zplug
 from .managers.zypper import Zypper
@@ -139,6 +140,7 @@ manager_classes = (
     YarnClassic,
     Yay,
     YUM,
+    Zim,
     Zinit,
     Zplug,
     Zypper,

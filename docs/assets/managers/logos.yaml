@@ -359,6 +359,7 @@ icons:
     license: CC0-1.0
     managers:
     - antidote
+    - zim
     - zinit
     - zplug
     source: https://github.com/Zsh-art/logo/blob/17617f2f6c70c65943a48745c91d997e7561f19d/svg/white_logomark.svg

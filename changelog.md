@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Open every installation method with a command that works today. The Alpine Linux, Chocolatey, Nix and Void Linux tabs carry the condensed build recipe from their packaging section instead of a one-liner the reader cannot run yet, and the pending channels close on an admonition inviting support on their upstream pull request.
 - [antidote] Add the Antidote Zsh plugin manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support. Zsh is the CLI mpm executes, since Antidote ships as a sourced shell function rather than an executable.
 - [mpm] Record `zgenom` as an unsupported manager: it reports no version through any binary, and its `list` prints the generated `init.zsh` rather than an inventory.
 - [mpm] Record `zr` as an unsupported manager: plugins are the arguments handed to it, so it owns no inventory to report.

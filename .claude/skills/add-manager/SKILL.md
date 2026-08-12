@@ -41,6 +41,8 @@ dein.vim is the worked example of both hatches failing, and the shape to compare
 
 When a tool is rejected, record the decision rather than leaving it implicit: add a row to `docs/unsupported.md` and its id to the `unsupported` list of `docs/benchmark.yaml`. The benchmark then renders a `❌` linking to the reason instead of a blank cell, which is reserved for tools nobody has assessed yet. Nothing has ever been *removed* from the pool, and no manager request has been closed as not-planned, so a gap in the benchmark is nearly always unwritten rather than refused.
 
+Ground the reason upstream whenever the blocking behavior has been raised there. Search the tool's tracker for the missing capability and link what you find: a feature request closed not-planned, a maintainer stating the position, or an open request left unaddressed for years. Quote the deciding sentence and anchor the link on the exact `#issuecomment-<id>` when a comment is what settles it, exactly as the benchmark's `❌` cells do. `zgenom` is the worked example: its decline rests on reporting no version, and the request to tag releases was closed on the maintainer's own "*I consider everything merged into main as a stable release*". That turns a verdict a reader has to trust into one they can audit, and it dates the decision, so a tool whose upstream later changes course can be reassessed against the same link. When no such discussion exists, say so rather than implying one: an absence that is deliberate design (`zr` treats plugins as arguments and so owns no inventory) is itself the reason.
+
 ## Choose an implementation strategy: class-based or config-based
 
 Before writing anything, decide how the manager will be implemented. `mpm` supports two paths:

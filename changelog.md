@@ -7,6 +7,7 @@
 
 - [antidote] Add the Antidote Zsh plugin manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support. Zsh is the CLI mpm executes, since Antidote ships as a sourced shell function rather than an executable.
 - [mpm] Record `zgenom` as an unsupported manager: it reports no version through any binary, and its `list` prints the generated `init.zsh` rather than an inventory.
+- [mpm] Record `zr` as an unsupported manager: plugins are the arguments handed to it, so it owns no inventory to report.
 - [antigen] Add the Antigen Zsh plugin manager with `installed`, `upgrade` and `remove` support. It declares no `install`: `antigen bundle` loads a bundle for the current shell only, writing nothing back.
 - [sheldon] Add the Sheldon shell plugin manager with `upgrade` and `remove` support. It declares no `installed` (Sheldon prints no listing) and no `install` (`sheldon add` needs both a local name and a source flag).
 - [zim] Add the Zim Zsh module manager with `installed` and `upgrade` support. It declares no `install` or `remove`: Zim materializes only the module set the user's own `.zimrc` names.

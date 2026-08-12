@@ -300,7 +300,8 @@ Common validation failures after adding a manager:
 - **`test_manager_count`**: forgot to increment the count in `test_pool.py`.
 - **`test_content_order`**: class attributes are not in the canonical order (like `version_regexes` before `post_args`).
 - **`test_manager_logos_resolve`** (in `tests/test_docs.py`, so the `Validate` command above does not catch it): a declared `logo` slug with no vendored SVG, or a vendored mark no manager claims. Run `docs/logos_update.py`.
-- **Label group collision**: the group name in `labels.py` collides with a manager ID. Use the `-based` suffix (like `scoop-based`, `pip-based`).
+- **Label group collision**: the group name in `labels.py` collides with a manager ID. Use the `-based` suffix (like `scoop-based`, `pypi-based`).
+- **A content rule silently disappearing**: `MANAGER_CONTENT_KEYWORDS` is keyed by the ID a label *derives* from, so folding a manager into a group (or renaming one) orphans its entry, which then generates nothing. No test catches it. Re-key it to the group and diff `pyproject.toml` for a dropped `patterns =` line.
 - **Whole-suite collection abort**: `tests/conftest.py` asserts `PACKAGE_IDS` covers exactly the class managers at import time; a missing class entry (or a stray bundled one) kills every test, not one.
 - **`test_docstring_corpus`**: the `$ ...` shell-session samples in operation docstrings are checked against the real CLI construction. Write them in build order: binary, `pre_args`, the declared arguments with the package ID exactly where the code puts it, `post_args` last (`pkcon install --noninteractive hello --plain`, not `pkcon install hello --noninteractive --plain`).
 - **`test_new_package_manager_issue_template`**: the issue template's platform checklist is generated from `MAIN_PLATFORMS`; it goes stale when an extra-platforms release adds detections.

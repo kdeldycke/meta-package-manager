@@ -48,6 +48,7 @@ from meta_package_manager._docs import (
     operation_matrix,
 )
 from meta_package_manager.labels import (
+    LABEL_RENAMES,
     LABELS,
     generate_content_rules,
     generate_file_rules,
@@ -214,6 +215,10 @@ def update_labels(*, check: bool = False) -> bool:
         # labelmaker/repomatic expect the bare hex color, without leading '#'.
         entry["color"] = color.lstrip("#")
         entry["description"] = description
+        # Carry a renamed label's predecessor, so `sync-labels` migrates it in place
+        # instead of stranding the issues filed against the old name.
+        if renamed_from := LABEL_RENAMES.get(name):
+            entry["rename-from"] = _string_array(renamed_from)
         extra.append(entry)
 
     arrays = {

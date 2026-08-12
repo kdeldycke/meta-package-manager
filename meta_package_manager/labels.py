@@ -131,14 +131,13 @@ MANAGER_PREFIX = "📦 manager: "
 MANAGER_LABEL_GROUPS: TLabelGroup = {
     "asdf-based": frozenset({"asdf", "mise"}),
     "rpm-based": frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
-    "dpkg-based": frozenset({"apt", "apt-mint", "deb-get", "opkg", "pacstall"}),
+    "dpkg-based": frozenset({"apt", "apt-mint", "deb-get", "fink", "opkg", "pacstall"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
     "npm-based": frozenset({"npm", "pnpm", "volta", "yarn", "yarn-berry"}),
     "pacman-based": frozenset({"pacman", "pacaur", "paru", "yay"}),
-    "pip-based": frozenset({"pip", "pipx"}),
     "pkg-based": frozenset({"pkg", "ports"}),
+    "pypi-based": frozenset({"pip", "pipx", "uv", "uvx"}),
     "scoop-based": frozenset({"scoop", "sfsu"}),
-    "uv-based": frozenset({"uv", "uvx"}),
     "vim-based": frozenset({"lazy", "vim-pack"}),
     "vscode-based": frozenset({"vscode", "vscodium"}),
     "zsh-based": frozenset({"antidote", "zinit"}),
@@ -148,7 +147,14 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
 Grouping is by ecosystem (the underlying packaging system), not by installation
 paradigm. For example, source-based helpers like Pacstall and AUR helpers are grouped
 with their ecosystem (dpkg-based and pacman-based respectively), even though they build
-from source rather than fetching pre-built binaries.
+from source rather than fetching pre-built binaries. `fink` follows the same rule over
+its platform: it manages `.deb` packages through dpkg, so it groups with the other dpkg
+front-ends despite being the only macOS one among them.
+
+`pypi-based` is named for the registry rather than for a tool, because no single tool is
+common to it: `uv` reimplements resolution and installation from scratch and touches no
+`pip` code. What the four share is the index they all resolve against, which is the
+level a report lands at.
 
 `vim-based` and `zsh-based` widen that reading, and deliberately so: plugin managers
 share no backend at all, each cloning straight from upstream Git into its own tree. What
@@ -203,6 +209,32 @@ LABELS = sorted(
     (*LABELS, *_manager_label_rows, *_platform_label_rows),
     key=lambda i: str.casefold(i[0]),
 )
+
+
+LABEL_RENAMES: dict[str, tuple[str, ...]] = {
+    f"{MANAGER_PREFIX}pypi-based": (f"{MANAGER_PREFIX}pip-based",),
+}
+"""Labels a renamed one supersedes, emitted as labelmaker's `rename-from`.
+
+Folding managers into a group orphans the labels they used to carry, and the
+issues already filed against those. `rename-from` migrates one in place, which
+is the only lossless move available: GitHub keeps every issue and pull request
+attached across a rename, whereas creating the new label and deleting the old
+one drops the association.
+
+The mechanism is strictly one-to-one, so this map cannot express a merge:
+labelmaker errors outright when two `rename-from` labels both exist, and falls
+to `on-rename-clash` (`error`, repomatic's default) when the target already
+exists. An N-to-1 fold therefore names the *single* source carrying the most
+history, leaving the remainder to a hand migration, and a fold whose target
+label already exists names none at all.
+
+That is why only `pypi-based` appears here. `dpkg-based`, `vim-based`,
+`zsh-based` and `asdf-based` were all synced into existence before their
+predecessors were retired, so a declared rename would only error; their
+orphans (`fink`, `vim-pack`, `zinit`, `asdf`, `mise`) carry no issue or pull
+request at all and are deleted rather than migrated.
+"""
 
 
 # Labeller rules.
@@ -275,7 +307,7 @@ MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "nix": ("nixos", "nixpkgs"),
     "npm-based": ("node.js", "nodejs"),
     "pacman-based": ("arch",),
-    "pip-based": ("pypi",),
+    "pypi-based": ("pypi",),
     "pkcon": ("packagekit",),
     "pkg-based": ("freebsd", "freebsd ports"),
     "pkg-tools": ("openbsd",),

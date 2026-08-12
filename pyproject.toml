@@ -891,10 +891,6 @@ label = "📦 manager: pacman-based"
 patterns = [ "/\\barch\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
-label = "📦 manager: pip-based"
-patterns = [ "/\\bpypi\\b/i" ]
-
-[[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pkcon"
 patterns = [ "/\\bpackagekit\\b/i" ]
 
@@ -915,6 +911,10 @@ label = "📦 manager: pwsh-gallery"
 patterns = [
   "/\\bpowershell\\b|\\bpowershell\\ gallery\\b|\\bpsgallery\\b|\\bpsresourceget\\b/i",
 ]
+
+[[tool.repomatic.labels.content-rules]]
+label = "📦 manager: pypi-based"
+patterns = [ "/\\bpypi\\b/i" ]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: rpm-based"
@@ -1050,7 +1050,7 @@ description = "cpan"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: dpkg-based"
 color = "bfdadc"
-description = "apt, apt-mint, deb-get, opkg, pacstall"
+description = "apt, apt-mint, deb-get, fink, opkg, pacstall"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: emerge"
@@ -1061,11 +1061,6 @@ description = "emerge"
 name = "📦 manager: eopkg"
 color = "bfdadc"
 description = "eopkg"
-
-[[tool.repomatic.labels.extra]]
-name = "📦 manager: fink"
-color = "bfdadc"
-description = "fink"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: flatpak"
@@ -1128,11 +1123,6 @@ color = "bfdadc"
 description = "pacaur, pacman, paru, yay"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: pip-based"
-color = "bfdadc"
-description = "pip, pipx"
-
-[[tool.repomatic.labels.extra]]
 name = "📦 manager: pkcon"
 color = "bfdadc"
 description = "pkcon"
@@ -1156,6 +1146,12 @@ description = "pkgin"
 name = "📦 manager: pwsh-gallery"
 color = "bfdadc"
 description = "pwsh-gallery"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: pypi-based"
+color = "bfdadc"
+description = "pip, pipx, uv, uvx"
+rename-from = [ "📦 manager: pip-based" ]
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: rpm-based"
@@ -1226,11 +1222,6 @@ description = "tlmgr"
 name = "📦 manager: topgrade"
 color = "bfdadc"
 description = "topgrade"
-
-[[tool.repomatic.labels.extra]]
-name = "📦 manager: uv-based"
-color = "bfdadc"
-description = "uv, uvx"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: vim-based"
@@ -1341,11 +1332,13 @@ label = "📦 manager: dpkg-based"
 any-glob-to-any-file = [
   "meta_package_manager/managers/apt.*",
   "meta_package_manager/managers/deb_get.*",
+  "meta_package_manager/managers/fink.*",
   "meta_package_manager/managers/opkg.*",
   "meta_package_manager/managers/pacstall.*",
   "tests/*apt*",
   "tests/*apt_mint*",
   "tests/*deb_get*",
+  "tests/*fink*",
   "tests/*opkg*",
   "tests/*pacstall*",
 ]
@@ -1357,10 +1350,6 @@ any-glob-to-any-file = [ "meta_package_manager/managers/emerge.*", "tests/*emerg
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: eopkg"
 any-glob-to-any-file = [ "meta_package_manager/managers/eopkg.*", "tests/*eopkg*" ]
-
-[[tool.repomatic.labels.file-rules]]
-label = "📦 manager: fink"
-any-glob-to-any-file = [ "meta_package_manager/managers/fink.*", "tests/*fink*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: flatpak"
@@ -1434,15 +1423,6 @@ any-glob-to-any-file = [
 ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: pip-based"
-any-glob-to-any-file = [
-  "meta_package_manager/managers/pip.*",
-  "meta_package_manager/managers/pipx.*",
-  "tests/*pip*",
-  "tests/*pipx*",
-]
-
-[[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pkcon"
 any-glob-to-any-file = [ "meta_package_manager/managers/pkcon.*", "tests/*pkcon*" ]
 
@@ -1461,6 +1441,18 @@ any-glob-to-any-file = [ "meta_package_manager/managers/pkgin.*", "tests/*pkgin*
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pwsh-gallery"
 any-glob-to-any-file = [ "meta_package_manager/managers/pwsh_gallery.*", "tests/*pwsh_gallery*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: pypi-based"
+any-glob-to-any-file = [
+  "meta_package_manager/managers/pip.*",
+  "meta_package_manager/managers/pipx.*",
+  "meta_package_manager/managers/uv.*",
+  "tests/*pip*",
+  "tests/*pipx*",
+  "tests/*uv*",
+  "tests/*uvx*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: rpm-based"
@@ -1531,10 +1523,6 @@ any-glob-to-any-file = [ "meta_package_manager/managers/tlmgr.*", "tests/*tlmgr*
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: topgrade"
 any-glob-to-any-file = [ "meta_package_manager/managers/topgrade.*", "tests/*topgrade*" ]
-
-[[tool.repomatic.labels.file-rules]]
-label = "📦 manager: uv-based"
-any-glob-to-any-file = [ "meta_package_manager/managers/uv.*", "tests/*uv*", "tests/*uvx*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: vim-based"

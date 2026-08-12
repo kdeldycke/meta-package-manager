@@ -544,6 +544,19 @@ default.extend-ignore-re = [
   "hex: [0-9A-Fa-f]{6}",
 ]
 default.extend-ignore-identifiers-re = [
+  # error: `ba` should be `by`, `be`
+  #     ╭▸ ./meta_package_manager/managers/antidote.py:259:10
+  #     │
+  # 259 │         6ba0722 avoid issues when `env` has been aliased
+  #     ╰╴         ━━
+  #
+  # Git short SHAs, here in the captured `antidote update --dry-run` transcript.
+  # Same failure mode as the Guix base32 hashes and the brand color triplets
+  # above: typos reads a letter run inside the hash as a misspelling. These
+  # samples are held byte-accurate by the docstring corpus, so the hash cannot be
+  # reworded around it. Anchored to the whole identifier so a hex run embedded in
+  # a longer word keeps being checked.
+  "^[0-9a-f]{7}$",
   # error: `buildd` should be `build`, `builds`
   #     ╭▸ ./claude.md:118
   #     │
@@ -559,6 +572,15 @@ default.extend-ignore-identifiers-re = [
   #   ╰╴    ━━━━━━━
   #
   "certifi",
+  # error: `Hashi` should be `Hash`
+  #    ╭▸ ./docs/unsupported.md:64:194
+  #    │
+  # 64 │ (..) the bare `packer` name belongs to HashiCorp's tool and to (..)
+  #    ╰╴                                       ━━━━━
+  #
+  # `HashiCorp` is a company name; typos splits it on the camel-case boundary and
+  # reads the first half as a misspelling of `Hash`.
+  "HashiCorp",
   # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
   #     ╭▸ ./claude.md
   #     │

@@ -42,6 +42,7 @@ API <meta_package_manager>
 tests
 packaging
 binaries
+infrastructure
 releasing
 genindex
 modindex

@@ -346,11 +346,11 @@ optional-dependencies.xml = [ "click-extra[xml]" ]
 optional-dependencies.yaml = [ "click-extra[yaml]" ]
 urls.Changelog = "https://github.com/kdeldycke/meta-package-manager/blob/main/changelog.md"
 # Canonical host of the documentation site, and the single source `docs/conf.py`
-# reads to set `html_baseurl`. `package-manager.org` is a registered alias that
-# 301s here; it must never be published as a second live origin, or every page
-# ends up with two indexable URLs. `meta_package_manager._docs.DOCS_SITE_URL`
-# repeats the value because runtime code cannot read this file; a test in
-# `tests/test_docs.py` keeps the two in step.
+# reads to set `html_baseurl`. Whatever else resolves here redirects; nothing is
+# ever published as a second live origin, or every page ends up with two
+# indexable URLs. `meta_package_manager._docs.DOCS_SITE_URL` repeats the value
+# because runtime code cannot read this file; a test in `tests/test_docs.py`
+# keeps the two in step.
 urls.Documentation = "https://mpm.run"
 urls.Download = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.7.0.dev0"
 urls.Funding = "https://github.com/sponsors/kdeldycke"

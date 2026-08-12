@@ -375,6 +375,8 @@ PACKAGE_IDS = {
     "mise": "jq",
     "nix": "hello",
     "npm": "ms",
+    # Tiny single-function plugin of Oh My Fish's own package index.
+    "oh-my-fish": "bak",
     "opkg": "lolcat",
     "pacaur": "nyancat",
     "pacman": "nyancat",

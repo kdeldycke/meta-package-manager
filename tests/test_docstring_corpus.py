@@ -266,15 +266,17 @@ PID_SENTINEL = "MPM-DOC-SENTINEL"
 """Stand-in package id; the documented command carries a real example id where
 the constructed command carries this."""
 
-BUILD_CLI_KWARGS = frozenset((
-    "auto_post_args",
-    "auto_pre_args",
-    "auto_pre_cmds",
-    "override_cli_path",
-    "override_post_args",
-    "override_pre_args",
-    "override_pre_cmds",
-))
+BUILD_CLI_KWARGS = frozenset(
+    (
+        "auto_post_args",
+        "auto_pre_args",
+        "auto_pre_cmds",
+        "override_cli_path",
+        "override_post_args",
+        "override_pre_args",
+        "override_pre_cmds",
+    )
+)
 """`run_cli` kwargs forwarded to `build_cli` when reconstructing the full
 command. `sudo` is deliberately not forwarded: escalation depends on platform
 and policy, so documented `sudo` prefixes are stripped on the other side."""
@@ -329,18 +331,26 @@ def _normalize_constructed(command: tuple, cli_names: tuple[str, ...]) -> list[s
     Drops the `sudo --non-interactive` escalation prefix, unwraps the ``bash -c
     "source ...
     && <command>"`` indirection used for shell-function managers (sdkman in
-    Bash, zinit in Zsh), and reduces the absolute binary path to its basename.
-    Only the segment after the last `&&` is kept, so a wrapper chaining a
-    setup command before the real one (zinit's `ice` modifier) still reduces
-    to the invocation its docstring documents.
+    Bash, zinit in Zsh, oh-my-fish in Fish), and reduces the absolute binary
+    path to its basename. Only the segment after the last conjunction is kept,
+    so a wrapper chaining a setup command before the real one (zinit's `ice`
+    modifier, the `source` of a manager's own entry point) still reduces to the
+    invocation its docstring documents.
+
+    Fish spells that conjunction `; and ` rather than `&&`, so both separators
+    are recognized. A wrapper that chains nothing (Fisher, whose function Fish
+    autoloads) carries neither and is left alone, matching a docstring that
+    documents the `fish -c` form verbatim.
     """
     tokens = _strip_sudo([str(token) for token in command])
     if (
-        tokens[:2] in (["bash", "-c"], ["zsh", "-c"])
+        tokens[:2] in (["bash", "-c"], ["zsh", "-c"], ["fish", "-c"])
         and len(tokens) == 3
-        and " && " in tokens[2]
     ):
-        tokens = shlex.split(tokens[2].rsplit(" && ", 1)[1])
+        for separator in (" && ", "; and "):
+            if separator in tokens[2]:
+                tokens = shlex.split(tokens[2].rsplit(separator, 1)[1])
+                break
     if tokens:
         tokens[0] = Path(tokens[0]).name
     return tokens
@@ -427,9 +437,9 @@ def test_documented_command_matches_construction(
         type(manager),
         "installed",
         property(
-            lambda self: iter([
-                self.package(id=PID_SENTINEL, installed_version=PID_SENTINEL)
-            ])
+            lambda self: iter(
+                [self.package(id=PID_SENTINEL, installed_version=PID_SENTINEL)]
+            )
         ),
     )
 

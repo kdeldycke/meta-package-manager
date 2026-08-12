@@ -119,6 +119,7 @@ Meta Package Manager,mas,1
 Meta Package Manager,mise,1
 Meta Package Manager,nix,1
 Meta Package Manager,npm,1
+Meta Package Manager,oh-my-fish,1
 Meta Package Manager,opkg,1
 Meta Package Manager,pacaur,1
 Meta Package Manager,pacman,1
@@ -215,6 +216,7 @@ print(operation_matrix()[0])
 | [`mise`](https://kdeldycke.github.io/meta-package-manager/managers/mise.html)                                                                                    | >= 2025.5.10 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`nix`](https://kdeldycke.github.io/meta-package-manager/managers/nix.html)                                                                                      | >= 2         |          |     🐧 🍎     |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`npm`](https://kdeldycke.github.io/meta-package-manager/managers/npm.html)                                                                                      | >= 11.10     |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
+| [`oh-my-fish`](https://kdeldycke.github.io/meta-package-manager/managers/oh-my-fish.html)                                                                        | >= 6         |          |     🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`opkg`](https://kdeldycke.github.io/meta-package-manager/managers/opkg.html)                                                                                    | >= 0.2       |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`pacaur`](https://kdeldycke.github.io/meta-package-manager/managers/pacaur.html) [⚠️](https://kdeldycke.github.io/meta-package-manager/managers/pacaur.html)    | >= 4         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`pacman`](https://kdeldycke.github.io/meta-package-manager/managers/pacman.html)                                                                                | >= 5         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |

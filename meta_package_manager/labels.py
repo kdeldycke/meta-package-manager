@@ -132,6 +132,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "asdf-based": frozenset({"asdf", "mise"}),
     "rpm-based": frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
     "dpkg-based": frozenset({"apt", "apt-mint", "deb-get", "fink", "opkg", "pacstall"}),
+    "fish-based": frozenset({"fisher", "oh-my-fish"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
     "npm-based": frozenset({"npm", "pnpm", "volta", "yarn", "yarn-berry"}),
     "pacman-based": frozenset({

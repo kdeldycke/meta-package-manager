@@ -71,6 +71,7 @@ keywords = [
   "nixpkgs",
   "node",
   "npm",
+  "oh-my-fish",
   "openbsd",
   "opkg",
   "pacaur",
@@ -1068,9 +1069,9 @@ color = "bfdadc"
 description = "eopkg"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: fisher"
+name = "📦 manager: fish-based"
 color = "bfdadc"
-description = "fisher"
+description = "fisher, oh-my-fish"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: flatpak"
@@ -1362,8 +1363,13 @@ label = "📦 manager: eopkg"
 any-glob-to-any-file = [ "meta_package_manager/managers/eopkg.*", "tests/*eopkg*" ]
 
 [[tool.repomatic.labels.file-rules]]
-label = "📦 manager: fisher"
-any-glob-to-any-file = [ "meta_package_manager/managers/fisher.*", "tests/*fisher*" ]
+label = "📦 manager: fish-based"
+any-glob-to-any-file = [
+  "meta_package_manager/managers/fisher.*",
+  "meta_package_manager/managers/oh_my_fish.*",
+  "tests/*fisher*",
+  "tests/*oh_my_fish*",
+]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: flatpak"

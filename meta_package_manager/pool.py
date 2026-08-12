@@ -48,6 +48,7 @@ from .managers.mas import MAS
 from .managers.mise import Mise
 from .managers.nix import Nix
 from .managers.npm import NPM
+from .managers.oh_my_fish import OhMyFish
 from .managers.pacman import DkpPacman, Pacaur, Pacman, Paru, Pikaur, Trizen, Yay
 from .managers.pacstall import Pacstall
 from .managers.pip import Pip
@@ -108,6 +109,7 @@ manager_classes = (
     Mise,
     Nix,
     NPM,
+    OhMyFish,
     Pacaur,
     Pacman,
     Pacstall,

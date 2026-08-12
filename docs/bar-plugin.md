@@ -14,6 +14,10 @@ I recommend SwiftBar, because Xbar has 2 outstanding issues:
 - [Shell parameters over-escaping](https://github.com/matryer/xbar/issues/831)
 ```
 
+```{important}
+SwiftBar `2.1.0` or newer is required: older releases mangle the variable defaults carrying an `=` sign ([swiftbar/SwiftBar#445](https://github.com/swiftbar/SwiftBar/issues/445)). The plugin detects the host version and renders an error instead of its menu below that threshold. Xbar exposes no version to its plugins, so it is not checked.
+```
+
 ## Configuration
 
 The plugin is configurable with these environment variables:

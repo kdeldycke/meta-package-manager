@@ -7,12 +7,15 @@
 # <xbar.dependencies>python,mpm</xbar.dependencies>
 # <xbar.image>https://raw.githubusercontent.com/kdeldycke/meta-package-manager/refs/heads/main/docs/assets/xbar-submenu-table-rendering.png</xbar.image>
 # <xbar.abouturl>https://kdeldycke.github.io/meta-package-manager/bar-plugin.html</xbar.abouturl>
-# <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into a sub-menu for each manager.</xbar.var>
-# <xbar.var>boolean(VAR_TABLE_RENDERING=true): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
-# XXX Deactivate font-related options for Xbar. Default variable value does not allow `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
-# <!--xbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</xbar.var-->
-# <!--xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Font parameters for monospace text. Used for table rendering and error messages.</xbar.var-->
-# <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: font=Menlo size=12]</swiftbar.environment>
+# XXX Quotes around default values are required by SwiftBar, and optional in Xbar, which
+# strips them. Unquoted, the variable is silently ignored by SwiftBar and never reaches
+# its settings UI.
+# <xbar.var>boolean(VAR_SUBMENU_LAYOUT="false"): Group packages into a sub-menu for each manager.</xbar.var>
+# <xbar.var>boolean(VAR_TABLE_RENDERING="true"): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
+# XXX Font options are declared SwiftBar-only, as Xbar truncates a default value at its
+# first `=` character. See: https://github.com/matryer/xbar/issues/832
+# <swiftbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</swiftbar.var>
+# <swiftbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Font parameters for monospace text. Used for table rendering and error messages.</swiftbar.var>
 """Xbar and SwiftBar plugin for Meta Package Manager (the {command}`mpm` CLI).
 
 Default update cycle should be set to several hours so we have a chance to get
@@ -46,8 +49,12 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-SWIFTBAR_MIN_VERSION = (2, 1, 2)
-"""SwiftBar v2.1.2 fix an issue with multiple parameters in the font strings.
+SWIFTBAR_MIN_VERSION = (2, 1, 0)
+"""SwiftBar `2.1.0` fixes an issue with multiple parameters in the font strings.
+
+The fix was first handed out as a `2.1.2`-labelled test build, a number that never
+reached a release: the public train renumbered it down to `2.1.0`. Requiring the
+build we validated on would lock the plugin out of every released SwiftBar.
 
 See [swiftbar/SwiftBar#445](https://github.com/swiftbar/SwiftBar/issues/445).
 """

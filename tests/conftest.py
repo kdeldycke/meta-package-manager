@@ -357,6 +357,10 @@ PACKAGE_IDS = {
     "emerge": "games-misc/nyancat",
     "eopkg": "sl",
     "fink": "figlet",
+    # Same inert, empty repository the Zsh plugin managers use: Fisher extracts
+    # no function, completion or conf.d script from it, so the round-trip
+    # exercises the clone and the fish_plugins bookkeeping and nothing else.
+    "fisher": "zdharma-continuum/null",
     "flatpak": "org.gnome.Calculator",
     "fwupd": "f95c9218acd12697af946874bfe4239587209232",  # No-op without device.
     "gem": "paint",
@@ -424,6 +428,8 @@ PACKAGE_IDS = {
     # Zinit's own do-nothing plugin: an empty repository it documents for
     # ice-only usage, so loading and deleting it runs no third-party code.
     "zinit": "zdharma-continuum/null",
+    # Declares no install operation: the round-trip auto-skips.
+    "zplug": "zdharma-continuum/null",
     "zypper": "nyancat",
 }
 """Package IDs used by the destructive install/remove tests, one per manager.

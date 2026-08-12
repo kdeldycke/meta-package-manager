@@ -107,6 +107,7 @@ Meta Package Manager,dnf5,1
 Meta Package Manager,emerge,1
 Meta Package Manager,eopkg,1
 Meta Package Manager,fink,1
+Meta Package Manager,fisher,1
 Meta Package Manager,flatpak,1
 Meta Package Manager,fwupd,1
 Meta Package Manager,gem,1
@@ -163,6 +164,7 @@ Meta Package Manager,yay,1
 Meta Package Manager,yum,1
 Meta Package Manager,zerobrew,1
 Meta Package Manager,zinit,1
+Meta Package Manager,zplug,1
 Meta Package Manager,zypper,1
 ```
 
@@ -201,6 +203,7 @@ print(operation_matrix()[0])
 | [`emerge`](https://kdeldycke.github.io/meta-package-manager/managers/emerge.html)                                                                                | >= 3         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`eopkg`](https://kdeldycke.github.io/meta-package-manager/managers/eopkg.html)                                                                                  | >= 3.2       |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`fink`](https://kdeldycke.github.io/meta-package-manager/managers/fink.html)                                                                                    |              |          |      🍎       |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
+| [`fisher`](https://kdeldycke.github.io/meta-package-manager/managers/fisher.html)                                                                                | >= 4         |          |     🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`flatpak`](https://kdeldycke.github.io/meta-package-manager/managers/flatpak.html)                                                                              | >= 1.2       |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
 | [`fwupd`](https://kdeldycke.github.io/meta-package-manager/managers/fwupd.html)                                                                                  | >= 1.9.5     |          |      🐧       |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |          |   ✓    |           |          |
 | [`gem`](https://kdeldycke.github.io/meta-package-manager/managers/gem.html)                                                                                      | >= 2.5       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
@@ -257,6 +260,7 @@ print(operation_matrix()[0])
 | [`yum`](https://kdeldycke.github.io/meta-package-manager/managers/yum.html)                                                                                      | >= 4         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`zerobrew`](https://kdeldycke.github.io/meta-package-manager/managers/zerobrew.html)                                                                            | >= 0.3       |          |     🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`zinit`](https://kdeldycke.github.io/meta-package-manager/managers/zinit.html)                                                                                  | >= 3.10      |          |     🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`zplug`](https://kdeldycke.github.io/meta-package-manager/managers/zplug.html)                                                                                  | >= 2         |          |     🐧 🍎     |      ✓      |            |           |          |           |     ✓     |       ✓       |          |        |           |          |
 | [`zypper`](https://kdeldycke.github.io/meta-package-manager/managers/zypper.html)                                                                                | >= 1.14      |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 
 Platforms: 🅱️ BSD[^bsd] · 🐧 Linux[^linux] · 🍎 macOS · ⨂ Unix[^unix] · 🪟 Windows

@@ -6,6 +6,8 @@
 > This version is **not released yet** and is under active development.
 
 - [antidote] Add the Antidote Zsh plugin manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support. Zsh is the CLI mpm executes, since Antidote ships as a sourced shell function rather than an executable.
+- [zplug] Add the zplug Zsh plugin manager with `installed` and `upgrade` support. It declares no `install` or `remove`: zplug materializes only the plugin set the user's own `.zshrc` names.
+- [fisher] Add the Fisher Fish plugin manager with `installed`, `install`, `upgrade` and `remove` support. Fish is the CLI mpm executes, since Fisher ships as an autoloaded shell function rather than an executable.
 - [dkp-pacman] Add devkitPro's `pacman` fork, covering the console homebrew toolchains, with the full operation set inherited from `pacman`.
 - [bar-plugin] Fix the plugin rendering a version error instead of its menu on every released SwiftBar. The minimum requirement was pinned on an unreleased `2.1.2` test build, while the fix it targets shipped in `2.1.0`.
 - [bar-plugin] Quote the default values of the plugin variables, so SwiftBar `2.1.0` and above parses them and exposes them in its settings UI. Xbar still trims the quotes.

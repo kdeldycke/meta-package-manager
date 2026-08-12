@@ -360,7 +360,6 @@ homepages:
   etc-update: https://wiki.gentoo.org/wiki/Etc-update
   falconf: https://github.com/GideonBear/falconf
   fish-plug: https://github.com/kidonng/fish-plug
-  fisher: https://github.com/jorgebucaran/fisher
   flutter: https://flutter.dev
   fossil: https://fossil-scm.org
   fundle: https://github.com/danhper/fundle
@@ -489,7 +488,6 @@ homepages:
   zgenom: https://github.com/jandamm/zgenom
   zigup: https://github.com/marler8997/zigup
   zim: https://zimfw.sh
-  zplug: https://github.com/zplug/zplug
   zr: https://github.com/jedahan/zr
   zvm: https://github.com/tristanisham/zvm
 

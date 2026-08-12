@@ -148,7 +148,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "scoop-based": frozenset({"scoop", "sfsu"}),
     "vim-based": frozenset({"lazy", "vim-pack"}),
     "vscode-based": frozenset({"vscode", "vscodium"}),
-    "zsh-based": frozenset({"antidote", "zinit"}),
+    "zsh-based": frozenset({"antidote", "zinit", "zplug"}),
 }
 """Managers sharing the same ecosystem are grouped together under the same label.
 

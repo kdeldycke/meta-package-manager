@@ -37,6 +37,7 @@ from .managers.deb_get import Deb_Get
 from .managers.dnf import DNF, DNF5, YUM
 from .managers.emerge import Emerge
 from .managers.eopkg import EOPKG
+from .managers.fisher import Fisher
 from .managers.flatpak import Flatpak
 from .managers.fwupd import FWUPD
 from .managers.gem import Gem
@@ -68,6 +69,7 @@ from .managers.winget import WinGet
 from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
 from .managers.zinit import Zinit
+from .managers.zplug import Zplug
 from .managers.zypper import Zypper
 
 TYPE_CHECKING = False
@@ -96,6 +98,7 @@ manager_classes = (
     DNF5,
     Emerge,
     EOPKG,
+    Fisher,
     Flatpak,
     FWUPD,
     Gem,
@@ -135,6 +138,7 @@ manager_classes = (
     Yay,
     YUM,
     Zinit,
+    Zplug,
     Zypper,
 )
 """The list of all classes implementing the specific package managers.

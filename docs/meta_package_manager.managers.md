@@ -108,6 +108,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.fisher module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.fisher
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.flatpak module
 
 ```{eval-rst}
@@ -382,6 +391,15 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.zinit
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.zplug module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.zplug
    :members:
    :show-inheritance:
    :undoc-members:

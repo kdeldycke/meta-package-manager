@@ -44,6 +44,7 @@ keywords = [
   "eopkg",
   "exherbo",
   "fink",
+  "fisher",
   "flatpak",
   "fwupd",
   "gem",
@@ -149,6 +150,7 @@ keywords = [
   "zb",
   "zerobrew",
   "zinit",
+  "zplug",
   "zsh",
   "zypper",
 ]
@@ -1066,6 +1068,11 @@ color = "bfdadc"
 description = "eopkg"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: fisher"
+color = "bfdadc"
+description = "fisher"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: flatpak"
 color = "bfdadc"
 description = "flatpak"
@@ -1249,7 +1256,7 @@ description = "xbps"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: zsh-based"
 color = "bfdadc"
-description = "antidote, zinit"
+description = "antidote, zinit, zplug"
 
 [[tool.repomatic.labels.extra]]
 name = "🔌 plugin"
@@ -1353,6 +1360,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/emerge.*", "tests/*emerg
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: eopkg"
 any-glob-to-any-file = [ "meta_package_manager/managers/eopkg.*", "tests/*eopkg*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: fisher"
+any-glob-to-any-file = [ "meta_package_manager/managers/fisher.*", "tests/*fisher*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: flatpak"
@@ -1561,8 +1572,10 @@ label = "📦 manager: zsh-based"
 any-glob-to-any-file = [
   "meta_package_manager/managers/antidote.*",
   "meta_package_manager/managers/zinit.*",
+  "meta_package_manager/managers/zplug.*",
   "tests/*antidote*",
   "tests/*zinit*",
+  "tests/*zplug*",
 ]
 
 [[tool.repomatic.labels.file-rules]]

@@ -8,6 +8,8 @@
 - [bar-plugin] Fix the plugin rendering a version error instead of its menu on every released SwiftBar. The minimum requirement was pinned on an unreleased `2.1.2` test build, while the fix it targets shipped in `2.1.0`.
 - [bar-plugin] Quote the default values of the plugin variables, so SwiftBar `2.1.0` and above parses them and exposes them in its settings UI. Xbar still trims the quotes.
 - [bar-plugin] Declare the font variables as `swiftbar.var` and drop the `swiftbar.environment` block they were hidden in, so all four variables are editable from SwiftBar's UI.
+- [mpm] Add the GNOME Shell extension to the benchmark's feature matrix.
+- [mpm] Link every feature label of the benchmark's matrix to the same page its `mpm` cell points at, a convention only the Xbar/SwiftBar plugin row followed. The `purl` row now points at the augmentation section describing purls, instead of the generated `install` help.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

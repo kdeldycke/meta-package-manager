@@ -331,6 +331,9 @@ def subcmd():
 PACKAGE_IDS = {
     # Purpose-built empty Zsh plugin, shared with zinit below: nothing to source,
     # nothing to break, and it is the ecosystem's established inert package.
+    # An application of AM's own catalog. Declares no install operation, since
+    # installing blocks on an escalation prompt, so the round-trip auto-skips.
+    "am": "appimageupdate",
     "antidote": "zdharma-continuum/null",
     # Declares no install operation: the round-trip auto-skips.
     "antigen": "zdharma-continuum/null",

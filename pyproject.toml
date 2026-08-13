@@ -10,6 +10,7 @@ description = "🎁 snapshot every package on your machine to one file, restore 
 readme = "readme.md"
 keywords = [
   "alpine linux",
+  "am",
   "anaconda",
   "antidote",
   "antigen",
@@ -1054,6 +1055,11 @@ label = "🖥 platform: Windows"
 patterns = [ "/\\bc:|\\bmicrosoft\\b|\\bwindows\\b/i" ]
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: am"
+color = "bfdadc"
+description = "am"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: apk"
 color = "bfdadc"
 description = "apk"
@@ -1414,6 +1420,10 @@ description = "Cygwin, GNU/Hurd, Haiku, IBM AIX, IBM i, illumos, Solaris"
 name = "🖥 platform: Windows"
 color = "bfd4f2"
 description = "Windows"
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: am"
+any-glob-to-any-file = [ "meta_package_manager/managers/am.*", "tests/*am*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: apk"

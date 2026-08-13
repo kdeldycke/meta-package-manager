@@ -197,6 +197,7 @@ out of the diff and dates a dead project's row honestly.
 """
 
 UPSTREAM_REPOS = {
+    "am": "https://github.com/ivan-hc/AM",
     "antidote": "https://github.com/mattmc3/antidote",
     "antigen": "https://github.com/zsh-users/antigen",
     "apk": "https://gitlab.alpinelinux.org/alpine/apk-tools",

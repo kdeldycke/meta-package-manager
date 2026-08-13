@@ -26,6 +26,7 @@ from click_extra import get_current_context
 from . import definitions
 from .capabilities import implements
 from .dispatch import warm_availability
+from .managers.am import AM
 from .managers.antidote import Antidote
 from .managers.antigen import Antigen
 from .managers.apk import APK
@@ -90,6 +91,7 @@ if TYPE_CHECKING:
 
 
 manager_classes = (
+    AM,
     Antidote,
     Antigen,
     APK,

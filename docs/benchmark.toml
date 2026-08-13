@@ -323,7 +323,6 @@ zypper = ["topgrade", "upt", "pacaptr", "metapac"]
 
 [homepages]
 0install = "https://0install.net"
-am = "https://github.com/ivan-hc/AM"
 android-studio = "https://developer.android.com/studio"
 antibody = "https://getantibody.github.io"
 antigravity = "https://antigravity.google"
@@ -593,6 +592,7 @@ topgrade = "https://github.com/topgrade-rs/topgrade/issues/1764"
 android-studio = "excluded"
 antibody = "archived"
 antigravity = "excluded"
+app-man = "excluded"
 atuin = "excluded"
 bash-it = "excluded"
 chezmoi = "excluded"

@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import platform
 import subprocess
 import sys
 from functools import partial
@@ -34,7 +35,7 @@ else:
 
 # Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.pytest import create_config, runner  # noqa: F401
-from extra_platforms import is_github_ci, is_linux
+from extra_platforms import is_github_ci, is_linux, is_windows
 from extra_platforms.pytest import skip_hermetic_build
 from pytest import fixture, param
 
@@ -553,11 +554,27 @@ def gh_unauthenticated() -> bool:
     return probe.returncode != 0
 
 
+def cpan_install_blocked() -> bool:
+    """Whether `cpan install` cannot complete on this host.
+
+    Derived from measured CI results rather than from the permissions of Perl's
+    site library, which do not predict the outcome: that tree is root-owned on
+    macOS too, yet the round-trip succeeds there. The install fails only on the
+    x86 Linux runners; the arm64 image of the same Ubuntu release ships a Perl
+    the unelevated user can install into, and macOS resolves a writable target
+    of its own.
+
+    Keep this keyed on evidence. A flat `is_linux` was wrong on arm64, and a
+    writability probe would have been wrong on macOS in the other direction.
+    """
+    return is_linux() and platform.machine().lower() not in {"aarch64", "arm64"}
+
+
 INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
     # choco installs to an admin-only location the unelevated CI process cannot write to.
     "choco": is_github_ci,
-    # cpan writes to the system Perl tree, unwritable by the unelevated Linux user.
-    "cpan": is_linux,
+    # cpan writes to the system Perl tree, out of reach only on the x86 Linux runners.
+    "cpan": cpan_install_blocked,
     # The RPM and zypper front-ends are not backed by a working RPM/SUSE distro on the
     # Debian-based ubuntu runners (no release version, no repositories), so they cannot
     # even resolve the package and fail before reaching the privileged install step.
@@ -570,14 +587,21 @@ INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
     # fwupd flashes firmware; the CI VMs expose no flashable hardware, so the install
     # exits non-zero.
     "fwupd": lambda: True,
-    # gem writes to the system gem directory, unwritable by the unelevated Linux user.
-    "gem": is_linux,
+    # gem carries no blocker: RubyGems falls back to a user install when the system
+    # gem directory is not writable, so the round-trip completes on every runner,
+    # Linux included. The `is_linux` blocker that used to sit here asserted a failure
+    # that no longer happens on any image.
     # gh refuses extension installs without credentials; tests.yaml feeds the workflow
     # token to the destructive CI step so this round-trip runs for real there.
     "gh-ext": gh_unauthenticated,
     # mas resolves an install through an App Store search that finds nothing for the
     # numeric id on the headless runners, so the install fails.
     "mas": is_github_ci,
+    # pixi resolves its cache directory from the Windows user profile, which the
+    # suite's isolated HOME leaves unset: the install aborts on "could not determine
+    # default cache directory" before reaching the package. Same shape as the pnpm
+    # entry below, an environment the runner never sets up rather than a manager bug.
+    "pixi": is_windows,
     # pkcon hands mutations to packagekitd, which authorizes them through polkit; the
     # headless runner ships no policy permitting unattended installs for the unelevated
     # user, so the transaction is refused. See the Pkcon class docstring for why mpm

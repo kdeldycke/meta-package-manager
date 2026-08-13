@@ -118,6 +118,7 @@ Meta Package Manager,gh-ext,1
 Meta Package Manager,ghcup,1
 Meta Package Manager,guix,1
 Meta Package Manager,haxelib,1
+Meta Package Manager,juliaup,1
 Meta Package Manager,krew,1
 Meta Package Manager,lazy,1
 Meta Package Manager,macports,1
@@ -227,6 +228,7 @@ print(operation_matrix()[0])
 | [`ghcup`](https://mpm.run/managers/ghcup.html)                                                 | >= 0.2.1     |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |   ✓    |     ✓     |          |
 | [`guix`](https://mpm.run/managers/guix.html)                                                   |              |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`haxelib`](https://mpm.run/managers/haxelib.html)                                             | >= 4         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`juliaup`](https://mpm.run/managers/juliaup.html)                                             | >= 1.21      |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`krew`](https://mpm.run/managers/krew.html)                                                   | >= 0.4       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`lazy`](https://mpm.run/managers/lazy.html)                                                   | >= 11        |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
 | [`macports`](https://mpm.run/managers/macports.html)                                           | >= 2         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |

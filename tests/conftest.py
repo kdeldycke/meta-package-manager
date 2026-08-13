@@ -383,6 +383,10 @@ PACKAGE_IDS = {
     "ghcup": "hls-2.9.0.1",
     "guix": "hello",
     "haxelib": "hxjsonast",  # Tiny zero-dependency JSON parser.
+    # A channel, which is what juliaup calls a package. An old released series
+    # rather than `release`: every Julia is a large download, and removing the
+    # channel the host actually uses is what `remove` refuses outright.
+    "juliaup": "1.6",
     "krew": "ctx",  # Tiny context-switcher plugin of krew's own index.
     # Declares no install operation: the round-trip auto-skips. lazy.nvim manages
     # itself, so it is a real entry of its own inventory.

@@ -62,6 +62,7 @@ keywords = [
   "guix",
   "haxelib",
   "homebrew",
+  "juliaup",
   "krew",
   "lazy",
   "lazy.nvim",
@@ -1174,6 +1175,11 @@ color = "bfdadc"
 description = "brew, cask, zerobrew"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: juliaup"
+color = "bfdadc"
+description = "juliaup"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: krew"
 color = "bfdadc"
 description = "krew"
@@ -1512,6 +1518,10 @@ any-glob-to-any-file = [
   "tests/*homebrew*",
   "tests/*zerobrew*",
 ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: juliaup"
+any-glob-to-any-file = [ "meta_package_manager/managers/juliaup.*", "tests/*juliaup*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: krew"

@@ -1,0 +1,152 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# juliaup is the Julia version manager (https://github.com/JuliaLang/juliaup).
+# See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is a channel, and there is nothing else it could be. Every verb
+# juliaup exposes takes exactly one channel token: `add`, `remove`, `update`,
+# `default`, `link` and `override set` all share that one argument shape.
+# Concrete installed versions are not addressable at all, living only in an
+# internal deduplication table no command accepts a key from, so the choice
+# between naming a channel and naming a version never arises. `1.10.11` is
+# itself a channel name, exactly as `release` is.
+#
+# Several channels can resolve to one concrete version, so `1.11`, `rc` and
+# `release` may all report the same version string. That is three distinct
+# addressable packages sharing a version, not a duplicate to collapse.
+#
+# The `Version` column is not always a version. A channel linked to a local
+# Julia renders as ``Linked to `/path` `` and an alias as ``Alias to `1.11` ``,
+# so the parsers require the version to start with a digit. Those rows are
+# skipped, which is right: neither has a version for mpm to report.
+#
+# ```{note}
+# The patterns match spaces and tabs explicitly rather than using `\s`, which
+# also matches newlines. mpm feeds these one line at a time so the distinction
+# is currently moot, but a whitespace class that can cross a line lets the
+# separator rule become a package id and the following row's channel become its
+# version, which is a silent and very confusing failure.
+# ```
+#
+# ```{caution}
+# `outdated` answers offline and instantly, from a versions database on disk
+# rather than from the network, so its freshness is whatever the last `add`,
+# `update` or `julia` launch left behind. On a juliaup that has done none of
+# those it compares against a copy compiled into the binary. No non-mutating
+# command refreshes it, which is also why no `sync` is declared: the only
+# things that refresh the database are the mutating operations themselves.
+# ```
+#
+# ```{note}
+# Unlike its peers in this family, juliaup never updates itself as a side
+# effect: `update` touches only channels, and self-update lives in a separate
+# `self update` command whose behavior depends on which cargo feature the
+# distributor built with. Naming a channel genuinely restricts the run to it.
+# ```
+#
+# No escalation: juliaup installs under `$JULIAUP_DEPOT_PATH/juliaup`, falling
+# back to `~/.julia/juliaup`, and its source carries no privileged path at all.
+
+[mpm.managers.juliaup]
+name = "Julia juliaup"
+homepage_url = "https://github.com/JuliaLang/juliaup"
+logo = "julia"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["juliaup"]
+requirement = ">=1.21.0"
+# The release that made nightly and pull-request channels report a bare version
+# instead of prose. An older juliaup still works and simply omits those rows
+# from the inventory, since the parsers require a digit-initial version; the
+# floor is where the whole listing becomes readable.
+# `juliaup --version` prints one line and nothing else. Capitalized, since the
+# command declares itself as `Juliaup`.
+version_regexes = ['^Juliaup[ \t]+(?P<version>\S+)$']
+
+# A four-column table whose widths follow the data, so nothing sits at a fixed
+# offset. The optional `*` is the default-channel marker, right-justified in
+# its own column, and is consumed so it never lands in the package id. Header
+# and separator rows fail the digit-initial version requirement and drop out.
+[mpm.managers.juliaup.operations.installed]
+args = ["status"]
+regex = '^[ \t]*(?:\*[ \t]+)?(?P<package_id>\S+)[ \t]+(?P<installed_version>\d\S*)'
+
+# The same table: its last column names the newer version when one is pending.
+# Two forms exist, and only one is usable. A system channel gets `Update to
+# <version> available`, carrying both versions on the one line. A nightly or
+# pull-request channel is compared by entity tag instead and gets a bare
+# `Update available`, naming no version, so it cannot match and is left out
+# rather than reported with a version invented for it.
+[mpm.managers.juliaup.operations.outdated]
+args = ["status"]
+regex = '^[ \t]*(?:\*[ \t]+)?(?P<package_id>\S+)[ \t]+(?P<installed_version>\d\S*)[^\n]*?\bUpdate to (?P<latest_version>\S+) available[ \t]*$'
+
+# juliaup has no search command, so mpm filters the catalog itself. Anchoring
+# the version to the end of the line is what drops the synthesized placeholder
+# rows: `pr{number}` and `x.y-nightly` are literal templates rather than
+# installable names, and their version cell holds a build-target string instead
+# of a version.
+[mpm.managers.juliaup.operations.search]
+args = ["list"]
+regex = '^[ \t]*(?P<package_id>\S+)[ \t]+(?P<latest_version>\d\S*)[ \t]*$'
+
+[mpm.managers.juliaup.operations.install]
+args = ["add", "{package_id}"]
+
+# Refuses to remove the default channel, and any channel a directory override
+# points at, erroring rather than silently unsetting it.
+[mpm.managers.juliaup.operations.remove]
+args = ["remove", "{package_id}"]
+
+[mpm.managers.juliaup.operations.upgrade_one]
+args = ["update", "{package_id}"]
+
+[mpm.managers.juliaup.operations.upgrade_all]
+args = ["update"]
+
+# Reclaims the concrete versions no channel points at anymore. `--prune-linked`
+# is deliberately not passed: it deletes linked channels, which are packages
+# here rather than cache.
+[mpm.managers.juliaup.operations.cleanup_orphan]
+args = ["gc"]
+
+# Output samples locking the version probe and the declared parsers. Consumed
+# by tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# The listing is a verbatim user transcript from
+# [JuliaLang/juliaup#1561](https://github.com/JuliaLang/juliaup/issues/1561),
+# chosen for its spread: released channels, a release candidate, a dated
+# nightly and a pull-request channel whose version cell is followed by a URL.
+#
+# No `outdated` or `search` fixture. The `Update to <version> available` string
+# is verified in `src/command_status.rs`, but no captured transcript with that
+# column populated turned up, and the column widths are data-dependent, so a
+# reconstruction would be a guess at padding dressed up as a capture.
+[samples.version]
+output = "Juliaup 1.21.0"
+expected = "1.21.0"
+
+[[samples.installed]]
+output = """
+ Default  Channel       Version                                                        Update
+----------------------------------------------------------------------------------------------
+          1.6           1.6.7+0.x64.apple.darwin14
+          1.9           1.9.4+0.aarch64.apple.darwin14
+          1.10          1.10.11+0.aarch64.apple.darwin14
+          1.11          1.11.9+0.aarch64.apple.darwin14
+          1.12          1.12.6+0.aarch64.apple.darwin14
+          1.13          1.13.0-rc1+0.aarch64.apple.darwin14
+          1.13-nightly  1.13.0-rc1.105
+          nightly       1.14.0-DEV.2820
+          pr62430       1.14.0-DEV.2741 https://github.com/JuliaLang/julia/pull/62430"""
+packages = [
+  { id = "1.6", version = "1.6.7+0.x64.apple.darwin14" },
+  { id = "1.9", version = "1.9.4+0.aarch64.apple.darwin14" },
+  { id = "1.10", version = "1.10.11+0.aarch64.apple.darwin14" },
+  { id = "1.11", version = "1.11.9+0.aarch64.apple.darwin14" },
+  { id = "1.12", version = "1.12.6+0.aarch64.apple.darwin14" },
+  { id = "1.13", version = "1.13.0-rc1+0.aarch64.apple.darwin14" },
+  { id = "1.13-nightly", version = "1.13.0-rc1.105" },
+  { id = "nightly", version = "1.14.0-DEV.2820" },
+  { id = "pr62430", version = "1.14.0-DEV.2741" },
+]

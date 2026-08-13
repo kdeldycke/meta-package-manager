@@ -173,6 +173,14 @@ icons:
     - swupd
     source: https://www.intel.com/content/www/us/en/newsroom/resources/press-kits-intel-overview.html
     title: Intel
+  julia:
+    contrast_on_light: 4.86
+    hex: 9558B2
+    license: CC0-1.0
+    managers:
+    - juliaup
+    source: https://github.com/JuliaLang/julia-logo-graphics/blob/b5551ca7946b4a25746c045c15fbb8806610f8d0/images/julia-dots.svg
+    title: Julia
   kubernetes:
     contrast_on_light: 4.76
     hex: 326CE5

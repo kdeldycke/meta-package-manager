@@ -56,15 +56,16 @@ its {data}`SOURCES`, so a reader can always tell which question a point answers.
 from __future__ import annotations
 
 import argparse
-import gzip
-import io
+import http.client
 import json
 import re
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
+import zlib
 from collections import Counter
 from datetime import date, datetime, timezone
 from itertools import accumulate
@@ -153,6 +154,32 @@ SERIES_COLORS = {
     "metapac": ("#e87ba4", "#d55181"),
 }
 """Light and dark hex pair per series, in fixed order and never cycled."""
+
+LAST_FETCH_REASONS: Counter[str] = Counter()
+"""Why the most recent {func}`fetch` gave up, tallied by outcome.
+
+Module-level rather than returned, so the retry loop keeps its `bytes | None`
+signature while the caller can still report what went wrong. Only ever read
+straight after a `None`.
+"""
+
+MAX_RETRY_DELAY = 15.0
+"""Ceiling on {func}`fetch`'s exponential backoff, in seconds.
+
+Doubling without a bound spends the whole attempt budget waiting, which is the
+wrong trade against a service that fails most requests but recovers within
+seconds on the next one.
+"""
+
+WAYBACK_PAGE_TRIES = 8
+"""Attempts per archived page.
+
+Sized against a measurement rather than a guess: 25 requests for one capture
+known to exist returned 23 plain `503`s and 2 truncated bodies, and no clean
+response at all. Since a truncated body still carries the counter, the per-try
+success rate that matters was 2 in 25, and eight tries is the point past which
+more attempts cost more than the captures they recover.
+"""
 
 WAYBACK_REQUEST_DELAY = 3.0
 """Seconds to wait between two archived pages.
@@ -254,29 +281,73 @@ def gh_api(path: str, *headers: str) -> Any:
     return json.loads(result.stdout)
 
 
-def fetch(url: str, tries: int = 3, timeout: int = 45) -> bytes | None:
-    """Fetch a URL with backoff, returning `None` once every attempt failed.
+def gunzip(blob: bytes) -> bytes:
+    """Decompress a gzip payload, tolerating one cut short mid-stream.
 
-    The Wayback Machine answers `503` and truncates responses under load, often
-    for minutes at a time, so a single failure never means a missing capture.
+    {class}`gzip.GzipFile` needs the trailer to finish, so it raises on the
+    truncated bodies the archive delivers, discarding the megabyte that did
+    arrive. Feeding the same bytes to a raw decompressor returns everything
+    decodable before the cut and simply never reports the end of stream.
+    """
+    decompressor = zlib.decompressobj(zlib.MAX_WBITS | 16)
+    try:
+        return decompressor.decompress(blob)
+    except zlib.error:
+        return b""
+
+
+def fetch(url: str, tries: int = 3, timeout: int = 45) -> bytes | None:
+    """Fetch a URL with capped backoff, returning `None` once every try failed.
+
+    The archive's replay service is frequently only partly healthy: its
+    load balancer answers `503` for most requests while a minority succeed,
+    measured at roughly one in five during an outage, with neighbouring
+    requests for the same capture landing on different backends. A failure
+    therefore says nothing about whether the capture exists, and repeating the
+    request is the lever that works. Pacing is not: the whole service is
+    degraded, not this client's budget.
+
+    The delay is capped rather than doubled without bound, since a long tail of
+    attempts is what converts a low per-request success rate into a fetched
+    page, and an uncapped schedule spends that budget waiting instead.
     """
     delay = 2.0
+    reasons: Counter[str] = Counter()
     for attempt in range(1, tries + 1):
         try:
             request = urllib.request.Request(
                 url, headers={"User-Agent": USER_AGENT, "Accept-Encoding": "gzip"}
             )
             with urllib.request.urlopen(request, timeout=timeout) as response:
-                payload: bytes = response.read()
-                if response.headers.get("Content-Encoding") == "gzip":
-                    # Annotated above: `GzipFile.read()` is untyped, and the
-                    # reassignment would otherwise widen `payload` to `Any`.
-                    payload = gzip.GzipFile(fileobj=io.BytesIO(payload)).read()
-                return payload
-        except Exception:  # noqa: BLE001
-            if attempt < tries:
-                time.sleep(delay)
-                delay *= 2
+                gzipped = response.headers.get("Content-Encoding") == "gzip"
+                try:
+                    payload: bytes = response.read()
+                except http.client.IncompleteRead as truncation:
+                    # Kept, not discarded. A degraded backend routinely cuts the
+                    # connection after sending most of the page, and the star
+                    # counter sits in markup that arrives well before the end:
+                    # measured over 25 requests, every delivery that was not a
+                    # 503 arrived this way, so dropping them threw away the only
+                    # payloads the run produced.
+                    payload = truncation.partial
+                    reasons["truncated"] += 1
+                if gzipped:
+                    payload = gunzip(payload)
+                if payload:
+                    return payload
+                reasons["empty body"] += 1
+        except urllib.error.HTTPError as error:
+            reasons[f"HTTP {error.code}"] += 1
+        except Exception as error:  # noqa: BLE001
+            reasons[type(error).__name__] += 1
+        if attempt < tries:
+            time.sleep(delay)
+            delay = min(delay * 2, MAX_RETRY_DELAY)
+    # Named rather than swallowed: a run that reports only "unreachable" cannot
+    # tell a service refusing every request from one this collector is asking
+    # wrongly, and those call for opposite responses.
+    LAST_FETCH_REASONS.clear()
+    LAST_FETCH_REASONS.update(reasons)
     return None
 
 
@@ -395,10 +466,14 @@ def backfill_wayback(store: dict[tuple[str, str], dict], repo: str) -> int:
         time.sleep(WAYBACK_REQUEST_DELAY)
         payload = fetch(
             f"https://web.archive.org/web/{stamp}id_/https://github.com/{repo}",
-            tries=3,
+            tries=WAYBACK_PAGE_TRIES,
         )
         if not payload:
-            print(f"    {day}: unreachable")
+            tally = ", ".join(
+                f"{count}x {reason}"
+                for reason, count in LAST_FETCH_REASONS.most_common()
+            )
+            print(f"    {day}: unreachable ({tally or 'no response'})")
             continue
         html = payload.decode("utf-8", errors="replace")
         stars = None

@@ -17,7 +17,9 @@
 from __future__ import annotations
 
 import ast
+import gzip
 import importlib.util
+import io
 import json
 import re
 import shutil
@@ -590,6 +592,47 @@ def test_star_history_chart_renders():
     assert not years.intersection(re.findall(r">([^<>]+)</text>", aged))
     for column in plotted:
         assert f'class="lbl s-{column}"' in aged
+
+
+def test_star_history_salvages_truncated_gzip():
+    """Check a gzip stream cut short still yields its star counter.
+
+    The archive's replay service commonly drops the connection after sending
+    most of a page: measured over 25 requests for one capture, every response
+    that was not a bare `503` arrived truncated. {class}`gzip.GzipFile` needs
+    the trailer and raises, discarding a payload whose counter had already
+    arrived, so the collector decompresses leniently instead.
+    """
+    body = (
+        b"<html><head><title>x</title></head><body>"
+        + b"<div>filler</div>" * 4000
+        + b'<span id="repo-stars-counter-star" title="4,383">4.4k</span>'
+        + b"</body></html>"
+    )
+    buffer = io.BytesIO()
+    with gzip.GzipFile(fileobj=buffer, mode="wb") as compressor:
+        compressor.write(body)
+    truncated = buffer.getvalue()[:-25]
+
+    # The strict reader loses the whole payload, which is the bug being fixed.
+    with pytest.raises((EOFError, gzip.BadGzipFile)):
+        gzip.GzipFile(fileobj=io.BytesIO(truncated)).read()
+
+    salvaged = stars_update.gunzip(truncated).decode("utf-8", errors="replace")
+    assert len(salvaged) > 1000
+    counters = [
+        match.group(1)
+        for match in (
+            pattern.search(salvaged)
+            for pattern in stars_update.WAYBACK_STAR_PATTERNS
+        )
+        if match
+    ]
+    assert "4,383" in counters
+
+    # A payload with no gzip framing at all must degrade quietly, not raise:
+    # the collector calls this on whatever bytes arrived.
+    assert stars_update.gunzip(b"not gzip at all") == b""
 
 
 def test_star_history_series_start_at_creation():

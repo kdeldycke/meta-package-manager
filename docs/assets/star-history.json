@@ -2910,6 +2910,12 @@
 		"stars": 97
 	},
 	{
+		"date": "2021-08-23",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 169
+	},
+	{
 		"date": "2021-10-21",
 		"repo": "rami3l/pacaptr",
 		"source": "wayback",
@@ -2964,10 +2970,46 @@
 		"stars": 299
 	},
 	{
+		"date": "2023-07-29",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 306
+	},
+	{
+		"date": "2024-01-19",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 335
+	},
+	{
+		"date": "2024-02-26",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 341
+	},
+	{
+		"date": "2024-04-19",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 345
+	},
+	{
 		"date": "2024-10-06",
 		"repo": "rami3l/pacaptr",
 		"source": "wayback",
 		"stars": 365
+	},
+	{
+		"date": "2024-11-13",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 368
+	},
+	{
+		"date": "2024-12-13",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 374
 	},
 	{
 		"date": "2025-03-18",
@@ -2976,16 +3018,40 @@
 		"stars": 380
 	},
 	{
+		"date": "2025-04-16",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 383
+	},
+	{
 		"date": "2025-07-11",
 		"repo": "rami3l/pacaptr",
 		"source": "wayback",
 		"stars": 390
 	},
 	{
+		"date": "2025-12-28",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 403
+	},
+	{
+		"date": "2026-01-30",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 406
+	},
+	{
 		"date": "2026-02-08",
 		"repo": "rami3l/pacaptr",
 		"source": "wayback",
 		"stars": 407
+	},
+	{
+		"date": "2026-05-29",
+		"repo": "rami3l/pacaptr",
+		"source": "wayback",
+		"stars": 416
 	},
 	{
 		"date": "2026-08-13",
@@ -3000,10 +3066,64 @@
 		"stars": 0
 	},
 	{
+		"date": "2024-11-13",
+		"repo": "ripytide/metapac",
+		"source": "wayback",
+		"stars": 13
+	},
+	{
+		"date": "2025-03-16",
+		"repo": "ripytide/metapac",
+		"source": "wayback",
+		"stars": 50
+	},
+	{
+		"date": "2025-07-29",
+		"repo": "ripytide/metapac",
+		"source": "wayback",
+		"stars": 95
+	},
+	{
 		"date": "2025-08-09",
 		"repo": "ripytide/metapac",
 		"source": "wayback",
 		"stars": 115
+	},
+	{
+		"date": "2025-09-27",
+		"repo": "ripytide/metapac",
+		"source": "wayback",
+		"stars": 179
+	},
+	{
+		"date": "2025-11-24",
+		"repo": "ripytide/metapac",
+		"source": "wayback",
+		"stars": 221
+	},
+	{
+		"date": "2026-01-06",
+		"repo": "ripytide/metapac",
+		"source": "wayback",
+		"stars": 237
+	},
+	{
+		"date": "2026-02-19",
+		"repo": "ripytide/metapac",
+		"source": "wayback",
+		"stars": 263
+	},
+	{
+		"date": "2026-06-05",
+		"repo": "ripytide/metapac",
+		"source": "wayback",
+		"stars": 287
+	},
+	{
+		"date": "2026-08-01",
+		"repo": "ripytide/metapac",
+		"source": "wayback",
+		"stars": 301
 	},
 	{
 		"date": "2026-08-13",
@@ -3108,6 +3228,24 @@
 		"stars": 513
 	},
 	{
+		"date": "2025-12-25",
+		"repo": "sigoden/upt",
+		"source": "wayback",
+		"stars": 518
+	},
+	{
+		"date": "2026-01-30",
+		"repo": "sigoden/upt",
+		"source": "wayback",
+		"stars": 519
+	},
+	{
+		"date": "2026-03-07",
+		"repo": "sigoden/upt",
+		"source": "wayback",
+		"stars": 520
+	},
+	{
 		"date": "2026-08-13",
 		"repo": "sigoden/upt",
 		"source": "sample",
@@ -3192,10 +3330,28 @@
 		"stars": 1329
 	},
 	{
+		"date": "2024-03-06",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 1438
+	},
+	{
+		"date": "2024-05-28",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 1620
+	},
+	{
 		"date": "2024-06-12",
 		"repo": "topgrade-rs/topgrade",
 		"source": "wayback",
 		"stars": 1666
+	},
+	{
+		"date": "2024-08-19",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 1827
 	},
 	{
 		"date": "2024-09-01",
@@ -3204,16 +3360,40 @@
 		"stars": 1854
 	},
 	{
+		"date": "2024-10-03",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 1950
+	},
+	{
+		"date": "2024-11-07",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 2035
+	},
+	{
 		"date": "2024-12-01",
 		"repo": "topgrade-rs/topgrade",
 		"source": "wayback",
 		"stars": 2078
 	},
 	{
+		"date": "2025-01-08",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 2159
+	},
+	{
 		"date": "2025-02-14",
 		"repo": "topgrade-rs/topgrade",
 		"source": "wayback",
 		"stars": 2227
+	},
+	{
+		"date": "2025-03-07",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 2262
 	},
 	{
 		"date": "2025-04-20",
@@ -3228,6 +3408,12 @@
 		"stars": 2384
 	},
 	{
+		"date": "2025-06-22",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 2513
+	},
+	{
 		"date": "2025-07-05",
 		"repo": "topgrade-rs/topgrade",
 		"source": "wayback",
@@ -3240,10 +3426,22 @@
 		"stars": 2766
 	},
 	{
+		"date": "2025-09-18",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 2850
+	},
+	{
 		"date": "2025-10-01",
 		"repo": "topgrade-rs/topgrade",
 		"source": "wayback",
 		"stars": 2880
+	},
+	{
+		"date": "2025-11-15",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 3031
 	},
 	{
 		"date": "2026-01-11",
@@ -3262,6 +3460,18 @@
 		"repo": "topgrade-rs/topgrade",
 		"source": "wayback",
 		"stars": 3517
+	},
+	{
+		"date": "2026-04-08",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 3643
+	},
+	{
+		"date": "2026-05-09",
+		"repo": "topgrade-rs/topgrade",
+		"source": "wayback",
+		"stars": 3981
 	},
 	{
 		"date": "2026-06-01",

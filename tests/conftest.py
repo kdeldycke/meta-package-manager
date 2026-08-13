@@ -17,7 +17,6 @@
 
 from __future__ import annotations
 
-import platform
 import subprocess
 import sys
 from functools import partial
@@ -35,7 +34,7 @@ else:
 
 # Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.pytest import create_config, runner  # noqa: F401
-from extra_platforms import is_github_ci, is_linux, is_windows
+from extra_platforms import is_github_ci, is_linux, is_windows, is_x86_64
 from extra_platforms.pytest import skip_hermetic_build
 from pytest import fixture, param
 
@@ -566,8 +565,11 @@ def cpan_install_blocked() -> bool:
 
     Keep this keyed on evidence. A flat `is_linux` was wrong on arm64, and a
     writability probe would have been wrong on macOS in the other direction.
+    `is_x86_64` rather than a negated ARM test, so the pair of images actually
+    measured is what the predicate names: a third Linux architecture would be an
+    unknown, not an assumed failure.
     """
-    return is_linux() and platform.machine().lower() not in {"aarch64", "arm64"}
+    return is_linux() and is_x86_64()
 
 
 INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {

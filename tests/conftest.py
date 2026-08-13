@@ -468,6 +468,10 @@ PACKAGE_IDS = {
     # authenticates interactively: the round-trip auto-skips. A marketing
     # version is what xcodes addresses a bundle by.
     "xcodes": "16.2",
+    # A box. Chosen for being tiny by Vagrant standards and published by
+    # HashiCorp itself, so it stays available; every box is still a large
+    # download, which is the lightest this ecosystem offers.
+    "vagrant": "hashicorp/bionic64",
     "yarn": "ms",
     "yarn-berry": "ms",
     "yay": "nyancat",

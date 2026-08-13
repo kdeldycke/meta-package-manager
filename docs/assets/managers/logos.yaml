@@ -401,6 +401,14 @@ icons:
     - uvx
     source: https://docs.astral.sh/uv/
     title: uv
+  vagrant:
+    contrast_on_light: 4.88
+    hex: 1868F2
+    license: CC0-1.0
+    managers:
+    - vagrant
+    source: https://www.hashicorp.com/brand
+    title: Vagrant
   voidlinux:
     contrast_on_light: 4.64
     hex: '478061'

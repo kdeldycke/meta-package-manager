@@ -396,6 +396,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.vagrant module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.vagrant
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.vim_pack module
 
 ```{eval-rst}

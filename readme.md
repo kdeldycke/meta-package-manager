@@ -180,6 +180,7 @@ Meta Package Manager,trizen,1
 Meta Package Manager,urpmi,1
 Meta Package Manager,uv,1
 Meta Package Manager,uvx,1
+Meta Package Manager,vagrant,1
 Meta Package Manager,vim-pack,1
 Meta Package Manager,volta,1
 Meta Package Manager,vscode,1
@@ -293,6 +294,7 @@ print(operation_matrix()[0])
 | [`urpmi`](https://mpm.run/managers/urpmi.html)                                                 |              |          |               |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`uv`](https://mpm.run/managers/uv.html)                                                       | >= 0.5       |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`uvx`](https://mpm.run/managers/uvx.html)                                                     | >= 0.10.10   |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`vagrant`](https://mpm.run/managers/vagrant.html)                                             | >= 2.4       |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`vim-pack`](https://mpm.run/managers/vim-pack.html)                                           | >= 0.12      |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`volta`](https://mpm.run/managers/volta.html) [⚠️](https://mpm.run/managers/volta.html)       | >= 1.0.2     |          |   🐧 🍎 🪟    |      ✓      |            |           |          |     ✓     |     ✓     |               |    ✓     |        |           |          |
 | [`vscode`](https://mpm.run/managers/vscode.html)                                               | >= 1.60      |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |           |               |    ✓     |        |           |          |

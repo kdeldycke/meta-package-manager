@@ -477,13 +477,19 @@ def benchmark_managers_table() -> str:
             glyph = "⚠️" if pool[mid].unmaintained else "✅"
             row.append(f"[{glyph}]({manager_source_url(mid)})")
         elif mid in unsupported:
-            # Only the verdict links to its reason; the fallback marker rides
-            # alongside it, explained once by the page's legend.
-            verdict = UNSUPPORTED_GLYPHS[unsupported[mid]]
-            cell = f"[{verdict}]({UNSUPPORTED_DOCS_URL})"
-            if "topgrade" in competitor_data.get(mid, []):
-                cell += f" {TOPGRADE_FALLBACK_GLYPH}"
-            row.append(cell)
+            # One glyph per cell. Where `topgrade` still reaches the tool, the
+            # lifebuoy stands alone: it already answers the only question this
+            # column asks, and pairing it with the verdict doubled the width of
+            # every such row for a fact the linked page states anyway. The
+            # skull and the cross therefore appear only when nothing reaches
+            # the tool at all. `docs/unsupported.md` keeps both glyphs, being
+            # the record rather than the comparison.
+            glyph = (
+                TOPGRADE_FALLBACK_GLYPH
+                if "topgrade" in competitor_data.get(mid, [])
+                else UNSUPPORTED_GLYPHS[unsupported[mid]]
+            )
+            row.append(f"[{glyph}]({UNSUPPORTED_DOCS_URL})")
         else:
             row.append("")
         flags = set(competitor_data.get(mid, []))
@@ -868,6 +874,16 @@ def manager_card(manager_id: str) -> str:
 
     A manager with no mark still gets the box, headerless: the facts are the
     point, and the artwork is the bonus.
+
+    The upstream readings sit beside the home page they describe, read from
+    {func}`_manager_upstreams` rather than hotlinked as badges: a badge per
+    manager would have put hundreds of third-party images across the docs and
+    handed `linkcheck` as many URLs. Two date rows rather than one, because each
+    answers what the other cannot. Thirteen upstreams were last released more
+    than a year before their newest commit, `cask` by a decade: it cuts no
+    releases and is committed to daily, so a release date alone reports the most
+    used tap in the pool as long dead, while a commit date alone says nothing
+    about whether that activity ever reaches users.
     """
     m = pool[manager_id]
     source_url = manager_source_url(manager_id)
@@ -877,6 +893,20 @@ def manager_card(manager_id: str) -> str:
         ("ID", f"`{manager_id}`"),
         ("Home page", f"<{m.homepage_url}>"),
     ]
+
+    # How the manager's own project is doing, beside the home page it describes.
+    # These sat in the manager index as three columns, which asked a reader
+    # comparing one tool to scan a hundred rows for it; on the page devoted to
+    # that tool they are read where the question is actually asked. Absent for a
+    # manager whose upstream cannot be measured, rather than shown empty.
+    upstream = _manager_upstreams().get(manager_id, {})
+    stars = upstream.get("stars")
+    if stars is not None:
+        facts.append(("Upstream stars", f"{stars:,}"))
+    if upstream.get("release"):
+        facts.append(("Last release", upstream["release"]))
+    if upstream.get("commit"):
+        facts.append(("Last commit", upstream["commit"]))
     if m.requirement:
         # Unstyled, like the readme matrix's own Version column: a table cell is
         # data, not the prose the backtick-the-version rule governs. Both angle
@@ -1957,20 +1987,13 @@ def managers_index_table() -> str:
     with {func}`_platform_coverage`'s annotation (`🐧 (Exherbo Linux only)`)
     instead of disappearing, as it does in the readme's all-or-nothing matrix.
 
-    The three upstream columns answer the question the `⚠️` flag only answers at
-    its extreme: how a manager's own project is doing. They sit next to it for
-    that reason, and are read from {func}`_manager_upstreams` rather than
-    hotlinked as badges, which would have put two hundred third-party images on
-    one page and handed `linkcheck` as many URLs to resolve.
-
-    ```{note}
-    Two date columns rather than one, because each answers what the other
-    cannot. Thirteen upstreams were last released more than a year before their
-    newest commit, `cask` by a decade: it cuts no releases and is committed to
-    daily, so a release date alone reports the most used tap in the pool as long
-    dead. A commit date alone says nothing about whether that activity ever
-    reaches users, which is the question a release answers.
-    ```
+    The `⚠️` flag is all this table says about upstream health. The stars,
+    newest release and newest commit behind it live in each manager's own
+    {func}`manager_card`: they answer a question asked about one tool at a time,
+    and as columns they made a reader scan a hundred rows to find the single one
+    they came for, while widening the table enough to push the platform icons
+    off a narrow screen. The index keeps what a reader actually scans a hundred
+    rows for: identity, platforms, and whether the thing is abandoned.
     """
     upstreams = _manager_upstreams()
     table = []
@@ -1983,8 +2006,6 @@ def managers_index_table() -> str:
                 continue
             icon, annotation = coverage
             parts.append(f"{icon} ({annotation})" if annotation else icon)
-        upstream = upstreams.get(mid, {})
-        stars = upstream.get("stars")
         # The artwork is spliced in after rendering: a multi-kilobyte SVG in a
         # cell would pad every other row of the column to its own width.
         table.append(
@@ -1993,9 +2014,6 @@ def managers_index_table() -> str:
                 f"[{m.name}](managers/{mid}.md)",
                 id_cell,
                 "⚠️" if m.unmaintained else "",
-                f"{stars:,}" if stars is not None else "",
-                upstream.get("release", ""),
-                upstream.get("commit", ""),
                 " ".join(parts),
             ]
         )
@@ -2008,9 +2026,6 @@ def managers_index_table() -> str:
             "Manager",
             "ID",
             "Unmaintained",
-            "Stars",
-            "Last release",
-            "Last commit",
             "Platforms",
         ],
         table_format=TableFormat.GITHUB,
@@ -2018,9 +2033,6 @@ def managers_index_table() -> str:
             "center",
             "left",
             "left",
-            "center",
-            "right",
-            "center",
             "center",
             "center",
         ],
@@ -2032,14 +2044,15 @@ def managers_index_table() -> str:
         (record["date"] for record in upstreams.values()), default="an unknown date"
     )
     footnote = (
-        "Stars, releases and commits are read from each project's own forge, "
-        f"last sampled on {sampled}. They describe the upstream repository "
-        "rather than the tool's install base: a distribution's package manager "
-        "hosted on its own GitLab gathers a fraction of the stars an equally "
-        "widespread GitHub project does, and a manager shipped inside a larger "
-        "tool inherits that tool's figures. The release date is the newest "
-        "release a project published, or its newest tag where it publishes "
-        "none. An empty cell means it does neither, or has no public "
+        "Each manager's own page carries its upstream stars, newest release and "
+        f"newest commit, read from that project's forge and last sampled on "
+        f"{sampled}. They describe the upstream repository rather than the "
+        "tool's install base: a distribution's package manager hosted on its "
+        "own GitLab gathers a fraction of the stars an equally widespread "
+        "GitHub project does, and a manager shipped inside a larger tool "
+        "inherits that tool's figures. The release date is the newest release a "
+        "project published, or its newest tag where it publishes none. A "
+        "manager missing those rows publishes neither, or has no public "
         "repository at all."
     )
     # Blank lines throughout: a paragraph glued to the last row of a table is

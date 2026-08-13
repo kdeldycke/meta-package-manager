@@ -8,6 +8,8 @@
     .grid{stroke:#0b0b0b;stroke-opacity:.10;stroke-width:1}
     .axis{font-size:12px;fill:#52514e}
     polyline{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+    .prior{stroke-dasharray:6 4;stroke-width:1.5;opacity:.65}
+    text.prior{font-size:11px;font-weight:600;opacity:1}
     .s-mpm{stroke:#2a78d6;color:#2a78d6}
     .s-topgrade{stroke:#eb6834;color:#eb6834}
     .s-upt{stroke:#1baf7a;color:#1baf7a}

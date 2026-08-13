@@ -606,7 +606,9 @@ def test_star_history_store_well_formed():
     assert isinstance(records, list)
     assert records, "no star history recorded yet"
 
-    tracked = set(stars_update.TRACKED_REPOS.values())
+    # Covers the retired forerunners too, which are collected but hold no
+    # benchmark column of their own.
+    tracked = set(stars_update.collected_repos().values())
     seen = set()
     for record in records:
         assert set(record) == {"date", "repo", "source", "stars"}
@@ -639,20 +641,34 @@ def test_star_history_chart_renders():
     # An accessible name, since the chart carries meaning no caption repeats.
     assert 'role="img"' in svg and "aria-label=" in svg
 
-    plotted = {column for column, points in stars_update.series(store).items()}
-    for column in plotted:
+    plotted = set(stars_update.series(store))
+    for key in plotted:
+        column, prior, _ = key.partition(stars_update.PREDECESSOR_SUFFIX)
         # Identity is never colour alone: every series is directly labelled.
-        assert f'class="lbl s-{column}"' in svg
+        # A forerunner is annotated where it stops instead of in the margin,
+        # and borrows its successor's hue rather than claiming a slot.
+        marker = f'class="lbl prior s-{column}"' if prior else f'class="lbl s-{column}"'
+        assert marker in svg
         assert stars_update.SERIES_COLORS[column][0] in svg
         assert stars_update.SERIES_COLORS[column][1] in svg
     # The dark steps are selected, not an automatic flip of the light ones.
     assert "prefers-color-scheme: dark" in svg
 
-    # The single-series variant plotted on the history page drops the peers.
+    # A forerunner is drawn broken away from its successor, never joined to it:
+    # the two are independent tallies on separate repositories.
+    if any(stars_update.PREDECESSOR_SUFFIX in key for key in plotted):
+        assert "stroke-dasharray" in svg
+
+    # The single-series variant plotted on the history page drops the peers,
+    # forerunners included.
     solo = stars_update.render_chart(store, columns=("mpm",))
     assert 'class="lbl s-mpm"' in solo
-    for column in plotted - {"mpm"}:
-        assert f'class="lbl s-{column}"' not in solo
+    for key in plotted - {"mpm"}:
+        # Keyed on the rendered label, not the hue: the stylesheet declares
+        # every series colour whether or not that series is drawn.
+        column, prior, _ = key.partition(stars_update.PREDECESSOR_SUFFIX)
+        marker = f'class="lbl prior s-{column}"' if prior else f'class="lbl s-{column}"'
+        assert marker not in solo
 
     # The relative variant swaps the calendar axis for one measured in project
     # age, so it must carry no calendar year among its tick labels.
@@ -660,8 +676,36 @@ def test_star_history_chart_renders():
     assert "years</text>" in aged
     years = {str(year) for year in range(2000, 2100)}
     assert not years.intersection(re.findall(r">([^<>]+)</text>", aged))
-    for column in plotted:
-        assert f'class="lbl s-{column}"' in aged
+    for key in plotted:
+        column, prior, _ = key.partition(stars_update.PREDECESSOR_SUFFIX)
+        marker = f'class="lbl prior s-{column}"' if prior else f'class="lbl s-{column}"'
+        assert marker in aged
+
+
+def test_star_history_predecessor_stops_at_handover():
+    """Check a forerunner's plotted line ends where its successor's begins.
+
+    The archived repository still collects the odd star, so its record runs to
+    today. Drawing that tail would put it alongside its successor for the whole
+    width of the chart, reading as two live projects rather than one handover.
+    """
+    grouped = stars_update.series(stars_update.load_store())
+    assert stars_update.PREDECESSOR_REPOS, "expected a forerunner to be declared"
+
+    for column in stars_update.PREDECESSOR_REPOS:
+        key = column + stars_update.PREDECESSOR_SUFFIX
+        if key not in grouped or column not in grouped:
+            continue
+        handover = grouped[column][0][0]
+        assert grouped[key][-1][0] <= handover
+        # The clip is a plotting decision, never a deletion: the store still
+        # holds the points the chart drops.
+        stored = [
+            record["date"]
+            for record in stars_update.load_store().values()
+            if record["repo"] == stars_update.PREDECESSOR_REPOS[column]
+        ]
+        assert max(stored) >= handover.isoformat()
 
 
 def test_star_history_salvages_truncated_gzip():
@@ -1244,20 +1288,16 @@ def test_managers_index_table_renders():
     assert lines[0] == f"`mpm` can drive {len(pool)} package managers:"
     # The leading column carries the brand marks and is headerless.
     assert re.fullmatch(
-        r"\|\s+\| Manager\s+\| ID\s+\|\s+Unmaintained\s+\|\s+Stars\s+\|"
-        r"\s+Last release\s+\|\s+Last commit\s+\|\s+Platforms\s+\|",
+        r"\|\s+\| Manager\s+\| ID\s+\|\s+Unmaintained\s+\|\s+Platforms\s+\|",
         lines[2],
     )
-    # Every sampled reading reaches the table it was collected for, thousands
-    # separated so a five-figure count is read at a glance.
+    # The upstream readings moved to each manager's own card, so the index must
+    # no longer spend three columns on them.
     upstreams = _docs._manager_upstreams()
     assert upstreams
-    for manager_id, record in upstreams.items():
-        assert manager_id in pool
-        assert f"{record['stars']:,}" in table
-        for field in ("release", "commit"):
-            if field in record:
-                assert record[field] in table
+    assert set(upstreams).issubset(pool)
+    for header in ("Stars", "Last release", "Last commit"):
+        assert header not in lines[2]
     unmaintained = 0
     for mid, manager in pool.items():
         # Both the name and the identifier link to the manager's page.
@@ -1278,7 +1318,33 @@ def test_managers_index_table_renders():
     # The sourcing note closes the block as its own paragraph: glued to the last
     # row, it would parse as one more row of the table.
     assert lines[-2] == ""
-    assert lines[-1].startswith("Stars, releases and commits are read from")
+    assert lines[-1].startswith("Each manager's own page carries its upstream")
+
+
+def test_manager_card_carries_upstream_readings():
+    """Check each sampled upstream reading reaches the card of its manager.
+
+    The stars, newest release and newest commit used to be three columns of the
+    index; they now belong to the page devoted to the tool they describe, so
+    this follows them there rather than lapsing when the columns went.
+    """
+    upstreams = _docs._manager_upstreams()
+    assert upstreams, "no upstream readings sampled yet"
+
+    for manager_id, record in upstreams.items():
+        assert manager_id in pool
+        card = _docs.manager_card(manager_id)
+        # Thousands separated, so a five-figure count is read at a glance.
+        assert f"{record['stars']:,}" in card
+        for field in ("release", "commit"):
+            if record.get(field):
+                assert record[field] in card
+
+    # A manager whose upstream cannot be measured simply carries no such row,
+    # rather than an empty one.
+    unmeasured = set(pool) - set(upstreams)
+    for manager_id in sorted(unmeasured)[:5]:
+        assert "Upstream stars" not in _docs.manager_card(manager_id)
 
 
 def test_matrix_blocks_in_sync():

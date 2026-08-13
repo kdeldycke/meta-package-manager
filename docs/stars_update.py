@@ -132,6 +132,30 @@ off the chart on purpose: Homebrew outweighs the rest by an order of magnitude
 and flattens all five curves onto the axis.
 """
 
+PREDECESSOR_REPOS = {
+    "topgrade": "r-darwish/topgrade",
+}
+"""Retired forerunner of a tracked project, plotted beside its successor.
+
+`topgrade-rs/topgrade` is a continuation rather than a fresh start: the
+original was archived at 3308 stars, and the successor opened its own
+repository in 2022 to carry the project on. Its curve therefore begins with an
+audience it inherited, not one it gathered, which is exactly what the
+by-age chart would otherwise misreport as the fastest start in the field.
+
+Drawn in the successor's own hue to tie the two together, but dashed and never
+joined to it: the counts are independent tallies on separate repositories, so a
+continuous line would claim a running total that no repository ever showed.
+"""
+
+PREDECESSOR_SUFFIX = ":prior"
+"""Marks a predecessor's series key, appended to the column it belongs to.
+
+Keeps `TRACKED_REPOS` exactly the benchmark's own columns, which a conformance
+test pins, while still letting the collector and the renderer address the extra
+curve through the same code paths.
+"""
+
 SOURCES = {
     "created": "Repository creation, the one date a star count is known to be 0.",
     "github": "Exact per-star timestamps, surviving stars only (admin token).",
@@ -421,6 +445,19 @@ abbreviated `4.4k` shown to readers, so a capture yields an integer, not an
 estimate. The layout was reworked twice in the window we mine, hence the
 alternatives.
 """
+
+
+def collected_repos() -> dict[str, str]:
+    """Every repository the collector touches, keyed by its series name.
+
+    The benchmark columns plus the retired forerunners of
+    {data}`PREDECESSOR_REPOS`, whose keys carry {data}`PREDECESSOR_SUFFIX` so a
+    caller can tell the two apart without a second lookup.
+    """
+    repos = dict(TRACKED_REPOS)
+    for column, slug in PREDECESSOR_REPOS.items():
+        repos[column + PREDECESSOR_SUFFIX] = slug
+    return repos
 
 
 def load_store() -> dict[tuple[str, str], dict]:
@@ -803,7 +840,7 @@ def sample(store: dict[tuple[str, str], dict]) -> int:
     """
     today = datetime.now(tz=timezone.utc).date().isoformat()
     changed = 0
-    for column, repo in TRACKED_REPOS.items():
+    for column, repo in collected_repos().items():
         try:
             payload = gh_api(f"repos/{repo}")
         except subprocess.CalledProcessError as error:
@@ -860,8 +897,15 @@ def backfill_github(store: dict[tuple[str, str], dict], repo: str) -> int:
     return changed
 
 
-def wayback_captures(repo: str) -> list[str]:
-    """List one archived capture per month of a repository's GitHub page."""
+def wayback_captures(repo: str) -> list[str] | None:
+    """List one archived capture per month of a repository's GitHub page.
+
+    Returns `None` when the index itself could not be read, which is not the
+    same answer as an empty list and must not be reported as one: the archive
+    fails this query as readily as any other, and a run that treats the outage
+    as "this repository was never archived" skips it silently and for good. A
+    repository with 63 captures was passed over exactly that way.
+    """
     query = urllib.parse.urlencode({
         "url": f"github.com/{repo}",
         "output": "json",
@@ -869,13 +913,17 @@ def wayback_captures(repo: str) -> list[str]:
         "filter": "statuscode:200",
         "collapse": "timestamp:6",
     })
-    payload = fetch("https://web.archive.org/cdx/search/cdx?" + query, tries=4)
-    if not payload or not payload.strip():
+    payload = fetch("https://web.archive.org/cdx/search/cdx?" + query, tries=6)
+    if payload is None:
+        return None
+    if not payload.strip():
+        # A genuinely empty index answers 200 with no rows.
         return []
     try:
         return [row[0] for row in json.loads(payload)[1:]]
     except (json.JSONDecodeError, IndexError):
-        return []
+        # Unparseable is a fault, not an absence: same reasoning as above.
+        return None
 
 
 def backfill_wayback(store: dict[tuple[str, str], dict], repo: str) -> int:
@@ -896,6 +944,14 @@ def backfill_wayback(store: dict[tuple[str, str], dict], repo: str) -> int:
         return 0
 
     stamps = wayback_captures(repo)
+    if stamps is None:
+        # Loud, and distinct from "nothing was ever archived": this repository
+        # still has a past to mine, so the next run must come back to it.
+        tally = ", ".join(
+            f"{count}x {reason}" for reason, count in LAST_FETCH_REASONS.most_common()
+        )
+        print(f"  capture index unreadable ({tally or 'no response'}), retry later")
+        return 0
     print(f"  {len(stamps)} monthly captures")
     changed = 0
     for stamp in stamps:
@@ -940,7 +996,7 @@ def backfill_wayback(store: dict[tuple[str, str], dict], repo: str) -> int:
 def series(store: dict[tuple[str, str], dict]) -> dict[str, list[tuple[date, int]]]:
     """Group the history into one chronological series per benchmark column."""
     grouped: dict[str, list[tuple[date, int]]] = {}
-    for column, repo in TRACKED_REPOS.items():
+    for column, repo in collected_repos().items():
         # Coerced rather than trusted: the records come back from JSON as
         # `Any`, and letting that leak makes every downstream chart
         # coordinate untyped too.
@@ -951,6 +1007,24 @@ def series(store: dict[tuple[str, str], dict]) -> dict[str, list[tuple[date, int
         )
         if points:
             grouped[column] = points
+
+    # A forerunner's line stops where its successor's begins. The archived
+    # repository keeps collecting the odd star to this day, and plotting that
+    # tail would run it the whole width of the chart alongside the successor,
+    # reading as two projects living side by side. Cutting it at the handover
+    # shows what actually happened: one audience stopped being counted here and
+    # started being counted there. The store keeps the discarded points, so the
+    # record stays complete even though the chart does not draw them.
+    for column in PREDECESSOR_REPOS:
+        key = column + PREDECESSOR_SUFFIX
+        if key not in grouped or column not in grouped:
+            continue
+        handover = grouped[column][0][0]
+        clipped = [point for point in grouped[key] if point[0] <= handover]
+        if clipped:
+            grouped[key] = clipped
+        else:
+            del grouped[key]
     return grouped
 
 
@@ -1060,15 +1134,29 @@ def render_chart(
 
     # Series, drawn in the fixed palette order so a column keeps its hue.
     labels: list[tuple[float, str, str]] = []
-    for column in TRACKED_REPOS:
+    for key in collected_repos():
         # Distinct from the `points` bound above, which holds dates rather
         # than the day offsets this loop plots.
-        shifted = offsets.get(column)
+        shifted = offsets.get(key)
         if not shifted:
             continue
+        # The separator, not the tail: `partition` returns what follows it,
+        # which for a key ending in the suffix is always the empty string.
+        column, prior, _ = key.partition(PREDECESSOR_SUFFIX)
         coords = " ".join(f"{x_of(x):.1f},{y_of(s):.1f}" for x, s in shifted)
-        parts.append(f'<polyline class="s-{column}" points="{coords}"/>')
-        _end_offset, end_stars = shifted[-1]
+        css = f"s-{column} prior" if prior else f"s-{column}"
+        parts.append(f'<polyline class="{css}" points="{coords}"/>')
+        end_offset, end_stars = shifted[-1]
+        if prior:
+            # Annotated where it stops rather than in the right margin: a
+            # forerunner ends mid-chart, and a label parked at the edge would
+            # read as its final position on a date it never reached.
+            parts.append(
+                f'<text class="lbl prior s-{column}" '
+                f'x="{x_of(end_offset) + 6:.1f}" '
+                f'y="{y_of(end_stars) - 8:.1f}">retired · {end_stars:,}</text>'
+            )
+            continue
         labels.append((y_of(end_stars), column, f"{end_stars:,}"))
 
     # Direct labels at each line's end. Three light-mode hues sit below 3:1
@@ -1117,6 +1205,8 @@ def render_chart(
     .grid{{stroke:#0b0b0b;stroke-opacity:.10;stroke-width:1}}
     .axis{{font-size:12px;fill:#52514e}}
     polyline{{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}}
+    .prior{{stroke-dasharray:6 4;stroke-width:1.5;opacity:.65}}
+    text.prior{{font-size:11px;font-weight:600;opacity:1}}
 {css_light}
     @media (prefers-color-scheme: dark) {{
       text{{fill:#fff}}
@@ -1187,12 +1277,12 @@ def main() -> int:
         print(f"\n{moved} upstream reading(s) updated in {UPSTREAMS.name}")
 
     if args.backfill_github:
-        for column, repo in TRACKED_REPOS.items():
+        for column, repo in collected_repos().items():
             print(f"Reconstructing {column} ({repo}):")
             changed += backfill_github(store, repo)
 
     if args.backfill_wayback:
-        for column, repo in TRACKED_REPOS.items():
+        for column, repo in collected_repos().items():
             print(f"Mining archives for {column} ({repo}):")
             changed += backfill_wayback(store, repo)
 

@@ -211,6 +211,7 @@ UPSTREAM_REPOS = {
     "lazy": "https://github.com/folke/lazy.nvim",
     "macports": "https://github.com/macports/macports-base",
     "mas": "https://github.com/mas-cli/mas",
+    "micro": "https://github.com/micro-editor/micro",
     "mise": "https://github.com/jdx/mise",
     "nix": "https://github.com/NixOS/nix",
     "npm": "https://github.com/npm/cli",

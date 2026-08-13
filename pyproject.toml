@@ -73,6 +73,7 @@ keywords = [
   "mageia",
   "mas",
   "meta-package-manager",
+  "micro",
   "mise",
   "neovim",
   "netbsd",
@@ -1204,6 +1205,11 @@ color = "bfdadc"
 description = "mas"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: micro"
+color = "bfdadc"
+description = "micro"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: mpm"
 color = "bfdadc"
 description = "mpm"
@@ -1562,6 +1568,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/macports.*", "tests/*mac
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mas"
 any-glob-to-any-file = [ "meta_package_manager/managers/mas.*", "tests/*mas*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: micro"
+any-glob-to-any-file = [ "meta_package_manager/managers/micro.*", "tests/*micro*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mpm"

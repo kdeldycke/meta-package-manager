@@ -1,0 +1,135 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# micro is a terminal text editor (https://micro-editor.github.io), and what is
+# wrapped here is its plugin manager. See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# An editor's plugin manager usually fails the test that decides whether a tool
+# can be driven with nobody at the keyboard, and micro passes it outright: the
+# `-plugin` flag is handled before the screen is ever initialized, writing to
+# standard output and exiting, so no terminal is required and no interface is
+# drawn. It also owns a real registry rather than fetching whatever Git URL a
+# user names: a curated channel of plugin manifests, each carrying semantic
+# versions and dependency constraints that micro resolves against its own
+# version.
+#
+# No logo is declared: Simple Icons carries no mark for the editor, so the
+# manager page keeps its default package glyph rather than borrowing an
+# unrelated one.
+#
+# ```{warning}
+# micro always exits zero from a plugin command, whatever happened. Installing
+# a plugin that does not exist, a failed download and an unresolvable
+# dependency all report success, because the flag handler exits zero
+# unconditionally and writes its diagnosis to standard output rather than to
+# standard error. mpm reports what the tool reports, so a failed install here
+# shows as a success. Reading the output is the only way to tell, and this
+# definition deliberately does not try to guess at error strings that upstream
+# never promised to keep.
+# ```
+#
+# ```{note}
+# The inventory reports the plugins micro has *loaded*, not every plugin on
+# disk: one installed but disabled in the editor's settings is skipped. That is
+# micro's own notion of what is installed, and it is the set its own commands
+# act on.
+# ```
+#
+# No `outdated`: nothing non-mutating reports a remote version. The catalog
+# listing prints names alone, the search command prints no versions at all, and
+# the only comparison against the registry happens inside the update, which
+# installs as it goes. `upgrade --all` is unaffected.
+#
+# No `sync`: there is no command that refreshes the plugin channel without also
+# acting on it. No `cleanup` either.
+#
+# No escalation: plugins live under the editor's own configuration directory,
+# which follows `$MICRO_CONFIG_HOME` or the XDG configuration home before
+# falling back to `~/.config/micro`.
+
+[mpm.managers.micro]
+name = "micro editor"
+homepage_url = "https://micro-editor.github.io"
+platforms = ["all_platforms"]
+cli_names = ["micro"]
+requirement = ">=2.0.0"
+# The release that introduced the `-plugin` flag. Earlier micros managed
+# plugins only from inside the editor, which is not drivable.
+# Note the single dash: micro's flags are Go's, not GNU's.
+version_cli_options = ["-version"]
+# `micro -version` prints the version first, then a commit hash and a build
+# date on their own lines. A build made without the release flags reports
+# `0.0.0-unknown` here rather than omitting the line.
+version_regexes = ['^Version:[ \t]+(?P<version>\S+)']
+
+# Three line shapes coexist, and one alternation covers them. A regular plugin
+# renders as `name (version)`. A plugin bundled with the editor renders as
+# `name (built-in)`, matched by the first branch so the marker is consumed
+# without being mistaken for a version: such a plugin is real and loaded, but
+# has no version of its own and can be neither removed nor updated. And the
+# init script renders as a bare name on recent releases. Anchoring at both ends
+# is what rejects the introductory sentence, which carries spaces.
+[mpm.managers.micro.operations.installed]
+args = ["-plugin", "list"]
+regex = '^(?P<package_id>\S+)(?:[ \t]+\(built-in\)|[ \t]+\((?P<installed_version>[^)]+)\))?$'
+
+# micro's own search renders each hit as a multi-line block, which no per-line
+# pattern can reassemble, and prints no version in any case. The catalog
+# listing is used instead: it names every installable plugin, one per line, and
+# mpm narrows it. The heading carries a space and so cannot be read as a name.
+#
+# The order is not stable between runs, the listing being assembled from
+# concurrent fetches, which is why no sample of it is shipped below.
+[mpm.managers.micro.operations.search]
+args = ["-plugin", "available"]
+regex = '^(?P<package_id>\S+)$'
+
+# Version pinning is not offered by micro: the installer resolves whatever
+# version satisfies the constraints, so there is nothing to pin to.
+[mpm.managers.micro.operations.install]
+args = ["-plugin", "install", "{package_id}"]
+
+[mpm.managers.micro.operations.remove]
+args = ["-plugin", "remove", "{package_id}"]
+
+# Naming a plugin genuinely restricts the update to it, rather than quietly
+# updating everything. micro's own version is always folded in as a constraint,
+# so a plugin demanding a newer editor is held back instead of breaking it.
+[mpm.managers.micro.operations.upgrade_one]
+args = ["-plugin", "update", "{package_id}"]
+
+[mpm.managers.micro.operations.upgrade_all]
+args = ["-plugin", "update"]
+
+# Output samples locking the version probe and the installed parser. Consumed
+# by tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# Both are real transcripts. The listing is from a checked-in dotfiles
+# repository running a recent micro, and carries the three shapes together:
+# versioned plugins alongside bundled ones. No search fixture: that listing's
+# order varies between runs, so nothing about it would be reproducible.
+[samples.version]
+output = """
+Version: 2.0.12
+Commit hash: c2cebaa3
+Compiled on May 16, 2024"""
+expected = "2.0.12"
+
+[[samples.installed]]
+output = """
+The following plugins are currently installed:
+editorconfig (1.0.0)
+fzf (1.1.1)
+lsp (0.6.2)
+autoclose (built-in)
+comment (built-in)
+diff (built-in)"""
+packages = [
+  { id = "editorconfig", version = "1.0.0" },
+  { id = "fzf", version = "1.1.1" },
+  { id = "lsp", version = "0.6.2" },
+  { id = "autoclose" },
+  { id = "comment" },
+  { id = "diff" },
+]

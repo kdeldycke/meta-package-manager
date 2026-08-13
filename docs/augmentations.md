@@ -42,6 +42,7 @@ print(augmentations_table())
 | [`juliaup`](managers/juliaup.md)           |                      |              |      ✅      |       ✅        |
 | [`krew`](managers/krew.md)                 |                      |              |      ✅      |       ✅        |
 | [`mas`](managers/mas.md)                   |                      |              |      ✅      |       ✅        |
+| [`micro`](managers/micro.md)               |                      |              |      ✅      |       ✅        |
 | [`mise`](managers/mise.md)                 |                      |              |      ✅      |                 |
 | [`nix`](managers/nix.md)                   |                      |              |      ✅      |       ✅        |
 | [`npm`](managers/npm.md)                   |                      |              |      ✅      |                 |

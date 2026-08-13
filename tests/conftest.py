@@ -527,7 +527,7 @@ manager_classes_params = pytest.mark.parametrize(
 SHORT_FAILURE_TIMEOUT = 10
 """Seconds to cap a destructive install that is *expected* to fail.
 
-The managers in {data}`INSTALL_REMOVE_BLOCKERS` cannot complete a real install in the
+The managers in {data}`INSTALL_REMOVE_BLOCKED_WHEN` cannot complete a real install in the
 test environment. Most fail within a second (a permission error, a missing remote, an
 empty search), but a few (`scoop` and `sfsu` on Windows, `pwsh-gallery` on macOS)
 hang with no error until the state-change timeout would otherwise elapse. Capping their
@@ -572,7 +572,7 @@ def cpan_install_blocked() -> bool:
     return is_linux() and is_x86_64()
 
 
-INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
+INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # choco installs to an admin-only location the unelevated CI process cannot write to.
     "choco": is_github_ci,
     # cpan writes to the system Perl tree, out of reach only on the x86 Linux runners.
@@ -588,7 +588,7 @@ INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
     "flatpak": is_linux,
     # fwupd flashes firmware; the CI VMs expose no flashable hardware, so the install
     # exits non-zero.
-    "fwupd": lambda: True,
+    "fwupd": True,
     # gem carries no blocker: RubyGems falls back to a user install when the system
     # gem directory is not writable, so the round-trip completes on every runner,
     # Linux included. The `is_linux` blocker that used to sit here asserted a failure
@@ -626,10 +626,16 @@ INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
     "snap": lambda: is_linux() and not is_github_ci(),
     # steamcmd can only install titles owned by an authenticated account; the runners'
     # anonymous session is not logged in, so the install fails. No environment satisfies it.
-    "steamcmd": lambda: True,
+    "steamcmd": True,
 }
-"""Managers that cannot complete a real install in a given environment, mapped to the
-predicate that is True where the manager is known to be uninstallable.
+"""Managers that cannot complete a real install, mapped to the condition under which
+that is true. Read an entry as "`<manager>` is blocked when `<condition>`".
+
+The name carries the polarity so the values do not have to: a bare `is_github_ci` next
+to a manager id reads as a *statement about* that manager unless the mapping says which
+way round it goes. The inverse shape (listing where each manager *is* installable) was
+weighed and dropped: fifteen of these seventeen entries are naturally phrased as "blocked
+when X", so inverting would spell them all as negation lambdas to spare the two constants.
 
 Rather than skip these managers (which would also drop their dispatch coverage and any
 signal that they still fail the *expected* way), the destructive install/remove test drives
@@ -639,10 +645,12 @@ each one's `install` anyway, caps the doomed CLI call with
 skipped, since the failed install left nothing to remove and the working managers already
 cover the removal path.
 
-The predicate is a zero-argument callable: `is_linux` for the unprivileged Linux runner,
-`is_github_ci` for GitHub Actions only (a configured local box can still install),
-`lambda: True` for managers no environment can install, or a live probe like
-`gh_unauthenticated` when installability hinges on host state rather than platform.
+A condition is either a plain `True` for the managers no environment can install, or a
+zero-argument callable evaluated per host: `is_linux` for the unprivileged Linux runner,
+`is_github_ci` for GitHub Actions only (a configured local box can still install), or a
+live probe like `gh_unauthenticated` when installability hinges on host state rather than
+platform. Resolve one through {func}`install_remove_blocked` rather than calling it
+directly, which is what keeps the constants from needing a `lambda` wrapper.
 
 ```{note}
 
@@ -654,6 +662,18 @@ reaching their privileged install errors), and drifts across tool versions, OS i
 and locales. mpm's failure message is identical everywhere, so the test stays robust.
 ```
 """
+
+
+def install_remove_blocked(manager_id: str) -> bool:
+    """Whether `manager_id` cannot complete a real install here.
+
+    Resolves the {data}`INSTALL_REMOVE_BLOCKED_WHEN` condition, which is either a
+    constant or a callable evaluated against the running host. A manager with no
+    entry is not blocked.
+    """
+    condition = INSTALL_REMOVE_BLOCKED_WHEN.get(manager_id, False)
+    return condition() if callable(condition) else condition
+
 
 # Unmaintained managers are excluded: their upstreams are unreliable or gone, so a real
 # install/remove would only contribute flakiness (see PackageManager.unmaintained).

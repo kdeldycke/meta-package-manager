@@ -23,8 +23,8 @@ import pytest
 from meta_package_manager.pool import pool
 
 from .conftest import (
-    INSTALL_REMOVE_BLOCKERS,
     SHORT_FAILURE_TIMEOUT,
+    install_remove_blocked,
     maintained_manager_ids_and_dummy_package,
 )
 from .test_cli import CLISubCommandTests
@@ -116,7 +116,7 @@ class TestInstallRemove(CLISubCommandTests):
         ```{note}
 
         Managers that cannot complete a real install in a given environment are not
-        skipped: they are listed in `INSTALL_REMOVE_BLOCKERS` (`conftest.py`) and
+        skipped: they are listed in `INSTALL_REMOVE_BLOCKED_WHEN` (`conftest.py`) and
         driven anyway. The blocked `install` is capped at `SHORT_FAILURE_TIMEOUT`
         and asserted to fail the stable mpm way (exit `1` plus a ``Could not
         install:` message). It runs at `--verbosity INFO``: the minimum level at
@@ -126,8 +126,7 @@ class TestInstallRemove(CLISubCommandTests):
         remove, and the working managers already cover the removal path.
         ```
         """
-        blocker = INSTALL_REMOVE_BLOCKERS.get(manager_id)
-        if blocker and blocker():
+        if install_remove_blocked(manager_id):
             # This manager cannot complete a real install here. Drive the doomed install
             # anyway, capped at SHORT_FAILURE_TIMEOUT, and assert it fails the stable mpm
             # way. No remove leg: the failed install left nothing to remove, and the

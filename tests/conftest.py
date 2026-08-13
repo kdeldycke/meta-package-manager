@@ -376,6 +376,11 @@ PACKAGE_IDS = {
     "gem": "paint",
     # A tiny script-based extension (a bare git clone), from a GitHub CLI maintainer.
     "gh-ext": "mislav/gh-branch",
+    # A tool version, which is what ghcup calls a package. `hls` rather than a
+    # GHC: every ghcup artifact is a large download, and the language server is
+    # among the lighter ones. Pinned so the round-trip does not depend on
+    # whatever the current release happens to be.
+    "ghcup": "hls-2.9.0.1",
     "guix": "hello",
     "haxelib": "hxjsonast",  # Tiny zero-dependency JSON parser.
     "krew": "ctx",  # Tiny context-switcher plugin of krew's own index.

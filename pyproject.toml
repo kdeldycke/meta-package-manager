@@ -53,6 +53,7 @@ keywords = [
   "fwupd",
   "gem",
   "gh-ext",
+  "ghcup",
   "github cli",
   "gnome",
   "gnome-shell",
@@ -1153,6 +1154,11 @@ color = "bfdadc"
 description = "gh-ext"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: ghcup"
+color = "bfdadc"
+description = "ghcup"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: guix"
 color = "bfdadc"
 description = "guix"
@@ -1483,6 +1489,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/gem.*", "tests/*gem*" ]
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: gh-ext"
 any-glob-to-any-file = [ "meta_package_manager/managers/gh_ext.*", "tests/*gh_ext*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: ghcup"
+any-glob-to-any-file = [ "meta_package_manager/managers/ghcup.*", "tests/*ghcup*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: guix"

@@ -36,6 +36,7 @@ print(augmentations_table())
 | [`flatpak`](managers/flatpak.md)           |                      |              |      ✅      |       ✅        |
 | [`gem`](managers/gem.md)                   |                      |              |              |       ✅        |
 | [`gh-ext`](managers/gh-ext.md)             |                      |              |      ✅      |       ✅        |
+| [`ghcup`](managers/ghcup.md)               |                      |              |      ✅      |       ✅        |
 | [`guix`](managers/guix.md)                 |                      |              |      ✅      |       ✅        |
 | [`haxelib`](managers/haxelib.md)           |                      |              |      ✅      |       ✅        |
 | [`krew`](managers/krew.md)                 |                      |              |      ✅      |       ✅        |

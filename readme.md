@@ -115,6 +115,7 @@ Meta Package Manager,flatpak,1
 Meta Package Manager,fwupd,1
 Meta Package Manager,gem,1
 Meta Package Manager,gh-ext,1
+Meta Package Manager,ghcup,1
 Meta Package Manager,guix,1
 Meta Package Manager,haxelib,1
 Meta Package Manager,krew,1
@@ -223,6 +224,7 @@ print(operation_matrix()[0])
 | [`fwupd`](https://mpm.run/managers/fwupd.html)                                                 | >= 1.9.5     |          |      🐧       |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |          |   ✓    |           |          |
 | [`gem`](https://mpm.run/managers/gem.html)                                                     | >= 2.5       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`gh-ext`](https://mpm.run/managers/gh-ext.html)                                               | >= 2         |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`ghcup`](https://mpm.run/managers/ghcup.html)                                                 | >= 0.2.1     |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |   ✓    |     ✓     |          |
 | [`guix`](https://mpm.run/managers/guix.html)                                                   |              |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`haxelib`](https://mpm.run/managers/haxelib.html)                                             | >= 4         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`krew`](https://mpm.run/managers/krew.html)                                                   | >= 0.4       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |

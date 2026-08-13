@@ -140,6 +140,14 @@ icons:
     - chromebrew
     source: https://www.google.com/chrome
     title: Google Chrome
+  haskell:
+    contrast_on_light: 7.19
+    hex: 5D4F85
+    license: CC0-1.0
+    managers:
+    - ghcup
+    source: https://wiki.haskell.org/Thompson-Wheeler_logo
+    title: Haskell
   haxe:
     contrast_on_light: 2.72
     hex: EA8220

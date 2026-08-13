@@ -267,8 +267,6 @@ linkcheck_ignore = [
     r"https://www\.npmjs\.com",
     r"https://(www\.)?patreon\.com",
     r"https://www\.tug\.org/",
-    # star-history.com renders chart fragments client-side.
-    r"https://star-history\.com/",
     # GitHub fragment anchors are rendered client-side and not visible to linkcheck.
     r"https://github\.com/kdeldycke/click-extra#",
     # GitHub README tab fragments are rendered client-side.

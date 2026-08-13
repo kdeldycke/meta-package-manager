@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Plot the GitHub star history of `mpm` and its benchmarked peers from a locally sampled database, replacing the star-history.com embeds GitHub's stargazer API restriction broke. `docs/stars_update.py` snapshots the aggregate star count of every tracked repository weekly, reconstructs `mpm`'s own curve from per-star timestamps, backfills the competitors from archived GitHub pages, and renders the charts as committed SVGs.
+- [mpm] Add a star chart plotted against each project's age instead of the calendar, alongside the absolute one on the benchmark page. Every series is anchored at its repository's creation date, the only zero-star origin the five share.
 - [bar-plugin,gnome-shell,mpm] Publish the documentation at `https://mpm.run`. Every absolute link in `readme.md`, the benchmark tables, the packaging specs and the extension metadata points at the new origin; the former `kdeldycke.github.io` URLs redirect to it.
 - [mpm] Emit a canonical URL on every documentation page, plus a `sitemap.xml` listing all of them and a `robots.txt` pointing crawlers at it.
 - [mpm] Open every installation method with a command that works today. The Alpine Linux, Chocolatey, Nix and Void Linux tabs carry the condensed build recipe from their packaging section instead of a one-liner the reader cannot run yet, and the pending channels close on an admonition inviting support on their upstream pull request.

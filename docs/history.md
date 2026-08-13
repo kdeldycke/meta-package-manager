@@ -10,4 +10,6 @@ With its complexity increasing, it was [decided to move the plugin](https://gith
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=kdeldycke/meta-package-manager&type=Date)](https://star-history.com/#kdeldycke/meta-package-manager&Date)
+![Star history of mpm](assets/star-history-mpm.svg)
+
+Reconstructed from the timestamp of every star the repository still holds, so the curve dips where followers were lost rather than only ever climbing. See the [benchmark](benchmark.md#popularity) for the same history plotted against competing tools.

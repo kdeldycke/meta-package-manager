@@ -18,8 +18,10 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import json
 import re
 import shutil
+from datetime import date, datetime, timezone
 from itertools import permutations
 from pathlib import Path
 
@@ -62,6 +64,20 @@ def _load_docs_update():
 
 
 docs_update = _load_docs_update()
+
+
+def _load_stars_update():
+    """Load `docs/stars_update.py` by path, like its `docs_update` sibling."""
+    spec = importlib.util.spec_from_file_location(
+        "stars_update",
+        Path(__file__).parent.parent / "docs" / "stars_update.py",
+    )
+    module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    return module
+
+
+stars_update = _load_stars_update()
 
 
 """ Test all non-code artifacts depending on manager definitions.
@@ -489,6 +505,117 @@ def test_benchmark_table_renders():
     assert sum(line.count("](managers/") for line in lines) == len(pool)
     # ☠️ marks what mpm never wrapped, so it must never land on a pool manager.
     assert "[☠️](https://github.com/kdeldycke" not in table
+
+
+def test_star_history_repos_match_benchmark():
+    """Check the tracked repositories are exactly `mpm` plus every competitor.
+
+    The chart and the benchmark's own columns must never drift apart: a
+    competitor added to the comparison without a repository to sample would
+    silently go unplotted.
+    """
+    assert set(stars_update.TRACKED_REPOS) == {"mpm", *_docs.BENCHMARK_COMPETITORS}
+    for column, slug in stars_update.TRACKED_REPOS.items():
+        assert column == column.lower()
+        owner, _, name = slug.partition("/")
+        assert owner and name, f"{column} needs an owner/name slug, got {slug!r}"
+    # Every plotted series needs a hue, in the same fixed order.
+    assert list(stars_update.SERIES_COLORS) == list(stars_update.TRACKED_REPOS)
+
+
+def test_star_history_store_well_formed():
+    """Check the committed star history keeps the shape its renderer expects.
+
+    Guards the file a scheduled job appends to unattended: a duplicated day, a
+    repository that left the benchmark, or an unknown provenance would all
+    surface here rather than as a misdrawn chart.
+    """
+    records = json.loads(stars_update.STORE.read_text(encoding="UTF-8"))
+    assert isinstance(records, list)
+    assert records, "no star history recorded yet"
+
+    tracked = set(stars_update.TRACKED_REPOS.values())
+    seen = set()
+    for record in records:
+        assert set(record) == {"date", "repo", "source", "stars"}
+        assert record["repo"] in tracked
+        assert record["source"] in stars_update.SOURCES
+        assert isinstance(record["stars"], int)
+        assert record["stars"] >= 0
+        # Dates are plain ISO days, never timestamps: the chart plots daily.
+        day = date.fromisoformat(record["date"])
+        assert day <= datetime.now(tz=timezone.utc).date()
+        key = (record["repo"], record["date"])
+        assert key not in seen, f"duplicate record for {key}"
+        seen.add(key)
+
+    # Sorted by repository then date, so a scheduled commit reads as an append.
+    keys = [(r["repo"], r["date"]) for r in records]
+    assert keys == sorted(keys)
+
+
+def test_star_history_chart_renders():
+    """Check the chart generator still draws every tracked series.
+
+    Like the benchmark table, the SVG is generated rather than hand-written, so
+    this guards the generator against crashes and structural regressions.
+    """
+    store = stars_update.load_store()
+    svg = stars_update.render_chart(store)
+    assert svg.startswith("<svg ")
+    assert svg.rstrip().endswith("</svg>")
+    # An accessible name, since the chart carries meaning no caption repeats.
+    assert 'role="img"' in svg and "aria-label=" in svg
+
+    plotted = {column for column, points in stars_update.series(store).items()}
+    for column in plotted:
+        # Identity is never colour alone: every series is directly labelled.
+        assert f'class="lbl s-{column}"' in svg
+        assert stars_update.SERIES_COLORS[column][0] in svg
+        assert stars_update.SERIES_COLORS[column][1] in svg
+    # The dark steps are selected, not an automatic flip of the light ones.
+    assert "prefers-color-scheme: dark" in svg
+
+    # The single-series variant plotted on the history page drops the peers.
+    solo = stars_update.render_chart(store, columns=("mpm",))
+    assert 'class="lbl s-mpm"' in solo
+    for column in plotted - {"mpm"}:
+        assert f'class="lbl s-{column}"' not in solo
+
+    # The relative variant swaps the calendar axis for one measured in project
+    # age, so it must carry no calendar year among its tick labels.
+    aged = stars_update.render_chart(store, relative=True)
+    assert "years</text>" in aged
+    years = {str(year) for year in range(2000, 2100)}
+    assert not years.intersection(re.findall(r">([^<>]+)</text>", aged))
+    for column in plotted:
+        assert f'class="lbl s-{column}"' in aged
+
+
+def test_star_history_series_start_at_creation():
+    """Check every tracked repository is anchored by a zero-star origin.
+
+    The relative chart measures each curve from its repository's creation, and
+    a competitor backfilled from the archives has no knowable first star: its
+    earliest capture already shows a count. Without the anchor its curve would
+    begin in mid-air, and the relative axis would have nothing to align on.
+    """
+    store = stars_update.load_store()
+    origins = {
+        record["repo"]: record
+        for record in store.values()
+        if record["source"] == "created"
+    }
+    for column, slug in stars_update.TRACKED_REPOS.items():
+        assert slug in origins, f"{column} has no creation anchor"
+        assert origins[slug]["stars"] == 0
+        # The anchor must precede every measurement of that repository.
+        later = [
+            record["date"]
+            for record in store.values()
+            if record["repo"] == slug and record["source"] != "created"
+        ]
+        assert all(day >= origins[slug]["date"] for day in later)
 
 
 def test_binaries_download_table_renders():

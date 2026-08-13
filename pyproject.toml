@@ -767,8 +767,6 @@ exclude = [
   "^https://www\\.npmjs\\.com/?$",
   "^https://(www\\.)?patreon\\.com/?$",
   "^https://www\\.tug\\.org/.*$",
-  # star-history.com renders chart fragments client-side; lychee can't see them.
-  "^https://star-history\\.com/.*$",
   # openclipart.org intermittently returns 500 for valid asset detail pages.
   "^https://openclipart\\.org/.*$",
 ]

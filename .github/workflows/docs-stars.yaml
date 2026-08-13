@@ -1,0 +1,82 @@
+---
+name: ⭐ Star history
+"on":
+  workflow_dispatch:
+  schedule:
+    # Weekly: the chart plots multi-year trends, so a finer cadence would only
+    # add commits without moving a curve. Deliberately not on push, following
+    # the schedule-only rule for anything sourced from a third party.
+    - cron: "41 5 * * 2"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Accumulate the star history the benchmark and history pages plot.
+#
+# GitHub restricted its stargazer endpoints to a repository's own admins on
+# 2026-06-30 (REST) and 2026-07-17 (GraphQL), which killed every third-party
+# star chart on the web, this project's two included. The aggregate
+# `stargazers_count` stayed public, so this job snapshots it weekly and commits
+# the result: a history that accrues here cannot be revoked upstream.
+#
+# Only the sampling needs the network. The docs build reads the committed JSON
+# and SVG, so it stays hermetic, exactly like the vendored brand marks.
+#
+# See `docs/stars_update.py` for the collection and rendering rationale.
+
+# Supply-chain cooldown: no package published within the window can be resolved
+# by any command in this workflow. Held equal to `[tool.repomatic]
+# minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
+jobs:
+
+  stars:
+    name: "Sample star counts and redraw the charts"
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # `main` is protected, so the default token cannot push the weekly
+          # commit: the toolkit PAT is the same route the autofix job takes.
+          token: ${{ secrets.REPOMATIC_PAT }}
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.12.1"
+
+      # The collector is pure standard library and shells out to `gh`, so it
+      # needs no project sync: `--no-project` skips resolving the environment
+      # entirely and still runs on an interpreter uv pins rather than whatever
+      # the runner image ships.
+      #
+      # `gh` inherits this token to read the aggregate counts, and the per-star
+      # timestamps of this repository, which only an admin token still sees.
+      - name: Sample star counts
+        env:
+          GH_TOKEN: ${{ secrets.REPOMATIC_PAT }}
+        run: >
+          uv --no-progress run --no-project --python 3.13 --
+          python docs/stars_update.py --sample --backfill-github
+
+      # Nothing to commit is the common case between two stars: the guard keeps
+      # the history free of empty weekly commits.
+      - name: Commit the new samples
+        run: |
+          set -e
+          if git diff --quiet -- docs/assets/; then
+            echo "No star count moved this week."
+            exit 0
+          fi
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add docs/assets/star-history.json docs/assets/star-history*.svg
+          git commit --message "Sample GitHub star history"
+          git push

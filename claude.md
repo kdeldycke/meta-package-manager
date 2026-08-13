@@ -4,7 +4,7 @@ This file provides guidance to [Claude Code](https://claude.ai/code) when workin
 
 ## Project overview
 
-Meta Package Manager (`mpm`) is a CLI that wraps multiple package managers (Homebrew, apt, pip, npm, etc.) behind a unified interface. It can list, search, install, upgrade, and remove packages across all supported managers simultaneously.
+Meta Package Manager (`mpm`) is a CLI that wraps multiple package managers (Homebrew, apt, pip, npm, etc.) behind a unified interface. It can list, search, install, upgrade, and remove packages across all supported managers simultaneously, and snapshot the whole inventory to a single file that restores it on another machine.
 
 ## Upstream conventions
 

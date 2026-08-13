@@ -1,0 +1,150 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# rustup is the Rust toolchain installer (https://rustup.rs). See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# The packages here are toolchains, not components. rustup exposes both, and
+# only one can be the inventory: a package is a `stable-aarch64-apple-darwin` or
+# a `1.62.0-x86_64-unknown-linux-gnu`, which is exactly the string `toolchain
+# install`, `toolchain uninstall` and `update` all accept, so every declared
+# operation addresses the same object. Components lose that on three counts, any
+# one of them decisive. They are scoped to a toolchain, so `clippy` on stable and
+# `clippy` on nightly are different installs wearing one name. They carry no
+# version of their own, being versioned by the toolchain that holds them. And a
+# bare `component list` answers for whichever toolchain is *active*, which would
+# make mpm's inventory depend on ambient state rather than on the machine.
+#
+# `installed` therefore reports no version, which is deliberate rather than an
+# omission: a toolchain listing carries none. `--verbose` appends the install
+# path, not a version, and the only per-toolchain version rustup will produce
+# comes from spawning that toolchain's own `rustc` once per entry, which is the
+# per-package follow-up call a definition cannot make. `outdated` supplies both
+# versions where it matters, and mpm's package model treats an installed version
+# as optional throughout.
+#
+# `rustup check` is what `outdated` runs, and its two quirks are both handled
+# rather than worked around. It exits 100 when updates exist, which needs no
+# declaration: mpm only counts a non-zero exit as a failure for a read-only query
+# when stderr is also non-empty, and a successful check writes nothing there.
+# And it appends a line for rustup's own binary, which the pattern excludes by
+# requiring a hyphen in the first field, a shape every toolchain triple has and
+# the bare `rustup` of that line does not.
+#
+# Every mutating operation forces `--no-self-update`. rustup otherwise replaces
+# its own binary as a side effect of installing or updating a toolchain, on all
+# three branches, which is not what a user asking mpm to upgrade a package
+# expects. Two exposures stay outside that flag's reach, both being global user
+# state rather than per-invocation: an `auto-self-update = check-only` setting is
+# consulted before the flag, and a non-empty `CI` disables self-update outright.
+#
+# No `search`: rustup has no registry to search, its channel names being a fixed
+# vocabulary. No `sync` and no `cleanup`: neither command exists. Purging the
+# download cache happens only as a side effect of an argument-less `rustup
+# update`, and cannot be invoked on its own.
+#
+# No escalation. rustup installs under `$RUSTUP_HOME` (`~/.rustup` by default),
+# has no system-wide mode, and actively refuses to run under sudo.
+#
+# ```{caution}
+# rustup's output has no stability guarantee, and its maintainers say so plainly:
+# the `1.28.0` reformatting of `rustup show` broke downstream parsers, and a
+# further restyling of `rustup check` is proposed in
+# [rust-lang/rustup#4574](https://github.com/rust-lang/rustup/pull/4574). The
+# `outdated` pattern below is deliberately tolerant of both the `Update available
+# : ` spelling of `1.28.x` and the `update available: ` of `1.29.0`, so a wrapper
+# does not break on the next rename the way `mise`'s did.
+# ```
+#
+# ```{note}
+# Listing toolchains is not a read-only operation at the filesystem level: rustup
+# writes its settings file while doing it, so `installed` fails on a host whose
+# `$RUSTUP_HOME` is mounted read-only.
+# ```
+
+[mpm.managers.rustup]
+name = "Rust rustup"
+homepage_url = "https://rustup.rs"
+logo = "rust"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["rustup"]
+requirement = ">=1.28.0"
+# `1.28.0` is where the `(active, default)` suffix took its current shape. Both
+# patterns below span 1.28 and 1.29 unchanged.
+extra_env = { RUSTUP_TERM_COLOR = "never", RUSTUP_TERM_PROGRESS_WHEN = "never" }
+# `rustup --version` prints the version on stdout and follows it with two info
+# lines naming the *active toolchain's* rustc version, a different number
+# entirely. Anchored so the first line is the only candidate.
+version_regexes = ['^rustup (?P<version>\S+)']
+
+# One toolchain per line, optionally suffixed with `(active)`, `(default)`,
+# `(active, default)` or, on older releases, `(default) (override)`. Matching
+# only the leading token drops every one of those, and drops the install path
+# `--verbose` would append too. Requiring an embedded hyphen is what keeps the
+# `no installed toolchains` sentinel from being reported as a package called
+# `no`; the cost is that a custom linked toolchain named without one is skipped.
+[mpm.managers.rustup.operations.installed]
+args = ["toolchain", "list"]
+regex = '^(?P<package_id>\S+-\S+)'
+
+# Only the lines offering an upgrade carry an arrow; the `up to date:` ones do
+# not and fall through. Each version is followed by a parenthesised hash and
+# date, so the captures stop at the first space. Refusing a leading parenthesis
+# rejects the `(unknown version) -> …` arm rather than capturing `(unknown`.
+[mpm.managers.rustup.operations.outdated]
+args = ["check"]
+regex = '^(?P<package_id>\S+-\S+) - [Uu]pdate available\s*:\s*(?P<installed_version>[^\s(]\S*).*? -> (?P<latest_version>[^\s(]\S*)'
+
+[mpm.managers.rustup.operations.install]
+args = ["toolchain", "install", "--no-self-update", "{package_id}"]
+
+[mpm.managers.rustup.operations.remove]
+args = ["toolchain", "uninstall", "{package_id}"]
+
+# Naming a toolchain genuinely restricts the run to it: the named branch never
+# reaches the update-everything path.
+[mpm.managers.rustup.operations.upgrade_one]
+args = ["update", "--no-self-update", "{package_id}"]
+
+[mpm.managers.rustup.operations.upgrade_all]
+args = ["update", "--no-self-update"]
+
+# Output samples locking the version probe and the declared parsers. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# The version and toolchain listing are real transcripts, from
+# rust-lang/rustup#5004 and rust-lang/rustup#4771 respectively; the listing shows
+# a channel, a dated nightly and three pinned releases side by side, which is the
+# spread the pattern has to survive.
+#
+# The `check` block comes from rustup's own byte-exact terminal capture under
+# `tests/suite/cli_rustup_ui/`, which its CI asserts against, with that
+# harness's `[HOST_TUPLE]` placeholder replaced by a real target triple. Its
+# `1.0.0` and `hash-stable-1.0.0` are the fixture versions rustup tests with, not
+# release numbers.
+[samples.version]
+output = "rustup 1.29.0 (28d1352db 2026-03-05)"
+expected = "1.29.0"
+
+[[samples.installed]]
+output = """
+stable-x86_64-unknown-linux-gnu (active, default)
+nightly-x86_64-unknown-linux-gnu
+1.14-x86_64-unknown-linux-gnu
+1.62.0-x86_64-unknown-linux-gnu
+1.71-x86_64-unknown-linux-gnu"""
+packages = [
+  { id = "stable-x86_64-unknown-linux-gnu" },
+  { id = "nightly-x86_64-unknown-linux-gnu" },
+  { id = "1.14-x86_64-unknown-linux-gnu" },
+  { id = "1.62.0-x86_64-unknown-linux-gnu" },
+  { id = "1.71-x86_64-unknown-linux-gnu" },
+]
+
+[[samples.outdated]]
+output = """
+stable-x86_64-unknown-linux-gnu - update available: 1.0.0 (hash-stable-1.0.0) -> 1.1.0 (hash-stable-1.1.0)
+nightly-x86_64-unknown-linux-gnu - up to date: 1.1.0 (hash-nightly-1.1.0)"""
+packages = [
+  { id = "stable-x86_64-unknown-linux-gnu", version = "1.1.0" },
+]

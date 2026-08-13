@@ -325,6 +325,7 @@ icons:
     license: CC-BY-SA-4.0
     managers:
     - cargo
+    - rustup
     source: https://www.rust-lang.org
     title: Rust
   slackware:

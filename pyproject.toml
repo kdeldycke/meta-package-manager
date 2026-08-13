@@ -116,6 +116,7 @@ keywords = [
   "ruby",
   "ruby-gem",
   "rust",
+  "rustup",
   "sbom",
   "scoop",
   "sdkman",
@@ -1243,6 +1244,11 @@ color = "bfdadc"
 description = "dnf, dnf5, urpmi, yum, zypper"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: rustup"
+color = "bfdadc"
+description = "rustup"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: scoop-based"
 color = "bfdadc"
 description = "scoop, sfsu"
@@ -1594,6 +1600,10 @@ any-glob-to-any-file = [
   "tests/*yum*",
   "tests/*zypper*",
 ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: rustup"
+any-glob-to-any-file = [ "meta_package_manager/managers/rustup.*", "tests/*rustup*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: scoop-based"

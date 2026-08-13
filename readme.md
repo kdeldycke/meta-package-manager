@@ -143,6 +143,7 @@ Meta Package Manager,pkgin,1
 Meta Package Manager,pnpm,1
 Meta Package Manager,ports,1
 Meta Package Manager,pwsh-gallery,1
+Meta Package Manager,rustup,1
 Meta Package Manager,scoop,1
 Meta Package Manager,sdkman,1
 Meta Package Manager,sfsu,1
@@ -250,6 +251,7 @@ print(operation_matrix()[0])
 | [`pnpm`](https://mpm.run/managers/pnpm.html)                                                   | >= 11        |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`ports`](https://mpm.run/managers/ports.html)                                                 |              |          |               |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`pwsh-gallery`](https://mpm.run/managers/pwsh-gallery.html)                                   | >= 7.4       |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`rustup`](https://mpm.run/managers/rustup.html)                                               | >= 1.28      |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`scoop`](https://mpm.run/managers/scoop.html)                                                 | >= 0.2.4     |          |      🪟       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`sdkman`](https://mpm.run/managers/sdkman.html)                                               | >= 5         |          |     🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`sfsu`](https://mpm.run/managers/sfsu.html)                                                   | >= 1.16      |          |      🪟       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |

@@ -409,6 +409,13 @@ PACKAGE_IDS = {
     "pnpm": "ms",
     "ports": "net/nyancat",
     "pwsh-gallery": "Posh-Git",
+    # A toolchain, which is what rustup calls a package, named by release so it
+    # resolves to whatever target triple the host runs. Pinned to an old release
+    # nobody builds against today, since removing `stable` or `nightly` would
+    # take the host's working Rust with it. Every rustup artifact is a large
+    # download, so this is the lightest available rather than a small one, as
+    # with `sdkman` below.
+    "rustup": "1.60.0",
     "scoop": "main/hyperfine",
     "sdkman": "jbang",
     "sfsu": "main/hyperfine",

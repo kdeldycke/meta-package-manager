@@ -69,6 +69,7 @@ from collections import Counter
 from datetime import date, datetime, timezone
 from itertools import accumulate
 from pathlib import Path
+from typing import Any
 
 ASSETS = Path(__file__).parent / "assets"
 """Directory holding the committed data file and the rendered chart."""
@@ -237,8 +238,13 @@ def upsert(
     return True
 
 
-def gh_api(path: str, *headers: str) -> list | dict:
-    """Call the GitHub API through `gh`, inheriting its authentication."""
+def gh_api(path: str, *headers: str) -> Any:
+    """Call the GitHub API through `gh`, inheriting its authentication.
+
+    Returns the decoded JSON as {data}`~typing.Any`: the endpoints called here
+    answer with a list or an object depending on the path, and narrowing that
+    union at every call site costs more than the payload shapes are worth.
+    """
     argv = ["gh", "api", path]
     for header in headers:
         argv += ["--header", header]
@@ -261,8 +267,10 @@ def fetch(url: str, tries: int = 3, timeout: int = 45) -> bytes | None:
                 url, headers={"User-Agent": USER_AGENT, "Accept-Encoding": "gzip"}
             )
             with urllib.request.urlopen(request, timeout=timeout) as response:
-                payload = response.read()
+                payload: bytes = response.read()
                 if response.headers.get("Content-Encoding") == "gzip":
+                    # Annotated above: `GzipFile.read()` is untyped, and the
+                    # reassignment would otherwise widen `payload` to `Any`.
                     payload = gzip.GzipFile(fileobj=io.BytesIO(payload)).read()
                 return payload
         except Exception:  # noqa: BLE001
@@ -414,8 +422,11 @@ def series(store: dict[tuple[str, str], dict]) -> dict[str, list[tuple[date, int
     """Group the history into one chronological series per benchmark column."""
     grouped: dict[str, list[tuple[date, int]]] = {}
     for column, repo in TRACKED_REPOS.items():
+        # Coerced rather than trusted: the records come back from JSON as
+        # `Any`, and letting that leak makes every downstream chart
+        # coordinate untyped too.
         points = sorted(
-            (date.fromisoformat(record["date"]), record["stars"])
+            (date.fromisoformat(record["date"]), int(record["stars"]))
             for (rec_repo, _day), record in store.items()
             if rec_repo == repo
         )
@@ -475,10 +486,12 @@ def render_chart(
     span = max(span, 1)
 
     # Round the axis up to a decade-ish step so the top gridline is a whole
-    # number the eye can anchor on.
-    step = 10 ** (len(str(peak)) - 1)
+    # number the eye can anchor on. Annotated because `int ** int` widens to
+    # `Any` (a negative exponent would yield a float), which would otherwise
+    # leak all the way into the plotted coordinates.
+    step: int = 10 ** (len(str(peak)) - 1)
     step = step // 2 if peak / step < 2 else step
-    ceiling = ((peak // step) + 1) * step
+    ceiling: int = ((peak // step) + 1) * step
 
     def x_of(offset: int) -> float:
         return left + offset / span * plot_w
@@ -529,12 +542,14 @@ def render_chart(
     # Series, drawn in the fixed palette order so a column keeps its hue.
     labels: list[tuple[float, str, str]] = []
     for column in TRACKED_REPOS:
-        points = offsets.get(column)
-        if not points:
+        # Distinct from the `points` bound above, which holds dates rather
+        # than the day offsets this loop plots.
+        shifted = offsets.get(column)
+        if not shifted:
             continue
-        coords = " ".join(f"{x_of(x):.1f},{y_of(s):.1f}" for x, s in points)
+        coords = " ".join(f"{x_of(x):.1f},{y_of(s):.1f}" for x, s in shifted)
         parts.append(f'<polyline class="s-{column}" points="{coords}"/>')
-        _end_offset, end_stars = points[-1]
+        _end_offset, end_stars = shifted[-1]
         labels.append((y_of(end_stars), column, f"{end_stars:,}"))
 
     # Direct labels at each line's end. Three light-mode hues sit below 3:1
@@ -544,11 +559,16 @@ def render_chart(
     for index in range(1, len(labels)):
         gap = labels[index][0] - labels[index - 1][0]
         if gap < 15:
-            labels[index] = (labels[index - 1][0] + 15, *labels[index][1:])
-    for y, column, value in labels:
+            # Rebuilt field by field rather than with a starred unpack, which
+            # widens the tuple to a homogeneous type mypy cannot match. The
+            # names stay distinct from the axis-tick loop above, whose `value`
+            # is an integer.
+            _label_y, label_column, label_text = labels[index]
+            labels[index] = (labels[index - 1][0] + 15, label_column, label_text)
+    for label_y, label_column, label_text in labels:
         parts.append(
-            f'<text class="lbl s-{column}" x="{left + plot_w + 12}" '
-            f'y="{y + 4:.1f}">{column} · {value}</text>'
+            f'<text class="lbl s-{label_column}" x="{left + plot_w + 12}" '
+            f'y="{label_y + 4:.1f}">{label_column} · {label_text}</text>'
         )
 
     css_light = "\n".join(

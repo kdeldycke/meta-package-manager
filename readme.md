@@ -92,6 +92,7 @@ Meta Package Manager,apt,1
 Meta Package Manager,apt-cyg,1
 Meta Package Manager,apt-mint,1
 Meta Package Manager,asdf,1
+Meta Package Manager,bin,1
 Meta Package Manager,brew,1
 Meta Package Manager,cargo,1
 Meta Package Manager,cask,1
@@ -198,6 +199,7 @@ print(operation_matrix()[0])
 | [`apt-cyg`](https://mpm.run/managers/apt-cyg.html) [⚠️](https://mpm.run/managers/apt-cyg.html) |              |          |               |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |   ✓    |           |          |
 | [`apt-mint`](https://mpm.run/managers/apt-mint.html)                                           | >= 1         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`asdf`](https://mpm.run/managers/asdf.html)                                                   | >= 0.16      |          |     🐧 🍎     |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
+| [`bin`](https://mpm.run/managers/bin.html)                                                     | >= 0.27      |          |   🐧 🍎 🪟    |      ✓      |            |           |          |           |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`brew`](https://mpm.run/managers/brew.html)                                                   | >= 6         |          |     🐧 🍎     |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`cargo`](https://mpm.run/managers/cargo.html)                                                 | >= 1         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |        |           |          |
 | [`cask`](https://mpm.run/managers/cask.html)                                                   | >= 6         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |

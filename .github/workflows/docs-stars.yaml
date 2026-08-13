@@ -69,14 +69,19 @@ jobs:
       # Nothing to commit is the common case between two stars: the guard keeps
       # the history free of empty weekly commits.
       - name: Commit the new samples
+        # The actor reaches the script through the environment rather than a
+        # `${{ }}` expansion: an expansion is spliced into the shell source
+        # before it runs, so a crafted account name would execute as code.
+        env:
+          ACTOR: ${{ github.actor }}
         run: |
           set -e
           if git diff --quiet -- docs/assets/; then
             echo "No star count moved this week."
             exit 0
           fi
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git config user.name "${ACTOR}"
+          git config user.email "${ACTOR}@users.noreply.github.com"
           git add docs/assets/star-history.json docs/assets/star-history*.svg
           git commit --message "Sample GitHub star history"
           git push

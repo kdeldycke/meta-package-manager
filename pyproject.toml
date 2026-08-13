@@ -21,6 +21,7 @@ keywords = [
   "apt-mint",
   "asdf",
   "atom",
+  "bin",
   "brew",
   "cargo",
   "cask",
@@ -1065,6 +1066,11 @@ color = "bfdadc"
 description = "asdf, mise"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: bin"
+color = "bfdadc"
+description = "bin"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: cargo"
 color = "bfdadc"
 description = "cargo"
@@ -1381,6 +1387,10 @@ any-glob-to-any-file = [
   "tests/*asdf*",
   "tests/*mise*",
 ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: bin"
+any-glob-to-any-file = [ "meta_package_manager/managers/bin.*", "tests/*bin*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: cargo"

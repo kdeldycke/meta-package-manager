@@ -340,6 +340,10 @@ PACKAGE_IDS = {
     "apt-cyg": "tree",
     "apt-mint": "nyancat",
     "asdf": "jq",
+    # Declares no install operation: the round-trip auto-skips. bin keys every
+    # other operation on the installed binary's absolute path, so that is the
+    # shape an identifier takes here.
+    "bin": "/usr/local/bin/bin",
     "brew": "nyancat",
     "cargo": "fsays",
     "cask": "itsycal",

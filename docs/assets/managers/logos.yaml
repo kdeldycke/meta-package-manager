@@ -140,6 +140,14 @@ icons:
     - chromebrew
     source: https://www.google.com/chrome
     title: Google Chrome
+  googlecloud:
+    contrast_on_light: 3.56
+    hex: 4285F4
+    license: CC0-1.0
+    managers:
+    - gcloud
+    source: https://cloud.google.com
+    title: Google Cloud
   haskell:
     contrast_on_light: 7.19
     hex: 5D4F85

@@ -6,7 +6,7 @@ requires = [ "uv-build>=0.8" ]
 # Docs: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 name = "meta-package-manager"
 version = "7.7.0.dev0"
-description = "🎁 wraps all package managers with a unifying CLI"
+description = "🎁 snapshot every package on your machine to one file, restore it on a new one"
 readme = "readme.md"
 keywords = [
   "alpine linux",
@@ -51,6 +51,7 @@ keywords = [
   "fisher",
   "flatpak",
   "fwupd",
+  "gcloud",
   "gem",
   "gh-ext",
   "ghcup",
@@ -506,7 +507,7 @@ build-backend.source-include = [
 
 [tool.nuitka]
 product-name = "Meta Package Manager"
-file-description = "🎁 wraps all package managers with a unifying CLI"
+file-description = "🎁 snapshot every package on your machine to one file, restore it on a new one"
 copyright = "Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
 file-version = "7.7.0"
 product-version = "7.7.0"
@@ -1147,6 +1148,11 @@ color = "bfdadc"
 description = "fwupd"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: gcloud"
+color = "bfdadc"
+description = "gcloud"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: gem"
 color = "bfdadc"
 description = "gem"
@@ -1499,6 +1505,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/flatpak.*", "tests/*flat
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: fwupd"
 any-glob-to-any-file = [ "meta_package_manager/managers/fwupd.*", "tests/*fwupd*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: gcloud"
+any-glob-to-any-file = [ "meta_package_manager/managers/gcloud.*", "tests/*gcloud*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: gem"

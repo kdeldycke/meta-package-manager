@@ -1,0 +1,144 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# gcloud is Google's Cloud CLI (https://cloud.google.com/sdk/gcloud), and the
+# part of it wrapped here is `gcloud components`, which installs and updates the
+# SDK's own components. Everything else gcloud does manages cloud resources
+# rather than packages, and is out of scope. See docs/overrides.md ("Define a
+# new manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# A package is a component, identified by its `id`: `bq`, `gsutil`, `kubectl`,
+# `app-engine-python`, `beta`. The `name` field alongside it is a human display
+# string ("BigQuery Command Line Tool") and is not an identifier.
+#
+# ```{note}
+# The listing renders as a bordered table by default, which is only a default:
+# gcloud's `--format` overrides it, and `value(...)` prints the requested fields
+# tab-separated with no heading, one record per line. That is what the parsers
+# below read, so none of the box drawing is ever parsed. Only resource output
+# reaches stdout; the version banner, progress bars and trailers all go to
+# stderr.
+# ```
+#
+# ```{caution}
+# The two listing modes return different record types, and the difference is
+# silent. `--only-local-state` reports what is installed from local state alone,
+# with no network call, but its records carry neither `latest_version_string`
+# nor `state`. The default mode fetches the remote snapshot and carries both.
+# Asking for a field the mode does not have yields an empty column rather than
+# an error, so `installed` and `outdated` deliberately use different modes.
+# ```
+#
+# ```{warning}
+# The mutating operations below are refused outright when the SDK was installed
+# through a distribution's package manager: apt, yum, snap, Nix, the AUR and
+# Google's own Docker image all disable the component manager, and the error
+# names the substitute command to use instead. They work normally on Homebrew,
+# on Google's interactive tarball install and on Windows. They are declared
+# because that is a property of the installation rather than of the tool, and it
+# surfaces as an ordinary command failure carrying a self-explanatory message.
+# ```
+#
+# No single-package `upgrade`. Naming components on `components update` expands
+# the selection through both the dependency and the consumer closure, so
+# upgrading one can touch its neighbours, which is not the per-package contract
+# mpm's `upgrade <package>` states. The positional is also hidden upstream and
+# absent from the reference documentation. `upgrade --all` has no such problem
+# and is declared.
+#
+# No escalation is declared, and none could be. Whether a component operation
+# needs root depends entirely on where the SDK was extracted: a user-owned
+# install needs none, and Google's own installer warns against running as root
+# because it would leave the installation unusable for everyone else. A static
+# privileged flag would break the common case to serve the rare one.
+#
+# No `search`: no such command exists, and the component list is the whole
+# catalog at around fifty entries, which mpm filters itself. Nothing maps to
+# `sync` or `cleanup`.
+
+[mpm.managers.gcloud]
+name = "Google Cloud CLI"
+homepage_url = "https://cloud.google.com/sdk/gcloud"
+logo = "googlecloud"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["gcloud"]
+requirement = ">=170.0.0"
+# The release that added `--only-local-state`, which is what lets the inventory
+# be read without a network round-trip.
+# `gcloud --version` prints one `<key> <value>` line per bundled component,
+# sorted, so the SDK's own line is found by its key rather than by position.
+# That key contains spaces, which is why the pattern names it in full.
+version_regexes = ['^Google Cloud SDK[ \t]+(?P<version>\S+)']
+
+# Local state only, so no network call and no remote snapshot: every record it
+# returns is installed by construction, which is why no status field is needed
+# to filter them. Hidden components are excluded by the command itself.
+[mpm.managers.gcloud.operations.installed]
+args = [
+  "components",
+  "list",
+  "--only-local-state",
+  "--format=value(id,current_version_string)",
+]
+regex = '^(?P<package_id>[^\t]+)\t(?P<installed_version>[^\t]*)'
+
+# The default mode instead, since only it carries the remote snapshot the
+# comparison needs. The filter is gcloud's own, narrowing to the one state that
+# means an upgrade is pending: the others are `Installed`, `Not Installed` and
+# `Deprecated`, the last marking a component still on disk that upstream has
+# dropped, which is not an available update.
+[mpm.managers.gcloud.operations.outdated]
+args = [
+  "components",
+  "list",
+  "--filter=state.name='Update Available'",
+  "--format=value(id,current_version_string,latest_version_string)",
+]
+regex = '^(?P<package_id>[^\t]+)\t(?P<installed_version>[^\t]*)\t(?P<latest_version>[^\t]+)'
+
+# `--quiet` answers every prompt with its default, which is what makes these
+# unattended: the confirmation to proceed defaults to yes, and the prompt asking
+# whether to install instead of update defaults to no.
+[mpm.managers.gcloud.operations.install]
+args = ["components", "install", "--quiet", "{package_id}"]
+
+# Removal cascades to everything depending on the named component, which is
+# upstream's documented behavior rather than a surprise.
+[mpm.managers.gcloud.operations.remove]
+args = ["components", "remove", "--quiet", "{package_id}"]
+
+[mpm.managers.gcloud.operations.upgrade_all]
+args = ["components", "update", "--quiet"]
+
+# Output samples locking the version probe and the declared parsers. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# The version block is a capture from a public continuous-integration log. The
+# two listings are source-derived: the field values are taken from a captured
+# `--format=json` run of the same command, re-rendered through the tab-separated
+# contract `value(...)` documents, since no capture of that projection turned
+# up. Tabs are written as escapes so they survive review.
+[samples.version]
+output = """
+Google Cloud SDK 578.0.0
+bq 2.1.36
+bundled-python3-unix 3.14.6
+core 2026.07.24
+gcloud-crc32c 1.0.0
+gsutil 5.37"""
+expected = "578.0.0"
+
+[[samples.installed]]
+output = "bq\t2.0.83\ncore\t2026.07.24\ngsutil\t5.37"
+packages = [
+  { id = "bq", version = "2.0.83" },
+  { id = "core", version = "2026.07.24" },
+  { id = "gsutil", version = "5.37" },
+]
+
+[[samples.outdated]]
+output = "bq\t2.0.83\t2.0.84\ngsutil\t5.37\t5.38"
+packages = [
+  { id = "bq", version = "2.0.84" },
+  { id = "gsutil", version = "5.38" },
+]

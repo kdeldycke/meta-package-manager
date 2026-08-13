@@ -373,6 +373,9 @@ PACKAGE_IDS = {
     "fisher": "zdharma-continuum/null",
     "flatpak": "org.gnome.Calculator",
     "fwupd": "f95c9218acd12697af946874bfe4239587209232",  # No-op without device.
+    # An SDK component. `kubectl` is one of the smallest that is not a
+    # dependency of the core install, so removing it again is safe.
+    "gcloud": "kubectl",
     "gem": "paint",
     # A tiny script-based extension (a bare git clone), from a GitHub CLI maintainer.
     "gh-ext": "mislav/gh-branch",

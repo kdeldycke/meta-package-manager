@@ -21,6 +21,7 @@
 
 **What is Meta Package Manager?**
 
+- snapshots every package on your machine to one file, and restores it on a new one
 - provides the `mpm` CLI, a wrapper around all package managers
 - `mpm` is like [`yt-dlp`](https://github.com/yt-dlp/yt-dlp), but for package managers instead of videos
 - `mpm` solves [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/)
@@ -35,12 +36,26 @@ Thanks to [`uv`](https://docs.astral.sh/uv/getting-started/installation/), you c
 $ uvx meta-package-manager
 ```
 
+Take everything installed on this machine, whichever package manager put it there, and write it to a single file:
+
+```shell-session
+$ mpm dump packages.toml
+```
+
+On the next machine, put it all back:
+
+```shell-session
+$ mpm restore packages.toml
+```
+
 ## Features
 
 <img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.png"/>
 
 <img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.png"/>
 
+- [Snapshot installed packages](https://mpm.run/cli-parameters.html#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once.
+- [Restore that manifest](https://mpm.run/cli-parameters.html#mpm-restore) on another machine, and get the same set of packages back.
 - Inventory and list all [package managers](https://mpm.run/cli-parameters.html#mpm-managers) available on the system.
 - Supports macOS, Linux and Windows.
 - [Standalone executables](#executables) for Linux, macOS and Windows.
@@ -55,8 +70,6 @@ $ uvx meta-package-manager
 - [Diagnose the health of package managers](https://mpm.run/cli-parameters.html#mpm-doctor).
 - [Upgrade all outdated packages](https://mpm.run/cli-parameters.html#mpm-upgrade).
 - [Mitigate supply-chain attacks](https://mpm.run/cooldown.html) with a release-age cooldown that refuses too-recent versions: `mpm --cooldown "7 days" upgrade --all`.
-- [Snapshot installed packages](https://mpm.run/cli-parameters.html#mpm-dump) to a TOML manifest or a Brewfile.
-- [Restore/install list of packages](https://mpm.run/cli-parameters.html#mpm-restore) from TOML files.
 - [Software Bill of Materials](https://mpm.run/cli-parameters.html#mpm-sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
 - Pin-point commands to a [subset of package managers](https://mpm.run/configuration.html#selecting-managers) (include/exclude selectors).
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
@@ -113,6 +126,7 @@ Meta Package Manager,fink,1
 Meta Package Manager,fisher,1
 Meta Package Manager,flatpak,1
 Meta Package Manager,fwupd,1
+Meta Package Manager,gcloud,1
 Meta Package Manager,gem,1
 Meta Package Manager,gh-ext,1
 Meta Package Manager,ghcup,1
@@ -225,6 +239,7 @@ print(operation_matrix()[0])
 | [`fisher`](https://mpm.run/managers/fisher.html)                                               | >= 4         |          |     🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`flatpak`](https://mpm.run/managers/flatpak.html)                                             | >= 1.2       |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
 | [`fwupd`](https://mpm.run/managers/fwupd.html)                                                 | >= 1.9.5     |          |      🐧       |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |          |   ✓    |           |          |
+| [`gcloud`](https://mpm.run/managers/gcloud.html)                                               | >= 170       |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |          |     ✓     |           |       ✓       |    ✓     |        |           |          |
 | [`gem`](https://mpm.run/managers/gem.html)                                                     | >= 2.5       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`gh-ext`](https://mpm.run/managers/gh-ext.html)                                               | >= 2         |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`ghcup`](https://mpm.run/managers/ghcup.html)                                                 | >= 0.2.1     |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |   ✓    |     ✓     |          |

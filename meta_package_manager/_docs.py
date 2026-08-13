@@ -878,12 +878,19 @@ def manager_card(manager_id: str) -> str:
     The upstream readings sit beside the home page they describe, read from
     {func}`_manager_upstreams` rather than hotlinked as badges: a badge per
     manager would have put hundreds of third-party images across the docs and
-    handed `linkcheck` as many URLs. Two date rows rather than one, because each
-    answers what the other cannot. Thirteen upstreams were last released more
-    than a year before their newest commit, `cask` by a decade: it cuts no
-    releases and is committed to daily, so a release date alone reports the most
-    used tap in the pool as long dead, while a commit date alone says nothing
-    about whether that activity ever reaches users.
+    handed `linkcheck` as many URLs.
+
+    ```{note}
+    The newest release is sampled but deliberately not shown. Twelve upstreams
+    last released over a year before their newest commit, and the gap means two
+    opposite things: `cask` and `chromebrew` are committed to daily and simply
+    cut no releases, where `pacaur` and `apm` really are abandoned. One row
+    cannot tell those apart, so it reported the most active tap in the pool as
+    dead since 2016. The question it was there to answer is already answered
+    properly by the curated `unmaintained` flag, which is a maintainer's
+    judgement rather than a date inferred from a tag that may never come. The
+    commit date stays: it is measured, not interpreted.
+    ```
     """
     m = pool[manager_id]
     source_url = manager_source_url(manager_id)
@@ -903,8 +910,6 @@ def manager_card(manager_id: str) -> str:
     stars = upstream.get("stars")
     if stars is not None:
         facts.append(("Upstream stars", f"{stars:,}"))
-    if upstream.get("release"):
-        facts.append(("Last release", upstream["release"]))
     if upstream.get("commit"):
         facts.append(("Last commit", upstream["commit"]))
     if m.requirement:
@@ -2071,15 +2076,15 @@ def managers_index_table() -> str:
         (record["date"] for record in upstreams.values()), default="an unknown date"
     )
     footnote = (
-        "Each manager's own page carries its upstream stars, newest release and "
-        f"newest commit, read from that project's forge and last sampled on "
-        f"{sampled}. They describe the upstream repository rather than the "
-        "tool's install base: a distribution's package manager hosted on its "
-        "own GitLab gathers a fraction of the stars an equally widespread "
-        "GitHub project does, and a manager shipped inside a larger tool "
-        "inherits that tool's figures. The release date is the newest release a "
-        "project published, or its newest tag where it publishes none. A "
-        "manager missing those rows publishes neither, or has no public "
+        "Each manager's own page carries its upstream stars and newest commit, "
+        f"read from that project's forge and last sampled on {sampled}. They "
+        "describe the upstream repository rather than the tool's install base: "
+        "a distribution's package manager hosted on its own GitLab gathers a "
+        "fraction of the stars an equally widespread GitHub project does, and "
+        "a manager shipped inside a larger tool inherits that tool's figures. "
+        "Whether a project is still maintained is the Unmaintained column "
+        "above, a judgement call rather than a date inferred from a release "
+        "that may never come. A manager missing those rows has no public "
         "repository at all."
     )
     # Blank lines throughout: a paragraph glued to the last row of a table is

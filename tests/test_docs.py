@@ -1320,7 +1320,7 @@ def test_managers_index_table_renders():
     # The sourcing note closes the block as its own paragraph: glued to the last
     # row, it would parse as one more row of the table.
     assert lines[-2] == ""
-    assert lines[-1].startswith("Each manager's own page carries its upstream")
+    assert lines[-1].startswith("Each manager's own page carries its upstream stars")
 
 
 def test_brewfile_managers_table_renders():
@@ -1371,9 +1371,13 @@ def test_manager_card_carries_upstream_readings():
         card = _docs.manager_card(manager_id)
         # Thousands separated, so a five-figure count is read at a glance.
         assert f"{record['stars']:,}" in card
-        for field in ("release", "commit"):
-            if record.get(field):
-                assert record[field] in card
+        if record.get("commit"):
+            assert record["commit"] in card
+        # The release date is sampled but never shown: a project that cuts no
+        # releases is indistinguishable from an abandoned one by that date
+        # alone, which reported `cask` as dead since 2016 while it was being
+        # committed to daily. `unmaintained` answers that question instead.
+        assert "Last release" not in card
 
     # A manager whose upstream cannot be measured simply carries no such row,
     # rather than an empty one.

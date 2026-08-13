@@ -197,6 +197,14 @@ icons:
     - macports
     source: https://github.com/macports/macports-www/blob/8de17ad57e97d5ff87b16c084cef36059fa6c2f4/img/macports-avatar.svg
     title: MacPorts
+  manjaro:
+    contrast_on_light: 2.3
+    hex: 35BFA4
+    license: CC0-1.0
+    managers:
+    - pamac
+    source: https://manjaro.org
+    title: Manjaro
   neovim:
     contrast_on_light: 3.19
     hex: 57A143

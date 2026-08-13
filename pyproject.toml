@@ -89,6 +89,7 @@ keywords = [
   "pacman",
   "pacstall",
   "paludis",
+  "pamac",
   "paru",
   "php composer",
   "pikaur",
@@ -1191,7 +1192,7 @@ description = "opam"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pacman-based"
 color = "bfdadc"
-description = "dkp-pacman, pacaur, pacman, paru, pikaur, trizen, yay"
+description = "dkp-pacman, pacaur, pacman, pamac, paru, pikaur, trizen, yay"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pkcon"
@@ -1518,9 +1519,11 @@ any-glob-to-any-file = [ "meta_package_manager/managers/opam.*", "tests/*opam*" 
 label = "📦 manager: pacman-based"
 any-glob-to-any-file = [
   "meta_package_manager/managers/pacman.*",
+  "meta_package_manager/managers/pamac.*",
   "tests/*dkp_pacman*",
   "tests/*pacaur*",
   "tests/*pacman*",
+  "tests/*pamac*",
   "tests/*paru*",
   "tests/*pikaur*",
   "tests/*trizen*",

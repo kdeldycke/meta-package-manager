@@ -128,6 +128,7 @@ Meta Package Manager,opkg,1
 Meta Package Manager,pacaur,1
 Meta Package Manager,pacman,1
 Meta Package Manager,pacstall,1
+Meta Package Manager,pamac,1
 Meta Package Manager,paru,1
 Meta Package Manager,pikaur,1
 Meta Package Manager,pip,1
@@ -232,6 +233,7 @@ print(operation_matrix()[0])
 | [`pacaur`](https://mpm.run/managers/pacaur.html) [⚠️](https://mpm.run/managers/pacaur.html)    | >= 4         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`pacman`](https://mpm.run/managers/pacman.html)                                               | >= 5         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`pacstall`](https://mpm.run/managers/pacstall.html)                                           | >= 6         |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
+| [`pamac`](https://mpm.run/managers/pamac.html)                                                 | >= 11        |          |               |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`paru`](https://mpm.run/managers/paru.html)                                                   | >= 1.9.3     |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`pikaur`](https://mpm.run/managers/pikaur.html)                                               | >= 1         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`pip`](https://mpm.run/managers/pip.html)                                                     | >= 26.1      |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |

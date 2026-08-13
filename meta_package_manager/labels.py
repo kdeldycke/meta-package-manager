@@ -140,6 +140,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
         "dkp-pacman",
         "pacman",
         "pacaur",
+        "pamac",
         "paru",
         "pikaur",
         "trizen",

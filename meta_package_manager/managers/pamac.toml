@@ -1,0 +1,152 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# pamac is Manjaro's package manager (https://github.com/manjaro/pamac-cli). See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# The project is split across three repositories: the `pamac` binary mpm drives
+# ships from `manjaro/pamac-cli`, the GTK front-end from `manjaro/pamac` and the
+# libalpm backend from `manjaro/libpamac`. The GitLab home this manager was
+# queued under is archived and redirects to GitHub.
+#
+# Escalation is polkit's, so no operation is marked `sudo`: run as a normal user
+# pamac spawns `pkttyagent` and authenticates the transaction over D-Bus against
+# the `org.manjaro.pamac.commit` policy. Manjaro's own wiki is explicit that
+# `sudo pamac` is wrong ("Do not use sudo with pamac"), and wrapping it would
+# stack escalation on top of the broker. `--no-confirm` suppresses pamac's own
+# "Apply transaction ?" prompt but never the polkit check, so an unattended run
+# depends on the host's polkit policy, exactly as it does for `pkcon`.
+#
+# No color to suppress and no color flag to pass: `src/cli.vala` and
+# `src/transaction-cli.vala` contain no ANSI escape, no isatty branch and no
+# color option at all. Only `search` is terminal-width sensitive, and its
+# `get_term_width()` falls back to 80 columns when the TIOCGWINSZ ioctl fails,
+# which is what happens under the pipe mpm reads through.
+#
+# No `sync`: pamac ships no read-only metadata refresh. Its whole subcommand set
+# is search, info, list, clone, build, install, reinstall, remove, checkupdates,
+# upgrade/update and clean. Refreshing happens either as a side effect of
+# `upgrade --force-refresh`, which is a full system upgrade, or into throwaway
+# temporary databases inside `checkupdates`. Declaring one would mean faking it
+# with a mutating command.
+#
+# Everything here is scoped to the official repositories: `--no-aur` is passed
+# explicitly wherever pamac accepts it, rather than inheriting the host's
+# `/etc/pamac.conf`, whose `EnableAUR` is on by default on Manjaro. That keeps
+# results identical on every host and keeps `outdated` off the AUR RPC. The
+# blind spot is the same one `pacman` documents: `list --installed` still lists
+# foreign packages (an AUR package simply has an empty repository column), so an
+# AUR package appears as installed yet never as outdated. Reach the AUR through
+# the helpers mpm wraps for it (`yay`, `paru`, `pikaur`, `trizen`, `pacaur`).
+
+[mpm.managers.pamac]
+name = "Manjaro pamac"
+homepage_url = "https://github.com/manjaro/pamac-cli"
+logo = "manjaro"
+platforms = ["linux"]
+cli_names = ["pamac"]
+requirement = ">=11.0.0"
+# Deliberately prefix-agnostic: the banner read "Pamac %s" until 11.6.0 and
+# "pamac-cli %s" after it, both emitted by the same display_version(). Anchored
+# so it takes pamac-cli's own version and not the libpamac one trailing it on
+# the same line.
+version_regexes = ['^\S+\s+(?P<version>\d+\.\d+\.\d+)']
+
+# `--no-confirm` is declared per subcommand rather than globally: it is an
+# OptionEntry of install/remove/upgrade/clean only, so a `pre_args` copy would
+# make `list` and `checkupdates` fail their own option parsing.
+
+# print_pkgs() pads the name to the longest in the result set plus one space,
+# then left-justifies the version and the repository, separating each with two
+# spaces, and closes on a human-readable installed size. Only the first two
+# fields are needed, and neither a name nor a version can carry whitespace.
+[mpm.managers.pamac.operations.installed]
+args = ["list", "--installed"]
+regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)'
+
+# `--quiet` swaps the padded table for one `name  old -> new` per line. Rows
+# without an arrow are replacers (a repository package superseding an installed
+# one under a different name) and carry no installed version, so they do not
+# match and are skipped.
+#
+# checkupdates exits 100 when updates exist, which needs no declaration here:
+# mpm only treats a non-zero exit as a failure when stderr is non-empty for a
+# read-only query, the same rule that already carries `npm`/`pnpm outdated`.
+[mpm.managers.pamac.operations.outdated]
+args = ["checkupdates", "--quiet", "--no-aur"]
+regex = '^(?P<package_id>\S+)\s{2}(?P<installed_version>\S+) -> (?P<latest_version>\S+)$'
+
+# Same print_pkgs() call as `installed`, so the identical regex applies. No
+# sample of its own below: the format is proven identical in source, and the
+# `installed` fixture already locks this exact pattern.
+[mpm.managers.pamac.operations.orphans]
+args = ["list", "--orphans"]
+regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)'
+
+# Each hit is a `name  version` line padded out to the repository name, followed
+# by its description wrapped across continuation lines indented by four spaces.
+# Those continuation lines cannot match a pattern anchored on a non-space, so
+# mpm's per-line parser skips them. pamac exposes no exact-match flag, so mpm
+# refilters the results itself.
+[mpm.managers.pamac.operations.search]
+args = ["search", "--no-aur", "{query}"]
+regex = '^(?P<package_id>\S+)\s{2}(?P<latest_version>\S+)\s'
+
+[mpm.managers.pamac.operations.install]
+args = ["install", "--no-confirm", "{package_id}"]
+
+[mpm.managers.pamac.operations.remove]
+args = ["remove", "--no-confirm", "{package_id}"]
+
+# Routed through `install --no-upgrade` on purpose, and NOT through `upgrade`:
+# pamac's upgrade branch parses its options and calls run_sysupgrade() without
+# ever reading its positional arguments, so `pamac upgrade <package>` silently
+# upgrades the whole system and never reports that it ignored the name. Contrast
+# `install`, which passes args[2:] on to install_pkgs(). Installing an
+# already-installed package is how alpm upgrades it, and `--no-upgrade` confines
+# the transaction to the named package instead of pulling a sysupgrade alongside.
+[mpm.managers.pamac.operations.upgrade_one]
+args = ["install", "--no-confirm", "--no-upgrade", "{package_id}"]
+
+[mpm.managers.pamac.operations.upgrade_all]
+args = ["upgrade", "--no-confirm", "--no-aur"]
+
+[mpm.managers.pamac.operations.cleanup_cache]
+args = ["clean", "--no-confirm"]
+
+# `remove --orphans` with no package argument is an explicitly allowed form: the
+# no-target branch bails to the help screen unless --orphans is set.
+[mpm.managers.pamac.operations.cleanup_orphan]
+args = ["remove", "--no-confirm", "--orphans"]
+
+# Output samples locking the version probe and the declared parsers. Both
+# listings are source-derived: the field order, padding and separators are
+# computed from the printf statements of `src/cli.vala` at 11.7.4, and every
+# package name, version, repository and size below is real, taken from the
+# transaction transcript pasted in manjaro/pamac#578. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# `search` ships no fixture: its records close on a description wrapped from
+# package metadata, which no printf can reconstruct, and inventing that text
+# would put fabricated output in a file whose whole point is real data.
+[samples.version]
+output = "pamac-cli 11.7.4  -  libpamac 11.7.4"
+expected = "11.7.4"
+
+[[samples.installed]]
+output = """
+plymouth 26.134.222-1  extra  1.2 MB
+ventoy   1.1.12-1      extra  16.8 MB"""
+packages = [
+  { id = "plymouth", version = "26.134.222-1" },
+  { id = "ventoy", version = "1.1.12-1" },
+]
+
+[[samples.outdated]]
+output = """
+plymouth  26.134.222-1 -> 26.134.222-2
+ventoy  1.1.12-1 -> 1.1.14-1"""
+packages = [
+  { id = "plymouth", version = "26.134.222-2" },
+  { id = "ventoy", version = "1.1.14-1" },
+]

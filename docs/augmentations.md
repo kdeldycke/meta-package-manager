@@ -47,6 +47,7 @@ print(augmentations_table())
 | [`pacaur`](managers/pacaur.md)             |                      |      ✅      |              |       ✅        |
 | [`pacman`](managers/pacman.md)             |                      |      ✅      |              |       ✅        |
 | [`pacstall`](managers/pacstall.md)         |                      |              |      ✅      |       ✅        |
+| [`pamac`](managers/pamac.md)               |                      |              |      ✅      |       ✅        |
 | [`paru`](managers/paru.md)                 |                      |      ✅      |              |       ✅        |
 | [`pikaur`](managers/pikaur.md)             |                      |      ✅      |              |       ✅        |
 | [`pip`](managers/pip.md)                   |          ✅          |              |              |                 |

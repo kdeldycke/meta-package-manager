@@ -49,7 +49,7 @@ This has been chosen as a separator because it is shared by popular package mana
 
 PURL_MAP: dict[str, set[str] | None] = {
     "alpine": None,
-    "alpm": {"pacman", "pacaur", "paru", "yay"},
+    "alpm": {"pacman", "pacaur", "pamac", "paru", "yay"},
     "android": None,
     "apache": None,
     "apk": {"apk"},

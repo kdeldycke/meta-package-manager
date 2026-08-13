@@ -389,6 +389,7 @@ PACKAGE_IDS = {
     "pacaur": "nyancat",
     "pacman": "nyancat",
     "pacstall": "hello",
+    "pamac": "nyancat",
     "paru": "nyancat",
     "pikaur": "nyancat",
     "pip": "pytz",

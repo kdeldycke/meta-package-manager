@@ -1,4 +1,4 @@
-# Infrastructure
+# {octicon}`globe` Infrastructure
 
 Everything needed to rebuild the documentation site's hosting from nothing, and the reasoning behind each deviation from a stock GitHub Pages setup.
 

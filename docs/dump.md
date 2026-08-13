@@ -98,7 +98,32 @@ $ mpm dump --brewfile Brewfile
 $ brew bundle install --file=Brewfile
 ```
 
-Only the managers natively supported by Homebrew Bundle make it into the file: [`brew`](managers/brew.md), [`cask`](managers/cask.md), [`mas`](managers/mas.md), [`vscode`](managers/vscode.md), [`npm`](managers/npm.md), [`cargo`](managers/cargo.md), [`uvx`](managers/uvx.md), [`winget`](managers/winget.md), and [`flatpak`](managers/flatpak.md). Everything else ([`apt`](managers/apt.md), [`dnf`](managers/dnf.md), [`pacman`](managers/pacman.md), [`pip`](managers/pip.md), [`pipx`](managers/pipx.md), [`gem`](managers/gem.md), [`snap`](managers/snap.md), [`scoop`](managers/scoop.md), `chocolatey`, [`sdkman`](managers/sdkman.md), ...) gets tallied in the header but excluded from the body.
+Only the managers Homebrew Bundle natively supports make it into the file, each under its own entry keyword:
+
+```{python:render}
+:mirror:
+from meta_package_manager._docs import brewfile_managers_table
+
+print(brewfile_managers_table())
+```
+
+<!-- mirror -->
+
+| Manager                          | Brewfile entry |
+| :------------------------------- | :------------- |
+| [`brew`](managers/brew.md)       | `brew`         |
+| [`cargo`](managers/cargo.md)     | `cargo`        |
+| [`cask`](managers/cask.md)       | `cask`         |
+| [`flatpak`](managers/flatpak.md) | `flatpak`      |
+| [`mas`](managers/mas.md)         | `mas`          |
+| [`npm`](managers/npm.md)         | `npm`          |
+| [`uvx`](managers/uvx.md)         | `uv`           |
+| [`vscode`](managers/vscode.md)   | `vscode`       |
+| [`winget`](managers/winget.md)   | `winget`       |
+
+<!-- mirror-end -->
+
+Every other manager gets tallied in the header but excluded from the body.
 
 The header carries a deliberate warning:
 

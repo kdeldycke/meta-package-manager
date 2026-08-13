@@ -941,13 +941,6 @@ def manager_card(manager_id: str) -> str:
             FACT_SEPARATOR.join(f"`pkg:{t}`" for t in purl_types),
         )
     )
-    if m.brewfile_entry_type:
-        facts.append(
-            (
-                "Brewfile entry",
-                f"`{m.brewfile_entry_type}`, in [Brewfile backups](../dump.md)",
-            )
-        )
 
     # How mpm invokes the tool. Only the CLI names are unconditional: the rest is
     # listed when the manager departs from the plain "run the binary" default.
@@ -977,11 +970,18 @@ def manager_card(manager_id: str) -> str:
         argv = " ".join((m.cli_names[0], *m.pre_args, "<command>", *m.post_args))
         facts.append(("Every call", f"`{argv}`"))
     if m.extra_env:
+        # One per line, where every other repeated row keeps
+        # {data}`FACT_SEPARATOR`. An assignment is a long token carrying its own
+        # `=`, so three of them dot-separated wrap mid-value in a box this
+        # narrow and read as one run-on string. The other rows hold short names
+        # that stay whole on a line, which is what makes the dot work there.
+        # Indented to the definition's own column, so the list nests inside the
+        # row rather than closing it.
         facts.append(
             (
                 "Forced environment",
-                FACT_SEPARATOR.join(
-                    f"`{k}={v}`" for k, v in sorted(m.extra_env.items())
+                "\n  ".join(
+                    f"- `{k}={v}`" for k, v in sorted(m.extra_env.items())
                 ),
             )
         )
@@ -1970,6 +1970,33 @@ def _manager_upstreams() -> dict[str, dict]:
         )
     )
     return {record["id"]: record for record in records}
+
+
+def brewfile_managers_table() -> str:
+    """Produce the Brewfile-entry table of `docs/dump.md`.
+
+    Which managers survive a `--brewfile` dump, and under which entry keyword.
+    Generated from the pool's own `brewfile_entry_type` declarations rather than
+    listed in prose, which had gone stale and could not show that a manager and
+    its Brewfile keyword sometimes differ: `uvx` writes `uv` entries, a mapping
+    a sentence naming both would have to state twice to be read once.
+
+    It replaces the enumeration that used to carry this, and the per-manager
+    cards that used to repeat it: `--brewfile` is an option of one command, so
+    the fact belongs on that command's page, stated once.
+    """
+    table = [
+        [f"[`{mid}`](managers/{mid}.md)", f"`{m.brewfile_entry_type}`"]
+        for mid, m in sorted(pool.items())
+        if m.brewfile_entry_type
+    ]
+    return render_table(
+        table,
+        headers=["Manager", "Brewfile entry"],
+        table_format=TableFormat.GITHUB,
+        colalign=["left", "left"],
+        disable_numparse=True,
+    )
 
 
 def managers_index_table() -> str:

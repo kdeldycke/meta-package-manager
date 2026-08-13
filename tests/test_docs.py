@@ -922,7 +922,9 @@ def test_manager_card_renders(manager):
         assert f"**{label}**\n: " in card
     # The former Platforms and Ecosystem sections now live here.
     assert "**purl types**\n: `pkg:" in card
-    assert ("**Brewfile entry**" in card) is bool(manager.brewfile_entry_type)
+    # The Brewfile keyword is not a card fact: `--brewfile` is an option of one
+    # command, so `docs/dump.md` states the whole mapping once, in a table.
+    assert "Brewfile entry" not in card
 
     # The tracker link and the source file close the box, in that order: a
     # reader after either has read everything else first. Managers sharing an
@@ -1319,6 +1321,39 @@ def test_managers_index_table_renders():
     # row, it would parse as one more row of the table.
     assert lines[-2] == ""
     assert lines[-1].startswith("Each manager's own page carries its upstream")
+
+
+def test_brewfile_managers_table_renders():
+    """Check the Brewfile table lists exactly the managers that reach a dump.
+
+    `--brewfile` is an option of one command, so the mapping belongs on that
+    command's page and nowhere else: it used to be a prose enumeration that had
+    gone stale, repeated by a row on every manager's own card.
+    """
+    table = _docs.brewfile_managers_table()
+    lines = table.splitlines()
+    assert lines[0].startswith("| Manager")
+    assert "Brewfile entry" in lines[0]
+
+    exported = {mid: m.brewfile_entry_type for mid, m in pool.items()}
+    expected = {mid: kind for mid, kind in exported.items() if kind}
+    assert expected, "no manager declares a Brewfile entry type"
+
+    rows = [line for line in lines[2:] if line.startswith("| [")]
+    assert len(rows) == len(expected)
+    for mid, kind in expected.items():
+        # Each manager links to its page, beside the keyword it writes.
+        assert f"[`{mid}`](managers/{mid}.md)" in table
+        assert any(f"`{mid}`" in row and f"`{kind}`" in row for row in rows)
+
+    # A manager with no Brewfile mapping must not appear at all.
+    for mid, kind in exported.items():
+        if not kind:
+            assert f"[`{mid}`](managers/{mid}.md)" not in table
+
+    # The fact lives here now, not on every manager's card.
+    for mid in sorted(expected)[:3]:
+        assert "Brewfile entry" not in _docs.manager_card(mid)
 
 
 def test_manager_card_carries_upstream_readings():

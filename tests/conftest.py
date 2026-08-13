@@ -461,6 +461,10 @@ PACKAGE_IDS = {
     "vscodium": "tamasfe.even-better-toml",
     "winget": "sharkdp.hyperfine",
     "xbps": "sl",
+    # Declares no install operation, since downloading an Xcode always
+    # authenticates interactively: the round-trip auto-skips. A marketing
+    # version is what xcodes addresses a bundle by.
+    "xcodes": "16.2",
     "yarn": "ms",
     "yarn-berry": "ms",
     "yay": "nyancat",

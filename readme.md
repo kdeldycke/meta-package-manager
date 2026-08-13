@@ -172,6 +172,7 @@ Meta Package Manager,vscode,1
 Meta Package Manager,vscodium,1
 Meta Package Manager,winget,1
 Meta Package Manager,xbps,1
+Meta Package Manager,xcodes,1
 Meta Package Manager,yarn,1
 Meta Package Manager,yarn-berry,1
 Meta Package Manager,yay,1
@@ -283,6 +284,7 @@ print(operation_matrix()[0])
 | [`vscodium`](https://mpm.run/managers/vscodium.html)                                           | >= 1.60      |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |           |               |    ✓     |        |           |          |
 | [`winget`](https://mpm.run/managers/winget.html)                                               | >= 1.28.190  |          |      🪟       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`xbps`](https://mpm.run/managers/xbps.html)                                                   | >= 0.59      |          |      🐧       |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
+| [`xcodes`](https://mpm.run/managers/xcodes.html)                                               | >= 1         |          |      🍎       |      ✓      |            |           |          |           |           |               |    ✓     |   ✓    |           |          |
 | [`yarn`](https://mpm.run/managers/yarn.html)                                                   | >= 1.20, < 2 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`yarn-berry`](https://mpm.run/managers/yarn-berry.html)                                       | >= 2         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |             |            |           |    ✓     |           |           |               |          |        |     ✓     |          |
 | [`yay`](https://mpm.run/managers/yay.html)                                                     | >= 11        |    ✓     |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |

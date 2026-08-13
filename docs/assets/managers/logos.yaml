@@ -409,6 +409,14 @@ icons:
     - vscodium
     source: https://github.com/VSCodium/vscodium.github.io/blob/ed028c57f10e6432ec55dfc34d4db1a83fba941d/img/codium_cnl.svg
     title: VSCodium
+  xcode:
+    contrast_on_light: 3.88
+    hex: 147EFB
+    license: CC0-1.0
+    managers:
+    - xcodes
+    source: https://developer.apple.com/develop
+    title: Xcode
   yarn:
     contrast_on_light: 3.69
     hex: 2C8EBB

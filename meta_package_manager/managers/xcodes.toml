@@ -1,0 +1,124 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# xcodes installs and manages Xcode versions on macOS
+# (https://github.com/XcodesOrg/xcodes). See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# A package is one installed Xcode, identified by its marketing version exactly
+# as the listing renders it: `16.2`, but also `26.4 Release Candidate` and
+# `27.0 Beta 5`. Those spaces are not a problem here, because mpm substitutes a
+# package id as a single argv element and xcodes joins its version arguments
+# back together either way. A build number cannot stand in as a space-free
+# identifier: xcodes parses `17E192` as major 17 with a prerelease of `e 192`
+# and reports the version as not installed.
+#
+# ```{note}
+# The listing has two shapes, and mpm sees the machine-readable one. Written to
+# a terminal, xcodes pads the version column to align it for a human; written
+# anywhere else it separates the columns with a tab instead, a distinction its
+# source has carried deliberately since `1.0.0` for the benefit of tools like
+# this one. The tab is what the pattern below anchors on, which also rejects the
+# legible errors xcodes prints to stdout rather than stderr.
+# ```
+#
+# ```{caution}
+# No `install`, and it is not a matter of flags. Downloading an Xcode always
+# authenticates against an Apple ID, on both data sources, and the prompts are
+# real reads from standard input: `XCODES_USERNAME` and `XCODES_PASSWORD` exist
+# but two-factor authentication has no environment path at all, being three
+# further interactive reads, and a federated Apple ID opens a browser and waits
+# for a pasted callback URL. A second prompt follows for the superuser password
+# the post-install steps need. An unattended install is therefore not
+# expressible, while everything below runs with no credentials whatsoever.
+# ```
+#
+# ```{warning}
+# Never pass `--data-source apple`. The default source is a public feed served
+# over plain HTTP, which is what keeps the catalog readable anonymously; that
+# one flag routes the same reads through Apple's authenticated endpoints and
+# turns every one of them into a login prompt.
+# ```
+#
+# No `outdated`: knowing an Xcode is behind means joining the installed set
+# against the catalog, which is two commands and a comparison rather than one
+# argument list. No `search` either, the catalog listing accepting no query, and
+# it is filtered to the host's architecture by default, so its contents differ
+# between machines. No upgrade of either kind exists, and no cleanup: the
+# request to reclaim disk space has been open upstream since 2022.
+#
+# `sync` maps to `xcodes update`, which despite its name refreshes the catalog
+# rather than any installed Xcode. It prints the whole catalog while doing so,
+# which is noise mpm does not read.
+#
+# No escalation: the reads and the removal all run unprivileged, and only the
+# install path xcodes cannot run unattended needs a superuser password.
+
+[mpm.managers.xcodes]
+name = "Xcode xcodes"
+homepage_url = "https://github.com/XcodesOrg/xcodes"
+logo = "xcode"
+platforms = ["macos"]
+cli_names = ["xcodes"]
+requirement = ">=1.0.0"
+# The tab-separated listing and its `<version> (<build>)` column have been
+# unchanged since the first release; the later architecture label is absorbed by
+# the pattern below rather than requiring a newer xcodes.
+# `xcodes version` prints the bare version and nothing else. Note the
+# subcommand: there is no `--version` flag.
+version_cli_options = ["version"]
+version_regexes = ['^(?P<version>\d+(?:\.\d+)+)$']
+
+# Two tab-separated columns, the version and the bundle path. The first column
+# carries optional decorations after the version, in order: a parenthesized
+# build number, a bracketed architecture label, and `(Selected)` for the active
+# Xcode. Everything from the first parenthesis or bracket onward is consumed
+# without being captured, since a definition may only name the package and
+# version fields. The version itself may contain spaces, so the pattern stops at
+# those decorations rather than at whitespace.
+#
+# No version is captured: the id is the marketing version, so a version column
+# would only repeat it. The build number is the one extra fact the row carries,
+# but it is an Apple build identifier rather than a version, and reporting it as
+# one would misrepresent it.
+#
+# An empty result is empty output and a zero exit, not an error.
+[mpm.managers.xcodes.operations.installed]
+args = ["installed"]
+regex = '^(?P<package_id>[^\t]+?)(?: [(\[][^\t]*)?\t'
+
+# Moves the bundle to the Trash rather than deleting it, and needs no
+# privileges. Non-interactive as long as the version is actually installed: an
+# unparseable or absent one falls through to a numbered menu on standard input.
+[mpm.managers.xcodes.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+# Refreshes the cached catalog of available versions. Named `update`, but it
+# updates the list rather than any Xcode.
+[mpm.managers.xcodes.operations.sync]
+args = ["update"]
+
+# Output samples locking the version probe and the declared parser. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# The listing is a capture of the piped, tab-separated form from a real
+# `2.0.3` build, with the tab written as an escape so it survives review. Its
+# rows cover the shapes the pattern has to survive: a plain release, a
+# prerelease whose name carries spaces, and the architecture label recent
+# versions add.
+#
+# No catalog sample: `xcodes list` filters to the host's architecture by
+# default, so its output is not reproducible across machines and has no place in
+# a fixture.
+[samples.version]
+output = "2.0.3"
+expected = "2.0.3"
+
+[[samples.installed]]
+output = "15.4 (15F31d)\t/Applications/Xcode-15.4.0.app\n16.2 (16C5032a)\t/Applications/Xcode-16.2.0.app\n26.2 (17C52) [Apple Silicon]\t/Applications/Xcode-26.2.0.app\n26.4 Release Candidate (17E192)\t/Applications/Xcode-26.4.0-Release.Candidate.app"
+packages = [
+  { id = "15.4" },
+  { id = "16.2" },
+  { id = "26.2" },
+  { id = "26.4 Release Candidate" },
+]

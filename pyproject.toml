@@ -159,6 +159,7 @@ keywords = [
   "xbar",
   "xbar-plugin",
   "xbps",
+  "xcodes",
   "yarn",
   "yarn-berry",
   "yay",
@@ -1357,6 +1358,11 @@ color = "bfdadc"
 description = "xbps"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: xcodes"
+color = "bfdadc"
+description = "xcodes"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: zsh-based"
 color = "bfdadc"
 description = "antidote, antigen, zim, zinit, zplug"
@@ -1721,6 +1727,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/winget.*", "tests/*winge
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: xbps"
 any-glob-to-any-file = [ "meta_package_manager/managers/xbps.*", "tests/*xbps*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: xcodes"
+any-glob-to-any-file = [ "meta_package_manager/managers/xcodes.*", "tests/*xcodes*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: zsh-based"

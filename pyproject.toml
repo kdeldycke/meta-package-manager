@@ -58,6 +58,7 @@ keywords = [
   "gnome-shell-extension",
   "gnu guix",
   "guix",
+  "haxelib",
   "homebrew",
   "krew",
   "lazy",
@@ -1150,6 +1151,11 @@ color = "bfdadc"
 description = "guix"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: haxelib"
+color = "bfdadc"
+description = "haxelib"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: homebrew"
 color = "bfdadc"
 description = "brew, cask, zerobrew"
@@ -1465,6 +1471,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/gh_ext.*", "tests/*gh_ex
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: guix"
 any-glob-to-any-file = [ "meta_package_manager/managers/guix.*", "tests/*guix*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: haxelib"
+any-glob-to-any-file = [ "meta_package_manager/managers/haxelib.*", "tests/*haxelib*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: homebrew"

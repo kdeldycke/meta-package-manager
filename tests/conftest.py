@@ -373,6 +373,7 @@ PACKAGE_IDS = {
     # A tiny script-based extension (a bare git clone), from a GitHub CLI maintainer.
     "gh-ext": "mislav/gh-branch",
     "guix": "hello",
+    "haxelib": "hxjsonast",  # Tiny zero-dependency JSON parser.
     "krew": "ctx",  # Tiny context-switcher plugin of krew's own index.
     # Declares no install operation: the round-trip auto-skips. lazy.nvim manages
     # itself, so it is a real entry of its own inventory.

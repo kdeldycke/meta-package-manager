@@ -88,7 +88,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "gradle": None,
     "guix": {"guix"},
     "hackage": None,
-    "haxe": None,
+    "haxe": {"haxelib"},
     "helm": None,
     "hex": None,
     "huggingface": None,

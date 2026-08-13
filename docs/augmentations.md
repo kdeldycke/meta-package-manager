@@ -37,6 +37,7 @@ print(augmentations_table())
 | [`gem`](managers/gem.md)                   |                      |              |              |       ✅        |
 | [`gh-ext`](managers/gh-ext.md)             |                      |              |      ✅      |       ✅        |
 | [`guix`](managers/guix.md)                 |                      |              |      ✅      |       ✅        |
+| [`haxelib`](managers/haxelib.md)           |                      |              |      ✅      |       ✅        |
 | [`krew`](managers/krew.md)                 |                      |              |      ✅      |       ✅        |
 | [`mas`](managers/mas.md)                   |                      |              |      ✅      |       ✅        |
 | [`mise`](managers/mise.md)                 |                      |              |      ✅      |                 |

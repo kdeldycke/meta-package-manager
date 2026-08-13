@@ -140,6 +140,14 @@ icons:
     - chromebrew
     source: https://www.google.com/chrome
     title: Google Chrome
+  haxe:
+    contrast_on_light: 2.72
+    hex: EA8220
+    license: CC0-1.0
+    managers:
+    - haxelib
+    source: https://haxe.org/foundation/branding.html
+    title: Haxe
   homebrew:
     contrast_on_light: 1.84
     hex: FBB040

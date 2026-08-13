@@ -115,6 +115,7 @@ Meta Package Manager,fwupd,1
 Meta Package Manager,gem,1
 Meta Package Manager,gh-ext,1
 Meta Package Manager,guix,1
+Meta Package Manager,haxelib,1
 Meta Package Manager,krew,1
 Meta Package Manager,lazy,1
 Meta Package Manager,macports,1
@@ -220,6 +221,7 @@ print(operation_matrix()[0])
 | [`gem`](https://mpm.run/managers/gem.html)                                                     | >= 2.5       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`gh-ext`](https://mpm.run/managers/gh-ext.html)                                               | >= 2         |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`guix`](https://mpm.run/managers/guix.html)                                                   |              |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
+| [`haxelib`](https://mpm.run/managers/haxelib.html)                                             | >= 4         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`krew`](https://mpm.run/managers/krew.html)                                                   | >= 0.4       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`lazy`](https://mpm.run/managers/lazy.html)                                                   | >= 11        |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
 | [`macports`](https://mpm.run/managers/macports.html)                                           | >= 2         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |

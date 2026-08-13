@@ -1,0 +1,143 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# haxelib is the Haxe language's package manager
+# (https://github.com/HaxeFoundation/haxelib). See docs/overrides.md ("Define a
+# new manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# Every invocation carries `--global`, and that is load-bearing rather than
+# tidy. Without it `RepoManager.getPath` walks the whole directory tree upwards
+# looking for a `.haxelib` directory and silently switches to that project-local
+# repository the moment it finds one, so any ancestor of the working directory
+# can hijack the listing. `--global` calls `Repository.getGlobal()` instead,
+# which never consults the working directory at all. `HAXELIB_PATH` is not a
+# substitute: it only redirects which repository counts as the global one, and
+# is consulted after the local lookup has already won.
+#
+# `--always` answers every prompt yes. haxelib prompts on paths mpm must not
+# block on: setting an already-downloaded version as current, and, for a
+# VCS-installed library, resetting the checkout before updating. That second one
+# discards uncommitted work in the user's haxelib checkout, which is the cost of
+# running unattended and is why the flag appears only on the mutating operations.
+#
+# `--quiet` silences the download progress renderer, which writes erase-line
+# control bytes to stdout unconditionally: haxelib performs no TTY detection
+# anywhere, so a pipe gets them too. It does not silence `Cli.print`, so the
+# data output every parser below reads is unaffected. There is no color to
+# suppress: the only escape sequences in the whole client are those erase-line
+# ones.
+#
+# No `outdated`: haxelib ships no non-mutating way to list upgradable libraries.
+# `update` interleaves the staleness check with the upgrade inside one loop, so
+# there is no half of it to run. The upstream request for machine-readable
+# output that would make one possible has been open since 2019
+# (https://github.com/HaxeFoundation/haxelib/issues/438), and no command emits
+# JSON. `upgrade --all` still works.
+#
+# No `cleanup`: haxelib has no cache to clear and no old-version pruning.
+# Downloads land straight in the repository. No `sync` either: `search` queries
+# the live registry, so there is no local index to refresh.
+#
+# No escalation is declared. The default global repository is a root-owned
+# system directory on Unix, but whether that applies is a property of the
+# installation rather than of the invocation: `haxelib setup` records the path,
+# and distribution and Homebrew packages commonly point it somewhere the user
+# owns. haxelib has no user-install mode to switch to
+# (https://github.com/HaxeFoundation/haxelib/issues/330, open since 2016), so a
+# read-only repository surfaces as haxelib's own error rather than as something
+# mpm can escalate around.
+
+[mpm.managers.haxelib]
+name = "Haxe haxelib"
+homepage_url = "https://lib.haxe.org"
+logo = "haxe"
+platforms = ["all_platforms"]
+cli_names = ["haxelib"]
+requirement = ">=4.0.0"
+# `haxelib version` prints the bare version, and appends " (<sha>)" or
+# " (<sha> - dirty)" when the client was itself built from a git checkout.
+# Anchored so the suffix is ignored.
+version_regexes = ['^(?P<version>\d+\.\d+\.\d+(?:-[a-z]+(?:\.\d+)?)?)']
+
+# One line per library: `name:` followed by every installed version, with the
+# active one in brackets. Three details drive this pattern. The bracketed
+# version is not necessarily the first token, so the pattern scans past the
+# plain ones. A library overridden by a local checkout is rendered with a
+# trailing `[dev:<path>]` marker and *nothing* bracketed, so the negative
+# lookahead keeps a filesystem path out of the version field. And the whole
+# bracket group is optional, so such a library is still reported, just without a
+# version, which is what mpm's package model expects when a tool tracks none.
+[mpm.managers.haxelib.operations.installed]
+args = ["--global", "list"]
+regex = '^(?P<package_id>[A-Za-z0-9_.-]+):(?:[^\[]*\[(?!dev:)(?P<installed_version>[^\]]+)\])?'
+
+# Names only: the remoting call returns an id and a name, and only the name is
+# printed. The trailing `N libraries found` line, the new-version banner that
+# `--quiet` does not suppress, and the network retry notices all reach stdout
+# too, so the pattern is anchored at both ends: every one of those lines carries
+# a space and is rejected for free.
+[mpm.managers.haxelib.operations.search]
+args = ["--global", "--quiet", "search", "{query}"]
+regex = '^(?P<package_id>[A-Za-z0-9_.-]{3,})$'
+
+[mpm.managers.haxelib.operations.install]
+args = ["--global", "--always", "--quiet", "install", "{package_id}"]
+
+[mpm.managers.haxelib.operations.remove]
+args = ["--global", "remove", "{package_id}"]
+
+# `upgrade` is a registered alias of `update`, merged upstream in 3.3.0, so both
+# spellings reach the same command. Named it takes one library; bare it updates
+# everything. Unlike some whole-system upgraders it never silently ignores the
+# package it was handed: the argument count is enforced, and the named library
+# is what gets updated.
+[mpm.managers.haxelib.operations.upgrade_one]
+args = ["--global", "--always", "--quiet", "update", "{package_id}"]
+
+[mpm.managers.haxelib.operations.upgrade_all]
+args = ["--global", "--always", "--quiet", "update"]
+
+# Output samples locking the version probe and the declared parsers. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# The `installed` block is a verbatim excerpt of the listing pasted in
+# FunkinCrew/Funkin#2384, chosen for the cases it exercises: `flixel` and
+# `thx.semver` both carry a plain version ahead of the bracketed active one, and
+# `thx.semver` carries a dot in its name. The dev-override rows of that same
+# paste are left out only because their paths run through a directory whose name
+# does not belong in shipped documentation; the pattern is checked against them
+# separately.
+#
+# The `search` block is source-derived: the command's whole body prints each
+# result name and then the count, and the names below are real libraries taken
+# from the listing above.
+[samples.version]
+output = "4.2.0"
+expected = "4.2.0"
+
+[[samples.installed]]
+output = """
+flixel: 5.8.0 [git]
+format: [3.5.0]
+hamcrest: [3.0.0]
+hxcpp: [4.3.2]
+thx.semver: 0.2.2 [git]"""
+packages = [
+  { id = "flixel", version = "git" },
+  { id = "format", version = "3.5.0" },
+  { id = "hamcrest", version = "3.0.0" },
+  { id = "hxcpp", version = "4.3.2" },
+  { id = "thx.semver", version = "git" },
+]
+
+[[samples.search]]
+output = """
+flixel
+flixel-addons
+flixel-ui
+3 libraries found"""
+packages = [
+  { id = "flixel" },
+  { id = "flixel-addons" },
+  { id = "flixel-ui" },
+]

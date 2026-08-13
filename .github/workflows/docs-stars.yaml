@@ -14,7 +14,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Accumulate the star history the benchmark and history pages plot.
+# Accumulate the star history the benchmark and history pages plot, and the
+# popularity and activity of every wrapped manager's upstream, shown on the
+# manager index.
 #
 # GitHub restricted its stargazer endpoints to a repository's own admins on
 # 2026-06-30 (REST) and 2026-07-17 (GraphQL), which killed every third-party
@@ -64,7 +66,7 @@ jobs:
           GH_TOKEN: ${{ secrets.REPOMATIC_PAT }}
         run: >
           uv --no-progress run --no-project --python 3.13 --
-          python docs/stars_update.py --sample --backfill-github
+          python docs/stars_update.py --sample --sample-upstreams --backfill-github
 
       # Nothing to commit is the common case between two stars: the guard keeps
       # the history free of empty weekly commits.
@@ -83,5 +85,6 @@ jobs:
           git config user.name "${ACTOR}"
           git config user.email "${ACTOR}@users.noreply.github.com"
           git add docs/assets/star-history.json docs/assets/star-history*.svg
-          git commit --message "Sample GitHub star history"
+          git add docs/assets/manager-upstreams.json
+          git commit --message "Sample forge popularity and activity"
           git push

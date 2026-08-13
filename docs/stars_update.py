@@ -14,7 +14,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Sample GitHub stars of `mpm` and its benchmarked peers, and plot the history.
+"""Sample forge metrics: `mpm`'s star history, and every manager's upstream.
+
+Two datasets, collected by one module because they read the same APIs on the
+same schedule and land in the same commit. The star history plotted on the
+benchmark and history pages is the older of the two; {data}`UPSTREAM_REPOS`
+adds the popularity and activity readings the manager index shows, one per
+wrapped manager.
 
 Replaces the third-party star-history.com chart the benchmark and history pages
 used to embed. On 2026-06-30 GitHub restricted the REST stargazer endpoints to a
@@ -70,7 +76,7 @@ from collections import Counter
 from datetime import date, datetime, timezone
 from itertools import accumulate
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 ASSETS = Path(__file__).parent / "assets"
 """Directory holding the committed data file and the rendered chart."""
@@ -155,6 +161,195 @@ SERIES_COLORS = {
 }
 """Light and dark hex pair per series, in fixed order and never cycled."""
 
+UPSTREAMS = ASSETS / "manager-upstreams.json"
+"""Popularity and activity of each wrapped manager's own upstream project.
+
+One record per manager, where {data}`STORE` keeps one per repository *and* date:
+the manager index reports where a project stands today, and a hundred managers
+sampled weekly would otherwise pile up thousands of records a year that nothing
+ever reads chronologically. A record therefore carries the date its reading was
+taken and is rewritten only when that reading moves, which keeps a quiet week
+out of the diff and dates a dead project's row honestly.
+"""
+
+UPSTREAM_REPOS = {
+    "antidote": "https://github.com/mattmc3/antidote",
+    "antigen": "https://github.com/zsh-users/antigen",
+    "apk": "https://gitlab.alpinelinux.org/alpine/apk-tools",
+    "apm": "https://github.com/atom/apm",
+    "apt": "https://salsa.debian.org/apt-team/apt",
+    "apt-cyg": "https://github.com/transcode-open/apt-cyg",
+    "asdf": "https://github.com/asdf-vm/asdf",
+    "bin": "https://github.com/marcosnils/bin",
+    "brew": "https://github.com/Homebrew/brew",
+    "cargo": "https://github.com/rust-lang/cargo",
+    "cask": "https://github.com/Homebrew/homebrew-cask",
+    "cave": "https://gitlab.exherbo.org/paludis/paludis",
+    "choco": "https://github.com/chocolatey/choco",
+    "chromebrew": "https://github.com/chromebrew/chromebrew",
+    "composer": "https://github.com/composer/composer",
+    "conda": "https://github.com/conda/conda",
+    "cpan": "https://github.com/andk/cpanpm",
+    "deb-get": "https://github.com/wimpysworld/deb-get",
+    "dkp-pacman": "https://github.com/devkitPro/pacman",
+    "dnf": "https://github.com/rpm-software-management/dnf",
+    "dnf5": "https://github.com/rpm-software-management/dnf5",
+    "dotnet": "https://github.com/dotnet/sdk",
+    "emerge": "https://github.com/gentoo/portage",
+    "eopkg": "https://github.com/getsolus/eopkg",
+    "fink": "https://github.com/fink/fink",
+    "fisher": "https://github.com/jorgebucaran/fisher",
+    "flatpak": "https://github.com/flatpak/flatpak",
+    "fwupd": "https://github.com/fwupd/fwupd",
+    "gem": "https://github.com/ruby/rubygems",
+    "gh-ext": "https://github.com/cli/cli",
+    "ghcup": "https://github.com/haskell/ghcup-hs",
+    "guix": "https://codeberg.org/guix/guix",
+    "haxelib": "https://github.com/HaxeFoundation/haxelib",
+    "juliaup": "https://github.com/JuliaLang/juliaup",
+    "krew": "https://github.com/kubernetes-sigs/krew",
+    "lazy": "https://github.com/folke/lazy.nvim",
+    "macports": "https://github.com/macports/macports-base",
+    "mas": "https://github.com/mas-cli/mas",
+    "mise": "https://github.com/jdx/mise",
+    "nix": "https://github.com/NixOS/nix",
+    "npm": "https://github.com/npm/cli",
+    "oh-my-fish": "https://github.com/oh-my-fish/oh-my-fish",
+    "opam": "https://github.com/ocaml/opam",
+    "pacaur": "https://github.com/E5ten/pacaur",
+    "pacman": "https://gitlab.archlinux.org/pacman/pacman",
+    "pacstall": "https://github.com/pacstall/pacstall",
+    "pamac": "https://github.com/manjaro/pamac-cli",
+    "paru": "https://github.com/Morganamilo/paru",
+    "pikaur": "https://github.com/actionless/pikaur",
+    "pip": "https://github.com/pypa/pip",
+    "pipx": "https://github.com/pypa/pipx",
+    "pixi": "https://github.com/prefix-dev/pixi",
+    "pkcon": "https://github.com/PackageKit/PackageKit",
+    "pkg": "https://github.com/freebsd/pkg",
+    "pkg-tools": "https://github.com/openbsd/src",
+    "pkgin": "https://github.com/NetBSDfr/pkgin",
+    "pnpm": "https://github.com/pnpm/pnpm",
+    "ports": "https://github.com/freebsd/freebsd-ports",
+    "pwsh-gallery": "https://github.com/PowerShell/PSResourceGet",
+    "pyenv": "https://github.com/pyenv/pyenv",
+    "rustup": "https://github.com/rust-lang/rustup",
+    "scoop": "https://github.com/ScoopInstaller/Scoop",
+    "sdkman": "https://github.com/sdkman/sdkman-cli",
+    "sfsu": "https://github.com/winpax/sfsu",
+    "sheldon": "https://github.com/rossmacarthur/sheldon",
+    "slapt-get": "https://github.com/jaos/slapt-get",
+    "snap": "https://github.com/canonical/snapd",
+    "soar": "https://github.com/pkgforge/soar",
+    "sorcery": "https://github.com/sourcemage/sorcery",
+    "stew": "https://github.com/marwanhawari/stew",
+    "swupd": "https://github.com/clearlinux/swupd-client",
+    "tlmgr": "https://github.com/TeX-Live/texlive-source",
+    "topgrade": "https://github.com/topgrade-rs/topgrade",
+    "trizen": "https://github.com/trizen/trizen",
+    "uv": "https://github.com/astral-sh/uv",
+    "uvx": "https://github.com/astral-sh/uv",
+    "vagrant": "https://github.com/hashicorp/vagrant",
+    "vim-pack": "https://github.com/neovim/neovim",
+    "volta": "https://github.com/volta-cli/volta",
+    "vscode": "https://github.com/microsoft/vscode",
+    "vscodium": "https://github.com/VSCodium/vscodium",
+    "winget": "https://github.com/microsoft/winget-cli",
+    "xbps": "https://github.com/void-linux/xbps",
+    "xcodes": "https://github.com/XcodesOrg/xcodes",
+    "yarn": "https://github.com/yarnpkg/yarn",
+    "yarn-berry": "https://github.com/yarnpkg/berry",
+    "yay": "https://github.com/Jguer/yay",
+    "yum": "https://github.com/rpm-software-management/yum",
+    "zerobrew": "https://github.com/lucasgelfond/zerobrew",
+    "zim": "https://github.com/zimfw/zimfw",
+    "zinit": "https://github.com/zdharma-continuum/zinit",
+    "zplug": "https://github.com/zplug/zplug",
+    "zypper": "https://github.com/openSUSE/zypper",
+}
+"""Source repository of each manager's upstream project, keyed by manager ID.
+
+Curated by hand, since a manager declares a home page and nothing else, and a
+home page is a website far more often than a repository. Two rules settle the
+projects that have more than one:
+
+- **The canonical repository beats a mirror**, however well known the mirror is.
+  Alpine's `apk-tools` is mirrored on GitHub, where the newest tag is `v2.10.4`
+  from 2019 while the GitLab original sits on `v3.0.7`: a mirror's activity is
+  not the project's. The exception is a canonical forge exposing no API at all
+  (Gentoo's gitweb, the FreeBSD and OpenBSD trees), where the project's own
+  mirror is the only readable copy and stands in for it.
+- **A manager shipped inside a larger tool takes that tool's repository**, so
+  `vscode` reads Visual Studio Code's figures and `vim-pack` reads Neovim's.
+  A count cannot be split out of a monorepo, and choosing case by case which
+  manager deserves its parent's numbers would be arbitrary.
+
+Sorted by manager ID, and paired with {data}`NO_UPSTREAM` so every wrapped
+manager appears in exactly one of the two.
+"""
+
+NO_UPSTREAM = {
+    "apt-mint": "Ships in a distribution package with no public repository.",
+    "gcloud": "Google publishes the Cloud SDK as a binary; its source is not.",
+    "opkg": "Hosted on the Yocto Project's cgit, which serves no API.",
+    "steamcmd": "Valve ships SteamCMD as a proprietary binary.",
+    "sun-tools": "Oracle Solaris packaging tools are proprietary.",
+    "tazpkg": "Hosted on SliTaz's Mercurial server, which serves no API.",
+    "urpmi": "Hosted on Mageia's own git server, which serves no API.",
+}
+"""Managers whose upstream cannot be measured, and why.
+
+Recorded rather than left implicit: a manager absent from both maps is an
+oversight a conformance test reports, while one listed here is a decision. Their
+popularity and activity cells stay empty in the manager index.
+"""
+
+FORGE_APIS = {
+    "codeberg.org": "forgejo",
+    "github.com": "github",
+    "gitlab.alpinelinux.org": "gitlab",
+    "gitlab.archlinux.org": "gitlab",
+    "gitlab.exherbo.org": "gitlab",
+    "salsa.debian.org": "gitlab",
+}
+"""Forge software each host runs, which is what selects the API to call.
+
+Never guessed from the host name: an unknown host raises instead, so a manager
+whose upstream lands on a fourth kind of forge has to declare how to read it
+rather than silently sampling nothing.
+"""
+
+GITHUB_METRICS_QUERY = """
+query($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    stargazerCount
+    latestRelease { publishedAt }
+    defaultBranchRef { target { ... on Commit { committedDate } } }
+    refs(refPrefix: "refs/tags/", first: 1,
+         orderBy: {field: TAG_COMMIT_DATE, direction: DESC}) {
+      nodes {
+        target {
+          ... on Commit { committedDate }
+          ... on Tag { target { ... on Commit { committedDate } } }
+        }
+      }
+    }
+  }
+}
+"""
+"""Reads a repository's stars, newest release, newest tag and last commit.
+
+One call where REST needs three, and correct where REST is not: `/tags` answers
+in an order nobody should assume. Its first tag is the newest for `pip`, but
+`v0.0.1-pre` from 2014 for `cargo` and a 2019 branch marker for `zypper`, so a
+fallback trusting that order would date live projects a decade into the past.
+Ordering on `TAG_COMMIT_DATE` states the question instead of hoping the default
+matches it.
+
+The commit date is read off the default branch rather than from the repository's
+`pushedAt`, which any push to any branch bumps.
+"""
+
 LAST_FETCH_REASONS: Counter[str] = Counter()
 """Why the most recent {func}`fetch` gave up, tallied by outcome.
 
@@ -194,6 +389,16 @@ USER_AGENT = (
     "(KHTML, like Gecko) Chrome/120 Safari/537.36"
 )
 """Sent to the Wayback Machine, which serves robots a reduced index."""
+
+FORGE_USER_AGENT = "meta-package-manager docs collector"
+"""Sent to every forge API, where the browser identity above backfires.
+
+Three of the four self-hosted GitLab instances read here answer a browser
+user-agent with a page rather than a payload: salsa, Exherbo's and Arch's each
+returned two to eight kilobytes of HTML where the same URL fetched under a plain
+agent returned under a kilobyte of JSON. Nothing errors, so the symptom is a
+manager quietly missing from the index rather than a failed run.
+"""
 
 WAYBACK_STAR_PATTERNS = (
     re.compile(r'id="repo-stars-counter-star"[^>]*title="([\d,]+)"', re.IGNORECASE),
@@ -281,6 +486,236 @@ def gh_api(path: str, *headers: str) -> Any:
     return json.loads(result.stdout)
 
 
+def gh_graphql(query: str, **variables: str) -> Any:
+    """Run a GraphQL query through `gh`, inheriting its authentication.
+
+    The query travels as a raw field, since `--field` reads a value looking like
+    a number or a boolean as one, and returns the `data` envelope unwrapped.
+    """
+    argv = ["gh", "api", "graphql", "--raw-field", f"query={query}"]
+    for name, value in variables.items():
+        argv += ["--field", f"{name}={value}"]
+    result = subprocess.run(
+        argv, capture_output=True, text=True, encoding="UTF-8", check=True
+    )
+    return json.loads(result.stdout)["data"]
+
+
+def forge_json(url: str) -> Any:
+    """Read one JSON document from a forge's public API.
+
+    Covers every forge but GitHub, whose authentication `gh` already carries.
+    The instances read here (GitLab and Forgejo) serve their project metadata
+    to anonymous callers, so no token is involved and none is asked for.
+    """
+    payload = fetch(url, user_agent=FORGE_USER_AGENT)
+    if payload is None:
+        return None
+    try:
+        return json.loads(payload)
+    except json.JSONDecodeError:
+        return None
+
+
+class ForgeMetrics(NamedTuple):
+    """One repository's popularity and activity, as any forge reports them."""
+
+    stars: int
+    """Count of accounts following the repository on its own forge."""
+
+    release: str | None
+    """ISO date of the newest release or tag, `None` when a project has neither."""
+
+    release_source: str | None
+    """Where {attr}`release` came from: a `release` object, or a bare `tag`.
+
+    Recorded because the two are not the same claim. A release is something the
+    project announced; a tag is only the newest thing it labelled, which is the
+    closest available answer for the many upstreams that never cut a release.
+    """
+
+    commit: str | None
+    """ISO date of the newest commit on the default branch.
+
+    The second half of the activity reading, and the half that stays true for a
+    rolling repository. Homebrew's cask tap last tagged a release in 2016 and is
+    committed to several times a day: a release date alone would report the most
+    used tap in the pool as a decade dead.
+    """
+
+
+def newest_dated(release: str | None, tag: str | None) -> tuple[str | None, str | None]:
+    """Pick whichever of a project's newest release and newest tag is more recent.
+
+    Not a preference for releases: six of the sampled upstreams carry a tag
+    newer than their latest release object, `tlmgr` by eleven months, so
+    always reading the release would report them as idle for a year. ISO dates
+    compare as strings, which is the whole of the arithmetic here.
+    """
+    if release and tag:
+        return (release, "release") if release >= tag else (tag, "tag")
+    if release:
+        return release, "release"
+    if tag:
+        return tag, "tag"
+    return None, None
+
+
+def github_metrics(path: str) -> ForgeMetrics:
+    """Read a GitHub repository through {data}`GITHUB_METRICS_QUERY`."""
+    owner, _, name = path.partition("/")
+    repo = gh_graphql(GITHUB_METRICS_QUERY, owner=owner, name=name)["repository"]
+    release = repo["latestRelease"]
+    tag = None
+    for node in repo["refs"]["nodes"]:
+        # A lightweight tag points straight at its commit, an annotated one at a
+        # tag object wrapping it, and the query asks for both shapes.
+        target = node["target"]
+        committed = target.get("committedDate") or (target.get("target") or {}).get(
+            "committedDate"
+        )
+        if committed:
+            tag = committed[:10]
+    dated, source = newest_dated(release["publishedAt"][:10] if release else None, tag)
+    branch = repo["defaultBranchRef"]
+    return ForgeMetrics(
+        repo["stargazerCount"],
+        dated,
+        source,
+        branch["target"]["committedDate"][:10] if branch else None,
+    )
+
+
+def gitlab_metrics(host: str, path: str) -> ForgeMetrics | None:
+    """Read a GitLab project, on whichever instance hosts it."""
+    project = f"{host}/api/v4/projects/{urllib.parse.quote(path, safe='')}"
+    payload = forge_json(project)
+    if not payload:
+        return None
+    releases = forge_json(f"{project}/releases?per_page=1")
+    # Ordering spelled out rather than inherited: it is GitLab's current default
+    # for tags, but the whole point of asking is to not depend on that.
+    tags = forge_json(
+        f"{project}/repository/tags?per_page=1&order_by=updated&sort=desc"
+    )
+    commits = forge_json(f"{project}/repository/commits?per_page=1")
+    dated, source = newest_dated(
+        releases[0]["released_at"][:10] if releases else None,
+        tags[0]["commit"]["created_at"][:10] if tags else None,
+    )
+    return ForgeMetrics(
+        payload["star_count"],
+        dated,
+        source,
+        commits[0]["committed_date"][:10] if commits else None,
+    )
+
+
+def forgejo_metrics(host: str, path: str) -> ForgeMetrics | None:
+    """Read a Forgejo or Gitea repository, on whichever instance hosts it."""
+    repo = f"{host}/api/v1/repos/{path}"
+    payload = forge_json(repo)
+    if not payload:
+        return None
+    releases = forge_json(f"{repo}/releases?limit=1")
+    tags = forge_json(f"{repo}/tags?limit=1")
+    commits = forge_json(f"{repo}/commits?limit=1")
+    dated, source = newest_dated(
+        releases[0]["published_at"][:10] if releases else None,
+        tags[0]["commit"]["created"][:10] if tags else None,
+    )
+    return ForgeMetrics(
+        payload["stars_count"],
+        dated,
+        source,
+        commits[0]["commit"]["committer"]["date"][:10] if commits else None,
+    )
+
+
+def upstream_metrics(url: str) -> ForgeMetrics | None:
+    """Read one upstream repository, through whichever API its host speaks."""
+    host, _, path = url.removeprefix("https://").partition("/")
+    forge = FORGE_APIS[host]
+    if forge == "github":
+        return github_metrics(path)
+    if forge == "gitlab":
+        return gitlab_metrics(f"https://{host}", path)
+    return forgejo_metrics(f"https://{host}", path)
+
+
+def load_upstreams() -> dict[str, dict]:
+    """Read the committed upstream readings, keyed by manager ID."""
+    if not UPSTREAMS.exists():
+        return {}
+    records = json.loads(UPSTREAMS.read_text(encoding="UTF-8"))
+    return {record["id"]: record for record in records}
+
+
+def save_upstreams(records: dict[str, dict]) -> None:
+    """Write the upstream readings back, sorted and indented like {data}`STORE`."""
+    ordered = [records[manager_id] for manager_id in sorted(records)]
+    UPSTREAMS.write_text(
+        json.dumps(ordered, indent="\t", sort_keys=True) + "\n", encoding="UTF-8"
+    )
+
+
+def sample_upstreams() -> int:
+    """Snapshot the popularity and activity of every manager's upstream.
+
+    A repository that fails to answer keeps its previous reading rather than
+    losing it: one flaky instance must not blank a column of the manager index,
+    and a stale figure carrying its own date is more useful than a hole.
+    """
+    today = datetime.now(tz=timezone.utc).date().isoformat()
+    records = load_upstreams()
+    # A manager that left the pool, or one whose upstream moved out of reach,
+    # takes its reading with it: nothing downstream would ever read the row
+    # again, and the conformance test rejects the file while it lingers.
+    changed = 0
+    for stale in set(records) - set(UPSTREAM_REPOS):
+        del records[stale]
+        changed += 1
+        print(f"  {stale:14} dropped, no longer measured")
+    for manager_id, url in sorted(UPSTREAM_REPOS.items()):
+        try:
+            metrics = upstream_metrics(url)
+        except Exception as error:  # noqa: BLE001
+            # Caught wide and per manager, like the star sampler's own loop: a
+            # repository gone private, a host answering a payload of a shape
+            # nobody anticipated or a forge added without its API declared must
+            # cost one row, not the ninety-two others collected before it.
+            metrics = None
+            detail = getattr(error, "stderr", None) or repr(error)
+            print(f"  {manager_id:14} {url}: FAILED ({detail.strip()[:60]})")
+        if metrics is None:
+            if manager_id not in records:
+                print(f"  {manager_id:14} {url}: unreadable, and never sampled")
+            continue
+        record = {"date": today, "id": manager_id, "repo": url, "stars": metrics.stars}
+        if metrics.release:
+            record["release"] = metrics.release
+            record["release_source"] = metrics.release_source
+        if metrics.commit:
+            record["commit"] = metrics.commit
+        previous = records.get(manager_id)
+        # Compared without their dates: a week where nothing moved must leave
+        # the file untouched rather than restamping a hundred unchanged rows.
+        if previous and {k: v for k, v in previous.items() if k != "date"} == {
+            k: v for k, v in record.items() if k != "date"
+        }:
+            continue
+        records[manager_id] = record
+        changed += 1
+        print(
+            f"  {manager_id:14} {metrics.stars} stars, "
+            f"{metrics.release_source or 'nothing'} {metrics.release or ''}, "
+            f"commit {metrics.commit or 'unknown'}"
+        )
+    if changed:
+        save_upstreams(records)
+    return changed
+
+
 def gunzip(blob: bytes) -> bytes:
     """Decompress a gzip payload, tolerating one cut short mid-stream.
 
@@ -296,8 +731,16 @@ def gunzip(blob: bytes) -> bytes:
         return b""
 
 
-def fetch(url: str, tries: int = 3, timeout: int = 45) -> bytes | None:
+def fetch(
+    url: str,
+    tries: int = 3,
+    timeout: int = 45,
+    user_agent: str = USER_AGENT,
+) -> bytes | None:
     """Fetch a URL with capped backoff, returning `None` once every try failed.
+
+    The identity defaults to the browser one the archive wants and every forge
+    refuses: see {data}`FORGE_USER_AGENT`.
 
     The archive's replay service is frequently only partly healthy: its
     load balancer answers `503` for most requests while a minority succeed,
@@ -316,7 +759,7 @@ def fetch(url: str, tries: int = 3, timeout: int = 45) -> bytes | None:
     for attempt in range(1, tries + 1):
         try:
             request = urllib.request.Request(
-                url, headers={"User-Agent": USER_AGENT, "Accept-Encoding": "gzip"}
+                url, headers={"User-Agent": user_agent, "Accept-Encoding": "gzip"}
             )
             with urllib.request.urlopen(request, timeout=timeout) as response:
                 gzipped = response.headers.get("Content-Encoding") == "gzip"
@@ -696,6 +1139,11 @@ def main() -> int:
         help="Snapshot every tracked repository's current star count.",
     )
     parser.add_argument(
+        "--sample-upstreams",
+        action="store_true",
+        help="Snapshot each manager's upstream popularity and activity.",
+    )
+    parser.add_argument(
         "--backfill-github",
         action="store_true",
         help="Reconstruct exact history for repositories the token administers.",
@@ -712,7 +1160,13 @@ def main() -> int:
     )
     args = parser.parse_args()
     if not any(
-        (args.sample, args.backfill_github, args.backfill_wayback, args.render)
+        (
+            args.sample,
+            args.sample_upstreams,
+            args.backfill_github,
+            args.backfill_wayback,
+            args.render,
+        )
     ):
         parser.error("pick at least one mode")
 
@@ -722,6 +1176,14 @@ def main() -> int:
     if args.sample:
         print("Sampling current star counts:")
         changed += sample(store)
+
+    # Counted apart from the chart's own points: this dataset has no curve to
+    # redraw, and folding it into `changed` would re-render three SVGs every
+    # time an unrelated upstream gained a star.
+    if args.sample_upstreams:
+        print("Sampling manager upstreams:")
+        moved = sample_upstreams()
+        print(f"\n{moved} upstream reading(s) updated in {UPSTREAMS.name}")
 
     if args.backfill_github:
         for column, repo in TRACKED_REPOS.items():

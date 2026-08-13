@@ -525,6 +525,76 @@ def test_star_history_repos_match_benchmark():
     assert list(stars_update.SERIES_COLORS) == list(stars_update.TRACKED_REPOS)
 
 
+def test_manager_upstreams_cover_the_pool():
+    """Check every wrapped manager is either measured upstream, or excused.
+
+    The two maps partition the pool, so a manager added without a decision on
+    its upstream fails here instead of quietly rendering three empty cells. Both
+    are also checked against the pool from the other side: an ID left behind by
+    a renamed or dropped manager would otherwise sample forever.
+    """
+    measured = set(stars_update.UPSTREAM_REPOS)
+    excused = set(stars_update.NO_UPSTREAM)
+    assert measured | excused == set(pool)
+    assert not measured & excused
+
+    for manager_id, url in stars_update.UPSTREAM_REPOS.items():
+        assert url.startswith("https://"), f"{manager_id} needs an https URL"
+        host, _, path = url.removeprefix("https://").partition("/")
+        # An unknown host would raise mid-sample, one manager at a time.
+        assert host in stars_update.FORGE_APIS, f"{manager_id} sits on {host}"
+        owner, _, name = path.partition("/")
+        assert owner and name, f"{manager_id} needs an owner/name path, got {path!r}"
+
+    # Every reason reads as a sentence, since it is the only record of why a
+    # manager shows nothing.
+    for reason in stars_update.NO_UPSTREAM.values():
+        assert reason.endswith(".")
+
+
+def test_manager_upstreams_store_well_formed():
+    """Check the committed upstream readings keep the shape the index expects.
+
+    Guards a second file a scheduled job rewrites unattended: an ID that left
+    the pool, a date in the future or a negative count would all surface here
+    rather than in a rendered table nobody re-reads.
+    """
+    records = json.loads(stars_update.UPSTREAMS.read_text(encoding="UTF-8"))
+    assert isinstance(records, list)
+    assert records, "no upstream reading recorded yet"
+
+    today = datetime.now(tz=timezone.utc).date()
+    for record in records:
+        assert set(record) <= {
+            "commit",
+            "date",
+            "id",
+            "release",
+            "release_source",
+            "repo",
+            "stars",
+        }
+        assert set(record) >= {"date", "id", "repo", "stars"}
+        assert record["id"] in pool
+        # A reading whose manager is no longer measured must be dropped rather
+        # than left to age: the sampler prunes it on its next run.
+        assert record["id"] in stars_update.UPSTREAM_REPOS
+        assert record["repo"] == stars_update.UPSTREAM_REPOS[record["id"]]
+        assert isinstance(record["stars"], int)
+        assert record["stars"] >= 0
+        # A release date always states where it came from, and never the reverse.
+        assert ("release" in record) == ("release_source" in record)
+        if "release" in record:
+            assert record["release_source"] in {"release", "tag"}
+        for field in ("commit", "date", "release"):
+            if field in record:
+                assert date.fromisoformat(record[field]) <= today
+
+    ids = [record["id"] for record in records]
+    assert len(ids) == len(set(ids)), "one manager was sampled twice"
+    assert ids == sorted(ids), "records are sorted by manager ID"
+
+
 def test_star_history_store_well_formed():
     """Check the committed star history keeps the shape its renderer expects.
 
@@ -1174,9 +1244,20 @@ def test_managers_index_table_renders():
     assert lines[0] == f"`mpm` can drive {len(pool)} package managers:"
     # The leading column carries the brand marks and is headerless.
     assert re.fullmatch(
-        r"\|\s+\| Manager\s+\| ID\s+\|\s+Unmaintained\s+\|\s+Platforms\s+\|",
+        r"\|\s+\| Manager\s+\| ID\s+\|\s+Unmaintained\s+\|\s+Stars\s+\|"
+        r"\s+Last release\s+\|\s+Last commit\s+\|\s+Platforms\s+\|",
         lines[2],
     )
+    # Every sampled reading reaches the table it was collected for, thousands
+    # separated so a five-figure count is read at a glance.
+    upstreams = _docs._manager_upstreams()
+    assert upstreams
+    for manager_id, record in upstreams.items():
+        assert manager_id in pool
+        assert f"{record['stars']:,}" in table
+        for field in ("release", "commit"):
+            if field in record:
+                assert record[field] in table
     unmaintained = 0
     for mid, manager in pool.items():
         # Both the name and the identifier link to the manager's page.
@@ -1194,6 +1275,10 @@ def test_managers_index_table_renders():
     assert "⚠️](managers/" not in table
     # Every placeholder was substituted by the artwork it stands for.
     assert "%logo:" not in table
+    # The sourcing note closes the block as its own paragraph: glued to the last
+    # row, it would parse as one more row of the table.
+    assert lines[-2] == ""
+    assert lines[-1].startswith("Stars, releases and commits are read from")
 
 
 def test_matrix_blocks_in_sync():

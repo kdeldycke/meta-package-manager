@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import csv
 import inspect
+import json
 import re
 import sys
 from functools import cache
@@ -1923,6 +1924,24 @@ def manager_changelog(manager_id: str) -> str:
     return "\n".join(lines)
 
 
+@cache
+def _manager_upstreams() -> dict[str, dict]:
+    """Read the sampled upstream readings of `docs/assets/manager-upstreams.json`.
+
+    Written by `docs/stars_update.py --sample-upstreams` on the weekly schedule
+    and committed, which is what keeps the docs build hermetic: the manager index
+    reports a hundred forge repositories without the build touching a network.
+    Keyed by manager ID; a manager whose upstream cannot be measured is simply
+    absent, and renders as empty cells.
+    """
+    records = json.loads(
+        (PROJECT_ROOT / "docs" / "assets" / "manager-upstreams.json").read_text(
+            encoding="UTF-8"
+        )
+    )
+    return {record["id"]: record for record in records}
+
+
 def managers_index_table() -> str:
     """Produce the manager index table of `docs/managers.md`.
 
@@ -1937,7 +1956,23 @@ def managers_index_table() -> str:
     coverage reading as the manager pages: a partially-backed group keeps its icon
     with {func}`_platform_coverage`'s annotation (`🐧 (Exherbo Linux only)`)
     instead of disappearing, as it does in the readme's all-or-nothing matrix.
+
+    The three upstream columns answer the question the `⚠️` flag only answers at
+    its extreme: how a manager's own project is doing. They sit next to it for
+    that reason, and are read from {func}`_manager_upstreams` rather than
+    hotlinked as badges, which would have put two hundred third-party images on
+    one page and handed `linkcheck` as many URLs to resolve.
+
+    ```{note}
+    Two date columns rather than one, because each answers what the other
+    cannot. Thirteen upstreams were last released more than a year before their
+    newest commit, `cask` by a decade: it cuts no releases and is committed to
+    daily, so a release date alone reports the most used tap in the pool as long
+    dead. A commit date alone says nothing about whether that activity ever
+    reaches users, which is the question a release answers.
+    ```
     """
+    upstreams = _manager_upstreams()
     table = []
     for mid, m in sorted(pool.items()):
         id_cell = f"[`{mid}`](managers/{mid}.md)"
@@ -1948,6 +1983,8 @@ def managers_index_table() -> str:
                 continue
             icon, annotation = coverage
             parts.append(f"{icon} ({annotation})" if annotation else icon)
+        upstream = upstreams.get(mid, {})
+        stars = upstream.get("stars")
         # The artwork is spliced in after rendering: a multi-kilobyte SVG in a
         # cell would pad every other row of the column to its own width.
         table.append(
@@ -1956,6 +1993,9 @@ def managers_index_table() -> str:
                 f"[{m.name}](managers/{mid}.md)",
                 id_cell,
                 "⚠️" if m.unmaintained else "",
+                f"{stars:,}" if stars is not None else "",
+                upstream.get("release", ""),
+                upstream.get("commit", ""),
                 " ".join(parts),
             ]
         )
@@ -1963,14 +2003,48 @@ def managers_index_table() -> str:
         table,
         # The mark column is headerless: the artwork labels itself, and the
         # managers whose upstream has no usable mark leave the cell empty.
-        headers=["", "Manager", "ID", "Unmaintained", "Platforms"],
+        headers=[
+            "",
+            "Manager",
+            "ID",
+            "Unmaintained",
+            "Stars",
+            "Last release",
+            "Last commit",
+            "Platforms",
+        ],
         table_format=TableFormat.GITHUB,
-        colalign=["center", "left", "left", "center", "center"],
+        colalign=[
+            "center",
+            "left",
+            "left",
+            "center",
+            "right",
+            "center",
+            "center",
+            "center",
+        ],
         disable_numparse=True,
     )
     for mid in pool:
         rendered = rendered.replace(f"%logo:{mid}%", manager_logo(mid, inline=True))
-    return f"`mpm` can drive {len(pool)} package managers:\n\n{rendered}"
+    sampled = max(
+        (record["date"] for record in upstreams.values()), default="an unknown date"
+    )
+    footnote = (
+        "Stars, releases and commits are read from each project's own forge, "
+        f"last sampled on {sampled}. They describe the upstream repository "
+        "rather than the tool's install base: a distribution's package manager "
+        "hosted on its own GitLab gathers a fraction of the stars an equally "
+        "widespread GitHub project does, and a manager shipped inside a larger "
+        "tool inherits that tool's figures. The release date is the newest "
+        "release a project published, or its newest tag where it publishes "
+        "none. An empty cell means it does neither, or has no public "
+        "repository at all."
+    )
+    # Blank lines throughout: a paragraph glued to the last row of a table is
+    # parsed as one more row of it.
+    return f"`mpm` can drive {len(pool)} package managers:\n\n{rendered}\n\n{footnote}"
 
 
 def manager_page_stub(manager_id: str) -> str:

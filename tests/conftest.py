@@ -418,6 +418,10 @@ PACKAGE_IDS = {
     "pnpm": "ms",
     "ports": "net/nyancat",
     "pwsh-gallery": "Posh-Git",
+    # A PyPy rather than a CPython: pyenv builds CPython from source, dragging
+    # OpenSSL and readline along with it, where this definition downloads a
+    # prebuilt archive. Still a large download, which is the lightest pyenv has.
+    "pyenv": "pypy3.11-7.3.20",
     # A toolchain, which is what rustup calls a package, named by release so it
     # resolves to whatever target triple the host runs. Pinned to an old release
     # nobody builds against today, since removing `stable` or `nightly` would

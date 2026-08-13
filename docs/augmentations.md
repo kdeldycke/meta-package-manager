@@ -59,6 +59,7 @@ print(augmentations_table())
 | [`pkgin`](managers/pkgin.md)               |                      |              |      ✅      |       ✅        |
 | [`pnpm`](managers/pnpm.md)                 |                      |              |      ✅      |                 |
 | [`pwsh-gallery`](managers/pwsh-gallery.md) |                      |              |              |       ✅        |
+| [`pyenv`](managers/pyenv.md)               |                      |              |      ✅      |       ✅        |
 | [`scoop`](managers/scoop.md)               |                      |              |      ✅      |       ✅        |
 | [`sfsu`](managers/sfsu.md)                 |                      |              |      ✅      |       ✅        |
 | [`slapt-get`](managers/slapt-get.md)       |                      |              |      ✅      |       ✅        |

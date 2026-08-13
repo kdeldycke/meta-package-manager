@@ -115,6 +115,7 @@ keywords = [
   "purl",
   "pwsh",
   "pwsh-gallery",
+  "pyenv",
   "ruby",
   "ruby-gem",
   "rust",
@@ -1245,6 +1246,11 @@ color = "bfdadc"
 description = "pwsh-gallery"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: pyenv"
+color = "bfdadc"
+description = "pyenv"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: pypi-based"
 color = "bfdadc"
 description = "pip, pipx, uv, uvx"
@@ -1595,6 +1601,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/pkgin.*", "tests/*pkgin*
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pwsh-gallery"
 any-glob-to-any-file = [ "meta_package_manager/managers/pwsh_gallery.*", "tests/*pwsh_gallery*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: pyenv"
+any-glob-to-any-file = [ "meta_package_manager/managers/pyenv.*", "tests/*pyenv*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pypi-based"

@@ -1,0 +1,154 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# pyenv is the Python version manager (https://github.com/pyenv/pyenv). See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is one installed interpreter, named by the exact token pyenv prints,
+# which is also the token `install` and `uninstall` accept. The token is left
+# whole rather than split into an implementation and a version, because the
+# namespace is far too heterogeneous for one pattern to divide: `3.13.0`,
+# `3.13.0t`, `3.13-dev`, `3.14.0rc1`, `pypy3.11-7.3.20`, `graalpy-24.1.1`,
+# `miniconda3-latest` and `anaconda3-2024.10-1` all coexist, and any mis-split
+# would break the round-trip that makes the id useful.
+#
+# Virtualenvs are deliberately excluded, which is what `--skip-envs` does, and
+# the reason is a bug rather than a preference. `pyenv uninstall` reduces its
+# argument to the part after the last slash, so handing back the very id the
+# listing prints for an environment, `3.12.11/envs/mango`, reports success while
+# deleting the top-level `mango` compatibility symlink instead and orphaning the
+# environment itself. An mpm `remove` would destroy the wrong object and report
+# it as done. Environments are also created by a plugin's `pyenv virtualenv`
+# rather than by `pyenv install`, so they were never addressable by half the
+# operations here.
+#
+# ```{note}
+# `--bare` is what makes the listing independent of the working directory.
+# pyenv's default listing marks the *selected* interpreter with `*` and names
+# the `.python-version` file it was selected by, and that selection follows the
+# cwd up the directory tree. Only the marker moves: the set of rows is always
+# the contents of `$PYENV_ROOT/versions`. `--bare` drops the marker along with
+# the annotation, the `-->` alias expansion, and the `system` pseudo-entry that
+# is not an installable package. Upstream pins this with a test of its own, so
+# no equivalent of haxelib's forced `--global` is needed here.
+# ```
+#
+# ```{note}
+# The default listing also writes a warning to stderr when a `.python-version`
+# somewhere above the working directory names an interpreter that is not
+# installed, which is an ordinary state on a developer's machine. `--bare` skips
+# that branch entirely, so nothing spurious reaches mpm's diagnosis tail.
+# ```
+#
+# No `outdated`, and no upgrade of either kind: pyenv has no in-place upgrade,
+# a newer patch release being a separate install into its own prefix. Its
+# `latest` subcommand would have to be asked once per package, which a
+# definition cannot do, and it would need a comparison depth pyenv itself never
+# picks: given `3.12.11`, nothing says whether the newer version is `3.12.15` or
+# `3.14.7`.
+#
+# No `sync`: the catalog ships inside pyenv, so `install --list` is answered
+# offline and refreshing it means upgrading pyenv itself. No `cleanup` either:
+# `rehash` regenerates shims rather than reclaiming anything, and `uninstall`
+# already runs it, while the download cache has no command to purge it.
+#
+# No escalation: pyenv installs under `$PYENV_ROOT`, defaulting to `~/.pyenv`,
+# and its sources contain no privileged path. Its shell integration is not
+# required either, existing to put shims on `$PATH` rather than to make these
+# subcommands work.
+#
+# Nothing here needs color suppression: the only code that emits escapes turns
+# them off when its output is not a terminal, and it runs during an install.
+
+[mpm.managers.pyenv]
+name = "Python pyenv"
+homepage_url = "https://github.com/pyenv/pyenv"
+logo = "python"
+platforms = ["linux_like", "macos"]
+cli_names = ["pyenv"]
+requirement = ">=2.3.13"
+# The release that added `--skip-envs`. `--skip-aliases` is much older, and the
+# cleaner `install --list --bare` is far newer, which is why the listing below
+# parses the indented form instead of demanding a 2026 pyenv.
+# `pyenv --version` prints `pyenv <version>`, and appends a git description when
+# it runs from a checkout, which is the install method upstream recommends. The
+# pattern is anchored at the start only, so `pyenv 2.8.4-1-g91190aa0` still
+# reports `2.8.4`.
+version_regexes = ['^pyenv[ \t]+(?P<version>\d+(?:\.\d+)+)']
+
+# One bare token per line, no marker, no annotation, no indentation.
+#
+# No `installed_version` is captured, deliberately. The token is a definition
+# name rather than a version field: `miniconda3-latest` and `3.13-dev` carry no
+# version at all, and `pypy3.11-7.3.20` fuses an implementation with one. Since
+# a single pattern has to serve every shape, reporting the whole token as a
+# version would be wrong more often than it would be right, and mpm treats the
+# installed version as optional throughout.
+[mpm.managers.pyenv.operations.installed]
+args = ["versions", "--bare", "--skip-aliases", "--skip-envs"]
+regex = '^(?P<package_id>\S+)$'
+
+# pyenv has no search command: `install --list` dumps its whole catalog, offline
+# and ignoring any argument, so no `{query}` is substituted and mpm narrows the
+# results itself. Every definition is indented by exactly two spaces, which is
+# what excludes the unindented `Available versions:` header.
+[mpm.managers.pyenv.operations.search]
+args = ["install", "--list"]
+regex = '^  (?P<package_id>\S+)$'
+
+# `--skip-existing` turns a redundant install into a silent no-op, where the
+# bare form stops to ask. The alternative, `--force`, would recompile an
+# interpreter already on disk.
+[mpm.managers.pyenv.operations.install]
+args = ["install", "--skip-existing", "{package_id}"]
+
+# `--force` suppresses the confirmation prompt and makes removing something
+# already absent a no-op instead of an error. It has to precede the package,
+# since the argument parser only inspects the first word and rejects a later
+# one beginning with a dash.
+[mpm.managers.pyenv.operations.remove]
+args = ["uninstall", "--force", "{package_id}"]
+
+# Output samples locking the version probe and the declared parsers. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# Both listings are captures from a real pyenv 2.8.4 run against a populated
+# root. The installed sample carries the spread that makes the token
+# indivisible: released CPythons, a free-threaded release candidate, and three
+# alternative implementations whose names embed a version differently. The
+# search sample keeps the header row, which is the thing its pattern has to
+# reject.
+[samples.version]
+output = "pyenv 2.8.4"
+expected = "2.8.4"
+
+[[samples.installed]]
+output = """
+3.11.9
+3.12.11
+3.13.7
+3.14.0rc1
+graalpy-24.1.1
+miniconda3-latest
+pypy3.11-7.3.20"""
+packages = [
+  { id = "3.11.9" },
+  { id = "3.12.11" },
+  { id = "3.13.7" },
+  { id = "3.14.0rc1" },
+  { id = "graalpy-24.1.1" },
+  { id = "miniconda3-latest" },
+  { id = "pypy3.11-7.3.20" },
+]
+
+[[samples.search]]
+output = """
+Available versions:
+  2.1.3
+  2.2.3
+  2.3.7"""
+packages = [
+  { id = "2.1.3" },
+  { id = "2.2.3" },
+  { id = "2.3.7" },
+]

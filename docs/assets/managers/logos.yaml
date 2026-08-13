@@ -327,6 +327,14 @@ icons:
     - pipx
     source: https://pypi.org
     title: PyPI
+  python:
+    contrast_on_light: 4.84
+    hex: 3776AB
+    license: CC0-1.0
+    managers:
+    - pyenv
+    source: https://www.python.org/community/logos/
+    title: Python
   rubygems:
     contrast_on_light: 3.56
     hex: E9573F

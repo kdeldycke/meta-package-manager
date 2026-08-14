@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [urpmi] Stop running `urpmi` concurrently with the other RPM front-ends. It has no listing of its own and fronts `librpm` directly, and the Mandriva lineage it serves ships `dnf` alongside it, so the two reach one database on the same host.
 - [pkg,ports] Stop running `ports` concurrently with `pkg`. The ports tree keeps no registry of its own and registers what it builds through `pkg`, whose advisory lock on that shared install database refuses a second writer.
 - [scoop,sfsu] Stop running `sfsu` concurrently with `scoop`. sfsu delegates every mutating operation to the `scoop` binary and its own `update` and `cleanup` reach the same buckets and cache, so a concurrent bucket refresh was two `git pull` in one repository.
 - [pacaur,pacman,pamac,paru,pikaur,trizen,yay] Stop running the AUR helpers concurrently with `pacman` and with each other. All of them drive the same pacman database, either by shelling out to `sudo pacman` or, for `pamac`, through Manjaro's own `libalpm` binding, so two mutating at once failed to init their transaction.

@@ -62,7 +62,7 @@ if TYPE_CHECKING:
 SHARED_LOCK_FAMILIES: Final[tuple[frozenset[str], ...]] = (
     frozenset({"apt", "apt-mint", "deb-get", "nala", "pacstall"}),
     frozenset({"brew", "cask"}),
-    frozenset({"dnf", "dnf5", "yum", "zypper"}),
+    frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
     frozenset({"pacaur", "pacman", "pamac", "paru", "pikaur", "trizen", "yay"}),
     frozenset({"pkg", "ports"}),
     frozenset({"scoop", "sfsu"}),
@@ -81,7 +81,9 @@ serialize on its lock:
   Homebrew's own update lock: two concurrent `brew update` (which {command}`mpm sync`
   issues identically for both, as the formula/cask split does not apply to it) collide,
   one failing with *"Another active Homebrew update process is already running"*.
-- `dnf`, `dnf5`, `yum` and `zypper` all reach the RPM database.
+- `dnf`, `dnf5`, `yum`, `zypper` and `urpmi` all reach the RPM database. `urpmi`
+  fronts `librpm` directly, having no listing of its own, and the Mandriva lineage
+  it serves ships `dnf` alongside it, so the two genuinely coexist on one host.
 - `pacman` and the AUR helpers `pacaur`, `pamac`, `paru`, `pikaur`, `trizen` and
   `yay` all reach the pacman database (`/var/lib/pacman/db.lck`). The helpers are
   front-ends rather than reimplementations: each shells out to `sudo pacman` for the
@@ -104,6 +106,14 @@ worth stating: it is `Pacman` by inheritance and would look like an oversight. B
 devkitPro ships it precisely so it can sit beside a distribution's own `pacman`
 without colliding, pointed at its own repositories and its own database, so it
 contends with nothing.
+
+`pkcon` is the case this model cannot express, and it is left out knowingly rather
+than filed under a guess. PackageKit is a client for whatever backend the host
+provides (apt, dnf, zypp, alpm), so the family it belongs to is a property of the
+machine rather than of the manager, and a `frozenset` here is fixed at import. It
+needs no protection from *itself*, `packagekitd` queuing its own transactions, but a
+`pkcon` mutation still contends with a native manager mpm drives in the same run.
+Expressing that would mean resolving the backend at dispatch time.
 
 Concurrency is safe *across* families and unsafe *within* one, just as it is unsafe
 within a single manager (which is why a manager's own packages stay serial). When two

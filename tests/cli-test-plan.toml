@@ -3,20 +3,33 @@
 # Runs the same binary tests as in the brew official Formula:
 # https://github.com/Homebrew/homebrew-core/blob/f0a4d69/Formula/meta-package-manager.rb#L401-L413
 
-# Check mpm is reporting the correct version of itself.
+# Check mpm is reporting the correct version of itself. `--no-color` pins the plain
+# rendering: it is the form machine readers parse (the bar plugin probes
+# `mpm --no-color --version`), and the only one whose layout is exactly specified.
+# With colors on, the same metadata is laid out beside the ANSI brand mark instead.
+[[cases]]
+cli_parameters = "--no-color --version"
+exit_code = 0
+stdout_regex_fullmatch = "mpm, version [0-9]+\\.[0-9]+\\.[0-9]+(\\.[a-z]+[0-9]+(\\+[a-f0-9]+)?)?\\nPython [^\\n]+\\n"
+
+# Check ANSI reaches stdout, and that the brand mark renders there.
 # click_extra 7.19+ renders the program name with both bright (97m) and bold (1m)
-# codes. The bold code is optional to stay compatible with older click_extra
-# releases that only emit the bright code.
+# codes, so the assertion below starts after them rather than pinning either.
 # `--color` forces ANSI: the test harness captures stdout (no TTY), so without it
 # the binary emits a plain, uncolored string and these assertions fail on every
 # platform. XXX Skipped on Windows even so: colorama rewrites ANSI into Win32
 # console calls, so the forced escape codes never reach stdout there.
+# Deliberately no full-match: the mark is 10 lines of half-blocks, and it drops back
+# to the plain rendering on a terminal too narrow to seat it. Asserting its lightest
+# brand tone is enough, no other mpm output emitting that color.
 [[cases]]
 cli_parameters = "--color --version"
 skip_platforms = "windows"
 exit_code = 0
-stdout_contains = "mpm\u001b[0m, version \u001b[32m"
-stdout_regex_fullmatch = "\\x1b\\[97m(\\x1b\\[1m)?mpm\\x1b\\[0m, version \\x1b\\[32m[0-9]+\\.[0-9]+\\.[0-9]+(\\.[a-z]+[0-9]+(\\+[a-f0-9]+)?)?\\x1b\\[0m\\n(\\x1b\\[90mPython [^\\n]+\\x1b\\[0m\\n)?"
+stdout_contains = [
+    "mpm\u001b[0m, version \u001b[32m",
+    "\u001b[38;5;189m",
+]
 
 # Check mpm is reporting its usage in help screen.
 [[cases]]

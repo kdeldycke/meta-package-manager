@@ -34,7 +34,6 @@ across all of them, and renders the aggregated, multi-manager result.
 from __future__ import annotations
 
 import logging
-import platform
 import threading
 from collections.abc import Iterable
 from configparser import RawConfigParser
@@ -71,7 +70,6 @@ from click_extra.highlight import HelpKeywords
 from click_extra.logging import LogLevel
 from click_extra.table import SERIALIZATION_FORMATS
 from click_extra.theme import get_current_theme as theme
-from extra_platforms import current_architecture, current_platform
 
 from . import bar_plugin
 from .config import (
@@ -82,6 +80,7 @@ from .config import (
     register_config_managers_from_context,
 )
 from .execution import PLAN_RECORDER, CLIError
+from .logo import env_summary, version_screen_params
 from .manager import PackageManager
 from .package import Package
 from .pool import pool
@@ -320,12 +319,10 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     # announcements, skip reasons) sits at INFO, one --verbosity INFO away.
     config_schema=MpmConfig,
     config_validators=(build_manager_overrides_validator(pool),),
-    version_fields={
-        "env_info": (
-            f"Python {platform.python_version()}, "
-            f"{current_platform().name} {current_architecture().name}"
-        ),
-    },
+    # Swaps --version for the brand-mark screen, which degrades to the plain
+    # message below whenever colors, width or accessibility rule it out.
+    params=version_screen_params,
+    version_fields={"env_info": env_summary()},
 )
 # Honored by exit_on_failures(): the action commands' per-package failures then
 # report without gating automation on a non-zero exit code.

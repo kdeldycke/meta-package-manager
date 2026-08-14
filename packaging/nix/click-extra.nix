@@ -72,6 +72,12 @@ buildPythonPackage (finalAttrs: {
   # system TLS CA bundle.
   disabledTestMarks = [ "network" ];
 
+  # The configuration tests are served over HTTP by a local pytest-httpserver
+  # binding to ``localhost``. The Darwin build sandbox cuts the build off from
+  # the resolver, so that bind fails there with a ``gaierror`` unless local
+  # networking is allowed.
+  __darwinAllowLocalNetworking = true;
+
   pythonImportsCheck = [ "click_extra" ];
 
   meta = {

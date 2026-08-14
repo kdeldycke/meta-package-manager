@@ -5,7 +5,9 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Render the brand mark as ANSI art beside the `--version` metadata, adding the interpreter, the platform, the number of managers supported here and the documentation URL. Drops back to the plain two-line output when colors are off, the terminal is too narrow or `--accessible` is set.
 - [mpm] Add a *Concurrency* section to each manager's documentation page, naming the managers `mpm` will never run it alongside and what they contend for. Rendered from the lock families themselves, so a page cannot promise a guarantee the dispatcher does not implement, and omitted for a manager sharing no backend.
+- [nala] Label `nala` issues and pull requests with the shared `dpkg-based` group rather than a manager label of its own.
 - [urpmi] Stop running `urpmi` concurrently with the other RPM front-ends. It has no listing of its own and fronts `librpm` directly, and the Mandriva lineage it serves ships `dnf` alongside it, so the two reach one database on the same host.
 - [pkg,ports] Stop running `ports` concurrently with `pkg`. The ports tree keeps no registry of its own and registers what it builds through `pkg`, whose advisory lock on that shared install database refuses a second writer.
 - [scoop,sfsu] Stop running `sfsu` concurrently with `scoop`. sfsu delegates every mutating operation to the `scoop` binary and its own `update` and `cleanup` reach the same buckets and cache, so a concurrent bucket refresh was two `git pull` in one repository.

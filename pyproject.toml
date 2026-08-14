@@ -1132,7 +1132,7 @@ description = "dotnet"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: dpkg-based"
 color = "bfdadc"
-description = "apt, apt-mint, deb-get, fink, opkg, pacstall"
+description = "apt, apt-mint, deb-get, fink, nala, opkg, pacstall"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: emerge"
@@ -1228,11 +1228,6 @@ description = "miktex"
 name = "📦 manager: mpm"
 color = "bfdadc"
 description = "mpm"
-
-[[tool.repomatic.labels.extra]]
-name = "📦 manager: nala"
-color = "bfdadc"
-description = "nala"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: nix"
@@ -1517,12 +1512,14 @@ any-glob-to-any-file = [
   "meta_package_manager/managers/apt.*",
   "meta_package_manager/managers/deb_get.*",
   "meta_package_manager/managers/fink.*",
+  "meta_package_manager/managers/nala.*",
   "meta_package_manager/managers/opkg.*",
   "meta_package_manager/managers/pacstall.*",
   "tests/*apt*",
   "tests/*apt_mint*",
   "tests/*deb_get*",
   "tests/*fink*",
+  "tests/*nala*",
   "tests/*opkg*",
   "tests/*pacstall*",
 ]
@@ -1614,10 +1611,6 @@ any-glob-to-any-file = [ "meta_package_manager/managers/miktex.*", "tests/*mikte
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mpm"
 any-glob-to-any-file = [ "meta_package_manager/*" ]
-
-[[tool.repomatic.labels.file-rules]]
-label = "📦 manager: nala"
-any-glob-to-any-file = [ "meta_package_manager/managers/nala.*", "tests/*nala*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: nix"

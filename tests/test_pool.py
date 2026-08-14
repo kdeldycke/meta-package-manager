@@ -30,6 +30,7 @@ import meta_package_manager
 from meta_package_manager.capabilities import Delegate
 from meta_package_manager.cli import mpm
 from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES, warm_availability
+from meta_package_manager.labels import MANAGER_LABEL_GROUPS
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.managers.pacman import Pacman
 from meta_package_manager.pool import manager_classes, pool
@@ -97,6 +98,33 @@ def test_shared_lock_family_members_exist_in_pool():
     """Every lock-family member must be a real manager id (catches typos)."""
     for manager_id in set().union(*(f.members for f in SHARED_LOCK_FAMILIES)):
         assert manager_id in pool.all_manager_ids
+
+
+def test_lock_families_nest_in_label_groups():
+    """Every lock family must sit inside a single ecosystem label group.
+
+    The two constants answer different questions. {data}`MANAGER_LABEL_GROUPS` groups
+    managers by the packaging ecosystem an issue lands in, {data}`SHARED_LOCK_FAMILIES`
+    the ones that cannot run at once on a real host. The implication runs one way only:
+    contending for a backend lock means sharing that backend's ecosystem, so a lock
+    family is always contained in a label group.
+
+    Never the reverse, and the gaps are the point: `fink` and `opkg` speak dpkg through
+    databases of their own, `zerobrew` has its own prefix and `dkp-pacman` its own
+    repositories, while `pypi-based`, `npm-based` and the plugin-manager groups share a
+    registry or a host program rather than any lock at all. Asserting equality here
+    would be asserting those four facts away.
+
+    Catches a manager wired into a lock family but forgotten in the label groups, which
+    is what it caught for `nala`.
+    """
+    for family in SHARED_LOCK_FAMILIES:
+        assert any(
+            family.members <= group for group in MANAGER_LABEL_GROUPS.values()
+        ), (
+            f"lock family {sorted(family.members)} is not contained in any ecosystem "
+            "label group"
+        )
 
 
 def test_delegating_managers_share_their_target_lock():

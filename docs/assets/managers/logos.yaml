@@ -203,6 +203,7 @@ icons:
     hex: 008080
     license: CC0-1.0
     managers:
+    - miktex
     - tlmgr
     source: https://github.com/latex3/branding/tree/9def6b5f6075567d62b67424e11dbe6d4d5245b4
     title: LaTeX

@@ -75,6 +75,7 @@ keywords = [
   "mas",
   "meta-package-manager",
   "micro",
+  "miktex",
   "mise",
   "nala",
   "neovim",
@@ -1219,6 +1220,11 @@ color = "bfdadc"
 description = "micro"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: miktex"
+color = "bfdadc"
+description = "miktex"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: mpm"
 color = "bfdadc"
 description = "mpm"
@@ -1600,6 +1606,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/mas.*", "tests/*mas*" ]
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: micro"
 any-glob-to-any-file = [ "meta_package_manager/managers/micro.*", "tests/*micro*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: miktex"
+any-glob-to-any-file = [ "meta_package_manager/managers/miktex.*", "tests/*miktex*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mpm"

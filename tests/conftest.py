@@ -402,6 +402,8 @@ PACKAGE_IDS = {
     # A plugin of micro's own channel. Tiny, pure Lua, and not bundled with
     # the editor, so the round-trip actually installs and removes something.
     "micro": "bounce",
+    # A small, dependency-free TeX package of MiKTeX's own catalog.
+    "miktex": "fancyhdr",
     "mise": "jq",
     "nala": "nyancat",
     "nix": "hello",

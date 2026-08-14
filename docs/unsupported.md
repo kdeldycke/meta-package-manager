@@ -77,6 +77,10 @@ Merges pending `/etc` configuration files left behind by a Portage upgrade. It r
 
 Fish plugin manager with no commit since 2023-01-05.
 
+## [`gofish`](https://github.com/fishworks/gofish) ☠️
+
+Cross-platform package manager modelled on Homebrew, down to a registry of its own: "fish food" recipes hosted at [fishworks/fish-food](https://github.com/fishworks/fish-food). Its readme announces the end in as many words, "*THIS PROJECT IS BEING ARCHIVED*", blaming "*the amount of time and money required to maintain this side project*", and no commit has landed since 2022-03-08. The repository is archived and names no successor.
+
 ## [`home-manager`](https://github.com/nix-community/home-manager) ❌ 🛟
 
 Draws its packages from nixpkgs, the registry `mpm` already reaches through [`nix`](managers/nix.md): the manual states that "*Nixpkgs packages can be installed to the user profile using `home.packages`*", an option typed `list of package`. No per-package verb either, its command dispatch accepting only whole-state operations like `build`, `switch` and `generations`, so a package is added by editing `home.nix` and running `home-manager switch`. It does report what it installed, through `home-manager packages`, but that inventory is a view onto the same profile `mpm` already reads.

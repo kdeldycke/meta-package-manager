@@ -60,10 +60,10 @@ if TYPE_CHECKING:
 
 
 SHARED_LOCK_FAMILIES: Final[tuple[frozenset[str], ...]] = (
-    frozenset({"apt", "apt-mint", "deb-get", "nala"}),
+    frozenset({"apt", "apt-mint", "deb-get", "nala", "pacstall"}),
     frozenset({"brew", "cask"}),
     frozenset({"dnf", "dnf5", "yum", "zypper"}),
-    frozenset({"pacman", "pacstall"}),
+    frozenset({"pacaur", "pacman", "pamac", "paru", "pikaur", "trizen", "yay"}),
 )
 """Managers that contend for one shared backend lock, grouped by backend.
 
@@ -71,15 +71,26 @@ Different managers are otherwise independent processes over disjoint state, so r
 them in parallel is safe. The exception is a handful that drive a *shared* backend and
 serialize on its lock:
 
-- `apt`, `apt-mint` and `deb-get` all reach {command}`dpkg`
-  (`/var/lib/dpkg/lock`).
+- `apt`, `apt-mint`, `deb-get`, `nala` and `pacstall` all reach {command}`dpkg`
+  (`/var/lib/dpkg/lock`). `pacstall` belongs here despite its `pac` prefix and its
+  AUR-inspired design: it builds its pacscripts into `.deb` archives and installs
+  those, so it contends with the Debian family and never touches pacman's database.
 - `brew` and `cask` are the *same* {command}`brew` binary and serialize on
   Homebrew's own update lock: two concurrent `brew update` (which {command}`mpm sync`
   issues identically for both, as the formula/cask split does not apply to it) collide,
   one failing with *"Another active Homebrew update process is already running"*.
 - `dnf`, `dnf5`, `yum` and `zypper` all reach the RPM database.
-- `pacman` and `pacstall` all reach the pacman database
-  (`/var/lib/pacman/db.lck`).
+- `pacman` and the AUR helpers `pacaur`, `pamac`, `paru`, `pikaur`, `trizen` and
+  `yay` all reach the pacman database (`/var/lib/pacman/db.lck`). The helpers are
+  front-ends rather than reimplementations: each shells out to `sudo pacman` for the
+  privileged steps, `pamac` reaching the same `libalpm` through Manjaro's `libpamac`.
+  Two of them mutating at once fail to init their transaction.
+
+`dkp-pacman` is deliberately *not* in that last family, and it is the one exclusion
+worth stating: it is `Pacman` by inheritance and would look like an oversight. But
+devkitPro ships it precisely so it can sit beside a distribution's own `pacman`
+without colliding, pointed at its own repositories and its own database, so it
+contends with nothing.
 
 Concurrency is safe *across* families and unsafe *within* one, just as it is unsafe
 within a single manager (which is why a manager's own packages stay serial). When two

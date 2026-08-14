@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [pacaur,pacman,pamac,paru,pikaur,trizen,yay] Stop running the AUR helpers concurrently with `pacman` and with each other. All of them drive the same pacman database, either by shelling out to `sudo pacman` or, for `pamac`, through Manjaro's own `libalpm` binding, so two mutating at once failed to init their transaction.
+- [pacstall] Serialize `pacstall` against the `apt` family rather than against `pacman`. It builds its pacscripts into `.deb` archives and installs them through `dpkg`, so it contends for dpkg's lock and never touches pacman's.
 - [mpm] Plot the GitHub star history of `mpm` and its benchmarked peers from a locally sampled database, replacing the star-history.com embeds GitHub's stargazer API restriction broke. `docs/stars_update.py` snapshots the aggregate star count of every tracked repository weekly, reconstructs `mpm`'s own curve from per-star timestamps, backfills the competitors from archived GitHub pages, and renders the charts as committed SVGs.
 - [mpm] Add a star chart plotted against each project's age instead of the calendar, alongside the absolute one on the benchmark page. Every series is anchored at its repository's creation date, the only zero-star origin the five share.
 - [mpm] Report each manager's upstream popularity and activity on the manager index: its star count, the date of its newest release or tag, and the date of its newest commit. `docs/stars_update.py --sample-upstreams` reads the 93 measurable upstreams weekly from GitHub, GitLab and Codeberg into a committed database, so the page stays offline at build time. The seven managers whose upstream has no public repository render empty cells.

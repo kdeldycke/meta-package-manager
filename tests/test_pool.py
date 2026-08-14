@@ -30,6 +30,7 @@ import meta_package_manager
 from meta_package_manager.cli import mpm
 from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES, warm_availability
 from meta_package_manager.manager import PackageManager
+from meta_package_manager.managers.pacman import Pacman
 from meta_package_manager.pool import manager_classes, pool
 
 from .conftest import (
@@ -95,6 +96,28 @@ def test_shared_lock_family_members_exist_in_pool():
     """Every lock-family member must be a real manager id (catches typos)."""
     for manager_id in set().union(*SHARED_LOCK_FAMILIES):
         assert manager_id in pool.all_manager_ids
+
+
+def test_pacman_subclasses_share_the_pacman_lock():
+    """Every manager inheriting from `Pacman` drives pacman's own database, so it
+    must serialize with the rest of that family.
+
+    `dkp-pacman` is the sole exemption: devkitPro ships it to sit beside a
+    distribution's `pacman` with its own repositories and database, so it contends
+    with nothing. Any *other* subclass missing from the family is the bug this
+    catches, which is how the AUR helpers went unserialized until `7.6.0`.
+
+    Inheritance is a sufficient signal, never a necessary one: `pamac` reaches the
+    same `libalpm` through a bundled definition and is covered by the family
+    without appearing here.
+    """
+    family = next(f for f in SHARED_LOCK_FAMILIES if "pacman" in f)
+    for manager_id in pool.all_manager_ids:
+        if manager_id == "dkp-pacman" or not isinstance(pool[manager_id], Pacman):
+            continue
+        assert manager_id in family, (
+            f"{manager_id} inherits from Pacman but is missing from its lock family"
+        )
 
 
 def test_cached_pool():

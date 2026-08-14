@@ -136,10 +136,87 @@ UNSUPPORTED_DOCS_URL = "unsupported.md"
 Relative to `docs/`, so it resolves in the Sphinx build and in the checked-in
 mirror rendered on GitHub alike. Held as a single constant because every
 manager listed in `benchmark.toml`'s `unsupported` key points at the same
-place: retargeting it is then a one-line fix here, instead of an edit per
-manager in the TOML. Deliberately fragment-less, since the page opens on the
-table of excluded tools.
+page: retargeting it is then a one-line fix here, instead of an edit per
+manager in the TOML. The section anchor comes from
+{func}`unsupported_anchors`, so each glyph lands on the verdict that explains
+that manager rather than at the top of the page.
+
+```{note}
+The fragment is a Sphinx anchor, computed the way `myst_heading_slug_func`
+computes it. GitHub slugifies the same heading differently, keeping the spaces
+the stripped glyphs leave behind, so the mirrored benchmark table lands a
+GitHub reader at the top of the page instead. The published site is the
+canonical home of these links, and a whole-page landing is the worst that
+happens elsewhere.
+```
 """
+
+
+def _heading_slug(title: str) -> str:
+    """Slugify a markdown heading the way the Sphinx build does.
+
+    `docs/conf.py` pins `myst_heading_slug_func` to docutils' `make_id`, which
+    strips the non-ASCII glyphs off a title, collapses whitespace runs to a
+    single hyphen and lowercases the rest. Reimplemented here rather than
+    imported: `docutils` reaches this project through the docs dependency
+    group alone, and the benchmark table renders under the test group too.
+    `test_unsupported_anchors_match_docutils` holds the two in lockstep.
+
+    Markdown syntax is dropped first, since a slug is computed from the
+    rendered text: a heading is usually a single linked code span, whose
+    anchor then comes out as the bare manager ID.
+    """
+    plain = re.sub(r"\[`?([^`\]]+)`?\]\([^)]*\)", r"\1", title).replace("`", "")
+    ascii_only = plain.encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^a-z0-9]+", "-", ascii_only.lower()).strip("-")
+
+
+def unsupported_sections() -> tuple[tuple[str, str, tuple[str, ...]], ...]:
+    """Parse `docs/unsupported.md` into its verdict sections, in page order.
+
+    Returns one `(anchor, glyphs, manager_ids)` triple per section, where
+    `glyphs` is the {func}`unsupported_status` string the title ends with.
+
+    A section covers the managers whose IDs appear as linked code spans in its
+    own title; where the title names a family instead of a tool, they are the
+    linked code spans of the paragraph opening the section. That fallback is
+    what lets a verdict shared word for word be written once: fifteen JetBrains
+    IDEs answer to a single section rather than fifteen copies of one
+    paragraph.
+
+    Only glyph-bearing headings are verdicts. A heading without them is plain
+    page structure, like the project-scoped ecosystems closing the page, and is
+    skipped.
+    """
+    text = (PROJECT_ROOT / "docs" / "unsupported.md").read_text(encoding="UTF-8")
+    verdict = (
+        rf"(?:{'|'.join(UNSUPPORTED_GLYPHS.values())})"
+        rf"(?: {TOPGRADE_FALLBACK_GLYPH})?"
+    )
+    sections = []
+    for title, glyphs, body in re.findall(
+        rf"^## (.+?) ({verdict})$\n(.*?)(?=^## |\Z)",
+        text,
+        re.MULTILINE | re.DOTALL,
+    ):
+        ids = re.findall(r"\[`([^`]+)`\]", title)
+        if not ids:
+            ids = re.findall(r"\[`([^`]+)`\]", body.strip().partition("\n")[0])
+        sections.append((_heading_slug(f"{title} {glyphs}"), glyphs, tuple(ids)))
+    return tuple(sections)
+
+
+def unsupported_anchors() -> dict[str, str]:
+    """Map each declined manager ID to the anchor of its verdict section.
+
+    Derived from {func}`unsupported_sections`, so `docs/unsupported.md` stays
+    the single source of truth for both the reason and where to link for it.
+    Several IDs share one anchor wherever a family section covers them.
+    """
+    return {
+        mid: anchor for anchor, _glyphs, ids in unsupported_sections() for mid in ids
+    }
+
 
 DOCS_SITE_URL = "https://mpm.run"
 """Base URL of the published documentation site.
@@ -528,8 +605,9 @@ def benchmark_managers_table() -> str:
     renders as `[✅](source_url)`, linking to the class definition that proves the
     support, or `[⚠️](source_url)` when that manager carries the `unmaintained` flag,
     matching the manager index. A manager listed in the TOML's `unsupported` mapping
-    instead renders the {data}`UNSUPPORTED_GLYPHS` entry for its status, linked to
-    {data}`UNSUPPORTED_DOCS_URL`, which keeps a deliberate refusal distinct from a blank
+    instead renders the {data}`UNSUPPORTED_GLYPHS` entry for its status, linked to its
+    own section of {data}`UNSUPPORTED_DOCS_URL` through {func}`unsupported_anchors`,
+    which keeps a deliberate refusal distinct from a blank
     cell meaning nobody has assessed the tool yet. Competitor columns are filled from
     `docs/benchmark.toml`, which only encodes what the *other* tools support.
 
@@ -558,6 +636,7 @@ def benchmark_managers_table() -> str:
     coarse_support: dict[str, dict[str, str]] = data.get("coarse_support", {})
     refused: dict[str, dict[str, str]] = data.get("refused", {})
     unsupported: dict[str, str] = data.get("unsupported", {})
+    anchors = unsupported_anchors()
 
     pool_ids = set(pool.all_manager_ids)
     all_ids = sorted(
@@ -594,7 +673,11 @@ def benchmark_managers_table() -> str:
                 if "topgrade" in competitor_data.get(mid, [])
                 else UNSUPPORTED_GLYPHS[unsupported[mid]]
             )
-            row.append(f"[{glyph}]({UNSUPPORTED_DOCS_URL})")
+            anchor = anchors.get(mid)
+            target = (
+                f"{UNSUPPORTED_DOCS_URL}#{anchor}" if anchor else UNSUPPORTED_DOCS_URL
+            )
+            row.append(f"[{glyph}]({target})")
         else:
             row.append("")
         flags = set(competitor_data.get(mid, []))

@@ -1563,61 +1563,100 @@ def test_mirror_blocks_in_sync():
 
 
 def test_unsupported_page_matches_benchmark():
-    """Check `docs/unsupported.md`'s table is exactly the benchmark's
-    `unsupported` set, with matching glyphs, sorted by ID.
+    """Check `docs/unsupported.md`'s sections cover exactly the benchmark's
+    `unsupported` set, with matching glyphs, sorted by anchor.
 
-    The benchmark renders each `unsupported` manager as a glyph linking to that
-    page for the reason, so the two must stay in lockstep. A manager listed on
-    one side only produces either a link into a page that never explains it, or
-    a row nothing points at. Both happened while the mechanism was being
-    introduced, hence this test.
+    The benchmark renders each `unsupported` manager as a glyph linking into
+    that page for the reason, so the two must stay in lockstep. A manager
+    listed on one side only produces either a link into a page that never
+    explains it, or a section nothing points at. Both happened while the
+    mechanism was being introduced, hence this test.
 
     The glyph must agree too: `☠️` and `❌` are read side by side across the two
     pages, and `⚠️` is reserved for the *wrapped* managers of the index, so it
     must never leak onto a page listing what `mpm` refused to wrap. The `🛟`
     fallback marker is derived rather than written, so the page is held to what
     `unsupported_status()` computes from the competitor data.
+
+    A family section carries one verdict for several tools, so every member is
+    checked against that shared title: grouping tools whose glyphs differ would
+    silently restate one tool's verdict as another's.
     """
     toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
     benchmark = tomllib.loads(toml_path.read_text(encoding="UTF-8"))
     statuses = benchmark["unsupported"]
     competitors = benchmark["managers"]
 
-    page = (PROJECT_ROOT / "docs" / "unsupported.md").read_text(encoding="utf-8")
-    # Rows are ``| [`id`](url) | glyph | kind | why |``.
-    rows = [
-        (mid, glyphs.strip())
-        for mid, glyphs in re.findall(
-            r"^\| \[`([^`]+)`\]\([^)]*\) \| ([^|]+) \|", page, re.MULTILINE
-        )
-    ]
-    assert rows, "no manager rows found in docs/unsupported.md"
+    sections = _docs.unsupported_sections()
+    assert sections, "no verdict sections found in docs/unsupported.md"
 
-    ids = [mid for mid, _ in rows]
-    assert ids == sorted(ids), "unsupported.md rows must be sorted by manager ID"
-    assert len(ids) == len(set(ids)), "unsupported.md repeats a manager row"
+    anchors = [anchor for anchor, _glyphs, _ids in sections]
+    assert anchors == sorted(anchors), (
+        "unsupported.md sections must be sorted by title, which sorts their "
+        f"anchors: got {anchors}"
+    )
+    assert len(anchors) == len(set(anchors)), (
+        "two unsupported.md sections slugify to the same anchor, so one of "
+        "them is unreachable"
+    )
 
+    ids = [mid for _anchor, _glyphs, section_ids in sections for mid in section_ids]
+    assert len(ids) == len(set(ids)), "unsupported.md covers a manager twice"
     assert set(ids) == set(statuses), (
         "docs/unsupported.md and benchmark.toml's unsupported key disagree; "
         f"page-only: {sorted(set(ids) - set(statuses))}, "
         f"benchmark-only: {sorted(set(statuses) - set(ids))}"
     )
 
-    for mid, glyph in rows:
-        expected = _docs.unsupported_status(
-            mid, statuses[mid], competitors.get(mid, [])
+    for anchor, glyphs, section_ids in sections:
+        assert section_ids, (
+            f"unsupported.md section {anchor!r} names no manager: a family "
+            "title must list its members in the paragraph opening the section"
         )
-        assert glyph == expected, (
-            f"unsupported.md row {mid!r} shows {glyph!r} but benchmark.toml "
-            f"declares it {statuses[mid]!r}, which renders {expected!r}"
-        )
+        for mid in section_ids:
+            expected = _docs.unsupported_status(
+                mid, statuses[mid], competitors.get(mid, [])
+            )
+            assert glyphs == expected, (
+                f"unsupported.md section {anchor!r} shows {glyphs!r} but "
+                f"benchmark.toml declares {mid!r} {statuses[mid]!r}, which "
+                f"renders {expected!r}"
+            )
 
     # ⚠️ marks a manager that is wrapped but unmaintained: it has no business
     # on the page cataloguing the tools that were never wrapped.
+    page = (PROJECT_ROOT / "docs" / "unsupported.md").read_text(encoding="utf-8")
     assert "⚠️" not in page, (
         "⚠️ is reserved for wrapped-but-unmaintained managers; "
         "docs/unsupported.md must use ☠️ or ❌"
     )
+
+
+def test_unsupported_anchors_match_docutils():
+    """Check the anchors linked from the benchmark are the ones Sphinx emits.
+
+    `_heading_slug()` reimplements what `docs/conf.py` pins
+    `myst_heading_slug_func` to, because `docutils` only reaches this project
+    through the docs dependency group while the benchmark table also renders
+    under the test group. That copy is only safe while the two agree, and a
+    disagreement is invisible: the link renders, resolves to nothing, and drops
+    the reader at the top of the page.
+    """
+    try:
+        from docutils.nodes import make_id
+    except ImportError:
+        pytest.skip("needs the docs dependency group (click-extra[sphinx])")
+
+    page = (PROJECT_ROOT / "docs" / "unsupported.md").read_text(encoding="utf-8")
+    titles = [line[3:] for line in page.splitlines() if line.startswith("## ")]
+    assert titles
+    for title in titles:
+        # `make_id` slugifies rendered text, so strip the markdown first.
+        plain = re.sub(r"\[`?([^`\]]+)`?\]\([^)]*\)", r"\1", title).replace("`", "")
+        assert _docs._heading_slug(title) == make_id(plain), (
+            f"unsupported.md heading {title!r} slugifies differently in "
+            "_docs._heading_slug() and docutils.nodes.make_id()"
+        )
 
 
 def test_cooldown_support_statuses_known():

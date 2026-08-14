@@ -598,10 +598,10 @@ default.extend-ignore-identifiers-re = [
   #
   "certifi",
   # error: `Hashi` should be `Hash`
-  #    ╭▸ ./docs/unsupported.md:64:194
-  #    │
-  # 64 │ (..) the bare `packer` name belongs to HashiCorp's tool and to (..)
-  #    ╰╴                                       ━━━━━
+  #     ╭▸ ./docs/unsupported.md:140:143
+  #     │
+  # 140 │ (..) the bare `packer` name belongs to HashiCorp's tool and to (..)
+  #     ╰╴                                       ━━━━━
   #
   # `HashiCorp` is a company name; typos splits it on the camel-case boundary and
   # reads the first half as a misspelling of `Hash`.

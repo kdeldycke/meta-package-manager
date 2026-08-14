@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Split the unsupported-managers page into one section per declined tool, in place of the single table. Each title carries the tool and its verdict glyphs, so the manager ID doubles as the anchor a decision can be cited by, and the benchmark now links each glyph to the section that explains it instead of to the top of the page. Tools whose verdict was repeated word for word are grouped into one family section naming its members, collapsing the fifteen identical JetBrains entries into one.
 - [bin] Report outdated binaries. The check writes its findings to `stderr` and exits `3` when it finds any, neither of which a declarative definition can express, so `bin` moves from a bundled definition to a class.
 - [bun] Implement `bun`, covering what it installs globally. It resolves the npm registry like the rest of that family but installs into its own prefix, so nothing it holds appears in `npm`, `pnpm` or `yarn` inventories. Upgrades force `--latest`, without which a package pinned at install time is held at its recorded range and the upgrade reports success while changing nothing.
 - [yazi] Implement `yazi`, the package manager of the `ya` command-line companion to the Yazi file manager. Plugins and flavors are reported as one inventory, each identified by its Git coordinates and versioned by the commit it is checked out at.

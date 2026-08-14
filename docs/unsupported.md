@@ -131,6 +131,10 @@ Bash configuration framework with no registry of its own: its plugins and themes
 
 Zsh configuration framework with no registry of its own: every plugin ships inside the git checkout, and `omz plugin list` is a directory glob over `$ZSH/plugins` and `$ZSH_CUSTOM/plugins` rather than a query against an index. The verb set confirms it, offering only `disable`, `enable`, `info`, `list` and `load`, where `enable` just rewrites the `plugins=()` array in `~/.zshrc` for a directory already on disk: adding a third-party plugin means hand-creating `$ZSH_CUSTOM/plugins/foobar/foobar.plugin.zsh` yourself ([Customization](https://github.com/ohmyzsh/ohmyzsh/wiki/Customization#adding-a-new-plugin)), and the [External plugins](https://github.com/ohmyzsh/ohmyzsh/wiki/External-plugins) page is a hand-curated list of links, not an index. Nothing versioned to install against either: upstream carries no tags, so `omz version` falls through `git describe --tags HEAD` to the branch name.
 
+## [`oneget`](https://github.com/OneGet/oneget) ❌
+
+Windows package-manager *manager*: PackageManagement brokers transactions out to providers (NuGet, PowerShellGet, Chocolatey) instead of owning packages itself, so everything it reaches through PowerShellGet `mpm` already reaches directly through [`pwsh-gallery`](managers/pwsh-gallery.md). Wrapping it would buy a delegation layer and not one extra package, which is the verdict [`metapac`](#metapac) and [`upt`](#upt) get for the same shape. Its upstream has stopped moving besides: the readme declares the module "*currently not in development*" and "*no longer accepting any pull requests*", naming AnyPackage and PowerShellGet as the successors.
+
 ## [`pacapt`](https://github.com/icy/pacapt) ☠️
 
 Cross-manager wrapper retired in 2022. All 19 of the package managers it drove are shipped by `mpm`.

@@ -404,6 +404,11 @@ jobs:
           extra_nix_config: sandbox = true
       - run: nix-env --file ./packaging/nix --install
       - run: mpm --version
+      # docs/install.md offers the flake as a second entry point into the same
+      # overlay, and nothing built it: its copy of the cloup override sat
+      # broken for three weeks. Costs nothing whenever the flake's nixpkgs
+      # input resolves to the revision the channel above already built.
+      - run: nix build --no-link --print-build-logs ./packaging/nix
 
   # AUR builds from source with full test suites. Upstream PKGBUILD check()
   # failures in transitive dependencies cascade to every downstream package and

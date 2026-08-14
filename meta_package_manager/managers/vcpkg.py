@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
@@ -209,15 +210,32 @@ class VCPKG(PackageManager):
         Search does not support extended or exact matching.
         ```
 
-        ```{code-block} shell-session
-
-        $ vcpkg --classic search zlib --x-json
+        ```{caution}
+        `--x-json` is experimental, as its `x` prefix announces, and a vcpkg
+        predating it *ignores it silently* rather than refusing it: the command
+        succeeds and prints the human column listing instead. Decoding that as
+        JSON raises, and since nothing isolates one manager's failure from the
+        rest of a fan-out, the exception used to take down an entire
+        `mpm search` on any host carrying such a build. The results are dropped
+        with a warning instead. A version floor could not have caught it, vcpkg
+        numbering its releases by date, as {attr}`requirement` explains.
         ```
         """
         output = self.run_cli("search", query, "--x-json")
         if not output.strip():
             return
-        for port_name, data in json.loads(output).items():
+        try:
+            results = json.loads(output)
+        except json.JSONDecodeError:
+            results = None
+        if not isinstance(results, dict):
+            logging.warning(
+                "Ignoring unparseable search results: this vcpkg does not "
+                "honor --x-json and answered with its human listing.",
+                extra={"label": self.id},
+            )
+            return
+        for port_name, data in results.items():
             version = data.get("version") if isinstance(data, dict) else None
             yield self.package(id=port_name, latest_version=version)
 

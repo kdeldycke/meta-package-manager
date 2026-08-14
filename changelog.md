@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [bin] Report outdated binaries. The check writes its findings to `stderr` and exits `3` when it finds any, neither of which a declarative definition can express, so `bin` moves from a bundled definition to a class.
 - [bun] Implement `bun`, covering what it installs globally. It resolves the npm registry like the rest of that family but installs into its own prefix, so nothing it holds appears in `npm`, `pnpm` or `yarn` inventories. Upgrades force `--latest`, without which a package pinned at install time is held at its recorded range and the upgrade reports success while changing nothing.
 - [yazi] Implement `yazi`, the package manager of the `ya` command-line companion to the Yazi file manager. Plugins and flavors are reported as one inventory, each identified by its Git coordinates and versioned by the commit it is checked out at.
 - [mason] Implement `mason`, the Neovim installer for LSP servers, DAP adapters, linters and formatters. The inventory is read straight off mason's install tree by a `--clean` Neovim, so it costs no plugin loading and reports packages that reach no other manager: mason redirects every backend it uses into the package's own directory, so a tool it installed is invisible to `npm`, `pip` and the rest.

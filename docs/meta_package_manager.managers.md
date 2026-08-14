@@ -72,6 +72,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.bin module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.bin
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.composer module
 
 ```{eval-rst}

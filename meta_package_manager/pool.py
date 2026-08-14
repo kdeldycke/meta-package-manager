@@ -33,6 +33,7 @@ from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
 from .managers.asdf import ASDF
+from .managers.bin import Bin
 from .managers.composer import Composer
 from .managers.conda import Conda
 from .managers.deb_get import Deb_Get
@@ -104,6 +105,7 @@ manager_classes = (
     APT,
     APT_Mint,
     ASDF,
+    Bin,
     Brew,
     Cask,
     Composer,

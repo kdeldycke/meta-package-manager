@@ -1,7 +1,8 @@
-"""Update the Nix package definition to the latest GitHub release.
+"""Update a Nix package definition to its upstream's latest GitHub release.
 
 Fetches the latest release version from GitHub, computes the source hash using
-nix-prefetch-url, and patches package.nix in-place.
+nix-prefetch-url, and patches the .nix file in-place. Defaults to package.nix;
+pass another definition's path to bump one of the dependency pins instead.
 
 Requires Nix to be installed for hash computation.
 """
@@ -17,13 +18,20 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-GITHUB_API = (
-    "https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest"
-)
-GITHUB_TARBALL = (
-    "https://github.com/kdeldycke/meta-package-manager"
-    "/archive/refs/tags/v{version}.tar.gz"
-)
+GITHUB_REPOS = {
+    "click-extra.nix": "kdeldycke/click-extra",
+    "extra-platforms.nix": "kdeldycke/extra-platforms",
+    "package.nix": "kdeldycke/meta-package-manager",
+}
+"""Upstream repository each definition in this directory tracks.
+
+Keyed on file name rather than taken from the caller: a definition and the
+releases it is bumped against then cannot be paired by mistake, which is the
+one way this script could write a version belonging to another project.
+"""
+
+RELEASES_API = "https://api.github.com/repos/{repo}/releases/latest"
+GITHUB_TARBALL = "https://github.com/{repo}/archive/refs/tags/v{version}.tar.gz"
 PACKAGE_NIX = Path(__file__).parent / "package.nix"
 
 
@@ -35,11 +43,21 @@ def fetch_json(url: str) -> dict[str, Any]:
         return result
 
 
-def get_latest_version() -> str:
+def get_upstream_repo(nix_path: Path) -> str:
+    """Resolve the upstream repository a definition tracks, or refuse to guess."""
+    repo = GITHUB_REPOS.get(nix_path.name)
+    if repo is None:
+        known = ", ".join(sorted(GITHUB_REPOS))
+        msg = f"No upstream repository known for {nix_path.name}. Expected: {known}."
+        raise RuntimeError(msg)
+    return repo
+
+
+def get_latest_version(repo: str) -> str:
     """Get the latest release version from GitHub."""
-    data = fetch_json(GITHUB_API)
+    data = fetch_json(RELEASES_API.format(repo=repo))
     tag_name: str = data["tag_name"]
-    return tag_name.lstrip("v")
+    return tag_name.removeprefix("v")
 
 
 def get_current_version(nix_path: Path) -> str:
@@ -96,17 +114,18 @@ def update_nix(nix_path: Path, version: str, sri_hash: str) -> None:
 def main() -> None:
     """Check for a new release and update the Nix package definition."""
     nix_path = Path(sys.argv[1]) if len(sys.argv) > 1 else PACKAGE_NIX
+    repo = get_upstream_repo(nix_path)
 
-    latest = get_latest_version()
+    latest = get_latest_version(repo)
     current = get_current_version(nix_path)
 
     if latest == current:
         print(f"Already up to date at {current}.")
         return
 
-    print(f"Updating {current} -> {latest}")
+    print(f"Updating {repo} {current} -> {latest}")
 
-    tarball_url = GITHUB_TARBALL.format(version=latest)
+    tarball_url = GITHUB_TARBALL.format(repo=repo, version=latest)
     sri_hash = compute_sri_hash(tarball_url)
     print(f"SRI hash: {sri_hash}")
 

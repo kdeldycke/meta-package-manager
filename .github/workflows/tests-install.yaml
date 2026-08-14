@@ -218,10 +218,15 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-26.04
     steps:
+      # Fetched from Codeberg, where Guix development moved: Savannah answers
+      # this runner with an HTTP error (wget exit 8), which is what kept both
+      # Guix jobs red. `--no-verbose` over `--quiet` so the next such failure
+      # names itself instead of costing a log dig.
       - name: Install Guix
         run: >
-          wget --quiet --output-document=guix-install.sh
-          https://git.savannah.gnu.org/cgit/guix.git/plain/etc/guix-install.sh
+          wget --no-verbose --output-document=guix-install.sh
+          --tries=5 --retry-on-http-error=429,500,502,503,504
+          https://codeberg.org/guix/guix/raw/branch/master/etc/guix-install.sh
       - name: Run Guix installer
         run: |
           chmod +x guix-install.sh
@@ -248,10 +253,15 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Fetched from Codeberg, where Guix development moved: Savannah answers
+      # this runner with an HTTP error (wget exit 8), which is what kept both
+      # Guix jobs red. `--no-verbose` over `--quiet` so the next such failure
+      # names itself instead of costing a log dig.
       - name: Install Guix
         run: >
-          wget --quiet --output-document=guix-install.sh
-          https://git.savannah.gnu.org/cgit/guix.git/plain/etc/guix-install.sh
+          wget --no-verbose --output-document=guix-install.sh
+          --tries=5 --retry-on-http-error=429,500,502,503,504
+          https://codeberg.org/guix/guix/raw/branch/master/etc/guix-install.sh
       - name: Run Guix installer
         run: |
           chmod +x guix-install.sh

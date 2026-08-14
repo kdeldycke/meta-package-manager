@@ -237,6 +237,7 @@ UPSTREAM_REPOS = {
     "macports": "https://github.com/macports/macports-base",
     "mamba": "https://github.com/mamba-org/mamba",
     "mas": "https://github.com/mas-cli/mas",
+    "mason": "https://github.com/mason-org/mason.nvim",
     "micro": "https://github.com/micro-editor/micro",
     "micromamba": "https://github.com/mamba-org/mamba",
     "miktex": "https://github.com/MiKTeX/miktex",

@@ -74,6 +74,7 @@ keywords = [
   "mageia",
   "mamba",
   "mas",
+  "mason",
   "meta-package-manager",
   "micro",
   "micromamba",
@@ -1217,6 +1218,11 @@ color = "bfdadc"
 description = "mas"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: mason"
+color = "bfdadc"
+description = "mason"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: micro"
 color = "bfdadc"
 description = "micro"
@@ -1604,6 +1610,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/macports.*", "tests/*mac
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mas"
 any-glob-to-any-file = [ "meta_package_manager/managers/mas.*", "tests/*mas*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: mason"
+any-glob-to-any-file = [ "meta_package_manager/managers/mason.*", "tests/*mason*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: micro"

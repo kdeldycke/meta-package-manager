@@ -139,6 +139,7 @@ Meta Package Manager,lazy,1
 Meta Package Manager,macports,1
 Meta Package Manager,mamba,1
 Meta Package Manager,mas,1
+Meta Package Manager,mason,1
 Meta Package Manager,micro,1
 Meta Package Manager,micromamba,1
 Meta Package Manager,miktex,1
@@ -261,6 +262,7 @@ print(operation_matrix()[0])
 | [`macports`](https://mpm.run/managers/macports.html)                                           | >= 2         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`mamba`](https://mpm.run/managers/mamba.html)                                                 | >= 2         |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`mas`](https://mpm.run/managers/mas.html)                                                     | >= 7         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`mason`](https://mpm.run/managers/mason.html)                                                 | >= 2         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |     ✓     |               |    ✓     |   ✓    |           |          |
 | [`micro`](https://mpm.run/managers/micro.html)                                                 | >= 2         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`micromamba`](https://mpm.run/managers/micromamba.html)                                       | >= 2         |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`miktex`](https://mpm.run/managers/miktex.html)                                               | >= 22.3      |          |      🪟       |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |

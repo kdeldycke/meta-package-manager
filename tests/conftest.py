@@ -399,7 +399,8 @@ PACKAGE_IDS = {
     "lazy": "lazy.nvim",
     "macports": "hello",
     "mamba": "zstd",
-    "mas": "747648890",  # Telegram (test is always skipped).
+    "mas": "747648890",
+    "mason": "stylua",  # Telegram (test is always skipped).
     # A plugin of micro's own channel. Tiny, pure Lua, and not bundled with
     # the editor, so the round-trip actually installs and removes something.
     "micro": "bounce",

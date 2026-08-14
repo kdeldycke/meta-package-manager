@@ -234,6 +234,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.mason module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.mason
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.mise module
 
 ```{eval-rst}

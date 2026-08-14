@@ -49,6 +49,7 @@ from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
 from .managers.lazy import Lazy
 from .managers.mamba import Mamba, Micromamba
+from .managers.mason import Mason
 from .managers.mas import MAS
 from .managers.miktex import MiKTeX
 from .managers.mise import Mise
@@ -123,6 +124,7 @@ manager_classes = (
     Lazy,
     Mamba,
     MAS,
+    Mason,
     Micromamba,
     MiKTeX,
     Mise,

@@ -289,11 +289,10 @@ class UVX(UVBase):
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
 
     brewfile_entry_type = "uv"
-    """`uv` is mapped to Homebrew Bundle's `uv` entry type, which installs via
-    `uv tool install` — the same mechanism {class}`UVX` wraps. The
-    pip-style {class}`UV` manager intentionally has no Brewfile mapping: its
-    packages live inside a Python environment, not as top-level tools, so the
-    semantics do not round-trip through `brew bundle`.
+    """Mapped to Homebrew Bundle's `uv` entry type, which installs via
+    `uv tool install`: the same mechanism {class}`UVX` wraps, while the
+    pip-style {class}`UV` manager has no Brewfile counterpart. See
+    {doc}`/dump`, section "`uv` mapping".
     """
 
     requirement = ">=0.10.10"

@@ -138,7 +138,7 @@ These go under `[mpm.<subcommand>]` (or `[tool.mpm.<subcommand>]`):
 | Key              | Type    | Default | Description                                                                               |
 | :--------------- | :------ | :------ | :---------------------------------------------------------------------------------------- |
 | `toml`           | boolean | `true`  | Emit a TOML manifest with one section per manager.                                        |
-| `brewfile`       | boolean | `false` | Emit a Brewfile instead of a TOML manifest (managers supported by `brew bundle` only).    |
+| `brewfile`       | boolean | `false` | Emit a [Brewfile](dump.md#brewfile) instead of a TOML manifest.                           |
 | `header`         | boolean | `true`  | Include a metadata + warning comment block at the top of the output.                      |
 | `overwrite`      | boolean | `false` | Allow overwriting an existing output file.                                                |
 | `merge`          | boolean | `false` | TOML only. Add each new entry to an existing file.                                        |

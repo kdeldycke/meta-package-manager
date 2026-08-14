@@ -101,9 +101,8 @@ if TYPE_CHECKING:
     flag_value="brewfile",
     help=(
         "Emit a Brewfile that `brew bundle install` can consume. Only managers "
-        "natively supported by brew bundle are included (brew, cask, mas, vscode, "
-        "npm, cargo, uv, winget, flatpak). Other managers are tallied in the "
-        "header and excluded from the output."
+        "natively supported by brew bundle are included. Other managers are "
+        "tallied in the header and excluded from the output."
     ),
 )
 @overwrite_option

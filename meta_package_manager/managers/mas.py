@@ -90,13 +90,13 @@ class MAS(PackageManager):
     """
 
     def brewfile_entry(self, package):
-        """Brewfile `mas` entries take the app's display name as the positional
-        argument and the Mac App Store numeric ID as the `id:` keyword.
+        """Emit the app's display name, with its numeric adamID as the `id:`
+        keyword `brew bundle` installs from.
 
-        Returns `None` (silently skip) for any package whose ID is not a numeric
-        adamID: that shape is impossible to round-trip through `brew bundle`
-        without the ID, and a half-broken `mas "Name"` line would error at
-        install time.
+        Returns `None` (silently skip) for any package whose ID is not such a
+        number: without it the entry cannot round-trip, and a half-broken
+        `mas "Name"` line would error at install time. See {doc}`/dump`,
+        section "`mas` entries".
         """
         try:
             adam_id = int(package.id)

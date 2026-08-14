@@ -258,10 +258,11 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """Name of the Brewfile DSL entry type this manager maps to, or `None` if the
     manager has no Brewfile equivalent.
 
-    Set by the subset of managers covered by Homebrew Bundle's DSL (`brew`, `cask`,
-    `mas`, `vscode`, `npm`, `cargo`, `uv`, `winget`, `flatpak`). Consumed
-    by {mod}`meta_package_manager.brewfile` when rendering the output of
-    `mpm dump --brewfile`.
+    Set by the subset of managers Homebrew Bundle's DSL covers, and consumed by
+    {mod}`meta_package_manager.brewfile` when rendering the output of
+    `mpm dump --brewfile`. Which manager maps to which entry is tabulated from
+    these declarations in {doc}`/dump`, section "Brewfile", where the export's
+    own quirks are documented too.
     """
 
     brewfile_skip_warning: ClassVar[str | None] = None

@@ -294,6 +294,10 @@ Never swap one for the other: a reader scanning for something they can still ins
 
 Documents capabilities `mpm` backfills on top of native tools. Two classes: *selective* — only some managers need it (full `upgrade --all`, the synthesized orphan sweep of `cleanup --orphans`, exact/extended search), shown in the per-manager table — and *universal* — every managed tool gains it (`--dry-run` simulation, cross-scheme version parsing, purl identifiers, uniform sudo). The per-manager table renders live at Sphinx build time through the `{python:render}` block calling `augmentations_table()` from `meta_package_manager/_docs.py`, derived from the capability declarations (`upgrade_all_is_synthesized()`, `cleanup_orphan_is_synthesized()` and the `search_capabilities` flags in `meta_package_manager/capabilities.py`), so the rendered page never drifts from the code. The block carries the `:mirror:` flag like the benchmark table: a generated copy sits below the fence between `<!-- mirror -->` markers, refreshed by `click-extra refresh-directives`, never hand-edited. `test_augmentations_table_renders` guards the generator.
 
+### Snapshot page (`docs/dump.md`)
+
+The canonical home of every Brewfile fact: which managers map to which entry keyword (a table generated from the pool's own `brewfile_entry_type` declarations), what the header warns about, how taps and entry order are emitted, and the per-manager caveats (VSCodium extensions skipped, `mas` entries keyed by App Store ID, the `uv`/`uvx` split, the flatpak remote). Everywhere else keeps a one-line contextual mention pointing here: manager class docstrings, the bundled TOML description comments, the `--brewfile` option help, `docs/configuration.md` and `docs/overrides.md`. Never re-enumerate the covered managers or entry types in prose: that list drifted twice already, still naming `uv` after the mapping had moved to `uvx`. Read it off `BUNDLE_ENTRY_TYPES` or the generated table instead.
+
 ### Per-manager pages (`docs/managers/`)
 
 One documentation page per pool manager, plus the `docs/managers.md` hub. The invariants:

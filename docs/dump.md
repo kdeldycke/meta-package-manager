@@ -125,6 +125,8 @@ print(brewfile_managers_table())
 
 Every other manager gets tallied in the header but excluded from the body.
 
+Third-party taps are registered for you: a [`brew`](managers/brew.md) or [`cask`](managers/cask.md) package whose ID carries a `user/tap/` prefix adds a `tap "user/tap"` line at the top of the file, so `brew bundle install` can resolve it before reaching the entry that needs it. Homebrew's own default taps are never emitted. Entries are then grouped by keyword, in Homebrew Bundle's own section order, and sorted by name within each group.
+
 The header carries a deliberate warning:
 
 ```text
@@ -149,6 +151,10 @@ VS Code instead of VSCodium.
 ```
 
 Edit the file by hand to add VSCodium entries through a separate channel if you need them.
+
+### `mas` entries
+
+Mac App Store apps are emitted as `mas "App Name", id: 497799835`: Homebrew Bundle installs by numeric App Store ID and keeps the name as a label. A [`mas`](managers/mas.md) package whose ID is not such a number is left out of the file, a bare `mas "App Name"` line having nothing for `brew bundle install` to resolve.
 
 ### `uv` mapping
 

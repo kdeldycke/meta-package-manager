@@ -61,9 +61,8 @@ class Flatpak(PackageManager):
     ```
 
     ```{note}
-    Brewfile backups emit the bare `flatpak "id"` form: mpm does not
-    capture each app's origin remote, so `brew bundle install` restores
-    through Flathub and non-Flathub apps must be edited in by hand.
+    A `--brewfile` dump emits the bare `flatpak "id"` form, mpm capturing no
+    origin remote per app. See {doc}`/dump`, section "Flatpak remote".
     ```
     """
 
@@ -73,11 +72,8 @@ class Flatpak(PackageManager):
     brewfile_entry_type = "flatpak"
     """Mapped to Homebrew Bundle's `flatpak` extension.
 
-    The Brewfile `flatpak` entry supports a `with: ["remote"]` keyword for
-    non-default remotes. mpm's {meth}`installed` does not currently capture the
-    origin remote per package, so the dump emits the bare `flatpak "id"` form;
-    `brew bundle install` then resolves through the default `flathub` remote.
-    Non-flathub flatpaks need to be edited in by hand after the dump.
+    Its `with: ["remote"]` keyword goes unused, {meth}`installed` capturing no
+    origin remote to fill it with. See {doc}`/dump`, section "Flatpak remote".
     """
 
     platforms = UNIX_WITHOUT_MACOS

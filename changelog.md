@@ -97,6 +97,7 @@
 - [mpm] Add 47 managers to the benchmark's support table, covering every tool `topgrade` drives that had no row yet: the Android Studio, Antigravity, Cursor, Windsurf and fifteen JetBrains plugin managers, plus `bob`, `colima`, `elan`, `gearlever`, `helix-db`, `hyprpm`, `install-release`, `skills`, `tpack`, `vite-plus` and eighteen others.
 - [mpm] Flag `topgrade`'s support for `soar` and `zerobrew` in the benchmark, which was left blank.
 - [mpm] Drop the `topgrade` refusals recorded against `opencode` and `zerobrew`: both requests were closed as not-planned, then implemented anyway.
+- [mpm] List declined managers on the manager index too, in a second block below the wrapped ones sharing the same columns. Their `Support` cell renders the benchmark's own ☠️/❌/🛟 glyphs, linked to the verdict in `docs/unsupported.md`, and folds in what used to be a dedicated `Unmaintained` column. A population summary opens the page with how many managers have been assessed, wrapped and declined so far.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

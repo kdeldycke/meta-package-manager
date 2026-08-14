@@ -1,12 +1,6 @@
 # {octicon}`git-pull-request` Contribution guide
 
-Good candidates for new package manager:
-
-- [Awesome Package Manager](https://github.com/damon-kwok/awesome-package-manager)
-- [Package managers from list of terminal CLIs](https://github.com/k4m4/terminals-are-sexy#package-managers)
-- [Wikipedia list of package managers](https://en.wikipedia.org/wiki/List_of_software_package_management_systems)
-- [GitHub list of package managers](https://github.com/showcases/package-managers)
-- {doc}`/benchmark` of other similar tools
+Candidates for a new package manager come from `mpm`'s own coverage map. The {doc}`/benchmark` holds one row per tool any comparable wrapper drives, so a blank cell in its `mpm` column marks a tool nobody has assessed yet: that is the worklist. {doc}`/unsupported` is the other half of the map, recording each tool already declined and the reason, which is worth checking before proposing one.
 
 ## Document a new package manager
 

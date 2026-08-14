@@ -703,6 +703,56 @@ def manager_source_url(manager_id: str) -> str:
     return f"{GITHUB_BLOB_URL}/{rel.as_posix()}#L{lineno}"
 
 
+@cache
+def _load_benchmark_toml() -> dict:
+    """Parse `docs/benchmark.toml`, shared by every generator reading it.
+
+    Cached: the benchmark table, the manager index and its population stats
+    all read the same file within one build.
+    """
+    toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
+    return tomllib.loads(toml_path.read_text(encoding="UTF-8"))
+
+
+def _support_glyph(
+    mid: str,
+    unsupported: dict[str, str],
+    anchors: dict[str, str],
+    competitor_data: dict[str, list[str]],
+) -> str:
+    """Linked support glyph for a manager ID: the benchmark's own `mpm` column rule.
+
+    A wrapped manager renders `[✅]`, linked to the class proving it, or `[⚠️]`
+    when it carries the `unmaintained` flag. A declined manager renders the
+    {data}`TOPGRADE_FALLBACK_GLYPH` alone where `topgrade` still reaches it, or
+    its {data}`UNSUPPORTED_GLYPHS` verdict otherwise, linked to its own section
+    of {data}`UNSUPPORTED_DOCS_URL`. A manager in neither set, assessed by
+    nobody yet, renders an empty cell. Shared by {func}`benchmark_managers_table`
+    and {func}`managers_index_table`, so the two pages can never disagree on
+    what a manager's glyph should be.
+    """
+    if mid in pool:
+        glyph = "⚠️" if pool[mid].unmaintained else "✅"
+        return f"[{glyph}]({manager_source_url(mid)})"
+    if mid in unsupported:
+        # One glyph per cell. Where `topgrade` still reaches the tool, the
+        # lifebuoy stands alone: it already answers the only question this
+        # column asks, and pairing it with the verdict doubled the width of
+        # every such row for a fact the linked page states anyway. The skull
+        # and the cross therefore appear only when nothing reaches the tool at
+        # all. `docs/unsupported.md` keeps both glyphs, being the record
+        # rather than the comparison.
+        glyph = (
+            TOPGRADE_FALLBACK_GLYPH
+            if "topgrade" in competitor_data.get(mid, [])
+            else UNSUPPORTED_GLYPHS[unsupported[mid]]
+        )
+        anchor = anchors.get(mid)
+        target = f"{UNSUPPORTED_DOCS_URL}#{anchor}" if anchor else UNSUPPORTED_DOCS_URL
+        return f"[{glyph}]({target})"
+    return ""
+
+
 def benchmark_managers_table() -> str:
     """Produce the `Package manager support` table of the benchmark page.
 
@@ -710,15 +760,10 @@ def benchmark_managers_table() -> str:
     `docs/benchmark.md`, so the table (and its source-line anchors) always
     matches the code being documented without a checked-in copy.
 
-    The `mpm` column is auto-derived from the live pool: each implemented manager
-    renders as `[✅](source_url)`, linking to the class definition that proves the
-    support, or `[⚠️](source_url)` when that manager carries the `unmaintained` flag,
-    matching the manager index. A manager listed in the TOML's `unsupported` mapping
-    instead renders the {data}`UNSUPPORTED_GLYPHS` entry for its status, linked to its
-    own section of {data}`UNSUPPORTED_DOCS_URL` through {func}`unsupported_anchors`,
-    which keeps a deliberate refusal distinct from a blank
-    cell meaning nobody has assessed the tool yet. Competitor columns are filled from
-    `docs/benchmark.toml`, which only encodes what the *other* tools support.
+    The `mpm` column is rendered by {func}`_support_glyph`, shared with the manager
+    index so the two pages can never disagree on a manager's status. Competitor
+    columns are filled from `docs/benchmark.toml`, which only encodes what the
+    *other* tools support.
 
     Each manager identifier in the first column is rendered as a link: to its
     dedicated documentation page for implemented managers, or to its homepage
@@ -738,8 +783,7 @@ def benchmark_managers_table() -> str:
     Manager rows are the sorted union of pool IDs and TOML keys, so a new
     entry on either side appears in the table without manual edits.
     """
-    toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
-    data = tomllib.loads(toml_path.read_text(encoding="UTF-8"))
+    data = _load_benchmark_toml()
     competitor_data: dict[str, list[str]] = data["managers"]
     homepages: dict[str, str] = data.get("homepages", {})
     coarse_support: dict[str, dict[str, str]] = data.get("coarse_support", {})
@@ -762,33 +806,7 @@ def benchmark_managers_table() -> str:
         else:
             url = homepages.get(mid)
             label = f"[`{mid}`]({url})" if url else f"`{mid}`"
-        row = [label]
-        if mid in pool_ids:
-            # A wrapped manager whose upstream died keeps the ⚠️ of the manager
-            # index: still usable, but on notice. Never ☠️, which is reserved
-            # for the tools mpm declined to wrap at all.
-            glyph = "⚠️" if pool[mid].unmaintained else "✅"
-            row.append(f"[{glyph}]({manager_source_url(mid)})")
-        elif mid in unsupported:
-            # One glyph per cell. Where `topgrade` still reaches the tool, the
-            # lifebuoy stands alone: it already answers the only question this
-            # column asks, and pairing it with the verdict doubled the width of
-            # every such row for a fact the linked page states anyway. The
-            # skull and the cross therefore appear only when nothing reaches
-            # the tool at all. `docs/unsupported.md` keeps both glyphs, being
-            # the record rather than the comparison.
-            glyph = (
-                TOPGRADE_FALLBACK_GLYPH
-                if "topgrade" in competitor_data.get(mid, [])
-                else UNSUPPORTED_GLYPHS[unsupported[mid]]
-            )
-            anchor = anchors.get(mid)
-            target = (
-                f"{UNSUPPORTED_DOCS_URL}#{anchor}" if anchor else UNSUPPORTED_DOCS_URL
-            )
-            row.append(f"[{glyph}]({target})")
-        else:
-            row.append("")
+        row = [label, _support_glyph(mid, unsupported, anchors, competitor_data)]
         flags = set(competitor_data.get(mid, []))
         coarse_map = coarse_support.get(mid, {})
         refused_map = refused.get(mid, {})
@@ -952,9 +970,7 @@ def _toml_definition(definition_source: str) -> dict:
     Cached: rendering one config-defined manager's page reads the same file
     from several section generators.
     """
-    return tomllib.loads(  # type: ignore[no-any-return]
-        (PROJECT_ROOT / definition_source).read_text(encoding="UTF-8"),
-    )
+    return tomllib.loads((PROJECT_ROOT / definition_source).read_text(encoding="UTF-8"))
 
 
 @cache
@@ -2422,27 +2438,44 @@ def managers_index_table() -> str:
 
     Rendered live at Sphinx build time. Both the name and the ID link to the
     manager's dedicated page, since a reader scanning for `apt-mint` looks at the
-    identifier column, not the prose name. The `⚠️` marker of the readme's
-    operation matrix gets a column of its own rather than trailing the ID, which
-    kept a sort-worthy fact glued to an identifier. `⚠️` is deliberately not the
-    `☠️` of the benchmark and unsupported pages: both mark a dead upstream, but a
-    `⚠️` manager is still wrapped and usable, where `☠️` marks one `mpm` declined
-    to wrap at all. Platform icons follow the same
-    coverage reading as the manager pages: a partially-backed group keeps its icon
-    with {func}`_platform_coverage`'s annotation (`🐧 (Exherbo Linux only)`)
-    instead of disappearing, as it does in the readme's all-or-nothing matrix.
+    identifier column, not the prose name. `Support` renders the same
+    {func}`_support_glyph` scale as the benchmark's `mpm` column: `✅`/`⚠️` for a
+    wrapped manager, `☠️`/`❌`/`🛟` for one `mpm` declined. Keeping the glyph in a
+    column of its own, rather than trailing the ID, avoids gluing a sort-worthy
+    fact to an identifier. Platform icons follow the same coverage reading as the
+    manager pages: a partially-backed group keeps its icon with
+    {func}`_platform_coverage`'s annotation (`🐧 (Exherbo Linux only)`) instead of
+    disappearing, as it does in the readme's all-or-nothing matrix.
 
-    The `⚠️` flag is all this table says about upstream health. The stars,
-    newest release and newest commit behind it live in each manager's own
-    {func}`manager_card`: they answer a question asked about one tool at a time,
-    and as columns they made a reader scan a hundred rows to find the single one
-    they came for, while widening the table enough to push the platform icons
-    off a narrow screen. The index keeps what a reader actually scans a hundred
-    rows for: identity, platforms, and whether the thing is abandoned.
+    The glyph is all this table says about a manager's status. The stars, newest
+    release and newest commit behind a wrapped one live in its own
+    {func}`manager_card`, and the reason behind a declined one lives in its own
+    section of `docs/unsupported.md`: both answer a question asked about one tool
+    at a time, and as columns here they made a reader scan a hundred rows to find
+    the single one they came for, while widening the table enough to push the
+    platform icons off a narrow screen.
+
+    Declined managers (`docs/benchmark.toml`'s `unsupported` mapping) are
+    appended after the wrapped ones as a second block, sorted the same way. No
+    prose name or platform data exists for a tool `mpm` never wrapped, so those
+    cells stay blank; the ID cell links to the manager's verdict section instead
+    of a dedicated page it does not have. Both blocks come from a single
+    `render_table` call over the combined rows, split apart only afterwards: this
+    keeps their column widths identical, where rendering each block on its own
+    would size them from different content and the columns would drift out of
+    alignment. The blank line between them is what keeps "wrapped" and
+    "declined" visually apart without duplicating the table's shape.
     """
+    data = _load_benchmark_toml()
+    competitor_data: dict[str, list[str]] = data.get("managers", {})
+    unsupported: dict[str, str] = data.get("unsupported", {})
+    anchors = unsupported_anchors()
+
+    headers = ["", "Manager", "ID", "Support", "Platforms"]
+    colalign = ["center", "left", "left", "center", "center"]
+
     table = []
     for mid, m in sorted(pool.items()):
-        id_cell = f"[`{mid}`](managers/{mid}.md)"
         parts = []
         for p_obj in MAIN_PLATFORMS:
             coverage = _platform_coverage(p_obj, m.platforms)
@@ -2456,35 +2489,82 @@ def managers_index_table() -> str:
             [
                 f"%logo:{mid}%",
                 f"[{m.name}](managers/{mid}.md)",
-                id_cell,
-                "⚠️" if m.unmaintained else "",
+                f"[`{mid}`](managers/{mid}.md)",
+                _support_glyph(mid, unsupported, anchors, competitor_data),
                 " ".join(parts),
             ]
         )
+    supported_count = len(table)
+
+    for mid in sorted(unsupported):
+        anchor = anchors.get(mid)
+        target = f"{UNSUPPORTED_DOCS_URL}#{anchor}" if anchor else UNSUPPORTED_DOCS_URL
+        table.append(
+            [
+                "",
+                "",
+                f"[`{mid}`]({target})",
+                _support_glyph(mid, unsupported, anchors, competitor_data),
+                "",
+            ]
+        )
+
     rendered = render_table(
         table,
         # The mark column is headerless: the artwork labels itself, and the
         # managers whose upstream has no usable mark leave the cell empty.
-        headers=[
-            "",
-            "Manager",
-            "ID",
-            "Unmaintained",
-            "Platforms",
-        ],
+        headers=headers,
         table_format=TableFormat.GITHUB,
-        colalign=[
-            "center",
-            "left",
-            "left",
-            "center",
-            "center",
-        ],
+        colalign=colalign,
         disable_numparse=True,
     )
     for mid in pool:
         rendered = rendered.replace(f"%logo:{mid}%", manager_logo(mid, inline=True))
-    return f"`mpm` can drive {len(pool)} package managers:\n\n{rendered}"
+
+    lines = rendered.splitlines()
+    header_lines = lines[:2]
+    supported_lines = lines[2 : 2 + supported_count]
+    unsupported_lines = lines[2 + supported_count :]
+    blocks = "\n".join((
+        *header_lines,
+        *supported_lines,
+        "",
+        *header_lines,
+        *unsupported_lines,
+    ))
+
+    return f"`mpm` can drive {len(pool)} package managers:\n\n{blocks}"
+
+
+def manager_population_stats() -> str:
+    """Produce the manager population summary opening `docs/managers.md`.
+
+    Rendered live at Sphinx build time, right above the index table it
+    summarizes. Counts are read from the same sources as
+    {func}`managers_index_table`: the live pool for wrapped managers, and
+    `docs/benchmark.toml`'s `unsupported` mapping for declined ones, so the two
+    can never disagree on how many managers exist in either state.
+    """
+    data = _load_benchmark_toml()
+    competitor_data: dict[str, list[str]] = data.get("managers", {})
+    unsupported: dict[str, str] = data.get("unsupported", {})
+
+    unmaintained = sum(1 for m in pool.values() if m.unmaintained)
+    archived = sum(1 for status in unsupported.values() if status == "archived")
+    excluded = len(unsupported) - archived
+    topgrade_fallback = sum(
+        1 for mid in unsupported if "topgrade" in competitor_data.get(mid, [])
+    )
+    assessed = len(pool) + len(unsupported)
+
+    return (
+        f"{assessed} package managers have been assessed so far. `mpm` wraps "
+        f"{len(pool)} of them, {unmaintained} flagged unmaintained. The other "
+        f"{len(unsupported)} were declined, {archived} for a dead upstream and "
+        f"{excluded} on their own merits; {topgrade_fallback} of those "
+        f"{len(unsupported)} stay reachable through "
+        "[`topgrade`](managers/topgrade.md)."
+    )
 
 
 def manager_page(manager_id: str) -> str:

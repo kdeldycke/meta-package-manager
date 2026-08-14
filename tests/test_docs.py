@@ -1453,9 +1453,38 @@ def test_manager_changelog_entries():
     assert pairs == expected
 
 
+def test_manager_population_stats():
+    """Check the population summary's counts add up against their sources.
+
+    Rendered live at Sphinx build time by the ``{python:render}`` block
+    opening `docs/managers.md`, right above the index table it summarizes.
+    """
+    text = _docs.manager_population_stats()
+    data = _docs._load_benchmark_toml()
+    unsupported: dict[str, str] = data.get("unsupported", {})
+    competitor_data: dict[str, list[str]] = data.get("managers", {})
+
+    unmaintained = sum(1 for m in pool.values() if m.unmaintained)
+    archived = sum(1 for status in unsupported.values() if status == "archived")
+    excluded = len(unsupported) - archived
+    topgrade_fallback = sum(
+        1 for mid in unsupported if "topgrade" in competitor_data.get(mid, [])
+    )
+
+    assert text.startswith(f"{len(pool) + len(unsupported)} package managers")
+    assert f"wraps {len(pool)} of them" in text
+    assert f"{unmaintained} flagged unmaintained" in text
+    assert f"other {len(unsupported)} were declined" in text
+    assert f"{archived} for a dead upstream" in text
+    assert f"{excluded} on their own merits" in text
+    assert f"{topgrade_fallback} of those {len(unsupported)} stay reachable" in text
+    assert "[`topgrade`](managers/topgrade.md)" in text
+
+
 def test_managers_index_table_renders():
-    """Check the manager index generator still produces a well-formed table
-    linking every pool manager to its documentation page.
+    """Check the manager index generator produces two well-formed blocks: every
+    wrapped manager linking to its documentation page, then every declined one
+    linking to its verdict, sharing the exact same columns.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
     block in `docs/managers.md`, so there is no checked-in copy to compare
@@ -1464,33 +1493,66 @@ def test_managers_index_table_renders():
     table = _docs.managers_index_table()
     lines = table.splitlines()
     assert lines[0] == f"`mpm` can drive {len(pool)} package managers:"
+    assert lines[1] == ""
     # The leading column carries the brand marks and is headerless.
-    assert re.fullmatch(
-        r"\|\s+\| Manager\s+\| ID\s+\|\s+Unmaintained\s+\|\s+Platforms\s+\|",
-        lines[2],
-    )
-    # The upstream readings moved to each manager's own card, so the index must
-    # no longer spend three columns on them.
-    for header in ("Stars", "Last release", "Last commit"):
+    header_pattern = r"\|\s+\| Manager\s+\| ID\s+\|\s+Support\s+\|\s+Platforms\s+\|"
+    assert re.fullmatch(header_pattern, lines[2])
+    # The upstream readings moved to each manager's own card, and the
+    # unmaintained flag folded into the shared Support column, so the index
+    # must no longer spend columns on any of them.
+    for header in ("Stars", "Last release", "Last commit", "Unmaintained"):
         assert header not in lines[2]
+
+    # Exactly one blank line separates the wrapped block from the declined
+    # one, its header and separator byte-identical to the first block's:
+    # both are sliced from a single render_table() call over the combined
+    # rows, so the columns cannot drift out of alignment between the two.
+    assert lines.count("") == 2
+    split_at = lines.index("", 2)
+    assert lines[split_at + 1 : split_at + 3] == lines[2:4]
+    supported_block = "\n".join(lines[4:split_at])
+    declined_block = "\n".join(lines[split_at + 3 :])
+
+    data = _docs._load_benchmark_toml()
+    unsupported: dict[str, str] = data.get("unsupported", {})
+    competitor_data: dict[str, list[str]] = data.get("managers", {})
+    anchors = _docs.unsupported_anchors()
+
     unmaintained = 0
     for mid, manager in pool.items():
-        # Both the name and the identifier link to the manager's page.
-        assert f"[{manager.name}](managers/{mid}.md)" in table
-        assert f"[`{mid}`](managers/{mid}.md)" in table
+        assert mid not in unsupported, f"{mid} is both wrapped and unsupported"
+        # Both the name and the identifier link to the manager's page, only
+        # in the wrapped block.
+        assert f"[{manager.name}](managers/{mid}.md)" in supported_block
+        assert f"[`{mid}`](managers/{mid}.md)" in supported_block
+        assert f"](managers/{mid}.md)" not in declined_block
         if manager.unmaintained:
             unmaintained += 1
         if manager.logo:
-            assert _docs.manager_logo(mid, inline=True) in table
-    # The marker moved out of the ID cell into a column of its own. It stays ⚠️
-    # rather than the ☠️ of the unsupported page: these managers are wrapped and
-    # usable, only their upstream is gone.
+            assert _docs.manager_logo(mid, inline=True) in supported_block
     assert unmaintained
-    assert table.count("⚠️") == unmaintained
-    assert "⚠️](managers/" not in table
+    # The marker moved out of the ID cell into a column of its own, rendered
+    # by the same helper the benchmark's `mpm` column uses. A wrapped
+    # manager's glyph proves itself with a link to its source, never to the
+    # unsupported page, and only the declined block ever shows ☠️/❌/🛟.
+    assert supported_block.count("⚠️") == unmaintained
+    assert "unsupported.md" not in supported_block
+    for glyph in ("☠️", "❌", "🛟"):
+        assert glyph not in supported_block
+
+    # Every declined manager appears exactly once, after every wrapped one,
+    # sorted alphabetically, its Support cell matching the shared helper
+    # benchmark_managers_table() also renders its own `mpm` column from.
+    declined_ids = re.findall(r"\[`([a-z0-9.-]+)`\]\(unsupported\.md", declined_block)
+    assert declined_ids == sorted(unsupported)
+    for mid in unsupported:
+        assert mid not in pool
+        glyph_cell = _docs._support_glyph(mid, unsupported, anchors, competitor_data)
+        assert glyph_cell in declined_block
+
     # Every placeholder was substituted by the artwork it stands for.
     assert "%logo:" not in table
-    # The table is the last thing rendered: no trailing prose glued to it.
+    # The declined block is the last thing rendered: no trailing prose.
     assert lines[-1].startswith("|")
 
 

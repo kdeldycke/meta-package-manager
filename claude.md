@@ -267,10 +267,10 @@ The benchmark compares `mpm` against related tools. It mixes one generated table
 
 A dead upstream gets two glyphs, and the split is the point — it encodes whether `mpm` ships code for the tool:
 
-- ⚠️ — **wrapped, but at risk.** The upstream is abandoned and the manager carries the `unmaintained` flag, yet it stays wrapped and usable. Marks the `Unmaintained` column of the manager index, the same fact in `readme.md`'s operation matrix, and the benchmark's `mpm` column where it replaces the ✅ that manager would otherwise get.
-- ☠️ — **never wrapped.** The upstream is dead, so `mpm` declined to write the manager at all. Closes the section title of `docs/unsupported.md` and marks the benchmark's `mpm` column (see the `unsupported` key below), alongside ❌ for a *live* tool declined on its own merits.
+- ⚠️ — **wrapped, but at risk.** The upstream is abandoned and the manager carries the `unmaintained` flag, yet it stays wrapped and usable. Marks the `Support` column of the manager index and the benchmark's `mpm` column alike, replacing the ✅ that manager would otherwise get, plus the same fact in `readme.md`'s operation matrix.
+- ☠️ — **never wrapped.** The upstream is dead, so `mpm` declined to write the manager at all. Closes the section title of `docs/unsupported.md` and marks the manager index's `Support` column and the benchmark's `mpm` column alike (see the `unsupported` key below), alongside ❌ for a *live* tool declined on its own merits.
 
-The benchmark's `mpm` column is therefore a five-state scale, and the two families never mix: ✅/⚠️ link to the implementing class, ☠️/❌ to the decision not to write one, and a blank cell means the tool was never assessed.
+The benchmark's `mpm` column and the manager index's `Support` column are therefore both a five-state scale, and the two families never mix: ✅/⚠️ link to the implementing class, ☠️/❌ to the decision not to write one. Only the benchmark ever shows a blank cell, since the manager index lists nothing it has not assessed.
 
 Never swap one for the other: a reader scanning for something they can still install today needs ⚠️ to mean "works, may go away" and ☠️ to mean "was never there". Two tables add glyphs that do not travel: the benchmark's 🟡 for coarse support a competitor cannot invoke in isolation, and the cooldown table's 🔜 (gate shipped upstream, not yet plugged into `mpm`), 🚧 (proposed upstream) and ➖ (not applicable). Only the dense per-manager operation grids keep plain `✓`: `readme.md`'s operation matrix and each manager page's own operations table. The bar plugin's ⚠️ is unrelated, counting runtime errors rather than upstream health. The evidence-link discipline below is benchmark-specific.
 

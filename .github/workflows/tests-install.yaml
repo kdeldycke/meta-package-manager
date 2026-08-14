@@ -402,6 +402,9 @@ jobs:
           # macOS resolver, so a test binding to `localhost` fails there and
           # nowhere else. Already the default on Linux.
           extra_nix_config: sandbox = true
+      # Report what the override resolved to: the whole reason this job and the
+      # reviewers' disagreed for months was a sandbox mode no log ever printed.
+      - run: nix config show sandbox
       - run: nix-env --file ./packaging/nix --install
       - run: mpm --version
       # docs/install.md offers the flake as a second entry point into the same

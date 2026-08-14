@@ -233,6 +233,10 @@ Refreshes a local cache of community-written command summaries. The pages are do
 
 Not tools: internal steps of [`topgrade`](managers/topgrade.md), which `mpm` already wraps. They name no upstream project of their own and install nothing.
 
+## [`upm`](https://github.com/epitron/upm) ❌
+
+"*Universal Package Manager*", putting one syntax over apk, apt, guix, opkg, pacman, pkg, pkg_add, pkgin, xbps and yum. It owns no registry: every command is translated to whichever of those the host already carries, all of them wrapped by `mpm` directly, so it reaches no package `mpm` cannot. That is [`upt`](#upt)'s verdict word for word, and like `upt` it reads as a peer of `mpm` rather than a candidate to wrap.
+
 ## [`upt`](https://github.com/sigoden/upt) ❌
 
 Translates one CLI vocabulary onto whichever single OS-level manager is detected, never more than one per invocation, by the maintainer's own account: "*upt is just aliases, nothing more*" ([sigoden/upt#60](https://github.com/sigoden/upt/issues/60#issuecomment-2560419544)).

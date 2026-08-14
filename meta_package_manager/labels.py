@@ -130,7 +130,7 @@ MANAGER_PREFIX = "📦 manager: "
 
 MANAGER_LABEL_GROUPS: TLabelGroup = {
     "asdf-based": frozenset({"asdf", "mise"}),
-    "conda-based": frozenset({"conda", "pixi"}),
+    "conda-based": frozenset({"conda", "mamba", "micromamba", "pixi"}),
     "rpm-based": frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
     "dpkg-based": frozenset({
         "apt",

@@ -89,6 +89,11 @@ SHARED_LOCK_FAMILIES: Final[tuple[LockFamily, ...]] = (
         "on Homebrew's own update lock",
     ),
     LockFamily(
+        frozenset({"conda", "mamba", "micromamba"}),
+        "they act on one environment prefix and one package cache, and `conda` "
+        "honors none of the locks `mamba` takes on them",
+    ),
+    LockFamily(
         frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
         "they all reach the RPM database",
     ),
@@ -123,6 +128,13 @@ serialize on its lock:
   Homebrew's own update lock: two concurrent `brew update` (which {command}`mpm sync`
   issues identically for both, as the formula/cask split does not apply to it) collide,
   one failing with *"Another active Homebrew update process is already running"*.
+- `conda`, `mamba` and `micromamba` act on one environment prefix and one package
+  cache. This is the family that does *not* get the guarantee below: mamba takes a
+  real lock on the prefix and on every cache directory for the length of a
+  transaction, and conda honors none of them, its own locking covering the repodata
+  cache alone. Concurrent runs corrupt rather than block, which upstream closed as
+  not planned ([conda/conda#13037](https://github.com/conda/conda/issues/13037)).
+  Serializing them here is what keeps that out of reach.
 - `dnf`, `dnf5`, `yum`, `zypper` and `urpmi` all reach the RPM database. `urpmi`
   fronts `librpm` directly, having no listing of its own, and the Mandriva lineage
   it serves ships `dnf` alongside it, so the two genuinely coexist on one host.
@@ -159,10 +171,11 @@ Expressing that would mean resolving the backend at dispatch time.
 
 Concurrency is safe *across* families and unsafe *within* one, just as it is unsafe
 within a single manager (which is why a manager's own packages stay serial). For every
-family above, two members running at once *block or fail* rather than corrupt: each
-backend holds a real lock and the loser is told so. Do not carry that guarantee over
-to a family added later without checking it, since it is a property of the backend
-rather than of this mechanism.
+family above *except* the conda one, two members running at once *block or fail*
+rather than corrupt: each backend holds a real lock and the loser is told so. That is
+a property of those backends rather than of this mechanism, so a family added later
+earns the guarantee only by inspection, and conda is the standing proof that some do
+not.
 
 Enforced for the mutating fan-outs only: {func}`merge_into_lock_lanes` collapses each
 family's members into a single {func}`dispatch` lane, so they run serially while

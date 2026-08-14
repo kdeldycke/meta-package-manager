@@ -398,11 +398,13 @@ PACKAGE_IDS = {
     # itself, so it is a real entry of its own inventory.
     "lazy": "lazy.nvim",
     "macports": "hello",
+    "mamba": "zstd",
     "mas": "747648890",  # Telegram (test is always skipped).
     # A plugin of micro's own channel. Tiny, pure Lua, and not bundled with
     # the editor, so the round-trip actually installs and removes something.
     "micro": "bounce",
     # A small, dependency-free TeX package of MiKTeX's own catalog.
+    "micromamba": "zstd",
     "miktex": "fancyhdr",
     "mise": "jq",
     "nala": "nyancat",

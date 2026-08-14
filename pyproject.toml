@@ -72,9 +72,11 @@ keywords = [
   "macos",
   "macports",
   "mageia",
+  "mamba",
   "mas",
   "meta-package-manager",
   "micro",
+  "micromamba",
   "miktex",
   "mise",
   "nala",
@@ -1116,7 +1118,7 @@ description = "composer"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: conda-based"
 color = "bfdadc"
-description = "conda, pixi"
+description = "conda, mamba, micromamba, pixi"
 rename-from = [ "📦 manager: conda" ]
 
 [[tool.repomatic.labels.extra]]
@@ -1493,8 +1495,11 @@ any-glob-to-any-file = [ "meta_package_manager/managers/composer.*", "tests/*com
 label = "📦 manager: conda-based"
 any-glob-to-any-file = [
   "meta_package_manager/managers/conda.*",
+  "meta_package_manager/managers/mamba.*",
   "meta_package_manager/managers/pixi.*",
   "tests/*conda*",
+  "tests/*mamba*",
+  "tests/*micromamba*",
   "tests/*pixi*",
 ]
 

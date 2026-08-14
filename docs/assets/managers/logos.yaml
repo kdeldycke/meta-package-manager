@@ -17,6 +17,8 @@ icons:
     license: CC0-1.0
     managers:
     - conda
+    - mamba
+    - micromamba
     source: https://www.anaconda.com
     title: Anaconda
   appstore:

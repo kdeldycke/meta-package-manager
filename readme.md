@@ -137,8 +137,10 @@ Meta Package Manager,juliaup,1
 Meta Package Manager,krew,1
 Meta Package Manager,lazy,1
 Meta Package Manager,macports,1
+Meta Package Manager,mamba,1
 Meta Package Manager,mas,1
 Meta Package Manager,micro,1
+Meta Package Manager,micromamba,1
 Meta Package Manager,miktex,1
 Meta Package Manager,mise,1
 Meta Package Manager,nala,1
@@ -257,8 +259,10 @@ print(operation_matrix()[0])
 | [`krew`](https://mpm.run/managers/krew.html)                                                   | >= 0.4       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`lazy`](https://mpm.run/managers/lazy.html)                                                   | >= 11        |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
 | [`macports`](https://mpm.run/managers/macports.html)                                           | >= 2         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
+| [`mamba`](https://mpm.run/managers/mamba.html)                                                 | >= 2         |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`mas`](https://mpm.run/managers/mas.html)                                                     | >= 7         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`micro`](https://mpm.run/managers/micro.html)                                                 | >= 2         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`micromamba`](https://mpm.run/managers/micromamba.html)                                       | >= 2         |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`miktex`](https://mpm.run/managers/miktex.html)                                               | >= 22.3      |          |      🪟       |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`mise`](https://mpm.run/managers/mise.html)                                                   | >= 2025.5.10 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`nala`](https://mpm.run/managers/nala.html)                                                   | >= 0.12.2    |          |               |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |

@@ -48,6 +48,7 @@ from .managers.ghcup import GHCup
 from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
 from .managers.lazy import Lazy
+from .managers.mamba import Mamba, Micromamba
 from .managers.mas import MAS
 from .managers.miktex import MiKTeX
 from .managers.mise import Mise
@@ -120,7 +121,9 @@ manager_classes = (
     GHCup,
     Guix,
     Lazy,
+    Mamba,
     MAS,
+    Micromamba,
     MiKTeX,
     Mise,
     Nala,

@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mamba,micromamba] Implement `mamba` and `micromamba`, the C++ reimplementation of conda and its statically linked twin. Both read the inventory from `list --json`, accepting the array both bare and inside the envelope `2.9.0` introduced, and synthesize `outdated` from the dry-run transaction the way the `conda` wrapper does. Search matches package names exactly without falling back to `mpm`'s own refiltering.
+- [conda,mamba,micromamba] Stop running `conda`, `mamba` and `micromamba` concurrently. They act on one environment prefix and one package cache, and `conda` honors none of the locks `mamba` takes on them.
 - [mpm] Render the brand mark as ANSI art beside the `--version` metadata, adding the interpreter, the platform, the number of managers supported here and the documentation URL. Drops back to the plain two-line output when colors are off, the terminal is too narrow or `--accessible` is set.
 - [mpm] Add a *Concurrency* section to each manager's documentation page, naming the managers `mpm` will never run it alongside and what they contend for. Rendered from the lock families themselves, so a page cannot promise a guarantee the dispatcher does not implement, and omitted for a manager sharing no backend.
 - [nala] Label `nala` issues and pull requests with the shared `dpkg-based` group rather than a manager label of its own.

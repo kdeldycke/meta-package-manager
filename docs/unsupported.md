@@ -123,6 +123,10 @@ Driven through a PowerShell call that triggers the Store's own bulk update. It e
 
 Vim plugin manager with no commit since 2018-07-26, superseded by [`dein`](#dein), itself superseded by [`dpp`](#dpp).
 
+## [`ninite`](https://ninite.com) ❌
+
+Installs from a real catalog of Windows applications, so the packages are there, but the free product exposes no command line to reach them with: the whole interface is a web form that generates a bespoke `.exe` bundling the selected apps. That installer takes no package argument, lists nothing and removes nothing, which is the same shape that rules out [`microsoft-store`](#microsoft-store). A command line exists only in Ninite Pro, behind a per-machine monthly subscription with no free tier, so no `mpm` install could exercise it and the destructive install/remove round-trip the test suite runs on every wrapped manager could never be provisioned.
+
 ## [`oh-my-bash`](https://ohmybash.nntoan.com) ❌ 🛟
 
 Bash configuration framework with no registry of its own: its plugins and themes are files inside the single git checkout, loaded by name from the `plugins=()` array a user hand-edits into `~/.bashrc` and resolved against `$OSH/plugins/<name>/`, so nothing is independently fetched or versioned and a new plugin arrives only as a pull request against the framework itself ([ohmybash/oh-my-bash#771](https://github.com/ohmybash/oh-my-bash/pull/771)). `upgrade_oh_my_bash` is correspondingly a `git pull --rebase` of that one checkout, which is the whole of what `topgrade` already drives. Nor is there a surface to drive it through: [`lib/cli.bash`](https://github.com/ohmybash/oh-my-bash/blob/master/lib/cli.bash) advertises `plugin`, `theme` and `version` subcommands in its completion table but implements all three as `echo 'Not yet implemented'` stubs, leaving no inventory command and no per-package verb.

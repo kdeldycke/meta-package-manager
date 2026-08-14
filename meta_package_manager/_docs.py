@@ -909,7 +909,7 @@ def manager_card(manager_id: str) -> str:
     upstream = _manager_upstreams().get(manager_id, {})
     stars = upstream.get("stars")
     if stars is not None:
-        facts.append(("Upstream stars", f"{stars:,}"))
+        facts.append(("⭐ Upstream stars", f"{stars:,}"))
     if upstream.get("commit"):
         facts.append(("Last commit", upstream["commit"]))
     if m.requirement:
@@ -980,14 +980,13 @@ def manager_card(manager_id: str) -> str:
         # `=`, so three of them dot-separated wrap mid-value in a box this
         # narrow and read as one run-on string. The other rows hold short names
         # that stay whole on a line, which is what makes the dot work there.
-        # Indented to the definition's own column, so the list nests inside the
-        # row rather than closing it.
+        # A raw line break rather than a bullet list: markers and their vertical
+        # padding dressed a wrapped value up as an enumeration, in a box whose
+        # every other row is a plain run of values.
         facts.append(
             (
                 "Forced environment",
-                "\n  ".join(
-                    f"- `{k}={v}`" for k, v in sorted(m.extra_env.items())
-                ),
+                "<br/>".join(f"`{k}={v}`" for k, v in sorted(m.extra_env.items())),
             )
         )
     if m.timeout is not None:

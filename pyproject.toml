@@ -553,9 +553,11 @@ include-package = [ "cyclonedx", "hjson", "json5", "jsonc", "spdx_tools", "yaml"
 # Correct capitalization for proper nouns.
 default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PyPi = "PyPI", Typescript = "TypeScript" }
 # Non-typo words flagged by default: `astroid` (the Python AST library),
-# `oject` (a "project" fragment surfaced when CLI-help output wraps a line)
-# and `sur` (macOS 11 Big Sur and Homebrew's `big_sur` bottle tag).
-default.extend-words = { astroid = "astroid", oject = "oject", sur = "sur" }
+# `mis` (the `mis-split` prefix in pyenv.toml's comment), `oject` (a "project"
+# fragment surfaced when CLI-help output wraps a line), `sur` (macOS 11 Big Sur
+# and Homebrew's `big_sur` bottle tag), and `uncatalogued` plus `unparseable`,
+# British-spelling variants typos only knows in their American form.
+default.extend-words = { astroid = "astroid", mis = "mis", oject = "oject", sur = "sur", uncatalogued = "uncatalogued", unparseable = "unparseable" }
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
 default.extend-ignore-re = [
   "(?s)<!-- typos:off -->.*?<!-- typos:on -->",
@@ -566,6 +568,11 @@ default.extend-ignore-re = [
   # Guix base32 source hashes are random strings; typos otherwise mangles embedded
   # letter runs (`adn` to `and`), corrupting the hash.
   'base32 "[0-9a-z]{52}"',
+  # `meged` is AppMan's own typo, quoted verbatim on the unsupported page.
+  # Correcting it would misquote the source, and the autofix job rewrites it
+  # unprompted rather than reporting it, `merged` being an unambiguous
+  # suggestion where `mis` above merely errors out.
+  "meged to share the same code",
   # Brand color hex triplets in the generated docs/assets/managers/logos.yaml:
   # typos reads embedded letter runs as misspellings (`BA` to `BY`), which would
   # corrupt both the color and the contrast figure derived from it. Anchored on

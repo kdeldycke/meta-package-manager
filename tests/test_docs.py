@@ -1057,16 +1057,17 @@ def test_manager_stubs_in_sync():
 
 def test_manager_page_headings_survive_a_build(tmp_path):
     """Check a real Sphinx build turns the generated headings into sections,
-    below the lede rather than above it.
+    under a generated title and below the lede.
 
-    The stub carries none of a page's headings: they are printed by
-    `manager_page()` and parsed out of the directive's output, which only works
-    because `myst-parser` supports titles in a nested parse. Two ways that can
-    regress, both silent, and neither visible to a test of the generators
-    alone: the sections can vanish, or the lede can be reparented below them,
-    which is what happens the moment `manager_page()` prints anything above its
-    first heading. So one page is built for real, and both its heading sequence
-    and the position of its infobox are asserted.
+    The stub carries no heading at all, not even the page title: every one is
+    printed by `manager_page()` and parsed out of the directive's output, which
+    only works because `myst-parser` supports titles in a nested parse. Three
+    ways that can regress, all silent, none visible to a test of the generators
+    alone: the document can lose its title, the sections can vanish, or the
+    lede can be reparented below them, which is what happens the moment
+    anything is printed above the first heading of the parse. So one page is
+    built for real, and its title, heading sequence and infobox position are
+    asserted.
 
     `brew` is the subject: it is the one manager exercising every section.
 
@@ -1102,6 +1103,10 @@ def test_manager_page_headings_survive_a_build(tmp_path):
     argv = ["--builder", "html", "--fresh-env", str(source), str(build_dir)]
     assert build.build_main(argv) == 0
     html = (build_dir / "index.html").read_text(encoding="UTF-8")
+
+    # The generated title is the document's own: Sphinx promoted it out of the
+    # directive's output, which is what feeds the toctree label and the tab.
+    assert f"<title>{pool[manager_id].name}" in html
 
     # Backticked identifiers render as code spans, and every heading trails the
     # permalink anchor Sphinx appends.

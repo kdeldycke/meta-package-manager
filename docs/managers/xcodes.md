@@ -1,11 +1,3 @@
-# {octicon}`package` Xcode xcodes
-
-```{python:render}
-from meta_package_manager._docs import manager_intro
-
-print(manager_intro("xcodes"))
-```
-
 ```{python:render}
 from meta_package_manager._docs import manager_page
 

@@ -1,11 +1,3 @@
-# {octicon}`package` Fedora YUM
-
-```{python:render}
-from meta_package_manager._docs import manager_intro
-
-print(manager_intro("yum"))
-```
-
 ```{python:render}
 from meta_package_manager._docs import manager_page
 

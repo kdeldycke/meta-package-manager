@@ -2274,39 +2274,40 @@ def managers_index_table() -> str:
 
 
 def manager_page(manager_id: str) -> str:
-    """Produce the whole body of a manager's documentation page.
+    """Produce a manager's whole documentation page, title included.
 
-    Walks {data}`MANAGER_SECTIONS`, emitting each section's heading followed by
-    its generator's output, and skipping a section whose generator produces
-    nothing for this manager (like reference traces for a manager documenting
-    no literal output samples).
+    Opens on the page title, then walks {data}`MANAGER_SECTIONS`: an untitled
+    entry renders as the lede, a titled one as its heading followed by its
+    generator's output. A section whose generator produces nothing for this
+    manager (like reference traces for a manager documenting no literal output
+    samples) is skipped.
 
-    The headings are emitted here rather than committed into the stub, which is
-    what keeps a page's layout out of a hundred files: adding a section is an
-    edit to {data}`MANAGER_SECTIONS` alone, where it used to rewrite every stub
-    in `docs/managers/`.
+    Nothing is left for the stub but the call, which is the point: a section
+    added, renamed or dropped is an edit to {data}`MANAGER_SECTIONS` alone,
+    where it used to rewrite every file in `docs/managers/`.
 
     ```{note}
-    Headings survive the directive's nested parse, `myst-parser` having grown
-    explicit support for them (`temp_root_node` in its `MockState.nested_parse`)
-    since the days they had to be committed into each stub. What does not
-    survive is content emitted *before* the first heading: the parser builds the
-    sections under the parent node and appends the loose lead nodes after them,
-    so a lede printed here would render at the foot of the page. Hence the
-    untitled entries of {data}`MANAGER_SECTIONS` staying in blocks of their own
-    in the stub, above every heading this function prints, and hence
-    `test_manager_page_headings_survive_a_build` asserting the order rather than
-    the mere presence of the sections.
+    The title has to come from here rather than stay in the stub, and it is the
+    lede that forces it. Headings survive the directive's nested parse,
+    `myst-parser` having grown explicit support for them (`temp_root_node` in
+    its `MockState.nested_parse`) since the days they had to be committed into
+    each stub. What does not survive is content emitted *above* the first
+    heading of that parse: the parser builds the sections under the parent node
+    and appends the loose lead nodes after them, so a lede printed before the
+    first `##` renders at the foot of the page. Printing the `#` title first
+    puts every later node inside a section of its own, and the order holds.
+    `test_manager_page_headings_survive_a_build` builds a page for real and
+    asserts it, both regressions being silent otherwise.
     ```
     """
-    blocks = []
+    m = pool[manager_id]
+    blocks = [f"# {{octicon}}`package` {m.name}"]
     for title, func_name in MANAGER_SECTIONS:
-        if not title:
-            continue
         body = globals()[func_name](manager_id)
         if not body.strip():
             continue
-        blocks.append(f"## {title.format(manager_id=manager_id)}")
+        if title:
+            blocks.append(f"## {title.format(manager_id=manager_id)}")
         blocks.append(body)
     return "\n\n".join(blocks) + "\n"
 
@@ -2314,27 +2315,21 @@ def manager_page(manager_id: str) -> str:
 def manager_page_stub(manager_id: str) -> str:
     """Produce the committed stub of a manager's documentation page.
 
-    The stub carries the page title, a block per untitled section of
-    {data}`MANAGER_SECTIONS` (the lede, which must sit above every heading) and
-    one last block for the whole sectioned body ({func}`manager_page`), so the
-    content renders live at Sphinx build time and never drifts from the pool.
-    The block formatting mirrors `docs/benchmark.md` so the stubs are an
-    `mdformat` fixpoint.
+    One ``{python:render}`` block calling {func}`manager_page`, and nothing
+    else: the title, the lede and every section render live at Sphinx build
+    time and never drift from the pool. The block formatting mirrors
+    `docs/benchmark.md` so the stubs are an `mdformat` fixpoint.
 
-    Nothing here names a section, which is the point: the stubs went from 9,671
-    committed lines rewritten by every layout change to a fixed template. The
-    title stays in the file rather than joining the generated body, which it
-    could: it is what makes a page greppable by the name it is published under,
-    and renaming a manager is rarer than adding a section.
+    The stubs went from 9,671 committed lines that every layout change rewrote
+    to a template naming nothing but the manager. What is lost is a page's
+    title as committed text: `docs/managers/` no longer greps for the name a
+    manager is published under, which `docs/managers.md` and the pool both
+    still carry.
     """
-    m = pool[manager_id]
-    blocks = [f"# {{octicon}}`package` {m.name}"]
-    lede = [func_name for title, func_name in MANAGER_SECTIONS if not title]
-    for func_name in (*lede, "manager_page"):
-        blocks.append(
-            "```{python:render}\n"
-            f"from meta_package_manager._docs import {func_name}\n\n"
-            f'print({func_name}("{manager_id}"))\n'
-            "```",
-        )
-    return "\n\n".join(blocks) + "\n"
+    return (
+        "```{python:render}\n"
+        "from meta_package_manager._docs import manager_page\n"
+        "\n"
+        f'print(manager_page("{manager_id}"))\n'
+        "```\n"
+    )

@@ -42,6 +42,14 @@ icons:
     - yay
     source: https://www.archlinux.org/art
     title: Arch Linux
+  bun:
+    contrast_on_light: 21.0
+    hex: '000000'
+    license: CC0-1.0
+    managers:
+    - bun
+    source: https://bun.sh/press-kit
+    title: Bun
   chocolatey:
     contrast_on_light: 2.18
     hex: 80B5E3

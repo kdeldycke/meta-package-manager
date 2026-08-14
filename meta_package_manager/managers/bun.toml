@@ -1,0 +1,115 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# bun is a JavaScript runtime and package manager (https://bun.sh), and what is
+# wrapped here is what it installs globally. See docs/overrides.md ("Define a
+# new manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# bun resolves from the npm registry like the rest of that family, but installs
+# into its own prefix rather than npm's: `$BUN_INSTALL` before `~/.bun`, with
+# the packages under `install/global`. Nothing it installs appears in npm's,
+# pnpm's or yarn's inventory, and none of them contend for its lock, so bun
+# joins no lock family despite sharing their registry.
+#
+# ```{warning}
+# Upgrades force `--latest`, and leaving it off would be a silent no-op rather
+# than a lesser upgrade. bun records the range a package was installed with, so
+# a package pinned at install time is held there by a bare `bun update`: the
+# command reports success, the version does not move, and `bun outdated` says
+# as much by printing an `Update` column that stays at the installed version
+# while `Latest` shows the newer one. Forcing `--latest` is what makes an
+# upgrade mean what mpm means by it.
+# ```
+#
+# ```{note}
+# The inventory is a tree, and only its branch lines are matched. The first
+# line names the global `node_modules` and its total package count, which is a
+# count of everything pulled in rather than of what was asked for, so it is
+# deliberately not read. A scoped package carries an `@` in its name as well as
+# before its version, which the greedy pattern resolves by splitting on the
+# last one.
+# ```
+#
+# ```{note}
+# The outdated table is padded ASCII with no machine-readable alternative:
+# `--json` is accepted and ignored by both this command and the listing. The
+# version fields are therefore anchored on a leading digit, which is what
+# rejects the header row (`Current`, `Latest`) and the dashed separators
+# without matching on their text. The third column, `Update`, is the version a
+# range-respecting upgrade would reach and is skipped in favour of `Latest`,
+# which is where `--latest` actually goes.
+# ```
+#
+# No `search`: bun exposes package metadata for a name already known
+# (`bun info`) but no query against the registry.
+#
+# No `sync` and no `cleanup`: nothing refreshes an index without acting, and
+# nothing prunes the global install.
+#
+# No escalation: everything lives under the user's own prefix.
+
+[mpm.managers.bun]
+name = "Bun"
+homepage_url = "https://bun.sh"
+logo = "bun"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["bun"]
+requirement = ">=1.2.0"
+# The release that added `bun outdated`, which is what `outdated` below drives.
+version_cli_options = ["--version"]
+# `bun --version` prints the bare version on a line of its own, with no program
+# name to key on.
+version_regexes = ['^(?P<version>\d+\.\d+\.\d+\S*)$']
+
+[mpm.managers.bun.operations.installed]
+args = ["pm", "ls", "--global"]
+regex = '^[├└]──[ \t]+(?P<package_id>\S+)@(?P<installed_version>\S+)$'
+
+[mpm.managers.bun.operations.outdated]
+args = ["outdated", "--global"]
+regex = '^\|[ \t]*(?P<package_id>\S+)[ \t]*\|[ \t]*(?P<installed_version>\d\S*)[ \t]*\|[ \t]*\S+[ \t]*\|[ \t]*(?P<latest_version>\d\S*)[ \t]*\|$'
+
+# Version pinning is not offered by the DSL, so this always takes the latest.
+# bun would accept a `name@version` spec here.
+[mpm.managers.bun.operations.install]
+args = ["install", "--global", "{package_id}"]
+
+[mpm.managers.bun.operations.remove]
+args = ["remove", "--global", "{package_id}"]
+
+[mpm.managers.bun.operations.upgrade_one]
+args = ["update", "--global", "--latest", "{package_id}"]
+
+[mpm.managers.bun.operations.upgrade_all]
+args = ["update", "--global", "--latest"]
+
+# Output samples locking the version probe and both parsers. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# All three are real transcripts from bun 1.3.14, captured against a scratch
+# prefix holding a scoped package and an out-of-date one. Only the install root
+# on the listing's first line is rewritten, to bun's documented default: that
+# line is machine-specific and no pattern reads it.
+[samples.version]
+output = "1.3.14"
+expected = "1.3.14"
+
+[[samples.installed]]
+output = """
+/home/user/.bun/install/global node_modules (42)
+├── @sindresorhus/is@8.1.0
+└── cowsay@1.6.0"""
+packages = [
+  { id = "@sindresorhus/is", version = "8.1.0" },
+  { id = "cowsay", version = "1.6.0" },
+]
+
+[[samples.outdated]]
+output = """
+bun outdated v1.3.14 (0d9b296a)
+|--------------------------------------|
+| Package  | Current | Update | Latest |
+|----------|---------|--------|--------|
+| cowsay   | 1.5.0   | 1.5.0  | 1.6.0  |
+|--------------------------------------|"""
+packages = [{ id = "cowsay", version = "1.6.0" }]

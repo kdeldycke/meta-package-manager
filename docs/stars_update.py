@@ -207,6 +207,7 @@ UPSTREAM_REPOS = {
     "asdf": "https://github.com/asdf-vm/asdf",
     "bin": "https://github.com/marcosnils/bin",
     "brew": "https://github.com/Homebrew/brew",
+    "bun": "https://github.com/oven-sh/bun",
     "cargo": "https://github.com/rust-lang/cargo",
     "cask": "https://github.com/Homebrew/homebrew-cask",
     "cave": "https://gitlab.exherbo.org/paludis/paludis",

@@ -143,7 +143,14 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     }),
     "fish-based": frozenset({"fisher", "oh-my-fish"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
-    "npm-based": frozenset({"npm", "pnpm", "volta", "yarn", "yarn-berry"}),
+    "npm-based": frozenset({
+        "bun",
+        "npm",
+        "pnpm",
+        "volta",
+        "yarn",
+        "yarn-berry",
+    }),
     "pacman-based": frozenset({
         "dkp-pacman",
         "pacman",

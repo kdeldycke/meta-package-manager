@@ -348,6 +348,7 @@ PACKAGE_IDS = {
     # shape an identifier takes here.
     "bin": "/usr/local/bin/bin",
     "brew": "nyancat",
+    "bun": "cowsay",
     "cargo": "fsays",
     "cask": "itsycal",
     "cave": "base/figlet",

@@ -142,6 +142,11 @@ def props(spec: Specifier):
             (
                 {
                     "package_id": "left-pad",
+                    "manager_id": "bun",
+                    "version": "2011-04.gamma",
+                },
+                {
+                    "package_id": "left-pad",
                     "manager_id": "npm",
                     "version": "2011-04.gamma",
                 },

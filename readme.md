@@ -108,6 +108,7 @@ Meta Package Manager,apt-mint,1
 Meta Package Manager,asdf,1
 Meta Package Manager,bin,1
 Meta Package Manager,brew,1
+Meta Package Manager,bun,1
 Meta Package Manager,cargo,1
 Meta Package Manager,cask,1
 Meta Package Manager,cave,1
@@ -232,6 +233,7 @@ print(operation_matrix()[0])
 | [`asdf`](https://mpm.run/managers/asdf.html)                                                   | >= 0.16      |          |     🐧 🍎     |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`bin`](https://mpm.run/managers/bin.html)                                                     | >= 0.27      |          |   🐧 🍎 🪟    |      ✓      |            |           |          |           |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`brew`](https://mpm.run/managers/brew.html)                                                   | >= 6         |          |     🐧 🍎     |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
+| [`bun`](https://mpm.run/managers/bun.html)                                                     | >= 1.2       |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`cargo`](https://mpm.run/managers/cargo.html)                                                 | >= 1         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |        |           |          |
 | [`cask`](https://mpm.run/managers/cask.html)                                                   | >= 6         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`cave`](https://mpm.run/managers/cave.html)                                                   |              |          |               |      ✓      |            |     ✓     |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |

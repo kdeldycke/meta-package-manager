@@ -1,5 +1,6 @@
 {
   lib,
+  stdenv,
   python3Packages,
   fetchFromGitHub,
   zsh,
@@ -29,26 +30,28 @@ python3Packages.buildPythonApplication (finalAttrs: {
     xmltodict
   ];
 
-  nativeCheckInputs = with python3Packages; [
-    pytestCheckHook
-    # tests/test_docs.py parses the GitHub workflow YAML files and loads
-    # docs/docs_update.py, which round-trips pyproject.toml with tomlkit.
-    pyyaml
-    tomlkit
-    # The SBOM unit tests import the CycloneDX renderer and its JSON/XML
-    # schema validators, the SPDX writers, and the mocked HTTP client of
-    # the OSV adapter.
-    cyclonedx-python-lib
-    httpx
-    jsonschema
-    lxml
-    platformdirs
-    respx
-    spdx-tools
-  ]
-  # The Xbar/SwiftBar plugin tests only run on macOS and drive the plugin
-  # through the login shells it targets.
-  ++ lib.optionals python3Packages.python.stdenv.hostPlatform.isDarwin [ zsh ];
+  nativeCheckInputs =
+    with python3Packages;
+    [
+      pytestCheckHook
+      # tests/test_docs.py parses the GitHub workflow YAML files and loads
+      # docs/docs_update.py, which round-trips pyproject.toml with tomlkit.
+      pyyaml
+      tomlkit
+      # The SBOM unit tests import the CycloneDX renderer and its JSON/XML
+      # schema validators, the SPDX writers, and the mocked HTTP client of
+      # the OSV adapter.
+      cyclonedx-python-lib
+      httpx
+      jsonschema
+      lxml
+      platformdirs
+      respx
+      spdx-tools
+    ]
+    # The Xbar/SwiftBar plugin tests only run on macOS and drive the plugin
+    # through the login shells it targets.
+    ++ lib.optionals stdenv.hostPlatform.isDarwin [ zsh ];
 
   pythonImportsCheck = [ "meta_package_manager" ];
 

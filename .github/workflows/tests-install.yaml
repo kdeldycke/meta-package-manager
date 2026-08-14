@@ -396,6 +396,12 @@ jobs:
       - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31.11.0
         with:
           nix_path: nixpkgs=channel:nixos-unstable
+          # Nix leaves the build sandbox off on macOS, while Hydra and
+          # nixpkgs-review both build with it on. Force it so this job matches
+          # what nixpkgs reviewers run: the sandbox cuts the build off from the
+          # macOS resolver, so a test binding to `localhost` fails there and
+          # nowhere else. Already the default on Linux.
+          extra_nix_config: sandbox = true
       - run: nix-env --file ./packaging/nix --install
       - run: mpm --version
 

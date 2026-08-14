@@ -1143,13 +1143,19 @@ def test_manager_page_sections_render(manager):
     fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
     for _title, func_name in _docs.MANAGER_SECTIONS:
         output = getattr(_docs, func_name)(manager.id)
-        # Three sections are omitted for some managers (a section with no output
+        # Four sections are omitted for some managers (a section with no output
         # is dropped from the page by manager_page): reference traces for a
         # manager documenting no literal output samples, the Rosetta table for
-        # one documenting fewer than three harvestable native commands, and the
+        # one documenting fewer than three harvestable native commands, the
         # upstream badges for one whose project has no repository the sampler
-        # could read. Every other section renders for every manager.
-        if func_name not in ("manager_traces", "manager_rosetta", "manager_upstream"):
+        # could read, and concurrency for one sharing no backend lock. Every
+        # other section renders for every manager.
+        if func_name not in (
+            "manager_concurrency",
+            "manager_rosetta",
+            "manager_traces",
+            "manager_upstream",
+        ):
             assert output.strip()
         # Fenced blocks (code samples, eval-rst) cannot produce MyST headings:
         # only the prose between them must stay heading-free.

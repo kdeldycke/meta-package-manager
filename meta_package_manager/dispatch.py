@@ -38,6 +38,7 @@ policy: which managers must never overlap, how the trail binds to the pool's
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from typing import Final
 
 from click.core import ParameterSource
@@ -59,13 +60,54 @@ if TYPE_CHECKING:
     from .manager import PackageManager
 
 
-SHARED_LOCK_FAMILIES: Final[tuple[frozenset[str], ...]] = (
-    frozenset({"apt", "apt-mint", "deb-get", "nala", "pacstall"}),
-    frozenset({"brew", "cask"}),
-    frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
-    frozenset({"pacaur", "pacman", "pamac", "paru", "pikaur", "trizen", "yay"}),
-    frozenset({"pkg", "ports"}),
-    frozenset({"scoop", "sfsu"}),
+@dataclass(frozen=True)
+class LockFamily:
+    """A set of managers contending for one backend lock."""
+
+    members: frozenset[str]
+    """Manager ids that must never mutate at the same time."""
+
+    contention: str
+    """Why they collide, written to complete the sentence *"`mpm` never runs X at the
+    same time as Y: …"*.
+
+    Rendered on every member's own documentation page by
+    {func}`~meta_package_manager._docs.manager_concurrency`, so it addresses a user
+    of those managers rather than a reader of this module: keep it to the fact and
+    its consequence, and leave the maintenance rationale to the notes below.
+    """
+
+
+SHARED_LOCK_FAMILIES: Final[tuple[LockFamily, ...]] = (
+    LockFamily(
+        frozenset({"apt", "apt-mint", "deb-get", "nala", "pacstall"}),
+        "they all install through `dpkg` and serialize on its `/var/lib/dpkg/lock`",
+    ),
+    LockFamily(
+        frozenset({"brew", "cask"}),
+        "they are the same `brew` binary, and two concurrent `brew update` collide "
+        "on Homebrew's own update lock",
+    ),
+    LockFamily(
+        frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
+        "they all reach the RPM database",
+    ),
+    LockFamily(
+        frozenset({"pacaur", "pacman", "pamac", "paru", "pikaur", "trizen", "yay"}),
+        "they all reach the pacman database (`/var/lib/pacman/db.lck`), and two of "
+        "them mutating at once fail to init their transaction",
+    ),
+    LockFamily(
+        frozenset({"pkg", "ports"}),
+        "`ports` keeps no registry of its own and registers what it builds through "
+        "`pkg`, whose advisory lock on that shared install database refuses a "
+        "second writer",
+    ),
+    LockFamily(
+        frozenset({"scoop", "sfsu"}),
+        "they work on the same `~/scoop` tree, `sfsu` delegating its mutating "
+        "operations to the `scoop` binary itself",
+    ),
 )
 """Managers that contend for one shared backend lock, grouped by backend.
 
@@ -116,8 +158,11 @@ needs no protection from *itself*, `packagekitd` queuing its own transactions, b
 Expressing that would mean resolving the backend at dispatch time.
 
 Concurrency is safe *across* families and unsafe *within* one, just as it is unsafe
-within a single manager (which is why a manager's own packages stay serial). When two
-members run at once the shared lock makes them *block or fail*, never corrupt.
+within a single manager (which is why a manager's own packages stay serial). For every
+family above, two members running at once *block or fail* rather than corrupt: each
+backend holds a real lock and the loser is told so. Do not carry that guarantee over
+to a family added later without checking it, since it is a property of the backend
+rather than of this mechanism.
 
 Enforced for the mutating fan-outs only: {func}`merge_into_lock_lanes` collapses each
 family's members into a single {func}`dispatch` lane, so they run serially while
@@ -128,13 +173,16 @@ manager and stay fully concurrent. Members of a lane also share a command cache 
 to a byte-identical invocation (`brew` and `cask` for `sync` and `cleanup`) run the
 subprocess once.
 
-Adding a newly-conflicting set of managers is a one-line edit here: append a
-`frozenset` of their ids and both the serialization and the cache pick it up.
+Adding a newly-conflicting set of managers is one entry here: a {class}`LockFamily`
+of their ids, and the serialization, the command cache and the *Concurrency* section
+of every member's documentation page all pick it up.
 """
 
 
-_LOCK_FAMILY_BY_MANAGER: Final[dict[str, frozenset[str]]] = {
-    manager_id: family for family in SHARED_LOCK_FAMILIES for manager_id in family
+_LOCK_FAMILY_BY_MANAGER: Final[dict[str, LockFamily]] = {
+    manager_id: family
+    for family in SHARED_LOCK_FAMILIES
+    for manager_id in family.members
 }
 """Reverse index of {data}`SHARED_LOCK_FAMILIES`: each member maps to its family.
 

@@ -66,6 +66,7 @@ from meta_package_manager.docstring_corpus import (
     literal_blocks,
     version_trace,
 )
+from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES
 from meta_package_manager.labels import MANAGER_LABELS
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
@@ -220,6 +221,7 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     ("Selecting and configuring `{manager_id}`", "manager_selection"),
     ("Recipes", "manager_recipes"),
     ("Privilege escalation", "manager_sudo"),
+    ("Concurrency", "manager_concurrency"),
     ("Cooldown", "manager_cooldown"),
     ("Version probe", "manager_version_probe"),
     ("Reference traces", "manager_traces"),
@@ -1801,6 +1803,47 @@ def manager_sudo(manager_id: str) -> str:
             parts.append("None of its operations needs root.")
     parts.append("See [privilege escalation](../sudo.md) for the full policy.")
     return "\n\n".join(parts)
+
+
+def manager_concurrency(manager_id: str) -> str:
+    """Produce the concurrency section of a manager's documentation page.
+
+    Renders the manager's {class}`~meta_package_manager.dispatch.LockFamily`: the
+    siblings `mpm` will not let it overlap with, and that family's own reason for
+    contending. A manager in no family drives state nothing else touches, has
+    nothing to say here, and {func}`manager_page` drops the section entirely.
+
+    ```{note}
+    Derived from {data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES` rather
+    than restated, so a family gained or lost moves every affected page at once. It
+    is the same constant {func}`~meta_package_manager.dispatch.merge_into_lock_lanes`
+    serializes on, which is what keeps the pages from promising a guarantee the
+    dispatcher does not implement.
+    ```
+    """
+    family = next(
+        (f for f in SHARED_LOCK_FAMILIES if manager_id in f.members),
+        None,
+    )
+    if family is None:
+        return ""
+    siblings = [
+        f"[`{sibling}`]({sibling}.md)"
+        for sibling in sorted(family.members - {manager_id})
+    ]
+    joined = (
+        siblings[0]
+        if len(siblings) == 1
+        else f"{', '.join(siblings[:-1])} or {siblings[-1]}"
+    )
+    return "\n\n".join((
+        f"`mpm` never runs `{manager_id}` at the same time as {joined}: "
+        f"{family.contention}. Each mutating operation waits for the previous one, "
+        "even with a higher `--jobs`, while managers outside this group keep "
+        "running in parallel.",
+        "Only mutations are held back. The read-only queries (`installed`, "
+        "`outdated`, `search`) take no backend lock and stay fully concurrent.",
+    ))
 
 
 def _fact_block(facts: list[str]) -> str:

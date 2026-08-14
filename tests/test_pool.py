@@ -27,9 +27,9 @@ from click_extra.context import JOBS, VERBOSITY_LEVEL
 from click_extra.logging import LogLevel
 
 import meta_package_manager
+from meta_package_manager.capabilities import Delegate
 from meta_package_manager.cli import mpm
 from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES, warm_availability
-from meta_package_manager.capabilities import Delegate
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.managers.pacman import Pacman
 from meta_package_manager.pool import manager_classes, pool
@@ -88,14 +88,14 @@ def test_shared_lock_families_are_disjoint():
     """No manager may belong to two lock families, or its lane grouping is ambiguous."""
     seen: set[str] = set()
     for family in SHARED_LOCK_FAMILIES:
-        overlap = seen & family
+        overlap = seen & family.members
         assert not overlap, f"managers in more than one lock family: {overlap}"
-        seen |= family
+        seen |= family.members
 
 
 def test_shared_lock_family_members_exist_in_pool():
     """Every lock-family member must be a real manager id (catches typos)."""
-    for manager_id in set().union(*SHARED_LOCK_FAMILIES):
+    for manager_id in set().union(*(f.members for f in SHARED_LOCK_FAMILIES)):
         assert manager_id in pool.all_manager_ids
 
 
@@ -107,7 +107,7 @@ def test_delegating_managers_share_their_target_lock():
     this derivable rather than a list to keep in step: wiring a new delegate without
     a lock family fails here.
     """
-    family_of = {mid: f for f in SHARED_LOCK_FAMILIES for mid in f}
+    family_of = {mid: f for f in SHARED_LOCK_FAMILIES for mid in f.members}
     id_of = {type(pool[manager_id]): manager_id for manager_id in pool.all_manager_ids}
     for manager_id in pool.all_manager_ids:
         for klass in type(pool[manager_id]).__mro__:
@@ -115,7 +115,8 @@ def test_delegating_managers_share_their_target_lock():
                 if not isinstance(attribute, Delegate):
                     continue
                 target = id_of[attribute.source_class]
-                assert target in family_of.get(manager_id, frozenset()), (
+                sharing = family_of.get(manager_id)
+                assert sharing and target in sharing.members, (
                     f"{manager_id} delegates to {target} but they do not share a "
                     "lock family"
                 )
@@ -128,13 +129,13 @@ def test_pacman_subclasses_share_the_pacman_lock():
     `dkp-pacman` is the sole exemption: devkitPro ships it to sit beside a
     distribution's `pacman` with its own repositories and database, so it contends
     with nothing. Any *other* subclass missing from the family is the bug this
-    catches, which is how the AUR helpers went unserialized until `7.6.0`.
+    catches, which is how the AUR helpers went unserialized through `7.6.1`.
 
     Inheritance is a sufficient signal, never a necessary one: `pamac` reaches the
     same `libalpm` through a bundled definition and is covered by the family
     without appearing here.
     """
-    family = next(f for f in SHARED_LOCK_FAMILIES if "pacman" in f)
+    family = next(f for f in SHARED_LOCK_FAMILIES if "pacman" in f.members).members
     for manager_id in pool.all_manager_ids:
         if manager_id == "dkp-pacman" or not isinstance(pool[manager_id], Pacman):
             continue

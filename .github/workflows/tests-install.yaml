@@ -312,10 +312,15 @@ jobs:
       # definition below is built nowhere else and has no log to consult.
       - name: Install mpm from the local definition
         run: |
-          guix install --load-path=./packaging/guix meta-package-manager && exit 0
-          echo "::group::Tail of the Guix build logs"
-          sudo find /var/log/guix/drvs -name '*.drv.gz' -mmin -90 \
-            -exec sh -c 'echo "===== ${1}"; zcat "${1}" | tail -60' _ {} \;
+          set -o pipefail
+          guix install --load-path=./packaging/guix meta-package-manager \
+            2>&1 | tee guix-install.log && exit 0
+          echo "::group::Tail of the failed build logs"
+          sed -n "s/.*View build log at '\(.*\)'.*/\1/p" guix-install.log \
+            | while read -r log; do
+                echo "===== ${log}"
+                sudo zcat "${log}" | tail -60
+              done
           echo "::endgroup::"
           exit 1
       - run: mpm --version

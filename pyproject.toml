@@ -155,6 +155,7 @@ keywords = [
   "uv",
   "uvx",
   "vagrant",
+  "vcpkg",
   "vim-pack",
   "visual studio code",
   "void linux",
@@ -1374,6 +1375,11 @@ color = "bfdadc"
 description = "vagrant"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: vcpkg"
+color = "bfdadc"
+description = "vcpkg"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: vim-based"
 color = "bfdadc"
 description = "lazy, vim-pack"
@@ -1761,6 +1767,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/topgrade.*", "tests/*top
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: vagrant"
 any-glob-to-any-file = [ "meta_package_manager/managers/vagrant.*", "tests/*vagrant*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: vcpkg"
+any-glob-to-any-file = [ "meta_package_manager/managers/vcpkg.*", "tests/*vcpkg*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: vim-based"

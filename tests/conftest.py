@@ -466,6 +466,9 @@ PACKAGE_IDS = {
     "uvx": "pycowsay",
     # A single-file Vim plugin with no dependencies. vim.pack keys packages on
     # their source URL, the only id it accepts for an install.
+    # A tiny header-only library, and one of the smallest ports vcpkg
+    # carries. The triplet is left off so it resolves to the host default.
+    "vcpkg": "zlib",
     "vim-pack": "https://github.com/tpope/vim-sensible",
     # Zero-dependency and ships a bin: Volta manages CLI tools, so the usual
     # bin-less npm pick (ms) is out.

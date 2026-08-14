@@ -75,6 +75,7 @@ print(augmentations_table())
 | [`urpmi`](managers/urpmi.md)               |                      |              |      ✅      |       ✅        |
 | [`uv`](managers/uv.md)                     |          ✅          |              |              |                 |
 | [`vagrant`](managers/vagrant.md)           |          ✅          |              |      ✅      |       ✅        |
+| [`vcpkg`](managers/vcpkg.md)               |                      |              |      ✅      |       ✅        |
 | [`xbps`](managers/xbps.md)                 |                      |              |      ✅      |       ✅        |
 | [`yarn`](managers/yarn.md)                 |                      |              |      ✅      |       ✅        |
 | [`yarn-berry`](managers/yarn-berry.md)     |                      |              |      ✅      |       ✅        |

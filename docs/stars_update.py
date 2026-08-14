@@ -277,6 +277,7 @@ UPSTREAM_REPOS = {
     "uv": "https://github.com/astral-sh/uv",
     "uvx": "https://github.com/astral-sh/uv",
     "vagrant": "https://github.com/hashicorp/vagrant",
+    "vcpkg": "https://github.com/microsoft/vcpkg",
     "vim-pack": "https://github.com/neovim/neovim",
     "volta": "https://github.com/volta-cli/volta",
     "vscode": "https://github.com/microsoft/vscode",

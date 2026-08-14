@@ -167,6 +167,10 @@ Arch AUR helper with no commit since 2016-03-25. Superseded by the same AUR help
 
 Neovim plugin manager whose README has declared it unmaintained since August 2023, pointing at [`lazy`](managers/lazy.md), which `mpm` wraps, and at [`pckr-nvim`](#pckr-nvim).
 
+## [`pakku`](https://github.com/kitsunyan/pakku) ☠️
+
+Pacman wrapper with AUR support, abandoned: its last release is `v0.14` from 2019-12-20 and its last commit 2020-11-12. Nothing is out of reach for want of it either, `mpm` wrapping six live tools over the same ground in [`pacaur`](managers/pacaur.md), [`pamac`](managers/pamac.md), [`paru`](managers/paru.md), [`pikaur`](managers/pikaur.md), [`trizen`](managers/trizen.md) and [`yay`](managers/yay.md).
+
 ## [`paq`](https://github.com/savq/paq-nvim) ❌ 🛟
 
 Neovim plugin manager clearing both tests its peers failed: installation has a documented headless recipe closing on paq's own `PaqDoneInstall` autocommand, and `paq-lock.json` sits at a fixed path recording each plugin's name, URL and commit, so an inventory needs no configuration loaded. It reports no version of its own, though. `require("paq")` exposes `clean`, `install`, `list`, `log_clean`, `log_open`, `query`, `setup`, `sync` and `update`, and no version constant appears anywhere in its source; upstream tags releases, but a tag never reaches the checkout a user clones. Nothing on its tracker asks for one.

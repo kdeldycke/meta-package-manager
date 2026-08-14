@@ -239,6 +239,10 @@ Update the WSL kernel and its distributions. WSL is a platform, not a package ma
 
 A VS Code fork whose vendor documents a launcher (`windsurf .`) and never the extension-management flags, so nothing upstream commits to `--list-extensions` behaving as it does in VS Code. The one fork where the community did test it, [`cursor`](#cursor), found the listing opens the editor window instead. Reassess with a citation the day Windsurf documents the flags or a listing is confirmed working.
 
+## [`wpkg`](https://windowspackager.org) ☠️
+
+Windows Packager, a dpkg clone bringing Debian-style packaging and apt-like verbs to Windows. Its upstream is gone: windowspackager.org now serves a parking page offering the domain for sale, no canonical repository survives it, and the only trace left on GitHub is a single-star fork carrying no releases. Not to be confused with the unrelated [WPKG](https://wpkg.org) deployment tool, which shares the name and nothing else.
+
 ## [`yaourt`](https://github.com/archlinuxfr/yaourt) ☠️
 
 Archived, and self-described `[unmaintained]` in its own repository description, with no commit since 2018-12. The dominant AUR helper before `yay`; `mpm` wraps its successors [`yay`](managers/yay.md) and [`paru`](managers/paru.md).

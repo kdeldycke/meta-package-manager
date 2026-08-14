@@ -464,10 +464,13 @@ docs = [
   "tomlkit>=0.13",
 ]
 typing = [
-  # Stubs for the untyped runtime libraries mpm imports (boltons; PyYAML in
-  # tests/test_docs.py; xmltodict in managers/zypper.py); stub versions track
-  # their target library's API.
+  # Stubs for the untyped runtime libraries mpm imports (boltons; docutils and
+  # PyYAML in tests/test_docs.py; xmltodict in managers/zypper.py); stub
+  # versions track their target library's API. docutils is only guarded behind
+  # an ImportError at runtime, never at type-check time, so mypy needs its stub
+  # even though the library itself ships with the docs group alone.
   "types-boltons>=25.0.0.20250919",
+  "types-docutils>=0.22.3.20260724",
   "types-pyyaml>=6.0.12.9",
   "types-xmltodict>=1.0.1.20250920",
 ]

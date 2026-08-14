@@ -1029,6 +1029,7 @@ test = [
 ]
 typing = [
     { name = "types-boltons" },
+    { name = "types-docutils" },
     { name = "types-pyyaml" },
     { name = "types-xmltodict" },
 ]
@@ -1091,6 +1092,7 @@ test = [
 ]
 typing = [
     { name = "types-boltons", specifier = ">=25.0.0.20250919" },
+    { name = "types-docutils", specifier = ">=0.22.3.20260724" },
     { name = "types-pyyaml", specifier = ">=6.0.12.9" },
     { name = "types-xmltodict", specifier = ">=1.0.1.20250920" },
 ]
@@ -2112,6 +2114,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/3c/33/c22cc4c7d472c378c86643acb2a33ed972a9f17687a3b05c672ae621fdb6/types_boltons-26.1.0.20260724.tar.gz", hash = "sha256:63695b95add313f714d733729002c48e333f13e807b8795572e74fa47a8ae2ae", size = 22261, upload-time = "2026-07-24T04:58:09.764Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/77/88/ec6a17cdd63ceb8c0ebc55f253bc6cd2943d5e1db24a0a7aa1888a5005a4/types_boltons-26.1.0.20260724-py3-none-any.whl", hash = "sha256:ec6edf04de47b435d21ca44f4081f7572e3eeb6fcd3eeab88130c53529503fce", size = 28721, upload-time = "2026-07-24T04:58:08.849Z" },
+]
+
+[[package]]
+name = "types-docutils"
+version = "0.22.3.20260724"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e5/8f/30e02b59a9aad81eacd3d02fab5365257e89fde56e7acf44a4128f5f80aa/types_docutils-0.22.3.20260724.tar.gz", hash = "sha256:0223ce87f9b8331a5a3a7c7832e828033d289da6b878a0dcfbc74c30ec58850e", size = 57883, upload-time = "2026-07-24T04:58:36.388Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/1a/898fbb98680dbd5eb7ac8e9cbaf39cf234d329a45d89d04faaf33d7d8008/types_docutils-0.22.3.20260724-py3-none-any.whl", hash = "sha256:45e2fe584608671aa648784c4f805d08a36cd69eb2bd542e60522140c46dc89c", size = 91986, upload-time = "2026-07-24T04:58:35.368Z" },
 ]
 
 [[package]]

@@ -711,7 +711,8 @@ def _load_benchmark_toml() -> dict:
     all read the same file within one build.
     """
     toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
-    return tomllib.loads(toml_path.read_text(encoding="UTF-8"))
+    content = toml_path.read_text(encoding="UTF-8")
+    return tomllib.loads(content)  # type: ignore[no-any-return]
 
 
 def _support_glyph(
@@ -970,7 +971,8 @@ def _toml_definition(definition_source: str) -> dict:
     Cached: rendering one config-defined manager's page reads the same file
     from several section generators.
     """
-    return tomllib.loads((PROJECT_ROOT / definition_source).read_text(encoding="UTF-8"))
+    content = (PROJECT_ROOT / definition_source).read_text(encoding="UTF-8")
+    return tomllib.loads(content)  # type: ignore[no-any-return]
 
 
 @cache

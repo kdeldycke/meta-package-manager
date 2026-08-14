@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [luarocks] Add LuaRocks package manager, with `installed`, `outdated`, `search`, `install`, `upgrade` and `remove` support. Every call forces `--no-project` so the inventory answers for the machine rather than for the working directory's project tree, and search results are reduced to one entry per rock.
 - [gext] Implement `gext`, covering GNOME Shell extensions from extensions.gnome.org. The inventory forces `--all`, without which only enabled extensions are reported, and `outdated` reads a dry run that exits `17` once it has something to report.
 - [mpm] Document concurrency on a page of its own: how far `--jobs` spreads a command, a per-subcommand table of what runs at once, and the managers that queue on a shared backend. The readme's flat diagram of one band per manager moves there and gains a level, grouping the serialized managers under the backend they contend for.
 - [mpm] Merge the readme's *Metadata and operations* table into its *Supported package managers* section.

@@ -70,6 +70,7 @@ keywords = [
   "krew",
   "lazy",
   "lazy.nvim",
+  "luarocks",
   "mac app store",
   "macos",
   "macports",
@@ -1226,6 +1227,11 @@ color = "bfdadc"
 description = "krew"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: luarocks"
+color = "bfdadc"
+description = "luarocks"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: macports"
 color = "bfdadc"
 description = "macports"
@@ -1629,6 +1635,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/juliaup.*", "tests/*juli
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: krew"
 any-glob-to-any-file = [ "meta_package_manager/managers/krew.*", "tests/*krew*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: luarocks"
+any-glob-to-any-file = [ "meta_package_manager/managers/luarocks.*", "tests/*luarocks*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: macports"

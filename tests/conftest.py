@@ -399,6 +399,8 @@ PACKAGE_IDS = {
     # Declares no install operation: the round-trip auto-skips. lazy.nvim manages
     # itself, so it is a real entry of its own inventory.
     "lazy": "lazy.nvim",
+    # Pure-Lua table pretty-printer, one file and no dependencies.
+    "luarocks": "inspect",
     "macports": "hello",
     "mamba": "zstd",
     "mas": "747648890",

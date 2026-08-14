@@ -236,6 +236,7 @@ UPSTREAM_REPOS = {
     "juliaup": "https://github.com/JuliaLang/juliaup",
     "krew": "https://github.com/kubernetes-sigs/krew",
     "lazy": "https://github.com/folke/lazy.nvim",
+    "luarocks": "https://github.com/luarocks/luarocks",
     "macports": "https://github.com/macports/macports-base",
     "mamba": "https://github.com/mamba-org/mamba",
     "mas": "https://github.com/mas-cli/mas",

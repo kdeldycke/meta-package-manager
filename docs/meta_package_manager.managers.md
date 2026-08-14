@@ -225,6 +225,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.luarocks module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.luarocks
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.mamba module
 
 ```{eval-rst}

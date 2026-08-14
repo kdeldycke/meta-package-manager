@@ -93,7 +93,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "hex": None,
     "huggingface": None,
     "julia": None,
-    "luarocks": None,
+    "luarocks": {"luarocks"},
     "maven": None,
     "melpa": None,
     "meteor": None,

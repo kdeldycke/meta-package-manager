@@ -42,6 +42,7 @@ print(augmentations_table())
 | [`haxelib`](managers/haxelib.md)           |                      |              |      ✅      |       ✅        |
 | [`juliaup`](managers/juliaup.md)           |                      |              |      ✅      |       ✅        |
 | [`krew`](managers/krew.md)                 |                      |              |      ✅      |       ✅        |
+| [`luarocks`](managers/luarocks.md)         |          ✅          |              |      ✅      |       ✅        |
 | [`mamba`](managers/mamba.md)               |                      |              |              |       ✅        |
 | [`mas`](managers/mas.md)                   |                      |              |      ✅      |       ✅        |
 | [`micro`](managers/micro.md)               |                      |              |      ✅      |       ✅        |

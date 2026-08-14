@@ -50,6 +50,7 @@ from .managers.ghcup import GHCup
 from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
 from .managers.lazy import Lazy
+from .managers.luarocks import LuaRocks
 from .managers.mamba import Mamba, Micromamba
 from .managers.mason import Mason
 from .managers.mas import MAS
@@ -126,6 +127,7 @@ manager_classes = (
     GHCup,
     Guix,
     Lazy,
+    LuaRocks,
     Mamba,
     MAS,
     Mason,

@@ -147,6 +147,10 @@ Cross-manager wrapper retired in 2022. All 19 of the package managers it drove a
 
 Arch meta package manager, archived on 2025-08-05, its README pointing to [`metapac`](#metapac) as its successor.
 
+## [`package-control`](https://packagecontrol.io) ❌
+
+Sublime Text's package manager, thoroughly alive and backed by a registry of its own at packagecontrol.io. It is drivable only from inside the editor, though: its readme documents installation as three steps through the `Command Palette`, and no command-line entry point exists to list, install or remove anything with nobody at the keyboard. That is the test [`pckr-nvim`](#pckr-nvim) and [`dpp`](#dpp) fail too. Contrast [`micro`](managers/micro.md), an editor `mpm` does wrap, whose plugin flag is handled before its screen is ever initialised and so prints and exits.
+
 ## [`packer-aur`](https://github.com/keenerd/packer) ☠️
 
 Arch AUR helper with no commit since 2016-03-25. Superseded by the same AUR helpers as [`yaourt`](#yaourt); the bare `packer` name belongs to HashiCorp's tool and to [`packer-nvim`](#packer-nvim), hence the suffix.

@@ -35,6 +35,7 @@ print(augmentations_table())
 | [`fink`](managers/fink.md)                 |                      |              |      ✅      |       ✅        |
 | [`flatpak`](managers/flatpak.md)           |                      |              |      ✅      |       ✅        |
 | [`gem`](managers/gem.md)                   |                      |              |              |       ✅        |
+| [`gext`](managers/gext.md)                 |                      |              |      ✅      |       ✅        |
 | [`gh-ext`](managers/gh-ext.md)             |                      |              |      ✅      |       ✅        |
 | [`ghcup`](managers/ghcup.md)               |                      |              |      ✅      |       ✅        |
 | [`guix`](managers/guix.md)                 |                      |              |      ✅      |       ✅        |

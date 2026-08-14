@@ -381,6 +381,7 @@ PACKAGE_IDS = {
     # dependency of the core install, so removing it again is safe.
     "gcloud": "kubectl",
     "gem": "paint",
+    "gext": "caffeine@patapon.info",
     # A tiny script-based extension (a bare git clone), from a GitHub CLI maintainer.
     "gh-ext": "mislav/gh-branch",
     # A tool version, which is what ghcup calls a package. `hls` rather than a

@@ -130,6 +130,7 @@ Meta Package Manager,flatpak,1
 Meta Package Manager,fwupd,1
 Meta Package Manager,gcloud,1
 Meta Package Manager,gem,1
+Meta Package Manager,gext,1
 Meta Package Manager,gh-ext,1
 Meta Package Manager,ghcup,1
 Meta Package Manager,guix,1
@@ -255,6 +256,7 @@ print(operation_matrix()[0])
 | [`fwupd`](https://mpm.run/managers/fwupd.html)                                                 | >= 1.9.5     |          |      🐧       |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |          |   ✓    |           |          |
 | [`gcloud`](https://mpm.run/managers/gcloud.html)                                               | >= 170       |          |   🐧 🍎 🪟    |      ✓      |     ✓      |           |          |     ✓     |           |       ✓       |    ✓     |        |           |          |
 | [`gem`](https://mpm.run/managers/gem.html)                                                     | >= 2.5       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
+| [`gext`](https://mpm.run/managers/gext.html)                                                   | >= 0.11      |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`gh-ext`](https://mpm.run/managers/gh-ext.html)                                               | >= 2         |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`ghcup`](https://mpm.run/managers/ghcup.html)                                                 | >= 0.2.1     |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |   ✓    |     ✓     |          |
 | [`guix`](https://mpm.run/managers/guix.html)                                                   |              |          |      🐧       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |

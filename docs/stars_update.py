@@ -228,6 +228,7 @@ UPSTREAM_REPOS = {
     "flatpak": "https://github.com/flatpak/flatpak",
     "fwupd": "https://github.com/fwupd/fwupd",
     "gem": "https://github.com/ruby/rubygems",
+    "gext": "https://github.com/essembeh/gnome-extensions-cli",
     "gh-ext": "https://github.com/cli/cli",
     "ghcup": "https://github.com/haskell/ghcup-hs",
     "guix": "https://codeberg.org/guix/guix",

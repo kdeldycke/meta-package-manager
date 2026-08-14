@@ -55,6 +55,7 @@ keywords = [
   "fwupd",
   "gcloud",
   "gem",
+  "gext",
   "gh-ext",
   "ghcup",
   "github cli",
@@ -1175,6 +1176,11 @@ color = "bfdadc"
 description = "gem"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: gext"
+color = "bfdadc"
+description = "gext"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: gh-ext"
 color = "bfdadc"
 description = "gh-ext"
@@ -1574,6 +1580,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/gcloud.*", "tests/*gclou
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: gem"
 any-glob-to-any-file = [ "meta_package_manager/managers/gem.*", "tests/*gem*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: gext"
+any-glob-to-any-file = [ "meta_package_manager/managers/gext.*", "tests/*gext*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: gh-ext"

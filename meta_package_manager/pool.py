@@ -45,6 +45,7 @@ from .managers.fisher import Fisher
 from .managers.flatpak import Flatpak
 from .managers.fwupd import FWUPD
 from .managers.gem import Gem
+from .managers.gext import Gext
 from .managers.ghcup import GHCup
 from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
@@ -121,6 +122,7 @@ manager_classes = (
     Flatpak,
     FWUPD,
     Gem,
+    Gext,
     GHCup,
     Guix,
     Lazy,

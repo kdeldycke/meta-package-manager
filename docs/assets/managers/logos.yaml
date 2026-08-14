@@ -135,6 +135,14 @@ icons:
     - gh-ext
     source: https://github.com/logos
     title: GitHub
+  gnome:
+    contrast_on_light: 3.75
+    hex: 4A86CF
+    license: CC0-1.0
+    managers:
+    - gext
+    source: https://wiki.gnome.org/Engagement/BrandGuidelines
+    title: GNOME
   gnu:
     contrast_on_light: 6.99
     hex: A42E2B

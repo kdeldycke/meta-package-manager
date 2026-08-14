@@ -169,12 +169,6 @@ class AM(PackageManager):
 
         ```{code-block} shell-session
 
-        $ am --version
-        10.4
-        ```
-
-        ```{code-block} console
-
         $ am -fi --byname
 
          YOU HAVE INSTALLED 3 PROGRAMS MANAGED BY "AM"

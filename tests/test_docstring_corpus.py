@@ -356,6 +356,21 @@ def _normalize_constructed(command: tuple, cli_names: tuple[str, ...]) -> list[s
     return tokens
 
 
+def _stands_for_package_id(token: str) -> bool:
+    """Whether a constructed token is standing in for the package id.
+
+    Usually the sentinel whole, or a token embedding it (a `name=version` spec).
+    But a manager whose ids fuse two fields splits the sentinel back apart before
+    building its command, the way ghcup's `tool-version` becomes two argv words,
+    and those fragments are placeholders just as much as the whole is.
+
+    The length floor keeps a one- or two-character literal from matching by
+    accident: a lone `-` is a substring of the sentinel without standing for
+    anything.
+    """
+    return len(token) >= 3 and (PID_SENTINEL in token or token in PID_SENTINEL)
+
+
 def _matches(
     documented: list[str], constructed: list[str], cli_names: tuple[str, ...]
 ) -> bool:
@@ -369,7 +384,7 @@ def _matches(
     if len(documented) != len(constructed):
         return False
     for position, (doc_token, built_token) in enumerate(zip(documented, constructed)):
-        if PID_SENTINEL in built_token:
+        if _stands_for_package_id(built_token):
             if doc_token.startswith("-"):
                 return False
         elif doc_token != built_token and not (

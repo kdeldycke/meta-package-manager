@@ -69,6 +69,7 @@ def test_default_sudo_matches_system_managers():
         "emerge",
         "eopkg",
         "macports",
+        "nala",
         "pacman",
         "pkg",
         "pkg-tools",
@@ -105,6 +106,7 @@ def test_internal_sudo_matches_internal_escalators():
     none of them escalates through mpm (an internal escalator is never wrapped)."""
     internal = {mid for mid, manager in pool.items() if type(manager).internal_sudo}
     assert internal == {
+        "am",
         "cask",
         "fink",
         "pacaur",

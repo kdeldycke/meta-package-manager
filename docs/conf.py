@@ -286,6 +286,11 @@ linkcheck_ignore = [
     # label to. A label search always answers 200, empty or not, so there is
     # nothing for linkcheck to catch here anyway.
     r"https://github\.com/kdeldycke/meta-package-manager/issues\?q=",
+    # The upstream badges of the manager pages: a dozen per page over a hundred
+    # pages, all served by shields.io, which answers an image to any query it
+    # understands. A broken badge is a wrong forge path rather than a dead link,
+    # which is what the badge catalogue tests check instead.
+    r"https://img\.shields\.io/",
 ]
 
 # Retry transiently-unreachable hosts before reporting them broken, so a flaky

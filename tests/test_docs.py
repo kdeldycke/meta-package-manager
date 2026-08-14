@@ -26,6 +26,7 @@ import shutil
 from datetime import date, datetime, timezone
 from itertools import permutations
 from pathlib import Path
+from urllib.parse import quote, urlparse
 
 import pytest
 from extra_platforms import Group, extract_members
@@ -1069,12 +1070,13 @@ def test_manager_page_sections_render(manager):
     fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
     for _title, func_name in _docs.MANAGER_SECTIONS:
         output = getattr(_docs, func_name)(manager.id)
-        # Two sections are omitted for some managers (a section with no output is
-        # dropped from the stub by manager_page_stub): reference traces for a
-        # manager documenting no literal output samples, and the Rosetta table
-        # for one documenting fewer than three harvestable native commands. Every
-        # other section renders for every manager.
-        if func_name not in ("manager_traces", "manager_rosetta"):
+        # Three sections are omitted for some managers (a section with no output
+        # is dropped from the stub by manager_page_stub): reference traces for a
+        # manager documenting no literal output samples, the Rosetta table for
+        # one documenting fewer than three harvestable native commands, and the
+        # upstream badges for one whose project has no repository the sampler
+        # could read. Every other section renders for every manager.
+        if func_name not in ("manager_traces", "manager_rosetta", "manager_upstream"):
             assert output.strip()
         # Fenced blocks (code samples, eval-rst) cannot produce MyST headings:
         # only the prose between them must stay heading-free.
@@ -1384,6 +1386,59 @@ def test_manager_card_carries_upstream_readings():
     unmeasured = set(pool) - set(upstreams)
     for manager_id in sorted(unmeasured)[:5]:
         assert "Upstream stars" not in _docs.manager_card(manager_id)
+
+
+def test_upstream_badges_cover_every_forge():
+    """Check every sampled repository is hosted where a badge can read it.
+
+    A forge missing from `UPSTREAM_FORGES` costs its managers the whole
+    section, silently. Naming the host here turns that into one failing
+    assertion pointing at the line to add.
+    """
+    hosts = {
+        urlparse(record["repo"]).netloc
+        for record in _docs._manager_upstreams().values()
+        if record.get("repo")
+    }
+    assert hosts, "no upstream repositories sampled yet"
+    assert hosts <= set(_docs.UPSTREAM_FORGES), (
+        f"forges with no badge family: {sorted(hosts - set(_docs.UPSTREAM_FORGES))}"
+    )
+
+
+def test_manager_upstream_badges():
+    """Check the upstream section of every sampled manager holds live badges.
+
+    Three invariants, each guarding a way the section silently goes wrong:
+    the badges point at the forge family the repository is actually hosted on,
+    the release-gated ones follow the sample rather than guessing (shields
+    answers the same red error for an unreleased project and a missing one),
+    and nothing here repeats a figure the infobox already states.
+    """
+    upstreams = _docs._manager_upstreams()
+    assert upstreams, "no upstream readings sampled yet"
+
+    for manager_id, record in upstreams.items():
+        section = _docs.manager_upstream(manager_id)
+        host = urlparse(record["repo"]).netloc
+        family, instance_param = _docs.UPSTREAM_FORGES[host]
+        badges = re.findall(r"!\[[^\]]*\]\(([^)]+)\)", section)
+        assert badges, f"{manager_id} renders no badge"
+        for url in badges:
+            assert url.startswith(f"{_docs.SHIELDS_URL}/{family}/")
+            assert f"style={_docs.BADGE_STYLE}" in url
+            # A self-hosted forge is only readable when its instance is named.
+            if instance_param:
+                assert f"{instance_param}={quote(f'https://{host}', safe='')}" in url
+
+        release_badges = [url for url in badges if "release-date" in url]
+        assert bool(release_badges) == (
+            record.get("release_source") == "release" and family == "github"
+        )
+
+        # The stars and the newest commit stay facts of the card, stated once.
+        assert "/stars/" not in section
+        assert "last-commit" not in section
 
 
 def test_matrix_blocks_in_sync():

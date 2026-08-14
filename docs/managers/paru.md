@@ -70,6 +70,14 @@ from meta_package_manager._docs import manager_version_probe
 print(manager_version_probe("paru"))
 ```
 
+## Upstream project
+
+```{python:render}
+from meta_package_manager._docs import manager_upstream
+
+print(manager_upstream("paru"))
+```
+
 ## Changelog
 
 ```{python:render}

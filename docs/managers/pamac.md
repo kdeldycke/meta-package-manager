@@ -78,6 +78,14 @@ from meta_package_manager._docs import manager_traces
 print(manager_traces("pamac"))
 ```
 
+## Upstream project
+
+```{python:render}
+from meta_package_manager._docs import manager_upstream
+
+print(manager_upstream("pamac"))
+```
+
 ## Changelog
 
 ```{python:render}

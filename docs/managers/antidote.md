@@ -78,6 +78,14 @@ from meta_package_manager._docs import manager_traces
 print(manager_traces("antidote"))
 ```
 
+## Upstream project
+
+```{python:render}
+from meta_package_manager._docs import manager_upstream
+
+print(manager_upstream("antidote"))
+```
+
 ## Changelog
 
 ```{python:render}

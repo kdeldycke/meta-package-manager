@@ -44,7 +44,7 @@ from itertools import groupby
 from pathlib import Path
 from textwrap import dedent
 from typing import NamedTuple
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 import yaml
 from click_extra.table import TableFormat, render_table
@@ -223,6 +223,7 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     ("Cooldown", "manager_cooldown"),
     ("Version probe", "manager_version_probe"),
     ("Reference traces", "manager_traces"),
+    ("Upstream project", "manager_upstream"),
     ("Changelog", "manager_changelog"),
 )
 """Layout of a per-manager documentation page: section title, generator function.
@@ -246,6 +247,108 @@ The headings live in the committed stubs, never in the generated content: the
 ``{python:render}`` directive nested-parses its output into the surrounding
 document, where MyST headings rely on fragile section reparenting. Every
 generator listed here must therefore emit heading-free MyST.
+"""
+
+SHIELDS_URL = "https://img.shields.io"
+"""Badge service the per-manager upstream readings are rendered by.
+
+Every URL built on it is exempted from `linkcheck` in `docs/conf.py`: a hundred
+manager pages carrying a dozen badges each would spend the job's whole budget
+confirming a service that answers an image to any query, valid or not.
+"""
+
+BADGE_STYLE = "flat-square"
+"""Shields.io style shared by the manager pages and the benchmark tables."""
+
+
+class UpstreamBadge(NamedTuple):
+    """One live reading of a manager's upstream repository."""
+
+    group: str
+    """Metric family this reading belongs to, named after the benchmark's own
+    sections so both pages ask the reader to learn one vocabulary."""
+
+    label: str
+    """Alt text of the image, read in place of the badge when it does not load."""
+
+    path: str
+    """Shields.io path below the forge family, with `{repo}` standing for the
+    repository's `owner/name` path."""
+
+    release_source: str | None = None
+    """Sampled `release_source` this reading requires, `None` to always render.
+
+    Gates the badges that only mean something for a project publishing releases
+    on its forge. Shields cannot tell an unreleased project from a missing one:
+    both answer a red *no releases or repo not found*, which is how `pip` (which
+    tags rather than releases) would have earned a broken-looking page. The
+    weekly sample already settled that question per manager, so it selects the
+    badge here.
+    """
+
+
+UPSTREAM_BADGES: dict[str, tuple[UpstreamBadge, ...]] = {
+    "github": (
+        UpstreamBadge("Activity", "commit activity", "commit-activity/m/{repo}"),
+        UpstreamBadge(
+            "Activity", "commits since", "commits-since/{repo}/latest", "release"
+        ),
+        UpstreamBadge("Activity", "open issues", "issues-raw/{repo}"),
+        UpstreamBadge("Activity", "open pull requests", "issues-pr-raw/{repo}"),
+        UpstreamBadge("Popularity", "forks", "forks/{repo}"),
+        UpstreamBadge("Popularity", "watchers", "watchers/{repo}"),
+        UpstreamBadge("Popularity", "contributors", "contributors/{repo}"),
+        UpstreamBadge("Metadata", "latest release", "v/release/{repo}", "release"),
+        UpstreamBadge("Metadata", "latest tag", "v/tag/{repo}", "tag"),
+        UpstreamBadge("Metadata", "release date", "release-date/{repo}", "release"),
+        UpstreamBadge("Metadata", "license", "license/{repo}"),
+        UpstreamBadge("Metadata", "main language", "languages/top/{repo}"),
+    ),
+    "gitlab": (
+        UpstreamBadge("Activity", "open issues", "issues/open/{repo}"),
+        UpstreamBadge("Activity", "open merge requests", "merge-requests/open/{repo}"),
+        UpstreamBadge("Popularity", "forks", "forks/{repo}"),
+        UpstreamBadge("Popularity", "contributors", "contributors/{repo}"),
+        UpstreamBadge("Metadata", "latest tag", "v/tag/{repo}"),
+        UpstreamBadge("Metadata", "license", "license/{repo}"),
+    ),
+    "gitea": (
+        UpstreamBadge("Activity", "open issues", "issues/open/{repo}"),
+        UpstreamBadge("Activity", "open pull requests", "pull-requests/open/{repo}"),
+        UpstreamBadge("Popularity", "forks", "forks/{repo}"),
+        UpstreamBadge("Metadata", "latest release", "v/release/{repo}", "release"),
+    ),
+}
+"""Readings each forge family answers, in render order.
+
+Not the same list three times: a badge is listed for a forge only where it was
+verified to answer, since shields renders a red error image for an endpoint a
+forge cannot serve. GitHub is the deepest catalogue by far, which is also where
+88 of the sampled upstreams live; GitLab has no release-date badge at all, and
+the Gitea family (Codeberg) tops out at four.
+
+Stars and the newest commit are deliberately absent: both are already stated by
+{func}`manager_card` from the weekly sample, and a page that reads its own
+figure twice from two sources eventually contradicts itself.
+"""
+
+UPSTREAM_FORGES: dict[str, tuple[str, str | None]] = {
+    "codeberg.org": ("gitea", "gitea_url"),
+    "github.com": ("github", None),
+    "gitlab.alpinelinux.org": ("gitlab", "gitlab_url"),
+    "gitlab.archlinux.org": ("gitlab", "gitlab_url"),
+    "gitlab.exherbo.org": ("gitlab", "gitlab_url"),
+    "salsa.debian.org": ("gitlab", "gitlab_url"),
+}
+"""Badge family each forge host is read through, and the parameter naming the
+instance.
+
+Keyed by host and never guessed from its name, like the sampler's own
+`FORGE_APIS`: a host missing here renders no badges rather than a page of red
+error images, and `test_upstream_badges_cover_every_forge` names it. The
+public instances need no parameter; every self-hosted one is passed its base
+URL, which is what lets Alpine's own GitLab and Codeberg's Forgejo answer
+through the same service as GitHub.
 """
 
 
@@ -876,9 +979,11 @@ def manager_card(manager_id: str) -> str:
     point, and the artwork is the bonus.
 
     The upstream readings sit beside the home page they describe, read from
-    {func}`_manager_upstreams` rather than hotlinked as badges: a badge per
-    manager would have put hundreds of third-party images across the docs and
-    handed `linkcheck` as many URLs.
+    {func}`_manager_upstreams`: a star count and a commit date are two short
+    facts, and a box of facts is where they belong. The rest of what a forge
+    knows about the project is a section of its own further down the page
+    ({func}`manager_upstream`), where a dozen live badges fit and the box would
+    have burst. Nothing is stated in both places.
 
     ```{note}
     The newest release is sampled but deliberately not shown. Twelve upstreams
@@ -1922,6 +2027,80 @@ def _changelog_entries() -> dict[str, tuple[ChangelogEntry, ...]]:
     return {mid: tuple(items) for mid, items in entries.items()}
 
 
+def manager_upstream(manager_id: str) -> str:
+    """Produce the upstream-project section of a manager's documentation page.
+
+    The readings the benchmark tables carry for `mpm` and its peers, asked of
+    each wrapped manager's own repository: its activity, its popularity and the
+    metadata of its newest release, in the three groups those tables use.
+    Grouped rather than strung out, so a dozen images read as three answers.
+
+    Live badges here, where {func}`manager_card` states its two figures from the
+    weekly sample, and the split is the point. A sampled date is written into
+    the page at build time and starts ageing immediately: `pip` tagging a
+    release the day after a sample leaves the page a week behind, and a page
+    nobody rebuilds stays wrong for as long as that lasts. A badge is fetched
+    when the page is read, so it cannot be stale, and shields renders a date as
+    the distance to today (*last tuesday*, *january 2016*) coloured by age,
+    which is the reading a reader wanted from a bare date anyway. What the badge
+    cannot do is be there at all for a forge with no such endpoint, or be
+    trusted to distinguish an unreleased project from a missing one, which is
+    what {data}`UPSTREAM_BADGES` and {attr}`UpstreamBadge.release_source` settle
+    from the sample.
+
+    ```{note}
+    The benchmark's *Distribution* section has no counterpart here. Its rows
+    count downloads and repology packaging for `mpm`'s own release channels,
+    and asking the same of a wrapped manager would need a hand-kept repology
+    project id per manager, guessable for none of them: `brew` is `homebrew`
+    there, `uvx` is not a project at all.
+    ```
+    """
+    upstream = _manager_upstreams().get(manager_id, {})
+    repo_url = upstream.get("repo")
+    if not repo_url:
+        return ""
+
+    parsed = urlparse(repo_url)
+    forge = UPSTREAM_FORGES.get(parsed.netloc)
+    if forge is None:
+        return ""
+    family, instance_param = forge
+    repo_path = parsed.path.strip("/")
+
+    # The instance is named as a query parameter for every forge but GitHub, so
+    # a project on Alpine's own GitLab is read through the same service as one
+    # on the public instance.
+    params = [f"style={BADGE_STYLE}"]
+    if instance_param:
+        instance = quote(f"{parsed.scheme}://{parsed.netloc}", safe="")
+        params.insert(0, f"{instance_param}={instance}")
+    query = "&".join(params)
+
+    rows = []
+    for group, badges in groupby(UPSTREAM_BADGES[family], key=lambda b: b.group):
+        cells = [
+            f"![{badge.label}]({SHIELDS_URL}/{family}/"
+            f"{badge.path.format(repo=repo_path)}?{query})"
+            for badge in badges
+            if badge.release_source in (None, upstream.get("release_source"))
+        ]
+        if cells:
+            rows.append([group, " ".join(cells)])
+    if not rows:
+        return ""
+
+    return render_table(
+        rows,
+        # The repository names the column it heads, as the benchmark's own
+        # tables are headed by the project each column reads.
+        headers=["Metrics", f"[`{repo_path}`]({repo_url})"],
+        table_format=TableFormat.GITHUB,
+        colalign=["left", "left"],
+        disable_numparse=True,
+    )
+
+
 def manager_changelog(manager_id: str) -> str:
     """Produce the release-history section of a manager's documentation page.
 
@@ -2076,7 +2255,9 @@ def managers_index_table() -> str:
     )
     footnote = (
         "Each manager's own page carries its upstream stars and newest commit, "
-        f"read from that project's forge and last sampled on {sampled}. They "
+        f"read from that project's forge and last sampled on {sampled}, with "
+        "the rest of what the forge knows about the project in the page's "
+        "*Upstream project* section, read live. They "
         "describe the upstream repository rather than the tool's install base: "
         "a distribution's package manager hosted on its own GitLab gathers a "
         "fraction of the stars an equally widespread GitHub project does, and "
@@ -2084,7 +2265,8 @@ def managers_index_table() -> str:
         "Whether a project is still maintained is the Unmaintained column "
         "above, a judgement call rather than a date inferred from a release "
         "that may never come. A manager missing those rows has no public "
-        "repository at all."
+        "repository, keeps one on a forge the sampler does not read, or was "
+        "wrapped after that sample and waits for the next one."
     )
     # Blank lines throughout: a paragraph glued to the last row of a table is
     # parsed as one more row of it.

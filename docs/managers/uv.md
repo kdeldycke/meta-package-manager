@@ -78,6 +78,14 @@ from meta_package_manager._docs import manager_traces
 print(manager_traces("uv"))
 ```
 
+## Upstream project
+
+```{python:render}
+from meta_package_manager._docs import manager_upstream
+
+print(manager_upstream("uv"))
+```
+
 ## Changelog
 
 ```{python:render}

@@ -78,6 +78,14 @@ from meta_package_manager._docs import manager_traces
 print(manager_traces("vagrant"))
 ```
 
+## Upstream project
+
+```{python:render}
+from meta_package_manager._docs import manager_upstream
+
+print(manager_upstream("vagrant"))
+```
+
 ## Changelog
 
 ```{python:render}

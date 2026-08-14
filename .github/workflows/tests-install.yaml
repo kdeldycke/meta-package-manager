@@ -298,6 +298,14 @@ jobs:
             sleep 20
           done
           exit 1
+      # The installer lays down the 1.5.0 binary, whose bundled channel predates
+      # `python-click-extra` and `python-extra-platforms` landing in Guix. The
+      # definition below takes both from upstream, so without this pull they
+      # resolve to "unbound variable" and nothing gets built.
+      - name: Refresh channel and expose the pulled guix
+        run: |
+          guix pull
+          echo "${HOME}/.config/guix/current/bin" >> "${GITHUB_PATH}"
       - run: guix install --load-path=./packaging/guix meta-package-manager
       - run: mpm --version
 

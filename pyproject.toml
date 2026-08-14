@@ -86,6 +86,7 @@ keywords = [
   "nala",
   "neovim",
   "netbsd",
+  "nimble",
   "nix",
   "nixpkgs",
   "node",
@@ -1262,6 +1263,11 @@ color = "bfdadc"
 description = "mpm"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: nimble"
+color = "bfdadc"
+description = "nimble"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: nix"
 color = "bfdadc"
 description = "nix"
@@ -1663,6 +1669,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/miktex.*", "tests/*mikte
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: mpm"
 any-glob-to-any-file = [ "meta_package_manager/*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: nimble"
+any-glob-to-any-file = [ "meta_package_manager/managers/nimble.*", "tests/*nimble*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: nix"

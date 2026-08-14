@@ -57,6 +57,7 @@ from .managers.mas import MAS
 from .managers.miktex import MiKTeX
 from .managers.mise import Mise
 from .managers.nala import Nala
+from .managers.nimble import Nimble
 from .managers.nix import Nix
 from .managers.npm import NPM
 from .managers.oh_my_fish import OhMyFish
@@ -135,6 +136,7 @@ manager_classes = (
     MiKTeX,
     Mise,
     Nala,
+    Nimble,
     Nix,
     NPM,
     OhMyFish,

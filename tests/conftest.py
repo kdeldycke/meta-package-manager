@@ -413,6 +413,8 @@ PACKAGE_IDS = {
     "miktex": "fancyhdr",
     "mise": "jq",
     "nala": "nyancat",
+    # Pure-Nim TOML parser, no dependencies and no compiled artifact.
+    "nimble": "parsetoml",
     "nix": "hello",
     "npm": "ms",
     # Tiny single-function plugin of Oh My Fish's own package index.

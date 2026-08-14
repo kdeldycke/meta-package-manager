@@ -245,6 +245,7 @@ UPSTREAM_REPOS = {
     "micromamba": "https://github.com/mamba-org/mamba",
     "miktex": "https://github.com/MiKTeX/miktex",
     "mise": "https://github.com/jdx/mise",
+    "nimble": "https://github.com/nim-lang/nimble",
     "nix": "https://github.com/NixOS/nix",
     "npm": "https://github.com/npm/cli",
     "oh-my-fish": "https://github.com/oh-my-fish/oh-my-fish",

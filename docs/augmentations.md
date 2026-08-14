@@ -49,6 +49,7 @@ print(augmentations_table())
 | [`micromamba`](managers/micromamba.md)     |                      |              |              |       ✅        |
 | [`mise`](managers/mise.md)                 |                      |              |      ✅      |                 |
 | [`nala`](managers/nala.md)                 |                      |              |      ✅      |       ✅        |
+| [`nimble`](managers/nimble.md)             |                      |              |      ✅      |       ✅        |
 | [`nix`](managers/nix.md)                   |                      |              |      ✅      |       ✅        |
 | [`npm`](managers/npm.md)                   |                      |              |      ✅      |                 |
 | [`opam`](managers/opam.md)                 |                      |              |      ✅      |       ✅        |

@@ -98,7 +98,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "melpa": None,
     "meteor": None,
     "mlflow": None,
-    "nim": None,
+    "nim": {"nimble"},
     "nix": {"nix"},
     "npm": {"bun", "npm", "pnpm", "volta", "yarn", "yarn-berry"},
     "nuget": {"dotnet"},

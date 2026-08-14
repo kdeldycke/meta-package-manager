@@ -29,6 +29,7 @@ from click_extra.logging import LogLevel
 import meta_package_manager
 from meta_package_manager.cli import mpm
 from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES, warm_availability
+from meta_package_manager.capabilities import Delegate
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.managers.pacman import Pacman
 from meta_package_manager.pool import manager_classes, pool
@@ -96,6 +97,28 @@ def test_shared_lock_family_members_exist_in_pool():
     """Every lock-family member must be a real manager id (catches typos)."""
     for manager_id in set().union(*SHARED_LOCK_FAMILIES):
         assert manager_id in pool.all_manager_ids
+
+
+def test_delegating_managers_share_their_target_lock():
+    """A manager delegating an operation to another's CLI runs that manager's own
+    binary against that manager's own state, so the two must serialize.
+
+    The delegation is declared in the class body ({class}`Delegate`), which makes
+    this derivable rather than a list to keep in step: wiring a new delegate without
+    a lock family fails here.
+    """
+    family_of = {mid: f for f in SHARED_LOCK_FAMILIES for mid in f}
+    id_of = {type(pool[manager_id]): manager_id for manager_id in pool.all_manager_ids}
+    for manager_id in pool.all_manager_ids:
+        for klass in type(pool[manager_id]).__mro__:
+            for attribute in vars(klass).values():
+                if not isinstance(attribute, Delegate):
+                    continue
+                target = id_of[attribute.source_class]
+                assert target in family_of.get(manager_id, frozenset()), (
+                    f"{manager_id} delegates to {target} but they do not share a "
+                    "lock family"
+                )
 
 
 def test_pacman_subclasses_share_the_pacman_lock():

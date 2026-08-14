@@ -64,6 +64,8 @@ SHARED_LOCK_FAMILIES: Final[tuple[frozenset[str], ...]] = (
     frozenset({"brew", "cask"}),
     frozenset({"dnf", "dnf5", "yum", "zypper"}),
     frozenset({"pacaur", "pacman", "pamac", "paru", "pikaur", "trizen", "yay"}),
+    frozenset({"pkg", "ports"}),
+    frozenset({"scoop", "sfsu"}),
 )
 """Managers that contend for one shared backend lock, grouped by backend.
 
@@ -85,8 +87,19 @@ serialize on its lock:
   front-ends rather than reimplementations: each shells out to `sudo pacman` for the
   privileged steps, `pamac` reaching the same `libalpm` through Manjaro's `libpamac`.
   Two of them mutating at once fail to init their transaction.
+- `pkg` and `ports` share the install database `pkg` maintains, which every mutating
+  operation but `sync` reaches: `ports` has no registry of its own, builds from
+  `/usr/ports` and registers the result through `pkg`, whose advisory lock on that
+  database refuses a second writer. Their `sync` is the one pair that would not
+  collide, refreshing a git tree and a package catalog respectively, and is
+  serialized along with the rest rather than splitting the family per operation.
+- `scoop` and `sfsu` work on the same `~/scoop` tree. sfsu reimplements Scoop's read
+  paths only, delegating `install`, `remove` and both upgrades to the `scoop` binary
+  itself, so those are literally the same command twice; its own `update` and
+  `cleanup` then reach the same buckets and cache Scoop's do. Concurrent bucket
+  refreshes are two `git pull` in one repository, which fails on the index lock.
 
-`dkp-pacman` is deliberately *not* in that last family, and it is the one exclusion
+`dkp-pacman` is deliberately *not* in the pacman family, and it is the one exclusion
 worth stating: it is `Pacman` by inheritance and would look like an oversight. But
 devkitPro ships it precisely so it can sit beside a distribution's own `pacman`
 without colliding, pointed at its own repositories and its own database, so it

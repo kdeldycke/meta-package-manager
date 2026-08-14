@@ -64,6 +64,22 @@ if TYPE_CHECKING:
 class LockFamily:
     """A set of managers contending for one backend lock."""
 
+    backend: str
+    """Short name of the contended resource, labelling the family in the docs.
+
+    Rendered as the middle level of
+    `meta_package_manager._docs.lock_families_sankey()` and as the first
+    column of `meta_package_manager._docs.lock_families_table()`, so it
+    reads as a thing managers queue on rather than as a tool: *pacman
+    database*, not *pacman*.
+
+    That phrasing is also load-bearing for the diagram. Mermaid identifies a
+    sankey node by its label alone, so a family named after a member (`pkg`,
+    `conda`, `pacman` and `scoop` all name both) would fold the two levels into
+    one self-linked node. `test_lock_family_backends_are_distinct` holds every
+    name clear of the pool.
+    """
+
     members: frozenset[str]
     """Manager ids that must never mutate at the same time."""
 
@@ -72,7 +88,7 @@ class LockFamily:
     same time as Y: …"*.
 
     Rendered on every member's own documentation page by
-    {func}`~meta_package_manager._docs.manager_concurrency`, so it addresses a user
+    `meta_package_manager._docs.manager_concurrency()`, so it addresses a user
     of those managers rather than a reader of this module: keep it to the fact and
     its consequence, and leave the maintenance rationale to the notes below.
     """
@@ -80,35 +96,42 @@ class LockFamily:
 
 SHARED_LOCK_FAMILIES: Final[tuple[LockFamily, ...]] = (
     LockFamily(
+        "dpkg lock",
         frozenset({"apt", "apt-mint", "deb-get", "nala", "pacstall"}),
         "they all install through `dpkg` and serialize on its `/var/lib/dpkg/lock`",
     ),
     LockFamily(
+        "Homebrew update lock",
         frozenset({"brew", "cask"}),
         "they are the same `brew` binary, and two concurrent `brew update` collide "
         "on Homebrew's own update lock",
     ),
     LockFamily(
+        "conda environment prefix",
         frozenset({"conda", "mamba", "micromamba"}),
         "they act on one environment prefix and one package cache, and `conda` "
         "honors none of the locks `mamba` takes on them",
     ),
     LockFamily(
+        "RPM database",
         frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
         "they all reach the RPM database",
     ),
     LockFamily(
+        "pacman database",
         frozenset({"pacaur", "pacman", "pamac", "paru", "pikaur", "trizen", "yay"}),
         "they all reach the pacman database (`/var/lib/pacman/db.lck`), and two of "
         "them mutating at once fail to init their transaction",
     ),
     LockFamily(
+        "pkg install database",
         frozenset({"pkg", "ports"}),
         "`ports` keeps no registry of its own and registers what it builds through "
         "`pkg`, whose advisory lock on that shared install database refuses a "
         "second writer",
     ),
     LockFamily(
+        "Scoop tree",
         frozenset({"scoop", "sfsu"}),
         "they work on the same `~/scoop` tree, `sfsu` delegating its mutating "
         "operations to the `scoop` binary itself",
@@ -187,8 +210,86 @@ to a byte-identical invocation (`brew` and `cask` for `sync` and `cleanup`) run 
 subprocess once.
 
 Adding a newly-conflicting set of managers is one entry here: a {class}`LockFamily`
-of their ids, and the serialization, the command cache and the *Concurrency* section
-of every member's documentation page all pick it up.
+naming the backend and its members, after which the serialization, the command cache,
+the *Concurrency* section of every member's documentation page and both renderings of
+`docs/concurrency.md` all pick it up.
+"""
+
+
+FAN_OUT_CONCURRENT: Final[str] = "concurrent"
+"""Every selected manager runs at once, one {func}`dispatch` lane each."""
+
+FAN_OUT_GROUPED: Final[str] = "grouped"
+"""Same, but {data}`SHARED_LOCK_FAMILIES` members are merged into one lane."""
+
+FAN_OUT_SEQUENTIAL: Final[str] = "sequential"
+"""One manager at a time, whatever `mpm --jobs` says."""
+
+FAN_OUT_NONE: Final[str] = "none"
+"""Runs no package operation, so there is nothing to spread."""
+
+
+@dataclass(frozen=True)
+class FanOut:
+    """How one way of invoking a subcommand spreads over the selected managers."""
+
+    invocation: str
+    """The subcommand, plus whichever argument changes the answer.
+
+    `install` appears twice: a package tied to a manager rides the per-package
+    fan-out, while one left untied needs the priority search that cannot be
+    parallelized.
+    """
+
+    mode: str
+    """One of the four `FAN_OUT_*` constants above."""
+
+    @property
+    def command(self) -> str:
+        """Bare subcommand name, as the CLI registers it."""
+        return self.invocation.split(" ", 1)[0]
+
+
+COMMAND_FAN_OUT: Final[tuple[FanOut, ...]] = (
+    FanOut("cleanup", FAN_OUT_GROUPED),
+    FanOut("config-template", FAN_OUT_NONE),
+    FanOut("doctor", FAN_OUT_GROUPED),
+    FanOut("dump", FAN_OUT_CONCURRENT),
+    FanOut("help", FAN_OUT_NONE),
+    FanOut("install", FAN_OUT_GROUPED),
+    FanOut("install <untied package>", FAN_OUT_SEQUENTIAL),
+    FanOut("installed", FAN_OUT_CONCURRENT),
+    FanOut("managers", FAN_OUT_NONE),
+    FanOut("orphans", FAN_OUT_CONCURRENT),
+    FanOut("outdated", FAN_OUT_CONCURRENT),
+    FanOut("remove", FAN_OUT_GROUPED),
+    FanOut("restore", FAN_OUT_GROUPED),
+    FanOut("sbom", FAN_OUT_CONCURRENT),
+    FanOut("search", FAN_OUT_CONCURRENT),
+    FanOut("sync", FAN_OUT_GROUPED),
+    FanOut("upgrade", FAN_OUT_GROUPED),
+    FanOut("which", FAN_OUT_NONE),
+)
+"""Fan-out mode of every `mpm` subcommand, rendered on `docs/concurrency.md`.
+
+The three fan-out shapes above are visible from inside this module; which
+subcommand takes which is not, being an argument at each call site. This is
+where the two meet, so a reader can answer *"does this command parallelize?"*
+without following `report_state=True` through four CLI modules.
+
+Kept complete rather than restricted to the commands that fan out:
+`test_fan_out_covers_every_subcommand` holds it equal to the CLI's own command
+list, so a new subcommand fails the suite until someone decides its mode. The
+{data}`FAN_OUT_NONE` entries are that decision recorded, and
+`meta_package_manager._docs.concurrency_table()` leaves them out of the
+rendered table.
+
+```{caution}
+Hand-maintained, and the one thing here that can drift from the code silently.
+A subcommand switching between {func}`collect_from_managers` and
+{func}`collect_per_package`, or gaining `report_state=True`, has to be
+reflected in the same commit: no test can read the mode back off a call site.
+```
 """
 
 

@@ -19,6 +19,7 @@ cli-parameters
 configuration
 overrides
 cooldown
+concurrency
 sudo
 security
 bar-plugin

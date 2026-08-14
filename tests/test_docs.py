@@ -34,6 +34,15 @@ from yaml import Loader, load, safe_load
 
 from meta_package_manager import _docs
 from meta_package_manager.capabilities import Operations
+from meta_package_manager.cli import mpm
+from meta_package_manager.dispatch import (
+    COMMAND_FAN_OUT,
+    FAN_OUT_CONCURRENT,
+    FAN_OUT_GROUPED,
+    FAN_OUT_NONE,
+    FAN_OUT_SEQUENTIAL,
+    SHARED_LOCK_FAMILIES,
+)
 from meta_package_manager.docstring_corpus import literal_blocks
 from meta_package_manager.labels import (
     LABELS,
@@ -795,6 +804,92 @@ def test_binaries_download_table_renders():
     # must carry a versioned download link.
     assert sum(line.count("releases/download/") for line in lines) == 6
     assert "latest/download" not in table
+
+
+def test_fan_out_covers_every_subcommand():
+    """Check the fan-out catalog names every subcommand the CLI registers.
+
+    `COMMAND_FAN_OUT` is the only place a reader learns whether a command
+    parallelizes, and it cannot be derived: the mode is an argument at each CLI
+    call site. Holding it equal to the CLI's own command list is what stops a
+    new subcommand from silently missing off `docs/concurrency.md`, and forces
+    whoever adds one to answer the question rather than leave it open.
+    """
+    catalogued = {entry.command for entry in COMMAND_FAN_OUT}
+    assert catalogued == set(mpm.commands), (
+        f"uncatalogued: {sorted(set(mpm.commands) - catalogued)}, "
+        f"unknown commands: {sorted(catalogued - set(mpm.commands))}"
+    )
+    known_modes = {
+        FAN_OUT_CONCURRENT,
+        FAN_OUT_GROUPED,
+        FAN_OUT_NONE,
+        FAN_OUT_SEQUENTIAL,
+    }
+    assert all(entry.mode in known_modes for entry in COMMAND_FAN_OUT)
+    invocations = [entry.invocation for entry in COMMAND_FAN_OUT]
+    assert invocations == sorted(invocations), "COMMAND_FAN_OUT must be sorted"
+    assert len(invocations) == len(set(invocations))
+
+
+def test_concurrency_table_renders():
+    """Check the concurrency table generator produces a well-formed table.
+
+    Rendered live at Sphinx build time by the ``{python:render}`` block in
+    `docs/concurrency.md`, so there is no checked-in copy to compare against.
+    Every rendered row must carry a glyph the page's own legend defines, and
+    the no-fan-out entries must stay out.
+    """
+    table = _docs.concurrency_table()
+    lines = table.splitlines()
+    rows = lines[2:]
+    assert lines[0].startswith("| Command")
+    fanning_out = [e for e in COMMAND_FAN_OUT if e.mode != FAN_OUT_NONE]
+    assert len(rows) == len(fanning_out)
+    glyphs = _docs.FAN_OUT_GLYPHS.values()
+    assert all(any(glyph in row for glyph in glyphs) for row in rows)
+    # The three modes each own a row, so the legend never documents a glyph
+    # the table stopped using.
+    for glyph in _docs.FAN_OUT_GLYPHS.values():
+        assert any(glyph in row for row in rows), f"{glyph} is legended but unused"
+    assert not any("`mpm which`" in row or "`mpm help`" in row for row in rows)
+
+
+def test_lock_family_backends_are_distinct():
+    """Check no lock family is named after a manager, or after another family.
+
+    Mermaid identifies a sankey node by its label, so a family sharing a label
+    with one of its own members would collapse the diagram's two levels into a
+    single self-linked node. Four backends (`conda`, `pacman`, `pkg`, `scoop`)
+    lend their name to a manager, which is exactly how that happens.
+    """
+    backends = [family.backend for family in SHARED_LOCK_FAMILIES]
+    assert len(backends) == len(set(backends)), "two lock families share a name"
+    assert not set(backends) & set(pool.all_manager_ids), (
+        "a lock family is named after a manager, which would fold the sankey's "
+        "two levels into one self-linked node"
+    )
+
+
+def test_lock_families_render():
+    """Check both concurrency-page generators cover every lock family.
+
+    The sankey and the table are two readings of the same constant, so a
+    family added to `SHARED_LOCK_FAMILIES` must surface in both without
+    further edits.
+    """
+    sankey = _docs.lock_families_sankey()
+    table = _docs.lock_families_table()
+    for family in SHARED_LOCK_FAMILIES:
+        assert f",{family.backend},{len(family.members)}" in sankey
+        assert family.contention in table
+        for manager_id in family.members:
+            assert f"{family.backend},{manager_id},1" in sankey
+            assert f"[`{manager_id}`](managers/{manager_id}.md)" in table
+    # Managers outside a family are deliberately absent: the diagram is the
+    # serialized population, not the pool.
+    grouped = {mid for f in SHARED_LOCK_FAMILIES for mid in f.members}
+    assert not any(f",{mid}," in sankey for mid in set(pool.all_manager_ids) - grouped)
 
 
 def test_augmentations_table_renders():

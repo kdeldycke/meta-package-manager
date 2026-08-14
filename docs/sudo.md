@@ -45,7 +45,7 @@ A per-manager `sudo` value wins over the global flag, so you can escalate everyt
 
 ## One prompt, up front
 
-`mpm` runs managers concurrently with their output muted behind a progress bar, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A cache found warm (a prior `sudo --validate`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all.
+`mpm` [runs managers concurrently](concurrency.md) with their output muted behind a progress bar, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A cache found warm (a prior `sudo --validate`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all.
 
 Only a cold cache, on an interactive terminal, leads to a prompt: a notice names the managers about to escalate and the subcommand, then a single branded `sudo` prompt authenticates once for the whole run, so nothing blocks in the fan-out:
 

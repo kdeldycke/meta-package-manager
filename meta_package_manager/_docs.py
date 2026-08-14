@@ -59,6 +59,14 @@ from meta_package_manager.capabilities import (
     implements_method,
     upgrade_all_is_synthesized,
 )
+from meta_package_manager.dispatch import (
+    COMMAND_FAN_OUT,
+    FAN_OUT_CONCURRENT,
+    FAN_OUT_GROUPED,
+    FAN_OUT_SEQUENTIAL,
+    SHARED_LOCK_FAMILIES,
+    LockFamily,
+)
 from meta_package_manager.docstring_corpus import (
     block_commands,
     block_language,
@@ -66,7 +74,6 @@ from meta_package_manager.docstring_corpus import (
     literal_blocks,
     version_trace,
 )
-from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES
 from meta_package_manager.labels import MANAGER_LABELS
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
@@ -431,29 +438,131 @@ through the same service as GitHub.
 """
 
 
-def managers_sankey() -> str:
-    """Produce a sankey diagram to map `mpm` to all its supported managers.
+def _lock_families() -> tuple[LockFamily, ...]:
+    """Order the lock families widest-first, ties broken by backend name.
+
+    Mermaid derives a sankey's node order from its link order, so the widest
+    family leads and the two-member ones close the diagram. The same order
+    carries the table, keeping the two readings of `docs/concurrency.md` row by
+    band.
+    """
+    return tuple(
+        sorted(SHARED_LOCK_FAMILIES, key=lambda f: (-len(f.members), f.backend))
+    )
+
+
+FAN_OUT_GLYPHS: dict[str, str] = {
+    FAN_OUT_CONCURRENT: "✅",
+    FAN_OUT_GROUPED: "🔒",
+    FAN_OUT_SEQUENTIAL: "⛓️",
+}
+"""Glyph rendered in the `Concurrency` column for each fan-out mode.
+
+A padlock for the modes gated on a backend lock, a chain for the one that
+parallelizes nothing. Deliberately not ❌, which these docs reserve for a
+capability a tool lacks: a sequential command is working as designed rather
+than missing something.
+
+{data}`~meta_package_manager.dispatch.FAN_OUT_NONE` has no glyph on purpose.
+Those subcommands are absent from the table rather than shown as a blank row,
+their `mpm --jobs` answer being that the question does not arise.
+"""
+
+
+def concurrency_table() -> str:
+    """Produce the per-subcommand table of the concurrency page.
+
+    One row per {data}`~meta_package_manager.dispatch.COMMAND_FAN_OUT` entry
+    that spreads work over managers at all, glyphed through
+    {data}`FAN_OUT_GLYPHS` and ordered as the catalog declares them.
+    """
+    table = [
+        [f"`mpm {entry.invocation}`", FAN_OUT_GLYPHS[entry.mode]]
+        for entry in COMMAND_FAN_OUT
+        if entry.mode in FAN_OUT_GLYPHS
+    ]
+    return render_table(
+        table,
+        headers=["Command", "Concurrency"],
+        table_format=TableFormat.GITHUB,
+        colalign=("left", "center"),
+        disable_numparse=True,
+    )
+
+
+def lock_families_sankey() -> str:
+    """Produce a sankey diagram of the managers `mpm` refuses to overlap.
+
+    Three levels: the serialized population, the backend each family contends
+    for, then the managers queueing on it. Rendered on `docs/concurrency.md`,
+    where the prose above it accounts for the rest of the pool.
+
+    ```{note}
+    Only the families are drawn, and the diagram is rooted at them rather than
+    at `mpm`. Managers sharing no backend are the large majority, so a band for
+    them would take most of the canvas and squeeze all seven families into what
+    is left, to answer a question the sentence above the diagram answers
+    better. This is what replaced the flat fan-out of one band per manager the
+    readme used to carry, which had grown to a hundred-odd bands of equal
+    width: a picture of the pool's size rather than of its structure, and slow
+    to lay out for it.
+    ```
 
     ```{warning}
     Output must stay compatible with the Mermaid version bundled in
     `sphinxcontrib-mermaid`. See module docstring for details.
     ```
     """
-    table = []
-    for mid, m in sorted(pool.items()):
-        line = f"Meta Package Manager,{mid},1"
-        table.append(line)
+    families = _lock_families()
+    root = "Serialized managers"
+    links = [f"{root},{family.backend},{len(family.members)}" for family in families]
+    links.extend(
+        f"{family.backend},{mid},1"
+        for family in families
+        for mid in sorted(family.members)
+    )
 
     output = dedent("""\
         ```mermaid
         ---
-        config: {"sankey": {"showValues": false, "width": 800, "height": 400}}
+        config: {"sankey": {"showValues": false, "width": 800, "height": 600}}
         ---
         sankey-beta\n
         """)
-    output += "\n".join(table)
+    output += "\n".join(links)
     output += "\n```"
     return output
+
+
+def lock_families_table() -> str:
+    """Produce the shared-backend table of the concurrency page.
+
+    One row per {class}`~meta_package_manager.dispatch.LockFamily`: the backend
+    its members queue on, those members linked to their own pages, and the
+    family's `contention` sentence.
+
+    That sentence is a fragment by design, written to complete *"`mpm` never
+    runs X at the same time as Y: …"* on each member's page. It is reused here
+    verbatim under a *Why?* heading, which is a frame a lowercase fragment
+    reads naturally in, rather than recased into a standalone sentence: one
+    wording, one place to fix it.
+    """
+    table = [
+        [
+            family.backend,
+            ", ".join(
+                f"[`{mid}`](managers/{mid}.md)" for mid in sorted(family.members)
+            ),
+            family.contention,
+        ]
+        for family in _lock_families()
+    ]
+    return render_table(
+        table,
+        headers=["Shared backend", "Managers", "Why?"],
+        table_format=TableFormat.GITHUB,
+        disable_numparse=True,
+    )
 
 
 def operation_matrix() -> tuple[str, str]:

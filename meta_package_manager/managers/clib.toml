@@ -1,0 +1,68 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# clib is the package manager of the C
+# ecosystem, distributing small libraries and standalone programs. See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against clib 2.8.7 on macOS:
+#   - `install` forces `--global`. Without it clib vendors sources into a `deps/`
+#     directory relative to the working directory, which is a project operation
+#     rather than a machine-wide one; `--global` installs to the prefix instead.
+#   - No inventory: clib ships no `list` command of any kind, so `installed` and
+#     `outdated` are not declared and mpm auto-skips them. What remains is still
+#     more than the competing wrappers offer, none of which reach clib at all.
+#   - `upgrade` is not declared either. `clib upgrade` upgrades *clib itself* to a
+#     given version rather than any package, and `clib update` re-fetches packages
+#     into the project `deps/` directory, so neither is a package upgrade.
+#   - Every operation keys on the `owner/repo` slug. `search` reports it as `repo`,
+#     `install` takes it directly, and `uninstall` parses it back apart through
+#     `parse_repo_owner`/`parse_repo_name` (src/clib-uninstall.c), so one id feeds
+#     all three.
+#   - The registry carries no versions at all, only names, URLs and descriptions,
+#     so search results are yielded version-less. The description is dropped too:
+#     the definition schema only maps `package_id`, `installed_version` and
+#     `latest_version`, so a class would be needed to carry it, which is not worth
+#     the weight for one cosmetic column.
+
+[mpm.managers.clib]
+name = "clib"
+homepage_url = "https://github.com/clibs/clib"
+# No Windows: upstream documents Homebrew, MacPorts, Ubuntu, Fedora and NixOS
+# installs only, and expects libcurl to be linkable.
+platforms = ["linux_like", "macos"]
+cli_names = ["clib"]
+# `clib --version` prints the bare version and nothing else.
+version_regexes = ['(?P<version>\d+\.\d+\.\d+)']
+
+[mpm.managers.clib.operations.search]
+args = ["search", "--json", "--no-color", "{query}"]
+format = "json"
+fields = { package_id = "repo" }
+
+[mpm.managers.clib.operations.install]
+args = ["install", "--global", "{package_id}"]
+
+[mpm.managers.clib.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+# Output samples locking the version probe and the declared parsers, captured
+# from clib 2.8.7. Consumed by tests/test_manager_definition.py; ignored by
+# mpm's loader.
+[samples.version]
+output = "2.8.7"
+expected = "2.8.7"
+
+[[samples.search]]
+output = """
+[
+  {
+    "repo": "willemt/skiplist",
+    "href": "https://github.com/willemt/skiplist",
+    "description": "Dictionary implemented through a skiplist",
+    "category": "data structure"
+  }
+]"""
+packages = [
+  { id = "willemt/skiplist" },
+]

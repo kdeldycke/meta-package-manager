@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [clib] Add clib package manager as a bundled definition, with `search`, `install` and `remove` support. `install` forces `--global`, without which clib vendors sources into a `deps/` directory relative to the working directory. It ships no listing command, so no inventory is declared.
 - [nimble] Add Nimble package manager, with `installed`, `search`, `install`, `remove` and `sync` support. The inventory forces `--ver`, without which every package is reported with no version at all.
 - [luarocks] Add LuaRocks package manager, with `installed`, `outdated`, `search`, `install`, `upgrade` and `remove` support. Every call forces `--no-project` so the inventory answers for the machine rather than for the working directory's project tree, and search results are reduced to one entry per rock.
 - [gext] Implement `gext`, covering GNOME Shell extensions from extensions.gnome.org. The inventory forces `--all`, without which only enabled extensions are reported, and `outdated` reads a dry run that exits `17` once it has something to report.

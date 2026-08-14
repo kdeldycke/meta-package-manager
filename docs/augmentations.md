@@ -24,6 +24,7 @@ print(augmentations_table())
 | [`asdf`](managers/asdf.md)                 |          ✅          |              |      ✅      |       ✅        |
 | [`cargo`](managers/cargo.md)               |                      |              |      ✅      |       ✅        |
 | [`chromebrew`](managers/chromebrew.md)     |                      |              |      ✅      |       ✅        |
+| [`clib`](managers/clib.md)                 |                      |              |      ✅      |       ✅        |
 | [`composer`](managers/composer.md)         |                      |              |      ✅      |                 |
 | [`conda`](managers/conda.md)               |                      |              |      ✅      |       ✅        |
 | [`deb-get`](managers/deb-get.md)           |                      |              |      ✅      |       ✅        |

@@ -73,14 +73,14 @@ def test_manager_classes_order():
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
     assert len(manager_classes) == 77
-    # Thirty-seven extra beyond the built-in classes: the bundled config-defined
-    # managers (apt-cyg, bun, cargo, cave, choco, chromebrew, cpan, fink,
+    # Thirty-eight extra beyond the built-in classes: the bundled config-defined
+    # managers (apt-cyg, bun, cargo, cave, choco, chromebrew, clib, cpan, fink,
     # gcloud, gh-ext, haxelib, juliaup, krew, macports, micro, ollama, opam,
     # opkg, pamac, pkg-tools, pkgin, pyenv, rustup, slapt-get, soar, sorcery,
     # steamcmd, stew, swupd, tlmgr, topgrade, urpmi, vscode, vscodium, xcodes,
     # yazi, zerobrew), shipped as package data and loaded into the pool at
     # construction.
-    assert len(pool) == 114
+    assert len(pool) == 115
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))
 

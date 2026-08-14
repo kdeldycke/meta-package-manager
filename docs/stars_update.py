@@ -212,6 +212,7 @@ UPSTREAM_REPOS = {
     "cask": "https://github.com/Homebrew/homebrew-cask",
     "cave": "https://gitlab.exherbo.org/paludis/paludis",
     "choco": "https://github.com/chocolatey/choco",
+    "clib": "https://github.com/clibs/clib",
     "chromebrew": "https://github.com/chromebrew/chromebrew",
     "composer": "https://github.com/composer/composer",
     "conda": "https://github.com/conda/conda",

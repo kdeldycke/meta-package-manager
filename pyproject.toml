@@ -35,6 +35,7 @@ keywords = [
   "clear linux",
   "CLI",
   "cli-tools",
+  "clib",
   "composer",
   "conda",
   "conda-forge",
@@ -1127,6 +1128,11 @@ color = "bfdadc"
 description = "chromebrew"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: clib"
+color = "bfdadc"
+description = "clib"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: composer"
 color = "bfdadc"
 description = "composer"
@@ -1527,6 +1533,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/choco.*", "tests/*choco*
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: chromebrew"
 any-glob-to-any-file = [ "meta_package_manager/managers/chromebrew.*", "tests/*chromebrew*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: clib"
+any-glob-to-any-file = [ "meta_package_manager/managers/clib.*", "tests/*clib*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: composer"

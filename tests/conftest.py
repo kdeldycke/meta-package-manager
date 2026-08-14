@@ -356,6 +356,9 @@ PACKAGE_IDS = {
     "chromebrew": "sl",
     "composer": "ralouphie/getallheaders",
     "conda": "pytz",  # Pure-Python, zero-dependency leaf on the default channel.
+    # One of the registry's few "executables" entries, so a --global install has
+    # something to place in the prefix.
+    "clib": "stephenmathieson/tabs-to-spaces",
     "cpan": "Try::Tiny",
     "deb-get": "deb-get",
     # devkitPro's repositories carry console toolchains and their libraries, not

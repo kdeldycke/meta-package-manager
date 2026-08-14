@@ -407,6 +407,9 @@ PACKAGE_IDS = {
     "npm": "ms",
     # Tiny single-function plugin of Oh My Fish's own package index.
     "oh-my-fish": "bak",
+    # The smallest model in ollama's library, at a few hundred megabytes;
+    # every model is a large download and this is the lightest.
+    "ollama": "tinyllama:latest",
     "opam": "zarith",  # Small pure-OCaml-adjacent leaf library.
     "opkg": "lolcat",
     "pacaur": "nyancat",

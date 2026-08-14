@@ -143,6 +143,7 @@ Meta Package Manager,mise,1
 Meta Package Manager,nix,1
 Meta Package Manager,npm,1
 Meta Package Manager,oh-my-fish,1
+Meta Package Manager,ollama,1
 Meta Package Manager,opam,1
 Meta Package Manager,opkg,1
 Meta Package Manager,pacaur,1
@@ -259,6 +260,7 @@ print(operation_matrix()[0])
 | [`nix`](https://mpm.run/managers/nix.html)                                                     | >= 2         |          |     🐧 🍎     |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`npm`](https://mpm.run/managers/npm.html)                                                     | >= 11.10     |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
 | [`oh-my-fish`](https://mpm.run/managers/oh-my-fish.html)                                       | >= 6         |          |     🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
+| [`ollama`](https://mpm.run/managers/ollama.html)                                               | >= 0.5       |          |   🐧 🍎 🪟    |      ✓      |            |           |          |     ✓     |     ✓     |               |    ✓     |        |           |          |
 | [`opam`](https://mpm.run/managers/opam.html)                                                   | >= 2         |          |   🅱️ 🐧 🍎    |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`opkg`](https://mpm.run/managers/opkg.html)                                                   | >= 0.2       |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
 | [`pacaur`](https://mpm.run/managers/pacaur.html) [⚠️](https://mpm.run/managers/pacaur.html)    | >= 4         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |

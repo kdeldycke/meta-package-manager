@@ -84,6 +84,7 @@ keywords = [
   "npm",
   "nuget",
   "oh-my-fish",
+  "ollama",
   "opam",
   "openbsd",
   "opkg",
@@ -1231,6 +1232,11 @@ color = "bfdadc"
 description = "npm, pnpm, volta, yarn, yarn-berry"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: ollama"
+color = "bfdadc"
+description = "ollama"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: opam"
 color = "bfdadc"
 description = "opam"
@@ -1604,6 +1610,10 @@ any-glob-to-any-file = [
   "tests/*yarn*",
   "tests/*yarn_berry*",
 ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: ollama"
+any-glob-to-any-file = [ "meta_package_manager/managers/ollama.*", "tests/*ollama*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: opam"

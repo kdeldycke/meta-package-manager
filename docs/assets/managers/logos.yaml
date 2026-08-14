@@ -278,6 +278,14 @@ icons:
     - opam
     source: https://ocaml.org/logo
     title: OCaml
+  ollama:
+    contrast_on_light: 21.0
+    hex: '000000'
+    license: CC0-1.0
+    managers:
+    - ollama
+    source: https://github.com/ollama/ollama/issues/2152#issuecomment-1905286922
+    title: Ollama
   openbsd:
     contrast_on_light: 1.58
     hex: F2CA30

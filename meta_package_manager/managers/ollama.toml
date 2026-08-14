@@ -1,0 +1,102 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# ollama runs large language models locally (https://ollama.com), and what is
+# wrapped here is its model management. See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# A package is a model, identified by the `name:tag` pair the listing prints.
+# The tag is part of the identity rather than a version: `llama3.2:1b` and
+# `llama3.2:3b` are separate models, installed and removed independently, and
+# the listing always spells the tag out, `:latest` included. That string is
+# exactly what `pull` and `rm` accept back.
+#
+# No version is reported. The only version-shaped column is a truncated content
+# digest, which is a hash rather than an ordered version, and putting it in a
+# version column would invite comparisons that mean nothing. mpm treats an
+# installed version as optional throughout.
+#
+# ```{warning}
+# ollama is a client talking to a local daemon, and listing models needs that
+# daemon. Where it is not already running, the client does not simply fail: on
+# macOS it launches the desktop application through `open`, and on Windows it
+# starts the background helper, in both cases as a side effect of a read. Only
+# Linux fails cleanly, asking the user to run `ollama serve` themselves. No
+# flag suppresses this. It is bounded, since the daemon is one the user
+# installed deliberately and which starts itself at login on both desktop
+# platforms, and it changes no package state, but a plain `mpm installed` can
+# start a service on a machine where none was running.
+# ```
+#
+# No `outdated`. Re-pulling a tag fetches whatever the registry now holds, but
+# nothing reports that a local model is behind without downloading it. The
+# upstream change that would add the mechanism has been an unmerged draft since
+# 2024 ([ollama/ollama#2179](https://github.com/ollama/ollama/pull/2179)). The
+# `MODIFIED` column is no substitute: it records the last pull attempt, so a
+# re-pull that changed nothing still resets it.
+#
+# Without an `outdated` there is no `upgrade --all` either, since mpm builds
+# that one from the outdated set. Upgrading a named model works, being the same
+# pull that installed it.
+#
+# No `search`: ollama has no such subcommand, and the request for one has been
+# open since 2023 ([ollama/ollama#286](https://github.com/ollama/ollama/issues/286)),
+# with a later CLI-specific request closed as a duplicate of it. No `sync` or
+# `cleanup` either: the daemon prunes unreferenced blobs at startup, and no
+# command exposes that.
+#
+# No escalation. The client only speaks HTTP to the daemon, which does every
+# write itself, so nothing here needs privileges even where the daemon runs
+# under a service account of its own.
+
+[mpm.managers.ollama]
+name = "Ollama"
+homepage_url = "https://ollama.com"
+logo = "ollama"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["ollama"]
+requirement = ">=0.5.0"
+# The release from which the listing and the version probe have been unchanged,
+# so a parser written against either holds from there to today.
+# `ollama --version` reports the daemon's version, and adds a `Warning:` line
+# naming the client's own when the two differ or the daemon is unreachable.
+# Both lines carry the same `version is` phrase, so the first match is the
+# daemon's where there is one and the client's otherwise, which is the right
+# answer in each case. The probe is also the one command that never starts the
+# daemon.
+version_regexes = ['version is (?P<version>\S+)']
+
+# A borderless table, one model per line, whose column widths follow the data,
+# so nothing sits at a fixed offset. Two conditions reject the header, which is
+# printed even for an empty inventory: a model's name always carries a tag, and
+# the identifier beside it is a twelve-character truncation of the content
+# digest. `NAME` has no colon and `ID` is not hexadecimal.
+[mpm.managers.ollama.operations.installed]
+args = ["list"]
+regex = '^(?P<package_id>\S+:\S+)[ \t]+[0-9a-f]{12}[ \t]'
+
+[mpm.managers.ollama.operations.install]
+args = ["pull", "{package_id}"]
+
+[mpm.managers.ollama.operations.remove]
+args = ["rm", "{package_id}"]
+
+# Upgrading is the same fetch as installing: a pull re-resolves the tag and
+# downloads whatever the registry now holds under it.
+[mpm.managers.ollama.operations.upgrade_one]
+args = ["pull", "{package_id}"]
+
+# Output sample locking the version probe. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# No `installed` fixture. Upstream's own test asserts a listing byte for byte,
+# but its rows are unrepresentative twice over: the identifiers are literal
+# test strings rather than digests, and the names carry no tag, where every
+# real row does. Shipping it would lock the parser to a shape the tool never
+# emits, so the pattern above is instead checked against the field definitions
+# upstream documents for the same data.
+[samples.version]
+output = """
+ollama version is 0.32.8
+Warning: client version is 0.32.9"""
+expected = "0.32.8"

@@ -241,6 +241,7 @@ UPSTREAM_REPOS = {
     "nix": "https://github.com/NixOS/nix",
     "npm": "https://github.com/npm/cli",
     "oh-my-fish": "https://github.com/oh-my-fish/oh-my-fish",
+    "ollama": "https://github.com/ollama/ollama",
     "opam": "https://github.com/ocaml/opam",
     "pacaur": "https://github.com/E5ten/pacaur",
     "pacman": "https://gitlab.archlinux.org/pacman/pacman",

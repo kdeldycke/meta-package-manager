@@ -1055,23 +1055,91 @@ def test_manager_stubs_in_sync():
         assert path.read_text(encoding="utf-8") == _docs.manager_page_stub(mid)
 
 
+def test_manager_page_headings_survive_a_build(tmp_path):
+    """Check a real Sphinx build turns the generated headings into sections,
+    below the lede rather than above it.
+
+    The stub carries none of a page's headings: they are printed by
+    `manager_page()` and parsed out of the directive's output, which only works
+    because `myst-parser` supports titles in a nested parse. Two ways that can
+    regress, both silent, and neither visible to a test of the generators
+    alone: the sections can vanish, or the lede can be reparented below them,
+    which is what happens the moment `manager_page()` prints anything above its
+    first heading. So one page is built for real, and both its heading sequence
+    and the position of its infobox are asserted.
+
+    `brew` is the subject: it is the one manager exercising every section.
+
+    Skipped when the `docs` dependency group is missing, as in the hermetic
+    unit-test environment.
+    """
+    pytest.importorskip("myst_parser")
+    pytest.importorskip("sphinx_design")
+    build = pytest.importorskip("sphinx.cmd.build")
+    try:
+        import click_extra.sphinx  # noqa: F401
+    except ImportError:
+        pytest.skip("needs the docs dependency group (click-extra[sphinx])")
+
+    manager_id = "brew"
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "conf.py").write_text(
+        # The subset of docs/conf.py the page needs: the directive that runs
+        # the generator, and the MyST extensions its output relies on.
+        'project = "test"\n'
+        'extensions = ["myst_parser", "sphinx_design", "click_extra.sphinx"]\n'
+        "click_extra_enable_exec_directives = True\n"
+        'myst_enable_extensions = ["attrs_block", "attrs_inline", '
+        '"colon_fence", "deflist"]\n',
+        encoding="UTF-8",
+    )
+    (source / "index.md").write_text(
+        _docs.manager_page_stub(manager_id), encoding="UTF-8"
+    )
+
+    build_dir = tmp_path / "build"
+    argv = ["--builder", "html", "--fresh-env", str(source), str(build_dir)]
+    assert build.build_main(argv) == 0
+    html = (build_dir / "index.html").read_text(encoding="UTF-8")
+
+    # Backticked identifiers render as code spans, and every heading trails the
+    # permalink anchor Sphinx appends.
+    rendered = [
+        re.sub(r"<[^>]+>", "", found).strip()
+        for found in re.findall(r"<h2>(.*?)<a class", html, re.DOTALL)
+    ]
+    expected = [
+        title.format(manager_id=manager_id).replace("`", "")
+        for title, func_name in _docs.MANAGER_SECTIONS
+        if title and getattr(_docs, func_name)(manager_id).strip()
+    ]
+    assert rendered == expected
+
+    # The lede opens the page: its infobox stands above the first heading,
+    # neither swept below the last section by the nested parse nor rendered a
+    # second time by a stub that also delegates it to `manager_page()`.
+    assert html.count("manager-card") == 1
+    assert html.index("manager-card") < html.index("<h2>")
+
+
 @all_managers
 def test_manager_page_sections_render(manager):
     """Check every section generator of the per-manager pages produces
     non-empty, heading-free MyST.
 
-    The sections are rendered live at Sphinx build time by the
-    ``{python:render}`` blocks of `docs/managers/<id>.md`, so there is no
+    The sections are rendered live at Sphinx build time by the single
+    ``{python:render}`` block of `docs/managers/<id>.md`, so there is no
     checked-in copy to compare against: this test guards the generators
     against crashes and locks the heading-free invariant documented on
-    `MANAGER_SECTIONS` (headings belong to the committed stubs).
+    `MANAGER_SECTIONS` (a heading comes from `manager_page()` alone).
     """
     heading = re.compile(r"^#{1,6} ", re.MULTILINE)
     fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
     for _title, func_name in _docs.MANAGER_SECTIONS:
         output = getattr(_docs, func_name)(manager.id)
         # Three sections are omitted for some managers (a section with no output
-        # is dropped from the stub by manager_page_stub): reference traces for a
+        # is dropped from the page by manager_page): reference traces for a
         # manager documenting no literal output samples, the Rosetta table for
         # one documenting fewer than three harvestable native commands, and the
         # upstream badges for one whose project has no repository the sampler

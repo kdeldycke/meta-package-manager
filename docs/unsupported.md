@@ -37,6 +37,10 @@ The same AppImage manager as [`am`](managers/am.md), which `mpm` wraps, under a 
 
 Bash configuration framework shipping no registry of its own: its plugins, aliases and completions all live inside the single git checkout under `plugins/available`, `aliases/available` and `completion/available`, so `bash-it enable plugin git` only symlinks a file the clone already put on disk and `bash-it disable` removes that symlink again. Nothing is fetched and nothing carries a version of its own: `bash-it update` runs `git fetch` and checks out a tag or `master` across the whole tree, a mechanism its maintainer describes as "*we assume we cloned the project, and we run `git fetch` and things like that*" ([Bash-it/bash-it#1819](https://github.com/Bash-it/bash-it/issues/1819)).
 
+## [`bpm`](https://github.com/bpm-rocks/bpm) ☠️
+
+Bash package manager, abandoned: 28 commits in all and nothing since 2021-07-25. Little would have been left to wrap in any case, its whole verb surface being `install` and `run`, with no listing, no removal and no upgrade, and its readme conceding it carries no versioning at all, which it blames on Bash having no namespacing.
+
 ## Container runtimes ❌ 🛟
 
 [`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`podman`](https://podman.io) and [`toolbx`](https://containertoolbx.org).

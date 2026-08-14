@@ -73,6 +73,10 @@ Vim and Neovim plugin manager, the live successor to [`dein`](#dein), but drivab
 
 Merges pending `/etc` configuration files left behind by a Portage upgrade. It resolves conflicts, installs nothing, and is already covered by [`emerge`](managers/emerge.md), which `mpm` wraps.
 
+## [`fresh`](https://freshshell.com) ❌
+
+Describes itself as "*Bundler for your dot files*": it sources shell configuration (aliases, functions, snippets) out of other people's Git repositories and splices it into the user's own config, then symlinks the result. That is the verdict [`chezmoi`](#dotfiles-and-repository-syncers) and its peers already carry, and it earns a section of its own only because `topgrade` does not reach it, so it cannot sit under a title promising that fallback. Its `search` queries a community wiki rather than a registry, nothing it tracks carries a version of its own, and what it manages is the user's content, outside the system scope every `mpm` manager holds to.
+
 ## [`fundle`](https://github.com/danhper/fundle) ☠️ 🛟
 
 Fish plugin manager with no commit since 2023-01-05.

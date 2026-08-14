@@ -1376,9 +1376,6 @@ def test_managers_index_table_renders():
     )
     # The upstream readings moved to each manager's own card, so the index must
     # no longer spend three columns on them.
-    upstreams = _docs._manager_upstreams()
-    assert upstreams
-    assert set(upstreams).issubset(pool)
     for header in ("Stars", "Last release", "Last commit"):
         assert header not in lines[2]
     unmaintained = 0
@@ -1398,10 +1395,8 @@ def test_managers_index_table_renders():
     assert "⚠️](managers/" not in table
     # Every placeholder was substituted by the artwork it stands for.
     assert "%logo:" not in table
-    # The sourcing note closes the block as its own paragraph: glued to the last
-    # row, it would parse as one more row of the table.
-    assert lines[-2] == ""
-    assert lines[-1].startswith("Each manager's own page carries its upstream stars")
+    # The table is the last thing rendered: no trailing prose glued to it.
+    assert lines[-1].startswith("|")
 
 
 def test_brewfile_managers_table_renders():

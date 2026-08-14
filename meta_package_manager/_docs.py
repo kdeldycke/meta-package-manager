@@ -1016,7 +1016,7 @@ def manager_card(manager_id: str) -> str:
     upstream = _manager_upstreams().get(manager_id, {})
     stars = upstream.get("stars")
     if stars is not None:
-        facts.append(("⭐ Upstream stars", f"{stars:,}"))
+        facts.append(("Upstream stars", f"⭐ {stars:,}"))
     if upstream.get("commit"):
         facts.append(("Last commit", upstream["commit"]))
     if m.requirement:
@@ -2248,7 +2248,6 @@ def managers_index_table() -> str:
     off a narrow screen. The index keeps what a reader actually scans a hundred
     rows for: identity, platforms, and whether the thing is abandoned.
     """
-    upstreams = _manager_upstreams()
     table = []
     for mid, m in sorted(pool.items()):
         id_cell = f"[`{mid}`](managers/{mid}.md)"
@@ -2293,27 +2292,7 @@ def managers_index_table() -> str:
     )
     for mid in pool:
         rendered = rendered.replace(f"%logo:{mid}%", manager_logo(mid, inline=True))
-    sampled = max(
-        (record["date"] for record in upstreams.values()), default="an unknown date"
-    )
-    footnote = (
-        "Each manager's own page carries its upstream stars and newest commit, "
-        f"read from that project's forge and last sampled on {sampled}, with "
-        "the rest of what the forge knows about the project in the page's "
-        "*Upstream project* section, read live. They "
-        "describe the upstream repository rather than the tool's install base: "
-        "a distribution's package manager hosted on its own GitLab gathers a "
-        "fraction of the stars an equally widespread GitHub project does, and "
-        "a manager shipped inside a larger tool inherits that tool's figures. "
-        "Whether a project is still maintained is the Unmaintained column "
-        "above, a judgement call rather than a date inferred from a release "
-        "that may never come. A manager missing those rows has no public "
-        "repository, keeps one on a forge the sampler does not read, or was "
-        "wrapped after that sample and waits for the next one."
-    )
-    # Blank lines throughout: a paragraph glued to the last row of a table is
-    # parsed as one more row of it.
-    return f"`mpm` can drive {len(pool)} package managers:\n\n{rendered}\n\n{footnote}"
+    return f"`mpm` can drive {len(pool)} package managers:\n\n{rendered}"
 
 
 def manager_page(manager_id: str) -> str:

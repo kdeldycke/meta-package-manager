@@ -203,6 +203,10 @@ Vim and Neovim plugin manager, drivable unattended unlike [`dein`](#dein) and [`
 
 [`needrestart`](https://github.com/liske/needrestart) restarts services whose libraries were replaced by an upgrade. It installs nothing and owns no packages: it reacts to what a real package manager just did.
 
+## [`sage`](https://github.com/svnpenn/sage) ☠️
+
+Cygwin package manager, offered as an alternative to [`apt-cyg`](managers/apt-cyg.md), which `mpm` wraps. It is gone in the strongest sense available: the repository 404s and so does the `svnpenn` account that owned it, so the project was not renamed or transferred, it was deleted along with its owner. Nothing survives to wrap, and no fork carries the name.
+
 ## Self-updating applications ❌ 🛟
 
 [`atuin`](https://atuin.sh), [`cursor-agent`](https://cursor.com/cli), [`deno`](https://deno.com), [`flutter`](https://flutter.dev), [`fossil`](https://fossil-scm.org), [`spicetify`](https://spicetify.app) and [`typst`](https://typst.app).

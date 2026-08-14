@@ -288,6 +288,7 @@ UPSTREAM_REPOS = {
     "vscodium": "https://github.com/VSCodium/vscodium",
     "winget": "https://github.com/microsoft/winget-cli",
     "xbps": "https://github.com/void-linux/xbps",
+    "yazi": "https://github.com/sxyazi/yazi",
     "xcodes": "https://github.com/XcodesOrg/xcodes",
     "yarn": "https://github.com/yarnpkg/yarn",
     "yarn-berry": "https://github.com/yarnpkg/berry",

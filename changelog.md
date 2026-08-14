@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [yazi] Implement `yazi`, the package manager of the `ya` command-line companion to the Yazi file manager. Plugins and flavors are reported as one inventory, each identified by its Git coordinates and versioned by the commit it is checked out at.
 - [mason] Implement `mason`, the Neovim installer for LSP servers, DAP adapters, linters and formatters. The inventory is read straight off mason's install tree by a `--clean` Neovim, so it costs no plugin loading and reports packages that reach no other manager: mason redirects every backend it uses into the package's own directory, so a tool it installed is invisible to `npm`, `pip` and the rest.
 - [mamba,micromamba] Implement `mamba` and `micromamba`, the C++ reimplementation of conda and its statically linked twin. Both read the inventory from `list --json`, accepting the array both bare and inside the envelope `2.9.0` introduced, and synthesize `outdated` from the dry-run transaction the way the `conda` wrapper does. Search matches package names exactly without falling back to `mpm`'s own refiltering.
 - [conda,mamba,micromamba] Stop running `conda`, `mamba` and `micromamba` concurrently. They act on one environment prefix and one package cache, and `conda` honors none of the locks `mamba` takes on them.

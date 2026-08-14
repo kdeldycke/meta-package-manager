@@ -200,6 +200,7 @@ Meta Package Manager,xcodes,1
 Meta Package Manager,yarn,1
 Meta Package Manager,yarn-berry,1
 Meta Package Manager,yay,1
+Meta Package Manager,yazi,1
 Meta Package Manager,yum,1
 Meta Package Manager,zerobrew,1
 Meta Package Manager,zim,1
@@ -323,6 +324,7 @@ print(operation_matrix()[0])
 | [`yarn`](https://mpm.run/managers/yarn.html)                                                   | >= 1.20, < 2 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
 | [`yarn-berry`](https://mpm.run/managers/yarn-berry.html)                                       | >= 2         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |             |            |           |    ✓     |           |           |               |          |        |     ✓     |          |
 | [`yay`](https://mpm.run/managers/yay.html)                                                     | >= 11        |    ✓     |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
+| [`yazi`](https://mpm.run/managers/yazi.html)                                                   | >= 25.2.7    |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`yum`](https://mpm.run/managers/yum.html)                                                     | >= 4         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
 | [`zerobrew`](https://mpm.run/managers/zerobrew.html)                                           | >= 0.3       |          |     🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`zim`](https://mpm.run/managers/zim.html)                                                     | >= 1         |          |     🐧 🍎     |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |

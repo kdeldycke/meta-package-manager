@@ -1,0 +1,104 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# yazi is a terminal file manager (https://yazi-rs.github.io), and what is
+# wrapped here is the package manager of its command-line companion, `ya`. See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# The manager is `ya`, not `yazi`: the file manager itself is the interactive
+# program, while `ya` is the non-interactive half of the same release, shipping
+# in the same archive and carrying the package verbs. That is what makes this
+# drivable with nobody at the keyboard, where an interactive file manager would
+# not be.
+#
+# ```{note}
+# Packages come in two kinds and one listing covers both. A *plugin* extends
+# the file manager's behavior and a *flavor* themes it; `ya pkg list` prints
+# them under a `Plugins:` and a `Flavors:` heading respectively. Both are
+# addressed by the same `owner/repo:name` identifier and act the same way, so
+# mpm reports one flat inventory and the headings are simply not matched: only
+# the tab-indented entries below them are, which is what skips the headings
+# without a rule of their own.
+# ```
+#
+# ```{note}
+# The version is a short Git commit, not a release. yazi packages are Git
+# subdirectories rather than published artifacts, so the revision a package is
+# checked out at is the only version there is, exactly as it is for the Neovim
+# plugin managers mpm wraps.
+# ```
+#
+# No `outdated`: nothing reports a remote revision without also fetching it.
+# `ya pkg upgrade` compares and updates in one step, and no flag stops it after
+# the comparison. `upgrade --all` is unaffected.
+#
+# No `search`: yazi has no catalog command. Packages are named by their Git
+# coordinates, and the curated list lives on the project's website rather than
+# behind a CLI.
+#
+# No `sync` and no `cleanup`: nothing refreshes an index without acting, and
+# nothing prunes a cache.
+#
+# No escalation: packages live under the user's own cache directory, which
+# follows the XDG cache home before falling back to `~/.cache/yazi`.
+#
+# No logo is declared: Simple Icons carries no mark for yazi, so the manager
+# page keeps its default package glyph rather than borrowing an unrelated one.
+
+[mpm.managers.yazi]
+name = "Yazi ya"
+homepage_url = "https://yazi-rs.github.io"
+platforms = ["all_platforms"]
+cli_names = ["ya"]
+requirement = ">=25.2.7"
+# The release that renamed `ya pack` to `ya pkg`, which is the surface driven
+# here. Earlier releases carry the same verbs under the old name.
+version_cli_options = ["--version"]
+# `ya --version` prints one line: the program name capitalized, the version,
+# then a commit and a build date in parentheses.
+version_regexes = ['^Ya[ \t]+(?P<version>\S+)']
+
+# Entries are tab-indented under a `Plugins:` or `Flavors:` heading, each
+# carrying its short commit in parentheses. Anchoring on the leading tab is
+# what rejects the two headings without naming them, and what would reject any
+# further heading upstream adds.
+[mpm.managers.yazi.operations.installed]
+args = ["pkg", "list"]
+regex = '^\t(?P<package_id>\S+)[ \t]+\((?P<installed_version>[^)]+)\)$'
+
+# Version pinning is not offered: `ya pkg add` takes the package's Git
+# coordinates and checks out the default branch, with no revision argument.
+[mpm.managers.yazi.operations.install]
+args = ["pkg", "add", "{package_id}"]
+
+[mpm.managers.yazi.operations.remove]
+args = ["pkg", "delete", "{package_id}"]
+
+# Naming packages genuinely restricts the upgrade to them; the bare form
+# upgrades everything, which is what upstream documents the argument as.
+[mpm.managers.yazi.operations.upgrade_one]
+args = ["pkg", "upgrade", "{package_id}"]
+
+[mpm.managers.yazi.operations.upgrade_all]
+args = ["pkg", "upgrade"]
+
+# Output samples locking the version probe and the installed parser. Consumed
+# by tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# Both are real transcripts, captured from `ya` 26.5.6 against a scratch cache
+# holding one plugin and one flavor, so the listing carries both headings and
+# an entry under each.
+[samples.version]
+output = "Ya 26.5.6 (aa52643 2026-05-05)"
+expected = "26.5.6"
+
+[[samples.installed]]
+output = """
+Plugins:
+\tyazi-rs/plugins:full-border (3f2b882)
+Flavors:
+\tyazi-rs/flavors:catppuccin-mocha (be0b21d)"""
+packages = [
+  { id = "yazi-rs/plugins:full-border", version = "3f2b882" },
+  { id = "yazi-rs/flavors:catppuccin-mocha", version = "be0b21d" },
+]

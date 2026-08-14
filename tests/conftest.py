@@ -482,6 +482,7 @@ PACKAGE_IDS = {
     "vscodium": "tamasfe.even-better-toml",
     "winget": "sharkdp.hyperfine",
     "xbps": "sl",
+    "yazi": "yazi-rs/plugins:full-border",
     # Declares no install operation, since downloading an Xcode always
     # authenticates interactively: the round-trip auto-skips. A marketing
     # version is what xcodes addresses a bundle by.

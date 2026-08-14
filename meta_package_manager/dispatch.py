@@ -60,7 +60,7 @@ if TYPE_CHECKING:
 
 
 SHARED_LOCK_FAMILIES: Final[tuple[frozenset[str], ...]] = (
-    frozenset({"apt", "apt-mint", "deb-get"}),
+    frozenset({"apt", "apt-mint", "deb-get", "nala"}),
     frozenset({"brew", "cask"}),
     frozenset({"dnf", "dnf5", "yum", "zypper"}),
     frozenset({"pacman", "pacstall"}),

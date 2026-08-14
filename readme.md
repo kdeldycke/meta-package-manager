@@ -140,6 +140,7 @@ Meta Package Manager,macports,1
 Meta Package Manager,mas,1
 Meta Package Manager,micro,1
 Meta Package Manager,mise,1
+Meta Package Manager,nala,1
 Meta Package Manager,nix,1
 Meta Package Manager,npm,1
 Meta Package Manager,oh-my-fish,1
@@ -257,6 +258,7 @@ print(operation_matrix()[0])
 | [`mas`](https://mpm.run/managers/mas.html)                                                     | >= 7         |          |      🍎       |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`micro`](https://mpm.run/managers/micro.html)                                                 | >= 2         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`mise`](https://mpm.run/managers/mise.html)                                                   | >= 2025.5.10 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
+| [`nala`](https://mpm.run/managers/nala.html)                                                   | >= 0.12.2    |          |               |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`nix`](https://mpm.run/managers/nix.html)                                                     | >= 2         |          |     🐧 🍎     |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 | [`npm`](https://mpm.run/managers/npm.html)                                                     | >= 11.10     |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
 | [`oh-my-fish`](https://mpm.run/managers/oh-my-fish.html)                                       | >= 6         |          |     🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |

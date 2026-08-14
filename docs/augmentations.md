@@ -44,6 +44,7 @@ print(augmentations_table())
 | [`mas`](managers/mas.md)                   |                      |              |      ✅      |       ✅        |
 | [`micro`](managers/micro.md)               |                      |              |      ✅      |       ✅        |
 | [`mise`](managers/mise.md)                 |                      |              |      ✅      |                 |
+| [`nala`](managers/nala.md)                 |                      |              |      ✅      |       ✅        |
 | [`nix`](managers/nix.md)                   |                      |              |      ✅      |       ✅        |
 | [`npm`](managers/npm.md)                   |                      |              |      ✅      |                 |
 | [`opam`](managers/opam.md)                 |                      |              |      ✅      |       ✅        |

@@ -50,6 +50,7 @@ from .managers.homebrew import Brew, Cask
 from .managers.lazy import Lazy
 from .managers.mas import MAS
 from .managers.mise import Mise
+from .managers.nala import Nala
 from .managers.nix import Nix
 from .managers.npm import NPM
 from .managers.oh_my_fish import OhMyFish
@@ -119,6 +120,7 @@ manager_classes = (
     Lazy,
     MAS,
     Mise,
+    Nala,
     Nix,
     NPM,
     OhMyFish,

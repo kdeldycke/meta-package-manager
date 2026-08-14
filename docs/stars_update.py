@@ -318,6 +318,7 @@ manager appears in exactly one of the two.
 NO_UPSTREAM = {
     "apt-mint": "Ships in a distribution package with no public repository.",
     "gcloud": "Google publishes the Cloud SDK as a binary; its source is not.",
+    "nala": "Hosted on GitLab, which the sampler does not query.",
     "opkg": "Hosted on the Yocto Project's cgit, which serves no API.",
     "steamcmd": "Valve ships SteamCMD as a proprietary binary.",
     "sun-tools": "Oracle Solaris packaging tools are proprietary.",

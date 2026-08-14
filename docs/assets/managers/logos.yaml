@@ -63,6 +63,7 @@ icons:
     managers:
     - apt
     - deb-get
+    - nala
     source: https://www.debian.org/logos
     title: Debian
   dotnet:

@@ -403,6 +403,7 @@ PACKAGE_IDS = {
     # the editor, so the round-trip actually installs and removes something.
     "micro": "bounce",
     "mise": "jq",
+    "nala": "nyancat",
     "nix": "hello",
     "npm": "ms",
     # Tiny single-function plugin of Oh My Fish's own package index.

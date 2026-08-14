@@ -227,10 +227,26 @@ jobs:
           wget --no-verbose --output-document=guix-install.sh
           --tries=5 --retry-on-http-error=429,500,502,503,504
           https://codeberg.org/guix/guix/raw/branch/master/etc/guix-install.sh
+      # `yes ''` feeds the newlines the script reads with `read -r`, which is the
+      # only automation upstream supports: plain `yes` answers `y`, which it
+      # rejects with "that (y) was not a return!" and warns is "likely to break
+      # in future". Retried because the tarball comes from ftpmirror.gnu.org, a
+      # redirector that answered 502 here, and whose URL the script hardcodes.
       - name: Run Guix installer
         run: |
           chmod +x guix-install.sh
-          yes | sudo ./guix-install.sh
+          # `ftpmirror.gnu.org` is a redirector, and it answered 502 to this
+          # runner and to a home connection alike while `ftp.gnu.org` served the
+          # same tarballs. The script hardcodes the redirector with no override,
+          # so rewrite it to the canonical host it redirects to. A no-op if
+          # upstream ever drops the redirector, which is today's behaviour.
+          sed -i 's|https://ftpmirror\.gnu\.org/gnu/guix/|https://ftp.gnu.org/gnu/guix/|g' guix-install.sh
+          for attempt in 1 2 3; do
+            yes '' | sudo ./guix-install.sh && exit 0
+            echo "Guix installer attempt ${attempt} failed, retrying in 20s."
+            sleep 20
+          done
+          exit 1
       - name: Refresh channel and expose the pulled guix
         run: |
           guix pull
@@ -262,10 +278,26 @@ jobs:
           wget --no-verbose --output-document=guix-install.sh
           --tries=5 --retry-on-http-error=429,500,502,503,504
           https://codeberg.org/guix/guix/raw/branch/master/etc/guix-install.sh
+      # `yes ''` feeds the newlines the script reads with `read -r`, which is the
+      # only automation upstream supports: plain `yes` answers `y`, which it
+      # rejects with "that (y) was not a return!" and warns is "likely to break
+      # in future". Retried because the tarball comes from ftpmirror.gnu.org, a
+      # redirector that answered 502 here, and whose URL the script hardcodes.
       - name: Run Guix installer
         run: |
           chmod +x guix-install.sh
-          yes | sudo ./guix-install.sh
+          # `ftpmirror.gnu.org` is a redirector, and it answered 502 to this
+          # runner and to a home connection alike while `ftp.gnu.org` served the
+          # same tarballs. The script hardcodes the redirector with no override,
+          # so rewrite it to the canonical host it redirects to. A no-op if
+          # upstream ever drops the redirector, which is today's behaviour.
+          sed -i 's|https://ftpmirror\.gnu\.org/gnu/guix/|https://ftp.gnu.org/gnu/guix/|g' guix-install.sh
+          for attempt in 1 2 3; do
+            yes '' | sudo ./guix-install.sh && exit 0
+            echo "Guix installer attempt ${attempt} failed, retrying in 20s."
+            sleep 20
+          done
+          exit 1
       - run: guix install --load-path=./packaging/guix meta-package-manager
       - run: mpm --version
 

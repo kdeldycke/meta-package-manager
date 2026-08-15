@@ -133,7 +133,7 @@ $ pipx install meta-package-manager
 `````
 
 `````{tab-item} Homebrew
-Meta Package Manager is [available as a Homebrew formula](https://formulae.brew.sh/formula/meta-package-manager), so you just need to:
+Meta Package Manager is [available as a Homebrew formula](https://formulae.brew.sh/formula/meta-package-manager), bottled for macOS and [Linux](https://docs.brew.sh/Homebrew-on-Linux), so you just need to:
 
 ```{code-block} shell-session
 $ brew install meta-package-manager

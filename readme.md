@@ -226,15 +226,17 @@ Platforms: 🅱️ BSD[^bsd] · 🐧 Linux[^linux] · 🍎 macOS · ⨂ Unix[
 
 All [installation methods](https://mpm.run/install.html) are available in the documentation. Below are the most popular ones:
 
-### macOS
+### Homebrew
 
-`mpm` is part of the official [Homebrew](https://brew.sh) default tap, so you can install it with:
+`mpm` is part of the official [Homebrew](https://brew.sh) default tap, bottled for macOS and [Linux](https://docs.brew.sh/Homebrew-on-Linux), so you can install it with:
 
 ```shell-session
 $ brew install meta-package-manager
 ```
 
-It is also [available on MacPorts](https://ports.macports.org/port/meta-package-manager/):
+### macOS
+
+`mpm` is also [available on MacPorts](https://ports.macports.org/port/meta-package-manager/):
 
 ```shell-session
 $ sudo port install meta-package-manager

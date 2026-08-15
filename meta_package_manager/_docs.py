@@ -39,6 +39,7 @@ import inspect
 import json
 import re
 import sys
+from collections import Counter
 from functools import cache
 from itertools import groupby
 from pathlib import Path
@@ -111,6 +112,13 @@ it summarizes. Deliberately orthogonal to
 either one it does not (`yaourt`, `upt`).
 """
 
+WRAPPED_GLYPHS = {"maintained": "✅", "unmaintained": "⚠️"}
+"""Glyph rendered for a manager `mpm` wraps, keyed by its `unmaintained` flag.
+
+The counterpart of {data}`UNSUPPORTED_GLYPHS` on the wrapped side of the scale,
+so every glyph literal of the five-state support scale is written once.
+"""
+
 UNSUPPORTED_GLYPHS = {"archived": "☠️", "excluded": "❌"}
 """Glyph rendered in the `mpm` column for each `unsupported` status.
 
@@ -156,6 +164,34 @@ GitHub reader at the top of the page instead. The published site is the
 canonical home of these links, and a whole-page landing is the worst that
 happens elsewhere.
 ```
+"""
+
+SUPPORT_SCALE = {
+    WRAPPED_GLYPHS["maintained"]: "Wrapped by `mpm`, linking to the class "
+    "implementing it.",
+    WRAPPED_GLYPHS["unmaintained"]: "Wrapped by `mpm` and usable, but its upstream "
+    "is gone.",
+    TOPGRADE_FALLBACK_GLYPH: "Not wrapped, yet still reachable through "
+    f"[`mpm upgrade --topgrade`]({UNSUPPORTED_DOCS_URL}), which upgrades whatever "
+    "it detects on the host. Wins over the two verdicts below, which are left to "
+    "the tools nothing reaches at all.",
+    UNSUPPORTED_GLYPHS["archived"]: "Never wrapped, and its "
+    f"[upstream is retired]({UNSUPPORTED_DOCS_URL}).",
+    UNSUPPORTED_GLYPHS["excluded"]: "Never wrapped: a live tool "
+    f"[declined on its own merits]({UNSUPPORTED_DOCS_URL}).",
+}
+"""The five states a manager can be in, in the order the manager index shows them.
+
+Keys are the glyphs {func}`_bare_support_glyph` returns, values the wording
+{func}`manager_support_legend` renders beside them. Composed from
+{data}`WRAPPED_GLYPHS`, {data}`TOPGRADE_FALLBACK_GLYPH` and
+{data}`UNSUPPORTED_GLYPHS` rather than repeating their glyphs, so the scale
+cannot drift from the cells it describes.
+
+The key order is a reading order, from best supported to least, and doubles as
+the sort of the declined tail closing {func}`managers_index_table`: those rows
+group by verdict instead of continuing the alphabet, since a reader reaching
+them is asking what became of the tool rather than looking one up by name.
 """
 
 
@@ -715,6 +751,40 @@ def _load_benchmark_toml() -> dict:
     return tomllib.loads(content)  # type: ignore[no-any-return]
 
 
+def _bare_support_glyph(
+    mid: str,
+    unsupported: dict[str, str],
+    competitor_data: dict[str, list[str]],
+) -> str:
+    """Support glyph of a manager ID, unlinked: which {data}`SUPPORT_SCALE` state.
+
+    A wrapped manager takes its {data}`WRAPPED_GLYPHS` entry, keyed by its
+    `unmaintained` flag. A declined one takes {data}`TOPGRADE_FALLBACK_GLYPH`
+    where `topgrade` still reaches it, and its {data}`UNSUPPORTED_GLYPHS`
+    verdict otherwise. A manager in neither set, assessed by nobody yet, has no
+    glyph at all.
+
+    One glyph per manager. Where `topgrade` still reaches the tool, the lifebuoy
+    stands alone: it already answers the only question a support cell asks, and
+    pairing it with the verdict doubled the width of every such row for a fact
+    the linked page states anyway. The skull and the cross therefore mark only
+    the tools nothing reaches at all. `docs/unsupported.md` keeps both glyphs,
+    being the record rather than the comparison.
+
+    Split out of {func}`_support_glyph` because the glyph is also what
+    {func}`manager_support_legend` counts and what the declined tail of
+    {func}`managers_index_table` sorts on, neither of which wants the link.
+    """
+    if mid in pool:
+        flag = "unmaintained" if pool[mid].unmaintained else "maintained"
+        return WRAPPED_GLYPHS[flag]
+    if mid in unsupported:
+        if "topgrade" in competitor_data.get(mid, []):
+            return TOPGRADE_FALLBACK_GLYPH
+        return UNSUPPORTED_GLYPHS[unsupported[mid]]
+    return ""
+
+
 def _support_glyph(
     mid: str,
     unsupported: dict[str, str],
@@ -723,35 +793,21 @@ def _support_glyph(
 ) -> str:
     """Linked support glyph for a manager ID: the benchmark's own `mpm` column rule.
 
-    A wrapped manager renders `[✅]`, linked to the class proving it, or `[⚠️]`
-    when it carries the `unmaintained` flag. A declined manager renders the
-    {data}`TOPGRADE_FALLBACK_GLYPH` alone where `topgrade` still reaches it, or
-    its {data}`UNSUPPORTED_GLYPHS` verdict otherwise, linked to its own section
-    of {data}`UNSUPPORTED_DOCS_URL`. A manager in neither set, assessed by
-    nobody yet, renders an empty cell. Shared by {func}`benchmark_managers_table`
-    and {func}`managers_index_table`, so the two pages can never disagree on
-    what a manager's glyph should be.
+    The glyph comes from {func}`_bare_support_glyph`; all this adds is its
+    target. A wrapped manager links to the class proving it, a declined one to
+    its own section of {data}`UNSUPPORTED_DOCS_URL`, and a manager assessed by
+    nobody yet renders an empty cell. Shared by
+    {func}`benchmark_managers_table` and {func}`managers_index_table`, so the
+    two pages can never disagree on what a manager's glyph should be.
     """
+    glyph = _bare_support_glyph(mid, unsupported, competitor_data)
+    if not glyph:
+        return ""
     if mid in pool:
-        glyph = "⚠️" if pool[mid].unmaintained else "✅"
         return f"[{glyph}]({manager_source_url(mid)})"
-    if mid in unsupported:
-        # One glyph per cell. Where `topgrade` still reaches the tool, the
-        # lifebuoy stands alone: it already answers the only question this
-        # column asks, and pairing it with the verdict doubled the width of
-        # every such row for a fact the linked page states anyway. The skull
-        # and the cross therefore appear only when nothing reaches the tool at
-        # all. `docs/unsupported.md` keeps both glyphs, being the record
-        # rather than the comparison.
-        glyph = (
-            TOPGRADE_FALLBACK_GLYPH
-            if "topgrade" in competitor_data.get(mid, [])
-            else UNSUPPORTED_GLYPHS[unsupported[mid]]
-        )
-        anchor = anchors.get(mid)
-        target = f"{UNSUPPORTED_DOCS_URL}#{anchor}" if anchor else UNSUPPORTED_DOCS_URL
-        return f"[{glyph}]({target})"
-    return ""
+    anchor = anchors.get(mid)
+    target = f"{UNSUPPORTED_DOCS_URL}#{anchor}" if anchor else UNSUPPORTED_DOCS_URL
+    return f"[{glyph}]({target})"
 
 
 def benchmark_managers_table() -> str:
@@ -1132,11 +1188,16 @@ def manager_logo(manager_id: str, *, inline: bool = False) -> str:
 
 
 def manager_label_url(manager_id: str) -> str:
-    """Produce the tracker search listing everything filed about a manager.
+    """Produce the tracker search listing what is still open about a manager.
 
     Managers sharing an ecosystem share a single label
     ({data}`~meta_package_manager.labels.MANAGER_LABEL_GROUPS`), so the five
     RPM-based wrappers all point at the same `📦 manager: rpm-based` search.
+
+    The query carries `state:open`, without which GitHub answers with every
+    issue and pull request ever filed under the label, closed ones included: a
+    reader clicking a card's badge is asking what is left to do with the
+    manager, and years of settled tickets bury the handful that answers it.
 
     Only the ASCII specials of the query are percent-encoded, the way GitHub's
     own label links are: escaping the emoji too would triple the length of an
@@ -1146,7 +1207,7 @@ def manager_label_url(manager_id: str) -> str:
     label = MANAGER_LABELS[manager_id]
     query = "".join(
         char if not char.isascii() else quote(char, safe="")
-        for char in f'label:"{label}"'
+        for char in f'label:"{label}" state:open'
     )
     return f"{GITHUB_ISSUES_URL}?q={query}"
 
@@ -2457,16 +2518,22 @@ def managers_index_table() -> str:
     the single one they came for, while widening the table enough to push the
     platform icons off a narrow screen.
 
-    Declined managers (`docs/benchmark.toml`'s `unsupported` mapping) are
-    appended after the wrapped ones as a second block, sorted the same way. No
-    prose name or platform data exists for a tool `mpm` never wrapped, so those
-    cells stay blank; the ID cell links to the manager's verdict section instead
-    of a dedicated page it does not have. Both blocks come from a single
-    `render_table` call over the combined rows, split apart only afterwards: this
-    keeps their column widths identical, where rendering each block on its own
-    would size them from different content and the columns would drift out of
-    alignment. The blank line between them is what keeps "wrapped" and
-    "declined" visually apart without duplicating the table's shape.
+    Declined managers (`docs/benchmark.toml`'s `unsupported` mapping) close the
+    same table, in one continuous run of rows: they used to be a second block
+    behind a repeated header, which read as a separate table and cost a reader
+    tracking a tool across both a second set of column widths to parse. No prose
+    name or platform data exists for a tool `mpm` never wrapped, so those cells
+    stay blank; the ID cell links to the manager's verdict section instead of a
+    dedicated page it does not have, and the emptied `Manager` column is what
+    marks the tail apart now that no blank line does.
+
+    The two halves sort differently, on purpose. Wrapped managers stay
+    alphabetical, the order a reader looking one up by name expects. The
+    declined tail groups by verdict instead, following {data}`SUPPORT_SCALE`
+    (`🛟` first, then `☠️`, then `❌`) and only then by ID: nobody reaches those
+    rows hunting for a name, they read them to learn what became of a tool, and
+    the lifebuoys leading means the still-upgradable majority is what the page
+    ends on.
     """
     data = _load_benchmark_toml()
     competitor_data: dict[str, list[str]] = data.get("managers", {})
@@ -2496,9 +2563,15 @@ def managers_index_table() -> str:
                 " ".join(parts),
             ]
         )
-    supported_count = len(table)
 
-    for mid in sorted(unsupported):
+    scale = tuple(SUPPORT_SCALE)
+    for mid in sorted(
+        unsupported,
+        key=lambda mid: (
+            scale.index(_bare_support_glyph(mid, unsupported, competitor_data)),
+            mid,
+        ),
+    ):
         anchor = anchors.get(mid)
         target = f"{UNSUPPORTED_DOCS_URL}#{anchor}" if anchor else UNSUPPORTED_DOCS_URL
         table.append(
@@ -2523,49 +2596,54 @@ def managers_index_table() -> str:
     for mid in pool:
         rendered = rendered.replace(f"%logo:{mid}%", manager_logo(mid, inline=True))
 
-    lines = rendered.splitlines()
-    header_lines = lines[:2]
-    supported_lines = lines[2 : 2 + supported_count]
-    unsupported_lines = lines[2 + supported_count :]
-    blocks = "\n".join((
-        *header_lines,
-        *supported_lines,
-        "",
-        *header_lines,
-        *unsupported_lines,
-    ))
-
-    return f"`mpm` can drive {len(pool)} package managers:\n\n{blocks}"
+    return (
+        f"The {len(pool)} managers `mpm` drives open the table, alphabetically. "
+        f"The {len(unsupported)} it declined close it, grouped by verdict:"
+        f"\n\n{rendered}"
+    )
 
 
-def manager_population_stats() -> str:
-    """Produce the manager population summary opening `docs/managers.md`.
+def manager_support_legend() -> str:
+    """Produce the counted glyph legend opening `docs/managers.md`.
 
-    Rendered live at Sphinx build time, right above the index table it
-    summarizes. Counts are read from the same sources as
-    {func}`managers_index_table`: the live pool for wrapped managers, and
-    `docs/benchmark.toml`'s `unsupported` mapping for declined ones, so the two
-    can never disagree on how many managers exist in either state.
+    Rendered live at Sphinx build time, right above the index table it is the
+    key to. Each {data}`SUPPORT_SCALE` state gets a row: its glyph, how many
+    managers are in it, and what it means. Counts come from
+    {func}`_bare_support_glyph` over the same two sources
+    {func}`managers_index_table` builds its rows from, the live pool and
+    `docs/benchmark.toml`'s `unsupported` mapping, so the legend cannot claim a
+    population the table below does not show.
+
+    The counts replace the prose summary that used to open the page ("`mpm`
+    wraps N of them, M flagged unmaintained…"), a sentence restating in words
+    what the reader was about to see as glyphs, and holding the same numbers a
+    second time. Folding them into the legend costs a column and settles both
+    questions at once: what a glyph means, and how much of the pool it covers.
     """
     data = _load_benchmark_toml()
     competitor_data: dict[str, list[str]] = data.get("managers", {})
     unsupported: dict[str, str] = data.get("unsupported", {})
 
-    unmaintained = sum(1 for m in pool.values() if m.unmaintained)
-    archived = sum(1 for status in unsupported.values() if status == "archived")
-    excluded = len(unsupported) - archived
-    topgrade_fallback = sum(
-        1 for mid in unsupported if "topgrade" in competitor_data.get(mid, [])
+    counts = Counter(
+        _bare_support_glyph(mid, unsupported, competitor_data)
+        for mid in (*pool, *unsupported)
     )
-    assessed = len(pool) + len(unsupported)
-
+    table = [
+        [glyph, str(counts[glyph]), meaning]
+        for glyph, meaning in SUPPORT_SCALE.items()
+    ]
+    rendered = render_table(
+        table,
+        headers=["Glyph", "Managers", "Meaning"],
+        table_format=TableFormat.GITHUB,
+        colalign=["center", "right", "left"],
+        disable_numparse=True,
+    )
     return (
-        f"{assessed} package managers have been assessed so far. `mpm` wraps "
-        f"{len(pool)} of them, {unmaintained} flagged unmaintained. The other "
-        f"{len(unsupported)} were declined, {archived} for a dead upstream and "
-        f"{excluded} on their own merits; {topgrade_fallback} of those "
-        f"{len(unsupported)} stay reachable through "
-        "[`topgrade`](managers/topgrade.md)."
+        f"{counts.total()} package managers have been assessed so far, each in "
+        "one of five states. The index below reports them in its `Support` "
+        "column, on the same glyph scale as the benchmark's "
+        f"[`mpm` column](benchmark.md#package-manager-support):\n\n{rendered}"
     )
 
 

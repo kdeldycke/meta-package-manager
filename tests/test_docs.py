@@ -1032,9 +1032,13 @@ def test_manager_card_renders(manager):
     assert f"**Issues and PRs**\n: {badge}\n\n**Source**\n: " in card
     assert "**" not in card.partition("**Source**\n: ")[2]
 
-    # Only the ASCII specials are escaped, the way GitHub's own label links are.
+    # Only the ASCII specials are escaped, the way GitHub's own label links are,
+    # and the search is narrowed to what is still open: a closed backlog is not
+    # what a reader clicking the badge came for.
     quoted = label_name.replace(" ", "%20").replace(":", "%3A")
-    assert url == f"{_docs.GITHUB_ISSUES_URL}?q=label%3A%22{quoted}%22"
+    assert url == (
+        f"{_docs.GITHUB_ISSUES_URL}?q=label%3A%22{quoted}%22%20state%3Aopen"
+    )
 
     # How mpm invokes the tool, the whole of what used to be a section of its own.
     cli_row = "CLI names (lookup order)" if len(manager.cli_names) > 1 else "CLI name"
@@ -1453,38 +1457,67 @@ def test_manager_changelog_entries():
     assert pairs == expected
 
 
-def test_manager_population_stats():
-    """Check the population summary's counts add up against their sources.
+def test_manager_support_legend():
+    """Check the glyph legend counts every assessed manager exactly once.
 
-    Rendered live at Sphinx build time by the ``{python:render}`` block
-    opening `docs/managers.md`, right above the index table it summarizes.
+    Rendered live at Sphinx build time by the ``{python:render}`` block opening
+    `docs/managers.md`, right above the index table it is the key to. The
+    population it reports replaced a prose summary, so the numbers are asserted
+    against an independent recount of the same two sources.
     """
-    text = _docs.manager_population_stats()
+    text = _docs.manager_support_legend()
     data = _docs._load_benchmark_toml()
     unsupported: dict[str, str] = data.get("unsupported", {})
     competitor_data: dict[str, list[str]] = data.get("managers", {})
 
+    assessed = len(pool) + len(unsupported)
+    assert text.startswith(f"{assessed} package managers have been assessed")
+    assert "benchmark.md#package-manager-support" in text
+
+    # One row per state, in scale order, each carrying its glyph, its
+    # population and its meaning.
+    lines = text.splitlines()
+    assert lines[1] == ""
+    assert lines[2].startswith("| Glyph | Managers | Meaning")
+    rows = lines[4:]
+    assert len(rows) == len(_docs.SUPPORT_SCALE)
+
     unmaintained = sum(1 for m in pool.values() if m.unmaintained)
-    archived = sum(1 for status in unsupported.values() if status == "archived")
-    excluded = len(unsupported) - archived
     topgrade_fallback = sum(
         1 for mid in unsupported if "topgrade" in competitor_data.get(mid, [])
     )
+    dead = sum(
+        1
+        for mid, status in unsupported.items()
+        if status == "archived" and "topgrade" not in competitor_data.get(mid, [])
+    )
+    expected = {
+        _docs.WRAPPED_GLYPHS["maintained"]: len(pool) - unmaintained,
+        _docs.WRAPPED_GLYPHS["unmaintained"]: unmaintained,
+        _docs.TOPGRADE_FALLBACK_GLYPH: topgrade_fallback,
+        _docs.UNSUPPORTED_GLYPHS["archived"]: dead,
+        _docs.UNSUPPORTED_GLYPHS["excluded"]: len(unsupported)
+        - topgrade_fallback
+        - dead,
+    }
+    # The scale is exhaustive: every state is populated, and the five
+    # populations partition the assessed managers.
+    assert list(expected) == list(_docs.SUPPORT_SCALE)
+    assert sum(expected.values()) == assessed
+    for row, (glyph, meaning) in zip(rows, _docs.SUPPORT_SCALE.items()):
+        cells = [cell.strip() for cell in row.split("|")[1:-1]]
+        assert cells == [glyph, str(expected[glyph]), meaning]
+        assert expected[glyph], f"no manager left in the {glyph} state"
 
-    assert text.startswith(f"{len(pool) + len(unsupported)} package managers")
-    assert f"wraps {len(pool)} of them" in text
-    assert f"{unmaintained} flagged unmaintained" in text
-    assert f"other {len(unsupported)} were declined" in text
-    assert f"{archived} for a dead upstream" in text
-    assert f"{excluded} on their own merits" in text
-    assert f"{topgrade_fallback} of those {len(unsupported)} stay reachable" in text
-    assert "[`topgrade`](managers/topgrade.md)" in text
+    # The wording the index's own glyphs are read against, never backticked.
+    for glyph in _docs.SUPPORT_SCALE:
+        assert f"`{glyph}`" not in text
 
 
 def test_managers_index_table_renders():
-    """Check the manager index generator produces two well-formed blocks: every
-    wrapped manager linking to its documentation page, then every declined one
-    linking to its verdict, sharing the exact same columns.
+    """Check the manager index renders as one well-formed table: every wrapped
+    manager linking to its documentation page, then every declined one linking
+    to its verdict, in the exact same columns.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
     block in `docs/managers.md`, so there is no checked-in copy to compare
@@ -1492,7 +1525,15 @@ def test_managers_index_table_renders():
     """
     table = _docs.managers_index_table()
     lines = table.splitlines()
-    assert lines[0] == f"`mpm` can drive {len(pool)} package managers:"
+    data = _docs._load_benchmark_toml()
+    unsupported: dict[str, str] = data.get("unsupported", {})
+    competitor_data: dict[str, list[str]] = data.get("managers", {})
+    anchors = _docs.unsupported_anchors()
+
+    assert lines[0] == (
+        f"The {len(pool)} managers `mpm` drives open the table, alphabetically. "
+        f"The {len(unsupported)} it declined close it, grouped by verdict:"
+    )
     assert lines[1] == ""
     # The leading column carries the brand marks and is headerless.
     header_pattern = r"\|\s+\| Manager\s+\| ID\s+\|\s+Support\s+\|\s+Platforms\s+\|"
@@ -1503,20 +1544,12 @@ def test_managers_index_table_renders():
     for header in ("Stars", "Last release", "Last commit", "Unmaintained"):
         assert header not in lines[2]
 
-    # Exactly one blank line separates the wrapped block from the declined
-    # one, its header and separator byte-identical to the first block's:
-    # both are sliced from a single render_table() call over the combined
-    # rows, so the columns cannot drift out of alignment between the two.
-    assert lines.count("") == 2
-    split_at = lines.index("", 2)
-    assert lines[split_at + 1 : split_at + 3] == lines[2:4]
-    supported_block = "\n".join(lines[4:split_at])
-    declined_block = "\n".join(lines[split_at + 3 :])
-
-    data = _docs._load_benchmark_toml()
-    unsupported: dict[str, str] = data.get("unsupported", {})
-    competitor_data: dict[str, list[str]] = data.get("managers", {})
-    anchors = _docs.unsupported_anchors()
+    # One table, not two: the lede is the only blank line, the header and its
+    # separator appear once, and the declined managers continue the same rows.
+    assert lines.count("") == 1
+    assert len(lines) == 4 + len(pool) + len(unsupported)
+    supported_block = "\n".join(lines[4 : 4 + len(pool)])
+    declined_block = "\n".join(lines[4 + len(pool) :])
 
     unmaintained = 0
     for mid, manager in pool.items():
@@ -1540,11 +1573,31 @@ def test_managers_index_table_renders():
     for glyph in ("☠️", "❌", "🛟"):
         assert glyph not in supported_block
 
+    # The wrapped half is alphabetical, the order a reader looking a manager up
+    # by name expects.
+    wrapped_ids = re.findall(r"\[`([a-z0-9.-]+)`\]\(managers/", supported_block)
+    assert wrapped_ids == sorted(pool)
+
     # Every declined manager appears exactly once, after every wrapped one,
-    # sorted alphabetically, its Support cell matching the shared helper
+    # grouped by verdict in SUPPORT_SCALE order and alphabetical within each
+    # group, its Support cell matching the shared helper
     # benchmark_managers_table() also renders its own `mpm` column from.
+    scale = tuple(_docs.SUPPORT_SCALE)
     declined_ids = re.findall(r"\[`([a-z0-9.-]+)`\]\(unsupported\.md", declined_block)
-    assert declined_ids == sorted(unsupported)
+    assert declined_ids == sorted(
+        unsupported,
+        key=lambda mid: (
+            scale.index(_docs._bare_support_glyph(mid, unsupported, competitor_data)),
+            mid,
+        ),
+    )
+    # Each verdict is a single uninterrupted run, in scale order.
+    ranks = [
+        scale.index(_docs._bare_support_glyph(mid, unsupported, competitor_data))
+        for mid in declined_ids
+    ]
+    assert ranks == sorted(ranks)
+    assert set(ranks) == {scale.index(glyph) for glyph in ("🛟", "☠️", "❌")}
     for mid in unsupported:
         assert mid not in pool
         glyph_cell = _docs._support_glyph(mid, unsupported, anchors, competitor_data)

@@ -23,6 +23,7 @@ keywords = [
   "asdf",
   "atom",
   "bin",
+  "bpkg",
   "brew",
   "bun",
   "cargo",
@@ -1125,6 +1126,11 @@ color = "bfdadc"
 description = "bin"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: bpkg"
+color = "bfdadc"
+description = "bpkg"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: cargo"
 color = "bfdadc"
 description = "cargo"
@@ -1539,6 +1545,10 @@ any-glob-to-any-file = [
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: bin"
 any-glob-to-any-file = [ "meta_package_manager/managers/bin.*", "tests/*bin*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: bpkg"
+any-glob-to-any-file = [ "meta_package_manager/managers/bpkg.*", "tests/*bpkg*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: cargo"

@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [bpkg] Add bpkg package manager as a bundled definition, with `install` support. `install` forces `--global`, without which bpkg vendors the package into a `deps/` directory relative to the working directory. It exposes no inventory and no removal verb, and its catalogue read is left unmapped because `bpkg update` cannot sync an index.
 - [jpm] Add jpm package manager as a bundled definition, with `install`, `remove`, `upgrade --all`, `sync` and cache cleanup support. It reports no version of its own, so the probe reads the Janet interpreter it ships beside. No listing command exists, so no inventory is declared.
 - [clib] Add clib package manager as a bundled definition, with `search`, `install` and `remove` support. `install` forces `--global`, without which clib vendors sources into a `deps/` directory relative to the working directory. It ships no listing command, so no inventory is declared.
 - [nimble] Add Nimble package manager, with `installed`, `search`, `install`, `remove` and `sync` support. The inventory forces `--ver`, without which every package is reported with no version at all.

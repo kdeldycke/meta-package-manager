@@ -347,6 +347,8 @@ PACKAGE_IDS = {
     # other operation on the installed binary's absolute path, so that is the
     # shape an identifier takes here.
     "bin": "/usr/local/bin/bin",
+    # A one-file terminal-colour helper from bpkg's own organisation.
+    "bpkg": "bpkg/term",
     "brew": "nyancat",
     "bun": "cowsay",
     "cargo": "fsays",

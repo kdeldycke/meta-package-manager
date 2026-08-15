@@ -1,0 +1,44 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# bpkg is a lightweight package manager for
+# bash, installing scripts and libraries straight from their Git repositories. See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against bpkg 1.1.4 on macOS:
+#   - `install` forces `--global`. Without it bpkg vendors the package into a
+#     `deps/` directory relative to the working directory, which is a project
+#     operation rather than a machine-wide one.
+#   - Only `install` is declared, and nothing is parsed, which is why no sample
+#     beyond the version probe appears below. bpkg exposes no inventory of what it
+#     has installed and no removal verb at all: its fourteen commands are getdeps,
+#     init, install, json, list, package, realpath, run, show, source, suggest,
+#     term, update and utils. That still clears the bar an inventory-less tool has
+#     to meet, since a per-package install reaches a package no competitor does.
+#   - `list` is deliberately *not* mapped to a search. It prints the remote
+#     catalogue rather than what is installed, and needs `bpkg update` to have
+#     synced an index first, which fails out of the box: update passes the unset
+#     `BPKG_CURL_AUTH_PARAM` through as an empty argument, so curl refuses with
+#     "option : blank argument where content is expected" and the index is never
+#     written. Declaring a search that always answers nothing would be worse than
+#     declaring none, mpm resolving an install's candidate manager by searching.
+#   - Like clib, the catalogue behind `list` is a GitHub wiki page rather than a
+#     package index.
+
+[mpm.managers.bpkg]
+name = "bpkg"
+homepage_url = "https://www.bpkg.sh"
+# Bash, curl and git: no Windows support is documented upstream.
+platforms = ["linux_like", "macos"]
+cli_names = ["bpkg"]
+# `bpkg --version` prints the bare version and nothing else.
+version_regexes = ['^(?P<version>\d+\.\d+\.\d+)']
+
+[mpm.managers.bpkg.operations.install]
+args = ["install", "--global", "{package_id}"]
+
+# Output sample locking the version probe, captured from bpkg 1.1.4. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "1.1.4"
+expected = "1.1.4"

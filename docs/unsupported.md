@@ -41,6 +41,10 @@ Bash configuration framework shipping no registry of its own: its plugins, alias
 
 Bash package manager, abandoned: 28 commits in all and nothing since 2021-07-25. Little would have been left to wrap in any case, its whole verb surface being `install` and `run`, with no listing, no removal and no upgrade, and its readme conceding it carries no versioning at all, which it blames on Bash having no namespacing.
 
+## [`certbot`](https://certbot.eff.org) ❌ 🛟
+
+The EFF's ACME client, obtaining and renewing TLS certificates. `topgrade` runs `certbot renew` beside its package steps, which is what lands it in this table, but a certificate is not a package: it is issued against a domain the host proves it controls, expires on a schedule of its own, and comes from no catalog anyone can enumerate. Nothing here can be listed, searched, installed by name or removed.
+
 ## Container runtimes ❌ 🛟
 
 [`colima`](https://colima.run), [`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`podman`](https://podman.io) and [`toolbx`](https://containertoolbx.org).

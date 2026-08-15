@@ -69,6 +69,7 @@ jobs:
   apk-source:
     name: "✅ apk-source"
     runs-on: ubuntu-26.04
+    timeout-minutes: 20
     container:
       image: alpine:edge
     env:
@@ -131,6 +132,7 @@ jobs:
           - macos-15-intel
           - macos-26
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - if: runner.os == 'Linux'
         run: |
@@ -154,6 +156,7 @@ jobs:
           - windows-2025
           - windows-11-arm
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Pack
@@ -190,6 +193,7 @@ jobs:
           - os: windows-2025
             asset_pattern: meta-package-manager-*-windows-x64.exe
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - name: Download mpm binary
         shell: bash
@@ -217,6 +221,7 @@ jobs:
     name: ⁉️ guix
     continue-on-error: true
     runs-on: ubuntu-26.04
+    timeout-minutes: 60
     steps:
       # Fetched from Codeberg, where Guix development moved: Savannah answers
       # this runner with an HTTP error (wget exit 8), which is what kept both
@@ -267,6 +272,7 @@ jobs:
     name: ⁉️ guix-source
     continue-on-error: true
     runs-on: ubuntu-26.04
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       # Fetched from Codeberg, where Guix development moved: Savannah answers
@@ -342,6 +348,7 @@ jobs:
           - macos-15-intel
           - macos-26
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - name: Install MacPorts
         run: |
@@ -386,6 +393,7 @@ jobs:
           - macos-15-intel
           - macos-26
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install MacPorts
@@ -437,6 +445,7 @@ jobs:
           - ubuntu-26.04
           - macos-26
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31.11.0
         with:
@@ -457,6 +466,7 @@ jobs:
           - ubuntu-26.04
           - macos-26
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31.11.0
@@ -502,6 +512,7 @@ jobs:
   aur:
     name: "⁉️ ${{ matrix.helper }}"
     runs-on: ubuntu-26.04
+    timeout-minutes: 30
     continue-on-error: true
     strategy:
       matrix:
@@ -539,6 +550,7 @@ jobs:
           - windows-11-arm
           - windows-2025
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
@@ -567,6 +579,7 @@ jobs:
           - windows-11-arm
           - windows-2025
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
@@ -599,6 +612,7 @@ jobs:
           - windows-2025      # x86
           - windows-11-arm    # arm64
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - shell: pwsh
         run: |
@@ -624,6 +638,7 @@ jobs:
           - windows-11-arm
           - windows-2025
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
@@ -676,6 +691,7 @@ jobs:
           - os: macos-26
             asset: zb-darwin-arm64
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - name: Install ZeroBrew
         run: >

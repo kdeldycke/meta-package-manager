@@ -84,6 +84,7 @@ jobs:
       && !startsWith(github.event.head_commit.message || '', '[changelog] Bump major version to ')
       && !startsWith(github.event.head_commit.message || '', '[changelog] Bump minor version to ')
     runs-on: ubuntu-26.04
+    timeout-minutes: 10
     outputs:
       metadata: ${{ steps.metadata.outputs.metadata }}
     steps:
@@ -112,6 +113,7 @@ jobs:
         || fromJSON(needs.metadata.outputs.metadata).test_matrix_pr }}
     name: "${{ matrix.state == 'stable' && '✅' || '⁉️' }} ${{ matrix.os }} / py${{ matrix.python-version }}"
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 180
     # We keep going when a job flagged as not stable fails.
     continue-on-error: ${{ matrix.state == 'unstable' }}
     env:
@@ -537,6 +539,7 @@ jobs:
     needs:
       - metadata
     runs-on: ubuntu-26.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

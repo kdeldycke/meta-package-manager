@@ -113,6 +113,7 @@ jobs:
   build-gnome-extension:
     name: 🐚 Pack GNOME Shell extension
     runs-on: ubuntu-26.04
+    timeout-minutes: 15
     permissions:
       # Checkout only. The packed zip leaves as a run artifact, which rides the
       # Actions runtime token and needs no scope of its own.
@@ -152,6 +153,7 @@ jobs:
     name: 🐂 Guix
     needs: release
     runs-on: ubuntu-26.04
+    timeout-minutes: 15
     permissions:
       contents: write
       pull-requests: write
@@ -270,6 +272,7 @@ jobs:
     name: ❄️ Nix
     needs: release
     runs-on: ubuntu-26.04
+    timeout-minutes: 15
     permissions:
       contents: write
       pull-requests: write

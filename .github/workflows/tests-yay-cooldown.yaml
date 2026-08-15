@@ -29,6 +29,7 @@ jobs:
   yay-cooldown:
     name: "yay --cooldown on Arch Linux"
     runs-on: ubuntu-26.04
+    timeout-minutes: 20
     container:
       image: archlinux:base-devel
     steps:

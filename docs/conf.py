@@ -228,16 +228,18 @@ html_theme_options = {
     # Sits atop every page, so it stays a single line and leads with the track
     # record rather than pleading scarcity: how thin the maintenance is says
     # nothing to a reader who has not yet decided the project is worth funding.
-    # The age is recomputed at build time, so the claim never goes stale.
+    # The age is recomputed at build time, so the claim never goes stale. Each
+    # call to action opens on its emoji, which gives the eye two markers to land
+    # on in a line that is otherwise unbroken prose.
     "announcement": (
         f"{project} has been maintained for {maintained_years}+ years, and is "
         "free to use. You can help if you "
         "<strong><a class='reference external' "
         f"href='https://github.com/sponsors/{github_user}'>"
-        "purchase business support 🤝</a></strong> or "
+        "🤝 purchase business support</a></strong> or "
         "<strong><a class='reference external' "
         f"href='https://github.com/sponsors/{github_user}'>"
-        "sponsor the project 🫶</a></strong>."
+        "🫶 sponsor the project</a></strong>."
     ),
 }
 

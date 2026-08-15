@@ -79,7 +79,7 @@ Vim and Neovim plugin manager whose development stopped, superseded by [`dpp`](#
 
 ## Dotfiles and repository syncers ❌ 🛟
 
-[`chezmoi`](https://www.chezmoi.io), [`git`](https://git-scm.com), [`myrepos`](https://myrepos.branchable.com), [`rcm`](https://github.com/thoughtbot/rcm) and [`yadm`](https://yadm.io).
+[`chezmoi`](https://www.chezmoi.io), [`falconf`](https://github.com/GideonBear/falconf), [`git`](https://git-scm.com), [`myrepos`](https://myrepos.branchable.com), [`rcm`](https://github.com/thoughtbot/rcm) and [`yadm`](https://yadm.io).
 
 Synchronize files and Git checkouts, not packages. There is no registry, no package identity and no version: what they track is the user's own content, which is outside the system scope every `mpm` manager holds to.
 

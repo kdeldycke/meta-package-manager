@@ -33,6 +33,10 @@ Google ships two separate products under the name: the Antigravity **IDE**, a VS
 
 The same AppImage manager as [`am`](managers/am.md), which `mpm` wraps, under a second name. Its repository carries no implementation at all, only a stub that replaces its own contents with AM's and re-executes it: "*Since version 5, "AppMan" and "AM" have been meged to share the same code*". The script then reads the path it was invoked through to decide whether to install system-wide or under the user's home, which is the entire difference between the two. Wrapping it would also double-count, since `am -fi` already lists AppMan's applications in a table of their own.
 
+## [`auto-cpufreq`](https://github.com/AdnanHodzic/auto-cpufreq) ❌ 🛟
+
+A CPU speed and power optimizer for Linux, running as a daemon that switches governors and turbo boost according to load and battery state. `topgrade` updates it in place, which is what puts it in the benchmark, but it installs nothing and owns nothing installable: what it manages is a kernel tuning policy, which has no name, no version and no catalog to draw from.
+
 ## [`bash-it`](https://bash-it.readthedocs.io) ❌ 🛟
 
 Bash configuration framework shipping no registry of its own: its plugins, aliases and completions all live inside the single git checkout under `plugins/available`, `aliases/available` and `completion/available`, so `bash-it enable plugin git` only symlinks a file the clone already put on disk and `bash-it disable` removes that symlink again. Nothing is fetched and nothing carries a version of its own: `bash-it update` runs `git fetch` and checks out a tag or `master` across the whole tree, a mechanism its maintainer describes as "*we assume we cloned the project, and we run `git fetch` and things like that*" ([Bash-it/bash-it#1819](https://github.com/Bash-it/bash-it/issues/1819)).

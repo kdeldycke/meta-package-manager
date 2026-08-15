@@ -289,6 +289,12 @@ Windows Packager, a dpkg clone bringing Debian-style packaging and apt-like verb
 
 Archived, and self-described `[unmaintained]` in its own repository description, with no commit since 2018-12. The dominant AUR helper before `yay`; `mpm` wraps its successors [`yay`](managers/yay.md) and [`paru`](managers/paru.md).
 
+## [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) ❌
+
+A command-line audio and video downloader, not a package manager: what it fetches is media, addressed by URL, carrying no name, no version and no catalog to enumerate. Its `--update` flag replaces its own binary in place, which is the whole of its resemblance to one and the reason it keeps being suggested.
+
+That is the verdict the [self-updating applications](#self-updating-applications) family carries, and yt-dlp would sit there but for the lifebuoy: no competitor drives it, so it cannot share a title promising `topgrade` reaches it.
+
 ## [`zgenom`](https://github.com/jandamm/zgenom) ❌ 🛟
 
 Zsh plugin manager reporting no version through any binary: its whole function set runs from `zgenom-api` to `zgenom-update` with no version command anywhere, so the probe that establishes a shell-function manager's presence has nothing to read. The upstream request to tag releases was closed on the maintainer's position that "*I consider everything merged into main as a stable release*" ([jandamm/zgenom#120](https://github.com/jandamm/zgenom/issues/120#issuecomment-1112530002)), so no version is coming. Its `list` compounds that by `cat`-ing the generated `init.zsh` verbatim rather than reporting an inventory.

@@ -5,7 +5,7 @@
 # (build_bundled_managers) for the loader.
 #
 # Homebrew Bundle has no `vscodium` entry type, so `mpm dump --brewfile` leaves
-# VSCodium extensions out of the file: https://mpm.run/dump.html#brewfile
+# VSCodium extensions out of the file: https://mpm.run/dump/#brewfile
 #
 # No version_regexes: `codium --version` prints the bare version, then the commit
 # hash and the arch on their own lines, and the default regex picks the first

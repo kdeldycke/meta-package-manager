@@ -244,11 +244,15 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.9 caps a table column to a width (`max_column_widths` on
-  # print_table): meta_package_manager.tables holds the search table's
-  # description column to `auto`, so a long match wraps in its cell instead of
-  # stretching the table past the terminal.
-  "click-extra>=8.9",
+  # click-extra 8.9.1 resolves the `click-extra-manpages` index against the
+  # page's own URL rather than its docname, which the `dirhtml` builder set in
+  # `[tool.repomatic] sphinx.builder` publishes one directory deeper: the man
+  # links of `cli-parameters` pointed inside their own page before it. 8.9 caps
+  # a table column to a width (`max_column_widths` on print_table), which
+  # meta_package_manager.tables uses to hold the search table's description
+  # column to `auto`, wrapping a long match in its cell instead of stretching
+  # the table past the terminal.
+  "click-extra>=8.9.1",
   # extra-platforms 13.6 detects AlmaLinux, silencing the "unrecognized platform"
   # warning 13.5 printed to stdout on the release workflow's RHEL-family test
   # containers, which corrupted the CLI output the test suite asserts on.
@@ -450,7 +454,7 @@ exclude-newer = "1 week"
 # timestamp, conventionally the midnight following the release upload, so the
 # exemption covers that release and nothing later. Drop the entry once the
 # release ages past the cooldown window.
-exclude-newer-package = { click-extra = "2026-08-15T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-08-16T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches
@@ -760,6 +764,12 @@ exclude = [ "skills" ]
 # Extension zip packed by release.yaml's build-gnome-extension job and attached
 # to every GitHub release by the engine's extra-assets job (repomatic >= 7.4.2).
 release-assets = [ "mpm-gnome-shell-extension.zip" ]
+# Publish every page as `<name>/index.html`, so the site serves `/managers/apk/`
+# instead of `/managers/apk.html`. Extension-less URLs are what search engines
+# and readers expect of a documentation site, and they outlive a change of
+# generator. `docs/conf.py` keeps the former paths alive as redirect stubs, and
+# `docs/infrastructure.md` carries the edge side of the move.
+sphinx.builder = "dirhtml"
 # Source paths for workflow trigger filters.
 workflow.source-paths = [ "meta_package_manager" ]
 # Wholesale replacement of tests.yaml's `paths:` filter (this override is

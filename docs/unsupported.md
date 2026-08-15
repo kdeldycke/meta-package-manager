@@ -15,7 +15,7 @@ A third marker rides alongside either of them:
 
 - 🛟 [`topgrade`](managers/topgrade.md) reaches it anyway, so `mpm upgrade --topgrade` still upgrades it. `mpm` wraps `topgrade` as the catch-all for tools too thin to earn a manager of their own, which is why most of this page is still upgradable without being wrapped.
 
-One section per tool, except where several share a verdict word for word: those are grouped under the family they belong to, which names its members up front. Each section is an anchor, so a decision can be cited from anywhere in the documentation, the code or an issue: `https://mpm.run/unsupported.html#paq`.
+One section per tool, except where several share a verdict word for word: those are grouped under the family they belong to, which names its members up front. Each section is an anchor, so a decision can be cited from anywhere in the documentation, the code or an issue: `https://mpm.run/unsupported/#paq`.
 
 ```{hint}
 None of these verdicts are permanent. If a tool here looks misjudged, make the case in a [new manager request](https://github.com/kdeldycke/meta-package-manager/issues/new?template=new-package-manager.yml) and the entry will be reassessed.

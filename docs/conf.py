@@ -303,6 +303,13 @@ linkcheck_ignore = [
     # understands. A broken badge is a wrong forge path rather than a dead link,
     # which is what the badge catalogue tests check instead.
     r"https://img\.shields\.io/",
+    # The readme's operation matrix links every manager to its own page on this
+    # very site, absolutely: the readme renders on GitHub and PyPI, where a
+    # relative Sphinx link cannot resolve. Both ends are generated from the same
+    # pool, so a link here can only break by the site being down or by a URL
+    # shape moving, and the crawl of a hundred-odd of them would eat a budget
+    # already throttled by the hosts above.
+    r"https://mpm\.run/managers/",
 ]
 
 # Retry transiently-unreachable hosts before reporting them broken, so a flaky
@@ -351,4 +358,58 @@ click_extra_manpages = [
 # Wire Sphinx's standard manpage role to the HTML siblings generated above.
 # Lets docstrings reference subcommands as {manpage}`mpm-install(1)` and
 # render them as proper hyperlinks in the docs.
-manpages_url = "man/{page}.{section}.html"
+#
+# Rooted, not relative: this template is emitted verbatim into the page, with
+# none of the per-page rewriting Sphinx gives a link between two documents. A
+# relative `man/…` resolved against the page's own URL, which the `dirhtml`
+# builder ends in a directory, so a reference from `/cli-parameters/` reached
+# for `/cli-parameters/man/…` and 404ed. The site is only ever served from the
+# domain root, which is what makes the leading slash safe.
+manpages_url = "/man/{page}.{section}.html"
+
+
+# Landing pages for the URLs this site published before it moved to `dirhtml`.
+# `/managers/apk.html` is what years of links, bookmarks and search results
+# point at; the directory build answers `/managers/apk/` and would 404 every
+# one of them. Each stub is a zero-delay refresh plus the canonical link that
+# tells a crawler where the page went, which is as close to a `301` as a static
+# host with no server-side rules can get: GitHub Pages serves files, and the
+# apex stays unproxied so no edge rule can rewrite a path (see
+# `docs/infrastructure.md`).
+LEGACY_URL_STUB = """\
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="0; url={target}">
+<link rel="canonical" href="{target}">
+<title>Page moved</title>
+</head>
+<body><p>This page moved to <a href="{target}">{target}</a>.</p></body>
+</html>
+"""
+
+
+def write_legacy_url_stubs(app, exception):
+    """Write a `page.html` stub beside every `page/index.html` of a dirhtml build.
+
+    Skipped for any other builder, which either publishes those paths for real
+    (`html`) or has no output to alias (`linkcheck`).
+    """
+    if exception or app.builder.name != "dirhtml":
+        return
+    outdir = Path(app.outdir)
+    for index_file in outdir.rglob("index.html"):
+        page = index_file.parent.relative_to(outdir)
+        # The site root has no legacy alias: it never carried a suffix.
+        if page == Path():
+            continue
+        alias = outdir / f"{page}.html"
+        if alias.exists():
+            continue
+        target = f"{app.config.html_baseurl}{page.as_posix()}/"
+        alias.write_text(LEGACY_URL_STUB.format(target=target), encoding="UTF-8")
+
+
+def setup(app):
+    app.connect("build-finished", write_legacy_url_stubs)

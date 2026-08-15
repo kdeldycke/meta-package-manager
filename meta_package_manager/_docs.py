@@ -276,6 +276,25 @@ drift apart. Carries no trailing slash, since every consumer appends a rooted
 path.
 """
 
+
+def manager_page_url(manager_id: str) -> str:
+    """Absolute URL of a manager's documentation page on the published site.
+
+    Directory-shaped (`/managers/apk/`), the form the `dirhtml` builder set in
+    `[tool.repomatic] sphinx.builder` publishes: the page is written as
+    `managers/apk/index.html`, and the trailing slash is what keeps the server
+    from answering a redirect on the way there. The `.html` URLs this site used
+    to publish still resolve, through the stubs `docs/conf.py` writes beside
+    every page.
+
+    A function rather than an f-string repeated at each call site: the readme
+    matrix and the manager-index prose both build it, and the shape of a
+    published URL is exactly the kind of fact that drifts when it lives in two
+    places.
+    """
+    return f"{DOCS_SITE_URL}/managers/{manager_id}/"
+
+
 EMPTY_CELLS = frozenset({"", "—", "➖"})
 """Hand-curated table cells carrying no reusable content.
 
@@ -647,12 +666,8 @@ def operation_matrix() -> tuple[str, str]:
     table = []
     for mid, m in sorted(pool.items()):
         line = [
-            f"[`{mid}`]({DOCS_SITE_URL}/managers/{mid}.html)"
-            + (
-                ""
-                if not m.unmaintained
-                else f" [⚠️]({DOCS_SITE_URL}/managers/{mid}.html)"
-            ),
+            f"[`{mid}`]({manager_page_url(mid)})"
+            + ("" if not m.unmaintained else f" [⚠️]({manager_page_url(mid)})"),
             _format_requirement(m.requirement or ""),
             "✓" if m.supports_cooldown else "",
         ]
@@ -2624,8 +2639,7 @@ def manager_support_legend() -> str:
         for mid in (*pool, *unsupported)
     )
     table = [
-        [glyph, str(counts[glyph]), meaning]
-        for glyph, meaning in SUPPORT_SCALE.items()
+        [glyph, str(counts[glyph]), meaning] for glyph, meaning in SUPPORT_SCALE.items()
     ]
     rendered = render_table(
         table,

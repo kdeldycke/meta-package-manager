@@ -48,7 +48,7 @@
 - [bar-plugin,gnome-shell,mpm] Publish the documentation at `https://mpm.run`. Every absolute link in `readme.md`, the benchmark tables, the packaging specs and the extension metadata points at the new origin; the former `kdeldycke.github.io` URLs redirect to it.
 - [mpm] Emit a canonical URL on every documentation page, plus a `sitemap.xml` listing all of them and a `robots.txt` pointing crawlers at it.
 - [mpm] Open every installation method with a command that works today. The Alpine Linux, Chocolatey, Nix and Void Linux tabs carry the condensed build recipe from their packaging section instead of a one-liner the reader cannot run yet, and the pending channels close on an admonition inviting support on their upstream pull request.
-- [mpm] Raise the click-extra floor from `8.8.1` to `8.9`.
+- [mpm] Raise the click-extra floor from `8.8.1` to `8.9.1`, whose `click-extra-manpages` directive resolves its links against the page's own URL rather than its docname, which a directory-published page sits one level below.
 - [mpm] Cap the description column of `mpm search` to the width the other columns leave on the terminal, wrapping a long description inside its own cell instead of letting a verbose match push the table past the terminal edge and mangle its borders.
 - [mpm] Distinguish, in the Python compatibility table, a version a release rules out (❌) from one that did not exist yet when that release was cut (–), which used to render as a refusal too.
 - [mpm] Bump the in-repo Alpine, MacPorts and Nix packaging specs to build click-extra from `8.9.0`, the Alpine one jumping from `8.6.2`. Its dependencies, test dependencies and build backend are unchanged across the whole range, so the specs need no other edit.

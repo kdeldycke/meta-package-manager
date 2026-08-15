@@ -8,7 +8,8 @@ Everything needed to rebuild the documentation site's hosting from nothing, and 
 | --- | --- | --- |
 | Canonical host | `mpm.run` | Everything the site publishes lives here |
 | Hosting | GitHub Pages, `gh-pages` branch | Custom domain set in the repository's Pages settings, not a `CNAME` file |
-| Build | GitHub Actions, `.github/workflows/docs.yaml` | Sphinx, then deploy, then link check |
+| Build | GitHub Actions, `.github/workflows/docs.yaml` | Sphinx `dirhtml`, then deploy, then link check |
+| URL shape | `/managers/apk/`, no extension | Old `.html` paths answer from redirect stubs |
 | DNS | Cloudflare | Apex and `www` are **DNS-only**; only the wildcard is proxied |
 | Vanity redirects | Cloudflare Single Redirect, `http_request_dynamic_redirect` phase | `<manager>.mpm.run` to that manager's page |
 | Certificates | GitHub for the apex and `www`, Cloudflare Universal SSL for the wildcard | Neither is managed by us |
@@ -27,13 +28,13 @@ One thing is proxied, because an edge redirect cannot work otherwise, and it has
 
 ## Vanity subdomains carry no manager list
 
-`https://apt.mpm.run/` 301s to `https://mpm.run/managers/apt.html`, and so does every other manager, without anything enumerating them.
+`https://apt.mpm.run/` 301s to `https://mpm.run/managers/apt/`, and so does every other manager, without anything enumerating them.
 
 The redirect rule splices the subdomain label straight into the path:
 
 ```
 expression:  ends_with(http.host, ".mpm.run") and http.host ne "www.mpm.run"
-target:      concat("https://mpm.run/managers/", substring(http.host, 0, -8), ".html")
+target:      concat("https://mpm.run/managers/", substring(http.host, 0, -8), "/")
 ```
 
 `substring(http.host, 0, -8)` trims the eight characters of `.mpm.run` off the end, leaving the label. `substring()` was chosen over `regex_replace()` because it is core to the Rules language and works on the Free plan.
@@ -41,9 +42,22 @@ target:      concat("https://mpm.run/managers/", substring(http.host, 0, -8), ".
 Two consequences worth keeping:
 
 - **A manager added to the pool gets its vanity host for free.** Nothing here can drift from `meta_package_manager.pool`, because nothing here knows what a manager is.
-- **An unknown label lands on the site's 404**, not on an edge error. `wrong.mpm.run` redirects to `/managers/wrong.html` and fails there, which is the friendlier of the two failures and costs nothing to allow.
+- **An unknown label lands on the site's 404**, not on an edge error. `wrong.mpm.run` redirects to `/managers/wrong/` and fails there, which is the friendlier of the two failures and costs nothing to allow.
 
 The apex is not matched: `mpm.run` does not end in `.mpm.run`. `www` is excluded explicitly, though it is also DNS-only and so never reaches the rule at all: belt and braces, because the day someone proxies `www` is the day the exclusion starts mattering.
+
+The trailing slash is the only thing this rule says about page layout, and it is edited by hand in the dashboard: it targeted `.html` paths until the site switched builders.
+
+## Pages are directories
+
+`[tool.repomatic] sphinx.builder` is `dirhtml`, so Sphinx writes every page as `<name>/index.html` and the site serves `/managers/apk/` where it used to serve `/managers/apk.html`. An extension-less URL survives a change of generator, which a suffix naming the output format does not.
+
+The `.html` paths the site published for years still answer, from stubs `docs/conf.py` writes beside each page at the end of a `dirhtml` build: a zero-delay `<meta http-equiv="refresh">` plus the `<link rel="canonical">` naming the directory URL. That is as close to a `301` as this host allows, GitHub Pages serving files and the apex staying unproxied, so no edge rule can rewrite a path. A stub answering `200` is the one deliberate exception to the rule below, and its canonical link is what keeps it from becoming a second indexable copy of the page.
+
+Two smaller consequences of the switch, both handled and both easy to reintroduce:
+
+- **`manpages_url` is rooted, not relative.** The man pages under `/man/` are roff renderings, not Sphinx documents, so their link template lands in the page verbatim, with none of the per-page rewriting a document reference gets. Relative, it resolved against the page's own directory and 404ed. Their *index* broke the same way for a different reason, and was fixed upstream: click-extra `8.9.1` resolves the `click-extra-manpages` directive's links against the page's own URL rather than its docname, which is one directory shallower under this builder. That release is the floor `pyproject.toml` declares.
+- **Absolute self-links move by hand.** The readme, the benchmark and the packaging specs name the canonical host from outside Sphinx's reach, so nothing rewrites them when the layout changes: `meta_package_manager._docs.manager_page_url` builds the manager ones, and the rest are literals.
 
 ## One host serves, and only one
 
@@ -80,7 +94,7 @@ A token for steps 2 to 5 needs `Zone → Read`, `DNS → Edit`, `Dynamic URL Red
 ## Known gaps
 
 - **No `AAAA` records on the apex.** GitHub publishes an IPv6 apex set; it was not verifiable from the machine that set this up, and a wrong `AAAA` black-holes v6 clients while an absent one costs nothing. Visitors still reach the proxied hostnames over IPv6 from Cloudflare's edge. Worth adding once verified.
-- **URLs still carry `.html`.** Clean URLs need Sphinx's `dirhtml` builder, which needs a `builder` input on repomatic's reusable `docs.yaml`. Until then the vanity redirects target `.html` paths, and the `substring()` rule's suffix would need revisiting alongside that change.
+- **The old `.html` URLs answer `200`, not `301`.** A static host cannot redirect, so they land on the stubs described above. Whatever authority a `301` would have passed along stays with the canonical link instead.
 - **Downstream packaging specs lag.** The in-repo `packaging/*` specs point at the canonical host, but the copies already accepted by Nix, Guix, MacPorts and Alpine still carry the old URL until the next release bump re-submits them.
 
 ## Keeping this current

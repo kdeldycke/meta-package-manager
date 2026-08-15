@@ -138,7 +138,7 @@ def pytest_collection_modifyitems(config, items):
     integration layer and quarantines the repo-maintenance guards, so a
     downstream packager can run the suite with a single selection and no
     per-module ignore list. See
-    https://mpm.run/packaging.html
+    https://mpm.run/packaging/
     """
     run_destructive, run_non_destructive = solve_destructive_options(config)
 

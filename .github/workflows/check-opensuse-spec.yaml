@@ -1,0 +1,196 @@
+---
+name: 🦎 Validate openSUSE spec
+"on":
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/check-opensuse-spec.yaml
+      - packaging/opensuse/**
+  pull_request:
+    paths:
+      - .github/workflows/check-opensuse-spec.yaml
+      - packaging/opensuse/**
+  workflow_dispatch:
+
+# Temporary workflow validating packaging/opensuse/ before it is submitted to
+# openSUSE's devel:languages:python. Three independent signals, each in its own
+# job so a failure names itself: the spec's form (rpmlint, spec-cleaner), the
+# build (rpmbuild, whose %check phase runs mpm's own hermetic test suite), and
+# the installed package driving the container's real zypper.
+#
+# Every runtime dependency is already in Tumbleweed, so unlike the Alpine, Nix
+# and Void channels there is no dependency cascade to build first.
+#
+# Fold into tests-install.yaml as an `opensuse-source` job and delete this file
+# once it goes green, per docs/add-packaging-channel.md.
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Nothing here resolves a version from a live registry: zypper reads the
+# openSUSE archive, which stages its own releases, and the source tarball is
+# fetched at the exact version the spec pins. The window is declared anyway so
+# that any step added later inherits it. See claude.md § Cooldown on every
+# install.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
+jobs:
+
+  build-rpm:
+    name: rpmbuild
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    container:
+      image: opensuse/tumbleweed
+    steps:
+      - name: Install build tooling
+        run: |
+          set -eux
+          zypper --non-interactive --gpg-auto-import-keys refresh
+          zypper --non-interactive install --no-recommends \
+            curl \
+            git \
+            python-rpm-macros \
+            rpm-build \
+            rpmlint \
+            tar
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install the spec's own build dependencies
+        # Read off the spec rather than restated here, so the two cannot drift.
+        # Version constraints are stripped because zypper cannot take a
+        # `name >= version` capability as a single argument; rpmbuild checks
+        # them again at build time anyway, which is where a floor must hold.
+        run: |
+          set -eux
+          rpmspec --query --buildrequires \
+            packaging/opensuse/meta-package-manager.spec \
+            | cut --delimiter=' ' --fields=1 \
+            | xargs zypper --non-interactive install --no-recommends
+      - name: Fetch the pinned source tarball
+        run: |
+          set -eux
+          mkdir --parents /usr/src/packages/SOURCES
+          source_url="$(rpmspec --parse \
+            packaging/opensuse/meta-package-manager.spec \
+            | sed --quiet 's/^Source:[[:space:]]*//p')"
+          curl --location --fail --silent --show-error \
+            --output "/usr/src/packages/SOURCES/${source_url##*/}" \
+            "${source_url}"
+      - name: Build the binary and source RPMs
+        # rpmbuild has no long-form equivalent for -ba. The %check phase runs
+        # `pytest -m "not integration"`, so a green build is also a green suite.
+        run: rpmbuild -ba packaging/opensuse/meta-package-manager.spec
+      - name: Stage the built RPM for the integration job
+        run: cp /usr/src/packages/RPMS/noarch/*.rpm ./
+      - name: Lint the built RPM
+        # Reported rather than gated on warnings: a package nobody has yet
+        # submitted always trips some openSUSE house style, and the build above
+        # is the assertion this job exists to make. Errors still fail.
+        run: |
+          set -uo pipefail
+          report="$(rpmlint ./*.rpm 2>&1 || true)"
+          echo "${report}"
+          {
+            echo "## rpmlint (binary RPM)"
+            echo ""
+            echo '```'
+            echo "${report}"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+          if echo "${report}" | grep --quiet " E: "; then
+            echo "rpmlint reported errors, see above." >&2
+            exit 1
+          fi
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: opensuse-rpm
+          path: ./*.rpm
+
+  lint-spec:
+    name: rpmlint + spec-cleaner
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    container:
+      image: opensuse/tumbleweed
+    steps:
+      - name: Install lint tooling
+        run: |
+          set -eux
+          zypper --non-interactive --gpg-auto-import-keys refresh
+          zypper --non-interactive install --no-recommends \
+            git \
+            python-rpm-macros \
+            rpmlint \
+            spec-cleaner
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Lint the spec
+        run: |
+          set -uo pipefail
+          report="$(rpmlint packaging/opensuse/meta-package-manager.spec 2>&1 || true)"
+          echo "${report}"
+          {
+            echo "## rpmlint (spec)"
+            echo ""
+            echo '```'
+            echo "${report}"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+          if echo "${report}" | grep --quiet " E: "; then
+            echo "rpmlint reported errors, see above." >&2
+            exit 1
+          fi
+      - name: Diff against openSUSE's canonical spec form
+        # spec-cleaner rewrites a spec the way the distribution formats it, so
+        # this diff is what a reviewer would otherwise ask for by hand. Never
+        # gated: it also reflows cosmetics that carry no review weight, and it
+        # would strip the comments this spec deliberately keeps.
+        run: |
+          set -uo pipefail
+          report="$(spec-cleaner --diff packaging/opensuse/meta-package-manager.spec 2>&1 || true)"
+          echo "${report}"
+          {
+            echo "## spec-cleaner --diff"
+            echo ""
+            echo '```diff'
+            echo "${report}"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  integration:
+    name: Install and drive zypper
+    needs: build-rpm
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    container:
+      image: opensuse/tumbleweed
+    steps:
+      - name: Refresh repositories
+        run: zypper --non-interactive --gpg-auto-import-keys refresh
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: opensuse-rpm
+      - name: Install the built RPM
+        # --allow-unsigned-rpm: this artifact was built by the job above, not
+        # signed by a repository. zypper still resolves its Requires from the
+        # distribution repositories, which is the half worth testing.
+        run: |
+          set -eux
+          zypper --non-interactive install --no-recommends --allow-unsigned-rpm ./*.rpm
+      - name: Smoke-test the installed CLI
+        run: |
+          set -eux
+          mpm --version
+          meta-package-manager --version
+          mpm --table-format=json managers
+      - name: Drive the distribution's own zypper
+        # The check no other channel's CI can make: mpm reading real zypper
+        # state, on the distribution whose manager it is.
+        run: |
+          set -eux
+          mpm --zypper --verbosity INFO installed

@@ -103,6 +103,14 @@ Fish plugin manager with no commit since 2023-01-05.
 
 Cross-platform package manager modelled on Homebrew, down to a registry of its own: "fish food" recipes hosted at [fishworks/fish-food](https://github.com/fishworks/fish-food). Its readme announces the end in as many words, "*THIS PROJECT IS BEING ARCHIVED*", blaming "*the amount of time and money required to maintain this side project*", and no commit has landed since 2022-03-08. The repository is archived and names no successor.
 
+## [`helm`](https://helm.sh) ❌ 🛟
+
+Everything about Helm reads like a candidate: chart repositories that are real registries, and `list`, `search`, `install`, `upgrade` and `uninstall` all native. Scope is the whole of the objection, and it is decisive.
+
+Helm does not install onto the machine. Installing a chart "*creates a new release object*" inside a Kubernetes cluster, and `helm list` enumerates the releases of whichever cluster the current context points at. That inventory therefore describes a cluster rather than a host, changes with `kubectl config use-context`, and is empty or unreachable where no cluster is configured at all, none of which the system scope every `mpm` manager holds to can express.
+
+The line is not that Kubernetes is out of bounds: [`krew`](managers/krew.md) is wrapped, and installs `kubectl` plugins as binaries under the user's own home. The object is what differs, a local binary against a remote deployment.
+
 ## [`home-manager`](https://github.com/nix-community/home-manager) ❌ 🛟
 
 Draws its packages from nixpkgs, the registry `mpm` already reaches through [`nix`](managers/nix.md): the manual states that "*Nixpkgs packages can be installed to the user profile using `home.packages`*", an option typed `list of package`. No per-package verb either, its command dispatch accepting only whole-state operations like `build`, `switch` and `generations`, so a package is added by editing `home.nix` and running `home-manager switch`. It does report what it installed, through `home-manager packages`, but that inventory is a view onto the same profile `mpm` already reads.

@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Wrap the name and version columns of `mpm installed`, `mpm outdated` and `mpm search` inside their own cell, so their tables stop overflowing the terminal. `package_id` stays uncapped and never wraps: it is the value copied back into an install, removal or upgrade command, and an identifier split over two lines cannot be selected in one go.
 - [mpm] Wrap the `Supported` and `CLI` columns of `mpm managers` inside their own cell, instead of stretching the table past the edge of the terminal and mangling every border. Tables are also measured against the width of the terminal now, rather than against the 80-column budget that lays out help screens.
 - [am,miktex,nala,pamac,pkcon] Declare support for the Linux compatibility layers, WSL included, in place of the Linux distributions alone. Their platform set matched none of the groups the documentation classifies against, so the readme's operation matrix reported no platform at all for `am`, `nala`, `pamac` and `pkcon`, and Windows alone for `miktex`.
 - [mpm] Report only the detected managers in `mpm managers`, and drop the `Supported` and `Executable` columns there, both a ✓ on every such row. The new `--view supported` restores the previous listing, `--view all` (or the global `--all-managers`) reports every manager `mpm` implements, and both bring the two columns back. Naming managers explicitly still reports them whatever their state.

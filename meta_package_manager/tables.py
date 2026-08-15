@@ -155,7 +155,12 @@ INSTALLED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
         SortableField.PACKAGE_ID,
     ),
     (
-        ColumnSpec("package_name", "Name", "Package's common name."),
+        ColumnSpec(
+            "package_name",
+            "Name",
+            "Package's common name.",
+            max_width=AUTO_WIDTH,
+        ),
         SortableField.PACKAGE_NAME,
     ),
     (
@@ -164,23 +169,49 @@ INSTALLED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
     ),
     (
         ColumnSpec(
-            "installed_version", "Installed version", "Version currently installed."
+            "installed_version",
+            "Installed version",
+            "Version currently installed.",
+            max_width=AUTO_WIDTH,
         ),
         SortableField.VERSION,
     ),
 )
-"""Columns of the `mpm installed` table."""
+"""Columns of the `mpm installed` table.
+
+```{important}
+`package_id` is deliberately the one column of every package table left
+uncapped, and the rule holds wherever these specs are reused. It is the value
+the user copies back into an `mpm install`, `mpm remove` or `mpm upgrade`
+invocation, and a cell wrapped over two lines cannot be selected in one go. So
+it never wraps, and the shrinking falls on its neighbors instead: the name is
+free prose, and a version is read rather than retyped.
+
+The trade is explicit. A package ID wider than the terminal on its own still
+pushes the table past the edge, because the alternative is handing the user a
+broken identifier. Both halves of the trade are real here: `vim-pack` names its
+plugins by GitHub URL (50 characters), and Homebrew Cask reports versions like
+`1.26832.0,056ee2be623b207f6a4d24dfb1b2fb5a82db0ecf`.
+```
+"""
 
 OUTDATED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
     *INSTALLED_COLUMNS,
     (
         ColumnSpec(
-            "latest_version", "Latest version", "Version available for upgrade."
+            "latest_version",
+            "Latest version",
+            "Version available for upgrade.",
+            max_width=AUTO_WIDTH,
         ),
         None,
     ),
 )
-"""Columns of the `mpm outdated` table."""
+"""Columns of the `mpm outdated` table.
+
+Inherits the width policy documented on {data}`INSTALLED_COLUMNS`: the second
+version column wraps like the first, `package_id` still does not.
+"""
 
 SEARCH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
     (
@@ -188,7 +219,12 @@ SEARCH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
         SortableField.PACKAGE_ID,
     ),
     (
-        ColumnSpec("package_name", "Name", "Package's common name."),
+        ColumnSpec(
+            "package_name",
+            "Name",
+            "Package's common name.",
+            max_width=AUTO_WIDTH,
+        ),
         SortableField.PACKAGE_NAME,
     ),
     (
@@ -196,7 +232,12 @@ SEARCH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
         SortableField.MANAGER_ID,
     ),
     (
-        ColumnSpec("latest_version", "Latest version", "Latest version available."),
+        ColumnSpec(
+            "latest_version",
+            "Latest version",
+            "Latest version available.",
+            max_width=AUTO_WIDTH,
+        ),
         SortableField.VERSION,
     ),
     (
@@ -216,11 +257,13 @@ The `description` column exists in the registry (so `--columns` can select it)
 but stays out of the default selection unless `--description` (or `--extended`,
 which searches descriptions) is passed.
 
-It is also the only column of any registry holding free prose, of a length no
-manager bounds: a single verbose match used to stretch the table far past the
-terminal and wrap every row at the edge, mangling the borders.
+It is the column holding the longest free prose, of a length no manager bounds:
+a single verbose match used to stretch the table far past the terminal and wrap
+every row at the edge, mangling the borders.
 {data}`~click_extra.table.AUTO_WIDTH` caps it at whatever the other columns
-leave on the terminal, so the description wraps inside its own cell.
+leave on the terminal, so the description wraps inside its own cell. The name
+and version columns share that treatment, and `package_id` is exempt from it,
+per the width policy documented on {data}`INSTALLED_COLUMNS`.
 """
 
 WHICH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (

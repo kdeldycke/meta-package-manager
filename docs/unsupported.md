@@ -263,6 +263,14 @@ Rebuild a local database from files already on disk. Nothing is fetched, install
 
 Refreshes a local cache of community-written command summaries. The pages are documentation, not packages: nothing is installed, versioned or removable.
 
+## [`tmux`](https://github.com/tmux-plugins/tpm) ❌ 🛟
+
+The Tmux Plugin Manager clears the bar most editor and shell plugin managers fail: it is genuinely scriptable, shipping `bin/install_plugins`, `bin/update_plugins` and `bin/clean_plugins`, and its own comment notes tmux "*does not need to be started in order to run this script*". Nobody has to be at the keyboard.
+
+What it has no shape for is a package. Those three scripts are the whole surface and none takes an argument: the plugin set is whatever `.tmux.conf` declares, so installing is all-or-nothing from that file and there is no verb naming one plugin. Neither is there a listing, nor a version of its own, upstream tagging its repository but publishing no releases and putting nothing on disk that names one.
+
+No inventory, no per-package operation, and `topgrade` already reaching it leaves nothing a wrapper would add, which is [`zr`](#zr)'s verdict.
+
 ## `topgrade` internal steps ❌ 🛟
 
 [`remotes`](https://github.com/topgrade-rs/topgrade), [`rtcl`](https://github.com/topgrade-rs/topgrade) and [`system`](https://github.com/topgrade-rs/topgrade).

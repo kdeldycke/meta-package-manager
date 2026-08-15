@@ -43,7 +43,7 @@ Bash package manager, abandoned: 28 commits in all and nothing since 2021-07-25.
 
 ## Container runtimes ❌ 🛟
 
-[`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`podman`](https://podman.io) and [`toolbx`](https://containertoolbx.org).
+[`colima`](https://colima.run), [`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`podman`](https://podman.io) and [`toolbx`](https://containertoolbx.org).
 
 Manage container images and running containers, not packages. An image is a filesystem bundle addressed by tag or digest rather than a versioned package, and pulling a newer tag is not an upgrade `mpm` can reason about.
 

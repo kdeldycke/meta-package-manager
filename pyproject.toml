@@ -408,9 +408,21 @@ typing = [
   # Stubs for the untyped libraries mpm imports: boltons, xmltodict in
   # managers/zypper.py, docutils and PyYAML in tests/test_docs.py. mypy needs the
   # docutils stub even though the library itself ships with the docs group alone.
+  #
+  # These floors are freshness markers rather than API minima. typeshed
+  # republishes a stub on every upstream change and ships no changelog to pin a
+  # symbol against, so each floor is simply the release current when the stub was
+  # declared. Raise one only when mypy reports a symbol the older stub lacks.
   "types-boltons>=25.0.0.20250919",
+  # Declared for `docutils.nodes`, which mypy follows into tests/test_docs.py even
+  # though the import there is guarded by `ImportError`. Floor is the stub current
+  # when the missing-stub error first turned the Lint workflow red.
   "types-docutils>=0.22.3.20260724",
+  # Declared for PyYAML in tests/test_docs.py. Floor predates typeshed's
+  # date-stamped versioning and no symbol mpm reads has needed a newer stub.
   "types-pyyaml>=6.0.12.9",
+  # Declared for xmltodict in managers/zypper.py. Floor is a 1.0 stub, matching
+  # the 1.x line the lock resolves.
   "types-xmltodict>=1.0.1.20250920",
 ]
 
@@ -810,7 +822,6 @@ manpages.script = "meta_package_manager.cli:mpm"
 # `meta-package-manager-manpages.tar.gz`) when omitted; `mpm-manpages.tar.gz`
 # matches the CLI name and shortens the asset URL on every release.
 manpages.asset-name = "mpm-manpages"
-
 # Content-based labeller rules. See repomatic's labels.content-rules schema.
 labels.content-rules."📦 manager: apk" = [ "alpine", "alpine linux" ]
 labels.content-rules."📦 manager: apm" = [ "atom" ]
@@ -1485,19 +1496,6 @@ description = "Cygwin, GNU/Hurd, Haiku, IBM AIX, IBM i, illumos, Solaris"
 name = "🖥 platform: Windows"
 color = "bfd4f2"
 description = "Windows"
-
-[tool.actionlint]
-# actionlint reads no pyproject section of its own: repomatic serializes this
-# one to a temporary YAML config and passes it via `--config-file`. actionlint
-# validates a literal `runs-on:` against a built-in label list that does not
-# yet carry GitHub's Ubuntu 26.04 preview images, so it rejects them as
-# unknown. Declaring them here is the mechanism actionlint's own error message
-# points to. They are ordinary GitHub-hosted images, not self-hosted runners:
-# that key is simply where actionlint accepts a label it does not ship. Drop
-# this section once rhysd/actionlint#682 ships in a release. Meanwhile it opens
-# no hole: a typo'd runner is still caught by `lint-repo`'s own check against
-# KNOWN_RUNNERS.
-self-hosted-runner.labels = [ "ubuntu-26.04", "ubuntu-26.04-arm" ]
 
 [tool.gitleaks]
 # Extend gitleaks' built-in ruleset instead of replacing it: this section is

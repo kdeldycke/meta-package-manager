@@ -19,6 +19,14 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/">
+<style>
+  .mpm-face{stroke:none;fill-rule:evenodd}
+  .mpm-top{fill:#d3d3f6}
+  .mpm-right{fill:#807bad}
+  .mpm-left{fill:#2d2364}
+  .word{fill:#2d2364}
+  .sub{fill:#2d2364;fill-opacity:.8}
+</style>
   <defs
      id="defs155" />
   <sodipodi:namedview
@@ -83,98 +91,98 @@
       <g
          id="g19383"
          transform="translate(14,-4)"
-         style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-opacity:1">
-        <path
+         >
+        <path class="mpm-face mpm-left"
            id="path12540"
-           style="fill:#d3d3f6;fill-opacity:1;fill-rule:evenodd;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0"
            d="m 389.53749,667.01506 118.58031,67.90401 v 135.80415 l -118.58031,-67.904 z" />
-        <path
+        <path class="mpm-face mpm-right"
            id="path12542"
-           style="fill:#d3d3f6;fill-opacity:1;fill-rule:evenodd;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0"
            d="M 508.09462,734.89223 626.67493,666.98824 V 802.7924 l -118.58031,67.90399 z" />
-        <path
+        <path class="mpm-face mpm-top"
            id="path12548"
            sodipodi:nodetypes="ccccc"
-           style="fill:#d3d3f6;fill-opacity:1;fill-rule:evenodd;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0"
            d="m 626.69039,667.01506 -118.58032,-67.90399 47.43058,-27.16083 118.58032,67.904 z" />
-        <path
+        <path class="mpm-face mpm-top"
            id="path12550"
            sodipodi:nodetypes="ccccc"
-           style="fill:#d3d3f6;fill-opacity:1;fill-rule:evenodd;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0"
            d="m 508.09462,734.89223 -47.43058,27.16083 -118.58031,-67.90399 47.43058,-27.16083 z" />
-        <path
+        <path class="mpm-face mpm-top"
            id="path13068"
-           style="fill:#d3d3f6;fill-opacity:1;fill-rule:evenodd;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0"
            d="m 508.09462,734.89223 118.58031,-67.90399 47.43058,27.16083 -118.58031,67.90399 z" />
-        <path
+        <path class="mpm-face mpm-top"
            id="path13070"
            d="m 342.08373,639.84121 118.58031,-67.904 47.43058,27.16084 -118.58031,67.90399 z"
-           style="fill:#d3d3f6;fill-opacity:1;fill-rule:evenodd;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0" />
-        <path
+        <clipPath id="mpm-rim" clipPathUnits="userSpaceOnUse"><path d="M 389.53749,667.01506 L 508.11007,599.11107 L 626.68266,667.00165 L 508.09462,734.89223 Z"/></clipPath><g clip-path="url(#mpm-rim)"><path class="mpm-face mpm-right" d="M 389.53749,667.01506 L 508.11007,599.11107 L 508.11007,734.91522 L 389.53749,802.81921 Z"/><path class="mpm-face mpm-left" d="M 508.11007,599.11107 L 626.68266,667.00165 L 626.68266,802.8058 L 508.11007,734.91522 Z"/></g><path class="mpm-face mpm-top"
            id="path13429"
            sodipodi:nodetypes="ccccc"
-           style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0"
            d="m 508.09462,626.27344 -35.5741,20.37082 35.5741,20.3708 35.5741,-20.3708 z" />
-        <path
+        <path class="mpm-face mpm-left"
            id="path13431"
            sodipodi:nodetypes="ccccc"
-           style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0"
            d="m 508.09462,667.01506 v 40.74164 l -35.5741,-20.37082 v -40.74162 z" />
-        <path
+        <path class="mpm-face mpm-right"
            id="path13433"
            sodipodi:nodetypes="ccccc"
            d="m 508.09462,667.01506 4e-5,40.74164 35.57409,-20.37082 v -40.74162 z"
-           style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0" />
-        <path
+        <path class="mpm-face mpm-top"
            id="path13429-7"
            sodipodi:nodetypes="ccccc"
-           style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0"
            d="m 401.40093,768.84998 -35.57409,20.37082 35.57409,20.37081 35.57409,-20.37081 z" />
-        <path
+        <path class="mpm-face mpm-left"
            id="path13431-4"
            sodipodi:nodetypes="ccccc"
-           style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0"
            d="m 401.40093,809.59161 v 40.74163 L 365.82684,829.96243 V 789.2208 Z" />
-        <path
+        <path class="mpm-face mpm-right"
            id="path13433-7"
            sodipodi:nodetypes="ccccc"
            d="m 401.40093,809.59161 4e-5,40.74163 35.57409,-20.37081 V 789.2208 Z"
-           style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0" />
-        <path
+        <path class="mpm-face mpm-top"
            id="path13514"
            d="m 602.96351,802.80773 -35.5741,20.37081 35.5741,20.37082 35.57409,-20.37082 z"
            sodipodi:nodetypes="ccccc"
-           style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0" />
-        <path
+        <path class="mpm-face mpm-left"
            id="path13516"
            d="m 602.96351,843.54936 v 40.74162 l -35.5741,-20.37081 v -40.74163 z"
            sodipodi:nodetypes="ccccc"
-           style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            inkscape:connector-curvature="0" />
-        <path
+        <path class="mpm-face mpm-right"
            id="path13518"
            sodipodi:nodetypes="ccccc"
            inkscape:connector-curvature="0"
-           style="fill:#d3d3f6;fill-opacity:1;stroke:#534d73;stroke-width:15.3939;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           
            d="m 602.96351,843.54936 3e-5,40.74162 35.5741,-20.37081 v -40.74163 z" />
       </g>
-      <g
+      <g class="word"
          aria-label="mpm"
          id="text1137"
-         style="font-size:213.333px;line-height:1.25;fill:#2d2364">
+         style="font-size:213.333px;line-height:1.25">
         <path
            d="m 876.28262,766.05029 h -35.41328 v -88.95985 q 0,-7.25333 -5.33332,-12.37332 -5.11999,-5.33332 -12.58665,-5.33332 -7.25332,0 -12.58665,5.33332 -5.11999,5.11999 -5.11999,12.37332 v 88.95985 H 769.61612 V 641.67716 h 35.62661 v 17.70664 q 1.06667,-8.95999 5.54666,-13.22665 4.47999,-4.47999 12.15998,-4.47999 h 17.91997 q 18.13331,0 26.66663,12.58664 4.26666,-6.39998 10.87998,-9.38665 6.61332,-3.19999 15.78664,-3.19999 h 17.70664 q 14.50664,0 24.95996,10.45331 10.66665,10.45332 10.66665,24.95997 v 88.95985 h -35.62661 v -88.95985 q 0,-7.03999 -5.33333,-12.37332 -5.11999,-5.33332 -12.37331,-5.33332 -7.25332,0 -12.58665,5.33332 -5.33332,5.11999 -5.33332,12.37332 z"
            style="font-family:Silom;-inkscape-font-specification:Silom"
@@ -188,10 +196,10 @@
            style="font-family:Silom;-inkscape-font-specification:Silom"
            id="path120" />
       </g>
-      <g
+      <g class="sub"
          aria-label="Meta  Package  Manager"
          id="text14169"
-         style="font-size:37.3333px;line-height:1.25;font-family:Silom;-inkscape-font-specification:Silom;letter-spacing:2px;fill:#534d73">
+         style="font-size:37.3333px;line-height:1.25;font-family:Silom;-inkscape-font-specification:Silom;letter-spacing:2px">
         <path
            d="m 771.28537,859.99121 v -27.99998 h 1.456 l 13.29065,13.25333 13.25333,-13.25333 h 3.13599 v 27.99998 h -6.23466 v -17.09865 l -10.90132,10.90132 -10.86399,-10.90132 v 17.09865 z"
            id="path141" />

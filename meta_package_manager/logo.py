@@ -60,14 +60,14 @@ TAGLINE = "Meta Package Manager"
 LOGO: tuple[str, ...] = (
     "       ..    ..       ",
     "     .....  .....     ",
-    "   ......    ......   ",
-    " ......        ...... ",
-    " ....    ....    .... ",
-    "   .     ++::     .   ",
-    "  ...    ++::    ...  ",
-    " ......   +:   ...... ",
-    "  ......      ......  ",
-    "   +......  ......:   ",
+    "   ......::++......   ",
+    " ......::::++++...... ",
+    " ....::::....++++.... ",
+    "   .:::::++::+++++.   ",
+    "  ...::::++::++++...  ",
+    " ......:::+:+++...... ",
+    "  ......:::+++......  ",
+    "   +......:+......:   ",
     "   +++....+:....:::   ",
     "   ++++++++::::::::   ",
     "   ++++++++::::::::   ",
@@ -92,20 +92,62 @@ which drifted three separate ways: a column count rounded off the row scale left
 sampling grid off-centre, paint order tilted mirror-paired surfaces, and an odd
 column count gave the axis a column that would have had to face both ways at once.
 
+The box is open, so the two far walls show through its rim, and they carry the
+plane *opposite* the one they sit behind: the far-left wall is lit as a right-facing
+face, which is why the interior's left half is `:` where the exterior's is `+`. That
+mirroring is what keeps the floating cube legible against the wall behind it, each
+of its faces landing on the other tone. The interior cells were filled by testing
+every empty cell's centre against the rim quadrilateral in the artwork's own
+coordinates, so they cannot drift from the SVG the way an eyeballed fill would.
+
 Hand-editing a row is fine, but keep the rows equal in length and even in number,
 keep the width even, and keep every row symmetric.
 """
 
+BRAND_WASH = "#d3d3f6"
+"""The pale lavender of the artwork's lit planes.
+
+One of the two colors the whole identity is drawn from, with {data}`BRAND_INK`.
+Declared here as well as in `docs/brand_update.py` because runtime code cannot
+read the SVG sources, which are not shipped in the wheel;
+`test_ansi_logo_tracks_the_brand_palette` fails if the two ever disagree.
+"""
+
+BRAND_INK = "#2d2364"
+"""The deep purple of the artwork's shadowed planes, and of its lettering.
+
+The second brand color. It used to be the wordmark's alone, the box outline
+carrying a third, lighter purple that this mark's shadow faces stood in for, so
+the terminal rendition inherited a mismatch the artwork has since dropped.
+"""
+
+BRAND_MID = "#807bad"
+"""The midpoint of the two, for the third plane an isometric solid needs.
+
+Computed rather than chosen, so the palette remains two colors and a derivation.
+The artwork gained it when the mark went flat: with no outline left to separate
+the faces, a right-facing plane can no longer share a value with a left-facing
+one.
+"""
+
 TONES: dict[str, int] = {
-    ".": 189,  # `#d7d7ff`, standing in for the artwork's `#d3d3f6` fill.
-    ":": 103,  # `#8787af`, a mid tone interpolated for the right-hand faces.
-    "+": 60,  # `#5f5f87`, standing in for the artwork's `#534d73` stroke.
+    ".": 189,  # `#d7d7ff`, the palette's nearest to BRAND_WASH.
+    ":": 103,  # `#8787af`, its nearest to BRAND_MID.
+    "+": 17,  # `#00005f`, its nearest chromatic entry to BRAND_INK.
 }
 """Xterm-256 palette index per shading tone of {data}`LOGO`.
 
-Indices rather than truecolor: the 256-color cube is the widest-supported palette
-that still lands within a few units of the brand colors, and click emits no downgrade
-of its own for a terminal that cannot do 24-bit.
+One index per plane, mapped to the closest thing the palette can render: the lit
+faces take {data}`BRAND_WASH`, the shadowed ones {data}`BRAND_INK`, and the
+right-hand planes {data}`BRAND_MID`.
+
+Indices rather than truecolor: the 256-color cube is the widest-supported palette,
+and click emits no downgrade of its own for a terminal that cannot do 24-bit —
+including Apple's own Terminal, where a 24-bit sequence would take the mark with
+it. The cost is borne entirely by the ink: the cube resolves dark colors coarsely,
+so `#00005f` is as close as it gets (a perceptual distance of ~24, against ~3 for
+the wash). It is the nearest entry that keeps any chroma at all, the closer ones
+by raw distance all being grays, which would paint a purple mark in ash.
 """
 
 LOGO_WIDTH = len(LOGO[0])

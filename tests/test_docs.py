@@ -32,7 +32,7 @@ import pytest
 from extra_platforms import Group, extract_members
 from yaml import Loader, load, safe_load
 
-from meta_package_manager import _docs
+from meta_package_manager import _docs, logo
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import mpm
 from meta_package_manager.dispatch import (
@@ -915,6 +915,44 @@ def test_augmentations_table_renders():
     assert any(
         line.startswith("| [`pip`](managers/pip.md) ") and "✅" in line for line in rows
     )
+
+
+def test_ansi_logo_tracks_the_brand_palette():
+    """Check the terminal mark names the very colors the artwork is drawn in.
+
+    `meta_package_manager.logo` repeats them as literals, the SVG sources living
+    in `docs/` and never reaching the wheel. That repetition is how the terminal
+    mark came to shade its faces with a purple the artwork had already dropped,
+    so the sources are what the constants are checked against: the brand SVGs
+    must use these three values, and nothing else.
+    """
+    # Two brand colors and the midpoint a flat isometric solid needs for its
+    # third plane, which must be exactly that: a midpoint, not a fourth choice.
+    assert logo.BRAND_MID == "#{:02x}{:02x}{:02x}".format(*(
+        (int(logo.BRAND_INK[i : i + 2], 16) + int(logo.BRAND_WASH[i : i + 2], 16)) // 2
+        for i in (1, 3, 5)
+    ))
+    palette = {logo.BRAND_INK, logo.BRAND_MID, logo.BRAND_WASH}
+    # The one derived value the artwork holds: the social banner's background,
+    # which is the wash over white and so cannot be any of them literally.
+    derived = {"#e7e7fa"}
+    for name in (
+        "banner-social.svg",
+        "favicon.svg",
+        "icon.svg",
+        "logo-banner.svg",
+        "logo-square.svg",
+    ):
+        source = (PROJECT_ROOT / "docs" / "assets" / name).read_text(encoding="UTF-8")
+        # Inkscape's editor chrome is not artwork: it never renders.
+        source = re.sub(r"<sodipodi:namedview[\s\S]*?/>", "", source)
+        colors = {match.lower() for match in re.findall(r"#[0-9a-fA-F]{6}", source)}
+        assert colors - derived == palette, f"{name} strays from the brand palette"
+
+    # Three tones, in the order they shade an isometric solid: the lit faces,
+    # the interpolation, then the shadowed ones.
+    assert list(logo.TONES) == [".", ":", "+"]
+    assert len(set(logo.TONES.values())) == 3
 
 
 def test_manager_logo_assets():

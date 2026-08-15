@@ -26,14 +26,40 @@ Every [GitHub release](https://github.com/kdeldycke/meta-package-manager/release
 $ gh attestation verify mpm-gnome-shell-extension.zip --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
 ```
 
-Then install and enable it:
+Then install it:
 
 ```shell-session
 $ gnome-extensions install --force mpm-gnome-shell-extension.zip
+```
+
+```{important}
+A running GNOME Shell does not pick up a freshly installed extension, and `gnome-extensions enable` asks the shell rather than the disk. Run it too early and it answers `Extension "mpm@kdeldycke.github.io" does not exist`, however successful the install was. Restart the session first.
+```
+
+A Wayland session cannot restart the shell in place, so end the session and log back in:
+
+```shell-session
+$ gnome-session-quit --logout --no-prompt
+```
+
+An X11 session can restart the shell alone, from the `Alt`+`F2` prompt: type `r`, then `Enter`.
+
+Once the shell is back, enable the extension:
+
+```shell-session
 $ gnome-extensions enable mpm@kdeldycke.github.io
 ```
 
-Log out and back in (or restart GNOME Shell) for the extension to load.
+`State: ACTIVE` confirms the shell loaded it:
+
+```shell-session
+$ gnome-extensions info mpm@kdeldycke.github.io
+mpm@kdeldycke.github.io
+  Name: Meta Package Manager
+  (...)
+  Enabled: Yes
+  State: ACTIVE
+```
 
 Between releases, the bleeding-edge equivalent is produced on each extension change as a workflow artifact of [`tests-gnome-extension.yaml`](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests-gnome-extension.yaml).
 
@@ -44,12 +70,24 @@ $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager
 $ glib-compile-schemas "gnome-shell/mpm@kdeldycke.github.io/schemas/"
 $ ln -snf "$(pwd)/gnome-shell/mpm@kdeldycke.github.io" ~/.local/share/gnome-shell/extensions/
+```
+
+Restart the session as above, then enable it:
+
+```shell-session
 $ gnome-extensions enable mpm@kdeldycke.github.io
 ```
 
 ## Configuration
 
 Settings live in the extension preferences window, also reachable from the indicator menu:
+
+```{image} assets/gnome-shell-preferences.png
+:alt: The preferences window of the GNOME Shell extension
+:align: center
+:width: 400px
+```
+
 
 | Setting                | Description                                                     | Type    | Default |
 | ---------------------- | --------------------------------------------------------------- | ------- | ------- |
@@ -74,6 +112,8 @@ Clicking a package runs `mpm --<manager-id> upgrade <package-id>`, and a section
 By default the command opens in a terminal window, so the run can be followed and `sudo` can prompt for a password. Turning `upgrade-in-terminal` off runs upgrades silently in the background: system package managers then need passwordless escalation, as `mpm` cannot prompt without a terminal. See the `NOPASSWD` guidance in {doc}`sudo`.
 
 Since a terminal window detaches from the process actually running the upgrade, the extension cannot tell when it completes: it refreshes the package list a few minutes after launching one (`post-upgrade-recheck`), and a *Check now* entry forces a refresh at any time.
+
+When no `mpm` is found on the system, the menu carries a bootstrap pair in place of the package list: *Install mpm with uv* runs `uv tool install --upgrade meta-package-manager` through the same terminal path as an upgrade, and *Open mpm installation instructions* opens {doc}`install` for the systems `uv` does not answer for. The {doc}`menubar plugin <bar-plugin>` offers the same pair.
 
 ## Development workflow
 

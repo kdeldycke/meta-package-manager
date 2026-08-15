@@ -111,6 +111,7 @@ jobs:
           gnome-extensions pack --force
           --extra-source=mpm.js
           --extra-source=icons
+          --extra-source=license
           --out-dir "$RUNNER_TEMP"
           "gnome-shell/mpm@kdeldycke.github.io"
       # Round-trip: consume the zip with the same command users run, proving

@@ -59,6 +59,26 @@ EXPECTED_ICON_STATES = frozenset({"error", "unknown", "updates", "uptodate"})
 """Values of the `State` mapping in `extension.js`, each backed by a
 `mpm-<state>-symbolic.svg` icon."""
 
+PACK_DEFAULTS = frozenset({
+    "extension.js",
+    "metadata.json",
+    "prefs.js",
+    "schemas",
+    "stylesheet.css",
+})
+"""Sources `gnome-extensions pack` bundles on its own.
+
+`extension.js` and `metadata.json` are mandatory, `prefs.js` and the stylesheets
+optional, and a `schemas/` folder is picked up automatically. Anything else needs
+an explicit `--extra-source`, without which it silently never reaches the zip.
+Documentation: [`gnome-extensions(1)` man
+page](https://man.archlinux.org/man/extra/gnome-shell/gnome-extensions.1.en).
+"""
+
+PACKING_WORKFLOWS = ("release.yaml", "tests-gnome-extension.yaml")
+"""Both workflows packing the extension: one produces the release asset, the
+other the artifact round-tripped through `gnome-extensions install`."""
+
 
 def _extension_source(*names: str) -> str:
     """Concatenate the content of the given extension source files."""
@@ -78,6 +98,25 @@ def _gschema() -> ElementTree.Element:
 def _gschema_keys() -> list[str]:
     """Key names declared in the GSettings schema, in file order."""
     return [key.attrib["name"] for key in _gschema().findall("key")]
+
+
+def _install_argv(source: str) -> tuple[str, ...]:
+    """The `INSTALL_ARGV` literal of a source file, JavaScript or Python.
+
+    Both dialects spell it as a bracketed list of quoted strings, so one reader
+    covers the two. Read as text rather than imported: this module stays free of
+    package imports to keep its `once` marker from lowering the coverage slice.
+    """
+    literal = re.search(r"INSTALL_ARGV = [\[(](.+?)[\])]", source, re.DOTALL)
+    assert literal
+    return tuple(re.findall(r"['\"]([^'\"]+)['\"]", literal.group(1)))
+
+
+def _extra_sources(workflow: str) -> set[str]:
+    """Sources whitelisted with `--extra-source` by a workflow's pack step."""
+    workflow_file = PROJECT_ROOT / ".github" / "workflows" / workflow
+    content = workflow_file.read_text(encoding="UTF-8")
+    return set(re.findall(r"--extra-source=(\S+)", content))
 
 
 def test_metadata_well_formed():
@@ -152,6 +191,67 @@ def test_no_orphan_icons():
     expected.add("mpm-logo.svg")
     shipped = {path.name for path in (EXTENSION_DIR / "icons").glob("*.svg")}
     assert shipped == expected
+
+
+def test_logo_matches_the_brand_mark():
+    """The extension ships the brand mark itself, not a fork of it.
+
+    `docs/brand_update.py` owns every artwork under `docs/assets/`, but not this
+    copy: the extension bundles its own icons, and the flat redesign had to be
+    carried over by hand. Byte-identity turns the next such drift into a failure.
+    """
+    bundled = (EXTENSION_DIR / "icons" / "mpm-logo.svg").read_text(encoding="UTF-8")
+    brand = (PROJECT_ROOT / "docs" / "assets" / "icon.svg").read_text(encoding="UTF-8")
+    assert bundled == brand
+
+
+def test_install_bootstrap_matches_the_bar_plugin():
+    """Both frontends offer the same command to install a missing `mpm`.
+
+    The two menus are written in different languages against different toolkits,
+    so nothing else holds their bootstrap offer together.
+    """
+    plugin = (PROJECT_ROOT / "meta_package_manager" / "bar_plugin.py").read_text(
+        encoding="UTF-8"
+    )
+    assert _install_argv(_extension_source("mpm.js")) == _install_argv(plugin)
+
+
+def test_pack_whitelists_are_identical():
+    """Both packing workflows declare the same sources.
+
+    They pack the same artifact: the tested zip stops being the shipped one the
+    moment their whitelists diverge.
+    """
+    released, tested = (_extra_sources(name) for name in PACKING_WORKFLOWS)
+    assert released == tested
+
+
+def test_pack_whitelist_covers_every_source():
+    """Every file of the extension directory reaches the packed zip.
+
+    `gnome-extensions pack` packs from a whitelist, so a file added here but
+    declared nowhere is dropped from the bundle without a word, and a declared
+    file that was since removed breaks the pack. Both fail here instead.
+    """
+    # Hidden files belong to no bundle: .DS_Store and friends are not sources.
+    shipped = {
+        path.name
+        for path in EXTENSION_DIR.iterdir()
+        if not path.name.startswith(".")
+    }
+    assert shipped - PACK_DEFAULTS == _extra_sources(PACKING_WORKFLOWS[0])
+
+
+def test_bundled_license_matches_the_project():
+    """The extension carries its own copy of the license.
+
+    The zip is distributed detached from the repository, on GitHub releases and
+    extensions.gnome.org alike, and GNOME Shell extensions are derived works of
+    a `GPL-2.0-or-later` codebase: the license text has to travel with it.
+    """
+    bundled = (EXTENSION_DIR / "license").read_text(encoding="UTF-8")
+    assert bundled == (PROJECT_ROOT / "license").read_text(encoding="UTF-8")
 
 
 def test_runtime_argv_long_form():

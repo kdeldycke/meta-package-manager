@@ -112,6 +112,9 @@ jobs:
   # both, or the released artifact stops being the one that was tested.
   build-gnome-extension:
     name: 🐚 Pack GNOME Shell extension
+    # For `release_commits_matrix` alone, not for ordering: the job stays unconditional
+    # (the build lane is too), so the engine never cascade-skips on a regular push.
+    needs: build
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
@@ -120,6 +123,19 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Pack the commit the engine tags, not the pushed head. A release run is
+          # triggered by the post-release bump commit and tags its parent, so every
+          # engine-built asset comes from `matrix.commit` while a default checkout
+          # here would pack the tree one commit later: v7.6.1 shipped an extension
+          # advertising `version-name` 7.6.2.dev0 that way. Resolves to the empty
+          # string on a regular push, which checkout reads as the pushed head. The
+          # matrix is ordered newest first, so a push carrying several release
+          # commits packs the latest: the same single-release assumption the
+          # engine's extra-assets job already makes by uploading one artifact.
+          ref: >-
+            ${{ fromJSON(needs.build.outputs.release_commits_matrix
+            || '{"include":[{"commit":""}]}').include[0].commit }}
       # The gnome-extensions CLI lives in the gnome-shell package; skipping the
       # recommends keeps the desktop stack out of the runner.
       - name: Install gnome-extensions CLI
@@ -134,6 +150,7 @@ jobs:
           gnome-extensions pack --force
           --extra-source=mpm.js
           --extra-source=icons
+          --extra-source=license
           --out-dir "$RUNNER_TEMP"
           "gnome-shell/mpm@kdeldycke.github.io"
       - name: Rename to the release asset name

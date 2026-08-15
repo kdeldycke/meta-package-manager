@@ -9,6 +9,7 @@
 - [mpm] Show a spinner while `mpm managers` detects the pool.
 - [mpm] Detect managers concurrently in `mpm managers`, which alone kept probing them one at a time.
 - [mpm] Run the version probe of managers sharing a CLI once instead of once each, `brew`/`cask`, `uv`/`uvx` and `yarn`/`yarn-berry` among them. Detection groups them into lanes that take turns over a shared command cache, the mechanism a lock family already uses for its operations.
+- [mpm] Load the SPDX and CycloneDX writer libraries only when `mpm sbom` runs, instead of on every invocation. Cuts about 300 ms off the startup of every other command for anyone carrying the `[sbom-offline]` extra.
 - [zef] Add Zef package manager, with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support. Raku identity strings are colon-separated, so both listings match the distribution name lazily up to `:ver<` and reduce the rows to one entry per name.
 - [basalt] Add Basalt package manager as a bundled definition, with `installed`, `install` and `remove` support. Every operation goes through its `global` subcommand tree, the bare ones acting on the current directory's project instead. Versions are the commit hashes basalt pins each package to.
 - [bpkg] Add bpkg package manager as a bundled definition, with `install` support. `install` forces `--global`, without which bpkg vendors the package into a `deps/` directory relative to the working directory. It exposes no inventory and no removal verb, and its catalogue read is left unmapped because `bpkg update` cannot sync an index.

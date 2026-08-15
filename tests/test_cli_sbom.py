@@ -24,7 +24,10 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import sys
 from pathlib import Path
+from textwrap import dedent
 from xml.etree import ElementTree
 
 import pytest
@@ -207,3 +210,47 @@ def test_minimal_mode_skips_metadata_extractor(invoke):
         assert package["downloadLocation"] == "NOASSERTION"
         assert "licenseDeclared" not in package
         assert "checksums" not in package
+
+
+def test_cli_import_defers_sbom_libraries():
+    """Importing the CLI must not pull the SBOM writer libraries.
+
+    `cli.py` imports every subcommand module up front to register it, so a
+    module-level import of the writers in `cli_sbom` would spend their (heavy)
+    third-party import cost on every `mpm` invocation, for a dependency only
+    `mpm sbom` ever uses. The imports therefore live inside the subcommand body,
+    the one place in the codebase deliberately breaking the imports-at-module-level
+    rule, and this test is what keeps them from drifting back up.
+
+    Runs in a fresh interpreter: the test session has long since imported
+    everything, so `sys.modules` here proves nothing.
+    """
+    probe = dedent("""
+        import sys
+
+        import meta_package_manager.cli  # noqa: F401
+
+        heavy = sorted(
+            name
+            for name in sys.modules
+            if name.split(".", 1)[0] in {"spdx_tools", "cyclonedx"}
+        )
+        print(",".join(heavy))
+    """)
+    result = subprocess.run(
+        (sys.executable, "-c", probe),
+        capture_output=True,
+        text=True,
+        encoding="UTF-8",
+        check=True,
+    )
+    assert result.stdout.strip() == "", (
+        f"importing meta_package_manager.cli pulled in: {result.stdout.strip()}"
+    )
+
+
+def test_sbom_command_loads_the_deferred_libraries(invoke, fake_pool):
+    """The other half of the contract: deferring them must not break the export."""
+    result = invoke("sbom", "--minimal")
+    assert result.exit_code == 0
+    assert result.stdout.strip()

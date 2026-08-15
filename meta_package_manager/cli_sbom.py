@@ -20,6 +20,25 @@ optional metadata enrichment and an opt-in OSV vulnerability scan.
 
 The `mpm` group itself, and the plumbing shared with the other subcommand
 modules, live in {mod}`meta_package_manager.cli`.
+
+```{important}
+The two writer modules are imported **inside** {func}`sbom`, the one place in the
+codebase deliberately breaking the imports-at-module-level rule.
+{mod}`meta_package_manager.sbom.spdx` and {mod}`meta_package_manager.sbom.cyclonedx`
+each pull a heavy third-party library at import time (`spdx-tools`, itself dragging
+`beartype` and `license-expression`, plus `cyclonedx-python-lib`), and `cli.py`
+imports every subcommand module up front to register it. So a module-level import
+here spent that cost on **every** `mpm` invocation, `mpm --version` included, for a
+library only this subcommand ever touches: deferring them took `mpm --version` from
+750 ms to 440 ms on a machine carrying the optional `[sbom-offline]` extra.
+
+Both are cheap no-ops for anyone without that extra, and the rest of this module
+still imports at the top: {mod}`meta_package_manager.sbom.base` costs under a
+millisecond and holds the {class}`~meta_package_manager.sbom.base.ExportFormat`
+enum the option declarations need at decoration time.
+`tests.test_cli_sbom.test_cli_import_defers_sbom_libraries` fails if the imports
+migrate back up.
+```
 """
 
 from __future__ import annotations
@@ -52,8 +71,6 @@ from .cli import (
 )
 from .dispatch import collect_from_managers
 from .sbom.base import SBOM, ExportFormat
-from .sbom.cyclonedx import CycloneDX, cyclonedx_support
-from .sbom.spdx import SPDX, spdx_support
 from .summary import print_summary, sbom_summary
 
 TYPE_CHECKING = False
@@ -107,6 +124,12 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     With `--query`, restrict the export to installed packages whose ID or name
     matches it (fuzzy by default, verbatim with `--exact`).
     """
+    # Deferred on purpose: these two modules carry the heavy writer libraries, and
+    # importing them at module level would tax every other subcommand. See the
+    # module docstring for the measurement and the rule it deliberately breaks.
+    from .sbom.cyclonedx import CycloneDX, cyclonedx_support
+    from .sbom.spdx import SPDX, spdx_support
+
     standard = "SPDX" if spdx else "CycloneDX"
 
     if is_stdout(export_path):

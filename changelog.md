@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Report only the detected managers in `mpm managers`, and drop the `Supported` and `Executable` columns there, both a ✓ on every such row. The new `--view supported` restores the previous listing, `--view all` (or the global `--all-managers`) reports every manager `mpm` implements, and both bring the two columns back. Naming managers explicitly still reports them whatever their state.
+- [mpm] Show a spinner while `mpm managers` detects the pool.
 - [mpm] Detect managers concurrently in `mpm managers`, which alone kept probing them one at a time.
 - [mpm] Run the version probe of managers sharing a CLI once instead of once each, `brew`/`cask`, `uv`/`uvx` and `yarn`/`yarn-berry` among them. Detection groups them into lanes that take turns over a shared command cache, the mechanism a lock family already uses for its operations.
 - [zef] Add Zef package manager, with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support. Raku identity strings are colon-separated, so both listings match the distribution name lazily up to `:ver<` and reduce the rows to one entry per name.

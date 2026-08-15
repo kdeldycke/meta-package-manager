@@ -55,9 +55,69 @@ class TestManagers(CLISubCommandTests, CLITableTests):
 
     @unsupported_manager_ids
     def test_unsupported_managers(self, invoke, subcmd, manager_id):
-        result = invoke(f"--{manager_id}", subcmd)
+        """A manager named by the user is reported whatever its state: the default
+        view widens to `supported` on an explicit selection, so the row spelling out
+        why `mpm` cannot use it is the answer the selector asked for."""
+        result = invoke(f"--{manager_id}", subcmd, color=False)
         assert result.exit_code == 0
         self.check_manager_selection(result, set())
+        assert manager_id in result.stdout
+
+    @pytest.mark.parametrize(
+        ("view_args", "expected_ids"),
+        (
+            pytest.param(
+                (),
+                lambda: {
+                    mid for mid in pool.default_manager_ids if pool[mid].available
+                },
+                id="default-view-is-detected",
+            ),
+            pytest.param(
+                ("--view", "detected"),
+                lambda: {
+                    mid for mid in pool.default_manager_ids if pool[mid].available
+                },
+                id="detected",
+            ),
+            pytest.param(
+                ("--view", "supported"),
+                lambda: set(pool.default_manager_ids),
+                id="supported",
+            ),
+            pytest.param(
+                ("--view", "all"),
+                lambda: set(pool.all_manager_ids),
+                id="all",
+            ),
+        ),
+    )
+    def test_view_widths(self, invoke, subcmd, view_args, expected_ids):
+        """Each view reports its own nested slice of the pool."""
+        result = invoke("--table-format", "json", subcmd, *view_args)
+        assert result.exit_code == 0
+        assert set(json.loads(result.stdout)) == expected_ids()
+
+    def test_all_managers_flag_selects_widest_view(self, invoke, subcmd):
+        """The global flag keeps naming the widest view, as `--view all` does."""
+        result = invoke("--all-managers", "--table-format", "json", subcmd)
+        assert result.exit_code == 0
+        assert set(json.loads(result.stdout)) == set(pool.all_manager_ids)
+
+    def test_default_view_drops_constant_columns(self, invoke, subcmd):
+        """`Supported` and `Executable` are a ✓ on every detected row, so the
+        default view leaves them out and the wider ones bring them back."""
+        labels = {spec.id: spec.label for spec, _ in MANAGERS_COLUMNS}
+        dropped = (labels["supported"], labels["executable"])
+
+        detected = invoke(subcmd, color=False)
+        assert detected.exit_code == 0
+        assert not any(label in detected.stdout for label in dropped)
+
+        for view in ("supported", "all"):
+            wider = invoke(subcmd, "--view", view, color=False)
+            assert wider.exit_code == 0
+            assert all(label in wider.stdout for label in dropped)
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--table-format", "json", subcmd)
@@ -66,7 +126,7 @@ class TestManagers(CLISubCommandTests, CLITableTests):
 
         assert data
         assert isinstance(data, dict)
-        assert set(data) == set(pool.default_manager_ids)
+        assert set(data) <= set(pool.default_manager_ids)
 
         for manager_id, info in data.items():
             assert isinstance(manager_id, str)
@@ -105,11 +165,11 @@ class TestManagers(CLISubCommandTests, CLITableTests):
 
 
 def test_managers_stamps_global_timeout(invoke):
-    """The version probes behind the table's detection columns fire lazily at
-    rendering time, after selection, so the `managers` subcommand must forward
-    the global `--timeout` for the pool to bind it on each selected instance.
-    An unstamped instance falls back to the 120-second read-only default,
-    letting a wedged binary hold its table row for that long.
+    """The version probes behind the table's detection columns fire in the pool's
+    warm-up round, right after selection, so the `managers` subcommand must forward
+    the global `--timeout` for the pool to bind it on each candidate beforehand.
+    An unstamped instance falls back to the 120-second read-only default, letting a
+    wedged binary hold the whole round for that long.
     """
     original = pool["pip"].timeout
     try:

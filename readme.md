@@ -371,48 +371,45 @@ You still pick up older security fixes promptly, while sitting out the risky fir
 
 ### List managers
 
-If you wonder why your package manager doesn't seem to be identified, you can list all those recognized by `mpm` on the current platform:
+`mpm` reports the package managers it detected on your system, and the version each one self-reports:
 
 ```shell-session
 $ mpm managers
-╭──────────────┬───────────────────────┬───────────┬────────────────────────────────────────────────────────────────────────┬────────────┬─────────────────────╮
-│ Manager ID   │ Name                  │ Supported │ CLI                                                                    │ Executable │ Version             │
-├──────────────┼───────────────────────┼───────────┼────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────────┤
-│ asdf         │ asdf                  │ ✓         │ ✘ asdf not found                                                       │            │                     │
-│ brew         │ Homebrew Formulae     │ ✓         │ ✓ /opt/homebrew/bin/brew                                               │ ✓          │ ✓ 6.0.16-2-g007333f │
-│ cargo        │ Rust cargo            │ ✓         │ ✓ /opt/homebrew/bin/cargo                                              │ ✓          │ ✓ 1.97.1            │
-│ cask         │ Homebrew Cask         │ ✓         │ ✓ /opt/homebrew/bin/brew                                               │ ✓          │ ✓ 6.0.16-2-g007333f │
-│ composer     │ PHP Composer          │ ✓         │ ✘ composer not found                                                   │            │                     │
-│ conda        │ Conda                 │ ✓         │ ✘ conda not found                                                      │            │                     │
-│ cpan         │ Perl CPAN             │ ✓         │ ✓ /usr/bin/cpan                                                        │ ✓          │ ✓ 2.28              │
-│ fink         │ Fink                  │ ✓         │ ✘ fink not found                                                       │            │                     │
-│ gem          │ RubyGems              │ ✓         │ ✓ /usr/bin/gem                                                         │ ✓          │ ✓ 3.4.5             │
-│ gh-ext       │ GitHub CLI extensions │ ✓         │ ✓ /opt/homebrew/bin/gh                                                 │ ✓          │ ✓ 2.97.0            │
-│ macports     │ MacPorts              │ ✓         │ ✘ port not found                                                       │            │                     │
-│ mas          │ Mac App Store         │ ✓         │ ✓ /opt/homebrew/bin/mas                                                │ ✓          │ ✓ 7.0.0             │
-│ mise         │ mise                  │ ✓         │ ✘ mise not found                                                       │            │                     │
-│ nix          │ Nix                   │ ✓         │ ✘ nix-env not found                                                    │            │                     │
-│ npm          │ Node npm              │ ✓         │ ✓ /opt/homebrew/bin/npm                                                │ ✓          │ ✓ 11.19.0           │
-│ pip          │ Python pip            │ ✓         │ ✓ /Users/kde/code/meta-package-manager/.venv/bin/python3               │ ✓          │ ✘                   │
-│ pipx         │ Python pipx           │ ✓         │ ✘ pipx not found                                                       │            │                     │
-│ pnpm         │ Node pnpm             │ ✓         │ ✓ /opt/homebrew/bin/pnpm                                               │ ✓          │ ✓ 11.20.0           │
-│ pwsh-gallery │ PowerShell Gallery    │ ✓         │ ✘ pwsh not found                                                       │            │                     │
-│ sdkman       │ SDKMAN                │ ✓         │ ✘ sdkman-init.sh not found                                             │            │                     │
-│ steamcmd     │ Valve SteamCMD        │ ✓         │ ✘ steamcmd not found                                                   │            │                     │
-│ stew         │ stew                  │ ✓         │ ✘ stew not found                                                       │            │                     │
-│ tlmgr        │ TeX Live Manager      │ ✓         │ ✘ tlmgr not found                                                      │            │                     │
-│ topgrade     │ Topgrade              │ ✓         │ ✓ /opt/homebrew/bin/topgrade                                           │ ✓          │ ✓ 17.9.0            │
-│ uv           │ Python uv             │ ✓         │ ✓ /opt/homebrew/bin/uv                                                 │ ✓          │ ✓ 0.12.3            │
-│ uvx          │ Python uvx            │ ✓         │ ✓ /opt/homebrew/bin/uv                                                 │ ✓          │ ✓ 0.12.3            │
-│ vim-pack     │ Neovim vim-pack       │ ✓         │ ✓ /opt/homebrew/bin/nvim                                               │ ✓          │ ✓ 0.12.4            │
-│ vscode       │ Visual Studio Code    │ ✓         │ ✓ /Applications/Visual Studio Code.app/Contents/Resources/app/bin/code │ ✓          │ ✓ 1.132.0           │
-│ vscodium     │ VSCodium              │ ✓         │ ✘ codium not found                                                     │            │                     │
-│ yarn         │ Yarn Classic          │ ✓         │ ✓ /opt/homebrew/bin/yarn                                               │ ✓          │ ✓ 1.22.22           │
-│ yarn-berry   │ Yarn Berry            │ ✓         │ ✓ /opt/homebrew/bin/yarn                                               │ ✓          │ ✘ 1.22.22 >=2.0.0   │
-│ zerobrew     │ zerobrew              │ ✓         │ ✘ zb not found                                                         │            │                     │
-│ zinit        │ Zinit                 │ ✓         │ ✓ /opt/homebrew/bin/zsh                                                │ ✓          │ ✓ 3.15.0            │
-╰──────────────┴───────────────────────┴───────────┴────────────────────────────────────────────────────────────────────────┴────────────┴─────────────────────╯
+╭────────────┬───────────────────────┬────────────────────────────────────────────────────────────────────────┬──────────────────────╮
+│ Manager ID │ Name                  │ CLI                                                                    │ Version              │
+├────────────┼───────────────────────┼────────────────────────────────────────────────────────────────────────┼──────────────────────┤
+│ brew       │ Homebrew Formulae     │ ✓ /opt/homebrew/bin/brew                                               │ ✓ 6.0.17-69-g38ee325 │
+│ cargo      │ Rust cargo            │ ✓ /opt/homebrew/bin/cargo                                              │ ✓ 1.97.1             │
+│ cask       │ Homebrew Cask         │ ✓ /opt/homebrew/bin/brew                                               │ ✓ 6.0.17-69-g38ee325 │
+│ cpan       │ Perl CPAN             │ ✓ /usr/bin/cpan                                                        │ ✓ 2.28               │
+│ gem        │ RubyGems              │ ✓ /usr/bin/gem                                                         │ ✓ 3.4.5              │
+│ gh-ext     │ GitHub CLI extensions │ ✓ /opt/homebrew/bin/gh                                                 │ ✓ 2.97.0             │
+│ mas        │ Mac App Store         │ ✓ /opt/homebrew/bin/mas                                                │ ✓ 7.0.0              │
+│ npm        │ Node npm              │ ✓ /opt/homebrew/bin/npm                                                │ ✓ 11.19.0            │
+│ pnpm       │ Node pnpm             │ ✓ /opt/homebrew/bin/pnpm                                               │ ✓ 11.20.0            │
+│ topgrade   │ Topgrade              │ ✓ /opt/homebrew/bin/topgrade                                           │ ✓ 17.9.0             │
+│ uv         │ Python uv             │ ✓ /opt/homebrew/bin/uv                                                 │ ✓ 0.12.3             │
+│ uvx        │ Python uvx            │ ✓ /opt/homebrew/bin/uv                                                 │ ✓ 0.12.3             │
+│ vim-pack   │ Neovim vim-pack       │ ✓ /opt/homebrew/bin/nvim                                               │ ✓ 0.12.4             │
+│ vscode     │ Visual Studio Code    │ ✓ /Applications/Visual Studio Code.app/Contents/Resources/app/bin/code │ ✓ 1.133.0            │
+│ yarn       │ Yarn Classic          │ ✓ /opt/homebrew/bin/yarn                                               │ ✓ 1.22.22            │
+│ zinit      │ Zinit                 │ ✓ /opt/homebrew/bin/zsh                                                │ ✓ 3.15.0             │
+╰────────────┴───────────────────────┴────────────────────────────────────────────────────────────────────────┴──────────────────────╯
 ```
+
+If you wonder why one of your package managers is not in that list, name it: a manager you select explicitly is always reported, and the extra columns spell out what `mpm` could not resolve.
+
+```shell-session
+$ mpm --composer --pipx managers
+╭────────────┬──────────────┬───────────┬──────────────────────┬────────────┬─────────╮
+│ Manager ID │ Name         │ Supported │ CLI                  │ Executable │ Version │
+├────────────┼──────────────┼───────────┼──────────────────────┼────────────┼─────────┤
+│ composer   │ PHP Composer │ ✓         │ ✘ composer not found │            │         │
+│ pipx       │ Python pipx  │ ✓         │ ✘ pipx not found     │            │         │
+╰────────────┴──────────────┴───────────┴──────────────────────┴────────────┴─────────╯
+```
+
+To browse the whole catalog instead, widen the view: `mpm managers --view supported` lists every manager your platform can run, found or not, and `mpm managers --view all` adds those `mpm` implements for other platforms and the unmaintained ones.
 
 Unmaintained managers sit out of this default selection, and managers tied to other platforms are hidden: pass `--all-managers` to widen the table to every manager `mpm` knows.
 

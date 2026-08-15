@@ -29,12 +29,14 @@ from __future__ import annotations
 
 import logging
 from functools import partial
+from typing import Final
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
 from click_extra import (
     STRING,
     Choice,
+    Spinner,
     argument,
     columns_option,
     echo,
@@ -58,7 +60,7 @@ from .cli import (
 )
 from .config import dump_manager_overrides
 from .dispatch import collect_from_managers
-from .execution import CLIError, highlight_cli_name
+from .execution import SPINNER_DELAY, CLIError, highlight_cli_name
 from .manager import PackageManager
 from .package import Package, packages_asdict
 from .platforms import MAIN_PLATFORMS
@@ -67,6 +69,7 @@ from .summary import package_counts, print_summary
 from .tables import (
     INSTALLED_COLUMNS,
     MANAGERS_COLUMNS,
+    MANAGERS_DETECTED_COLUMNS,
     OUTDATED_COLUMNS,
     SEARCH_COLUMNS,
     WHICH_COLUMNS,
@@ -84,41 +87,89 @@ if TYPE_CHECKING:
     from click_extra import Context
 
 
+MANAGER_VIEWS: Final[tuple[str, ...]] = ("detected", "supported", "all")
+"""How much of the manager pool `mpm managers` reports, widest last.
+
+Three nested sets: the managers detected on the system, then those this platform
+supports whether or not their CLI was found, then every manager `mpm` implements
+(unsupported and unmaintained ones included). Each maps onto the pool's own
+selection knobs rather than filtering after the fact, so the views are the
+`drop_not_found` and `keep_unmaintained` combinations named.
+
+Unrelated to {class}`meta_package_manager.manager.ManagerScope`, which is about
+the filesystem a manager operates on: hence *view* rather than *scope*.
+"""
+
+
 @mpm.command(
-    short_help="List every registered package manager and check its presence "
-    "on the system.",
+    short_help="List the package managers detected on the system.",
     section=EXPLORE,
 )
 @columns_option(columns=column_specs(MANAGERS_COLUMNS))
+@option(
+    "--view",
+    type=Choice(MANAGER_VIEWS),
+    default=None,
+    help="How much of the manager pool to report. Defaults to 'detected', unless "
+    "--<manager-id> selectors name managers to answer about (then 'supported') or "
+    "--all-managers was passed (then 'all').",
+)
 @pass_context
-def managers(ctx):
+def managers(ctx, view):
     """List every package manager detected on the system.
 
-    Only reports by default all managers supported on the current platform. To include
-    unsupported and unmaintained managers in the report, use the `--all-managers`
-    flag.
+    Reports by default the managers `mpm` found and can drive right now. The pool has
+    grown past a hundred entries, most of them absent from any given machine, which is
+    what makes the detected ones the useful default.
+
+    The wider views are for troubleshooting a manager `mpm` does not pick up, each row
+    spelling out what is missing. `--view supported` adds the managers this platform
+    could run but whose CLI is absent; `--view all` adds those supported on other
+    platforms and the unmaintained ones, and is what the global `--all-managers` flag
+    selects here.
 
     User's own selection configuration are intentionally ignored, so a manager dropped
     from regular operations is still visible here for troubleshooting. To narrow down the
-    report to a subset of managers, pass the same selectors as for other subcommands (e.g.
+    report to a subset of managers, pass the same selectors as for other subcommands (like
     `--pip` or `--no-apt`).
     """
     if ctx.obj.user_drops:
         dropped = ", ".join(map(theme().invoked_command, sorted(ctx.obj.user_drops)))
         logging.info(f"Ignoring user exclusion of {dropped}.")
+
+    if ctx.obj.all_managers:
+        # The global flag is the pool-wide escape hatch every subcommand shares, so it
+        # keeps naming the widest view here, whatever the default resolves to.
+        view = "all"
+    elif view is None:
+        # A --<manager-id> selector is a question about that manager: answer it whatever
+        # its state, since hiding a manager the user just named would drop the very row
+        # explaining why mpm cannot use it.
+        view = "supported" if ctx.obj.user_selection else "detected"
+
     inventory = partial(
         pool.select_managers,
         keep=ctx.obj.user_selection,
         drop=None,
-        keep_unmaintained=ctx.obj.all_managers,
-        # Keep managers whose CLI was not found, to show how mpm reacts to the
-        # local platform.
-        drop_not_found=False,
-        # The version probes feeding the table fire lazily at column-render time,
-        # after selection: pass the global --timeout so the pool binds it to them,
-        # or a wedged binary would hold each row at the read-only default cap.
+        keep_unmaintained=view == "all",
+        drop_not_found=view == "detected",
+        # Pass the global --timeout so the pool binds it to the version probes feeding
+        # the table, or a wedged binary would hold the run at the read-only default cap.
         timeout=ctx.obj.timeout,
     )
+
+    # Materialize the selection up front: the pool detects the whole candidate set in
+    # one parallel round on the first iteration, which is the only wait this command
+    # has, and the spinner is what covers it. Managers keep their own per-call spinners
+    # disabled here (`progress` is never handed to the selection above), so nothing
+    # competes with this one for stderr.
+    with Spinner(
+        "Detecting package managers",
+        delay=SPINNER_DELAY,
+        enabled=None if ctx.obj.progress else False,
+        timer=True,
+    ):
+        selection = tuple(inventory())
 
     # Machine-friendly data rendering.
     table_format = ctx.meta[TABLE_FORMAT]
@@ -135,7 +186,7 @@ def managers(ctx):
             "fresh",
             "available",
         )
-        for manager in inventory():
+        for manager in selection:
             manager_data[manager.id] = {fid: getattr(manager, fid) for fid in fields}
             manager_data[manager.id]["errors"] = _cli_errors(manager)
 
@@ -143,7 +194,7 @@ def managers(ctx):
 
     # Human-friendly content rendering.
     table: list[dict[str, str | None]] = []
-    for manager in inventory():
+    for manager in selection:
         # Build up the OS column content.
         os_infos = (
             theme().success(OK_GLYPH) if manager.supported else theme().error(KO_GLYPH)
@@ -189,7 +240,12 @@ def managers(ctx):
             "version": version_infos,
         })
 
-    print_projected_table(ctx, MANAGERS_COLUMNS, table)
+    print_projected_table(
+        ctx,
+        MANAGERS_COLUMNS,
+        table,
+        default_ids=MANAGERS_DETECTED_COLUMNS if view == "detected" else None,
+    )
 
 
 def _manager_result(

@@ -138,6 +138,15 @@ class GlobalOptions:
     network: bool
     """Allow network calls during the run."""
 
+    progress: bool
+    """Whether progress indicators may render, after mpm's output-mode gating.
+
+    The same value the group folds into each manager's `progress` flag, exposed
+    for the subcommands resolving their own managers instead of going through
+    {attr}`selected_managers` (`managers`, whose only wait is the detection round
+    the pool runs for it). The widget still auto-gates on an interactive stderr.
+    """
+
     timeout: int | None
     """User-set maximum duration in seconds for each CLI call, or `None`."""
 
@@ -728,6 +737,7 @@ def mpm(
         description=description,
         summary=summary,
         network=network,
+        progress=show_progress,
         timeout=timeout,
     )
 

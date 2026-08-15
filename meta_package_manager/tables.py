@@ -114,6 +114,21 @@ MANAGERS_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
 )
 """Columns of the `mpm managers` table."""
 
+MANAGERS_DETECTED_COLUMNS: tuple[str, ...] = (
+    "manager_id",
+    "manager_name",
+    "cli",
+    "version",
+)
+"""Columns kept by the default, detected-only view of the `mpm managers` table.
+
+A detected manager is by definition supported on this platform, found and
+executable, so `supported` and `executable` render the same ✓ on every row and
+carry no information. Both come back in the wider views, where an unsupported
+platform or a missing binary makes them vary again. Only the *default* selection
+narrows: `--columns` still addresses every column of {data}`MANAGERS_COLUMNS`.
+"""
+
 INSTALLED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
     (
         ColumnSpec("package_id", "Package ID", "Package's identifier."),

@@ -231,10 +231,18 @@ class TestManagerSelection(InspectCLIOutput):
         assert selector in result.stderr
 
     def test_default_all_managers(self, invoke):
-        """Test all available managers are selected by default."""
+        """Test all available managers are selected by default.
+
+        With no selector to answer about, `managers` reports its default
+        `detected` view, so the platform defaults whose CLI is missing are left
+        out. The wider views are covered in `tests.test_cli_managers`.
+        """
         result = invoke("managers")
         assert result.exit_code == 0
-        self.check_manager_selection(result)
+        self.check_manager_selection(
+            result,
+            {mid for mid in pool.default_manager_ids if pool[mid].available},
+        )
 
     @default_manager_ids
     def test_manager_shortcuts(self, invoke, manager_id):

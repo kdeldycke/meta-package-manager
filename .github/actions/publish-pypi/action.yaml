@@ -34,7 +34,7 @@ runs:
         # _render_publish_pypi_job in repomatic/github/workflow_sync.py), so the empty workdir
         # is by design and setup-uv's warning about it is noise.
         ignore-empty-workdir: true
-        version: "0.12.1"
+        version: "0.12.3"
 
     - name: Download build artifact
       id: download

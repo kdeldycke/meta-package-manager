@@ -52,7 +52,7 @@ env:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@c4538934003ce3d0e306d13c0605bdc3c75bfa05 # v7.10.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@69cfe3259bda727942bcffe4a382d341cae69c44 # v7.12.1
     permissions:
       id-token: write
       issues: write
@@ -74,18 +74,19 @@ jobs:
       # `{"include":[]}` matrix, which expands the job to zero runs and skips it cleanly.
       matrix: ${{ fromJSON(needs.build.outputs.release_commits_matrix || '{"include":[]}') }}
     runs-on: ubuntu-26.04
+    timeout-minutes: 15
     permissions:
       # OIDC only: the PyPI Trusted Publishing token. The GitHub release notes
       # (with their PyPI admonition) are owned end to end by the engine lane's
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@c4538934003ce3d0e306d13c0605bdc3c75bfa05 # v7.10.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@69cfe3259bda727942bcffe4a382d341cae69c44 # v7.12.1
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@c4538934003ce3d0e306d13c0605bdc3c75bfa05 # v7.10.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@69cfe3259bda727942bcffe4a382d341cae69c44 # v7.12.1
     needs:
       - build
       - build-gnome-extension
@@ -206,7 +207,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.10.0' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.12.1' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
@@ -326,7 +327,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.10.0' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.12.1' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"

@@ -495,14 +495,9 @@ include-package-data = [ "click_extra", "meta_package_manager.managers:*.lua", "
 include-package = [ "cyclonedx", "hjson", "json5", "jsonc", "spdx_tools", "yaml" ]
 
 [tool.typos]
-# Correct capitalization for proper nouns.
 default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PyPi = "PyPI", Typescript = "TypeScript" }
-# Non-typo words flagged by default: `astroid` (the Python AST library),
-# `mis` (the `mis-split` prefix in pyenv.toml's comment), `oject` (a "project"
-# fragment surfaced when CLI-help output wraps a line), `sur` (macOS 11 Big Sur
-# and Homebrew's `big_sur` bottle tag), and `uncatalogued` plus `unparseable`,
-# British-spelling variants typos only knows in their American form.
-default.extend-words = { astroid = "astroid", mis = "mis", oject = "oject", sur = "sur", uncatalogued = "uncatalogued", unparseable = "unparseable" }
+# False positives: "astroid" is a Python AST library (not "asteroid"); "oject" appears when "pyproject.toml" is split across line breaks in CLI help output; "sur" is macOS 11 Big Sur and Homebrew's big_sur bottle tag (not "sure").
+default.extend-words = { astroid = "astroid", oject = "oject", sur = "sur", mis = "mis", uncatalogued = "uncatalogued", unparseable = "unparseable" }
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
 default.extend-ignore-re = [
   "(?s)<!-- typos:off -->.*?<!-- typos:on -->",

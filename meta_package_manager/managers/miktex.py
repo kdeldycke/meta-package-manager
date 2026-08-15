@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import re
 
-from extra_platforms import LINUX, WINDOWS
+from extra_platforms import LINUX_LIKE, WINDOWS
 
 from ..capabilities import version_not_implemented
 from ..manager import PackageManager
@@ -106,7 +106,7 @@ class MiKTeX(PackageManager):
     homepage_url = "https://miktex.org"
     logo = "latex"
 
-    platforms = LINUX, WINDOWS
+    platforms = LINUX_LIKE, WINDOWS
 
     requirement = ">=22.3"
     """The release that introduced the `packages` command this drives."""

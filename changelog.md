@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [am,miktex,nala,pamac,pkcon] Declare support for the Linux compatibility layers, WSL included, in place of the Linux distributions alone. Their platform set matched none of the groups the documentation classifies against, so the readme's operation matrix reported no platform at all for `am`, `nala`, `pamac` and `pkcon`, and Windows alone for `miktex`.
 - [mpm] Report only the detected managers in `mpm managers`, and drop the `Supported` and `Executable` columns there, both a ✓ on every such row. The new `--view supported` restores the previous listing, `--view all` (or the global `--all-managers`) reports every manager `mpm` implements, and both bring the two columns back. Naming managers explicitly still reports them whatever their state.
 - [mpm] Show a spinner while `mpm managers` detects the pool.
 - [mpm] Detect managers concurrently in `mpm managers`, which alone kept probing them one at a time.

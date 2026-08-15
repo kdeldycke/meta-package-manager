@@ -19,7 +19,7 @@ from __future__ import annotations
 import re
 from typing import ClassVar
 
-from extra_platforms import LINUX
+from extra_platforms import LINUX_LIKE
 
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
@@ -90,7 +90,7 @@ class Nala(PackageManager):
     homepage_url = "https://gitlab.com/volian/nala"
     logo = "debian"
 
-    platforms = LINUX
+    platforms = LINUX_LIKE
 
     default_sudo = True
     """Nala checks for root and exits with a message rather than escalating on

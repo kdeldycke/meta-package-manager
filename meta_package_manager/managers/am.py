@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from extra_platforms import LINUX
+from extra_platforms import LINUX_LIKE
 
 from ..manager import PackageManager
 
@@ -88,7 +88,7 @@ class AM(PackageManager):
 
     homepage_url = "https://github.com/ivan-hc/AM"
 
-    platforms = LINUX
+    platforms = LINUX_LIKE
 
     sudo = False
     default_sudo = False

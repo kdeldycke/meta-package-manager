@@ -19,7 +19,7 @@ from __future__ import annotations
 import re
 from typing import ClassVar
 
-from extra_platforms import LINUX
+from extra_platforms import LINUX_LIKE
 
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
@@ -56,7 +56,7 @@ class Pkcon(PackageManager):
     homepage_url = "https://www.freedesktop.org/software/PackageKit/"
     logo = "freedesktopdotorg"
 
-    platforms = LINUX
+    platforms = LINUX_LIKE
 
     requirement = ">=0.7.0"
     """All the commands and flags used here (`--plain`, `--noninteractive`,

@@ -41,7 +41,7 @@
 name = "Manjaro pamac"
 homepage_url = "https://github.com/manjaro/pamac-cli"
 logo = "manjaro"
-platforms = ["linux"]
+platforms = ["linux_like"]
 cli_names = ["pamac"]
 requirement = ">=11.0.0"
 # Deliberately prefix-agnostic: the banner read "Pamac %s" until 11.6.0 and

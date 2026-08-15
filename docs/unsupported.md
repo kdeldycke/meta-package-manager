@@ -41,6 +41,12 @@ A CPU speed and power optimizer for Linux, running as a daemon that switches gov
 
 Bash configuration framework shipping no registry of its own: its plugins, aliases and completions all live inside the single git checkout under `plugins/available`, `aliases/available` and `completion/available`, so `bash-it enable plugin git` only symlinks a file the clone already put on disk and `bash-it disable` removes that symlink again. Nothing is fetched and nothing carries a version of its own: `bash-it update` runs `git fetch` and checks out a tag or `master` across the whole tree, a mechanism its maintainer describes as "*we assume we cloned the project, and we run `git fetch` and things like that*" ([Bash-it/bash-it#1819](https://github.com/Bash-it/bash-it/issues/1819)).
 
+## [`basher`](https://github.com/basherpm/basher) ❌
+
+Package manager for shell scripts, and on the verbs alone the most complete candidate on this page: `list`, `outdated`, `upgrade`, `install` and `uninstall` are all native, so even the staleness read would have needed no synthesis.
+
+It reports no version by any route, which is what settles it. None of the eleven commands it exposes is a `version`, no version constant appears anywhere in its source, and upstream publishes neither tags nor releases, so nothing on disk or in the repository names one. That is [`zgenom`](#zgenom)'s verdict exactly. Nothing on its tracker asks for a version either, so this rests on the observed behaviour rather than on an upstream position, and a release scheme would reopen it.
+
 ## [`bpm`](https://github.com/bpm-rocks/bpm) ☠️
 
 Bash package manager, abandoned: 28 commits in all and nothing since 2021-07-25. Little would have been left to wrap in any case, its whole verb surface being `install` and `run`, with no listing, no removal and no upgrade, and its readme conceding it carries no versioning at all, which it blames on Bash having no namespacing.

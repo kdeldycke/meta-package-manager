@@ -343,6 +343,8 @@ PACKAGE_IDS = {
     "apt-cyg": "tree",
     "apt-mint": "nyancat",
     "asdf": "jq",
+    # A pure-Bash argument parser from basalt's own author, no build step.
+    "basalt": "hyperupcall/bash-args",
     # Declares no install operation: the round-trip auto-skips. bin keys every
     # other operation on the installed binary's absolute path, so that is the
     # shape an identifier takes here.
@@ -655,6 +657,10 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     "zypper": is_linux,
     # flatpak has no remote configured to resolve apps from on the runners.
     "flatpak": is_linux,
+    # basalt refuses every command, the read-only listing included, without a GitHub
+    # token file of its own, and needs the environment its shell-init snippet exports.
+    # Neither is set up on a runner.
+    "basalt": is_github_ci,
     # fwupd flashes firmware; the CI VMs expose no flashable hardware, so the install
     # exits non-zero.
     "fwupd": True,

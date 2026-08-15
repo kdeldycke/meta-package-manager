@@ -1,0 +1,63 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# basalt is a package manager
+# for Bash, installing libraries and executables from their Git repositories. See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against basalt v0.10.0 on macOS:
+#   - Every operation goes through the `global` subcommand tree. basalt's bare
+#     subcommands (`add`, `remove`, `install`, `list`) act on the `basalt.toml` of
+#     the current directory's project, which is out of mpm's system scope; the
+#     `global` ones act on the machine-wide tree.
+#   - `global list` prints one `<url>@<commit>` line per package. The pattern drops
+#     the scheme and host so the id is the `owner/repo` slug that `global add` and
+#     `global remove` accept back, which is the only form all three agree on.
+#   - Versions are commit hashes, not releases: basalt pins each package to the
+#     commit it resolved. That is what it records, so it is what mpm reports.
+#   - No `outdated` and no search: basalt offers neither a staleness query nor a
+#     catalogue of any kind.
+#   - `remove` forces `--force`, without which basalt prompts and would hang mpm's
+#     non-interactive subprocess.
+#
+# Two host requirements are basalt's own, and both fail loudly rather than
+# silently, so they are left to fail rather than worked around:
+#   - A GitHub token file at `$XDG_CONFIG_HOME/basalt/token`. Without it *every*
+#     command refuses, the read-only listing included.
+#   - `BASALT_GLOBAL_REPO` and `BASALT_GLOBAL_DATA_DIR` in the environment, which
+#     the user exports by evaluating `basalt global init <shell>` in their shell
+#     configuration. mpm inherits them from the shell it is launched from.
+
+[mpm.managers.basalt]
+name = "Basalt"
+homepage_url = "https://github.com/hyperupcall/basalt"
+# Bash 4.3 or newer: no Windows support, and macOS needs a Bash newer than the
+# 3.2 it ships.
+platforms = ["linux_like", "macos"]
+cli_names = ["basalt"]
+requirement = ">=0.10.0"
+# `basalt --version` prints "Version: v0.10.0"; the tag prefix is dropped.
+version_regexes = ['Version:[ \t]+v?(?P<version>\S+)']
+
+[mpm.managers.basalt.operations.installed]
+args = ["global", "list"]
+regex = '^(?:[a-z]+://[^/]+/)?(?P<package_id>[^@\s]+)@(?P<installed_version>\S+)$'
+
+[mpm.managers.basalt.operations.install]
+args = ["global", "add", "{package_id}"]
+
+[mpm.managers.basalt.operations.remove]
+args = ["global", "remove", "--force", "{package_id}"]
+
+# Output samples locking the version probe and the declared parser, captured from
+# basalt v0.10.0. Consumed by tests/test_manager_definition.py; ignored by mpm's
+# loader.
+[samples.version]
+output = "Version: v0.10.0"
+expected = "0.10.0"
+
+[[samples.installed]]
+output = "https://github.com/hyperupcall/bash-args@8fa6ff556d9c4fca5ce8431ddc571139abcf69a7"
+packages = [
+  { id = "hyperupcall/bash-args", version = "8fa6ff556d9c4fca5ce8431ddc571139abcf69a7" },
+]

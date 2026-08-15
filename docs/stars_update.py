@@ -205,6 +205,7 @@ UPSTREAM_REPOS = {
     "apt": "https://salsa.debian.org/apt-team/apt",
     "apt-cyg": "https://github.com/transcode-open/apt-cyg",
     "asdf": "https://github.com/asdf-vm/asdf",
+    "basalt": "https://github.com/hyperupcall/basalt",
     "bin": "https://github.com/marcosnils/bin",
     "bpkg": "https://github.com/bpkg/bpkg",
     "brew": "https://github.com/Homebrew/brew",

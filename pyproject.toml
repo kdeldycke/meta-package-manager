@@ -22,6 +22,7 @@ keywords = [
   "apt-mint",
   "asdf",
   "atom",
+  "basalt",
   "bin",
   "bpkg",
   "brew",
@@ -1121,6 +1122,11 @@ color = "bfdadc"
 description = "asdf, mise"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: basalt"
+color = "bfdadc"
+description = "basalt"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: bin"
 color = "bfdadc"
 description = "bin"
@@ -1541,6 +1547,10 @@ any-glob-to-any-file = [
   "tests/*asdf*",
   "tests/*mise*",
 ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: basalt"
+any-glob-to-any-file = [ "meta_package_manager/managers/basalt.*", "tests/*basalt*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: bin"

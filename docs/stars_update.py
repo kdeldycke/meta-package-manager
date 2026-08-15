@@ -234,6 +234,7 @@ UPSTREAM_REPOS = {
     "ghcup": "https://github.com/haskell/ghcup-hs",
     "guix": "https://codeberg.org/guix/guix",
     "haxelib": "https://github.com/HaxeFoundation/haxelib",
+    "jpm": "https://github.com/janet-lang/jpm",
     "juliaup": "https://github.com/JuliaLang/juliaup",
     "krew": "https://github.com/kubernetes-sigs/krew",
     "lazy": "https://github.com/folke/lazy.nvim",

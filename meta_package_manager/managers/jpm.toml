@@ -1,0 +1,57 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# jpm is the Janet
+# Project Manager, installing Janet modules from the janet-lang/pkgs listing. See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against jpm shipped with Janet 1.41.2 on macOS:
+#   - jpm reports no version of its own. `jpm --version` does not merely go
+#     unrecognised, it fails: "error: unknown cli option version". jpm ships with
+#     Janet and is versioned with it, so the probe reads the interpreter it sits
+#     beside, which is what `version_cli` exists for.
+#   - No inventory: jpm has no listing command of any kind, so `installed` and
+#     `outdated` are not declared and mpm auto-skips them. There is no `search`
+#     either. What remains is the mutating surface plus a sync and a cache purge.
+#   - Scope is global by default, and stays that way wherever mpm is invoked from:
+#     the local `./jpm_tree` is reached only through the explicit `--local` flag
+#     (cli.janet), never by a `project.janet` sitting in the working directory. The
+#     one override left is the `JANET_TREE` environment variable (config.janet),
+#     which a user sets deliberately and mpm therefore honours.
+#   - No sudo is forced. Writing to the module tree is privileged only where that
+#     tree is root-owned, which depends on how Janet was installed rather than on
+#     the operation: a Homebrew prefix needs none, a system one does. Forcing it
+#     would break the first case, and omitting it fails loudly in the second.
+
+[mpm.managers.jpm]
+name = "jpm"
+homepage_url = "https://github.com/janet-lang/jpm"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["jpm"]
+version_cli = "janet"
+version_cli_options = ["-v"]
+# A Homebrew build reports "1.41.2-homebrew"; the suffix is dropped.
+version_regexes = ['^(?P<version>\d+\.\d+\.\d+)']
+
+[mpm.managers.jpm.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.jpm.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+# Upgrades every installed package; jpm offers no per-package upgrade verb.
+[mpm.managers.jpm.operations.upgrade_all]
+args = ["update-installed"]
+
+# Re-clones the janet-lang/pkgs listing that maps short names to repositories.
+[mpm.managers.jpm.operations.sync]
+args = ["update-pkgs"]
+
+[mpm.managers.jpm.operations.cleanup_cache]
+args = ["clear-cache"]
+
+# Output sample locking the version probe, captured from Janet 1.41.2. Consumed
+# by tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "1.41.2-homebrew"
+expected = "1.41.2"

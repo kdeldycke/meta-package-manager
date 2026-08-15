@@ -67,6 +67,7 @@ keywords = [
   "guix",
   "haxelib",
   "homebrew",
+  "jpm",
   "juliaup",
   "krew",
   "lazy",
@@ -1240,6 +1241,11 @@ color = "bfdadc"
 description = "brew, cask, zerobrew"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: jpm"
+color = "bfdadc"
+description = "jpm"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: juliaup"
 color = "bfdadc"
 description = "juliaup"
@@ -1659,6 +1665,10 @@ any-glob-to-any-file = [
   "tests/*homebrew*",
   "tests/*zerobrew*",
 ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: jpm"
+any-glob-to-any-file = [ "meta_package_manager/managers/jpm.*", "tests/*jpm*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: juliaup"

@@ -47,7 +47,9 @@ accurate on every supported version.
 
 from __future__ import annotations
 
+import shutil
 import sys
+from contextlib import contextmanager
 
 from click_extra.context import COLUMNS, TABLE_FORMAT
 from click_extra.table import (
@@ -66,7 +68,7 @@ else:
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Iterable, Iterator, Sequence
 
     from click_extra import Context
 
@@ -91,11 +93,21 @@ MANAGERS_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
         SortableField.MANAGER_NAME,
     ),
     (
-        ColumnSpec("supported", "Supported", "Support status on the current platform."),
+        ColumnSpec(
+            "supported",
+            "Supported",
+            "Support status on the current platform.",
+            max_width=AUTO_WIDTH,
+        ),
         None,
     ),
     (
-        ColumnSpec("cli", "CLI", "Location of the manager's binary on the system."),
+        ColumnSpec(
+            "cli",
+            "CLI",
+            "Location of the manager's binary on the system.",
+            max_width=AUTO_WIDTH,
+        ),
         None,
     ),
     (
@@ -112,7 +124,15 @@ MANAGERS_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
         SortableField.VERSION,
     ),
 )
-"""Columns of the `mpm managers` table."""
+"""Columns of the `mpm managers` table.
+
+`supported` and `cli` are the two whose content no manager bounds: the first
+enumerates every platform a manager runs on when they do not collapse to a
+group name, the second holds a filesystem path. Both take
+{data}`~click_extra.table.AUTO_WIDTH` so they share whatever the fixed columns
+leave on the terminal and wrap inside their own cell, instead of stretching the
+table past the edge and mangling every border.
+"""
 
 MANAGERS_DETECTED_COLUMNS: tuple[str, ...] = (
     "manager_id",
@@ -240,6 +260,32 @@ def column_specs(
     return tuple(spec for spec, _ in columns)
 
 
+@contextmanager
+def _terminal_width_budget(ctx: Context) -> Iterator[None]:
+    """Give a table the whole terminal, then put the help budget back.
+
+    click-extra sizes every {data}`~click_extra.table.AUTO_WIDTH` column from
+    `ctx.make_formatter().width`, the same budget that lays out help screens.
+    Click caps that at 80 columns unless `max_content_width` says otherwise, which
+    is right for prose and far too tight for a data table: the fixed columns alone
+    can exceed it, leaving each auto column at
+    {data}`~click_extra.table.MIN_COLUMN_WIDTH` however wide the terminal is, so a
+    path wraps every eight characters on a 200-column screen.
+
+    Raising the cap on the `mpm` group instead was measured and rejected. mpm's
+    help text is hand-formatted against an 80-character reference, and a large
+    cap stops Click wrapping altogether: `mpm --help` then emitted a 463-character
+    line. So the widening is scoped to the render and undone after it, leaving
+    every help screen untouched.
+    """
+    previous = ctx.max_content_width
+    ctx.max_content_width = shutil.get_terminal_size().columns
+    try:
+        yield
+    finally:
+        ctx.max_content_width = previous
+
+
 def print_projected_table(
     ctx: Context,
     columns: Sequence[tuple[ColumnSpec, str | None]],
@@ -277,11 +323,12 @@ def print_projected_table(
     projected = select_columns(column_specs(columns), selected)
     sort_field = {spec.id: field for spec, field in columns}
     ids = tuple(spec.id for spec in projected)
-    ctx.print_table(
-        [select_row(row, ids, ids) for row in rows],
-        tuple((spec.label, sort_field[spec.id]) for spec in projected),
-        max_column_widths=tuple(spec.max_width for spec in projected),
-    )
+    with _terminal_width_budget(ctx):
+        ctx.print_table(
+            [select_row(row, ids, ids) for row in rows],
+            tuple((spec.label, sort_field[spec.id]) for spec in projected),
+            max_column_widths=tuple(spec.max_width for spec in projected),
+        )
 
 
 def print_serialized_and_exit(ctx: Context, data: object) -> None:

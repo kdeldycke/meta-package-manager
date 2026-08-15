@@ -321,6 +321,16 @@ html_last_updated_fmt = "%Y-%m-%d"
 copyright = f"{author} and contributors"
 html_show_sphinx = False
 
+# Do not publish a copy of every source document under `_sources/`. Nothing links
+# to it: no page this theme renders carries a source link, so the copy was 1.1 MB
+# of tree that only a hand-typed URL could reach. The sources themselves are not
+# lost, they are the repository. Both settings are named because they gate
+# different halves of the feature, `html_copy_source` the files and
+# `html_show_sourcelink` the link, and a theme reading only the second would
+# otherwise offer a link to files that are no longer there.
+html_copy_source = False
+html_show_sourcelink = False
+
 # Individual files are copied to the root of _static/, which is where Furo looks
 # for the light_logo/dark_logo pair. Listing docs/assets/ wholesale would drag
 # the screenshots, the dependency graph and the binary scan reports along.
@@ -329,9 +339,11 @@ html_static_path = [
     "assets/logo-square-dark.png",
     "assets/logo-square-light.png",
 ]
-# Copied verbatim to the site root, where crawlers expect it. `html_static_path`
-# would bury it under `_static/`, which robots.txt cannot be served from.
-html_extra_path = ["robots.txt"]
+# Copied verbatim to the site root, which is the only place each of these means
+# anything: `html_static_path` would bury them under `_static/`, where a crawler
+# never looks for `robots.txt`, neither host looks for `404.html`, and Cloudflare
+# never reads `_redirects`.
+html_extra_path = ["404.html", "_redirects", "robots.txt"]
 # sphinx-sitemap defaults to a `{lang}{version}{link}` layout meant for sites
 # publishing several translations or versions side by side. This one publishes a
 # single tree, so anything but the bare link yields sitemap entries that 404.
@@ -368,48 +380,34 @@ click_extra_manpages = [
 manpages_url = "/man/{page}.{section}.html"
 
 
-# Landing pages for the URLs this site published before it moved to `dirhtml`.
-# `/managers/apk.html` is what years of links, bookmarks and search results
-# point at; the directory build answers `/managers/apk/` and would 404 every
-# one of them. Each stub is a zero-delay refresh plus the canonical link that
-# tells a crawler where the page went, which is as close to a `301` as a static
-# host with no server-side rules can get: GitHub Pages serves files, and the
-# apex stays unproxied so no edge rule can rewrite a path (see
-# `docs/infrastructure.md`).
-LEGACY_URL_STUB = """\
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url={target}">
-<link rel="canonical" href="{target}">
-<title>Page moved</title>
-</head>
-<body><p>This page moved to <a href="{target}">{target}</a>.</p></body>
-</html>
-"""
+def prune_build_artifacts(app, exception):
+    """Delete what Sphinx leaves in the output tree that is not content.
 
+    `.buildinfo` records the configuration hash an incremental build compares
+    against, and `.buildinfo.bak` is the copy Sphinx keeps when that comparison
+    fails. Neither is content, and no setting suppresses them: the HTML builder
+    writes `.buildinfo` from a finish task unconditionally, so the only way to
+    keep them out of a published tree is to remove them once it has.
 
-def write_legacy_url_stubs(app, exception):
-    """Write a `page.html` stub beside every `page/index.html` of a dirhtml build.
+    `_sources/` is created unconditionally too, before `html_copy_source` is
+    ever consulted, so switching that off empties the directory without
+    removing it. It is deleted here only while empty, which keeps this from
+    quietly discarding the sources of a build that does want to publish them.
 
-    Skipped for any other builder, which either publishes those paths for real
-    (`html`) or has no output to alias (`linkcheck`).
+    The cost of dropping the markers is local and small: a subsequent
+    incremental build finds none and re-reads every document, as it already has
+    to whenever a generator changes (see `CLAUDE.md` on the Sphinx cache). CI
+    builds are always fresh, so they lose nothing at all.
     """
-    if exception or app.builder.name != "dirhtml":
+    if exception:
         return
     outdir = Path(app.outdir)
-    for index_file in outdir.rglob("index.html"):
-        page = index_file.parent.relative_to(outdir)
-        # The site root has no legacy alias: it never carried a suffix.
-        if page == Path():
-            continue
-        alias = outdir / f"{page}.html"
-        if alias.exists():
-            continue
-        target = f"{app.config.html_baseurl}{page.as_posix()}/"
-        alias.write_text(LEGACY_URL_STUB.format(target=target), encoding="UTF-8")
+    for marker in (".buildinfo", ".buildinfo.bak"):
+        (outdir / marker).unlink(missing_ok=True)
+    sources = outdir / "_sources"
+    if sources.is_dir() and not any(sources.iterdir()):
+        sources.rmdir()
 
 
 def setup(app):
-    app.connect("build-finished", write_legacy_url_stubs)
+    app.connect("build-finished", prune_build_artifacts)

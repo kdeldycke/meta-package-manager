@@ -1,0 +1,19 @@
+# Cloudflare Pages redirect rules, copied verbatim into the built site by
+# `html_extra_path` in `conf.py`. Inert on any other host: GitHub Pages serves
+# this file as a text asset and never reads it.
+#
+# The site publishes every page as a directory (`[tool.repomatic] sphinx.builder`
+# is `dirhtml`), so the `.html` URLs it answered to for years have to be sent to
+# their directory. Pages does normalize `/page.html` to `/page` on its own, but
+# only when an asset sits at the stripped path: against a directory it finds
+# nothing, and an unmatched route falls through to the site's own 404. Measured
+# on a preview deployment, not assumed.
+#
+# Both rules carry a placeholder, so both spend the dynamic budget rather than
+# the static one. That budget is 100 and this file uses two, but the accounting
+# is worth knowing before the file grows: from the first rule containing `*` or
+# `:placeholder`, every later line burns the dynamic budget too, and the parser
+# stops reading the file at the 101st. Exact rules therefore go first, always.
+# See https://kevin.deldycke.com/2022/cloudflare-commands#pages-redirects
+/managers/:manager.html  /managers/:manager/  301
+/:page.html  /:page/  301

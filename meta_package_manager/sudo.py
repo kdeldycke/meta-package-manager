@@ -154,6 +154,12 @@ def _is_sudo_auth_failure(error: str) -> bool:
     askpass helper). Lets {meth}`CLIExecutor.run
     <meta_package_manager.execution.CLIExecutor.run>` turn an opaque escalation
     failure into an actionable hint.
+
+    The wordings are not interchangeable across implementations: `sudo-rs`, the
+    Rust rewrite Ubuntu ships as the default `sudo` since `25.10`, answers
+    `sudo: interactive authentication is required` where the original says
+    `sudo: a password is required`. Matching only the latter left every
+    escalation failure on a current Ubuntu unrecognized, and the hint unprinted.
     """
     lowered = error.lower()
     return "sudo:" in lowered and any(
@@ -161,6 +167,7 @@ def _is_sudo_auth_failure(error: str) -> bool:
         for marker in (
             "a password is required",
             "a terminal is required",
+            "interactive authentication is required",
             "no tty present",
             "askpass",
         )

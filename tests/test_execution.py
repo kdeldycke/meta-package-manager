@@ -21,6 +21,7 @@ import os
 import re
 import threading
 import time
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -646,6 +647,31 @@ def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
         with caplog.at_level(logging.WARNING):
             manager.run(*cli)
     assert any("mpm --sudo" in record.getMessage() for record in caplog.records)
+
+
+@pytest.mark.parametrize("escalate", (True, False))
+def test_escalated_calls_keep_the_controlling_terminal(escalate):
+    """An escalated call is never detached into a POSIX session of its own.
+
+    `sudo` keys its credential cache per terminal (`tty_tickets`), so a child
+    spawned with `start_new_session` cannot read the cache
+    {func}`~meta_package_manager.sudo.prime_sudo` probed and warmed: it fails
+    with `sudo: interactive authentication is required` however fresh the
+    credentials are. Everything mpm does not escalate keeps the session
+    isolation that reaps wedged grandchildren.
+    """
+    manager = FakeManager()
+    manager.sudo = True
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_UNIX_PLATFORM,
+        ),
+        patch("meta_package_manager.execution.run_cli") as spawn,
+    ):
+        spawn.return_value = SimpleNamespace(returncode=0, stdout="", stderr="")
+        manager.run(manager.build_cli("-c", "true", sudo=escalate))
+    assert spawn.call_args.kwargs["start_new_session"] is not escalate
 
 
 @pytest.mark.parametrize(

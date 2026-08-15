@@ -23,6 +23,7 @@ import subprocess
 import sys
 from collections.abc import Collection, Iterable, Iterator
 from textwrap import dedent
+from types import SimpleNamespace
 
 import pytest
 from boltons.iterutils import same
@@ -30,6 +31,7 @@ from boltons.strutils import strip_ansi
 from click_extra.table import SERIALIZATION_FORMATS, TableFormat
 
 from meta_package_manager import __version__
+from meta_package_manager.cli import _debug_rerun_command
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 
@@ -159,6 +161,34 @@ def test_executable_module():
         rf"(Python [^\n]+\n)?",
         process.stdout,
     )
+
+
+@pytest.mark.parametrize(
+    ("argv", "expected"),
+    (
+        (
+            ("mpm", "--apt", "upgrade", "papers"),
+            "mpm --verbosity DEBUG --apt upgrade papers",
+        ),
+        # An explicit verbosity is dropped, not duplicated: Click keeps the last
+        # value of a repeated option, which sits after the one we insert.
+        (
+            ("mpm", "--verbosity", "WARNING", "upgrade", "--all"),
+            "mpm --verbosity DEBUG upgrade --all",
+        ),
+        (("mpm", "--verbosity=INFO", "sync"), "mpm --verbosity DEBUG sync"),
+        # Copy-pasteable: an argument needing quotes keeps them.
+        (
+            ("mpm", "install", "my package"),
+            "mpm --verbosity DEBUG install 'my package'",
+        ),
+    ),
+)
+def test_debug_rerun_command(monkeypatch, argv, expected):
+    """The re-run hint of the error summary reproduces the current invocation."""
+    ctx = SimpleNamespace(find_root=lambda: SimpleNamespace(info_name="mpm"))
+    monkeypatch.setattr(sys, "argv", list(argv))
+    assert _debug_rerun_command(ctx) == expected
 
 
 def test_timeout(invoke, slow_fake_pool):

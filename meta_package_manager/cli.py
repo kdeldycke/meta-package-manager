@@ -34,6 +34,8 @@ across all of them, and renders the aggregated, multi-manager result.
 from __future__ import annotations
 
 import logging
+import shlex
+import sys
 import threading
 from collections.abc import Iterable
 from configparser import RawConfigParser
@@ -319,6 +321,33 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         bar_path = shorten_bar_path
     echo(bar_path)
     ctx.exit()
+
+
+def _debug_rerun_command(ctx: Context) -> str:
+    """This very invocation, rewritten to run at `DEBUG` verbosity.
+
+    Printed by the end-of-run error summary so the transcript it points at is one
+    copy-paste away, rather than an exercise left to the reader: the frontends
+    make the argv genuinely hard to guess, since a click in the
+    {doc}`menubar plugin <bar-plugin>` or the {doc}`GNOME Shell extension
+    <gnome-shell>` opens a terminal on a command the user never typed.
+
+    `--verbosity` is a group-level option, so it is inserted right after the
+    program name, ahead of the subcommand. Any occurrence already in the argv is
+    dropped first: Click keeps the last value of a repeated option, which would
+    otherwise leave the suggested command running at the level being replaced.
+    """
+    args: list[str] = []
+    drop_value = False
+    for arg in sys.argv[1:]:
+        if drop_value:
+            drop_value = False
+        elif arg == "--verbosity":
+            drop_value = True
+        elif not arg.startswith("--verbosity="):
+            args.append(arg)
+    prog = ctx.find_root().info_name or "mpm"
+    return shlex.join((prog, "--verbosity", "DEBUG", *args))
 
 
 @group(
@@ -660,7 +689,8 @@ def mpm(
         plural = "managers" if len(failed) > 1 else "manager"
         logging.warning(
             f"{len(failed)} {plural} reported errors during this run "
-            f"({ids}); full transcript at --verbosity DEBUG.",
+            f"({ids}); full transcript with: "
+            f"{theme().invoked_command(_debug_rerun_command(ctx))}",
         )
 
     ctx.call_on_close(summarize_cli_errors)

@@ -459,6 +459,8 @@ def test_sudo_prompt_respects_sudo_constraints(manager_ids):
         ("sudo: a terminal is required to read the password", True),
         ("sudo: no tty present and no askpass program specified", True),
         ("SUDO: A PASSWORD IS REQUIRED", True),
+        # sudo-rs, the default sudo of Ubuntu 25.10 and newer.
+        ("sudo: interactive authentication is required", True),
         ("", False),
         ("error: package not found", False),
         ("sudo: command not found", False),

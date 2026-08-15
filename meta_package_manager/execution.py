@@ -1070,6 +1070,10 @@ class CLIExecutor:
         self._last_run = None
         # Casting to string helps serialize Path and Version objects.
         clean_args = args_cleanup(*args)
+        # Whether mpm is escalating this call itself, as opposed to a manager
+        # escalating internally. Drives both the session isolation of the spawn
+        # below and the tailored credential hint of the failure gate.
+        is_escalation = clean_args[:2] == _SUDO_ESCALATION_PREFIX
         # Enforce the release-age cooldown by injecting the manager's dedicated
         # environment variable into every call (harmless for operations that ignore
         # it, like removal or cache cleanup).
@@ -1152,13 +1156,16 @@ class CLIExecutor:
                             # Detach the child into its own POSIX session and
                             # process group, so timeout and Ctrl+C kill the
                             # whole tree and a wedged grandchild (mas) cannot
-                            # linger as an orphan. The armed watchdog marks the
-                            # one call that may legitimately prompt: it keeps
-                            # the controlling terminal, or the internal sudo
-                            # could not reach /dev/tty. mpm's own escalations
-                            # run sudo --non-interactive and never prompt, so
-                            # they always detach. No-op on Windows.
-                            start_new_session=watchdog is None,
+                            # linger as an orphan. Two kinds of call keep the
+                            # controlling terminal instead: the one the armed
+                            # watchdog marks, whose internal sudo could not
+                            # otherwise reach /dev/tty, and mpm's own
+                            # escalations, because sudo keys its credential
+                            # cache per terminal (tty_tickets) and a session of
+                            # its own hides the very cache prime_sudo() just
+                            # probed. No-op on Windows.
+                            start_new_session=watchdog is None
+                            and not is_escalation,
                             # The tee routes each streamed record through the
                             # armed watchdog before the root logger. `None` is
                             # run_cli's default, the untouched root-logger path.
@@ -1264,7 +1271,6 @@ class CLIExecutor:
             # for my password?"). The tailored message stands in for the generic
             # diagnosis relay below: the raw "password is required" tail carries
             # less than the fix.
-            is_escalation = clean_args[:2] == _SUDO_ESCALATION_PREFIX
             if is_escalation and _is_sudo_auth_failure(error):
                 logging.warning(
                     "Needs administrator rights but sudo has no cached "

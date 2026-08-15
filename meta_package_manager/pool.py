@@ -439,14 +439,11 @@ class ManagerPool:
         # Bind the version-detection probes to the user's --timeout before any can
         # fire, so a wedged binary cannot outlast the cap during detection the way
         # it could when the timeout was applied only to the operation loop below.
-        # Probes fire eagerly in the parallel warm-up round right after, or lazily
-        # at rendering time for the callers keeping unavailable managers (`mpm
-        # managers` builds its version column from the yielded instances), so the
-        # binding must precede the `drop_not_found` branch. Only timeout is
-        # pre-applied: the rest of extra_options (notably dry_run, which would turn
-        # detection into a no-op simulation) must wait for the loop. A per-manager
-        # [mpm.managers.<id>] timeout override keeps precedence, just as it does in
-        # the loop.
+        # Probes fire in the parallel warm-up round right after, so the binding must
+        # precede it. Only timeout is pre-applied: the rest of extra_options (notably
+        # dry_run, which would turn detection into a no-op simulation) must wait for
+        # the loop. A per-manager [mpm.managers.<id>] timeout override keeps
+        # precedence, just as it does in the loop.
         if "timeout" in extra_options:
             for manager_id in selected_ids:
                 if "timeout" not in self.overridden_fields.get(manager_id, set()):
@@ -457,14 +454,18 @@ class ManagerPool:
         # round capped at the slowest manager. This shaves startup latency off any
         # command that touches many managers; the filter loop stays sequential, so
         # its skip / "does not implement" logging keeps its order.
-        if drop_not_found:
-            candidates = [
-                self.register[manager_id]
-                for manager_id in selected_ids
-                if not implements_operation
-                or implements(self.register[manager_id], implements_operation)
-            ]
-            warm_availability(candidates)
+        #
+        # Warming is not conditioned on `drop_not_found`: a caller keeping
+        # unavailable managers still reads the very same probes, just later. `mpm
+        # managers` is the one such caller, and it reads them one row at a time
+        # while rendering its table, which is the slowest way to get them.
+        candidates = [
+            self.register[manager_id]
+            for manager_id in selected_ids
+            if not implements_operation
+            or implements(self.register[manager_id], implements_operation)
+        ]
+        warm_availability(candidates)
 
         # Deduplicate managers IDs while preserving order, then remove excluded
         # managers.

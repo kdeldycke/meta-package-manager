@@ -311,9 +311,10 @@ def test_exempt_operations_skip_diagnosis_relay(operation, caplog):
     assert [error.code for error in manager.cli_errors] == [8]
 
 
-# CLIExecutor.run_cache: lock-family peers replay a byte-identical command instead of
-# re-running it. Each script appends a byte to a marker file, so its length counts how
-# many subprocesses actually ran.
+# CLIExecutor.run_cache: a lane's peers replay a byte-identical command instead of
+# re-running it, whether the lane is a lock family (dispatch) or a probe group
+# (warm_availability). Each script appends a byte to a marker file, so its length counts
+# how many subprocesses actually ran.
 
 
 def _append_script(marker, payload="x", tail=""):

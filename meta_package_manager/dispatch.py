@@ -27,7 +27,7 @@ the manager-bound `✓`/`✗` ledger ({class}`OperationTrail`) that the
 concurrent and sequential paths both report through.
 
 The generic layers live upstream in click-extra: the concurrency primitives in
-{mod}`click_extra.execution` (`run_jobs`/`run_lanes` driven by
+{mod}`click_extra.execution` (`run_lanes` driven by
 `mpm --jobs`) and the batch-reporting trail in {mod}`click_extra.spinner`
 ({class}`~click_extra.spinner.OperationTrail` with its
 `trail_glyph`/`trail_line` atoms). This module keeps what is package-manager
@@ -44,7 +44,7 @@ from typing import Final
 from click.core import ParameterSource
 from click_extra import get_current_context
 from click_extra.context import JOBS
-from click_extra.execution import resolve_jobs, run_jobs, run_lanes
+from click_extra.execution import resolve_jobs, run_lanes
 from click_extra.spinner import OperationTrail as _OperationTrail
 from click_extra.theme import get_current_theme as theme
 
@@ -318,6 +318,51 @@ def effective_jobs(ctx: Context | None, count: int) -> int:
     return resolve_jobs(ctx, count, serial_at_debug=True)
 
 
+def probe_signature(manager: PackageManager) -> tuple:
+    """Static signature of the command `manager`'s version probe would spawn.
+
+    Built from class attributes alone: no filesystem lookup, no subprocess. Two
+    managers sharing a signature search the same directories for the same binary
+    names and pass it the same arguments, so their probes *may* resolve to a
+    byte-identical command line. `brew` and `cask` do, and so do `uv`/`uvx` and
+    `yarn`/`yarn-berry`.
+
+    Deliberately conservative in the safe direction. It never splits two managers
+    that would spawn the same command, which is what
+    {func}`merge_into_probe_lanes` needs to put them on one lane; it may however
+    merge two that turn out to differ (the Zsh plugin managers all probe `zsh`,
+    some with `--version` and some with `version`). A wrong merge costs the two a
+    shared lane, where the second simply misses the cache and spawns as it would
+    have anyway.
+
+    Not the resolved command line, on purpose: resolving it means walking `PATH`
+    for every candidate up front, which measured slower than the redundant
+    subprocesses it would save.
+    """
+    return (
+        tuple(manager.cli_search_path),
+        tuple(manager.cli_names or ()),
+        manager.version_cli,
+        tuple(manager.version_cli_options),
+    )
+
+
+def merge_into_probe_lanes(
+    managers: Iterable[PackageManager],
+) -> list[tuple[PackageManager, ...]]:
+    """Group `managers` into {func}`warm_availability` lanes by {func}`probe_signature`.
+
+    The probe counterpart of {func}`merge_into_lock_lanes`: managers whose version
+    probe may resolve to the same command line land on one lane and run serially,
+    while unrelated managers keep a lane each and run concurrently. Lanes come out
+    in first-seen order, so a run is reproducible.
+    """
+    lanes: dict[tuple, list[PackageManager]] = {}
+    for manager in managers:
+        lanes.setdefault(probe_signature(manager), []).append(manager)
+    return [tuple(lane) for lane in lanes.values()]
+
+
 def warm_availability(managers: Iterable[PackageManager]) -> None:
     """Probe several managers' `available` concurrently.
 
@@ -327,21 +372,47 @@ def warm_availability(managers: Iterable[PackageManager]) -> None:
     sequential string of probes into a single round bounded by the slowest one,
     shaving startup latency off any command that touches many managers.
 
-    Each manager is a distinct instance with its own cached attributes and
-    subprocess, so the probes are independent and thread-safe; the GIL is released
-    while each waits. The executor barrier publishes every cached value before the
-    caller reads it back.
+    Managers on distinct lanes are distinct instances with their own cached
+    attributes and subprocess, so their probes are independent and thread-safe; the
+    GIL is released while each waits. The executor barrier publishes every cached
+    value before the caller reads it back.
 
-    Sized by {func}`effective_jobs`: a no-op (leaving the probes to lazy,
-    sequential evaluation) without an active context, at `DEBUG` verbosity, for a
-    single candidate, or at `mpm --jobs` `1`.
+    Probes run in {func}`merge_into_probe_lanes` lanes rather than one flat batch,
+    so the managers that would spawn a byte-identical `--version` call take turns
+    on one worker and share a
+    {attr}`~meta_package_manager.execution.CLIExecutor.run_cache`: the first spawns,
+    the rest replay its result. That is the same mechanism {func}`dispatch` gives a
+    lock family, and it needs the lane for the same reason — a cache handed to
+    managers running concurrently would just race them both into spawning.
+
+    Sized by {func}`effective_jobs` over the *lane* count: a no-op (leaving the
+    probes to lazy, sequential evaluation) without an active context, at `DEBUG`
+    verbosity, for a single lane, or at `mpm --jobs` `1`.
     """
-    candidates = list(managers)
-    jobs = effective_jobs(get_current_context(silent=True), len(candidates))
+    lanes = merge_into_probe_lanes(managers)
+    jobs = effective_jobs(get_current_context(silent=True), len(lanes))
     if jobs <= 1:
         return
-    # Reading `available` forces and caches the probe inside each worker.
-    list(run_jobs(lambda manager: manager.available, candidates, jobs=jobs))
+
+    # Restore whatever each manager carried instead of forcing `None` back: the cache
+    # is scoped to this round, and a caller that installed one of its own keeps it.
+    restore: list[tuple[PackageManager, dict | None]] = []
+    for lane in lanes:
+        if len(lane) < 2:
+            continue
+        shared_cache: dict = {}
+        for manager in lane:
+            restore.append((manager, manager.run_cache))
+            manager.run_cache = shared_cache
+
+    try:
+        # Reading `available` forces and caches the probe inside each worker.
+        list(run_lanes(lambda manager: manager.available, lanes, jobs=jobs))
+    finally:
+        # Unwound in reverse so the *first* value recorded for a manager is the one
+        # that survives, should the same instance ever be handed in twice.
+        for manager, previous_cache in reversed(restore):
+            manager.run_cache = previous_cache
 
 
 def _state_failed(data: dict) -> bool:

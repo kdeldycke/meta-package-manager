@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import inspect
+import itertools
 import threading
 from importlib import import_module
 from pathlib import Path
@@ -29,7 +30,11 @@ from click_extra.logging import LogLevel
 import meta_package_manager
 from meta_package_manager.capabilities import Delegate
 from meta_package_manager.cli import mpm
-from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES, warm_availability
+from meta_package_manager.dispatch import (
+    SHARED_LOCK_FAMILIES,
+    merge_into_probe_lanes,
+    warm_availability,
+)
 from meta_package_manager.labels import MANAGER_LABEL_GROUPS
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.managers.pacman import Pacman
@@ -392,14 +397,32 @@ def test_select_managers_timeout_stamping():
 
 
 class _RecordingManager:
-    """Stand-in whose `available` probe records the thread it ran on."""
+    """Stand-in whose `available` probe records the thread it ran on.
 
-    def __init__(self, log: list) -> None:
+    Carries the four attributes {func}`probe_signature` reads. `probe` varies them
+    per instance by default, so each stand-in lands on a lane of its own; passing
+    the same `probe` to several puts them on a shared lane instead.
+    """
+
+    cli_search_path: tuple[str, ...] = ()
+    version_cli = None
+    version_cli_options: tuple[str, ...] = ("--version",)
+    run_cache: dict | None = None
+
+    _counter = itertools.count()
+
+    def __init__(self, log: list, probe: str | None = None) -> None:
         self._log = log
+        self.cli_names = (probe or f"fake-cli-{next(self._counter)}",)
+        self.cache_seen: dict | None = None
+        self.thread_seen: threading.Thread | None = None
 
     @property
     def available(self) -> bool:
         self._log.append(threading.current_thread())
+        # The cache is installed for the round only, so snapshot it while probing.
+        self.cache_seen = self.run_cache
+        self.thread_seen = threading.current_thread()
         return True
 
 
@@ -442,3 +465,47 @@ def test_warm_availability_probes_concurrently():
         warm_availability(managers)  # type: ignore[arg-type]
     assert len(threads) == 4
     assert all(thread is not threading.main_thread() for thread in threads)
+
+
+def test_merge_into_probe_lanes_groups_by_signature():
+    """Managers whose probe may resolve to the same command share a lane."""
+    accessed: list = []
+    twins = [_RecordingManager(accessed, probe="shared-cli") for _ in range(3)]
+    loners = [_RecordingManager(accessed) for _ in range(2)]
+
+    lanes = merge_into_probe_lanes([*twins, *loners])  # type: ignore[arg-type]
+
+    assert [len(lane) for lane in lanes] == [3, 1, 1]
+    assert lanes[0] == tuple(twins)
+
+
+def test_merge_into_probe_lanes_partitions_the_whole_pool():
+    """Every manager lands on exactly one lane, whatever the pool grows to."""
+    lanes = merge_into_probe_lanes(pool.values())
+    laned = [manager for lane in lanes for manager in lane]
+    assert len(laned) == len(pool)
+    assert {manager.id for manager in laned} == set(pool.all_manager_ids)
+
+
+def test_warm_availability_shares_one_cache_within_a_lane():
+    """A lane's managers probe against one shared `run_cache`, then get their own
+    value back: that dict is what collapses `brew` and `cask` both running
+    `brew --version` into a single subprocess."""
+    accessed: list = []
+    twins = [_RecordingManager(accessed, probe="shared-cli") for _ in range(2)]
+    loner = _RecordingManager(accessed)
+    sentinel: dict = {}
+    twins[1].run_cache = sentinel
+
+    with _jobs_context(jobs=4):
+        warm_availability([*twins, loner])  # type: ignore[arg-type]
+
+    assert twins[0].cache_seen is twins[1].cache_seen is not None
+    # A lane of one gets no cache at all: there is no peer to share with.
+    assert loner.cache_seen is None
+    # A lane runs on a single worker, which is what makes the shared dict safe.
+    assert twins[0].thread_seen is twins[1].thread_seen
+
+    # Pre-existing values are restored rather than blanked.
+    assert twins[0].run_cache is None
+    assert twins[1].run_cache is sentinel

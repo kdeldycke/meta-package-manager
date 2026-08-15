@@ -10,6 +10,8 @@ Two things bound that parallelism: how many managers you let run at once, and th
 
 Two situations ignore that setting and run sequentially anyway. A batch of one manager has nothing left to parallelize. And `--verbosity DEBUG` streams every manager's raw output line by line, where interleaving a dozen of them would scramble the narration the flag exists to produce.
 
+Before any of that, every command detects which of the managers it selected are installed, by asking each of them for its version. That round is bounded by `--jobs` and takes the same two exceptions, and it is the only work `mpm managers` does: `--jobs` therefore still matters to a command driving no package operation at all.
+
 ## What each command spreads
 
 - ✅ every selected manager runs at once.

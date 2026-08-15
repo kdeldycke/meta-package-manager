@@ -627,18 +627,31 @@ class CLIExecutor:
     """
 
     run_cache: dict[tuple, tuple[int, str, str]] | None = None
-    """Optional cache that de-duplicates identical CLI runs within a lock family.
+    """Optional cache that de-duplicates identical CLI runs across a lane's managers.
 
     `None` by default, which disables caching: every {meth}`run` call spawns its own
-    subprocess. {func}`meta_package_manager.dispatch.dispatch` injects one shared dict
-    into all the managers of a multi-manager lock-family lane (see
-    {data}`meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`) for the duration of
-    that lane, so members resolving to a byte-identical command (`brew` and `cask`
-    both running `brew update` for {command}`mpm sync`) run the subprocess once and
-    replay the cached `(code, output, error)` for the rest. The replay still walks
-    {meth}`run`'s logging and failure gate, so a failed shared command is attributed
-    to every member. Keyed on the resolved command line and its environment, so only
-    genuinely identical invocations collapse.
+    subprocess. Two callers install a shared dict, each for the duration of one lane:
+
+    - {func}`meta_package_manager.dispatch.dispatch`, on every multi-manager
+      lock-family lane (see
+      {data}`meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`), so `brew` and
+      `cask` both running `brew update` for {command}`mpm sync` spawn it once.
+    - {func}`meta_package_manager.dispatch.warm_availability`, on every
+      version-probe lane (see
+      {func}`meta_package_manager.dispatch.merge_into_probe_lanes`), so `brew` and
+      `cask` both probing `brew --version` spawn it once too.
+
+    The replay still walks {meth}`run`'s logging and failure gate, so a failed shared
+    command is attributed to every member. Keyed on the resolved command line and its
+    environment, so only genuinely identical invocations collapse.
+
+    ```{caution}
+    Not thread-safe, and it does not need to be: both callers bind a cache to a lane,
+    and {func}`click_extra.execution.run_lanes` runs a lane's items serially on a
+    single worker. Handing one dict to managers that run *concurrently* would race
+    two peers into spawning the same command anyway, losing the de-duplication rather
+    than corrupting anything, so the lane is what makes the cache work at all.
+    ```
     """
 
     def __init__(self) -> None:
@@ -1069,21 +1082,29 @@ class CLIExecutor:
         output = ""
         error = ""
 
-        # Within a lock-family lane, key this run on its resolved command line and
-        # environment so a family peer that already ran the identical command serves it
-        # from cache instead of spawning a redundant (and lock-contending) subprocess.
-        # See SHARED_LOCK_FAMILIES and CLIExecutor.run_cache.
+        # The invocation is disclosed at INFO so `--verbosity INFO` shows (and lets the
+        # user reproduce) every CLI mpm runs on the system. The version-detection probes
+        # stay at DEBUG: they are discovery, fired for every candidate manager, and
+        # would drown the narration.
+        command_level = (
+            logging.DEBUG if self._active_operation == VERSION_PROBE else logging.INFO
+        )
+
+        # Within a lane sharing a cache, key this run on its resolved command line and
+        # environment so a peer that already ran the identical command serves it from
+        # cache instead of spawning a redundant (and lock-contending) subprocess.
+        # See CLIExecutor.run_cache for the two lane kinds that install one.
         cache = self.run_cache
         cache_key = (tuple(clean_args), tuple(sorted((extra_env or {}).items())))
         cached = cache.get(cache_key) if cache is not None else None
 
         if cached is not None:
             # Replay the peer's result: the subprocess is skipped, but the failure
-            # gate below still runs, so this manager is marked like the peer. INFO,
-            # like the command disclosure it stands in for: it explains why this
-            # manager shows no prompt line of its own.
+            # gate below still runs, so this manager is marked like the peer. Logged
+            # at the level the command disclosure it stands in for would have used:
+            # it explains why this manager shows no prompt line of its own.
             code, output, error = cached
-            logging.info(f"Reuse lock-family peer result: {cli_msg}")
+            logging.log(command_level, f"Reuse peer result: {cli_msg}")
         elif self.plan and self._active_operation in _MUTATING_OPERATIONS:
             # Plan mode: record the state-changing command for inspection instead of
             # running it. Read-only queries (and force_exec calls, which patch plan
@@ -1097,15 +1118,6 @@ class CLIExecutor:
         else:
             # `id` is declared on the `PackageManager` subclass, not this mixin.
             manager_id: str = self.id  # type: ignore[attr-defined]
-            # The invocation is disclosed at INFO so `--verbosity INFO` shows (and
-            # lets the user reproduce) every CLI mpm runs on the system. The
-            # version-detection probes stay at DEBUG: they are discovery, fired
-            # for every candidate manager, and would drown the narration.
-            command_level = (
-                logging.DEBUG
-                if self._active_operation == VERSION_PROBE
-                else logging.INFO
-            )
             effective_timeout = self._resolve_timeout()
             spinner = self._make_spinner()
             # A mutating command of an internal escalator (cask, fink) may block
@@ -1205,7 +1217,7 @@ class CLIExecutor:
             error = result.stderr or ""
             self._cleanup_windows_processes()
 
-        # Publish a freshly produced result — real or dry-run — so lock-family peers
+        # Publish a freshly produced result — real or dry-run — so the lane's peers
         # replay it instead of re-running, collapsing identical invocations even under
         # --dry-run (where the first member logs the command and the rest are silent
         # cache hits). Skipped when this run was itself a hit. Normalization below is

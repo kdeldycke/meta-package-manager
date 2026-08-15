@@ -235,7 +235,7 @@ Cygwin package manager, offered as an alternative to [`apt-cyg`](managers/apt-cy
 
 ## Self-updating applications ❌ 🛟
 
-[`atuin`](https://atuin.sh), [`cursor-agent`](https://cursor.com/cli), [`deno`](https://deno.com), [`flutter`](https://flutter.dev), [`fossil`](https://fossil-scm.org), [`spicetify`](https://spicetify.app) and [`typst`](https://typst.app).
+[`atuin`](https://atuin.sh), [`claude-code`](https://claude.com/product/claude-code), [`codex`](https://github.com/openai/codex), [`cursor-agent`](https://cursor.com/cli), [`deno`](https://deno.com), [`flutter`](https://flutter.dev), [`fossil`](https://fossil-scm.org), [`opencode`](https://github.com/sst/opencode), [`spicetify`](https://spicetify.app) and [`typst`](https://typst.app).
 
 Update only themselves. There is no catalog, no inventory and no per-package operation to map: the whole surface is one command that replaces the binary in place.
 

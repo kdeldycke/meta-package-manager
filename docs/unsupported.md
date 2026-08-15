@@ -235,6 +235,12 @@ Update only themselves. There is no catalog, no inventory and no per-package ope
 
 No commit since 2016-10-27. An early cross-distribution package manager over the RPM and dpkg archives among others, chasing the same goal as `mpm`; every archive it drove has a manager today.
 
+## [`sparkle`](https://sparkle-project.org) ❌ 🛟
+
+An update framework developers embed in their own macOS applications, described by its site as "*an easy-to-use software update framework for macOS applications*". Each application carries its own appcast feed and Sparkle's helper acts on one bundle path at a time, so there is no catalog and no inventory anywhere in it.
+
+`topgrade` reaches it by supplying the enumeration itself, walking `/Applications`, probing every bundle with `--probe` and updating whichever answer. That is a directory listing performed by the caller, not something Sparkle exposes, and it leaves nothing here to list, search, install by name or remove.
+
 ## [`sysget`](https://github.com/cvengler/sysget) ☠️
 
 Cross-manager wrapper retired in 2019. All 21 of the package managers it drove are shipped by `mpm`.

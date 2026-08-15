@@ -28,7 +28,6 @@ gets no content rule and is labelled by hand.
 from __future__ import annotations
 
 import inspect
-import re
 from pathlib import Path
 
 from boltons.iterutils import flatten
@@ -289,8 +288,8 @@ CONTENT_RULES_STATIC: TLabelRules = [
 ]
 """Curated keywords feeding the content rules of labels not derived from the pool.
 
-Holds keywords, not finished patterns: {func}`generate_content_rules` runs them
-through `_keyword_alternation()` like every other content rule.
+Holds bare keywords, like every other content rule: repomatic's `apply-labels`
+does the anchoring and case-folding (see {func}`generate_content_rules`).
 """
 
 
@@ -399,7 +398,7 @@ PLATFORM_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "Unix": ("unix",),
     "Windows": ("c:", "microsoft", "windows"),
 }
-"""Curated keyword patterns feeding each platform label's content rule."""
+"""Curated keywords feeding each platform label's content rule."""
 
 assert set(PLATFORM_CONTENT_KEYWORDS) == {p_obj.name for p_obj in MAIN_PLATFORMS}
 
@@ -427,35 +426,13 @@ def _definition_stem(manager_id: str) -> str:
     return Path(inspect.getfile(type(manager))).stem
 
 
-def _anchored(keyword: str) -> str:
-    r"""Anchor a keyword to whole-token matches with `\b` boundaries.
+def _sorted_keywords(keywords: tuple[str, ...]) -> tuple[str, ...]:
+    """Order a label's keywords case-insensitively.
 
-    `github/issue-labeler` matches each pattern as an unanchored regex, so a bare
-    keyword also matches inside a larger word (`arch` in `search`). A boundary is
-    added only on an edge that closes on a word character, so a keyword ending in
-    punctuation (`c:`) stays unanchored there.
+    Matching is order-independent, so this is purely to keep the generated
+    `pyproject.toml` stable: a reordered source tuple must not churn the file.
     """
-    escaped = re.escape(keyword)
-    prefix = r"\b" if keyword[:1].isalnum() else ""
-    suffix = r"\b" if keyword[-1:].isalnum() else ""
-    return f"{prefix}{escaped}{suffix}"
-
-
-def _keyword_alternation(keywords: tuple[str, ...]) -> str:
-    """OR-join a label's keywords into one case-insensitive `/…/i` regex.
-
-    The single encoder for every content rule: `github/issue-labeler` requires
-    *every* pattern in a label's list to match, so a raw keyword list reads as "all
-    of these" rather than "any of these": a label carrying both `node.js` and
-    `nodejs` would fire only when both appear at once. Collapsing the keywords into
-    a single alternation restores "any keyword wins".
-
-    The `/…/i` wrapper makes the match case-insensitive, because users capitalize
-    the names they type (`Perl`, `PyPI`, `SwiftBar`), which a lowercase keyword
-    would miss under the labeller's case-sensitive default.
-    """
-    alternatives = "|".join(_anchored(kw) for kw in sorted(keywords, key=str.casefold))
-    return f"/{alternatives}/i"
+    return tuple(sorted(keywords, key=str.casefold))
 
 
 def generate_content_rules() -> TLabelRules:
@@ -470,15 +447,21 @@ def generate_content_rules() -> TLabelRules:
     `uv` merely because they sat in the trace. The keywords are the distro, language
     and brand names a human types, which mpm never prints.
 
-    Every rule — static, manager and platform alike — emits exactly one pattern,
-    built by `_keyword_alternation()`. A rule listing its keywords raw would
-    read as "all of these" under the labeller's all-of semantics, which no issue
-    ever satisfies: a multi-keyword label encoded that way is silently dead. A label
-    with no keyword is skipped: that manager gets no content rule, only its file
-    rule. Rules are sorted by label, both cases folded.
+    Keywords are emitted raw, one pattern each, because repomatic's `apply-labels`
+    applies a label as soon as *any* one of its patterns matches, and compiles a
+    bare pattern case-insensitively with a `\b` anchor on each edge that is itself
+    a word character. That is what the retired `github/issue-labeler` needed
+    hand-built here: its all-of semantics forced a `/…/i` alternation to mean "any
+    keyword wins", and its case-sensitive default forced the `i` flag. Keep the
+    keywords bare, and reach for the `/body/flags` escape hatch only for something
+    an anchored literal cannot express.
+
+    A label with no keyword is skipped: that manager gets no content rule, only its
+    file rule. Rules are sorted by label, and each label's keywords among
+    themselves, both cases folded.
     """
     rules = [
-        (label_name, (_keyword_alternation(keywords),))
+        (label_name, _sorted_keywords(keywords))
         for label_name, keywords in CONTENT_RULES_STATIC
     ]
     for label_name in _label_members():
@@ -486,11 +469,11 @@ def generate_content_rules() -> TLabelRules:
         keywords = MANAGER_CONTENT_KEYWORDS.get(key, ())
         if not keywords:
             continue
-        rules.append((label_name, (_keyword_alternation(keywords),)))
+        rules.append((label_name, _sorted_keywords(keywords)))
     for platform_name, platform_keywords in PLATFORM_CONTENT_KEYWORDS.items():
         rules.append((
             f"{PLATFORM_PREFIX}{platform_name}",
-            (_keyword_alternation(platform_keywords),),
+            _sorted_keywords(platform_keywords),
         ))
     return sorted(rules, key=lambda rule: str.casefold(rule[0]))
 

@@ -270,34 +270,49 @@ def test_label_rules_reference_known_labels():
     labels_config = data["tool"]["repomatic"]["labels"]
     known = {label["name"] for label in labels_config["extra"]}
     for section in ("content-rules", "file-rules"):
-        stale = [
-            rule["label"]
-            for rule in labels_config[section]
-            if rule["label"] not in known
-        ]
+        stale = [label for label in labels_config[section] if label not in known]
         assert not stale, f"{section} reference unknown labels: {stale}"
 
 
 def test_label_rules_in_pyproject():
     """Check the generated `[tool.repomatic.labels.*]` rule blocks in
-    `pyproject.toml` match a fresh generation from the pool.
+    `pyproject.toml` match a fresh generation from the pool, in the schema
+    repomatic reads.
 
     Drift means a manager was added without running `docs/docs_update.py`
     (repomatic's `update-docs` job self-heals this on the next push).
+
+    The shape is asserted first, and separately from the content, because the two
+    fail for unrelated reasons. repomatic `7.11.0` replaced the array-of-tables
+    form with a label-to-patterns table and ignores the old one with a warning,
+    which dropped all 130 of these rules without failing anything: the generator
+    and the file still agreed with each other, in a schema the consumer had
+    abandoned. mpm does not depend on repomatic, so the shape is all this suite
+    can check on its own.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
     labels_config = data["tool"]["repomatic"]["labels"]
 
+    for key in ("content-rules", "file-rules"):
+        rules = labels_config[key]
+        assert isinstance(rules, dict), (
+            f"[tool.repomatic.labels.{key}] must be a table mapping each label to "
+            f"its patterns, not {type(rules).__name__}. An array-of-tables is the "
+            "pre-7.11.0 form, which repomatic ignores with a warning."
+        )
+        assert all(
+            isinstance(patterns, list) and patterns for patterns in rules.values()
+        ), f"Every [tool.repomatic.labels.{key}] label needs a non-empty pattern list."
+
     checked_in_content = [
-        (rule["label"], tuple(rule["patterns"]))
-        for rule in labels_config["content-rules"]
+        (label, tuple(patterns))
+        for label, patterns in labels_config["content-rules"].items()
     ]
     assert checked_in_content == generate_content_rules()
 
     checked_in_file = [
-        (rule["label"], tuple(rule["any-glob-to-any-file"]))
-        for rule in labels_config["file-rules"]
+        (label, tuple(globs)) for label, globs in labels_config["file-rules"].items()
     ]
     assert checked_in_file == generate_file_rules()
 

@@ -153,21 +153,6 @@ def _string_array(values: tuple[str, ...], multiline: bool = False):
     return tomlkit.array(f"[\n{body}]")
 
 
-def _rules_aot(rules: list[tuple[str, tuple[str, ...]]], field: str):
-    """Render labeller rules as a `tomlkit` array-of-tables.
-
-    Each rule becomes a ``{label, <field>}`` table. The pattern array switches to
-    one-item-per-line when its inline form would run long.
-    """
-    aot = tomlkit.aot()
-    for label, values in rules:
-        entry = tomlkit.table()
-        entry["label"] = label
-        entry[field] = _string_array(values)
-        aot.append(entry)
-    return aot
-
-
 def _sync_file(path: Path, content: str, *, check: bool) -> bool:
     """Write *content* to *path*, or only report whether it would change.
 
@@ -208,7 +193,7 @@ def update_labels(*, check: bool = False) -> bool:
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
-    labels_table = doc["tool"]["repomatic"]["labels"]
+    repomatic_table = doc["tool"]["repomatic"]
 
     extra = tomlkit.aot()
     for name, color, description in LABELS:
@@ -223,26 +208,42 @@ def update_labels(*, check: bool = False) -> bool:
             entry["rename-from"] = _string_array(renamed_from)
         extra.append(entry)
 
-    arrays = {
-        "content-rules": _rules_aot(generate_content_rules(), "patterns"),
-        "extra": extra,
-        "file-rules": _rules_aot(generate_file_rules(), "any-glob-to-any-file"),
-    }
-    for key, aot in arrays.items():
-        labels_table[key] = aot
-        # Separate the last entry from the following table with one blank line.
-        last_field = list(aot[-1].keys())[-1]
-        aot[-1][last_field].trivia.trail = "\n\n"
+    # The whole `labels` sub-tree is dropped and rebuilt, rather than assigned
+    # over in place: replacing an array-of-tables with a table leaves `tomlkit`'s
+    # internal table map holding indices into the section it just removed, and
+    # the next assignment to the same container dies on an out-of-range lookup.
+    del repomatic_table["labels"]
+
+    # The rule sets go in as dotted keys on `[tool.repomatic]`, which is what
+    # `pyproject-fmt` canonicalizes a table of scalars to, and what the rest of
+    # this section already reads like (`workflow.paths`, `manpages.script`).
+    # `extra` stays an array-of-tables, having no dotted-key form, and therefore
+    # has to be written last: TOML closes a table the moment a sub-table header
+    # opens, so a dotted key emitted after it would land inside `extra`.
+    for section, rules in (
+        ("content-rules", generate_content_rules()),
+        ("file-rules", generate_file_rules()),
+    ):
+        for label, values in rules:
+            key = tomlkit.key(["labels", section, label])
+            repomatic_table[key] = _string_array(values)
+
+    # `append()` rather than item assignment on both lines: assigning a super
+    # table over a key the dotted keys above just created discards them and
+    # re-roots the array-of-tables at the document top level, as `[[labels.extra]]`.
+    labels_table = tomlkit.table(is_super_table=True)
+    labels_table.append("extra", extra)
+    repomatic_table.append("labels", labels_table)
+
+    # Separate the last `extra` entry from the following table with one blank line.
+    last_field = list(extra[-1].keys())[-1]
+    extra[-1][last_field].trivia.trail = "\n\n"
 
     content = tomlkit.dumps(doc)
-    for key in arrays:
-        # tomlkit prefixes each inserted array-of-tables with two blank lines;
-        # collapse the section's leading separator to a single blank line.
-        content = content.replace(
-            f"\n\n\n[[tool.repomatic.labels.{key}]]",
-            f"\n\n[[tool.repomatic.labels.{key}]]",
-            1,
-        )
+    # tomlkit prefixes the inserted array-of-tables with two blank lines; collapse
+    # the section's leading separator to a single blank line.
+    header = "[[tool.repomatic.labels.extra]]"
+    content = content.replace(f"\n\n\n{header}", f"\n\n{header}", 1)
     return _sync_file(pyproject, content, check=check)
 
 

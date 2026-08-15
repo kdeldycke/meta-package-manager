@@ -89,11 +89,16 @@ jobs:
       - name: Stage the built RPM for the integration job
         run: cp /usr/src/packages/RPMS/noarch/*.rpm ./
       - name: Lint the built RPM
-        # Reported rather than gated on warnings: a package nobody has yet
-        # submitted always trips some openSUSE house style, and the build above
-        # is the assertion this job exists to make. Errors still fail.
+        # Warnings are reported rather than gated; errors fail the job, minus
+        # two checks a plain rpmbuild container structurally cannot satisfy.
+        # An OBS build root clamps file timestamps to the source date, so the
+        # byte-code it compiles never post-dates the sources, and it converts
+        # the .changes file into the %changelog tag this spec leaves empty on
+        # purpose. Neither happens here, and the same package lints at zero
+        # errors on the Build Service, which stays the authority for the RPM.
         run: |
           set -uo pipefail
+          outside_obs='python-bytecode-inconsistent-mtime|no-changelogname-tag'
           report="$(rpmlint ./*.rpm 2>&1 || true)"
           echo "${report}"
           {
@@ -103,7 +108,9 @@ jobs:
             echo "${report}"
             echo '```'
           } >> "${GITHUB_STEP_SUMMARY}"
-          if echo "${report}" | grep --quiet " E: "; then
+          if echo "${report}" | grep " E: " \
+              | grep --invert-match --extended-regexp "${outside_obs}" \
+              | grep --quiet .; then
             echo "rpmlint reported errors, see above." >&2
             exit 1
           fi

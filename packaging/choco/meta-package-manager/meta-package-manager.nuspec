@@ -32,7 +32,7 @@ Full documentation at https://mpm.run/
     <docsUrl>https://mpm.run/</docsUrl>
     <bugTrackerUrl>https://github.com/kdeldycke/meta-package-manager/issues</bugTrackerUrl>
     <licenseUrl>https://github.com/kdeldycke/meta-package-manager/blob/main/license</licenseUrl>
-    <iconUrl>https://cdn.jsdelivr.net/gh/kdeldycke/meta-package-manager@v6.2.1/docs/assets/icon.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.4.2</releaseNotes>
     <copyright>Kevin Deldycke and contributors</copyright>

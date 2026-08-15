@@ -5,15 +5,15 @@ function global:au_GetLatest {
     $version = $release.tag_name.TrimStart('v')
     $baseUrl = "https://github.com/kdeldycke/meta-package-manager/releases/download/v$version"
 
-    $urlX64 = "$baseUrl/mpm-$version-windows-x64.exe"
-    $urlArm64 = "$baseUrl/mpm-$version-windows-arm64.exe"
+    $urlX64 = "$baseUrl/meta-package-manager-$version-windows-x64.exe"
+    $urlArm64 = "$baseUrl/meta-package-manager-$version-windows-arm64.exe"
 
     # Download binaries to compute checksums.
     $tempDir = Join-Path $env:TEMP "mpm-choco-$version"
     New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
-    $x64Path = Join-Path $tempDir "mpm-$version-windows-x64.exe"
-    $arm64Path = Join-Path $tempDir "mpm-$version-windows-arm64.exe"
+    $x64Path = Join-Path $tempDir "meta-package-manager-$version-windows-x64.exe"
+    $arm64Path = Join-Path $tempDir "meta-package-manager-$version-windows-arm64.exe"
 
     Invoke-WebRequest -Uri $urlX64 -OutFile $x64Path
     Invoke-WebRequest -Uri $urlArm64 -OutFile $arm64Path

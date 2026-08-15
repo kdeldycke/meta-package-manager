@@ -185,6 +185,7 @@ keywords = [
   "yazi",
   "yum",
   "zb",
+  "zef",
   "zerobrew",
   "zim",
   "zinit",
@@ -1489,6 +1490,11 @@ color = "bfdadc"
 description = "yazi"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: zef"
+color = "bfdadc"
+description = "zef"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: zsh-based"
 color = "bfdadc"
 description = "antidote, antigen, zim, zinit, zplug"
@@ -1928,6 +1934,10 @@ any-glob-to-any-file = [ "meta_package_manager/managers/xcodes.*", "tests/*xcode
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: yazi"
 any-glob-to-any-file = [ "meta_package_manager/managers/yazi.*", "tests/*yazi*" ]
+
+[[tool.repomatic.labels.file-rules]]
+label = "📦 manager: zef"
+any-glob-to-any-file = [ "meta_package_manager/managers/zef.*", "tests/*zef*" ]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: zsh-based"

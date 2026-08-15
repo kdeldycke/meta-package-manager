@@ -514,6 +514,8 @@ PACKAGE_IDS = {
     # Zinit's own do-nothing plugin: an empty repository it documents for
     # ice-only usage, so loading and deleting it runs no third-party code.
     # Declares no install operation: the round-trip auto-skips.
+    # A leaf Raku distribution: pure Raku, no dependencies of its own.
+    "zef": "hyperize",
     "zim": "zsh-users/zsh-completions",
     "zinit": "zdharma-continuum/null",
     # Declares no install operation: the round-trip auto-skips.

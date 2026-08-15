@@ -85,6 +85,7 @@ from .managers.volta import Volta
 from .managers.winget import WinGet
 from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
+from .managers.zef import Zef
 from .managers.zim import Zim
 from .managers.zinit import Zinit
 from .managers.zplug import Zplug
@@ -173,6 +174,7 @@ manager_classes = (
     YarnClassic,
     Yay,
     YUM,
+    Zef,
     Zim,
     Zinit,
     Zplug,

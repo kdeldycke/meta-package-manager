@@ -303,6 +303,7 @@ UPSTREAM_REPOS = {
     "yay": "https://github.com/Jguer/yay",
     "yum": "https://github.com/rpm-software-management/yum",
     "zerobrew": "https://github.com/lucasgelfond/zerobrew",
+    "zef": "https://github.com/ugexe/zef",
     "zim": "https://github.com/zimfw/zimfw",
     "zinit": "https://github.com/zdharma-continuum/zinit",
     "zplug": "https://github.com/zplug/zplug",

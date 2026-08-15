@@ -87,6 +87,7 @@ print(augmentations_table())
 | [`yarn-berry`](managers/yarn-berry.md)     |                      |              |      ✅      |       ✅        |
 | [`yay`](managers/yay.md)                   |                      |      ✅      |              |       ✅        |
 | [`yum`](managers/yum.md)                   |                      |              |      ✅      |       ✅        |
+| [`zef`](managers/zef.md)                   |                      |              |      ✅      |       ✅        |
 | [`zypper`](managers/zypper.md)             |                      |      ✅      |              |                 |
 
 <!-- mirror-end -->

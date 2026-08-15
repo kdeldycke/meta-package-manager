@@ -109,7 +109,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "p2": None,
     "pear": None,
     "pecl": None,
-    "perl6": None,
+    "perl6": {"zef"},
     "platformio": None,
     "pub": None,
     "puppet": None,

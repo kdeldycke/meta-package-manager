@@ -244,89 +244,14 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.9 is the floor mpm targets. The 8.9.0 release caps a table
-  # column to a width, through a `max_width` field on ColumnSpec and the
-  # `max_column_widths` argument of print_table: meta_package_manager.tables
-  # declares the search table's description column `auto`, so a verbose match
-  # wraps inside its own cell instead of stretching the table twice past the
-  # terminal. It also renders the `{matrix}` Python axis in three states (a
-  # version the release declares, one its requires-python rules out, and one it
-  # neither claimed nor forbade), which rewrote the compatibility table of
-  # docs/install.md, and binds the test suite's HTTP server to 127.0.0.1
-  # instead of `localhost`, dropping the name lookup the Darwin Nix sandbox
-  # refuses to serve (see packaging/nix/click-extra.nix). The 8.8.0 release
-  # ships the click_extra.output helpers (is_stdout / prep_path) that
-  # meta_package_manager.cli used to carry private copies of: the upstream
-  # prep_path creates missing parent directories, so `mpm backup a/b/c.toml` no
-  # longer dies on FileNotFoundError, and returns a UTF-8 stream for stdout
-  # instead of None. It also adds OperationTrail's determinate `progress_bar`
-  # rendering, which meta_package_manager.dispatch selects for every concurrent
-  # batch (each one counts its work up front, so the bar always has a length),
-  # and gates the trail's elapsed times on a `timer` argument following --time
-  # rather than always clocking the finisher. The 8.8.1 patch widens
-  # click-extra's own uv-build floor to >=0.8 and drops its `required-version`
-  # upper cap: mpm uncapped both in 7.5.0, and a still-capped dependency would
-  # re-break the distribution builds (MacPorts' py-uv-build 0.12) that uncap
-  # was meant to unblock. The 8.7.0 release ships the `<!-- mirror-src -->`
-  # comment form of the `python:render` `:mirror:` block, where the generator
-  # Python hides inside an HTML comment while its output still renders on GitHub
-  # and PyPI: the readme's manager Sankey diagram and operation matrix now ride
-  # it, refreshed offline by `click-extra refresh-directives` instead of baked in
-  # by docs/docs_update.py. It also scopes the strict configuration check to
-  # mpm's own section when reading a shared `pyproject.toml`, and fixes
-  # `DO_NOT_TRACK` so a truthy value forces telemetry off instead of feeding the
-  # flag verbatim. The 8.6.1 release shipped the test suite in the PyPI sdist (so
-  # downstream packagers build and test without a Git checkout), a setuptools
-  # package-data shim, and a fix for the source line reported in `click:run`
-  # directive errors (mpm drives that directive in docs/configuration.md). The
-  # 8.6.0 series shipped OperationTrail, the batch ✓/✗ trail upstreamed from
-  # mpm's own dispatch layer, which meta_package_manager.dispatch now
-  # subclasses (with the trail_glyph / trail_line atoms), plus the mirror-block
-  # fix making `click-extra refresh-directives` run `python:render` `:mirror:`
-  # blocks with the page's directory on sys.path (the offline docs regen of
-  # benchmark.md and augmentations.md relies on it), the newest-first
-  # `column-order` / `row-order` defaults of the `{matrix}` directive behind the
-  # compatibility tables of docs/install.md and docs/packaging.md, and the
-  # test-suite fix keeping a venv's symlinked interpreter unresolved (so the
-  # binary test plan sees the venv's own packages).
-  # The 8.5.0 series renamed the --show-params introspection flag to --params
-  # (the name the bug-report template, the documentation and the binary test
-  # plan reference), shipped run_cli's start_new_session mode (the manager
-  # invocation leads its own POSIX session and process group, so timeouts and
-  # Ctrl+C reap wedged grandchildren) and promoted print_table / render_table
-  # to Context methods reading --table-format and --sort-by from the shared
-  # meta.
-  # The 8.4.0 series brought the subprocess-execution primitives
-  # meta_package_manager.execution delegates to:
-  #   - run_cli, the spawn/stream/timeout engine disclosing invocations at INFO
-  #     and streaming their output live to DEBUG logs.
-  #   - install_interrupt_handler / terminate_live_processes, the Ctrl+C child
-  #     termination machinery (moved from mpm).
-  #   - args_cleanup / format_cli_prompt / INDENT relocated from
-  #     click_extra.testing to click_extra.execution.
-  #   - The logging-to-spinner bridge that prints log records above a running
-  #     spinner instead of garbling its frame.
-  # The 8.3.0 series brought the `click:config` Sphinx directive rendering the
-  # option reference in docs/configuration.md (via the [sphinx] extra of the
-  # docs dependency group); 8.2.0 the resolve_jobs / run_jobs / run_lanes
-  # concurrency primitives, the --export-config option, the
-  # click_extra.sphinx.matrix machinery behind docs/install.md's compatibility
-  # tables, and the `click:tree` / `python:render` directives behind
-  # docs/cli-parameters.md and docs/benchmark.md. Earlier 8.x floors tracked
-  # the split click_extra.highlight module, the ConfigValidator /
-  # ValidationError import move to click_extra.config, print_table()'s
-  # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
-  # default; 8.8.1 covers them all.
+  # click-extra 8.9 caps a table column to a width (`max_column_widths` on
+  # print_table): meta_package_manager.tables holds the search table's
+  # description column to `auto`, so a long match wraps in its cell instead of
+  # stretching the table past the terminal.
   "click-extra>=8.9",
-  # extra-platforms 13.6.0 adds AlmaLinux detection, silencing the "unrecognized
-  # platform, please report" warning that 13.5.x printed to stdout on AlmaLinux
-  # hosts (the release workflow's RHEL-family test containers), which corrupted
-  # the CLI output the test suite asserts on. 13.5.0 renamed the GUIX_BUILD trait
-  # to HERMETIC_BUILD and made skip_hermetic_build the primary marker mpm's test
-  # suite consumes, deprecating the skip_guix_build alias; it also ships (since
-  # 13.4.0) the write_fake_executable() helper the suite consumes and (since
-  # 13.1.0) the ChromeOS, Clear Linux, SliTaz and Source Mage detections that the
-  # chromebrew, swupd, tazpkg and sorcery managers declare.
+  # extra-platforms 13.6 detects AlmaLinux, silencing the "unrecognized platform"
+  # warning 13.5 printed to stdout on the release workflow's RHEL-family test
+  # containers, which corrupted the CLI output the test suite asserts on.
   "extra-platforms>=13.6",
   # Required at runtime by meta_package_manager.package and
   # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
@@ -417,10 +342,10 @@ test = [
   "extra-platforms",
   # respx requires httpx as a peer; pin the same floor as [sbom-online].
   "httpx>=0.27",
-  # Guards the pyproject-fmt fixpoint of the pyproject.toml sections rewritten by
-  # docs/docs_update.py, so the update-docs and format-pyproject autofix jobs never
-  # rewrite each other's output. Optional: the test skips when the package is
-  # missing, keeping hermetic distro builds working. 2.25.1 is the verified style.
+  # Guards the pyproject-fmt fixpoint of the pyproject.toml sections
+  # docs/docs_update.py rewrites, so update-docs and format-pyproject never rewrite
+  # each other's output. Optional: the test skips when it is missing, keeping
+  # hermetic distro builds working. 2.25.1 is the verified style.
   "pyproject-fmt>=2.25.1",
   # pytest 9.0.0 reads native TOML config from the [tool.pytest] table used in this file.
   "pytest>=9",
@@ -450,10 +375,9 @@ docs = [
   # furo 2025.9.25 is a recent CalVer release supporting Sphinx 8.
   "furo>=2025.9.25",
   # attrs_block, attrs_inline and colon_fence (enabled in docs/conf.py) ship in
-  # myst-parser 4.0+; the `alert` extension also enabled there needs 5.1. A flat
-  # floor is only resolvable because this group declares its own
-  # requires-python (see [tool.uv]); on the project's 3.10 floor uv caps
-  # myst-parser at 4.0.1 and a >= 5.1 requirement has no solution.
+  # myst-parser 4.0+; the `alert` extension needs 5.1. The flat floor only resolves
+  # because this group declares its own requires-python: on the project's 3.10
+  # floor, uv caps myst-parser at 4.0.1.
   "myst-parser>=5.1",
   # Sphinx 8.0.0 is the first version to drop Python 3.9, matching requires-python.
   "sphinx>=8",
@@ -481,11 +405,9 @@ docs = [
   "tomlkit>=0.13",
 ]
 typing = [
-  # Stubs for the untyped runtime libraries mpm imports (boltons; docutils and
-  # PyYAML in tests/test_docs.py; xmltodict in managers/zypper.py); stub
-  # versions track their target library's API. docutils is only guarded behind
-  # an ImportError at runtime, never at type-check time, so mypy needs its stub
-  # even though the library itself ships with the docs group alone.
+  # Stubs for the untyped libraries mpm imports: boltons, xmltodict in
+  # managers/zypper.py, docutils and PyYAML in tests/test_docs.py. mypy needs the
+  # docutils stub even though the library itself ships with the docs group alone.
   "types-boltons>=25.0.0.20250919",
   "types-docutils>=0.22.3.20260724",
   "types-pyyaml>=6.0.12.9",

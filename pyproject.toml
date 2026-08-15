@@ -240,8 +240,18 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.8.1 is the floor mpm targets. The 8.8.0 release ships the
-  # click_extra.output helpers (is_stdout / prep_path) that
+  # click-extra 8.9 is the floor mpm targets. The 8.9.0 release caps a table
+  # column to a width, through a `max_width` field on ColumnSpec and the
+  # `max_column_widths` argument of print_table: meta_package_manager.tables
+  # declares the search table's description column `auto`, so a verbose match
+  # wraps inside its own cell instead of stretching the table twice past the
+  # terminal. It also renders the `{matrix}` Python axis in three states (a
+  # version the release declares, one its requires-python rules out, and one it
+  # neither claimed nor forbade), which rewrote the compatibility table of
+  # docs/install.md, and binds the test suite's HTTP server to 127.0.0.1
+  # instead of `localhost`, dropping the name lookup the Darwin Nix sandbox
+  # refuses to serve (see packaging/nix/click-extra.nix). The 8.8.0 release
+  # ships the click_extra.output helpers (is_stdout / prep_path) that
   # meta_package_manager.cli used to carry private copies of: the upstream
   # prep_path creates missing parent directories, so `mpm backup a/b/c.toml` no
   # longer dies on FileNotFoundError, and returns a UTF-8 stream for stdout
@@ -303,7 +313,7 @@ dependencies = [
   # ValidationError import move to click_extra.config, print_table()'s
   # sort_key parameter, and the 8.1.1 fix for the EnumChoice-typed --sort-by
   # default; 8.8.1 covers them all.
-  "click-extra>=8.8.1",
+  "click-extra>=8.9",
   # extra-platforms 13.6.0 adds AlmaLinux detection, silencing the "unrecognized
   # platform, please report" warning that 13.5.x printed to stdout on AlmaLinux
   # hosts (the release workflow's RHEL-family test containers), which corrupted
@@ -497,6 +507,12 @@ required-version = ">=0.11.15"
 dependency-groups.docs = { requires-python = ">= 3.14" }
 # Cooldown period.
 exclude-newer = "1 week"
+# Per-package override pulling a freshly-published dependency in before the
+# global cooldown above would let it through. The value is an absolute ISO 8601
+# timestamp, conventionally the midnight following the release upload, so the
+# exemption covers that release and nothing later. Drop the entry once the
+# release ages past the cooldown window.
+exclude-newer-package = { click-extra = "2026-08-15T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

@@ -11,6 +11,9 @@ resolution-markers = [
 exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P1W"
 
+[options.exclude-newer-package]
+click-extra = "2026-08-15T00:00:00Z"
+
 [[package]]
 name = "accessible-pygments"
 version = "0.0.5"
@@ -245,7 +248,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "8.8.1"
+version = "8.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -258,9 +261,9 @@ dependencies = [
     { name = "wcmatch" },
     { name = "wcwidth" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f6/f2/ab33d5d978f4ceb1b52eb3e4ee0538aa197768913d411380a7b318e45e91/click_extra-8.8.1.tar.gz", hash = "sha256:fc67535bbc186ac608b04f1da3dd1c442903567f08a12f484af89a894653f796", size = 1263359, upload-time = "2026-08-02T06:09:18.847Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/5a/6ac519c831e4d51522d05a8655d3dc8051a109ea1fd935da2dfe06ac5dc1/click_extra-8.9.0.tar.gz", hash = "sha256:6586bd80d21b13d6343fc987c2279e170ad7213c972e638e8a6259c8241189cf", size = 1294893, upload-time = "2026-08-14T18:16:52.087Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/e8/79d8d14891d3b8a69be97da3383e2da69832d55e84a8a9ca1196d653d7c7/click_extra-8.8.1-py3-none-any.whl", hash = "sha256:30b6fbf2ebbce57aa2ec1a24e8f6ec6ffc91e7488d84d8fd14d9ac1c27c6e257", size = 442054, upload-time = "2026-08-02T06:09:16.972Z" },
+    { url = "https://files.pythonhosted.org/packages/0d/50/eb9aa0bf13d2f69288236f013ce5ce81b55d1b8211986dfe217c6ec54ab8/click_extra-8.9.0-py3-none-any.whl", hash = "sha256:7fc32dbddf4fcbf9c514a86a9aef0e0a882dc24145df34fbcf706bda4d4a0441", size = 452781, upload-time = "2026-08-14T18:16:50.459Z" },
 ]
 
 [package.optional-dependencies]
@@ -1038,7 +1041,7 @@ typing = [
 requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1" },
     { name = "boltons", specifier = ">=25" },
-    { name = "click-extra", specifier = ">=8.8.1" },
+    { name = "click-extra", specifier = ">=8.9" },
     { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
     { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
     { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },

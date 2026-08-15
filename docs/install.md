@@ -512,22 +512,22 @@ mpm, version 7.6.0
 
 ## Python compatibility
 
-The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented. The table is regenerated from the release tags by repomatic's `update-docs` job, through click-extra's [`matrix` mechanism](https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive):
+The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented. Cells carry three states: ✅ for a version the release declares, ❌ for one its `requires-python` rules out, and – for one it neither claimed nor forbade, which is mostly a Python that did not exist yet when the release was cut. The table is regenerated from the release tags by repomatic's `update-docs` job, through click-extra's [`matrix` mechanism](https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive):
 
 <!-- matrix python package=mpm -->
 
 | `mpm`               | Released   | `3.14` | `3.13` | `3.12` | `3.11` | `3.10` | `3.9` | `3.8` | `3.7` | `3.6` | `3.5` | `3.4` | `3.3` | `2.7` |
 | :------------------ | :--------- | :----: | :----: | :----: | :----: | :----: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `6.0.x` → `7.x`     | 2025-12-08 |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
-| `5.21.0`            | 2025-05-28 |   ❌   |   ✅   |   ✅   |   ✅   |   ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
-| `5.19.x` → `5.20.x` | 2024-11-13 |   ❌   |   ✅   |   ✅   |   ✅   |   ✅   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
-| `5.17.x` → `5.18.x` | 2024-07-07 |   ❌   |   ❌   |   ✅   |   ✅   |   ✅   |  ✅   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
-| `5.14.x` → `5.16.x` | 2024-01-12 |   ❌   |   ❌   |   ✅   |   ✅   |   ✅   |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
-| `3.2.x` → `5.13.x`  | 2020-05-31 |   ❌   |   ❌   |   ✅   |   ✅   |   ✅   |  ✅   |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
-| `2.9.x` → `3.1.x`   | 2020-03-18 |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |  ❌   |  ✅   |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |  ❌   |
-| `2.5.x` → `2.8.x`   | 2017-03-01 |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |  ❌   |  ✅   |  ✅   |  ✅   |  ✅   |  ✅   |  ❌   |  ✅   |
-| `2.1.x` → `2.4.x`   | 2016-12-17 |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |  ❌   |  ❌   |  ❌   |  ✅   |  ✅   |  ✅   |  ✅   |  ✅   |
-| `1.8.x` → `2.1.x`   | 2016-08-22 |   ❌   |   ❌   |   ❌   |   ❌   |   ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ✅   |  ✅   |  ✅   |  ✅   |
+| `5.21.0`            | 2025-05-28 |   –    |   ✅   |   ✅   |   ✅   |   ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
+| `5.19.x` → `5.20.x` | 2024-11-13 |   –    |   ✅   |   ✅   |   ✅   |   ✅   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
+| `5.17.x` → `5.18.x` | 2024-07-07 |   –    |   –    |   ✅   |   ✅   |   ✅   |  ✅   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
+| `5.14.x` → `5.16.x` | 2024-01-12 |   –    |   –    |   ✅   |   ✅   |   ✅   |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
+| `3.2.x` → `5.13.x`  | 2020-05-31 |   –    |   –    |   ✅   |   ✅   |   ✅   |  ✅   |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |  ❌   |  ❌   |
+| `2.9.x` → `3.1.x`   | 2020-03-18 |   –    |   –    |   –    |   –    |   –    |   –   |  ✅   |  ✅   |  ✅   |  ❌   |  ❌   |  ❌   |  ❌   |
+| `2.5.x` → `2.8.x`   | 2017-03-01 |   –    |   –    |   –    |   –    |   –    |   –   |  ✅   |  ✅   |  ✅   |  ✅   |  ✅   |  ❌   |  ✅   |
+| `2.1.x` → `2.4.x`   | 2016-12-17 |   –    |   –    |   –    |   –    |   –    |   –   |   –   |   –   |  ✅   |  ✅   |  ✅   |  ✅   |  ✅   |
+| `1.8.x` → `2.1.x`   | 2016-08-22 |   –    |   –    |   –    |   –    |   –    |   –   |   –   |   –   |   –   |  ✅   |  ✅   |  ✅   |  ✅   |
 
 <!-- matrix-end -->
 

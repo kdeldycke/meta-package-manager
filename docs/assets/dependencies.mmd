@@ -46,6 +46,7 @@ flowchart LR
     rpds_py(["`rpds-py`"])
     six(["`six`"])
     sphinx_basic_ng(["`sphinx-basic-ng`"])
+    sphinx_last_updated_by_git(["`sphinx-last-updated-by-git`"])
     tabulate(["`tabulate`"])
     wcmatch(["`wcmatch`"])
     wcwidth(["`wcwidth`"])
@@ -112,6 +113,7 @@ flowchart LR
         sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
         sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
         sphinx_design{{"`sphinx-design >=0.6`"}}
+        sphinx_sitemap{{"`sphinx-sitemap >=2.6`"}}
         sphinxext_opengraph{{"`sphinxext-opengraph >=0.13`"}}
         tomlkit{{"`tomlkit >=0.13`"}}
     end
@@ -133,11 +135,12 @@ flowchart LR
 
     subgraph grp_typing [--group typing]
         types_boltons{{"`types-boltons >=25.0.0.20250919`"}}
+        types_docutils{{"`types-docutils >=0.22.3.20260724`"}}
         types_pyyaml{{"`types-pyyaml >=6.0.12.9`"}}
         types_xmltodict{{"`types-xmltodict >=1.0.1.20250920`"}}
     end
 
-    meta_package_manager ==>|" >=8.8.1 "| click_extra
+    meta_package_manager ==>|" >=8.9 "| click_extra
     meta_package_manager ==>|" >=2 "| tomli
     meta_package_manager ==>|" >=0.12 "| xmltodict
     meta_package_manager ==>|" >=25 "| boltons
@@ -240,6 +243,7 @@ flowchart LR
     sphinx_autodoc_typehints --> sphinx
     sphinx_copybutton --> sphinx
     sphinx_design --> sphinx
+    sphinx_sitemap --> sphinx_last_updated_by_git
     sphinxext_opengraph --> sphinx
     jsonschema --> referencing
     jsonschema --> idna
@@ -281,6 +285,7 @@ flowchart LR
     mdit_py_plugins --> markdown_it_py
     py_serializable --> defusedxml
     sphinx_basic_ng --> sphinx
+    sphinx_last_updated_by_git --> sphinx
     tabulate --> wcwidth
     wcmatch --> bracex
     isoduration --> arrow
@@ -389,6 +394,8 @@ flowchart LR
     click sphinx_copybutton "https://pypi.org/project/sphinx-copybutton/" _blank
     click sphinx_datatables "https://pypi.org/project/sphinx-datatables/" _blank
     click sphinx_design "https://pypi.org/project/sphinx-design/" _blank
+    click sphinx_last_updated_by_git "https://pypi.org/project/sphinx-last-updated-by-git/" _blank
+    click sphinx_sitemap "https://pypi.org/project/sphinx-sitemap/" _blank
     click sphinxcontrib_applehelp "https://pypi.org/project/sphinxcontrib-applehelp/" _blank
     click sphinxcontrib_devhelp "https://pypi.org/project/sphinxcontrib-devhelp/" _blank
     click sphinxcontrib_htmlhelp "https://pypi.org/project/sphinxcontrib-htmlhelp/" _blank
@@ -403,6 +410,7 @@ flowchart LR
     click tomli_w "https://pypi.org/project/tomli-w/" _blank
     click tomlkit "https://pypi.org/project/tomlkit/" _blank
     click types_boltons "https://pypi.org/project/types-boltons/" _blank
+    click types_docutils "https://pypi.org/project/types-docutils/" _blank
     click types_pyyaml "https://pypi.org/project/types-pyyaml/" _blank
     click types_xmltodict "https://pypi.org/project/types-xmltodict/" _blank
     click typing_extensions "https://pypi.org/project/typing-extensions/" _blank
@@ -444,6 +452,7 @@ flowchart LR
     style sphinx_copybutton stroke-width:3px
     style sphinx_datatables stroke-width:3px
     style sphinx_design stroke-width:3px
+    style sphinx_sitemap stroke-width:3px
     style sphinxcontrib_jquery stroke-width:3px
     style sphinxcontrib_mermaid stroke-width:3px
     style sphinxext_opengraph stroke-width:3px
@@ -451,6 +460,7 @@ flowchart LR
     style tomli_w stroke-width:3px
     style tomlkit stroke-width:3px
     style types_boltons stroke-width:3px
+    style types_docutils stroke-width:3px
     style types_pyyaml stroke-width:3px
     style types_xmltodict stroke-width:3px
     style xmltodict stroke-width:3px

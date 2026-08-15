@@ -51,6 +51,7 @@ import sys
 
 from click_extra.context import COLUMNS, TABLE_FORMAT
 from click_extra.table import (
+    AUTO_WIDTH,
     SERIALIZATION_FORMATS,
     ColumnSpec,
     print_data,
@@ -169,6 +170,7 @@ SEARCH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
             "Description",
             "Package description, for managers that provide one. Out of the "
             "default selection: select it explicitly or pass --description.",
+            max_width=AUTO_WIDTH,
         ),
         None,
     ),
@@ -178,6 +180,12 @@ SEARCH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
 The `description` column exists in the registry (so `--columns` can select it)
 but stays out of the default selection unless `--description` (or `--extended`,
 which searches descriptions) is passed.
+
+It is also the only column of any registry holding free prose, of a length no
+manager bounds: a single verbose match used to stretch the table far past the
+terminal and wrap every row at the edge, mangling the borders.
+{data}`~click_extra.table.AUTO_WIDTH` caps it at whatever the other columns
+leave on the terminal, so the description wraps inside its own cell.
 """
 
 WHICH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
@@ -240,6 +248,15 @@ def print_projected_table(
     resolves it per table. A sort field whose column is projected out is simply
     skipped, and a table carrying none of the selected fields keeps its
     original row order.
+
+    ```{note}
+    The width limits are forwarded by hand, from the same specs the projection
+    just resolved. click-extra reads them off {class}`~click_extra.table.ColumnSpec`
+    headers on its own, but mpm's headers are `(label, sortable field)` pairs
+    instead: a spec's ID addresses the column for `--columns` while the field it
+    sorts on may differ (`installed_version` sorts on `version`) or be absent
+    altogether, which a bare spec cannot express.
+    ```
     """
     selected = ctx.meta.get(COLUMNS) or tuple(default_ids or ())
     projected = select_columns(column_specs(columns), selected)
@@ -248,6 +265,7 @@ def print_projected_table(
     ctx.print_table(
         [select_row(row, ids, ids) for row in rows],
         tuple((spec.label, sort_field[spec.id]) for spec in projected),
+        max_column_widths=tuple(spec.max_width for spec in projected),
     )
 
 

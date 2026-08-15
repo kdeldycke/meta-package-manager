@@ -1036,9 +1036,7 @@ def test_manager_card_renders(manager):
     # and the search is narrowed to what is still open: a closed backlog is not
     # what a reader clicking the badge came for.
     quoted = label_name.replace(" ", "%20").replace(":", "%3A")
-    assert url == (
-        f"{_docs.GITHUB_ISSUES_URL}?q=label%3A%22{quoted}%22%20state%3Aopen"
-    )
+    assert url == (f"{_docs.GITHUB_ISSUES_URL}?q=label%3A%22{quoted}%22%20state%3Aopen")
 
     # How mpm invokes the tool, the whole of what used to be a section of its own.
     cli_row = "CLI names (lookup order)" if len(manager.cli_names) > 1 else "CLI name"

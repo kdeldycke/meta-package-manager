@@ -771,17 +771,17 @@ workflow.paths."tests.yaml" = [
 # lxml cannot compile on Windows ARM64.
 # See: https://bugs.launchpad.net/lxml/+bug/2004481
 test-matrix.remove.os = [ "windows-11-arm" ]
-# Free-threaded 3.14t and prerelease 3.15 exercise interpreter-level
-# compatibility, which is OS-independent: the shipped-config slice (3.10,
-# 3.14) already covers every OS, so these two only need the single fastest
-# runner (ubuntu-26.04-arm), not the full spread. 3.14t runs stable (3.14's
-# free-threaded build is supported); 3.15 keeps repomatic's built-in
-# prerelease `unstable` flag. See repomatic's test-matrix guide.
+# Prerelease 3.15 exercises interpreter-level compatibility, which is
+# OS-independent: the shipped-config slice (3.10, 3.14) already covers every
+# OS, so it only needs the single fastest runner (ubuntu-26.04-arm), not the
+# full spread. It keeps repomatic's built-in prerelease `unstable` flag.
+#
+# Free-threaded 3.14t needs no entry here: it is not a value of the
+# `python-version` axis, so an exclude naming it matches nothing and is dropped
+# with a warning. repomatic already lands it on ubuntu-26.04-arm alone, and
+# marks it stable (3.14's free-threaded build is supported).
+# See repomatic's test-matrix guide.
 test-matrix.exclude = [
-  { os = "ubuntu-26.04", python-version = "3.14t" },
-  { os = "macos-26", python-version = "3.14t" },
-  { os = "macos-26-intel", python-version = "3.14t" },
-  { os = "windows-2025", python-version = "3.14t" },
   { os = "ubuntu-26.04", python-version = "3.15" },
   { os = "macos-26", python-version = "3.15" },
   { os = "macos-26-intel", python-version = "3.15" },

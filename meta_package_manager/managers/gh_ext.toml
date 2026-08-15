@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # This is a real, 100%-config-defined manager: mpm loads it from this file at startup
 # through the very same schema and parser a user's own `[mpm.managers.<id>]` section
 # goes through, dogfooding the configuration-defined-manager feature on a genuine

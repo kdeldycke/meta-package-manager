@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # gcloud is Google's Cloud CLI (https://cloud.google.com/sdk/gcloud), and the
 # part of it wrapped here is `gcloud components`, which installs and updates the
 # SDK's own components. Everything else gcloud does manages cloud resources

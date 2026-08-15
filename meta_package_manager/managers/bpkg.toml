@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # bpkg is a lightweight package manager for
 # bash, installing scripts and libraries straight from their Git repositories. See
 # docs/overrides.md ("Define a new manager") for the schema and

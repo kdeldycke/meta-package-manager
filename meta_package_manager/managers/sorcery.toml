@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # Sorcery is Source Mage GNU/Linux's source-based package
 # manager, a suite of bash tools: sorcery itself plus gaze (queries), cast (install),
 # dispel (remove), scribe (grimoire sync) and cleanse (cleanup). See docs/overrides.md

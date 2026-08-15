@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # urpmi is the RPM front-end of the Mandriva lineage (Mageia, OpenMandriva, ROSA),
 # spanning several binaries: urpmi (install/upgrade/cache), urpme (remove), urpmq
 # (queries) and urpmi.update (media refresh). See docs/overrides.md ("Define a new

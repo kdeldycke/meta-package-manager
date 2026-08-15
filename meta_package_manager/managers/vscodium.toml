@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # VSCodium is the telemetry-free community build of Visual
 # Studio Code; its `codium` CLI exposes the exact same extension command surface as
 # `code`, so this definition mirrors vscode.toml. See docs/overrides.md ("Define a

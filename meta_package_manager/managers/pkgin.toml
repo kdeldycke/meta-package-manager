@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # pkgin is the binary package manager for pkgsrc, NetBSD's
 # portable package collection (also used on illumos/SmartOS, macOS and Linux). See
 # docs/overrides.md ("Define a new manager") for the schema and

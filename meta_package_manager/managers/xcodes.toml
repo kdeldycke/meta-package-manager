@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # xcodes installs and manages Xcode versions on macOS
 # (https://github.com/XcodesOrg/xcodes). See docs/overrides.md ("Define a new
 # manager") for the schema and meta_package_manager/definitions.py

@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # basalt is a package manager
 # for Bash, installing libraries and executables from their Git repositories. See
 # docs/overrides.md ("Define a new manager") for the schema and

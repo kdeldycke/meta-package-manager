@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # micro is a terminal text editor (https://micro-editor.github.io), and what is
 # wrapped here is its plugin manager. See docs/overrides.md ("Define a new
 # manager") for the schema and meta_package_manager/definitions.py

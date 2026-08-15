@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # soar is a fast package manager for portable Linux
 # binaries and AppImages. See docs/overrides.md ("Define a new manager") for the schema
 # and meta_package_manager/definitions.py (build_bundled_managers) for the loader.

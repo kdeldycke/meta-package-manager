@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # OpenBSD's pkg tools are the base system's package suite, spanning three binaries:
 # pkg_info (queries), pkg_add (install/upgrade) and pkg_delete (remove/cleanup). See
 # docs/overrides.md ("Define a new manager") for the schema and

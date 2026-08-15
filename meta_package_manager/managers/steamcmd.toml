@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # Valve's SteamCMD drives the
 # Steam content system from the command line. See docs/overrides.md ("Define a new
 # manager") for the schema and meta_package_manager/definitions.py

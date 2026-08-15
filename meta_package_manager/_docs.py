@@ -1097,11 +1097,10 @@ def _toml_definition_intro(definition_source: str) -> str | None:
     """Extract the description comment atop a bundled TOML definition.
 
     The TOML counterpart of a manager class docstring: each bundled file opens
-    with a comment block describing the manager and its quirks. The boilerplate
-    is stripped (the "Bundled package-manager definition" tag line and the
-    schema/loader pointer), bare URLs are wrapped into autolinks, and paragraph
-    breaks (lone `#` lines) are preserved. Returns `None` when nothing but
-    boilerplate is found.
+    with a comment block describing the manager and its quirks. The
+    schema/loader pointer is stripped, bare URLs are wrapped into autolinks,
+    and paragraph breaks (lone `#` lines) are preserved. Returns `None` when
+    the file carries no such comment.
     """
     lines = []
     for line in (
@@ -1118,11 +1117,7 @@ def _toml_definition_intro(definition_source: str) -> str | None:
     # The schema/loader pointer spans reflowed lines, so strip it before
     # splitting paragraphs.
     text = re.sub(r"(?s)\s*See\s+docs/overrides\.md.*?for\s+the\s+loader\.", "", text)
-    paragraphs = [
-        p.strip("\n")
-        for p in text.split("\n\n")
-        if p.strip() and not p.startswith("Bundled package-manager definition")
-    ]
+    paragraphs = [p.strip("\n") for p in text.split("\n\n") if p.strip()]
     if not paragraphs:
         return None
     intro = "\n\n".join(paragraphs)

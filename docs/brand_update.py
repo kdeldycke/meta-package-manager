@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Export the project's own brand artwork: light and dark PNGs, and the app icons.
+"""Export the project's own brand artwork: light and dark ONGs, and the app icons.
 
 The SVGs under `docs/assets/` are the sources, and this script is the only thing
 that writes a raster beside them. It exists because the dark exports are not files

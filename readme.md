@@ -400,18 +400,20 @@ $ mpm managers
 If you wonder why one of your package managers is not in that list, name it: a manager you select explicitly is always reported, and the extra columns spell out what `mpm` could not resolve.
 
 ```shell-session
-$ mpm --composer --pipx managers
-╭────────────┬──────────────┬───────────┬──────────────────────┬────────────┬─────────╮
-│ Manager ID │ Name         │ Supported │ CLI                  │ Executable │ Version │
-├────────────┼──────────────┼───────────┼──────────────────────┼────────────┼─────────┤
-│ composer   │ PHP Composer │ ✓         │ ✘ composer not found │            │         │
-│ pipx       │ Python pipx  │ ✓         │ ✘ pipx not found     │            │         │
-╰────────────┴──────────────┴───────────┴──────────────────────┴────────────┴─────────╯
+$ mpm --composer --volta --choco --yarn-berry managers
+╭────────────┬──────────────┬──────────────────┬──────────────────────────┬────────────┬───────────────────╮
+│ Manager ID │ Name         │ Supported        │ CLI                      │ Executable │ Version           │
+├────────────┼──────────────┼──────────────────┼──────────────────────────┼────────────┼───────────────────┤
+│ choco      │ Chocolatey   │ ✘ Windows        │ ✘ choco not found        │            │                   │
+│ composer   │ PHP Composer │ ✓                │ ✘ composer not found     │            │                   │
+│ volta      │ Volta        │ ✓ (unmaintained) │ ✘ volta not found        │            │                   │
+│ yarn-berry │ Yarn Berry   │ ✓                │ ✓ /opt/homebrew/bin/yarn │ ✓          │ ✘ 1.22.22 >=2.0.0 │
+╰────────────┴──────────────┴──────────────────┴──────────────────────────┴────────────┴───────────────────╯
 ```
 
-To browse the whole catalog instead, widen the view: `mpm managers --view supported` lists every manager your platform can run, found or not, and `mpm managers --view all` adds those `mpm` implements for other platforms and the unmaintained ones.
+Four different reasons, one per row. `choco` only runs on Windows. `composer` is supported here but its CLI is nowhere on the `PATH`. `volta` is missing too, and is flagged unmaintained upstream, which is also why selecting it prints a deprecation notice on `stderr`. And `yarn-berry` is the interesting one: its CLI was found and is executable, but the `yarn` on this machine is a `1.x` that does not satisfy the `>=2.0.0` its wrapper requires, so `mpm` will not drive it.
 
-Unmaintained managers sit out of this default selection, and managers tied to other platforms are hidden: pass `--all-managers` to widen the table to every manager `mpm` knows.
+To browse the whole catalog instead, widen the view: `mpm managers --view supported` lists every manager your platform can run, found or not, and `mpm managers --view all` adds those `mpm` implements for other platforms and the unmaintained ones. The global `--all-managers` flag is a synonym for the widest of the three.
 
 If your favorite manager is not supported yet, you can help! See the [contribution guide](https://mpm.run/contributing.html). A handful of tools are deliberately left out, each with its rationale: they are catalogued in [unsupported managers](https://mpm.run/unsupported.html).
 

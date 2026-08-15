@@ -126,6 +126,36 @@ class VCPKG(PackageManager):
     with a literal separator and no truncation, so it is parsed as text.
     """
 
+    _COLUMN_GAP_REGEXP = re.compile(r"[ \t]{2,}")
+    """Splits a row of the human search listing into its columns.
+
+    The widths are computed from the results rather than fixed, so the gap
+    between columns is the only stable separator. A single space never
+    separates them, descriptions being full of them.
+    """
+
+    def _parse_column_listing(self, output: str) -> Iterator[Package]:
+        """Parse the human search listing vcpkg prints when `--x-json` is ignored.
+
+        Rows are `port`, `version` and `description`, except that a port's
+        features repeat it as `port[feature]` carrying a description alone.
+        Those are skipped: mpm keys on the port, which has a row of its own,
+        and a feature has no version to report anyway.
+
+        The version is recognised by starting with a digit rather than by its
+        column, which is what separates a genuine version from the description
+        of a port that happens to declare none.
+        """
+        for line in output.splitlines():
+            fields = self._COLUMN_GAP_REGEXP.split(line.strip())
+            package_id = fields[0]
+            if not package_id or "[" in package_id:
+                continue
+            version = None
+            if len(fields) > 1 and fields[1][:1].isdigit():
+                version = fields[1]
+            yield self.package(id=package_id, latest_version=version)
+
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
@@ -215,10 +245,23 @@ class VCPKG(PackageManager):
         predating it *ignores it silently* rather than refusing it: the command
         succeeds and prints the human column listing instead. Decoding that as
         JSON raises, and since nothing isolates one manager's failure from the
-        rest of a fan-out, the exception used to take down an entire
-        `mpm search` on any host carrying such a build. The results are dropped
-        with a warning instead. A version floor could not have caught it, vcpkg
-        numbering its releases by date, as {attr}`requirement` explains.
+        rest of a fan-out, the exception took down an entire `mpm search` on any
+        host carrying such a build. A version floor could not have caught it,
+        vcpkg numbering its releases by date, as {attr}`requirement` explains,
+        so the column listing is parsed instead when the JSON does not decode.
+
+        Falling back rather than merely reporting the loss matters beyond
+        search: `install` picks its manager by searching first, so a vcpkg whose
+        search answers nothing can install nothing either.
+        ```
+
+        ```{code-block} console
+
+        $ vcpkg --classic search excel --x-json
+        cpr                      1.14.2           C++ Requests is a simple wrapper around libcurl
+        cpr[ssl]                                  Enable SSL support
+        duckdb[excel]                             Statically link the excel extension into DuckDB
+        freexl                   2.0.0#2          FreeXL is an open source library to extract valid data
         ```
         """
         output = self.run_cli("search", query, "--x-json")
@@ -228,16 +271,16 @@ class VCPKG(PackageManager):
             results = json.loads(output)
         except json.JSONDecodeError:
             results = None
-        if not isinstance(results, dict):
-            logging.warning(
-                "Ignoring unparseable search results: this vcpkg does not "
-                "honor --x-json and answered with its human listing.",
-                extra={"label": self.id},
-            )
+        if isinstance(results, dict):
+            for port_name, data in results.items():
+                version = data.get("version") if isinstance(data, dict) else None
+                yield self.package(id=port_name, latest_version=version)
             return
-        for port_name, data in results.items():
-            version = data.get("version") if isinstance(data, dict) else None
-            yield self.package(id=port_name, latest_version=version)
+        logging.debug(
+            "Search did not answer JSON: parsing the column listing instead.",
+            extra={"label": self.id},
+        )
+        yield from self._parse_column_listing(output)
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

@@ -658,6 +658,11 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # gem directory is not writable, so the round-trip completes on every runner,
     # Linux included. The `is_linux` blocker that used to sit here asserted a failure
     # that no longer happens on any image.
+    # gcloud disables its component manager whenever the CLI was installed through a
+    # package manager, which is how the runner images ship it: "You cannot perform this
+    # action because the Google Cloud CLI component manager is disabled for this
+    # installation." Components become the distribution's to add, not gcloud's.
+    "gcloud": is_github_ci,
     # gh refuses extension installs without credentials; tests.yaml feeds the workflow
     # token to the destructive CI step so this round-trip runs for real there.
     "gh-ext": gh_unauthenticated,

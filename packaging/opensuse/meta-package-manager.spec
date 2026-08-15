@@ -18,8 +18,8 @@
 
 # mpm is an end-user CLI whose importable module is incidental, so it builds
 # for the primary flavor only and keeps an unsuffixed /usr/bin/mpm, the shape
-# httpie uses. Bump when Tumbleweed moves its primary interpreter.
-%define primary_python python313
+# httpie uses. %%primary_python comes from python-rpm-macros, so this follows
+# the distribution's interpreter instead of pinning one.
 %define pythons %{primary_python}
 
 Name:           meta-package-manager
@@ -80,6 +80,13 @@ zypper is one of the ~70 managers it drives.
 
 %install
 %pyproject_install
+# bar_plugin.py carries the `#!/usr/bin/env python3` shebang Xbar and SwiftBar
+# need to run it directly, which openSUSE rejects in an installed file.
+# %%pyproject_install already rewrites the ones under _bindir, and nothing
+# else, so this module is reached by path.
+%python3_fix_shebang_path %{buildroot}%{python_sitelib}/meta_package_manager/bar_plugin.py
+# mpm and meta-package-manager are one entry point under two names.
+%fdupes %{buildroot}%{_bindir}
 %fdupes %{buildroot}%{python_sitelib}
 
 %check

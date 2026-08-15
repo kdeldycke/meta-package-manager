@@ -301,6 +301,10 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+# The rule above targets PyInstaller build manifests. RPM recipes share the
+# extension and are packaging sources, tracked like every other spec under
+# packaging/.
+!packaging/**/*.spec
 
 # Installer logs
 pip-log.txt

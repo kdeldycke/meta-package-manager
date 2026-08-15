@@ -39,6 +39,8 @@ That last one is the visible consequence: with a `cooldown` set, clicking a pack
 
 Both variants of each entry go through `mpm`: a plain click opens a terminal so the run can be followed, and holding the `Option` key runs it silently.
 
+When no `mpm` is found on the system, or one older than the plugin requires, the menu carries a bootstrap pair in place of the package list: an *Install mpm … with uv* entry running `uv tool install --upgrade meta-package-manager` in a terminal, and an *Open mpm installation instructions* entry opening {doc}`install` for the systems `uv` does not answer for. The {doc}`GNOME Shell extension <gnome-shell>` offers the same pair.
+
 ## Screenshots
 
 ### SwiftBar

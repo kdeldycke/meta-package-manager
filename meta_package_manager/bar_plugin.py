@@ -65,6 +65,29 @@ XBAR_MIN_VERSION = (2, 1, 7)
 MPM_MIN_VERSION = (5, 0, 0)
 """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
+INSTALL_ARGV = ("uv", "tool", "install", "--upgrade", "meta-package-manager")
+"""Bootstrap command offered when no runnable `mpm` is found.
+
+A global [`uv tool`](https://docs.astral.sh/uv/concepts/tools/) install, the
+primary method of the [installation page](https://mpm.run/install/): it puts
+`mpm` on the `PATH` of every shell, where a `pip install` would have buried it in
+whichever interpreter happened to run this plugin. `--upgrade` makes the same
+command serve the outdated-`mpm` case, so nothing pins the specifier to
+{data}`MPM_MIN_VERSION`: the latest release always satisfies it, and Xbar mangles
+a quoted `>=` specifier anyway (see
+[matryer/xbar#831](https://github.com/matryer/xbar/issues/831)).
+
+The GNOME Shell extension offers the same command from its own missing-`mpm`
+menu, and `tests/test_gnome_extension.py` holds the two in sync.
+"""
+
+INSTALL_DOCS_URL = "https://mpm.run/install/"
+"""Installation page, offered beside {data}`INSTALL_ARGV`.
+
+`uv` may itself be missing, and is not the right answer everywhere: a
+distribution package, Homebrew or a standalone binary all install `mpm` too.
+"""
+
 MPM_TIMEOUT = 60
 """Maximum duration in seconds the plugin lets any single `mpm` call run.
 
@@ -430,27 +453,21 @@ class MPMPlugin:
                 print("---")
             action_msg = "Install" if not runnable else "Upgrade"
             min_version_str = self.version_to_str(MPM_MIN_VERSION)
-            # Use the Python from the best candidate if it was a python -m invocation,
-            # otherwise fall back to the interpreter running this script.
-            python_path = sys.executable
-            if mpm_args and mpm_args[-1] == "meta_package_manager":
-                python_path = mpm_args[0]
             self.pp(
-                f"{action_msg} mpm >= {min_version_str}",
-                f"shell={python_path}",
-                "param1=-m",
-                "param2=pip",
-                "param3=install",
-                "param4=--upgrade",
-                # XXX This seems broken beyond repair. No amount of workaround works.
-                # See:
-                # https://github.com/matryer/xbar/issues/831
-                # https://github.com/swiftbar/SwiftBar/issues/308
-                # Fallback to the only version that is working on SwiftBar.
-                f'param5=\\"meta-package-manager>={min_version_str}\\"',
+                f"{action_msg} mpm >= {min_version_str} with uv",
+                f"shell={INSTALL_ARGV[0]}",
+                *(
+                    f"param{index}={arg}"
+                    for index, arg in enumerate(INSTALL_ARGV[1:], start=1)
+                ),
                 self.error_font,
                 "refresh=true",
                 "terminal=true",
+            )
+            self.pp(
+                "Open mpm installation instructions",
+                f"href={INSTALL_DOCS_URL}",
+                self.error_font,
             )
             return
 

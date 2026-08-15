@@ -26,8 +26,17 @@ export const MPM_TIMEOUT = 60;
 /* Default `--timeout` (seconds), mirroring bar_plugin.py: mpm's own defaults
  * are tuned for interactive runs and are too long for a background refresh. */
 
+export const INSTALL_ARGV = [
+    'uv', 'tool', 'install', '--upgrade', 'meta-package-manager',
+];
+/* Bootstrap offered when no mpm is found: a global uv tool install, the same
+ * command bar_plugin.py offers from its own menu (kept in sync by
+ * tests/test_gnome_extension.py). uv may itself be missing, and is not the
+ * right answer on every distribution, which is what the companion
+ * documentation item covers. */
+
 export const INSTALL_DOCS_URL =
-    'https://mpm.run/install.html';
+    'https://mpm.run/install/';
 
 const VERSION_REGEX = /\bversion\s+(\d+(?:\.\d+)+)/;
 

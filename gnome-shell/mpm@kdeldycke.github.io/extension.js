@@ -413,16 +413,24 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
-    /* The bootstrap item of the MISSING state: bar_plugin.py offers a pip
-     * install command, a GNOME menu opens the installation docs instead. */
+    /* The bootstrap items of the MISSING state, the same pair bar_plugin.py
+     * offers: a global uv install run through the regular action path, and the
+     * installation page for every system uv does not answer for. */
     _addInstallItem() {
-        const item = new PopupMenu.PopupMenuItem(
+        const install = new PopupMenu.PopupMenuItem(_('Install mpm with uv'));
+        install.connect('activate', () => {
+            this.menu.close();
+            this._runAction(Mpm.INSTALL_ARGV);
+        });
+        this._reportSection.addMenuItem(install);
+
+        const docs = new PopupMenu.PopupMenuItem(
             _('Open mpm installation instructions'));
-        item.connect('activate', () => {
+        docs.connect('activate', () => {
             this.menu.close();
             Gio.AppInfo.launch_default_for_uri(Mpm.INSTALL_DOCS_URL, null);
         });
-        this._reportSection.addMenuItem(item);
+        this._reportSection.addMenuItem(docs);
     }
 
     _setMissing(message) {

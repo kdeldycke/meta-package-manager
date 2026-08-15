@@ -258,6 +258,27 @@ You can help move it forward by showing your support on [the merge request](http
 ````
 `````
 
+`````{tab-item} openSUSE
+On Tumbleweed, add the repository [the packaging spec builds in](packaging.md#opensuse) and install from it:
+
+```{code-block} shell-session
+$ sudo zypper addrepo https://download.opensuse.org/repositories/home:/kdeldycke/openSUSE_Tumbleweed/home:kdeldycke.repo
+$ sudo zypper --gpg-auto-import-keys refresh
+$ sudo zypper install meta-package-manager
+```
+
+Every dependency comes from Tumbleweed itself, so nothing else is added to your system.
+
+````{admonition} Help land it in openSUSE Factory
+:class: important
+The repository above is a personal project on the Open Build Service. The package is being prepared for submission to `devel:languages:python`, the development project through which it would reach Tumbleweed and then Leap. Once accepted, installation needs no extra repository:
+
+```{code-block} shell-session
+$ sudo zypper install meta-package-manager
+```
+````
+`````
+
 `````{tab-item} Void Linux
 Build and install from the [`mpm` branch of my `void-packages` fork](https://github.com/kdeldycke/void-packages/tree/mpm):
 

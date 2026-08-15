@@ -86,6 +86,7 @@ Where `mpm` stands on each distribution channel whose packaging is maintained fr
 | Guix             | [`packaging/guix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix)                        | [landed upstream on 2026-06-28](https://codeberg.org/guix/guix/pulls/8047)             | `guix-source`           | automated    |
 | MacPorts         | [`packaging/macports/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports)                | [landed upstream on 2026-07-22](https://github.com/macports/macports-ports/pull/33609) | `macports-source`       | manual       |
 | Nix              | [`packaging/nix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix)                          | [pending review](https://github.com/NixOS/nixpkgs/pull/506145)                         | `nix-source`            | automated    |
+| openSUSE         | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [building in a home project](https://build.opensuse.org/package/show/home:kdeldycke/meta-package-manager) | `check-opensuse-spec`   | manual       |
 | Void Linux       | [`void-packages` fork](https://github.com/kdeldycke/void-packages/tree/mpm)                                            | [pending review](https://github.com/void-linux/void-packages/pull/60532)               | —                       | manual       |
 
 The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) build and install each in-repo spec on every change to it and on a weekly schedule. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)); manual specs pin the released version and its source checksums, refreshed by hand at each release.
@@ -195,6 +196,35 @@ $ nix run nixpkgs#meta-package-manager -- --version
 
 You can help move it forward by showing your support on [the pull request](https://github.com/NixOS/nixpkgs/pull/506145).
 ````
+
+### openSUSE
+
+The [spec maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse) builds in [a home project on the Open Build Service](https://build.opensuse.org/package/show/home:kdeldycke/meta-package-manager), which publishes a repository Tumbleweed can install from directly:
+
+```{code-block} shell-session
+$ sudo zypper addrepo https://download.opensuse.org/repositories/home:/kdeldycke/openSUSE_Tumbleweed/home:kdeldycke.repo
+$ sudo zypper --gpg-auto-import-keys refresh
+$ sudo zypper install meta-package-manager
+```
+
+To build the spec by hand instead:
+
+```{code-block} shell-session
+$ sudo zypper install --no-recommends rpm-build python-rpm-macros
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ cd ./meta-package-manager/packaging/opensuse
+$ sudo zypper install --no-recommends $(rpmspec --query --buildrequires meta-package-manager.spec | cut --delimiter=' ' --fields=1)
+$ mkdir --parents ~/rpmbuild/SOURCES
+$ curl --location --output ~/rpmbuild/SOURCES/meta_package_manager-7.6.1.tar.gz https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-7.6.1.tar.gz
+$ rpmbuild -ba meta-package-manager.spec
+$ sudo zypper install --allow-unsigned-rpm ~/rpmbuild/RPMS/noarch/meta-package-manager-*.rpm
+```
+
+Every runtime dependency is already packaged in Tumbleweed, so this is the one channel whose spec introduces no dependency of its own. The package is built for the primary Python flavor alone and keeps an unsuffixed `/usr/bin/mpm`, the shape openSUSE gives an application rather than a library, and its `%check` phase runs the hermetic layer with `pytest -m "not integration"`.
+
+```{note}
+The package is not in openSUSE proper yet: it is being prepared for submission to the `devel:languages:python` development project, the route to Tumbleweed and then Leap. The home-project repository above is the supported install in the meantime. [`zypper`](managers/zypper.md) is itself one of the managers `mpm` drives.
+```
 
 ### Void Linux
 

@@ -227,6 +227,12 @@ selection_cases = {
     # have a real binary on PATH.  Hermetic builders (Guix, Nixpkgs, etc.)
     # otherwise see these cases return empty tuples because `uv` and
     # `gem` are not installed.
+    #
+    # Availability-dependent expectations are wrapped in a lambda and resolved
+    # inside the test: materializing them here would fire a live version probe
+    # per manager at collection time, and under xdist a probe flapping between
+    # workers (or a binary locked mid-spawn, a Windows classic) makes their
+    # collected parametrize lists diverge, which aborts the whole session.
     "single_selector": (
         {"keep": ("uv",), "drop_not_found": False},
         ("uv",),
@@ -257,7 +263,7 @@ selection_cases = {
     ),
     "single_exclusion": (
         {"drop": {"uv"}},
-        tuple(
+        lambda: tuple(
             mid
             for mid in pool.all_manager_ids
             if pool[mid].supported and pool[mid].available and mid != "uv"
@@ -265,7 +271,7 @@ selection_cases = {
     ),
     "duplicate_exclusions": (
         {"drop": ("uv", "uv")},
-        tuple(
+        lambda: tuple(
             mid
             for mid in pool.all_manager_ids
             if pool[mid].supported and pool[mid].available and mid != "uv"
@@ -273,7 +279,7 @@ selection_cases = {
     ),
     "multiple_exclusions": (
         {"drop": ("uv", "gem")},
-        tuple(
+        lambda: tuple(
             mid
             for mid in pool.all_manager_ids
             if pool[mid].supported and pool[mid].available and mid not in ("uv", "gem")
@@ -289,7 +295,7 @@ selection_cases = {
     ),
     "default_selection": (
         {},
-        tuple(
+        lambda: tuple(
             mid
             for mid in pool.all_manager_ids
             if pool[mid].supported and pool[mid].available
@@ -297,7 +303,7 @@ selection_cases = {
     ),
     "explicit_default_selection": (
         {"keep": None, "drop": None},
-        tuple(
+        lambda: tuple(
             mid
             for mid in pool.all_manager_ids
             if pool[mid].supported and pool[mid].available
@@ -305,11 +311,11 @@ selection_cases = {
     ),
     "keep_unmaintained": (
         {"keep_unmaintained": True},
-        tuple(mid for mid in pool.all_manager_ids if pool[mid].available),
+        lambda: tuple(mid for mid in pool.all_manager_ids if pool[mid].available),
     ),
     "drop_unmaintained": (
         {"keep_unmaintained": False},
-        tuple(
+        lambda: tuple(
             mid
             for mid in pool.all_manager_ids
             if not pool[mid].unmaintained
@@ -319,11 +325,11 @@ selection_cases = {
     ),
     "keep_unsupported": (
         {"keep_unsupported": True},
-        tuple(mid for mid in pool.all_manager_ids if pool[mid].available),
+        lambda: tuple(mid for mid in pool.all_manager_ids if pool[mid].available),
     ),
     "drop_unsupported": (
         {"keep_unsupported": False},
-        tuple(
+        lambda: tuple(
             mid
             for mid in pool.all_manager_ids
             if pool[mid].supported and pool[mid].available
@@ -331,7 +337,7 @@ selection_cases = {
     ),
     "drop_not_found": (
         {"drop_not_found": True},
-        tuple(
+        lambda: tuple(
             mid
             for mid in pool.all_manager_ids
             if not pool[mid].unmaintained
@@ -360,6 +366,9 @@ selection_cases = {
 def test_select_managers(kwargs, expected):
     """We use tuple everywhere so we can check that select_managers() conserve the
     original order."""
+    if callable(expected):
+        # Availability-dependent case: see the comment atop selection_cases.
+        expected = expected()
     selection = pool._select_managers(**kwargs)
     assert tuple(m.id for m in selection) == expected
 

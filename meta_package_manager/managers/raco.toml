@@ -1,0 +1,80 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# raco is Racket's command-line
+# tool, whose `pkg` subcommand tree is the package manager for the Racket
+# catalog. See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against Racket v9.3 on macOS:
+#   - raco reports no version of its own: `raco --version` is refused outright
+#     with "A flag must follow a command". raco ships with Racket and is
+#     versioned with it, so the probe reads the interpreter beside it.
+#   - The listing forces `--all` and `--long`, and both are load-bearing. Without
+#     `--all` raco hides auto-installed packages behind a summary line, "[1
+#     auto-installed package not shown]", so an inventory would silently omit
+#     every dependency pulled in on the user's behalf. Without `--long` the
+#     checksum column is truncated with an ellipsis, which would report a
+#     mangled version rather than none at all.
+#   - Versions are the 40-character checksums raco pins each package to; the
+#     catalog publishes no release numbers, so the checksum is the identity.
+#     Anchoring the pattern on forty hex characters is also what makes it skip
+#     the column header, the `[none]` placeholder of an empty scope and the two
+#     scope banners, none of which a line-count-based skip would survive if
+#     Racket reordered them.
+#   - An auto-installed package is flagged with a trailing `*` on its name, which
+#     the pattern strips so the id round-trips into `install` and `remove`.
+#   - Both scopes are listed at once, the installation-wide tree and the
+#     user-specific one, which together are what the machine holds.
+#   - `install` and `update` force `--auto`. Their default dependency mode is
+#     `search-ask`, which "asks for permission to auto-install" and would hang
+#     mpm's non-interactive subprocess; `--auto` is the documented shorthand for
+#     `--deps search-auto`, the same resolution without the prompt.
+#   - No search: `raco pkg` has no catalog query verb.
+
+[mpm.managers.raco]
+name = "raco"
+homepage_url = "https://docs.racket-lang.org/pkg/"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["raco"]
+version_cli = "racket"
+version_cli_options = ["--version"]
+# `racket --version` prints "Welcome to Racket v9.3 [cs]."
+version_regexes = ['Racket v(?P<version>\S+)']
+
+[mpm.managers.raco.operations.installed]
+args = ["pkg", "show", "--all", "--long"]
+regex = '^ (?P<package_id>\S+?)\*?[ \t]+(?P<installed_version>[0-9a-f]{40})[ \t]'
+
+[mpm.managers.raco.operations.install]
+args = ["pkg", "install", "--auto", "{package_id}"]
+
+[mpm.managers.raco.operations.remove]
+args = ["pkg", "remove", "{package_id}"]
+
+[mpm.managers.raco.operations.upgrade_all]
+args = ["pkg", "update", "--all", "--auto"]
+
+[mpm.managers.raco.operations.upgrade_one]
+args = ["pkg", "update", "--auto", "{package_id}"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from Racket v9.3. Consumed by tests/test_manager_definition.py; ignored by
+# mpm's loader.
+[samples.version]
+output = "Welcome to Racket v9.3 [cs]."
+expected = "9.3"
+
+[[samples.installed]]
+output = """
+Installation-wide:
+ Package[*=auto]            Checksum                                    Source
+ base*                      6272bda442d1c26a40d2403a251665d500147ab3    (catalog "base")
+ racket-aarch64-macosx-4    4c09d8fd50131e48edb3d5a5e95016ca31435da0    (catalog "racket-aarch64-macosx-4")
+ racket-lib                 62eb15ddc03bc26a1c0f85c8aff03aa6ef7a518a    (catalog "racket-lib")
+User-specific for installation "9.3":
+ [none]"""
+packages = [
+  { id = "base", version = "6272bda442d1c26a40d2403a251665d500147ab3" },
+  { id = "racket-aarch64-macosx-4", version = "4c09d8fd50131e48edb3d5a5e95016ca31435da0" },
+  { id = "racket-lib", version = "62eb15ddc03bc26a1c0f85c8aff03aa6ef7a518a" },
+]

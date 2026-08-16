@@ -272,6 +272,7 @@ UPSTREAM_REPOS = {
     "ports": "https://github.com/freebsd/freebsd-ports",
     "pwsh-gallery": "https://github.com/PowerShell/PSResourceGet",
     "pyenv": "https://github.com/pyenv/pyenv",
+    "raco": "https://github.com/racket/racket",
     "rustup": "https://github.com/rust-lang/rustup",
     "scoop": "https://github.com/ScoopInstaller/Scoop",
     "sdkman": "https://github.com/sdkman/sdkman-cli",

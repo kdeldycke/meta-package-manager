@@ -536,6 +536,8 @@ PACKAGE_IDS = {
     # take the host's working Rust with it. Every rustup artifact is a large
     # download, so this is the lightest available rather than a small one, as
     # with `sdkman` below.
+    # A one-module pure-Racket package with no build step.
+    "raco": "uuid",
     "rustup": "1.60.0",
     "scoop": "main/hyperfine",
     "sdkman": "jbang",

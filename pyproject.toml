@@ -133,6 +133,7 @@ keywords = [
   "pwsh",
   "pwsh-gallery",
   "pyenv",
+  "raco",
   "ruby",
   "ruby-gem",
   "rust",
@@ -1006,6 +1007,7 @@ labels.file-rules."📦 manager: pypi-based" = [
   "tests/*uv*",
   "tests/*uvx*",
 ]
+labels.file-rules."📦 manager: raco" = [ "meta_package_manager/managers/raco.*", "tests/*raco*" ]
 labels.file-rules."📦 manager: rpm-based" = [
   "meta_package_manager/managers/dnf.*",
   "meta_package_manager/managers/urpmi.*",
@@ -1346,6 +1348,11 @@ name = "📦 manager: pypi-based"
 color = "bfdadc"
 description = "pip, pipx, uv, uvx"
 rename-from = [ "📦 manager: pip-based" ]
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: raco"
+color = "bfdadc"
+description = "raco"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: rpm-based"

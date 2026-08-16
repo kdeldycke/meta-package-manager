@@ -563,20 +563,26 @@ jobs:
       # No coverage on this step: two tests cannot move a slice that already
       # opts out of the ratchet.
       # A single xdist worker rather than --numprocesses=0, and not for
-      # parallelism: both tests still run sequentially on the one worker. A
-      # bare pytest process that drove every manager's subprocess tree dies
-      # dirty at interpreter shutdown on Windows (a clean all-passed summary,
-      # then exit 1 with no diagnostics, cov or not), while a worker's
-      # shutdown cannot touch the controller's exit code once its reports are
-      # in: the grouped step above runs the same subprocess load under xdist
-      # and has never shown the flake.
+      # parallelism: both tests still run sequentially on the one worker,
+      # while the worker's shutdown cannot touch the controller's exit code
+      # once its reports are in.
+      # The invocation retries once because driving every Windows manager in
+      # one process occasionally lets a manager's own subprocess teardown
+      # broadcast a console control event that lands on pytest itself (a
+      # KeyboardInterrupt mid-run under xdist, a clean all-passed summary
+      # followed by a bare exit 1 without it). Both tests converge on re-run,
+      # and a genuine failure fails both attempts.
       - name: Sequential cross-manager destructive tests
-        run: >
-          uv --no-progress run --frozen --all-extras --group test --
-          pytest --maxfail=10
-          --numprocesses=1 --dist=loadgroup --skip-non-destructive --run-destructive
-          -m destructive_all_managers
-          --ignore=./tests/test_bar_plugin.py
+        shell: bash
+        run: |
+          cross_manager_tests() {
+            uv --no-progress run --frozen --all-extras --group test -- \
+              pytest --maxfail=10 \
+              --numprocesses=1 --dist=loadgroup --skip-non-destructive --run-destructive \
+              -m destructive_all_managers \
+              --ignore=./tests/test_bar_plugin.py
+          }
+          cross_manager_tests || cross_manager_tests
         env:
           # Same rationale as the step above: gh-ext's upgrade needs credentials.
           GH_TOKEN: ${{ github.token }}

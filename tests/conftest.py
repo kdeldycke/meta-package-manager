@@ -39,7 +39,7 @@ from extra_platforms.pytest import skip_hermetic_build
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
-from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES, warm_availability
+from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES
 from meta_package_manager.pool import ManagerPool, manager_classes, pool
 
 from .fake_manager import FakeManager, TimingOutFakeManager
@@ -252,11 +252,15 @@ def warm_manager_probes():
     """Resolve every pool manager's availability before the first test runs.
 
     The pool is a module-global singleton shared by every test of the process,
-    and a manager's version probe caches its first result on the instance.
-    Firing every probe up front, in a still-pristine environment, keeps
-    whichever test happens to touch a manager first (possibly under a
-    monkeypatched environment or a stubbed `run_cli`) from seeding the shared
-    cache with a poisoned result for every later test on that worker.
+    and a manager's version probe caches its first result on the instance. The
+    click-extra `runner` fixture pins `HOME` (and its platform equivalents) to
+    an empty directory for the duration of each CLI invocation, so a probe
+    first fired from inside a test spawns into a crippled environment: the
+    GitHub runners' rustup shim at `~/.cargo/bin/cargo`, for one, cannot
+    resolve a toolchain without `$HOME/.rustup` and answers with an error
+    instead of a version, caching cargo as unavailable for every later test
+    on that worker. Warming the whole pool here, before any test and outside
+    any runner isolation, seeds those caches from the real environment.
 
     test_pool.py's selection cases used to provide this warming as an accident
     of materializing their expected manager lists at import time, until
@@ -264,8 +268,14 @@ def warm_manager_probes():
     diverge. A session fixture runs after collection, so workers still agree
     on the test list, and once per worker, so the cost matches what
     collection-time probing already paid.
+
+    The probes run sequentially on purpose, and not through
+    {func}`~meta_package_manager.dispatch.warm_availability`: that helper
+    sizes its thread pool from the active click context, of which a pytest
+    session has none, so it returns before probing anything.
     """
-    warm_availability(pool.values())
+    for manager in pool.values():
+        manager.available
 
 
 @fixture(autouse=True)

@@ -39,6 +39,7 @@ from extra_platforms.pytest import skip_hermetic_build
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
+from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES
 from meta_package_manager.pool import ManagerPool, manager_classes, pool
 
 from .fake_manager import FakeManager, TimingOutFakeManager
@@ -96,6 +97,13 @@ def pytest_configure(config):
         "markers",
         "destructive: mark test as being destructive, "
         "i.e. modifying the system they run on.",
+    )
+    config.addinivalue_line(
+        "markers",
+        "destructive_all_managers: mark a destructive test as driving every "
+        "available manager in one invocation, which no lock-family grouping "
+        "can isolate: CI runs these on their own, sequentially, after the "
+        "parallel destructive step.",
     )
     config.addinivalue_line(
         "markers",
@@ -184,6 +192,42 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(
                 pytest.mark.skip(reason="repo-maintenance guard: not a git checkout"),
             )
+
+    # Give every destructive test its scheduling group, so the destructive CI
+    # step can run `--dist=loadgroup` without two workers racing one package
+    # manager, one backend lock, or one install target: tests sharing a group
+    # serialize on a single worker, while groups spread across workers. The
+    # cross-manager tests drive every available manager in one invocation, so
+    # no grouping can isolate them: they carry `destructive_all_managers` and
+    # run in a sequential CI step of their own.
+    violations = []
+    for item in items:
+        all_managers = "destructive_all_managers" in item.keywords
+        if all_managers and "destructive" not in item.keywords:
+            # The marker only makes sense on a destructive test: anything else
+            # would smuggle a cross-manager mutation into the parallel
+            # non-destructive slice.
+            violations.append(item.nodeid)
+            continue
+        if all_managers or "destructive" not in item.keywords:
+            continue
+        # An explicit group (from a test hardcoding its manager) wins.
+        if item.get_closest_marker("xdist_group"):
+            continue
+        callspec = getattr(item, "callspec", None)
+        manager_id = callspec.params.get("manager_id") if callspec else None
+        if manager_id is None:
+            violations.append(item.nodeid)
+            continue
+        item.add_marker(pytest.mark.xdist_group(name=destructive_group(manager_id)))
+    if violations:
+        msg = (
+            "Every destructive test needs a scheduling group: parametrize it "
+            "with manager_id, mark it with an explicit xdist_group, or mark "
+            "it (and only a destructive test) with destructive_all_managers. "
+            "Offenders: " + ", ".join(sorted(violations))
+        )
+        raise pytest.UsageError(msg)
 
 
 def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:
@@ -575,6 +619,59 @@ Only to be used for destructive tests.
 # latter's command mapping, but only the destructive round-trip proves the mapped
 # commands work against the real tool on hosts that carry it.
 assert set(PACKAGE_IDS) == set(pool.known_manager_ids)
+
+
+DESTRUCTIVE_TEST_FAMILIES: dict[str, frozenset[str]] = {
+    # `pip` and `uv` both round-trip the same package ({data}`PACKAGE_IDS` maps
+    # both to `pytz`) in the active virtual environment, so two workers would
+    # race on one `site-packages`.
+    "active venv": frozenset({"pip", "uv"}),
+    # `pipx` and `uvx` both install `pycowsay`, whose console-script shim lands
+    # in the same default bin directory (`~/.local/bin`) wherever the
+    # environment does not split them with `UV_TOOL_BIN_DIR`.
+    "tool shims": frozenset({"pipx", "uvx"}),
+}
+"""Managers whose *destructive tests* collide on a shared install target.
+
+The test-suite complement of
+{data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`: those families
+record managers contending for one backend lock at runtime, while the entries
+here only collide because of what the destructive round-trips themselves
+install, so they belong to the suite rather than to `mpm`. Family names carry
+a space on purpose, keeping them clear of the manager-id namespace the other
+group names live in.
+"""
+
+# A manager cannot need both catalogs: a backend-lock family already
+# serializes its members, making a test-level entry for them redundant.
+assert not any(
+    members & family.members
+    for members in DESTRUCTIVE_TEST_FAMILIES.values()
+    for family in SHARED_LOCK_FAMILIES
+)
+
+_DESTRUCTIVE_GROUPS: dict[str, str] = {
+    manager_id: name
+    for name, members in (
+        *((family.backend, family.members) for family in SHARED_LOCK_FAMILIES),
+        *DESTRUCTIVE_TEST_FAMILIES.items(),
+    )
+    for manager_id in members
+}
+"""Scheduling group of every manager whose destructive tests may not run alone."""
+
+
+def destructive_group(manager_id: str) -> str:
+    """Resolve the `xdist_group` a destructive test driving `manager_id` runs in.
+
+    Managers sharing a backend lock
+    ({data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`) or an install
+    target ({data}`DESTRUCTIVE_TEST_FAMILIES`) collapse into one group, which
+    `--dist=loadgroup` schedules serially on a single worker, mirroring `mpm`'s
+    own grouped fan-out; every other manager gets a group of its own and runs
+    in parallel with the rest.
+    """
+    return _DESTRUCTIVE_GROUPS.get(manager_id, manager_id)
 
 # Collection of pre-computed parametrized decorators.
 

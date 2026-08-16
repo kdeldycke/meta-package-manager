@@ -21,7 +21,7 @@ import pytest
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.pool import pool
 
-from .conftest import default_manager_ids
+from .conftest import default_manager_ids, destructive_group
 from .test_cli import CLISubCommandTests
 
 
@@ -53,6 +53,7 @@ class TestRestore(CLISubCommandTests):
         )
 
     @pytest.mark.destructive()
+    @pytest.mark.destructive_all_managers()
     def test_default_all_managers(self, invoke, create_config):
         toml_path = create_config(
             "all-managers.toml",
@@ -115,6 +116,8 @@ class TestRestore(CLISubCommandTests):
         assert "Ignore [random_section] section" in result.stderr
 
     @pytest.mark.destructive()
+    # Only npm acts here, but nothing parametrizes it: hand it its group.
+    @pytest.mark.xdist_group(name=destructive_group("npm"))
     def test_restore_single_manager(self, invoke, create_config):
         toml_path = create_config(
             "uv-npm-dummy.toml",
@@ -137,6 +140,8 @@ class TestRestore(CLISubCommandTests):
         assert ":npm: Restore packages..." in result.stderr
 
     @pytest.mark.destructive()
+    # `--no-npm` leaves uv as the acting manager: hand it uv's group.
+    @pytest.mark.xdist_group(name=destructive_group("uv"))
     def test_restore_excluded_manager(self, invoke, create_config):
         toml_path = create_config(
             "uv-npm-dummy.toml",

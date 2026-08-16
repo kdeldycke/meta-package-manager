@@ -79,6 +79,7 @@ class TestUpgrade(CLISubCommandTests):
         self.check_manager_selection(result)
 
     @pytest.mark.destructive()
+    @pytest.mark.destructive_all_managers()
     def test_all_managers_upgrade_all(self, invoke):
         # Only the explicit `--all` spelling runs destructively: the bare
         # `upgrade` alias is already asserted by both dry-run variants above,

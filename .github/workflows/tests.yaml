@@ -511,13 +511,39 @@ jobs:
           --numprocesses=0 --run-non-destructive --run-destructive
           ./tests/test_bar_plugin.py
 
-      # Run destructive tests last, as they alter the system packages.
+      # Run destructive tests last, as they alter the system packages. They are
+      # scheduled by lock family: conftest.py stamps every destructive test with an
+      # xdist group derived from dispatch.py's SHARED_LOCK_FAMILIES, so managers
+      # contending for one backend lock stay serial on a single worker while
+      # independent families run in parallel, the same policy mpm's own grouped
+      # fan-out applies at runtime.
       # This run omits --exitfirst on purpose: walking every manager surfaces all
       # newly CI-unsupported managers in a single run instead of one per push cycle.
       # --maxfail=10 still caps a wholesale breakage. The runs above keep --exitfirst.
       # `--cov-fail-under=0` opts this slice out of the coverage ratchet: the
       # destructive subset covers ~48% of the package on its own by design.
-      - name: Sequential random destructive tests
+      - name: Parallel destructive tests
+        run: >
+          uv --no-progress run --frozen --
+          pytest --maxfail=10
+          --cov
+          --cov-report=term
+          --cov-fail-under=0
+          --numprocesses=auto --dist=loadgroup --maxschedchunk=1
+          --skip-non-destructive --run-destructive
+          -m "not destructive_all_managers"
+          --ignore=./tests/test_bar_plugin.py
+        env:
+          # The runners ship gh unauthenticated, and gh refuses extension installs
+          # without credentials. Feed it the workflow token so the gh-ext destructive
+          # install/remove round-trip runs for real (see conftest.py's PACKAGE_IDS).
+          GH_TOKEN: ${{ github.token }}
+
+      # The cross-manager destructive tests drive every available manager in a
+      # single invocation, so no lock-family grouping can isolate them from the
+      # step above: they run on their own, sequentially, once the grouped tests
+      # are done.
+      - name: Sequential cross-manager destructive tests
         run: >
           uv --no-progress run --frozen --
           pytest --maxfail=10
@@ -525,11 +551,10 @@ jobs:
           --cov-report=term
           --cov-fail-under=0
           --numprocesses=0 --skip-non-destructive --run-destructive
+          -m destructive_all_managers
           --ignore=./tests/test_bar_plugin.py
         env:
-          # The runners ship gh unauthenticated, and gh refuses extension installs
-          # without credentials. Feed it the workflow token so the gh-ext destructive
-          # install/remove round-trip runs for real (see conftest.py's PACKAGE_IDS).
+          # Same rationale as the step above: gh-ext's upgrade needs credentials.
           GH_TOKEN: ${{ github.token }}
 
   once-tests:

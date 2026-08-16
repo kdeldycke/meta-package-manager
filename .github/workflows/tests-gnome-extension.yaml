@@ -125,3 +125,32 @@ jobs:
         with:
           name: gnome-shell-extension
           path: ${{ runner.temp }}/mpm@kdeldycke.github.io.shell-extension.zip
+
+  # The static analyzer extensions.gnome.org runs on every upload, whose findings
+  # reach the reviewer before we ever see them: running it here turns a rejection
+  # round-trip, manual and days deep in a review queue, into a CI failure. It
+  # cost us one already (EGO-L-003, signals connected without a matching
+  # disconnect). Resolved under the workflow-level cooldown like every other
+  # install here.
+  shexli:
+    name: extensions.gnome.org static analysis
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.12.1"
+      # shexli exits 0 whatever it finds, errors included, so its exit code
+      # cannot gate anything: the JSON summary is the only usable signal. The
+      # report is teed to the log first, or a red job would say nothing about
+      # what it caught. pipefail keeps a crashed analyzer (it is young, and
+      # segfaults on some inputs) from passing as a clean run.
+      - name: Run shexli
+        run: |
+          set -euo pipefail
+          uvx shexli --format json "gnome-shell/mpm@kdeldycke.github.io" | tee "$RUNNER_TEMP/shexli.json"
+          jq --exit-status '.summary.finding_count == 0' "$RUNNER_TEMP/shexli.json"

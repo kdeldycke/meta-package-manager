@@ -133,22 +133,34 @@ export function compareVersions(left, right) {
  * Run a command asynchronously and capture its output.
  *
  * @param {string[]} argv - Command to run.
- * @param {Gio.Cancellable|null} cancellable - Cancelled on extension disable.
+ * @param {Gio.Cancellable} cancellable - Cancelled on extension disable.
+ *   Required, never defaulted: a caller with nothing to cancel leaves the
+ *   watchdog below as the one source `disable()` cannot reach.
  * @param {number} watchdogSeconds - Hard kill after this delay, 0 to disable.
  *   mpm's own `--timeout` only bounds each manager CLI it runs internally,
  *   not a wedged mpm process itself.
  * @returns {Promise<{status: number, stdout: string, stderr: string}>}
  */
-export async function runCommand(argv, cancellable = null, watchdogSeconds = 0) {
+export async function runCommand(argv, cancellable, watchdogSeconds = 0) {
     const proc = Gio.Subprocess.new(
         argv,
         Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE);
-    /* Cancelling communicate_utf8_async only abandons the read and leaves the
-     * child running: hook the cancellable so the child is actually killed. */
-    let cancelId = 0;
-    if (cancellable)
-        cancelId = cancellable.connect(() => proc.force_exit());
     let watchdogId = 0;
+    const clearWatchdog = () => {
+        if (watchdogId) {
+            GLib.source_remove(watchdogId);
+            watchdogId = 0;
+        }
+    };
+    /* Cancelling communicate_utf8_async only abandons the read and leaves the
+     * child running: hook the cancellable so the child is actually killed, and
+     * the watchdog dropped on the spot rather than whenever the abandoned read
+     * settles. A main loop source that outlives disable() keeps firing, on a
+     * session that may be locked by then. */
+    const cancelId = cancellable.connect(() => {
+        clearWatchdog();
+        proc.force_exit();
+    });
     if (watchdogSeconds > 0) {
         watchdogId = GLib.timeout_add_seconds(
             GLib.PRIORITY_DEFAULT, watchdogSeconds, () => {
@@ -168,10 +180,8 @@ export async function runCommand(argv, cancellable = null, watchdogSeconds = 0) 
             stderr: stderr ?? '',
         };
     } finally {
-        if (watchdogId)
-            GLib.source_remove(watchdogId);
-        if (cancelId)
-            cancellable.disconnect(cancelId);
+        clearWatchdog();
+        cancellable.disconnect(cancelId);
     }
 }
 
@@ -180,12 +190,12 @@ export async function runCommand(argv, cancellable = null, watchdogSeconds = 0) 
  * means a clean exit and an empty stderr; up to date means >= MPM_MIN_VERSION.
  *
  * @param {string[]} mpm - The mpm argv to probe.
- * @param {Gio.Cancellable|null} cancellable - Cancelled on extension disable.
+ * @param {Gio.Cancellable} cancellable - Cancelled on extension disable.
  * @param {number} watchdogSeconds - Hard kill for a wedged probe.
  * @returns {Promise<{runnable: boolean, upToDate: boolean,
  *   version: number[]|null, error: string|null}>}
  */
-export async function probeMpm(mpm, cancellable = null, watchdogSeconds = 30) {
+export async function probeMpm(mpm, cancellable, watchdogSeconds = 30) {
     let result;
     try {
         result = await runCommand(

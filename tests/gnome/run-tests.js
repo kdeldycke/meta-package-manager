@@ -182,35 +182,43 @@ function testFinders() {
 }
 
 async function testSubprocess() {
+    /* Every call takes a cancellable, the extension's own liveness handle:
+     * runCommand no longer defaults it, so a watchdog always has something
+     * able to drop it. This one is never cancelled. */
+    const live = new Gio.Cancellable();
+
     const result = await Mpm.runCommand(
-        ['sh', '-c', 'echo out; echo err >&2; exit 3']);
+        ['sh', '-c', 'echo out; echo err >&2; exit 3'], live);
     check('runCommand captures everything',
         [result.status, result.stdout, result.stderr],
         [3, 'out\n', 'err\n']);
 
     /* probeMpm appends --no-color --version, which the sh -c scripts below
      * receive as ignored positional parameters. */
-    const fresh = await Mpm.probeMpm(['sh', '-c', 'echo "mpm, version 6.4.0"']);
+    const fresh = await Mpm.probeMpm(
+        ['sh', '-c', 'echo "mpm, version 6.4.0"'], live);
     check('probeMpm fresh enough',
         [fresh.runnable, fresh.upToDate, fresh.version, fresh.error],
         [true, true, [6, 4, 0], null]);
 
-    const stale = await Mpm.probeMpm(['sh', '-c', 'echo "mpm, version 5.0.0"']);
+    const stale = await Mpm.probeMpm(
+        ['sh', '-c', 'echo "mpm, version 5.0.0"'], live);
     check('probeMpm too old',
         [stale.runnable, stale.upToDate, stale.version],
         [true, false, [5, 0, 0]]);
 
-    const broken = await Mpm.probeMpm(['sh', '-c', 'echo boom >&2; exit 1']);
+    const broken = await Mpm.probeMpm(
+        ['sh', '-c', 'echo boom >&2; exit 1'], live);
     check('probeMpm broken candidate',
         [broken.runnable, broken.error !== null], [false, true]);
 
-    const missing = await Mpm.probeMpm(['/nonexistent/mpm-binary']);
+    const missing = await Mpm.probeMpm(['/nonexistent/mpm-binary'], live);
     check('probeMpm missing binary',
         [missing.runnable, missing.error !== null], [false, true]);
 
     /* The watchdog force-kills a wedged process; signal deaths report -1. */
     const watchdogStart = GLib.get_monotonic_time();
-    const wedged = await Mpm.runCommand(['sleep', '5'], null, 1);
+    const wedged = await Mpm.runCommand(['sleep', '5'], live, 1);
     check('runCommand watchdog kills a wedged process',
         [wedged.status, (GLib.get_monotonic_time() - watchdogStart) / 1e6 < 4],
         [-1, true]);

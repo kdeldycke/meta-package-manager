@@ -58,7 +58,6 @@ class MpmIndicator extends PanelMenu.Button {
         super._init(0.5, _('Meta Package Manager'));
         this._extension = extension;
         this._settings = extension.getSettings();
-        this._destroyed = false;
         this._checking = false;
         this._cancellable = null;
         this._checkTimeoutId = null;
@@ -82,8 +81,12 @@ class MpmIndicator extends PanelMenu.Button {
 
         this._buildMenu();
 
-        this._settingsChangedId =
-            this._settings.connect('changed', () => this._onSettingsChanged());
+        /* Every signal is tracked against this indicator through
+         * connectObject(), so teardown is one disconnectObject() per emitter
+         * instead of a handler id per connection: the shell disconnects the
+         * rest with the actor itself. */
+        this._settings.connectObject(
+            'changed', () => this._onSettingsChanged(), this);
 
         if (firstBoot) {
             /* Delay the very first check to keep session startup snappy. Not
@@ -124,7 +127,8 @@ class MpmIndicator extends PanelMenu.Button {
          * wiring while keeping the row clickable (same trick as
          * arch-update). */
         this._checkNowItem = new PopupMenu.PopupMenuItem(_('Check now'));
-        this._checkNowItem.connect('activate', () => this._checkUpdates());
+        this._checkNowItem.connectObject(
+            'activate', () => this._checkUpdates(), this);
         const checkNowSection = new PopupMenu.PopupMenuSection();
         checkNowSection.box.add_child(this._checkNowItem);
         this.menu.addMenuItem(checkNowSection);
@@ -137,10 +141,10 @@ class MpmIndicator extends PanelMenu.Button {
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         const settingsItem = new PopupMenu.PopupMenuItem(_('Settings'));
-        settingsItem.connect('activate', () => {
+        settingsItem.connectObject('activate', () => {
             this.menu.close();
             this._extension.openPreferences();
-        });
+        }, this);
         this.menu.addMenuItem(settingsItem);
 
         this._updateLastChecked();
@@ -196,8 +200,6 @@ class MpmIndicator extends PanelMenu.Button {
      * lock/unlock cycles and settings changes never reset the countdown
      * (arch-update's _scheduleCheck pattern). */
     _scheduleCheck() {
-        if (this._destroyed)
-            return;
         if (this._checkTimeoutId) {
             GLib.source_remove(this._checkTimeoutId);
             this._checkTimeoutId = null;
@@ -218,10 +220,15 @@ class MpmIndicator extends PanelMenu.Button {
     /* The full refresh pipeline, mirroring bar_plugin.py print_menu(): locate
      * mpm, gate on version, best-effort `sync`, then `outdated` as JSON. */
     async _checkUpdates() {
-        if (this._checking || this._destroyed)
+        if (this._checking)
             return;
         this._checking = true;
-        this._cancellable = new Gio.Cancellable();
+        /* The cancellable is also the liveness handle: destroy() cancels it,
+         * so a check outliving the indicator learns that from its own
+         * cancellation. Held in a local as well, because destroy() clears the
+         * field while this run still needs to consult it. */
+        const cancellable = new Gio.Cancellable();
+        this._cancellable = cancellable;
         this._setPanelState(State.CHECKING);
         this._checkNowItem.reactive = false;
         this._checkNowItem.add_style_class_name('popup-inactive-menu-item');
@@ -232,7 +239,7 @@ class MpmIndicator extends PanelMenu.Button {
                 this._setMissing(_('mpm not found on this system.'));
                 return;
             }
-            const probe = await Mpm.probeMpm(mpm, this._cancellable);
+            const probe = await Mpm.probeMpm(mpm, cancellable);
             if (!probe.runnable) {
                 this._setMissing(_('mpm cannot run: %s').format(probe.error));
                 return;
@@ -253,9 +260,9 @@ class MpmIndicator extends PanelMenu.Button {
             /* Refresh the package indexes first, best-effort: failures will
              * resurface per manager in the outdated report. */
             await Mpm.runCommand(
-                Mpm.syncArgv(mpm, timeout), this._cancellable, watchdog);
+                Mpm.syncArgv(mpm, timeout), cancellable, watchdog);
             const result = await Mpm.runCommand(
-                Mpm.outdatedArgv(mpm, timeout), this._cancellable, watchdog);
+                Mpm.outdatedArgv(mpm, timeout), cancellable, watchdog);
             if (result.stderr || !result.stdout) {
                 this._setError(result.stderr || _('mpm produced no output.'));
                 return;
@@ -272,13 +279,14 @@ class MpmIndicator extends PanelMenu.Button {
             this._maybeNotify(model);
             this._showReport();
         } catch (error) {
-            if (this._destroyed || this._cancellable?.is_cancelled())
+            if (cancellable.is_cancelled())
                 return;
             this._setError(String(error));
         } finally {
             this._checking = false;
-            this._cancellable = null;
-            if (!this._destroyed) {
+            if (this._cancellable === cancellable)
+                this._cancellable = null;
+            if (!cancellable.is_cancelled()) {
                 lastCheck = new Date();
                 this._updateLastChecked();
                 this._checkNowItem.reactive = true;
@@ -352,10 +360,10 @@ class MpmIndicator extends PanelMenu.Button {
         if (manager.packages.length > 0) {
             const upgradeAll = new PopupMenu.PopupMenuItem(
                 _('🆙 Upgrade all %s packages').format(manager.id));
-            upgradeAll.connect('activate', () => {
+            upgradeAll.connectObject('activate', () => {
                 this.menu.close();
                 this._runAction(Mpm.upgradeAllArgv(lastMpm, manager.id));
-            });
+            }, this);
             section.addMenuItem(upgradeAll);
         }
         for (const error of manager.errors)
@@ -390,11 +398,11 @@ class MpmIndicator extends PanelMenu.Button {
                 style_class: styleClass,
             }));
         }
-        item.connect('activate', () => {
+        item.connectObject('activate', () => {
             this.menu.close();
             this._runAction(
                 Mpm.upgradePackageArgv(lastMpm, manager.id, pkg.id));
-        });
+        }, this);
         return item;
     }
 
@@ -418,18 +426,18 @@ class MpmIndicator extends PanelMenu.Button {
      * installation page for every system uv does not answer for. */
     _addInstallItem() {
         const install = new PopupMenu.PopupMenuItem(_('Install mpm with uv'));
-        install.connect('activate', () => {
+        install.connectObject('activate', () => {
             this.menu.close();
             this._runAction(Mpm.INSTALL_ARGV);
-        });
+        }, this);
         this._reportSection.addMenuItem(install);
 
         const docs = new PopupMenu.PopupMenuItem(
             _('Open mpm installation instructions'));
-        docs.connect('activate', () => {
+        docs.connectObject('activate', () => {
             this.menu.close();
             Gio.AppInfo.launch_default_for_uri(Mpm.INSTALL_DOCS_URL, null);
-        });
+        }, this);
         this._reportSection.addMenuItem(docs);
     }
 
@@ -465,9 +473,9 @@ class MpmIndicator extends PanelMenu.Button {
                 title: this._extension.metadata.name,
                 icon: this._stateIcon(State.UPDATES),
             });
-            this._notifSource.connect('destroy', () => {
+            this._notifSource.connectObject('destroy', () => {
                 this._notifSource = null;
-            });
+            }, this);
             Main.messageTray.add(this._notifSource);
         }
         const title = ngettext(
@@ -516,11 +524,9 @@ class MpmIndicator extends PanelMenu.Button {
     }
 
     destroy() {
-        this._destroyed = true;
-        if (this._settingsChangedId) {
-            this._settings.disconnect(this._settingsChangedId);
-            this._settingsChangedId = null;
-        }
+        /* Cancel first: that is what tells an in-flight check it has outlived
+         * the indicator, and what drops the watchdog source runCommand armed
+         * for it. Then no timer, signal or source is left to fire. */
         if (this._cancellable !== null) {
             this._cancellable.cancel();
             this._cancellable = null;
@@ -530,7 +536,9 @@ class MpmIndicator extends PanelMenu.Button {
             this._checkTimeoutId = null;
         }
         this._clearOneShot();
+        this._settings.disconnectObject(this);
         if (this._notifSource !== null) {
+            this._notifSource.disconnectObject(this);
             this._notifSource.destroy();
             this._notifSource = null;
         }

@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Run the destructive tests in parallel, scheduled by shared-backend lock family: tests of managers contending for one lock serialize on a single worker while independent families run at once, and the cross-manager tests that drive every available manager keep a sequential run of their own behind the new `destructive_all_managers` marker.
 - [mpm] Wrap the name and version columns of `mpm installed`, `mpm outdated` and `mpm search` inside their own cell, so their tables stop overflowing the terminal. `package_id` stays uncapped and never wraps: it is the value copied back into an install, removal or upgrade command, and an identifier split over two lines cannot be selected in one go.
 - [mpm] Wrap the `Supported` and `CLI` columns of `mpm managers` inside their own cell, instead of stretching the table past the edge of the terminal and mangling every border. Tables are also measured against the width of the terminal now, rather than against the 80-column budget that lays out help screens.
 - [am,miktex,nala,pamac,pkcon] Declare support for the Linux compatibility layers, WSL included, in place of the Linux distributions alone. Their platform set matched none of the groups the documentation classifies against, so the readme's operation matrix reported no platform at all for `am`, `nala`, `pamac` and `pkcon`, and Windows alone for `miktex`.

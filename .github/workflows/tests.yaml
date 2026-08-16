@@ -543,9 +543,14 @@ jobs:
       # single invocation, so no lock-family grouping can isolate them from the
       # step above: they run on their own, sequentially, once the grouped tests
       # are done.
+      # The full sync scope is re-declared here because the grouped step may
+      # have upgraded the very interpreter the venv was built from (Homebrew's
+      # python sits among macOS upgrade targets): uv then rebuilds the venv
+      # from the replacement, and without the scope that rebuild carries only
+      # the base dependencies, pytest not among them.
       - name: Sequential cross-manager destructive tests
         run: >
-          uv --no-progress run --frozen --
+          uv --no-progress run --frozen --all-extras --group test --
           pytest --maxfail=10
           --cov
           --cov-report=term

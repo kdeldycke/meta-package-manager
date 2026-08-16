@@ -23,6 +23,7 @@ import pytest
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import CLIError
+from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
 from .fake_manager import FakeManager
@@ -85,7 +86,22 @@ class TestUpgrade(CLISubCommandTests):
         # installed gem even when current) repeat their full upgrade on a
         # second pass, doubling the destructive wall-clock for the sake of an
         # argument-parsing message.
-        result = invoke("--verbosity", "DEBUG", "upgrade", "--all")
+        #
+        # Every default manager is selected explicitly because both halves of
+        # this test hang on the verbosity mechanics: select_managers demotes
+        # the per-manager skip/announce signals to DEBUG on an implicit run,
+        # and DEBUG collapses the fan-out to a single worker (serial_at_debug
+        # in effective_jobs), which no --jobs value can override. Explicit
+        # selection keeps every signal visible at INFO, where the grouped
+        # concurrent dispatch engages: this is the one destructive exercise of
+        # the concurrent `upgrade --all` path.
+        result = invoke(
+            *(f"--{mid}" for mid in pool.default_manager_ids),
+            "--verbosity",
+            "INFO",
+            "upgrade",
+            "--all",
+        )
         # Accept exit code 1: end-to-end destructive upgrades depend on the
         # health of every installed third-party manager, and CI runners
         # regularly surface transient backend failures (missing project files,

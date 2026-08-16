@@ -16,6 +16,7 @@ output-formats
 dump
 sbom
 cli-parameters
+man
 configuration
 overrides
 cooldown

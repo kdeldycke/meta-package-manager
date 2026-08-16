@@ -42,6 +42,7 @@ Measured against a preview deployment before the cutover, because the behaviour 
 | `/managers/apk/` | `200` | The page |
 | `/managers/apk` | `308` → `/managers/apk/` | Pages normalizes a directory to its trailing slash |
 | `/managers/apk.html` | `301` → `/managers/apk/` | `docs/_redirects`, not Pages |
+| `/usage.html` | `301` → `/cli-parameters/` | `docs/_redirects`, for a page renamed twice since 2021 |
 | `/index.html` | `308` → `/` | Pages normalization again |
 | `/nope` | `404` | `docs/404.html` |
 
@@ -143,6 +144,7 @@ Single Redirects live in the `rulesets` API, which accepts account-owned tokens:
 - **Nothing reconciles the edge configuration.** The rules and records above are recorded here by hand; no script diffs them against the live zone, so this file can drift from reality without anything noticing.
 - **The wildcard covers hostnames nobody registered.** `*.mpm.run` answers for every label, so a typo becomes a redirect into the site's 404 rather than a DNS failure. That is the friendlier failure, and it is deliberate, but it does mean the zone answers for names the project never chose.
 - **No `AAAA` on the apex beyond the proxy.** Not needed while Cloudflare terminates everything, and noted only so a future reader does not go looking for one.
+- **The Read the Docs era cannot be redirected from here.** The site published to `meta-package-manager.readthedocs.io` between 2016-12-25 and 2021-10-08, and that project was deleted: its host answers `404` to every path, including the root, so nothing can be handed back to this one. The rules `docs/_redirects` carries for those paths are inert until somebody reclaims the project and points it here, which is also the reason to reclaim it: the subdomain is unclaimed, and a name that once served this documentation is a name worth not leaving to someone else. Everything from the GitHub Pages era is fine by contrast, that site still holding `mpm.run` as its custom domain and `301`-ing each request onto it.
 
 ## Keeping this current
 

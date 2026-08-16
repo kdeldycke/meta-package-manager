@@ -156,6 +156,62 @@ def test_docs_site_url_matches_pyproject():
     assert not _docs.DOCS_SITE_URL.endswith("/")
 
 
+def test_redirects_file_is_well_formed():
+    """`docs/_redirects` sends every retired URL to a page that still exists.
+
+    Two of these invariants are the Cloudflare Pages engine's own. A rule only
+    counts as static while it appears before the first rule holding a `*` or a
+    `:placeholder`; from there on every line spends the 100-rule dynamic budget,
+    and the parser discards the rest of the file at the 101st rather than
+    reporting anything. The third is this project's: a redirect landing on a
+    page that no longer exists just trades a 404 for a slower one, and a rule
+    whose source is a page the site still publishes hides that page entirely.
+    """
+    redirects = PROJECT_ROOT.joinpath("docs", "_redirects")
+    rules = []
+    for line in redirects.read_text(encoding="UTF-8").splitlines():
+        if not (stripped := line.strip()) or stripped.startswith("#"):
+            continue
+        source, destination, *status = stripped.split()
+        # A retired URL is retired for good: nothing here is a temporary move.
+        assert status == ["301"], f"{source} is not a permanent redirect."
+        rules.append((source, destination))
+
+    def is_dynamic(url: str) -> bool:
+        return "*" in url or ":" in url
+
+    first_dynamic = next(
+        (index for index, (source, _) in enumerate(rules) if is_dynamic(source)),
+        len(rules),
+    )
+    assert all(is_dynamic(source) for source, _ in rules[first_dynamic:]), (
+        "An exact rule sits after a dynamic one, so it spends the dynamic budget."
+    )
+    assert len(rules) - first_dynamic < 100
+
+    # Every page Sphinx publishes, as the site path the dirhtml builder gives it.
+    docs = PROJECT_ROOT.joinpath("docs")
+    pages = {
+        "/" if path.stem == "index" else f"/{path.stem}/"
+        for path in docs.glob("*.md")
+    }
+    pages.update(
+        f"/managers/{path.stem}/"
+        for path in docs.joinpath("managers").glob("*.md")
+    )
+
+    for source, destination in rules:
+        if not is_dynamic(destination):
+            assert destination in pages, (
+                f"{source} redirects to {destination}, which is not a page."
+            )
+        if not is_dynamic(source):
+            retired = source.removesuffix(".html").rstrip("/") + "/"
+            assert retired not in pages, (
+                f"{source} shadows {retired}, a page the site still publishes."
+            )
+
+
 def test_changelog():
     content = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
     assert content.startswith("# Changelog\n")

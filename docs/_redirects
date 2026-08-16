@@ -2,18 +2,110 @@
 # `html_extra_path` in `conf.py`. Inert on any other host: GitHub Pages serves
 # this file as a text asset and never reads it.
 #
-# The site publishes every page as a directory (`[tool.repomatic] sphinx.builder`
-# is `dirhtml`), so the `.html` URLs it answered to for years have to be sent to
-# their directory. Pages does normalize `/page.html` to `/page` on its own, but
-# only when an asset sits at the stripped path: against a directory it finds
-# nothing, and an unmatched route falls through to the site's own 404. Measured
-# on a preview deployment, not assumed.
+# This is the inventory of every URL these documents have answered to since the
+# first Sphinx build, mapped back to today's canonical page. Three hosting eras
+# produced them:
 #
-# Both rules carry a placeholder, so both spend the dynamic budget rather than
-# the static one. That budget is 100 and this file uses two, but the accounting
-# is worth knowing before the file grows: from the first rule containing `*` or
-# `:placeholder`, every later line burns the dynamic budget too, and the parser
-# stops reading the file at the 101st. Exact rules therefore go first, always.
+#   2016-12-25 → 2021-10-08   Read the Docs, `meta-package-manager.readthedocs.io`
+#   2021-10-08 → 2026-08-15   GitHub Pages, `kdeldycke.github.io/meta-package-manager`
+#   2026-08-15 → today        Cloudflare Pages, `mpm.run`
+#
+# Only the last two reach these rules. GitHub Pages still carries `mpm.run` as
+# its custom domain, so it answers a `kdeldycke.github.io/meta-package-manager/…`
+# link with a 301 to the same path here, where the rules below pick it up: that
+# is what keeps the whole Pages era alive, and why `docs/infrastructure.md` says
+# never to delete that site. The Read the Docs project was deleted and its host
+# answers 404 to everything, so no link into that era can arrive at all.
+#
+# The site published each page as `<name>.html` until 2026-08-15, when
+# `[tool.repomatic] sphinx.builder` switched to `dirhtml`. Pages does normalize
+# `/page.html` to `/page` on its own, but only when an asset sits at the
+# stripped path: against a directory it finds nothing, and an unmatched route
+# falls through to the site's own 404. Measured on a preview deployment.
+#
+# Each renamed page therefore gets two rules. The `.html` one is the URL that
+# was published; the directory one is the URL this file's own catch-all
+# manufactures out of it, and which a crawler following that 301 now holds.
+#
+# ORDER IS LOAD-BEARING. The Pages engine only counts a rule as static while it
+# appears BEFORE the first rule containing a `*` or a `:placeholder`. From that
+# rule on, every line burns the 100-rule dynamic budget, and at 101 the parser
+# discards the REST OF THE FILE. Hence the contract, enforced by
+# `test_redirects_file_is_well_formed`:
+#
+#   1. All exact rules first, all `*`/`:placeholder` rules second.
+#   2. The dynamic half stays under 100 rules.
+#
+# Matching is anchored: `:name` never crosses a slash and never matches empty,
+# `*` may match empty. So `/a` and `/a/` are different sources, and a rule
+# ending in `/*` also answers the bare trailing-slash URL through an empty splat.
 # See https://kevin.deldycke.com/2022/cloudflare-commands#pages-redirects
-/managers/:manager.html  /managers/:manager/  301
-/:page.html  /:page/  301
+
+# Pages that were renamed.
+# `usage` → `cli-help` (2021-10-09) → `cli-parameters` (2022-11-26).
+/usage.html                             /cli-parameters/        301
+/usage/                                 /cli-parameters/        301
+/cli-help.html                          /cli-parameters/        301
+/cli-help/                              /cli-parameters/        301
+# `alternatives` → `benchmark` (2022-04-28).
+/alternatives.html                      /benchmark/             301
+/alternatives/                          /benchmark/             301
+# `features` → `augmentations` (2026-07-01).
+/features.html                          /augmentations/         301
+/features/                              /augmentations/         301
+# `bitbar` → `xbar` (2021-04-25) → `bar-plugin` (2022-04-17), tracking the two
+# renames of the menu bar host application itself.
+/xbar.html                              /bar-plugin/            301
+/xbar/                                  /bar-plugin/            301
+
+# Pages that were dissolved into several others.
+# The use-cases page was split over 2026-06-12 and 2026-07-01 into `duplicates`,
+# `output-formats`, `dump` and `augmentations`, with its opening survey folded
+# back into the readme. No section inherited enough of it to be the target, so
+# the home page is: it renders that readme and its toctree reaches every heir.
+/usecase.html                           /                       301
+/usecase/                               /                       301
+# The development guide became `claude.md` (2026-03-23). Its contributor-facing
+# half is the contributing page, which is where the rest of it is reachable from.
+/development.html                       /contributing/          301
+/development/                           /contributing/          301
+
+# API pages that autodoc no longer emits.
+# `modules` was the generated module index, dropped when the API tree was
+# flattened onto a single page (2025-12-06).
+/modules.html                           /meta_package_manager/  301
+/modules/                               /meta_package_manager/  301
+# The bar plugin got its own autodoc page, renamed with the module
+# (`xbar` → `bar_plugin`, 2022-04-17) and folded into the package page in
+# 2025-12-06, where it is still a section of its own.
+/meta_package_manager.xbar.html         /meta_package_manager/  301
+/meta_package_manager.xbar/             /meta_package_manager/  301
+/meta_package_manager.bar_plugin.html   /meta_package_manager/  301
+/meta_package_manager.bar_plugin/       /meta_package_manager/  301
+# The test suite stopped being autodoc'd in 2024-11-23. The testing guide is
+# what a reader looking for it wants.
+/meta_package_manager.tests.html        /tests/                 301
+/meta_package_manager.tests/            /tests/                 301
+
+# Read the Docs era only. Nothing can reach these while that project stays
+# deleted, and they are kept for the same reason the rest of the file is: the
+# paths were published, they cost one static rule each, and they answer the day
+# the project is reclaimed. `/api/*` closes the same era from the dynamic half.
+/bitbar.html                            /bar-plugin/            301
+/bitbar/                                /bar-plugin/            301
+/setup.html                             /meta_package_manager/  301
+/setup/                                 /meta_package_manager/  301
+/meta_package_manager.bitbar.html       /meta_package_manager/  301
+/meta_package_manager.bitbar/           /meta_package_manager/  301
+
+# Everything below spends the dynamic budget.
+
+# The API tree lived under `/api/` between 2017-01-28 and 2021-01-24, one page
+# per module and a second level for the managers. All of it is one page now, so
+# the whole subtree collapses onto it rather than earning 25 exact rules.
+/api/*                                  /meta_package_manager/  301
+# Every page still published, sent from its pre-`dirhtml` URL to its directory.
+# The manager rule is not redundant with the one under it: `:page` never crosses
+# a slash, so it cannot match a path two segments deep.
+/managers/:manager.html                 /managers/:manager/     301
+/:page.html                             /:page/                 301

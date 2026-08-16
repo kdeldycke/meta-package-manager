@@ -229,6 +229,10 @@ Vim and Neovim plugin manager, drivable unattended unlike [`dein`](#dein) and [`
 
 [`needrestart`](https://github.com/liske/needrestart) restarts services whose libraries were replaced by an upgrade. It installs nothing and owns no packages: it reacts to what a real package manager just did.
 
+## [`rye`](https://rye.astral.sh) ☠️ 🛟
+
+Python project manager, archived by Astral with its last release `0.44.0` dating from 2025-02-26. Its readme states Rye "is no longer developed" and that "no further updates are planned, including security updates", naming [uv](https://docs.astral.sh/uv/) as "the successor project from the same maintainers". `mpm` wraps that successor as [`uv`](managers/uv.md) and [`uvx`](managers/uvx.md), so the global tools and interpreters Rye installed are reached without it.
+
 ## [`sage`](https://github.com/svnpenn/sage) ☠️
 
 Cygwin package manager, offered as an alternative to [`apt-cyg`](managers/apt-cyg.md), which `mpm` wraps. It is gone in the strongest sense available: the repository 404s and so does the `svnpenn` account that owned it, so the project was not renamed or transferred, it was deleted along with its owner. Nothing survives to wrap, and no fork carries the name.

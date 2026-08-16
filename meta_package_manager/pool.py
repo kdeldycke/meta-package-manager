@@ -74,6 +74,7 @@ from .managers.sdkman import SDKMAN
 from .managers.sfsu import SFSU
 from .managers.sheldon import Sheldon
 from .managers.snap import Snap
+from .managers.spack import Spack
 from .managers.sun_tools import Sun_Tools
 from .managers.tazpkg import Tazpkg
 from .managers.uv import UV, UVX
@@ -157,6 +158,7 @@ manager_classes = (
     SFSU,
     Sheldon,
     Snap,
+    Spack,
     Sun_Tools,
     Tazpkg,
     Trizen,

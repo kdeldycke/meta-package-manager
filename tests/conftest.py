@@ -553,6 +553,10 @@ PACKAGE_IDS = {
     "snap": "hello-world",
     "soar": "bat",  # Single-file static binary from the soarpkgs registry.
     "sorcery": "figlet",
+    # Spack builds everything from source, so the round-trip needs the cheapest
+    # thing in the catalog: zlib compiles in a few seconds and pulls in nothing
+    # beyond the compiler wrapper and make.
+    "spack": "zlib",
     "steamcmd": "1007",  # Steamworks SDK Redist.
     "stew": "sharkdp/hyperfine",
     # SVR4 packages install from local datastreams, not a repository: install is

@@ -75,6 +75,7 @@ print(augmentations_table())
 | [`snap`](managers/snap.md)                 |                      |              |      ✅      |       ✅        |
 | [`soar`](managers/soar.md)                 |                      |              |      ✅      |       ✅        |
 | [`sorcery`](managers/sorcery.md)           |                      |              |      ✅      |       ✅        |
+| [`spack`](managers/spack.md)               |                      |              |      ✅      |                 |
 | [`swupd`](managers/swupd.md)               |                      |              |      ✅      |       ✅        |
 | [`tazpkg`](managers/tazpkg.md)             |                      |              |      ✅      |       ✅        |
 | [`tlmgr`](managers/tlmgr.md)               |                      |              |      ✅      |       ✅        |

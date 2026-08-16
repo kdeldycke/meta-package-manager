@@ -153,6 +153,7 @@ keywords = [
   "solaris",
   "sorcery",
   "source mage",
+  "spack",
   "spdx",
   "steamcmd",
   "stew",
@@ -1045,6 +1046,7 @@ labels.file-rules."📦 manager: slapt-get" = [ "meta_package_manager/managers/s
 labels.file-rules."📦 manager: snap" = [ "meta_package_manager/managers/snap.*", "tests/*snap*" ]
 labels.file-rules."📦 manager: soar" = [ "meta_package_manager/managers/soar.*", "tests/*soar*" ]
 labels.file-rules."📦 manager: sorcery" = [ "meta_package_manager/managers/sorcery.*", "tests/*sorcery*" ]
+labels.file-rules."📦 manager: spack" = [ "meta_package_manager/managers/spack.*", "tests/*spack*" ]
 labels.file-rules."📦 manager: steamcmd" = [ "meta_package_manager/managers/steamcmd.*", "tests/*steamcmd*" ]
 labels.file-rules."📦 manager: stew" = [ "meta_package_manager/managers/stew.*", "tests/*stew*" ]
 labels.file-rules."📦 manager: sun-tools" = [ "meta_package_manager/managers/sun_tools.*", "tests/*sun_tools*" ]
@@ -1406,6 +1408,11 @@ description = "soar"
 name = "📦 manager: sorcery"
 color = "bfdadc"
 description = "sorcery"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: spack"
+color = "bfdadc"
+description = "spack"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: steamcmd"

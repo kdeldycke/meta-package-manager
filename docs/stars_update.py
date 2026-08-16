@@ -283,6 +283,7 @@ UPSTREAM_REPOS = {
     "snap": "https://github.com/canonical/snapd",
     "soar": "https://github.com/pkgforge/soar",
     "sorcery": "https://github.com/sourcemage/sorcery",
+    "spack": "https://github.com/spack/spack",
     "stew": "https://github.com/marwanhawari/stew",
     "swupd": "https://github.com/clearlinux/swupd-client",
     "tlmgr": "https://github.com/TeX-Live/texlive-source",

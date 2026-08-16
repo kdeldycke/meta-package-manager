@@ -262,6 +262,7 @@ icons:
     hex: 57A143
     license: CC-BY-SA-3.0
     managers:
+    - bob
     - lazy
     - mason
     - vim-pack

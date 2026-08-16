@@ -1,0 +1,126 @@
+# bob is a version manager for Neovim (https://github.com/MordechaiHadad/bob),
+# installing the editor's own releases from https://github.com/neovim/neovim.
+# See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is a version token, and every verb agrees on it: `install`,
+# `uninstall`, `update` and `use` all take exactly one, and the listing prints
+# one per row. Both shapes of token are real packages: a released tag such as
+# `v0.12.4`, and the rolling `nightly`. That is the reading `rustup` settled,
+# where the object the verbs agree on is what counts as a package.
+#
+# Parsing notes, verified against bob 4.1.7 on macOS:
+#   - No `installed_version` is captured, deliberately, following `pyenv` and
+#     `rustup`. The token is the identity rather than a version field: `nightly`
+#     is not a version at all, and one pattern has to serve both shapes, so
+#     reporting the whole token as a version would be wrong for every rolling
+#     channel. mpm treats the installed version as optional throughout.
+#   - The listing is a box-drawing table, and its `Status` column is the anchor
+#     that reads it. bob prints exactly two statuses, `Used` for the active
+#     version and `Installed` for the rest, so requiring one of them is what
+#     rejects the header row, whose second column reads `Status`, along with the
+#     three border rows, which open on a different box character. Requiring the
+#     token to look like a version would have dropped `nightly` instead.
+#   - Colors are unconditional. bob writes the SGR escapes around its status and
+#     around the stable entry of the catalog whether or not it is writing to a
+#     terminal, and honors neither `NO_COLOR` nor `TERM=dumb`, all three
+#     verified. Nothing is forced to suppress them: mpm searches each line
+#     rather than anchoring it, so the patterns step over the escapes instead of
+#     fighting them.
+#   - Both patterns are deliberately insensitive to whitespace and column width.
+#     The table widens from seven columns to sixteen when a nightly rollback
+#     exists, and upstream removed the padding from the catalog outright in
+#     `v4.1.4` ([bob#333](https://github.com/MordechaiHadad/bob/pull/333)), so
+#     alignment is the one thing about this output that has already changed.
+#   - The catalog lists released tags alone, and that costs more than a search
+#     hit. `nightly` never appears in it, so mpm, which resolves a package it
+#     was handed no manager for by searching the catalog first, refuses to
+#     install a channel bob itself installs without complaint. Naming the
+#     manager does not help: the lookup is what supplies the candidate. An
+#     installed `nightly` still lists, upgrades and removes normally, since
+#     those read the inventory rather than the catalog.
+#   - A search here is broader than it looks, because the ids are versions.
+#     mpm's default matching is fuzzy and counts any alphanumeric segment of the
+#     query, so `0.12.4` splits into `0`, `12` and `4` and matches nearly every
+#     tag Neovim ever cut. `--exact` is what narrows it to one.
+#   - No `outdated`: nothing reports staleness without acting on it, `update`
+#     computing what is behind and installing it in the same pass.
+#   - No `cleanup`: `bob erase` deletes every installed version along with bob's
+#     own configuration, which is a mass removal rather than reclamation. The
+#     same reading left `luarocks purge` unmapped.
+#
+# ```{caution}
+# `bob sync` is not mpm's `sync` and is deliberately left unmapped. It reads a
+# version file from the working directory and installs whatever that names,
+# which is project scope rather than a metadata refresh. Nothing in bob
+# refreshes its catalog without also acting, so no `sync` is declared at all.
+# ```
+#
+# ```{note}
+# An empty inventory is reported honestly: `bob list` writes a timestamped
+# `There are no versions installed` line to standard output and exits zero. It
+# carries no table row, so the pattern yields nothing and mpm reports an empty
+# inventory rather than a failure.
+# ```
+
+[mpm.managers.bob]
+name = "bob"
+homepage_url = "https://github.com/MordechaiHadad/bob"
+logo = "neovim"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["bob"]
+version_cli_options = ["--version"]
+# `bob --version` prints "bob-nvim 4.1.7", so the version is not the first
+# token and the default pattern would report the program name instead.
+version_regexes = ['bob-nvim[ \t]+(?P<version>\S+)']
+
+[mpm.managers.bob.operations.installed]
+args = ["list"]
+regex = '^│[ \t]+(?P<package_id>\S+)[ \t]+│[^│]*(?:Installed|Used)'
+
+# The catalog takes no query, so mpm narrows it. Matching a version-shaped token
+# anywhere in the line is what steps over the color escapes wrapping the stable
+# entry, and it leaves the trailing `(stable)` marker out of the id.
+[mpm.managers.bob.operations.search]
+args = ["list-remote"]
+regex = '(?P<package_id>v\d+(?:\.\d+)+)'
+
+[mpm.managers.bob.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.bob.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+# Naming a version genuinely restricts the update to it. Bare `update` refuses
+# to run without either a version or `--all`.
+[mpm.managers.bob.operations.upgrade_one]
+args = ["update", "{package_id}"]
+
+[mpm.managers.bob.operations.upgrade_all]
+args = ["update", "--all"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from bob 4.1.7. Consumed by tests/test_manager_definition.py; ignored by mpm's
+# loader.
+#
+# The listing carries both token shapes and both statuses at once. Its color
+# escapes are written as `\u001B` because TOML forbids a raw control character
+# in a string; they are what the terminal actually receives, and stripping them
+# would leave a fixture that no longer proves the pattern survives them.
+#
+# No search fixture: that listing is the whole Neovim release history, sixty
+# lines of upstream's tags rather than anything about the host, and the escape
+# it would lock is already locked above.
+[samples.version]
+output = "bob-nvim 4.1.7"
+expected = "4.1.7"
+
+[[samples.installed]]
+output = """
+┌───────────┬─────────────┐
+│  Version  │  Status     │
+├───────────┼─────────────┤
+│  nightly  │  \u001B[33mInstalled\u001B[0m  │
+│  v0.12.4  │  \u001B[32mUsed\u001B[0m       │
+└───────────┴─────────────┘"""
+packages = [{ id = "nightly" }, { id = "v0.12.4" }]

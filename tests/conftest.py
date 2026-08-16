@@ -425,6 +425,13 @@ PACKAGE_IDS = {
     # other operation on the installed binary's absolute path, so that is the
     # shape an identifier takes here.
     "bin": "/usr/local/bin/bin",
+    # A Neovim version, which is what bob calls a package. Deliberately a
+    # released tag and not `nightly`: bob installs the rolling channel happily,
+    # but it appears in no catalog listing, and mpm resolves an untied package
+    # through the catalog before installing it, so the round-trip would fail on
+    # a name the tool itself accepts. A tag is also reproducible where the
+    # nightly of the day is not.
+    "bob": "v0.11.7",
     # A one-file terminal-colour helper from bpkg's own organisation.
     "bpkg": "bpkg/term",
     "brew": "nyancat",

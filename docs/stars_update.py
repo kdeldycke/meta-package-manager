@@ -207,6 +207,7 @@ UPSTREAM_REPOS = {
     "asdf": "https://github.com/asdf-vm/asdf",
     "basalt": "https://github.com/hyperupcall/basalt",
     "bin": "https://github.com/marcosnils/bin",
+    "bob": "https://github.com/MordechaiHadad/bob",
     "bpkg": "https://github.com/bpkg/bpkg",
     "brew": "https://github.com/Homebrew/brew",
     "bun": "https://github.com/oven-sh/bun",

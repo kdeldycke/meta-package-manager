@@ -24,6 +24,7 @@ keywords = [
   "atom",
   "basalt",
   "bin",
+  "bob",
   "bpkg",
   "brew",
   "bun",
@@ -904,6 +905,7 @@ labels.file-rules."📦 manager: bash-based" = [
   "tests/*bpkg*",
 ]
 labels.file-rules."📦 manager: bin" = [ "meta_package_manager/managers/bin.*", "tests/*bin*" ]
+labels.file-rules."📦 manager: bob" = [ "meta_package_manager/managers/bob.*", "tests/*bob*" ]
 labels.file-rules."📦 manager: cargo" = [ "meta_package_manager/managers/cargo.*", "tests/*cargo*" ]
 labels.file-rules."📦 manager: cave" = [ "meta_package_manager/managers/cave.*", "tests/*cave*" ]
 labels.file-rules."📦 manager: choco" = [ "meta_package_manager/managers/choco.*", "tests/*choco*" ]
@@ -1121,6 +1123,11 @@ description = "basalt, bpkg"
 name = "📦 manager: bin"
 color = "bfdadc"
 description = "bin"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: bob"
+color = "bfdadc"
+description = "bob"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: cargo"

@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from functools import partial
@@ -776,19 +777,20 @@ def cpan_install_blocked() -> bool:
 
 
 def gcloud_components_blocked() -> bool:
-    """Whether gcloud's component manager refuses to mutate this installation.
+    """Whether gcloud's component manager cannot mutate this installation.
 
-    gcloud disables its component manager when the CLI was installed through a
-    package manager, refusing any component mutation with *"You cannot perform
-    this action because the Google Cloud CLI component manager is disabled for
-    this installation."* That used to be true of every runner image, but image
-    rollouts alternate between that layout and the tarball one whose component
-    manager works, and both coexist across the fleet while a rollout is in
-    flight, so the state is probed live rather than assumed from the platform:
-    `components list` is refused under the same flag, without mutating
-    anything. A missing `gcloud` is not flagged, as selection then finds no
-    available manager and the test already exits on its "No manager selected"
-    path.
+    Two independent layouts break `components install` on the runner fleet,
+    and both vary across its images and architectures, so the state is probed
+    live rather than assumed from the platform. A package-manager install
+    disables the component manager outright (*"You cannot perform this action
+    because the Google Cloud CLI component manager is disabled for this
+    installation."*), which the exit code of a read-only `components list`
+    already exposes. A tarball layout whose SDK root is owned by root passes
+    that first probe yet still refuses the unelevated mutation, so the
+    resolved `installation.sdk_root` is then checked for write access: the
+    arm64 Ubuntu image ships a writable root where the x86 one does not. A
+    missing `gcloud` is not flagged, as selection then finds no available
+    manager and the test already exits on its "No manager selected" path.
     """
     gcloud_path = which("gcloud")
     if not gcloud_path:
@@ -798,7 +800,17 @@ def gcloud_components_blocked() -> bool:
         capture_output=True,
         check=False,
     )
-    return probe.returncode != 0
+    if probe.returncode != 0:
+        return True
+    root_probe = subprocess.run(
+        (gcloud_path, "info", "--format=value(installation.sdk_root)"),
+        capture_output=True,
+        check=False,
+        text=True,
+        encoding="UTF-8",
+    )
+    sdk_root = root_probe.stdout.strip()
+    return bool(sdk_root) and not os.access(sdk_root, os.W_OK)
 
 
 INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {

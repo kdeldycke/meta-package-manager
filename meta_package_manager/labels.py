@@ -143,6 +143,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     }),
     "fish-based": frozenset({"fisher", "oh-my-fish"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
+    "neovim-based": frozenset({"lazy", "mason", "vim-pack"}),
     "npm-based": frozenset({
         "bun",
         "npm",
@@ -164,7 +165,6 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "pkg-based": frozenset({"pkg", "ports"}),
     "pypi-based": frozenset({"pip", "pipx", "uv", "uvx"}),
     "scoop-based": frozenset({"scoop", "sfsu"}),
-    "vim-based": frozenset({"lazy", "vim-pack"}),
     "vscode-based": frozenset({"vscode", "vscodium"}),
     "zsh-based": frozenset({"antidote", "antigen", "zim", "zinit", "zplug"}),
 }
@@ -182,17 +182,25 @@ common to it: `uv` reimplements resolution and installation from scratch and tou
 `pip` code. What the four share is the index they all resolve against, which is the
 level a report lands at.
 
-The plugin-manager groups (`bash-based`, `fish-based`, `vim-based`, `zsh-based`) widen
+The host-program groups (`bash-based`, `fish-based`, `neovim-based`, `zsh-based`) widen
 that reading, and deliberately so: plugin managers share no backend at all, each cloning
 straight from upstream Git into its own tree. What they share is the host program a
-report is about, which is what the label has to answer. An issue mentioning a Vim plugin
-is about the same corner of `mpm` whether it arrives through `vim-pack` or `lazy`, so
-both carry one label and one tracker search. The groups stay separate along that same
-line, one per host program: `zinit` and `antidote` host Zsh plugins, not Vim ones, and a
-report about either belongs nowhere near the editor label. Grouping all of them under a
-single shell-plugin label was considered and rejected on the same grounds, since it
-would answer with `mpm`'s implementation shape (an interpreter-keyed manager wrapping
-every call in `zsh -c` or `fish -c`) where the reporter filed against a shell.
+report is about, which is what the label has to answer. An issue mentioning a Neovim
+plugin is about the same corner of `mpm` whether it arrives through `vim-pack` or
+`lazy`, so both carry one label and one tracker search. The groups stay separate along
+that same line, one per host program: `zinit` and `antidote` host Zsh plugins, not
+Neovim ones, and a report about either belongs nowhere near the editor label. Grouping
+all of them under a single shell-plugin label was considered and rejected on the same
+grounds, since it would answer with `mpm`'s implementation shape (an interpreter-keyed
+manager wrapping every call in `zsh -c` or `fish -c`) where the reporter filed against a
+shell.
+
+`mason` is the one member of those groups that manages no plugins at all, installing
+ordinary developer tools rather than editor Lua. It groups under `neovim-based` anyway,
+because the host program is the axis: Neovim is what a `mason` report is about, and it
+is also what `mpm` keys the manager on, the three sharing one module and one `nvim`
+binary. Naming the group for the editor rather than for plugins is what lets it hold
+`mason` without straining.
 
 `sheldon` is the one shell plugin manager left ungrouped, and it fails both halves of
 that test: it manages plugins for any shell rather than for one, and it is a compiled
@@ -274,15 +282,17 @@ label already exists names none at all.
 with no label of its own, and the target does not exist yet, so the fold is genuinely
 one-to-one.
 
-`dpkg-based`, `vim-based`,
-`zsh-based` and `asdf-based` were all synced into existence before their
-predecessors were retired, so a declared rename would only error; their
-orphans (`fink`, `vim-pack`, `zinit`, `asdf`, `mise`) carry no issue or pull
-request at all and are deleted rather than migrated.
+`dpkg-based`, `zsh-based` and `asdf-based` were all synced into existence before
+their predecessors were retired, so a declared rename would only error; their
+orphans (`fink`, `zinit`, `asdf`, `mise`) carry no issue or pull request at all
+and are deleted rather than migrated. `vim-based` was created on those same
+terms, orphaning `vim-pack`, and has since been folded into `neovim-based`.
 
 `bash-based` names no source either, for the other reason: it folds two labels
 rather than one, and `basalt` and `bpkg` both carry zero issues and zero pull
 requests, so there is no history for the single rename slot to preserve.
+`neovim-based` is that same shape, folding `vim-based` and `mason`, which
+likewise carry zero of each.
 """
 
 

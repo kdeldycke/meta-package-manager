@@ -49,14 +49,13 @@ from .managers.gext import Gext
 from .managers.ghcup import GHCup
 from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
-from .managers.lazy import Lazy
 from .managers.luarocks import LuaRocks
 from .managers.mamba import Mamba, Micromamba
-from .managers.mason import Mason
 from .managers.mas import MAS
 from .managers.miktex import MiKTeX
 from .managers.mise import Mise
 from .managers.nala import Nala
+from .managers.neovim import Lazy, Mason, Vim_Pack
 from .managers.nimble import Nimble
 from .managers.nix import Nix
 from .managers.npm import NPM
@@ -80,7 +79,6 @@ from .managers.tazpkg import Tazpkg
 from .managers.uv import UV, UVX
 from .managers.vagrant import Vagrant
 from .managers.vcpkg import VCPKG
-from .managers.vim_pack import Vim_Pack
 from .managers.volta import Volta
 from .managers.winget import WinGet
 from .managers.xbps import XBPS

@@ -216,15 +216,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.managers.lazy module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.lazy
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.managers.luarocks module
 
 ```{eval-rst}
@@ -261,15 +252,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.managers.mason module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.mason
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.managers.mise module
 
 ```{eval-rst}
@@ -283,6 +265,15 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.nala
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.managers.neovim module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.neovim
    :members:
    :show-inheritance:
    :undoc-members:
@@ -490,15 +481,6 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.vcpkg
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.vim_pack module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.vim_pack
    :members:
    :show-inheritance:
    :undoc-members:

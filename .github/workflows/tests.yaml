@@ -551,14 +551,20 @@ jobs:
       # from the replacement, and without the scope that rebuild carries only
       # the base dependencies, pytest not among them.
       # No coverage on this step: two tests cannot move a slice that already
-      # opts out of the ratchet, and coverage's shutdown hooks are the
-      # standing suspect for the Windows runs that print a clean all-passed
-      # summary and still exit 1.
+      # opts out of the ratchet.
+      # A single xdist worker rather than --numprocesses=0, and not for
+      # parallelism: both tests still run sequentially on the one worker. A
+      # bare pytest process that drove every manager's subprocess tree dies
+      # dirty at interpreter shutdown on Windows (a clean all-passed summary,
+      # then exit 1 with no diagnostics, cov or not), while a worker's
+      # shutdown cannot touch the controller's exit code once its reports are
+      # in: the grouped step above runs the same subprocess load under xdist
+      # and has never shown the flake.
       - name: Sequential cross-manager destructive tests
         run: >
           uv --no-progress run --frozen --all-extras --group test --
           pytest --maxfail=10
-          --numprocesses=0 --skip-non-destructive --run-destructive
+          --numprocesses=1 --dist=loadgroup --skip-non-destructive --run-destructive
           -m destructive_all_managers
           --ignore=./tests/test_bar_plugin.py
         env:

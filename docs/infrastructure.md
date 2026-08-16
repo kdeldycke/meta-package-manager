@@ -9,13 +9,13 @@ Everything needed to rebuild the documentation site's hosting from nothing, and 
 | Canonical host | `mpm.run` | Everything the site publishes lives here |
 | Hosting | Cloudflare Pages project `meta-package-manager` | Direct Upload, no Git connection |
 | Build | GitHub Actions, `.github/workflows/docs.yaml` | Sphinx `dirhtml`, then `wrangler pages deploy` |
-| Deploy target | `[tool.repomatic] sphinx.deploy` | `cloudflare-pages`, selecting the job that publishes |
+| Deploy target | `[tool.repomatic] site.deploy` | `cloudflare-pages`, selecting the job that publishes |
 | DNS | Cloudflare | Apex and the wildcard are **proxied**; nothing is DNS-only |
 | Redirects | `docs/_redirects` for paths, zone rules for hosts | Pages matches on path only, never on host |
 | URL shape | `/managers/apk/`, no extension | `sphinx.builder` is `dirhtml` |
 | Certificates | Cloudflare, for everything | Issued and renewed internally, no ACME, no token |
 
-There are no Workers, no KV namespaces and no D1 databases. The whole edge configuration is three DNS records and two redirect rules.
+There are no Workers, no KV namespaces and no D1 databases. The whole edge configuration is two DNS records and two redirect rules.
 
 ## Cloudflare never builds this site
 
@@ -79,7 +79,7 @@ Three consequences worth keeping:
 
 ## DNS
 
-Three records, and each earns its place:
+Two records, and each earns its place:
 
 | Type | Name | Content | Proxied |
 | --- | --- | --- | --- |
@@ -120,7 +120,7 @@ Both matter more than usual now, because `meta-package-manager.pages.dev` serves
 
 1. Register the domain and point its nameservers at Cloudflare.
 2. Create a Pages project named after the repository. Choose **Direct Upload**, never a Git connection.
-3. Create the API token, and set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository secrets.
+3. Create the API token, and set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository secrets. The project is named after the repository, which is what `site.cloudflare-project` overrides when it is not.
 4. Attach `mpm.run` to the project as a custom domain, then add the proxied apex `CNAME` and the proxied `*` `AAAA` at `100::`.
 5. Add the two redirect rules.
 6. Push, or run the Docs workflow by hand, to produce the first deployment.

@@ -341,12 +341,20 @@ jobs:
 
       # vim-pack
       # https://formulae.brew.sh/formula/neovim
-      # vim.pack ships in Neovim's core since 0.12, and the Homebrew formula tracks the
-      # latest release. Other runners package an older Neovim that falls below mpm's
-      # >=0.12.0 requirement, which just reports the manager unavailable there.
+      # https://snapcraft.io/nvim
+      # https://community.chocolatey.org/packages/neovim
+      # vim.pack ships in Neovim's core since 0.12, so mpm requires >=0.12.0 and reports
+      # the manager unavailable below that. Ubuntu still packages 0.11 in apt, hence the
+      # snap: it tracks Neovim's own stable tag and builds for both amd64 and arm64.
       - name: Neovim - macOS install
         if: runner.os == 'macOS'
         run: brew install neovim
+      - name: Neovim - Linux install
+        if: runner.os == 'Linux'
+        run: sudo snap install --classic nvim
+      - name: Neovim - Windows install
+        if: runner.os == 'Windows'
+        run: choco install neovim --no-progress --yes --retry-count=3
 
       # Gem
       - name: Ruby & Gem - Windows upgrade

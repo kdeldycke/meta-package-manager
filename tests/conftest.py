@@ -39,7 +39,7 @@ from extra_platforms.pytest import skip_hermetic_build
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
-from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES
+from meta_package_manager.dispatch import SHARED_LOCK_FAMILIES, warm_availability
 from meta_package_manager.pool import ManagerPool, manager_classes, pool
 
 from .fake_manager import FakeManager, TimingOutFakeManager
@@ -245,6 +245,27 @@ def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:
         f"Run destructive tests: {run_destructive_tests}",
         f"Run non-destructive tests: {run_non_destructive_tests}",
     )
+
+
+@fixture(autouse=True, scope="session")
+def warm_manager_probes():
+    """Resolve every pool manager's availability before the first test runs.
+
+    The pool is a module-global singleton shared by every test of the process,
+    and a manager's version probe caches its first result on the instance.
+    Firing every probe up front, in a still-pristine environment, keeps
+    whichever test happens to touch a manager first (possibly under a
+    monkeypatched environment or a stubbed `run_cli`) from seeding the shared
+    cache with a poisoned result for every later test on that worker.
+
+    test_pool.py's selection cases used to provide this warming as an accident
+    of materializing their expected manager lists at import time, until
+    probing at collection made xdist workers' collected parametrize lists
+    diverge. A session fixture runs after collection, so workers still agree
+    on the test list, and once per worker, so the cost matches what
+    collection-time probing already paid.
+    """
+    warm_availability(pool.values())
 
 
 @fixture(autouse=True)

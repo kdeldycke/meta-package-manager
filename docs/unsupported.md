@@ -203,7 +203,7 @@ Vim plugin manager with no commit since 2022-08-24. Its whole job, splicing plug
 
 ## [`pckr-nvim`](https://github.com/lewis6991/pckr.nvim) ❌
 
-Successor to [`packer-nvim`](#packer-nvim) and actively developed, but drivable only from inside Neovim: no documented completion signal, and a confirmation prompt that blocks an unattended run by default ([lewis6991/pckr.nvim#12](https://github.com/lewis6991/pckr.nvim/issues/12)).
+Successor to [`packer-nvim`](#packer-nvim) and actively developed, but drivable only from inside Neovim, and less so than its predecessor was. packer.nvim documented a headless recipe, `nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'`, which closed on the completion event named in it; the rewrite emits no autocommand at all, so an unattended run has nothing to wait on, and its `pckr/cli.lua` is the `:Pckr` Ex-command dispatcher rather than the shell entry point the name suggests. Removal blocks on an `OK to remove? [y/N]` prompt in `pckr/display.lua`. Its lockfile is opt-in, written only by the `:Pckr lock` action, and is a Lua table keyed by remote URL, so it is neither guaranteed to exist nor readable without an evaluator the way [`lazy`](managers/lazy.md)'s JSON one is. A request for a synchronous entry point was closed with a redirect to `config` and dependencies ([lewis6991/pckr.nvim#12](https://github.com/lewis6991/pckr.nvim/issues/12)).
 
 ## [`pihole`](https://pi-hole.net) ❌ 🛟
 

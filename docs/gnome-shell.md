@@ -105,6 +105,20 @@ Settings live in the extension preferences window, also reachable from the indic
 
 These settings only drive the menu layout and check cadence. Everything else comes from `mpm`'s own configuration file: the extension passes no option beyond the ones it decides itself, so the file found at its default location on the system applies to every run it triggers. See {doc}`configuration` for the search paths and the full schema.
 
+## Panel icons
+
+The extension ships no state artwork. Each state names a stock symbolic icon, which the shell resolves against whichever icon theme is in force, recolors with the panel foreground, and lets a desktop theme restyle: an Ubuntu desktop draws Yaru's rendering of these names, not Adwaita's.
+
+| State | Adwaita | Yaru | Icon name | Menubar plugin | Shown when |
+| :---------------- | :-----: | :--: | :----------------------------------- | :------------- | :------------------------------------------------------ |
+| Unknown | <img src="https://raw.githubusercontent.com/StorageB/icons/main/GNOME48Adwaita/neutral/status/content-loading-symbolic.svg" width="18"> | <img src="https://raw.githubusercontent.com/ubuntu/yaru/master/icons/Yaru/scalable/status/content-loading-symbolic.svg" width="18"> | `content-loading-symbolic` | | Before the first check of the session, and during one. |
+| Up to date | <img src="https://raw.githubusercontent.com/StorageB/icons/main/GNOME48Adwaita/neutral/actions/selection-mode-symbolic.svg" width="18"> | <img src="https://raw.githubusercontent.com/ubuntu/yaru/master/icons/Yaru/scalable/actions/selection-mode-symbolic.svg" width="18"> | `selection-mode-symbolic` | 📦✓ | No selected manager reports an upgrade. |
+| Updates available | <img src="https://raw.githubusercontent.com/StorageB/icons/main/GNOME48Adwaita/neutral/status/software-update-available-symbolic.svg" width="18"> | <img src="https://raw.githubusercontent.com/ubuntu/yaru/master/icons/Yaru/scalable/status/software-update-available-symbolic.svg" width="18"> | `software-update-available-symbolic` | 🎁↑N | Packages can be upgraded. Also marks each *Upgrade all* row. |
+| Error | <img src="https://raw.githubusercontent.com/StorageB/icons/main/GNOME48Adwaita/neutral/status/software-update-urgent-symbolic.svg" width="18"> | <img src="https://raw.githubusercontent.com/ubuntu/yaru/master/icons/Yaru/scalable/status/software-update-urgent-symbolic.svg" width="18"> | `software-update-urgent-symbolic` | ⚠️ ❗️ | A check failed, or no runnable `mpm` was found. |
+| Manager failed | <img src="https://raw.githubusercontent.com/StorageB/icons/main/GNOME48Adwaita/neutral/status/dialog-warning-symbolic.svg" width="18"> | <img src="https://raw.githubusercontent.com/ubuntu/yaru/master/icons/Yaru/scalable/status/dialog-warning-symbolic.svg" width="18"> | `dialog-warning-symbolic` | ⚠️ | On the sub-menu header of a manager that reported errors. |
+
+The two rendering columns are why the names matter more than any drawing: Yaru defines all five itself, so an Ubuntu desktop never draws the Adwaita ones. Both are shown from their upstream repositories, and neither is bundled here. To browse the rest, the full [Adwaita](https://github.com/StorageB/icons/blob/main/GNOME48Adwaita/icons.md) and [Yaru](https://github.com/StorageB/icons/blob/main/Yaru/icons.md) name-to-preview lists are worth a bookmark, as is the GNOME design team's [Icon Library](https://flathub.org/apps/org.gnome.design.IconLibrary). The preferences window carries the one piece of artwork the extension does ship, the project logo in its *About* row.
+
 ## Menu actions
 
 Clicking a package runs `mpm --<manager-id> upgrade <package-id>`, and a section's *Upgrade all* entry runs `mpm --<manager-id> upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.

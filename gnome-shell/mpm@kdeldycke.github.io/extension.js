@@ -48,7 +48,7 @@ const State = {
  * name this domain exactly. */
 const STATE_ICONS = {
     unknown: 'content-loading-symbolic',
-    uptodate: 'object-select-symbolic',
+    uptodate: 'selection-mode-symbolic',
     updates: 'software-update-available-symbolic',
     error: 'software-update-urgent-symbolic',
 };

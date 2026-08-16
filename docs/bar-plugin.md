@@ -41,6 +41,21 @@ Both variants of each entry go through `mpm`: a plain click opens a terminal so 
 
 When no `mpm` is found on the system, or one older than the plugin requires, the menu carries a bootstrap pair in place of the package list: an *Install mpm … with uv* entry running `uv tool install --upgrade meta-package-manager` in a terminal, and an *Open mpm installation instructions* entry opening {doc}`install` for the systems `uv` does not answer for. The {doc}`GNOME Shell extension <gnome-shell>` offers the same pair.
 
+## Menu markers
+
+The plugin has no icon files of its own: every state is an emoji, which Xbar and SwiftBar render as text wherever it appears.
+
+| Marker | Where                    | Meaning                                                                  |
+| :----- | :----------------------- | :----------------------------------------------------------------------- |
+| 🎁↑N   | Menu bar title           | N packages can be upgraded.                                              |
+| 📦✓    | Menu bar title           | Every selected manager reports nothing to upgrade.                       |
+| ⚠️N    | Menu bar title, appended | N managers reported errors during the run.                               |
+| ❗️     | Menu bar title           | No runnable `mpm`: the bootstrap pair replaces the package list.         |
+| ⚠️     | Manager section header   | That manager reported an error, in the sub-menu layout.                  |
+| 🆙     | *Upgrade all* row        | Upgrades every outdated package of one manager.                          |
+
+The {doc}`GNOME Shell extension <gnome-shell>` renders the same states as named icons from the desktop icon theme instead: an emoji is a font glyph a desktop theme cannot restyle, and the GNOME reviewers ask for icons.
+
 ## Screenshots
 
 ### SwiftBar

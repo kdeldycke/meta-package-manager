@@ -29,6 +29,8 @@ The mascot and logo are derived from [Open Clipart](https://openclipart.org), di
 - [angry paper box](https://github.com/kdeldycke/meta-package-manager/blob/main/docs/assets/angry-paper-box.svg) is sourced from [paper box head](https://openclipart.org/detail/300407/paper-box-head)
 - [multi-box logo](https://github.com/kdeldycke/meta-package-manager/blob/main/docs/assets/logo-banner.svg) is based on a modified [Packaging icons](https://openclipart.org/detail/190311/packaging-icons)
 
+The panel icons shown on the {doc}`GNOME Shell extension <gnome-shell>` page are previews of two desktop icon themes, displayed from their own repositories and bundled nowhere here: the [Adwaita icon theme](https://gitlab.gnome.org/GNOME/adwaita-icon-theme) of the GNOME Project, and Ubuntu's [Yaru](https://github.com/ubuntu/yaru). Both are distributed under a [Creative Commons Attribution-Share Alike 3.0 License](http://creativecommons.org/licenses/by-sa/3.0/) or the GNU GPL/LGPL, at the recipient's option. The extension names these icons rather than shipping them, so what a desktop draws is its own theme's rendering.
+
 The page titles and sidebar entries use [Octicons](https://primer.style/foundations/icons/), MIT-licensed and copyright GitHub Inc., reached through [sphinx-design](https://github.com/executablebooks/sphinx-design)'s bundled copy for the `{octicon}` role and inlined into `docs/_static/custom.css` for the sidebar.
 
 [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/), shown on the [home page](index.md) and in [duplicate packages](duplicates.md), is the work of Randall Munroe under a [Creative Commons Attribution-NonCommercial 2.5 License](https://xkcd.com/license.html).

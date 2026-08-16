@@ -54,36 +54,36 @@ $ mpm restore packages.toml
 
 <img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.png"/>
 
-- [Snapshot installed packages](https://mpm.run/cli-parameters.html#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once.
-- [Restore that manifest](https://mpm.run/cli-parameters.html#mpm-restore) on another machine, and get the same set of packages back.
-- Inventory and list all [package managers](https://mpm.run/cli-parameters.html#mpm-managers) available on the system.
+- [Snapshot installed packages](https://mpm.run/cli-parameters/#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once.
+- [Restore that manifest](https://mpm.run/cli-parameters/#mpm-restore) on another machine, and get the same set of packages back.
+- Inventory and list all [package managers](https://mpm.run/cli-parameters/#mpm-managers) available on the system.
 - Supports macOS, Linux and Windows.
 - [Standalone executables](#executables) for Linux, macOS and Windows.
-- [List installed packages](https://mpm.run/cli-parameters.html#mpm-installed).
-- [List duplicate installed packages](https://mpm.run/duplicates.html).
-- [Search for packages](https://mpm.run/cli-parameters.html#mpm-search).
-- [Install a package](https://mpm.run/cli-parameters.html#mpm-install).
-- [Remove a package](https://mpm.run/cli-parameters.html#mpm-remove).
-- [List outdated packages](https://mpm.run/cli-parameters.html#mpm-outdated).
-- [List orphaned packages](https://mpm.run/cli-parameters.html#mpm-orphans).
-- [Sync local package infos](https://mpm.run/cli-parameters.html#mpm-sync).
-- [Diagnose the health of package managers](https://mpm.run/cli-parameters.html#mpm-doctor).
-- [Upgrade all outdated packages](https://mpm.run/cli-parameters.html#mpm-upgrade).
-- [Mitigate supply-chain attacks](https://mpm.run/cooldown.html) with a release-age cooldown that refuses too-recent versions: `mpm --cooldown "7 days" upgrade --all`.
-- [Software Bill of Materials](https://mpm.run/cli-parameters.html#mpm-sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
-- Pin-point commands to a [subset of package managers](https://mpm.run/configuration.html#selecting-managers) (include/exclude selectors).
+- [List installed packages](https://mpm.run/cli-parameters/#mpm-installed).
+- [List duplicate installed packages](https://mpm.run/duplicates/).
+- [Search for packages](https://mpm.run/cli-parameters/#mpm-search).
+- [Install a package](https://mpm.run/cli-parameters/#mpm-install).
+- [Remove a package](https://mpm.run/cli-parameters/#mpm-remove).
+- [List outdated packages](https://mpm.run/cli-parameters/#mpm-outdated).
+- [List orphaned packages](https://mpm.run/cli-parameters/#mpm-orphans).
+- [Sync local package infos](https://mpm.run/cli-parameters/#mpm-sync).
+- [Diagnose the health of package managers](https://mpm.run/cli-parameters/#mpm-doctor).
+- [Upgrade all outdated packages](https://mpm.run/cli-parameters/#mpm-upgrade).
+- [Mitigate supply-chain attacks](https://mpm.run/cooldown/) with a release-age cooldown that refuses too-recent versions: `mpm --cooldown "7 days" upgrade --all`.
+- [Software Bill of Materials](https://mpm.run/cli-parameters/#mpm-sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
+- Pin-point commands to a [subset of package managers](https://mpm.run/configuration/#selecting-managers) (include/exclude selectors).
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
-- Export output to [JSON or user-friendly tables](https://mpm.run/cli-parameters.html#mpm).
-- [Shell auto-completion](https://mpm.run/install.html) for Bash, Zsh and Fish.
-- Provides a [Xbar/SwiftBar plugin](https://mpm.run/bar-plugin.html) for
+- Export output to [JSON or user-friendly tables](https://mpm.run/cli-parameters/#mpm).
+- [Shell auto-completion](https://mpm.run/install/) for Bash, Zsh and Fish.
+- Provides a [Xbar/SwiftBar plugin](https://mpm.run/bar-plugin/) for
   friendly macOS integration.
-- Provides a [GNOME Shell extension](https://mpm.run/gnome-shell.html) for
+- Provides a [GNOME Shell extension](https://mpm.run/gnome-shell/) for
   friendly Linux desktop integration.
 - Because `mpm` tries to wrap all other package managers, it became another pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
 
 ## Supported package managers
 
-One CLI to rule them all. Every manager below links to its own documentation page, and `mpm` [runs them concurrently](https://mpm.run/concurrency.html) bar the few that queue on a shared backend.
+One CLI to rule them all. Every manager below links to its own documentation page, and `mpm` [runs them concurrently](https://mpm.run/concurrency/) bar the few that queue on a shared backend.
 
 <!-- mirror-src
 from meta_package_manager._docs import operation_matrix
@@ -219,13 +219,13 @@ Platforms: 🅱️ BSD[^bsd] · 🐧 Linux[^linux] · 🍎 macOS · ⨂ Unix[
 <!-- mirror-src-end -->
 
 > [!NOTE]
-> If your favorite manager is missing or does not support an operation, you can influence its implementation: [open a ticket to document its output](https://github.com/kdeldycke/meta-package-manager/issues/new?assignees=&labels=%F0%9F%8E%81+feature+request&template=new-package-manager.yaml) or [read the contribution guide](https://mpm.run/contributing.html) and submit a pull request.
+> If your favorite manager is missing or does not support an operation, you can influence its implementation: [open a ticket to document its output](https://github.com/kdeldycke/meta-package-manager/issues/new?assignees=&labels=%F0%9F%8E%81+feature+request&template=new-package-manager.yaml) or [read the contribution guide](https://mpm.run/contributing/) and submit a pull request.
 >
 > You can help if you [purchase business support 🤝](https://github.com/sponsors/kdeldycke) or [sponsor the project 🫶](https://github.com/sponsors/kdeldycke).
 
 ## Installation
 
-All [installation methods](https://mpm.run/install.html) are available in the documentation. Below are the most popular ones:
+All [installation methods](https://mpm.run/install/) are available in the documentation. Below are the most popular ones:
 
 ### Homebrew
 
@@ -370,7 +370,7 @@ There is a counter-argument to the advice above. Chasing the newest release the 
 $ mpm --cooldown "7 days" upgrade --all
 ```
 
-You still pick up older security fixes promptly, while sitting out the risky first days of a brand-new release. See [the cooldown guide](https://mpm.run/cooldown.html) for the full mechanism and which managers enforce it natively.
+You still pick up older security fixes promptly, while sitting out the risky first days of a brand-new release. See [the cooldown guide](https://mpm.run/cooldown/) for the full mechanism and which managers enforce it natively.
 
 ### List managers
 
@@ -418,7 +418,7 @@ Four different reasons, one per row. `choco` only runs on Windows. `composer` is
 
 To browse the whole catalog instead, widen the view: `mpm managers --view supported` lists every manager your platform can run, found or not, and `mpm managers --view all` adds those `mpm` implements for other platforms and the unmaintained ones. The global `--all-managers` flag is a synonym for the widest of the three.
 
-If your favorite manager is not supported yet, you can help! See the [contribution guide](https://mpm.run/contributing.html). A handful of tools are deliberately left out, each with its rationale: they are catalogued in [unsupported managers](https://mpm.run/unsupported.html).
+If your favorite manager is not supported yet, you can help! See the [contribution guide](https://mpm.run/contributing/). A handful of tools are deliberately left out, each with its rationale: they are catalogued in [unsupported managers](https://mpm.run/unsupported/).
 
 ## Used in
 
@@ -432,8 +432,8 @@ Feel free to send a PR to add your project in this list if you are relying on `m
 
 Other subcommands and options are documented in:
 
-- the [detailed help screens](https://mpm.run/cli-parameters.html)
-- the [manager augmentations](https://mpm.run/augmentations.html) where you’ll find inspiration on how to leverage `mpm` power
+- the [detailed help screens](https://mpm.run/cli-parameters/)
+- the [manager augmentations](https://mpm.run/augmentations/) where you’ll find inspiration on how to leverage `mpm` power
 
 <!-- operation-footnotes-start -->
 

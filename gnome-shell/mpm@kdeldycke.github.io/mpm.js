@@ -368,7 +368,7 @@ export function terminalArgv(terminal, argv) {
 /**
  * Fire-and-forget spawn of an action command, either wrapped in a terminal
  * or silenced in the background (the NOPASSWD path documented at
- * https://mpm.run/sudo.html).
+ * https://mpm.run/sudo/).
  *
  * @param {string[]} argv - Command to spawn.
  * @returns {Gio.Subprocess} the spawned process handle.

@@ -472,7 +472,7 @@ build-backend.source-exclude = [
 # of fetching a GitHub tag tarball. source-include feeds the sdist only: the
 # wheel stays module-only, since uv-build packs just the module-root. Git-ignored
 # build output (docs/_build/, __pycache__/) is left out automatically. See
-# https://mpm.run/packaging.html
+# https://mpm.run/packaging/
 build-backend.source-include = [
   ".github/**",
   "changelog.md",

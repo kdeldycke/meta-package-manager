@@ -86,7 +86,7 @@ export default class MpmPreferences extends ExtensionPreferences {
         logo.set_pixel_size(48);
         aboutRow.add_prefix(logo);
         const link = Gtk.LinkButton.new_with_label(
-            'https://mpm.run/gnome-shell.html',
+            'https://mpm.run/gnome-shell/',
             _('Documentation'));
         link.set_valign(Gtk.Align.CENTER);
         aboutRow.add_suffix(link);

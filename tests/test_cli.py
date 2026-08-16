@@ -188,7 +188,7 @@ def test_debug_rerun_command(monkeypatch, argv, expected):
     """The re-run hint of the error summary reproduces the current invocation."""
     ctx = SimpleNamespace(find_root=lambda: SimpleNamespace(info_name="mpm"))
     monkeypatch.setattr(sys, "argv", list(argv))
-    assert _debug_rerun_command(ctx) == expected
+    assert _debug_rerun_command(ctx) == expected  # type: ignore[arg-type]
 
 
 def test_timeout(invoke, slow_fake_pool):

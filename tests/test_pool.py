@@ -473,7 +473,7 @@ def test_merge_into_probe_lanes_groups_by_signature():
     twins = [_RecordingManager(accessed, probe="shared-cli") for _ in range(3)]
     loners = [_RecordingManager(accessed) for _ in range(2)]
 
-    lanes = merge_into_probe_lanes([*twins, *loners])  # type: ignore[arg-type]
+    lanes = merge_into_probe_lanes([*twins, *loners])  # type: ignore[list-item]
 
     assert [len(lane) for lane in lanes] == [3, 1, 1]
     assert lanes[0] == tuple(twins)
@@ -498,7 +498,7 @@ def test_warm_availability_shares_one_cache_within_a_lane():
     twins[1].run_cache = sentinel
 
     with _jobs_context(jobs=4):
-        warm_availability([*twins, loner])  # type: ignore[arg-type]
+        warm_availability([*twins, loner])  # type: ignore[list-item]
 
     assert twins[0].cache_seen is twins[1].cache_seen is not None
     # A lane of one gets no cache at all: there is no peer to share with.

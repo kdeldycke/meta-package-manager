@@ -202,14 +202,11 @@ html_baseurl = docs_site_url
 # against it, so social crawlers can follow the image instead of a relative
 # path they cannot resolve.
 ogp_site_url = docs_site_url
-# Social-card image (og:image), served from the GitHub raw host like the readme
-# banner and screenshots: docs/assets/ is not copied into the built site (only
-# the two sidebar logos are named in html_static_path), so a site-relative path
-# would 404 for crawlers.
-ogp_image = (
-    f"https://raw.githubusercontent.com/{github_user}/"
-    f"{project_id}/main/docs/assets/banner-social-light.png"
-)
+# Social-card image (og:image), named as a path relative to the site root:
+# sphinxext.opengraph joins it onto ogp_site_url, so every page emits the same
+# absolute URL whatever its depth. The card is the site's own copy rather than a
+# GitHub raw hotlink, which keeps one origin and refreshes it on every deploy.
+ogp_image = "_static/banner-social-dark.png"
 ogp_image_alt = project
 html_theme_options = {
     # Sidebar logo. Furo renders this pair as .only-light/.only-dark images
@@ -332,10 +329,17 @@ html_copy_source = False
 html_show_sourcelink = False
 
 # Individual files are copied to the root of _static/, which is where Furo looks
-# for the light_logo/dark_logo pair. Listing docs/assets/ wholesale would drag
+# for the light_logo/dark_logo pair. The other two entries are read by no theme
+# and shown on no page: `banner-social-dark.png` is the og:image social crawlers
+# fetch, and `icon.png` is where the Chocolatey nuspec points its `<iconUrl>`,
+# that community repository refusing GitHub raw as an icon host and asking for a
+# static CDN (CPMR0033). Both are URLs published outside this repository, so
+# dropping either entry breaks one. Listing docs/assets/ wholesale would drag
 # the screenshots, the dependency graph and the binary scan reports along.
 html_static_path = [
     "_static",
+    "assets/banner-social-dark.png",
+    "assets/icon.png",
     "assets/logo-square-dark.png",
     "assets/logo-square-light.png",
 ]

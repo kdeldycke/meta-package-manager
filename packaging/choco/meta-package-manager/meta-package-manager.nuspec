@@ -32,7 +32,11 @@ Full documentation at https://mpm.run/
     <docsUrl>https://mpm.run/</docsUrl>
     <bugTrackerUrl>https://github.com/kdeldycke/meta-package-manager/issues</bugTrackerUrl>
     <licenseUrl>https://github.com/kdeldycke/meta-package-manager/blob/main/license</licenseUrl>
-    <iconUrl>https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/icon.png</iconUrl>
+    <!-- The community repository refuses GitHub raw as an icon host and asks for a static CDN:
+         https://docs.chocolatey.org/en-us/community-repository/moderation/package-validator/rules/cpmr0033/
+         The documentation site is one, and republishes the mark on every docs deploy,
+         so the icon tracks the artwork with no tag or commit ref to bump here. -->
+    <iconUrl>https://mpm.run/_static/icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.6.1</releaseNotes>
     <copyright>Kevin Deldycke and contributors</copyright>

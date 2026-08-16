@@ -98,6 +98,8 @@ Three things Sphinx writes into its output directory are not content, and none o
 
 That matters more here than it did on GitHub Pages, which simply refused to serve dot-prefixed paths: Pages Direct Upload rejects any file over 25 MiB, and the parse cache held a 20 MB pickle.
 
+Two files go the other way, published for consumers that never read a page: `_static/banner-social-dark.png`, the `og:image` a social crawler fetches when a link to any page here is pasted somewhere, and `_static/icon.png`, which the Chocolatey nuspec names as its `<iconUrl>`. That repository refuses GitHub raw as an icon host and asks for a static CDN, and this site is the only static CDN the project controls. Both paths are public contracts rather than build artifacts, which `docs/conf.py` records beside the `html_static_path` entries that ship them.
+
 ## One declaration of the canonical URL
 
 The origin is declared once, as `[project.urls] Documentation` in `pyproject.toml`, because three consumers need it and only one of them can read that file:

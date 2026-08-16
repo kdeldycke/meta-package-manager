@@ -28,10 +28,10 @@ import {
 
 import * as Mpm from './mpm.js';
 
-/* Panel states, each mapped to one of the bundled symbolic icons. UPDATES and
- * UPTODATE mirror the 🎁↑N / 📦✓ title states of the bar plugin; ERROR covers
- * both a failed check and the ⚠️ per-manager error marker; MISSING is the
- * bootstrap state of bar_plugin.py when no runnable mpm is found. */
+/* Panel states, each mapped to a stock icon name below. UPDATES and UPTODATE
+ * mirror the 🎁↑N / 📦✓ title states of the bar plugin; ERROR covers both a
+ * failed check and the per-manager error marker; MISSING is the bootstrap
+ * state of bar_plugin.py when no runnable mpm is found. */
 const State = {
     UNKNOWN: 'unknown',
     CHECKING: 'unknown',
@@ -39,6 +39,18 @@ const State = {
     UPDATES: 'updates',
     ERROR: 'error',
     MISSING: 'error',
+};
+
+/* Each state renders as a stock symbolic icon from the icon theme, not as
+ * artwork of our own: the shell recolors them with the panel foreground, the
+ * user's theme (Yaru on Ubuntu) can restyle them, and they carry the meaning
+ * every other GNOME updates indicator already gives them. `software-update-*`
+ * name this domain exactly. */
+const STATE_ICONS = {
+    unknown: 'content-loading-symbolic',
+    uptodate: 'object-select-symbolic',
+    updates: 'software-update-available-symbolic',
+    error: 'software-update-urgent-symbolic',
 };
 
 /* State deliberately kept at module scope so a screen-lock disable()/enable()
@@ -151,8 +163,7 @@ class MpmIndicator extends PanelMenu.Button {
     }
 
     _stateIcon(state) {
-        const path = this._extension.path;
-        return Gio.icon_new_for_string(`${path}/icons/mpm-${state}-symbolic.svg`);
+        return new Gio.ThemedIcon({name: STATE_ICONS[state]});
     }
 
     /* Panel icon, count label and indicator visibility for a given state. */
@@ -318,12 +329,19 @@ class MpmIndicator extends PanelMenu.Button {
             const count = manager.packages.length;
             const packageLabel = ngettext('package', 'packages', count);
             if (submenuLayout) {
-                /* Submenu header mirrors the table-mode section title, with
-                 * the ⚠️ error marker of the bar plugin's submenu layout. */
-                const warning = manager.errors.length > 0 ? '⚠️ ' : '';
-                const title =
-                    `${warning}${manager.id} - ${count} ${packageLabel}`;
-                const submenu = new PopupMenu.PopupSubMenuMenuItem(title);
+                /* Submenu header mirrors the table-mode section title. Where
+                 * the bar plugin prefixes a ⚠️ character, this marks the same
+                 * fact with the themed warning icon: an emoji is a font
+                 * glyph the shell cannot restyle, and the GNOME reviewers ask
+                 * for icons. */
+                const title = `${manager.id} - ${count} ${packageLabel}`;
+                const failed = manager.errors.length > 0;
+                /* The second argument is the submenu's own icon slot: asking
+                 * for it only when there is something to report keeps the
+                 * healthy rows flush with the flat layout. */
+                const submenu = new PopupMenu.PopupSubMenuMenuItem(title, failed);
+                if (failed)
+                    submenu.icon.icon_name = 'dialog-warning-symbolic';
                 this._fillManagerSection(submenu.menu, manager);
                 this._reportSection.addMenuItem(submenu);
             } else {
@@ -358,8 +376,9 @@ class MpmIndicator extends PanelMenu.Button {
         for (const pkg of manager.packages)
             section.addMenuItem(this._makePackageItem(manager, pkg));
         if (manager.packages.length > 0) {
-            const upgradeAll = new PopupMenu.PopupMenuItem(
-                _('🆙 Upgrade all %s packages').format(manager.id));
+            const upgradeAll = new PopupMenu.PopupImageMenuItem(
+                _('Upgrade all %s packages').format(manager.id),
+                STATE_ICONS[State.UPDATES]);
             upgradeAll.connectObject('activate', () => {
                 this.menu.close();
                 this._runAction(Mpm.upgradeAllArgv(lastMpm, manager.id));

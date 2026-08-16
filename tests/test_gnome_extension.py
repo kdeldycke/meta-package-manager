@@ -56,8 +56,8 @@ SCHEMA_ID = "org.gnome.shell.extensions.mpm"
 GJS_RUNNER = PROJECT_ROOT / "tests" / "gnome" / "run-tests.js"
 
 EXPECTED_ICON_STATES = frozenset({"error", "unknown", "updates", "uptodate"})
-"""Values of the `State` mapping in `extension.js`, each backed by a
-`mpm-<state>-symbolic.svg` icon."""
+"""Values of the `State` mapping in `extension.js`, each mapped by `STATE_ICONS`
+to a stock symbolic icon name."""
 
 PACK_DEFAULTS = frozenset({
     "extension.js",
@@ -93,6 +93,17 @@ def _gschema() -> ElementTree.Element:
     schema = ElementTree.parse(schema_file).getroot().find("schema")
     assert schema is not None
     return schema
+
+
+def _state_icons() -> dict[str, str]:
+    """The `STATE_ICONS` mapping of `extension.js`: state to stock icon name."""
+    block = re.search(
+        r"const STATE_ICONS = \{(.+?)\};",
+        _extension_source("extension.js"),
+        re.DOTALL,
+    )
+    assert block
+    return dict(re.findall(r"(\w+):\s*'([^']+)'", block.group(1)))
 
 
 def _gschema_keys() -> list[str]:
@@ -181,16 +192,22 @@ def test_icon_states_in_sync():
 
 
 @pytest.mark.parametrize("state", sorted(EXPECTED_ICON_STATES))
-def test_symbolic_icon_exists(state):
-    assert (EXTENSION_DIR / "icons" / f"mpm-{state}-symbolic.svg").is_file()
+def test_state_maps_to_a_themed_icon(state):
+    """Every panel state names a stock icon instead of bundled artwork.
+
+    The shell resolves these against the user's icon theme, which is what lets
+    it recolor them with the panel foreground and lets a theme (Yaru on Ubuntu)
+    restyle them. The `-symbolic` suffix is what marks a name as themable.
+    """
+    icons = _state_icons()
+    assert state in icons
+    assert icons[state].endswith("-symbolic")
 
 
 def test_no_orphan_icons():
-    expected = {f"mpm-{state}-symbolic.svg" for state in EXPECTED_ICON_STATES}
-    # The logo only appears in the preferences window.
-    expected.add("mpm-logo.svg")
+    """The logo is the only artwork left, and the preferences window uses it."""
     shipped = {path.name for path in (EXTENSION_DIR / "icons").glob("*.svg")}
-    assert shipped == expected
+    assert shipped == {"mpm-logo.svg"}
 
 
 def test_logo_matches_the_brand_mark():

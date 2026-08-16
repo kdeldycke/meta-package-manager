@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Open parcel with a rising arrow: upgrades are available (the 🎁↑ state of
-     the Xbar/SwiftBar plugin title). Recolored by the shell symbolic pipeline. -->
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <path fill="#bebebe" d="M8 1l3.5 3.9H9.3v4.7H6.7V4.9H4.5zM2.2 8.4h11.6v4.8a1 1 0 0 1-1 1H3.2a1 1 0 0 1-1-1z"/>
-</svg>

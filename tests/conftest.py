@@ -742,6 +742,32 @@ def cpan_install_blocked() -> bool:
     return is_linux() and is_x86_64()
 
 
+def gcloud_components_blocked() -> bool:
+    """Whether gcloud's component manager refuses to mutate this installation.
+
+    gcloud disables its component manager when the CLI was installed through a
+    package manager, refusing any component mutation with *"You cannot perform
+    this action because the Google Cloud CLI component manager is disabled for
+    this installation."* That used to be true of every runner image, but image
+    rollouts alternate between that layout and the tarball one whose component
+    manager works, and both coexist across the fleet while a rollout is in
+    flight, so the state is probed live rather than assumed from the platform:
+    `components list` is refused under the same flag, without mutating
+    anything. A missing `gcloud` is not flagged, as selection then finds no
+    available manager and the test already exits on its "No manager selected"
+    path.
+    """
+    gcloud_path = which("gcloud")
+    if not gcloud_path:
+        return False
+    probe = subprocess.run(
+        (gcloud_path, "components", "list", "--quiet"),
+        capture_output=True,
+        check=False,
+    )
+    return probe.returncode != 0
+
+
 INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # choco installs to an admin-only location the unelevated CI process cannot write to.
     "choco": is_github_ci,
@@ -767,11 +793,10 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # gem directory is not writable, so the round-trip completes on every runner,
     # Linux included. The `is_linux` blocker that used to sit here asserted a failure
     # that no longer happens on any image.
-    # gcloud disables its component manager whenever the CLI was installed through a
-    # package manager, which is how the runner images ship it: "You cannot perform this
-    # action because the Google Cloud CLI component manager is disabled for this
-    # installation." Components become the distribution's to add, not gcloud's.
-    "gcloud": is_github_ci,
+    # gcloud refuses component mutations when it was installed through a package
+    # manager, but runner images ship both that layout and the tarball one whose
+    # component manager works, so the state is probed live per host.
+    "gcloud": gcloud_components_blocked,
     # gh refuses extension installs without credentials; tests.yaml feeds the workflow
     # token to the destructive CI step so this round-trip runs for real there.
     "gh-ext": gh_unauthenticated,

@@ -78,17 +78,20 @@ class TestUpgrade(CLISubCommandTests):
         self.check_manager_selection(result)
 
     @pytest.mark.destructive()
-    @pytest.mark.parametrize("all_option", ("--all", None))
-    def test_all_managers_upgrade_all(self, invoke, all_option):
-        result = invoke("--verbosity", "DEBUG", "upgrade", all_option)
+    def test_all_managers_upgrade_all(self, invoke):
+        # Only the explicit `--all` spelling runs destructively: the bare
+        # `upgrade` alias is already asserted by both dry-run variants above,
+        # and the non-convergent managers (cpan rebuilds, gem re-walks every
+        # installed gem even when current) repeat their full upgrade on a
+        # second pass, doubling the destructive wall-clock for the sake of an
+        # argument-parsing message.
+        result = invoke("--verbosity", "DEBUG", "upgrade", "--all")
         # Accept exit code 1: end-to-end destructive upgrades depend on the
         # health of every installed third-party manager, and CI runners
         # regularly surface transient backend failures (missing project files,
         # toolchain gaps, network blips). The contract we test here is that
         # mpm dispatched to every selected manager and surfaced their output.
         assert result.exit_code in (0, 1)
-        if not all_option:
-            assert "assume -A/--all option" in result.stderr
         self.check_manager_selection(result)
 
     @default_manager_ids
@@ -111,11 +114,10 @@ class TestUpgrade(CLISubCommandTests):
 
     @pytest.mark.destructive()
     @default_manager_ids
-    @pytest.mark.parametrize("all_option", ("--all", None))
-    def test_single_manager_upgrade_all(self, invoke, manager_id, all_option):
-        result = invoke(f"--{manager_id}", "--verbosity", "INFO", "upgrade", all_option)
-        if not all_option:
-            assert "assume -A/--all option" in result.stderr
+    def test_single_manager_upgrade_all(self, invoke, manager_id):
+        # Only the explicit `--all` spelling runs destructively: see
+        # test_all_managers_upgrade_all.
+        result = invoke(f"--{manager_id}", "--verbosity", "INFO", "upgrade", "--all")
         if result.exit_code == 2:
             self.assert_no_manager_selected(result)
         else:

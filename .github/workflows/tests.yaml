@@ -550,13 +550,14 @@ jobs:
       # python sits among macOS upgrade targets): uv then rebuilds the venv
       # from the replacement, and without the scope that rebuild carries only
       # the base dependencies, pytest not among them.
+      # No coverage on this step: two tests cannot move a slice that already
+      # opts out of the ratchet, and coverage's shutdown hooks are the
+      # standing suspect for the Windows runs that print a clean all-passed
+      # summary and still exit 1.
       - name: Sequential cross-manager destructive tests
         run: >
           uv --no-progress run --frozen --all-extras --group test --
           pytest --maxfail=10
-          --cov
-          --cov-report=term
-          --cov-fail-under=0
           --numprocesses=0 --skip-non-destructive --run-destructive
           -m destructive_all_managers
           --ignore=./tests/test_bar_plugin.py

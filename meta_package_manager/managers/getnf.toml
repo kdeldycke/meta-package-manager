@@ -1,0 +1,120 @@
+# Bundled package-manager definition shipped with mpm.
+#
+# getnf installs Nerd Fonts (https://www.nerdfonts.com), the patched programming
+# fonts published as release assets of https://github.com/ryanoasis/nerd-fonts.
+# See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A font is a package here. Each one carries a name the tool resolves against
+# its catalog, a version taken from the Nerd Fonts release it was cut from, and
+# a directory of its own that removal deletes. The vetting turns on whether an
+# inventory exists rather than on what that inventory holds, the same reading
+# that wrapped `mas` for App Store applications and `vagrant` for boxes.
+#
+# Parsing notes, verified against getnf v0.3.0 on macOS:
+#   - `TERM=dumb` is forced. getnf colors its headings through `tput`, which
+#     emits escape sequences whether or not stdout is a terminal, so the same
+#     command yields different bytes depending on the caller's terminal. The
+#     rows mpm parses are plain either way; pinning TERM is what keeps the whole
+#     transcript stable, and it is why the samples below carry no escapes.
+#   - Versions are Nerd Fonts release tags, so the release the font was cut from
+#     is its version. The `v` prefix is stripped to leave a bare version.
+#   - A font installed outside getnf, or by a getnf too old to record where it
+#     came from, has no release marker and renders as `<name> - unknown
+#     version`. One alternation spans both shapes without letting that marker
+#     land in the version field: such a font is genuinely installed and can be
+#     removed, it just carries no version. The `micro` definition takes the same
+#     approach for its bundled plugins.
+#   - The user scope is the wrapped one. `-l`, `-i` and `-u` all address the
+#     per-user font directory, `~/Library/Fonts` on macOS and
+#     `~/.local/share/fonts` elsewhere. `-g` switches every operation to the
+#     machine-wide directory and shells out to `sudo` to write there, so mpm
+#     stays with the scope that needs no escalation.
+#   - Search lists the whole catalog. `-L` accepts no query, so mpm narrows the
+#     results itself, the same route the `micro` definition takes.
+#   - `-i` on an already-installed font reinstalls it at the current release,
+#     which is a real per-font upgrade rather than a whole-host one: getnf's
+#     `direct_install` validates the name against the catalog and acts on the
+#     fonts it was handed. `pamac` is the counter-example that makes this worth
+#     stating, its `upgrade <package>` ignoring positionals entirely.
+#   - No `outdated`: nothing reports staleness without acting on it, `-U`
+#     computing which fonts are behind and updating them in the same pass.
+#   - No `sync` and no `cleanup`: the catalog refreshes as a side effect of
+#     every command that needs it and never on its own, and the downloaded
+#     archives are deleted after each install unless `-k` keeps them.
+#
+# ```{warning}
+# Every operation but removal needs network access. getnf probes
+# `connectivitycheck.gstatic.com` then `cp.cloudflare.com` and aborts with
+# "Internet connection is required for getnf to work." if neither answers, then
+# refreshes its catalog from the GitHub API. So an offline `mpm installed`
+# reports getnf as failed rather than empty. Only `-u` and the version probe
+# run before that check and work offline.
+# ```
+#
+# ```{warning}
+# `getnf -U` exits 1 on a host holding no Nerd Font at all, reporting "No
+# installed Nerd Fonts found." on standard error, so `mpm upgrade --all` marks
+# getnf as failed on a machine that simply has nothing to upgrade. With at least
+# one font installed the same command exits 0, whether or not anything needed
+# updating.
+# ```
+
+[mpm.managers.getnf]
+name = "getnf"
+homepage_url = "https://github.com/getnf/getnf"
+platforms = ["linux_like", "macos"]
+cli_names = ["getnf"]
+# getnf colors through tput, which ignores whether stdout is a terminal.
+extra_env = { TERM = "dumb" }
+version_cli_options = ["-V"]
+# `getnf -V` prints "getnf v0.3.0".
+version_regexes = ['getnf v(?P<version>\S+)']
+
+# The heading and the blank line above it carry spaces or nothing at all, so
+# anchoring both ends is what keeps them out of the results.
+[mpm.managers.getnf.operations.installed]
+args = ["-l"]
+regex = '^(?P<package_id>\S+)[ \t]+-[ \t]+(?:unknown version|v?(?P<installed_version>\S+))$'
+
+# The catalog carries no versions, every font in it being available at the one
+# Nerd Fonts release named in the heading.
+[mpm.managers.getnf.operations.search]
+args = ["-L"]
+regex = '^(?P<package_id>\S+)$'
+
+[mpm.managers.getnf.operations.install]
+args = ["-i", "{package_id}"]
+
+[mpm.managers.getnf.operations.remove]
+args = ["-u", "{package_id}"]
+
+[mpm.managers.getnf.operations.upgrade_one]
+args = ["-i", "{package_id}"]
+
+[mpm.managers.getnf.operations.upgrade_all]
+args = ["-U"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from getnf v0.3.0 against Nerd Fonts v3.5.0. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+#
+# The listing carries both row shapes at once. Its second font was installed
+# normally; the first had its release marker removed, which is the state a font
+# installed by hand leaves behind.
+#
+# No search fixture: that listing is the entire Nerd Fonts catalog, seventy-odd
+# names whose content belongs to upstream rather than to the host, and the one
+# thing it would lock is already locked here, both outputs opening on the same
+# blank line and heading.
+[samples.version]
+output = "getnf v0.3.0"
+expected = "0.3.0"
+
+[[samples.installed]]
+output = """
+
+Installed Nerd Fonts:
+0xProto - unknown version
+Agave - v3.5.0"""
+packages = [{ id = "0xProto" }, { id = "Agave", version = "3.5.0" }]

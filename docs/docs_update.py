@@ -85,6 +85,7 @@ KEYWORDS_EXTRAS = (
     "mageia",
     "meta-package-manager",
     "neovim",
+    "nerd fonts",
     "netbsd",
     "nixpkgs",
     "node",

@@ -58,6 +58,7 @@ keywords = [
   "fwupd",
   "gcloud",
   "gem",
+  "getnf",
   "gext",
   "gh-ext",
   "ghcup",
@@ -89,6 +90,7 @@ keywords = [
   "mise",
   "nala",
   "neovim",
+  "nerd fonts",
   "netbsd",
   "nimble",
   "nix",
@@ -852,6 +854,7 @@ labels.content-rules."📦 manager: eopkg" = [ "solus" ]
 labels.content-rules."📦 manager: flatpak" = [ "flathub" ]
 labels.content-rules."📦 manager: fwupd" = [ "lvfs" ]
 labels.content-rules."📦 manager: gem" = [ "ruby" ]
+labels.content-rules."📦 manager: getnf" = [ "nerd font", "nerd fonts" ]
 labels.content-rules."📦 manager: gh-ext" = [ "gh extension", "github cli" ]
 labels.content-rules."📦 manager: guix" = [ "gnu guix" ]
 labels.content-rules."📦 manager: homebrew" = [ "homebrew" ]
@@ -944,6 +947,7 @@ labels.file-rules."📦 manager: flatpak" = [ "meta_package_manager/managers/fla
 labels.file-rules."📦 manager: fwupd" = [ "meta_package_manager/managers/fwupd.*", "tests/*fwupd*" ]
 labels.file-rules."📦 manager: gcloud" = [ "meta_package_manager/managers/gcloud.*", "tests/*gcloud*" ]
 labels.file-rules."📦 manager: gem" = [ "meta_package_manager/managers/gem.*", "tests/*gem*" ]
+labels.file-rules."📦 manager: getnf" = [ "meta_package_manager/managers/getnf.*", "tests/*getnf*" ]
 labels.file-rules."📦 manager: gext" = [ "meta_package_manager/managers/gext.*", "tests/*gext*" ]
 labels.file-rules."📦 manager: gh-ext" = [ "meta_package_manager/managers/gh_ext.*", "tests/*gh_ext*" ]
 labels.file-rules."📦 manager: ghcup" = [ "meta_package_manager/managers/ghcup.*", "tests/*ghcup*" ]
@@ -1201,6 +1205,11 @@ description = "gcloud"
 name = "📦 manager: gem"
 color = "bfdadc"
 description = "gem"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: getnf"
+color = "bfdadc"
+description = "getnf"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: gext"

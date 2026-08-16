@@ -464,6 +464,10 @@ PACKAGE_IDS = {
     # dependency of the core install, so removing it again is safe.
     "gcloud": "kubectl",
     "gem": "paint",
+    # A Nerd Font, which is what getnf calls a package. One of the smallest
+    # archives upstream publishes, and a long-standing Google font, so the
+    # round-trip stays cheap and the name survives a Nerd Fonts release.
+    "getnf": "ShareTechMono",
     "gext": "caffeine@patapon.info",
     # A tiny script-based extension (a bare git clone), from a GitHub CLI maintainer.
     "gh-ext": "mislav/gh-branch",

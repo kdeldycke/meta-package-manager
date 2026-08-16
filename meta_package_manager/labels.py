@@ -360,6 +360,7 @@ MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "flatpak": ("flathub",),
     "fwupd": ("lvfs",),
     "gem": ("ruby",),
+    "getnf": ("nerd font", "nerd fonts"),
     "gh-ext": ("gh extension", "github cli"),
     "guix": ("gnu guix",),
     "homebrew": ("homebrew",),

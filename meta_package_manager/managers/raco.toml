@@ -1,5 +1,3 @@
-# Bundled package-manager definition shipped with mpm.
-#
 # raco is Racket's command-line
 # tool, whose `pkg` subcommand tree is the package manager for the Racket
 # catalog. See docs/overrides.md ("Define a new manager") for the schema and

@@ -1189,6 +1189,25 @@ def test_bundled_registered(toml_path):
                 assert package["id"]
 
 
+@pytest.mark.parametrize("toml_path", BUNDLED_DEFINITION_FILES, ids=attrgetter("stem"))
+def test_bundled_definition_carries_no_boilerplate(toml_path):
+    """No shipped definition reintroduces the tag line every file once opened on.
+
+    `_toml_definition_intro()` used to filter that line out before rendering, and
+    the filter was dropped along with the line, so a file carrying it now prints
+    it at the top of the manager's page. A file sitting under
+    `meta_package_manager/managers/` already says everything the line said.
+
+    This is a test rather than a review note because the mistake spreads on its
+    own: the next definition written after the cleanup restored the line, and the
+    one after that inherited it by being modelled on the first.
+    """
+    assert "definition shipped with mpm" not in toml_path.read_text(encoding="UTF-8"), (
+        f"{toml_path.name} carries the boilerplate tag line dropped from every "
+        "bundled definition, which now renders on the manager's page"
+    )
+
+
 @pytest.mark.parametrize(
     ("operation", "expected"),
     (

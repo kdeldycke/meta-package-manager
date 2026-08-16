@@ -893,9 +893,13 @@ labels.file-rules."📦 manager: asdf-based" = [
   "tests/*asdf*",
   "tests/*mise*",
 ]
-labels.file-rules."📦 manager: basalt" = [ "meta_package_manager/managers/basalt.*", "tests/*basalt*" ]
+labels.file-rules."📦 manager: bash-based" = [
+  "meta_package_manager/managers/basalt.*",
+  "meta_package_manager/managers/bpkg.*",
+  "tests/*basalt*",
+  "tests/*bpkg*",
+]
 labels.file-rules."📦 manager: bin" = [ "meta_package_manager/managers/bin.*", "tests/*bin*" ]
-labels.file-rules."📦 manager: bpkg" = [ "meta_package_manager/managers/bpkg.*", "tests/*bpkg*" ]
 labels.file-rules."📦 manager: cargo" = [ "meta_package_manager/managers/cargo.*", "tests/*cargo*" ]
 labels.file-rules."📦 manager: cave" = [ "meta_package_manager/managers/cave.*", "tests/*cave*" ]
 labels.file-rules."📦 manager: choco" = [ "meta_package_manager/managers/choco.*", "tests/*choco*" ]
@@ -1103,19 +1107,14 @@ color = "bfdadc"
 description = "asdf, mise"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: basalt"
+name = "📦 manager: bash-based"
 color = "bfdadc"
-description = "basalt"
+description = "basalt, bpkg"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: bin"
 color = "bfdadc"
 description = "bin"
-
-[[tool.repomatic.labels.extra]]
-name = "📦 manager: bpkg"
-color = "bfdadc"
-description = "bpkg"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: cargo"

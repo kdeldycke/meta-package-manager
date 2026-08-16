@@ -219,7 +219,9 @@ jobs:
         run: brew install rust
       - name: Cargo - Linux install
         if: runner.os == 'Linux'
-        run: sudo apt-get --quiet --yes install cargo
+        run: |
+          sudo apt-get --quiet --yes install cargo
+          cargo --version
       - name: Cargo - Windows install
         if: runner.os == 'Windows'
         run: choco install rust --no-progress --yes --retry-count=3

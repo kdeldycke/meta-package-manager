@@ -116,8 +116,11 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         The search on the small `co` string is producing all variations of multiple
         `co` substring matches and highlights.
         """
-        result = invoke("--color", "--cargo", "search", "co")
-        assert result.exit_code == 0
+        # `--verbosity INFO` keeps the selection narration in the captured
+        # stderr, so a failure names the reason cargo was dropped (probe
+        # failure, version parse, timeout) instead of a bare exit 2.
+        result = invoke("--color", "--cargo", "--verbosity", "INFO", "search", "co")
+        assert result.exit_code == 0, result.stderr
         # crates.io intermittently throttles CI runners into empty search
         # results: an empty table means there is nothing to highlight, not a
         # highlighting bug.

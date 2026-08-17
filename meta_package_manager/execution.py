@@ -104,6 +104,19 @@ flooding the default view. The raw streams are always available in full, live,
 at `DEBUG`.
 """
 
+WIN_DEFAULT_PATHEXT: Final = ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC"
+"""Executable suffixes to search on Windows when `%PATHEXT%` is unset.
+
+A copy of CPython's own `shutil._WIN_DEFAULT_PATHEXT`, which
+{meth}`CLIExecutor.search_all_cli` reads to mirror {func}`shutil.which`'s
+behaviour. That attribute is private, so it can be renamed or dropped by any
+release without notice, and reading it unguarded made every manager detection
+on Windows one `AttributeError` away from failing. This constant is the
+fallback; `test_windows_pathext_tracks_cpython` compares the two on every
+platform and every interpreter the matrix covers, so a divergence surfaces as
+a named test failure rather than as a Windows-only crash.
+"""
+
 
 class CLIError(Exception):
     """An error occurred when running package manager CLI."""
@@ -748,7 +761,11 @@ class CLIExecutor:
         # Code below is inspired by the original implementation of `shutil.which()`:
         # https://github.com/python/cpython/blob/8d46c7e/Lib/shutil.py#L1478-L1491
         if is_any_windows():
-            win_pathext = shutil._WIN_DEFAULT_PATHEXT  # type: ignore[attr-defined]
+            # `_WIN_DEFAULT_PATHEXT` is private, so fall back to our own copy
+            # rather than crash the whole detection if a release drops it.
+            win_pathext = getattr(
+                shutil, "_WIN_DEFAULT_PATHEXT", WIN_DEFAULT_PATHEXT
+            )
             pathext_source = os.getenv("PATHEXT") or win_pathext
             pathext = unique(ext for ext in pathext_source.split(os.pathsep) if ext)
             search_filenames = []

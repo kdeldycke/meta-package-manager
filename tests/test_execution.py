@@ -19,6 +19,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+import shutil
 import threading
 import time
 from types import SimpleNamespace
@@ -41,6 +42,7 @@ from meta_package_manager.execution import (
     READ_ONLY_TIMEOUT,
     SPINNER_DELAY,
     VERSION_PROBE,
+    WIN_DEFAULT_PATHEXT,
     CLIError,
     format_plan_command,
 )
@@ -775,3 +777,28 @@ def test_untied_install_search_runs_under_read_only_stamp(
     # sequential priority search that probes each manager with refiltered_search.
     invoke("--dry-run", "install", "unmatched-name")
     assert recorded["operation"] == Operations.search.name
+
+
+def test_windows_pathext_tracks_cpython():
+    """Our copy of CPython's default `PATHEXT` still matches the original.
+
+    `search_all_cli` mirrors {func}`shutil.which` on Windows by reading
+    `shutil._WIN_DEFAULT_PATHEXT`, which is private: a release may rename it,
+    drop it, or add a suffix to it, and only Windows would notice. The
+    attribute is defined on every platform, so this canary runs on every cell
+    of the test matrix, including the prerelease interpreter that sees the
+    change first, and turns a Windows-only detection failure into a named
+    failure everywhere.
+
+    On divergence: update {data}`WIN_DEFAULT_PATHEXT` to the new value. If the
+    attribute is gone for good, the fallback is already what the code uses.
+    """
+    cpython_value = getattr(shutil, "_WIN_DEFAULT_PATHEXT", None)
+    assert cpython_value is not None, (
+        "shutil._WIN_DEFAULT_PATHEXT is gone: mpm now relies on its own "
+        "WIN_DEFAULT_PATHEXT fallback, so confirm the value is still current."
+    )
+    assert cpython_value == WIN_DEFAULT_PATHEXT, (
+        f"CPython now defaults PATHEXT to {cpython_value!r}, but "
+        f"WIN_DEFAULT_PATHEXT still copies {WIN_DEFAULT_PATHEXT!r}."
+    )

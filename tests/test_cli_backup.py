@@ -60,21 +60,26 @@ def test_default_all_managers_output_to_console(invoke, subcmd):
     check_selection(result)
 
 
-def test_output_to_console(invoke, subcmd):
+def test_output_to_console(invoke, subcmd, fake_pool):
+    """An explicit `-` target prints to `<stdout>`.
+
+    The three destination tests below run on the fake pool: what varies
+    between them is where the snapshot lands, not what is in it, and
+    re-collecting the host's inventory for each cost twenty seconds a case.
+    `test_default_all_managers_output_to_console` keeps the live one.
+    """
     result = invoke(subcmd, "-")
     assert result.exit_code == 0
     assert "Print installed package list to <stdout>" in result.stderr
-    check_selection(result)
 
 
-def test_output_to_file(invoke, subcmd):
+def test_output_to_file(invoke, subcmd, fake_pool):
     result = invoke(subcmd, "mpm-packages.toml")
     assert result.exit_code == 0
     assert "mpm-packages.toml" in result.stderr
-    check_selection(result)
 
 
-def test_output_to_file_creates_missing_parents(invoke, subcmd):
+def test_output_to_file_creates_missing_parents(invoke, subcmd, fake_pool):
     """A destination whose directory does not exist yet is created, not an error.
 
     Regression: mpm used to open the target directly, so a path into a

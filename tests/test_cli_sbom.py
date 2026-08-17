@@ -93,9 +93,15 @@ def test_unrecognized_extension_without_format(invoke, subcmd):
     assert "Export packages from" not in result.stderr
 
 
-def test_unrecognized_extension_with_explicit_format(invoke, subcmd, tmp_path):
+def test_unrecognized_extension_with_explicit_format(
+    invoke, subcmd, fake_pool, tmp_path
+):
     """An explicit `--format` overrides extension auto-detection, even when
     the filename carries no recognizable suffix.
+
+    The subject is the filename, so the inventory behind it is the fake one:
+    collecting the host's real packages to prove a suffix was overridden costs
+    the better part of a minute and answers nothing extra.
     """
     target = tmp_path / "help"
     result = invoke(subcmd, "--format", "json", str(target))
@@ -106,9 +112,17 @@ def test_unrecognized_extension_with_explicit_format(invoke, subcmd, tmp_path):
 
 @pytest.mark.parametrize("export_format", (None, *ExportFormat))
 @pytest.mark.parametrize("standard_name", ("SPDX", "CycloneDX"))
-def test_output_to_file(invoke, subcmd, export_format, standard_name):
-    # Let the CLI auto-detect the format. `--verbosity DEBUG` makes the
-    # per-manager skip messages reach stderr for check_manager_selection.
+def test_output_to_file(invoke, subcmd, fake_pool, export_format, standard_name):
+    """Every standard and format pair renders and lands where it was asked to.
+
+    Runs on the fake pool: twelve cases serializing one inventory differ in
+    the writer, not in the packages, and re-collecting the host's real ones per
+    case made this the most expensive block left in the suite (up to eighty-six
+    seconds a case). Selection is asserted by the live-inventory test above,
+    once, as it is shared by every subcommand.
+    """
+    # Let the CLI auto-detect the format. `--verbosity DEBUG` keeps the
+    # per-manager export lines in stderr, which the assertions below read.
     file_name = f"export.{export_format.value}" if export_format else "-"
     result = invoke(
         "--verbosity", "DEBUG", subcmd, f"--{standard_name.lower()}", file_name
@@ -138,7 +152,6 @@ def test_output_to_file(invoke, subcmd, export_format, standard_name):
             content = Path(file_name).read_text(encoding="utf-8")
 
         assert result.exit_code == 0
-        check_selection(result)
 
         if standard_name == "CycloneDX" and export_format in (
             ExportFormat.JSON,

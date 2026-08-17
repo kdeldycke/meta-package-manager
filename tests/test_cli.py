@@ -554,6 +554,12 @@ class CLITableTests:
 
         Debug level messages are redirected to <stderr> and are not supposed to interfere
         with this behavior.
+
+        The one serialization case kept on the real pool, deliberately: it is
+        what proves a live inventory survives serialization, whatever package
+        names, versions and encodings the host's managers report. The format
+        matrix below runs on the fake pool, that property being a fact about
+        the data rather than about each format.
         """
         result = invoke("--table-format", "json", "--verbosity", "DEBUG", subcmd)
         assert result.exit_code == 0
@@ -570,11 +576,17 @@ class CLITableTests:
         ),
         ids=lambda f: f.value,
     )
-    def test_serialized_output(self, invoke, subcmd, fmt):
+    def test_serialized_output(self, invoke, subcmd, fake_pool, fmt):
         """All serialization formats produce parseable output on `<stdout>`.
 
         Debug messages go to `<stderr>` and must not leak into the structured output.
         Formats whose optional dependency is not installed are skipped.
+
+        Runs on the fake pool: the subject is the serializer, not the inventory
+        feeding it, and re-querying every installed manager once per format made
+        this the most expensive block in the suite (`outdated` alone spent
+        sixteen minutes of one Windows runner's time across its seven cases).
+        {meth}`test_json_output` keeps the live inventory covered.
         """
         result = invoke("--table-format", fmt, "--verbosity", "DEBUG", subcmd)
         if result.exit_code == 1 and "requires an optional dependency" in str(

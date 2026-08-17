@@ -634,3 +634,60 @@ class CLIQueryTests:
         result = invoke("--color", subcmd, "alpha")
         assert result.exit_code == 0
         assert "\x1b[32malpha\x1b[0m" in result.stdout
+
+
+REAL_POOL_TEMPLATE_TESTS = frozenset({"test_json_output"})
+"""Template tests deliberately driving the host's own managers.
+
+One per format family is the whole budget: proving a live inventory survives
+serialization is a fact about the *data*, so it needs one serializer rather
+than one case per serializer per subcommand. Everything else inherited runs on
+`fake_pool`.
+"""
+
+TEMPLATE_TEST_METHODS = tuple(
+    pytest.param(method, id=f"{template.__name__}.{name}")
+    for template in (CLITableTests, CLIQueryTests)
+    for name, method in vars(template).items()
+    if name.startswith("test_")
+)
+"""Every test a subcommand inherits by subclassing a template."""
+
+# An empty tuple would make the guards below vacuous rather than failing.
+assert len(TEMPLATE_TEST_METHODS) >= 5
+
+
+@pytest.mark.parametrize("method", TEMPLATE_TEST_METHODS)
+def test_template_tests_read_their_subcommand(method):
+    """A template test must take `subcmd`, or it is the same test N times.
+
+    A method naming its own subcommand still gets inherited by every subclass,
+    which runs the identical invocation once per subclass with nothing to tell
+    the copies apart. `test_all_table_rendering` did exactly that: fifty
+    formats collected as three hundred cases, two hundred and fifty of them
+    byte-identical, each driving the real manager pool. Nothing in the run
+    reported it, since duplicate work looks like coverage. A test that names
+    its own subcommand belongs at module level, where it is collected once.
+    """
+    assert "subcmd" in inspect.signature(method).parameters, (
+        f"{method.__qualname__} does not read the `subcmd` fixture, so every "
+        "subclass would re-run the same invocation: move it to module level."
+    )
+
+
+@pytest.mark.parametrize("method", TEMPLATE_TEST_METHODS)
+def test_template_tests_default_to_the_fake_pool(method):
+    """A template test must take `fake_pool` unless it is a listed exception.
+
+    Omitting the fixture is how a test silently acquires the host's real
+    managers, and a template multiplies that by its subclasses. The exceptions
+    are named in {data}`REAL_POOL_TEMPLATE_TESTS` so adding one is a decision
+    rather than an oversight.
+    """
+    if method.__name__ in REAL_POOL_TEMPLATE_TESTS:
+        return
+    assert "fake_pool" in inspect.signature(method).parameters, (
+        f"{method.__qualname__} drives the host's real managers for every "
+        "subclass inheriting it: take `fake_pool`, or add it to "
+        "REAL_POOL_TEMPLATE_TESTS with the reason it must stay live."
+    )

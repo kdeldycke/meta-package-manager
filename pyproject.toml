@@ -609,7 +609,10 @@ overrides = [
 [tool.pytest]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
 addopts = [
-  "--durations=10",
+  # Deep enough to show the tail, not just the handful of worst offenders: at
+  # 10 the list bottomed out around a minute on the slowest runners, which hid
+  # every block whose cost is a hundred cheap cases rather than a few dear ones.
+  "--durations=25",
   # Import test modules via importlib instead of prepending their root dir to
   # sys.path. Avoids "import file mismatch" collection errors when an installed
   # copy of the package coexists with the source tree, as in distro builds.

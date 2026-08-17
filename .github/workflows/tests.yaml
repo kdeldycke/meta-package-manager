@@ -449,16 +449,6 @@ jobs:
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
           version: "0.12.1"
-      - name: Force native ARM64 Python on Windows ARM64
-        # Workaround for https://github.com/astral-sh/uv/issues/12906: uv defaults to x86_64 Python on ARM64 Windows,
-        # relying on transparent emulation. Rust-backed native extensions then fail to compile, because the ARM64 Rust
-        # toolchain lacks the x86_64-pc-windows-msvc target. Setting UV_PYTHON to an architecture-qualified specifier
-        # forces uv (and uvx) to use native ARM64 Python for all steps.
-        if: runner.os == 'Windows' && runner.arch == 'ARM64'
-        shell: bash
-        run: echo "UV_PYTHON=cpython-${PYTHON_VERSION}-aarch64" >> "$GITHUB_ENV"
-        env:
-          PYTHON_VERSION: ${{ matrix.python-version }}
       - name: Install Python ${{ matrix.python-version }}
         # If UV cannot find the requested Python version, it exits with code 2, which let the job pass unnoticed on
         # Windows. So we force the shell to bash, even on Windows, and "set -e" to ensure any error in the install
@@ -466,7 +456,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          uv --no-progress venv --python "${UV_PYTHON:-${PYTHON_VERSION}}"
+          uv --no-progress venv --python "${PYTHON_VERSION}"
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
       - name: Install project

@@ -799,8 +799,23 @@ workflow.paths."tests.yaml" = [
   "tests/**",
   "uv.lock",
 ]
-# lxml cannot compile on Windows ARM64.
+# Windows ARM64 is the one runner the suite cannot install itself on: `lxml`
+# ships no `win_arm64` wheel (still true of 6.1.1, the release this project
+# locks) and cannot compile there. It reaches us through
+# `cyclonedx-python-lib[validation]` in the `test` group alone, never through a
+# runtime install, so this is a limit of the test tooling rather than of `mpm`,
+# and the architecture stays covered on the axes that ship: `tests-install.yaml`
+# runs several jobs on this runner, and the released `windows-arm64.exe` is
+# driven by the binary self-test.
 # See: https://bugs.launchpad.net/lxml/+bug/2004481
+#
+# Revisit when lxml ships a `win_arm64` wheel, that being what would make the
+# cell free. Restoring the runner also means restoring the workaround
+# `tests.yaml` carried until then: uv resolves an emulated x86_64 Python on
+# ARM64 Windows, whose Rust-backed extensions then fail to build for want of an
+# x86_64 target in the ARM64 Rust toolchain, so the job has to pin
+# `UV_PYTHON=cpython-<version>-aarch64`. See
+# https://github.com/astral-sh/uv/issues/12906, open as of this writing.
 test-matrix.remove.os = [ "windows-11-arm" ]
 # The two axes answer different questions, so neither needs the other's spread.
 # The OS axis is the product: `mpm` drives a different set of managers on each

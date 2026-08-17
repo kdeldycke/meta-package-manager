@@ -72,15 +72,15 @@ def cooldown_permits(manager: PackageManager) -> bool:
     """Decide whether a release-introducing operation may run on `manager`.
 
     Returns `True` when no cooldown is active, when the manager can enforce it
-    natively, or when the user opted out of the requirement with
-    `--allow-unsupported-managers` or its `require_cooldown_support` configuration
-    key. Returns `False` (after logging the skip) when an active cooldown cannot be
-    enforced and the requirement still holds, so the caller leaves the manager alone
-    rather than letting a freshly-published version slip in.
+    natively, or when the user opted into the best-effort posture with
+    `--cooldown best-effort` or the `[mpm.cooldown] policy` configuration key.
+    Returns `False` (after logging the skip) when an active cooldown cannot be
+    enforced and the fail-closed default still holds, so the caller leaves the
+    manager alone rather than letting a freshly-published version slip in.
 
-    The skip message names both remedies, the one-shot flag and the persistent
-    configuration key: opting out of a supply-chain safeguard is a standing policy
-    decision, not something to re-type on every run.
+    The skip message names both remedies, the one-shot keyword and the
+    persistent configuration key: opting out of a supply-chain safeguard is a
+    standing policy decision, not something to re-type on every run.
     """
     if manager.cooldown is None or manager.supports_cooldown:
         return True
@@ -93,8 +93,8 @@ def cooldown_permits(manager: PackageManager) -> bool:
         return True
     logging.warning(
         "Skipped: cannot enforce the release-age cooldown. Run it anyway with "
-        "`--allow-unsupported-managers`, or set "
-        "`[mpm] require_cooldown_support = false` in your configuration file.",
+        "`--cooldown best-effort`, or set `[mpm.cooldown] policy = "
+        '"best-effort"` in your configuration file.',
         extra={"label": manager.id},
     )
     return False

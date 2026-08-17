@@ -304,8 +304,9 @@ stdout_contains = "<cargo>"
 
 # Globals introduced this cycle. `--man` exercises the roff renderer click-extra
 # 7.19 ships and its embedded data files; `--summary` replaces the old
-# `--stats`; `--accessible` swaps to the plain renderer; `--cooldown DURATION`
-# parses a duration string. The introspection flags `--params` and
+# `--stats`; `--accessible` swaps to the plain renderer; `--cooldown` parses
+# both halves of its union, a duration string and an enforcement keyword. The
+# introspection flags `--params` and
 # `--man` print and exit 0 without contacting any package manager.
 [[cases]]
 cli_parameters = "--man"
@@ -333,6 +334,12 @@ stdout_contains = "cargo"
 
 [[cases]]
 cli_parameters = "--cooldown 30days managers"
+skip_platforms = "windows"
+exit_code = 0
+stdout_contains = "cargo"
+
+[[cases]]
+cli_parameters = "--cooldown best-effort managers"
 skip_platforms = "windows"
 exit_code = 0
 stdout_contains = "cargo"

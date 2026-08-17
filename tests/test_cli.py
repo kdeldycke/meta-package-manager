@@ -179,31 +179,46 @@ def test_executable_module():
 
 
 @pytest.mark.parametrize(
-    ("argv", "expected"),
+    ("argv", "restrict_to", "expected"),
     (
         (
             ("mpm", "--apt", "upgrade", "papers"),
+            None,
             "mpm --verbosity DEBUG --apt upgrade papers",
         ),
         # An explicit verbosity is dropped, not duplicated: Click keeps the last
         # value of a repeated option, which sits after the one we insert.
         (
             ("mpm", "--verbosity", "WARNING", "upgrade", "--all"),
+            None,
             "mpm --verbosity DEBUG upgrade --all",
         ),
-        (("mpm", "--verbosity=INFO", "sync"), "mpm --verbosity DEBUG sync"),
+        (("mpm", "--verbosity=INFO", "sync"), None, "mpm --verbosity DEBUG sync"),
         # Copy-pasteable: an argument needing quotes keeps them.
         (
             ("mpm", "install", "my package"),
+            None,
             "mpm --verbosity DEBUG install 'my package'",
+        ),
+        # A narrowed re-run targets the managers that reported errors.
+        (
+            ("mpm", "upgrade", "claude-code"),
+            ("pip", "pnpm"),
+            "mpm --pip --pnpm --verbosity DEBUG upgrade claude-code",
+        ),
+        # A selector already in the argv is not duplicated.
+        (
+            ("mpm", "--pip", "upgrade", "claude-code"),
+            ("pip", "pnpm"),
+            "mpm --pnpm --verbosity DEBUG --pip upgrade claude-code",
         ),
     ),
 )
-def test_debug_rerun_command(monkeypatch, argv, expected):
+def test_debug_rerun_command(monkeypatch, argv, restrict_to, expected):
     """The re-run hint of the error summary reproduces the current invocation."""
     ctx = SimpleNamespace(find_root=lambda: SimpleNamespace(info_name="mpm"))
     monkeypatch.setattr(sys, "argv", list(argv))
-    assert _debug_rerun_command(ctx) == expected  # type: ignore[arg-type]
+    assert _debug_rerun_command(ctx, restrict_to) == expected  # type: ignore[arg-type]
 
 
 def test_timeout(invoke, slow_fake_pool):

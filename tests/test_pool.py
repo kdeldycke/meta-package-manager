@@ -215,8 +215,17 @@ def test_manager_groups():
     )
 
 
+DERIVED_EXTRA_OPTIONS = frozenset({"require_cooldown_support"})
+"""Extra options computed from another flag rather than declared as one.
+
+`require_cooldown_support` is derived from the `--cooldown` enforcement policy
+(see {mod}`meta_package_manager.cooldown`): the manager-level attribute stays,
+but its own CLI flag disappeared into the `8.0.0` union option."""
+
+
 def test_extra_option_allowlist():
-    assert pool.ALLOWED_EXTRA_OPTION.issubset(opt.name for opt in mpm.params)
+    cli_params = {opt.name for opt in mpm.params}
+    assert pool.ALLOWED_EXTRA_OPTION - DERIVED_EXTRA_OPTIONS <= cli_params
 
 
 selection_cases = {

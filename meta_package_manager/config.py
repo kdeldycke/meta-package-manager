@@ -40,6 +40,7 @@ import sys
 import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import tomli_w
 from click import get_app_dir
@@ -53,6 +54,7 @@ from click_extra.config import (
 from click_extra.context import CONF_FULL
 from click_extra.theme import get_current_theme as theme
 
+from .cooldown import parse_cooldown_section
 from .definitions import (
     OVERRIDABLE_FIELDS,
     build_manager_class,
@@ -62,7 +64,7 @@ from .definitions import (
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Mapping
-    from typing import Any, Final
+    from typing import Final
 
     import click
 
@@ -142,17 +144,18 @@ class MpmConfig:
     keywords `auto` (one fewer than the logical CPU count, the default) and
     `max` (every logical CPU); set `1` to run sequentially."""
 
-    cooldown: str = ""
-    """Minimum release age (like `7 days` or `1 week`) a package version must
-    reach before it can be installed or upgraded. Empty disables the gate."""
+    cooldown: dict[str, Any] = field(default_factory=dict)
+    """Release-age cooldown gate: `period` is the minimum age a package version
+    must reach before it can be installed or upgraded, `policy` the posture for
+    managers that cannot enforce it (`enforce` skips them, `best-effort` runs
+    them without the safeguard).
 
-    require_cooldown_support: bool = field(
-        default=True,
-        metadata={CONFIG_PATH_METADATA_KEY: "require_cooldown_support"},
-    )
-    """Require managers to natively support a requested cooldown to run
-    install/upgrade: skip those that cannot (fail-closed). Set to `False` to run
-    them anyway, without the safeguard."""
+    Typed as `dict[str, Any]` so click-extra treats the `[mpm.cooldown]`
+    sub-tree as opaque: it carries no CLI flag of its own (the `--cooldown`
+    option merges over it axis by axis at runtime instead) and its keys are
+    validated by {func}`validate_cooldown_section`, registered as a
+    {class}`click_extra.ConfigValidator`. The deprecated `[mpm] cooldown =
+    "<duration>"` string spelling stays accepted as the period."""
 
     description: bool = False
     """Show package description in results."""
@@ -362,6 +365,53 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
         "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
     ))
     return "\n".join(lines)
+
+
+def validate_cooldown_section(section: Any) -> None:
+    """Strict validator for the `[mpm.cooldown]` configuration sub-tree.
+
+    Delegates the shape and value checks to
+    {func}`meta_package_manager.cooldown.parse_cooldown_section`, translating
+    its `ValueError` into a {class}`click_extra.ValidationError`. click-extra
+    only hands dict sub-trees to extension validators, so the deprecated
+    top-level string spelling never lands here: its migration warning is
+    logged at runtime instead (see the `mpm` group body).
+
+    :raises click_extra.ValidationError: when the section is malformed.
+    """
+    try:
+        parse_cooldown_section(section)
+    except (TypeError, ValueError) as exc:
+        raise ValidationError("", str(exc)) from exc
+
+
+def build_cooldown_validator() -> ConfigValidator:
+    """Construct a {class}`click_extra.ConfigValidator` for the
+    `[mpm.cooldown]` sub-tree.
+
+    Used by the CLI bootstrap (`@group` decorator) to register the validator
+    alongside the manager-overrides one. Stateless: the cooldown section
+    needs no pool binding, unlike the manager overrides.
+    """
+    return ConfigValidator(
+        extension_path="cooldown",
+        validator=validate_cooldown_section,
+        description="Release-age cooldown window and policy (see docs/cooldown.md).",
+    )
+
+
+def cooldown_section(ctx: click.Context) -> Any:
+    """Return the raw `[mpm.cooldown]` value from the loaded config, or `None`.
+
+    Reads the full parsed config {mod}`click_extra` exposes under
+    {data}`~click_extra.context.CONF_FULL`, tolerating a missing or malformed
+    layer at each step: resolution decides how to read the value, and an
+    invalid one already failed the load-time validator. The deprecated
+    top-level string spelling comes through here unchanged.
+    """
+    conf_full = ctx.meta.get(CONF_FULL) or {}
+    mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
+    return mpm_section.get("cooldown") if isinstance(mpm_section, dict) else None
 
 
 def validate_manager_overrides_section(

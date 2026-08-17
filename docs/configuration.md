@@ -61,7 +61,7 @@ These go under `[mpm]` (or `[tool.mpm]` in `pyproject.toml`). The reference belo
 from meta_package_manager.cli import mpm
 ```
 
-See the [release-age cooldown](#release-age-cooldown) section below for the safeguard behind `cooldown` and `require_cooldown_support`, and [privilege escalation](sudo.md) for the model behind `sudo`.
+See the [release-age cooldown](#release-age-cooldown) section below for the safeguard behind the `[mpm.cooldown]` table, and [privilege escalation](sudo.md) for the model behind `sudo`.
 
 Click-extra's built-in options ride the same configuration pipeline. The most useful ones:
 
@@ -75,16 +75,23 @@ Click-extra's built-in options ride the same configuration pipeline. The most us
 
 `cooldown` is a supply-chain safeguard: it refuses to install or upgrade any package version published more recently than the given age, giving a freshly-published (and possibly compromised) release time to be caught and pulled before it reaches the system.
 
-`mpm` enforces the cooldown through each manager's own release-age mechanism, so coverage is limited to the managers `mpm` can gate: [`uv`](managers/uv.md) and [`uvx`](managers/uvx.md) (via `exclude-newer`), [`npm`](managers/npm.md) (via `min-release-age`), [`pnpm`](managers/pnpm.md) (via `minimumReleaseAge`), [`pip`](managers/pip.md) (via `--uploaded-prior-to`), [`pipx`](managers/pipx.md) (which inherits the pip setting), and [`yay`](managers/yay.md) (through a generated Lua-hook overlay, since yay ships no release-age option of its own). Managers without native support cannot honor the gate. By default they are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Pass `--allow-unsupported-managers` (or set `require_cooldown_support = false`) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
+`mpm` enforces the cooldown through each manager's own release-age mechanism, so coverage is limited to the managers `mpm` can gate: [`uv`](managers/uv.md) and [`uvx`](managers/uvx.md) (via `exclude-newer`), [`npm`](managers/npm.md) (via `min-release-age`), [`pnpm`](managers/pnpm.md) (via `minimumReleaseAge`), [`pip`](managers/pip.md) (via `--uploaded-prior-to`), [`pipx`](managers/pipx.md) (which inherits the pip setting), and [`yay`](managers/yay.md) (through a generated Lua-hook overlay, since yay ships no release-age option of its own). Managers without native support cannot honor the gate. By default they are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Re-run with `--cooldown best-effort` (or set `policy = "best-effort"` in the `[mpm.cooldown]` table) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
 
 See {doc}`cooldown` for the full support matrix and the rationale.
 
-The value is a duration like `7 days`, `1 week`, `12h` or `30m`; a bare number is read as a count of days, and `0` (or an empty string) disables the gate.
+The table carries the two axes of the gate: `period` is the window, a duration like `7 days`, `1 week`, `12h` or `30m` (a bare number is read as a count of days, and `0` disables the gate); `policy` is the posture for managers that cannot enforce it, `enforce` (skip them, the default) or `best-effort` (run them without the safeguard). A `policy` without a `period` is rejected: a posture without a window is a no-op gate. The one-run spellings of both axes are the `--cooldown` keywords, which merge over this table axis by axis.
 
 ```toml
-[mpm]
+[mpm.cooldown]
 # Only let releases that are at least a week old into the system.
-cooldown = "1 week"
+period = "1 week"
+# Also run the managers that cannot enforce the window; the default
+# ("enforce") skips them instead.
+policy = "best-effort"
+```
+
+```{note}
+The previous `[mpm] cooldown = "<duration>"` top-level spelling stays accepted as the `period`, with a deprecation warning on every run until it is migrated.
 ```
 
 ### Accessibility

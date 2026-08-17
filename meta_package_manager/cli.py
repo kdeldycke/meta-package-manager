@@ -47,7 +47,6 @@ from textwrap import dedent
 from click_extra import (
     STRING,
     Choice,
-    Duration,
     IntRange,
     Section,
     VersionOption,
@@ -62,6 +61,7 @@ from click_extra import (
     zero_exit_option,
 )
 from click_extra.context import (
+    CONF_FULL,
     PROGRESS,
     TABLE_FORMAT,
     VERBOSITY_LEVEL,
@@ -74,10 +74,18 @@ from click_extra.table import SERIALIZATION_FORMATS
 from click_extra.theme import get_current_theme as theme
 
 from . import bar_plugin
+from .cooldown import (
+    Cooldown,
+    CooldownPolicy,
+    parse_cooldown_section,
+    resolve_cooldown,
+)
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,
+    build_cooldown_validator,
     build_manager_overrides_validator,
+    cooldown_section,
     print_contribution_hints,
     register_config_managers_from_context,
 )
@@ -323,7 +331,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     ctx.exit()
 
 
-def _debug_rerun_command(ctx: Context) -> str:
+def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None) -> str:
     """This very invocation, rewritten to run at `DEBUG` verbosity.
 
     Printed by the end-of-run error summary so the transcript it points at is one
@@ -336,6 +344,13 @@ def _debug_rerun_command(ctx: Context) -> str:
     program name, ahead of the subcommand. Any occurrence already in the argv is
     dropped first: Click keeps the last value of a repeated option, which would
     otherwise leave the suggested command running at the level being replaced.
+
+    `restrict_to` names the managers the re-run should target: each earns its
+    `--<manager-id>` selector, inserted ahead of `--verbosity`, so the
+    transcript narrows to the managers that actually reported errors instead
+    of replaying the whole pool. The failed managers ran inside the original
+    selection, so narrowing to them always reproduces the failures. Selectors
+    already present in the argv are not duplicated.
     """
     args: list[str] = []
     drop_value = False
@@ -346,8 +361,11 @@ def _debug_rerun_command(ctx: Context) -> str:
             drop_value = True
         elif not arg.startswith("--verbosity="):
             args.append(arg)
+    selectors = []
+    if restrict_to:
+        selectors = [f"--{mid}" for mid in restrict_to if f"--{mid}" not in args]
     prog = ctx.find_root().info_name or "mpm"
-    return shlex.join((prog, "--verbosity", "DEBUG", *args))
+    return shlex.join((prog, *selectors, "--verbosity", "DEBUG", *args))
 
 
 @group(
@@ -356,7 +374,10 @@ def _debug_rerun_command(ctx: Context) -> str:
     # plus real warnings and critical. Per-operation narration (priority,
     # announcements, skip reasons) sits at INFO, one --verbosity INFO away.
     config_schema=MpmConfig,
-    config_validators=(build_manager_overrides_validator(pool),),
+    config_validators=(
+        build_cooldown_validator(),
+        build_manager_overrides_validator(pool),
+    ),
     # Swaps --version for the brand-mark screen, which degrades to the plain
     # message below whenever colors, width or accessibility rule it out.
     params=version_screen_params,
@@ -489,26 +510,21 @@ def _debug_rerun_command(ctx: Context) -> str:
     ),
     option(
         "--cooldown",
-        type=Duration(),
+        type=Cooldown(),
         default="",
         show_default="disabled",
-        metavar="DURATION",
+        metavar="[DURATION | enforce | best-effort | off]",
         help="Refuse to install or upgrade any package version published more "
-        "recently than this duration, as a mitigation against supply-chain "
+        "recently than the given duration, as a mitigation against supply-chain "
         "attacks. Accepts a friendly duration ('7 days', '1 week', '12h'), an "
-        "ISO 8601 duration ('P7D', 'PT12H'), or an RFC 3339 absolute timestamp "
-        "('2024-05-01T00:00:00Z'). Only honored by managers with native "
-        "release-age support (" + ", ".join(COOLDOWN_SUPPORTED_MANAGERS) + "); the "
-        "others are skipped unless --allow-unsupported-managers is set.",
-    ),
-    option(
-        "--require-cooldown-support/--allow-unsupported-managers",
-        default=True,
-        help="When --cooldown is set, whether to require each manager to natively "
-        "enforce it. The default (--require-cooldown-support) skips managers that "
-        "cannot, so nothing slips in unguarded (fail-closed). "
-        "--allow-unsupported-managers runs install and upgrade on them anyway, "
-        "trading the supply-chain safeguard for broader manager coverage.",
+        "ISO 8601 duration ('P7D', 'PT12H'), an RFC 3339 absolute timestamp "
+        "('2024-05-01T00:00:00Z'), or an enforcement keyword: 'enforce' and "
+        "'best-effort' pick the posture for managers without native release-age "
+        "support (skip them, or run them without the safeguard) while the "
+        "window comes from the configuration, and 'off' disables the gate for "
+        "this run. The window is only honored by managers with native "
+        "release-age support (" + ", ".join(COOLDOWN_SUPPORTED_MANAGERS) + "); "
+        "the others are skipped unless the best-effort posture is selected.",
     ),
 )
 @option_group(
@@ -585,7 +601,6 @@ def mpm(
     plan,
     timeout,
     cooldown,
-    require_cooldown_support,
     description,
     summary,
     network,
@@ -652,6 +667,28 @@ def mpm(
     if suggest_contribs:
         ctx.call_on_close(partial(print_contribution_hints, ctx))
 
+    # Resolve the release-age gate axis by axis: the --cooldown flag carries
+    # either a window or a posture and inherits the other axis from the
+    # [mpm.cooldown] configuration table (see meta_package_manager.cooldown).
+    cooldown_settings = parse_cooldown_section(cooldown_section(ctx))
+    cooldown_window, cooldown_policy = resolve_cooldown(cooldown, cooldown_settings)
+    if cooldown_settings.legacy:
+        # The load-time validator never sees the deprecated string spelling
+        # (click-extra only forwards dict sub-trees to extension validators),
+        # so the migration notice lives here, once per run.
+        logging.warning(
+            'Deprecated configuration: `[mpm] cooldown = "..."` moved to '
+            '`[mpm.cooldown] period = "..."`. Update your configuration file.',
+        )
+    if (
+        isinstance(cooldown, CooldownPolicy)
+        and cooldown is not CooldownPolicy.off
+        and cooldown_window is None
+    ):
+        logging.info(
+            f"--cooldown {cooldown} has no effect: no cooldown window is configured."
+        )
+
     # Snapshot per-manager error counts so the close-time summary below only
     # reports errors that accumulated during *this* invocation. The pool is a
     # module-level singleton and survives across calls (e.g. in test runs that
@@ -675,6 +712,10 @@ def mpm(
         Skipped at DEBUG verbosity (the raw streams appeared inline) and
         in serialization formats (logging is disabled and `cli_errors`
         ships in the structured payload anyway).
+
+        The suggested re-run narrows to the failed managers, so the
+        transcript it produces is a diagnosis, not a replay of the whole
+        pool (see {func}`_debug_rerun_command`).
         """
         if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
             return
@@ -689,8 +730,8 @@ def mpm(
         plural = "managers" if len(failed) > 1 else "manager"
         logging.warning(
             f"{len(failed)} {plural} reported errors during this run "
-            f"({ids}); full transcript with: "
-            f"{theme().invoked_command(_debug_rerun_command(ctx))}",
+            f"({ids}); diagnose with: "
+            f"{theme().invoked_command(_debug_rerun_command(ctx, failed))}",
         )
 
     ctx.call_on_close(summarize_cli_errors)
@@ -751,9 +792,11 @@ def mpm(
             plan=plan,
             timeout=timeout,
             progress=show_progress,
-            # Minimum release age gate and its fail-open escape hatch.
-            cooldown=cooldown,
-            require_cooldown_support=require_cooldown_support,
+            # Minimum release age gate and its enforcement policy.
+            cooldown=cooldown_window,
+            require_cooldown_support=(
+                cooldown_policy is not CooldownPolicy.best_effort
+            ),
             **kwargs,
         )
 

@@ -11,18 +11,20 @@ The cooldown applies to every install and upgrade `mpm` performs:
 ```{code-block} shell-session
 $ mpm --cooldown "7 days" upgrade --all
 $ mpm --cooldown "1 week" install some-package
-$ mpm --cooldown 12h --allow-unsupported-managers upgrade --all   # let unsupported managers run too
+$ mpm --cooldown best-effort upgrade --all   # posture only: the window comes from the configuration
+$ mpm --cooldown off upgrade --all           # disable the gate for this run
 ```
 
-If you are unsure which value to pick, `--cooldown '7 days'` is a reasonable default: long enough for most compromised releases to be flagged and pulled from registries, short enough to keep security updates timely. There is no bare `--cooldown` shorthand: the option always takes an explicit duration.
+If you are unsure which value to pick, `--cooldown '7 days'` is a reasonable default: long enough for most compromised releases to be flagged and pulled from registries, short enough to keep security updates timely. There is no bare `--cooldown` shorthand: the option always takes an explicit value, a duration or a keyword.
 
-`--cooldown` accepts three input shapes:
+`--cooldown` accepts four input shapes:
 
-- **Friendly duration**: `7 days`, `1 week`, `12h`, `30m`, `45s`, a bare number of days (`7`), or `0` / empty to disable the gate.
+- **Friendly duration**: `7 days`, `1 week`, `12h`, `30m`, `45s`, a bare number of days (`7`), or `0` to disable the gate for this run.
 - **ISO 8601 duration**: `P7D`, `PT12H`, `P1WT6H`. Case-insensitive.
 - **RFC 3339 absolute timestamp**: `2024-05-01T00:00:00Z` or with an offset like `+02:00`. Converted at parse time to `now - timestamp`; a timestamp in the future disables the gate.
+- **Enforcement keyword**: `enforce`, `best-effort` or `off`, selecting the posture for managers that cannot natively enforce the window (skip them, run them without the safeguard, or disable the gate entirely). A keyword carries no window of its own: it comes from the configuration, which is what makes the keywords a one-run override rather than a full setting.
 
-The same value is settable as the `cooldown` key in any `mpm` configuration file (see {doc}`configuration` for the full schema) or as the `MPM_COOLDOWN` environment variable.
+A duration sets the window for this run and leaves the posture to the configuration; a keyword sets the posture and leaves the window to the configuration; `off` and `0` are two spellings of the same thing. The window is settable as the `period` key of the `[mpm.cooldown]` table in any `mpm` configuration file, with the `policy` key carrying the posture (see {doc}`configuration` for the full schema), or a one-run window as the `MPM_COOLDOWN` environment variable.
 
 ```{note}
 Durations resolve to a fixed number of seconds, assuming a day is 24 hours. The local time zone, DST transitions, and calendar boundaries are ignored. Calendar units (months, years) are rejected for the same reason: 28-31 days and 365-366 days make them unsuitable for a precise release-age cutoff. Use `days` or `weeks` instead.
@@ -34,7 +36,7 @@ When `cooldown` is set, `mpm`:
 
 1. Computes a UTC cutoff timestamp equal to `now - cooldown`.
 2. For each manager that natively enforces a release-age gate (see the support table below), injects the manager's dedicated environment variable carrying that cutoff into every CLI call. The manager's own resolver then excludes every version published after the cutoff, including transitive dependencies.
-3. For each manager without a native gate, **skips** install / upgrade with a warning (fail-closed). Pass `--allow-unsupported-managers` (or set `require_cooldown_support = false` in the config file) to run those managers anyway, without the safeguard.
+3. For each manager without a native gate, **skips** install / upgrade with a warning (fail-closed). Re-run with `--cooldown best-effort` (or set `policy = "best-effort"` in the `[mpm.cooldown]` table of the config file) to run those managers anyway, without the safeguard.
 4. Leaves read-only operations (`outdated`, `installed`, `search`) untouched: information is never blocked, only mutations are.
 
 The choice to delegate to each manager's own resolver rather than reimplement the gate inside `mpm` is deliberate: only the resolver can apply the cutoff to the whole dependency closure (see [Limitations](#limitations) below).

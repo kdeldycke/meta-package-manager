@@ -25,6 +25,13 @@ import pytest
 from click_extra import Duration
 
 from meta_package_manager.cli_maintenance import cooldown_permits
+from meta_package_manager.cooldown import (
+    Cooldown,
+    CooldownPolicy,
+    CooldownSettings,
+    parse_cooldown_section,
+    resolve_cooldown,
+)
 from meta_package_manager.managers.gem import Gem
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM
@@ -346,7 +353,7 @@ def test_cooldown_permits_blocks_unsupported(caplog):
     manager.require_cooldown_support = True
     assert cooldown_permits(manager) is False
     assert "cannot enforce" in caplog.text
-    assert "--allow-unsupported-managers" in caplog.text
+    assert "--cooldown best-effort" in caplog.text
 
 
 def test_cooldown_permits_allows_unsupported_on_opt_in(caplog):
@@ -362,3 +369,166 @@ def test_cli_rejects_invalid_cooldown(invoke):
     result = invoke("--cooldown", "bogus", "managers")
     assert result.exit_code == 2
     assert "not a valid duration" in result.stderr
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    (
+        # Duration grammar flows through click-extra's Duration type.
+        ("7 days", timedelta(days=7)),
+        ("12h", timedelta(hours=12)),
+        ("P7D", timedelta(days=7)),
+        # Zero, off and future timestamps all read as "no gate".
+        ("0", CooldownPolicy.off),
+        ("off", CooldownPolicy.off),
+        ("OFF", CooldownPolicy.off),
+        ("2999-01-01T00:00:00Z", CooldownPolicy.off),
+        # Posture keywords, case-insensitively.
+        ("enforce", CooldownPolicy.enforce),
+        ("best-effort", CooldownPolicy.best_effort),
+        ("Best-Effort", CooldownPolicy.best_effort),
+        # Empty stays "unspecified": resolution inherits both axes.
+        ("", None),
+    ),
+)
+def test_cooldown_option_parses_windows_and_keywords(raw, expected):
+    """The `--cooldown` union spells a window or an enforcement posture."""
+    assert Cooldown().convert(raw, None, None) == expected
+
+
+@pytest.mark.parametrize(
+    ("section", "expected"),
+    (
+        (None, CooldownSettings(duration=None, policy=None)),
+        ({}, CooldownSettings(duration=None, policy=None)),
+        (
+            {"period": "1 week"},
+            CooldownSettings(duration=timedelta(days=7), policy=None),
+        ),
+        (
+            {"period": "1 week", "policy": "best-effort"},
+            CooldownSettings(
+                duration=timedelta(days=7), policy=CooldownPolicy.best_effort
+            ),
+        ),
+        # A zero period reads as "no window".
+        ({"period": "0"}, CooldownSettings(duration=None, policy=None)),
+        # The deprecated top-level string spelling is the window.
+        (
+            "1 week",
+            CooldownSettings(duration=timedelta(days=7), policy=None, legacy=True),
+        ),
+    ),
+)
+def test_parse_cooldown_section(section, expected):
+    assert parse_cooldown_section(section) == expected
+
+
+@pytest.mark.parametrize(
+    ("section", "reason"),
+    (
+        # A posture without a window would be a standing no-op gate.
+        ({"policy": "best-effort"}, "requires a period"),
+        # off is a CLI-only keyword; configuration disables via the period.
+        ({"period": "1 week", "policy": "off"}, "CLI-only"),
+        ({"policy": "sideways"}, "unknown policy"),
+        ({"period": "bogus"}, "not a valid duration"),
+        ({"windows": "1 week"}, "unknown key"),
+    ),
+)
+def test_parse_cooldown_section_rejects(section, reason):
+    with pytest.raises(ValueError, match=reason):
+        parse_cooldown_section(section)
+
+
+def test_parse_cooldown_section_rejects_wrong_shape():
+    """A section that is neither a table nor a string is a type error."""
+    with pytest.raises(TypeError, match="expected a table"):
+        parse_cooldown_section(["1 week"])
+
+
+@pytest.mark.parametrize(
+    ("flag", "settings", "expected"),
+    (
+        # Nothing anywhere: no gate, fail-closed posture by default.
+        (None, CooldownSettings(None, None), (None, CooldownPolicy.enforce)),
+        # The configuration alone decides both axes.
+        (
+            None,
+            CooldownSettings(timedelta(days=7), CooldownPolicy.best_effort),
+            (timedelta(days=7), CooldownPolicy.best_effort),
+        ),
+        # A flag window inherits the configured posture.
+        (
+            timedelta(days=1),
+            CooldownSettings(timedelta(days=7), CooldownPolicy.best_effort),
+            (timedelta(days=1), CooldownPolicy.best_effort),
+        ),
+        # A flag posture inherits the configured window.
+        (
+            CooldownPolicy.best_effort,
+            CooldownSettings(timedelta(days=7), None),
+            (timedelta(days=7), CooldownPolicy.best_effort),
+        ),
+        # A flag posture overrides the configured one.
+        (
+            CooldownPolicy.enforce,
+            CooldownSettings(timedelta(days=7), CooldownPolicy.best_effort),
+            (timedelta(days=7), CooldownPolicy.enforce),
+        ),
+        # off forces the window off too, whatever the configuration.
+        (
+            CooldownPolicy.off,
+            CooldownSettings(timedelta(days=7), CooldownPolicy.best_effort),
+            (None, CooldownPolicy.off),
+        ),
+    ),
+)
+def test_resolve_cooldown(flag, settings, expected):
+    """The flag and the configuration merge axis by axis."""
+    assert resolve_cooldown(flag, settings) == expected
+
+
+def test_cli_cooldown_config_table(tmp_path, invoke):
+    """A `[mpm.cooldown]` table reaches the gate through the configuration."""
+    conf = tmp_path / "config.toml"
+    conf.write_text('[mpm.cooldown]\nperiod = "1 week"\n', encoding="UTF-8")
+    # A posture keyword inherits the configured window, so the run has an
+    # active gate and the "no effect" note stays off.
+    result = invoke(
+        "--config",
+        str(conf),
+        "--verbosity",
+        "INFO",
+        "--cooldown",
+        "best-effort",
+        "managers",
+    )
+    assert result.exit_code == 0
+    assert "has no effect" not in result.stderr
+
+
+def test_cli_cooldown_keyword_without_window_is_a_noop(invoke):
+    """A posture keyword with no window anywhere logs an INFO note."""
+    result = invoke("--verbosity", "INFO", "--cooldown", "best-effort", "managers")
+    assert result.exit_code == 0
+    assert "--cooldown best-effort has no effect" in result.stderr
+
+
+def test_cli_cooldown_legacy_config_spelling(tmp_path, invoke):
+    """The deprecated top-level string still sets the window, with a warning."""
+    conf = tmp_path / "config.toml"
+    conf.write_text('[mpm]\ncooldown = "1 week"\n', encoding="UTF-8")
+    result = invoke("--config", str(conf), "managers")
+    assert result.exit_code == 0
+    assert "Deprecated configuration" in result.stderr
+    assert "[mpm.cooldown] period" in result.stderr
+
+
+def test_cli_cooldown_config_policy_without_period(tmp_path, invoke):
+    """A standing posture without a window is rejected at load time."""
+    conf = tmp_path / "config.toml"
+    conf.write_text('[mpm.cooldown]\npolicy = "best-effort"\n', encoding="UTF-8")
+    result = invoke("--config", str(conf), "managers")
+    assert result.exit_code == 1
+    assert "requires a period" in result.stderr

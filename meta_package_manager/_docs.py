@@ -2210,7 +2210,7 @@ def manager_cooldown(manager_id: str) -> str:
         parts.append(
             "With `--cooldown` set, `mpm` skips this manager's install and "
             "upgrade operations rather than run them unguarded (fail-closed); "
-            "`--allow-unsupported-managers` opts back in.",
+            "`--cooldown best-effort` opts back in.",
         )
     return "\n\n".join(parts)
 

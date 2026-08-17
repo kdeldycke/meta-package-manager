@@ -21,7 +21,8 @@ import pytest
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.pool import pool
 
-from .conftest import default_manager_ids, destructive_group
+from .conftest import default_manager_ids
+from .destructive_plan import destructive_group
 from .test_cli import CLISubCommandTests
 
 

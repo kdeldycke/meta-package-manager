@@ -17,10 +17,8 @@
 from __future__ import annotations
 
 import ast
-import gzip
+import csv
 import importlib.util
-import io
-import json
 import re
 import shutil
 from datetime import date, datetime, timezone
@@ -76,20 +74,6 @@ def _load_docs_update():
 
 
 docs_update = _load_docs_update()
-
-
-def _load_stars_update():
-    """Load `docs/stars_update.py` by path, like its `docs_update` sibling."""
-    spec = importlib.util.spec_from_file_location(
-        "stars_update",
-        Path(__file__).parent.parent / "docs" / "stars_update.py",
-    )
-    module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
-    spec.loader.exec_module(module)  # type: ignore[union-attr]
-    return module
-
-
-stars_update = _load_stars_update()
 
 
 """ Test all non-code artifacts depending on manager definitions.
@@ -590,270 +574,197 @@ def test_benchmark_table_renders():
     assert "[☠️](https://github.com/kdeldycke" not in table
 
 
-def test_star_history_repos_match_benchmark():
-    """Check the tracked repositories are exactly `mpm` plus every competitor.
+def _metrics_config() -> dict:
+    """The `[tool.repomatic.metrics]` table, through the docs generators' reader."""
+    return _docs._metrics_config()
 
-    The chart and the benchmark's own columns must never drift apart: a
-    competitor added to the comparison without a repository to sample would
-    silently go unplotted.
-    """
-    assert set(stars_update.TRACKED_REPOS) == {"mpm", *_docs.BENCHMARK_COMPETITORS}
-    for column, slug in stars_update.TRACKED_REPOS.items():
-        assert column == column.lower()
-        owner, _, name = slug.partition("/")
-        assert owner and name, f"{column} needs an owner/name slug, got {slug!r}"
-    # Every plotted series needs a hue, in the same fixed order.
-    assert list(stars_update.SERIES_COLORS) == list(stars_update.TRACKED_REPOS)
+
+def _canonical_repo_url(target: str) -> str:
+    """Mirror the sampler's rule: a bare slug is GitHub, anything else a URL."""
+    return target if "://" in target else f"https://github.com/{target}"
+
+
+def _load_metrics_store() -> list[dict]:
+    """The committed metrics store, as parsed rows."""
+    with _docs.METRICS_STORE.open(encoding="UTF-8") as store:
+        return list(csv.DictReader(store))
 
 
 def test_manager_upstreams_cover_the_pool():
     """Check every wrapped manager is either measured upstream, or excused.
 
-    The two maps partition the pool, so a manager added without a decision on
-    its upstream fails here instead of quietly rendering three empty cells. Both
-    are also checked against the pool from the other side: an ID left behind by
-    a renamed or dropped manager would otherwise sample forever.
+    The metrics subjects and the excuse map partition the pool, so a manager
+    added without a decision on its upstream fails here instead of quietly
+    rendering empty cells. Both are also checked against the pool from the
+    other side: an ID left behind by a renamed or dropped manager would
+    otherwise sample forever.
     """
-    measured = set(stars_update.UPSTREAM_REPOS)
-    excused = set(stars_update.NO_UPSTREAM)
+    subjects = _metrics_config()["subjects"]
+    measured = {name for name in subjects if name in pool}
+    excused = set(_docs.NO_UPSTREAM)
     assert measured | excused == set(pool)
     assert not measured & excused
 
-    for manager_id, url in stars_update.UPSTREAM_REPOS.items():
+    forges = {"codeberg.org", "github.com", "gitlab.com"} | set(
+        _metrics_config()["forges"]
+    )
+    for manager_id in measured:
+        url = _canonical_repo_url(subjects[manager_id])
         assert url.startswith("https://"), f"{manager_id} needs an https URL"
         host, _, path = url.removeprefix("https://").partition("/")
         # An unknown host would raise mid-sample, one manager at a time.
-        assert host in stars_update.FORGE_APIS, f"{manager_id} sits on {host}"
+        assert host in forges, f"{manager_id} sits on {host}"
         owner, _, name = path.partition("/")
         assert owner and name, f"{manager_id} needs an owner/name path, got {path!r}"
 
     # Every reason reads as a sentence, since it is the only record of why a
     # manager shows nothing.
-    for reason in stars_update.NO_UPSTREAM.values():
+    for reason in _docs.NO_UPSTREAM.values():
         assert reason.endswith(".")
 
 
-def test_manager_upstreams_store_well_formed():
-    """Check the committed upstream readings keep the shape the index expects.
+def test_metrics_charts_are_committed():
+    """Check every configured chart is committed as a rendered SVG.
 
-    Guards a second file a scheduled job rewrites unattended: an ID that left
-    the pool, a date in the future or a negative count would all surface here
-    rather than in a rendered table nobody re-reads.
+    The charts are drawn by the sampler's weekly run, and the docs build reads
+    the committed files to stay hermetic: a missing one means a page embeds
+    nothing where a chart belongs.
     """
-    records = json.loads(stars_update.UPSTREAMS.read_text(encoding="UTF-8"))
-    assert isinstance(records, list)
-    assert records, "no upstream reading recorded yet"
-
-    today = datetime.now(tz=timezone.utc).date()
-    for record in records:
-        assert set(record) <= {
-            "commit",
-            "date",
-            "id",
-            "release",
-            "release_source",
-            "repo",
-            "stars",
-        }
-        assert set(record) >= {"date", "id", "repo", "stars"}
-        assert record["id"] in pool
-        # A reading whose manager is no longer measured must be dropped rather
-        # than left to age: the sampler prunes it on its next run.
-        assert record["id"] in stars_update.UPSTREAM_REPOS
-        assert record["repo"] == stars_update.UPSTREAM_REPOS[record["id"]]
-        assert isinstance(record["stars"], int)
-        assert record["stars"] >= 0
-        # A release date always states where it came from, and never the reverse.
-        assert ("release" in record) == ("release_source" in record)
-        if "release" in record:
-            assert record["release_source"] in {"release", "tag"}
-        for field in ("commit", "date", "release"):
-            if field in record:
-                assert date.fromisoformat(record[field]) <= today
-
-    ids = [record["id"] for record in records]
-    assert len(ids) == len(set(ids)), "one manager was sampled twice"
-    assert ids == sorted(ids), "records are sorted by manager ID"
+    for chart in _metrics_config()["charts"]:
+        path = PROJECT_ROOT / chart["output"]
+        assert path.is_file(), f"{chart['output']} was never drawn"
+        svg = path.read_text(encoding="UTF-8")
+        assert svg.startswith("<svg ")
+        # An accessible name, since the chart carries meaning no caption
+        # repeats.
+        assert f'aria-label="{chart["title"]}"' in svg
 
 
-def test_star_history_store_well_formed():
-    """Check the committed star history keeps the shape its renderer expects.
+def test_metrics_predecessor_is_sampled():
+    """Check every declared forerunner has readings of its own in the store.
 
-    Guards the file a scheduled job appends to unattended: a duplicated day, a
-    repository that left the benchmark, or an unknown provenance would all
-    surface here rather than as a misdrawn chart.
+    The renderer draws it beside its successor, dashed and never joined: a
+    forerunner the sampler never read would draw nothing, silently.
     """
-    records = json.loads(stars_update.STORE.read_text(encoding="UTF-8"))
-    assert isinstance(records, list)
-    assert records, "no star history recorded yet"
-
-    # Covers the retired forerunners too, which are collected but hold no
-    # benchmark column of their own.
-    tracked = set(stars_update.collected_repos().values())
-    seen = set()
-    for record in records:
-        assert set(record) == {"date", "repo", "source", "stars"}
-        assert record["repo"] in tracked
-        assert record["source"] in stars_update.SOURCES
-        assert isinstance(record["stars"], int)
-        assert record["stars"] >= 0
-        # Dates are plain ISO days, never timestamps: the chart plots daily.
-        day = date.fromisoformat(record["date"])
-        assert day <= datetime.now(tz=timezone.utc).date()
-        key = (record["repo"], record["date"])
-        assert key not in seen, f"duplicate record for {key}"
-        seen.add(key)
-
-    # Sorted by repository then date, so a scheduled commit reads as an append.
-    keys = [(r["repo"], r["date"]) for r in records]
-    assert keys == sorted(keys)
+    config = _metrics_config()
+    rows = _load_metrics_store()
+    for successor, forerunner in config["predecessors"].items():
+        assert successor in config["subjects"]
+        url = _canonical_repo_url(forerunner)
+        assert any(
+            row["repo"] == url for row in rows
+        ), f"no reading recorded for {forerunner}"
 
 
-def test_star_history_chart_renders():
-    """Check the chart generator still draws every tracked series.
-
-    Like the benchmark table, the SVG is generated rather than hand-written, so
-    this guards the generator against crashes and structural regressions.
-    """
-    store = stars_update.load_store()
-    svg = stars_update.render_chart(store)
-    assert svg.startswith("<svg ")
-    assert svg.rstrip().endswith("</svg>")
-    # An accessible name, since the chart carries meaning no caption repeats.
-    assert 'role="img"' in svg and "aria-label=" in svg
-
-    plotted = set(stars_update.series(store))
-    for key in plotted:
-        column, prior, _ = key.partition(stars_update.PREDECESSOR_SUFFIX)
-        # Identity is never colour alone: every series is directly labelled.
-        # A forerunner is annotated where it stops instead of in the margin,
-        # and borrows its successor's hue rather than claiming a slot.
-        marker = f'class="lbl prior s-{column}"' if prior else f'class="lbl s-{column}"'
-        assert marker in svg
-        assert stars_update.SERIES_COLORS[column][0] in svg
-        assert stars_update.SERIES_COLORS[column][1] in svg
-    # The dark steps are selected, not an automatic flip of the light ones.
-    assert "prefers-color-scheme: dark" in svg
-
-    # A forerunner is drawn broken away from its successor, never joined to it:
-    # the two are independent tallies on separate repositories.
-    if any(stars_update.PREDECESSOR_SUFFIX in key for key in plotted):
-        assert "stroke-dasharray" in svg
-
-    # The single-series variant plotted on the history page drops the peers,
-    # forerunners included.
-    solo = stars_update.render_chart(store, columns=("mpm",))
-    assert 'class="lbl s-mpm"' in solo
-    for key in plotted - {"mpm"}:
-        # Keyed on the rendered label, not the hue: the stylesheet declares
-        # every series colour whether or not that series is drawn.
-        column, prior, _ = key.partition(stars_update.PREDECESSOR_SUFFIX)
-        marker = f'class="lbl prior s-{column}"' if prior else f'class="lbl s-{column}"'
-        assert marker not in solo
-
-    # The relative variant swaps the calendar axis for one measured in project
-    # age, so it must carry no calendar year among its tick labels.
-    aged = stars_update.render_chart(store, relative=True)
-    assert "years</text>" in aged
-    years = {str(year) for year in range(2000, 2100)}
-    assert not years.intersection(re.findall(r">([^<>]+)</text>", aged))
-    for key in plotted:
-        column, prior, _ = key.partition(stars_update.PREDECESSOR_SUFFIX)
-        marker = f'class="lbl prior s-{column}"' if prior else f'class="lbl s-{column}"'
-        assert marker in aged
-
-
-def test_star_history_predecessor_stops_at_handover():
-    """Check a forerunner's plotted line ends where its successor's begins.
-
-    The archived repository still collects the odd star, so its record runs to
-    today. Drawing that tail would put it alongside its successor for the whole
-    width of the chart, reading as two live projects rather than one handover.
-    """
-    grouped = stars_update.series(stars_update.load_store())
-    assert stars_update.PREDECESSOR_REPOS, "expected a forerunner to be declared"
-
-    for column in stars_update.PREDECESSOR_REPOS:
-        key = column + stars_update.PREDECESSOR_SUFFIX
-        if key not in grouped or column not in grouped:
-            continue
-        handover = grouped[column][0][0]
-        assert grouped[key][-1][0] <= handover
-        # The clip is a plotting decision, never a deletion: the store still
-        # holds the points the chart drops.
-        stored = [
-            record["date"]
-            for record in stars_update.load_store().values()
-            if record["repo"] == stars_update.PREDECESSOR_REPOS[column]
-        ]
-        assert max(stored) >= handover.isoformat()
-
-
-def test_star_history_salvages_truncated_gzip():
-    """Check a gzip stream cut short still yields its star counter.
-
-    The archive's replay service commonly drops the connection after sending
-    most of a page: measured over 25 requests for one capture, every response
-    that was not a bare `503` arrived truncated. {class}`gzip.GzipFile` needs
-    the trailer and raises, discarding a payload whose counter had already
-    arrived, so the collector decompresses leniently instead.
-    """
-    body = (
-        b"<html><head><title>x</title></head><body>"
-        + b"<div>filler</div>" * 4000
-        + b'<span id="repo-stars-counter-star" title="4,383">4.4k</span>'
-        + b"</body></html>"
-    )
-    buffer = io.BytesIO()
-    with gzip.GzipFile(fileobj=buffer, mode="wb") as compressor:
-        compressor.write(body)
-    truncated = buffer.getvalue()[:-25]
-
-    # The strict reader loses the whole payload, which is the bug being fixed.
-    with pytest.raises((EOFError, gzip.BadGzipFile)):
-        gzip.GzipFile(fileobj=io.BytesIO(truncated)).read()
-
-    salvaged = stars_update.gunzip(truncated).decode("utf-8", errors="replace")
-    assert len(salvaged) > 1000
-    counters = [
-        match.group(1)
-        for match in (
-            pattern.search(salvaged)
-            for pattern in stars_update.WAYBACK_STAR_PATTERNS
-        )
-        if match
-    ]
-    assert "4,383" in counters
-
-    # A payload with no gzip framing at all must degrade quietly, not raise:
-    # the collector calls this on whatever bytes arrived.
-    assert stars_update.gunzip(b"not gzip at all") == b""
-
-
-def test_star_history_series_start_at_creation():
-    """Check every tracked repository is anchored by a zero-star origin.
+def test_metrics_series_start_at_creation():
+    """Check every charted repository is anchored by a zero-star origin.
 
     The relative chart measures each curve from its repository's creation, and
     a competitor backfilled from the archives has no knowable first star: its
     earliest capture already shows a count. Without the anchor its curve would
     begin in mid-air, and the relative axis would have nothing to align on.
     """
-    store = stars_update.load_store()
-    origins = {
-        record["repo"]: record
-        for record in store.values()
-        if record["source"] == "created"
-    }
-    for column, slug in stars_update.TRACKED_REPOS.items():
-        assert slug in origins, f"{column} has no creation anchor"
-        assert origins[slug]["stars"] == 0
-        # The anchor must precede every measurement of that repository.
-        later = [
-            record["date"]
-            for record in store.values()
-            if record["repo"] == slug and record["source"] != "created"
+    config = _metrics_config()
+    rows = _load_metrics_store()
+    for name in ("mpm", *_docs.BENCHMARK_COMPETITORS):
+        url = _canonical_repo_url(config["subjects"][name])
+        star_rows = [
+            row for row in rows if row["repo"] == url and row["metric"] == "stars"
         ]
-        assert all(day >= origins[slug]["date"] for day in later)
+        origins = [row for row in star_rows if row["source"] == "created"]
+        assert origins, f"{name} has no creation anchor"
+        assert origins[0]["value"] == "0"
+        # The anchor must precede every measurement of that repository.
+        assert all(row["date"] >= origins[0]["date"] for row in star_rows)
+
+
+def test_metrics_store_well_formed():
+    """Check the committed metrics store keeps the shape its readers expect.
+
+    Guards a file a scheduled job rewrites unattended: a repository that left
+    the subjects, a duplicated reading, or an unknown provenance would all
+    surface here rather than in a rendered table or misdrawn chart nobody
+    re-reads.
+    """
+    config = _metrics_config()
+    tracked = {
+        _canonical_repo_url(target)
+        for target in (
+            *config["subjects"].values(),
+            *config["predecessors"].values(),
+        )
+    }
+
+    rows = _load_metrics_store()
+    assert rows, "no metric reading recorded yet"
+
+    today = datetime.now(tz=timezone.utc).date()
+    star_days = set()
+    attributes = set()
+    releases = set()
+    release_sources = set()
+    for row in rows:
+        assert set(row) == {"date", "metric", "repo", "source", "value"}
+        assert row["repo"] in tracked
+        assert row["metric"] in {"commit", "release", "release_source", "stars"}
+        assert row["source"] in {
+            "created",
+            "github",
+            "sample",
+            "star-history",
+            "wayback",
+        }
+        # Dates are plain ISO days, never timestamps.
+        assert date.fromisoformat(row["date"]) <= today
+        if row["metric"] == "stars":
+            assert int(row["value"]) >= 0
+            key = (row["repo"], row["date"])
+            assert key not in star_days, f"duplicate reading for {key}"
+            star_days.add(key)
+        else:
+            # An attribute keeps one row: a moved value replaces it rather
+            # than appending.
+            key = (row["repo"], row["metric"])
+            assert key not in attributes, f"duplicate attribute for {key}"
+            attributes.add(key)
+            if row["metric"] in {"commit", "release"}:
+                date.fromisoformat(row["value"])
+            if row["metric"] == "release":
+                releases.add(row["repo"])
+            if row["metric"] == "release_source":
+                assert row["value"] in {"release", "tag"}
+                release_sources.add(row["repo"])
+
+    # A release date always states where it came from, and never the reverse.
+    assert releases == release_sources
+
+    # Sorted by repository, metric and date, so a scheduled commit reads as an
+    # append per subject.
+    keys = [(row["repo"], row["metric"], row["date"]) for row in rows]
+    assert keys == sorted(keys)
+
+
+def test_metrics_subjects_match_benchmark():
+    """Check the charted subjects are exactly `mpm` plus every competitor.
+
+    The charts and the benchmark's own columns must never drift apart: a
+    competitor added to the comparison without a repository to sample would
+    silently go unplotted.
+    """
+    config = _metrics_config()
+    charted = ["mpm", *_docs.BENCHMARK_COMPETITORS]
+    for name in charted:
+        assert name in config["subjects"], f"{name} has no repository to sample"
+        target = config["subjects"][name]
+        owner, _, repo = target.partition("/")
+        assert owner and repo, f"{name} needs an owner/name slug, got {target!r}"
+
+    # Every plotted series needs a hue, in the same fixed order.
+    assert list(config["colors"]) == charted
+    # And every chart names the series it draws, since the default would plot
+    # all hundred-odd subjects.
+    for chart in config["charts"]:
+        assert list(chart["only"]) in (charted, ["mpm"]), chart["output"]
 
 
 def test_binaries_download_table_renders():

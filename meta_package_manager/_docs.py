@@ -36,7 +36,6 @@ from __future__ import annotations
 
 import csv
 import inspect
-import json
 import re
 import sys
 from collections import Counter
@@ -465,7 +464,7 @@ UPSTREAM_BADGES: dict[str, tuple[UpstreamBadge, ...]] = {
 Not the same list three times: a badge is listed for a forge only where it was
 verified to answer, since shields renders a red error image for an endpoint a
 forge cannot serve. GitHub is the deepest catalogue by far, which is also where
-88 of the sampled upstreams live; GitLab has no release-date badge at all, and
+109 of the sampled upstreams live; GitLab has no release-date badge at all, and
 the Gitea family (Codeberg) tops out at four.
 
 Stars and the newest commit are deliberately absent: both are already stated by
@@ -478,6 +477,7 @@ UPSTREAM_FORGES: dict[str, tuple[str, str | None]] = {
     "github.com": ("github", None),
     "gitlab.alpinelinux.org": ("gitlab", "gitlab_url"),
     "gitlab.archlinux.org": ("gitlab", "gitlab_url"),
+    "gitlab.com": ("gitlab", None),
     "gitlab.exherbo.org": ("gitlab", "gitlab_url"),
     "salsa.debian.org": ("gitlab", "gitlab_url"),
 }
@@ -490,6 +490,23 @@ error images, and `test_upstream_badges_cover_every_forge` names it. The
 public instances need no parameter; every self-hosted one is passed its base
 URL, which is what lets Alpine's own GitLab and Codeberg's Forgejo answer
 through the same service as GitHub.
+"""
+
+NO_UPSTREAM = {
+    "apt-mint": "Ships in a distribution package with no public repository.",
+    "gcloud": "Google publishes the Cloud SDK as a binary; its source is not.",
+    "opkg": "Hosted on the Yocto Project's cgit, which serves no API.",
+    "steamcmd": "Valve ships SteamCMD as a proprietary binary.",
+    "sun-tools": "Oracle Solaris packaging tools are proprietary.",
+    "tazpkg": "Hosted on SliTaz's Mercurial server, which serves no API.",
+    "urpmi": "Hosted on Mageia's own git server, which serves no API.",
+}
+"""Managers whose upstream cannot be measured, and why.
+
+Recorded rather than left implicit: a manager absent from both the metrics
+subjects and this map is an oversight a conformance test reports, while one
+listed here is a decision. Their popularity and activity cells stay empty on
+the manager pages.
 """
 
 
@@ -2461,22 +2478,82 @@ def manager_changelog(manager_id: str) -> str:
     return "\n".join(lines)
 
 
+METRICS_STORE = PROJECT_ROOT / "docs" / "assets" / "metrics.csv"
+"""Forge readings sampled by `repomatic sample-metrics` on the weekly schedule
+of `.github/workflows/metrics.yaml`, and committed.
+
+One row per repository, metric and date. The star-history charts of the
+benchmark and history pages read the accruing `stars` rows through the
+repomatic renderer itself; the manager pages read the same store for the two
+facts their cards state.
+"""
+
+
+@cache
+def _metrics_config() -> dict:
+    """Parse the `[tool.repomatic.metrics]` table of `pyproject.toml`.
+
+    The sampler's own configuration is the single source declaring which
+    repository each subject measures, so the manager pages join the store
+    against it rather than carrying a second map.
+    """
+    content = (PROJECT_ROOT / "pyproject.toml").read_text(encoding="UTF-8")
+    config = tomllib.loads(content)
+    return config["tool"]["repomatic"]["metrics"]  # type: ignore[no-any-return]
+
+
+def _canonical_repo_url(target: str) -> str:
+    """Resolve a metrics subject to the full URL the store records.
+
+    A bare `owner/name` is GitHub, mirroring the sampler's own rule; anything
+    else is already the URL it reads.
+    """
+    if "://" in target:
+        return target
+    return f"https://github.com/{target}"
+
+
 @cache
 def _manager_upstreams() -> dict[str, dict]:
-    """Read the sampled upstream readings of `docs/assets/manager-upstreams.json`.
+    """Read the sampled upstream readings of {data}`METRICS_STORE`.
 
-    Written by `docs/stars_update.py --sample-upstreams` on the weekly schedule
-    and committed, which is what keeps the docs build hermetic: the manager index
-    reports a hundred forge repositories without the build touching a network.
-    Keyed by manager ID; a manager whose upstream cannot be measured is simply
-    absent, and renders as empty cells.
+    Committed by the weekly `metrics.yaml` schedule, which is what keeps the
+    docs build hermetic: the manager pages report a hundred forge repositories
+    without the build touching a network. Keyed by manager ID, resolved
+    through the `[tool.repomatic.metrics] subjects` table; a manager whose
+    upstream cannot be measured is simply absent, and renders as empty cells.
     """
-    records = json.loads(
-        (PROJECT_ROOT / "docs" / "assets" / "manager-upstreams.json").read_text(
-            encoding="UTF-8"
-        )
-    )
-    return {record["id"]: record for record in records}
+    subjects = _metrics_config()["subjects"]
+
+    # One aggregated view per repository: the newest star count, and the sole
+    # row of each attribute metric.
+    per_repo: dict[str, dict] = {}
+    with METRICS_STORE.open(encoding="UTF-8") as store:
+        for row in csv.DictReader(store):
+            reading = per_repo.setdefault(row["repo"], {})
+            metric = row["metric"]
+            if metric == "stars":
+                newest = reading.get("stars_day", "")
+                if row["date"] >= newest:
+                    reading["stars_day"] = row["date"]
+                    reading["stars"] = int(row["value"])
+            else:
+                reading[metric] = row["value"]
+
+    upstreams = {}
+    for manager_id in pool:
+        if manager_id not in subjects:
+            continue
+        repo = _canonical_repo_url(subjects[manager_id])
+        readings = per_repo.get(repo)
+        if not readings:
+            continue
+        upstreams[manager_id] = {"repo": repo} | {
+            key: value
+            for key, value in readings.items()
+            if key in ("stars", "commit", "release", "release_source")
+        }
+    return upstreams
 
 
 def brewfile_managers_table() -> str:

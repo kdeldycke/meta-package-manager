@@ -883,6 +883,162 @@ manpages.script = "meta_package_manager.cli:mpm"
 # matches the CLI name and shortens the asset URL on every release.
 manpages.asset-name = "mpm-manpages"
 # Content-based labeller rules. See repomatic's labels.content-rules schema.
+# One chart per documentation page embedding one, in the filenames the
+# pages already reference. `only` keeps the five tracked series to
+# themselves: the default would plot all hundred-odd subjects. The benchmark
+# pair measures the vertical axis in powers of ten, so the series orders of
+# magnitude apart stay legible on one chart.
+metrics.charts = [
+  { only = [ "mpm", "topgrade", "upt", "pacaptr", "metapac" ], output = "./docs/assets/star-history.svg", scale = "logarithmic", title = "Star history of mpm and its benchmarked peers" },
+  { mode = "relative", only = [ "mpm", "topgrade", "upt", "pacaptr", "metapac" ], output = "./docs/assets/star-history-relative.svg", scale = "logarithmic", title = "Stars of mpm and its benchmarked peers by project age" },
+  { only = [ "mpm" ], output = "./docs/assets/star-history-mpm.svg", title = "Star history of mpm" },
+]
+# Forge readings the docs pages display: the star-history charts of the
+# benchmark and history pages, and the upstream stars and commit dates the
+# manager cards show. `repomatic sample-metrics` appends to the store and
+# redraws the charts on the weekly `metrics.yaml` schedule, replacing the
+# project's own `docs/stars_update.py` sampler and the third-party
+# star-history embeds GitHub's 2026 stargazer restriction broke.
+metrics.sync = true
+# Hues of the plotted series, light and dark, in draw order.
+metrics.colors.mpm = [ "#2a78d6", "#3987e5" ]
+metrics.colors.topgrade = [ "#eb6834", "#d95926" ]
+metrics.colors.upt = [ "#1baf7a", "#199e70" ]
+metrics.colors.pacaptr = [ "#eda100", "#c98500" ]
+metrics.colors.metapac = [ "#e87ba4", "#d55181" ]
+# The four self-hosted GitLab instances the pool's upstreams live on.
+# Public hosts need no entry, and a host named nowhere raises rather than
+# sampling nothing.
+metrics.forges."gitlab.alpinelinux.org" = "gitlab"
+metrics.forges."gitlab.archlinux.org" = "gitlab"
+metrics.forges."gitlab.exherbo.org" = "gitlab"
+metrics.forges."salsa.debian.org" = "gitlab"
+# `topgrade-rs/topgrade` is a continuation of the archived original, which
+# still collects the odd star: draw the forerunner beside it, dashed, never
+# joined, so the by-age chart does not report an inherited audience as the
+# fastest start in the field.
+metrics.predecessors.topgrade = "r-darwish/topgrade"
+metrics.subjects.am = "https://github.com/ivan-hc/AM"
+metrics.subjects.antidote = "https://github.com/mattmc3/antidote"
+metrics.subjects.antigen = "https://github.com/zsh-users/antigen"
+metrics.subjects.apk = "https://gitlab.alpinelinux.org/alpine/apk-tools"
+metrics.subjects.apm = "https://github.com/atom/apm"
+metrics.subjects.apt = "https://salsa.debian.org/apt-team/apt"
+metrics.subjects.apt-cyg = "https://github.com/transcode-open/apt-cyg"
+metrics.subjects.asdf = "https://github.com/asdf-vm/asdf"
+metrics.subjects.basalt = "https://github.com/hyperupcall/basalt"
+metrics.subjects.bin = "https://github.com/marcosnils/bin"
+metrics.subjects.bob = "https://github.com/MordechaiHadad/bob"
+metrics.subjects.bpkg = "https://github.com/bpkg/bpkg"
+metrics.subjects.brew = "https://github.com/Homebrew/brew"
+metrics.subjects.bun = "https://github.com/oven-sh/bun"
+metrics.subjects.cargo = "https://github.com/rust-lang/cargo"
+metrics.subjects.cask = "https://github.com/Homebrew/homebrew-cask"
+metrics.subjects.cave = "https://gitlab.exherbo.org/paludis/paludis"
+metrics.subjects.choco = "https://github.com/chocolatey/choco"
+metrics.subjects.chromebrew = "https://github.com/chromebrew/chromebrew"
+metrics.subjects.clib = "https://github.com/clibs/clib"
+metrics.subjects.composer = "https://github.com/composer/composer"
+metrics.subjects.conda = "https://github.com/conda/conda"
+metrics.subjects.cpan = "https://github.com/andk/cpanpm"
+metrics.subjects.deb-get = "https://github.com/wimpysworld/deb-get"
+metrics.subjects.dkp-pacman = "https://github.com/devkitPro/pacman"
+metrics.subjects.dnf = "https://github.com/rpm-software-management/dnf"
+metrics.subjects.dnf5 = "https://github.com/rpm-software-management/dnf5"
+metrics.subjects.dotnet = "https://github.com/dotnet/sdk"
+metrics.subjects.elan = "https://github.com/leanprover/elan"
+metrics.subjects.emerge = "https://github.com/gentoo/portage"
+metrics.subjects.eopkg = "https://github.com/getsolus/eopkg"
+metrics.subjects.fink = "https://github.com/fink/fink"
+metrics.subjects.fisher = "https://github.com/jorgebucaran/fisher"
+metrics.subjects.flatpak = "https://github.com/flatpak/flatpak"
+metrics.subjects.fwupd = "https://github.com/fwupd/fwupd"
+metrics.subjects.gem = "https://github.com/ruby/rubygems"
+metrics.subjects.getnf = "https://github.com/getnf/getnf"
+metrics.subjects.gext = "https://github.com/essembeh/gnome-extensions-cli"
+metrics.subjects.gh-ext = "https://github.com/cli/cli"
+metrics.subjects.ghcup = "https://github.com/haskell/ghcup-hs"
+metrics.subjects.guix = "https://codeberg.org/guix/guix"
+metrics.subjects.haxelib = "https://github.com/HaxeFoundation/haxelib"
+metrics.subjects.jpm = "https://github.com/janet-lang/jpm"
+metrics.subjects.juliaup = "https://github.com/JuliaLang/juliaup"
+metrics.subjects.krew = "https://github.com/kubernetes-sigs/krew"
+metrics.subjects.lazy = "https://github.com/folke/lazy.nvim"
+metrics.subjects.luarocks = "https://github.com/luarocks/luarocks"
+metrics.subjects.macports = "https://github.com/macports/macports-base"
+metrics.subjects.mamba = "https://github.com/mamba-org/mamba"
+metrics.subjects.mas = "https://github.com/mas-cli/mas"
+metrics.subjects.mason = "https://github.com/mason-org/mason.nvim"
+metrics.subjects.metapac = "ripytide/metapac"
+metrics.subjects.micro = "https://github.com/micro-editor/micro"
+metrics.subjects.micromamba = "https://github.com/mamba-org/mamba"
+metrics.subjects.miktex = "https://github.com/MiKTeX/miktex"
+metrics.subjects.mise = "https://github.com/jdx/mise"
+metrics.subjects.mpm = "kdeldycke/meta-package-manager"
+metrics.subjects.nala = "https://gitlab.com/volian/nala"
+metrics.subjects.nimble = "https://github.com/nim-lang/nimble"
+metrics.subjects.nix = "https://github.com/NixOS/nix"
+metrics.subjects.npm = "https://github.com/npm/cli"
+metrics.subjects.oh-my-fish = "https://github.com/oh-my-fish/oh-my-fish"
+metrics.subjects.ollama = "https://github.com/ollama/ollama"
+metrics.subjects.opam = "https://github.com/ocaml/opam"
+metrics.subjects.pacaptr = "rami3l/pacaptr"
+metrics.subjects.pacaur = "https://github.com/E5ten/pacaur"
+metrics.subjects.pacman = "https://gitlab.archlinux.org/pacman/pacman"
+metrics.subjects.pacstall = "https://github.com/pacstall/pacstall"
+metrics.subjects.pamac = "https://github.com/manjaro/pamac-cli"
+metrics.subjects.paru = "https://github.com/Morganamilo/paru"
+metrics.subjects.pikaur = "https://github.com/actionless/pikaur"
+metrics.subjects.pip = "https://github.com/pypa/pip"
+metrics.subjects.pipx = "https://github.com/pypa/pipx"
+metrics.subjects.pixi = "https://github.com/prefix-dev/pixi"
+metrics.subjects.pkcon = "https://github.com/PackageKit/PackageKit"
+metrics.subjects.pkg = "https://github.com/freebsd/pkg"
+metrics.subjects.pkg-tools = "https://github.com/openbsd/src"
+metrics.subjects.pkgin = "https://github.com/NetBSDfr/pkgin"
+metrics.subjects.pnpm = "https://github.com/pnpm/pnpm"
+metrics.subjects.ports = "https://github.com/freebsd/freebsd-ports"
+metrics.subjects.pwsh-gallery = "https://github.com/PowerShell/PSResourceGet"
+metrics.subjects.pyenv = "https://github.com/pyenv/pyenv"
+metrics.subjects.raco = "https://github.com/racket/racket"
+metrics.subjects.rustup = "https://github.com/rust-lang/rustup"
+metrics.subjects.scoop = "https://github.com/ScoopInstaller/Scoop"
+metrics.subjects.sdkman = "https://github.com/sdkman/sdkman-cli"
+metrics.subjects.sfsu = "https://github.com/winpax/sfsu"
+metrics.subjects.sheldon = "https://github.com/rossmacarthur/sheldon"
+metrics.subjects.slapt-get = "https://github.com/jaos/slapt-get"
+metrics.subjects.snap = "https://github.com/canonical/snapd"
+metrics.subjects.soar = "https://github.com/pkgforge/soar"
+metrics.subjects.sorcery = "https://github.com/sourcemage/sorcery"
+metrics.subjects.spack = "https://github.com/spack/spack"
+metrics.subjects.stew = "https://github.com/marwanhawari/stew"
+metrics.subjects.swupd = "https://github.com/clearlinux/swupd-client"
+metrics.subjects.tlmgr = "https://github.com/TeX-Live/texlive-source"
+metrics.subjects.topgrade = "https://github.com/topgrade-rs/topgrade"
+metrics.subjects.trizen = "https://github.com/trizen/trizen"
+metrics.subjects.upt = "sigoden/upt"
+metrics.subjects.uv = "https://github.com/astral-sh/uv"
+metrics.subjects.uvx = "https://github.com/astral-sh/uv"
+metrics.subjects.vagrant = "https://github.com/hashicorp/vagrant"
+metrics.subjects.vcpkg = "https://github.com/microsoft/vcpkg"
+metrics.subjects.vim-pack = "https://github.com/neovim/neovim"
+metrics.subjects.volta = "https://github.com/volta-cli/volta"
+metrics.subjects.vscode = "https://github.com/microsoft/vscode"
+metrics.subjects.vscodium = "https://github.com/VSCodium/vscodium"
+metrics.subjects.winget = "https://github.com/microsoft/winget-cli"
+metrics.subjects.xbps = "https://github.com/void-linux/xbps"
+metrics.subjects.xcodes = "https://github.com/XcodesOrg/xcodes"
+metrics.subjects.yarn = "https://github.com/yarnpkg/yarn"
+metrics.subjects.yarn-berry = "https://github.com/yarnpkg/berry"
+metrics.subjects.yay = "https://github.com/Jguer/yay"
+metrics.subjects.yazi = "https://github.com/sxyazi/yazi"
+metrics.subjects.yum = "https://github.com/rpm-software-management/yum"
+metrics.subjects.zef = "https://github.com/ugexe/zef"
+metrics.subjects.zerobrew = "https://github.com/lucasgelfond/zerobrew"
+metrics.subjects.zim = "https://github.com/zimfw/zimfw"
+metrics.subjects.zinit = "https://github.com/zdharma-continuum/zinit"
+metrics.subjects.zplug = "https://github.com/zplug/zplug"
+metrics.subjects.zypper = "https://github.com/openSUSE/zypper"
 labels.content-rules."📦 manager: apk" = [ "alpine", "alpine linux" ]
 labels.content-rules."📦 manager: apm" = [ "atom" ]
 labels.content-rules."📦 manager: apt-cyg" = [ "cygwin" ]

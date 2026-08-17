@@ -1,0 +1,13 @@
+---
+name: 📈 Forge metrics
+"on":
+  workflow_dispatch:
+  schedule:
+    - cron: "41 5 * * 2"
+
+jobs:
+
+  metrics:
+    uses: kdeldycke/repomatic/.github/workflows/metrics.yaml@a9a1d6a43119f85ad7e04c2adf2f7bd9a0abdd10 # v7.13.0
+    secrets:
+      REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

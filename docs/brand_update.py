@@ -117,8 +117,8 @@ BRAND_SVGS = (
 """The SVGs this script owns, and the only ones held to the two-purple palette.
 
 `docs/assets/` also holds artwork with a palette of its own that nothing here
-should touch: the mascot illustrations and the star-history charts plotted by
-`docs/stars_update.py`.
+should touch: the mascot illustrations and the star-history charts drawn by
+`repomatic sample-metrics`.
 """
 
 EXPORTS = (

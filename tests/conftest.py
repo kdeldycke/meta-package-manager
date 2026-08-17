@@ -458,6 +458,12 @@ PACKAGE_IDS = {
     # that only writes to stdout. It opts into `RollForward=LatestMajor`, so it
     # still runs on a machine carrying no .NET 8 runtime.
     "dotnet": "dotnetsay",
+    # A Lean toolchain, which is what elan calls a package. Pinned to a concrete
+    # release rather than `stable`: the listing resolves a channel to its
+    # concrete name, so removing what `stable` installed would look up an id the
+    # inventory never reports. Every toolchain is a large download, so the round
+    # trip is expensive wherever elan is actually present.
+    "elan": "leanprover/lean4:v4.33.0",
     "emerge": "games-misc/nyancat",
     "eopkg": "sl",
     "fink": "figlet",

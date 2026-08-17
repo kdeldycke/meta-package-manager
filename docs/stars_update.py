@@ -225,6 +225,7 @@ UPSTREAM_REPOS = {
     "dnf": "https://github.com/rpm-software-management/dnf",
     "dnf5": "https://github.com/rpm-software-management/dnf5",
     "dotnet": "https://github.com/dotnet/sdk",
+    "elan": "https://github.com/leanprover/elan",
     "emerge": "https://github.com/gentoo/portage",
     "eopkg": "https://github.com/getsolus/eopkg",
     "fink": "https://github.com/fink/fink",

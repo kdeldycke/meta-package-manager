@@ -1,0 +1,104 @@
+# elan is the version manager for the Lean theorem prover
+# (https://github.com/leanprover/elan), installing the toolchains published at
+# https://github.com/leanprover/lean4. See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# A package is a toolchain, every verb taking exactly one and the listing
+# printing one per line, which is the reading `rustup` settled for this whole
+# family. elan is in fact a rustup fork, so much of its shape carries over, but
+# the parsers below do not: see the sentinel note.
+#
+# Parsing notes, verified against elan 4.2.3 on macOS, driving Lean 4.33.0:
+#   - No `installed_version` is captured, following `pyenv`, `rustup` and `bob`.
+#     A toolchain name is the identity rather than a version field, and the
+#     listing resolves `stable` to a concrete `leanprover/lean4:v4.33.0`, so the
+#     version is already inside the id. The only place a Lean version appears on
+#     its own is `elan show`, which reports the *active* toolchain alone and so
+#     answers for ambient state rather than for the machine.
+#   - The sentinel is rejected differently than in `rustup`, and the difference
+#     matters. Both print `no installed toolchains` when empty, and rustup drops
+#     it by requiring an embedded hyphen in the id. elan's names need not carry
+#     one, `stable` being a legal toolchain, so that test would silently drop
+#     real packages here. Anchoring both ends is what rejects the sentinel
+#     instead, its three words failing a single-token match.
+#   - Unlike rustup, `elan toolchain list` marks nothing: a default toolchain
+#     renders exactly like any other, the `(default)` suffix appearing only in
+#     `elan show`. Nothing has to be stripped from the id.
+#   - `elan toolchain gc` **reports** the toolchains no known project references
+#     and `--delete` removes them, which is a read-only orphan query and its
+#     collection in one verb pair. Its rows are `- <toolchain>`; the
+#     `Known projects:` block that follows renders as
+#     `- default toolchain: <toolchain>`, so anchoring the end is what tells the
+#     two apart. Both states were reproduced before the pattern was written.
+#   - No `outdated`, no `search` and no `upgrade`. `elan update` is refused
+#     outright as an unrecognized argument, elan publishes no catalog of
+#     available toolchains, and `elan self update` replaces elan itself rather
+#     than a package, so it is deliberately not wired to anything.
+#
+# ```{caution}
+# Upstream calls the garbage collector experimental, having merged it as such in
+# [leanprover/elan#130](https://github.com/leanprover/elan/pull/130), so the two
+# operations resting on it are the ones to re-check first if its output moves.
+# ```
+#
+# No logo: Simple Icons carries no mark for Lean, so the manager page keeps its
+# default package glyph rather than borrowing an unrelated one.
+#
+# No escalation: elan installs under `$ELAN_HOME`, falling back to `~/.elan`.
+
+[mpm.managers.elan]
+name = "Lean elan"
+homepage_url = "https://github.com/leanprover/elan"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["elan"]
+requirement = ">=4.0.0"
+# The first stable release carrying the garbage collector that `orphans` and
+# `cleanup_orphan` are built on, merged 2024-06-18 and shipped 2025-01-30.
+# Everything else here spans older releases unchanged.
+# `elan --version` prints `elan 4.2.3 ( )`, the parenthesised commit hash being
+# empty on a release build. Anchored so only the leading token is a candidate.
+version_regexes = ['^elan (?P<version>\S+)']
+
+[mpm.managers.elan.operations.installed]
+args = ["toolchain", "list"]
+regex = '^(?P<package_id>\S+)$'
+
+# The report lists one unused toolchain per line under a header sentence, then a
+# `Known projects:` block whose own rows also open on a dash. Anchoring the end
+# keeps `- default toolchain: <name>` out, that row carrying spaces.
+[mpm.managers.elan.operations.orphans]
+args = ["toolchain", "gc"]
+regex = '^- (?P<package_id>\S+)$'
+
+[mpm.managers.elan.operations.install]
+args = ["toolchain", "install", "{package_id}"]
+
+[mpm.managers.elan.operations.remove]
+args = ["toolchain", "uninstall", "{package_id}"]
+
+[mpm.managers.elan.operations.cleanup_orphan]
+args = ["toolchain", "gc", "--delete"]
+
+# Output samples locking the version probe and the declared parsers, captured
+# from elan 4.2.3. Consumed by tests/test_manager_definition.py; ignored by
+# mpm's loader.
+#
+# The orphan report was captured with the installed toolchain deliberately
+# unreferenced, a state reached by clearing `default_toolchain` from elan's own
+# `settings.toml`, there being no verb that unsets a default. It carries the
+# `Known projects:` heading its rows have to be told apart from.
+[samples.version]
+output = "elan 4.2.3 ( )"
+expected = "4.2.3"
+
+[[samples.installed]]
+output = "leanprover/lean4:v4.33.0"
+packages = [{ id = "leanprover/lean4:v4.33.0" }]
+
+[[samples.orphans]]
+output = """
+The following toolchains are not used by any known project; rerun with `--delete` to delete them:
+- leanprover/lean4:v4.33.0
+Known projects:"""
+packages = [{ id = "leanprover/lean4:v4.33.0" }]

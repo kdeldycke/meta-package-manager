@@ -50,6 +50,7 @@ keywords = [
   "dnf",
   "dnf5",
   "dotnet",
+  "elan",
   "emerge",
   "eopkg",
   "exherbo",
@@ -938,6 +939,7 @@ labels.file-rules."📦 manager: dpkg-based" = [
   "tests/*opkg*",
   "tests/*pacstall*",
 ]
+labels.file-rules."📦 manager: elan" = [ "meta_package_manager/managers/elan.*", "tests/*elan*" ]
 labels.file-rules."📦 manager: emerge" = [ "meta_package_manager/managers/emerge.*", "tests/*emerge*" ]
 labels.file-rules."📦 manager: eopkg" = [ "meta_package_manager/managers/eopkg.*", "tests/*eopkg*" ]
 labels.file-rules."📦 manager: fish-based" = [
@@ -1179,6 +1181,11 @@ description = "dotnet"
 name = "📦 manager: dpkg-based"
 color = "bfdadc"
 description = "apt, apt-mint, deb-get, fink, nala, opkg, pacstall"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: elan"
+color = "bfdadc"
+description = "elan"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: emerge"

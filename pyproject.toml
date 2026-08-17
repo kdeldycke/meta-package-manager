@@ -909,7 +909,6 @@ labels.file-rules."📦 manager: bash-based" = [
   "tests/*bpkg*",
 ]
 labels.file-rules."📦 manager: bin" = [ "meta_package_manager/managers/bin.*", "tests/*bin*" ]
-labels.file-rules."📦 manager: bob" = [ "meta_package_manager/managers/bob.*", "tests/*bob*" ]
 labels.file-rules."📦 manager: cargo" = [ "meta_package_manager/managers/cargo.*", "tests/*cargo*" ]
 labels.file-rules."📦 manager: cave" = [ "meta_package_manager/managers/cave.*", "tests/*cave*" ]
 labels.file-rules."📦 manager: choco" = [ "meta_package_manager/managers/choco.*", "tests/*choco*" ]
@@ -979,7 +978,9 @@ labels.file-rules."📦 manager: micro" = [ "meta_package_manager/managers/micro
 labels.file-rules."📦 manager: miktex" = [ "meta_package_manager/managers/miktex.*", "tests/*miktex*" ]
 labels.file-rules."📦 manager: mpm" = [ "meta_package_manager/*" ]
 labels.file-rules."📦 manager: neovim-based" = [
+  "meta_package_manager/managers/bob.*",
   "meta_package_manager/managers/neovim.*",
+  "tests/*bob*",
   "tests/*lazy*",
   "tests/*mason*",
   "tests/*neovim*",
@@ -1128,11 +1129,6 @@ description = "basalt, bpkg"
 name = "📦 manager: bin"
 color = "bfdadc"
 description = "bin"
-
-[[tool.repomatic.labels.extra]]
-name = "📦 manager: bob"
-color = "bfdadc"
-description = "bob"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: cargo"
@@ -1308,7 +1304,7 @@ description = "mpm"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: neovim-based"
 color = "bfdadc"
-description = "lazy, mason, vim-pack"
+description = "bob, lazy, mason, vim-pack"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: nimble"

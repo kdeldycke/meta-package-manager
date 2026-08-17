@@ -143,7 +143,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     }),
     "fish-based": frozenset({"fisher", "oh-my-fish"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
-    "neovim-based": frozenset({"lazy", "mason", "vim-pack"}),
+    "neovim-based": frozenset({"bob", "lazy", "mason", "vim-pack"}),
     "npm-based": frozenset({
         "bun",
         "npm",
@@ -201,6 +201,14 @@ because the host program is the axis: Neovim is what a `mason` report is about, 
 is also what `mpm` keys the manager on, the three sharing one module and one `nvim`
 binary. Naming the group for the editor rather than for plugins is what lets it hold
 `mason` without straining.
+
+`bob` stretches that naming one step further, and is the member to check the axis
+against. It installs Neovim itself rather than anything into it, and is the only member
+`mpm` does not key on the `nvim` binary, being its own executable in its own definition.
+It groups here regardless, because the axis is what a report is *about* and every bob
+report is about Neovim: leaving it out would split the editor across two labels and two
+tracker searches, which is the split this group exists to prevent. `volta` is the same
+call already taken elsewhere, kept under `npm-based` though it manages a runtime too.
 
 `sheldon` is the one shell plugin manager left ungrouped, and it fails both halves of
 that test: it manages plugins for any shell rather than for one, and it is a compiled

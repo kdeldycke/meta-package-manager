@@ -258,7 +258,9 @@ Do **not** subclass when the two managers have completely different output forma
 ### CLI output guidelines
 
 - Use `--long-form-options` for self-documenting CLIs.
-- Suppress colors and emoji (`--no-color`, `--color=never`, etc.) via `post_args` or `extra_env`.
+- Suppress colors and emoji (`--no-color`, `--color=never`, etc.) via `post_args` or `extra_env`. Some tools cannot be talked out of it: `bob` writes SGR escapes whether or not it holds a terminal and honors neither `NO_COLOR` nor `TERM=dumb`. That is not a blocker, because listings are matched with `re.search` rather than anchored to the start of the line, so a pattern can simply step over the escapes instead of fighting them. Prove the tool ignores every lever before adding one that does nothing. Where it *is* the terminal that varies the bytes rather than the packages, pin it: `getnf` colors through `tput`, which ignores redirection entirely, so it forces `TERM=dumb`.
+- A fixture carrying those escapes needs them written as a `\u001B` unicode escape in a TOML basic string, since TOML rejects a raw control character outright and the file will not parse. Stripping them instead is the wrong fix: it leaves a sample that no longer proves the pattern survives what the tool actually emits.
+- Prefer a format string with **no space in it** when a tool offers an output projection. `mpm` discloses the command it runs so a user can replay it by hand, and it does not shell-quote, so `--format {name} {version}` prints a line that no longer works when pasted back. `spack` uses `{name}@{version}` for exactly this, which is its own spec syntax besides.
 - Prefer machine-readable output (JSON, XML, CSV) over text parsing. When parsing text, use class-level compiled regexes with named groups.
 - Include at least one CLI output sample in each method's docstring as a `.. code-block:: shell-session` block. This helps future maintainers verify parsing without access to the actual manager.
 - Read {doc}`/falsehoods` to anticipate edge cases in package naming and versioning.
@@ -271,6 +273,7 @@ The destructive suite runs `mpm --<id> install <pkg>` then `mpm --<id> remove <p
 - **Not relied upon**: avoid ubiquitous tools (`wget`, `curl`, `git`, `jq`, `openssl`). They are usually already installed (so the install step is a no-op) and removing them can break the host or the test runner.
 - **Self-contained**, ideally a Rust or Go binary.
 - **Verified to exist** in that manager's repo/registry, with the exact ID format the manager expects (a bare name, `category/name`, `bucket/name`, `Publisher.Package`, a numeric ID, ...). Check the real index before committing the choice: do not guess.
+- **Findable through the manager's own `search`**, which is a stricter test than existing. `mpm install` resolves a package it was handed no manager for by searching first, so a name the tool installs happily but its catalog never lists cannot be installed through `mpm` at all, and the round-trip fails on the install step. Naming the manager does not help: the lookup is what supplies the candidate. `bob` is the worked example, where `nightly` installs fine but appears in no `list-remote` output, so the entry names a released tag instead. Run `mpm --<id> search <pkg>` before settling on a pick, and where the gap is real, say so on the manager's page: it is a user-visible limitation, not just a test-fixture detail.
 
 Reuse the established picks for consistency instead of inventing new ones:
 

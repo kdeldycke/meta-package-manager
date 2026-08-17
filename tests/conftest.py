@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from operator import attrgetter
 from pathlib import Path
@@ -36,6 +37,7 @@ from extra_platforms.pytest import skip_hermetic_build
 from pytest import fixture
 
 from meta_package_manager.cli import mpm
+from meta_package_manager.dispatch import merge_into_probe_lanes
 from meta_package_manager.pool import ManagerPool, manager_classes, pool
 
 from .destructive_plan import destructive_group
@@ -264,13 +266,25 @@ def warm_manager_probes():
     on the test list, and once per worker, so the cost matches what
     collection-time probing already paid.
 
-    The probes run sequentially on purpose, and not through
-    {func}`~meta_package_manager.dispatch.warm_availability`: that helper
-    sizes its thread pool from the active click context, of which a pytest
-    session has none, so it returns before probing anything.
+    Not routed through {func}`~meta_package_manager.dispatch.warm_availability`,
+    which sizes its thread pool from the active click context: a pytest session
+    has none, so that helper returns before probing anything. The lane grouping
+    it relies on is reused directly instead, since managers sharing a version
+    probe must still take turns rather than spawn the same command at once.
+
+    Threaded because a probe is a subprocess wait rather than work: sequentially
+    it cost up to 69 seconds of every worker's startup on the slower runners,
+    enough to show up in the suite's own slowest-tests report.
     """
-    for manager in pool.values():
-        manager.available
+    lanes = merge_into_probe_lanes(pool.values())
+
+    def probe(lane):
+        for manager in lane:
+            manager.available
+
+    with ThreadPoolExecutor(max_workers=min(8, len(lanes))) as executor:
+        # Consume the iterator so an exception in a lane surfaces here.
+        list(executor.map(probe, lanes))
 
 
 @fixture(autouse=True)

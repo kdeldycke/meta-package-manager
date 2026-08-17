@@ -250,14 +250,10 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.9.1 resolves the `click-extra-manpages` index against the
-  # page's own URL rather than its docname, which the `dirhtml` builder set in
-  # `[tool.repomatic] sphinx.builder` publishes one directory deeper: the man
-  # links of `cli-parameters` pointed inside their own page before it. 8.9 caps
-  # a table column to a width (`max_column_widths` on print_table), which
-  # meta_package_manager.tables uses to hold the search table's description
-  # column to `auto`, wrapping a long match in its cell instead of stretching
-  # the table past the terminal.
+  # click-extra 8.9.1 resolves the manpage index against the page URL, not the
+  # docname, which dirhtml publishes one directory deeper. 8.9 also adds
+  # print_table's max_column_widths, used by meta_package_manager.tables to
+  # hold the search table's description column to auto.
   "click-extra>=8.9.1",
   # extra-platforms 13.6 detects AlmaLinux, silencing the "unrecognized platform"
   # warning 13.5 printed to stdout on the release workflow's RHEL-family test
@@ -779,6 +775,13 @@ exclude = [ "skills" ]
 # Extension zip packed by release.yaml's build-gnome-extension job and attached
 # to every GitHub release by the engine's extra-assets job (repomatic >= 7.4.2).
 release-assets = [ "mpm-gnome-shell-extension.zip" ]
+# Publish the built site to the Cloudflare Pages project named after the
+# repository, selecting the `deploy-docs-cloudflare` and
+# `cloudflare-config-drift` jobs of the shared docs workflow over the
+# GitHub Pages default. The site moved off GitHub Pages so the `mpm.run`
+# apex could sit behind the proxy; `docs/infrastructure.md` records the
+# whole setup, including the token rotation this deploy path needs.
+site.deploy = "cloudflare-pages"
 # Publish every page as `<name>/index.html`, so the site serves `/managers/apk/`
 # instead of `/managers/apk.html`. Extension-less URLs are what search engines
 # and readers expect of a documentation site, and they outlive a change of

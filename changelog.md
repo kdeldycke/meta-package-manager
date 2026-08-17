@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Deploy the documentation to Cloudflare Pages from the shared docs workflow through repomatic's `site.deploy` switch, completing the hosting move below: until then the workflow still uploaded to the GitHub Pages site the domain no longer serves from. Its config-drift check, monthly run and token-expiry warning land with the same repomatic upgrade.
 - [mpm] Publish an index of every man page at `https://mpm.run/man/`, the directory their `.1` files and HTML renderings are already served from, and which answered `404` until now despite being linked from the installation page. The index moves there from the CLI parameters page, which keeps a pointer.
 - [mpm] Link to the documentation site at its extension-less URLs everywhere the project names one: the readme, the issue templates and the GNOME Shell extension. Each `.html` link still resolved, through a redirect.
 - [mpm] Link the benchmark page to `mpm`'s own documentation by relative path, the convention the rest of its rows already followed, rather than by absolute URL into the published site. Sphinx resolves those at build time, so they survive a local build and a read on the forge.

@@ -802,17 +802,34 @@ workflow.paths."tests.yaml" = [
 # lxml cannot compile on Windows ARM64.
 # See: https://bugs.launchpad.net/lxml/+bug/2004481
 test-matrix.remove.os = [ "windows-11-arm" ]
-# Prerelease 3.15 exercises interpreter-level compatibility, which is
-# OS-independent: the shipped-config slice (3.10, 3.14) already covers every
-# OS, so it only needs the single fastest runner (ubuntu-26.04-arm), not the
-# full spread. It keeps repomatic's built-in prerelease `unstable` flag.
+# The two axes answer different questions, so neither needs the other's spread.
+# The OS axis is the product: `mpm` drives a different set of managers on each
+# one, so every OS and architecture keeps a cell. The Python axis is
+# interpreter compatibility, which is OS-independent, so the floor runs on the
+# single fastest runner (ubuntu-26.04-arm) rather than on all five.
 #
-# Free-threaded 3.14t needs no entry here: it is not a value of the
+# Measured before cutting, over the 40 most recent runs of this workflow: of
+# the eleven that had a cell fail, not one failed on an OS whose *other*
+# Python version passed. Every Windows failure took both Windows cells, every
+# x86-Linux failure took both x86-Linux cells. The pairs cost 158 runner-
+# minutes a push and had caught nothing the survivor would have missed.
+#
+# Linux keeps the floor because Linux is where the floor is actually used:
+# distribution packagers (Guix, Nix, Alpine, Debian) build against whatever
+# interpreter their channel ships, while macOS and Windows users install a
+# Nuitka binary carrying a pinned one.
+#
+# Prerelease 3.15 rides on that same reasoning and keeps repomatic's built-in
+# `unstable` flag. Free-threaded 3.14t needs no entry: it is not a value of the
 # `python-version` axis, so an exclude naming it matches nothing and is dropped
 # with a warning. repomatic already lands it on ubuntu-26.04-arm alone, and
 # marks it stable (3.14's free-threaded build is supported).
 # See repomatic's test-matrix guide.
 test-matrix.exclude = [
+  { os = "ubuntu-26.04", python-version = "3.10" },
+  { os = "macos-26", python-version = "3.10" },
+  { os = "macos-26-intel", python-version = "3.10" },
+  { os = "windows-2025", python-version = "3.10" },
   { os = "ubuntu-26.04", python-version = "3.15" },
   { os = "macos-26", python-version = "3.15" },
   { os = "macos-26-intel", python-version = "3.15" },

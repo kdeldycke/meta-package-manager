@@ -122,6 +122,22 @@ def test_project_metadata():
     assert set(pool.all_manager_ids).issubset(toml_config["project"]["keywords"])
 
 
+def test_docs_deploy_where_infrastructure_says():
+    """Check the docs workflow deploys where the infrastructure record says.
+
+    `docs/infrastructure.md` names `[tool.repomatic] site.deploy` as the
+    switch selecting the Cloudflare Pages jobs of the shared docs workflow.
+    A key unset or repointed keeps publishing to the GitHub Pages site the
+    domain no longer serves from, silently: both hosts answer, only one is
+    read. The record and the key were split for two days once; this holds
+    them together.
+    """
+    config = tomllib.loads(
+        (PROJECT_ROOT / "pyproject.toml").read_text(encoding="UTF-8")
+    )
+    assert config["tool"]["repomatic"]["site"]["deploy"] == "cloudflare-pages"
+
+
 def test_docs_site_url_matches_pyproject():
     """The canonical docs origin is declared once, in `pyproject.toml`.
 

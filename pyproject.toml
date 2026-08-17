@@ -517,7 +517,13 @@ include-package-data = [ "click_extra", "meta_package_manager.managers:*.lua", "
 include-package = [ "cyclonedx", "hjson", "json5", "jsonc", "spdx_tools", "yaml" ]
 
 [tool.typos]
-default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PyPi = "PyPI", Typescript = "TypeScript" }
+# Correct capitalization for proper nouns referenced in claude.md, plus "PATCHed"
+# and "PNGs": typos cuts an all-caps run before its trailing lowercase letters,
+# so "PNGs" is checked as "PN" + "Gs" and rewritten to "ONGs", and "PATCHed" as
+# "PATC" + "Hed" and rewritten to "PATCHead". Only an identifier accept
+# suppresses either, since the checker never sees the whole word. Any acronym
+# carrying a lowercase suffix needs its own entry here.
+default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PATCHed = "PATCHed", PNGs = "PNGs", PyPi = "PyPI", Typescript = "TypeScript" }
 # False positives: "astroid" is a Python AST library (not "asteroid"); "oject" appears when "pyproject.toml" is split across line breaks in CLI help output; "sur" is macOS 11 Big Sur and Homebrew's big_sur bottle tag (not "sure").
 default.extend-words = { astroid = "astroid", oject = "oject", sur = "sur", mis = "mis", uncatalogued = "uncatalogued", unparseable = "unparseable" }
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.

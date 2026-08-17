@@ -15,8 +15,13 @@ name: 📚 Docs
       - readme.md
       - uv.lock
       - "**/*.py"
+  schedule:
+    - cron: "43 6 15 * *"
 
 jobs:
 
   docs:
-    uses: kdeldycke/repomatic/.github/workflows/docs.yaml@69cfe3259bda727942bcffe4a382d341cae69c44 # v7.12.1
+    uses: kdeldycke/repomatic/.github/workflows/docs.yaml@a9a1d6a43119f85ad7e04c2adf2f7bd9a0abdd10 # v7.13.0
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

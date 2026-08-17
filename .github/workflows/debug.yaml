@@ -13,4 +13,4 @@ name: 🩺 Debug
 jobs:
 
   debug:
-    uses: kdeldycke/repomatic/.github/workflows/debug.yaml@69cfe3259bda727942bcffe4a382d341cae69c44 # v7.12.1
+    uses: kdeldycke/repomatic/.github/workflows/debug.yaml@a9a1d6a43119f85ad7e04c2adf2f7bd9a0abdd10 # v7.13.0

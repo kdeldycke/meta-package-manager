@@ -49,6 +49,7 @@ from .cli import (
     mpm,
     package_label,
 )
+from .cooldown import CooldownPolicy
 from .dispatch import (
     OperationTrail,
     collect_from_managers,
@@ -72,8 +73,8 @@ def cooldown_permits(manager: PackageManager) -> bool:
     """Decide whether a release-introducing operation may run on `manager`.
 
     Returns `True` when no cooldown is active, when the manager can enforce it
-    natively, or when the user opted into the best-effort posture with
-    `--cooldown best-effort` or the `[mpm.cooldown] policy` configuration key.
+    natively, or when the manager's resolved {class}`~meta_package_manager.cooldown.CooldownPolicy`
+    waives the requirement (`best-effort`) or exempts it outright (`off`).
     Returns `False` (after logging the skip) when an active cooldown cannot be
     enforced and the fail-closed default still holds, so the caller leaves the
     manager alone rather than letting a freshly-published version slip in.
@@ -84,7 +85,8 @@ def cooldown_permits(manager: PackageManager) -> bool:
     """
     if manager.cooldown is None or manager.supports_cooldown:
         return True
-    if not manager.require_cooldown_support:
+    policy = manager.cooldown_policy or CooldownPolicy.enforce
+    if policy in (CooldownPolicy.best_effort, CooldownPolicy.off):
         logging.warning(
             "Cannot enforce the release-age cooldown; running without the "
             "supply-chain safeguard.",

@@ -794,9 +794,7 @@ def mpm(
             progress=show_progress,
             # Minimum release age gate and its enforcement policy.
             cooldown=cooldown_window,
-            require_cooldown_support=(
-                cooldown_policy is not CooldownPolicy.best_effort
-            ),
+            cooldown_policy=cooldown_policy,
             **kwargs,
         )
 

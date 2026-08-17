@@ -377,7 +377,7 @@ CANONICAL_ATTRS = (
     "_active_operation",
     "progress",
     "cooldown",
-    "require_cooldown_support",
+    "cooldown_policy",
     "windows_creation_flags",
     "windows_processes_to_cleanup",
     "cli_errors",

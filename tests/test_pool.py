@@ -19,6 +19,7 @@ from __future__ import annotations
 import inspect
 import itertools
 import threading
+from datetime import timedelta
 from importlib import import_module
 from pathlib import Path
 
@@ -30,6 +31,7 @@ from click_extra.logging import LogLevel
 import meta_package_manager
 from meta_package_manager.capabilities import Delegate
 from meta_package_manager.cli import mpm
+from meta_package_manager.cooldown import CooldownPolicy
 from meta_package_manager.dispatch import (
     SHARED_LOCK_FAMILIES,
     merge_into_probe_lanes,
@@ -215,12 +217,13 @@ def test_manager_groups():
     )
 
 
-DERIVED_EXTRA_OPTIONS = frozenset({"require_cooldown_support"})
+DERIVED_EXTRA_OPTIONS = frozenset({"cooldown_policy"})
 """Extra options computed from another flag rather than declared as one.
 
-`require_cooldown_support` is derived from the `--cooldown` enforcement policy
-(see {mod}`meta_package_manager.cooldown`): the manager-level attribute stays,
-but its own CLI flag disappeared into the `8.0.0` union option."""
+`cooldown_policy` is resolved from the `--cooldown` union and the
+{mod}`meta_package_manager.cooldown` configuration (see
+{func}`meta_package_manager.cooldown.resolve_cooldown`): the manager-level
+attribute has no CLI flag of its own, only the per-manager override."""
 
 
 def test_extra_option_allowlist():
@@ -411,6 +414,41 @@ def test_select_managers_timeout_stamping():
     finally:
         for mid, value in originals.items():
             pool[mid].timeout = value
+
+
+def test_select_managers_cooldown_policy_keeps_precedence():
+    """A per-manager `cooldown_policy` override pins that manager's enforcement
+    posture, so the global policy resolved from `--cooldown` must not clobber
+    it: `[mpm.managers.<id>] cooldown_policy = "best-effort"` keeps running
+    that one manager unguarded while the rest stay fail-closed.
+    """
+    manager = pool["gem"]
+    original = manager.cooldown_policy
+    try:
+        selection = pool._select_managers(
+            keep=("gem",),
+            drop_not_found=False,
+            cooldown=timedelta(days=7),
+            cooldown_policy=CooldownPolicy.enforce,
+        )
+        assert [m.cooldown_policy for m in selection] == [CooldownPolicy.enforce]
+
+        manager.cooldown_policy = CooldownPolicy.best_effort
+        pool.overridden_fields.setdefault("gem", set()).add("cooldown_policy")
+        try:
+            selection = pool._select_managers(
+                keep=("gem",),
+                drop_not_found=False,
+                cooldown=timedelta(days=7),
+                cooldown_policy=CooldownPolicy.enforce,
+            )
+            assert [m.cooldown_policy for m in selection] == [
+                CooldownPolicy.best_effort,
+            ]
+        finally:
+            pool.overridden_fields["gem"].discard("cooldown_policy")
+    finally:
+        manager.cooldown_policy = original
 
 
 class _RecordingManager:

@@ -96,7 +96,7 @@ def test_supported_managers_advertise_cooldown(manager_class, env_var):
 
 
 @pytest.mark.parametrize("manager_class", (Gem, Homebrew))
-def test_unsupported_managers_lack_cooldown(manager_class):
+def test_ungateable_managers_lack_cooldown(manager_class):
     manager = manager_class()
     assert manager.supports_cooldown is False
     assert manager.cooldown_env_var is None
@@ -346,23 +346,40 @@ def test_cooldown_permits_supported_manager():
     assert cooldown_permits(manager) is True
 
 
-def test_cooldown_permits_blocks_unsupported(caplog):
+def test_cooldown_permits_blocks_ungateable(caplog):
     caplog.set_level(logging.WARNING)
     manager = Homebrew()
     manager.cooldown = timedelta(days=7)
-    manager.require_cooldown_support = True
+    manager.cooldown_policy = CooldownPolicy.enforce
     assert cooldown_permits(manager) is False
     assert "cannot enforce" in caplog.text
     assert "--cooldown best-effort" in caplog.text
 
 
-def test_cooldown_permits_allows_unsupported_on_opt_in(caplog):
+def test_cooldown_permits_allows_best_effort(caplog):
     caplog.set_level(logging.WARNING)
     manager = Homebrew()
     manager.cooldown = timedelta(days=7)
-    manager.require_cooldown_support = False
+    manager.cooldown_policy = CooldownPolicy.best_effort
     assert cooldown_permits(manager) is True
     assert "without the supply-chain safeguard" in caplog.text
+
+
+def test_cooldown_permits_allows_off(caplog):
+    """`off` exempts a manager from the gate entirely, like best-effort."""
+    caplog.set_level(logging.WARNING)
+    manager = Homebrew()
+    manager.cooldown = timedelta(days=7)
+    manager.cooldown_policy = CooldownPolicy.off
+    assert cooldown_permits(manager) is True
+
+
+def test_off_policy_suppresses_env_injection():
+    """An `off` policy holds back the cutoff even where a manager could honor it."""
+    manager = UV()
+    manager.cooldown = timedelta(days=7)
+    manager.cooldown_policy = CooldownPolicy.off
+    assert manager.cooldown_env() == {}
 
 
 def test_cli_rejects_invalid_cooldown(invoke):

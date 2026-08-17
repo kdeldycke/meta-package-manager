@@ -75,6 +75,7 @@ from click_extra.spinner import Spinner
 from click_extra.theme import get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
 
+from .cooldown import CooldownPolicy
 from .sudo import (
     _STALL_NOTICE_OPERATIONS,
     _SUDO_CACHE_WARM,
@@ -519,13 +520,17 @@ class CLIExecutor:
     {attr}`cooldown_env_var` and {attr}`supports_cooldown`.
     """
 
-    require_cooldown_support: bool = True
-    """Require native {attr}`cooldown` support to run install/upgrade.
+    cooldown_policy: CooldownPolicy | None = None
+    """Per-manager enforcement posture of an active release-age {attr}`cooldown`.
 
-    By default (`True`, fail-closed), when a {attr}`cooldown` is requested,
-    install and upgrade operations are skipped for managers lacking native
-    release-age support, so nothing slips in unguarded. Setting this to `False`
-    opts into running those operations anyway, without the safeguard.
+    `None` (the default) inherits the policy resolved from `--cooldown` and the
+    `[mpm.cooldown]` configuration, which the pool's selection applies to every
+    manager per run. Pin it explicitly through a `[mpm.managers.<id>]` override,
+    which keeps precedence over the global resolution: `enforce` holds the
+    manager fail-closed even under a best-effort run, `best-effort` waives the
+    requirement and runs it without the safeguard, and `off` exempts it from
+    the gate entirely, suppressing the cutoff injection even where the manager
+    could honor one.
     """
 
     sudo: bool | None = None
@@ -705,9 +710,14 @@ class CLIExecutor:
         """Environment fragment enforcing the {attr}`cooldown`, empty when inactive.
 
         Returns an empty mapping unless a {attr}`cooldown` is set *and* the manager
-        supports it. Merged into the environment of every {meth}`run` call.
+        supports it *and* its {attr}`cooldown_policy` has not exempted it
+        (`off`). Merged into the environment of every {meth}`run` call.
         """
-        if self.cooldown is None or self.cooldown_env_var is None:
+        if (
+            self.cooldown is None
+            or self.cooldown_env_var is None
+            or self.cooldown_policy is CooldownPolicy.off
+        ):
             return {}
         return {self.cooldown_env_var: self.cooldown_env_value()}
 

@@ -37,8 +37,9 @@ The runtime *policy* around definitions stays in
 {mod}`meta_package_manager.config`: where sections may be loaded from, the
 trust gate on local files, the override-application pass and the registration
 passes wired into the CLI. The split keeps this module dependent on
-{mod}`meta_package_manager.manager` only, so the configuration layer can build
-on it without a circular import.
+{mod}`meta_package_manager.manager` and the leaf
+{mod}`meta_package_manager.cooldown` vocabulary only, so the configuration layer
+can build on it without a circular import.
 """
 
 from __future__ import annotations
@@ -54,6 +55,7 @@ from typing import cast
 from click_extra.config import ValidationError
 from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS, traits_from_ids
 
+from .cooldown import CooldownPolicy, parse_policy_token
 from .manager import JSON_FIELD_SELECTOR_REGEX, MetaPackageManager, PackageManager
 
 if sys.version_info >= (3, 11):
@@ -82,6 +84,20 @@ def _to_bool(value: Any) -> bool:
     if not isinstance(value, bool):
         raise TypeError(f"expected a boolean, got {type(value).__name__}: {value!r}")
     return value
+
+
+def _to_cooldown_policy(value: Any) -> CooldownPolicy:
+    """Coerce a `cooldown_policy` override to its enum member.
+
+    Accepts the same keywords as the `--cooldown` option, case-insensitively.
+    """
+    policy = parse_policy_token(value) if isinstance(value, str) else None
+    if policy is None:
+        accepted = ", ".join(p.value for p in CooldownPolicy)
+        raise TypeError(
+            f"expected one of {accepted}; got {type(value).__name__}: {value!r}"
+        )
+    return policy
 
 
 def _to_int(value: Any) -> int:
@@ -129,6 +145,7 @@ def _to_str_dict(value: Any) -> dict[str, str]:
 OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "cli_names": _to_str_tuple,
     "cli_search_path": _to_str_tuple,
+    "cooldown_policy": _to_cooldown_policy,
     "dry_run": _to_bool,
     "extra_env": _to_str_dict,
     "ignore_auto_updates": _to_bool,

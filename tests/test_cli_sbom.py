@@ -93,7 +93,7 @@ def test_unrecognized_extension_without_format(invoke, subcmd):
     assert "Export packages from" not in result.stderr
 
 
-def test_unrecognized_extension_with_explicit_format(self, invoke, subcmd, tmp_path):
+def test_unrecognized_extension_with_explicit_format(invoke, subcmd, tmp_path):
     """An explicit `--format` overrides extension auto-detection, even when
     the filename carries no recognizable suffix.
     """

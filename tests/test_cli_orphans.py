@@ -23,7 +23,6 @@ from meta_package_manager.tables import INSTALLED_COLUMNS
 
 from .test_cli import (
     CLIQueryTests,
-    CLISubCommandTests,
     CLITableTests,
     check_packages_payload,
 )
@@ -35,7 +34,7 @@ def subcmd():
 
 
 @pytest.mark.usefixtures("fake_pool")
-class TestOrphans(CLISubCommandTests, CLITableTests, CLIQueryTests):
+class TestOrphans(CLITableTests, CLIQueryTests):
     """Pin the whole class to `fake_pool`.
 
     Unlike the other `CLITableTests` subcommands, `orphans` is implemented by

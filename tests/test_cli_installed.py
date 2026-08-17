@@ -23,7 +23,6 @@ from meta_package_manager.tables import INSTALLED_COLUMNS
 
 from .test_cli import (
     CLIQueryTests,
-    CLISubCommandTests,
     CLITableTests,
     check_packages_payload,
 )
@@ -34,7 +33,7 @@ def subcmd():
     return "installed"
 
 
-class TestInstalled(CLISubCommandTests, CLITableTests, CLIQueryTests):
+class TestInstalled(CLITableTests, CLIQueryTests):
     columns_registry = INSTALLED_COLUMNS
 
     def test_json_parsing(self, invoke, subcmd):

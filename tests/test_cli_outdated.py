@@ -24,7 +24,6 @@ from meta_package_manager.tables import OUTDATED_COLUMNS
 
 from .test_cli import (
     CLIQueryTests,
-    CLISubCommandTests,
     CLITableTests,
     check_packages_payload,
 )
@@ -38,7 +37,7 @@ def subcmd():
 BAR_PLUGIN_KEYWORDS = frozenset({"shell"}.union({f"param{i}" for i in range(1, 10)}))
 
 
-class TestOutdated(CLISubCommandTests, CLITableTests, CLIQueryTests):
+class TestOutdated(CLITableTests, CLIQueryTests):
     columns_registry = OUTDATED_COLUMNS
 
     def test_json_parsing(self, invoke, subcmd):

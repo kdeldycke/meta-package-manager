@@ -21,7 +21,7 @@ import pytest
 
 from meta_package_manager.tables import WHICH_COLUMNS
 
-from .test_cli import CLISubCommandTests, CLITableTests
+from .test_cli import CLITableTests
 
 
 @pytest.fixture
@@ -29,6 +29,6 @@ def subcmd():
     return "which", "python"
 
 
-class TestWhich(CLISubCommandTests, CLITableTests):
+class TestWhich(CLITableTests):
     columns_registry = WHICH_COLUMNS
     columns_test_pair = ("manager_id", "cli_path")

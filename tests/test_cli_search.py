@@ -22,7 +22,7 @@ from extra_platforms.pytest import skip_github_ci, unless_macos
 
 from meta_package_manager.tables import SEARCH_COLUMNS
 
-from .test_cli import CLISubCommandTests, CLITableTests, check_packages_payload
+from .test_cli import CLITableTests, check_packages_payload
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def subcmd():
     return "search", "excel"
 
 
-class TestSearch(CLISubCommandTests, CLITableTests):
+class TestSearch(CLITableTests):
     columns_registry = SEARCH_COLUMNS
 
     def test_description_column_selection(self, invoke, fake_pool):

@@ -549,11 +549,6 @@ class CLITableTests:
         assert "Unknown value(s): 'bogus'" in result.stderr
         assert self.columns_test_pair[0] in result.stderr
 
-    @pytest.mark.parametrize("mode", TableFormat)
-    def test_all_table_rendering(self, invoke, mode):
-        result = invoke("--table-format", mode, "installed")
-        assert result.exit_code == 0
-
     def test_json_output(self, invoke, subcmd):
         """JSON output is expected to be parseable if read from `<stdout>`.
 
@@ -588,6 +583,25 @@ class CLITableTests:
             pytest.skip(f"{fmt.value} extra not installed")
         assert result.exit_code == 0
         assert "debug" in result.stderr
+
+
+@pytest.mark.parametrize("mode", TableFormat)
+def test_all_table_rendering(invoke, fake_pool, mode):
+    """Every table format renders an inventory without crashing.
+
+    A module-level test rather than a {class}`CLITableTests` method, because it
+    names its own subcommand instead of reading the `subcmd` fixture: inherited,
+    it ran the *same* invocation once per subclass, so fifty formats became
+    three hundred cases of which two hundred and fifty were byte-identical.
+
+    The fake pool is what makes it an assertion rather than a coincidence. The
+    real pool reports whatever the host happens to carry, so on a runner with an
+    empty inventory every format rendered an empty table and the test proved
+    nothing about formatting; the fake pool guarantees rows to render, on any
+    host, at the price of no subprocess at all.
+    """
+    result = invoke("--table-format", mode, "installed")
+    assert result.exit_code == 0
 
 
 # The per-table resolution of --sort-by (field-to-column mapping, skipped

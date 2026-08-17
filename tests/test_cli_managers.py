@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import json
+from functools import partial
 
 import pytest
 from boltons.iterutils import same
@@ -26,7 +27,7 @@ from meta_package_manager.pool import pool
 from meta_package_manager.tables import MANAGERS_COLUMNS
 
 from .conftest import all_manager_ids, unsupported_manager_ids
-from .test_cli import CLISubCommandTests, CLITableTests, managers_table_signals
+from .test_cli import CLITableTests, check_manager_selection, managers_table_signals
 
 
 @pytest.fixture
@@ -34,20 +35,24 @@ def subcmd():
     return "managers"
 
 
-class TestManagers(CLISubCommandTests, CLITableTests):
+def evaluate_signals(mid, stdout, stderr):
+    yield from managers_table_signals(mid, stdout, stderr)
+
+
+check_selection = partial(check_manager_selection, signals=evaluate_signals)
+"""Selection assertions reading this subcommand's own signals."""
+
+
+class TestManagers(CLITableTests):
     columns_registry = MANAGERS_COLUMNS
     columns_test_pair = ("manager_id", "version")
-
-    @staticmethod
-    def evaluate_signals(mid, stdout, stderr):
-        yield from managers_table_signals(mid, stdout, stderr)
 
     @all_manager_ids
     def test_all_managers(self, invoke, subcmd, manager_id):
         """Check only the selected manager is listed."""
         result = invoke(f"--{manager_id}", "--all-managers", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(
+        check_selection(
             result,
             {manager_id},
             reference_set=pool.all_manager_ids,
@@ -60,7 +65,7 @@ class TestManagers(CLISubCommandTests, CLITableTests):
         why `mpm` cannot use it is the answer the selector asked for."""
         result = invoke(f"--{manager_id}", subcmd, color=False)
         assert result.exit_code == 0
-        self.check_manager_selection(result, set())
+        check_selection(result, set())
         assert manager_id in result.stdout
 
     @pytest.mark.parametrize(

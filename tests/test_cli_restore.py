@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+from functools import partial
+
 import pytest
 
 from meta_package_manager.capabilities import Operations
@@ -23,7 +25,7 @@ from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
 from .destructive_plan import destructive_group
-from .test_cli import CLISubCommandTests
+from .test_cli import assert_no_manager_selected, check_manager_selection
 
 
 @pytest.fixture
@@ -40,144 +42,150 @@ def subcmd(create_config):
     return "restore", str(toml_path)
 
 
-class TestRestore(CLISubCommandTests):
-    @staticmethod
-    def evaluate_signals(mid, stdout, stderr):
-        yield from (
-            # The glued `:<mid>:` label form matches whatever level the
-            # message lands at: demoted to DEBUG for implicit selection,
-            # WARNING/INFO for explicit ones (`mpm --<mid> restore`).
-            f":{mid}: Does not implement {Operations.install}." in stderr,
-            f"No [{mid}] section found." in stderr,
-            f":{mid}: Restore packages..." in stderr,
-            f":{mid}: Skipped:" in stderr,
-        )
+def evaluate_signals(mid, stdout, stderr):
+    yield from (
+        # The glued `:<mid>:` label form matches whatever level the
+        # message lands at: demoted to DEBUG for implicit selection,
+        # WARNING/INFO for explicit ones (`mpm --<mid> restore`).
+        f":{mid}: Does not implement {Operations.install}." in stderr,
+        f"No [{mid}] section found." in stderr,
+        f":{mid}: Restore packages..." in stderr,
+        f":{mid}: Skipped:" in stderr,
+    )
 
-    @pytest.mark.destructive()
-    @pytest.mark.destructive_all_managers()
-    def test_default_all_managers(self, invoke, create_config):
-        toml_path = create_config(
-            "all-managers.toml",
-            "".join(
-                f"""
-            [{m}]
-            blah = 123
-            """
-                for m in pool.all_manager_ids
-            ),
-        )
 
-        # `--verbosity DEBUG` surfaces the skip/does-not-implement messages
-        # for managers covered by the config but absent from the system.
-        result = invoke("--verbosity", "DEBUG", "restore", str(toml_path))
-        # Accept exit code 1: the bogus "blah" packages fail to install on any
-        # available manager, which now exits non-zero (restore is no longer
-        # best-effort).
+check_selection = partial(check_manager_selection, signals=evaluate_signals)
+"""Selection assertions reading this subcommand's own signals."""
+
+
+@pytest.mark.destructive()
+@pytest.mark.destructive_all_managers()
+def test_default_all_managers(invoke, create_config):
+    toml_path = create_config(
+        "all-managers.toml",
+        "".join(
+            f"""
+        [{m}]
+        blah = 123
+        """
+            for m in pool.all_manager_ids
+        ),
+    )
+
+    # `--verbosity DEBUG` surfaces the skip/does-not-implement messages
+    # for managers covered by the config but absent from the system.
+    result = invoke("--verbosity", "DEBUG", "restore", str(toml_path))
+    # Accept exit code 1: the bogus "blah" packages fail to install on any
+    # available manager, which now exits non-zero (restore is no longer
+    # best-effort).
+    assert result.exit_code in (0, 1)
+    assert "all-managers.toml" in result.stderr
+    check_selection(result)
+
+
+@pytest.mark.destructive()
+@default_manager_ids
+def test_single_manager(invoke, create_config, manager_id):
+    toml_path = create_config(
+        "all-managers.toml",
+        "".join(
+            f"""
+        [{m}]
+        blah = 123
+        """
+            for m in pool.all_manager_ids
+        ),
+    )
+
+    result = invoke("--verbosity", "INFO", f"--{manager_id}", "restore", str(toml_path))
+
+    if result.exit_code == 2:
+        assert_no_manager_selected(result)
+    else:
+        # Accept exit code 1: the bogus "blah" package fails to install.
         assert result.exit_code in (0, 1)
-        assert "all-managers.toml" in result.stderr
-        self.check_manager_selection(result)
+        check_selection(result, {manager_id})
 
-    @pytest.mark.destructive()
-    @default_manager_ids
-    def test_single_manager(self, invoke, create_config, manager_id):
-        toml_path = create_config(
-            "all-managers.toml",
-            "".join(
-                f"""
-            [{m}]
-            blah = 123
-            """
-                for m in pool.all_manager_ids
-            ),
-        )
 
-        result = invoke(
-            "--verbosity", "INFO", f"--{manager_id}", "restore", str(toml_path)
-        )
+def test_ignore_unrecognized_manager(invoke, create_config):
+    toml_path = create_config(
+        "unrecognized.toml",
+        """
+        [random_section]
+        blah = 123
+        """,
+    )
 
-        if result.exit_code == 2:
-            self.assert_no_manager_selected(result)
-        else:
-            # Accept exit code 1: the bogus "blah" package fails to install.
-            assert result.exit_code in (0, 1)
-            self.check_manager_selection(result, {manager_id})
+    result = invoke("--verbosity", "INFO", "restore", str(toml_path))
+    assert result.exit_code == 0
+    assert "unrecognized.toml" in result.stderr
+    assert "Ignore [random_section] section" in result.stderr
 
-    def test_ignore_unrecognized_manager(self, invoke, create_config):
-        toml_path = create_config(
-            "unrecognized.toml",
-            """
-            [random_section]
-            blah = 123
-            """,
-        )
 
-        result = invoke("--verbosity", "INFO", "restore", str(toml_path))
-        assert result.exit_code == 0
-        assert "unrecognized.toml" in result.stderr
-        assert "Ignore [random_section] section" in result.stderr
+@pytest.mark.destructive()
+# Only npm acts here, but nothing parametrizes it: hand it its group.
+@pytest.mark.xdist_group(name=destructive_group("npm"))
+def test_restore_single_manager(invoke, create_config):
+    toml_path = create_config(
+        "uv-npm-dummy.toml",
+        """
+        [uv]
+        leftpad = "0.1.2"
 
-    @pytest.mark.destructive()
-    # Only npm acts here, but nothing parametrizes it: hand it its group.
-    @pytest.mark.xdist_group(name=destructive_group("npm"))
-    def test_restore_single_manager(self, invoke, create_config):
-        toml_path = create_config(
-            "uv-npm-dummy.toml",
-            """
-            [uv]
-            leftpad = "0.1.2"
+        [npm]
+        chance = "1.1.9"
+        """,
+    )
 
-            [npm]
-            chance = "1.1.9"
-            """,
-        )
+    result = invoke(
+        "--verbosity", "INFO", "--npm", "restore", str(toml_path), color=False
+    )
+    # Accept exit code 1: an end-to-end install can fail on a flaky backend.
+    assert result.exit_code in (0, 1)
+    assert "uv-npm-dummy.toml" in result.stderr
+    assert ":uv: Restore packages..." not in result.stderr
+    assert ":npm: Restore packages..." in result.stderr
 
-        result = invoke(
-            "--verbosity", "INFO", "--npm", "restore", str(toml_path), color=False
-        )
-        # Accept exit code 1: an end-to-end install can fail on a flaky backend.
-        assert result.exit_code in (0, 1)
-        assert "uv-npm-dummy.toml" in result.stderr
-        assert ":uv: Restore packages..." not in result.stderr
-        assert ":npm: Restore packages..." in result.stderr
 
-    @pytest.mark.destructive()
-    # `--no-npm` leaves uv as the acting manager: hand it uv's group.
-    @pytest.mark.xdist_group(name=destructive_group("uv"))
-    def test_restore_excluded_manager(self, invoke, create_config):
-        toml_path = create_config(
-            "uv-npm-dummy.toml",
-            """
-            [uv]
-            leftpad = "0.1.2"
+@pytest.mark.destructive()
+# `--no-npm` leaves uv as the acting manager: hand it uv's group.
+@pytest.mark.xdist_group(name=destructive_group("uv"))
+def test_restore_excluded_manager(invoke, create_config):
+    toml_path = create_config(
+        "uv-npm-dummy.toml",
+        """
+        [uv]
+        leftpad = "0.1.2"
 
-            [npm]
-            chance = "1.1.9"
-            """,
-        )
+        [npm]
+        chance = "1.1.9"
+        """,
+    )
 
-        result = invoke(
-            "--verbosity",
-            "INFO",
-            "--no-npm",
-            "restore",
-            str(toml_path),
-            color=False,
-        )
-        # Accept exit code 1: an end-to-end install can fail on a flaky backend.
-        assert result.exit_code in (0, 1)
-        assert "uv-npm-dummy.toml" in result.stderr
-        assert ":uv: Restore packages..." in result.stderr
-        assert ":npm: Restore packages..." not in result.stderr
+    result = invoke(
+        "--verbosity",
+        "INFO",
+        "--no-npm",
+        "restore",
+        str(toml_path),
+        color=False,
+    )
+    # Accept exit code 1: an end-to-end install can fail on a flaky backend.
+    assert result.exit_code in (0, 1)
+    assert "uv-npm-dummy.toml" in result.stderr
+    assert ":uv: Restore packages..." in result.stderr
+    assert ":npm: Restore packages..." not in result.stderr
 
-    def test_empty_manager(self, invoke, create_config):
-        toml_path = create_config(
-            "uv-empty.toml",
-            """
-            [uv]
-            """,
-        )
 
-        result = invoke("--verbosity", "INFO", "restore", str(toml_path), color=False)
-        assert result.exit_code == 0
-        assert "uv-empty.toml" in result.stderr
-        assert ":uv: Restore packages..." in result.stderr
+def test_empty_manager(invoke, create_config):
+    toml_path = create_config(
+        "uv-empty.toml",
+        """
+        [uv]
+        """,
+    )
+
+    result = invoke("--verbosity", "INFO", "restore", str(toml_path), color=False)
+    assert result.exit_code == 0
+    assert "uv-empty.toml" in result.stderr
+    assert ":uv: Restore packages..." in result.stderr

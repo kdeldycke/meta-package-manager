@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import re
+from functools import partial
 
 import pytest
 
@@ -27,7 +28,7 @@ from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
 from .fake_manager import FakeManager
-from .test_cli import CLISubCommandTests
+from .test_cli import assert_no_manager_selected, check_manager_selection
 
 
 @pytest.fixture
@@ -45,102 +46,108 @@ def subcmd():
     return "upgrade", "--all"
 
 
-class TestUpgrade(CLISubCommandTests):
-    """Test the system-wide upgrade sub-command.
+def evaluate_signals(mid, stdout, stderr):
+    yield from (
+        # The glued `:<mid>:` label form matches whatever level the
+        # message lands at: demoted to DEBUG for implicit selection,
+        # WARNING/INFO for explicit ones (`mpm --<mid> upgrade`).
+        f":{mid}: Does not implement upgrade_all_cli." in stderr,
+        f":{mid}: Does not implement {Operations.upgrade_all}." in stderr,
+        f":{mid}: Upgrade all outdated packages..." in stderr,
+        bool(re.search(rf"Upgrade \S+ with {mid}\.\.\.", stderr)),
+        f":{mid}: Skipped:" in stderr,
+    )
 
-    ```{danger}
-    All tests here should me marked as destructive unless --dry-run parameter is
-    passed.
-    ```
-    """
 
-    @staticmethod
-    def evaluate_signals(mid, stdout, stderr):
-        yield from (
-            # The glued `:<mid>:` label form matches whatever level the
-            # message lands at: demoted to DEBUG for implicit selection,
-            # WARNING/INFO for explicit ones (`mpm --<mid> upgrade`).
-            f":{mid}: Does not implement upgrade_all_cli." in stderr,
-            f":{mid}: Does not implement {Operations.upgrade_all}." in stderr,
-            f":{mid}: Upgrade all outdated packages..." in stderr,
-            bool(re.search(rf"Upgrade \S+ with {mid}\.\.\.", stderr)),
-            f":{mid}: Skipped:" in stderr,
-        )
+check_selection = partial(check_manager_selection, signals=evaluate_signals)
+"""Selection assertions reading this subcommand's own signals."""
 
-    @pytest.mark.parametrize("all_option", ("--all", None))
-    def test_all_managers_dry_run_upgrade_all(self, invoke, all_option):
-        # `--verbosity DEBUG` makes the per-manager skip/does-not-implement
-        # messages reach stderr: at default verbosity they stay quiet because
-        # this invocation makes no explicit `--<id>` selection.
-        result = invoke("--verbosity", "DEBUG", "--dry-run", "upgrade", all_option)
-        assert result.exit_code == 0
-        if not all_option:
-            assert "assume -A/--all option" in result.stderr
-        self.check_manager_selection(result)
 
-    @pytest.mark.destructive()
-    @pytest.mark.destructive_all_managers()
-    def test_all_managers_upgrade_all(self, invoke):
-        # Only the explicit `--all` spelling runs destructively: the bare
-        # `upgrade` alias is already asserted by both dry-run variants above,
-        # and the non-convergent managers (cpan rebuilds, gem re-walks every
-        # installed gem even when current) repeat their full upgrade on a
-        # second pass, doubling the destructive wall-clock for the sake of an
-        # argument-parsing message.
-        #
-        # Every default manager is selected explicitly because both halves of
-        # this test hang on the verbosity mechanics: select_managers demotes
-        # the per-manager skip/announce signals to DEBUG on an implicit run,
-        # and DEBUG collapses the fan-out to a single worker (serial_at_debug
-        # in effective_jobs), which no --jobs value can override. Explicit
-        # selection keeps every signal visible at INFO, where the grouped
-        # concurrent dispatch engages: this is the one destructive exercise of
-        # the concurrent `upgrade --all` path.
-        result = invoke(
-            *(f"--{mid}" for mid in pool.default_manager_ids),
-            "--verbosity",
-            "INFO",
-            "upgrade",
-            "--all",
-        )
-        # Accept exit code 1: end-to-end destructive upgrades depend on the
-        # health of every installed third-party manager, and CI runners
-        # regularly surface transient backend failures (missing project files,
-        # toolchain gaps, network blips). The contract we test here is that
-        # mpm dispatched to every selected manager and surfaced their output.
+# Test the system-wide upgrade sub-command.
+#
+# ```{danger}
+# All tests here should me marked as destructive unless --dry-run parameter is
+# passed.
+# ```
+
+
+@pytest.mark.parametrize("all_option", ("--all", None))
+def test_all_managers_dry_run_upgrade_all(invoke, all_option):
+    # `--verbosity DEBUG` makes the per-manager skip/does-not-implement
+    # messages reach stderr: at default verbosity they stay quiet because
+    # this invocation makes no explicit `--<id>` selection.
+    result = invoke("--verbosity", "DEBUG", "--dry-run", "upgrade", all_option)
+    assert result.exit_code == 0
+    if not all_option:
+        assert "assume -A/--all option" in result.stderr
+    check_selection(result)
+
+
+@pytest.mark.destructive()
+@pytest.mark.destructive_all_managers()
+def test_all_managers_upgrade_all(invoke):
+    # Only the explicit `--all` spelling runs destructively: the bare
+    # `upgrade` alias is already asserted by both dry-run variants above,
+    # and the non-convergent managers (cpan rebuilds, gem re-walks every
+    # installed gem even when current) repeat their full upgrade on a
+    # second pass, doubling the destructive wall-clock for the sake of an
+    # argument-parsing message.
+    #
+    # Every default manager is selected explicitly because both halves of
+    # this test hang on the verbosity mechanics: select_managers demotes
+    # the per-manager skip/announce signals to DEBUG on an implicit run,
+    # and DEBUG collapses the fan-out to a single worker (serial_at_debug
+    # in effective_jobs), which no --jobs value can override. Explicit
+    # selection keeps every signal visible at INFO, where the grouped
+    # concurrent dispatch engages: this is the one destructive exercise of
+    # the concurrent `upgrade --all` path.
+    result = invoke(
+        *(f"--{mid}" for mid in pool.default_manager_ids),
+        "--verbosity",
+        "INFO",
+        "upgrade",
+        "--all",
+    )
+    # Accept exit code 1: end-to-end destructive upgrades depend on the
+    # health of every installed third-party manager, and CI runners
+    # regularly surface transient backend failures (missing project files,
+    # toolchain gaps, network blips). The contract we test here is that
+    # mpm dispatched to every selected manager and surfaced their output.
+    assert result.exit_code in (0, 1)
+    check_selection(result)
+
+
+@default_manager_ids
+@pytest.mark.parametrize("all_option", ("--all", None))
+def test_single_manager_dry_run_upgrade_all(invoke, manager_id, all_option):
+    result = invoke(
+        f"--{manager_id}", "--dry-run", "--verbosity", "INFO", "upgrade", all_option
+    )
+    if not all_option:
+        assert "assume -A/--all option" in result.stderr
+    if result.exit_code == 2:
+        assert_no_manager_selected(result)
+    else:
+        # Accept exit code 1: some managers (like pip on Windows) may
+        # report errors during the upgrade dry-run simulation, causing
+        # exit code 1 rather than 0. This is an environmental issue and
+        # not a test-logic failure.
         assert result.exit_code in (0, 1)
-        self.check_manager_selection(result)
+        check_selection(result, {manager_id})
 
-    @default_manager_ids
-    @pytest.mark.parametrize("all_option", ("--all", None))
-    def test_single_manager_dry_run_upgrade_all(self, invoke, manager_id, all_option):
-        result = invoke(
-            f"--{manager_id}", "--dry-run", "--verbosity", "INFO", "upgrade", all_option
-        )
-        if not all_option:
-            assert "assume -A/--all option" in result.stderr
-        if result.exit_code == 2:
-            self.assert_no_manager_selected(result)
-        else:
-            # Accept exit code 1: some managers (like pip on Windows) may
-            # report errors during the upgrade dry-run simulation, causing
-            # exit code 1 rather than 0. This is an environmental issue and
-            # not a test-logic failure.
-            assert result.exit_code in (0, 1)
-            self.check_manager_selection(result, {manager_id})
 
-    @pytest.mark.destructive()
-    @default_manager_ids
-    def test_single_manager_upgrade_all(self, invoke, manager_id):
-        # Only the explicit `--all` spelling runs destructively: see
-        # test_all_managers_upgrade_all.
-        result = invoke(f"--{manager_id}", "--verbosity", "INFO", "upgrade", "--all")
-        if result.exit_code == 2:
-            self.assert_no_manager_selected(result)
-        else:
-            # Accept exit code 1: see test_all_managers_upgrade_all.
-            assert result.exit_code in (0, 1)
-            self.check_manager_selection(result, {manager_id})
+@pytest.mark.destructive()
+@default_manager_ids
+def test_single_manager_upgrade_all(invoke, manager_id):
+    # Only the explicit `--all` spelling runs destructively: see
+    # test_all_managers_upgrade_all.
+    result = invoke(f"--{manager_id}", "--verbosity", "INFO", "upgrade", "--all")
+    if result.exit_code == 2:
+        assert_no_manager_selected(result)
+    else:
+        # Accept exit code 1: see test_all_managers_upgrade_all.
+        assert result.exit_code in (0, 1)
+        check_selection(result, {manager_id})
 
 
 def test_installed_ids_tolerates_a_failing_cli(

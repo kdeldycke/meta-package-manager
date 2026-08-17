@@ -25,6 +25,7 @@ from meta_package_manager.tables import OUTDATED_COLUMNS
 from .test_cli import (
     CLIQueryTests,
     CLITableTests,
+    check_filtered_ids,
     check_packages_payload,
 )
 
@@ -83,4 +84,4 @@ class TestOutdated(CLITableTests, CLIQueryTests):
     )
     def test_query_filter(self, invoke, fake_pool, args, expected_ids):
         result = invoke("--table-format", "json", "outdated", *args)
-        self.check_filtered_ids(result, expected_ids)
+        check_filtered_ids(result, expected_ids)

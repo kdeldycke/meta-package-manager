@@ -1,0 +1,169 @@
+---
+name: 📸 Documentation screenshots
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/docs-screenshots.yaml
+      - docs/gnome_screenshots_update.py
+      - docs/outdated-sample.json
+      - gnome-shell/mpm@kdeldycke.github.io/**
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Photograph the GNOME Shell extension's menu, from a real shell.
+#
+# Everything in the image is genuine: a headless `gnome-shell` renders the real
+# extension, with the real theme, fonts and icon set, and the shell's own
+# screenshot service takes the picture. Only the package data is held still, by
+# a stand-in `mpm` serving `docs/outdated-sample.json`, so the capture documents
+# the extension instead of whatever the runner had outdated that morning. See
+# `docs/gnome_screenshots_update.py` for the rationale of each stub.
+#
+# The macOS half of the same job cannot exist: photographing an Xbar or SwiftBar
+# menu needs Screen Recording and Accessibility grants that a hosted runner has
+# no way to give, and a hosted macOS display is 1x besides. GNOME is where a real
+# capture is reachable from CI at all, which is why this workflow starts here.
+#
+# Scheduled on nothing: the images move when the extension or the payload moves,
+# and a cron would only manufacture churn. The trigger paths deliberately exclude
+# `docs/assets/`, so merging this job's own pull request cannot retrigger it.
+
+# Supply-chain cooldown: no package published within the window can be resolved
+# by any command in this workflow. Held equal to `[tool.repomatic]
+# minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
+jobs:
+
+  update-gnome-screenshots:
+    name: Capture the GNOME Shell extension menu
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+      pull-requests: write
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Recommends would drag in a desktop session nobody here logs into, so each
+      # one the capture actually needs is named instead: the symbolic icons the
+      # extension asks the theme for, `dbus-run-session`, GNOME's UI font (without
+      # it fontconfig lands on whatever it likes and the images drift),
+      # `gsettings` and `glib-compile-schemas`, and the Mesa software rasterizer,
+      # a runner having no GPU to render the session with.
+      - name: Install GNOME Shell
+        run: >
+          sudo apt-get update && sudo apt-get install --yes --no-install-recommends
+          adwaita-icon-theme
+          dbus-bin
+          fonts-cantarell
+          gnome-shell
+          gsettings-desktop-schemas
+          libgl1-mesa-dri
+          libglib2.0-bin
+
+      # The shell version is what the extension's `metadata.json` declares support
+      # for, so a runner image moving past that range fails the capture below
+      # rather than silently shipping an unsupported combination. Recorded in the
+      # summary, and carried into the pull request body.
+      - name: Record the GNOME Shell version
+        run: |
+          printf 'SHELL_VERSION=' >> "${GITHUB_ENV}"
+          gnome-shell --version >> "${GITHUB_ENV}"
+          {
+            echo '## Capture host'
+            echo '```'
+            gnome-shell --version
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      # One session bus for the whole capture: the driver spawns the shell on it,
+      # and talks to it over the same bus. The shell runs on the headless backend,
+      # which needs no display server of its own; should a runner image ever fail
+      # to bring it up, the fallback is a nested session under `xvfb-run`.
+      - name: Capture the menus
+        run: >
+          dbus-run-session --
+          python3 docs/gnome_screenshots_update.py --workspace "${RUNNER_TEMP}/capture"
+
+      # The per-shot shell logs are the only diagnosis a failed capture leaves,
+      # and a headless GNOME fails in ways no exit code explains.
+      - name: Upload the session logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gnome-capture-logs
+          path: ${{ runner.temp }}/capture/*.log
+          if-no-files-found: warn
+
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.12.1"
+
+      # The same lossless pass the autofix lane applies to every committed image,
+      # from the same pinned binary. Skipping it would leave `format-images`
+      # rewriting these four files right back, one pull request per capture.
+      - name: Optimize the captures
+        run: >
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0'
+          run oxipng -- --opt 4 --strip safe docs/assets/gnome-shell-*menu-*.png
+
+      - name: Detect changed captures
+        id: captures
+        run: |
+          git status --porcelain -- docs/assets > "${RUNNER_TEMP}/captures.status"
+          if [ -s "${RUNNER_TEMP}/captures.status" ]; then
+            echo "changed=true" >> "${GITHUB_OUTPUT}"
+            {
+              echo '## Captures to review'
+              echo '```'
+              cat "${RUNNER_TEMP}/captures.status"
+              echo '```'
+            } >> "${GITHUB_STEP_SUMMARY}"
+          else
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            echo 'Captures are identical to the committed ones.' >> "${GITHUB_STEP_SUMMARY}"
+          fi
+
+      - name: Render PR body
+        if: steps.captures.outputs.changed == 'true'
+        run: >
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0' pr-body
+          --template-file .github/pr-templates/update-gnome-screenshots.md
+          --template-arg shell_version="${SHELL_VERSION}"
+          --output body.md
+
+      # Upserted on a stable branch, force-pushed: a capture supersedes the
+      # previous one outright, and an image diff is what GitHub reviews best.
+      - name: Open PR with the new captures
+        if: steps.captures.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch="update-gnome-screenshots"
+          title="Update GNOME Shell extension menu screenshots"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "${branch}"
+          git add docs/assets/gnome-shell-*menu-*.png
+          git commit --message "${title}"
+          git push --force --set-upstream origin "${branch}"
+          gh pr list --head "${branch}" --state open --json number --jq '.[0].number' \
+            > "${RUNNER_TEMP}/existing-pr"
+          if [ -s "${RUNNER_TEMP}/existing-pr" ]; then
+            gh pr edit "${branch}" --title "${title}" --body-file body.md
+          else
+            gh pr create --title "${title}" --body-file body.md --label "🔌 plugin"
+          fi

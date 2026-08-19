@@ -129,6 +129,43 @@ Since a terminal window detaches from the process actually running the upgrade, 
 
 When no `mpm` is found on the system, the menu carries a bootstrap pair in place of the package list: *Install mpm with uv* runs `uv tool install --upgrade meta-package-manager` through the same terminal path as an upgrade, and *Open mpm installation instructions* opens {doc}`install` for the systems `uv` does not answer for. The {doc}`menubar plugin <bar-plugin>` offers the same pair.
 
+## Screenshots
+
+Both layouts, photographed from a real GNOME session driven by `docs/gnome_screenshots_update.py` and refreshed by [`docs-screenshots.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs-screenshots.yaml) whenever the extension changes.
+Each pair follows the appearance of this page, the shell restyling its menu with the desktop's light or dark preference and the version diff keeping its colors legible on both.
+
+The default flat layout lists every manager's packages inline, under a header counting them:
+
+```{image} assets/gnome-shell-flatmenu-light.png
+:alt: The extension's menu listing outdated packages inline, one header per package manager
+:align: center
+:class: only-light
+:width: 600px
+```
+
+```{image} assets/gnome-shell-flatmenu-dark.png
+:alt: The extension's menu listing outdated packages inline, one header per package manager
+:align: center
+:class: only-dark
+:width: 600px
+```
+
+With `submenu-layout` enabled, each manager collapses into a submenu of its own:
+
+```{image} assets/gnome-shell-submenu-light.png
+:alt: The extension's menu with one submenu per package manager
+:align: center
+:class: only-light
+:width: 600px
+```
+
+```{image} assets/gnome-shell-submenu-dark.png
+:alt: The extension's menu with one submenu per package manager
+:align: center
+:class: only-dark
+:width: 600px
+```
+
 ## Development workflow
 
 The extension lives in the [`gnome-shell/` directory](https://github.com/kdeldycke/meta-package-manager/tree/main/gnome-shell) of the `mpm` repository and shares its version, release cycle and issue tracker.

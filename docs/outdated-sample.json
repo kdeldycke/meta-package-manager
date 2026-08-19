@@ -1,0 +1,126 @@
+{
+	"apt": {
+		"errors": [],
+		"id": "apt",
+		"name": "Debian apt",
+		"packages": [
+			{
+				"id": "alsa-ucm-conf",
+				"installed_version": "1.2.15.3-1ubuntu1",
+				"latest_version": "1.2.15.3-1ubuntu1.5",
+				"name": "alsa-ucm-conf"
+			},
+			{
+				"id": "apparmor",
+				"installed_version": "5.0.0~beta1-0ubuntu7",
+				"latest_version": "5.0.2-0ubuntu1~26.04.1",
+				"name": "apparmor"
+			},
+			{
+				"id": "apport",
+				"installed_version": "2.34.0-0ubuntu2",
+				"latest_version": "2.34.1-0ubuntu0.1",
+				"name": "apport"
+			},
+			{
+				"id": "apport-core-dump-handler",
+				"installed_version": "2.34.0-0ubuntu2",
+				"latest_version": "2.34.1-0ubuntu0.1",
+				"name": "apport-core-dump-handler"
+			},
+			{
+				"id": "apport-gtk",
+				"installed_version": "2.34.0-0ubuntu2",
+				"latest_version": "2.34.1-0ubuntu0.1",
+				"name": "apport-gtk"
+			},
+			{
+				"id": "at-spi2-common",
+				"installed_version": "2.60.0-1",
+				"latest_version": "2.60.4-0ubuntu0.1",
+				"name": "at-spi2-common"
+			},
+			{
+				"id": "at-spi2-core",
+				"installed_version": "2.60.0-1",
+				"latest_version": "2.60.4-0ubuntu0.1",
+				"name": "at-spi2-core"
+			},
+			{
+				"id": "base-files",
+				"installed_version": "14ubuntu6",
+				"latest_version": "14ubuntu6.1",
+				"name": "base-files"
+			},
+			{
+				"id": "bind9-dnsutils",
+				"installed_version": "1:9.20.18-1ubuntu2.1",
+				"latest_version": "1:9.20.24-1ubuntu0.1",
+				"name": "bind9-dnsutils"
+			},
+			{
+				"id": "bind9-host",
+				"installed_version": "1:9.20.18-1ubuntu2.1",
+				"latest_version": "1:9.20.24-1ubuntu0.1",
+				"name": "bind9-host"
+			}
+		]
+	},
+	"flatpak": {
+		"errors": [],
+		"id": "flatpak",
+		"name": "Flatpak",
+		"packages": [
+			{
+				"id": "com.spotify.Client",
+				"installed_version": "1.2.63.394",
+				"latest_version": "1.2.65.255",
+				"name": "com.spotify.Client"
+			},
+			{
+				"id": "org.gnome.Boxes",
+				"installed_version": "49.0",
+				"latest_version": "49.1",
+				"name": "org.gnome.Boxes"
+			}
+		]
+	},
+	"npm": {
+		"errors": [],
+		"id": "npm",
+		"name": "Node npm",
+		"packages": [
+			{
+				"id": "npm",
+				"installed_version": "11.6.0",
+				"latest_version": "11.7.0",
+				"name": "npm"
+			},
+			{
+				"id": "typescript",
+				"installed_version": "5.9.2",
+				"latest_version": "5.9.3",
+				"name": "typescript"
+			}
+		]
+	},
+	"snap": {
+		"errors": [],
+		"id": "snap",
+		"name": "Snap",
+		"packages": [
+			{
+				"id": "code",
+				"installed_version": "1.104.1",
+				"latest_version": "1.105.0",
+				"name": "code"
+			},
+			{
+				"id": "firefox",
+				"installed_version": "142.0.1-1",
+				"latest_version": "143.0-1",
+				"name": "firefox"
+			}
+		]
+	}
+}

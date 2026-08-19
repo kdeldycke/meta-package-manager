@@ -28,6 +28,8 @@ job of the `tests-gnome-extension.yaml` workflow.
 
 from __future__ import annotations
 
+import ast
+import importlib.util
 import json
 import os
 import re
@@ -312,6 +314,66 @@ def test_process_import_boundaries():
     # The prefs process resource path is /org/gnome/Shell/Extensions/ (capital
     # S); the lowercase path below is the shell-process namespace.
     assert "resource:///org/gnome/shell/" not in prefs_side
+
+
+def _capture_driver():
+    """Load `docs/gnome_screenshots_update.py` by path, `docs` being no package."""
+    spec = importlib.util.spec_from_file_location(
+        "gnome_screenshots_update",
+        PROJECT_ROOT / "docs" / "gnome_screenshots_update.py",
+    )
+    module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    return module
+
+
+def test_capture_driver_targets_this_extension():
+    """The screenshot driver carries its own copy of the extension identity."""
+    driver = _capture_driver()
+    assert driver.EXTENSION_UUID == EXTENSION_UUID
+    assert driver.SCHEMA_ID == SCHEMA_ID
+    assert driver.EXTENSION_DIR == EXTENSION_DIR
+
+
+def test_capture_settings_exist_in_the_schema():
+    """Every extension setting the capture writes is declared in the schema.
+
+    A renamed key would otherwise surface as a `gsettings set` failure minutes
+    into a headless GNOME session, on a runner, instead of here.
+    """
+    source = (PROJECT_ROOT / "docs" / "gnome_screenshots_update.py").read_text("UTF-8")
+    written = set()
+    for node in ast.walk(ast.parse(source)):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "gsettings"
+            and len(node.args) > 1
+            and isinstance(node.args[0], ast.Name)
+            and node.args[0].id == "SCHEMA_ID"
+            and isinstance(node.args[1], ast.Constant)
+        ):
+            written.add(node.args[1].value)
+    assert written
+    assert written <= set(_gschema_keys())
+
+
+def test_captures_are_referenced_by_the_docs():
+    """Each capture is shown on the extension's page, and none is an orphan.
+
+    The images are written by a workflow and read by a page neither of which
+    can see the other: a renamed shot leaves a broken image on the site and a
+    stale file in the asset folder, and nothing else reports either.
+    """
+    driver = _capture_driver()
+    page = (PROJECT_ROOT / "docs" / "gnome-shell.md").read_text("UTF-8")
+    produced = {shot.path for shot in driver.SHOTS}
+    for path in produced:
+        assert f"assets/{path.name}" in page, path.name
+    # The same glob the capture workflow stages, so a committed file the driver
+    # no longer produces is reported here rather than lingering.
+    committed = set((PROJECT_ROOT / "docs" / "assets").glob("gnome-shell-*menu-*.png"))
+    assert committed <= produced
 
 
 @pytest.mark.skipif(not which("gjs"), reason="gjs interpreter not available")

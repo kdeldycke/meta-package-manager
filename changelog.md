@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [gnome-shell] Illustrate the extension's page with screenshots of its menu, in both layouts and both shell appearances. Each one is captured from a real headless GNOME session by the new `docs-screenshots.yaml` workflow, which reshoots them whenever the extension changes.
 - [mpm] Replace the project's own forge sampler with repomatic's `sample-metrics`: the star-history charts and the manager cards' upstream readings now accrue in one committed CSV, appended and rendered by the new `metrics.yaml` workflow.
 - [mpm] Plot the benchmark's star-history charts on a logarithmic vertical axis, so the series orders of magnitude apart stay legible on one chart.
 - [nala] Sample the upstream project from GitLab, dropping the excuse that its forge went unqueried: the manager page gains the upstream stars and commit facts, and its live badges.

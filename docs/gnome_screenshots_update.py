@@ -196,7 +196,19 @@ def js(snippet: str) -> str:
 
     A plain substitution rather than a format string: these snippets are all
     braces, and `{}` means blocks and objects here, not fields.
+
+    ```{caution}
+    No snippet may carry a backslash. `gdbus` parses each argument as a
+    GVariant literal, which consumes escape sequences before the shell ever
+    sees them, so a `\\d` in a regex arrives as a literal `d` and the pattern
+    quietly stops matching instead of failing. Character classes say the same
+    thing and survive the trip. Raised here rather than documented in a
+    comment, because the failure has no symptom of its own.
+    ```
     """
+    if "\\" in snippet:
+        msg = f"Backslash in a JS snippet, gdbus will eat it: {snippet!r}"
+        raise ValueError(msg)
     return snippet.replace("INDICATOR", _INDICATOR)
 
 
@@ -215,10 +227,10 @@ section deliberately: nothing public reports it, and this file and the extension
 ship together.
 """
 
-PIN_LAST_CHECK = js(r"""(() => {
+PIN_LAST_CHECK = js("""(() => {
     const label = INDICATOR._lastCheckedItem.label;
     label.text = label.text.replace(
-        /\d{1,2}:\d{2}(:\d{2})?(\s?[AP]M)?/, 'PINNED');
+        /[0-9]{1,2}:[0-9]{2}(:[0-9]{2})?( ?[AP]M)?/, 'PINNED');
     return label.text;
 })()""").replace("PINNED", PINNED_LAST_CHECK)
 

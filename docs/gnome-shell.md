@@ -140,14 +140,12 @@ The default flat layout lists every manager's packages inline, under a header co
 :alt: The extension's menu listing outdated packages inline, one header per package manager
 :align: center
 :class: only-light
-:width: 600px
 ```
 
 ```{image} assets/gnome-shell-flatmenu-dark.png
 :alt: The extension's menu listing outdated packages inline, one header per package manager
 :align: center
 :class: only-dark
-:width: 600px
 ```
 
 With `submenu-layout` enabled, each manager collapses into a submenu of its own:
@@ -156,14 +154,12 @@ With `submenu-layout` enabled, each manager collapses into a submenu of its own:
 :alt: The extension's menu with one submenu per package manager
 :align: center
 :class: only-light
-:width: 600px
 ```
 
 ```{image} assets/gnome-shell-submenu-dark.png
 :alt: The extension's menu with one submenu per package manager
 :align: center
 :class: only-dark
-:width: 600px
 ```
 
 ## Development workflow

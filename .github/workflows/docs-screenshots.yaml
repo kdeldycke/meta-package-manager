@@ -160,7 +160,8 @@ jobs:
           git add docs/assets/gnome-shell-*menu-*.png
           git commit --message "${title}"
           git push --force --set-upstream origin "${branch}"
-          gh pr list --head "${branch}" --state open --json number --jq '.[0].number' \
+          gh pr list --head "${branch}" --state open --json number \
+            --jq '.[0].number // empty' \
             > "${RUNNER_TEMP}/existing-pr"
           if [ -s "${RUNNER_TEMP}/existing-pr" ]; then
             gh pr edit "${branch}" --title "${title}" --body-file body.md

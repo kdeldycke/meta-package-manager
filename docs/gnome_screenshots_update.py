@@ -99,6 +99,15 @@ generous, never exact.
 CAPTURE_MARGIN = 24
 """Desktop background kept around the menu, in pixels."""
 
+PINNED_LAST_CHECK = "10:30 AM"
+"""Clock the menu's *Last checked* row is pinned to before the shutter.
+
+The row reports when the extension last ran `mpm`, so it reads differently on
+every capture and would commit four fresh images per run on its own. Pinned
+rather than hidden, and only its time is substituted: the row belongs in the
+menu, and its wording belongs to the extension.
+"""
+
 BACKGROUND_COLOR = "#2d2364"
 """Flat desktop background behind the menu, the ink of the project's own mark.
 
@@ -205,6 +214,13 @@ document that instead of the menu. Reaches into the indicator's own private
 section deliberately: nothing public reports it, and this file and the extension
 ship together.
 """
+
+PIN_LAST_CHECK = js(r"""(() => {
+    const label = INDICATOR._lastCheckedItem.label;
+    label.text = label.text.replace(
+        /\d{1,2}:\d{2}(:\d{2})?(\s?[AP]M)?/, 'PINNED');
+    return label.text;
+})()""").replace("PINNED", PINNED_LAST_CHECK)
 
 OPEN_MENU = js("""(() => {
     INDICATOR.menu.open(false);
@@ -479,6 +495,10 @@ def capture(shot: Shot, scratch: Path, schema_dir: Path) -> None:
             "the menu to be populated",
         )
         shell_eval(HIDE_CLOCK)
+        pinned = shell_eval(PIN_LAST_CHECK)
+        if PINNED_LAST_CHECK not in str(pinned):
+            msg = f"Last-checked row not pinned, it reads {pinned!r}"
+            raise RuntimeError(msg)
         shell_eval(OPEN_MENU)
         # The menu opens unanimated, but still needs a frame to lay out.
         time.sleep(1)

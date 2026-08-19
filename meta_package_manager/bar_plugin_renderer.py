@@ -107,6 +107,22 @@ class BarPluginRenderer(MPMPlugin):
         return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)
 
     @cached_property
+    def fold_sections(self) -> bool:
+        """Render manager sections as inline accordions instead of sub-menus.
+
+        SwiftBar `2.1.0` renders an item carrying `fold=true` alongside its
+        `--`-prefixed children as a collapsible section: clicking the header
+        expands it in place rather than opening a sub-menu, without dismissing
+        the menu, and the expanded state survives a refresh
+        ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)).
+
+        Depends on {attr}`submenu_layout` for the children it folds. Xbar has no
+        equivalent and ignores the parameter, so the grouped layout keeps its
+        sub-menus there.
+        """
+        return self.submenu_layout and self.is_swiftbar
+
+    @cached_property
     def menu_diff_colors(self) -> dict[str, int]:
         """Appearance-adaptive version-diff suffix colors for the menu.
 
@@ -218,6 +234,13 @@ class BarPluginRenderer(MPMPlugin):
         # Print menu bar icon with number of available upgrades.
         total_outdated = sum(len(m["packages"]) for m in managers)
         total_errors = sum(len(m.get("errors", [])) for m in managers)
+
+        # Producing no output is what makes the host hide the plugin, so the
+        # rendering stops before its first line. Errors keep the icon around:
+        # they are the report, and silencing them would hide a broken manager.
+        if self.hide_when_up_to_date and not total_outdated and not total_errors:
+            return
+
         self.pp(
             (f"🎁↑{total_outdated}" if total_outdated else "📦✓")
             + (f" ⚠️{total_errors}" if total_errors else ""),
@@ -245,9 +268,22 @@ class BarPluginRenderer(MPMPlugin):
                     p["upgrade_cli"],
                 ))
 
+            # SwiftBar renders the count as a native badge on the section
+            # header, so the label drops the copy it would duplicate. A zero
+            # earns no badge: the pill is prominent enough that it should only
+            # ever carry an actionable count, and the section is itself proof
+            # the manager was queried.
+            badge = ""
+            if self.is_swiftbar and package_count:
+                badge = f"badge={package_count}"
+
             # Table-like rendering
             if self.table_rendering:
-                header = f"{manager['id']} - {package_count} {package_label}"
+                header = (
+                    manager["id"]
+                    if self.is_swiftbar
+                    else f"{manager['id']} - {package_count} {package_label}"
+                )
                 if table:
                     formatted_lines = render_table(
                         [p[0] for p in table],
@@ -260,7 +296,11 @@ class BarPluginRenderer(MPMPlugin):
 
             # Variable-width / non-table / non-monospaced rendering.
             else:
-                header = f"{package_count} outdated {manager['name']} {package_label}"
+                header = (
+                    manager["name"]
+                    if self.is_swiftbar
+                    else f"{package_count} outdated {manager['name']} {package_label}"
+                )
                 formatted_lines = [" ".join(map(str, p[0])) for p in table]
 
             upgrade_cli_list = [p[1] for p in table]
@@ -274,7 +314,12 @@ class BarPluginRenderer(MPMPlugin):
             error = ""
             if self.submenu_layout and manager.get("errors", None):
                 error = "⚠️ "
-            self.pp(f"{error}{header}", font)
+            self.pp(
+                f"{error}{header}",
+                font,
+                badge,
+                "fold=true" if self.fold_sections else "",
+            )
 
             # Print a menu entry for each outdated packages. The ansi=true
             # parameter renders the version-diff colors; SwiftBar defaults it

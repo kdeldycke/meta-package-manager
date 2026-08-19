@@ -89,6 +89,27 @@ def test_check_mpm_missing_binary():
     assert isinstance(error, FileNotFoundError)
 
 
+def test_search_mpm_stops_at_home(monkeypatch, tmp_path):
+    """The venv walk stops at Home, so a lockfile sitting in a shared parent
+    above it is never mistaken for the plugin's own project."""
+    home = tmp_path / "home"
+    project = home / "project"
+    project.mkdir(parents=True)
+    (project / "uv.lock").touch()
+    (tmp_path / "uv.lock").touch()
+
+    monkeypatch.setattr(bar_plugin, "__file__", str(project / "bar_plugin.py"))
+    monkeypatch.setattr(bar_plugin.Path, "home", classmethod(lambda cls: home))
+
+    candidates = list(bar_plugin.MPMPlugin().search_mpm())
+
+    def uv_candidate(folder):
+        return ("uv", "run", "--frozen", "--project", str(folder), "mpm")
+
+    assert uv_candidate(project) in candidates
+    assert uv_candidate(tmp_path) not in candidates
+
+
 def _pin_plugin_env(
     monkeypatch, table_rendering: bool, os_appearance: str | None = None
 ) -> None:
@@ -98,7 +119,13 @@ def _pin_plugin_env(
     is deleted otherwise, so the host appearance never reaches the renderer.
     """
     monkeypatch.setenv("VAR_TABLE_RENDERING", str(table_rendering))
-    for var in ("VAR_SUBMENU_LAYOUT", "VAR_DEFAULT_FONT", "VAR_MONOSPACE_FONT"):
+    for var in (
+        "SWIFTBAR",
+        "VAR_DEFAULT_FONT",
+        "VAR_HIDE_WHEN_UP_TO_DATE",
+        "VAR_MONOSPACE_FONT",
+        "VAR_SUBMENU_LAYOUT",
+    ):
         monkeypatch.delenv(var, raising=False)
     if os_appearance is None:
         monkeypatch.delenv("OS_APPEARANCE", raising=False)
@@ -213,6 +240,101 @@ def test_renderer_sanitizes_error_lines(monkeypatch):
     for line in error_lines:
         assert "ansi=false" in line
         assert "\x1b[" not in line
+
+
+@pytest.mark.parametrize(
+    ("is_swiftbar", "submenu_layout", "table_rendering", "outdated", "expected"),
+    (
+        # Xbar renders neither parameter, so the count stays in the label.
+        (False, False, True, True, "fakemanager - 2 packages | font=Menlo size=12"),
+        (False, True, True, True, "fakemanager - 2 packages | font=Menlo size=12"),
+        (False, False, False, True, "2 outdated Fake Manager packages |"),
+        # SwiftBar moves the count to a native badge.
+        (True, False, True, True, "fakemanager | font=Menlo size=12 badge=2"),
+        (True, False, False, True, "Fake Manager | badge=2"),
+        # And folds the section into an accordion once the grouped layout gave
+        # it the children to fold.
+        (True, True, True, True, "fakemanager | font=Menlo size=12 badge=2 fold=true"),
+        # A zero count earns no badge, the section being proof enough that the
+        # manager was queried.
+        (True, False, True, False, "fakemanager | font=Menlo size=12"),
+        (True, True, True, False, "fakemanager | font=Menlo size=12 fold=true"),
+    ),
+)
+def test_renderer_section_header(
+    monkeypatch, is_swiftbar, submenu_layout, table_rendering, outdated, expected
+):
+    """The section header carries an actionable count badge and an accordion
+    toggle on SwiftBar, and the labelled count everywhere else."""
+    _pin_plugin_env(monkeypatch, table_rendering=table_rendering)
+    monkeypatch.setenv("VAR_SUBMENU_LAYOUT", str(submenu_layout))
+    if is_swiftbar:
+        monkeypatch.setenv("SWIFTBAR", "1")
+
+    data = _outdated_fixture()
+    if not outdated:
+        data["fakemanager"]["packages"] = []
+
+    # The menu bar line and the section separator precede the header.
+    assert BarPluginRenderer().render(data).splitlines()[2] == expected
+
+
+@pytest.mark.parametrize(
+    ("hide", "errors", "renders"),
+    (
+        # Nothing to report, but the icon is kept by default.
+        (False, [], True),
+        (True, [], False),
+        # An error is a report of its own: hiding it would bury a broken manager.
+        (True, ["boom"], True),
+    ),
+)
+def test_renderer_hides_when_up_to_date(monkeypatch, hide, errors, renders):
+    """An empty rendering is what makes the host drop the menu bar icon, so it
+    is produced only when asked for and only when there is nothing to say."""
+    _pin_plugin_env(monkeypatch, table_rendering=True)
+    monkeypatch.setenv("VAR_HIDE_WHEN_UP_TO_DATE", str(hide))
+
+    output = BarPluginRenderer().render({
+        "fakemanager": {
+            "id": "fakemanager",
+            "name": "Fake Manager",
+            "packages": [],
+            "errors": errors,
+        },
+    })
+
+    # Whitespace would not do: the host keys the icon on a strictly empty output.
+    assert bool(output) is renders
+
+
+@pytest.mark.parametrize(
+    ("hide", "reports_error"),
+    (
+        (False, True),
+        (True, False),
+    ),
+)
+def test_plugin_empty_mpm_output(monkeypatch, capsys, hide, reports_error):
+    """An `mpm` producing nothing is a failure to report, unless the user asked
+    for the icon to vanish while everything is up to date."""
+    monkeypatch.delenv("SWIFTBAR", raising=False)
+    monkeypatch.setenv("VAR_HIDE_WHEN_UP_TO_DATE", str(hide))
+    monkeypatch.setattr(
+        bar_plugin,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args, 0, stdout="", stderr=""
+        ),
+    )
+
+    plugin = bar_plugin.MPMPlugin()
+    # Short-circuit the search for a runnable mpm: a cached_property reads back
+    # from the instance dictionary.
+    plugin.__dict__["best_mpm"] = (("mpm",), True, True, (9, 9, 9), None)
+    plugin.print_menu()
+
+    assert ("\u2757\ufe0f" in capsys.readouterr().out) is reports_error
 
 
 def _invocation_matrix(*iterables):

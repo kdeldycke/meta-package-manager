@@ -16,6 +16,8 @@
 # first `=` character. See: https://github.com/matryer/xbar/issues/832
 # <swiftbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</swiftbar.var>
 # <swiftbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Font parameters for monospace text. Used for table rendering and error messages.</swiftbar.var>
+# XXX Only SwiftBar hides a plugin producing no output, so this is SwiftBar-only too.
+# <swiftbar.var>boolean(VAR_HIDE_WHEN_UP_TO_DATE="false"): Hide the menu bar icon while no package is outdated and no manager reports an error.</swiftbar.var>
 """Xbar and SwiftBar plugin for Meta Package Manager (the {command}`mpm` CLI).
 
 Default update cycle should be set to several hours so we have a chance to get
@@ -198,6 +200,21 @@ class MPMPlugin:
         return self.getenv_bool("VAR_TABLE_RENDERING", True)
 
     @cached_property
+    def hide_when_up_to_date(self) -> bool:
+        """Remove the menu bar icon entirely while there is nothing to report.
+
+        SwiftBar hides a plugin whose run produces no output, so rendering
+        nothing is how the icon is made to disappear. That forces the plugin to
+        tell a deliberate silence from a broken `mpm` call, which is why
+        {meth}`print_menu` only tolerates an empty output when this is set.
+
+        Xbar has no such behavior, hence the SwiftBar-only declaration.
+
+        Value is sourced from the `VAR_HIDE_WHEN_UP_TO_DATE` environment variable.
+        """
+        return self.getenv_bool("VAR_HIDE_WHEN_UP_TO_DATE", False)
+
+    @cached_property
     def default_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
         return self.normalize_params(
@@ -272,9 +289,11 @@ class MPMPlugin:
         # a virtualenv. So walk back the whole folder tree from here in search of a
         # virtualenv.
         for folder in Path(__file__).parents:
-            # Stop looking beyond Home.
+            # Stop at Home: neither it nor any folder above it is a project of
+            # the user's, and scanning on reaches `/` by way of every shared
+            # parent a stray lockfile could sit in.
             if folder == Path.home():
-                continue
+                break
 
             venv_cli = self.search_venv(folder)
             if not venv_cli:
@@ -498,15 +517,18 @@ class MPMPlugin:
         )
 
         # Bail-out immediately on errors related to mpm self-execution or if mpm is
-        # not able to produce any output.
-        if process.stderr or not process.stdout:
+        # not able to produce any output. An empty output is deliberate when the
+        # user asked for the icon to vanish while everything is up to date, and is
+        # then forwarded as-is for the host to hide the plugin.
+        if process.stderr or (not process.stdout and not self.hide_when_up_to_date):
             self.print_error_header()
             self.print_error(process.stderr)
             return
 
         # Capturing the output of mpm and re-printing it will introduce an extra
         # line returns, hence the extra rstrip() call.
-        print(process.stdout.rstrip())
+        if process.stdout:
+            print(process.stdout.rstrip())
 
 
 if __name__ == "__main__":

@@ -22,12 +22,17 @@ SwiftBar `2.1.0` or newer is required: older releases mangle the variable defaul
 
 The plugin is configurable with these environment variables:
 
-| Variable name         | Description                                                                      | Type    | Defaults             | SwiftBar support |                    Xbar support                    |
-| --------------------- | -------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :------------------------------------------------: |
-| `VAR_SUBMENU_LAYOUT`  | Group packages into a sub-menu for each manager.                                 | Boolean | `False`              |        ✅        |                         ✅                         |
-| `VAR_TABLE_RENDERING` | Aligns package names and versions in a table for easier visual parsing.          | Boolean | `True`               |        ✅        |                         ✅                         |
-| `VAR_DEFAULT_FONT`    | Font parameters for regular text.                                                | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
-| `VAR_MONOSPACE_FONT`  | Font parameters for monospace text. Used for table rendering and error messages. | String  | `font=Menlo size=12` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
+| Variable name              | Description                                                                      | Type    | Defaults             | SwiftBar support |                    Xbar support                    |
+| -------------------------- | -------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :------------------------------------------------: |
+| `VAR_SUBMENU_LAYOUT`       | Group packages into a sub-menu for each manager.                                 | Boolean | `False`              |        ✅        |                         ✅                         |
+| `VAR_TABLE_RENDERING`      | Aligns package names and versions in a table for easier visual parsing.          | Boolean | `True`               |        ✅        |                         ✅                         |
+| `VAR_DEFAULT_FONT`         | Font parameters for regular text.                                                | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
+| `VAR_MONOSPACE_FONT`       | Font parameters for monospace text. Used for table rendering and error messages. | String  | `font=Menlo size=12` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
+| `VAR_HIDE_WHEN_UP_TO_DATE` | Hide the menu bar icon while nothing is outdated and no manager errored.         | Boolean | `False`              |        ✅        |                         ❌                         |
+
+```{note}
+SwiftBar renders two things differently from Xbar: the outdated count sits in a native badge on each manager header rather than in its label, and the grouped layout folds every section into an inline accordion ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)) that expands in place without dismissing the menu. The SwiftBar screenshots below predate both.
+```
 
 These variables only drive the menu layout. Everything else comes from `mpm`'s own configuration file: the plugin passes no option beyond the ones it decides itself, so the file found at its default location on the system applies to every run it triggers. See {doc}`configuration` for the search paths and the full schema.
 

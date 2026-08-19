@@ -123,6 +123,10 @@
 - [bar-plugin] Fix the plugin rendering a version error instead of its menu on every released SwiftBar. The minimum requirement was pinned on an unreleased `2.1.2` test build, while the fix it targets shipped in `2.1.0`.
 - [bar-plugin] Quote the default values of the plugin variables, so SwiftBar `2.1.0` and above parses them and exposes them in its settings UI. Xbar still trims the quotes.
 - [bar-plugin] Declare the font variables as `swiftbar.var` and drop the `swiftbar.environment` block they were hidden in, so all four variables are editable from SwiftBar's UI.
+- [bar-plugin] Fold each manager section into an inline accordion on SwiftBar `2.1.0` and above, expanding in place on click instead of opening a sub-menu, in the grouped layout.
+- [bar-plugin] Render each manager's outdated count as a native SwiftBar badge on its section header, in place of the count spelled out in the label.
+- [bar-plugin] Add the `VAR_HIDE_WHEN_UP_TO_DATE` variable, removing the menu bar icon entirely while no package is outdated and no manager reported an error.
+- [bar-plugin] Stop the plugin's virtualenv search at the user's home folder, as its comment always claimed: it kept climbing to `/Users` and `/`, where a stray lockfile in a shared parent would have been taken for the plugin's own project.
 - [lazy] Add the lazy.nvim Neovim plugin manager with `installed` and `upgrade` support. It declares no `install` or `remove`: lazy.nvim materializes only the plugin set the user's own Lua configuration names.
 - [mpm] Add the GNOME Shell extension to the benchmark's feature matrix.
 - [mpm] Link every feature label of the benchmark's matrix to the same page its `mpm` cell points at, a convention only the Xbar/SwiftBar plugin row followed. The `purl` row now points at the augmentation section describing purls, instead of the generated `install` help.

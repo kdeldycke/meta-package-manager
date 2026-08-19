@@ -524,16 +524,18 @@ def _lock_families() -> tuple[LockFamily, ...]:
 
 
 FAN_OUT_GLYPHS: dict[str, str] = {
-    FAN_OUT_CONCURRENT: "✅",
-    FAN_OUT_GROUPED: "🔒",
-    FAN_OUT_SEQUENTIAL: "⛓️",
+    FAN_OUT_CONCURRENT: "⇶⇶⇶",
+    FAN_OUT_GROUPED: "⇉⇶→",
+    FAN_OUT_SEQUENTIAL: "→→→",
 }
 """Glyph rendered in the `Concurrency` column for each fan-out mode.
 
-A padlock for the modes gated on a backend lock, a chain for the one that
-parallelizes nothing. Deliberately not ❌, which these docs reserve for a
-capability a tool lacks: a sequential command is working as designed rather
-than missing something.
+Arrow density stands in for how many managers move at once: three
+three-way arrows for a mode that never throttles, three single arrows for
+one that never overlaps, and a mix of both for the mode that is either
+depending on which managers were selected. Deliberately not ✅/❌, which
+these docs reserve for a capability a tool has or lacks: a sequential
+command is working as designed rather than missing something.
 
 {data}`~meta_package_manager.dispatch.FAN_OUT_NONE` has no glyph on purpose.
 Those subcommands are absent from the table rather than shown as a blank row,

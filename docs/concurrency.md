@@ -14,9 +14,9 @@ Before any of that, every command detects which of the managers it selected are 
 
 ## What each command spreads
 
-- ✅ every selected manager runs at once.
-- 🔒 every selected manager runs at once, except those queueing on a [shared backend](#shared-backends), which take turns.
-- ⛓️ one manager at a time, whatever `--jobs` says.
+- ⇶⇶⇶ every selected manager runs at once.
+- ⇉⇶→ mixed concurrency, where every manager runs at once, except the ones [sharing the same backend](#shared-backends) which runs sequentially.
+- →→→ one manager at a time, whatever `--jobs` says.
 
 ```{python:render}
 :mirror:
@@ -29,26 +29,26 @@ print(concurrency_table())
 
 | Command                        | Concurrency |
 | :----------------------------- | :---------: |
-| `mpm cleanup`                  |     🔒      |
-| `mpm doctor`                   |     🔒      |
-| `mpm dump`                     |     ✅      |
-| `mpm install`                  |     🔒      |
-| `mpm install <untied package>` |     ⛓️      |
-| `mpm installed`                |     ✅      |
-| `mpm orphans`                  |     ✅      |
-| `mpm outdated`                 |     ✅      |
-| `mpm remove`                   |     🔒      |
-| `mpm restore`                  |     🔒      |
-| `mpm sbom`                     |     ✅      |
-| `mpm search`                   |     ✅      |
-| `mpm sync`                     |     🔒      |
-| `mpm upgrade`                  |     🔒      |
+| `mpm cleanup`                  |     ⇉⇶→     |
+| `mpm doctor`                   |     ⇉⇶→     |
+| `mpm dump`                     |     ⇶⇶⇶     |
+| `mpm install`                  |     ⇉⇶→     |
+| `mpm install <untied package>` |     →→→     |
+| `mpm installed`                |     ⇶⇶⇶     |
+| `mpm orphans`                  |     ⇶⇶⇶     |
+| `mpm outdated`                 |     ⇶⇶⇶     |
+| `mpm remove`                   |     ⇉⇶→     |
+| `mpm restore`                  |     ⇉⇶→     |
+| `mpm sbom`                     |     ⇶⇶⇶     |
+| `mpm search`                   |     ⇶⇶⇶     |
+| `mpm sync`                     |     ⇉⇶→     |
+| `mpm upgrade`                  |     ⇉⇶→     |
 
 <!-- mirror-end -->
 
 Managers run in parallel; a single manager's own packages do not. An `mpm remove pkg-a pkg-b` drives [`brew`](managers/brew.md) and [`cargo`](managers/cargo.md) at the same time, but hands `pkg-a` and `pkg-b` to `brew` one at a time. No package manager is safe to invoke twice at once against its own state.
 
-The one command that parallelizes nothing is an `mpm install` naming a package you left untied to a manager. That install is a priority search: try the managers in order and stop at the first one carrying the package, which cannot be answered by running them all at once. `mpm` notes at `INFO` when an explicit `--jobs` is ignored for this reason. Tie the package to a manager, with `--brew` or with a purl like `pkg:brew/curl`, and the install joins the 🔒 row above.
+The one command that parallelizes nothing is an `mpm install` naming a package you left untied to a manager. That install is a priority search: try the managers in order and stop at the first one carrying the package, which cannot be answered by running them all at once. `mpm` notes at `INFO` when an explicit `--jobs` is ignored for this reason. Tie the package to a manager, with `--brew` or with a purl like `pkg:brew/curl`, and the install joins the ⇉⇶→ row above.
 
 The subcommands that drive no package operation of their own are left out of the table: there is nothing for them to spread.
 

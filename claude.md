@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to [Claude Code](https://claude.ai/code) when working with code in this repository.
+Project-specific guidance for working in this repository. The generic coding conventions load from the maintainer's machine configuration and are deliberately not duplicated here: this file carries only what is specific to `mpm`.
 
 ## Project overview
 
@@ -8,28 +8,9 @@ Meta Package Manager (`mpm`) is a CLI that wraps multiple package managers (Home
 
 ## Upstream conventions
 
-This repository uses reusable workflows from [`kdeldycke/repomatic`](https://github.com/kdeldycke/repomatic) and follows the conventions established there. For code style, documentation, testing, and design principles, refer to the upstream `claude.md` as the canonical reference.
+This repository uses reusable workflows from [`kdeldycke/repomatic`](https://github.com/kdeldycke/repomatic) and follows the conventions established there. The generic conventions used to be projected into this file by repomatic's retired `agent` component; they now live with the maintainer, and this file keeps only the `mpm`-specific half.
 
 **Contributing upstream:** If you spot inefficiencies, improvements, or missing features in the reusable workflows, propose changes via a pull request or issue at [`kdeldycke/repomatic`](https://github.com/kdeldycke/repomatic/issues).
-
-### Source of truth hierarchy
-
-`CLAUDE.md` defines the rules. The codebase and GitHub (issues, PRs, CI logs) are what you measure against those rules. When they disagree, fix the code to match the rules. If the rules are wrong, fix `CLAUDE.md`.
-
-### Keeping `CLAUDE.md` lean
-
-`CLAUDE.md` must contain only conventions, policies, rationale, and non-obvious rules that Claude cannot discover by reading the codebase. Actively remove:
-
-- **Structural inventories** — project trees, module tables, workflow lists. Claude can discover these via `Glob`/`Read`.
-- **Code examples that duplicate source files** — YAML snippets copied from workflows, Python patterns visible in every module. Reference the source file instead.
-- **General programming knowledge** — standard Python idioms, well-known library usage, tool descriptions derivable from imports.
-- **Implementation details readable from code** — what a function does, what a workflow's concurrency block looks like. Only the *rationale* for non-obvious choices belongs here.
-
-## Philosophy
-
-1. First create something that works (to provide business value).
-2. Then something that's beautiful (to lower maintenance costs).
-3. Finally works on performance (to avoid wasting time on premature optimizations).
 
 ## Stability policy
 
@@ -86,29 +67,6 @@ The product feature's vocabulary is settled; reuse it rather than coining near-s
 
 The rule has no scratch exemption. It binds reusable workflows, one-off CI steps, test scripts, local reproduction commands and throwaway experiments equally: an uncooled `uvx` in a five-minute debugging step resolves the same tree from the same registry onto the same runner as a production job.
 
-### A cooldown is not a pin, and neither is a checksum
-
-The three guarantees are independent, and most of what CI installs has only one or two of them. Know which one you are relying on before calling something verified.
-
-| Guarantee | What it proves                                                      | Where this repo has it                                        |
-| :-------- | :------------------------------------------------------------------ | :------------------------------------------------------------ |
-| Cooldown  | The version has been public long enough for a compromise to surface | Every `uvx`, `uv pip`, `uv tool`, `npm` and `npx` invocation  |
-| Pin       | Everyone resolves the same version                                  | Action SHAs, the inline `repomatic==X.Y.Z` literal, `uv.lock` |
-| Checksum  | The bytes are the bytes that version shipped                        | `uv.lock` hashes                                              |
-
-The gap worth naming: a `uvx`-resolved tree is gated by publication age but never checked against a known digest, because a `uvx` environment has no lockfile. `uv.lock` is the only place a Python dependency is hash-pinned, so anything resolved outside it trades hash verification for the cooldown alone.
-
-### Where the window comes from
-
-`[tool.repomatic] minimum-release-age` is the single source of truth, left at its `1 week` default here. Never hard-code a duration next to an install command: read it from config, or from the `npm_min_release_age_days` output `repomatic metadata` derives from it.
-
-Two places carry the duration as a literal instead, and both must be kept equal to that source by hand:
-
-- **Every workflow that installs anything**, because YAML cannot read Python: each sets `NPM_CONFIG_MIN_RELEASE_AGE` and `UV_EXCLUDE_NEWER` in a **workflow-level `env:` block**. Job-level would not cover the bootstrap, since `metadata` resolves packages before any other job's output exists and a workflow-level `env:` cannot reference `needs`. The literal covers every job, including that bootstrap and any step added later by someone who never read this section.
-- **`[tool.uv] exclude-newer`**, because uv reads its own config and knows nothing of `[tool.repomatic]`. The two must not merely be close: a lock window wider than the install window resolves versions those installs then refuse, leaving a package pinned in `uv.lock` that CI cannot install.
-
-That makes the cooldown the one place an environment variable beats an explicit flag, inverting [§ `uv` flags in CI workflows](#uv-flags-in-ci-workflows): a flag only protects the command someone remembered to write it on, and the commands that most need protecting are the ones nobody thought about.
-
 ### Per-ecosystem knobs
 
 | Ecosystem                                                                  | Cooldown                                                           | Per-package exemption                                   |
@@ -119,12 +77,6 @@ That makes the cooldown the one place an environment variable beats an explicit 
 uv accepts a friendly duration (`1 week`), an ISO 8601 span (`P7D`), or an absolute date; npm counts whole days and needs 11.10.0 or newer. Both knobs gate the whole resolved tree, transitive dependencies included, which is the point: the compromised package is rarely the one named on the command line.
 
 For every other package manager, `docs/cooldown.md` is the inventory, and it is this project's own: which managers enforce a cooldown natively, which have support proposed upstream, which have none, and which are N/A because their archive already stages releases on its own.
-
-### Distro archives are out of scope, not an exception
-
-`apk`, `pacman`, `xbps` and their peers are not live registries, and this rule was never about them. A stable archive is frozen at release and moves only through the distro's own staging, which is a cooldown implemented one layer down. Nobody self-publishes into it, which is the property the window exists to compensate for everywhere else. A distro version string is also the maintainer's package build, not an upstream publish date, so a publish-date filter would have nothing to filter on. That is why `tests-yay-cooldown.yaml`, `check-void-deps.yaml` and the `*-source` jobs of `tests-install.yaml` carry no window: they drive `pacman`, `xbps-src`, `abuild` and `nix-build` inside their own distro containers.
-
-The exception is a repository added by hand. A PPA or a vendor's `.repo` file is a live, single-publisher registry wearing apt's clothes, with none of the distro staging behind it. Pin the version there, or fetch a checksummed artifact instead.
 
 ### Documented exemptions
 
@@ -222,27 +174,6 @@ The generation of API documentation is
 [covered by a dedicated workflow](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs.yaml).
 
 ## Documentation requirements
-
-### Scope of `CLAUDE.md` vs `readme.md`
-
-- **`CLAUDE.md`**: Contributor and Claude-focused directives — code style, testing guidelines, design principles, and internal development guidance.
-- **`readme.md`**: User-facing documentation — installation, usage, and public API.
-
-When adding new content, consider whether it benefits end users (`readme.md`) or contributors/Claude working on the codebase (`CLAUDE.md`).
-
-### Knowledge placement
-
-Each piece of knowledge has one canonical home, chosen by audience. Other locations get a brief pointer ("See `module.py` for rationale.").
-
-| Audience              | Home                      | Content                                           |
-| :-------------------- | :------------------------ | :------------------------------------------------ |
-| End users             | `readme.md`               | Installation, configuration, usage.               |
-| Developers            | Python docstrings         | Design decisions, trade-offs, "why" explanations. |
-| Workflow maintainers  | YAML comments             | Brief "what" + pointer to Python code for "why."  |
-| Bug reporters         | `.github/ISSUE_TEMPLATE/` | Reproduction steps, version commands.             |
-| Contributors / Claude | `CLAUDE.md`               | Conventions, policies, non-obvious rules.         |
-
-**YAML to Python distillation:** When workflow YAML files contain lengthy "why" explanations, migrate the rationale to Python module, class, or constant docstrings (using MyST admonition fences like ```` ```{note} ```` and ```` ```{warning} ````). Trim the YAML comment to a one-line "what" plus a pointer.
 
 ### Example data
 
@@ -342,48 +273,7 @@ The terminal rendition in `meta_package_manager/logo.py` repeats the two colors 
 
 The project's single legal sink: license and copyright, the blanket trademark notice covering every manager name and mark the docs display, credits for third-party artwork (the vendored brand marks, Open Clipart mascots, Octicons, the XKCD strip), and a pointer to where dependency licenses live. Legalese goes here and nowhere else, so a credit is never stranded next to the artwork it covers, where nobody looks for it. The file keeps its `license.md` name (and `license.html` URL) to stay aligned with the upstream repomatic docs tree, even though the page now covers more than the license; its `index.md` entry stays last in the `Development` toctree. A new third-party asset means a new entry here, and an attribution-bearing license means the entry is mandatory.
 
-## File naming conventions
-
-### Extensions: prefer long form
-
-Use the longest, most explicit file extension available. For YAML, that means `.yaml` (not `.yml`). Apply the same principle to all extensions (e.g., `.html` not `.htm`, `.jpeg` not `.jpg`).
-
-### Filenames: lowercase
-
-Use lowercase filenames everywhere. Avoid shouting-case names like `FUNDING.YML` or `README.MD`.
-
-### GitHub exceptions
-
-GitHub silently ignores certain files unless they use the exact name it expects. These are the known hard constraints where you **cannot** use `.yaml` or lowercase:
-
-| File                     | Required name                       | Why                                               |
-| ------------------------ | ----------------------------------- | ------------------------------------------------- |
-| Issue form templates     | `.github/ISSUE_TEMPLATE/*.yml`      | `.yaml` is not recognized for issue forms         |
-| Issue template config    | `.github/ISSUE_TEMPLATE/config.yml` | `.yaml` not recognized                            |
-| Funding config           | `.github/funding.yml`               | Only `.yml` documented; no evidence `.yaml` works |
-| Release notes config     | `.github/release.yml`               | Only `.yml` documented                            |
-| Issue template directory | `.github/ISSUE_TEMPLATE/`           | Must be uppercase; GitHub ignores lowercase       |
-| Code owners              | `CODEOWNERS`                        | Must be uppercase; no extension                   |
-
-Workflows (`.github/workflows/*.yaml`) and action metadata (`action.yaml`) officially support both `.yml` and `.yaml` — use `.yaml`.
-
 ## Code style
-
-### Terminology and spelling
-
-Use correct capitalization for proper nouns and trademarked names:
-
-<!-- typos:off -->
-
-- **PyPI** (not ~~PyPi~~) — the Python Package Index. The "I" is capitalized because it stands for "Index". See [PyPI trademark guidelines](https://pypi.org/trademarks/).
-- **GitHub** (not ~~Github~~)
-- **GitHub Actions** (not ~~Github Actions~~ or ~~GitHub actions~~)
-- **JavaScript** (not ~~Javascript~~)
-- **TypeScript** (not ~~Typescript~~)
-- **macOS** (not ~~MacOS~~ or ~~macos~~)
-- **iOS** (not ~~IOS~~ or ~~ios~~)
-
-<!-- typos:on -->
 
 ### Version formatting
 
@@ -415,7 +305,7 @@ Default to a subject line and nothing else, when there is no context to link. A 
 - **No decorative prefixes.** This is not [Conventional Commits](https://www.conventionalcommits.org): no `feat:`, `chore:`, `fix:`. A `[bracketed]` prefix is reserved for a mechanism that parses it back, and only `[changelog] …` qualifies, matched literally by repomatic's auto-tagging job. Do not confuse it with the `[scope]` tags that open every `changelog.md` bullet: those name a manager or platform, live in the changelog file rather than in git, and are indexed by `manager_changelog()`. The two vocabularies are unrelated. Never write a GitHub skip token (`[skip ci]` and its aliases) in any message, including a body: they match anywhere and leave a required check "Pending" rather than failing.
 - **Body: link the context.** Omit it when the subject says everything. Write one short paragraph when the *why* is not evident from the diff, and especially when the decision was made somewhere public: the upstream manager's issue tracker, the distro packaging PR, the spec page that forced the behavior. Forges render commit messages as HTML, so a link is the cheapest route from `git log` to the full story. Format every cross-repository reference as `[owner/repo#N](https://github.com/owner/repo/issues/N)`.
 
-Never narrate the work in sequence or enumerate the files touched: `git log --stat` lists the files and the diff shows the order. Rationale needing more room than a paragraph belongs somewhere durable instead, per [§ Knowledge placement](#knowledge-placement).
+Never narrate the work in sequence or enumerate the files touched: `git log --stat` lists the files and the diff shows the order. Rationale needing more room than a paragraph belongs somewhere durable instead: a code comment, a docstring, `docs/`, or the PR body.
 
 ### Comments and docstrings
 
@@ -428,48 +318,9 @@ Never narrate the work in sequence or enumerate the files touched: `git log --st
 - **Heading anchors:** use the natural auto-generated anchor for cross-references; add explicit MyST anchors (`(my-anchor)=`) only when the natural one is unavailable (duplicate headings, non-heading targets).
 - **Dataclass field docs:** In dataclasses, document fields with attribute docstrings (a string literal immediately after the field declaration), not `:param:` entries in the class docstring. Attribute docstrings are co-located with the field they describe, recognized by Sphinx, and stay in sync when fields are added or reordered. The class docstring should contain only a summary of the class purpose.
 
-### Documenting code decisions
-
-Document design decisions, trade-offs, and non-obvious implementation choices directly in the code using docstring admonitions (MyST fences like ```` ```{warning} ````, ```` ```{note} ````, ```` ```{caution} ````; a colon fence `:::{note}` when a code block must nest inside), inline comments, and module-level docstrings for constants that need context.
-
-### `__init__.py` files
-
-Keep `__init__.py` files minimal. They are easy to overlook when scanning a codebase, so avoid placing logic, constants, or re-exports in them. Acceptable content: license headers, package docstrings, `from __future__ import annotations`, and `__version__` (standard Python convention for the root package). Anything else belongs in a named module.
-
-### `TYPE_CHECKING` block
-
-Place a module-level `TYPE_CHECKING` block after all imports (including version-dependent conditional imports). Use `TYPE_CHECKING = False` (not `from typing import TYPE_CHECKING`) to avoid importing `typing` at runtime. See existing modules for the canonical pattern.
-
-Only add `TYPE_CHECKING = False` when there is a corresponding `if TYPE_CHECKING:` block. If all type-checking imports are removed, remove the `TYPE_CHECKING = False` assignment too — a bare assignment with no consumer is dead code.
-
-### Modern `typing` practices
-
-Use modern equivalents from `collections.abc` and built-in types instead of `typing` imports. Use `X | Y` instead of `Union` and `X | None` instead of `Optional`. New modules should include `from __future__ import annotations` ([PEP 563](https://peps.python.org/pep-0563/)).
-
-### Minimal inline type annotations
-
-Omit type annotations on local variables, loop variables, and assignments when mypy can infer the type from the right-hand side. Annotations add visual noise without helping the type checker.
-
-**When to annotate:** Add an explicit annotation only when mypy cannot infer the correct type and reports an error — e.g., empty collections that need a specific element type (`items: list[Package] = []`), `None` initializations where the intended type isn't obvious from later usage, or narrowing a union that mypy doesn't resolve on its own.
-
-**Function signatures are unaffected.** Always annotate function parameters and return types — those are part of the public API and cannot be inferred.
-
 ### Named constants
 
 Do not inline a named constant during a refactor. It exists for readability and grep-ability, and in this codebase the grep is usually the point: `SHARED_LOCK_FAMILIES`, `CANONICAL_ATTRS`, `MANAGER_SECTIONS` and `MANAGER_LABELS` are each the single place a reader can enumerate a rule that is otherwise scattered across managers. When moving code between modules, carry the constant with it rather than replacing it with a literal at the call site.
-
-### Python 3.10 compatibility
-
-This project supports Python 3.10+. Be aware of syntax features **not** available in Python 3.10:
-
-- **Multi-line f-string expressions (Python 3.12+):** Cannot break an f-string after `{` onto the next line.
-- **Exception groups and `except*` (Python 3.11+).**
-- **`Self` type hint (Python 3.11+):** Use `from typing_extensions import Self` instead.
-
-### Imports
-
-- Place imports at the top of the file, unless avoiding circular imports. **Never use local imports inside functions** — move them to the module level. Local imports hide dependencies, bypass ruff's import sorting, and make it harder to see what a module depends on.
-- **Version-dependent imports** (e.g., `tomllib` fallback for Python 3.10) should be placed **after all normal imports** but **before the `TYPE_CHECKING` block**. This allows ruff to freely sort and organize the normal imports above without interference.
 
 ### Workflow file naming
 
@@ -487,43 +338,6 @@ Each job that tests a third-party distributor must have a comment above it with 
 
 Jobs that test *released* artifacts from external distributors (PyPI, Homebrew, Scoop, etc.) must not run on every push. They test the published version, not the code being pushed, so they belong on a schedule or manual dispatch only.
 
-### Non-interactive CI
-
-When a third-party tool prompts interactively (path selection, asset selection), pre-create its config files and resolve inputs via `gh` or other CLI tools rather than piping stdin. This is more robust across platforms, especially Windows where stdin redirection often fails with "Incorrect function."
-
-### YAML workflows
-
-For single-line commands that fit on one line, use plain inline `run:` without any block scalar indicator:
-
-```yaml
-# Preferred for short commands: plain inline.
-  - name: Install project
-    run: uv --no-progress sync --frozen --all-extras --group test
-```
-
-When a command is too long for a single line, use the folded block scalar (`>`) to split it across multiple lines:
-
-```yaml
-# Preferred for long commands: folded block scalar joins lines with spaces.
-  - name: Unittests
-    run: >
-      uv --no-progress run --frozen -- pytest
-      --cov-report=xml
-      --junitxml=junit.xml
-```
-
-Use literal block scalar (`|`) only when the command requires preserved newlines (e.g., multi-statement scripts, heredocs):
-
-```yaml
-# Use | for multi-statement scripts.
-  - name: Install Python
-    run: |
-      set -e
-      uv --no-progress venv --python "${{ matrix.python-version }}"
-```
-
-YAML lines may run up to 120 characters (`yamllint` sets `line-length: max: 120`): don't carry Python's 88-character limit over to workflow comments or reflexively wrap them at 80.
-
 ### Command-line options
 
 Always prefer long-form options over short-form for readability when invoking commands in workflow files and scripts:
@@ -533,16 +347,6 @@ Always prefer long-form options over short-form for readability when invoking co
 - Use `--recursive` instead of `-r`.
 
 The same rule applies to every argv `mpm` constructs at runtime: the manager commands built by the manager classes and definitions, and the `sudo` invocations in `meta_package_manager/sudo.py` (`sudo --non-interactive --validate`, not `sudo -n -v`). Long forms make the `--verbosity INFO` command disclosure self-documenting.
-
-### `uv` flags in CI workflows
-
-When invoking `uv` and `uvx` commands in GitHub Actions workflows:
-
-- **`--no-progress`** on all CI commands (uv-level flag, placed before the subcommand). Progress bars render poorly in CI logs.
-- **`--frozen`** on `uv run` commands (run-level flag, placed after `run`). The lockfile should be immutable in CI.
-- **Flag placement:** `uv --no-progress run --frozen -- command` (not `uv run --no-progress`).
-- **Exceptions:** Omit `--frozen` for `uvx` with pinned versions, `uv tool install`, CLI invocability tests, and local development examples.
-- **Prefer explicit flags over environment variables** (`UV_NO_PROGRESS`, `UV_FROZEN`). Flags are self-documenting, visible in logs, avoid conflicts (e.g., `UV_FROZEN` vs `--locked`), and align with the long-form option principle.
 
 ## CLI output and logging
 
@@ -631,10 +435,6 @@ Distinguish absorbing a flake from hiding a failure: a forced `exit 0` belongs o
 
 Every configurable default lives in exactly one place, and all other code derives it rather than repeating the literal. When adding one, grep for the value and point every other occurrence at the source. The cases already carrying this weight are worth knowing, since each has a test holding it: the coverage floor in `[tool.coverage] report.fail_under`, the cooldown window in `[tool.repomatic] minimum-release-age`, the manager pool in `meta_package_manager/pool.py`, and the page layout in `MANAGER_SECTIONS`.
 
-### Linting and formatting
-
-Linting and formatting are automated via GitHub workflows. Developers don't need to run these manually during development, but are still expected to do best effort. Push your changes and the workflows will catch any issues and perform the nitpicking.
-
 ### Ordering conventions
 
 Keep definitions sorted for readability and to minimize merge conflicts:
@@ -644,16 +444,6 @@ Keep definitions sorted for readability and to minimize merge conflicts:
 - **Manager class members**: The canonical declaration order (identity, escalation policy, requirement, CLI plumbing, version probe, toggles, then methods in base-class order) is the `CANONICAL_ATTRS` tuple in `tests/test_managers.py`, enforced by `test_content_order`. Manager-specific constants (the `_*_REGEXP` parsers) conventionally sit between the attributes and the operations.
 - **YAML configuration keys**: Alphabetically within each mapping level.
 - **Documentation lists and tables**: Alphabetically, unless a logical order (e.g., chronological in changelog) takes precedence.
-
-### Prefer `uv` over `pip` in documentation
-
-Documentation and install pages must use `uv` as the default package installer. When showing how to install the package, use `uv tool install` (for CLI tools) or `uv pip install` (for libraries/extras). Alternative installers (`pip`, `pipx`, etc.) may appear as secondary options in tab sets or dedicated sections, but `uv` must be the primary/default command shown.
-
-### Idempotency by default
-
-Workflows and CLI commands must be safe to re-run. Running the same command or workflow twice with the same inputs should produce the same result without errors or unwanted side effects.
-
-**In practice:** use `--skip-existing`, check for existing state before writing, prefer upsert semantics, make file-modifying operations convergent.
 
 ### Issue and PR labelling
 

@@ -183,7 +183,9 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    timeout-minutes: 30
+    # Sixteen captures across two hosts and both appearances, each restarting
+    # its host so a system appearance change reaches the menu.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
@@ -226,3 +228,4 @@ jobs:
           uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0'
           pr-sync --template-file .github/pr-templates/update-bar-plugin-screenshots.md
           --add-path 'docs/assets/swiftbar-*.png'
+          --add-path 'docs/assets/xbar-*.png'

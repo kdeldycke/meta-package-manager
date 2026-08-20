@@ -693,6 +693,27 @@ def mouse(kind: str, left: float, top: float) -> None:
     )
 
 
+def press_escape() -> None:
+    """Close whatever menu is open, with a real key event.
+
+    Not through System Events: an open menu is a modal tracking loop, and a host
+    that answers no accessibility at all leaves AppleScript waiting on it until
+    the event times out. A key posted to the HID tap needs nothing of the app.
+    """
+    print(
+        swift("""
+        import CoreGraphics
+        let source = CGEventSource(stateID: .hidSystemState)
+        CGEvent(keyboardEventSource: source, virtualKey: 53, keyDown: true)?
+            .post(tap: .cghidEventTap)
+        usleep(80000)
+        CGEvent(keyboardEventSource: source, virtualKey: 53, keyDown: false)?
+            .post(tap: .cghidEventTap)
+        print("escape")
+        """)
+    )
+
+
 def menu_bounds(host: Host) -> dict[str, float] | None:
     """Box enclosing every menu the host currently has open.
 
@@ -818,7 +839,7 @@ def capture(shot: Shot, plugins: Path) -> None:
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
 
     # Dismiss the menu so the next shot starts from a bare desktop.
-    osascript('tell application "System Events" to key code 53')
+    press_escape()
     time.sleep(1)
     print(f"  {shot.path.name}: {png_size(shot.path)}")
 

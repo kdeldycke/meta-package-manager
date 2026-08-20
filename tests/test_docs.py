@@ -212,6 +212,34 @@ def test_redirects_file_is_well_formed():
             )
 
 
+def test_verbatim_card_links_are_rooted():
+    """A sphinx-design `:link:` is emitted verbatim, so a local one is rooted.
+
+    Sphinx rewrites the paths it owns, per page: the `:img-top:` of the same
+    card becomes the `../_images/…` a directory-deep `dirhtml` page needs. A
+    `:link:` gets none of that, so a relative `assets/…` resolved against the
+    page's own URL and reached for `/bar-plugin/assets/…`, which the site does
+    not publish. Same failure, and same fix, as `manpages_url` in `conf.py`:
+    the site is only ever served from the domain root, which is what makes the
+    leading slash safe. Nothing else catches it, `linkcheck` visiting external
+    URLs alone.
+    """
+    assets = PROJECT_ROOT.joinpath("docs", "assets")
+    for page in sorted(PROJECT_ROOT.joinpath("docs").glob("*.md")):
+        content = page.read_text(encoding="UTF-8")
+        for target in re.findall(r"^:link: (\S+)$", content, re.MULTILINE):
+            if urlparse(target).scheme:
+                continue
+            assert target.startswith("/"), (
+                f"{page.name} links {target}, resolved against the page's own "
+                "URL rather than the site root."
+            )
+            if target.startswith("/_images/"):
+                assert assets.joinpath(Path(target).name).is_file(), (
+                    f"{page.name} links {target}, which no asset backs."
+                )
+
+
 def test_changelog():
     content = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
     assert content.startswith("# Changelog\n")

@@ -55,6 +55,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import json
 import math
 import os
@@ -137,6 +138,7 @@ first hunting for whichever `wayland-N` mutter settled on.
 """
 
 ACTIVATION_ENVIRONMENT = (
+    "ADW_DEBUG_COLOR_SCHEME",
     "GDK_BACKEND",
     "GSETTINGS_BACKEND",
     "WAYLAND_DISPLAY",
@@ -716,6 +718,13 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
         ("gsettings", "reset-recursively", SCHEMA_ID),
         env=os.environ | {"GSETTINGS_SCHEMA_DIR": str(schema_dir)},
     )
+    # The window is a libadwaita process of its own, and the shell's appearance
+    # reaches such a process through the settings portal, which a session this
+    # bare does not run: without this it renders light whatever the desktop
+    # says, and the two captures come back byte-identical.
+    os.environ["ADW_DEBUG_COLOR_SCHEME"] = (
+        "prefer-dark" if shot.dark else "prefer-light"
+    )
     with shell_session(scratch / f"{shot.stem}.log"):
         apply_monitor_scale()
         # The shell claims its bus name before it has finished loading
@@ -889,11 +898,22 @@ def capture_all(workspace: Path | None = None) -> None:
         for shot in SHOTS:
             capture(shot, scratch, schema_dir)
 
+        # A shot that differs in its settings has to differ in its pixels. Two
+        # identical files mean a setting never reached its subject, which is
+        # silent by construction: the preferences window rendered light in both
+        # appearances that way, and only the file sizes gave it away.
+        digests: dict[str, Shot] = {}
         for shot in SHOTS:
             print(
                 f"{shot.path.relative_to(PROJECT_ROOT)}: "
                 f"{shot.path.stat().st_size} bytes"
             )
+            digest = hashlib.sha256(shot.path.read_bytes()).hexdigest()
+            twin = digests.get(digest)
+            if twin is not None:
+                msg = f"{shot.stem} and {twin.stem} came out byte-identical"
+                raise RuntimeError(msg)
+            digests[digest] = shot
 
 
 def record() -> None:

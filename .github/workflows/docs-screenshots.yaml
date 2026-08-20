@@ -234,15 +234,25 @@ jobs:
 
       # The first capture is what raises macOS 26's screen-recording consent
       # sheet, so it is spent deliberately and the sheet dismissed before any
-      # shot that matters. Accessibility is granted, so the click is scriptable.
+      # shot that matters. The sheet belongs to UserNotificationCenter, not to
+      # the process that triggered it, and it sits over everything: leaving it
+      # up both lands it in the frame and swallows the click below.
       - name: Spend the consent prompt
         run: |
           screencapture -x -t png "${RUNNER_TEMP}/warmup.png" || true
-          osascript -e 'tell application "System Events" to click button "Allow" \
-            of window 1 of process "universalAccessAuthWarn"' || true
-          osascript -e 'tell application "System Events" to keystroke return' || true
+          osascript -e 'tell application "System Events" to tell process \
+            "UserNotificationCenter" to click button "Allow" of window 1' || true
           sleep 3
+          osascript -e 'tell application "System Events" to count windows of \
+            process "UserNotificationCenter"' || true
           screencapture -x -t png "${RUNNER_TEMP}/after-consent.png" || true
+
+      # What the status item looks like to the accessibility API, so a click
+      # that misses says which part of the tree it missed.
+      - name: Report SwiftBar's menu bar
+        run: |
+          osascript -e 'tell application "System Events" to tell process "SwiftBar" \
+            to return {count of menu bars, entire contents of menu bar 2}' || true
 
       - name: Open the SwiftBar menu and photograph it
         run: |
@@ -267,7 +277,6 @@ jobs:
           JSON.stringify(rows);
           JS
           osascript -l JavaScript "${RUNNER_TEMP}/menu.js" | tee "${RUNNER_TEMP}/windows.json"
-          # The open menu is a window of SwiftBar's own, on the pop-up menu layer.
           cat > "${RUNNER_TEMP}/pick.py" <<'PY'
           import json, sys
           rows = json.load(open(sys.argv[1], encoding="UTF-8"))
@@ -276,7 +285,9 @@ jobs:
           PY
           menu_id=$(python3 "${RUNNER_TEMP}/pick.py" "${RUNNER_TEMP}/windows.json")
           echo "menu window: ${menu_id:-none}"
-          screencapture -x -o -t png ${menu_id:+-l${menu_id}} "${RUNNER_TEMP}/menu.png" || true
+          if [ -n "${menu_id}" ]; then
+            screencapture -x -o -t png "-l${menu_id}" "${RUNNER_TEMP}/menu.png"
+          fi
           screencapture -x -t png "${RUNNER_TEMP}/fullscreen-with-menu.png" || true
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

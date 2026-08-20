@@ -130,16 +130,21 @@ $ ln -sf "$(mpm --bar-plugin-path)" "${HOME}/Library/Application Support/xbar/pl
 
 ## Python `>= 3.9` required
 
-The plugin **requires Python 3.9 or newer**. Which is the version that ships with the latest macOS releases:
+The plugin **requires Python 3.9 or newer**, which every macOS still receiving security updates provides out of the box:
 
-| macOS version  | Python version[^1] |
-| -------------- | ------------------ |
-| 16.x - TBA     | 3.9.6              |
-| 15.x - Sequoia | 3.9.6              |
-| 14.x - Sonoma  | 3.9.6              |
-| 13.x - Ventura | 3.8.9              |
+| macOS           | Released   | Security updates until[^1] | Command Line Tools | `python3`[^2] |
+| --------------- | ---------- | -------------------------- | ------------------ | ------------- |
+| 26.x - Tahoe    | 2025-09-15 | current                    | 26                 | 3.9.6         |
+| 15.x - Sequoia  | 2024-09-16 | current                    | 16                 | 3.9.6         |
+| 14.x - Sonoma   | 2023-09-26 | current                    | 15                 | 3.9.6         |
+| 13.x - Ventura  | 2022-10-24 | 2025-09-15                 | 14                 | 3.9.6         |
+| 12.x - Monterey | 2021-10-25 | 2024-09-16                 | 13                 | 3.8.9         |
 
-That way, the plugin is compatible with the latest macOS releases out of the box, and can be run as-is without any extra dependency.
+Apple patches the current release and its two predecessors, so the three rows marked *current* are the ones a user can still be running on an up-to-date system, and all three answer `3.9.6`. Monterey is the last release that shipped a Python older than the plugin requires, and it stopped receiving updates in 2024.
+
+The version tracks the Command Line Tools rather than macOS itself: `/usr/bin/python3` is a stub resolving to whichever toolchain is installed, which is why the table pairs each release with the toolchain it shipped alongside. Apple renumbered both to `26` in 2025, so the sequence skips from `16` to `26` and no macOS `16` was ever released.
+
+That way, the plugin is compatible with every supported macOS out of the box, and can be run as-is without any extra dependency.
 
 ````{caution}
 It looks like since Monterey (macOS), there is no default Python version installed anymore, and the `python` CLI is a stub that points to the App Store to install Xcode:
@@ -219,4 +224,6 @@ If the plugin has been changed between releases, a [copy of the plugin is pushed
    :undoc-members:
 ```
 
-[^1]: Source: [https://ihaveahax.net/wiki/Python_version_information#Xcode\_(macOS)](https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS))
+[^1]: Source: [https://endoflife.date/macos](https://endoflife.date/macos)
+
+[^2]: Source: [https://ihaveahax.net/wiki/Python_version_information#Xcode\_(macOS)](https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS)), whose table is keyed by toolchain version.

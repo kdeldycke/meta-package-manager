@@ -302,16 +302,26 @@ def run(
     env: Mapping[str, str] | None = None,
     timeout: int = 120,
 ) -> subprocess.CompletedProcess[str]:
-    """Run a command, capturing its output as text."""
-    return subprocess.run(
+    """Run a command, capturing its output as text.
+
+    Output is captured, so a failure has to carry its own diagnosis: the default
+    {exc}`~subprocess.CalledProcessError` reports the exit code and drops the
+    message the command printed to explain it.
+    """
+    result = subprocess.run(
         argv,
         capture_output=True,
         text=True,
         encoding="UTF-8",
-        check=check,
+        check=False,
         env=dict(env) if env is not None else None,
         timeout=timeout,
     )
+    if check and result.returncode:
+        detail = (result.stderr or result.stdout).strip()
+        msg = f"{argv[0]} exited {result.returncode}: {detail}"
+        raise RuntimeError(msg)
+    return result
 
 
 def gdbus_call(

@@ -58,10 +58,16 @@ jobs:
       # one the capture actually needs is named instead: the symbolic icons the
       # extension asks the theme for, `dbus-run-session`, GNOME's UI font (without
       # it fontconfig lands on whatever it likes and the images drift), the GTK4
-      # and libadwaita typelibs `prefs.js` imports in the process the shell
-      # spawns for the preferences window, `gsettings` and `glib-compile-schemas`,
-      # and the Mesa software rasterizer, a runner having no GPU to render the
-      # session with.
+      # and libadwaita typelibs `prefs.js` imports, `gsettings` and
+      # `glib-compile-schemas`, and the Mesa software rasterizer, a runner having
+      # no GPU to render the session with.
+      #
+      # `gnome-shell-extension-prefs` is the one that reads like a duplicate and
+      # is not: opening an extension's preferences is a D-Bus call the shell
+      # forwards to `org.gnome.Shell.Extensions`, and while `gnome-shell` ships
+      # that service's activation file, the `gnome-extensions-app` binary it
+      # execs ships here. Without it the name simply fails to activate, and
+      # `gnome-extensions prefs` exits 2.
       - name: Install GNOME Shell
         run: >
           sudo apt-get update && sudo apt-get install --yes --no-install-recommends
@@ -71,6 +77,7 @@ jobs:
           gir1.2-adw-1
           gir1.2-gtk-4.0
           gnome-shell
+          gnome-shell-extension-prefs
           gsettings-desktop-schemas
           libgl1-mesa-dri
           libglib2.0-bin

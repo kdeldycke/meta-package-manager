@@ -95,16 +95,18 @@ jobs:
       # Every AppleScript here is a file rather than an `-e` argument. A
       # continuation backslash inside a single-quoted `-e` string reaches
       # osascript verbatim, and the whole script dies on a syntax error that
-      # `|| true` then hides.
+      # `|| true` then hides. Loop variables avoid `sheet`, `bar` and friends
+      # for the same reason: System Events reserves them as UI element classes,
+      # and using one is a parse error rather than a shadowed name.
       - name: Spend the consent prompt
         run: |
           screencapture -x -t png "${RUNNER_TEMP}/warmup.png" || true
           cat > "${RUNNER_TEMP}/dismiss.applescript" <<'AS'
           tell application "System Events"
               tell process "UserNotificationCenter"
-                  repeat with sheet in windows
+                  repeat with theWindow in windows
                       try
-                          click button "Allow" of sheet
+                          click button "Allow" of theWindow
                       end try
                   end repeat
                   return count of windows
@@ -123,16 +125,12 @@ jobs:
           cat > "${RUNNER_TEMP}/describe.applescript" <<'AS'
           tell application "System Events"
               tell process "SwiftBar"
-                  set report to "menu bars: " & (count of menu bars)
-                  repeat with bar in menu bars
-                      set report to report & linefeed & "  bar items: " & ¬
-                          (count of menu bar items of bar)
-                      repeat with item_ in menu bar items of bar
-                          set report to report & linefeed & "    " & ¬
-                              (description of item_)
-                      end repeat
+                  set theReport to "menu bars: " & (count of menu bars)
+                  repeat with theBar in menu bars
+                      set theCount to count of menu bar items of theBar
+                      set theReport to theReport & linefeed & "items: " & theCount
                   end repeat
-                  return report
+                  return theReport
               end tell
           end tell
           AS

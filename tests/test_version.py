@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import copy
 import operator
+import re
 
 import pytest
 from boltons.strutils import strip_ansi
@@ -30,6 +31,8 @@ from meta_package_manager.version import (
     is_version,
     parse_version,
 )
+
+from .conftest import PROJECT_ROOT
 
 
 def reverse_fixtures(table):
@@ -806,6 +809,21 @@ def test_parse_version_is_tokenized_string():
     assert v == TokenizedString("1.2.3")
 
 
+def styled_split(styled: str) -> tuple[str, str]:
+    """Recover the (prefix, suffix) boundary from a `diff_versions()` result.
+
+    The split has to be read back out of the colors, which is the only place
+    the function records it. Slicing the *inputs* by an expected length instead
+    compares the expectation against itself and passes whatever the function
+    did, which is how this file spent its first year asserting nothing about
+    where `diff_versions()` actually cut.
+    """
+    runs = re.findall(r"\x1b\[[0-9;]*m(.*?)\x1b\[0m", styled, re.DOTALL)
+    # A common prefix is emitted as its own run ahead of the suffix. With none,
+    # the whole string is the suffix.
+    return (runs[0], runs[1]) if len(runs) > 1 else ("", runs[0] if runs else "")
+
+
 @pytest.mark.parametrize(
     ("old", "new", "expected_common", "expected_old", "expected_new"),
     (
@@ -845,13 +863,53 @@ def test_diff_versions(old, new, expected_common, expected_old, expected_new):
     assert strip_ansi(styled_old) == (str(old) if old else "")
     assert strip_ansi(styled_new) == (str(new) if new else "")
 
-    # Verify the split point.
-    full_old = str(old) if old else ""
-    full_new = str(new) if new else ""
-    assert full_old[: len(expected_common)] == expected_common
-    assert full_old[len(expected_common) :] == expected_old
-    assert full_new[: len(expected_common)] == expected_common
-    assert full_new[len(expected_common) :] == expected_new
+    # Verify the split point, as the function actually drew it.
+    if old:
+        assert styled_split(styled_old) == (expected_common, expected_old)
+    if new:
+        assert styled_split(styled_new) == (expected_common, expected_new)
+
+
+def test_diff_versions_matches_the_gnome_extension():
+    """The GNOME Shell extension splits a version pair exactly like this does.
+
+    `diffVersions()` in `gnome-shell/mpm@kdeldycke.github.io/mpm.js` is a second
+    implementation of this function, serving a frontend Python never runs in.
+    Nothing but this test holds the two together, and they had already drifted
+    on 17 of the 21 pairs measured: the JS one stopped one step short of the
+    separator, leaving it in the dimmed prefix, so a menu row read
+    `5.0.` + `0~beta1-0ubuntu7` where the bar plugin colored `.0~beta1-0ubuntu7`
+    whole.
+
+    The cases are read out of the gjs suite rather than restated here, so one
+    list serves both languages and a case added there is asserted against this
+    implementation on the next run. Reading a JS file to test Python needs no
+    `gjs` on the runner, which is what lets this stay on the full test matrix
+    while the suite it borrows from runs once.
+    """
+    suite = PROJECT_ROOT.joinpath("tests", "gnome", "run-tests.js")
+    source = suite.read_text(encoding="UTF-8")
+    cases = re.findall(
+        r"Mpm\.diffVersions\(\s*'([^']*)',\s*'([^']*)'\s*\),\s*\{\s*"
+        r"prefix: '([^']*)',\s*oldSuffix: '([^']*)',\s*newSuffix: '([^']*)',?\s*\}",
+        source,
+    )
+    # A regex quietly stopping short would report perfect agreement over the
+    # cases it still matched, so it answers for every call in the file.
+    assert len(cases) == source.count("Mpm.diffVersions("), (
+        "Some diffVersions() case in the gjs suite is shaped so this test "
+        "cannot read it, and is going unchecked against the Python side."
+    )
+    assert cases
+
+    for installed, latest, prefix, old_suffix, new_suffix in cases:
+        styled_old, styled_new = diff_versions(installed, latest)
+        assert styled_split(styled_old) == (prefix, old_suffix), (
+            f"{installed} → {latest} splits differently in the two frontends."
+        )
+        assert styled_split(styled_new) == (prefix, new_suffix), (
+            f"{installed} → {latest} splits differently in the two frontends."
+        )
 
 
 # --- Known limitations ---

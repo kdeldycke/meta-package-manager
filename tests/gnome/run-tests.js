@@ -120,19 +120,39 @@ function testParseOutdated() {
         model.managers[1].packages, []);
 }
 
+/* These cases are the contract between this implementation and the Python
+ * diff_versions() the bar plugin renders with: test_version.py reads the pairs
+ * and expectations straight out of this function and asserts its own splits
+ * match. Add a case here and the Python side picks it up on the next run. */
 function testDiffVersions() {
     check('diff distinct suffix', Mpm.diffVersions('1.2.0', '1.3.0'),
-        {prefix: '1.', oldSuffix: '2.0', newSuffix: '3.0'});
+        {prefix: '1', oldSuffix: '.2.0', newSuffix: '.3.0'});
     check('diff last component', Mpm.diffVersions('0.60.0', '0.60.1'),
-        {prefix: '0.60.', oldSuffix: '0', newSuffix: '1'});
+        {prefix: '0.60', oldSuffix: '.0', newSuffix: '.1'});
     check('diff never splits a digit run', Mpm.diffVersions('1.23', '1.24'),
-        {prefix: '1.', oldSuffix: '23', newSuffix: '24'});
+        {prefix: '1', oldSuffix: '.23', newSuffix: '.24'});
     check('diff widening component', Mpm.diffVersions('7.5.0', '7.15.0'),
-        {prefix: '7.', oldSuffix: '5.0', newSuffix: '15.0'});
+        {prefix: '7', oldSuffix: '.5.0', newSuffix: '.15.0'});
     check('diff no common prefix', Mpm.diffVersions('?', '1.2'),
         {prefix: '', oldSuffix: '?', newSuffix: '1.2'});
     check('diff identical versions', Mpm.diffVersions('1.0', '1.0'),
         {prefix: '1.0', oldSuffix: '', newSuffix: ''});
+    /* The separator introducing the diverging token is colored with it, not
+     * left in the dimmed prefix. */
+    check('diff colors the separator', Mpm.diffVersions('1.0.0-alpha', '1.0.0-beta'),
+        {prefix: '1.0.0', oldSuffix: '-alpha', newSuffix: '-beta'});
+    check('diff keeps a Debian epoch dimmed',
+        Mpm.diffVersions('1:9.20.18-1ubuntu2.1', '1:9.20.24-1ubuntu0.1'),
+        {prefix: '1:9.20', oldSuffix: '.18-1ubuntu2.1', newSuffix: '.24-1ubuntu0.1'});
+    /* A version that is the other plus a whole new token already sits on a
+     * boundary: backtracking would color both in full and highlight nothing. */
+    check('diff appended token', Mpm.diffVersions('14ubuntu6', '14ubuntu6.1'),
+        {prefix: '14ubuntu6', oldSuffix: '', newSuffix: '.1'});
+    check('diff truncated token', Mpm.diffVersions('1.2.3', '1.2'),
+        {prefix: '1.2', oldSuffix: '.3', newSuffix: ''});
+    /* Nothing precedes the first token, so there is no separator to color. */
+    check('diff first token', Mpm.diffVersions('1.2.3', '2.0.0'),
+        {prefix: '', oldSuffix: '1.2.3', newSuffix: '2.0.0'});
 }
 
 function testShellHelpers() {

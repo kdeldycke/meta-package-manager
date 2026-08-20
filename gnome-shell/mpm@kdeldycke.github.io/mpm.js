@@ -285,9 +285,14 @@ export function parseOutdated(text) {
 /**
  * Split a version pair into a common prefix and colored suffixes, mirroring
  * the diff_versions() convention of the bar plugin: unchanged prefix dimmed,
- * installed suffix red, latest suffix green. The prefix backtracks to the
- * last separator so a digit run is never split ("1.23" vs "1.24" diffs as
- * "23"/"24", not "3"/"4").
+ * installed suffix red, latest suffix green. The split snaps back to a
+ * separator boundary, so a digit run is never cut in half and the separator
+ * introducing the diverging token is colored with it: "1.23" vs "1.24" diffs
+ * as ".23"/".24", not "3"/"4" nor "23"/"24".
+ *
+ * Held byte-for-byte to the Python implementation by
+ * tests/test_version.py::test_diff_versions_matches_the_gnome_extension,
+ * which reads the cases below out of tests/gnome/run-tests.js.
  *
  * @param {string} installed - Installed version string.
  * @param {string} latest - Latest version string.
@@ -298,12 +303,22 @@ export function diffVersions(installed, latest) {
     const shortest = Math.min(installed.length, latest.length);
     while (split < shortest && installed[split] === latest[split])
         split++;
-    const isAlnum = character => /[a-zA-Z0-9]/.test(character ?? '');
-    while (
-        split > 0 && isAlnum(installed[split - 1]) &&
+    const isAlnum = character => /[\p{L}\p{N}]/u.test(character ?? '');
+    // Snap back to a separator boundary, so the whole diverging token and the
+    // separator introducing it are colored, the way diff_versions() does it.
+    // Only when the divergence lands inside a token, though: one version being
+    // the other plus a whole new token already sits on a boundary, and walking
+    // back would swallow the tokens that did match.
+    if (
+        split > 0 && split < Math.max(installed.length, latest.length) &&
         (isAlnum(installed[split]) || isAlnum(latest[split]))
-    )
-        split--;
+    ) {
+        // Walk back past the partial alnum token, then past the separator.
+        while (split > 0 && isAlnum(installed[split - 1]))
+            split--;
+        while (split > 0 && !isAlnum(installed[split - 1]))
+            split--;
+    }
     return {
         prefix: installed.slice(0, split),
         oldSuffix: installed.slice(split),

@@ -723,8 +723,15 @@ def diff_versions(
             break
         common += 1
 
-    # Snap back to a separator boundary when the strings actually differ.
-    if common and common < max(len(old), len(new)):
+    # Snap back to a separator boundary when the strings actually differ, and
+    # only when the divergence lands inside a token. One version being the
+    # other plus a whole new token (`14ubuntu6` and `14ubuntu6.1`) already sits
+    # on a boundary: walking back would swallow the tokens that did match and
+    # color both versions in full, highlighting nothing.
+    diverges_mid_token = (
+        old[common : common + 1].isalnum() or new[common : common + 1].isalnum()
+    )
+    if common and common < max(len(old), len(new)) and diverges_mid_token:
         snap = common
         # Walk back past the partial alnum token.
         while snap > 0 and old[snap - 1].isalnum():

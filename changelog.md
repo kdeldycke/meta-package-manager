@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [bar-plugin,gnome-shell] Split a version diff at the same point in both frontends. The GNOME menu left the separator introducing the diverging token in the dimmed prefix, where the bar plugin colors it: `5.0.0~beta1-0ubuntu7` highlighted `0~beta1-0ubuntu7` in one and `.0~beta1-0ubuntu7` in the other, and 17 of 21 sampled pairs disagreed.
+- [bar-plugin] Stop coloring both versions in full when one is the other plus a whole new token. `14ubuntu6` → `14ubuntu6.1` highlights `.1` alone, in place of every token including the ones that matched.
 - [gnome-shell] Render each version of a package row as one string. The dimmed common prefix and its colored suffix are two labels, and the shell theme's own row spacing held them apart: `5.0.0~beta1-0ubuntu7` read as `5.0. 0~beta1-0ubuntu7`.
 - [gnome-shell] Illustrate the extension's page with screenshots of its menu, in both layouts and both shell appearances. Each one is captured from a real headless GNOME session by the new `docs-screenshots.yaml` workflow, which reshoots them whenever the extension changes.
 - [mpm] Replace the project's own forge sampler with repomatic's `sample-metrics`: the star-history charts and the manager cards' upstream readings now accrue in one committed CSV, appended and rendered by the new `metrics.yaml` workflow.

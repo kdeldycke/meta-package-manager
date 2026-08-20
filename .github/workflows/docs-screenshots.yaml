@@ -7,9 +7,12 @@ name: 📸 Documentation screenshots
       - main
     paths:
       - .github/workflows/docs-screenshots.yaml
+      - docs/bar_screenshots_update.py
       - docs/gnome_screenshots_update.py
       - docs/outdated-sample.json
       - gnome-shell/mpm@kdeldycke.github.io/**
+      - meta_package_manager/bar_plugin.py
+      - meta_package_manager/bar_plugin_renderer.py
 
 permissions: {}
 
@@ -167,3 +170,56 @@ jobs:
           pr-sync --template-file .github/pr-templates/update-gnome-screenshots.md
           --template-arg shell_version="${SHELL_VERSION}"
           --add-path 'docs/assets/gnome-shell-*.png'
+
+  # The macOS half, and the one I first called impossible: these runners disable
+  # SIP, run a full Aqua session, and ship screen-recording and accessibility
+  # already granted, so a real SwiftBar can be installed, driven and photographed
+  # with no TCC manipulation of any kind. What the images cost is resolution:
+  # every mode the virtual display offers has a backing store equal to its
+  # logical size, so these are 1x where the GNOME captures are 2x.
+  update-bar-plugin-screenshots:
+    name: Capture the Xbar/SwiftBar plugin menu
+    runs-on: macos-26
+    permissions:
+      contents: write
+      pull-requests: write
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.12.1"
+
+      # The driver renders the menu through `BarPluginRenderer`, so it needs the
+      # package and its dependencies rather than a bare interpreter.
+      - name: Install project
+        run: uv --no-progress sync --frozen --all-extras --all-groups
+
+      - name: Capture the menus
+        run: uv --no-progress run --frozen -- python docs/bar_screenshots_update.py
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/repomatic/bin
+          key: >-
+            repomatic-${{ runner.os }}-${{ runner.arch }}-oxipng-${{
+            hashFiles('.github/workflows/docs-screenshots.yaml') }}
+          restore-keys: |
+            repomatic-${{ runner.os }}-${{ runner.arch }}-oxipng-
+
+      - name: Optimize the captures
+        run: |
+          set -euo pipefail
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0' \
+            format-images | tee --append "${GITHUB_STEP_SUMMARY}"
+
+      - name: Sync pull request
+        env:
+          GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
+        run: >
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0'
+          pr-sync --template-file .github/pr-templates/update-bar-plugin-screenshots.md
+          --add-path 'docs/assets/swiftbar-*.png'

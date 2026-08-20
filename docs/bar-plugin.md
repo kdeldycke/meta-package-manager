@@ -82,8 +82,8 @@ The {doc}`GNOME Shell extension <gnome-shell>` renders the same states as named 
 ```
 
 ```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
-:img-top: assets/swiftbar-submenu-strandard-rendering.png
-:link: /_images/swiftbar-submenu-strandard-rendering.png
+:img-top: assets/swiftbar-submenu-standard-rendering.png
+:link: /_images/swiftbar-submenu-standard-rendering.png
 ```
 ````
 

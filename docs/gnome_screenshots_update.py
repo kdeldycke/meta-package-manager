@@ -129,6 +129,33 @@ A wallpaper would do as well, and would tie the images to whichever
 `gnome-backgrounds` release the runner installed.
 """
 
+WAYLAND_DISPLAY = "mpm-capture-0"
+"""Name of the Wayland socket the session hosts.
+
+Named rather than discovered so it can be published to the bus below without
+first hunting for whichever `wayland-N` mutter settled on.
+"""
+
+ACTIVATION_ENVIRONMENT = (
+    "GDK_BACKEND",
+    "GSETTINGS_BACKEND",
+    "WAYLAND_DISPLAY",
+    "XDG_CACHE_HOME",
+    "XDG_CONFIG_HOME",
+    "XDG_CURRENT_DESKTOP",
+    "XDG_DATA_HOME",
+    "XDG_RUNTIME_DIR",
+    "XDG_STATE_HOME",
+)
+"""What a D-Bus-activated service has to be told about this session.
+
+An activated process inherits the environment the *bus* was started with, not
+the one its caller holds, and this bus predates the compositor: without this
+publication the preferences window host launches with no `WAYLAND_DISPLAY` to
+connect to and dies before it can map a window, which the shell forwards on as
+an unhandled promise rejection and nothing else reports.
+"""
+
 SHELL_BOOT_TIMEOUT = 90
 """Seconds allowed for the shell to claim its bus name. Software rendering on a
 cold runner is slow, and a shell that never comes up fails on the poll below
@@ -275,24 +302,6 @@ the extension is unknown, carries no preferences, or the window host failed to
 activate.
 """
 
-FOCUSED_WINDOW = js("""(() => {
-    const window = global.display.focus_window;
-    if (!window)
-        return null;
-    const frame = window.get_frame_rect();
-    return {
-        title: window.get_title(),
-        width: frame.width,
-        height: frame.height,
-    };
-})()""")
-"""Reports the window the preferences shot is waiting for, and its logical size.
-
-Reads `global.display` rather than anything of the extension's: the preferences
-window belongs to a process of its own, which is the whole point of the
-two-process split the GNOME guidelines impose.
-"""
-
 OPEN_MENU = js("""(() => {
     INDICATOR.menu.open(false);
     return true;
@@ -423,6 +432,21 @@ def screenshot_area(x: int, y: int, width: int, height: int, target: Path) -> No
         raise RuntimeError(msg)
 
 
+def publish_activation_environment() -> None:
+    """Hand {data}`ACTIVATION_ENVIRONMENT` to the session bus."""
+    pairs = ", ".join(
+        f"{name!r}: {os.environ[name]!r}"
+        for name in ACTIVATION_ENVIRONMENT
+        if name in os.environ
+    )
+    gdbus_call(
+        "/org/freedesktop/DBus",
+        "org.freedesktop.DBus.UpdateActivationEnvironment",
+        "{" + pairs + "}",
+        dest="org.freedesktop.DBus",
+    )
+
+
 def apply_monitor_scale() -> None:
     """Put the virtual monitor on a logical scale of {data}`MONITOR_SCALE`.
 
@@ -461,6 +485,26 @@ def apply_monitor_scale() -> None:
         "{}",
         dest=DISPLAY_CONFIG_NAME,
     )
+
+
+def prefs_window_probe() -> str:
+    """JS locating the preferences window, focusing it, and measuring it.
+
+    Searches every window rather than reading the focused one: a freshly mapped
+    window on a session nobody is driving does not reliably take focus, and
+    `ScreenshotWindow` photographs whichever window holds it. Matching on the
+    title first and activating it second makes the shutter's subject explicit
+    instead of assumed.
+    """
+    return js("""(() => {
+    const windows = global.display.list_all_windows();
+    const match = windows.find(w => (w.get_title() || '').includes(NAME));
+    if (!match)
+        return null;
+    match.activate(global.get_current_time());
+    const frame = match.get_frame_rect();
+    return {title: match.get_title(), width: frame.width, height: frame.height};
+})()""").replace("NAME", repr(extension_name()))
 
 
 def extension_name() -> str:
@@ -599,6 +643,8 @@ def shell_session(log: Path) -> Iterator[None]:
         "gnome-shell",
         "--headless",
         "--no-x11",
+        "--wayland-display",
+        WAYLAND_DISPLAY,
         "--virtual-monitor",
         "{}x{}".format(*MONITOR),
         # Unlocks org.gnome.Shell.Eval, the only way in to open the menu.
@@ -618,6 +664,7 @@ def shell_session(log: Path) -> Iterator[None]:
                 return shell_is_up()
 
             wait_until(up, SHELL_BOOT_TIMEOUT, "gnome-shell to claim its bus name")
+            publish_activation_environment()
             yield
         finally:
             process.terminate()
@@ -678,21 +725,17 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
             "",
             "{}",
         )
+        probe = prefs_window_probe()
         wait_until(
-            lambda: shell_eval(FOCUSED_WINDOW) is not None,
+            lambda: shell_eval(probe) is not None,
             REPORT_TIMEOUT,
-            "the preferences window to take focus",
+            "the preferences window to appear",
         )
-        window = shell_eval(FOCUSED_WINDOW)
+        window = shell_eval(probe)
         if not isinstance(window, dict):
-            msg = f"Unexpected focused-window reply: {window!r}"
+            msg = f"Unexpected preferences-window reply: {window!r}"
             raise TypeError(msg)
-        # Proves the shutter is aimed at the right process: anything else taking
-        # focus would otherwise be published as the preferences window.
-        if extension_name() not in window["title"]:
-            msg = f"Focused window is {window['title']!r}, not the preferences"
-            raise RuntimeError(msg)
-        # The window is mapped, but its first frame still has to land.
+        # The window is mapped and focused, but its first frame still has to land.
         time.sleep(1)
         screenshot_window(shot.path)
 
@@ -783,6 +826,11 @@ def capture_all(workspace: Path | None = None) -> None:
             # Nothing on a runner accelerates GL, and mutter is quicker to say so
             # than to discover it.
             "LIBGL_ALWAYS_SOFTWARE": "1",
+            # Claimed here rather than read back off the session: the shell is
+            # told to host this socket name, so both halves agree by construction.
+            "WAYLAND_DISPLAY": WAYLAND_DISPLAY,
+            "GDK_BACKEND": "wayland",
+            "XDG_CURRENT_DESKTOP": "GNOME",
             # No accessibility bus in a throwaway session; skip the warning.
             "NO_AT_BRIDGE": "1",
         }

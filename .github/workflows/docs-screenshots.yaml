@@ -167,3 +167,83 @@ jobs:
           pr-sync --template-file .github/pr-templates/update-gnome-screenshots.md
           --template-arg shell_version="${SHELL_VERSION}"
           --add-path 'docs/assets/gnome-shell-*.png'
+
+  # An investigation, not a capture lane: dispatch-only, and nothing downstream
+  # depends on it. The question is whether a hosted macOS runner can photograph
+  # an Xbar or SwiftBar menu at all, which turns entirely on what its screen
+  # recording and accessibility grants allow. Everything here is read-only: it
+  # reports what the host permits rather than trying to widen it.
+  probe-macos:
+    name: Probe what a macOS runner can photograph
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: macos-26
+    permissions: {}
+    timeout-minutes: 20
+    steps:
+      - name: Report the host and its security posture
+        run: |
+          sw_vers
+          echo "--- SIP ---"
+          csrutil status || true
+          echo "--- displays ---"
+          system_profiler SPDisplaysDataType | head -30 || true
+          echo "--- GUI session ---"
+          launchctl managername || true
+          echo "--- user TCC grants ---"
+          sqlite3 "${HOME}/Library/Application Support/com.apple.TCC/TCC.db" \
+            "select service, client, auth_value from access" || true
+          echo "--- system TCC grants ---"
+          sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" \
+            "select service, client, auth_value from access" || true
+
+      # -1743 means the automation grant is missing, which is what UI scripting
+      # an app's menu bar item would need.
+      - name: Probe Apple events
+        run: |
+          osascript -e 'tell application "System Events" to return name of every process' || true
+
+      # Window bounds and layers need no grant; window names do. A menu, when
+      # one is open, lands on layer 101.
+      - name: Probe the window server
+        run: |
+          cat > "${RUNNER_TEMP}/windows.js" <<'JS'
+          ObjC.import("CoreGraphics");
+          ObjC.import("Foundation");
+          const raw = $.CGWindowListCopyWindowInfo(17, 0);
+          const list = ObjC.castRefToObject(raw);
+          const rows = [];
+          for (let i = 0; i < list.count; i++) {
+              const w = list.objectAtIndex(i);
+              rows.push({
+                  owner: ObjC.unwrap(w.objectForKey("kCGWindowOwnerName")),
+                  layer: ObjC.unwrap(w.objectForKey("kCGWindowLayer")),
+                  name: ObjC.unwrap(w.objectForKey("kCGWindowName")),
+              });
+          }
+          JSON.stringify({total: list.count, rows}, null, 2);
+          JS
+          osascript -l JavaScript "${RUNNER_TEMP}/windows.js" || true
+
+      # The decisive one: a capture that shows only the desktop is a capture
+      # the screen recording grant refused, and it fails silently.
+      - name: Capture the bare desktop
+        run: |
+          screencapture -x -t png "${RUNNER_TEMP}/desktop.png" || true
+          sips -g pixelWidth -g pixelHeight "${RUNNER_TEMP}/desktop.png" || true
+
+      # Same capture with a window on screen: if that window is in the image,
+      # other processes are photographable and the whole approach is viable.
+      - name: Capture with an app window open
+        run: |
+          echo "probe" > "${RUNNER_TEMP}/probe.txt"
+          open -a TextEdit "${RUNNER_TEMP}/probe.txt" || true
+          sleep 10
+          osascript -l JavaScript "${RUNNER_TEMP}/windows.js" || true
+          screencapture -x -t png "${RUNNER_TEMP}/with-window.png" || true
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: macos-probe
+          path: ${{ runner.temp }}/*.png
+          if-no-files-found: warn

@@ -771,6 +771,10 @@ exclude = [
 ]
 
 [tool.repomatic]
+# Keep the shared debug workflow out of this repository. Deleting the file is not
+# enough on its own: `repomatic init` restores every component it owns, so an
+# unwanted one has to be named here to stay gone.
+exclude = [ "workflows/debug.yaml" ]
 # Extension zip packed by release.yaml's build-gnome-extension job and attached
 # to every GitHub release by the engine's extra-assets job (repomatic >= 7.4.2).
 release-assets = [ "mpm-gnome-shell-extension.zip" ]

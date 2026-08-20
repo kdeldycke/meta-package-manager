@@ -174,31 +174,47 @@ jobs:
           AS
           osascript "${RUNNER_TEMP}/describe.applescript"
 
+      # A real mouse event, not an accessibility press. The previous run settled
+      # why: after `AXPress` the item reported `menus on the item: 0`, so the
+      # menu was never built, let alone drawn. SwiftBar distinguishes a plain
+      # click from an option-click, which means handling `mouseDown` itself, and
+      # a synthetic press never reaches that. Accessibility is granted, so
+      # posting to the HID tap is permitted.
       - name: Open the SwiftBar menu and photograph it
         run: |
           set -euo pipefail
-          # `menu bar 1`, not 2: an agent app has no app menu, so its status
-          # bar is the only menu bar it owns. The step above reports the count,
-          # and it reported one.
-          cat > "${RUNNER_TEMP}/open-menu.applescript" <<'AS'
+          cat > "${RUNNER_TEMP}/where.applescript" <<'AS'
           tell application "System Events"
               tell process "SwiftBar"
-                  perform action "AXPress" of menu bar item 1 of menu bar 1
+                  set theItem to menu bar item 1 of menu bar 1
+                  set {itemX, itemY} to position of theItem
+                  set {itemW, itemH} to size of theItem
+                  set midX to itemX + (itemW / 2)
+                  set midY to itemY + (itemH / 2)
+                  return (midX as string) & " " & (midY as string)
               end tell
           end tell
-          delay 30
           AS
-          # `AXPress` rather than `click`: click sends a press and a release, and
-          # the release dismisses a status menu as surely as a second click
-          # would. Backgrounded with a delay after it, because an open menu is a
-          # tracking session belonging to the client that opened it and closes
-          # the moment osascript exits. The click itself was never in doubt: an
-          # earlier run had it return the `🎁↑3` item it pressed.
-          osascript "${RUNNER_TEMP}/open-menu.applescript" &
-          sleep 6
-          # Whether the menu is open according to the accessibility API, which
-          # distinguishes "the press did nothing" from "the press opened a menu
-          # the window server does not list where I am looking".
+          osascript "${RUNNER_TEMP}/where.applescript" | tee "${RUNNER_TEMP}/where.txt"
+          read -r click_x click_y < "${RUNNER_TEMP}/where.txt"
+          cat > "${RUNNER_TEMP}/click.swift" <<'SWIFT'
+          import CoreGraphics
+          import Foundation
+          let point = CGPoint(x: Double(CommandLine.arguments[1]) ?? 0,
+                              y: Double(CommandLine.arguments[2]) ?? 0)
+          let source = CGEventSource(stateID: .hidSystemState)
+          let down = CGEvent(mouseEventSource: source, mouseType: .leftMouseDown,
+                             mouseCursorPosition: point, mouseButton: .left)
+          let up = CGEvent(mouseEventSource: source, mouseType: .leftMouseUp,
+                           mouseCursorPosition: point, mouseButton: .left)
+          down?.post(tap: .cghidEventTap)
+          usleep(120000)
+          up?.post(tap: .cghidEventTap)
+          print("clicked \(point.x),\(point.y)")
+          SWIFT
+          swift "${RUNNER_TEMP}/click.swift" "${click_x}" "${click_y}"
+          sleep 4
+
           cat > "${RUNNER_TEMP}/menu-state.applescript" <<'AS'
           tell application "System Events"
               tell process "SwiftBar"
@@ -208,6 +224,7 @@ jobs:
           end tell
           AS
           osascript "${RUNNER_TEMP}/menu-state.applescript" || true
+
           cat > "${RUNNER_TEMP}/menu.js" <<'JS'
           ObjC.import("CoreGraphics");
           ObjC.import("Foundation");

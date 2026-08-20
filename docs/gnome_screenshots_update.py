@@ -200,6 +200,9 @@ elif "outdated" in sys.argv:
 is parsed with shell syntax and exists precisely to override the lookup.
 """
 
+_UUID = repr(EXTENSION_UUID)
+"""The UUID as a JS string literal. Python's `repr` is one too."""
+
 _INDICATOR = f"Main.panel.statusArea[{EXTENSION_UUID!r}]"
 """How the shell's own JS reaches our indicator. Python's `repr` of the UUID is
 also a valid JS string literal, so the snippets below stay copy-pasteable into
@@ -233,7 +236,7 @@ def js(snippet: str) -> str:
     if "\\" in snippet:
         msg = f"Backslash in a JS snippet, gdbus will eat it: {snippet!r}"
         raise ValueError(msg)
-    return snippet.replace("INDICATOR", _INDICATOR)
+    return snippet.replace("INDICATOR", _INDICATOR).replace("UUID", _UUID)
 
 
 HIDE_CLOCK = js("""(() => {
@@ -257,6 +260,20 @@ PIN_LAST_CHECK = js("""(() => {
         /[0-9]{1,2}:[0-9]{2}(:[0-9]{2})?( ?[AP]M)?/, 'PINNED');
     return label.text;
 })()""").replace("PINNED", PINNED_LAST_CHECK)
+
+EXTENSION_LOADED = js("""(() => {
+    const extension = Main.extensionManager.lookup(UUID);
+    if (!extension)
+        return null;
+    return {state: extension.state, hasPrefs: !!extension.hasPrefs};
+})()""")
+"""What the shell knows about the extension, `hasPrefs` above all.
+
+That flag is the gate on opening a preferences window, and the only thing that
+reports it: the `gnome-extensions prefs` CLI answers a bare exit code 2 whether
+the extension is unknown, carries no preferences, or the window host failed to
+activate.
+"""
 
 FOCUSED_WINDOW = js("""(() => {
     const window = global.display.focus_window;
@@ -638,10 +655,29 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
     )
     with shell_session(scratch / f"{shot.stem}.log"):
         apply_monitor_scale()
-        # Asks the shell to host the preferences process, exactly as the menu's
-        # own Settings row does. A GTK failure inside that process surfaces in
-        # the session log rather than here, the shell being what spawns it.
-        run(("gnome-extensions", "prefs", EXTENSION_UUID), timeout=30)
+        # The shell claims its bus name before it has finished loading
+        # extensions, and asking for the preferences of one it does not know yet
+        # is indistinguishable from one that has none.
+        wait_until(
+            lambda: shell_eval(EXTENSION_LOADED) is not None,
+            REPORT_TIMEOUT,
+            "the shell to load the extension",
+        )
+        loaded = shell_eval(EXTENSION_LOADED)
+        if not isinstance(loaded, dict) or not loaded["hasPrefs"]:
+            msg = f"The shell reports no preferences for {EXTENSION_UUID}: {loaded}"
+            raise RuntimeError(msg)
+
+        # The call the menu's own Settings row makes, rather than the CLI
+        # wrapping it: the shell forwards this to the window host, and a failure
+        # comes back as a D-Bus error naming its cause instead of an exit code.
+        gdbus_call(
+            "/org/gnome/Shell",
+            "org.gnome.Shell.Extensions.OpenExtensionPrefs",
+            EXTENSION_UUID,
+            "",
+            "{}",
+        )
         wait_until(
             lambda: shell_eval(FOCUSED_WINDOW) is not None,
             REPORT_TIMEOUT,

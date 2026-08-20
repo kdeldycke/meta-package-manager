@@ -169,44 +169,82 @@ jobs:
           --add-path 'docs/assets/gnome-shell-*.png'
 
   # An investigation, not a capture lane: dispatch-only, and nothing downstream
-  # depends on it. The question is whether a hosted macOS runner can photograph
-  # an Xbar or SwiftBar menu at all, which turns entirely on what its screen
-  # recording and accessibility grants allow. Everything here is read-only: it
-  # reports what the host permits rather than trying to widen it.
+  # depends on it. A first probe settled the question this one builds on: these
+  # runners disable SIP, run a full Aqua session, and ship `kTCCServiceScreenCapture`
+  # and `kTCCServiceAccessibility` already granted to `/bin/bash` and `osascript`,
+  # so both photographing another process and driving its menu bar are permitted
+  # out of the box. What is left to prove is the chain: SwiftBar installed,
+  # rendering a plugin, its menu opened and photographed.
   probe-macos:
     name: Probe what a macOS runner can photograph
     if: github.event_name == 'workflow_dispatch'
     runs-on: macos-26
     permissions: {}
     timeout-minutes: 20
+    env:
+      # Pinned and checksummed: SwiftBar publishes a plain zip, so the cask (and
+      # a registry with no cooldown knob) stays out of this entirely.
+      SWIFTBAR_URL: https://github.com/swiftbar/SwiftBar/releases/download/v2.1.1/SwiftBar.v2.1.1.b597.zip
+      SWIFTBAR_SHA256: fcdec490782d6587046304044951c63de49ac422fc63892a6fab2dd7bc70c0cd
     steps:
-      - name: Report the host and its security posture
+      - name: What the display offers
         run: |
-          sw_vers
-          echo "--- SIP ---"
-          csrutil status || true
-          echo "--- displays ---"
-          system_profiler SPDisplaysDataType | head -30 || true
-          echo "--- GUI session ---"
-          launchctl managername || true
-          echo "--- user TCC grants ---"
-          sqlite3 "${HOME}/Library/Application Support/com.apple.TCC/TCC.db" \
-            "select service, client, auth_value from access" || true
-          echo "--- system TCC grants ---"
-          sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" \
-            "select service, client, auth_value from access" || true
+          system_profiler SPDisplaysDataType | head -20 || true
+          which displayplacer || echo "displayplacer absent"
 
-      # -1743 means the automation grant is missing, which is what UI scripting
-      # an app's menu bar item would need.
-      - name: Probe Apple events
+      - name: Install SwiftBar
         run: |
-          osascript -e 'tell application "System Events" to return name of every process' || true
+          set -euo pipefail
+          curl --silent --show-error --location --fail \
+            --output "${RUNNER_TEMP}/swiftbar.zip" "${SWIFTBAR_URL}"
+          echo "${SWIFTBAR_SHA256}  ${RUNNER_TEMP}/swiftbar.zip" | shasum --algorithm 256 --check
+          ditto -x -k "${RUNNER_TEMP}/swiftbar.zip" /Applications
+          xattr -dr com.apple.quarantine /Applications/SwiftBar.app || true
+          defaults read /Applications/SwiftBar.app/Contents/Info.plist CFBundleShortVersionString
 
-      # Window bounds and layers need no grant; window names do. A menu, when
-      # one is open, lands on layer 101.
-      - name: Probe the window server
+      - name: Plant a plugin and start SwiftBar
         run: |
-          cat > "${RUNNER_TEMP}/windows.js" <<'JS'
+          set -euo pipefail
+          plugins="${RUNNER_TEMP}/plugins"
+          mkdir -p "${plugins}"
+          cat > "${plugins}/probe.1h.sh" <<'PLUGIN'
+          #!/bin/bash
+          echo "🎁↑3 | dropdown=false"
+          echo "---"
+          echo "brew - 2 packages | font=Menlo size=12"
+          echo "wget            1.21.4 → 1.25.0 | font=Menlo size=12"
+          echo "curl            8.7.1 → 8.11.0  | font=Menlo size=12"
+          echo "---"
+          echo "npm - 1 package | font=Menlo size=12"
+          echo "typescript      5.9.2 → 5.9.3   | font=Menlo size=12"
+          PLUGIN
+          chmod +x "${plugins}/probe.1h.sh"
+          # Setting the folder up front is what keeps the first run from stopping
+          # on its folder picker.
+          defaults write com.ameba.SwiftBar PluginDirectory "${plugins}"
+          open -a SwiftBar
+          sleep 20
+          pgrep -l SwiftBar || echo "SwiftBar is not running"
+
+      # The first capture is what raises macOS 26's screen-recording consent
+      # sheet, so it is spent deliberately and the sheet dismissed before any
+      # shot that matters. Accessibility is granted, so the click is scriptable.
+      - name: Spend the consent prompt
+        run: |
+          screencapture -x -t png "${RUNNER_TEMP}/warmup.png" || true
+          osascript -e 'tell application "System Events" to click button "Allow" \
+            of window 1 of process "universalAccessAuthWarn"' || true
+          osascript -e 'tell application "System Events" to keystroke return' || true
+          sleep 3
+          screencapture -x -t png "${RUNNER_TEMP}/after-consent.png" || true
+
+      - name: Open the SwiftBar menu and photograph it
+        run: |
+          set -euo pipefail
+          osascript -e 'tell application "System Events" to tell process "SwiftBar" \
+            to click menu bar item 1 of menu bar 2' || true
+          sleep 3
+          cat > "${RUNNER_TEMP}/menu.js" <<'JS'
           ObjC.import("CoreGraphics");
           ObjC.import("Foundation");
           const raw = $.CGWindowListCopyWindowInfo(17, 0);
@@ -215,35 +253,31 @@ jobs:
           for (let i = 0; i < list.count; i++) {
               const w = list.objectAtIndex(i);
               rows.push({
+                  id: ObjC.unwrap(w.objectForKey("kCGWindowNumber")),
                   owner: ObjC.unwrap(w.objectForKey("kCGWindowOwnerName")),
                   layer: ObjC.unwrap(w.objectForKey("kCGWindowLayer")),
-                  name: ObjC.unwrap(w.objectForKey("kCGWindowName")),
               });
           }
-          JSON.stringify({total: list.count, rows}, null, 2);
+          JSON.stringify(rows);
           JS
-          osascript -l JavaScript "${RUNNER_TEMP}/windows.js" || true
-
-      # The decisive one: a capture that shows only the desktop is a capture
-      # the screen recording grant refused, and it fails silently.
-      - name: Capture the bare desktop
-        run: |
-          screencapture -x -t png "${RUNNER_TEMP}/desktop.png" || true
-          sips -g pixelWidth -g pixelHeight "${RUNNER_TEMP}/desktop.png" || true
-
-      # Same capture with a window on screen: if that window is in the image,
-      # other processes are photographable and the whole approach is viable.
-      - name: Capture with an app window open
-        run: |
-          echo "probe" > "${RUNNER_TEMP}/probe.txt"
-          open -a TextEdit "${RUNNER_TEMP}/probe.txt" || true
-          sleep 10
-          osascript -l JavaScript "${RUNNER_TEMP}/windows.js" || true
-          screencapture -x -t png "${RUNNER_TEMP}/with-window.png" || true
+          osascript -l JavaScript "${RUNNER_TEMP}/menu.js" | tee "${RUNNER_TEMP}/windows.json"
+          # The open menu is a window of SwiftBar's own, on the pop-up menu layer.
+          cat > "${RUNNER_TEMP}/pick.py" <<'PY'
+          import json, sys
+          rows = json.load(open(sys.argv[1], encoding="UTF-8"))
+          menus = [r for r in rows if r["owner"] == "SwiftBar" and r["layer"] >= 101]
+          print(menus[0]["id"] if menus else "")
+          PY
+          menu_id=$(python3 "${RUNNER_TEMP}/pick.py" "${RUNNER_TEMP}/windows.json")
+          echo "menu window: ${menu_id:-none}"
+          screencapture -x -o -t png ${menu_id:+-l${menu_id}} "${RUNNER_TEMP}/menu.png" || true
+          screencapture -x -t png "${RUNNER_TEMP}/fullscreen-with-menu.png" || true
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: macos-probe
-          path: ${{ runner.temp }}/*.png
+          path: |
+            ${{ runner.temp }}/*.png
+            ${{ runner.temp }}/windows.json
           if-no-files-found: warn

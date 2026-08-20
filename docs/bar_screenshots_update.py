@@ -302,7 +302,12 @@ def write_plugin(plugins: Path, shot: Shot) -> None:
     os.environ.clear()
     os.environ.update(environment)
     try:
-        menu = BarPluginRenderer().render(payload)
+        renderer = BarPluginRenderer()
+        # A recorded `mpm outdated` payload carries no upgrade commands: those
+        # are the plugin dialect's own, derived per manager from what it
+        # implements, and `mpm outdated --plugin-output` adds them on the way
+        # out. Rendering without them raises `KeyError: 'upgrade_cli'`.
+        menu = renderer.render(renderer.add_upgrade_cli(payload))
     finally:
         os.environ.clear()
         os.environ.update(previous)

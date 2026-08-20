@@ -802,18 +802,28 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
             REPORT_TIMEOUT,
             "the preferences window to appear",
         )
-        shell_eval(grow_prefs_window())
+        # Asked on every turn of the poll rather than once: a request sent to a
+        # window still being mapped is simply dropped, and the client answers
+        # whenever GTK gets to it. The observed height rides in the failure, so
+        # a window that will not grow says how far it got.
+        grow = grow_prefs_window()
         frame = prefs_frame()
+        seen: object = None
+        deadline = time.monotonic() + REPORT_TIMEOUT
+        while time.monotonic() < deadline:
+            shell_eval(grow)
+            seen = shell_eval(frame)
+            if isinstance(seen, dict) and seen["height"] >= PREFERENCES_HEIGHT:
+                break
+            time.sleep(0.5)
+        else:
+            msg = (
+                f"The preferences window stopped at {seen!r}, short of "
+                f"{PREFERENCES_HEIGHT}px."
+            )
+            raise RuntimeError(msg)
+        window = seen
 
-        def grown() -> bool:
-            reply = shell_eval(frame)
-            return isinstance(reply, dict) and reply["height"] >= PREFERENCES_HEIGHT
-
-        wait_until(grown, REPORT_TIMEOUT, "the preferences window to grow")
-        window = shell_eval(frame)
-        if not isinstance(window, dict):
-            msg = f"Unexpected preferences-window reply: {window!r}"
-            raise TypeError(msg)
         # Mapped and activated is not yet focused: a window found the instant it
         # appears takes a moment to receive focus, and the shutter needs it.
         name = extension_name()

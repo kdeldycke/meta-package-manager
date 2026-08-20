@@ -210,11 +210,14 @@ jobs:
           restore-keys: |
             repomatic-${{ runner.os }}-${{ runner.arch }}-oxipng-
 
+      # `-a` rather than `--append`, the one place this repository's long-form
+      # preference cannot hold: BSD tee has no long options, and the GNU spelling
+      # aborts the pipeline the Linux job runs it through happily.
       - name: Optimize the captures
         run: |
           set -euo pipefail
           uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0' \
-            format-images | tee --append "${GITHUB_STEP_SUMMARY}"
+            format-images | tee -a "${GITHUB_STEP_SUMMARY}"
 
       - name: Sync pull request
         env:

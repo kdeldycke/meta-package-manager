@@ -23,6 +23,23 @@ counterpart).
 
 The `mpm` group itself, and the plumbing shared with the other subcommand
 modules, live in {mod}`meta_package_manager.cli`.
+
+```{todo}
+Fold `search`'s `--extended/--id-name-only` and `--exact/--fuzzy` pair into a
+single `--search-strategy=[exact, fuzzy, extended]` option, whose help spells
+out what each strategy does. `exact` is case-sensitive and keeps every
+non-alphanumeric character. `fuzzy` lowercases the query, strips it of
+non-alphanumeric characters and tokenizes it, so word order stops mattering.
+`extended` is `fuzzy` widened past the package ID and name, reaching the
+description and whatever other metadata each manager supports.
+
+The strategies sketched out were:
+
+1. `strict`: `--exact`, on ID or name.
+2. `substring`: regex, case-insensitive, no splitting.
+3. `fuzzy`: token-based.
+4. `extended`: `fuzzy` plus metadata.
+```
 """
 
 from __future__ import annotations
@@ -566,17 +583,6 @@ def orphans(ctx, exact, query):
         print_summary(package_counts(orphans_data))
 
 
-# TODO: make it a --search-strategy=[exact, fuzzy, extended]
-# Add details helps => exact: is case-sensitive, and keep all non-alnum chars
-# fuzzy: query is case-insensitive, stripped-out of non-alnum chars and
-# tokenized (no order sensitive)
-# extended, same as fuzzy, but do not limit search to package ID and name.
-# extended to description and other metadata depending on manager support.
-# Modes:
-#  1. strict (--exact, on ID or name)
-#  2. substring (regex, no case, no split)
-#  3. fuzzy (token-based)
-#  4. extended (fuzzy + metadata)
 @mpm.command(short_help="Search packages.", section=EXPLORE)
 @option(
     "--extended/--id-name-only",

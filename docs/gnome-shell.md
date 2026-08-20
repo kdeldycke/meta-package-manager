@@ -16,7 +16,9 @@ The extension is a frontend to the `mpm` CLI, which must be installed separately
 
 ### From extensions.gnome.org
 
+```{todo}
 The extension is not yet published on [extensions.gnome.org](https://extensions.gnome.org). Once it lands there, it will be installable with one click from the site. Until then, use one of the methods below.
+```
 
 ### From a release zip
 

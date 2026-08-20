@@ -513,8 +513,12 @@ class Homebrew(PackageManager):
         [brew pin <cask>](https://github.com/Homebrew/brew/pull/22276) so casks
         can now actually be pinned. `mpm` discards both fields today: pinned
         packages still appear in `mpm outdated` output, and `brew upgrade`
-        silently skips them at upgrade time. Track this gap if a future `mpm`
-        release wants to surface or filter on pin state.
+        silently skips them at upgrade time.
+        ```
+
+        ```{todo}
+        Surface pin state, or let `mpm outdated` filter on it, by reading the
+        `pinned` and `pinned_version` fields the note above describes.
         ```
         """
         # Build up the list of CLI options.

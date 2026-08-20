@@ -337,7 +337,9 @@ Zsh plugin manager owning no inventory to report: plugins are the arguments you 
 
 Tools that resolve dependencies inside a working tree are out of scope today.
 
+```{todo}
 This is a big feature for the future, but is already delimited by the {attr}`~meta_package_manager.manager.ManagerScope.PROJECT` concept, the {meth}`~meta_package_manager.manager.PackageManager.discover_projects` extension point, and [issue #1725](https://github.com/kdeldycke/meta-package-manager/issues/1725).
+```
 
 `mpm` already covers the system-scoped part of these managers:
 

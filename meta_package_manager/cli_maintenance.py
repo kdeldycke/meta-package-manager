@@ -22,6 +22,10 @@ cleanup category selection.
 
 The `mpm` group itself, and the per-package action engine `restore` also
 drives, live in {mod}`meta_package_manager.cli`.
+
+```{todo}
+Add a `--force`/`--reinstall` flag to `install`.
+```
 """
 
 from __future__ import annotations
@@ -275,7 +279,6 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> bool:
     help="A mix of plain <package_id>, simple <package_id@version> specifiers or full "
     "<pkg:npm/left-pad> purls.",
 )
-# TODO: add a --force/--reinstall flag
 @pass_context
 def install(ctx, packages_specs):
     """Install one or more packages.

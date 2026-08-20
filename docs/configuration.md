@@ -94,6 +94,10 @@ policy = "best-effort"
 The previous `[mpm] cooldown = "<duration>"` top-level spelling stays accepted as the `period`, with a deprecation warning on every run until it is migrated.
 ```
 
+```{todo}
+Name the release that drops the deprecated `[mpm] cooldown = "<duration>"` top-level spelling. It is accepted as a migration aid with no removal scheduled, so the warning above has no deadline for a reader to act on.
+```
+
 ### Accessibility
 
 The `--accessible` flag (or the `ACCESSIBLE=1` environment variable) is a shortcut for `--no-color --table-format plain`: it strips ANSI codes and replaces Unicode box-drawing characters with plain ASCII, so the output is friendly to screen readers and braille displays.

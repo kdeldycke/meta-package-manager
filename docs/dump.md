@@ -164,6 +164,10 @@ The Brewfile [`uv`](managers/uv.md) entry installs through `uv tool install`, th
 
 Brewfile's [`flatpak`](managers/flatpak.md) entry accepts a `with: ["remote_name"]` keyword for non-default remotes. `mpm` does not currently track the origin remote per installed flatpak, so the dump emits bare `flatpak "id"` lines; `brew bundle install` then resolves through `flathub`. Non-flathub flatpaks need to be edited in by hand after the dump.
 
+```{todo}
+Track the origin remote of each installed [`flatpak`](managers/flatpak.md) package, so a Brewfile dump emits the `with: ["remote_name"]` keyword instead of leaving non-flathub entries to be edited in by hand.
+```
+
 ## See also
 
 - {doc}`output-formats` — JSON and CSV table exports for ad-hoc piping of `installed`, `outdated`, `orphans`, and `search` results.

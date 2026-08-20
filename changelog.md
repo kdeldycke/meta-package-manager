@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Collect nine more entries onto the documentation's todo-list page, gathering future work that sat unindexed in code comments, docstrings and documentation prose.
 - [bar-plugin,gnome-shell] Split a version diff at the same point in both frontends. The GNOME menu left the separator introducing the diverging token in the dimmed prefix, where the bar plugin colors it: `5.0.0~beta1-0ubuntu7` highlighted `0~beta1-0ubuntu7` in one and `.0~beta1-0ubuntu7` in the other, and 17 of 21 sampled pairs disagreed.
 - [bar-plugin] Stop coloring both versions in full when one is the other plus a whole new token. `14ubuntu6` → `14ubuntu6.1` highlights `.1` alone, in place of every token including the ones that matched.
 - [mpm] Fix the eight screenshot links of the bar plugin page, which resolved against the page's own URL and 404ed. Sphinx emits a card's `:link:` verbatim, without the per-page rewriting it gives the image above it.

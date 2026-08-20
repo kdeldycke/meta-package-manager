@@ -183,18 +183,31 @@ jobs:
           cat > "${RUNNER_TEMP}/open-menu.applescript" <<'AS'
           tell application "System Events"
               tell process "SwiftBar"
-                  click menu bar item 1 of menu bar 1
+                  perform action "AXPress" of menu bar item 1 of menu bar 1
               end tell
           end tell
           delay 30
           AS
-          # Backgrounded, and holding a delay after the click: an open menu is a
-          # tracking session belonging to the client that opened it, so the menu
-          # closes the moment osascript exits. The previous run proved the click
-          # itself lands (it returned the `🎁↑3` item) and then found no menu
-          # window three seconds later.
+          # `AXPress` rather than `click`: click sends a press and a release, and
+          # the release dismisses a status menu as surely as a second click
+          # would. Backgrounded with a delay after it, because an open menu is a
+          # tracking session belonging to the client that opened it and closes
+          # the moment osascript exits. The click itself was never in doubt: an
+          # earlier run had it return the `🎁↑3` item it pressed.
           osascript "${RUNNER_TEMP}/open-menu.applescript" &
           sleep 6
+          # Whether the menu is open according to the accessibility API, which
+          # distinguishes "the press did nothing" from "the press opened a menu
+          # the window server does not list where I am looking".
+          cat > "${RUNNER_TEMP}/menu-state.applescript" <<'AS'
+          tell application "System Events"
+              tell process "SwiftBar"
+                  set theItem to menu bar item 1 of menu bar 1
+                  return "menus on the item: " & (count of menus of theItem)
+              end tell
+          end tell
+          AS
+          osascript "${RUNNER_TEMP}/menu-state.applescript" || true
           cat > "${RUNNER_TEMP}/menu.js" <<'JS'
           ObjC.import("CoreGraphics");
           ObjC.import("Foundation");

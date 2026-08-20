@@ -101,14 +101,16 @@ preferences window grown to {data}`PREFERENCES_HEIGHT`. The menu captures are
 cropped to the menu, so only the window one depends on this.
 """
 
-PREFERENCES_HEIGHT = 1320
+PREFERENCES_HEIGHT = 1180
 """Logical height the preferences window is grown to before the shutter.
 
 `Adw.PreferencesWindow` opens at a size of its own choosing and scrolls its page,
 so a capture at that size documents the first two groups and hides the other
 four. Grown to the whole page instead, which is what the hand-made screenshot
-this replaces showed. A group added to `prefs.js` needs this raised: the subject
-is the window, so anything past its bottom edge is simply not in the picture.
+this replaces showed. Measured against the page rather than guessed: the first capture at `1320`
+left some 200px of empty window below the *About* row. A group added to
+`prefs.js` needs this raised, and the subject being the window, anything past
+its bottom edge is simply not in the picture.
 """
 
 MONITOR_SCALE = 2

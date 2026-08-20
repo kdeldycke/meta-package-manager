@@ -368,6 +368,30 @@ def click(left: float, top: float) -> None:
     )
 
 
+def expand_first_section() -> None:
+    """Open the first folded section of a grouped menu.
+
+    SwiftBar `2.1` renders a grouped layout as inline accordions that expand in
+    place without dismissing the menu, so the packages a section holds are
+    invisible until one is opened, and with them everything `VAR_TABLE_RENDERING`
+    decides. Left folded, the two grouped captures come out byte-identical,
+    which is exactly what the twin guard reported.
+    """
+    reply = osascript("""
+tell application "System Events"
+    tell process "SwiftBar"
+        set theRow to menu item 1 of menu 1 of menu bar item 1 of menu bar 1
+        set {rowX, rowY} to position of theRow
+        set {rowW, rowH} to size of theRow
+        return ((rowX + rowW / 2) as string) & " " & ((rowY + rowH / 2) as string)
+    end tell
+end tell
+""")
+    left, top = reply.split()
+    click(float(left), float(top))
+    time.sleep(2)
+
+
 def menu_window() -> dict[str, float] | None:
     """The open menu's window id and bounds, or `None` while none is open.
 
@@ -443,6 +467,15 @@ def capture(shot: Shot, plugins: Path) -> None:
     if window is None:
         msg = f"{shot.stem}: no menu window opened"
         raise RuntimeError(msg)
+
+    if shot.submenu_layout:
+        expand_first_section()
+        # The menu is redrawn around the expanded section, so its window and
+        # bounds are read again rather than reused.
+        window = menu_window()
+        if window is None:
+            msg = f"{shot.stem}: the menu closed while expanding a section"
+            raise RuntimeError(msg)
 
     # Crop above SwiftBar's own rows: they carry an *Updated N Seconds Ago*
     # clock, and an image that changes every run opens a pull request every run.

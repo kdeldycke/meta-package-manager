@@ -580,7 +580,12 @@ this window spans `1288` to `1374`.
 
 
 def system_items() -> list[dict[str, float]]:
-    """Bounds of the status items macOS draws for itself."""
+    """Bounds of the plugin-sized status items in the menu bar.
+
+    Bounded on both sides. Below `60px` are the system's own glyphs, and a run
+    that looked before Xbar had drawn anything aimed at the `31px` search icon;
+    above `120px` is the clock. A plugin item titled `🎁↑9 ⚠️1` measures `86`.
+    """
     reply = osascript(
         """
 ObjC.import("CoreGraphics");
@@ -595,7 +600,7 @@ for (let i = 0; i < list.count; i++) {
         const b = ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds"));
         // In the menu bar, and item-sized: the Window Server owns a
         // full-width backdrop up there too, whose left edge is the screen's.
-        if (b.Y < 40 && b.Width < 200) {
+        if (b.Y < 40 && b.Width >= 60 && b.Width <= 120) {
             boxes.push({x: b.X, y: b.Y, width: b.Width, height: b.Height});
         }
     }
@@ -636,19 +641,18 @@ def status_item(host: Host) -> tuple[float, float]:
         msg = f"{host.name} shows no status item titled with {MENU_MARKER!r}"
         raise RuntimeError(msg)
 
-    items = system_items()
-    if not items:
-        msg = "The menu bar lists no system status item to anchor on"
-        raise RuntimeError(msg)
-    anchor = min(items, key=lambda box: box["x"])
-    left = anchor["x"] + anchor["width"] / 2
-    if left < 200:
-        msg = (
-            f"Anchored {left}px from the left edge, which is no status item: "
-            f"the menu bar listed {items}"
-        )
-        raise RuntimeError(msg)
-    return left, anchor["y"] + anchor["height"] / 2
+    for attempt in range(1, 13):
+        items = system_items()
+        if items:
+            anchor = min(items, key=lambda box: box["x"])
+            return (
+                anchor["x"] + anchor["width"] / 2,
+                anchor["y"] + anchor["height"] / 2,
+            )
+        print(f"  {host.name} status item, attempt {attempt}: not drawn yet")
+        time.sleep(5)
+    msg = f"{host.name} never drew a status item wide enough to be one"
+    raise RuntimeError(msg)
 
 
 def mouse(kind: str, left: float, top: float) -> None:

@@ -92,12 +92,23 @@ daily. Refresh it from a real system with `--record`.
 
 ASSET_DIR = PROJECT_ROOT / "docs" / "assets"
 
-MONITOR = (3840, 2400)
+MONITOR = (3840, 3200)
 """Virtual monitor the session renders on, in device pixels.
 
-Sized so that {data}`MONITOR_SCALE` divides it back to a `1920x1200` desktop:
-wide and tall enough that no menu reaches an edge, the captures being cropped to
-the menu anyway.
+Sized so that {data}`MONITOR_SCALE` divides it back to a `1920x1600` desktop:
+wide enough that no menu reaches an edge, and tall enough to hold the
+preferences window grown to {data}`PREFERENCES_HEIGHT`. The menu captures are
+cropped to the menu, so only the window one depends on this.
+"""
+
+PREFERENCES_HEIGHT = 1320
+"""Logical height the preferences window is grown to before the shutter.
+
+`Adw.PreferencesWindow` opens at a size of its own choosing and scrolls its page,
+so a capture at that size documents the first two groups and hides the other
+four. Grown to the whole page instead, which is what the hand-made screenshot
+this replaces showed. A group added to `prefs.js` needs this raised: the subject
+is the window, so anything past its bottom edge is simply not in the picture.
 """
 
 MONITOR_SCALE = 2
@@ -501,6 +512,24 @@ has to be observed to land before the shutter, and a fixed sleep only guesses.
 """
 
 
+def grow_prefs_window() -> str:
+    """JS growing the preferences window to {data}`PREFERENCES_HEIGHT`."""
+    return (
+        js("""(() => {
+    const windows = global.display.list_all_windows();
+    const match = windows.find(w => (w.get_title() || '').includes(NAME));
+    if (!match)
+        return null;
+    const frame = match.get_frame_rect();
+    match.move_resize_frame(false, frame.x, 0, frame.width, HEIGHT);
+    const grown = match.get_frame_rect();
+    return {width: grown.width, height: grown.height};
+})()""")
+        .replace("NAME", repr(extension_name()))
+        .replace("HEIGHT", str(PREFERENCES_HEIGHT))
+    )
+
+
 def prefs_window_probe() -> str:
     """JS locating the preferences window, focusing it, and measuring it.
 
@@ -756,10 +785,16 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
             REPORT_TIMEOUT,
             "the preferences window to appear",
         )
-        window = shell_eval(probe)
+        window = shell_eval(grow_prefs_window())
         if not isinstance(window, dict):
             msg = f"Unexpected preferences-window reply: {window!r}"
             raise TypeError(msg)
+        if window["height"] < PREFERENCES_HEIGHT:
+            msg = (
+                f"The preferences window stopped at {window['height']}px, short "
+                f"of {PREFERENCES_HEIGHT}: the monitor cannot hold it."
+            )
+            raise RuntimeError(msg)
         # Mapped and activated is not yet focused: a window found the instant it
         # appears takes a moment to receive focus, and the shutter needs it.
         name = extension_name()

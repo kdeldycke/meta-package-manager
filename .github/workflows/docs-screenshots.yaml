@@ -237,28 +237,64 @@ jobs:
       # shot that matters. The sheet belongs to UserNotificationCenter, not to
       # the process that triggered it, and it sits over everything: leaving it
       # up both lands it in the frame and swallows the click below.
+      #
+      # Every AppleScript here is a file rather than an `-e` argument. A
+      # continuation backslash inside a single-quoted `-e` string reaches
+      # osascript verbatim, and the whole script dies on a syntax error that
+      # `|| true` then hides.
       - name: Spend the consent prompt
         run: |
           screencapture -x -t png "${RUNNER_TEMP}/warmup.png" || true
-          osascript -e 'tell application "System Events" to tell process \
-            "UserNotificationCenter" to click button "Allow" of window 1' || true
+          cat > "${RUNNER_TEMP}/dismiss.applescript" <<'AS'
+          tell application "System Events"
+              tell process "UserNotificationCenter"
+                  repeat with sheet in windows
+                      try
+                          click button "Allow" of sheet
+                      end try
+                  end repeat
+                  return count of windows
+              end tell
+          end tell
+          AS
+          osascript "${RUNNER_TEMP}/dismiss.applescript"
           sleep 3
-          osascript -e 'tell application "System Events" to count windows of \
-            process "UserNotificationCenter"' || true
+          osascript "${RUNNER_TEMP}/dismiss.applescript"
           screencapture -x -t png "${RUNNER_TEMP}/after-consent.png" || true
 
       # What the status item looks like to the accessibility API, so a click
       # that misses says which part of the tree it missed.
       - name: Report SwiftBar's menu bar
         run: |
-          osascript -e 'tell application "System Events" to tell process "SwiftBar" \
-            to return {count of menu bars, entire contents of menu bar 2}' || true
+          cat > "${RUNNER_TEMP}/describe.applescript" <<'AS'
+          tell application "System Events"
+              tell process "SwiftBar"
+                  set report to "menu bars: " & (count of menu bars)
+                  repeat with bar in menu bars
+                      set report to report & linefeed & "  bar items: " & ¬
+                          (count of menu bar items of bar)
+                      repeat with item_ in menu bar items of bar
+                          set report to report & linefeed & "    " & ¬
+                              (description of item_)
+                      end repeat
+                  end repeat
+                  return report
+              end tell
+          end tell
+          AS
+          osascript "${RUNNER_TEMP}/describe.applescript"
 
       - name: Open the SwiftBar menu and photograph it
         run: |
           set -euo pipefail
-          osascript -e 'tell application "System Events" to tell process "SwiftBar" \
-            to click menu bar item 1 of menu bar 2' || true
+          cat > "${RUNNER_TEMP}/open-menu.applescript" <<'AS'
+          tell application "System Events"
+              tell process "SwiftBar"
+                  click menu bar item 1 of menu bar 2
+              end tell
+          end tell
+          AS
+          osascript "${RUNNER_TEMP}/open-menu.applescript" || true
           sleep 3
           cat > "${RUNNER_TEMP}/menu.js" <<'JS'
           ObjC.import("CoreGraphics");

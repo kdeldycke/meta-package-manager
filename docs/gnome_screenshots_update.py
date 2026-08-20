@@ -513,21 +513,38 @@ has to be observed to land before the shutter, and a fixed sleep only guesses.
 
 
 def grow_prefs_window() -> str:
-    """JS growing the preferences window to {data}`PREFERENCES_HEIGHT`."""
+    """JS asking the preferences window to grow to {data}`PREFERENCES_HEIGHT`."""
     return (
         js("""(() => {
     const windows = global.display.list_all_windows();
     const match = windows.find(w => (w.get_title() || '').includes(NAME));
     if (!match)
-        return null;
+        return false;
     const frame = match.get_frame_rect();
     match.move_resize_frame(false, frame.x, 0, frame.width, HEIGHT);
-    const grown = match.get_frame_rect();
-    return {width: grown.width, height: grown.height};
+    return true;
 })()""")
         .replace("NAME", repr(extension_name()))
         .replace("HEIGHT", str(PREFERENCES_HEIGHT))
     )
+
+
+def prefs_frame() -> str:
+    """JS reporting the preferences window's frame, once it has one.
+
+    Read in a turn of its own rather than after the resize that asks for it: a
+    resize is a request to the client, answered whenever GTK gets to it, so the
+    frame read back in the same turn is the one before the request (or zero,
+    for a window still being mapped).
+    """
+    return js("""(() => {
+    const windows = global.display.list_all_windows();
+    const match = windows.find(w => (w.get_title() || '').includes(NAME));
+    if (!match)
+        return null;
+    const frame = match.get_frame_rect();
+    return {width: frame.width, height: frame.height};
+})()""").replace("NAME", repr(extension_name()))
 
 
 def prefs_window_probe() -> str:
@@ -785,16 +802,18 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
             REPORT_TIMEOUT,
             "the preferences window to appear",
         )
-        window = shell_eval(grow_prefs_window())
+        shell_eval(grow_prefs_window())
+        frame = prefs_frame()
+
+        def grown() -> bool:
+            reply = shell_eval(frame)
+            return isinstance(reply, dict) and reply["height"] >= PREFERENCES_HEIGHT
+
+        wait_until(grown, REPORT_TIMEOUT, "the preferences window to grow")
+        window = shell_eval(frame)
         if not isinstance(window, dict):
             msg = f"Unexpected preferences-window reply: {window!r}"
             raise TypeError(msg)
-        if window["height"] < PREFERENCES_HEIGHT:
-            msg = (
-                f"The preferences window stopped at {window['height']}px, short "
-                f"of {PREFERENCES_HEIGHT}: the monitor cannot hold it."
-            )
-            raise RuntimeError(msg)
         # Mapped and activated is not yet focused: a window found the instant it
         # appears takes a moment to receive focus, and the shutter needs it.
         name = extension_name()

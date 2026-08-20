@@ -134,30 +134,31 @@ When no `mpm` is found on the system, the menu carries a bootstrap pair in place
 Both layouts, photographed from a real GNOME session driven by `docs/gnome_screenshots_update.py` and refreshed by [`docs-screenshots.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs-screenshots.yaml) whenever the extension changes.
 Each pair follows the appearance of this page, the shell restyling its menu with the desktop's light or dark preference and the version diff keeping its colors legible on both.
 
-The default flat layout lists every manager's packages inline, under a header counting them:
+The default flat layout lists every manager's packages inline, under a header counting them.
+The `flatpak` section also carries a manager error, which the menu renders as a monospace red line under the packages that did resolve:
 
 ```{image} assets/gnome-shell-flatmenu-light.png
-:alt: The extension's menu listing outdated packages inline, one header per package manager
+:alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
 :align: center
 :class: only-light
 ```
 
 ```{image} assets/gnome-shell-flatmenu-dark.png
-:alt: The extension's menu listing outdated packages inline, one header per package manager
+:alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
 :align: center
 :class: only-dark
 ```
 
-With `submenu-layout` enabled, each manager collapses into a submenu of its own:
+With `submenu-layout` enabled, each manager collapses into a submenu of its own, and the one that reported an error takes the `dialog-warning-symbolic` icon documented above:
 
 ```{image} assets/gnome-shell-submenu-light.png
-:alt: The extension's menu with one submenu per package manager
+:alt: The extension's menu with one submenu per package manager, the failing one carrying a warning icon
 :align: center
 :class: only-light
 ```
 
 ```{image} assets/gnome-shell-submenu-dark.png
-:alt: The extension's menu with one submenu per package manager
+:alt: The extension's menu with one submenu per package manager, the failing one carrying a warning icon
 :align: center
 :class: only-dark
 ```

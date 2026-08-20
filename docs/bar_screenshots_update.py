@@ -165,6 +165,13 @@ Used to pick our item out of a menu bar that, on a developer's own Mac, holds
 whatever other plugins they run.
 """
 
+FIRST_ROW = (40, 15)
+"""Offset from a menu's top-left corner into its first row.
+
+Reckoned rather than asked for, on the one host whose accessibility tree answers
+nothing. A menu's first row is at its top, and this only has to land inside it.
+"""
+
 MENU_TIMEOUT = 60
 """Seconds allowed for SwiftBar to render a plugin and open its menu."""
 
@@ -475,55 +482,52 @@ end tell
     time.sleep(3)
 
 
-_STATUS_ITEM = """
-tell application "System Events"
-    tell process "HOST"
-        set theBar to menu bar (count of menu bars)
-        repeat with theItem in menu bar items of theBar
-            try
-                if (name of theItem) contains "MARKER" then
-                    set {itemX, itemY} to position of theItem
-                    set {itemW, itemH} to size of theItem
-                    return ((itemX + itemW / 2) as string) & " " & ((itemY + itemH / 2) as string)
-                end if
-            end try
-        end repeat
-        return "none"
-    end tell
-end tell
-"""
-"""Locates the plugin's own status item and returns its centre.
+def owned_windows(host: Host, low: int, high: int) -> list[dict[str, float]]:
+    """Bounds of the host's windows within a layer range, from the window server.
 
-Matched on the title rather than taken as item 1: a developer running this
-locally has other plugins, and each of them owns a status item too. The last
-menu bar is the status bar, an agent app having no app menu of its own.
+    The one interface both hosts answer. Xbar serves no accessibility tree at
+    all: `count of menu bars` on its process times out with `-1712`, not with an
+    empty answer, however long it is given and however many times it is asked.
+    Its status item and its menus are windows all the same, and windows are
+    something the window server will happily describe.
+    """
+    reply = osascript(
+        """
+ObjC.import("CoreGraphics");
+ObjC.import("Foundation");
+const raw = $.CGWindowListCopyWindowInfo(17, 0);
+const list = ObjC.castRefToObject(raw);
+const boxes = [];
+for (let i = 0; i < list.count; i++) {
+    const w = list.objectAtIndex(i);
+    const owner = ObjC.unwrap(w.objectForKey("kCGWindowOwnerName"));
+    const layer = ObjC.unwrap(w.objectForKey("kCGWindowLayer"));
+    if (owner === "HOST" && layer >= LOW && layer <= HIGH) {
+        const b = ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds"));
+        boxes.push({x: b.X, y: b.Y, width: b.Width, height: b.Height});
+    }
+}
+JSON.stringify(boxes);
 """
+        .replace("HOST", host.name)
+        .replace("LOW", str(low))
+        .replace("HIGH", str(high)),
+        language="JXA",
+    )
+    boxes: list[dict[str, float]] = json.loads(reply)
+    return boxes
 
 
 def status_item(host: Host) -> tuple[float, float]:
-    """Screen coordinates of the plugin's status item, once the host answers.
-
-    Retried, because a host still opening its own first-run window answers
-    nothing at all: Xbar met the query with `-1712`, an AppleEvent timeout,
-    rather than with an empty menu bar.
-    """
-    script = bounded(
-        _STATUS_ITEM.replace("HOST", host.name).replace("MARKER", MENU_MARKER),
-    )
-    reply = "none"
-    for attempt in range(1, 6):
-        try:
-            reply = osascript(script)
-        except RuntimeError as error:
-            print(f"  {host.name} status item, attempt {attempt}: {error}")
-            reply = "none"
-        if reply != "none":
-            return float(reply.split()[0]), float(reply.split()[1])
+    """Screen coordinates of the host's status item, once it has drawn one."""
+    for attempt in range(1, 13):
+        items = owned_windows(host, 20, 30)
+        if items:
+            item = items[0]
+            return item["x"] + item["width"] / 2, item["y"] + item["height"] / 2
+        print(f"  {host.name} status item, attempt {attempt}: not drawn yet")
         time.sleep(5)
-    msg = (
-        f"{host.name} shows no status item titled with {MENU_MARKER!r} "
-        f"({describe(host)})"
-    )
+    msg = f"{host.name} never drew a status item"
     raise RuntimeError(msg)
 
 
@@ -568,36 +572,18 @@ def mouse(kind: str, left: float, top: float) -> None:
 def menu_bounds(host: Host) -> dict[str, float] | None:
     """Box enclosing every menu the host currently has open.
 
-    A submenu is a window of its own, so a grouped layout with one section
-    opened spans two: the union is what the capture has to cover.
+    A submenu is a window of its own, so a grouped layout with one group opened
+    spans two: the union is what the capture has to cover.
     """
-    reply = osascript(
-        """
-ObjC.import("CoreGraphics");
-ObjC.import("Foundation");
-const raw = $.CGWindowListCopyWindowInfo(17, 0);
-const list = ObjC.castRefToObject(raw);
-const boxes = [];
-for (let i = 0; i < list.count; i++) {
-    const w = list.objectAtIndex(i);
-    const owner = ObjC.unwrap(w.objectForKey("kCGWindowOwnerName"));
-    const layer = ObjC.unwrap(w.objectForKey("kCGWindowLayer"));
-    if (owner === "HOST" && layer >= 101) {
-        boxes.push(ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds")));
+    boxes = owned_windows(host, 101, 10_000)
+    if not boxes:
+        return None
+    return {
+        "x": min(box["x"] for box in boxes),
+        "y": min(box["y"] for box in boxes),
+        "right": max(box["x"] + box["width"] for box in boxes),
+        "bottom": max(box["y"] + box["height"] for box in boxes),
     }
-}
-boxes.length
-    ? JSON.stringify({
-          x: Math.min(...boxes.map(b => b.X)),
-          y: Math.min(...boxes.map(b => b.Y)),
-          right: Math.max(...boxes.map(b => b.X + b.Width)),
-          bottom: Math.max(...boxes.map(b => b.Y + b.Height)),
-      })
-    : "";
-""".replace("HOST", host.name),
-        language="JXA",
-    )
-    return json.loads(reply) if reply.startswith("{") else None
 
 
 def chrome_top(host: Host) -> float | None:
@@ -631,7 +617,7 @@ end tell
     return None if reply == "none" else float(reply)
 
 
-def expand_first_section(host: Host) -> None:
+def expand_first_section(host: Host, bounds: dict[str, float]) -> None:
     """Open the first group of a grouped menu, however this host opens one.
 
     Without it the two grouped captures of a host come out byte-identical:
@@ -639,8 +625,14 @@ def expand_first_section(host: Host) -> None:
     level shows nothing but manager rows. SwiftBar `2.1` folds them into inline
     accordions a click expands in place; Xbar builds real submenus, which open
     on hover.
+
+    SwiftBar's row is asked for by name; Xbar's is reckoned from the top-left of
+    its menu, that being where a first row is and its accessibility tree
+    answering nothing.
     """
-    reply = osascript(f"""
+    if host is SWIFTBAR:
+        reply = osascript(
+            bounded(f"""
 tell application "System Events"
     tell process "{host.name}"
         set theBar to menu bar (count of menu bars)
@@ -649,18 +641,20 @@ tell application "System Events"
                 set theRow to menu item 1 of menu 1 of theItem
                 set {{rowX, rowY}} to position of theRow
                 set {{rowW, rowH}} to size of theRow
-                return ((rowX + rowW / 2) as string) & " " & ¬
-                    ((rowY + rowH / 2) as string)
+                return ((rowX + rowW / 2) as string) & " " & ((rowY + rowH / 2) as string)
             end try
         end repeat
         return "none"
     end tell
 end tell
 """)
-    if reply == "none":
-        return
-    left, top = (float(value) for value in reply.split())
-    mouse("click" if host is SWIFTBAR else "move", left, top)
+        )
+        if reply == "none":
+            return
+        left, top = (float(value) for value in reply.split())
+        mouse("click", left, top)
+    else:
+        mouse("move", bounds["x"] + FIRST_ROW[0], bounds["y"] + FIRST_ROW[1])
     time.sleep(3)
 
 
@@ -683,7 +677,7 @@ def capture(shot: Shot, plugins: Path) -> None:
         raise RuntimeError(msg)
 
     if shot.submenu_layout:
-        expand_first_section(shot.host)
+        expand_first_section(shot.host, bounds)
         bounds = menu_bounds(shot.host)
         if bounds is None:
             msg = f"{shot.stem}: the menu closed while opening a group"

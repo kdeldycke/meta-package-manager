@@ -148,10 +148,13 @@ jobs:
       - name: Open the SwiftBar menu and photograph it
         run: |
           set -euo pipefail
+          # `menu bar 1`, not 2: an agent app has no app menu, so its status
+          # bar is the only menu bar it owns. The step above reports the count,
+          # and it reported one.
           cat > "${RUNNER_TEMP}/open-menu.applescript" <<'AS'
           tell application "System Events"
               tell process "SwiftBar"
-                  click menu bar item 1 of menu bar 2
+                  click menu bar item 1 of menu bar 1
               end tell
           end tell
           AS

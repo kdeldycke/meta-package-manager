@@ -518,17 +518,99 @@ JSON.stringify(boxes);
     return boxes
 
 
+_STATUS_ITEM = """
+tell application "System Events"
+    tell process "HOST"
+        set theBar to menu bar (count of menu bars)
+        repeat with theItem in menu bar items of theBar
+            try
+                if (name of theItem) contains "MARKER" then
+                    set {itemX, itemY} to position of theItem
+                    set {itemW, itemH} to size of theItem
+                    return ((itemX + itemW / 2) as string) & " " & ((itemY + itemH / 2) as string)
+                end if
+            end try
+        end repeat
+        return "none"
+    end tell
+end tell
+"""
+"""Locates the plugin's own status item and returns its centre.
+
+Matched on the title rather than taken as item 1: a developer running this
+locally has other plugins, and each of them owns a status item too. The last
+menu bar is the status bar, an agent app having no app menu of its own.
+"""
+
+STATUS_ITEM_INSET = 30
+"""Pixels left of the leftmost system status item to aim at.
+
+Half the width of the plugin's own item, near enough. Only Xbar needs it: with
+one bar app running, its item is the first thing to the left of the system ones.
+"""
+
+
+def system_items() -> list[dict[str, float]]:
+    """Bounds of the status items macOS draws for itself."""
+    reply = osascript(
+        """
+ObjC.import("CoreGraphics");
+ObjC.import("Foundation");
+const raw = $.CGWindowListCopyWindowInfo(17, 0);
+const list = ObjC.castRefToObject(raw);
+const boxes = [];
+for (let i = 0; i < list.count; i++) {
+    const w = list.objectAtIndex(i);
+    const layer = ObjC.unwrap(w.objectForKey("kCGWindowLayer"));
+    if (layer >= 20 && layer <= 30) {
+        const b = ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds"));
+        if (b.Y < 40) {
+            boxes.push({x: b.X, y: b.Y, width: b.Width, height: b.Height});
+        }
+    }
+}
+JSON.stringify(boxes);
+""",
+        language="JXA",
+    )
+    boxes: list[dict[str, float]] = json.loads(reply)
+    return boxes
+
+
 def status_item(host: Host) -> tuple[float, float]:
-    """Screen coordinates of the host's status item, once it has drawn one."""
-    for attempt in range(1, 13):
-        items = owned_windows(host, 20, 30)
-        if items:
-            item = items[0]
-            return item["x"] + item["width"] / 2, item["y"] + item["height"] / 2
-        print(f"  {host.name} status item, attempt {attempt}: not drawn yet")
-        time.sleep(5)
-    msg = f"{host.name} never drew a status item"
-    raise RuntimeError(msg)
+    """Screen coordinates of the plugin's status item.
+
+    Two routes, because the hosts differ in what they answer. SwiftBar serves an
+    accessibility tree, so its item is asked for by name. Xbar serves none at
+    all: `count of menu bars` on its process times out with `-1712` however long
+    it is given. And a status item is not a window either, the menu bar being
+    drawn for an app rather than by it, so the window server cannot stand in.
+    What it does list is the system's own items, and with a single bar app
+    running the plugin's item is the first slot to their left.
+    """
+    if host is SWIFTBAR:
+        script = bounded(
+            _STATUS_ITEM.replace("HOST", host.name).replace("MARKER", MENU_MARKER),
+        )
+        for attempt in range(1, 13):
+            reply = "none"
+            try:
+                reply = osascript(script)
+            except RuntimeError as error:
+                print(f"  {host.name} status item, attempt {attempt}: {error}")
+            if reply != "none":
+                left, top = reply.split()
+                return float(left), float(top)
+            time.sleep(5)
+        msg = f"{host.name} shows no status item titled with {MENU_MARKER!r}"
+        raise RuntimeError(msg)
+
+    items = system_items()
+    if not items:
+        msg = "The menu bar lists no system status item to anchor on"
+        raise RuntimeError(msg)
+    anchor = min(items, key=lambda box: box["x"])
+    return anchor["x"] - STATUS_ITEM_INSET, anchor["y"] + anchor["height"] / 2
 
 
 def mouse(kind: str, left: float, top: float) -> None:

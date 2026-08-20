@@ -375,7 +375,7 @@ def test_captures_are_referenced_by_the_docs():
     assert page.count(f":scale: {100 // driver.MONITOR_SCALE}") == len(produced)
     # The same glob the capture workflow stages, so a committed file the driver
     # no longer produces is reported here rather than lingering.
-    committed = set((PROJECT_ROOT / "docs" / "assets").glob("gnome-shell-*menu-*.png"))
+    committed = set((PROJECT_ROOT / "docs" / "assets").glob("gnome-shell-*.png"))
     assert committed <= produced
 
 

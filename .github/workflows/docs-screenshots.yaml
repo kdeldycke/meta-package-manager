@@ -57,15 +57,19 @@ jobs:
       # Recommends would drag in a desktop session nobody here logs into, so each
       # one the capture actually needs is named instead: the symbolic icons the
       # extension asks the theme for, `dbus-run-session`, GNOME's UI font (without
-      # it fontconfig lands on whatever it likes and the images drift),
-      # `gsettings` and `glib-compile-schemas`, and the Mesa software rasterizer,
-      # a runner having no GPU to render the session with.
+      # it fontconfig lands on whatever it likes and the images drift), the GTK4
+      # and libadwaita typelibs `prefs.js` imports in the process the shell
+      # spawns for the preferences window, `gsettings` and `glib-compile-schemas`,
+      # and the Mesa software rasterizer, a runner having no GPU to render the
+      # session with.
       - name: Install GNOME Shell
         run: >
           sudo apt-get update && sudo apt-get install --yes --no-install-recommends
           adwaita-icon-theme
           dbus-bin
           fonts-cantarell
+          gir1.2-adw-1
+          gir1.2-gtk-4.0
           gnome-shell
           gsettings-desktop-schemas
           libgl1-mesa-dri
@@ -155,4 +159,4 @@ jobs:
           uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0'
           pr-sync --template-file .github/pr-templates/update-gnome-screenshots.md
           --template-arg shell_version="${SHELL_VERSION}"
-          --add-path 'docs/assets/gnome-shell-*menu-*.png'
+          --add-path 'docs/assets/gnome-shell-*.png'

@@ -142,11 +142,13 @@ Bounded by the `boot-wait` grace period, which the capture drops to its floor.
 
 
 class Shot(NamedTuple):
-    """One captured image: a file stem and the two settings that shape it."""
+    """One captured image: a file stem and the state that shapes it."""
 
     stem: str
-    submenu_layout: bool
     dark: bool
+    submenu_layout: bool = False
+    preferences: bool = False
+    """Photograph the preferences window instead of the indicator menu."""
 
     @property
     def path(self) -> Path:
@@ -155,18 +157,21 @@ class Shot(NamedTuple):
 
 
 SHOTS = (
-    Shot("gnome-shell-flatmenu-light", submenu_layout=False, dark=False),
-    Shot("gnome-shell-flatmenu-dark", submenu_layout=False, dark=True),
-    Shot("gnome-shell-submenu-light", submenu_layout=True, dark=False),
-    Shot("gnome-shell-submenu-dark", submenu_layout=True, dark=True),
+    Shot("gnome-shell-flatmenu-light", dark=False),
+    Shot("gnome-shell-flatmenu-dark", dark=True),
+    Shot("gnome-shell-submenu-light", dark=False, submenu_layout=True),
+    Shot("gnome-shell-submenu-dark", dark=True, submenu_layout=True),
+    Shot("gnome-shell-preferences-light", dark=False, preferences=True),
+    Shot("gnome-shell-preferences-dark", dark=True, preferences=True),
 )
-"""The matrix documented on the extension's page: the one layout switch the
-extension exposes, in both shell appearances.
+"""Everything the extension's page illustrates: the one layout switch the menu
+exposes and the preferences window, each in both shell appearances.
 
-Each shot gets a session of its own. Both settings are applied live by a running
-shell, so one session could serve all four, but a fresh one costs seconds and
-buys independence: a shot cannot inherit a previous shot's leftover state, and a
-failure names the shot that caused it.
+Each shot gets a session of its own. The layout and the appearance are both
+applied live by a running shell, so one session could serve several, but a fresh
+one costs seconds and buys independence: a shot cannot inherit a previous shot's
+leftover state, a failure names the shot that caused it, and the preferences
+window needs a settings profile the menu shots deliberately do not have.
 """
 
 FAKE_MPM_SOURCE = '''#!/usr/bin/env python3
@@ -252,6 +257,24 @@ PIN_LAST_CHECK = js("""(() => {
         /[0-9]{1,2}:[0-9]{2}(:[0-9]{2})?( ?[AP]M)?/, 'PINNED');
     return label.text;
 })()""").replace("PINNED", PINNED_LAST_CHECK)
+
+FOCUSED_WINDOW = js("""(() => {
+    const window = global.display.focus_window;
+    if (!window)
+        return null;
+    const frame = window.get_frame_rect();
+    return {
+        title: window.get_title(),
+        width: frame.width,
+        height: frame.height,
+    };
+})()""")
+"""Reports the window the preferences shot is waiting for, and its logical size.
+
+Reads `global.display` rather than anything of the extension's: the preferences
+window belongs to a process of its own, which is the whole point of the
+two-process split the GNOME guidelines impose.
+"""
 
 OPEN_MENU = js("""(() => {
     INDICATOR.menu.open(false);
@@ -413,6 +436,29 @@ def apply_monitor_scale() -> None:
     )
 
 
+def extension_name() -> str:
+    """The extension's display name, which is what titles its window."""
+    metadata = json.loads(
+        (EXTENSION_DIR / "metadata.json").read_text(encoding="UTF-8"),
+    )
+    return str(metadata["name"])
+
+
+def screenshot_window(target: Path) -> None:
+    """Capture the focused window through the shell's screenshot service."""
+    reply = gdbus_call(
+        "/org/gnome/Shell/Screenshot",
+        "org.gnome.Shell.Screenshot.ScreenshotWindow",
+        "true",
+        "false",
+        "false",
+        str(target),
+    )
+    if not reply.stdout.startswith("(true,"):
+        msg = f"Window screenshot refused: {reply.stdout.strip()}"
+        raise RuntimeError(msg)
+
+
 def png_size(target: Path) -> tuple[int, int]:
     """Read a PNG's pixel dimensions straight out of its header."""
     header = target.read_bytes()[:24]
@@ -555,21 +601,74 @@ def shell_session(log: Path) -> Iterator[None]:
 
 
 def capture(shot: Shot, scratch: Path, schema_dir: Path) -> None:
-    """Boot a session shaped by one shot's settings and photograph its menu."""
+    """Boot a session shaped by one shot and photograph its subject."""
     print(f"Capturing {shot.path.name}")
+    gsettings(
+        "org.gnome.desktop.interface",
+        "color-scheme",
+        gvariant("prefer-dark" if shot.dark else "prefer-light"),
+    )
+    if shot.preferences:
+        capture_preferences(shot, scratch, schema_dir)
+    else:
+        capture_menu(shot, scratch, schema_dir)
+
+
+def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
+    """Photograph the preferences window, on the schema's own defaults.
+
+    The window renders the settings themselves, so it cannot open on the values
+    the menu shots set for their own convenience: a `boot-wait` dropped to its
+    floor and a `check-interval` pushed to its ceiling would be published as the
+    defaults they are not.
+    """
+    run(
+        ("gsettings", "reset-recursively", SCHEMA_ID),
+        env=os.environ | {"GSETTINGS_SCHEMA_DIR": str(schema_dir)},
+    )
+    with shell_session(scratch / f"{shot.stem}.log"):
+        apply_monitor_scale()
+        # Asks the shell to host the preferences process, exactly as the menu's
+        # own Settings row does. A GTK failure inside that process surfaces in
+        # the session log rather than here, the shell being what spawns it.
+        run(("gnome-extensions", "prefs", EXTENSION_UUID), timeout=30)
+        wait_until(
+            lambda: shell_eval(FOCUSED_WINDOW) is not None,
+            REPORT_TIMEOUT,
+            "the preferences window to take focus",
+        )
+        window = shell_eval(FOCUSED_WINDOW)
+        if not isinstance(window, dict):
+            msg = f"Unexpected focused-window reply: {window!r}"
+            raise TypeError(msg)
+        # Proves the shutter is aimed at the right process: anything else taking
+        # focus would otherwise be published as the preferences window.
+        if extension_name() not in window["title"]:
+            msg = f"Focused window is {window['title']!r}, not the preferences"
+            raise RuntimeError(msg)
+        # The window is mapped, but its first frame still has to land.
+        time.sleep(1)
+        screenshot_window(shot.path)
+
+        # The HiDPI guard of the menu shots, as a floor rather than an equality:
+        # what a window capture includes and what `get_frame_rect` reports need
+        # not agree to the pixel, but a session that lost its scale cannot clear
+        # the floor.
+        captured = png_size(shot.path)
+        if captured[0] < window["width"] * MONITOR_SCALE:
+            msg = f"{shot.path.name} came out {captured}, below {MONITOR_SCALE}x"
+            raise RuntimeError(msg)
+
+
+def capture_menu(shot: Shot, scratch: Path, schema_dir: Path) -> None:
+    """Photograph the indicator menu, in the layout the shot asks for."""
     marker = scratch / "outdated-served"
     marker.unlink(missing_ok=True)
-
     gsettings(
         SCHEMA_ID,
         "submenu-layout",
         "true" if shot.submenu_layout else "false",
         schema_dir=schema_dir,
-    )
-    gsettings(
-        "org.gnome.desktop.interface",
-        "color-scheme",
-        gvariant("prefer-dark" if shot.dark else "prefer-light"),
     )
 
     with shell_session(scratch / f"{shot.stem}.log"):

@@ -82,11 +82,27 @@ $ gnome-extensions enable mpm@kdeldycke.github.io
 
 Settings live in the extension preferences window, also reachable from the indicator menu:
 
-```{image} assets/gnome-shell-preferences.png
+``````{tab-set}
+`````{tab-item} Light
+:sync: light
+
+```{image} assets/gnome-shell-preferences-light.png
 :alt: The preferences window of the GNOME Shell extension
 :align: center
-:width: 400px
+:scale: 50
 ```
+`````
+
+`````{tab-item} Dark
+:sync: dark
+
+```{image} assets/gnome-shell-preferences-dark.png
+:alt: The preferences window of the GNOME Shell extension
+:align: center
+:scale: 50
+```
+`````
+``````
 
 
 | Setting                | Description                                                     | Type    | Default |
@@ -132,40 +148,56 @@ When no `mpm` is found on the system, the menu carries a bootstrap pair in place
 ## Screenshots
 
 Both layouts, photographed from a real GNOME session driven by `docs/gnome_screenshots_update.py` and refreshed by [`docs-screenshots.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs-screenshots.yaml) whenever the extension changes.
-Each pair follows the appearance of this page, the shell restyling its menu with the desktop's light or dark preference and the version diff keeping its colors legible on both.
+Each one is captured in both shell appearances, so the two are there to be compared rather than picked for you: the shell restyles its menu with the desktop's light or dark preference, and the version diff has to keep its colors legible on both. The tabs are synchronized, so switching one switches the other.
 
 The default flat layout lists every manager's packages inline, under a header counting them.
 The `flatpak` section also carries a manager error, which the menu renders as a monospace red line under the packages that did resolve:
 
+``````{tab-set}
+`````{tab-item} Light
+:sync: light
+
 ```{image} assets/gnome-shell-flatmenu-light.png
 :alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
 :align: center
-:class: only-light
 :scale: 50
 ```
+`````
+
+`````{tab-item} Dark
+:sync: dark
 
 ```{image} assets/gnome-shell-flatmenu-dark.png
 :alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
 :align: center
-:class: only-dark
 :scale: 50
 ```
+`````
+``````
 
 With `submenu-layout` enabled, each manager collapses into a submenu of its own, and the one that reported an error takes the `dialog-warning-symbolic` icon documented above:
+
+``````{tab-set}
+`````{tab-item} Light
+:sync: light
 
 ```{image} assets/gnome-shell-submenu-light.png
 :alt: The extension's menu with one submenu per package manager, the failing one carrying a warning icon
 :align: center
-:class: only-light
 :scale: 50
 ```
+`````
+
+`````{tab-item} Dark
+:sync: dark
 
 ```{image} assets/gnome-shell-submenu-dark.png
 :alt: The extension's menu with one submenu per package manager, the failing one carrying a warning icon
 :align: center
-:class: only-dark
 :scale: 50
 ```
+`````
+``````
 
 ## Development workflow
 

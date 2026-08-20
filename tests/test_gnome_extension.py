@@ -370,6 +370,9 @@ def test_captures_are_referenced_by_the_docs():
     produced = {shot.path for shot in driver.SHOTS}
     for path in produced:
         assert f"assets/{path.name}" in page, path.name
+    # Captured at MONITOR_SCALE, so displayed at its reciprocal: the two move
+    # together or the images render at twice the size of everything else.
+    assert page.count(f":scale: {100 // driver.MONITOR_SCALE}") == len(produced)
     # The same glob the capture workflow stages, so a committed file the driver
     # no longer produces is reported here rather than lingering.
     committed = set((PROJECT_ROOT / "docs" / "assets").glob("gnome-shell-*menu-*.png"))

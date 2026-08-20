@@ -141,12 +141,14 @@ The `flatpak` section also carries a manager error, which the menu renders as a 
 :alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
 :align: center
 :class: only-light
+:scale: 50
 ```
 
 ```{image} assets/gnome-shell-flatmenu-dark.png
 :alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
 :align: center
 :class: only-dark
+:scale: 50
 ```
 
 With `submenu-layout` enabled, each manager collapses into a submenu of its own, and the one that reported an error takes the `dialog-warning-symbolic` icon documented above:
@@ -155,12 +157,14 @@ With `submenu-layout` enabled, each manager collapses into a submenu of its own,
 :alt: The extension's menu with one submenu per package manager, the failing one carrying a warning icon
 :align: center
 :class: only-light
+:scale: 50
 ```
 
 ```{image} assets/gnome-shell-submenu-dark.png
 :alt: The extension's menu with one submenu per package manager, the failing one carrying a warning icon
 :align: center
 :class: only-dark
+:scale: 50
 ```
 
 ## Development workflow

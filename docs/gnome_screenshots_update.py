@@ -60,6 +60,7 @@ import math
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import time
@@ -90,10 +91,23 @@ daily. Refresh it from a real system with `--record`.
 
 ASSET_DIR = PROJECT_ROOT / "docs" / "assets"
 
-MONITOR = (1920, 1200)
-"""Virtual monitor the session renders on, wide and tall enough that no menu
-reaches an edge. The captures are cropped to the menu, so this only has to be
-generous, never exact.
+MONITOR = (3840, 2400)
+"""Virtual monitor the session renders on, in device pixels.
+
+Sized so that {data}`MONITOR_SCALE` divides it back to a `1920x1200` desktop:
+wide and tall enough that no menu reaches an edge, the captures being cropped to
+the menu anyway.
+"""
+
+MONITOR_SCALE = 2
+"""Logical scale applied to that monitor, which is what makes the captures HiDPI.
+
+Every coordinate the shell reports, and every one `ScreenshotArea` takes, stays
+logical; only the framebuffer behind them doubles. So the menu lays out exactly
+as it would on a `1920x1200` desktop and comes back drawn at twice the pixels,
+which is what a Retina reader needs and what upscaling a `1x` capture cannot
+fake. The documentation renders these at `:scale: 50` to land back at their
+logical size.
 """
 
 CAPTURE_MARGIN = 24
@@ -187,6 +201,11 @@ also a valid JS string literal, so the snippets below stay copy-pasteable into
 Looking Glass.
 """
 
+DISPLAY_CONFIG_NAME = "org.gnome.Mutter.DisplayConfig"
+"""Bus name owning the monitor layout, exported by the shell beside its own."""
+
+DISPLAY_CONFIG_PATH = "/org/gnome/Mutter/DisplayConfig"
+
 _EVAL_REPLY = re.compile(r"\((true|false), (.*)\)\s*", re.DOTALL)
 """`gdbus` renders the `(bs)` reply of `Eval` as a GVariant tuple literal."""
 
@@ -276,15 +295,20 @@ def gdbus_call(
     object_path: str,
     method: str,
     *args: str,
+    dest: str = "org.gnome.Shell",
     check: bool = True,
 ) -> subprocess.CompletedProcess[str]:
-    """Call one method of the session's `org.gnome.Shell` service."""
+    """Call one method on a service the shell exports.
+
+    Two bus names are in play: the shell's own, and the `org.gnome.Mutter.*`
+    family it also owns, which is where the monitor layout lives.
+    """
     argv = (
         "gdbus",
         "call",
         "--session",
         "--dest",
-        "org.gnome.Shell",
+        dest,
         "--object-path",
         object_path,
         "--method",
@@ -347,6 +371,56 @@ def screenshot_area(x: int, y: int, width: int, height: int, target: Path) -> No
     if not reply.stdout.startswith("(true,"):
         msg = f"Screenshot refused: {reply.stdout.strip()}"
         raise RuntimeError(msg)
+
+
+def apply_monitor_scale() -> None:
+    """Put the virtual monitor on a logical scale of {data}`MONITOR_SCALE`.
+
+    Mutter takes the scale from a monitor configuration rather than from the
+    `--virtual-monitor` argument, so it can only be set once the session is up.
+    `ApplyMonitorsConfig` is the call the Display panel makes, and its
+    `temporary` method leaves nothing on disk for a later run to inherit.
+    """
+    state = gdbus_call(
+        DISPLAY_CONFIG_PATH,
+        f"{DISPLAY_CONFIG_NAME}.GetCurrentState",
+        dest=DISPLAY_CONFIG_NAME,
+    ).stdout
+    # The reply opens on its serial, then on the monitor array, whose first
+    # entry pairs a connector tuple with the modes it advertises.
+    serial = re.match(r"\((?:uint32 )?(\d+),", state)
+    monitor = re.search(r"\(\('([^']+)',", state)
+    if serial is None or monitor is None:
+        msg = f"Unreadable monitor state: {state!r}"
+        raise RuntimeError(msg)
+    mode = re.search(r"\[\('([^']+)',", state[monitor.end() :])
+    if mode is None:
+        msg = f"Monitor {monitor[1]!r} advertises no mode: {state!r}"
+        raise RuntimeError(msg)
+    layout = (
+        f"[(0, 0, {float(MONITOR_SCALE)}, 0, true, "
+        f"[('{monitor[1]}', '{mode[1]}', {{}})])]"
+    )
+    # Method 1 is `temporary`: applied to the running session only.
+    gdbus_call(
+        DISPLAY_CONFIG_PATH,
+        f"{DISPLAY_CONFIG_NAME}.ApplyMonitorsConfig",
+        serial[1],
+        "1",
+        layout,
+        "{}",
+        dest=DISPLAY_CONFIG_NAME,
+    )
+
+
+def png_size(target: Path) -> tuple[int, int]:
+    """Read a PNG's pixel dimensions straight out of its header."""
+    header = target.read_bytes()[:24]
+    if header[:8] != b"\x89PNG\r\n\x1a\n":
+        msg = f"Not a PNG: {target}"
+        raise ValueError(msg)
+    width, height = struct.unpack(">II", header[16:24])
+    return width, height
 
 
 def wait_until(probe: Callable[[], bool], timeout: int, description: str) -> None:
@@ -499,6 +573,7 @@ def capture(shot: Shot, scratch: Path, schema_dir: Path) -> None:
     )
 
     with shell_session(scratch / f"{shot.stem}.log"):
+        apply_monitor_scale()
         wait_until(marker.exists, REPORT_TIMEOUT, "the extension's first check")
         # The report lands one turn of the loop after the payload is served.
         wait_until(
@@ -531,6 +606,15 @@ def capture(shot: Shot, scratch: Path, schema_dir: Path) -> None:
         # Anchored at the top of the screen: the top bar is part of the subject,
         # the indicator icon and its outdated count being what the menu hangs off.
         screenshot_area(left, 0, right - left, bottom, shot.path)
+
+        # The area is requested in logical pixels and must come back drawn in
+        # device ones. A capture that matches the request one for one means the
+        # session lost its scale, and the images would silently go back to 1x.
+        expected = ((right - left) * MONITOR_SCALE, bottom * MONITOR_SCALE)
+        captured = png_size(shot.path)
+        if captured != expected:
+            msg = f"{shot.path.name} came out {captured}, expected {expected}"
+            raise RuntimeError(msg)
 
 
 def capture_all(workspace: Path | None = None) -> None:

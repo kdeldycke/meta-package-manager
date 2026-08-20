@@ -112,59 +112,47 @@ jobs:
           # uv release clears the cooldown window.
           version: "0.12.1"
 
-      # The same lossless pass the autofix lane applies to every committed image,
-      # from the same pinned binary. Skipping it would leave `format-images`
-      # rewriting these four files right back, one pull request per capture.
+      # The oxipng `format-images` provisions, keyed on the file carrying the
+      # repomatic pin that decides its version: a bump misses the cache once and
+      # repopulates it, and a stale hit is re-verified against the registry
+      # checksum rather than trusted.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/repomatic/bin
+          key: >-
+            repomatic-${{ runner.os }}-${{ runner.arch }}-oxipng-${{
+            hashFiles('.github/workflows/docs-screenshots.yaml') }}
+          restore-keys: |
+            repomatic-${{ runner.os }}-${{ runner.arch }}-oxipng-
+
+      # Literally the command the autofix lane runs, rather than the binary it
+      # drives: `run oxipng` is a passthrough, so reaching for it means restating
+      # repomatic's optimization level, strip mode and savings thresholds here,
+      # where the next upstream change to any of them would go unnoticed and
+      # leave `format-images` rewriting these files right back, one pull request
+      # per capture. It discovers images repo-wide and rewrites only what clears
+      # its own threshold, so the already-optimized rest of the tree is a no-op.
       - name: Optimize the captures
+        run: |
+          set -euo pipefail
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0' \
+            format-images | tee --append "${GITHUB_STEP_SUMMARY}"
+
+      # One call for what three steps did by hand. It opens the pull request when
+      # the captures moved, refreshes it when they move again, does nothing at all
+      # when they match what is already on the branch, and closes it, branch and
+      # all, once a change is reverted: that last state is the one a hand-rolled
+      # upsert never handled, leaving a stale PR open forever. The branch name and
+      # the label come from the template, so no step repeats them. `--add-path` is
+      # a git pathspec, quoted so git expands it rather than the shell, and one
+      # matching nothing is dropped instead of fatal.
+      - name: Sync pull request
+        env:
+          # The PAT when the repository has one, so the PR it opens triggers the
+          # checks a `GITHUB_TOKEN`-authored one never would.
+          GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
         run: >
           uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0'
-          run oxipng -- --opt 4 --strip safe docs/assets/gnome-shell-*menu-*.png
-
-      - name: Detect changed captures
-        id: captures
-        run: |
-          git status --porcelain -- docs/assets > "${RUNNER_TEMP}/captures.status"
-          if [ -s "${RUNNER_TEMP}/captures.status" ]; then
-            echo "changed=true" >> "${GITHUB_OUTPUT}"
-            {
-              echo '## Captures to review'
-              echo '```'
-              cat "${RUNNER_TEMP}/captures.status"
-              echo '```'
-            } >> "${GITHUB_STEP_SUMMARY}"
-          else
-            echo "changed=false" >> "${GITHUB_OUTPUT}"
-            echo 'Captures are identical to the committed ones.' >> "${GITHUB_STEP_SUMMARY}"
-          fi
-
-      - name: Render PR body
-        if: steps.captures.outputs.changed == 'true'
-        run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.13.0' pr-body
-          --template-file .github/pr-templates/update-gnome-screenshots.md
+          pr-sync --template-file .github/pr-templates/update-gnome-screenshots.md
           --template-arg shell_version="${SHELL_VERSION}"
-          --output body.md
-
-      # Upserted on a stable branch, force-pushed: a capture supersedes the
-      # previous one outright, and an image diff is what GitHub reviews best.
-      - name: Open PR with the new captures
-        if: steps.captures.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          branch="update-gnome-screenshots"
-          title="Update GNOME Shell extension menu screenshots"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B "${branch}"
-          git add docs/assets/gnome-shell-*menu-*.png
-          git commit --message "${title}"
-          git push --force --set-upstream origin "${branch}"
-          gh pr list --head "${branch}" --state open --json number \
-            --jq '.[0].number // empty' \
-            > "${RUNNER_TEMP}/existing-pr"
-          if [ -s "${RUNNER_TEMP}/existing-pr" ]; then
-            gh pr edit "${branch}" --title "${title}" --body-file body.md
-          else
-            gh pr create --title "${title}" --body-file body.md --label "🔌 plugin"
-          fi
+          --add-path 'docs/assets/gnome-shell-*menu-*.png'

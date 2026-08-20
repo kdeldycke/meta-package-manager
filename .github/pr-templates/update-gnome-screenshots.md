@@ -3,6 +3,7 @@ args: [shell_version]
 title: Update GNOME Shell extension screenshots
 commit_message: Update GNOME Shell extension screenshots
 footer: false
+labels: [🔌 plugin]
 ---
 
 ### Screenshots

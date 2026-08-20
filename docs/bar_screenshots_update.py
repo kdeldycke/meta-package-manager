@@ -386,20 +386,18 @@ end tell
     time.sleep(3)
 
 
-def spend_consent_prompt() -> None:
-    """Trigger macOS's screen-recording consent sheet, then dismiss it.
+def dismiss_prompts() -> None:
+    """Click through whatever consent sheets are currently up.
 
-    It is raised by the *first* capture, belongs to `UserNotificationCenter`
-    rather than to whatever triggered it, and arrives a few seconds later. Left
-    up it sits over everything, landing in the frame and swallowing clicks.
+    Two kinds appear. macOS raises a screen-recording sheet on the first
+    capture, and each host raises an automation sheet of its own on launch
+    (*"xbar" wants access to control "System Events"*). Both are modal, both
+    belong to `UserNotificationCenter` rather than to whatever provoked them,
+    and either one left up blocks every click that follows.
     """
-    with TemporaryDirectory(prefix="mpm-consent-") as name:
-        run(
-            ("screencapture", "-x", "-t", "png", str(Path(name) / "warmup.png")),
-            check=False,
-        )
     for attempt in range(1, 6):
-        found = osascript("""
+        found = osascript(
+            bounded("""
 tell application "System Events"
     set theCount to 0
     try
@@ -415,8 +413,26 @@ tell application "System Events"
     return theCount
 end tell
 """)
-        print(f"consent sheet, attempt {attempt}: {found} window(s)")
+        )
+        print(f"  consent sheet, attempt {attempt}: {found} window(s)")
+        if found == "0" and attempt > 1:
+            return
         time.sleep(4)
+
+
+def spend_consent_prompt() -> None:
+    """Trigger macOS's screen-recording consent sheet, then dismiss it.
+
+    It is raised by the *first* capture, belongs to `UserNotificationCenter`
+    rather than to whatever triggered it, and arrives a few seconds later. Left
+    up it sits over everything, landing in the frame and swallowing clicks.
+    """
+    with TemporaryDirectory(prefix="mpm-consent-") as name:
+        run(
+            ("screencapture", "-x", "-t", "png", str(Path(name) / "warmup.png")),
+            check=False,
+        )
+    dismiss_prompts()
 
 
 def write_plugin(plugins: Path, shot: Shot) -> None:
@@ -483,16 +499,14 @@ end tell
 """)
     )
     time.sleep(3)
+    dismiss_prompts()
 
 
 def owned_windows(host: Host, low: int, high: int) -> list[dict[str, float]]:
     """Bounds of the host's windows within a layer range, from the window server.
 
-    The one interface both hosts answer. Xbar serves no accessibility tree at
-    all: `count of menu bars` on its process times out with `-1712`, not with an
-    empty answer, however long it is given and however many times it is asked.
-    Its status item and its menus are windows all the same, and windows are
-    something the window server will happily describe.
+    How an open menu is found, for both hosts. A status item is not covered:
+    macOS draws those into a window of Control Center's, so neither app owns one.
     """
     reply = osascript(
         """
@@ -545,11 +559,12 @@ locally has other plugins, and each of them owns a status item too. The last
 menu bar is the status bar, an agent app having no app menu of its own.
 """
 
-STATUS_ITEM_INSET = 30
-"""Pixels left of the leftmost system status item to aim at.
-
-Half the width of the plugin's own item, near enough. Only Xbar needs it: with
-one bar app running, its item is the first thing to the left of the system ones.
+"""macOS 26 groups the third-party status items into one window of its own,
+owned by Control Center rather than by the app that drew them, which is why no
+window is ever listed for SwiftBar or Xbar. With a single bar app running, that
+window holds exactly one item and its centre is where to click. Measured against
+accessibility on the host that answers it: SwiftBar's item reports `x=1331`, and
+this window spans `1288` to `1374`.
 """
 
 
@@ -615,7 +630,7 @@ def status_item(host: Host) -> tuple[float, float]:
         msg = "The menu bar lists no system status item to anchor on"
         raise RuntimeError(msg)
     anchor = min(items, key=lambda box: box["x"])
-    left = anchor["x"] - STATUS_ITEM_INSET
+    left = anchor["x"] + anchor["width"] / 2
     if left < 200:
         msg = (
             f"Anchored {left}px from the left edge, which is no status item: "

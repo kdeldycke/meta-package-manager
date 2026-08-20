@@ -705,7 +705,14 @@ def diff_versions(
     The split point snaps to the nearest separator boundary so the full
     diverging token and its preceding separator are highlighted. For
     `2.1.1774638290` vs `2.1.1774896198`, the common part is `2.1`
-    and the diff includes `.1774638290` / `.1774896198`.
+    and the diff includes `.1774638290` / `.1774896198`. It does not snap when
+    the divergence already sits on a boundary, one version being the other plus
+    a whole new token: `14ubuntu6` and `14ubuntu6.1` highlight `.1` alone.
+
+    The GNOME Shell extension carries a second implementation of this, as
+    `diffVersions()` in `gnome-shell/mpm@kdeldycke.github.io/mpm.js`. The two
+    are held together by `tests/version-diff-cases.json`, the corpus both test
+    suites assert against: a split changed here has to be changed there too.
 
     `prefix_fg`, `old_fg` and `new_fg` override the common-prefix, old-suffix
     and new-suffix colors, in any form accepted by {func}`click_extra.style`

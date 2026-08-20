@@ -290,9 +290,8 @@ export function parseOutdated(text) {
  * introducing the diverging token is colored with it: "1.23" vs "1.24" diffs
  * as ".23"/".24", not "3"/"4" nor "23"/"24".
  *
- * Held byte-for-byte to the Python implementation by
- * tests/test_version.py::test_diff_versions_matches_the_gnome_extension,
- * which reads the cases below out of tests/gnome/run-tests.js.
+ * Held to the Python implementation by tests/version-diff-cases.json, the
+ * shared corpus both test suites assert against.
  *
  * @param {string} installed - Installed version string.
  * @param {string} latest - Latest version string.

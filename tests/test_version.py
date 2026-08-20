@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import copy
+import json
 import operator
 import re
 
@@ -824,92 +825,60 @@ def styled_split(styled: str) -> tuple[str, str]:
     return (runs[0], runs[1]) if len(runs) > 1 else ("", runs[0] if runs else "")
 
 
-@pytest.mark.parametrize(
-    ("old", "new", "expected_common", "expected_old", "expected_new"),
-    (
-        # Token boundary: diff includes separator + full diverging token.
-        ("2.1.1774638290", "2.1.1774896198", "2.1", ".1774638290", ".1774896198"),
-        # Patch bump.
-        ("1.2.3", "1.2.4", "1.2", ".3", ".4"),
-        # Minor bump.
-        ("1.2.3", "1.3.0", "1", ".2.3", ".3.0"),
-        # Major bump: no separator before first token.
-        ("1.2.3", "2.0.0", "", "1.2.3", "2.0.0"),
-        # Pre-release tag change.
-        ("1.0.0-alpha", "1.0.0-beta", "1.0.0", "-alpha", "-beta"),
-        # Year-based: first token differs, no common separator.
-        ("2013.0523", "2024.0010", "", "2013.0523", "2024.0010"),
-        # No common prefix at all.
-        ("abc", "def", "", "abc", "def"),
-        # No separators in either string.
-        ("12345", "12399", "", "12345", "12399"),
-        # Identical versions: everything is common.
-        ("1.2.3", "1.2.3", "1.2.3", "", ""),
-        # One side empty.
-        ("", "1.0", "", "", "1.0"),
-        ("1.0", "", "", "1.0", ""),
-        # Both empty.
-        ("", "", "", "", ""),
-        # Alpha bump within pre-release.
-        ("3.12.0a4", "3.12.0a5", "3.12", ".0a4", ".0a5"),
-        # TokenizedString inputs.
-        (TokenizedString("1.2.3"), TokenizedString("1.2.4"), "1.2", ".3", ".4"),
-    ),
-)
-def test_diff_versions(old, new, expected_common, expected_old, expected_new):
-    styled_old, styled_new = diff_versions(old, new)
+def test_diff_versions():
+    """Split every pair of the shared corpus where both frontends agree to.
 
-    # Plain text must equal the full original string.
-    assert strip_ansi(styled_old) == (str(old) if old else "")
-    assert strip_ansi(styled_new) == (str(new) if new else "")
+    `tests/version-diff-cases.json` is the contract, read here and by
+    `testDiffVersions()` in `tests/gnome/run-tests.js`: the GNOME Shell
+    extension carries a second implementation of this function, for a frontend
+    Python never runs in, and nothing but one shared case list keeps the two
+    honest. They had drifted on 17 of 21 pairs, the JS one stopping short of
+    the separator introducing the diverging token and leaving it in the dimmed
+    prefix.
 
-    # Verify the split point, as the function actually drew it.
-    if old:
-        assert styled_split(styled_old) == (expected_common, expected_old)
-    if new:
-        assert styled_split(styled_new) == (expected_common, expected_new)
-
-
-def test_diff_versions_matches_the_gnome_extension():
-    """The GNOME Shell extension splits a version pair exactly like this does.
-
-    `diffVersions()` in `gnome-shell/mpm@kdeldycke.github.io/mpm.js` is a second
-    implementation of this function, serving a frontend Python never runs in.
-    Nothing but this test holds the two together, and they had already drifted
-    on 17 of the 21 pairs measured: the JS one stopped one step short of the
-    separator, leaving it in the dimmed prefix, so a menu row read
-    `5.0.` + `0~beta1-0ubuntu7` where the bar plugin colored `.0~beta1-0ubuntu7`
-    whole.
-
-    The cases are read out of the gjs suite rather than restated here, so one
-    list serves both languages and a case added there is asserted against this
-    implementation on the next run. Reading a JS file to test Python needs no
-    `gjs` on the runner, which is what lets this stay on the full test matrix
-    while the suite it borrows from runs once.
+    A case added to the file is asserted against both implementations on the
+    next run. It is read here rather than parametrized from, so no worker
+    stats the filesystem while collecting.
     """
-    suite = PROJECT_ROOT.joinpath("tests", "gnome", "run-tests.js")
-    source = suite.read_text(encoding="UTF-8")
-    cases = re.findall(
-        r"Mpm\.diffVersions\(\s*'([^']*)',\s*'([^']*)'\s*\),\s*\{\s*"
-        r"prefix: '([^']*)',\s*oldSuffix: '([^']*)',\s*newSuffix: '([^']*)',?\s*\}",
-        source,
+    corpus = json.loads(
+        PROJECT_ROOT.joinpath("tests", "version-diff-cases.json").read_text(
+            encoding="UTF-8",
+        ),
     )
-    # A regex quietly stopping short would report perfect agreement over the
-    # cases it still matched, so it answers for every call in the file.
-    assert len(cases) == source.count("Mpm.diffVersions("), (
-        "Some diffVersions() case in the gjs suite is shaped so this test "
-        "cannot read it, and is going unchecked against the Python side."
-    )
-    assert cases
+    # An unreadable or empty corpus would otherwise report a clean run over
+    # the nothing it managed to load.
+    assert corpus
 
-    for installed, latest, prefix, old_suffix, new_suffix in cases:
+    mismatches = []
+    for case in corpus:
+        installed, latest = case["installed"], case["latest"]
         styled_old, styled_new = diff_versions(installed, latest)
-        assert styled_split(styled_old) == (prefix, old_suffix), (
-            f"{installed} → {latest} splits differently in the two frontends."
-        )
-        assert styled_split(styled_new) == (prefix, new_suffix), (
-            f"{installed} → {latest} splits differently in the two frontends."
-        )
+
+        # Plain text must equal the full original string.
+        if strip_ansi(styled_old) != installed:
+            mismatches.append(f"{case['id']}: {styled_old!r} is not {installed!r}")
+        if strip_ansi(styled_new) != latest:
+            mismatches.append(f"{case['id']}: {styled_new!r} is not {latest!r}")
+
+        # Verify the split point, as the function actually drew it.
+        for styled, suffix in (
+            (styled_old, case["oldSuffix"]),
+            (styled_new, case["newSuffix"]),
+        ):
+            drawn = styled_split(styled)
+            if drawn != (case["prefix"], suffix):
+                mismatches.append(
+                    f"{case['id']}: {installed} \u2192 {latest} split as {drawn}, "
+                    f"where the corpus asks for {(case['prefix'], suffix)}",
+                )
+
+    assert not mismatches, "\n".join(mismatches)
+
+
+def test_diff_versions_accepts_tokenized_strings():
+    """A `TokenizedString` is stringified before the split, like a plain str."""
+    tokenized = diff_versions(TokenizedString("1.2.3"), TokenizedString("1.2.4"))
+    assert tokenized == diff_versions("1.2.3", "1.2.4")
 
 
 # --- Known limitations ---

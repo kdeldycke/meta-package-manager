@@ -103,19 +103,28 @@ jobs:
           screencapture -x -t png "${RUNNER_TEMP}/warmup.png" || true
           cat > "${RUNNER_TEMP}/dismiss.applescript" <<'AS'
           tell application "System Events"
-              tell process "UserNotificationCenter"
-                  repeat with theWindow in windows
-                      try
-                          click button "Allow" of theWindow
-                      end try
-                  end repeat
-                  return count of windows
-              end tell
+              set theCount to 0
+              try
+                  tell process "UserNotificationCenter"
+                      set theCount to count of windows
+                      repeat with theWindow in windows
+                          try
+                              click button "Allow" of theWindow
+                          end try
+                      end repeat
+                  end tell
+              end try
+              return theCount
           end tell
           AS
-          osascript "${RUNNER_TEMP}/dismiss.applescript"
-          sleep 3
-          osascript "${RUNNER_TEMP}/dismiss.applescript"
+          # The sheet arrives on its own schedule, and the process hosting it
+          # does not exist until it does: every attempt reports the window count
+          # it found, and none of them is allowed to fail the step.
+          for attempt in 1 2 3 4 5; do
+            printf 'attempt %s: ' "${attempt}"
+            osascript "${RUNNER_TEMP}/dismiss.applescript" || echo "no host yet"
+            sleep 4
+          done
           screencapture -x -t png "${RUNNER_TEMP}/after-consent.png" || true
 
       # What the status item looks like to the accessibility API, so a click

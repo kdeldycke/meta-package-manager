@@ -7,4 +7,4 @@ footer: false
 
 ### Screenshots
 
-Refreshes the GNOME Shell extension captures rendered on [the extension's page](https://mpm.run/gnome-shell/).
+Refreshes the GNOME Shell extension screenshots on [the extension's page](https://mpm.run/gnome-shell/) from a real, headless `$shell_version` session.

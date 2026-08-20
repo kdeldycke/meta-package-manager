@@ -564,7 +564,9 @@ for (let i = 0; i < list.count; i++) {
     const layer = ObjC.unwrap(w.objectForKey("kCGWindowLayer"));
     if (layer >= 20 && layer <= 30) {
         const b = ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds"));
-        if (b.Y < 40) {
+        // In the menu bar, and item-sized: the Window Server owns a
+        // full-width backdrop up there too, whose left edge is the screen's.
+        if (b.Y < 40 && b.Width < 200) {
             boxes.push({x: b.X, y: b.Y, width: b.Width, height: b.Height});
         }
     }
@@ -610,7 +612,14 @@ def status_item(host: Host) -> tuple[float, float]:
         msg = "The menu bar lists no system status item to anchor on"
         raise RuntimeError(msg)
     anchor = min(items, key=lambda box: box["x"])
-    return anchor["x"] - STATUS_ITEM_INSET, anchor["y"] + anchor["height"] / 2
+    left = anchor["x"] - STATUS_ITEM_INSET
+    if left < 200:
+        msg = (
+            f"Anchored {left}px from the left edge, which is no status item: "
+            f"the menu bar listed {items}"
+        )
+        raise RuntimeError(msg)
+    return left, anchor["y"] + anchor["height"] / 2
 
 
 def mouse(kind: str, left: float, top: float) -> None:

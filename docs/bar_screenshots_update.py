@@ -253,6 +253,33 @@ def run(
     return result
 
 
+def bounded(script: str, seconds: int = 15) -> str:
+    """Wrap an AppleScript body in an AppleEvent timeout.
+
+    The default is a minute of silence before `-1712`, which is a long time to
+    spend discovering that a host is not answering yet.
+    """
+    return f"with timeout of {seconds} seconds\n{script}\nend timeout"
+
+
+def describe(host: Host) -> str:
+    """What System Events can see of a host, for a failure worth diagnosing."""
+    return osascript(
+        bounded(f"""
+tell application "System Events"
+    try
+        tell process "{host.name}"
+            return "menu bars: " & (count of menu bars) & ¬
+                ", windows: " & (count of windows)
+        end tell
+    on error message
+        return "unreachable: " & message
+    end try
+end tell
+""")
+    )
+
+
 def osascript(source: str, *, language: str = "AppleScript") -> str:
     """Run a script through `osascript`, from a file rather than `-e`.
 
@@ -427,39 +454,77 @@ def restart(host: Host, plugins: Path) -> None:
     if host.plugin_dir is None:
         run(("defaults", "write", SWIFTBAR_DOMAIN, "PluginDirectory", str(plugins)))
     run(("open", str(Path("/Applications") / host.bundle)))
-    time.sleep(15)
-
-
-def status_item(host: Host) -> tuple[float, float]:
-    """Screen coordinates of the plugin's own status item.
-
-    Matched on the title rather than taken as item 1: a developer running this
-    locally has other plugins, and each of them owns a status item too. The
-    last menu bar is the status bar, an agent app having no app menu of its own.
-    """
-    reply = osascript(f"""
+    time.sleep(20)
+    # Xbar greets a first run with its plugin browser, which sits in front of
+    # the menu bar and leaves the process too busy to answer accessibility.
+    osascript(
+        bounded(f"""
 tell application "System Events"
-    tell process "{host.name}"
+    try
+        tell process "{host.name}"
+            repeat with theWindow in windows
+                try
+                    click button 1 of theWindow
+                end try
+            end repeat
+        end tell
+    end try
+end tell
+""")
+    )
+    time.sleep(3)
+
+
+_STATUS_ITEM = """
+tell application "System Events"
+    tell process "HOST"
         set theBar to menu bar (count of menu bars)
         repeat with theItem in menu bar items of theBar
             try
-                if (name of theItem) contains "{MENU_MARKER}" then
-                    set {{itemX, itemY}} to position of theItem
-                    set {{itemW, itemH}} to size of theItem
-                    return ((itemX + itemW / 2) as string) & " " & ¬
-                        ((itemY + itemH / 2) as string)
+                if (name of theItem) contains "MARKER" then
+                    set {itemX, itemY} to position of theItem
+                    set {itemW, itemH} to size of theItem
+                    return ((itemX + itemW / 2) as string) & " " & ((itemY + itemH / 2) as string)
                 end if
             end try
         end repeat
         return "none"
     end tell
 end tell
-""")
-    if reply == "none":
-        msg = f"{host.name} shows no status item titled with {MENU_MARKER!r}"
-        raise RuntimeError(msg)
-    left, top = reply.split()
-    return float(left), float(top)
+"""
+"""Locates the plugin's own status item and returns its centre.
+
+Matched on the title rather than taken as item 1: a developer running this
+locally has other plugins, and each of them owns a status item too. The last
+menu bar is the status bar, an agent app having no app menu of its own.
+"""
+
+
+def status_item(host: Host) -> tuple[float, float]:
+    """Screen coordinates of the plugin's status item, once the host answers.
+
+    Retried, because a host still opening its own first-run window answers
+    nothing at all: Xbar met the query with `-1712`, an AppleEvent timeout,
+    rather than with an empty menu bar.
+    """
+    script = bounded(
+        _STATUS_ITEM.replace("HOST", host.name).replace("MARKER", MENU_MARKER),
+    )
+    reply = "none"
+    for attempt in range(1, 6):
+        try:
+            reply = osascript(script)
+        except RuntimeError as error:
+            print(f"  {host.name} status item, attempt {attempt}: {error}")
+            reply = "none"
+        if reply != "none":
+            return float(reply.split()[0]), float(reply.split()[1])
+        time.sleep(5)
+    msg = (
+        f"{host.name} shows no status item titled with {MENU_MARKER!r} "
+        f"({describe(host)})"
+    )
+    raise RuntimeError(msg)
 
 
 def mouse(kind: str, left: float, top: float) -> None:

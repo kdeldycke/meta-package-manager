@@ -474,8 +474,19 @@ def restart(host: Host, plugins: Path) -> None:
     A restart rather than a refresh call, because the two hosts refresh
     differently and one of them has to be restarted anyway for a system
     appearance change to reach its menu.
+
+    Every other host is quit first, not just this one. Two bar apps running at
+    once put two plugin items in the menu bar, and since macOS draws them into a
+    window of Control Center's rather than one of their own, nothing in that
+    window says which item belongs to whom: the click then lands on whichever
+    happens to sit leftmost. That is what opened a SwiftBar menu during an Xbar
+    shot, and what left the capture looking for a menu Xbar never had.
     """
-    run(("osascript", "-e", f'tell application "{host.name}" to quit'), check=False)
+    for other in (SWIFTBAR, XBAR):
+        run(
+            ("osascript", "-e", f'tell application "{other.name}" to quit'),
+            check=False,
+        )
     time.sleep(3)
     if host.plugin_dir is None:
         run(("defaults", "write", SWIFTBAR_DOMAIN, "PluginDirectory", str(plugins)))

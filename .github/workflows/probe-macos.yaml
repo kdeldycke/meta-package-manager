@@ -57,6 +57,24 @@ jobs:
           SWIFT
           swift "${RUNNER_TEMP}/modes.swift" || echo "mode enumeration failed"
 
+      - name: Raise the display to its tallest mode
+        run: |
+          cat > "${RUNNER_TEMP}/setmode.swift" <<'SWIFT'
+          import CoreGraphics
+          let display = CGMainDisplayID()
+          let modes = CGDisplayCopyAllDisplayModes(display, nil) as? [CGDisplayMode]
+          let target = (modes ?? []).first { $0.width == 1600 && $0.height == 1200 }
+          guard let mode = target else { exit(2) }
+          var config: CGDisplayConfigRef?
+          CGBeginDisplayConfiguration(&config)
+          CGConfigureDisplayWithDisplayMode(config, display, mode, nil)
+          CGCompleteDisplayConfiguration(config, .permanently)
+          print("set \(mode.width)x\(mode.height)")
+          SWIFT
+          swift "${RUNNER_TEMP}/setmode.swift" || echo "mode change refused"
+          sleep 3
+          system_profiler SPDisplaysDataType | grep -i resolution || true
+
       - name: Install SwiftBar
         run: |
           set -euo pipefail
@@ -168,9 +186,15 @@ jobs:
                   click menu bar item 1 of menu bar 1
               end tell
           end tell
+          delay 30
           AS
-          osascript "${RUNNER_TEMP}/open-menu.applescript" || true
-          sleep 3
+          # Backgrounded, and holding a delay after the click: an open menu is a
+          # tracking session belonging to the client that opened it, so the menu
+          # closes the moment osascript exits. The previous run proved the click
+          # itself lands (it returned the `🎁↑3` item) and then found no menu
+          # window three seconds later.
+          osascript "${RUNNER_TEMP}/open-menu.applescript" &
+          sleep 6
           cat > "${RUNNER_TEMP}/menu.js" <<'JS'
           ObjC.import("CoreGraphics");
           ObjC.import("Foundation");

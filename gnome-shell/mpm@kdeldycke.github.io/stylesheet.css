@@ -28,6 +28,13 @@
   padding-right: 1em;
 }
 
+/* Each version is spelled by two labels, so the box holding them declares no
+   spacing of its own: a gap between a prefix and its suffix would break the
+   version string apart, right where it reads as one word. */
+.mpm-version-diff {
+  spacing: 0;
+}
+
 /* Version diff, mirroring the Xbar/SwiftBar convention: common prefix dimmed,
    installed suffix red, latest suffix green. Mid-luminance picks read on both
    the light and dark shell themes. */

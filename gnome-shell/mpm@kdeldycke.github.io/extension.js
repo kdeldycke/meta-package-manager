@@ -408,15 +408,24 @@ class MpmIndicator extends PanelMenu.Button {
             [diff.prefix, 'mpm-version-prefix'],
             [diff.newSuffix, 'mpm-version-new'],
         ];
+        /* The cells spell out two version strings, so they go in a box of
+         * their own: added straight to the menu item, each would be held off
+         * the next by the shell theme's own popup-menu-item spacing, splitting
+         * "5.0.0~beta1" into "5.0." and "0~beta1". */
+        const versions = new St.BoxLayout({
+            y_align: Clutter.ActorAlign.CENTER,
+            style_class: 'mpm-version-diff',
+        });
         for (const [text, styleClass] of cells) {
             if (text === '')
                 continue;
-            item.add_child(new St.Label({
+            versions.add_child(new St.Label({
                 text,
                 y_align: Clutter.ActorAlign.CENTER,
                 style_class: styleClass,
             }));
         }
+        item.add_child(versions);
         item.connectObject('activate', () => {
             this.menu.close();
             this._runAction(

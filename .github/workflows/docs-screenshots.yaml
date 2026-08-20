@@ -201,7 +201,19 @@ jobs:
         run: uv --no-progress sync --frozen --all-extras --all-groups
 
       - name: Capture the menus
-        run: uv --no-progress run --frozen -- python docs/bar_screenshots_update.py
+        run: >
+          uv --no-progress run --frozen -- python docs/bar_screenshots_update.py
+          --diagnostics "${RUNNER_TEMP}/diagnostics"
+
+      # What was on screen when a shot failed, which is the only thing that
+      # settles a host whose own process answers nothing.
+      - name: Upload the diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bar-diagnostics
+          path: ${{ runner.temp }}/diagnostics
+          if-no-files-found: warn
 
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:

@@ -172,6 +172,9 @@ Reckoned rather than asked for, on the one host whose accessibility tree answers
 nothing. A menu's first row is at its top, and this only has to land inside it.
 """
 
+DIAGNOSTICS: Path | None = None
+"""Where a failed shot leaves its evidence, when a caller asks for any."""
+
 MENU_TIMEOUT = 60
 """Seconds allowed for SwiftBar to render a plugin and open its menu."""
 
@@ -790,6 +793,43 @@ def capture(shot: Shot, plugins: Path) -> None:
     print(f"  {shot.path.name}: {png_size(shot.path)}")
 
 
+def diagnose(label: str, host: Host) -> None:
+    """Photograph the whole screen and dump what the window server lists.
+
+    Reached when a shot fails. Everything else here reports what a host was
+    asked and answered; this reports what was actually on screen, which is the
+    only thing that settles a host inferred at second hand.
+    """
+    if DIAGNOSTICS is None:
+        return
+    DIAGNOSTICS.mkdir(parents=True, exist_ok=True)
+    run(
+        ("screencapture", "-x", "-t", "png", str(DIAGNOSTICS / f"{label}.png")),
+        check=False,
+    )
+    windows = osascript(
+        """
+ObjC.import("CoreGraphics");
+ObjC.import("Foundation");
+const raw = $.CGWindowListCopyWindowInfo(17, 0);
+const list = ObjC.castRefToObject(raw);
+const rows = [];
+for (let i = 0; i < list.count; i++) {
+    const w = list.objectAtIndex(i);
+    rows.push({
+        owner: ObjC.unwrap(w.objectForKey("kCGWindowOwnerName")),
+        layer: ObjC.unwrap(w.objectForKey("kCGWindowLayer")),
+        bounds: ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds")),
+    });
+}
+JSON.stringify(rows, null, 2);
+""",
+        language="JXA",
+    )
+    (DIAGNOSTICS / f"{label}-windows.json").write_text(windows, encoding="UTF-8")
+    print(f"  diagnostics for {host.name} written to {DIAGNOSTICS}")
+
+
 def capture_all() -> None:
     """Install both hosts, then walk every shot."""
     if sys.platform != "darwin":
@@ -822,7 +862,11 @@ def capture_all() -> None:
                 plugins.mkdir(parents=True, exist_ok=True)
                 if shot.host.plugin_dir is not None:
                     planted.append(plugins / "mpm.1h.sh")
-                capture(shot, plugins)
+                try:
+                    capture(shot, plugins)
+                except Exception:
+                    diagnose(shot.stem, shot.host)
+                    raise
 
                 digest = hashlib.sha256(shot.path.read_bytes()).hexdigest()
                 twin = digests.get(digest)
@@ -859,8 +903,14 @@ def capture_all() -> None:
 
 def main() -> None:
     """Capture every shot."""
+    global DIAGNOSTICS
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.parse_args()
+    parser.add_argument(
+        "--diagnostics",
+        type=Path,
+        help="Folder for a screenshot and window dump of any shot that fails.",
+    )
+    DIAGNOSTICS = parser.parse_args().diagnostics
     capture_all()
 
 

@@ -487,6 +487,18 @@ def apply_monitor_scale() -> None:
     )
 
 
+FOCUSED_TITLE = js("""(() => {
+    const window = global.display.focus_window;
+    return window ? window.get_title() || '' : null;
+})()""")
+"""Title of the window holding focus, which is the one the shutter will take.
+
+`ScreenshotWindow` photographs the focused window and answers a bare `false`
+when nothing holds focus, so activating a window is not enough: the activation
+has to be observed to land before the shutter, and a fixed sleep only guesses.
+"""
+
+
 def prefs_window_probe() -> str:
     """JS locating the preferences window, focusing it, and measuring it.
 
@@ -526,7 +538,11 @@ def screenshot_window(target: Path) -> None:
         str(target),
     )
     if not reply.stdout.startswith("(true,"):
-        msg = f"Window screenshot refused: {reply.stdout.strip()}"
+        focused = shell_eval(FOCUSED_TITLE)
+        msg = (
+            f"Window screenshot refused: {reply.stdout.strip()}, "
+            f"with {focused!r} holding focus"
+        )
         raise RuntimeError(msg)
 
 
@@ -735,7 +751,15 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
         if not isinstance(window, dict):
             msg = f"Unexpected preferences-window reply: {window!r}"
             raise TypeError(msg)
-        # The window is mapped and focused, but its first frame still has to land.
+        # Mapped and activated is not yet focused: a window found the instant it
+        # appears takes a moment to receive focus, and the shutter needs it.
+        name = extension_name()
+        wait_until(
+            lambda: name in str(shell_eval(FOCUSED_TITLE) or ""),
+            REPORT_TIMEOUT,
+            "the preferences window to take focus",
+        )
+        # Focused, but its first frame still has to land.
         time.sleep(1)
         screenshot_window(shot.path)
 

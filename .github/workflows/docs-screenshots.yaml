@@ -222,7 +222,13 @@ jobs:
           # Setting the folder up front is what keeps the first run from stopping
           # on its folder picker.
           defaults write com.ameba.SwiftBar PluginDirectory "${plugins}"
-          open -a SwiftBar
+          # By path, not by name: Launch Services has never seen this bundle, so
+          # `open -a SwiftBar` cannot resolve it. Registering it first also lets
+          # anything else address it by name later.
+          lsregister=/System/Library/Frameworks/CoreServices.framework/Frameworks
+          lsregister="${lsregister}/LaunchServices.framework/Support/lsregister"
+          "${lsregister}" -f /Applications/SwiftBar.app || true
+          open /Applications/SwiftBar.app
           sleep 20
           pgrep -l SwiftBar || echo "SwiftBar is not running"
 

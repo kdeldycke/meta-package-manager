@@ -172,6 +172,11 @@ Reckoned rather than asked for, on the one host whose accessibility tree answers
 nothing. A menu's first row is at its top, and this only has to land inside it.
 """
 
+CLOCK_HIDDEN = False
+"""Whether the menu bar clock could be taken out, and so whether the captures
+can reach up to include it.
+"""
+
 DIAGNOSTICS: Path | None = None
 """Where a failed shot leaves its evidence, when a caller asks for any."""
 
@@ -579,13 +584,8 @@ this window spans `1288` to `1374`.
 """
 
 
-def system_items() -> list[dict[str, float]]:
-    """Bounds of the plugin-sized status items in the menu bar.
-
-    Bounded on both sides. Below `60px` are the system's own glyphs, and a run
-    that looked before Xbar had drawn anything aimed at the `31px` search icon;
-    above `120px` is the clock. A plugin item titled `🎁↑9 ⚠️1` measures `86`.
-    """
+def menu_bar_windows(low: int = 60, high: int = 120) -> list[dict[str, float]]:
+    """Menu bar windows whose width falls in a range."""
     reply = osascript(
         """
 ObjC.import("CoreGraphics");
@@ -598,19 +598,27 @@ for (let i = 0; i < list.count; i++) {
     const layer = ObjC.unwrap(w.objectForKey("kCGWindowLayer"));
     if (layer >= 20 && layer <= 30) {
         const b = ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds"));
-        // In the menu bar, and item-sized: the Window Server owns a
-        // full-width backdrop up there too, whose left edge is the screen's.
-        if (b.Y < 40 && b.Width >= 60 && b.Width <= 120) {
+        if (b.Y < 40 && b.Width >= LOW && b.Width <= HIGH) {
             boxes.push({x: b.X, y: b.Y, width: b.Width, height: b.Height});
         }
     }
 }
 JSON.stringify(boxes);
-""",
+""".replace("LOW", str(low)).replace("HIGH", str(high)),
         language="JXA",
     )
     boxes: list[dict[str, float]] = json.loads(reply)
     return boxes
+
+
+def system_items() -> list[dict[str, float]]:
+    """Bounds of the plugin-sized status items in the menu bar.
+
+    Bounded on both sides. Below `60px` are the system's own glyphs, and a run
+    that looked before Xbar had drawn anything aimed at the `31px` search icon;
+    above `120px` is the clock. A plugin item titled `🎁↑9 ⚠️1` measures `86`.
+    """
+    return menu_bar_windows()
 
 
 def status_item(host: Host) -> tuple[float, float]:
@@ -691,6 +699,41 @@ def mouse(kind: str, left: float, top: float) -> None:
             str(top),
         )
     )
+
+
+def hide_clock() -> bool:
+    """Take the clock out of the menu bar, and report whether it went.
+
+    The captures reach up to the top of the screen so the status item the menu
+    hangs off is in frame, the way the GNOME ones include the top bar. The clock
+    sits in that strip and reads differently every minute, so leaving it in
+    would rewrite all sixteen images on every run. It is a Control Center
+    module, hidden by the same preference the Control Center settings pane
+    writes, and Control Center has to be restarted to read it.
+    """
+    run(
+        (
+            "defaults",
+            "-currentHost",
+            "write",
+            "com.apple.controlcenter.plist",
+            "Clock",
+            "-int",
+            "8",
+        ),
+        check=False,
+    )
+    run(("killall", "ControlCenter"), check=False)
+    time.sleep(8)
+    # The clock is the one menu bar window wider than any status item: it
+    # measured 153px against an item's 86. If it is still there, the preference
+    # did not take, and the captures stay below the menu bar rather than commit
+    # a new set every run.
+    wide = [box for box in menu_bar_windows() if box["width"] > 120]
+    if wide:
+        print(f"  the clock is still in the menu bar ({wide}), keeping it out of frame")
+        return False
+    return True
 
 
 def press_escape() -> None:
@@ -832,10 +875,11 @@ def capture(shot: Shot, plugins: Path) -> None:
     chrome = chrome_top(shot.host)
     if chrome is not None:
         bottom = min(bottom, chrome - 1)
-    rect = (
-        f"{bounds['x']},{bounds['y']},"
-        f"{bounds['right'] - bounds['x']},{bottom - bounds['y']}"
-    )
+    # Anchored at the top of the screen when the clock could be hidden, so the
+    # status item the menu hangs off is in frame the way the GNOME captures
+    # include the top bar. Otherwise the frame starts at the menu.
+    top = 0.0 if CLOCK_HIDDEN else bounds["y"]
+    rect = f"{bounds['x']},{top},{bounds['right'] - bounds['x']},{bottom - top}"
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
 
     # Dismiss the menu so the next shot starts from a bare desktop.
@@ -889,6 +933,8 @@ def capture_all() -> None:
         install(host)
     raise_display()
     spend_consent_prompt()
+    global CLOCK_HIDDEN
+    CLOCK_HIDDEN = hide_clock()
 
     with TemporaryDirectory(prefix="mpm-bar-capture-") as name:
         scratch = Path(name) / "plugins"
@@ -950,6 +996,17 @@ def capture_all() -> None:
                     check=False,
                 )
             set_appearance(dark=False)
+            run(
+                (
+                    "defaults",
+                    "-currentHost",
+                    "delete",
+                    "com.apple.controlcenter.plist",
+                    "Clock",
+                ),
+                check=False,
+            )
+            run(("killall", "ControlCenter"), check=False)
 
 
 def main() -> None:

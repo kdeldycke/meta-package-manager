@@ -352,8 +352,8 @@ html_extra_path = ["404.html", "_redirects", "robots.txt"]
 # publishing several translations or versions side by side. This one publishes a
 # single tree, so anything but the bare link yields sitemap entries that 404.
 sitemap_url_scheme = "{link}"
-html_css_files = ["custom.css", "table-crosshair.css"]
-html_js_files = ["table-crosshair.js"]
+html_css_files = ["custom.css", "manager-index.css", "table-crosshair.css"]
+html_js_files = ["manager-index.js", "table-crosshair.js"]
 
 # Opt into click_extra.sphinx's executable directives. Enables the `click:run`
 # blocks in docs/cli-parameters.md and docs/configuration.md, which run mpm's CLI

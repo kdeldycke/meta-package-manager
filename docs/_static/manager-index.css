@@ -1,0 +1,38 @@
+/*
+ * Manager index table: verdict group titles and whole-row links.
+ *
+ * The classes are only ever applied by manager-index.js, and only to the one
+ * table whose rows it recognizes, so these rules are inert everywhere else.
+ * Colors come from furo's own CSS variables, so both themes are covered.
+ */
+
+/* The band opening a verdict group, once its cell spans the full width. Furo
+ * gives a cell no vertical padding of its own, so the band needs its own to
+ * read as a heading rather than as one more row. */
+table.manager-index td.manager-group-cell {
+  background-color: var(--color-background-secondary, rgba(128, 128, 128, 0.1));
+  border-top: 2px solid var(--color-table-border, rgba(128, 128, 128, 0.4));
+  padding-bottom: 0.4rem;
+  padding-top: 0.4rem;
+}
+
+/* The mark column is centred and the title is not: it labels the rows below
+ * it, which start at the left edge. Alignment is set on the span rather than
+ * on the cell, leaving the column's own rule alone. */
+table.manager-index .manager-group {
+  display: block;
+  font-size: 1.05em;
+  font-weight: 700;
+  text-align: left;
+}
+
+/* Whole-row link. The wash marks what a click follows and the pointer says
+ * the row is one; `:focus-within` gives the same feedback to a reader tabbing
+ * through the row's own links, which stay focusable. */
+table.manager-index tr.manager-row {
+  cursor: pointer;
+}
+table.manager-index tr.manager-row:focus-within > td,
+table.manager-index tr.manager-row:hover > td {
+  background-color: var(--color-background-hover, rgba(128, 128, 128, 0.12));
+}

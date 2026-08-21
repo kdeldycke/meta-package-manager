@@ -5,6 +5,10 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Group the manager index by support state, each group opening on a title row spanning the table. Managers stay alphabetical inside their group.
+- [mpm] Make every row of the manager index clickable end to end and highlight it on hover, following the manager's page or a declined tool's verdict.
+- [mpm] Shorten the manager index legend to one label per state, reused as the title of the group of rows carrying that glyph.
+- [mpm] Restore the crosshair highlight of the benchmark, SBOM, cooldown and augmentations tables, dead since the documentation moved to extension-less URLs.
 - [bar-plugin] Render an error line at the same size as every other monospace row. Its own smaller size left a visible gap under the message, both hosts putting the surplus below the text rather than around it.
 - [bar-plugin] Separate a package name from its version diff by two spaces, in the fixed-width table and the variable-width rendering alike. A single space left `bind9-dnsutils 1:9.20.18-1ubuntu2.1 → 1:9.20.24-1ubuntu0.1` reading as one run of text.
 - [bar-plugin] Give the plugin's location section one tab per host. SwiftBar has no default plugin folder and must not be pointed at `~/Library/Application Support/SwiftBar/Plugins`, which is its own data directory; the conventional `~/.swiftbar` needs SwiftBar `2.1.1`. Xbar's folder is fixed.

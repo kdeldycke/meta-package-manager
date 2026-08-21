@@ -21,8 +21,11 @@
   }
 
   ready(function () {
+    // Both URL shapes, since the site builds with `dirhtml`: a page answers
+    // to `/benchmark/` today and answered to `/benchmark.html` until the
+    // builder changed under it.
     if (
-      !/\/(benchmark|sbom|cooldown|augmentations)\.html?$/.test(
+      !/\/(augmentations|benchmark|cooldown|sbom)(\.html?)?\/?$/.test(
         window.location.pathname
       )
     ) {

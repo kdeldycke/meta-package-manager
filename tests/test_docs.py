@@ -1576,10 +1576,21 @@ def test_manager_support_legend():
         assert f"`{glyph}`" not in text
 
 
+def _row_manager_id(row: str) -> str:
+    """Manager ID of a rendered index row: its first backticked link.
+
+    The `Manager` column holding the prose name never code-spans it, so the
+    first such span is the `ID` cell whatever the row's group.
+    """
+    match = re.search(r"\[`([a-z0-9.-]+)`\]", row)
+    assert match, f"no manager ID in row: {row}"
+    return match.group(1)
+
+
 def test_managers_index_table_renders():
-    """Check the manager index renders as one well-formed table: every wrapped
-    manager linking to its documentation page, then every declined one linking
-    to its verdict, in the exact same columns.
+    """Check the manager index renders as one well-formed table: five verdict
+    groups, each opening on its own title row, wrapped managers linking to their
+    documentation page and declined ones to their verdict, in the same columns.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
     block in `docs/managers.md`, so there is no checked-in copy to compare
@@ -1592,26 +1603,60 @@ def test_managers_index_table_renders():
     competitor_data: dict[str, list[str]] = data.get("managers", {})
     anchors = _docs.unsupported_anchors()
 
-    assert lines[0] == (
-        f"The {len(pool)} managers `mpm` drives open the table, alphabetically. "
-        f"The {len(unsupported)} it declined close it, grouped by verdict:"
-    )
-    assert lines[1] == ""
+    # The table is all there is: the prose lede restating the split the group
+    # titles now show is gone.
+    assert lines[0].startswith("|")
     # The leading column carries the brand marks and is headerless.
     header_pattern = r"\|\s+\| Manager\s+\| ID\s+\|\s+Support\s+\|\s+Platforms\s+\|"
-    assert re.fullmatch(header_pattern, lines[2])
+    assert re.fullmatch(header_pattern, lines[0])
     # The upstream readings moved to each manager's own card, and the
     # unmaintained flag folded into the shared Support column, so the index
     # must no longer spend columns on any of them.
     for header in ("Stars", "Last release", "Last commit", "Unmaintained"):
-        assert header not in lines[2]
+        assert header not in lines[0]
 
-    # One table, not two: the lede is the only blank line, the header and its
-    # separator appear once, and the declined managers continue the same rows.
-    assert lines.count("") == 1
-    assert len(lines) == 4 + len(pool) + len(unsupported)
-    supported_block = "\n".join(lines[4 : 4 + len(pool)])
-    declined_block = "\n".join(lines[4 + len(pool) :])
+    # One table, not two: no blank line, the header and its separator appear
+    # once, and every manager continues the same rows behind a title row per
+    # state.
+    assert lines.count("") == 0
+    assert len(lines) == 2 + len(_docs.SUPPORT_SCALE) + len(pool) + len(unsupported)
+
+    # Split the body on its title rows, each of which must carry a state's own
+    # SUPPORT_SCALE label: one wording for the legend and the group it titles.
+    blocks: dict[str, list[str]] = {}
+    titles = []
+    current: list[str] = []
+    for line in lines[2:]:
+        marker = re.search(r'<span class="manager-group">(.+?)</span>', line)
+        if marker:
+            titles.append(marker.group(1))
+            current = blocks.setdefault(marker.group(1).partition(" ")[0], [])
+            continue
+        assert titles, "a manager row ahead of the first title row"
+        current.append(line)
+    assert titles == [
+        f"{glyph} {label}" for glyph, label in _docs.SUPPORT_SCALE.items()
+    ]
+    # Every assessed manager sits in the group its own glyph puts it in, once,
+    # alphabetically within that group.
+    grouped: dict[str, list[str]] = {glyph: [] for glyph in _docs.SUPPORT_SCALE}
+    for mid in sorted((*pool, *unsupported)):
+        grouped[_docs._bare_support_glyph(mid, unsupported, competitor_data)].append(
+            mid
+        )
+    assert {
+        glyph: [_row_manager_id(row) for row in rows] for glyph, rows in blocks.items()
+    } == grouped
+
+    supported_block = "\n".join(
+        line for glyph in _docs.WRAPPED_GLYPHS.values() for line in blocks[glyph]
+    )
+    declined_block = "\n".join(
+        line
+        for glyph, rows in blocks.items()
+        if glyph not in set(_docs.WRAPPED_GLYPHS.values())
+        for line in rows
+    )
 
     unmaintained = 0
     for mid, manager in pool.items():
@@ -1635,39 +1680,20 @@ def test_managers_index_table_renders():
     for glyph in ("☠️", "❌", "🛟"):
         assert glyph not in supported_block
 
-    # The wrapped half is alphabetical, the order a reader looking a manager up
-    # by name expects.
-    wrapped_ids = re.findall(r"\[`([a-z0-9.-]+)`\]\(managers/", supported_block)
-    assert wrapped_ids == sorted(pool)
-
-    # Every declined manager appears exactly once, after every wrapped one,
-    # grouped by verdict in SUPPORT_SCALE order and alphabetical within each
-    # group, its Support cell matching the shared helper
-    # benchmark_managers_table() also renders its own `mpm` column from.
-    scale = tuple(_docs.SUPPORT_SCALE)
-    declined_ids = re.findall(r"\[`([a-z0-9.-]+)`\]\(unsupported\.md", declined_block)
-    assert declined_ids == sorted(
-        unsupported,
-        key=lambda mid: (
-            scale.index(_docs._bare_support_glyph(mid, unsupported, competitor_data)),
-            mid,
-        ),
-    )
-    # Each verdict is a single uninterrupted run, in scale order.
-    ranks = [
-        scale.index(_docs._bare_support_glyph(mid, unsupported, competitor_data))
-        for mid in declined_ids
-    ]
-    assert ranks == sorted(ranks)
-    assert set(ranks) == {scale.index(glyph) for glyph in ("🛟", "☠️", "❌")}
+    # A declined manager's Support cell matches the shared helper
+    # benchmark_managers_table() also renders its own `mpm` column from, and
+    # links to its verdict rather than to a page it does not have.
     for mid in unsupported:
         assert mid not in pool
         glyph_cell = _docs._support_glyph(mid, unsupported, anchors, competitor_data)
         assert glyph_cell in declined_block
+        assert f"[`{mid}`](unsupported.md" in declined_block
 
-    # Every placeholder was substituted by the artwork it stands for.
+    # Every placeholder was substituted by what it stands for: the artwork of a
+    # mark, and the label of a group title.
     assert "%logo:" not in table
-    # The declined block is the last thing rendered: no trailing prose.
+    assert "%group:" not in table
+    # The table is the last thing rendered: no trailing prose.
     assert lines[-1].startswith("|")
 
 

@@ -166,31 +166,33 @@ happens elsewhere.
 """
 
 SUPPORT_SCALE = {
-    WRAPPED_GLYPHS["maintained"]: "Wrapped by `mpm`, linking to the class "
-    "implementing it.",
-    WRAPPED_GLYPHS["unmaintained"]: "Wrapped by `mpm` and usable, but its upstream "
-    "is gone.",
-    TOPGRADE_FALLBACK_GLYPH: "Not wrapped, yet still reachable through "
-    f"[`mpm upgrade --topgrade`]({UNSUPPORTED_DOCS_URL}), which upgrades whatever "
-    "it detects on the host. Wins over the two verdicts below, which are left to "
-    "the tools nothing reaches at all.",
-    UNSUPPORTED_GLYPHS["archived"]: "Never wrapped, and its "
-    f"[upstream is retired]({UNSUPPORTED_DOCS_URL}).",
-    UNSUPPORTED_GLYPHS["excluded"]: "Never wrapped: a live tool "
-    f"[declined on its own merits]({UNSUPPORTED_DOCS_URL}).",
+    WRAPPED_GLYPHS["maintained"]: "Active support by `mpm`",
+    WRAPPED_GLYPHS["unmaintained"]: "Wrapped by `mpm` and usable, but upstream is "
+    "unmaintained",
+    TOPGRADE_FALLBACK_GLYPH: "Falls back to `topgrade`",
+    UNSUPPORTED_GLYPHS["archived"]: "Unsupported by `mpm` and upstream is unmaintained",
+    UNSUPPORTED_GLYPHS["excluded"]: "`mpm` declined support",
 }
 """The five states a manager can be in, in the order the manager index shows them.
 
-Keys are the glyphs {func}`_bare_support_glyph` returns, values the wording
-{func}`manager_support_legend` renders beside them. Composed from
-{data}`WRAPPED_GLYPHS`, {data}`TOPGRADE_FALLBACK_GLYPH` and
+Keys are the glyphs {func}`_bare_support_glyph` returns, values the label both
+{func}`manager_support_legend` and {func}`managers_index_table` render: the
+legend as the meaning of a glyph, the index as the title of the group of rows
+carrying it. One wording, so the key and its table can never disagree.
+Composed from {data}`WRAPPED_GLYPHS`, {data}`TOPGRADE_FALLBACK_GLYPH` and
 {data}`UNSUPPORTED_GLYPHS` rather than repeating their glyphs, so the scale
-cannot drift from the cells it describes.
+cannot drift from the cells it describes either.
+
+Each label is a caption rather than a sentence: it titles a group of rows, and
+a reader scanning five of them wants the state named, not explained. What a
+glyph means beyond its name lives where the reason lives, in the manager's own
+page or its verdict section.
 
 The key order is a reading order, from best supported to least, and doubles as
-the sort of the declined tail closing {func}`managers_index_table`: those rows
-group by verdict instead of continuing the alphabet, since a reader reaching
-them is asking what became of the tool rather than looking one up by name.
+the sort of {func}`managers_index_table`: the whole index groups by verdict
+rather than running one alphabet from `am` to `zypper`, since the question a
+reader brings to it is what became of a tool. Alphabetical order survives
+inside each group.
 """
 
 
@@ -806,8 +808,8 @@ def _bare_support_glyph(
     being the record rather than the comparison.
 
     Split out of {func}`_support_glyph` because the glyph is also what
-    {func}`manager_support_legend` counts and what the declined tail of
-    {func}`managers_index_table` sorts on, neither of which wants the link.
+    {func}`manager_support_legend` counts and what {func}`managers_index_table`
+    groups its rows by, neither of which wants the link.
     """
     if mid in pool:
         flag = "unmaintained" if pool[mid].unmaintained else "maintained"
@@ -2607,22 +2609,31 @@ def managers_index_table() -> str:
     the single one they came for, while widening the table enough to push the
     platform icons off a narrow screen.
 
-    Declined managers (`docs/benchmark.toml`'s `unsupported` mapping) close the
-    same table, in one continuous run of rows: they used to be a second block
-    behind a repeated header, which read as a separate table and cost a reader
-    tracking a tool across both a second set of column widths to parse. No prose
-    name or platform data exists for a tool `mpm` never wrapped, so those cells
-    stay blank; the ID cell links to the manager's verdict section instead of a
-    dedicated page it does not have, and the emptied `Manager` column is what
-    marks the tail apart now that no blank line does.
+    Declined managers (`docs/benchmark.toml`'s `unsupported` mapping) share the
+    same table as the wrapped ones: they used to be a second block behind a
+    repeated header, which read as a separate table and cost a reader tracking a
+    tool across both a second set of column widths to parse. No prose name or
+    platform data exists for a tool `mpm` never wrapped, so those cells stay
+    blank, and the ID cell links to the manager's verdict section instead of a
+    dedicated page it does not have.
 
-    The two halves sort differently, on purpose. Wrapped managers stay
-    alphabetical, the order a reader looking one up by name expects. The
-    declined tail groups by verdict instead, following {data}`SUPPORT_SCALE`
-    (`🛟` first, then `☠️`, then `❌`) and only then by ID: nobody reaches those
-    rows hunting for a name, they read them to learn what became of a tool, and
-    the lifebuoys leading means the still-upgradable majority is what the page
-    ends on.
+    Rows group by verdict rather than running one alphabet from `am` to
+    `zypper`, in {data}`SUPPORT_SCALE` order and alphabetically within each
+    group. A reader comes to this page asking what became of a tool, which is
+    the question the grouping answers first; the one arriving with a name in
+    hand still finds it, the browser's own find command reaching a row wherever
+    it sits.
+
+    Each group opens on a title row carrying the state's {data}`SUPPORT_SCALE`
+    label, spliced into its only filled cell as a `manager-group` span.
+    `docs/_static/manager-index.js` reads that span for the two shapes a
+    markdown table cannot express: it merges the title row over the full width,
+    a table format having no spanning cell, and extends the ID cell's target
+    over the whole row, since a row is one manager and every part of it should
+    answer the same click. Both degrade to what the markdown already says: the
+    title reads in the first column of an otherwise empty row, and the links
+    stay real links, so the `Support` glyph still leads to the source proving it
+    and any of them opens in a new tab.
     """
     data = _load_benchmark_toml()
     competitor_data: dict[str, list[str]] = data.get("managers", {})
@@ -2632,7 +2643,7 @@ def managers_index_table() -> str:
     headers = ["", "Manager", "ID", "Support", "Platforms"]
     colalign = ["center", "left", "left", "center", "center"]
 
-    table = []
+    rows = {}
     for mid, m in sorted(pool.items()):
         parts = []
         for p_obj in MAIN_PLATFORMS:
@@ -2643,35 +2654,40 @@ def managers_index_table() -> str:
             parts.append(f"{icon} ({annotation})" if annotation else icon)
         # The artwork is spliced in after rendering: a multi-kilobyte SVG in a
         # cell would pad every other row of the column to its own width.
-        table.append(
-            [
-                f"%logo:{mid}%",
-                f"[{m.name}](managers/{mid}.md)",
-                f"[`{mid}`](managers/{mid}.md)",
-                _support_glyph(mid, unsupported, anchors, competitor_data),
-                " ".join(parts),
-            ]
-        )
+        rows[mid] = [
+            f"%logo:{mid}%",
+            f"[{m.name}](managers/{mid}.md)",
+            f"[`{mid}`](managers/{mid}.md)",
+            _support_glyph(mid, unsupported, anchors, competitor_data),
+            " ".join(parts),
+        ]
 
-    scale = tuple(SUPPORT_SCALE)
-    for mid in sorted(
-        unsupported,
-        key=lambda mid: (
-            scale.index(_bare_support_glyph(mid, unsupported, competitor_data)),
-            mid,
-        ),
-    ):
+    for mid in unsupported:
         anchor = anchors.get(mid)
         target = f"{UNSUPPORTED_DOCS_URL}#{anchor}" if anchor else UNSUPPORTED_DOCS_URL
-        table.append(
-            [
-                "",
-                "",
-                f"[`{mid}`]({target})",
-                _support_glyph(mid, unsupported, anchors, competitor_data),
-                "",
-            ]
-        )
+        rows[mid] = [
+            "",
+            "",
+            f"[`{mid}`]({target})",
+            _support_glyph(mid, unsupported, anchors, competitor_data),
+            "",
+        ]
+
+    scale = tuple(SUPPORT_SCALE)
+    glyphs = {
+        mid: _bare_support_glyph(mid, unsupported, competitor_data) for mid in rows
+    }
+
+    table = []
+    group = None
+    for mid in sorted(rows, key=lambda mid: (scale.index(glyphs[mid]), mid)):
+        if glyphs[mid] != group:
+            group = glyphs[mid]
+            # Like the artwork, the title is spliced in after rendering: its
+            # label is wider than the mark column it sits in, and would pad
+            # every other cell of that column to its own width.
+            table.append([f"%group:{group}%", "", "", "", ""])
+        table.append(rows[mid])
 
     rendered = render_table(
         table,
@@ -2684,12 +2700,13 @@ def managers_index_table() -> str:
     )
     for mid in pool:
         rendered = rendered.replace(f"%logo:{mid}%", manager_logo(mid, inline=True))
+    for glyph, label in SUPPORT_SCALE.items():
+        rendered = rendered.replace(
+            f"%group:{glyph}%",
+            f'<span class="manager-group">{glyph} {label}</span>',
+        )
 
-    return (
-        f"The {len(pool)} managers `mpm` drives open the table, alphabetically. "
-        f"The {len(unsupported)} it declined close it, grouped by verdict:"
-        f"\n\n{rendered}"
-    )
+    return rendered
 
 
 def manager_support_legend() -> str:

@@ -89,16 +89,22 @@ jobs:
       # for, so a runner image moving past that range fails the capture below
       # rather than silently shipping an unsupported combination. Recorded in the
       # summary, and carried into the pull request body.
-      - name: Record the GNOME Shell version
+      - name: Record the capture host
         run: |
           printf 'SHELL_VERSION=' >> "${GITHUB_ENV}"
           gnome-shell --version >> "${GITHUB_ENV}"
+          . /etc/os-release
           {
             echo '## Capture host'
-            echo '```'
-            gnome-shell --version
-            echo '```'
-          } >> "${GITHUB_STEP_SUMMARY}"
+            echo
+            echo '| Component | Version |'
+            echo '| :--- | :--- |'
+            echo "| Distribution | ${PRETTY_NAME} |"
+            echo "| Kernel | $(uname -r) |"
+            echo "| GNOME Shell | $(gnome-shell --version | cut -d' ' -f3) |"
+            echo "| gjs | $(gjs --version 2>/dev/null || echo 'absent') |"
+            echo "| Ambient \`python3\` | $(python3 --version | cut -d' ' -f2) |"
+          } | tee -a "${GITHUB_STEP_SUMMARY}"
 
       # One session bus for the whole capture: the driver spawns the shell on it,
       # and talks to it over the same bus. The shell runs on the headless backend,
@@ -204,6 +210,35 @@ jobs:
         run: >
           uv --no-progress run --frozen -- python docs/bar_screenshots_update.py
           --diagnostics "${RUNNER_TEMP}/diagnostics"
+
+      # The ambient `python3` is the one an Xbar or SwiftBar plugin runs under,
+      # so it is the version the plugin's documented `>= 3.9` floor is about.
+      # Reported rather than asserted: the page's table is only as good as what
+      # a real macOS actually ships.
+      - name: Record the capture host
+        if: always()
+        run: |
+          plist=/Contents/Info.plist
+          key=CFBundleShortVersionString
+          macos="$(sw_vers -productVersion) ($(sw_vers -buildVersion))"
+          tools="$(pkgutil --pkg-info=com.apple.pkg.CLTools_Executables |
+            awk '/^version:/ {print $2}')"
+          python="$(/usr/bin/python3 --version | cut -d' ' -f2)"
+          swiftbar="$(defaults read "/Applications/SwiftBar.app${plist}" "${key}" \
+            2>/dev/null || echo 'absent')"
+          xbar="$(defaults read "/Applications/xbar.app${plist}" "${key}" \
+            2>/dev/null || echo 'absent')"
+          {
+            echo '## Capture host'
+            echo
+            echo '| Component | Version |'
+            echo '| :--- | :--- |'
+            echo "| macOS | ${macos} |"
+            echo "| Command Line Tools | ${tools} |"
+            echo "| Ambient \`/usr/bin/python3\` | ${python} |"
+            echo "| SwiftBar | ${swiftbar} |"
+            echo "| Xbar | ${xbar} |"
+          } | tee -a "${GITHUB_STEP_SUMMARY}"
 
       # What was on screen when a shot failed, which is the only thing that
       # settles a host whose own process answers nothing.

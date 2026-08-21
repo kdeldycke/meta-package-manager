@@ -529,11 +529,19 @@ def write_plugin(plugins: Path, shot: Shot) -> None:
 
 
 def position_keys(plugins: Path) -> tuple[str, ...]:
-    """Both spellings of the autosave name a host may key its item by."""
+    """Every spelling of the autosave name a host may key its item by.
+
+    SwiftBar resolves symlinks before naming a plugin, so the name it files an
+    item under is the plugin's real path: a machine whose plugin folder holds a
+    symlink into a checkout carries the checkout's path, not the link's. The
+    temporary folder these captures plant into is itself reached through one,
+    macOS putting `/var` behind `/private/var`, so the raw path and the
+    resolved path are two different strings and only one of them matches.
+    """
     script = plugins / PLUGIN_NAME
-    return (
-        f"NSStatusItem Preferred Position {script}",
-        f"NSStatusItem Preferred Position {PLUGIN_NAME}",
+    names = (str(script.resolve()), str(script), PLUGIN_NAME)
+    return tuple(
+        f"NSStatusItem Preferred Position {name}" for name in dict.fromkeys(names)
     )
 
 
@@ -809,13 +817,15 @@ def hide_clock() -> bool:
     )
     run(("killall", "ControlCenter"), check=False)
     time.sleep(8)
-    # The clock is the one menu bar window wider than any status item: it
-    # measured 153px against an item's 86. The range has to be passed, since
-    # the default one stops at the 120px this looks past: asking the unbounded
-    # call for something wider than its own ceiling answered an empty list
-    # every time, so the check passed while the clock sat in frame and every
-    # run rewrote all sixteen images (run 32444526285).
-    wide = menu_bar_windows(low=121, high=10_000)
+    # The clock is the one menu bar window wider than a status item and
+    # narrower than the bar itself: it measured 146px against an item's 86.
+    # Both bounds are load-bearing, and each has already been got wrong once.
+    # Below 121 the probe finds status items and reports the clock present
+    # whatever it did (run 32444526285). Above about 400 it finds the menu
+    # bar's own backdrop and the desktop, which span the whole screen and are
+    # always there, so it reports the clock present even once it has gone
+    # (run 32447506267).
+    wide = menu_bar_windows(low=121, high=400)
     if wide:
         print(f"  the clock is still in the menu bar ({wide}), keeping it out of frame")
         return False

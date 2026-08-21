@@ -381,13 +381,31 @@ def set_appearance(*, dark: bool) -> None:
     label colors come from the system appearance rather than from anything the
     plugin emits. Only the version diff is ours, and it keys off `OS_APPEARANCE`.
     """
-    osascript(f"""
+    # Every host is quit first. A bar app holding a menu open, or one that
+    # answers no accessibility at all, leaves System Events wedged, and this is
+    # the one appearance switch the whole shot depends on.
+    for host in (SWIFTBAR, XBAR):
+        run(
+            ("osascript", "-e", f'tell application "{host.name}" to quit'),
+            check=False,
+        )
+    time.sleep(3)
+    for attempt in range(1, 4):
+        try:
+            osascript(
+                bounded(f"""
 tell application "System Events"
     tell appearance preferences
         set dark mode to {"true" if dark else "false"}
     end tell
 end tell
-""")
+"""),
+            )
+        except RuntimeError as error:
+            print(f"  appearance, attempt {attempt}: {error}")
+            time.sleep(5)
+            continue
+        break
     time.sleep(3)
 
 

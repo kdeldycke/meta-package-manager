@@ -23,8 +23,7 @@ cooldown
 concurrency
 sudo
 security
-bar-plugin
-gnome-shell
+desktop-menus
 benchmark
 unsupported
 falsehoods

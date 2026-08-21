@@ -2,11 +2,9 @@
 
 The Meta Package Manager project is actively maintaining a plugin that is both compatible with [Xbar](https://github.com/matryer/xbar) and [SwiftBar](https://github.com/swiftbar/SwiftBar).
 
-The plugin is written in Python and is a small wrapper around the `mpm` CLI.
+The plugin is written in Python and is a small wrapper around the `mpm` CLI. It is one of the two {doc}`desktop menus <desktop-menus>` the project maintains, and that page holds what the two have in common.
 
-For Linux desktops, the {doc}`GNOME Shell extension <gnome-shell>` provides the same menu from the top bar.
-
-Each outdated package has its version diff colored with the same convention as `mpm outdated`: unchanged prefix in gray, installed-version suffix in red, latest-version suffix in green. SwiftBar renders these colors natively (package lines carry the `ansi=true` parameter); Xbar strips the color codes and shows plain text. On the translucent menus of recent macOS releases the suffixes adapt to the menu appearance, since the default system colors lose contrast against the material: a light menu darkens both suffixes, and a dark menu brightens the green.
+SwiftBar renders the [version-diff colors](desktop-menus.md#version-diffs) natively (package lines carry the `ansi=true` parameter); Xbar strips the color codes and shows plain text. On the translucent menus of recent macOS releases the suffixes adapt to the menu appearance, since the default system colors lose contrast against the material: a light menu darkens both suffixes, and a dark menu brightens the green.
 
 ```{hint}
 I recommend SwiftBar, because Xbar has 2 outstanding issues:
@@ -31,20 +29,14 @@ The plugin is configurable with these environment variables:
 | `VAR_HIDE_WHEN_UP_TO_DATE` | Hide the menu bar icon while nothing is outdated and no manager errored.         | Boolean | `False`              |        ✅        |                         ❌                         |
 
 ```{note}
-SwiftBar renders two things differently from Xbar: the outdated count sits in a native badge on each manager header rather than in its label, and the grouped layout folds every section into an inline accordion ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)) that expands in place without dismissing the menu. The SwiftBar screenshots below predate both.
+SwiftBar renders two things differently from Xbar: the outdated count sits in a native badge on each manager header rather than in its label, and the grouped layout folds every section into an inline accordion ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)) that expands in place without dismissing the menu. Both are visible in the screenshots below.
 ```
 
-These variables only drive the menu layout. Everything else comes from `mpm`'s own configuration file: the plugin passes no option beyond the ones it decides itself, so the file found at its default location on the system applies to every run it triggers. See {doc}`configuration` for the search paths and the full schema.
+These variables only drive the menu layout: everything else comes from `mpm`'s own configuration, as {doc}`desktop-menus` explains.
 
 ## Menu actions
 
-Clicking a package runs `mpm --<manager-id> upgrade <package-id>`, and a section's *Upgrade all* entry runs `mpm --<manager-id> upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
-
-That last one is the visible consequence: with a `cooldown` set, clicking a package of a manager that cannot enforce it natively skips it with a warning instead of upgrading it ungated. Set `policy = "best-effort"` in the `[mpm.cooldown]` table to let those managers run anyway, without the safeguard.
-
-Both variants of each entry go through `mpm`: a plain click opens a terminal so the run can be followed, and holding the `Option` key runs it silently.
-
-When no `mpm` is found on the system, or one older than the plugin requires, the menu carries a bootstrap pair in place of the package list: an *Install mpm … with uv* entry running `uv tool install --upgrade meta-package-manager` in a terminal, and an *Open mpm installation instructions* entry opening {doc}`install` for the systems `uv` does not answer for. The {doc}`GNOME Shell extension <gnome-shell>` offers the same pair.
+A click runs `mpm` rather than the package manager, and inherits the policy of the run that rendered the menu: see {doc}`desktop-menus`. Both variants of each entry go through it, and the modifier picks between them: a plain click opens a terminal so the run can be followed, and holding the `Option` key runs it silently.
 
 ## Menu markers
 
@@ -59,7 +51,7 @@ The plugin has no icon files of its own: every state is an emoji, which Xbar and
 | ⚠️     | Manager section header   | That manager reported an error, in the sub-menu layout.                  |
 | 🆙     | *Upgrade all* row        | Upgrades every outdated package of one manager.                          |
 
-The {doc}`GNOME Shell extension <gnome-shell>` renders the same states as named icons from the desktop icon theme instead: an emoji is a font glyph a desktop theme cannot restyle, and the GNOME reviewers ask for icons.
+The {doc}`GNOME Shell extension <gnome-shell>` names an icon for each of these states instead, and the [panel icons table](gnome-shell.md#panel-icons) lines the two vocabularies up.
 
 ## Screenshots
 

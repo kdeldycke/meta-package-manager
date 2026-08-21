@@ -2,9 +2,9 @@
 
 The Meta Package Manager project maintains a GNOME Shell extension.
 
-A top bar indicator lists the outdated packages reported by `mpm outdated` across every package manager on the system, and lets you upgrade them one by one or per manager. Each outdated package has its version diff colored with the same convention as `mpm outdated`: unchanged prefix in gray, installed-version suffix in red, latest-version suffix in green.
+A top bar indicator lists the outdated packages reported by `mpm outdated` across every package manager on the system, and lets you upgrade them one by one or per manager. It is one of the two {doc}`desktop menus <desktop-menus>` the project maintains, and that page holds what the two have in common.
 
-The extension is a frontend to the `mpm` CLI, which must be installed separately: see {doc}`install`. It looks for `mpm` on the session `PATH`, then in well-known locations (`~/.local/bin`, `/usr/local/bin`, Linuxbrew), and a custom launcher (like `uv run mpm`) can be configured in its settings. `mpm` `6.4.0` or newer is required.
+The extension looks for `mpm` on the session `PATH`, then in well-known locations (`~/.local/bin`, `/usr/local/bin`, Linuxbrew), and a custom launcher (like `uv run mpm`) can be configured in its settings. `mpm` `6.4.0` or newer is required.
 
 ## Requirements
 
@@ -121,7 +121,7 @@ Settings live in the extension preferences window, also reachable from the indic
 | `terminal-command`     | Custom terminal emulator, empty to autodetect.                  | String  | Empty   |
 | `post-upgrade-recheck` | Seconds before refreshing the list after an upgrade is started. | Integer | `300`   |
 
-These settings only drive the menu layout and check cadence. Everything else comes from `mpm`'s own configuration file: the extension passes no option beyond the ones it decides itself, so the file found at its default location on the system applies to every run it triggers. See {doc}`configuration` for the search paths and the full schema.
+These settings only drive the menu layout and check cadence: everything else comes from `mpm`'s own configuration, as {doc}`desktop-menus` explains.
 
 ## Panel icons
 
@@ -139,13 +139,13 @@ The two rendering columns are why the names matter more than any drawing: Yaru d
 
 ## Menu actions
 
-Clicking a package runs `mpm --<manager-id> upgrade <package-id>`, and a section's *Upgrade all* entry runs `mpm --<manager-id> upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
+A click runs `mpm` rather than the package manager, and inherits the policy of the run that rendered the menu: see {doc}`desktop-menus`.
 
 By default the command opens in a terminal window, so the run can be followed and `sudo` can prompt for a password. Turning `upgrade-in-terminal` off runs upgrades silently in the background: system package managers then need passwordless escalation, as `mpm` cannot prompt without a terminal. See the `NOPASSWD` guidance in {doc}`sudo`.
 
 Since a terminal window detaches from the process actually running the upgrade, the extension cannot tell when it completes: it refreshes the package list a few minutes after launching one (`post-upgrade-recheck`), and a *Check now* entry forces a refresh at any time.
 
-When no `mpm` is found on the system, the menu carries a bootstrap pair in place of the package list: *Install mpm with uv* runs `uv tool install --upgrade meta-package-manager` through the same terminal path as an upgrade, and *Open mpm installation instructions* opens {doc}`install` for the systems `uv` does not answer for. The {doc}`menubar plugin <bar-plugin>` offers the same pair.
+The bootstrap pair a missing `mpm` puts in place of the package list opens through the same terminal path as an upgrade.
 
 ## Screenshots
 

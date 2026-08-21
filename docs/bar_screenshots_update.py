@@ -73,6 +73,9 @@ ASSET_DIR = PROJECT_ROOT / "docs" / "assets"
 class Host(NamedTuple):
     """One bar app the plugin is photographed inside."""
 
+    domain: str
+    """Preferences domain, where the status item's position is recorded."""
+
     name: str
     """Display name, and the process name the accessibility API answers to."""
 
@@ -114,6 +117,7 @@ class Host(NamedTuple):
 
 
 SWIFTBAR = Host(
+    domain="com.ameba.SwiftBar",
     name="SwiftBar",
     url=(
         "https://github.com/swiftbar/SwiftBar/releases/download/v2.1.1/"
@@ -127,6 +131,7 @@ SWIFTBAR = Host(
 )
 
 XBAR = Host(
+    domain="com.matryer.xbar",
     name="xbar",
     url=(
         "https://github.com/matryer/xbar/releases/download/v2.1.7-beta/"
@@ -138,8 +143,6 @@ XBAR = Host(
     chrome_item=None,
     plugin_dir=Path.home() / "Library/Application Support/xbar/plugins",
 )
-
-SWIFTBAR_DOMAIN = "com.ameba.SwiftBar"
 
 LSREGISTER = (
     "/System/Library/Frameworks/CoreServices.framework/Frameworks"
@@ -158,11 +161,31 @@ are `2x`. Height is what a menu runs out of, so the tallest mode is the one
 worth having.
 """
 
+PLUGIN_NAME = "mpm.1h.sh"
+"""Filename the plugin is planted under, which is also the name AppKit keys its
+status item's remembered position by.
+"""
+
 MENU_MARKER = "🎁"
 """Marker the plugin's own status item carries when packages are outdated.
 
 Used to pick our item out of a menu bar that, on a developer's own Mac, holds
 whatever other plugins they run.
+"""
+
+STATUS_ITEM_POSITION = 700.0
+"""Where the plugin's status item is asked to sit, as AppKit records it.
+
+Left of where macOS would otherwise put it, and the reason is Xbar's submenus.
+A menu opens under its item unless that would run off the right edge, in which
+case it is pushed left until its right edge meets the screen's. From there a
+submenu has nowhere to fly but leftwards, back over its own parent. Moving the
+item left leaves room for the submenu to open to the right of the parent, which
+is both the readable arrangement and the one a user with a fuller menu bar sees.
+
+Written as `NSStatusItem Preferred Position`, the key AppKit itself maintains
+for an item whose owner gave it an autosave name: SwiftBar's own preferences
+carry one per plugin, keyed by filename.
 """
 
 FIRST_ROW = (40, 15)
@@ -493,7 +516,7 @@ def write_plugin(plugins: Path, shot: Shot) -> None:
         os.environ.clear()
         os.environ.update(previous)
 
-    script = plugins / "mpm.1h.sh"
+    script = plugins / PLUGIN_NAME
     body = "#!/bin/bash\ncat <<'MENU'\n" + menu.rstrip("\n") + "\nMENU\n"
     script.write_text(body, encoding="UTF-8")
     script.chmod(0o755)
@@ -520,7 +543,21 @@ def restart(host: Host, plugins: Path) -> None:
         )
     time.sleep(3)
     if host.plugin_dir is None:
-        run(("defaults", "write", SWIFTBAR_DOMAIN, "PluginDirectory", str(plugins)))
+        run(("defaults", "write", host.domain, "PluginDirectory", str(plugins)))
+    # Asked for before the item is drawn, since AppKit reads it when creating
+    # one. A host that gives its items no autosave name simply ignores this, and
+    # the click still finds the item wherever it landed.
+    run(
+        (
+            "defaults",
+            "write",
+            host.domain,
+            f"NSStatusItem Preferred Position {PLUGIN_NAME}",
+            "-float",
+            str(STATUS_ITEM_POSITION),
+        ),
+        check=False,
+    )
     run(("open", str(Path("/Applications") / host.bundle)))
     time.sleep(20)
     # Xbar greets a first run with its plugin browser, which sits in front of
@@ -972,7 +1009,7 @@ def capture_all() -> None:
         scratch.mkdir(parents=True)
         # Remembered so a local run gives the developer their own plugins back.
         swiftbar_folder = run(
-            ("defaults", "read", SWIFTBAR_DOMAIN, "PluginDirectory"),
+            ("defaults", "read", SWIFTBAR.domain, "PluginDirectory"),
             check=False,
         ).stdout.strip()
         planted: list[Path] = []
@@ -989,7 +1026,7 @@ def capture_all() -> None:
                 plugins = shot.host.plugin_dir or scratch
                 plugins.mkdir(parents=True, exist_ok=True)
                 if shot.host.plugin_dir is not None:
-                    planted.append(plugins / "mpm.1h.sh")
+                    planted.append(plugins / PLUGIN_NAME)
                 try:
                     capture(shot, plugins)
                 except Exception:
@@ -1015,7 +1052,7 @@ def capture_all() -> None:
                     (
                         "defaults",
                         "write",
-                        SWIFTBAR_DOMAIN,
+                        SWIFTBAR.domain,
                         "PluginDirectory",
                         swiftbar_folder,
                     ),
@@ -1023,7 +1060,7 @@ def capture_all() -> None:
                 )
             else:
                 run(
-                    ("defaults", "delete", SWIFTBAR_DOMAIN, "PluginDirectory"),
+                    ("defaults", "delete", SWIFTBAR.domain, "PluginDirectory"),
                     check=False,
                 )
             set_appearance(dark=False)

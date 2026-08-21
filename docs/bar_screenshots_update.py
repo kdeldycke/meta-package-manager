@@ -174,7 +174,7 @@ whatever other plugins they run.
 """
 
 STATUS_ITEM_POSITION = 700.0
-"""Where the plugin's status item is dragged to, in screen coordinates.
+"""Where the plugin's status item is asked to sit, in screen coordinates.
 
 Left of where macOS would otherwise put it, and the reason is Xbar's submenus.
 A menu opens under its item unless that would run off the right edge, in which
@@ -182,12 +182,16 @@ case it is pushed left until its right edge meets the screen's. From there a
 submenu has nowhere to fly but leftwards, back over its own parent. Moving the
 item left leaves room for the submenu to open to the right of the parent, which
 is both the readable arrangement and the one a user with a fuller menu bar sees.
+It also carries the menu clear of the clock, which is the other thing in that
+strip nobody wants photographed.
 
-Reached by a command-drag, the gesture a user reorders the menu bar with.
-Writing `NSStatusItem Preferred Position` was tried first and does nothing:
-AppKit reads that key only for an item whose owner gave it an autosave name,
-and neither host does, so the item stayed at `1338` with the preference set
-(run 32444526285).
+Asked for through `NSStatusItem Preferred Position`, which AppKit maintains
+itself for a status item whose owner gave it an autosave name. SwiftBar does,
+and the name is the plugin's path, which is what {func}`position_keys` spells:
+a machine running SwiftBar `2.1.1` carries both a path-keyed entry and an older
+filename-keyed one, and writing the bare filename alone moved nothing (run
+32444526285). A host that names its items differently, or not at all, ignores
+the write, and the capture still finds the item wherever it landed.
 """
 
 FIRST_ROW = (40, 15)
@@ -524,6 +528,15 @@ def write_plugin(plugins: Path, shot: Shot) -> None:
     script.chmod(0o755)
 
 
+def position_keys(plugins: Path) -> tuple[str, ...]:
+    """Both spellings of the autosave name a host may key its item by."""
+    script = plugins / PLUGIN_NAME
+    return (
+        f"NSStatusItem Preferred Position {script}",
+        f"NSStatusItem Preferred Position {PLUGIN_NAME}",
+    )
+
+
 def restart(host: Host, plugins: Path) -> None:
     """Bring the host back up on whatever the plugin folder now holds.
 
@@ -546,6 +559,16 @@ def restart(host: Host, plugins: Path) -> None:
     time.sleep(3)
     if host.plugin_dir is None:
         run(("defaults", "write", host.domain, "PluginDirectory", str(plugins)))
+    # While the host is down, since a running app rewrites its preferences from
+    # memory when it quits, and AppKit reads this one as it creates the item.
+    for key in position_keys(plugins):
+        run(
+            (
+                "defaults", "write", host.domain, key,
+                "-float", str(STATUS_ITEM_POSITION),
+            ),
+            check=False,
+        )
     run(("open", str(Path("/Applications") / host.bundle)))
     time.sleep(20)
     # Xbar greets a first run with its plugin browser, which sits in front of
@@ -719,67 +742,6 @@ def status_item(host: Host) -> tuple[float, float]:
     raise RuntimeError(msg)
 
 
-def settle_item(host: Host, left: float, top: float) -> tuple[float, float]:
-    """Drag the plugin's status item to {data}`STATUS_ITEM_POSITION`.
-
-    A command-drag is how the menu bar is reordered by hand, and posting one is
-    the only lever that moves an item whose owner never named it. The gesture is
-    walked across in steps: a single jump from one point to another is dropped,
-    the drag session tracking the pointer rather than the endpoints.
-
-    Idempotent by the guard below, so the fifteen shots that follow the first
-    one cost nothing: a host relaunched between shots redraws its item where
-    macOS remembers it.
-    """
-    if left <= STATUS_ITEM_POSITION:
-        return left, top
-    print(
-        swift(
-            """
-        import CoreGraphics
-        import Foundation
-        let fromX = Double(CommandLine.arguments[1]) ?? 0
-        let toX = Double(CommandLine.arguments[2]) ?? 0
-        let y = Double(CommandLine.arguments[3]) ?? 0
-        let source = CGEventSource(stateID: .hidSystemState)
-
-        func post(_ type: CGEventType, _ x: Double) {
-            let event = CGEvent(mouseEventSource: source, mouseType: type,
-                                mouseCursorPosition: CGPoint(x: x, y: y),
-                                mouseButton: .left)
-            event?.flags = .maskCommand
-            event?.post(tap: .cghidEventTap)
-        }
-
-        CGEvent(keyboardEventSource: source, virtualKey: 55, keyDown: true)?
-            .post(tap: .cghidEventTap)
-        usleep(300000)
-        post(.leftMouseDown, fromX)
-        usleep(300000)
-        let steps = 24
-        for step in 1...steps {
-            post(.leftMouseDragged,
-                 fromX + (toX - fromX) * Double(step) / Double(steps))
-            usleep(40000)
-        }
-        usleep(300000)
-        post(.leftMouseUp, toX)
-        usleep(200000)
-        CGEvent(keyboardEventSource: source, virtualKey: 55, keyDown: false)?
-            .post(tap: .cghidEventTap)
-        print("drag \\(fromX) -> \\(toX)")
-        """,
-            str(left),
-            str(STATUS_ITEM_POSITION),
-            str(top),
-        )
-    )
-    time.sleep(2)
-    settled = status_item(host)
-    print(f"  {host.name} status item now at {settled[0]}")
-    return settled
-
-
 def mouse(kind: str, left: float, top: float) -> None:
     """Post a real mouse event at a screen position.
 
@@ -824,22 +786,27 @@ def hide_clock() -> bool:
     The captures reach up to the top of the screen so the status item the menu
     hangs off is in frame, the way the GNOME ones include the top bar. The clock
     sits in that strip and reads differently every minute, so leaving it in
-    would rewrite all sixteen images on every run. It is a Control Center
-    module, hidden by the same preference the Control Center settings pane
-    writes, and Control Center has to be restarted to read it.
+    would rewrite all sixteen images on every run.
+
+    The clock is a Control Center module, and hiding one is a boolean in Control
+    Center's own preferences, keyed by the module's name: `NSStatusItem Visible
+    Clock`. Two neighbouring spellings do nothing, and both were tried first
+    (run 32444526285, run 32447506267). The domain is the plain one rather than
+    the per-host one every module's *other* settings live in, and the key is the
+    status item's visibility rather than a `Clock` module key, which macOS `26`
+    does not define at all. Control Center has to be restarted to read it.
     """
-    for domain, key, kind, value in (
-        # The module's own visibility, in the shape the Control Center pane
-        # writes: 8 keeps it out of the menu bar, 18 puts it back.
-        ("com.apple.controlcenter.plist", "Clock", "-int", "8"),
-        # And the status item AppKit keys by name, which is the lever the pane
-        # uses for the items it does not own.
-        ("com.apple.controlcenter", "NSStatusItem Visible Clock", "-bool", "false"),
-    ):
-        run(
-            ("defaults", "-currentHost", "write", domain, key, kind, value),
-            check=False,
-        )
+    run(
+        (
+            "defaults",
+            "write",
+            "com.apple.controlcenter",
+            "NSStatusItem Visible Clock",
+            "-bool",
+            "false",
+        ),
+        check=False,
+    )
     run(("killall", "ControlCenter"), check=False)
     time.sleep(8)
     # The clock is the one menu bar window wider than any status item: it
@@ -971,7 +938,7 @@ def capture(shot: Shot, plugins: Path) -> None:
     write_plugin(plugins, shot)
     restart(shot.host, plugins)
 
-    mouse("click", *settle_item(shot.host, *status_item(shot.host)))
+    mouse("click", *status_item(shot.host))
     deadline = time.monotonic() + MENU_TIMEOUT
     bounds = None
     while time.monotonic() < deadline:
@@ -1096,6 +1063,12 @@ def capture_all() -> None:
                     ("osascript", "-e", f'tell application "{host.name}" to quit'),
                     check=False,
                 )
+            # Written per shot against a folder that is gone by now, so a
+            # developer running this locally keeps the menu bar they arranged.
+            for host in (SWIFTBAR, XBAR):
+                folder = host.plugin_dir or scratch
+                for key in position_keys(folder):
+                    run(("defaults", "delete", host.domain, key), check=False)
             for leftover in planted:
                 leftover.unlink(missing_ok=True)
             if swiftbar_folder:

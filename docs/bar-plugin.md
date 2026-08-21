@@ -180,24 +180,74 @@ The menu chrome is the host's, and only the version diff is the plugin's: its co
 
 ## Location
 
-A copy of the latest stable version of the plugin is [available on Xbar website](https://xbarapp.com/docs/plugins/Dev/meta_package_manager.7h.py.html) and [plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
-
-Once `mpm` is installed on your system, it can dynamically be located with the dedicated `--bar-plugin-path` option:
+Once `mpm` is installed on your system, the plugin ships with it and its path is printed by the dedicated `--bar-plugin-path` option:
 
 ```shell-session
 $ mpm --bar-plugin-path
 ~/Library/Python/3.11/lib/python/site-packages/meta_package_manager/bar_plugin.py
 ```
 
-This option is handy for deployment and initial configuration of Xbar/SwiftBar. I [use this in my dotfiles](https://github.com/kdeldycke/dotfiles/blob/c04296d29e5f5ce48687f79554b265b3e89d5dbb/install.sh#L230) to symlink the plugin to its latest version:
+Symlinking that path into the host's plugin folder is what keeps the menu on the latest plugin: every `mpm` upgrade is then picked up with no further action. That is [how my dotfiles install it](https://github.com/kdeldycke/dotfiles/blob/8e1fa1f8223e9a1c2cbaef8286480d2b148ead23/install.sh#L341-L357).
+
+Where that folder is, and how it is set, differs between the two hosts:
+
+`````{tab-set}
+
+````{tab-item} SwiftBar
+:sync: swiftbar
+
+SwiftBar has no default plugin folder: it asks for one on first launch, then imports every file it finds there, traversing nested folders and symlinks.
+
+`~/.swiftbar` is the conventional choice:
 
 ```shell-session
-$ ln -sf "$(mpm --bar-plugin-path)" "${HOME}/Library/Application Support/xbar/plugins/mpm.7h.py"
+$ mkdir -p ~/.swiftbar
+$ ln -sf "$(mpm --bar-plugin-path)" ~/.swiftbar/meta_package_manager.7h.py
 ```
+
+SwiftBar's folder picker hides dotted folders, so point the app at it either by typing the path into that picker, or by writing the preference by hand. A running SwiftBar rewrites its preferences from memory when it quits, so that write only sticks while the app is stopped:
+
+```shell-session
+$ killall SwiftBar
+$ defaults write com.ameba.SwiftBar PluginDirectory -string "${HOME}/.swiftbar"
+$ open -a SwiftBar
+```
+
+```{warning}
+Do not use `~/Library/Application Support/SwiftBar/Plugins`, tempting as the name is. That is SwiftBar's own data directory, in which it keeps a state and a cache folder per plugin ([swiftbar/SwiftBar#522](https://github.com/swiftbar/SwiftBar/issues/522)). Pointing the plugin folder at it makes SwiftBar scan the tree it writes into, and import its own output as plugins.
+```
+
+```{important}
+`~/.swiftbar` needs SwiftBar `2.1.1` or newer. `2.1.0` introduced packaged `.swiftbar` plugin bundles and recognized them by the folder name, so it took the whole `.swiftbar` root for one bundle and skipped every file inside it as *not a regular file* ([swiftbar/SwiftBar#508](https://github.com/swiftbar/SwiftBar/issues/508)).
+```
+````
+
+````{tab-item} Xbar
+:sync: xbar
+
+Xbar's plugin folder is fixed at `~/Library/Application Support/xbar/plugins`:
+
+```shell-session
+$ ln -sf "$(mpm --bar-plugin-path)" "${HOME}/Library/Application Support/xbar/plugins/meta_package_manager.7h.py"
+```
+
+A copy of the latest stable release is also [published on the Xbar website](https://xbarapp.com/docs/plugins/Dev/meta_package_manager.7h.py.html) and in its [plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py), so it can be installed from Xbar's own plugin browser. That copy is only refreshed on `mpm` releases, so it lags behind the symlink above.
+````
+
+`````
 
 ## Python `>= 3.9` required
 
-The plugin **requires Python 3.9 or newer**, which every macOS still receiving security updates provides out of the box:
+The plugin **requires Python 3.9 or newer**, and runs on the interpreter macOS provides, without any extra dependency.
+
+macOS ships no Python of its own: `/usr/bin/python3` is a stub that runs the interpreter bundled with the Command Line Tools, and offers to install them when they are missing:
+
+```shell-session
+$ python3 --version
+xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
+```
+
+The version that answers therefore tracks the Command Line Tools, not the macOS release:
 
 | macOS           | Released   | Security updates until[^1] | Command Line Tools | `python3`[^2] |
 | --------------- | ---------- | -------------------------- | ------------------ | ------------- |
@@ -207,20 +257,7 @@ The plugin **requires Python 3.9 or newer**, which every macOS still receiving s
 | 13.x - Ventura  | 2022-10-24 | 2025-09-15                 | 14                 | 3.9.6         |
 | 12.x - Monterey | 2021-10-25 | 2024-09-16                 | 13                 | 3.8.9         |
 
-Apple patches the current release and its two predecessors, so the three rows marked *current* are the ones a user can still be running on an up-to-date system, and all three answer `3.9.6`. Monterey is the last release that shipped a Python older than the plugin requires, and it stopped receiving updates in 2024.
-
-The version tracks the Command Line Tools rather than macOS itself: `/usr/bin/python3` is a stub resolving to whichever toolchain is installed, which is why the table pairs each release with the toolchain it shipped alongside. Apple renumbered both to `26` in 2025, so the sequence skips from `16` to `26` and no macOS `16` was ever released.
-
-That way, the plugin is compatible with every supported macOS out of the box, and can be run as-is without any extra dependency.
-
-````{caution}
-It looks like since Monterey (macOS), there is no default Python version installed anymore, and the `python` CLI is a stub that points to the App Store to install Xcode:
-
-```shell-session
-$ python3 --version
-xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
-```
-````
+Every macOS still receiving security updates answers `3.9.6`. Monterey is the only release below the requirement, and it stopped receiving updates in 2024.
 
 ## Development workflow
 

@@ -174,7 +174,7 @@ whatever other plugins they run.
 """
 
 STATUS_ITEM_POSITION = 700.0
-"""Where the plugin's status item is asked to sit, as AppKit records it.
+"""Where the plugin's status item is dragged to, in screen coordinates.
 
 Left of where macOS would otherwise put it, and the reason is Xbar's submenus.
 A menu opens under its item unless that would run off the right edge, in which
@@ -183,9 +183,11 @@ submenu has nowhere to fly but leftwards, back over its own parent. Moving the
 item left leaves room for the submenu to open to the right of the parent, which
 is both the readable arrangement and the one a user with a fuller menu bar sees.
 
-Written as `NSStatusItem Preferred Position`, the key AppKit itself maintains
-for an item whose owner gave it an autosave name: SwiftBar's own preferences
-carry one per plugin, keyed by filename.
+Reached by a command-drag, the gesture a user reorders the menu bar with.
+Writing `NSStatusItem Preferred Position` was tried first and does nothing:
+AppKit reads that key only for an item whose owner gave it an autosave name,
+and neither host does, so the item stayed at `1338` with the preference set
+(run 32444526285).
 """
 
 FIRST_ROW = (40, 15)
@@ -544,20 +546,6 @@ def restart(host: Host, plugins: Path) -> None:
     time.sleep(3)
     if host.plugin_dir is None:
         run(("defaults", "write", host.domain, "PluginDirectory", str(plugins)))
-    # Asked for before the item is drawn, since AppKit reads it when creating
-    # one. A host that gives its items no autosave name simply ignores this, and
-    # the click still finds the item wherever it landed.
-    run(
-        (
-            "defaults",
-            "write",
-            host.domain,
-            f"NSStatusItem Preferred Position {PLUGIN_NAME}",
-            "-float",
-            str(STATUS_ITEM_POSITION),
-        ),
-        check=False,
-    )
     run(("open", str(Path("/Applications") / host.bundle)))
     time.sleep(20)
     # Xbar greets a first run with its plugin browser, which sits in front of
@@ -731,6 +719,67 @@ def status_item(host: Host) -> tuple[float, float]:
     raise RuntimeError(msg)
 
 
+def settle_item(host: Host, left: float, top: float) -> tuple[float, float]:
+    """Drag the plugin's status item to {data}`STATUS_ITEM_POSITION`.
+
+    A command-drag is how the menu bar is reordered by hand, and posting one is
+    the only lever that moves an item whose owner never named it. The gesture is
+    walked across in steps: a single jump from one point to another is dropped,
+    the drag session tracking the pointer rather than the endpoints.
+
+    Idempotent by the guard below, so the fifteen shots that follow the first
+    one cost nothing: a host relaunched between shots redraws its item where
+    macOS remembers it.
+    """
+    if left <= STATUS_ITEM_POSITION:
+        return left, top
+    print(
+        swift(
+            """
+        import CoreGraphics
+        import Foundation
+        let fromX = Double(CommandLine.arguments[1]) ?? 0
+        let toX = Double(CommandLine.arguments[2]) ?? 0
+        let y = Double(CommandLine.arguments[3]) ?? 0
+        let source = CGEventSource(stateID: .hidSystemState)
+
+        func post(_ type: CGEventType, _ x: Double) {
+            let event = CGEvent(mouseEventSource: source, mouseType: type,
+                                mouseCursorPosition: CGPoint(x: x, y: y),
+                                mouseButton: .left)
+            event?.flags = .maskCommand
+            event?.post(tap: .cghidEventTap)
+        }
+
+        CGEvent(keyboardEventSource: source, virtualKey: 55, keyDown: true)?
+            .post(tap: .cghidEventTap)
+        usleep(300000)
+        post(.leftMouseDown, fromX)
+        usleep(300000)
+        let steps = 24
+        for step in 1...steps {
+            post(.leftMouseDragged,
+                 fromX + (toX - fromX) * Double(step) / Double(steps))
+            usleep(40000)
+        }
+        usleep(300000)
+        post(.leftMouseUp, toX)
+        usleep(200000)
+        CGEvent(keyboardEventSource: source, virtualKey: 55, keyDown: false)?
+            .post(tap: .cghidEventTap)
+        print("drag \\(fromX) -> \\(toX)")
+        """,
+            str(left),
+            str(STATUS_ITEM_POSITION),
+            str(top),
+        )
+    )
+    time.sleep(2)
+    settled = status_item(host)
+    print(f"  {host.name} status item now at {settled[0]}")
+    return settled
+
+
 def mouse(kind: str, left: float, top: float) -> None:
     """Post a real mouse event at a screen position.
 
@@ -779,25 +828,27 @@ def hide_clock() -> bool:
     module, hidden by the same preference the Control Center settings pane
     writes, and Control Center has to be restarted to read it.
     """
-    run(
-        (
-            "defaults",
-            "-currentHost",
-            "write",
-            "com.apple.controlcenter.plist",
-            "Clock",
-            "-int",
-            "8",
-        ),
-        check=False,
-    )
+    for domain, key, kind, value in (
+        # The module's own visibility, in the shape the Control Center pane
+        # writes: 8 keeps it out of the menu bar, 18 puts it back.
+        ("com.apple.controlcenter.plist", "Clock", "-int", "8"),
+        # And the status item AppKit keys by name, which is the lever the pane
+        # uses for the items it does not own.
+        ("com.apple.controlcenter", "NSStatusItem Visible Clock", "-bool", "false"),
+    ):
+        run(
+            ("defaults", "-currentHost", "write", domain, key, kind, value),
+            check=False,
+        )
     run(("killall", "ControlCenter"), check=False)
     time.sleep(8)
     # The clock is the one menu bar window wider than any status item: it
-    # measured 153px against an item's 86. If it is still there, the preference
-    # did not take, and the captures stay below the menu bar rather than commit
-    # a new set every run.
-    wide = [box for box in menu_bar_windows() if box["width"] > 120]
+    # measured 153px against an item's 86. The range has to be passed, since
+    # the default one stops at the 120px this looks past: asking the unbounded
+    # call for something wider than its own ceiling answered an empty list
+    # every time, so the check passed while the clock sat in frame and every
+    # run rewrote all sixteen images (run 32444526285).
+    wide = menu_bar_windows(low=121, high=10_000)
     if wide:
         print(f"  the clock is still in the menu bar ({wide}), keeping it out of frame")
         return False
@@ -920,7 +971,7 @@ def capture(shot: Shot, plugins: Path) -> None:
     write_plugin(plugins, shot)
     restart(shot.host, plugins)
 
-    mouse("click", *status_item(shot.host))
+    mouse("click", *settle_item(shot.host, *status_item(shot.host)))
     deadline = time.monotonic() + MENU_TIMEOUT
     bounds = None
     while time.monotonic() < deadline:

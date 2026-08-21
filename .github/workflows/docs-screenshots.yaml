@@ -20,19 +20,24 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Photograph the GNOME Shell extension's menu, from a real shell.
+# Photograph both desktop menus, each from a real desktop.
 #
-# Everything in the image is genuine: a headless `gnome-shell` renders the real
+# Everything in the images is genuine: a headless `gnome-shell` renders the real
 # extension, with the real theme, fonts and icon set, and the shell's own
-# screenshot service takes the picture. Only the package data is held still, by
-# a stand-in `mpm` serving `docs/outdated-sample.json`, so the capture documents
-# the extension instead of whatever the runner had outdated that morning. See
-# `docs/gnome_screenshots_update.py` for the rationale of each stub.
+# screenshot service takes the picture, while on macOS the two bar apps run for
+# real and their menus are captured by window id. Only the package data is held
+# still, by a stand-in `mpm` serving `docs/outdated-sample.json`, so a capture
+# documents the frontend rather than whatever the runner had outdated that
+# morning. See `docs/gnome_screenshots_update.py` and
+# `docs/bar_screenshots_update.py` for the rationale of each stub.
 #
-# The macOS half of the same job cannot exist: photographing an Xbar or SwiftBar
-# menu needs Screen Recording and Accessibility grants that a hosted runner has
-# no way to give, and a hosted macOS display is 1x besides. GNOME is where a real
-# capture is reachable from CI at all, which is why this workflow starts here.
+# The macOS half was written off as impossible first: photographing an Xbar or
+# SwiftBar menu needs Screen Recording and Accessibility, which a hosted runner
+# was assumed to withhold. Measured instead of assumed, `macos-26` ships both
+# already granted to `/bin/bash` and `osascript`, and runs with SIP disabled, so
+# the second job is real. What the runner does not offer is a HiDPI display: its
+# screen is 1x, where the GNOME job renders at 2x on a virtual monitor it sizes
+# itself.
 #
 # Scheduled on nothing: the images move when the extension or the payload moves,
 # and a cron would only manufacture churn. The trigger paths deliberately exclude

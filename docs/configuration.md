@@ -136,7 +136,7 @@ These go under `[mpm.<subcommand>]` (or `[tool.mpm.<subcommand>]`):
 | Key             | Type    | Default | Description                                                                          |
 | :-------------- | :------ | :------ | :----------------------------------------------------------------------------------- |
 | `exact`         | boolean | `false` | With a `QUERY`, require a verbatim match on the package ID or name instead of fuzzy. |
-| `plugin_output` | boolean | `false` | Render output for Xbar/SwiftBar plugin consumption.                                  |
+| `plugin_output` | boolean | `false` | Render output for SwiftBar/Xbar plugin consumption.                                  |
 
 **`[mpm.upgrade]`**
 

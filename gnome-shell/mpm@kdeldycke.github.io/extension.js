@@ -1,6 +1,6 @@
 /* Meta Package Manager GNOME Shell extension.
  *
- * Panel indicator mirroring the Xbar/SwiftBar plugin: it lists outdated
+ * Panel indicator mirroring the SwiftBar/Xbar plugin: it lists outdated
  * packages reported by `mpm outdated` across every package manager, and every
  * menu action runs `mpm` itself so the user's mpm configuration file governs
  * clicks (manager selection, sudo policy, per-manager overrides, cooldown).

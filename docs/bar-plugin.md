@@ -1,6 +1,6 @@
-# {octicon}`plug` Xbar and SwiftBar plugin
+# {octicon}`plug` SwiftBar & Xbar plugin
 
-The Meta Package Manager project is actively maintaining a plugin that is both compatible with [Xbar](https://github.com/matryer/xbar) and [SwiftBar](https://github.com/swiftbar/SwiftBar).
+The Meta Package Manager project is actively maintaining a plugin that is both compatible with [SwiftBar](https://github.com/swiftbar/SwiftBar) and [Xbar](https://github.com/matryer/xbar).
 
 The plugin is written in Python and is a small wrapper around the `mpm` CLI. It is one of the two {doc}`desktop menus <desktop-menus>` the project maintains, and that page holds what the two have in common.
 
@@ -40,7 +40,7 @@ A click runs `mpm` rather than the package manager, and inherits the policy of t
 
 ## Menu markers
 
-The plugin has no icon files of its own: every state is an emoji, which Xbar and SwiftBar render as text wherever it appears.
+The plugin has no icon files of its own: every state is an emoji, which SwiftBar and Xbar render as text wherever it appears.
 
 | Marker | Where                    | Meaning                                                                  |
 | :----- | :----------------------- | :----------------------------------------------------------------------- |

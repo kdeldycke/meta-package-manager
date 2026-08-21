@@ -1,6 +1,6 @@
 ---
-title: Update Xbar/SwiftBar plugin screenshots
-commit_message: Update Xbar/SwiftBar plugin screenshots
+title: Update SwiftBar/Xbar plugin screenshots
+commit_message: Update SwiftBar/Xbar plugin screenshots
 footer: false
 labels: [🔌 plugin]
 ---

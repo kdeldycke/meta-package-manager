@@ -75,7 +75,7 @@ $ mpm restore packages.toml
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
 - Export output to [JSON or user-friendly tables](https://mpm.run/cli-parameters/#mpm).
 - [Shell auto-completion](https://mpm.run/install/) for Bash, Zsh and Fish.
-- Provides a [Xbar/SwiftBar plugin](https://mpm.run/bar-plugin/) for
+- Provides a [SwiftBar/Xbar plugin](https://mpm.run/bar-plugin/) for
   friendly macOS integration.
 - Provides a [GNOME Shell extension](https://mpm.run/gnome-shell/) for
   friendly Linux desktop integration.

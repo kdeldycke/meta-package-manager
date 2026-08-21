@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""mpm-side renderer that builds Xbar/SwiftBar plugin output.
+"""mpm-side renderer that builds SwiftBar/Xbar plugin output.
 
 Lives in its own module rather than in
 {mod}`meta_package_manager.bar_plugin` because that module is
@@ -84,7 +84,7 @@ the most readable recognizable red the xterm-256 palette can express (a pure
 
 
 class BarPluginRenderer(MPMPlugin):
-    """All utilities used to render output compatible with both Xbar and SwiftBar plugin
+    """All utilities used to render output compatible with both SwiftBar and Xbar plugin
     dialect.
 
     The minimal code to locate `mpm`, then call it and print its output resides in the
@@ -178,7 +178,7 @@ class BarPluginRenderer(MPMPlugin):
 
     @staticmethod
     def render_cli(cmd_args: tuple[str | Path, ...]) -> str:
-        """Return a formatted CLI compatible with Xbar and SwiftBar plugin format.
+        """Return a formatted CLI compatible with SwiftBar and Xbar plugin format.
 
         I.e. a string with this schema:
 

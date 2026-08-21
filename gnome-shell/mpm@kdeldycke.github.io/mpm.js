@@ -1,6 +1,6 @@
 /* Shell-free logic of the Meta Package Manager GNOME Shell extension.
  *
- * This module is the GJS counterpart of the Xbar/SwiftBar plugin launcher
+ * This module is the GJS counterpart of the SwiftBar/Xbar plugin launcher
  * (meta_package_manager/bar_plugin.py): locate a runnable mpm, gate on a
  * minimum version, run `sync` then `outdated`, and build the commands behind
  * the menu actions. Rendering lives in extension.js.

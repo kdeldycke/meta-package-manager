@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [bar-plugin] Name SwiftBar ahead of Xbar wherever the pair appears, the plugin page title included. SwiftBar is the maintained host of the two.
 - [mpm] Open the manager index with a proportion bar, cut into one region per support state, each as wide as its share of the assessed pool.
 - [mpm] Highlight the hovered row, and not only its column, in the benchmark, SBOM, cooldown and augmentations tables. The row half of the crosshair had never painted.
 - [mpm] Group the manager index by support state, each group opening on a title row spanning the table. Managers stay alphabetical inside their group.

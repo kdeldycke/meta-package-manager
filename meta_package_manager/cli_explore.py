@@ -469,7 +469,7 @@ def installed(ctx, exact, duplicates, query):
     "--plugin-output",
     is_flag=True,
     default=False,
-    help="Output results for direct consumption by an Xbar/SwiftBar-compatible plugin. "
+    help="Output results for direct consumption by a SwiftBar/Xbar-compatible plugin. "
     "The layout is dynamic and depends on environment variables set by either Xbar "
     "or SwiftBar.",
 )
@@ -507,7 +507,7 @@ def outdated(ctx, exact, plugin_output, query):
     # Machine-friendly data rendering.
     print_serialized_and_exit(ctx, outdated_data)
 
-    # Xbar/SwiftBar-friendly plugin rendering.
+    # SwiftBar/Xbar-friendly plugin rendering.
     if plugin_output:
         BarPluginRenderer().print(outdated_data)
         ctx.exit()

@@ -47,7 +47,7 @@ LABELS: list[tuple[str, str, str]] = [
     (
         "🔌 plugin",
         "#fef2c0",
-        "Xbar/SwiftBar/GNOME Shell plugin code, documentation and features",
+        "SwiftBar/Xbar/GNOME Shell plugin code, documentation and features",
     ),
 ]
 """Global registry of all labels used in the project.

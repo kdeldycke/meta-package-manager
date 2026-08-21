@@ -292,7 +292,7 @@ def single_manager_selectors():
 
 
 def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
-    """Print the location of the {doc}`Xbar/SwiftBar plugin <bar-plugin>`.
+    """Print the location of the {doc}`SwiftBar/Xbar plugin <bar-plugin>`.
 
     Returns the normalized path of the standalone [bar_plugin.py](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/bar_plugin.py)
     script that is distributed with this Python module. This
@@ -579,7 +579,7 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
     ),
 )
 @option_group(
-    "Xbar/SwiftBar options",
+    "SwiftBar/Xbar options",
     option(
         "--bar-plugin-path",
         is_flag=True,
@@ -587,7 +587,7 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
         expose_value=False,
         is_eager=True,
         callback=bar_plugin_path,
-        help="Print location of the Xbar/SwiftBar plugin.",
+        help="Print location of the SwiftBar/Xbar plugin.",
     ),
 )
 @pass_context

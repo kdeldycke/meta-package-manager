@@ -18,7 +18,7 @@
 # <swiftbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Font parameters for monospace text. Used for table rendering and error messages.</swiftbar.var>
 # XXX Only SwiftBar hides a plugin producing no output, so this is SwiftBar-only too.
 # <swiftbar.var>boolean(VAR_HIDE_WHEN_UP_TO_DATE="false"): Hide the menu bar icon while no package is outdated and no manager reports an error.</swiftbar.var>
-"""Xbar and SwiftBar plugin for Meta Package Manager (the {command}`mpm` CLI).
+"""SwiftBar and Xbar plugin for Meta Package Manager (the {command}`mpm` CLI).
 
 Default update cycle should be set to several hours so we have a chance to get
 user's attention once a day. Higher frequency might ruin the system as all
@@ -410,7 +410,7 @@ class MPMPlugin:
 
     @staticmethod
     def pp(label: str, *args: str | None) -> None:
-        """Print one menu-line with the Xbar/SwiftBar dialect.
+        """Print one menu-line with the SwiftBar/Xbar dialect.
 
         First argument is the menu-line label, separated by a pipe to all other non-
         empty parameters, themselves separated by a space.

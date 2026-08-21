@@ -723,7 +723,7 @@ search = "date-released: \\d{{4}}-\\d{{2}}-\\d{{2}}"
 replace = "date-released: {utcnow:%Y-%m-%d}"
 
 [[tool.bumpversion.files]]
-# Update the version advertised in the Xbar/SwiftBar plugin header.
+# Update the version advertised in the SwiftBar/Xbar plugin header.
 filename = "./meta_package_manager/bar_plugin.py"
 search = "<xbar.version>{current_version}</xbar.version>"
 replace = "<xbar.version>{new_version}</xbar.version>"
@@ -1710,7 +1710,7 @@ description = "antidote, antigen, zim, zinit, zplug"
 [[tool.repomatic.labels.extra]]
 name = "🔌 plugin"
 color = "fef2c0"
-description = "Xbar/SwiftBar/GNOME Shell plugin code, documentation and features"
+description = "SwiftBar/Xbar/GNOME Shell plugin code, documentation and features"
 
 [[tool.repomatic.labels.extra]]
 name = "🖥 platform: BSD"

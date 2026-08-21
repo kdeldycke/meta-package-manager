@@ -189,7 +189,7 @@ jobs:
   # every mode the virtual display offers has a backing store equal to its
   # logical size, so these are 1x where the GNOME captures are 2x.
   update-bar-plugin-screenshots:
-    name: Capture the Xbar/SwiftBar plugin menu
+    name: Capture the SwiftBar/Xbar plugin menu
     runs-on: macos-26
     permissions:
       contents: write
@@ -216,7 +216,7 @@ jobs:
           uv --no-progress run --frozen -- python docs/bar_screenshots_update.py
           --diagnostics "${RUNNER_TEMP}/diagnostics"
 
-      # The ambient `python3` is the one an Xbar or SwiftBar plugin runs under,
+      # The ambient `python3` is the one a SwiftBar or Xbar plugin runs under,
       # so it is the version the plugin's documented `>= 3.9` floor is about.
       # Reported rather than asserted: the page's table is only as good as what
       # a real macOS actually ships.

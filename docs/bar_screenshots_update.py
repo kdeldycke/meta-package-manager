@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Capture the Xbar/SwiftBar plugin's menu from a real SwiftBar.
+"""Capture the SwiftBar/Xbar plugin's menu from a real SwiftBar.
 
 The macOS counterpart of `docs/gnome_screenshots_update.py`, and the same
 bargain: a real host renders the real plugin, and only the package data is held

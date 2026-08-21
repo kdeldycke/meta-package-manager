@@ -1,10 +1,10 @@
 # {octicon}`device-desktop` Desktop menus
 
-`mpm` puts the same menu on two desktops. On macOS it is a plugin for the menu bar, running under {doc}`Xbar or SwiftBar <bar-plugin>`. On Linux it is a {doc}`GNOME Shell extension <gnome-shell>` in the top bar. Both list the outdated packages `mpm outdated` reports across every package manager on the system, and upgrade them one by one or per manager.
+`mpm` puts the same menu on two desktops. On macOS it is a plugin for the menu bar, running under {doc}`SwiftBar or Xbar <bar-plugin>`. On Linux it is a {doc}`GNOME Shell extension <gnome-shell>` in the top bar. Both list the outdated packages `mpm outdated` reports across every package manager on the system, and upgrade them one by one or per manager.
 
 |                | {doc}`Menu bar plugin <bar-plugin>`              | {doc}`GNOME Shell extension <gnome-shell>`  |
 | :------------- | :----------------------------------------------- | :------------------------------------------ |
-| Desktop        | macOS, under Xbar or SwiftBar                    | GNOME Shell `46` to `50`                    |
+| Desktop        | macOS, under SwiftBar or Xbar                    | GNOME Shell `46` to `50`                    |
 | Written in     | Python, one file shipped inside `mpm`            | GJS                                         |
 | Installed by   | symlinking that file into the host's plugin folder | an extension zip, or a source checkout    |
 | Configured by  | environment variables, edited in the host's UI   | GSettings, edited in the preferences window |
@@ -41,4 +41,4 @@ The menu then carries a bootstrap pair in place of the package list: an *Install
 
 ## The states a menu reports
 
-Both frontends report the same states, and only the vocabulary differs. The plugin spells each one as an emoji, which Xbar and SwiftBar render as text wherever it appears. The extension names a stock symbolic icon instead, which the shell resolves against whichever icon theme is in force: an emoji is a font glyph a desktop theme cannot restyle, and the GNOME reviewers ask for icons. The [panel icons table](gnome-shell.md#panel-icons) puts the two vocabularies side by side.
+Both frontends report the same states, and only the vocabulary differs. The plugin spells each one as an emoji, which SwiftBar and Xbar render as text wherever it appears. The extension names a stock symbolic icon instead, which the shell resolves against whichever icon theme is in force: an emoji is a font glyph a desktop theme cannot restyle, and the GNOME reviewers ask for icons. The [panel icons table](gnome-shell.md#panel-icons) puts the two vocabularies side by side.

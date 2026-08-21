@@ -13,7 +13,7 @@ To install `mpm` on your own system, head to the [installation methods](install.
 The `mpm` test suite splits into two layers, separated by the `integration` pytest marker:
 
 - A **hermetic layer** (everything not marked `integration`) needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox. Beyond `pytest` it imports `pyyaml` and `tomlkit` (both pulled in by `tests/test_docs.py`); the SBOM tests additionally want the `[sbom-offline]` and `[sbom-online]` extras but **skip themselves when those are absent**, so a lean build never has to ignore them. `pyproject-fmt` stays optional too, its formatting-fixpoint test auto-skipping when missing.
-- An **integration layer** (marked `integration`: `tests/test_manager_*.py`, `tests/test_cli*.py` and the Xbar/SwiftBar plugin suite) drives the ~70 real package managers ([`apt`](managers/apt.md), [`brew`](managers/brew.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), and more) and the `mpm` CLI end-to-end. It cannot run in a hermetic builder.
+- An **integration layer** (marked `integration`: `tests/test_manager_*.py`, `tests/test_cli*.py` and the SwiftBar/Xbar plugin suite) drives the ~70 real package managers ([`apt`](managers/apt.md), [`brew`](managers/brew.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), and more) and the `mpm` CLI end-to-end. It cannot run in a hermetic builder.
 
 Pick the skip path that fits the builder. Either way no per-module ignore list is needed, and the selection stays correct as test modules are added:
 

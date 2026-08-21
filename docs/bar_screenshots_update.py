@@ -401,8 +401,9 @@ def dismiss_prompts() -> None:
     and either one left up blocks every click that follows.
     """
     for attempt in range(1, 6):
-        found = osascript(
-            bounded("""
+        try:
+            found = osascript(
+                bounded("""
 tell application "System Events"
     set theCount to 0
     try
@@ -418,7 +419,14 @@ tell application "System Events"
     return theCount
 end tell
 """)
-        )
+            )
+        except RuntimeError as error:
+            # System Events can drop out from under this: Control Center is
+            # restarted to hide the clock, and a host holding a menu open blocks
+            # it outright. Nothing here is load-bearing enough to fail a shot.
+            print(f"  consent sheet, attempt {attempt}: {error}")
+            time.sleep(4)
+            continue
         print(f"  consent sheet, attempt {attempt}: {found} window(s)")
         if found == "0" and attempt > 1:
             return

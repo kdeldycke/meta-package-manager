@@ -499,21 +499,26 @@ def restart(host: Host, plugins: Path) -> None:
     time.sleep(20)
     # Xbar greets a first run with its plugin browser, which sits in front of
     # the menu bar and leaves the process too busy to answer accessibility.
-    osascript(
-        bounded(f"""
+    # Best-effort, and addressed to the host itself: Xbar answers no
+    # accessibility at all, so this times out for it rather than finding no
+    # windows. A greeting window left open is survivable; failing the shot over
+    # one is not.
+    try:
+        osascript(
+            bounded(f"""
 tell application "System Events"
-    try
-        tell process "{host.name}"
-            repeat with theWindow in windows
-                try
-                    click button 1 of theWindow
-                end try
-            end repeat
-        end tell
-    end try
+    tell process "{host.name}"
+        repeat with theWindow in windows
+            try
+                click button 1 of theWindow
+            end try
+        end repeat
+    end tell
 end tell
 """)
-    )
+        )
+    except RuntimeError as error:
+        print(f"  {host.name} did not answer a window sweep: {error}")
     time.sleep(3)
     dismiss_prompts()
 

@@ -474,7 +474,7 @@ class TestBarPlugin:
         # Error line. Optional.
         (
             (
-                r"(--)?.+ \| font=[Mm]enlo size=10 color=red trim=false "
+                r"(--)?.+ \| font=[Mm]enlo size=12 color=red trim=false "
                 r"ansi=false emojize=false( symbolize=false)?$"
             ),
             False,

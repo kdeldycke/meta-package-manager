@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [bar-plugin] Render an error line at the same size as every other monospace row. Its own smaller size left a visible gap under the message, both hosts putting the surplus below the text rather than around it.
 - [bar-plugin] Separate a package name from its version diff by two spaces, in the fixed-width table and the variable-width rendering alike. A single space left `bind9-dnsutils 1:9.20.18-1ubuntu2.1 → 1:9.20.24-1ubuntu0.1` reading as one run of text.
 - [mpm] Collect nine more entries onto the documentation's todo-list page, gathering future work that sat unindexed in code comments, docstrings and documentation prose.
 - [bar-plugin,gnome-shell] Split a version diff at the same point in both frontends. The GNOME menu left the separator introducing the diverging token in the dimmed prefix, where the bar plugin colors it: `5.0.0~beta1-0ubuntu7` highlighted `0~beta1-0ubuntu7` in one and `.0~beta1-0ubuntu7` in the other, and 17 of 21 sampled pairs disagreed.

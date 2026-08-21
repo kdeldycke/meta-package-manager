@@ -230,8 +230,15 @@ class MPMPlugin:
 
     @cached_property
     def error_font(self) -> str:
-        """Error font is based on monospace font."""
-        return self.normalize_params(f"{self.monospace_font} color=red size=10")
+        """Error font is the monospace font, in red.
+
+        It carries no size of its own. A smaller string is still laid out in a
+        row the menu sizes for the larger font, and both hosts leave the
+        surplus under the text instead of splitting it: at `size=10`, an error
+        line ended up with 15 pixels of space below it where every other row
+        leaves 9.
+        """
+        return self.normalize_params(f"{self.monospace_font} color=red")
 
     @cached_property
     def is_swiftbar(self) -> bool:

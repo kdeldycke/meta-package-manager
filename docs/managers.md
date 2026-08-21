@@ -1,6 +1,12 @@
 # {octicon}`file-submodule` Package managers
 
 ```{python:render}
+from meta_package_manager._docs import manager_support_bar
+
+print(manager_support_bar())
+```
+
+```{python:render}
 from meta_package_manager._docs import manager_support_legend
 
 print(manager_support_legend())

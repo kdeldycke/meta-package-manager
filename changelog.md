@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Open the manager index with a proportion bar, cut into one region per support state, each as wide as its share of the assessed pool.
+- [mpm] Highlight the hovered row, and not only its column, in the benchmark, SBOM, cooldown and augmentations tables. The row half of the crosshair had never painted.
 - [mpm] Group the manager index by support state, each group opening on a title row spanning the table. Managers stay alphabetical inside their group.
 - [mpm] Make every row of the manager index clickable end to end and highlight it on hover, following the manager's page or a declined tool's verdict.
 - [mpm] Shorten the manager index legend to one label per state, reused as the title of the group of rows carrying that glyph.

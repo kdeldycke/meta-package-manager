@@ -1519,6 +1519,67 @@ def test_manager_changelog_entries():
     assert pairs == expected
 
 
+def test_manager_support_bar_renders():
+    """Check the support bar opens the page with one region per state, each as
+    wide as its own population, and coloured by a step the stylesheet declares.
+
+    Rendered live at Sphinx build time by the ``{python:render}`` block opening
+    `docs/managers.md`, as raw HTML: the shares are a ratio CSS can draw, and a
+    committed image would go stale on the next manager the pool gains.
+    """
+    bar = _docs.manager_support_bar()
+    counts = _docs._support_population()
+    unsupported = _docs._load_benchmark_toml().get("unsupported", {})
+    total = len(pool) + len(unsupported)
+
+    # A group, not an image: its regions are links, which `role="img"` would
+    # hide from anyone not using a mouse.
+    assert bar.startswith('<div class="manager-bar" role="group" aria-label="')
+    assert f"among the {total} package managers assessed so far" in bar
+    assert bar.endswith("</div>")
+
+    regions = re.findall(
+        r'<a class="manager-bar-region manager-bar-(\d+)" href="#([a-z-]+)"'
+        r' style="flex-grow: (\d+)" title="([^"]+)" aria-label="([^"]+)">'
+        r'<span class="manager-bar-glyph">(.+?)</span></a>',
+        bar,
+    )
+    # Every state gets a region, in scale order, sized by its own count.
+    assert [region[-1] for region in regions] == list(_docs.SUPPORT_SCALE)
+    assert [region[0] for region in regions] == [
+        str(i) for i in range(1, len(_docs.SUPPORT_SCALE) + 1)
+    ]
+    assert sum(int(region[2]) for region in regions) == total
+
+    # Every region lands on the group of the index carrying the same state, and
+    # every state has an anchor to land on.
+    assert set(_docs.SUPPORT_ANCHORS) == set(_docs.SUPPORT_SCALE)
+    index = _docs.managers_index_table()
+    for _, target, grow, tooltip, label, glyph in regions:
+        assert int(grow) == counts[glyph]
+        assert target == _docs.SUPPORT_ANCHORS[glyph]
+        assert index.count(f'id="{target}"') == 1
+        # Both readings are attributes, where a code span is just punctuation.
+        assert "`" not in tooltip and "`" not in label
+        assert tooltip == f"{glyph} {label}"
+        # The glyph is dropped from the spoken one: a screen reader announcing
+        # "lifebuoy" ahead of the count helps nobody.
+        assert label.startswith(f"{counts[glyph]} managers, ")
+        assert _docs.SUPPORT_SCALE[glyph].replace("`", "") in label
+
+    # Every region has a step declared for it, in all three theme scopes: the
+    # default, the explicit dark toggle, and the OS dark preference. A state
+    # added without its colour would otherwise render as a transparent gap.
+    css = (PROJECT_ROOT / "docs" / "_static" / "manager-index.css").read_text(
+        encoding="UTF-8"
+    )
+    for rank in range(1, len(_docs.SUPPORT_SCALE) + 1):
+        assert css.count(f"--manager-bar-{rank}: #") == 3
+        assert f".manager-bar-{rank} {{" in css
+    # And no orphan step outlives the state it painted.
+    assert css.count("--manager-bar-") == 4 * len(_docs.SUPPORT_SCALE)
+
+
 def test_manager_support_legend():
     """Check the glyph legend counts every assessed manager exactly once.
 
@@ -1621,22 +1682,24 @@ def test_managers_index_table_renders():
     assert lines.count("") == 0
     assert len(lines) == 2 + len(_docs.SUPPORT_SCALE) + len(pool) + len(unsupported)
 
-    # Split the body on its title rows, each of which must carry a state's own
-    # SUPPORT_SCALE label: one wording for the legend and the group it titles.
+    # Split the body on its title rows. Each lays out like the rows it opens:
+    # the state's glyph in the mark column, and beside it the state's own
+    # SUPPORT_SCALE label, one wording for the legend and the group it titles.
     blocks: dict[str, list[str]] = {}
     titles = []
     current: list[str] = []
     for line in lines[2:]:
-        marker = re.search(r'<span class="manager-group">(.+?)</span>', line)
+        marker = re.match(
+            r'\|\s*(\S+)\s*\|\s*<span class="manager-group"[^>]*>(.+?)</span>',
+            line,
+        )
         if marker:
-            titles.append(marker.group(1))
-            current = blocks.setdefault(marker.group(1).partition(" ")[0], [])
+            titles.append(marker.groups())
+            current = blocks.setdefault(marker.group(1), [])
             continue
         assert titles, "a manager row ahead of the first title row"
         current.append(line)
-    assert titles == [
-        f"{glyph} {label}" for glyph, label in _docs.SUPPORT_SCALE.items()
-    ]
+    assert titles == list(_docs.SUPPORT_SCALE.items())
     # Every assessed manager sits in the group its own glyph puts it in, once,
     # alphabetically within that group.
     grouped: dict[str, list[str]] = {glyph: [] for glyph in _docs.SUPPORT_SCALE}

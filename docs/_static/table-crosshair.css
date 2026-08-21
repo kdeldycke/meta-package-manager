@@ -7,18 +7,22 @@
  * CSS variables, so the highlight adapts to light and dark themes.
  */
 
-/* Hovered row and column: subtle wash. */
+/* Hovered row and column: subtle wash. The row half is matched on the `tr` the
+ * script marks, not on a cell: `td.crosshair-row` selected a cell carrying that
+ * class, which nothing ever produced, so the row never painted. Its specificity
+ * has to stay level with the column rule above it, hence no leading `table`:
+ * one notch higher and it would outrank the hovered cell's own rule below.
+ */
 table td.crosshair-col,
 table th.crosshair-col,
-table td.crosshair-row,
-table th.crosshair-row {
+tr.crosshair-row > td,
+tr.crosshair-row > th {
   background-color: var(--color-background-hover, rgba(128, 128, 128, 0.12));
 }
 
 /* Emphasize the anchors of the crosshair: the column header and the row label. */
 table thead th.crosshair-col,
-table td.crosshair-row:first-child,
-table th.crosshair-row:first-child {
+tr.crosshair-row > :first-child {
   font-weight: 700;
 }
 

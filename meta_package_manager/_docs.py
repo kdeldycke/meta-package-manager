@@ -167,8 +167,7 @@ happens elsewhere.
 
 SUPPORT_SCALE = {
     WRAPPED_GLYPHS["maintained"]: "Active support by `mpm`",
-    WRAPPED_GLYPHS["unmaintained"]: "Wrapped by `mpm` and usable, but upstream is "
-    "unmaintained",
+    WRAPPED_GLYPHS["unmaintained"]: "Usable in `mpm`, but upstream is unmaintained",
     TOPGRADE_FALLBACK_GLYPH: "Falls back to `topgrade`",
     UNSUPPORTED_GLYPHS["archived"]: "Unsupported by `mpm` and upstream is unmaintained",
     UNSUPPORTED_GLYPHS["excluded"]: "`mpm` declined support",
@@ -193,6 +192,25 @@ the sort of {func}`managers_index_table`: the whole index groups by verdict
 rather than running one alphabet from `am` to `zypper`, since the question a
 reader brings to it is what became of a tool. Alphabetical order survives
 inside each group.
+"""
+
+
+SUPPORT_ANCHORS = {
+    **{glyph: f"state-{name}" for name, glyph in WRAPPED_GLYPHS.items()},
+    TOPGRADE_FALLBACK_GLYPH: "state-topgrade-fallback",
+    **{glyph: f"state-{name}" for name, glyph in UNSUPPORTED_GLYPHS.items()},
+}
+"""In-page anchor of each {data}`SUPPORT_SCALE` state on `docs/managers.md`.
+
+{func}`managers_index_table` stamps one onto each group's title row, and
+{func}`manager_support_bar` points the matching region of the bar at it, so a
+reader who sees a share can reach the managers behind it in one click.
+
+Named after the state rather than after its caption, which is what makes the
+anchor outlive a rewording: four of the five names are the keys of
+{data}`WRAPPED_GLYPHS` and {data}`UNSUPPORTED_GLYPHS`, read straight off those
+mappings, and only the lifebuoy needs a literal, being a constant of its own
+rather than an entry in either.
 """
 
 
@@ -2624,16 +2642,18 @@ def managers_index_table() -> str:
     hand still finds it, the browser's own find command reaching a row wherever
     it sits.
 
-    Each group opens on a title row carrying the state's {data}`SUPPORT_SCALE`
-    label, spliced into its only filled cell as a `manager-group` span.
+    Each group opens on a title row laid out like the rows it introduces: the
+    state's glyph in the mark column, where every manager below it shows its
+    own brand mark, and the state's {data}`SUPPORT_SCALE` label where their
+    names start, spliced in as a `manager-group` span.
     `docs/_static/manager-index.js` reads that span for the two shapes a
-    markdown table cannot express: it merges the title row over the full width,
-    a table format having no spanning cell, and extends the ID cell's target
-    over the whole row, since a row is one manager and every part of it should
-    answer the same click. Both degrade to what the markdown already says: the
-    title reads in the first column of an otherwise empty row, and the links
-    stay real links, so the `Support` glyph still leads to the source proving it
-    and any of them opens in a new tab.
+    markdown table cannot express: it merges the label over the columns to its
+    right, a table format having no spanning cell, and extends the ID cell's
+    target over the whole row, since a row is one manager and every part of it
+    should answer the same click. Both degrade to what the markdown already
+    says: the title reads as a glyph and a label in the two leading columns,
+    and the links stay real links, so the `Support` glyph still leads to the
+    source proving it and any of them opens in a new tab.
     """
     data = _load_benchmark_toml()
     competitor_data: dict[str, list[str]] = data.get("managers", {})
@@ -2683,10 +2703,11 @@ def managers_index_table() -> str:
     for mid in sorted(rows, key=lambda mid: (scale.index(glyphs[mid]), mid)):
         if glyphs[mid] != group:
             group = glyphs[mid]
-            # Like the artwork, the title is spliced in after rendering: its
-            # label is wider than the mark column it sits in, and would pad
-            # every other cell of that column to its own width.
-            table.append([f"%group:{group}%", "", "", "", ""])
+            # The glyph takes the mark column, which is the icon column of every
+            # other row, and the label starts where the prose names do. Like the
+            # artwork, the label is spliced in after rendering: its span markup
+            # is wider than the column, and would pad every name to its width.
+            table.append([group, f"%group:{group}%", "", "", ""])
         table.append(rows[mid])
 
     rendered = render_table(
@@ -2703,10 +2724,80 @@ def managers_index_table() -> str:
     for glyph, label in SUPPORT_SCALE.items():
         rendered = rendered.replace(
             f"%group:{glyph}%",
-            f'<span class="manager-group">{glyph} {label}</span>',
+            f'<span class="manager-group" id="{SUPPORT_ANCHORS[glyph]}">{label}</span>',
         )
 
     return rendered
+
+
+def _support_population() -> Counter[str]:
+    """Count every assessed manager into its {data}`SUPPORT_SCALE` state.
+
+    The single reading of the population, shared by {func}`manager_support_bar`
+    and {func}`manager_support_legend` so the widths of the bar and the numbers
+    of the legend below it cannot disagree. Both sources are the ones
+    {func}`managers_index_table` builds its rows from: the live pool, and
+    `docs/benchmark.toml`'s `unsupported` mapping.
+    """
+    data = _load_benchmark_toml()
+    competitor_data: dict[str, list[str]] = data.get("managers", {})
+    unsupported: dict[str, str] = data.get("unsupported", {})
+    return Counter(
+        _bare_support_glyph(mid, unsupported, competitor_data)
+        for mid in (*pool, *unsupported)
+    )
+
+
+def manager_support_bar() -> str:
+    """Produce the support bar opening `docs/managers.md`.
+
+    Rendered live at Sphinx build time, above the legend naming its regions and
+    the index they summarize: one full-width bar cut into the five
+    {data}`SUPPORT_SCALE` states, in scale order, each region as wide as its
+    share of the assessed population. It answers in one glance the question the
+    page exists for, how much of what has been assessed `mpm` actually drives,
+    where the legend answers it in five numbers a reader has to add up.
+
+    Emitted as raw HTML rather than as a chart image: the shares are three
+    numbers and a ratio, a picture nothing but CSS is needed to draw, and a
+    committed image would go stale on the next manager the pool gains.
+
+    Each region carries its own state's count as `flex-grow`, over a zero
+    basis, so the proportions come out exact at any width and the gaps between
+    regions are taken out of the track before the split rather than distorting
+    it. That is also what keeps the markup honest: the number in the style
+    attribute is the population, not a percentage computed here.
+
+    ```{note}
+    A region too narrow to hold its glyph drops it rather than clipping it, on
+    a container query in `docs/_static/manager-index.css`. Nothing is lost: the
+    legend below names every state, and each region's tooltip carries its count
+    and share. The `⚠️` region is the one this is written for, five managers of
+    two hundred odd leaving it about fifteen pixels wide.
+    ```
+    """
+    counts = _support_population()
+    total = counts.total()
+    regions = []
+    for rank, (glyph, label) in enumerate(SUPPORT_SCALE.items(), start=1):
+        count = counts[glyph]
+        share = count / total * 100
+        reading = f"{count} managers, {share:.1f}%: {label}".replace("`", "")
+        regions.append(
+            f'<a class="manager-bar-region manager-bar-{rank}"'
+            f' href="#{SUPPORT_ANCHORS[glyph]}" style="flex-grow: {count}"'
+            f' title="{glyph} {reading}" aria-label="{reading}">'
+            f'<span class="manager-bar-glyph">{glyph}</span></a>'
+        )
+    # A group rather than an image: the regions are links onto the matching
+    # group of the index below, and a `role="img"` would hide them. Each one
+    # names its own share, so the bar reads without its pictographs, which a
+    # screen reader would otherwise announce as "lifebuoy".
+    return (
+        f'<div class="manager-bar" role="group" aria-label="Share of each'
+        f" support state among the {total} package managers assessed so far,"
+        f' counted in the table below">{"".join(regions)}</div>'
+    )
 
 
 def manager_support_legend() -> str:
@@ -2726,14 +2817,7 @@ def manager_support_legend() -> str:
     second time. Folding them into the legend costs a column and settles both
     questions at once: what a glyph means, and how much of the pool it covers.
     """
-    data = _load_benchmark_toml()
-    competitor_data: dict[str, list[str]] = data.get("managers", {})
-    unsupported: dict[str, str] = data.get("unsupported", {})
-
-    counts = Counter(
-        _bare_support_glyph(mid, unsupported, competitor_data)
-        for mid in (*pool, *unsupported)
-    )
+    counts = _support_population()
     table = [
         [glyph, str(counts[glyph]), meaning] for glyph, meaning in SUPPORT_SCALE.items()
     ]

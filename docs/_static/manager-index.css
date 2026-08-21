@@ -1,28 +1,146 @@
 /*
- * Manager index table: verdict group titles and whole-row links.
+ * The manager index page: the support bar opening it, and the table below it.
  *
- * The classes are only ever applied by manager-index.js, and only to the one
- * table whose rows it recognizes, so these rules are inert everywhere else.
- * Colors come from furo's own CSS variables, so both themes are covered.
+ * The bar's classes are written by meta_package_manager._docs. The table's are
+ * applied by manager-index.js, and only to the one table whose rows it
+ * recognizes, so those rules are inert on every other page. Both themes are
+ * covered: the table borrows furo's own CSS variables, while the bar carries a
+ * palette of its own, five ordered steps being something furo has no variable
+ * for.
  */
 
-/* The band opening a verdict group, once its cell spans the full width. Furo
- * gives a cell no vertical padding of its own, so the band needs its own to
- * read as a heading rather than as one more row. */
-table.manager-index td.manager-group-cell {
+/* One full-width bar cut into the five support states, in scale order. Regions
+ * are sized by `flex-grow` alone, over a zero basis: the generator writes each
+ * state's own count there, so the split stays exact at any width and the gaps
+ * come out of the track before it rather than out of the shares.
+ */
+.manager-bar {
+  display: flex;
+  /* The gap is the separator, in the page's own color: a border around each
+   * region would add ink that carries no data. */
+  gap: 2px;
+  height: 2rem;
+  margin: 0 0 1.5rem;
+  width: 100%;
+}
+
+/* A single-hue ordinal ramp, darkest state first, because the five states are
+ * ordered rather than merely different: a categorical palette would claim they
+ * are five unrelated things, and a rainbow would rank them by hue. Each mode
+ * gets its own steps from the same ramp, so prominence always grows with
+ * distance from the surface: the strongest state is the darkest on white and
+ * the lightest on black, never one flipped into the other.
+ */
+.manager-bar {
+  --manager-bar-1: #104281;
+  --manager-bar-2: #1c5cab;
+  --manager-bar-3: #2a78d6;
+  --manager-bar-4: #5598e7;
+  --manager-bar-5: #86b6ef;
+}
+body[data-theme="dark"] .manager-bar {
+  --manager-bar-1: #9ec5f4;
+  --manager-bar-2: #6da7ec;
+  --manager-bar-3: #3987e5;
+  --manager-bar-4: #256abf;
+  --manager-bar-5: #184f95;
+}
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) .manager-bar {
+    --manager-bar-1: #9ec5f4;
+    --manager-bar-2: #6da7ec;
+    --manager-bar-3: #3987e5;
+    --manager-bar-4: #256abf;
+    --manager-bar-5: #184f95;
+  }
+}
+
+/* Each region is a link onto its own group in the index below, so it wears no
+ * link decoration of its own: the fill is the mark, and an underline under a
+ * pictograph would read as data-carrying ink. */
+.manager-bar-region {
+  align-items: center;
+  color: inherit;
+  /* Each region is its own query container, which is what lets the glyph
+   * inside it answer to the width the flex split gave it. */
+  container-type: inline-size;
+  display: flex;
+  flex-basis: 0;
+  justify-content: center;
+  line-height: 1;
+  min-width: 0;
+  text-decoration: none;
+}
+.manager-bar-region:hover {
+  filter: brightness(1.12);
+}
+.manager-bar-region:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #0a4bff);
+  outline-offset: 2px;
+}
+.manager-bar-region:first-child {
+  border-radius: 4px 0 0 4px;
+}
+.manager-bar-region:last-child {
+  border-radius: 0 4px 4px 0;
+}
+.manager-bar-1 {
+  background-color: var(--manager-bar-1);
+}
+.manager-bar-2 {
+  background-color: var(--manager-bar-2);
+}
+.manager-bar-3 {
+  background-color: var(--manager-bar-3);
+}
+.manager-bar-4 {
+  background-color: var(--manager-bar-4);
+}
+.manager-bar-5 {
+  background-color: var(--manager-bar-5);
+}
+
+.manager-bar-glyph {
+  font-size: 1.1rem;
+}
+
+/* A region too narrow for its glyph drops it instead of cropping it: half a
+ * pictograph reads as a rendering fault, where an unlabelled region reads as
+ * what it is, a share too small to caption. The legend below names every state
+ * and each region's tooltip carries its own count.
+ */
+@container (max-width: 1.9rem) {
+  .manager-bar-glyph {
+    display: none;
+  }
+}
+
+/* The band opening a verdict group. Furo gives a cell no vertical padding of
+ * its own, so the band needs its own to read as a heading rather than as one
+ * more row. */
+table.manager-index tr.manager-group-row > td {
   background-color: var(--color-background-secondary, rgba(128, 128, 128, 0.1));
   border-top: 2px solid var(--color-table-border, rgba(128, 128, 128, 0.4));
   padding-bottom: 0.4rem;
   padding-top: 0.4rem;
 }
 
-/* The mark column is centred and the title is not: it labels the rows below
- * it, which start at the left edge. Alignment is set on the span rather than
- * on the cell, leaving the column's own rule alone. */
+/* The state's glyph stands where every row below it carries its brand mark,
+ * at the size those marks are drawn. */
+table.manager-index tr.manager-group-row > td:first-child {
+  font-size: 1.15em;
+}
+
+/* The label starts where the prose names do, and the column it sits in is
+ * left-aligned already; the block display is what makes it fill the merged
+ * cell rather than centre itself in it. */
 table.manager-index .manager-group {
   display: block;
   font-size: 1.05em;
   font-weight: 700;
+  /* The label is what the bar's regions link to, so it lands clear of the
+   * header furo pins over the content on a narrow viewport. */
+  scroll-margin-top: 4rem;
   text-align: left;
 }
 

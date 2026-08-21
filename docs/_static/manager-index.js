@@ -61,16 +61,16 @@
         if (row.parentElement.tagName === "THEAD") {
           return;
         }
-        var cell = row.cells[0];
+        var cell = row.cells[1];
         if (cell && cell.querySelector(".manager-group")) {
-          // A title row is a heading, not data: its other cells exist only
-          // because the markdown table had to declare them, so drop them and
-          // let the title span the width they occupied.
-          while (row.cells.length > 1) {
-            row.deleteCell(1);
+          // A title row is a heading, not data. Its mark column keeps the
+          // state's glyph, like every row below it; the cells right of the
+          // label exist only because the markdown table had to declare them,
+          // so drop them and let the label span the width they occupied.
+          while (row.cells.length > 2) {
+            row.deleteCell(2);
           }
-          cell.colSpan = width;
-          cell.classList.add("manager-group-cell");
+          cell.colSpan = width - 1;
           row.classList.add("manager-group-row");
           return;
         }

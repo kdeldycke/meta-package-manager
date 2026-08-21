@@ -263,8 +263,15 @@ class BarPluginRenderer(MPMPlugin):
                     prefix_fg=VERSION_PREFIX_COLOR,
                     **self.menu_diff_colors,
                 )
+                # The empty cell is a spacer, and it earns its place in both
+                # renderings. Aligned, the longest name would otherwise sit one
+                # space from its version, too tight to read a package apart from
+                # what it upgrades to; the spacer column widens that gap to two
+                # without disturbing the alignment of the rest. Joined for the
+                # variable-width rendering, it falls out as the same double
+                # space between the two halves of the row.
                 table.append((
-                    (p.get("name") or p.get("id"), installed, "→", latest),
+                    (p.get("name") or p.get("id"), "", installed, "→", latest),
                     p["upgrade_cli"],
                 ))
 
@@ -288,7 +295,7 @@ class BarPluginRenderer(MPMPlugin):
                     formatted_lines = render_table(
                         [p[0] for p in table],
                         table_format=TableFormat.ALIGNED,
-                        colalign=("left", "right", "center", "left"),
+                        colalign=("left", "left", "right", "center", "left"),
                         disable_numparse=True,
                     ).splitlines()
                 else:

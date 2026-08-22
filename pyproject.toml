@@ -5,7 +5,7 @@ requires = [ "uv-build>=0.8" ]
 [project]
 # Docs: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 name = "meta-package-manager"
-version = "8.0.0.dev0"
+version = "8.0.0"
 description = "🎁 snapshot every package on your machine to one file, restore it on a new one"
 readme = "readme.md"
 keywords = [
@@ -326,7 +326,7 @@ urls.Changelog = "https://github.com/kdeldycke/meta-package-manager/blob/main/ch
 # because runtime code cannot read this file; a test in `tests/test_docs.py`
 # keeps the two in step.
 urls.Documentation = "https://mpm.run"
-urls.Download = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.0.0.dev0"
+urls.Download = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.0.0"
 urls.Funding = "https://github.com/sponsors/kdeldycke"
 urls.Homepage = "https://github.com/kdeldycke/meta-package-manager"
 urls.Issues = "https://github.com/kdeldycke/meta-package-manager/issues"
@@ -651,7 +651,7 @@ report.fail_under = 78
 report.precision = 2
 
 [tool.bumpversion]
-current_version = "8.0.0.dev0"
+current_version = "8.0.0"
 # Parse versions with an optional .devN suffix (PEP 440).
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.dev(?P<dev>\\d+))?"
 serialize = [

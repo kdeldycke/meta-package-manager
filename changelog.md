@@ -1,9 +1,6 @@
 # Changelog
 
-## [`8.0.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`8.0.0` (2026-08-22)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...v8.0.0)
 
 - [bar-plugin] Name SwiftBar ahead of Xbar wherever the pair appears, the plugin page title included. SwiftBar is the maintained host of the two.
 - [mpm] Open the manager index with a proportion bar, cut into one region per support state, each as wide as its share of the assessed pool.

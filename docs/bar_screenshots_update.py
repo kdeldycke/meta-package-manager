@@ -51,7 +51,7 @@ import sys
 import time
 import urllib.request
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import NamedTuple
 
 from meta_package_manager.bar_plugin_renderer import BarPluginRenderer
@@ -212,6 +212,19 @@ SYSTEM_ITEMS_EDGE: float | None = None
 Measured before either host starts, so everything left of it afterwards is a
 plugin's. That is what identifies Xbar's status item, which cannot be asked for
 by name: the app answers no accessibility at all.
+"""
+
+CLOCK_BOX: dict[str, float] | None = None
+"""Where the clock sits, measured once the menu bar holds nothing of ours.
+
+Photographed on its own before each shot, to check the drawn clock caught up
+with the time it was set to.
+"""
+
+CLOCK_READINGS: dict[bool, str] = {}
+"""What the clock looked like on the first capture of each appearance.
+
+Keyed by dark mode, since the same reading is drawn in two palettes.
 """
 
 CLOCK_STAMP: str | None = None
@@ -899,7 +912,11 @@ def pin_clock() -> bool:
     if wide:
         print(f"  the clock still carries its date ({wide}), keeping it out of frame")
         return False
-    return True
+    global CLOCK_BOX
+    boxes = menu_bar_windows(low=20, high=400)
+    CLOCK_BOX = max(boxes, key=lambda box: box["x"]) if boxes else None
+    print(f"  the clock reads {reading} and sits at {CLOCK_BOX}")
+    return CLOCK_BOX is not None
 
 
 def hold_clock() -> None:
@@ -911,6 +928,56 @@ def hold_clock() -> None:
     """
     if CLOCK_STAMP is not None:
         run(("sudo", "date", CLOCK_STAMP), check=False)
+
+
+def clock_reading() -> str:
+    """Photograph the clock on its own, and fingerprint what it drew.
+
+    The system clock and the clock on screen are two different things: setting
+    the time back does not repaint the menu bar by itself, and a shot taken
+    before that repaint lands carries whatever the clock last said. One did,
+    two minutes stale, while `date` answered the pinned time throughout
+    (run 32582726726).
+    """
+    if CLOCK_BOX is None:
+        return ""
+    with NamedTemporaryFile(suffix=".png") as handle:
+        run(
+            (
+                "screencapture", "-x", "-o", "-t", "png",
+                "-R",
+                f"{CLOCK_BOX['x']},{CLOCK_BOX['y']},"
+                f"{CLOCK_BOX['width']},{CLOCK_BOX['height']}",
+                handle.name,
+            ),
+            check=False,
+        )
+        drawn = Path(handle.name).read_bytes()
+        # An empty file is `screencapture` having refused the rectangle, which
+        # must not read as a clock that matches every other clock.
+        return hashlib.sha256(drawn).hexdigest() if drawn else ""
+
+
+def settle_clock(dark: bool) -> None:
+    """Hold the clock at the pinned reading until the menu bar agrees.
+
+    The first shot of an appearance decides what that reading looks like, and
+    every later one waits for the same pixels rather than trusting the write.
+    """
+    for attempt in range(1, 7):
+        hold_clock()
+        time.sleep(1.5)
+        drawn = clock_reading()
+        if not drawn:
+            print("  the clock could not be photographed, so it goes unchecked")
+            return
+        if dark not in CLOCK_READINGS:
+            CLOCK_READINGS[dark] = drawn
+            return
+        if drawn == CLOCK_READINGS[dark]:
+            return
+        print(f"  the drawn clock has not caught up yet, attempt {attempt}")
+    print("  the drawn clock never caught up, so this shot will not match")
 
 
 def unpin_clock() -> None:
@@ -1067,7 +1134,7 @@ def capture(shot: Shot, plugins: Path) -> None:
     # As late as it can be: the strip is in the frame from here on, and the
     # clock has been ticking since the last shot.
     if CLOCK_PINNED:
-        hold_clock()
+        settle_clock(shot.dark)
     rect = f"{bounds['x']},{top},{bounds['right'] - bounds['x']},{bottom - top}"
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
 

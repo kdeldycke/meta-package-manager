@@ -51,7 +51,7 @@ import sys
 import time
 import urllib.request
 from pathlib import Path
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from tempfile import TemporaryDirectory
 from typing import NamedTuple
 
 from meta_package_manager.bar_plugin_renderer import BarPluginRenderer
@@ -214,19 +214,6 @@ plugin's. That is what identifies Xbar's status item, which cannot be asked for
 by name: the app answers no accessibility at all.
 """
 
-CLOCK_BOX: dict[str, float] | None = None
-"""Where the clock sits, measured once the menu bar holds nothing of ours.
-
-Photographed on its own before each shot, to check the drawn clock caught up
-with the time it was set to.
-"""
-
-CLOCK_READINGS: dict[bool, str] = {}
-"""What the clock looked like on the first capture of each appearance.
-
-Keyed by dark mode, since the same reading is drawn in two palettes.
-"""
-
 CLOCK_STAMP: str | None = None
 """The reading the clock is held at, in the form `date` takes.
 
@@ -234,6 +221,13 @@ Computed once, and re-applied before every shot: pinning the clock stops it
 being corrected, not being a clock. Left to tick, it drifted from `10:32` on
 the first capture to `10:53` on the last, so every image carried a different
 menu bar and the whole set churned anyway (run 32573216871).
+"""
+
+CLOCK_REPAINT_WAIT = 5
+"""Seconds to wait for the menu bar clock to redraw after the time is set.
+
+Long enough to cover the minute boundary {func}`hold_clock` lands just short
+of, with the shot then taken well inside the minute that follows.
 """
 
 CLOCK_TIME = (10, 30)
@@ -892,10 +886,11 @@ def pin_clock() -> bool:
     if pinned > now:
         pinned -= 24 * 60 * 60
     global CLOCK_STAMP
-    CLOCK_STAMP = time.strftime("%m%d%H%M", time.localtime(pinned))
+    CLOCK_STAMP = time.strftime(
+        "%m%d%H%M.%S", time.localtime(pinned - CLOCK_REPAINT_WAIT + 2)
+    )
     run(("sudo", "systemsetup", "-setusingnetworktime", "off"), check=False)
     hold_clock()
-    time.sleep(8)
 
     # Two things have to hold, and each fails silently on its own. The clock
     # has to read the pinned time, which `date` answers for. And the date has
@@ -912,72 +907,32 @@ def pin_clock() -> bool:
     if wide:
         print(f"  the clock still carries its date ({wide}), keeping it out of frame")
         return False
-    global CLOCK_BOX
-    boxes = menu_bar_windows(low=20, high=400)
-    CLOCK_BOX = max(boxes, key=lambda box: box["x"]) if boxes else None
-    print(f"  the clock reads {reading} and sits at {CLOCK_BOX}")
-    return CLOCK_BOX is not None
+    print(f"  the clock reads {reading}")
+    return True
 
 
 def hold_clock() -> None:
-    """Put the clock back to {data}`CLOCK_STAMP`, as computed at pin time.
+    """Put the clock back, landing a few seconds short of the pinned reading.
 
-    Never recomputed: by the second call the machine already believes it is
-    `10:30`, so asking for the most recent past `10:30` would answer yesterday
-    and walk the date back a day per shot.
+    Setting the time does not repaint the menu bar, and a shot taken before it
+    repaints carries whatever the clock last said: one did, two minutes stale,
+    while `date` answered the pinned time throughout (run 32582726726).
+    Landing just short of the minute makes the clock repaint itself, since it
+    always holds a timer for the next boundary, and crossing one is the only
+    thing that reliably brings the drawn clock and the system clock together.
+
+    Photographing the clock to check instead was tried and cost more than it
+    caught: `screencapture` lights macOS's screen-recording indicator, which
+    the shot taken a second later then carries, in a menu bar that is supposed
+    to look the same every run (run 32591406062).
+
+    {data}`CLOCK_STAMP` is never recomputed: by the second call the machine
+    already believes it is `10:30`, so asking for the most recent past `10:30`
+    would answer yesterday and walk the date back a day per shot.
     """
     if CLOCK_STAMP is not None:
         run(("sudo", "date", CLOCK_STAMP), check=False)
-
-
-def clock_reading() -> str:
-    """Photograph the clock on its own, and fingerprint what it drew.
-
-    The system clock and the clock on screen are two different things: setting
-    the time back does not repaint the menu bar by itself, and a shot taken
-    before that repaint lands carries whatever the clock last said. One did,
-    two minutes stale, while `date` answered the pinned time throughout
-    (run 32582726726).
-    """
-    if CLOCK_BOX is None:
-        return ""
-    with NamedTemporaryFile(suffix=".png") as handle:
-        run(
-            (
-                "screencapture", "-x", "-o", "-t", "png",
-                "-R",
-                f"{CLOCK_BOX['x']},{CLOCK_BOX['y']},"
-                f"{CLOCK_BOX['width']},{CLOCK_BOX['height']}",
-                handle.name,
-            ),
-            check=False,
-        )
-        drawn = Path(handle.name).read_bytes()
-        # An empty file is `screencapture` having refused the rectangle, which
-        # must not read as a clock that matches every other clock.
-        return hashlib.sha256(drawn).hexdigest() if drawn else ""
-
-
-def settle_clock(dark: bool) -> None:
-    """Hold the clock at the pinned reading until the menu bar agrees.
-
-    The first shot of an appearance decides what that reading looks like, and
-    every later one waits for the same pixels rather than trusting the write.
-    """
-    for attempt in range(1, 7):
-        hold_clock()
-        time.sleep(1.5)
-        drawn = clock_reading()
-        if not drawn:
-            print("  the clock could not be photographed, so it goes unchecked")
-            return
-        if dark not in CLOCK_READINGS:
-            CLOCK_READINGS[dark] = drawn
-            return
-        if drawn == CLOCK_READINGS[dark]:
-            return
-        print(f"  the drawn clock has not caught up yet, attempt {attempt}")
-    print("  the drawn clock never caught up, so this shot will not match")
+        time.sleep(CLOCK_REPAINT_WAIT)
 
 
 def unpin_clock() -> None:
@@ -1134,7 +1089,7 @@ def capture(shot: Shot, plugins: Path) -> None:
     # As late as it can be: the strip is in the frame from here on, and the
     # clock has been ticking since the last shot.
     if CLOCK_PINNED:
-        settle_clock(shot.dark)
+        hold_clock()
     rect = f"{bounds['x']},{top},{bounds['right'] - bounds['x']},{bottom - top}"
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
 

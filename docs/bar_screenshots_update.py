@@ -603,8 +603,12 @@ def restart(host: Host, plugins: Path) -> None:
     for key in position_keys(plugins):
         run(
             (
-                "defaults", "write", host.domain, key,
-                "-float", str(STATUS_ITEM_POSITION),
+                "defaults",
+                "write",
+                host.domain,
+                key,
+                "-float",
+                str(STATUS_ITEM_POSITION),
             ),
             check=False,
         )

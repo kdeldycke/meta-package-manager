@@ -412,9 +412,6 @@ def subcmd():
     return
 
 
-
-
-
 # Collection of pre-computed parametrized decorators.
 
 all_managers = pytest.mark.parametrize("manager", pool.values(), ids=attrgetter("id"))
@@ -435,4 +432,3 @@ manager_classes_params = pytest.mark.parametrize(
     manager_classes,
     ids=attrgetter("name"),
 )
-

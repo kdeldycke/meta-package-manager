@@ -61,7 +61,6 @@ from click_extra import (
     zero_exit_option,
 )
 from click_extra.context import (
-    CONF_FULL,
     PROGRESS,
     TABLE_FORMAT,
     VERBOSITY_LEVEL,
@@ -74,12 +73,6 @@ from click_extra.table import SERIALIZATION_FORMATS
 from click_extra.theme import get_current_theme as theme
 
 from . import bar_plugin
-from .cooldown import (
-    Cooldown,
-    CooldownPolicy,
-    parse_cooldown_section,
-    resolve_cooldown,
-)
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,
@@ -88,6 +81,12 @@ from .config import (
     cooldown_section,
     print_contribution_hints,
     register_config_managers_from_context,
+)
+from .cooldown import (
+    Cooldown,
+    CooldownPolicy,
+    parse_cooldown_section,
+    resolve_cooldown,
 )
 from .execution import PLAN_RECORDER, CLIError
 from .logo import env_summary, version_screen_params

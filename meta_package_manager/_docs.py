@@ -980,15 +980,13 @@ def augmentations_table() -> str:
         extended = extended_search_is_synthesized(manager)
         if not (upgrade_all or orphan_sweep or exact or extended):
             continue
-        table.append(
-            [
-                f"[`{mid}`](managers/{mid}.md)",
-                "✅" if upgrade_all else "",
-                "✅" if orphan_sweep else "",
-                "✅" if exact else "",
-                "✅" if extended else "",
-            ]
-        )
+        table.append([
+            f"[`{mid}`](managers/{mid}.md)",
+            "✅" if upgrade_all else "",
+            "✅" if orphan_sweep else "",
+            "✅" if exact else "",
+            "✅" if extended else "",
+        ])
 
     return render_table(
         table,
@@ -1367,31 +1365,23 @@ def manager_card(manager_id: str) -> str:
     purl_types = sorted(
         {manager_id} | {t for t, ids in PURL_MAP.items() if ids and manager_id in ids},
     )
-    facts.append(
-        (
-            "purl types",
-            FACT_SEPARATOR.join(f"`pkg:{t}`" for t in purl_types),
-        )
-    )
+    facts.append((
+        "purl types",
+        FACT_SEPARATOR.join(f"`pkg:{t}`" for t in purl_types),
+    ))
 
     # How mpm invokes the tool. Only the CLI names are unconditional: the rest is
     # listed when the manager departs from the plain "run the binary" default.
     cli_label = "CLI names (lookup order)" if len(m.cli_names) > 1 else "CLI name"
-    facts.append(
-        (
-            cli_label,
-            FACT_SEPARATOR.join(f"`{name}`" for name in m.cli_names),
-        )
-    )
+    facts.append((
+        cli_label,
+        FACT_SEPARATOR.join(f"`{name}`" for name in m.cli_names),
+    ))
     if m.cli_search_path:
-        facts.append(
-            (
-                "Extra search paths",
-                FACT_SEPARATOR.join(
-                    f"`{_collapse_home(p)}`" for p in m.cli_search_path
-                ),
-            )
-        )
+        facts.append((
+            "Extra search paths",
+            FACT_SEPARATOR.join(f"`{_collapse_home(p)}`" for p in m.cli_search_path),
+        ))
     if m.pre_cmds:
         facts.append(("Pre-commands", f"`{' '.join(m.pre_cmds)}`"))
     if m.pre_args or m.post_args:
@@ -1410,12 +1400,10 @@ def manager_card(manager_id: str) -> str:
         # A raw line break rather than a bullet list: markers and their vertical
         # padding dressed a wrapped value up as an enumeration, in a box whose
         # every other row is a plain run of values.
-        facts.append(
-            (
-                "Forced environment",
-                "<br/>".join(f"`{k}={v}`" for k, v in sorted(m.extra_env.items())),
-            )
-        )
+        facts.append((
+            "Forced environment",
+            "<br/>".join(f"`{k}={v}`" for k, v in sorted(m.extra_env.items())),
+        ))
     if m.timeout is not None:
         facts.append(("Call timeout", f"{m.timeout} seconds"))
 
@@ -1459,13 +1447,11 @@ def manager_logo_credits() -> str:
             if license_id.startswith("http")
             else f"`{license_id}`"
         )
-        table.append(
-            [
-                f"[{icon['title']}]({icon['source']})",
-                ", ".join(f"[`{mid}`](managers/{mid}.md)" for mid in icon["managers"]),
-                license_cell,
-            ]
-        )
+        table.append([
+            f"[{icon['title']}]({icon['source']})",
+            ", ".join(f"[`{mid}`](managers/{mid}.md)" for mid in icon["managers"]),
+            license_cell,
+        ])
 
     rendered = render_table(
         table,
@@ -2280,12 +2266,10 @@ def manager_traces(manager_id: str) -> str:
         for op in Operations:
             spec = operations.get(op.name, {})
             for sample in samples.get(op.name, ()):
-                command = " ".join(
-                    (
-                        spec.get("cli", m.cli_names[0]),
-                        *spec.get("args", ()),
-                    )
-                )
+                command = " ".join((
+                    spec.get("cli", m.cli_names[0]),
+                    *spec.get("args", ()),
+                ))
                 output = sample["output"].strip("\n")
                 fences.append(_fenced(f"$ {command}\n{output}", "shell-session"))
         source_label = "bundled definition"

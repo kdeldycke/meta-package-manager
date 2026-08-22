@@ -201,9 +201,16 @@ Reckoned rather than asked for, on the one host whose accessibility tree answers
 nothing. A menu's first row is at its top, and this only has to land inside it.
 """
 
-CLOCK_HIDDEN = False
-"""Whether the menu bar clock could be taken out, and so whether the captures
-can reach up to include it.
+CLOCK_PINNED = False
+"""Whether the menu bar clock was made to read the same on every run, and so
+whether the captures can reach up to include it.
+"""
+
+CLOCK_TIME = (10, 30)
+"""Hour and minute the menu bar clock is held at, in 24-hour form.
+
+The same reading the GNOME captures pin their *Last checked* row to, so the two
+sets of documentation screenshots agree on what time it is.
 """
 
 DIAGNOSTICS: Path | None = None
@@ -788,48 +795,79 @@ def mouse(kind: str, left: float, top: float) -> None:
     )
 
 
-def hide_clock() -> bool:
-    """Take the clock out of the menu bar, and report whether it went.
+def pin_clock() -> bool:
+    """Hold the menu bar clock still, and report whether it stayed.
 
     The captures reach up to the top of the screen so the status item the menu
     hangs off is in frame, the way the GNOME ones include the top bar. The clock
-    sits in that strip and reads differently every minute, so leaving it in
-    would rewrite all sixteen images on every run.
+    sits in that strip and reads differently every minute, so left alone it
+    rewrites all sixteen images on every run: its window measured 146, 154 and
+    160 pixels wide across three of them.
 
-    The clock is a Control Center module, and hiding one is a boolean in Control
-    Center's own preferences, keyed by the module's name: `NSStatusItem Visible
-    Clock`. Two neighbouring spellings do nothing, and both were tried first
-    (run 32444526285, run 32447506267). The domain is the plain one rather than
-    the per-host one every module's *other* settings live in, and the key is the
-    status item's visibility rather than a `Clock` module key, which macOS `26`
-    does not define at all. Control Center has to be restarted to read it.
+    Taking it out was tried first and cannot be done. macOS `26` offers no
+    supported way to remove the clock from the menu bar, and neither preference
+    that looks like one moves it: `Clock` in Control Center's per-host domain,
+    which that release does not define, nor `NSStatusItem Visible Clock` in its
+    plain domain, which does hide a module like `Battery` and leaves the clock
+    alone (run 32444526285, run 32447506267, run 32474473540).
+
+    So the clock stays and is made deterministic instead. The date and the day
+    cannot be pinned, so they are switched off, leaving a reading that repeats
+    every day. Then the time itself is pinned, and network time with it, since
+    macOS would otherwise correct the clock partway through the run.
     """
-    run(
-        (
-            "defaults",
-            "write",
-            "com.apple.controlcenter",
-            "NSStatusItem Visible Clock",
-            "-bool",
-            "false",
-        ),
-        check=False,
-    )
+    for key, kind, value in (
+        ("ShowDate", "-int", "2"),
+        ("ShowDayOfWeek", "-bool", "false"),
+        ("ShowSeconds", "-bool", "false"),
+        ("Show24Hour", "-bool", "true"),
+    ):
+        run(
+            ("defaults", "write", "com.apple.menuextra.clock", key, kind, value),
+            check=False,
+        )
     run(("killall", "ControlCenter"), check=False)
+
+    # Backwards, never forwards. GitHub enforces a job's `timeout-minutes`
+    # against the wall clock, so a jump ahead can retire a job that has barely
+    # started, where a jump back only makes it look younger than it is. So the
+    # target is the most recent time the clock read this, which is today's if
+    # it has already passed and yesterday's otherwise.
+    hour, minute = CLOCK_TIME
+    now = time.time()
+    target = time.localtime(now)
+    pinned = time.mktime(target[:3] + (hour, minute, 0) + target[6:])
+    if pinned > now:
+        pinned -= 24 * 60 * 60
+    stamp = time.strftime("%m%d%H%M", time.localtime(pinned))
+    run(("sudo", "systemsetup", "-setusingnetworktime", "off"), check=False)
+    run(("sudo", "date", stamp), check=False)
     time.sleep(8)
-    # The clock is the one menu bar window wider than a status item and
-    # narrower than the bar itself: it measured 146px against an item's 86.
-    # Both bounds are load-bearing, and each has already been got wrong once.
-    # Below 121 the probe finds status items and reports the clock present
-    # whatever it did (run 32444526285). Above about 400 it finds the menu
-    # bar's own backdrop and the desktop, which span the whole screen and are
-    # always there, so it reports the clock present even once it has gone
-    # (run 32447506267).
+
+    # Two things have to hold, and each fails silently on its own. The clock
+    # has to read the pinned time, which `date` answers for. And the date has
+    # to be off the menu bar, which only its width shows: 154 pixels with the
+    # date, about a third of that without. The band is the one that isolates
+    # the clock from a status item below it and from the menu bar's own
+    # backdrop above it, both of which this probe has matched by accident
+    # before (run 32444526285, run 32447506267).
+    reading = run(("date", "+%H:%M"), check=False).stdout.strip()
+    if reading != f"{hour:02}:{minute:02}":
+        print(f"  the clock reads {reading!r}, not the pinned time")
+        return False
     wide = menu_bar_windows(low=121, high=400)
     if wide:
-        print(f"  the clock is still in the menu bar ({wide}), keeping it out of frame")
+        print(f"  the clock still carries its date ({wide}), keeping it out of frame")
         return False
     return True
+
+
+def unpin_clock() -> None:
+    """Hand the clock back to the network, on the way out of a local run."""
+    run(("sudo", "systemsetup", "-setusingnetworktime", "on"), check=False)
+    for key in ("ShowDate", "ShowDayOfWeek", "ShowSeconds", "Show24Hour"):
+        run(("defaults", "delete", "com.apple.menuextra.clock", key), check=False)
+    run(("killall", "ControlCenter"), check=False)
 
 
 def press_escape() -> None:
@@ -974,7 +1012,7 @@ def capture(shot: Shot, plugins: Path) -> None:
     # Anchored at the top of the screen when the clock could be hidden, so the
     # status item the menu hangs off is in frame the way the GNOME captures
     # include the top bar. Otherwise the frame starts at the menu.
-    top = 0.0 if CLOCK_HIDDEN else bounds["y"]
+    top = 0.0 if CLOCK_PINNED else bounds["y"]
     rect = f"{bounds['x']},{top},{bounds['right'] - bounds['x']},{bottom - top}"
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
 
@@ -1029,8 +1067,8 @@ def capture_all() -> None:
         install(host)
     raise_display()
     spend_consent_prompt()
-    global CLOCK_HIDDEN
-    CLOCK_HIDDEN = hide_clock()
+    global CLOCK_PINNED
+    CLOCK_PINNED = pin_clock()
 
     with TemporaryDirectory(prefix="mpm-bar-capture-") as name:
         scratch = Path(name) / "plugins"
@@ -1079,6 +1117,7 @@ def capture_all() -> None:
                 folder = host.plugin_dir or scratch
                 for key in position_keys(folder):
                     run(("defaults", "delete", host.domain, key), check=False)
+            unpin_clock()
             for leftover in planted:
                 leftover.unlink(missing_ok=True)
             if swiftbar_folder:

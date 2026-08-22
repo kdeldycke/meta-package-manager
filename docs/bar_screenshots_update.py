@@ -206,6 +206,14 @@ CLOCK_PINNED = False
 whether the captures can reach up to include it.
 """
 
+SYSTEM_ITEMS_EDGE: float | None = None
+"""Left edge of the menu bar region macOS keeps for itself.
+
+Measured before either host starts, so everything left of it afterwards is a
+plugin's. That is what identifies Xbar's status item, which cannot be asked for
+by name: the app answers no accessibility at all.
+"""
+
 CLOCK_TIME = (10, 30)
 """Hour and minute the menu bar clock is held at, in 24-hour form.
 
@@ -705,14 +713,36 @@ JSON.stringify(boxes);
     return boxes
 
 
-def system_items() -> list[dict[str, float]]:
-    """Bounds of the plugin-sized status items in the menu bar.
+def measure_system_items() -> float | None:
+    """Where the system's own menu bar items begin, with no plugin running.
 
-    Bounded on both sides. Below `60px` are the system's own glyphs, and a run
-    that looked before Xbar had drawn anything aimed at the `31px` search icon;
-    above `120px` is the clock. A plugin item titled `🎁↑9 ⚠️1` measures `86`.
+    A width band cannot separate the two populations, and every value tried has
+    eventually matched the wrong thing: the `31px` search icon from below, the
+    clock from above once its date came off and it shrank into the band a
+    plugin item sits in, which cost run 32570175632 its Xbar shots. Position
+    can, since macOS packs its own items against the right edge and gives an
+    app the room to their left.
     """
-    return menu_bar_windows()
+    boxes = menu_bar_windows(low=20, high=400)
+    if not boxes:
+        return None
+    return min(box["x"] for box in boxes)
+
+
+def system_items() -> list[dict[str, float]]:
+    """Bounds of every status item a plugin drew, newest first.
+
+    Anything at or right of {data}`SYSTEM_ITEMS_EDGE` belongs to macOS. Without
+    that measurement the old width band stands in, which is wrong often enough
+    to have earned the function above, but is all there is.
+    """
+    if SYSTEM_ITEMS_EDGE is None:
+        return menu_bar_windows()
+    return [
+        box
+        for box in menu_bar_windows(low=20, high=400)
+        if box["x"] < SYSTEM_ITEMS_EDGE
+    ]
 
 
 def status_item(host: Host) -> tuple[float, float]:
@@ -723,8 +753,8 @@ def status_item(host: Host) -> tuple[float, float]:
     all: `count of menu bars` on its process times out with `-1712` however long
     it is given. And a status item is not a window either, the menu bar being
     drawn for an app rather than by it, so the window server cannot stand in.
-    What it does list is the system's own items, and with a single bar app
-    running the plugin's item is the first slot to their left.
+    What it does list is every menu bar window, and with a single bar app
+    running the one item left of {data}`SYSTEM_ITEMS_EDGE` is the plugin's.
     """
     if host is SWIFTBAR:
         script = bounded(
@@ -753,7 +783,7 @@ def status_item(host: Host) -> tuple[float, float]:
             )
         print(f"  {host.name} status item, attempt {attempt}: not drawn yet")
         time.sleep(5)
-    msg = f"{host.name} never drew a status item wide enough to be one"
+    msg = f"{host.name} drew no status item left of the system's own"
     raise RuntimeError(msg)
 
 
@@ -1067,8 +1097,12 @@ def capture_all() -> None:
         install(host)
     raise_display()
     spend_consent_prompt()
-    global CLOCK_PINNED
+    global CLOCK_PINNED, SYSTEM_ITEMS_EDGE
     CLOCK_PINNED = pin_clock()
+    # After the clock is pinned, since pinning changes its width, and before
+    # either host starts, since the point is a menu bar holding nothing of ours.
+    SYSTEM_ITEMS_EDGE = measure_system_items()
+    print(f"the system's menu bar items start at {SYSTEM_ITEMS_EDGE}")
 
     with TemporaryDirectory(prefix="mpm-bar-capture-") as name:
         scratch = Path(name) / "plugins"

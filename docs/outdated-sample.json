@@ -25,9 +25,7 @@
 		]
 	},
 	"flatpak": {
-		"errors": [
-			"error: org.gnome.Weather/x86_64/stable not installed"
-		],
+		"errors": ["error: org.gnome.Weather/x86_64/stable not installed"],
 		"id": "flatpak",
 		"name": "Flatpak",
 		"packages": [

@@ -4,16 +4,16 @@ Everything needed to rebuild the documentation site's hosting from nothing, and 
 
 ## What the site runs on
 
-| Piece | Where | Notes |
-| --- | --- | --- |
-| Canonical host | `mpm.run` | Everything the site publishes lives here |
-| Hosting | Cloudflare Pages project `meta-package-manager` | Direct Upload, no Git connection |
-| Build | GitHub Actions, `.github/workflows/docs.yaml` | Sphinx `dirhtml`, then `wrangler pages deploy` |
-| Deploy target | `[tool.repomatic] site.deploy` | `cloudflare-pages`, selecting the job that publishes |
-| DNS | Cloudflare | Apex and the wildcard are **proxied**; nothing is DNS-only |
-| Redirects | `docs/_redirects` for paths, zone rules for hosts | Pages matches on path only, never on host |
-| URL shape | `/managers/apk/`, no extension | `sphinx.builder` is `dirhtml` |
-| Certificates | Cloudflare, for everything | Issued and renewed internally, no ACME, no token |
+| Piece          | Where                                             | Notes                                                      |
+| -------------- | ------------------------------------------------- | ---------------------------------------------------------- |
+| Canonical host | `mpm.run`                                         | Everything the site publishes lives here                   |
+| Hosting        | Cloudflare Pages project `meta-package-manager`   | Direct Upload, no Git connection                           |
+| Build          | GitHub Actions, `.github/workflows/docs.yaml`     | Sphinx `dirhtml`, then `wrangler pages deploy`             |
+| Deploy target  | `[tool.repomatic] site.deploy`                    | `cloudflare-pages`, selecting the job that publishes       |
+| DNS            | Cloudflare                                        | Apex and the wildcard are **proxied**; nothing is DNS-only |
+| Redirects      | `docs/_redirects` for paths, zone rules for hosts | Pages matches on path only, never on host                  |
+| URL shape      | `/managers/apk/`, no extension                    | `sphinx.builder` is `dirhtml`                              |
+| Certificates   | Cloudflare, for everything                        | Issued and renewed internally, no ACME, no token           |
 
 There are no Workers, no KV namespaces and no D1 databases. The whole edge configuration is two DNS records and two redirect rules.
 
@@ -37,14 +37,14 @@ GitHub Pages is still enabled on the repository, and should stay that way: with 
 
 Measured against a preview deployment before the cutover, because the behaviour is not what the documentation suggests:
 
-| Request | Answer | Why |
-| --- | --- | --- |
-| `/managers/apk/` | `200` | The page |
-| `/managers/apk` | `308` → `/managers/apk/` | Pages normalizes a directory to its trailing slash |
-| `/managers/apk.html` | `301` → `/managers/apk/` | `docs/_redirects`, not Pages |
-| `/usage.html` | `301` → `/cli-parameters/` | `docs/_redirects`, for a page renamed twice since 2021 |
-| `/index.html` | `308` → `/` | Pages normalization again |
-| `/nope` | `404` | `docs/404.html` |
+| Request              | Answer                     | Why                                                    |
+| -------------------- | -------------------------- | ------------------------------------------------------ |
+| `/managers/apk/`     | `200`                      | The page                                               |
+| `/managers/apk`      | `308` → `/managers/apk/`   | Pages normalizes a directory to its trailing slash     |
+| `/managers/apk.html` | `301` → `/managers/apk/`   | `docs/_redirects`, not Pages                           |
+| `/usage.html`        | `301` → `/cli-parameters/` | `docs/_redirects`, for a page renamed twice since 2021 |
+| `/index.html`        | `308` → `/`                | Pages normalization again                              |
+| `/nope`              | `404`                      | `docs/404.html`                                        |
 
 Three findings sit behind that table, and each cost a preview deployment to learn:
 
@@ -82,10 +82,10 @@ Three consequences worth keeping:
 
 Two records, and each earns its place:
 
-| Type | Name | Content | Proxied |
-| --- | --- | --- | --- |
-| CNAME | `mpm.run` | `meta-package-manager.pages.dev` | yes |
-| AAAA | `*.mpm.run` | `100::` | yes |
+| Type  | Name        | Content                          | Proxied |
+| ----- | ----------- | -------------------------------- | ------- |
+| CNAME | `mpm.run`   | `meta-package-manager.pages.dev` | yes     |
+| AAAA  | `*.mpm.run` | `100::`                          | yes     |
 
 `www.mpm.run` has no record of its own: the wildcard covers it, and the rule above redirects it. `100::` is the IPv6 discard prefix, the documented placeholder for a hostname that exists only to be intercepted at the edge — a proxied hostname needs at least one record for Cloudflare to answer for it at all, and the wildcard's traffic never reaches an origin.
 
@@ -105,11 +105,11 @@ Two files go the other way, published for consumers that never read a page: `_st
 
 The origin is declared once, as `[project.urls] Documentation` in `pyproject.toml`, because three consumers need it and only one of them can read that file:
 
-| Consumer | Reads it from | Why |
-| --- | --- | --- |
-| `docs/conf.py` | `pyproject.toml` directly | Sets `html_baseurl`, which drives canonical tags and the sitemap |
-| `meta_package_manager._docs.DOCS_SITE_URL` | Repeats the literal | Runtime code cannot read `pyproject.toml`: it is not shipped in the wheel |
-| `docs/robots.txt` | Repeats the literal | A static file with no templating |
+| Consumer                                   | Reads it from             | Why                                                                       |
+| ------------------------------------------ | ------------------------- | ------------------------------------------------------------------------- |
+| `docs/conf.py`                             | `pyproject.toml` directly | Sets `html_baseurl`, which drives canonical tags and the sitemap          |
+| `meta_package_manager._docs.DOCS_SITE_URL` | Repeats the literal       | Runtime code cannot read `pyproject.toml`: it is not shipped in the wheel |
+| `docs/robots.txt`                          | Repeats the literal       | A static file with no templating                                          |
 
 `test_docs_site_url_matches_pyproject` fails when the first two drift apart.
 

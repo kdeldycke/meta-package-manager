@@ -214,6 +214,15 @@ plugin's. That is what identifies Xbar's status item, which cannot be asked for
 by name: the app answers no accessibility at all.
 """
 
+CLOCK_STAMP: str | None = None
+"""The reading the clock is held at, in the form `date` takes.
+
+Computed once, and re-applied before every shot: pinning the clock stops it
+being corrected, not being a clock. Left to tick, it drifted from `10:32` on
+the first capture to `10:53` on the last, so every image carried a different
+menu bar and the whole set churned anyway (run 32573216871).
+"""
+
 CLOCK_TIME = (10, 30)
 """Hour and minute the menu bar clock is held at, in 24-hour form.
 
@@ -869,9 +878,10 @@ def pin_clock() -> bool:
     pinned = time.mktime(target[:3] + (hour, minute, 0) + target[6:])
     if pinned > now:
         pinned -= 24 * 60 * 60
-    stamp = time.strftime("%m%d%H%M", time.localtime(pinned))
+    global CLOCK_STAMP
+    CLOCK_STAMP = time.strftime("%m%d%H%M", time.localtime(pinned))
     run(("sudo", "systemsetup", "-setusingnetworktime", "off"), check=False)
-    run(("sudo", "date", stamp), check=False)
+    hold_clock()
     time.sleep(8)
 
     # Two things have to hold, and each fails silently on its own. The clock
@@ -890,6 +900,17 @@ def pin_clock() -> bool:
         print(f"  the clock still carries its date ({wide}), keeping it out of frame")
         return False
     return True
+
+
+def hold_clock() -> None:
+    """Put the clock back to {data}`CLOCK_STAMP`, as computed at pin time.
+
+    Never recomputed: by the second call the machine already believes it is
+    `10:30`, so asking for the most recent past `10:30` would answer yesterday
+    and walk the date back a day per shot.
+    """
+    if CLOCK_STAMP is not None:
+        run(("sudo", "date", CLOCK_STAMP), check=False)
 
 
 def unpin_clock() -> None:
@@ -1043,6 +1064,10 @@ def capture(shot: Shot, plugins: Path) -> None:
     # status item the menu hangs off is in frame the way the GNOME captures
     # include the top bar. Otherwise the frame starts at the menu.
     top = 0.0 if CLOCK_PINNED else bounds["y"]
+    # As late as it can be: the strip is in the frame from here on, and the
+    # clock has been ticking since the last shot.
+    if CLOCK_PINNED:
+        hold_clock()
     rect = f"{bounds['x']},{top},{bounds['right'] - bounds['x']},{bottom - top}"
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
 

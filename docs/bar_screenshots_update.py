@@ -161,6 +161,50 @@ are `2x`. Height is what a menu runs out of, so the tallest mode is the one
 worth having.
 """
 
+MENU_BAR_MODULES = (
+    "AccessibilityShortcuts",
+    "AirDrop",
+    "Bluetooth",
+    "Display",
+    "FocusModes",
+    "Hearing",
+    "KeyboardBrightness",
+    "MusicRecognition",
+    "ScreenMirroring",
+    "Sound",
+    "StageManager",
+    "UserSwitcher",
+    "VoiceControl",
+    "WiFi",
+)
+"""Control Center modules put into the menu bar, to widen the system cluster.
+
+macOS packs its own items against the right edge and gives an app the room to
+their left, so every module shown here pushes the plugin's item further left,
+which is the whole point: Xbar opens a submenu to the left of its parent when
+the parent already sits against the screen edge.
+
+Every one of these draws the same picture on every run. The three left out do
+not: `Battery` reads a percentage, `Weather` a temperature, and `NowPlaying`
+appears only while something plays.
+"""
+
+SPACER_NAME = "aaa-spacer.1h.sh"
+"""Filename of a plugin that draws nothing but takes up room.
+
+The system modules above are not enough on their own, and this makes up the
+rest. It sorts before the real plugin so the host loads it first, which is what
+puts the real one to its left: AppKit gives each new status item the leftmost
+slot among an app's own.
+"""
+
+SPACER_WIDTH = 90
+"""Spaces the spacer's title carries, and so roughly how wide it draws.
+
+Blank rather than an icon, because whatever it drew would be in frame and would
+have to mean something. A gap means nothing, which is what is wanted.
+"""
+
 PLUGIN_NAME = "mpm.1h.sh"
 """Filename the plugin is planted under, which is also the name AppKit keys its
 status item's remembered position by.
@@ -558,6 +602,15 @@ def write_plugin(plugins: Path, shot: Shot) -> None:
     script.write_text(body, encoding="UTF-8")
     script.chmod(0o755)
 
+    # `trim=false` or the host strips the title back to nothing and the item
+    # collapses, taking the room it was planted for with it.
+    spacer = plugins / SPACER_NAME
+    spacer.write_text(
+        "#!/bin/bash\necho '" + " " * SPACER_WIDTH + "| trim=false'\n",
+        encoding="UTF-8",
+    )
+    spacer.chmod(0o755)
+
 
 def position_keys(plugins: Path) -> tuple[str, ...]:
     """Every spelling of the autosave name a host may key its item by.
@@ -839,6 +892,43 @@ def mouse(kind: str, left: float, top: float) -> None:
             str(top),
         )
     )
+
+
+def fill_menu_bar() -> None:
+    """Show every menu bar module macOS draws the same way twice.
+
+    `18` is the value the Control Center settings pane writes for a module in
+    the menu bar, against `8` for one that stays inside Control Center. The
+    codes are per-host, unlike the status item keys beside them.
+    """
+    for module in MENU_BAR_MODULES:
+        run(
+            ("defaults", "-currentHost", "write", "com.apple.controlcenter",
+             module, "-int", "18"),
+            check=False,
+        )
+    # The input menu is not a Control Center module and keeps its own domain.
+    run(
+        ("defaults", "write", "com.apple.TextInputMenu", "visible", "-bool", "true"),
+        check=False,
+    )
+    run(("killall", "ControlCenter"), check=False)
+    run(("killall", "SystemUIServer"), check=False)
+    time.sleep(10)
+
+
+def report_menu_bar(label: str) -> None:
+    """Print every window in the menu bar, left to right.
+
+    The one measurement that answers how much room the plugin's item has, and
+    the only way to tell which modules a runner actually draws: a VM has no
+    battery, no Bluetooth radio and no keyboard backlight, and a module macOS
+    cannot draw is simply absent rather than an error.
+    """
+    boxes = sorted(menu_bar_windows(low=1, high=10_000), key=lambda box: box["x"])
+    print(f"  menu bar after {label}:")
+    for box in boxes:
+        print(f"    x={box['x']:>6} w={box['width']:>5} h={box['height']}")
 
 
 def pin_clock() -> bool:
@@ -1145,7 +1235,10 @@ def capture_all() -> None:
     raise_display()
     spend_consent_prompt()
     global CLOCK_PINNED, SYSTEM_ITEMS_EDGE
+    report_menu_bar("startup")
+    fill_menu_bar()
     CLOCK_PINNED = pin_clock()
+    report_menu_bar("filling it and pinning the clock")
     # After the clock is pinned, since pinning changes its width, and before
     # either host starts, since the point is a menu bar holding nothing of ours.
     SYSTEM_ITEMS_EDGE = measure_system_items()
@@ -1174,6 +1267,7 @@ def capture_all() -> None:
                 plugins.mkdir(parents=True, exist_ok=True)
                 if shot.host.plugin_dir is not None:
                     planted.append(plugins / PLUGIN_NAME)
+                    planted.append(plugins / SPACER_NAME)
                 try:
                     capture(shot, plugins)
                 except Exception:

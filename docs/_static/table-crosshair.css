@@ -20,12 +20,6 @@ tr.crosshair-row > th {
   background-color: var(--color-background-hover, rgba(128, 128, 128, 0.12));
 }
 
-/* Emphasize the anchors of the crosshair: the column header and the row label. */
-table thead th.crosshair-col,
-tr.crosshair-row > :first-child {
-  font-weight: 700;
-}
-
 /* The hovered cell itself: stronger highlight plus an outline, so the
  * (row, column) intersection is unambiguous. */
 table td.crosshair-cell,

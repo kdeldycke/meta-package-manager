@@ -223,7 +223,7 @@ $ sudo zypper install --allow-unsigned-rpm ~/rpmbuild/RPMS/noarch/meta-package-m
 Every runtime dependency is already packaged in Tumbleweed, so this is the one channel whose spec introduces no dependency of its own. The package is built for the primary Python flavor alone and keeps an unsuffixed `/usr/bin/mpm`, the shape openSUSE gives an application rather than a library, and its `%check` phase runs the hermetic layer with `pytest -m "not integration"`.
 
 ```{note}
-The package is not in openSUSE proper yet: it is being prepared for submission to the `devel:languages:python` development project, the route to Tumbleweed and then Leap. The home-project repository above is the supported install in the meantime. [`zypper`](managers/zypper.md) is itself one of the managers `mpm` drives.
+The package is not in openSUSE proper yet: it is being prepared for submission to the `system:packagemanager` development project, the route to Tumbleweed and then Leap. The home-project repository above is the supported install in the meantime. [`zypper`](managers/zypper.md) is itself one of the managers `mpm` drives.
 ```
 
 ### Void Linux

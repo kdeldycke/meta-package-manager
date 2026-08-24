@@ -14,7 +14,7 @@ name: 🦎 Validate openSUSE spec
   workflow_dispatch:
 
 # Temporary workflow validating packaging/opensuse/ before it is submitted to
-# openSUSE's devel:languages:python. Three independent signals, each in its own
+# openSUSE's system:packagemanager. Three independent signals, each in its own
 # job so a failure names itself: the spec's form (rpmlint, spec-cleaner), the
 # build (rpmbuild, whose %check phase runs mpm's own hermetic test suite), and
 # the installed package driving the container's real zypper.

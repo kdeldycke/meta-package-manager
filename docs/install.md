@@ -271,7 +271,7 @@ Every dependency comes from Tumbleweed itself, so nothing else is added to your 
 
 ````{admonition} Help land it in openSUSE Factory
 :class: important
-The repository above is a personal project on the Open Build Service. The package is being prepared for submission to `devel:languages:python`, the development project through which it would reach Tumbleweed and then Leap. Once accepted, installation needs no extra repository:
+The repository above is a personal project on the Open Build Service. The package is being prepared for submission to `system:packagemanager`, the development project through which it would reach Tumbleweed and then Leap. Once accepted, installation needs no extra repository:
 
 ```{code-block} shell-session
 $ sudo zypper install meta-package-manager

@@ -2,6 +2,16 @@
 name: 📸 Documentation screenshots
 "on":
   workflow_dispatch:
+    inputs:
+      capture_screens:
+        description: >
+          Photograph the whole screen beside every macOS shot. Off by default,
+          and worth knowing why: each capture is another chance for macOS to
+          raise its screen-recording consent sheet, which is the kind of thing
+          that lands in a frame uninvited, so the diagnostic makes what it looks
+          for more likely the longer it runs.
+        type: boolean
+        default: false
   push:
     branches:
       - main
@@ -212,6 +222,8 @@ jobs:
         run: uv --no-progress sync --frozen --all-extras --all-groups
 
       - name: Capture the menus
+        env:
+          MPM_CAPTURE_SCREENS: ${{ inputs.capture_screens && '1' || '' }}
         run: >
           uv --no-progress run --frozen -- python docs/bar_screenshots_update.py
           --diagnostics "${RUNNER_TEMP}/diagnostics"

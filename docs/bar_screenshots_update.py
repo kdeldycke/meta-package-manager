@@ -263,6 +263,13 @@ plugin's. That is what identifies Xbar's status item, which cannot be asked for
 by name: the app answers no accessibility at all.
 """
 
+CLOCK_EPOCH: float | None = None
+"""The instant the clock is held at, in epoch seconds.
+
+Kept beside the stamp below rather than parsed back out of it: a stamp carries
+no year, which Python warns about reading today and refuses in `3.15`.
+"""
+
 CLOCK_STAMP: str | None = None
 """The reading the clock is held at, in the form `date` takes.
 
@@ -277,6 +284,22 @@ CLOCK_REPAINT_WAIT = 5
 
 Long enough to cover the minute boundary {func}`hold_clock` lands just short
 of, with the shot then taken well inside the minute that follows.
+"""
+
+PLUGIN_AGE = 300
+"""Seconds the plugin's last run is made to look old, before each shot.
+
+SwiftBar's footer carries the age of that run, formatted by
+`RelativeDateTimeFormatter`, so a few seconds of it reads to the second and
+rewrites the image every run. Minutes are a coarser bucket: the clock is wound
+back this far before the host starts, and forward to the pinned reading before
+the shutter, which lands the footer mid-way through a minute where the twenty
+seconds of jitter in a launch cannot reach either boundary.
+
+Kept to five minutes rather than the hours that would be coarser still: the
+wind forward is the one jump this driver makes in the direction a job's timeout
+is measured in, so it stays far shorter than the timeout it could otherwise eat
+into.
 """
 
 CLOCK_TIME = (10, 30)
@@ -1048,7 +1071,8 @@ def pin_clock() -> bool:
     pinned = time.mktime(target[:3] + (hour, minute, 0) + target[6:])
     if pinned > now:
         pinned -= 24 * 60 * 60
-    global CLOCK_STAMP
+    global CLOCK_EPOCH, CLOCK_STAMP
+    CLOCK_EPOCH = pinned
     CLOCK_STAMP = time.strftime(
         "%m%d%H%M.%S", time.localtime(pinned - CLOCK_REPAINT_WAIT + 2)
     )
@@ -1072,6 +1096,14 @@ def pin_clock() -> bool:
         return False
     print(f"  the clock reads {reading}")
     return True
+
+
+def age_plugin_run() -> None:
+    """Wind the clock back, so whatever runs next looks {data}`PLUGIN_AGE` old."""
+    if CLOCK_EPOCH is None:
+        return
+    stamp = time.strftime("%m%d%H%M.%S", time.localtime(CLOCK_EPOCH - PLUGIN_AGE))
+    run(("sudo", "date", stamp), check=False)
 
 
 def hold_clock() -> None:
@@ -1215,6 +1247,10 @@ def capture(shot: Shot, plugins: Path) -> None:
     """Render one shot's menu, open it, and photograph it."""
     print(f"Capturing {shot.path.name}")
     write_plugin(plugins, shot)
+    # Before the host starts, since what it reports is the age of the plugin's
+    # run and that run happens as it comes up.
+    if CLOCK_PINNED:
+        age_plugin_run()
     restart(shot.host, plugins)
 
     mouse("click", *status_item(shot.host))
@@ -1258,16 +1294,16 @@ def capture(shot: Shot, plugins: Path) -> None:
     if DIAGNOSTICS:
         report_windows(shot.stem)
         print(f"  frame: {rect}")
+        if CAPTURE_SCREENS:
+            DIAGNOSTICS.mkdir(parents=True, exist_ok=True)
+            run(
+                (
+                    "screencapture", "-x", "-o", "-t", "png",
+                    str(DIAGNOSTICS / f"{shot.stem}-screen.png"),
+                ),
+                check=False,
+            )
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
-    if DIAGNOSTICS and CAPTURE_SCREENS:
-        DIAGNOSTICS.mkdir(parents=True, exist_ok=True)
-        run(
-            (
-                "screencapture", "-x", "-o", "-t", "png",
-                str(DIAGNOSTICS / f"{shot.stem}-screen.png"),
-            ),
-            check=False,
-        )
 
     # Dismiss the menu so the next shot starts from a bare desktop.
     press_escape()

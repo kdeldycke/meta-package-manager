@@ -49,10 +49,24 @@ jobs:
     container:
       image: opensuse/tumbleweed
     steps:
+      - name: Refresh repositories
+        # The opensuse/tumbleweed image ships a metadata cache that can name a
+        # snapshot the mirrors have already rotated past, so a first refresh
+        # fails with "Failed to retrieve new repository metadata" on a tree that
+        # is otherwise fine. Dropping the cache and retrying absorbs that; a
+        # real outage still exhausts the attempts and fails the job.
+        run: |
+          set -eux
+          zypper --non-interactive clean --all
+          for attempt in 1 2 3; do
+            zypper --non-interactive --gpg-auto-import-keys refresh && exit 0
+            echo "refresh attempt ${attempt} failed, retrying" >&2
+            sleep 15
+          done
+          exit 1
       - name: Install build tooling
         run: |
           set -eux
-          zypper --non-interactive --gpg-auto-import-keys refresh
           zypper --non-interactive install --no-recommends \
             curl \
             git \
@@ -129,10 +143,20 @@ jobs:
     container:
       image: opensuse/tumbleweed
     steps:
+      - name: Refresh repositories
+        # Retried against stale image metadata, as in the build-rpm job above.
+        run: |
+          set -eux
+          zypper --non-interactive clean --all
+          for attempt in 1 2 3; do
+            zypper --non-interactive --gpg-auto-import-keys refresh && exit 0
+            echo "refresh attempt ${attempt} failed, retrying" >&2
+            sleep 15
+          done
+          exit 1
       - name: Install lint tooling
         run: |
           set -eux
-          zypper --non-interactive --gpg-auto-import-keys refresh
           zypper --non-interactive install --no-recommends \
             git \
             python-rpm-macros \
@@ -181,7 +205,16 @@ jobs:
       image: opensuse/tumbleweed
     steps:
       - name: Refresh repositories
-        run: zypper --non-interactive --gpg-auto-import-keys refresh
+        # Retried against stale image metadata, as in the build-rpm job above.
+        run: |
+          set -eux
+          zypper --non-interactive clean --all
+          for attempt in 1 2 3; do
+            zypper --non-interactive --gpg-auto-import-keys refresh && exit 0
+            echo "refresh attempt ${attempt} failed, retrying" >&2
+            sleep 15
+          done
+          exit 1
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: opensuse-rpm

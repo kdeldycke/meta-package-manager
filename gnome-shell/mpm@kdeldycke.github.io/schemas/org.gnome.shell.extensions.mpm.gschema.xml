@@ -21,6 +21,11 @@
       <summary>Check interval (minutes)</summary>
       <description>Time between two package checks. The default mirrors the 7-hour cycle of the Xbar/SwiftBar plugin: checks are resource intensive and package managers like Homebrew may hit GitHub API quotas when refreshed too often.</description>
     </key>
+    <key name="group-by-manager" type="b">
+      <default>false</default>
+      <summary>Group packages by manager</summary>
+      <description>Mirror of the Xbar/SwiftBar plugin VAR_GROUP_BY_MANAGER variable: give each package manager a section that expands on a click, instead of listing every package inline.</description>
+    </key>
     <key name="mpm-command" type="s">
       <default>''</default>
       <summary>mpm command override</summary>
@@ -41,11 +46,6 @@
       <default>true</default>
       <summary>Show the outdated package count</summary>
       <description>Display the number of outdated packages next to the indicator icon.</description>
-    </key>
-    <key name="submenu-layout" type="b">
-      <default>false</default>
-      <summary>Group packages into per-manager submenus</summary>
-      <description>Mirror of the Xbar/SwiftBar plugin VAR_SUBMENU_LAYOUT variable: collapse each package manager section into its own submenu instead of listing everything inline.</description>
     </key>
     <key name="terminal-command" type="s">
       <default>''</default>

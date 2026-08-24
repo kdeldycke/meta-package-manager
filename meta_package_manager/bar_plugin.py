@@ -10,7 +10,7 @@
 # XXX Quotes around default values are required by SwiftBar, and optional in Xbar, which
 # strips them. Unquoted, the variable is silently ignored by SwiftBar and never reaches
 # its settings UI.
-# <xbar.var>boolean(VAR_SUBMENU_LAYOUT="false"): Group packages into a sub-menu for each manager.</xbar.var>
+# <xbar.var>boolean(VAR_GROUP_BY_MANAGER="false"): Group each manager's packages into a section of its own.</xbar.var>
 # <xbar.var>boolean(VAR_TABLE_RENDERING="true"): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
 # XXX Font options are declared SwiftBar-only, as Xbar truncates a default value at its
 # first `=` character. See: https://github.com/matryer/xbar/issues/832

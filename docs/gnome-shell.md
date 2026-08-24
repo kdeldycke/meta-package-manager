@@ -109,7 +109,7 @@ Settings live in the extension preferences window, also reachable from the indic
 
 | Setting                | Description                                                     | Type    | Default |
 | ---------------------- | --------------------------------------------------------------- | ------- | ------- |
-| `submenu-layout`       | Group packages into a sub-menu for each manager.                | Boolean | `false` |
+| `group-by-manager`       | Group each manager's packages into a section of its own.        | Boolean | `false` |
 | `check-interval`       | Minutes between two package checks.                             | Integer | `420`   |
 | `boot-wait`            | Seconds before the first check after login.                     | Integer | `30`    |
 | `timeout`              | Seconds passed to `mpm --timeout` for background checks.        | Integer | `60`    |
@@ -159,7 +159,7 @@ The `flatpak` section also carries a manager error, which the menu renders as a 
 `````{tab-item} Light
 :sync: light
 
-```{image} assets/gnome-shell-flatmenu-light.png
+```{image} assets/gnome-shell-flat-light.png
 :alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
 :align: center
 :scale: 50
@@ -169,7 +169,7 @@ The `flatpak` section also carries a manager error, which the menu renders as a 
 `````{tab-item} Dark
 :sync: dark
 
-```{image} assets/gnome-shell-flatmenu-dark.png
+```{image} assets/gnome-shell-flat-dark.png
 :alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
 :align: center
 :scale: 50
@@ -177,14 +177,14 @@ The `flatpak` section also carries a manager error, which the menu renders as a 
 `````
 ``````
 
-With `submenu-layout` enabled, each manager collapses into a submenu of its own, and the one that reported an error takes the `dialog-warning-symbolic` icon documented above:
+With `group-by-manager` enabled, each manager gets a section that expands on a click, and the one that reported an error takes the `dialog-warning-symbolic` icon documented above:
 
 ``````{tab-set}
 `````{tab-item} Light
 :sync: light
 
-```{image} assets/gnome-shell-submenu-light.png
-:alt: The extension's menu with one submenu per package manager, the failing one carrying a warning icon
+```{image} assets/gnome-shell-grouped-light.png
+:alt: The extension's menu with one section per package manager, the failing one carrying a warning icon
 :align: center
 :scale: 50
 ```
@@ -193,8 +193,8 @@ With `submenu-layout` enabled, each manager collapses into a submenu of its own,
 `````{tab-item} Dark
 :sync: dark
 
-```{image} assets/gnome-shell-submenu-dark.png
-:alt: The extension's menu with one submenu per package manager, the failing one carrying a warning icon
+```{image} assets/gnome-shell-grouped-dark.png
+:alt: The extension's menu with one section per package manager, the failing one carrying a warning icon
 :align: center
 :scale: 50
 ```

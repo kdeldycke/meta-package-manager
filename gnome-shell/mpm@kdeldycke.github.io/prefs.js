@@ -51,8 +51,8 @@ export default class MpmPreferences extends ExtensionPreferences {
         page.add(indicator);
 
         const menu = new Adw.PreferencesGroup({title: _('Menu')});
-        menu.add(this._switchRow(settings, 'submenu-layout', {
-            title: _('Group packages into per-manager submenus'),
+        menu.add(this._switchRow(settings, 'group-by-manager', {
+            title: _('Group packages by manager'),
         }));
         page.add(menu);
 

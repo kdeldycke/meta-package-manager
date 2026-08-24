@@ -96,15 +96,18 @@ class BarPluginRenderer(MPMPlugin):
     """
 
     @cached_property
-    def submenu_layout(self) -> bool:
-        """Group packages into manager sub-menus.
+    def group_by_manager(self) -> bool:
+        """Give each manager a section of its own, in place of one flat list.
 
-        If `True`, will replace the default flat layout with an alternative structure
-        where actions are grouped into submenus, one for each manager.
+        How that section is drawn is the host's business, and no two draw it
+        alike: Xbar opens a fly-out sub-menu, SwiftBar folds an accordion into
+        the menu it came from, and the GNOME Shell extension expands inline. So
+        the name says what the grouping *is* rather than what any one of them
+        makes of it.
 
-        Value is sourced from the `VAR_SUBMENU_LAYOUT` environment variable.
+        Value is sourced from the `VAR_GROUP_BY_MANAGER` environment variable.
         """
-        return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)
+        return self.getenv_bool("VAR_GROUP_BY_MANAGER", False)
 
     @cached_property
     def fold_sections(self) -> bool:
@@ -116,11 +119,11 @@ class BarPluginRenderer(MPMPlugin):
         the menu, and the expanded state survives a refresh
         ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)).
 
-        Depends on {attr}`submenu_layout` for the children it folds. Xbar has no
+        Depends on {attr}`group_by_manager` for the children it folds. Xbar has no
         equivalent and ignores the parameter, so the grouped layout keeps its
         sub-menus there.
         """
-        return self.submenu_layout and self.is_swiftbar
+        return self.group_by_manager and self.is_swiftbar
 
     @cached_property
     def own_panel_per_manager(self) -> bool:
@@ -131,7 +134,7 @@ class BarPluginRenderer(MPMPlugin):
         from, and the flat layout never left it, so everywhere else every
         package sits in one continuous column.
         """
-        return self.submenu_layout and not self.fold_sections
+        return self.group_by_manager and not self.fold_sections
 
     @cached_property
     def menu_diff_colors(self) -> dict[str, int]:
@@ -217,7 +220,7 @@ class BarPluginRenderer(MPMPlugin):
     def print_upgrade_all_item(self, manager: dict, submenu: str = "") -> None:
         """Print the menu entry to upgrade all outdated package of a manager."""
         if manager.get("upgrade_all_cli"):
-            if self.submenu_layout:
+            if self.group_by_manager:
                 print("-----")
             self.print_cli_item(
                 f"{submenu}🆙 Upgrade all {manager['id']} packages",
@@ -327,7 +330,7 @@ class BarPluginRenderer(MPMPlugin):
         )
 
         # Prefix for section content.
-        submenu = "--" if self.submenu_layout else ""
+        submenu = "--" if self.group_by_manager else ""
 
         rows_by_manager = {
             manager["id"]: self.package_rows(manager) for manager in managers
@@ -377,7 +380,7 @@ class BarPluginRenderer(MPMPlugin):
 
             # Print section header.
             error = ""
-            if self.submenu_layout and manager.get("errors", None):
+            if self.group_by_manager and manager.get("errors", None):
                 error = "⚠️ "
             self.pp(
                 f"{error}{header}",
@@ -401,7 +404,7 @@ class BarPluginRenderer(MPMPlugin):
             self.print_upgrade_all_item(manager, submenu)
 
             for error_msg in manager.get("errors", []):
-                print("-----" if self.submenu_layout else "---")
+                print("-----" if self.group_by_manager else "---")
                 # Error lines are marked ansi=false, and plugin output is
                 # echoed with colors forced, so any ANSI code captured from a
                 # manager's own output would reach the bar app as raw text.

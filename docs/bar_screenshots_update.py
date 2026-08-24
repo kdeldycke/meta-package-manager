@@ -292,7 +292,7 @@ class Shot(NamedTuple):
     """One captured image: a host, the two plugin variables, and an appearance."""
 
     host: Host
-    submenu_layout: bool
+    group_by_manager: bool
     table_rendering: bool
     dark: bool
 
@@ -301,7 +301,7 @@ class Shot(NamedTuple):
         """File stem, naming every axis that shapes the image."""
         return "-".join((
             self.host.name.lower(),
-            "submenu" if self.submenu_layout else "flatmenu",
+            "grouped" if self.group_by_manager else "flat",
             "table" if self.table_rendering else "standard",
             "rendering",
             "dark" if self.dark else "light",
@@ -322,7 +322,7 @@ class Shot(NamedTuple):
         """
         return {
             **self.host.environment,
-            "VAR_SUBMENU_LAYOUT": str(self.submenu_layout).lower(),
+            "VAR_GROUP_BY_MANAGER": str(self.group_by_manager).lower(),
             "VAR_TABLE_RENDERING": str(self.table_rendering).lower(),
             "OS_APPEARANCE": "Dark" if self.dark else "Light",
         }
@@ -1161,7 +1161,7 @@ def capture(shot: Shot, plugins: Path) -> None:
         msg = f"{shot.stem}: no menu opened"
         raise RuntimeError(msg)
 
-    if shot.submenu_layout:
+    if shot.group_by_manager:
         expand_first_section(shot.host, bounds)
         bounds = menu_bounds(shot.host)
         if bounds is None:

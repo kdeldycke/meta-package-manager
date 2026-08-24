@@ -124,7 +124,7 @@ def _pin_plugin_env(
         "VAR_DEFAULT_FONT",
         "VAR_HIDE_WHEN_UP_TO_DATE",
         "VAR_MONOSPACE_FONT",
-        "VAR_SUBMENU_LAYOUT",
+        "VAR_GROUP_BY_MANAGER",
     ):
         monkeypatch.delenv(var, raising=False)
     if os_appearance is None:
@@ -243,7 +243,7 @@ def test_renderer_sanitizes_error_lines(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    ("is_swiftbar", "submenu_layout", "table_rendering", "outdated", "expected"),
+    ("is_swiftbar", "group_by_manager", "table_rendering", "outdated", "expected"),
     (
         # Xbar renders neither parameter, so the count stays in the label.
         (False, False, True, True, "fakemanager - 2 packages | font=Menlo size=12"),
@@ -262,12 +262,12 @@ def test_renderer_sanitizes_error_lines(monkeypatch):
     ),
 )
 def test_renderer_section_header(
-    monkeypatch, is_swiftbar, submenu_layout, table_rendering, outdated, expected
+    monkeypatch, is_swiftbar, group_by_manager, table_rendering, outdated, expected
 ):
     """The section header carries an actionable count badge and an accordion
     toggle on SwiftBar, and the labelled count everywhere else."""
     _pin_plugin_env(monkeypatch, table_rendering=table_rendering)
-    monkeypatch.setenv("VAR_SUBMENU_LAYOUT", str(submenu_layout))
+    monkeypatch.setenv("VAR_GROUP_BY_MANAGER", str(group_by_manager))
     if is_swiftbar:
         monkeypatch.setenv("SWIFTBAR", "1")
 
@@ -537,9 +537,9 @@ class TestBarPlugin:
                 assert "\x1b[" in line
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
-    @pytest.mark.parametrize("submenu_layout", (True, False, None))
+    @pytest.mark.parametrize("group_by_manager", (True, False, None))
     @pytest.mark.parametrize("table_rendering", (True, False, None))
-    def test_rendering(self, submenu_layout, table_rendering):
+    def test_rendering(self, group_by_manager, table_rendering):
         extra_checks: list[tuple[str, bool]] = []
         # XXX Package upgrade line is not required, as it may be skipped in the
         # final rendering of the plugin if no outdated packages are found:
@@ -584,8 +584,8 @@ class TestBarPlugin:
             )
 
         extra_env = {}
-        if submenu_layout is not None:
-            extra_env["VAR_SUBMENU_LAYOUT"] = str(submenu_layout)
+        if group_by_manager is not None:
+            extra_env["VAR_GROUP_BY_MANAGER"] = str(group_by_manager)
         if table_rendering is not None:
             extra_env["VAR_TABLE_RENDERING"] = str(table_rendering)
 

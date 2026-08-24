@@ -324,11 +324,11 @@ class MpmIndicator extends PanelMenu.Button {
             return;
         }
 
-        const submenuLayout = this._settings.get_boolean('submenu-layout');
+        const groupByManager = this._settings.get_boolean('group-by-manager');
         lastModel.managers.forEach((manager, index) => {
             const count = manager.packages.length;
             const packageLabel = ngettext('package', 'packages', count);
-            if (submenuLayout) {
+            if (groupByManager) {
                 /* Submenu header mirrors the table-mode section title. Where
                  * the bar plugin prefixes a ⚠️ character, this marks the same
                  * fact with the themed warning icon: an emoji is a font

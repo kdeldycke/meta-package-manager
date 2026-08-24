@@ -188,7 +188,7 @@ class Shot(NamedTuple):
 
     stem: str
     dark: bool
-    submenu_layout: bool = False
+    group_by_manager: bool = False
     preferences: bool = False
     """Photograph the preferences window instead of the indicator menu."""
 
@@ -199,10 +199,10 @@ class Shot(NamedTuple):
 
 
 SHOTS = (
-    Shot("gnome-shell-flatmenu-light", dark=False),
-    Shot("gnome-shell-flatmenu-dark", dark=True),
-    Shot("gnome-shell-submenu-light", dark=False, submenu_layout=True),
-    Shot("gnome-shell-submenu-dark", dark=True, submenu_layout=True),
+    Shot("gnome-shell-flat-light", dark=False),
+    Shot("gnome-shell-flat-dark", dark=True),
+    Shot("gnome-shell-grouped-light", dark=False, group_by_manager=True),
+    Shot("gnome-shell-grouped-dark", dark=True, group_by_manager=True),
     Shot("gnome-shell-preferences-light", dark=False, preferences=True),
     Shot("gnome-shell-preferences-dark", dark=True, preferences=True),
 )
@@ -854,8 +854,8 @@ def capture_menu(shot: Shot, scratch: Path, schema_dir: Path) -> None:
     marker.unlink(missing_ok=True)
     gsettings(
         SCHEMA_ID,
-        "submenu-layout",
-        "true" if shot.submenu_layout else "false",
+        "group-by-manager",
+        "true" if shot.group_by_manager else "false",
         schema_dir=schema_dir,
     )
 

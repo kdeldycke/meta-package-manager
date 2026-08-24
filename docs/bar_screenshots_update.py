@@ -1243,21 +1243,21 @@ def capture(shot: Shot, plugins: Path) -> None:
             msg = f"{shot.stem}: the menu closed while opening a group"
             raise RuntimeError(msg)
 
-    bottom = bounds["bottom"]
+    # The margin is added before the host's own rows are cut off, not after:
+    # the other way round it hands back the very thing the cut removes, and the
+    # first run with a margin photographed SwiftBar's own entry (run
+    # 32720404121).
+    width, height = DISPLAY_MODE
+    bottom = min(float(height), bounds["bottom"] + CAPTURE_MARGIN)
     chrome = chrome_top(shot.host)
     if chrome is not None:
         bottom = min(bottom, chrome - 1)
-    # Anchored at the top of the screen when the clock could be hidden, so the
-    # status item the menu hangs off is in frame the way the GNOME captures
-    # include the top bar. Otherwise the frame starts at the menu.
     # Anchored at the top of the screen when the clock is pinned: the menu bar
     # is part of the subject, the plugin's own title being what the menu hangs
-    # off. Otherwise the frame starts at the menu.
+    # off. Otherwise the frame starts a margin above the menu.
     top = 0.0 if CLOCK_PINNED else max(0.0, bounds["y"] - CAPTURE_MARGIN)
     left = max(0.0, bounds["x"] - CAPTURE_MARGIN)
-    width, height = DISPLAY_MODE
     right = min(float(width), bounds["right"] + CAPTURE_MARGIN)
-    bottom = min(float(height), bottom + CAPTURE_MARGIN)
     # As late as it can be: the strip is in the frame from here on, and the
     # clock has been ticking since the last shot.
     if CLOCK_PINNED:

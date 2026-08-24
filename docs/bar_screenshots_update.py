@@ -1145,7 +1145,7 @@ for (let i = 0; i < list.count; i++) {
     const b = ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds"));
     rows.push(`layer=${layer} owner=${owner} x=${b.X} y=${b.Y} w=${b.Width} h=${b.Height}`);
 }
-rows.join("\n");
+rows.join(String.fromCharCode(10));
 """,
         language="JXA",
     )

@@ -245,10 +245,12 @@ jobs:
             echo "| Xbar | ${xbar} |"
           } | tee -a "${GITHUB_STEP_SUMMARY}"
 
-      # What was on screen when a shot failed, which is the only thing that
-      # settles a host whose own process answers nothing.
+      # What was on screen, which is the only thing that settles a host whose
+      # own process answers nothing. Uploaded whether or not the captures
+      # worked: a shot that comes back wrong rather than missing leaves the job
+      # green and the evidence is gone by the time anyone looks at the image.
       - name: Upload the diagnostics
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bar-diagnostics

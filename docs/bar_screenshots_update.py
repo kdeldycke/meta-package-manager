@@ -1290,7 +1290,17 @@ def capture(shot: Shot, plugins: Path) -> None:
     rect = f"{left},{top},{right - left},{bottom - top}"
     if DIAGNOSTICS:
         report_windows(shot.stem)
+        print(f"  frame: {rect}")
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
+    if DIAGNOSTICS:
+        DIAGNOSTICS.mkdir(parents=True, exist_ok=True)
+        run(
+            (
+                "screencapture", "-x", "-o", "-t", "png",
+                str(DIAGNOSTICS / f"{shot.stem}-screen.png"),
+            ),
+            check=False,
+        )
 
     # Dismiss the menu so the next shot starts from a bare desktop.
     press_escape()

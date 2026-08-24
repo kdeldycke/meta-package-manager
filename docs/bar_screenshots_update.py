@@ -1129,6 +1129,31 @@ def press_escape() -> None:
     )
 
 
+def report_windows(label: str) -> None:
+    """Print every window above the desktop, with the process that owns it."""
+    reply = osascript(
+        """
+ObjC.import("CoreGraphics");
+ObjC.import("Foundation");
+const raw = $.CGWindowListCopyWindowInfo(17, 0);
+const list = ObjC.castRefToObject(raw);
+const rows = [];
+for (let i = 0; i < list.count; i++) {
+    const w = list.objectAtIndex(i);
+    const layer = ObjC.unwrap(w.objectForKey("kCGWindowLayer"));
+    const owner = ObjC.unwrap(w.objectForKey("kCGWindowOwnerName"));
+    const b = ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds"));
+    rows.push(`layer=${layer} owner=${owner} x=${b.X} y=${b.Y} w=${b.Width} h=${b.Height}`);
+}
+rows.join("\n");
+""",
+        language="JXA",
+    )
+    print(f"  windows at {label}:")
+    for row in reply.splitlines():
+        print(f"    {row}")
+
+
 def menu_bounds(host: Host) -> dict[str, float] | None:
     """Box enclosing every menu the host currently has open.
 
@@ -1263,6 +1288,8 @@ def capture(shot: Shot, plugins: Path) -> None:
     if CLOCK_PINNED:
         hold_clock()
     rect = f"{left},{top},{right - left},{bottom - top}"
+    if DIAGNOSTICS:
+        report_windows(shot.stem)
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
 
     # Dismiss the menu so the next shot starts from a bare desktop.

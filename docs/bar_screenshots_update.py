@@ -98,15 +98,6 @@ class Host(NamedTuple):
     apart.
     """
 
-    chrome_item: str | None
-    """Title of the first menu row belonging to the host rather than the plugin,
-    or `None` when its rows are worth keeping.
-
-    SwiftBar's footer carries an *Updated N Seconds Ago* clock that would rewrite
-    every image on every run, so its captures stop above it. Xbar's footer is a
-    single static `xbar` row, which costs nothing to keep.
-    """
-
     plugin_dir: Path | None
     """Where the host reads plugins from, or `None` when it is told at runtime.
 
@@ -127,7 +118,6 @@ SWIFTBAR = Host(
     sha256="fcdec490782d6587046304044951c63de49ac422fc63892a6fab2dd7bc70c0cd",
     bundle="SwiftBar.app",
     environment={"SWIFTBAR": "1", "SWIFTBAR_VERSION": "2.1.1"},
-    chrome_item="SwiftBar",
     plugin_dir=None,
 )
 
@@ -141,7 +131,6 @@ XBAR = Host(
     sha256="60e595a2bc15d831a1b118e1940c4f2e91ac4fd0d22039282dc0b6d369e41bbe",
     bundle="xbar.app",
     environment={},
-    chrome_item=None,
     plugin_dir=Path.home() / "Library/Application Support/xbar/plugins",
 )
 
@@ -1180,36 +1169,6 @@ def menu_bounds(host: Host) -> dict[str, float] | None:
     }
 
 
-def chrome_top(host: Host) -> float | None:
-    """Vertical position of the first row belonging to the host, not the plugin.
-
-    Read from the accessibility tree rather than measured off the image, so a
-    menu of any length crops at the right place.
-    """
-    if host.chrome_item is None:
-        return None
-    reply = osascript(f"""
-tell application "System Events"
-    tell process "{host.name}"
-        set theBar to menu bar (count of menu bars)
-        repeat with theItem in menu bar items of theBar
-            try
-                repeat with theRow in menu items of menu 1 of theItem
-                    try
-                        if (name of theRow) is "{host.chrome_item}" then
-                            set {{rowX, rowY}} to position of theRow
-                            return rowY as string
-                        end if
-                    end try
-                end repeat
-            end try
-        end repeat
-        return "none"
-    end tell
-end tell
-""")
-    return None if reply == "none" else float(reply)
-
 
 def expand_first_section(host: Host, bounds: dict[str, float]) -> None:
     """Open the first group of a grouped menu, however this host opens one.
@@ -1277,15 +1236,14 @@ def capture(shot: Shot, plugins: Path) -> None:
             msg = f"{shot.stem}: the menu closed while opening a group"
             raise RuntimeError(msg)
 
-    # The margin is added before the host's own rows are cut off, not after:
-    # the other way round it hands back the very thing the cut removes, and the
-    # first run with a margin photographed SwiftBar's own entry (run
-    # 32720404121).
+    # The whole panel, the host's own rows included. They were cut off for a
+    # while, SwiftBar's footer carrying an *Updated N Seconds Ago* clock that
+    # rewrites the image on every run, and the cut cost more than it saved: it
+    # took a third of the menu with it, and a menu photographed with its foot
+    # missing is not what anyone running the plugin sees. The clock is held
+    # still by the same pin the menu bar's is.
     width, height = DISPLAY_MODE
     bottom = min(float(height), bounds["bottom"] + CAPTURE_MARGIN)
-    chrome = chrome_top(shot.host)
-    if chrome is not None:
-        bottom = min(bottom, chrome - 1)
     # Anchored at the top of the screen when the clock is pinned: the menu bar
     # is part of the subject, the plugin's own title being what the menu hangs
     # off. Otherwise the frame starts a margin above the menu.

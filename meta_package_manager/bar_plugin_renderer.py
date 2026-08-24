@@ -123,6 +123,17 @@ class BarPluginRenderer(MPMPlugin):
         return self.submenu_layout and self.is_swiftbar
 
     @cached_property
+    def own_panel_per_manager(self) -> bool:
+        """Whether each manager's packages get a panel of their own.
+
+        True for Xbar's grouped layout alone, where a `--`-prefixed row opens a
+        fly-out sub-menu. SwiftBar folds the same rows into the menu they came
+        from, and the flat layout never left it, so everywhere else every
+        package sits in one continuous column.
+        """
+        return self.submenu_layout and not self.fold_sections
+
+    @cached_property
     def menu_diff_colors(self) -> dict[str, int]:
         """Appearance-adaptive version-diff suffix colors for the menu.
 
@@ -215,6 +226,74 @@ class BarPluginRenderer(MPMPlugin):
                 "refresh=true",
             )
 
+    def package_rows(self, manager) -> list[tuple[tuple[str, ...], str]]:
+        """One row of cells per outdated package, with the command it runs."""
+        rows = []
+        for package in manager["packages"]:
+            installed, latest = diff_versions(
+                package["installed_version"] if package["installed_version"] else "?",
+                package["latest_version"],
+                prefix_fg=VERSION_PREFIX_COLOR,
+                **self.menu_diff_colors,
+            )
+            # The empty cell is a spacer, and it earns its place in both
+            # renderings. Aligned, the longest name would otherwise sit one
+            # space from its version, too tight to read a package apart from
+            # what it upgrades to; the spacer column widens that gap to two
+            # without disturbing the alignment of the rest. Joined for the
+            # variable-width rendering, it falls out as the same double space
+            # between the two halves of the row.
+            label = package.get("name") or package.get("id")
+            rows.append((
+                (label, "", installed, "→", latest),
+                package["upgrade_cli"],
+            ))
+        return rows
+
+    @staticmethod
+    def align_rows(rows: list[tuple[str, ...]]) -> list[str]:
+        """Lay a set of rows out in aligned columns.
+
+        The arrow is centered, so it is what the eye follows down the column,
+        and the version on either side of it grows outwards from there.
+        """
+        if not rows:
+            return []
+        return render_table(
+            rows,
+            table_format=TableFormat.ALIGNED,
+            colalign=("left", "left", "right", "center", "left"),
+            disable_numparse=True,
+        ).splitlines()
+
+    def align_managers(
+        self, rows_by_manager: dict[str, list[tuple[tuple[str, ...], str]]]
+    ) -> dict[str, list[str]]:
+        """Align every manager's rows, together or apart.
+
+        Together when the managers share one column, which is the flat layout
+        and SwiftBar's accordion: a table sized per manager lines its own arrows
+        up and leaves them ragged against the section above, which reads as a
+        mistake in a menu the eye scans in one pass.
+
+        Apart when each manager gets a panel of its own, since a width taken
+        from the whole pool would pad every short sub-menu out to the longest
+        package name in it.
+        """
+        if self.own_panel_per_manager:
+            return {
+                manager_id: self.align_rows([cells for cells, _ in rows])
+                for manager_id, rows in rows_by_manager.items()
+            }
+        lines = self.align_rows([
+            cells for rows in rows_by_manager.values() for cells, _ in rows
+        ])
+        aligned, start = {}, 0
+        for manager_id, rows in rows_by_manager.items():
+            aligned[manager_id] = lines[start : start + len(rows)]
+            start += len(rows)
+        return aligned
+
     def _render(self, outdated_data) -> None:
         """Main method implementing the final structured rendering in *Bar plugin
         dialect.
@@ -250,30 +329,17 @@ class BarPluginRenderer(MPMPlugin):
         # Prefix for section content.
         submenu = "--" if self.submenu_layout else ""
 
+        rows_by_manager = {
+            manager["id"]: self.package_rows(manager) for manager in managers
+        }
+        aligned = self.align_managers(rows_by_manager) if self.table_rendering else {}
+
         for manager in managers:
             package_count = len(manager["packages"])
             plural = "s" if package_count > 1 else ""
             package_label = f"package{plural}"
 
-            table = []
-            for p in manager["packages"]:
-                installed, latest = diff_versions(
-                    p["installed_version"] if p["installed_version"] else "?",
-                    p["latest_version"],
-                    prefix_fg=VERSION_PREFIX_COLOR,
-                    **self.menu_diff_colors,
-                )
-                # The empty cell is a spacer, and it earns its place in both
-                # renderings. Aligned, the longest name would otherwise sit one
-                # space from its version, too tight to read a package apart from
-                # what it upgrades to; the spacer column widens that gap to two
-                # without disturbing the alignment of the rest. Joined for the
-                # variable-width rendering, it falls out as the same double
-                # space between the two halves of the row.
-                table.append((
-                    (p.get("name") or p.get("id"), "", installed, "→", latest),
-                    p["upgrade_cli"],
-                ))
+            table = rows_by_manager[manager["id"]]
 
             # SwiftBar renders the count as a native badge on the section
             # header, so the label drops the copy it would duplicate. A zero
@@ -291,15 +357,7 @@ class BarPluginRenderer(MPMPlugin):
                     if self.is_swiftbar
                     else f"{manager['id']} - {package_count} {package_label}"
                 )
-                if table:
-                    formatted_lines = render_table(
-                        [p[0] for p in table],
-                        table_format=TableFormat.ALIGNED,
-                        colalign=("left", "left", "right", "center", "left"),
-                        disable_numparse=True,
-                    ).splitlines()
-                else:
-                    formatted_lines = []
+                formatted_lines = aligned[manager["id"]]
 
             # Variable-width / non-table / non-monospaced rendering.
             else:
@@ -308,9 +366,9 @@ class BarPluginRenderer(MPMPlugin):
                     if self.is_swiftbar
                     else f"{package_count} outdated {manager['name']} {package_label}"
                 )
-                formatted_lines = [" ".join(map(str, p[0])) for p in table]
+                formatted_lines = [" ".join(map(str, cells)) for cells, _ in table]
 
-            upgrade_cli_list = [p[1] for p in table]
+            upgrade_cli_list = [cli for _, cli in table]
 
             assert len(formatted_lines) == len(upgrade_cli_list)
 

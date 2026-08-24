@@ -50,8 +50,9 @@ import subprocess
 import sys
 import time
 import urllib.request
+import zlib
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, gettempdir
 from typing import NamedTuple
 
 from meta_package_manager.bar_plugin_renderer import BarPluginRenderer
@@ -159,6 +160,21 @@ Every mode it advertises has a backing store equal to its logical size, so a
 HiDPI capture is not available and these images are `1x` where the GNOME ones
 are `2x`. Height is what a menu runs out of, so the tallest mode is the one
 worth having.
+"""
+
+BACKGROUND_COLOR = (0x2D, 0x23, 0x64)
+"""Flat desktop behind the menus, the ink of the project's own mark.
+
+The same value the GNOME captures paint their desktop with, so a reader moving
+between the two pages sees one project rather than two. A wallpaper would tie
+the images to whatever the runner image happened to ship.
+"""
+
+CAPTURE_MARGIN = 24
+"""Desktop kept around the menu, in pixels.
+
+Matches the GNOME captures. It is also what puts the menu's own shadow in the
+frame, which a rectangle cropped to the menu's bounds cuts off.
 """
 
 MENU_BAR_MODULES = (
@@ -894,6 +910,65 @@ def mouse(kind: str, left: float, top: float) -> None:
     )
 
 
+def desktop_picture() -> str:
+    """What the desktop is showing, so a local run can be given it back."""
+    return run(
+        (
+            "osascript",
+            "-e",
+            'tell application "System Events" to get picture of desktop 1',
+        ),
+        check=False,
+    ).stdout.strip()
+
+
+def set_desktop_picture(picture: str) -> None:
+    """Point every desktop at one picture."""
+    if not picture:
+        return
+    script = Path(gettempdir()) / "mpm-desktop.applescript"
+    script.write_text(
+        'tell application "System Events" to tell every desktop to set '
+        f'picture to "{picture}"\n',
+        encoding="UTF-8",
+    )
+    run(("osascript", str(script)), check=False)
+    time.sleep(2)
+
+
+def paint_desktop() -> None:
+    """Put a flat {data}`BACKGROUND_COLOR` desktop behind every capture.
+
+    macOS wants a file, so one is written: a PNG of the whole display in one
+    colour, assembled here rather than shipped, since a checked-in image would
+    be a binary nobody can read a hex value out of.
+    """
+    width, height = DISPLAY_MODE
+    red, green, blue = BACKGROUND_COLOR
+    # A PNG is a header, a zlib stream of filtered scanlines, and a footer. Each
+    # scanline carries a leading filter byte, `0` for none.
+    raw = (b"\x00" + bytes((red, green, blue)) * width) * height
+
+    def chunk(kind: bytes, payload: bytes) -> bytes:
+        body = kind + payload
+        return (
+            struct.pack(">I", len(payload))
+            + body
+            + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
+        )
+
+    # Kept out of the folder the plugins are planted in, which is deleted on
+    # the way out: the desktop keeps reading the file it was pointed at.
+    picture = Path(gettempdir()) / "mpm-capture-desktop.png"
+    picture.write_bytes(
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(raw, 9))
+        + chunk(b"IEND", b"")
+    )
+    set_desktop_picture(str(picture))
+
+
 def fill_menu_bar() -> None:
     """Show every menu bar module macOS draws the same way twice.
 
@@ -1175,12 +1250,19 @@ def capture(shot: Shot, plugins: Path) -> None:
     # Anchored at the top of the screen when the clock could be hidden, so the
     # status item the menu hangs off is in frame the way the GNOME captures
     # include the top bar. Otherwise the frame starts at the menu.
-    top = 0.0 if CLOCK_PINNED else bounds["y"]
+    # Anchored at the top of the screen when the clock is pinned: the menu bar
+    # is part of the subject, the plugin's own title being what the menu hangs
+    # off. Otherwise the frame starts at the menu.
+    top = 0.0 if CLOCK_PINNED else max(0.0, bounds["y"] - CAPTURE_MARGIN)
+    left = max(0.0, bounds["x"] - CAPTURE_MARGIN)
+    width, height = DISPLAY_MODE
+    right = min(float(width), bounds["right"] + CAPTURE_MARGIN)
+    bottom = min(float(height), bottom + CAPTURE_MARGIN)
     # As late as it can be: the strip is in the frame from here on, and the
     # clock has been ticking since the last shot.
     if CLOCK_PINNED:
         hold_clock()
-    rect = f"{bounds['x']},{top},{bounds['right'] - bounds['x']},{bottom - top}"
+    rect = f"{left},{top},{right - left},{bottom - top}"
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
 
     # Dismiss the menu so the next shot starts from a bare desktop.
@@ -1237,6 +1319,8 @@ def capture_all() -> None:
     global CLOCK_PINNED, SYSTEM_ITEMS_EDGE
     report_menu_bar("startup")
     fill_menu_bar()
+    wallpaper = desktop_picture()
+    paint_desktop()
     CLOCK_PINNED = pin_clock()
     report_menu_bar("filling it and pinning the clock")
     # After the clock is pinned, since pinning changes its width, and before
@@ -1293,6 +1377,7 @@ def capture_all() -> None:
                 for key in position_keys(folder):
                     run(("defaults", "delete", host.domain, key), check=False)
             unpin_clock()
+            set_desktop_picture(wallpaper)
             for leftover in planted:
                 leftover.unlink(missing_ok=True)
             if swiftbar_folder:

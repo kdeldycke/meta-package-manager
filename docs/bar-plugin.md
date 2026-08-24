@@ -48,7 +48,7 @@ The plugin has no icon files of its own: every state is an emoji, which SwiftBar
 | 📦✓    | Menu bar title           | Every selected manager reports nothing to upgrade.                       |
 | ⚠️N    | Menu bar title, appended | N managers reported errors during the run.                               |
 | ❗️     | Menu bar title           | No runnable `mpm`: the bootstrap pair replaces the package list.         |
-| ⚠️     | Manager section header   | That manager reported an error, in the sub-menu layout.                  |
+| ⚠️     | Manager section header   | That manager reported an error, in the grouped layout.                   |
 | 🆙     | *Upgrade all* row        | Upgrades every outdated package of one manager.                          |
 
 The {doc}`GNOME Shell extension <gnome-shell>` names an icon for each of these states instead, and the [panel icons table](gnome-shell.md#panel-icons) lines the two vocabularies up.

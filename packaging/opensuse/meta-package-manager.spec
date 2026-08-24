@@ -29,18 +29,18 @@ Summary:        Wraps all package managers with a unifying CLI
 License:        GPL-2.0-or-later
 URL:            https://mpm.run/
 Source:         https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-%{version}.tar.gz
-BuildRequires:  %{primary_python}
-BuildRequires:  %{primary_python}-pip
-BuildRequires:  %{primary_python}-uv-build >= 0.8
+BuildRequires:  python3-base
+BuildRequires:  python3-pip
+BuildRequires:  python3-uv-build >= 0.8
 BuildRequires:  fdupes
 BuildRequires:  python-rpm-macros
 # SECTION runtime requirements, also imported by the test suite
-BuildRequires:  %{primary_python}-boltons >= 25
-BuildRequires:  %{primary_python}-click-extra >= 8.8.1
-BuildRequires:  %{primary_python}-extra-platforms >= 13.6
-BuildRequires:  %{primary_python}-packageurl-python >= 0.11
-BuildRequires:  %{primary_python}-tomli-w >= 1
-BuildRequires:  %{primary_python}-xmltodict >= 0.12
+BuildRequires:  python3-boltons >= 25
+BuildRequires:  python3-click-extra >= 8.8.1
+BuildRequires:  python3-extra-platforms >= 13.6
+BuildRequires:  python3-packageurl-python >= 0.11
+BuildRequires:  python3-tomli-w >= 1
+BuildRequires:  python3-xmltodict >= 0.12
 # /SECTION
 # SECTION test requirements
 # extra-platforms reads /etc/os-release to identify the build platform, and
@@ -49,19 +49,19 @@ BuildRequires:  openSUSE-release
 # PyYAML and tomlkit are parsers the documentation tests need; the SBOM tests
 # skip themselves when cyclonedx-python-lib and spdx-tools are absent, which
 # they are on openSUSE.
-BuildRequires:  %{primary_python}-PyYAML
-BuildRequires:  %{primary_python}-pytest >= 9
-BuildRequires:  %{primary_python}-tomlkit
+BuildRequires:  python3-PyYAML
+BuildRequires:  python3-pytest >= 9
+BuildRequires:  python3-tomlkit
 # /SECTION
-Requires:       %{primary_python}-boltons >= 25
-Requires:       %{primary_python}-click-extra >= 8.8.1
-Requires:       %{primary_python}-extra-platforms >= 13.6
-Requires:       %{primary_python}-packageurl-python >= 0.11
-Requires:       %{primary_python}-tomli-w >= 1
-Requires:       %{primary_python}-xmltodict >= 0.12
+Requires:       python3-boltons >= 25
+Requires:       python3-click-extra >= 8.8.1
+Requires:       python3-extra-platforms >= 13.6
+Requires:       python3-packageurl-python >= 0.11
+Requires:       python3-tomli-w >= 1
+Requires:       python3-xmltodict >= 0.12
 # Unlock `mpm sbom --vulnerabilities`, which queries the OSV database.
-Suggests:       %{primary_python}-httpx >= 0.27
-Suggests:       %{primary_python}-platformdirs >= 4
+Suggests:       python3-httpx >= 0.27
+Suggests:       python3-platformdirs >= 4
 BuildArch:      noarch
 
 %description

@@ -300,6 +300,15 @@ sets of documentation screenshots agree on what time it is.
 DIAGNOSTICS: Path | None = None
 """Where a failed shot leaves its evidence, when a caller asks for any."""
 
+CAPTURE_SCREENS = bool(os.environ.get("MPM_CAPTURE_SCREENS"))
+"""Whether to photograph the whole screen beside every shot.
+
+Off unless asked for, and asked for only while chasing something that lands in
+a frame without belonging there. Every `screencapture` is a chance for macOS to
+raise its screen-recording consent sheet, which is exactly such a thing, so
+this diagnostic makes what it looks for more likely the longer it runs.
+"""
+
 MENU_TIMEOUT = 60
 """Seconds allowed for SwiftBar to render a plugin and open its menu."""
 
@@ -1292,7 +1301,7 @@ def capture(shot: Shot, plugins: Path) -> None:
         report_windows(shot.stem)
         print(f"  frame: {rect}")
     run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
-    if DIAGNOSTICS:
+    if DIAGNOSTICS and CAPTURE_SCREENS:
         DIAGNOSTICS.mkdir(parents=True, exist_ok=True)
         run(
             (

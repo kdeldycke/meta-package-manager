@@ -555,46 +555,57 @@ end tell
     time.sleep(3)
 
 
+def alert_windows() -> list[str]:
+    """Modal alerts standing on the desktop, as the window server sees them.
+
+    Asked of the window server rather than of System Events, which answers that
+    `UserNotificationCenter` has no windows at all while one of these is up
+    (run 32852129407).
+    """
+    reply = osascript(
+        """
+ObjC.import("CoreGraphics");
+ObjC.import("Foundation");
+const raw = $.CGWindowListCopyWindowInfo(17, 0);
+const list = ObjC.castRefToObject(raw);
+const rows = [];
+for (let i = 0; i < list.count; i++) {
+    const w = list.objectAtIndex(i);
+    const owner = ObjC.unwrap(w.objectForKey("kCGWindowOwnerName"));
+    if (owner === "UserNotificationCenter") {
+        const b = ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds"));
+        rows.push(`x=${b.X} y=${b.Y} w=${b.Width} h=${b.Height}`);
+    }
+}
+rows.join(String.fromCharCode(10));
+""",
+        language="JXA",
+    )
+    return [row for row in reply.splitlines() if row]
+
+
 def dismiss_prompts() -> None:
-    """Click through whatever consent sheets are currently up.
+    """Answer whatever alert macOS has put up, with its default button.
 
     Two kinds appear. macOS raises a screen-recording sheet on the first
-    capture, and each host raises an automation sheet of its own on launch
-    (*"xbar" wants access to control "System Events"*). Both are modal, both
-    belong to `UserNotificationCenter` rather than to whatever provoked them,
-    and either one left up blocks every click that follows.
+    capture, and each host raises an automation alert of its own on launch
+    (*"xbar" wants access to control "System Events"*). Either one left up sits
+    over everything, lands in the frame and swallows clicks, and the automation
+    one blocks System Events itself: with it up the appearance never switches
+    and the dark shots come back light.
+
+    Answered with Return rather than a click on a computed position. The default
+    button is *Allow*, and answering records the grant, so the alert is gone for
+    the rest of the run rather than raised again by the next launch.
     """
-    for attempt in range(1, 6):
-        try:
-            found = osascript(
-                bounded("""
-tell application "System Events"
-    set theCount to 0
-    try
-        tell process "UserNotificationCenter"
-            set theCount to count of windows
-            repeat with theWindow in windows
-                try
-                    click button "Allow" of theWindow
-                end try
-            end repeat
-        end tell
-    end try
-    return theCount
-end tell
-""")
-            )
-        except RuntimeError as error:
-            # System Events can drop out from under this: Control Center is
-            # restarted to hide the clock, and a host holding a menu open blocks
-            # it outright. Nothing here is load-bearing enough to fail a shot.
-            print(f"  consent sheet, attempt {attempt}: {error}")
-            time.sleep(4)
-            continue
-        print(f"  consent sheet, attempt {attempt}: {found} window(s)")
-        if found == "0" and attempt > 1:
+    for attempt in range(1, 7):
+        alerts = alert_windows()
+        if not alerts:
             return
-        time.sleep(4)
+        print(f"  alert up, attempt {attempt}: {alerts}")
+        press_key(36, "return")
+        time.sleep(2)
+    print("  an alert is still up, and will be in the frame")
 
 
 def spend_consent_prompt() -> None:
@@ -1143,25 +1154,36 @@ def unpin_clock() -> None:
     run(("killall", "ControlCenter"), check=False)
 
 
-def press_escape() -> None:
-    """Close whatever menu is open, with a real key event.
+def press_key(code: int, label: str) -> None:
+    """Press a key, as the frontmost window sees it.
 
     Not through System Events: an open menu is a modal tracking loop, and a host
     that answers no accessibility at all leaves AppleScript waiting on it until
     the event times out. A key posted to the HID tap needs nothing of the app.
     """
     print(
-        swift("""
+        swift(
+            """
         import CoreGraphics
+        import Foundation
+        let key = CGKeyCode(UInt16(CommandLine.arguments[1]) ?? 53)
         let source = CGEventSource(stateID: .hidSystemState)
-        CGEvent(keyboardEventSource: source, virtualKey: 53, keyDown: true)?
+        CGEvent(keyboardEventSource: source, virtualKey: key, keyDown: true)?
             .post(tap: .cghidEventTap)
         usleep(80000)
-        CGEvent(keyboardEventSource: source, virtualKey: 53, keyDown: false)?
+        CGEvent(keyboardEventSource: source, virtualKey: key, keyDown: false)?
             .post(tap: .cghidEventTap)
-        print("escape")
-        """)
+        print(CommandLine.arguments[2])
+        """,
+            str(code),
+            label,
+        )
     )
+
+
+def press_escape() -> None:
+    """Close whatever menu is open."""
+    press_key(53, "escape")
 
 
 def report_windows(label: str) -> None:
@@ -1258,6 +1280,7 @@ def capture(shot: Shot, plugins: Path) -> None:
         age_plugin_run()
     restart(shot.host, plugins)
 
+    dismiss_prompts()
     # Forward again before the menu is built, since that is when the host reads
     # the clock to work out how old the plugin's run is.
     if CLOCK_PINNED:

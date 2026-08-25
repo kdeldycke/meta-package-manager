@@ -299,13 +299,16 @@ The version string is always bare (e.g., `1.2.3`). The `v` prefix is a **tag nam
 
 ### Commit messages
 
-Default to a subject line and nothing else, when there is no context to link. A commit message is a log entry, not a design document.
+Default to a subject line and nothing else. A commit message is a log entry, not a design document. It gives a quick summary of what the commit holds, and points at context that lives elsewhere.
 
 - **Subject.** One line under 72 characters, imperative mood, capitalized, no trailing period, every identifier backticked. Name what changed, not the category it falls in: `` Sync `uv.lock` ``, `` Fix `yay` cooldown overlay on Arch ``. Avoid the bare one-word subject (`Typo`, `Lint`, `Fix`): it costs the next reader a `git show` to learn anything. Say what the typo was in, what the lint fixed.
 - **No decorative prefixes.** This is not [Conventional Commits](https://www.conventionalcommits.org): no `feat:`, `chore:`, `fix:`. A `[bracketed]` prefix is reserved for a mechanism that parses it back, and only `[changelog] …` qualifies, matched literally by repomatic's auto-tagging job. Do not confuse it with the `[scope]` tags that open every `changelog.md` bullet: those name a manager or platform, live in the changelog file rather than in git, and are indexed by `manager_changelog()`. The two vocabularies are unrelated. Never write a GitHub skip token (`[skip ci]` and its aliases) in any message, including a body: they match anywhere and leave a required check "Pending" rather than failing.
-- **Body: link the context.** Omit it when the subject says everything. Write one short paragraph when the *why* is not evident from the diff, and especially when the decision was made somewhere public: the upstream manager's issue tracker, the distro packaging PR, the spec page that forced the behavior. Forges render commit messages as HTML, so a link is the cheapest route from `git log` to the full story. Format every cross-repository reference as `[owner/repo#N](https://github.com/owner/repo/issues/N)`.
+- **Body: three cases, and nothing else.** Omit the body by default, even when the *why* is not obvious from the diff. A body is not the place to explain the change, defend the approach, or restate what the diff already shows. Write one only when the commit meets one of these cases, and write no more than the case needs:
+  - **It bundles orthogonal work.** The commit carries several unrelated tasks, or spans different domains, and one subject cannot name them all. Give one short line per strand.
+  - **A public record holds the context.** Link it: the upstream manager's issue tracker, the distro packaging PR, the spec page that forced the behavior, the discussion thread. Forges render commit messages as HTML, so the link is the cheapest route from `git log` to the full story. Format every cross-repository reference as `[owner/repo#N](https://github.com/owner/repo/issues/N)`.
+  - **It resolves or references a tracked item.** Use `Closes #N` when merging the commit into the default branch must close the issue, and `Related to #N` when it must not.
 
-Never narrate the work in sequence or enumerate the files touched: `git log --stat` lists the files and the diff shows the order. Rationale needing more room than a paragraph belongs somewhere durable instead: a code comment, a docstring, `docs/`, or the PR body.
+Never narrate the work in sequence, enumerate the files touched, or summarize the diff in prose: `git log --stat` lists the files and the diff shows the rest. Rationale belongs somewhere durable instead: a code comment, a docstring, `docs/`, or the PR body.
 
 ### Comments and docstrings
 

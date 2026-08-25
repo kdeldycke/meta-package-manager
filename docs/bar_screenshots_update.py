@@ -293,8 +293,13 @@ SwiftBar's footer carries the age of that run, formatted by
 `RelativeDateTimeFormatter`, so a few seconds of it reads to the second and
 rewrites the image every run. Minutes are a coarser bucket: the clock is wound
 back this far before the host starts, and forward to the pinned reading before
-the shutter, which lands the footer mid-way through a minute where the twenty
+the click, which lands the footer mid-way through a minute where the twenty
 seconds of jitter in a launch cannot reach either boundary.
+
+Both ends land before the click, not before the shutter. The host works the age
+out as it assembles the menu, so a wind forward placed any later moves the menu
+bar's clock and leaves the footer reading the launch delay and nothing else,
+which is how it came to say `28 Seconds Ago` and then `27` (run 32777818530).
 
 Kept to five minutes rather than the hours that would be coarser still: the
 wind forward is the one jump this driver makes in the direction a job's timeout
@@ -1253,6 +1258,10 @@ def capture(shot: Shot, plugins: Path) -> None:
         age_plugin_run()
     restart(shot.host, plugins)
 
+    # Forward again before the menu is built, since that is when the host reads
+    # the clock to work out how old the plugin's run is.
+    if CLOCK_PINNED:
+        hold_clock()
     mouse("click", *status_item(shot.host))
     deadline = time.monotonic() + MENU_TIMEOUT
     bounds = None

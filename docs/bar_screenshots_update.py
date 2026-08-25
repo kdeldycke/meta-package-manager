@@ -192,6 +192,20 @@ the parent already sits against the screen edge.
 Every one of these draws the same picture on every run. The three left out do
 not: `Battery` reads a percentage, `Weather` a temperature, and `NowPlaying`
 appears only while something plays.
+
+Order matters as much as membership, and macOS does not keep one on its own, so
+each module is also given a position. The tuple reads right to left, the way
+the menu bar fills.
+"""
+
+MENU_BAR_SPACING = 40
+"""Pixels between the pinned positions of two menu bar modules.
+
+`NSStatusItem Preferred Position` counts from the right edge, which is how a
+menu bar packs, and Control Center maintains one per module of its own accord.
+Any spacing wider than an icon will do: what matters is that every module has a
+value and no two share one, since with none of them pinned the row comes back
+in a different order from one launch to the next.
 """
 
 SPACER_NAME = "aaa-spacer.1h.sh"
@@ -1013,10 +1027,21 @@ def fill_menu_bar() -> None:
     the menu bar, against `8` for one that stays inside Control Center. The
     codes are per-host, unlike the status item keys beside them.
     """
-    for module in MENU_BAR_MODULES:
+    for index, module in enumerate(MENU_BAR_MODULES):
         run(
             ("defaults", "-currentHost", "write", "com.apple.controlcenter",
              module, "-int", "18"),
+            check=False,
+        )
+        # Plain domain, not the per-host one the module codes live in: that is
+        # where Control Center keeps its own, as a machine that has arranged a
+        # menu bar by hand shows.
+        run(
+            (
+                "defaults", "write", "com.apple.controlcenter",
+                f"NSStatusItem Preferred Position {module}",
+                "-float", str(MENU_BAR_SPACING * (index + 4)),
+            ),
             check=False,
         )
     # The input menu is not a Control Center module and keeps its own domain.

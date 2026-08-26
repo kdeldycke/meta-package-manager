@@ -166,47 +166,21 @@ Matches the GNOME captures. It is also what puts the menu's own shadow in the
 frame, which a rectangle cropped to the menu's bounds cuts off.
 """
 
-MENU_BAR_MODULES = (
-    "AccessibilityShortcuts",
-    "AirDrop",
-    "Bluetooth",
-    "Display",
-    "FocusModes",
-    "Hearing",
-    "KeyboardBrightness",
-    "MusicRecognition",
-    "ScreenMirroring",
-    "Sound",
-    "StageManager",
-    "UserSwitcher",
-    "VoiceControl",
-    "WiFi",
-)
-"""Control Center modules put into the menu bar, to widen the system cluster.
-
-macOS packs its own items against the right edge and gives an app the room to
-their left, so every module shown here pushes the plugin's item further left,
-which is the whole point: Xbar opens a submenu to the left of its parent when
-the parent already sits against the screen edge.
-
-Every one of these draws the same picture on every run. The three left out do
-not: `Battery` reads a percentage, `Weather` a temperature, and `NowPlaying`
-appears only while something plays.
-
-Order matters as much as membership, and macOS does not keep one on its own, so
-each module is also given a position. The tuple reads right to left, the way
-the menu bar fills.
-"""
-
-MENU_BAR_SPACING = 40
-"""Pixels between the pinned positions of two menu bar modules.
-
-`NSStatusItem Preferred Position` counts from the right edge, which is how a
-menu bar packs, and Control Center maintains one per module of its own accord.
-Any spacing wider than an icon will do: what matters is that every module has a
-value and no two share one, since with none of them pinned the row comes back
-in a different order from one launch to the next.
-"""
+# Why the menu bar carries no Control Center modules.
+#
+# Fourteen of them were shown here for a while, to widen the cluster the plugin's
+# item is packed against. macOS lays them out in a different order on each launch:
+# two runs of identical code came back `33, 38, 38` pixels wide across one block
+# and `38, 38, 33` across the same block, then `48, 38, 48, 38, 48` against `48,
+# 48, 38, 48, 32`. Every capture carries the strip, so every capture was rewritten
+# each run.
+#
+# Giving each module an `NSStatusItem Preferred Position` did not settle it, which
+# is the difference between a module Control Center owns and a status item an app
+# owns: the second honours that key, the first apparently does not.
+#
+# So the room comes from the spacer below instead, which is a plugin like any
+# other and lands where it is put.
 
 SPACER_NAME = "aaa-spacer.1h.sh"
 """Filename of a plugin that draws nothing but takes up room.
@@ -217,8 +191,12 @@ puts the real one to its left: AppKit gives each new status item the leftmost
 slot among an app's own.
 """
 
-SPACER_WIDTH = 90
+SPACER_WIDTH = 180
 """Spaces the spacer's title carries, and so roughly how wide it draws.
+
+Ninety of them measured 343 pixels, so this is about 690: enough on its own to
+carry the plugin's item from where macOS packs it, around 1284, to under 600,
+which is what leaves an Xbar submenu room to open to the right of its parent.
 
 Blank rather than an icon, because whatever it drew would be in frame and would
 have to mean something. A gap means nothing, which is what is wanted.
@@ -1020,40 +998,6 @@ def paint_desktop() -> None:
     set_desktop_picture(str(picture))
 
 
-def fill_menu_bar() -> None:
-    """Show every menu bar module macOS draws the same way twice.
-
-    `18` is the value the Control Center settings pane writes for a module in
-    the menu bar, against `8` for one that stays inside Control Center. The
-    codes are per-host, unlike the status item keys beside them.
-    """
-    for index, module in enumerate(MENU_BAR_MODULES):
-        run(
-            ("defaults", "-currentHost", "write", "com.apple.controlcenter",
-             module, "-int", "18"),
-            check=False,
-        )
-        # Plain domain, not the per-host one the module codes live in: that is
-        # where Control Center keeps its own, as a machine that has arranged a
-        # menu bar by hand shows.
-        run(
-            (
-                "defaults", "write", "com.apple.controlcenter",
-                f"NSStatusItem Preferred Position {module}",
-                "-float", str(MENU_BAR_SPACING * (index + 4)),
-            ),
-            check=False,
-        )
-    # The input menu is not a Control Center module and keeps its own domain.
-    run(
-        ("defaults", "write", "com.apple.TextInputMenu", "visible", "-bool", "true"),
-        check=False,
-    )
-    run(("killall", "ControlCenter"), check=False)
-    run(("killall", "SystemUIServer"), check=False)
-    time.sleep(10)
-
-
 def report_menu_bar(label: str) -> None:
     """Print every window in the menu bar, left to right.
 
@@ -1415,11 +1359,10 @@ def capture_all() -> None:
     spend_consent_prompt()
     global CLOCK_PINNED, SYSTEM_ITEMS_EDGE
     report_menu_bar("startup")
-    fill_menu_bar()
     wallpaper = desktop_picture()
     paint_desktop()
     CLOCK_PINNED = pin_clock()
-    report_menu_bar("filling it and pinning the clock")
+    report_menu_bar("pinning the clock")
     # After the clock is pinned, since pinning changes its width, and before
     # either host starts, since the point is a menu bar holding nothing of ours.
     SYSTEM_ITEMS_EDGE = measure_system_items()

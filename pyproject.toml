@@ -451,12 +451,6 @@ required-version = ">=0.11.15"
 dependency-groups.docs = { requires-python = ">= 3.14" }
 # Cooldown period.
 exclude-newer = "1 week"
-# Per-package override pulling a freshly-published dependency in before the
-# global cooldown above would let it through. The value is an absolute ISO 8601
-# timestamp, conventionally the midnight following the release upload, so the
-# exemption covers that release and nothing later. Drop the entry once the
-# release ages past the cooldown window.
-exclude-newer-package = { click-extra = "2026-08-16T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

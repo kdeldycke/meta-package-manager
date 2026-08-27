@@ -143,7 +143,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.1"
+          version: "0.12.5"
       # shexli exits 0 whatever it finds, errors included, so its exit code
       # cannot gate anything: the JSON summary is the only usable signal. The
       # report is teed to the log first, or a red job would say nothing about

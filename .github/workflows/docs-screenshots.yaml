@@ -145,7 +145,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.1"
+          version: "0.12.5"
 
       # The oxipng `format-images` provisions, keyed on the file carrying the
       # repomatic pin that decides its version: a bump misses the cache once and
@@ -214,7 +214,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.1"
+          version: "0.12.5"
 
       # The driver renders the menu through `BarPluginRenderer`, so it needs the
       # package and its dependencies rather than a bare interpreter.

@@ -271,6 +271,16 @@ the first capture to `10:53` on the last, so every image carried a different
 menu bar and the whole set churned anyway (run 32573216871).
 """
 
+APPEARANCE_SETTLE = 12
+"""Seconds to wait after switching light or dark, before anything is drawn.
+
+macOS crossfades between the two, and the translucent material a menu is drawn
+on carries the tail of that fade. Three seconds left one capture in sixteen
+differing from its twin across the whole panel, every pixel of it by less than
+eight levels: not an element that moved, a tint that had not finished arriving
+(run 32975739409).
+"""
+
 CLOCK_REPAINT_WAIT = 5
 """Seconds to wait for the menu bar clock to redraw after the time is set.
 
@@ -544,7 +554,7 @@ end tell
             time.sleep(5)
             continue
         break
-    time.sleep(3)
+    time.sleep(APPEARANCE_SETTLE)
 
 
 def alert_windows() -> list[str]:

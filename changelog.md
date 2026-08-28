@@ -178,6 +178,7 @@
 - [mpm] Recognize the authentication failure of `sudo-rs`, the Rust rewrite Ubuntu ships as its default `sudo` since `25.10`. It answers `interactive authentication is required` where the original says `a password is required`, so every escalation that failed for want of a password on a current Ubuntu was reported as an opaque error instead of the hint naming the ways to pre-authenticate.
 - [bar-plugin,gnome-shell] Offer `uv tool install --upgrade meta-package-manager` when no `mpm` is found, in place of the `python -m pip install` command the menubar plugin used to run into whichever interpreter happened to render it. Both frontends also carry an entry opening the installation page, for the systems `uv` does not answer for.
 - [gnome-shell] Restart the GNOME session before enabling the extension, in the documented installation steps. `gnome-extensions enable` asks the running shell rather than the disk, so it answered `Extension "mpm@kdeldycke.github.io" does not exist` when run right after a successful install.
+- [mpm] Point the documentation's links to repomatic at `repomatic.net`, and drop the retired `CLOUDFLARE_ACCOUNT_ID` secret from the infrastructure page.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

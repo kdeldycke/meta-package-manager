@@ -21,7 +21,7 @@ Python versions, independently of the project's `requires-python`. Nothing
 forces the two to agree, so a `requires-python` bump that forgets the matrix,
 or a `repomatic` release that shifts its floor, would silently leave the
 declared floor untested. These tests turn that drift into a failing check, as
-recommended by [repomatic's test-matrix guide](https://kdeldycke.github.io/repomatic/test-matrix.html).
+recommended by [repomatic's test-matrix guide](https://repomatic.net/test-matrix).
 """
 
 from __future__ import annotations

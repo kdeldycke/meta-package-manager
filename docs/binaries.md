@@ -105,7 +105,7 @@ Nuitka `--onefile` Windows x64 binaries are systematically flagged by antivirus 
 
 ### Why it happens
 
-The generic mechanics (Nuitka `--onefile`'s "drop and execute from temp" pattern reads as a trojan dropper, and AV heuristics are poisoned by malware authors using Nuitka) are documented in [repomatic's false-positive playbook](https://kdeldycke.github.io/repomatic/security.html#why-binaries-get-flagged). On top of that, `mpm` invokes external system commands (package managers), triggering behavioral rules for command-and-control activity.
+The generic mechanics (Nuitka `--onefile`'s "drop and execute from temp" pattern reads as a trojan dropper, and AV heuristics are poisoned by malware authors using Nuitka) are documented in [repomatic's false-positive playbook](https://repomatic.net/security#why-binaries-get-flagged). On top of that, `mpm` invokes external system commands (package managers), triggering behavioral rules for command-and-control activity.
 
 ### Typical detection profile
 
@@ -113,11 +113,11 @@ The [catalog above](#catalog) tracks the exact counts per release and platform. 
 
 ### Submitting false positive reports
 
-After each release with high detections, submit false-positive reports to the major vendors. The [vendor portals, priority order, submission content, and long-term mitigations](https://kdeldycke.github.io/repomatic/security.html#vendor-portals) are maintained upstream, and the `av-false-positive` skill generates the per-vendor submission files with all details pre-filled.
+After each release with high detections, submit false-positive reports to the major vendors. The [vendor portals, priority order, submission content, and long-term mitigations](https://repomatic.net/security#vendor-portals) are maintained upstream, and the `av-false-positive` skill generates the per-vendor submission files with all details pre-filled.
 
 ### Impact on Chocolatey
 
-Chocolatey's moderation pipeline rejects any package flagged by more than 10 antivirus engines on VirusTotal ([chocolatey/home#395](https://github.com/chocolatey/home/issues/395#issuecomment-4378555157)). The Windows x64 binary sits well above that threshold (see the [catalog](#catalog)), so [submission `6.4.2`](https://community.chocolatey.org/packages/meta-package-manager/6.4.2) was rejected and automated publishing to the community repository has been removed from `release.yaml`. Reaching the cutoff would require either lowering the detection count through false-positive submissions (a moving target) or applying one of the [long-term mitigations](https://kdeldycke.github.io/repomatic/security.html#long-term-mitigations).
+Chocolatey's moderation pipeline rejects any package flagged by more than 10 antivirus engines on VirusTotal ([chocolatey/home#395](https://github.com/chocolatey/home/issues/395#issuecomment-4378555157)). The Windows x64 binary sits well above that threshold (see the [catalog](#catalog)), so [submission `6.4.2`](https://community.chocolatey.org/packages/meta-package-manager/6.4.2) was rejected and automated publishing to the community repository has been removed from `release.yaml`. Reaching the cutoff would require either lowering the detection count through false-positive submissions (a moving target) or applying one of the [long-term mitigations](https://repomatic.net/security#long-term-mitigations).
 
 ### References
 

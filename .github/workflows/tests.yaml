@@ -237,7 +237,11 @@ jobs:
       # Composer
       - name: Composer - macOS install
         if: runner.os == 'macOS'
-        run: brew install composer
+        # Homebrew demoted Intel macOS to a Tier 3 configuration and stopped bottling for it, so composer and its php
+        # and httpd dependencies have no bottle on macos-26-intel. Tolerated on Intel only, where mpm reports the
+        # manager as unavailable and the suite skips its cases; an ARM failure still means a real regression.
+        # See: https://docs.brew.sh/Support-Tiers#tier-3
+        run: brew install composer || [ "$RUNNER_ARCH" = "X64" ]
       - name: Composer - Windows upgrade
         if: runner.os == 'Windows'
         run: choco upgrade composer --no-progress --yes --retry-count=3

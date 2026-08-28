@@ -60,6 +60,20 @@ if TYPE_CHECKING:
     from .version import TokenizedString
 
 
+COOLDOWN_EXEMPT = datetime.min.replace(tzinfo=timezone.utc)
+"""Sentinel a {meth}`PackageManager.release_date` probe returns for a package
+outside the cooldown gate's scope.
+
+A hybrid manager can serve two registries with different threat models: an AUR
+helper resolves the live, self-published AUR next to Arch's official
+repositories, whose archive stages releases on its own (see the N/A rows of
+`docs/cooldown.md`). The out-of-scope half reads as infinitely aged, so the
+hold logic of {meth}`PackageManager.cooldown_hold_reason` lets it through
+untouched, and the constant's name keeps the probe's intent readable where a
+bare `datetime.min` would read as a bug.
+"""
+
+
 JSON_FIELD_SELECTOR_REGEX = re.compile(
     r"^(?P<key>[^\[\]]+?)(?:\[(?P<index>\d+)\])?$",
 )
@@ -858,6 +872,20 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
+    def upgrade_all_cli_excluding(
+        self,
+        package_ids: tuple[str, ...],
+    ) -> tuple[str, ...]:
+        """Returns the CLI upgrading all outdated packages except the named ones.
+
+        Optional refinement of {meth}`upgrade_all_cli` for managers whose full
+        upgrade is one transaction with a native exclusion flag (pacman's
+        `--ignore`). Under an active probe-backed cooldown, `mpm` prefers this
+        over per-package upgrades: the manager keeps its own transaction and
+        dependency ordering, and only the held packages are left out.
+        """
+        raise NotImplementedError
+
     def upgrade(self, package_id: str | None = None, version: str | None = None) -> str:
         """Perform an upgrade of either all or one package.
 
@@ -876,9 +904,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         {meth}`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.
 
         An active probe-backed cooldown (see {meth}`cooldown_hold_reason`)
-        forces the same one-by-one path even when a native one-shot command
-        exists: only the per-package path can hold back individual too-fresh
-        releases while the rest of the upgrade proceeds.
+        routes through {meth}`_upgrade_all_with_cooldown` instead of the plain
+        one-shot command, so individual too-fresh releases can be held back
+        while the rest of the upgrade proceeds.
         """
         if package_id:
             cli = self.upgrade_one_cli(package_id, version=version)
@@ -886,11 +914,11 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         else:
             if self._cooldown_probe_engaged:
                 logging.info(
-                    "Active cooldown: upgrade outdated packages one by one, "
-                    "holding back any release younger than the window.",
+                    "Active cooldown: hold back any release younger than the "
+                    "window, and upgrade the rest.",
                     extra={"label": self.id},
                 )
-                return self._upgrade_all_one_by_one()
+                return self._upgrade_all_with_cooldown()
             try:
                 cli = self.upgrade_all_cli()
             except NotImplementedError:
@@ -902,14 +930,53 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
         return self.run(cli, extra_env=self.extra_env)
 
+    def _upgrade_all_with_cooldown(self) -> str:
+        """Upgrade all outdated packages, holding back the too-fresh ones.
+
+        The full-upgrade path of an active probe-backed cooldown: each
+        outdated package is checked against {meth}`cooldown_hold_reason` and
+        held back, with a `WARNING` naming the reason, rather than upgraded.
+
+        A manager implementing {meth}`upgrade_all_cli_excluding` keeps its
+        native one-transaction upgrade, the held packages riding its exclusion
+        flag (and a run with nothing held falls back to the plain
+        {meth}`upgrade_all_cli`). Every other manager upgrades the eligible
+        packages one by one instead, deliberately even when nothing is held:
+        its one-shot command may cover more than the packages enumerated here
+        (`flatpak update` also pulls runtimes), and whatever the listing did
+        not enumerate was never probed.
+        """
+        with self.acting_as("outdated"):
+            outdated_packages = tuple(self.refiltered_outdated)
+        held = []
+        eligible = []
+        for package in outdated_packages:
+            hold = self.cooldown_hold_reason(package.id)
+            if hold:
+                logging.warning(
+                    f"Hold {package.id}: {hold}.",
+                    extra={"label": self.id},
+                )
+                held.append(package.id)
+            else:
+                eligible.append(package.id)
+        if self._defines("upgrade_all_cli_excluding"):
+            if held:
+                cli = self.upgrade_all_cli_excluding(tuple(held))
+            else:
+                cli = self.upgrade_all_cli()
+            return self.run(cli, extra_env=self.extra_env)
+        logs = []
+        for package_id in eligible:
+            output = self.upgrade(package_id)
+            if output:
+                logs.append(output)
+        return "\n".join(logs)
+
     def _upgrade_all_one_by_one(self) -> str:
         """Upgrade every outdated package through its own one-package CLI.
 
-        The fallback behind managers with no native one-shot upgrade command,
-        and the only route able to honor a probe-backed cooldown: each outdated
-        package is checked against {meth}`cooldown_hold_reason` and held back,
-        with a `WARNING` naming the reason, rather than upgraded when its
-        latest release is too fresh.
+        The fallback behind managers with no native one-shot upgrade command.
         """
         # The listing is a read-only query, so it runs under the `outdated`
         # stamp: it resolves the short read-only timeout, and `mpm --plan`
@@ -919,13 +986,6 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             outdated_packages = tuple(self.refiltered_outdated)
         logs = []
         for package in outdated_packages:
-            hold = self.cooldown_hold_reason(package.id)
-            if hold:
-                logging.warning(
-                    f"Hold {package.id}: {hold}.",
-                    extra={"label": self.id},
-                )
-                continue
             output = self.upgrade(package.id)
             if output:
                 logs.append(output)

@@ -7,6 +7,7 @@
 
 - [flatpak,mpm] Gate `flatpak` under `--cooldown` with a per-app probe: `mpm` reads the publication date of each app's latest build from its remote and holds back any release younger than the window.
 - [mas] Gate the Mac App Store under `--cooldown` with the same per-app probe, reading each app's release date from the catalog record of `mas lookup --json`.
+- [paru] Gate `paru`'s AUR half under `--cooldown`: too-fresh AUR packages, dated by the RPC's `LastModified`, are held out of the `--sysupgrade` transaction with `--ignore` while official-repository packages pass untouched.
 - [bar-plugin] Name SwiftBar ahead of Xbar wherever the pair appears, the plugin page title included. SwiftBar is the maintained host of the two.
 - [mpm] Open the manager index with a proportion bar, cut into one region per support state, each as wide as its share of the assessed pool.
 - [mpm] Highlight the hovered row, and not only its column, in the benchmark, SBOM, cooldown and augmentations tables. The row half of the crosshair had never painted.

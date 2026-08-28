@@ -42,7 +42,8 @@ from meta_package_manager.managers.gem import Gem
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.mas import MAS
 from meta_package_manager.managers.npm import NPM
-from meta_package_manager.managers.pacman import _YAY_COOLDOWN_INIT_LUA, Yay
+from meta_package_manager.manager import COOLDOWN_EXEMPT
+from meta_package_manager.managers.pacman import _YAY_COOLDOWN_INIT_LUA, Paru, Yay
 from meta_package_manager.managers.pip import Pip
 from meta_package_manager.managers.pipx import Pipx
 from meta_package_manager.managers.uv import UV, UVX
@@ -364,7 +365,7 @@ def _probed_flatpak(monkeypatch, dates, cooldown=timedelta(days=7)):
     return manager
 
 
-@pytest.mark.parametrize("manager_class", (Flatpak, MAS))
+@pytest.mark.parametrize("manager_class", (Flatpak, MAS, Paru))
 def test_probe_managers_advertise_synthesized_cooldown(manager_class):
     manager = manager_class()
     assert manager.supports_cooldown is True
@@ -377,6 +378,7 @@ def test_probe_managers_advertise_synthesized_cooldown(manager_class):
 def test_cooldown_is_synthesized_classifier():
     assert cooldown_is_synthesized(Flatpak) is True
     assert cooldown_is_synthesized(MAS) is True
+    assert cooldown_is_synthesized(Paru) is True
     # A native env var (npm), an env-var overlay (yay) and an ungateable
     # manager (brew) all sit outside the synthesized classification.
     assert cooldown_is_synthesized(NPM) is False
@@ -574,6 +576,133 @@ def test_flatpak_release_date_none_without_date_line(monkeypatch):
 
     monkeypatch.setattr(manager, "run_cli", fake_run_cli)
     assert manager.release_date("org.gnome.Dictionary") is None
+
+
+_PARU_AUR_INFO_OUTPUT = """\
+Repository      : aur
+Name            : paru
+Version         : 2.1.0-1
+Description     : Feature packed AUR helper
+First Submitted : Wed, 21 Oct 2020 20:07:31
+Last Modified   : Sat, 12 Jul 2025 14:52:15
+Out Of Date     : No
+"""
+
+_PARU_REPO_INFO_OUTPUT = """\
+Repository      : extra
+Name            : firefox
+Version         : 141.0-1
+Description     : Fast, Private & Safe Web Browser
+Build Date      : Tue, 22 Jul 2025 09:14:02
+"""
+
+
+def test_paru_release_date_reads_aur_last_modified(monkeypatch):
+    manager = Paru()
+    monkeypatch.setattr(
+        manager, "run_cli", lambda *args, **kwargs: _PARU_AUR_INFO_OUTPUT
+    )
+    published = manager.release_date("paru")
+    assert published == datetime(2025, 7, 12, 14, 52, 15, tzinfo=timezone.utc)
+
+
+def test_paru_release_date_parses_space_padded_days(monkeypatch):
+    output = _PARU_AUR_INFO_OUTPUT.replace(
+        "Sat, 12 Jul 2025 14:52:15", "Wed,  2 Jul 2025 08:01:02"
+    )
+    manager = Paru()
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    published = manager.release_date("paru")
+    assert published == datetime(2025, 7, 2, 8, 1, 2, tzinfo=timezone.utc)
+
+
+def test_paru_release_date_exempts_repository_packages(monkeypatch):
+    manager = Paru()
+    monkeypatch.setattr(
+        manager, "run_cli", lambda *args, **kwargs: _PARU_REPO_INFO_OUTPUT
+    )
+    assert manager.release_date("firefox") is COOLDOWN_EXEMPT
+
+
+def test_paru_release_date_none_on_unparsable_date(monkeypatch):
+    output = _PARU_AUR_INFO_OUTPUT.replace(
+        "Sat, 12 Jul 2025 14:52:15", "sometime last summer"
+    )
+    manager = Paru()
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    assert manager.release_date("paru") is None
+
+
+def test_paru_release_date_none_without_fields(monkeypatch):
+    manager = Paru()
+    monkeypatch.setattr(
+        manager, "run_cli", lambda *args, **kwargs: "Name : paru\n"
+    )
+    assert manager.release_date("paru") is None
+
+
+def test_hold_reason_passes_exempt_sentinel(monkeypatch):
+    manager = _probed_flatpak(monkeypatch, {"org.example.Fig": COOLDOWN_EXEMPT})
+    assert manager.cooldown_hold_reason("org.example.Fig") is None
+
+
+def test_paru_gated_upgrade_all_rides_the_ignore_flag(monkeypatch):
+    """Held AUR packages are excluded from the single `--sysupgrade`
+    transaction instead of rerouting to per-package upgrades."""
+    manager = Paru()
+    manager.cooldown = timedelta(days=7)
+    now = datetime.now(tz=timezone.utc)
+    dates = {
+        "fig": COOLDOWN_EXEMPT,
+        "kiwi": now - timedelta(days=1),
+        "plum": now - timedelta(days=30),
+    }
+    monkeypatch.setattr(manager, "release_date", dates.get)
+    outdated = tuple(
+        SimpleNamespace(id=package_id, installed_version="1.0", latest_version="2.0")
+        for package_id in sorted(dates)
+    )
+    monkeypatch.setattr(Paru, "outdated", property(lambda self: iter(outdated)))
+    monkeypatch.setattr(
+        manager, "build_cli", lambda *args, sudo=False: ("paru", *args)
+    )
+    ran = []
+
+    def fake_run(*args, **kwargs):
+        ran.append(args[0])
+        return ""
+
+    monkeypatch.setattr(manager, "run", fake_run)
+    manager.upgrade()
+    assert ran == [
+        ("paru", "--sync", "--refresh", "--sysupgrade", "--ignore=kiwi"),
+    ]
+
+
+def test_paru_gated_upgrade_all_without_holds_keeps_native_cli(monkeypatch):
+    manager = Paru()
+    manager.cooldown = timedelta(days=7)
+    aged = datetime.now(tz=timezone.utc) - timedelta(days=30)
+    monkeypatch.setattr(
+        manager, "release_date", {"fig": COOLDOWN_EXEMPT, "plum": aged}.get
+    )
+    outdated = tuple(
+        SimpleNamespace(id=package_id, installed_version="1.0", latest_version="2.0")
+        for package_id in ("fig", "plum")
+    )
+    monkeypatch.setattr(Paru, "outdated", property(lambda self: iter(outdated)))
+    monkeypatch.setattr(
+        manager, "build_cli", lambda *args, sudo=False: ("paru", *args)
+    )
+    ran = []
+
+    def fake_run(*args, **kwargs):
+        ran.append(args[0])
+        return ""
+
+    monkeypatch.setattr(manager, "run", fake_run)
+    manager.upgrade()
+    assert ran == [("paru", "--sync", "--refresh", "--sysupgrade")]
 
 
 def test_mas_release_date_reads_catalog_record(monkeypatch):

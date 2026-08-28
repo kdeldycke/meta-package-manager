@@ -29,7 +29,7 @@ from pathlib import Path
 from extra_platforms import LINUX_LIKE, MACOS, UNIX_WITHOUT_MACOS
 
 from ..capabilities import search_capabilities, version_not_implemented
-from ..manager import PackageManager
+from ..manager import COOLDOWN_EXEMPT, PackageManager
 from ..version import VersionRange
 
 TYPE_CHECKING = False
@@ -482,6 +482,96 @@ class Paru(Pacman):
     paru v1.10.0 - libalpm v13.0.1
     ```
     """
+
+    _AUR_INFO_ENV = {"LC_ALL": "C.UTF-8", "TZ": "UTC"}
+    """Locale and timezone forced on the release-date probe below.
+
+    paru localizes the `Repository` and `Last Modified` field labels and
+    renders the timestamp in the host's local timezone with no offset marker
+    (`src/fmt.rs` formats `%a, %e %b %Y %T` after a `with_timezone(&Local)`),
+    so the probe pins both to parse a stable English UTC rendering.
+    """
+    _REPOSITORY_REGEXP = re.compile(r"^Repository\s*:\s*(?P<repo>\S+)", re.MULTILINE)
+    _LAST_MODIFIED_REGEXP = re.compile(
+        r"^Last Modified\s*:\s*(?P<date>.+?)\s*$", re.MULTILINE
+    )
+
+    def release_date(self, package_id: str) -> datetime | None:
+        """Publication timestamp of the latest release of an AUR package.
+
+        `paru --sync --info` prints the AUR RPC's `LastModified` for an AUR
+        package: the server-set timestamp of the last push, the same clock
+        `mpm`'s yay overlay gates on. Git commit dates are client-set and
+        forgeable, and are never consulted.
+
+        A package answering from an official repository instead
+        (`Repository` is anything but `aur`) is out of the gate's scope:
+        Arch's archive stages releases on its own, so it reads as
+        {data}`~meta_package_manager.manager.COOLDOWN_EXEMPT` and always
+        passes.
+
+        ```{code-block} console
+
+        $ paru --noconfirm --color never --sync --info paru
+        Repository      : aur
+        Name            : paru
+        Version         : 2.1.0-1
+        Description     : Feature packed AUR helper
+        URL             : https://github.com/morganamilo/paru
+        Licenses        : GPL-3.0-or-later
+        Maintainer      : Morganamilo
+        Votes           : 1289
+        Popularity      : 21.161366
+        First Submitted : Wed, 21 Oct 2020 20:07:31
+        Last Modified   : Sat, 12 Jul 2025 14:52:15
+        Out Of Date     : No
+        ```
+        """
+        output = self.run_cli(
+            "--sync",
+            "--info",
+            package_id,
+            override_extra_env=self._AUR_INFO_ENV,
+        )
+        repository = self._REPOSITORY_REGEXP.search(output)
+        if repository and repository.group("repo") != "aur":
+            return COOLDOWN_EXEMPT
+        match = self._LAST_MODIFIED_REGEXP.search(output)
+        if match:
+            # paru space-pads single-digit days (`%e`): collapse runs of
+            # whitespace so `strptime`'s `%d` reads both renderings.
+            raw_date = " ".join(match.group("date").split())
+            try:
+                parsed = datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S")
+            except ValueError:
+                return None
+            # The probe forced TZ=UTC, so the naive rendering is UTC.
+            return parsed.replace(tzinfo=timezone.utc)
+        return None
+
+    def upgrade_all_cli_excluding(
+        self,
+        package_ids: tuple[str, ...],
+    ) -> tuple[str, ...]:
+        """Full upgrade in one transaction, skipping the named packages.
+
+        pacman's `--ignore` takes a comma-separated list, so the held packages
+        ride the helper's own `--sysupgrade` transaction: dependency ordering
+        and the repo-plus-AUR interleaving stay paru's job.
+
+        ```{code-block} console
+
+        $ paru --noconfirm --color never --sync --refresh --sysupgrade \\
+            --ignore=fig,kiwi
+        ```
+        """
+        return self.build_cli(
+            "--sync",
+            "--refresh",
+            "--sysupgrade",
+            f"--ignore={','.join(package_ids)}",
+            sudo=True,
+        )
 
 
 class Pikaur(Pacman):

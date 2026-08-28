@@ -635,9 +635,9 @@ testpaths = [ "tests" ]
 xfail_strict = true
 
 [tool.coverage]
+run.source = [ "meta_package_manager" ]
 # https://coverage.readthedocs.io/en/latest/config.html
 run.branch = true
-run.source = [ "meta_package_manager" ]
 # Coverage ratchet: the suite fails below this percentage. Only the parallel
 # non-destructive run of tests.yaml is expected to clear it; the bar-plugin and
 # destructive slices cover a fraction of the package by design and opt out with

@@ -202,10 +202,12 @@ jobs:
           sudo npm install --global npm@latest
       - name: NPM - macOS install
         if: runner.os == 'macOS'
-        # Homebrew demoted Intel macOS to a Tier 3 configuration and stopped bottling for it, so any formula can lose
-        # its bottle there without warning and a source build would cost the job its whole time budget. Every macOS
-        # `brew install` below therefore tolerates a failure on Intel alone, where mpm reports the manager as
-        # unavailable and the suite skips its cases; an ARM failure still means a real regression.
+        # macOS 26 is Apple's last Intel release, so Homebrew scheduled Intel Tahoe 26 into Tier 3 from September
+        # 2026, where "bottles will rarely be built or published". Any formula can therefore lose its bottle without
+        # warning, and building it from source would cost the job its whole time budget. Every macOS `brew install`
+        # below tolerates a failure on Intel alone, where mpm reports the manager as unavailable and the suite skips
+        # its cases; an ARM failure still means a real regression. Homebrew expects to drop Intel entirely around
+        # September 2027, which is when this runner stops earning its cell.
         # See: https://docs.brew.sh/Support-Tiers#tier-3
         run: brew install npm || [ "$RUNNER_ARCH" = "X64" ]
       - name: NPM - Windows upgrade

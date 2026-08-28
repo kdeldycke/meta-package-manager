@@ -21,7 +21,7 @@ There are no Workers, no KV namespaces and no D1 databases. The whole edge confi
 
 GitHub Actions renders it and uploads the finished tree, which is what a Direct Upload flow means: Cloudflare has no access to this repository and no build configuration capable of producing a usable site. The `deploy-docs-cloudflare` job of repomatic's shared `docs.yaml` runs `sphinx-build`, then `wrangler pages deploy ./docs/_build`.
 
-One repository secret feeds it. `CLOUDFLARE_API_TOKEN` needs exactly one permission, `Account → Cloudflare Pages → Edit`, and an account-owned token resolves its own account. A second secret used to carry that account identifier; repomatic `7.14.0` dropped it, so a repository set up before then holds a `CLOUDFLARE_ACCOUNT_ID` nothing reads any more.
+One repository secret feeds it. `CLOUDFLARE_API_TOKEN` needs exactly one permission, `Account → Cloudflare Pages → Edit`, and it is the only one: an account-owned token resolves its own account, so the deploy needs no separate identifier beside it.
 
 The token does need rotating, and nothing warns when it lapses: Cloudflare sends no expiry notice for account API tokens. Give it a TTL, and remember that a docs deploy only runs when the docs change, so an expired token surfaces whenever the next documentation push happens to land.
 

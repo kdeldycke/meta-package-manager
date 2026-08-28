@@ -192,12 +192,10 @@ def test_redirects_file_is_well_formed():
     # Every page Sphinx publishes, as the site path the dirhtml builder gives it.
     docs = PROJECT_ROOT.joinpath("docs")
     pages = {
-        "/" if path.stem == "index" else f"/{path.stem}/"
-        for path in docs.glob("*.md")
+        "/" if path.stem == "index" else f"/{path.stem}/" for path in docs.glob("*.md")
     }
     pages.update(
-        f"/managers/{path.stem}/"
-        for path in docs.joinpath("managers").glob("*.md")
+        f"/managers/{path.stem}/" for path in docs.joinpath("managers").glob("*.md")
     )
 
     for source, destination in rules:
@@ -695,9 +693,9 @@ def test_metrics_predecessor_is_sampled():
     for successor, forerunner in config["predecessors"].items():
         assert successor in config["subjects"]
         url = _canonical_repo_url(forerunner)
-        assert any(
-            row["repo"] == url for row in rows
-        ), f"no reading recorded for {forerunner}"
+        assert any(row["repo"] == url for row in rows), (
+            f"no reading recorded for {forerunner}"
+        )
 
 
 def test_metrics_series_start_at_creation():
@@ -954,10 +952,13 @@ def test_ansi_logo_tracks_the_brand_palette():
     """
     # Two brand colors and the midpoint a flat isometric solid needs for its
     # third plane, which must be exactly that: a midpoint, not a fourth choice.
-    assert logo.BRAND_MID == "#{:02x}{:02x}{:02x}".format(*(
-        (int(logo.BRAND_INK[i : i + 2], 16) + int(logo.BRAND_WASH[i : i + 2], 16)) // 2
-        for i in (1, 3, 5)
-    ))
+    assert logo.BRAND_MID == "#{:02x}{:02x}{:02x}".format(
+        *(
+            (int(logo.BRAND_INK[i : i + 2], 16) + int(logo.BRAND_WASH[i : i + 2], 16))
+            // 2
+            for i in (1, 3, 5)
+        )
+    )
     palette = {logo.BRAND_INK, logo.BRAND_MID, logo.BRAND_WASH}
     # The one derived value the artwork holds: the social banner's background,
     # which is the wash over white and so cannot be any of them literally.
@@ -1114,14 +1115,12 @@ def test_manager_card_renders(manager):
     forced = card.partition("**Every call**\n: ")[2].partition("\n")[0]
     assert bool(forced) is bool(manager.pre_args or manager.post_args)
     if forced:
-        argv = " ".join(
-            (
-                manager.cli_names[0],
-                *manager.pre_args,
-                "<command>",
-                *manager.post_args,
-            )
-        )
+        argv = " ".join((
+            manager.cli_names[0],
+            *manager.pre_args,
+            "<command>",
+            *manager.post_args,
+        ))
         assert forced == f"`{argv}`"
 
     # No path leaks the home directory of whoever built the docs.
@@ -1149,7 +1148,8 @@ def test_manager_card_renders(manager):
         # brackets escaped: a leading `>` would otherwise open a blockquote and
         # swallow itself, and a `<` would open a tag.
         requirement = (
-            _docs._format_requirement(manager.requirement)
+            _docs
+            ._format_requirement(manager.requirement)
             .replace("<", r"\<")
             .replace(">", r"\>")
         )
@@ -2120,16 +2120,14 @@ def test_retraction_status_reuses_table_row(manager):
         assert (line in section) is (cell not in _docs.EMPTY_CELLS)
 
 
-SKILL_SPEC_FIELDS = frozenset(
-    {
-        "allowed-tools",
-        "compatibility",
-        "description",
-        "license",
-        "metadata",
-        "name",
-    }
-)
+SKILL_SPEC_FIELDS = frozenset({
+    "allowed-tools",
+    "compatibility",
+    "description",
+    "license",
+    "metadata",
+    "name",
+})
 """The six frontmatter fields the [Agent Skills
 spec](https://agentskills.io/specification) defines."""
 

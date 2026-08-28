@@ -773,9 +773,7 @@ class CLIExecutor:
         if is_any_windows():
             # `_WIN_DEFAULT_PATHEXT` is private, so fall back to our own copy
             # rather than crash the whole detection if a release drops it.
-            win_pathext = getattr(
-                shutil, "_WIN_DEFAULT_PATHEXT", WIN_DEFAULT_PATHEXT
-            )
+            win_pathext = getattr(shutil, "_WIN_DEFAULT_PATHEXT", WIN_DEFAULT_PATHEXT)
             pathext_source = os.getenv("PATHEXT") or win_pathext
             pathext = unique(ext for ext in pathext_source.split(os.pathsep) if ext)
             search_filenames = []
@@ -1191,8 +1189,7 @@ class CLIExecutor:
                             # cache per terminal (tty_tickets) and a session of
                             # its own hides the very cache prime_sudo() just
                             # probed. No-op on Windows.
-                            start_new_session=watchdog is None
-                            and not is_escalation,
+                            start_new_session=watchdog is None and not is_escalation,
                             # The tee routes each streamed record through the
                             # armed watchdog before the root logger. `None` is
                             # run_cli's default, the untouched root-logger path.

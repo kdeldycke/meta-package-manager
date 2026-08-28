@@ -28,7 +28,7 @@ import sys
 if sys.version_info >= (3, 11):
     from enum import StrEnum
 else:
-    from backports.strenum import StrEnum  # type: ignore[import-not-found]
+    from backports.strenum import StrEnum
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -66,7 +66,7 @@ class SBOM:
 
     def __init__(
         self,
-        export_format: ExportFormat = ExportFormat.JSON,  # type: ignore[assignment]
+        export_format: ExportFormat = ExportFormat.JSON,
     ) -> None:
         """Defaults to JSON export format."""
         logging.debug(f"Set export format to {export_format}")
@@ -197,4 +197,4 @@ class SBOM:
             elif suffixes[-1] in (".tag", ".spdx"):
                 export_format = ExportFormat.TAG_VALUE
         logging.debug(f"File suffixes {suffixes} resolves to {export_format}.")
-        return export_format  # type: ignore[return-value]
+        return export_format

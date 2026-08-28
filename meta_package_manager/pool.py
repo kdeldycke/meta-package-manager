@@ -93,9 +93,11 @@ from .managers.zypper import Zypper
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
+    from datetime import timedelta
     from typing import Final
 
     from .capabilities import Operations
+    from .cooldown import CooldownPolicy
     from .manager import PackageManager
 
 
@@ -388,7 +390,7 @@ class ManagerPool:
         keep_unsupported: bool = False,
         drop_not_found: bool = True,
         implements_operation: Operations | None = None,
-        **extra_options: bool | int,
+        **extra_options: bool | int | timedelta | CooldownPolicy | None,
     ) -> Iterator[PackageManager]:
         """Utility method to extract a subset of the manager pool based on selection
         list (`keep` parameter) and exclusion list (`drop` parameter) criterion.
@@ -445,9 +447,11 @@ class ManagerPool:
         # the loop. A per-manager [mpm.managers.<id>] timeout override keeps
         # precedence, just as it does in the loop.
         if "timeout" in extra_options:
+            timeout = extra_options["timeout"]
+            assert timeout is None or isinstance(timeout, int)
             for manager_id in selected_ids:
                 if "timeout" not in self.overridden_fields.get(manager_id, set()):
-                    self.register[manager_id].timeout = extra_options["timeout"]
+                    self.register[manager_id].timeout = timeout
 
         # Probe every candidate's availability (its --version detection) up front
         # and in parallel, so the sequential string of probes below becomes a single

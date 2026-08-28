@@ -1170,6 +1170,7 @@ test = [
     { name = "spdx-tools" },
 ]
 typing = [
+    { name = "backports-strenum" },
     { name = "types-boltons" },
     { name = "types-docutils" },
     { name = "types-pyyaml" },
@@ -1233,6 +1234,7 @@ test = [
     { name = "spdx-tools" },
 ]
 typing = [
+    { name = "backports-strenum", specifier = ">=1" },
     { name = "types-boltons", specifier = ">=25.0.0.20250919" },
     { name = "types-docutils", specifier = ">=0.22.3.20260724" },
     { name = "types-pyyaml", specifier = ">=6.0.12.9" },

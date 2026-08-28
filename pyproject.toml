@@ -419,6 +419,14 @@ typing = [
   # republishes a stub on every upstream change and ships no changelog to pin a
   # symbol against, so each floor is simply the release current when the stub was
   # declared. Raise one only when mypy reports a symbol the older stub lacks.
+  #
+  # The runtime dependency above is gated on `python_version<'3.11'`, so the
+  # package is absent from the 3.14 runner mypy runs on while `--python-version
+  # 3.10` sends it down the backport branch of every `StrEnum` import. It then
+  # resolves `StrEnum` to `Any`, which silently untypes each enum built on it:
+  # members degrade to `str` and the class stops being iterable. Declared here
+  # unconditionally so the bundled stub is on disk whatever the interpreter.
+  "backports-strenum>=1",
   "types-boltons>=25.0.0.20250919",
   # Declared for `docutils.nodes`, which mypy follows into tests/test_docs.py even
   # though the import there is guarded by `ImportError`. Floor is the stub current

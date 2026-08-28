@@ -34,15 +34,6 @@ command) but share the same output machinery. This module owns all of it:
 - {func}`print_projected_table` and {func}`print_serialized_and_exit`, the
   human-friendly and machine-friendly rendering paths every table-producing
   subcommand goes through.
-
-```{note}
-The registry pairs' second element is annotated `str | None` rather than
-`SortableField | None`: on Python 3.10, {class}`SortableField` extends
-`backports.strenum.StrEnum`, whose stubs type the members as plain
-{class}`str`, so the tighter annotation only checks under 3.11+.
-`StrEnum` members being {class}`str` subclasses, the wider annotation is
-accurate on every supported version.
-```
 """
 
 from __future__ import annotations
@@ -64,7 +55,7 @@ from click_extra.table import (
 if sys.version_info >= (3, 11):
     from enum import StrEnum
 else:
-    from backports.strenum import StrEnum  # type: ignore[import-not-found]
+    from backports.strenum import StrEnum
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -83,7 +74,7 @@ class SortableField(StrEnum):
     VERSION = "version"
 
 
-MANAGERS_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+MANAGERS_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
     (
         ColumnSpec("manager_id", "Manager ID", "Manager's identifier."),
         SortableField.MANAGER_ID,
@@ -149,7 +140,7 @@ platform or a missing binary makes them vary again. Only the *default* selection
 narrows: `--columns` still addresses every column of {data}`MANAGERS_COLUMNS`.
 """
 
-INSTALLED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+INSTALLED_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
     (
         ColumnSpec("package_id", "Package ID", "Package's identifier."),
         SortableField.PACKAGE_ID,
@@ -195,7 +186,7 @@ plugins by GitHub URL (50 characters), and Homebrew Cask reports versions like
 ```
 """
 
-OUTDATED_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+OUTDATED_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
     *INSTALLED_COLUMNS,
     (
         ColumnSpec(
@@ -213,7 +204,7 @@ Inherits the width policy documented on {data}`INSTALLED_COLUMNS`: the second
 version column wraps like the first, `package_id` still does not.
 """
 
-SEARCH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+SEARCH_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
     (
         ColumnSpec("package_id", "Package ID", "Package's identifier."),
         SortableField.PACKAGE_ID,
@@ -266,7 +257,7 @@ and version columns share that treatment, and `package_id` is exempt from it,
 per the width policy documented on {data}`INSTALLED_COLUMNS`.
 """
 
-WHICH_COLUMNS: tuple[tuple[ColumnSpec, str | None], ...] = (
+WHICH_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
     (
         ColumnSpec(
             "manager_id", "Manager ID", "Manager whose search path found the binary."

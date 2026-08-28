@@ -231,7 +231,7 @@ class BarPluginRenderer(MPMPlugin):
 
     def package_rows(self, manager) -> list[tuple[tuple[str, ...], str]]:
         """One row of cells per outdated package, with the command it runs."""
-        rows = []
+        rows: list[tuple[tuple[str, ...], str]] = []
         for package in manager["packages"]:
             installed, latest = diff_versions(
                 package["installed_version"] if package["installed_version"] else "?",

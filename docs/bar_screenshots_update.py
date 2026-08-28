@@ -1366,10 +1366,21 @@ JSON.stringify(rows, null, 2);
     print(f"  diagnostics for {host.name} written to {DIAGNOSTICS}")
 
 
-def capture_all() -> None:
-    """Install both hosts, then walk every shot."""
+def require_macos() -> None:
+    """Abort unless this is macOS, every capture below driving a macOS bar app.
+
+    Kept out of {func}`capture_all` so the guard cannot narrow `sys.platform` for
+    the rest of that function: mypy runs against the platform it is invoked on,
+    and an inline check leaves the whole body unreachable on a Linux runner,
+    which `warn_unreachable` reports as an error.
+    """
     if sys.platform != "darwin":
         sys.exit("These captures need macOS, and a bar app to drive.")
+
+
+def capture_all() -> None:
+    """Install both hosts, then walk every shot."""
+    require_macos()
     for host in (SWIFTBAR, XBAR):
         install(host)
     raise_display()

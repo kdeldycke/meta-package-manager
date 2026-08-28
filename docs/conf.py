@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from datetime import UTC, date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import tomllib  # type: ignore[import-not-found]  # stdlib >=3.11; docs require >=3.12.
@@ -35,7 +35,7 @@ github_user = "kdeldycke"
 # Whole years since `1.0.0` (2016-07-05), the oldest entry of the changelog, for
 # the announcement banner below. Floored, so the figure is never ahead of the
 # anniversary it claims.
-maintained_years = (datetime.now(tz=UTC).date() - date(2016, 7, 5)).days // 365
+maintained_years = (datetime.now(tz=timezone.utc).date() - date(2016, 7, 5)).days // 365
 
 # Addons.
 extensions = [

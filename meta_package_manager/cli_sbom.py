@@ -150,13 +150,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
         guessed_format = SBOM.autodetect_export_format(export_path)
         if not export_format:
             if not guessed_format:
-                # On Python 3.10, `ExportFormat` extends `backports.strenum.StrEnum`
-                # whose typeshed stub omits `__iter__`; iteration is provided by the
-                # `EnumMeta` metaclass at runtime.
-                supported = ", ".join(
-                    f.value
-                    for f in ExportFormat  # type: ignore[attr-defined]
-                )
+                supported = ", ".join(f.value for f in ExportFormat)
                 logging.critical(
                     f"Cannot guess export format from {export_path.name!r}. "
                     f"Use --format to pick one of: {supported}."

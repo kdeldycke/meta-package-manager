@@ -53,6 +53,7 @@ from extra_platforms import Group, extract_members
 from meta_package_manager.capabilities import (
     Operations,
     cleanup_orphan_is_synthesized,
+    cooldown_is_synthesized,
     exact_search_is_synthesized,
     extended_search_is_synthesized,
     implements,
@@ -968,6 +969,10 @@ def augmentations_table() -> str:
       `exact_support`/`extended_support` flags set by
       {func}`meta_package_manager.capabilities.search_capabilities` and the
       config-defined manager builder).
+    - *Cooldown gate*: the manager has no native release-age knob, so `mpm`
+      enforces `--cooldown` itself, probing each package's publication date
+      and holding back the too-fresh ones
+      ({func}`meta_package_manager.capabilities.cooldown_is_synthesized`).
 
     Managers needing no backfill at all are left out of the table. Each listed
     manager links to its dedicated documentation page.
@@ -978,7 +983,8 @@ def augmentations_table() -> str:
         orphan_sweep = cleanup_orphan_is_synthesized(manager)
         exact = exact_search_is_synthesized(manager)
         extended = extended_search_is_synthesized(manager)
-        if not (upgrade_all or orphan_sweep or exact or extended):
+        cooldown = cooldown_is_synthesized(manager)
+        if not (upgrade_all or orphan_sweep or exact or extended or cooldown):
             continue
         table.append([
             f"[`{mid}`](managers/{mid}.md)",
@@ -986,6 +992,7 @@ def augmentations_table() -> str:
             "✅" if orphan_sweep else "",
             "✅" if exact else "",
             "✅" if extended else "",
+            "✅" if cooldown else "",
         ])
 
     return render_table(
@@ -996,9 +1003,10 @@ def augmentations_table() -> str:
             "Orphan sweep",
             "Exact search",
             "Extended search",
+            "Cooldown gate",
         ],
         table_format=TableFormat.GITHUB,
-        colalign=["left", "center", "center", "center", "center"],
+        colalign=["left", "center", "center", "center", "center", "center"],
         disable_numparse=True,
     )
 

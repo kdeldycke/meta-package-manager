@@ -15,83 +15,83 @@ print(augmentations_table())
 
 <!-- mirror -->
 
-| Manager                                    | Full `upgrade --all` | Orphan sweep | Exact search | Extended search |
-| :----------------------------------------- | :------------------: | :----------: | :----------: | :-------------: |
-| [`apk`](managers/apk.md)                   |                      |              |      ✅      |                 |
-| [`apm`](managers/apm.md)                   |                      |              |      ✅      |                 |
-| [`apt-cyg`](managers/apt-cyg.md)           |                      |              |      ✅      |       ✅        |
-| [`apt-mint`](managers/apt-mint.md)         |                      |              |              |       ✅        |
-| [`asdf`](managers/asdf.md)                 |          ✅          |              |      ✅      |       ✅        |
-| [`bob`](managers/bob.md)                   |                      |              |      ✅      |       ✅        |
-| [`cargo`](managers/cargo.md)               |                      |              |      ✅      |       ✅        |
-| [`chromebrew`](managers/chromebrew.md)     |                      |              |      ✅      |       ✅        |
-| [`clib`](managers/clib.md)                 |                      |              |      ✅      |       ✅        |
-| [`composer`](managers/composer.md)         |                      |              |      ✅      |                 |
-| [`conda`](managers/conda.md)               |                      |              |      ✅      |       ✅        |
-| [`deb-get`](managers/deb-get.md)           |                      |              |      ✅      |       ✅        |
-| [`dkp-pacman`](managers/dkp-pacman.md)     |                      |      ✅      |              |       ✅        |
-| [`dnf`](managers/dnf.md)                   |                      |              |      ✅      |       ✅        |
-| [`dnf5`](managers/dnf5.md)                 |                      |              |      ✅      |       ✅        |
-| [`dotnet`](managers/dotnet.md)             |                      |              |      ✅      |       ✅        |
-| [`eopkg`](managers/eopkg.md)               |                      |              |      ✅      |                 |
-| [`fink`](managers/fink.md)                 |                      |              |      ✅      |       ✅        |
-| [`flatpak`](managers/flatpak.md)           |                      |              |      ✅      |       ✅        |
-| [`gem`](managers/gem.md)                   |                      |              |              |       ✅        |
-| [`getnf`](managers/getnf.md)               |                      |              |      ✅      |       ✅        |
-| [`gext`](managers/gext.md)                 |                      |              |      ✅      |       ✅        |
-| [`gh-ext`](managers/gh-ext.md)             |                      |              |      ✅      |       ✅        |
-| [`ghcup`](managers/ghcup.md)               |                      |              |      ✅      |       ✅        |
-| [`guix`](managers/guix.md)                 |                      |              |      ✅      |       ✅        |
-| [`haxelib`](managers/haxelib.md)           |                      |              |      ✅      |       ✅        |
-| [`juliaup`](managers/juliaup.md)           |                      |              |      ✅      |       ✅        |
-| [`krew`](managers/krew.md)                 |                      |              |      ✅      |       ✅        |
-| [`luarocks`](managers/luarocks.md)         |          ✅          |              |      ✅      |       ✅        |
-| [`mamba`](managers/mamba.md)               |                      |              |              |       ✅        |
-| [`mas`](managers/mas.md)                   |                      |              |      ✅      |       ✅        |
-| [`micro`](managers/micro.md)               |                      |              |      ✅      |       ✅        |
-| [`micromamba`](managers/micromamba.md)     |                      |              |              |       ✅        |
-| [`mise`](managers/mise.md)                 |                      |              |      ✅      |                 |
-| [`nala`](managers/nala.md)                 |                      |              |      ✅      |       ✅        |
-| [`nimble`](managers/nimble.md)             |                      |              |      ✅      |       ✅        |
-| [`nix`](managers/nix.md)                   |                      |              |      ✅      |       ✅        |
-| [`npm`](managers/npm.md)                   |                      |              |      ✅      |                 |
-| [`opam`](managers/opam.md)                 |                      |              |      ✅      |       ✅        |
-| [`opkg`](managers/opkg.md)                 |                      |              |      ✅      |       ✅        |
-| [`pacaur`](managers/pacaur.md)             |                      |      ✅      |              |       ✅        |
-| [`pacman`](managers/pacman.md)             |                      |      ✅      |              |       ✅        |
-| [`pacstall`](managers/pacstall.md)         |                      |              |      ✅      |       ✅        |
-| [`pamac`](managers/pamac.md)               |                      |              |      ✅      |       ✅        |
-| [`paru`](managers/paru.md)                 |                      |      ✅      |              |       ✅        |
-| [`pikaur`](managers/pikaur.md)             |                      |      ✅      |              |       ✅        |
-| [`pip`](managers/pip.md)                   |          ✅          |              |              |                 |
-| [`pkcon`](managers/pkcon.md)               |                      |              |      ✅      |       ✅        |
-| [`pkg-tools`](managers/pkg-tools.md)       |                      |              |      ✅      |       ✅        |
-| [`pkgin`](managers/pkgin.md)               |                      |              |      ✅      |       ✅        |
-| [`pnpm`](managers/pnpm.md)                 |                      |              |      ✅      |                 |
-| [`pwsh-gallery`](managers/pwsh-gallery.md) |                      |              |              |       ✅        |
-| [`pyenv`](managers/pyenv.md)               |                      |              |      ✅      |       ✅        |
-| [`scoop`](managers/scoop.md)               |                      |              |      ✅      |       ✅        |
-| [`sfsu`](managers/sfsu.md)                 |                      |              |      ✅      |       ✅        |
-| [`slapt-get`](managers/slapt-get.md)       |                      |              |      ✅      |       ✅        |
-| [`snap`](managers/snap.md)                 |                      |              |      ✅      |       ✅        |
-| [`soar`](managers/soar.md)                 |                      |              |      ✅      |       ✅        |
-| [`sorcery`](managers/sorcery.md)           |                      |              |      ✅      |       ✅        |
-| [`spack`](managers/spack.md)               |                      |              |      ✅      |                 |
-| [`swupd`](managers/swupd.md)               |                      |              |      ✅      |       ✅        |
-| [`tazpkg`](managers/tazpkg.md)             |                      |              |      ✅      |       ✅        |
-| [`tlmgr`](managers/tlmgr.md)               |                      |              |      ✅      |       ✅        |
-| [`trizen`](managers/trizen.md)             |                      |      ✅      |              |       ✅        |
-| [`urpmi`](managers/urpmi.md)               |                      |              |      ✅      |       ✅        |
-| [`uv`](managers/uv.md)                     |          ✅          |              |              |                 |
-| [`vagrant`](managers/vagrant.md)           |          ✅          |              |      ✅      |       ✅        |
-| [`vcpkg`](managers/vcpkg.md)               |                      |              |      ✅      |       ✅        |
-| [`xbps`](managers/xbps.md)                 |                      |              |      ✅      |       ✅        |
-| [`yarn`](managers/yarn.md)                 |                      |              |      ✅      |       ✅        |
-| [`yarn-berry`](managers/yarn-berry.md)     |                      |              |      ✅      |       ✅        |
-| [`yay`](managers/yay.md)                   |                      |      ✅      |              |       ✅        |
-| [`yum`](managers/yum.md)                   |                      |              |      ✅      |       ✅        |
-| [`zef`](managers/zef.md)                   |                      |              |      ✅      |       ✅        |
-| [`zypper`](managers/zypper.md)             |                      |      ✅      |              |                 |
+| Manager                                    | Full `upgrade --all` | Orphan sweep | Exact search | Extended search | Cooldown gate |
+| :----------------------------------------- | :------------------: | :----------: | :----------: | :-------------: | :-----------: |
+| [`apk`](managers/apk.md)                   |                      |              |      ✅      |                 |               |
+| [`apm`](managers/apm.md)                   |                      |              |      ✅      |                 |               |
+| [`apt-cyg`](managers/apt-cyg.md)           |                      |              |      ✅      |       ✅        |               |
+| [`apt-mint`](managers/apt-mint.md)         |                      |              |              |       ✅        |               |
+| [`asdf`](managers/asdf.md)                 |          ✅          |              |      ✅      |       ✅        |               |
+| [`bob`](managers/bob.md)                   |                      |              |      ✅      |       ✅        |               |
+| [`cargo`](managers/cargo.md)               |                      |              |      ✅      |       ✅        |               |
+| [`chromebrew`](managers/chromebrew.md)     |                      |              |      ✅      |       ✅        |               |
+| [`clib`](managers/clib.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`composer`](managers/composer.md)         |                      |              |      ✅      |                 |               |
+| [`conda`](managers/conda.md)               |                      |              |      ✅      |       ✅        |               |
+| [`deb-get`](managers/deb-get.md)           |                      |              |      ✅      |       ✅        |               |
+| [`dkp-pacman`](managers/dkp-pacman.md)     |                      |      ✅      |              |       ✅        |               |
+| [`dnf`](managers/dnf.md)                   |                      |              |      ✅      |       ✅        |               |
+| [`dnf5`](managers/dnf5.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`dotnet`](managers/dotnet.md)             |                      |              |      ✅      |       ✅        |               |
+| [`eopkg`](managers/eopkg.md)               |                      |              |      ✅      |                 |               |
+| [`fink`](managers/fink.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`flatpak`](managers/flatpak.md)           |                      |              |      ✅      |       ✅        |      ✅       |
+| [`gem`](managers/gem.md)                   |                      |              |              |       ✅        |               |
+| [`getnf`](managers/getnf.md)               |                      |              |      ✅      |       ✅        |               |
+| [`gext`](managers/gext.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`gh-ext`](managers/gh-ext.md)             |                      |              |      ✅      |       ✅        |               |
+| [`ghcup`](managers/ghcup.md)               |                      |              |      ✅      |       ✅        |               |
+| [`guix`](managers/guix.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`haxelib`](managers/haxelib.md)           |                      |              |      ✅      |       ✅        |               |
+| [`juliaup`](managers/juliaup.md)           |                      |              |      ✅      |       ✅        |               |
+| [`krew`](managers/krew.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`luarocks`](managers/luarocks.md)         |          ✅          |              |      ✅      |       ✅        |               |
+| [`mamba`](managers/mamba.md)               |                      |              |              |       ✅        |               |
+| [`mas`](managers/mas.md)                   |                      |              |      ✅      |       ✅        |      ✅       |
+| [`micro`](managers/micro.md)               |                      |              |      ✅      |       ✅        |               |
+| [`micromamba`](managers/micromamba.md)     |                      |              |              |       ✅        |               |
+| [`mise`](managers/mise.md)                 |                      |              |      ✅      |                 |               |
+| [`nala`](managers/nala.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`nimble`](managers/nimble.md)             |                      |              |      ✅      |       ✅        |               |
+| [`nix`](managers/nix.md)                   |                      |              |      ✅      |       ✅        |               |
+| [`npm`](managers/npm.md)                   |                      |              |      ✅      |                 |               |
+| [`opam`](managers/opam.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`opkg`](managers/opkg.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`pacaur`](managers/pacaur.md)             |                      |      ✅      |              |       ✅        |               |
+| [`pacman`](managers/pacman.md)             |                      |      ✅      |              |       ✅        |               |
+| [`pacstall`](managers/pacstall.md)         |                      |              |      ✅      |       ✅        |               |
+| [`pamac`](managers/pamac.md)               |                      |              |      ✅      |       ✅        |               |
+| [`paru`](managers/paru.md)                 |                      |      ✅      |              |       ✅        |      ✅       |
+| [`pikaur`](managers/pikaur.md)             |                      |      ✅      |              |       ✅        |               |
+| [`pip`](managers/pip.md)                   |          ✅          |              |              |                 |               |
+| [`pkcon`](managers/pkcon.md)               |                      |              |      ✅      |       ✅        |               |
+| [`pkg-tools`](managers/pkg-tools.md)       |                      |              |      ✅      |       ✅        |               |
+| [`pkgin`](managers/pkgin.md)               |                      |              |      ✅      |       ✅        |               |
+| [`pnpm`](managers/pnpm.md)                 |                      |              |      ✅      |                 |               |
+| [`pwsh-gallery`](managers/pwsh-gallery.md) |                      |              |              |       ✅        |               |
+| [`pyenv`](managers/pyenv.md)               |                      |              |      ✅      |       ✅        |               |
+| [`scoop`](managers/scoop.md)               |                      |              |      ✅      |       ✅        |               |
+| [`sfsu`](managers/sfsu.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`slapt-get`](managers/slapt-get.md)       |                      |              |      ✅      |       ✅        |               |
+| [`snap`](managers/snap.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`soar`](managers/soar.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`sorcery`](managers/sorcery.md)           |                      |              |      ✅      |       ✅        |               |
+| [`spack`](managers/spack.md)               |                      |              |      ✅      |                 |               |
+| [`swupd`](managers/swupd.md)               |                      |              |      ✅      |       ✅        |               |
+| [`tazpkg`](managers/tazpkg.md)             |                      |              |      ✅      |       ✅        |               |
+| [`tlmgr`](managers/tlmgr.md)               |                      |              |      ✅      |       ✅        |               |
+| [`trizen`](managers/trizen.md)             |                      |      ✅      |              |       ✅        |               |
+| [`urpmi`](managers/urpmi.md)               |                      |              |      ✅      |       ✅        |               |
+| [`uv`](managers/uv.md)                     |          ✅          |              |              |                 |               |
+| [`vagrant`](managers/vagrant.md)           |          ✅          |              |      ✅      |       ✅        |               |
+| [`vcpkg`](managers/vcpkg.md)               |                      |              |      ✅      |       ✅        |               |
+| [`xbps`](managers/xbps.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`yarn`](managers/yarn.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`yarn-berry`](managers/yarn-berry.md)     |                      |              |      ✅      |       ✅        |               |
+| [`yay`](managers/yay.md)                   |                      |      ✅      |              |       ✅        |               |
+| [`yum`](managers/yum.md)                   |                      |              |      ✅      |       ✅        |               |
+| [`zef`](managers/zef.md)                   |                      |              |      ✅      |       ✅        |               |
+| [`zypper`](managers/zypper.md)             |                      |      ✅      |              |                 |               |
 
 <!-- mirror-end -->
 
@@ -139,6 +139,16 @@ It goes one step further for a manager that ships no search command at all. [`op
 $ mpm --opkg search nano
 (...)
 ```
+
+## Supply-chain cooldown gate
+
+A release-age [cooldown](cooldown.md) needs a mechanism inside the manager to filter versions by publication date, and most managers ship none. Where the manager's install unit is a self-contained artifact, or its whole transaction is enumerable with a native exclusion flag, `mpm` synthesizes the gate itself: it probes each package's publication date through the manager's own CLI, reading a server-set timestamp the package's author cannot backdate, and holds back any release younger than the window.
+
+```shell-session
+$ mpm --flatpak --cooldown "7 days" upgrade --all
+```
+
+The *Cooldown gate* column above lists the managers relying on this backfill. The probe's admission rules, per-manager mechanisms and limits are covered by the [cooldown page](cooldown.md).
 
 ## Universal augmentations
 

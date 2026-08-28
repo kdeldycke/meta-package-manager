@@ -464,13 +464,22 @@ def test_per_package_no_finisher_off_terminal(capsys):
 # ---------------------------------------------------------------------------
 
 
-def _thread_recorder():
-    """Build a `(work, threads_by_id)` pair recording each manager's thread."""
+def _thread_recorder(barrier, rendezvous_ids):
+    """Build a `(work, threads_by_id)` pair recording each manager's thread.
+
+    The managers named in `rendezvous_ids` meet on `barrier` before recording:
+    their lanes are then provably in flight at the same time, which is what
+    pins them to distinct threads. Sleep-based overlap was racy here: a lane
+    finishing before another starts lets the pool reuse its thread, as seen on
+    free-threaded builds. A family lane may only contribute *one* manager to
+    the rendezvous, its members being serialized on that single lane.
+    """
     threads_by_id: dict = {}
     lock = threading.Lock()
 
     def work(manager):
-        time.sleep(0.01)  # Overlap lanes so distinct ones land on distinct threads.
+        if manager.id in rendezvous_ids:
+            barrier.wait()
         with lock:
             threads_by_id.setdefault(manager.id, []).append(threading.current_thread())
         return manager.id, {}
@@ -482,7 +491,11 @@ def test_lock_family_members_share_one_lane_when_mutating():
     """brew and cask (one family) run on a single worker; an outsider gets its own."""
     ctx = FakeContext(jobs=4)
     managers = [StubManager("brew"), StubManager("cask"), StubManager("gem")]
-    work, threads_by_id = _thread_recorder()
+    # brew (family lane) and gem (own lane) must overlap; cask serializes
+    # behind brew on the family lane and stays out of the rendezvous.
+    work, threads_by_id = _thread_recorder(
+        threading.Barrier(2, timeout=5), {"brew", "gem"}
+    )
     collect_from_managers(
         "Syncing",
         "Synced",
@@ -537,10 +550,15 @@ def test_lock_family_members_share_one_lane_in_collect_per_package():
     ctx = FakeContext(jobs=4)
     threads_by_id: dict = {}
     lock = threading.Lock()
+    # Same rendezvous as _thread_recorder: brew's and gem's lanes must be in
+    # flight together, pinning them to distinct threads, while cask serializes
+    # behind brew on the family lane and stays out of the barrier.
+    barrier = threading.Barrier(2, timeout=5)
 
-    def make_task(manager_id):
+    def make_task(manager_id, rendezvous=False):
         def task():
-            time.sleep(0.01)
+            if rendezvous:
+                barrier.wait()
             with lock:
                 threads_by_id.setdefault(manager_id, []).append(
                     threading.current_thread()
@@ -550,9 +568,9 @@ def test_lock_family_members_share_one_lane_in_collect_per_package():
         return task
 
     tasks = [
-        (StubManager("brew"), make_task("brew")),
+        (StubManager("brew"), make_task("brew", rendezvous=True)),
         (StubManager("cask"), make_task("cask")),
-        (StubManager("gem"), make_task("gem")),
+        (StubManager("gem"), make_task("gem", rendezvous=True)),
     ]
     collect_per_package("Removing", "Removed", tasks, ctx=ctx)  # type: ignore[arg-type]
     assert threads_by_id["brew"] == threads_by_id["cask"]

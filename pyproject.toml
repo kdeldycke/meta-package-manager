@@ -772,9 +772,10 @@ exclude = [
 ]
 
 [tool.repomatic]
-# Keep the shared debug workflow out of this repository. Deleting the file is not
-# enough on its own: `repomatic init` restores every component it owns, so an
-# unwanted one has to be named here to stay gone.
+# Keep the shared debug workflow out of this repository. repomatic 7.14.0 made it
+# opt-in behind `debug.sync`, which defaults off, so this entry is now the second
+# of two locks rather than the only one. It states the intent where a diff shows
+# it, and holds if that default ever flips.
 exclude = [ "workflows/debug.yaml" ]
 # Extension zip packed by release.yaml's build-gnome-extension job and attached
 # to every GitHub release by the engine's extra-assets job (repomatic >= 7.4.2).

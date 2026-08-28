@@ -792,6 +792,23 @@ docs.apidoc-extra-args = [ "--separate" ]
 # of two locks rather than the only one. It states the intent where a diff shows
 # it, and holds if that default ever flips.
 exclude = [ "workflows/debug.yaml" ]
+# `sync-gitignore` rebuilds the file from gitignore.io and this key, so a rule
+# added straight to `.gitignore` survives exactly one edit. Setting the key
+# replaces repomatic's default wholesale, hence the first two blocks below being
+# a verbatim copy of it: only the last one is this repository's own.
+gitignore.extra-content = """
+# Claude Code local files.
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+**/.claude/.cc-writes/
+
+# Sphinx linkcheck output.
+docs/_linkcheck/
+
+# The PyInstaller block above ignores `*.spec`, which targets its build
+# manifests. RPM recipes share the extension and are packaging sources, tracked
+# like every other spec under packaging/.
+!packaging/**/*.spec"""
 # Extension zip packed by release.yaml's build-gnome-extension job and attached
 # to every GitHub release by the engine's extra-assets job (repomatic >= 7.4.2).
 release-assets = [ "mpm-gnome-shell-extension.zip" ]

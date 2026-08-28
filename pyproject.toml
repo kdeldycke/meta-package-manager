@@ -536,6 +536,13 @@ default.extend-ignore-re = [
   # corrupt both the color and the contrast figure derived from it. Anchored on
   # the field so ordinary prose keeps being checked.
   "hex: [0-9A-Fa-f]{6}",
+  # `rpmbuild -ba` builds both the binary and the source package, and the flag
+  # has no long-form spelling to fall back on, so the openSUSE build recipe in
+  # docs/packaging.md cannot be reworded around it. typos reads the option
+  # letters as a word and offers `by` and `be`, an ambiguous pair it refuses to
+  # write, so the whole `fix-typos` job dies on it instead of opening a pull
+  # request. Anchored on the leading dash, which keeps a standalone `ba` checked.
+  "-ba\\b",
 ]
 default.extend-ignore-identifiers-re = [
   # error: `ba` should be `by`, `be`

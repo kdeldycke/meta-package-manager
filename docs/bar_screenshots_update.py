@@ -711,8 +711,12 @@ def restart(host: Host, plugins: Path) -> None:
     for key in position_keys(plugins):
         run(
             (
-                "defaults", "write", host.domain, key,
-                "-float", str(STATUS_ITEM_POSITION),
+                "defaults",
+                "write",
+                host.domain,
+                key,
+                "-float",
+                str(STATUS_ITEM_POSITION),
             ),
             check=False,
         )
@@ -1207,7 +1211,6 @@ def menu_bounds(host: Host) -> dict[str, float] | None:
     }
 
 
-
 def expand_first_section(host: Host, bounds: dict[str, float]) -> None:
     """Open the first group of a grouped menu, however this host opens one.
 
@@ -1309,7 +1312,11 @@ def capture(shot: Shot, plugins: Path) -> None:
             DIAGNOSTICS.mkdir(parents=True, exist_ok=True)
             run(
                 (
-                    "screencapture", "-x", "-o", "-t", "png",
+                    "screencapture",
+                    "-x",
+                    "-o",
+                    "-t",
+                    "png",
                     str(DIAGNOSTICS / f"{shot.stem}-screen.png"),
                 ),
                 check=False,

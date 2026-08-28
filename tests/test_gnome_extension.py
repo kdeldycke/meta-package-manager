@@ -255,9 +255,7 @@ def test_pack_whitelist_covers_every_source():
     """
     # Hidden files belong to no bundle: .DS_Store and friends are not sources.
     shipped = {
-        path.name
-        for path in EXTENSION_DIR.iterdir()
-        if not path.name.startswith(".")
+        path.name for path in EXTENSION_DIR.iterdir() if not path.name.startswith(".")
     }
     assert shipped - PACK_DEFAULTS == _extra_sources(PACKING_WORKFLOWS[0])
 

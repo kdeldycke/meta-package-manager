@@ -22,7 +22,7 @@ The plugin is configurable with these environment variables:
 
 | Variable name              | Description                                                                      | Type    | Defaults             | SwiftBar support |                    Xbar support                    |
 | -------------------------- | -------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :------------------------------------------------: |
-| `VAR_GROUP_BY_MANAGER`       | Group each manager's packages into a section of its own.                         | Boolean | `False`              |        ✅        |                         ✅                         |
+| `VAR_GROUP_BY_MANAGER`     | Group each manager's packages into a section of its own.                         | Boolean | `False`              |        ✅        |                         ✅                         |
 | `VAR_TABLE_RENDERING`      | Aligns package names and versions in a table for easier visual parsing.          | Boolean | `True`               |        ✅        |                         ✅                         |
 | `VAR_DEFAULT_FONT`         | Font parameters for regular text.                                                | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
 | `VAR_MONOSPACE_FONT`       | Font parameters for monospace text. Used for table rendering and error messages. | String  | `font=Menlo size=12` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
@@ -42,14 +42,14 @@ A click runs `mpm` rather than the package manager, and inherits the policy of t
 
 The plugin has no icon files of its own: every state is an emoji, which SwiftBar and Xbar render as text wherever it appears.
 
-| Marker | Where                    | Meaning                                                                  |
-| :----- | :----------------------- | :----------------------------------------------------------------------- |
-| 🎁↑N   | Menu bar title           | N packages can be upgraded.                                              |
-| 📦✓    | Menu bar title           | Every selected manager reports nothing to upgrade.                       |
-| ⚠️N    | Menu bar title, appended | N managers reported errors during the run.                               |
-| ❗️     | Menu bar title           | No runnable `mpm`: the bootstrap pair replaces the package list.         |
-| ⚠️     | Manager section header   | That manager reported an error, in the grouped layout.                   |
-| 🆙     | *Upgrade all* row        | Upgrades every outdated package of one manager.                          |
+| Marker | Where                    | Meaning                                                          |
+| :----- | :----------------------- | :--------------------------------------------------------------- |
+| 🎁↑N   | Menu bar title           | N packages can be upgraded.                                      |
+| 📦✓    | Menu bar title           | Every selected manager reports nothing to upgrade.               |
+| ⚠️N    | Menu bar title, appended | N managers reported errors during the run.                       |
+| ❗️     | Menu bar title           | No runnable `mpm`: the bootstrap pair replaces the package list. |
+| ⚠️     | Manager section header   | That manager reported an error, in the grouped layout.           |
+| 🆙     | *Upgrade all* row        | Upgrades every outdated package of one manager.                  |
 
 The {doc}`GNOME Shell extension <gnome-shell>` names an icon for each of these states instead, and the [panel icons table](gnome-shell.md#panel-icons) lines the two vocabularies up.
 

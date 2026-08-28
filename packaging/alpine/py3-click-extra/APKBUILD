@@ -20,17 +20,17 @@ depends="
 	py3-wcwidth
 	"
 makedepends="py3-gpep517 py3-installer py3-uv-build"
-# Libraries the test modules import at collection time.
+# Libraries the test modules import at collection time. Sphinx and myst-parser
+# are omitted: they only serve tests/sphinx/, which asserts on the exact HTML
+# Sphinx and Pygments emit; upstream skips that tree when they are absent.
 checkdepends="
 	git
 	py3-hjson
 	py3-jsonschema
-	py3-myst-parser
 	py3-pygments
 	py3-pytest
 	py3-pytest-httpserver
 	py3-requests
-	py3-sphinx
 	py3-tomlkit
 	py3-xmltodict
 	py3-yaml

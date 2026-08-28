@@ -179,6 +179,7 @@
 - [bar-plugin,gnome-shell] Offer `uv tool install --upgrade meta-package-manager` when no `mpm` is found, in place of the `python -m pip install` command the menubar plugin used to run into whichever interpreter happened to render it. Both frontends also carry an entry opening the installation page, for the systems `uv` does not answer for.
 - [gnome-shell] Restart the GNOME session before enabling the extension, in the documented installation steps. `gnome-extensions enable` asks the running shell rather than the disk, so it answered `Extension "mpm@kdeldycke.github.io" does not exist` when run right after a successful install.
 - [mpm] Point the documentation's links to repomatic at `repomatic.net`, and drop the retired `CLOUDFLARE_ACCOUNT_ID` secret from the infrastructure page.
+- [mpm] Give every module its own API reference page, in place of the three pages that stacked a whole package each. The `managers` page alone carried 64 modules.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

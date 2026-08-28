@@ -71,17 +71,17 @@
 /development/                           /contributing/          301
 
 # API pages that autodoc no longer emits.
-# `modules` was the generated module index, dropped when the API tree was
-# flattened onto a single page (2025-12-06).
+# `modules` was the generated module index, suppressed by `--no-toc`. The
+# package page carries the same listing, as a toctree over the per-module pages.
 /modules.html                           /meta_package_manager/  301
 /modules/                               /meta_package_manager/  301
-# The bar plugin got its own autodoc page, renamed with the module
-# (`xbar` → `bar_plugin`, 2022-04-17) and folded into the package page in
-# 2025-12-06, where it is still a section of its own.
-/meta_package_manager.xbar.html         /meta_package_manager/  301
-/meta_package_manager.xbar/             /meta_package_manager/  301
-/meta_package_manager.bar_plugin.html   /meta_package_manager/  301
-/meta_package_manager.bar_plugin/       /meta_package_manager/  301
+# The bar plugin's own autodoc page was renamed with the module
+# (`xbar` → `bar_plugin`, 2022-04-17), folded into the package page in
+# 2025-12-06, and split back out under the new name in 2026-08-28. Only the old
+# name needs a rule: the current one is a live page again, reached from its
+# pre-`dirhtml` URL by the generic rule at the foot of this file.
+/meta_package_manager.xbar.html         /meta_package_manager.bar_plugin/  301
+/meta_package_manager.xbar/             /meta_package_manager.bar_plugin/  301
 # The test suite stopped being autodoc'd in 2024-11-23. The testing guide is
 # what a reader looking for it wants.
 /meta_package_manager.tests.html        /tests/                 301
@@ -101,8 +101,10 @@
 # Everything below spends the dynamic budget.
 
 # The API tree lived under `/api/` between 2017-01-28 and 2021-01-24, one page
-# per module and a second level for the managers. All of it is one page now, so
-# the whole subtree collapses onto it rather than earning 25 exact rules.
+# per module and a second level for the managers. It is one page per module
+# again, but under different names and at the site root, so no `/api/` path maps
+# onto a successor. The whole subtree collapses onto the package page, whose
+# toctree lists every module, rather than earning 25 exact rules.
 /api/*                                  /meta_package_manager/  301
 # Every page still published, sent from its pre-`dirhtml` URL to its directory.
 # The manager rule is not redundant with the one under it: `:page` never crosses

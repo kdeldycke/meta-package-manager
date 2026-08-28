@@ -772,6 +772,14 @@ exclude = [
 ]
 
 [tool.repomatic]
+# Give every module its own reference page (`/meta_package_manager.managers.apk`)
+# instead of stacking a package's modules onto one. The managers package is what
+# forces it: 64 modules landed on a single page, which no reader scrolls and no
+# anchor links into usefully. Page length now follows the module rather than the
+# package, so the pool can keep growing without the reference degrading. The
+# curated `/managers/<id>/` pages stay the place a user is sent; these are the
+# API surface behind them.
+docs.apidoc-extra-args = [ "--separate" ]
 # Keep the shared debug workflow out of this repository. repomatic 7.14.0 made it
 # opt-in behind `debug.sync`, which defaults off, so this entry is now the second
 # of two locks rather than the only one. It states the intent where a diff shows

@@ -1,4 +1,4 @@
-# meta\_package\_manager.managers package
+# `meta_package_manager.managers` package
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers
@@ -9,569 +9,71 @@
 
 ## Submodules
 
-## meta_package_manager.managers.am module
-
 ```{eval-rst}
-.. automodule:: meta_package_manager.managers.am
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.antidote module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.antidote
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.antigen module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.antigen
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.apk module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.apk
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.apm module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.apm
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.apt module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.apt
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.asdf module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.asdf
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.bin module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.bin
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.composer module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.composer
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.conda module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.conda
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.deb_get module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.deb_get
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.dnf module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.dnf
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.dotnet module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.dotnet
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.emerge module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.emerge
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.eopkg module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.eopkg
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.fisher module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.fisher
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.flatpak module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.flatpak
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.fwupd module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.fwupd
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.gem module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.gem
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.gext module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.gext
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.ghcup module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.ghcup
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.guix module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.guix
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.homebrew module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.homebrew
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.luarocks module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.luarocks
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.mamba module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.mamba
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.mas module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.mas
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.miktex module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.miktex
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.mise module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.mise
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.nala module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.nala
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.neovim module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.neovim
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.nimble module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.nimble
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.nix module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.nix
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.npm module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.npm
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.oh_my_fish module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.oh_my_fish
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.pacman module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.pacman
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.pacstall module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.pacstall
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.pip module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.pip
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.pipx module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.pipx
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.pixi module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.pixi
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.pkcon module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.pkcon
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.pkg module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.pkg
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.pnpm module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.pnpm
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.pwsh_gallery module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.pwsh_gallery
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.scoop module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.scoop
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.sdkman module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.sdkman
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.sfsu module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.sfsu
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.sheldon module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.sheldon
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.snap module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.snap
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.spack module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.spack
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.sun_tools module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.sun_tools
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.tazpkg module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.tazpkg
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.uv module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.uv
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.vagrant module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.vagrant
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.vcpkg module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.vcpkg
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.volta module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.volta
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.winget module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.winget
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.xbps module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.xbps
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.yarn module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.yarn
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.zef module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.zef
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.zim module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.zim
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.zinit module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.zinit
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.zplug module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.zplug
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.managers.zypper module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.managers.zypper
-   :members:
-   :show-inheritance:
-   :undoc-members:
+.. toctree::
+   :maxdepth: 4
+
+   meta_package_manager.managers.am
+   meta_package_manager.managers.antidote
+   meta_package_manager.managers.antigen
+   meta_package_manager.managers.apk
+   meta_package_manager.managers.apm
+   meta_package_manager.managers.apt
+   meta_package_manager.managers.asdf
+   meta_package_manager.managers.bin
+   meta_package_manager.managers.composer
+   meta_package_manager.managers.conda
+   meta_package_manager.managers.deb_get
+   meta_package_manager.managers.dnf
+   meta_package_manager.managers.dotnet
+   meta_package_manager.managers.emerge
+   meta_package_manager.managers.eopkg
+   meta_package_manager.managers.fisher
+   meta_package_manager.managers.flatpak
+   meta_package_manager.managers.fwupd
+   meta_package_manager.managers.gem
+   meta_package_manager.managers.gext
+   meta_package_manager.managers.ghcup
+   meta_package_manager.managers.guix
+   meta_package_manager.managers.homebrew
+   meta_package_manager.managers.luarocks
+   meta_package_manager.managers.mamba
+   meta_package_manager.managers.mas
+   meta_package_manager.managers.miktex
+   meta_package_manager.managers.mise
+   meta_package_manager.managers.nala
+   meta_package_manager.managers.neovim
+   meta_package_manager.managers.nimble
+   meta_package_manager.managers.nix
+   meta_package_manager.managers.npm
+   meta_package_manager.managers.oh_my_fish
+   meta_package_manager.managers.pacman
+   meta_package_manager.managers.pacstall
+   meta_package_manager.managers.pip
+   meta_package_manager.managers.pipx
+   meta_package_manager.managers.pixi
+   meta_package_manager.managers.pkcon
+   meta_package_manager.managers.pkg
+   meta_package_manager.managers.pnpm
+   meta_package_manager.managers.pwsh_gallery
+   meta_package_manager.managers.scoop
+   meta_package_manager.managers.sdkman
+   meta_package_manager.managers.sfsu
+   meta_package_manager.managers.sheldon
+   meta_package_manager.managers.snap
+   meta_package_manager.managers.spack
+   meta_package_manager.managers.sun_tools
+   meta_package_manager.managers.tazpkg
+   meta_package_manager.managers.uv
+   meta_package_manager.managers.vagrant
+   meta_package_manager.managers.vcpkg
+   meta_package_manager.managers.volta
+   meta_package_manager.managers.winget
+   meta_package_manager.managers.xbps
+   meta_package_manager.managers.yarn
+   meta_package_manager.managers.zef
+   meta_package_manager.managers.zim
+   meta_package_manager.managers.zinit
+   meta_package_manager.managers.zplug
+   meta_package_manager.managers.zypper
 ```

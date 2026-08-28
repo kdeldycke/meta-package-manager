@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 
 from extra_platforms import MACOS
 
@@ -173,6 +174,35 @@ class MAS(PackageManager):
                 installed_version=app["version"],
                 latest_version=app["newVersion"],
             )
+
+    def release_date(self, package_id: str) -> datetime | None:
+        """Publication timestamp of the latest release of an app, read from the
+        App Store catalog.
+
+        `mas lookup --json` relays the App Store's own catalog record, whose
+        `currentVersionReleaseDate` is stamped by the store when the version
+        goes live after review, not by the app's author, which is what makes
+        it a sound cooldown clock. App Review already delays every release on
+        its own, so the window mostly buys time between a version going live
+        and a takedown.
+
+        ```{code-block} console
+
+        $ mas lookup 409183694 --json
+        {"adamID":409183694,"bundleID":"com.apple.iWork.Keynote","currentVersionReleaseDate":"2024-04-02T17:19:42Z","name":"Keynote","version":"14.0"}
+        ```
+        """
+        output = self.run_cli("lookup", package_id, "--json")
+        for record in self._parse_json_stream(output):
+            raw_date = record.get("currentVersionReleaseDate")
+            if raw_date:
+                try:
+                    return datetime.fromisoformat(
+                        str(raw_date).replace("Z", "+00:00")
+                    )
+                except ValueError:
+                    return None
+        return None
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

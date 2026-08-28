@@ -40,6 +40,7 @@ from meta_package_manager.execution import CLIError
 from meta_package_manager.managers.flatpak import Flatpak
 from meta_package_manager.managers.gem import Gem
 from meta_package_manager.managers.homebrew import Homebrew
+from meta_package_manager.managers.mas import MAS
 from meta_package_manager.managers.npm import NPM
 from meta_package_manager.managers.pacman import _YAY_COOLDOWN_INIT_LUA, Yay
 from meta_package_manager.managers.pip import Pip
@@ -363,8 +364,9 @@ def _probed_flatpak(monkeypatch, dates, cooldown=timedelta(days=7)):
     return manager
 
 
-def test_flatpak_advertises_synthesized_cooldown():
-    manager = Flatpak()
+@pytest.mark.parametrize("manager_class", (Flatpak, MAS))
+def test_probe_managers_advertise_synthesized_cooldown(manager_class):
+    manager = manager_class()
     assert manager.supports_cooldown is True
     assert manager.cooldown_env_var is None
     # The gate runs through the probe: no environment is ever injected.
@@ -374,6 +376,7 @@ def test_flatpak_advertises_synthesized_cooldown():
 
 def test_cooldown_is_synthesized_classifier():
     assert cooldown_is_synthesized(Flatpak) is True
+    assert cooldown_is_synthesized(MAS) is True
     # A native env var (npm), an env-var overlay (yay) and an ungateable
     # manager (brew) all sit outside the synthesized classification.
     assert cooldown_is_synthesized(NPM) is False
@@ -571,6 +574,43 @@ def test_flatpak_release_date_none_without_date_line(monkeypatch):
 
     monkeypatch.setattr(manager, "run_cli", fake_run_cli)
     assert manager.release_date("org.gnome.Dictionary") is None
+
+
+def test_mas_release_date_reads_catalog_record(monkeypatch):
+    manager = MAS()
+
+    def fake_run_cli(*args, **kwargs):
+        assert args == ("lookup", "999999999", "--json")
+        return (
+            '{"adamID":999999999,"currentVersionReleaseDate":'
+            '"2020-03-18T17:39:23Z","name":"Papaya","version":"2.0"}'
+        )
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    published = manager.release_date("999999999")
+    assert published == datetime(2020, 3, 18, 17, 39, 23, tzinfo=timezone.utc)
+
+
+def test_mas_release_date_none_without_date_field(monkeypatch):
+    manager = MAS()
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: '{"adamID":999999999,"name":"Papaya"}',
+    )
+    assert manager.release_date("999999999") is None
+
+
+def test_mas_release_date_none_on_unparsable_date(monkeypatch):
+    manager = MAS()
+    monkeypatch.setattr(
+        manager,
+        "run_cli",
+        lambda *args, **kwargs: (
+            '{"adamID":999999999,"currentVersionReleaseDate":"soon","name":"Papaya"}'
+        ),
+    )
+    assert manager.release_date("999999999") is None
 
 
 def test_attempt_install_reports_cooldown_status(monkeypatch):

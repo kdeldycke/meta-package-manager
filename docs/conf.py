@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from datetime import UTC, date, datetime
 from pathlib import Path
 
@@ -280,20 +281,21 @@ linkcheck_ignore = [
     r"https://github\.com/kdeldycke/click-extra#",
     # GitHub README tab fragments are rendered client-side.
     r"https://github\.com/.+\?tab=readme-ov-file#",
-    # The unversioned `releases/latest/download/<file>` URLs of the readme's
-    # Executables table do resolve: every release publishes those aliases beside
-    # the versioned `meta-package-manager-<version>-<platform>-<arch>.<ext>`
-    # artifacts. They are skipped for the throttling budget described below.
+    # The unversioned `releases/latest/download/<file>` aliases of the readme's
+    # Executables table. The release engine uploads one beside every versioned
+    # artifact, so each resolves for as long as the newest release carried that
+    # platform. A release is allowed to ship short, and the repair is the next
+    # release rather than a held one, so a missing cell must not paint the docs
+    # deploy red for a whole cycle. The versioned URLs of the binaries catalog
+    # stay checked, and those are the ones that can never change.
     r"https://github\.com/kdeldycke/meta-package-manager/releases/latest/download/.*",
     # The per-manager source links generated into the benchmark and augmentations
-    # tables (one `blob/main` link per manager) are guarded by the table-render
-    # tests and re-verified authenticated by lychee in the same CI job. Sphinx's
-    # unauthenticated crawl gets throttled by GitHub to ~1 request per minute,
-    # which overruns the link-check job budget.
+    # tables, one `blob/main` link per manager. lychee checks them authenticated
+    # in this same CI job, and the table-render tests hold their shape, so a
+    # second crawl of the set buys no coverage the job does not already have.
     r"https://github\.com/kdeldycke/meta-package-manager/blob/",
-    # Same budget, same guard: the tracker search each manager card links its
-    # label to. A label search always answers 200, empty or not, so there is
-    # nothing for linkcheck to catch here anyway.
+    # The tracker search each manager card links its label to. A label search
+    # always answers 200, empty or not, so there is nothing to catch here.
     r"https://github\.com/kdeldycke/meta-package-manager/issues\?q=",
     # The upstream badges of the manager pages: a dozen per page over a hundred
     # pages, all served by shields.io, which answers an image to any query it
@@ -312,6 +314,41 @@ linkcheck_ignore = [
 # Retry transiently-unreachable hosts before reporting them broken, so a flaky
 # but valid link stays checked instead of being moved to linkcheck_ignore.
 linkcheck_retries = 3
+
+# Authenticate the github.com crawl when CI exposes a token: GitHub throttles
+# anonymous requests to ~1 per minute, which the ~280 github.com links of these
+# pages overrun on their own. repomatic's shared `docs.yaml` exposes
+# `GITHUB_TOKEN` on the linkcheck step for exactly this consumer; local builds
+# carry no token and stay anonymous.
+#
+# Release-asset downloads are the exception and stay anonymous: an
+# `Authorization` header makes github.com redirect them to the legacy
+# `objects.githubusercontent.com` host instead of `release-assets`, and that
+# signed URL answers 401 whatever the next request carries. The binaries page
+# tabulates one download URL per binary ever released, so authenticating them
+# would report the whole catalog as broken. Checking that many anonymously stays
+# affordable: the endpoint answers a CDN redirect, not a rendered page, and a
+# burst of them draws none of the throttling above.
+#
+# `linkcheck_auth` carries the exception because its patterns are regular
+# expressions, where `linkcheck_request_headers` matches whole hosts only.
+if os.environ.get("GITHUB_TOKEN"):
+
+    def github_bearer_auth(request):
+        """Sign a request with the CI token.
+
+        Returns the prepared request, as ``requests`` expects from an ``auth``
+        callable.
+        """
+        request.headers["Authorization"] = f"Bearer {os.environ['GITHUB_TOKEN']}"
+        return request
+
+    linkcheck_auth = [
+        (
+            r"https://github\.com/(?!.*/releases/(?:latest/)?download/)",
+            github_bearer_auth,
+        ),
+    ]
 
 # Footer content.
 html_last_updated_fmt = "%Y-%m-%d"

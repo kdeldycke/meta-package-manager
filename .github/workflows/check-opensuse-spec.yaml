@@ -47,7 +47,9 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     container:
-      image: opensuse/tumbleweed
+      # Tumbleweed is a rolling release and publishes no immutable tag, so
+      # `latest` is what OBS builds against and what this job must validate.
+      image: opensuse/tumbleweed:latest # zizmor: ignore[unpinned-images]
     steps:
       - name: Refresh repositories
         # The opensuse/tumbleweed image ships a metadata cache that can name a
@@ -141,7 +143,8 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     container:
-      image: opensuse/tumbleweed
+      # Rolling and unpinnable, as in the build-rpm job above.
+      image: opensuse/tumbleweed:latest # zizmor: ignore[unpinned-images]
     steps:
       - name: Refresh repositories
         # Retried against stale image metadata, as in the build-rpm job above.
@@ -202,7 +205,8 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     container:
-      image: opensuse/tumbleweed
+      # Rolling and unpinnable, as in the build-rpm job above.
+      image: opensuse/tumbleweed:latest # zizmor: ignore[unpinned-images]
     steps:
       - name: Refresh repositories
         # Retried against stale image metadata, as in the build-rpm job above.

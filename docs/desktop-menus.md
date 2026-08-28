@@ -2,14 +2,14 @@
 
 `mpm` puts the same menu on two desktops. On macOS it is a plugin for the menu bar, running under {doc}`SwiftBar or Xbar <bar-plugin>`. On Linux it is a {doc}`GNOME Shell extension <gnome-shell>` in the top bar. Both list the outdated packages `mpm outdated` reports across every package manager on the system, and upgrade them one by one or per manager.
 
-|                | {doc}`Menu bar plugin <bar-plugin>`              | {doc}`GNOME Shell extension <gnome-shell>`  |
-| :------------- | :----------------------------------------------- | :------------------------------------------ |
-| Desktop        | macOS, under SwiftBar or Xbar                    | GNOME Shell `46` to `50`                    |
-| Written in     | Python, one file shipped inside `mpm`            | GJS                                         |
-| Installed by   | symlinking that file into the host's plugin folder | an extension zip, or a source checkout    |
-| Configured by  | environment variables, edited in the host's UI   | GSettings, edited in the preferences window |
-| States drawn as | emoji                                            | named icons from the desktop icon theme     |
-| `mpm` required | `5.0.0` or newer                                 | `6.4.0` or newer                            |
+|                 | {doc}`Menu bar plugin <bar-plugin>`                | {doc}`GNOME Shell extension <gnome-shell>`  |
+| :-------------- | :------------------------------------------------- | :------------------------------------------ |
+| Desktop         | macOS, under SwiftBar or Xbar                      | GNOME Shell `46` to `50`                    |
+| Written in      | Python, one file shipped inside `mpm`              | GJS                                         |
+| Installed by    | symlinking that file into the host's plugin folder | an extension zip, or a source checkout      |
+| Configured by   | environment variables, edited in the host's UI     | GSettings, edited in the preferences window |
+| States drawn as | emoji                                              | named icons from the desktop icon theme     |
+| `mpm` required  | `5.0.0` or newer                                   | `6.4.0` or newer                            |
 
 Both are frontends to the `mpm` CLI, which is installed separately: see {doc}`install`.
 

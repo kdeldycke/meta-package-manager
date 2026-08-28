@@ -45,6 +45,7 @@ from meta_package_manager.managers.pacman import _YAY_COOLDOWN_INIT_LUA, Yay
 from meta_package_manager.managers.pip import Pip
 from meta_package_manager.managers.pipx import Pipx
 from meta_package_manager.managers.uv import UV, UVX
+from meta_package_manager.specifier import Specifier
 from meta_package_manager.version import parse_version
 
 """Test the supply-chain release-age cooldown feature.
@@ -574,14 +575,14 @@ def test_flatpak_release_date_none_without_date_line(monkeypatch):
 
 def test_attempt_install_reports_cooldown_status(monkeypatch):
     manager = _probed_flatpak(monkeypatch, {})
-    spec = SimpleNamespace(package_id="org.example.Fig", version=None)
+    spec = Specifier(raw_spec="org.example.Fig", package_id="org.example.Fig")
     assert _attempt_install(manager, spec) == "cooldown"
 
 
 def test_package_task_holds_fresh_release(monkeypatch):
     fresh = datetime.now(tz=timezone.utc) - timedelta(days=1)
     manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh})
-    spec = SimpleNamespace(package_id="org.example.Kiwi", version=None)
+    spec = Specifier(raw_spec="org.example.Kiwi", package_id="org.example.Kiwi")
     task = _package_task(
         manager,
         spec,

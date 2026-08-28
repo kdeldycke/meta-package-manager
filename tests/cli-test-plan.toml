@@ -278,29 +278,33 @@ stderr_contains = "is valid."
 # Table-format breadth. Each format is a separate tabulate renderer (toml,
 # yaml, json, xml). A regression here flags a missing tabulate/format
 # package data file in the bundled binary.
+#
+# The manager named is incidental: every case below only needs one that the
+# host always detects, so each accepts dnf alongside cargo for the reason the
+# CSV cases above give.
 [[cases]]
 cli_parameters = "--table-format json managers"
 skip_platforms = "windows"
 exit_code = 0
-stdout_contains = "\"id\": \"cargo\""
+stdout_regex_matches = "\"id\": \"(cargo|dnf)\""
 
 [[cases]]
 cli_parameters = "--table-format yaml managers"
 skip_platforms = "windows"
 exit_code = 0
-stdout_contains = "id: cargo"
+stdout_regex_matches = "id: (cargo|dnf)"
 
 [[cases]]
 cli_parameters = "--table-format toml managers"
 skip_platforms = "windows"
 exit_code = 0
-stdout_contains = "id = \"cargo\""
+stdout_regex_matches = "id = \"(cargo|dnf)\""
 
 [[cases]]
 cli_parameters = "--table-format xml managers"
 skip_platforms = "windows"
 exit_code = 0
-stdout_contains = "<cargo>"
+stdout_regex_matches = "<(cargo|dnf)>"
 
 # Globals introduced this cycle. `--man` exercises the roff renderer click-extra
 # 7.19 ships and its embedded data files; `--summary` replaces the old
@@ -324,25 +328,25 @@ stdout_contains = "mpm.accessible"
 cli_parameters = "--accessible managers"
 skip_platforms = "windows"
 exit_code = 0
-stdout_contains = "cargo"
+stdout_regex_matches = "(cargo|dnf)"
 
 [[cases]]
 cli_parameters = "--summary managers"
 skip_platforms = "windows"
 exit_code = 0
-stdout_contains = "cargo"
+stdout_regex_matches = "(cargo|dnf)"
 
 [[cases]]
 cli_parameters = "--cooldown 30days managers"
 skip_platforms = "windows"
 exit_code = 0
-stdout_contains = "cargo"
+stdout_regex_matches = "(cargo|dnf)"
 
 [[cases]]
 cli_parameters = "--cooldown best-effort managers"
 skip_platforms = "windows"
 exit_code = 0
-stdout_contains = "cargo"
+stdout_regex_matches = "(cargo|dnf)"
 
 # Subcommands not exercised by the other tests. `config-template` prints a
 # per-manager TOML overrides skeleton, `help` dispatches click-extra's

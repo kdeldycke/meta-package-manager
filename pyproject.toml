@@ -870,7 +870,19 @@ workflow.paths."tests.yaml" = [
 # x86_64 target in the ARM64 Rust toolchain, so the job has to pin
 # `UV_PYTHON=cpython-<version>-aarch64`. See
 # https://github.com/astral-sh/uv/issues/12906, open as of this writing.
-test-matrix.remove.os = [ "windows-11-arm" ]
+#
+# Intel macOS goes for the opposite reason: cost, not capability. macOS 26 is
+# Apple's last Intel release, so Homebrew scheduled Intel Tahoe 26 into Tier 3
+# from September 2026, where "bottles will rarely be built or published". The
+# cell's manager coverage decays one formula at a time, each turning into a
+# skipped manager rather than a signal, and hosted macOS bills about ten times
+# Linux. See: https://docs.brew.sh/Support-Tiers#tier-3
+#
+# This drops the CI cell alone, and is not a statement of support: `mpm` is a
+# pure-Python package and keeps running on Intel whatever the host OS,
+# `tests-install.yaml` still installs it on `macos-15-intel`, and an Intel bug
+# reported by a user is a bug to fix like any other.
+test-matrix.remove.os = [ "macos-26-intel", "windows-11-arm" ]
 # The two axes answer different questions, so neither needs the other's spread.
 # The OS axis is the product: `mpm` drives a different set of managers on each
 # one, so every OS and architecture keeps a cell. The Python axis is
@@ -897,11 +909,9 @@ test-matrix.remove.os = [ "windows-11-arm" ]
 test-matrix.exclude = [
   { os = "ubuntu-26.04", python-version = "3.10" },
   { os = "macos-26", python-version = "3.10" },
-  { os = "macos-26-intel", python-version = "3.10" },
   { os = "windows-2025", python-version = "3.10" },
   { os = "ubuntu-26.04", python-version = "3.15" },
   { os = "macos-26", python-version = "3.15" },
-  { os = "macos-26-intel", python-version = "3.15" },
   { os = "windows-2025", python-version = "3.15" },
 ]
 # Sync optional-dependencies into the build venv so the Nuitka binary ships

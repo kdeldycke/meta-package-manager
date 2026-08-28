@@ -202,14 +202,7 @@ jobs:
           sudo npm install --global npm@latest
       - name: NPM - macOS install
         if: runner.os == 'macOS'
-        # macOS 26 is Apple's last Intel release, so Homebrew scheduled Intel Tahoe 26 into Tier 3 from September
-        # 2026, where "bottles will rarely be built or published". Any formula can therefore lose its bottle without
-        # warning, and building it from source would cost the job its whole time budget. Every macOS `brew install`
-        # below tolerates a failure on Intel alone, where mpm reports the manager as unavailable and the suite skips
-        # its cases; an ARM failure still means a real regression. Homebrew expects to drop Intel entirely around
-        # September 2027, which is when this runner stops earning its cell.
-        # See: https://docs.brew.sh/Support-Tiers#tier-3
-        run: brew install npm || [ "$RUNNER_ARCH" = "X64" ]
+        run: brew install npm
       - name: NPM - Windows upgrade
         if: runner.os == 'Windows'
         run: npm install --global npm # zizmor: ignore[adhoc-packages]
@@ -223,8 +216,7 @@ jobs:
       # Cargo
       - name: Cargo - macOS install
         if: runner.os == 'macOS'
-        # Tolerated on Intel, as in the NPM step above.
-        run: brew install rust || [ "$RUNNER_ARCH" = "X64" ]
+        run: brew install rust
       - name: Cargo - Linux install
         if: runner.os == 'Linux'
         run: |
@@ -237,8 +229,7 @@ jobs:
       # Yarn
       - name: Yarn - macOS install
         if: runner.os == 'macOS'
-        # Tolerated on Intel, as in the NPM step above.
-        run: brew install yarn || [ "$RUNNER_ARCH" = "X64" ]
+        run: brew install yarn
 
       # XXX Yarn is only installed on macOS. On Linux and Windows, Yarn's post-install binary path is not registered
       # in PATH within the same GitHub Actions shell session, causing FileNotFoundError during mpm upgrade tests.
@@ -246,8 +237,7 @@ jobs:
       # Composer
       - name: Composer - macOS install
         if: runner.os == 'macOS'
-        # Tolerated on Intel, as in the NPM step above: composer needs php and httpd, neither of them bottled there.
-        run: brew install composer || [ "$RUNNER_ARCH" = "X64" ]
+        run: brew install composer
       - name: Composer - Windows upgrade
         if: runner.os == 'Windows'
         run: choco upgrade composer --no-progress --yes --retry-count=3
@@ -255,8 +245,7 @@ jobs:
       # MAS
       - name: MAS - macOS install
         if: runner.os == 'macOS'
-        # Tolerated on Intel, as in the NPM step above.
-        run: brew install mas || [ "$RUNNER_ARCH" = "X64" ]
+        run: brew install mas
 
       # Flatpak
       - name: Flatpak - Linux install
@@ -361,8 +350,7 @@ jobs:
       # snap: it tracks Neovim's own stable tag and builds for both amd64 and arm64.
       - name: Neovim - macOS install
         if: runner.os == 'macOS'
-        # Tolerated on Intel, as in the NPM step above.
-        run: brew install neovim || [ "$RUNNER_ARCH" = "X64" ]
+        run: brew install neovim
       - name: Neovim - Linux install
         if: runner.os == 'Linux'
         run: sudo snap install --classic nvim
@@ -440,13 +428,12 @@ jobs:
       # Pixi
       # https://formulae.brew.sh/formula/pixi
       # https://github.com/ScoopInstaller/Main/blob/master/bucket/pixi.json
-      # Not preinstalled on any runner image. Homebrew covers macOS and Linux, Scoop
-      # covers Windows; both were bootstrapped by earlier steps of this job.
+      # Not preinstalled on any runner image. Homebrew covers macOS and Linux (the
+      # formula is bottled for both), Scoop covers Windows; both were bootstrapped
+      # by earlier steps of this job.
       - name: Pixi - Linux & macOS install
         if: runner.os != 'Windows'
-        # Tolerated on Intel macOS, as in the NPM step above, where the formula lost its bottle. This step also runs
-        # on Linux, whose x86 runners report the same architecture, so the guard names the operating system too.
-        run: brew install pixi || { [ "$RUNNER_OS" = "macOS" ] && [ "$RUNNER_ARCH" = "X64" ]; }
+        run: brew install pixi
       - name: Pixi - Windows install
         if: runner.os == 'Windows'
         shell: pwsh

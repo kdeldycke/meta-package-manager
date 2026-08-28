@@ -34,6 +34,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from datetime import datetime, timezone
 from enum import Enum
 from functools import cached_property
 from typing import ClassVar, cast
@@ -45,6 +46,7 @@ from extra_platforms import (
     extract_members,
 )
 
+from .cooldown import CooldownPolicy
 from .execution import CLIError, CLIExecutor, highlight_cli_name
 from .package import EMPTY_METADATA, Package, PackageMetadata
 from .version import VersionRange
@@ -662,6 +664,115 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             ):
                 yield pkg
 
+    def release_date(self, package_id: str) -> datetime | None:
+        """Publication timestamp of the latest release of a package.
+
+        The probe behind the synthesized per-package cooldown gate (see
+        {meth}`cooldown_hold_reason`): a manager without a native
+        {attr}`~meta_package_manager.execution.CLIExecutor.cooldown_env_var`
+        that implements this method becomes gateable, package by package.
+
+        The contract binds the timestamp's provenance, not just its shape:
+
+        - Returns a timezone-aware {class}`~datetime.datetime`, or `None` when
+          the registry answers but carries no date (the gate then fails
+          closed under the default `enforce` posture).
+        - The timestamp must be **server-set**: stamped by the registry, store
+          or build service at publication. A client-set or package-embedded
+          date (a git commit date, an archive metadata field the author
+          writes) is forgeable by exactly the attacker the cooldown exists to
+          stop, and must never back this probe.
+        - The date is the one of the **latest available release**, the version
+          the manager would resolve absent a pin. Implementations should read
+          it through the manager's own CLI, so the probe sees the same
+          registry, mirrors and authentication as the install it guards.
+
+        Optional. Will be simply skipped by {program}`mpm` if not implemented.
+        """
+        raise NotImplementedError
+
+    def _probes_release_date(self) -> bool:
+        """Whether a subclass implements the {meth}`release_date` probe.
+
+        The override of the
+        {meth}`~meta_package_manager.execution.CLIExecutor._probes_release_date`
+        hook, which is what folds probe-backed managers into
+        {attr}`~meta_package_manager.execution.CLIExecutor.supports_cooldown`.
+        """
+        return self._defines("release_date")
+
+    @property
+    def _cooldown_probe_engaged(self) -> bool:
+        """Whether an active cooldown is enforced through the release-date probe.
+
+        `True` only when a window is set, the manager implements
+        {meth}`release_date`, no native environment variable already delegates
+        the gate to the manager's own resolver, and a per-manager
+        `cooldown_policy` override has not exempted it (`off`).
+        """
+        return (
+            self.cooldown is not None
+            and self.cooldown_env_var is None
+            and self.cooldown_policy is not CooldownPolicy.off
+            and self._probes_release_date()
+        )
+
+    def cooldown_hold_reason(self, package_id: str) -> str | None:
+        """Decide whether the release-age cooldown holds back one package.
+
+        The per-package half of the gate, for managers that implement the
+        {meth}`release_date` probe instead of carrying a native
+        {attr}`~meta_package_manager.execution.CLIExecutor.cooldown_env_var`.
+        Returns `None` when the package may proceed: no active probe-backed
+        cooldown, or a publication old enough to clear the window. Returns a
+        human-readable hold reason otherwise, which the caller renders in its
+        trail and logs.
+
+        The probe is fail-closed: a publication date that cannot be read
+        (probe failure, or a registry carrying no date) holds the package
+        under the default `enforce` posture, and only a `best-effort` policy
+        lets it through, unguarded.
+        """
+        if not self._cooldown_probe_engaged:
+            return None
+        # A --dry-run simulates every CLI call, the probe included, so there is
+        # no date to read and nothing real to protect: let the simulation
+        # proceed. --plan takes precedence and executes reads for real.
+        if self.dry_run and not self.plan:
+            return None
+        published = None
+        try:
+            # The probe is a read-only query: stamp it as such so it resolves
+            # the read-only timeout and executes for real under --plan.
+            with self.acting_as("outdated"):
+                published = self.release_date(package_id)
+        except CLIError:
+            pass
+        assert self.cooldown is not None
+        if published is None:
+            if (
+                self.cooldown_policy or CooldownPolicy.enforce
+            ) is CooldownPolicy.best_effort:
+                logging.info(
+                    f"Cannot date the latest release of {package_id}; "
+                    "running without the supply-chain safeguard.",
+                    extra={"label": self.id},
+                )
+                return None
+            return "its latest release cannot be dated (fail-closed)"
+        # The contract wants an aware datetime; absorb a naive one as UTC
+        # rather than crash the comparison below on a misimplemented probe.
+        if published.tzinfo is None:
+            published = published.replace(tzinfo=timezone.utc)
+        cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+        if published <= cutoff:
+            return None
+        return (
+            "its latest release was published "
+            f"{published.isoformat(sep=' ', timespec='seconds')}, "
+            "within the cooldown window"
+        )
+
     @property
     def orphans(self) -> Iterator[Package]:
         """List packages installed as dependencies that nothing requires anymore.
@@ -763,11 +874,23 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
         See for example the case of
         {meth}`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.
+
+        An active probe-backed cooldown (see {meth}`cooldown_hold_reason`)
+        forces the same one-by-one path even when a native one-shot command
+        exists: only the per-package path can hold back individual too-fresh
+        releases while the rest of the upgrade proceeds.
         """
         if package_id:
             cli = self.upgrade_one_cli(package_id, version=version)
 
         else:
+            if self._cooldown_probe_engaged:
+                logging.info(
+                    "Active cooldown: upgrade outdated packages one by one, "
+                    "holding back any release younger than the window.",
+                    extra={"label": self.id},
+                )
+                return self._upgrade_all_one_by_one()
             try:
                 cli = self.upgrade_all_cli()
             except NotImplementedError:
@@ -775,20 +898,38 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                     "upgrade_all_cli operation not implemented. "
                     "Call single upgrade operation on each package, one-by-one.",
                 )
-                # The listing is a read-only query, so it runs under the
-                # `outdated` stamp: it resolves the short read-only timeout, and
-                # `mpm --plan` executes it for real instead of capturing it, so
-                # the plan lists the actual per-package upgrade commands.
-                with self.acting_as("outdated"):
-                    outdated_packages = tuple(self.refiltered_outdated)
-                logs = []
-                for package in outdated_packages:
-                    output = self.upgrade(package.id)
-                    if output:
-                        logs.append(output)
-                return "\n".join(logs)
+                return self._upgrade_all_one_by_one()
 
         return self.run(cli, extra_env=self.extra_env)
+
+    def _upgrade_all_one_by_one(self) -> str:
+        """Upgrade every outdated package through its own one-package CLI.
+
+        The fallback behind managers with no native one-shot upgrade command,
+        and the only route able to honor a probe-backed cooldown: each outdated
+        package is checked against {meth}`cooldown_hold_reason` and held back,
+        with a `WARNING` naming the reason, rather than upgraded when its
+        latest release is too fresh.
+        """
+        # The listing is a read-only query, so it runs under the `outdated`
+        # stamp: it resolves the short read-only timeout, and `mpm --plan`
+        # executes it for real instead of capturing it, so the plan lists the
+        # actual per-package upgrade commands.
+        with self.acting_as("outdated"):
+            outdated_packages = tuple(self.refiltered_outdated)
+        logs = []
+        for package in outdated_packages:
+            hold = self.cooldown_hold_reason(package.id)
+            if hold:
+                logging.warning(
+                    f"Hold {package.id}: {hold}.",
+                    extra={"label": self.id},
+                )
+                continue
+            output = self.upgrade(package.id)
+            if output:
+                logs.append(output)
+        return "\n".join(logs)
 
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.

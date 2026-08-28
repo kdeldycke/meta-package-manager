@@ -18,13 +18,17 @@ from __future__ import annotations
 
 import gc
 import logging
+import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from click_extra import Duration
 
-from meta_package_manager.cli_maintenance import cooldown_permits
+from meta_package_manager.capabilities import cooldown_is_synthesized
+from meta_package_manager.cli import _package_task
+from meta_package_manager.cli_maintenance import _attempt_install, cooldown_permits
 from meta_package_manager.cooldown import (
     Cooldown,
     CooldownPolicy,
@@ -32,6 +36,8 @@ from meta_package_manager.cooldown import (
     parse_cooldown_section,
     resolve_cooldown,
 )
+from meta_package_manager.execution import CLIError
+from meta_package_manager.managers.flatpak import Flatpak
 from meta_package_manager.managers.gem import Gem
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM
@@ -332,6 +338,266 @@ def test_yay_cooldown_no_recursion_when_version_resolved_lazily(tmp_path, monkey
         "MPM_COOLDOWN_EPOCH",
         "MPM_YAY_USER_DIR",
     }
+
+
+_FLATPAK_REMOTE_INFO_OUTPUT = """\
+GNOME Dictionary - Check word definitions and spellings
+
+        ID: org.gnome.Dictionary
+       Ref: app/org.gnome.Dictionary/x86_64/stable
+      Arch: x86_64
+    Branch: stable
+Collection: org.flathub.Stable
+    Commit: 5697aaea8f6a55b02c34e77504cbe4e419257b482ec7cba434255f5bd6f4
+   Subject: Export org.gnome.Dictionary
+      Date: 2020-12-08 12:00:26 +0000
+"""
+
+
+def _probed_flatpak(monkeypatch, dates, cooldown=timedelta(days=7)):
+    """A flatpak manager whose release-date probe answers from `dates`."""
+    manager = Flatpak()
+    manager.cooldown = cooldown
+    monkeypatch.setattr(manager, "release_date", dates.get)
+    return manager
+
+
+def test_flatpak_advertises_synthesized_cooldown():
+    manager = Flatpak()
+    assert manager.supports_cooldown is True
+    assert manager.cooldown_env_var is None
+    # The gate runs through the probe: no environment is ever injected.
+    manager.cooldown = timedelta(days=7)
+    assert manager.cooldown_env() == {}
+
+
+def test_cooldown_is_synthesized_classifier():
+    assert cooldown_is_synthesized(Flatpak) is True
+    # A native env var (npm), an env-var overlay (yay) and an ungateable
+    # manager (brew) all sit outside the synthesized classification.
+    assert cooldown_is_synthesized(NPM) is False
+    assert cooldown_is_synthesized(Yay) is False
+    assert cooldown_is_synthesized(Homebrew) is False
+
+
+def test_cooldown_permits_probe_backed_manager():
+    manager = Flatpak()
+    manager.cooldown = timedelta(days=7)
+    assert cooldown_permits(manager) is True
+
+
+def test_hold_reason_inactive_without_cooldown(monkeypatch):
+    manager = Flatpak()
+    monkeypatch.setattr(
+        manager,
+        "release_date",
+        lambda package_id: pytest.fail("probe must not run without a cooldown"),
+    )
+    assert manager.cooldown_hold_reason("org.example.Fig") is None
+
+
+def test_hold_reason_passes_aged_release(monkeypatch):
+    aged = datetime.now(tz=timezone.utc) - timedelta(days=30)
+    manager = _probed_flatpak(monkeypatch, {"org.example.Fig": aged})
+    assert manager.cooldown_hold_reason("org.example.Fig") is None
+
+
+def test_hold_reason_holds_fresh_release(monkeypatch):
+    fresh = datetime.now(tz=timezone.utc) - timedelta(days=1)
+    manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh})
+    reason = manager.cooldown_hold_reason("org.example.Kiwi")
+    assert reason is not None
+    assert "within the cooldown window" in reason
+
+
+def test_hold_reason_fail_closed_on_unknown_date(monkeypatch):
+    manager = _probed_flatpak(monkeypatch, {})
+    reason = manager.cooldown_hold_reason("org.example.Plum")
+    assert reason == "its latest release cannot be dated (fail-closed)"
+
+
+def test_hold_reason_fail_closed_on_probe_error(monkeypatch):
+    manager = Flatpak()
+    manager.cooldown = timedelta(days=7)
+
+    def broken_probe(package_id):
+        raise CLIError(1, "", "error: nothing matches org.example.Plum")
+
+    monkeypatch.setattr(manager, "release_date", broken_probe)
+    reason = manager.cooldown_hold_reason("org.example.Plum")
+    assert reason == "its latest release cannot be dated (fail-closed)"
+
+
+def test_hold_reason_best_effort_waives_unknown_date(monkeypatch, caplog):
+    caplog.set_level(logging.INFO)
+    manager = _probed_flatpak(monkeypatch, {})
+    manager.cooldown_policy = CooldownPolicy.best_effort
+    assert manager.cooldown_hold_reason("org.example.Plum") is None
+    assert "without the supply-chain safeguard" in caplog.text
+
+
+def test_hold_reason_off_policy_skips_probe(monkeypatch):
+    manager = Flatpak()
+    manager.cooldown = timedelta(days=7)
+    manager.cooldown_policy = CooldownPolicy.off
+    monkeypatch.setattr(
+        manager,
+        "release_date",
+        lambda package_id: pytest.fail("probe must not run under an off policy"),
+    )
+    assert manager.cooldown_hold_reason("org.example.Fig") is None
+
+
+def test_hold_reason_dry_run_skips_probe(monkeypatch):
+    manager = Flatpak()
+    manager.cooldown = timedelta(days=7)
+    manager.dry_run = True
+    monkeypatch.setattr(
+        manager,
+        "release_date",
+        lambda package_id: pytest.fail("probe must not run under --dry-run"),
+    )
+    assert manager.cooldown_hold_reason("org.example.Fig") is None
+
+
+def test_hold_reason_naive_datetime_read_as_utc(monkeypatch):
+    fresh_naive = datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(
+        days=1
+    )
+    manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh_naive})
+    assert manager.cooldown_hold_reason("org.example.Kiwi") is not None
+
+
+def test_synthesized_gate_reroutes_upgrade_all(monkeypatch):
+    """An active probe-backed cooldown swaps the native one-shot upgrade for the
+    per-package path: eligible packages upgrade, too-fresh ones are held."""
+    manager = Flatpak()
+    manager.cooldown = timedelta(days=7)
+    now = datetime.now(tz=timezone.utc)
+    dates = {
+        "org.example.Fig": now - timedelta(days=30),
+        "org.example.Kiwi": now - timedelta(days=1),
+    }
+    monkeypatch.setattr(manager, "release_date", dates.get)
+    outdated = tuple(
+        SimpleNamespace(id=package_id, installed_version="1.0", latest_version="2.0")
+        for package_id in sorted(dates)
+    )
+    monkeypatch.setattr(Flatpak, "outdated", property(lambda self: iter(outdated)))
+    monkeypatch.setattr(
+        manager,
+        "upgrade_all_cli",
+        lambda: pytest.fail("the native one-shot upgrade must not run"),
+    )
+    monkeypatch.setattr(
+        manager,
+        "upgrade_one_cli",
+        lambda package_id, version=None: ("flatpak", "update", package_id),
+    )
+    ran = []
+
+    def fake_run(*args, **kwargs):
+        ran.append(args[0])
+        return ""
+
+    monkeypatch.setattr(manager, "run", fake_run)
+    manager.upgrade()
+    assert ran == [("flatpak", "update", "org.example.Fig")]
+
+
+def test_upgrade_all_without_cooldown_keeps_native_path(monkeypatch):
+    manager = Flatpak()
+    assert manager.cooldown is None
+    monkeypatch.setattr(
+        manager,
+        "upgrade_all_cli",
+        lambda: ("flatpak", "update", "--noninteractive"),
+    )
+    ran = []
+
+    def fake_run(*args, **kwargs):
+        ran.append(args[0])
+        return ""
+
+    monkeypatch.setattr(manager, "run", fake_run)
+    manager.upgrade()
+    assert ran == [("flatpak", "update", "--noninteractive")]
+
+
+def test_flatpak_release_date_reads_installed_origin(monkeypatch):
+    manager = Flatpak()
+    monkeypatch.setitem(
+        manager.__dict__, "installed_ids", frozenset({"org.gnome.Dictionary"})
+    )
+
+    def fake_run_cli(*args, **kwargs):
+        if args[0] == "info":
+            return "ID: org.gnome.Dictionary\nOrigin: flathub\n"
+        assert args[0] == "remote-info"
+        assert args[2] == "flathub"
+        return _FLATPAK_REMOTE_INFO_OUTPUT
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    published = manager.release_date("org.gnome.Dictionary")
+    assert published == datetime(2020, 12, 8, 12, 0, 26, tzinfo=timezone.utc)
+
+
+def test_flatpak_release_date_probes_every_remote_for_a_new_app(monkeypatch):
+    manager = Flatpak()
+    monkeypatch.setitem(manager.__dict__, "installed_ids", frozenset())
+
+    def fake_run_cli(*args, **kwargs):
+        if args[0] == "remotes":
+            return "fedora\nflathub\n"
+        assert args[0] == "remote-info"
+        if args[2] == "fedora":
+            raise CLIError(1, "", "error: nothing matches org.gnome.Dictionary")
+        return _FLATPAK_REMOTE_INFO_OUTPUT
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    published = manager.release_date("org.gnome.Dictionary")
+    assert published == datetime(2020, 12, 8, 12, 0, 26, tzinfo=timezone.utc)
+
+
+def test_flatpak_release_date_none_without_date_line(monkeypatch):
+    manager = Flatpak()
+    monkeypatch.setitem(manager.__dict__, "installed_ids", frozenset())
+
+    def fake_run_cli(*args, **kwargs):
+        if args[0] == "remotes":
+            return "flathub\n"
+        return "ID: org.gnome.Dictionary\n"
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    assert manager.release_date("org.gnome.Dictionary") is None
+
+
+def test_attempt_install_reports_cooldown_status(monkeypatch):
+    manager = _probed_flatpak(monkeypatch, {})
+    spec = SimpleNamespace(package_id="org.example.Fig", version=None)
+    assert _attempt_install(manager, spec) == "cooldown"
+
+
+def test_package_task_holds_fresh_release(monkeypatch):
+    fresh = datetime.now(tz=timezone.utc) - timedelta(days=1)
+    manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh})
+    spec = SimpleNamespace(package_id="org.example.Kiwi", version=None)
+    task = _package_task(
+        manager,
+        spec,
+        threading.Lock(),
+        action=lambda m, s: pytest.fail("a held package must not run its action"),
+        verb="install",
+        past="installed",
+        prep="with",
+        operation="install",
+        record_failure=lambda s: pytest.fail(
+            "a held package must not be recorded as a failure"
+        ),
+    )
+    ok, label = task()
+    assert ok is False
+    assert "(cooldown)" in label
 
 
 def test_cooldown_permits_without_cooldown():

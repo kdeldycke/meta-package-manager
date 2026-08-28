@@ -77,7 +77,9 @@ def cooldown_permits(manager: PackageManager) -> bool:
     """Decide whether a release-introducing operation may run on `manager`.
 
     Returns `True` when no cooldown is active, when the manager can enforce it
-    natively, or when the manager's resolved {class}`~meta_package_manager.cooldown.CooldownPolicy`
+    (natively, or through the per-package {meth}`release_date
+    <meta_package_manager.manager.PackageManager.release_date>` probe), or when
+    the manager's resolved {class}`~meta_package_manager.cooldown.CooldownPolicy`
     waives the requirement (`best-effort`) or exempts it outright (`off`).
     Returns `False` (after logging the skip) when an active cooldown cannot be
     enforced and the fail-closed default still holds, so the caller leaves the
@@ -253,21 +255,32 @@ def _dispatch_sourced_operation(
     exit_on_failures(ctx, verb, failures)
 
 
-def _attempt_install(manager: PackageManager, spec: Specifier) -> bool:
-    """Try installing one `spec` with one `manager`, returning success.
+def _attempt_install(manager: PackageManager, spec: Specifier) -> str:
+    """Try installing one `spec` with one `manager`, returning the trail status.
 
     Thin adapter of {func}`_run_manager_action` for the sequential install
-    paths, whose callers map the result onto their `✓`/`✗` ledger and decide
-    the retry/stop semantics (the tied loop records every miss; the untied
-    priority search falls through to the next manager).
+    paths, whose callers map the returned status (`installed`, `failed` or
+    `cooldown`) onto their `✓`/`✗` ledger and decide the retry/stop semantics
+    (the tied loop records every miss; the untied priority search falls
+    through to the next manager). The `cooldown` status reports a package held
+    back by the per-package release-age probe: `✗` on the trail, but never a
+    recorded failure, so it cannot force a non-zero exit on its own.
     """
-    return _run_manager_action(
+    hold = manager.cooldown_hold_reason(spec.package_id)
+    if hold:
+        logging.warning(
+            f"Hold {package_label(spec)}: {hold}.",
+            extra={"label": manager.id},
+        )
+        return "cooldown"
+    installed = _run_manager_action(
         manager,
         spec,
         action=_install_action,
         verb="install",
         operation=Operations.install.name,
     )
+    return "installed" if installed else "failed"
 
 
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)
@@ -405,17 +418,19 @@ def install(ctx, packages_specs):
         for spec in package_specs:
             # A tied package has exactly one candidate manager, so a miss is final:
             # record it as unresolved (forcing a non-zero exit) and mark the ✗ trail.
-            if _attempt_install(manager, spec):
+            # A package held by the cooldown is ✗ too, but never unresolved.
+            status = _attempt_install(manager, spec)
+            if status == "installed":
                 installed_count += 1
-                trail(spec, manager_id, "installed")
-            else:
+            elif status == "failed":
                 unresolved_labels.append(package_label(spec))
-                trail(spec, manager_id, "failed")
+            trail(spec, manager_id, status)
 
     # Drop managers that cannot honor an active cooldown (once, not per package).
     eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
     for spec in unmatched_packages:
         installed = False
+        held = False
         for manager in eligible_managers:
             # Is the package available on this manager? The per-attempt reason is INFO
             # narration; the ✗ trail line below names the manager that missed.
@@ -463,8 +478,16 @@ def install(ctx, packages_specs):
                     msg = "Exact search returned multiple packages."
                     raise ValueError(msg)
 
+            status = _attempt_install(manager, spec)
+            # A package held by the cooldown ends the search: the highest-
+            # priority manager providing it has answered, and falling through
+            # to another ecosystem would sidestep the safeguard.
+            if status == "cooldown":
+                held = True
+                trail(spec, manager.id, "cooldown")
+                break
             # On a failed install, fall through to the next manager in priority order.
-            if not _attempt_install(manager, spec):
+            if status == "failed":
                 trail(spec, manager.id, "failed")
                 continue
             # Stop at the first (highest-priority) manager that provides the package.
@@ -473,7 +496,7 @@ def install(ctx, packages_specs):
             trail(spec, manager.id, "installed")
             break
 
-        if not installed:
+        if not installed and not held:
             unresolved_labels.append(package_label(spec))
 
     op.finish(installed_count == total, f"Installed {installed_count}/{total} packages")

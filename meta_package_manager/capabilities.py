@@ -201,6 +201,27 @@ def cleanup_orphan_is_synthesized(
     )
 
 
+def cooldown_is_synthesized(
+    manager: PackageManager | type[PackageManager],
+) -> bool:
+    """Whether `mpm` backfills the manager's release-age cooldown gate.
+
+    `True` when the manager enforces `--cooldown` through `mpm`'s own
+    per-package probe: it implements the
+    {meth}`meta_package_manager.manager.PackageManager.release_date` probe and
+    carries no native `cooldown_env_var` for `mpm` to inject. `False` when the
+    manager's own resolver enforces the window (a native environment variable,
+    yay's generated hook overlay included), or when it cannot be gated at all.
+
+    Feeds the per-manager table of `docs/augmentations.md`, rendered live by
+    `meta_package_manager._docs`.
+    """
+    cls = manager if isinstance(manager, type) else type(manager)
+    return cls.cooldown_env_var is None and implements_method(
+        manager, "release_date"
+    )
+
+
 def supports_cleanup_cache(
     manager: PackageManager | type[PackageManager],
 ) -> bool:

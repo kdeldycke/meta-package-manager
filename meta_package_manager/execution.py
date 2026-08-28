@@ -516,8 +516,11 @@ class CLIExecutor:
     publication, so a waiting period keeps freshly-published (and potentially
     compromised) versions out of the system. `None` disables the gate.
 
-    Only managers able to natively enforce a release-age limit honor this; see
-    {attr}`cooldown_env_var` and {attr}`supports_cooldown`.
+    Only managers able to enforce a release-age limit honor this, natively
+    through {attr}`cooldown_env_var` or through the per-package release-date
+    probe of
+    {meth}`~meta_package_manager.manager.PackageManager.release_date`; see
+    {attr}`supports_cooldown`.
     """
 
     cooldown_policy: CooldownPolicy | None = None
@@ -586,8 +589,10 @@ class CLIExecutor:
     cooldown_env_var: ClassVar[str | None] = None
     """Environment variable this manager reads to honor a {attr}`cooldown`.
 
-    `None` (the default) means the manager has no native release-age mechanism and
-    cannot honor a cooldown. A subclass that sets this string advertises support (see
+    `None` (the default) means the manager has no native release-age mechanism
+    to feed through the environment; it may still honor a cooldown through the
+    per-package release-date probe (see {meth}`_probes_release_date`). A
+    subclass that sets this string advertises native support (see
     {attr}`supports_cooldown`); the value produced by {meth}`cooldown_env_value`
     is then injected into the environment of every CLI call.
     """
@@ -678,8 +683,25 @@ class CLIExecutor:
 
     @property
     def supports_cooldown(self) -> bool:
-        """Whether this manager can natively enforce a release-age {attr}`cooldown`."""
-        return self.cooldown_env_var is not None
+        """Whether this manager can enforce a release-age {attr}`cooldown`.
+
+        Either natively, by injecting {attr}`cooldown_env_var` into every CLI
+        call, or through the per-package release-date probe advertised by
+        {meth}`_probes_release_date`.
+        """
+        return self.cooldown_env_var is not None or self._probes_release_date()
+
+    def _probes_release_date(self) -> bool:
+        """Whether a per-package release-date probe backs the {attr}`cooldown`.
+
+        Always `False` at this level: the executor knows nothing of package
+        operations. {class}`~meta_package_manager.manager.PackageManager`
+        overrides this to advertise the managers implementing the
+        {meth}`~meta_package_manager.manager.PackageManager.release_date`
+        probe, which is what lets a manager without any native release-age
+        knob still enforce the gate package by package.
+        """
+        return False
 
     def cooldown_env_value(self) -> str:
         """Render {attr}`cooldown` as the value of {attr}`cooldown_env_var`.

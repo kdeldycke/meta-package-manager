@@ -163,12 +163,25 @@ class GlobalOptions:
 COOLDOWN_SUPPORTED_MANAGERS = tuple(
     sorted(mid for mid, manager in pool.items() if manager.supports_cooldown)
 )
-"""IDs of the managers that natively enforce a release-age `mpm --cooldown`.
+"""IDs of the managers that can enforce a release-age `mpm --cooldown`.
 
-Derived from the pool so the `--cooldown` help text never drifts from the set of
-managers that actually carry a {attr}`cooldown_env_var
-<meta_package_manager.execution.CLIExecutor.cooldown_env_var>`: adding cooldown
-support to a manager surfaces it here automatically.
+Derived from the pool so the `--cooldown` help text never drifts from the set
+of managers that actually enforce the window, whether through a native
+{attr}`cooldown_env_var
+<meta_package_manager.execution.CLIExecutor.cooldown_env_var>` or through the
+per-package {meth}`release_date
+<meta_package_manager.manager.PackageManager.release_date>` probe: adding
+cooldown support to a manager surfaces it here automatically.
+"""
+
+
+RELEASE_INTRODUCING_OPERATIONS = frozenset(("install", "upgrade"))
+"""Operation names that bring new package versions onto the system.
+
+The per-package cooldown hold of {meth}`cooldown_hold_reason
+<meta_package_manager.manager.PackageManager.cooldown_hold_reason>` only
+applies to these: `remove` introduces nothing, and read-only queries are never
+blocked. `restore` rides the `install` operation name, so it is covered.
 """
 
 
@@ -990,6 +1003,18 @@ def _package_task(
     mgr = theme().invoked_command(manager.id)
 
     def task() -> tuple[bool, str]:
+        # A release-introducing attempt first passes the per-package cooldown
+        # hold (a no-op unless the manager runs an active probe-backed gate).
+        # A held package is ✗ but never recorded as a failure, matching the
+        # manager-level cooldown skip: it must not force a non-zero exit.
+        if operation in RELEASE_INTRODUCING_OPERATIONS:
+            hold = manager.cooldown_hold_reason(spec.package_id)
+            if hold:
+                logging.warning(
+                    f"Hold {package_label(spec)}: {hold}.",
+                    extra={"label": manager.id},
+                )
+                return False, f"{package_label(spec)} held in {mgr} (cooldown)"
         if _run_manager_action(
             manager, spec, action=action, verb=verb, operation=operation
         ):

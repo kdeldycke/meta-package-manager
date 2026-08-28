@@ -17,10 +17,12 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime
 
 from extra_platforms import UNIX_WITHOUT_MACOS
 
 from ..capabilities import search_capabilities, version_not_implemented
+from ..execution import CLIError
 from ..manager import PackageManager
 
 TYPE_CHECKING = False
@@ -94,6 +96,17 @@ class Flatpak(PackageManager):
         """,
         re.VERBOSE,
     )
+    _ORIGIN_REGEXP = re.compile(r"^\s*Origin:\s*(?P<remote>\S+)", re.MULTILINE)
+    _REMOTE_DATE_REGEXP = re.compile(
+        r"^\s*Date:\s*(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4})",
+        re.MULTILINE,
+    )
+    _C_LOCALE_ENV = {"LC_ALL": "C.UTF-8"}
+    """Locale forced on the release-date probes below.
+
+    The `Origin:` and `Date:` field labels parsed by {meth}`release_date` are
+    localized by flatpak, and the probes key on their English spelling.
+    """
 
     version_regexes = (r"Flatpak\s+(?P<version>\S+)",)
     """
@@ -183,6 +196,81 @@ class Flatpak(PackageManager):
                     latest_version=latest_version,
                     installed_version=installed_version,
                 )
+
+    def release_date(self, package_id: str) -> datetime | None:
+        """Publication timestamp of the latest build of an app, read off its remote.
+
+        The date is the ostree commit timestamp of the newest commit on the
+        app's branch, reported by `flatpak remote-info` and rendered in UTC
+        with a literal `+0000` offset whatever the host locale. The remote's
+        build service stamps it at publication (Flathub's buildbot for the
+        `flathub` remote), so the app's author cannot backdate it, which is
+        what makes it a sound cooldown clock. On a third-party remote the
+        publisher stamps it instead: the probe is then only as trustworthy as
+        the remote itself, exactly like the packages it serves.
+
+        The probe resolves the remote to interrogate from the installed app's
+        origin, and falls back to trying every configured remote for an app
+        not installed yet (an `install` gated before its first installation).
+        On a host with several remotes, that fallback logs one error per
+        remote not serving the app.
+
+        ```{code-block} console
+
+        $ flatpak remote-info --ostree-verbose flathub org.gnome.Dictionary
+
+        GNOME Dictionary - Check word definitions and spellings
+
+                ID: org.gnome.Dictionary
+               Ref: app/org.gnome.Dictionary/x86_64/stable
+              Arch: x86_64
+            Branch: stable
+        Collection: org.flathub.Stable
+          Download: 1.3 MB
+         Installed: 5.3 MB
+           Runtime: org.gnome.Platform/x86_64/3.38
+               Sdk: org.gnome.Sdk/x86_64/3.38
+            Commit: 5697aaea8f6a55b02c34e77504cbe4e419257b482ec7cba434255f5bd6f4
+           Subject: Export org.gnome.Dictionary
+              Date: 2020-12-08 12:00:26 +0000
+        ```
+        """
+        remotes = []
+        if package_id in self.installed_ids:
+            origin_output = self.run_cli(
+                "info",
+                "--ostree-verbose",
+                package_id,
+                override_extra_env=self._C_LOCALE_ENV,
+            )
+            origin = self._ORIGIN_REGEXP.search(origin_output)
+            if origin:
+                remotes.append(origin.group("remote"))
+        if not remotes:
+            remotes = self.run_cli(
+                "remotes",
+                "--columns=name",
+                "--ostree-verbose",
+                override_extra_env=self._C_LOCALE_ENV,
+            ).split()
+        for remote in remotes:
+            try:
+                output = self.run_cli(
+                    "remote-info",
+                    "--ostree-verbose",
+                    remote,
+                    package_id,
+                    override_extra_env=self._C_LOCALE_ENV,
+                )
+            except CLIError:
+                # The app is not served by this remote: try the next one.
+                continue
+            match = self._REMOTE_DATE_REGEXP.search(output)
+            if match:
+                return datetime.strptime(
+                    match.group("date"), "%Y-%m-%d %H:%M:%S %z"
+                )
+        return None
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

@@ -2185,14 +2185,25 @@ def manager_cooldown(manager_id: str) -> str:
 
     parts = []
     if m.supports_cooldown:
-        parts.append(
-            "`mpm` natively enforces its [release-age cooldown](../cooldown.md) "
-            f"on {m.name}, injecting the `{m.cooldown_env_var}` environment "
-            "variable on every call. Point it at a window "
-            f"(`mpm --cooldown 7 --{manager_id} upgrade --all`) to skip anything "
-            "published in the last 7 days: a guard against a compromised or "
-            "yanked fresh release landing before anyone notices.",
-        )
+        if m.cooldown_env_var:
+            parts.append(
+                "`mpm` natively enforces its [release-age cooldown](../cooldown.md) "
+                f"on {m.name}, injecting the `{m.cooldown_env_var}` environment "
+                "variable on every call. Point it at a window "
+                f"(`mpm --cooldown 7 --{manager_id} upgrade --all`) to skip anything "
+                "published in the last 7 days: a guard against a compromised or "
+                "yanked fresh release landing before anyone notices.",
+            )
+        else:
+            parts.append(
+                "`mpm` enforces its [release-age cooldown](../cooldown.md) on "
+                f"{m.name} with its own per-package probe: before an install or "
+                "upgrade, it reads the publication date of the package's latest "
+                "release and holds back any release younger than the window "
+                f"(`mpm --cooldown 7 --{manager_id} upgrade --all` skips anything "
+                "published in the last 7 days): a guard against a compromised or "
+                "yanked fresh release landing before anyone notices.",
+            )
     elif row:
         parts.append(
             f"State of {m.name}'s release-age gating, from the "

@@ -634,9 +634,9 @@ testpaths = [ "tests" ]
 # Make sure tests that are expected to fail do not resurect and start working all of a sudden.
 xfail_strict = true
 
+# https://coverage.readthedocs.io/en/latest/config.html
 [tool.coverage]
 run.source = [ "meta_package_manager" ]
-# https://coverage.readthedocs.io/en/latest/config.html
 run.branch = true
 # Coverage ratchet: the suite fails below this percentage. Only the parallel
 # non-destructive run of tests.yaml is expected to clear it; the bar-plugin and

@@ -21,7 +21,6 @@ name: 📚 Docs
 jobs:
 
   docs:
-    uses: kdeldycke/repomatic/.github/workflows/docs.yaml@a9a1d6a43119f85ad7e04c2adf2f7bd9a0abdd10 # v7.13.0
+    uses: kdeldycke/repomatic/.github/workflows/docs.yaml@954c819c0e21141997c73f78a2bb7bc8633ed815 # v7.14.0
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

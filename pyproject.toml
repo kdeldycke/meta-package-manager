@@ -583,6 +583,13 @@ default.extend-ignore-identifiers-re = [
   #
   "ist",
 ]
+# Skip the content of SVG files. A terminal capture renders each run of
+# same-styled characters as one <text> element, so a word cut at a run boundary
+# leaves a fragment the checker reads as a misspelling. Correcting it in place
+# adds a letter to a run of fixed width, while the next run still carries the
+# rest of the word, so the picture gains a doubled letter. typos ships an "svg"
+# file type, so no glob is needed here. Filenames stay checked.
+type.svg.check-file = false
 
 [tool.mypy]
 explicit_package_bases = true

@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [zeroinstall] Add Zero Install package manager, with search, remove and cache cleanup support.
 - [flatpak,mpm] Gate `flatpak` under `--cooldown` with a per-app probe: `mpm` reads the publication date of each app's latest build from its remote and holds back any release younger than the window.
 - [mas] Gate the Mac App Store under `--cooldown` with the same per-app probe, reading each app's release date from the catalog record of `mas lookup --json`.
 - [paru] Gate `paru`'s AUR half under `--cooldown`: too-fresh AUR packages, dated by the RPC's `LastModified`, are held out of the `--sysupgrade` transaction with `--ignore` while official-repository packages pass untouched.

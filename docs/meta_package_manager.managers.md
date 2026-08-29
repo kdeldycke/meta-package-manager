@@ -72,6 +72,7 @@
    meta_package_manager.managers.xbps
    meta_package_manager.managers.yarn
    meta_package_manager.managers.zef
+   meta_package_manager.managers.zero_install
    meta_package_manager.managers.zim
    meta_package_manager.managers.zinit
    meta_package_manager.managers.zplug

@@ -85,6 +85,7 @@ from .managers.winget import WinGet
 from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
 from .managers.zef import Zef
+from .managers.zero_install import ZeroInstall
 from .managers.zim import Zim
 from .managers.zinit import Zinit
 from .managers.zplug import Zplug
@@ -177,6 +178,7 @@ manager_classes = (
     Yay,
     YUM,
     Zef,
+    ZeroInstall,
     Zim,
     Zinit,
     Zplug,

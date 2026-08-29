@@ -67,7 +67,6 @@
 # used to be, `tomllib` rejects a repeated key outright.
 
 [managers]
-0install = []
 am = ["topgrade"]
 android-studio = ["topgrade"]
 antibody = ["topgrade"]
@@ -331,6 +330,7 @@ yt-dlp = []
 yum = ["topgrade", "upt"]
 zef = []
 zerobrew = ["topgrade"]
+zeroinstall = []
 zgenom = ["topgrade"]
 zigup = ["topgrade"]
 zim = ["topgrade"]
@@ -341,7 +341,6 @@ zvm = ["topgrade"]
 zypper = ["topgrade", "upt", "pacaptr", "metapac"]
 
 [homepages]
-0install = "https://0install.net"
 android-studio = "https://developer.android.com/studio"
 antibody = "https://getantibody.github.io"
 antigravity = "https://antigravity.google"

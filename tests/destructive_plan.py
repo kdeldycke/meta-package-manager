@@ -245,6 +245,11 @@ PACKAGE_IDS = {
     "yay": "nyancat",
     "yum": "nyancat",
     "zerobrew": "nyancat",
+    # Declares no install operation, `0install add` needing a pet name and a
+    # feed URI where mpm carries one id: the round-trip auto-skips. A pet name
+    # is what removal takes, and the user invents it, so there is no canonical
+    # one to name here.
+    "zeroinstall": "zeroinstall",
     # Zinit's own do-nothing plugin: an empty repository it documents for
     # ice-only usage, so loading and deleting it runs no third-party code.
     # Declares no install operation: the round-trip auto-skips.

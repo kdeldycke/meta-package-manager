@@ -193,6 +193,7 @@ keywords = [
   "zb",
   "zef",
   "zerobrew",
+  "zeroinstall",
   "zim",
   "zinit",
   "zplug",
@@ -1090,6 +1091,7 @@ metrics.subjects.yazi = "https://github.com/sxyazi/yazi"
 metrics.subjects.yum = "https://github.com/rpm-software-management/yum"
 metrics.subjects.zef = "https://github.com/ugexe/zef"
 metrics.subjects.zerobrew = "https://github.com/lucasgelfond/zerobrew"
+metrics.subjects.zeroinstall = "https://github.com/0install/0install"
 metrics.subjects.zim = "https://github.com/zimfw/zimfw"
 metrics.subjects.zinit = "https://github.com/zdharma-continuum/zinit"
 metrics.subjects.zplug = "https://github.com/zplug/zplug"
@@ -1327,6 +1329,11 @@ labels.file-rules."📦 manager: xbps" = [ "meta_package_manager/managers/xbps.*
 labels.file-rules."📦 manager: xcodes" = [ "meta_package_manager/managers/xcodes.*", "tests/*xcodes*" ]
 labels.file-rules."📦 manager: yazi" = [ "meta_package_manager/managers/yazi.*", "tests/*yazi*" ]
 labels.file-rules."📦 manager: zef" = [ "meta_package_manager/managers/zef.*", "tests/*zef*" ]
+labels.file-rules."📦 manager: zeroinstall" = [
+  "meta_package_manager/managers/zero_install.*",
+  "tests/*zero_install*",
+  "tests/*zeroinstall*",
+]
 labels.file-rules."📦 manager: zsh-based" = [
   "meta_package_manager/managers/antidote.*",
   "meta_package_manager/managers/antigen.*",
@@ -1753,6 +1760,11 @@ description = "yazi"
 name = "📦 manager: zef"
 color = "bfdadc"
 description = "zef"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: zeroinstall"
+color = "bfdadc"
+description = "zeroinstall"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: zsh-based"

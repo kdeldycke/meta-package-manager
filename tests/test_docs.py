@@ -2065,6 +2065,34 @@ def test_benchmark_operations_rows_have_support():
         )
 
 
+def test_cooldown_support_table_covers_the_pool():
+    """Check the cooldown support table holds one row per pool manager.
+
+    The "Supported managers" table of `docs/cooldown.md` is hand-curated, and
+    `manager_cooldown()` reuses each manager's row on its own page. A manager
+    missing from the table silently degrades that page to a "not yet assessed"
+    line, which is how `pikaur`, `trizen` and `dkp-pacman` all shipped
+    uncovered, and one listed twice would resolve to whichever row comes
+    first: the mapping must partition the pool, exactly like the retraction
+    table below.
+    """
+    rows: dict[str, int] = {}
+    for cells in _docs._cooldown_table("## Supported managers"):
+        # Key on linked code spans: every id cell links to its manager page,
+        # while the header row's bare `mpm` span carries no link.
+        for mid in re.findall(r"\[`([^`]+)`\]", cells[0]):
+            rows[mid] = rows.get(mid, 0) + 1
+
+    missing = sorted(set(pool.all_manager_ids) - set(rows))
+    assert not missing, f"No cooldown support row covers: {', '.join(missing)}."
+    unknown = sorted(set(rows) - set(pool.all_manager_ids))
+    assert not unknown, f"Support rows name unknown managers: {', '.join(unknown)}."
+    duplicated = sorted(mid for mid, count in rows.items() if count > 1)
+    assert not duplicated, (
+        f"Several cooldown support rows cover: {', '.join(duplicated)}."
+    )
+
+
 def test_retraction_table_well_formed():
     """Check the retraction table partitions the pool and travels intact.
 

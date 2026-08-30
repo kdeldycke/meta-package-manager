@@ -121,6 +121,7 @@ keywords = [
   "pikaur",
   "pip",
   "pipx",
+  "pipxu",
   "pixi",
   "pkcon",
   "pkg",
@@ -1050,6 +1051,7 @@ metrics.subjects.paru = "https://github.com/Morganamilo/paru"
 metrics.subjects.pikaur = "https://github.com/actionless/pikaur"
 metrics.subjects.pip = "https://github.com/pypa/pip"
 metrics.subjects.pipx = "https://github.com/pypa/pipx"
+metrics.subjects.pipxu = "https://github.com/bulletmark/pipxu"
 metrics.subjects.pixi = "https://github.com/prefix-dev/pixi"
 metrics.subjects.pkcon = "https://github.com/PackageKit/PackageKit"
 metrics.subjects.pkg = "https://github.com/freebsd/pkg"
@@ -1284,9 +1286,11 @@ labels.file-rules."📦 manager: pyenv" = [ "meta_package_manager/managers/pyenv
 labels.file-rules."📦 manager: pypi-based" = [
   "meta_package_manager/managers/pip.*",
   "meta_package_manager/managers/pipx.*",
+  "meta_package_manager/managers/pipxu.*",
   "meta_package_manager/managers/uv.*",
   "tests/*pip*",
   "tests/*pipx*",
+  "tests/*pipxu*",
   "tests/*uv*",
   "tests/*uvx*",
 ]
@@ -1644,7 +1648,7 @@ description = "pyenv"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pypi-based"
 color = "bfdadc"
-description = "pip, pipx, uv, uvx"
+description = "pip, pipx, pipxu, uv, uvx"
 rename-from = [ "📦 manager: pip-based" ]
 
 [[tool.repomatic.labels.extra]]

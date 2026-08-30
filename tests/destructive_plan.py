@@ -171,6 +171,7 @@ PACKAGE_IDS = {
     "pikaur": "nyancat",
     "pip": "pytz",
     "pipx": "pycowsay",
+    "pipxu": "pycowsay",
     # conda-forge ships no nyancat, so pixi reuses the binary-store pick. It is a
     # single self-contained Rust binary, built for every platform pixi runs on.
     "pixi": "hyperfine",

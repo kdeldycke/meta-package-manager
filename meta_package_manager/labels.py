@@ -163,7 +163,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
         "yay",
     }),
     "pkg-based": frozenset({"pkg", "ports"}),
-    "pypi-based": frozenset({"pip", "pipx", "uv", "uvx"}),
+    "pypi-based": frozenset({"pip", "pipx", "pipxu", "uv", "uvx"}),
     "scoop-based": frozenset({"scoop", "sfsu"}),
     "vscode-based": frozenset({"vscode", "vscodium"}),
     "zsh-based": frozenset({"antidote", "antigen", "zim", "zinit", "zplug"}),

@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [go] Add Go package manager, listing and installing the commands `go install` puts on the machine.
+- [pipxu] Add pipxu package manager, with inventory, install, remove and upgrade support.
 - [pkgm] Add pkgm package manager, with inventory, outdated, install, remove and full upgrade support.
 - [zeroinstall] Add Zero Install package manager, with search, remove and cache cleanup support.
 - [flatpak,mpm] Gate `flatpak` under `--cooldown` with a per-app probe: `mpm` reads the publication date of each app's latest build from its remote and holds back any release younger than the window.

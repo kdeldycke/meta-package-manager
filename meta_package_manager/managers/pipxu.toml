@@ -1,0 +1,85 @@
+# pipxu installs Python applications into isolated virtual environments
+# (https://github.com/bulletmark/pipxu), the way `pipx` does, but building each
+# environment with `uv` rather than with venv and pip. See docs/overrides.md
+# ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is the application's distribution name, and every verb takes it:
+# `install`, `uninstall` and `upgrade` all accept one or more, and the listing
+# prints one per line. It shares PyPI with `pip`, `pipx`, `uv` and `uvx`, which
+# is why it joins their label group, but its inventory is its own: an
+# application installed through pipxu is invisible to the other four.
+#
+# Parsing notes, verified against pipxu 1.34 on macOS:
+#   - The inventory is `pipxu version`, not `pipxu list`. Both enumerate the
+#     installed applications, but `list` reports the executables each one
+#     provides and no version at all, while `version` prints exactly one
+#     `name==version` per line. `list --json` is neither: it nests the
+#     executables under a name-keyed object and still carries no version.
+#   - `pipxu --version` and `pipxu version` are different commands that look
+#     alike. The flag prints the tool's own version, `pipxu==1.34`, in the very
+#     shape a package line takes, so the version probe and the inventory must
+#     not be swapped.
+#   - `upgrade` genuinely restricts itself to the applications it is given,
+#     checked against an unknown name rather than assumed: it answers
+#     `Error: Unknown package` and upgrades nothing. That is what makes
+#     `upgrade_one` declarable here where `pamac` and `pkgm` refuse it.
+#   - No `outdated`: nothing reports staleness without acting on it, `upgrade`
+#     resolving and installing in one pass.
+#   - No `search` and no `sync`: pipxu has neither, deferring both to the index
+#     `uv` resolves against.
+#
+# ```{caution}
+# pipxu exits `0` on a failed operation, an unknown package name included, so
+# an exit code proves nothing about whether the operation did anything.
+# ```
+#
+# ```{note}
+# Upstream supports Linux and macOS only: "This utility has been developed and
+# tested on Linux but will likely also work on macOS. It does not work and is
+# not supported on Windows." The macOS half of that was verified here.
+# ```
+
+[mpm.managers.pipxu]
+name = "pipxu"
+homepage_url = "https://github.com/bulletmark/pipxu"
+platforms = ["linux_like", "macos"]
+cli_names = ["pipxu"]
+# No version floor is declared. Every verb driven here was present in the
+# release the parsers were captured from, and no upstream note dates their
+# introduction, so a floor could only be guessed. Driven against `1.34`.
+version_cli_options = ["--version"]
+# `pipxu --version` prints "pipxu==1.34", so the version is not the first token
+# and the default pattern would report the program name instead.
+version_regexes = ['pipxu==(?P<version>\S+)']
+
+# One `name==version` per line, which is why this and not `pipxu list`.
+[mpm.managers.pipxu.operations.installed]
+args = ["version"]
+regex = '^(?P<package_id>\S+)==(?P<installed_version>\S+)$'
+
+[mpm.managers.pipxu.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.pipxu.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+[mpm.managers.pipxu.operations.upgrade_one]
+args = ["upgrade", "{package_id}"]
+
+[mpm.managers.pipxu.operations.upgrade_all]
+args = ["upgrade", "--all"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from pipxu 1.34. Consumed by tests/test_manager_definition.py; ignored by
+# mpm's loader.
+[samples.version]
+output = "pipxu==1.34"
+expected = "1.34"
+
+# A four-segment version proves the pattern takes the whole tail rather than a
+# fixed number of components.
+[[samples.installed]]
+output = """
+pycowsay==0.0.0.2"""
+packages = [{ id = "pycowsay", version = "0.0.0.2" }]

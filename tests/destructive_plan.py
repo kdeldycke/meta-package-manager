@@ -176,6 +176,9 @@ PACKAGE_IDS = {
     "pkg": "nyancat",
     "pkg-tools": "nyancat",
     "pkgin": "nyancat",
+    # A pantry path rather than the `jq` executable name: both install, but only
+    # the path is what `pkgm list` reports back, so only it round-trips.
+    "pkgm": "stedolan.github.io/jq",
     "pnpm": "ms",
     "ports": "net/nyancat",
     "pwsh-gallery": "Posh-Git",

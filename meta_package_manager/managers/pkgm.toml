@@ -1,0 +1,111 @@
+# pkgm installs pkgx packages to the machine (https://github.com/pkgxdev/pkgm),
+# where pkgx itself only runs them from a cache. See docs/overrides.md ("Define a
+# new manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# A package is a pantry path such as `stedolan.github.io/jq`, and every verb
+# agrees on it: the listing prints one per row, and `install` and `uninstall`
+# both accept it. An executable name works too, `jq` reaching the same package,
+# but only the pantry path is what the inventory yields, so it is the identity
+# mpm keys on and the one that round-trips through remove and backup/restore.
+#
+# Parsing notes, verified against pkgm 0.12.2 on macOS:
+#   - The listing prints installation *paths*, one per line, so the id and the
+#     version are read out of a path rather than out of columns. A pantry path
+#     carries slashes of its own, and the version always follows the last `/v`,
+#     which is what the greedy id group resolves against.
+#   - Colors are unconditional on `outdated`: pkgm wraps the trailing path in
+#     SGR escapes whether or not it writes to a terminal, and honors neither
+#     `NO_COLOR` nor a pipe, both verified. Nothing is forced to suppress them,
+#     mpm running every capture through `strip_ansi` before parsing.
+#   - No `upgrade_one`. `pkgm update` ignores a package argument outright and
+#     upgrades the whole machine regardless: `pkgm update <unknown-name>` was
+#     observed upgrading an unrelated package rather than reporting the name it
+#     was given. Declaring it would silently turn a single-package upgrade into
+#     a whole-machine one, which is the `pamac` reading.
+#   - No `search`. pkgm has no search verb at all, upstream's own framing being
+#     that you install by executable name and so never search first.
+#   - No `sync` and no `cleanup`: nothing refreshes the pantry without also
+#     acting on it, and nothing reclaims space.
+#
+# ```{caution}
+# pkgm exits `0` on every failure observed, including `no such pkg` for a name
+# it does not carry and an uncaught exception from its own runtime. An exit code
+# therefore proves nothing about whether an operation did anything, and a
+# failed removal is reported to mpm as a success.
+# ```
+#
+# ```{note}
+# Dependencies are installed as packages in their own right and listed as such:
+# installing `jq` also lists `github.com/kkos/oniguruma`. Removal is not
+# transitive, so a dependency outlives the package that brought it in.
+# ```
+#
+# ```{note}
+# Every message names a `/usr/local/pkgs/...` destination even when the write
+# goes to `~/.local/pkgs`, which is where an unprivileged run puts it. The path
+# in the output is cosmetic; the one in the listing is real.
+# ```
+
+[mpm.managers.pkgm]
+name = "pkgm"
+homepage_url = "https://github.com/pkgxdev/pkgm"
+# Upstream ships installation instructions for Homebrew and its own shell
+# installer only, and every path it writes is Unix-shaped.
+platforms = ["linux_like", "macos"]
+cli_names = ["pkgm"]
+# No version floor is declared. Every verb driven here predates the release the
+# parsers were captured from, and no upstream note dates their introduction, so
+# a floor could only be guessed. Driven against `0.12.2`.
+version_cli_options = ["--version"]
+# `pkgm --version` prints "pkgm 0.12.2", so the version is not the first token
+# and the default pattern would report the program name instead.
+version_regexes = ['pkgm[ \t]+(?P<version>\S+)']
+
+# One row per installed version directory. The id group is greedy so it spans
+# the slashes inside a pantry path and stops at the last `/v`.
+[mpm.managers.pkgm.operations.installed]
+args = ["list"]
+regex = '/pkgs/(?P<package_id>\S+)/v(?P<installed_version>\S+)$'
+
+# One row per stale package, reporting both versions around a `<`. The trailing
+# path is dropped: it repeats the id and carries the color escapes.
+[mpm.managers.pkgm.operations.outdated]
+args = ["outdated"]
+regex = '^(?P<package_id>\S+) is outdated \S+ < (?P<latest_version>\S+)'
+
+[mpm.managers.pkgm.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.pkgm.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+[mpm.managers.pkgm.operations.upgrade_all]
+args = ["update"]
+
+# Output samples locking the version probe and the declared parsers, captured
+# from pkgm 0.12.2. Consumed by tests/test_manager_definition.py; ignored by
+# mpm's loader.
+[samples.version]
+output = "pkgm 0.12.2"
+expected = "0.12.2"
+
+# Both id shapes at once: a two-segment pantry path and a three-segment one, the
+# second proving the id group spans interior slashes.
+[[samples.installed]]
+output = """
+~/.local/pkgs/stedolan.github.io/jq/v1.8.2
+~/.local/pkgs/github.com/kkos/oniguruma/v6.9.10"""
+packages = [
+  { id = "stedolan.github.io/jq", version = "1.8.2" },
+  { id = "github.com/kkos/oniguruma", version = "6.9.10" },
+]
+
+# The color escapes are written as `\u001B` because TOML forbids a raw control
+# character in a string. They are what the terminal actually receives, and the
+# fixture keeps them: mpm strips them at runtime, but a sample reaches the parser
+# unstripped, so this locks the pattern stopping before the path either way.
+[[samples.outdated]]
+output = """
+stedolan.github.io/jq is outdated 1.7.1 < 1.8.2 \u001B[2m/root/.local/pkgs/stedolan.github.io/jq/v1.7.1\u001B[22m"""
+packages = [{ id = "stedolan.github.io/jq", version = "1.8.2" }]

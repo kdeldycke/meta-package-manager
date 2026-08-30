@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [pkgm] Add pkgm package manager, with inventory, outdated, install, remove and full upgrade support.
 - [zeroinstall] Add Zero Install package manager, with search, remove and cache cleanup support.
 - [flatpak,mpm] Gate `flatpak` under `--cooldown` with a per-app probe: `mpm` reads the publication date of each app's latest build from its remote and holds back any release younger than the window.
 - [mas] Gate the Mac App Store under `--cooldown` with the same per-app probe, reading each app's release date from the catalog record of `mas lookup --json`.

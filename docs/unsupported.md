@@ -111,6 +111,12 @@ Describes itself as "*Bundler for your dot files*": it sources shell configurati
 
 Fish plugin manager with no commit since 2023-01-05.
 
+## [`gearlever`](https://gearlever.mijorus.it) ❌ 🛟
+
+Painfully close, and it fails on the version alone. Gear Lever manages the AppImages on a machine and its command line is better shaped than most of this page: `list-installed` enumerates the integrated apps, `list-updates` reports the stale ones, both take a `--json` flag emitting a document with a `schema_version` and per-app `current_version` and `available_version` fields, and `remove`, `update` and `integrate` all act on one app.
+
+None of that is reachable, because nothing reports Gear Lever's own version. Its `Cli.options` table declares `integrate`, `update`, `remove`, `remove-all`, `list-installed`, `list-updates`, `list-update-managers`, `set-update-url`, `set-update-source` and a background fetch, and no version among them. The failure mode is the aggravating part: `Cli.from_options` returns `-1` for an option it does not know, after which `main()` falls through to `GearleverApplication(...).run(sys.argv)`, so a version probe does not fail, it launches the GTK window. That is [`cursor`](#cursor)'s verdict, where opening a GUI in place of an answer is worse than an error because nothing signals it, layered on [`zgenom`](#zgenom)'s. A `--version` upstream would reopen this immediately.
+
 ## [`gofish`](https://github.com/fishworks/gofish) ☠️
 
 Cross-platform package manager modelled on Homebrew, down to a registry of its own: "fish food" recipes hosted at [fishworks/fish-food](https://github.com/fishworks/fish-food). Its readme announces the end in as many words, "*THIS PROJECT IS BEING ARCHIVED*", blaming "*the amount of time and money required to maintain this side project*", and no commit has landed since 2022-03-08. The repository is archived and names no successor.

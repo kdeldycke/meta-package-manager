@@ -76,6 +76,7 @@ keywords = [
   "haxelib",
   "homebrew",
   "jpm",
+  "julia",
   "juliaup",
   "krew",
   "lazy",
@@ -1027,6 +1028,7 @@ metrics.subjects.go = "https://github.com/golang/go"
 metrics.subjects.guix = "https://codeberg.org/guix/guix"
 metrics.subjects.haxelib = "https://github.com/HaxeFoundation/haxelib"
 metrics.subjects.jpm = "https://github.com/janet-lang/jpm"
+metrics.subjects.julia = "https://github.com/JuliaLang/julia"
 metrics.subjects.juliaup = "https://github.com/JuliaLang/juliaup"
 metrics.subjects.krew = "https://github.com/kubernetes-sigs/krew"
 metrics.subjects.lazy = "https://github.com/folke/lazy.nvim"
@@ -1243,6 +1245,7 @@ labels.file-rules."📦 manager: homebrew" = [
   "tests/*zerobrew*",
 ]
 labels.file-rules."📦 manager: jpm" = [ "meta_package_manager/managers/jpm.*", "tests/*jpm*" ]
+labels.file-rules."📦 manager: julia" = [ "meta_package_manager/managers/julia.*", "tests/*julia*" ]
 labels.file-rules."📦 manager: juliaup" = [ "meta_package_manager/managers/juliaup.*", "tests/*juliaup*" ]
 labels.file-rules."📦 manager: krew" = [ "meta_package_manager/managers/krew.*", "tests/*krew*" ]
 labels.file-rules."📦 manager: luarocks" = [ "meta_package_manager/managers/luarocks.*", "tests/*luarocks*" ]
@@ -1562,6 +1565,11 @@ description = "brew, cask, zerobrew"
 name = "📦 manager: jpm"
 color = "bfdadc"
 description = "jpm"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: julia"
+color = "bfdadc"
+description = "julia"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: juliaup"

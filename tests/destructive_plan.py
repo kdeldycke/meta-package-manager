@@ -139,6 +139,9 @@ PACKAGE_IDS = {
     # channel the host actually uses is what `remove` refuses outright.
     # janet-lang's own argument parser: pure Janet, so no compiler is involved.
     "jpm": "argparse",
+    # The General registry's canonical example package: pure Julia, no
+    # dependencies, and it exists precisely to be installed by tests.
+    "julia": "Example",
     "juliaup": "1.6",
     "krew": "ctx",  # Tiny context-switcher plugin of krew's own index.
     # Declares no install operation: the round-trip auto-skips. lazy.nvim manages

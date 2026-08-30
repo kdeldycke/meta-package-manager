@@ -1,0 +1,100 @@
+# Julia's built-in package manager, `Pkg`, driven headlessly
+# (https://julialang.org). See docs/overrides.md ("Define a new manager") for
+# the schema and meta_package_manager/definitions.py (build_bundled_managers)
+# for the loader.
+#
+# A package is a name from a registry, General being installed on first use, and
+# every verb takes that name. Not to be confused with [`juliaup`](juliaup.md),
+# which manages Julia *versions* where this manages the packages one Julia
+# installs.
+#
+# Every operation is one `julia -e` form, so the commands and the patterns below
+# are written together.
+#
+# Parsing notes, verified against Julia 1.12.7 on macOS:
+#   - **The scope is the default environment**, `~/.julia/environments/v<major>.<minor>`,
+#     which is user-wide rather than tied to a directory. Julia does not
+#     activate a project from the working directory on its own, so the reading
+#     is stable, but `JULIA_PROJECT` and `--project` both override it. Nothing
+#     is forced against them: a user who sets that variable means it.
+#   - `--startup-file=no` is forced so a user's `startup.jl` cannot activate a
+#     different environment, or print into the output being parsed.
+#   - The listing prefixes a package with `⌃` when a newer version exists and
+#     appends an `Info` line explaining the marker, so the pattern anchors on
+#     the UUID in brackets rather than on the start of the line. That is also
+#     what rejects the `Status` header and the `Info` footer.
+#   - `Pkg.update` restricts itself to the package it is given, checked against
+#     a name that is not installed rather than assumed: it exits `1` and
+#     upgrades nothing, where `pamac` and `pkgm` silently upgrade everything.
+#   - No `search`: `Pkg` resolves names against its registries but exposes no
+#     query over them.
+#
+# ```{note}
+# An empty environment prints `Status ... (empty project)` and exits `0`, so an
+# empty inventory is honest rather than a failure.
+# ```
+
+[mpm.managers.julia]
+name = "Julia Pkg"
+homepage_url = "https://julialang.org"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["julia"]
+# No version floor is declared. Every form driven here predates the release the
+# parsers were captured from by many years, and no upstream note dates their
+# introduction, so a floor could only be guessed. Driven against `1.12.7`.
+pre_args = ["--startup-file=no"]
+version_cli_options = ["--version"]
+# `julia --version` prints "julia version 1.12.7", so the version is not the
+# first token and the default pattern would report the program name instead.
+version_regexes = ['julia\s+version\s+(?P<version>\S+)']
+
+# The UUID in brackets is the anchor: it steps over the `⌃` marker an upgradable
+# package carries, and matches neither the `Status` header nor the `Info` footer.
+[mpm.managers.julia.operations.installed]
+args = ["-e", 'using Pkg; Pkg.status()']
+regex = '\[[0-9a-f]+\]\s+(?P<package_id>\S+)\s+v(?P<installed_version>\S+)'
+
+# The same listing narrowed to what is behind, with the available version in
+# parentheses after a `<`.
+[mpm.managers.julia.operations.outdated]
+args = ["-e", 'using Pkg; Pkg.status(outdated=true)']
+regex = '\[[0-9a-f]+\]\s+(?P<package_id>\S+)\s+v\S+\s+\(<v(?P<latest_version>[^)]+)\)'
+
+[mpm.managers.julia.operations.install]
+args = ["-e", 'using Pkg; Pkg.add("{package_id}")']
+
+[mpm.managers.julia.operations.remove]
+args = ["-e", 'using Pkg; Pkg.rm("{package_id}")']
+
+[mpm.managers.julia.operations.upgrade_one]
+args = ["-e", 'using Pkg; Pkg.update("{package_id}")']
+
+[mpm.managers.julia.operations.upgrade_all]
+args = ["-e", 'using Pkg; Pkg.update()']
+
+# Refreshes the registries themselves rather than anything installed.
+[mpm.managers.julia.operations.sync]
+args = ["-e", 'using Pkg; Pkg.Registry.update()']
+
+# Output samples locking the version probe and the declared parsers, captured
+# from Julia 1.12.7. Consumed by tests/test_manager_definition.py; ignored by
+# mpm's loader.
+[samples.version]
+output = "julia version 1.12.7"
+expected = "1.12.7"
+
+# Captured with the package deliberately held one release back, so the listing
+# carries the `⌃` marker and its `Info` footer: both are what the pattern has to
+# step over, and a current-only capture would prove neither.
+[[samples.installed]]
+output = """
+Status `/tmp/mpm-drive/.julia/environments/v1.12/Project.toml`
+⌃ [7876af07] Example v0.5.4
+Info Packages marked with ⌃ have new versions available and may be upgradable."""
+packages = [{ id = "Example", version = "0.5.4" }]
+
+[[samples.outdated]]
+output = """
+Status `/tmp/mpm-drive/.julia/environments/v1.12/Project.toml`
+⌃ [7876af07] Example v0.5.4 (<v0.5.5)"""
+packages = [{ id = "Example", version = "0.5.5" }]

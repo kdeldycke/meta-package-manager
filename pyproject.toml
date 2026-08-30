@@ -151,6 +151,7 @@ keywords = [
   "sdkman",
   "sfsu",
   "sheldon",
+  "skills",
   "slackware",
   "slapt-get",
   "slitaz",
@@ -1070,6 +1071,7 @@ metrics.subjects.scoop = "https://github.com/ScoopInstaller/Scoop"
 metrics.subjects.sdkman = "https://github.com/sdkman/sdkman-cli"
 metrics.subjects.sfsu = "https://github.com/winpax/sfsu"
 metrics.subjects.sheldon = "https://github.com/rossmacarthur/sheldon"
+metrics.subjects.skills = "https://github.com/vercel-labs/skills"
 metrics.subjects.slapt-get = "https://github.com/jaos/slapt-get"
 metrics.subjects.snap = "https://github.com/canonical/snapd"
 metrics.subjects.soar = "https://github.com/pkgforge/soar"
@@ -1320,6 +1322,7 @@ labels.file-rules."📦 manager: scoop-based" = [
 ]
 labels.file-rules."📦 manager: sdkman" = [ "meta_package_manager/managers/sdkman.*", "tests/*sdkman*" ]
 labels.file-rules."📦 manager: sheldon" = [ "meta_package_manager/managers/sheldon.*", "tests/*sheldon*" ]
+labels.file-rules."📦 manager: skills" = [ "meta_package_manager/managers/skills.*", "tests/*skills*" ]
 labels.file-rules."📦 manager: slapt-get" = [ "meta_package_manager/managers/slapt_get.*", "tests/*slapt_get*" ]
 labels.file-rules."📦 manager: snap" = [ "meta_package_manager/managers/snap.*", "tests/*snap*" ]
 labels.file-rules."📦 manager: soar" = [ "meta_package_manager/managers/soar.*", "tests/*soar*" ]
@@ -1691,6 +1694,11 @@ description = "sdkman"
 name = "📦 manager: sheldon"
 color = "bfdadc"
 description = "sheldon"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: skills"
+color = "bfdadc"
+description = "skills"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: slapt-get"

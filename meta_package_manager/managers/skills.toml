@@ -1,0 +1,82 @@
+# The Agent Skills directory's own installer (https://skills.sh), which places
+# reusable skill folders into the directories the coding agents on a machine
+# read. See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is one installed skill, named as the listing reports it, and that
+# name is what `remove` takes. It is not what `add` takes: see below.
+#
+# Parsing notes, verified against skills 1.5.23 on macOS:
+#   - **Every operation is scoped with `--global`.** Without it the tool answers
+#     for the working directory, and run from a repository carrying its own
+#     `.claude/skills` it reports that repository's skills as the inventory.
+#     `list --global` is directory-independent, checked by running it from two
+#     directories for the same answer, and it is the only machine-wide reading.
+#   - No `install`. `skills add` takes a *source repository* and installs every
+#     skill in it at once: one `add vercel-labs/agent-skills` brought in nine.
+#     Nothing names a single skill to install, so the operation mpm needs does
+#     not exist, while `remove` is per skill and keyed on the listed name. The
+#     `0install` split, with the halves the other way round.
+#   - No `outdated`, nothing reporting staleness without acting, and no
+#     `search`: `find` is documented as interactive.
+#   - The inventory carries **no version at all**, only a name, a path, the
+#     agents it was linked into and the repository it came from. That is a
+#     supported shape rather than a gap, `installed_version` being optional,
+#     and the same reading `rustup` and `pyenv` settled.
+#   - Colors are unconditional, so the pattern reads the id out of the *path*
+#     rather than off the padded first column: anchoring on `/skills/` steps
+#     over the escapes instead of fighting them. That the path repeats the name
+#     is what makes this work, and `--global` is what keeps a project skill's
+#     `./.claude/skills/<name>` path out of the same match.
+#
+# ```{note}
+# The tool chooses its own interactivity by sniffing the environment: removal
+# announces `Agent detected — removing non-interactively` before proceeding.
+# `--yes` is passed regardless rather than relying on that detection, which is
+# upstream behavior no flag pins.
+# ```
+
+[mpm.managers.skills]
+name = "Agent Skills"
+homepage_url = "https://skills.sh"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["skills"]
+# No version floor is declared. Every verb driven here was present in the
+# release the parsers were captured from, and no upstream note dates their
+# introduction, so a floor could only be guessed. Driven against `1.5.23`.
+version_cli_options = ["--version"]
+version_regexes = ['(?P<version>\d+\.\d+\.\d+)']
+
+# The id comes out of the installation path, which repeats the skill name.
+[mpm.managers.skills.operations.installed]
+args = ["list", "--global"]
+regex = '/skills/(?P<package_id>[^/\s\u001B]+)'
+
+[mpm.managers.skills.operations.remove]
+args = ["remove", "{package_id}", "--global", "--yes"]
+
+[mpm.managers.skills.operations.upgrade_all]
+args = ["update", "--global", "--yes"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from skills 1.5.23. Consumed by tests/test_manager_definition.py; ignored by
+# mpm's loader.
+#
+# The color escapes are written as `\u001B` because TOML forbids a raw control
+# character in a string. They are what the terminal actually receives, and the
+# fixture keeps them: mpm strips them at runtime, but a sample reaches the
+# parser unstripped, so this locks the pattern working either way. The state was
+# reduced to two skills for real rather than trimmed out of a longer capture.
+[samples.version]
+output = "1.5.23"
+expected = "1.5.23"
+
+[[samples.installed]]
+output = """
+\u001B[1mGlobal Skills\u001B[0m
+
+\u001B[36mdeploy-to-vercel      \u001B[0m \u001B[38;5;102m~/.agents/skills/deploy-to-vercel      \u001B[0m
+  \u001B[38;5;102mAgents:\u001B[0m Claude Code  \u001B[38;5;102mSource:\u001B[0m vercel-labs/agent-skills
+\u001B[36mvercel-cli-with-tokens\u001B[0m \u001B[38;5;102m~/.agents/skills/vercel-cli-with-tokens\u001B[0m
+  \u001B[38;5;102mAgents:\u001B[0m Claude Code  \u001B[38;5;102mSource:\u001B[0m vercel-labs/agent-skills"""
+packages = [{ id = "deploy-to-vercel" }, { id = "vercel-cli-with-tokens" }]

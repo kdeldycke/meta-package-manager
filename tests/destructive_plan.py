@@ -206,6 +206,10 @@ PACKAGE_IDS = {
     "sfsu": "main/hyperfine",
     # Declares no install operation: the round-trip auto-skips.
     "sheldon": "zsh-autosuggestions",
+    # Declares no install operation: the round-trip auto-skips. `add` takes a
+    # source repository rather than one skill, so there is nothing per-package
+    # to install; the name below is what `remove` accepts.
+    "skills": "deploy-to-vercel",
     "slapt-get": "nano",
     "snap": "hello-world",
     "soar": "bat",  # Single-file static binary from the soarpkgs registry.

@@ -24,6 +24,7 @@ three test modules: the shared fixtures are what a reader opens conftest for.
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 from shutil import which
 
@@ -179,6 +180,9 @@ PACKAGE_IDS = {
     "paru": "nyancat",
     # A small library of pi's own npm scope. The id carries its scheme, which
     # is the form every verb takes.
+    # A vim statusline plugin of Pearl's own repository: a git clone with no
+    # build. The id carries its repository prefix, which every verb takes.
+    "pearl": "pearl/airline",
     "pi": "npm:@earendil-works/pi-telemetry",
     "pikaur": "nyancat",
     "pip": "pytz",
@@ -502,6 +506,30 @@ def claude_marketplace_missing() -> bool:
     return "No marketplaces configured" in result.stdout
 
 
+def pearl_bash_too_old() -> bool:
+    """Whether the host's Bash predates what Pearl's hook functions need.
+
+    Pearl requires Bash `4.1` and warns on every invocation when it does not
+    have it. Below that its read-only listings still work while an install
+    fails inside the package's own hooks, so the round-trip breaks for a
+    property of the machine rather than of `mpm`. macOS ships `3.2`, which is
+    what this catches; any newer Bash earlier on `PATH` satisfies it.
+    """
+    bash = which("bash")
+    if not bash:
+        return False
+    result = subprocess.run(
+        (bash, "--version"),
+        capture_output=True,
+        text=True,
+        encoding="UTF-8",
+    )
+    match = re.search(r"version\s+(\d+)\.(\d+)", result.stdout)
+    if not match:
+        return False
+    return (int(match.group(1)), int(match.group(2))) < (4, 1)
+
+
 INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # Claude Code resolves a plugin through the marketplaces configured for the
     # user, and a fresh host has none, so the install fails for want of a registry.
@@ -540,6 +568,9 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # mas resolves an install through an App Store search that finds nothing for the
     # numeric id on the headless runners, so the install fails.
     "mas": is_github_ci,
+    # Pearl's hook functions need Bash 4.1; macOS ships 3.2, where an install
+    # fails inside the package's own hooks while the listings still work.
+    "pearl": pearl_bash_too_old,
     # pixi resolves its cache directory from the Windows user profile, which the
     # suite's isolated HOME leaves unset: the install aborts on "could not determine
     # default cache directory" before reaching the package. Same shape as the pnpm

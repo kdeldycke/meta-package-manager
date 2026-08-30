@@ -62,6 +62,7 @@ print(augmentations_table())
 | [`pacstall`](managers/pacstall.md)         |                      |              |      ✅      |       ✅        |               |
 | [`pamac`](managers/pamac.md)               |                      |              |      ✅      |       ✅        |               |
 | [`paru`](managers/paru.md)                 |                      |      ✅      |              |       ✅        |      ✅       |
+| [`pearl`](managers/pearl.md)               |                      |              |      ✅      |       ✅        |               |
 | [`pikaur`](managers/pikaur.md)             |                      |      ✅      |              |       ✅        |               |
 | [`pip`](managers/pip.md)                   |          ✅          |              |              |                 |               |
 | [`pkcon`](managers/pkcon.md)               |                      |              |      ✅      |       ✅        |               |

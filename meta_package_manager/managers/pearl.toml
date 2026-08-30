@@ -1,0 +1,96 @@
+# Pearl installs "packages" that wire dotfiles, shell and editor configuration
+# into a machine (https://github.com/pearl-core/pearl). See docs/overrides.md
+# ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is `repo/name`, the repository prefix being part of the identity
+# because several repositories can be configured at once. That is the form the
+# listings print and every verb accepts.
+#
+# Parsing notes, verified against Pearl 2.3.12 on macOS:
+#   - `--no-confirm` is forced: Pearl asks "Are you sure?" before acting, and
+#     that flag is the documented way past it.
+#   - Both listings are two-line records, the identifier then an indented
+#     description, so the patterns key on the identifier's own shape and the
+#     four-space indent keeps the description out.
+#   - The inventory marks each entry `[installed]`, which is what separates it
+#     from the catalog `list` prints without `--installed-only`.
+#   - It carries **no version** anywhere, only an identifier and a description.
+#     That is a supported shape rather than a gap, `installed_version` being
+#     optional, and the same reading `rustup` and `pyenv` settled.
+#   - No `upgrade_all`. Bare `pearl update` updates *Pearl itself*, its help
+#     reading "Update Pearl or the packages if specified", so only the
+#     single-package form is declared.
+#
+# ```{caution}
+# Pearl needs Bash `4.1` or newer and says so on every invocation when it does
+# not have it. macOS ships Bash `3.2`, where installing fails inside the
+# package's own hook functions while the read-only listings still work. A newer
+# Bash anywhere on `PATH` is enough: the whole round-trip was driven that way.
+# ```
+#
+# ```{note}
+# An install runs the package's own hook functions, which may take over the
+# terminal and may fail: a failing `post_install` rolls the package back rather
+# than leaving it half-installed.
+# ```
+
+[mpm.managers.pearl]
+name = "Pearl"
+homepage_url = "https://github.com/pearl-core/pearl"
+platforms = ["linux_like", "macos"]
+cli_names = ["pearl"]
+# No version floor is declared. Every verb driven here was present in the
+# release the parsers were captured from, and no upstream note dates their
+# introduction, so a floor could only be guessed. Driven against `2.3.12`.
+pre_args = ["--no-confirm"]
+version_cli_options = ["--version"]
+version_regexes = ['pearl\s+(?P<version>\S+)']
+
+# `--installed-only` narrows the catalog to what the machine holds. The
+# `[installed]` marker is then redundant but kept in the pattern: it is what
+# makes a line unambiguous if the flag is ever dropped.
+[mpm.managers.pearl.operations.installed]
+args = ["list", "--installed-only"]
+regex = '^(?P<package_id>\S+/\S+)\s+\[installed\]'
+
+[mpm.managers.pearl.operations.search]
+args = ["search", "{query}"]
+regex = '^(?P<package_id>\S+/\S+)'
+
+[mpm.managers.pearl.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.pearl.operations.remove]
+args = ["remove", "{package_id}"]
+
+# Only the single-package form: bare `update` is Pearl updating itself.
+[mpm.managers.pearl.operations.upgrade_one]
+args = ["update", "{package_id}"]
+
+# Output samples locking the version probe and the declared parsers, captured
+# from Pearl 2.3.12. Consumed by tests/test_manager_definition.py; ignored by
+# mpm's loader.
+#
+# Pearl colors both listings unconditionally, and its escapes fall *between*
+# the repository prefix and the package name, so no pattern could recover the
+# identifier from the raw bytes as one token. These samples are therefore the
+# stripped form, which is exactly what the parser sees: mpm runs every capture
+# through `strip_ansi` before matching.
+[samples.version]
+output = "pearl 2.3.12"
+expected = "2.3.12"
+
+[[samples.installed]]
+output = """
+pearl/airline [installed]
+    Status/tabline for vim"""
+packages = [{ id = "pearl/airline" }]
+
+[[samples.search]]
+output = """
+pearl/bufexplorer
+    BufExplorer Plugin for Vim
+pearl/dot-vim
+    Awesome vim dotfiles"""
+packages = [{ id = "pearl/bufexplorer" }, { id = "pearl/dot-vim" }]

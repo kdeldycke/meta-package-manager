@@ -120,6 +120,7 @@ keywords = [
   "paludis",
   "pamac",
   "paru",
+  "pearl",
   "php composer",
   "pi",
   "pikaur",
@@ -1057,6 +1058,7 @@ metrics.subjects.pacman = "https://gitlab.archlinux.org/pacman/pacman"
 metrics.subjects.pacstall = "https://github.com/pacstall/pacstall"
 metrics.subjects.pamac = "https://github.com/manjaro/pamac-cli"
 metrics.subjects.paru = "https://github.com/Morganamilo/paru"
+metrics.subjects.pearl = "https://github.com/pearl-core/pearl"
 metrics.subjects.pi = "https://github.com/earendil-works/pi"
 metrics.subjects.pikaur = "https://github.com/actionless/pikaur"
 metrics.subjects.pip = "https://github.com/pypa/pip"
@@ -1294,6 +1296,7 @@ labels.file-rules."📦 manager: pacman-based" = [
   "tests/*trizen*",
   "tests/*yay*",
 ]
+labels.file-rules."📦 manager: pearl" = [ "meta_package_manager/managers/pearl.*", "tests/*pearl*" ]
 labels.file-rules."📦 manager: pi" = [ "meta_package_manager/managers/pi.*", "tests/*pi*" ]
 labels.file-rules."📦 manager: pkcon" = [ "meta_package_manager/managers/pkcon.*", "tests/*pkcon*" ]
 labels.file-rules."📦 manager: pkg-based" = [ "meta_package_manager/managers/pkg.*", "tests/*pkg*", "tests/*ports*" ]
@@ -1648,6 +1651,11 @@ description = "opam"
 name = "📦 manager: pacman-based"
 color = "bfdadc"
 description = "dkp-pacman, pacaur, pacman, pamac, paru, pikaur, trizen, yay"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: pearl"
+color = "bfdadc"
+description = "pearl"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pi"

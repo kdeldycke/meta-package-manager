@@ -265,6 +265,12 @@ Cygwin package manager, offered as an alternative to [`apt-cyg`](managers/apt-cy
 
 Update only themselves. There is no catalog, no inventory and no per-package operation to map: the whole surface is one command that replaces the binary in place.
 
+## [`sera`](https://gitlab.com/cscs/sera) ❌ 🛟
+
+Command-line updater for KDE Plasma addons, and the closest this page comes to a candidate that fails on one requirement alone: it does list what is installed, which is the thing most tools here cannot do, and `list_current_packages` even emits each addon as `{"NM": name, "VO": version}`.
+
+What it has no route to is its own version. The script holds one internally, `version="v2.9.9-1"`, but nothing prints it: its whole dispatch is `help`, `list`, `check`, `sync` and `upgrade`, with `*) exit;;` swallowing anything else, so `sera --version` exits silently and a probe reads nothing. Upstream publishes no tags either. That is [`zgenom`](#zgenom)'s verdict, and {attr}`~meta_package_manager.manager.PackageManager.fresh` enforces it. A second obstacle sits behind it: `sync` is dispatched as `upgrade_package "$1" "$2"` and wants a content id *and* an addon name, so one identifier could not drive an upgrade even with a version in hand, which is the [`0install`](managers/zeroinstall.md) shape.
+
 ## [`smart`](https://github.com/smartpm/smart) ☠️
 
 No commit since 2016-10-27. An early cross-distribution package manager over the RPM and dpkg archives among others, chasing the same goal as `mpm`; every archive it drove has a manager today.

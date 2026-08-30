@@ -34,6 +34,7 @@
    meta_package_manager.managers.gem
    meta_package_manager.managers.gext
    meta_package_manager.managers.ghcup
+   meta_package_manager.managers.go
    meta_package_manager.managers.guix
    meta_package_manager.managers.homebrew
    meta_package_manager.managers.luarocks

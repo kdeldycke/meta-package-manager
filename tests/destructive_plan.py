@@ -124,6 +124,8 @@ PACKAGE_IDS = {
     # among the lighter ones. Pinned so the round-trip does not depend on
     # whatever the current release happens to be.
     "ghcup": "hls-2.9.0.1",
+    # An official example command: tiny, dependency-free and quick to compile.
+    "go": "golang.org/x/example/hello",
     "guix": "hello",
     "haxelib": "hxjsonast",  # Tiny zero-dependency JSON parser.
     # A channel, which is what juliaup calls a package. An old released series

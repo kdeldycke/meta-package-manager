@@ -47,6 +47,7 @@ from .managers.fwupd import FWUPD
 from .managers.gem import Gem
 from .managers.gext import Gext
 from .managers.ghcup import GHCup
+from .managers.go import Go
 from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
 from .managers.luarocks import LuaRocks
@@ -129,6 +130,7 @@ manager_classes = (
     Gem,
     Gext,
     GHCup,
+    Go,
     Guix,
     Lazy,
     LuaRocks,

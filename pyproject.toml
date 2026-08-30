@@ -130,6 +130,7 @@ keywords = [
   "pkgin",
   "pkgm",
   "pkgsrc",
+  "platformio-core",
   "plugin",
   "pnpm",
   "portage",
@@ -1061,6 +1062,7 @@ metrics.subjects.pkg = "https://github.com/freebsd/pkg"
 metrics.subjects.pkg-tools = "https://github.com/openbsd/src"
 metrics.subjects.pkgin = "https://github.com/NetBSDfr/pkgin"
 metrics.subjects.pkgm = "https://github.com/pkgxdev/pkgm"
+metrics.subjects.platformio-core = "https://github.com/platformio/platformio-core"
 metrics.subjects.pnpm = "https://github.com/pnpm/pnpm"
 metrics.subjects.ports = "https://github.com/freebsd/freebsd-ports"
 metrics.subjects.pwsh-gallery = "https://github.com/PowerShell/PSResourceGet"
@@ -1289,6 +1291,10 @@ labels.file-rules."📦 manager: pkg-based" = [ "meta_package_manager/managers/p
 labels.file-rules."📦 manager: pkg-tools" = [ "meta_package_manager/managers/pkg_tools.*", "tests/*pkg_tools*" ]
 labels.file-rules."📦 manager: pkgin" = [ "meta_package_manager/managers/pkgin.*", "tests/*pkgin*" ]
 labels.file-rules."📦 manager: pkgm" = [ "meta_package_manager/managers/pkgm.*", "tests/*pkgm*" ]
+labels.file-rules."📦 manager: platformio-core" = [
+  "meta_package_manager/managers/platformio_core.*",
+  "tests/*platformio_core*",
+]
 labels.file-rules."📦 manager: pwsh-gallery" = [ "meta_package_manager/managers/pwsh_gallery.*", "tests/*pwsh_gallery*" ]
 labels.file-rules."📦 manager: pyenv" = [ "meta_package_manager/managers/pyenv.*", "tests/*pyenv*" ]
 labels.file-rules."📦 manager: pypi-based" = [
@@ -1648,6 +1654,11 @@ description = "pkgin"
 name = "📦 manager: pkgm"
 color = "bfdadc"
 description = "pkgm"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: platformio-core"
+color = "bfdadc"
+description = "platformio-core"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pwsh-gallery"

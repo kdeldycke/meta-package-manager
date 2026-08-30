@@ -185,6 +185,9 @@ PACKAGE_IDS = {
     # A pantry path rather than the `jq` executable name: both install, but only
     # the path is what `pkgm list` reports back, so only it round-trips.
     "pkgm": "stedolan.github.io/jq",
+    # Declares no install operation: the round-trip auto-skips. Every mutating
+    # verb needs the package kind as a flag, which an id alone does not carry.
+    "platformio-core": "ArduinoJson",
     "pnpm": "ms",
     "ports": "net/nyancat",
     "pwsh-gallery": "Posh-Git",

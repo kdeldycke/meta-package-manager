@@ -1,0 +1,85 @@
+# PlatformIO Core's package manager (https://platformio.org), wrapped for the
+# platforms, tools and libraries it installs machine-wide. See docs/overrides.md
+# ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is whatever `pio pkg list --global` reports, which spans three kinds
+# at once: development platforms, the toolchains they build with, and libraries.
+# The listing groups them under a heading per kind and prints one entry per
+# line, so the kind is context rather than part of the id.
+#
+# Parsing notes, verified against PlatformIO Core 6.1.19 on macOS:
+#   - **Global scope is a flag on every command.** Without `--global` the whole
+#     `pkg` surface answers for the project in the working directory, which is
+#     the `haxelib` hazard. `list`, `install`, `uninstall` and `update` all take
+#     it.
+#   - No `outdated`, and this is the reason: `pio pkg outdated` is the one
+#     command in the family that has no `--global`, taking only `--project-dir`
+#     and `--environment`. Its single staleness read therefore answers for a
+#     working tree rather than for the host, which is the `cabal outdated`
+#     shape.
+#   - **No `install` and no `remove`, because a package's *kind* is a flag.**
+#     `pio pkg install` and `pio pkg uninstall` take the specification as the
+#     value of `--library`, `--platform` or `--tool`, never as a positional:
+#     both answer `Error: Got unexpected extra argument` when handed a bare
+#     name. An id alone cannot drive either verb, and `install` in particular
+#     cannot infer a kind for a package it has never seen. The listing does
+#     carry the kind in its headings, so a Python class could look up what to
+#     remove; a definition cannot, one operation being one command.
+#   - **The ids are a pair.** The listing prints the short name, `ArduinoJson`,
+#     while install and search use the owner-qualified `bblanchon/ArduinoJson`
+#     that the entry shows only inside its `(required: ...)` suffix. Removal
+#     accepts the short name, so the id yielded here is the one that would
+#     round-trip out of the inventory.
+#
+# ```{todo}
+# Declaring `search` would need a class: its records span three lines. It is
+# worth the upgrade, because those records carry a server-set publication date
+# ("Published on Mon Mar  2 17:23:45 2026"), which is what qualifies a manager
+# for the per-package `release_date()` probe under `--cooldown` instead of the
+# ❌ row this definition earns. Doing that would also unlock `remove`, the kind
+# lookup being the same class-only capability.
+# ```
+
+[mpm.managers.platformio-core]
+name = "PlatformIO Core"
+homepage_url = "https://platformio.org"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["pio"]
+# No version floor is declared. Every verb driven here was present in the
+# release the parsers were captured from, and no upstream note dates their
+# introduction, so a floor could only be guessed. Driven against `6.1.19`.
+version_cli_options = ["--version"]
+# `pio --version` prints "PlatformIO Core, version 6.1.19", so the version is
+# not the first token and the default pattern would report the program name.
+version_regexes = ['PlatformIO Core,\s+version\s+(?P<version>\S+)']
+
+# One entry per line under a heading per kind. The leading box-drawing run is
+# what rejects the headings, which open on a word character instead.
+[mpm.managers.platformio-core.operations.installed]
+args = ["pkg", "list", "--global"]
+regex = '^[^\w\s]+\s+(?P<package_id>\S+)\s+@\s+(?P<installed_version>\S+)'
+
+[mpm.managers.platformio-core.operations.upgrade_all]
+args = ["pkg", "update", "--global"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from PlatformIO Core 6.1.19. Consumed by tests/test_manager_definition.py;
+# ignored by mpm's loader.
+[samples.version]
+output = "PlatformIO Core, version 6.1.19"
+expected = "6.1.19"
+
+# Two kinds at once, which is what proves the headings are stepped over rather
+# than matched: the state was built by installing one library and one tool.
+[[samples.installed]]
+output = """
+Tools
+└── tool-scons @ 4.41101.0 (required: platformio/tool-scons)
+
+Libraries
+└── ArduinoJson @ 7.4.3 (required: bblanchon/ArduinoJson)"""
+packages = [
+  { id = "tool-scons", version = "4.41101.0" },
+  { id = "ArduinoJson", version = "7.4.3" },
+]

@@ -52,6 +52,7 @@ keywords = [
   "dnf5",
   "dotnet",
   "elan",
+  "emacs",
   "emerge",
   "eopkg",
   "exherbo",
@@ -1010,6 +1011,7 @@ metrics.subjects.dnf = "https://github.com/rpm-software-management/dnf"
 metrics.subjects.dnf5 = "https://github.com/rpm-software-management/dnf5"
 metrics.subjects.dotnet = "https://github.com/dotnet/sdk"
 metrics.subjects.elan = "https://github.com/leanprover/elan"
+metrics.subjects.emacs = "https://github.com/emacs-mirror/emacs"
 metrics.subjects.emerge = "https://github.com/gentoo/portage"
 metrics.subjects.eopkg = "https://github.com/getsolus/eopkg"
 metrics.subjects.fink = "https://github.com/fink/fink"
@@ -1212,6 +1214,7 @@ labels.file-rules."📦 manager: dpkg-based" = [
   "tests/*pacstall*",
 ]
 labels.file-rules."📦 manager: elan" = [ "meta_package_manager/managers/elan.*", "tests/*elan*" ]
+labels.file-rules."📦 manager: emacs" = [ "meta_package_manager/managers/emacs.*", "tests/*emacs*" ]
 labels.file-rules."📦 manager: emerge" = [ "meta_package_manager/managers/emerge.*", "tests/*emerge*" ]
 labels.file-rules."📦 manager: eopkg" = [ "meta_package_manager/managers/eopkg.*", "tests/*eopkg*" ]
 labels.file-rules."📦 manager: fish-based" = [
@@ -1474,6 +1477,11 @@ description = "apt, apt-mint, deb-get, fink, nala, opkg, pacstall"
 name = "📦 manager: elan"
 color = "bfdadc"
 description = "elan"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: emacs"
+color = "bfdadc"
+description = "emacs"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: emerge"

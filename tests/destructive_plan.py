@@ -102,6 +102,9 @@ PACKAGE_IDS = {
     # inventory never reports. Every toolchain is a large download, so the round
     # trip is expensive wherever elan is actually present.
     "elan": "leanprover/lean4:v4.33.0",
+    # A tiny, dependency-free GNU ELPA package: pure elisp with no build step,
+    # so the round-trip stays cheap wherever Emacs is present.
+    "emacs": "queue",
     "emerge": "games-misc/nyancat",
     "eopkg": "sl",
     "fink": "figlet",

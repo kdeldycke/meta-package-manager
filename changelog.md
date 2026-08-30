@@ -9,6 +9,7 @@
 - [go] Add Go package manager, listing and installing the commands `go install` puts on the machine.
 - [skills] Add Agent Skills manager, listing, removing and upgrading the skills installed for the coding agents on a machine.
 - [platformio-core] Add PlatformIO Core package manager, listing and upgrading the platforms, tools and libraries it installs machine-wide.
+- [emacs] Add GNU Emacs package manager, driving `package.el` headlessly for inventory, install, remove and archive refresh.
 - [pipxu] Add pipxu package manager, with inventory, install, remove and upgrade support.
 - [pkgm] Add pkgm package manager, with inventory, outdated, install, remove and full upgrade support.
 - [zeroinstall] Add Zero Install package manager, with search, remove and cache cleanup support.

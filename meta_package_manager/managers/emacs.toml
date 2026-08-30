@@ -1,0 +1,97 @@
+# GNU Emacs's own package manager, `package.el`, driven headlessly
+# (https://www.gnu.org/software/emacs/). See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# A package is a symbol from an ELPA archive, and every verb takes that symbol:
+# the inventory prints it, and install and removal both accept it. The archives
+# are the registry, GNU ELPA and NonGNU ELPA being configured out of the box.
+#
+# Every operation is one `emacs --batch --eval` invocation, so the output format
+# is chosen here rather than parsed out of whatever the tool prints. The
+# inventory's `format` string and the pattern below are therefore written
+# together, and neither can drift without the other.
+#
+# Parsing notes, verified against GNU Emacs 31.1 on macOS:
+#   - **`package-initialize` is mandatory in batch mode.** `emacs --batch` skips
+#     the init file, so `package-alist` is empty until it runs, and the
+#     inventory would report nothing at all rather than failing.
+#   - The inventory holds only what `package.el` installed. Emacs's own bundled
+#     libraries are not in `package-alist`, which is the right scope: they are
+#     part of the editor rather than packages a user manages.
+#   - An empty inventory prints nothing and exits `0`, so it is honest rather
+#     than an error.
+#   - Removal takes the package *description* rather than the symbol, hence the
+#     `alist-get` lookup: `package-delete` refuses a bare symbol.
+#   - `sync` is `package-refresh-contents`, which contacts every configured
+#     archive and is the only read that reaches the network.
+#
+# ```{todo}
+# Declare `outdated`, `upgrade_all` and `search`. All three are expressible as
+# further `--eval` forms, comparing `package-alist` against
+# `package-archive-contents`, but none was captured on the drive that produced
+# the samples below and no operation is declared from a form that was not run.
+# ```
+
+[mpm.managers.emacs]
+name = "GNU Emacs packages"
+homepage_url = "https://www.gnu.org/software/emacs/"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["emacs"]
+# No version floor is declared. `package.el` has shipped with Emacs since
+# `24.1`, well below anything a floor would usefully exclude, and every form
+# driven here is older still. Driven against `31.1`.
+version_cli_options = ["--version"]
+# `emacs --version` opens with "GNU Emacs 31.1" and continues into a copyright
+# notice, so the pattern takes the version off the first line only.
+version_regexes = ['GNU Emacs\s+(?P<version>\S+)']
+
+# The format string is this manager's own: one `name version` per line, with the
+# version joined back from the list `package.el` stores it as.
+[mpm.managers.emacs.operations.installed]
+args = [
+  "--batch",
+  "--eval",
+  '(progn (require (quote package)) (package-initialize) (dolist (p package-alist) (princ (format "%s %s\n" (car p) (package-version-join (package-desc-version (cadr p)))))))',
+]
+regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)$'
+
+[mpm.managers.emacs.operations.install]
+args = [
+  "--batch",
+  "--eval",
+  '(progn (require (quote package)) (package-initialize) (package-install (quote {package_id})))',
+]
+
+# `package-delete` wants the description rather than the symbol, so the entry is
+# looked up in `package-alist` first.
+[mpm.managers.emacs.operations.remove]
+args = [
+  "--batch",
+  "--eval",
+  '(progn (require (quote package)) (package-initialize) (package-delete (car (alist-get (quote {package_id}) package-alist))))',
+]
+
+[mpm.managers.emacs.operations.sync]
+args = [
+  "--batch",
+  "--eval",
+  '(progn (require (quote package)) (package-initialize) (package-refresh-contents))',
+]
+
+# Output samples locking the version probe and the declared parser, captured
+# from GNU Emacs 31.1. Consumed by tests/test_manager_definition.py; ignored by
+# mpm's loader.
+[samples.version]
+output = """
+GNU Emacs 31.1
+Copyright (C) 2026 Free Software Foundation, Inc.
+GNU Emacs comes with ABSOLUTELY NO WARRANTY."""
+expected = "31.1"
+
+# One package, which is the whole inventory the drive produced: `queue` was
+# installed from GNU ELPA for this capture and removed again afterwards.
+[[samples.installed]]
+output = """
+queue 0.2"""
+packages = [{ id = "queue", version = "0.2" }]

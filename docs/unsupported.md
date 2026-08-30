@@ -103,6 +103,10 @@ Fish plugin manager with no commit since 2023-01-05.
 
 Cross-platform package manager modelled on Homebrew, down to a registry of its own: "fish food" recipes hosted at [fishworks/fish-food](https://github.com/fishworks/fish-food). Its readme announces the end in as many words, "*THIS PROJECT IS BEING ARCHIVED*", blaming "*the amount of time and money required to maintain this side project*", and no commit has landed since 2022-03-08. The repository is archived and names no successor.
 
+## [`helix`](https://helix-editor.com) ❌ 🛟
+
+Editor whose whole package-adjacent surface is one flag, `-g, --grammar {fetch|build}`, and it takes no package argument: both modes act on every tree-sitter grammar listed in `languages.toml` at once, so there is no install, remove or upgrade of a single grammar to declare. Nothing reports an inventory either. `hx --health languages` prints a capability matrix over the languages helix ships configuration for, three hundred rows of ✓ and ✘ across the language server, debug adapter, formatter, highlight, textobject and indent columns, truncated to the terminal width and carrying no version anywhere; it answers what helix knows about rather than what the host holds. The grammars are not a registry of helix's own, each being a git repository pinned by revision in that same configuration file. That leaves an all-or-nothing refresh as the only real operation, which is exactly what [`topgrade`](managers/topgrade.md) already runs, so `mpm upgrade --topgrade` reaches it without `mpm` learning the editor. The [`zr`](#zr) reading. Checked against helix `25.07.1`.
+
 ## [`helm`](https://helm.sh) ❌ 🛟
 
 Everything about Helm reads like a candidate: chart repositories that are real registries, and `list`, `search`, `install`, `upgrade` and `uninstall` all native. Scope is the whole of the objection, and it is decisive.

@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [claude-code-plugins] Add Claude Code plugins manager, with inventory, install, remove, single-plugin upgrade, marketplace sync and orphan cleanup.
 - [go] Add Go package manager, listing and installing the commands `go install` puts on the machine.
 - [pipxu] Add pipxu package manager, with inventory, install, remove and upgrade support.
 - [pkgm] Add pkgm package manager, with inventory, outdated, install, remove and full upgrade support.

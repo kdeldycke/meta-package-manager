@@ -1,0 +1,98 @@
+# Claude Code's own plugin system
+# (https://docs.claude.com/en/docs/claude-code/plugins), driven through the
+# `claude plugin` command surface. See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# A package is a plugin identified as `name@marketplace`, and every verb takes
+# that form: it is what the listing reports and what `install`, `uninstall` and
+# `update` all accept, so ids round-trip without translation. A marketplace is
+# the registry, added from a URL, a path or a GitHub repository, and several
+# can be configured at once, which is why the marketplace half of the id is
+# part of the identity rather than decoration.
+#
+# Parsing notes, verified against Claude Code 2.1.236 on macOS:
+#   - The inventory is `claude plugin list --json`. The default output is a
+#     multi-line record per plugin, an `❯ id` line followed by indented
+#     `Version:`, `Scope:` and `Status:` lines, which no per-line pattern can
+#     reduce. The JSON form is a flat top-level array carrying both fields
+#     this needs.
+#   - `claude plugin list --json --available` is *not* a search source: it
+#     answers with an object keyed `installed` and `available` rather than an
+#     array, so declaring `search` would pull the whole manager into a class.
+#   - No `upgrade_all`: `claude plugin update` requires a plugin argument and
+#     offers no `--all`.
+#   - No `outdated`: nothing reports staleness without acting on it.
+#   - `sync` refreshes every configured marketplace at once, `update` taking an
+#     optional name and updating all of them when given none.
+#
+# ```{note}
+# `claude plugin prune --dry-run` lists the auto-installed dependencies that
+# `cleanup_orphan` removes, which is the shape `orphans` wants. It is left undeclared
+# because no populated sample could be captured: the drive host had no
+# auto-installed plugin to strand.
+# ```
+
+[mpm.managers.claude-code-plugins]
+name = "Claude Code plugins"
+homepage_url = "https://docs.claude.com/en/docs/claude-code/plugins"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["claude"]
+# No version floor is declared. Every verb driven here was present in the
+# release the parsers were captured from, and no upstream note dates their
+# introduction, so a floor could only be guessed. Driven against `2.1.236`.
+version_cli_options = ["--version"]
+# `claude --version` prints "2.1.236 (Claude Code)", so the pattern has to stop
+# before the trailing product name rather than take the whole line.
+version_regexes = ['(?P<version>\d+\.\d+\.\d+)\s+\(Claude Code\)']
+
+# A flat top-level array, which is the one JSON shape a definition can parse.
+[mpm.managers.claude-code-plugins.operations.installed]
+args = ["plugin", "list", "--json"]
+format = "json"
+fields = { package_id = "id", installed_version = "version" }
+
+[mpm.managers.claude-code-plugins.operations.install]
+args = ["plugin", "install", "{package_id}"]
+
+[mpm.managers.claude-code-plugins.operations.remove]
+args = ["plugin", "uninstall", "{package_id}"]
+
+[mpm.managers.claude-code-plugins.operations.upgrade_one]
+args = ["plugin", "update", "{package_id}"]
+
+# Refreshes every configured marketplace: `update` takes an optional name and
+# updates all of them when given none.
+[mpm.managers.claude-code-plugins.operations.sync]
+args = ["plugin", "marketplace", "update"]
+
+# Categorised as an orphan sweep rather than a cache purge: prune removes the
+# auto-installed dependencies nothing needs any more, and touches nothing else.
+# `--yes` is mandatory rather than a convenience: prune prompts for
+# confirmation, and refuses to run at all when stdout is not a terminal.
+[mpm.managers.claude-code-plugins.operations.cleanup_orphan]
+args = ["plugin", "prune", "--yes"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from Claude Code 2.1.236. Consumed by tests/test_manager_definition.py;
+# ignored by mpm's loader.
+[samples.version]
+output = "2.1.236 (Claude Code)"
+expected = "2.1.236"
+
+# The install paths and timestamps are kept rather than trimmed: a sample is a
+# complete capture, and they are what a reader compares their own output to.
+[[samples.installed]]
+output = """
+[
+  {
+    "id": "pyright-lsp@claude-plugins-official",
+    "version": "1.0.0",
+    "scope": "user",
+    "enabled": true,
+    "installPath": "/tmp/mpm-drive/.claude/plugins/cache/claude-plugins-official/pyright-lsp/1.0.0",
+    "installedAt": "2026-08-30T19:20:57.593Z",
+    "lastUpdated": "2026-08-30T19:20:57.593Z"
+  }
+]"""
+packages = [{ id = "pyright-lsp@claude-plugins-official", version = "1.0.0" }]

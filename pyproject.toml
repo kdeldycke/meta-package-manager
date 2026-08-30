@@ -35,6 +35,7 @@ keywords = [
   "chocolatey",
   "chromebrew",
   "chromeos",
+  "claude-code-plugins",
   "clear linux",
   "CLI",
   "cli-tools",
@@ -996,6 +997,7 @@ metrics.subjects.cask = "https://github.com/Homebrew/homebrew-cask"
 metrics.subjects.cave = "https://gitlab.exherbo.org/paludis/paludis"
 metrics.subjects.choco = "https://github.com/chocolatey/choco"
 metrics.subjects.chromebrew = "https://github.com/chromebrew/chromebrew"
+metrics.subjects.claude-code-plugins = "https://github.com/anthropics/claude-code"
 metrics.subjects.clib = "https://github.com/clibs/clib"
 metrics.subjects.composer = "https://github.com/composer/composer"
 metrics.subjects.conda = "https://github.com/conda/conda"
@@ -1173,6 +1175,10 @@ labels.file-rules."📦 manager: cargo" = [ "meta_package_manager/managers/cargo
 labels.file-rules."📦 manager: cave" = [ "meta_package_manager/managers/cave.*", "tests/*cave*" ]
 labels.file-rules."📦 manager: choco" = [ "meta_package_manager/managers/choco.*", "tests/*choco*" ]
 labels.file-rules."📦 manager: chromebrew" = [ "meta_package_manager/managers/chromebrew.*", "tests/*chromebrew*" ]
+labels.file-rules."📦 manager: claude-code-plugins" = [
+  "meta_package_manager/managers/claude_code_plugins.*",
+  "tests/*claude_code_plugins*",
+]
 labels.file-rules."📦 manager: clib" = [ "meta_package_manager/managers/clib.*", "tests/*clib*" ]
 labels.file-rules."📦 manager: composer" = [ "meta_package_manager/managers/composer.*", "tests/*composer*" ]
 labels.file-rules."📦 manager: conda-based" = [
@@ -1418,6 +1424,11 @@ description = "choco"
 name = "📦 manager: chromebrew"
 color = "bfdadc"
 description = "chromebrew"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: claude-code-plugins"
+color = "bfdadc"
+description = "claude-code-plugins"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: clib"

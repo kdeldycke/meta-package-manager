@@ -76,6 +76,9 @@ PACKAGE_IDS = {
     "cave": "base/figlet",
     "choco": "hyperfine",
     "chromebrew": "sl",
+    # A plugin of the official marketplace, named with the `plugin@marketplace`
+    # form every verb takes.
+    "claude-code-plugins": "pyright-lsp@claude-plugins-official",
     "composer": "ralouphie/getallheaders",
     "conda": "pytz",  # Pure-Python, zero-dependency leaf on the default channel.
     # One of the registry's few "executables" entries, so a --global install has
@@ -460,7 +463,33 @@ def gcloud_components_blocked() -> bool:
     return bool(sdk_root) and not os.access(sdk_root, os.W_OK)
 
 
+def claude_marketplace_missing() -> bool:
+    """Whether Claude Code has no marketplace to resolve a plugin from.
+
+    A plugin id names its marketplace, and `claude plugin install` resolves it
+    against the ones configured for the current user. A fresh host has none, so
+    the install fails for want of a registry rather than for any defect, which
+    is a condition of the machine rather than of the platform: the maintainer's
+    own workstation carries two, and a runner carries none.
+    """
+    marketplaces = which("claude")
+    if not marketplaces:
+        # A missing CLI is not flagged: selection then finds no available
+        # manager and the test exits on its "No manager selected" path.
+        return False
+    result = subprocess.run(
+        ("claude", "plugin", "marketplace", "list"),
+        capture_output=True,
+        text=True,
+        encoding="UTF-8",
+    )
+    return "No marketplaces configured" in result.stdout
+
+
 INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
+    # Claude Code resolves a plugin through the marketplaces configured for the
+    # user, and a fresh host has none, so the install fails for want of a registry.
+    "claude-code-plugins": claude_marketplace_missing,
     # choco installs to an admin-only location the unelevated CI process cannot write to.
     "choco": is_github_ci,
     # cpan writes to the system Perl tree, out of reach only on the x86 Linux runners.

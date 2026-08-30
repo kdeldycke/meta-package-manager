@@ -91,6 +91,12 @@ Vim and Neovim plugin manager, the live successor to [`dein`](#dein), but drivab
 
 Merges pending `/etc` configuration files left behind by a Portage upgrade. It resolves conflicts, installs nothing, and is already covered by [`emerge`](managers/emerge.md), which `mpm` wraps.
 
+## [`fish-plug`](https://github.com/kidonng/plug.fish) ❌ 🛟
+
+Fish plugin manager owning no verb that names a plugin, which its own source settles rather than any behaviour that has to be run: the whole tool is three files and, as its readme puts it, "*< 100 lines of code you can actually read and understand*". Plugins are whatever the `$plugins` variable lists in the user's `config.fish`, and installation is a side effect of starting a shell, `conf.d/plugin_load.fish` cloning any entry whose directory is missing. `functions/plugin_update.fish` takes no argument and pulls every entry of that same list; `functions/plugin_uninstall.fish` takes none either, sweeping the directories the list no longer names and asking `"$plugin_name is disabled, uninstall? (y/N)"` for each, so removal cannot be driven with nobody at the keyboard. There is no listing.
+
+It reports no version either, by any route: upstream publishes zero tags and zero releases, carries no version constant, and its documented install clones a branch, so nothing on disk names one. That is [`zgenom`](#zgenom)'s verdict, reached independently. The project renamed itself to `plug.fish` and rewrote at `v3`, which is the version driven here.
+
 ## [`fresh`](https://freshshell.com) ❌
 
 Describes itself as "*Bundler for your dot files*": it sources shell configuration (aliases, functions, snippets) out of other people's Git repositories and splices it into the user's own config, then symlinks the result. That is the verdict [`chezmoi`](#dotfiles-and-repository-syncers) and its peers already carry, and it earns a section of its own only because `topgrade` does not reach it, so it cannot sit under a title promising that fallback. Its `search` queries a community wiki rather than a registry, nothing it tracks carries a version of its own, and what it manages is the user's content, outside the system scope every `mpm` manager holds to.

@@ -315,6 +315,12 @@ A Go rewrite of the Tmux Plugin Manager with a terminal interface, and it lands 
 
 Translates one CLI vocabulary onto whichever single OS-level manager is detected, never more than one per invocation, by the maintainer's own account: "*upt is just aliases, nothing more*" ([sigoden/upt#60](https://github.com/sigoden/upt/issues/60#issuecomment-2560419544)).
 
+## [`vundle`](https://github.com/VundleVim/Vundle.vim) ❌ 🛟
+
+Vim plugin manager reporting no version through anything a probe can read, which is what [`PackageManager.fresh`](managers.md) requires: `g:vundle_version` does not exist, checked by asking Vim for it, and the `0.10.2` in `autoload/vundle.vim` is a comment rather than a variable. Upstream tags releases but publishes none, and the documented install clones `master`, so the copy on disk names no version either. The companion-binary route does not help: the binary here is `vim`, whose version is Vim's own, which is the argument that settled [`zigup`](#zigup).
+
+It clears more of the bar than most of this page, which is worth recording. Driven under `vim -es -u <vimrc>`, `PluginInstall tpope/vim-surround` really did install a plugin the configuration never declared, so it reaches packages one at a time, unlike [`tmux`](#tmux) or [`fish-plug`](#fish-plug). What it has no shape for is an inventory: the only listing is the `g:vundle#bundles` list built from the `Plugin` lines of the user's `vimrc`, so it echoes the configuration rather than the machine. After that ad-hoc install it still reported two plugins while three sat on disk. Checked against Vundle `0.10.2` and Vim `9.2`.
+
 ## [`waydroid`](https://waydro.id) ❌ 🛟
 
 Runs an Android system in a container. It installs no packages of its own, and what runs inside it is out of reach of the host's package managers.

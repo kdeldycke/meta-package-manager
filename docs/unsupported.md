@@ -297,6 +297,10 @@ No inventory, no per-package operation, and `topgrade` already reaching it leave
 
 Not tools: internal steps of [`topgrade`](managers/topgrade.md), which `mpm` already wraps. They name no upstream project of their own and install nothing.
 
+## [`tpack`](https://github.com/tmuxpack/tpack) ❌ 🛟
+
+A Go rewrite of the Tmux Plugin Manager with a terminal interface, and it lands the same way as [`tmux`](#tmux) for the same reason, though not for identical reasons throughout. What it shares is decisive: there is no listing command at all, and neither of its state-changing verbs names a plugin. `tpack install` is documented as *"Install all plugins declared in tmux.conf"* and takes no positional, while `tpack clean` removes *"plugin directories not declared in tmux.conf"*, so the plugin set is the user's configuration file in both directions and nothing installs or removes one plugin. Where it does go further than tpm is `tpack update [plugin...]`, which names plugins, alongside a `check-updates` read; that leaves an upgrade as the entire honest surface a wrapper could offer, which is what [`topgrade`](managers/topgrade.md) already reaches. The [`zr`](#zr) reading. Checked against tpack `1.2.1`.
+
 ## [`upm`](https://github.com/epitron/upm) ❌
 
 "*Universal Package Manager*", putting one syntax over apk, apt, guix, opkg, pacman, pkg, pkg_add, pkgin, xbps and yum. It owns no registry: every command is translated to whichever of those the host already carries, all of them wrapped by `mpm` directly, so it reaches no package `mpm` cannot. That is [`upt`](#upt)'s verdict word for word, and like `upt` it reads as a peer of `mpm` rather than a candidate to wrap.

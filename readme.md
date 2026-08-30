@@ -227,6 +227,7 @@ print(operation_matrix()[0])
 | [`zim`](https://mpm.run/managers/zim/)                                                 | >= 1         |          |     🐧 🍎     |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
 | [`zinit`](https://mpm.run/managers/zinit/)                                             | >= 3.10      |          |     🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
 | [`zplug`](https://mpm.run/managers/zplug/)                                             | >= 2         |          |     🐧 🍎     |      ✓      |            |           |          |           |     ✓     |       ✓       |          |        |           |          |
+| [`zvm`](https://mpm.run/managers/zvm/)                                                 |              |          |   🐧 🍎 🪟    |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |        |     ✓     |          |
 | [`zypper`](https://mpm.run/managers/zypper/)                                           | >= 1.14      |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
 
 Platforms: 🅱️ BSD[^bsd] · 🐧 Linux[^linux] · 🍎 macOS · ⨂ Unix[^unix] · 🪟 Windows

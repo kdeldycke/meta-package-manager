@@ -11,6 +11,7 @@
 - [platformio-core] Add PlatformIO Core package manager, listing and upgrading the platforms, tools and libraries it installs machine-wide.
 - [emacs] Add GNU Emacs package manager, driving `package.el` headlessly for inventory, install, remove and archive refresh.
 - [julia] Add Julia `Pkg` package manager, with inventory, outdated, install, remove, upgrade and registry refresh.
+- [zvm] Add zvm Zig version manager, with inventory, catalog search, install, remove and build-cache cleanup.
 - [pearl] Add Pearl package manager, with inventory, search, install, remove and single-package upgrade.
 - [pi] Add Pi extensions manager, with inventory, install, remove and upgrade of the packages that extend the Pi coding agent.
 - [pipxu] Add pipxu package manager, with inventory, install, remove and upgrade support.

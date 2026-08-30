@@ -208,6 +208,7 @@ keywords = [
   "zinit",
   "zplug",
   "zsh",
+  "zvm",
   "zypper",
 ]
 license = "GPL-2.0-or-later"
@@ -1115,6 +1116,7 @@ metrics.subjects.zeroinstall = "https://github.com/0install/0install"
 metrics.subjects.zim = "https://github.com/zimfw/zimfw"
 metrics.subjects.zinit = "https://github.com/zdharma-continuum/zinit"
 metrics.subjects.zplug = "https://github.com/zplug/zplug"
+metrics.subjects.zvm = "https://github.com/tristanisham/zvm"
 metrics.subjects.zypper = "https://github.com/openSUSE/zypper"
 labels.content-rules."📦 manager: apk" = [ "alpine", "alpine linux" ]
 labels.content-rules."📦 manager: apm" = [ "atom" ]
@@ -1383,6 +1385,7 @@ labels.file-rules."📦 manager: zsh-based" = [
   "tests/*zinit*",
   "tests/*zplug*",
 ]
+labels.file-rules."📦 manager: zvm" = [ "meta_package_manager/managers/zvm.*", "tests/*zvm*" ]
 labels.file-rules."🔌 plugin" = [
   "gnome-shell/**",
   "meta_package_manager/bar_plugin*",
@@ -1852,6 +1855,11 @@ description = "zeroinstall"
 name = "📦 manager: zsh-based"
 color = "bfdadc"
 description = "antidote, antigen, zim, zinit, zplug"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: zvm"
+color = "bfdadc"
+description = "zvm"
 
 [[tool.repomatic.labels.extra]]
 name = "🔌 plugin"

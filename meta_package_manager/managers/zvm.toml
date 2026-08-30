@@ -1,0 +1,91 @@
+# zvm installs and switches between versions of the Zig compiler
+# (https://github.com/tristanisham/zvm). See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# A package is a version token, and every verb agrees on it: `install`, `rm` and
+# `use` all take one, and the listing prints one per line. Both shapes are real
+# packages, a released number such as `0.13.0` and the rolling `master`, which
+# is the reading [`rustup`](rustup.md) and [`bob`](bob.md) settled: the object
+# every verb accepts is what counts as a package.
+#
+# Parsing notes, verified against zvm 0.9.1 on macOS:
+#   - No `installed_version` is captured, deliberately, as for `bob` and
+#     `pyenv`. The token is the identity rather than a version field, and
+#     `master` is not a version at all.
+#   - The inventory prints bare tokens, one per line. Its empty state is a
+#     sentence rather than a blank, "No local Zig installs. Run `zvm ls --all`
+#     …", which the pattern rejects on the spaces alone.
+#   - The catalog is a three-column table whose header the pattern has to
+#     reject, so it matches the two token shapes explicitly rather than
+#     anything at the start of a line. Dropping `master` would have been the
+#     easy mistake: it sits on the last row, formatted
+#     `master (remote) (0.17.0-dev…)`, and it is installable like any other.
+#   - **No `upgrade_all`, and the name is the trap.** `zvm upgrade` is
+#     documented as "Self-upgrade ZVM": it replaces the tool, not any installed
+#     Zig. Nothing upgrades a compiler in place either, a newer one being an
+#     `install`, so no upgrade of any kind is declared.
+#   - No `outdated`: nothing reports staleness.
+#
+# ```{note}
+# Installs are verified twice by zvm itself, against a shasum and a minisign
+# signature, both reported on the way through.
+# ```
+
+[mpm.managers.zvm]
+name = "zvm"
+homepage_url = "https://github.com/tristanisham/zvm"
+# Upstream publishes release binaries for Linux, macOS and Windows, and for
+# FreeBSD, NetBSD, OpenBSD and Solaris besides.
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["zvm"]
+# No version floor is declared. Every verb driven here was present in the
+# release the parsers were captured from, and no upstream note dates their
+# introduction, so a floor could only be guessed. Driven against `0.9.1`.
+version_cli_options = ["--version"]
+# `zvm --version` prints "zvm version v0.9.1 darwin/arm64": the version is
+# neither the first token nor the last, and it carries a tag-style `v`.
+version_regexes = ['zvm\s+version\s+v?(?P<version>\d+\.\d+\.\d+)']
+
+[mpm.managers.zvm.operations.installed]
+args = ["ls"]
+regex = '^(?P<package_id>\S+)$'
+
+# The two token shapes are named explicitly: it is what rejects the `Version
+# Installed ZLS` header, and what keeps the rolling channel of the last row.
+[mpm.managers.zvm.operations.search]
+args = ["ls", "--all"]
+regex = '^(?P<package_id>\d+\.\d+\.\d+|master)\b'
+
+[mpm.managers.zvm.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.zvm.operations.remove]
+args = ["rm", "{package_id}"]
+
+# Removes build artifacts rather than any installed compiler.
+[mpm.managers.zvm.operations.cleanup_cache]
+args = ["clean"]
+
+# Output samples locking the version probe and the declared parsers, captured
+# from zvm 0.9.1. Consumed by tests/test_manager_definition.py; ignored by mpm's
+# loader.
+[samples.version]
+output = "zvm version v0.9.1 darwin/arm64"
+expected = "0.9.1"
+
+[[samples.installed]]
+output = """
+0.13.0"""
+packages = [{ id = "0.13.0" }]
+
+# The header and the rolling channel are both kept: they are the two rows the
+# pattern has to treat differently, and a numeric-only slice would prove
+# neither. The `[installed]` marker of an installed version is here too.
+[[samples.search]]
+output = """
+Version     Installed   ZLS
+0.16.0                  (tagged)
+0.13.0      [installed] (tagged)
+master (remote) (0.17.0-dev.1936+5a625d5f3)"""
+packages = [{ id = "0.16.0" }, { id = "0.13.0" }, { id = "master" }]

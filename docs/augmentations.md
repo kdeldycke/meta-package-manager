@@ -93,6 +93,7 @@ print(augmentations_table())
 | [`yum`](managers/yum.md)                   |                      |              |      ✅      |       ✅        |               |
 | [`zef`](managers/zef.md)                   |                      |              |      ✅      |       ✅        |               |
 | [`zeroinstall`](managers/zeroinstall.md)   |                      |              |      ✅      |       ✅        |               |
+| [`zvm`](managers/zvm.md)                   |                      |              |      ✅      |       ✅        |               |
 | [`zypper`](managers/zypper.md)             |                      |      ✅      |              |                 |               |
 
 <!-- mirror-end -->

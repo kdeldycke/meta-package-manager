@@ -288,6 +288,10 @@ PACKAGE_IDS = {
     "zinit": "zdharma-continuum/null",
     # Declares no install operation: the round-trip auto-skips.
     "zplug": "zdharma-continuum/null",
+    # A Zig version, which is what zvm calls a package. A released tag rather
+    # than `master`: every Zig is a large download, and a tag is reproducible
+    # where the rolling channel of the day is not.
+    "zvm": "0.13.0",
     "zypper": "nyancat",
 }
 """Package IDs used by the destructive install/remove tests, one per manager.

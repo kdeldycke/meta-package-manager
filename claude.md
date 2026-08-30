@@ -59,24 +59,11 @@ Which boils down to the following these rules of thumb regarding stability:
 
 ## Cooldown on every install
 
-**Every command that resolves a package from a live registry carries a cooldown, except where this section names otherwise.** A cooldown refuses any version published more recently than a fixed window, so a compromised release has to survive that window before it can enter a build. Most malicious releases (stolen publishing credentials, dependency confusion, account takeover) are caught and pulled within days of publication, which is what makes a window of days worth the delay it costs.
-
 `mpm --cooldown` applies the same idea to a different subject, and the two are easy to conflate here. That flag is a user-facing feature, gating the packages `mpm` installs on the user's machine, and `docs/cooldown.md` is its documentation. This section covers what CI resolves onto a runner while building `mpm` itself. A comment or changelog entry naming one should not read as the other.
 
 The product feature's vocabulary is settled; reuse it rather than coining near-synonyms. The gate has two axes: the **window** (the release age itself, `period` in configuration) and the **posture** (what happens to managers that cannot enforce it, `policy`), spelled by the single `--cooldown` union and the `[mpm.cooldown]` table. Managers are **gateable** or **ungateable** depending on whether they carry a native release-age mechanism. Never write "unsupported managers" in this sense: that phrase belongs to the tools `mpm` declined to wrap (`docs/unsupported.md`) and to platform support, and the collision is what the `8.0.0` rework removed. Strength words (`strict`, `soft`, `full`, `partial`) are kept out of the keyword set because they read as a weaker *window* rather than a narrower scope; the shipped keywords are `enforce` / `best-effort` / `off`, and the default posture is fail-closed by design.
 
-The rule has no scratch exemption. It binds reusable workflows, one-off CI steps, test scripts, local reproduction commands and throwaway experiments equally: an uncooled `uvx` in a five-minute debugging step resolves the same tree from the same registry onto the same runner as a production job.
-
-### Per-ecosystem knobs
-
-| Ecosystem                                                                  | Cooldown                                                           | Per-package exemption                                   |
-| :------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------------ |
-| uv: `uvx`, `uv pip install`, `uv run --with`, `uv tool install`, `uv lock` | `--exclude-newer`, or `UV_EXCLUDE_NEWER`                           | `--exclude-newer-package pkg=YYYY-MM-DD`, CLI flag only |
-| npm, `npx`                                                                 | `--min-release-age` in whole days, or `NPM_CONFIG_MIN_RELEASE_AGE` | `--min-release-age-exclude` taking a name or glob       |
-
-uv accepts a friendly duration (`1 week`), an ISO 8601 span (`P7D`), or an absolute date; npm counts whole days and needs 11.10.0 or newer. Both knobs gate the whole resolved tree, transitive dependencies included, which is the point: the compromised package is rarely the one named on the command line.
-
-For every other package manager, `docs/cooldown.md` is the inventory, and it is this project's own: which managers enforce a cooldown natively, which have support proposed upstream, which have none, and which are N/A because their archive already stages releases on its own.
+The uv and npm knobs and their per-package exemptions are the ones in § Per-ecosystem knobs of the machine-wide instructions. For every other package manager, `docs/cooldown.md` is the inventory, and it is this project's own: which managers enforce a cooldown natively, which have support proposed upstream, which have none, and which are N/A because their archive already stages releases on its own.
 
 ### Documented exemptions
 
@@ -177,15 +164,12 @@ The generation of API documentation is
 
 ### Example data
 
-Invented example data (docs, docstrings, comments, test fixtures) must be domain-neutral: cities, weather, fruits, animals, recipes. Do not reach for software-engineering or packaging vocabulary for a placeholder, and never invent a plausible-looking package or manager name: this project's whole domain is package metadata, so a made-up `foo-lib 1.2.3` in a docstring is indistinguishable from a real fixture and will eventually be read as one.
+Do not reach for software-engineering or packaging vocabulary for a placeholder, and never invent a plausible-looking package or manager name: this project's whole domain is package metadata, so a made-up `foo-lib 1.2.3` in a docstring is indistinguishable from a real fixture and will eventually be read as one.
 
 The exception is the material that must be real to be correct: the `[samples]` fixtures of the bundled TOML definitions and the `shell-session` blocks harvested into the docstring corpus are captured CLI output, held to byte-accuracy by `test_documented_output_still_parses`. Those are not examples, they are data.
 
 ### Changelog and readme updates
 
-Always update documentation when making changes:
-
-- **`changelog.md`**: Add a bullet point describing **what** changed (new features, bug fixes, behavior changes), not **why**. Keep entries concise and actionable. Justifications and rationale belong in documentation or code comments, not in the changelog.
 - **`readme.md`**: Update relevant sections when adding/modifying public API, classes, or functions.
 
 **Changelog scope tags.** Every bullet opens with a comma-separated `[scope]` tag, alphabetically sorted and deduplicated, drawn from the pool manager IDs plus the platform IDs and `mpm`, `bar-plugin`, `gnome-shell`. `test_changelog` enforces that vocabulary, and it is not cosmetic: `manager_changelog()` indexes the tags to build the release-history section of every manager page. Two consequences. A tag naming a manager must describe `mpm`'s *support* for that manager, so work on `mpm`'s own downstream package for a channel that shares a manager's name (Guix, Nix, MacPorts, Alpine) is scoped `[mpm]` like the rest of the packaging work, never to the manager whose page it would otherwise land on. And a new manager needs its changelog entry, since `test_manager_changelog_entries` asserts every pool manager has one.
@@ -283,55 +267,17 @@ The project's single legal sink: license and copyright, the blanket trademark no
 
 ## Code style
 
-### Version formatting
-
-The version string is always bare (e.g., `1.2.3`). The `v` prefix is a **tag namespace** — it only appears when the reference is to a git tag or something derived from a tag (action ref, comparison URL, commit message). This aligns with PEP 440, PyPI, and semver conventions.
-
-| Context                                | Format            | Example                                        | Rationale                         |
-| :------------------------------------- | :---------------- | :--------------------------------------------- | :-------------------------------- |
-| Python `__version__`, `pyproject.toml` | `1.2.3`           | `version = "6.1.2"`                            | PEP 440 bare version.             |
-| Git tags                               | `` `v1.2.3` ``    | `` `v6.1.2` ``                                 | Tag namespace convention.         |
-| GitHub comparison URLs                 | `v1.2.3...v1.2.4` | `compare/v6.1.1...v6.1.2`                      | References tags.                  |
-| GitHub action/workflow refs            | `` `@v1.2.3` ``   | `actions/checkout@v6.0.2`                      | References tags.                  |
-| Commit messages                        | `v1.2.3`          | `[changelog] Release v6.1.2`                   | References the tag being created. |
-| CLI `--version` output                 | `1.2.3`           | `mpm, version 6.1.2`                           | Package version, not a tag.       |
-| Changelog headings                     | `` `1.2.3` ``     | `` ## [`6.1.2` (2026-03-04)] ``                | Package version, code-formatted.  |
-| PyPI URLs                              | `1.2.3`           | `pypi.org/project/meta-package-manager/6.1.2/` | PyPI uses bare versions.          |
-
-**Rules:**
-
-1. **No `v` prefix on package versions.** Anywhere the version identifies the *package* (PyPI, changelog heading, CLI output, `pyproject.toml`), use the bare version: `1.2.3`.
-2. **`v` prefix on tag references.** Anywhere the version identifies a *git tag* (comparison URLs, action refs, commit messages, PR titles), use `v1.2.3`.
-3. **Always backtick-escape versions in prose.** Both `v1.2.3` (tag) and `1.2.3` (package) are identifiers, not natural language. In markdown and in MyST docstrings alike, wrap them in single backticks: `` `v1.2.3` ``, `` `1.2.3` ``.
-4. **Development versions** follow PEP 440: `1.2.3.dev0` with optional `+{short_sha}` local identifier.
-
 ### Commit messages
 
-Default to a subject line and nothing else. A commit message is a log entry, not a design document. It gives a quick summary of what the commit holds, and points at context that lives elsewhere.
-
-- **Subject.** One line under 72 characters, imperative mood, capitalized, no trailing period, every identifier backticked. Name what changed, not the category it falls in: `` Sync `uv.lock` ``, `` Fix `yay` cooldown overlay on Arch ``. Avoid the bare one-word subject (`Typo`, `Lint`, `Fix`): it costs the next reader a `git show` to learn anything. Say what the typo was in, what the lint fixed.
-- **No decorative prefixes.** This is not [Conventional Commits](https://www.conventionalcommits.org): no `feat:`, `chore:`, `fix:`. A `[bracketed]` prefix is reserved for a mechanism that parses it back, and only `[changelog] …` qualifies, matched literally by repomatic's auto-tagging job. Do not confuse it with the `[scope]` tags that open every `changelog.md` bullet: those name a manager or platform, live in the changelog file rather than in git, and are indexed by `manager_changelog()`. The two vocabularies are unrelated. Never write a GitHub skip token (`[skip ci]` and its aliases) in any message, including a body: they match anywhere and leave a required check "Pending" rather than failing.
-- **Body: three cases, and nothing else.** Omit the body by default, even when the *why* is not obvious from the diff. A body is not the place to explain the change, defend the approach, or restate what the diff already shows. Write one only when the commit meets one of these cases, and write no more than the case needs:
-  - **It bundles orthogonal work.** The commit carries several unrelated tasks, or spans different domains, and one subject cannot name them all. Give one short line per strand.
-  - **A public record holds the context.** Link it: the upstream manager's issue tracker, the distro packaging PR, the spec page that forced the behavior, the discussion thread. Forges render commit messages as HTML, so the link is the cheapest route from `git log` to the full story. Format every cross-repository reference as `[owner/repo#N](https://github.com/owner/repo/issues/N)`.
-  - **It resolves or references a tracked item.** Use `Closes #N` when merging the commit into the default branch must close the issue, and `Related to #N` when it must not.
-
-Never narrate the work in sequence, enumerate the files touched, or summarize the diff in prose: `git log --stat` lists the files and the diff shows the rest. Rationale belongs somewhere durable instead: a code comment, a docstring, `docs/`, or the PR body.
-
+- **No decorative prefixes.** A `[bracketed]` prefix is reserved for a mechanism that parses it back, and only `[changelog] …` qualifies, matched literally by repomatic's auto-tagging job. Do not confuse it with the `[scope]` tags that open every `changelog.md` bullet: those name a manager or platform, live in the changelog file rather than in git, and are indexed by `manager_changelog()`. The two vocabularies are unrelated.
 ### Comments and docstrings
 
-- All comments in Python files must end with a period.
-- Docstrings are written in MyST markdown: single-backtick code spans, `{role}` cross-references in the unprefixed form (`{class}`, `{meth}`, `{func}`, `{attr}`, `{data}`, `{mod}`, `{exc}`), markdown links, and backtick-fenced directives. click-extra's `myst_docstrings` Sphinx extension converts them back to reST at build time, so autodoc is unaffected. Field lists (`:param x:`, `:return:`) keep their reST syntax, which passes through the conversion. A brace-bearing literal keeps reST double backticks (like ` `{count}` `) so the converter cannot misread it as a role. The `click-extra convert-to-myst` command migrates legacy reST docstrings idempotently.
 - **Every URL in a docstring is a link.** MyST's `linkify` extension is off, so a bare `https://…` renders as dead plain text on the manager pages and in the API docs alike. Write a titled markdown link (`` [`emerge(1)` man page](url) ``), keeping `]` and `(` on the same source line — a line break between them silently kills the link. A list of one reference is not a list: inline it as `Documentation: [title](url).` and keep the bullets for two or more. Bare URLs inside a fenced block are captured CLI output and stay untouched. The bundled TOML definitions need none of this: `_toml_definition_intro()` autolinks their description comments.
 - Documentation in `./docs/` uses MyST markdown format where possible. Fallback to reStructuredText if necessary.
-- Keep lines within 88 characters in Python files, including docstrings and comments (ruff default). Markdown files have no line-length limit — do not hard-wrap prose in markdown. Each sentence or logical clause should flow as a single long line; let the renderer handle wrapping.
-- Titles in markdown use sentence case.
-- **Heading anchors:** use the natural auto-generated anchor for cross-references; add explicit MyST anchors (`(my-anchor)=`) only when the natural one is unavailable (duplicate headings, non-heading targets).
-- **Dataclass field docs:** In dataclasses, document fields with attribute docstrings (a string literal immediately after the field declaration), not `:param:` entries in the class docstring. Attribute docstrings are co-located with the field they describe, recognized by Sphinx, and stay in sync when fields are added or reordered. The class docstring should contain only a summary of the class purpose.
 
 ### Named constants
 
-Do not inline a named constant during a refactor. It exists for readability and grep-ability, and in this codebase the grep is usually the point: `SHARED_LOCK_FAMILIES`, `CANONICAL_ATTRS`, `MANAGER_SECTIONS` and `MANAGER_LABELS` are each the single place a reader can enumerate a rule that is otherwise scattered across managers. When moving code between modules, carry the constant with it rather than replacing it with a literal at the call site.
+In this codebase the grep is usually the point: `SHARED_LOCK_FAMILIES`, `CANONICAL_ATTRS`, `MANAGER_SECTIONS` and `MANAGER_LABELS` are each the single place a reader can enumerate a rule that is otherwise scattered across managers.
 
 ### Workflow file naming
 
@@ -351,13 +297,7 @@ Jobs that test *released* artifacts from external distributors (PyPI, Homebrew, 
 
 ### Command-line options
 
-Always prefer long-form options over short-form for readability when invoking commands in workflow files and scripts:
-
-- Use `--output` instead of `-o`.
-- Use `--verbose` instead of `-v`.
-- Use `--recursive` instead of `-r`.
-
-The same rule applies to every argv `mpm` constructs at runtime: the manager commands built by the manager classes and definitions, and the `sudo` invocations in `meta_package_manager/sudo.py` (`sudo --non-interactive --validate`, not `sudo -n -v`). Long forms make the `--verbosity INFO` command disclosure self-documenting.
+The long-form rule applies to every argv `mpm` constructs at runtime: the manager commands built by the manager classes and definitions, and the `sudo` invocations in `meta_package_manager/sudo.py` (`sudo --non-interactive --validate`, not `sudo -n -v`). Long forms make the `--verbosity INFO` command disclosure self-documenting.
 
 ## CLI output and logging
 
@@ -401,20 +341,13 @@ Action commands (`install`, `remove`, `upgrade <packages>`, `restore`) collect p
 
 ## Testing guidelines
 
-- Use `@pytest.mark.parametrize` when testing the same logic for multiple inputs. Prefer parametrize over copy-pasted test functions that differ only in their data — it deduplicates test logic, improves readability, and makes it trivial to add new cases.
-- Keep test logic simple with straightforward asserts.
-- Tests should be sorted logically and alphabetically where applicable.
-- Test coverage is measured with `pytest-cov` and gated by the `[tool.coverage] report.fail_under` ratchet, which the parallel non-destructive run of `tests.yaml` is the one slice expected to clear. Declare the floor there and nowhere else: a `--cov-fail-under` flag outranks the config, so the partial slices opt out with an explicit `--cov-fail-under=0` rather than the full run passing a value. Coverage is off by default locally, since `--cov` is passed by the workflow rather than sitting in `addopts`: a focused local `pytest` never trips the floor, and only a deliberate local `--cov` does.
-- Do not use classes for grouping tests. Write test functions as top-level module functions. Only use test classes when they provide shared fixtures, setup/teardown methods, or class-level state.
+- Test coverage is gated by the `[tool.coverage] report.fail_under` ratchet, which the parallel non-destructive run of `tests.yaml` is the one slice expected to clear; the partial slices opt out with an explicit `--cov-fail-under=0`. Coverage is off by default locally, since `--cov` is passed by the workflow rather than sitting in `addopts`: a focused local `pytest` never trips the floor, and only a deliberate local `--cov` does.
 - **A test class earns its place by sharing tests, never by grouping them.** `tests/test_cli.py` keeps exactly two template classes, `CLITableTests` and `CLIQueryTests`: each hands its subclasses a battery of inherited behavior tests (`--columns` projection, serialization across every format, query filtering) for the price of a `subcmd` fixture and a little per-command data (`columns_registry`, `columns_test_pair`). That much is the deliberate exception to the no-classes rule, kept by decision: dissolving it into a command×behavior parametrize was assessed and rejected, since it would pull each command's specifics out of the command's own file into a central cross-product harder to read and extend. Everything else is a function. A module inheriting no template writes plain module-level tests, the file being the grouping; shared assertion logic is a module-level helper (`check_packages_payload`, `check_filtered_ids`), and per-command parametrize data stays in the subcommand's own file.
 - **The manager-selection strategy is an argument, not a base class.** `check_manager_selection()` takes the per-subcommand `signals` callable answering *"did this manager show up?"*, which each `test_cli_*.py` defines as a module-level `evaluate_signals()` and binds once with `check_selection = partial(check_manager_selection, signals=evaluate_signals)`, keeping call sites free of plumbing. It used to arrive through an `InspectCLIOutput`/`CLISubCommandTests` pair that shared no test at all: two `@staticmethod` helpers and an abstract strategy, delivered by inheritance and resolved through the MRO. The tell was `managers_table_signals()`, already a module-level function so two hierarchies could share it, wrapped by subclasses in a `@staticmethod` that forwarded to it. Selection itself is still exercised once, on a single subcommand, since the logic is shared, and a subcommand with no specific behavior needs no `test_cli_*.py` file at all.
-- **`@pytest.mark.once` for run-once tests.** The `once` marker (declared in `[tool.pytest].markers`) tags tests that only need to run once, not across the full CI matrix. The matrix `tests` job filters them out with `pytest -m "not once"`, and the `once-tests` job of `tests.yaml` runs them on a single runner. Two modules carry it today, both via a module-level `pytestmark`: `tests/test_metadata.py` (which reads `pyproject.toml` and the generated matrix) and `tests/test_gnome_extension.py` (which asserts on checked-in extension sources). The admission test is coverage, not just OS-independence: a `once` module must import no package code beyond `__version__`, so moving it off the matrix cannot lower the slice that holds the coverage floor. A test that both covers `meta_package_manager` and reads only static files stays on the matrix.
+- **`@pytest.mark.once` for run-once tests.** Two modules carry it today, both via a module-level `pytestmark`: `tests/test_metadata.py` (which reads `pyproject.toml` and the generated matrix) and `tests/test_gnome_extension.py` (which asserts on checked-in extension sources). The admission test is coverage, not just OS-independence: a `once` module must import no package code beyond `__version__`, so moving it off the matrix cannot lower the slice that holds the coverage floor. A test that both covers `meta_package_manager` and reads only static files stays on the matrix.
 - **Every destructive test declares its scheduling group.** The destructive CI step runs `--dist=loadgroup`, so a destructive test must resolve to an `xdist_group` in one of three ways: parametrize it with `manager_id` (the collection hook in `tests/conftest.py` then derives the group through `destructive_group()`, collapsing `SHARED_LOCK_FAMILIES` members onto one worker), mark it with an explicit `xdist_group` when its manager is hardcoded, or mark it `destructive_all_managers` when it drives every available manager at once, which routes it to the sequential cross-manager step. Collection fails on a destructive test with none of the three. `tests/destructive_plan.py` holds the whole plan those tests read (the per-manager package, the per-host blockers, the groups), keeping `conftest.py` to what the rest of the suite shares; its `DESTRUCTIVE_TEST_FAMILIES` records the suite-level conflicts the lock catalog cannot know about: managers whose round-trips install the same package into the same target.
 - **The inherited battery runs on the fake pool, and both halves of that are enforced.** A CLI test gets the host's real managers by *omitting* `fake_pool`, so the expensive, host-dependent path is the one an author lands on by accident, multiplied by however many subclasses inherit it. That is how a fifty-format rendering test became three hundred real-pool invocations, two hundred and fifty of them byte-identical, with nothing in the run reporting it: duplicate work looks like coverage. So a template test whose subject is the *rendering* (table formats, serializers, column projection) takes `fake_pool`, which also makes it deterministic on a runner carrying nothing, while one whose subject is the *inventory* keeps the real pool and is named in `REAL_POOL_TEMPLATE_TESTS` (exactly one per format family, `test_json_output`, not one per format). `test_template_tests_read_their_subcommand` and `test_template_tests_default_to_the_fake_pool` hold both rules against every inherited test: a method that names its own subcommand belongs at module level, where it is collected once.
-- **Write conformance tests when fixing a class of bugs.** For a bug that is a *category* rather than a one-off, add a generic test locking in the invariant: enumerate every member of the set (pool managers, generators, bundled TOML files, docstring corpus entries) and assert the property uniformly, failing with the violator's name. This is why `test_content_order`, `test_manager_changelog_entries` and `test_documented_output_still_parses` exist. Applies when the bug stems from a shared convention checkable from the codebase alone, with no fixtures or mocks.
-- **CI-only pytest flags belong in workflow steps, not `[tool.pytest].addopts`.** Flags that emit CI-only artifacts (`--cov-report=xml`, `--junitxml=junit.xml`) pollute local runs when placed in `addopts`: keep `addopts` for flags that apply everywhere and pass CI-specific ones in the workflow `run:` step. Coverage settings (`run.branch`, `run.source`, `report.precision`) belong in `[tool.coverage]`, not in `--cov-*` flags.
-- **Pass `encoding="UTF-8"` to `subprocess.run(..., text=True)` when output may contain non-ASCII bytes** (emoji in a workflow `name:`, accented author names, translated strings). `text=True` alone decodes with the platform default (`cp1252` on Windows), so such output raises `UnicodeDecodeError` only in Windows CI while passing on macOS and Linux. Test helpers shelling out to package managers or `git` are the usual offenders.
-- **Pass an explicit encoding to every text-mode `open()`, `read_text()` and `write_text()` in tests, same as production.** The same Windows `cp1252` default applies to file I/O, and the failure stays hidden until the content grows its first non-ASCII character, which manager output and docstring samples do constantly. When a change touches file I/O, run the suite once with `PYTHONWARNDEFAULTENCODING=1` ([PEP 597](https://peps.python.org/pep-0597/)) to surface every bare call at runtime, on any platform: a linter misses the unannotated `Path` locals.
+- **Write conformance tests when fixing a class of bugs.** The local instances are `test_content_order`, `test_manager_changelog_entries` and `test_documented_output_still_parses`, which enumerate pool managers, generators, bundled TOML files and docstring corpus entries.
 - **TTY-gated output needs a pseudo-terminal to test.** The `✓`/`✗` trail, finishers and spinners only render on an interactive terminal, so click-extra's `CliRunner` (non-TTY) never emits them — drive the CLI under `pty.openpty()` to exercise them. Most CLI tests instead assert on the stdout table, exit code, or an explicit `--verbosity`, none of which are TTY-gated.
 - **`--dry-run` simulates read CLIs too.** It dry-runs *every* manager invocation, including the installed-package lookup that `remove`/`upgrade` use to find their source managers — so a dry-run of those reports "not recognized" and cannot exercise their multi-manager path. Reach for purls (which carry the manager and bypass the lookup) or unit fixtures instead.
 - **`--plan` runs reads but captures writes.** The complement of `--dry-run`: plan mode executes the read-only queries (so `install`/`remove`/`upgrade --all` resolve their real source managers and targets), then records only the state-changing commands (`_MUTATING_OPERATIONS`) into `execution.PLAN_RECORDER` and prints them to stdout at context close, without running them. `force_exec` reads (version probes, `yarn global dir`) patch `plan` off and run for real. Test it against real reads or purls, and assert on stdout: the plan is plain `echo`, not the TTY-gated trail.
@@ -432,49 +365,36 @@ Action commands (`install`, `remove`, `upgrade <packages>`, `restore`) collect p
 
 ### Keep logic in Python, not workflow YAML
 
-Push anything beyond trivial wiring out of workflow YAML and into the package or its tests. Rather than duplicating an `if:` condition across steps, compute it once and reference the result. Rather than asserting a project invariant with `grep` in a `run:` block, write the test: `tests/test_docs.py` and `tests/test_metadata.py` hold contracts that a shell one-liner would have expressed worse and silently stopped checking. A tested generator that fails loudly beats a static artifact that can drift.
+Rather than asserting a project invariant with `grep` in a `run:` block, write the test: `tests/test_docs.py` and `tests/test_metadata.py` hold contracts that a shell one-liner would have expressed worse and silently stopped checking.
 
 The corollary bounds how much a workflow may know: `tests-install.yaml` is long because each distribution channel genuinely needs its own install incantation, not because logic accumulated there.
 
 ### Defensive workflow design
 
-GitHub Actions workflows face race conditions, eventual consistency and partial failures, and this project adds a second layer of flakiness on top: every job drives real package managers against live third-party feeds. Prefer belt-and-suspenders, several independent correctness mechanisms over one guarantee. When a step depends on external state (a CDN, an upstream release, a snap store), add a retry or a graceful default and say in a comment what transient failure it absorbs. The `choco upgrade all` and `snap install code` steps of `tests.yaml` are the models.
+This project adds a second layer of flakiness on top of the usual races and partial failures: every job drives real package managers against live third-party feeds. The `choco upgrade all` and `snap install code` steps of `tests.yaml` are the models.
 
 Distinguish absorbing a flake from hiding a failure: a forced `exit 0` belongs on setup that is best-effort by nature, never on the assertion the job exists to make.
 
 ### Single source of truth for defaults
 
-Every configurable default lives in exactly one place, and all other code derives it rather than repeating the literal. When adding one, grep for the value and point every other occurrence at the source. The cases already carrying this weight are worth knowing, since each has a test holding it: the coverage floor in `[tool.coverage] report.fail_under`, the cooldown window in `[tool.repomatic] minimum-release-age`, the manager pool in `meta_package_manager/pool.py`, and the page layout in `MANAGER_SECTIONS`.
+The cases already carrying this weight are worth knowing, since each has a test holding it: the coverage floor in `[tool.coverage] report.fail_under`, the cooldown window in `[tool.repomatic] minimum-release-age`, the manager pool in `meta_package_manager/pool.py`, and the page layout in `MANAGER_SECTIONS`.
 
 ### Ordering conventions
 
-Keep definitions sorted for readability and to minimize merge conflicts:
-
-- **Workflow jobs**: Ordered by execution dependency (upstream jobs first), then alphabetically within the same dependency level.
-- **Python module-level constants and variables**: Alphabetically, unless there is a logical grouping or dependency order. Hard-coded domain constants should be placed at the top of the file, immediately after imports. These constants encode domain assertions and business rules — surfacing them early gives readers an immediate sense of the assumptions the module operates under.
 - **Manager class members**: The canonical declaration order (identity, escalation policy, requirement, CLI plumbing, version probe, toggles, then methods in base-class order) is the `CANONICAL_ATTRS` tuple in `tests/test_managers.py`, enforced by `test_content_order`. Manager-specific constants (the `_*_REGEXP` parsers) conventionally sit between the attributes and the operations.
-- **YAML configuration keys**: Alphabetically within each mapping level.
-- **Documentation lists and tables**: Alphabetically, unless a logical order (e.g., chronological in changelog) takes precedence.
 
 ### Issue and PR labelling
 
-The content and file rules generated into `pyproject.toml` from `meta_package_manager/labels.py` only *pre-label* a freshly filed issue or PR: they save the maintainer a first pass, never replace the manual review and classification, and nothing downstream treats them as authoritative. Tune for **precision, not recall** — encode a rule only when the signal is unambiguous, and none when it is not (that manager is then labelled by hand).
+The content and file rules are generated into `pyproject.toml` from `meta_package_manager/labels.py`.
 
 - **Content rules** come only from `MANAGER_CONTENT_KEYWORDS`: ecosystem, distro, language or brand names that unambiguously name the manager *and* never appear in mpm's own output. Never the manager ID or a CLI name — mpm prints those for every installed manager (the `✓ <id>` trail, the `<id>: <count>` summary, the `managers` table), so a pasted trace would tag the issue with every manager on the user's system. A manager whose only name is its ID gets no content rule.
 - **File rules** map each manager's own module and test paths to its label; keep them narrow enough that only that manager's files match.
 
-The `generate_content_rules` docstring covers the regex mechanics (anchoring, case-folding, why a label's keywords are OR-joined into one pattern). This is the local instance of the labeller principle in repomatic's `claude.md`.
+The `generate_content_rules` docstring covers the regex mechanics (anchoring, case-folding, why a label's keywords are OR-joined into one pattern).
 
 ### Common maintenance pitfalls
 
-- **Documentation drift** is the most frequent issue. CLI output, version references, and workflow job descriptions in `readme.md` go stale after every release or refactor. Always verify docs against actual output after changes.
 - **Module refactors strand fully-qualified docstring cross-refs.** Moving an attribute between classes or modules (like the `7.3.0` split that moved `cli_path` and `version` onto `execution.CLIExecutor`) silently breaks every `` {attr}`x <old.path>` `` pointing at the old home, and the docs build only warns, never fails. After a move, grep the whole tree for the old dotted path. The same sweep rule applies when docstrings gain a new rendering surface (like the manager pages): one malformed fence, glued bullet list, or stale ref found means the whole corpus needs a sweep for that defect class, not a spot fix.
-- **CI debugging starts from the URL.** When a workflow fails, fetch the run logs first (`gh run view --log-failed`). Do not guess at the cause; when the user points to a specific failure, diagnose that exact one.
-- **Trace to root cause before coding a fix.** Audit a bug's scope before writing the patch. If the same pattern appears in multiple places, fix it at the shared layer; if only one call site is affected, check whether the data is on the wrong code path before handling it where it lands.
 - **Never reformat a hand-maintained table with an ad-hoc `mdformat`.** Several tables are parsed back by tests and generators against the exact row shape checked in, so a reformat that re-pads every cell reports as a content failure rather than a formatting complaint: `test_unsupported_page_matches_benchmark` used to match `docs/unsupported.md` rows with a padding-sensitive regex and answered "no manager rows found" when the table was realigned. That page is sections now, but `docs/cooldown.md` still feeds the per-manager pages through `_cooldown_table()`. The repository pins no `mdformat` configuration of its own (the `format-markdown` job upstream owns it), so a local run resolves different defaults and different plugins than CI. Edit a table row by copying the padding of the row above it, and leave the rest of the file untouched: the diff stays three lines instead of a hundred and fifty, and nothing downstream breaks.
-- **Angle-bracket placeholders in bash code blocks.** `mdformat-shfmt` runs `shfmt` on fenced ```` ```bash ```` blocks, and `shfmt` parses `<foo>`/`>foo` as redirection and reorders the command. Use curly braces (`{foo}`) for placeholders in bash examples.
-- **Type-checking divergence.** Code that passes `mypy` locally may fail in CI where `--python-version 3.10` is used. Always consider the minimum supported Python version.
 - **`[[tool.repomatic.labels.extra]]` must stay the last array-of-tables of `[tool.repomatic]`.** `docs_update.update_labels()` drops the labels subtree and re-appends it at the end of the section, and `test_pyproject_updates_are_pyproject_fmt_fixpoint` fails on any array-of-tables sitting after it. A config wanting an array-of-tables shape goes in as an inline array value instead: `[tool.repomatic.metrics] charts` is one.
-- **Simplify before adding.** When asked to improve something, first ask whether existing code or tools already cover the case. Remove dead code and unused abstractions before introducing new ones.
-- **Route through existing infrastructure, don't bypass it.** Before writing a new helper or merge function, check whether the codebase already handles the operation. A bug from data on the wrong code path is better fixed by routing it correctly than by duplicating logic at the wrong site.
 - **click-extra extension validators only see dict sub-trees.** The opaque `[mpm]` extension sections (`MpmConfig`'s mapping-typed fields: `managers`, `cooldown`) are forwarded to their `ConfigValidator` only when the value is a table; a string-shaped legacy value never reaches the validator, while the runtime path reading `CONF_FULL` sees every shape. Anything handling a deprecated or non-table spelling, a migration warning in particular, therefore belongs at runtime (the `mpm` group body is where the cooldown one lives), not in the validator.

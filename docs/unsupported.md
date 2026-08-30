@@ -315,6 +315,12 @@ A Go rewrite of the Tmux Plugin Manager with a terminal interface, and it lands 
 
 Translates one CLI vocabulary onto whichever single OS-level manager is detected, never more than one per invocation, by the maintainer's own account: "*upt is just aliases, nothing more*" ([sigoden/upt#60](https://github.com/sigoden/upt/issues/60#issuecomment-2560419544)).
 
+## [`voom`](https://github.com/airblade/voom) ❌ 🛟
+
+Vim plugin manager in a hundred lines of POSIX shell, and the benchmark pointed at the wrong tool until now: its homepage named [VOoM](https://www.vim.org/scripts/script.php?script_id=2657), a two-pane outliner plugin that installs nothing, while what `topgrade` actually drives is a *binary*, its `run_voom` requiring `voom` on the path and running `voom update`.
+
+The tool it does name is declined on the same two grounds as the rest of this family. It reports no version by any route: the script's whole option surface is `help | --help | -h`, it carries no version constant, and upstream publishes zero tags and zero releases, which is [`zgenom`](#zgenom)'s verdict. And no verb names a plugin to install or remove: its own synopsis is "*Run `voom` to install/uninstall; `voom update` to update already-installed plugins*", so the set is the `~/.vim/plugins` manifest and a bare run reconciles the directory to that file in both directions. `update [-q] <name>` does name one plugin, which is exactly as far as [`tpack`](#tpack) gets, and it leaves an upgrade as the whole surface a wrapper could offer.
+
 ## [`vundle`](https://github.com/VundleVim/Vundle.vim) ❌ 🛟
 
 Vim plugin manager reporting no version through anything a probe can read, which is what [`PackageManager.fresh`](managers.md) requires: `g:vundle_version` does not exist, checked by asking Vim for it, and the `0.10.2` in `autoload/vundle.vim` is a comment rather than a variable. Upstream tags releases but publishes none, and the documented install clones `master`, so the copy on disk names no version either. The companion-binary route does not help: the binary here is `vim`, whose version is Vim's own, which is the argument that settled [`zigup`](#zigup).

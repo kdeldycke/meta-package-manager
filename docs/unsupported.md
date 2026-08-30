@@ -133,6 +133,10 @@ JetBrains' IDE installer ships no command-line interface at all: it is a tray ap
 
 FreeBSD jail runtime, a self-described prototype with no commit since 2018-10-25. Not a package manager to begin with.
 
+## [`kakoune`](https://kakoune.org) ❌ 🛟
+
+Editor shipping no plugin manager of any kind, so there is nothing to wrap. Its whole command-line surface is sessions, filters and user-interface selection: `-e` and `-E` execute a command on client or server startup, `-l` lists sessions, and `-d` runs headless, with no install, list or update flag anywhere among them. Plugins are not packages either, being `*.kak` files the user drops into a directory that the readme describes loading wholesale: "*If the `$XDG_CONFIG_HOME/kak/autoload` directory exists, load every `*.kak` files in it, and load recursively any subdirectory*". Nothing names a source, a version or a registry, so what [`topgrade`](managers/topgrade.md) reaches through this editor is a *third-party* plugin manager running inside a headless session, not Kakoune. The [`helix`](#helix) reading, and the same one that leaves the shell frameworks unwrapped. Checked against Kakoune `2026.05.21`.
+
 ## [`macos`](https://www.apple.com/macos/) ❌ 🛟
 
 Apple's `softwareupdate(8)` updates the operating system rather than managing packages, putting it outside `mpm`'s domain along with every other system updater a competitor happens to drive. Nothing about it is inventoriable either: `--list` reports the updates *pending* for the machine, `--history` is a log of those applied through the tool and prints its header alone on a current host, and no verb lists installed components, searches a catalog or removes anything. A macOS update cannot be uninstalled.

@@ -11,6 +11,7 @@
 - [platformio-core] Add PlatformIO Core package manager, listing and upgrading the platforms, tools and libraries it installs machine-wide.
 - [emacs] Add GNU Emacs package manager, driving `package.el` headlessly for inventory, install, remove and archive refresh.
 - [julia] Add Julia `Pkg` package manager, with inventory, outdated, install, remove, upgrade and registry refresh.
+- [pi] Add Pi extensions manager, with inventory, install, remove and upgrade of the packages that extend the Pi coding agent.
 - [pipxu] Add pipxu package manager, with inventory, install, remove and upgrade support.
 - [pkgm] Add pkgm package manager, with inventory, outdated, install, remove and full upgrade support.
 - [zeroinstall] Add Zero Install package manager, with search, remove and cache cleanup support.

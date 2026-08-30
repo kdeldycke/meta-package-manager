@@ -177,6 +177,9 @@ PACKAGE_IDS = {
     "pacstall": "hello",
     "pamac": "nyancat",
     "paru": "nyancat",
+    # A small library of pi's own npm scope. The id carries its scheme, which
+    # is the form every verb takes.
+    "pi": "npm:@earendil-works/pi-telemetry",
     "pikaur": "nyancat",
     "pip": "pytz",
     "pipx": "pycowsay",

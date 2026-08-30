@@ -1,0 +1,81 @@
+# The extension manager of the Pi coding agent (https://pi.dev), which installs
+# packages that add tools and resources to the agent. See docs/overrides.md
+# ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is a *source spec* carrying its scheme, `npm:@scope/name` or
+# `git:github.com/user/repo` or a URL or a local path, and that spec is what
+# every verb takes: the listing prints it, and install, remove and the
+# single-package update all accept it, so ids round-trip without translation.
+#
+# Parsing notes, verified against pi 0.84.2 on macOS:
+#   - **Bare `pi update` updates pi itself**, not the packages: `--self` is its
+#     documented default when no target is given. `upgrade_all` therefore names
+#     `--extensions` explicitly, and `upgrade_one` uses `--extension <source>`,
+#     which was checked to name the package it is given rather than sweeping
+#     everything.
+#   - The listing is a two-line record, the source spec then the directory it
+#     resolved to, under a `User packages:` heading. Only the first carries the
+#     id, so the pattern keys on the two-space indent that the four-space path
+#     line and the unindented heading both fail.
+#   - The inventory carries **no version**, only a spec and a path, which is a
+#     supported shape rather than a gap: `installed_version` is optional, the
+#     same reading `rustup` and `pyenv` settled.
+#   - An empty inventory prints `No packages installed.` and exits `0`, so it is
+#     honest rather than a failure.
+#
+# ```{caution}
+# `pi list` reports user *and* project packages together and takes no scope
+# flag, where install and remove both take `-l` to choose. Run from a directory
+# carrying a `.pi/settings.json`, the inventory therefore includes that
+# project's packages alongside the machine's. Anywhere else it is user-scoped,
+# which is what `mpm` wants.
+# ```
+
+[mpm.managers.pi]
+name = "Pi extensions"
+homepage_url = "https://pi.dev"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["pi"]
+# No version floor is declared. Every verb driven here was present in the
+# release the parsers were captured from, and no upstream note dates their
+# introduction, so a floor could only be guessed. Driven against `0.84.2`.
+version_cli_options = ["--version"]
+version_regexes = ['(?P<version>\d+\.\d+\.\d+)']
+
+# The two-space indent is the whole discriminator: the heading carries none and
+# the path line under each entry carries four.
+[mpm.managers.pi.operations.installed]
+args = ["list"]
+regex = '^ {2}(?P<package_id>\S+)$'
+
+[mpm.managers.pi.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.managers.pi.operations.remove]
+args = ["remove", "{package_id}"]
+
+# `--extension` rather than a bare positional, which `update` would read as a
+# target to self-update.
+[mpm.managers.pi.operations.upgrade_one]
+args = ["update", "--extension", "{package_id}"]
+
+[mpm.managers.pi.operations.upgrade_all]
+args = ["update", "--extensions"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from pi 0.84.2. Consumed by tests/test_manager_definition.py; ignored by mpm's
+# loader.
+[samples.version]
+output = "0.84.2"
+expected = "0.84.2"
+
+# One package, which is the whole inventory the drive produced. Its resolved
+# path is kept rather than trimmed: it is the second line the pattern has to
+# reject, so a sample without it would prove nothing.
+[[samples.installed]]
+output = """
+User packages:
+  npm:@earendil-works/pi-telemetry
+    /tmp/mpm-drive/.pi/agent/npm/node_modules/@earendil-works/pi-telemetry"""
+packages = [{ id = "npm:@earendil-works/pi-telemetry" }]

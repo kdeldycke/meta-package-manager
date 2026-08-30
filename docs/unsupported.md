@@ -247,6 +247,12 @@ A convenience layer over [`pip`](managers/pip.md), which `mpm` wraps directly: i
 
 Wraps `pip` and nothing else: it discovers the `pip`, `pip3` and `pip2` executables on `PATH` and shells out to them, resolving every candidate version against PyPI, so its whole inventory is the packages `mpm` already reaches through [`pip`](managers/pip.md). Its readme calls it "*The missing command for `pip`*", and what it adds on top is project-file rewriting of `requirements.txt` and `Pipfile` plus a semver-aware upgrade gate, both outside the system scope every `mpm` manager holds to.
 
+## [`pkg-termux`](https://github.com/termux/termux-tools) ❌
+
+Termux's `pkg` is a dispatcher over two managers `mpm` already wraps, which is [`upt`](#upt)'s verdict reached by a different route. Its script branches on `TERMUX_APP_PACKAGE_MANAGER` and forwards every command: under apt, `install` becomes `apt install`, `list-installed` becomes `apt list --installed`, `uninstall` becomes `apt remove`, `files` becomes `dpkg -L` and `search` becomes `apt search`; under pacman the same commands become `pacman -Sy --needed`, `pacman -Q`, `pacman -Rcns`, `pacman -Ql` and `pacman -Sys`. Nothing it accepts reaches a package [`apt`](managers/apt.md) or [`pacman`](managers/pacman.md) cannot.
+
+What it adds is a mirror selection and a cache refresh in front of some of those calls, `select_mirror` and `update_apt_cache`, which is convenience rather than a registry. That is the line [`nala`](managers/nala.md) sits on the other side of: nala was wrapped for owning its own vocabulary, downloader and rollback history, where `pkg` forwards its argv unchanged.
+
 ## [`pkgfile`](https://github.com/falconindy/pkgfile) ❌ 🛟
 
 Answers which package owns a given file by searching the `.files` metadata `repo-add` publishes on [`pacman`](managers/pacman.md) mirrors, scoped to the repositories enabled in `/etc/pacman.conf`. Its [man page](https://man.archlinux.org/man/extra/pkgfile/pkgfile.1.en) documents exactly three operations, `--search`, `--list` and `--update`, none of which installs, removes or reports locally-installed packages. `--update` only refreshes the cached index, and that index is pacman's own repository metadata rather than a registry of its own. The bundled `command-not-found` hook can offer to install a match, but delegates to `sudo pacman -S`.

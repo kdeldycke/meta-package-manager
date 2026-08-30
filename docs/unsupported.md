@@ -55,6 +55,12 @@ Bash package manager, abandoned: 28 commits in all and nothing since 2021-07-25.
 
 The EFF's ACME client, obtaining and renewing TLS certificates. `topgrade` runs `certbot renew` beside its package steps, which is what lands it in this table, but a certificate is not a package: it is issued against a domain the host proves it controls, expires on a schedule of its own, and comes from no catalog anyone can enumerate. Nothing here can be listed, searched, installed by name or removed.
 
+## [`cinnamon-spices`](https://cinnamon-spices.linuxmint.com) ❌ 🛟
+
+What [`topgrade`](managers/topgrade.md) drives here is `cinnamon-spice-updater --update-all`, and that script's own `argparse` block is the whole surface: `--update-all`, `--update <spice-type>`, `--list-simple <spice-type>` and `--list-json <spice-type>`, where a spice-type is one of `applet`, `desklet`, `extension` or `theme`.
+
+Nothing there is a package operation. There is no install and no removal, both of which happen in Cinnamon's own settings UI. The two listings are not an inventory either: `--list-simple` is documented as a "*Simple list of UUIDs (or theme names) with available updates*" and both call `get_updates_of_type`, so they report what is *stale* rather than what is present, which leaves `mpm` no way to enumerate the machine. And the one mutating option takes a *type*, never a spice, so no individual applet can be updated by name. No `--version` is declared either, which disqualifies it a second time over. The [`zr`](#zr) reading.
+
 ## Container runtimes ❌ 🛟
 
 [`colima`](https://colima.run), [`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`podman`](https://podman.io) and [`toolbx`](https://containertoolbx.org).

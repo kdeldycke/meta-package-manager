@@ -152,6 +152,7 @@ gext = ["topgrade"]
 go = ["topgrade"]
 gofish = []
 guix = ["topgrade", "upt"]
+gup = ["topgrade"]
 haxelib = ["topgrade"]
 helix = ["topgrade"]
 helix-db = ["topgrade"]
@@ -518,6 +519,11 @@ topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420
 
 [coarse_support.fundle]
 topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
+
+# One `Go` step runs `go-global-update` and `gup` back to back, so neither
+# can be asked for on its own.
+[coarse_support.gup]
+topgrade = "https://github.com/topgrade-rs/topgrade/blob/v17.9.0/src/step.rs#L380-L383"
 
 [coarse_support.lazy]
 topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"

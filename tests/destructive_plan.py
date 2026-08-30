@@ -134,6 +134,9 @@ PACKAGE_IDS = {
     # An official example command: tiny, dependency-free and quick to compile.
     "go": "golang.org/x/example/hello",
     "guix": "hello",
+    # The same binary the `go` entry above installs, under the name gup keys
+    # on. Declares no install operation: the round-trip auto-skips.
+    "gup": "hello",
     "haxelib": "hxjsonast",  # Tiny zero-dependency JSON parser.
     # A channel, which is what juliaup calls a package. An old released series
     # rather than `release`: every Julia is a large download, and removing the

@@ -1,0 +1,180 @@
+# gup updates and removes the binaries `go install` leaves under $GOBIN
+# (https://github.com/nao1215/gup). See docs/overrides.md ("Define a new
+# manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# A package is the *binary name*. It is what the listing reports first, what
+# `remove` and `update` accept, and what gup itself prints when it tells the
+# user how to update one. The module path sits beside it in every record, and
+# no verb takes it.
+#
+# ```{note}
+# gup covers the same binaries [`go`](go.md) lists, and both are wrapped on
+# purpose: the Go toolchain has no removal verb in any scope and reports no
+# staleness, so `remove`, `outdated` and `upgrade` are reachable through gup
+# alone. A host carrying both therefore reports every Go command twice, under
+# two ids, `go` keying on the module path and gup on the binary name.
+# ```
+#
+# Parsing notes, verified against gup 1.8.1 on macOS:
+#   - Both queries read `--json`, a flat top-level array whose field names
+#     upstream commits to in `cmd/jsonout.go`: "The field names are part of the
+#     public contract documented in the README."
+#   - `check` reports *every* binary, with a `status` of `up-to-date` or
+#     `update-available`, and `--quiet` trims the text output alone rather than
+#     the JSON. Nothing filters it here: mpm's own `refiltered_outdated` drops
+#     the entries whose two versions match, which is what that filter is for.
+#   - `remove` refuses wherever stdin is not a terminal, answering `gup remove
+#     requires confirmation, but stdin is not a TTY`, so `--force` is passed.
+#   - `update` takes binary names as positionals, which its own usage line
+#     omits: `gup update [flags]` is what the help documents, and
+#     `gup update zvm` runs.
+#   - Versions carry the `v` the Go module proxy reports, `v1.8.1` rather than
+#     `1.8.1`.
+#   - No `install`, gup installing nothing it was not already given: `go
+#     install` is what creates a binary, and `import` only replays a manifest.
+#     No `search` either, gup owning no catalog of its own.
+#
+# ```{caution}
+# `check` and `update` shell out to the Go toolchain and fail loudly without
+# it, answering `you didn't install golang`. The listing reads the binaries
+# themselves and needs nothing, which upstream settled in `1.7.1`: "don't
+# require the go command for local-only work".
+# ```
+
+[mpm.managers.gup]
+name = "gup"
+homepage_url = "https://github.com/nao1215/gup"
+# Upstream builds for those three alone, and its own help calls gup
+# "cross-platform software that runs on Windows, Mac and Linux".
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["gup"]
+requirement = ">=1.3.1"
+# `--json` reached `list` and `check` in 1.3.1, which shipped "machine-readable
+# JSON output to list, check, and update". Both queries parse it, so an older
+# release answers neither.
+version_cli_options = ["version"]
+# The `version` subcommand, not `--version`: the flag only arrived in 1.4.0 and
+# would raise the floor for nothing.
+version_regexes = ['gup\s+version\s+v?(?P<version>\S+)']
+
+[mpm.managers.gup.operations.installed]
+args = ["list", "--json"]
+format = "json"
+fields = { package_id = "name", installed_version = "current_version" }
+
+# `latest_version` is empty in a listing and populated here, `check` being the
+# call that reaches the module proxy.
+[mpm.managers.gup.operations.outdated]
+args = ["check", "--json"]
+format = "json"
+fields = { package_id = "name", installed_version = "current_version", latest_version = "latest_version" }
+
+[mpm.managers.gup.operations.remove]
+args = ["remove", "--force", "{package_id}"]
+
+[mpm.managers.gup.operations.upgrade_one]
+args = ["update", "{package_id}"]
+
+[mpm.managers.gup.operations.upgrade_all]
+args = ["update"]
+
+# Output samples locking the version probe and the declared parsers, captured
+# from gup 1.8.1. Consumed by tests/test_manager_definition.py; ignored by mpm's
+# loader.
+[samples.version]
+output = "gup version v1.8.1 (under Apache License version 2.0)"
+expected = "1.8.1"
+
+# The pseudo-version `hello` carries is kept beside two tagged releases: it is
+# the shape a module with no tag resolves to, and the listing reports it like
+# any other. `latest_version` is empty throughout, the listing making no
+# network call.
+[[samples.installed]]
+output = """
+[
+  {
+    "name": "gup",
+    "import_path": "github.com/nao1215/gup",
+    "module_path": "github.com/nao1215/gup",
+    "channel": "latest",
+    "current_version": "v1.8.1",
+    "latest_version": "",
+    "current_go_version": "go1.27.0",
+    "installed_go_version": "unknown",
+    "status": "installed"
+  },
+  {
+    "name": "hello",
+    "import_path": "golang.org/x/example/hello",
+    "module_path": "golang.org/x/example/hello",
+    "channel": "latest",
+    "current_version": "v0.0.0-20250915201037-7f05d217867b",
+    "latest_version": "",
+    "current_go_version": "go1.27.0",
+    "installed_go_version": "unknown",
+    "status": "installed"
+  },
+  {
+    "name": "zvm",
+    "import_path": "github.com/tristanisham/zvm",
+    "module_path": "github.com/tristanisham/zvm",
+    "channel": "latest",
+    "current_version": "v0.8.29",
+    "latest_version": "",
+    "current_go_version": "go1.27.0",
+    "installed_go_version": "unknown",
+    "status": "installed"
+  }
+]"""
+packages = [
+  { id = "gup", version = "v1.8.1" },
+  { id = "hello", version = "v0.0.0-20250915201037-7f05d217867b" },
+  { id = "zvm", version = "v0.8.29" },
+]
+
+# Only `zvm` is stale, and the other two are expected here regardless: the
+# parser yields every record `check` prints, and `refiltered_outdated` is what
+# drops the pair whose versions match.
+[[samples.outdated]]
+output = """
+[
+  {
+    "name": "gup",
+    "import_path": "github.com/nao1215/gup",
+    "module_path": "github.com/nao1215/gup",
+    "channel": "latest",
+    "current_version": "v1.8.1",
+    "latest_version": "v1.8.1",
+    "current_go_version": "go1.27.0",
+    "installed_go_version": "go1.27.0",
+    "status": "up-to-date"
+  },
+  {
+    "name": "hello",
+    "import_path": "golang.org/x/example/hello",
+    "module_path": "golang.org/x/example/hello",
+    "channel": "latest",
+    "current_version": "v0.0.0-20250915201037-7f05d217867b",
+    "latest_version": "v0.0.0-20250915201037-7f05d217867b",
+    "current_go_version": "go1.27.0",
+    "installed_go_version": "go1.27.0",
+    "status": "up-to-date"
+  },
+  {
+    "name": "zvm",
+    "import_path": "github.com/tristanisham/zvm",
+    "module_path": "github.com/tristanisham/zvm",
+    "channel": "latest",
+    "current_version": "v0.8.29",
+    "latest_version": "v0.9.1",
+    "current_go_version": "go1.27.0",
+    "installed_go_version": "go1.27.0",
+    "status": "update-available"
+  }
+]"""
+packages = [
+  { id = "gup", version = "v1.8.1" },
+  { id = "hello", version = "v0.0.0-20250915201037-7f05d217867b" },
+  { id = "zvm", version = "v0.9.1" },
+]

@@ -7,6 +7,7 @@
 
 - [claude-code-plugins] Add Claude Code plugins manager, with inventory, install, remove, single-plugin upgrade, marketplace sync and orphan cleanup.
 - [go] Add Go package manager, listing and installing the commands `go install` puts on the machine.
+- [gup] Add gup package manager, reporting, removing and upgrading the binaries `go install` leaves under `$GOBIN`.
 - [skills] Add Agent Skills manager, listing, removing and upgrading the skills installed for the coding agents on a machine.
 - [platformio-core] Add PlatformIO Core package manager, listing and upgrading the platforms, tools and libraries it installs machine-wide.
 - [emacs] Add GNU Emacs package manager, driving `package.el` headlessly for inventory, install, remove and archive refresh.

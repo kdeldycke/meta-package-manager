@@ -73,6 +73,7 @@ keywords = [
   "gnu guix",
   "go",
   "guix",
+  "gup",
   "haxelib",
   "homebrew",
   "jpm",
@@ -1029,6 +1030,7 @@ metrics.subjects.gh-ext = "https://github.com/cli/cli"
 metrics.subjects.ghcup = "https://github.com/haskell/ghcup-hs"
 metrics.subjects.go = "https://github.com/golang/go"
 metrics.subjects.guix = "https://codeberg.org/guix/guix"
+metrics.subjects.gup = "https://github.com/nao1215/gup"
 metrics.subjects.haxelib = "https://github.com/HaxeFoundation/haxelib"
 metrics.subjects.jpm = "https://github.com/janet-lang/jpm"
 metrics.subjects.julia = "https://github.com/JuliaLang/julia"
@@ -1239,7 +1241,12 @@ labels.file-rules."📦 manager: getnf" = [ "meta_package_manager/managers/getnf
 labels.file-rules."📦 manager: gext" = [ "meta_package_manager/managers/gext.*", "tests/*gext*" ]
 labels.file-rules."📦 manager: gh-ext" = [ "meta_package_manager/managers/gh_ext.*", "tests/*gh_ext*" ]
 labels.file-rules."📦 manager: ghcup" = [ "meta_package_manager/managers/ghcup.*", "tests/*ghcup*" ]
-labels.file-rules."📦 manager: go" = [ "meta_package_manager/managers/go.*", "tests/*go*" ]
+labels.file-rules."📦 manager: go-based" = [
+  "meta_package_manager/managers/go.*",
+  "meta_package_manager/managers/gup.*",
+  "tests/*go*",
+  "tests/*gup*",
+]
 labels.file-rules."📦 manager: guix" = [ "meta_package_manager/managers/guix.*", "tests/*guix*" ]
 labels.file-rules."📦 manager: haxelib" = [ "meta_package_manager/managers/haxelib.*", "tests/*haxelib*" ]
 labels.file-rules."📦 manager: homebrew" = [
@@ -1551,9 +1558,9 @@ color = "bfdadc"
 description = "ghcup"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: go"
+name = "📦 manager: go-based"
 color = "bfdadc"
-description = "go"
+description = "go, gup"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: guix"

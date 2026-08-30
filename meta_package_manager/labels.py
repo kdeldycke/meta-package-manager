@@ -142,6 +142,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
         "pacstall",
     }),
     "fish-based": frozenset({"fisher", "oh-my-fish"}),
+    "go-based": frozenset({"go", "gup"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
     "neovim-based": frozenset({"bob", "lazy", "mason", "vim-pack"}),
     "npm-based": frozenset({

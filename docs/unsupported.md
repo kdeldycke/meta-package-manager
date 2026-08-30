@@ -315,6 +315,12 @@ A Go rewrite of the Tmux Plugin Manager with a terminal interface, and it lands 
 
 Translates one CLI vocabulary onto whichever single OS-level manager is detected, never more than one per invocation, by the maintainer's own account: "*upt is just aliases, nothing more*" ([sigoden/upt#60](https://github.com/sigoden/upt/issues/60#issuecomment-2560419544)).
 
+## [`vim`](https://www.vim.org) ❌ 🛟
+
+Vim's own package feature loads plugins but never fetches them, which leaves nothing to wrap. Asked directly, Vim `9.2` reports `has('packages')` as `1` and `exists(':packadd')` as `2`, while `:PackUpdate` and `:PackAdd` both come back `0`: the one command it has puts a package already on disk onto the runtime path. Getting it there is the user's job, a plugin being a directory under `pack/*/start/` that they clone or copy themselves, so there is no registry, no listing, and no install, update or removal of anything.
+
+That is precisely what separates it from [`vim-pack`](managers/vim-pack.md), which `mpm` does wrap: Neovim's manager takes sources and records them, where Vim's feature only reads a directory. What [`topgrade`](managers/topgrade.md) drives through this row is third-party managers anyway, its Vim step forcing a vim-plug update or running a `update_plugins.py` the user supplies.
+
 ## [`voom`](https://github.com/airblade/voom) ❌ 🛟
 
 Vim plugin manager in a hundred lines of POSIX shell, and the benchmark pointed at the wrong tool until now: its homepage named [VOoM](https://www.vim.org/scripts/script.php?script_id=2657), a two-pane outliner plugin that installs nothing, while what `topgrade` actually drives is a *binary*, its `run_voom` requiring `voom` on the path and running `voom update`.

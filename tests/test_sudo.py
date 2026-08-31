@@ -207,8 +207,14 @@ def prime_sudo_env(
     the TTY check), and replaces `subprocess.run` so no test ever launches a real
     `sudo`. Callers set the mock's `return_value`/`side_effect` to shape the
     probe and prompt outcomes.
+
+    The escalator is pinned to `sudo` rather than detected, since a Windows
+    runner carries none on `PATH` and detection finding nothing would return
+    from `prime_sudo` before the paths these tests exercise. A test wanting a
+    different host nests its own {func}`only_escalator`, whose patch then wins.
     """
     with ExitStack() as stack:
+        stack.enter_context(only_escalator("sudo"))
         stack.enter_context(
             patch("meta_package_manager.sudo.is_any_windows", return_value=windows),
         )

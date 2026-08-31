@@ -342,9 +342,15 @@ def _is_sudo_auth_failure(error: str) -> bool:
             "interactive authentication is required",
             "no tty present",
             "askpass",
-            # opendoas, `doas.c`: `errx(1, "Authentication required")` is what
-            # `-n` answers when the matching rule carries no `nopass`.
+            # Three `doas` wordings, identical in OpenBSD's own `doas.c` and in
+            # opendoas: `-n` meeting a rule without `nopass` answers
+            # `Authentication required`, a password prompt with no terminal to
+            # read from answers `a tty is required` (where sudo says *terminal*,
+            # already matched above), and a rejected password answers
+            # `Authentication failed`.
             "authentication required",
+            "a tty is required",
+            "authentication failed",
         )
     )
 

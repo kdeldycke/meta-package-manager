@@ -662,8 +662,10 @@ def test_sudo_prompt_respects_sudo_constraints(manager_ids):
         ("SUDO: A PASSWORD IS REQUIRED", True),
         # sudo-rs, the default sudo of Ubuntu 25.10 and newer.
         ("sudo: interactive authentication is required", True),
-        # opendoas, when `-n` meets a rule carrying no `nopass`.
+        # The three doas wordings, shared by OpenBSD's doas and opendoas.
         ("doas: Authentication required", True),
+        ("doas: a tty is required", True),
+        ("doas: Authentication failed", True),
         # Unsigned by any escalator: a command of its own saying the same thing.
         ("build.sh: authentication required", False),
         ("", False),

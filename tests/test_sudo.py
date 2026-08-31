@@ -42,9 +42,11 @@ from extra_platforms import is_any_windows
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
+    ESCALATORS,
     _is_sudo_auth_failure,
     _is_sudo_denied,
     prime_sudo,
+    resolve_escalator,
 )
 
 from .fake_manager import FakeManager
@@ -128,6 +130,29 @@ def test_internal_sudo_matches_internal_escalators():
 # Sudo priming: probe the credential cache non-interactively first, prompt once up
 # front only for the managers mpm itself escalates, then keep the cache warm so a
 # password prompt never stalls the concurrent fan-out.
+
+
+@pytest.fixture(autouse=True)
+def _clear_escalator_cache():
+    """Keep the `PATH`-derived escalator choice from leaking between tests.
+
+    `resolve_escalator` caches on the assumption that `PATH` does not move
+    mid-run, which a test patching `shutil.which` breaks in both directions.
+    """
+    resolve_escalator.cache_clear()
+    yield
+    resolve_escalator.cache_clear()
+
+
+@contextmanager
+def only_escalator(escalator_id: str | None):
+    """Pretend the host carries exactly `escalator_id`, or none at all."""
+    with patch(
+        "meta_package_manager.sudo.shutil.which",
+        side_effect=lambda name: f"/usr/bin/{name}" if name == escalator_id else None,
+    ):
+        resolve_escalator.cache_clear()
+        yield
 
 
 def _escalating_manager() -> FakeManager:
@@ -669,6 +694,129 @@ def test_is_sudo_auth_failure(error, expected):
 )
 def test_is_sudo_denied(error, expected):
     assert _is_sudo_denied(error) is expected
+
+
+# Escalator selection: which binary drives the escalation, and how each dialect
+# reaches the argv, the probe and the prompt.
+
+
+def test_escalator_registry_prefers_sudo():
+    """`sudo` stays the first choice, so a host carrying both keeps the behavior
+    it has today and only an explicit override moves it."""
+    assert [e.id for e in ESCALATORS] == ["sudo", "doas"]
+
+
+@pytest.mark.parametrize(
+    ("installed", "expected"),
+    (
+        pytest.param("sudo", "sudo", id="sudo-only"),
+        pytest.param("doas", "doas", id="doas-only"),
+        pytest.param(None, None, id="neither"),
+    ),
+)
+def test_resolve_escalator_detects_what_the_host_carries(installed, expected):
+    with only_escalator(installed):
+        escalator = resolve_escalator()
+    assert (escalator.id if escalator else None) == expected
+
+
+def test_resolve_escalator_override_wins_over_detection():
+    """An override is honored even when its binary is missing, so the failure
+    names the escalator the user asked for."""
+    with only_escalator("sudo"):
+        assert resolve_escalator("doas").id == "doas"
+
+
+def test_resolve_escalator_rejects_an_unknown_name(caplog):
+    with only_escalator("sudo"), caplog.at_level(logging.WARNING):
+        assert resolve_escalator("please") is None
+    assert any("Unknown sudo_command" in r.getMessage() for r in caplog.records)
+
+
+@pytest.mark.parametrize(
+    ("escalator_id", "expected_prefix"),
+    (
+        pytest.param("sudo", ("sudo", "--non-interactive"), id="sudo"),
+        # `doas` parses short options only: `-n` is its whole "do not prompt"
+        # vocabulary, so the long-form convention cannot reach it.
+        pytest.param("doas", ("doas", "-n"), id="doas"),
+    ),
+)
+def test_build_cli_escalates_with_the_selected_binary(escalator_id, expected_prefix):
+    manager = _escalating_manager()
+    manager.sudo_command = escalator_id
+    with only_escalator(escalator_id):
+        args = manager.build_cli("install", "pkg", sudo=True)
+    assert tuple(str(a) for a in args[: len(expected_prefix)]) == expected_prefix
+
+
+def test_build_cli_skips_escalation_without_an_escalator():
+    """A host carrying neither binary runs the command unprivileged rather than
+    prefixing a `sudo` that is not there."""
+    manager = _escalating_manager()
+    with only_escalator(None):
+        args = manager.build_cli("install", "pkg", sudo=True)
+    assert "sudo" not in [str(a) for a in args]
+    assert "doas" not in [str(a) for a in args]
+
+
+def test_prime_sudo_warns_without_any_escalator(caplog):
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        prime_sudo_env() as run,
+        only_escalator(None),
+        caplog.at_level(logging.WARNING),
+    ):
+        prime_sudo(ctx, [_escalating_manager()])
+    run.assert_not_called()
+    assert any("Found none of sudo, doas" in r.getMessage() for r in caplog.records)
+
+
+def test_prime_sudo_probes_and_prompts_through_doas(capsys):
+    """A doas host is probed with `doas -n true` and, on a cold cache, prompted
+    with a bare `doas true`: it cannot be told what prompt to print, so the
+    echoed notice carries the explanation instead."""
+    ctx = click.Context(click.Command("upgrade"))
+    manager = _escalating_manager()
+    manager.sudo_command = "doas"
+    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run, only_escalator("doas"):
+        run.side_effect = (
+            subprocess.CompletedProcess((), 1),  # Cold-cache probe.
+            subprocess.CompletedProcess((), 0),  # Successful password prompt.
+        )
+        try:
+            prime_sudo(ctx, [manager])
+            assert run.call_args_list[0].args[0] == ("doas", "-n", "true")
+            assert run.call_args_list[1].args[0] == ("doas", "true")
+        finally:
+            ctx.close()
+    assert "needs administrator rights to upgrade" in capsys.readouterr().err
+
+
+def test_doas_gets_no_keepalive_thread(caplog):
+    """doas persistence is opt-in per rule, so a recurring probe would report a
+    drop on every tick of a host that never asked for it. The cache is marked
+    warm, without a thread refreshing it."""
+    ctx = click.Context(click.Command("mpm"))
+    manager = _escalating_manager()
+    manager.sudo_command = "doas"
+    with (
+        prime_sudo_env() as run,
+        only_escalator("doas"),
+        caplog.at_level(logging.INFO),
+    ):
+        run.return_value = subprocess.CompletedProcess((), 0)
+        try:
+            prime_sudo(ctx, [manager])
+            assert _SUDO_CACHE_WARM.is_set()
+            # The probe is the only subprocess: no refresh tick follows it.
+            assert run.call_count == 1
+        finally:
+            ctx.close()
+    assert not _SUDO_CACHE_WARM.is_set()
+    assert any(
+        "cannot be refreshed on a schedule" in r.getMessage() for r in caplog.records
+    )
 
 
 # Stall watchdog: a mutating call of an internal escalator (cask, fink) that goes

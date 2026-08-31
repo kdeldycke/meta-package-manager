@@ -213,6 +213,7 @@ class ManagerPool:
             "progress",
             "stop_on_error",
             "sudo",
+            "sudo_command",
             "timeout",
         },
     )

@@ -1,0 +1,93 @@
+---
+# TEMPORARY probe workflow, to be deleted once `doas` support is verified.
+# It measures the real `doas` contract on a runner: exact argv acceptance, the
+# stderr wordings mpm's matchers key on, and an end-to-end escalated install.
+name: 🧪 doas probe
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/doas-probe.yaml
+      - meta_package_manager/sudo.py
+
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
+jobs:
+
+  doas:
+    name: doas on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-26.04
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.12.5"
+
+      - name: Install doas
+        run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends opendoas
+
+      - name: Report the doas build
+        run: >
+          echo "--- which ---"; command -v doas;
+          echo "--- version (may exit non-zero) ---"; doas -v || true;
+          echo "--- usage, to enumerate accepted flags ---"; doas -h 2>&1 || true
+
+      # Every wording below is what mpm's `_is_sudo_denied` and
+      # `_is_sudo_auth_failure` matchers key on. Captured with no doas.conf at
+      # all, so the user is unconfigured and therefore unauthorized.
+      - name: Capture the unauthorized wordings
+        run: >
+          echo "--- doas -n true, no doas.conf ---";
+          doas -n true 2>err.txt; echo "exit=$?"; cat err.txt;
+          echo "--- doas true, no doas.conf ---";
+          doas true 2>err2.txt </dev/null; echo "exit=$?"; cat err2.txt
+
+      - name: Configure a passwordless rule
+        run: >
+          printf 'permit nopass %s as root\n' "$(id -un)" | sudo tee /etc/doas.conf;
+          sudo chown root:root /etc/doas.conf; sudo chmod 0400 /etc/doas.conf;
+          echo "--- doas -n true, now permitted ---";
+          doas -n true; echo "exit=$?";
+          echo "--- doas -n whoami ---"; doas -n whoami
+
+      - name: Install mpm
+        run: uv sync --no-progress --all-extras --all-groups
+
+      # The plan recorder prints the exact argv a state-changing operation
+      # would run, without running it: the cheapest proof that the doas prefix
+      # reaches the command line intact.
+      - name: Plan an escalated operation through doas
+        run: >
+          uv run --no-progress --frozen -- mpm --verbosity DEBUG --sudo-command doas
+          --apt --plan --sudo upgrade 2>&1 | tail -40
+
+      - name: Plan the same operation through sudo
+        run: >
+          uv run --no-progress --frozen -- mpm --verbosity DEBUG --sudo-command sudo
+          --apt --plan --sudo upgrade 2>&1 | tail -40
+
+      # End to end, for real: doas is passwordless here, so the escalated
+      # install must succeed and the package must land.
+      - name: Install a package for real, escalated through doas
+        run: >
+          uv run --no-progress --frozen -- mpm --verbosity INFO --sudo-command doas
+          --apt --sudo install sl 2>&1 | tail -40;
+          echo "--- did it land? ---"; command -v sl
+
+      - name: Probe an unauthorized user, to prove the denial path
+        run: >
+          sudo tee /etc/doas.conf <<< 'permit nopass root as root' > /dev/null;
+          echo "--- doas -n true, user no longer permitted ---";
+          doas -n true 2>err3.txt </dev/null; echo "exit=$?"; cat err3.txt;
+          echo "--- what mpm makes of it ---";
+          uv run --no-progress --frozen -- mpm --verbosity INFO --sudo-command doas
+          --apt --sudo install sl 2>&1 | tail -20

@@ -89,6 +89,7 @@ from .cooldown import (
     resolve_cooldown,
 )
 from .execution import PLAN_RECORDER, CLIError
+from .sudo import ESCALATORS
 from .logo import env_summary, version_screen_params
 from .manager import PackageManager
 from .package import Package
@@ -481,6 +482,15 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
         "off a terminal, managers needing root fail fast rather than stalling.",
     ),
     option(
+        "--sudo-command",
+        type=Choice([e.id for e in ESCALATORS]),
+        default=None,
+        help="Escalator to run privileged manager operations with. Auto-detected "
+        "by default, preferring sudo on a host carrying both. Selects the binary "
+        "only: whether a manager escalates at all stays up to --sudo/--no-sudo "
+        "and each manager's own policy.",
+    ),
+    option(
         "-d",
         "--dry-run",
         is_flag=True,
@@ -609,6 +619,7 @@ def mpm(
     ignore_auto_updates,
     stop_on_error,
     sudo,
+    sudo_command,
     dry_run,
     plan,
     timeout,
@@ -800,6 +811,7 @@ def mpm(
             # Does the manager should raise on error or not.
             stop_on_error=stop_on_error,
             sudo=sudo,
+            sudo_command=sudo_command,
             dry_run=dry_run,
             plan=plan,
             timeout=timeout,

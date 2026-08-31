@@ -79,7 +79,8 @@ from .cooldown import CooldownPolicy
 from .sudo import (
     _STALL_NOTICE_OPERATIONS,
     _SUDO_CACHE_WARM,
-    _SUDO_ESCALATION_PREFIX,
+    ESCALATORS,
+    resolve_escalator,
     _is_sudo_auth_failure,
     _resolved_sudo,
     _StallWatchdog,
@@ -563,6 +564,16 @@ class CLIExecutor:
     `build_cli(..., sudo=True)` operations escalate out of the box, while staying
     switchable off through {attr}`~meta_package_manager.execution.CLIExecutor.sudo`
     (`--no-sudo` or config) for rootless setups.
+    """
+
+    sudo_command: str | None = None
+    """User override naming which escalator drives this run: `sudo` or `doas`.
+
+    `None` (the default) auto-detects, preferring `sudo` when the host carries
+    both. Set globally by `mpm --sudo-command` and by the `[mpm] sudo_command`
+    config key. Selects the binary only; whether a manager escalates at all
+    stays the separate decision of {attr}`sudo` and {attr}`default_sudo`.
+    See {func}`~meta_package_manager.sudo.resolve_escalator`.
     """
 
     internal_sudo: bool = False
@@ -1120,7 +1131,9 @@ class CLIExecutor:
         # Whether mpm is escalating this call itself, as opposed to a manager
         # escalating internally. Drives both the session isolation of the spawn
         # below and the tailored credential hint of the failure gate.
-        is_escalation = clean_args[:2] == _SUDO_ESCALATION_PREFIX
+        is_escalation = any(
+            clean_args[: len(e.escalate_args)] == e.escalate_args for e in ESCALATORS
+        )
         # Enforce the release-age cooldown by injecting the manager's dedicated
         # environment variable into every call (harmless for operations that ignore
         # it, like removal or cache cleanup).
@@ -1425,9 +1438,19 @@ class CLIExecutor:
         # marks the operation as needing root (`sudo`), the per-manager policy opts in
         # (the `sudo` override, else `default_sudo`), and the platform has `sudo`.
         # A non-UNIX host simply does not escalate rather than raising.
-        escalate = bool(sudo and _resolved_sudo(self) and current_platform() in UNIX)
+        escalator = resolve_escalator(self.sudo_command)
+        escalate = bool(
+            sudo
+            and _resolved_sudo(self)
+            and current_platform() in UNIX
+            # A host carrying no escalator cannot escalate. prime_sudo() has
+            # already warned about it, so the command runs unprivileged and
+            # fails on the manager's own permission error rather than on a
+            # missing binary.
+            and escalator is not None
+        )
         # Sudo replaces any pre-command, be it overridden or automatic.
-        # `--non-interactive` spends the credential cache warmed up front by
+        # The non-interactive prefix spends the credential cache warmed up front by
         # prime_sudo() and fails fast instead of blocking on an invisible /dev/tty
         # password prompt buried in the concurrent fan-out.
         if escalate:
@@ -1436,7 +1459,8 @@ class CLIExecutor:
                 raise ValueError(msg)
             if auto_pre_cmds:
                 auto_pre_cmds = False
-            params.extend(_SUDO_ESCALATION_PREFIX)
+            assert escalator is not None
+            params.extend(escalator.escalate_args)
         elif override_pre_cmds:
             params.extend(override_pre_cmds)  # type: ignore[arg-type]
         elif auto_pre_cmds:

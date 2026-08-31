@@ -85,10 +85,13 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import threading
 import time
+from dataclasses import dataclass
+from functools import cache
 from typing import Final
 
 from click_extra import echo
@@ -157,15 +160,84 @@ goes unflagged. Priming still authenticates; only the watchdog is suppressed.
 ```
 """
 
-_SUDO_ESCALATION_PREFIX: Final = ("sudo", "--non-interactive")
-"""Argv prefix mpm prepends to escalate a manager command non-interactively.
+@dataclass(frozen=True)
+class Escalator:
+    """One privilege-escalation binary, and the argv dialects mpm drives it with.
 
-{meth}`CLIExecutor.build_cli
-<meta_package_manager.execution.CLIExecutor.build_cli>` emits it and
-{meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>` matches
-it byte-for-byte to turn a `sudo --non-interactive` authentication failure into
-an actionable
-hint, so the two sites must stay in lockstep.
+    Everything specific to an escalator lives here, so the rest of the module
+    reasons about escalation without naming a binary. The dialects are not
+    interchangeable: `doas` is not a `sudo` clone with another name, it takes
+    short options only and has no way to authenticate without running a command.
+    """
+
+    id: str
+    """The binary's name, and the value the `sudo_command` override selects it by."""
+
+    escalate_args: tuple[str, ...]
+    """Argv prefix escalating a manager command, non-interactively.
+
+    Non-interactive on purpose: a prompt raised inside the concurrent fan-out
+    lands on a terminal nobody is watching (see {func}`prime_sudo`). Emitted by
+    {meth}`CLIExecutor.build_cli
+    <meta_package_manager.execution.CLIExecutor.build_cli>` and matched back by
+    {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>` to
+    recognize an escalation failure, so the two sites must stay in lockstep.
+    """
+
+    probe_args: tuple[str, ...]
+    """Argv reading the credential cache without ever prompting.
+
+    `sudo` answers this without running anything (`--validate`); `doas` has no
+    such mode, so it runs `true` as the cheapest harmless command.
+    """
+
+    prompt_args: tuple[str, ...]
+    """Argv authenticating the user up front, interactively, once per run."""
+
+    refreshable: bool
+    """Whether {attr}`probe_args` can also serve as a keepalive tick.
+
+    True only where the escalator caches credentials on a schedule mpm can
+    reason about. `doas` persistence is opt-in per rule in `doas.conf`, so a
+    recurring probe would report a drop on every tick for the majority of hosts,
+    where no rule asks for it. Those escalators get no keepalive thread at all.
+    """
+
+    brands_prompt: bool
+    """Whether the escalator can be told what password prompt to print.
+
+    `sudo --prompt` can; `doas` cannot. The notice {func}`prime_sudo` echoes
+    before authenticating names the managers either way, so an unbranded prompt
+    loses the `[mpm]` marker, not the explanation.
+    """
+
+
+ESCALATORS: Final[tuple[Escalator, ...]] = (
+    Escalator(
+        id="sudo",
+        escalate_args=("sudo", "--non-interactive"),
+        probe_args=("sudo", "--non-interactive", "--validate"),
+        prompt_args=("sudo", "--validate"),
+        refreshable=True,
+        brands_prompt=True,
+    ),
+    Escalator(
+        id="doas",
+        # `doas` parses short options only, so the long-form convention of
+        # `docs/cli-parameters.md` cannot apply here: `-n` is the whole
+        # vocabulary for "do not prompt".
+        escalate_args=("doas", "-n"),
+        probe_args=("doas", "-n", "true"),
+        prompt_args=("doas", "true"),
+        refreshable=False,
+        brands_prompt=False,
+    ),
+)
+"""Every escalator mpm can drive, in the order it prefers them.
+
+`sudo` comes first so a host carrying both keeps the behavior it has today, and
+the `sudo_command` override exists for the user who wants the other one. The
+order only decides auto-detection: an explicit override always wins.
 """
 
 _SUDO_KEEPALIVE_INTERVAL: Final = 60
@@ -181,12 +253,47 @@ _SUDO_PRIMED: Final = "mpm_sudo_primed"
 """`ctx.meta` key marking that {func}`prime_sudo` already ran this invocation."""
 
 
-_SUDO_VALIDATE_CLI: Final = ("sudo", "--non-interactive", "--validate")
-"""Argv probing and refreshing the credential cache without ever prompting.
+@cache
+def resolve_escalator(override: str | None = None) -> Escalator | None:
+    """The escalator mpm drives, or `None` when the host carries none.
 
-Shared by {func}`prime_sudo`'s up-front probe and the recurring refresh of
-{func}`_start_sudo_keepalive`, so the two always read the cache the same way.
-"""
+    With no `override`, returns the first entry of {data}`ESCALATORS` whose
+    binary is on `PATH`, so a host without `sudo` still escalates through
+    whatever it does have. An `override` names one by its
+    {attr}`~Escalator.id` and is honored even when the binary is missing, so
+    the failure names the escalator the user asked for instead of silently
+    falling back to another one.
+
+    Cached on the override, since `PATH` does not move mid-run. Tests changing
+    what is installed must call `resolve_escalator.cache_clear()`.
+    """
+    if override is not None:
+        for escalator in ESCALATORS:
+            if escalator.id == override:
+                return escalator
+        # An unknown name is a configuration error, not a reason to escalate
+        # through something the user did not ask for.
+        logging.warning(
+            f"Unknown sudo_command {override!r}: expected one of "
+            f"{', '.join(e.id for e in ESCALATORS)}. Managers needing root may fail.",
+        )
+        return None
+    for escalator in ESCALATORS:
+        if shutil.which(escalator.id):
+            return escalator
+    return None
+
+
+def _resolved_sudo_command(managers: Iterable[CLIExecutor]) -> str | None:
+    """The `sudo_command` override shared by `managers`, if any set one.
+
+    The override is a global choice that the pool copies onto every selected
+    manager, so the first value found speaks for the run.
+    """
+    for manager in managers:
+        if manager.sudo_command is not None:
+            return manager.sudo_command
+    return None
 
 
 def _resolved_sudo(manager: CLIExecutor) -> bool:
@@ -259,8 +366,15 @@ def _is_sudo_denied(error: str) -> bool:
     )
 
 
-def _start_sudo_keepalive(ctx: Context) -> None:
-    """Keep the `sudo` credential cache fresh for the rest of the invocation.
+def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:
+    """Keep the credential cache of `escalator` fresh for the rest of the invocation.
+
+    Marks the cache warm whatever the escalator, but only spawns the refreshing
+    thread for a {attr}`~Escalator.refreshable` one: an escalator whose
+    persistence is opt-in per rule would report a drop on every tick of a host
+    that never asked for it, which is noise rather than news. The flag can then
+    go stale, exactly as its own docstring already admits for a hardened
+    `sudoers` policy.
 
     Refreshes the cache every {data}`_SUDO_KEEPALIVE_INTERVAL` seconds so a long
     fan-out does not outlast sudo's timestamp and re-prompt mid-flight. Output is
@@ -279,7 +393,7 @@ def _start_sudo_keepalive(ctx: Context) -> None:
     def keepalive() -> None:
         while not stop.wait(_SUDO_KEEPALIVE_INTERVAL):
             refresh = subprocess.run(
-                _SUDO_VALIDATE_CLI,
+                escalator.probe_args,
                 capture_output=True,
                 check=False,
             )
@@ -304,10 +418,18 @@ def _start_sudo_keepalive(ctx: Context) -> None:
             else:
                 logging.debug("The sudo credentials are still gone.")
 
-    logging.info("Keeping the sudo credentials fresh for the whole run.")
+    _SUDO_CACHE_WARM.set()
+    if not escalator.refreshable:
+        logging.info(
+            f"{escalator.id} credentials cannot be refreshed on a schedule: "
+            "they hold for as long as its own persistence rules say.",
+        )
+        ctx.call_on_close(_SUDO_CACHE_WARM.clear)
+        return
+
+    logging.info(f"Keeping the {escalator.id} credentials fresh for the whole run.")
     thread = threading.Thread(target=keepalive, daemon=True)
     thread.start()
-    _SUDO_CACHE_WARM.set()
 
     def teardown() -> None:
         stop.set()
@@ -377,6 +499,19 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         return
     ctx.meta[_SUDO_PRIMED] = True
 
+    escalator = resolve_escalator(_resolved_sudo_command(managers))
+    if escalator is None:
+        # No escalator on PATH at all, or an override naming an unknown one
+        # (which logged its own warning). Let unprivileged managers proceed.
+        if escalating:
+            logging.warning(
+                f"Found none of {', '.join(e.id for e in ESCALATORS)} to escalate "
+                f"{', '.join(escalating)} with: they may fail. Install one, or "
+                "drop escalation with `--no-sudo` or a `[mpm] sudo = false` "
+                "entry in your configuration file.",
+            )
+        return
+
     # Deferred on purpose: `config` pulls in the definitions machinery, which
     # imports back into this module through `manager` and `execution`.
     from .config import config_file_is_trusted
@@ -400,44 +535,48 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
 
     try:
         logging.debug(
-            f"Probe the sudo credential cache: {' '.join(_SUDO_VALIDATE_CLI)}",
+            f"Probe the {escalator.id} credential cache: "
+            f"{' '.join(escalator.probe_args)}",
         )
         probe = subprocess.run(
-            _SUDO_VALIDATE_CLI,
+            escalator.probe_args,
             capture_output=True,
             check=False,
         )
     except OSError:
-        # No sudo on PATH (FileNotFoundError), or one that cannot be run: not executable
+        # Not on PATH (FileNotFoundError), or one that cannot be run: not executable
         # for this user (PermissionError), not a valid binary (OSError). Degrade to a
         # warning and let unprivileged managers proceed rather than crash.
         logging.warning(
-            "sudo could not be run: managers needing root may fail. Drop "
-            "escalation with `--no-sudo` or a `[mpm] sudo = false` entry in "
+            f"{escalator.id} could not be run: managers needing root may fail. "
+            "Drop escalation with `--no-sudo` or a `[mpm] sudo = false` entry in "
             "your configuration file.",
         )
         return
     if probe.returncode == 0:
-        # Cache already warm (a prior `sudo --validate`, a NOPASSWD rule):
+        # Cache already warm (a prior authentication, a passwordless rule):
         # keep it fresh,
         # silently. A CI job with pre-cached credentials thus gets the keepalive
         # instead of the no-terminal warning.
-        logging.info("Found the sudo credential cache warm: no password prompt needed.")
-        _start_sudo_keepalive(ctx)
+        logging.info(
+            f"Found the {escalator.id} credential cache warm: no password prompt "
+            "needed.",
+        )
+        _start_sudo_keepalive(ctx, escalator)
         return
 
     ids = ", ".join(escalating)
     probe_error = (probe.stderr or b"").decode("UTF-8", errors="replace")
     # The raw answer settles which cold case this is, and catches a wording no
     # matcher knows yet (the sudo-rs precedent, see _is_sudo_auth_failure).
-    logging.debug(f"The sudo probe answered: {probe_error.strip()!r}")
+    logging.debug(f"The {escalator.id} probe answered: {probe_error.strip()!r}")
     if _is_sudo_denied(probe_error):
         if escalating:
             logging.warning(
                 f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
-                "rights, but you are not authorized to run sudo on this host: "
-                "they will fail. Drop escalation with `--no-sudo` or a "
-                "`[mpm] sudo = false` entry in your configuration file.",
+                f"rights, but you are not authorized to run {escalator.id} on "
+                "this host: they will fail. Drop escalation with `--no-sudo` or "
+                "a `[mpm] sudo = false` entry in your configuration file.",
             )
         # An internal-only selection stays silent, as on the no-terminal path:
         # each manager's own sudo surfaces the denial through its error path.
@@ -448,9 +587,10 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
             logging.warning(
                 f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
                 "rights, but no terminal is available to prompt for a password: "
-                "they may fail. Re-run in a terminal, pre-authenticate with "
-                "`sudo --validate`, or drop escalation with `--no-sudo` or a "
-                "`[mpm] sudo = false` entry in your configuration file.",
+                f"they may fail. Re-run in a terminal, pre-authenticate with "
+                f"`{' '.join(escalator.prompt_args)}`, or drop escalation with "
+                "`--no-sudo` or a `[mpm] sudo = false` entry in your "
+                "configuration file.",
             )
         # An internal-only selection stays silent: each manager's own sudo fails
         # fast and surfaces through its error path.
@@ -473,16 +613,20 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         f"{ctx.command.name}: enter your password.",
         err=True,
     )
-    # `sudo --prompt` expands %-escapes; manager IDs are plain slugs, so the escaping
-    # is belt-and-braces.
-    prompt = f"[mpm] password for {ids}: ".replace("%", "%%")
-    prompt_cli = ("sudo", "--validate", "--prompt", prompt)
+    prompt_cli = escalator.prompt_args
+    if escalator.brands_prompt:
+        # `sudo --prompt` expands %-escapes; manager IDs are plain slugs, so the
+        # escaping is belt-and-braces. An escalator that cannot be told what to
+        # print falls back to its own prompt, under the notice echoed above.
+        prompt = f"[mpm] password for {ids}: ".replace("%", "%%")
+        prompt_cli = (*prompt_cli, "--prompt", prompt)
     if subprocess.run(prompt_cli, check=False).returncode != 0:
         logging.warning(
-            "Could not acquire sudo credentials: managers needing root may fail.",
+            f"Could not acquire {escalator.id} credentials: managers needing root "
+            "may fail.",
         )
         return
-    _start_sudo_keepalive(ctx)
+    _start_sudo_keepalive(ctx, escalator)
 
 
 class _StallWatchdog(logging.Handler):

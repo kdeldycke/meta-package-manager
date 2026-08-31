@@ -88,7 +88,7 @@ else:
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Container, Iterable
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
@@ -118,6 +118,24 @@ WRAPPED_GLYPHS = {"maintained": "✅", "unmaintained": "⚠️"}
 The counterpart of {data}`UNSUPPORTED_GLYPHS` on the wrapped side of the scale,
 so every glyph literal of the five-state support scale is written once.
 """
+
+QUEUED_GLYPH = "🚧"
+"""Glyph for a manager assessed as a wrap candidate but not written yet.
+
+The state a blank cell used to swallow. A manager absent from the pool and
+from {data}`UNSUPPORTED_GLYPHS` may be one nobody has looked at, or one
+looked at closely and queued behind something the assessing host does not
+have: an Arch box, a Hyprland session, a Nim toolchain, or a date a
+dead-upstream recheck waits on. Only the second kind carries this glyph,
+and `docs/benchmark.toml`'s `queued` table is where the blocker is written
+down, one line per manager.
+
+It is deliberately unlinked in a support cell, unlike every other state.
+A wrapped manager has a class to point at and a declined one a verdict
+section; a queued one has neither yet, and pointing at its home page would
+answer a question the reader did not ask.
+"""
+
 
 UNSUPPORTED_GLYPHS = {"archived": "☠️", "excluded": "❌"}
 """Glyph rendered in the `mpm` column for each `unsupported` status.
@@ -169,22 +187,24 @@ happens elsewhere.
 SUPPORT_SCALE = {
     WRAPPED_GLYPHS["maintained"]: "Active support by `mpm`",
     WRAPPED_GLYPHS["unmaintained"]: "Usable in `mpm`, but upstream is unmaintained",
+    QUEUED_GLYPH: "Assessed as a candidate, blocked on a host or a date",
     TOPGRADE_FALLBACK_GLYPH: "Falls back to `topgrade`",
     UNSUPPORTED_GLYPHS["archived"]: "Unsupported by `mpm` and upstream is unmaintained",
     UNSUPPORTED_GLYPHS["excluded"]: "`mpm` declined support",
 }
-"""The five states a manager can be in, in the order the manager index shows them.
+"""The six states a manager can be in, in the order the manager index shows them.
 
 Keys are the glyphs {func}`_bare_support_glyph` returns, values the label both
 {func}`manager_support_legend` and {func}`managers_index_table` render: the
 legend as the meaning of a glyph, the index as the title of the group of rows
 carrying it. One wording, so the key and its table can never disagree.
-Composed from {data}`WRAPPED_GLYPHS`, {data}`TOPGRADE_FALLBACK_GLYPH` and
-{data}`UNSUPPORTED_GLYPHS` rather than repeating their glyphs, so the scale
-cannot drift from the cells it describes either.
+Composed from {data}`WRAPPED_GLYPHS`, {data}`QUEUED_GLYPH`,
+{data}`TOPGRADE_FALLBACK_GLYPH` and {data}`UNSUPPORTED_GLYPHS` rather than
+repeating their glyphs, so the scale cannot drift from the cells it
+describes either.
 
 Each label is a caption rather than a sentence: it titles a group of rows, and
-a reader scanning five of them wants the state named, not explained. What a
+a reader scanning six of them wants the state named, not explained. What a
 glyph means beyond its name lives where the reason lives, in the manager's own
 page or its verdict section.
 
@@ -198,6 +218,7 @@ inside each group.
 
 SUPPORT_ANCHORS = {
     **{glyph: f"state-{name}" for name, glyph in WRAPPED_GLYPHS.items()},
+    QUEUED_GLYPH: "state-queued",
     TOPGRADE_FALLBACK_GLYPH: "state-topgrade-fallback",
     **{glyph: f"state-{name}" for name, glyph in UNSUPPORTED_GLYPHS.items()},
 }
@@ -208,10 +229,10 @@ SUPPORT_ANCHORS = {
 reader who sees a share can reach the managers behind it in one click.
 
 Named after the state rather than after its caption, which is what makes the
-anchor outlive a rewording: four of the five names are the keys of
+anchor outlive a rewording: four of the six names are the keys of
 {data}`WRAPPED_GLYPHS` and {data}`UNSUPPORTED_GLYPHS`, read straight off those
-mappings, and only the lifebuoy needs a literal, being a constant of its own
-rather than an entry in either.
+mappings, and only the lifebuoy and the barrier need a literal, each being a
+constant of its own rather than an entry in either.
 """
 
 
@@ -810,14 +831,16 @@ def _bare_support_glyph(
     mid: str,
     unsupported: dict[str, str],
     competitor_data: dict[str, list[str]],
+    queued: Container[str],
 ) -> str:
     """Support glyph of a manager ID, unlinked: which {data}`SUPPORT_SCALE` state.
 
     A wrapped manager takes its {data}`WRAPPED_GLYPHS` entry, keyed by its
     `unmaintained` flag. A declined one takes {data}`TOPGRADE_FALLBACK_GLYPH`
     where `topgrade` still reaches it, and its {data}`UNSUPPORTED_GLYPHS`
-    verdict otherwise. A manager in neither set, assessed by nobody yet, has no
-    glyph at all.
+    verdict otherwise. A manager `queued` names takes {data}`QUEUED_GLYPH`: it
+    is a candidate whose wrap waits on something the assessing host lacks. A
+    manager in none of the three, assessed by nobody yet, has no glyph at all.
 
     One glyph per manager. Where `topgrade` still reaches the tool, the lifebuoy
     stands alone: it already answers the only question a support cell asks, and
@@ -833,6 +856,8 @@ def _bare_support_glyph(
     if mid in pool:
         flag = "unmaintained" if pool[mid].unmaintained else "maintained"
         return WRAPPED_GLYPHS[flag]
+    if mid in queued:
+        return QUEUED_GLYPH
     if mid in unsupported:
         if "topgrade" in competitor_data.get(mid, []):
             return TOPGRADE_FALLBACK_GLYPH
@@ -845,19 +870,23 @@ def _support_glyph(
     unsupported: dict[str, str],
     anchors: dict[str, str],
     competitor_data: dict[str, list[str]],
+    queued: Container[str],
 ) -> str:
     """Linked support glyph for a manager ID: the benchmark's own `mpm` column rule.
 
     The glyph comes from {func}`_bare_support_glyph`; all this adds is its
     target. A wrapped manager links to the class proving it, a declined one to
-    its own section of {data}`UNSUPPORTED_DOCS_URL`, and a manager assessed by
-    nobody yet renders an empty cell. Shared by
+    its own section of {data}`UNSUPPORTED_DOCS_URL`, a queued one stays
+    unlinked for want of either, and a manager assessed by nobody yet renders
+    an empty cell. Shared by
     {func}`benchmark_managers_table` and {func}`managers_index_table`, so the
     two pages can never disagree on what a manager's glyph should be.
     """
-    glyph = _bare_support_glyph(mid, unsupported, competitor_data)
+    glyph = _bare_support_glyph(mid, unsupported, competitor_data, queued)
     if not glyph:
         return ""
+    if glyph == QUEUED_GLYPH:
+        return glyph
     if mid in pool:
         return f"[{glyph}]({manager_source_url(mid)})"
     anchor = anchors.get(mid)
@@ -901,11 +930,16 @@ def benchmark_managers_table() -> str:
     coarse_support: dict[str, dict[str, str]] = data.get("coarse_support", {})
     refused: dict[str, dict[str, str]] = data.get("refused", {})
     unsupported: dict[str, str] = data.get("unsupported", {})
+    queued: dict[str, str] = data.get("queued", {})
     anchors = unsupported_anchors()
 
     pool_ids = set(pool.all_manager_ids)
     all_ids = sorted(
-        pool_ids | competitor_data.keys() | refused.keys() | unsupported.keys()
+        pool_ids
+        | competitor_data.keys()
+        | refused.keys()
+        | unsupported.keys()
+        | queued.keys()
     )
 
     headers = ["Manager", "`mpm`"]
@@ -918,7 +952,10 @@ def benchmark_managers_table() -> str:
         else:
             url = homepages.get(mid)
             label = f"[`{mid}`]({url})" if url else f"`{mid}`"
-        row = [label, _support_glyph(mid, unsupported, anchors, competitor_data)]
+        row = [
+            label,
+            _support_glyph(mid, unsupported, anchors, competitor_data, queued),
+        ]
         flags = set(competitor_data.get(mid, []))
         coarse_map = coarse_support.get(mid, {})
         refused_map = refused.get(mid, {})
@@ -2661,6 +2698,8 @@ def managers_index_table() -> str:
     data = _load_benchmark_toml()
     competitor_data: dict[str, list[str]] = data.get("managers", {})
     unsupported: dict[str, str] = data.get("unsupported", {})
+    queued: dict[str, str] = data.get("queued", {})
+    homepages: dict[str, str] = data.get("homepages", {})
     anchors = unsupported_anchors()
 
     headers = ["", "Manager", "ID", "Support", "Platforms"]
@@ -2681,8 +2720,18 @@ def managers_index_table() -> str:
             f"%logo:{mid}%",
             f"[{m.name}](managers/{mid}.md)",
             f"[`{mid}`](managers/{mid}.md)",
-            _support_glyph(mid, unsupported, anchors, competitor_data),
+            _support_glyph(mid, unsupported, anchors, competitor_data, queued),
             " ".join(parts),
+        ]
+
+    for mid in queued:
+        url = homepages.get(mid)
+        rows[mid] = [
+            "",
+            "",
+            f"[`{mid}`]({url})" if url else f"`{mid}`",
+            _support_glyph(mid, unsupported, anchors, competitor_data, queued),
+            "",
         ]
 
     for mid in unsupported:
@@ -2692,13 +2741,14 @@ def managers_index_table() -> str:
             "",
             "",
             f"[`{mid}`]({target})",
-            _support_glyph(mid, unsupported, anchors, competitor_data),
+            _support_glyph(mid, unsupported, anchors, competitor_data, queued),
             "",
         ]
 
     scale = tuple(SUPPORT_SCALE)
     glyphs = {
-        mid: _bare_support_glyph(mid, unsupported, competitor_data) for mid in rows
+        mid: _bare_support_glyph(mid, unsupported, competitor_data, queued)
+        for mid in rows
     }
 
     table = []
@@ -2745,9 +2795,10 @@ def _support_population() -> Counter[str]:
     data = _load_benchmark_toml()
     competitor_data: dict[str, list[str]] = data.get("managers", {})
     unsupported: dict[str, str] = data.get("unsupported", {})
+    queued: dict[str, str] = data.get("queued", {})
     return Counter(
-        _bare_support_glyph(mid, unsupported, competitor_data)
-        for mid in (*pool, *unsupported)
+        _bare_support_glyph(mid, unsupported, competitor_data, queued)
+        for mid in (*pool, *queued, *unsupported)
     )
 
 
@@ -2833,7 +2884,7 @@ def manager_support_legend() -> str:
     )
     return (
         f"{counts.total()} package managers have been assessed so far, each in "
-        "one of five states. The index below reports them in its `Support` "
+        "one of six states. The index below reports them in its `Support` "
         "column, on the same glyph scale as the benchmark's "
         f"[`mpm` column](benchmark.md#package-manager-support):\n\n{rendered}"
     )

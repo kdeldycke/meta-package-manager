@@ -438,6 +438,7 @@ def test_benchmark_toml_well_formed():
         "coarse_support",
         "refused",
         "unsupported",
+        "queued",
     }
 
     competitors = set(_docs.BENCHMARK_COMPETITORS)
@@ -1529,8 +1530,10 @@ def test_manager_support_bar_renders():
     """
     bar = _docs.manager_support_bar()
     counts = _docs._support_population()
-    unsupported = _docs._load_benchmark_toml().get("unsupported", {})
-    total = len(pool) + len(unsupported)
+    benchmark = _docs._load_benchmark_toml()
+    unsupported = benchmark.get("unsupported", {})
+    queued = benchmark.get("queued", {})
+    total = len(pool) + len(queued) + len(unsupported)
 
     # A group, not an image: its regions are links, which `role="img"` would
     # hide from anyone not using a mouse.
@@ -1593,7 +1596,8 @@ def test_manager_support_legend():
     unsupported: dict[str, str] = data.get("unsupported", {})
     competitor_data: dict[str, list[str]] = data.get("managers", {})
 
-    assessed = len(pool) + len(unsupported)
+    queued: dict[str, str] = data.get("queued", {})
+    assessed = len(pool) + len(queued) + len(unsupported)
     assert text.startswith(f"{assessed} package managers have been assessed")
     assert "benchmark.md#package-manager-support" in text
 
@@ -1617,13 +1621,14 @@ def test_manager_support_legend():
     expected = {
         _docs.WRAPPED_GLYPHS["maintained"]: len(pool) - unmaintained,
         _docs.WRAPPED_GLYPHS["unmaintained"]: unmaintained,
+        _docs.QUEUED_GLYPH: len(queued),
         _docs.TOPGRADE_FALLBACK_GLYPH: topgrade_fallback,
         _docs.UNSUPPORTED_GLYPHS["archived"]: dead,
         _docs.UNSUPPORTED_GLYPHS["excluded"]: len(unsupported)
         - topgrade_fallback
         - dead,
     }
-    # The scale is exhaustive: every state is populated, and the five
+    # The scale is exhaustive: every state is populated, and the six
     # populations partition the assessed managers.
     assert list(expected) == list(_docs.SUPPORT_SCALE)
     assert sum(expected.values()) == assessed
@@ -1662,6 +1667,7 @@ def test_managers_index_table_renders():
     data = _docs._load_benchmark_toml()
     unsupported: dict[str, str] = data.get("unsupported", {})
     competitor_data: dict[str, list[str]] = data.get("managers", {})
+    queued: dict[str, str] = data.get("queued", {})
     anchors = _docs.unsupported_anchors()
 
     # The table is all there is: the prose lede restating the split the group
@@ -1680,7 +1686,9 @@ def test_managers_index_table_renders():
     # once, and every manager continues the same rows behind a title row per
     # state.
     assert lines.count("") == 0
-    assert len(lines) == 2 + len(_docs.SUPPORT_SCALE) + len(pool) + len(unsupported)
+    assert len(lines) == (
+        2 + len(_docs.SUPPORT_SCALE) + len(pool) + len(queued) + len(unsupported)
+    )
 
     # Split the body on its title rows. Each lays out like the rows it opens:
     # the state's glyph in the mark column, and beside it the state's own
@@ -1703,8 +1711,8 @@ def test_managers_index_table_renders():
     # Every assessed manager sits in the group its own glyph puts it in, once,
     # alphabetically within that group.
     grouped: dict[str, list[str]] = {glyph: [] for glyph in _docs.SUPPORT_SCALE}
-    for mid in sorted((*pool, *unsupported)):
-        grouped[_docs._bare_support_glyph(mid, unsupported, competitor_data)].append(
+    for mid in sorted((*pool, *queued, *unsupported)):
+        grouped[_docs._bare_support_glyph(mid, unsupported, competitor_data, queued)].append(
             mid
         )
     assert {
@@ -1748,7 +1756,7 @@ def test_managers_index_table_renders():
     # links to its verdict rather than to a page it does not have.
     for mid in unsupported:
         assert mid not in pool
-        glyph_cell = _docs._support_glyph(mid, unsupported, anchors, competitor_data)
+        glyph_cell = _docs._support_glyph(mid, unsupported, anchors, competitor_data, queued)
         assert glyph_cell in declined_block
         assert f"[`{mid}`](unsupported.md" in declined_block
 

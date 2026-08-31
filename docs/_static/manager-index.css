@@ -24,9 +24,9 @@
   width: 100%;
 }
 
-/* A single-hue ordinal ramp, darkest state first, because the five states are
+/* A single-hue ordinal ramp, darkest state first, because the six states are
  * ordered rather than merely different: a categorical palette would claim they
- * are five unrelated things, and a rainbow would rank them by hue. Each mode
+ * are six unrelated things, and a rainbow would rank them by hue. Each mode
  * gets its own steps from the same ramp, so prominence always grows with
  * distance from the surface: the strongest state is the darkest on white and
  * the lightest on black, never one flipped into the other.
@@ -37,6 +37,7 @@
   --manager-bar-3: #2a78d6;
   --manager-bar-4: #5598e7;
   --manager-bar-5: #86b6ef;
+  --manager-bar-6: #b0d0f5;
 }
 body[data-theme="dark"] .manager-bar {
   --manager-bar-1: #9ec5f4;
@@ -44,6 +45,7 @@ body[data-theme="dark"] .manager-bar {
   --manager-bar-3: #3987e5;
   --manager-bar-4: #256abf;
   --manager-bar-5: #184f95;
+  --manager-bar-6: #123a70;
 }
 @media (prefers-color-scheme: dark) {
   body:not([data-theme="light"]) .manager-bar {
@@ -52,6 +54,7 @@ body[data-theme="dark"] .manager-bar {
     --manager-bar-3: #3987e5;
     --manager-bar-4: #256abf;
     --manager-bar-5: #184f95;
+    --manager-bar-6: #123a70;
   }
 }
 
@@ -98,6 +101,9 @@ body[data-theme="dark"] .manager-bar {
 }
 .manager-bar-5 {
   background-color: var(--manager-bar-5);
+}
+.manager-bar-6 {
+  background-color: var(--manager-bar-6);
 }
 
 .manager-bar-glyph {

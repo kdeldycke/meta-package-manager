@@ -37,6 +37,10 @@ The same AppImage manager as [`am`](managers/am.md), which `mpm` wraps, under a 
 
 A CPU speed and power optimizer for Linux, running as a daemon that switches governors and turbo boost according to load and battery state. `topgrade` updates it in place, which is what puts it in the benchmark, but it installs nothing and owns nothing installable: what it manages is a kernel tuning policy, which has no name, no version and no catalog to draw from.
 
+## [`autopackage`](https://en.wikipedia.org/wiki/Autopackage) ☠️
+
+Cross-distribution installer for Linux binaries, and there is nothing left to drive. Its last stable release is `1.4.2` from 2009-05-24, and in August 2010 "Listaller and Autopackage announced that the projects will merge", a successor that no longer ships either. Its own site survives through the Wayback Machine alone.
+
 ## [`bash-it`](https://bash-it.readthedocs.io) ❌ 🛟
 
 Bash configuration framework shipping no registry of its own: its plugins, aliases and completions all live inside the single git checkout under `plugins/available`, `aliases/available` and `completion/available`, so `bash-it enable plugin git` only symlinks a file the clone already put on disk and `bash-it disable` removes that symlink again. Nothing is fetched and nothing carries a version of its own: `bash-it update` runs `git fetch` and checks out a tag or `master` across the whole tree, a mechanism its maintainer describes as "*we assume we cloned the project, and we run `git fetch` and things like that*" ([Bash-it/bash-it#1819](https://github.com/Bash-it/bash-it/issues/1819)).
@@ -61,6 +65,10 @@ What [`topgrade`](managers/topgrade.md) drives here is `cinnamon-spice-updater -
 
 Nothing there is a package operation. There is no install and no removal, both of which happen in Cinnamon's own settings UI. The two listings are not an inventory either: `--list-simple` is documented as a "*Simple list of UUIDs (or theme names) with available updates*" and both call `get_updates_of_type`, so they report what is *stale* rather than what is present, which leaves `mpm` no way to enumerate the machine. And the one mutating option takes a *type*, never a spice, so no individual applet can be updated by name. No `--version` is declared either, which disqualifies it a second time over. The [`zr`](#zr) reading.
 
+## [`component`](https://github.com/componentjs/component) ☠️
+
+Front-end package manager and build tool for modular web applications, archived on GitHub with a last push of 2017-12-16. It installed into the working tree rather than onto the machine, so it would have landed among the project-scoped ecosystems below even while alive.
+
 ## Container runtimes ❌ 🛟
 
 [`colima`](https://colima.run), [`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`podman`](https://podman.io) and [`toolbx`](https://containertoolbx.org).
@@ -70,6 +78,10 @@ Manage container images and running containers, not packages. An image is a file
 ## [`cursor`](https://cursor.com) ❌ 🛟
 
 A VS Code fork that did not inherit the CLI intact: `--list-extensions` launches the Cursor window instead of listing anything ([forum.cursor.com](https://forum.cursor.com/t/command-line-list-extensions/103565), where a moderator grants "*this is not expected behavior*" and the thread closes with no fix). Silently opening a GUI where a listing was asked for is worse than an error, since nothing signals the failure. Cursor's own [CLI documentation](https://cursor.com/docs/cli/installation) covers the separate [`cursor-agent`](#self-updating-applications) binary and never documents the extension flags at all, so there is no contract to build on. Contrast [`vscode`](managers/vscode.md), whose `--list-extensions --show-versions` is documented and stable.
+
+## [`cydia`](https://en.wikipedia.org/wiki/Cydia) ☠️
+
+Package front-end for jailbroken iOS, described by Wikipedia as "a graphical user interface of APT for iOS". Its last release is `1.1.36` from 2020-06-24 and its store closed on 2018-12-16. Dormancy is not the only objection: the APT it drives runs on a phone rather than on the host, which is the scope that declined [`fdroidcl`](#fdroidcl).
 
 ## [`declaro`](https://github.com/mantinhas/declaro) ❌
 
@@ -93,6 +105,10 @@ Synchronize files and Git checkouts, not packages. There is no registry, no pack
 
 Vim and Neovim plugin manager, the live successor to [`dein`](#dein), but drivable only from inside the editor: its work happens in a Deno process ([denops.vim](https://github.com/vim-denops/denops.vim)) that Vim starts, and it documents no headless entry point. It reports no version and ships no binary of its own either, so it fails the same two requirements `dein` does, with nothing left to key the manager on.
 
+## [`entropy`](https://github.com/Sabayon/entropy) ☠️
+
+Sabayon Linux's own binary package manager, last pushed 2020-09-07. Six years of silence is twice the span the stability policy reads as abandonment, and no fork has picked it up.
+
 ## [`etc-update`](https://wiki.gentoo.org/wiki/Etc-update) ❌ 🛟
 
 Merges pending `/etc` configuration files left behind by a Portage upgrade. It resolves conflicts, installs nothing, and is already covered by [`emerge`](managers/emerge.md), which `mpm` wraps.
@@ -108,6 +124,10 @@ fdroidcl installs nothing onto the machine: it drives another computer's package
 Fish plugin manager owning no verb that names a plugin, which its own source settles rather than any behaviour that has to be run: the whole tool is three files and, as its readme puts it, "*< 100 lines of code you can actually read and understand*". Plugins are whatever the `$plugins` variable lists in the user's `config.fish`, and installation is a side effect of starting a shell, `conf.d/plugin_load.fish` cloning any entry whose directory is missing. `functions/plugin_update.fish` takes no argument and pulls every entry of that same list; `functions/plugin_uninstall.fish` takes none either, sweeping the directories the list no longer names and asking `"$plugin_name is disabled, uninstall? (y/N)"` for each, so removal cannot be driven with nobody at the keyboard. There is no listing.
 
 It reports no version either, by any route: upstream publishes zero tags and zero releases, carries no version constant, and its documented install clones a branch, so nothing on disk names one. That is [`zgenom`](#zgenom)'s verdict, reached independently. The project renamed itself to `plug.fish` and rewrote at `v3`, which is the version driven here.
+
+## [`fpm`](https://github.com/jordansissel/fpm) ❌
+
+Builds packages instead of managing them, which leaves nothing for `mpm` to address. It converts a directory, a gem or a Python distribution into a `.deb`, an `.rpm` or a `.pkg` for some other manager to install, so it owns no inventory, installs nothing on its own and removes nothing. The managers that consume what it produces are wrapped already. Alive and busy, pushed 2026-08-26.
 
 ## [`fresh`](https://freshshell.com) ❌
 
@@ -126,6 +146,10 @@ None of that is reachable, because nothing reports Gear Lever's own version. Its
 ## [`gofish`](https://github.com/fishworks/gofish) ☠️
 
 Cross-platform package manager modelled on Homebrew, down to a registry of its own: "fish food" recipes hosted at [fishworks/fish-food](https://github.com/fishworks/fish-food). Its readme announces the end in as many words, "*THIS PROJECT IS BEING ARCHIVED*", blaming "*the amount of time and money required to maintain this side project*", and no commit has landed since 2022-03-08. The repository is archived and names no successor.
+
+## [`gopm`](https://github.com/gpmgo/gopm) ☠️
+
+Go package manager and build tool, archived on GitHub with a last push of 2019-07-29. Go modules absorbed the job, and the toolchain that resolves them is wrapped as [`go`](managers/go.md).
 
 ## [`helix`](https://helix-editor.com) ❌ 🛟
 
@@ -146,6 +170,10 @@ Draws its packages from nixpkgs, the registry `mpm` already reaches through [`ni
 ## [`install-release`](https://github.com/Rishang/install-release) ❌ 🛟
 
 Installer of single-binary tools from GitHub and GitLab releases, reporting no version of its own, which is the requirement {attr}`~meta_package_manager.manager.PackageManager.fresh` enforces: without one the manager is never considered available. Both executables it ships, `ir` and `install-release`, reject `--version`, `-V`, `-v` and a `version` subcommand alike, all four checked against `0.8.4`, and no request for one has ever been filed upstream. The companion-binary route that rescued [`raco`](managers/raco.md) does not apply either, the two executables being one entry point under two names rather than a versioned sibling. Otherwise well shaped, which is worth recording: `ls`, `get`, `rm`, `upgrade` and `hold` would have mapped cleanly. The [`zgenom`](#zgenom) verdict. Its own scope is narrower than its help suggests, too: every invocation on macOS answers "*Package installation is only supported on Linux*" and lists nothing, where the help advertises "*Linux/MacOS*".
+
+## [`jam`](https://github.com/caolan/jam) ☠️
+
+Browser-focused JavaScript package manager built on RequireJS, archived on GitHub with a last push of 2016-10-06.
 
 ## JetBrains IDE plugins ❌ 🛟
 
@@ -243,6 +271,10 @@ Neovim plugin manager clearing both tests its peers failed: installation has a d
 
 Vim plugin manager with no commit since 2022-08-24. Its whole job, splicing plugin directories into `runtimepath`, became a Vim 8 and Neovim built-in, which is what [`vim-pack`](managers/vim-pack.md) wraps.
 
+## [`pbi`](https://github.com/trueos/trueos) ☠️
+
+PC-BSD's Push Button Installer format and the `pbi_*` tools around it. PC-BSD became TrueOS, whose repository is archived with a last push of 2020-04-22, and FreeBSD's own [`pkg`](managers/pkg.md) is what the platform installs with today.
+
 ## [`pckr-nvim`](https://github.com/lewis6991/pckr.nvim) ❌
 
 Successor to [`packer-nvim`](#packer-nvim) and actively developed, but drivable only from inside Neovim, and less so than its predecessor was. packer.nvim documented a headless recipe, `nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'`, which closed on the completion event named in it; the rewrite emits no autocommand at all, so an unattended run has nothing to wait on, and its `pckr/cli.lua` is the `:Pckr` Ex-command dispatcher rather than the shell entry point the name suggests. Removal blocks on an `OK to remove? [y/N]` prompt in `pckr/display.lua`. Its lockfile is opt-in, written only by the `:Pckr lock` action, and is a Lua table keyed by remote URL, so it is neither guaranteed to exist nor readable without an evaluator the way [`lazy`](managers/lazy.md)'s JSON one is. A request for a synchronous entry point was closed with a redirect to `config` and dependencies ([lewis6991/pckr.nvim#12](https://github.com/lewis6991/pckr.nvim/issues/12)).
@@ -258,6 +290,10 @@ A convenience layer over [`pip`](managers/pip.md), which `mpm` wraps directly: i
 ## [`pipupgrade`](https://github.com/achillesrasquinha/pipupgrade) ❌ 🛟
 
 Wraps `pip` and nothing else: it discovers the `pip`, `pip3` and `pip2` executables on `PATH` and shells out to them, resolving every candidate version against PyPI, so its whole inventory is the packages `mpm` already reaches through [`pip`](managers/pip.md). Its readme calls it "*The missing command for `pip`*", and what it adds on top is project-file rewriting of `requirements.txt` and `Pipfile` plus a semver-aware upgrade gate, both outside the system scope every `mpm` manager holds to.
+
+## [`pisi`](https://github.com/pisilinux/pisi) ☠️
+
+Pardus' package manager, left behind by the distribution that created it: "Pardus used to use Pisi, but migrated to APT in 2013". The PisiLinux fork carrying it on was last pushed 2022-03-28, past the silence the stability policy reads as abandonment. Its living descendant is Solus' [`eopkg`](managers/eopkg.md), which `mpm` wraps.
 
 ## [`pkg-termux`](https://github.com/termux/termux-tools) ❌
 
@@ -313,6 +349,10 @@ An update framework developers embed in their own macOS applications, described 
 
 `topgrade` reaches it by supplying the enumeration itself, walking `/Applications`, probing every bundle with `--probe` and updating whichever answer. That is a directory listing performed by the caller, not something Sparkle exposes, and it leaves nothing here to list, search, install by name or remove.
 
+## [`spm`](https://github.com/spmjs/spm) ☠️
+
+Static package manager for front-end assets, archived on GitHub with a last push of 2018-08-15. It shares its abbreviation with Swift's package manager, which is a different tool and project-scoped.
+
 ## [`sysget`](https://github.com/cvengler/sysget) ☠️
 
 Cross-manager wrapper retired in 2019. All 21 of the package managers it drove are shipped by `mpm`.
@@ -345,6 +385,10 @@ Not tools: internal steps of [`topgrade`](managers/topgrade.md), which `mpm` alr
 
 A Go rewrite of the Tmux Plugin Manager with a terminal interface, and it lands the same way as [`tmux`](#tmux) for the same reason, though not for identical reasons throughout. What it shares is decisive: there is no listing command at all, and neither of its state-changing verbs names a plugin. `tpack install` is documented as *"Install all plugins declared in tmux.conf"* and takes no positional, while `tpack clean` removes *"plugin directories not declared in tmux.conf"*, so the plugin set is the user's configuration file in both directions and nothing installs or removes one plugin. Where it does go further than tpm is `tpack update [plugin...]`, which names plugins, alongside a `check-updates` read; that leaves an upgrade as the entire honest surface a wrapper could offer, which is what [`topgrade`](managers/topgrade.md) already reaches. The [`zr`](#zr) reading. Checked against tpack `1.2.1`.
 
+## [`up2date`](https://en.wikipedia.org/wiki/Up2date) ☠️
+
+Red Hat's RPM updater, retired by its own vendor: "As of Fedora Core 5 and Red Hat Enterprise Linux 5, up2date is no longer shipped with the distribution; yum is used instead." That successor is wrapped as [`yum`](managers/yum.md).
+
 ## [`upm`](https://github.com/epitron/upm) ❌
 
 "*Universal Package Manager*", putting one syntax over apk, apt, guix, opkg, pacman, pkg, pkg_add, pkgin, xbps and yum. It owns no registry: every command is translated to whichever of those the host already carries, all of them wrapped by `mpm` directly, so it reaches no package `mpm` cannot. That is [`upt`](#upt)'s verdict word for word, and like `upt` it reads as a peer of `mpm` rather than a candidate to wrap.
@@ -358,6 +402,10 @@ Translates one CLI vocabulary onto whichever single OS-level manager is detected
 Vim's own package feature loads plugins but never fetches them, which leaves nothing to wrap. Asked directly, Vim `9.2` reports `has('packages')` as `1` and `exists(':packadd')` as `2`, while `:PackUpdate` and `:PackAdd` both come back `0`: the one command it has puts a package already on disk onto the runtime path. Getting it there is the user's job, a plugin being a directory under `pack/*/start/` that they clone or copy themselves, so there is no registry, no listing, and no install, update or removal of anything.
 
 That is precisely what separates it from [`vim-pack`](managers/vim-pack.md), which `mpm` does wrap: Neovim's manager takes sources and records them, where Vim's feature only reads a directory. What [`topgrade`](managers/topgrade.md) drives through this row is third-party managers anyway, its Vim step forcing a vim-plug update or running a `update_plugins.py` the user supplies.
+
+## [`volo`](https://github.com/volojs/volo) ☠️
+
+Front-end project tool that added dependencies by fetching them from GitHub, last pushed 2022-11-25. That is past the roughly three years of silence the stability policy reads as abandonment, and what it created was a project template rather than machine-wide state.
 
 ## [`voom`](https://github.com/airblade/voom) ❌ 🛟
 

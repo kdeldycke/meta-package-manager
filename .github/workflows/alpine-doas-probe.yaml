@@ -42,6 +42,17 @@ jobs:
           git -C /home/probe/mpm checkout "$GITHUB_SHA"
           chown -R probe: /home/probe
 
+      - name: Measure who can see the apk index
+        shell: sh {0}
+        run: |
+          echo "--- caches ---"
+          ls -la /var/cache/apk/ 2>&1; ls -la /etc/apk/ 2>&1
+          cat /etc/apk/repositories
+          echo "--- search as root ---"
+          apk search --verbose tree | head -3; echo "root-exit=$?"
+          echo "--- search as probe ---"
+          su probe -s /bin/sh -c 'apk search --verbose tree; echo "probe-exit=$?"' 2>&1 | head -6
+
       - name: Install mpm as the unprivileged user
         run: |
           cat > /home/probe/setup.sh << 'EOF'

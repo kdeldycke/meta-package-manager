@@ -22,7 +22,7 @@ Password:
 
 ## Escalation policy
 
-Which managers escalate is decided per manager. System package managers ([`apt`](managers/apt.md), [`dnf`](managers/dnf.md), [`pacman`](managers/pacman.md), [`zypper`](managers/zypper.md), [`xbps`](managers/xbps.md), [`macports`](managers/macports.md), [`snap`](managers/snap.md), and the like) run their state-changing operations through `sudo` by default; user-level managers ([`brew`](managers/brew.md), [`npm`](managers/npm.md), [`pip`](managers/pip.md), ...) do not, and daemon-backed managers authorizing through polkit ([`flatpak`](managers/flatpak.md), [`fwupd`](managers/fwupd.md), [`pkcon`](managers/pkcon.md)) need no wrap at all.
+Which managers escalate is decided per manager. System package managers ([`apt`](managers/apt.md), [`dnf`](managers/dnf.md), [`pacman`](managers/pacman.md), [`zypper`](managers/zypper.md), [`xbps`](managers/xbps.md), [`macports`](managers/macports.md), [`snap`](managers/snap.md), and the like) run their state-changing operations through `sudo` by default; user-level managers ([`brew`](managers/brew.md), [`npm`](managers/npm.md), [`pip`](managers/pip.md), ...) do not, and daemon-backed managers authorizing through polkit ([`flatpak`](managers/flatpak.md), [`fwupd`](managers/fwupd.md), [`pkcon`](managers/pkcon.md)) need no wrap at all. A password prompt raised by those last ones comes from polkit, not `sudo`, so a `NOPASSWD` rule does not silence it: grant a polkit rule instead.
 
 ## Controlling escalation
 
@@ -45,7 +45,7 @@ A per-manager `sudo` value wins over the global flag, so you can escalate everyt
 
 ## One prompt, up front
 
-`mpm` [runs managers concurrently](concurrency.md) with their output muted behind a progress bar, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A cache found warm (a prior `sudo --validate`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all.
+`mpm` [runs managers concurrently](concurrency.md) with their output muted behind a progress bar, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A cache found warm (a prior `sudo --validate`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all. While that keepalive runs, the terminal holds live `sudo` credentials, so anyone at the keyboard can interrupt `mpm` and reuse them until they expire: the same exposure as any pre-authenticated `sudo` session, worth knowing before walking away from a long run.
 
 Only a cold cache, on an interactive terminal, leads to a prompt: a notice names the managers about to escalate and the subcommand, then a single branded `sudo` prompt authenticates once for the whole run, so nothing blocks in the fan-out:
 
@@ -56,6 +56,10 @@ apt, deb-get need administrator rights to upgrade: enter your password.
 ```
 
 Off a terminal (a pipe, CI, a {doc}`desktop menu <desktop-menus>`), `mpm` cannot prompt: a warning names the managers needing root, and they fail fast with a clear error instead of hanging. To escalate unattended, configure a `NOPASSWD` rule for the managers' commands: the probe then finds the cache warm and keeps it alive. A prior `sudo --validate` also works, but only from the same terminal session `mpm` runs in: under sudo's default terminal-keyed timestamps, credentials cached in one terminal do not carry to a `mpm` launched without one (a desktop frontend, a CI step), so `NOPASSWD` is the robust choice there.
+
+One tool undoes the priming from inside the run: every Homebrew command [resets the `sudo` timestamp at startup](https://github.com/Homebrew/brew/blob/6bf9a47106220bc907579a9aa7c47faac070ea40/Library/Homebrew/brew.sh#L651-L655), on purpose, so a run mixing [`brew`](managers/brew.md) or [`cask`](managers/cask.md) with escalating managers can lose its credentials mid-flight. `mpm` warns when its background refresh finds them gone, and the managers escalating internally regain their hidden-prompt notice. A `NOPASSWD` rule is immune to the reset.
+
+The probe also reads `sudo`'s answer: a user the `sudoers` policy does not authorize at all gets one warning and no password prompt, since a password could not change the answer.
 
 ## Managers escalating internally
 

@@ -30,16 +30,20 @@ from __future__ import annotations
 
 import logging
 import subprocess
+import time
+from collections.abc import Callable
 from contextlib import ExitStack, contextmanager
 from unittest.mock import patch
 
 import click
 import pytest
+from extra_platforms import is_any_windows
 
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
     _is_sudo_auth_failure,
+    _is_sudo_denied,
     prime_sudo,
 )
 
@@ -307,6 +311,54 @@ def test_prime_sudo_warm_probe_keeps_alive_off_tty(caplog):
     assert not caplog.records
 
 
+def _wait_for(predicate: Callable[[], bool], timeout: float = 5.0) -> bool:
+    """Poll `predicate` until it holds or `timeout` seconds pass."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if predicate():
+            return True
+        time.sleep(0.005)
+    return False
+
+
+def test_keepalive_drop_warns_once_and_rearms(monkeypatch, caplog):
+    """A refresh finding the credentials gone (Homebrew resets them on every
+    command) clears the warm flag, with one warning per drop, and a later
+    successful refresh sets the flag back."""
+    monkeypatch.setattr("meta_package_manager.sudo._SUDO_KEEPALIVE_INTERVAL", 0.01)
+    ctx = click.Context(click.Command("mpm"))
+    refresh_rc = [0]
+
+    def fake_run(argv, **kwargs):
+        return subprocess.CompletedProcess(argv, refresh_rc[0])
+
+    def drop_warnings():
+        return [
+            record
+            for record in caplog.records
+            if "primed for this run are gone" in record.getMessage()
+        ]
+
+    with prime_sudo_env() as run, caplog.at_level(logging.WARNING):
+        run.side_effect = fake_run
+        try:
+            prime_sudo(ctx, [_escalating_manager()])
+            assert _SUDO_CACHE_WARM.is_set()
+            # Drop the credentials: the next refresh finds them gone.
+            refresh_rc[0] = 1
+            assert _wait_for(lambda: not _SUDO_CACHE_WARM.is_set())
+            # Let several more failing refreshes pass: the drop warns only once.
+            time.sleep(0.1)
+            assert len(drop_warnings()) == 1
+            # A re-authentication in this terminal re-warms the cache.
+            refresh_rc[0] = 0
+            assert _wait_for(_SUDO_CACHE_WARM.is_set)
+        finally:
+            ctx.close()
+    assert not _SUDO_CACHE_WARM.is_set()
+    assert len(drop_warnings()) == 1
+
+
 def test_prime_sudo_cold_internal_only_never_prompts_on_tty(capsys, caplog):
     """A cold cache with only internal escalators (a stock cask/fink selection)
     probes, then returns without prompting: most such runs never escalate, and
@@ -341,6 +393,91 @@ def test_prime_sudo_cold_internal_only_stays_silent_off_tty(caplog):
     assert run.call_count == 1
     assert not _SUDO_CACHE_WARM.is_set()
     assert not caplog.records
+
+
+def test_prime_sudo_denied_user_skips_prompt(caplog):
+    """A probe reporting a sudoers denial skips the password prompt even on a
+    terminal: a password could only be collected then rejected. One warning
+    names the managers and the remedy."""
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        caplog.at_level(logging.WARNING),
+    ):
+        run.return_value = subprocess.CompletedProcess(
+            (),
+            1,
+            stderr=b"Sorry, user kevin may not run sudo on host.\n",
+        )
+        prime_sudo(ctx, [_escalating_manager()])
+    # The non-interactive probe is the only subprocess: no prompt is raised.
+    assert run.call_count == 1
+    assert not _SUDO_CACHE_WARM.is_set()
+    assert any(
+        "not authorized to run sudo" in record.getMessage()
+        and "fakemanager" in record.getMessage()
+        and "--no-sudo" in record.getMessage()
+        for record in caplog.records
+    )
+
+
+def test_prime_sudo_denied_internal_only_stays_silent(caplog):
+    """A sudoers denial with only internal escalators selected stays silent:
+    each manager's own sudo surfaces the denial through its error path."""
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        caplog.at_level(logging.WARNING),
+    ):
+        run.return_value = subprocess.CompletedProcess(
+            (),
+            1,
+            stderr=b"Sorry, user kevin may not run sudo on host.\n",
+        )
+        prime_sudo(ctx, [_internal_manager()])
+    assert run.call_count == 1
+    assert not caplog.records
+
+
+@pytest.mark.skipif(
+    is_any_windows(),
+    reason="The POSIX ownership check is skipped on Windows.",
+)
+@pytest.mark.parametrize(
+    ("mode", "expect_warning"),
+    (
+        pytest.param(0o755, False, id="trusted"),
+        pytest.param(0o777, True, id="world-writable"),
+    ),
+)
+def test_prime_sudo_audits_escalated_binaries(tmp_path, caplog, mode, expect_warning):
+    """The binary of a manager mpm escalates gets the config-file tamper test:
+    one warning per manager when others can modify it, and the escalation still
+    proceeds (the probe still runs)."""
+    ctx = click.Context(click.Command("mpm"))
+    binary = tmp_path / "fake-mpm"
+    binary.write_text("#!/bin/sh\n", encoding="UTF-8")
+    binary.chmod(mode)
+    manager = _escalating_manager()
+    manager.cli_path = binary
+    with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
+        run.return_value = subprocess.CompletedProcess((), 0)
+        try:
+            prime_sudo(ctx, [manager])
+        finally:
+            ctx.close()
+    assert run.call_count == 1
+    tamper_warnings = [
+        record
+        for record in caplog.records
+        if "others can write to it" in record.getMessage()
+    ]
+    if expect_warning:
+        assert len(tamper_warnings) == 1
+        assert str(binary) in tamper_warnings[0].getMessage()
+        assert tamper_warnings[0].label == manager.id
+    else:
+        assert not tamper_warnings
 
 
 @pytest.mark.parametrize(
@@ -468,6 +605,31 @@ def test_sudo_prompt_respects_sudo_constraints(manager_ids):
 )
 def test_is_sudo_auth_failure(error, expected):
     assert _is_sudo_auth_failure(error) is expected
+
+
+@pytest.mark.parametrize(
+    ("error", "expected"),
+    (
+        # sudo 1.9 and newer, per its message catalog.
+        ("User kevin is not allowed to run sudo on host.", True),
+        # sudo before 1.9, and sudo-rs's validate denial.
+        ("Sorry, user kevin may not run sudo on host.", True),
+        ("kevin is not in the sudoers file.", True),
+        # The per-command denial, sudo and sudo-rs alike.
+        (
+            "Sorry, user kevin is not allowed to execute '/bin/sh' as root on host.",
+            True,
+        ),
+        ("SORRY, USER KEVIN MAY NOT RUN SUDO ON HOST.", True),
+        # A cold cache is an authentication failure, never a denial.
+        ("sudo: a password is required", False),
+        ("sudo: interactive authentication is required", False),
+        ("", False),
+        ("error: package not found", False),
+    ),
+)
+def test_is_sudo_denied(error, expected):
+    assert _is_sudo_denied(error) is expected
 
 
 # Stall watchdog: a mutating call of an internal escalator (cask, fink) that goes

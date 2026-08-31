@@ -1173,9 +1173,11 @@ class CLIExecutor:
             spinner = self._make_spinner()
             # A mutating command of an internal escalator (cask, fink) may block
             # on a hidden `sudo` password prompt when prime_sudo() found no warm
-            # credential cache to keep alive. Arm the stall watchdog around the
-            # spawn so the silence is flagged, on the terminal where the prompt
-            # waits, while it can still be answered.
+            # credential cache to keep alive, or when the keepalive has since
+            # found the cache dropped (every Homebrew command resets it). Arm
+            # the stall watchdog around the spawn so the silence is flagged, on
+            # the terminal where the prompt waits, while it can still be
+            # answered.
             watchdog = None
             if (
                 self.internal_sudo

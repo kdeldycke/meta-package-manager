@@ -96,12 +96,18 @@ prompt.
 """
 
 _SUDO_CACHE_WARM: Final = threading.Event()
-"""Set while a priming keepalive maintains the credential cache for the invocation.
+"""Set while the priming keepalive believes the credential cache is warm.
 
 Armed by {func}`_start_sudo_keepalive` and cleared when the context closes. A warm
 cache serves internal escalations ({attr}`CLIExecutor.internal_sudo
 <meta_package_manager.execution.CLIExecutor.internal_sudo>`) silently, so the
 silent-call stall watchdog skips arming while this flag is set.
+
+The keepalive keeps the flag honest mid-run: a refresh that finds the
+credentials gone clears it, with one warning per drop, so later spawns arm the
+watchdog again, and a refresh that succeeds after a re-authentication sets it
+back. Homebrew is the known cache killer: every `brew` command resets the
+`sudo` timestamp at startup, on purpose (see `docs/sudo.md`).
 
 ```{note}
 
@@ -135,6 +141,14 @@ shorter `timestamp_timeout` may still see a mid-run escalation re-prompt or fail
 
 _SUDO_PRIMED: Final = "mpm_sudo_primed"
 """`ctx.meta` key marking that {func}`prime_sudo` already ran this invocation."""
+
+
+_SUDO_VALIDATE_CLI: Final = ("sudo", "--non-interactive", "--validate")
+"""Argv probing and refreshing the credential cache without ever prompting.
+
+Shared by {func}`prime_sudo`'s up-front probe and the recurring refresh of
+{func}`_start_sudo_keepalive`, so the two always read the cache the same way.
+"""
 
 
 def _resolved_sudo(manager: CLIExecutor) -> bool:
@@ -174,31 +188,88 @@ def _is_sudo_auth_failure(error: str) -> bool:
     )
 
 
+def _is_sudo_denied(error: str) -> bool:
+    """Whether `error` is `sudo` reporting the user is not authorized to run it.
+
+    Distinct from {func}`_is_sudo_auth_failure`: an authentication failure means
+    the cache is cold and a password would unblock, while a denial means the
+    `sudoers` policy grants this user nothing, so a prompt could only collect a
+    password `sudo` then rejects. {func}`prime_sudo` skips its up-front prompt on
+    a denial.
+
+    The detection is opportunistic: some `sudo` configurations reveal the denial
+    to a non-interactive `--validate` while others hide it behind `a password is
+    required` (authenticating before disclosing authorization), and the hidden
+    case simply keeps today's prompt-then-fail path. The markers cover, in
+    order: `sudo` since `1.9` (`is not allowed to run sudo on`, per its message
+    catalog), `sudo` before `1.9` and `sudo-rs`'s validate denial (`may not run
+    sudo on`, `src/common/error.rs`), the historic sudoers lecture (`is not in
+    the sudoers file`), and both implementations' per-command denial (`is not
+    allowed to execute`). Unlike {func}`_is_sudo_auth_failure`, which scans the
+    stderr of arbitrary failed commands, this one only ever reads the probe's
+    own output, so the markers need no `sudo:` prefix guard.
+    """
+    lowered = error.lower()
+    return any(
+        marker in lowered
+        for marker in (
+            "is not allowed to run sudo",
+            "may not run sudo",
+            "is not in the sudoers file",
+            "is not allowed to execute",
+        )
+    )
+
+
 def _start_sudo_keepalive(ctx: Context) -> None:
     """Keep the `sudo` credential cache fresh for the rest of the invocation.
 
     Refreshes the cache every {data}`_SUDO_KEEPALIVE_INTERVAL` seconds so a long
     fan-out does not outlast sudo's timestamp and re-prompt mid-flight. Output is
     captured so a failed refresh cannot smear the aggregate spinner drawing on
-    stderr. Sets {data}`_SUDO_CACHE_WARM` for the whole run; the daemon thread is
-    stopped and the flag cleared when the context closes (normal exit or Ctrl+C both
-    run close callbacks).
+    stderr. Sets {data}`_SUDO_CACHE_WARM` for the run, and keeps it honest: a
+    refresh finding the credentials gone (a manager reset them, Homebrew does on
+    every command, or a strict `sudoers` policy expired them) clears the flag and
+    warns, once per drop, so the stall watchdog re-arms for later spawns; a
+    refresh succeeding again, after the user re-authenticates in this terminal,
+    sets it back. The refresh never re-prompts by design: only a command that
+    needs the credentials may. The daemon thread is stopped and the flag cleared
+    when the context closes (normal exit or Ctrl+C both run close callbacks).
     """
     stop = threading.Event()
 
     def keepalive() -> None:
         while not stop.wait(_SUDO_KEEPALIVE_INTERVAL):
-            subprocess.run(
-                ("sudo", "--non-interactive", "--validate"),
+            refresh = subprocess.run(
+                _SUDO_VALIDATE_CLI,
                 capture_output=True,
                 check=False,
             )
+            # A refresh racing the teardown must not touch the flag the
+            # teardown just cleared.
+            if stop.is_set():
+                break
+            if refresh.returncode == 0:
+                _SUDO_CACHE_WARM.set()
+            elif _SUDO_CACHE_WARM.is_set():
+                _SUDO_CACHE_WARM.clear()
+                logging.warning(
+                    "The sudo credentials primed for this run are gone: a "
+                    "manager reset them (every Homebrew command does) or the "
+                    "sudoers policy expired them. Managers needing root may "
+                    "prompt or fail.",
+                )
 
-    threading.Thread(target=keepalive, daemon=True).start()
+    thread = threading.Thread(target=keepalive, daemon=True)
+    thread.start()
     _SUDO_CACHE_WARM.set()
 
     def teardown() -> None:
         stop.set()
+        # The thread leaves its wait promptly once stopped; join it so a
+        # refresh still in flight cannot set the flag back after the clear
+        # below. The timeout bounds a Ctrl+C exit if sudo itself wedges.
+        thread.join(timeout=2)
         _SUDO_CACHE_WARM.clear()
 
     ctx.call_on_close(teardown)
@@ -222,6 +293,12 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     naming the managers and the subcommand, then a single branded `sudo` password
     prompt.
 
+    Before probing, the binary of each manager mpm escalates is audited with the
+    same tamper test the config loader applies
+    ({func}`~meta_package_manager.config.config_file_is_trusted`): a binary that
+    others can modify, handed to `sudo`, runs their code as root, so it draws one
+    warning per manager (see `docs/security.md`).
+
     Call at the top of each mutating subcommand, before the fan-out draws its
     spinner. Never prompts when:
 
@@ -231,6 +308,10 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     - already primed once this invocation (idempotent),
     - the `sudo` executable is missing (one warning is logged),
     - the probe finds the cache already warm (keepalive only, fully silent),
+    - the probe reports the user is not authorized to run `sudo` at all
+      ({func}`_is_sudo_denied`): one warning names the managers mpm escalates and
+      the remedy, since a prompt could only collect a password `sudo` then
+      rejects, while an internal-only selection stays silent,
     - no interactive terminal is available: one warning names the managers mpm
       escalates and leaves them to fail fast rather than block on a prompt no one
       can answer, while an internal-only selection stays silent, or
@@ -251,9 +332,30 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         return
     ctx.meta[_SUDO_PRIMED] = True
 
+    # Deferred on purpose: `config` pulls in the definitions machinery, which
+    # imports back into this module through `manager` and `execution`.
+    from .config import config_file_is_trusted
+
+    for manager in managers:
+        if not _resolved_sudo(manager):
+            continue
+        # The same file-plus-parent tamper test the config loader applies (see
+        # `docs/security.md`): a binary that others can modify, handed to
+        # `sudo`, runs their code as root. The warning does not block: like the
+        # risky-override warning, existing setups keep working.
+        cli_path = manager.cli_path
+        if cli_path is not None and not config_file_is_trusted(cli_path):
+            logging.warning(
+                f"About to run {cli_path} as root, but it is not owned by you "
+                "or root, or others can write to it or its directory. Fix its "
+                "ownership and permissions, or drop escalation with "
+                "`--no-sudo`.",
+                extra={"label": manager.id},
+            )
+
     try:
         probe = subprocess.run(
-            ("sudo", "--non-interactive", "--validate"),
+            _SUDO_VALIDATE_CLI,
             capture_output=True,
             check=False,
         )
@@ -261,7 +363,11 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         # No sudo on PATH (FileNotFoundError), or one that cannot be run: not executable
         # for this user (PermissionError), not a valid binary (OSError). Degrade to a
         # warning and let unprivileged managers proceed rather than crash.
-        logging.warning("sudo could not be run: managers needing root may fail.")
+        logging.warning(
+            "sudo could not be run: managers needing root may fail. Drop "
+            "escalation with `--no-sudo` or a `[mpm] sudo = false` entry in "
+            "your configuration file.",
+        )
         return
     if probe.returncode == 0:
         # Cache already warm (a prior `sudo --validate`, a NOPASSWD rule):
@@ -272,6 +378,19 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         return
 
     ids = ", ".join(escalating)
+    probe_error = (probe.stderr or b"").decode("UTF-8", errors="replace")
+    if _is_sudo_denied(probe_error):
+        if escalating:
+            logging.warning(
+                f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
+                "rights, but you are not authorized to run sudo on this host: "
+                "they will fail. Drop escalation with `--no-sudo` or a "
+                "`[mpm] sudo = false` entry in your configuration file.",
+            )
+        # An internal-only selection stays silent, as on the no-terminal path:
+        # each manager's own sudo surfaces the denial through its error path.
+        return
+
     if not (sys.stdin.isatty() and sys.stderr.isatty()):
         if escalating:
             logging.warning(
@@ -318,7 +437,8 @@ class _StallWatchdog(logging.Handler):
     `/dev/null` and its output streams to `DEBUG` logs, so on a cold
     credential cache the prompt lands invisibly on `/dev/tty`: the run looks
     stuck until the mutating timeout kills it. When {func}`prime_sudo` left the
-    cache cold, {meth}`CLIExecutor.run
+    cache cold, or the keepalive later found it dropped mid-run,
+    {meth}`CLIExecutor.run
     <meta_package_manager.execution.CLIExecutor.run>` arms this watchdog around
     the spawn: once {data}`_STALL_NOTICE_DELAY` seconds pass without a fresh
     output line, a daemon thread logs one `WARNING` naming the manager and

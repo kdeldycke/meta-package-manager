@@ -743,6 +743,9 @@ def config_file_is_trusted(path: Path) -> bool:
     On platforms without `os.getuid` (Windows), the POSIX ownership model does not
     apply and the check is skipped (returns `True`); see `docs/security.md` for the
     rationale and the residual risk.
+
+    Also consulted by {func}`meta_package_manager.sudo.prime_sudo`, which runs the
+    same tamper test on the binary of each manager it is about to escalate.
     """
     if not hasattr(os, "getuid"):
         return True

@@ -97,6 +97,12 @@ Vim and Neovim plugin manager, the live successor to [`dein`](#dein), but drivab
 
 Merges pending `/etc` configuration files left behind by a Portage upgrade. It resolves conflicts, installs nothing, and is already covered by [`emerge`](managers/emerge.md), which `mpm` wraps.
 
+## [`fdroidcl`](https://github.com/mvdan/fdroidcl) ❌
+
+Everything but the target reads like a candidate. The F-Droid repository is a real registry nothing else in the pool reaches, `fdroidcl version` answers `v0.8.1`, and `update`, `search`, `scan`, `install` and `uninstall` are all native. Scope is the whole of the objection, and it is [`helm`](#helm)'s objection pointed at a different remote.
+
+fdroidcl installs nothing onto the machine: it drives another computer's package manager over adb. `scan` shells out to `pm list packages` on each connected device, and `install` pushes an APK to one. The two do not even agree on their target. `scan` iterates over every device plugged in, while `install` calls `oneDevice()` and fails unless `ANDROID_SERIAL` or a single connection settles which one. So the inventory describes a set of guest machines, changes with what is attached, and is empty where nothing is, none of which the system scope every `mpm` manager holds to can express. The line is not that attached hardware is out of bounds, since [`fwupd`](managers/fwupd.md) is wrapped and treats each updatable device as a package: its firmware belongs to this machine's own stack, where an Android phone is a separate computer running its own operating system and its own package manager.
+
 ## [`fish-plug`](https://github.com/kidonng/plug.fish) ❌ 🛟
 
 Fish plugin manager owning no verb that names a plugin, which its own source settles rather than any behaviour that has to be run: the whole tool is three files and, as its readme puts it, "*< 100 lines of code you can actually read and understand*". Plugins are whatever the `$plugins` variable lists in the user's `config.fish`, and installation is a side effect of starting a shell, `conf.d/plugin_load.fish` cloning any entry whose directory is missing. `functions/plugin_update.fish` takes no argument and pulls every entry of that same list; `functions/plugin_uninstall.fish` takes none either, sweeping the directories the list no longer names and asking `"$plugin_name is disabled, uninstall? (y/N)"` for each, so removal cannot be driven with nobody at the keyboard. There is no listing.

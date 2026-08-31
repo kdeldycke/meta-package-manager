@@ -27,7 +27,11 @@ jobs:
     steps:
       - name: Set the stage as root
         run: |
-          apk add --no-cache doas git python3 uv
+          # The base image ships no package index, and --no-cache would keep it
+          # that way: populate it so the unprivileged user's availability
+          # search can see the catalog.
+          apk update
+          apk add doas git python3 uv
           uv --version
           if command -v sudo; then echo "sudo present, premise broken"; exit 1; fi
           adduser -D probe

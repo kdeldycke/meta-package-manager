@@ -158,6 +158,8 @@ class APK(PackageManager):
         also matched against package descriptions.
         ```
 
+        `apk-tools` 2 prints the bare name and version:
+
         ```{code-block} shell-session
 
         $ apk --no-progress search --verbose firefox
@@ -173,6 +175,17 @@ class APK(PackageManager):
         ntp-4.2.8_p17-r0
         openntpd-6.8_p1-r1
         ```
+
+        `apk-tools` 3 appends each package's description, so only the first
+        whitespace-delimited token is the name and version:
+
+        ```{code-block} shell-session
+
+        $ apk --no-progress search --verbose curl
+        curl-8.21.0-r0 - URL retrieval utility and library
+        curl-dev-8.21.0-r0 - URL retrieval utility and library (development files)
+        curl-doc-8.21.0-r0 - URL retrieval utility and library (documentation)
+        ```
         """
         args = ["search", "--verbose"]
         if extended:
@@ -181,7 +194,10 @@ class APK(PackageManager):
         output = self.run_cli(*args)
 
         for line in output.splitlines():
-            if split := self.split_name_version(line.strip()):
+            # The first token covers both dialects: the whole line on
+            # apk-tools 2, the name-version ahead of the description on 3.
+            token = line.split(maxsplit=1)[0] if line.strip() else ""
+            if split := self.split_name_version(token):
                 package_id, version = split
                 yield self.package(id=package_id, latest_version=version)
 

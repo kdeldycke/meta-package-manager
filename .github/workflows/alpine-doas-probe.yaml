@@ -13,6 +13,8 @@ name: 🧪 alpine doas probe
       - main
     paths:
       - .github/workflows/alpine-doas-probe.yaml
+      - meta_package_manager/managers/apk.py
+      - meta_package_manager/sudo.py
 
 env:
   UV_EXCLUDE_NEWER: "1 week"

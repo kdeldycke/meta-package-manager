@@ -90,6 +90,7 @@ apt = ["topgrade", "upt", "pacaptr", "metapac"]
 apt-cyg = []
 apt-mint = []
 apt-rpm = []
+aptitude = []
 aqua = ["topgrade"]
 asdf = ["topgrade"]
 atuin = ["topgrade"]
@@ -170,6 +171,7 @@ git = ["topgrade"]
 gext = ["topgrade"]
 glide = []
 go = ["topgrade"]
+go-global-update = ["topgrade"]
 gofish = []
 gopm = []
 guix = ["topgrade", "upt"]
@@ -181,6 +183,7 @@ helm = ["topgrade"]
 home-manager = ["topgrade"]
 hyprpm = ["topgrade"]
 install-release = ["topgrade"]
+ips = []
 jam = []
 jetbrains-aqua = ["topgrade"]
 jetbrains-clion = ["topgrade"]
@@ -385,6 +388,7 @@ antibody = "https://getantibody.github.io"
 antigravity = "https://antigravity.google"
 app-man = "https://github.com/ivan-hc/AppMan"
 apt-rpm = "https://en.wikipedia.org/wiki/APT-RPM"
+aptitude = "https://salsa.debian.org/apt-team/aptitude"
 aqua = "https://aquaproj.github.io"
 atuin = "https://atuin.sh"
 aura = "https://github.com/fosskers/aura"
@@ -429,6 +433,7 @@ fundle = "https://github.com/danhper/fundle"
 gearlever = "https://gearlever.mijorus.it"
 git = "https://git-scm.com"
 glide = "https://github.com/Masterminds/glide"
+go-global-update = "https://github.com/Gelio/go-global-update"
 gofish = "https://gofi.sh"
 gopm = "https://github.com/gpmgo/gopm"
 helix = "https://helix-editor.com"
@@ -437,6 +442,7 @@ helm = "https://helm.sh"
 home-manager = "https://github.com/nix-community/home-manager"
 hyprpm = "https://hypr.land"
 install-release = "https://github.com/Rishang/install-release"
+ips = "https://github.com/oracle/solaris-ips"
 jam = "https://github.com/caolan/jam"
 jetbrains-aqua = "https://www.jetbrains.com/aqua/"
 jetbrains-clion = "https://www.jetbrains.com/clion/"
@@ -584,6 +590,11 @@ topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420
 
 # One `Go` step runs `go-global-update` and `gup` back to back, so neither
 # can be asked for on its own.
+[coarse_support.go-global-update]
+topgrade = "https://github.com/topgrade-rs/topgrade/blob/v17.9.0/src/step.rs#L380-L383"
+
+# One `Go` step runs `go-global-update` and `gup` back to back, so neither
+# can be asked for on its own.
 [coarse_support.gup]
 topgrade = "https://github.com/topgrade-rs/topgrade/blob/v17.9.0/src/step.rs#L380-L383"
 
@@ -707,6 +718,7 @@ fresh = "excluded"
 fundle = "archived"
 gearlever = "excluded"
 git = "excluded"
+go-global-update = "excluded"
 gofish = "archived"
 gopm = "archived"
 helix = "excluded"
@@ -808,6 +820,7 @@ zigup = "excluded"
 zr = "excluded"
 
 [queued]
+aptitude = "A Debian host. Assessed: it sits over the same archives as `apt` and the same dpkg backend, but carries its own resolver, its own search-pattern vocabulary, a `versions` verb and its own action log, which is the shape `nala` was wrapped on rather than the translation layer that declined `upt`. Alive, `0.8.13-8.1` reaching Debian unstable on 2026-04-15."
 aqua = "Project scope, tracked in issue 1725. Every operation resolves the nearest `aqua.yaml`, so the listing reports what a config declares rather than what the host holds. Reassess if aquaproj/aqua#1900 gives `install` a package argument."
 aura = "An Arch host. Assessed: v4's clap subcommands replaced pacman's letters, so it cannot subclass `Pacman` the way the six wrapped AUR helpers do."
 bower = "Project scope, tracked in issue 1725. Alive, and its own readme steers new work elsewhere: \"While Bower is maintained, we recommend yarn and webpack or parcel for new front-end projects!\" What disqualifies it here is that it resolves into `bower_components/` inside a working tree."
@@ -815,6 +828,7 @@ cabal = "Project scope, tracked in issue 1725. `cabal outdated` answers for a pa
 choosenim = "A host carrying choosenim. Assessed from `cliparams.nim`, but no route to a runnable binary here: pkgx has none, a release binary cannot be made executable, and `nimble install` pins a version that no longer builds."
 glide = "Project scope, tracked in issue 1725. Alive, and it manages \"the vendor directory within a Go package\", which is a working tree rather than a machine."
 hyprpm = "A Hyprland host. Assessed: the listing reads on-disk state and needs no running compositor, but the repository-versus-plugin identity has to be settled against real output."
+ips = "A Solaris or illumos host. Assessed: Oracle's Image Packaging System owns its own repositories and a full verb set, `list`, `install`, `uninstall`, `update` and `search`, and it is current, upstream pushing on 2026-08-20 and OpenIndiana snapshotting 2026.04 on 2026-05-05. One implementation note: its CLI is `pkg`, the name the wrapped FreeBSD manager already answers to, so the two can only be told apart by their platform declarations."
 lure = "A Linux host, and a dead-upstream recheck after 2026-12-25, when the tool itself crosses three years of silence. On merits it is the AUR-helper shape that wrapped `nala`."
 netpkg = "A Zenwalk host. Assessed: it is that distribution's own manager, adding dependency metadata over Slackware `.tgz` packages, and Zenwalk still releases, its newest being dated 2025-01-16. What has to be settled against a real install is its relationship to `slapt-get`, which mpm wraps and which Zenwalk is also compatible with."
 pear = "A host carrying a PEAR-enabled PHP. Assessed: `pear.php.net` is a registry of its own, `list`, `install`, `uninstall` and `version` are native and system-scoped, and upstream is maintained, `v1.10.18` dating from 2026-01-25. Neither Homebrew's PHP nor pkgx's ships a working `pear` here."

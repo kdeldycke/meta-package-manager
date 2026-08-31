@@ -151,6 +151,10 @@ Painfully close, and it fails on the version alone. Gear Lever manages the AppIm
 
 None of that is reachable, because nothing reports Gear Lever's own version. Its `Cli.options` table declares `integrate`, `update`, `remove`, `remove-all`, `list-installed`, `list-updates`, `list-update-managers`, `set-update-url`, `set-update-source` and a background fetch, and no version among them. The failure mode is the aggravating part: `Cli.from_options` returns `-1` for an option it does not know, after which `main()` falls through to `GearleverApplication(...).run(sys.argv)`, so a version probe does not fail, it launches the GTK window. That is [`cursor`](#cursor)'s verdict, where opening a GUI in place of an answer is worse than an error because nothing signals it, layered on [`zgenom`](#zgenom)'s. A `--version` upstream would reopen this immediately.
 
+## [`go-global-update`](https://github.com/Gelio/go-global-update) ❌ 🛟
+
+Updates the binaries `go install` put on the machine, and that is the whole of it. A bare run upgrades every one, naming binaries upgrades those, and `--dry-run` simulates the same thing; there is no listing, no install and no removal anywhere in its surface. That leaves an upgrade as its only honest operation, which is the [`zr`](#zr) reading, and [`topgrade`](managers/topgrade.md) already reaches it inside the same `Go` step that runs [`gup`](managers/gup.md). Every binary it touches is one `gup` lists, reports stale, removes and upgrades one at a time, so wrapping it would add a second route to a subset of what `gup` already does. Alive but slowing, last pushed 2024-09-13.
+
 ## [`gofish`](https://github.com/fishworks/gofish) ☠️
 
 Cross-platform package manager modelled on Homebrew, down to a registry of its own: "fish food" recipes hosted at [fishworks/fish-food](https://github.com/fishworks/fish-food). Its readme announces the end in as many words, "*THIS PROJECT IS BEING ARCHIVED*", blaming "*the amount of time and money required to maintain this side project*", and no commit has landed since 2022-03-08. The repository is archived and names no successor.

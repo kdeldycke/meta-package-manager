@@ -39,7 +39,7 @@ from unittest.mock import patch
 
 import click
 import pytest
-from extra_platforms import is_any_windows
+from extra_platforms import UNIX, is_any_windows
 
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import (
@@ -60,6 +60,11 @@ from .fake_manager import FakeManager
 # consuming it are skipped.
 if not is_any_windows():
     import pwd
+
+# A UNIX platform to force build_cli's platform gate deterministically,
+# independent of the host the tests run on. Not imported from
+# tests.test_execution, which already imports from this module.
+_UNIX_PLATFORM = next(iter(UNIX))
 
 # Escalation policy inventories: which managers escalate through mpm and which run
 # sudo themselves, pinned across the whole pool so a new manager cannot silently
@@ -928,7 +933,15 @@ def test_sudo_command_reaches_the_config_file(invoke, tmp_path):
 )
 def test_build_cli_escalates_with_the_selected_binary(escalator_id, expected_prefix):
     manager = _escalating_manager()
-    with only_escalator(escalator_id, selected=escalator_id):
+    with (
+        # Pin the platform gate too: a Windows host never escalates, whatever
+        # the escalator, and this test's subject is the argv dialect.
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_UNIX_PLATFORM,
+        ),
+        only_escalator(escalator_id, selected=escalator_id),
+    ):
         args = manager.build_cli("install", "pkg", sudo=True)
     assert tuple(str(a) for a in args[: len(expected_prefix)]) == expected_prefix
 

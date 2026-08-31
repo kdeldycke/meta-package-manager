@@ -80,10 +80,10 @@ from .sudo import (
     _STALL_NOTICE_OPERATIONS,
     _SUDO_CACHE_WARM,
     ESCALATORS,
-    resolve_escalator,
     _is_sudo_auth_failure,
     _resolved_sudo,
     _StallWatchdog,
+    resolve_escalator,
 )
 from .version import parse_version
 
@@ -1436,8 +1436,9 @@ class CLIExecutor:
 
         # Resolve whether this privileged operation is actually escalated: the caller
         # marks the operation as needing root (`sudo`), the per-manager policy opts in
-        # (the `sudo` override, else `default_sudo`), and the platform has `sudo`.
-        # A non-UNIX host simply does not escalate rather than raising.
+        # (the `sudo` override, else `default_sudo`), and the host is a UNIX one
+        # carrying an escalator. A non-UNIX host simply does not escalate rather
+        # than raising.
         escalator = resolve_escalator(self.sudo_command)
         escalate = bool(
             sudo

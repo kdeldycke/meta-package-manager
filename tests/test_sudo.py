@@ -749,6 +749,16 @@ def test_resolve_escalator_rejects_an_unknown_name(caplog):
     assert any("Unknown sudo_command" in r.getMessage() for r in caplog.records)
 
 
+def test_sudo_command_reaches_the_config_file(invoke, tmp_path):
+    """`[mpm] sudo_command` is honored, and validated against the same choices
+    as the flag: an unknown escalator is a usage error, not a silent fallback."""
+    config = tmp_path / "config.toml"
+    config.write_text('[mpm]\nsudo_command = "bogus"\n', encoding="UTF-8")
+    result = invoke("--config", str(config), "managers")
+    assert result.exit_code == 2
+    assert "'bogus' is not one of 'sudo', 'doas'" in result.stderr
+
+
 @pytest.mark.parametrize(
     ("escalator_id", "expected_prefix"),
     (

@@ -170,6 +170,24 @@ class Specifier:
         """Resolve a pURL into its corresponding manager candidates.
 
         Yields `Specifier` objects or returns `None`.
+
+        ```{todo}
+        Reassemble the package ID from `purl.namespace` where the type calls for
+        it, instead of reading `purl.name` alone. Two claimed types carry a
+        namespace today and both resolve wrongly: `pkg:composer/monolog/monolog`
+        yields `monolog` where Composer needs `monolog/monolog`, and
+        `pkg:npm/@angular/animation` yields `animation`, which is a real and
+        unrelated package, so the install succeeds on the wrong thing rather
+        than failing. Claiming `golang` for {doc}`/managers/go` waits on the
+        same fix, the module path being exactly the part that gets dropped.
+
+        The join cannot be blanket, which is what makes this more than a
+        one-liner: a `pkg:deb/debian/curl` namespace names the *distribution*
+        rather than half the package name, so joining it would ask `apt` for
+        `debian/curl`. The rule has to be per-type, and
+        `tests/test_specifier.py` covers only namespace-free pURLs today, which
+        is why nothing caught it.
+        ```
         """
         # Try to parse specifier as a pURL.
         try:

@@ -51,11 +51,31 @@ Keying on a shared interpreter raises a second problem, which that same probe so
 
 dein.vim is the worked example of both hatches failing, and the shape to compare a candidate against. It is Vimscript with no binary anywhere, and nothing to test for that would make an `nvim` or `vim` probe conclusive the way `lazy`'s is. It reports no version either: `g:dein#_cache_version` is an internal state-format counter, and its releases are Git tags on a checkout the user places freely.
 
-When a tool is rejected, record the decision rather than leaving it implicit: add a section to `docs/unsupported.md` and an entry to the `unsupported` table of `docs/benchmark.toml`. Title the section with the tool as a linked code span followed by its glyphs (`` [`paq`](https://github.com/savq/paq-nvim) ❌ 🛟 ``), and keep the page sorted by title; where an existing section already carries that verdict word for word, add the tool to its member list instead of copying the paragraph. The benchmark then renders a `❌` linking straight to that section instead of a blank cell. That changes the rendered table, so run `click-extra refresh-directives readme.md docs` afterwards or `test_mirror_blocks_in_sync` fails: a decline is never a docs-only edit.
+When a tool is rejected, record the decision rather than leaving it implicit: add a section to `docs/unsupported.md` and an entry to the `unsupported` table of `docs/benchmark.toml`. Title the section with the tool as a linked code span followed by its glyphs (`` [`paq`](https://github.com/savq/paq-nvim) ❌ 🛟 ``), and keep the page sorted by title. Sort the key against the whole list rather than eyeballing the line above it: the `unsupported` table of `docs/benchmark.toml` sorts by manager id while the sections of `docs/unsupported.md` sort by *title*, so `topgrade` precedes `tpack` on the page while `toolbx` precedes `tpack` in the table, and a family section titled after its family sorts under that title rather than under any member. Both orderings are asserted by `tests/test_docs.py`. Where an existing section already carries that verdict word for word, add the tool to its member list instead of copying the paragraph. The benchmark then renders a `❌` linking straight to that section instead of a blank cell. That changes the rendered table, so run `click-extra refresh-directives readme.md docs` afterwards or `test_mirror_blocks_in_sync` fails: a decline is never a docs-only edit.
 
 **Every tool assessed gets one of the two outcomes, always.** Wrapped, or written down as unsupported with a rationale. Nothing is left in between, including a tool waved off in passing during a discussion: that is still a decision, and an unrecorded one is indistinguishable from an unexamined one. The target is total coverage of everything that installs software, so a blank benchmark cell is a gap to close rather than a neutral state, and "not worth wrapping" is a rationale to write out, not a reason to skip the row.
 
 Ground the reason upstream whenever the blocking behavior has been raised there. Search the tool's tracker for the missing capability and link what you find: a feature request closed not-planned, a maintainer stating the position, or an open request left unaddressed for years. Quote the deciding sentence and anchor the link on the exact `#issuecomment-<id>` when a comment is what settles it, exactly as the benchmark's `❌` cells do. `zgenom` is the worked example: its decline rests on reporting no version, and the request to tag releases was closed on the maintainer's own "*I consider everything merged into main as a stable release*". That turns a verdict a reader has to trust into one they can audit, and it dates the decision, so a tool whose upstream later changes course can be reassessed against the same link. When no such discussion exists, say so rather than implying one: an absence that is deliberate design (`zr` treats plugins as arguments and so owns no inventory) is itself the reason.
+
+## Drive the tool before writing it
+
+Install the candidate, run every verb, capture the output. This is the step that pays: `bob`'s catalogue omission, `spack`'s environment scoping and `getnf`'s colour handling were each invisible from the documentation, and each would have shipped a broken definition. Documentation is a starting point, never the authority.
+
+**Read the argument parser, not the readme.** Where a tool ships its parser in one readable file, that file is what settles the verdict. `pkgit`'s readme lists neither `--version` nor `--list` while `src/parse_args.c` handles both, so a readme-only reading would have declined a genuine candidate twice over. `choosenim` and `gup` are the same shape: `gup update <name>` runs although its own usage line documents `gup update [flags]` alone.
+
+**Check what the competitor actually drives before trusting a home page.** A benchmark row's URL can name a different project entirely: the `voom` row linked a Vim outliner that installs nothing, while `topgrade`'s `run_voom` requires a `voom` binary and runs `voom update`, which is [airblade/voom](https://github.com/airblade/voom). Reading the competitor's own step source settles it in one call.
+
+Run the candidate under a **repointed `HOME`** so its state never lands on the real machine, and know what that does and does not buy:
+
+- **Not every tool honours it.** `bob` resolved its data directory to the real `~/.local/share/bob` regardless, and `roswell` reads and writes `~/.roswell` whatever `$HOME` says: 37 MB and 248 MB respectively, on the actual machine. Check where a tool reports installing before assuming the sandbox held, and check `PATH` too, since `0install` wrote its launcher into the first writable `bin` it found.
+- **A repointed `HOME` silently disables the cooldown safeguard.** A host config setting `cooldown` fail-closes managers that cannot enforce it natively; under a scratch `HOME` no config is found, so an install succeeds where a real user would be refused. Verify both ways, or at least know which one produced the green.
+- **A long scratch path breaks tools with a socket under `$HOME`.** `0install` failed on `can't connect to the keyboxd: File name too long`, which is the path overflowing the Unix socket limit rather than anything about the tool. Drive from a short path such as `/tmp/mpm-drive`.
+- **A GPG-verifying tool needs the command sandbox off.** Past the path limit, the same tool failed on `IPC connect call failed`, because the sandbox blocks the socket `keyboxd` listens on, leaving every feed signature unverifiable. The symptom names the daemon, never the sandbox.
+- **A downloaded release binary cannot be made executable** where `chmod` is denied, so that route dead-ends at a `644` file. Prefer a channel that sets the bit itself: `pkgx <tool>` runs anything in its pantry, and `go install <module>@latest` writes an executable binary, which is how `zvm` was wrapped after being abandoned once on exactly this. Check whether a blocked candidate is written in Go before recording it as undrivable.
+
+**Fixtures come from that driving and nowhere else.** Never invent a sample and never trim one: a `shell-session` block is a complete capture that has to parse through the manager's own parser. Where a needed state is missing, create it for real. `getnf`'s `unknown version` row came from deleting a release marker, `elan`'s orphan report from clearing `default_toolchain` out of elan's own settings, and `gup`'s outdated fixture from downgrading a binary to an older tag.
+
+**A tab-indented fixture cannot survive in a docstring.** `ruff format` rewrites a docstring's indentation, so a leading tab reaches the corpus as spaces and a parser keyed on `\t` at line start fails only *after* the formatter runs. `go`'s listing hit this: its parser now ignores leading whitespace and keys on the field separator instead. Run the formatter before trusting a green corpus test, and prefer a parser that does not depend on how a line is indented. A bundled TOML definition is immune, its samples living in the TOML file rather than in Python.
 
 ## Choose an implementation strategy: class-based or config-based
 
@@ -232,6 +252,20 @@ Key helpers from the base class:
 - `self.package(id=..., ...)` creates a `Package` with `manager_id` pre-filled.
 - `self.cli_path` resolves to the discovered binary path. Use `.parent` to find sibling binaries for operations that use a different CLI (see `nix.py` for `sync` and `cleanup`).
 
+### Traps that recur across managers
+
+Each of these cost a wrong implementation once. Ask them of every candidate:
+
+- **Does a whole-system upgrader read its positionals?** `pamac upgrade <package>` parses its options and calls `run_sysupgrade()` without ever reading them, so it silently upgrades everything; single-package upgrades route through `install --no-upgrade` instead. `haxelib` is the same shape and is safe, but only because its argument count is enforced upstream, which is a fact to verify rather than assume.
+- **Does the tool update itself as a side effect?** `rustup` replaces its own binary on every mutating branch unless `--no-self-update` is passed. Worse, several tools name their self-update the same as a package upgrade: bare `pi update`, `pearl update`, `zvm upgrade` and `choosenim update self` each replace the tool rather than anything it installed, so an `upgrade_all` mapped to them upgrades the wrong thing.
+- **What does the output depend on besides the packages installed?** `nala` needs `LC_ALL=C` to pin its runtime-translated strings and glyphs, and `vcpkg` needs `--classic` to pin its inventory to the machine rather than to whichever project the working directory sits in.
+- **Does a project-local mode exist?** `haxelib` walks up the whole tree for a `.haxelib` directory and switches to that repository the moment it finds one, so every call forces `--global`. `vagrant` and `pyenv` need the same audit before either can be called system-scoped.
+- **What does a read do when its server is down?** `ollama`'s listing needs a daemon, and where none runs the client starts one, launching the desktop application on macOS. It was wrapped anyway, the daemon being one the user installed deliberately, but the behaviour is documented on its page.
+- **Is there a projection flag hiding under a table?** `gcloud` renders a bordered table by default, yet `--format=value(...)` prints tab-separated fields with no heading. Check for a machine-readable mode before concluding a listing needs a Python class.
+- **Does the listing repeat an identifier?** `vagrant` reports one row per name, provider and version, so a package appears several times and has to be reduced to one entry per id. That is the case `parse_regex_lines` names as its own exit, and `luarocks` and `roswell` share it.
+- **Which object do the verbs agree on?** For a runtime manager, that question decides what counts as a package: `rustup` narrowed to toolchains because a component listing answers for whichever toolchain is active, while `ghcup` widened to every tool kind because its listing is flat and self-describing. An inventory that depends on ambient state rather than on the machine is the defect that forced `--global` on haxelib.
+- **Does a failure look like an empty result?** `roswell` exits `0` with empty stdout and its diagnosis on stderr alone when the implementation it resolves is absent, so a parser would report an empty inventory and never know. Pass `must_succeed=True` on any call whose output is parsed, and remember it keys on the exit code: a zero exit with a non-empty stderr slips through, which is why that candidate is still queued.
+
 ### Delegating operations to another manager
 
 When a manager uses its own CLI for read operations but delegates mutating operations to another manager's binary, use the `Delegate` descriptor from `capabilities.py`:
@@ -347,10 +381,18 @@ Every new manager touches the same set of files. This list is derived from all 3
 
 ## Validate
 
+Regenerate first, then test: several checks compare a generated artifact against the tree, so testing before regenerating reports drift that the regeneration would have settled.
+
 ```shell-session
-$ uv run -- pytest tests/test_pool.py tests/test_managers.py -x -q
+$ uv run --frozen -- python docs/docs_update.py
+$ uv run --frozen -- click-extra refresh-directives readme.md docs
+$ uv run --frozen -- pytest tests/test_pool.py tests/test_managers.py tests/test_manager_definition.py tests/test_docstring_corpus.py tests/test_docs.py -q --numprocesses=auto
 $ uv run --group typing mypy meta_package_manager/managers/<name>.py
 ```
+
+That selection covers everything a manager touches and runs in about fifteen seconds. `docs/logos_update.py` is run by hand and only when a `logo` is declared: it re-downloads every mark, and the manifest records which managers each is credited to, so a new manager reusing an existing mark fails `test_manager_logos_resolve` until it is re-run.
+
+A broader slice is worth one pass before a batch of work leaves the machine, `pytest tests/ --skip-destructive --ignore=tests/test_cli_sbom.py`, which takes about seven minutes. The full non-destructive suite is a different matter and has stalled around 91-94% with no summary on more than one machine, so treat that as a local-environment issue rather than a signal and rely on the targeted selection plus CI.
 
 The test suite enforces: valid ID format, homepage URL, platform declarations, version regexes, no duplicate IDs, correct pool count, canonical attribute ordering (`test_content_order`), and label group disjointness.
 

@@ -163,6 +163,12 @@ Editor shipping no plugin manager of any kind, so there is nothing to wrap. Its 
 
 Apple's `softwareupdate(8)` updates the operating system rather than managing packages, putting it outside `mpm`'s domain along with every other system updater a competitor happens to drive. Nothing about it is inventoriable either: `--list` reports the updates *pending* for the machine, `--history` is a log of those applied through the tool and prints its header alone on a current host, and no verb lists installed components, searches a catalog or removes anything. A macOS update cannot be uninstalled.
 
+## [`mash`](https://mash.pkgx.sh) ❌
+
+Runs scripts instead of installing them, which is [`pkgx`](#pkgx)'s verdict one layer up. mash is a 107-line Bash script over pkgx, and `mash <scriptname> [args...]` is the whole usage its own `--help` prints. The source carries no `install`, `remove`, `list`, `search` or `update` branch: naming a script fetches it from `pkgxdev.github.io/mash/<scriptname>`, marks it executable and runs it. What lands on disk is an ETag-validated HTTP cache under the OS cache directory, revalidated on every run, so nothing accumulates and nothing enumerates it. The catalog behind those names is real, trawled from GitHub into a website, and no verb reaches it.
+
+The version probe is not what fails, and the way it reads is worth naming: the script on `main` answers `mash 0.0.0-dev`, while the release workflow substitutes the tag before publishing. Checked against the released `0.4.0`, which answers with its own version.
+
 ## [`maza`](https://github.com/tanrax/maza-ad-blocking) ❌ 🛟
 
 Rewrites the local hosts file from an upstream blocklist. A host list is data, not a package: there is nothing to enumerate, version or uninstall.

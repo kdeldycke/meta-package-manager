@@ -29,10 +29,12 @@ of `prime_sudo` stay in {mod}`tests.test_execution`.
 from __future__ import annotations
 
 import logging
+import os
 import subprocess
 import time
 from collections.abc import Callable
 from contextlib import ExitStack, contextmanager
+from pathlib import Path
 from unittest.mock import patch
 
 import click
@@ -47,11 +49,17 @@ from meta_package_manager.sudo import (
     _is_permission_failure,
     _is_sudo_auth_failure,
     _is_sudo_denied,
+    inspect_install_root,
     prime_sudo,
     resolve_escalator,
 )
 
 from .fake_manager import FakeManager
+
+# Platform-dependent import: `pwd` does not exist on Windows, where the tests
+# consuming it are skipped.
+if not is_any_windows():
+    import pwd
 
 # Escalation policy inventories: which managers escalate through mpm and which run
 # sudo themselves, pinned across the whole pool so a new manager cannot silently
@@ -757,6 +765,74 @@ def test_is_sudo_denied(error, expected):
 )
 def test_is_permission_failure(error, expected):
     assert _is_permission_failure(error) is expected
+
+
+@pytest.mark.skipif(
+    is_any_windows(),
+    reason="The POSIX ownership model does not apply on Windows.",
+)
+def test_inspect_install_root(tmp_path):
+    """The snapshot carries the root's owner; every dead end answers `None`."""
+    manager = FakeManager()
+
+    manager.install_root = tmp_path
+    root = inspect_install_root(manager)
+    assert root is not None
+    assert root.path == tmp_path
+    assert root.owner_uid == os.getuid()
+    assert root.owner_name == pwd.getpwuid(os.getuid()).pw_name
+
+    manager.install_root = tmp_path / "not-there"
+    assert inspect_install_root(manager) is None
+
+    manager.install_root = None
+    assert inspect_install_root(manager) is None
+
+
+@pytest.mark.skipif(
+    is_any_windows(),
+    reason="The POSIX ownership model does not apply on Windows.",
+)
+def test_inspect_install_root_swallows_probe_failures():
+    """A probe that dies means "unknown", never a crash of the command it
+    decorates."""
+
+    class _BrokenProbe(FakeManager):
+        @property
+        def install_root(self):
+            raise RuntimeError("probe exploded")
+
+    assert inspect_install_root(_BrokenProbe()) is None
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "expected_argv"),
+    (
+        pytest.param("npm", ("prefix",), id="npm"),
+        pytest.param("gem", ("environment", "gemdir"), id="gem"),
+        pytest.param(
+            "pip",
+            ("-c", "import sysconfig; print(sysconfig.get_paths()['purelib'])"),
+            id="pip",
+        ),
+    ),
+)
+def test_install_root_probes_run_the_documented_verb(manager_id, expected_argv):
+    """Each override resolves its root through its own discovery verb, forced
+    to run for real (`force_exec`) like the version probe."""
+    manager = type(pool[manager_id])()
+    calls = []
+
+    def fake_run_cli(*args, **kwargs):
+        calls.append((args, kwargs))
+        return "/fake/root\n"
+
+    manager.run_cli = fake_run_cli
+    assert manager.install_root == Path("/fake/root")
+    assert len(calls) == 1
+    args, kwargs = calls[0]
+    assert args == expected_argv
+    assert kwargs.get("force_exec") is True
 
 
 # Escalator selection: which binary drives the escalation, and how each dialect

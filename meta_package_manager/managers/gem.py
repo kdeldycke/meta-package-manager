@@ -17,6 +17,8 @@
 from __future__ import annotations
 
 import re
+from functools import cached_property
+from pathlib import Path
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -103,6 +105,27 @@ class Gem(PackageManager):
         """,
         re.VERBOSE,
     )
+
+    @cached_property
+    def install_root(self) -> Path | None:
+        """The gem directory system-scope installs write into.
+
+        `auto_post_args` is off so the probe stays the canonical verb, without
+        the `--quiet` every other operation appends:
+
+        ```{code-block} console
+
+        $ gem environment gemdir
+        /Library/Ruby/Gems/2.6.0
+        ```
+        """
+        output = self.run_cli(
+            "environment",
+            "gemdir",
+            auto_post_args=False,
+            force_exec=True,
+        ).strip()
+        return Path(output) if output else None
 
     @property
     def installed(self) -> Iterator[Package]:

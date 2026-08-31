@@ -68,15 +68,6 @@ nix user asks.
 ```
 
 ```{todo}
-Decide escalation from the ownership of the target tree instead of a static
-flag. `_resolved_sudo` reads a boolean, so the dormant privileged markers of
-`pip`, `npm`, `gem` and `cpan` only wake through a global `--sudo` that
-escalates every other selected manager too. Probing whether each install
-root is really root-owned would let them escalate on their own evidence, and
-skip with an explanation when the root belongs to the user.
-```
-
-```{todo}
 Rebrand the hidden password prompt of an internal escalator with a
 `SUDO_ASKPASS` helper, once the stall notice of `_StallWatchdog` proves
 insufficient in the field. It is also the only route serving a hardened
@@ -107,6 +98,7 @@ from extra_platforms import is_any_windows
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from pathlib import Path
 
     from click import Context
 
@@ -454,6 +446,62 @@ def _is_permission_failure(error: str) -> bool:
             "eacces",
         )
     )
+
+
+@dataclass(frozen=True)
+class InstallRoot:
+    """Ownership snapshot of the tree a manager's global installs write into.
+
+    Built by {func}`inspect_install_root` from a manager's own
+    {attr}`~meta_package_manager.manager.PackageManager.install_root` probe.
+    Diagnosis only, by decision: deciding escalation from this snapshot was
+    assessed and rejected, since silently running a manager as root on
+    filesystem evidence nobody reviewed is a posture change no diagnostic
+    payoff justifies. The scoped `sudo = true` override stays the one road to
+    escalating a dormant marker, and the failure-gate hint
+    ({func}`_is_permission_failure`) is what names it.
+    """
+
+    path: Path
+    """The install root itself."""
+
+    owner_uid: int
+    """Numeric owner of the root directory."""
+
+    owner_name: str
+    """The owner's account name, or the bare uid when no account matches."""
+
+
+def inspect_install_root(manager: PackageManager) -> InstallRoot | None:
+    """Resolve and stat `manager`'s install root, or `None` when unknowable.
+
+    `None` covers every dead end: a non-POSIX host (the ownership model does
+    not apply, and `pwd` does not exist), a manager with no discovery verb, a
+    probe that fails, and a resolved path that does not exist. The probe shells
+    out, so failures of any kind are swallowed: this is diagnosis, and it must
+    never break the command it decorates.
+    """
+    if not hasattr(os, "getuid"):
+        return None
+    try:
+        path = manager.install_root
+    except Exception:  # noqa: BLE001
+        # The probe runs the manager's own CLI: any failure means "unknown".
+        return None
+    if path is None:
+        return None
+    try:
+        uid = path.stat().st_uid
+    except OSError:
+        return None
+    # Deferred on purpose: `pwd` does not exist on Windows, returned above.
+    import pwd
+
+    try:
+        owner_name = pwd.getpwuid(uid).pw_name
+    except KeyError:
+        owner_name = str(uid)
+    return InstallRoot(path=path, owner_uid=uid, owner_name=owner_name)
 
 
 def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:

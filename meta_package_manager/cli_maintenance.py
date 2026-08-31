@@ -64,7 +64,7 @@ from .execution import CLIError
 from .manager import PackageManager
 from .pool import pool
 from .specifier import Solver, Specifier
-from .sudo import prime_sudo
+from .sudo import inspect_install_root, prime_sudo
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -858,7 +858,13 @@ def doctor(ctx):
     def doctor_work(manager: PackageManager) -> tuple[str, dict]:
         logging.log(announce, "Diagnose...", extra={"label": manager.id})
         healthy, report = manager.doctor()
-        return manager.id, {"failed": not healthy, "report": report}
+        # Resolved here so the probes overlap with the diagnoses in the same
+        # concurrent fan-out. Informational only: ownership never flips health.
+        return manager.id, {
+            "failed": not healthy,
+            "report": report,
+            "root": inspect_install_root(manager),
+        }
 
     # The diagnosis is independent per manager, so fan out concurrently with a
     # ✓/✗ trail and a success-count finisher; reports are relayed afterwards, in
@@ -875,9 +881,13 @@ def doctor(ctx):
         if data.get("failed"):
             unhealthy.append(manager_id)
         report = (data.get("report") or "").strip()
-        if report:
+        root = data.get("root")
+        if report or root:
             echo(f"{theme().invoked_command(manager_id)}:")
-            echo(report)
+            if root:
+                echo(f"Install root: {root.path} (owned by {root.owner_name})")
+            if report:
+                echo(report)
             echo()
 
     if unhealthy:

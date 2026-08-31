@@ -544,6 +544,27 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             )
         return None
 
+    @cached_property
+    def install_root(self) -> Path | None:
+        """Root of the tree this manager's global installs write into.
+
+        `None` on the base: most managers never need the question answered, and
+        `cpan` cannot answer it (its target depends on `local::lib`,
+        `INSTALL_BASE` and the perl in front, with no single verb speaking for
+        the machine). A manager that knows its own discovery verb overrides
+        this with a probe (`npm --global prefix`, `gem environment gemdir`),
+        run through `force_exec` like the {attr}`version
+        <meta_package_manager.execution.CLIExecutor.version>` probe, so a
+        `--dry-run` or `--plan` run still resolves it for real.
+
+        A host-probing property, like {attr}`cli_path
+        <meta_package_manager.execution.CLIExecutor.cli_path>`: the
+        documentation generators must never read it. Consumed through
+        {func}`~meta_package_manager.sudo.inspect_install_root`, which adds the
+        ownership reading.
+        """
+        return None
+
     @property
     def installed(self) -> Iterator[Package]:
         """List packages currently installed on the system.

@@ -337,6 +337,27 @@ class Pip(PackageManager):
         # But we're explicitly using the old syntax to bypass `cached_property`.
         return super(Pip, self).version  # noqa: UP008
 
+    @cached_property
+    def install_root(self) -> Path | None:
+        """The `site-packages` directory of the python driving this pip.
+
+        Asked of the interpreter itself, so `override_pre_args` drops the
+        `-m pip` plumbing every other operation rides:
+
+        ```{code-block} console
+
+        $ python3 -c "import sysconfig; print(sysconfig.get_paths()['purelib'])"
+        /usr/lib/python3/dist-packages
+        ```
+        """
+        output = self.run_cli(
+            "-c",
+            "import sysconfig; print(sysconfig.get_paths()['purelib'])",
+            override_pre_args=(),
+            force_exec=True,
+        ).strip()
+        return Path(output) if output else None
+
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.

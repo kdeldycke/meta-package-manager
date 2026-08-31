@@ -62,6 +62,7 @@
 - [mpm] Skip the up-front password prompt when `sudo` reports the user is not authorized to run it at all, warning that escalating managers will fail.
 - [mpm] Escalate through `doas` on a host carrying no `sudo`, as OpenBSD, Alpine and NetBSD do by default. Add `--sudo-command` and its `[mpm] sudo_command` key to name the escalator explicitly.
 - [cpan,gem,npm,pip] Warn with the scoped `sudo = true` remedy when an operation carrying a dormant privileged marker fails on a permission error, like a global install into a root-owned prefix.
+- [gem,npm,pip] Report each manager's install root and its owner in `mpm doctor`, resolved through the manager's own discovery verb.
 - [mpm] Narrate the sudo priming decisions at `--verbosity INFO`, and expose the probe's raw answer and every cache refresh at `DEBUG`.
 - [mpm] Chart the privilege-escalation decision path on the sudo documentation page, from the up-front probe to the end of the run.
 - [mpm] Load the SPDX and CycloneDX writer libraries only when `mpm sbom` runs, instead of on every invocation. Cuts about 300 ms off the startup of every other command for anyone carrying the `[sbom-offline]` extra.

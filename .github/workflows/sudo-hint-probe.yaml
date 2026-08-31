@@ -57,12 +57,14 @@ jobs:
           grep -q -- "mpm --npm --sudo" out.txt
           grep -q "\[mpm.managers.npm\] sudo = true" out.txt
 
+      # The escalated npm resolves root's own config (sudo resets HOME), so the
+      # package lands under root's default prefix, not the runner's: asserted
+      # through the escalated npm's own listing rather than a hardcoded path.
       - name: Assert the named remedy actually works
         run: |
           uv run --no-progress --frozen -- mpm --verbosity INFO --npm --sudo \
             install cowsay 2>&1 | tail -15
-          test -e /opt/npmroot/bin/cowsay
-          test -e /opt/npmroot/lib/node_modules/cowsay
+          sudo npm ls --global --depth=0 | grep cowsay
 
       - name: Assert no hint on an unrelated npm failure
         run: |
@@ -72,6 +74,16 @@ jobs:
           if grep -q "marked privileged" out2.txt; then
             echo "hint fired on a non-permission failure"; exit 1
           fi
+
+      # Health findings from `npm doctor` and `pip check` are expected on a
+      # runner and irrelevant here: the gates only read the ownership lines.
+      - name: Assert doctor reports install roots and owners
+        run: |
+          uv run --no-progress --frozen -- mpm --verbosity INFO --npm --pip \
+            doctor > doc.txt 2>&1 || true
+          cat doc.txt
+          grep -q "Install root: /opt/npmroot (owned by root)" doc.txt
+          grep -qE "Install root: .+packages \(owned by [a-z]" doc.txt
 
       # Report-only: whether the runner's system Ruby reproduces the gem
       # wording depends on the image's ownership of the gem dir.

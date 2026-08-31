@@ -18,6 +18,9 @@ from __future__ import annotations
 
 from extra_platforms import ALL_PLATFORMS
 
+from functools import cached_property
+from pathlib import Path
+
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
 
@@ -155,6 +158,19 @@ class NPM(PackageManager):
             output = ""
 
         return output
+
+    @cached_property
+    def install_root(self) -> Path | None:
+        """The global prefix every `--global` operation writes under.
+
+        ```{code-block} console
+
+        $ npm --global prefix
+        /usr/local
+        ```
+        """
+        output = self.run_cli("prefix", force_exec=True).strip()
+        return Path(output) if output else None
 
     @property
     def installed(self) -> Iterator[Package]:

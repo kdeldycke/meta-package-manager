@@ -89,12 +89,12 @@ from .cooldown import (
     resolve_cooldown,
 )
 from .execution import PLAN_RECORDER, CLIError
-from .sudo import ESCALATION, ESCALATORS
 from .logo import env_summary, version_screen_params
 from .manager import PackageManager
 from .package import Package
 from .pool import pool
 from .specifier import VERSION_SEP, Specifier
+from .sudo import ESCALATION, ESCALATORS
 from .tables import SortableField
 
 TYPE_CHECKING = False

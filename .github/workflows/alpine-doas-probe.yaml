@@ -48,10 +48,10 @@ jobs:
           echo "--- caches ---"
           ls -la /var/cache/apk/ 2>&1; ls -la /etc/apk/ 2>&1
           cat /etc/apk/repositories
-          echo "--- search as root ---"
-          apk search --verbose tree | head -3; echo "root-exit=$?"
-          echo "--- search as probe ---"
-          su probe -s /bin/sh -c 'apk search --verbose tree; echo "probe-exit=$?"' 2>&1 | head -6
+          echo "--- exact search, root ---"
+          apk search -e tree; apk search -e curl; echo "root-exit=$?"
+          echo "--- exact search, probe ---"
+          su probe -s /bin/sh -c 'apk search -e tree; apk search -e curl; echo "probe-exit=$?"' 2>&1 | head -6
 
       - name: Install mpm as the unprivileged user
         run: |
@@ -71,7 +71,7 @@ jobs:
           cd /home/probe/mpm
           doas -n true && echo "doas warm for probe"
           uv run --no-progress --frozen -- mpm --verbosity INFO --apk \
-            install tree > out.txt 2>&1
+            install curl > out.txt 2>&1
           echo "mpm exit=$?"
           tail -30 out.txt
           EOF
@@ -82,20 +82,20 @@ jobs:
           grep -E '\$ doas -n .*apk' /home/probe/mpm/out.txt
           grep -q "Found the doas credential cache warm" /home/probe/mpm/out.txt
           grep -q "cannot be refreshed on a schedule" /home/probe/mpm/out.txt
-          apk info -e tree
+          apk info -e curl
 
       - name: Assert the denial path on a revoked rule
         run: |
-          apk del tree
+          apk del curl
           printf 'permit nopass root as root\n' > /etc/doas.conf
           cat > /home/probe/run2.sh << 'EOF'
           export HOME=/home/probe
           cd /home/probe/mpm
           uv run --no-progress --frozen -- mpm --verbosity INFO --apk \
-            install tree > out2.txt 2>&1 || true
+            install curl > out2.txt 2>&1 || true
           tail -20 out2.txt
           EOF
           chown probe: /home/probe/run2.sh
           su probe -s /bin/sh /home/probe/run2.sh
           grep -q "not authorized to run doas" /home/probe/mpm/out2.txt
-          if apk info -e tree; then echo "install went through a denial"; exit 1; fi
+          if apk info -e curl; then echo "install went through a denial"; exit 1; fi

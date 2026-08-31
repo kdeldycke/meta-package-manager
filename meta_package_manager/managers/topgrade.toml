@@ -1,5 +1,5 @@
-# A meta-meta-package-manager: topgrade
-# wrapped by mpm. See docs/overrides.md ("Define a new manager") for the schema and
+# A meta-meta-package-manager: topgrade wrapped by mpm.
+# See docs/overrides.md ("Define a new manager") for the schema and
 # meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # topgrade is a Rust utility that auto-detects every package manager, runtime
@@ -9,9 +9,10 @@
 # entries, no search index, no install or remove primitives. Only `upgrade --all`
 # makes sense, and it is the only operation declared here.
 #
-# Adding topgrade to mpm's pool is a knowing nod to XKCD #927
-# (https://xkcd.com/927/): for the system package managers both reach, routing
-# through topgrade is structurally redundant. Everything else is the point.
+# Adding topgrade to mpm's pool is a knowing nod to
+# [XKCD #927](https://xkcd.com/927/): for the system package managers both
+# reach, routing through topgrade is structurally redundant. Everything else
+# is the point.
 # topgrade drives far more tools than mpm wraps, so it serves as the pool's
 # deliberate sinkhole: every runtime, plugin and OS updater too thin to earn a
 # manager of its own stays reachable in the same `mpm upgrade --all` invocation
@@ -22,11 +23,13 @@
 # rather than wrapped: it reaches nothing mpm cannot already reach through here.
 # A candidate offering an inventory, or any per-package verb, clears that floor,
 # because topgrade offers neither for anything it drives. The vetting order is
-# spelled out in docs/add-new-manager.md.
+# spelled out in {doc}`/add-new-manager`.
 #
-# Caution: `mpm upgrade --topgrade` runs `topgrade --yes` to skip the interactive
+# ```{caution}
+# `mpm upgrade --topgrade` runs `topgrade --yes` to skip the interactive
 # prompts. If you also select other managers that topgrade itself drives (brew,
 # apt, pacman, ...), those will be upgraded twice in the same run.
+# ```
 
 [mpm.managers.topgrade]
 name = "Topgrade"

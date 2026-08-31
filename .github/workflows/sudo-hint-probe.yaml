@@ -40,7 +40,12 @@ jobs:
         run: |
           sudo mkdir -p /opt/npmroot
           sudo chown root:root /opt/npmroot
+          # The runner prepares /opt with setgid, sticky and a permissive ACL,
+          # which children inherit: strip all of it or anyone can write.
+          sudo chmod 0755 /opt/npmroot
+          sudo setfacl -b /opt/npmroot
           npm config set prefix /opt/npmroot
+          npm config get prefix
           ls -ld /opt/npmroot
 
       - name: Assert the hint on a dormant npm permission failure

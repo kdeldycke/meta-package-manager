@@ -733,14 +733,18 @@ def test_is_sudo_denied(error, expected):
     (
         # npm, on a root-owned global prefix.
         (
-            "npm error Error: EACCES: permission denied, "
-            "access '/usr/local/lib/node_modules'",
+            (
+                "npm error Error: EACCES: permission denied, "
+                "access '/usr/local/lib/node_modules'"
+            ),
             True,
         ),
         # gem, on a system Ruby.
         (
-            "You don't have write permissions for the "
-            "/Library/Ruby/Gems/3.4.0 directory.",
+            (
+                "You don't have write permissions for the "
+                "/Library/Ruby/Gems/3.4.0 directory."
+            ),
             True,
         ),
         # pip and cpan, from the interpreter and the shell.

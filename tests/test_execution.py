@@ -51,6 +51,7 @@ from meta_package_manager.sudo import _STALL_NOTICE_OPERATIONS
 
 from .conftest import _patch_pool_with
 from .fake_manager import FakeManager
+from .test_sudo import only_escalator
 
 # A UNIX and a non-UNIX platform to force build_cli's platform gate deterministically,
 # independent of the host the tests run on.
@@ -560,11 +561,20 @@ def test_run_registers_live_process_then_discards_it():
 
 def test_build_cli_escalates_with_sudo_n_when_policy_on():
     """A privileged op escalates to `sudo --non-interactive` when the manager's
-    policy opts in."""
+    policy opts in.
+
+    The escalator is pinned rather than detected: a Windows runner carries no
+    `sudo` on `PATH`, and detection finding none would skip the wrapping this
+    test asserts.
+    """
     manager = FakeManager()
     manager.sudo = True
-    with patch(
-        "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_UNIX_PLATFORM,
+        ),
+        only_escalator("sudo"),
     ):
         cli = manager.build_cli("install", "pkg", sudo=True)
     assert cli[:2] == ("sudo", "--non-interactive")
@@ -611,8 +621,13 @@ def test_npm_sudo_marker_dormant_until_opted_in():
 
     manager = NPM()
     assert manager.default_sudo is False
-    with patch(
-        "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_UNIX_PLATFORM,
+        ),
+        # Pinned, not detected: a Windows runner carries no `sudo` on `PATH`.
+        only_escalator("sudo"),
     ):
         assert "sudo" not in manager.build_cli("update", sudo=True)
         manager.sudo = True
@@ -669,6 +684,8 @@ def test_escalated_calls_keep_the_controlling_terminal(escalate):
             "meta_package_manager.execution.current_platform",
             return_value=_UNIX_PLATFORM,
         ),
+        # Pinned, not detected: a Windows runner carries no `sudo` on `PATH`.
+        only_escalator("sudo"),
         patch("meta_package_manager.execution.run_cli") as spawn,
     ):
         spawn.return_value = SimpleNamespace(returncode=0, stdout="", stderr="")

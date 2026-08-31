@@ -162,6 +162,10 @@ def only_escalator(escalator_id: str | None, *, selected: str | None = None):
             yield
         finally:
             ESCALATION.select(None)
+            # Entries computed under the patched `shutil.which` must not
+            # outlive it: the helper is imported by other test modules that
+            # carry no cache-clearing fixture of their own.
+            resolve_escalator.cache_clear()
 
 
 def _escalating_manager() -> FakeManager:

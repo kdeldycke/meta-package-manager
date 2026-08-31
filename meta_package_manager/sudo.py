@@ -41,6 +41,44 @@ Everything in this module is UNIX-only: a Windows run returns early at
 {func}`prime_sudo`'s guard and never arms the watchdog (the internal
 escalators are macOS-only managers today).
 ```
+
+```{todo}
+Drive the escalators other than `sudo`: `doas`, `run0`, `pkexec`, and
+`gsudo` on Windows. `_SUDO_ESCALATION_PREFIX` hardcodes `sudo`, so a host
+carrying only one of the others cannot escalate at all, and both refusal
+matchers below only know `sudo` and `sudo-rs` phrasings. Let the user pick
+the binary, and emulate an option a backend cannot express rather than
+failing on it: topgrade returns a hard error there, which its users report
+as a bug
+([topgrade-rs/topgrade#1435](https://github.com/topgrade-rs/topgrade/issues/1435)).
+```
+
+```{todo}
+Escalate to the user owning a manager's tree, not only to root.
+`_SUDO_ESCALATION_PREFIX` can reach root alone, so a manager installed under
+another user's home (a shared Homebrew prefix on Linux, a nix profile owned
+by someone else) has no route: `sudo --user` is what such a tree needs.
+```
+
+```{todo}
+Decide escalation from the ownership of the target tree instead of a static
+flag. `_resolved_sudo` reads a boolean, so the dormant privileged markers of
+`pip`, `npm`, `gem` and `cpan` only wake through a global `--sudo` that
+escalates every other selected manager too. Probing whether each install
+root is really root-owned would let them escalate on their own evidence, and
+skip with an explanation when the root belongs to the user.
+```
+
+```{todo}
+Rebrand the hidden password prompt of an internal escalator with a
+`SUDO_ASKPASS` helper, once the stall notice of `_StallWatchdog` proves
+insufficient in the field. It is also the only route serving a hardened
+`sudoers` policy, whose timestamps the primed cache cannot reach (see
+`_SUDO_CACHE_WARM`). That class records why the helper was rejected first,
+and any implementation has to answer the same three points: the raw password
+it handles, the spinner it must pause, and the tools it never reaches
+(`brew` honors the variable, `fink`'s plain `sudo` re-exec does not).
+```
 """
 
 from __future__ import annotations
@@ -478,16 +516,13 @@ class _StallWatchdog(logging.Handler):
     Considered alternative: a `SUDO_ASKPASS` helper. `brew` documents
     passing `--askpass` to its internal `sudo` whenever that variable is
     set, so mpm could export a helper into the child environment and rebrand
-    the hidden prompt itself ("[mpm] cask needs your password..."), working
-    even under hardened sudoers policies whose timestamps the priming cache
-    cannot serve (see {data}`_SUDO_CACHE_WARM`). Rejected for now: the
-    helper reads the raw password and pipes it to `sudo` (a security
+    the hidden prompt itself ("[mpm] cask needs your password..."). Rejected:
+    the helper reads the raw password and pipes it to `sudo` (a security
     surface this notice avoids entirely), it needs a side channel to pause
     the spinner that would smear its prompt, and it only covers tools
     honoring the variable (`brew` does, `fink`'s plain `sudo` re-exec
-    does not). Revisit if this notice proves insufficient in the field; the
-    scoped `sudo = true` opt-in documented in `docs/sudo.md` already
-    covers users wanting a guaranteed up-front prompt.
+    does not). The scoped `sudo = true` opt-in documented in `docs/sudo.md`
+    already covers users wanting a guaranteed up-front prompt.
     ```
     """
 

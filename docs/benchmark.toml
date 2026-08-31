@@ -667,10 +667,7 @@ topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420
 # request was made, the issue was closed, no support followed. Entries and
 # their nested keys are sorted alphabetically.
 [refused.cabal]
-topgrade = "https://github.com/topgrade-rs/topgrade/issues/320"
-
-[refused.yt-dlp]
-topgrade = "https://github.com/topgrade-rs/topgrade/issues/1764"
+topgrade = "https://github.com/topgrade-rs/topgrade/issues/320#issuecomment-3536466336"
 
 # Managers left unwrapped by decision, each carrying its reason in the table
 # of `docs/unsupported.md`. The value is the tool's own status, which picks

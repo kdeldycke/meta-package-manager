@@ -117,7 +117,7 @@ For a guaranteed one-prompt experience, opt the manager into up-front authentica
 sudo = true # Authenticate up front before any privileged cask payload.
 ```
 
-or scope the global flag to the manager: `mpm --cask --sudo upgrade`. Prefer these to a bare `mpm --sudo upgrade`, which is broader than it looks: the global flag covers every selected manager, and also activates dormant privileged markers like those of [`pip`](managers/pip.md), [`npm`](managers/npm.md), [`gem`](managers/gem.md) and [`cpan`](managers/cpan.md), wrapping their system-scope installs in `sudo`.
+or scope the global flag to the manager: `mpm --cask --sudo upgrade`. Prefer these to a bare `mpm --sudo upgrade`, which is broader than it looks: the global flag covers every selected manager, and also activates dormant privileged markers like those of [`pip`](managers/pip.md), [`npm`](managers/npm.md), [`gem`](managers/gem.md) and [`cpan`](managers/cpan.md), wrapping their system-scope installs in `sudo`. Left dormant, those markers still pay off on failure: an operation carrying one that dies on a permission error (a root-owned npm prefix, a system Ruby) draws a warning naming this scoped opt-in, right after the tool's own account of the refusal.
 
 ## Running `mpm` itself as root
 

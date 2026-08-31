@@ -637,6 +637,62 @@ def test_npm_sudo_marker_dormant_until_opted_in():
         )
 
 
+def test_dormant_marker_permission_failure_hints_the_opt_in(caplog):
+    """An operation carrying a dormant privileged marker that dies on a
+    permission error draws the hint naming the scoped opt-in, labeled and
+    placed after the tool's own account of the refusal."""
+    manager = FakeManager()
+    assert manager.sudo is None and manager.default_sudo is False
+    script = (
+        "import sys; "
+        "sys.stderr.write('EACCES: permission denied, access /opt/x'); "
+        "sys.exit(1)"
+    )
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_UNIX_PLATFORM,
+        ),
+        patch("meta_package_manager.execution.os.geteuid", return_value=501, create=True),
+        caplog.at_level(logging.WARNING),
+    ):
+        manager.run_cli("-c", script, sudo=True)
+    hints = [r for r in caplog.records if "marked privileged" in r.getMessage()]
+    assert len(hints) == 1
+    assert "`mpm --fakemanager --sudo`" in hints[0].getMessage()
+    assert "`[mpm.managers.fakemanager] sudo = true`" in hints[0].getMessage()
+    assert hints[0].label == manager.id
+
+
+@pytest.mark.parametrize(
+    ("marker", "stderr", "euid"),
+    (
+        pytest.param(False, "EACCES: permission denied", 501, id="no-marker"),
+        pytest.param(True, "404 not found", 501, id="not-a-permission-error"),
+        pytest.param(True, "EACCES: permission denied", 0, id="already-root"),
+    ),
+)
+def test_dormant_marker_hint_negative_gates(caplog, marker, stderr, euid):
+    """Each gate individually silences the hint: no privileged marker, a
+    failure that is not a permission refusal, or a process already root."""
+    manager = FakeManager()
+    script = f"import sys; sys.stderr.write({stderr!r}); sys.exit(1)"
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_UNIX_PLATFORM,
+        ),
+        patch(
+            "meta_package_manager.execution.os.geteuid",
+            return_value=euid,
+            create=True,
+        ),
+        caplog.at_level(logging.WARNING),
+    ):
+        manager.run_cli("-c", script, sudo=marker)
+    assert not any("marked privileged" in r.getMessage() for r in caplog.records)
+
+
 @pytest.mark.skipif(is_any_windows(), reason="escalation is UNIX-only")
 def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
     """A real `sudo --non-interactive` that cannot authenticate triggers the actionable hint.

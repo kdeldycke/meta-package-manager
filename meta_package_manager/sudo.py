@@ -55,11 +55,16 @@ before any of this on that platform.
 ```
 
 ```{todo}
-Escalate to the user owning a manager's tree, not only to root. Every
-{attr}`~Escalator.escalate_args` reaches root alone, so a manager installed
-under another user's home (a shared Homebrew prefix on Linux, a nix profile
-owned by someone else) has no route: `sudo --user` is what such a tree needs,
-and `doas -u` its equivalent.
+Escalate to the user owning a manager's tree, not only to root: every
+{attr}`~Escalator.escalate_args` reaches root alone, where `sudo --user` and
+`doas -u` could reach the owner. The one legitimate case is a multi-user nix
+install, whose foreign-owned profiles are a first-class upstream
+configuration. A shared Homebrew prefix is not: Homebrew's
+[support tiers](https://docs.brew.sh/Support-Tiers) file "Multi-user Homebrew
+environments where multiple users share the same installation" as
+unsupported, so smoothing that setup over (as topgrade does for its brew
+step) would carry a burden upstream itself refuses. Stays unbuilt until a
+nix user asks.
 ```
 
 ```{todo}
@@ -422,6 +427,32 @@ def _is_sudo_denied(error: str) -> bool:
     # sudo itself, and sudo prefixes none of them.
     return _names_an_escalator(lowered) and (
         "operation not permitted" in lowered or "is not enabled" in lowered
+    )
+
+
+def _is_permission_failure(error: str) -> bool:
+    """Whether `error` reads as a filesystem permission refusal.
+
+    Consumed by the failure gate of {meth}`CLIExecutor.run
+    <meta_package_manager.execution.CLIExecutor.run>` to recognize a dormant
+    privileged marker ({attr}`CLIExecutor._dormant_sudo
+    <meta_package_manager.execution.CLIExecutor._dormant_sudo>`) meeting the
+    root-owned tree it exists for. No `stat` of mpm's own is needed: the tool
+    already performed the probe, and its own message usually names the very
+    directory. The markers cover the wordings of the managers carrying dormant
+    markers today: npm (`EACCES: permission denied, access
+    '/usr/local/lib/node_modules'`), gem (`You don't have write permissions
+    for the /Library/Ruby/Gems/3.4.0 directory`), and pip and cpan (plain
+    `Permission denied` from the interpreter and the shell).
+    """
+    lowered = error.lower()
+    return any(
+        marker in lowered
+        for marker in (
+            "permission denied",
+            "write permissions",
+            "eacces",
+        )
     )
 
 

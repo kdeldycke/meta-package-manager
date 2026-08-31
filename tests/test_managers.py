@@ -375,6 +375,7 @@ CANONICAL_ATTRS = (
     "plan",
     "timeout",
     "_active_operation",
+    "_dormant_sudo",
     "progress",
     "cooldown",
     "cooldown_policy",

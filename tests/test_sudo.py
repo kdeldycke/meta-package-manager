@@ -44,6 +44,7 @@ from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
     ESCALATION,
     ESCALATORS,
+    _is_permission_failure,
     _is_sudo_auth_failure,
     _is_sudo_denied,
     prime_sudo,
@@ -725,6 +726,33 @@ def test_is_sudo_auth_failure(error, expected):
 )
 def test_is_sudo_denied(error, expected):
     assert _is_sudo_denied(error) is expected
+
+
+@pytest.mark.parametrize(
+    ("error", "expected"),
+    (
+        # npm, on a root-owned global prefix.
+        (
+            "npm error Error: EACCES: permission denied, "
+            "access '/usr/local/lib/node_modules'",
+            True,
+        ),
+        # gem, on a system Ruby.
+        (
+            "You don't have write permissions for the "
+            "/Library/Ruby/Gems/3.4.0 directory.",
+            True,
+        ),
+        # pip and cpan, from the interpreter and the shell.
+        ("[Errno 13] Permission denied: '/usr/lib/python3.12'", True),
+        ("PERMISSION DENIED", True),
+        ("error: package not found", False),
+        ("sudo: a password is required", False),
+        ("", False),
+    ),
+)
+def test_is_permission_failure(error, expected):
+    assert _is_permission_failure(error) is expected
 
 
 # Escalator selection: which binary drives the escalation, and how each dialect

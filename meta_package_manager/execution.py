@@ -81,6 +81,7 @@ from .sudo import (
     _SUDO_CACHE_WARM,
     ESCALATION,
     ESCALATORS,
+    _is_permission_failure,
     _is_sudo_auth_failure,
     _resolved_sudo,
     _StallWatchdog,
@@ -497,6 +498,19 @@ class CLIExecutor:
     just before the manager is handed to a subcommand, and by the {attr}`version`
     probe. Consumed by {meth}`_resolve_timeout` to pick a per-operation default.
     `None` (no known operation) falls back to {data}`DEFAULT_TIMEOUT`.
+    """
+
+    _dormant_sudo: bool = False
+    """Whether the command just built carries a privileged marker the policy left off.
+
+    Stamped by {meth}`build_cli` when an operation passes `sudo=True` but
+    {func}`~meta_package_manager.sudo._resolved_sudo` keeps escalation off (the
+    dormant markers of `pip`, `npm`, `gem` and `cpan`). Consumed by the failure
+    gate of {meth}`run`, which turns the permission error such a call is prone
+    to into the hint naming the scoped opt-in. Per-call state, safe for the same
+    reason {attr}`_active_operation` is: a manager instance runs one command at
+    a time (see `SHARED_LOCK_FAMILIES` in
+    {mod}`meta_package_manager.dispatch`).
     """
 
     progress: bool = False
@@ -1346,6 +1360,23 @@ class CLIExecutor:
                     exception.diagnosis,
                     extra={"label": self.id},  # type: ignore[attr-defined]
                 )
+            # A dormant privileged marker meeting a permission refusal: the
+            # marker predicted exactly this failure, so name the opt-in. On top
+            # of the relay above, which carries the tool's own account, usually
+            # naming the very directory it could not write.
+            if (
+                self._dormant_sudo
+                and _is_permission_failure(error)
+                and getattr(os, "geteuid", lambda: 1)() != 0
+            ):
+                logging.warning(
+                    "The failed operation is marked privileged, but escalation "
+                    "is off for this manager. Opt in with "
+                    f"`mpm --{self.id} --sudo`, or a "  # type: ignore[attr-defined]
+                    f"`[mpm.managers.{self.id}] sudo = true` "  # type: ignore[attr-defined]
+                    "entry in your configuration file.",
+                    extra={"label": self.id},  # type: ignore[attr-defined]
+                )
             # Accumulate before deciding whether to raise: the error is recorded
             # whether or not it also propagates (see the `cli_errors` docstring).
             self.cli_errors.append(exception)
@@ -1441,6 +1472,12 @@ class CLIExecutor:
             # fails on the manager's own permission error rather than on a
             # missing binary.
             and escalator is not None
+        )
+        # A privileged marker the policy left dormant, remembered for the
+        # failure gate of run(): a permission error is then the marker's
+        # prediction coming true, worth the hint naming the opt-in.
+        self._dormant_sudo = bool(
+            sudo and not _resolved_sudo(self) and current_platform() in UNIX
         )
         # Sudo replaces any pre-command, be it overridden or automatic.
         # The non-interactive prefix spends the credential cache warmed up front by

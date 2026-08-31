@@ -33,6 +33,10 @@ Google ships two separate products under the name: the Antigravity **IDE**, a VS
 
 The same AppImage manager as [`am`](managers/am.md), which `mpm` wraps, under a second name. Its repository carries no implementation at all, only a stub that replaces its own contents with AM's and re-executes it: "*Since version 5, "AppMan" and "AM" have been meged to share the same code*". The script then reads the path it was invoked through to decide whether to install system-wide or under the user's home, which is the entire difference between the two. Wrapping it would also double-count, since `am -fi` already lists AppMan's applications in a table of their own.
 
+## [`apt-rpm`](https://en.wikipedia.org/wiki/APT-RPM) ☠️
+
+APT ported onto RPM, and its last release is `0.5.15lorg3.2` from 2006-06-22. Its original maintainer had stepped away a year before that, announcing in March 2005 "that he would not continue developing it and that he would instead focus on Smart Package Manager, which was planned as a successor to APT-RPM". That successor is on this page too, as [`smart`](#smart), and it is retired as well.
+
 ## [`auto-cpufreq`](https://github.com/AdnanHodzic/auto-cpufreq) ❌ 🛟
 
 A CPU speed and power optimizer for Linux, running as a daemon that switches governors and turbo boost according to load and battery state. `topgrade` updates it in place, which is what puts it in the benchmark, but it installs nothing and owns nothing installable: what it manages is a kernel tuning policy, which has no name, no version and no catalog to draw from.
@@ -54,6 +58,10 @@ It reports no version by any route, which is what settles it. None of the eleven
 ## [`bpm`](https://github.com/bpm-rocks/bpm) ☠️
 
 Bash package manager, abandoned: 28 commits in all and nothing since 2021-07-25. Little would have been left to wrap in any case, its whole verb surface being `install` and `run`, with no listing, no removal and no upgrade, and its readme conceding it carries no versioning at all, which it blames on Bash having no namespacing.
+
+## [`canopy`](https://docs.enthought.com/canopy/) ☠️
+
+Enthought's scientific Python distribution and the package manager inside it. Its newest release note is "Release notes for Canopy 2.1.9 (23 April 2018)", and the documentation index publishes nothing past that `2.1` line. Eight years without a release is well past the silence the stability policy reads as abandonment.
 
 ## [`certbot`](https://certbot.eff.org) ❌ 🛟
 
@@ -239,6 +247,14 @@ Zsh configuration framework with no registry of its own: every plugin ships insi
 
 Windows package-manager *manager*: PackageManagement brokers transactions out to providers (NuGet, PowerShellGet, Chocolatey) instead of owning packages itself, so everything it reaches through PowerShellGet `mpm` already reaches directly through [`pwsh-gallery`](managers/pwsh-gallery.md). Wrapping it would buy a delegation layer and not one extra package, which is the verdict [`metapac`](#metapac) and [`upt`](#upt) get for the same shape. Its upstream has stopped moving besides: the readme declares the module "*currently not in development*" and "*no longer accepting any pull requests*", naming AnyPackage and PowerShellGet as the successors.
 
+## [`opencsw`](https://www.opencsw.org) ☠️
+
+Community collection of Solaris packages in SysV format. Its own front page has announced nothing since 2022-02-15, "Unbound version 1.15.0 has been pushed to unstable", which is four years of silence on a catalogue whose whole value is how current it is.
+
+## [`openpkg`](https://en.wikipedia.org/wiki/OpenPKG) ☠️
+
+Cross-platform RPM-based packaging for Linux, BSD and Solaris. Its own site no longer serves: `openpkg.org` answers with an expired TLS certificate over HTTPS and HTTP alike, which is why this section links Wikipedia instead. That stub carries nothing newer than "in June 2005 it offered more than 880 freely available packages".
+
 ## [`pacapt`](https://github.com/icy/pacapt) ☠️
 
 Cross-manager wrapper retired in 2022. All 19 of the package managers it drove are shipped by `mpm`.
@@ -314,6 +330,10 @@ Runs programs instead of installing them, which leaves nothing to declare. Every
 ## [`plug`](https://github.com/junegunn/vim-plug) ❌ 🛟
 
 Vim and Neovim plugin manager, drivable unattended unlike [`dein`](#dein) and [`dpp`](#dpp): `PlugInstall` runs under `--headless` and exits cleanly. It reports no version, though, and by design. It ships as a single file the documented install fetches from `master`, so no release tag ever reaches the copy on disk, and it records no manifest either: the plugin list lives in the user's own config. The request for a version command was closed on the maintainer's ["it doesn't have a version number in it, so it's not currently possible"](https://github.com/junegunn/vim-plug/issues/1266#issuecomment-1983679360).
+
+## [`ppm`](https://en.wikipedia.org/wiki/ActivePerl) ☠️
+
+ActiveState's Perl Package Manager, which ships inside ActivePerl rather than on its own. That distribution's last release is `5.28.1` from 2019-05-30, seven years back, so the manager has had no vehicle since. CPAN itself stays reachable through [`cpan`](managers/cpan.md).
 
 ## [`restarts`](https://github.com/liske/needrestart) ❌ 🛟
 

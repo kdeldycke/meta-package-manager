@@ -124,11 +124,11 @@ QUEUED_GLYPH = "🚧"
 
 The state a blank cell used to swallow. A manager absent from the pool and
 from {data}`UNSUPPORTED_GLYPHS` may be one nobody has looked at, or one
-looked at closely and queued behind something the assessing host does not
-have: an Arch box, a Hyprland session, a Nim toolchain, or a date a
-dead-upstream recheck waits on. Only the second kind carries this glyph,
-and `docs/benchmark.toml`'s `queued` table is where the blocker is written
-down, one line per manager.
+looked at closely and queued behind something: a host the assessing machine
+is not, a date a dead-upstream recheck waits on, or the project scope
+`mpm` does not implement yet. Only the second kind carries this glyph, and
+`docs/benchmark.toml`'s `queued` table is where the blocker is written
+down, one line per manager, since the glyph alone cannot say which.
 
 It is deliberately unlinked in a support cell, unlike every other state.
 A wrapped manager has a class to point at and a declined one a verdict
@@ -187,7 +187,7 @@ happens elsewhere.
 SUPPORT_SCALE = {
     WRAPPED_GLYPHS["maintained"]: "Active support by `mpm`",
     WRAPPED_GLYPHS["unmaintained"]: "Usable in `mpm`, but upstream is unmaintained",
-    QUEUED_GLYPH: "Assessed as a candidate, blocked on a host or a date",
+    QUEUED_GLYPH: "Assessed as a candidate, not wrapped yet",
     TOPGRADE_FALLBACK_GLYPH: "Falls back to `topgrade`",
     UNSUPPORTED_GLYPHS["archived"]: "Unsupported by `mpm` and upstream is unmaintained",
     UNSUPPORTED_GLYPHS["excluded"]: "`mpm` declined support",

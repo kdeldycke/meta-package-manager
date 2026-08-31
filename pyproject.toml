@@ -927,6 +927,7 @@ test-matrix.exclude = [
   { os = "macos-26", python-version = "3.15" },
   { os = "windows-2025", python-version = "3.15" },
 ]
+test-matrix.unstable = [{ os = "ubuntu-26.04" }]
 # Sync optional-dependencies into the build venv so the Nuitka binary ships
 # every feature gated behind try/except imports in click-extra and mpm:
 #   - sbom-offline: cyclonedx-python-lib + spdx-tools, for `mpm sbom --spdx`
@@ -1897,6 +1898,9 @@ description = "Cygwin, GNU/Hurd, Haiku, IBM AIX, IBM i, illumos, Solaris"
 name = "🖥 platform: Windows"
 color = "bfd4f2"
 description = "Windows"
+
+[tool.repomatic.test-matrix.variations]
+os = ["ubuntu-26.04"]
 
 [tool.gitleaks]
 # Extend gitleaks' built-in ruleset instead of replacing it: this section is

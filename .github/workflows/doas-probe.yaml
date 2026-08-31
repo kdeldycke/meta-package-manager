@@ -44,7 +44,10 @@ jobs:
       # Every wording below is what mpm's `_is_sudo_denied` and
       # `_is_sudo_auth_failure` matchers key on. Captured with no doas.conf at
       # all, so the user is unconfigured and therefore unauthorized.
+      # `bash {0}` drops the default `-e`, which would abort the step on the
+      # very failures this probe exists to capture.
       - name: Capture the unauthorized wordings
+        shell: bash {0}
         run: >
           echo "--- doas -n true, no doas.conf ---";
           doas -n true 2>err.txt; echo "exit=$?"; cat err.txt;
@@ -84,6 +87,7 @@ jobs:
           echo "--- did it land? ---"; command -v sl
 
       - name: Probe an unauthorized user, to prove the denial path
+        shell: bash {0}
         run: >
           sudo tee /etc/doas.conf <<< 'permit nopass root as root' > /dev/null;
           echo "--- doas -n true, user no longer permitted ---";

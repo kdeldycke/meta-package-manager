@@ -24,6 +24,21 @@ Password:
 
 Which managers escalate is decided per manager. System package managers ([`apt`](managers/apt.md), [`dnf`](managers/dnf.md), [`pacman`](managers/pacman.md), [`zypper`](managers/zypper.md), [`xbps`](managers/xbps.md), [`macports`](managers/macports.md), [`snap`](managers/snap.md), and the like) run their state-changing operations through `sudo` by default; user-level managers ([`brew`](managers/brew.md), [`npm`](managers/npm.md), [`pip`](managers/pip.md), ...) do not, and daemon-backed managers authorizing through polkit ([`flatpak`](managers/flatpak.md), [`fwupd`](managers/fwupd.md), [`pkcon`](managers/pkcon.md)) need no wrap at all. A password prompt raised by those last ones comes from polkit, not `sudo`, so a `NOPASSWD` rule does not silence it: grant a polkit rule instead.
 
+## Choosing the escalator
+
+`mpm` drives `sudo` or [`doas`](https://man.openbsd.org/doas), picking whichever the host carries and preferring `sudo` when both are installed. That matters on the systems that ship no `sudo` at all: OpenBSD replaced it with `doas` in its base system, and neither Alpine nor NetBSD carries one by default, while `mpm` wraps escalating managers on all three ([`apk`](managers/apk.md), [`pkg-tools`](managers/pkg-tools.md) and [`pkgin`](managers/pkgin.md) among them).
+
+Name one explicitly with `--sudo-command`, or with its `[mpm] sudo_command` config key:
+
+```toml
+[mpm]
+sudo_command = "doas"
+```
+
+This selects the binary only. Whether a manager escalates at all stays the separate decision of `--sudo` / `--no-sudo` and each manager's own policy, described next.
+
+The two are not interchangeable underneath. `doas` takes short options only, so `mpm` escalates through `doas -n` where it would write `sudo --non-interactive`. It also has no way to authenticate without running a command, so the credential probe runs `doas -n true`, and its persistence is opt-in per rule in `doas.conf`: `mpm` therefore never refreshes a `doas` credential on a schedule, where it keeps a `sudo` one alive for the whole run. A host with neither binary gets one warning, and its managers run unprivileged rather than failing on a missing `sudo`.
+
 ## Controlling escalation
 
 Override the default globally with `--sudo` / `--no-sudo`, or per manager with the `sudo` key of a [`[mpm.managers.<id>]`](overrides.md) section:
@@ -54,7 +69,9 @@ flowchart TD
     begin(["Mutating subcommand: install, upgrade,<br/>remove, sync, cleanup, restore"]) --> skip{"Windows, running as root,<br/>dry run or plan,<br/>or nothing escalates?"}
     skip -->|"yes"| bare["No sudo machinery:<br/>managers run as themselves"]
     skip -->|"no"| audit["Tamper audit: warn on an escalated<br/>binary that others can modify"]
-    audit --> probe["Probe the credential cache:<br/>sudo --non-interactive --validate"]
+    audit --> pick{"Which escalator does<br/>the host carry?"}
+    pick -->|"none"| noesc["One warning:<br/>escalations run unprivileged"]
+    pick -->|"sudo, or doas"| probe["Probe its credential cache,<br/>without prompting"]
     probe -->|"warm"| keepalive["Silent keepalive: every escalated call<br/>spends the cache, refreshed<br/>until the run ends"]
     probe -->|"cold: sudoers<br/>denies the user"| denied["One warning, no prompt:<br/>escalations fail fast"]
     probe -->|"cold:<br/>no terminal"| notty["One warning:<br/>escalations fail fast"]

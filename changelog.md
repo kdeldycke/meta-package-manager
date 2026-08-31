@@ -60,6 +60,7 @@
 - [mpm] Warn when the `sudo` credentials primed for a run are dropped mid-flight, as every Homebrew command does on startup, and re-arm the hidden-prompt notices.
 - [mpm] Warn before escalating a manager whose binary is not owned by the user or root, or can be modified by others.
 - [mpm] Skip the up-front password prompt when `sudo` reports the user is not authorized to run it at all, warning that escalating managers will fail.
+- [mpm] Escalate through `doas` on a host carrying no `sudo`, as OpenBSD, Alpine and NetBSD do by default. Add `--sudo-command` and its `[mpm] sudo_command` key to name the escalator explicitly.
 - [mpm] Narrate the sudo priming decisions at `--verbosity INFO`, and expose the probe's raw answer and every cache refresh at `DEBUG`.
 - [mpm] Chart the privilege-escalation decision path on the sudo documentation page, from the up-front probe to the end of the run.
 - [mpm] Load the SPDX and CycloneDX writer libraries only when `mpm sbom` runs, instead of on every invocation. Cuts about 300 ms off the startup of every other command for anyone carrying the `[sbom-offline]` extra.

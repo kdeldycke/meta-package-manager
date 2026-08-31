@@ -662,6 +662,10 @@ def test_sudo_prompt_respects_sudo_constraints(manager_ids):
         ("SUDO: A PASSWORD IS REQUIRED", True),
         # sudo-rs, the default sudo of Ubuntu 25.10 and newer.
         ("sudo: interactive authentication is required", True),
+        # opendoas, when `-n` meets a rule carrying no `nopass`.
+        ("doas: Authentication required", True),
+        # Unsigned by any escalator: a command of its own saying the same thing.
+        ("build.sh: authentication required", False),
         ("", False),
         ("error: package not found", False),
         ("sudo: command not found", False),
@@ -685,9 +689,21 @@ def test_is_sudo_auth_failure(error, expected):
             True,
         ),
         ("SORRY, USER KEVIN MAY NOT RUN SUDO ON HOST.", True),
+        # opendoas prints the bare errno string of EPERM for an unmatched rule.
+        ("doas: Operation not permitted", True),
+        # An installed but unconfigured doas, measured on a runner carrying no
+        # `/etc/doas.conf`. No password can fix it either.
+        (
+            "doas: doas is not enabled, /etc/doas.conf: No such file or directory",
+            True,
+        ),
         # A cold cache is an authentication failure, never a denial.
         ("sudo: a password is required", False),
         ("sudo: interactive authentication is required", False),
+        ("doas: Authentication required", False),
+        # The same errno string, from a command rather than from an escalator,
+        # must not read as a refusal: only a line the escalator signed counts.
+        ("rm: cannot remove '/etc/hosts': Operation not permitted", False),
         ("", False),
         ("error: package not found", False),
     ),

@@ -304,11 +304,22 @@ def _resolved_sudo(manager: CLIExecutor) -> bool:
     return manager.sudo if manager.sudo is not None else manager.default_sudo
 
 
-def _is_sudo_auth_failure(error: str) -> bool:
-    """Whether `error` is `sudo` refusing to authenticate non-interactively.
+def _names_an_escalator(error: str) -> bool:
+    """Whether `error` is prefixed by one of the escalators mpm drives.
 
-    `sudo --non-interactive` writes one of these to `<stderr>` when it has no
-    cached credentials
+    Both matchers below key on wordings plain enough to appear in an unrelated
+    command's output (`doas` reports an unauthorized user as the bare errno
+    string `Operation not permitted`), so they only trust a line the escalator
+    signed with its own name.
+    """
+    return any(f"{escalator.id}:" in error for escalator in ESCALATORS)
+
+
+def _is_sudo_auth_failure(error: str) -> bool:
+    """Whether the escalator is refusing to authenticate non-interactively.
+
+    `sudo --non-interactive` and `doas -n` write one of these to `<stderr>` when
+    they have no cached credentials
     and cannot prompt for a password (nothing cached, no controlling terminal, no
     askpass helper). Lets {meth}`CLIExecutor.run
     <meta_package_manager.execution.CLIExecutor.run>` turn an opaque escalation
@@ -321,7 +332,7 @@ def _is_sudo_auth_failure(error: str) -> bool:
     escalation failure on a current Ubuntu unrecognized, and the hint unprinted.
     """
     lowered = error.lower()
-    return "sudo:" in lowered and any(
+    return _names_an_escalator(lowered) and any(
         marker in lowered
         for marker in (
             "a password is required",
@@ -329,6 +340,9 @@ def _is_sudo_auth_failure(error: str) -> bool:
             "interactive authentication is required",
             "no tty present",
             "askpass",
+            # opendoas, `doas.c`: `errx(1, "Authentication required")` is what
+            # `-n` answers when the matching rule carries no `nopass`.
+            "authentication required",
         )
     )
 
@@ -350,12 +364,11 @@ def _is_sudo_denied(error: str) -> bool:
     catalog), `sudo` before `1.9` and `sudo-rs`'s validate denial (`may not run
     sudo on`, `src/common/error.rs`), the historic sudoers lecture (`is not in
     the sudoers file`), and both implementations' per-command denial (`is not
-    allowed to execute`). Unlike {func}`_is_sudo_auth_failure`, which scans the
-    stderr of arbitrary failed commands, this one only ever reads the probe's
-    own output, so the markers need no `sudo:` prefix guard.
+    allowed to execute`), and `doas`, which reports the bare errno string of
+    `EPERM` instead.
     """
     lowered = error.lower()
-    return any(
+    if any(
         marker in lowered
         for marker in (
             "is not allowed to run sudo",
@@ -363,6 +376,18 @@ def _is_sudo_denied(error: str) -> bool:
             "is not in the sudoers file",
             "is not allowed to execute",
         )
+    ):
+        return True
+    # Two opendoas answers, both measured on a runner and both leaving nothing
+    # for a password to fix. An unmatched rule ends in `errc(1, EPERM, NULL)`,
+    # printing the bare errno string of EPERM and nothing more specific; a
+    # missing `doas.conf` ends in `err(1, "doas is not enabled, %s")`, which is
+    # what an installed-but-unconfigured host answers (`doas.c`). The errno
+    # string is one any command could print, so both count only on a line doas
+    # signed. The sudo wordings above need no such guard: each already names
+    # sudo itself, and sudo prefixes none of them.
+    return _names_an_escalator(lowered) and (
+        "operation not permitted" in lowered or "is not enabled" in lowered
     )
 
 

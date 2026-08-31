@@ -86,12 +86,21 @@ jobs:
           --apt --sudo install sl 2>&1 | tail -40;
           echo "--- did it land? ---"; command -v sl
 
-      - name: Probe an unauthorized user, to prove the denial path
-        shell: bash {0}
-        run: >
-          sudo tee /etc/doas.conf <<< 'permit nopass root as root' > /dev/null;
-          echo "--- doas -n true, user no longer permitted ---";
-          doas -n true 2>err3.txt </dev/null; echo "exit=$?"; cat err3.txt;
-          echo "--- what mpm makes of it ---";
-          uv run --no-progress --frozen -- mpm --verbosity INFO --sudo-command doas
-          --apt --sudo install sl 2>&1 | tail -20
+      # Both denial wordings must reach mpm's "not authorized" warning rather
+      # than the generic no-terminal one: they are what `_is_sudo_denied`
+      # matches, and a silent regression there costs the user the explanation.
+      - name: Assert the denial path, unauthorized user
+        run: |
+          sudo tee /etc/doas.conf <<< 'permit nopass root as root' > /dev/null
+          uv run --no-progress --frozen -- mpm --verbosity INFO --sudo-command doas \
+            --apt --sudo install sl > out.txt 2>&1 || true
+          tail -20 out.txt
+          grep -q "not authorized to run doas" out.txt
+
+      - name: Assert the denial path, unconfigured doas
+        run: |
+          sudo rm -f /etc/doas.conf
+          uv run --no-progress --frozen -- mpm --verbosity INFO --sudo-command doas \
+            --apt --sudo install sl > out2.txt 2>&1 || true
+          tail -20 out2.txt
+          grep -q "not authorized to run doas" out2.txt

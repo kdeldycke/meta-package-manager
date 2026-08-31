@@ -271,6 +271,10 @@ linkcheck_ignore = [
     r"https://medium\.com/",
     r"https://ohmybash\.nntoan\.com",
     r"https://openclipart\.org/",
+    # archive.org throttles crawlers with a 429. The `sage` section links a
+    # capture because the project it cites was deleted along with its owner,
+    # so the snapshot is the only thing left to point at.
+    r"https://web\.archive\.org/",
     r"http://www\.slackware\.com/",
     r"https://www\.bitdefender\.com/",
     r"https://www\.gnu\.org/software/",

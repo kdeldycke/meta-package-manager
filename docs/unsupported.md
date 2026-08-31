@@ -191,7 +191,7 @@ Plugins are driven through an **undocumented** `update` subcommand of the IDE bi
 
 ## [`jetbrains-toolbox`](https://www.jetbrains.com/toolbox-app/) ❌ 🛟
 
-JetBrains' IDE installer ships no command-line interface at all: it is a tray application, and the only way to drive it non-interactively is the third-party [`jetbrains-toolbox-updater`](https://github.com/DerLinkshaender/jetbrains-toolbox-updater) crate that pokes at its installation directory. Nothing to execute, nothing to list, no version to report.
+JetBrains' IDE installer ships no command-line interface at all: it is a tray application, and the only way to drive it non-interactively is the third-party [`jetbrains-toolbox-updater`](https://github.com/GideonBear/jetbrains-toolbox-updater) crate that pokes at its installation directory. That crate is what [`topgrade`](managers/topgrade.md) depends on, `jetbrains-toolbox-updater = "6.0.0"` in its `Cargo.toml`, which is where this row's lifebuoy comes from. Nothing to execute, nothing to list, no version to report.
 
 ## [`jetpack`](https://github.com/3ofcoins/jetpack) ☠️ 🛟
 
@@ -343,9 +343,9 @@ ActiveState's Perl Package Manager, which ships inside ActivePerl rather than on
 
 Python project manager, archived by Astral with its last release `0.44.0` dating from 2025-02-26. Its readme states Rye "is no longer developed" and that "no further updates are planned, including security updates", naming [uv](https://docs.astral.sh/uv/) as "the successor project from the same maintainers". `mpm` wraps that successor as [`uv`](managers/uv.md) and [`uvx`](managers/uvx.md), so the global tools and interpreters Rye installed are reached without it.
 
-## [`sage`](https://github.com/svnpenn/sage) ☠️
+## [`sage`](https://web.archive.org/web/20191121154506/https://github.com/svnpenn/sage) ☠️
 
-Cygwin package manager, offered as an alternative to [`apt-cyg`](managers/apt-cyg.md), which `mpm` wraps. It is gone in the strongest sense available: the repository 404s and so does the `svnpenn` account that owned it, so the project was not renamed or transferred, it was deleted along with its owner. Nothing survives to wrap, and no fork carries the name.
+Cygwin package manager, offered as an alternative to [`apt-cyg`](managers/apt-cyg.md), which `mpm` wraps. It is gone in the strongest sense available: `github.com/svnpenn/sage` 404s and so does the `svnpenn` account that owned it, so the project was not renamed or transferred, it was deleted along with its owner. The title above therefore links the Wayback Machine's last capture, from 2019-11-21, there being nothing live left to point at. No fork carries the name.
 
 ## Self-updating applications ❌ 🛟
 

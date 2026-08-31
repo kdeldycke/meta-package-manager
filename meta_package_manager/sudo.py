@@ -43,21 +43,23 @@ escalators are macOS-only managers today).
 ```
 
 ```{todo}
-Drive the escalators other than `sudo`: `doas`, `run0`, `pkexec`, and
-`gsudo` on Windows. `_SUDO_ESCALATION_PREFIX` hardcodes `sudo`, so a host
-carrying only one of the others cannot escalate at all, and both refusal
-matchers below only know `sudo` and `sudo-rs` phrasings. Let the user pick
-the binary, and emulate an option a backend cannot express rather than
-failing on it: topgrade returns a hard error there, which its users report
-as a bug
+Add `run0` and `pkexec` to {data}`ESCALATORS`, and `gsudo` for Windows, once
+a user asks for one: `sudo` and `doas` cover the hosts that ship an escalator
+in base today. Each needs its own probe and prompt argv and its own refusal
+wordings, the way `doas` needed both. Emulate an option a backend cannot
+express rather than failing on it: topgrade returns a hard error there, which
+its users report as a bug
 ([topgrade-rs/topgrade#1435](https://github.com/topgrade-rs/topgrade/issues/1435)).
+Windows needs more than a table entry, since {func}`prime_sudo` returns
+before any of this on that platform.
 ```
 
 ```{todo}
-Escalate to the user owning a manager's tree, not only to root.
-`_SUDO_ESCALATION_PREFIX` can reach root alone, so a manager installed under
-another user's home (a shared Homebrew prefix on Linux, a nix profile owned
-by someone else) has no route: `sudo --user` is what such a tree needs.
+Escalate to the user owning a manager's tree, not only to root. Every
+{attr}`~Escalator.escalate_args` reaches root alone, so a manager installed
+under another user's home (a shared Homebrew prefix on Linux, a nix profile
+owned by someone else) has no route: `sudo --user` is what such a tree needs,
+and `doas -u` its equivalent.
 ```
 
 ```{todo}

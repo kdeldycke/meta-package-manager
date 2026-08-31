@@ -89,7 +89,7 @@ from .cooldown import (
     resolve_cooldown,
 )
 from .execution import PLAN_RECORDER, CLIError
-from .sudo import ESCALATORS
+from .sudo import ESCALATION, ESCALATORS
 from .logo import env_summary, version_screen_params
 from .manager import PackageManager
 from .package import Package
@@ -640,6 +640,11 @@ def mpm(
     # CLIExecutor.run) into a process-wide recorder, then prints them to stdout at
     # close, one copy-pasteable line each. Reset first so a previous in-process
     # invocation (the test suite drives the CLI repeatedly) cannot leak into this one.
+    # Which binary escalates is a machine-level fact, so it is held once for the
+    # process instead of copied onto every manager. Assigned unconditionally, for
+    # the same reason PLAN_RECORDER is reset below.
+    ESCALATION.select(sudo_command)
+
     if plan:
         PLAN_RECORDER.reset()
 
@@ -811,7 +816,6 @@ def mpm(
             # Does the manager should raise on error or not.
             stop_on_error=stop_on_error,
             sudo=sudo,
-            sudo_command=sudo_command,
             dry_run=dry_run,
             plan=plan,
             timeout=timeout,

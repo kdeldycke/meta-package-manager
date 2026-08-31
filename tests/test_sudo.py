@@ -42,6 +42,7 @@ from extra_platforms import is_any_windows
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
+    ESCALATION,
     ESCALATORS,
     _is_sudo_auth_failure,
     _is_sudo_denied,
@@ -145,14 +146,22 @@ def _clear_escalator_cache():
 
 
 @contextmanager
-def only_escalator(escalator_id: str | None):
-    """Pretend the host carries exactly `escalator_id`, or none at all."""
+def only_escalator(escalator_id: str | None, *, selected: str | None = None):
+    """Pretend the host carries exactly `escalator_id`, or none at all.
+
+    `selected` drives the process-wide choice the CLI would have recorded, so a
+    test can force an escalator the way `--sudo-command` does.
+    """
     with patch(
         "meta_package_manager.sudo.shutil.which",
         side_effect=lambda name: f"/usr/bin/{name}" if name == escalator_id else None,
     ):
         resolve_escalator.cache_clear()
-        yield
+        ESCALATION.select(selected)
+        try:
+            yield
+        finally:
+            ESCALATION.select(None)
 
 
 def _escalating_manager() -> FakeManager:
@@ -751,6 +760,35 @@ def test_resolve_escalator_rejects_an_unknown_name(caplog):
     assert any("Unknown sudo_command" in r.getMessage() for r in caplog.records)
 
 
+def test_escalator_choice_is_machine_level():
+    """The escalator is process-wide, never a manager attribute: a machine runs
+    one of them, and every manager escalating on it uses that one.
+
+    Guards both halves. No manager may carry the choice as an attribute, and the
+    per-manager config section must refuse it, so `[mpm.managers.<id>]` can never
+    make one manager escalate differently from its peers.
+    """
+    from meta_package_manager.definitions import OVERRIDABLE_FIELDS
+
+    assert not hasattr(FakeManager(), "sudo_command")
+    assert "sudo_command" not in OVERRIDABLE_FIELDS
+    assert "sudo_command" not in pool.ALLOWED_EXTRA_OPTION
+
+
+def test_per_manager_sudo_command_is_refused(invoke, tmp_path):
+    """A `[mpm.managers.<id>] sudo_command` entry is rejected outright, naming
+    the fields that are per-manager, rather than silently escalating one manager
+    through another binary."""
+    config = tmp_path / "config.toml"
+    config.write_text(
+        '[mpm.managers.apt]\nsudo_command = "doas"\n',
+        encoding="UTF-8",
+    )
+    result = invoke("--config", str(config), "managers")
+    assert result.exit_code != 0
+    assert "mpm.managers.apt.sudo_command: unknown field" in result.stderr
+
+
 def test_sudo_command_reaches_the_config_file(invoke, tmp_path):
     """`[mpm] sudo_command` is honored, and validated against the same choices
     as the flag: an unknown escalator is a usage error, not a silent fallback."""
@@ -772,8 +810,7 @@ def test_sudo_command_reaches_the_config_file(invoke, tmp_path):
 )
 def test_build_cli_escalates_with_the_selected_binary(escalator_id, expected_prefix):
     manager = _escalating_manager()
-    manager.sudo_command = escalator_id
-    with only_escalator(escalator_id):
+    with only_escalator(escalator_id, selected=escalator_id):
         args = manager.build_cli("install", "pkg", sudo=True)
     assert tuple(str(a) for a in args[: len(expected_prefix)]) == expected_prefix
 
@@ -806,8 +843,10 @@ def test_prime_sudo_probes_and_prompts_through_doas(capsys):
     echoed notice carries the explanation instead."""
     ctx = click.Context(click.Command("upgrade"))
     manager = _escalating_manager()
-    manager.sudo_command = "doas"
-    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run, only_escalator("doas"):
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        only_escalator("doas", selected="doas"),
+    ):
         run.side_effect = (
             subprocess.CompletedProcess((), 1),  # Cold-cache probe.
             subprocess.CompletedProcess((), 0),  # Successful password prompt.
@@ -827,10 +866,9 @@ def test_doas_gets_no_keepalive_thread(caplog):
     warm, without a thread refreshing it."""
     ctx = click.Context(click.Command("mpm"))
     manager = _escalating_manager()
-    manager.sudo_command = "doas"
     with (
         prime_sudo_env() as run,
-        only_escalator("doas"),
+        only_escalator("doas", selected="doas"),
         caplog.at_level(logging.INFO),
     ):
         run.return_value = subprocess.CompletedProcess((), 0)

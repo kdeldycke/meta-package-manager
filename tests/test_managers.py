@@ -353,7 +353,6 @@ CANONICAL_ATTRS = (
     # Escalation policy.
     "sudo",
     "default_sudo",
-    "sudo_command",
     "internal_sudo",
     # Version gate and native cooldown marker.
     "requirement",

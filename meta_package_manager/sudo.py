@@ -286,16 +286,42 @@ def resolve_escalator(override: str | None = None) -> Escalator | None:
     return None
 
 
-def _resolved_sudo_command(managers: Iterable[CLIExecutor]) -> str | None:
-    """The `sudo_command` override shared by `managers`, if any set one.
+class _EscalationChoice:
+    """Which escalator this process drives, resolved once per invocation.
 
-    The override is a global choice that the pool copies onto every selected
-    manager, so the first value found speaks for the run.
+    Escalation is a property of the machine, not of a manager: every manager
+    that escalates on a given host escalates through the same binary. Keeping
+    the choice here rather than on each manager is what makes that a statement
+    the code makes rather than one a reader has to infer from every copy
+    holding the same value.
     """
-    for manager in managers:
-        if manager.sudo_command is not None:
-            return manager.sudo_command
-    return None
+
+    def __init__(self) -> None:
+        self._override: str | None = None
+
+    def select(self, override: str | None) -> None:
+        """Record the user's `--sudo-command`, or `None` to auto-detect.
+
+        Called once at the top of the CLI group. It always assigns, so a
+        previous in-process invocation (the test suite drives the CLI
+        repeatedly) cannot leak its choice into this one.
+        """
+        self._override = override
+
+    def resolve(self) -> Escalator | None:
+        """The escalator to drive, or `None` when the host carries none."""
+        return resolve_escalator(self._override)
+
+
+ESCALATION: Final = _EscalationChoice()
+"""Process-wide escalator selection.
+
+A module-level singleton for the same reason as
+{data}`~meta_package_manager.execution.PLAN_RECORDER`:
+{meth}`CLIExecutor.build_cli
+<meta_package_manager.execution.CLIExecutor.build_cli>` needs it from the
+fan-out's worker threads, where the click context is not reliably reachable.
+"""
 
 
 def _resolved_sudo(manager: CLIExecutor) -> bool:
@@ -532,7 +558,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         return
     ctx.meta[_SUDO_PRIMED] = True
 
-    escalator = resolve_escalator(_resolved_sudo_command(managers))
+    escalator = ESCALATION.resolve()
     if escalator is None:
         # No escalator on PATH at all, or an override naming an unknown one
         # (which logged its own warning). Let unprivileged managers proceed.

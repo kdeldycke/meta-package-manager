@@ -79,11 +79,11 @@ from .cooldown import CooldownPolicy
 from .sudo import (
     _STALL_NOTICE_OPERATIONS,
     _SUDO_CACHE_WARM,
+    ESCALATION,
     ESCALATORS,
     _is_sudo_auth_failure,
     _resolved_sudo,
     _StallWatchdog,
-    resolve_escalator,
 )
 from .version import parse_version
 
@@ -564,16 +564,6 @@ class CLIExecutor:
     `build_cli(..., sudo=True)` operations escalate out of the box, while staying
     switchable off through {attr}`~meta_package_manager.execution.CLIExecutor.sudo`
     (`--no-sudo` or config) for rootless setups.
-    """
-
-    sudo_command: str | None = None
-    """User override naming which escalator drives this run: `sudo` or `doas`.
-
-    `None` (the default) auto-detects, preferring `sudo` when the host carries
-    both. Set globally by `mpm --sudo-command` and by the `[mpm] sudo_command`
-    config key. Selects the binary only; whether a manager escalates at all
-    stays the separate decision of {attr}`sudo` and {attr}`default_sudo`.
-    See {func}`~meta_package_manager.sudo.resolve_escalator`.
     """
 
     internal_sudo: bool = False
@@ -1439,7 +1429,9 @@ class CLIExecutor:
         # (the `sudo` override, else `default_sudo`), and the host is a UNIX one
         # carrying an escalator. A non-UNIX host simply does not escalate rather
         # than raising.
-        escalator = resolve_escalator(self.sudo_command)
+        # Which binary escalates is a machine-level fact, held process-wide
+        # rather than per manager: see ESCALATION.
+        escalator = ESCALATION.resolve()
         escalate = bool(
             sudo
             and _resolved_sudo(self)

@@ -47,6 +47,26 @@ A per-manager `sudo` value wins over the global flag, so you can escalate everyt
 
 `mpm` [runs managers concurrently](concurrency.md) with their output muted behind a progress bar, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A cache found warm (a prior `sudo --validate`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all. While that keepalive runs, the terminal holds live `sudo` credentials, so anyone at the keyboard can interrupt `mpm` and reuse them until they expire: the same exposure as any pre-authenticated `sudo` session, worth knowing before walking away from a long run.
 
+The decision path, from the up-front probe to the end of the run:
+
+```mermaid
+flowchart TD
+    begin(["Mutating subcommand: install, upgrade,<br/>remove, sync, cleanup, restore"]) --> skip{"Windows, running as root,<br/>dry run or plan,<br/>or nothing escalates?"}
+    skip -->|"yes"| bare["No sudo machinery:<br/>managers run as themselves"]
+    skip -->|"no"| audit["Tamper audit: warn on an escalated<br/>binary that others can modify"]
+    audit --> probe["Probe the credential cache:<br/>sudo --non-interactive --validate"]
+    probe -->|"warm"| keepalive["Silent keepalive: every escalated call<br/>spends the cache, refreshed<br/>until the run ends"]
+    probe -->|"cold: sudoers<br/>denies the user"| denied["One warning, no prompt:<br/>escalations fail fast"]
+    probe -->|"cold:<br/>no terminal"| notty["One warning:<br/>escalations fail fast"]
+    probe -->|"cold:<br/>on a terminal"| who{"Does mpm itself<br/>escalate a manager?"}
+    who -->|"yes"| prompt["One branded password prompt<br/>for the whole run"]
+    who -->|"no: internal<br/>escalators only"| stall["No prompt: the 30 s stall notice<br/>flags a hidden mid-run prompt"]
+    prompt -->|"authenticated"| keepalive
+    prompt -->|"refused"| failed["One warning:<br/>escalations may fail"]
+    keepalive -->|"credentials dropped mid-run:<br/>every Homebrew command resets them"| dropped["One warning:<br/>stall notices re-arm"]
+    dropped -->|"a new sudo authentication<br/>in the same terminal"| keepalive
+```
+
 Only a cold cache, on an interactive terminal, leads to a prompt: a notice names the managers about to escalate and the subcommand, then a single branded `sudo` prompt authenticates once for the whole run, so nothing blocks in the fan-out:
 
 ```shell-session

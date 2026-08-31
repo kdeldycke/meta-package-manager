@@ -250,6 +250,10 @@ def _start_sudo_keepalive(ctx: Context) -> None:
             if stop.is_set():
                 break
             if refresh.returncode == 0:
+                if not _SUDO_CACHE_WARM.is_set():
+                    logging.info("The sudo credentials are warm again.")
+                else:
+                    logging.debug("Refreshed the sudo credentials.")
                 _SUDO_CACHE_WARM.set()
             elif _SUDO_CACHE_WARM.is_set():
                 _SUDO_CACHE_WARM.clear()
@@ -259,7 +263,10 @@ def _start_sudo_keepalive(ctx: Context) -> None:
                     "sudoers policy expired them. Managers needing root may "
                     "prompt or fail.",
                 )
+            else:
+                logging.debug("The sudo credentials are still gone.")
 
+    logging.info("Keeping the sudo credentials fresh for the whole run.")
     thread = threading.Thread(target=keepalive, daemon=True)
     thread.start()
     _SUDO_CACHE_WARM.set()
@@ -354,6 +361,9 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
             )
 
     try:
+        logging.debug(
+            f"Probe the sudo credential cache: {' '.join(_SUDO_VALIDATE_CLI)}",
+        )
         probe = subprocess.run(
             _SUDO_VALIDATE_CLI,
             capture_output=True,
@@ -374,11 +384,15 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         # keep it fresh,
         # silently. A CI job with pre-cached credentials thus gets the keepalive
         # instead of the no-terminal warning.
+        logging.info("Found the sudo credential cache warm: no password prompt needed.")
         _start_sudo_keepalive(ctx)
         return
 
     ids = ", ".join(escalating)
     probe_error = (probe.stderr or b"").decode("UTF-8", errors="replace")
+    # The raw answer settles which cold case this is, and catches a wording no
+    # matcher knows yet (the sudo-rs precedent, see _is_sudo_auth_failure).
+    logging.debug(f"The sudo probe answered: {probe_error.strip()!r}")
     if _is_sudo_denied(probe_error):
         if escalating:
             logging.warning(
@@ -409,6 +423,11 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         # return without prompting. Most such runs never escalate, so an up-front
         # password prompt on every run would be the mirror-image regression. The
         # silent-call stall notice covers the rare mid-run prompt instead.
+        logging.info(
+            "Only managers running sudo internally are selected, on a cold "
+            "credential cache: no up-front prompt, the stall notice covers a "
+            "hidden one.",
+        )
         return
 
     echo(

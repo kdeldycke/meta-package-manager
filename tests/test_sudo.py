@@ -324,7 +324,7 @@ def _wait_for(predicate: Callable[[], bool], timeout: float = 5.0) -> bool:
 def test_keepalive_drop_warns_once_and_rearms(monkeypatch, caplog):
     """A refresh finding the credentials gone (Homebrew resets them on every
     command) clears the warm flag, with one warning per drop, and a later
-    successful refresh sets the flag back."""
+    successful refresh sets the flag back, saying so at INFO."""
     monkeypatch.setattr("meta_package_manager.sudo._SUDO_KEEPALIVE_INTERVAL", 0.01)
     ctx = click.Context(click.Command("mpm"))
     refresh_rc = [0]
@@ -339,7 +339,7 @@ def test_keepalive_drop_warns_once_and_rearms(monkeypatch, caplog):
             if "primed for this run are gone" in record.getMessage()
         ]
 
-    with prime_sudo_env() as run, caplog.at_level(logging.WARNING):
+    with prime_sudo_env() as run, caplog.at_level(logging.INFO):
         run.side_effect = fake_run
         try:
             prime_sudo(ctx, [_escalating_manager()])
@@ -357,6 +357,45 @@ def test_keepalive_drop_warns_once_and_rearms(monkeypatch, caplog):
             ctx.close()
     assert not _SUDO_CACHE_WARM.is_set()
     assert len(drop_warnings()) == 1
+    assert all(record.levelno == logging.WARNING for record in drop_warnings())
+    assert any(
+        "warm again" in record.getMessage() and record.levelno == logging.INFO
+        for record in caplog.records
+    )
+
+
+def test_prime_sudo_narrates_warm_probe_at_info(caplog):
+    """A warm probe and the keepalive arming both tell their story at INFO, so
+    a `--verbosity INFO` run shows why no password prompt appeared."""
+    ctx = click.Context(click.Command("mpm"))
+    with prime_sudo_env() as run, caplog.at_level(logging.INFO):
+        run.return_value = subprocess.CompletedProcess((), 0)
+        try:
+            prime_sudo(ctx, [_escalating_manager()])
+        finally:
+            ctx.close()
+    messages = [record.getMessage() for record in caplog.records]
+    assert any("credential cache warm" in message for message in messages)
+    assert any("Keeping the sudo credentials fresh" in message for message in messages)
+
+
+def test_prime_sudo_narrates_internal_only_skip_at_info(caplog):
+    """The decision to not prompt for an internal-only selection surfaces at
+    INFO, never as a warning."""
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        caplog.at_level(logging.INFO),
+    ):
+        run.return_value = subprocess.CompletedProcess((), 1)
+        prime_sudo(ctx, [_internal_manager()])
+    skips = [
+        record
+        for record in caplog.records
+        if "no up-front prompt" in record.getMessage()
+    ]
+    assert len(skips) == 1
+    assert skips[0].levelno == logging.INFO
 
 
 def test_prime_sudo_cold_internal_only_never_prompts_on_tty(capsys, caplog):

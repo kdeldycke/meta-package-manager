@@ -97,7 +97,7 @@ class LockFamily:
 SHARED_LOCK_FAMILIES: Final[tuple[LockFamily, ...]] = (
     LockFamily(
         "dpkg lock",
-        frozenset({"apt", "apt-mint", "deb-get", "nala", "pacstall"}),
+        frozenset({"apt", "apt-mint", "aptitude", "deb-get", "nala", "pacstall"}),
         "they all install through `dpkg` and serialize on its `/var/lib/dpkg/lock`",
     ),
     LockFamily(

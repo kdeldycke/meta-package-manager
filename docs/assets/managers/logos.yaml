@@ -72,6 +72,7 @@ icons:
     license: CC-BY-SA-3.0
     managers:
     - apt
+    - aptitude
     - deb-get
     - nala
     source: https://www.debian.org/logos

@@ -82,6 +82,7 @@ def test_default_sudo_matches_system_managers():
         "apk",
         "apt",
         "apt-mint",
+        "aptitude",
         "cave",
         "dkp-pacman",
         "deb-get",

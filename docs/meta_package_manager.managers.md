@@ -19,6 +19,7 @@
    meta_package_manager.managers.apk
    meta_package_manager.managers.apm
    meta_package_manager.managers.apt
+   meta_package_manager.managers.aptitude
    meta_package_manager.managers.asdf
    meta_package_manager.managers.bin
    meta_package_manager.managers.composer

@@ -20,6 +20,7 @@ keywords = [
   "apt",
   "apt-cyg",
   "apt-mint",
+  "aptitude",
   "asdf",
   "atom",
   "basalt",
@@ -993,6 +994,7 @@ metrics.subjects.apk = "https://gitlab.alpinelinux.org/alpine/apk-tools"
 metrics.subjects.apm = "https://github.com/atom/apm"
 metrics.subjects.apt = "https://salsa.debian.org/apt-team/apt"
 metrics.subjects.apt-cyg = "https://github.com/transcode-open/apt-cyg"
+metrics.subjects.aptitude = "https://salsa.debian.org/apt-team/aptitude"
 metrics.subjects.asdf = "https://github.com/asdf-vm/asdf"
 metrics.subjects.basalt = "https://github.com/hyperupcall/basalt"
 metrics.subjects.bin = "https://github.com/marcosnils/bin"
@@ -1132,7 +1134,7 @@ labels.content-rules."📦 manager: composer" = [ "php" ]
 labels.content-rules."📦 manager: conda-based" = [ "anaconda", "conda-forge", "miniconda", "prefix.dev" ]
 labels.content-rules."📦 manager: cpan" = [ "perl" ]
 labels.content-rules."📦 manager: dotnet" = [ "nuget" ]
-labels.content-rules."📦 manager: dpkg-based" = [ "aptitude", "debian", "dpkg", "ubuntu" ]
+labels.content-rules."📦 manager: dpkg-based" = [ "debian", "dpkg", "ubuntu" ]
 labels.content-rules."📦 manager: emerge" = [ "gentoo", "portage" ]
 labels.content-rules."📦 manager: eopkg" = [ "solus" ]
 labels.content-rules."📦 manager: flatpak" = [ "flathub" ]
@@ -1210,6 +1212,7 @@ labels.file-rules."📦 manager: cpan" = [ "meta_package_manager/managers/cpan.*
 labels.file-rules."📦 manager: dotnet" = [ "meta_package_manager/managers/dotnet.*", "tests/*dotnet*" ]
 labels.file-rules."📦 manager: dpkg-based" = [
   "meta_package_manager/managers/apt.*",
+  "meta_package_manager/managers/aptitude.*",
   "meta_package_manager/managers/deb_get.*",
   "meta_package_manager/managers/fink.*",
   "meta_package_manager/managers/nala.*",
@@ -1217,6 +1220,7 @@ labels.file-rules."📦 manager: dpkg-based" = [
   "meta_package_manager/managers/pacstall.*",
   "tests/*apt*",
   "tests/*apt_mint*",
+  "tests/*aptitude*",
   "tests/*deb_get*",
   "tests/*fink*",
   "tests/*nala*",
@@ -1490,7 +1494,7 @@ description = "dotnet"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: dpkg-based"
 color = "bfdadc"
-description = "apt, apt-mint, deb-get, fink, nala, opkg, pacstall"
+description = "apt, apt-mint, aptitude, deb-get, fink, nala, opkg, pacstall"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: elan"

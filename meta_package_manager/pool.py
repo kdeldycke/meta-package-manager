@@ -32,6 +32,7 @@ from .managers.antigen import Antigen
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
+from .managers.aptitude import Aptitude
 from .managers.asdf import ASDF
 from .managers.bin import Bin
 from .managers.composer import Composer
@@ -111,6 +112,7 @@ manager_classes = (
     APM,
     APT,
     APT_Mint,
+    Aptitude,
     ASDF,
     Bin,
     Brew,

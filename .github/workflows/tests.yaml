@@ -167,6 +167,13 @@ jobs:
           # must compile from source, which needs libxml2 and libxslt headers.
           sudo apt-get --quiet --yes install libxml2-dev libxslt-dev
 
+      # Aptitude
+      - name: Aptitude - Linux install
+        if: runner.os == 'Linux'
+        # Its recommends are dropped: libdpkg-perl only backs `aptitude changelog`
+        # and sensible-utils only picks a pager, neither of which mpm ever reaches.
+        run: sudo apt-get --quiet --yes install --no-install-recommends aptitude
+
       # PackageKit
       - name: PackageKit - Linux install
         if: runner.os == 'Linux'

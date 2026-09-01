@@ -71,7 +71,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "cran": None,
     "crystal": None,
     "ctan": None,
-    "deb": {"apt", "apt-mint"},
+    "deb": {"apt", "apt-mint", "aptitude"},
     "docker": None,
     "drupal": None,
     "dtype": None,

@@ -135,6 +135,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "dpkg-based": frozenset({
         "apt",
         "apt-mint",
+        "aptitude",
         "deb-get",
         "fink",
         "nala",
@@ -363,7 +364,7 @@ MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "conda-based": ("anaconda", "conda-forge", "miniconda", "prefix.dev"),
     "cpan": ("perl",),
     "dotnet": ("nuget",),
-    "dpkg-based": ("aptitude", "debian", "dpkg", "ubuntu"),
+    "dpkg-based": ("debian", "dpkg", "ubuntu"),
     "emerge": ("gentoo", "portage"),
     "eopkg": ("solus",),
     "flatpak": ("flathub",),

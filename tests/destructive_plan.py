@@ -54,6 +54,7 @@ PACKAGE_IDS = {
     "apt": "nyancat",
     "apt-cyg": "tree",
     "apt-mint": "nyancat",
+    "aptitude": "nyancat",
     "asdf": "jq",
     # A pure-Bash argument parser from basalt's own author, no build step.
     "basalt": "hyperupcall/bash-args",

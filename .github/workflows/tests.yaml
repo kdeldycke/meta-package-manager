@@ -167,12 +167,13 @@ jobs:
           # must compile from source, which needs libxml2 and libxslt headers.
           sudo apt-get --quiet --yes install libxml2-dev libxslt-dev
 
-      # Aptitude
-      - name: Aptitude - Linux install
-        if: runner.os == 'Linux'
-        # Its recommends are dropped: libdpkg-perl only backs `aptitude changelog`
-        # and sensible-utils only picks a pager, neither of which mpm ever reaches.
-        run: sudo apt-get --quiet --yes install --no-install-recommends aptitude
+      # Aptitude is deliberately not installed. It is the only dpkg front-end
+      # besides `apt` that these runners could carry, and installing it made the
+      # two destructive round-trips deadlock on dpkg's locks in the same job,
+      # each naming the other's process, even though both carry the `dpkg lock`
+      # xdist group that is supposed to serialize them. Until that scheduling
+      # gap is understood, `apt` stays the family's sole CI representative, as
+      # `nala`, `apt-mint`, `deb-get` and `pacstall` already are.
 
       # PEAR
       - name: PEAR - Linux install

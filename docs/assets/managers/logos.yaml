@@ -349,6 +349,14 @@ icons:
     - cpan
     source: https://github.com/metacpan/perl-assets/blob/56b555711934dde8fd0b20ec29ecc3bf81a3d493/blessed/src/010.svg
     title: Perl
+  php:
+    contrast_on_light: 3.98
+    hex: 777BB4
+    license: CC-BY-SA-4.0
+    managers:
+    - pear
+    source: https://php.net/download-logos.php
+    title: PHP
   pnpm:
     contrast_on_light: 2.32
     hex: F69220

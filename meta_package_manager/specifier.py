@@ -107,7 +107,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "openwrt": {"opkg"},
     "osgi": None,
     "p2": None,
-    "pear": None,
+    "pear": {"pear"},
     "pecl": None,
     "perl6": {"zef"},
     "platformio": None,

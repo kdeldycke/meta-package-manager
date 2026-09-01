@@ -51,6 +51,7 @@
    meta_package_manager.managers.oh_my_fish
    meta_package_manager.managers.pacman
    meta_package_manager.managers.pacstall
+   meta_package_manager.managers.pear
    meta_package_manager.managers.pip
    meta_package_manager.managers.pipx
    meta_package_manager.managers.pixi

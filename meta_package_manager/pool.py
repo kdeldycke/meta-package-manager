@@ -64,6 +64,7 @@ from .managers.npm import NPM
 from .managers.oh_my_fish import OhMyFish
 from .managers.pacman import DkpPacman, Pacaur, Pacman, Paru, Pikaur, Trizen, Yay
 from .managers.pacstall import Pacstall
+from .managers.pear import PEAR
 from .managers.pip import Pip
 from .managers.pipx import Pipx
 from .managers.pixi import Pixi
@@ -151,6 +152,7 @@ manager_classes = (
     Pacman,
     Pacstall,
     Paru,
+    PEAR,
     Pikaur,
     Pip,
     Pipx,

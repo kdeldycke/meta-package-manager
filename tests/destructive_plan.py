@@ -186,6 +186,7 @@ PACKAGE_IDS = {
     # is the form every verb takes.
     # A vim statusline plugin of Pearl's own repository: a git clone with no
     # build. The id carries its repository prefix, which every verb takes.
+    "pear": "Text_Password",
     "pearl": "pearl/airline",
     "pi": "npm:@earendil-works/pi-telemetry",
     "pikaur": "nyancat",
@@ -454,6 +455,35 @@ def cpan_install_blocked() -> bool:
     return is_linux() and is_x86_64()
 
 
+def pear_install_blocked() -> bool:
+    """Whether `pear install` cannot complete on this host.
+
+    PEAR gates an install on exactly one test of its own, refusing with `Cannot
+    install, php_dir for channel "pear.php.net" is not writeable by the current
+    user`, so the same directory is probed here rather than the platform
+    guessed from. A distribution's PHP roots that directory at `/usr/share/php`
+    and owns it as root, blocking an unelevated round-trip; a PEAR relocated to
+    a user-owned prefix is not blocked, and the probe follows it either way.
+
+    mpm leaves PEAR's privileged markers dormant, being a dual-scope language
+    manager, so nothing escalates the install on the manager's behalf.
+    """
+    pear_path = which("pear")
+    if not pear_path:
+        return False
+    probe = subprocess.run(
+        (pear_path, "config-get", "php_dir"),
+        capture_output=True,
+        check=False,
+        text=True,
+        encoding="UTF-8",
+    )
+    php_dir = probe.stdout.strip()
+    if probe.returncode != 0 or not php_dir:
+        return False
+    return not os.access(php_dir, os.W_OK)
+
+
 def gcloud_components_blocked() -> bool:
     """Whether gcloud's component manager cannot mutate this installation.
 
@@ -546,6 +576,8 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     "choco": is_github_ci,
     # cpan writes to the system Perl tree, out of reach only on the x86 Linux runners.
     "cpan": cpan_install_blocked,
+    # pear writes to the PHP interpreter's php_dir, root-owned on a distro install.
+    "pear": pear_install_blocked,
     # The RPM and zypper front-ends are not backed by a working RPM/SUSE distro on the
     # Debian-based ubuntu runners (no release version, no repositories), so they cannot
     # even resolve the package and fail before reaching the privileged install step.

@@ -511,15 +511,19 @@ def test_anchored_regexes_scanning_whole_output_are_multiline():
             function = node.value.func
             if not (isinstance(function, ast.Attribute) and function.attr == "compile"):
                 continue
-            if not node.value.args or not isinstance(node.value.args[0], ast.Constant):
+            if not node.value.args:
+                continue
+            # A pattern built at runtime rather than spelled as a literal is not
+            # readable here, so it is skipped instead of guessed at.
+            literal = node.value.args[0]
+            if not isinstance(literal, ast.Constant) or not isinstance(
+                literal.value, str
+            ):
                 continue
             flags = ast.unparse(node.value.args[1]) if len(node.value.args) > 1 else ""
             for target in node.targets:
                 if isinstance(target, ast.Name):
-                    compiled[target.id] = (
-                        node.value.args[0].value,
-                        "MULTILINE" in flags,
-                    )
+                    compiled[target.id] = (literal.value, "MULTILINE" in flags)
 
         for node in ast.walk(tree):
             if not (

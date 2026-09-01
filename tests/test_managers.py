@@ -474,3 +474,73 @@ def test_content_order(manager_class):
     enforced_props = tuple(p for p in collected_props if p in props_ref)
     expected_order = tuple(p for p in props_ref if p in collected_props)
     assert enforced_props == expected_order
+
+
+def _is_line_anchored(pattern: str) -> bool:
+    """Does the pattern bind to the start or the end of a line?
+
+    Blank lines and `#` comments are stripped first, so a `re.VERBOSE` pattern
+    opening on its own line is read the same as a compact one.
+    """
+    stripped = re.sub(r"(?m)^\s*(#.*)?$", "", pattern).strip()
+    return stripped.startswith("^") or bool(re.search(r"(?<!\\)\$$", stripped))
+
+
+def test_anchored_regexes_scanning_whole_output_are_multiline():
+    """A line-anchored regex walked over a whole output must set `re.MULTILINE`.
+
+    Without the flag `^` binds to the start of the *string*, so `findall` and
+    `finditer` return at most one match and every result after the first is
+    dropped: silently, since a short listing is indistinguishable from a real
+    one. The managers feeding a regex to
+    {meth}`~meta_package_manager.manager.PackageManager.parse_regex_lines` are
+    not concerned, that helper splitting the output before matching, which is
+    why the invariant is keyed on the call site rather than on the pattern.
+
+    `flatpak` shipped exactly this bug: its search reported only the first
+    package because the sample in its docstring carries a single result line.
+    """
+    offenders = []
+    for path in sorted(Path("meta_package_manager").rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="UTF-8"))
+
+        compiled: dict[str, tuple[str, bool]] = {}
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Assign) or not isinstance(node.value, ast.Call):
+                continue
+            function = node.value.func
+            if not (isinstance(function, ast.Attribute) and function.attr == "compile"):
+                continue
+            if not node.value.args or not isinstance(node.value.args[0], ast.Constant):
+                continue
+            flags = ast.unparse(node.value.args[1]) if len(node.value.args) > 1 else ""
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    compiled[target.id] = (
+                        node.value.args[0].value,
+                        "MULTILINE" in flags,
+                    )
+
+        for node in ast.walk(tree):
+            if not (
+                isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+            ):
+                continue
+            if node.func.attr not in {"findall", "finditer"}:
+                continue
+            owner = node.func.value
+            name = (
+                owner.attr
+                if isinstance(owner, ast.Attribute)
+                else getattr(owner, "id", None)
+            )
+            if name not in compiled:
+                continue
+            pattern, multiline = compiled[name]
+            if _is_line_anchored(pattern) and not multiline:
+                offenders.append(f"{path.as_posix()}:{node.lineno}: {name}")
+
+    assert not offenders, (
+        "line-anchored regexes scanned over a whole output without "
+        f"re.MULTILINE: {offenders}"
+    )

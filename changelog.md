@@ -63,6 +63,7 @@
 - [mpm] Skip the up-front password prompt when `sudo` reports the user is not authorized to run it at all, warning that escalating managers will fail.
 - [mpm] Escalate through `doas` on a host carrying no `sudo`, as OpenBSD, Alpine and NetBSD do by default. Add `--sudo-command` and its `[mpm] sudo_command` key to name the escalator explicitly.
 - [apk] Parse the search output of `apk-tools` 3, which appends each package's description where version 2 printed the bare name and version. Every result was dropped on Alpine edge.
+- [flatpak] Fix `search` reporting only its first result and silently dropping every other match.
 - [cpan,gem,npm,pip] Warn with the scoped `sudo = true` remedy when an operation carrying a dormant privileged marker fails on a permission error, like a global install into a root-owned prefix.
 - [gem,npm,pip] Report each manager's install root and its owner in `mpm doctor`, resolved through the manager's own discovery verb.
 - [mpm] Narrate the sudo priming decisions at `--verbosity INFO`, and expose the probe's raw answer and every cache refresh at `DEBUG`.

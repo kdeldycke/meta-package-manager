@@ -94,7 +94,9 @@ class Flatpak(PackageManager):
         (?P<branch>\S+)\t
         (?P<remotes>.+)
         """,
-        re.VERBOSE,
+        # Walked over the whole output by `findall`, so `^` has to bind to each
+        # line: without this only the first result is ever matched.
+        re.VERBOSE | re.MULTILINE,
     )
     _ORIGIN_REGEXP = re.compile(r"^\s*Origin:\s*(?P<remote>\S+)", re.MULTILINE)
     _REMOTE_DATE_REGEXP = re.compile(

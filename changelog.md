@@ -8,6 +8,7 @@
 - [aptitude] Add aptitude package manager, with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.
 - [pear] Add PEAR package manager, with inventory, outdated, install, remove, upgrade, channel sync and cache cleanup.
 - [roswell] Add Roswell package manager, listing and installing the Common Lisp implementations it manages.
+- [pkgit] Add pkgit package manager, with inventory, search, install and full upgrade of the packages it compiles from git repositories.
 - [claude-code-plugins] Add Claude Code plugins manager, with inventory, install, remove, single-plugin upgrade, marketplace sync and orphan cleanup.
 - [go] Add Go package manager, listing and installing the commands `go install` puts on the machine.
 - [gup] Add gup package manager, reporting, removing and upgrading the binaries `go install` leaves under `$GOBIN`.

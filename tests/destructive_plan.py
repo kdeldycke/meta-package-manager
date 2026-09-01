@@ -198,6 +198,9 @@ PACKAGE_IDS = {
     "pixi": "hyperfine",
     "pkcon": "hello",
     "pkg": "nyancat",
+    # pkgit has no catalog of its own: the shipped default config declares
+    # exactly one repository, pkgit's own.
+    "pkgit": "pkgit",
     "pkg-tools": "nyancat",
     "pkgin": "nyancat",
     # A pantry path rather than the `jq` executable name: both install, but only

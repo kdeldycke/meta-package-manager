@@ -68,6 +68,7 @@ print(augmentations_table())
 | [`pkcon`](managers/pkcon.md)               |                      |              |      ✅      |       ✅        |               |
 | [`pkg-tools`](managers/pkg-tools.md)       |                      |              |      ✅      |       ✅        |               |
 | [`pkgin`](managers/pkgin.md)               |                      |              |      ✅      |       ✅        |               |
+| [`pkgit`](managers/pkgit.md)               |                      |              |      ✅      |       ✅        |               |
 | [`pnpm`](managers/pnpm.md)                 |                      |              |      ✅      |                 |               |
 | [`pwsh-gallery`](managers/pwsh-gallery.md) |                      |              |              |       ✅        |               |
 | [`pyenv`](managers/pyenv.md)               |                      |              |      ✅      |       ✅        |               |

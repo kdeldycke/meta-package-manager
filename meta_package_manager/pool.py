@@ -70,6 +70,7 @@ from .managers.pipx import Pipx
 from .managers.pixi import Pixi
 from .managers.pkcon import Pkcon
 from .managers.pkg import PKG, Ports
+from .managers.pkgit import Pkgit
 from .managers.pnpm import PNPM
 from .managers.pwsh_gallery import PWSH_Gallery
 from .managers.roswell import Roswell
@@ -160,6 +161,7 @@ manager_classes = (
     Pixi,
     Pkcon,
     PKG,
+    Pkgit,
     PNPM,
     Ports,
     PWSH_Gallery,

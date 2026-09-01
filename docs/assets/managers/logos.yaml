@@ -58,6 +58,14 @@ icons:
     - choco
     source: https://chocolatey.org/media-kit
     title: Chocolatey
+  commonlisp:
+    contrast_on_light: 21.0
+    hex: '000000'
+    license: CC0-1.0
+    managers:
+    - roswell
+    source: https://commons.wikimedia.org/wiki/File:Lisp_logo.svg
+    title: Common Lisp
   composer:
     contrast_on_light: 6.14
     hex: '885630'

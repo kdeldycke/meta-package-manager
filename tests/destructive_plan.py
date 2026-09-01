@@ -221,6 +221,9 @@ PACKAGE_IDS = {
     # with `sdkman` below.
     # A one-module pure-Racket package with no build step.
     "raco": "uuid",
+    # A Lisp implementation: roswell lists and installs those, never Quicklisp
+    # systems (see the Roswell class docstring).
+    "roswell": "sbcl-bin",
     "rustup": "1.60.0",
     "scoop": "main/hyperfine",
     "sdkman": "jbang",

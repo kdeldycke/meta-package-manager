@@ -72,6 +72,7 @@ from .managers.pkcon import Pkcon
 from .managers.pkg import PKG, Ports
 from .managers.pnpm import PNPM
 from .managers.pwsh_gallery import PWSH_Gallery
+from .managers.roswell import Roswell
 from .managers.scoop import Scoop
 from .managers.sdkman import SDKMAN
 from .managers.sfsu import SFSU
@@ -162,6 +163,7 @@ manager_classes = (
     PNPM,
     Ports,
     PWSH_Gallery,
+    Roswell,
     Scoop,
     SDKMAN,
     SFSU,

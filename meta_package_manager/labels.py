@@ -389,6 +389,7 @@ MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
         "psgallery",
         "psresourceget",
     ),
+    "roswell": ("common lisp", "quicklisp"),
     "rpm-based": ("fedora", "mageia", "opensuse", "redhat", "rhel", "rpm", "suse"),
     "sdkman": ("sdk man",),
     "slapt-get": ("slackware",),

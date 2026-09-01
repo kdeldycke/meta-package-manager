@@ -59,6 +59,7 @@
    meta_package_manager.managers.pkg
    meta_package_manager.managers.pnpm
    meta_package_manager.managers.pwsh_gallery
+   meta_package_manager.managers.roswell
    meta_package_manager.managers.scoop
    meta_package_manager.managers.sdkman
    meta_package_manager.managers.sfsu

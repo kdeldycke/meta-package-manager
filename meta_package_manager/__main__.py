@@ -51,7 +51,9 @@ def force_unicode_output() -> None:
     and none of the box-drawing the table borders use. Every table-rendering
     subcommand therefore died with a `UnicodeEncodeError` the moment its output
     was piped or redirected, which is precisely how automation invokes a CLI.
-    A POSIX host under a `C` locale reaches the same ASCII dead end.
+    A POSIX host reaches the same dead end through a narrow `PYTHONIOENCODING`,
+    verified with `ascii`; its `C` locale alone does not, the interpreter
+    coercing that to UTF-8.
 
     Reconfiguring is a no-op wherever the stream already speaks UTF-8, so this
     only fires on the legacy path. The `backslashreplace` fallback covers a

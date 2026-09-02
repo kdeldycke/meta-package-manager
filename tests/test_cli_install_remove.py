@@ -23,6 +23,7 @@ import pytest
 
 from meta_package_manager.pool import pool
 
+from . import conftest
 from .destructive_plan import (
     REMOVE_REFUSES_INSTALLED,
     SHORT_FAILURE_TIMEOUT,
@@ -213,3 +214,32 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
             reference_set=pool.all_manager_ids,
             strict_selection_match=False,
         )
+
+
+def test_collection_hook_runs_before_xdist_stamps_the_group():
+    """mpm's collection hook must run before xdist's, or the groups do nothing.
+
+    `--dist=loadgroup` does not read the `xdist_group` marker when it schedules:
+    xdist's own worker-side hook copies the group name onto the *node id* as an
+    `@<group>` suffix, and the controller schedules from that. So a marker this
+    suite adds in `pytest_collection_modifyitems` is only seen if that hook has
+    already run when xdist's does, and pytest calls the later-registered plugin
+    first: the worker interactor registers after `conftest.py`, so without
+    `tryfirst` it stamps ids that carry no group at all.
+
+    The failure is silent and platform-shaped, which is why it is guarded here
+    rather than left to CI: nothing errors, the tests simply scatter across
+    workers, and the only symptom is two managers colliding on a backend lock
+    they were supposed to take in turn. `apt` and `aptitude` did exactly that on
+    the Ubuntu runners, each reporting the other's process holding
+    `/var/lib/dpkg/lock-frontend`.
+    """
+    opts = getattr(conftest.pytest_collection_modifyitems, "pytest_impl", None)
+    assert opts is not None, (
+        "the collection hook lost its @pytest.hookimpl decorator, so xdist "
+        "stamps node ids before the xdist_group markers exist"
+    )
+    assert opts["tryfirst"] is True, (
+        "the collection hook must keep tryfirst=True: xdist's worker-side hook "
+        "would otherwise stamp node ids before the xdist_group markers are added"
+    )

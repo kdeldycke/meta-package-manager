@@ -136,6 +136,7 @@ def solve_destructive_options(config: Config) -> tuple[bool, bool]:
     return run_destructive, run_non_destructive
 
 
+@pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(config, items):
     """Apply collection-time markers and skips.
 

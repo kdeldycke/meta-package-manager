@@ -167,13 +167,13 @@ jobs:
           # must compile from source, which needs libxml2 and libxslt headers.
           sudo apt-get --quiet --yes install libxml2-dev libxslt-dev
 
-      # Aptitude is deliberately not installed. It is the only dpkg front-end
-      # besides `apt` that these runners could carry, and installing it made the
-      # two destructive round-trips deadlock on dpkg's locks in the same job,
-      # each naming the other's process, even though both carry the `dpkg lock`
-      # xdist group that is supposed to serialize them. Until that scheduling
-      # gap is understood, `apt` stays the family's sole CI representative, as
-      # `nala`, `apt-mint`, `deb-get` and `pacstall` already are.
+      # Aptitude
+      - name: Aptitude - Linux install
+        if: runner.os == 'Linux'
+        # The second dpkg front-end these runners can carry, so it is what
+        # exercises the `dpkg lock` xdist group against a real backend lock:
+        # `apt` alone never proves the serialization works.
+        run: sudo apt-get --quiet --yes install --no-install-recommends aptitude
 
       # PEAR
       - name: PEAR - Linux install

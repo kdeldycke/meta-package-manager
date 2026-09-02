@@ -34,6 +34,7 @@ keywords = [
   "cave",
   "choco",
   "chocolatey",
+  "choosenim",
   "chromebrew",
   "chromeos",
   "claude-code-plugins",
@@ -101,6 +102,7 @@ keywords = [
   "neovim",
   "nerd fonts",
   "netbsd",
+  "nim",
   "nimble",
   "nix",
   "nixpkgs",
@@ -1010,6 +1012,7 @@ metrics.subjects.cargo = "https://github.com/rust-lang/cargo"
 metrics.subjects.cask = "https://github.com/Homebrew/homebrew-cask"
 metrics.subjects.cave = "https://gitlab.exherbo.org/paludis/paludis"
 metrics.subjects.choco = "https://github.com/chocolatey/choco"
+metrics.subjects.choosenim = "https://github.com/nim-lang/choosenim"
 metrics.subjects.chromebrew = "https://github.com/chromebrew/chromebrew"
 metrics.subjects.claude-code-plugins = "https://github.com/anthropics/claude-code"
 metrics.subjects.clib = "https://github.com/clibs/clib"
@@ -1200,6 +1203,7 @@ labels.file-rules."📦 manager: bin" = [ "meta_package_manager/managers/bin.*",
 labels.file-rules."📦 manager: cargo" = [ "meta_package_manager/managers/cargo.*", "tests/*cargo*" ]
 labels.file-rules."📦 manager: cave" = [ "meta_package_manager/managers/cave.*", "tests/*cave*" ]
 labels.file-rules."📦 manager: choco" = [ "meta_package_manager/managers/choco.*", "tests/*choco*" ]
+labels.file-rules."📦 manager: choosenim" = [ "meta_package_manager/managers/choosenim.*", "tests/*choosenim*" ]
 labels.file-rules."📦 manager: chromebrew" = [ "meta_package_manager/managers/chromebrew.*", "tests/*chromebrew*" ]
 labels.file-rules."📦 manager: claude-code-plugins" = [
   "meta_package_manager/managers/claude_code_plugins.*",
@@ -1466,6 +1470,11 @@ description = "cave"
 name = "📦 manager: choco"
 color = "bfdadc"
 description = "choco"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: choosenim"
+color = "bfdadc"
+description = "choosenim"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: chromebrew"

@@ -285,6 +285,14 @@ icons:
     - pkgin
     source: https://www.netbsd.org
     title: NetBSD
+  nim:
+    contrast_on_light: 1.23
+    hex: FFE953
+    license: CC0-1.0
+    managers:
+    - choosenim
+    source: https://nim-lang.org
+    title: Nim
   nixos:
     contrast_on_light: 4.39
     hex: 5277C3

@@ -24,6 +24,7 @@ print(augmentations_table())
 | [`asdf`](managers/asdf.md)                 |          ✅          |              |      ✅      |       ✅        |               |
 | [`bob`](managers/bob.md)                   |                      |              |      ✅      |       ✅        |               |
 | [`cargo`](managers/cargo.md)               |                      |              |      ✅      |       ✅        |               |
+| [`choosenim`](managers/choosenim.md)       |                      |              |      ✅      |       ✅        |               |
 | [`chromebrew`](managers/chromebrew.md)     |                      |              |      ✅      |       ✅        |               |
 | [`clib`](managers/clib.md)                 |                      |              |      ✅      |       ✅        |               |
 | [`composer`](managers/composer.md)         |                      |              |      ✅      |                 |               |

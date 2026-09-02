@@ -87,6 +87,7 @@ KEYWORDS_EXTRAS = (
     "neovim",
     "nerd fonts",
     "netbsd",
+    "nim",
     "nixpkgs",
     "node",
     "nuget",

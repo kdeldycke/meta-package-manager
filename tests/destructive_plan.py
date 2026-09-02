@@ -77,6 +77,10 @@ PACKAGE_IDS = {
     "cask": "itsycal",
     "cave": "base/figlet",
     "choco": "hyperfine",
+    # A Nim release, choosenim's packages being toolchains. Listed in the
+    # catalog, so mpm's pre-install search resolves it. The remove leg cannot
+    # run here: see REMOVE_REFUSES_INSTALLED below.
+    "choosenim": "2.0.0",
     "chromebrew": "sl",
     # A plugin of the official marketplace, named with the `plugin@marketplace`
     # form every verb takes.
@@ -694,6 +698,27 @@ def install_remove_blocked(manager_id: str) -> bool:
     """
     condition = INSTALL_REMOVE_BLOCKED_WHEN.get(manager_id, False)
     return condition() if callable(condition) else condition
+
+
+REMOVE_REFUSES_INSTALLED: frozenset[str] = frozenset(
+    {
+        # choosenim selects whatever it installs, and refuses to remove the selected
+        # toolchain: `Error: Cannot remove current version.` So the package the
+        # install leg just placed is exactly the one the remove leg cannot take back.
+        # Removing an *older* toolchain works, which is the path users reach for.
+        "choosenim",
+    }
+)
+"""Managers whose `remove` cannot take back what the install leg just installed.
+
+Distinct from {data}`INSTALL_REMOVE_BLOCKED_WHEN`, which covers a failing *install*
+and skips the removal for want of anything to remove. Here the install succeeds and
+the removal is refused on purpose, so the round-trip is driven in full and the
+refusal asserted, keeping the signal that the manager still fails the expected way.
+
+Unconditional rather than host-resolved: the refusal is the tool's own rule, so no
+environment satisfies it.
+"""
 
 
 # Unmaintained managers are excluded: their upstreams are unreliable or gone, so a real

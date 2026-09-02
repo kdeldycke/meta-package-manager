@@ -1,0 +1,156 @@
+# choosenim is the Nim toolchain installer (https://github.com/nim-lang/choosenim).
+# See docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# The project moved from `dom96/choosenim` to the `nim-lang` organisation, and
+# the old repository is neither archived nor deprecated: it still outranks the
+# live one in search results, which is what
+# [dom96/choosenim#349](https://github.com/dom96/choosenim/pull/349) was opened
+# to fix. The old repository stopped at `0.8.4` in July 2022; `nim-lang` carries
+# the whole release history, `0.8.4` included, and has shipped through `0.8.16`,
+# so any version above `0.8.4` can only have come from the live one.
+#
+# A package is a Nim toolchain version, and every declared verb agrees on it:
+# the bare form installs one, `remove` and `update` each take one, and the
+# listing prints one per row. This is the reading `rustup` settled, where the
+# object the verbs agree on is what counts as a package. Nim *libraries* are a
+# different object on a different tool, and mpm reaches them through
+# [`nimble`](nimble.md), which is why choosenim claims no purl type: a
+# `pkg:nim/...` names a nimble library, never a compiler release.
+#
+# Parsing notes, verified against choosenim 0.8.4 and 0.8.16 on Linux:
+#   - `--installed` is what makes the inventory readable with one pattern. A
+#     bare `versions` prints an `Installed:` section followed by an `Available:`
+#     one, and nothing in a row says which section holds it; passing the flag
+#     drops the second section outright, so every row left is installed. It also
+#     spares a network round-trip, the catalog being fetched only without it.
+#   - No `installed_version` is captured, deliberately, following `bob`, `pyenv`
+#     and `rustup`. The token is the identity, and a second named group cannot
+#     capture the same span anyway. mpm treats the installed version as optional
+#     throughout.
+#   - Every row is indented under a right-aligned label, and that label is the
+#     `*` marking the selected version. The pattern accepts it and drops it,
+#     since `remove` and `update` take the bare version.
+#   - The first character of the token is what rejects the furniture. A row is
+#     either a release (`2.2.10`) or a nimble special version (`#devel`), while
+#     every other line of the listing is a `Channel:`, `Installed:` or
+#     `Available:` label, or the `stable` a channel resolves to. Requiring a
+#     digit or a `#` keeps all four out without pinning the label width.
+#   - The ` (latest)` suffix on the newest release is left out of the id by
+#     stopping the token at the first space.
+#   - `--noColor` is load-bearing rather than tidiness. choosenim writes SGR
+#     escapes whether or not it holds a terminal, and ignores `NO_COLOR`, both
+#     verified. The escapes wrap the *label*, so they sit between the
+#     indentation and the version and no pattern could step over them the way
+#     `bob`'s does. The flag failing is not a silent risk: choosenim rejects an
+#     unknown flag outright with `Error: Unknown flag: ...`, so a rename would
+#     fail loudly instead of quietly emptying the inventory.
+#   - A search here is broader than it looks, because the ids are versions.
+#     mpm's default matching is fuzzy and counts any alphanumeric segment of the
+#     query, so `2.0.16` splits into `2`, `0` and `16` and matches nearly every
+#     Nim release. `--exact` is what narrows it to one.
+#   - No `outdated`: nothing reports staleness per version. `(latest)` marks the
+#     newest release rather than an upgrade, and the `(update available!)`
+#     marker choosenim does print is appended to the selected *channel*, which is
+#     one line about ambient state rather than a package the listing enumerates.
+#
+# ```{caution}
+# `remove` refuses the selected toolchain, exiting `1` with `Error: Cannot
+# remove current version.`, and the bare install form selects whatever it
+# installs. So a version mpm just installed can never be the one it removes
+# next, and cleaning up an *older* toolchain is the path that works. mpm
+# declares the operation regardless, that being the case users actually reach
+# for; the refusal surfaces as a normal failure. Switching away first to force
+# it through was rejected: choosing a Nim version is the user's decision, not a
+# side effect mpm should smuggle into a removal.
+# ```
+#
+# ```{caution}
+# No `upgrade_all`, and the two candidates are both traps. A bare `update`
+# refuses to run at all (`Error: Expected 1 parameter to 'update' command'`),
+# and `update self` replaces the choosenim binary rather than any Nim it
+# installed, which is the same shape as `rustup`'s self-update and `zvm
+# upgrade`. Only the per-version form is mapped.
+# ```
+#
+# ```{note}
+# choosenim used to block on an interactive telemetry prompt the first time it
+# ran, which no unattended caller could answer. `0.8.16` compiles the whole
+# analytics block out behind a `when false:` carrying a TODO to re-enable it, so
+# the prompt is gone for now. `CHOOSENIM_NO_ANALYTICS` is set regardless: it is
+# honored by every release that has the prompt, it opts out rather than in where
+# `--yes` would have agreed to be tracked, and it keeps mpm unattended on the day
+# that TODO is acted on.
+# ```
+#
+# No escalation: choosenim installs under `~/.choosenim` and has no system-wide
+# mode. No `sync` and no `cleanup`: neither exists, the catalog being fetched
+# inline by the commands that need it.
+
+[mpm.managers.choosenim]
+name = "Nim choosenim"
+homepage_url = "https://github.com/nim-lang/choosenim"
+logo = "nim"
+platforms = ["linux_like", "macos", "windows"]
+cli_names = ["choosenim"]
+requirement = ">=0.8.4"
+# The oldest release this parser was checked against. The listing shape is
+# unchanged through 0.8.16, the `Installed:` header and its indented rows
+# included.
+extra_env = { CHOOSENIM_NO_ANALYTICS = "1" }
+post_args = ["--noColor"]
+# `choosenim --version` prints `choosenim v0.8.16 (2025-07-12 02:03:47)
+# [linux/amd64]`, so the `v` prefix is dropped and the build timestamp and
+# platform left out of the capture. The prefix is optional in the pattern:
+# losing it upstream would take the manager offline rather than misread it.
+version_regexes = ['^choosenim v?(?P<version>\S+)']
+
+[mpm.managers.choosenim.operations.installed]
+args = ["versions", "--installed"]
+regex = '^\s+(?:\* )?(?P<package_id>[#\d]\S*)'
+
+# The catalog takes no query, so mpm narrows it. Dropping `--installed` is what
+# adds the `Available:` section, and the installed rows stay in the result: a
+# search answers what choosenim can select, which includes what is already here.
+[mpm.managers.choosenim.operations.search]
+args = ["versions"]
+regex = '^\s+(?:\* )?(?P<package_id>[#\d]\S*)'
+
+# The version is the whole command: choosenim has no `install` verb, taking the
+# toolchain as its sole positional.
+[mpm.managers.choosenim.operations.install]
+args = ["{package_id}"]
+
+[mpm.managers.choosenim.operations.remove]
+args = ["remove", "{package_id}"]
+
+# Naming a version genuinely restricts the update to it, and is the only form
+# that does. See the caution above for why no `upgrade_all` is declared.
+[mpm.managers.choosenim.operations.upgrade_one]
+args = ["update", "{package_id}"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from choosenim 0.8.16 on Linux. Consumed by tests/test_manager_definition.py;
+# ignored by mpm's loader.
+#
+# The listing carries every shape the pattern has to survive at once: the
+# `Channel:` line that precedes the sections once a channel is selected, the
+# section label, the selected version behind its `*` marker and trailing
+# `(latest)`, and a plain row. Only the last two are packages.
+#
+# No search fixture: that listing is the whole Nim release history rather than
+# anything about the host, and its pattern is the one locked above.
+[samples.version]
+output = "choosenim v0.8.16 (2025-07-12 02:03:47) [linux/amd64]"
+expected = "0.8.16"
+
+[[samples.installed]]
+output = """
+   Channel: stable
+
+ Installed:  
+          * 2.2.10 (latest)
+            1.6.20
+
+"""
+packages = [{ id = "2.2.10" }, { id = "1.6.20" }]

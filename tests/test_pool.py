@@ -87,7 +87,7 @@ def test_manager_count():
     # raco, rustup, skills, slapt-get, soar, sorcery, steamcmd, stew, swupd, tlmgr,
     # topgrade, urpmi, vscode, vscodium, xcodes, yazi, zerobrew, zvm), shipped as
     # package data and loaded into the pool at construction.
-    assert len(pool) == 142
+    assert len(pool) == 143
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))
 

@@ -24,6 +24,7 @@ import pytest
 from meta_package_manager.pool import pool
 
 from .destructive_plan import (
+    REMOVE_REFUSES_INSTALLED,
     SHORT_FAILURE_TIMEOUT,
     install_remove_blocked,
     maintained_manager_ids_and_dummy_package,
@@ -133,6 +134,10 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
     `WARNING` would hide it and make {meth}`check_manager_selection` pass
     vacuously). No follow-up `remove`: the failed install left nothing to
     remove, and the working managers already cover the removal path.
+
+    A manager in `REMOVE_REFUSES_INSTALLED` is the other way round: its
+    install succeeds and its `remove` is refused on purpose, so both legs
+    run and the refusal is asserted rather than a clean exit.
     ```
     """
     if install_remove_blocked(manager_id):
@@ -174,6 +179,17 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
         # The manager is not available on this host: mpm selected nothing.
         if result.exit_code == 2:
             assert_no_manager_selected(result)
+            continue
+
+        # This manager refuses to remove the package the install leg just placed
+        # (see REMOVE_REFUSES_INSTALLED). Assert the stable mpm failure rather
+        # than a clean exit, so the expected refusal stays a signal.
+        if command == "remove" and manager_id in REMOVE_REFUSES_INSTALLED:
+            assert result.exit_code == 1
+            assert f"Could not remove: {package_id}" in result.stderr, (
+                f"{manager_id} remove: expected a 'Could not remove:' failure in "
+                f"stderr, got:\n{result.stderr}"
+            )
             continue
 
         # cargo, conda, cpan, npm and winget installs are flaky on the CI

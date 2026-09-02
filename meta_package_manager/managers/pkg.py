@@ -507,12 +507,19 @@ class Ports(PackageManager):
     the only sensible behavior for an automated tool. See `ports(7)`.
     """
 
-    version_cli_options = ("-V", ".MAKE.VERSION")
+    version_cli_options = ("-V", "MAKE_VERSION")
     """FreeBSD `make` exposes its version via internal variable expansion.
 
-    GNU Make's `--version` flag does not work on BSD make; using
-    `-V .MAKE.VERSION` keeps the probe portable and avoids accidentally
-    matching a GNU Make installation shadowing the BSD binary.
+    GNU Make's `--version` flag does not work on BSD make, so the probe reads
+    the variable instead, which also avoids matching a GNU Make installation
+    shadowing the BSD binary.
+
+    The variable is `MAKE_VERSION`, the one `make(1)` documents as "the version
+    of make (...) typically the date of last import from NetBSD". The dotted
+    `.MAKE.VERSION` this once read is not among the `.MAKE.*` family that page
+    lists, and expands to the empty string: the probe then found no version at
+    all, which left `ports` permanently unavailable rather than merely
+    misreported.
     """
 
     version_regexes = (r"(?P<version>\d{8,})",)
@@ -522,7 +529,7 @@ class Ports(PackageManager):
         r"^(?P<package_id>\S+)\s+<\s+needs updating\s+\(port has (?P<latest_version>\S+)\)",
         re.MULTILINE,
     )
-    """Match outdated entries from `pkg version -vIPL=` output.
+    """Match outdated entries from `pkg version -vPL=` output.
 
     Format per line:
     `<pkgname-pkgver>  <op>  needs updating (port has <latest_version>)`
@@ -566,7 +573,10 @@ class Ports(PackageManager):
 
         output = self.run_cli(
             "query",
-            r'"%n %v %o %c"',
+            # No quotes around the format: mpm builds an argv rather than a
+            # shell line, so `pkg` would take them as literal format text and
+            # wrap every record in them, leaving each id with a leading `"`.
+            "%n %v %o %c",
             override_cli_path=pkg_path,
             auto_pre_args=False,
             auto_extra_env=False,
@@ -587,23 +597,31 @@ class Ports(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch packages whose installed version lags the ports tree.
 
-        Uses `pkg version` in ports-comparison mode (`-PL=`): it walks
-        the local tree for each installed package and reports those with a
-        newer `Makefile` version available.
+        Uses `pkg version` in ports-comparison mode (`-P`): it walks the
+        local tree for each installed package and reports those with a newer
+        `Makefile` version available. `-L =` drops the packages that are
+        already current, so every reported line is an actionable one.
+
+        `-I`, which reads `/usr/ports/INDEX-<major>` instead of the tree, is
+        not combined with it: `pkg` accepts only one source and exits with a
+        usage error on `-vIPL=`. The tree is also what {attr}`available`
+        already requires, where the index is a separate file the user has to
+        fetch.
 
         ```{code-block} shell-session
 
-        $ pkg version -vIPL=
-        curl-8.7.1                         <   needs updating (port has 8.8.0)
-        python311-3.11.9                   <   needs updating (port has 3.11.10)
-        vim-9.1.0                          =   up-to-date with port
+        $ pkg version -vPL=
+        expat-2.8.2                        <   needs updating (port has 2.8.3)
+        git-2.54.0                         <   needs updating (port has 2.55.0)
+        libffi-3.6.0                       <   needs updating (port has 3.8.0)
+        FreeBSD-acct-15.1                  ?   orphaned: base/FreeBSD-acct
         ```
         """
         pkg_path = self.sibling_cli("pkg")
 
         output = self.run_cli(
             "version",
-            "-vIPL=",
+            "-vPL=",
             override_cli_path=pkg_path,
             auto_pre_args=False,
             auto_extra_env=False,
@@ -748,6 +766,14 @@ class Ports(PackageManager):
         Accepts either form and returns the origin verbatim when already
         slashed. Otherwise queries the `pkg` binary to look up the origin
         from the configured repository.
+
+        `--search name` is passed even though
+        [`pkg-search(8)`](https://man.freebsd.org/cgi/man.cgi?query=pkg-search)
+        documents that field as the default for a term holding no `/`: under
+        `--exact`, `pkg` 2.7.5 matches nothing without it, so
+        `pkg search --exact --quiet --origins curl` reports no result on a host
+        where `ftp/curl` is installed. `--origins` does not select the field
+        either, being an output modifier equivalent to `-L origin`.
         """
         if "/" in package_id:
             return package_id
@@ -757,6 +783,8 @@ class Ports(PackageManager):
             "search",
             "--exact",
             "--quiet",
+            "--search",
+            "name",
             "--origins",
             package_id,
             override_cli_path=pkg_path,

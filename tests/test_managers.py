@@ -30,6 +30,7 @@ from boltons.urlutils import URL
 from extra_platforms import ALL_PLATFORMS, Platform, is_windows
 
 from meta_package_manager import cli_explore, cli_maintenance
+from meta_package_manager import managers as managers_module
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
 from meta_package_manager.execution import CLIExecutor
@@ -547,4 +548,45 @@ def test_anchored_regexes_scanning_whole_output_are_multiline():
     assert not offenders, (
         "line-anchored regexes scanned over a whole output without "
         f"re.MULTILINE: {offenders}"
+    )
+
+
+def test_argv_literals_carry_no_shell_quoting():
+    """No argv literal may wrap itself in the quotes a shell would have eaten.
+
+    Managers build an argument list, never a shell line, so a literal like
+    `'"%n %v %o %c"'` reaches the tool with its quotes intact and is read as
+    part of the value. `ports` shipped exactly that for years: `pkg` echoed the
+    quotes back around every record, so each package id began with a `"` and
+    every description ended with one, and nothing failed loudly enough to
+    notice. The docstring above it showed the shell form, which is correct for
+    a human to type and wrong to paste into an argv.
+
+    The check is cheap because the population is small and static: every string
+    constant handed to `run_cli`, `build_cli` or `run` across the package.
+    """
+    import ast
+
+    offenders = []
+    for path in sorted(Path(inspect.getfile(managers_module)).parent.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="UTF-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            name = getattr(node.func, "attr", getattr(node.func, "id", ""))
+            if name not in {"run_cli", "build_cli", "run"}:
+                continue
+            for arg in node.args:
+                value = getattr(arg, "value", None)
+                if (
+                    isinstance(value, str)
+                    and len(value) > 1
+                    and value.startswith('"')
+                    and value.endswith('"')
+                ):
+                    offenders.append(f"{path.name}:{arg.lineno}: {value!r}")
+
+    assert not offenders, (
+        "these argv literals carry shell quoting the tool will read as part of "
+        "the value: " + ", ".join(offenders)
     )

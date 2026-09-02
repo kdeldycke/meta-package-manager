@@ -84,6 +84,7 @@ keywords = [
   "lazy",
   "lazy.nvim",
   "luarocks",
+  "lure",
   "mac app store",
   "macos",
   "macports",
@@ -1043,6 +1044,7 @@ metrics.subjects.juliaup = "https://github.com/JuliaLang/juliaup"
 metrics.subjects.krew = "https://github.com/kubernetes-sigs/krew"
 metrics.subjects.lazy = "https://github.com/folke/lazy.nvim"
 metrics.subjects.luarocks = "https://github.com/luarocks/luarocks"
+metrics.subjects.lure = "https://github.com/lure-sh/lure"
 metrics.subjects.macports = "https://github.com/macports/macports-base"
 metrics.subjects.mamba = "https://github.com/mamba-org/mamba"
 metrics.subjects.mas = "https://github.com/mas-cli/mas"
@@ -1272,6 +1274,7 @@ labels.file-rules."📦 manager: julia" = [ "meta_package_manager/managers/julia
 labels.file-rules."📦 manager: juliaup" = [ "meta_package_manager/managers/juliaup.*", "tests/*juliaup*" ]
 labels.file-rules."📦 manager: krew" = [ "meta_package_manager/managers/krew.*", "tests/*krew*" ]
 labels.file-rules."📦 manager: luarocks" = [ "meta_package_manager/managers/luarocks.*", "tests/*luarocks*" ]
+labels.file-rules."📦 manager: lure" = [ "meta_package_manager/managers/lure.*", "tests/*lure*" ]
 labels.file-rules."📦 manager: macports" = [ "meta_package_manager/managers/macports.*", "tests/*macports*" ]
 labels.file-rules."📦 manager: mas" = [ "meta_package_manager/managers/mas.*", "tests/*mas*" ]
 labels.file-rules."📦 manager: micro" = [ "meta_package_manager/managers/micro.*", "tests/*micro*" ]
@@ -1614,6 +1617,11 @@ description = "krew"
 name = "📦 manager: luarocks"
 color = "bfdadc"
 description = "luarocks"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: lure"
+color = "bfdadc"
+description = "lure"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: macports"

@@ -154,6 +154,9 @@ PACKAGE_IDS = {
     "lazy": "lazy.nvim",
     # Pure-Lua table pretty-printer, one file and no dependencies.
     "luarocks": "inspect",
+    # A shell script in LURE's default recipe repository: no compiler needed,
+    # and its build is the fastest in that catalog.
+    "lure": "neofetch",
     "macports": "hello",
     "mamba": "zstd",
     "mas": "747648890",

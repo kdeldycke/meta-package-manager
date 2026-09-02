@@ -46,6 +46,7 @@ print(augmentations_table())
 | [`juliaup`](managers/juliaup.md)           |                      |              |      ✅      |       ✅        |               |
 | [`krew`](managers/krew.md)                 |                      |              |      ✅      |       ✅        |               |
 | [`luarocks`](managers/luarocks.md)         |          ✅          |              |      ✅      |       ✅        |               |
+| [`lure`](managers/lure.md)                 |                      |              |      ✅      |       ✅        |               |
 | [`mamba`](managers/mamba.md)               |                      |              |              |       ✅        |               |
 | [`mas`](managers/mas.md)                   |                      |              |      ✅      |       ✅        |      ✅       |
 | [`micro`](managers/micro.md)               |                      |              |      ✅      |       ✅        |               |

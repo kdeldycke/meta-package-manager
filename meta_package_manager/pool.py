@@ -52,6 +52,7 @@ from .managers.go import Go
 from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
 from .managers.luarocks import LuaRocks
+from .managers.lure import Lure
 from .managers.mamba import Mamba, Micromamba
 from .managers.mas import MAS
 from .managers.miktex import MiKTeX
@@ -139,6 +140,7 @@ manager_classes = (
     Guix,
     Lazy,
     LuaRocks,
+    Lure,
     Mamba,
     MAS,
     Mason,

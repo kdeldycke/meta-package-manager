@@ -375,6 +375,7 @@ MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "gh-ext": ("gh extension", "github cli"),
     "guix": ("gnu guix",),
     "homebrew": ("homebrew",),
+    "hyprpm": ("hyprland",),
     "mas": ("app store", "app-store"),
     "nix": ("nixos", "nixpkgs"),
     "npm-based": ("node.js", "nodejs"),

@@ -1,0 +1,147 @@
+# hyprpm is the plugin manager shipped inside Hyprland
+# (https://github.com/hyprwm/Hyprland), the Wayland compositor. See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is a plugin *repository*, not a plugin. hyprpm nests the two: one
+# git repository is added, built and removed as a unit, and the plugins it
+# carries are enabled and disabled inside it. `add`, `remove` and `update` all
+# take the repository, which is the object mpm's package model describes, while
+# `enable` and `disable` configure something already installed rather than
+# installing it. Mapping those two onto install and remove would be faking
+# operations, so mpm reports the repositories and leaves the plugins to
+# hyprpm's own verbs. The cost is real and worth stating: the per-plugin
+# enabled/failed state the listing prints is not carried into mpm.
+#
+# Parsing notes, verified against hyprpm 0.56.2 on Arch Linux:
+#   - The listing is a two-level tree. Each repository heads a block, and its
+#     plugins follow indented beneath it, so only the `Repository` lines are
+#     packages and every other line falls through the pattern unmatched.
+#   - The pattern is unanchored on purpose. hyprpm writes SGR escapes whether
+#     or not it holds a terminal, and honors neither `NO_COLOR` nor `TERM=dumb`
+#     nor `CLICOLOR`, all three verified, so the line opens with escapes rather
+#     than with its text. Matching mid-line steps over them instead of fighting
+#     levers that do nothing, which is the reading `bob` settled.
+#   - The id is the bare repository name, not `author/name`. Both are accepted
+#     by `remove`, and the author is printed right beside the name, but a
+#     regex parser maps one named group to one package field and cannot join
+#     two captures into a single id. Two repositories sharing a name would
+#     collide, which is an ambiguity hyprpm has itself and resolves the same way.
+#   - No `installed_version` is captured: the listing carries none. The state
+#     file records a commit hash, but reading it would mean parsing hyprpm's
+#     private files rather than driving its CLI.
+#
+# ```{important}
+# hyprpm has no version flag of its own: `hyprpm --version` answers
+# `Unrecognized option --version`. It ships with the compositor and is
+# versioned with it, so the probe runs `Hyprland --version` through
+# `version_cli`, the same escape hatch the base-system suites use. That makes a
+# host with no Hyprland report no version and leaves the manager unavailable,
+# which is the right answer: hyprpm without its compositor cannot build a
+# plugin. `hyprctl version` was rejected for the probe because it talks to a
+# running instance and fails with `HYPRLAND_INSTANCE_SIGNATURE not set!` on a
+# host that merely has Hyprland installed.
+# ```
+#
+# ```{caution}
+# `add` and `remove` both stop on an `Are you sure? [Y/n]` confirmation that no
+# flag disables. mpm clears it without answering: click-extra runs every child
+# with `stdin` on {data}`subprocess.DEVNULL`, hyprpm reads an empty line, and
+# its check only aborts on an explicit `n`, so the default applies. Both halves
+# are deliberate rather than lucky, but the pair is what makes this manager
+# drivable unattended: read a hang here as one of them having changed.
+# ```
+#
+# ```{note}
+# `install` takes a git URL, where the listing reports a name, so an id read
+# back from `installed` cannot be handed to `install`. That is hyprpm's own
+# asymmetry: `add` accepts a URL alone while `remove` accepts a URL, a name or
+# `author/name`. Removal and upgrade therefore round-trip on a listed id and
+# installation does not, the same shape `bob` documents for its catalog.
+# ```
+#
+# No `outdated`: nothing reports staleness without acting, `update` computing
+# what is behind and building it in one pass. No `search`: hyprpm has no
+# catalog, a repository being whatever URL the user hands it. No `cleanup`:
+# `purge-cache` removes every built plugin, the headers and hyprpm's own
+# settings, which is a mass removal rather than reclamation, the same reading
+# that left `bob erase` and `luarocks purge` unmapped.
+
+[mpm.managers.hyprpm]
+name = "Hyprland hyprpm"
+homepage_url = "https://github.com/hyprwm/Hyprland"
+platforms = ["linux_like"]
+cli_names = ["hyprpm"]
+requirement = ">=0.56.0"
+# The release series this parser was checked against. hyprpm carries the
+# compositor's version, so the floor is a Hyprland version rather than one of
+# its own.
+version_cli = "Hyprland"
+version_cli_options = ["--version"]
+# Anchored to the first line: the report goes on to name the versions of every
+# library Hyprland was built against, a dozen numbers that a loose pattern
+# would reach before the compositor's own.
+version_regexes = ['^Hyprland (?P<version>\S+)']
+
+# Only the repository headings are packages; the indented plugin rows beneath
+# each one carry no id and fall through.
+[mpm.managers.hyprpm.operations.installed]
+args = ["list"]
+regex = 'Repository (?P<package_id>\S+) \(by '
+
+# Takes a git URL rather than a listed name: see the note above.
+[mpm.managers.hyprpm.operations.install]
+args = ["add", "{package_id}"]
+
+[mpm.managers.hyprpm.operations.remove]
+args = ["remove", "{package_id}"]
+
+[mpm.managers.hyprpm.operations.upgrade_all]
+args = ["update"]
+
+# Output samples locking the version probe and the declared parser, captured
+# from hyprpm 0.56.2 on Arch Linux. Consumed by tests/test_manager_definition.py;
+# ignored by mpm's loader.
+#
+# The version sample is the whole report rather than its first line, which is
+# what makes the anchor testable: eleven further version numbers follow, and an
+# unanchored pattern would have its pick of them.
+#
+# The listing carries two repositories, one holding a single plugin and one
+# holding two, with a built plugin and a failed one side by side. Its escapes
+# are written as `\u001B` because TOML forbids a raw control character in a
+# string; they are what the terminal actually receives, and stripping them
+# would leave a sample that no longer proves the pattern survives them.
+[samples.version]
+output = """
+Hyprland 0.56.2 built from branch v0.56.2 at commit efb50993780079460b0cbed1363e2166a2de1d9f clean ([gha] Nix: update inputs).
+Date: Wed Aug 5 14:13:21 2026
+Tag: v0.56.2, commits: 7661
+
+Libraries:
+Hyprgraphics: built against 0.5.1, system has 0.5.1
+Hyprutils: built against 0.14.0, system has 0.14.1
+Hyprcursor: built against 0.1.13, system has 0.1.13
+Hyprlang: built against 0.6.8, system has 0.6.8
+Aquamarine: built against 0.14.0, system has 0.14.0
+
+Version ABI string: efb50993780079460b0cbed1363e2166a2de1d9f_aq_0.14_hu_0.14_hg_0.5_hc_0.1_hlg_0.6
+no flags were set
+"""
+expected = "0.56.2"
+
+[[samples.installed]]
+output = """
+\u001B[0m→\u001B[0m Repository hyprsplit (by shezdy):
+  │ Plugin hyprsplit
+  └─ enabled: \u001B[32mtrue
+\u001B[0m
+\u001B[0m→\u001B[0m Repository hyprland-plugins (by hyprwm):
+  │ Plugin csgo-vulkan-fix
+  └─ enabled: \u001B[31mPlugin failed to build
+\u001B[0m
+  │ Plugin hyprbars
+  └─ enabled: \u001B[32mtrue
+\u001B[0m
+"""
+packages = [{ id = "hyprsplit" }, { id = "hyprland-plugins" }]

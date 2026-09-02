@@ -12,6 +12,7 @@
 - [lure] Add LURE package manager, with inventory, catalog search, install and repository refresh.
 - [choosenim] Add choosenim Nim toolchain installer, with inventory, catalog search, install, remove and single-version upgrade.
 - [aura] Add aura AUR helper, reporting repository and AUR upgrades together.
+- [hyprpm] Add hyprpm Hyprland plugin manager, listing, installing, removing and upgrading plugin repositories.
 - [claude-code-plugins] Add Claude Code plugins manager, with inventory, install, remove, single-plugin upgrade, marketplace sync and orphan cleanup.
 - [go] Add Go package manager, listing and installing the commands `go install` puts on the machine.
 - [gup] Add gup package manager, reporting, removing and upgrading the binaries `go install` leaves under `$GOBIN`.

@@ -79,6 +79,7 @@ KEYWORDS_EXTRAS = (
     "gnome-shell-extension",
     "gnu guix",
     "homebrew",
+    "hyprland",
     "lazy.nvim",
     "mac app store",
     "macos",

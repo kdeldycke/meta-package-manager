@@ -79,6 +79,8 @@ keywords = [
   "gup",
   "haxelib",
   "homebrew",
+  "hyprland",
+  "hyprpm",
   "jpm",
   "julia",
   "juliaup",
@@ -1043,6 +1045,7 @@ metrics.subjects.go = "https://github.com/golang/go"
 metrics.subjects.guix = "https://codeberg.org/guix/guix"
 metrics.subjects.gup = "https://github.com/nao1215/gup"
 metrics.subjects.haxelib = "https://github.com/HaxeFoundation/haxelib"
+metrics.subjects.hyprpm = "https://github.com/hyprwm/Hyprland"
 metrics.subjects.jpm = "https://github.com/janet-lang/jpm"
 metrics.subjects.julia = "https://github.com/JuliaLang/julia"
 metrics.subjects.juliaup = "https://github.com/JuliaLang/juliaup"
@@ -1156,6 +1159,7 @@ labels.content-rules."📦 manager: getnf" = [ "nerd font", "nerd fonts" ]
 labels.content-rules."📦 manager: gh-ext" = [ "gh extension", "github cli" ]
 labels.content-rules."📦 manager: guix" = [ "gnu guix" ]
 labels.content-rules."📦 manager: homebrew" = [ "homebrew" ]
+labels.content-rules."📦 manager: hyprpm" = [ "hyprland" ]
 labels.content-rules."📦 manager: mas" = [ "app store", "app-store" ]
 labels.content-rules."📦 manager: nix" = [ "nixos", "nixpkgs" ]
 labels.content-rules."📦 manager: npm-based" = [ "node.js", "nodejs" ]
@@ -1275,6 +1279,7 @@ labels.file-rules."📦 manager: homebrew" = [
   "tests/*homebrew*",
   "tests/*zerobrew*",
 ]
+labels.file-rules."📦 manager: hyprpm" = [ "meta_package_manager/managers/hyprpm.*", "tests/*hyprpm*" ]
 labels.file-rules."📦 manager: jpm" = [ "meta_package_manager/managers/jpm.*", "tests/*jpm*" ]
 labels.file-rules."📦 manager: julia" = [ "meta_package_manager/managers/julia.*", "tests/*julia*" ]
 labels.file-rules."📦 manager: juliaup" = [ "meta_package_manager/managers/juliaup.*", "tests/*juliaup*" ]
@@ -1604,6 +1609,11 @@ description = "haxelib"
 name = "📦 manager: homebrew"
 color = "bfdadc"
 description = "brew, cask, zerobrew"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: hyprpm"
+color = "bfdadc"
+description = "hyprpm"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: jpm"

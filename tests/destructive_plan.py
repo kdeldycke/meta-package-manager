@@ -150,6 +150,10 @@ PACKAGE_IDS = {
     # rather than `release`: every Julia is a large download, and removing the
     # channel the host actually uses is what `remove` refuses outright.
     # janet-lang's own argument parser: pure Janet, so no compiler is involved.
+    # A git URL, which is the only form `hyprpm add` takes; `remove` accepts it
+    # too, so the round-trip is symmetric. Needs headers from a prior
+    # `hyprpm update`, so it only runs on a real Hyprland host.
+    "hyprpm": "https://github.com/hyprwm/hyprland-plugins",
     "jpm": "argparse",
     # The General registry's canonical example package: pure Julia, no
     # dependencies, and it exists precisely to be installed by tests.

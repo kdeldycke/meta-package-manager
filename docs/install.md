@@ -81,6 +81,16 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 `mpm` is available on several popular package managers:
 
+:::{note}
+On FreeBSD, install the `sqlite3` module for your Python before any of the methods below: the base `python3XX` package ships without it, and `mpm` imports it through click-extra, so it exits with `ModuleNotFoundError: No module named '_sqlite3'` on the first run.
+
+```{code-block} shell-session
+$ sudo pkg install py311-sqlite3
+```
+
+Match the digits to your interpreter (`py314-sqlite3` for Python 3.14). Verified on FreeBSD 15.1.
+:::
+
 ``````{tab-set}
 :class: tabs-vertical
 `````{tab-item} uv

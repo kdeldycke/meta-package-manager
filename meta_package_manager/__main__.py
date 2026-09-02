@@ -23,6 +23,61 @@ $ python -m meta_package_manager
 
 from __future__ import annotations
 
+import codecs
+import sys
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from typing import TextIO
+
+
+def _stream_speaks_utf8(stream: TextIO) -> bool:
+    """Whether `stream` already encodes the full repertoire mpm prints."""
+    encoding = getattr(stream, "encoding", None)
+    if not encoding:
+        return False
+    try:
+        return codecs.lookup(encoding).name == "utf-8"
+    except LookupError:
+        return False
+
+
+def force_unicode_output() -> None:
+    """Make the standard streams carry the glyphs mpm prints, or degrade instead
+    of raising.
+
+    Windows resolves a *redirected* stream's encoding from the legacy code page,
+    `cp1252` on a Western install, and that page has no `✓` (`U+2713`), no `✘`,
+    and none of the box-drawing the table borders use. Every table-rendering
+    subcommand therefore died with a `UnicodeEncodeError` the moment its output
+    was piped or redirected, which is precisely how automation invokes a CLI.
+    A POSIX host under a `C` locale reaches the same ASCII dead end.
+
+    Reconfiguring is a no-op wherever the stream already speaks UTF-8, so this
+    only fires on the legacy path. The `backslashreplace` fallback covers a
+    stream that refuses reconfiguration outright: a `\u2713` in the output is
+    ugly, but it is lossless and it is not a crash.
+
+    ```{caution}
+    CI cannot catch a regression here. Every workflow sets
+    `PYTHONIOENCODING=utf8`, which hands the process UTF-8 streams before mpm
+    runs, so the matrix exercises an environment no user has. The guard belongs
+    in `tests/test_main.py`, which drives the streams directly.
+    ```
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None or _stream_speaks_utf8(stream):
+            continue
+        try:
+            reconfigure(encoding="UTF-8")
+        except (OSError, ValueError, LookupError):
+            try:
+                reconfigure(errors="backslashreplace")
+            except (OSError, ValueError, LookupError):
+                # Nothing more to try: leave the stream as the platform made it.
+                pass
+
 
 def main():
     """Execute the CLI but force its name to not let Click defaults to:
@@ -45,6 +100,10 @@ def main():
     # dynamic --<id> selectors enumerate them as first-class flags alongside the
     # built-ins. Best-effort and local-only; the authoritative registration happens
     # during config loading (config.register_config_managers_from_context).
+    # Before anything prints: a legacy-encoded stream cannot carry the table
+    # glyphs, and the failure is a traceback rather than a mangled character.
+    force_unicode_output()
+
     from meta_package_manager.config import register_eager_config_managers
     from meta_package_manager.pool import pool
 

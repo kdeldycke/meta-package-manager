@@ -876,7 +876,9 @@ def test_resolve_escalator_override_wins_over_detection():
     """An override is honored even when its binary is missing, so the failure
     names the escalator the user asked for."""
     with only_escalator("sudo"):
-        assert resolve_escalator("doas").id == "doas"
+        escalator = resolve_escalator("doas")
+    assert escalator is not None
+    assert escalator.id == "doas"
 
 
 def test_resolve_escalator_rejects_an_unknown_name(caplog):

@@ -504,6 +504,32 @@ def pear_install_blocked() -> bool:
     return not os.access(php_dir, os.W_OK)
 
 
+def snap_sudo_unavailable() -> bool:
+    """Whether snap's privileged install cannot run unattended on this host.
+
+    mpm sudo-escalates snap (snapd refuses unprivileged state changes), so the
+    round-trip completes only where `sudo` needs no password. The platform
+    cannot answer that: GitHub's runners grant passwordless sudo, a typical
+    workstation password-gates it, and a provisioned box may do either, so the
+    state is probed live rather than inferred from `is_github_ci`.
+
+    `sudo --non-interactive true` asks the question the install actually asks,
+    which is whether a command can escalate without a prompt. `--validate` asks
+    a different one, refreshing the credential cache, and answers non-zero on a
+    host whose `NOPASSWD` rule sits beside a password-requiring group rule even
+    though every command still runs unprompted.
+    """
+    sudo_path = which("sudo")
+    if not sudo_path:
+        return True
+    probe = subprocess.run(
+        (sudo_path, "--non-interactive", "true"),
+        capture_output=True,
+        check=False,
+    )
+    return probe.returncode != 0
+
+
 def gcloud_components_blocked() -> bool:
     """Whether gcloud's component manager cannot mutate this installation.
 
@@ -650,12 +676,11 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # scoop install hangs until the timeout on the GitHub Windows runners; sfsu wraps it.
     "scoop": is_github_ci,
     "sfsu": is_github_ci,
-    # mpm sudo-escalates snap now (snapd rejects unprivileged state changes), so the
-    # blocker turns on whether that sudo runs unattended. A typical Linux host
-    # password-gates sudo, failing the non-interactive install; GitHub's Ubuntu runners
-    # grant passwordless sudo, so snap completes a real install+remove of hello-world
-    # and is not a blocker there.
-    "snap": lambda: is_linux() and not is_github_ci(),
+    # mpm sudo-escalates snap (snapd rejects unprivileged state changes), so the
+    # blocker turns on whether that sudo runs unattended, which is a property of
+    # the host rather than of CI: a passwordless workstation completes the
+    # round-trip exactly as a runner does.
+    "snap": snap_sudo_unavailable,
     # steamcmd can only install titles owned by an authenticated account; the runners'
     # anonymous session is not logged in, so the install fails. No environment satisfies it.
     "steamcmd": True,

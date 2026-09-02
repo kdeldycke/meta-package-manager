@@ -343,6 +343,12 @@ ActiveState's Perl Package Manager, which ships inside ActivePerl rather than on
 
 [`needrestart`](https://github.com/liske/needrestart) restarts services whose libraries were replaced by an upgrade. It installs nothing and owns no packages: it reacts to what a real package manager just did.
 
+## [`ruckzuck`](https://github.com/rzander/ruckzuck) ❌
+
+Windows software catalogue and updater, declined for the one thing it cannot report: its own version. `RZGet.exe` answers `--version`, `-v` and a bare `version` alike by printing nothing and exiting `0`, and its argument parser confirms why, handling `install`, `update`, `show`, `search` and `uninstall` and carrying no version branch at all. The number exists only as a resource on the binary, which reads `1.7.4.3` against a `1.7.3.11` release tag, and no invocation surfaces it. The `version_cli` companion-binary route does not rescue it either: the other artifacts RuckZuck ships are a GUI, a ConfigMgr helper and an Intune wrapper rather than a sibling CLI reporting the suite's version. That is [`zgenom`](#zgenom)'s verdict. Nothing on its tracker asks for a version flag, so this rests on the observed behaviour rather than an upstream position, and one would reopen the question immediately.
+
+Everything else was driven on Windows 11 and works, which is what makes the single missing flag worth recording precisely: `search --isinstalled true` and `search <keyword>` each return a flat JSON array carrying `ShortName` and `ProductVersion`, `update --list --all` prints one bare shortname per line and reported a real pending upgrade, and `install`, `uninstall`, `update --all` and `update <shortname>` complete the verb set. Little else in this table is so nearly wrappable.
+
 ## [`rye`](https://rye.astral.sh) ☠️ 🛟
 
 Python project manager, archived by Astral with its last release `0.44.0` dating from 2025-02-26. Its readme states Rye "is no longer developed" and that "no further updates are planned, including security updates", naming [uv](https://docs.astral.sh/uv/) as "the successor project from the same maintainers". `mpm` wraps that successor as [`uv`](managers/uv.md) and [`uvx`](managers/uvx.md), so the global tools and interpreters Rye installed are reached without it.

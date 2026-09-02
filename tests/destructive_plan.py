@@ -56,6 +56,9 @@ PACKAGE_IDS = {
     "apt-mint": "nyancat",
     "aptitude": "nyancat",
     "asdf": "jq",
+    # An AUR package rather than a repository one, so the round-trip exercises
+    # the half that makes aura an AUR helper. Prebuilt, so no compile step.
+    "aura": "yay-bin",
     # A pure-Bash argument parser from basalt's own author, no build step.
     "basalt": "hyperupcall/bash-args",
     # Declares no install operation: the round-trip auto-skips. bin keys every

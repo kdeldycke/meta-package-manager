@@ -73,13 +73,14 @@ config: {"sankey": {"showValues": false, "width": 800, "height": 600}}
 ---
 sankey-beta
 
-Serialized managers,pacman database,7
+Serialized managers,pacman database,8
 Serialized managers,dpkg lock,6
 Serialized managers,RPM database,5
 Serialized managers,conda environment prefix,3
 Serialized managers,Homebrew update lock,2
 Serialized managers,Scoop tree,2
 Serialized managers,pkg install database,2
+pacman database,aura,1
 pacman database,pacaur,1
 pacman database,pacman,1
 pacman database,pamac,1
@@ -120,15 +121,15 @@ print(lock_families_table())
 
 <!-- mirror -->
 
-| Shared backend           | Managers                                                                                                                                                                                                           | Why?                                                                                                                                                         |
-| :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| pacman database          | [`pacaur`](managers/pacaur.md), [`pacman`](managers/pacman.md), [`pamac`](managers/pamac.md), [`paru`](managers/paru.md), [`pikaur`](managers/pikaur.md), [`trizen`](managers/trizen.md), [`yay`](managers/yay.md) | they all reach the pacman database (`/var/lib/pacman/db.lck`), and two of them mutating at once fail to init their transaction                               |
-| dpkg lock                | [`apt`](managers/apt.md), [`apt-mint`](managers/apt-mint.md), [`aptitude`](managers/aptitude.md), [`deb-get`](managers/deb-get.md), [`nala`](managers/nala.md), [`pacstall`](managers/pacstall.md)                 | they all install through `dpkg` and serialize on its `/var/lib/dpkg/lock`                                                                                    |
-| RPM database             | [`dnf`](managers/dnf.md), [`dnf5`](managers/dnf5.md), [`urpmi`](managers/urpmi.md), [`yum`](managers/yum.md), [`zypper`](managers/zypper.md)                                                                       | they all reach the RPM database                                                                                                                              |
-| conda environment prefix | [`conda`](managers/conda.md), [`mamba`](managers/mamba.md), [`micromamba`](managers/micromamba.md)                                                                                                                 | they act on one environment prefix and one package cache, and `conda` honors none of the locks `mamba` takes on them                                         |
-| Homebrew update lock     | [`brew`](managers/brew.md), [`cask`](managers/cask.md)                                                                                                                                                             | they are the same `brew` binary, and two concurrent `brew update` collide on Homebrew's own update lock                                                      |
-| Scoop tree               | [`scoop`](managers/scoop.md), [`sfsu`](managers/sfsu.md)                                                                                                                                                           | they work on the same `~/scoop` tree, `sfsu` delegating its mutating operations to the `scoop` binary itself                                                 |
-| pkg install database     | [`pkg`](managers/pkg.md), [`ports`](managers/ports.md)                                                                                                                                                             | `ports` keeps no registry of its own and registers what it builds through `pkg`, whose advisory lock on that shared install database refuses a second writer |
+| Shared backend           | Managers                                                                                                                                                                                                                                       | Why?                                                                                                                                                         |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pacman database          | [`aura`](managers/aura.md), [`pacaur`](managers/pacaur.md), [`pacman`](managers/pacman.md), [`pamac`](managers/pamac.md), [`paru`](managers/paru.md), [`pikaur`](managers/pikaur.md), [`trizen`](managers/trizen.md), [`yay`](managers/yay.md) | they all reach the pacman database (`/var/lib/pacman/db.lck`), and two of them mutating at once fail to init their transaction                               |
+| dpkg lock                | [`apt`](managers/apt.md), [`apt-mint`](managers/apt-mint.md), [`aptitude`](managers/aptitude.md), [`deb-get`](managers/deb-get.md), [`nala`](managers/nala.md), [`pacstall`](managers/pacstall.md)                                             | they all install through `dpkg` and serialize on its `/var/lib/dpkg/lock`                                                                                    |
+| RPM database             | [`dnf`](managers/dnf.md), [`dnf5`](managers/dnf5.md), [`urpmi`](managers/urpmi.md), [`yum`](managers/yum.md), [`zypper`](managers/zypper.md)                                                                                                   | they all reach the RPM database                                                                                                                              |
+| conda environment prefix | [`conda`](managers/conda.md), [`mamba`](managers/mamba.md), [`micromamba`](managers/micromamba.md)                                                                                                                                             | they act on one environment prefix and one package cache, and `conda` honors none of the locks `mamba` takes on them                                         |
+| Homebrew update lock     | [`brew`](managers/brew.md), [`cask`](managers/cask.md)                                                                                                                                                                                         | they are the same `brew` binary, and two concurrent `brew update` collide on Homebrew's own update lock                                                      |
+| Scoop tree               | [`scoop`](managers/scoop.md), [`sfsu`](managers/sfsu.md)                                                                                                                                                                                       | they work on the same `~/scoop` tree, `sfsu` delegating its mutating operations to the `scoop` binary itself                                                 |
+| pkg install database     | [`pkg`](managers/pkg.md), [`ports`](managers/ports.md)                                                                                                                                                                                         | `ports` keeps no registry of its own and registers what it builds through `pkg`, whose advisory lock on that shared install database refuses a second writer |
 
 <!-- mirror-end -->
 

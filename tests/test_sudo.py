@@ -129,6 +129,7 @@ def test_internal_sudo_matches_internal_escalators():
     internal = {mid for mid, manager in pool.items() if type(manager).internal_sudo}
     assert internal == {
         "am",
+        "aura",
         "cask",
         "fink",
         "pacaur",

@@ -155,6 +155,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
         "yarn-berry",
     }),
     "pacman-based": frozenset({
+        "aura",
         "dkp-pacman",
         "pacman",
         "pacaur",

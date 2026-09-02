@@ -119,7 +119,18 @@ SHARED_LOCK_FAMILIES: Final[tuple[LockFamily, ...]] = (
     ),
     LockFamily(
         "pacman database",
-        frozenset({"pacaur", "pacman", "pamac", "paru", "pikaur", "trizen", "yay"}),
+        frozenset(
+            {
+                "aura",
+                "pacaur",
+                "pacman",
+                "pamac",
+                "paru",
+                "pikaur",
+                "trizen",
+                "yay",
+            }
+        ),
         "they all reach the pacman database (`/var/lib/pacman/db.lck`), and two of "
         "them mutating at once fail to init their transaction",
     ),

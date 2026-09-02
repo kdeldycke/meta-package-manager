@@ -43,8 +43,7 @@ if TYPE_CHECKING:
 
 
 _YAY_COOLDOWN_INIT_LUA = (
-    resources
-    .files("meta_package_manager.managers")
+    resources.files("meta_package_manager.managers")
     .joinpath("yay_cooldown.lua")
     .read_text(encoding="UTF-8")
 )
@@ -80,10 +79,10 @@ class Pacman(PackageManager):
     ```{caution}
     `--query --upgrades` only reports updates for packages tracked in a
     sync database, so foreign packages (installed with `pacman -U`, as AUR
-    helpers do) stay invisible to the base `pacman` binary. The subclasses
-    escape this because their own binary also queries the AUR RPC. This
-    upstream behavior is not confirmed on a live Arch box: see
-    {meth}`Pacman.outdated`.
+    helpers do) stay invisible to the base `pacman` binary. `Pacaur`, `Paru`
+    and `Yay` escape this because their own binary also queries the AUR RPC,
+    which is verified for `yay`: see {meth}`Pacman.outdated`. `Aura` does not
+    escape it and reports the two halves separately.
     ```
     """
 
@@ -107,7 +106,10 @@ class Pacman(PackageManager):
 
     requirement = ">=5.0.0"
 
-    pre_args = ("--noconfirm", "--color", "never")
+    pre_args: tuple[str, ...] = ("--noconfirm", "--color", "never")
+    """Annotated with a variadic tuple so a subclass may drop an argument:
+    `Aura` rejects `--color` outright and forces `--noconfirm` alone.
+    """
 
     _INSTALLED_REGEXP = re.compile(r"(?P<package_id>\S+) (?P<installed_version>\S+)")
     _OUTDATED_REGEXP = re.compile(
@@ -180,10 +182,11 @@ class Pacman(PackageManager):
         AUR update from the results.
 
         ```{caution}
-        This follows upstream `-Qu` semantics but has not been
-        confirmed on a live Arch box. Before relying on it, verify that
-        `yay --query --upgrades` invoked through mpm actually surfaces
-        a pending AUR update.
+        Confirmed on a live Arch box against `yay` 13.0.1: with an AUR
+        package deliberately downgraded, `yay --query --upgrades` reported it
+        alongside the repository upgrades in one listing, so the inherited
+        parser sees both. `Aura` is the exception and overrides this, its
+        `-Qu` reporting the repositories alone.
         ```
         :::
         """
@@ -339,6 +342,119 @@ class Pacman(PackageManager):
         ```
         """
         return self.build_cli("--database", "--check")
+
+
+class Aura(Pacman):
+    """AUR helper wrapping `pacman`, driven through the `aura` binary.
+
+    Aura reuses every parser and query of `Pacman` unchanged, but not its
+    forced arguments and not its {meth}`outdated`: those are the two places
+    where a v4 aura genuinely differs from the helpers around it.
+
+    ```{note}
+    Every v4 subcommand answers to a long name, a pacman letter and a long
+    pacman flag alike, so `aura --query --upgrades` and `aura -Qu` are one
+    command. That is what lets this class inherit `Pacman`'s operations
+    verbatim rather than restating them against a clap-only vocabulary.
+    ```
+
+    ```{important}
+    Repository upgrades and AUR upgrades are two commands here, where `yay` and
+    `paru` fold both into one `--query --upgrades`. Aura's `-Qu` reads the
+    local ALPM database against the sync databases, so it reports the official
+    repositories alone and an out-of-date AUR package stays invisible to it.
+    The AUR half lives behind `--aursync --sysupgrade --dryrun`, which reports
+    without acting. {meth}`outdated` runs both and concatenates them, so mpm
+    reports what an `aura -Syu` followed by an `aura -Au` would actually
+    upgrade.
+    ```
+
+    Documentation: [Aura manual](https://fosskers.github.io/aura/).
+    """
+
+    name = "Arch Linux aura"
+
+    homepage_url = "https://github.com/fosskers/aura"
+    logo = "archlinux"
+
+    default_sudo = False
+    """Aura refuses to build as root, `makepkg` hard-refusing it, and elevates
+    itself for the privileged half instead.
+
+    Its `[general] elevator` setting names the program, and with none set it
+    looks for `sudo`, `doas` and `run0` in that order. So the escalation default
+    inherited from `Pacman` must not wrap it, the same treatment `yay` gets.
+    """
+
+    internal_sudo = True
+    """Aura calls the elevation binary from inside its own commands."""
+
+    requirement = ">=4.0.0"
+    """The major that introduced the subcommand interface every operation here
+    drives; the parsers were checked against `4.2.0`.
+
+    Aura v3 was a different implementation in a different language, and its
+    releases are not on this line at all.
+    """
+
+    pre_args = ("--noconfirm",)
+    """`Pacman`'s `--color never` is dropped: aura rejects the flag outright
+    with `error: unexpected argument '--color' found`, which would fail every
+    call rather than merely leaving the output colored.
+
+    Nothing replaces it, and nothing needs to: aura writes no SGR escapes when
+    its output is not a terminal, verified on every listing parsed here.
+    """
+
+    version_regexes = (r"aura\s+(?P<version>\S+)",)
+    r"""Search the version right after the `aura` string.
+
+    `Pacman`'s own pattern looks for `Pacman v`, which aura never prints, so the
+    probe would leave the manager permanently unavailable without this.
+
+    ```{code-block} shell-session
+
+    $ aura --version
+    aura 4.2.0
+    ```
+    """
+
+    _AUR_OUTDATED_REGEXP = re.compile(
+        r"^\s*(?P<package_id>\S+)\s+::\s+"
+        r"(?P<installed_version>\S+)\s+->\s+(?P<latest_version>\S+)"
+    )
+    """The AUR upgrade report keeps neither the shape nor the separator of the
+    repository one: the row is indented and the package is split from its
+    versions by ` :: ` where `Pacman`'s `_OUTDATED_REGEXP` expects a bare space.
+
+    Reusing that pattern here would not fail loudly, which is why this one
+    exists: it would match from the separator onwards and report a package
+    literally named `::`.
+    """
+
+    @property
+    def outdated(self) -> Iterator[Package]:
+        """Fetch outdated packages, from the repositories and the AUR alike.
+
+        The two halves are separate commands and cannot be folded: see the
+        class docstring.
+
+        ```{code-block} shell-session
+
+        $ aura --noconfirm --query --upgrades
+        kmscon-terminfo 10.0.2-2 -> 10.0.3-1
+        python-platformdirs 4.11.5-1 -> 4.11.7-1
+        ```
+
+        ```{code-block} shell-session
+
+        $ aura --noconfirm --aursync --sysupgrade --dryrun
+         yay-bin :: 12.6.0-1 -> 13.0.1-1
+        ```
+        """
+        yield from super().outdated
+        output = self.run_cli("--aursync", "--sysupgrade", "--dryrun")
+        yield from self.parse_regex_lines(self._AUR_OUTDATED_REGEXP, output)
 
 
 class DkpPacman(Pacman):

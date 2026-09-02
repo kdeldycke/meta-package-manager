@@ -23,6 +23,7 @@ keywords = [
   "aptitude",
   "asdf",
   "atom",
+  "aura",
   "basalt",
   "bin",
   "bob",
@@ -1002,6 +1003,7 @@ metrics.subjects.apt = "https://salsa.debian.org/apt-team/apt"
 metrics.subjects.apt-cyg = "https://github.com/transcode-open/apt-cyg"
 metrics.subjects.aptitude = "https://salsa.debian.org/apt-team/aptitude"
 metrics.subjects.asdf = "https://github.com/asdf-vm/asdf"
+metrics.subjects.aura = "https://github.com/fosskers/aura"
 metrics.subjects.basalt = "https://github.com/hyperupcall/basalt"
 metrics.subjects.bin = "https://github.com/marcosnils/bin"
 metrics.subjects.bob = "https://github.com/MordechaiHadad/bob"
@@ -1313,6 +1315,7 @@ labels.file-rules."📦 manager: opam" = [ "meta_package_manager/managers/opam.*
 labels.file-rules."📦 manager: pacman-based" = [
   "meta_package_manager/managers/pacman.*",
   "meta_package_manager/managers/pamac.*",
+  "tests/*aura*",
   "tests/*dkp_pacman*",
   "tests/*pacaur*",
   "tests/*pacman*",
@@ -1690,7 +1693,7 @@ description = "opam"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pacman-based"
 color = "bfdadc"
-description = "dkp-pacman, pacaur, pacman, pamac, paru, pikaur, trizen, yay"
+description = "aura, dkp-pacman, pacaur, pacman, pamac, paru, pikaur, trizen, yay"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pear"

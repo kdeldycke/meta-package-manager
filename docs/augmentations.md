@@ -22,6 +22,7 @@ print(augmentations_table())
 | [`apt-cyg`](managers/apt-cyg.md)           |                      |              |      ✅      |       ✅        |               |
 | [`apt-mint`](managers/apt-mint.md)         |                      |              |              |       ✅        |               |
 | [`asdf`](managers/asdf.md)                 |          ✅          |              |      ✅      |       ✅        |               |
+| [`aura`](managers/aura.md)                 |                      |      ✅      |              |       ✅        |               |
 | [`bob`](managers/bob.md)                   |                      |              |      ✅      |       ✅        |               |
 | [`cargo`](managers/cargo.md)               |                      |              |      ✅      |       ✅        |               |
 | [`choosenim`](managers/choosenim.md)       |                      |              |      ✅      |       ✅        |               |

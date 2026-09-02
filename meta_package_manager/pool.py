@@ -63,7 +63,16 @@ from .managers.nimble import Nimble
 from .managers.nix import Nix
 from .managers.npm import NPM
 from .managers.oh_my_fish import OhMyFish
-from .managers.pacman import DkpPacman, Pacaur, Pacman, Paru, Pikaur, Trizen, Yay
+from .managers.pacman import (
+    Aura,
+    DkpPacman,
+    Pacaur,
+    Pacman,
+    Paru,
+    Pikaur,
+    Trizen,
+    Yay,
+)
 from .managers.pacstall import Pacstall
 from .managers.pear import PEAR
 from .managers.pip import Pip
@@ -118,6 +127,7 @@ manager_classes = (
     APT_Mint,
     Aptitude,
     ASDF,
+    Aura,
     Bin,
     Brew,
     Cask,

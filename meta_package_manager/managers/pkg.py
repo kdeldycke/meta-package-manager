@@ -102,7 +102,14 @@ class PKG(PackageManager):
     ```
     """
 
-    pre_args = ("--quiet",)
+    """`--quiet` is deliberately absent from `pre_args`, and cannot go back.
+
+    `pkg` accepts it only *after* the subcommand: as a global argument both
+    `--quiet` and `-q` are answered with ``pkg: unrecognized option `--quiet'``
+    and exit `1`, which broke every operation on `pkg` 2.x. Each subcommand
+    that takes the flag therefore carries it in its own argument list, and
+    `query` never gets it at all, being the one subcommand that rejects it.
+    """
 
     _INSTALLED_REGEXP = re.compile(r"(\S+) (\S+) (.+)")
 
@@ -150,7 +157,7 @@ class PKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ pkg upgrade --dry-run
+        $ pkg upgrade --quiet --dry-run
         Updating FreeBSD repository catalogue...
         FreeBSD repository is up to date.
         All repositories are up to date.
@@ -195,7 +202,7 @@ class PKG(PackageManager):
         ```
         :::
         """
-        output = self.run_cli("upgrade", "--dry-run")
+        output = self.run_cli("upgrade", "--quiet", "--dry-run")
 
         outdated_list = output.split("Installed packages to be UPGRADED:", 1)[1].strip()
 
@@ -218,7 +225,7 @@ class PKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ pkg --quiet autoremove --dry-run
+        $ pkg autoremove --quiet --dry-run
         Checking integrity... done (0 conflicting)
         Deinstallation has been requested for the following 2 packages:
 
@@ -229,205 +236,77 @@ class PKG(PackageManager):
         Number of packages to be removed: 2
         ```
         """
-        output = self.run_cli("autoremove", "--dry-run")
+        output = self.run_cli("autoremove", "--quiet", "--dry-run")
         yield from self.parse_regex_lines(self._ORPHANS_REGEXP, output)
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        Default search on ID substring:
+        ```{caution}
+        The result is a single JSON *array*, not one object per line. `--raw`
+        wraps every match in one, and `json-compact` only strips the
+        whitespace. The stream of bare objects this once parsed was `pkg` 1.x's
+        shape; the array below is what 2.7.5 returns.
+        ```
 
-        ```{code-block} shell-session
+        ```{caution}
+        `--quiet` stays out of this command even though `search` accepts it: it
+        overrides `--raw` and collapses the output to bare `<name>-<version>`
+        tokens, which carry neither the version field nor the comment.
+        ```
 
-        $ pkg search --raw --raw-format json-compact --search name nginx
-        {
-            "name": "nginx",
-            "version": "1.24.0_14,3",
-            "comment": "Robust and small WWW server",
-            (...)
-        }
-        {
-            "name": "nginx-devel",
-            "version": "1.25.3_9",
-            "comment": "Robust and small WWW server",
-            (...)
-        }
-        {
-            "name": "nginx-ultimate-bad-bot-blocker",
-            "version": "4.2020.03.2005_1",
-            "comment": "Nginx bad bot and other things blocker",
-            (...)
-        }
-        {
-            "name": "p5-Nginx-ReadBody",
-            "version": "0.07_1",
-            "comment": "Nginx embedded perl module to read a request",
-            (...)
-        }
-        (...)
+        A search matching nothing exits `1` with an empty array on `<stdout>`
+        and nothing on `<stderr>`, which is why no `must_succeed` is passed:
+        mpm only counts a non-zero exit as a failure when `<stderr>` is
+        non-empty, so the empty result reads as one.
+
+        Default search on ID substring, truncated for width:
+
+        ```{code-block} console
+
+        $ pkg search --raw --raw-format json-compact --search name nyancat
+        [{"name":"nyancat","origin":"net/nyancat","version":"1.5.2,1","comment":"Animated telnet server that renders a loop of the nyan cat animation",(...)}]
         ```
 
         Exact search on ID:
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
-        $ pkg search --raw --raw-format json-compact --search name --exact nginx
-        {
-            "name": "nginx",
-            "origin": "www/nginx",
-            "version": "1.24.0_14,3",
-            "comment": "Robust and small WWW server",
-            "maintainer": "joneum@FreeBSD.org",
-            "www": "https://nginx.com/",
-            "abi": "FreeBSD:13:amd64",
-            "arch": "freebsd:13:x86:64",
-            "prefix": "/usr/local",
-            "sum": "c39a7696e6eda7bfedba251e4480e50d4c65c520d5a783a584b19b3ef883",
-            "flatsize": 1464332,
-            "path": "All/nginx-1.24.0_14,3.pkg",
-            "repopath": "All/nginx-1.24.0_14,3.pkg",
-            "licenselogic": "single",
-            "licenses": [
-                "BSD2CLAUSE"
-            ],
-            "pkgsize": 473632,
-            "desc": "NGINX is a high performance edge web server with the (...)",
-            "deps": {
-                "pcre2": {
-                    "origin": "devel/pcre2",
-                    "version": "10.42"
-                }
-            },
-            "categories": [
-                "www"
-            ],
-            "shlibs_required": [
-                "libpcre2-8.so.0"
-            ],
-            "options": {
-                "AJP": "off",
-                "ARRAYVAR": "off",
-                "AWS_AUTH": "off",
-                "BROTLI": "off",
-                "CACHE_PURGE": "off",
-                "CLOJURE": "off",
-                "COOKIE_FLAG": "off",
-                "CT": "off",
-                "DEBUG": "off",
-                "DEBUGLOG": "off",
-                "DEVEL_KIT": "off",
-                "DRIZZLE": "off",
-                "DSO": "on",
-                "DYNAMIC_UPSTREAM": "off",
-                "ECHO": "off",
-                "ENCRYPTSESSION": "off",
-                "FILE_AIO": "on",
-                "FIPS_CHECK": "off",
-                "FORMINPUT": "off",
-                "GOOGLE_PERFTOOLS": "off",
-                "GRIDFS": "off",
-                "GSSAPI_HEIMDAL": "off",
-                "GSSAPI_MIT": "off",
-                "HEADERS_MORE": "off",
-                "HTTP": "on",
-                "HTTPV2": "on",
-                "HTTPV3": "off",
-                "HTTPV3_BORING": "off",
-                "HTTPV3_LSSL": "off",
-                "HTTPV3_QTLS": "off",
-                "HTTP_ACCEPT_LANGUAGE": "off",
-                "HTTP_ADDITION": "on",
-                "HTTP_AUTH_DIGEST": "off",
-                "HTTP_AUTH_KRB5": "off",
-                "HTTP_AUTH_LDAP": "off",
-                "HTTP_AUTH_PAM": "off",
-                "HTTP_AUTH_REQ": "on",
-                "HTTP_CACHE": "on",
-                "HTTP_DAV": "on",
-                "HTTP_DAV_EXT": "off",
-                "HTTP_DEGRADATION": "off",
-                "HTTP_EVAL": "off",
-                "HTTP_FANCYINDEX": "off",
-                "HTTP_SUBS_FILTER": "off",
-                "HTTP_TARANTOOL": "off",
-                "HTTP_UPLOAD": "off",
-                "HTTP_UPLOAD_PROGRESS": "off",
-                "HTTP_UPSTREAM_CHECK": "off",
-                "HTTP_UPSTREAM_FAIR": "off",
-                "HTTP_UPSTREAM_STICKY": "off",
-                "HTTP_VIDEO_THUMBEXTRACTOR": "off",
-                "HTTP_XSLT": "off",
-                "HTTP_ZIP": "off",
-                "ICONV": "off",
-                "IPV6": "on",
-                "LET": "off",
-                "LINK": "off",
-                "LUA": "off",
-                "MAIL": "on",
-                "MAIL_IMAP": "off",
-                "MAIL_POP3": "off",
-                "MAIL_SMTP": "off",
-                "MAIL_SSL": "on",
-                "MEMC": "off",
-                "MODSECURITY3": "off",
-                "NAXSI": "off",
-                "NJS": "off",
-                "NJS_XML": "off",
-                "OPENTRACING": "off",
-                "PASSENGER": "off",
-                "POSTGRES": "off",
-                "RDS_CSV": "off",
-                "RDS_JSON": "off",
-                "REDIS2": "off",
-                "RTMP": "off",
-                "SET_MISC": "off",
-                "SFLOW": "off",
-                "SHIBBOLETH": "off",
-                "SLOWFS_CACHE": "off",
-                "SRCACHE": "off",
-                "STREAM": "on",
-                "STREAM_REALIP": "on",
-                "STREAM_SSL": "on",
-                "STREAM_SSL_PREREAD": "on",
-                "STS": "off",
-                "THREADS": "on",
-                "VOD": "off",
-                "VTS": "off",
-                "WEBSOCKIFY": "off",
-                "WWW": "on",
-                "XSS": "off"
-            },
-            "annotations": {
-                "FreeBSD_version": "1302001",
-                "build_timestamp": "2024-01-07T10:41:34+0000",
-                "built_by": "poudriere-git-3.4.0",
-                "cpe": "cpe:2.3:a:f5:nginx:1.24.0:::::freebsd13:x64:14",
-                "port_checkout_unclean": "no",
-                "port_git_hash": "756e18783",
-                "ports_top_checkout_unclean": "no",
-                "ports_top_git_hash": "756e18783"
-            }
-        }
+        $ pkg search --raw --raw-format json-compact --search name --exact nyancat
         ```
 
-        Extended search:
+        Extended search over the comment and description fields:
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
         $ pkg search --raw --raw-format json-compact \
-          --search name --search comment --search description nginx
+          --search name --search comment --search description nyancat
         ```
         """
-        search_args = ["--raw", "--raw-format", "json-compact", "--search", "name"]
+        # The `search` subcommand is part of the command, not implied: without
+        # it `pkg` reads `--raw` as a global argument and refuses to run.
+        search_args = [
+            "search",
+            "--raw",
+            "--raw-format",
+            "json-compact",
+            "--search",
+            "name",
+        ]
         if exact:
             search_args.append("--exact")
         # Expand search to the comment and description fields.
         if extended:
             search_args += ["--search", "comment", "--search", "description"]
 
-        output = self.run_cli(search_args, query, must_succeed=True)
+        # No `must_succeed`: `pkg` exits `1` on a search that matches nothing,
+        # writing an empty JSON array and nothing to `<stderr>`, so the default
+        # non-strict rule reads that as the empty result it is.
+        output = self.run_cli(search_args, query)
 
-        for package in map(json.loads, output.splitlines()):
+        # A single top-level array, not one object per line: `json-compact`
+        # compacts the whitespace and keeps the array `--raw` wraps results in.
+        for package in json.loads(output) if output.strip() else ():
             yield self.package(
                 id=package["name"],
                 description=package["comment"],
@@ -440,7 +319,7 @@ class PKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ sudo pkg --quiet install --yes dmg2img
+        $ sudo pkg install --quiet --yes dmg2img
         Updating FreeBSD repository catalogue...
         FreeBSD repository is up to date.
         All repositories are up to date.
@@ -455,17 +334,17 @@ class PKG(PackageManager):
         [1/1] Extracting dmg2img-1.6.7: 100%
         ```
         """
-        return self.run_cli("install", "--yes", package_id, sudo=True)
+        return self.run_cli("install", "--quiet", "--yes", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
         ```{code-block} shell-session
 
-        $ sudo pkg --quiet upgrade --yes
+        $ sudo pkg upgrade --quiet --yes
         ```
         """
-        return self.build_cli("upgrade", "--yes", sudo=True)
+        return self.build_cli("upgrade", "--quiet", "--yes", sudo=True)
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -477,17 +356,17 @@ class PKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ sudo pkg --quiet upgrade --yes dmg2img
+        $ sudo pkg upgrade --quiet --yes dmg2img
         ```
         """
-        return self.build_cli("upgrade", "--yes", package_id, sudo=True)
+        return self.build_cli("upgrade", "--quiet", "--yes", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
         ```{code-block} shell-session
 
-        $ sudo pkg --quiet delete --yes dmg2img
+        $ sudo pkg delete --quiet --yes dmg2img
         Checking integrity... done (0 conflicting)
         Deinstallation has been requested for the following 1 packages:
 
@@ -500,14 +379,14 @@ class PKG(PackageManager):
         pkg: Package database is busy while closing!
         ```
         """
-        return self.run_cli("delete", "--yes", package_id, sudo=True)
+        return self.run_cli("delete", "--quiet", "--yes", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.
 
         ```{code-block} shell-session
 
-        $ sudo pkg --quiet -o IGNORE_OSVERSION=yes update
+        $ sudo pkg -o IGNORE_OSVERSION=yes update --quiet
         Updating FreeBSD repository catalogue...
         Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
         Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
@@ -520,7 +399,7 @@ class PKG(PackageManager):
 
         ```{code-block} console
 
-        $ pkg --quiet update
+        $ pkg update --quiet
         Updating FreeBSD repository catalogue...
         Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
         Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
@@ -534,30 +413,30 @@ class PKG(PackageManager):
         """
         # The -o command-line form survives sudo's environment reset, which would
         # strip an IGNORE_OSVERSION passed as a plain environment variable.
-        self.run_cli("-o", "IGNORE_OSVERSION=yes", "update", sudo=True)
+        self.run_cli("-o", "IGNORE_OSVERSION=yes", "update", "--quiet", sudo=True)
 
     def cleanup_orphan(self) -> None:
         """Remove every package installed as a dependency and no longer required.
 
         ```{code-block} shell-session
 
-        $ sudo pkg --quiet autoremove --yes
+        $ sudo pkg autoremove --quiet --yes
         Checking integrity... done (0 conflicting)
         Nothing to do.
         ```
         """
-        self.run_cli("autoremove", "--yes", sudo=True)
+        self.run_cli("autoremove", "--quiet", "--yes", sudo=True)
 
     def cleanup_cache(self) -> None:
         """Delete every cached package from the local cache directory.
 
         ```{code-block} shell-session
 
-        $ sudo pkg --quiet clean --yes --all
+        $ sudo pkg clean --quiet --yes --all
         Nothing to do.
         ```
         """
-        self.run_cli("clean", "--yes", "--all", sudo=True)
+        self.run_cli("clean", "--quiet", "--yes", "--all", sudo=True)
 
     def doctor_cli(self) -> tuple[str, ...]:
         """Generates the CLI running the native self-diagnosis.
@@ -567,7 +446,7 @@ class PKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ pkg --quiet check --checksums --all
+        $ pkg check --checksums --all
         ```
         """
         return self.build_cli("check", "--checksums", "--all")

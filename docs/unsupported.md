@@ -337,6 +337,12 @@ Vim plugin manager with no commit since 2018-07-26, superseded by [`dein`](#dein
 
 Declined in {mpm-release}`7.6.0`.
 
+## [`nh`](https://github.com/nix-community/nh) ❌ 🛟
+
+Reimplements the NixOS, Home Manager and nix-darwin workflows, so every package it reaches comes from nixpkgs, the registry [`nix`](managers/nix.md) already reads. Its whole command tree is five subcommands, `os`, `home`, `darwin`, `search` and `clean`, and not one of them acts on a single package: `nh os switch` rebuilds the system from its configuration, `nh search` queries the same nixpkgs index, and `nh clean` extends `nix-collect-garbage`. It lists nothing either, `nh os info` reporting generations rather than packages. The [`home-manager`](#home-manager) verdict one layer up, since `nh home` drives that very tool.
+
+Declined in {mpm-release}`8.0.0`.
+
 ## [`ninite`](https://ninite.com) ❌
 
 Installs from a real catalog of Windows applications, so the packages are there, but the free product exposes no command line to reach them with: the whole interface is a web form that generates a bespoke `.exe` bundling the selected apps. That installer takes no package argument, lists nothing and removes nothing, which is the same shape that rules out [`microsoft-store`](#microsoft-store). A command line exists only in Ninite Pro, behind a per-machine monthly subscription with no free tier, so no `mpm` install could exercise it and the destructive install/remove round-trip the test suite runs on every wrapped manager could never be provisioned.

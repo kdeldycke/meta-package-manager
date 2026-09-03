@@ -238,6 +238,8 @@
 - [mpm] Skip a manager whose CLI cannot be executed instead of aborting the run: a wrong-architecture or non-program binary anywhere on `PATH` used to crash every subcommand.
 - [mpm] Recognize a `NOPASSWD` policy that `sudo --validate` reports as a cold cache, so escalation on such a host stops warning that managers may fail and then watching them succeed.
 - [mpm] Record why `opi`, `osc`, `myrlyn` and `transactional-update` are not wrapped, on the unsupported-managers page.
+- [mpm] Record `nh` as an unsupported manager: it reimplements the NixOS, Home Manager and nix-darwin workflows over nixpkgs, the registry `nix` already reaches, and switches whole system states rather than packages.
+- [mpm] Queue `cards`, `pkgman`, `prt-get`, `shelly` and `slackpkg` as wrap candidates, leaving the benchmark with no unassessed manager: each clears the vetting ladder and waits on a NuTyX, Haiku, CRUX, Arch or Slackware host.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

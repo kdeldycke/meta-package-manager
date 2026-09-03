@@ -692,3 +692,59 @@ def test_reads_inside_mutating_methods_survive_plan_mode():
         "reads issued inside a mutating method are captured by --plan and return "
         f"an empty string; exempt them with force_exec=True or acting_as: {offenders}"
     )
+
+
+def test_manager_keywords_have_one_owner():
+    """No two managers claim the same keyword alias.
+
+    A keyword names exactly one manager, so a term spanning several of them (an
+    ecosystem name like `homebrew`, answering for both `brew` and `cask`) belongs
+    in the globally curated `KEYWORDS_EXTRAS` instead, which owes nothing to a
+    single class. Without this, two managers could disagree about who a name
+    refers to and both would ship it.
+    """
+    owners: dict[str, list[str]] = {}
+    for manager in pool.values():
+        for keyword in manager.keywords:
+            owners.setdefault(keyword.casefold(), []).append(manager.id)
+
+    shared = {
+        keyword: sorted(ids) for keyword, ids in owners.items() if len(ids) > 1
+    }
+    assert not shared, f"Keywords claimed by more than one manager: {shared}"
+
+
+def test_manager_keywords_are_not_manager_ids():
+    """A keyword never restates a manager ID.
+
+    Every ID already reaches the PyPI keywords straight from the pool, so
+    repeating one is redundant. Repeating *another* manager's ID is worse, since
+    it would file that manager's own name under this class.
+    """
+    ids = {manager_id.casefold() for manager_id in pool.all_manager_ids}
+
+    offenders = {}
+    for manager in pool.values():
+        clashing = sorted(k for k in manager.keywords if k.casefold() in ids)
+        if clashing:
+            offenders[manager.id] = clashing
+
+    assert not offenders, f"Keywords restating a manager ID: {offenders}"
+
+
+def test_manager_keywords_are_normalized():
+    """Keywords are stripped and lowercase.
+
+    They are merged into one case-insensitively sorted set, so a stray capital or
+    a trailing space would produce a near-duplicate entry that the uniqueness
+    check above cannot see.
+    """
+    offenders = {}
+    for manager in pool.values():
+        malformed = sorted(
+            k for k in manager.keywords if k != k.strip().casefold() or not k
+        )
+        if malformed:
+            offenders[manager.id] = malformed
+
+    assert not offenders, f"Keywords that are not stripped and lowercase: {offenders}"

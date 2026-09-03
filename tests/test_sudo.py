@@ -791,7 +791,9 @@ def test_sudo_prompt_names_the_account_that_owns_the_password():
         ("SUDO: A PASSWORD IS REQUIRED", True),
         # sudo-rs, the default sudo of Ubuntu 25.10 and newer.
         ("sudo: interactive authentication is required", True),
-        # The three doas wordings, shared by OpenBSD's doas and opendoas.
+        # The three doas wordings, shared by OpenBSD's doas and opendoas. The
+        # first is what Alpine's doas 6.8.2 answers under `-n` for both a bare
+        # `permit` rule and a cold `permit persist` one.
         ("doas: Authentication required", True),
         ("doas: a tty is required", True),
         ("doas: Authentication failed", True),
@@ -821,9 +823,12 @@ def test_is_sudo_auth_failure(error, expected):
         ),
         ("SORRY, USER KEVIN MAY NOT RUN SUDO ON HOST.", True),
         # opendoas prints the bare errno string of EPERM for an unmatched rule.
+        # Confirmed on Alpine's doas 6.8.2 against a config permitting another
+        # user only.
         ("doas: Operation not permitted", True),
         # An installed but unconfigured doas, measured on a runner carrying no
-        # `/etc/doas.conf`. No password can fix it either.
+        # `/etc/doas.conf`, and confirmed verbatim on Alpine's doas 6.8.2. No
+        # password can fix it either.
         (
             "doas: doas is not enabled, /etc/doas.conf: No such file or directory",
             True,

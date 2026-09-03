@@ -208,6 +208,20 @@ Create `meta_package_manager/managers/<name>.py`. Follow the import pattern, cla
 
 Class-level attributes and methods must follow the canonical order defined in `PackageManager` (enforced by `test_content_order`). The order is: `homepage_url`, `logo`, `platforms`, `requirement`, `cli_names`, `cli_search_path`, `extra_env`, `pre_cmds`, `pre_args`, `post_args`, `version_cli_options`, `version_regexes`, then operations (`installed`, `outdated`, `release_date`, `search`, `install`, `upgrade_all_cli`, `upgrade_one_cli`, `upgrade_all_cli_excluding`, `remove`, `sync`, `cleanup`).
 
+### The class docstring is the manager's page
+
+`manager_intro()` inlines the class docstring straight onto `docs/managers/<id>.md`, so it is not maintainer commentary: it is the prose a user reads at `https://mpm.run/managers/<id>/`. Write it for someone about to drive *this* manager.
+
+Carry what is true here and absent elsewhere, and let the shared pages carry the rest:
+
+- **A default that does not fit this manager.** `mpm` caps a mutating operation at 500 seconds, which suits a binary package manager and not one that compiles. Every `ports` upgrade outlasts it, so its page names the ceiling and the key that raises it (`[mpm.managers.ports] timeout`). {doc}`/overrides` documents that the knob exists; only the manager page can say who needs to reach for it.
+- **A precondition the manager cannot satisfy itself**, like a tree or a login the user provides.
+- **A coexistence**, where two managers share one install database and their listings overlap.
+- **An operation deliberately absent**, with the reason, so a reader stops looking for it.
+- **A wrap resting on incidental upstream behavior** rather than a stated contract, so the next breakage reads as an upstream change and not a parser bug.
+
+State the fact where the user meets it, and name the concrete key, path or command that acts on it: a page saying an operation "may be slow" helps nobody, where one naming the ceiling and the override is actionable. Skip anything true of every manager, since a page restating the generic contract buries the one fact that is specific to it.
+
 ### Class attributes
 
 Required:

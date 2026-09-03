@@ -478,6 +478,24 @@ class Ports(PackageManager):
     `/usr/ports`. The manager flags itself unavailable when the tree is
     missing.
     ```
+
+    :::{caution}
+    Every mutating operation compiles from source, so it outlasts the 500
+    second ceiling `mpm` puts on a state-changing command by default. An
+    upgrade of one small library already exceeds it and fails with
+    `Timed out after 500s`, having built nothing. Raise the ceiling for this
+    manager alone, in the configuration file:
+
+    ```toml
+    [mpm.managers.ports]
+    timeout = 3000
+    ```
+
+    No single value fits: a build scales with the port, its dependency tree and
+    the machine, so treat the number above as a starting point rather than a
+    recommendation. `sync` and `installed` are unaffected, delegating to `git`
+    and `pkg` rather than building.
+    :::
     """
 
     # Removal goes through the shared install database, identical to PKG.
@@ -673,6 +691,11 @@ class Ports(PackageManager):
         line without checking that `portmaster` is installed, because
         upgrade commands are typically printed for the user to inspect
         before running.
+
+        `-a` is the one short option `mpm` builds at runtime, and it stays
+        short: `portmaster` 3.35 lists no `--all` among the long options its
+        own parser accepts, so the long form this project prefers everywhere
+        else does not exist here.
 
         ```{code-block} shell-session
 

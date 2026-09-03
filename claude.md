@@ -391,7 +391,9 @@ The cases already carrying this weight are worth knowing, since each has a test 
 
 The content and file rules are generated into `pyproject.toml` from `meta_package_manager/labels.py`.
 
-- **Content rules** come only from `MANAGER_CONTENT_KEYWORDS`: ecosystem, distro, language or brand names that unambiguously name the manager *and* never appear in mpm's own output. Never the manager ID or a CLI name — mpm prints those for every installed manager (the `✓ <id>` trail, the `<id>: <count>` summary, the `managers` table), so a pasted trace would tag the issue with every manager on the user's system. A manager whose only name is its ID gets no content rule.
+- **Content rules** come only from each manager's own `keywords` attribute: ecosystem, distro, language or brand names that unambiguously name the manager *and* never appear in mpm's own output. Never the manager ID or a CLI name — mpm prints those for every installed manager (the `✓ <id>` trail, the `<id>: <count>` summary, the `managers` table), so a pasted trace would tag the issue with every manager on the user's system. A manager whose only name is its ID declares none and gets no content rule.
+
+  That attribute is the single source for both the labeller and the PyPI keywords, which is why the precision bar above governs what a manager may declare: a term naming an ecosystem rather than one manager belongs in `docs_update.py`'s `KEYWORDS_EXTRAS`, which reaches PyPI alone. A label groups several managers, so its rule is the union of its members' keywords (`rpm-based` collects `fedora` from `dnf` and `mageia` from `urpmi`), and a subclass inherits its parent's terms without claiming them: `test_manager_keywords_have_one_owner` reads what a class *declares*, so `apt-mint` inheriting `debian` from `apt` is not a second owner.
 - **File rules** map each manager's own module and test paths to its label; keep them narrow enough that only that manager's files match.
 
 The `generate_content_rules` docstring covers the regex mechanics (anchoring, case-folding, why a label's keywords are OR-joined into one pattern).

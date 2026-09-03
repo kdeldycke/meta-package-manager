@@ -286,16 +286,26 @@ class MPMPlugin:
         The order in which the candidates are returned by this method is conserved by
         the `ranked_mpm()` method below.
 
-        We prioritize venv-based findings first, as they're more likely to have all
-        dependencies installed and sorted out. They're also our prime candidates in
-        unittests.
+        Venv-based findings come first, because the plugin prefers the `mpm` it
+        is part of. This file ships inside the package, so walking back up its
+        own folders reaches the project that installed it, and that `mpm` is the
+        one this plugin was released with, whose dependencies are already
+        resolved. Both hosts import the file through a symlink into their own
+        plugin folder, hence the resolution below: an unresolved path walks that
+        folder and finds nothing, leaving the plugin to drive whichever other
+        `mpm` the system answers with.
 
-        Then we search for system-wide installation. And finally Python modules.
+        The rest are fallbacks, for a plugin that reached the host on its own: a
+        system-wide installation, then the module under an interpreter. None of
+        them is trusted on sight, `check_mpm()` running each before it is ranked.
         """
         # This script might be itself part of an mpm installation that was deployed in
         # a virtualenv. So walk back the whole folder tree from here in search of a
-        # virtualenv.
-        for folder in Path(__file__).parents:
+        # virtualenv. The path is resolved first: both hosts are installed by
+        # symlinking this file into their own plugin folder, and that folder is
+        # where an unresolved `__file__` walks, never the installation the script
+        # belongs to.
+        for folder in Path(__file__).resolve().parents:
             # Stop at Home: neither it nor any folder above it is a project of
             # the user's, and scanning on reaches `/` by way of every shared
             # parent a stray lockfile could sit in.
@@ -319,11 +329,16 @@ class MPMPlugin:
         for py_path in (sys.executable, which("python3")):
             if not py_path:
                 continue
-            normalized = os.path.normcase(Path(py_path).resolve())
+            # Deduplicated on the path as written, never on its target: a venv
+            # interpreter is a symlink to the one it was built from, and that
+            # target sees none of the venv's packages. Two names for a single
+            # interpreter cost one extra probe here, where a resolved key drops
+            # a whole environment that holds `mpm`.
+            normalized = os.path.normcase(py_path)
             if normalized in seen:
                 continue
             seen.add(normalized)
-            yield (normalized, "-m", "meta_package_manager")
+            yield (py_path, "-m", "meta_package_manager")
 
     def check_mpm(
         self, mpm_cli_args: tuple[str, ...]

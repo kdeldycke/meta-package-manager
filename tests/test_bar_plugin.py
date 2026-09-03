@@ -142,6 +142,34 @@ def test_mpm_cli_ignores_the_spawn_directory(tmp_path):
     assert "mpm, version" in process.stdout
 
 
+def test_search_mpm_resolves_a_symlinked_plugin(monkeypatch, tmp_path):
+    """The venv walk follows the symlink both hosts are installed through.
+
+    A bar app imports this file from its own plugin folder, so an unresolved
+    `__file__` walks that folder and finds nothing, leaving the plugin to drive
+    whichever other `mpm` the system answers with.
+    """
+    home = tmp_path / "home"
+    project = home / "project"
+    package = project / "meta_package_manager"
+    package.mkdir(parents=True)
+    (project / "uv.lock").touch()
+    target = package / "bar_plugin.py"
+    target.touch()
+
+    plugin_folder = home / ".swiftbar"
+    plugin_folder.mkdir()
+    link = plugin_folder / "meta_package_manager.7h.py"
+    link.symlink_to(target)
+
+    monkeypatch.setattr(bar_plugin, "__file__", str(link))
+    monkeypatch.setattr(bar_plugin.Path, "home", classmethod(lambda cls: home))
+
+    candidates = list(bar_plugin.MPMPlugin().search_mpm())
+
+    assert ("uv", "run", "--frozen", "--project", str(project), "mpm") in candidates
+
+
 def _pin_plugin_env(
     monkeypatch, table_rendering: bool, os_appearance: str | None = None
 ) -> None:

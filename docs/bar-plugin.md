@@ -228,6 +228,18 @@ A copy of the latest stable release is also [published on the Xbar website](http
 
 `````
 
+## Which `mpm` the plugin runs
+
+The plugin prefers the `mpm` it is part of. It ships inside the package, so it walks back up its own folders to the installation that carries it, and runs that one: the version it was released with, whose dependencies are already resolved. The symlink above is followed to get there, or the walk would scan the host's plugin folder and find nothing.
+
+Failing that, it falls back to an `mpm` on the `PATH`, then to the module under the interpreter running the plugin, and under `python3`. Every candidate is run before it is ranked, so an unusable one is skipped instead of being picked.
+
+To see which one a menu is driving, ask the plugin. It prints each candidate it found, in the order it ranked them, with the version it answered and the error it failed with:
+
+```shell-session
+$ python3 "$(mpm --bar-plugin-path)" --search-mpm
+```
+
 ## Python `>= 3.9` required
 
 The plugin **requires Python 3.9 or newer**, and runs on the interpreter macOS provides, without any extra dependency.

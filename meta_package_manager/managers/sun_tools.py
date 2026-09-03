@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import re
 
-from extra_platforms import SOLARIS
+from extra_platforms import ILLUMOS, SOLARIS
 
 from ..manager import PackageManager
 
@@ -64,7 +64,11 @@ class Sun_Tools(PackageManager):
     # Icons, so do not file a request, and do not vendor one by hand:
     # https://github.com/simple-icons/simple-icons/issues/11441
 
-    platforms = SOLARIS
+    platforms = ILLUMOS, SOLARIS
+    """The SVR4 tools predate the illumos fork, so every illumos distribution
+    inherits them: OpenIndiana Hipster 2026.04 ships `pkginfo`, `pkgadd` and
+    `pkgrm`, with 279 packages registered in its SVR4 database.
+    """
 
     default_sudo = True
 

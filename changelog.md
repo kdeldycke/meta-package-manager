@@ -18,6 +18,7 @@
 - [ports] Fix the FreeBSD ports manager, which reported no version and so never activated, and repair `installed`, `outdated`, `install` and `upgrade`.
 - [ports,sdkman] Fix `--plan` for the operations that query before they act: they reported every package as missing instead of printing the command.
 - [ports] Fix `upgrade`, which hung on FreeBSD's port options dialog until it timed out, having built nothing.
+- [sun-tools] Activate on illumos as well as Solaris: OpenIndiana and its siblings inherit the SVR4 `pkginfo`, `pkgadd` and `pkgrm` tools.
 - [claude-code-plugins] Add Claude Code plugins manager, with inventory, install, remove, single-plugin upgrade, marketplace sync and orphan cleanup.
 - [go] Add Go package manager, listing and installing the commands `go install` puts on the machine.
 - [gup] Add gup package manager, reporting, removing and upgrading the binaries `go install` leaves under `$GOBIN`.

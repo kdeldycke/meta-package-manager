@@ -882,7 +882,12 @@ def _load_benchmark_toml() -> dict:
     """
     toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
     content = toml_path.read_text(encoding="UTF-8")
-    return tomllib.loads(content)  # type: ignore[no-any-return]
+    # Bound to an annotated local rather than returned straight: whether
+    # `tomllib.loads` is typed as `Any` or as a `dict` varies with the typeshed
+    # in use, and this laundering keeps the function clean of `no-any-return`
+    # without an ignore that a different mypy then calls unused.
+    document: dict = tomllib.loads(content)
+    return document
 
 
 def _bare_support_glyph(
@@ -1183,7 +1188,9 @@ def _toml_definition(definition_source: str) -> dict:
     from several section generators.
     """
     content = (PROJECT_ROOT / definition_source).read_text(encoding="UTF-8")
-    return tomllib.loads(content)  # type: ignore[no-any-return]
+    # Annotated local, as in `_load_benchmark_toml` above.
+    document: dict = tomllib.loads(content)
+    return document
 
 
 @cache

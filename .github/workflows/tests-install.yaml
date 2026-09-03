@@ -697,19 +697,37 @@ jobs:
           meta-package-manager --version
 
   # https://github.com/lucasgelfond/zerobrew
+  #
+  # Only the macos-15-intel cell is advisory, and the marker is per cell rather
+  # than per job so the other three keep gating. That one has no prebuilt
+  # `openssl@3` for its architecture, so it alone falls back to a source build
+  # and dies in ZeroBrew's formula shim: `undefined method 'which' for an
+  # instance of OpensslAT3`. Nothing here can fix that, and a cell that can only
+  # ever be red teaches readers to ignore this workflow's red runs, which is how
+  # its ZeroBrew pin sat three months past a CVE unnoticed. Restore the gate
+  # once upstream implements `which`.
   zerobrew:
-    name: "✅ zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
+    name: "${{ matrix.mark }} zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
+    continue-on-error: ${{ matrix.unstable }}
     strategy:
       matrix:
         include:
           - os: ubuntu-26.04-arm
             asset: zb-linux-arm64
+            mark: "✅"
+            unstable: false
           - os: ubuntu-26.04
             asset: zb-linux-x64
+            mark: "✅"
+            unstable: false
           - os: macos-15-intel
             asset: zb-darwin-x64
+            mark: "⁉️"
+            unstable: true
           - os: macos-26
             asset: zb-darwin-arm64
+            mark: "✅"
+            unstable: false
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:

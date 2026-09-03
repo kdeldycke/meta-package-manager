@@ -614,6 +614,55 @@ def pearl_bash_too_old() -> bool:
     return (int(match.group(1)), int(match.group(2))) < (4, 1)
 
 
+def rpm_distro_missing() -> bool:
+    """Whether this host is not backed by a working RPM distribution.
+
+    The RPM front-ends (`dnf`, `dnf5`, `yum`, `zypper`) resolve nothing on a host
+    whose RPM database was never populated: they find no release version and no
+    repositories, and fail at the search step before reaching the privileged
+    install. A Debian-based runner carrying one of their binaries is exactly that
+    host.
+
+    Keyed on the database rather than on the platform, so a real openSUSE or
+    Fedora machine runs the round-trip instead of inheriting a CI artifact. The
+    flat `is_linux` this replaces blocked every Linux, which meant the four
+    front-ends were never exercised anywhere.
+    """
+    rpm_path = which("rpm")
+    if not rpm_path:
+        return True
+    probe = subprocess.run(
+        # One dot per installed package, so the output stays small on a full host.
+        (rpm_path, "--query", "--all", "--queryformat", "."),
+        capture_output=True,
+        check=False,
+        text=True,
+        encoding="UTF-8",
+    )
+    return probe.returncode != 0 or not probe.stdout.strip()
+
+
+def flatpak_remotes_missing() -> bool:
+    """Whether flatpak has no remote to resolve an application from.
+
+    An install needs a configured remote, and a bare flatpak carries none, so the
+    round-trip fails for want of a catalog rather than for anything `mpm` did.
+    Probed live because a desktop install configures Flathub while a server or a
+    CI image does not, which the platform cannot answer.
+    """
+    flatpak_path = which("flatpak")
+    if not flatpak_path:
+        return True
+    probe = subprocess.run(
+        (flatpak_path, "remotes", "--columns=name"),
+        capture_output=True,
+        check=False,
+        text=True,
+        encoding="UTF-8",
+    )
+    return probe.returncode != 0 or not probe.stdout.strip()
+
+
 INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # Claude Code resolves a plugin through the marketplaces configured for the
     # user, and a fresh host has none, so the install fails for want of a registry.
@@ -624,15 +673,14 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     "cpan": cpan_install_blocked,
     # pear writes to the PHP interpreter's php_dir, root-owned on a distro install.
     "pear": pear_install_blocked,
-    # The RPM and zypper front-ends are not backed by a working RPM/SUSE distro on the
-    # Debian-based ubuntu runners (no release version, no repositories), so they cannot
-    # even resolve the package and fail before reaching the privileged install step.
-    "dnf": is_linux,
-    "dnf5": is_linux,
-    "yum": is_linux,
-    "zypper": is_linux,
-    # flatpak has no remote configured to resolve apps from on the runners.
-    "flatpak": is_linux,
+    # The RPM front-ends resolve no package where the RPM database is empty, which the
+    # Debian-based runners are, so they fail before the privileged install step.
+    "dnf": rpm_distro_missing,
+    "dnf5": rpm_distro_missing,
+    "yum": rpm_distro_missing,
+    "zypper": rpm_distro_missing,
+    # flatpak needs a remote to resolve apps from, and the runners configure none.
+    "flatpak": flatpak_remotes_missing,
     # basalt refuses every command, the read-only listing included, without a GitHub
     # token file of its own, and needs the environment its shell-init snippet exports.
     # Neither is set up on a runner.
@@ -703,10 +751,11 @@ skipped, since the failed install left nothing to remove and the working manager
 cover the removal path.
 
 A condition is either a plain `True` for the managers no environment can install, or a
-zero-argument callable evaluated per host: `is_linux` for the unprivileged Linux runner,
-`is_github_ci` for GitHub Actions only (a configured local box can still install), or a
-live probe like `gh_unauthenticated` when installability hinges on host state rather than
-platform. Resolve one through {func}`install_remove_blocked` rather than calling it
+zero-argument callable evaluated per host: `is_github_ci` for GitHub Actions only (a
+configured local box can still install), or a live probe like `gh_unauthenticated` or
+`rpm_distro_missing` when installability hinges on host state rather than platform. Prefer
+a probe: a platform test blocks every machine of that platform, including the ones where
+the round-trip would have worked. Resolve one through {func}`install_remove_blocked` rather than calling it
 directly, which is what keeps the constants from needing a `lambda` wrapper.
 
 ```{note}

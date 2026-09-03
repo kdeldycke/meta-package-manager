@@ -25,6 +25,7 @@ import pytest
 from boltons.strutils import strip_ansi
 
 from meta_package_manager.version import (
+    UNDERSCORE_POST_RELEASE_TAGS,
     Token,
     TokenizedString,
     VersionRange,
@@ -580,6 +581,16 @@ compared_gt = (
     ("6.5.0", "5.15.90"),
     # PEP 440 post-release > release.
     ("1.0.post1", "1.0"),
+    # Gentoo and Alpine post-release suffixes, verified against
+    # `apk version -t` on Alpine 3.24.1 running apk-tools 3.0.8.
+    ("1.0_p1", "1.0"),
+    ("1.0_git20240101", "1.0"),
+    ("1.0_p1", "1.0_alpha1"),
+    # Their pre-release half keeps the generic string-loses-to-release rule.
+    ("1.0", "1.0_alpha1"),
+    ("1.0", "1.0_rc1"),
+    # The same words behind another separator stay pre-release markers.
+    ("1.0", "1.0-p1"),
     # PEP 440 pre-release chain: alpha < beta < rc < release.
     ("1.0b1", "1.0a1"),
     ("1.0rc1", "1.0b1"),
@@ -621,6 +632,28 @@ def test_version_comparison_gt(ver1, ver2):
 @pytest.mark.parametrize(("ver1", "ver2"), reverse_fixtures(compared_gt))
 def test_version_comparison_lt(ver1, ver2):
     assert TokenizedString(ver1) < TokenizedString(ver2)
+
+
+@pytest.mark.parametrize("tag", sorted(UNDERSCORE_POST_RELEASE_TAGS))
+def test_underscore_post_release_tag_outranks_its_base(tag):
+    """Every tag of the set sorts above the release it suffixes.
+
+    Enumerating the set rather than sampling it is what keeps a tag added
+    later from silently keeping the pre-release reading of the generic rule.
+    """
+    assert TokenizedString(f"1.0_{tag}1") > TokenizedString("1.0")
+
+
+@pytest.mark.parametrize("tag", sorted(UNDERSCORE_POST_RELEASE_TAGS))
+@pytest.mark.parametrize("separator", (".", "-", "+", ""))
+def test_post_release_tag_needs_its_underscore(tag, separator):
+    """The same tag behind any other separator keeps the pre-release reading.
+
+    Gating on the underscore is what confines the Gentoo and Alpine reading to
+    the two schemes spelling it that way, leaving a build identifier like
+    `2.1.1-git-23hfb2` ordered below its base.
+    """
+    assert TokenizedString(f"1.0{separator}{tag}1") < TokenizedString("1.0")
 
 
 compared_eq = (

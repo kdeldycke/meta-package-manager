@@ -49,8 +49,12 @@ Key rules:
   zero integers, the versions are equivalent.
 
 - **Pre-release suffixes lose.** When a release version is a prefix of a
-  longer version whose first significant extra token is a string (e.g.,
-  `"alpha"`, `"git"`), the shorter release is considered greater.
+  longer version whose first significant extra token is a string (like
+  `"alpha"` or `"rc"`), the shorter release is considered greater. The
+  exceptions are the post-release tags, which invert the rule: `post` and
+  `patch` whatever introduces them, plus the Gentoo and Alpine suffixes of
+  {data}`UNDERSCORE_POST_RELEASE_TAGS` behind an underscore, so that
+  `1.0_p1 > 1.0`.
 
 - **Hex hashes stay whole.** A contiguous run of 7+ hex characters with
   interleaved digits and letters (at least one letter-then-digit and one
@@ -81,6 +85,15 @@ This is a heuristic comparator, not a format-specific parser.
 - **Perl floating-point versions** (`1.1 == 1.10`) are treated as
   `(1, 1)` vs `(1, 10)` — not equal. The Gentoo three-digit-group
   conversion scheme is not implemented.
+
+- **A pre-release tag facing a post-release tag** at the same position is
+  ordered alphabetically, which is not their release order: `1.0_rc1`
+  compares greater than `1.0_p1` because `"rc" > "post"`, where `apk`
+  answers `<`. The prefix rule of `_compare_tuples()` covers a suffix
+  meeting a bare release, which is the common case; two suffixed versions
+  of one base reach plain `Token` comparison, and that class carries no
+  notion of a pre or post rank. Sorting them would mean ranking every
+  string token for every manager, so it is left undone.
 
 - **Format-specific separators** like Java build metadata (`,`) or
   Perl-style floats (`.`) are treated as plain delimiters, which can
@@ -178,10 +191,40 @@ semantics in some ecosystems (e.g., `1.0-patch1`). Without this set,
 the prefix-comparison rule treats all string suffixes as pre-release
 indicators, which wrongly makes `1.0 > 1.0.post1`.
 
-This set is deliberately small. Only tags with unambiguous "newer than
-release" semantics across multiple ecosystems belong here. Candidates like
-`rev` or `p` are excluded because they can also mean "revision" (Gentoo
-`-r0`) or "pre-release patchlevel" (FreeBSD `p1`), depending on context.
+This set is deliberately small. Only tags whose spelling alone carries
+"newer than release" semantics across ecosystems belong here. A tag whose
+meaning depends on the separator introducing it goes in
+{data}`UNDERSCORE_POST_RELEASE_TAGS` instead.
+"""
+
+UNDERSCORE_POST_RELEASE_TAGS: frozenset[str] = frozenset({
+    "cvs",
+    "git",
+    "hg",
+    "p",
+    "svn",
+})
+"""Post-release suffixes of the Gentoo and Alpine scheme, recognized only
+behind an underscore.
+
+Both distributions split a suffix into a pre-release half (`_alpha`, `_beta`,
+`_pre`, `_rc`), which the generic string-loses-to-release rule already orders
+correctly, and a post-release half listed here: `1.0_p1` is a patch level of
+`1.0`, and `1.0_git20240101` a snapshot taken after it. Alpine's own
+comparator agrees, `apk version -t 1.0_p1 1.0` answering `>`.
+
+The underscore is what makes these safe to recognize. `apk` parses the
+suffixes in this spelling alone, refusing `9.6p1` outright, and every other
+reading of the same words arrives behind a different separator: `2.1.1-git-*`
+is a build identifier of `2.1.1`, not a release after it. Gating on the
+separator therefore fixes the two schemes that spell it this way and leaves
+every other one untouched.
+
+Ordering *within* the set is not modelled. `apk` ranks the suffixes
+`cvs < svn < git < hg < p`, which no separator-blind tokenizer can
+reproduce, so all five normalize to `post` and compare equal to each other.
+That keeps the fix inside this module's remit, a heuristic comparator rather
+than a per-format parser.
 """
 
 
@@ -423,6 +466,20 @@ class TokenizedString:
         return "".join(parts)
 
     @staticmethod
+    def _canonical_token(value: str, preceding_separator: str) -> str:
+        """Normalize one split part to the spelling used for comparison.
+
+        `preceding_separator` is the raw separator standing between this token
+        and the one before it, empty for the first token. It selects between
+        the two families of {data}`TOKEN_ALIASES`, which hold whatever the
+        separator, and {data}`UNDERSCORE_POST_RELEASE_TAGS`, which only carry
+        their post-release meaning behind an underscore.
+        """
+        if preceding_separator == "_" and value in UNDERSCORE_POST_RELEASE_TAGS:
+            return "post"
+        return TOKEN_ALIASES.get(value, value)
+
+    @staticmethod
     def tokenize(
         string: str,
     ) -> tuple[tuple[Token, ...], tuple[str, ...], tuple[str, ...]]:
@@ -442,11 +499,14 @@ class TokenizedString:
         parts = ALNUM_EXTRACTOR.split(normalized_str)
 
         # Normalize well-known pre-release aliases to their canonical short
-        # form so that `1.0alpha1` and `1.0a1` compare equal. The
-        # replacement happens on the lowered split parts, before Token
-        # creation. original_segments (used by pretty_print) are unaffected.
+        # form so that `1.0alpha1` and `1.0a1` compare equal, and the
+        # underscore-gated post-release suffixes of the Gentoo and Alpine
+        # scheme to `post`. Both replacements happen on the lowered split
+        # parts, before Token creation, reading `parts[i - 1]` for the
+        # separator that introduces each token. original_segments (used by
+        # pretty_print) are unaffected.
         tokens = tuple(
-            Token(TOKEN_ALIASES.get(parts[i], parts[i]))
+            Token(TokenizedString._canonical_token(parts[i], parts[i - 1]))
             for i in range(1, len(parts), 2)
         )
         separators = tuple(parts[i] for i in range(2, len(parts) - 1, 2))
@@ -530,6 +590,9 @@ class TokenizedString:
         extra token in the longer tuple decides the outcome:
 
         - **Post-release tag** (`post`, `patch`): the longer tuple is greater.
+          The Gentoo and Alpine suffixes of
+          {data}`UNDERSCORE_POST_RELEASE_TAGS` reach this branch already
+          normalized to `post` by {meth}`_canonical_token`.
         - **Other string token** (pre-release tag): the shorter tuple is greater.
         - **Integer token** (additional version component): the longer tuple is greater.
         - **All trailing zeros**: the tuples are equal (trailing `.0` is padding).
@@ -570,9 +633,8 @@ class TokenizedString:
             # would be treated as pre-release indicators.
             longer_wins = 1
         else:
-            # Pre-release suffix (e.g., `alpha`, `beta`, `rc`,
-            # `dev`, `git`): the shorter version is the actual
-            # release, so shorter is greater.
+            # Pre-release suffix (`alpha`, `beta`, `rc`, `dev`): the shorter
+            # version is the actual release, so shorter is greater.
             longer_wins = -1
         return -longer_wins if len(a) < len(b) else longer_wins
 

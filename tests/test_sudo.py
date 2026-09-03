@@ -39,6 +39,7 @@ from unittest.mock import patch
 
 import click
 import pytest
+from click_extra.spinner import Spinner
 from extra_platforms import UNIX, is_any_windows
 
 from meta_package_manager.pool import pool
@@ -1278,6 +1279,39 @@ def test_stall_watchdog_negative_gates(
     assert not any(
         "hidden password prompt" in record.getMessage() for record in caplog.records
     )
+
+
+@pytest.mark.parametrize(
+    ("internal_sudo", "expected_enabled"),
+    (
+        pytest.param(True, False, id="armed-call-stays-still"),
+        pytest.param(False, None, id="ordinary-call-animates"),
+    ),
+)
+def test_hidden_prompt_risk_holds_the_spinner_still(internal_sudo, expected_enabled):
+    """A call that may hide a `sudo` prompt builds its spinner disabled, leaving
+    the terminal line the tool writes that prompt on: an animation repainting it
+    erases the prompt and leaves the run to die at the mutating timeout. The
+    control differs by the `internal_sudo` gate alone, and keeps `enabled=None`,
+    the auto-detected animation of an ordinary call.
+    """
+    manager = FakeManager()
+    manager.internal_sudo = internal_sudo
+    manager._active_operation = "install"
+    manager.progress = True
+    built: list[bool | None] = []
+
+    class RecordingSpinner(Spinner):
+        def __init__(self, *args, **kwargs):
+            built.append(kwargs["enabled"])
+            super().__init__(*args, **kwargs)
+
+    with (
+        patch("sys.stderr.isatty", return_value=True),
+        patch("meta_package_manager.execution.Spinner", RecordingSpinner),
+    ):
+        manager.run_cli("-c", "print('quick call')")
+    assert built == [expected_enabled]
 
 
 def test_stall_watchdog_tee_gates_debug_lines_at_default_verbosity(caplog):

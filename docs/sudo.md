@@ -106,7 +106,7 @@ The probe also reads `sudo`'s answer: a user the `sudoers` policy does not autho
 
 Some managers run `sudo` from inside their own commands: on macOS, [`brew`](managers/brew.md) escalates while installing a cask with a privileged payload (the `macfuse` example above) and [`fink`](managers/fink.md) re-execs its root commands through `sudo`, while on Linux the AUR helpers call `sudo pacman` for their privileged phases, [`pacstall`](managers/pacstall.md) re-execs itself through `sudo pacstall`, and [`topgrade`](managers/topgrade.md) drives each privileged step through its own per-step `sudo`. `mpm` never wraps these managers in `sudo` (`brew` even refuses to run as root, and `topgrade` warns and prompts when launched as root), and most of their runs never escalate, so a stock `mpm upgrade` does not pre-authenticate for them: prompting on every run would be worse than the rare mid-run prompt it avoids.
 
-Two mechanisms cover that rare prompt instead. When the up-front probe finds the credential cache already warm, the keepalive is armed for internal escalators too, so their mid-run `sudo` spends the cache silently. And on a cold cache, a mutating call of such a manager that stays silent for 30 seconds on a terminal draws a warning, while there is still time to answer the prompt:
+Two mechanisms cover that rare prompt instead. When the up-front probe finds the credential cache already warm, the keepalive is armed for internal escalators too, so their mid-run `sudo` spends the cache silently. And on a cold cache, such a manager's mutating call runs without a spinner, so the prompt the tool prints stays on the terminal to be answered, and a call that then stays silent for 30 seconds draws a warning:
 
 ```shell-session
 $ mpm install macfuse

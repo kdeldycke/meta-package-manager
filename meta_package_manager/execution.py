@@ -54,7 +54,6 @@ import shlex
 import shutil
 import stat
 import subprocess
-import sys
 import threading
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -78,10 +77,9 @@ from extra_platforms import UNIX, current_platform, is_any_windows
 
 from .cooldown import CooldownPolicy
 from .sudo import (
-    _STALL_NOTICE_OPERATIONS,
-    _SUDO_CACHE_WARM,
     ESCALATION,
     ESCALATORS,
+    _hidden_prompt_risk,
     _is_permission_failure,
     _is_sudo_auth_failure,
     _resolved_sudo,
@@ -1074,7 +1072,7 @@ class CLIExecutor:
             return DEFAULT_TIMEOUT
         return OPERATION_TIMEOUTS.get(self._active_operation, DEFAULT_TIMEOUT)
 
-    def _make_spinner(self) -> Spinner:
+    def _make_spinner(self, *, animate: bool = True) -> Spinner:
         """Build a (not-yet-started) progress spinner for the current CLI call.
 
         The label combines the manager ID and the active operation, so a slow call
@@ -1082,6 +1080,11 @@ class CLIExecutor:
         spinner is disabled unless {attr}`progress` is set; even then it only
         animates on a TTY (see {class}`click_extra.Spinner`), so it stays silent
         when output is piped or captured.
+
+        :param animate: pass `False` to hold the line still whatever
+            {attr}`progress` says, for a call whose child may print a prompt of
+            its own onto it (see
+            {func}`~meta_package_manager.sudo._hidden_prompt_risk`).
         """
         manager_id = self.id  # type: ignore[attr-defined]
         operation = self._active_operation
@@ -1091,7 +1094,7 @@ class CLIExecutor:
         return Spinner(
             label,
             delay=SPINNER_DELAY,
-            enabled=None if self.progress else False,
+            enabled=None if self.progress and animate else False,
             timer=True,
         )
 
@@ -1218,22 +1221,19 @@ class CLIExecutor:
             # `id` is declared on the `PackageManager` subclass, not this mixin.
             manager_id: str = self.id  # type: ignore[attr-defined]
             effective_timeout = self._resolve_timeout()
-            spinner = self._make_spinner()
             # A mutating command of an internal escalator (cask, fink) may block
             # on a hidden `sudo` password prompt when prime_sudo() found no warm
             # credential cache to keep alive, or when the keepalive has since
-            # found the cache dropped (every Homebrew command resets it). Arm
-            # the stall watchdog around the spawn so the silence is flagged, on
-            # the terminal where the prompt waits, while it can still be
-            # answered.
-            watchdog = None
-            if (
-                self.internal_sudo
-                and self._active_operation in _STALL_NOTICE_OPERATIONS
-                and sys.stderr.isatty()
-                and not _SUDO_CACHE_WARM.is_set()
-            ):
-                watchdog = _StallWatchdog(manager_id)
+            # found the cache dropped (every Homebrew command resets it). Two
+            # things follow, and both must hold for the prompt to be answerable:
+            # the spinner stays still, leaving the terminal line the tool writes
+            # its prompt on, and the stall watchdog flags the silence for a
+            # prompt that never appears.
+            hidden_prompt = _hidden_prompt_risk(
+                self.internal_sudo, self._active_operation
+            )
+            spinner = self._make_spinner(animate=not hidden_prompt)
+            watchdog = _StallWatchdog(manager_id) if hidden_prompt else None
             try:
                 # run_cli() owns the spawn: it registers the child in click-extra's
                 # live-process registry (so the SIGINT handler installed by mpm's

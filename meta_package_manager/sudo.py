@@ -55,6 +55,22 @@ before any of this on that platform.
 ```
 
 ```{todo}
+Hold the *aggregate* progress indicator still while a hidden password prompt
+can appear, as {func}`_hidden_prompt_risk` already does for the per-call
+spinner. A concurrent batch mutes the per-manager spinners and draws one
+progress bar for the whole run
+({class}`~meta_package_manager.dispatch.OperationTrail`), which repaints the
+terminal line the prompt sits on: `mpm upgrade` therefore keeps erasing a
+prompt a single-manager run now leaves alone. The bar is built once, before
+any operation is stamped, so reading the predicate there needs the operation
+threaded into {func}`~meta_package_manager.dispatch.dispatch`, and it costs
+every macOS run carrying `cask` its progress bar on a cold cache. Weigh that
+against a `suspend()` on click-extra's live lines, which would pause either
+indicator around the risky call alone, and which the `SUDO_ASKPASS` helper
+below would need too.
+```
+
+```{todo}
 Escalate to the user owning a manager's tree, not only to root: every
 {attr}`~Escalator.escalate_args` reaches root alone, where `sudo --user` and
 `doas -u` could reach the owner. The one legitimate case is a multi-user nix
@@ -910,6 +926,38 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     _start_sudo_keepalive(ctx, escalator)
 
 
+def _hidden_prompt_risk(internal_sudo: bool, operation: str | None) -> bool:
+    """Whether a call may block on a `sudo` password prompt the user cannot see.
+
+    True for a mutating call of a manager that escalates internally
+    ({attr}`CLIExecutor.internal_sudo
+    <meta_package_manager.execution.CLIExecutor.internal_sudo>`), made on a
+    terminal while the credential cache is cold. Those are the conditions under
+    which the tool's own `sudo` prompts for a password nothing has primed.
+
+    {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
+    reads it once per call and spends it twice, so the two responses cannot drift
+    apart: it arms {class}`_StallWatchdog`, and it holds the call's spinner still.
+
+    The still spinner is what makes the prompt answerable. `sudo` writes its
+    prompt to `/dev/tty` with no trailing newline, so the prompt sits on the live
+    terminal line. An animated call repaints that line every
+    {data}`~meta_package_manager.execution.SPINNER_DELAY` seconds, which erases
+    the prompt within one frame. Nothing repaints it, so the user reads a notice
+    about a prompt they cannot see, and the run dies at
+    {data}`~meta_package_manager.execution.MUTATING_TIMEOUT`.
+
+    Only the per-call spinner is covered; the module todo tracks the aggregate
+    indicator a concurrent batch draws instead.
+    """
+    return (
+        internal_sudo
+        and operation in _STALL_NOTICE_OPERATIONS
+        and sys.stderr.isatty()
+        and not _SUDO_CACHE_WARM.is_set()
+    )
+
+
 class _StallWatchdog(logging.Handler):
     """Warn when a CLI call that may hide a `sudo` password prompt goes silent.
 
@@ -925,8 +973,13 @@ class _StallWatchdog(logging.Handler):
     the spawn: once {data}`_STALL_NOTICE_DELAY` seconds pass without a fresh
     output line, a daemon thread logs one `WARNING` naming the manager and
     quoting its last line, so the user can tell a hidden prompt from a slow
-    download and answer it on the terminal while it still waits. Each silence
-    episode warns at most once; a fresh line starts a new episode.
+    download. Each silence episode warns at most once; a fresh line starts a new
+    episode.
+
+    The notice only pays off because of the still spinner:
+    {func}`_hidden_prompt_risk` arms both for the same call, so a prompt the tool
+    prints stays on screen to be answered. A notice raised while an animation
+    erases that prompt names the stall but cannot end it.
 
     The watchdog doubles as the sole handler of {attr}`tee`, the logger
     {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
@@ -943,11 +996,14 @@ class _StallWatchdog(logging.Handler):
     set, so mpm could export a helper into the child environment and rebrand
     the hidden prompt itself ("[mpm] cask needs your password..."). Rejected:
     the helper reads the raw password and pipes it to `sudo` (a security
-    surface this notice avoids entirely), it needs a side channel to pause
-    the spinner that would smear its prompt, and it only covers tools
-    honoring the variable (`brew` does, `fink`'s plain `sudo` re-exec
-    does not). The scoped `sudo = true` opt-in documented in `docs/sudo.md`
-    already covers users wanting a guaranteed up-front prompt.
+    surface this notice avoids entirely), and it only covers tools honoring
+    the variable (`brew` does, `fink`'s plain `sudo` re-exec does not). The
+    scoped `sudo = true` opt-in documented in `docs/sudo.md` already covers
+    users wanting a guaranteed up-front prompt. Its third original reason, a
+    side channel to pause the spinner that would smear its prompt, is spent:
+    {func}`_hidden_prompt_risk` holds the per-call spinner still for exactly
+    these calls, and what remains is the aggregate indicator that predicate's
+    own todo tracks.
     ```
 
     ```{note}

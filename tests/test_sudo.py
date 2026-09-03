@@ -90,6 +90,7 @@ def test_default_sudo_matches_system_managers():
         "dnf5",
         "emerge",
         "eopkg",
+        "ips",
         "macports",
         "nala",
         "pacman",

@@ -96,7 +96,7 @@ class Sun_Tools(PackageManager):
     """
 
     _PKGINFO_FIELD_REGEXP = re.compile(
-        r"^\s*(?P<field>PKGINST|VERSION|STATUS):\s+(?P<value>.+?)\s*$",
+        r"^\s*(?P<field>PKGINST|NAME|VERSION|STATUS):\s+(?P<value>.+?)\s*$",
     )
 
     @property
@@ -105,8 +105,8 @@ class Sun_Tools(PackageManager):
 
         Plain `pkginfo` prints no version column (only category, package instance
         and name), so the long `-l` listing is parsed instead: each package is a
-        multi-line block carrying `PKGINST:`, `VERSION:` and `STATUS:` fields.
-        Only completely-installed packages are yielded.
+        multi-line block carrying `PKGINST:`, `NAME:`, `VERSION:` and `STATUS:`
+        fields. Only completely-installed packages are yielded.
 
         ```{code-block} shell-session
 
@@ -124,6 +124,7 @@ class Sun_Tools(PackageManager):
         output = self.run_cli("-l")
 
         package_id = None
+        name = None
         version = None
         complete = False
         for line in output.splitlines():
@@ -134,16 +135,21 @@ class Sun_Tools(PackageManager):
             if field == "PKGINST":
                 # A new block starts: flush the previous one.
                 if package_id and complete:
-                    yield self.package(id=package_id, installed_version=version)
+                    yield self.package(
+                        id=package_id, name=name, installed_version=version
+                    )
                 package_id = value
+                name = None
                 version = None
                 complete = False
+            elif field == "NAME":
+                name = value
             elif field == "VERSION":
                 version = value
             elif field == "STATUS":
                 complete = value.startswith("completely installed")
         if package_id and complete:
-            yield self.package(id=package_id, installed_version=version)
+            yield self.package(id=package_id, name=name, installed_version=version)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

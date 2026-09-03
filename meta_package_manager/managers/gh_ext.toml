@@ -14,6 +14,7 @@ homepage_url = "https://cli.github.com"
 logo = "github"
 # "linux_like" covers every Linux distribution plus WSL, matching gh's Linux binary.
 platforms = ["linux_like", "macos", "windows"]
+keywords = ["gh extension", "github cli"]
 cli_names = ["gh"]
 # The `gh extension` command surface has been stable since the gh 2.x line.
 requirement = ">=2.0.0"

@@ -65,6 +65,8 @@ class ASDF(PackageManager):
 
     homepage_url = "https://asdf-vm.com"
 
+    keywords = ("asdf-vm",)
+
     platforms = LINUX_LIKE, MACOS
 
     requirement = ">=0.16.0"

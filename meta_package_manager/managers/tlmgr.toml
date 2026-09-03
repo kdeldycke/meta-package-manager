@@ -27,6 +27,7 @@ name = "TeX Live Manager"
 homepage_url = "https://www.tug.org/texlive/"
 logo = "latex"
 platforms = ["unix", "windows"]
+keywords = ["ctan", "tex live", "texlive"]
 cli_names = ["tlmgr"]
 requirement = ">=2018"
 version_regexes = ['TeX Live.*version (?P<version>\d{4})']

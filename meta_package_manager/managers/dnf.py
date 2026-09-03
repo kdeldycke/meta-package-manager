@@ -67,6 +67,8 @@ class DNF(PackageManager):
     homepage_url = "https://github.com/rpm-software-management/dnf"
     logo = "fedora"
 
+    keywords = ("fedora", "redhat", "rhel", "rpm")
+
     platforms = UNIX_WITHOUT_MACOS
 
     default_sudo = True

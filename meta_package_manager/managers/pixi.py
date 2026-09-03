@@ -114,6 +114,8 @@ class Pixi(PackageManager):
     # https://github.com/simple-icons/simple-icons/issues/13796
     # Do not reach for their `pixiv` mark, which is an unrelated brand.
 
+    keywords = ("prefix.dev",)
+
     platforms = LINUX_LIKE, MACOS, WINDOWS
 
     requirement = ">=0.65.0"

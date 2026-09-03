@@ -64,6 +64,8 @@ class Sun_Tools(PackageManager):
     # Icons, so do not file a request, and do not vendor one by hand:
     # https://github.com/simple-icons/simple-icons/issues/11441
 
+    keywords = ("solaris", "svr4")
+
     platforms = ILLUMOS, SOLARIS
     """The SVR4 tools predate the illumos fork, so every illumos distribution
     inherits them: OpenIndiana Hipster 2026.04 ships `pkginfo`, `pkgadd` and

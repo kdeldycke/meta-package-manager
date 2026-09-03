@@ -64,6 +64,8 @@ class APT(PackageManager):
     homepage_url = "https://wiki.debian.org/AptCLI"
     logo = "debian"
 
+    keywords = ("debian", "dpkg", "ubuntu")
+
     platforms = UNIX_WITHOUT_MACOS
 
     default_sudo = True

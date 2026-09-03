@@ -71,6 +71,8 @@ class Roswell(PackageManager):
     homepage_url = "https://roswell.github.io/"
     logo = "commonlisp"
 
+    keywords = ("common lisp", "quicklisp")
+
     platforms = ALL_PLATFORMS
 
     requirement = ">=22.12.14.113"

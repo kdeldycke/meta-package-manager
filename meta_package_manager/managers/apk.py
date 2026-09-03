@@ -52,6 +52,8 @@ class APK(PackageManager):
     homepage_url = "https://gitlab.alpinelinux.org/alpine/apk-tools"
     logo = "alpinelinux"
 
+    keywords = ("alpine", "alpine linux")
+
     platforms = LINUX_LIKE
 
     default_sudo = True

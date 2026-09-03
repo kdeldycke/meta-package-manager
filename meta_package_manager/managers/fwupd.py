@@ -65,6 +65,8 @@ class FWUPD(PackageManager):
     homepage_url = "https://fwupd.org"
     logo = "linuxfoundation"
 
+    keywords = ("lvfs",)
+
     platforms = LINUX_LIKE
 
     requirement = ">=1.9.5"

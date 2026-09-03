@@ -48,6 +48,8 @@ class XBPS(PackageManager):
     homepage_url = "https://github.com/void-linux/xbps"
     logo = "voidlinux"
 
+    keywords = ("void linux",)
+
     platforms = LINUX_LIKE
 
     default_sudo = True

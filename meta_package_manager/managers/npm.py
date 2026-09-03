@@ -68,6 +68,8 @@ class NPM(PackageManager):
     homepage_url = "https://www.npmjs.com"
     logo = "npm"
 
+    keywords = ("node.js", "nodejs")
+
     brewfile_entry_type = "npm"
 
     platforms = ALL_PLATFORMS

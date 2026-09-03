@@ -76,6 +76,8 @@ class Gem(PackageManager):
     homepage_url = "https://rubygems.org"
     logo = "rubygems"
 
+    keywords = ("ruby",)
+
     platforms = ALL_PLATFORMS
 
     # Default to the version shipped with the latest maintained macOS version:

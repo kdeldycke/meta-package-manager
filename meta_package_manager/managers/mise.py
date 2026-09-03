@@ -67,6 +67,8 @@ class Mise(PackageManager):
     # before drawing anything:
     # https://github.com/simple-icons/simple-icons/issues/14747
 
+    keywords = ("mise-en-place",)
+
     platforms = ALL_PLATFORMS
 
     requirement = ">=2025.5.10"

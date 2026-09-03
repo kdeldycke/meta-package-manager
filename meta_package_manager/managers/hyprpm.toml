@@ -71,6 +71,7 @@
 name = "Hyprland hyprpm"
 homepage_url = "https://github.com/hyprwm/Hyprland"
 platforms = ["linux_like"]
+keywords = ["hyprland"]
 cli_names = ["hyprpm"]
 requirement = ">=0.56.0"
 # The release series this parser was checked against. hyprpm carries the

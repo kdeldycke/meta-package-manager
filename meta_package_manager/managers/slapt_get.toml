@@ -21,6 +21,7 @@ name = "slapt-get"
 homepage_url = "https://software.jaos.org/"
 logo = "slackware"
 platforms = ["slackware"]
+keywords = ["slackware"]
 cli_names = ["slapt-get"]
 default_sudo = true
 # First line of `slapt-get --version` is "slapt-get version 0.11.12", followed by the

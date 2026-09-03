@@ -54,6 +54,8 @@ class APM(PackageManager):
 
     homepage_url = "https://atom.io/packages"
 
+    keywords = ("atom",)
+
     platforms = BSD, LINUX_LIKE, MACOS, WINDOWS
 
     requirement = ">=1.0.0"

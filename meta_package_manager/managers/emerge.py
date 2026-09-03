@@ -64,6 +64,8 @@ class Emerge(PackageManager):
     homepage_url = "https://wiki.gentoo.org/wiki/Portage#emerge"
     logo = "gentoo"
 
+    keywords = ("gentoo", "portage")
+
     platforms = UNIX_WITHOUT_MACOS
 
     default_sudo = True

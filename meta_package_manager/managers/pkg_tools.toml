@@ -24,6 +24,7 @@ name = "OpenBSD pkg tools"
 homepage_url = "https://man.openbsd.org/pkg_add"
 logo = "openbsd"
 platforms = ["openbsd"]
+keywords = ["openbsd"]
 cli_names = ["pkg_info"]
 # The pkg_* tools live in /usr/sbin, not always on a regular user's PATH.
 cli_search_path = ["/usr/sbin"]

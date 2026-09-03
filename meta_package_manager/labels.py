@@ -352,83 +352,6 @@ every issue and PR.
 """
 
 
-MANAGER_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
-    "apk": ("alpine", "alpine linux"),
-    "apm": ("atom",),
-    "apt-cyg": ("cygwin",),
-    "asdf-based": ("asdf-vm", "mise-en-place"),
-    "cargo": ("crate", "rust"),
-    "cave": ("exherbo", "paludis"),
-    "choco": ("chocolatey",),
-    "chromebrew": ("chrome os", "chromeos"),
-    "composer": ("php",),
-    "conda-based": ("anaconda", "conda-forge", "miniconda", "prefix.dev"),
-    "cpan": ("perl",),
-    "dotnet": ("nuget",),
-    "dpkg-based": ("debian", "dpkg", "ubuntu"),
-    "emerge": ("gentoo", "portage"),
-    "eopkg": ("solus",),
-    "flatpak": ("flathub",),
-    "fwupd": ("lvfs",),
-    "gem": ("ruby",),
-    "getnf": ("nerd font", "nerd fonts"),
-    "gh-ext": ("gh extension", "github cli"),
-    "guix": ("gnu guix",),
-    "homebrew": ("homebrew",),
-    "hyprpm": ("hyprland",),
-    "mas": ("app store", "app-store"),
-    "nix": ("nixos", "nixpkgs"),
-    "npm-based": ("node.js", "nodejs"),
-    "pacman-based": ("arch",),
-    "pypi-based": ("pypi",),
-    "pkcon": ("packagekit",),
-    "pkg-based": ("freebsd", "freebsd ports"),
-    "pkg-tools": ("openbsd",),
-    "pkgin": ("netbsd", "pkgsrc"),
-    "pwsh-gallery": (
-        "powershell",
-        "powershell gallery",
-        "psgallery",
-        "psresourceget",
-    ),
-    "roswell": ("common lisp", "quicklisp"),
-    "rpm-based": ("fedora", "mageia", "opensuse", "redhat", "rhel", "rpm", "suse"),
-    "sdkman": ("sdk man",),
-    "slapt-get": ("slackware",),
-    "snap": ("snapcraft",),
-    "sorcery": ("source mage",),
-    "steamcmd": ("valve",),
-    "sun-tools": ("solaris", "svr4"),
-    "swupd": ("clear linux", "clearlinux"),
-    "tazpkg": ("slitaz",),
-    "tlmgr": ("ctan", "tex live", "texlive"),
-    "vscode-based": ("visual studio", "visual studio code"),
-    "xbps": ("void linux",),
-}
-"""Curated ecosystem keywords feeding each manager label's content rule.
-
-Keyed by the manager or group ID the label derives from. These are the *only*
-content patterns a manager label gets: the bare manager IDs are deliberately left
-out (see {func}`generate_content_rules`). Add only terms that are both
-unambiguously about this manager and absent from anything mpm prints itself: the
-`✓ <id>` trail, the `<id>: <count>` summary line, the `managers` table (which
-lists every manager's ID and CLI binary) and the `$`-prompt command disclosure.
-That rules out manager IDs and CLI names (`fwupdmgr`, `pwsh`), leaving the distro,
-language and brand names a human types in an issue. A manager with no such term
-gets no content rule and is labelled by hand.
-
-Skip anything that doubles as a common word even once word-anchored (`port`,
-`flat`, `mint`, `void`): dropping the ID removed the implicit AND-guard those
-leaned on, so on their own they match unrelated prose.
-"""
-
-# Check synonym keys against the label registry: a key matching no manager label is
-# a leftover from a renamed group or a removed manager.
-assert set(MANAGER_CONTENT_KEYWORDS).issubset(
-    set(all_manager_label_ids) | set(MANAGER_LABEL_GROUPS)
-)
-
-
 PLATFORM_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "BSD": ("bsd",),
     "Linux": ("linux",),
@@ -477,13 +400,27 @@ def generate_content_rules() -> TLabelRules:
     r"""Build every content rule: the static ones plus one per manager or platform
     label that has curated keywords.
 
-    Manager labels are driven solely by {data}`MANAGER_CONTENT_KEYWORDS`, never by
-    the bare manager IDs or CLI names. mpm enumerates every installed manager in its
-    own output (the `✓ <id>` trail, the `<id>: <count>` summary line, the `managers`
+    Manager labels are driven solely by each manager's own
+    {attr}`~meta_package_manager.manager.PackageManager.keywords`, never by the bare
+    manager IDs or CLI names. mpm enumerates every installed manager in its own
+    output (the `✓ <id>` trail, the `<id>: <count>` summary line, the `managers`
     table), so a pasted trace would otherwise make every manager on the user's
     system match at once: a `cpan`-only report came back tagged `mise`, `pip` and
     `uv` merely because they sat in the trace. The keywords are the distro, language
     and brand names a human types, which mpm never prints.
+
+    A label groups several managers, so its rule is the union of its members'
+    keywords: `📦 manager: rpm-based` collects `fedora` from `dnf`, `mageia` from
+    `urpmi` and `opensuse` from `zypper`. Reading them off the managers is what
+    keeps a renamed or regrouped manager from stranding its terms, which a table
+    keyed by label silently did.
+
+    ```{caution}
+    Every keyword becomes a label rule, so the precision bar of this module governs
+    what a manager may declare: a term mpm prints, or one naming an ecosystem rather
+    than a single manager, belongs in `KEYWORDS_EXTRAS` instead, which only reaches
+    the PyPI keywords.
+    ```
 
     Keywords are emitted raw, one pattern each, because repomatic's `apply-labels`
     applies a label as soon as *any* one of its patterns matches, and compiles a
@@ -502,12 +439,15 @@ def generate_content_rules() -> TLabelRules:
         (label_name, _sorted_keywords(keywords))
         for label_name, keywords in CONTENT_RULES_STATIC
     ]
-    for label_name in _label_members():
-        key = label_name.removeprefix(MANAGER_PREFIX)
-        keywords = MANAGER_CONTENT_KEYWORDS.get(key, ())
+    for label_name, manager_ids in _label_members().items():
+        keywords = {
+            keyword
+            for manager_id in manager_ids
+            for keyword in pool[manager_id].keywords
+        }
         if not keywords:
             continue
-        rules.append((label_name, _sorted_keywords(keywords)))
+        rules.append((label_name, _sorted_keywords(tuple(keywords))))
     for platform_name, platform_keywords in PLATFORM_CONTENT_KEYWORDS.items():
         rules.append((
             f"{PLATFORM_PREFIX}{platform_name}",

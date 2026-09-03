@@ -694,23 +694,33 @@ def test_reads_inside_mutating_methods_survive_plan_mode():
     )
 
 
+def declared_keywords(manager) -> tuple[str, ...]:
+    """Keywords the manager's own class body sets, ignoring anything inherited.
+
+    A subclass reuses its parent's implementation, which is not a second claim on
+    the parent's names: `apt-mint` inherits `debian` from `apt`, and every AUR
+    helper inherits `arch` from `pacman`. Generation reads the *inherited* value,
+    so a label still collects its members' terms through a set union, but
+    ownership is only what a class declares for itself.
+    """
+    return type(manager).__dict__.get("keywords", ())
+
+
 def test_manager_keywords_have_one_owner():
-    """No two managers claim the same keyword alias.
+    """No two managers declare the same keyword alias.
 
     A keyword names exactly one manager, so a term spanning several of them (an
-    ecosystem name like `homebrew`, answering for both `brew` and `cask`) belongs
-    in the globally curated `KEYWORDS_EXTRAS` instead, which owes nothing to a
-    single class. Without this, two managers could disagree about who a name
-    refers to and both would ship it.
+    ecosystem name like `zsh`, answering for five plugin managers) belongs in the
+    globally curated `KEYWORDS_EXTRAS` instead, which owes nothing to a single
+    class. Without this, two managers could disagree about who a name refers to
+    and both would ship it.
     """
     owners: dict[str, list[str]] = {}
     for manager in pool.values():
-        for keyword in manager.keywords:
+        for keyword in declared_keywords(manager):
             owners.setdefault(keyword.casefold(), []).append(manager.id)
 
-    shared = {
-        keyword: sorted(ids) for keyword, ids in owners.items() if len(ids) > 1
-    }
+    shared = {keyword: sorted(ids) for keyword, ids in owners.items() if len(ids) > 1}
     assert not shared, f"Keywords claimed by more than one manager: {shared}"
 
 
@@ -725,7 +735,7 @@ def test_manager_keywords_are_not_manager_ids():
 
     offenders = {}
     for manager in pool.values():
-        clashing = sorted(k for k in manager.keywords if k.casefold() in ids)
+        clashing = sorted(k for k in declared_keywords(manager) if k.casefold() in ids)
         if clashing:
             offenders[manager.id] = clashing
 
@@ -742,7 +752,7 @@ def test_manager_keywords_are_normalized():
     offenders = {}
     for manager in pool.values():
         malformed = sorted(
-            k for k in manager.keywords if k != k.strip().casefold() or not k
+            k for k in declared_keywords(manager) if k != k.strip().casefold() or not k
         )
         if malformed:
             offenders[manager.id] = malformed

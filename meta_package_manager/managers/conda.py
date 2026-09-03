@@ -64,6 +64,8 @@ class Conda(PackageManager):
     homepage_url = "https://conda.org"
     logo = "anaconda"
 
+    keywords = ("anaconda", "conda-forge", "miniconda")
+
     platforms = LINUX_LIKE, MACOS, WINDOWS
 
     requirement = ">=4.6.0"

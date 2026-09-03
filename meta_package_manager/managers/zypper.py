@@ -90,6 +90,8 @@ class Zypper(PackageManager):
     homepage_url = "https://en.opensuse.org/Portal:Zypper"
     logo = "opensuse"
 
+    keywords = ("opensuse", "suse")
+
     platforms = UNIX_WITHOUT_MACOS
 
     default_sudo = True

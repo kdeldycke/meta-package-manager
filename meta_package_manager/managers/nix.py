@@ -47,6 +47,8 @@ class Nix(PackageManager):
     homepage_url = "https://nixos.org"
     logo = "nixos"
 
+    keywords = ("nixos", "nixpkgs")
+
     platforms = LINUX_LIKE, MACOS
 
     requirement = ">=2.0.0"

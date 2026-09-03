@@ -212,6 +212,7 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "brewfile_skip_warning": _to_str,
     "default_sudo": _to_bool,
     "internal_sudo": _to_bool,
+    "keywords": _to_str_tuple,
     "maintenance_note": _to_str,
     "unmaintained_message": _to_str,
     "version_cli": _to_str,

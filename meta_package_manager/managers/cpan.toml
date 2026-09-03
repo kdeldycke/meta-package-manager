@@ -45,6 +45,7 @@ name = "Perl CPAN"
 homepage_url = "https://www.cpan.org"
 logo = "perl"
 platforms = ["all_platforms"]
+keywords = ["perl"]
 requirement = ">=1.64"
 # PERL_MM_USE_DEFAULT suppresses the interactive configuration cpan may launch on
 # first run.

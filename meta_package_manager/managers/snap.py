@@ -62,6 +62,8 @@ class Snap(PackageManager):
     homepage_url = "https://snapcraft.io"
     logo = "snapcraft"
 
+    keywords = ("snapcraft",)
+
     platforms = UNIX_WITHOUT_MACOS
 
     default_sudo = True

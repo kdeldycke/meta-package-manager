@@ -936,6 +936,8 @@ class Brew(Homebrew):
     homepage_url = "https://brew.sh"
     logo = "homebrew"
 
+    keywords = ("homebrew",)
+
     brewfile_entry_type = "brew"
 
     cli_names = ("brew",)

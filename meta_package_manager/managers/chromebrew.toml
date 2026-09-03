@@ -22,6 +22,7 @@ name = "Chromebrew"
 homepage_url = "https://chromebrew.github.io"
 logo = "googlechrome"
 platforms = ["chromeos"]
+keywords = ["chrome os", "chromeos"]
 cli_names = ["crew"]
 # Chromebrew is a rolling release with no meaningful floor: the whole CLI surface used
 # here (list/search/install/remove/upgrade/update, --no-color, the bare `crew version`)

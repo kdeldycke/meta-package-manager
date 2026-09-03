@@ -25,6 +25,7 @@ name = "Pkgin"
 homepage_url = "https://pkgin.net"
 logo = "netbsd"
 platforms = ["netbsd"]
+keywords = ["netbsd", "pkgsrc"]
 cli_names = ["pkgin"]
 default_sudo = true
 # Lowercase -v prints the version (uppercase -V is verbose): "pkgin 26.4.0 (using

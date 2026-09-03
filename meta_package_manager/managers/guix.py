@@ -58,6 +58,8 @@ class Guix(PackageManager):
     homepage_url = "https://guix.gnu.org"
     logo = "gnu"
 
+    keywords = ("gnu guix",)
+
     platforms = LINUX_LIKE
 
     # Guix is a rolling-release distribution: the only "version" it

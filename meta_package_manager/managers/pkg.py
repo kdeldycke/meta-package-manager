@@ -88,6 +88,8 @@ class PKG(PackageManager):
     homepage_url = "https://github.com/freebsd/pkg"
     logo = "freebsd"
 
+    keywords = ("freebsd",)
+
     platforms = FREEBSD
 
     default_sudo = True
@@ -505,6 +507,8 @@ class Ports(PackageManager):
 
     homepage_url = "https://www.freebsd.org/ports/"
     logo = "freebsd"
+
+    keywords = ("freebsd ports",)
 
     platforms = FREEBSD
 

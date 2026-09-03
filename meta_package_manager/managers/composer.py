@@ -47,6 +47,8 @@ class Composer(PackageManager):
     homepage_url = "https://getcomposer.org"
     logo = "composer"
 
+    keywords = ("php",)
+
     platforms = ALL_PLATFORMS
 
     requirement = ">=1.4.0"

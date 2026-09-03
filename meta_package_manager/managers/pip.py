@@ -130,6 +130,8 @@ class Pip(PackageManager):
     homepage_url = "https://pip.pypa.io"
     logo = "pypi"
 
+    keywords = ("pypi",)
+
     platforms = ALL_PLATFORMS
 
     requirement = ">=26.1.0"

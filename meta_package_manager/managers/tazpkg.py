@@ -64,6 +64,8 @@ class Tazpkg(PackageManager):
 
     homepage_url = "https://slitaz.org"
 
+    keywords = ("slitaz",)
+
     platforms = SLITAZ
 
     default_sudo = True

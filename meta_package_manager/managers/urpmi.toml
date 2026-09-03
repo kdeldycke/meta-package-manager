@@ -24,6 +24,7 @@
 name = "urpmi"
 homepage_url = "https://wiki.mageia.org/en/URPMI"
 platforms = ["mageia", "mandriva"]
+keywords = ["mageia"]
 cli_names = ["urpmi"]
 extra_env = { LC_ALL = "C" }
 default_sudo = true

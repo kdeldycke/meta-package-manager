@@ -95,6 +95,8 @@ class Pacman(PackageManager):
     that Arch's logo would misattribute.
     """
 
+    keywords = ("arch",)
+
     platforms: frozenset[Platform] | Group | Platform | Iterable[Platform | Group] = (
         UNIX_WITHOUT_MACOS
     )

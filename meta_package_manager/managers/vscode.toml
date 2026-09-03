@@ -20,6 +20,7 @@ homepage_url = "https://code.visualstudio.com"
 # do not file one, and do not vendor the mark by hand:
 # https://github.com/simple-icons/simple-icons/issues/11236
 platforms = ["all_platforms"]
+keywords = ["visual studio", "visual studio code"]
 cli_names = ["code"]
 requirement = ">=1.60.0"
 # Brewfile's DSL has a first-class `vscode` entry type, so `mpm dump --brewfile`

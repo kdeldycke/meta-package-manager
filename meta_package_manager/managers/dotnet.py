@@ -85,6 +85,8 @@ class DotNet(PackageManager):
     homepage_url = "https://learn.microsoft.com/dotnet/core/tools/global-tools"
     logo = "dotnet"
 
+    keywords = ("nuget",)
+
     platforms = LINUX_LIKE, MACOS, WINDOWS
 
     requirement = ">=8.0.400"

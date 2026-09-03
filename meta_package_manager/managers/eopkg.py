@@ -47,6 +47,8 @@ class EOPKG(PackageManager):
     homepage_url = "https://github.com/getsolus/eopkg/"
     logo = "solus"
 
+    keywords = ("solus",)
+
     platforms = LINUX_LIKE
 
     default_sudo = True

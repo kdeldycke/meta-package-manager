@@ -62,6 +62,7 @@
 name = "getnf"
 homepage_url = "https://github.com/getnf/getnf"
 platforms = ["linux_like", "macos"]
+keywords = ["nerd font", "nerd fonts"]
 cli_names = ["getnf"]
 # getnf colors through tput, which ignores whether stdout is a terminal.
 extra_env = { TERM = "dumb" }

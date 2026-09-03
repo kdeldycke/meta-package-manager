@@ -92,6 +92,8 @@ class PWSH_Gallery(PackageManager):
     # is not one of those four sources, so do not count on it:
     # https://github.com/simple-icons/simple-icons/issues/14846
 
+    keywords = ("powershell", "powershell gallery", "psgallery", "psresourceget")
+
     platforms = LINUX_LIKE, MACOS, WINDOWS
 
     requirement = ">=7.4.0"

@@ -19,6 +19,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import sys
 from collections import Counter
 from itertools import product
 from typing import ClassVar, cast
@@ -108,6 +109,37 @@ def test_search_mpm_stops_at_home(monkeypatch, tmp_path):
 
     assert uv_candidate(project) in candidates
     assert uv_candidate(tmp_path) not in candidates
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 11),
+    reason="python -P was added in 3.11",
+)
+def test_mpm_cli_ignores_the_spawn_directory(tmp_path):
+    """A menu action imports the installed `mpm`, wherever it is spawned from.
+
+    `-m` prepends the working directory to `sys.path`, so an action started
+    from a source checkout used to import that tree with the dependencies the
+    installed version pinned.
+    """
+    decoy = tmp_path / "meta_package_manager"
+    decoy.mkdir()
+    (decoy / "__init__.py").write_text(
+        'raise SystemExit("decoy imported")',
+        encoding="UTF-8",
+    )
+
+    process = subprocess.run(
+        (*BarPluginRenderer().mpm_cli, "--version"),
+        capture_output=True,
+        cwd=tmp_path,
+        encoding="UTF-8",
+        check=False,
+    )
+
+    assert "decoy imported" not in process.stderr
+    assert process.returncode == 0
+    assert "mpm, version" in process.stdout
 
 
 def _pin_plugin_env(

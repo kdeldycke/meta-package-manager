@@ -178,6 +178,15 @@ class BarPluginRenderer(MPMPlugin):
         started. A Nuitka-compiled `mpm` is its own interpreter, so it is invoked
         directly instead of through the module.
 
+        `-P` keeps the directory the action is spawned from out of `sys.path`,
+        where `-m` prepends it. Without it, an action started from a source
+        checkout imports that tree instead of the installed package, and pairs
+        it with the dependencies the installed version pinned. A `7.6.1`
+        interpreter reading an `8.0.0.dev0` tree died on
+        `from click_extra.table import AUTO_WIDTH`. The flag needs Python
+        `3.11`, and the interpreter rendering the menu is the one re-entered, so
+        its own version decides.
+
         ```{note}
         The candidates
         {meth}`meta_package_manager.bar_plugin.MPMPlugin.search_mpm` produces are
@@ -188,7 +197,8 @@ class BarPluginRenderer(MPMPlugin):
         """
         if "__compiled__" in globals():
             return (sys.executable,)
-        return (sys.executable, "-m", "meta_package_manager")
+        safe_path = ("-P",) if sys.version_info >= (3, 11) else ()
+        return (sys.executable, *safe_path, "-m", "meta_package_manager")
 
     @staticmethod
     def render_cli(cmd_args: tuple[str | Path, ...]) -> str:

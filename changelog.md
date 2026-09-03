@@ -220,6 +220,7 @@
 - [gnome-shell] Restart the GNOME session before enabling the extension, in the documented installation steps. `gnome-extensions enable` asks the running shell rather than the disk, so it answered `Extension "mpm@kdeldycke.github.io" does not exist` when run right after a successful install.
 - [mpm] Point the documentation's links to repomatic at `repomatic.net`, and drop the retired `CLOUDFLARE_ACCOUNT_ID` secret from the infrastructure page.
 - [mpm] Give every module its own API reference page, in place of the three pages that stacked a whole package each. The `managers` page alone carried 64 modules.
+- [bar-plugin] Stop a menu action from importing a source checkout it happens to be spawned from, instead of the installed `mpm`.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

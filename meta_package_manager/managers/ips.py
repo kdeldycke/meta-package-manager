@@ -55,10 +55,17 @@ class IPS(PackageManager):
     ```{todo}
     `outdated` is not implemented. The operation needs a sample naming both the
     installed and the available version, and the only illumos host available
-    reported `no packages have newer versions available`, so no such output
-    could be captured. Inventing one is not an option: a fixture has to parse
-    through this manager's own parser and has to be real. Implement it against
-    a host carrying a pending update.
+    reported `no packages have newer versions available`.
+
+    That state cannot be manufactured on a consistent image, so do not spend
+    time trying: installing a superseded build to force one is refused with
+    ``did not match any allowable packages``, the release incorporations
+    constraining an image to one allowable version per package. Inventing a
+    fixture is not an option either, a sample having to parse through this
+    manager's own parser and having to be real.
+
+    Capture it on a host whose image has fallen behind its publisher, which is
+    the only state that emits the output.
     ```
     """
 

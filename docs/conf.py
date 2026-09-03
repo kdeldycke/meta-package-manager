@@ -5,6 +5,9 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 import tomllib  # type: ignore[import-not-found]  # stdlib >=3.11; docs require >=3.12.
+from docutils import nodes
+
+from meta_package_manager._docs import changelog_releases
 
 project_path = Path(__file__).parent.parent.resolve()
 
@@ -425,6 +428,34 @@ click_extra_manpages = [
 manpages_url = "/man/{page}.{section}.html"
 
 
+def mpm_release_role(name, rawtext, text, lineno, inliner, options=None, content=None):
+    """Render a version as a link to its changelog release, followed by its date.
+
+    `{mpm-release}`8.0.0`` becomes the linked code span `8.0.0` trailed by
+    `(2026-09-10)`, or by `(unreleased)` while that release is in preparation.
+    The same shape `scope_changelog()` gives each release it lists, so a version
+    reads the same wherever the documentation states one.
+
+    The target is the comparison URL of the release heading, not the heading
+    itself: a changelog heading holds no letter, so `docutils.nodes.make_id`
+    reduces it to the empty string and it has no anchor to link to.
+
+    Both halves are resolved at build time. A date written into a page starts
+    ageing immediately, and the release in preparation has none to write yet.
+
+    Used by the verdict sections of `unsupported.md`, one per declined tool.
+    """
+    release = changelog_releases().get(text)
+    if release is None:
+        message = inliner.reporter.error(
+            f"{text!r} names no release of changelog.md", line=lineno
+        )
+        return [inliner.problematic(rawtext, rawtext, message)], [message]
+    release_date, url = release
+    reference = nodes.reference("", "", nodes.literal(text=text), refuri=url)
+    return [reference, nodes.Text(f" ({release_date})")], []
+
+
 def prune_build_artifacts(app, exception):
     """Delete what Sphinx leaves in the output tree that is not content.
 
@@ -455,4 +486,5 @@ def prune_build_artifacts(app, exception):
 
 
 def setup(app):
+    app.add_role("mpm-release", mpm_release_role)
     app.connect("build-finished", prune_build_artifacts)

@@ -30,7 +30,7 @@ import pytest
 from extra_platforms import Group, extract_members
 from yaml import Loader, load, safe_load
 
-from meta_package_manager import _docs, logo
+from meta_package_manager import __version__, _docs, logo
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import mpm
 from meta_package_manager.dispatch import (
@@ -1991,7 +1991,7 @@ def test_unsupported_page_matches_benchmark():
     sections = _docs.unsupported_sections()
     assert sections, "no verdict sections found in docs/unsupported.md"
 
-    anchors = [anchor for anchor, _glyphs, _ids in sections]
+    anchors = [section.anchor for section in sections]
     assert anchors == sorted(anchors), (
         "unsupported.md sections must be sorted by title, which sorts their "
         f"anchors: got {anchors}"
@@ -2001,7 +2001,7 @@ def test_unsupported_page_matches_benchmark():
         "them is unreachable"
     )
 
-    ids = [mid for _anchor, _glyphs, section_ids in sections for mid in section_ids]
+    ids = [mid for section in sections for mid in section.manager_ids]
     assert len(ids) == len(set(ids)), "unsupported.md covers a manager twice"
     assert set(ids) == set(statuses), (
         "docs/unsupported.md and benchmark.toml's unsupported key disagree; "
@@ -2009,19 +2009,19 @@ def test_unsupported_page_matches_benchmark():
         f"benchmark-only: {sorted(set(statuses) - set(ids))}"
     )
 
-    for anchor, glyphs, section_ids in sections:
-        assert section_ids, (
-            f"unsupported.md section {anchor!r} names no manager: a family "
-            "title must list its members in the paragraph opening the section"
+    for section in sections:
+        assert section.manager_ids, (
+            f"unsupported.md section {section.anchor!r} names no manager: a "
+            "family title must list its members in the paragraph opening it"
         )
-        for mid in section_ids:
+        for mid in section.manager_ids:
             expected = _docs.unsupported_status(
                 mid, statuses[mid], competitors.get(mid, [])
             )
-            assert glyphs == expected, (
-                f"unsupported.md section {anchor!r} shows {glyphs!r} but "
-                f"benchmark.toml declares {mid!r} {statuses[mid]!r}, which "
-                f"renders {expected!r}"
+            assert section.glyphs == expected, (
+                f"unsupported.md section {section.anchor!r} shows "
+                f"{section.glyphs!r} but benchmark.toml declares {mid!r} "
+                f"{statuses[mid]!r}, which renders {expected!r}"
             )
 
     # ⚠️ marks a manager that is wrapped but unmaintained: it has no business
@@ -2030,6 +2030,100 @@ def test_unsupported_page_matches_benchmark():
     assert "⚠️" not in page, (
         "⚠️ is reserved for wrapped-but-unmaintained managers; "
         "docs/unsupported.md must use ☠️ or ❌"
+    )
+
+
+def test_unsupported_verdicts_cite_a_release():
+    """Check every verdict of `docs/unsupported.md` closes on the release that
+    published it, and that the changelog declares that release.
+
+    The page invites a reassessment of any verdict it carries, and the release
+    is what dates one: without it a reader cannot tell a decision taken two
+    years ago from one taken last week. The stamp is hand-written, nothing else
+    on the page holding that fact, so this is what stops a section copied from
+    its neighbour claiming a release it was never published in.
+
+    The version is all the page states. The `mpm-release` role resolves it to a
+    link and a date at build time, so an unresolvable version renders as a
+    docutils error on a page nobody rebuilt to look at: the same index the role
+    reads is checked here against a fresh count of the changelog headings.
+
+    Coupling a stamp to the changelog *bullet* announcing the decline is not
+    available, and never was. A batch of declines ships as one `[mpm]` entry
+    naming no ID (*Record 47 more unsupported managers, covering ...*), and the
+    entry introducing the page named none of the ten tools it carried. The
+    release is what the page and the changelog do share, so it is what gets
+    checked.
+    """
+    changelog = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="UTF-8")
+    heading = re.compile(r"^## \[`([^`]+)` \(([^)]+)\)\]", re.MULTILINE)
+    # A development section is titled for the version it will ship as, so its
+    # `.devN` suffix comes off: a verdict published today stamps `8.0.0`, and
+    # the page announces it a release ahead of the tag as the changelog does.
+    dates = {
+        re.sub(r"\.dev\d+$", "", version): date
+        for version, date in heading.findall(changelog)
+    }
+    assert dates, "no release heading found in changelog.md"
+    upcoming = re.sub(r"\.dev\d+$", "", __version__)
+    assert upcoming in dates, f"changelog.md declares no {upcoming!r} section"
+
+    # Recounted from the file rather than read off the production index, so a
+    # parser dropping a release cannot hide behind the check it feeds.
+    index = _docs.changelog_releases()
+    assert {version: date for version, (date, _url) in index.items()} == dates
+
+    # No verdict can predate the release that first published the page itself.
+    # The changelog lists its releases newest first, so the ones that could
+    # have carried a verdict are the slice down to that release.
+    oldest = "7.6.0"
+    assert oldest in dates, f"changelog.md declares no {oldest!r} release"
+    published = tuple(dates)[: tuple(dates).index(oldest) + 1]
+
+    sections = _docs.unsupported_sections()
+    assert sections
+    for section in sections:
+        assert section.release, (
+            f"unsupported.md section {section.anchor!r} carries no "
+            "``Declined in {mpm-release}`<version>`.`` line: every verdict "
+            f"names the release that published it, {upcoming!r} for a new one"
+        )
+        assert section.release in dates, (
+            f"unsupported.md section {section.anchor!r} is declined in "
+            f"{section.release!r}, a version no changelog.md release heading "
+            f"declares, so the `mpm-release` role cannot render it; the "
+            f"release in development is {upcoming!r}"
+        )
+        assert section.release in published, (
+            f"unsupported.md section {section.anchor!r} is declined in "
+            f"{section.release!r} ({dates[section.release]}), which predates "
+            f"{oldest!r}, the release that first published the page"
+        )
+
+    # One stamp per section, and each closes its own: the line is page
+    # structure rather than prose, so it reads the same everywhere.
+    page = PROJECT_ROOT.joinpath("docs", "unsupported.md").read_text(encoding="UTF-8")
+    stamps = tuple(_docs.DECLINE_STAMP.finditer(page))
+    assert len(stamps) == len(sections), (
+        f"docs/unsupported.md carries {len(stamps)} decline stamps for "
+        f"{len(sections)} verdict sections: a section has two, or one sits "
+        "under a heading carrying no verdict"
+    )
+    for stamp in stamps:
+        trailing = page[stamp.end() :].lstrip("\n")
+        follower = trailing.splitlines()[0] if trailing else ""
+        assert trailing.startswith("## ") or not trailing, (
+            f"the {stamp[0]!r} line must close its section, but "
+            f"{follower!r} follows it"
+        )
+
+    # An unregistered role renders as its own literal braces on the published
+    # page. Only a build exercises the role itself; this is what catches it
+    # going missing from the configuration.
+    conf = PROJECT_ROOT.joinpath("docs", "conf.py").read_text(encoding="UTF-8")
+    assert 'app.add_role("mpm-release"' in conf, (
+        "docs/conf.py must register the `mpm-release` role the decline stamps "
+        "of docs/unsupported.md are written with"
     )
 
 

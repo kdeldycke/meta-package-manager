@@ -255,11 +255,53 @@ def _heading_slug(title: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", ascii_only.lower()).strip("-")
 
 
-def unsupported_sections() -> tuple[tuple[str, str, tuple[str, ...]], ...]:
-    """Parse `docs/unsupported.md` into its verdict sections, in page order.
+DECLINE_STAMP = re.compile(
+    r"^Declined in \{mpm-release\}`(?P<version>[^`]+)`\.$",
+    re.MULTILINE,
+)
+"""Line closing every verdict section of `docs/unsupported.md`.
 
-    Returns one `(anchor, glyphs, manager_ids)` triple per section, where
-    `glyphs` is the {func}`unsupported_status` string the title ends with.
+Names the release that first published the verdict, which is what tells a reader
+how old the reading behind it is. The page invites a reassessment, and a decision
+taken two years ago is a better candidate for one than a decision taken last
+week.
+
+The version is all the page states. The link and the release date beside it are
+rendered by the `mpm-release` role of `docs/conf.py`, off
+{func}`changelog_releases`, and never written down. A checked-in date would age
+from the moment it was typed, and every verdict of the release in preparation
+would have to be rewritten the day that release ships, in the commit that
+freezes it.
+
+Written by hand, where the glyphs beside it are derived from the benchmark data
+and the anchor from the title. Nothing holds this fact already: a declined tool
+has no manager page, and the changelog announces a batch of declines in one
+`[mpm]` bullet naming no ID at all. It cannot drift either, a shipped release
+being immutable, where the glyphs move with their upstream.
+`test_unsupported_verdicts_cite_a_release` holds each version to a release the
+changelog declares, which is what the role needs to resolve it.
+"""
+
+
+class UnsupportedSection(NamedTuple):
+    """One verdict section of `docs/unsupported.md`."""
+
+    anchor: str
+    """Slug the title renders to, and the target every glyph citing it links to."""
+
+    glyphs: str
+    """Verdict the title ends with, as {func}`unsupported_status` renders it."""
+
+    manager_ids: tuple[str, ...]
+    """Tools the verdict covers, in the order the section names them."""
+
+    release: str
+    """Version the {data}`DECLINE_STAMP` names, or an empty string for a section
+    carrying no stamp."""
+
+
+def unsupported_sections() -> tuple[UnsupportedSection, ...]:
+    """Parse `docs/unsupported.md` into its verdict sections, in page order.
 
     A section covers the managers whose IDs appear as linked code spans in its
     own title; where the title names a family instead of a tool, they are the
@@ -267,6 +309,11 @@ def unsupported_sections() -> tuple[tuple[str, str, tuple[str, ...]], ...]:
     what lets a verdict shared word for word be written once: fifteen JetBrains
     IDEs answer to a single section rather than fifteen copies of one
     paragraph.
+
+    A family shares its {data}`DECLINE_STAMP` too, since its members were
+    declined together. A tool joining one later is declined into a verdict that
+    already stood, so it earns its own section unless the family's release is
+    still true of it.
 
     Only glyph-bearing headings are verdicts. A heading without them is plain
     page structure, like the project-scoped ecosystems closing the page, and is
@@ -286,7 +333,15 @@ def unsupported_sections() -> tuple[tuple[str, str, tuple[str, ...]], ...]:
         ids = re.findall(r"\[`([^`]+)`\]", title)
         if not ids:
             ids = re.findall(r"\[`([^`]+)`\]", body.strip().partition("\n")[0])
-        sections.append((_heading_slug(f"{title} {glyphs}"), glyphs, tuple(ids)))
+        stamp = DECLINE_STAMP.search(body)
+        sections.append(
+            UnsupportedSection(
+                _heading_slug(f"{title} {glyphs}"),
+                glyphs,
+                tuple(ids),
+                stamp["version"] if stamp else "",
+            ),
+        )
     return tuple(sections)
 
 
@@ -298,7 +353,9 @@ def unsupported_anchors() -> dict[str, str]:
     Several IDs share one anchor wherever a family section covers them.
     """
     return {
-        mid: anchor for anchor, _glyphs, ids in unsupported_sections() for mid in ids
+        mid: section.anchor
+        for section in unsupported_sections()
+        for mid in section.manager_ids
     }
 
 
@@ -2376,6 +2433,38 @@ class ChangelogEntry(NamedTuple):
     """Entry body, verbatim from the changelog."""
 
 
+CHANGELOG_RELEASE = re.compile(
+    r"^## \[`(?P<version>[^`]+)` \((?P<date>[^)]+)\)\]\((?P<url>[^)]+)\)",
+    re.MULTILINE,
+)
+"""Release heading of `changelog.md`: its version, its date and its comparison URL.
+
+The development section is headed by the version it will ship as, suffixed
+`.devN`, and dated `unreleased` until it does.
+"""
+
+
+@cache
+def changelog_releases() -> dict[str, tuple[str, str]]:
+    """Index `changelog.md` by release, newest first: version to date and URL.
+
+    Keyed on the bare version, so the `.devN` suffix of the development heading
+    comes off and a page naming the release in preparation resolves to it.
+
+    The URL is the comparison link the heading carries, because a release
+    heading has no anchor to link to instead. `myst_heading_slug_func` is
+    `docutils.nodes.make_id`, which strips a heading holding no letter down to
+    the empty string, so `` `7.6.0` (2026-08-10) `` yields nothing at all. That
+    is what {func}`scope_changelog` links each of its releases by, and what the
+    `mpm-release` role of `docs/conf.py` renders a {data}`DECLINE_STAMP` as.
+    """
+    changelog = (PROJECT_ROOT / "changelog.md").read_text(encoding="UTF-8")
+    return {
+        re.sub(r"\.dev\d+$", "", match["version"]): (match["date"], match["url"])
+        for match in CHANGELOG_RELEASE.finditer(changelog)
+    }
+
+
 @cache
 def _changelog_entries() -> dict[str, tuple[ChangelogEntry, ...]]:
     """Index `changelog.md` by the scope tags its entries carry.
@@ -2394,9 +2483,6 @@ def _changelog_entries() -> dict[str, tuple[ChangelogEntry, ...]]:
     Entries keep their changelog order, which is newest release first and
     curated within a release. Cached: one parse feeds every page.
     """
-    release = re.compile(
-        r"^## \[`(?P<version>[^`]+)` \((?P<date>[^)]+)\)\]\((?P<url>[^)]+)\)",
-    )
     bullet = re.compile(
         r"^- (?:\*\*(?P<flag>[A-Za-z]+):\*\* )?"
         r"\[(?P<scopes>[a-z0-9,\-]+)\] (?P<text>.+)$",
@@ -2412,7 +2498,7 @@ def _changelog_entries() -> dict[str, tuple[ChangelogEntry, ...]]:
     # it stays out, as it always has.
     changelog = re.sub(r"\n[ \t]+(?![-*+] )(?=\S)", " ", changelog)
     for line in changelog.splitlines():
-        heading = release.match(line)
+        heading = CHANGELOG_RELEASE.match(line)
         if heading:
             version, date, url = heading.group("version", "date", "url")
             continue

@@ -184,6 +184,21 @@ def only_escalator(escalator_id: str | None, *, selected: str | None = None):
             resolve_escalator.cache_clear()
 
 
+def _prompt_argv(run):
+    """The argv of the interactive prompt, found by shape rather than by index.
+
+    `prime_sudo` spawns a variable number of non-interactive probes before it
+    prompts, so a positional lookup breaks whenever one is added. The prompt is
+    the only call carrying `--prompt` (or, for `doas`, the only one without a
+    non-interactive flag).
+    """
+    for call in run.call_args_list:
+        argv = call.args[0]
+        if "--prompt" in argv:
+            return argv
+    raise AssertionError(f"no branded prompt among {run.call_args_list}")
+
+
 def _escalating_manager() -> FakeManager:
     """A fake manager whose policy escalates, to trip prime_sudo."""
     manager = FakeManager()
@@ -281,9 +296,12 @@ def test_prime_sudo_warns_without_tty(caplog):
     with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
         run.return_value = subprocess.CompletedProcess((), 1)
         prime_sudo(ctx, [_escalating_manager()])
-    # The non-interactive probe is the only subprocess: no prompt can be answered.
-    assert run.call_count == 1
-    assert run.call_args.args[0] == ("sudo", "--non-interactive", "--validate")
+    # Two non-interactive probes and no prompt: the cache is cold, the policy
+    # grants nothing unauthenticated, and nothing could be answered off-terminal.
+    assert [call.args[0][:3] for call in run.call_args_list] == [
+        ("sudo", "--non-interactive", "--validate"),
+        ("sudo", "--non-interactive", "--list"),
+    ]
     assert any(
         "fakemanager needs administrator rights" in record.getMessage()
         and "no terminal" in record.getMessage()
@@ -291,26 +309,58 @@ def test_prime_sudo_warns_without_tty(caplog):
     )
 
 
+def test_prime_sudo_skips_the_prompt_under_a_passwordless_policy(caplog):
+    """A cold cache whose policy still runs every escalated command unauthenticated.
+
+    `sudo --validate` refuses whenever *any* matching `sudoers` entry wants a
+    password, so the `NOPASSWD` rule `docs/sudo.md` recommends reads as a cold
+    cache once a distribution's stock `ALL ALL=(ALL) ALL` sits beside it.
+    openSUSE ships exactly that pair, where mpm used to warn that managers "may
+    fail" and then watch them succeed. Off-terminal on purpose: that is the path
+    the spurious warning came from, and a policy needing no password needs no
+    terminal either.
+    """
+    ctx = click.Context(click.Command("mpm"))
+    with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
+
+        def answer(argv, **kwargs):
+            """A cold credential cache over a policy that clears the command."""
+            return subprocess.CompletedProcess((), 0 if "--list" in argv else 1)
+
+        run.side_effect = answer
+        try:
+            prime_sudo(ctx, [_escalating_manager()])
+            assert _SUDO_CACHE_WARM.is_set()
+        finally:
+            ctx.close()
+    assert not _SUDO_CACHE_WARM.is_set()
+    assert not caplog.records
+    assert not any("--prompt" in call.args[0] for call in run.call_args_list)
+
+
 def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
     """A cold cache on a terminal: probe first, then one branded password prompt,
     then the keepalive until the context closes."""
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
-        run.side_effect = (
-            subprocess.CompletedProcess((), 1),  # Cold-cache probe.
-            subprocess.CompletedProcess((), 0),  # Successful password prompt.
-        )
+        def answer(argv, **kwargs):
+            """Cold cache, and a policy granting nothing unauthenticated, so the
+            interactive prompt is the only call that succeeds. Keyed on argv
+            rather than on call order, which the probes ahead of it may shift."""
+            code = 0 if "--prompt" in argv else 1
+            return subprocess.CompletedProcess((), code)
+
+        run.side_effect = answer
         try:
             prime_sudo(ctx, [_escalating_manager()])
             # The non-interactive probe runs first, then authenticates once, up
             # front, before the fan-out, with the branded prompt.
-            assert run.call_count == 2
             assert run.call_args_list[0].args[0] == (
                 "sudo",
                 "--non-interactive",
                 "--validate",
             )
-            prompt_argv = run.call_args_list[1].args[0]
+            prompt_argv = _prompt_argv(run)
             assert prompt_argv[:3] == ("sudo", "--validate", "--prompt")
             assert prompt_argv[3].startswith("[mpm] password for ")
             assert "fakemanager" in prompt_argv[3]
@@ -635,7 +685,7 @@ def test_prime_sudo_notice_names_managers_and_subcommand(
         finally:
             ctx.close()
     assert expected_notice in capsys.readouterr().err
-    assert run.call_args_list[1].args[0] == (
+    assert _prompt_argv(run) == (
         "sudo",
         "--validate",
         "--prompt",
@@ -682,7 +732,7 @@ def test_sudo_prompt_respects_sudo_constraints(manager_ids):
             prime_sudo(ctx, managers)
         finally:
             ctx.close()
-    prompt_argv = run.call_args_list[1].args[0]
+    prompt_argv = _prompt_argv(run)
     assert prompt_argv[:3] == ("sudo", "--validate", "--prompt")
     prompt = prompt_argv[3]
     assert prompt
@@ -713,7 +763,7 @@ def test_sudo_prompt_names_the_account_that_owns_the_password():
             prime_sudo(ctx, [manager])
         finally:
             ctx.close()
-    prompt = run.call_args_list[1].args[0][3]
+    prompt = _prompt_argv(run)[3]
     assert prompt.startswith("[mpm] password for %p ")
     assert "zypper" in prompt
 

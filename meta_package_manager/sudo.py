@@ -190,6 +190,23 @@ class Escalator:
     such mode, so it runs `true` as the cheapest harmless command.
     """
 
+    passwordless_probe_args: tuple[str, ...] | None
+    """Argv asking whether *one named command* runs without a password, or `None`.
+
+    Completed with the command's path by {func}`_escalation_is_passwordless`.
+    `sudo --list -- <command>` answers precisely, reporting the command when the
+    policy grants it unauthenticated and failing under `--non-interactive` when a
+    password would be wanted. `doas` has no such query and gets `None`.
+
+    Needed because {attr}`probe_args` answers a *different* question. `sudo
+    --validate` refuses whenever any matching `sudoers` entry requires a
+    password, even when the entry that would actually run the command is tagged
+    `NOPASSWD`. openSUSE stacks exactly that pair: its stock `ALL ALL=(ALL) ALL`
+    sits under the `NOPASSWD` rule `docs/sudo.md` recommends, so `--validate`
+    reports a cold cache on a host where every escalation in fact runs untouched,
+    and mpm warned that managers "may fail" before they went on to succeed.
+    """
+
     prompt_args: tuple[str, ...]
     """Argv authenticating the user up front, interactively, once per run."""
 
@@ -216,6 +233,7 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         id="sudo",
         escalate_args=("sudo", "--non-interactive"),
         probe_args=("sudo", "--non-interactive", "--validate"),
+        passwordless_probe_args=("sudo", "--non-interactive", "--list", "--"),
         prompt_args=("sudo", "--validate"),
         refreshable=True,
         brands_prompt=True,
@@ -227,6 +245,7 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # vocabulary for "do not prompt".
         escalate_args=("doas", "-n"),
         probe_args=("doas", "-n", "true"),
+        passwordless_probe_args=None,
         prompt_args=("doas", "true"),
         refreshable=False,
         brands_prompt=False,
@@ -580,6 +599,47 @@ def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:
     ctx.call_on_close(teardown)
 
 
+def _escalation_is_passwordless(
+    escalator: Escalator,
+    managers: Iterable[PackageManager],
+) -> bool:
+    """Whether every command mpm escalates already runs without a password.
+
+    Asked only after {attr}`~Escalator.probe_args` reported a cold cache, and
+    answering the question that probe cannot: `sudo --validate` refuses while any
+    matching `sudoers` entry wants a password, where
+    {attr}`~Escalator.passwordless_probe_args` names one command and reports the
+    rule that would actually run it. A host whose policy grants every escalated
+    command unauthenticated therefore needs no prompt, no warning and no
+    keepalive, having no credential to keep.
+
+    Conservative on every uncertainty: an escalator with no such query, a manager
+    whose binary was not found, or a single command the policy does not clear
+    unauthenticated all answer `False` and leave the cold-cache path to handle it.
+    """
+    if escalator.passwordless_probe_args is None:
+        return False
+    cli_paths: set[Path] = set()
+    for manager in managers:
+        if not _resolved_sudo(manager):
+            continue
+        if manager.cli_path is None:
+            return False
+        cli_paths.add(manager.cli_path)
+    if not cli_paths:
+        return False
+    for cli_path in sorted(cli_paths):
+        probe_cli = (*escalator.passwordless_probe_args, str(cli_path))
+        logging.debug(f"Probe the {escalator.id} policy: {' '.join(probe_cli)}")
+        try:
+            probe = subprocess.run(probe_cli, capture_output=True, check=False)
+        except OSError:
+            return False
+        if probe.returncode != 0:
+            return False
+    return True
+
+
 def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     """Warm the `sudo` credential cache, up front, for a mutating fan-out.
 
@@ -718,6 +778,18 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
             )
         # An internal-only selection stays silent, as on the no-terminal path:
         # each manager's own sudo surfaces the denial through its error path.
+        return
+
+    if _escalation_is_passwordless(escalator, managers):
+        # No credential is involved, so there is none to prompt for, refresh or
+        # lose mid-run. The flag still goes up: it gates the stall watchdog, and
+        # nothing can stall on a password the policy never asks for.
+        logging.info(
+            f"The {escalator.id} policy runs every escalated command without a "
+            "password: no prompt needed.",
+        )
+        _SUDO_CACHE_WARM.set()
+        ctx.call_on_close(_SUDO_CACHE_WARM.clear)
         return
 
     if not (sys.stdin.isatty() and sys.stderr.isatty()):

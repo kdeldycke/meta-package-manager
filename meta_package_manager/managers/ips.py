@@ -77,6 +77,9 @@ class IPS(PackageManager):
     # Icons, so do not file a request, and do not vendor one by hand:
     # https://github.com/simple-icons/simple-icons/issues/11441
 
+    keywords = ("pkg5",)
+    """The name the upstream project answers to, which the `ips` ID does not carry."""
+
     platforms = ILLUMOS, SOLARIS
 
     default_sudo = True

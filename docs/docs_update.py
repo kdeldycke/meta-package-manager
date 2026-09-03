@@ -100,7 +100,6 @@ KEYWORDS_EXTRAS = (
     "packagekit",
     "paludis",
     "php composer",
-    "pkg5",
     "pkgsrc",
     "plugin",
     "portage",
@@ -133,8 +132,8 @@ KEYWORDS_EXTRAS = (
 
 Ecosystem names, platform names and generic discovery terms. The manager IDs come
 for free from the pool: {func}`update_keywords` merges both sets into
-`pyproject.toml`. When a new manager brings a well-known ecosystem name that
-differs from its ID (like `gh-ext` and `github cli`), add the alias here.
+`pyproject.toml`. A term naming one specific manager belongs on that manager's own
+`keywords` attribute instead, where it cannot outlive the class it describes.
 """
 
 
@@ -254,9 +253,11 @@ def update_labels(*, check: bool = False) -> bool:
 def update_keywords(*, check: bool = False) -> bool:
     """Sync the `[project]` keywords of `pyproject.toml`.
 
-    The keyword set is the pool's manager IDs merged with the curated
-    {data}`KEYWORDS_EXTRAS`, so a new manager advertises itself on PyPI without
-    a hand edit. Same `tomlkit` round-trip as {func}`update_labels`.
+    The keyword set merges three sources, so a new manager advertises itself on
+    PyPI without a hand edit: the pool's manager IDs, each manager's own
+    {attr}`~meta_package_manager.manager.PackageManager.keywords` aliases, and the
+    curated {data}`KEYWORDS_EXTRAS` for terms belonging to no manager in
+    particular. Same `tomlkit` round-trip as {func}`update_labels`.
 
     :param check: Report only, leaving `pyproject.toml` untouched.
     :return: `True` when the keywords are out of date.
@@ -264,9 +265,16 @@ def update_keywords(*, check: bool = False) -> bool:
     pyproject = PROJECT_ROOT / "pyproject.toml"
     doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
 
+    manager_keywords = {
+        keyword for manager in pool.values() for keyword in manager.keywords
+    }
+
     doc["project"]["keywords"] = _string_array(
         tuple(
-            sorted(set(KEYWORDS_EXTRAS) | set(pool.all_manager_ids), key=str.casefold),
+            sorted(
+                set(KEYWORDS_EXTRAS) | set(pool.all_manager_ids) | manager_keywords,
+                key=str.casefold,
+            ),
         ),
         multiline=True,
     )

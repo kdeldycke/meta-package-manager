@@ -270,6 +270,20 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     Documentation-only, like {attr}`homepage_url`: no CLI output reads it.
     """
 
+    keywords: tuple[str, ...] = ()
+    """Well-known names for this manager that its {attr}`id` does not already carry.
+
+    Merged into the PyPI keywords of `pyproject.toml` by
+    {func}`docs_update.update_keywords`, alongside every manager ID and the globally
+    curated `KEYWORDS_EXTRAS`. Declare an alias here rather than in that tuple
+    whenever it names *this* manager: an alias living beside the class it describes
+    cannot outlive it, where a central entry silently rots once the manager is
+    renamed or dropped.
+
+    Reserve `KEYWORDS_EXTRAS` for terms belonging to no manager in particular, like
+    `cyclonedx` or `package manager`. Documentation-only: no CLI output reads it.
+    """
+
     brewfile_entry_type: ClassVar[str | None] = None
     """Name of the Brewfile DSL entry type this manager maps to, or `None` if the
     manager has no Brewfile equivalent.

@@ -642,14 +642,17 @@ class Ports(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Build and install a port from source.
 
-        `package_id` may be either a bare port name (e.g. `nginx`) or
-        its full origin (e.g. `www/nginx`). When given a bare name, the
-        origin is resolved through `pkg search -o` against the active
-        repository.
+        `package_id` may be either a bare port name like `nginx` or its full
+        origin like `www/nginx`. A bare name is resolved to its origin through
+        {meth}`_resolve_origin`, which queries the active repository.
 
-        ```{code-block} shell-session
+        The block below illustrates rather than captures: the origin is
+        resolved by a query, so the corpus cannot rebuild this command from a
+        stand-in package id. Read the exact argv off `mpm --plan install`.
 
-        $ cd /usr/ports/www/nginx && sudo make BATCH=yes install clean
+        ```{code-block} console
+
+        $ sudo make -C /usr/ports/www/nginx install clean BATCH=yes
         ```
         """
         origin = self._resolve_origin(package_id)

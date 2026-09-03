@@ -1475,7 +1475,9 @@ def test_manager_changelog_entries():
     section double as the lint for a manager shipped without its changelog line.
     """
     index = _docs._changelog_entries()
-    assert set(index) == set(pool.all_manager_ids)
+    # The index keys every scope tag, the project-wide and frontend ones
+    # included, so only the pool half is asserted here.
+    assert set(pool.all_manager_ids) <= set(index)
 
     raw = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
     # The older releases hard-wrap their bullets, so an entry spans several
@@ -1486,7 +1488,9 @@ def test_manager_changelog_entries():
 
     pairs = 0
     for mid, entries in index.items():
-        rendered = _docs.manager_changelog(mid)
+        if mid not in pool:
+            continue
+        rendered = _docs.scope_changelog(mid)
         # The page opens straight on the newest release that touched it.
         newest = entries[0]
         assert rendered.startswith(
@@ -1518,6 +1522,34 @@ def test_manager_changelog_entries():
         if scope in pool
     )
     assert pairs == expected
+
+
+def test_frontend_changelog_sections():
+    """Check each desktop frontend page renders the changelog scoped to it.
+
+    Both pages are hand-written, so what pins the section is the pair of
+    ``{python:render}`` blocks, one per frontend, each naming its own scope. A
+    scope the index fails to resolve renders an empty section instead of
+    failing, hence the recount straight from `changelog.md`.
+    """
+    changelog = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
+    scopes = re.findall(
+        r"^- (?:\*\*[A-Za-z]+:\*\* )?\[([a-z0-9,\-]+)\]",
+        changelog,
+        re.MULTILINE,
+    )
+    for scope, page in (
+        ("bar-plugin", "bar-plugin.md"),
+        ("gnome-shell", "gnome-shell.md"),
+    ):
+        rendered = _docs.scope_changelog(scope)
+        expected = sum(1 for tags in scopes if scope in tags.split(","))
+        assert expected
+        assert len(re.findall(r"^  - ", rendered, re.MULTILINE)) == expected
+
+        source = PROJECT_ROOT.joinpath("docs", page).read_text(encoding="utf-8")
+        assert "## Changelog" in source
+        assert f'print(scope_changelog("{scope}"))' in source
 
 
 def test_manager_support_bar_renders():

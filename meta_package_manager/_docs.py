@@ -406,7 +406,7 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     ("Version probe", "manager_version_probe"),
     ("Reference traces", "manager_traces"),
     ("Upstream project", "manager_upstream"),
-    ("Changelog", "manager_changelog"),
+    ("Changelog", "scope_changelog"),
 )
 """Layout of a per-manager documentation page: section title, generator function.
 
@@ -2378,24 +2378,21 @@ class ChangelogEntry(NamedTuple):
 
 @cache
 def _changelog_entries() -> dict[str, tuple[ChangelogEntry, ...]]:
-    """Index `changelog.md` by the managers each of its entries is scoped to.
+    """Index `changelog.md` by the scope tags its entries carry.
 
     Every changelog bullet opens with a comma-separated scope tag, and
     `test_changelog` already enforces that vocabulary: tags are sorted,
     deduplicated and drawn from the pool IDs plus the platform IDs and the
     `mpm`, `bar-plugin` and `gnome-shell` scopes. So the changelog needs no
-    heuristic mining, only a read: scopes naming a pool manager are kept, the
-    project-wide ones dropped, and a multi-scope entry is filed under each
-    manager it names.
+    heuristic mining, only a read: every scope keys the entries naming it, and
+    a multi-scope entry is filed under each one it names.
+
+    Indexing every tag, in place of the pool alone, is what lets a page other
+    than a manager's read its own history: the two desktop frontends do,
+    through {func}`scope_changelog`. A scope no page renders costs one key.
 
     Entries keep their changelog order, which is newest release first and
-    curated within a release. Cached: one parse feeds all the manager pages.
-
-    ```{note}
-    A scope whose manager left the pool silently drops its entries here, but
-    `test_changelog` fails on it first, since the same vocabulary check builds
-    its allowed set from the live pool.
-    ```
+    curated within a release. Cached: one parse feeds every page.
     """
     release = re.compile(
         r"^## \[`(?P<version>[^`]+)` \((?P<date>[^)]+)\)\]\((?P<url>[^)]+)\)",
@@ -2422,13 +2419,11 @@ def _changelog_entries() -> dict[str, tuple[ChangelogEntry, ...]]:
         match = bullet.match(line)
         if not match:
             continue
-        for manager_id in match["scopes"].split(","):
-            if manager_id not in pool:
-                continue
-            entries.setdefault(manager_id, []).append(
+        for scope in match["scopes"].split(","):
+            entries.setdefault(scope, []).append(
                 ChangelogEntry(version, date, url, match["flag"], match["text"]),
             )
-    return {mid: tuple(items) for mid, items in entries.items()}
+    return {scope: tuple(items) for scope, items in entries.items()}
 
 
 def manager_upstream(manager_id: str) -> str:
@@ -2505,18 +2500,21 @@ def manager_upstream(manager_id: str) -> str:
     )
 
 
-def manager_changelog(manager_id: str) -> str:
-    """Produce the release-history section of a manager's documentation page.
+def scope_changelog(scope: str) -> str:
+    """Produce the release-history section of a page, from its changelog scope.
 
-    Every change `mpm` shipped for this manager, grouped by the release that
-    carried it, newest first. The entry text is reproduced verbatim: the
-    changelog is the curated wording, and rewriting it here would be one more
-    thing to drift. Reproducing it is only safe because every link it carries
-    is absolute, so nothing breaks one directory deeper in `docs/managers/`.
+    Every change `mpm` shipped under that scope, grouped by the release that
+    carried it, newest first. A manager page passes its own ID; the SwiftBar
+    and GNOME Shell pages pass `bar-plugin` and `gnome-shell`, the two scopes
+    naming a frontend rather than a wrapped tool. The entry text is reproduced
+    verbatim: the changelog is the curated wording, and rewriting it here would
+    be one more thing to drift. Reproducing it is only safe because every link
+    it carries is absolute, so nothing breaks one directory deeper in
+    `docs/managers/`.
 
-    A change scoped to several managers is repeated verbatim on each of their
-    pages, carrying no marker of the others: a reader is on one manager's page
-    to read about that manager.
+    A change scoped to several subjects is repeated verbatim on each of their
+    pages, carrying no marker of the others: a reader is on one page to read
+    about that one subject.
 
     ```{note}
     Released headings are not linkable: `myst_heading_slug_func` is
@@ -2527,7 +2525,7 @@ def manager_changelog(manager_id: str) -> str:
     costs `linkcheck` nothing since the changelog page already cites it.
     ```
     """
-    entries = _changelog_entries().get(manager_id, ())
+    entries = _changelog_entries().get(scope, ())
     if not entries:
         return ""
 

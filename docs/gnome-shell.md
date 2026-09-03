@@ -233,3 +233,11 @@ $ journalctl --follow --output=cat /usr/bin/gnome-shell
 The extension version is advertised through the `version-name` field of `metadata.json`, kept in lockstep with the `mpm` version by `bump-my-version`.
 
 If the extension changed between releases, a fresh zip is uploaded to [extensions.gnome.org](https://extensions.gnome.org) for review. Reviews there are manual and can take a while.
+
+## Changelog
+
+```{python:render}
+from meta_package_manager._docs import scope_changelog
+
+print(scope_changelog("gnome-shell"))
+```

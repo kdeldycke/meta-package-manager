@@ -302,6 +302,14 @@ If the plugin has been changed between releases, a [copy of the plugin is pushed
 
 7. [Create a pull-request](https://help.github.com/articles/creating-a-pull-request/) in the original repository.
 
+## Changelog
+
+```{python:render}
+from meta_package_manager._docs import scope_changelog
+
+print(scope_changelog("bar-plugin"))
+```
+
 ## `meta_package_manager.bar_plugin` API
 
 ```{eval-rst}

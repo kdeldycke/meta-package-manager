@@ -45,6 +45,7 @@ enforcement and dry-run.
 
 from __future__ import annotations
 
+import errno
 import logging
 import math
 import os
@@ -105,6 +106,27 @@ CLIs conclude with their actual error, so the tail is where the diagnosis
 lives; the cap keeps a verbose failure (a source build's compiler spew) from
 flooding the default view. The raw streams are always available in full, live,
 at `DEBUG`.
+"""
+
+UNRUNNABLE_ERRNOS: Final[frozenset[int]] = frozenset({
+    errno.EACCES,
+    errno.EISDIR,
+    errno.ENOENT,
+    errno.ENOEXEC,
+    errno.EPERM,
+})
+"""`OSError` numbers meaning the CLI cannot be spawned, rather than that it failed.
+
+Each marks the manager unavailable and yields empty output, the same way `WinError`
+193 does on Windows: something was found at that path, and it is not a program this
+host can run. `ENOEXEC` is the POSIX twin of that Windows code, raised for a
+wrong-architecture binary, a truncated download, or a text file carrying the
+executable bit. GitHub's `ubuntu-26.04-arm` image ships one: an x86 `pnpm` at
+`/usr/local/bin/pnpm`, which crashed every `mpm` run on that host until this set
+existed, since the pool probes every manager it can see.
+
+Anything outside this set (a file-descriptor ceiling, an out-of-memory refusal)
+describes the machine rather than the CLI, and still propagates.
 """
 
 WIN_DEFAULT_PATHEXT: Final = ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC"
@@ -1261,13 +1283,15 @@ class CLIExecutor:
                     )
                     self.executable = False
                     return ""
-                # The binary disappeared between the availability check and
-                # execution (e.g. only a .bat wrapper found on Windows while
-                # the underlying binary is absent).
-                if isinstance(ex, FileNotFoundError):
+                # Something is at that path but cannot be spawned: it vanished
+                # between the availability check and execution (only a .bat
+                # wrapper found on Windows while the underlying binary is
+                # absent), it is not executable by this user, or it is not a
+                # program this machine can run at all. See UNRUNNABLE_ERRNOS.
+                if ex.errno in UNRUNNABLE_ERRNOS:
                     logging.debug(
                         f"{highlight_cli_name(self.cli_path, self.cli_names)} "
-                        "executable not found.",
+                        f"cannot be executed: {ex.strerror}.",
                     )
                     self.executable = False
                     return ""

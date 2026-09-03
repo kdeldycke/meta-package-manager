@@ -227,6 +227,7 @@
 - [zypper] Fix `installed`, `outdated` and `search`, which crashed whenever the query matched exactly one package. An exact search and a host one update behind are both ordinary states.
 - [zypper] Show captured openSUSE Tumbleweed output in the manager page's reference traces, in place of placeholder package names.
 - [mpm] Ask for the password of the account `sudo` accepts it from, which is root rather than the caller under openSUSE's default `targetpw` policy.
+- [mpm] Skip a manager whose CLI cannot be executed instead of aborting the run: a wrong-architecture or non-program binary anywhere on `PATH` used to crash every subcommand.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

@@ -16,10 +16,12 @@
 
 from __future__ import annotations
 
+import errno
 import logging
 import os
 import re
 import shutil
+import subprocess
 import threading
 import time
 from types import SimpleNamespace
@@ -41,6 +43,7 @@ from meta_package_manager.execution import (
     PLAN_RECORDER,
     READ_ONLY_TIMEOUT,
     SPINNER_DELAY,
+    UNRUNNABLE_ERRNOS,
     VERSION_PROBE,
     WIN_DEFAULT_PATHEXT,
     CLIError,
@@ -875,3 +878,42 @@ def test_windows_pathext_tracks_cpython():
         f"CPython now defaults PATHEXT to {cpython_value!r}, but "
         f"WIN_DEFAULT_PATHEXT still copies {WIN_DEFAULT_PATHEXT!r}."
     )
+
+
+@pytest.mark.skipif(is_any_windows(), reason="`ENOEXEC` is POSIX-only.")
+def test_a_file_that_is_not_a_program_raises_enoexec(tmp_path):
+    """The premise {data}`UNRUNNABLE_ERRNOS` rests on.
+
+    `subprocess` execs directly rather than through a shell, so it never falls
+    back to interpreting a file the kernel refused. A wrong-architecture binary
+    and a text file carrying the executable bit both land here.
+    """
+    not_a_program = tmp_path / "pnpm"
+    not_a_program.write_bytes(b"\x7fELF is how one starts, and this is not one")
+    not_a_program.chmod(0o755)
+    with pytest.raises(OSError) as caught:
+        subprocess.run((str(not_a_program),), capture_output=True)
+    assert caught.value.errno == errno.ENOEXEC
+
+
+@pytest.mark.parametrize(
+    "error_code",
+    tuple(sorted(UNRUNNABLE_ERRNOS)),
+    ids=lambda code: errno.errorcode[code],
+)
+def test_unrunnable_cli_degrades_instead_of_crashing(error_code, caplog):
+    """A CLI that cannot be spawned marks its manager unavailable and yields "".
+
+    mpm probes every manager it can see, so one unrunnable binary anywhere on
+    `PATH` aborts every subcommand instead of skipping that single manager.
+    `ENOEXEC` is the one that reached CI: GitHub's `ubuntu-26.04-arm` image
+    carries an x86 `pnpm` at `/usr/local/bin/pnpm`.
+    """
+    manager = FakeManager()
+    refusal = OSError(error_code, os.strerror(error_code), "/usr/local/bin/pnpm")
+    with patch("meta_package_manager.execution.run_cli", side_effect=refusal):
+        with caplog.at_level(logging.DEBUG):
+            output = manager.run("--version")
+    assert output == ""
+    assert manager.executable is False
+    assert any("cannot be executed" in r.getMessage() for r in caplog.records)

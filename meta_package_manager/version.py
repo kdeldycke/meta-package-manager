@@ -197,13 +197,9 @@ meaning depends on the separator introducing it goes in
 {data}`UNDERSCORE_POST_RELEASE_TAGS` instead.
 """
 
-UNDERSCORE_POST_RELEASE_TAGS: frozenset[str] = frozenset({
-    "cvs",
-    "git",
-    "hg",
-    "p",
-    "svn",
-})
+UNDERSCORE_POST_RELEASE_TAGS: frozenset[str] = frozenset(
+    {"cvs", "git", "hg", "p", "svn"},
+)
 """Post-release suffixes of the Gentoo and Alpine scheme, recognized only
 behind an underscore.
 

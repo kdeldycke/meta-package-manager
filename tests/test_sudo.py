@@ -46,6 +46,7 @@ from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
     ESCALATION,
     ESCALATORS,
+    Escalator,
     _is_permission_failure,
     _is_sudo_auth_failure,
     _is_sudo_denied,
@@ -168,10 +169,21 @@ def only_escalator(escalator_id: str | None, *, selected: str | None = None):
 
     `selected` drives the process-wide choice the CLI would have recorded, so a
     test can force an escalator the way `--sudo-command` does.
+
+    The binary is also pinned as genuine, so `resolve_escalator` never spends a
+    `subprocess.run` on {meth}`~meta_package_manager.sudo.Escalator.is_genuine`.
+    That keeps the call counts these tests assert on measuring credential
+    probes alone, and keeps a pretended host from probing the real one. A test
+    about an impostor patches `is_genuine` itself instead.
     """
-    with patch(
-        "meta_package_manager.sudo.shutil.which",
-        side_effect=lambda name: f"/usr/bin/{name}" if name == escalator_id else None,
+    with (
+        patch(
+            "meta_package_manager.sudo.shutil.which",
+            side_effect=lambda name: (
+                f"/usr/bin/{name}" if name == escalator_id else None
+            ),
+        ),
+        patch.object(Escalator, "is_genuine", return_value=True),
     ):
         resolve_escalator.cache_clear()
         ESCALATION.select(selected)
@@ -344,6 +356,7 @@ def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
     then the keepalive until the context closes."""
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
+
         def answer(argv, **kwargs):
             """Cold cache, and a policy granting nothing unauthenticated, so the
             interactive prompt is the only call that succeeds. Keyed on argv
@@ -951,6 +964,91 @@ def test_resolve_escalator_detects_what_the_host_carries(installed, expected):
     with only_escalator(installed):
         escalator = resolve_escalator()
     assert (escalator.id if escalator else None) == expected
+
+
+def _both_escalators_installed():
+    """Pretend the host carries `sudo` and `doas` both, without pinning either
+    as genuine, so the identity probe is what decides between them."""
+    return patch(
+        "meta_package_manager.sudo.shutil.which",
+        side_effect=lambda name: f"/usr/bin/{name}",
+    )
+
+
+@pytest.mark.parametrize(
+    ("returncode", "stdout", "expected"),
+    (
+        # Real sudo, measured on Alpine 3.24.1 running sudo 1.9.17_p2.
+        pytest.param(0, "Sudo version 1.9.17p2\n", True, id="real-sudo"),
+        # Alpine's doas-sudo-shim 0.2.0-r0 rejects the option outright, its
+        # parser sending every unknown long option to `die`.
+        pytest.param(1, "", False, id="doas-sudo-shim"),
+        # A stand-in free to accept the option is still not sudo, so the
+        # marker is checked and not just the exit status.
+        pytest.param(0, "some other tool 1.0\n", False, id="silent-impostor"),
+        # Nothing captured at all.
+        pytest.param(0, None, False, id="no-output"),
+    ),
+)
+def test_escalator_identity_probe_reads_the_binary(returncode, stdout, expected):
+    sudo = ESCALATORS[0]
+    assert sudo.id == "sudo"
+    with patch("meta_package_manager.sudo.subprocess.run") as run:
+        run.return_value = subprocess.CompletedProcess((), returncode, stdout=stdout)
+        assert sudo.is_genuine() is expected
+    run.assert_called_once()
+    assert run.call_args.args[0] == ("sudo", "--version")
+
+
+def test_escalator_without_identity_args_is_genuine():
+    """An escalator opts into the identity check by declaring the argv for it,
+    so the ones with no known stand-in spend no subprocess."""
+    doas = ESCALATORS[1]
+    assert doas.id == "doas"
+    assert doas.identity_args is None
+    with patch("meta_package_manager.sudo.subprocess.run") as run:
+        assert doas.is_genuine() is True
+    run.assert_not_called()
+
+
+def test_escalator_identity_probe_survives_a_missing_binary():
+    """A binary that vanished between `which()` and the probe cannot be driven,
+    rather than crashing the run."""
+    with patch("meta_package_manager.sudo.subprocess.run", side_effect=OSError):
+        assert ESCALATORS[0].is_genuine() is False
+
+
+def test_resolve_escalator_skips_an_impostor_for_the_real_thing():
+    """Alpine's `doas-sudo-shim` puts a `sudo` on `PATH` that forwards to
+    `doas`, accepting `--non-interactive` and no other option mpm sends. Driving
+    `doas` directly is what keeps the probes answering."""
+    with (
+        _both_escalators_installed(),
+        patch.object(
+            Escalator,
+            "is_genuine",
+            autospec=True,
+            side_effect=lambda self: self.id != "sudo",
+        ),
+    ):
+        resolve_escalator.cache_clear()
+        escalator = resolve_escalator()
+        resolve_escalator.cache_clear()
+    assert escalator is not None
+    assert escalator.id == "doas"
+
+
+def test_resolve_escalator_falls_back_to_a_lone_impostor():
+    """An impostor still escalates, so it beats reporting no escalator at all."""
+    with (
+        only_escalator("sudo"),
+        patch.object(Escalator, "is_genuine", return_value=False),
+    ):
+        resolve_escalator.cache_clear()
+        escalator = resolve_escalator()
+        resolve_escalator.cache_clear()
+    assert escalator is not None
+    assert escalator.id == "sudo"
 
 
 def test_resolve_escalator_override_wins_over_detection():

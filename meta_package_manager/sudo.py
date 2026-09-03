@@ -159,6 +159,7 @@ goes unflagged. Priming still authenticates; only the watchdog is suppressed.
 ```
 """
 
+
 @dataclass(frozen=True)
 class Escalator:
     """One privilege-escalation binary, and the argv dialects mpm drives it with.
@@ -227,6 +228,56 @@ class Escalator:
     loses the `[mpm]` marker, not the explanation.
     """
 
+    identity_args: tuple[str, ...] | None = None
+    """Argv proving the binary on `PATH` is this escalator, not a stand-in.
+
+    A name on `PATH` is not proof of the dialect behind it: Alpine's
+    `doas-sudo-shim` installs `/usr/bin/sudo` as a shell script forwarding to
+    `doas`, and it accepts `--non-interactive` alone out of everything mpm
+    sends. So {attr}`escalate_args` works there while every probe dies on
+    `unrecognized option`, and mpm reads that as a cold credential cache on a
+    host where escalation in fact runs untouched.
+
+    Run by {meth}`is_genuine`, which needs the argv to authenticate nothing and
+    to cost nothing: `sudo --version` reports the build and exits `0` on real
+    sudo, where the shim rejects the option and exits `1`. `None` where no
+    stand-in is known, which is every escalator but `sudo`.
+    """
+
+    identity_marker: str | None = None
+    """Substring {attr}`identity_args` prints when the binary is genuine.
+
+    Matched against `<stdout>` on a zero exit. Kept beside the argv because
+    exit status alone is too weak a signal: a stand-in free to accept the
+    option would pass on the returncode.
+    """
+
+    def is_genuine(self) -> bool:
+        """Whether the binary on `PATH` really is this escalator.
+
+        `True` when the escalator declares no {attr}`identity_args`, so an
+        escalator opts into the check rather than out of it.
+        """
+        if not self.identity_args:
+            return True
+        try:
+            probe = subprocess.run(
+                self.identity_args,
+                capture_output=True,
+                check=False,
+                text=True,
+                encoding="UTF-8",
+            )
+        except OSError:
+            # The binary vanished between `which()` and here, or is not
+            # executable. Either way it cannot be driven.
+            return False
+        # `stdout` is `None` whenever the output was not captured, so it is
+        # normalized rather than trusted to be a string.
+        return probe.returncode == 0 and bool(
+            self.identity_marker and self.identity_marker in (probe.stdout or "")
+        )
+
 
 ESCALATORS: Final[tuple[Escalator, ...]] = (
     Escalator(
@@ -237,6 +288,8 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         prompt_args=("sudo", "--validate"),
         refreshable=True,
         brands_prompt=True,
+        identity_args=("sudo", "--version"),
+        identity_marker="Sudo version",
     ),
     Escalator(
         id="doas",
@@ -276,14 +329,16 @@ def resolve_escalator(override: str | None = None) -> Escalator | None:
     """The escalator mpm drives, or `None` when the host carries none.
 
     With no `override`, returns the first entry of {data}`ESCALATORS` whose
-    binary is on `PATH`, so a host without `sudo` still escalates through
-    whatever it does have. An `override` names one by its
-    {attr}`~Escalator.id` and is honored even when the binary is missing, so
-    the failure names the escalator the user asked for instead of silently
-    falling back to another one.
+    binary is on `PATH` and passes {meth}`~Escalator.is_genuine`, so a host
+    without `sudo` still escalates through whatever it does have, and one whose
+    `sudo` is a stand-in for another escalator drives that other one directly.
+    An `override` names one by its {attr}`~Escalator.id` and is honored even
+    when the binary is missing, so the failure names the escalator the user
+    asked for instead of silently falling back to another one.
 
-    Cached on the override, since `PATH` does not move mid-run. Tests changing
-    what is installed must call `resolve_escalator.cache_clear()`.
+    Cached on the override, since `PATH` does not move mid-run and the identity
+    probe costs a subprocess. Tests changing what is installed must call
+    `resolve_escalator.cache_clear()`.
     """
     if override is not None:
         for escalator in ESCALATORS:
@@ -296,9 +351,19 @@ def resolve_escalator(override: str | None = None) -> Escalator | None:
             f"{', '.join(e.id for e in ESCALATORS)}. Managers needing root may fail.",
         )
         return None
-    for escalator in ESCALATORS:
-        if shutil.which(escalator.id):
+    installed = tuple(e for e in ESCALATORS if shutil.which(e.id))
+    for escalator in installed:
+        if escalator.is_genuine():
             return escalator
+    # Every installed escalator failed its identity probe. Falling back to the
+    # first one still beats reporting none: a stand-in that answers no probe
+    # usually still escalates, and Alpine's `doas-sudo-shim` only reaches this
+    # line on a host whose `doas` was removed from under it.
+    if installed:
+        logging.debug(
+            f"{installed[0].id} does not identify as itself: driving it anyway.",
+        )
+        return installed[0]
     return None
 
 

@@ -200,8 +200,16 @@ than filed under a guess. PackageKit is a client for whatever backend the host
 provides (apt, dnf, zypp, alpm), so the family it belongs to is a property of the
 machine rather than of the manager, and a `frozenset` here is fixed at import. It
 needs no protection from *itself*, `packagekitd` queuing its own transactions, but a
-`pkcon` mutation still contends with a native manager mpm drives in the same run.
-Expressing that would mean resolving the backend at dispatch time.
+`pkcon` mutation still contends with a native manager mpm drives in the same run. An
+openSUSE host is the ordinary case rather than a contrived one: mpm detects `pkcon`
+and `zypper` together there, and `pkcon backend-details` names `zypp`.
+
+```{todo}
+Resolve `pkcon`'s backend at dispatch time and merge it into that backend's lane,
+in place of the fixed membership above. `pkcon backend-details` reports the backend
+in its first line, so the mapping needs no guessing, only a probe whose cost is paid
+once per run.
+```
 
 Concurrency is safe *across* families and unsafe *within* one, just as it is unsafe
 within a single manager (which is why a manager's own packages stay serial). For every

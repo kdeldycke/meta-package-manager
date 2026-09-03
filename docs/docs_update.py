@@ -100,6 +100,7 @@ KEYWORDS_EXTRAS = (
     "packagekit",
     "paludis",
     "php composer",
+    "pkg5",
     "pkgsrc",
     "plugin",
     "portage",

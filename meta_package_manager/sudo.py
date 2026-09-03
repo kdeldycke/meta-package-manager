@@ -748,15 +748,21 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
 
     echo(
         f"{ids} need{'s' if len(escalating) == 1 else ''} administrator rights to "
-        f"{ctx.command.name}: enter your password.",
+        f"{ctx.command.name}.",
         err=True,
     )
     prompt_cli = escalator.prompt_args
     if escalator.brands_prompt:
-        # `sudo --prompt` expands %-escapes; manager IDs are plain slugs, so the
-        # escaping is belt-and-braces. An escalator that cannot be told what to
-        # print falls back to its own prompt, under the notice echoed above.
-        prompt = f"[mpm] password for {ids}: ".replace("%", "%%")
+        # `sudo --prompt` expands %-escapes, and `%p` is the account whose password
+        # is wanted. That is not always the invoking user: a `targetpw`, `rootpw` or
+        # `runaspw` policy asks for another one, and openSUSE ships `targetpw` by
+        # default, so a prompt naming the caller would send its users to type the
+        # wrong password. Manager IDs are plain slugs, but are escaped anyway so one
+        # carrying a `%` cannot smuggle in an escape of its own. An escalator that
+        # cannot be told what to print falls back to its own prompt, under the
+        # notice echoed above.
+        escaped_ids = ids.replace("%", "%%")
+        prompt = f"[mpm] password for %p (running {escaped_ids}): "
         prompt_cli = (*prompt_cli, "--prompt", prompt)
     if subprocess.run(prompt_cli, check=False).returncode != 0:
         logging.warning(

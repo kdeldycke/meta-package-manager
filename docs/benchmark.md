@@ -439,7 +439,7 @@ print(benchmark_managers_table())
 | [`zplug`](managers/zplug.md)                                                 |       [✅](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/zplug.py#L50)       | [🟡](https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279) |             |                     |                     |
 | [`zr`](https://github.com/jedahan/zr)                                        |                                                 [🛟](unsupported.md#zr)                                                  | [🟡](https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279) |             |                     |                     |
 | [`zvm`](managers/zvm.md)                                                     |         [✅](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/zvm.toml)         |                                        ✅                                        |             |                     |                     |
-| [`zypper`](managers/zypper.md)                                               |      [✅](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/zypper.py#L45)       |                                        ✅                                        |     ✅      |         ✅          |         ✅          |
+| [`zypper`](managers/zypper.md)                                               |      [✅](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/zypper.py#L64)       |                                        ✅                                        |     ✅      |         ✅          |         ✅          |
 
 <!-- mirror-end -->
 

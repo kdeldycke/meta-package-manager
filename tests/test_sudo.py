@@ -604,14 +604,14 @@ def test_prime_sudo_warns_when_sudo_cannot_run(caplog, probe_error):
     (
         pytest.param(
             ("alpha",),
-            "alpha needs administrator rights to upgrade: enter your password.",
-            "[mpm] password for alpha: ",
+            "alpha needs administrator rights to upgrade.",
+            "[mpm] password for %p (running alpha): ",
             id="singular",
         ),
         pytest.param(
             ("beta", "alpha"),
-            "alpha, beta need administrator rights to upgrade: enter your password.",
-            "[mpm] password for alpha, beta: ",
+            "alpha, beta need administrator rights to upgrade.",
+            "[mpm] password for %p (running alpha, beta): ",
             id="plural-sorted",
         ),
     ),
@@ -659,10 +659,15 @@ def test_sudo_prompt_respects_sudo_constraints(manager_ids):
     must stay within sudo's constraints.
 
     Locks the properties rather than the wording, so a future rewording trips here
-    only if it breaks sudo: every `%` must be doubled (`sudo --prompt` expands
-    `%h`/`%H`/`%p`/`%u`/`%U`, and a lone `%` is undefined), the prompt
-    must be a single line (a newline would detach the ask from the input cursor),
-    and it must end with a space so the typed password is not glued to the text.
+    only if it breaks sudo: the only expandable escapes left are the ones the
+    prompt hands to sudo on purpose, every other `%` being doubled (`sudo
+    --prompt` expands `%h`/`%H`/`%p`/`%u`/`%U`, and a lone `%` is undefined), the
+    prompt must be a single line (a newline would detach the ask from the input
+    cursor), and it must end with a space so the typed password is not glued to
+    the text.
+
+    A manager id is the untrusted half here: whatever it contains, it may never
+    reach sudo as an escape.
     """
     ctx = click.Context(click.Command("upgrade"))
     managers = []
@@ -681,11 +686,36 @@ def test_sudo_prompt_respects_sudo_constraints(manager_ids):
     assert prompt_argv[:3] == ("sudo", "--validate", "--prompt")
     prompt = prompt_argv[3]
     assert prompt
-    # Doubling check: with every %% pair removed, no expandable % may remain.
-    assert "%" not in prompt.replace("%%", "")
+    # Doubling check: with every %% pair collapsed away, the only escapes left may
+    # be the ones the prompt spells itself. Anything else came from a manager id.
+    residual = prompt.replace("%%", "")
+    for deliberate in ("%p",):
+        residual = residual.replace(deliberate, "")
+    assert "%" not in residual
     assert "\n" not in prompt
     assert "\r" not in prompt
     assert prompt.endswith(" ")
+
+
+def test_sudo_prompt_names_the_account_that_owns_the_password():
+    """The prompt defers to sudo's `%p` for whose password is wanted.
+
+    Not the caller: a `targetpw`, `rootpw` or `runaspw` policy asks for another
+    account, and openSUSE ships `Defaults targetpw`, so a prompt naming the
+    invoking user sends every one of its users to type the wrong password.
+    """
+    ctx = click.Context(click.Command("upgrade"))
+    manager = _escalating_manager()
+    manager.id = "zypper"
+    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
+        run.return_value = subprocess.CompletedProcess((), 1)
+        try:
+            prime_sudo(ctx, [manager])
+        finally:
+            ctx.close()
+    prompt = run.call_args_list[1].args[0][3]
+    assert prompt.startswith("[mpm] password for %p ")
+    assert "zypper" in prompt
 
 
 @pytest.mark.parametrize(

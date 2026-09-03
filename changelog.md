@@ -222,8 +222,11 @@
 - [mpm] Give every module its own API reference page, in place of the three pages that stacked a whole package each. The `managers` page alone carried 64 modules.
 - [bar-plugin] Stop a menu action from importing a source checkout it happens to be spawned from, instead of the installed `mpm`.
 - [bar-plugin,gnome-shell] Give each frontend page a release history of its own, built from the changelog entries scoped to it.
+- [bar-plugin] Follow the symlink both hosts are installed through when looking for the `mpm` the plugin ships with, in place of the plugin folder it sits in.
+- [bar-plugin] Probe a virtualenv interpreter as itself, in place of the interpreter it was built from, which sees none of the virtualenv's packages.
 - [zypper] Fix `installed`, `outdated` and `search`, which crashed whenever the query matched exactly one package. An exact search and a host one update behind are both ordinary states.
 - [zypper] Show captured openSUSE Tumbleweed output in the manager page's reference traces, in place of placeholder package names.
+- [mpm] Ask for the password of the account `sudo` accepts it from, which is root rather than the caller under openSUSE's default `targetpw` policy.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

@@ -88,9 +88,11 @@ Only a cold cache, on an interactive terminal, leads to a prompt: a notice names
 
 ```shell-session
 $ mpm upgrade
-apt, deb-get need administrator rights to upgrade: enter your password.
-[mpm] password for apt, deb-get:
+apt, deb-get need administrator rights to upgrade.
+[mpm] password for kevin (running apt, deb-get):
 ```
+
+The prompt names the account whose password `sudo` accepts, which is not always the caller. A `targetpw`, `rootpw` or `runaspw` policy asks for a different one, and openSUSE ships `Defaults targetpw`, so the same prompt reads `password for root` there.
 
 Off a terminal (a pipe, CI, a {doc}`desktop menu <desktop-menus>`), `mpm` cannot prompt: a warning names the managers needing root, and they fail fast with a clear error instead of hanging. To escalate unattended, configure a `NOPASSWD` rule for the managers' commands: the probe then finds the cache warm and keeps it alive. A prior `sudo --validate` also works, but only from the same terminal session `mpm` runs in: under sudo's default terminal-keyed timestamps, credentials cached in one terminal do not carry to a `mpm` launched without one (a desktop frontend, a CI step), so `NOPASSWD` is the robust choice there.
 

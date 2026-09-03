@@ -119,7 +119,12 @@ class Zypper(PackageManager):
 
         This is reused by the `installed` and `search` operations.
 
-        ```{code-block} shell-session
+        The block below is an illustration, not a fixture: its argv carries a
+        `[*args]` placeholder and its result is elided, so it takes the
+        non-harvested `console` fence. The literal shapes this parses, one
+        solvable and many, are covered by `tests/test_manager_zypper.py`.
+
+        ```{code-block} console
 
         $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
             --xmlout search --details --type package [*args]
@@ -280,12 +285,12 @@ class Zypper(PackageManager):
 
         $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
             packages --unneeded
+        Ignoring repository 'openSUSE-20260830-0' because of 'no-cd' option.
         Loading repository data...
         Reading installed packages...
-        S  | Repository | Name    | Version   | Arch
-        ---+------------+---------+-----------+-------
-        i  | @System    | libfoo  | 1.2.3-1.1 | x86_64
-        i+ | openSUSE   | libbar  | 0.9-2.4   | noarch
+        S  | Repository            | Name    | Version   | Arch
+        ---+-----------------------+---------+-----------+--------
+        i  | Main Repository (OSS) | xorriso | 1.5.8-1.2 | aarch64
         ```
         """
         output = self.run_cli("packages", "--unneeded")

@@ -214,7 +214,7 @@ Class-level attributes and methods must follow the canonical order defined in `P
 
 Carry what is true here and absent elsewhere, and let the shared pages carry the rest:
 
-- **A default that does not fit this manager.** `mpm` caps a mutating operation at 500 seconds, which suits a binary package manager and not one that compiles. Every `ports` upgrade outlasts it, so its page names the ceiling and the key that raises it (`[mpm.managers.ports] timeout`). {doc}`/overrides` documents that the knob exists; only the manager page can say who needs to reach for it.
+- **A default that does not fit this manager.** `mpm` caps a mutating operation at 500 seconds, which suits a manager that downloads and not one that compiles: a large port outlasts it by hours. So the `ports` page names the ceiling and the key that raises it (`[mpm.managers.ports] timeout`). {doc}`/overrides` documents that the knob exists; only the manager page can say who needs to reach for it.
 - **A precondition the manager cannot satisfy itself**, like a tree or a login the user provides.
 - **A coexistence**, where two managers share one install database and their listings overlap.
 - **An operation deliberately absent**, with the reason, so a reader stops looking for it.

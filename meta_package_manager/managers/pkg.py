@@ -480,21 +480,21 @@ class Ports(PackageManager):
     ```
 
     :::{caution}
-    Every mutating operation compiles from source, so it outlasts the 500
-    second ceiling `mpm` puts on a state-changing command by default. An
-    upgrade of one small library already exceeds it and fails with
-    `Timed out after 500s`, having built nothing. Raise the ceiling for this
-    manager alone, in the configuration file:
+    Mutating operations compile from source, so their duration is set by the
+    port rather than by the network. A small library finishes well inside the
+    500 second ceiling `mpm` puts on a state-changing command (`expat` takes
+    about a minute), where a compiler or a browser runs for hours and reports
+    `Timed out after 500s`. Raise the ceiling for this manager alone, in the
+    configuration file:
 
     ```toml
     [mpm.managers.ports]
-    timeout = 3000
+    timeout = 14400
     ```
 
-    No single value fits: a build scales with the port, its dependency tree and
-    the machine, so treat the number above as a starting point rather than a
-    recommendation. `sync` and `installed` are unaffected, delegating to `git`
-    and `pkg` rather than building.
+    No single value fits, a build scaling with the port, its dependency tree
+    and the machine. `sync` and `installed` are unaffected, delegating to
+    `git` and `pkg` rather than building.
     :::
     """
 
@@ -692,20 +692,26 @@ class Ports(PackageManager):
         upgrade commands are typically printed for the user to inspect
         before running.
 
-        `-a` is the one short option `mpm` builds at runtime, and it stays
-        short: `portmaster` 3.35 lists no `--all` among the long options its
-        own parser accepts, so the long form this project prefers everywhere
-        else does not exist here.
+        `-G` is what makes the run unattended, and `--no-confirm` does not
+        cover it: `portmaster` invokes `make config` for any port whose
+        options were never saved, which spawns the `portconfig` dialog even
+        under `BATCH=yes`. With no terminal to answer it, the dialog spins
+        until `mpm` times out the whole command, having built nothing.
+
+        Both flags stay short because `portmaster` 3.35 offers no long form
+        for either: its parser accepts `--force-config`, the *opposite* of
+        `-G`, and nothing spelling `-a`.
 
         ```{code-block} shell-session
 
-        $ sudo portmaster --no-confirm --no-term-title -a
+        $ sudo portmaster --no-confirm --no-term-title -G -a
         ```
         """
         portmaster = self.which("portmaster") or Path("portmaster")
         return self.build_cli(
             "--no-confirm",
             "--no-term-title",
+            "-G",
             "-a",
             override_cli_path=portmaster,
             auto_pre_args=False,
@@ -720,9 +726,12 @@ class Ports(PackageManager):
     ) -> tuple[str, ...]:
         """Generate the CLI to upgrade one port via `portmaster`.
 
+        Carries `-G` for the reason {meth}`upgrade_all_cli` gives: without it
+        `portmaster` stops on the `portconfig` options dialog.
+
         ```{code-block} console
 
-        $ sudo portmaster --no-confirm --no-term-title www/nginx
+        $ sudo portmaster --no-confirm --no-term-title -G www/nginx
         ```
         """
         origin = self._resolve_origin(package_id)
@@ -730,6 +739,7 @@ class Ports(PackageManager):
         return self.build_cli(
             "--no-confirm",
             "--no-term-title",
+            "-G",
             origin,
             override_cli_path=portmaster,
             auto_pre_args=False,

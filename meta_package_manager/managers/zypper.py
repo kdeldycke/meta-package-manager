@@ -121,49 +121,30 @@ class Zypper(PackageManager):
 
         This is reused by the `installed` and `search` operations.
 
-        The block below is an illustration, not a fixture: its argv carries a
-        `[*args]` placeholder and its result is elided, so it takes the
-        non-harvested `console` fence. The literal shapes this parses, one
-        solvable and many, are covered by `tests/test_manager_zypper.py`.
+        The query below stands in for the `*args` each caller appends, and its
+        result shows both shapes the note above describes: `libopenh264-8`
+        returned twice, once `installed` and once `other-version`, which `mpm`
+        drops; and `libopenh264-devel` returned once per repository at a
+        different edition, which `mpm` collapses to the highest.
 
-        ```{code-block} console
+        ```{code-block} shell-session
 
         $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
-            --xmlout search --details --type package [*args]
+            --xmlout search --details --type package libopenh264
         <?xml version='1.0'?>
         <stream>
-            <message type="info">Loading repository data...</message>
-            <message type="info">Reading installed packages...</message>
+        <message type="info">Ignoring repository &apos;openSUSE-20260830-0&apos; because of &apos;no-cd&apos; option.</message>
+        <message type="info">Loading repository data...</message>
+        <message type="info">Reading installed packages...</message>
 
-            <search-result version="0.0">
-                <solvable-list>
-                    <solvable status="installed" name="aaa_base" kind="package"
-                        edition="12.12-bp12.3.1" arch="x86_64"/>
-
-                    <solvable status="installed" name="adwaita-icon-theme"
-                        kind="package" edition="1.0.3-bp153.1.1" arch="x86_64"/>
-                    <solvable status="other-version" name="adwaita-icon-theme"
-                        kind="package" edition="1.0.1-bp153.1.1" arch="x86_64"/>
-
-                    <solvable status="not-installed" name="kopete-devel"
-                        kind="package" edition="20.04.2-bp153.2.5.1" arch="x86_64"
-                        repository="Update"/>
-                    <solvable status="not-installed" name="kopete-devel"
-                        kind="package" edition="20.04.2-bp153.2.2.1" arch="x86_64"
-                        repository="Update"/>
-                    <solvable status="not-installed" name="kopete-devel"
-                        kind="package" edition="20.04.2-bp153.2.2.1" arch="x86_64"
-                        repository="Debug"/>
-                    <solvable status="not-installed" name="kopete-devel"
-                        kind="package" edition="20.04.2-bp153.2.5.1" arch="i586"
-                        repository="Update"/>
-                    <solvable status="not-installed" name="kopete-devel"
-                        kind="package" edition="20.04.2-bp153.2.2.1" arch="i586"
-                        repository="Update"/>
-
-                    (...)
-                </solvable-list>
-            </search-result>
+        <search-result version="0.0">
+        <solvable-list>
+        <solvable status="installed" name="libopenh264-8" kind="package" edition="2.6.0-2.suse1699.10" arch="aarch64" repository="Open H.264 Codec (openSUSE Tumbleweed)"/>
+        <solvable status="other-version" name="libopenh264-8" kind="package" edition="2.6.0~noopenh264-1.5" arch="aarch64" repository="Main Repository (OSS)"/>
+        <solvable status="not-installed" name="libopenh264-devel" kind="package" edition="2.6.0-2.suse1699.10" arch="aarch64" repository="Open H.264 Codec (openSUSE Tumbleweed)"/>
+        <solvable status="not-installed" name="libopenh264-devel" kind="package" edition="2.6.0~noopenh264-1.5" arch="aarch64" repository="Main Repository (OSS)"/>
+        </solvable-list>
+        </search-result>
         </stream>
         ```
         """

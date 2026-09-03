@@ -884,6 +884,20 @@ class _StallWatchdog(logging.Handler):
     does not). The scoped `sudo = true` opt-in documented in `docs/sudo.md`
     already covers users wanting a guaranteed up-front prompt.
     ```
+
+    ```{note}
+
+    One terminal state defeats the notice, and it is not a defect this class
+    can repair. Keeping the child in mpm's process group is what lets its
+    `sudo` reach the terminal at all, so when that group is *not* the
+    terminal's foreground group, the read earns `SIGTTIN` and the kernel stops
+    the whole group, mpm included: the notice thread is stopped along with the
+    process it would warn about. Measured on a shell without job control
+    (`ssh -tt host 'mpm …'`), where `ps` reports `mpm`, the helper and `sudo`
+    all in state `T` at `do_signal_stop`. An interactive run puts mpm in the
+    foreground group and the notice fires normally, so this reaches the
+    frontends that spawn mpm from a pty without making it the foreground job.
+    ```
     """
 
     tee: logging.Logger

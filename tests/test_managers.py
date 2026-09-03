@@ -703,7 +703,11 @@ def declared_keywords(manager) -> tuple[str, ...]:
     so a label still collects its members' terms through a set union, but
     ownership is only what a class declares for itself.
     """
-    return type(manager).__dict__.get("keywords", ())
+    # Annotated local, as in `_load_benchmark_toml`: a class `__dict__` is typed
+    # as `Any`, and this laundering keeps the function clean of `no-any-return`
+    # without an ignore that a different mypy then calls unused.
+    keywords: tuple[str, ...] = type(manager).__dict__.get("keywords", ())
+    return keywords
 
 
 def test_manager_keywords_have_one_owner():

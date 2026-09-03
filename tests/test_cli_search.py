@@ -18,11 +18,23 @@
 from __future__ import annotations
 
 import pytest
-from extra_platforms.pytest import skip_github_ci, unless_macos
+from extra_platforms.pytest import unless_macos
 
+from meta_package_manager.pool import pool
 from meta_package_manager.tables import SEARCH_COLUMNS
 
 from .test_cli import CLITableTests, check_packages_payload
+
+_MAS_UNICODE_SEARCH = (
+    '{"adamID":1435447041,"name":"钉钉 - AI时代的工作方式","version":"8.5.5"}\n'
+    '{"adamID":1189898970,"name":"WeCom-Business IM & Work Tools","version":"5.0.10"}\n'
+)
+"""A `mas search 钉 --json` answer, captured on macOS against `mas` 7.0.0.
+
+One JSON object per line, which is the stream shape
+{meth}`~meta_package_manager.managers.mas.MAS._parse_json_stream` reads. The
+second entry is kept so the highlighter has a non-matching row to leave alone.
+"""
 
 
 @pytest.fixture
@@ -78,8 +90,7 @@ class TestSearch(CLITableTests):
         check_packages_payload(result)
 
     @unless_macos
-    @skip_github_ci
-    def test_unicode_search(self, invoke):
+    def test_unicode_search(self, invoke, monkeypatch):
         """Check `mpm` is accepting unicode as search query.
 
         `mas` is the only manager we have that is accepting unicode characters for
@@ -98,11 +109,28 @@ class TestSearch(CLITableTests):
 
         Test originates from #16.
 
-        ```{caution}
-        Test is skipped on GitHub Actions as `mas` does not have access there
-        to a registered account on the App Store. So the search returns no results.
+        ```{note}
+        The search answer is canned, so the assertions below run on every macOS
+        host instead of only a lucky one. `mas search` queries
+        `itunes.apple.com` over the network for every call, and an unreachable
+        API returns the same empty table as a query mpm mangled: asserting
+        through the live call reports a unicode bug whenever the host is
+        offline, firewalled or signed out of the App Store, which is why this
+        test used to be skipped on GitHub Actions. Only the search is canned,
+        every other call reaching the real binary, so `mas` still has to be
+        installed and answer its version probe for the selector to resolve it.
         ```
         """
+        mas = pool["mas"]
+        real_run_cli = mas.run_cli
+
+        def canned_search(*args, **kwargs):
+            if "search" in args:
+                return _MAS_UNICODE_SEARCH
+            return real_run_cli(*args, **kwargs)
+
+        monkeypatch.setattr(mas, "run_cli", canned_search)
+
         result = invoke("--color", "--mas", "search", "钉")
         assert result.exit_code == 0
         assert "钉钉" in result.stdout

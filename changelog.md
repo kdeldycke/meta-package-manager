@@ -756,7 +756,7 @@
 - [fwupd] Remove `--offline` parameter which has been silently disabled and has now been remove in v2.0.0 of `fwupd`. Refs [#1511](https://github.com/kdeldycke/meta-package-manager/pull/1511).
 - [bar-plugin] Bump minimal Python version to 3.9 to aligns it with macOS default.
 - [bar-plugin] Check minimal version of SwiftBar is 2.1.2.
-- [bar-plugin] Reduce size of error messages from 12 to 10.
+- [bar-plugin] Reduce the font size of error messages from 12 to 10 points.
 - [mpm] Remove reference to `python3` command in documentation to reduce confusion.
 - [mpm] Build `arm64` binary for Linux.
 - [mpm] Try to build `arm64` binary for Windows but mark it as unstable.
@@ -824,8 +824,6 @@
 - [mpm] Add dependency on `more-itertools`.
 - [mpm] Add metadata and icon to binaries produced by Nuitka.
 - [mpm] Mark Python 3.13-dev tests as stable.
-- [bar-plugin] Reactivate login shells invocation tests.
-- [bar-plugin] Skip rendering tests on GitHub.
 - [mpm] Remove `sys.path` cleaning hack in `__main__` invocation.
 - [mpm] Reactivate config file test for `restore` subcommand.
 
@@ -1100,7 +1098,7 @@
 - [mpm] Remove tests on `macos-10.15` and `ubuntu-18.04`, they're deprecated by GitHub.
 - [mpm] Fix plugin rendering tests.
 - [mpm] Always run plugin rendering tests in Poetry venv.
-- [bar-plugin] Add a `--check-mpm` option to tests the mpm binary search phase without running a full outdated package listing.
+- [bar-plugin] Add a `--check-mpm` option to test the mpm binary search phase without running a full outdated package listing.
 - [mpm] Tests Python and plugin invocation in lots of shell configuration.
 - [mpm] Deactivate login shell tests.
 - [mpm] Force Homebrew tap repair in tests.
@@ -1303,7 +1301,7 @@
 
 - [brew,cask] Do not let homebrew auto-update on other commands. Refs [#36](https://github.com/kdeldycke/meta-package-manager/issues/36).
 - [brew,cask] Disable analytics and env hints in logs.
-- [bar-plugin] Fix log verbosity and unittests for xbar plugin.
+- [bar-plugin] Fix log verbosity of the xbar plugin.
 - [mpm] Show in debug logs the extra environment variable used for CLIs.
 - [mpm] Enforce code structure in package manager definition files.
 - [mpm] Fix documentation generation.
@@ -1694,7 +1692,6 @@
   [#9](https://github.com/kdeldycke/meta-package-manager/issues/9).
 - [mpm] Print table rendering, stats and timing in console output instead of
   logger to allow them to be greppable.
-- [bar-plugin] Test plugin with Python 2.7.
 - [mpm] Allow for manager-specific search path to help hunting down CLIs.
 - [mpm] Highlight CLI and indent results in debug output.
 - [mpm] Bump dependency to `pylint 2.5` and `cli-helpers 2.0`.
@@ -1810,7 +1807,6 @@
 - [mpm] Removes direct dependency on `tabulate`.
 - [cask] Fix minimal version check for `cask`. Closes [#41](https://github.com/kdeldycke/meta-package-manager/issues/41) and
   [#44](https://github.com/kdeldycke/meta-package-manager/pull/44).
-- [bar-plugin] Do not run BitBar plugin unittests but on macOS.
 
 ## [`2.6.1` (2017-11-05)](https://github.com/kdeldycke/meta-package-manager/compare/v2.6.0...v2.6.1)
 
@@ -1866,7 +1862,6 @@
 - [mpm] Add new `list` operation. Closes [#20](https://github.com/kdeldycke/meta-package-manager/issues/20).
 - [mas] Fix upgrade of `mas` packages. Closes [#32](https://github.com/kdeldycke/meta-package-manager/issues/32).
 - [gem] Fix listing of gems installed in several versions at once (like `molinillo (0.5.4, 0.4.5, 0.2.3)`), reporting the latest of them.
-- [bar-plugin] Document BitBar plugin release process.
 - [mpm] Colorize check-marks in CLI output.
 - [mpm] Decouple `sync` and `outdated` actions in all managers.
 - [mpm] Cache output of `outdated` command.
@@ -1940,7 +1935,6 @@
 - [mpm] Show unmet version requirements in table output for `mpm managers`
   sub-command.
 - [mpm] Fix duplicates in outdated packages by indexing them by ID.
-- [bar-plugin] Unittest simple call of BitBar plugin.
 - [mpm] Always print the raw, un-normalized version of managers, as reported
   by themselves.
 - [mpm] Fetch version of all managers.

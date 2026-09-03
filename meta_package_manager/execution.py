@@ -188,6 +188,13 @@ Under `mpm --plan` their CLI calls are captured into {data}`PLAN_RECORDER`
 instead of being executed, while the read-only queries (`installed`, `outdated`,
 `search`) still run so the plan resolves against real system state. `restore`
 re-stamps `install` on the manager, so it is covered here.
+
+The match is on the operation in flight, never on the command: a read issued
+from *inside* a mutating method is captured too, and hands its caller an empty
+string. A helper whose result the command cannot be built without therefore
+passes `force_exec=True` (`Ports._resolve_origin`), or runs under
+{meth}`CLIExecutor.acting_as` re-stamped with the read it performs (the
+`install` flow does this around its candidate search).
 """
 
 VERSION_PROBE: Final = "version"
@@ -1174,10 +1181,12 @@ class CLIExecutor:
             code, output, error = cached
             logging.log(command_level, f"Reuse peer result: {cli_msg}")
         elif self.plan and self._active_operation in _MUTATING_OPERATIONS:
-            # Plan mode: record the state-changing command for inspection instead of
-            # running it. Read-only queries (and force_exec calls, which patch plan
-            # off) fall through to real execution below, so the plan resolves against
-            # actual system state. See _MUTATING_OPERATIONS and PLAN_RECORDER.
+            # Plan mode: record the state-changing command for inspection instead
+            # of running it. A read dispatched as its own operation (and any
+            # force_exec call, which patches plan off) falls through to real
+            # execution below, so the plan resolves against actual system state.
+            # A read issued from inside a mutating method does not: the stamp is
+            # what is tested here. See _MUTATING_OPERATIONS and PLAN_RECORDER.
             # `id` is declared on the `PackageManager` subclass, not this mixin.
             plan_command = format_plan_command(clean_args, extra_env)
             PLAN_RECORDER.record(self.id, plan_command)  # type: ignore[attr-defined]

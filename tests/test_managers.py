@@ -590,3 +590,104 @@ def test_argv_literals_carry_no_shell_quoting():
         "these argv literals carry shell quoting the tool will read as part of "
         "the value: " + ", ".join(offenders)
     )
+
+
+def test_reads_inside_mutating_methods_survive_plan_mode():
+    """A read a mutating method needs must be exempted from plan capture.
+
+    `mpm --plan` decides what to record from the operation in flight, not from
+    the command: any CLI call made while `install`, `remove` or `upgrade` is
+    stamped gets written to the plan recorder and hands its caller an empty
+    string. A method that queries before it acts therefore reads back nothing
+    and concludes the package does not exist. `ports` did exactly that, failing
+    every `mpm --plan install` with `Could not resolve port origin`, and
+    `sdkman` reported every installed candidate as missing.
+
+    Two exemptions are accepted, matching the two shapes in the codebase: the
+    helper passes `force_exec=True` (which lifts plan for that one call), or the
+    caller re-stamps the block with `acting_as` naming the read it performs. The
+    mutating call itself must stay outside such a stamp, or plan mode would run
+    the change it exists to only print; that half is not checkable here and is
+    left to review.
+
+    The check is deliberately narrow. It knows two ways a method triggers a
+    read, the `installed`/`outdated` properties and a `_resolve*` helper, so a
+    read reached by any other route passes unnoticed. It covers the population
+    that has produced the bug twice, not every way of writing it.
+    """
+    mutating = {
+        "cleanup_cache",
+        "cleanup_orphan",
+        "cleanup_repair",
+        "install",
+        "remove",
+        "remove_orphan",
+        "restore",
+        "sync",
+        "upgrade",
+        "upgrade_all_cli",
+        "upgrade_one_cli",
+    }
+    read_properties = {"installed", "outdated"}
+
+    def forces_exec(class_node: ast.ClassDef, method_name: str) -> bool:
+        """Does the named sibling method pass `force_exec=True` to any call?"""
+        for node in class_node.body:
+            if (
+                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and node.name == method_name
+            ):
+                for call in (n for n in ast.walk(node) if isinstance(n, ast.Call)):
+                    for keyword in call.keywords:
+                        if keyword.arg == "force_exec" and (
+                            getattr(keyword.value, "value", None) is True
+                        ):
+                            return True
+        return False
+
+    offenders = []
+    for path in sorted(Path("meta_package_manager").rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="UTF-8"))
+        for class_node in (n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)):
+            methods = [
+                n
+                for n in class_node.body
+                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+            for method in methods:
+                if method.name not in mutating:
+                    continue
+                stamped = any(
+                    isinstance(n, ast.Attribute) and n.attr == "acting_as"
+                    for n in ast.walk(method)
+                )
+                if stamped:
+                    continue
+                triggers = set()
+                for node in ast.walk(method):
+                    if (
+                        isinstance(node, ast.Attribute)
+                        and isinstance(node.value, ast.Name)
+                        and node.value.id == "self"
+                        and node.attr in read_properties
+                    ):
+                        triggers.add(f"self.{node.attr}")
+                    if (
+                        isinstance(node, ast.Call)
+                        and isinstance(node.func, ast.Attribute)
+                        and isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == "self"
+                        and node.func.attr.startswith("_resolve")
+                        and not forces_exec(class_node, node.func.attr)
+                    ):
+                        triggers.add(f"self.{node.func.attr}()")
+                if triggers:
+                    offenders.append(
+                        f"{class_node.name}.{method.name} reads "
+                        f"{sorted(triggers)} in {path}"
+                    )
+
+    assert not offenders, (
+        "reads issued inside a mutating method are captured by --plan and return "
+        f"an empty string; exempt them with force_exec=True or acting_as: {offenders}"
+    )

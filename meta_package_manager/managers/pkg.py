@@ -767,6 +767,13 @@ class Ports(PackageManager):
         slashed. Otherwise queries the `pkg` binary to look up the origin
         from the configured repository.
 
+        The lookup runs under `force_exec`, like the `go env GOBIN` probe that
+        `go` cannot build a command without. Plan mode captures by the
+        *operation* in flight rather than by the command, so a read issued from
+        inside `install` is recorded instead of run: without the flag this
+        helper reads back an empty string and reports every package as
+        unresolvable under `mpm --plan install`.
+
         `--search name` is passed even though
         [`pkg-search(8)`](https://man.freebsd.org/cgi/man.cgi?query=pkg-search)
         documents that field as the default for a term holding no `/`: under
@@ -790,6 +797,7 @@ class Ports(PackageManager):
             override_cli_path=pkg_path,
             auto_pre_args=False,
             auto_extra_env=False,
+            force_exec=True,
         )
         first_line = output.strip().splitlines()
         if not first_line:

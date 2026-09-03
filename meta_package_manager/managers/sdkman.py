@@ -217,15 +217,26 @@ class SDKMAN(PackageManager):
         version. The currently installed version is looked up from
         {meth}`installed` and passed to the CLI.
 
+        That lookup is stamped as the read it is: plan mode captures by the
+        operation in flight, so an inventory read issued under `remove` would be
+        recorded rather than run, and every package would then be reported as
+        not installed. The `uninstall` call stays outside the stamp, or plan
+        mode would run the removal it is meant to only print.
+
         ```{code-block} shell-session
 
         $ sdk uninstall java 21.0.4-tem
         ```
         """
-        for pkg in self.installed:
-            if pkg.id == package_id:
-                return self.run_cli("uninstall", package_id, str(pkg.installed_version))
-        raise ValueError(f"{package_id} is not installed")
+        installed_version = None
+        with self.acting_as("installed"):
+            for pkg in self.installed:
+                if pkg.id == package_id:
+                    installed_version = str(pkg.installed_version)
+                    break
+        if installed_version is None:
+            raise ValueError(f"{package_id} is not installed")
+        return self.run_cli("uninstall", package_id, installed_version)
 
     def sync(self) -> None:
         """Sync package metadata.

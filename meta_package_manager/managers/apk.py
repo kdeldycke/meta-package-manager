@@ -16,12 +16,15 @@
 
 from __future__ import annotations
 
+import json
+import logging
 import re
 
 from extra_platforms import LINUX_LIKE
 
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
+from ..version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -36,14 +39,29 @@ class APK(PackageManager):
     Documentation: [Alpine Package Keeper](https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper).
 
     ```{note}
-    `installed` and `outdated` both parse the `list` applet, so the
-    version floor is `2.10.0`: the release that introduced it. Progress
-    output is disabled on every call to keep the parsed lines stable.
+    The version floor is `2.10.0`, the release introducing the `list` applet
+    that {meth}`outdated` parses and {meth}`installed` falls back on. Where
+    {attr}`query_requirement` is met, `installed` reads the structured `query`
+    applet instead. Progress output is disabled on every call to keep the
+    parsed lines stable.
     ```
 
     ```{caution}
     `outdated` reads the local repository cache rather than the remote, so
     `sync` must run first for an accurate upgrade list.
+    ```
+
+    ```{warning}
+    `orphans` is deliberately not implemented, and `apk query --orphaned` must
+    not be mapped onto it. The two words name different sets: mpm's orphan is a
+    package installed as a dependency that nothing requires any more, where
+    apk's is one no configured repository provides any more. Measured on Alpine
+    `3.24.1` with apk-tools `3.0.8`: pointing apk at no repository
+    (`--repositories-file /dev/null`) reports all 86 installed packages as
+    orphaned, and the stock repositories report none, while a package dropped
+    from `apk-world(5)` and required by nothing is never reported at all.
+    Wiring that selector to `cleanup --orphans` would delete a working system
+    whenever its mirrors were unreachable.
     ```
     """
 
@@ -61,6 +79,20 @@ class APK(PackageManager):
     requirement = ">=2.10.0"
     """The `list` applet, used by {meth}`installed` and {meth}`outdated`,
     was introduced in version `2.10.0`.
+    """
+
+    query_requirement = ">=3.0.0"
+    """Minimum apk version answering the `query` applet.
+
+    `apk-tools` 3 added `query`, which reports the same inventory as `list` does
+    but in `json` or `yaml`, so {meth}`installed` reads names and versions
+    outright instead of recovering them from a line's shape.
+
+    Kept apart from {attr}`requirement` (`>=2.10.0`), following
+    {attr}`Yay.cooldown_requirement
+    <meta_package_manager.managers.pacman.Yay.cooldown_requirement>`, so an
+    `apk-tools` 2 host keeps every operation through the `list` applet. Alpine
+    `3.22` and older still ship `2.14`, and their support windows run into 2027.
     """
 
     pre_args = ("--no-progress",)
@@ -99,8 +131,68 @@ class APK(PackageManager):
     """
 
     @property
+    def _has_query_applet(self) -> bool:
+        """Whether this apk is known to answer the `query` applet.
+
+        An undetectable version answers `False`, which only picks the `list`
+        dialect of {meth}`installed`: a manager whose version never resolved
+        fails {attr}`~meta_package_manager.manager.PackageManager.fresh` and so
+        runs no operation on a real host.
+        """
+        if self.version is None:
+            return False
+        return self.version in VersionRange(self.query_requirement)
+
+    @staticmethod
+    def _parse_query_json(output: str) -> tuple[tuple[str, str], ...]:
+        """Extract `(name, version)` pairs from a `query --format json` payload.
+
+        An empty selection prints `[]`, and a refusal (an `apk-tools` 2 meeting
+        the applet, a repository it cannot reach) prints no JSON at all. Both
+        yield nothing rather than raising, so a caller reports an empty set the
+        way every other parser here does.
+        """
+        try:
+            entries = json.loads(output)
+        except ValueError:
+            logging.debug("apk query returned no JSON payload.")
+            return ()
+        if not isinstance(entries, list):
+            logging.debug("apk query returned JSON that is not a list of packages.")
+            return ()
+        return tuple(
+            (entry["name"], entry["version"])
+            for entry in entries
+            if isinstance(entry, dict) and entry.get("name") and entry.get("version")
+        )
+
+    @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
+
+        `apk-tools` 3 answers the `query` applet, whose `json` payload names and
+        versions each package outright, so nothing has to be recovered from a
+        line's shape. The pattern is mandatory, an empty selection matching
+        nothing rather than everything.
+
+        ```{code-block} shell-session
+
+        $ apk --no-progress query --installed --fields name,version --format json '*'
+        [
+          {
+            "name": "alpine-base",
+            "version": "3.24.1-r0"
+          }, {
+            "name": "apk-tools",
+            "version": "3.0.8-r0"
+          }, {
+            "name": "busybox",
+            "version": "1.37.0-r31"
+          }
+        ]
+        ```
+
+        `apk-tools` 2 has no `query`, and gets the `list` applet instead:
 
         ```{code-block} shell-session
 
@@ -111,8 +203,30 @@ class APK(PackageManager):
         busybox-1.36.1-r5 x86_64 {busybox} (GPL-2.0-only) [installed]
         python3-3.11.6-r0 x86_64 {python3} (PSF-2.0) [installed]
         ```
+
+        Which dialect to *ask* for is decided by {attr}`_has_query_applet`, but
+        both are parsed whatever the host, keyed on the payload being JSON. That
+        is what lets each documented block above stand as a fixture, and it
+        keeps the reading of an answer independent of the guess that produced
+        it.
         """
-        output = self.run_cli("list", "--installed")
+        if self._has_query_applet:
+            output = self.run_cli(
+                "query",
+                "--installed",
+                "--fields",
+                "name,version",
+                "--format",
+                "json",
+                "*",
+            )
+        else:
+            output = self.run_cli("list", "--installed")
+
+        if output.lstrip().startswith("["):
+            for package_id, version in self._parse_query_json(output):
+                yield self.package(id=package_id, installed_version=version)
+            return
 
         for match in self._INSTALLED_REGEXP.finditer(output):
             if split := self.split_name_version(match.group("pkgver")):

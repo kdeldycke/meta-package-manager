@@ -16,6 +16,7 @@
 - [mpm] Fix a crash rendering tables to a non-UTF-8 stream, which broke every table subcommand on Windows as soon as its output was redirected.
 - [mpm] Fix comparison of the Gentoo and Alpine post-release suffixes: `1.0_p1` and `1.0_git20240101` now rank above `1.0`, not below it.
 - [mpm] Escalate through `doas` where `sudo` is Alpine's `doas-sudo-shim`, which rejects every option the credential probes send and so reported a cold cache.
+- [apk] Read the installed inventory from the structured `apk query` applet on apk-tools 3, keeping the `apk list` parser for apk-tools 2.
 - [pkg] Fix every operation on FreeBSD, where `pkg` rejects the global `--quiet` it was passed, and repair `search`, which omitted its subcommand and mis-parsed the results.
 - [ports] Fix the FreeBSD ports manager, which reported no version and so never activated, and repair `installed`, `outdated`, `install` and `upgrade`.
 - [ports,sdkman] Fix `--plan` for the operations that query before they act: they reported every package as missing instead of printing the command.

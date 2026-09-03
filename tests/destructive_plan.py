@@ -642,25 +642,53 @@ def rpm_distro_missing() -> bool:
     return probe.returncode != 0 or not probe.stdout.strip()
 
 
-def flatpak_remotes_missing() -> bool:
-    """Whether flatpak has no remote to resolve an application from.
+def flatpak_install_blocked() -> bool:
+    """Whether a flatpak install cannot complete unattended on this host.
 
-    An install needs a configured remote, and a bare flatpak carries none, so the
-    round-trip fails for want of a catalog rather than for anything `mpm` did.
-    Probed live because a desktop install configures Flathub while a server or a
-    CI image does not, which the platform cannot answer.
+    Two gates, and an install needs both. It needs a configured remote to resolve
+    the application from, which a bare flatpak has none of. It then needs polkit
+    to authorize the system-scope deploy, which an unattended session cannot
+    answer for: `pkcheck` reports `auth_admin` there, and flatpak resolves the
+    whole application before dying on `Flatpak system operation Deploy not
+    allowed for user`, a late failure that reads like an mpm fault and is not one.
+
+    Probed live rather than inferred: a desktop install configures Flathub and
+    clears the polkit prompt from its session, while a CI image and a headless SSH
+    login clear neither. Root needs no polkit at all and is let through.
+
+    Every uncertainty answers "blocked", since the cost of skipping a round-trip
+    that would have worked is one lost signal, against a red run for a property of
+    the host.
     """
     flatpak_path = which("flatpak")
     if not flatpak_path:
         return True
-    probe = subprocess.run(
+    remotes = subprocess.run(
         (flatpak_path, "remotes", "--columns=name"),
         capture_output=True,
         check=False,
         text=True,
         encoding="UTF-8",
     )
-    return probe.returncode != 0 or not probe.stdout.strip()
+    if remotes.returncode != 0 or not remotes.stdout.strip():
+        return True
+    if getattr(os, "geteuid", lambda: 1)() == 0:
+        return False
+    pkcheck_path = which("pkcheck")
+    if not pkcheck_path:
+        return True
+    authorized = subprocess.run(
+        (
+            pkcheck_path,
+            "--action-id",
+            "org.freedesktop.Flatpak.app-install",
+            "--process",
+            str(os.getpid()),
+        ),
+        capture_output=True,
+        check=False,
+    )
+    return authorized.returncode != 0
 
 
 INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
@@ -679,8 +707,9 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     "dnf5": rpm_distro_missing,
     "yum": rpm_distro_missing,
     "zypper": rpm_distro_missing,
-    # flatpak needs a remote to resolve apps from, and the runners configure none.
-    "flatpak": flatpak_remotes_missing,
+    # flatpak needs a remote to resolve apps from and polkit to authorize the
+    # system-scope deploy; an unattended session clears neither.
+    "flatpak": flatpak_install_blocked,
     # basalt refuses every command, the read-only listing included, without a GitHub
     # token file of its own, and needs the environment its shell-init snippet exports.
     # Neither is set up on a runner.

@@ -704,8 +704,9 @@ jobs:
   # and dies in ZeroBrew's formula shim: `undefined method 'which' for an
   # instance of OpensslAT3`. Nothing here can fix that, and a cell that can only
   # ever be red teaches readers to ignore this workflow's red runs, which is how
-  # its ZeroBrew pin sat three months past a CVE unnoticed. Restore the gate
-  # once upstream implements `which`.
+  # its ZeroBrew pin sat three months past a CVE unnoticed. Reported upstream as
+  # https://github.com/lucasgelfond/zerobrew/issues/404: restore the gate once
+  # that closes.
   zerobrew:
     name: "${{ matrix.mark }} zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
     continue-on-error: ${{ matrix.unstable }}

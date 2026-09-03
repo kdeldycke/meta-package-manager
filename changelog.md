@@ -18,6 +18,7 @@
 - [ports] Fix the FreeBSD ports manager, which reported no version and so never activated, and repair `installed`, `outdated`, `install` and `upgrade`.
 - [ports,sdkman] Fix `--plan` for the operations that query before they act: they reported every package as missing instead of printing the command.
 - [ports] Fix `upgrade`, which hung on FreeBSD's port options dialog until it timed out, having built nothing.
+- [ips] Add the Image Packaging System of Solaris and illumos, with inventory, search, install, remove, upgrade, catalog sync and history purge.
 - [sun-tools] Activate on illumos as well as Solaris: OpenIndiana and its siblings inherit the SVR4 `pkginfo`, `pkgadd` and `pkgrm` tools.
 - [sun-tools] Report each package's human-readable name, which was parsed from `pkginfo -l` and then dropped.
 - [claude-code-plugins] Add Claude Code plugins manager, with inventory, install, remove, single-plugin upgrade, marketplace sync and orphan cleanup.
@@ -98,7 +99,7 @@
 - [gext] Implement `gext`, covering GNOME Shell extensions from extensions.gnome.org. The inventory forces `--all`, without which only enabled extensions are reported, and `outdated` reads a dry run that exits `17` once it has something to report.
 - [mpm] Document concurrency on a page of its own: how far `--jobs` spreads a command, a per-subcommand table of what runs at once, and the managers that queue on a shared backend. The readme's flat diagram of one band per manager moves there and gains a level, grouping the serialized managers under the backend they contend for.
 - [mpm] Merge the readme's *Metadata and operations* table into its *Supported package managers* section.
-- [mpm] Close each verdict of the unsupported-managers page on the release that first published it, so a reader can date the decision.
+- [mpm] Close each verdict of the unsupported-managers page on the release that first published it, with that release's date, so a reader can tell how old a verdict is.
 - [mpm] Split the unsupported-managers page into one section per declined tool, in place of the single table. Each title carries the tool and its verdict glyphs, so the manager ID doubles as the anchor a decision can be cited by, and the benchmark now links each glyph to the section that explains it instead of to the top of the page. Tools whose verdict was repeated word for word are grouped into one family section naming its members, collapsing the fifteen identical JetBrains entries into one.
 - [mpm] Merge the manager index into a single table: the managers `mpm` wraps open it alphabetically, and the ones it declined close it grouped by verdict. Its glyph legend now counts the managers in each state, in place of the prose summary that used to open the page.
 - [mpm] Link the tracker badge of each manager card to the open issues and pull requests carrying its label, rather than to every one ever filed.

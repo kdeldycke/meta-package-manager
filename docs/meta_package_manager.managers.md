@@ -38,6 +38,7 @@
    meta_package_manager.managers.go
    meta_package_manager.managers.guix
    meta_package_manager.managers.homebrew
+   meta_package_manager.managers.ips
    meta_package_manager.managers.luarocks
    meta_package_manager.managers.lure
    meta_package_manager.managers.mamba

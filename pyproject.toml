@@ -81,6 +81,7 @@ keywords = [
   "homebrew",
   "hyprland",
   "hyprpm",
+  "ips",
   "jpm",
   "julia",
   "juliaup",
@@ -1046,6 +1047,7 @@ metrics.subjects.guix = "https://codeberg.org/guix/guix"
 metrics.subjects.gup = "https://github.com/nao1215/gup"
 metrics.subjects.haxelib = "https://github.com/HaxeFoundation/haxelib"
 metrics.subjects.hyprpm = "https://github.com/hyprwm/Hyprland"
+metrics.subjects.ips = "https://github.com/OpenIndiana/pkg5"
 metrics.subjects.jpm = "https://github.com/janet-lang/jpm"
 metrics.subjects.julia = "https://github.com/JuliaLang/julia"
 metrics.subjects.juliaup = "https://github.com/JuliaLang/juliaup"
@@ -1280,6 +1282,7 @@ labels.file-rules."📦 manager: homebrew" = [
   "tests/*zerobrew*",
 ]
 labels.file-rules."📦 manager: hyprpm" = [ "meta_package_manager/managers/hyprpm.*", "tests/*hyprpm*" ]
+labels.file-rules."📦 manager: ips" = [ "meta_package_manager/managers/ips.*", "tests/*ips*" ]
 labels.file-rules."📦 manager: jpm" = [ "meta_package_manager/managers/jpm.*", "tests/*jpm*" ]
 labels.file-rules."📦 manager: julia" = [ "meta_package_manager/managers/julia.*", "tests/*julia*" ]
 labels.file-rules."📦 manager: juliaup" = [ "meta_package_manager/managers/juliaup.*", "tests/*juliaup*" ]
@@ -1614,6 +1617,11 @@ description = "brew, cask, zerobrew"
 name = "📦 manager: hyprpm"
 color = "bfdadc"
 description = "hyprpm"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: ips"
+color = "bfdadc"
+description = "ips"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: jpm"

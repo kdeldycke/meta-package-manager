@@ -154,6 +154,10 @@ PACKAGE_IDS = {
     # too, so the round-trip is symmetric. Needs headers from a prior
     # `hyprpm update`, so it only runs on a real Hyprland host.
     "hyprpm": "https://github.com/hyprwm/hyprland-plugins",
+    # A small archive utility, verified present in OpenIndiana's catalog through
+    # `pkg search -p` and absent from a fresh install, so the round-trip really
+    # installs it. IPS package IDs are `category/name` paths.
+    "ips": "archiver/ofarc",
     "jpm": "argparse",
     # The General registry's canonical example package: pure Julia, no
     # dependencies, and it exists precisely to be installed by tests.

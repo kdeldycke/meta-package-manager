@@ -45,6 +45,7 @@ print(augmentations_table())
 | [`ghcup`](managers/ghcup.md)               |                      |              |      ✅      |       ✅        |               |
 | [`guix`](managers/guix.md)                 |                      |              |      ✅      |       ✅        |               |
 | [`haxelib`](managers/haxelib.md)           |                      |              |      ✅      |       ✅        |               |
+| [`ips`](managers/ips.md)                   |                      |              |      ✅      |       ✅        |               |
 | [`juliaup`](managers/juliaup.md)           |                      |              |      ✅      |       ✅        |               |
 | [`krew`](managers/krew.md)                 |                      |              |      ✅      |       ✅        |               |
 | [`luarocks`](managers/luarocks.md)         |          ✅          |              |      ✅      |       ✅        |               |

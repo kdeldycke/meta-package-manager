@@ -51,6 +51,7 @@ from .managers.ghcup import GHCup
 from .managers.go import Go
 from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
+from .managers.ips import IPS
 from .managers.luarocks import LuaRocks
 from .managers.lure import Lure
 from .managers.mamba import Mamba, Micromamba
@@ -148,6 +149,7 @@ manager_classes = (
     GHCup,
     Go,
     Guix,
+    IPS,
     Lazy,
     LuaRocks,
     Lure,

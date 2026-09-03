@@ -231,6 +231,10 @@ Runs Microsoft's own updater for one suite of applications. It has a fixed, sing
 
 Driven through a PowerShell call that triggers the Store's own bulk update. It exposes no per-package command line, so there is nothing to list, install or remove individually. Contrast [`winget`](managers/winget.md), Microsoft's actual package CLI, which `mpm` wraps.
 
+## [`myrlyn`](https://github.com/shundhammer/myrlyn) ❌
+
+openSUSE's graphical package manager, for selecting packages and patterns to install, update and remove. It is a Qt application and nothing else: `myrlyn --help` answers `FATAL: Could not connect to the display` and exits, so it accepts no argument without an X or Wayland session, and offers no operation to drive headlessly. What it installs are libzypp packages, which [`zypper`](managers/zypper.md) already reaches.
+
 ## [`neobundle`](https://github.com/Shougo/neobundle.vim) ☠️ 🛟
 
 Vim plugin manager with no commit since 2018-07-26, superseded by [`dein`](#dein), itself superseded by [`dpp`](#dpp).
@@ -258,6 +262,16 @@ Community collection of Solaris packages in SysV format. Its own front page has 
 ## [`openpkg`](https://en.wikipedia.org/wiki/OpenPKG) ☠️
 
 Cross-platform RPM-based packaging for Linux, BSD and Solaris. Its own site no longer serves: `openpkg.org` answers with an expired TLS certificate over HTTPS and HTTP alike, which is why this section links Wikipedia instead. That stub carries nothing newer than "in June 2005 it offered more than 880 freely available packages".
+
+## [`opi`](https://github.com/openSUSE/opi) ❌
+
+openSUSE Package Installer, searching the Open Build Service and Packman for packages the configured repositories do not carry, then adding the repository it found one in and handing the install to zypper. The reach is real; the surface driving it is not. Its whole command line is `opi [-h] [-V] [-n] [-P] [-m] [-v] [query ...]`, with no listing, no removal and no upgrade, so install is the only operation on offer.
+
+It cannot report whether that install happened. `opi -n` exits `0` when it installs, `0` when the package was already current, and `0` while printing `No package found.` for a name that does not exist, so a wrapper keying success on the exit code, which is what `mpm` does for `install`, reports every call as a success. Its non-interactive mode also answers its own prompts by taking the first option offered, the repository included, so an unattended run can add a stranger's Build Service home project to the system. Whatever it does install becomes an ordinary RPM that [`zypper`](managers/zypper.md) then inventories.
+
+## [`osc`](https://github.com/openSUSE/osc) ❌
+
+The openSUSE Commander, a command-line client for the Open Build Service. It installs nothing on the machine it runs on: its verbs are `checkout`, `build`, `buildconfig`, `buildinfo`, `buildlog` and `submitrequest`, which fetch a package's sources, compile them in a chroot and submit the result upstream, and it carries no `install` command at all. The build service behind it is a registry, but reaching a package there means building it, which is a contributor's workflow rather than a package operation.
 
 ## [`pacapt`](https://github.com/icy/pacapt) ☠️
 
@@ -414,6 +428,12 @@ Not tools: internal steps of [`topgrade`](managers/topgrade.md), which `mpm` alr
 ## [`tpack`](https://github.com/tmuxpack/tpack) ❌ 🛟
 
 A Go rewrite of the Tmux Plugin Manager with a terminal interface, and it lands the same way as [`tmux`](#tmux) for the same reason, though not for identical reasons throughout. What it shares is decisive: there is no listing command at all, and neither of its state-changing verbs names a plugin. `tpack install` is documented as *"Install all plugins declared in tmux.conf"* and takes no positional, while `tpack clean` removes *"plugin directories not declared in tmux.conf"*, so the plugin set is the user's configuration file in both directions and nothing installs or removes one plugin. Where it does go further than tpm is `tpack update [plugin...]`, which names plugins, alongside a `check-updates` read; that leaves an upgrade as the entire honest surface a wrapper could offer, which is what [`topgrade`](managers/topgrade.md) already reaches. The [`zr`](#zr) reading. Checked against tpack `1.2.1`.
+
+## [`transactional-update`](https://github.com/openSUSE/transactional-update) ❌ 🛟
+
+The atomic update tool of openSUSE MicroOS and Aeon, applying changes to a new btrfs snapshot instead of to the running system. It owns no registry: its own help documents the package commands as "*Call 'zypper dup'*", "*Call 'zypper up'*" and "*Call 'zypper patch'*", so every package it reaches is one [`zypper`](managers/zypper.md) reaches already. It offers no listing, and that same help marks `pkg install`, `pkg remove` and `pkg update` interactive.
+
+The snapshot model would defeat a wrapper even with the verbs in place. The tool applies updates "*without touching the running system*", so an inventory taken after an install reports the previous contents until the machine reboots into the new snapshot.
 
 ## [`up2date`](https://en.wikipedia.org/wiki/Up2date) ☠️
 

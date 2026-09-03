@@ -229,6 +229,7 @@
 - [mpm] Ask for the password of the account `sudo` accepts it from, which is root rather than the caller under openSUSE's default `targetpw` policy.
 - [mpm] Skip a manager whose CLI cannot be executed instead of aborting the run: a wrong-architecture or non-program binary anywhere on `PATH` used to crash every subcommand.
 - [mpm] Recognize a `NOPASSWD` policy that `sudo --validate` reports as a cold cache, so escalation on such a host stops warning that managers may fail and then watching them succeed.
+- [mpm] Record why `opi`, `osc`, `myrlyn` and `transactional-update` are not wrapped, on the unsupported-managers page.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

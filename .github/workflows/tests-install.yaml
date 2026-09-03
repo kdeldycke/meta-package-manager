@@ -713,9 +713,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
+      # This pin is maintained by hand. `sync-workflow-pins` walks action `uses:`
+      # refs, `uvx`/`npm` version literals and setup-uv's `version:` input, and a
+      # `gh release download <tag>` is none of those, so nothing bumps it on its
+      # own: it sat on 0.3.0 for three months. Keep it at 0.3.2 or newer, which
+      # is where CVE-2026-53970 was fixed, the build shim having extracted
+      # resource and patch downloads without verifying their SHA-256 first.
       - name: Install ZeroBrew
         run: >
-          gh release download v0.3.0
+          gh release download v0.3.2
           --repo lucasgelfond/zerobrew
           --pattern "${{ matrix.asset }}"
           --output /usr/local/bin/zb

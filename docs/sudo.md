@@ -28,6 +28,8 @@ Which managers escalate is decided per manager. System package managers ([`apt`]
 
 `mpm` drives `sudo` or [`doas`](https://man.openbsd.org/doas), picking whichever the host carries and preferring `sudo` when both are installed. That matters on the systems that ship no `sudo` at all: OpenBSD replaced it with `doas` in its base system, and neither Alpine nor NetBSD carries one by default, while `mpm` wraps escalating managers on all three ([`apk`](managers/apk.md), [`pkg-tools`](managers/pkg-tools.md) and [`pkgin`](managers/pkgin.md) among them).
 
+A `sudo` on `PATH` is checked before it is preferred, because the name does not always belong to sudo. Alpine packages [`doas-sudo-shim`](https://github.com/jirutka/doas-sudo-shim), which installs a `/usr/bin/sudo` script forwarding to `doas` and accepting `--non-interactive` out of everything `mpm` sends: escalation through it works while every credential probe fails on an unknown option, which reads as a cold cache on a host that never asks for a password. So `mpm` runs `sudo --version` first and drives `doas` directly where that does not answer as sudo.
+
 Name one explicitly with `--sudo-command`, or with its `[mpm] sudo_command` config key:
 
 ```toml

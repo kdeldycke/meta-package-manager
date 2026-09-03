@@ -110,6 +110,26 @@ jobs:
       - name: Install mpm
         run: apk add --repository "$HOME/packages/alpine" meta-package-manager
       - run: mpm --version
+      # The only job with apk on the machine: no runner image ships it and the
+      # test matrix carries no Alpine host, so this is the one place mpm's apk
+      # manager is driven against the real tool. Weekly, it catches an apk
+      # release whose output the parsers stop reading, the failure the
+      # apk-tools 3 rewrite could have caused. It exercises the released
+      # package rather than the pushed tree, so a red run reports what users
+      # already have installed.
+      # Asserts on the inventory alone. `search` is deliberately left out: it
+      # is the operation apk-tools 3 already broke in the released package, so
+      # asserting on it here would keep the job red over a fix that is merged
+      # and waiting for the next release rather than over anything actionable.
+      # BusyBox grep has short-form options only, so the long-form convention
+      # cannot apply to the -q below, as it cannot to abuild's flags above.
+      - name: Drive mpm against apk
+        run: |
+          mpm --apk --verbosity INFO installed > installed.txt
+          cat installed.txt
+          grep -q busybox installed.txt
+          grep -q apk-tools installed.txt
+          mpm --apk outdated
 
   # https://formulae.brew.sh/formula/meta-package-manager
   # https://github.com/Homebrew/homebrew-core/blob/main/Formula/m/meta-package-manager.rb

@@ -30,7 +30,7 @@ from ..version import parse_version
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from typing import TypedDict
+    from typing import Any, TypedDict
 
     from ..package import Package
     from ..version import TokenizedString
@@ -40,6 +40,25 @@ if TYPE_CHECKING:
 
         id: str
         version: TokenizedString
+
+
+def _xml_items(parent: Any, key: str) -> list[Any]:
+    """Return the `key` children of `parent` as a list, whatever their number.
+
+    `xmltodict` renders a repeated element as a list, collapses a lone
+    occurrence to the bare mapping, and maps an empty parent to `None`. A caller
+    iterating the raw value walks the children in the first case, the *attribute
+    names* of the single child in the second, and raises on the third. zypper
+    reaches every shape from its ordinary output: `search --match-exact` matches
+    exactly one solvable, and a host that is one package behind reports exactly
+    one update.
+    """
+    children = parent.get(key) if parent else None
+    if children is None:
+        return []
+    if isinstance(children, list):
+        return children
+    return [children]
 
 
 class Zypper(PackageManager):
@@ -157,13 +176,13 @@ class Zypper(PackageManager):
         if not output:
             return
 
-        package_list = (
+        package_list = _xml_items(
             xmltodict
             .parse(output)
             .get("stream", {})
             .get("search-result", {})
-            .get("solvable-list", {})
-            .get("solvable", [])
+            .get("solvable-list", {}),
+            "solvable",
         )
 
         # Group packages by ID.
@@ -206,35 +225,17 @@ class Zypper(PackageManager):
             --xmlout list-updates
         <?xml version='1.0'?>
         <stream>
-            <message type="info">Loading repository data...</message>
-            <message type="info">Reading installed packages...</message>
-            <update-status version="0.6">
-                <update-list>
-                    <update name="git" kind="package" edition="2.34.1-10.9.1"
-                            edition-old="2.26.2-3.34.1" arch="x86_64">
-                        <summary>Fast, scalable revision control system</summary>
-                        <description>
-                            Git is a fast, scalable, distributed revision
-                            control system.
-                        </description>
-                        <license/>
-                        <source
-                            url="http://download.opensuse.org/updata/leap/15.3/sle"
-                            alias="repo-sle-update"/>
-                    </update>
-                    <update name="vim" kind="package" edition="9.0.1234-1.1"
-                            edition-old="8.2.4956-1.1" arch="x86_64">
-                        <summary>Vi IMproved text editor</summary>
-                        <description>
-                            Highly configurable text editor.
-                        </description>
-                        <license/>
-                        <source
-                            url="http://download.opensuse.org/update/leap/15.3/sle"
-                            alias="repo-sle-update"/>
-                    </update>
-                </update-list>
-            </update-status>
+        <message type="info">Ignoring repository &apos;openSUSE-20260830-0&apos; because of &apos;no-cd&apos; option.</message>
+        <message type="info">Loading repository data...</message>
+        <message type="info">Reading installed packages...</message>
+        <update-status version="0.6">
+        <update-list>
+        <update kind="package" name="libopenh264-8" edition="2.6.0-2.suse1699.10" arch="aarch64" edition-old="2.6.0~noopenh264-1.5"><summary>H.264 codec library</summary><description>OpenH264 is a codec library which supports H.264 encoding and
+        decoding. It is suitable for use in real time applications such as
+        WebRTC.
+
+        This package contains libraries used by applications that use openh264.</description><license/><source url="http://codecs.opensuse.org/openh264/openSUSE_Tumbleweed" alias="repo-openh264"/></update></update-list>
+        </update-status>
         </stream>
         ```
         """
@@ -242,7 +243,6 @@ class Zypper(PackageManager):
         if not output:
             return
 
-        package_list = []
         update_list = (
             xmltodict
             .parse(output)
@@ -250,10 +250,8 @@ class Zypper(PackageManager):
             .get("update-status", {})
             .get("update-list", {})
         )
-        if update_list:
-            package_list = update_list.get("update", [])
 
-        for package in package_list:
+        for package in _xml_items(update_list, "update"):
             yield self.package(
                 id=package["@name"],
                 description=package.get("description"),
@@ -269,8 +267,9 @@ class Zypper(PackageManager):
     """Extract the installed rows of `zypper packages`' plain-text table.
 
     `packages --unneeded` has no XML rendering, so unlike the other queries this
-    one parses the human-readable table: ``status | repository | name | version |
-    arch` columns, keeping only the rows flagged installed (`i` or `i+``).
+    one parses the human-readable table, whose columns are `status`,
+    `repository`, `name`, `version` and `arch`. Only the rows flagged installed
+    (`i` or `i+`) are kept.
     """
 
     @property

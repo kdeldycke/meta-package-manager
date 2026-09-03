@@ -29,3 +29,13 @@ checksums           rmd160  60fa03be3d9c9037bab930b984aca67f55930fb5 \
 
 python.versions     310 311 312 313 314
 python.pep517_backend flit
+
+# boltons 26.1.0 declares `requires = ["flit_core >=3.2,<4"]`, and MacPorts has
+# moved past that ceiling: py-flit_core is 4.0.2, so the PEP 517 build aborts on
+# an unmet build dependency before compiling anything. The cap is upstream's
+# forward-compatibility guess rather than a known break, and boltons is pure
+# Python with no build step of its own, so the ceiling is widened here instead
+# of holding MacPorts' flit_core back for one port.
+post-extract {
+    reinplace {s|flit_core >=3.2,<4|flit_core >=3.2|} ${worksrcpath}/pyproject.toml
+}

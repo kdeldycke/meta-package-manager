@@ -219,22 +219,26 @@ class Flatpak(PackageManager):
 
         ```{code-block} console
 
-        $ flatpak remote-info --ostree-verbose flathub org.gnome.Dictionary
+        $ flatpak remote-info --ostree-verbose flathub org.gnome.Calculator
 
-        GNOME Dictionary - Check word definitions and spellings
+        Calculator - Perform arithmetic, scientific or financial calculations
 
-                ID: org.gnome.Dictionary
-               Ref: app/org.gnome.Dictionary/x86_64/stable
-              Arch: x86_64
-            Branch: stable
-        Collection: org.flathub.Stable
-          Download: 1.3 MB
-         Installed: 5.3 MB
-           Runtime: org.gnome.Platform/x86_64/3.38
-               Sdk: org.gnome.Sdk/x86_64/3.38
-            Commit: 5697aaea8f6a55b02c34e77504cbe4e419257b482ec7cba434255f5bd6f4
-           Subject: Export org.gnome.Dictionary
-              Date: 2020-12-08 12:00:26 +0000
+                    ID: org.gnome.Calculator
+                   Ref: app/org.gnome.Calculator/aarch64/stable
+                  Arch: aarch64
+                Branch: stable
+               Version: 50.0
+               License: GPL-3.0-or-later
+            Collection: org.flathub.Stable
+         Download Size: 1.8 MB
+        Installed Size: 4.9 MB
+               Runtime: org.gnome.Platform/aarch64/50
+                   Sdk: org.gnome.Sdk/aarch64/50
+
+                Commit: 473c4d6d2d553eaeba13c0f1fd27cc9af0c4362cb4ad2a7050149930e89f3eb1
+                Parent: 6f12ad4cd67efce88bf63ec51c13a9b6a1891c61d8ab640b85ce25d0f37f089c
+               Subject: Merge pull request #52 from flathub/update-master-19cd934 (ee57e22e7a51)
+                  Date: 2026-03-18 19:40:01 +0000
         ```
         """
         remotes = []

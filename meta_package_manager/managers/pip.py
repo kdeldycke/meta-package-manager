@@ -172,7 +172,7 @@ class Pip(PackageManager):
     ```{code-block} shell-session
 
     $ python -m pip --no-color --version
-    pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
+    pip 26.2.1 from /tmp/mpm-pip/lib/python3.14/site-packages/pip (python 3.14)
     ```
     """
 

@@ -213,6 +213,14 @@ class Escalator:
     sits under the `NOPASSWD` rule `docs/sudo.md` recommends, so `--validate`
     reports a cold cache on a host where every escalation in fact runs untouched,
     and mpm warned that managers "may fail" before they went on to succeed.
+
+    That is a property of `--validate` rather than of one distribution's policy,
+    and Fedora reaches it by an unrelated route: its stock `%wheel ALL=(ALL) ALL`
+    under the same `NOPASSWD` rule leaves `sudo 1.9.17p2` answering `a password
+    is required` and exiting `1`, while `--list --` exits `0` and a real
+    `sudo --non-interactive id -u` returns `0`. Two policies with nothing in
+    common, one false cold cache, which is what this second probe exists to
+    catch.
     """
 
     prompt_args: tuple[str, ...]
@@ -451,7 +459,18 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # always executes a program, and asking it anything either prompts or
         # dies for want of an agent. `pkcheck` is polkit's own query tool and
         # the only way to read the answer without doing either, reporting `0`
-        # when the action is authorized and `2` when it is not.
+        # when the action is authorized and `2` when it is not. Verified on
+        # polkit `127`, where it answers `2` and `polkit\56result=auth_admin`
+        # for a `wheel` user over SSH, that session being remote.
+        #
+        # A misspelled action id exits `127` rather than `2`, which this probe
+        # reads as a cold cache like any other non-zero: the id above is a
+        # polkit constant and cannot drift, but a future one is worth spelling
+        # against `pkcheck` directly, since nothing here would report a typo.
+        # `pkexec` itself also exits `127` when authentication fails and `126`
+        # when the prompt is dismissed, both colliding with the shell's own
+        # meanings for those codes, so its failures are told apart by the
+        # wording `_is_sudo_auth_failure` matches and never by exit code.
         probe_args=(
             "pkcheck",
             "--action-id",
@@ -703,12 +722,17 @@ def _is_sudo_denied(error: str) -> bool:
     to a non-interactive `--validate` while others hide it behind `a password is
     required` (authenticating before disclosing authorization), and the hidden
     case simply keeps today's prompt-then-fail path. The markers cover, in
-    order: `sudo` since `1.9` (`is not allowed to run sudo on`, per its message
-    catalog), `sudo` before `1.9` and `sudo-rs`'s *list* denial (`may not run
-    sudo on`, `src/common/error.rs`), the historic sudoers lecture (`is not in
-    the sudoers file`), and both implementations' per-command denial (`is not
+    order: one `sudo` wording (`is not allowed to run sudo on`, per its message
+    catalog), a second that `sudo-rs` also uses for its *list* denial (`may not
+    run sudo on`, `src/common/error.rs`), the historic sudoers lecture (`is not
+    in the sudoers file`), and both implementations' per-command denial (`is not
     allowed to execute`), and `doas`, which reports the bare errno string of
     `EPERM` instead.
+
+    Neither `sudo` wording supersedes the other, so both are matched rather than
+    one being kept for old releases: `1.9.17p2` on Fedora 44 answers a
+    non-sudoer's `--validate` with `Sorry, user plain may not run sudo on
+    localhost`, which reading that phrasing as the pre-`1.9` one would drop.
 
     `sudo-rs` denies a `--validate` differently from a `--list`, which matters
     because {attr}`~Escalator.probe_args` runs the former first: a user no

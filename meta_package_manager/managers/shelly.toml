@@ -1,0 +1,124 @@
+# Shelly is a package manager for Arch Linux driving `libalpm` directly
+# (https://github.com/Seafoam-Labs/Shelly-ALPM). See docs/overrides.md ("Define
+# a new manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# ```{note}
+# Only the *standard* half is wrapped, the ALPM repository packages
+# [`pacman`](pacman.md) also reaches, so a host carrying both reports those
+# packages twice under two ids. Shelly drives three more package universes
+# behind their own type selector, `aur`, `flatpak` and `appimage`, and each
+# answers a separate call: one operation is one command, so a definition
+# cannot merge them into a single listing.
+# ```
+#
+# ```{caution}
+# Shelly escalates on its own, calling `sudo` from inside every mutating
+# operation, so `mpm` never wraps it: an escalated call would stack sudo on
+# sudo. Off a terminal it answers `sudo: a terminal is required to read the
+# password` and exits `1`, so an unattended run needs a warm credential cache
+# or a `NOPASSWD` policy. See {doc}`/sudo`.
+# ```
+#
+# Parsing notes, verified by driving 3.1.1 and 3.0.0+9 on Arch Linux:
+#   - Every query reads `--json` and prints a flat top-level array of one
+#     object per package. `installed` and `search` carry the version under
+#     `Version`; `list-updates` splits it into `CurrentVersion` and
+#     `NewVersion`.
+#   - `search standard <query>` returns a bare *object* describing one exact
+#     package when no source modifier is passed, which no array parser can
+#     read. `--available` is what turns it into an array over the
+#     synchronization databases, so it is not optional here.
+#   - That search already matches descriptions, so `--extended` is its native
+#     behaviour and no flag narrows it back to names: mpm refilters instead.
+#   - `--no-confirm` sits in `pre_args` because every mutating verb prompts
+#     otherwise, and shelly accepts the flag before or after its subcommand.
+#   - `upgrade standard` is the whole-system path and `update standard
+#     <packages>` the per-package one, which is the split mpm needs. Neither
+#     reads the other's arguments.
+#   - `purify standard` always plans corrupted archives, and `--cache` and
+#     `--orphans` add their own targets to that plan.
+
+[mpm.managers.shelly]
+name = "Shelly"
+homepage_url = "https://github.com/Seafoam-Labs/Shelly-ALPM"
+logo = "archlinux"
+# Its own prerequisites name "Arch Linux (or an Arch-based distribution)", and
+# it links against the `libalpm` that `pacman` provides.
+platforms = ["arch", "cachyos", "endeavouros", "manjaro"]
+cli_names = ["shelly"]
+# 3.0.0+9 answers `list`, `list-updates` and `search` with the same JSON as
+# 3.1.1, both driven here. The 2.x series numbered releases on four parts and
+# is not covered.
+requirement = ">=3.0.0"
+# Every verb prompts for confirmation, and the flag is global.
+pre_args = ["--no-confirm"]
+version_cli_options = ["--version"]
+# A bare version on its own line. A release may carry build metadata, 3.0.0+9
+# being one, so the pattern reaches past the three numbers.
+version_regexes = ['(?P<version>\d+\.\d+\.\d+\S*)']
+
+[mpm.managers.shelly.operations.installed]
+args = ["list", "standard", "--json"]
+format = "json"
+fields = { package_id = "Name", installed_version = "Version" }
+
+[mpm.managers.shelly.operations.outdated]
+args = ["list-updates", "standard", "--json"]
+format = "json"
+fields = { package_id = "Name", installed_version = "CurrentVersion", latest_version = "NewVersion" }
+
+[mpm.managers.shelly.operations.search]
+args = ["search", "standard", "{query}", "--available", "--json"]
+format = "json"
+fields = { package_id = "Name", latest_version = "Version" }
+
+[mpm.managers.shelly.operations.install]
+args = ["install", "standard", "{package_id}"]
+
+[mpm.managers.shelly.operations.remove]
+args = ["remove", "standard", "{package_id}"]
+
+[mpm.managers.shelly.operations.upgrade_one]
+args = ["update", "standard", "{package_id}"]
+
+[mpm.managers.shelly.operations.upgrade_all]
+args = ["upgrade", "standard"]
+
+[mpm.managers.shelly.operations.sync]
+args = ["sync", "standard"]
+
+[mpm.managers.shelly.operations.cleanup_cache]
+args = ["purify", "standard", "--cache"]
+
+[mpm.managers.shelly.operations.cleanup_orphan]
+args = ["purify", "standard", "--orphans"]
+
+# Output samples locking the version probe and the declared parsers, captured
+# from shelly 3.1.1 on Arch Linux. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "3.1.1"
+expected = "3.1.1"
+
+[[samples.installed]]
+output = """
+[{"Name":"acl","Version":"2.4.0-1","Size":0,"Description":"Access control list utilities, libraries and headers","Url":"https://savannah.nongnu.org/projects/acl","Repository":"local","Replaces":[],"Licenses":["LGPL-2.1-or-later AND GPL-2.0-or-later"],"Groups":[],"Provides":["libacl.so=1-64"],"Depends":["glibc"],"OptDepends":[],"Conflicts":[],"PackageFile":null,"InstallReason":"Dependency","InstallDate":"2026-09-03T12:47:41","BuildDate":"2026-06-29T13:16:29","DownloadSize":0,"InstalledSize":353496,"RequiredBy":[],"OptionalFor":[]},{"Name":"zstd","Version":"1.5.7-3","Size":0,"Description":"Zstandard - Fast real-time compression algorithm","Url":"https://facebook.github.io/zstd/","Repository":"local","Replaces":[],"Licenses":["BSD-3-Clause","GPL-2.0-only"],"Groups":[],"Provides":["libzstd.so=1-64"],"Depends":["glibc","libgcc","libstdc++","zlib","xz","lz4"],"OptDepends":[],"Conflicts":[],"PackageFile":null,"InstallReason":"Dependency","InstallDate":"2026-09-03T12:47:49","BuildDate":"2026-02-15T16:43:11","DownloadSize":0,"InstalledSize":1610357,"RequiredBy":[],"OptionalFor":[]}]"""
+packages = [
+  { id = "acl", version = "2.4.0-1" },
+  { id = "zstd", version = "1.5.7-3" },
+]
+
+# Captured after downgrading `nyancat` to the 1.5.2-2 build the Arch archive
+# still serves, the repositories having moved to 1.5.2-3.
+[[samples.outdated]]
+output = """
+[{"Name":"nyancat","CurrentVersion":"1.5.2-2","NewVersion":"1.5.2-3","DownloadSize":12111,"SizeDifference":-20240,"Description":"Nyancat rendered in your terminal.","Url":"https://nyancat.dakko.us/","Repository":"extra","InstalledSize":42691,"Depends":["glibc"],"OptDepends":[],"Licenses":["custom:NCSA"],"Provides":[],"Conflicts":[],"Groups":[]}]"""
+packages = [{ id = "nyancat", version = "1.5.2-3" }]
+
+# An available package carries `InstallReason: Not Installed` and an
+# `OptDependsInstalled` key the local listing omits.
+[[samples.search]]
+output = """
+[{"Name":"nyancat","Version":"1.5.2-3","Size":12111,"Description":"Nyancat rendered in your terminal.","Url":"https://nyancat.dakko.us/","Repository":"extra","Replaces":[],"Licenses":["custom:NCSA"],"Groups":[],"Provides":[],"Depends":["glibc"],"OptDepends":[],"OptDependsInstalled":[],"Conflicts":[],"PackageFile":null,"InstallReason":"Not Installed","InstallDate":null,"BuildDate":"2024-07-13T00:38:20","DownloadSize":12111,"InstalledSize":42691,"RequiredBy":[],"OptionalFor":[]}]"""
+packages = [{ id = "nyancat", version = "1.5.2-3" }]

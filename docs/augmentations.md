@@ -78,6 +78,7 @@ print(augmentations_table())
 | [`pyenv`](managers/pyenv.md)               |                      |              |      ✅      |       ✅        |               |
 | [`scoop`](managers/scoop.md)               |                      |              |      ✅      |       ✅        |               |
 | [`sfsu`](managers/sfsu.md)                 |                      |              |      ✅      |       ✅        |               |
+| [`shelly`](managers/shelly.md)             |                      |              |      ✅      |       ✅        |               |
 | [`slapt-get`](managers/slapt-get.md)       |                      |              |      ✅      |       ✅        |               |
 | [`snap`](managers/snap.md)                 |                      |              |      ✅      |       ✅        |               |
 | [`soar`](managers/soar.md)                 |                      |              |      ✅      |       ✅        |               |

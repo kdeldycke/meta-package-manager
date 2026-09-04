@@ -39,6 +39,7 @@ icons:
     - pacman
     - paru
     - pikaur
+    - shelly
     - trizen
     - yay
     source: https://www.archlinux.org/art

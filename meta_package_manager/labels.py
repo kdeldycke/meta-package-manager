@@ -162,6 +162,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
         "pamac",
         "paru",
         "pikaur",
+        "shelly",
         "trizen",
         "yay",
     }),

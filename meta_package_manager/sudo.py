@@ -37,43 +37,27 @@ cold-cache escalation is covered by the silent-call stall notice instead, raised
 while the hidden prompt can still be answered.
 
 ```{note}
-Everything in this module is UNIX-only: a Windows run returns early at
-{func}`prime_sudo`'s guard and never arms the watchdog (the internal
-escalators are macOS-only managers today).
+Windows reaches only a corner of this module. `gsudo` gives it an escalator
+to probe and a cache to warm, but no manager there escalates by default, so
+{func}`prime_sudo` returns on the empty selection unless `--sudo` or a
+`[mpm.managers.<id>] sudo = true` entry asks for it. The internal escalators
+stay macOS-only managers, so the watchdog is not armed there either.
 ```
 
 ```{todo}
-Add a Windows escalator, `gsudo` or the `sudo.exe` shipping with Windows 11
-`24H2`. Two things block it, and neither is a {data}`ESCALATORS` entry.
-{func}`prime_sudo` returns before any of this machinery on that platform, so
-Windows has to join it first. And nothing there answers
-{attr}`~Escalator.probe_args`, which reads an exit code: `gsudo status --json`
-reports `IsElevated` and `CacheAvailable` without prompting, exactly the
-question worth asking, but it exits `0` whatever the answer is, so reading it
-means parsing output.
-
-Measured against `gsudo 2.6.1` on Windows 11 `21H2`, so an implementation need
-not rediscover it: stdout and exit codes pass through faithfully; a failed
-elevation exits `999`, truncated to `231` through a POSIX caller, and says
-`Error: Unable to connect to the elevated service.`, naming neither `gsudo` nor
-`sudo`; and `gsudo --version` opens `gsudo v2.6.1`, which is the identity
-marker. Neither backend can fail instead of prompting, both gating on a UAC
-dialog, and asking for a password on the command line is an open request
-against each: [microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)
-for the Windows one and
-[gerardog/gsudo#378](https://github.com/gerardog/gsudo/issues/378) for `gsudo`.
-
-Three traps to encode: `gsudo -n` means *new window* rather than
-non-interactive, its cache is scoped to the calling process unless `--pid 0`
-widens it, and Windows' own `sudo` defaults to `forceNewWindow`, which breaks
-output capture and needs `sudo run --inline`. That last one is not enough on
-its own, since it does not forward a command line unchanged
+Add Microsoft's own `sudo.exe`, shipping with Windows 11 `24H2`, beside
+`gsudo`. It defaults to `forceNewWindow`, which breaks output capture and needs
+`sudo run --inline`, and even then does not forward a command line unchanged
 ([microsoft/sudo#117](https://github.com/microsoft/sudo/issues/117)), which
 {meth}`CLIExecutor.build_cli
-<meta_package_manager.execution.CLIExecutor.build_cli>` relies on. Emulate an
-option a backend
-cannot express rather than failing on it: topgrade returns a hard error there,
-which its users report as a bug
+<meta_package_manager.execution.CLIExecutor.build_cli>` relies on. It caches
+nothing either, so every call raises a UAC dialog until asking for a password
+on the command line lands
+([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)); `gsudo` has
+the same gap open at
+[gerardog/gsudo#378](https://github.com/gerardog/gsudo/issues/378). Emulate an
+option a backend cannot express rather than failing on it: topgrade returns a
+hard error there, which its users report as a bug
 ([topgrade-rs/topgrade#1435](https://github.com/topgrade-rs/topgrade/issues/1435)).
 ```
 
@@ -117,11 +101,10 @@ from functools import cache
 from typing import Final
 
 from click_extra import echo
-from extra_platforms import is_any_windows
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Mapping
     from pathlib import Path
 
     from click import Context
@@ -291,6 +274,78 @@ class Escalator:
     (`test-framework/sudo-test/src/lib.rs`).
     """
 
+    probe_success_markers: tuple[str, ...] | None = None
+    """Substrings proving {attr}`probe_args` found escalation ready, for an
+    escalator whose probe cannot say so through its exit code. Any one is enough.
+
+    `None` keeps the exit code as the whole answer, which is what `sudo`, `doas`
+    and `run0` report through. `gsudo` is the exception: `gsudo status --json`
+    asks exactly the question {func}`prime_sudo` needs and always exits `0`, so
+    the answer lives in its output alone. Two of its fields settle it, and
+    either is sufficient: `IsElevated` because a process already elevated needs
+    no escalation, and `CacheAvailable` because a warm credentials cache spends
+    without raising a UAC dialog.
+    """
+
+    env_forward_template: str | None = None
+    """Argument forwarding one environment variable across the escalation, or
+    `None` for an escalator the variables survive on their own.
+
+    Only `run0` needs it. It runs the command in a transient service forked
+    from the service manager, which inherits nothing from the caller, so the
+    environment {meth}`CLIExecutor.run
+    <meta_package_manager.execution.CLIExecutor.run>` forces on a call would
+    reach `run0` and stop there. That silently costs the managers relying on
+    one: `nala`, `tazpkg` and `urpmi` pin their parsers against a translated
+    locale with `LC_ALL=C`, and `ports` keeps out of an interactive dialog with
+    `BATCH=yes`.
+
+    `sudo` and `doas` need no template: both reset the environment too, but
+    through a `sudoers` policy whose `env_keep` the host owns, which is where
+    such a decision belongs. `pkexec` clears it outright and would need the
+    `pkexec env NAME=VALUE ...` idiom rather than a per-variable flag, so it
+    keeps `None` until a manager on a polkit-only host asks for one.
+    """
+
+    def forward_env(
+        self,
+        args: tuple[str, ...],
+        env: Mapping[str, str | None] | None,
+    ) -> tuple[str, ...]:
+        """Splice {attr}`env_forward_template` for each variable into `args`.
+
+        Inserted ahead of the end-of-options separator the prefix closes on, so
+        a manager's own flags stay shielded from the escalator's parser. Sorted
+        for a stable command disclosure. Returns `args` untouched for an
+        escalator declaring no template, or for a call forcing no variable.
+
+        A `None` value asks for a variable to be *unset*, which needs carrying
+        nowhere: the fresh environment on the far side of the escalation never
+        had it.
+        """
+        if not self.env_forward_template or not env:
+            return args
+        forwarded = tuple(
+            self.env_forward_template.format(name=name, value=value)
+            for name, value in sorted(env.items())
+            if value is not None
+        )
+        if not forwarded:
+            return args
+        cut = len(self.escalate_args)
+        if self.escalate_args and self.escalate_args[-1] == "--":
+            cut -= 1
+        return (*args[:cut], *forwarded, *args[cut:])
+
+    def probe_says_warm(self, probe: subprocess.CompletedProcess[bytes]) -> bool:
+        """Whether the probe found escalation ready to run unprompted."""
+        if probe.returncode != 0:
+            return False
+        if not self.probe_success_markers:
+            return True
+        stdout = (probe.stdout or b"").decode("UTF-8", errors="replace")
+        return any(marker in stdout for marker in self.probe_success_markers)
+
     def resolved_probe_args(self) -> tuple[str, ...]:
         """{attr}`probe_args`, with any `{pid}` token replaced by mpm's own id.
 
@@ -367,6 +422,9 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # No `--validate` before systemd 262, so the cheapest harmless command
         # stands in for one, exactly as it does for `doas`.
         probe_args=("run0", "--pipe", "--no-ask-password", "true"),
+        # A bare `--setenv=NAME` would import the caller's value; the pair is
+        # spelled out because mpm forces values the caller may not carry.
+        env_forward_template="--setenv={name}={value}",
         passwordless_probe_args=None,
         prompt_args=("run0", "--pipe", "true"),
         # polkit owns the authorization and retains it per session, so there is
@@ -409,21 +467,32 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         refreshable=False,
         brands_prompt=False,
     ),
-    # ```{todo}
-    # Carry {attr}`CLIExecutor.extra_env
-    # <meta_package_manager.execution.CLIExecutor.extra_env>` through `run0`.
-    # It runs the command in a fresh service that inherits nothing, so the four
-    # managers injecting an environment lose it: `nala`, `tazpkg` and `urpmi`
-    # each force `LC_ALL=C` to pin their parsers against a translated locale,
-    # and `ports` forces `BATCH=yes` to stay out of an interactive dialog.
-    # run0 reads `--setenv=NAME=VALUE`, but {meth}`CLIExecutor.build_cli
-    # <meta_package_manager.execution.CLIExecutor.build_cli>` assembles the
-    # argv without ever seeing the environment, which is resolved beside it,
-    # so the splice needs that plumbed in first. Exposure is near zero
-    # meanwhile: run0 is only ever selected on a host carrying neither `sudo`
-    # nor `doas`, and all four of those managers ship on distributions that
-    # carry `sudo`. A user who hits it can pin `--sudo-command sudo`.
-    # ```
+    Escalator(
+        id="gsudo",
+        # Options must precede the command: gsudo claims any leading `-...`
+        # token as its own and takes no `--` separator, which is why a manager's
+        # flags stay behind its absolute path. `-n` is deliberately absent here,
+        # meaning *new window* rather than non-interactive.
+        escalate_args=("gsudo",),
+        # `status` never prompts and never fails, so the answer is in the JSON
+        # rather than the exit code. See `probe_success_markers`.
+        probe_args=("gsudo", "status", "--json"),
+        probe_success_markers=('"IsElevated":true', '"CacheAvailable":true'),
+        passwordless_probe_args=None,
+        # Warming the cache is the one moment a UAC dialog belongs: answered
+        # once up front, every later elevation of the run spends it silently.
+        # `--pid 0` widens the cache past the process that opened it, which is
+        # what lets a later manager subprocess use it at all.
+        prompt_args=("gsudo", "cache", "on", "--pid", "0"),
+        # The cache expires on idle rather than on a timestamp mpm can extend,
+        # and re-running `cache on` against a cold one raises a dialog.
+        refreshable=False,
+        # The prompt is the UAC consent dialog, which Windows words itself.
+        brands_prompt=False,
+        identity_args=("gsudo", "--version"),
+        # `gsudo v2.6.1 (Branch...)`, measured on Windows 11 21H2.
+        identity_markers=("gsudo",),
+    ),
 )
 """Every escalator mpm can drive, in the order it prefers them.
 
@@ -925,7 +994,12 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
       notice instead.
     """
     managers = list(managers)
-    if is_any_windows() or getattr(os, "geteuid", lambda: 1)() == 0:
+    # Windows is no longer excluded outright: `gsudo` gives it an escalator to
+    # probe and a cache to warm. Nothing changes for a stock Windows run all
+    # the same, since no manager there escalates by default and the next guard
+    # returns on the empty selection: only `--sudo`, or a `[mpm.managers.<id>]
+    # sudo = true` entry, reaches past this point.
+    if getattr(os, "geteuid", lambda: 1)() == 0:
         return
     escalating = sorted({m.id for m in managers if _resolved_sudo(m)})
     internal = any(m.internal_sudo for m in managers)
@@ -991,7 +1065,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
             "your configuration file.",
         )
         return
-    if probe.returncode == 0:
+    if escalator.probe_says_warm(probe):
         # Cache already warm (a prior authentication, a passwordless rule):
         # keep it fresh,
         # silently. A CI job with pre-cached credentials thus gets the keepalive

@@ -231,14 +231,13 @@ def _internal_manager() -> FakeManager:
 @contextmanager
 def prime_sudo_env(
     *,
-    windows: bool = False,
     root: bool = False,
     stdin_tty: bool | None = None,
     stderr_tty: bool | None = None,
 ):
     """Patch the whole environment `prime_sudo` probes, yielding the `run` mock.
 
-    Pins the platform (`windows`), the effective user (`root`) and the terminal
+    Pins the effective user (`root`) and the terminal
     state (`None` leaves the real descriptor unpatched, for tests that never reach
     the TTY check), and replaces `subprocess.run` so no test ever launches a real
     `sudo`. Callers set the mock's `return_value`/`side_effect` to shape the
@@ -251,9 +250,6 @@ def prime_sudo_env(
     """
     with ExitStack() as stack:
         stack.enter_context(only_escalator("sudo"))
-        stack.enter_context(
-            patch("meta_package_manager.sudo.is_any_windows", return_value=windows),
-        )
         stack.enter_context(
             patch(
                 "meta_package_manager.sudo.os.geteuid",
@@ -277,11 +273,33 @@ def test_prime_sudo_skips_when_no_manager_escalates():
     run.assert_not_called()
 
 
-def test_prime_sudo_skips_on_windows():
+def test_prime_sudo_leaves_a_stock_windows_run_alone():
+    """Windows is no longer skipped by a platform guard, and a stock run there
+    still spends no subprocess.
+
+    What returns early is the empty selection, not the platform: no manager
+    escalates by default on Windows, so only `--sudo` or a
+    `[mpm.managers.<id>] sudo = true` entry reaches the probe. Keeping the
+    guard out of the way is what lets `gsudo` be probed at all when one does.
+    """
     ctx = click.Context(click.Command("mpm"))
-    with prime_sudo_env(windows=True) as run:
-        prime_sudo(ctx, [_escalating_manager()])
+    with prime_sudo_env() as run, only_escalator("gsudo"):
+        prime_sudo(ctx, [FakeManager()])
     run.assert_not_called()
+
+
+def test_prime_sudo_probes_gsudo_when_windows_escalation_is_asked_for():
+    """A manager forced to escalate reaches the `gsudo` probe, which asks its
+    status rather than trying an elevation that would raise a UAC dialog."""
+    ctx = click.Context(click.Command("mpm"))
+    with prime_sudo_env(stdin_tty=False, stderr_tty=False) as run:
+        run.return_value = subprocess.CompletedProcess(
+            (), 0, stdout=b'{"IsElevated":false,"CacheAvailable":false}', stderr=b""
+        )
+        with only_escalator("gsudo"):
+            prime_sudo(ctx, [_escalating_manager()])
+    assert run.call_args_list, "the gsudo probe never ran"
+    assert run.call_args_list[0].args[0] == ("gsudo", "status", "--json")
 
 
 def test_prime_sudo_skips_when_root():
@@ -1016,7 +1034,97 @@ def test_escalator_registry_prefers_sudo():
     running, so it answers for the systemd hosts shipping neither of the
     others rather than displacing a working escalator.
     """
-    assert [e.id for e in ESCALATORS] == ["sudo", "doas", "run0", "pkexec"]
+    assert [e.id for e in ESCALATORS] == ["sudo", "doas", "run0", "pkexec", "gsudo"]
+
+
+@pytest.mark.parametrize(
+    ("returncode", "stdout", "expected"),
+    (
+        # Captured from gsudo 2.6.1 on Windows 11 21H2. An SSH session there
+        # already carries an elevated token, which is the first case.
+        pytest.param(
+            0,
+            b'{\n "IsElevated":true,\n "CacheAvailable":false\n}',
+            True,
+            id="elevated",
+        ),
+        pytest.param(
+            0,
+            b'{\n "IsElevated":false,\n "CacheAvailable":true\n}',
+            True,
+            id="cache-warm",
+        ),
+        pytest.param(
+            0,
+            b'{\n "IsElevated":false,\n "CacheAvailable":false\n}',
+            False,
+            id="cold",
+        ),
+        # A probe that could not run at all is never warm, whatever it printed.
+        pytest.param(1, b'{\n "IsElevated":true\n}', False, id="failed-probe-wins"),
+    ),
+)
+def test_gsudo_probe_reads_its_output_not_its_exit_code(returncode, stdout, expected):
+    """`gsudo status` exits `0` whether or not elevation is ready, so the answer
+    is only in its JSON.
+
+    Reading the exit code alone would report every Windows host as warm, and
+    the up-front prompt that keeps a UAC dialog out of the concurrent fan-out
+    would never fire.
+    """
+    gsudo = next(e for e in ESCALATORS if e.id == "gsudo")
+    probe = subprocess.CompletedProcess((), returncode, stdout=stdout)
+    assert gsudo.probe_says_warm(probe) is expected
+
+
+def test_run0_forwards_a_forced_environment():
+    """`run0` forks its payload off the service manager, which inherits nothing,
+    so a forced variable has to travel as an argument or be lost.
+
+    Spliced ahead of the `--` the prefix closes on, leaving a manager's own
+    flags shielded, and sorted so the disclosed command is stable.
+    """
+    run0 = next(e for e in ESCALATORS if e.id == "run0")
+    argv = (*run0.escalate_args, "/usr/bin/nala", "upgrade")
+    assert run0.forward_env(
+        argv, {"LC_ALL": "C", "DEBIAN_FRONTEND": "noninteractive"}
+    ) == (
+        "run0",
+        "--pipe",
+        "--no-ask-password",
+        "--setenv=DEBIAN_FRONTEND=noninteractive",
+        "--setenv=LC_ALL=C",
+        "--",
+        "/usr/bin/nala",
+        "upgrade",
+    )
+    # Nothing to carry leaves the command exactly as it was.
+    assert run0.forward_env(argv, {}) == argv
+    assert run0.forward_env(argv, None) == argv
+
+
+@pytest.mark.parametrize(
+    "escalator",
+    [e for e in ESCALATORS if e.env_forward_template is None],
+    ids=[e.id for e in ESCALATORS if e.env_forward_template is None],
+)
+def test_escalator_without_a_template_forwards_nothing(escalator):
+    """An escalator declaring no template leaves the argv alone: `sudo` and
+    `doas` defer to a `sudoers` policy the host owns."""
+    argv = (*escalator.escalate_args, "/usr/bin/apt", "upgrade")
+    assert escalator.forward_env(argv, {"LC_ALL": "C"}) == argv
+
+
+@pytest.mark.parametrize(
+    "escalator",
+    [e for e in ESCALATORS if e.probe_success_markers is None],
+    ids=[e.id for e in ESCALATORS if e.probe_success_markers is None],
+)
+def test_probe_without_markers_reads_the_exit_code(escalator):
+    """An escalator declaring no marker keeps the exit code as the whole answer,
+    which is what `sudo`, `doas`, `run0` and `pkexec` report through."""
+    assert escalator.probe_says_warm(subprocess.CompletedProcess((), 0, stdout=b""))
+    assert not escalator.probe_says_warm(subprocess.CompletedProcess((), 1, stdout=b""))
 
 
 def test_pkexec_probe_substitutes_the_running_pid():

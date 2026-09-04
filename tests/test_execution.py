@@ -594,16 +594,42 @@ def test_build_cli_no_escalation_when_policy_off():
     assert "sudo" not in cli
 
 
-def test_build_cli_no_escalation_off_unix():
-    """A non-UNIX host never escalates (no crash), even with policy on."""
+def test_build_cli_escalation_follows_the_escalator_not_the_platform():
+    """Carrying an escalator is what decides escalation, on any platform.
+
+    A UNIX gate used to stand here, which made the `gsudo` entry inert on the
+    one platform it exists for. What replaced it reaches further: a host with
+    no escalator cannot escalate whatever it runs, and one that has it can,
+    Windows included.
+    """
     manager = FakeManager()
     manager.sudo = True
-    with patch(
-        "meta_package_manager.execution.current_platform",
-        return_value=_NON_UNIX_PLATFORM,
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_NON_UNIX_PLATFORM,
+        ),
+        only_escalator("gsudo"),
+    ):
+        cli = manager.build_cli("install", "pkg", sudo=True)
+    assert cli[:1] == ("gsudo",)
+
+
+def test_build_cli_no_escalation_without_an_escalator():
+    """A host carrying none runs unprivileged rather than crashing on a missing
+    binary, which is what the platform gate used to cover."""
+    manager = FakeManager()
+    manager.sudo = True
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_NON_UNIX_PLATFORM,
+        ),
+        only_escalator(None),
     ):
         cli = manager.build_cli("install", "pkg", sudo=True)
     assert "sudo" not in cli
+    assert "gsudo" not in cli
 
 
 def test_build_cli_marker_required_for_escalation():
@@ -750,6 +776,58 @@ def test_escalated_calls_keep_the_controlling_terminal(escalate):
         spawn.return_value = SimpleNamespace(returncode=0, stdout="", stderr="")
         manager.run(manager.build_cli("-c", "true", sudo=escalate))
     assert spawn.call_args.kwargs["start_new_session"] is not escalate
+
+
+def test_run_forwards_a_forced_environment_across_run0():
+    """The environment a call forces reaches the payload `run0` escalates.
+
+    run0 forks it off the service manager, which inherits nothing, so a
+    variable handed to the escalator's own process stops there. `run()` splices
+    the escalator's own forwarding argument instead, and does it after the
+    cooldown merge so that gate travels too. Measured on Arch with systemd 261:
+    `run0 --pipe --no-ask-password printenv LC_ALL` exits `1`, while the same
+    call carrying `--setenv=LC_ALL=C` prints `C`.
+    """
+    manager = FakeManager()
+    manager.sudo = True
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_UNIX_PLATFORM,
+        ),
+        only_escalator("run0"),
+        patch("meta_package_manager.execution.run_cli") as spawn,
+    ):
+        spawn.return_value = SimpleNamespace(returncode=0, stdout="", stderr="")
+        manager.run(
+            manager.build_cli("-c", "true", sudo=True),
+            extra_env={"LC_ALL": "C"},
+        )
+    argv = spawn.call_args.args[0]
+    assert "--setenv=LC_ALL=C" in argv
+    # Ahead of the separator, so the payload's own flags stay shielded.
+    assert argv.index("--setenv=LC_ALL=C") < argv.index("--")
+
+
+def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():
+    """`sudo` resets the environment through a `sudoers` policy the host owns,
+    so mpm splices nothing of its own."""
+    manager = FakeManager()
+    manager.sudo = True
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_UNIX_PLATFORM,
+        ),
+        only_escalator("sudo"),
+        patch("meta_package_manager.execution.run_cli") as spawn,
+    ):
+        spawn.return_value = SimpleNamespace(returncode=0, stdout="", stderr="")
+        manager.run(
+            manager.build_cli("-c", "true", sudo=True),
+            extra_env={"LC_ALL": "C"},
+        )
+    assert not any(a.startswith("--setenv") for a in spawn.call_args.args[0])
 
 
 @pytest.mark.parametrize(

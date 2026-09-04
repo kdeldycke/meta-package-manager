@@ -106,13 +106,15 @@ flooding the default view. The raw streams are always available in full, live,
 at `DEBUG`.
 """
 
-UNRUNNABLE_ERRNOS: Final[frozenset[int]] = frozenset({
-    errno.EACCES,
-    errno.EISDIR,
-    errno.ENOENT,
-    errno.ENOEXEC,
-    errno.EPERM,
-})
+UNRUNNABLE_ERRNOS: Final[frozenset[int]] = frozenset(
+    {
+        errno.EACCES,
+        errno.EISDIR,
+        errno.ENOENT,
+        errno.ENOEXEC,
+        errno.EPERM,
+    }
+)
 """`OSError` numbers meaning the CLI cannot be spawned, rather than that it failed.
 
 Each marks the manager unavailable and yields empty output, the same way `WinError`
@@ -1167,15 +1169,30 @@ class CLIExecutor:
         # Whether mpm is escalating this call itself, as opposed to a manager
         # escalating internally. Drives both the session isolation of the spawn
         # below and the tailored credential hint of the failure gate.
-        is_escalation = any(
-            clean_args[: len(e.escalate_args)] == e.escalate_args for e in ESCALATORS
+        escalator = next(
+            (
+                e
+                for e in ESCALATORS
+                if clean_args[: len(e.escalate_args)] == e.escalate_args
+            ),
+            None,
         )
+        is_escalation = escalator is not None
         # Enforce the release-age cooldown by injecting the manager's dedicated
         # environment variable into every call (harmless for operations that ignore
         # it, like removal or cache cleanup).
         cooldown_env = self.cooldown_env()
         if cooldown_env:
             extra_env = {**(extra_env or {}), **cooldown_env}
+        # Forced variables reach the escalator's own process, and an escalator
+        # that hands the command to a fresh one loses them there: `run0` forks
+        # its payload off the service manager, inheriting nothing. Carrying them
+        # across is the escalator's own dialect, so it splices its own argument.
+        # Done here rather than in `build_cli`, which assembles the argv without
+        # ever seeing an environment, and after the cooldown merge so the gate
+        # travels too.
+        if escalator is not None:
+            clean_args = escalator.forward_env(clean_args, extra_env)
         cli_msg = format_cli_prompt(clean_args, extra_env)
 
         code = 0
@@ -1490,20 +1507,20 @@ class CLIExecutor:
 
         # Resolve whether this privileged operation is actually escalated: the caller
         # marks the operation as needing root (`sudo`), the per-manager policy opts in
-        # (the `sudo` override, else `default_sudo`), and the host is a UNIX one
-        # carrying an escalator. A non-UNIX host simply does not escalate rather
-        # than raising.
+        # (the `sudo` override, else `default_sudo`), and the host carries an
+        # escalator.
         # Which binary escalates is a machine-level fact, held process-wide
         # rather than per manager: see ESCALATION.
         escalator = ESCALATION.resolve()
         escalate = bool(
             sudo
             and _resolved_sudo(self)
-            and current_platform() in UNIX
-            # A host carrying no escalator cannot escalate. prime_sudo() has
-            # already warned about it, so the command runs unprivileged and
-            # fails on the manager's own permission error rather than on a
-            # missing binary.
+            # Carrying an escalator is the whole platform test now that `gsudo`
+            # gives Windows one. It stands in for the UNIX gate this replaced,
+            # and reaches further than it: a host with no escalator cannot
+            # escalate whatever it runs. prime_sudo() has already warned about
+            # that, so the command runs unprivileged and fails on the manager's
+            # own permission error rather than on a missing binary.
             and escalator is not None
         )
         # A privileged marker the policy left dormant, remembered for the

@@ -664,14 +664,16 @@ jobs:
       - name: Report the RPM front-ends
         run: uv --no-progress run --frozen -- mpm --dnf --dnf5 --yum managers
       - name: Drive mpm against dnf5
-        # Asserts on the two operations that were broken: the inventory proves
-        # the version probe read a real version, since an unavailable manager
-        # yields nothing at all, and the search proves the hits are parsed out
-        # of dnf5's tab-separated output rather than dnf4's `" : "` shape.
+        # Asserts on the two operations that were broken. A non-empty inventory
+        # is the whole point of the first: a manager failing its own version
+        # requirement is dropped from the pool and yields nothing, which is
+        # exactly what the `dnf5` banner used to cause. No package is named
+        # there, an image's set being its own business, where `search` can name
+        # one because it queries the repository rather than the container.
         run: |
           uv --no-progress run --frozen -- mpm --dnf5 --verbosity INFO installed > installed.txt
           cat installed.txt
-          grep --quiet bash installed.txt
+          test -s installed.txt
           uv --no-progress run --frozen -- mpm --dnf5 search bash > search.txt
           cat search.txt
           grep --quiet bash search.txt

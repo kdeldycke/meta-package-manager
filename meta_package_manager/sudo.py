@@ -55,22 +55,6 @@ before any of this on that platform.
 ```
 
 ```{todo}
-Hold the *aggregate* progress indicator still while a hidden password prompt
-can appear, as {func}`_hidden_prompt_risk` already does for the per-call
-spinner. A concurrent batch mutes the per-manager spinners and draws one
-progress bar for the whole run
-({class}`~meta_package_manager.dispatch.OperationTrail`), which repaints the
-terminal line the prompt sits on: `mpm upgrade` therefore keeps erasing a
-prompt a single-manager run now leaves alone. The bar is built once, before
-any operation is stamped, so reading the predicate there needs the operation
-threaded into {func}`~meta_package_manager.dispatch.dispatch`, and it costs
-every macOS run carrying `cask` its progress bar on a cold cache. Weigh that
-against a `suspend()` on click-extra's live lines, which would pause either
-indicator around the risky call alone, and which the `SUDO_ASKPASS` helper
-below would need too.
-```
-
-```{todo}
 Escalate to the user owning a manager's tree, not only to root: every
 {attr}`~Escalator.escalate_args` reaches root alone, where `sudo --user` and
 `doas -u` could reach the owner. The one legitimate case is a multi-user nix
@@ -89,9 +73,10 @@ Rebrand the hidden password prompt of an internal escalator with a
 insufficient in the field. It is also the only route serving a hardened
 `sudoers` policy, whose timestamps the primed cache cannot reach (see
 `_SUDO_CACHE_WARM`). That class records why the helper was rejected first,
-and any implementation has to answer the same three points: the raw password
-it handles, the spinner it must pause, and the tools it never reaches
-(`brew` honors the variable, `fink`'s plain `sudo` re-exec does not).
+and any implementation has to answer its two remaining points: the raw
+password it handles, and the tools it never reaches (`brew` honors the
+variable, `fink`'s plain `sudo` re-exec does not). The third, a still
+terminal for the prompt, {func}`_hidden_prompt_risk` now provides.
 ```
 """
 
@@ -947,8 +932,11 @@ def _hidden_prompt_risk(internal_sudo: bool, operation: str | None) -> bool:
     about a prompt they cannot see, and the run dies at
     {data}`~meta_package_manager.execution.MUTATING_TIMEOUT`.
 
-    Only the per-call spinner is covered; the module todo tracks the aggregate
-    indicator a concurrent batch draws instead.
+    A concurrent batch draws one aggregate indicator instead of these per-call
+    spinners, and that one is never in the way: the predicate also holds such a
+    manager back to the sequential tail of
+    {func}`~meta_package_manager.dispatch.dispatch`, which runs once the batch,
+    and its indicator, are done.
     """
     return (
         internal_sudo
@@ -1001,9 +989,8 @@ class _StallWatchdog(logging.Handler):
     scoped `sudo = true` opt-in documented in `docs/sudo.md` already covers
     users wanting a guaranteed up-front prompt. Its third original reason, a
     side channel to pause the spinner that would smear its prompt, is spent:
-    {func}`_hidden_prompt_risk` holds the per-call spinner still for exactly
-    these calls, and what remains is the aggregate indicator that predicate's
-    own todo tracks.
+    {func}`_hidden_prompt_risk` already leaves such a call a still terminal,
+    holding its spinner and scheduling it clear of the batch indicator.
     ```
 
     ```{note}

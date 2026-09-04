@@ -29,7 +29,7 @@ import re
 import pytest
 
 from meta_package_manager.managers.dnf import DNF, DNF5, YUM
-from meta_package_manager.version import VersionRange, parse_version
+from meta_package_manager.version import TokenizedString, VersionRange, parse_version
 
 DNF5_VERSION = """dnf5 version 5.4.3.0
 dnf5 plugin API version 2.0
@@ -73,7 +73,7 @@ DNF4_SEARCH = (
 """The dnf4 shape, kept so one parser is held to both."""
 
 
-def probe_version(cls: type, output: str):
+def probe_version(cls: type[DNF], output: str) -> TokenizedString | None:
     """Reproduce the version probe: first matching regex wins."""
     for regex in cls.version_regexes:
         match = re.compile(regex, re.MULTILINE).search(output)

@@ -22,6 +22,7 @@
 - [dnf,dnf5,yum] Fix version detection against `dnf5`, whose banner was read as the version `dnf5`, dropping every RPM front-end from the pool on Fedora 41 and later.
 - [dnf,dnf5,yum] Fix `search` on `dnf5`, which returned no results at all, and keep whole package descriptions instead of their first word.
 - [dnf] Decline a `dnf5` binary reached through the `dnf` name, leaving it to the `dnf5` manager instead of reporting the same RPM database twice.
+- [mpm] Record `rpm-ostree` as a queued wrap candidate, blocked on an ostree-booted host: Silverblue, Kinoite, IoT and CoreOS ship no `dnf` to reach instead.
 - [apk] Read the installed inventory from the structured `apk query` applet on apk-tools 3, keeping the `apk list` parser for apk-tools 2.
 - [pkg] Fix every operation on FreeBSD, where `pkg` rejects the global `--quiet` it was passed, and repair `search`, which omitted its subcommand and mis-parsed the results.
 - [ports] Fix the FreeBSD ports manager, which reported no version and so never activated, and repair `installed`, `outdated`, `install` and `upgrade`.

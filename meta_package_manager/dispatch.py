@@ -49,6 +49,7 @@ from click_extra.spinner import OperationTrail as _OperationTrail
 from click_extra.theme import get_current_theme as theme
 
 from .execution import SPINNER_DELAY
+from .sudo import _hidden_prompt_risk
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -525,6 +526,7 @@ def dispatch(
     ],
     *,
     coverage: bool = False,
+    operation: str | None = None,
     ctx: Context | None = None,
 ) -> None:
     """Fan a set of work *lanes* out across managers, narrating a `✓`/`✗` trail.
@@ -540,10 +542,20 @@ def dispatch(
     collapse identical invocations.
 
     Each callable does its work, records its own outcome (output to `INFO`, failures
-    into a caller-owned list) and returns `(ok, message)` for the trail. The whole
-    batch reports through one {class}`OperationTrail`: a per-outcome `✓`/`✗` line
-    plus a finisher, behind a single aggregate progress bar when concurrent (a slow
-    batch on a terminal) and silent otherwise.
+    into a caller-owned list) and returns `(ok, message)` for the trail: a per-outcome
+    `✓`/`✗` line plus one finisher, behind a single aggregate progress bar when
+    concurrent (a slow batch on a terminal) and silent otherwise.
+
+    The batch runs in up to two phases, each through its own
+    {class}`OperationTrail`. Every lane runs in the concurrent phase, except a lane
+    whose manager escalates from inside its own commands
+    ({attr}`~meta_package_manager.execution.CLIExecutor.internal_sudo`) on an
+    operation that can prompt: those are held back and run one after the other, in a
+    sequential tail whose trail draws no indicator, so the tool's own password prompt
+    owns the terminal. Only the closing phase renders the finisher, and it counts the
+    whole batch, so the two phases read as one run. A batch with nothing to hold back
+    (every read command, and every host with no such manager selected) keeps exactly
+    the single concurrent phase it had before.
 
     Concurrency is sized by {func}`effective_jobs` (driven by `mpm --jobs`): it
     collapses to a sequential pass — preserving each manager's own per-call spinner —
@@ -555,6 +567,10 @@ def dispatch(
         state-changing commands leave it `False` (the trail *is* their output, so the
         finisher reports the success count, ``{done_label} N/M {unit}``, `✗` on any
         failure).
+    :param operation: the operation these lanes perform, matched by
+        {func}`~meta_package_manager.sudo._hidden_prompt_risk` to decide which lanes
+        are held back to the sequential tail. Left `None` by the read commands, whose
+        operations never escalate, so their whole batch runs concurrently.
     :param ctx: the active click context, read only to size concurrency
         ({func}`effective_jobs`). Defaults to the current context, so a command need not
         thread it; tests pass an explicit stand-in.
@@ -564,8 +580,31 @@ def dispatch(
         return
     if ctx is None:
         ctx = get_current_context(silent=True)
-    jobs = effective_jobs(ctx, len(lanes))
-    managers = [manager for lane_managers, _ in lanes for manager in lane_managers]
+
+    # A lane whose manager escalates from inside its own commands is held back and
+    # run on its own, after the concurrent batch. Such a tool writes its `sudo`
+    # password prompt straight to the terminal with no trailing newline, so raised
+    # mid-batch it lands wherever the cursor sits and the next manager's output
+    # continues on that same line, leaving the prompt unreadable and the run stalled
+    # until the mutating timeout. Running last hands the prompt a terminal nothing
+    # else is writing to. The risk is read once, here: a cache dropped mid-run
+    # (every Homebrew command resets it) re-arms the per-call notice of
+    # _StallWatchdog, never this scheduling.
+    #
+    # A whole lane is held back on one such manager, since a lock family cannot be
+    # split across the two phases without losing the serialization it exists for:
+    # `cask` therefore takes `brew` with it, both being the same lane.
+    held_back = [
+        any(
+            _hidden_prompt_risk(manager.internal_sudo, operation)
+            for manager in lane_managers
+        )
+        for lane_managers, _tasks in lanes
+    ]
+    main_lanes = [lane for lane, tail in zip(lanes, held_back, strict=True) if not tail]
+    tail_lanes = [lane for lane, tail in zip(lanes, held_back, strict=True) if tail]
+
+    jobs = effective_jobs(ctx, len(main_lanes)) if main_lanes else 1
 
     # A multi-manager lane is a lock family: its members share one command cache
     # for the run, so byte-identical invocations (brew and cask both running
@@ -579,13 +618,30 @@ def dispatch(
         for manager in lane_managers:
             manager.run_cache = cache
 
-    try:
+    # Both phases tally into one count, so the single finisher covers the whole batch
+    # whichever phase closes it.
+    ok = 0
+
+    def run_phase(
+        phase_lanes: list[
+            tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]
+        ],
+        phase_jobs: int,
+        *,
+        last: bool,
+    ) -> None:
+        """Drive one phase's lanes through its own trail, finishing the batch on the
+        last one. A held-back phase runs at `jobs=1`, which leaves the trail with no
+        aggregate indicator: its outcomes echo as plain lines and the terminal stays
+        still for a prompt.
+        """
+        nonlocal ok
         with OperationTrail(
-            managers,
+            [manager for lane_managers, _ in phase_lanes for manager in lane_managers],
             label=label,
             unit=unit,
             total=total,
-            jobs=jobs,
+            jobs=phase_jobs,
             coverage=coverage,
         ) as trail:
             # Each lane's tasks run serially on one worker, marking the trail as each
@@ -593,16 +649,25 @@ def dispatch(
             list(
                 run_lanes(
                     lambda task: trail.mark(*task()),
-                    [tasks for _managers, tasks in lanes],
-                    jobs=jobs,
+                    [tasks for _managers, tasks in phase_lanes],
+                    jobs=phase_jobs,
                 )
             )
-
+            ok += trail.ok_count
+            if not last:
+                # Leaving the trail without a finisher erases the indicator and keeps
+                # every outcome line: the batch is reported once, by the phase below.
+                return
             if coverage:
                 trail.finish(True, f"{done_label} {total} {unit}")
             else:
-                ok = trail.ok_count
                 trail.finish(ok == total, f"{done_label} {ok}/{total} {unit}")
+
+    try:
+        if main_lanes:
+            run_phase(main_lanes, jobs, last=not tail_lanes)
+        if tail_lanes:
+            run_phase(tail_lanes, 1, last=True)
     finally:
         for lane_managers, _ in shared_caches:
             for manager in lane_managers:
@@ -646,6 +711,7 @@ def collect_from_managers(
     work: Callable[[PackageManager], tuple[str, dict]],
     *,
     report_state: bool = False,
+    operation: str | None = None,
     ctx: Context | None = None,
 ) -> list[tuple[str, dict]]:
     """Run `work(manager)` for every manager concurrently, results in input order.
@@ -693,7 +759,15 @@ def collect_from_managers(
         lanes = merge_into_lock_lanes(pairs)
     else:
         lanes = [((manager,), [unit]) for manager, unit in pairs]
-    dispatch(label, done_label, "managers", lanes, coverage=not report_state, ctx=ctx)
+    dispatch(
+        label,
+        done_label,
+        "managers",
+        lanes,
+        coverage=not report_state,
+        operation=operation,
+        ctx=ctx,
+    )
     return results
 
 
@@ -702,6 +776,7 @@ def collect_per_package(
     done_label: str,
     tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]],
     *,
+    operation: str | None = None,
     ctx: Context | None = None,
 ) -> None:
     """Run per-package operations across managers concurrently, serial within each.
@@ -717,7 +792,14 @@ def collect_per_package(
     cross-manager ordering (stop at the first manager that has the package) and stays
     sequential on its own.
     """
-    dispatch(label, done_label, "packages", merge_into_lock_lanes(tasks), ctx=ctx)
+    dispatch(
+        label,
+        done_label,
+        "packages",
+        merge_into_lock_lanes(tasks),
+        operation=operation,
+        ctx=ctx,
+    )
 
 
 def warn_jobs_ignored(ctx: Context) -> None:

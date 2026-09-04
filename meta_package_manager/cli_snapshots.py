@@ -470,7 +470,9 @@ def restore(ctx, toml_files):
                     ),
                 ))
 
-    collect_per_package("Restoring", "Restored", tasks)
+    collect_per_package(
+        "Restoring", "Restored", tasks, operation=Operations.install.name
+    )
 
     # Fail with a non-zero exit code if any referenced package could not be installed.
     exit_on_failures(ctx, "restore", restore_failures)

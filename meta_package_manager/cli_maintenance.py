@@ -250,7 +250,7 @@ def _dispatch_sourced_operation(
                 ),
             ))
 
-    collect_per_package(label, done_label, tasks)
+    collect_per_package(label, done_label, tasks, operation=operation.name)
 
     exit_on_failures(ctx, verb, failures)
 
@@ -375,7 +375,9 @@ def install(ctx, packages_specs):
                 else:
                     task = make_cooldown_task(spec, mgr)
                 tasks.append((manager, task))
-        collect_per_package("Installing", "Installed", tasks)
+        collect_per_package(
+            "Installing", "Installed", tasks, operation=Operations.install.name
+        )
 
         exit_on_failures(ctx, "install", unresolved_labels)
         return
@@ -577,7 +579,12 @@ def upgrade(ctx, all, packages_specs):
         # Full upgrade is independent per manager, so fan out concurrently with a
         # ✓/✗ trail and a success-count finisher (see collect_from_managers).
         collect_from_managers(
-            "Upgrading", "Upgraded", managers, upgrade_all_work, report_state=True
+            "Upgrading",
+            "Upgraded",
+            managers,
+            upgrade_all_work,
+            report_state=True,
+            operation=Operations.upgrade_all.name,
         )
         ctx.exit()
 

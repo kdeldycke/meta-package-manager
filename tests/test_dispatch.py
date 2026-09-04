@@ -42,6 +42,7 @@ from meta_package_manager.dispatch import (
     collect_from_managers,
     collect_per_package,
 )
+from meta_package_manager.sudo import _SUDO_CACHE_WARM
 
 
 class FakeContext:
@@ -55,13 +56,24 @@ class FakeContext:
 
 
 class StubManager:
-    """Minimal stand-in exposing only `id`, `progress` and `run_cache`."""
+    """Minimal stand-in exposing `id`, `progress`, `run_cache` and `internal_sudo`.
+
+    `internal_sudo` defaults off, as it does on a real manager: `dispatch` reads it
+    on every lane to decide which are held back to the sequential tail, so a stub
+    without it would be a manager no scheduler could place.
+    """
 
     run_cache = None
 
-    def __init__(self, manager_id: str, progress: bool = False) -> None:
+    def __init__(
+        self,
+        manager_id: str,
+        progress: bool = False,
+        internal_sudo: bool = False,
+    ) -> None:
         self.id = manager_id
         self.progress = progress
+        self.internal_sudo = internal_sudo
 
 
 class TTYStringIO(io.StringIO):
@@ -602,6 +614,92 @@ def test_lock_family_lane_shares_a_run_cache():
     # The cache is torn down once the lane completes.
     assert brew.run_cache is None
     assert cask.run_cache is None
+
+
+@pytest.mark.parametrize(
+    ("operation", "held_back"),
+    (
+        pytest.param("upgrade_all", True, id="prompting-operation-is-held-back"),
+        pytest.param("sync", False, id="non-prompting-operation-stays-concurrent"),
+    ),
+)
+def test_internal_escalator_runs_in_a_sequential_tail(
+    monkeypatch, operation, held_back
+):
+    """A manager escalating internally is held back and run once the concurrent batch
+    is done, so its hidden `sudo` prompt lands on a terminal nothing else writes to.
+
+    The tail runs at `jobs=1`, which `run_lanes` executes inline, so the held-back
+    manager is the one that ran on the calling thread. An operation that cannot
+    prompt keeps every manager in the concurrent phase, on a pool worker.
+    """
+    assert not _SUDO_CACHE_WARM.is_set()
+    monkeypatch.setattr("sys.stderr", TTYStringIO())
+
+    ctx = FakeContext(jobs=4)
+    managers = [
+        StubManager("cask", internal_sudo=True),
+        StubManager("gem"),
+        StubManager("pip"),
+    ]
+    threads: dict = {}
+    lock = threading.Lock()
+
+    def work(manager):
+        with lock:
+            threads[manager.id] = threading.current_thread()
+        return manager.id, {}
+
+    collect_from_managers(
+        "Upgrading",
+        "Upgraded",
+        managers,  # type: ignore[arg-type]
+        work,
+        report_state=True,
+        operation=operation,
+        ctx=ctx,  # type: ignore[arg-type]
+    )
+
+    assert set(threads) == {"cask", "gem", "pip"}
+    assert (threads["cask"] is threading.current_thread()) is held_back
+    # The managers that cannot prompt stay concurrent either way.
+    assert threads["gem"] is not threading.current_thread()
+    assert threads["pip"] is not threading.current_thread()
+
+
+def test_sequential_tail_reports_one_batch_wide_finisher(monkeypatch):
+    """Two phases, one finisher: the tail closes the batch with the whole run's
+    tally, so a held-back manager never reads as a second run of its own."""
+    assert not _SUDO_CACHE_WARM.is_set()
+    monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.0)
+    tty = TTYStringIO()
+    monkeypatch.setattr("sys.stderr", tty)
+
+    ctx = FakeContext(jobs=4)
+    managers = [
+        StubManager("cask", progress=True, internal_sudo=True),
+        StubManager("gem", progress=True),
+        StubManager("pip", progress=True),
+    ]
+
+    def work(manager):
+        return manager.id, {}
+
+    collect_from_managers(
+        "Upgrading",
+        "Upgraded",
+        managers,  # type: ignore[arg-type]
+        work,
+        report_state=True,
+        operation="upgrade_all",
+        ctx=ctx,  # type: ignore[arg-type]
+    )
+
+    output = _squeeze(tty.getvalue())
+    assert output.count("Upgraded") == 1
+    assert "Upgraded 3/3 managers" in output
+    # The held-back manager still leaves its own outcome line.
+    assert "cask" in output
 
 
 # ---------------------------------------------------------------------------

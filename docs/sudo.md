@@ -57,13 +57,27 @@ That splits the candidates in two. `sudo`, `sudo-rs` and `doas` keep a timestamp
 | `sudo-rs` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `doas` | ✅ `-n` | ✅ runs `true` | ❌ | ❌ | ❌ |
 | `run0` | ✅ `--no-ask-password` | ✅ runs `true` | ❌ | ❌ | ❌ |
-| `pkexec` | ❌ | ❌ | ➖ | ❌ | ➖ |
+| `pkexec` | ❌ | ✅ via `pkcheck` | ➖ | ❌ | ❌ |
 | `gsudo` | ❌ | ⚠️ cache warms, never reads | ➖ | ➖ | ⚠️ |
 | Windows `sudo` | ❌ | ❌ | ➖ | ➖ | ❌ |
 
 - **`sudo-rs`** is the Rust rewrite Ubuntu ships as its default `sudo` since `25.10`, so it arrives under the same name and needs no entry of its own. It answers every argv mpm sends. Two wordings differ and mpm now covers both: `sudo --version` prints `sudo-rs <version>` rather than `Sudo version <version>`, and a `--validate` denial quotes HAL 9000 where `--list` says `may not run sudo`.
 - **`run0`** ships with systemd since `256` and fits mpm's capture model: `--pipe` keeps stdout and stderr separate and propagates the exit code. It has no prompt control ([systemd#33902](https://github.com/systemd/systemd/issues/33902)) and no caller-side keepalive, polkit owning retention. Its refusal names neither `run0` nor a wording mpm recognizes, and a setup failure can print nothing at all ([systemd#35930](https://github.com/systemd/systemd/issues/35930)), so the exit code has to be the primary signal. It resets `HOME` to `/root` and `TERM` to `dumb`, so anything a manager needs travels through `--setenv`. systemd `262` adds `-n` and `--validate` as sudo-compatible spellings ([systemd#42465](https://github.com/systemd/systemd/pull/42465)). It also inherits nothing from the caller, so the four managers that force an environment lose it: [`nala`](managers/nala.md), [`tazpkg`](managers/tazpkg.md) and [`urpmi`](managers/urpmi.md) pin their parsers with `LC_ALL=C`, and [`ports`](managers/ports.md) stays out of a dialog with `BATCH=yes`. `run0` is only ever picked on a host carrying neither `sudo` nor `doas`, and all four ship on distributions that carry `sudo`, so pin `--sudo-command sudo` in the unlikely event of meeting this.
-- **`pkexec`** has no non-interactive flag and no validate mode: it always executes a program, and `pkcheck` is the separate binary that checks an authorization without running one. Off a terminal it cannot even prompt, answering `Error creating textual authentication agent` and exiting `127`. It takes no `--` separator, and strips the environment and the working directory. Passwordless use needs a polkit rule returning `polkit.Result.YES` for `org.freedesktop.policykit.exec`.
+- **`pkexec`** is reachable through `--sudo-command pkexec`, and auto-detection essentially never lands on it: it ships wherever polkit does, and those hosts carry `sudo` too. It **only works where a polkit rule already grants `org.freedesktop.policykit.exec`**, because it has no non-interactive flag and always executes a program. That is what `pkcheck` is for: polkit's own query tool answers whether the action is authorized without running or prompting, so `mpm` probes with it and declines the run on an unauthorized host instead of stopping on a prompt inside the fan-out. Grant it with a rule returning `polkit.Result.YES`:
+
+  ```js
+  // /etc/polkit-1/rules.d/49-mpm.rules
+  polkit.addRule(function (action, subject) {
+    if (
+      action.id == "org.freedesktop.policykit.exec" &&
+      subject.isInGroup("wheel")
+    ) {
+      return polkit.Result.YES;
+    }
+  });
+  ```
+
+  `mpm` passes `--keep-cwd`, since pkexec otherwise runs the command in the target user's home. It strips the environment like `run0`, with the same consequence for the four managers that inject one, and it takes no `--` separator: nothing needs one, because the first argument after it is already the manager's absolute path.
 - **`gsudo`** and **Windows `sudo`** both gate on UAC, which is interactive by design; neither can fail instead of prompting ([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)). `gsudo` caches credentials, but the cache is scoped to the calling process by default, so warming it from one subprocess does not carry into the next. Its `-n` means *new window*, not non-interactive. Windows `sudo` caches nothing and defaults to opening a new window, which breaks output capture.
 
 Verified by driving each backend: `run0` and `pkexec` on Arch Linux with systemd `261` and polkit `127`, `sudo-rs` on Ubuntu `26.04`. The Windows row is documentation only. [`please`](https://github.com/edneville/please) is a further candidate nobody has assessed yet, so it has no row rather than an empty one.

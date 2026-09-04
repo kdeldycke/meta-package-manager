@@ -795,6 +795,19 @@ Signed by neither `run0` nor any `sudo` wording, because systemd's bus layer
 words it: the matchers need a branch of their own to see it at all.
 """
 
+PKEXEC_NO_AGENT = (
+    "Error creating textual authentication agent: Error opening current "
+    "controlling terminal for the process (`/dev/tty'): No such device or "
+    "address"
+)
+"""What `pkexec` writes to `<stderr>` off a terminal, measured over SSH on Arch
+Linux running polkit 127.
+
+It raises its own textual agent when no other answers, and that agent needs a
+controlling terminal. Like run0's, the message names neither the escalator nor
+a `sudo` wording.
+"""
+
 
 @pytest.mark.parametrize(
     ("error", "expected"),
@@ -816,6 +829,16 @@ words it: the matchers need a branch of their own to see it at all.
         # asked and was refused.
         (RUN0_REFUSAL, True),
         ("Failed to start transient service unit: Access denied", True),
+        # pkexec, whose three authentication failures name neither pkexec nor
+        # sudo. The first was measured over SSH on Arch with no agent running.
+        (PKEXEC_NO_AGENT, True),
+        (
+            "Error executing command as another user: No authentication agent found.",
+            True,
+        ),
+        ("Error executing command as another user: Request dismissed", True),
+        # polkit refusing outright is a denial instead, so it stays False here.
+        ("Error executing command as another user: Not authorized", False),
         # Unsigned by any escalator: a command of its own saying the same thing.
         ("build.sh: authentication required", False),
         ("", False),
@@ -862,6 +885,11 @@ def test_is_sudo_auth_failure(error, expected):
         # run0 defers to polkit, whose refusal is an authentication failure
         # rather than a denial: a prompt may still authorize it.
         (RUN0_REFUSAL, False),
+        # pkexec separates the two: polkit refusing outright is a denial no
+        # password can lift, where a dismissed prompt is not.
+        ("Error executing command as another user: Not authorized", True),
+        ("Error executing command as another user: Request dismissed", False),
+        (PKEXEC_NO_AGENT, False),
         # A cold cache is an authentication failure, never a denial.
         ("sudo: a password is required", False),
         ("sudo: interactive authentication is required", False),
@@ -988,7 +1016,30 @@ def test_escalator_registry_prefers_sudo():
     running, so it answers for the systemd hosts shipping neither of the
     others rather than displacing a working escalator.
     """
-    assert [e.id for e in ESCALATORS] == ["sudo", "doas", "run0"]
+    assert [e.id for e in ESCALATORS] == ["sudo", "doas", "run0", "pkexec"]
+
+
+def test_pkexec_probe_substitutes_the_running_pid():
+    """`pkcheck` asks about a subject and refuses to guess one, so the probe
+    carries a `{pid}` token mpm fills with its own.
+
+    Left unsubstituted it would reach polkit as a literal, and every probe
+    would report a cold cache on a host that authorizes the action.
+    """
+    pkexec = next(e for e in ESCALATORS if e.id == "pkexec")
+    assert "{pid}" in pkexec.probe_args
+    resolved = pkexec.resolved_probe_args()
+    assert "{pid}" not in resolved
+    assert str(os.getpid()) in resolved
+
+
+@pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])
+def test_probe_args_resolve_for_every_escalator(escalator):
+    """Resolving a probe leaves no placeholder behind, whether it carried one
+    or not."""
+    resolved = escalator.resolved_probe_args()
+    assert len(resolved) == len(escalator.probe_args)
+    assert not any("{pid}" in arg for arg in resolved)
 
 
 @pytest.mark.parametrize(

@@ -270,6 +270,18 @@ class Escalator:
     (`test-framework/sudo-test/src/lib.rs`).
     """
 
+    def resolved_probe_args(self) -> tuple[str, ...]:
+        """{attr}`probe_args`, with any `{pid}` token replaced by mpm's own id.
+
+        Only `pkexec` needs it. Its probe is `pkcheck`, polkit's own
+        authorization query, which asks about a *subject* rather than about the
+        caller and refuses to guess one: without `--process` it exits `126` on
+        `Subject not specified`. Every other escalator answers for whoever runs
+        it and carries no token, so the substitution is a no-op there.
+        """
+        pid = str(os.getpid())
+        return tuple(arg.replace("{pid}", pid) for arg in self.probe_args)
+
     def is_genuine(self) -> bool:
         """Whether the binary on `PATH` really is this escalator.
 
@@ -348,6 +360,34 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # run0 reports the systemd version it ships with, not one of its own.
         identity_markers=("systemd",),
     ),
+    Escalator(
+        id="pkexec",
+        # No `--` separator: pkexec stops parsing at the first non-option and
+        # would try to execute `--` itself. Nothing is at risk without one,
+        # since the first argument mpm appends is the manager's absolute path,
+        # which is already a non-option. `--keep-cwd` holds the working
+        # directory, which pkexec otherwise resets to the target user's home.
+        escalate_args=("pkexec", "--keep-cwd"),
+        # pkexec carries no non-interactive switch and no validate mode: it
+        # always executes a program, and asking it anything either prompts or
+        # dies for want of an agent. `pkcheck` is polkit's own query tool and
+        # the only way to read the answer without doing either, reporting `0`
+        # when the action is authorized and `2` when it is not.
+        probe_args=(
+            "pkcheck",
+            "--action-id",
+            "org.freedesktop.policykit.exec",
+            "--process",
+            "{pid}",
+        ),
+        passwordless_probe_args=None,
+        prompt_args=("pkexec", "--keep-cwd", "true"),
+        # polkit owns retention, and the action pkexec defaults to is
+        # `auth_admin` rather than `auth_admin_keep`, so nothing is kept at all
+        # unless the host says otherwise.
+        refreshable=False,
+        brands_prompt=False,
+    ),
     # ```{todo}
     # Carry {attr}`CLIExecutor.extra_env
     # <meta_package_manager.execution.CLIExecutor.extra_env>` through `run0`.
@@ -373,6 +413,14 @@ order only decides auto-detection: an explicit override always wins.
 `run0` comes last for the same reason, one step further: it needs a running
 polkit to authorize anything, so a host carrying a working `sudo` or `doas`
 keeps it, and run0 answers for the systemd hosts that ship neither.
+
+`pkexec` closes the list, and auto-detection essentially never reaches it: it
+ships wherever polkit does, which is nearly every desktop Linux, and those
+carry `sudo` too. It is there for `--sudo-command pkexec`, and it only works
+where a polkit rule already grants `org.freedesktop.policykit.exec`, since it
+cannot escalate without prompting. The probe is what keeps that honest: a host
+without the rule reports a cold cache and its managers decline to run, rather
+than each of them stopping on a prompt inside the fan-out.
 """
 
 _SUDO_KEEPALIVE_INTERVAL: Final = 60
@@ -515,7 +563,21 @@ def _is_sudo_auth_failure(error: str) -> bool:
     fails it, the same prompt-then-fail path a `sudo` hiding its denial takes.
     """
     lowered = error.lower()
-    if "failed to start transient service unit: access denied" in lowered:
+    # The polkit-brokered pair sign nothing with their own name, so each is
+    # matched on a phrase distinctive enough to stand without the guard below:
+    # systemd's bus layer words run0's refusal, while pkexec's comes from the
+    # authentication agent it failed to raise, or from the prompt a user
+    # dismissed. A dismissal is an authentication failure and not a denial,
+    # since answering the next one would authorize the call.
+    if any(
+        marker in lowered
+        for marker in (
+            "failed to start transient service unit: access denied",
+            "error creating textual authentication agent",
+            "error executing command as another user: request dismissed",
+            "error executing command as another user: no authentication agent",
+        )
+    ):
         return True
     return _names_an_escalator(lowered) and any(
         marker in lowered
@@ -573,6 +635,9 @@ def _is_sudo_denied(error: str) -> bool:
             "may not run sudo",
             "is not in the sudoers file",
             "is not allowed to execute",
+            # pkexec, where polkit answered rather than the user: a prompt
+            # cannot change this one, unlike the dismissal it words otherwise.
+            "error executing command as another user: not authorized",
         )
     ):
         return True
@@ -704,7 +769,7 @@ def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:
     def keepalive() -> None:
         while not stop.wait(_SUDO_KEEPALIVE_INTERVAL):
             refresh = subprocess.run(
-                escalator.probe_args,
+                escalator.resolved_probe_args(),
                 capture_output=True,
                 check=False,
             )
@@ -885,13 +950,13 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
                 extra={"label": manager.id},
             )
 
+    probe_args = escalator.resolved_probe_args()
     try:
         logging.debug(
-            f"Probe the {escalator.id} credential cache: "
-            f"{' '.join(escalator.probe_args)}",
+            f"Probe the {escalator.id} credential cache: {' '.join(probe_args)}",
         )
         probe = subprocess.run(
-            escalator.probe_args,
+            probe_args,
             capture_output=True,
             check=False,
         )

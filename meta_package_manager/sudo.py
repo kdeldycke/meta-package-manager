@@ -43,15 +43,17 @@ escalators are macOS-only managers today).
 ```
 
 ```{todo}
-Add `run0` and `pkexec` to {data}`ESCALATORS`, and `gsudo` for Windows, once
-a user asks for one: `sudo` and `doas` cover the hosts that ship an escalator
-in base today. Each needs its own probe and prompt argv and its own refusal
-wordings, the way `doas` needed both. Emulate an option a backend cannot
-express rather than failing on it: topgrade returns a hard error there, which
-its users report as a bug
+Add `pkexec` to {data}`ESCALATORS`, and `gsudo` for Windows. Neither is a
+table entry the way `run0` was. `pkexec` cannot answer
+{attr}`~Escalator.probe_args` at all: it carries no non-interactive switch and
+no validate mode, so every probe either prompts or dies for want of an agent,
+and supporting it means either making that field optional or restricting it to
+hosts whose polkit rule already grants the action. Windows needs more still,
+since {func}`prime_sudo` returns before any of this on that platform, and both
+of its escalators gate on a UAC dialog that cannot fail instead of prompting.
+Emulate an option a backend cannot express rather than failing on it: topgrade
+returns a hard error there, which its users report as a bug
 ([topgrade-rs/topgrade#1435](https://github.com/topgrade-rs/topgrade/issues/1435)).
-Windows needs more than a table entry, since {func}`prime_sudo` returns
-before any of this on that platform.
 ```
 
 ```{todo}
@@ -320,12 +322,57 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         refreshable=False,
         brands_prompt=False,
     ),
+    Escalator(
+        id="run0",
+        # `--pipe` passes the caller's file descriptors straight through rather
+        # than allocating a pseudo TTY, which is what keeps a captured listing
+        # byte-clean and its exit code intact. run0 picks that mode on its own
+        # when no descriptor is a TTY, so the switch only pins what it would
+        # infer. The trailing `--` shields a manager's own flags from run0's
+        # getopt, which would otherwise claim any it recognizes.
+        escalate_args=("run0", "--pipe", "--no-ask-password", "--"),
+        # No `--validate` before systemd 262, so the cheapest harmless command
+        # stands in for one, exactly as it does for `doas`.
+        probe_args=("run0", "--pipe", "--no-ask-password", "true"),
+        passwordless_probe_args=None,
+        prompt_args=("run0", "--pipe", "true"),
+        # polkit owns the authorization and retains it per session, so there is
+        # no timestamp for mpm to extend: `-v` creates one and `-k` revokes it,
+        # and nothing refreshes one.
+        refreshable=False,
+        # The password prompt belongs to whichever polkit agent answers, built
+        # from the action's own message. run0 has no `--prompt`, and
+        # systemd/systemd#33902 asks for control over that text.
+        brands_prompt=False,
+        identity_args=("run0", "--version"),
+        # run0 reports the systemd version it ships with, not one of its own.
+        identity_markers=("systemd",),
+    ),
+    # ```{todo}
+    # Carry {attr}`CLIExecutor.extra_env
+    # <meta_package_manager.execution.CLIExecutor.extra_env>` through `run0`.
+    # It runs the command in a fresh service that inherits nothing, so the four
+    # managers injecting an environment lose it: `nala`, `tazpkg` and `urpmi`
+    # each force `LC_ALL=C` to pin their parsers against a translated locale,
+    # and `ports` forces `BATCH=yes` to stay out of an interactive dialog.
+    # run0 reads `--setenv=NAME=VALUE`, but {meth}`CLIExecutor.build_cli
+    # <meta_package_manager.execution.CLIExecutor.build_cli>` assembles the
+    # argv without ever seeing the environment, which is resolved beside it,
+    # so the splice needs that plumbed in first. Exposure is near zero
+    # meanwhile: run0 is only ever selected on a host carrying neither `sudo`
+    # nor `doas`, and all four of those managers ship on distributions that
+    # carry `sudo`. A user who hits it can pin `--sudo-command sudo`.
+    # ```
 )
 """Every escalator mpm can drive, in the order it prefers them.
 
 `sudo` comes first so a host carrying both keeps the behavior it has today, and
 the `sudo_command` override exists for the user who wants the other one. The
 order only decides auto-detection: an explicit override always wins.
+
+`run0` comes last for the same reason, one step further: it needs a running
+polkit to authorize anything, so a host carrying a working `sudo` or `doas`
+keeps it, and run0 answers for the systemd hosts that ship neither.
 """
 
 _SUDO_KEEPALIVE_INTERVAL: Final = 60
@@ -456,8 +503,20 @@ def _is_sudo_auth_failure(error: str) -> bool:
     `sudo: interactive authentication is required` where the original says
     `sudo: a password is required`. Matching only the latter left every
     escalation failure on a current Ubuntu unrecognized, and the hint unprinted.
+
+    `run0` needs its own branch. It hands the refusal to systemd's bus layer,
+    which signs it with neither `run0` nor any sudo wording, so the guard below
+    would drop it. The prefix is stable across both refusal paths: polkit
+    denying a `--no-ask-password` call answers `... Access denied as the
+    requested operation requires interactive authentication`, and a denied
+    interactive one answers the same `Access denied` alone. Both read as an
+    authentication failure rather than a denial, which is the conservative
+    call: a prompt may still authorize, and a user polkit grants nothing simply
+    fails it, the same prompt-then-fail path a `sudo` hiding its denial takes.
     """
     lowered = error.lower()
+    if "failed to start transient service unit: access denied" in lowered:
+        return True
     return _names_an_escalator(lowered) and any(
         marker in lowered
         for marker in (

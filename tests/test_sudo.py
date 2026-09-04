@@ -783,6 +783,19 @@ def test_sudo_prompt_names_the_account_that_owns_the_password():
     assert "zypper" in prompt
 
 
+RUN0_REFUSAL = (
+    "Failed to start transient service unit: Access denied as the requested "
+    "operation requires interactive authentication. However, interactive "
+    "authentication has not been enabled by the calling program."
+)
+"""What `run0` writes to `<stderr>` when polkit refuses a `--no-ask-password`
+call, measured on Arch Linux running systemd 261.
+
+Signed by neither `run0` nor any `sudo` wording, because systemd's bus layer
+words it: the matchers need a branch of their own to see it at all.
+"""
+
+
 @pytest.mark.parametrize(
     ("error", "expected"),
     (
@@ -798,6 +811,11 @@ def test_sudo_prompt_names_the_account_that_owns_the_password():
         ("doas: Authentication required", True),
         ("doas: a tty is required", True),
         ("doas: Authentication failed", True),
+        # Both of run0's refusal paths share a prefix: the non-interactive one
+        # measured above, and the bare `Access denied` an agent reports when it
+        # asked and was refused.
+        (RUN0_REFUSAL, True),
+        ("Failed to start transient service unit: Access denied", True),
         # Unsigned by any escalator: a command of its own saying the same thing.
         ("build.sh: authentication required", False),
         ("", False),
@@ -841,6 +859,9 @@ def test_is_sudo_auth_failure(error, expected):
             "doas: doas is not enabled, /etc/doas.conf: No such file or directory",
             True,
         ),
+        # run0 defers to polkit, whose refusal is an authentication failure
+        # rather than a denial: a prompt may still authorize it.
+        (RUN0_REFUSAL, False),
         # A cold cache is an authentication failure, never a denial.
         ("sudo: a password is required", False),
         ("sudo: interactive authentication is required", False),
@@ -960,9 +981,14 @@ def test_install_root_probes_run_the_documented_verb(manager_id, expected_argv):
 
 
 def test_escalator_registry_prefers_sudo():
-    """`sudo` stays the first choice, so a host carrying both keeps the behavior
-    it has today and only an explicit override moves it."""
-    assert [e.id for e in ESCALATORS] == ["sudo", "doas"]
+    """`sudo` stays the first choice, so a host carrying several keeps the
+    behavior it has today and only an explicit override moves it.
+
+    `run0` is last on purpose: it authorizes through polkit and needs one
+    running, so it answers for the systemd hosts shipping neither of the
+    others rather than displacing a working escalator.
+    """
+    assert [e.id for e in ESCALATORS] == ["sudo", "doas", "run0"]
 
 
 @pytest.mark.parametrize(

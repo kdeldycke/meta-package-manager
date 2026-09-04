@@ -247,6 +247,7 @@
 - [mpm] Recognize `sudo-rs` as a genuine `sudo`. Its `--version` banner failed the identity probe, so a host carrying `doas` too escalated through `doas` instead, against the documented preference.
 - [mpm] Report a user no `sudoers` rule matches as unauthorized on `sudo-rs`, instead of prompting for a password that cannot authorize them. Its `--validate` denial words itself unlike its `--list` one.
 - [mpm] Document what each privilege escalator can answer, and why `pkexec` and the Windows ones cannot be primed the way `sudo` is.
+- [mpm] Escalate through `run0` on systemd hosts carrying neither `sudo` nor `doas`, and accept it as a `--sudo-command` choice. A command it escalates outlives an interrupted run, because systemd owns the payload rather than `mpm`.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

@@ -73,18 +73,48 @@ class DNF(PackageManager):
 
     default_sudo = True
 
-    requirement = ">=4.0.0"
+    requirement = ">=4.0.0,<5"
+    """Ceiling because `dnf` is no longer dnf4 everywhere.
+
+    Fedora 41 and later ship `/usr/bin/dnf` as a symlink to `dnf5`, and
+    {attr}`~meta_package_manager.execution.CLIExecutor.cli_path` returns the
+    first name it finds without consulting the version. So this class is handed
+    a dnf5 binary on a current Fedora, and the ceiling is what makes it decline
+    one, leaving `dnf5` to the `DNF5` subclass that drives it properly. Without
+    it the two managers would report the same RPM database twice.
+    """
 
     cli_names: tuple[str, ...] = ("dnf", "dnf4")
-    """
-    ```{code-block} shell-session
+    """`dnf4` is the fallback for a host that renamed the dnf4 binary.
 
-    $ dnf --version
-    4.9.0
-    ```
+    It stays *after* `dnf` deliberately. On RHEL 8 and 9 the only name is `dnf`,
+    which is dnf4; on Fedora both exist, and reaching the vestigial
+    `/usr/bin/dnf4` there would report a second view of the database `dnf5`
+    already covers.
     """
 
     pre_args: tuple[str, ...] = ("--color=never", "--quiet")
+
+    version_regexes: tuple[str, ...] = (
+        r"dnf5\s+version\s+(?P<version>\S+)",
+        r"(?P<version>\S+)",
+    )
+    """dnf4 prints a bare version, so the first pattern is for the *other* binary.
+
+    A `dnf` that is really dnf5 opens `dnf5 version 5.4.3.0`, whose first token
+    is the word `dnf5`. Matching that first is what lets the `requirement`
+    ceiling above refuse it by version rather than by a parse accident: the bare
+    fallback alone would read `dnf5` as the version and report that back to the
+    user.
+
+    ```{code-block} shell-session
+
+    $ dnf --version
+    4.24.0
+      Installed: rpm-0:6.0.2-1.fc44.aarch64 at Fri 04 Sep 2026 08:23:20 AM GMT
+      Built    : Fedora Project at Thu 16 Jul 2026 04:13:23 PM GMT
+    ```
+    """
 
     _ORPHANS_REGEXP = re.compile(
         r"^(?P<package_id>\S+)-(?:\d+:)?(?P<installed_version>[^-\s]+-[^-\s]+)"
@@ -98,7 +128,26 @@ class DNF(PackageManager):
     `version-release`, dashes in the package name notwithstanding.
     """
 
-    _SEARCH_REGEXP = re.compile(r"(\S+)\.\S+\s:\s(\S+)")
+    _SEARCH_REGEXP = re.compile(
+        r"^[ \t]*(?P<package_id>\S+)\.[^.\s]+"
+        r"(?:[ \t]+:[ \t]+|\t)"
+        r"(?P<description>.+)$"
+    )
+    """Split a `search` hit into its package id and its summary.
+
+    One pattern for two output shapes, because `yum` fronts either binary. dnf4
+    writes `usd.aarch64 : 3D VFX pipeline interchange file format`, while dnf5
+    indents the line and separates the two fields with a tab. Matching both is
+    what keeps the parser working across the Fedora 41 cutover.
+
+    The trailing `.+` is what captures a summary whole. A `\\S+` there stopped at
+    the first space, so every description was stored as its own first word.
+
+    Nothing else is needed to reject the section headers both binaries print
+    (dnf4's `===` rules, dnf5's `Matched fields:` lines) or dnf4's metadata
+    banner: an anchored match needs a dotted `name.arch` token, and none of them
+    carry one.
+    """
 
     DELIMITER = "___MPM___"
 
@@ -203,19 +252,29 @@ class DNF(PackageManager):
         lvm2-dbusd.noarch : LVM2 D-Bus daemon
         usd-libs.aarch64 : Universal Scene Description library
         ```
+
+        dnf5 answers in its own shape, which `yum` also produces wherever that
+        name points at dnf5:
+
+        ```{code-block} shell-session
+
+        $ dnf --color=never --quiet search bash
+        Matched fields: name (exact)
+         bash.aarch64	The GNU Bourne Again shell
+        Matched fields: name, summary
+         argbash.noarch	Bash argument parsing code generator
+         bash-argsparse.noarch	An high level argument parsing library for bash
+        ```
         """
         output = self.run_cli("search", query)
 
-        for line in output.splitlines()[1:]:
-            # Skip section headers.
-            if line.startswith("="):
-                continue
-
-            # Extract package ID and description.
+        for line in output.splitlines():
             match = self._SEARCH_REGEXP.match(line)
             if match:
-                package_id, description = match.groups()
-                yield self.package(id=package_id, description=description)
+                yield self.package(
+                    id=match.group("package_id"),
+                    description=match.group("description"),
+                )
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:
@@ -344,7 +403,27 @@ class DNF5(DNF):
     pre_args = ("--quiet",)
     """Reset global options inherited from the `DNF` above.
 
-    `dnf5` does not support `--color=never` parameter.
+    Kept for the dnf5 releases that rejected `--color=never`. Current ones
+    accept it: `5.4.3.0` exits `0` on the option, where an unknown one exits
+    `2`.
+    """
+
+    version_regexes = (r"dnf5\s+version\s+(?P<version>\S+)",)
+    """`dnf5` opens its own name, where dnf4 answers with a bare version.
+
+    The bare `(?P<version>\\S+)` default reads that first token as the version
+    itself, so the manager reported `dnf5` and then refused its own
+    `requirement`, taking Fedora's reference package manager out of the pool
+    entirely.
+
+    ```{code-block} shell-session
+
+    $ dnf5 --version
+    dnf5 version 5.4.3.0
+    dnf5 plugin API version 2.0
+    libdnf5 version 5.4.3.0
+    libdnf5 plugin API version 2.2
+    ```
     """
 
 
@@ -366,5 +445,14 @@ class YUM(DNF):
 
     homepage_url = "http://yum.baseurl.org"
     logo = "fedora"
+
+    requirement = ">=4.0.0"
+    """No ceiling, unlike the `DNF` parent.
+
+    `yum` is a compatibility name rather than a generation: it fronts dnf4 on
+    RHEL 8 and 9, and dnf5 on Fedora 41 and later. Both are the manager this
+    class is for, so it accepts either, and the inherited `version_regexes`
+    already read both shapes.
+    """
 
     cli_names = ("yum",)

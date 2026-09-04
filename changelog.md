@@ -19,6 +19,9 @@
 - [mpm] Hold the progress spinner still during a call whose manager may prompt for a `sudo` password, so the prompt stays on screen instead of being erased by the animation.
 - [mpm] Run a manager that escalates internally after the concurrent batch, on its own, so its password prompt gets a terminal no other manager is writing to.
 - [mpm] Exit quietly on a Ctrl+C pressed while a run is already shutting down, instead of printing a `threading` traceback.
+- [dnf,dnf5,yum] Fix version detection against `dnf5`, whose banner was read as the version `dnf5`, dropping every RPM front-end from the pool on Fedora 41 and later.
+- [dnf,dnf5,yum] Fix `search` on `dnf5`, which returned no results at all, and keep whole package descriptions instead of their first word.
+- [dnf] Decline a `dnf5` binary reached through the `dnf` name, leaving it to the `dnf5` manager instead of reporting the same RPM database twice.
 - [apk] Read the installed inventory from the structured `apk query` applet on apk-tools 3, keeping the `apk list` parser for apk-tools 2.
 - [pkg] Fix every operation on FreeBSD, where `pkg` rejects the global `--quiet` it was passed, and repair `search`, which omitted its subcommand and mis-parsed the results.
 - [ports] Fix the FreeBSD ports manager, which reported no version and so never activated, and repair `installed`, `outdated`, `install` and `upgrade`.
@@ -249,7 +252,8 @@
 - [mpm] Document what each privilege escalator can answer, and why `pkexec` and the Windows ones cannot be primed the way `sudo` is.
 - [mpm] Escalate through `run0` on systemd hosts carrying neither `sudo` nor `doas`, and accept it as a `--sudo-command` choice. A command it escalates outlives an interrupted run, because systemd owns the payload rather than `mpm`.
 - [mpm] Accept `pkexec` as a `--sudo-command` choice, on hosts whose polkit rule already grants `org.freedesktop.policykit.exec`. It cannot escalate without prompting, so `mpm` asks `pkcheck` first and declines the run where the rule is missing.
-- [mpm] Record what `gsudo` answers on Windows, and why it cannot be driven yet: its status query never reports through an exit code, and elevation there is a UAC dialog.
+- [mpm] Escalate through `gsudo` on Windows, which no longer refuses to escalate at all. A manager only reaches it by asking, with `--sudo` or a `[mpm.managers.<id>] sudo = true` entry, since none escalates there by default.
+- [mpm] Carry a forced environment across a `run0` escalation. Its payload runs in a fresh service inheriting nothing, so `nala`, `tazpkg` and `urpmi` were losing the `LC_ALL=C` pinning their parsers, and `ports` the `BATCH=yes` keeping it out of a dialog.
 - [cargo,gem,mamba,micromamba] Record that each tool's shipped release-age gate never reaches the commands `mpm` drives, in place of a pending upstream proposal.
 - [vscode,vscodium] Point the cooldown status at the open request covering extension installs: the delay VS Code shipped holds back automatic updates only.
 

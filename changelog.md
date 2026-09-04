@@ -250,6 +250,8 @@
 - [mpm] Escalate through `run0` on systemd hosts carrying neither `sudo` nor `doas`, and accept it as a `--sudo-command` choice. A command it escalates outlives an interrupted run, because systemd owns the payload rather than `mpm`.
 - [mpm] Accept `pkexec` as a `--sudo-command` choice, on hosts whose polkit rule already grants `org.freedesktop.policykit.exec`. It cannot escalate without prompting, so `mpm` asks `pkcheck` first and declines the run where the rule is missing.
 - [mpm] Record what `gsudo` answers on Windows, and why it cannot be driven yet: its status query never reports through an exit code, and elevation there is a UAC dialog.
+- [cargo,gem,mamba,micromamba] Record that each tool's shipped release-age gate never reaches the commands `mpm` drives, in place of a pending upstream proposal.
+- [vscode,vscodium] Point the cooldown status at the open request covering extension installs: the delay VS Code shipped holds back automatic updates only.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

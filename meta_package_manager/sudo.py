@@ -59,12 +59,19 @@ elevation exits `999`, truncated to `231` through a POSIX caller, and says
 `sudo`; and `gsudo --version` opens `gsudo v2.6.1`, which is the identity
 marker. Neither backend can fail instead of prompting, both gating on a UAC
 dialog, and asking for a password on the command line is an open request
-upstream ([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)).
+against each: [microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)
+for the Windows one and
+[gerardog/gsudo#378](https://github.com/gerardog/gsudo/issues/378) for `gsudo`.
 
 Three traps to encode: `gsudo -n` means *new window* rather than
 non-interactive, its cache is scoped to the calling process unless `--pid 0`
 widens it, and Windows' own `sudo` defaults to `forceNewWindow`, which breaks
-output capture and needs `sudo run --inline`. Emulate an option a backend
+output capture and needs `sudo run --inline`. That last one is not enough on
+its own, since it does not forward a command line unchanged
+([microsoft/sudo#117](https://github.com/microsoft/sudo/issues/117)), which
+{meth}`CLIExecutor.build_cli
+<meta_package_manager.execution.CLIExecutor.build_cli>` relies on. Emulate an
+option a backend
 cannot express rather than failing on it: topgrade returns a hard error there,
 which its users report as a bug
 ([topgrade-rs/topgrade#1435](https://github.com/topgrade-rs/topgrade/issues/1435)).

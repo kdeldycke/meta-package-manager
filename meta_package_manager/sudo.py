@@ -44,19 +44,29 @@ escalators are macOS-only managers today).
 
 ```{todo}
 Add a Windows escalator, `gsudo` or the `sudo.exe` shipping with Windows 11
-`24H2`. It needs more than a {data}`ESCALATORS` entry, since {func}`prime_sudo`
-returns before any of this machinery on that platform, and neither backend can
-fail instead of prompting: both gate on a UAC consent dialog, and asking for a
-password on the command line is an open request upstream
-([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)). The nearest
-thing to {attr}`~Escalator.probe_args` is `gsudo`'s credentials cache, which
-`gsudo cache on` warms and `gsudo status` reads, though it is scoped to the
-calling process unless `--pid 0` widens it. Two traps to encode: `gsudo -n`
-means *new window* rather than non-interactive, and Windows' own `sudo`
-defaults to `forceNewWindow`, which breaks output capture, so it needs
-`sudo run --inline`. Emulate an option a backend cannot express rather than
-failing on it: topgrade returns a hard error there, which its users report as a
-bug
+`24H2`. Two things block it, and neither is a {data}`ESCALATORS` entry.
+{func}`prime_sudo` returns before any of this machinery on that platform, so
+Windows has to join it first. And nothing there answers
+{attr}`~Escalator.probe_args`, which reads an exit code: `gsudo status --json`
+reports `IsElevated` and `CacheAvailable` without prompting, exactly the
+question worth asking, but it exits `0` whatever the answer is, so reading it
+means parsing output.
+
+Measured against `gsudo 2.6.1` on Windows 11 `21H2`, so an implementation need
+not rediscover it: stdout and exit codes pass through faithfully; a failed
+elevation exits `999`, truncated to `231` through a POSIX caller, and says
+`Error: Unable to connect to the elevated service.`, naming neither `gsudo` nor
+`sudo`; and `gsudo --version` opens `gsudo v2.6.1`, which is the identity
+marker. Neither backend can fail instead of prompting, both gating on a UAC
+dialog, and asking for a password on the command line is an open request
+upstream ([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)).
+
+Three traps to encode: `gsudo -n` means *new window* rather than
+non-interactive, its cache is scoped to the calling process unless `--pid 0`
+widens it, and Windows' own `sudo` defaults to `forceNewWindow`, which breaks
+output capture and needs `sudo run --inline`. Emulate an option a backend
+cannot express rather than failing on it: topgrade returns a hard error there,
+which its users report as a bug
 ([topgrade-rs/topgrade#1435](https://github.com/topgrade-rs/topgrade/issues/1435)).
 ```
 

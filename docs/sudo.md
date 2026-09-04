@@ -58,7 +58,7 @@ That splits the candidates in two. `sudo`, `sudo-rs` and `doas` keep a timestamp
 | `doas` | ✅ `-n` | ✅ runs `true` | ❌ | ❌ | ❌ |
 | `run0` | ✅ `--no-ask-password` | ✅ runs `true` | ❌ | ❌ | ❌ |
 | `pkexec` | ❌ | ✅ via `pkcheck` | ➖ | ❌ | ❌ |
-| `gsudo` | ❌ | ⚠️ cache warms, never reads | ➖ | ➖ | ⚠️ |
+| `gsudo` | ❌ | ⚠️ `status --json`, never by exit code | ➖ | ➖ | ⚠️ cache, not a timestamp |
 | Windows `sudo` | ❌ | ❌ | ➖ | ➖ | ❌ |
 
 - **`sudo-rs`** is the Rust rewrite Ubuntu ships as its default `sudo` since `25.10`, so it arrives under the same name and needs no entry of its own. It answers every argv mpm sends. Two wordings differ and mpm now covers both: `sudo --version` prints `sudo-rs <version>` rather than `Sudo version <version>`, and a `--validate` denial quotes HAL 9000 where `--list` says `may not run sudo`.
@@ -78,9 +78,11 @@ That splits the candidates in two. `sudo`, `sudo-rs` and `doas` keep a timestamp
   ```
 
   `mpm` passes `--keep-cwd`, since pkexec otherwise runs the command in the target user's home. It strips the environment like `run0`, with the same consequence for the four managers that inject one, and it takes no `--` separator: nothing needs one, because the first argument after it is already the manager's absolute path.
-- **`gsudo`** and **Windows `sudo`** both gate on UAC, which is interactive by design; neither can fail instead of prompting ([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)). `gsudo` caches credentials, but the cache is scoped to the calling process by default, so warming it from one subprocess does not carry into the next. Its `-n` means *new window*, not non-interactive. Windows `sudo` caches nothing and defaults to opening a new window, which breaks output capture.
+- **`gsudo`** and **Windows `sudo`** both gate on UAC, which is interactive by design; neither can fail instead of prompting ([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)). `gsudo` caches credentials, but the cache is scoped to the calling process by default, so warming it from one subprocess does not carry into the next. Its `-n` means *new window*, not non-interactive, and installing it through Scoop also shims a `sudo` name that can collide with the one Windows 11 `24H2` ships. Windows `sudo` caches nothing and defaults to opening a new window, which breaks output capture.
 
-Verified by driving each backend: `run0` and `pkexec` on Arch Linux with systemd `261` and polkit `127`, `sudo-rs` on Ubuntu `26.04`. The Windows row is documentation only. [`please`](https://github.com/edneville/please) is a further candidate nobody has assessed yet, so it has no row rather than an empty one.
+  Driving `gsudo 2.6.1` settled what it can answer. It passes stdout and exit codes through faithfully, and `gsudo status --json` reports `IsElevated`, `IntegrityLevel` and `CacheAvailable` without ever prompting, which is the shape of a probe. What rules it out today is that `status` exits `0` whatever it finds, so the answer is only in its output, where {attr}`~Escalator.probe_args` reads an exit code alone. Failing to elevate is the reverse: it exits `999`, seen as `231` once truncated to a byte, and says `Error: Unable to connect to the elevated service.`, naming neither itself nor `sudo`.
+
+Verified by driving each backend: `run0` and `pkexec` on Arch Linux with systemd `261` and polkit `127`, `sudo-rs` on Ubuntu `26.04`, and `gsudo 2.6.1` on Windows 11 `21H2`. Only the Windows `sudo` row is documentation alone, that release predating it. Note what an SSH session on Windows cannot show: OpenSSH hands a local administrator an already-elevated token, so elevation there is a no-op and the UAC path only appears in the filtered token an interactive desktop session gets. Reaching it for the measurements above meant dropping to medium integrity with `gsudo --integrity`. [`please`](https://github.com/edneville/please) is a further candidate nobody has assessed yet, so it has no row rather than an empty one.
 
 ## Controlling escalation
 

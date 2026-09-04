@@ -249,6 +249,7 @@
 - [mpm] Document what each privilege escalator can answer, and why `pkexec` and the Windows ones cannot be primed the way `sudo` is.
 - [mpm] Escalate through `run0` on systemd hosts carrying neither `sudo` nor `doas`, and accept it as a `--sudo-command` choice. A command it escalates outlives an interrupted run, because systemd owns the payload rather than `mpm`.
 - [mpm] Accept `pkexec` as a `--sudo-command` choice, on hosts whose polkit rule already grants `org.freedesktop.policykit.exec`. It cannot escalate without prompting, so `mpm` asks `pkcheck` first and declines the run where the rule is missing.
+- [mpm] Record what `gsudo` answers on Windows, and why it cannot be driven yet: its status query never reports through an exit code, and elevation there is a UAC dialog.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

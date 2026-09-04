@@ -353,11 +353,16 @@ class FWUPD(PackageManager):
         data = self.parse_json(output)
         if data:
             for device in data["Devices"]:
-                if "updatable" in device["Flags"]:
+                # Every device field is optional: fwupd writes one only when the
+                # daemon read a value for it. The ID is the handle every later
+                # operation addresses the device by, so it is the one field a
+                # package cannot do without.
+                device_id = device.get("DeviceId")
+                if device_id and "updatable" in device.get("Flags", ()):
                     yield self.package(
-                        id=device["DeviceId"],
-                        name=device["Name"],
-                        installed_version=device["Version"],
+                        id=device_id,
+                        name=device.get("Name"),
+                        installed_version=device.get("Version"),
                     )
 
     @property
@@ -531,16 +536,25 @@ class FWUPD(PackageManager):
         data = self.parse_json(output)
         if data:
             for device in data["Devices"]:
-                if "updatable" in device["Flags"] and device.get("Releases"):
-                    yield self.package(
-                        id=device["DeviceId"],
-                        name=device["Name"],
-                        latest_version=max(
-                            parse_version(rel["Version"])
-                            for rel in device.get("Releases")
-                        ),
-                        installed_version=device["Version"],
-                    )
+                device_id = device.get("DeviceId")
+                if not device_id or "updatable" not in device.get("Flags", ()):
+                    continue
+                # A release carries a version only when fwupd read one, and an
+                # outdated package with no version to upgrade to reports
+                # nothing actionable.
+                versions = [
+                    parse_version(release["Version"])
+                    for release in device.get("Releases", ())
+                    if "Version" in release
+                ]
+                if not versions:
+                    continue
+                yield self.package(
+                    id=device_id,
+                    name=device.get("Name"),
+                    latest_version=max(versions),
+                    installed_version=device.get("Version"),
+                )
 
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.

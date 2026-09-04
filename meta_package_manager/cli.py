@@ -34,7 +34,9 @@ across all of them, and renders the aggregated, multi-manager result.
 from __future__ import annotations
 
 import logging
+import os
 import shlex
+import signal
 import sys
 import threading
 from collections.abc import Iterable
@@ -100,6 +102,7 @@ from .tables import SortableField
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
+    from types import FrameType
 
     from click_extra import Context, Parameter
 
@@ -342,6 +345,45 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         bar_path = shorten_bar_path
     echo(bar_path)
     ctx.exit()
+
+
+def install_teardown_interrupt_guard(ctx: Context) -> None:
+    """Make a Ctrl+C pressed during teardown exit at once, quietly.
+
+    {func}`~click_extra.execution.install_interrupt_handler` covers the run itself:
+    the first Ctrl+C terminates every live subprocess, then aborts. It cannot cover
+    what follows, because its own handler is restored when the context closes: the
+    interpreter is still joining any worker thread whose child is draining, and a
+    Ctrl+C landing inside that join surfaces as `Exception ignored on threading
+    shutdown`, a dozen lines of {mod}`threading` internals ending on a bare
+    `KeyboardInterrupt`. It reads as a crash, where the user only asked twice for
+    the run to stop.
+
+    So this guard is armed *by* a close callback rather than during the run, and is
+    deliberately never restored: nothing follows it but the teardown it covers. The
+    exit skips the join instead of unwinding through it, with the shell's
+    conventional 128 + `SIGINT`. Everything the run had to say is already flushed by
+    then, the abort having printed it.
+
+    Registered before {func}`~click_extra.execution.install_interrupt_handler`, so
+    that its restore runs first and this one has the last word: a context unwinds
+    its close callbacks last-in first-out.
+
+    Skipped off a terminal, where nobody is pressing Ctrl+C and a handler nothing
+    restores would outlive the call: the test suite drives this CLI in-process, over
+    and over, in a process whose own Ctrl+C belongs to pytest.
+    """
+    if threading.current_thread() is not threading.main_thread():
+        return
+    if not sys.stderr.isatty():
+        return
+
+    def exit_now(signum: int, frame: FrameType | None) -> None:
+        # os._exit, never sys.exit: a SystemExit raised here would unwind through
+        # the very thread join this exists to skip.
+        os._exit(128 + signal.SIGINT)
+
+    ctx.call_on_close(lambda: signal.signal(signal.SIGINT, exit_now))
 
 
 def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None) -> str:
@@ -633,7 +675,10 @@ def mpm(
     # Make the first Ctrl+C terminate any in-flight package-manager subprocesses so a
     # concurrent fan-out (upgrade, install, ...) aborts cleanly instead of hanging on
     # worker threads whose children survived the terminal signal. Restored on close.
-    # See meta_package_manager.execution for the full rationale.
+    # See meta_package_manager.execution for the full rationale. The teardown
+    # guard is registered first so its own callback runs last, and it is what
+    # remains installed once click-extra's handler is restored.
+    install_teardown_interrupt_guard(ctx)
     install_interrupt_handler(ctx)
 
     # Plan mode collects the state-changing commands it would run (see

@@ -20,6 +20,7 @@ import dataclasses
 import inspect
 import json
 import re
+import signal
 import subprocess
 import sys
 from collections.abc import Callable, Collection, Iterable, Iterator
@@ -31,6 +32,7 @@ import pytest
 from boltons.iterutils import same
 from boltons.strutils import strip_ansi
 from click_extra.table import SERIALIZATION_FORMATS, TableFormat
+from extra_platforms import is_any_windows
 
 from meta_package_manager import __version__
 from meta_package_manager.cli import _debug_rerun_command
@@ -706,3 +708,64 @@ def test_template_tests_default_to_the_fake_pool(method):
         "subclass inheriting it: take `fake_pool`, or add it to "
         "REAL_POOL_TEMPLATE_TESTS with the reason it must stay live."
     )
+
+
+_INTERRUPT_GUARD_PROBE = dedent("""
+    import io, os, signal, sys
+
+    import click
+
+    from meta_package_manager.cli import install_teardown_interrupt_guard
+
+    class FakeTTY(io.StringIO):
+        def isatty(self):
+            return True
+
+    # The guard only arms on a terminal, which a captured subprocess is not.
+    real_stderr = sys.stderr
+    sys.stderr = FakeTTY()
+    ctx = click.Context(click.Command("probe"))
+    if sys.argv[1] == "armed":
+        install_teardown_interrupt_guard(ctx)
+    # The guard is armed by the close callback, not by the call above.
+    ctx.close()
+    sys.stderr = real_stderr
+
+    os.kill(os.getpid(), signal.SIGINT)
+    sys.exit(7)
+""")
+"""Send a process its own `SIGINT` after a context closed, with and without the guard.
+
+Runs out of process because the guard exits through `os._exit`, which would take
+the test session with it.
+"""
+
+
+@pytest.mark.skipif(is_any_windows(), reason="POSIX SIGINT delivery.")
+@pytest.mark.parametrize(
+    ("mode", "returncode", "quiet"),
+    (
+        pytest.param("armed", 128 + signal.SIGINT, True, id="guard-exits-in-silence"),
+        pytest.param("bare", -signal.SIGINT, False, id="control-dumps-a-traceback"),
+    ),
+)
+def test_teardown_interrupt_guard_exits_without_a_traceback(mode, returncode, quiet):
+    """A Ctrl+C after teardown exits on the spot rather than unwinding through it.
+
+    The guarded run *exits* with the shell's 128 + `SIGINT` and says nothing. The
+    control is *killed by* the signal instead, CPython re-raising an uncaught
+    `KeyboardInterrupt` as the signal that caused it, and prints a traceback of
+    interpreter frames on the way out. That traceback is the whole defect: off a
+    real terminal its frames are `threading`'s thread-join internals, which read as
+    a crash to a user who only asked twice for the run to stop.
+    """
+    process = subprocess.run(
+        (sys.executable, "-c", _INTERRUPT_GUARD_PROBE, mode),
+        capture_output=True,
+        encoding="UTF-8",
+        check=False,
+    )
+    # Never 7: the probe must die on the signal, not run past it.
+    assert process.returncode == returncode
+    assert ("Traceback" not in process.stderr) is quiet
+    assert ("KeyboardInterrupt" not in process.stderr) is quiet

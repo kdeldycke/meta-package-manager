@@ -18,6 +18,7 @@
 - [mpm] Escalate through `doas` where `sudo` is Alpine's `doas-sudo-shim`, which rejects every option the credential probes send and so reported a cold cache.
 - [mpm] Hold the progress spinner still during a call whose manager may prompt for a `sudo` password, so the prompt stays on screen instead of being erased by the animation.
 - [mpm] Run a manager that escalates internally after the concurrent batch, on its own, so its password prompt gets a terminal no other manager is writing to.
+- [mpm] Exit quietly on a Ctrl+C pressed while a run is already shutting down, instead of printing a `threading` traceback.
 - [apk] Read the installed inventory from the structured `apk query` applet on apk-tools 3, keeping the `apk list` parser for apk-tools 2.
 - [pkg] Fix every operation on FreeBSD, where `pkg` rejects the global `--quiet` it was passed, and repair `search`, which omitted its subcommand and mis-parsed the results.
 - [ports] Fix the FreeBSD ports manager, which reported no version and so never activated, and repair `installed`, `outdated`, `install` and `upgrade`.

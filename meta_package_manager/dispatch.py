@@ -116,7 +116,8 @@ SHARED_LOCK_FAMILIES: Final[tuple[LockFamily, ...]] = (
     LockFamily(
         "RPM database",
         frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
-        "they all reach the RPM database",
+        "they all reach the RPM database, and a second writer waits on its lock "
+        "for as long as the first one holds it, rather than failing",
     ),
     LockFamily(
         "pacman database",
@@ -173,11 +174,18 @@ serialize on its lock:
 - `dnf`, `dnf5`, `yum`, `zypper` and `urpmi` all reach the RPM database. `urpmi`
   fronts `librpm` directly, having no listing of its own, and the Mandriva lineage
   it serves ships `dnf` alongside it, so the two genuinely coexist on one host.
+  This family waits where the pacman one below fails, which is what makes
+  serializing it worth more: a second `dnf5` sits in `fcntl_setlk` for as long as
+  the first holds the lock, so an unserialized pair would spend the whole mutating
+  timeout achieving nothing instead of reporting a collision. Measured on Fedora
+  44 with dnf5 `5.4.3.0`, and it is easy to hit by accident, since a `dnf` whose
+  caller was killed keeps the lock.
 - `pacman` and the AUR helpers `pacaur`, `pamac`, `paru`, `pikaur`, `trizen` and
   `yay` all reach the pacman database (`/var/lib/pacman/db.lck`). The helpers are
   front-ends rather than reimplementations: each shells out to `sudo pacman` for the
   privileged steps, `pamac` reaching the same `libalpm` through Manjaro's `libpamac`.
-  Two of them mutating at once fail to init their transaction.
+  Two of them mutating at once fail to init their transaction: pacman `7.1.0`
+  answers `unable to lock database` and exits straight away, holding nothing.
 - `pkg` and `ports` share the install database `pkg` maintains, which every mutating
   operation but `sync` reaches: `ports` has no registry of its own, builds from
   `/usr/ports` and registers the result through `pkg`, whose advisory lock on that

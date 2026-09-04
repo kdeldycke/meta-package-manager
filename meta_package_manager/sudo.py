@@ -245,12 +245,27 @@ class Escalator:
     stand-in is known, which is every escalator but `sudo`.
     """
 
-    identity_marker: str | None = None
-    """Substring {attr}`identity_args` prints when the binary is genuine.
+    identity_markers: tuple[str, ...] | None = None
+    """Substrings {attr}`identity_args` prints when the binary is genuine, any
+    one of which is proof.
 
     Matched against `<stdout>` on a zero exit. Kept beside the argv because
     exit status alone is too weak a signal: a stand-in free to accept the
     option would pass on the returncode.
+
+    Several markers rather than one because a reimplementation brands its own
+    banner: `sudo --version` prints `Sudo version 1.9.17` on the original and
+    `sudo-rs 0.2.13` on the Rust rewrite Ubuntu ships as its default `sudo`
+    since `25.10`. Matching the first alone rejected sudo-rs as a stand-in, and
+    {func}`resolve_escalator` then fell through to `doas` on a host carrying
+    both, inverting the documented preference. Upstream's `SUDO_RS_VERSION`
+    override replaces the number and never the `sudo-rs` prefix, so the prefix
+    is what the second marker keys on.
+
+    Both markers are the ones sudo-rs itself sorts the two implementations by:
+    its test framework reads the same banner, stripping `Sudo version ` to
+    recognize the original and treating everything else as its own
+    (`test-framework/sudo-test/src/lib.rs`).
     """
 
     def is_genuine(self) -> bool:
@@ -275,8 +290,9 @@ class Escalator:
             return False
         # `stdout` is `None` whenever the output was not captured, so it is
         # normalized rather than trusted to be a string.
-        return probe.returncode == 0 and bool(
-            self.identity_marker and self.identity_marker in (probe.stdout or "")
+        stdout = probe.stdout or ""
+        return probe.returncode == 0 and any(
+            marker in stdout for marker in self.identity_markers or ()
         )
 
 
@@ -290,7 +306,7 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         refreshable=True,
         brands_prompt=True,
         identity_args=("sudo", "--version"),
-        identity_marker="Sudo version",
+        identity_markers=("Sudo version", "sudo-rs"),
     ),
     Escalator(
         id="doas",
@@ -477,11 +493,18 @@ def _is_sudo_denied(error: str) -> bool:
     required` (authenticating before disclosing authorization), and the hidden
     case simply keeps today's prompt-then-fail path. The markers cover, in
     order: `sudo` since `1.9` (`is not allowed to run sudo on`, per its message
-    catalog), `sudo` before `1.9` and `sudo-rs`'s validate denial (`may not run
+    catalog), `sudo` before `1.9` and `sudo-rs`'s *list* denial (`may not run
     sudo on`, `src/common/error.rs`), the historic sudoers lecture (`is not in
     the sudoers file`), and both implementations' per-command denial (`is not
     allowed to execute`), and `doas`, which reports the bare errno string of
     `EPERM` instead.
+
+    `sudo-rs` denies a `--validate` differently from a `--list`, which matters
+    because {attr}`~Escalator.probe_args` runs the former first: a user no
+    `sudoers` rule matches gets `I'm sorry {user}. I'm afraid I can't do that`
+    (`Error::Authorization`) where `--list` says `may not run sudo`. Matching
+    only the list wording left a non-sudoer on Ubuntu `25.10` and later being
+    prompted for a password that could never authorize them.
     """
     lowered = error.lower()
     if any(
@@ -502,8 +525,14 @@ def _is_sudo_denied(error: str) -> bool:
     # string is one any command could print, so both count only on a line doas
     # signed. The sudo wordings above need no such guard: each already names
     # sudo itself, and sudo prefixes none of them.
+    #
+    # `sudo-rs`'s validate denial names no tool either, quoting HAL 9000
+    # instead, so it joins the guarded group and rides the `sudo: ` prefix its
+    # own diagnostic path writes.
     return _names_an_escalator(lowered) and (
-        "operation not permitted" in lowered or "is not enabled" in lowered
+        "operation not permitted" in lowered
+        or "is not enabled" in lowered
+        or "afraid i can't do that" in lowered
     )
 
 

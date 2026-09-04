@@ -823,6 +823,13 @@ def test_is_sudo_auth_failure(error, expected):
             True,
         ),
         ("SORRY, USER KEVIN MAY NOT RUN SUDO ON HOST.", True),
+        # sudo-rs denies a `--validate` by quoting HAL 9000 rather than naming
+        # sudo, and `--validate` is the probe mpm runs first. Matching only the
+        # `--list` wording above left a non-sudoer on Ubuntu 25.10 and later
+        # being prompted for a password that could never authorize them.
+        ("sudo: I'm sorry kevin. I'm afraid I can't do that", True),
+        # The same quote from a command rather than an escalator stays inert.
+        ("hal: I'm afraid I can't do that", False),
         # opendoas prints the bare errno string of EPERM for an unmatched rule.
         # Confirmed on Alpine's doas 6.8.2 against a config permitting another
         # user only.
@@ -986,6 +993,10 @@ def _both_escalators_installed():
     (
         # Real sudo, measured on Alpine 3.24.1 running sudo 1.9.17_p2.
         pytest.param(0, "Sudo version 1.9.17p2\n", True, id="real-sudo"),
+        # sudo-rs brands its own banner, measured on Ubuntu 26.04, where it is
+        # the default `sudo`. Matching `Sudo version` alone rejected it as a
+        # stand-in and handed a host carrying doas too the wrong escalator.
+        pytest.param(0, "sudo-rs 0.2.13-0ubuntu1\n", True, id="sudo-rs"),
         # Alpine's doas-sudo-shim 0.2.0-r0 rejects the option outright, its
         # parser sending every unknown long option to `die`.
         pytest.param(1, "", False, id="doas-sudo-shim"),
@@ -1042,6 +1053,30 @@ def test_resolve_escalator_skips_an_impostor_for_the_real_thing():
         resolve_escalator.cache_clear()
     assert escalator is not None
     assert escalator.id == "doas"
+
+
+def test_resolve_escalator_keeps_sudo_on_a_sudo_rs_host():
+    """A host whose `sudo` is sudo-rs keeps escalating through it, even carrying
+    `doas` too.
+
+    The identity probe reads the binary's own banner, and sudo-rs prints
+    `sudo-rs <version>` where the original prints `Sudo version <version>`.
+    Matching only the latter made `is_genuine` reject Ubuntu's default `sudo`,
+    and the search then settled on `doas`, inverting the preference
+    {data}`~meta_package_manager.sudo.ESCALATORS` documents.
+    """
+    with (
+        _both_escalators_installed(),
+        patch("meta_package_manager.sudo.subprocess.run") as run,
+    ):
+        run.return_value = subprocess.CompletedProcess(
+            (), 0, stdout="sudo-rs 0.2.13-0ubuntu1\n"
+        )
+        resolve_escalator.cache_clear()
+        escalator = resolve_escalator()
+        resolve_escalator.cache_clear()
+    assert escalator is not None
+    assert escalator.id == "sudo"
 
 
 def test_resolve_escalator_falls_back_to_a_lone_impostor():

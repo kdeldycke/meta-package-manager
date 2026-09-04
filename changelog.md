@@ -244,6 +244,9 @@
 - [mpm] Queue `cards`, `pkgman`, `prt-get` and `slackpkg` as wrap candidates, leaving the benchmark with no unassessed manager: each clears the vetting ladder and waits on a NuTyX, Haiku, CRUX or Slackware host.
 - [shelly] Add Shelly package manager, with inventory, outdated, search, install, remove, upgrade, database sync and cache and orphan cleanup.
 - [mpm] Document how to write the `NOPASSWD` rule unattended escalation needs, and why a `/etc/sudoers.d` drop-in can be silently overridden by a later rule.
+- [mpm] Recognize `sudo-rs` as a genuine `sudo`. Its `--version` banner failed the identity probe, so a host carrying `doas` too escalated through `doas` instead, against the documented preference.
+- [mpm] Report a user no `sudoers` rule matches as unauthorized on `sudo-rs`, instead of prompting for a password that cannot authorize them. Its `--validate` denial words itself unlike its `--list` one.
+- [mpm] Document what each privilege escalator can answer, and why `pkexec` and the Windows ones cannot be primed the way `sudo` is.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

@@ -41,6 +41,29 @@ This selects the binary only. Whether a manager escalates at all stays the separ
 
 The two are not interchangeable underneath. `doas` takes short options only, so `mpm` escalates through `doas -n` where it would write `sudo --non-interactive`. It also has no way to authenticate without running a command, so the credential probe runs `doas -n true`, and its persistence is opt-in per rule in `doas.conf`: `mpm` therefore never refreshes a `doas` credential on a schedule, where it keeps a `sudo` one alive for the whole run. A host with neither binary gets one warning, and its managers run unprivileged rather than failing on a missing `sudo`.
 
+## Escalator support
+
+`sudo` and `doas` are the two backends mpm drives today. What decides whether another one can join is not escalation itself, which they all do, but the *credential probe*: mpm reads the cache before a run so no password prompt lands inside the concurrent fan-out. A backend that cannot answer "am I already authorized?" without prompting cannot be primed, and every one of its calls risks a prompt nobody is watching.
+
+That splits the candidates in two. `sudo`, `sudo-rs` and `doas` keep a timestamp mpm can read and refresh. `run0` and `pkexec` broker authorization through polkit, where the grant is a property of the session and there is no cache to inspect, extend or keep warm. Windows is a third case again, where UAC is a consent dialog by design.
+
+| Escalator | Non-interactive | Probe, no prompt | Per-command query | Brands prompt | Refreshable |
+| :-------- | :-------------: | :--------------: | :---------------: | :-----------: | :---------: |
+| `sudo` | ✅ `--non-interactive` | ✅ `--validate` | ✅ `--list` | ✅ `--prompt` | ✅ |
+| `sudo-rs` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `doas` | ✅ `-n` | ✅ runs `true` | ❌ | ❌ | ❌ |
+| `run0` | ✅ `--no-ask-password` | ✅ runs `true` | ❌ | ❌ | ❌ |
+| `pkexec` | ❌ | ❌ | ➖ | ❌ | ➖ |
+| `gsudo` | ❌ | ⚠️ cache warms, never reads | ➖ | ➖ | ⚠️ |
+| Windows `sudo` | ❌ | ❌ | ➖ | ➖ | ❌ |
+
+- **`sudo-rs`** is the Rust rewrite Ubuntu ships as its default `sudo` since `25.10`, so it arrives under the same name and needs no entry of its own. It answers every argv mpm sends. Two wordings differ and mpm now covers both: `sudo --version` prints `sudo-rs <version>` rather than `Sudo version <version>`, and a `--validate` denial quotes HAL 9000 where `--list` says `may not run sudo`.
+- **`run0`** ships with systemd since `256` and fits mpm's capture model: `--pipe` keeps stdout and stderr separate and propagates the exit code. It has no prompt control ([systemd#33902](https://github.com/systemd/systemd/issues/33902)) and no caller-side keepalive, polkit owning retention. Its refusal names neither `run0` nor a wording mpm recognizes, and a setup failure can print nothing at all ([systemd#35930](https://github.com/systemd/systemd/issues/35930)), so the exit code has to be the primary signal. It resets `HOME` to `/root` and `TERM` to `dumb`, so anything a manager needs travels through `--setenv`. systemd `262` adds `-n` and `--validate` as sudo-compatible spellings ([systemd#42465](https://github.com/systemd/systemd/pull/42465)).
+- **`pkexec`** has no non-interactive flag and no validate mode: it always executes a program, and `pkcheck` is the separate binary that checks an authorization without running one. Off a terminal it cannot even prompt, answering `Error creating textual authentication agent` and exiting `127`. It takes no `--` separator, and strips the environment and the working directory. Passwordless use needs a polkit rule returning `polkit.Result.YES` for `org.freedesktop.policykit.exec`.
+- **`gsudo`** and **Windows `sudo`** both gate on UAC, which is interactive by design; neither can fail instead of prompting ([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)). `gsudo` caches credentials, but the cache is scoped to the calling process by default, so warming it from one subprocess does not carry into the next. Its `-n` means *new window*, not non-interactive. Windows `sudo` caches nothing and defaults to opening a new window, which breaks output capture.
+
+Verified by driving each backend: `run0` and `pkexec` on Arch Linux with systemd `261` and polkit `127`, `sudo-rs` on Ubuntu `26.04`. The Windows row is documentation only.
+
 ## Controlling escalation
 
 Override the default globally with `--sudo` / `--no-sudo`, or per manager with the `sudo` key of a [`[mpm.managers.<id>]`](overrides.md) section:

@@ -43,16 +43,20 @@ escalators are macOS-only managers today).
 ```
 
 ```{todo}
-Add `pkexec` to {data}`ESCALATORS`, and `gsudo` for Windows. Neither is a
-table entry the way `run0` was. `pkexec` cannot answer
-{attr}`~Escalator.probe_args` at all: it carries no non-interactive switch and
-no validate mode, so every probe either prompts or dies for want of an agent,
-and supporting it means either making that field optional or restricting it to
-hosts whose polkit rule already grants the action. Windows needs more still,
-since {func}`prime_sudo` returns before any of this on that platform, and both
-of its escalators gate on a UAC dialog that cannot fail instead of prompting.
-Emulate an option a backend cannot express rather than failing on it: topgrade
-returns a hard error there, which its users report as a bug
+Add a Windows escalator, `gsudo` or the `sudo.exe` shipping with Windows 11
+`24H2`. It needs more than a {data}`ESCALATORS` entry, since {func}`prime_sudo`
+returns before any of this machinery on that platform, and neither backend can
+fail instead of prompting: both gate on a UAC consent dialog, and asking for a
+password on the command line is an open request upstream
+([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)). The nearest
+thing to {attr}`~Escalator.probe_args` is `gsudo`'s credentials cache, which
+`gsudo cache on` warms and `gsudo status` reads, though it is scoped to the
+calling process unless `--pid 0` widens it. Two traps to encode: `gsudo -n`
+means *new window* rather than non-interactive, and Windows' own `sudo`
+defaults to `forceNewWindow`, which breaks output capture, so it needs
+`sudo run --inline`. Emulate an option a backend cannot express rather than
+failing on it: topgrade returns a hard error there, which its users report as a
+bug
 ([topgrade-rs/topgrade#1435](https://github.com/topgrade-rs/topgrade/issues/1435)).
 ```
 

@@ -257,6 +257,7 @@
 - [mpm] Carry a forced environment across a `run0` escalation. Its payload runs in a fresh service inheriting nothing, so `nala`, `tazpkg` and `urpmi` were losing the `LC_ALL=C` pinning their parsers, and `ports` the `BATCH=yes` keeping it out of a dialog.
 - [cargo,gem,mamba,micromamba] Record that each tool's shipped release-age gate never reaches the commands `mpm` drives, in place of a pending upstream proposal.
 - [vscode,vscodium] Point the cooldown status at the open request covering extension installs: the delay VS Code shipped holds back automatic updates only.
+- [fwupd] Fix a crash on a host whose `fwupdmgr` lists a device with no flags, name or version: `installed` and `outdated` aborted the whole run with a `KeyError`. Refs [#1528](https://github.com/kdeldycke/meta-package-manager/issues/1528).
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

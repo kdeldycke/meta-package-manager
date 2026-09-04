@@ -353,7 +353,7 @@ class FWUPD(PackageManager):
         data = self.parse_json(output)
         if data:
             for device in data["Devices"]:
-                if "updatable" in device["Flags"]:
+                if "updatable" in device.get("Flags", ()):
                     yield self.package(
                         id=device["DeviceId"],
                         name=device["Name"],
@@ -531,7 +531,7 @@ class FWUPD(PackageManager):
         data = self.parse_json(output)
         if data:
             for device in data["Devices"]:
-                if "updatable" in device["Flags"] and device.get("Releases"):
+                if "updatable" in device.get("Flags", ()) and device.get("Releases"):
                     yield self.package(
                         id=device["DeviceId"],
                         name=device["Name"],

@@ -623,3 +623,55 @@ jobs:
         # package code beyond `__version__`, so measuring them is pointless
         # and would only invite a spurious floor check.
         run: uv --no-progress run --frozen -- pytest -m once
+
+  dnf5-container:
+    name: 🎩 Drive mpm against dnf5
+    # `needs: metadata` is not for its outputs but for its skip gate: the
+    # version-bump branches it filters out must skip this job too.
+    needs:
+      - metadata
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    # The only CI machine carrying dnf: no runner image ships it and the test
+    # matrix has no RPM host, so `rpm_distro_missing` skips every destructive
+    # RPM test everywhere else. That gap is what let the manager ship reporting
+    # its version as the string `dnf5`, failing its own requirement and leaving
+    # the pool on every Fedora since 41.
+    container:
+      image: fedora:44
+    steps:
+      # The image carries neither, and both actions below need them: `checkout`
+      # falls back to a REST tarball without `git`, and `setup-uv` unpacks the
+      # release with `tar`. Weak dependencies are off for the reason
+      # `--no-install-recommends` is always passed to `apt-get`.
+      - name: Install container prerequisites
+        run: dnf5 --assumeyes --setopt=install_weak_deps=False install git-core tar
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.12.5"
+      - name: Install Python
+        run: uv --no-progress venv --python 3.14
+      - name: Install project
+        run: uv --no-progress sync --frozen --all-extras
+      # `dnf` and `yum` are symlinks to dnf5 on this image, so all three of
+      # mpm's RPM front-ends resolve one binary. Only `dnf5` is asserted on:
+      # `DNF` is expected to decline that binary by its `< 5` ceiling, which is
+      # what keeps one database from being reported twice.
+      - name: Report the RPM front-ends
+        run: uv --no-progress run --frozen -- mpm --dnf --dnf5 --yum managers
+      - name: Drive mpm against dnf5
+        # Asserts on the two operations that were broken: the inventory proves
+        # the version probe read a real version, since an unavailable manager
+        # yields nothing at all, and the search proves the hits are parsed out
+        # of dnf5's tab-separated output rather than dnf4's `" : "` shape.
+        run: |
+          uv --no-progress run --frozen -- mpm --dnf5 --verbosity INFO installed > installed.txt
+          cat installed.txt
+          grep --quiet bash installed.txt
+          uv --no-progress run --frozen -- mpm --dnf5 search bash > search.txt
+          cat search.txt
+          grep --quiet bash search.txt

@@ -1,9 +1,6 @@
 # Changelog
 
-## [`8.0.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`8.0.0` (2026-09-05)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...v8.0.0)
 
 - [aptitude] Add aptitude package manager, with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.
 - [pear] Add PEAR package manager, with inventory, outdated, install, remove, upgrade, channel sync and cache cleanup.

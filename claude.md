@@ -274,6 +274,7 @@ The project's single legal sink: license and copyright, the blanket trademark no
 ### Commit messages
 
 - **No decorative prefixes.** A `[bracketed]` prefix is reserved for a mechanism that parses it back, and only `[changelog] …` qualifies, matched literally by repomatic's auto-tagging job. Do not confuse it with the `[scope]` tags that open every `changelog.md` bullet: those name a manager or platform, live in the changelog file rather than in git, and are indexed by `scope_changelog()`. The two vocabularies are unrelated.
+
 ### Comments and docstrings
 
 - **Every URL in a docstring is a link.** MyST's `linkify` extension is off, so a bare `https://…` renders as dead plain text on the manager pages and in the API docs alike. Write a titled markdown link (`` [`emerge(1)` man page](url) ``), keeping `]` and `(` on the same source line — a line break between them silently kills the link. A list of one reference is not a list: inline it as `Documentation: [title](url).` and keep the bullets for two or more. Bare URLs inside a fenced block are captured CLI output and stay untouched. The bundled TOML definitions need none of this: `_toml_definition_intro()` autolinks their description comments.
@@ -394,6 +395,7 @@ The content and file rules are generated into `pyproject.toml` from `meta_packag
 - **Content rules** come only from each manager's own `keywords` attribute: ecosystem, distro, language or brand names that unambiguously name the manager *and* never appear in mpm's own output. Never the manager ID or a CLI name — mpm prints those for every installed manager (the `✓ <id>` trail, the `<id>: <count>` summary, the `managers` table), so a pasted trace would tag the issue with every manager on the user's system. A manager whose only name is its ID declares none and gets no content rule.
 
   That attribute is the single source for both the labeller and the PyPI keywords, which is why the precision bar above governs what a manager may declare: a term naming an ecosystem rather than one manager belongs in `docs_update.py`'s `KEYWORDS_EXTRAS`, which reaches PyPI alone. A label groups several managers, so its rule is the union of its members' keywords (`rpm-based` collects `fedora` from `dnf` and `mageia` from `urpmi`), and a subclass inherits its parent's terms without claiming them: `test_manager_keywords_have_one_owner` reads what a class *declares*, so `apt-mint` inheriting `debian` from `apt` is not a second owner.
+
 - **File rules** map each manager's own module and test paths to its label; keep them narrow enough that only that manager's files match.
 
 The `generate_content_rules` docstring covers the regex mechanics (anchoring, case-folding, why a label's keywords are OR-joined into one pattern).

@@ -484,7 +484,7 @@ def pear_install_blocked() -> bool:
     """Whether `pear install` cannot complete on this host.
 
     PEAR gates an install on exactly one test of its own, refusing with `Cannot
-    install, php_dir for channel "pear.php.net" is not writeable by the current
+    install, php_dir for channel "pear.php.net" is not writable by the current
     user`, so the same directory is probed here rather than the platform
     guessed from. A distribution's PHP roots that directory at `/usr/share/php`
     and owns it as root, blocking an unelevated round-trip; a PEAR relocated to

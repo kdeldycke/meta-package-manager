@@ -741,8 +741,20 @@ def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
 
     manager = FakeManager()
     manager.sudo = True
-    with patch(
-        "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
+    # `only_escalator` pins the choice, as the neighbouring build_cli tests do.
+    # Without it the fake above decides it: `write_fake_executable` answers
+    # every argv the same way, so `sudo --version` returns the credential
+    # diagnostic instead of `Sudo version`, `resolve_escalator` reads that as an
+    # impostor and falls through to whatever else the host carries. That is
+    # `run0` on a systemd runner and nothing on macOS, and `resolve_escalator`
+    # caches, so the failure only lands when this test is the first in its
+    # worker to resolve one.
+    with (
+        patch(
+            "meta_package_manager.execution.current_platform",
+            return_value=_UNIX_PLATFORM,
+        ),
+        only_escalator("sudo"),
     ):
         cli = manager.build_cli("-c", "pass", sudo=True)
         assert cli[:2] == ("sudo", "--non-interactive")

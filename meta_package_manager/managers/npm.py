@@ -16,10 +16,10 @@
 
 from __future__ import annotations
 
-from extra_platforms import ALL_PLATFORMS
-
 from functools import cached_property
 from pathlib import Path
+
+from extra_platforms import ALL_PLATFORMS
 
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager

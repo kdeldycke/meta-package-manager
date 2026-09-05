@@ -199,9 +199,7 @@ class MAS(PackageManager):
             raw_date = record.get("currentVersionReleaseDate")
             if raw_date:
                 try:
-                    return datetime.fromisoformat(
-                        str(raw_date).replace("Z", "+00:00")
-                    )
+                    return datetime.fromisoformat(str(raw_date).replace("Z", "+00:00"))
                 except ValueError:
                     return None
         return None

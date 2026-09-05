@@ -37,12 +37,12 @@ from meta_package_manager.cooldown import (
     resolve_cooldown,
 )
 from meta_package_manager.execution import CLIError
+from meta_package_manager.manager import COOLDOWN_EXEMPT
 from meta_package_manager.managers.flatpak import Flatpak
 from meta_package_manager.managers.gem import Gem
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.mas import MAS
 from meta_package_manager.managers.npm import NPM
-from meta_package_manager.manager import COOLDOWN_EXEMPT
 from meta_package_manager.managers.pacman import _YAY_COOLDOWN_INIT_LUA, Paru, Yay
 from meta_package_manager.managers.pip import Pip
 from meta_package_manager.managers.pipx import Pipx
@@ -467,9 +467,7 @@ def test_hold_reason_dry_run_skips_probe(monkeypatch):
 
 
 def test_hold_reason_naive_datetime_read_as_utc(monkeypatch):
-    fresh_naive = datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(
-        days=1
-    )
+    fresh_naive = datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(days=1)
     manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh_naive})
     assert manager.cooldown_hold_reason("org.example.Kiwi") is not None
 
@@ -635,9 +633,7 @@ def test_paru_release_date_none_on_unparsable_date(monkeypatch):
 
 def test_paru_release_date_none_without_fields(monkeypatch):
     manager = Paru()
-    monkeypatch.setattr(
-        manager, "run_cli", lambda *args, **kwargs: "Name : paru\n"
-    )
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: "Name : paru\n")
     assert manager.release_date("paru") is None
 
 
@@ -663,9 +659,7 @@ def test_paru_gated_upgrade_all_rides_the_ignore_flag(monkeypatch):
         for package_id in sorted(dates)
     )
     monkeypatch.setattr(Paru, "outdated", property(lambda self: iter(outdated)))
-    monkeypatch.setattr(
-        manager, "build_cli", lambda *args, sudo=False: ("paru", *args)
-    )
+    monkeypatch.setattr(manager, "build_cli", lambda *args, sudo=False: ("paru", *args))
     ran = []
 
     def fake_run(*args, **kwargs):
@@ -691,9 +685,7 @@ def test_paru_gated_upgrade_all_without_holds_keeps_native_cli(monkeypatch):
         for package_id in ("fig", "plum")
     )
     monkeypatch.setattr(Paru, "outdated", property(lambda self: iter(outdated)))
-    monkeypatch.setattr(
-        manager, "build_cli", lambda *args, sudo=False: ("paru", *args)
-    )
+    monkeypatch.setattr(manager, "build_cli", lambda *args, sudo=False: ("paru", *args))
     ran = []
 
     def fake_run(*args, **kwargs):

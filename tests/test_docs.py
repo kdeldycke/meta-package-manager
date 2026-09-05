@@ -1744,9 +1744,9 @@ def test_managers_index_table_renders():
     # alphabetically within that group.
     grouped: dict[str, list[str]] = {glyph: [] for glyph in _docs.SUPPORT_SCALE}
     for mid in sorted((*pool, *queued, *unsupported)):
-        grouped[_docs._bare_support_glyph(mid, unsupported, competitor_data, queued)].append(
-            mid
-        )
+        grouped[
+            _docs._bare_support_glyph(mid, unsupported, competitor_data, queued)
+        ].append(mid)
     assert {
         glyph: [_row_manager_id(row) for row in rows] for glyph, rows in blocks.items()
     } == grouped
@@ -1788,7 +1788,9 @@ def test_managers_index_table_renders():
     # links to its verdict rather than to a page it does not have.
     for mid in unsupported:
         assert mid not in pool
-        glyph_cell = _docs._support_glyph(mid, unsupported, anchors, competitor_data, queued)
+        glyph_cell = _docs._support_glyph(
+            mid, unsupported, anchors, competitor_data, queued
+        )
         assert glyph_cell in declined_block
         assert f"[`{mid}`](unsupported.md" in declined_block
 
@@ -2113,8 +2115,7 @@ def test_unsupported_verdicts_cite_a_release():
         trailing = page[stamp.end() :].lstrip("\n")
         follower = trailing.splitlines()[0] if trailing else ""
         assert trailing.startswith("## ") or not trailing, (
-            f"the {stamp[0]!r} line must close its section, but "
-            f"{follower!r} follows it"
+            f"the {stamp[0]!r} line must close its section, but {follower!r} follows it"
         )
 
     # An unregistered role renders as its own literal braces on the published

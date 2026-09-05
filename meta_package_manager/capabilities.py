@@ -217,9 +217,7 @@ def cooldown_is_synthesized(
     `meta_package_manager._docs`.
     """
     cls = manager if isinstance(manager, type) else type(manager)
-    return cls.cooldown_env_var is None and implements_method(
-        manager, "release_date"
-    )
+    return cls.cooldown_env_var is None and implements_method(manager, "release_date")
 
 
 def supports_cleanup_cache(

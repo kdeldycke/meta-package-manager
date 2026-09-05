@@ -53,7 +53,7 @@ class PEAR(PackageManager):
     ```{important}
     Whether that needs root is a property of the PHP install, not of PEAR: a
     distribution's `php_dir` is `/usr/share/php` and refuses an ordinary user
-    with `Cannot install, php_dir for channel "pear.php.net" is not writeable
+    with `Cannot install, php_dir for channel "pear.php.net" is not writable
     by the current user`. So the mutating operations carry privileged markers
     but leave them dormant, exactly as the other language managers do: `mpm
     --sudo`, or a `[mpm.managers.pear] sudo = true` entry, escalates them.

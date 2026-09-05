@@ -106,15 +106,13 @@ flooding the default view. The raw streams are always available in full, live,
 at `DEBUG`.
 """
 
-UNRUNNABLE_ERRNOS: Final[frozenset[int]] = frozenset(
-    {
-        errno.EACCES,
-        errno.EISDIR,
-        errno.ENOENT,
-        errno.ENOEXEC,
-        errno.EPERM,
-    }
-)
+UNRUNNABLE_ERRNOS: Final[frozenset[int]] = frozenset({
+    errno.EACCES,
+    errno.EISDIR,
+    errno.ENOENT,
+    errno.ENOEXEC,
+    errno.EPERM,
+})
 """`OSError` numbers meaning the CLI cannot be spawned, rather than that it failed.
 
 Each marks the manager unavailable and yields empty output, the same way `WinError`
@@ -1423,7 +1421,8 @@ class CLIExecutor:
                     "The failed operation is marked privileged, but escalation "
                     "is off for this manager. Opt in with "
                     f"`mpm --{self.id} --sudo`, or a "  # type: ignore[attr-defined]
-                    f"`[mpm.managers.{self.id}] sudo = true` "  # type: ignore[attr-defined]
+                    # type: ignore[attr-defined]
+                    f"`[mpm.managers.{self.id}] sudo = true` "
                     "entry in your configuration file.",
                     extra={"label": self.id},  # type: ignore[attr-defined]
                 )

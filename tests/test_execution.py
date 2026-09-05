@@ -682,7 +682,9 @@ def test_dormant_marker_permission_failure_hints_the_opt_in(caplog):
             "meta_package_manager.execution.current_platform",
             return_value=_UNIX_PLATFORM,
         ),
-        patch("meta_package_manager.execution.os.geteuid", return_value=501, create=True),
+        patch(
+            "meta_package_manager.execution.os.geteuid", return_value=501, create=True
+        ),
         caplog.at_level(logging.WARNING),
     ):
         manager.run_cli("-c", script, sudo=True)

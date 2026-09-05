@@ -815,15 +815,13 @@ def install_remove_blocked(manager_id: str) -> bool:
     return condition() if callable(condition) else condition
 
 
-REMOVE_REFUSES_INSTALLED: frozenset[str] = frozenset(
-    {
-        # choosenim selects whatever it installs, and refuses to remove the selected
-        # toolchain: `Error: Cannot remove current version.` So the package the
-        # install leg just placed is exactly the one the remove leg cannot take back.
-        # Removing an *older* toolchain works, which is the path users reach for.
-        "choosenim",
-    }
-)
+REMOVE_REFUSES_INSTALLED: frozenset[str] = frozenset({
+    # choosenim selects whatever it installs, and refuses to remove the selected
+    # toolchain: `Error: Cannot remove current version.` So the package the
+    # install leg just placed is exactly the one the remove leg cannot take back.
+    # Removing an *older* toolchain works, which is the path users reach for.
+    "choosenim",
+})
 """Managers whose `remove` cannot take back what the install leg just installed.
 
 Distinct from {data}`INSTALL_REMOVE_BLOCKED_WHEN`, which covers a failing *install*

@@ -677,3 +677,19 @@ jobs:
           uv --no-progress run --frozen -- mpm --dnf5 search bash > search.txt
           cat search.txt
           grep --quiet bash search.txt
+      # The two operations a VM could not exercise: a freshly installed host
+      # reports nothing outdated and nothing orphaned, so their parsers were
+      # never fed a non-empty listing. A released image drifts behind its
+      # updates stream, which is what usually gives `outdated` real rows here.
+      # Neither result is asserted on, both being legitimately empty for the
+      # days after a release, and a cell that can only flake teaches people to
+      # ignore this workflow. A broken parser is caught by the absence check
+      # instead: a query that fails logs `Could not ...` and still exits `0`,
+      # queries being read-only, so the wording is the only signal there is.
+      - name: Exercise the remaining dnf5 queries
+        run: |
+          uv --no-progress run --frozen -- mpm --dnf5 --verbosity INFO outdated 2> outdated.err
+          cat outdated.err
+          uv --no-progress run --frozen -- mpm --dnf5 --verbosity INFO orphans 2> orphans.err
+          cat orphans.err
+          if grep --quiet "Could not" outdated.err orphans.err; then exit 1; fi

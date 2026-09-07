@@ -37,27 +37,37 @@ cold-cache escalation is covered by the silent-call stall notice instead, raised
 while the hidden prompt can still be answered.
 
 ```{note}
-Windows reaches only a corner of this module. `gsudo` gives it an escalator
-to probe and a cache to warm, but no manager there escalates by default, so
-{func}`prime_sudo` returns on the empty selection unless `--sudo` or a
-`[mpm.managers.<id>] sudo = true` entry asks for it. The internal escalators
-stay macOS-only managers, so the watchdog is not armed there either.
+Windows reaches only a corner of this module. `gsudo` gives it an escalator to
+probe and a cache to warm, and Microsoft's own `sudo.exe` backs it up from
+`24H2`, but no manager there escalates by default, so {func}`prime_sudo`
+returns on the empty selection unless `--sudo` or a `[mpm.managers.<id>] sudo =
+true` entry asks for it. The internal escalators stay macOS-only managers, so
+the watchdog is not armed there either.
+
+Neither reaches an unattended run the way a Unix escalator does. `sudo.exe`
+refuses every token whose elevation type is `Default`, which is what a network
+logon carries: an SSH session holding a full administrator token at High
+integrity is still turned away with `You are not allowed to run sudo`. So a
+scripted or remote Windows run escalates through `gsudo` or not at all.
 ```
 
 ```{todo}
-Add Microsoft's own `sudo.exe`, shipping with Windows 11 `24H2`, beside
-`gsudo`. It defaults to `forceNewWindow`, which breaks output capture and needs
-`sudo run --inline`, and even then does not forward a command line unchanged
-([microsoft/sudo#117](https://github.com/microsoft/sudo/issues/117)), which
-{meth}`CLIExecutor.build_cli
-<meta_package_manager.execution.CLIExecutor.build_cli>` relies on. It caches
-nothing either, so every call raises a UAC dialog until asking for a password
-on the command line lands
-([microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7)); `gsudo` has
-the same gap open at
-[gerardog/gsudo#378](https://github.com/gerardog/gsudo/issues/378). Emulate an
-option a backend cannot express rather than failing on it: topgrade returns a
-hard error there, which its users report as a bug
+Prime Microsoft's `sudo.exe` once there is anything to prime. It caches
+nothing, so every escalation of a run raises a UAC dialog of its own, which is
+why {data}`ESCALATORS` ranks it behind `gsudo` rather than beside it.
+[microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7) is the request
+that would give it a cache for {func}`prime_sudo` to warm; `gsudo` has the same
+gap open at
+[gerardog/gsudo#378](https://github.com/gerardog/gsudo/issues/378) for its own
+password path. Nothing else blocks the backend: the command line, the
+`--preserve-env` environment and the child's exit code all survive the
+elevation, measured on build `26100.1742` from a Medium-integrity shell, the
+one path that really brokers it, so
+[microsoft/sudo#117](https://github.com/microsoft/sudo/issues/117) never
+reaches the shapes this project builds.
+
+Emulate an option a backend cannot express rather than failing on it: topgrade
+returns a hard error there, which its users report as a bug
 ([topgrade-rs/topgrade#1435](https://github.com/topgrade-rs/topgrade/issues/1435)).
 ```
 
@@ -243,6 +253,17 @@ class Escalator:
     loses the `[mpm]` marker, not the explanation.
     """
 
+    binary: str | None = None
+    """The name to look for on `PATH`, where it differs from {attr}`id`.
+
+    Only Microsoft's `sudo.exe` needs one. It ships under a name the Unix
+    escalator already claims, and shares none of its dialect: `--non-interactive`
+    and `--validate` are not options it has. So the two need distinct ids, for
+    the `sudo_command` override to name either, while
+    {func}`resolve_escalator` still has to look for the same file name on both
+    platforms.
+    """
+
     identity_args: tuple[str, ...] | None = None
     """Argv proving the binary on `PATH` is this escalator, not a stand-in.
 
@@ -314,6 +335,11 @@ class Escalator:
     `pkexec env NAME=VALUE ...` idiom rather than a per-variable flag, so it
     keeps `None` until a manager on a polkit-only host asks for one.
     """
+
+    @property
+    def binary_name(self) -> str:
+        """The file {func}`resolve_escalator` looks for on `PATH`."""
+        return self.binary or self.id
 
     def forward_env(
         self,
@@ -512,6 +538,58 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # `gsudo v2.6.1 (Branch...)`, measured on Windows 11 21H2.
         identity_markers=("gsudo",),
     ),
+    Escalator(
+        id="win-sudo",
+        binary="sudo",
+        # `--inline` overrides the `forceNewWindow` default, which runs the
+        # command in a window of its own and leaves nothing to capture. No `--`
+        # separator: the first argument mpm appends is the manager's absolute
+        # path, already a non-option, exactly as for `pkexec`.
+        #
+        # `--preserve-env` is the only environment forwarding this escalator
+        # offers, and it is all-or-nothing rather than per-variable, so it sits
+        # in the prefix instead of an `env_forward_template`: the variables
+        # `CLIExecutor.run` forces are already in the environment it spawns
+        # `sudo` with, and this is what carries them across the elevation.
+        # Without it the escalated child loses the `LC_ALL=C` a parser is pinned
+        # against, the way `run0` did before it grew its own forwarding.
+        escalate_args=("sudo", "--inline", "--preserve-env"),
+        # There is no credential cache to read: every escalation raises its own
+        # UAC dialog. So the probe answers the only question mpm can act on
+        # ahead of time, which is whether an escalation would be allowed to run
+        # at all, and `sudo config` cannot serve: it exits `0` and reports the
+        # mode even from a session the elevation gate goes on to refuse, and it
+        # words its answer in the display language.
+        #
+        # The registry value it reflects is neither localized nor ambiguous.
+        # `0x3` is inline mode, the only one mpm can drive: `0x0` is disabled,
+        # `0x1` opens a new window and `0x2` closes the child's input, and
+        # `--inline` exits with an error against any of them rather than
+        # falling back. A missing key or value exits non-zero, which reads as
+        # cold like any other.
+        probe_args=(
+            "reg",
+            "query",
+            r"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo",
+            "/v",
+            "Enabled",
+        ),
+        probe_success_markers=("0x3",),
+        passwordless_probe_args=None,
+        # Nothing to authenticate up front, so this only ever reports the mode.
+        # It is reached solely when the probe found a mode mpm cannot drive, and
+        # no argv fixes that: enabling inline mode is the user's call to make in
+        # Settings, not one mpm may take on their behalf.
+        prompt_args=("sudo", "config"),
+        refreshable=False,
+        # The prompt is the UAC consent dialog, which Windows words itself.
+        brands_prompt=False,
+        # `--version` prints a bare `sudo 1.0.0`, which a reimplementation
+        # shipping its own `1.x` under this name would also match. The help
+        # banner names the tool outright and has no version in it to drift.
+        identity_args=("sudo", "--help"),
+        identity_markers=("Sudo for Windows",),
+    ),
 )
 """Every escalator mpm can drive, in the order it prefers them.
 
@@ -519,11 +597,18 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
 the `sudo_command` override exists for the user who wants the other one. The
 order only decides auto-detection: an explicit override always wins.
 
-`run0` comes last for the same reason, one step further: it needs a running
-polkit to authorize anything, so a host carrying a working `sudo` or `doas`
-keeps it, and run0 answers for the systemd hosts that ship neither.
+`run0` comes after them for the same reason, one step further: it needs a
+running polkit to authorize anything, so a host carrying a working `sudo` or
+`doas` keeps it, and run0 answers for the systemd hosts that ship neither.
 
-`pkexec` closes the list, and auto-detection essentially never reaches it: it
+`win-sudo` closes the list, behind `gsudo`, and the two are the whole of
+Windows. Microsoft's is inbox from `24H2` where `gsudo` has to be installed,
+which is exactly why it ranks second: it caches nothing, so each escalation of
+a run raises its own UAC dialog, where one answered `gsudo cache on` covers
+every later one. It is the fallback for a host carrying no `gsudo`, not the
+default for a host carrying both.
+
+`pkexec` sits before them, and auto-detection essentially never reaches it: it
 ships wherever polkit does, which is nearly every desktop Linux, and those
 carry `sudo` too. It is there for `--sudo-command pkexec`, and it only works
 where a polkit rule already grants `org.freedesktop.policykit.exec`, since it
@@ -572,7 +657,7 @@ def resolve_escalator(override: str | None = None) -> Escalator | None:
             f"{', '.join(e.id for e in ESCALATORS)}. Managers needing root may fail.",
         )
         return None
-    installed = tuple(e for e in ESCALATORS if shutil.which(e.id))
+    installed = tuple(e for e in ESCALATORS if shutil.which(e.binary_name))
     for escalator in installed:
         if escalator.is_genuine():
             return escalator
@@ -745,7 +830,12 @@ def _is_sudo_denied(error: str) -> bool:
     if any(
         marker in lowered
         for marker in (
-            "is not allowed to run sudo",
+            # Left unanchored on the subject so it covers both the third-person
+            # `<user> is not allowed to run sudo` of the Unix message catalog
+            # and the second-person `You are not allowed to run sudo` Microsoft's
+            # `sudo.exe` prints, which is its whole diagnostic: it names neither
+            # itself nor a reason.
+            "not allowed to run sudo",
             "may not run sudo",
             "is not in the sudoers file",
             "is not allowed to execute",

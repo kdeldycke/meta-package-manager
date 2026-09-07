@@ -259,6 +259,7 @@
 - [mpm] Escalate through `run0` on systemd hosts carrying neither `sudo` nor `doas`, and accept it as a `--sudo-command` choice. A command it escalates outlives an interrupted run, because systemd owns the payload rather than `mpm`.
 - [mpm] Accept `pkexec` as a `--sudo-command` choice, on hosts whose polkit rule already grants `org.freedesktop.policykit.exec`. It cannot escalate without prompting, so `mpm` asks `pkcheck` first and declines the run where the rule is missing.
 - [mpm] Escalate through `gsudo` on Windows, which no longer refuses to escalate at all. A manager only reaches it by asking, with `--sudo` or a `[mpm.managers.<id>] sudo = true` entry, since none escalates there by default.
+- [mpm] Escalate through Microsoft's `sudo.exe`, ranked behind `gsudo`: it ships with Windows `24H2` where `gsudo` must be installed, but caches nothing, so each escalation raises its own UAC dialog.
 - [mpm] Carry a forced environment across a `run0` escalation. Its payload runs in a fresh service inheriting nothing, so `nala`, `tazpkg` and `urpmi` were losing the `LC_ALL=C` pinning their parsers, and `ports` the `BATCH=yes` keeping it out of a dialog.
 - [cargo,gem,mamba,micromamba] Record that each tool's shipped release-age gate never reaches the commands `mpm` drives, in place of a pending upstream proposal.
 - [vscode,vscodium] Point the cooldown status at the open request covering extension installs: the delay VS Code shipped holds back automatic updates only.

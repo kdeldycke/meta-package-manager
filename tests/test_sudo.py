@@ -1030,11 +1030,97 @@ def test_escalator_registry_prefers_sudo():
     """`sudo` stays the first choice, so a host carrying several keeps the
     behavior it has today and only an explicit override moves it.
 
-    `run0` is last on purpose: it authorizes through polkit and needs one
-    running, so it answers for the systemd hosts shipping neither of the
+    `run0` sits behind them on purpose: it authorizes through polkit and needs
+    one running, so it answers for the systemd hosts shipping neither of the
     others rather than displacing a working escalator.
+
+    `win-sudo` closes the list, behind `gsudo`. Microsoft's `sudo.exe` is inbox
+    from `24H2` where `gsudo` must be installed, but it caches nothing, so it
+    is the fallback for a host carrying no `gsudo` rather than the default for
+    one carrying both.
     """
-    assert [e.id for e in ESCALATORS] == ["sudo", "doas", "run0", "pkexec", "gsudo"]
+    assert [e.id for e in ESCALATORS] == [
+        "sudo",
+        "doas",
+        "run0",
+        "pkexec",
+        "gsudo",
+        "win-sudo",
+    ]
+
+
+def test_escalator_binary_name_defaults_to_its_id():
+    """Only `win-sudo` looks for a file under a name other than its own.
+
+    Microsoft's `sudo.exe` ships under the name the Unix escalator claims while
+    sharing none of its dialect, so the two carry distinct ids and
+    `resolve_escalator` has to be told which file to look for.
+    """
+    by_id = {e.id: e.binary_name for e in ESCALATORS}
+    assert by_id["win-sudo"] == "sudo"
+    assert all(e.binary_name == e.id for e in ESCALATORS if e.id != "win-sudo")
+
+
+@pytest.mark.parametrize(
+    ("returncode", "stdout", "expected"),
+    (
+        # Measured on Windows 11 24H2, build 26100.1742, running sudo 1.0.0.
+        pytest.param(0, "Sudo for Windows. \nCan be used to r", True, id="win-sudo"),
+        # The Unix escalator's banner, which must not claim this entry: both
+        # answer to the same file name, and only one takes `--inline`.
+        pytest.param(0, "Sudo version 1.9.17p2\n", False, id="unix-sudo"),
+        pytest.param(0, "sudo-rs 0.2.13-0ubuntu1\n", False, id="sudo-rs"),
+        # gsudo installs an optional `sudo` alias of its own.
+        pytest.param(0, "gsudo v2.6.1 (Branch)\n", False, id="gsudo-alias"),
+        pytest.param(1, "Sudo for Windows.\n", False, id="non-zero-exit"),
+    ),
+)
+def test_win_sudo_identity_rejects_every_other_sudo(returncode, stdout, expected):
+    """The help banner names the tool outright, where `--version` prints a bare
+    `sudo 1.0.0` that another implementation shipping a `1.x` would also match."""
+    win_sudo = next(e for e in ESCALATORS if e.id == "win-sudo")
+    with patch("meta_package_manager.sudo.subprocess.run") as run:
+        run.return_value = subprocess.CompletedProcess((), returncode, stdout=stdout)
+        assert win_sudo.is_genuine() is expected
+
+
+@pytest.mark.parametrize(
+    ("returncode", "stdout", "expected"),
+    (
+        pytest.param(0, "    Enabled    REG_DWORD    0x3\n", True, id="inline"),
+        pytest.param(0, "    Enabled    REG_DWORD    0x2\n", False, id="input-closed"),
+        pytest.param(0, "    Enabled    REG_DWORD    0x1\n", False, id="new-window"),
+        pytest.param(0, "    Enabled    REG_DWORD    0x0\n", False, id="disabled"),
+        pytest.param(1, "", False, id="value-missing"),
+    ),
+)
+def test_win_sudo_probe_only_accepts_inline_mode(returncode, stdout, expected):
+    """`--inline` errors against any other mode rather than falling back, so a
+    mode mpm cannot drive has to read as cold before a manager reaches it."""
+    win_sudo = next(e for e in ESCALATORS if e.id == "win-sudo")
+    probe = subprocess.CompletedProcess((), returncode, stdout=stdout.encode())
+    assert win_sudo.probe_says_warm(probe) is expected
+
+
+@pytest.mark.parametrize(
+    "error",
+    (
+        # Microsoft's `sudo.exe`, whose whole diagnostic this is: it names
+        # neither itself nor a reason. Measured on build 26100.1742 from an SSH
+        # session, whose token is elevated but of type `Default`.
+        pytest.param("You are not allowed to run sudo", id="win-sudo"),
+        # The Unix message catalog, in the third person.
+        pytest.param("kde is not allowed to run sudo on farm.", id="unix-sudo"),
+    ),
+)
+def test_denial_matches_both_subjects_of_the_sudo_wording(error):
+    """The marker is unanchored on the subject so one phrase covers both.
+
+    Keyed on `is not allowed`, Microsoft's second-person wording went
+    unrecognized, and `prime_sudo` would prompt for a consent that cannot
+    authorize the run.
+    """
+    assert _is_sudo_denied(error) is True
 
 
 @pytest.mark.parametrize(

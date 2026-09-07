@@ -303,6 +303,8 @@ Jobs that test *released* artifacts from external distributors (PyPI, Homebrew, 
 
 The long-form rule applies to every argv `mpm` constructs at runtime: the manager commands built by the manager classes and definitions, and the `sudo` invocations in `meta_package_manager/sudo.py` (`sudo --non-interactive --validate`, not `sudo -n -v`). Long forms make the `--verbosity INFO` command disclosure self-documenting.
 
+**A long form substitutes only when it takes the same arguments.** Check the tool's own `--help` before swapping one in: a short option sometimes has no long equivalent, and the similarly-named long option is a *different* option that takes a value. `xbps-query -R` enables repository mode and takes nothing, while `--repository` requires a URL, so `--repository --search foo` feeds `--search` in as that URL and reads `foo` as a package to describe. It exits `0` and prints plausible output, which is why only a reconstruction of the argv catches it.
+
 ## CLI output and logging
 
 `mpm` keeps two output channels distinct: the **state** of an operation (printed with `echo`) and **log messages** (`logging`, gated by `--verbosity`).

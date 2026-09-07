@@ -156,8 +156,20 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
         manager.__dict__.pop("version", None)
         try:
-            assert manager.version is not None, (
+            version = manager.version
+            assert version is not None, (
                 "version_regexes matched no parseable version in the documented output"
+            )
+            # A banner opening on the tool's own name is what the default
+            # `\S+` regex captures: `dnf5` and `XBPS:` each parsed into a
+            # version that then satisfied no `requirement`. Every real version
+            # string opens on a number, so an alphabetic leading token means
+            # the regex is reading the banner instead.
+            tokens = tuple(version)
+            assert tokens and tokens[0].integer is not None, (
+                f"version_regexes captured {str(version)!r} from the documented "
+                "output, whose leading token is not a number: the regex is "
+                "matching the banner instead of the version"
             )
         finally:
             manager.__dict__.pop("version", None)

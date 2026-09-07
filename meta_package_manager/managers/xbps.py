@@ -70,6 +70,19 @@ class XBPS(PackageManager):
     <meta_package_manager.execution.CLIExecutor.cli_path>`.
     """
 
+    version_regexes = (r"XBPS:\s+(?P<version>\S+)",)
+    """The banner names the suite before its version, so the pattern skips that
+    `XBPS:` prefix: the default regex captures it as the version instead, and
+    the `requirement` above is then unsatisfiable. Every `xbps-*` binary prints
+    this same `XBPS_RELVER` string.
+
+    ```{code-block} shell-session
+
+    $ xbps-install --version
+    XBPS: 0.60.7 API: 20250629 GIT: UNSET
+    ```
+    """
+
     _INSTALLED_REGEXP = re.compile(
         r"^ii\s+(?P<pkgver>\S+)\s+(?P<description>.+)$",
         re.MULTILINE,

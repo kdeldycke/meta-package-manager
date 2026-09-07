@@ -38,6 +38,25 @@ class WinGet(PackageManager):
     and reads `search` from winget's fixed-width column table.
 
     ```{note}
+    No operation is marked `sudo`, and escalating would be wrong rather than
+    merely redundant. winget runs unelevated; a package whose installer wants
+    administrator rights raises its own UAC prompt, which winget announces
+    before handing over. Wrapping the call would instead decide the *scope* of
+    every package: an EXE installer commonly picks user or machine by testing
+    whether the caller is an administrator, and an MSIX registers per user and
+    is [unsupported in the system
+    context](https://learn.microsoft.com/en-us/windows/package-manager/winget/troubleshooting).
+
+    What that costs is a package needing elevation from a session with no
+    interactive desktop to answer the prompt. Measured on winget `1.29.290`,
+    installing `7zip.7zip` from a medium-integrity shell reaches `Installer
+    failed with exit code: 1` and winget exits `6`, where the same command
+    succeeds elevated. Chocolatey is the opposite case and is escalated: it
+    owns an administrator-locked tree of its own, so nothing there turns on
+    which package is asked for.
+    ```
+
+    ```{note}
     `installed` and `outdated` keep only rows whose `Origin Source` is
     `winget`, dropping packages winget merely tracks (sideloaded, portable
     or Microsoft Store). Store entries still surface in `search`, but their

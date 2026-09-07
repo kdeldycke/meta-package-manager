@@ -30,6 +30,7 @@
 - [ports,sdkman] Fix `--plan` for the operations that query before they act: they reported every package as missing instead of printing the command.
 - [ports] Fix `upgrade`, which hung on FreeBSD's port options dialog until it timed out, having built nothing.
 - [xbps] Fix version detection, whose banner opens with the suite name: `XBPS:` was read as the version, dropping the manager from the pool on every Void Linux host. Closes [#2074](https://github.com/kdeldycke/meta-package-manager/issues/2074).
+- [xbps] Fix `search`, which returned no results: the long `--repository` option takes a URL and was consuming the `--search` that followed it, turning the query into a request for one package's properties.
 - [ips] Add the Image Packaging System of Solaris and illumos, with inventory, search, install, remove, upgrade, catalog sync and history purge.
 - [sun-tools] Activate on illumos as well as Solaris: OpenIndiana and its siblings inherit the SVR4 `pkginfo`, `pkgadd` and `pkgrm` tools.
 - [sun-tools] Report each package's human-readable name, which was parsed from `pkginfo -l` and then dropped.

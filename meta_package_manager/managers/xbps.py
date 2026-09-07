@@ -123,9 +123,9 @@ class XBPS(PackageManager):
         ```{code-block} shell-session
 
         $ xbps-query --list-pkgs
-        ii base-files-0.144_1            Void Linux base system files
-        ii cmark-gfm-0.29.0.gfm.13_1     CommonMark parsing and rendering library
-        ii curl-8.5.0_1                  Command line tool for transferring data
+        ii acl-2.4.0_1                        Access Control List filesystem support
+        ii acpid-2.0.34_4                     ACPI Daemon (acpid) With Netlink Support
+        ii alsa-firmware-1.2.4_1              Advanced Linux Sound Architecture (ALSA) firmware
         ```
         """
         output = self.run_cli(
@@ -154,8 +154,7 @@ class XBPS(PackageManager):
         ```{code-block} shell-session
 
         $ xbps-install --update --dry-run
-        firefox-120.0_1 update x86_64 https://repo-default.voidlinux.org/current 45MB 12MB
-        python3-3.11.6_2 update x86_64 https://repo-default.voidlinux.org/current 30MB 8MB
+        sl-5.05_1 update x86_64 https://repo-default.voidlinux.org/current 36429 9469
         ```
         """
         installed_versions = self.installed_version_map
@@ -178,8 +177,7 @@ class XBPS(PackageManager):
         ```{code-block} shell-session
 
         $ xbps-query --list-orphans
-        libglvnd-1.7.0_1
-        orc-0.4.34_1
+        figlet-2.2.5_6
         ```
         """
         output = self.run_cli(
@@ -206,13 +204,18 @@ class XBPS(PackageManager):
 
         ```{code-block} shell-session
 
-        $ xbps-query --repository --search firefox
-        [-] firefox-120.0_1            Standalone web browser from mozilla.org
-        [*] firefox-esr-115.5.0_1      Extended support release of Firefox
+        $ xbps-query -R --search firefox
+        [-] Gokapi-2.2.4_1                          Lightweight, self-hosted Firefox Send alternative
+        [-] ffsend-0.2.77_2                         Fully featured Firefox Send client
+        [-] firefox-155.0_1                         Mozilla Firefox web browser
+        [-] firefox-esr-140.14.0_1                  Mozilla Firefox web browser - Extended Support Release
         ```
         """
         output = self.run_cli(
-            "--repository",
+            # `-R` has no long form of its own: `--repository` is a different
+            # option taking a URL, so it consumes the `--search` that follows
+            # and the query is then read as a package to show properties for.
+            "-R",
             "--search",
             query,
             override_cli_path=self.sibling_cli("xbps-query", same_dir=True),

@@ -149,9 +149,16 @@ class EOPKG(PackageManager):
 
         `--install-info` describes the package as it stands on the system, so the
         version column is the *installed* one and the upgrade target is absent.
-        eopkg reports the candidate version through `info` alone, one package per
-        invocation, so `latest_version` is left unset rather than paid for with
-        one subprocess per outdated package.
+        `latest_version` is therefore left unset.
+
+        ```{todo}
+        Report the upgrade target. `eopkg info` takes every package name at once,
+        and prints a `Package found in {repo} repository:` section whose
+        `Name : {id}, version: {version}, release: {release}` line carries the
+        candidate, so one extra invocation would fill `latest_version` for the
+        whole listing. Parse that section rather than `--xml`, which emits one
+        ambiguous entry per name and buries the version inside `<History>`.
+        ```
 
         ```{code-block} shell-session
 

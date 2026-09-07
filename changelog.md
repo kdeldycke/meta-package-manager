@@ -272,6 +272,7 @@
 - [mpm] Carry a forced environment across a `run0` escalation. Its payload runs in a fresh service inheriting nothing, so `nala`, `tazpkg` and `urpmi` were losing the `LC_ALL=C` pinning their parsers, and `ports` the `BATCH=yes` keeping it out of a dialog.
 - [cargo,gem,mamba,micromamba] Record that each tool's shipped release-age gate never reaches the commands `mpm` drives, in place of a pending upstream proposal.
 - [vscode,vscodium] Point the cooldown status at the open request covering extension installs: the delay VS Code shipped holds back automatic updates only.
+- [winget] Record the optional `ReleaseDate` its manifests carry as author-supplied, so it cannot back a release-age gate any more than the commit date.
 - [fwupd] Fix a crash on a host whose `fwupdmgr` lists a device with no flags, name or version: `installed` and `outdated` aborted the whole run with a `KeyError`. Refs [#1528](https://github.com/kdeldycke/meta-package-manager/issues/1528).
 - [pip] Skip an interpreter carrying no `pip`, so an `mpm` installed by `uv tool` or `pipx` drives a real Python instead of reporting its own virtualenv as an errored manager on every run.
 - [pip] Skip a Windows `python3.exe` app-execution alias with no Python behind it. It shadowed every real interpreter, leaving `pip` reported as broken on a stock Windows and warning on every run.

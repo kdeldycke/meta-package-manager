@@ -59,7 +59,7 @@ from meta_package_manager.docstring_corpus import (
     split_session,
 )
 from meta_package_manager.pool import pool
-from meta_package_manager.version import parse_version
+from meta_package_manager.version import VersionRange, parse_version
 
 
 def _query_commands(cls: type, members: tuple[str, ...]) -> list[tuple[list[str], str]]:
@@ -171,6 +171,18 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
                 "output, whose leading token is not a number: the regex is "
                 "matching the banner instead of the version"
             )
+            # The banner check above cannot see a trace that parses cleanly and
+            # is merely old. A `requirement` raised without recapturing leaves
+            # the manager's own page showing a transcript of a version it
+            # refuses to drive, which is how `pip` came to document `2.0.2`
+            # under a `>=26.1.0` floor and `pixi` `0.48.0` under `>=0.65.0`.
+            if manager.requirement:
+                assert version in VersionRange(manager.requirement), (
+                    f"the documented `--version` output reports {str(version)!r}, "
+                    f"which does not satisfy this manager's own "
+                    f"{manager.requirement!r} requirement: the floor moved and "
+                    "the sample was left behind"
+                )
         finally:
             manager.__dict__.pop("version", None)
         return

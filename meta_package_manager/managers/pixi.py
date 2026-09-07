@@ -144,7 +144,7 @@ class Pixi(PackageManager):
     ```{code-block} shell-session
 
     $ pixi --version
-    pixi 0.48.0
+    pixi 0.78.0
     ```
     """
 
@@ -161,10 +161,13 @@ class Pixi(PackageManager):
         that is not installed in the prefix, and the optional `platform` key is
         omitted unless the environment pins one.
 
-        The block below is source-derived: its layout follows pixi's
-        `serde_json::to_string_pretty` serialization of `GlobalEnvironmentJson`,
-        and its values are those of the `ripgrep` entry in pixi's own
-        [`pixi global list` reference output](https://pixi.sh/latest/reference/cli/pixi/global/list/).
+        The block below was reconstructed from pixi's
+        `serde_json::to_string_pretty` serialization of `GlobalEnvironmentJson`
+        and the `ripgrep` entry of its own
+        [`pixi global list` reference output](https://pixi.sh/latest/reference/cli/pixi/global/list/),
+        back when no host here could run the tool. It has since been confirmed
+        byte for byte against `pixi 0.78.0` driven for real, so it is a capture
+        now rather than a reconstruction.
 
         ```{code-block} shell-session
 

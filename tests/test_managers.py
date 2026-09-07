@@ -273,6 +273,13 @@ def test_parsed_output_omits_reshaping_arg(
     names the arguments already known to reshape output rather than deriving
     them, because whether an argument is safe can only be read from the tool's
     output, not from the manager class.
+
+    It is not made redundant by
+    {func}`~tests.test_docstring_corpus.test_documented_query_command_matches_construction`,
+    which compares a docstring against the argv beside it: adding a reshaping
+    argument to the code *and* to the docstring leaves those two agreeing, and
+    only this test still fails. An agreement holds whichever way both sides
+    move.
     """
     manager = pool[manager_id]
     monkeypatch.setattr(

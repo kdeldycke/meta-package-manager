@@ -76,7 +76,7 @@ class SFSU(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > sfsu list --json
+        > sfsu list --json --no-color
         [
           {
             "name": "7zip",
@@ -110,7 +110,7 @@ class SFSU(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > sfsu status --only apps --json
+        > sfsu status --only apps --json --no-color
         {
           "packages": [
             {

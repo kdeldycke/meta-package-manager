@@ -120,7 +120,7 @@ class YarnClassic(Yarn):
 
         ```{code-block} shell-session
 
-        $ yarn global --json list --depth 0
+        $ yarn --silent global --json list --depth 0
         {"type":"activityStart","data":{"id":0}}
         {"type":"activityTick","data":{"id":0,"name":"awesome-lint@^0.18.0"}}
         {"type":"activityTick","data":{"id":0,"name":"arrify@^2.0.1"}}
@@ -176,7 +176,7 @@ class YarnClassic(Yarn):
 
         ```{code-block} shell-session
 
-        $ yarn --json outdated --cwd ~/.config/yarn/global
+        $ yarn --silent --json outdated --cwd ~/.config/yarn/global
         {"type":"warning","data":"package.json: No license field"}
         {"type":"table","data":{"head":["Package","Current","Wanted","Latest","Package Type","URL"],"body":[["markdown","0.4.0","0.4.0","0.5.0","dependencies","git://github.com/evilstreak/markdown-js.git"]]}}
         ```

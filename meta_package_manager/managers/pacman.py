@@ -144,7 +144,7 @@ class Pacman(PackageManager):
 
         ```{code-block} shell-session
 
-        $ pacman --noconfirm --query
+        $ pacman --noconfirm --color never --query
         a52dec 0.7.4-11
         aalib 1.4rc5-14
         abseil-cpp 20211102.0-2
@@ -164,7 +164,7 @@ class Pacman(PackageManager):
 
         ```{code-block} shell-session
 
-        $ pacman --noconfirm --query --upgrades
+        $ pacman --noconfirm --color never --query --upgrades
         linux 4.19.1.arch1-1 -> 4.19.2.arch1-1
         linux-headers 4.19.1.arch1-1 -> 4.19.2.arch1-1
         ```

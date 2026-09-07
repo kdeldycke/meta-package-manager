@@ -46,6 +46,7 @@ from __future__ import annotations
 import re
 import shlex
 from contextlib import suppress
+from functools import cached_property
 from itertools import product
 from pathlib import Path
 
@@ -398,6 +399,26 @@ def _stands_for_package_id(token: str) -> bool:
     return len(token) >= 3 and (PID_SENTINEL in token or token in PID_SENTINEL)
 
 
+PLACEHOLDER_RE = re.compile(r"^\{[a-z][a-z0-9-]*\}$")
+"""A documented token standing in for one the docstring cannot spell out.
+
+Two kinds earn one, and nothing else does. A value that cannot be written on a
+command line at all, like the `dnf --qf` format ending in a real newline. And a
+value resolved at run time from an earlier call, like the `go` binary directory
+or the `yarn` global directory, where a concrete example would pin the
+docstring to whichever machine produced it. Every other token is written
+verbatim, which is what lets
+{func}`test_documented_query_command_matches_construction` read the rest of a
+command as an exact record. Braces follow the placeholder convention this
+project already uses for shell examples.
+"""
+
+
+def _is_placeholder(token: str) -> bool:
+    """Whether a documented token stands in for an unwritable value."""
+    return bool(PLACEHOLDER_RE.match(token))
+
+
 def _matches(
     documented: list[str], constructed: list[str], cli_names: tuple[str, ...]
 ) -> bool:
@@ -409,11 +430,14 @@ def _matches(
     manager's CLI names (`python` for a `python3` binary), and as an absolute
     path when the docstring pins where that binary lives (`/usr/local/bin/apt`
     is what tells Mint's `apt` apart from Debian's). `_normalize_constructed`
-    already reduces the built side to a basename, so compare on that.
+    already reduces the built side to a basename, so compare on that. A
+    {data}`PLACEHOLDER_RE` token matches whatever sits in its position.
     """
     if len(documented) != len(constructed):
         return False
     for position, (doc_token, built_token) in enumerate(zip(documented, constructed)):
+        if _is_placeholder(doc_token):
+            continue
         if _stands_for_package_id(built_token):
             if doc_token.startswith("-"):
                 return False
@@ -536,5 +560,114 @@ def test_documented_command_matches_construction(
             _matches(doc_command, built, manager.cli_names) for built in normalized
         ), (
             f"documented command {doc_command} is not constructed by {member}(); "
+            f"constructed: {normalized}"
+        )
+
+
+QUERY_MEMBERS = (
+    "installed",
+    "orphans",
+    "outdated",
+)
+"""Read-only members whose docstrings document the exact CLI they run.
+
+{func}`test_documented_output_still_parses` replays their documented output
+through the parser, which proves the sample still parses. That says nothing
+about whether the command producing it is still the one the code sends. An
+argument that reshapes output rather than merely quieting it drifts the two
+apart in silence, leaving a fixture that parses beside a system that answers
+nothing, which is how `emerge`'s `--quiet` went unnoticed.
+"""
+
+
+def _class_command_map(cls: type) -> list[tuple[list[str], str]]:
+    """Every `(command, output)` pair a class documents, for the stub.
+
+    Drawn from the whole class rather than the member under test, because a
+    query often resolves a path first and reads it back: `go`'s inventory needs
+    the `go env GOBIN` and `go env GOPATH` blocks of `bin_dir`, and `yarn`'s
+    needs the `yarn global dir` block of `global_dir`. Feeding those documented
+    answers back is what lets the second command be built with the very value
+    its own docstring shows, instead of the empty string a blank stub returns.
+    """
+    pairs = []
+    for blocks in class_blocks(cls).values():
+        for block in blocks:
+            tokens, output = dissect(block)
+            if tokens:
+                pairs.append((tokens, output))
+    return pairs
+
+
+def _query_fixtures():
+    """Yield one `pytest.param` per manager query member with literal
+    documented commands."""
+    for manager in pool.values():
+        for member in QUERY_MEMBERS:
+            documented = _documented_commands(
+                type(manager), member, getattr(manager, "extra_env", None)
+            )
+            if documented:
+                yield pytest.param(
+                    manager, member, documented, id=f"{manager.id}-{member}"
+                )
+
+
+@pytest.mark.parametrize("manager, member, documented", list(_query_fixtures()))
+def test_documented_query_command_matches_construction(
+    manager, member, documented, monkeypatch
+):
+    """The command a query docstring shows must be the one the member builds."""
+    monkeypatch.setattr(manager, "which", lambda cli_name: Path("/usr/bin") / cli_name)
+    monkeypatch.setattr(
+        manager, "cli_path", Path("/usr/bin") / manager.cli_names[0], raising=False
+    )
+    monkeypatch.delenv("UV", raising=False)
+
+    dispatch = _dispatch(_class_command_map(type(manager)))
+    constructed = []
+
+    def record_run_cli(*args, **kwargs) -> str:
+        build_kwargs = {k: v for k, v in kwargs.items() if k in BUILD_CLI_KWARGS}
+        constructed.append(manager.build_cli(*args, **build_kwargs))
+        return dispatch(*args, **kwargs)
+
+    monkeypatch.setattr(manager, "run_cli", record_run_cli)
+
+    # A member may pick its command from the tool's version, asking a recent
+    # release one thing and an older one another, with both documented:
+    # `apk`'s inventory between the `query` and `list` applets, `pipx`'s
+    # outdated between its native query and a per-venv pip probe. Driving the
+    # member above and below every requirement reaches both branches, and a
+    # manager that branches on nothing simply builds the same command twice.
+    for forced_version in (parse_version("999.0.0"), parse_version("0.0.1")):
+        # The pool hands out one instance per manager, so a `cached_property`
+        # filled by an earlier test would answer here too, from an environment
+        # this one never set up. Drop every cached value, then pin the version
+        # the branch reads, so each member resolves its paths through the stub.
+        for name, attribute in vars(type(manager)).items():
+            if isinstance(attribute, cached_property):
+                manager.__dict__.pop(name, None)
+        monkeypatch.setattr(manager, "version", forced_version, raising=False)
+        # A member is an iterator, so nothing runs until it is drained. A
+        # parser fed a documented sample may still raise on the values around
+        # it, and the commands built before that point are what this reads.
+        with suppress(Exception):
+            tuple(getattr(manager, member))
+
+    normalized = [
+        _normalize_constructed(command, manager.cli_names)
+        for command in constructed
+        if command
+    ]
+    for doc_command in documented:
+        # Both sides go through the same reduction, so a docstring may document
+        # the `zsh -c 'source ... && zimfw list'` wrapper a shell-function
+        # manager really runs, rather than the bare command it reduces to.
+        reduced = _normalize_constructed(tuple(doc_command), manager.cli_names)
+        assert any(
+            _matches(reduced, built, manager.cli_names) for built in normalized
+        ), (
+            f"documented command {doc_command} is not constructed by {member}; "
             f"constructed: {normalized}"
         )

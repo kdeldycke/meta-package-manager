@@ -78,7 +78,7 @@ class Composer(PackageManager):
 
         ```{code-block} shell-session
 
-        $ composer global show --format=json
+        $ composer global --no-ansi show --format=json
         {
           "installed": [
             {
@@ -118,7 +118,7 @@ class Composer(PackageManager):
 
         ```{code-block} shell-session
 
-        $ composer global outdated --format=json
+        $ composer global --no-ansi outdated --format=json
         {
             "installed": [
                 {

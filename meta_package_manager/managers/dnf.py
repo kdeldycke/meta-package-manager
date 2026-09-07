@@ -167,7 +167,7 @@ class DNF(PackageManager):
 
         ```{code-block} shell-session
 
-        $ dnf repoquery --userinstalled --qf FORMAT
+        $ dnf --color=never --quiet repoquery --userinstalled --qf {format}
         NetworkManager-bluetooth___MPM___1.56.1___MPM___Bluetooth device plugin for NetworkManager___MPM___aarch64
         NetworkManager-team___MPM___1.56.1___MPM___Team device plugin for NetworkManager___MPM___aarch64
         NetworkManager-wifi___MPM___1.56.1___MPM___Wifi plugin for NetworkManager___MPM___aarch64
@@ -225,7 +225,7 @@ class DNF(PackageManager):
 
         ```{code-block} shell-session
 
-        $ dnf repoquery --installed --qf FORMAT
+        $ dnf --color=never --quiet repoquery --installed --qf {format}
         librepo___MPM___1.21.0-1.fc44___MPM___Repodata downloading library___MPM___aarch64
         openldap___MPM___2.6.13-1.fc44___MPM___LDAP support libraries___MPM___aarch64
         wireless-regdb___MPM___2026.05.30-1.fc44___MPM___Regulatory database for 802.11 wireless networking___MPM___noarch
@@ -233,7 +233,7 @@ class DNF(PackageManager):
 
         ```{code-block} shell-session
 
-        $ dnf repoquery --upgrades --qf FORMAT
+        $ dnf --color=never --quiet repoquery --upgrades --qf {format}
         librepo___MPM___1.21.0-2.fc44___MPM___Repodata downloading library___MPM___aarch64
         openldap___MPM___2.6.14-1.fc44___MPM___LDAP support libraries___MPM___aarch64
         wireless-regdb___MPM___2026.09.03-1.fc44___MPM___Regulatory database for 802.11 wireless networking___MPM___noarch

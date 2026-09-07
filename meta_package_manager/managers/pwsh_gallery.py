@@ -172,8 +172,17 @@ class PWSH_Gallery(PackageManager):
         ```{code-block} shell-session
 
         $ pwsh -NoProfile -NonInteractive -Command \\
-            "Get-InstalledPSResource | ForEach-Object { ... } | \\
-             ConvertTo-Json -AsArray -Depth 2 -Compress"
+            "Get-InstalledPSResource | ForEach-Object { \\
+             $i = $_; \\
+             $l = Find-PSResource -Name $i.Name -ErrorAction SilentlyContinue \\
+             | Select-Object -First 1; \\
+             if ($l -and $l.Version -gt $i.Version) { \\
+             [PSCustomObject]@{ \\
+             Name = $i.Name; \\
+             Installed = $i.Version.ToString(); \\
+             Latest = $l.Version.ToString() \\
+             } } \\
+             } | ConvertTo-Json -AsArray -Depth 2 -Compress"
         [{"Name":"PSReadLine","Installed":"2.3.4","Latest":"2.3.6"}]
         ```
         """

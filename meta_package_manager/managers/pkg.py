@@ -190,7 +190,7 @@ class PKG(PackageManager):
         We rely on `pkg upgrade` instead of `pkg version` because the latter
         does not provides the new version:
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
         $ pkg version --like "<"
         Updating FreeBSD repository catalogue...

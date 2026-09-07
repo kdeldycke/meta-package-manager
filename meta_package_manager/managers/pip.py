@@ -62,14 +62,29 @@ into without `--break-system-packages`. Prints `0` otherwise.
 """
 
 
+_PIP_PROBE_MARKER = "mpm-pip-probe"
+"""Sentinel {data}`_PIP_MODULE_PROBE` prefixes its answer with.
+
+Separates *the interpreter ran our code* from *something else answered*, which a
+bare `1`/`0` cannot. Windows installs `python.exe` and `python3.exe`
+app-execution aliases on a machine carrying no Python at all: they write an
+advert for the Microsoft Store to `<stderr>`, leave `<stdout>` empty and exit
+`9009`. Empty output is not the `0` those aliases would need to print to be
+skipped, so without a marker to look for they read as a Python whose `pip`
+merely could not be located.
+"""
+
+
 _PIP_MODULE_PROBE = (
-    "import importlib.util; print(1 if importlib.util.find_spec('pip') else 0)"
+    "import importlib.util; "
+    f"print('{_PIP_PROBE_MARKER}', 1 if importlib.util.find_spec('pip') else 0)"
 )
 """One-liner run inside a candidate interpreter to report whether `pip` is importable.
 
-Prints `1` when the interpreter can run `python -m pip`, `0` otherwise. Locates the
-module with {func}`importlib.util.find_spec` instead of importing it, so the probe
-stays cheap and free of pip's own import-time side effects.
+Prints {data}`_PIP_PROBE_MARKER` followed by `1` when the interpreter can run
+`python -m pip`, and by `0` when it cannot. Locates the module with
+{func}`importlib.util.find_spec` instead of importing it, so the probe stays cheap
+and free of pip's own import-time side effects.
 """
 
 
@@ -345,12 +360,21 @@ class Pip(PackageManager):
         does drive with `pip` keeps its `pip`, so it stays a candidate and the
         running interpreter is still preferred.
 
+        It also drops a candidate that is no interpreter at all. Windows keeps
+        `python.exe` and `python3.exe` app-execution aliases on `PATH` whether or
+        not a Store Python is installed, and `search_all_cli` has to keep yielding
+        such aliases, `winget.exe` being one. An alias with nothing behind it
+        prints its advert to `<stderr>` and exits `9009`, so a probe that failed
+        without ever reaching {data}`_PIP_PROBE_MARKER` is read as unusable rather
+        than as a Python whose `pip` went missing.
+
         The probe inherits the `--timeout` override when one is set, else the
         {data}`~meta_package_manager.execution.READ_ONLY_TIMEOUT` read-only cap.
 
-        Errs on the side of keeping a candidate: a probe that times out, crashes, or
-        prints anything unexpected returns `False`, leaving discovery untouched
-        rather than hiding a usable interpreter.
+        Errs on the side of keeping a candidate everywhere else: a probe that times
+        out, crashes before running, or exits `0` saying something unexpected
+        returns `False`, leaving discovery untouched rather than hiding a usable
+        interpreter.
         """
         timeout = self.timeout if self.timeout is not None else READ_ONLY_TIMEOUT
         try:
@@ -363,7 +387,15 @@ class Pip(PackageManager):
             )
         except (OSError, subprocess.SubprocessError):
             return False
-        return result.stdout.strip() == "0"
+        stdout = result.stdout or ""
+        if f"{_PIP_PROBE_MARKER} 1" in stdout:
+            return False
+        if f"{_PIP_PROBE_MARKER} 0" in stdout:
+            return True
+        # The marker never appeared, so the binary did not run the probe. A
+        # non-zero exit settles that it cannot: nothing to drive `python -m pip`
+        # with. A zero exit is left alone, being unexplained rather than refuted.
+        return result.returncode != 0
 
     @cached_property
     def version(self) -> TokenizedString | None:

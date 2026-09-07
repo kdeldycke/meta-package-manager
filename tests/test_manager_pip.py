@@ -25,7 +25,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from meta_package_manager.execution import CLIExecutor
-from meta_package_manager.managers.pip import Pip
+from meta_package_manager.managers.pip import _PIP_PROBE_MARKER, Pip
 
 PATCH_DIST = "meta_package_manager.managers.pip.importlib.metadata.distribution"
 PATCH_PREFIX = "meta_package_manager.managers.pip.sys.prefix"
@@ -98,10 +98,11 @@ def test_bundled_app_false_when_mpm_absent():
 # --- Guard two: PEP 668 externally-managed, non-virtualenv interpreters. ------
 
 
-def _completed(stdout):
-    """Mock a `subprocess.run` result carrying the given stdout."""
+def _completed(stdout, returncode=0):
+    """Mock a `subprocess.run` result carrying the given stdout and exit code."""
     result = MagicMock()
     result.stdout = stdout
+    result.returncode = returncode
     return result
 
 
@@ -211,13 +212,28 @@ def test_search_unavailable_when_all_candidates_blocked():
 
 
 @pytest.mark.parametrize(
-    ("stdout", "expected"),
-    [("0\n", True), ("0", True), ("1\n", False), ("", False), ("oops", False)],
+    ("stdout", "returncode", "expected"),
+    [
+        pytest.param(f"{_PIP_PROBE_MARKER} 0\n", 0, True, id="no-pip"),
+        pytest.param(f"{_PIP_PROBE_MARKER} 1\n", 0, False, id="pip-present"),
+        # A candidate free to print before the probe answers still answers.
+        pytest.param(
+            f"warming up\n{_PIP_PROBE_MARKER} 1\n", 0, False, id="noisy-preamble"
+        ),
+        # Windows keeps `python3.exe` on PATH with no Python behind it: the advert
+        # goes to stderr, stdout stays empty and it exits 9009. Measured on
+        # Windows 11 24H2. Read as a Python, it shadowed every real interpreter.
+        pytest.param("", 9009, True, id="app-execution-alias"),
+        # Unexplained rather than refuted: it ran, said nothing we asked for, and
+        # still succeeded, so discovery is left alone.
+        pytest.param("oops", 0, False, id="unexpected-but-successful"),
+        pytest.param("", 0, False, id="silent-but-successful"),
+    ],
 )
-def test_pip_module_missing_parses_probe(stdout, expected):
-    """The probe's `0`/`1` output maps to missing/present."""
+def test_pip_module_missing_parses_probe(stdout, returncode, expected):
+    """The marked answer decides, and a failure without one drops the candidate."""
     candidate = Path("/usr/bin/python3")
-    with patch(PATCH_RUN, return_value=_completed(stdout)) as run:
+    with patch(PATCH_RUN, return_value=_completed(stdout, returncode)) as run:
         assert Pip()._pip_module_missing(candidate) is expected
     # The candidate interpreter runs the pip-module one-liner. Compare against the
     # same str() conversion the probe applies, so the expectation holds on Windows

@@ -62,6 +62,17 @@ into without `--break-system-packages`. Prints `0` otherwise.
 """
 
 
+_PIP_MODULE_PROBE = (
+    "import importlib.util; print(1 if importlib.util.find_spec('pip') else 0)"
+)
+"""One-liner run inside a candidate interpreter to report whether `pip` is importable.
+
+Prints `1` when the interpreter can run `python -m pip`, `0` otherwise. Locates the
+module with {func}`importlib.util.find_spec` instead of importing it, so the probe
+stays cheap and free of pip's own import-time side effects.
+"""
+
+
 _DEP_SPEC_SPLIT_REGEX = re.compile(
     r"^(?P<name>[A-Za-z0-9_.\-]+)(?P<extras>\[[^\]]+\])?(?P<rest>.*)$"
 )
@@ -185,13 +196,15 @@ class Pip(PackageManager):
 
         The running interpreter is probed first, so an `mpm` installed into a
         virtualenv manages that virtualenv's own packages, then the Python(s)
-        found on `PATH`. Two kinds of interpreter are skipped, so the pip
+        found on `PATH`. Three kinds of interpreter are skipped, so the pip
         manager only ever targets a scope the user can actually install into:
 
         - mpm's own distributor-managed bundle (see
-          {meth}`_running_from_bundled_app`), and
+          {meth}`_running_from_bundled_app`),
         - any externally-managed, non-virtualenv interpreter {pep}`668` would
-          forbid `pip install` into (see {meth}`_pip_install_blocked`).
+          forbid `pip install` into (see {meth}`_pip_install_blocked`), and
+        - any interpreter carrying no `pip` at all (see
+          {meth}`_pip_module_missing`).
 
         When every candidate is skipped the manager is left with no
         {attr}`~meta_package_manager.execution.CLIExecutor.cli_path` and reports as
@@ -215,15 +228,22 @@ class Pip(PackageManager):
         # pinned dependencies as bogus pip upgrades.
         if current_exec and not self._running_from_bundled_app():
             current_python = Path(current_exec)
-            # Still track it for the dedup below even when PEP 668 blocks it.
-            if not self._pip_install_blocked(current_python):
+            # Still track it for the dedup below even when it is not a pip scope.
+            if not self._pip_install_blocked(
+                current_python
+            ) and not self._pip_module_missing(current_python):
                 yield current_python
 
         # Return the rest of the Python executables found on the system as usual,
-        # skipping the one already covered above and any externally-managed,
-        # non-virtualenv interpreter pip could not install into.
+        # skipping the one already covered above, any externally-managed,
+        # non-virtualenv interpreter pip could not install into, and any that
+        # carries no pip to drive.
         for py_path in super().search_all_cli(cli_names=cli_names, env=env):
-            if py_path == current_python or self._pip_install_blocked(py_path):
+            if (
+                py_path == current_python
+                or self._pip_install_blocked(py_path)
+                or self._pip_module_missing(py_path)
+            ):
                 continue
             yield py_path
 
@@ -259,7 +279,9 @@ class Pip(PackageManager):
         `mpm` in a private virtualenv, but are not detected here: they
         leave an `INSTALLER` of `pip` or `uv` and live outside
         `Cellar`, so these signals alone cannot tell them apart from a
-        deliberate user install. See [#1767](https://github.com/kdeldycke/meta-package-manager/issues/1767).
+        deliberate user install. {meth}`_pip_module_missing` catches them
+        instead, on the conclusive signal that such a virtualenv carries no
+        `pip` to drive. See [#1767](https://github.com/kdeldycke/meta-package-manager/issues/1767).
         ```
         """
         if "/Cellar/" in sys.prefix:
@@ -305,6 +327,43 @@ class Pip(PackageManager):
         except (OSError, subprocess.SubprocessError):
             return False
         return result.stdout.strip() == "1"
+
+    def _pip_module_missing(self, python_path: Path) -> bool:
+        """Does `python_path` carry no `pip`, leaving `python -m pip` unrunnable?
+
+        Runs the candidate interpreter with {data}`_PIP_MODULE_PROBE`. Every
+        operation of this manager is a `python -m pip` call, so an interpreter
+        without the module is not a pip scope at all: {meth}`search_all_cli` drops
+        it and falls through to the next candidate, instead of selecting it and
+        then failing every operation against it.
+
+        This is what excludes the private virtualenv a standalone-app installer
+        builds for `mpm` itself. `uv tool install` and `pipx` seed no `pip` there,
+        so the environment `mpm` runs from is skipped on the one signal that is
+        conclusive, where the {meth}`_running_from_bundled_app` fingerprints cannot
+        tell such an install apart from a deliberate one. A virtualenv the user
+        does drive with `pip` keeps its `pip`, so it stays a candidate and the
+        running interpreter is still preferred.
+
+        The probe inherits the `--timeout` override when one is set, else the
+        {data}`~meta_package_manager.execution.READ_ONLY_TIMEOUT` read-only cap.
+
+        Errs on the side of keeping a candidate: a probe that times out, crashes, or
+        prints anything unexpected returns `False`, leaving discovery untouched
+        rather than hiding a usable interpreter.
+        """
+        timeout = self.timeout if self.timeout is not None else READ_ONLY_TIMEOUT
+        try:
+            result = subprocess.run(
+                (str(python_path), "-c", _PIP_MODULE_PROBE),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return False
+        return result.stdout.strip() == "0"
 
     @cached_property
     def version(self) -> TokenizedString | None:

@@ -149,6 +149,7 @@ def test_search_prepends_current_interpreter_for_user_install():
         patch(PATCH_EXEC, fake_exec),
         patch.object(Pip, "_running_from_bundled_app", return_value=False),
         patch.object(Pip, "_pip_install_blocked", return_value=False),
+        patch.object(Pip, "_pip_module_missing", return_value=False),
         patch.object(CLIExecutor, "search_all_cli", _fake_base_search),
     ):
         found = list(Pip().search_all_cli(("python3", "python")))
@@ -166,6 +167,7 @@ def test_search_skips_bundled_interpreter():
         patch(PATCH_EXEC, fake_exec),
         patch.object(Pip, "_running_from_bundled_app", return_value=True),
         patch.object(Pip, "_pip_install_blocked", return_value=False),
+        patch.object(Pip, "_pip_module_missing", return_value=False),
         patch.object(CLIExecutor, "search_all_cli", _fake_base_search),
     ):
         found = list(Pip().search_all_cli(("python3", "python")))
@@ -183,6 +185,7 @@ def test_search_skips_pep668_blocked_candidate():
         patch.object(
             Pip, "_pip_install_blocked", side_effect=lambda path: path == blocked
         ),
+        patch.object(Pip, "_pip_module_missing", return_value=False),
         patch.object(CLIExecutor, "search_all_cli", _fake_base_search),
     ):
         found = list(Pip().search_all_cli(("python3", "python")))
@@ -197,7 +200,61 @@ def test_search_unavailable_when_all_candidates_blocked():
         patch(PATCH_EXEC, fake_exec),
         patch.object(Pip, "_running_from_bundled_app", return_value=False),
         patch.object(Pip, "_pip_install_blocked", return_value=True),
+        patch.object(Pip, "_pip_module_missing", return_value=False),
         patch.object(CLIExecutor, "search_all_cli", _fake_base_search),
     ):
         found = list(Pip().search_all_cli(("python3", "python")))
     assert found == []
+
+
+# --- Guard three: interpreters carrying no pip to drive. ----------------------
+
+
+@pytest.mark.parametrize(
+    ("stdout", "expected"),
+    [("0\n", True), ("0", True), ("1\n", False), ("", False), ("oops", False)],
+)
+def test_pip_module_missing_parses_probe(stdout, expected):
+    """The probe's `0`/`1` output maps to missing/present."""
+    candidate = Path("/usr/bin/python3")
+    with patch(PATCH_RUN, return_value=_completed(stdout)) as run:
+        assert Pip()._pip_module_missing(candidate) is expected
+    # The candidate interpreter runs the pip-module one-liner. Compare against the
+    # same str() conversion the probe applies, so the expectation holds on Windows
+    # where the path stringifies with backslashes.
+    command = run.call_args.args[0]
+    assert command[0] == str(candidate)
+    assert command[1] == "-c"
+    assert "find_spec" in command[2]
+
+
+@pytest.mark.parametrize(
+    "error",
+    [OSError("not a python"), subprocess.TimeoutExpired("python", 1)],
+)
+def test_pip_module_missing_keeps_candidate_on_error(error):
+    """A failed probe must not hide a candidate: default to pip being present."""
+    with patch(PATCH_RUN, side_effect=error):
+        assert Pip()._pip_module_missing(Path("/usr/bin/python3")) is False
+
+
+def test_search_skips_running_interpreter_without_pip():
+    """A standalone-app virtualenv carries no pip, so discovery falls through.
+
+    `uv tool install` and `pipx` build `mpm` its own virtualenv and seed no pip
+    into it. Selecting that interpreter would leave every `python -m pip` call
+    failing against an environment the user never asked mpm to manage.
+    """
+    fake_exec = "/home/kde/.local/share/uv/tools/meta-package-manager/bin/python"
+    with (
+        patch(PATCH_EXEC, fake_exec),
+        patch.object(Pip, "_running_from_bundled_app", return_value=False),
+        patch.object(Pip, "_pip_install_blocked", return_value=False),
+        patch.object(
+            Pip, "_pip_module_missing", side_effect=lambda path: str(path) == fake_exec
+        ),
+        patch.object(CLIExecutor, "search_all_cli", _fake_base_search),
+    ):
+        found = list(Pip().search_all_cli(("python3", "python")))
+    assert Path(fake_exec) not in found
+    assert found == [Path("/usr/bin/python3"), Path("/usr/local/bin/python3")]

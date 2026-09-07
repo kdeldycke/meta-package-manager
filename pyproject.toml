@@ -325,10 +325,11 @@ dependencies = [
   # print_table's max_column_widths, used by meta_package_manager.tables to
   # hold the search table's description column to auto.
   "click-extra>=8.9.1",
-  # extra-platforms 13.6 detects AlmaLinux, silencing the "unrecognized platform"
-  # warning 13.5 printed to stdout on the release workflow's RHEL-family test
-  # containers, which corrupted the CLI output the test suite asserts on.
-  "extra-platforms>=13.6",
+  # extra-platforms 13.8 stops current_platform() raising on illumos, where
+  # is_solaris() matched too, and reads its i86pc machine as X86_64. Every mpm
+  # run crashed there, which is where managers/ips.py and managers/sun_tools.py
+  # activate. It also adds the crux and nutyx platform tokens.
+  "extra-platforms>=13.8",
   # Required at runtime by meta_package_manager.package and
   # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
   # cross-manager package identification, independent of SBOM features. That API
@@ -529,6 +530,12 @@ required-version = ">=0.11.15"
 dependency-groups.docs = { requires-python = ">= 3.14" }
 # Cooldown period.
 exclude-newer = "1 week"
+# Per-package override pulling a freshly-published dependency in before the
+# global cooldown above would let it through. The value is an absolute ISO 8601
+# timestamp, conventionally the midnight following the release upload, so the
+# exemption covers that release and nothing later. Drop the entry once the
+# release ages past the cooldown window.
+exclude-newer-package = { extra-platforms = "2026-09-08T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

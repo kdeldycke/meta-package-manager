@@ -37,7 +37,7 @@ BuildRequires:  python-rpm-macros
 # SECTION runtime requirements, also imported by the test suite
 BuildRequires:  python3-boltons >= 25
 BuildRequires:  python3-click-extra >= 8.8.1
-BuildRequires:  python3-extra-platforms >= 13.6
+BuildRequires:  python3-extra-platforms >= 13.8
 BuildRequires:  python3-packageurl-python >= 0.11
 BuildRequires:  python3-tomli-w >= 1
 BuildRequires:  python3-xmltodict >= 0.12
@@ -55,7 +55,7 @@ BuildRequires:  python3-tomlkit
 # /SECTION
 Requires:       python3-boltons >= 25
 Requires:       python3-click-extra >= 8.8.1
-Requires:       python3-extra-platforms >= 13.6
+Requires:       python3-extra-platforms >= 13.8
 Requires:       python3-packageurl-python >= 0.11
 Requires:       python3-tomli-w >= 1
 Requires:       python3-xmltodict >= 0.12

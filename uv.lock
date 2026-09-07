@@ -12,6 +12,7 @@ exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for 
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
+extra-platforms = "2026-09-08T00:00:00Z"
 repomatic = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
 
 [[package]]
@@ -598,11 +599,11 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "13.6.0"
+version = "13.8.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d0/20/3d7ba1bd9cd9235eda78a143adcb2a710c6117f5b3f500237bc2f240808c/extra_platforms-13.6.0.tar.gz", hash = "sha256:92b5800c0ca9767820ae2cf3d48b7037432c1360055ed1804bc43a8269a2a090", size = 464011, upload-time = "2026-08-03T07:27:46.482Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1b/5d/b27245cf9053955747983d598a61c1058fc8a1fc3b0e39a04815894eadbc/extra_platforms-13.8.0.tar.gz", hash = "sha256:74e3f81abca4ac47f8f46cbae9a35eac51157077468121e50cfec2171388df07", size = 479823, upload-time = "2026-09-07T16:23:07.223Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cd/c4/3e562dc1fe2df78a16699a59ea76dda82474feefe6bed78929644b342925/extra_platforms-13.6.0-py3-none-any.whl", hash = "sha256:1ddfca538dd89fd5e1132ed5eca8b80ecb15f8ac7faa22ad232d4a6ff1a71f26", size = 98540, upload-time = "2026-08-03T07:27:44.994Z" },
+    { url = "https://files.pythonhosted.org/packages/13/37/3fc8fa3a5341619bc757ed836f82251b260acab5dba40a2c4f7db8b2c87f/extra_platforms-13.8.0-py3-none-any.whl", hash = "sha256:f1bee44eb3ac09ba4bcc19a8ddc1f73b72bacab76446f1e5e3121ab80899cde7", size = 103440, upload-time = "2026-09-07T16:23:05.599Z" },
 ]
 
 [[package]]
@@ -1192,7 +1193,7 @@ requires-dist = [
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
-    { name = "extra-platforms", specifier = ">=13.6" },
+    { name = "extra-platforms", specifier = ">=13.8" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
     { name = "packageurl-python", specifier = ">=0.11" },
     { name = "platformdirs", marker = "extra == 'sbom-online'", specifier = ">=4" },

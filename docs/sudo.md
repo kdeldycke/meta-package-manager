@@ -52,7 +52,7 @@ They are not interchangeable underneath. `doas` takes short options only, so `mp
 That splits the candidates in two. `sudo`, `sudo-rs` and `doas` keep a timestamp mpm can read and refresh. `run0` and `pkexec` broker authorization through polkit, where the grant is a property of the session and there is no cache to inspect, extend or keep warm. Windows is a third case again, where UAC is a consent dialog by design.
 
 | Escalator | Non-interactive | Probe, no prompt | Per-command query | Brands prompt | Refreshable |
-| :-------- | :-------------: | :--------------: | :---------------: | :-----------: | :---------: |
+| :-------- | :-------------- | :--------------- | :---------------- | :------------ | :---------- |
 | `sudo` | ✅ `--non-interactive` | ✅ `--validate` | ✅ `--list` | ✅ `--prompt` | ✅ |
 | `sudo-rs` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `doas` | ✅ `-n` | ✅ runs `true` | ❌ | ❌ | ❌ |

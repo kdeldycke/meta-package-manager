@@ -252,6 +252,60 @@ def test_version_regex_matches_sample(manager_id, sample_output, expected_versio
     assert matched == expected_version
 
 
+@pytest.mark.parametrize(
+    ("manager_id", "member", "forbidden_arg"),
+    (("emerge", "outdated", "--quiet"), ("emerge", "search", "--quiet")),
+)
+def test_parsed_output_omits_reshaping_arg(
+    manager_id, member, forbidden_arg, monkeypatch
+):
+    """An operation whose output feeds a regex must not send a reshaping argument.
+
+    Some arguments do not only trim noise, they change the shape of what the
+    tool prints. `emerge --quiet` is one: `--search` drops to a bare
+    `*  category/name` line without the `Latest version available:` and
+    `Description:` fields, and `--update --columns` drops the `[ebuild   U  ]`
+    state prefix and the brackets around the latest version. Every regex then
+    matches nothing, and the operation reports an empty set on a system that
+    has results, exiting zero with no diagnostic.
+
+    Verified against Portage `3.0.81.3`. This guard is deliberately narrow: it
+    names the arguments already known to reshape output rather than deriving
+    them, because whether an argument is safe can only be read from the tool's
+    output, not from the manager class.
+    """
+    manager = pool[manager_id]
+    monkeypatch.setattr(
+        manager, "cli_path", Path("/usr/bin") / manager.cli_names[0], raising=False
+    )
+    monkeypatch.setattr(manager, "which", lambda cli_name: Path("/usr/bin") / cli_name)
+
+    built = []
+
+    def record_run_cli(*args, **kwargs) -> str:
+        build_kwargs = {
+            key: value
+            for key, value in kwargs.items()
+            if key in {"auto_pre_args", "override_cli_path", "override_pre_args"}
+        }
+        built.append([str(token) for token in manager.build_cli(*args, **build_kwargs)])
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", record_run_cli)
+
+    if member == "search":
+        tuple(manager.search("htop", extended=False, exact=False))
+    else:
+        tuple(getattr(manager, member))
+
+    assert built, f"{member} built no command to inspect"
+    for command in built:
+        assert forbidden_arg not in command, (
+            f"{manager_id}.{member} sends {forbidden_arg}, which reshapes the "
+            f"output its regex parses: {command}"
+        )
+
+
 @all_managers
 def test_cli_path(manager):
     if manager.cli_path is not None:

@@ -74,6 +74,20 @@ class Emerge(PackageManager):
 
     pre_args = ("--quiet", "--color", "n", "--nospinner")
 
+    _PARSED_PRE_ARGS = tuple(arg for arg in pre_args if arg != "--quiet")
+    """{attr}`pre_args` without `--quiet`, for the operations whose output a
+    regex reads instead of a person.
+
+    `--quiet` does not only drop noise, it changes the shape of what emerge
+    prints. `--search` collapses each hit to a bare `*  category/name` line,
+    losing the `Latest version available:` and `Description:` fields
+    {attr}`_SEARCH_REGEXP` needs. `--update --columns` drops the
+    `[ebuild   U  ]` state prefix and leaves the latest version unbracketed,
+    which are the two things {attr}`_OUTDATED_REGEXP` anchors on. Either regex
+    then matches nothing, and the operation reports an empty set on a system
+    that has results.
+    """
+
     _INSTALLED_REGEXP = re.compile(
         r"""
         (?P<package_id>        # Named group must not split (?P< across lines.
@@ -134,7 +148,7 @@ class Emerge(PackageManager):
     ```{code-block} shell-session
 
     $ emerge --version
-    Portage 3.0.30 (python 3.9.9-final-0, gcc-11.2.1, 5.15.32-gentoo-r1 x86_64)
+    Portage 3.0.81.3 (python 3.14.7-final-0, default/linux/arm64/23.0, gcc-15, glibc-2.43-r2, 6.18.48-gentoo-dist-bin aarch64)
     ```
     """
 
@@ -153,12 +167,14 @@ class Emerge(PackageManager):
         ```{code-block} shell-session
 
         $ qlist --installed --verbose --nocolor
-        acct-group/audio-0-r1
-        acct-group/cron-0
-        app-admin/hddtemp-0.3_beta15-r29
-        app-admin/perl-cleaner-2.30
-        app-admin/system-config-printer-1.5.16-r1
-        app-arch/p7zip-16.02-r8
+        app-admin/sudo-1.9.17_p2
+        app-alternatives/awk-4
+        app-arch/unzip-6.0_p29-r2
+        app-misc/pax-utils-1.3.10
+        app-misc/tmux-3.5a
+        app-shells/bash-5.3_p15
+        dev-perl/Locale-gettext-1.70.0_p20181130
+        dev-perl/SGMLSpm-1.1-r2
         ```
         """
         qlist_path = self.sibling_cli("qlist")
@@ -177,16 +193,14 @@ class Emerge(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
+        Runs without `--quiet`, which would drop the `[ebuild   U  ]` state
+        prefix and unbracket the latest version. See {attr}`_PARSED_PRE_ARGS`.
+
         ```{code-block} shell-session
 
-        $ emerge --update --deep --pretend --columns --color n --nospinner @world
-        [blocks  B     ] app-text/dos2unix
-        [ebuild   N    ] app-games/qstat   [25c]
-        [ebuild    R   ] sys-apps/sed      [2.4.7-r6]
-        [ebuild       U] net-fs/samba      [2.2.8_pre1]      [2.2.7a]
-        [ebuild       U] sys-devel/distcc  [2.16]            [2.13-r1] USE=ip6* -gtk
-        [ebuild r     U] dev-libs/icu      [50.1.1:0/50.1.1] [50.1-r2:0/50.1]
-        [ebuild r  R   ] dev-libs/libxml2  [2.9.0-r1:2]       USE=icu
+        $ emerge --color n --nospinner --update --deep --pretend --columns @world
+        [ebuild     U  ] sys-process/htop                                      [3.5.3]                      [3.5.1]
+        [binary    gU  ] app-editors/nano                                      [9.2-1]                      [9.1]
         ```
         """
         output = self.run_cli(
@@ -195,6 +209,7 @@ class Emerge(PackageManager):
             "--pretend",
             "--columns",
             "@world",
+            override_pre_args=self._PARSED_PRE_ARGS,
         )
 
         yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
@@ -212,23 +227,15 @@ class Emerge(PackageManager):
         ```{code-block} shell-session
 
         $ emerge --quiet --color n --nospinner --depclean --pretend
-        Calculating dependencies... done!
-        >>> These are the packages that would be unmerged:
+        app-misc/tmux: 3.5a none none
+        dev-libs/libevent: 2.1.13 none none
 
-         dev-libs/libpcre
-            selected: 8.45-r1
-           protected: none
-             omitted: none
-
-         app-misc/tmux
-            selected: 3.3a
-           protected: none
-             omitted: none
-
-        All selected packages: =dev-libs/libpcre-8.45-r1 =app-misc/tmux-3.3a
-
-        >>> 'Selected' packages are slated for removal.
-        >>> 'Protected' and 'omitted' packages will not be removed.
+        All selected packages: =app-misc/tmux-3.5a =dev-libs/libevent-2.1.13
+        Packages installed:   327
+        Packages in world:    8
+        Packages in system:   50
+        Required packages:    325
+        Number to remove:     2
         ```
         """
         output = self.run_cli("--depclean", "--pretend")
@@ -244,49 +251,48 @@ class Emerge(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        The shape of a `search` answer. mpm runs
-        `emerge --quiet --color n --nospinner --search blah`, whose `--quiet`
-        compresses each result to a single line.
+        Runs without `--quiet`, which would collapse each hit to a bare
+        `*  category/name` line and strip the two fields
+        {attr}`_SEARCH_REGEXP` reads. See {attr}`_PARSED_PRE_ARGS`.
 
-        ```{code-block} console
+        ```{code-block} shell-session
 
-        $ emerge --search --color n --nospinner blah
-
-        [ Results for search key : blah ]
+        $ emerge --color n --nospinner --search %^(htop|tmux)$
+        [ Results for search key : %^(htop|tmux)$ ]
         Searching...
 
-        *  sys-process/htop
-            Latest version available: 1.0.2-r1
-            Latest version installed: [ Not Installed ]
-            Size of files: 380 KiB
-            Homepage:      http://htop.sourceforge.net
-            Description:   interactive process viewer
-            License:       BSD GPL-2
+        *  app-misc/tmux
+              Latest version available: 3.5a
+              Latest version installed: 3.5a
+              Size of files: 699 KiB
+              Homepage:      https://tmux.github.io/
+              Description:   Terminal multiplexer
+              License:       ISC
 
-        *  x11-drivers/nvidia-drivers
-            Latest version available: 455.45.01-r1
-            Latest version installed: [ Not Installed ]
-            Size of files: 180.214 KiB
-            Homepage:      https://www.nvidia.com/Download/Find.aspx
-            Description:   NVIDIA Accelerated Graphics Driver
-            License:       GPL-2 NVIDIA-r2
+        *  sys-process/htop
+              Latest version available: 3.5.3
+              Latest version installed: 3.5.1
+              Size of files: 465 KiB
+              Homepage:      https://htop.dev/ https://github.com/htop-dev/htop
+              Description:   Interactive process viewer
+              License:       GPL-2+
 
         [ Applications found : 2 ]
         ```
 
         ```{code-block} shell-session
 
-        $ emerge --quiet --color n --nospinner --search %^sed$
+        $ emerge --color n --nospinner --search sed
         ```
 
         ```{code-block} shell-session
 
-        $ emerge --quiet --color n --nospinner --searchdesc sed
+        $ emerge --color n --nospinner --searchdesc sed
         ```
 
         ```{code-block} shell-session
 
-        $ emerge --quiet --color n --nospinner --searchdesc %^sed$
+        $ emerge --color n --nospinner --searchdesc %^sed$
         ```
         """
         search_param = "--search"
@@ -296,7 +302,9 @@ class Emerge(PackageManager):
         if exact:
             query = f"%^{query}$"
 
-        output = self.run_cli(search_param, query)
+        output = self.run_cli(
+            search_param, query, override_pre_args=self._PARSED_PRE_ARGS
+        )
 
         for package_id, version, description in self._SEARCH_REGEXP.findall(output):
             yield self.package(

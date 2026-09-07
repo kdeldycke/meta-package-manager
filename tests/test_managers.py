@@ -229,6 +229,10 @@ def test_version_regexes(manager):
             "1.4.0-2563-gabc1234",
         ),
         ("guix", "guix (GNU Guix) abc1234\nCopyright (C) 2026\n", "abc1234"),
+        # eopkg 5.0.0 renamed itself `eopkg.bin` in the banner; 4.x and below
+        # print the bare name, and both spellings must still parse.
+        ("eopkg", "eopkg.bin 5.0.0\n", "5.0.0"),
+        ("eopkg", "eopkg 4.4.0\n", "4.4.0"),
         ("mise", "2026.6.3 macos-arm64 (2026-06-13)\n", "2026.6.3"),
         ("nix", "nix-env (Nix) 2.18.1\n", "2.18.1"),
         ("stew", "stew version v0.7.0\n", "0.7.0"),

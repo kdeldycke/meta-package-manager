@@ -32,6 +32,7 @@
 - [xbps] Fix version detection, whose banner opens with the suite name: `XBPS:` was read as the version, dropping the manager from the pool on every Void Linux host. Closes [#2074](https://github.com/kdeldycke/meta-package-manager/issues/2074).
 - [xbps] Fix `search`, which returned no results: the long `--repository` option takes a URL and was consuming the `--search` that followed it, turning the query into a request for one package's properties.
 - [eopkg] Fix `search`, which passed an empty argument to `eopkg` in extended mode.
+- [eopkg] Fix version detection on eopkg `5.0.0`, which calls itself `eopkg.bin` in its banner: the manager left the pool on every Solus host running it.
 - [eopkg] Fix `installed` and `outdated`, which silently dropped the last two packages of every listing.
 - [eopkg] Decode the character references `search` descriptions carry, so `ImageMagick&#xAE; suite` reads as `ImageMagick® suite`.
 - [emerge] Fix `outdated` and `search`, which reported nothing on Gentoo: the global `--quiet` they sent strips the version and description fields their parsers read.

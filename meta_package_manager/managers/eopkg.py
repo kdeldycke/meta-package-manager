@@ -84,8 +84,21 @@ class EOPKG(PackageManager):
         re.MULTILINE,
     )
 
-    version_regexes = (r"eopkg\s+(?P<version>\S+)",)
-    """
+    version_regexes = (r"eopkg(?:\.bin)?\s+(?P<version>\S+)",)
+    """eopkg `5.0.0` names itself `eopkg.bin` in its banner, so the pattern makes
+    that suffix optional. Without it nothing matches, no version is detected, and
+    the manager silently leaves the pool on every Solus host running `5.x`.
+
+    The name is fixed, not read from `argv[0]`: `/usr/bin/eopkg` and
+    `/usr/bin/eopkg-cli` are both symlinks to `eopkg.bin`, and all three spellings
+    print the same banner.
+
+    ```{code-block} shell-session
+
+    $ eopkg --version
+    eopkg.bin 5.0.0
+    ```
+
     ```{code-block} shell-session
 
     $ eopkg --version

@@ -158,10 +158,15 @@ class DNF(PackageManager):
         ```{code-block} shell-session
 
         $ dnf repoquery --userinstalled --qf FORMAT
-        acl___MPM___2.2.53-1.el8___MPM___Access control list utilities___MPM___x86_64
-        audit___MPM___3.0.7-4.el9___MPM___User space auditing tools___MPM___x86_64
-        audit-libs___MPM___3.0.7-4.el9___MPM___Dynamic auditing library___MPM___x86_64
+        NetworkManager-bluetooth___MPM___1.56.1___MPM___Bluetooth device plugin for NetworkManager___MPM___aarch64
+        NetworkManager-team___MPM___1.56.1___MPM___Team device plugin for NetworkManager___MPM___aarch64
+        NetworkManager-wifi___MPM___1.56.1___MPM___Wifi plugin for NetworkManager___MPM___aarch64
         ```
+
+        `%{version}` is the upstream version alone: the first of those three is
+        installed as `1:1.56.1-2.fc44`, and neither its epoch nor its release
+        reaches this listing. `outdated` below reports `%{evr}` instead, which
+        carries both.
         """
         qf = ["%{name}", "%{version}", "%{summary}", "%{arch}\n"]
         output = self.run_cli(
@@ -186,30 +191,70 @@ class DNF(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
+        Two queries, because one cannot answer both halves. `--upgrades`
+        restricts the query to *available* packages, so every field it returns
+        describes the upgrade candidate and none of them the installed package.
+        `repoquery` exposes no tag for the latter either, `--querytags` listing
+        `epoch`, `evr`, `release` and `version` for whichever package matched.
+        So the installed side is read once, up front, and joined on name and
+        architecture: the pair is what identifies a package on a multilib host,
+        where the same name is installed for two of them.
+
+        Both sides are reported as `%{evr}`, the epoch-version-release triplet
+        RPM actually orders packages by. A bare `%{version}` would hide the
+        release, and a release-only rebuild (`1.21.0-1.fc44` to
+        `1.21.0-2.fc44`) is a real upgrade that would then read as an identical
+        version on both sides. This is the one operation where that matters,
+        which is why `installed` above still reports `%{version}`: changing it
+        would rewrite the version string every snapshot carries.
+
+        One format serves both, the summary going unread on the installed pass.
+        That keeps the two outputs the same shape, which is what lets either
+        block stand in for the other when a documented `FORMAT` placeholder
+        leaves the two calls indistinguishable.
+
+        ```{code-block} shell-session
+
+        $ dnf repoquery --installed --qf FORMAT
+        librepo___MPM___1.21.0-1.fc44___MPM___Repodata downloading library___MPM___aarch64
+        openldap___MPM___2.6.13-1.fc44___MPM___LDAP support libraries___MPM___aarch64
+        wireless-regdb___MPM___2026.05.30-1.fc44___MPM___Regulatory database for 802.11 wireless networking___MPM___noarch
+        ```
+
         ```{code-block} shell-session
 
         $ dnf repoquery --upgrades --qf FORMAT
-        acl___MPM___2.2.53-1.el8___MPM___2.6.53-1.el8___MPM___Access control list utilities___MPM___x86_64
-        audit___MPM___2.2.53-1.el8___MPM___2.5.53-1.el8___MPM___User space auditing tools___MPM___x86_64
-        audit-libs___MPM___2.2.53-1.el8___MPM___2.6.53-1.el8___MPM___Dynamic auditing library___MPM___x86_64
+        librepo___MPM___1.21.0-2.fc44___MPM___Repodata downloading library___MPM___aarch64
+        openldap___MPM___2.6.14-1.fc44___MPM___LDAP support libraries___MPM___aarch64
+        wireless-regdb___MPM___2026.09.03-1.fc44___MPM___Regulatory database for 802.11 wireless networking___MPM___noarch
         ```
         """
-        qf = ["%{name}", "%{version}", "%{evr}", "%{summary}", "%{arch}\n"]
-        output = self.run_cli(
-            "repoquery", "--upgrades", "--qf", self.DELIMITER.join(qf)
-        )
+        qf = ["%{name}", "%{evr}", "%{summary}", "%{arch}\n"]
+        query_format = self.DELIMITER.join(qf)
+
+        installed_evr: dict[tuple[str, str], str] = {}
+        for line_package in self.run_cli(
+            "repoquery", "--installed", "--qf", query_format
+        ).splitlines():
+            if not line_package:
+                continue
+            name, evr, _summary, arch = line_package.split(self.DELIMITER)
+            installed_evr[(name, arch)] = evr
+
+        output = self.run_cli("repoquery", "--upgrades", "--qf", query_format)
 
         for line_package in output.splitlines():
             # remove empty new line
             if not line_package:
                 continue
-            package_id, installed_version, last_version, summary, arch = (
-                line_package.split(self.DELIMITER)
-            )
+            package_id, last_version, summary, arch = line_package.split(self.DELIMITER)
             yield self.package(
                 id=package_id,
                 description=summary,
-                installed_version=installed_version,
+                # A candidate whose package is somehow not installed keeps a
+                # `None` version rather than being dropped: the upgrade is
+                # pending either way, and hiding it would be the worse answer.
+                installed_version=installed_evr.get((package_id, arch)),
                 arch=arch,
                 latest_version=last_version,
             )
@@ -221,9 +266,16 @@ class DNF(PackageManager):
         ```{code-block} shell-session
 
         $ dnf --color=never --quiet repoquery --unneeded
-        libfoo-1.0.2-3.el9.x86_64
-        python3-extra-0:3.9.18-3.el9.noarch
+        bc-0:1.08.2-4.fc44.aarch64
+        dos2unix-0:7.5.6-1.fc44.aarch64
+        tree-0:2.2.1-4.fc44.aarch64
         ```
+
+        A host reaches this state on its own, but rarely: a fresh install has
+        nothing installed-as-a-dependency and then abandoned, which is why the
+        rows above were made by marking three leaf packages with
+        `dnf mark dependency`. That needs no network and is undone by
+        `dnf mark user`.
         """
         output = self.run_cli("repoquery", "--unneeded")
         yield from self.parse_regex_lines(self._ORPHANS_REGEXP, output)

@@ -4,11 +4,22 @@
 #
 # Parsing notes:
 #   - Every operation passes `--limit-output`, whose pipe-delimited rows are the
-#     machine-readable format; `--no-progress`, `--no-color` and `--retry-count`
-#     ride along as post_args on every invocation.
+#     machine-readable format, with `--no-progress` and `--no-color` riding along
+#     as post_args on every invocation. Nothing else may join them without being
+#     driven first: Chocolatey's parser hands an option it does not recognize to
+#     the command as a positional argument, so `list` and `outdated` filter on it
+#     and match nothing, while `search` folds it into the query and the feed
+#     answers 406. All three fail silently, returning an empty inventory rather
+#     than an error.
 #   - `choco search` reaches into all package metadata by default: the
 #     {id_name_only_args} template narrows it to package IDs for mpm's default
 #     `--id-name-only` mode, and {exact_args} maps `--exact`.
+#   - `--by-id-only` answers nothing for a search term under four characters,
+#     and the community feed reports `0 packages found` at exit 0 rather than
+#     refusing. Measured against Chocolatey 2.7.4: `vim`, `git`, `zip`, `gcc`
+#     and `foo` all return empty, while `curl`, `make`, `java`, `7zip` and
+#     `python` return results. `--exact` is unaffected and finds `vim` either
+#     way, so a short query is only ever short-changed in the default mode.
 #
 # The version floor is the first release where `choco list` reports installed
 # packages without the removed `--local-only` flag.
@@ -24,7 +35,15 @@ cli_names = ["choco"]
 # which has been entirely removed. Source:
 # https://docs.chocolatey.org/en-us/guides/upgrading-to-chocolatey-v2-v6#the-list-command-now-lists-local-packages-only-and-the-local-only-and-lo-options-have-been-removed
 requirement = ">=2.0.0"
-post_args = ["--no-progress", "--no-color", "--retry-count=3"]
+post_args = ["--no-progress", "--no-color"]
+# Chocolatey installs into C:\ProgramData\chocolatey and locks that path down to
+# administrators on purpose, so every write to it needs elevation:
+# https://docs.chocolatey.org/en-us/default-chocolatey-install-reasoning/
+# Measured on Windows 11 24H2 with Chocolatey 2.7.4, each operation run twice,
+# once at medium integrity and once at high: the four marked below fail at
+# medium with `Access to the path ... is denied` and exit 1, while `list`,
+# `outdated` and `search` answer the same either way.
+default_sudo = true
 
 # `choco list --limit-output` prints one "id|version" row per installed package.
 [mpm.managers.choco.operations.installed]
@@ -42,17 +61,27 @@ id_name_only_args = ["--by-id-only"]
 exact_args = ["--exact"]
 regex = '^(?P<package_id>.+)\|(?P<latest_version>.+)$'
 
+# Unelevated, `--yes` does not cover the extra prompt Chocolatey raises about
+# running without admin rights: it asks "Do you want to continue?" and answers
+# itself after 20 seconds. The install then fails on the first write anyway, so
+# escalating is what keeps that prompt out of the concurrent fan-out.
 [mpm.managers.choco.operations.install]
 args = ["install", "{package_id}", "--yes", "--limit-output"]
+sudo = true
 
 [mpm.managers.choco.operations.remove]
 args = ["uninstall", "{package_id}", "--yes", "--limit-output"]
+sudo = true
 
 [mpm.managers.choco.operations.upgrade_one]
 args = ["upgrade", "{package_id}", "--yes", "--limit-output"]
+sudo = true
 
+# Exits 0 unelevated when nothing is outdated, having attempted no write at all,
+# so it is marked from the runs that had real work to do.
 [mpm.managers.choco.operations.upgrade_all]
 args = ["upgrade", "all", "--yes", "--limit-output"]
+sudo = true
 
 # Output samples locking the version probe and the declared parsers, derived
 # from the upstream tool's own source code or documentation. Consumed by

@@ -78,7 +78,12 @@ def test_default_sudo_matches_system_managers():
     definitions alike) escalate by default; user-level managers do not, the
     dual-scope language managers (npm, pip, gem, cpan) keep their privileged
     markers dormant, and the polkit-native daemon clients (flatpak, fwupd, pkcon)
-    never mark an operation at all."""
+    never mark an operation at all.
+
+    `choco` is the lone Windows entry, and belongs on the same grounds as the
+    rest: Chocolatey installs into a `ProgramData` tree it locks to
+    administrators on purpose, so each of its four mutating operations fails
+    unprivileged. `scoop` stays out, being built around a user-owned prefix."""
     escalating = {mid for mid, manager in pool.items() if type(manager).default_sudo}
     assert escalating == {
         "apk",
@@ -86,6 +91,7 @@ def test_default_sudo_matches_system_managers():
         "apt-mint",
         "aptitude",
         "cave",
+        "choco",
         "dkp-pacman",
         "deb-get",
         "dnf",

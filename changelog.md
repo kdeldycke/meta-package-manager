@@ -265,6 +265,8 @@
 - [vscode,vscodium] Point the cooldown status at the open request covering extension installs: the delay VS Code shipped holds back automatic updates only.
 - [fwupd] Fix a crash on a host whose `fwupdmgr` lists a device with no flags, name or version: `installed` and `outdated` aborted the whole run with a `KeyError`. Refs [#1528](https://github.com/kdeldycke/meta-package-manager/issues/1528).
 - [pip] Skip an interpreter carrying no `pip`, so an `mpm` installed by `uv tool` or `pipx` drives a real Python instead of reporting its own virtualenv as an errored manager on every run.
+- [choco] Fix `installed`, `outdated` and `search`, which returned nothing at all: every invocation carried a `--retry-count=3` option Chocolatey does not have, and its parser passed it on as a package filter matching nothing.
+- [choco] Escalate `install`, `remove` and both upgrade paths. Chocolatey locks its `C:\ProgramData\chocolatey` tree to administrators, so each of them failed unprivileged with a permission error.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

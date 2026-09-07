@@ -590,7 +590,9 @@ class CLIExecutor:
     `[mpm.managers.<id>] sudo` config key, the latter winning (see
     {meth}`meta_package_manager.pool.ManagerPool._select_managers`).
 
-    Only privileged operations on UNIX are ever escalated. A manager that escalates
+    Only privileged operations are ever escalated, and only on a host carrying an
+    escalator. Carrying one is the whole platform test, Windows included, since
+    `gsudo` and Microsoft's `sudo.exe` give it one. A manager that escalates
     *internally* ({attr}`internal_sudo`) has no such markers and is never wrapped
     in `sudo` by `mpm`: its own `sudo` reuses the credential cache when
     {func}`~meta_package_manager.sudo.prime_sudo` finds it already warm, and is

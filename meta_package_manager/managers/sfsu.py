@@ -147,7 +147,7 @@ class SFSU(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > sfsu search --json git
+        > sfsu search --json git --no-color
         {
           "main": [
             {

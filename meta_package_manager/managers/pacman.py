@@ -222,7 +222,7 @@ class Pacman(PackageManager):
 
         ```{code-block} shell-session
 
-        $ pacman --noconfirm --sync --search fire
+        $ pacman --noconfirm --color never --sync --search fire
         extra/dump_syms 0.0.7-1
             Symbol dumper for Firefox
         extra/firefox 99.0-1

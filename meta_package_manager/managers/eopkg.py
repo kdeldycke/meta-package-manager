@@ -148,7 +148,7 @@ class EOPKG(PackageManager):
         Naked search without parameters is the same as extended search with all filtering
         parameters (i.e. `--name --summary --description`):
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
         $ eopkg --no-color search firefox
         gjs-dbginfo                 - Debug symbols for gjs
@@ -183,19 +183,18 @@ class EOPKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ eopkg --no-color search firefox --name
+        $ eopkg --no-color search --name firefox
         firefox         - Firefox web browser
         eid-mw-firefox  - Belgian eID add-on for Mozilla Firefox
         firefox-dbginfo - Debug symbols for firefox
         ```
         """
-        # Extended search is the default behavior.
-        arg = ""
-        # Non-extended search restrict matching to package name only.
-        if not extended:
-            arg = "--name"
+        # Extended search is the default behavior, so it adds no flag at all:
+        # an empty string would be passed through as an empty argv element.
+        # Non-extended search restricts matching to the package name.
+        args = () if extended else ("--name",)
 
-        output = self.run_cli("search", arg, query)
+        output = self.run_cli("search", *args, query)
 
         for package_id, description in self._SEARCH_REGEXP.findall(output):
             yield self.package(id=package_id, description=description)

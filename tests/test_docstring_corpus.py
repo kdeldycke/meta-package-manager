@@ -46,6 +46,7 @@ from __future__ import annotations
 import re
 import shlex
 from contextlib import suppress
+from itertools import product
 from pathlib import Path
 
 import pytest
@@ -280,11 +281,15 @@ MUTATION_MEMBERS = (
     "install",
     "remove",
     "remove_orphan",
+    # Not a mutation either, and the member that most needs the check: a
+    # `search` whose argv is wrong still exits zero and prints something, so
+    # only a reconstruction catches it.
+    "search",
     "sync",
     "upgrade_all_cli",
     "upgrade_one_cli",
 )
-"""Mutation methods whose docstrings document the exact CLI they run."""
+"""Methods whose docstrings document the exact CLI they run."""
 
 PID_SENTINEL = "MPM-DOC-SENTINEL"
 """Stand-in package id; the documented command carries a real example id where
@@ -401,7 +406,10 @@ def _matches(
     Wherever the constructed command carries the sentinel, the documented one
     may carry any non-flag token (the example package id, possibly with a
     pinned version). The leading binary may be documented under any of the
-    manager's CLI names (`python` for a `python3` binary).
+    manager's CLI names (`python` for a `python3` binary), and as an absolute
+    path when the docstring pins where that binary lives (`/usr/local/bin/apt`
+    is what tells Mint's `apt` apart from Debian's). `_normalize_constructed`
+    already reduces the built side to a basename, so compare on that.
     """
     if len(documented) != len(constructed):
         return False
@@ -410,7 +418,7 @@ def _matches(
             if doc_token.startswith("-"):
                 return False
         elif doc_token != built_token and not (
-            position == 0 and doc_token in cli_names
+            position == 0 and doc_token.rpartition("/")[2] in cli_names
         ):
             return False
     return True
@@ -491,6 +499,14 @@ def test_documented_command_matches_construction(
         manager.remove(PID_SENTINEL)
     elif member == "remove_orphan":
         manager.remove_orphan(PID_SENTINEL)
+    elif member == "search":
+        # A generator, so it has to be drained for `run_cli` to fire at all.
+        # All four modes run because one docstring often documents several
+        # (apk's extended search adds `--description`), and a manager refusing
+        # a mode advertises that through `search_capabilities` and raises.
+        for extended, exact in product((False, True), repeat=2):
+            with suppress(Exception):
+                tuple(manager.search(PID_SENTINEL, extended=extended, exact=exact))
     elif member in (
         "sync",
         "cleanup_orphan",

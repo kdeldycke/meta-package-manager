@@ -160,7 +160,7 @@ class Composer(PackageManager):
 
         ```{code-block} shell-session
 
-        $ composer global search symfony
+        $ composer global --no-ansi search symfony
         symfony/symfony The Symfony PHP framework
         symfony/yaml Symfony Yaml Component
         symfony/var-dumper Symfony (...) dumping PHP variables
@@ -180,7 +180,7 @@ class Composer(PackageManager):
 
         ```{code-block} shell-session
 
-        $ composer global search --only-name python
+        $ composer global --no-ansi search --only-name python
         hiqdev/hidev-python
         aanro/pythondocx
         laravel-admin-ext/python-editor
@@ -193,7 +193,7 @@ class Composer(PackageManager):
 
         ```{code-block} shell-session
 
-        $ search global --only-name pythonphp/pythonphp
+        $ composer global --no-ansi search --only-name pythonphp/pythonphp
         pythonphp/pythonphp
         ```
         """

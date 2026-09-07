@@ -244,7 +244,11 @@ class Emerge(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        ```{code-block} shell-session
+        The shape of a `search` answer. mpm runs
+        `emerge --quiet --color n --nospinner --search blah`, whose `--quiet`
+        compresses each result to a single line.
+
+        ```{code-block} console
 
         $ emerge --search --color n --nospinner blah
 
@@ -272,17 +276,17 @@ class Emerge(PackageManager):
 
         ```{code-block} shell-session
 
-        $ emerge --search --color n --nospinner %^sed$
+        $ emerge --quiet --color n --nospinner --search %^sed$
         ```
 
         ```{code-block} shell-session
 
-        $ emerge --searchdesc --color n --nospinner sed
+        $ emerge --quiet --color n --nospinner --searchdesc sed
         ```
 
         ```{code-block} shell-session
 
-        $ emerge --searchdesc --color n --nospinner %^sed$
+        $ emerge --quiet --color n --nospinner --searchdesc %^sed$
         ```
         """
         search_param = "--search"

@@ -301,7 +301,11 @@ class DNF(PackageManager):
         them.
         ```
 
-        ```{code-block} shell-session
+        The shape of a `search` answer, captured before `--quiet` joined
+        `pre_args`: mpm now runs `dnf --color=never --quiet search usd`, which
+        drops the metadata-expiration header below.
+
+        ```{code-block} console
 
         $ dnf --color=never search usd
         Last metadata expiration check: 0:06:37 ago on Sun 03 Apr 2022.

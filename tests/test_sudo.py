@@ -106,6 +106,7 @@ def test_default_sudo_matches_system_managers():
         "pkg-tools",
         "pkgin",
         "ports",
+        "prt-get",
         "slapt-get",
         "snap",
         "sorcery",

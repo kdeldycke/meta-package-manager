@@ -43,6 +43,7 @@
 - [sun-tools] Report each package's human-readable name, which was parsed from `pkginfo -l` and then dropped.
 - [ips,mpm,sun-tools] Fix `mpm` crashing on every illumos host, where the platform probe matched Solaris too and the `i86pc` machine string went unrecognized.
 - [mpm] Detect CRUX and NuTyX, two source-based Linux distributions.
+- [prt-get] Add the CRUX ports front-end, with inventory, outdated, catalog search, install, remove, single-port upgrade, full upgrade and ports-tree sync.
 - [claude-code-plugins] Add Claude Code plugins manager, with inventory, install, remove, single-plugin upgrade, marketplace sync and orphan cleanup.
 - [go] Add Go package manager, listing and installing the commands `go install` puts on the machine.
 - [gup] Add gup package manager, reporting, removing and upgrading the binaries `go install` leaves under `$GOBIN`.

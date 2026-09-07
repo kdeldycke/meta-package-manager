@@ -596,6 +596,7 @@ NO_UPSTREAM = {
     "gcloud": "Google publishes the Cloud SDK as a binary; its source is not.",
     "opkg": "Hosted on the Yocto Project's cgit, which serves no API.",
     "pkgit": "Hosted on Symlinx's cgit, which serves no API.",
+    "prt-get": "Hosted on CRUX's Gitea, behind an anti-scraper gate that answers automated requests with a challenge page.",
     "steamcmd": "Valve ships SteamCMD as a proprietary binary.",
     "sun-tools": "Oracle Solaris packaging tools are proprietary.",
     "tazpkg": "Hosted on SliTaz's Mercurial server, which serves no API.",

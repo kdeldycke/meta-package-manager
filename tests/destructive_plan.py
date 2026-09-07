@@ -229,6 +229,7 @@ PACKAGE_IDS = {
     "platformio-core": "ArduinoJson",
     "pnpm": "ms",
     "ports": "net/nyancat",
+    "prt-get": "dosfstools",
     "pwsh-gallery": "Posh-Git",
     # A PyPy rather than a CPython: pyenv builds CPython from source, dragging
     # OpenSSL and readline along with it, where this definition downloads a

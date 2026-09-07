@@ -56,6 +56,7 @@ keywords = [
   "conda-forge",
   "cpan",
   "crate",
+  "crux",
   "ctan",
   "cyclonedx",
   "cygwin",
@@ -183,6 +184,7 @@ keywords = [
   "powershell gallery",
   "powershell-gallery",
   "prefix.dev",
+  "prt-get",
   "psgallery",
   "psresourceget",
   "purl",
@@ -1225,6 +1227,7 @@ labels.content-rules."📦 manager: pkcon" = [ "packagekit" ]
 labels.content-rules."📦 manager: pkg-based" = [ "freebsd", "freebsd ports" ]
 labels.content-rules."📦 manager: pkg-tools" = [ "openbsd" ]
 labels.content-rules."📦 manager: pkgin" = [ "netbsd", "pkgsrc" ]
+labels.content-rules."📦 manager: prt-get" = [ "crux" ]
 labels.content-rules."📦 manager: pwsh-gallery" = [ "powershell", "powershell gallery", "psgallery", "psresourceget" ]
 labels.content-rules."📦 manager: pypi-based" = [ "pypi" ]
 labels.content-rules."📦 manager: roswell" = [ "common lisp", "quicklisp" ]
@@ -1403,6 +1406,7 @@ labels.file-rules."📦 manager: platformio-core" = [
   "meta_package_manager/managers/platformio_core.*",
   "tests/*platformio_core*",
 ]
+labels.file-rules."📦 manager: prt-get" = [ "meta_package_manager/managers/prt_get.*", "tests/*prt_get*" ]
 labels.file-rules."📦 manager: pwsh-gallery" = [ "meta_package_manager/managers/pwsh_gallery.*", "tests/*pwsh_gallery*" ]
 labels.file-rules."📦 manager: pyenv" = [ "meta_package_manager/managers/pyenv.*", "tests/*pyenv*" ]
 labels.file-rules."📦 manager: pypi-based" = [
@@ -1819,6 +1823,11 @@ description = "pkgm"
 name = "📦 manager: platformio-core"
 color = "bfdadc"
 description = "platformio-core"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: prt-get"
+color = "bfdadc"
+description = "prt-get"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pwsh-gallery"

@@ -74,6 +74,7 @@ print(augmentations_table())
 | [`pkgin`](managers/pkgin.md)               |                      |              |      ✅      |       ✅        |               |
 | [`pkgit`](managers/pkgit.md)               |                      |              |      ✅      |       ✅        |               |
 | [`pnpm`](managers/pnpm.md)                 |                      |              |      ✅      |                 |               |
+| [`prt-get`](managers/prt-get.md)           |                      |              |      ✅      |       ✅        |               |
 | [`pwsh-gallery`](managers/pwsh-gallery.md) |                      |              |              |       ✅        |               |
 | [`pyenv`](managers/pyenv.md)               |                      |              |      ✅      |       ✅        |               |
 | [`scoop`](managers/scoop.md)               |                      |              |      ✅      |       ✅        |               |

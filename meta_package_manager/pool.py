@@ -83,6 +83,7 @@ from .managers.pkcon import Pkcon
 from .managers.pkg import PKG, Ports
 from .managers.pkgit import Pkgit
 from .managers.pnpm import PNPM
+from .managers.prt_get import PrtGet
 from .managers.pwsh_gallery import PWSH_Gallery
 from .managers.roswell import Roswell
 from .managers.scoop import Scoop
@@ -178,6 +179,7 @@ manager_classes = (
     Pkgit,
     PNPM,
     Ports,
+    PrtGet,
     PWSH_Gallery,
     Roswell,
     Scoop,

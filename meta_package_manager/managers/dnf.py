@@ -301,21 +301,21 @@ class DNF(PackageManager):
         them.
         ```
 
-        The shape of a `search` answer, captured before `--quiet` joined
-        `pre_args`: mpm now runs `dnf --color=never --quiet search usd`, which
-        drops the metadata-expiration header below.
+        ```{code-block} shell-session
 
-        ```{code-block} console
-
-        $ dnf --color=never search usd
-        Last metadata expiration check: 0:06:37 ago on Sun 03 Apr 2022.
-        =================== Name Exactly Matched: usd =====================
+        $ dnf4 --color=never --quiet search usd
+        ========================== Name Exactly Matched: usd ===========================
         usd.aarch64 : 3D VFX pipeline interchange file format
-        =================== Name & Summary Matched: usd ===================
+        ========================= Name & Summary Matched: usd ==========================
+        libbpf-usdt-devel.noarch : The header for defining USDTs
         python3-usd.aarch64 : Development files for USD
         usd-devel.aarch64 : Development files for USD
-        ======================= Name Matched: usd =========================
+        ============================== Name Matched: usd ===============================
+        busd.aarch64 : D-Bus bus (broker) implementation
         lvm2-dbusd.noarch : LVM2 D-Bus daemon
+        rust-busd+default-devel.noarch : D-Bus bus (broker) implementation
+        rust-busd+tracing-subscriber-devel.noarch : D-Bus bus (broker) implementation
+        rust-busd-devel.noarch : D-Bus bus (broker) implementation
         usd-libs.aarch64 : Universal Scene Description library
         ```
 

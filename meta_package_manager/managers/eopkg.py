@@ -43,10 +43,10 @@ class EOPKG(PackageManager):
     they run unattended.
 
     ```{note}
-    eopkg `4.x` is a [Nuitka](https://nuitka.net) onefile bundle, and the Python
-    it carries reads its stdout encoding from the locale alone. Under `C` or
-    `POSIX` that encoding is `ascii`. The first summary holding a character it
-    cannot encode then aborts the command with
+    eopkg `4.x` and `5.x` ship as a [Nuitka](https://nuitka.net) onefile bundle,
+    and the Python each carries reads its stdout encoding from the locale alone.
+    Under `C` or `POSIX` that encoding is `ascii`. The first summary holding a
+    character it cannot encode then aborts the command with
     `Error: System error. Program terminated.` and exit `1`, after a truncated
     listing. `list-upgrades` and `list-available` write every summary raw, so
     either `Cap’n Proto` or `ImageMagick®` stops them; `search` escapes `®` but
@@ -56,7 +56,8 @@ class EOPKG(PackageManager):
     [PEP 538](https://peps.python.org/pep-0538/) coercion exports
     `LC_CTYPE=C.UTF-8` from mpm's own interpreter, and eopkg inherits it. A
     shell exports nothing, which is why the same command fails by hand and
-    works through mpm. Measured on Solus `4.9` with eopkg `4.4.0`.
+    works through mpm. Measured on Solus `4.9`, against eopkg `4.4.0` and
+    `5.0.0` alike.
     ```
     """
 
@@ -254,27 +255,17 @@ class EOPKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ sudo eopkg --no-color install --yes-all 0ad
-        Warning: Updates available, checking reverse dependencies of runtime dependencies for safety.
-        Following packages will be installed:
-        0ad          0ad-data         assimp           at-spi2             baobab             breeze-icons      budgie-control-center  budgie-desktop      dav1d                  enet                   evolution-data-server       ffmpeg
-        file-roller  firefox          fmt              fontconfig          gcr-4              gloox             gnome-calculator       gnome-calendar      gnome-online-accounts  gnome-settings-daemon  gnome-system-monitor        gnome-terminal
-        gvfs         harfbuzz         ibus             kf6-karchive        kf6-kauth          kf6-kbookmarks    kf6-kcodecs            kf6-kcolorscheme    kf6-kcompletion        kf6-kconfig            kf6-kconfigwidgets          kf6-kcoreaddons
-        kf6-kcrash   kf6-kdbusaddons  kf6-kded         kf6-kdoctools       kf6-kglobalaccel   kf6-kguiaddons    kf6-ki18n              kf6-kiconthemes     kf6-kio                kf6-kitemviews         kf6-kjobwidgets             kf6-knotifications
-        kf6-kparts   kf6-kservice     kf6-kwallet      kf6-kwidgetsaddons  kf6-kwindowsystem  kf6-kxmlgui       kf6-solid              kpmcore             ldb                    libadwaita             libarchive                  libass
-        libcheese    libgtk-4         libgtkmm-4       libgtksourceview5   libheif            libpng            libportal              libportal-gtk4      libreoffice-common     librsvg                libsodium                   libtiff
-        libtool      libvte           libwebkit-gtk41  libwebkit-gtk6      lzo                mesalib           miniupnpc              nautilus-extension  nemo                   network-manager        networkmanager-openconnect  openconnect
-        pipewire     pipewire-lib     pixman           poppler             poppler-utils      postgresql-libpq  python-pysmbc          qt6-base            qt6-declarative        qt6-multimedia         qt6-quick3d                 qt6-quicktimeline
-        qt6-wayland  rav1e            rhythmbox        samba               sdl2               svt-av1           thunderbird            wayland             xapp                   xmlsec1                xorg-server                 xorg-xwayland
-        xreader      xviewer          zenity
-        Total size of package(s): 1.94 GB
-        Downloading 1 / 111
-        Package ldb found in repository Solus
-        ldb-2.8.2-31-1-x86_64.eopkg    (137.0 KB)100%      0.00 --/- [--:--:--] [complete]
-        (...)
-        Package 0ad-data found in repository Solus
-        0ad-data-0.0.26a-10-1-x86_64.eopkg (1.4 GB) 39%
-        (...)
+        $ sudo eopkg --no-color install --yes-all htop
+        Total size of package(s): 159.05 KB
+        Downloading 1 package resources (0 cached)
+        Downloaded htop-3.5.3-30-1-x86_64.eopkg
+        Finished downloading packages.
+        Disabling keyboard interrupts for file operations.
+        Installing 1 / 1
+        Installing htop, version 3.5.3, release 30
+
+        Extracting the files of htop (100%) [complete]
+        Installed htop
         ```
         """
         return self.run_cli("install", "--yes-all", package_id, sudo=True)
@@ -299,49 +290,14 @@ class EOPKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ sudo eopkg --no-color upgrade --yes-all xz
+        $ sudo eopkg --no-color upgrade --yes-all bash
         Updating repositories
         Updating repository: Solus
-        eopkg-index.xml.xz.sha1sum     (40.0  B)100%      0.00 --/- [--:--:--] [complete]
+        Disabling keyboard interrupts for file operations.
+        Downloaded eopkg-index.xml.xz.sha1sum
+
         Solus repository information is up-to-date.
-        Warning: Safety switch forces the installation of following packages:
-        os-release
-        Warning: Safety switch forces the upgrade of following packages:
-        bash    bash-completion  brotli   eopkg    gawk            glib2    glibc         gobject-introspection  hwdata  json-c   libcap2  libdw
-        libelf  libjson-glib     libnspr  libnss   libpipeline     libssh2  libunistring  lvm2                   lzip    ncurses  nghttp2  nghttp3
-        pisi    readline         sqlite3  systemd  wireless-regdb  xz
-        Total size of package(s): 55.40 MB
-        Warning: There are extra packages due to dependencies.
-        Downloading 1 / 32
-        Package ncurses found in repository Solus
-        ncurses-6.5.20241006-29-1-x86_64.eopkg (767.0 KB)100%      0.00 --/- [--:--:--] [complete]
-        (...)
-        [✓] Syncing filesystems                                                success
-        [✓] Updating dynamic library cache                                     success
-        [ ] Updating clr-boot-manager                                          skipped
-        [ ] Updating clr-boot-manager                                          skipped
-        [ ] Updating clr-boot-manager                                          skipped
-        [ ] Updating clr-boot-manager                                          skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [✓] Updating hwdb                                                      success
-        [✓] Updating system users                                              success
-        [✓] Updating systemd tmpfiles                                          success
-        [✓] Reloading systemd configuration                                    success
-        [ ] Re-starting vendor-enabled .socket units                           skipped
-        [ ] Re-executing systemd                                               skipped
-        [✓] Compiling glib-schemas                                             success
-        [✓] Creating GIO modules cache                                         success
-        [✓] Updating manpages database                                         success
-        [✓] Reloading udev rules                                               success
-        [✓] Applying udev rules                                                success
+        No packages to upgrade.
         ```
         """
         return self.build_cli("upgrade", "--yes-all", package_id, sudo=True)
@@ -351,37 +307,13 @@ class EOPKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ sudo eopkg --no-color remove --yes-all firefox
+        $ sudo eopkg --no-color remove --yes-all htop
         The following list of packages will be removed
         in the respective order to satisfy dependencies:
-        firefox
-        Removing package firefox
-        Rebuilding the FilesDB...
-        Adding packages to FilesDB /var/lib/eopkg/info/files.db:
-        ................
-        847 packages added in total.
-        Done rebuilding FilesDB (version: 3)
-        Removed firefox
-        [✓] Syncing filesystems                                                success
-        [✓] Updating dynamic library cache                                     success
-        [ ] Updating clr-boot-manager                                          skipped
-        [ ] Updating clr-boot-manager                                          skipped
-        [ ] Updating clr-boot-manager                                          skipped
-        [ ] Updating clr-boot-manager                                          skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Registering QoL migration on next boot                             skipped
-        [ ] Re-starting vendor-enabled .socket units                           skipped
-        [ ] Re-executing systemd                                               skipped
-        [✓] Updating icon theme cache: hicolor                                 success
-        [✓] Updating desktop database                                          success
-        [✓] Updating manpages database                                         success
+        htop
+        Disabling keyboard interrupts for file operations.
+        Removing package htop
+        Removed htop
         ```
         """
         return self.run_cli("remove", "--yes-all", package_id, sudo=True)
@@ -393,9 +325,10 @@ class EOPKG(PackageManager):
 
         $ sudo eopkg --no-color update-repo
         Updating repository: Solus
-        eopkg-index.xml.xz.sha1sum  (40.0  B)100%   0.00 --/- [--:--:--] [complete]
-        eopkg-index.xml.xz           (3.1 MB)100%  87.40 KB/s [00:00:34] [complete]
-        Package database updated.
+        Disabling keyboard interrupts for file operations.
+        Downloaded eopkg-index.xml.xz.sha1sum
+
+        Solus repository information is up-to-date.
         ```
         """
         self.run_cli("update-repo", sudo=True)
@@ -409,8 +342,35 @@ class EOPKG(PackageManager):
         ```{code-block} shell-session
 
         $ sudo eopkg --no-color remove-orphans --yes-all
+        The following list of packages will be removed
+        in the respective order to satisfy dependencies:
+        flashrom libboost celt
+        Disabling keyboard interrupts for file operations.
+        Removing package flashrom
+        Removed flashrom
+        Removing package libboost
+        Removed libboost
+        Removing package celt
+        Removed celt
+        ```
+
+        `clean` releases stale transaction locks and prints nothing when none
+        are held, which is its usual outcome.
+
+        ```{code-block} shell-session
+
         $ sudo eopkg --no-color clean
+        ```
+
+        ```{code-block} shell-session
+
         $ sudo eopkg --no-color delete-cache
+        Cleaning package cache /var/cache/eopkg/packages...
+        Cleaning source archive cache /var/cache/eopkg/archives...
+        Cleaning temporary directory /var/eopkg...
+        Removing cache file /var/cache/eopkg/groupdb.cache...
+        Removing cache file /var/cache/eopkg/installdb.cache...
+        Removing cache file /var/cache/eopkg/packagedb.cache...
         ```
         """
         self.run_cli("remove-orphans", "--yes-all", sudo=True)

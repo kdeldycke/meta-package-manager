@@ -327,11 +327,10 @@ dependencies = [
   # print_table's max_column_widths, used by meta_package_manager.tables to
   # hold the search table's description column to auto.
   "click-extra>=8.9.1",
-  # extra-platforms 13.8 stops current_platform() raising on illumos, where
-  # is_solaris() matched too, and reads its i86pc machine as X86_64. Every mpm
-  # run crashed there, which is where managers/ips.py and managers/sun_tools.py
-  # activate. It also adds the crux and nutyx platform tokens.
-  "extra-platforms>=13.8",
+  # extra-platforms 13.9 detects Solus. Below it every mpm run there reports an
+  # unrecognized platform and selects no manager at all, which strands
+  # managers/eopkg.py on the only distribution it targets.
+  "extra-platforms>=13.9",
   # Required at runtime by meta_package_manager.package and
   # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
   # cross-manager package identification, independent of SBOM features. That API

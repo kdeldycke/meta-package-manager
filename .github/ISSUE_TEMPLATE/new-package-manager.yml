@@ -54,8 +54,8 @@ body:
             Gentoo Linux, Guix System, IBM PowerKVM, Kali Linux, KVM for IBM z Systems, Linux Mint, Mageia,
             Mandriva Linux, Manjaro Linux, NixOS, Nobara, NuTyX, openSUSE, OpenWrt, Oracle Linux, Parallels, Pidora,
             PikaOS, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware,
-            SUSE Linux Enterprise Server, SliTaz GNU/Linux, Source Mage GNU/Linux, Tuxedo OS, Ubuntu, Ultramarine,
-            Void Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer)
+            SUSE Linux Enterprise Server, SliTaz GNU/Linux, Solus, Source Mage GNU/Linux, Tuxedo OS, Ubuntu,
+            Ultramarine, Void Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer)
         - label: 🍎 macOS
         - label: ⨂ Unix (IBM AIX, Cygwin, Haiku, GNU/Hurd, illumos, IBM i, Solaris)
         - label: 🪟 Windows

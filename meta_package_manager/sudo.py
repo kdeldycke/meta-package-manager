@@ -497,6 +497,15 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # when the prompt is dismissed, both colliding with the shell's own
         # meanings for those codes, so its failures are told apart by the
         # wording `_is_sudo_auth_failure` matches and never by exit code.
+        #
+        # A host carrying polkit with no authority reachable answers `126` and
+        # `Error getting authority`, a fourth code and the one `pkexec` also
+        # spends on a dismissed prompt. Only non-zero is read here, so the
+        # collision costs nothing. Seen on an OpenRC Gentoo guest running
+        # polkit version `126`, where the package ships a systemd unit alone
+        # and `sys-apps/dbus` was absent, leaving nothing to activate
+        # `polkitd`: `pkexec` is on `PATH` and passes `is_genuine` there while
+        # being unable to escalate at all.
         probe_args=(
             "pkcheck",
             "--action-id",

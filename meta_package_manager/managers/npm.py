@@ -275,73 +275,13 @@ class NPM(PackageManager):
         Search does not supports exact matching.
         ```
 
-        ```{code-block} console
+        ```{code-block} shell-session
 
         $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
-            search --json python | jq
+            search --json borage
         [
-          {
-            "name": "python",
-            "description": "Interact with a python child process",
-            "maintainers": [
-              {
-                "username": "drderidder",
-                "email": "drderidder@gmail.com"
-              }
-            ],
-            "version": "0.0.4",
-            "date": "2015-01-25T02:48:07.820Z"
-          },
-          {
-            "name": "raven",
-            "description": "A standalone (Node.js) client for Sentry",
-            "maintainers": [
-              {
-                "username": "benvinegar",
-                "email": "ben@benv.ca"
-              },
-              {
-                "username": "lewisjellis",
-                "email": "me@lewisjellis.com"
-              },
-              {
-                "username": "mattrobenolt",
-                "email": "m@robenolt.com"
-              },
-              {
-                "username": "zeeg",
-                "email": "dcramer@gmail.com"
-              }
-            ],
-            "keywords": [
-              "raven",
-              "sentry",
-              "python",
-              "errors",
-              "debugging",
-              "exceptions"
-            ],
-            "version": "1.1.2",
-            "date": "2017-02-09T02:54:07.723Z"
-          },
-          {
-            "name": "brush-python",
-            "description": "Python brush module for SyntaxHighlighter.",
-            "maintainers": [
-              {
-                "username": "alexgorbatchev",
-                "email": "alex.gorbatchev@gmail.com"
-              }
-            ],
-            "keywords": [
-              "syntaxhighlighter",
-              "brush",
-              "python"
-            ],
-            "version": "4.0.0",
-            "date": "2016-02-07T21:32:39.597Z"
-          },
-          (...)
+
+        {"name":"@bouzuya/borage","keywords":["bouzuya","bbn"],"version":"3.1.2","description":"A GitHub Pages deployer for bouzuya/blog.bouzuya.net","sanitized_name":"@bouzuya/borage","publisher":{"email":"m@bouzuya.net","username":"bouzuya"},"maintainers":[{"email":"m@bouzuya.net","username":"bouzuya"}],"license":"MIT","date":"2017-05-21T23:27:30.332Z","links":{"homepage":"https://github.com/bouzuya/borage","repository":"git+https://github.com/bouzuya/borage.git","bugs":"https://github.com/bouzuya/borage/issues","npm":"https://www.npmjs.com/package/@bouzuya/borage"}}
         ]
         ```
 

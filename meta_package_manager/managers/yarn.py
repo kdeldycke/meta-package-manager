@@ -224,77 +224,10 @@ class YarnClassic(Yarn):
         works for exact match.
         ```
 
-        ```{code-block} console
+        ```{code-block} shell-session
 
-        $ yarn --json info python | jq
-        {
-          "type": "inspect",
-          "data": {
-            "name": "python",
-            "description": "Interact with python child process",
-            "dist-tags": {
-              "latest": "0.0.4"
-            },
-            "versions": [
-              "0.0.0",
-              "0.0.1",
-              "0.0.2",
-              "0.0.3",
-              "0.0.4"
-            ],
-            "maintainers": [
-              {
-                "name": "drderidder",
-                "email": "drderidder@gmail.com"
-              }
-            ],
-            "time": {
-              "modified": "2017-09-16T05:26:13.151Z",
-              "created": "2011-07-11T01:59:04.362Z",
-              "0.0.0": "2011-07-11T01:59:05.137Z",
-              "0.0.1": "2011-07-17T05:23:33.166Z",
-              "0.0.2": "2011-07-20T03:42:50.379Z",
-              "0.0.3": "2014-06-08T00:39:08.562Z",
-              "0.0.4": "2015-01-25T02:48:07.820Z"
-            },
-            "author": {
-              "name": "Darren DeRidder"
-            },
-            "repository": {
-              "type": "git",
-              "url": "git://github.com/73rhodes/node-python.git"
-            },
-            "homepage": "https://github.com/73rhodes/node-python",
-            "bugs": {
-              "url": "https://github.com/73rhodes/node-python/issues"
-            },
-            "readmeFilename": "README.md",
-            "users": {
-              "dewang-mistry": true,
-              "goliatone": true,
-              "sapanbhuta": true,
-              "aditcmarix": true,
-              "imlucas": true,
-              "heyderpd": true,
-              "ukuli": true,
-              "chbardel": true,
-              "asaupup": true,
-              "nuwaio": true
-            },
-            "version": "0.0.4",
-            "main": "./lib/python.js",
-            "engines": {
-              "node": ">= 0.4.1"
-            },
-            "gitHead": "69754aaa57658193916a1bf5fc391198098f74f6",
-            "scripts": {},
-            "dist": {
-              "shasum": "3094e898ef17a33aa9c3e973b3848a38e47d1818",
-              "tarball": "https://registry.npmjs.org/python/-/python-1.tgz"
-            },
-            "directories": {}
-          }
-        }
+        $ yarn --silent --json info @bouzuya/borage
+        {"type":"inspect","data":{"name":"@bouzuya/borage","description":"A GitHub Pages deployer for bouzuya/blog.bouzuya.net","dist-tags":{"latest":"3.1.2"},"versions":["3.1.2"],"maintainers":[{"name":"bouzuya","email":"m@bouzuya.net"}],"time":{"modified":"2022-06-12T15:26:55.277Z","created":"2017-05-21T23:27:30.332Z","3.1.2":"2017-05-21T23:27:30.332Z"},"homepage":"https://github.com/bouzuya/borage","keywords":["bouzuya","bbn"],"repository":{"type":"git","url":"git+https://github.com/bouzuya/borage.git"},"author":{"name":"bouzuya","email":"m@bouzuya.net","url":"http://bouzuya.net"},"bugs":{"url":"https://github.com/bouzuya/borage/issues"},"license":"MIT","readmeFilename":"README.md","version":"3.1.2","dependencies":{"aws-sdk":"^2.1.30","es6-promise":"^2.1.1","glob":"^5.0.9","mime":"^1.3.4"},"devDependencies":{"coffee-script":"^1.9.2","del":"^1.1.1","gulp":"^3.8.11","gulp-coffee":"^2.3.1","gulp-concat":"^2.5.2","gulp-espower":"^0.10.1","gulp-mocha":"^2.0.1","gulp-sourcemaps":"^1.5.2","gulp-uglify":"^1.2.0","gulp-util":"^3.0.4","gulp-watch":"^4.2.4","power-assert":"^0.11.0","run-sequence":"^1.1.0","sinon":"^1.14.1"},"main":"index.js","scripts":{"build":"gulp build","clean":"gulp clean","start":"gulp","test":"gulp test","watch":"gulp watch"},"gitHead":"0f45887778f89ccf9a17e0a097067ae085c515e5","dist":{"shasum":"9be1578d9d2859833cca435d3501d439f6f27489","tarball":"https://registry.npmjs.org/@bouzuya/borage/-/borage-3.1.2.tgz","integrity":"sha512-gBp5eS2+5VSQqqgHs7fBwesw+ZhbfwewPoiyaINPIchhiIkAjnJ8gPN7RsBqzUftZNXF04x5HuHZG9xe/PHptw==","signatures":[{"keyid":"SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA","sig":"MEQCIBDqfLdL4pGDRKMfJ3HvGGE6tmWoM2uKV8jZWAVshLaKAiAhfqB0YTsKYVz2SUSa1Jz/ZiBPlkF3jAPGqV7UN+lpBw=="}]}}}
         ```
         """
         output = self.run_cli("--json", "info", query, must_succeed=True)
@@ -443,25 +376,10 @@ class YarnBerry(Yarn):
         result only works for exact match.
         ```
 
-        ```{code-block} console
+        ```{code-block} shell-session
 
-        $ yarn npm info python --json | jq
-        {
-          "name": "python",
-          "description": "Interact with python child process",
-          "dist-tags": {
-            "latest": "0.0.4"
-          },
-          "versions": [
-            "0.0.0",
-            "0.0.1",
-            "0.0.2",
-            "0.0.3",
-            "0.0.4"
-          ],
-          "version": "0.0.4",
-          (...)
-        }
+        $ yarn npm info @bouzuya/borage --json
+        {"name":"@bouzuya/borage","description":"A GitHub Pages deployer for bouzuya/blog.bouzuya.net","dist-tags":{"latest":"3.1.2"},"versions":["3.1.2"],"readme":"![borage logo](https://cloud.githubusercontent.com/assets/1221346/17835500/a6087528-67aa-11e6-9370-9f16dd9988b0.png)\n\nborage is a deployer for [blog.bouzuya.net](http://blog.bouzuya.net).\n\nSee: [bouzuya/blog.bouzuya.net][]\n\n## Installation\n\n    $ npm install https://github.com/bouzuya/borage/archive/master.tar.gz\n\nor\n\n    $ npm install https://github.com/bouzuya/borage/archive/{VERSION}.tar.gz\n\n## License\n\n[MIT](LICENSE)\n\n## Author\n\n[bouzuya][user] &lt;[m@bouzuya.net][email]&gt; ([http://bouzuya.net][url])\n\n[user]: https://github.com/bouzuya\n[email]: mailto:m@bouzuya.net\n[url]: http://bouzuya.net\n[bouzuya/blog.bouzuya.net]: https://github.com/bouzuya/blog.bouzuya.net\n[bouzuya/grunt-tentacles]: https://github.com/bouzuya/grunt-tentacles\n[bouzuya/kraken]: https://github.com/bouzuya/kraken\n","maintainers":[{"name":"bouzuya","email":"m@bouzuya.net"}],"time":{"modified":"2022-06-12T15:26:55.277Z","created":"2017-05-21T23:27:30.332Z","3.1.2":"2017-05-21T23:27:30.332Z"},"homepage":"https://github.com/bouzuya/borage","keywords":["bouzuya","bbn"],"repository":{"type":"git","url":"git+https://github.com/bouzuya/borage.git"},"author":{"name":"bouzuya","email":"m@bouzuya.net","url":"http://bouzuya.net"},"bugs":{"url":"https://github.com/bouzuya/borage/issues"},"license":"MIT","readmeFilename":"README.md","version":"3.1.2","dependencies":{"aws-sdk":"^2.1.30","es6-promise":"^2.1.1","glob":"^5.0.9","mime":"^1.3.4"},"devDependencies":{"coffee-script":"^1.9.2","del":"^1.1.1","gulp":"^3.8.11","gulp-coffee":"^2.3.1","gulp-concat":"^2.5.2","gulp-espower":"^0.10.1","gulp-mocha":"^2.0.1","gulp-sourcemaps":"^1.5.2","gulp-uglify":"^1.2.0","gulp-util":"^3.0.4","gulp-watch":"^4.2.4","power-assert":"^0.11.0","run-sequence":"^1.1.0","sinon":"^1.14.1"},"main":"index.js","scripts":{"build":"gulp build","clean":"gulp clean","start":"gulp","test":"gulp test","watch":"gulp watch"},"gitHead":"0f45887778f89ccf9a17e0a097067ae085c515e5","dist":{"shasum":"9be1578d9d2859833cca435d3501d439f6f27489","tarball":"https://registry.npmjs.org/@bouzuya/borage/-/borage-3.1.2.tgz","integrity":"sha512-gBp5eS2+5VSQqqgHs7fBwesw+ZhbfwewPoiyaINPIchhiIkAjnJ8gPN7RsBqzUftZNXF04x5HuHZG9xe/PHptw==","signatures":[{"keyid":"SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA","sig":"MEQCIBDqfLdL4pGDRKMfJ3HvGGE6tmWoM2uKV8jZWAVshLaKAiAhfqB0YTsKYVz2SUSa1Jz/ZiBPlkF3jAPGqV7UN+lpBw=="}]}}
         ```
         """
         output = self.run_cli("npm", "info", query, "--json")

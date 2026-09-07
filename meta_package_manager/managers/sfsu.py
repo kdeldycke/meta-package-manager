@@ -145,21 +145,19 @@ class SFSU(PackageManager):
         {meth}`meta_package_manager.manager.PackageManager.refiltered_search`.
         ```
 
-        ```{code-block} pwsh
+        ```{code-block} pwsh-session
 
-        > sfsu search --json git --no-color
+        > sfsu search --json zoxide --no-color
         {
           "main": [
             {
-              "name": "git",
+              "name": "zoxide",
               "bucket": "main",
-              "version": "2.53.0.3",
-              "installed": true,
+              "version": "0.10.0",
+              "installed": false,
               "bins": []
-            },
-            ...
-          ],
-          ...
+            }
+          ]
         }
         ```
         """

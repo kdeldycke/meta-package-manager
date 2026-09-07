@@ -693,3 +693,15 @@ jobs:
           uv --no-progress run --frozen -- mpm --dnf5 --verbosity INFO orphans 2> orphans.err
           cat orphans.err
           if grep --quiet "Could not" outdated.err orphans.err; then exit 1; fi
+      # A fresh image reports no orphan, so the parser met an empty list on
+      # every host it had ever run against, VM included. `mark dependency`
+      # makes one out of an installed leaf: `tree` is required by nothing, so
+      # reclassifying it is enough and no removal is involved. This one is
+      # asserted, being synthesized rather than left to the image's drift.
+      - name: Drive mpm against a synthesized orphan
+        run: |
+          dnf5 --assumeyes --setopt=install_weak_deps=False install tree
+          dnf5 --assumeyes mark dependency tree
+          uv --no-progress run --frozen -- mpm --dnf5 orphans > orphans.txt
+          cat orphans.txt
+          grep --quiet tree orphans.txt

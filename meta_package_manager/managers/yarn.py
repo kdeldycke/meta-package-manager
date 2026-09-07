@@ -224,7 +224,7 @@ class YarnClassic(Yarn):
         works for exact match.
         ```
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
         $ yarn --json info python | jq
         {
@@ -443,7 +443,7 @@ class YarnBerry(Yarn):
         result only works for exact match.
         ```
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
         $ yarn npm info python --json | jq
         {

@@ -30,7 +30,8 @@ a docstring that has drifted from the code beside it), not that every field is
 captured correctly. It authors no fixtures of its own: the corpus is the
 docstrings.
 
-It covers `installed`, `outdated`, `orphans` and `--version` blocks.
+It covers `installed`, `outdated`, `orphans`, `search` and `--version`
+blocks.
 `installed`, `orphans` and `--version` are single-source (one CLI call), fed
 straight through. `outdated` may cross-reference two commands (`list` +
 `latest`), so its calls are routed to the right block by a command-dispatching
@@ -85,6 +86,31 @@ def _member_output(cls: type, member: str) -> str:
     return ""
 
 
+def _documented_query(cls: type) -> str:
+    """The query token of the first `search` block carrying output.
+
+    Handing a manager back the query its own transcript shows keeps the
+    command it builds equal to the documented one, so the dispatch answers
+    with the output sitting beside it rather than with the fallback.
+
+    The query is the last bare token of the command, which is not the same as
+    its last token: a manager may close on flags (`flatpak search gitg
+    --ostree-verbose`) or pipe the answer into a formatter (`npm search --json
+    python | jq`), and reading either of those as the query searches for the
+    wrong thing.
+    """
+    for block in class_blocks(cls).get("search", ()):
+        tokens, output = dissect(block)
+        if not tokens or not is_fixture(output):
+            continue
+        if "|" in tokens:
+            tokens = tokens[: tokens.index("|")]
+        bare = [token for token in tokens[1:] if not token.startswith("-")]
+        if bare:
+            return bare[-1]
+    return "python"
+
+
 def _dispatch(command_map: list[tuple[list[str], str]], default: str = ""):
     """A `run_cli` stub returning the output whose documented command best
     matches the invocation.
@@ -113,9 +139,10 @@ def _fixtures():
     """Yield a `pytest.param` per documented block worth replaying.
 
     `installed`, `orphans` and `version_regexes` are single-source: one param
-    per literal block, fed straight through. `outdated` is one param per manager,
-    driven by a command-dispatching stub so its (possibly two-command) path is
-    exercised whole.
+    per literal block, fed straight through. `outdated` and `search` are one
+    param per manager, driven by a command-dispatching stub so a path spanning
+    two commands, or a manager answering each search mode from its own block,
+    is exercised whole.
     """
     for manager in pool.values():
         # The pool yields untyped instances, and mypy cannot match type[Any]
@@ -129,10 +156,14 @@ def _fixtures():
                 yield pytest.param(
                     manager, member, output, id=f"{manager.id}-{member}-{index}"
                 )
-        if any(
-            is_fixture(split_session(b)) for b in blocks_by_member.get("outdated", ())
-        ):
-            yield pytest.param(manager, "outdated", None, id=f"{manager.id}-outdated")
+        for chained in ("outdated", "search"):
+            if any(
+                is_fixture(split_session(b))
+                for b in blocks_by_member.get(chained, ())
+            ):
+                yield pytest.param(
+                    manager, chained, None, id=f"{manager.id}-{chained}"
+                )
 
 
 @pytest.mark.parametrize("manager, member, output", list(_fixtures()))
@@ -189,7 +220,28 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
             manager.__dict__.pop("version", None)
         return
 
-    if member == "outdated":
+    if member == "search":
+        # Routed through the same dispatch as `outdated`, so a manager
+        # documenting several modes answers each from its own block. Driven in
+        # the plain mode: what is under test is the parser reading a documented
+        # transcript, not the flag that selected it.
+        command_map = _query_commands(type(manager), ("search",))
+        default = _member_output(type(manager), "search")
+        monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
+        query = _documented_query(type(manager))
+        # Every mode is tried, and the first to yield decides. A manager may
+        # read a different table per mode, `winget`'s extended search carrying
+        # a `Match` column its plain search does not, so feeding one mode's
+        # transcript to another's parser proves nothing about either. What is
+        # under test is that the documented output parses through the member,
+        # not which flag selected it.
+        packages: list = []
+        for extended, exact in product((False, True), repeat=2):
+            with suppress(Exception):
+                packages = list(manager.search(query, extended=extended, exact=exact))
+            if packages:
+                break
+    elif member == "outdated":
         command_map = _query_commands(type(manager), ("installed", "outdated"))
         default = _member_output(type(manager), "outdated")
         monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
@@ -230,15 +282,21 @@ def test_display_blocks_align_with_raw():
 def test_fixtures_carry_no_truncation_marker():
     """A harvested fixture block must document its output in full.
 
-    `installed`/`outdated`/`orphans`/`version_regexes` blocks are complete
-    samples, so none may abbreviate its output with a `(...)` marker (an
-    illustration that would truncate belongs under a non-harvested `console`
-    fence). A bare `...` is left alone: real CLI output legitimately
+    `installed`/`outdated`/`orphans`/`search`/`version_regexes` blocks are
+    complete samples, so none may abbreviate its output with a `(...)` marker
+    (an illustration that would truncate belongs under a non-harvested
+    `console` fence). A bare `...` is left alone: real CLI output legitimately
     contains it, like apt's `Listing...` header or a `guix` store path.
     """
     for manager in pool.values():
         blocks_by_member = class_blocks(type(manager))  # type: ignore[arg-type]
-        for member in ("installed", "outdated", "orphans", "version_regexes"):
+        for member in (
+            "installed",
+            "outdated",
+            "orphans",
+            "search",
+            "version_regexes",
+        ):
             for index, block in enumerate(blocks_by_member.get(member, ())):
                 assert "(...)" not in block, f"{manager.id}-{member}-{index}"
 

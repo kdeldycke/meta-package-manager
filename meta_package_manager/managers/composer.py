@@ -158,7 +158,7 @@ class Composer(PackageManager):
         Search does not supports exact matching.
         ```
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
         $ composer global --no-ansi search symfony
         symfony/symfony The Symfony PHP framework

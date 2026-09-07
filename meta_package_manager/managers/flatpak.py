@@ -294,7 +294,7 @@ class Flatpak(PackageManager):
         ```{code-block} shell-session
 
         $ flatpak search gitg --ostree-verbose
-        gitg    GUI for git        org.gnome.gitg  3.32.1  stable  flathub
+        gitg	GUI for git	org.gnome.gitg	3.32.1	stable	flathub
         ```
         """
         output = self.run_cli("search", query, "--ostree-verbose")

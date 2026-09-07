@@ -219,7 +219,7 @@ class APT(PackageManager):
           Blah blah blah
         ```
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
         $ apt --quiet search abc --full
         Sorting...

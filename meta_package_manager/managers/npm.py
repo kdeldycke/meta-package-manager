@@ -275,7 +275,7 @@ class NPM(PackageManager):
         Search does not supports exact matching.
         ```
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
         $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
             search --json python | jq

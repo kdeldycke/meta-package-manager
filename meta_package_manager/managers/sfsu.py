@@ -145,7 +145,7 @@ class SFSU(PackageManager):
         {meth}`meta_package_manager.manager.PackageManager.refiltered_search`.
         ```
 
-        ```{code-block} pwsh-session
+        ```{code-block} pwsh
 
         > sfsu search --json git --no-color
         {

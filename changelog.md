@@ -35,6 +35,7 @@
 - [emerge] Fix `outdated` and `search`, which reported nothing on Gentoo: the global `--quiet` they sent strips the version and description fields their parsers read.
 - [composer,dnf,emerge,eopkg,pacman,sfsu] Correct the `search` commands shown on each manager's page, which named fewer options than `mpm` actually runs.
 - [composer,dnf,pacman,pwsh-gallery,sfsu,yarn] Correct the inventory and outdated commands shown on each manager's page, which named fewer options than `mpm` actually runs.
+- [flatpak] Fix the search output shown on its page, whose tab separators had been flattened to spaces, leaving a transcript its own parser could not read.
 - [ips] Add the Image Packaging System of Solaris and illumos, with inventory, search, install, remove, upgrade, catalog sync and history purge.
 - [sun-tools] Activate on illumos as well as Solaris: OpenIndiana and its siblings inherit the SVR4 `pkginfo`, `pkgadd` and `pkgrm` tools.
 - [sun-tools] Report each package's human-readable name, which was parsed from `pkginfo -l` and then dropped.

@@ -148,7 +148,7 @@ class APM(PackageManager):
         Search does not supports exact matching.
         ```
 
-        ```{code-block} shell-session
+        ```{code-block} console
 
         $ apm search --json python | jq
         [

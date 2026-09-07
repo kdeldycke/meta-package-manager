@@ -252,6 +252,71 @@ def test_version_regex_matches_sample(manager_id, sample_output, expected_versio
     assert matched == expected_version
 
 
+@pytest.mark.parametrize("member", ("installed", "outdated"))
+def test_eopkg_listing_keeps_its_last_rows(member, monkeypatch):
+    """`eopkg`'s listings carry no footer, so no trailing line may be discarded.
+
+    Both listings used to drop the last two lines before matching, on the
+    assumption of a footer eopkg never prints: its final line is a package. The
+    two packages closing every listing were therefore lost, silently and with a
+    zero exit, so an inventory looked complete while missing its tail.
+
+    This guard is narrower than the bug class it comes from, and deliberately
+    so: what a parser may discard can only be read from the tool's own output,
+    not derived from the manager class. It pins the one listing shape measured
+    against eopkg `4.4.0`.
+    """
+    manager = pool["eopkg"]
+    listing = (
+        "Package Name          |St|        Version|  Rel.|  Distro|             Date\n"
+        "===========================================================================\n"
+        "aalib                 | i|        1.4.0_5|     9|   Solus|07 Sep 2026 10:08\n"
+        "zram-generator-defaults  | i|          1.2.1|     7|   Solus|07 Sep 2026 10:09\n"
+        "zstd                  | i|          1.5.7|    33|   Solus|07 Sep 2026 10:09\n"
+        "zxing-cpp             | i|          2.3.0|     6|   Solus|07 Sep 2026 10:09\n"
+    )
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: listing)
+
+    packages = {
+        package.id: str(package.installed_version)
+        for package in getattr(manager, member)
+    }
+
+    # The header and `===` separator carry no pipe-delimited version column, so
+    # they fall through the regex on their own and need no slicing.
+    assert packages == {
+        "aalib": "1.4.0_5",
+        "zram-generator-defaults": "1.2.1",
+        "zstd": "1.5.7",
+        "zxing-cpp": "2.3.0",
+    }
+
+
+def test_eopkg_search_decodes_character_references(monkeypatch):
+    """`eopkg search` emits the index's raw summary, character references included.
+
+    `list-available` resolves the same text, so the two disagree on the very
+    same package: only `search` reaches a user through mpm, and it used to show
+    `ImageMagick&#xAE; suite` where every other listing says `ImageMagick®
+    suite`. Measured against eopkg `4.4.0`.
+    """
+    manager = pool["eopkg"]
+    output = (
+        "imagemagick         - ImageMagick&#xAE; suite to create, edit, compose\n"
+        "imagemagick-docs    - Documentation for imagemagick\n"
+    )
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+
+    descriptions = {
+        package.id: package.description
+        for package in manager.search("imagemagick", extended=False, exact=False)
+    }
+    assert descriptions["imagemagick"] == (
+        "ImageMagick® suite to create, edit, compose"
+    )
+    assert descriptions["imagemagick-docs"] == "Documentation for imagemagick"
+
+
 @pytest.mark.parametrize(
     ("manager_id", "member", "forbidden_arg"),
     (("emerge", "outdated", "--quiet"), ("emerge", "search", "--quiet")),

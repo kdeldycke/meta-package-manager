@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from html import unescape
 
 from extra_platforms import LINUX_LIKE
 
@@ -40,6 +41,23 @@ class EOPKG(PackageManager):
 
     Mutating operations pass `--yes-all` to auto-confirm eopkg's prompts so
     they run unattended.
+
+    ```{note}
+    eopkg `4.x` is a [Nuitka](https://nuitka.net) onefile bundle, and the Python
+    it carries reads its stdout encoding from the locale alone. Under `C` or
+    `POSIX` that encoding is `ascii`. The first summary holding a character it
+    cannot encode then aborts the command with
+    `Error: System error. Program terminated.` and exit `1`, after a truncated
+    listing. `list-upgrades` and `list-available` write every summary raw, so
+    either `Cap’n Proto` or `ImageMagick®` stops them; `search` escapes `®` but
+    not `’`, so only the first stops it.
+
+    No `extra_env` pins the locale here, because mpm never reaches that state.
+    [PEP 538](https://peps.python.org/pep-0538/) coercion exports
+    `LC_CTYPE=C.UTF-8` from mpm's own interpreter, and eopkg inherits it. A
+    shell exports nothing, which is why the same command fails by hand and
+    works through mpm. Measured on Solus `4.9` with eopkg `4.4.0`.
+    ```
     """
 
     name = "Solus eopkg"
@@ -58,7 +76,8 @@ class EOPKG(PackageManager):
     pre_args = ("--no-color",)
 
     _LIST_REGEXP = re.compile(
-        r"^(?P<package_id>\S+)\s+\|.+?\|\s*(?P<version>\S+)\s*\|.+?\|.+?\|.+$",
+        r"^(?P<package_id>\S+)\s+\|.+?\|\s*(?P<installed_version>\S+)"
+        r"\s*\|.+?\|.+?\|.+$",
     )
     _SEARCH_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\s+- (?P<description>.+)$",
@@ -70,7 +89,7 @@ class EOPKG(PackageManager):
     ```{code-block} shell-session
 
     $ eopkg --version
-    eopkg 3.2.0
+    eopkg 4.4.0
     ```
     """
 
@@ -81,61 +100,62 @@ class EOPKG(PackageManager):
         ```{code-block} shell-session
 
         $ eopkg --no-color list-installed --install-info
-        Package Name          |St|        Version|  Rel.|  Distro|       Date
-        =====================================================================
-        aalib                 | i|        1.4.0_5|     8|   Solus|14 Oct 2024
-        abseil-cpp            | i|     20240116.2|    10|   Solus|14 Oct 2024
-        accountsservice       | i|        23.13.9|    36|   Solus|14 Oct 2024
-        acl                   | i|          2.3.2|    21|   Solus|14 Oct 2024
-        adwaita-icon-theme    | i|           46.2|    28|   Solus|14 Oct 2024
-        adwaita-icon-theme-legacy  | i|           46.2|     2|   Solus|14 Oct 2024
-        alsa-firmware         | i|          1.2.4|     7|   Solus|14 Oct 2024
-        alsa-lib              | i|         1.2.12|    38|   Solus|14 Oct 2024
-        alsa-plugins          | i|         1.2.12|    26|   Solus|14 Oct 2024
-        alsa-utils            | i|         1.2.12|    28|   Solus|14 Oct 2024
-        aom                   | i|         3.10.0|    24|   Solus|14 Oct 2024
-        appstream             | i|          1.0.1|     9|   Solus|14 Oct 2024
-        appstream-data        | i|             49|    51|   Solus|14 Oct 2024
-        appstream-glib        | i|          0.8.2|    13|   Solus|14 Oct 2024
-        argon2                | i|       20190702|     6|   Solus|14 Oct 2024
-        at-spi2               | i|         2.52.0|    44|   Solus|14 Oct 2024
-        atkmm                 | i|         2.28.4|    19|   Solus|14 Oct 2024
-        attr                  | i|          2.5.2|    25|   Solus|14 Oct 2024
-        audit                 | i|          4.0.2|    19|   Solus|14 Oct 2024
-        avahi                 | i|            0.8|    27|   Solus|14 Oct 2024
-        baobab                | i|           46.0|    27|   Solus|14 Oct 2024
+        Package Name          |St|        Version|  Rel.|  Distro|             Date
+        ===========================================================================
+        aalib                 | i|        1.4.0_5|     9|   Solus|07 Sep 2026 10:08
+        abseil-cpp            | i|     20260107.1|    11|   Solus|07 Sep 2026 10:08
+        accounts-qml-module   | i|            0.7|     6|   Solus|07 Sep 2026 10:08
+        accountsservice       | i|        23.13.9|    38|   Solus|07 Sep 2026 10:08
+        acl                   | i|          2.3.2|    22|   Solus|07 Sep 2026 10:08
+        alsa-firmware         | i|          1.2.4|     8|   Solus|07 Sep 2026 10:08
+        alsa-lib              | i|         1.2.14|    41|   Solus|07 Sep 2026 10:08
+        alsa-plugins          | i|         1.2.12|    26|   Solus|07 Sep 2026 10:08
+        alsa-ucm-conf         | i|         1.2.13|     1|   Solus|07 Sep 2026 10:08
+        alsa-utils            | i|         1.2.13|    29|   Solus|07 Sep 2026 10:08
+        anthy                 | i|          9100h|     4|   Solus|07 Sep 2026 10:08
+        aom                   | i|         3.12.1|    26|   Solus|07 Sep 2026 10:08
+        appstream             | i|          1.1.2|    17|   Solus|07 Sep 2026 10:08
+        appstream-catalog     | i|       20260417|    52|   Solus|07 Sep 2026 10:08
+        appstream-qt6         | i|          1.1.2|    17|   Solus|07 Sep 2026 10:08
+        argon2                | i|       20190702|     6|   Solus|07 Sep 2026 10:08
         ```
+
+        The listing carries no footer: its last line is a package, so every line
+        after the two header rows is one. A package whose name overflows the
+        first column pushes the pipe right instead of being truncated, which is
+        why the regex anchors on the pipes rather than on fixed offsets.
         """
         output = self.run_cli("list-installed", "--install-info")
 
-        for package in output.splitlines()[:-2]:
-            match = self._LIST_REGEXP.match(package)
-            if match:
-                package_id, installed_version = match.groups()
-                yield self.package(id=package_id, installed_version=installed_version)
+        yield from self.parse_regex_lines(self._LIST_REGEXP, output)
 
     @property
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
+        `--install-info` describes the package as it stands on the system, so the
+        version column is the *installed* one and the upgrade target is absent.
+        eopkg reports the candidate version through `info` alone, one package per
+        invocation, so `latest_version` is left unset rather than paid for with
+        one subprocess per outdated package.
+
         ```{code-block} shell-session
 
         $ eopkg --no-color list-upgrades --install-info
-        Package Name          |St|        Version|  Rel.|  Distro|       Date
-        =====================================================================
-        adwaita-icon-theme   | i|           46.2|    28|   Solus|14 Oct 2024
-        appstream-data       | i|             49|    51|   Solus|14 Oct 2024
-        at-spi2              | i|         2.52.0|    44|   Solus|14 Oct 2024
-        baobab               | i|           46.0|    27|   Solus|14 Oct 2024
+        Package Name          |St|        Version|  Rel.|  Distro|             Date
+        ===========================================================================
+        acl                  | i|          2.3.2|    22|   Solus|07 Sep 2026 10:08
+        alsa-lib             | i|         1.2.14|    41|   Solus|07 Sep 2026 10:08
+        alsa-ucm-conf        | i|         1.2.13|     1|   Solus|07 Sep 2026 10:08
+        alsa-utils           | i|         1.2.13|    29|   Solus|07 Sep 2026 10:08
+        anthy                | i|          9100h|     4|   Solus|07 Sep 2026 10:08
+        aom                  | i|         3.12.1|    26|   Solus|07 Sep 2026 10:08
+        appstream            | i|          1.1.2|    17|   Solus|07 Sep 2026 10:08
         ```
         """
         output = self.run_cli("list-upgrades", "--install-info")
 
-        for package in output.splitlines()[:-2]:
-            match = self._LIST_REGEXP.match(package)
-            if match:
-                package_id, installed_version = match.groups()
-                yield self.package(id=package_id, installed_version=installed_version)
+        yield from self.parse_regex_lines(self._LIST_REGEXP, output)
 
     @search_capabilities(exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
@@ -183,10 +203,26 @@ class EOPKG(PackageManager):
 
         ```{code-block} shell-session
 
-        $ eopkg --no-color search --name firefox
-        firefox         - Firefox web browser
-        eid-mw-firefox  - Belgian eID add-on for Mozilla Firefox
-        firefox-dbginfo - Debug symbols for firefox
+        $ eopkg --no-color search --name htop
+        htop            - htop (interactive process viewer for Linux)
+        htop-dbginfo    - Debug symbols for htop
+        neohtop         - Blazing-fast system monitoring for your desktop.
+        neohtop-dbginfo - Debug symbols for neohtop
+        ```
+
+        Summaries reach this listing exactly as the repository index stores them,
+        character references included, where `list-available` resolves the same
+        text. So `imagemagick` describes itself as `ImageMagick&#xAE; suite` here
+        and `ImageMagick® suite` there, and {func}`html.unescape` reconciles the
+        two. Measured against eopkg `4.4.0`.
+
+        ```{code-block} shell-session
+
+        $ eopkg --no-color search --name imagemagick
+        imagemagick         - ImageMagick&#xAE; suite to create, edit, compose, or convert bitmap images
+        imagemagick-dbginfo - Debug symbols for imagemagick
+        imagemagick-devel   - Development files for imagemagick
+        imagemagick-docs    - Documentation for imagemagick
         ```
         """
         # Extended search is the default behavior, so it adds no flag at all:
@@ -197,7 +233,7 @@ class EOPKG(PackageManager):
         output = self.run_cli("search", *args, query)
 
         for package_id, description in self._SEARCH_REGEXP.findall(output):
-            yield self.package(id=package_id, description=description)
+            yield self.package(id=package_id, description=unescape(description))
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

@@ -35,10 +35,20 @@ class DNF(PackageManager):
 
     `mpm` reads the inventory through `repoquery` rather than the human-facing
     listing: `--userinstalled` for packages installed on request (dependencies
-    pulled in automatically are skipped) and `--upgrades` for pending updates,
-    both with a `--queryformat` that joins the fields on a private `___MPM___`
-    delimiter so summaries containing spaces stay splittable. Every call is forced
-    `--color=never` and `--quiet` for parseable output.
+    pulled in automatically are skipped), `--upgrades` for pending updates and
+    `--unneeded` for the orphans, each with a `--queryformat` that joins the
+    fields on a private `___MPM___` delimiter so summaries containing spaces stay
+    splittable. Every call is forced `--color=never` and `--quiet` for parseable
+    output.
+
+    ```{note}
+    `outdated` is the one operation that runs two of those queries. `--upgrades`
+    answers for *available* packages, so it describes the upgrade candidate and
+    never the package installed, and `repoquery` offers no tag for the latter.
+    The installed set is therefore read separately and joined on name and
+    architecture. It is also the one place versions are reported as `%{evr}`,
+    epoch and release included, since an upgrade may move only the release.
+    ```
 
     ```{note}
     `remove` runs `autoremove`, so removing a package also drops the

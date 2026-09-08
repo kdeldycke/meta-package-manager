@@ -113,6 +113,14 @@ MAINTENANCE = Section("Maintenance subcommands")
 SNAPSHOTS = Section("Package snapshots subcommands")
 SBOM_SECTION = Section("SBOM subcommands")
 
+SECTIONS = (EXPLORE, MAINTENANCE, SNAPSHOTS, SBOM_SECTION)
+"""Help-screen order of the subcommand sections, from the broadest to the narrowest.
+
+Cloup otherwise ranks a section by the first subcommand registered into it, which
+here is whichever module the import block at the bottom of this file reaches first.
+That block is sorted by module name, so the order was an accident of the alphabet.
+"""
+
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
 """Sequence of package managers as defined by [XKCD #1654: Universal Install Script](https://xkcd.com/1654/).
@@ -429,6 +437,7 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
     # plus real warnings and critical. Per-operation narration (priority,
     # announcements, skip reasons) sits at INFO, one --verbosity INFO away.
     config_schema=MpmConfig,
+    sections=SECTIONS,
     config_validators=(
         build_cooldown_validator(),
         build_manager_overrides_validator(pool),

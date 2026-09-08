@@ -50,9 +50,9 @@ $ mpm restore packages.toml
 
 ## Features
 
-<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.png"/>
+<img align="right" width="38%" height="38%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.svg" alt="Packages an upgrade is available for"/>
 
-<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.png"/>
+<img align="right" width="38%" height="38%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.svg" alt="Package managers detected on the system"/>
 
 - [Snapshot installed packages](https://mpm.run/cli-parameters/#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once.
 - [Restore that manifest](https://mpm.run/cli-parameters/#mpm-restore) on another machine, and get the same set of packages back.
@@ -337,20 +337,25 @@ List all packages installed for which an upgrade is available:
 
 ```shell-session
 $ mpm outdated
-╭──────────────┬─────────────┬─────────┬───────────────────┬────────────────╮
-│ Package name │ ID          │ Manager │ Installed version │ Latest version │
-├──────────────┼─────────────┼─────────┼───────────────────┼────────────────┤
-│ curl         │ curl        │ brew    │ 7.79.1            │ 7.79.1_1       │
-│ git          │ git         │ brew    │ 2.33.0            │ 2.33.0_1       │
-│ openssl@1.1  │ openssl@1.1 │ brew    │ 1.1.1l            │ 1.1.1l_1       │
-│ rake         │ rake        │ gem     │ 13.0.3            │ 13.0.6         │
-│ Telegram     │ 747648890   │ mas     │ 8.1               │ 8.1.3          │
-│ npm          │ npm@8.0.0   │ npm     │ 7.24.0            │ 8.0.0          │
-│ pip          │ pip         │ pip     │ 21.2.4            │ 21.3           │
-│ regex        │ regex       │ pip     │ 2021.9.30         │ 2021.10.8      │
-╰──────────────┴─────────────┴─────────┴───────────────────┴────────────────╯
-8 packages total (brew: 3, pip: 2, gem: 1, mas: 1, npm: 1, apm: 0, cask: 0, composer: 0).
+╭──────────────────────────┬──────┬─────────┬───────────────────┬────────────────╮
+│ Package ID               │ Name │ Manager │ Installed version │ Latest version │
+├──────────────────────────┼──────┼─────────┼───────────────────┼────────────────┤
+│ graphviz                 │      │ brew    │ 15.1.1            │ 16.0.0         │
+│ libheif                  │      │ brew    │ 1.23.3            │ 1.23.4         │
+│ codexbar                 │      │ cask    │ 0.56.4            │ 0.56.8         │
+│ nativ                    │      │ cask    │ 0.3.6             │ 0.3.7          │
+│ activesupport            │      │ gem     │ 6.1.7.3           │ 8.1.3.1        │
+│ bigdecimal               │      │ gem     │ 3.1.4             │ 4.1.2          │
+│ corepack                 │      │ npm     │ 0.35.0            │ 0.36.0         │
+│ google-closure-compiler  │      │ npm     │ 20260825.0        │ 20260830.0     │
+│ coverage                 │      │ uv      │ 7.15.4            │ 7.16.0         │
+│ docutils                 │      │ uv      │ 0.22.4            │ 0.23           │
+│ (...)                                                                          │
+╰──────────────────────────┴──────┴─────────┴───────────────────┴────────────────╯
+76 packages total (gem: 48, brew: 13, uv: 9, cask: 3, npm: 3, mas: 0, pnpm: 0, uvx: 0, yarn: 0).
 ```
+
+On a terminal the differing part of each version is picked out in color, so a patch bump reads apart from a major one at a glance.
 
 The same query argument restricts the listing to outdated packages whose ID or name matches, again fuzzy by default and exact with `--exact`:
 
@@ -364,27 +369,24 @@ $ mpm outdated git
 
 ```shell-session
 $ mpm upgrade --all
-Updating all outdated packages from brew...
-==> Upgrading 4 outdated packages:
-gnu-getopt 2.35.1 -> 2.35.2
-rclone 1.51.0 -> 1.52.0
-fd 8.1.0 -> 8.1.1
-youtube-dl 2020.05.08 -> 2020.05.29
-(...)
-Updating all outdated packages from cask...
-==> Upgrading 4 outdated packages:
-balenaetcher 1.5.89 -> 1.5.94, libreoffice 6.4.3 -> 6.4.4
-(...)
-Updating all outdated packages from gem...
-Updating openssl
-(...)
-Updating all outdated packages from npm...
-+ npm@6.14.5
-(...)
-Updating all outdated packages from pip...
-Successfully installed dephell-argparse-0.1.3
-Successfully installed dephell-pythons-0.1.15
+✓ gem
+✓ mas
+✓ gh-ext
+✓ pnpm
+✓ pi
+✓ npm
+✓ vim-pack
+✓ yarn
+✓ uvx
+✓ zinit
+✓ uv
+✓ brew
+✓ cask
+✓ topgrade
+✓ Upgraded 14/14 managers
 ```
+
+Each manager is ticked off as it finishes, and managers sharing one backend lock run one at a time so they never race each other. Add `--verbosity INFO` to see the command run for each, or `--dry-run` to print them without running any.
 
 This is the primary use case of `mpm`, and the main reason I built it.
 

@@ -778,6 +778,12 @@ def which(ctx, cli_names):
     "manager_ids",
     type=Choice(pool.all_manager_ids, case_sensitive=False),
     nargs=-1,
+    # Without it Click spells the metavar as the choice list itself, and the pool
+    # runs to a hundred-odd IDs: the usage line wrapped over six lines and `mpm
+    # --tree` drew a row wide enough to push every short help off the screen.
+    # Naming the values is left to the docstring below, which points at the
+    # catalog command, since no render lists the choices behind a metavar.
+    metavar="[MANAGER_ID]...",
 )
 @pass_context
 def config_template(ctx, manager_ids):
@@ -791,7 +797,9 @@ def config_template(ctx, manager_ids):
     apply and customize the rest.
 
     With no positional arguments, every maintained manager (those not flagged
-    unmaintained) is dumped. Pass one or more manager IDs to restrict the output.
+    unmaintained) is dumped. Pass one or more manager IDs to restrict the output;
+    `mpm managers --view all` lists every ID this accepts, and shell completion
+    proposes them.
     """
     target_ids = manager_ids or pool.maintained_manager_ids
     overrides = {mid: dump_manager_overrides(pool[mid]) for mid in target_ids}

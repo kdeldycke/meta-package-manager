@@ -293,6 +293,7 @@
 - **Breaking:** [mpm] Layer the discovered configuration files instead of applying only the first. A project's `[tool.mpm]` now wins key by key over a machine-wide config, which used to be dropped whole. An explicit `--config` still pins one file.
 - [mpm] Report on the `--version` screen of a downloaded binary when and for what target it was compiled. A source install shows neither, its interpreter and platform saying the same thing.
 - [mpm] Stop calling a Click helper deprecated for removal in Click `9`, which warned on every colored `--version`.
+- [mpm] Picture the `--version` screen on the install page, and drop the `7.6.0` output the page still showed beside it.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

@@ -81,6 +81,14 @@ CAPTURES = (
         (),
     ),
     (
+        "mpm-version-cli",
+        ("--version",),
+        "The brand mark, and what this install is",
+        # The screen is drawn only when it fits beside the mark, and the capture
+        # pins a width of its own, so state one wide enough for the widest row.
+        ("--columns", "72"),
+    ),
+    (
         "mpm-outdated-cli",
         ("outdated",),
         "Packages an upgrade is available for",

@@ -525,20 +525,22 @@ $ mpm --zerobrew install meta-package-manager
 
 ## Python module usage
 
-Meta Package Manager should now be available system-wide:
+Meta Package Manager should now be available system-wide. On a color terminal wide enough for it, `--version` draws the brand mark beside what this install is: its version, the interpreter running it, the platform, and how many of the managers it implements are usable here.
 
-```shell-session
+![The mpm version screen](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-version-cli.svg)
+
+Anywhere else, and in a pipe, it prints the same facts as two plain lines:
+
+```{code-block} shell-session
 $ mpm --version
-mpm, version 7.6.0
-(...)
+mpm, version 8.0.0
+Python 3.14.7, macOS ARM64 (AArch64)
 ```
 
-If not, you can directly execute the module from Python:
+If the command is not found, you can directly execute the module from Python:
 
-```shell-session
+```{code-block} shell-session
 $ python -m meta_package_manager --version
-mpm, version 7.6.0
-(...)
 ```
 
 ## Python compatibility

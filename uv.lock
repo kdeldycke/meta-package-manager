@@ -325,7 +325,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "8.9.1"
+version = "9.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -338,9 +338,9 @@ dependencies = [
     { name = "wcmatch" },
     { name = "wcwidth" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fd/59/f527fbd7c2d36c057073900b69da480d928f2d91840d08dcf80929512c81/click_extra-8.9.1.tar.gz", hash = "sha256:18a99d91d94375aaa27dc6a5efdebf6cb0cd0637bae49fd1cb6d8a6398cf8294", size = 1298282, upload-time = "2026-08-15T13:20:59.481Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/ad/12875fcb2e444171679078e4adb1101809a416d85a6afda7c801cd7fbb58/click_extra-9.0.0.tar.gz", hash = "sha256:8668a7eac4da065e5a15edfe042b8e1c7b90b7c807fddf75b2e457e8c82fa0de", size = 1537734, upload-time = "2026-08-29T06:16:24.802Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d7/ab/a1407b2e1f55b702d6df86c283d9d5da4da417431c7ec986fc3b47cff6ae/click_extra-8.9.1-py3-none-any.whl", hash = "sha256:1491b38abd9de130addcc1a459aa4d04ff23cdebe978397ebe0e451342800af9", size = 453409, upload-time = "2026-08-15T13:20:57.861Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/9e/23cb15beddee01f7ae92b54e9bf223a71e7dec722ec2c1394b3d86fb9785/click_extra-9.0.0-py3-none-any.whl", hash = "sha256:a8e06bb8d62dabdf092f4338405cf941b0438f99abe884e036a00ce9ce6abfaf", size = 584429, upload-time = "2026-08-29T06:16:22.993Z" },
 ]
 
 [package.optional-dependencies]
@@ -1185,7 +1185,7 @@ typing = [
 requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1" },
     { name = "boltons", specifier = ">=25" },
-    { name = "click-extra", specifier = ">=8.9.1" },
+    { name = "click-extra", specifier = ">=9" },
     { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
     { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
     { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },

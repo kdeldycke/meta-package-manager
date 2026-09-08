@@ -27,7 +27,7 @@ from typing import ClassVar, cast
 import pytest
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
-from click_extra.color import color_envvars
+from click_extra.color import COLOR_ENVVARS
 from click_extra.execution import args_cleanup
 from extra_platforms.pytest import unless_macos
 
@@ -551,7 +551,7 @@ class TestBarPlugin:
         plugin output.
         """
         env = {**os.environ, **(extra_env or {})}
-        for var in (*color_envvars, "TERM"):
+        for var in (*COLOR_ENVVARS, "TERM"):
             env.pop(var, None)
         process = subprocess.run(
             bar_plugin.__file__,

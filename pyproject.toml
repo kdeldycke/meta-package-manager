@@ -322,11 +322,10 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.9.1 resolves the manpage index against the page URL, not the
-  # docname, which dirhtml publishes one directory deeper. 8.9 also adds
-  # print_table's max_column_widths, used by meta_package_manager.tables to
-  # hold the search table's description column to auto.
-  "click-extra>=8.9.1",
+  # click-extra 9 moved the roff source of `wrap` from `--man` to
+  # `--help-format man`, the invocation repomatic's `manpages` release job runs.
+  # Below it that job fails, and the published release keeps no man-page asset.
+  "click-extra>=9",
   # extra-platforms 13.9 detects Solus. Below it every mpm run there reports an
   # unrecognized platform and selects no manager at all, which strands
   # managers/eopkg.py on the only distribution it targets.

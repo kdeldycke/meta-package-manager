@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 import pytest
-from click_extra.color import color_envvars
+from click_extra.color import COLOR_ENVVARS
 
 from meta_package_manager.tables import OUTDATED_COLUMNS
 
@@ -56,7 +56,7 @@ class TestOutdated(CLITableTests, CLIQueryTests):
         # `TERM=dumb`, ...) leaking from the developer shell or the CI
         # runner: the point is precisely the automatic color state, where the
         # renderer must force colors on its own.
-        for var in (*color_envvars, "TERM"):
+        for var in (*COLOR_ENVVARS, "TERM"):
             monkeypatch.delenv(var, raising=False)
         result = invoke(subcmd, "--plugin-output")
         assert result.exit_code == 0

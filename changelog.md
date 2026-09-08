@@ -280,6 +280,7 @@
 - [pip] Skip a Windows `python3.exe` app-execution alias with no Python behind it. It shadowed every real interpreter, leaving `pip` reported as broken on a stock Windows and warning on every run.
 - [choco] Fix `installed`, `outdated` and `search`, which returned nothing at all: every invocation carried a `--retry-count=3` option Chocolatey does not have, and its parser passed it on as a package filter matching nothing.
 - [choco] Escalate `install`, `remove` and both upgrade paths. Chocolatey locks its `C:\ProgramData\chocolatey` tree to administrators, so each of them failed unprivileged with a permission error.
+- [mpm] Raise the click-extra floor from `8.9.1` to `9`, whose `wrap --help-format man` renders the man pages each release attaches. `--man` no longer writes roff.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

@@ -290,6 +290,7 @@
 - [mpm] Order the subcommand sections of `mpm --help` from the broadest to the narrowest, instead of by the alphabet of their source module.
 - [mpm] Redraw the readme's two CLI illustrations as SVG terminal windows, replacing captures that still pictured 14 managers and a `Supported` column mpm dropped.
 - [mpm] Refresh the readme's `outdated` and `upgrade --all` transcripts, which showed 2020-era packages and an output shape mpm replaced with the per-manager ✓ trail.
+- **Breaking:** [mpm] Layer the discovered configuration files instead of applying only the first. A project's `[tool.mpm]` now wins key by key over a machine-wide config, which used to be dropped whole. An explicit `--config` still pins one file.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

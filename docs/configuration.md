@@ -4,10 +4,12 @@ All `mpm` options can be set with a configuration file.
 
 ## Location
 
-Configuration is auto-discovered from two places, in order of priority:
+Configuration is auto-discovered from two places, and **both** apply:
 
 1. **`pyproject.toml`**: searched from the current working directory upward to the nearest VCS root (`.git`, `.hg`, etc.), using a `[tool.mpm]` section. This follows the same discovery pattern as `uv`, `ruff`, and `mypy`.
 2. **Dedicated config file**: searched in the platform-specific application directory.
+
+The two are layered key by key, with the project's `pyproject.toml` winning where both set the same key. So a machine-wide preference keeps applying inside a project that only overrides one setting. An explicit `--config` never layers: it pins that one file and nothing else is read.
 
 | Platform | Folder                                 |
 | :------- | :------------------------------------- |
@@ -312,7 +314,7 @@ For instance, `mpm --export-config toml > ~/.config/mpm/config.toml` seeds a con
 
 ## Troubleshooting
 
-You can easily debug the way `mpm` sources its configuration with `--params`:
+You can easily debug the way `mpm` sources its configuration with `--params`. The `Source` column says whether a value came from a configuration file, the command line, an environment variable or the built-in default:
 
 ```{click:run}
 from meta_package_manager.cli import mpm

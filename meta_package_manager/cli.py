@@ -49,8 +49,10 @@ from textwrap import dedent
 from click_extra import (
     STRING,
     Choice,
+    ConfigOption,
     IntRange,
     Section,
+    ShowParamsOption,
     VersionOption,
     echo,
     group,
@@ -105,6 +107,7 @@ if TYPE_CHECKING:
     from types import FrameType
 
     from click_extra import Context, Parameter
+    from click_extra.table import ColumnSpec
 
 
 # Subcommand sections.
@@ -431,6 +434,69 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
     return shlex.join((prog, *selectors, "--verbosity", "DEBUG", *args))
 
 
+class SourcedParamsOption(ShowParamsOption):
+    """`--params` with the `config_file` column drawn without being asked for.
+
+    click-extra keeps that column opt-in, reachable through a `--columns` projection
+    on the root command. mpm has no such option: its `--columns` are per-subcommand,
+    each with its own vocabulary of package fields, and `--params` is a root option
+    that prints and exits before any of them is parsed. The column would therefore be
+    unreachable, which is why it is drawn by default here instead.
+
+    It earns the width: mpm layers a user-wide configuration under a project's own
+    (see {func}`group_params`), so `Source` saying `CONFIGURATION` leaves the reader
+    asking *which* file, and this column is the answer.
+
+    ```{todo}
+    Inert on click-extra `9.1` and below, which renders the table from the base
+    class's column set rather than the running option's, so this override never
+    reaches it. The one-line fix is proposed upstream; drop this paragraph once a
+    release carrying it becomes the floor.
+    ```
+    """
+
+    @classmethod
+    def default_columns(cls) -> tuple[ColumnSpec, ...]:
+        """Every non-opt-in column, plus `config_file`."""
+        return tuple(
+            col
+            for col in cls.TABLE_HEADERS
+            if not col.optional or col.id == "config_file"
+        )
+
+
+def group_params() -> list[Parameter]:
+    """click-extra's default parameters, with three of them swapped for ours.
+
+    `--version` is swapped by {func}`~meta_package_manager.logo.version_screen_params`,
+    which this builds on. The other two are `--config`, which gains the cascade
+    described below, and `--params`, which gains the column that makes the cascade
+    readable.
+
+    Swapping instances in place keeps click-extra's carefully ordered parameter
+    sequence, and keeps the `@group(config_schema=…, config_validators=…)` arguments
+    working: those are grafted onto whichever parameter is a
+    {class}`~click_extra.config.ConfigOption`, after the list is built.
+
+    ```{note}
+    `cascade=True` layers every discovered configuration file, the most local one
+    winning key by key. Without it exactly one file applies, so a machine-wide
+    `verbosity` or manager exclusion was dropped in full the moment the working
+    directory held a `pyproject.toml` carrying any `[tool.mpm]` key at all. An
+    explicit `--config` never cascades: it pins one source, as it always did.
+    ```
+    """
+    swapped: list[Parameter] = []
+    for param in version_screen_params():
+        if isinstance(param, ConfigOption):
+            swapped.append(ConfigOption(cascade=True))
+        elif isinstance(param, ShowParamsOption):
+            swapped.append(SourcedParamsOption())
+        else:
+            swapped.append(param)
+    return swapped
+
+
 @group(
     # Verbosity stays at click-extra's WARNING default: the ✓/✗ trail and finisher
     # print via echo (not logging) and survive it, so a default run shows just those
@@ -444,7 +510,7 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
     ),
     # Swaps --version for the brand-mark screen, which degrades to the plain
     # message below whenever colors, width or accessibility rule it out.
-    params=version_screen_params,
+    params=group_params,
     version_fields={"env_info": env_summary()},
     examples=[
         ("List every package installed on the machine", "mpm installed"),

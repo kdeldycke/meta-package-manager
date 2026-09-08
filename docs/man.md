@@ -7,4 +7,4 @@ The index below is rendered by `click_extra.sphinx` from the `click_extra_manpag
 ```{click-extra-manpages}
 ```
 
-The raw `.1` files sit in this same directory, next to the renderings above, under `mpm.1` for the root command and `mpm-{subcommand}.1` for the rest. [Reading them in a terminal](install.md#man-pages) covers the rest: printing one straight from the CLI with `--man`, installing the release bundle into `MANPATH`, and regenerating the set from source in a packaging build phase.
+The raw `.1` files sit in this same directory, next to the renderings above, under `mpm.1` for the root command and `mpm-{subcommand}.1` for the rest. [Reading them in a terminal](install.md#man-pages) covers the rest: reading one straight from the CLI with `--man`, installing the release bundle into `MANPATH`, and regenerating the set from source in a packaging build phase.

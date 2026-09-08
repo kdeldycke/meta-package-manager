@@ -543,7 +543,7 @@ mpm, version 7.6.0
 
 ## Python compatibility
 
-The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented. Cells carry three states: ✅ for a version the release declares, ❌ for one its `requires-python` rules out, and – for one it neither claimed nor forbade, which is mostly a Python that did not exist yet when the release was cut. The table is regenerated from the release tags by repomatic's `update-docs` job, through click-extra's [`matrix` mechanism](https://kdeldycke.github.io/click-extra/sphinx.html#the-matrix-directive):
+The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented. Cells carry three states: ✅ for a version the release declares, ❌ for one its `requires-python` rules out, and – for one it neither claimed nor forbade, which is mostly a Python that did not exist yet when the release was cut. The table is regenerated from the release tags by repomatic's `update-docs` job, through click-extra's [`matrix` mechanism](https://kdeldycke.github.io/click-extra/python-directives.html#the-matrix-directive):
 
 <!-- matrix python package=mpm -->
 
@@ -640,21 +640,27 @@ _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 For broader shell coverage than Click's Bash, Zsh and Fish support, mpm's command tree can be exported to [Carapace](https://carapace.sh), a multi-shell completion engine that drives identical completions across Bash, Zsh, Fish, Nushell, PowerShell, Elvish and more from a single spec. Generate and install the spec with [click-extra](https://kdeldycke.github.io/click-extra/carapace.html)'s `wrap` command:
 
 ```{code-block} shell-session
-$ uvx --from "click-extra[carapace]" --with meta-package-manager click-extra wrap --carapace --install meta_package_manager.cli:mpm
+$ uvx --from "click-extra[carapace]" --with meta-package-manager click-extra wrap --help-format carapace --install meta_package_manager.cli:mpm
 ```
 
 This writes the spec to `~/.config/carapace/specs/mpm.yaml`, which [Carapace](https://carapace.sh) loads once it is installed and hooked into your shell. Re-run the command after upgrading mpm to refresh the spec.
 
 ## Man pages
 
-`mpm` exposes a `--man` option on every (sub)command that prints the corresponding roff page to stdout. Pipe it through `man --local-file -` to render it:
+`mpm` exposes a `--man` option on every (sub)command, which typesets the corresponding manual and pages it, the way `man` does:
 
 ```{code-block} shell-session
-$ mpm --man | man --local-file -
+$ mpm --man
 ```
 
 ```{code-block} shell-session
-$ mpm install --man | man --local-file -
+$ mpm install --man
+```
+
+To get the roff source instead, ask for the `man` rendering of `--help-format`:
+
+```{code-block} shell-session
+$ mpm --help-format man
 ```
 
 The full command tree is also pre-rendered as static `.1` files:
@@ -665,7 +671,7 @@ The full command tree is also pre-rendered as static `.1` files:
 Downstream packagers can regenerate them from source as part of their build phase:
 
 ```{code-block} shell-session
-$ click-extra wrap --man --output-dir /usr/share/man/man1/ meta_package_manager.cli:mpm
+$ click-extra wrap --help-format man --output-dir /usr/share/man/man1/ meta_package_manager.cli:mpm
 ```
 
 The `module:function` notation skips the `mpm` console-script entry point (which dispatches through `__main__:main` and hides the Click command behind a lazy import). The generator honors `SOURCE_DATE_EPOCH` for reproducible builds. See the [`click-extra` man-page reference](https://kdeldycke.github.io/click-extra/man-page.html#generating-man-pages) for other invocation forms (uvx for build sandboxes, `.py` file paths, and the programmatic API).
@@ -684,18 +690,18 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[hjson]
     ```
-  - - [HJSON](https://kdeldycke.github.io/click-extra/config.html#hjson) config files: `--config mpm.hjson`
+  - - [HJSON](https://kdeldycke.github.io/click-extra/config-formats.html#hjson) config files: `--config mpm.hjson`
     - [`hjson` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format hjson`
 * - `json5`
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[json5]
     ```
-  - - [JSON5](https://kdeldycke.github.io/click-extra/config.html#json5) config files: `--config mpm.json5`
+  - - [JSON5](https://kdeldycke.github.io/click-extra/config-formats.html#json5) config files: `--config mpm.json5`
 * - `jsonc`
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[jsonc]
     ```
-  - - [JSONC](https://kdeldycke.github.io/click-extra/config.html#jsonc) config files: `--config mpm.jsonc`
+  - - [JSONC](https://kdeldycke.github.io/click-extra/config-formats.html#jsonc) config files: `--config mpm.jsonc`
 * - `sbom-offline`
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[sbom-offline]
@@ -715,13 +721,13 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[xml]
     ```
-  - - [XML](https://kdeldycke.github.io/click-extra/config.html#xml) config files: `--config mpm.xml`
+  - - [XML](https://kdeldycke.github.io/click-extra/config-formats.html#xml) config files: `--config mpm.xml`
     - [`xml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format xml`
 * - `yaml`
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[yaml]
     ```
-  - - [YAML](https://kdeldycke.github.io/click-extra/config.html#yaml) config files: `--config mpm.yaml`
+  - - [YAML](https://kdeldycke.github.io/click-extra/config-formats.html#yaml) config files: `--config mpm.yaml`
     - [`yaml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format yaml`
 ````
 

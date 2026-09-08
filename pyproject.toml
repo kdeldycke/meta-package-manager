@@ -535,7 +535,7 @@ exclude-newer = "1 week"
 # timestamp, conventionally the midnight following the release upload, so the
 # exemption covers that release and nothing later. Drop the entry once the
 # release ages past the cooldown window.
-exclude-newer-package = { extra-platforms = "2026-09-08T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-09-04T00:00:00Z", extra-platforms = "2026-09-08T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

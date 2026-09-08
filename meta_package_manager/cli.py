@@ -591,8 +591,11 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
         "the others are skipped unless the best-effort posture is selected.",
     ),
 )
+# Not `Output options`: click-extra 9.1 groups its own defaults under that
+# exact title, and two groups sharing one name read as a rendering bug. This
+# one selects what mpm reports, where click-extra's paints it.
 @option_group(
-    "Output options",
+    "Reporting options",
     option(
         "--description",
         is_flag=True,

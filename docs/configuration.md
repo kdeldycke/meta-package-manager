@@ -15,7 +15,7 @@ Configuration is auto-discovered from two places, in order of priority:
 | Unix     | `~/.config/mpm/`                       |
 | Windows  | `C:\Users\<user>\AppData\Roaming\mpm\` |
 
-The dedicated config file can be TOML, YAML, JSON, or any format supported by click-extra (install [extra dependencies](install.md#extra-dependencies) for additional format support). An explicit `--config` flag always takes precedence over auto-discovery.
+The dedicated config file can be TOML, or any other [format click-extra reads](https://kdeldycke.github.io/click-extra/config-formats.html). INI, XML, property lists, SQLite databases and argfiles need no extra dependency, as the Python standard library parses them all; the rest ask for one, listed in the [extra dependencies](install.md#extra-dependencies) table. An explicit `--config` flag always takes precedence over auto-discovery.
 
 ## File format
 
@@ -301,7 +301,7 @@ This validates option names against the CLI parameters and reports unknown keys.
 
 `--export-config FORMAT` prints the fully-resolved configuration: every option's effective value once the config file, environment variables, and built-in defaults have been merged. It then exits without running any command. Where `--params` below is a debug table of *where* each value came from, this emits a clean document you can save straight back as a config file.
 
-`FORMAT` is one of `toml`, `yaml`, `json`, `json5`, `jsonc`, `hjson`, or `xml`:
+`FORMAT` is one of `toml`, `yaml`, `json`, `json5`, `jsonc`, `hjson`, `xml`, or `plist`:
 
 ```{click:run}
 from meta_package_manager.cli import mpm

@@ -281,6 +281,11 @@
 - [choco] Fix `installed`, `outdated` and `search`, which returned nothing at all: every invocation carried a `--retry-count=3` option Chocolatey does not have, and its parser passed it on as a package filter matching nothing.
 - [choco] Escalate `install`, `remove` and both upgrade paths. Chocolatey locks its `C:\ProgramData\chocolatey` tree to administrators, so each of them failed unprivileged with a permission error.
 - [mpm] Raise the click-extra floor from `8.9.1` to `9`, whose `wrap --help-format man` renders the man pages each release attaches. `--man` no longer writes roff.
+- [mpm] Shrink the `--table-format` and `--config` entries of every help screen, which spelled out fifty table formats and every configuration file pattern.
+- [mpm] Rename the `Output options` help section to `Reporting options`, leaving the old name to click-extra's own color, theme and table options.
+- [mpm] Fix three documented commands that no longer run: the Carapace spec export, the man-page install for packagers, and reading a manual with `--man`.
+- [mpm] Document `plist` among the `--export-config` formats, and which configuration formats need no extra dependency.
+- [mpm] Repoint six documentation links at the click-extra pages that now carry the configuration formats and the `matrix` directive.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

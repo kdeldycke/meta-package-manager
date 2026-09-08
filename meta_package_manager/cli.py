@@ -128,17 +128,17 @@ That block is sorted by module name, so the order was an accident of the alphabe
 """
 
 
-UNMAINTAINED_REASON = "upstream is unmaintained, and mpm may drop it in any release"
+UNMAINTAINED_REASON = "upstream is unmaintained"
 """Reason carried by the selectors of a manager flagged
 {attr}`~meta_package_manager.manager.PackageManager.unmaintained`.
 
 Click renders a `deprecated` string as `(DEPRECATED: {reason})` and a bare `True` as
 `(DEPRECATED)`, in the help screen, the man pages, the Markdown and JSON renderings
-and the completion spec alike. The bare label was ambiguous on these selectors: it
-reads as *mpm is retiring this option*, where the fact is that the tool behind it was
-abandoned upstream while mpm keeps driving it. One sentence settles both halves, and
-restates the exemption
-{attr}`~meta_package_manager.manager.PackageManager.unmaintained` carries.
+and the completion spec alike. The bare label is ambiguous on a selector: it reads as
+*mpm is retiring this option*, where the fact is that the tool behind it was abandoned
+while mpm keeps driving it. Three words settle which side is gone. They say nothing
+about what mpm does next, which is the stability policy's subject and is spelled out
+on the manager's own page.
 
 The wording is uniform across the five managers rather than drawn from each
 {attr}`~meta_package_manager.manager.PackageManager.unmaintained_message`: those are

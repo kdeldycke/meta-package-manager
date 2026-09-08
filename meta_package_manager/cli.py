@@ -125,6 +125,24 @@ That block is sorted by module name, so the order was an accident of the alphabe
 """
 
 
+UNMAINTAINED_REASON = "upstream is unmaintained, and mpm may drop it in any release"
+"""Reason carried by the selectors of a manager flagged
+{attr}`~meta_package_manager.manager.PackageManager.unmaintained`.
+
+Click renders a `deprecated` string as `(DEPRECATED: {reason})` and a bare `True` as
+`(DEPRECATED)`, in the help screen, the man pages, the Markdown and JSON renderings
+and the completion spec alike. The bare label was ambiguous on these selectors: it
+reads as *mpm is retiring this option*, where the fact is that the tool behind it was
+abandoned upstream while mpm keeps driving it. One sentence settles both halves, and
+restates the exemption
+{attr}`~meta_package_manager.manager.PackageManager.unmaintained` carries.
+
+The wording is uniform across the five managers rather than drawn from each
+{attr}`~meta_package_manager.manager.PackageManager.unmaintained_message`: those are
+markdown paragraphs with links, sized for the manager's own page, where a help label
+has one line to spend.
+"""
+
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
 """Sequence of package managers as defined by [XKCD #1654: Universal Install Script](https://xkcd.com/1654/).
 
@@ -299,7 +317,7 @@ def single_manager_selectors():
                 flag_value=manager_id,
                 default=None,
                 help=f"Select {manager.name}.",
-                deprecated=manager.unmaintained,
+                deprecated=UNMAINTAINED_REASON if manager.unmaintained else False,
                 expose_value=False,
                 callback=update_manager_selection,
             )
@@ -310,7 +328,7 @@ def single_manager_selectors():
                 flag_value=manager_id,
                 default=None,
                 help=f"Deselect {manager.name}.",
-                deprecated=manager.unmaintained,
+                deprecated=UNMAINTAINED_REASON if manager.unmaintained else False,
                 expose_value=False,
                 callback=update_manager_selection,
             )

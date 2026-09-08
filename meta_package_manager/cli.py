@@ -437,6 +437,16 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
     # message below whenever colors, width or accessibility rule it out.
     params=version_screen_params,
     version_fields={"env_info": env_summary()},
+    examples=[
+        ("List every package installed on the machine", "mpm installed"),
+        ("Upgrade everything every manager reports as outdated", "mpm upgrade --all"),
+        (
+            "Refuse any release younger than a week while upgrading",
+            'mpm --cooldown "7 days" upgrade --all',
+        ),
+        ("Snapshot the whole inventory to a TOML manifest", "mpm dump packages.toml"),
+        ("Replay that manifest on another machine", "mpm restore packages.toml"),
+    ],
 )
 # Honored by exit_on_failures(): the action commands' per-package failures then
 # report without gating automation on a non-zero exit code.

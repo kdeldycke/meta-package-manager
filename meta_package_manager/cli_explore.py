@@ -121,6 +121,14 @@ the filesystem a manager operates on: hence *view* rather than *scope*.
 @mpm.command(
     short_help="List the package managers detected on the system.",
     section=EXPLORE,
+    examples=[
+        ("List the managers detected on this machine", "mpm managers"),
+        (
+            "Report every manager mpm implements, detected or not",
+            "mpm --all-managers managers",
+        ),
+        ("Answer about two managers only", "mpm --brew --npm managers"),
+    ],
 )
 @columns_option(columns=column_specs(MANAGERS_COLUMNS))
 @option(
@@ -385,7 +393,17 @@ exact_match_option = option(
 `outdated`."""
 
 
-@mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
+@mpm.command(
+    aliases=["list"],
+    short_help="List installed packages.",
+    section=EXPLORE,
+    examples=[
+        ("List every installed package", "mpm installed"),
+        ("Keep the ones whose ID or name matches a query", "mpm installed curl"),
+        ("Find the packages several managers each installed", "mpm installed --duplicates"),
+        ("Report one manager's inventory as JSON", "mpm --brew --table-format json installed"),
+    ],
+)
 @exact_match_option
 @option(
     "-d",
@@ -463,7 +481,15 @@ def installed(ctx, exact, duplicates, query):
         print_summary(package_counts(installed_data))
 
 
-@mpm.command(short_help="List outdated packages.", section=EXPLORE)
+@mpm.command(
+    short_help="List outdated packages.",
+    section=EXPLORE,
+    examples=[
+        ("List every upgradable package", "mpm outdated"),
+        ("Restrict the listing to one package", "mpm outdated curl"),
+        ("Feed a SwiftBar or Xbar plugin", "mpm outdated --plugin-output"),
+    ],
+)
 @exact_match_option
 @option(
     "--plugin-output",
@@ -535,7 +561,14 @@ def outdated(ctx, exact, plugin_output, query):
         print_summary(package_counts(outdated_data))
 
 
-@mpm.command(short_help="List orphaned packages.", section=EXPLORE)
+@mpm.command(
+    short_help="List orphaned packages.",
+    section=EXPLORE,
+    examples=[
+        ("List the packages nothing requires anymore", "mpm orphans"),
+        ("Ask one manager for its orphans", "mpm --pacman orphans"),
+    ],
+)
 @exact_match_option
 @columns_option(columns=column_specs(INSTALLED_COLUMNS))
 @argument("query", type=STRING, required=False)
@@ -583,7 +616,15 @@ def orphans(ctx, exact, query):
         print_summary(package_counts(orphans_data))
 
 
-@mpm.command(short_help="Search packages.", section=EXPLORE)
+@mpm.command(
+    short_help="Search packages.",
+    section=EXPLORE,
+    examples=[
+        ("Search every manager for a package", "mpm search jq"),
+        ("Widen the search to package descriptions", "mpm search --extended jq"),
+        ("Require a verbatim match on the ID or name", "mpm search --exact jq"),
+    ],
+)
 @option(
     "--extended/--id-name-only",
     default=False,
@@ -668,7 +709,15 @@ def search(ctx, extended, exact, refilter, query):
         print_summary(package_counts(matches))
 
 
-@mpm.command(aliases=["locate"], short_help="Locate CLIs on system.", section=EXPLORE)
+@mpm.command(
+    aliases=["locate"],
+    short_help="Locate CLIs on system.",
+    section=EXPLORE,
+    examples=[
+        ("Locate every binary answering to a name", "mpm which python3"),
+        ("Look up several names in one run", "mpm which python3 pip3"),
+    ],
+)
 @columns_option(columns=column_specs(WHICH_COLUMNS))
 @argument("cli_names", type=STRING, nargs=-1, required=True)
 @pass_context
@@ -720,6 +769,10 @@ def which(ctx, cli_names):
     name="config-template",
     short_help="Print per-manager overrides as a TOML config template.",
     section=EXPLORE,
+    examples=[
+        ("Print the overridable block of one manager", "mpm config-template brew"),
+        ("Print a block for every manager mpm implements", "mpm config-template"),
+    ],
 )
 @argument(
     "manager_ids",

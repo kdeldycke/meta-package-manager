@@ -283,7 +283,16 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> str:
     return "installed" if installed else "failed"
 
 
-@mpm.command(short_help="Install a package.", section=MAINTENANCE)
+@mpm.command(
+    short_help="Install a package.",
+    section=MAINTENANCE,
+    examples=[
+        ("Install with the first manager carrying the package", "mpm install jq"),
+        ("Install with one manager only", "mpm --brew install jq"),
+        ("Pin the version to install", "mpm install jq@1.7.1"),
+        ("Name the manager in the specifier itself", "mpm install pkg:npm/left-pad"),
+    ],
+)
 @argument(
     "packages_specs",
     type=STRING,
@@ -508,7 +517,19 @@ def install(ctx, packages_specs):
     exit_on_failures(ctx, "install", unresolved_labels)
 
 
-@mpm.command(aliases=["update"], short_help="Upgrade packages.", section=MAINTENANCE)
+@mpm.command(
+    aliases=["update"],
+    short_help="Upgrade packages.",
+    section=MAINTENANCE,
+    examples=[
+        ("Upgrade every outdated package of every manager", "mpm upgrade --all"),
+        ("Upgrade two packages wherever they are installed", "mpm upgrade curl jq"),
+        (
+            "Sit out the first days of each new release",
+            'mpm --cooldown "7 days" upgrade --all',
+        ),
+    ],
+)
 @option(
     "-A",
     "--all",
@@ -602,7 +623,15 @@ def upgrade(ctx, all, packages_specs):
     )
 
 
-@mpm.command(aliases=["uninstall"], short_help="Remove a package.", section=MAINTENANCE)
+@mpm.command(
+    aliases=["uninstall"],
+    short_help="Remove a package.",
+    section=MAINTENANCE,
+    examples=[
+        ("Remove a package from every manager carrying it", "mpm remove jq"),
+        ("Remove it and the dependencies it pulled in", "mpm remove --orphans jq"),
+    ],
+)
 @option(
     "--orphans",
     is_flag=True,
@@ -663,7 +692,14 @@ def remove(ctx, orphans, packages_specs):
     )
 
 
-@mpm.command(short_help="Sync local package info.", section=MAINTENANCE)
+@mpm.command(
+    short_help="Sync local package info.",
+    section=MAINTENANCE,
+    examples=[
+        ("Refresh the package metadata of every manager", "mpm sync"),
+        ("Refresh one manager only", "mpm --apt sync"),
+    ],
+)
 @pass_context
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
@@ -730,7 +766,15 @@ def _cleanup_steps(
     return steps
 
 
-@mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
+@mpm.command(
+    short_help="Cleanup local data.",
+    section=MAINTENANCE,
+    examples=[
+        ("Prune caches and repair local state", "mpm cleanup"),
+        ("Also remove the packages nothing requires", "mpm cleanup --orphans"),
+        ("Prune caches and nothing else", "mpm cleanup --skip-repair"),
+    ],
+)
 @option(
     "--orphans/--skip-orphans",
     "orphans",
@@ -842,6 +886,10 @@ def cleanup(ctx, orphans, cache, repair):
     aliases=["check", "diagnose"],
     short_help="Diagnose managers health.",
     section=MAINTENANCE,
+    examples=[
+        ("Relay the self-diagnosis of every manager", "mpm doctor"),
+        ("Diagnose one manager", "mpm --brew doctor"),
+    ],
 )
 @pass_context
 def doctor(ctx):

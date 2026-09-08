@@ -81,6 +81,15 @@ if TYPE_CHECKING:
 @mpm.command(
     short_help="Export installed packages to a SBOM document.",
     section=SBOM_SECTION,
+    examples=[
+        ("Print an SPDX document of everything installed", "mpm sbom"),
+        (
+            "Write CycloneDX, format guessed from the extension",
+            "mpm sbom --cyclonedx sbom.json",
+        ),
+        ("Skip the per-package metadata for a fast run", "mpm sbom --minimal"),
+        ("Attach the vulnerabilities OSV.dev reports", "mpm --network sbom"),
+    ],
 )
 @option(
     "--spdx/--cyclonedx",

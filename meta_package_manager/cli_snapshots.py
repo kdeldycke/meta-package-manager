@@ -87,6 +87,15 @@ if TYPE_CHECKING:
     aliases=["backup", "lock", "freeze", "snapshot"],
     short_help="Snapshot installed packages to a TOML manifest or a Brewfile.",
     section=SNAPSHOTS,
+    examples=[
+        ("Print a TOML manifest of everything installed", "mpm dump"),
+        ("Write that manifest to a file", "mpm dump packages.toml"),
+        ("Emit a Brewfile instead", "mpm dump --brewfile Brewfile"),
+        (
+            "Refresh the versions an existing manifest records",
+            "mpm dump --update-version packages.toml",
+        ),
+    ],
 )
 @option(
     "--toml",
@@ -393,6 +402,10 @@ def _dump_brewfile(
 @mpm.command(
     short_help="Install packages referenced in TOML files.",
     section=SNAPSHOTS,
+    examples=[
+        ("Install every package a manifest lists", "mpm restore packages.toml"),
+        ("Replay several manifests in one run", "mpm restore base.toml laptop.toml"),
+    ],
 )
 @argument("toml_files", type=File("r"), required=True, nargs=-1)
 @pass_context

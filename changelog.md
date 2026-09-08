@@ -286,6 +286,7 @@
 - [mpm] Fix three documented commands that no longer run: the Carapace spec export, the man-page install for packagers, and reading a manual with `--man`.
 - [mpm] Document `plist` among the `--export-config` formats, and which configuration formats need no extra dependency.
 - [mpm] Repoint six documentation links at the click-extra pages that now carry the configuration formats and the `matrix` directive.
+- [mpm] Add an `Examples` section to `mpm --help` and every subcommand's, listing worked invocations. They render in the man pages too.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

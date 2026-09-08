@@ -294,6 +294,7 @@
 - [mpm] Show the readme's command output as SVG terminal windows, and illustrate the headline features with them.
 - [mpm] Lead the readme's installation section with `uv`, which installs `mpm` on Linux, macOS and Windows alike.
 - **Breaking:** [mpm] Layer the discovered configuration files instead of applying only the first. A project's `[tool.mpm]` now wins key by key over a machine-wide config, which used to be dropped whole. An explicit `--config` still pins one file.
+- **Breaking:** [mpm] Pair each manager's selectors on one help-screen line, as `--brew / --no-brew`, instead of listing every manager twice. Their `no_<id>` configuration keys and `MPM_NO_<ID>` variables are gone: spell them `<id> = false` and `MPM_<ID>=false`.
 - [mpm] Report on the `--version` screen of a downloaded binary when and for what target it was compiled. A source install shows neither, its interpreter and platform saying the same thing.
 - [mpm] Stop calling a Click helper deprecated for removal in Click `9`, which warned on every colored `--version`.
 - [mpm] Picture the `--version` screen on the install page, and drop the `7.6.0` output the page still showed beside it.

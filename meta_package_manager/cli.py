@@ -40,17 +40,18 @@ import signal
 import sys
 import threading
 from collections.abc import Iterable
-from configparser import RawConfigParser
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
+from typing import cast
 
 from click_extra import (
     STRING,
     Choice,
     ConfigOption,
     IntRange,
+    Option,
     Section,
     ShowParamsOption,
     VersionOption,
@@ -105,7 +106,9 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from types import FrameType
+    from typing import Any
 
+    import click
     from click_extra import Context, Parameter
     from click_extra.table import ColumnSpec
 
@@ -235,14 +238,17 @@ def guard_existing_output(ctx: Context, output_path: Path, *, overwrite: bool) -
 
 
 def update_manager_selection(
-    ctx: Context, param: Parameter, value: str | Iterable[str] | bool | None
+    ctx: Context,
+    param: Parameter,
+    value: tuple[str, ...] | tuple[bool, ...] | bool | None,
 ) -> None:
     """Update global selection list of managers in the context.
 
     Accumulate and merge all manager selectors to form the initial population enforced by the user.
     """
-    # Option has not been called.
-    if value is None:
+    # Option has not been called: an unset flag reads as None, and an unset
+    # option collecting several occurrences as an empty tuple.
+    if value is None or value == ():
         return
 
     # Use a list to keep the natural order of selection.
@@ -256,14 +262,12 @@ def update_manager_selection(
     # Add the value of --manager list.
     if param.name == "manager":
         if value:
-            assert isinstance(value, Iterable)
-            to_add.extend(value)
+            to_add.extend(cast("tuple[str, ...]", value))
 
     # Add the value of --exclude list.
     elif param.name == "exclude":
         if value:
-            assert isinstance(value, Iterable)
-            to_remove.update(value)
+            to_remove.update(cast("tuple[str, ...]", value))
 
     # Update the list of managers with the XKCD preset.
     elif param.name == "xkcd":
@@ -275,24 +279,21 @@ def update_manager_selection(
         # Because the parameter's name is transformed into a Python identifier on
         # instantiation, we have to reverse the process to get our value.
         # Example: --apt-mint => apt_mint => apt-mint
-        manager_id = param.name.removeprefix("no_").replace("_", "-")
+        manager_id = param.name.replace("_", "-")
         assert manager_id in pool.all_manager_ids, (
             f"unrecognized single manager selector {param.name!r}"
         )
 
-        # Normalize the value to a boolean.
-        if isinstance(value, str):
-            value = RawConfigParser.BOOLEAN_STATES.get(value.lower(), value)
-        assert value in (
-            manager_id,
-            True,
-            False,
-        ), f"unexpected value {value!r} for {param!r}"
-
-        if param.name.startswith("no_") ^ (value is False):
-            to_remove.add(manager_id)
-        else:
-            to_add.append(manager_id)
+        # One boolean per occurrence of the pair, in the order they were given:
+        # True for --<id>, False for --no-<id>. A configuration file provides a
+        # single value, which ManagerSelector wraps into one occurrence.
+        assert isinstance(value, tuple), f"unexpected value {value!r} for {param!r}"
+        for toggle in value:
+            assert toggle in (True, False), f"unexpected {toggle!r} for {param!r}"
+            if toggle is False:
+                to_remove.add(manager_id)
+            else:
+                to_add.append(manager_id)
 
     logging.debug(f"Managers added by {param}: {to_add}")
     logging.debug(f"Managers removed by {param}: {to_remove}")
@@ -306,34 +307,44 @@ def update_manager_selection(
         ctx.obj.setdefault("managers_to_remove", set()).update(to_remove)
 
 
+class ManagerSelector(Option):
+    """The `--<id>/--no-<id>` boolean flag pair of one manager.
+
+    Collects every occurrence instead of keeping the last one, as a plain
+    boolean flag would: exclusion takes precedence over inclusion whatever the
+    order the two halves are given in, so `--no-brew --brew` must still show
+    {func}`update_manager_selection` its `--no-brew` half.
+
+    ```{note}
+    A configuration file reaches the option as a lone value through
+    `default_map`, which Click cannot cast against a parameter collecting
+    several. Wrapping it here is what lets `brew = false` land as one
+    occurrence.
+    ```
+    """
+
+    def type_cast_value(self, ctx: click.Context, value: Any) -> Any:
+        """Read a lone configuration value as a single occurrence of the flag."""
+        if isinstance(value, (bool, str)):
+            value = (value,)
+        return super().type_cast_value(ctx, value)
+
+
 def single_manager_selectors():
-    """Dynamiccaly creates a dedicated flag selector alias for each manager."""
-    single_flags = []
-    single_no_flags = []
-    for manager_id, manager in pool.items():
-        single_flags.append(
-            option(
-                f"--{manager_id}",
-                flag_value=manager_id,
-                default=None,
-                help=f"Select {manager.name}.",
-                deprecated=UNMAINTAINED_REASON if manager.unmaintained else False,
-                expose_value=False,
-                callback=update_manager_selection,
-            )
+    """Dynamically creates a dedicated flag selector pair for each manager."""
+    return tuple(
+        option(
+            f"--{manager_id}/--no-{manager_id}",
+            cls=ManagerSelector,
+            multiple=True,
+            default=None,
+            help=f"Select or deselect {manager.name}.",
+            deprecated=UNMAINTAINED_REASON if manager.unmaintained else False,
+            expose_value=False,
+            callback=update_manager_selection,
         )
-        single_no_flags.append(
-            option(
-                f"--no-{manager_id}",
-                flag_value=manager_id,
-                default=None,
-                help=f"Deselect {manager.name}.",
-                deprecated=UNMAINTAINED_REASON if manager.unmaintained else False,
-                expose_value=False,
-                callback=update_manager_selection,
-            )
-        )
-    return *single_flags, *single_no_flags
+        for manager_id, manager in pool.items()
+    )
 
 
 def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):

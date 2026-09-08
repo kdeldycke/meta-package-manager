@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import platform
 import shutil
+import sys
 
 import click
 from click_extra import style
@@ -49,6 +50,12 @@ from click_extra.context import ACCESSIBLE, get
 from click_extra.version import VersionOption
 from extra_platforms import current_architecture, current_platform
 
+from . import (
+    __build_os__,
+    __build_target__,
+    __build_target_arch__,
+    __build_time__,
+)
 from .pool import pool
 
 DOCS_URL = "https://mpm.run"
@@ -188,6 +195,32 @@ def platform_label() -> str:
     return f"{current_platform().name} {current_architecture().name}"
 
 
+def build_rows() -> tuple[tuple[str, str], ...]:
+    """When and for what target this executable was compiled, or nothing at all.
+
+    Reads the placeholders `click-extra prebake all` fills in the release workflow.
+    They carry nothing outside a compiled binary, and the rows are dropped there: on
+    a source install the interpreter and the platform already rowed above *are* the
+    build, so repeating them says nothing new.
+
+    The target names the floor the binary was compiled for (`macosx-11.0-arm64`),
+    where {attr}`platform_label` names the machine running it now. Those answer
+    different questions in a bug report, which is what earns the second row.
+
+    Two rows rather than one sentence, because {func}`version_screen` sizes the
+    whole layout against its widest line and falls back to the plain message when
+    that overflows the terminal. Joined up, this metadata is wide enough to cost a
+    binary its version screen on an 80-column terminal; stacked, it costs no width
+    at all.
+    """
+    if not __build_time__:
+        return ()
+    target = __build_target__ or " ".join(
+        part for part in (__build_os__, __build_target_arch__) if part
+    )
+    return (("Built", __build_time__), *((("Target", target),) if target else ()))
+
+
 def render_logo() -> tuple[str, ...]:
     """Paint {data}`LOGO` into styled lines, one per pair of sub-pixel rows.
 
@@ -245,6 +278,7 @@ def _metadata(prog_name: str, version: str) -> tuple[tuple[str, str], ...]:
     rows = (
         ("Python", platform.python_version()),
         ("Platform", platform_label()),
+        *build_rows(),
         ("Managers", f"{supported} supported here, {total} total"),
         ("Docs", DOCS_URL),
     )
@@ -309,7 +343,10 @@ def colors_reach_output() -> bool:
     """
     color = invocation_color()
     if color is None:
-        return is_a_tty(click.get_text_stream("stdout"))
+        # `sys.stdout` rather than `click.get_text_stream("stdout")`: Click 8.5
+        # deprecated that helper for removal in 9.0, and it resolves to the same
+        # stream for an `isatty` probe.
+        return is_a_tty(sys.stdout)
     return color
 
 

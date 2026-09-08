@@ -23,12 +23,14 @@ import shutil
 import pytest
 from boltons.strutils import strip_ansi
 
+from meta_package_manager import logo
 from meta_package_manager.logo import (
     GUTTER,
     LOGO,
     LOGO_LINES,
     LOGO_WIDTH,
     TONES,
+    build_rows,
     env_summary,
     render_logo,
     version_screen,
@@ -177,6 +179,54 @@ def test_version_screen_needs_room(monkeypatch, columns, renders):
     monkeypatch.setenv("COLUMNS", columns)
     monkeypatch.setenv("LINES", "40")
     assert (version_screen(PROG, VERSION) is not None) is renders
+
+
+def test_build_rows_are_empty_outside_a_binary():
+    """A source install bakes nothing, so the two rows never reach the screen."""
+    assert build_rows() == ()
+
+
+def bake(monkeypatch) -> None:
+    """Fill the placeholders `click-extra prebake all` writes before a binary build.
+
+    The longest values any target produces, so the width assertion below is the
+    worst case rather than whatever this machine happens to be.
+    """
+    monkeypatch.setattr(logo, "__build_time__", "2026-09-08T10:24:16Z")
+    monkeypatch.setattr(logo, "__build_os__", "Windows")
+    monkeypatch.setattr(logo, "__build_target__", "manylinux_2_28_x86_64")
+    monkeypatch.setattr(logo, "__build_target_arch__", "ARM64 (AArch64)")
+
+
+def test_build_rows_reach_the_screen_once_baked(monkeypatch):
+    bake(monkeypatch)
+    assert build_rows() == (
+        ("Built", "2026-09-08T10:24:16Z"),
+        ("Target", "manylinux_2_28_x86_64"),
+    )
+    body = "\n".join(screen_lines(PROG, VERSION))
+    assert "2026-09-08T10:24:16Z" in body
+    assert "manylinux_2_28_x86_64" in body
+
+
+def test_build_rows_cost_the_screen_no_width(monkeypatch):
+    """A binary must still get its screen on a stock 80-column terminal.
+
+    The build metadata is stacked into two rows precisely so it never widens the
+    layout past the `Managers` row. Joined onto one line it would, and the screen
+    would then silently degrade to the plain message on every released binary,
+    which is the one build nobody runs from a checkout to notice.
+    """
+    monkeypatch.setenv("COLUMNS", "80")
+    monkeypatch.setenv("LINES", "40")
+    bare = version_screen(PROG, VERSION)
+    bake(monkeypatch)
+    baked = version_screen(PROG, VERSION)
+    assert bare is not None
+    assert baked is not None
+    assert max(map(len, strip_ansi(baked).split("\n"))) == max(
+        map(len, strip_ansi(bare).split("\n"))
+    )
 
 
 def test_version_screen_width_never_exceeds_the_terminal():

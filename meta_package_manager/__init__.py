@@ -22,3 +22,15 @@ point lives in {mod}`meta_package_manager.cli`.
 from __future__ import annotations
 
 __version__ = "8.0.0.dev0"
+# Empty placeholders `click-extra prebake all` fills in the release workflow, right
+# before the binary is compiled, so a downloaded executable can say when and for what
+# target it was built. They stay empty on every other install, where the interpreter
+# and the platform are the machine's own and answer the same question.
+# {func}`meta_package_manager.logo.build_rows` draws the filled ones on the version
+# screen. They sit here, against this file's keep-it-bare rule, because prebake
+# resolves its target module from `[project.scripts]` and rewrites it in place: a
+# named module would never be written to.
+__build_time__ = ""
+__build_os__ = ""
+__build_target__ = ""
+__build_target_arch__ = ""

@@ -291,6 +291,8 @@
 - [mpm] Redraw the readme's two CLI illustrations as SVG terminal windows, replacing captures that still pictured 14 managers and a `Supported` column mpm dropped.
 - [mpm] Refresh the readme's `outdated` and `upgrade --all` transcripts, which showed 2020-era packages and an output shape mpm replaced with the per-manager ✓ trail.
 - **Breaking:** [mpm] Layer the discovered configuration files instead of applying only the first. A project's `[tool.mpm]` now wins key by key over a machine-wide config, which used to be dropped whole. An explicit `--config` still pins one file.
+- [mpm] Report on the `--version` screen of a downloaded binary when and for what target it was compiled. A source install shows neither, its interpreter and platform saying the same thing.
+- [mpm] Stop calling a Click helper deprecated for removal in Click `9`, which warned on every colored `--version`.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

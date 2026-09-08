@@ -256,6 +256,21 @@ def test_version_regex_matches_sample(manager_id, sample_output, expected_versio
     assert matched == expected_version
 
 
+EOPKG_LISTING = (
+    "Package Name          |St|        Version|  Rel.|  Distro|             Date\n"
+    "===========================================================================\n"
+    "aalib                 | i|        1.4.0_5|     9|   Solus|07 Sep 2026 10:08\n"
+    "zram-generator-defaults  | i|          1.2.1|     7|   Solus|07 Sep 2026 10:09\n"
+    "zstd                  | i|          1.5.7|    33|   Solus|07 Sep 2026 10:09\n"
+    "zxing-cpp             | i|          2.3.0|     6|   Solus|07 Sep 2026 10:09\n"
+)
+"""A four-package `eopkg` listing, header and `===` separator included.
+
+`zram-generator-defaults` overflows the first column, pushing its pipe right,
+and the last line is a package rather than a footer.
+"""
+
+
 @pytest.mark.parametrize("member", ("installed", "outdated"))
 def test_eopkg_listing_keeps_its_last_rows(member, monkeypatch):
     """`eopkg`'s listings carry no footer, so no trailing line may be discarded.
@@ -268,32 +283,176 @@ def test_eopkg_listing_keeps_its_last_rows(member, monkeypatch):
     This guard is narrower than the bug class it comes from, and deliberately
     so: what a parser may discard can only be read from the tool's own output,
     not derived from the manager class. It pins the one listing shape measured
-    against eopkg `4.4.0`.
+    against eopkg `4.4.0` and `5.0.0`.
     """
     manager = pool["eopkg"]
-    listing = (
-        "Package Name          |St|        Version|  Rel.|  Distro|             Date\n"
-        "===========================================================================\n"
-        "aalib                 | i|        1.4.0_5|     9|   Solus|07 Sep 2026 10:08\n"
-        "zram-generator-defaults  | i|          1.2.1|     7|   Solus|07 Sep 2026 10:09\n"
-        "zstd                  | i|          1.5.7|    33|   Solus|07 Sep 2026 10:09\n"
-        "zxing-cpp             | i|          2.3.0|     6|   Solus|07 Sep 2026 10:09\n"
-    )
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: listing)
+    # `outdated` follows the listing with an `info` call; answering both with
+    # the listing leaves every candidate unresolved, which is the point here:
+    # this test is about which rows survive, not about the version join.
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: EOPKG_LISTING)
 
-    packages = {
-        package.id: str(package.installed_version)
-        for package in getattr(manager, member)
-    }
+    ids = {package.id for package in getattr(manager, member)}
 
     # The header and `===` separator carry no pipe-delimited version column, so
     # they fall through the regex on their own and need no slicing.
-    assert packages == {
+    assert ids == {"aalib", "zram-generator-defaults", "zstd", "zxing-cpp"}
+
+
+def test_eopkg_installed_reports_the_bare_version(monkeypatch):
+    """`installed` reports the `Version` column alone, release excluded.
+
+    Every snapshot carries this string, so the release stays out of it. Only
+    `outdated` pairs the two, where a release-only rebuild would otherwise read
+    as the same version on both sides.
+    """
+    manager = pool["eopkg"]
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: EOPKG_LISTING)
+
+    versions = {
+        package.id: str(package.installed_version) for package in manager.installed
+    }
+    assert versions == {
         "aalib": "1.4.0_5",
         "zram-generator-defaults": "1.2.1",
         "zstd": "1.5.7",
         "zxing-cpp": "2.3.0",
     }
+
+
+def test_eopkg_outdated_joins_the_upgrade_candidate(monkeypatch):
+    """`outdated` pairs the installed listing with the candidate `info` reports.
+
+    `list-upgrades --install-info` describes each package as installed, so the
+    upgrade target appears nowhere in it. The target comes from a second call,
+    `info` taking every name at once. Both sides carry the release, or the
+    `aalib` row below (a release-only rebuild) would read `1.4.0_5` on each side
+    and look like no upgrade at all.
+    """
+    manager = pool["eopkg"]
+    info_output = (
+        "Installed package:\n"
+        "Name                : aalib, version: 1.4.0_5, release: 9\n"
+        "Summary             : An ASCII art library\n"
+        "\n"
+        "Package found in Solus repository:\n"
+        "Name                : aalib, version: 1.4.0_5, release: 10\n"
+        "Summary             : An ASCII art library\n"
+        "\n"
+        "Installed package:\n"
+        "Name                : zstd, version: 1.5.7, release: 33\n"
+        "Summary             : Zstandard compression\n"
+        "\n"
+        "Package found in Solus repository:\n"
+        "Name                : zstd, version: 1.5.8, release: 34\n"
+        "Summary             : Zstandard compression\n"
+    )
+    calls: list[tuple[str, ...]] = []
+
+    def fake_run_cli(*args, **kwargs) -> str:
+        calls.append(tuple(str(a) for a in args))
+        return info_output if args and args[0] == "info" else EOPKG_LISTING
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+
+    packages = {
+        package.id: (
+            str(package.installed_version),
+            str(package.latest_version) if package.latest_version else None,
+        )
+        for package in manager.outdated
+    }
+
+    # The candidate is read from the repository section alone: the identically
+    # shaped `Name :` line of the `Installed package:` section above it must not
+    # win, or every package would report its own installed version as the target.
+    assert packages["aalib"] == ("1.4.0_5-9", "1.4.0_5-10")
+    assert packages["zstd"] == ("1.5.7-33", "1.5.8-34")
+    # A package `info` said nothing about keeps its row, without a target.
+    assert packages["zxing-cpp"] == ("2.3.0-6", None)
+
+    # One `info` call for the whole listing, not one per package.
+    info_calls = [call for call in calls if call and call[0] == "info"]
+    assert len(info_calls) == 1
+    assert set(info_calls[0][1:]) == {
+        "aalib",
+        "zram-generator-defaults",
+        "zstd",
+        "zxing-cpp",
+    }
+
+
+@pytest.mark.parametrize(
+    ("label", "info_output", "expected"),
+    (
+        (
+            "not installed: repository section only",
+            "htop package is not installed\n"
+            "Package found in Solus repository:\n"
+            "Name                : htop, version: 3.5.3, release: 30\n"
+            "Summary             : htop (interactive process viewer for Linux)\n"
+            "Description         : htop is an interactive process viewer for Linux.\n"
+            "Licenses            : GPL-2.0-or-later\n"
+            "Component           : system.utils\n"
+            "Dependencies        : ncurses glibc libcap2 lm_sensors \n"
+            "Distribution        : Solus, Dist. Release: 1\n"
+            "Architecture        : x86_64, Installed Size: 397.03 KB, "
+            "Package Size: 159.05\n"
+            "                      KB\n"
+            "Reverse Dependencies: htop-dbginfo \n",
+            [("htop", "3.5.3", "30")],
+        ),
+        (
+            "installed: both sections, only the repository one counts",
+            "Installed package:\n"
+            "Name                : bash, version: 5.3.15, release: 91\n"
+            "Summary             : bash (sh-compatible shell)\n"
+            "Licenses            : GPL-3.0-or-later\n"
+            "Component           : system.base\n"
+            "Dependencies        : readline glibc \n"
+            "Distribution        : Solus, Dist. Release: 1\n"
+            "Architecture        : x86_64, Installed Size: 9.51 MB\n"
+            "Reverse Dependencies: \n"
+            "\n"
+            "Package found in Solus repository:\n"
+            "Name                : bash, version: 5.3.15, release: 91\n"
+            "Summary             : bash (sh-compatible shell)\n",
+            [("bash", "5.3.15", "91")],
+        ),
+    ),
+)
+def test_eopkg_candidate_regex_reads_real_info_output(label, info_output, expected):
+    """The candidate pattern runs against `eopkg info` output captured verbatim.
+
+    Both blocks come off a Solus `4.9` host. The second is the one that matters:
+    an installed package prints an `Installed package:` section whose `Name :`
+    line is shaped exactly like the repository one, so a pattern keyed on the
+    field name alone would report the installed version as the upgrade target.
+    Exactly one match must come back, and it must be the repository's.
+    """
+    matches = [
+        (m.group("package_id"), m.group("version"), m.group("release"))
+        for m in pool["eopkg"]._CANDIDATE_REGEXP.finditer(info_output)
+    ]
+    assert matches == expected, label
+
+
+def test_eopkg_outdated_skips_the_info_call_when_nothing_is_outdated(monkeypatch):
+    """An empty listing must not reach `info`, which prints help with no names."""
+    manager = pool["eopkg"]
+    header = (
+        "Package Name          |St|        Version|  Rel.|  Distro|             Date\n"
+        "===========================================================================\n"
+    )
+    calls: list[tuple[str, ...]] = []
+
+    def fake_run_cli(*args, **kwargs) -> str:
+        calls.append(tuple(str(a) for a in args))
+        return header
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+
+    assert list(manager.outdated) == []
+    assert [call[0] for call in calls] == ["list-upgrades"]
 
 
 def test_eopkg_search_decodes_character_references(monkeypatch):

@@ -80,6 +80,27 @@ class EOPKG(PackageManager):
         r"^(?P<package_id>\S+)\s+\|.+?\|\s*(?P<installed_version>\S+)"
         r"\s*\|.+?\|.+?\|.+$",
     )
+    _UPGRADE_REGEXP = re.compile(
+        r"^(?P<package_id>\S+)\s+\|.+?\|\s*(?P<version>\S+)"
+        r"\s*\|\s*(?P<release>\S+)\s*\|.+?\|.+$",
+    )
+    """{attr}`_LIST_REGEXP` with the `Rel.` column captured too.
+
+    The two cannot be one pattern: {meth}`parse_regex_lines` maps every named
+    group onto a package field, and `release` is not one of them.
+    """
+    _CANDIDATE_REGEXP = re.compile(
+        r"^Package found in .+ repository:\n"
+        r"Name\s*:\s*(?P<package_id>[^,]+),\s*version:\s*(?P<version>[^,]+),"
+        r"\s*release:\s*(?P<release>\S+)\s*$",
+        re.MULTILINE,
+    )
+    """The upgrade candidate, read from the repository half of an `info` block.
+
+    `info` prints an `Installed package:` section before this one, opening on an
+    identically shaped `Name :` line, so the pattern anchors on the repository
+    heading and takes the line directly under it.
+    """
     _SEARCH_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\s+- (?P<description>.+)$",
         re.MULTILINE,
@@ -147,18 +168,20 @@ class EOPKG(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        `--install-info` describes the package as it stands on the system, so the
-        version column is the *installed* one and the upgrade target is absent.
-        `latest_version` is therefore left unset.
+        Two queries, because one cannot answer both halves. `list-upgrades`
+        names what is outdated but `--install-info` describes each package *as
+        installed*, so its version column is the current one and the upgrade
+        target appears nowhere. `info` holds the target, and it takes every
+        package name at once, so the whole listing costs one extra invocation
+        rather than one per package.
 
-        ```{todo}
-        Report the upgrade target. `eopkg info` takes every package name at once,
-        and prints a `Package found in {repo} repository:` section whose
-        `Name : {id}, version: {version}, release: {release}` line carries the
-        candidate, so one extra invocation would fill `latest_version` for the
-        whole listing. Parse that section rather than `--xml`, which emits one
-        ambiguous entry per name and buries the version inside `<History>`.
-        ```
+        Both sides are reported as `{version}-{release}`, the pair eopkg builds
+        its package files from (`htop-3.5.3-30-1-x86_64.eopkg`). A bare version
+        would hide the release, and a release-only rebuild is a real upgrade
+        that would then read as the same version on both sides. This is the one
+        operation where that matters, which is why `installed` above still
+        reports the bare version: changing it would rewrite the version string
+        every snapshot carries.
 
         ```{code-block} shell-session
 
@@ -173,10 +196,61 @@ class EOPKG(PackageManager):
         aom                  | i|         3.12.1|    26|   Solus|07 Sep 2026 10:08
         appstream            | i|          1.1.2|    17|   Solus|07 Sep 2026 10:08
         ```
+
+        `info` prints an `Installed package:` section before the repository one
+        whenever the package is installed, and both open on an identically
+        shaped `Name :` line. That is why {attr}`_CANDIDATE_REGEXP` anchors on
+        the repository heading rather than on the field name. The block below
+        shows a package that is *not* installed, so only the repository half
+        appears:
+
+        ```{code-block} console
+
+        $ eopkg --no-color info htop
+        htop package is not installed
+        Package found in Solus repository:
+        Name                : htop, version: 3.5.3, release: 30
+        Summary             : htop (interactive process viewer for Linux)
+        Description         : htop is an interactive process viewer for Linux.
+        Licenses            : GPL-2.0-or-later
+        Component           : system.utils
+        Dependencies        : ncurses glibc libcap2 lm_sensors
+        Distribution        : Solus, Dist. Release: 1
+        Architecture        : x86_64, Installed Size: 397.03 KB, Package Size: 159.05
+                              KB
+        Reverse Dependencies: htop-dbginfo
+        ```
         """
         output = self.run_cli("list-upgrades", "--install-info")
 
-        yield from self.parse_regex_lines(self._LIST_REGEXP, output)
+        installed: dict[str, str] = {}
+        for line in output.splitlines():
+            match = self._UPGRADE_REGEXP.match(line)
+            if match:
+                installed[match.group("package_id")] = (
+                    f"{match.group('version')}-{match.group('release')}"
+                )
+        if not installed:
+            return
+
+        candidates = {
+            match.group("package_id"): (
+                f"{match.group('version')}-{match.group('release')}"
+            )
+            for match in self._CANDIDATE_REGEXP.finditer(
+                self.run_cli("info", *installed),
+            )
+        }
+
+        for package_id, installed_version in installed.items():
+            yield self.package(
+                id=package_id,
+                installed_version=installed_version,
+                # A package pulled from the repository since the listing was
+                # built has no candidate section, and is reported without one
+                # rather than dropped: it is still outdated.
+                latest_version=candidates.get(package_id),
+            )
 
     @search_capabilities(exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

@@ -35,6 +35,7 @@
 - [eopkg] Fix version detection on eopkg `5.0.0`, which calls itself `eopkg.bin` in its banner: the manager left the pool on every Solus host running it.
 - [eopkg] Fix `installed` and `outdated`, which silently dropped the last two packages of every listing.
 - [eopkg] Decode the character references `search` descriptions carry, so `ImageMagick&#xAE; suite` reads as `ImageMagick® suite`.
+- [eopkg] Report the upgrade target in `outdated`, which had none. Both sides now name the release, so a rebuild no longer reads as the same version.
 - [emerge] Fix `outdated` and `search`, which reported nothing on Gentoo: the global `--quiet` they sent strips the version and description fields their parsers read.
 - [composer,dnf,emerge,eopkg,pacman,sfsu] Correct the `search` commands shown on each manager's page, which named fewer options than `mpm` actually runs.
 - [composer,dnf,pacman,pwsh-gallery,sfsu,yarn] Correct the inventory and outdated commands shown on each manager's page, which named fewer options than `mpm` actually runs.

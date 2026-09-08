@@ -17,7 +17,7 @@ The two are layered key by key, with the project's `pyproject.toml` winning wher
 | Unix     | `~/.config/mpm/`                       |
 | Windows  | `C:\Users\<user>\AppData\Roaming\mpm\` |
 
-The dedicated config file can be TOML, or any other [format click-extra reads](https://kdeldycke.github.io/click-extra/config-formats.html). INI, XML, property lists, SQLite databases and argfiles need no extra dependency, as the Python standard library parses them all; the rest ask for one, listed in the [extra dependencies](install.md#extra-dependencies) table. An explicit `--config` flag always takes precedence over auto-discovery.
+The dedicated config file can be TOML, or any other [format click-extra reads](https://kdeldycke.github.io/click-extra/config-formats.html). JSON, INI, property lists, SQLite databases and [argfiles](https://kdeldycke.github.io/click-extra/config-formats.html#argfile) need no extra dependency, the Python standard library parsing them all. YAML, XML and the JSON dialects each ask for one, listed in the [extra dependencies](install.md#extra-dependencies) table. An explicit `--config` flag always takes precedence over auto-discovery.
 
 ## File format
 

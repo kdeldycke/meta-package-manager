@@ -48,7 +48,7 @@ from urllib.parse import quote, urlparse
 
 import yaml
 from click_extra.table import TableFormat, render_table
-from extra_platforms import Group, extract_members
+from extra_platforms import extract_members
 
 from meta_package_manager.capabilities import (
     Operations,
@@ -362,7 +362,7 @@ def unsupported_anchors() -> dict[str, str]:
 DOCS_SITE_URL = "https://mpm.run"
 """Base URL of the published documentation site.
 
-Used by {func}`operation_matrix` to link each manager ID of `readme.md` to its
+Used by {func}`manager_roster` to link each manager ID of `readme.md` to its
 documentation page: the readme renders on GitHub and PyPI, where relative Sphinx
 links cannot resolve, so the links must be absolute.
 
@@ -424,7 +424,7 @@ near-black background rather than about contrast ratios.
 """
 
 FACT_SEPARATOR = "\u00a0· "
-"""Separator between the repeated values of an infobox row.
+"""Separator between repeated values: an infobox row, or a readme roster.
 
 A middle dot rather than a comma: the values are code spans whose own boxes
 already read as separate tokens, and a comma between them adds a mark the eye
@@ -740,89 +740,31 @@ def lock_families_table() -> str:
     )
 
 
-def operation_matrix() -> tuple[str, str]:
-    """Produce a table of managers' metadata and supported operations.
+def manager_roster(*, unmaintained: bool = False) -> str:
+    """Produce a run of manager IDs, each linking to its documentation page.
 
-    Each manager ID links to its dedicated documentation page (absolute URL:
-    the readme renders on GitHub and PyPI, where relative Sphinx links cannot
-    resolve). Home pages are listed on the manager pages themselves.
+    Two of these open the manager section of `readme.md`: the maintained pool
+    first, then the few whose upstream is unmaintained.
+
+    A roster rather than a matrix of supported operations, which is why nothing
+    here reads a manager's capabilities. At a column per operation and a row per
+    manager, that table had grown to two thirds of the readme's bulk and wide
+    enough for GitHub to render it in a scrolling box, while every fact in it is
+    read better elsewhere: per manager, the infobox of {func}`manager_card`
+    carries the version floor, the cooldown support, the platforms and the
+    operations; across managers, the index of `docs/managers.md` covers platform
+    coverage and upstream health, and `docs/cooldown.md` the cooldown gate.
+
+    Links are absolute, since the readme renders on GitHub and PyPI, where
+    relative Sphinx links cannot resolve.
+
+    :param unmaintained: Render the managers carrying the `unmaintained` flag,
+        rather than the rest of the pool.
     """
-    # Build up the column titles.
-    headers = [
-        "Package manager",
-        "Version",
-        "Cooldown",
-    ]
-
-    # Footnotes are used to details the OSes covered by each platform group.
-    footnotes = []
-
-    # One platform column, with the legend its cells need set below the table: a
-    # column per platform labelled each icon, a single one cannot. The footnote
-    # naming a group's members hangs off the icon it belongs to, which is also
-    # what keeps those definitions referenced instead of orphaned.
-    legend = []
-    for p_obj in MAIN_PLATFORMS:
-        entry = f"{p_obj.icon} {p_obj.name}"
-        # Add footnote for groups with more than one platform.
-        if isinstance(p_obj, Group) and len(p_obj) > 1:
-            footnote_tag = f"[^{p_obj.id}]"
-            entry += footnote_tag
-            platforms_string = ", ".join(
-                sorted(
-                    (
-                        p.name
-                        for p in p_obj.members.values()  # type: ignore[attr-defined]
-                    ),
-                    key=str.casefold,
-                ),
-            )
-            footnotes.append(f"{footnote_tag}: {p_obj.name}: {platforms_string}.")
-        legend.append(entry)
-    headers.append("Platforms")
-
-    headers.extend(f"`{op.name}`" for op in Operations)
-
-    table = []
-    for mid, m in sorted(pool.items()):
-        line = [
-            f"[`{mid}`]({manager_page_url(mid)})"
-            + ("" if not m.unmaintained else f" [⚠️]({manager_page_url(mid)})"),
-            _format_requirement(m.requirement or ""),
-            "✓" if m.supports_cooldown else "",
-        ]
-        line.append(
-            " ".join(
-                p_obj.icon
-                for p_obj in MAIN_PLATFORMS
-                if m.platforms.issuperset(extract_members(p_obj))
-            ),
-        )
-        line.extend("✓" if implements(m, op) else "" for op in Operations)
-        table.append(line)
-
-    # Set each column alignment.
-    alignments = ["left", "left", "center", "center"]
-    alignments.extend(["center"] * len(Operations))
-
-    rendered_table = render_table(
-        table,
-        headers=headers,
-        table_format=TableFormat.GITHUB,
-        colalign=alignments,
-        disable_numparse=True,
-    )
-
-    # The legend decodes the Platforms column, so it travels with the table
-    # rather than with the footnote definitions parked at the end of the readme.
-    # The blank line before it is load-bearing: this output is mirrored into a
-    # raw Markdown region that `mdformat` reformats in the autofix pipeline, and
-    # a line abutting the table is parsed as one more table row, which the
-    # formatter then rewrites into an explicit `| … |` row. That desynchronizes
-    # the region from this generator and reddens `test_mirror_blocks_in_sync`.
-    return (
-        f"{rendered_table}\n\nPlatforms: {FACT_SEPARATOR.join(legend)}",
-        "\n\n".join(footnotes),
+    return FACT_SEPARATOR.join(
+        f"[`{mid}`]({manager_page_url(mid)})"
+        for mid, m in sorted(pool.items())
+        if m.unmaintained == unmaintained
     )
 
 

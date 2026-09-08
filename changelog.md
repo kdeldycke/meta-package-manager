@@ -290,6 +290,9 @@
 - [mpm] Order the subcommand sections of `mpm --help` from the broadest to the narrowest, instead of by the alphabet of their source module.
 - [mpm] Redraw the readme's two CLI illustrations as SVG terminal windows, replacing captures that still pictured 14 managers and a `Supported` column mpm dropped.
 - [mpm] Refresh the readme's `outdated` and `upgrade --all` transcripts, which showed 2020-era packages and an output shape mpm replaced with the per-manager ✓ trail.
+- [mpm] List the readme's supported managers, unmaintained ones apart, instead of tabling every operation they implement. Each manager's own page keeps that detail.
+- [mpm] Show the readme's command output as SVG terminal windows, and illustrate the headline features with them.
+- [mpm] Lead the readme's installation section with `uv`, which installs `mpm` on Linux, macOS and Windows alike.
 - **Breaking:** [mpm] Layer the discovered configuration files instead of applying only the first. A project's `[tool.mpm]` now wins key by key over a machine-wide config, which used to be dropped whole. An explicit `--config` still pins one file.
 - [mpm] Report on the `--version` screen of a downloaded binary when and for what target it was compiled. A source install shows neither, its interpreter and platform saying the same thing.
 - [mpm] Stop calling a Click helper deprecated for removal in Click `9`, which warned on every colored `--version`.

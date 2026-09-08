@@ -8,10 +8,6 @@
   </a>
 </p>
 
-<a href="https://xkcd.com/1654/" alt="XKCD #1654: Universal Install Script">
-<img align="right" width="20%" height="20%" src="http://imgs.xkcd.com/comics/universal_install_script.png"/>
-</a>
-
 [![Last release](https://img.shields.io/pypi/v/meta-package-manager.svg)](https://pypi.org/project/meta-package-manager)
 [![Python versions](https://img.shields.io/pypi/pyversions/meta-package-manager.svg)](https://pypi.org/project/meta-package-manager)
 [![Downloads](https://static.pepy.tech/badge/meta_package_manager/month)](https://pepy.tech/projects/meta_package_manager)
@@ -50,13 +46,11 @@ $ mpm restore packages.toml
 
 ## Features
 
-<img align="right" width="38%" height="38%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.svg" alt="Packages an upgrade is available for"/>
-
-<img align="right" width="38%" height="38%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.svg" alt="Package managers detected on the system"/>
-
-- [Snapshot installed packages](https://mpm.run/cli-parameters/#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once.
+- [Snapshot installed packages](https://mpm.run/cli-parameters/#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once:
+  ![Every installed package written to a single TOML manifest](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-dump-cli.svg)
 - [Restore that manifest](https://mpm.run/cli-parameters/#mpm-restore) on another machine, and get the same set of packages back.
-- Inventory and list all [package managers](https://mpm.run/cli-parameters/#mpm-managers) available on the system.
+- Inventory and list all [package managers](https://mpm.run/cli-parameters/#mpm-managers) available on the system:
+  ![Package managers detected on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.svg)
 - Supports macOS, Linux and Windows.
 - [Standalone executables](#executables) for Linux, macOS and Windows.
 - [List installed packages](https://mpm.run/cli-parameters/#mpm-installed).
@@ -64,7 +58,8 @@ $ mpm restore packages.toml
 - [Search for packages](https://mpm.run/cli-parameters/#mpm-search).
 - [Install a package](https://mpm.run/cli-parameters/#mpm-install).
 - [Remove a package](https://mpm.run/cli-parameters/#mpm-remove).
-- [List outdated packages](https://mpm.run/cli-parameters/#mpm-outdated).
+- [List outdated packages](https://mpm.run/cli-parameters/#mpm-outdated):
+  ![Packages an upgrade is available for](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.svg)
 - [List orphaned packages](https://mpm.run/cli-parameters/#mpm-orphans).
 - [Sync local package infos](https://mpm.run/cli-parameters/#mpm-sync).
 - [Diagnose the health of package managers](https://mpm.run/cli-parameters/#mpm-doctor).
@@ -86,174 +81,38 @@ $ mpm restore packages.toml
 One CLI to rule them all. Every manager below links to its own documentation page, and `mpm` [runs them concurrently](https://mpm.run/concurrency/) bar the few that queue on a shared backend.
 
 <!-- mirror-src
-from meta_package_manager._docs import operation_matrix
+from meta_package_manager._docs import manager_roster
 
-print(operation_matrix()[0])
+print(manager_roster())
 -->
 
-| Package manager                                                                       | Version         | Cooldown |  Platforms   | `installed` | `outdated` | `orphans` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` | `doctor` |
-| :------------------------------------------------------------------------------------ | :-------------- | :------: | :----------: | :---------: | :--------: | :-------: | :------: | :-------: | :-------: | :-----------: | :------: | :----: | :-------: | :------: |
-| [`am`](https://mpm.run/managers/am/)                                                  | >= 10.4         |          |      🐧      |      ✓      |            |           |          |           |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`antidote`](https://mpm.run/managers/antidote/)                                      | >= 2.2          |          |    🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |           |       ✓       |    ✓     |        |           |          |
-| [`antigen`](https://mpm.run/managers/antigen/)                                        | >= 2            |          |    🐧 🍎     |      ✓      |            |           |          |           |           |       ✓       |    ✓     |        |           |          |
-| [`apk`](https://mpm.run/managers/apk/)                                                | >= 2.10         |          |      🐧      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`apm`](https://mpm.run/managers/apm/) [⚠️](https://mpm.run/managers/apm/)             | >= 1            |          |  🅱️ 🐧 🍎 🪟  |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`apt`](https://mpm.run/managers/apt/)                                                | >= 1            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`apt-cyg`](https://mpm.run/managers/apt-cyg/) [⚠️](https://mpm.run/managers/apt-cyg/) |                 |          |              |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |   ✓    |           |          |
-| [`apt-mint`](https://mpm.run/managers/apt-mint/)                                      | >= 1            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`aptitude`](https://mpm.run/managers/aptitude/)                                      | >= 0.4.11.4     |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`asdf`](https://mpm.run/managers/asdf/)                                              | >= 0.16         |          |    🐧 🍎     |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`aura`](https://mpm.run/managers/aura/)                                              | >= 4            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`basalt`](https://mpm.run/managers/basalt/)                                          | >= 0.10         |          |    🐧 🍎     |      ✓      |            |           |          |     ✓     |           |               |    ✓     |        |           |          |
-| [`bin`](https://mpm.run/managers/bin/)                                                | >= 0.27         |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |          |           |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`bob`](https://mpm.run/managers/bob/)                                                |                 |          |   🐧 🍎 🪟   |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`bpkg`](https://mpm.run/managers/bpkg/)                                              |                 |          |    🐧 🍎     |             |            |           |          |     ✓     |           |               |          |        |           |          |
-| [`brew`](https://mpm.run/managers/brew/)                                              | >= 6            |          |    🐧 🍎     |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`bun`](https://mpm.run/managers/bun/)                                                | >= 1.2          |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`cargo`](https://mpm.run/managers/cargo/)                                            | >= 1            |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |        |           |          |
-| [`cask`](https://mpm.run/managers/cask/)                                              | >= 6            |          |      🍎      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`cave`](https://mpm.run/managers/cave/)                                              |                 |          |              |      ✓      |            |     ✓     |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`choco`](https://mpm.run/managers/choco/)                                            | >= 2            |          |      🪟      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`choosenim`](https://mpm.run/managers/choosenim/)                                    | >= 0.8.4        |          |   🐧 🍎 🪟   |      ✓      |            |           |    ✓     |     ✓     |     ✓     |               |    ✓     |        |           |          |
-| [`chromebrew`](https://mpm.run/managers/chromebrew/)                                  |                 |          |              |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`claude-code-plugins`](https://mpm.run/managers/claude-code-plugins/)                |                 |          |   🐧 🍎 🪟   |      ✓      |            |           |          |     ✓     |     ✓     |               |    ✓     |   ✓    |     ✓     |          |
-| [`clib`](https://mpm.run/managers/clib/)                                              |                 |          |    🐧 🍎     |             |            |           |    ✓     |     ✓     |           |               |    ✓     |        |           |          |
-| [`composer`](https://mpm.run/managers/composer/)                                      | >= 1.4          |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
-| [`conda`](https://mpm.run/managers/conda/)                                            | >= 4.6          |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`cpan`](https://mpm.run/managers/cpan/)                                              | >= 1.64         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |          |        |           |          |
-| [`deb-get`](https://mpm.run/managers/deb-get/)                                        |                 |          |      🐧      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`dkp-pacman`](https://mpm.run/managers/dkp-pacman/)                                  | >= 6            |          |    🐧 🍎     |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`dnf`](https://mpm.run/managers/dnf/)                                                | >= 4, < 5       |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`dnf5`](https://mpm.run/managers/dnf5/)                                              | >= 5            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`dotnet`](https://mpm.run/managers/dotnet/)                                          | >= 8.0.400      |          |   🐧 🍎 🪟   |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`elan`](https://mpm.run/managers/elan/)                                              | >= 4            |          |   🐧 🍎 🪟   |      ✓      |            |     ✓     |          |     ✓     |           |               |    ✓     |        |     ✓     |          |
-| [`emacs`](https://mpm.run/managers/emacs/)                                            |                 |          |   🐧 🍎 🪟   |      ✓      |            |           |          |     ✓     |           |               |    ✓     |   ✓    |           |          |
-| [`emerge`](https://mpm.run/managers/emerge/)                                          | >= 3            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`eopkg`](https://mpm.run/managers/eopkg/)                                            | >= 3.2          |          |      🐧      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`fink`](https://mpm.run/managers/fink/)                                              |                 |          |      🍎      |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`fisher`](https://mpm.run/managers/fisher/)                                          | >= 4            |          |    🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`flatpak`](https://mpm.run/managers/flatpak/)                                        | >= 1.2          |    ✓     |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
-| [`fwupd`](https://mpm.run/managers/fwupd/)                                            | >= 1.9.5        |          |      🐧      |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |          |   ✓    |           |          |
-| [`gcloud`](https://mpm.run/managers/gcloud/)                                          | >= 170          |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |          |     ✓     |           |       ✓       |    ✓     |        |           |          |
-| [`gem`](https://mpm.run/managers/gem/)                                                | >= 2.5          |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`getnf`](https://mpm.run/managers/getnf/)                                            |                 |          |    🐧 🍎     |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`gext`](https://mpm.run/managers/gext/)                                              | >= 0.11         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`gh-ext`](https://mpm.run/managers/gh-ext/)                                          | >= 2            |          |   🐧 🍎 🪟   |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`ghcup`](https://mpm.run/managers/ghcup/)                                            | >= 0.2.1        |          |   🐧 🍎 🪟   |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |   ✓    |     ✓     |          |
-| [`go`](https://mpm.run/managers/go/)                                                  | >= 1.16         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |           |               |          |        |           |          |
-| [`guix`](https://mpm.run/managers/guix/)                                              |                 |          |      🐧      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`gup`](https://mpm.run/managers/gup/)                                                | >= 1.3.1        |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |          |           |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`haxelib`](https://mpm.run/managers/haxelib/)                                        | >= 4            |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`hyprpm`](https://mpm.run/managers/hyprpm/)                                          | >= 0.56         |          |      🐧      |      ✓      |            |           |          |     ✓     |           |       ✓       |    ✓     |        |           |          |
-| [`ips`](https://mpm.run/managers/ips/)                                                |                 |          |              |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`jpm`](https://mpm.run/managers/jpm/)                                                |                 |          |   🐧 🍎 🪟   |             |            |           |          |     ✓     |           |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`julia`](https://mpm.run/managers/julia/)                                            |                 |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`juliaup`](https://mpm.run/managers/juliaup/)                                        | >= 1.21         |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`krew`](https://mpm.run/managers/krew/)                                              | >= 0.4          |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`lazy`](https://mpm.run/managers/lazy/)                                              | >= 11           |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
-| [`luarocks`](https://mpm.run/managers/luarocks/)                                      | >= 3.9.1        |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`lure`](https://mpm.run/managers/lure/)                                              | >= 0.1.3        |          |      🐧      |      ✓      |            |           |    ✓     |     ✓     |           |               |          |   ✓    |           |          |
-| [`macports`](https://mpm.run/managers/macports/)                                      | >= 2            |          |      🍎      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`mamba`](https://mpm.run/managers/mamba/)                                            | >= 2            |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`mas`](https://mpm.run/managers/mas/)                                                | >= 7            |    ✓     |      🍎      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`mason`](https://mpm.run/managers/mason/)                                            | >= 2            |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |     ✓     |               |    ✓     |   ✓    |           |          |
-| [`micro`](https://mpm.run/managers/micro/)                                            | >= 2            |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`micromamba`](https://mpm.run/managers/micromamba/)                                  | >= 2            |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`miktex`](https://mpm.run/managers/miktex/)                                          | >= 22.3         |          |    🐧 🪟     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`mise`](https://mpm.run/managers/mise/)                                              | >= 2025.5.10    |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`nala`](https://mpm.run/managers/nala/)                                              | >= 0.12.2       |          |      🐧      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`nimble`](https://mpm.run/managers/nimble/)                                          | >= 0.22         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |   ✓    |           |          |
-| [`nix`](https://mpm.run/managers/nix/)                                                | >= 2            |          |    🐧 🍎     |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`npm`](https://mpm.run/managers/npm/)                                                | >= 11.10        |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
-| [`oh-my-fish`](https://mpm.run/managers/oh-my-fish/)                                  | >= 6            |          |    🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`ollama`](https://mpm.run/managers/ollama/)                                          | >= 0.5          |          |   🐧 🍎 🪟   |      ✓      |            |           |          |     ✓     |     ✓     |               |    ✓     |        |           |          |
-| [`opam`](https://mpm.run/managers/opam/)                                              | >= 2            |          |   🅱️ 🐧 🍎    |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`opkg`](https://mpm.run/managers/opkg/)                                              | >= 0.2          |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`pacaur`](https://mpm.run/managers/pacaur/) [⚠️](https://mpm.run/managers/pacaur/)    | >= 4            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`pacman`](https://mpm.run/managers/pacman/)                                          | >= 5            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`pacstall`](https://mpm.run/managers/pacstall/)                                      | >= 6            |          |      🐧      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`pamac`](https://mpm.run/managers/pamac/)                                            | >= 11           |          |      🐧      |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`paru`](https://mpm.run/managers/paru/)                                              | >= 1.9.3        |    ✓     |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`pear`](https://mpm.run/managers/pear/)                                              | >= 1.10         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`pearl`](https://mpm.run/managers/pearl/)                                            |                 |          |    🐧 🍎     |      ✓      |            |           |    ✓     |     ✓     |     ✓     |               |    ✓     |        |           |          |
-| [`pi`](https://mpm.run/managers/pi/)                                                  |                 |          |   🐧 🍎 🪟   |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`pikaur`](https://mpm.run/managers/pikaur/)                                          | >= 1            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`pip`](https://mpm.run/managers/pip/)                                                | >= 26.1         |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |    ✓     |
-| [`pipx`](https://mpm.run/managers/pipx/)                                              | >= 1            |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`pipxu`](https://mpm.run/managers/pipxu/)                                            |                 |          |    🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`pixi`](https://mpm.run/managers/pixi/)                                              | >= 0.65         |          |   🐧 🍎 🪟   |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`pkcon`](https://mpm.run/managers/pkcon/)                                            | >= 0.7          |          |      🐧      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`pkg`](https://mpm.run/managers/pkg/)                                                | >= 1.11         |          |              |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`pkg-tools`](https://mpm.run/managers/pkg-tools/)                                    |                 |          |              |      ✓      |            |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`pkgin`](https://mpm.run/managers/pkgin/)                                            |                 |          |              |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`pkgit`](https://mpm.run/managers/pkgit/)                                            | >= 1.2          |          |      🐧      |      ✓      |            |           |    ✓     |     ✓     |           |       ✓       |          |        |           |          |
-| [`pkgm`](https://mpm.run/managers/pkgm/)                                              |                 |          |    🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |           |       ✓       |    ✓     |        |           |          |
-| [`platformio-core`](https://mpm.run/managers/platformio-core/)                        |                 |          |   🐧 🍎 🪟   |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
-| [`pnpm`](https://mpm.run/managers/pnpm/)                                              | >= 11           |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`ports`](https://mpm.run/managers/ports/)                                            |                 |          |              |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`prt-get`](https://mpm.run/managers/prt-get/)                                        | >= 5.19         |          |              |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`pwsh-gallery`](https://mpm.run/managers/pwsh-gallery/)                              | >= 7.4          |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`pyenv`](https://mpm.run/managers/pyenv/)                                            | >= 2.3.13       |          |    🐧 🍎     |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |        |           |          |
-| [`raco`](https://mpm.run/managers/raco/)                                              |                 |          |   🐧 🍎 🪟   |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`roswell`](https://mpm.run/managers/roswell/)                                        | >= 22.12.14.113 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |           |               |          |        |           |          |
-| [`rustup`](https://mpm.run/managers/rustup/)                                          | >= 1.28         |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`scoop`](https://mpm.run/managers/scoop/)                                            | >= 0.2.4        |          |      🪟      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`sdkman`](https://mpm.run/managers/sdkman/)                                          | >= 5            |          |    🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`sfsu`](https://mpm.run/managers/sfsu/)                                              | >= 1.16         |          |      🪟      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`sheldon`](https://mpm.run/managers/sheldon/)                                        | >= 0.6          |          |    🐧 🍎     |             |            |           |          |           |           |       ✓       |    ✓     |        |           |          |
-| [`shelly`](https://mpm.run/managers/shelly/)                                          | >= 3            |          |              |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`skills`](https://mpm.run/managers/skills/)                                          |                 |          |   🐧 🍎 🪟   |      ✓      |            |           |          |           |           |       ✓       |    ✓     |        |           |          |
-| [`slapt-get`](https://mpm.run/managers/slapt-get/)                                    |                 |          |              |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`snap`](https://mpm.run/managers/snap/)                                              | >= 2            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`soar`](https://mpm.run/managers/soar/)                                              | >= 0.12         |          |      🐧      |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`sorcery`](https://mpm.run/managers/sorcery/)                                        |                 |          |              |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`spack`](https://mpm.run/managers/spack/)                                            | >= 1            |          |    🐧 🍎     |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |   ✓    |     ✓     |          |
-| [`steamcmd`](https://mpm.run/managers/steamcmd/)                                      |                 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |             |            |           |          |     ✓     |           |               |          |        |           |          |
-| [`stew`](https://mpm.run/managers/stew/)                                              | >= 0.3          |          |   🐧 🍎 🪟   |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`sun-tools`](https://mpm.run/managers/sun-tools/)                                    |                 |          |              |      ✓      |            |           |          |           |           |               |    ✓     |        |           |          |
-| [`swupd`](https://mpm.run/managers/swupd/) [⚠️](https://mpm.run/managers/swupd/)       |                 |          |              |      ✓      |            |           |    ✓     |     ✓     |           |       ✓       |    ✓     |        |     ✓     |          |
-| [`tazpkg`](https://mpm.run/managers/tazpkg/)                                          |                 |          |              |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`tlmgr`](https://mpm.run/managers/tlmgr/)                                            | >= 2018         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`topgrade`](https://mpm.run/managers/topgrade/)                                      | >= 17           |          |  🅱️ 🐧 🍎 🪟  |             |            |           |          |           |           |       ✓       |          |        |           |          |
-| [`trizen`](https://mpm.run/managers/trizen/)                                          | >= 1            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`urpmi`](https://mpm.run/managers/urpmi/)                                            |                 |          |              |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-| [`uv`](https://mpm.run/managers/uv/)                                                  | >= 0.5          |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`uvx`](https://mpm.run/managers/uvx/)                                                | >= 0.10.10      |    ✓     | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`vagrant`](https://mpm.run/managers/vagrant/)                                        | >= 2.4          |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`vcpkg`](https://mpm.run/managers/vcpkg/)                                            |                 |          |   🐧 🍎 🪟   |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`vim-pack`](https://mpm.run/managers/vim-pack/)                                      | >= 0.12         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`volta`](https://mpm.run/managers/volta/) [⚠️](https://mpm.run/managers/volta/)       | >= 1.0.2        |          |   🐧 🍎 🪟   |      ✓      |            |           |          |     ✓     |     ✓     |               |    ✓     |        |           |          |
-| [`vscode`](https://mpm.run/managers/vscode/)                                          | >= 1.60         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |           |               |    ✓     |        |           |          |
-| [`vscodium`](https://mpm.run/managers/vscodium/)                                      | >= 1.60         |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |           |               |    ✓     |        |           |          |
-| [`winget`](https://mpm.run/managers/winget/)                                          | >= 1.28.190     |          |      🪟      |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`xbps`](https://mpm.run/managers/xbps/)                                              | >= 0.59         |          |      🐧      |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`xcodes`](https://mpm.run/managers/xcodes/)                                          | >= 1            |          |      🍎      |      ✓      |            |           |          |           |           |               |    ✓     |   ✓    |           |          |
-| [`yarn`](https://mpm.run/managers/yarn/)                                              | >= 1.20, < 2    |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |     ✓      |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |          |
-| [`yarn-berry`](https://mpm.run/managers/yarn-berry/)                                  | >= 2            |          | 🅱️ 🐧 🍎 ⨂ 🪟 |             |            |           |    ✓     |           |           |               |          |        |     ✓     |          |
-| [`yay`](https://mpm.run/managers/yay/)                                                | >= 11           |    ✓     |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`yazi`](https://mpm.run/managers/yazi/)                                              | >= 25.2.7       |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`yum`](https://mpm.run/managers/yum/)                                                | >= 4            |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |    ✓     |
-| [`zef`](https://mpm.run/managers/zef/)                                                |                 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |      ✓      |            |           |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |          |
-| [`zerobrew`](https://mpm.run/managers/zerobrew/)                                      | >= 0.3          |          |    🐧 🍎     |      ✓      |     ✓      |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`zeroinstall`](https://mpm.run/managers/zeroinstall/)                                |                 |          | 🅱️ 🐧 🍎 ⨂ 🪟 |             |            |           |    ✓     |           |           |               |    ✓     |        |     ✓     |          |
-| [`zim`](https://mpm.run/managers/zim/)                                                | >= 1            |          |    🐧 🍎     |      ✓      |            |           |          |           |           |       ✓       |          |        |           |          |
-| [`zinit`](https://mpm.run/managers/zinit/)                                            | >= 3.10         |          |    🐧 🍎     |      ✓      |            |           |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |          |
-| [`zplug`](https://mpm.run/managers/zplug/)                                            | >= 2            |          |    🐧 🍎     |      ✓      |            |           |          |           |     ✓     |       ✓       |          |        |           |          |
-| [`zvm`](https://mpm.run/managers/zvm/)                                                |                 |          |   🐧 🍎 🪟   |      ✓      |            |           |    ✓     |     ✓     |           |               |    ✓     |        |     ✓     |          |
-| [`zypper`](https://mpm.run/managers/zypper/)                                          | >= 1.14         |          |    🅱️ 🐧 ⨂    |      ✓      |     ✓      |     ✓     |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |          |
-
-Platforms: 🅱️ BSD[^bsd] · 🐧 Linux[^linux] · 🍎 macOS · ⨂ Unix[^unix] · 🪟 Windows
+[`am`](https://mpm.run/managers/am/) · [`antidote`](https://mpm.run/managers/antidote/) · [`antigen`](https://mpm.run/managers/antigen/) · [`apk`](https://mpm.run/managers/apk/) · [`apt`](https://mpm.run/managers/apt/) · [`apt-mint`](https://mpm.run/managers/apt-mint/) · [`aptitude`](https://mpm.run/managers/aptitude/) · [`asdf`](https://mpm.run/managers/asdf/) · [`aura`](https://mpm.run/managers/aura/) · [`basalt`](https://mpm.run/managers/basalt/) · [`bin`](https://mpm.run/managers/bin/) · [`bob`](https://mpm.run/managers/bob/) · [`bpkg`](https://mpm.run/managers/bpkg/) · [`brew`](https://mpm.run/managers/brew/) · [`bun`](https://mpm.run/managers/bun/) · [`cargo`](https://mpm.run/managers/cargo/) · [`cask`](https://mpm.run/managers/cask/) · [`cave`](https://mpm.run/managers/cave/) · [`choco`](https://mpm.run/managers/choco/) · [`choosenim`](https://mpm.run/managers/choosenim/) · [`chromebrew`](https://mpm.run/managers/chromebrew/) · [`claude-code-plugins`](https://mpm.run/managers/claude-code-plugins/) · [`clib`](https://mpm.run/managers/clib/) · [`composer`](https://mpm.run/managers/composer/) · [`conda`](https://mpm.run/managers/conda/) · [`cpan`](https://mpm.run/managers/cpan/) · [`deb-get`](https://mpm.run/managers/deb-get/) · [`dkp-pacman`](https://mpm.run/managers/dkp-pacman/) · [`dnf`](https://mpm.run/managers/dnf/) · [`dnf5`](https://mpm.run/managers/dnf5/) · [`dotnet`](https://mpm.run/managers/dotnet/) · [`elan`](https://mpm.run/managers/elan/) · [`emacs`](https://mpm.run/managers/emacs/) · [`emerge`](https://mpm.run/managers/emerge/) · [`eopkg`](https://mpm.run/managers/eopkg/) · [`fink`](https://mpm.run/managers/fink/) · [`fisher`](https://mpm.run/managers/fisher/) · [`flatpak`](https://mpm.run/managers/flatpak/) · [`fwupd`](https://mpm.run/managers/fwupd/) · [`gcloud`](https://mpm.run/managers/gcloud/) · [`gem`](https://mpm.run/managers/gem/) · [`getnf`](https://mpm.run/managers/getnf/) · [`gext`](https://mpm.run/managers/gext/) · [`gh-ext`](https://mpm.run/managers/gh-ext/) · [`ghcup`](https://mpm.run/managers/ghcup/) · [`go`](https://mpm.run/managers/go/) · [`guix`](https://mpm.run/managers/guix/) · [`gup`](https://mpm.run/managers/gup/) · [`haxelib`](https://mpm.run/managers/haxelib/) · [`hyprpm`](https://mpm.run/managers/hyprpm/) · [`ips`](https://mpm.run/managers/ips/) · [`jpm`](https://mpm.run/managers/jpm/) · [`julia`](https://mpm.run/managers/julia/) · [`juliaup`](https://mpm.run/managers/juliaup/) · [`krew`](https://mpm.run/managers/krew/) · [`lazy`](https://mpm.run/managers/lazy/) · [`luarocks`](https://mpm.run/managers/luarocks/) · [`lure`](https://mpm.run/managers/lure/) · [`macports`](https://mpm.run/managers/macports/) · [`mamba`](https://mpm.run/managers/mamba/) · [`mas`](https://mpm.run/managers/mas/) · [`mason`](https://mpm.run/managers/mason/) · [`micro`](https://mpm.run/managers/micro/) · [`micromamba`](https://mpm.run/managers/micromamba/) · [`miktex`](https://mpm.run/managers/miktex/) · [`mise`](https://mpm.run/managers/mise/) · [`nala`](https://mpm.run/managers/nala/) · [`nimble`](https://mpm.run/managers/nimble/) · [`nix`](https://mpm.run/managers/nix/) · [`npm`](https://mpm.run/managers/npm/) · [`oh-my-fish`](https://mpm.run/managers/oh-my-fish/) · [`ollama`](https://mpm.run/managers/ollama/) · [`opam`](https://mpm.run/managers/opam/) · [`opkg`](https://mpm.run/managers/opkg/) · [`pacman`](https://mpm.run/managers/pacman/) · [`pacstall`](https://mpm.run/managers/pacstall/) · [`pamac`](https://mpm.run/managers/pamac/) · [`paru`](https://mpm.run/managers/paru/) · [`pear`](https://mpm.run/managers/pear/) · [`pearl`](https://mpm.run/managers/pearl/) · [`pi`](https://mpm.run/managers/pi/) · [`pikaur`](https://mpm.run/managers/pikaur/) · [`pip`](https://mpm.run/managers/pip/) · [`pipx`](https://mpm.run/managers/pipx/) · [`pipxu`](https://mpm.run/managers/pipxu/) · [`pixi`](https://mpm.run/managers/pixi/) · [`pkcon`](https://mpm.run/managers/pkcon/) · [`pkg`](https://mpm.run/managers/pkg/) · [`pkg-tools`](https://mpm.run/managers/pkg-tools/) · [`pkgin`](https://mpm.run/managers/pkgin/) · [`pkgit`](https://mpm.run/managers/pkgit/) · [`pkgm`](https://mpm.run/managers/pkgm/) · [`platformio-core`](https://mpm.run/managers/platformio-core/) · [`pnpm`](https://mpm.run/managers/pnpm/) · [`ports`](https://mpm.run/managers/ports/) · [`prt-get`](https://mpm.run/managers/prt-get/) · [`pwsh-gallery`](https://mpm.run/managers/pwsh-gallery/) · [`pyenv`](https://mpm.run/managers/pyenv/) · [`raco`](https://mpm.run/managers/raco/) · [`roswell`](https://mpm.run/managers/roswell/) · [`rustup`](https://mpm.run/managers/rustup/) · [`scoop`](https://mpm.run/managers/scoop/) · [`sdkman`](https://mpm.run/managers/sdkman/) · [`sfsu`](https://mpm.run/managers/sfsu/) · [`sheldon`](https://mpm.run/managers/sheldon/) · [`shelly`](https://mpm.run/managers/shelly/) · [`skills`](https://mpm.run/managers/skills/) · [`slapt-get`](https://mpm.run/managers/slapt-get/) · [`snap`](https://mpm.run/managers/snap/) · [`soar`](https://mpm.run/managers/soar/) · [`sorcery`](https://mpm.run/managers/sorcery/) · [`spack`](https://mpm.run/managers/spack/) · [`steamcmd`](https://mpm.run/managers/steamcmd/) · [`stew`](https://mpm.run/managers/stew/) · [`sun-tools`](https://mpm.run/managers/sun-tools/) · [`tazpkg`](https://mpm.run/managers/tazpkg/) · [`tlmgr`](https://mpm.run/managers/tlmgr/) · [`topgrade`](https://mpm.run/managers/topgrade/) · [`trizen`](https://mpm.run/managers/trizen/) · [`urpmi`](https://mpm.run/managers/urpmi/) · [`uv`](https://mpm.run/managers/uv/) · [`uvx`](https://mpm.run/managers/uvx/) · [`vagrant`](https://mpm.run/managers/vagrant/) · [`vcpkg`](https://mpm.run/managers/vcpkg/) · [`vim-pack`](https://mpm.run/managers/vim-pack/) · [`vscode`](https://mpm.run/managers/vscode/) · [`vscodium`](https://mpm.run/managers/vscodium/) · [`winget`](https://mpm.run/managers/winget/) · [`xbps`](https://mpm.run/managers/xbps/) · [`xcodes`](https://mpm.run/managers/xcodes/) · [`yarn`](https://mpm.run/managers/yarn/) · [`yarn-berry`](https://mpm.run/managers/yarn-berry/) · [`yay`](https://mpm.run/managers/yay/) · [`yazi`](https://mpm.run/managers/yazi/) · [`yum`](https://mpm.run/managers/yum/) · [`zef`](https://mpm.run/managers/zef/) · [`zerobrew`](https://mpm.run/managers/zerobrew/) · [`zeroinstall`](https://mpm.run/managers/zeroinstall/) · [`zim`](https://mpm.run/managers/zim/) · [`zinit`](https://mpm.run/managers/zinit/) · [`zplug`](https://mpm.run/managers/zplug/) · [`zvm`](https://mpm.run/managers/zvm/) · [`zypper`](https://mpm.run/managers/zypper/)
 
 <!-- mirror-src-end -->
 
-> [!NOTE]
-> If your favorite manager is missing or does not support an operation, you can influence its implementation: [open a ticket to document its output](https://github.com/kdeldycke/meta-package-manager/issues/new?assignees=&labels=%F0%9F%8E%81+feature+request&template=new-package-manager.yaml) or [read the contribution guide](https://mpm.run/contributing/) and submit a pull request.
->
-> You can help if you [purchase business support 🤝](https://github.com/sponsors/kdeldycke) or [sponsor the project 🫶](https://github.com/sponsors/kdeldycke).
+`mpm` also drives the managers below, whose upstream projects are unmaintained. They still work, but any of them can be dropped in a future release, without notice:
+
+<!-- mirror-src
+from meta_package_manager._docs import manager_roster
+
+print(manager_roster(unmaintained=True))
+-->
+
+[`apm`](https://mpm.run/managers/apm/) · [`apt-cyg`](https://mpm.run/managers/apt-cyg/) · [`pacaur`](https://mpm.run/managers/pacaur/) · [`swupd`](https://mpm.run/managers/swupd/) · [`volta`](https://mpm.run/managers/volta/)
+
+<!-- mirror-src-end -->
 
 ## Installation
 
 All [installation methods](https://mpm.run/install/) are available in the documentation. Below are the most popular ones:
+
+### uv
+
+`mpm` is [distributed on PyPI](https://pypi.org/project/meta-package-manager/), so [`uv`](https://docs.astral.sh/uv/) installs it on Linux, macOS and Windows alike:
+
+```shell-session
+$ uv tool install meta-package-manager
+```
 
 ### Homebrew
 
@@ -263,7 +122,7 @@ All [installation methods](https://mpm.run/install/) are available in the docume
 $ brew install meta-package-manager
 ```
 
-### macOS
+### MacPorts
 
 `mpm` is also [available on MacPorts](https://ports.macports.org/port/meta-package-manager/):
 
@@ -271,9 +130,9 @@ $ brew install meta-package-manager
 $ sudo port install meta-package-manager
 ```
 
-### Windows
+### Scoop
 
-`mpm` is available in the `main` repository of [Scoop](https://scoop.sh), so you just need to:
+`mpm` is available in the `main` repository of [Scoop](https://scoop.sh), so on Windows you just need to:
 
 ```pwsh-session
 > scoop install main/meta-package-manager
@@ -297,32 +156,7 @@ No need to install Python or `uv`. Useful for CI/CD pipelines running on minimal
 
 List all packages installed on current system:
 
-```shell-session
-$ mpm installed
-╭──────────────────────────────────────────────┬─────────┬──────────┬──────────────────────────────────────────╮
-│ Package ID                                   │ Name    │ Manager  │ Installed version                        │
-├──────────────────────────────────────────────┼─────────┼──────────┼──────────────────────────────────────────┤
-│ curl                                         │         │ brew     │ 8.21.0                                   │
-│ git                                          │         │ brew     │ 2.55.0                                   │
-│ aerial                                       │         │ cask     │ 3.6.3                                    │
-│ amethyst                                     │         │ cask     │ 0.24.3                                   │
-│ bigdecimal                                   │         │ gem      │ 3.1.4                                    │
-│ bundler                                      │         │ gem      │ 2.4.22                                   │
-│ 361285480                                    │ Keynote │ mas      │ 15.3.1                                   │
-│ 408981434                                    │ iMovie  │ mas      │ 10.4.4                                   │
-│ @mermaid-js/mermaid-cli                      │         │ npm      │ 11.12.0                                  │
-│ npm                                          │         │ npm      │ 11.19.0                                  │
-│ cyclonedx-python-lib                         │         │ uv       │ 11.11.0                                  │
-│ packageurl-python                            │         │ uv       │ 0.17.6                                   │
-│ https://github.com/nvim-lualine/lualine.nvim │         │ vim-pack │ 221ce6b2d999187044529f49da6554a92f740a96 │
-│ charliermarsh.ruff                           │         │ vscode   │ 2026.70.0                                │
-│ ms-python.python                             │         │ vscode   │ 2026.4.0                                 │
-│ zsh-users/zsh-autosuggestions                │         │ zinit    │ ?                                        │
-│ zsh-users/zsh-completions                    │         │ zinit    │ ?                                        │
-│ (...)                                        │         │          │                                          │
-╰──────────────────────────────────────────────┴─────────┴──────────┴──────────────────────────────────────────╯
-483 packages total (brew: 246, uv: 75, gem: 62, cask: 52, vscode: 16, vim-pack: 9, zinit: 9, mas: 7, npm: 6, cargo: 1, gh-ext: 0, pnpm: 0, uvx: 0, yarn: 0).
-```
+![Every package installed on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-installed-cli.svg)
 
 Narrow the listing to packages whose ID or name matches a query by passing it as an argument. The match is fuzzy by default (case-insensitive and tokenized); add `--exact` to require a verbatim match on the package ID or name:
 
@@ -335,25 +169,7 @@ $ mpm installed --exact Sphinx
 
 List all packages installed for which an upgrade is available:
 
-```shell-session
-$ mpm outdated
-╭──────────────────────────┬──────┬─────────┬───────────────────┬────────────────╮
-│ Package ID               │ Name │ Manager │ Installed version │ Latest version │
-├──────────────────────────┼──────┼─────────┼───────────────────┼────────────────┤
-│ graphviz                 │      │ brew    │ 15.1.1            │ 16.0.0         │
-│ libheif                  │      │ brew    │ 1.23.3            │ 1.23.4         │
-│ codexbar                 │      │ cask    │ 0.56.4            │ 0.56.8         │
-│ nativ                    │      │ cask    │ 0.3.6             │ 0.3.7          │
-│ activesupport            │      │ gem     │ 6.1.7.3           │ 8.1.3.1        │
-│ bigdecimal               │      │ gem     │ 3.1.4             │ 4.1.2          │
-│ corepack                 │      │ npm     │ 0.35.0            │ 0.36.0         │
-│ google-closure-compiler  │      │ npm     │ 20260825.0        │ 20260830.0     │
-│ coverage                 │      │ uv      │ 7.15.4            │ 7.16.0         │
-│ docutils                 │      │ uv      │ 0.22.4            │ 0.23           │
-│ (...)                                                                          │
-╰──────────────────────────┴──────┴─────────┴───────────────────┴────────────────╯
-76 packages total (gem: 48, brew: 13, uv: 9, cask: 3, npm: 3, mas: 0, pnpm: 0, uvx: 0, yarn: 0).
-```
+![Packages an upgrade is available for](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.svg)
 
 On a terminal the differing part of each version is picked out in color, so a patch bump reads apart from a major one at a glance.
 
@@ -406,43 +222,11 @@ You still pick up older security fixes promptly, while sitting out the risky fir
 
 `mpm` reports the package managers it detected on your system, and the version each one self-reports:
 
-```shell-session
-$ mpm managers
-╭────────────┬───────────────────────┬────────────────────────────────────────────────────────────────────────┬──────────────────────╮
-│ Manager ID │ Name                  │ CLI                                                                    │ Version              │
-├────────────┼───────────────────────┼────────────────────────────────────────────────────────────────────────┼──────────────────────┤
-│ brew       │ Homebrew Formulae     │ ✓ /opt/homebrew/bin/brew                                               │ ✓ 6.0.17-69-g38ee325 │
-│ cargo      │ Rust cargo            │ ✓ /opt/homebrew/bin/cargo                                              │ ✓ 1.97.1             │
-│ cask       │ Homebrew Cask         │ ✓ /opt/homebrew/bin/brew                                               │ ✓ 6.0.17-69-g38ee325 │
-│ cpan       │ Perl CPAN             │ ✓ /usr/bin/cpan                                                        │ ✓ 2.28               │
-│ gem        │ RubyGems              │ ✓ /usr/bin/gem                                                         │ ✓ 3.4.5              │
-│ gh-ext     │ GitHub CLI extensions │ ✓ /opt/homebrew/bin/gh                                                 │ ✓ 2.97.0             │
-│ mas        │ Mac App Store         │ ✓ /opt/homebrew/bin/mas                                                │ ✓ 7.0.0              │
-│ npm        │ Node npm              │ ✓ /opt/homebrew/bin/npm                                                │ ✓ 11.19.0            │
-│ pnpm       │ Node pnpm             │ ✓ /opt/homebrew/bin/pnpm                                               │ ✓ 11.20.0            │
-│ topgrade   │ Topgrade              │ ✓ /opt/homebrew/bin/topgrade                                           │ ✓ 17.9.0             │
-│ uv         │ Python uv             │ ✓ /opt/homebrew/bin/uv                                                 │ ✓ 0.12.3             │
-│ uvx        │ Python uvx            │ ✓ /opt/homebrew/bin/uv                                                 │ ✓ 0.12.3             │
-│ vim-pack   │ Neovim vim-pack       │ ✓ /opt/homebrew/bin/nvim                                               │ ✓ 0.12.4             │
-│ vscode     │ Visual Studio Code    │ ✓ /Applications/Visual Studio Code.app/Contents/Resources/app/bin/code │ ✓ 1.133.0            │
-│ yarn       │ Yarn Classic          │ ✓ /opt/homebrew/bin/yarn                                               │ ✓ 1.22.22            │
-│ zinit      │ Zinit                 │ ✓ /opt/homebrew/bin/zsh                                                │ ✓ 3.15.0             │
-╰────────────┴───────────────────────┴────────────────────────────────────────────────────────────────────────┴──────────────────────╯
-```
+![Package managers detected on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.svg)
 
 If you wonder why one of your package managers is not in that list, name it: a manager you select explicitly is always reported, and the extra columns spell out what `mpm` could not resolve.
 
-```shell-session
-$ mpm --composer --volta --choco --yarn-berry managers
-╭────────────┬──────────────┬──────────────────┬──────────────────────────┬────────────┬───────────────────╮
-│ Manager ID │ Name         │ Supported        │ CLI                      │ Executable │ Version           │
-├────────────┼──────────────┼──────────────────┼──────────────────────────┼────────────┼───────────────────┤
-│ choco      │ Chocolatey   │ ✘ Windows        │ ✘ choco not found        │            │                   │
-│ composer   │ PHP Composer │ ✓                │ ✘ composer not found     │            │                   │
-│ volta      │ Volta        │ ✓ (unmaintained) │ ✘ volta not found        │            │                   │
-│ yarn-berry │ Yarn Berry   │ ✓                │ ✓ /opt/homebrew/bin/yarn │ ✓          │ ✘ 1.22.22 >=2.0.0 │
-╰────────────┴──────────────┴──────────────────┴──────────────────────────┴────────────┴───────────────────╯
-```
+![Why a package manager cannot be driven](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-diagnostic-cli.svg)
 
 Four different reasons, one per row. `choco` only runs on Windows. `composer` is supported here but its CLI is nowhere on the `PATH`. `volta` is missing too, and is flagged unmaintained upstream, which is also why selecting it prints a deprecation notice on `stderr`. And `yarn-berry` is the interesting one: its CLI was found and is executable, but the `yarn` on this machine is a `1.x` that does not satisfy the `>=2.0.0` its wrapper requires, so `mpm` will not drive it.
 
@@ -464,11 +248,3 @@ Other subcommands and options are documented in:
 
 - the [detailed help screens](https://mpm.run/cli-parameters/)
 - the [manager augmentations](https://mpm.run/augmentations/) where you’ll find inspiration on how to leverage `mpm` power
-
-<!-- operation-footnotes-start -->
-
-[^bsd]: BSD: DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS.
-
-[^linux]: Linux: AlmaLinux, Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, ChromeOS, Clear Linux OS, CloudLinux OS, CRUX, Debian, EndeavourOS, Exherbo Linux, Fedora, Generic Linux, Gentoo Linux, Guix System, IBM PowerKVM, Kali Linux, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, Manjaro Linux, NixOS, Nobara, NuTyX, openSUSE, OpenWrt, Oracle Linux, Parallels, Pidora, PikaOS, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SliTaz GNU/Linux, Source Mage GNU/Linux, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Ultramarine, Void Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.
-
-[^unix]: Unix: Cygwin, GNU/Hurd, Haiku, IBM AIX, IBM i, illumos, Solaris.<!-- operation-footnotes-end -->

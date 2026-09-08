@@ -67,26 +67,48 @@ carried, which is what the pictures were imitating anyway.
 """
 
 COLUMNS = 100
-"""Width every captured command wraps its output to.
+"""Default width a captured command wraps its output to.
 
 Wide enough for the manager table's CLI-path column, narrow enough that the image
-stays legible beside the readme's prose at a third of the page width.
+stays legible in the readme's prose. A capture whose output needs another width
+states its own in `extra`, which then replaces this one rather than joining it.
 """
 
 CAPTURES = (
     (
+        "mpm-dump-cli",
+        ("dump",),
+        "Every installed package, written to one manifest",
+        # A whole machine runs to hundreds of entries. Keep the header and the
+        # first managers, which is what a reader needs to recognize the format.
+        ("--head", "22"),
+    ),
+    (
+        "mpm-installed-cli",
+        ("installed",),
+        "Every package installed on the system",
+        # Truncated like the outdated capture below, and for the same reason. A
+        # single package ID here is a plugin URL, which widens the table past any
+        # width the visible rows would need. Three tail lines rather than two,
+        # since the count line wraps at this width and would otherwise push the
+        # table's closing border out of the capture.
+        ("--columns", "160", "--merge-stderr", "--head", "16", "--tail", "3"),
+    ),
+    (
         "mpm-managers-cli",
         ("managers",),
         "Package managers detected on the system",
-        (),
+        # The widest CLI path is a macOS application bundle's, and the table wraps
+        # rather than truncates when it cannot fit.
+        ("--columns", "150"),
     ),
     (
-        "mpm-version-cli",
-        ("--version",),
-        "The brand mark, and what this install is",
-        # The screen is drawn only when it fits beside the mark, and the capture
-        # pins a width of its own, so state one wide enough for the widest row.
-        ("--columns", "72"),
+        "mpm-managers-diagnostic-cli",
+        ("--composer", "--volta", "--choco", "--yarn-berry", "managers"),
+        "Why a package manager cannot be driven",
+        # Selecting managers explicitly widens the table with the columns
+        # spelling out what could not be resolved. State a width that holds them.
+        ("--columns", "120"),
     ),
     (
         "mpm-outdated-cli",
@@ -97,6 +119,14 @@ CAPTURES = (
         # closing border and the count line, joined by the renderer's own [...] rule.
         # That count line is printed on stderr, so the capture has to fold it in.
         ("--merge-stderr", "--head", "16", "--tail", "2"),
+    ),
+    (
+        "mpm-version-cli",
+        ("--version",),
+        "The brand mark, and what this install is",
+        # The screen is drawn only when it fits beside the mark, and the capture
+        # pins a width of its own, so state one wide enough for the widest row.
+        ("--columns", "72"),
     ),
 )
 """The captures, as `(stem, mpm arguments, window caption, extra options)` tuples.
@@ -132,8 +162,10 @@ def capture(
             "screenshot",
             "--output",
             str(target),
-            "--columns",
-            str(COLUMNS),
+            # A repeated --columns keeps its *first* value, so the default is
+            # withheld when a capture states a width of its own. Emitting both
+            # pinned every capture to COLUMNS, override or not.
+            *(() if "--columns" in extra else ("--columns", str(COLUMNS))),
             "--preset",
             PRESET,
             "--title",

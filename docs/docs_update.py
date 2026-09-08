@@ -42,11 +42,7 @@ import sys
 
 import tomlkit
 
-from meta_package_manager._docs import (
-    PROJECT_ROOT,
-    manager_page_stub,
-    operation_matrix,
-)
+from meta_package_manager._docs import PROJECT_ROOT, manager_page_stub
 from meta_package_manager.labels import (
     LABEL_RENAMES,
     LABELS,
@@ -247,35 +243,6 @@ def update_keywords(*, check: bool = False) -> bool:
     return _sync_file(pyproject, tomlkit.dumps(doc), check=check)
 
 
-def update_readme_footnotes(*, check: bool = False) -> bool:
-    """Splice the operation-matrix platform footnotes into `readme.md`.
-
-    The manager Sankey diagram and the operation matrix are `<!-- mirror-src -->`
-    blocks refreshed by `click-extra refresh-directives`, so this owns only the
-    footnote definitions, which cannot use that mechanism: `mdformat-footnote`
-    strips an HTML comment placed on its own line after a footnote definition
-    (https://github.com/executablebooks/mdformat-footnote/issues/11), so the
-    closing marker is wedged against the tail of the last footnote (no leading
-    newline) and the region is spliced by hand.
-
-    :param check: Report only, leaving `readme.md` untouched.
-    :return: `True` when the footnotes are out of date.
-    """
-    readme = PROJECT_ROOT / "readme.md"
-    _, footnotes = operation_matrix()
-
-    start_tag = "<!-- operation-footnotes-start -->\n\n"
-    end_tag = "<!-- operation-footnotes-end -->\n"
-    orig_content = readme.read_text(encoding="UTF-8")
-    pre_content, rest = orig_content.split(start_tag, 1)
-    _, post_content = rest.split(end_tag, 1)
-    return _sync_file(
-        readme,
-        f"{pre_content}{start_tag}{footnotes}{end_tag}{post_content}",
-        check=check,
-    )
-
-
 def update_manager_stubs(*, check: bool = False) -> bool:
     """Sync the committed page stubs of `docs/managers/`.
 
@@ -327,7 +294,6 @@ def main() -> int:
         "pyproject.toml [project] keywords": update_keywords,
         "pyproject.toml [tool.repomatic.labels] arrays": update_labels,
         "docs/managers/ page stubs": update_manager_stubs,
-        "readme.md operation-matrix footnotes": update_readme_footnotes,
     }
     drifted = [name for name, updater in updaters.items() if updater(check=args.check)]
 

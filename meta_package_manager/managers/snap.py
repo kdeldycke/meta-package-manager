@@ -41,7 +41,7 @@ class Snap(PackageManager):
     Snap store documents `sudo snap install` as the canonical invocation. A
     host authenticated against the store with `snap login` (or granted a
     polkit rule) can drop the wrap with `--no-sudo` or a
-    `[mpm.managers.snap] sudo = false` override.
+    `[mpm.overrides.snap] sudo = false` override.
 
     ```{note}
     snap localizes and colorizes its table headers with no terminal

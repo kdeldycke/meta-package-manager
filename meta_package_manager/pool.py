@@ -268,7 +268,7 @@ class ManagerPool:
         Computed from the classes (their `id` is set by the metaclass at class
         creation, no instantiation needed). Lets the configuration layer tell a
         built-in *override* apart from a brand-new manager *definition*: a
-        `[mpm.managers.<id>]` section whose ID is in this set tunes a built-in,
+        `[mpm.overrides.<id>]` section whose ID is in this set tunes a built-in,
         any other ID defines a new manager. See
         {func}`meta_package_manager.config.validate_manager_overrides_section`.
         """
@@ -297,7 +297,7 @@ class ManagerPool:
     def known_manager_ids(self) -> frozenset[str]:
         """Every manager ID mpm ships: built-in classes plus bundled definitions.
 
-        A `[mpm.managers.<id>]` section keyed by one of these tunes a shipped
+        A `[mpm.overrides.<id>]` section keyed by one of these tunes a shipped
         manager (an override); any other ID defines a brand-new one. The configuration
         layer routes override-versus-definition on this set. See
         {func}`meta_package_manager.config.validate_manager_overrides_section`.
@@ -307,7 +307,7 @@ class ManagerPool:
     @cached_property
     def overridden_fields(self) -> dict[str, set[str]]:
         """Per-manager attribute names that the user explicitly overrode via
-        `[mpm.managers.<id>]`.
+        `[mpm.overrides.<id>]`.
 
         Populated by {func}`meta_package_manager.config.apply_manager_overrides`.
         Read by `_select_managers` to skip the global `--<flag>` defaults
@@ -472,7 +472,7 @@ class ManagerPool:
         # Probes fire in the parallel warm-up round right after, so the binding must
         # precede it. Only timeout is pre-applied: the rest of extra_options (notably
         # dry_run, which would turn detection into a no-op simulation) must wait for
-        # the loop. A per-manager [mpm.managers.<id>] timeout override keeps
+        # the loop. A per-manager [mpm.overrides.<id>] timeout override keeps
         # precedence, just as it does in the loop.
         if "timeout" in extra_options:
             timeout = extra_options["timeout"]
@@ -527,7 +527,7 @@ class ManagerPool:
                 continue
 
             # Apply manager-level options. Skip a field that the user explicitly
-            # overrode via [mpm.managers.<id>] so the per-manager value keeps
+            # overrode via [mpm.overrides.<id>] so the per-manager value keeps
             # precedence over the global default.
             user_overrides = self.overridden_fields.get(manager_id, set())
             for param, value in extra_options.items():

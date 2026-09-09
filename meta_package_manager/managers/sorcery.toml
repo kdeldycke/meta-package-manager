@@ -22,7 +22,7 @@
 #   - `cast` compiles from source and may prompt on a spell's first cast (optional
 #     dependencies, configuration); sorcery has no universal `--yes` flag.
 
-[mpm.managers.sorcery]
+[mpm.overrides.sorcery]
 name = "Sorcery"
 homepage_url = "https://sourcemage.org"
 platforms = ["sourcemage"]
@@ -34,51 +34,51 @@ default_sudo = true
 # like "20240108" on current releases (older stable lines used dotted forms).
 version_regexes = ['^(?P<version>[\d.]+)$']
 
-[mpm.managers.sorcery.operations.installed]
+[mpm.overrides.sorcery.operations.installed]
 cli = "gaze"
 args = ["-q", "installed"]
 regex = '^(?P<package_id>[^:]+):[^:]*:(?:installed|held):(?P<installed_version>.+)$'
 
 # `gaze -q search -name <regex>` greps spell names and prints one
 # "spell version @grimoire" line per match.
-[mpm.managers.sorcery.operations.search]
+[mpm.overrides.sorcery.operations.search]
 cli = "gaze"
 args = ["-q", "search", "-name", "{query}"]
 regex = '^(?P<package_id>\S+) (?P<latest_version>\S+) @'
 
-[mpm.managers.sorcery.operations.install]
+[mpm.overrides.sorcery.operations.install]
 cli = "cast"
 args = ["{package_id}"]
 sudo = true
 
-[mpm.managers.sorcery.operations.remove]
+[mpm.overrides.sorcery.operations.remove]
 cli = "dispel"
 args = ["{package_id}"]
 sudo = true
 
 # Re-casting an installed spell rebuilds it at the grimoire's current version: sorcery
 # has no separate upgrade-one verb.
-[mpm.managers.sorcery.operations.upgrade_one]
+[mpm.overrides.sorcery.operations.upgrade_one]
 cli = "cast"
 args = ["{package_id}"]
 sudo = true
 
 # `sorcery upgrade` rebuilds the install queue and casts it, without first
 # self-updating the sorcery tool (that is `sorcery system-update`).
-[mpm.managers.sorcery.operations.upgrade_all]
+[mpm.overrides.sorcery.operations.upgrade_all]
 args = ["upgrade"]
 sudo = true
 
 # `scribe update` refreshes all grimoires (the spell catalogue), the apt-update
 # analogue. Distinct from `sorcery update`, which upgrades the sorcery tool itself.
-[mpm.managers.sorcery.operations.sync]
+[mpm.overrides.sorcery.operations.sync]
 cli = "scribe"
 args = ["update"]
 sudo = true
 
 # `cleanse --sweep` deletes unnecessary sources and binary caches (the documented
 # replacement for the old `gaze prune`).
-[mpm.managers.sorcery.operations.cleanup_cache]
+[mpm.overrides.sorcery.operations.cleanup_cache]
 cli = "cleanse"
 args = ["--sweep"]
 sudo = true

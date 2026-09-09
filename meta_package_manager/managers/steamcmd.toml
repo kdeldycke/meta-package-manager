@@ -8,7 +8,7 @@
 # are declared, both mapping to the same idempotent `+app_update` command. Titles
 # are designated by their numeric Steam application ID.
 
-[mpm.managers.steamcmd]
+[mpm.overrides.steamcmd]
 name = "Valve SteamCMD"
 homepage_url = "https://developer.valvesoftware.com/wiki/SteamCMD"
 logo = "steam"
@@ -25,10 +25,10 @@ version_regexes = ['Valve Corporation - version (?P<version>\S+)']
 
 # `validate` forces integrity verification of the installed content, which is what
 # makes the same command safe for both install and upgrade.
-[mpm.managers.steamcmd.operations.install]
+[mpm.overrides.steamcmd.operations.install]
 args = ["+app_update", "{package_id}", "validate"]
 
-[mpm.managers.steamcmd.operations.upgrade_one]
+[mpm.overrides.steamcmd.operations.upgrade_one]
 args = ["+app_update", "{package_id}", "validate"]
 
 # Output samples locking the version probe and the declared parsers, derived

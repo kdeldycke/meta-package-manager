@@ -52,7 +52,7 @@
 # No escalation: the reads and the removal all run unprivileged, and only the
 # install path xcodes cannot run unattended needs a superuser password.
 
-[mpm.managers.xcodes]
+[mpm.overrides.xcodes]
 name = "Xcode xcodes"
 homepage_url = "https://github.com/XcodesOrg/xcodes"
 logo = "xcode"
@@ -81,19 +81,19 @@ version_regexes = ['^(?P<version>\d+(?:\.\d+)+)$']
 # one would misrepresent it.
 #
 # An empty result is empty output and a zero exit, not an error.
-[mpm.managers.xcodes.operations.installed]
+[mpm.overrides.xcodes.operations.installed]
 args = ["installed"]
 regex = '^(?P<package_id>[^\t]+?)(?: [(\[][^\t]*)?\t'
 
 # Moves the bundle to the Trash rather than deleting it, and needs no
 # privileges. Non-interactive as long as the version is actually installed: an
 # unparseable or absent one falls through to a numbered menu on standard input.
-[mpm.managers.xcodes.operations.remove]
+[mpm.overrides.xcodes.operations.remove]
 args = ["uninstall", "{package_id}"]
 
 # Refreshes the cached catalog of available versions. Named `update`, but it
 # updates the list rather than any Xcode.
-[mpm.managers.xcodes.operations.sync]
+[mpm.overrides.xcodes.operations.sync]
 args = ["update"]
 
 # Output samples locking the version probe and the declared parser. Consumed by

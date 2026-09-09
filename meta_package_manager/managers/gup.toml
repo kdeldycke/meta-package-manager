@@ -42,7 +42,7 @@
 # require the go command for local-only work".
 # ```
 
-[mpm.managers.gup]
+[mpm.overrides.gup]
 name = "gup"
 homepage_url = "https://github.com/nao1215/gup"
 # Upstream builds for those three alone, and its own help calls gup
@@ -58,25 +58,25 @@ version_cli_options = ["version"]
 # would raise the floor for nothing.
 version_regexes = ['gup\s+version\s+v?(?P<version>\S+)']
 
-[mpm.managers.gup.operations.installed]
+[mpm.overrides.gup.operations.installed]
 args = ["list", "--json"]
 format = "json"
 fields = { package_id = "name", installed_version = "current_version" }
 
 # `latest_version` is empty in a listing and populated here, `check` being the
 # call that reaches the module proxy.
-[mpm.managers.gup.operations.outdated]
+[mpm.overrides.gup.operations.outdated]
 args = ["check", "--json"]
 format = "json"
 fields = { package_id = "name", installed_version = "current_version", latest_version = "latest_version" }
 
-[mpm.managers.gup.operations.remove]
+[mpm.overrides.gup.operations.remove]
 args = ["remove", "--force", "{package_id}"]
 
-[mpm.managers.gup.operations.upgrade_one]
+[mpm.overrides.gup.operations.upgrade_one]
 args = ["update", "{package_id}"]
 
-[mpm.managers.gup.operations.upgrade_all]
+[mpm.overrides.gup.operations.upgrade_all]
 args = ["update"]
 
 # Output samples locking the version probe and the declared parsers, captured

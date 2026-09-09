@@ -1733,7 +1733,7 @@ def _native_invocation(manager, member: str) -> tuple[list[str], str | None] | N
     tokens = None
     source = getattr(manager, "definition_source", None)
     if source:
-        operations = _toml_definition(source)["mpm"]["managers"][manager.id].get(
+        operations = _toml_definition(source)["mpm"]["overrides"][manager.id].get(
             "operations",
             {},
         )
@@ -2098,7 +2098,7 @@ def manager_selection(manager_id: str) -> str:
         "Keep it enabled but tune how `mpm` drives it with a "
         "[per-manager override](../overrides.md):"
     )
-    tune_toml = _fenced(f"[mpm.managers.{manager_id}]\ntimeout = 900", "toml")
+    tune_toml = _fenced(f"[mpm.overrides.{manager_id}]\ntimeout = 900", "toml")
     template = (
         f"`mpm config-template {manager_id}` prints every overridable attribute "
         "as a ready-to-paste block."
@@ -2144,7 +2144,7 @@ def manager_sudo(manager_id: str) -> str:
     parts = [policy]
     source = getattr(m, "definition_source", None)
     if source and not m.internal_sudo:
-        operations = _toml_definition(source)["mpm"]["managers"][manager_id].get(
+        operations = _toml_definition(source)["mpm"]["overrides"][manager_id].get(
             "operations",
             {},
         )
@@ -2325,7 +2325,7 @@ def manager_traces(manager_id: str) -> str:
     if source:
         doc = _toml_definition(source)
         samples = doc.get("samples", {})
-        operations = doc["mpm"]["managers"][manager_id].get("operations", {})
+        operations = doc["mpm"]["overrides"][manager_id].get("operations", {})
         fences = []
         for op in Operations:
             spec = operations.get(op.name, {})

@@ -490,7 +490,7 @@ class Ports(PackageManager):
     configuration file:
 
     ```toml
-    [mpm.managers.ports]
+    [mpm.overrides.ports]
     timeout = 14400
     ```
 

@@ -46,7 +46,7 @@
 #
 # No escalation: everything lives under the user's own prefix.
 
-[mpm.managers.bun]
+[mpm.overrides.bun]
 name = "Bun"
 homepage_url = "https://bun.sh"
 logo = "bun"
@@ -59,26 +59,26 @@ version_cli_options = ["--version"]
 # name to key on.
 version_regexes = ['^(?P<version>\d+\.\d+\.\d+\S*)$']
 
-[mpm.managers.bun.operations.installed]
+[mpm.overrides.bun.operations.installed]
 args = ["pm", "ls", "--global"]
 regex = '^[├└]──[ \t]+(?P<package_id>\S+)@(?P<installed_version>\S+)$'
 
-[mpm.managers.bun.operations.outdated]
+[mpm.overrides.bun.operations.outdated]
 args = ["outdated", "--global"]
 regex = '^\|[ \t]*(?P<package_id>\S+)[ \t]*\|[ \t]*(?P<installed_version>\d\S*)[ \t]*\|[ \t]*\S+[ \t]*\|[ \t]*(?P<latest_version>\d\S*)[ \t]*\|$'
 
 # Version pinning is not offered by the DSL, so this always takes the latest.
 # bun would accept a `name@version` spec here.
-[mpm.managers.bun.operations.install]
+[mpm.overrides.bun.operations.install]
 args = ["install", "--global", "{package_id}"]
 
-[mpm.managers.bun.operations.remove]
+[mpm.overrides.bun.operations.remove]
 args = ["remove", "--global", "{package_id}"]
 
-[mpm.managers.bun.operations.upgrade_one]
+[mpm.overrides.bun.operations.upgrade_one]
 args = ["update", "--global", "--latest", "{package_id}"]
 
-[mpm.managers.bun.operations.upgrade_all]
+[mpm.overrides.bun.operations.upgrade_all]
 args = ["update", "--global", "--latest"]
 
 # Output samples locking the version probe and both parsers. Consumed by

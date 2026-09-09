@@ -63,7 +63,7 @@
 # inventory rather than a failure.
 # ```
 
-[mpm.managers.bob]
+[mpm.overrides.bob]
 name = "bob"
 homepage_url = "https://github.com/MordechaiHadad/bob"
 logo = "neovim"
@@ -74,29 +74,29 @@ version_cli_options = ["--version"]
 # token and the default pattern would report the program name instead.
 version_regexes = ['bob-nvim[ \t]+(?P<version>\S+)']
 
-[mpm.managers.bob.operations.installed]
+[mpm.overrides.bob.operations.installed]
 args = ["list"]
 regex = '^│[ \t]+(?P<package_id>\S+)[ \t]+│[^│]*(?:Installed|Used)'
 
 # The catalog takes no query, so mpm narrows it. Matching a version-shaped token
 # anywhere in the line is what steps over the color escapes wrapping the stable
 # entry, and it leaves the trailing `(stable)` marker out of the id.
-[mpm.managers.bob.operations.search]
+[mpm.overrides.bob.operations.search]
 args = ["list-remote"]
 regex = '(?P<package_id>v\d+(?:\.\d+)+)'
 
-[mpm.managers.bob.operations.install]
+[mpm.overrides.bob.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.bob.operations.remove]
+[mpm.overrides.bob.operations.remove]
 args = ["uninstall", "{package_id}"]
 
 # Naming a version genuinely restricts the update to it. Bare `update` refuses
 # to run without either a version or `--all`.
-[mpm.managers.bob.operations.upgrade_one]
+[mpm.overrides.bob.operations.upgrade_one]
 args = ["update", "{package_id}"]
 
-[mpm.managers.bob.operations.upgrade_all]
+[mpm.overrides.bob.operations.upgrade_all]
 args = ["update", "--all"]
 
 # Output samples locking the version probe and the declared parser, captured

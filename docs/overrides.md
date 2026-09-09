@@ -1,6 +1,6 @@
 # {octicon}`pin` Per-manager overrides
 
-Each built-in manager exposes a small set of attributes that can be overridden from the configuration file. Add a `[mpm.managers.<id>]` section (or `[tool.mpm.managers.<id>]` in `pyproject.toml`) for each manager you want to tune. Values from the file take precedence over the built-in defaults and over the matching global `[mpm]` settings or `--<flag>` command-line values when both apply to the same field.
+Each built-in manager exposes a small set of attributes that can be overridden from the configuration file. Add a `[mpm.overrides.<id>]` section (or `[tool.mpm.overrides.<id>]` in `pyproject.toml`) for each manager you want to tune. Values from the file take precedence over the built-in defaults and over the matching global `[mpm]` settings or `--<flag>` command-line values when both apply to the same field.
 
 (overridable-fields)=
 
@@ -45,7 +45,7 @@ The output lists every overridable field with its current value, so it doubles a
 Modern Windows ships placeholder executables under `%LOCALAPPDATA%\Microsoft\WindowsApps\` that, when invoked, open the Microsoft Store rather than running the real CLI. If you have installed the genuine [`winget`](managers/winget.md) somewhere else, point `cli_search_path` at that directory so `mpm` finds it first:
 
 ```toml
-[mpm.managers.winget]
+[mpm.overrides.winget]
 cli_search_path = [
   "C:\\Program Files\\WindowsApps\\Microsoft.DesktopAppInstaller_1.27.0_x64",
 ]
@@ -58,7 +58,7 @@ The override directories are searched before `$PATH`, so the real binary wins ov
 A few managers gate themselves behind a minimum version. If you ship a custom build that reports an unconventional version string, override `requirement`:
 
 ```toml
-[mpm.managers.guix]
+[mpm.overrides.guix]
 requirement = ">=0.0"
 ```
 
@@ -67,10 +67,10 @@ requirement = ">=0.0"
 Slow managers can be given a longer timeout without affecting the rest of the pool. Combine with `pre_args` to silence chatty output:
 
 ```toml
-[mpm.managers.brew]
+[mpm.overrides.brew]
 timeout = 900
 
-[mpm.managers.cargo]
+[mpm.overrides.cargo]
 pre_args = ["--quiet", "--color", "never"]
 ```
 
@@ -82,7 +82,7 @@ Unknown manager IDs and unknown field names are reported as warnings on `<stderr
 
 ## Define a new manager
 
-A `[mpm.managers.<id>]` section whose ID is **not** a built-in manager defines a brand-new manager rather than overriding one. `mpm` builds it at startup and treats it like any built-in: it gets its own `--<id>` / `--no-<id>` selectors, joins the default set on its supported platforms, and is driven by every subcommand it implements.
+A `[mpm.overrides.<id>]` section whose ID is **not** a built-in manager defines a brand-new manager rather than overriding one. `mpm` builds it at startup and treats it like any built-in: it gets its own `--<id>` / `--no-<id>` selectors, joins the default set on its supported platforms, and is driven by every subcommand it implements.
 
 ```{important}
 A manager definition makes `mpm` run the commands you declare. Definitions are only loaded from a trusted, local configuration file (owned by you, not world-writable, never a remote `--config` URL). Read {doc}`security` before adding one.
@@ -109,7 +109,7 @@ Five definition-only fields have no override counterpart:
 
 ### Operations
 
-Each entry under `[mpm.managers.<id>.operations]` declares one operation. Every operation takes an `args` list appended after the resolved binary. An operation may also name its own `cli` (a sibling binary resolved on the same search path), so one definition can span a multi-binary suite: `urpmq` searching while [`urpmi`](managers/urpmi.md) installs and `urpme` removes. Without `cli`, the operation runs the manager's main binary.
+Each entry under `[mpm.overrides.<id>.operations]` declares one operation. Every operation takes an `args` list appended after the resolved binary. An operation may also name its own `cli` (a sibling binary resolved on the same search path), so one definition can span a multi-binary suite: `urpmq` searching while [`urpmi`](managers/urpmi.md) installs and `urpme` removes. Without `cli`, the operation runs the manager's main binary.
 
 **Command operations** run a CLI and need nothing else. Any operation may add `sudo = true` to mark itself privileged, mirroring the escalation flag built-in managers set in code: whether it actually escalates follows the usual policy (the definition's `default_sudo`, then the global `--sudo`/`--no-sudo` flag). Command operations are the usual bearers; a query may also carry it, for the rare tool that gates even its read-only listings behind root ([`deb-get`](managers/deb-get.md)'s upgradable check).
 
@@ -147,7 +147,7 @@ Make version pinning expressible in a manager definition. `install` and `upgrade
 ### Example
 
 ```toml
-[mpm.managers.deno]
+[mpm.overrides.deno]
 name = "Deno"
 platforms = ["linux", "macos", "windows"]
 homepage_url = "https://deno.land"
@@ -155,20 +155,20 @@ cli_names = ["deno"]
 requirement = ">=1.40"
 version_regexes = ['deno (?P<version>\S+)']
 
-[mpm.managers.deno.operations.installed]
+[mpm.overrides.deno.operations.installed]
 args = ["list"]
 regex = '^(?P<package_id>\S+)@(?P<installed_version>\S+)$'
 
-[mpm.managers.deno.operations.outdated]
+[mpm.overrides.deno.operations.outdated]
 args = ["outdated", "--json"]
 format = "json"
 list_path = "packages"
 fields = { package_id = "name", installed_version = "current", latest_version = "latest" }
 
-[mpm.managers.deno.operations.install]
+[mpm.overrides.deno.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.deno.operations.upgrade_one]
+[mpm.overrides.deno.operations.upgrade_one]
 args = ["install", "--force", "{package_id}"]
 ```
 

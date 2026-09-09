@@ -15,7 +15,7 @@
 # `OPAMSWITCH` or the current directory resolves to, exactly as a bare `opam`
 # call in the same shell would. Per-switch targeting is not supported yet.
 
-[mpm.managers.opam]
+[mpm.overrides.opam]
 name = "OCaml opam"
 homepage_url = "https://opam.ocaml.org"
 logo = "ocaml"
@@ -28,27 +28,27 @@ pre_args = ["--color=never", "--yes"]
 # `opam --version` prints the bare version and nothing else.
 version_regexes = ['(?P<version>\d+(?:\.\d+)+\S*)']
 
-[mpm.managers.opam.operations.installed]
+[mpm.overrides.opam.operations.installed]
 args = ["list", "--installed", "--short", "--columns=name,version"]
 regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)$'
 
-[mpm.managers.opam.operations.search]
+[mpm.overrides.opam.operations.search]
 args = ["list", "--search", "{query}", "--short", "--columns=name,version"]
 regex = '^(?P<package_id>\S+)\s+(?P<latest_version>\S+)$'
 
-[mpm.managers.opam.operations.install]
+[mpm.overrides.opam.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.opam.operations.remove]
+[mpm.overrides.opam.operations.remove]
 args = ["remove", "{package_id}"]
 
-[mpm.managers.opam.operations.upgrade_one]
+[mpm.overrides.opam.operations.upgrade_one]
 args = ["upgrade", "{package_id}"]
 
-[mpm.managers.opam.operations.upgrade_all]
+[mpm.overrides.opam.operations.upgrade_all]
 args = ["upgrade"]
 
-[mpm.managers.opam.operations.sync]
+[mpm.overrides.opam.operations.sync]
 args = ["update"]
 
 # Output samples locking the version probe and the declared parsers, derived

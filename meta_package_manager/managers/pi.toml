@@ -32,7 +32,7 @@
 # which is what `mpm` wants.
 # ```
 
-[mpm.managers.pi]
+[mpm.overrides.pi]
 name = "Pi extensions"
 homepage_url = "https://pi.dev"
 platforms = ["linux_like", "macos", "windows"]
@@ -45,22 +45,22 @@ version_regexes = ['(?P<version>\d+\.\d+\.\d+)']
 
 # The two-space indent is the whole discriminator: the heading carries none and
 # the path line under each entry carries four.
-[mpm.managers.pi.operations.installed]
+[mpm.overrides.pi.operations.installed]
 args = ["list"]
 regex = '^ {2}(?P<package_id>\S+)$'
 
-[mpm.managers.pi.operations.install]
+[mpm.overrides.pi.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.pi.operations.remove]
+[mpm.overrides.pi.operations.remove]
 args = ["remove", "{package_id}"]
 
 # `--extension` rather than a bare positional, which `update` would read as a
 # target to self-update.
-[mpm.managers.pi.operations.upgrade_one]
+[mpm.overrides.pi.operations.upgrade_one]
 args = ["update", "--extension", "{package_id}"]
 
-[mpm.managers.pi.operations.upgrade_all]
+[mpm.overrides.pi.operations.upgrade_all]
 args = ["update", "--extensions"]
 
 # Output samples locking the version probe and the declared parser, captured

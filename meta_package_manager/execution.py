@@ -572,7 +572,7 @@ class CLIExecutor:
 
     `None` (the default) inherits the policy resolved from `--cooldown` and the
     `[mpm.cooldown]` configuration, which the pool's selection applies to every
-    manager per run. Pin it explicitly through a `[mpm.managers.<id>]` override,
+    manager per run. Pin it explicitly through a `[mpm.overrides.<id>]` override,
     which keeps precedence over the global resolution: `enforce` holds the
     manager fail-closed even under a best-effort run, `best-effort` waives the
     requirement and runs it without the safeguard, and `off` exempts it from
@@ -587,7 +587,7 @@ class CLIExecutor:
     {attr}`default_sudo` decides. `True`/`False` force escalation on or off for
     every operation this manager marks privileged (a `build_cli(..., sudo=True)` call).
     Set globally by `mpm --sudo` / `mpm --no-sudo` and per manager by the
-    `[mpm.managers.<id>] sudo` config key, the latter winning (see
+    `[mpm.overrides.<id>] sudo` config key, the latter winning (see
     {meth}`meta_package_manager.pool.ManagerPool._select_managers`).
 
     Only privileged operations are ever escalated, and only on a host carrying an
@@ -1425,7 +1425,7 @@ class CLIExecutor:
                     "The failed operation is marked privileged, but escalation "
                     "is off for this manager. Opt in with "
                     f"`mpm --{self.id} --sudo`, or a "  # type: ignore[attr-defined]
-                    f"`[mpm.managers.{self.id}] sudo = true` "  # type: ignore[attr-defined]
+                    f"`[mpm.overrides.{self.id}] sudo = true` "  # type: ignore[attr-defined]
                     "entry in your configuration file.",
                     extra={"label": self.id},  # type: ignore[attr-defined]
                 )

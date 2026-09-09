@@ -13,7 +13,7 @@
 #     installed regex alternation covers both, keeping the version group out of the
 #     URL branch so those packages are yielded version-less.
 
-[mpm.managers.stew]
+[mpm.overrides.stew]
 name = "stew"
 homepage_url = "https://github.com/marwanhawari/stew"
 platforms = ["linux_like", "macos", "all_windows"]
@@ -22,20 +22,20 @@ requirement = ">=0.3.0"
 # `stew --version` prints "stew version v0.6.0".
 version_regexes = ['stew version v(?P<version>\S+)']
 
-[mpm.managers.stew.operations.installed]
+[mpm.overrides.stew.operations.installed]
 args = ["list", "--tags"]
 regex = '^(?P<package_id>\S+?):(?:\S+?/\S+?@v?(?P<installed_version>\S+)|\S+)$'
 
-[mpm.managers.stew.operations.install]
+[mpm.overrides.stew.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.stew.operations.remove]
+[mpm.overrides.stew.operations.remove]
 args = ["uninstall", "{package_id}"]
 
-[mpm.managers.stew.operations.upgrade_one]
+[mpm.overrides.stew.operations.upgrade_one]
 args = ["upgrade", "{package_id}"]
 
-[mpm.managers.stew.operations.upgrade_all]
+[mpm.overrides.stew.operations.upgrade_all]
 args = ["upgrade", "--all"]
 
 # Output samples locking the version probe and the declared parsers, derived

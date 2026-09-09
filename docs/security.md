@@ -6,10 +6,10 @@
 
 The single most important thing to understand: **your `mpm` configuration file can make `mpm` run arbitrary commands.** Treat it like your shell startup file (`.bashrc`, `.zshrc`) or a `Makefile`: anyone who can write it can run code as you the next time you invoke `mpm`.
 
-This is not new to any one feature. The per-manager override mechanism alone already allows it. A `[mpm.managers.<id>]` section can point a built-in manager at a different binary and prefix every call with `sudo`:
+This is not new to any one feature. The per-manager override mechanism alone already allows it. A `[mpm.overrides.<id>]` section can point a built-in manager at a different binary and prefix every call with `sudo`:
 
 ```toml
-[mpm.managers.brew]
+[mpm.overrides.brew]
 cli_search_path = ["/tmp/somewhere"] # searched before $PATH
 cli_names = ["not-really-brew"]      # the binary mpm executes
 pre_cmds = ["sudo"]                  # prepended to every invocation
@@ -54,6 +54,6 @@ These guardrails govern definitions read from a *configuration file*. `mpm` also
 
 ## See also
 
-- {doc}`overrides` — the `[mpm.managers.<id>]` override and definition schema.
+- {doc}`overrides` — the `[mpm.overrides.<id>]` override and definition schema.
 - {doc}`cooldown` — the release-age gate that mitigates a different threat: compromised upstream *package* releases.
 - {doc}`configuration` — configuration-file discovery and precedence.

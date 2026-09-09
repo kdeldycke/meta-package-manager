@@ -10,7 +10,7 @@
 # `name - installed - latest` (`list-upgradable`) rows. No operation is marked
 # sudo: opkg's embedded targets run as root.
 
-[mpm.managers.opkg]
+[mpm.overrides.opkg]
 name = "opkg"
 homepage_url = "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/"
 logo = "openwrt"
@@ -20,35 +20,35 @@ requirement = ">=0.2.0"
 version_regexes = ['opkg\s+version\s+(?P<version>\S+)']
 
 # `opkg list-installed` prints "name - version" rows.
-[mpm.managers.opkg.operations.installed]
+[mpm.overrides.opkg.operations.installed]
 args = ["list-installed"]
 regex = '^(?P<package_id>\S+) - (?P<installed_version>\S+)'
 
 # `opkg list-upgradable` prints "name - installed - latest" rows.
-[mpm.managers.opkg.operations.outdated]
+[mpm.overrides.opkg.operations.outdated]
 args = ["list-upgradable"]
 regex = '^(?P<package_id>\S+) - (?P<installed_version>\S+) - (?P<latest_version>\S+)'
 
 # opkg has no search command, so the whole catalog is listed ("name - version -
 # description" rows) and mpm's refiltering narrows it against the query. The
 # description column is not captured: the DSL only recognizes id and versions.
-[mpm.managers.opkg.operations.search]
+[mpm.overrides.opkg.operations.search]
 args = ["list"]
 regex = '^(?P<package_id>\S+) - (?P<latest_version>\S+) - .+$'
 
-[mpm.managers.opkg.operations.install]
+[mpm.overrides.opkg.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.opkg.operations.remove]
+[mpm.overrides.opkg.operations.remove]
 args = ["remove", "{package_id}"]
 
-[mpm.managers.opkg.operations.upgrade_one]
+[mpm.overrides.opkg.operations.upgrade_one]
 args = ["upgrade", "{package_id}"]
 
-[mpm.managers.opkg.operations.upgrade_all]
+[mpm.overrides.opkg.operations.upgrade_all]
 args = ["upgrade"]
 
-[mpm.managers.opkg.operations.sync]
+[mpm.overrides.opkg.operations.sync]
 args = ["update"]
 
 # Output samples locking the version probe and the declared parsers, derived

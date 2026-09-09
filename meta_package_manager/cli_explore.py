@@ -790,7 +790,7 @@ def config_template(ctx, manager_ids):
     """Print the overridable attributes of one or more managers as a TOML config
     template.
 
-    Each block is a valid `[mpm.managers.<id>]` section ready to paste into a
+    Each block is a valid `[mpm.overrides.<id>]` section ready to paste into a
     standalone config file or a `[tool.mpm]` `pyproject.toml` block. The output
     lists every overridable field with its current value so it doubles as the
     canonical reference for what each manager exposes: prune the rows that don't
@@ -803,4 +803,4 @@ def config_template(ctx, manager_ids):
     """
     target_ids = manager_ids or pool.maintained_manager_ids
     overrides = {mid: dump_manager_overrides(pool[mid]) for mid in target_ids}
-    echo(tomli_w.dumps({"mpm": {"managers": overrides}}), nl=False)
+    echo(tomli_w.dumps({"mpm": {"overrides": overrides}}), nl=False)

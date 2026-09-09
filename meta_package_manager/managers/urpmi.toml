@@ -20,7 +20,7 @@
 #   - Mutations abort for non-root users ("Only superuser is allowed to install
 #     packages"), including urpmi.update and `--clean`.
 
-[mpm.managers.urpmi]
+[mpm.overrides.urpmi]
 name = "urpmi"
 homepage_url = "https://wiki.mageia.org/en/URPMI"
 platforms = ["mageia", "mandriva"]
@@ -33,7 +33,7 @@ version_regexes = ['urpmi (?P<version>\S+)']
 
 # The {NAME}-style tokens below are rpm queryformat tags, left untouched by mpm's
 # placeholder substitution (which only knows {package_id} and {query}).
-[mpm.managers.urpmi.operations.installed]
+[mpm.overrides.urpmi.operations.installed]
 cli = "rpm"
 args = ["--query", "--all", "--queryformat", '%{NAME} %{VERSION}-%{RELEASE}\n']
 regex = '^(?P<package_id>\S+) (?P<installed_version>\S+)$'
@@ -41,43 +41,43 @@ regex = '^(?P<package_id>\S+) (?P<installed_version>\S+)$'
 # `urpmq --auto-select` is the read-only lister of upgradable packages (`urpmi
 # --auto-select` is the mutating upgrade); -r appends "-version-release" to each
 # name, split below on the last two dash-fields.
-[mpm.managers.urpmi.operations.outdated]
+[mpm.overrides.urpmi.operations.outdated]
 cli = "urpmq"
 args = ["--auto-select", "-r"]
 regex = '^(?P<package_id>.+)-(?P<latest_version>[^-]+-[^-]+)$'
 
-[mpm.managers.urpmi.operations.search]
+[mpm.overrides.urpmi.operations.search]
 cli = "urpmq"
 args = ["--fuzzy", "{query}", "-r"]
 regex = '^(?P<package_id>.+)-(?P<latest_version>[^-]+-[^-]+)$'
 
-[mpm.managers.urpmi.operations.install]
+[mpm.overrides.urpmi.operations.install]
 args = ["--auto", "{package_id}"]
 sudo = true
 
-[mpm.managers.urpmi.operations.remove]
+[mpm.overrides.urpmi.operations.remove]
 cli = "urpme"
 args = ["--auto", "{package_id}"]
 sudo = true
 
 # Installing pulls the newest version from the media, upgrading in place: urpmi has
 # no dedicated per-package upgrade.
-[mpm.managers.urpmi.operations.upgrade_one]
+[mpm.overrides.urpmi.operations.upgrade_one]
 args = ["--auto", "{package_id}"]
 sudo = true
 
-[mpm.managers.urpmi.operations.upgrade_all]
+[mpm.overrides.urpmi.operations.upgrade_all]
 args = ["--auto-select", "--auto"]
 sudo = true
 
 # Refreshes all enabled non-removable media.
-[mpm.managers.urpmi.operations.sync]
+[mpm.overrides.urpmi.operations.sync]
 cli = "urpmi.update"
 args = ["-a"]
 sudo = true
 
 # Removes all packages from the /var/cache/urpmi/rpms cache.
-[mpm.managers.urpmi.operations.cleanup_cache]
+[mpm.overrides.urpmi.operations.cleanup_cache]
 args = ["--clean"]
 sudo = true
 

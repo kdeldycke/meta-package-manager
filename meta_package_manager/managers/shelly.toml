@@ -39,7 +39,7 @@
 #   - `purify standard` always plans corrupted archives, and `--cache` and
 #     `--orphans` add their own targets to that plan.
 
-[mpm.managers.shelly]
+[mpm.overrides.shelly]
 name = "Shelly"
 homepage_url = "https://github.com/Seafoam-Labs/Shelly-ALPM"
 logo = "archlinux"
@@ -58,40 +58,40 @@ version_cli_options = ["--version"]
 # being one, so the pattern reaches past the three numbers.
 version_regexes = ['(?P<version>\d+\.\d+\.\d+\S*)']
 
-[mpm.managers.shelly.operations.installed]
+[mpm.overrides.shelly.operations.installed]
 args = ["list", "standard", "--json"]
 format = "json"
 fields = { package_id = "Name", installed_version = "Version" }
 
-[mpm.managers.shelly.operations.outdated]
+[mpm.overrides.shelly.operations.outdated]
 args = ["list-updates", "standard", "--json"]
 format = "json"
 fields = { package_id = "Name", installed_version = "CurrentVersion", latest_version = "NewVersion" }
 
-[mpm.managers.shelly.operations.search]
+[mpm.overrides.shelly.operations.search]
 args = ["search", "standard", "{query}", "--available", "--json"]
 format = "json"
 fields = { package_id = "Name", latest_version = "Version" }
 
-[mpm.managers.shelly.operations.install]
+[mpm.overrides.shelly.operations.install]
 args = ["install", "standard", "{package_id}"]
 
-[mpm.managers.shelly.operations.remove]
+[mpm.overrides.shelly.operations.remove]
 args = ["remove", "standard", "{package_id}"]
 
-[mpm.managers.shelly.operations.upgrade_one]
+[mpm.overrides.shelly.operations.upgrade_one]
 args = ["update", "standard", "{package_id}"]
 
-[mpm.managers.shelly.operations.upgrade_all]
+[mpm.overrides.shelly.operations.upgrade_all]
 args = ["upgrade", "standard"]
 
-[mpm.managers.shelly.operations.sync]
+[mpm.overrides.shelly.operations.sync]
 args = ["sync", "standard"]
 
-[mpm.managers.shelly.operations.cleanup_cache]
+[mpm.overrides.shelly.operations.cleanup_cache]
 args = ["purify", "standard", "--cache"]
 
-[mpm.managers.shelly.operations.cleanup_orphan]
+[mpm.overrides.shelly.operations.cleanup_orphan]
 args = ["purify", "standard", "--orphans"]
 
 # Output samples locking the version probe and the declared parsers, captured

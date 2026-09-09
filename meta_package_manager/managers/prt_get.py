@@ -38,7 +38,7 @@ class PrtGet(PackageManager):
     ```{caution}
     CRUX builds every port from source, so an install or an upgrade compiles.
     `mpm` caps a mutating operation at 500 seconds, which a large port outlasts
-    by hours. Raise it for this manager with `[mpm.managers.prt-get] timeout`.
+    by hours. Raise it for this manager with `[mpm.overrides.prt-get] timeout`.
     ```
 
     ```{note}

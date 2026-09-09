@@ -1329,7 +1329,7 @@ def test_manager_page_sections_render(manager):
     assert len(operations.splitlines()) == 2 + len(Operations)
     selection = _docs.manager_selection(manager.id)
     assert f"--no-{manager.id}" in selection
-    assert f"[mpm.managers.{manager.id}]" in selection
+    assert f"[mpm.overrides.{manager.id}]" in selection
 
 
 DOCSTRING_FENCE = re.compile(

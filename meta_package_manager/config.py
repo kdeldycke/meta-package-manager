@@ -17,7 +17,7 @@
 """Configuration utilities for `mpm`.
 
 Hosts the schema of the `[mpm]` configuration section consumed by
-{mod}`click_extra` and the runtime policy around the `[mpm.managers.<id>]`
+{mod}`click_extra` and the runtime policy around the `[mpm.overrides.<id>]`
 sections of the same configuration file: applying attribute overrides to shipped
 managers, gating manager definitions on the trust of their source, and registering
 them into the pool.
@@ -131,7 +131,7 @@ class MpmConfig:
     sudo: bool | None = None
     """Force privileged manager operations with (`True`) or without (`False`)
     `sudo`. Unset by default: system managers escalate, user-level managers do
-    not. Overridden per manager by a `sudo` entry in `[mpm.managers.<id>]`."""
+    not. Overridden per manager by a `sudo` entry in `[mpm.overrides.<id>]`."""
 
     timeout: int | None = None
     """Maximum duration in seconds for each manager CLI call. When unset, a
@@ -181,7 +181,7 @@ class MpmConfig:
     """Print a contribution invitation when a user override targets a field that
     likely indicates an upstream detection bug."""
 
-    managers: dict[str, dict] = field(default_factory=dict)
+    overrides: dict[str, dict] = field(default_factory=dict)
     """Per-manager attribute overrides keyed by manager ID.
 
     Typed as `dict[str, dict]` so click-extra treats the sub-tree as opaque:
@@ -287,7 +287,7 @@ def _build_issue_url(hint: ContributionHint) -> str:
     # paste the snippet straight into their config file (or back into the issue
     # body) without translating tuples to TOML lists by hand.
     override_toml = tomli_w.dumps(
-        {"mpm": {"managers": {hint.manager_id: {hint.field: hint.user_value}}}},
+        {"mpm": {"overrides": {hint.manager_id: {hint.field: hint.user_value}}}},
     ).rstrip()
     bug_description = (
         f"While running `mpm`, I had to override the "
@@ -419,7 +419,7 @@ def validate_manager_overrides_section(
     *,
     pool: ManagerPool,
 ) -> None:
-    """Strict validator for the `[mpm.managers.<id>]` configuration sub-tree.
+    """Strict validator for the `[mpm.overrides.<id>]` configuration sub-tree.
 
     Pure function: inspects `section` against the pool's registered managers
     and {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`, raises the first
@@ -437,7 +437,7 @@ def validate_manager_overrides_section(
     :raises click_extra.ValidationError: when `section` is not a mapping, an
         override sets an unknown field or a wrong-typed value, or a definition is
         malformed. The `path` of the raised error is relative to the
-        `[mpm.managers]` section root (e.g. `"winget.cli_searchpath"`);
+        `[mpm.overrides]` section root (e.g. `"winget.cli_searchpath"`);
         click-extra prepends the app prefix when surfacing the error.
     """
     if not section:
@@ -466,7 +466,7 @@ def validate_manager_overrides_section(
 
 
 def _validate_override_fields(manager_id: str, fields: Any) -> None:
-    """Validate one `[mpm.managers.<built-in id>]` override section.
+    """Validate one `[mpm.overrides.<built-in id>]` override section.
 
     Each field must be a known {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` attribute and carry a
     value its converter accepts. Raises {class}`click_extra.ValidationError` on the
@@ -503,7 +503,7 @@ def apply_manager_overrides(
     """Apply per-manager attribute overrides parsed from the user's config file.
 
     Expects `overrides` to be a mapping of manager ID to a mapping of attribute
-    name to its new value, as returned by `conf["mpm"]["managers"]`. `None`
+    name to its new value, as returned by `conf["mpm"]["overrides"]`. `None`
     and empty mappings are accepted as no-op shortcuts so callers can
     unconditionally forward whatever was parsed from the config file.
 
@@ -556,7 +556,7 @@ def apply_manager_overrides(
             setattr(manager, field_name, value)
             pool.overridden_fields.setdefault(manager_id, set()).add(field_name)
             logging.debug(
-                f"Applied override [mpm.managers.{manager_id}].{field_name} "
+                f"Applied override [mpm.overrides.{manager_id}].{field_name} "
                 f"= {value!r}",
             )
 
@@ -578,7 +578,7 @@ def apply_manager_overrides(
 
 def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
     """Construct a {class}`click_extra.ConfigValidator` for the
-    `[mpm.managers]` sub-tree, bound to a specific {class}`ManagerPool`.
+    `[mpm.overrides]` sub-tree, bound to a specific {class}`ManagerPool`.
 
     Used by the CLI bootstrap (`@group` decorator) to register a validator
     against the live pool. Wrapping {func}`validate_manager_overrides_section`
@@ -592,7 +592,7 @@ def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
         validate_manager_overrides_section(section, pool=pool)
 
     return ConfigValidator(
-        extension_path="managers",
+        extension_path="overrides",
         validator=_validator,
         description="Per-manager attribute overrides (see docs/configuration.md).",
     )
@@ -630,30 +630,51 @@ accumulated between {func}`apply_manager_overrides_from_context` and
 {func}`print_contribution_hints`."""
 
 
-def _managers_section(ctx: click.Context) -> Mapping[str, Any] | None:
-    """Return the `[mpm.managers]` mapping from the loaded config, or `None`.
+def _overrides_section(ctx: click.Context) -> Mapping[str, Any] | None:
+    """Return the `[mpm.overrides]` mapping from the loaded config, or `None`.
 
     Reads the full parsed config {mod}`click_extra` exposes under
-    {data}`~click_extra.context.CONF_FULL` and drills into `["mpm"]["managers"]`,
+    {data}`~click_extra.context.CONF_FULL` and drills into `["mpm"]["overrides"]`,
     tolerating a missing or malformed layer at each step. Shared by
     {func}`apply_manager_overrides_from_context` (the override pass) and
     {func}`register_config_managers_from_context` (the definition pass).
     """
     conf_full = ctx.meta.get(CONF_FULL) or {}
     mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
-    return mpm_section.get("managers") if isinstance(mpm_section, dict) else None
+    return mpm_section.get("overrides") if isinstance(mpm_section, dict) else None
+
+
+def stale_overrides_section(ctx: click.Context) -> tuple[str, ...]:
+    """Name the per-manager sections a configuration still spells `[mpm.managers]`.
+
+    The override sections moved to `[mpm.overrides.<id>]`. Their old path now
+    names the `managers` subcommand, whose own options are scalars and lists, so
+    a table under it is a stale override block and nothing else.
+
+    Nothing else reports one: the schema no longer claims that sub-tree, and
+    {mod}`click_extra` drops a key no parameter answers to, so a configuration
+    left unedited stops applying in silence. Hence the check reads
+    {data}`~click_extra.context.CONF_FULL`, which carries every shape the
+    configuration holds, rather than the parsed parameters.
+    """
+    conf_full = ctx.meta.get(CONF_FULL) or {}
+    mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
+    section = mpm_section.get("managers") if isinstance(mpm_section, dict) else None
+    if not isinstance(section, dict):
+        return ()
+    return tuple(sorted(key for key, value in section.items() if isinstance(value, dict)))
 
 
 def apply_manager_overrides_from_context(
     ctx: click.Context,
     pool: ManagerPool,
 ) -> None:
-    """Read the `[mpm.managers.<id>]` sections from the loaded config and apply
+    """Read the `[mpm.overrides.<id>]` sections from the loaded config and apply
     them to `pool`.
 
     Reads the full parsed config that {mod}`click_extra` exposes under
     {data}`~click_extra.context.CONF_FULL` after configuration discovery and
-    forwards the `["mpm"]["managers"]` subtree to
+    forwards the `["mpm"]["overrides"]` subtree to
     {func}`apply_manager_overrides`. Returns silently when no configuration
     file was loaded or when the section is absent.
 
@@ -661,7 +682,7 @@ def apply_manager_overrides_from_context(
     stashed under {data}`CTX_HINTS_KEY` for {func}`print_contribution_hints` to
     surface at the end of the run.
     """
-    overrides = _managers_section(ctx)
+    overrides = _overrides_section(ctx)
     _warn_risky_overrides_from_untrusted_source(ctx, pool, overrides)
     hints = apply_manager_overrides(pool, overrides)
     if hints:
@@ -717,7 +738,7 @@ def print_contribution_hints(ctx: click.Context) -> None:
 # Brand-new manager definitions.
 #
 # Everything below is the *policy* half of config-defined managers: where a
-# `[mpm.managers.<id>]` section may be loaded from, whether its source is trusted,
+# `[mpm.overrides.<id>]` section may be loaded from, whether its source is trusted,
 # and the registration passes wired into the CLI. The schema, validation and
 # class-building machinery lives in {mod}`meta_package_manager.definitions`.
 
@@ -839,7 +860,7 @@ def _collect_definitions(
     pool: ManagerPool,
     sections: Mapping[str, Any],
 ) -> dict[str, ManagerDefinition]:
-    """Parse the non-built-in sections of `[mpm.managers]` into definitions.
+    """Parse the non-built-in sections of `[mpm.overrides]` into definitions.
 
     Sections keyed by a built-in ID (overrides) and any that fail to parse are skipped:
     parse failures were already surfaced by the load-time validator, so re-raising here
@@ -863,12 +884,12 @@ def register_config_managers_from_context(
     """Register config-defined managers from the loaded config (authoritative pass).
 
     Reads the parsed config under {data}`~click_extra.context.CONF_FULL`, parses the
-    non-built-in `[mpm.managers.<id>]` sections, and registers them through
+    non-built-in `[mpm.overrides.<id>]` sections, and registers them through
     {func}`register_config_managers`. This is the source of truth for *availability*:
     a manager defined in a config the eager pre-load could not reach (a URL, a custom
     path) still works from here, it just does not get a dedicated CLI flag.
     """
-    sections = _managers_section(ctx)
+    sections = _overrides_section(ctx)
     if not sections:
         return
     source, source_is_url = _config_source(ctx)
@@ -918,7 +939,7 @@ def discover_config_definitions(
     Best-effort and local-only: any error (no config, parse failure, missing reader)
     yields no definitions so CLI startup never breaks. URL configs are deferred to the
     authoritative {func}`register_config_managers_from_context` pass. Supports both
-    the standalone `[mpm.managers]` layout and `[tool.mpm.managers]` in
+    the standalone `[mpm.overrides]` layout and `[tool.mpm.overrides]` in
     `pyproject.toml`.
     """
     try:
@@ -929,7 +950,7 @@ def discover_config_definitions(
         root = data.get("mpm")
         if not isinstance(root, dict) and isinstance(data.get("tool"), dict):
             root = data["tool"].get("mpm")
-        sections = root.get("managers") if isinstance(root, dict) else None
+        sections = root.get("overrides") if isinstance(root, dict) else None
         if not isinstance(sections, dict):
             return {}, None
         return _collect_definitions(pool, sections), path

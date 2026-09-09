@@ -24,7 +24,7 @@
 # The version floor is the first release where `choco list` reports installed
 # packages without the removed `--local-only` flag.
 
-[mpm.managers.choco]
+[mpm.overrides.choco]
 name = "Chocolatey"
 homepage_url = "https://chocolatey.org"
 logo = "chocolatey"
@@ -46,16 +46,16 @@ post_args = ["--no-progress", "--no-color"]
 default_sudo = true
 
 # `choco list --limit-output` prints one "id|version" row per installed package.
-[mpm.managers.choco.operations.installed]
+[mpm.overrides.choco.operations.installed]
 args = ["list", "--limit-output"]
 regex = '^(?P<package_id>.+)\|(?P<installed_version>.+)$'
 
 # `choco outdated --limit-output` prints "id|installed|latest|pinned" rows.
-[mpm.managers.choco.operations.outdated]
+[mpm.overrides.choco.operations.outdated]
 args = ["outdated", "--limit-output"]
 regex = '^(?P<package_id>.+)\|(?P<installed_version>.+)\|(?P<latest_version>.+)\|.+$'
 
-[mpm.managers.choco.operations.search]
+[mpm.overrides.choco.operations.search]
 args = ["search", "{query}", "--limit-output", "{id_name_only_args}", "{exact_args}"]
 id_name_only_args = ["--by-id-only"]
 exact_args = ["--exact"]
@@ -65,21 +65,21 @@ regex = '^(?P<package_id>.+)\|(?P<latest_version>.+)$'
 # running without admin rights: it asks "Do you want to continue?" and answers
 # itself after 20 seconds. The install then fails on the first write anyway, so
 # escalating is what keeps that prompt out of the concurrent fan-out.
-[mpm.managers.choco.operations.install]
+[mpm.overrides.choco.operations.install]
 args = ["install", "{package_id}", "--yes", "--limit-output"]
 sudo = true
 
-[mpm.managers.choco.operations.remove]
+[mpm.overrides.choco.operations.remove]
 args = ["uninstall", "{package_id}", "--yes", "--limit-output"]
 sudo = true
 
-[mpm.managers.choco.operations.upgrade_one]
+[mpm.overrides.choco.operations.upgrade_one]
 args = ["upgrade", "{package_id}", "--yes", "--limit-output"]
 sudo = true
 
 # Exits 0 unelevated when nothing is outdated, having attempted no write at all,
 # so it is marked from the runs that had real work to do.
-[mpm.managers.choco.operations.upgrade_all]
+[mpm.overrides.choco.operations.upgrade_all]
 args = ["upgrade", "all", "--yes", "--limit-output"]
 sudo = true
 

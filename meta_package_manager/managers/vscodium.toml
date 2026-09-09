@@ -11,7 +11,7 @@
 # hash and the arch on their own lines, and the default regex picks the first
 # token up.
 
-[mpm.managers.vscodium]
+[mpm.overrides.vscodium]
 name = "VSCodium"
 homepage_url = "https://vscodium.com"
 logo = "vscodium"
@@ -24,14 +24,14 @@ brewfile_skip_warning = "Skipping {count} VSCodium extension(s) in Brewfile outp
 
 # `codium --list-extensions --show-versions` prints "publisher.extension@version"
 # rows.
-[mpm.managers.vscodium.operations.installed]
+[mpm.overrides.vscodium.operations.installed]
 args = ["--list-extensions", "--show-versions"]
 regex = '^(?P<package_id>[^@\s]+)@(?P<installed_version>\S+)$'
 
-[mpm.managers.vscodium.operations.install]
+[mpm.overrides.vscodium.operations.install]
 args = ["--install-extension", "{package_id}"]
 
-[mpm.managers.vscodium.operations.remove]
+[mpm.overrides.vscodium.operations.remove]
 args = ["--uninstall-extension", "{package_id}"]
 
 # Output samples locking the version probe and the declared parsers, derived

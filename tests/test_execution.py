@@ -689,7 +689,7 @@ def test_dormant_marker_permission_failure_hints_the_opt_in(caplog):
     hints = [r for r in caplog.records if "marked privileged" in r.getMessage()]
     assert len(hints) == 1
     assert "`mpm --fakemanager --sudo`" in hints[0].getMessage()
-    assert "`[mpm.managers.fakemanager] sudo = true`" in hints[0].getMessage()
+    assert "`[mpm.overrides.fakemanager] sudo = true`" in hints[0].getMessage()
     assert hints[0].label == manager.id
 
 

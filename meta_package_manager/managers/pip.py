@@ -753,7 +753,7 @@ class Pip(PackageManager):
         Successfully installed arrow-1.1.1 python-dateutil-2.8.2
         ```
         """
-        # Marked privileged so --sudo / `[mpm.managers.pip] sudo = true` can escalate
+        # Marked privileged so --sudo / `[mpm.overrides.pip] sudo = true` can escalate
         # global installs; dormant by default (pip's default_sudo is False).
         return self.run_cli("install", package_id, sudo=True)
 

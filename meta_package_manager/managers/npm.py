@@ -318,7 +318,7 @@ class NPM(PackageManager):
         added 3 packages in 3s
         ```
         """
-        # Marked privileged so --sudo / `[mpm.managers.npm] sudo = true` can escalate
+        # Marked privileged so --sudo / `[mpm.overrides.npm] sudo = true` can escalate
         # global installs; dormant by default (npm's default_sudo is False).
         return self.run_cli("install", package_id, sudo=True)
 

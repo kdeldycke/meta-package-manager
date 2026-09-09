@@ -87,7 +87,7 @@
 # mode. No `sync` and no `cleanup`: neither exists, the catalog being fetched
 # inline by the commands that need it.
 
-[mpm.managers.choosenim]
+[mpm.overrides.choosenim]
 name = "Nim choosenim"
 homepage_url = "https://github.com/nim-lang/choosenim"
 logo = "nim"
@@ -105,28 +105,28 @@ post_args = ["--noColor"]
 # losing it upstream would take the manager offline rather than misread it.
 version_regexes = ['^choosenim v?(?P<version>\S+)']
 
-[mpm.managers.choosenim.operations.installed]
+[mpm.overrides.choosenim.operations.installed]
 args = ["versions", "--installed"]
 regex = '^\s+(?:\* )?(?P<package_id>[#\d]\S*)'
 
 # The catalog takes no query, so mpm narrows it. Dropping `--installed` is what
 # adds the `Available:` section, and the installed rows stay in the result: a
 # search answers what choosenim can select, which includes what is already here.
-[mpm.managers.choosenim.operations.search]
+[mpm.overrides.choosenim.operations.search]
 args = ["versions"]
 regex = '^\s+(?:\* )?(?P<package_id>[#\d]\S*)'
 
 # The version is the whole command: choosenim has no `install` verb, taking the
 # toolchain as its sole positional.
-[mpm.managers.choosenim.operations.install]
+[mpm.overrides.choosenim.operations.install]
 args = ["{package_id}"]
 
-[mpm.managers.choosenim.operations.remove]
+[mpm.overrides.choosenim.operations.remove]
 args = ["remove", "{package_id}"]
 
 # Naming a version genuinely restricts the update to it, and is the only form
 # that does. See the caution above for why no `upgrade_all` is declared.
-[mpm.managers.choosenim.operations.upgrade_one]
+[mpm.overrides.choosenim.operations.upgrade_one]
 args = ["update", "{package_id}"]
 
 # Output samples locking the version probe and the declared parser, captured

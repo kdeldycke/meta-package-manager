@@ -23,7 +23,7 @@
 #     `latest_version`, so a class would be needed to carry it, which is not worth
 #     the weight for one cosmetic column.
 
-[mpm.managers.clib]
+[mpm.overrides.clib]
 name = "clib"
 homepage_url = "https://github.com/clibs/clib"
 # No Windows: upstream documents Homebrew, MacPorts, Ubuntu, Fedora and NixOS
@@ -33,15 +33,15 @@ cli_names = ["clib"]
 # `clib --version` prints the bare version and nothing else.
 version_regexes = ['(?P<version>\d+\.\d+\.\d+)']
 
-[mpm.managers.clib.operations.search]
+[mpm.overrides.clib.operations.search]
 args = ["search", "--json", "--no-color", "{query}"]
 format = "json"
 fields = { package_id = "repo" }
 
-[mpm.managers.clib.operations.install]
+[mpm.overrides.clib.operations.install]
 args = ["install", "--global", "{package_id}"]
 
-[mpm.managers.clib.operations.remove]
+[mpm.overrides.clib.operations.remove]
 args = ["uninstall", "{package_id}"]
 
 # Output samples locking the version probe and the declared parsers, captured

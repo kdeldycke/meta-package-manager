@@ -54,7 +54,7 @@
 # catalog at around fifty entries, which mpm filters itself. Nothing maps to
 # `sync` or `cleanup`.
 
-[mpm.managers.gcloud]
+[mpm.overrides.gcloud]
 name = "Google Cloud CLI"
 homepage_url = "https://cloud.google.com/sdk/gcloud"
 logo = "googlecloud"
@@ -71,7 +71,7 @@ version_regexes = ['^Google Cloud SDK[ \t]+(?P<version>\S+)']
 # Local state only, so no network call and no remote snapshot: every record it
 # returns is installed by construction, which is why no status field is needed
 # to filter them. Hidden components are excluded by the command itself.
-[mpm.managers.gcloud.operations.installed]
+[mpm.overrides.gcloud.operations.installed]
 args = [
   "components",
   "list",
@@ -85,7 +85,7 @@ regex = '^(?P<package_id>[^\t]+)\t(?P<installed_version>[^\t]*)'
 # means an upgrade is pending: the others are `Installed`, `Not Installed` and
 # `Deprecated`, the last marking a component still on disk that upstream has
 # dropped, which is not an available update.
-[mpm.managers.gcloud.operations.outdated]
+[mpm.overrides.gcloud.operations.outdated]
 args = [
   "components",
   "list",
@@ -97,15 +97,15 @@ regex = '^(?P<package_id>[^\t]+)\t(?P<installed_version>[^\t]*)\t(?P<latest_vers
 # `--quiet` answers every prompt with its default, which is what makes these
 # unattended: the confirmation to proceed defaults to yes, and the prompt asking
 # whether to install instead of update defaults to no.
-[mpm.managers.gcloud.operations.install]
+[mpm.overrides.gcloud.operations.install]
 args = ["components", "install", "--quiet", "{package_id}"]
 
 # Removal cascades to everything depending on the named component, which is
 # upstream's documented behavior rather than a surprise.
-[mpm.managers.gcloud.operations.remove]
+[mpm.overrides.gcloud.operations.remove]
 args = ["components", "remove", "--quiet", "{package_id}"]
 
-[mpm.managers.gcloud.operations.upgrade_all]
+[mpm.overrides.gcloud.operations.upgrade_all]
 args = ["components", "update", "--quiet"]
 
 # Output samples locking the version probe and the declared parsers. Consumed by

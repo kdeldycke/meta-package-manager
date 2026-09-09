@@ -33,7 +33,7 @@
 # auto-installed plugin to strand.
 # ```
 
-[mpm.managers.claude-code-plugins]
+[mpm.overrides.claude-code-plugins]
 name = "Claude Code plugins"
 homepage_url = "https://docs.claude.com/en/docs/claude-code/plugins"
 platforms = ["linux_like", "macos", "windows"]
@@ -47,30 +47,30 @@ version_cli_options = ["--version"]
 version_regexes = ['(?P<version>\d+\.\d+\.\d+)\s+\(Claude Code\)']
 
 # A flat top-level array, which is the one JSON shape a definition can parse.
-[mpm.managers.claude-code-plugins.operations.installed]
+[mpm.overrides.claude-code-plugins.operations.installed]
 args = ["plugin", "list", "--json"]
 format = "json"
 fields = { package_id = "id", installed_version = "version" }
 
-[mpm.managers.claude-code-plugins.operations.install]
+[mpm.overrides.claude-code-plugins.operations.install]
 args = ["plugin", "install", "{package_id}"]
 
-[mpm.managers.claude-code-plugins.operations.remove]
+[mpm.overrides.claude-code-plugins.operations.remove]
 args = ["plugin", "uninstall", "{package_id}"]
 
-[mpm.managers.claude-code-plugins.operations.upgrade_one]
+[mpm.overrides.claude-code-plugins.operations.upgrade_one]
 args = ["plugin", "update", "{package_id}"]
 
 # Refreshes every configured marketplace: `update` takes an optional name and
 # updates all of them when given none.
-[mpm.managers.claude-code-plugins.operations.sync]
+[mpm.overrides.claude-code-plugins.operations.sync]
 args = ["plugin", "marketplace", "update"]
 
 # Categorised as an orphan sweep rather than a cache purge: prune removes the
 # auto-installed dependencies nothing needs any more, and touches nothing else.
 # `--yes` is mandatory rather than a convenience: prune prompts for
 # confirmation, and refuses to run at all when stdout is not a terminal.
-[mpm.managers.claude-code-plugins.operations.cleanup_orphan]
+[mpm.overrides.claude-code-plugins.operations.cleanup_orphan]
 args = ["plugin", "prune", "--yes"]
 
 # Output samples locking the version probe and the declared parser, captured

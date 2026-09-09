@@ -19,7 +19,7 @@
 #     interactive on a terminal). Mutations need root: OpenBSD's base convention is
 #     doas, but mpm's escalation runs through sudo (available as a package).
 
-[mpm.managers.pkg-tools]
+[mpm.overrides.pkg-tools]
 name = "OpenBSD pkg tools"
 homepage_url = "https://man.openbsd.org/pkg_add"
 logo = "openbsd"
@@ -36,13 +36,13 @@ version_regexes = ['^(?P<version>[\d.]+)']
 # Bare `pkg_info` implies -I -a (one "stem-version  comment" line per installed
 # package, the name padded to a minimum of 20 characters); the flags are passed
 # explicitly since an operation needs a non-empty args list.
-[mpm.managers.pkg-tools.operations.installed]
+[mpm.overrides.pkg-tools.operations.installed]
 args = ["-I", "-a"]
 regex = '^(?P<package_id>\S+)-(?P<installed_version>\d\S*)\s'
 
 # `-n` dry-runs the unused-dependencies deletion, announcing each candidate the
 # way a real run does.
-[mpm.managers.pkg-tools.operations.orphans]
+[mpm.overrides.pkg-tools.operations.orphans]
 cli = "pkg_delete"
 args = ["-a", "-I", "-n"]
 regex = '^(?P<package_id>\S+)-(?P<installed_version>\d[^\s:]*): ok$'
@@ -50,34 +50,34 @@ regex = '^(?P<package_id>\S+)-(?P<installed_version>\d[^\s:]*): ok$'
 # -Q searches the remote repository by substring and prints bare "stem-version"
 # lines; an exactly-installed match gets " (installed)" appended, which falls
 # outside the captured tokens.
-[mpm.managers.pkg-tools.operations.search]
+[mpm.overrides.pkg-tools.operations.search]
 args = ["-Q", "{query}"]
 regex = '^(?P<package_id>\S+)-(?P<latest_version>\d\S*)'
 
-[mpm.managers.pkg-tools.operations.install]
+[mpm.overrides.pkg-tools.operations.install]
 cli = "pkg_add"
 args = ["-I", "{package_id}"]
 sudo = true
 
-[mpm.managers.pkg-tools.operations.remove]
+[mpm.overrides.pkg-tools.operations.remove]
 cli = "pkg_delete"
 args = ["-I", "{package_id}"]
 sudo = true
 
-[mpm.managers.pkg-tools.operations.upgrade_one]
+[mpm.overrides.pkg-tools.operations.upgrade_one]
 cli = "pkg_add"
 args = ["-u", "-I", "{package_id}"]
 sudo = true
 
 # `pkg_add -u` with no package name updates every installed package.
-[mpm.managers.pkg-tools.operations.upgrade_all]
+[mpm.overrides.pkg-tools.operations.upgrade_all]
 cli = "pkg_add"
 args = ["-u", "-I"]
 sudo = true
 
 # `pkg_delete -a` deletes unused dependencies: the whole cleanup is an orphan
 # sweep, declared as such.
-[mpm.managers.pkg-tools.operations.cleanup_orphan]
+[mpm.overrides.pkg-tools.operations.cleanup_orphan]
 cli = "pkg_delete"
 args = ["-a", "-I"]
 sudo = true

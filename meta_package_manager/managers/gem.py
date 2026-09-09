@@ -46,7 +46,7 @@ class Gem(PackageManager):
     All operations target the default gem scope (controlled by `GEM_HOME`).
     On system Ruby this means system-level gems, which may require elevated
     privileges for write operations: those carry dormant privileged markers,
-    so `mpm --sudo` or a `[mpm.managers.gem] sudo = true` override
+    so `mpm --sudo` or a `[mpm.overrides.gem] sudo = true` override
     escalates them, while nothing escalates by default. On recent macOS that
     default scope lives on the sealed, read-only system volume, so the gems
     Ruby bundles there surface as outdated yet cannot be upgraded in place,
@@ -256,7 +256,7 @@ class Gem(PackageManager):
         12 gems installed
         ```
         """
-        # Marked privileged so --sudo / `[mpm.managers.gem] sudo = true` can escalate
+        # Marked privileged so --sudo / `[mpm.overrides.gem] sudo = true` can escalate
         # system-Ruby installs; dormant by default (gem's default_sudo is False).
         return self.run_cli(
             "install",

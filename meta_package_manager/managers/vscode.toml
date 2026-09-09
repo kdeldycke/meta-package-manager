@@ -11,7 +11,7 @@
 # hash and the arch on their own lines, and the default regex picks the first
 # token up.
 
-[mpm.managers.vscode]
+[mpm.overrides.vscode]
 name = "Visual Studio Code"
 homepage_url = "https://code.visualstudio.com"
 # No logo, and there never will be: Simple Icons dropped every Microsoft mark in its
@@ -29,14 +29,14 @@ brewfile_entry_type = "vscode"
 
 # `code --list-extensions --show-versions` prints "publisher.extension@version"
 # rows.
-[mpm.managers.vscode.operations.installed]
+[mpm.overrides.vscode.operations.installed]
 args = ["--list-extensions", "--show-versions"]
 regex = '^(?P<package_id>[^@\s]+)@(?P<installed_version>\S+)$'
 
-[mpm.managers.vscode.operations.install]
+[mpm.overrides.vscode.operations.install]
 args = ["--install-extension", "{package_id}"]
 
-[mpm.managers.vscode.operations.remove]
+[mpm.overrides.vscode.operations.remove]
 args = ["--uninstall-extension", "{package_id}"]
 
 # Output samples locking the version probe and the declared parsers, derived

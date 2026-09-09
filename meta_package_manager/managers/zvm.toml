@@ -32,7 +32,7 @@
 # signature, both reported on the way through.
 # ```
 
-[mpm.managers.zvm]
+[mpm.overrides.zvm]
 name = "zvm"
 homepage_url = "https://github.com/tristanisham/zvm"
 # Upstream publishes release binaries for Linux, macOS and Windows, and for
@@ -47,24 +47,24 @@ version_cli_options = ["--version"]
 # neither the first token nor the last, and it carries a tag-style `v`.
 version_regexes = ['zvm\s+version\s+v?(?P<version>\d+\.\d+\.\d+)']
 
-[mpm.managers.zvm.operations.installed]
+[mpm.overrides.zvm.operations.installed]
 args = ["ls"]
 regex = '^(?P<package_id>\S+)$'
 
 # The two token shapes are named explicitly: it is what rejects the `Version
 # Installed ZLS` header, and what keeps the rolling channel of the last row.
-[mpm.managers.zvm.operations.search]
+[mpm.overrides.zvm.operations.search]
 args = ["ls", "--all"]
 regex = '^(?P<package_id>\d+\.\d+\.\d+|master)\b'
 
-[mpm.managers.zvm.operations.install]
+[mpm.overrides.zvm.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.zvm.operations.remove]
+[mpm.overrides.zvm.operations.remove]
 args = ["rm", "{package_id}"]
 
 # Removes build artifacts rather than any installed compiler.
-[mpm.managers.zvm.operations.cleanup_cache]
+[mpm.overrides.zvm.operations.cleanup_cache]
 args = ["clean"]
 
 # Output samples locking the version probe and the declared parsers, captured

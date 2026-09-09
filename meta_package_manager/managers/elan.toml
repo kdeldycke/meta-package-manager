@@ -47,7 +47,7 @@
 #
 # No escalation: elan installs under `$ELAN_HOME`, falling back to `~/.elan`.
 
-[mpm.managers.elan]
+[mpm.overrides.elan]
 name = "Lean elan"
 homepage_url = "https://github.com/leanprover/elan"
 platforms = ["linux_like", "macos", "windows"]
@@ -60,24 +60,24 @@ requirement = ">=4.0.0"
 # empty on a release build. Anchored so only the leading token is a candidate.
 version_regexes = ['^elan (?P<version>\S+)']
 
-[mpm.managers.elan.operations.installed]
+[mpm.overrides.elan.operations.installed]
 args = ["toolchain", "list"]
 regex = '^(?P<package_id>\S+)$'
 
 # The report lists one unused toolchain per line under a header sentence, then a
 # `Known projects:` block whose own rows also open on a dash. Anchoring the end
 # keeps `- default toolchain: <name>` out, that row carrying spaces.
-[mpm.managers.elan.operations.orphans]
+[mpm.overrides.elan.operations.orphans]
 args = ["toolchain", "gc"]
 regex = '^- (?P<package_id>\S+)$'
 
-[mpm.managers.elan.operations.install]
+[mpm.overrides.elan.operations.install]
 args = ["toolchain", "install", "{package_id}"]
 
-[mpm.managers.elan.operations.remove]
+[mpm.overrides.elan.operations.remove]
 args = ["toolchain", "uninstall", "{package_id}"]
 
-[mpm.managers.elan.operations.cleanup_orphan]
+[mpm.overrides.elan.operations.cleanup_orphan]
 args = ["toolchain", "gc", "--delete"]
 
 # Output samples locking the version probe and the declared parsers, captured

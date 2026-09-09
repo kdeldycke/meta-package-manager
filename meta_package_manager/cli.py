@@ -86,6 +86,7 @@ from .config import (
     cooldown_section,
     print_contribution_hints,
     register_config_managers_from_context,
+    stale_overrides_section,
 )
 from .cooldown import (
     Cooldown,
@@ -875,7 +876,16 @@ def mpm(
         and ctx.meta[VERBOSITY_LEVEL] != LogLevel.DEBUG
     )
 
-    # Register any brand-new managers defined in [mpm.managers.<id>] sections, then
+    # The load-time validator never sees a section the schema no longer claims, so
+    # the migration notice lives here, once per run.
+    stale = stale_overrides_section(ctx)
+    if stale:
+        logging.warning(
+            "Deprecated configuration: `[mpm.managers.<id>]` moved to "
+            f"`[mpm.overrides.<id>]`. These sections are ignored: {', '.join(stale)}.",
+        )
+
+    # Register any brand-new managers defined in [mpm.overrides.<id>] sections, then
     # apply per-manager attribute overrides, both before any subcommand observes the
     # pool. Registration is the authoritative pass (covers config sources the eager
     # pre-load in __main__ could not reach); overrides also collect contribution-hint

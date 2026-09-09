@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 """Tests for the per-manager override mechanism driven by the
-`[mpm.managers.<id>]` configuration section."""
+`[mpm.overrides.<id>]` configuration section."""
 
 from __future__ import annotations
 
@@ -345,20 +345,20 @@ def test_per_manager_sudo_beats_global_default(reset_overrides):
 
 
 def test_sudo_is_a_risky_override_field():
-    """`[mpm.managers.<id>] sudo = true` from an untrusted source can run a binary as
+    """`[mpm.overrides.<id>] sudo = true` from an untrusted source can run a binary as
     root, so it must trip the untrusted-source warning like pre_cmds."""
     assert "sudo" in RISKY_OVERRIDE_FIELDS
 
 
 CONFIG_TEMPLATE = dedent("""\
-    [mpm.managers.{manager_id}]
+    [mpm.overrides.{manager_id}]
     cli_search_path = ["/integration/test/path"]
     """)
 
 
 def test_cli_loads_manager_overrides(invoke, create_config, reset_overrides):
     """End-to-end: `mpm --config <path>` applies overrides from
-    `[mpm.managers.<id>]`."""
+    `[mpm.overrides.<id>]`."""
     conf_path = create_config(
         "conf.toml", CONFIG_TEMPLATE.format(manager_id=OVERRIDE_TARGET)
     )
@@ -374,13 +374,13 @@ def test_cli_fails_on_unknown_manager_in_config(invoke, create_config):
     conf_path = create_config(
         "conf.toml",
         dedent("""\
-            [mpm.managers.fictional-manager]
+            [mpm.overrides.fictional-manager]
             cli_search_path = ["/x"]
             """),
     )
     result = invoke("--config", str(conf_path), "managers")
     assert result.exit_code != 0
-    assert "mpm.managers.fictional-manager" in result.stderr
+    assert "mpm.overrides.fictional-manager" in result.stderr
     assert "unknown manager ID" in result.stderr
 
 
@@ -547,7 +547,7 @@ def test_cli_prints_contribution_hint(invoke, create_config, reset_overrides):
     conf_path = create_config(
         "conf.toml",
         dedent("""\
-            [mpm.managers.pip]
+            [mpm.overrides.pip]
             cli_search_path = ["/no/such/path/for/test"]
             """),
     )
@@ -563,7 +563,7 @@ def test_cli_no_hint_for_preference_override(invoke, create_config, reset_overri
     conf_path = create_config(
         "conf.toml",
         dedent("""\
-            [mpm.managers.pip]
+            [mpm.overrides.pip]
             timeout = 42
             """),
     )
@@ -577,7 +577,7 @@ def test_cli_opt_out_suppresses_hint(invoke, create_config, reset_overrides):
     conf_path = create_config(
         "conf.toml",
         dedent("""\
-            [mpm.managers.pip]
+            [mpm.overrides.pip]
             cli_search_path = ["/no/such/path"]
             """),
     )
@@ -601,7 +601,7 @@ def test_cli_opt_out_via_config(invoke, create_config, reset_overrides):
             [mpm]
             suggest_contribs = false
 
-            [mpm.managers.pip]
+            [mpm.overrides.pip]
             cli_search_path = ["/no/such/path"]
             """),
     )
@@ -666,8 +666,8 @@ def test_cli_config_template_one_manager(invoke):
     result = invoke("config-template", "winget")
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
-    assert list(parsed["mpm"]["managers"]) == ["winget"]
-    winget = parsed["mpm"]["managers"]["winget"]
+    assert list(parsed["mpm"]["overrides"]) == ["winget"]
+    winget = parsed["mpm"]["overrides"]["winget"]
     # Every key present must be an overridable field.
     assert set(winget).issubset(OVERRIDABLE_FIELDS)
 
@@ -677,7 +677,7 @@ def test_cli_config_template_multiple_managers(invoke):
     result = invoke("config-template", "winget", "pip")
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
-    assert set(parsed["mpm"]["managers"]) == {"winget", "pip"}
+    assert set(parsed["mpm"]["overrides"]) == {"winget", "pip"}
 
 
 def test_cli_config_template_no_args_dumps_all_maintained(invoke):
@@ -685,7 +685,7 @@ def test_cli_config_template_no_args_dumps_all_maintained(invoke):
     result = invoke("config-template")
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
-    assert set(parsed["mpm"]["managers"]) == set(pool.maintained_manager_ids)
+    assert set(parsed["mpm"]["overrides"]) == set(pool.maintained_manager_ids)
 
 
 def test_cli_config_template_unknown_manager_errors(invoke):
@@ -703,7 +703,7 @@ def test_cli_config_template_output_is_applicable(invoke, reset_overrides):
     result = invoke("config-template", OVERRIDE_TARGET)
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
-    apply_manager_overrides(pool, parsed["mpm"]["managers"])
+    apply_manager_overrides(pool, parsed["mpm"]["overrides"])
 
     for field, original in before.items():
         assert getattr(manager, field) == original, (

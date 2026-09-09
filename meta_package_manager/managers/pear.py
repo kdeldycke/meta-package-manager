@@ -56,7 +56,7 @@ class PEAR(PackageManager):
     with `Cannot install, php_dir for channel "pear.php.net" is not writeable
     by the current user`. So the mutating operations carry privileged markers
     but leave them dormant, exactly as the other language managers do: `mpm
-    --sudo`, or a `[mpm.managers.pear] sudo = true` entry, escalates them.
+    --sudo`, or a `[mpm.overrides.pear] sudo = true` entry, escalates them.
 
     The better fix is to own the prefix instead. PEAR is fully relocatable, and
     every role directory has to move together: repointing `php_dir` alone fails
@@ -223,7 +223,7 @@ class PEAR(PackageManager):
         install ok: channel://pear.php.net/Text_Password-1.2.1
         ```
         """
-        # Marked privileged so --sudo / `[mpm.managers.pear] sudo = true` can
+        # Marked privileged so --sudo / `[mpm.overrides.pear] sudo = true` can
         # escalate a system-PHP install; dormant by default.
         return self.run_cli(
             "install",

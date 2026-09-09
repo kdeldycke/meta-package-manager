@@ -86,16 +86,16 @@ Verified by driving each backend: `run0` and `pkexec` on Arch Linux with systemd
 
 ## Controlling escalation
 
-Override the default globally with `--sudo` / `--no-sudo`, or per manager with the `sudo` key of a [`[mpm.managers.<id>]`](overrides.md) section:
+Override the default globally with `--sudo` / `--no-sudo`, or per manager with the `sudo` key of a [`[mpm.overrides.<id>]`](overrides.md) section:
 
 ```toml
 [mpm]
 sudo = false # Same as passing --no-sudo on every run.
 
-[mpm.managers.npm]
+[mpm.overrides.npm]
 sudo = true # Run global npm installs through sudo.
 
-[mpm.managers.pacman]
+[mpm.overrides.pacman]
 sudo = false # Rootless setup: never escalate pacman.
 ```
 
@@ -169,7 +169,7 @@ warning:cask: No output for 30s: may be waiting on a hidden password prompt. Las
 For a guaranteed one-prompt experience, opt the manager into up-front authentication with a scoped `sudo = true` override:
 
 ```toml
-[mpm.managers.cask]
+[mpm.overrides.cask]
 sudo = true # Authenticate up front before any privileged cask payload.
 ```
 

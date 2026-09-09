@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Tests for brand-new package managers defined from the `[mpm.managers.<id>]`
+"""Tests for brand-new package managers defined from the `[mpm.overrides.<id>]`
 configuration section."""
 
 from __future__ import annotations
@@ -1056,7 +1056,7 @@ def test_cli_lists_config_defined_manager(
     conf_path = create_config(
         "conf.toml",
         f"""
-        [mpm.managers.mytool]
+        [mpm.overrides.mytool]
         name = "My Tool"
         platforms = ["all_platforms"]
         cli_names = ["mytool"]
@@ -1064,7 +1064,7 @@ def test_cli_lists_config_defined_manager(
         requirement = ">=1.0"
         version_regexes = ['mytool (?P<version>\\S+)']
 
-        [mpm.managers.mytool.operations.installed]
+        [mpm.overrides.mytool.operations.installed]
         args = ["list"]
         regex = '^(?P<package_id>\\S+)@(?P<installed_version>\\S+)$'
         """,
@@ -1078,10 +1078,10 @@ def test_cli_rejects_bad_definition(invoke, create_config, reset_definitions):
     conf_path = create_config(
         "conf.toml",
         """
-        [mpm.managers.mytool]
+        [mpm.overrides.mytool]
         platforms = ["narnia"]
 
-        [mpm.managers.mytool.operations.sync]
+        [mpm.overrides.mytool.operations.sync]
         args = ["update"]
         """,
     )
@@ -1143,7 +1143,7 @@ def test_bundled_inventory():
     assert BUNDLED_DEFINITION_FILES
     file_ids = set()
     for toml_path, data in BUNDLED_FILE_DATA.items():
-        sections = data["mpm"]["managers"]
+        sections = data["mpm"]["overrides"]
         assert len(sections) == 1, f"{toml_path.name} must define a single manager"
         file_ids.update(sections)
     assert file_ids == set(pool.bundled_manager_ids)
@@ -1162,7 +1162,7 @@ def test_bundled_registered(toml_path):
         f"unexpected top-level keys in {toml_path.name}"
     )
 
-    manager_id = next(iter(data["mpm"]["managers"]))
+    manager_id = next(iter(data["mpm"]["overrides"]))
     assert toml_path.stem == manager_id.replace("-", "_")
     assert manager_id in pool.bundled_manager_ids
     manager = pool[manager_id]
@@ -1230,7 +1230,7 @@ def _version_sample_params():
     """One param per shipped definition file, from its `[samples.version]` fixture."""
     params = []
     for data in BUNDLED_FILE_DATA.values():
-        manager_id = next(iter(data["mpm"]["managers"]))
+        manager_id = next(iter(data["mpm"]["overrides"]))
         sample = data.get("samples", {}).get("version")
         if sample:
             params.append(
@@ -1296,7 +1296,7 @@ def _parsing_sample_params():
     """One param per query-operation sample shipped in the definition files."""
     params = []
     for data in BUNDLED_FILE_DATA.values():
-        manager_id = next(iter(data["mpm"]["managers"]))
+        manager_id = next(iter(data["mpm"]["overrides"]))
         samples = data.get("samples", {})
         for operation in ("installed", "outdated", "orphans", "search"):
             op_samples = samples.get(operation, ())

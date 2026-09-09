@@ -14,7 +14,7 @@
 # - upgrade of a single bundle: bundles cannot be upgraded individually, only the
 #   whole OS via `swupd update`, declared as upgrade_all.
 
-[mpm.managers.swupd]
+[mpm.overrides.swupd]
 name = "Clear Linux Software Updater"
 homepage_url = "https://github.com/clearlinux/swupd-client"
 logo = "intel"
@@ -27,7 +27,7 @@ default_sudo = true
 version_regexes = ['swupd (?P<version>\S+)']
 
 # One bare bundle name per line, no version: bundles are versioned with the OS.
-[mpm.managers.swupd.operations.installed]
+[mpm.overrides.swupd.operations.installed]
 args = ["bundle-list", "--quiet"]
 regex = '^(?P<package_id>\S+)$'
 
@@ -35,25 +35,25 @@ regex = '^(?P<package_id>\S+)$'
 # *binary or library* (and needs the external swupd-search tool), while
 # `search-file` matches file paths. So the whole available bundle catalog is
 # listed and mpm's refiltering narrows it against the query.
-[mpm.managers.swupd.operations.search]
+[mpm.overrides.swupd.operations.search]
 args = ["bundle-list", "--all", "--quiet"]
 regex = '^(?P<package_id>\S+)$'
 
-[mpm.managers.swupd.operations.install]
+[mpm.overrides.swupd.operations.install]
 args = ["bundle-add", "--assume=yes", "{package_id}"]
 sudo = true
 
-[mpm.managers.swupd.operations.remove]
+[mpm.overrides.swupd.operations.remove]
 args = ["bundle-remove", "--assume=yes", "{package_id}"]
 sudo = true
 
 # Updates the whole OS to the latest version.
-[mpm.managers.swupd.operations.upgrade_all]
+[mpm.overrides.swupd.operations.upgrade_all]
 args = ["update", "--assume=yes"]
 sudo = true
 
 # Removes cached update content from the state directory.
-[mpm.managers.swupd.operations.cleanup_cache]
+[mpm.overrides.swupd.operations.cleanup_cache]
 args = ["clean"]
 sudo = true
 

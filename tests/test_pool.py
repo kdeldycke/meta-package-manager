@@ -389,7 +389,7 @@ def test_select_managers_timeout_stamping():
     unavailable ones are kept (`mpm managers`), whose version probes fire
     lazily at rendering time, after selection: an unstamped instance would fall
     back to the read-only default and let a wedged binary hold each table row
-    for 120 seconds. A per-manager `[mpm.managers.<id>]` override keeps
+    for 120 seconds. A per-manager `[mpm.overrides.<id>]` override keeps
     precedence over the global option.
     """
     originals = {mid: pool[mid].timeout for mid in ("gem", "uv")}
@@ -419,7 +419,7 @@ def test_select_managers_timeout_stamping():
 def test_select_managers_cooldown_policy_keeps_precedence():
     """A per-manager `cooldown_policy` override pins that manager's enforcement
     posture, so the global policy resolved from `--cooldown` must not clobber
-    it: `[mpm.managers.<id>] cooldown_policy = "best-effort"` keeps running
+    it: `[mpm.overrides.<id>] cooldown_policy = "best-effort"` keeps running
     that one manager unguarded while the rest stay fail-closed.
     """
     manager = pool["gem"]

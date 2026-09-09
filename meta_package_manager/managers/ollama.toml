@@ -47,7 +47,7 @@
 # write itself, so nothing here needs privileges even where the daemon runs
 # under a service account of its own.
 
-[mpm.managers.ollama]
+[mpm.overrides.ollama]
 name = "Ollama"
 homepage_url = "https://ollama.com"
 logo = "ollama"
@@ -69,19 +69,19 @@ version_regexes = ['version is (?P<version>\S+)']
 # printed even for an empty inventory: a model's name always carries a tag, and
 # the identifier beside it is a twelve-character truncation of the content
 # digest. `NAME` has no colon and `ID` is not hexadecimal.
-[mpm.managers.ollama.operations.installed]
+[mpm.overrides.ollama.operations.installed]
 args = ["list"]
 regex = '^(?P<package_id>\S+:\S+)[ \t]+[0-9a-f]{12}[ \t]'
 
-[mpm.managers.ollama.operations.install]
+[mpm.overrides.ollama.operations.install]
 args = ["pull", "{package_id}"]
 
-[mpm.managers.ollama.operations.remove]
+[mpm.overrides.ollama.operations.remove]
 args = ["rm", "{package_id}"]
 
 # Upgrading is the same fetch as installing: a pull re-resolves the tag and
 # downloads whatever the registry now holds under it.
-[mpm.managers.ollama.operations.upgrade_one]
+[mpm.overrides.ollama.operations.upgrade_one]
 args = ["pull", "{package_id}"]
 
 # Output sample locking the version probe. Consumed by

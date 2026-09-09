@@ -7,7 +7,7 @@
 # re-running `cargo install` is the upstream upgrade story, so neither operation
 # is declared.
 
-[mpm.managers.cargo]
+[mpm.overrides.cargo]
 name = "Rust cargo"
 homepage_url = "https://doc.rust-lang.org/cargo/"
 logo = "rust"
@@ -24,7 +24,7 @@ version_regexes = ['cargo\s+(?P<version>\S+)']
 
 # `cargo install --list` prints one "name vX.Y.Z:" header per crate, followed by
 # indented binary names that the anchored regex skips.
-[mpm.managers.cargo.operations.installed]
+[mpm.overrides.cargo.operations.installed]
 args = ["install", "--list"]
 regex = '^(?P<package_id>\S+)\s+v(?P<installed_version>\S+):$'
 
@@ -32,14 +32,14 @@ regex = '^(?P<package_id>\S+)\s+v(?P<installed_version>\S+):$'
 # at 100 results, so with client-side exact/extended refiltering on top the final
 # results cannot be guaranteed complete. The description column is not captured:
 # the DSL only recognizes id and versions.
-[mpm.managers.cargo.operations.search]
+[mpm.overrides.cargo.operations.search]
 args = ["search", "--limit", "100", "{query}"]
 regex = '^(?P<package_id>\S+)\s+=\s+"(?P<latest_version>\S+)"'
 
-[mpm.managers.cargo.operations.install]
+[mpm.overrides.cargo.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.cargo.operations.remove]
+[mpm.overrides.cargo.operations.remove]
 args = ["uninstall", "{package_id}"]
 
 # Output samples locking the version probe and the declared parsers, derived

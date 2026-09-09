@@ -19,7 +19,7 @@
 #   - The global `--yes` flag precedes the command word and auto-answers fink's own
 #     prompts.
 
-[mpm.managers.fink]
+[mpm.overrides.fink]
 name = "Fink"
 homepage_url = "https://www.finkproject.org"
 platforms = ["macos"]
@@ -31,37 +31,37 @@ internal_sudo = true
 # 0.45.6". The distribution and copyright lines below it vary.
 version_regexes = ['Package manager version: (?P<version>\S+)']
 
-[mpm.managers.fink.operations.installed]
+[mpm.overrides.fink.operations.installed]
 args = ["list", "--tab", "--installed"]
 regex = '^(?: i |\(i\)|\*i\*)\t(?P<package_id>[^\t]+)\t(?P<installed_version>[^\t]+)\t'
 
 # `fink list <pattern>` matches package names only (the pattern is anchored and
 # glob-style); any status column is accepted, including not-installed spaces, and
 # virtual packages carry an empty version which the parser then omits.
-[mpm.managers.fink.operations.search]
+[mpm.overrides.fink.operations.search]
 args = ["list", "--tab", "{query}"]
 regex = '^[^\t]*\t(?P<package_id>[^\t]+)\t(?P<latest_version>[^\t]*)\t'
 
-[mpm.managers.fink.operations.install]
+[mpm.overrides.fink.operations.install]
 args = ["--yes", "install", "{package_id}"]
 
-[mpm.managers.fink.operations.remove]
+[mpm.overrides.fink.operations.remove]
 args = ["--yes", "remove", "{package_id}"]
 
 # `update` is install's resolve-to-latest alias for single packages.
-[mpm.managers.fink.operations.upgrade_one]
+[mpm.overrides.fink.operations.upgrade_one]
 args = ["--yes", "update", "{package_id}"]
 
-[mpm.managers.fink.operations.upgrade_all]
+[mpm.overrides.fink.operations.upgrade_all]
 args = ["--yes", "update-all"]
 
 # Refreshes the local package descriptions from the remote (the apt-update
 # analogue). May be slow: fink fetches through git/rsync/cvs.
-[mpm.managers.fink.operations.sync]
+[mpm.overrides.fink.operations.sync]
 args = ["--yes", "selfupdate"]
 
 # Default scope purges obsolete .deb archives and source tarballs.
-[mpm.managers.fink.operations.cleanup_cache]
+[mpm.overrides.fink.operations.cleanup_cache]
 args = ["--yes", "cleanup"]
 
 # Output samples locking the version probe and the declared parsers, derived

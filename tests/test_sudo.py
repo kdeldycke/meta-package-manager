@@ -286,7 +286,7 @@ def test_prime_sudo_leaves_a_stock_windows_run_alone():
 
     What returns early is the empty selection, not the platform: no manager
     escalates by default on Windows, so only `--sudo` or a
-    `[mpm.managers.<id>] sudo = true` entry reaches the probe. Keeping the
+    `[mpm.overrides.<id>] sudo = true` entry reaches the probe. Keeping the
     guard out of the way is what lets `gsudo` be probed at all when one does.
     """
     ctx = click.Context(click.Command("mpm"))
@@ -1390,7 +1390,7 @@ def test_escalator_choice_is_machine_level():
     one of them, and every manager escalating on it uses that one.
 
     Guards both halves. No manager may carry the choice as an attribute, and the
-    per-manager config section must refuse it, so `[mpm.managers.<id>]` can never
+    per-manager config section must refuse it, so `[mpm.overrides.<id>]` can never
     make one manager escalate differently from its peers.
     """
     from meta_package_manager.definitions import OVERRIDABLE_FIELDS
@@ -1401,17 +1401,17 @@ def test_escalator_choice_is_machine_level():
 
 
 def test_per_manager_sudo_command_is_refused(invoke, tmp_path):
-    """A `[mpm.managers.<id>] sudo_command` entry is rejected outright, naming
+    """A `[mpm.overrides.<id>] sudo_command` entry is rejected outright, naming
     the fields that are per-manager, rather than silently escalating one manager
     through another binary."""
     config = tmp_path / "config.toml"
     config.write_text(
-        '[mpm.managers.apt]\nsudo_command = "doas"\n',
+        '[mpm.overrides.apt]\nsudo_command = "doas"\n',
         encoding="UTF-8",
     )
     result = invoke("--config", str(config), "managers")
     assert result.exit_code != 0
-    assert "mpm.managers.apt.sudo_command: unknown field" in result.stderr
+    assert "mpm.overrides.apt.sudo_command: unknown field" in result.stderr
 
 
 def test_sudo_command_reaches_the_config_file(invoke, tmp_path):

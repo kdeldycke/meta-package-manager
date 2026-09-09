@@ -46,7 +46,7 @@
 # which follows `$MICRO_CONFIG_HOME` or the XDG configuration home before
 # falling back to `~/.config/micro`.
 
-[mpm.managers.micro]
+[mpm.overrides.micro]
 name = "micro editor"
 homepage_url = "https://micro-editor.github.io"
 platforms = ["all_platforms"]
@@ -68,7 +68,7 @@ version_regexes = ['^Version:[ \t]+(?P<version>\S+)']
 # has no version of its own and can be neither removed nor updated. And the
 # init script renders as a bare name on recent releases. Anchoring at both ends
 # is what rejects the introductory sentence, which carries spaces.
-[mpm.managers.micro.operations.installed]
+[mpm.overrides.micro.operations.installed]
 args = ["-plugin", "list"]
 regex = '^(?P<package_id>\S+)(?:[ \t]+\(built-in\)|[ \t]+\((?P<installed_version>[^)]+)\))?$'
 
@@ -79,25 +79,25 @@ regex = '^(?P<package_id>\S+)(?:[ \t]+\(built-in\)|[ \t]+\((?P<installed_version
 #
 # The order is not stable between runs, the listing being assembled from
 # concurrent fetches, which is why no sample of it is shipped below.
-[mpm.managers.micro.operations.search]
+[mpm.overrides.micro.operations.search]
 args = ["-plugin", "available"]
 regex = '^(?P<package_id>\S+)$'
 
 # Version pinning is not offered by micro: the installer resolves whatever
 # version satisfies the constraints, so there is nothing to pin to.
-[mpm.managers.micro.operations.install]
+[mpm.overrides.micro.operations.install]
 args = ["-plugin", "install", "{package_id}"]
 
-[mpm.managers.micro.operations.remove]
+[mpm.overrides.micro.operations.remove]
 args = ["-plugin", "remove", "{package_id}"]
 
 # Naming a plugin genuinely restricts the update to it, rather than quietly
 # updating everything. micro's own version is always folded in as a constraint,
 # so a plugin demanding a newer editor is held back instead of breaking it.
-[mpm.managers.micro.operations.upgrade_one]
+[mpm.overrides.micro.operations.upgrade_one]
 args = ["-plugin", "update", "{package_id}"]
 
-[mpm.managers.micro.operations.upgrade_all]
+[mpm.overrides.micro.operations.upgrade_all]
 args = ["-plugin", "update"]
 
 # Output samples locking the version probe and the installed parser. Consumed

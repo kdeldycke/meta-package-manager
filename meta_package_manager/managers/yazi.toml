@@ -43,7 +43,7 @@
 # No logo is declared: Simple Icons carries no mark for yazi, so the manager
 # page keeps its default package glyph rather than borrowing an unrelated one.
 
-[mpm.managers.yazi]
+[mpm.overrides.yazi]
 name = "Yazi ya"
 homepage_url = "https://yazi-rs.github.io"
 platforms = ["all_platforms"]
@@ -60,24 +60,24 @@ version_regexes = ['^Ya[ \t]+(?P<version>\S+)']
 # carrying its short commit in parentheses. Anchoring on the leading tab is
 # what rejects the two headings without naming them, and what would reject any
 # further heading upstream adds.
-[mpm.managers.yazi.operations.installed]
+[mpm.overrides.yazi.operations.installed]
 args = ["pkg", "list"]
 regex = '^\t(?P<package_id>\S+)[ \t]+\((?P<installed_version>[^)]+)\)$'
 
 # Version pinning is not offered: `ya pkg add` takes the package's Git
 # coordinates and checks out the default branch, with no revision argument.
-[mpm.managers.yazi.operations.install]
+[mpm.overrides.yazi.operations.install]
 args = ["pkg", "add", "{package_id}"]
 
-[mpm.managers.yazi.operations.remove]
+[mpm.overrides.yazi.operations.remove]
 args = ["pkg", "delete", "{package_id}"]
 
 # Naming packages genuinely restricts the upgrade to them; the bare form
 # upgrades everything, which is what upstream documents the argument as.
-[mpm.managers.yazi.operations.upgrade_one]
+[mpm.overrides.yazi.operations.upgrade_one]
 args = ["pkg", "upgrade", "{package_id}"]
 
-[mpm.managers.yazi.operations.upgrade_all]
+[mpm.overrides.yazi.operations.upgrade_all]
 args = ["pkg", "upgrade"]
 
 # Output samples locking the version probe and the installed parser. Consumed

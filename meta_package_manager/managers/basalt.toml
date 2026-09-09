@@ -26,7 +26,7 @@
 #     the user exports by evaluating `basalt global init <shell>` in their shell
 #     configuration. mpm inherits them from the shell it is launched from.
 
-[mpm.managers.basalt]
+[mpm.overrides.basalt]
 name = "Basalt"
 homepage_url = "https://github.com/hyperupcall/basalt"
 # Bash 4.3 or newer: no Windows support, and macOS needs a Bash newer than the
@@ -37,14 +37,14 @@ requirement = ">=0.10.0"
 # `basalt --version` prints "Version: v0.10.0"; the tag prefix is dropped.
 version_regexes = ['Version:[ \t]+v?(?P<version>\S+)']
 
-[mpm.managers.basalt.operations.installed]
+[mpm.overrides.basalt.operations.installed]
 args = ["global", "list"]
 regex = '^(?:[a-z]+://[^/]+/)?(?P<package_id>[^@\s]+)@(?P<installed_version>\S+)$'
 
-[mpm.managers.basalt.operations.install]
+[mpm.overrides.basalt.operations.install]
 args = ["global", "add", "{package_id}"]
 
-[mpm.managers.basalt.operations.remove]
+[mpm.overrides.basalt.operations.remove]
 args = ["global", "remove", "--force", "{package_id}"]
 
 # Output samples locking the version probe and the declared parser, captured from

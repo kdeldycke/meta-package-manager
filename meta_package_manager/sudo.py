@@ -40,7 +40,7 @@ while the hidden prompt can still be answered.
 Windows reaches only a corner of this module. `gsudo` gives it an escalator to
 probe and a cache to warm, and Microsoft's own `sudo.exe` backs it up from
 `24H2`, but no manager there escalates by default, so {func}`prime_sudo`
-returns on the empty selection unless `--sudo` or a `[mpm.managers.<id>] sudo =
+returns on the empty selection unless `--sudo` or a `[mpm.overrides.<id>] sudo =
 true` entry asks for it. The internal escalators stay macOS-only managers, so
 the watchdog is not armed there either.
 
@@ -1120,7 +1120,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     # Windows is no longer excluded outright: `gsudo` gives it an escalator to
     # probe and a cache to warm. Nothing changes for a stock Windows run all
     # the same, since no manager there escalates by default and the next guard
-    # returns on the empty selection: only `--sudo`, or a `[mpm.managers.<id>]
+    # returns on the empty selection: only `--sudo`, or a `[mpm.overrides.<id>]
     # sudo = true` entry, reaches past this point.
     if getattr(os, "geteuid", lambda: 1)() == 0:
         return

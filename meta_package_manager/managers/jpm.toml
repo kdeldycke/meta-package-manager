@@ -21,7 +21,7 @@
 #     the operation: a Homebrew prefix needs none, a system one does. Forcing it
 #     would break the first case, and omitting it fails loudly in the second.
 
-[mpm.managers.jpm]
+[mpm.overrides.jpm]
 name = "jpm"
 homepage_url = "https://github.com/janet-lang/jpm"
 platforms = ["linux_like", "macos", "windows"]
@@ -31,21 +31,21 @@ version_cli_options = ["-v"]
 # A Homebrew build reports "1.41.2-homebrew"; the suffix is dropped.
 version_regexes = ['^(?P<version>\d+\.\d+\.\d+)']
 
-[mpm.managers.jpm.operations.install]
+[mpm.overrides.jpm.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.jpm.operations.remove]
+[mpm.overrides.jpm.operations.remove]
 args = ["uninstall", "{package_id}"]
 
 # Upgrades every installed package; jpm offers no per-package upgrade verb.
-[mpm.managers.jpm.operations.upgrade_all]
+[mpm.overrides.jpm.operations.upgrade_all]
 args = ["update-installed"]
 
 # Re-clones the janet-lang/pkgs listing that maps short names to repositories.
-[mpm.managers.jpm.operations.sync]
+[mpm.overrides.jpm.operations.sync]
 args = ["update-pkgs"]
 
-[mpm.managers.jpm.operations.cleanup_cache]
+[mpm.overrides.jpm.operations.cleanup_cache]
 args = ["clear-cache"]
 
 # Output sample locking the version probe, captured from Janet 1.41.2. Consumed

@@ -45,7 +45,7 @@
 # read-only repository surfaces as haxelib's own error rather than as something
 # mpm can escalate around.
 
-[mpm.managers.haxelib]
+[mpm.overrides.haxelib]
 name = "Haxe haxelib"
 homepage_url = "https://lib.haxe.org"
 logo = "haxe"
@@ -65,7 +65,7 @@ version_regexes = ['^(?P<version>\d+\.\d+\.\d+(?:-[a-z]+(?:\.\d+)?)?)']
 # lookahead keeps a filesystem path out of the version field. And the whole
 # bracket group is optional, so such a library is still reported, just without a
 # version, which is what mpm's package model expects when a tool tracks none.
-[mpm.managers.haxelib.operations.installed]
+[mpm.overrides.haxelib.operations.installed]
 args = ["--global", "list"]
 regex = '^(?P<package_id>[A-Za-z0-9_.-]+):(?:[^\[]*\[(?!dev:)(?P<installed_version>[^\]]+)\])?'
 
@@ -74,14 +74,14 @@ regex = '^(?P<package_id>[A-Za-z0-9_.-]+):(?:[^\[]*\[(?!dev:)(?P<installed_versi
 # `--quiet` does not suppress, and the network retry notices all reach stdout
 # too, so the pattern is anchored at both ends: every one of those lines carries
 # a space and is rejected for free.
-[mpm.managers.haxelib.operations.search]
+[mpm.overrides.haxelib.operations.search]
 args = ["--global", "--quiet", "search", "{query}"]
 regex = '^(?P<package_id>[A-Za-z0-9_.-]{3,})$'
 
-[mpm.managers.haxelib.operations.install]
+[mpm.overrides.haxelib.operations.install]
 args = ["--global", "--always", "--quiet", "install", "{package_id}"]
 
-[mpm.managers.haxelib.operations.remove]
+[mpm.overrides.haxelib.operations.remove]
 args = ["--global", "remove", "{package_id}"]
 
 # `upgrade` is a registered alias of `update`, merged upstream in 3.3.0, so both
@@ -89,10 +89,10 @@ args = ["--global", "remove", "{package_id}"]
 # everything. Unlike some whole-system upgraders it never silently ignores the
 # package it was handed: the argument count is enforced, and the named library
 # is what gets updated.
-[mpm.managers.haxelib.operations.upgrade_one]
+[mpm.overrides.haxelib.operations.upgrade_one]
 args = ["--global", "--always", "--quiet", "update", "{package_id}"]
 
-[mpm.managers.haxelib.operations.upgrade_all]
+[mpm.overrides.haxelib.operations.upgrade_all]
 args = ["--global", "--always", "--quiet", "update"]
 
 # Output samples locking the version probe and the declared parsers. Consumed by

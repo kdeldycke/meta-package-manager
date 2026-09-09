@@ -13,7 +13,7 @@
 # No outdated: krew compares nothing against its index short of running the
 # upgrade, so the operation is left undeclared and `upgrade --all` still works.
 
-[mpm.managers.krew]
+[mpm.overrides.krew]
 name = "kubectl krew"
 homepage_url = "https://krew.sigs.k8s.io"
 logo = "kubernetes"
@@ -30,30 +30,30 @@ extra_env = { NO_COLOR = "1" }
 # keeps the probe off them.
 version_regexes = ['GitTag\s+v?(?P<version>\S+)']
 
-[mpm.managers.krew.operations.installed]
+[mpm.overrides.krew.operations.installed]
 args = ["list"]
 regex = '^(?P<package_id>[a-z0-9][a-z0-9-]*)$'
 
 # `krew search` prints a NAME/DESCRIPTION/INSTALLED table. Only the first column
 # is captured: the DSL recognizes no description field, and INSTALLED is a
 # yes/no marker rather than a version.
-[mpm.managers.krew.operations.search]
+[mpm.overrides.krew.operations.search]
 args = ["search", "{query}"]
 regex = '^(?P<package_id>[a-z0-9][a-z0-9-]*)\s{2,}\S'
 
-[mpm.managers.krew.operations.install]
+[mpm.overrides.krew.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.krew.operations.remove]
+[mpm.overrides.krew.operations.remove]
 args = ["uninstall", "{package_id}"]
 
-[mpm.managers.krew.operations.upgrade_one]
+[mpm.overrides.krew.operations.upgrade_one]
 args = ["upgrade", "{package_id}"]
 
-[mpm.managers.krew.operations.upgrade_all]
+[mpm.overrides.krew.operations.upgrade_all]
 args = ["upgrade"]
 
-[mpm.managers.krew.operations.sync]
+[mpm.overrides.krew.operations.sync]
 args = ["update"]
 
 # Output samples locking the version probe and the declared parsers, derived

@@ -22,7 +22,7 @@
 #     privileged but escalation stays opt-in (default_sudo is left off): pass
 #     `--sudo` to mpm for a root-owned TeX tree.
 
-[mpm.managers.tlmgr]
+[mpm.overrides.tlmgr]
 name = "TeX Live Manager"
 homepage_url = "https://www.tug.org/texlive/"
 logo = "latex"
@@ -32,55 +32,55 @@ cli_names = ["tlmgr"]
 requirement = ">=2018"
 version_regexes = ['TeX Live.*version (?P<version>\d{4})']
 
-[mpm.managers.tlmgr.operations.installed]
+[mpm.overrides.tlmgr.operations.installed]
 args = ["info", "--only-installed", "--data", "name,localrev"]
 regex = '^(?P<package_id>[^,]+),(?P<installed_version>\d+)$'
 
 # Header lines ("location-url", "total-bytes", "end-of-header"), the
 # "end-of-updates" terminator and the trailing mktexlsr noise all fail the
 # single-char "u" status field and are skipped.
-[mpm.managers.tlmgr.operations.outdated]
+[mpm.overrides.tlmgr.operations.outdated]
 args = ["--machine-readable", "update", "--list", "--all"]
 regex = '^(?P<package_id>[^\t]+)\tu\t(?P<installed_version>\d+)\t(?P<latest_version>\d+)\t'
 
 # Name and description matches print one "pkgname - short description" line each;
 # the repository diagnostic line carries no " - " after its first token. The query
 # is a Perl regex on tlmgr's side.
-[mpm.managers.tlmgr.operations.search]
+[mpm.overrides.tlmgr.operations.search]
 args = ["search", "--global", "{query}"]
 regex = '^(?P<package_id>[^\s:]+) - '
 
-[mpm.managers.tlmgr.operations.install]
+[mpm.overrides.tlmgr.operations.install]
 args = ["install", "{package_id}"]
 sudo = true
 
-[mpm.managers.tlmgr.operations.remove]
+[mpm.overrides.tlmgr.operations.remove]
 args = ["remove", "{package_id}"]
 sudo = true
 
-[mpm.managers.tlmgr.operations.upgrade_one]
+[mpm.overrides.tlmgr.operations.upgrade_one]
 args = ["update", "{package_id}"]
 sudo = true
 
 # Excludes the tlmgr infrastructure itself, which is the sync operation's job.
-[mpm.managers.tlmgr.operations.upgrade_all]
+[mpm.overrides.tlmgr.operations.upgrade_all]
 args = ["update", "--all"]
 sudo = true
 
 # tlmgr re-fetches the remote TLPDB on demand and keeps no separate metadata cache:
 # self-updating the tool is the closest analogue to a catalog refresh.
-[mpm.managers.tlmgr.operations.sync]
+[mpm.overrides.tlmgr.operations.sync]
 args = ["update", "--self"]
 sudo = true
 
 # Prunes old package backups down to the configured autobackup count.
-[mpm.managers.tlmgr.operations.cleanup_cache]
+[mpm.overrides.tlmgr.operations.cleanup_cache]
 args = ["backup", "--clean", "--all"]
 sudo = true
 
 # `check all` runs every consistency check (files, dependencies, executes,
 # runfiles), reporting problems and exiting non-zero. Read-only, so no sudo.
-[mpm.managers.tlmgr.operations.doctor]
+[mpm.overrides.tlmgr.operations.doctor]
 args = ["check", "all"]
 
 # Output samples locking the version probe and the declared parsers, derived

@@ -31,7 +31,7 @@
 # apt, pacman, ...), those will be upgraded twice in the same run.
 # ```
 
-[mpm.managers.topgrade]
+[mpm.overrides.topgrade]
 name = "Topgrade"
 homepage_url = "https://github.com/topgrade-rs/topgrade"
 platforms = ["bsd", "linux_like", "macos", "all_windows"]
@@ -51,7 +51,7 @@ version_regexes = ['topgrade\s+(?P<version>\S+)']
 
 # --yes skips topgrade's "press enter to continue" prompts so the run completes
 # unattended, matching the contract mpm expects from an upgrade-all operation.
-[mpm.managers.topgrade.operations.upgrade_all]
+[mpm.overrides.topgrade.operations.upgrade_all]
 args = ["--yes"]
 
 # Output samples locking the version probe and the declared parsers, derived

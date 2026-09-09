@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Declarative package managers: the TOML schema and its class factory.
 
-A `[mpm.managers.<id>]` configuration section describes a manager as data. This
+A `[mpm.overrides.<id>]` configuration section describes a manager as data. This
 module owns everything that turns such a description into a live
 {class}`~meta_package_manager.manager.PackageManager` subclass:
 
@@ -31,7 +31,7 @@ module owns everything that turns such a description into a live
 - the **bundled-definition loader** ({func}`load_bundled_definitions`,
   {func}`build_bundled_managers`): mpm ships some managers as `*.toml` package
   data under `meta_package_manager/managers/`, each a single
-  `[mpm.managers.<id>]` section in the exact schema a user would write.
+  `[mpm.overrides.<id>]` section in the exact schema a user would write.
 
 The runtime *policy* around definitions stays in
 {mod}`meta_package_manager.config`: where sections may be loaded from, the
@@ -161,7 +161,7 @@ OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "version_cli_options": _to_str_tuple,
     "version_regexes": _to_str_tuple,
 }
-"""Per-manager attributes a user is allowed to override from the `[mpm.managers.<id>]`
+"""Per-manager attributes a user is allowed to override from the `[mpm.overrides.<id>]`
 configuration section.
 
 Each entry maps a {class}`meta_package_manager.manager.PackageManager` attribute name
@@ -489,7 +489,7 @@ class OperationSpec:
 
 @dataclass(frozen=True)
 class ManagerDefinition:
-    """A brand-new package manager declared from a `[mpm.managers.<id>]` section.
+    """A brand-new package manager declared from a `[mpm.overrides.<id>]` section.
 
     Produced by {func}`parse_manager_definition` after validation, consumed by
     {func}`build_manager_class`.
@@ -547,11 +547,11 @@ def parse_manager_definition(
     manager_id: str,
     section: Any,
 ) -> ManagerDefinition:
-    """Validate and parse one `[mpm.managers.<id>]` definition section.
+    """Validate and parse one `[mpm.overrides.<id>]` definition section.
 
     Returns a {class}`ManagerDefinition` ready for {func}`build_manager_class`.
     Raises {class}`click_extra.ValidationError` (path relative to the
-    `[mpm.managers]` root) on any problem, so the same function backs both
+    `[mpm.overrides]` root) on any problem, so the same function backs both
     `--validate-config` and the runtime registration path.
     """
     if not isinstance(section, dict):
@@ -655,7 +655,7 @@ def _parse_operations(
     manager_id: str,
     raw: Any,
 ) -> dict[str, OperationSpec]:
-    """Validate and parse the `[mpm.managers.<id>.operations]` sub-table."""
+    """Validate and parse the `[mpm.overrides.<id>.operations]` sub-table."""
     if not isinstance(raw, dict) or not raw:
         raise ValidationError(
             f"{manager_id}.operations",
@@ -1209,7 +1209,7 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
 # Bundled manager definitions.
 #
 # mpm ships a few managers as data rather than Python classes: a TOML file per manager
-# under meta_package_manager/managers/, each a single [mpm.managers.<id>] section in the
+# under meta_package_manager/managers/, each a single [mpm.overrides.<id>] section in the
 # exact schema a user would write. They are parsed and built through the same
 # parse_manager_definition / build_manager_class path as any user definition, then loaded
 # into the pool at construction time (ManagerPool.register), so they are always available
@@ -1231,7 +1231,7 @@ BUNDLED_DEFINITIONS_PACKAGE: Final[str] = "meta_package_manager.managers"
 
 @cache
 def load_bundled_definitions() -> tuple[tuple[ManagerDefinition, str], ...]:
-    """Parse every bundled `[mpm.managers.<id>]` definition shipped as package data.
+    """Parse every bundled `[mpm.overrides.<id>]` definition shipped as package data.
 
     Reads each `*.toml` resource of {data}`BUNDLED_DEFINITIONS_PACKAGE` via
     {mod}`importlib.resources` (so it works the same from an unpacked install, a zip
@@ -1256,7 +1256,7 @@ def load_bundled_definitions() -> tuple[tuple[ManagerDefinition, str], ...]:
         except (OSError, tomllib.TOMLDecodeError) as ex:
             logging.warning(f"Skipping unreadable bundled definition {source}: {ex}")
             continue
-        sections = data.get("mpm", {}).get("managers", {})
+        sections = data.get("mpm", {}).get("overrides", {})
         for manager_id, section in sections.items():
             try:
                 definitions.append(

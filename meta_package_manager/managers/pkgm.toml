@@ -47,7 +47,7 @@
 # in the output is cosmetic; the one in the listing is real.
 # ```
 
-[mpm.managers.pkgm]
+[mpm.overrides.pkgm]
 name = "pkgm"
 homepage_url = "https://github.com/pkgxdev/pkgm"
 # Upstream ships installation instructions for Homebrew and its own shell
@@ -64,23 +64,23 @@ version_regexes = ['pkgm[ \t]+(?P<version>\S+)']
 
 # One row per installed version directory. The id group is greedy so it spans
 # the slashes inside a pantry path and stops at the last `/v`.
-[mpm.managers.pkgm.operations.installed]
+[mpm.overrides.pkgm.operations.installed]
 args = ["list"]
 regex = '/pkgs/(?P<package_id>\S+)/v(?P<installed_version>\S+)$'
 
 # One row per stale package, reporting both versions around a `<`. The trailing
 # path is dropped: it repeats the id and carries the color escapes.
-[mpm.managers.pkgm.operations.outdated]
+[mpm.overrides.pkgm.operations.outdated]
 args = ["outdated"]
 regex = '^(?P<package_id>\S+) is outdated \S+ < (?P<latest_version>\S+)'
 
-[mpm.managers.pkgm.operations.install]
+[mpm.overrides.pkgm.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.pkgm.operations.remove]
+[mpm.overrides.pkgm.operations.remove]
 args = ["uninstall", "{package_id}"]
 
-[mpm.managers.pkgm.operations.upgrade_all]
+[mpm.overrides.pkgm.operations.upgrade_all]
 args = ["update"]
 
 # Output samples locking the version probe and the declared parsers, captured

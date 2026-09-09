@@ -29,7 +29,7 @@
 #     `--deps search-auto`, the same resolution without the prompt.
 #   - No search: `raco pkg` has no catalog query verb.
 
-[mpm.managers.raco]
+[mpm.overrides.raco]
 name = "raco"
 homepage_url = "https://docs.racket-lang.org/pkg/"
 platforms = ["linux_like", "macos", "windows"]
@@ -39,20 +39,20 @@ version_cli_options = ["--version"]
 # `racket --version` prints "Welcome to Racket v9.3 [cs]."
 version_regexes = ['Racket v(?P<version>\S+)']
 
-[mpm.managers.raco.operations.installed]
+[mpm.overrides.raco.operations.installed]
 args = ["pkg", "show", "--all", "--long"]
 regex = '^ (?P<package_id>\S+?)\*?[ \t]+(?P<installed_version>[0-9a-f]{40})[ \t]'
 
-[mpm.managers.raco.operations.install]
+[mpm.overrides.raco.operations.install]
 args = ["pkg", "install", "--auto", "{package_id}"]
 
-[mpm.managers.raco.operations.remove]
+[mpm.overrides.raco.operations.remove]
 args = ["pkg", "remove", "{package_id}"]
 
-[mpm.managers.raco.operations.upgrade_all]
+[mpm.overrides.raco.operations.upgrade_all]
 args = ["pkg", "update", "--all", "--auto"]
 
-[mpm.managers.raco.operations.upgrade_one]
+[mpm.overrides.raco.operations.upgrade_one]
 args = ["pkg", "update", "--auto", "{package_id}"]
 
 # Output samples locking the version probe and the declared parser, captured

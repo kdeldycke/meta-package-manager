@@ -172,5 +172,5 @@ Track the origin remote of each installed [`flatpak`](managers/flatpak.md) packa
 
 - {doc}`output-formats` — JSON and CSV table exports for ad-hoc piping of `installed`, `outdated`, `orphans`, and `search` results.
 - {doc}`sbom` — SPDX and CycloneDX SBOM exports for supply-chain inventory work.
-- {doc}`overrides` — per-manager `[mpm.managers.<id>]` config blocks and how to generate them with `mpm config-template`.
+- {doc}`overrides` — per-manager `[mpm.overrides.<id>]` config blocks and how to generate them with `mpm config-template`.
 - {doc}`cooldown` — release-age gates that complement the snapshot workflow on the install side.

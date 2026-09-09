@@ -34,7 +34,7 @@
 # empty inventory is honest rather than a failure.
 # ```
 
-[mpm.managers.julia]
+[mpm.overrides.julia]
 name = "Julia Pkg"
 homepage_url = "https://julialang.org"
 platforms = ["linux_like", "macos", "windows"]
@@ -50,30 +50,30 @@ version_regexes = ['julia\s+version\s+(?P<version>\S+)']
 
 # The UUID in brackets is the anchor: it steps over the `⌃` marker an upgradable
 # package carries, and matches neither the `Status` header nor the `Info` footer.
-[mpm.managers.julia.operations.installed]
+[mpm.overrides.julia.operations.installed]
 args = ["-e", 'using Pkg; Pkg.status()']
 regex = '\[[0-9a-f]+\]\s+(?P<package_id>\S+)\s+v(?P<installed_version>\S+)'
 
 # The same listing narrowed to what is behind, with the available version in
 # parentheses after a `<`.
-[mpm.managers.julia.operations.outdated]
+[mpm.overrides.julia.operations.outdated]
 args = ["-e", 'using Pkg; Pkg.status(outdated=true)']
 regex = '\[[0-9a-f]+\]\s+(?P<package_id>\S+)\s+v\S+\s+\(<v(?P<latest_version>[^)]+)\)'
 
-[mpm.managers.julia.operations.install]
+[mpm.overrides.julia.operations.install]
 args = ["-e", 'using Pkg; Pkg.add("{package_id}")']
 
-[mpm.managers.julia.operations.remove]
+[mpm.overrides.julia.operations.remove]
 args = ["-e", 'using Pkg; Pkg.rm("{package_id}")']
 
-[mpm.managers.julia.operations.upgrade_one]
+[mpm.overrides.julia.operations.upgrade_one]
 args = ["-e", 'using Pkg; Pkg.update("{package_id}")']
 
-[mpm.managers.julia.operations.upgrade_all]
+[mpm.overrides.julia.operations.upgrade_all]
 args = ["-e", 'using Pkg; Pkg.update()']
 
 # Refreshes the registries themselves rather than anything installed.
-[mpm.managers.julia.operations.sync]
+[mpm.overrides.julia.operations.sync]
 args = ["-e", 'using Pkg; Pkg.Registry.update()']
 
 # Output samples locking the version probe and the declared parsers, captured

@@ -41,7 +41,7 @@
 # lookup being the same class-only capability.
 # ```
 
-[mpm.managers.platformio-core]
+[mpm.overrides.platformio-core]
 name = "PlatformIO Core"
 homepage_url = "https://platformio.org"
 platforms = ["linux_like", "macos", "windows"]
@@ -56,11 +56,11 @@ version_regexes = ['PlatformIO Core,\s+version\s+(?P<version>\S+)']
 
 # One entry per line under a heading per kind. The leading box-drawing run is
 # what rejects the headings, which open on a word character instead.
-[mpm.managers.platformio-core.operations.installed]
+[mpm.overrides.platformio-core.operations.installed]
 args = ["pkg", "list", "--global"]
 regex = '^[^\w\s]+\s+(?P<package_id>\S+)\s+@\s+(?P<installed_version>\S+)'
 
-[mpm.managers.platformio-core.operations.upgrade_all]
+[mpm.overrides.platformio-core.operations.upgrade_all]
 args = ["pkg", "update", "--global"]
 
 # Output samples locking the version probe and the declared parser, captured

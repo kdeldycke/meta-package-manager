@@ -355,7 +355,7 @@ stdout_regex_matches = "(cargo|dnf)"
 [[cases]]
 cli_parameters = "config-template"
 exit_code = 0
-stdout_contains = "[mpm.managers.apk]"
+stdout_contains = "[mpm.overrides.apk]"
 
 [[cases]]
 cli_parameters = "help managers"

@@ -58,7 +58,7 @@
 # Nothing here needs color suppression: the only code that emits escapes turns
 # them off when its output is not a terminal, and it runs during an install.
 
-[mpm.managers.pyenv]
+[mpm.overrides.pyenv]
 name = "Python pyenv"
 homepage_url = "https://github.com/pyenv/pyenv"
 logo = "python"
@@ -82,7 +82,7 @@ version_regexes = ['^pyenv[ \t]+(?P<version>\d+(?:\.\d+)+)']
 # a single pattern has to serve every shape, reporting the whole token as a
 # version would be wrong more often than it would be right, and mpm treats the
 # installed version as optional throughout.
-[mpm.managers.pyenv.operations.installed]
+[mpm.overrides.pyenv.operations.installed]
 args = ["versions", "--bare", "--skip-aliases", "--skip-envs"]
 regex = '^(?P<package_id>\S+)$'
 
@@ -90,21 +90,21 @@ regex = '^(?P<package_id>\S+)$'
 # and ignoring any argument, so no `{query}` is substituted and mpm narrows the
 # results itself. Every definition is indented by exactly two spaces, which is
 # what excludes the unindented `Available versions:` header.
-[mpm.managers.pyenv.operations.search]
+[mpm.overrides.pyenv.operations.search]
 args = ["install", "--list"]
 regex = '^  (?P<package_id>\S+)$'
 
 # `--skip-existing` turns a redundant install into a silent no-op, where the
 # bare form stops to ask. The alternative, `--force`, would recompile an
 # interpreter already on disk.
-[mpm.managers.pyenv.operations.install]
+[mpm.overrides.pyenv.operations.install]
 args = ["install", "--skip-existing", "{package_id}"]
 
 # `--force` suppresses the confirmation prompt and makes removing something
 # already absent a no-op instead of an error. It has to precede the package,
 # since the argument parser only inspects the first word and rejects a later
 # one beginning with a dash.
-[mpm.managers.pyenv.operations.remove]
+[mpm.overrides.pyenv.operations.remove]
 args = ["uninstall", "--force", "{package_id}"]
 
 # Output samples locking the version probe and the declared parsers. Consumed by

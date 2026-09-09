@@ -40,7 +40,7 @@
 # not supported on Windows." The macOS half of that was verified here.
 # ```
 
-[mpm.managers.pipxu]
+[mpm.overrides.pipxu]
 name = "pipxu"
 homepage_url = "https://github.com/bulletmark/pipxu"
 platforms = ["linux_like", "macos"]
@@ -54,20 +54,20 @@ version_cli_options = ["--version"]
 version_regexes = ['pipxu==(?P<version>\S+)']
 
 # One `name==version` per line, which is why this and not `pipxu list`.
-[mpm.managers.pipxu.operations.installed]
+[mpm.overrides.pipxu.operations.installed]
 args = ["version"]
 regex = '^(?P<package_id>\S+)==(?P<installed_version>\S+)$'
 
-[mpm.managers.pipxu.operations.install]
+[mpm.overrides.pipxu.operations.install]
 args = ["install", "{package_id}"]
 
-[mpm.managers.pipxu.operations.remove]
+[mpm.overrides.pipxu.operations.remove]
 args = ["uninstall", "{package_id}"]
 
-[mpm.managers.pipxu.operations.upgrade_one]
+[mpm.overrides.pipxu.operations.upgrade_one]
 args = ["upgrade", "{package_id}"]
 
-[mpm.managers.pipxu.operations.upgrade_all]
+[mpm.overrides.pipxu.operations.upgrade_all]
 args = ["upgrade", "--all"]
 
 # Output samples locking the version probe and the declared parser, captured

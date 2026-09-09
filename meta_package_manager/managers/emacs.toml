@@ -33,7 +33,7 @@
 # the samples below and no operation is declared from a form that was not run.
 # ```
 
-[mpm.managers.emacs]
+[mpm.overrides.emacs]
 name = "GNU Emacs packages"
 homepage_url = "https://www.gnu.org/software/emacs/"
 platforms = ["linux_like", "macos", "windows"]
@@ -48,7 +48,7 @@ version_regexes = ['GNU Emacs\s+(?P<version>\S+)']
 
 # The format string is this manager's own: one `name version` per line, with the
 # version joined back from the list `package.el` stores it as.
-[mpm.managers.emacs.operations.installed]
+[mpm.overrides.emacs.operations.installed]
 args = [
   "--batch",
   "--eval",
@@ -56,7 +56,7 @@ args = [
 ]
 regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\S+)$'
 
-[mpm.managers.emacs.operations.install]
+[mpm.overrides.emacs.operations.install]
 args = [
   "--batch",
   "--eval",
@@ -65,14 +65,14 @@ args = [
 
 # `package-delete` wants the description rather than the symbol, so the entry is
 # looked up in `package-alist` first.
-[mpm.managers.emacs.operations.remove]
+[mpm.overrides.emacs.operations.remove]
 args = [
   "--batch",
   "--eval",
   '(progn (require (quote package)) (package-initialize) (package-delete (car (alist-get (quote {package_id}) package-alist))))',
 ]
 
-[mpm.managers.emacs.operations.sync]
+[mpm.overrides.emacs.operations.sync]
 args = [
   "--batch",
   "--eval",

@@ -1,5 +1,5 @@
 # This is a real, 100%-config-defined manager: mpm loads it from this file at startup
-# through the very same schema and parser a user's own `[mpm.managers.<id>]` section
+# through the very same schema and parser a user's own `[mpm.overrides.<id>]` section
 # goes through, dogfooding the configuration-defined-manager feature on a genuine
 # cross-platform CLI. See docs/overrides.md ("Define a new manager") for the schema,
 # and meta_package_manager/definitions.py (build_bundled_managers) for the loader.
@@ -8,7 +8,7 @@
 # reported by `gh extension list` and accepted by every extension subcommand, so ids
 # round-trip cleanly through install, remove, upgrade and backup/restore.
 
-[mpm.managers.gh-ext]
+[mpm.overrides.gh-ext]
 name = "GitHub CLI extensions"
 homepage_url = "https://cli.github.com"
 logo = "github"
@@ -27,7 +27,7 @@ version_regexes = ['gh version\s+(?P<version>\d+\.\d+\.\d+)']
 # installed_version is captured opaquely. The slug is the package id: it is the one
 # identifier every operation accepts (see the install comment below), so installed ids
 # round-trip through remove/upgrade and backup/restore.
-[mpm.managers.gh-ext.operations.installed]
+[mpm.overrides.gh-ext.operations.installed]
 args = ["extension", "list"]
 regex = '^gh \S+\t(?P<package_id>\S+/\S+)\t(?P<installed_version>\S+)'
 
@@ -35,7 +35,7 @@ regex = '^gh \S+\t(?P<package_id>\S+/\S+)\t(?P<installed_version>\S+)'
 # "installed"), the "owner/repo" slug, then a description. run_cli strips the captured
 # output, so the first row loses its leading empty-state tab and its slug shifts to
 # column 1; match the slug by content (the only field holding a "/"), not by column.
-[mpm.managers.gh-ext.operations.search]
+[mpm.overrides.gh-ext.operations.search]
 args = ["extension", "search", "{query}"]
 regex = '(?P<package_id>\S+/\S+)'
 
@@ -43,16 +43,16 @@ regex = '(?P<package_id>\S+/\S+)'
 # upgrade normalize it down to the short name gh derives from it ("dlvhdr/gh-dash" is
 # extension "dash"). Keying packages on the slug is thus the only scheme under which
 # the ids reported by `installed` above feed back into every other operation.
-[mpm.managers.gh-ext.operations.install]
+[mpm.overrides.gh-ext.operations.install]
 args = ["extension", "install", "{package_id}"]
 
-[mpm.managers.gh-ext.operations.remove]
+[mpm.overrides.gh-ext.operations.remove]
 args = ["extension", "remove", "{package_id}"]
 
-[mpm.managers.gh-ext.operations.upgrade_one]
+[mpm.overrides.gh-ext.operations.upgrade_one]
 args = ["extension", "upgrade", "{package_id}"]
 
-[mpm.managers.gh-ext.operations.upgrade_all]
+[mpm.overrides.gh-ext.operations.upgrade_all]
 args = ["extension", "upgrade", "--all"]
 
 # No `outdated`: `gh extension list` has no update-available column and gh offers no

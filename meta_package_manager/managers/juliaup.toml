@@ -46,7 +46,7 @@
 # No escalation: juliaup installs under `$JULIAUP_DEPOT_PATH/juliaup`, falling
 # back to `~/.julia/juliaup`, and its source carries no privileged path at all.
 
-[mpm.managers.juliaup]
+[mpm.overrides.juliaup]
 name = "Julia juliaup"
 homepage_url = "https://github.com/JuliaLang/juliaup"
 logo = "julia"
@@ -65,7 +65,7 @@ version_regexes = ['^Juliaup[ \t]+(?P<version>\S+)$']
 # offset. The optional `*` is the default-channel marker, right-justified in
 # its own column, and is consumed so it never lands in the package id. Header
 # and separator rows fail the digit-initial version requirement and drop out.
-[mpm.managers.juliaup.operations.installed]
+[mpm.overrides.juliaup.operations.installed]
 args = ["status"]
 regex = '^[ \t]*(?:\*[ \t]+)?(?P<package_id>\S+)[ \t]+(?P<installed_version>\d\S*)'
 
@@ -75,7 +75,7 @@ regex = '^[ \t]*(?:\*[ \t]+)?(?P<package_id>\S+)[ \t]+(?P<installed_version>\d\S
 # pull-request channel is compared by entity tag instead and gets a bare
 # `Update available`, naming no version, so it cannot match and is left out
 # rather than reported with a version invented for it.
-[mpm.managers.juliaup.operations.outdated]
+[mpm.overrides.juliaup.operations.outdated]
 args = ["status"]
 regex = '^[ \t]*(?:\*[ \t]+)?(?P<package_id>\S+)[ \t]+(?P<installed_version>\d\S*)[^\n]*?\bUpdate to (?P<latest_version>\S+) available[ \t]*$'
 
@@ -84,28 +84,28 @@ regex = '^[ \t]*(?:\*[ \t]+)?(?P<package_id>\S+)[ \t]+(?P<installed_version>\d\S
 # rows: `pr{number}` and `x.y-nightly` are literal templates rather than
 # installable names, and their version cell holds a build-target string instead
 # of a version.
-[mpm.managers.juliaup.operations.search]
+[mpm.overrides.juliaup.operations.search]
 args = ["list"]
 regex = '^[ \t]*(?P<package_id>\S+)[ \t]+(?P<latest_version>\d\S*)[ \t]*$'
 
-[mpm.managers.juliaup.operations.install]
+[mpm.overrides.juliaup.operations.install]
 args = ["add", "{package_id}"]
 
 # Refuses to remove the default channel, and any channel a directory override
 # points at, erroring rather than silently unsetting it.
-[mpm.managers.juliaup.operations.remove]
+[mpm.overrides.juliaup.operations.remove]
 args = ["remove", "{package_id}"]
 
-[mpm.managers.juliaup.operations.upgrade_one]
+[mpm.overrides.juliaup.operations.upgrade_one]
 args = ["update", "{package_id}"]
 
-[mpm.managers.juliaup.operations.upgrade_all]
+[mpm.overrides.juliaup.operations.upgrade_all]
 args = ["update"]
 
 # Reclaims the concrete versions no channel points at anymore. `--prune-linked`
 # is deliberately not passed: it deletes linked channels, which are packages
 # here rather than cache.
-[mpm.managers.juliaup.operations.cleanup_orphan]
+[mpm.overrides.juliaup.operations.cleanup_orphan]
 args = ["gc"]
 
 # Output samples locking the version probe and the declared parsers. Consumed

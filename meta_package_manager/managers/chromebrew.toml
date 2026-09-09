@@ -17,7 +17,7 @@
 #     there is no non-mutating upgradable listing. No `cleanup` either: CREW_DOCOPT
 #     has no clean verb.
 
-[mpm.managers.chromebrew]
+[mpm.overrides.chromebrew]
 name = "Chromebrew"
 homepage_url = "https://chromebrew.github.io"
 logo = "googlechrome"
@@ -33,31 +33,31 @@ cli_names = ["crew"]
 version_cli_options = ["version"]
 version_regexes = ['^(?P<version>[\d.]+)$']
 
-[mpm.managers.chromebrew.operations.installed]
+[mpm.overrides.chromebrew.operations.installed]
 args = ["list", "--verbose", "--no-color", "installed"]
 regex = '^(?P<package_id>\S+)\s+(?P<installed_version>\d\S*)$'
 
 # `crew search` prints one "name: description" line per match; the name is the token
 # before the first ": " (descriptions may contain colons of their own).
-[mpm.managers.chromebrew.operations.search]
+[mpm.overrides.chromebrew.operations.search]
 args = ["search", "--no-color", "{query}"]
 regex = '^(?P<package_id>[^\s:]+): '
 
-[mpm.managers.chromebrew.operations.install]
+[mpm.overrides.chromebrew.operations.install]
 args = ["install", "--no-color", "{package_id}"]
 
-[mpm.managers.chromebrew.operations.remove]
+[mpm.overrides.chromebrew.operations.remove]
 args = ["remove", "--no-color", "{package_id}"]
 
-[mpm.managers.chromebrew.operations.upgrade_one]
+[mpm.overrides.chromebrew.operations.upgrade_one]
 args = ["upgrade", "--no-color", "{package_id}"]
 
-[mpm.managers.chromebrew.operations.upgrade_all]
+[mpm.overrides.chromebrew.operations.upgrade_all]
 args = ["upgrade", "--no-color"]
 
 # `crew update` refreshes the package definitions (the apt-update analogue), distinct
 # from `crew upgrade`.
-[mpm.managers.chromebrew.operations.sync]
+[mpm.overrides.chromebrew.operations.sync]
 args = ["update"]
 
 # Output samples locking the version probe and the declared parsers, derived

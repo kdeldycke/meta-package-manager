@@ -58,7 +58,7 @@
 # updating.
 # ```
 
-[mpm.managers.getnf]
+[mpm.overrides.getnf]
 name = "getnf"
 homepage_url = "https://github.com/getnf/getnf"
 platforms = ["linux_like", "macos"]
@@ -72,26 +72,26 @@ version_regexes = ['getnf v(?P<version>\S+)']
 
 # The heading and the blank line above it carry spaces or nothing at all, so
 # anchoring both ends is what keeps them out of the results.
-[mpm.managers.getnf.operations.installed]
+[mpm.overrides.getnf.operations.installed]
 args = ["-l"]
 regex = '^(?P<package_id>\S+)[ \t]+-[ \t]+(?:unknown version|v?(?P<installed_version>\S+))$'
 
 # The catalog carries no versions, every font in it being available at the one
 # Nerd Fonts release named in the heading.
-[mpm.managers.getnf.operations.search]
+[mpm.overrides.getnf.operations.search]
 args = ["-L"]
 regex = '^(?P<package_id>\S+)$'
 
-[mpm.managers.getnf.operations.install]
+[mpm.overrides.getnf.operations.install]
 args = ["-i", "{package_id}"]
 
-[mpm.managers.getnf.operations.remove]
+[mpm.overrides.getnf.operations.remove]
 args = ["-u", "{package_id}"]
 
-[mpm.managers.getnf.operations.upgrade_one]
+[mpm.overrides.getnf.operations.upgrade_one]
 args = ["-i", "{package_id}"]
 
-[mpm.managers.getnf.operations.upgrade_all]
+[mpm.overrides.getnf.operations.upgrade_all]
 args = ["-U"]
 
 # Output samples locking the version probe and the declared parser, captured

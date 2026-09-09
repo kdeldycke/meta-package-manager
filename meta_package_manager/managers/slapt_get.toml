@@ -16,7 +16,7 @@
 #     (including `--update`, which writes the package cache) need root, and Slackware
 #     ships no sudo by default, so mpm's own escalation does the work.
 
-[mpm.managers.slapt-get]
+[mpm.overrides.slapt-get]
 name = "slapt-get"
 homepage_url = "https://software.jaos.org/"
 logo = "slackware"
@@ -28,39 +28,39 @@ default_sudo = true
 # license blurb.
 version_regexes = ['slapt-get version (?P<version>\S+)']
 
-[mpm.managers.slapt-get.operations.installed]
+[mpm.overrides.slapt-get.operations.installed]
 args = ["--installed"]
 regex = '^(?P<package_id>.+)-(?P<installed_version>[^-\s]+)-[^-\s]+-[^-\s]+ \[inst=yes\]: '
 
-[mpm.managers.slapt-get.operations.search]
+[mpm.overrides.slapt-get.operations.search]
 args = ["--search", "{query}"]
 regex = '^(?P<package_id>.+)-(?P<latest_version>[^-\s]+)-[^-\s]+-[^-\s]+ \[inst=(?:yes|no)\]: '
 
-[mpm.managers.slapt-get.operations.install]
+[mpm.overrides.slapt-get.operations.install]
 args = ["--install", "--no-prompt", "{package_id}"]
 sudo = true
 
-[mpm.managers.slapt-get.operations.remove]
+[mpm.overrides.slapt-get.operations.remove]
 args = ["--remove", "--no-prompt", "{package_id}"]
 sudo = true
 
 # `--install` pulls the newest available version of an installed package: slapt-get
 # has no dedicated single-package upgrade.
-[mpm.managers.slapt-get.operations.upgrade_one]
+[mpm.overrides.slapt-get.operations.upgrade_one]
 args = ["--install", "--no-prompt", "{package_id}"]
 sudo = true
 
-[mpm.managers.slapt-get.operations.upgrade_all]
+[mpm.overrides.slapt-get.operations.upgrade_all]
 args = ["--upgrade", "--no-prompt"]
 sudo = true
 
 # Retrieves the package data from the configured mirrors.
-[mpm.managers.slapt-get.operations.sync]
+[mpm.overrides.slapt-get.operations.sync]
 args = ["--update"]
 sudo = true
 
 # Purges the package download cache.
-[mpm.managers.slapt-get.operations.cleanup_cache]
+[mpm.overrides.slapt-get.operations.cleanup_cache]
 args = ["--clean"]
 sudo = true
 

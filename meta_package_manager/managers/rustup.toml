@@ -60,7 +60,7 @@
 # `$RUSTUP_HOME` is mounted read-only.
 # ```
 
-[mpm.managers.rustup]
+[mpm.overrides.rustup]
 name = "Rust rustup"
 homepage_url = "https://rustup.rs"
 logo = "rust"
@@ -81,7 +81,7 @@ version_regexes = ['^rustup (?P<version>\S+)']
 # `--verbose` would append too. Requiring an embedded hyphen is what keeps the
 # `no installed toolchains` sentinel from being reported as a package called
 # `no`; the cost is that a custom linked toolchain named without one is skipped.
-[mpm.managers.rustup.operations.installed]
+[mpm.overrides.rustup.operations.installed]
 args = ["toolchain", "list"]
 regex = '^(?P<package_id>\S+-\S+)'
 
@@ -89,22 +89,22 @@ regex = '^(?P<package_id>\S+-\S+)'
 # not and fall through. Each version is followed by a parenthesised hash and
 # date, so the captures stop at the first space. Refusing a leading parenthesis
 # rejects the `(unknown version) -> …` arm rather than capturing `(unknown`.
-[mpm.managers.rustup.operations.outdated]
+[mpm.overrides.rustup.operations.outdated]
 args = ["check"]
 regex = '^(?P<package_id>\S+-\S+) - [Uu]pdate available\s*:\s*(?P<installed_version>[^\s(]\S*).*? -> (?P<latest_version>[^\s(]\S*)'
 
-[mpm.managers.rustup.operations.install]
+[mpm.overrides.rustup.operations.install]
 args = ["toolchain", "install", "--no-self-update", "{package_id}"]
 
-[mpm.managers.rustup.operations.remove]
+[mpm.overrides.rustup.operations.remove]
 args = ["toolchain", "uninstall", "{package_id}"]
 
 # Naming a toolchain genuinely restricts the run to it: the named branch never
 # reaches the update-everything path.
-[mpm.managers.rustup.operations.upgrade_one]
+[mpm.overrides.rustup.operations.upgrade_one]
 args = ["update", "--no-self-update", "{package_id}"]
 
-[mpm.managers.rustup.operations.upgrade_all]
+[mpm.overrides.rustup.operations.upgrade_all]
 args = ["update", "--no-self-update"]
 
 # Output samples locking the version probe and the declared parsers. Consumed by

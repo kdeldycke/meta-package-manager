@@ -57,6 +57,7 @@ from click_extra.theme import get_current_theme as theme
 from .cooldown import parse_cooldown_section
 from .definitions import (
     OVERRIDABLE_FIELDS,
+    OVERRIDES_SECTION,
     build_manager_class,
     parse_manager_definition,
 )
@@ -287,7 +288,7 @@ def _build_issue_url(hint: ContributionHint) -> str:
     # paste the snippet straight into their config file (or back into the issue
     # body) without translating tuples to TOML lists by hand.
     override_toml = tomli_w.dumps(
-        {"mpm": {"overrides": {hint.manager_id: {hint.field: hint.user_value}}}},
+        {"mpm": {OVERRIDES_SECTION: {hint.manager_id: {hint.field: hint.user_value}}}},
     ).rstrip()
     bug_description = (
         f"While running `mpm`, I had to override the "
@@ -592,7 +593,7 @@ def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
         validate_manager_overrides_section(section, pool=pool)
 
     return ConfigValidator(
-        extension_path="overrides",
+        extension_path=OVERRIDES_SECTION,
         validator=_validator,
         description="Per-manager attribute overrides (see docs/configuration.md).",
     )
@@ -641,7 +642,9 @@ def _overrides_section(ctx: click.Context) -> Mapping[str, Any] | None:
     """
     conf_full = ctx.meta.get(CONF_FULL) or {}
     mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
-    return mpm_section.get("overrides") if isinstance(mpm_section, dict) else None
+    if not isinstance(mpm_section, dict):
+        return None
+    return mpm_section.get(OVERRIDES_SECTION)
 
 
 def stale_overrides_section(ctx: click.Context) -> tuple[str, ...]:
@@ -950,7 +953,7 @@ def discover_config_definitions(
         root = data.get("mpm")
         if not isinstance(root, dict) and isinstance(data.get("tool"), dict):
             root = data["tool"].get("mpm")
-        sections = root.get("overrides") if isinstance(root, dict) else None
+        sections = root.get(OVERRIDES_SECTION) if isinstance(root, dict) else None
         if not isinstance(sections, dict):
             return {}, None
         return _collect_definitions(pool, sections), path

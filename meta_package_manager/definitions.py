@@ -72,6 +72,20 @@ if TYPE_CHECKING:
     from .package import Package
 
 
+OVERRIDES_SECTION: Final[str] = "overrides"
+"""Key of the `[mpm]` sub-table holding the per-manager sections.
+
+A `[mpm.overrides.<id>]` block a user writes and a bundled definition file open on
+the same key, the two being one schema. It is named here because four readers have
+to agree on it: the configuration loader, its validator, the `config-template`
+writer and the documentation generators.
+
+It must not name a subcommand. {class}`~meta_package_manager.config.MpmConfig`
+declares the sub-tree opaque, so {mod}`click_extra` hands the whole of it to mpm's
+own validator, and a subcommand sharing the key loses its configuration surface.
+"""
+
+
 def _to_str(value: Any) -> str:
     """Validate that the value is a string."""
     if not isinstance(value, str):
@@ -1256,7 +1270,7 @@ def load_bundled_definitions() -> tuple[tuple[ManagerDefinition, str], ...]:
         except (OSError, tomllib.TOMLDecodeError) as ex:
             logging.warning(f"Skipping unreadable bundled definition {source}: {ex}")
             continue
-        sections = data.get("mpm", {}).get("overrides", {})
+        sections = data.get("mpm", {}).get(OVERRIDES_SECTION, {})
         for manager_id, section in sections.items():
             try:
                 definitions.append(

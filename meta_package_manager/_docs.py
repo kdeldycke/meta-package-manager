@@ -60,6 +60,7 @@ from meta_package_manager.capabilities import (
     implements_method,
     upgrade_all_is_synthesized,
 )
+from meta_package_manager.definitions import OVERRIDES_SECTION
 from meta_package_manager.dispatch import (
     COMMAND_FAN_OUT,
     FAN_OUT_CONCURRENT,
@@ -1733,7 +1734,7 @@ def _native_invocation(manager, member: str) -> tuple[list[str], str | None] | N
     tokens = None
     source = getattr(manager, "definition_source", None)
     if source:
-        operations = _toml_definition(source)["mpm"]["overrides"][manager.id].get(
+        operations = _toml_definition(source)["mpm"][OVERRIDES_SECTION][manager.id].get(
             "operations",
             {},
         )
@@ -2144,7 +2145,7 @@ def manager_sudo(manager_id: str) -> str:
     parts = [policy]
     source = getattr(m, "definition_source", None)
     if source and not m.internal_sudo:
-        operations = _toml_definition(source)["mpm"]["overrides"][manager_id].get(
+        operations = _toml_definition(source)["mpm"][OVERRIDES_SECTION][manager_id].get(
             "operations",
             {},
         )
@@ -2325,7 +2326,7 @@ def manager_traces(manager_id: str) -> str:
     if source:
         doc = _toml_definition(source)
         samples = doc.get("samples", {})
-        operations = doc["mpm"]["overrides"][manager_id].get("operations", {})
+        operations = doc["mpm"][OVERRIDES_SECTION][manager_id].get("operations", {})
         fences = []
         for op in Operations:
             spec = operations.get(op.name, {})

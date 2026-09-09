@@ -76,6 +76,7 @@ from .cli import (
     mpm,
 )
 from .config import dump_manager_overrides
+from .definitions import OVERRIDES_SECTION
 from .dispatch import collect_from_managers
 from .execution import SPINNER_DELAY, CLIError, highlight_cli_name
 from .manager import PackageManager
@@ -803,4 +804,4 @@ def config_template(ctx, manager_ids):
     """
     target_ids = manager_ids or pool.maintained_manager_ids
     overrides = {mid: dump_manager_overrides(pool[mid]) for mid in target_ids}
-    echo(tomli_w.dumps({"mpm": {"overrides": overrides}}), nl=False)
+    echo(tomli_w.dumps({"mpm": {OVERRIDES_SECTION: overrides}}), nl=False)

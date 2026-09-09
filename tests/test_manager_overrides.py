@@ -19,6 +19,7 @@
 
 from __future__ import annotations
 
+from dataclasses import fields
 from textwrap import dedent
 
 import pytest
@@ -26,6 +27,7 @@ import tomli_w
 from click_extra import ValidationError
 
 from meta_package_manager.config import (
+    MpmConfig,
     CONTRIBUTION_HINT_FIELDS,
     INVALIDATED_CACHED_PROPS,
     MAX_ISSUE_URL_LENGTH,
@@ -36,7 +38,7 @@ from meta_package_manager.config import (
     dump_manager_overrides,
     format_contribution_hints,
 )
-from meta_package_manager.definitions import OVERRIDABLE_FIELDS
+from meta_package_manager.definitions import OVERRIDABLE_FIELDS, OVERRIDES_SECTION
 from meta_package_manager.pool import pool
 
 from .conftest import all_manager_ids, tomllib
@@ -709,3 +711,13 @@ def test_cli_config_template_output_is_applicable(invoke, reset_overrides):
         assert getattr(manager, field) == original, (
             f"{OVERRIDE_TARGET}.{field} changed after round-trip"
         )
+
+
+def test_overrides_section_names_a_schema_field():
+    """`OVERRIDES_SECTION` and the schema field declaring it opaque agree.
+
+    click-extra derives a configuration path from the field name, so renaming one
+    side alone leaves every reader of the constant looking at a sub-tree the
+    schema no longer marks opaque, which the strict check then rejects key by key.
+    """
+    assert OVERRIDES_SECTION in {f.name for f in fields(MpmConfig)}

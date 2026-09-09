@@ -1197,7 +1197,6 @@ labels.content-rules."📦 manager: apk" = [ "alpine", "alpine linux" ]
 labels.content-rules."📦 manager: apm" = [ "atom" ]
 labels.content-rules."📦 manager: apt-cyg" = [ "cygwin" ]
 labels.content-rules."📦 manager: asdf-based" = [ "asdf-vm", "mise-en-place" ]
-labels.content-rules."📦 manager: cargo" = [ "crate", "rust" ]
 labels.content-rules."📦 manager: cave" = [ "exherbo", "paludis" ]
 labels.content-rules."📦 manager: choco" = [ "chocolatey" ]
 labels.content-rules."📦 manager: chromebrew" = [ "chrome os", "chromeos" ]
@@ -1230,6 +1229,7 @@ labels.content-rules."📦 manager: pwsh-gallery" = [ "powershell", "powershell 
 labels.content-rules."📦 manager: pypi-based" = [ "pypi" ]
 labels.content-rules."📦 manager: roswell" = [ "common lisp", "quicklisp" ]
 labels.content-rules."📦 manager: rpm-based" = [ "fedora", "mageia", "opensuse", "redhat", "rhel", "rpm", "suse" ]
+labels.content-rules."📦 manager: rust-based" = [ "crate", "rust" ]
 labels.content-rules."📦 manager: sdkman" = [ "sdk man" ]
 labels.content-rules."📦 manager: slapt-get" = [ "slackware" ]
 labels.content-rules."📦 manager: snap" = [ "snapcraft" ]
@@ -1264,10 +1264,8 @@ labels.file-rules."📦 manager: bash-based" = [
   "tests/*bpkg*",
 ]
 labels.file-rules."📦 manager: bin" = [ "meta_package_manager/managers/bin.*", "tests/*bin*" ]
-labels.file-rules."📦 manager: cargo" = [ "meta_package_manager/managers/cargo.*", "tests/*cargo*" ]
 labels.file-rules."📦 manager: cave" = [ "meta_package_manager/managers/cave.*", "tests/*cave*" ]
 labels.file-rules."📦 manager: choco" = [ "meta_package_manager/managers/choco.*", "tests/*choco*" ]
-labels.file-rules."📦 manager: choosenim" = [ "meta_package_manager/managers/choosenim.*", "tests/*choosenim*" ]
 labels.file-rules."📦 manager: chromebrew" = [ "meta_package_manager/managers/chromebrew.*", "tests/*chromebrew*" ]
 labels.file-rules."📦 manager: claude-code-plugins" = [
   "meta_package_manager/managers/claude_code_plugins.*",
@@ -1340,8 +1338,12 @@ labels.file-rules."📦 manager: homebrew" = [
 labels.file-rules."📦 manager: hyprpm" = [ "meta_package_manager/managers/hyprpm.*", "tests/*hyprpm*" ]
 labels.file-rules."📦 manager: ips" = [ "meta_package_manager/managers/ips.*", "tests/*ips*" ]
 labels.file-rules."📦 manager: jpm" = [ "meta_package_manager/managers/jpm.*", "tests/*jpm*" ]
-labels.file-rules."📦 manager: julia" = [ "meta_package_manager/managers/julia.*", "tests/*julia*" ]
-labels.file-rules."📦 manager: juliaup" = [ "meta_package_manager/managers/juliaup.*", "tests/*juliaup*" ]
+labels.file-rules."📦 manager: julia-based" = [
+  "meta_package_manager/managers/julia.*",
+  "meta_package_manager/managers/juliaup.*",
+  "tests/*julia*",
+  "tests/*juliaup*",
+]
 labels.file-rules."📦 manager: krew" = [ "meta_package_manager/managers/krew.*", "tests/*krew*" ]
 labels.file-rules."📦 manager: luarocks" = [ "meta_package_manager/managers/luarocks.*", "tests/*luarocks*" ]
 labels.file-rules."📦 manager: lure" = [ "meta_package_manager/managers/lure.*", "tests/*lure*" ]
@@ -1359,7 +1361,12 @@ labels.file-rules."📦 manager: neovim-based" = [
   "tests/*neovim*",
   "tests/*vim_pack*",
 ]
-labels.file-rules."📦 manager: nimble" = [ "meta_package_manager/managers/nimble.*", "tests/*nimble*" ]
+labels.file-rules."📦 manager: nim-based" = [
+  "meta_package_manager/managers/choosenim.*",
+  "meta_package_manager/managers/nimble.*",
+  "tests/*choosenim*",
+  "tests/*nimble*",
+]
 labels.file-rules."📦 manager: nix" = [ "meta_package_manager/managers/nix.*", "tests/*nix*" ]
 labels.file-rules."📦 manager: npm-based" = [
   "meta_package_manager/managers/bun.*",
@@ -1430,7 +1437,12 @@ labels.file-rules."📦 manager: rpm-based" = [
   "tests/*yum*",
   "tests/*zypper*",
 ]
-labels.file-rules."📦 manager: rustup" = [ "meta_package_manager/managers/rustup.*", "tests/*rustup*" ]
+labels.file-rules."📦 manager: rust-based" = [
+  "meta_package_manager/managers/cargo.*",
+  "meta_package_manager/managers/rustup.*",
+  "tests/*cargo*",
+  "tests/*rustup*",
+]
 labels.file-rules."📦 manager: scoop-based" = [
   "meta_package_manager/managers/scoop.*",
   "meta_package_manager/managers/sfsu.*",
@@ -1527,11 +1539,6 @@ color = "bfdadc"
 description = "bin"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: cargo"
-color = "bfdadc"
-description = "cargo"
-
-[[tool.repomatic.labels.extra]]
 name = "📦 manager: cave"
 color = "bfdadc"
 description = "cave"
@@ -1540,11 +1547,6 @@ description = "cave"
 name = "📦 manager: choco"
 color = "bfdadc"
 description = "choco"
-
-[[tool.repomatic.labels.extra]]
-name = "📦 manager: choosenim"
-color = "bfdadc"
-description = "choosenim"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: chromebrew"
@@ -1688,14 +1690,9 @@ color = "bfdadc"
 description = "jpm"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: julia"
+name = "📦 manager: julia-based"
 color = "bfdadc"
-description = "julia"
-
-[[tool.repomatic.labels.extra]]
-name = "📦 manager: juliaup"
-color = "bfdadc"
-description = "juliaup"
+description = "julia, juliaup"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: krew"
@@ -1743,9 +1740,9 @@ color = "bfdadc"
 description = "bob, lazy, mason, vim-pack"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: nimble"
+name = "📦 manager: nim-based"
 color = "bfdadc"
-description = "nimble"
+description = "choosenim, nimble"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: nix"
@@ -1859,9 +1856,10 @@ color = "bfdadc"
 description = "dnf, dnf5, urpmi, yum, zypper"
 
 [[tool.repomatic.labels.extra]]
-name = "📦 manager: rustup"
+name = "📦 manager: rust-based"
 color = "bfdadc"
-description = "rustup"
+description = "cargo, rustup"
+rename-from = [ "📦 manager: cargo" ]
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: scoop-based"

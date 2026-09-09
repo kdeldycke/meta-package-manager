@@ -145,7 +145,9 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "fish-based": frozenset({"fisher", "oh-my-fish"}),
     "go-based": frozenset({"go", "gup"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
+    "julia-based": frozenset({"julia", "juliaup"}),
     "neovim-based": frozenset({"bob", "lazy", "mason", "vim-pack"}),
+    "nim-based": frozenset({"choosenim", "nimble"}),
     "npm-based": frozenset({
         "bun",
         "npm",
@@ -168,6 +170,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     }),
     "pkg-based": frozenset({"pkg", "ports"}),
     "pypi-based": frozenset({"pip", "pipx", "pipxu", "uv", "uvx"}),
+    "rust-based": frozenset({"cargo", "rustup"}),
     "scoop-based": frozenset({"scoop", "sfsu"}),
     "vscode-based": frozenset({"vscode", "vscodium"}),
     "zsh-based": frozenset({"antidote", "antigen", "zim", "zinit", "zplug"}),
@@ -228,6 +231,24 @@ installs is npm packages.
 resolution and installation on top of rattler, but both resolve conda packages from the
 same channels, `conda-forge` by default. The registry is the level a report lands at, so
 the two share one label even though their CLIs have nothing else in common.
+
+`julia-based`, `nim-based` and `rust-based` apply the `bob` reading to a language
+instead of an editor. Each pairs a toolchain installer with the package manager that
+toolchain carries: `juliaup` installs Julia and `julia`'s Pkg installs into it,
+`choosenim` installs Nim and `nimble` installs into it, `rustup` installs Rust and
+`cargo` installs into it. The two halves share no registry, exactly as `bob` shares no
+plugin tree with `lazy`, and group for the same reason: every `rustup` report is a Rust
+report, so splitting the language across two labels would cost two tracker searches.
+`go-based` already showed a language names a group here as readily as a host program
+does.
+
+The pool holds ten more toolchain installers that stay ungrouped, and the line is
+whether the language's package manager is wrapped at all. `ghcup`, `elan`, `zvm`,
+`sdkman` and `xcodes` have no counterpart to pair with, so a group would hold one
+member. `pyenv` does have one and is still kept out: `pypi-based` is named for the
+registry on purpose, and pyenv resolves against none, so folding it in would contradict
+the reasoning that names that group. `asdf`, `mise` and `volta` are already placed
+above.
 """
 
 all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
@@ -274,6 +295,7 @@ LABELS = sorted(
 LABEL_RENAMES: dict[str, tuple[str, ...]] = {
     f"{MANAGER_PREFIX}conda-based": (f"{MANAGER_PREFIX}conda",),
     f"{MANAGER_PREFIX}pypi-based": (f"{MANAGER_PREFIX}pip-based",),
+    f"{MANAGER_PREFIX}rust-based": (f"{MANAGER_PREFIX}cargo",),
 }
 """Labels a renamed one supersedes, emitted as labelmaker's `rename-from`.
 
@@ -305,6 +327,12 @@ rather than one, and `basalt` and `bpkg` both carry zero issues and zero pull
 requests, so there is no history for the single rename slot to preserve.
 `neovim-based` is that same shape, folding `vim-based` and `mason`, which
 likewise carry zero of each.
+
+`rust-based` is the lossless shape again, and the only one of the three
+language groups that needed a slot: `cargo` carried eight items on 2026-09-08
+while `rustup` carried none, so the fold is genuinely one-to-one. `julia-based`
+and `nim-based` name no source because all four of their members were empty,
+leaving nothing for a rename to preserve.
 """
 
 

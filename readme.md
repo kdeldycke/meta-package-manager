@@ -102,6 +102,8 @@ print(manager_roster(unmaintained=True))
 
 <!-- mirror-src-end -->
 
+`mpm` drives [`topgrade`](https://mpm.run/managers/topgrade/) for `upgrade --all` only, and topgrade in turn upgrades runtimes, shell plugins and OS updaters that `mpm` does not wrap: one `mpm upgrade --all` therefore reaches past the names above.
+
 ## Installation
 
 All [installation methods](https://mpm.run/install/) are available in the documentation. Below are the most popular ones:

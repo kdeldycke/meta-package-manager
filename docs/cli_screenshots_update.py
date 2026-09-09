@@ -39,6 +39,16 @@ answers, and inventing a plausible package to hold it still would put fabricated
 metadata in the one project whose whole domain is package metadata.
 ```
 
+```{note}
+Holding the payload still is not an option for the recorded capture either, and for
+a second reason: it erases what there is to record. Stubbing every manager with a
+binary that answers its version probe and exits works (`mpm` detects and drives the
+stubs), but the run then ends before the recorder's first frame and it writes
+nothing. Leaving the real managers alongside the stubs brings the trail back,
+which is what pins the cause on the run's duration rather than on the stubbing.
+Only a real run lasts long enough to animate, so `mpm-upgrade-cli` records one.
+```
+
 ```{todo}
 Capture on a Linux host as well, so the readme is not illustrated by macOS alone.
 It needs a machine with a comparable manager set, which the hosted runners are not.

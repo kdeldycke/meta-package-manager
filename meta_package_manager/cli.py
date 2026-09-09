@@ -128,22 +128,35 @@ That block is sorted by module name, so the order was an accident of the alphabe
 """
 
 
-UNMAINTAINED_REASON = "upstream is unmaintained"
-"""Reason carried by the selectors of a manager flagged
+UNMAINTAINED_MARKER = "(unmaintained)"
+"""Marker closing the help of a selector whose manager is
 {attr}`~meta_package_manager.manager.PackageManager.unmaintained`.
 
-Click renders a `deprecated` string as `(DEPRECATED: {reason})` and a bare `True` as
-`(DEPRECATED)`, in the help screen, the man pages, the Markdown and JSON renderings
-and the completion spec alike. The bare label is ambiguous on a selector: it reads as
-*mpm is retiring this option*, where the fact is that the tool behind it was abandoned
-while mpm keeps driving it. Three words settle which side is gone. They say nothing
-about what mpm does next, which is the stability policy's subject and is spelled out
-on the manager's own page.
+Click writes `(DEPRECATED)`, or `(DEPRECATED: {reason})` when the flag carries one.
+Neither is what these selectors mean: the option is not being retired, the tool behind
+it was abandoned while mpm keeps driving it, which is why the manager index marks it
+`⚠️` rather than dropping it. One word carries that, and unlike Click's it fits on the
+line it annotates.
 
-The wording is uniform across the five managers rather than drawn from each
+The wording is uniform across the unmaintained managers rather than drawn from each
 {attr}`~meta_package_manager.manager.PackageManager.unmaintained_message`: those are
 markdown paragraphs with links, sized for the manager's own page, where a help label
 has one line to spend.
+
+```{note}
+click-extra paints Click's own spelling and no other (`DEPRECATED_RE` matches the
+literal word), so this marker renders unstyled. Legibility is worth more here than the
+tint: it is the wording every other surface uses for these managers.
+```
+"""
+
+UNMAINTAINED_REASON = "upstream is unmaintained"
+"""Why {data}`UNMAINTAINED_MARKER`'s manager is flagged, for Click's own notice.
+
+Read only at runtime, appended to the `DeprecationWarning: The option 'volta' is
+deprecated.` line Click prints on stderr when someone actually selects one. The help
+screen never shows it: {class}`ManagerSelector` keeps Click from labelling the option
+and writes {data}`UNMAINTAINED_MARKER` instead.
 """
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
@@ -323,6 +336,21 @@ class ManagerSelector(Option):
     ```
     """
 
+    def __init__(self, *args: Any, unmaintained: bool = False, **kwargs: Any) -> None:
+        """Mark the flag pair of an unmaintained manager, in mpm's own words.
+
+        `deprecated` is set after Click has built the option rather than passed
+        into it: Click appends its `(DEPRECATED: …)` label to the help string
+        from the constructor, and reads the attribute again only at parse time.
+        Assigning it afterwards therefore keeps the stderr notice a user gets for
+        actually selecting one, while leaving the help line to
+        {data}`UNMAINTAINED_MARKER`.
+        """
+        super().__init__(*args, **kwargs)
+        if unmaintained:
+            self.deprecated = UNMAINTAINED_REASON
+            self.help = f"{self.help} {UNMAINTAINED_MARKER}"
+
     def type_cast_value(self, ctx: click.Context, value: Any) -> Any:
         """Read a lone configuration value as a single occurrence of the flag."""
         if isinstance(value, (bool, str)):
@@ -339,7 +367,7 @@ def single_manager_selectors():
             multiple=True,
             default=None,
             help=f"Select or deselect {manager.name}.",
-            deprecated=UNMAINTAINED_REASON if manager.unmaintained else False,
+            unmaintained=manager.unmaintained,
             expose_value=False,
             callback=update_manager_selection,
         )

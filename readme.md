@@ -183,26 +183,9 @@ $ mpm outdated git
 
 [A recent study shows that 70% of vulnerabilities lie in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications), so keeping every piece of software up to date is one of the key habits of security professionals. `mpm` upgrades all packages from all managers with a one-liner:
 
-```shell-session
-$ mpm upgrade --all
-✓ gem
-✓ mas
-✓ gh-ext
-✓ pnpm
-✓ pi
-✓ npm
-✓ vim-pack
-✓ yarn
-✓ uvx
-✓ zinit
-✓ uv
-✓ brew
-✓ cask
-✓ topgrade
-✓ Upgraded 14/14 managers
-```
+![Every manager upgraded, in one command](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cli.svg)
 
-Each manager is ticked off as it finishes, and managers sharing one backend lock run one at a time so they never race each other. Add `--verbosity INFO` to see the command run for each, or `--dry-run` to print them without running any.
+Each manager is ticked off as it finishes, and managers sharing one backend lock run one at a time so they never race each other. A manager that fails is marked `✘` and named in a closing summary, while the others carry on: above, `gem` needs root on this machine and says so. Add `--verbosity INFO` to see the command run for each, or `--dry-run` to print them without running any.
 
 This is the primary use case of `mpm`, and the main reason I built it.
 

@@ -74,6 +74,15 @@ stays legible in the readme's prose. A capture whose output needs another width
 states its own in `extra`, which then replaces this one rather than joining it.
 """
 
+OPT_IN_CAPTURES = frozenset({"mpm-upgrade-cli"})
+"""Captures a wholesale run skips, because their command changes the machine.
+
+`mpm upgrade --all` upgrades every package every manager holds, so it cannot ride
+along with the read-only captures: someone refreshing the readme's artwork is not
+asking for that. Naming one in `--only` is the consent, and there is no flag that
+runs the whole set including these.
+"""
+
 CAPTURES = (
     (
         "mpm-dump-cli",
@@ -119,6 +128,16 @@ CAPTURES = (
         # closing border and the count line, joined by the renderer's own [...] rule.
         # That count line is printed on stderr, so the capture has to fold it in.
         ("--merge-stderr", "--head", "16", "--tail", "2"),
+    ),
+    (
+        "mpm-upgrade-cli",
+        ("upgrade", "--all"),
+        "Every manager upgraded, in one command",
+        # Recorded rather than captured: at the default verbosity this command draws
+        # a spinner and a ✓ per manager, which is a sequence of screens instead of a
+        # block of text. The timeout is a guard against a manager stopping on a
+        # password prompt no one is there to answer, not an expected duration.
+        ("--record", "--rows", "24", "--timeout", "2400"),
     ),
     (
         "mpm-version-cli",
@@ -206,7 +225,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     for stem, mpm_args, title, extra in CAPTURES:
-        if args.only and stem not in args.only:
+        if stem in OPT_IN_CAPTURES:
+            if not args.only or stem not in args.only:
+                continue
+        elif args.only and stem not in args.only:
             continue
         target = capture(stem, mpm_args, title, extra, args.mpm)
         print(f"Wrote {target.relative_to(PROJECT_ROOT)}")

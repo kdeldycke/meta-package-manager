@@ -146,8 +146,18 @@ has one line to spend.
 
 ```{note}
 click-extra paints Click's own spelling and no other (`DEPRECATED_RE` matches the
-literal word), so this marker renders unstyled. Legibility is worth more here than the
-tint: it is the wording every other surface uses for these managers.
+literal word), so this marker renders unstyled where Click's took the `deprecated`
+theme slot.
+```
+
+```{todo}
+Declare the marker so it takes that slot back, once a click-extra release carries a
+`deprecated` field on {class}`~click_extra.highlight.HelpKeywords`:
+
+    mpm.extra_keywords = HelpKeywords(..., deprecated={UNMAINTAINED_MARKER})
+
+Naming it on a release without the field raises `TypeError` at import, so this waits
+on the floor rather than being guarded.
 ```
 """
 

@@ -275,9 +275,7 @@ class Flatpak(PackageManager):
                 continue
             match = self._REMOTE_DATE_REGEXP.search(output)
             if match:
-                return datetime.strptime(
-                    match.group("date"), "%Y-%m-%d %H:%M:%S %z"
-                )
+                return datetime.strptime(match.group("date"), "%Y-%m-%d %H:%M:%S %z")
         return None
 
     @search_capabilities(extended_support=False, exact_support=False)

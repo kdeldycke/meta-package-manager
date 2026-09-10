@@ -665,7 +665,9 @@ def stale_overrides_section(ctx: click.Context) -> tuple[str, ...]:
     section = mpm_section.get("managers") if isinstance(mpm_section, dict) else None
     if not isinstance(section, dict):
         return ()
-    return tuple(sorted(key for key, value in section.items() if isinstance(value, dict)))
+    return tuple(
+        sorted(key for key, value in section.items() if isinstance(value, dict))
+    )
 
 
 def apply_manager_overrides_from_context(

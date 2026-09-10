@@ -158,12 +158,9 @@ def _fixtures():
                 )
         for chained in ("outdated", "search"):
             if any(
-                is_fixture(split_session(b))
-                for b in blocks_by_member.get(chained, ())
+                is_fixture(split_session(b)) for b in blocks_by_member.get(chained, ())
             ):
-                yield pytest.param(
-                    manager, chained, None, id=f"{manager.id}-{chained}"
-                )
+                yield pytest.param(manager, chained, None, id=f"{manager.id}-{chained}")
 
 
 @pytest.mark.parametrize("manager, member, output", list(_fixtures()))

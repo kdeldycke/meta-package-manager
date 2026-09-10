@@ -401,8 +401,14 @@ exact_match_option = option(
     examples=[
         ("List every installed package", "mpm installed"),
         ("Keep the ones whose ID or name matches a query", "mpm installed curl"),
-        ("Find the packages several managers each installed", "mpm installed --duplicates"),
-        ("Report one manager's inventory as JSON", "mpm --brew --table-format json installed"),
+        (
+            "Find the packages several managers each installed",
+            "mpm installed --duplicates",
+        ),
+        (
+            "Report one manager's inventory as JSON",
+            "mpm --brew --table-format json installed",
+        ),
     ],
 )
 @exact_match_option

@@ -29,8 +29,11 @@ from boltons.iterutils import unique
 from boltons.urlutils import URL
 from extra_platforms import ALL_PLATFORMS, Platform, is_windows
 
-from meta_package_manager import cli_explore, cli_maintenance
-from meta_package_manager import managers as managers_module
+from meta_package_manager import (
+    cli_explore,
+    cli_maintenance,
+    managers as managers_module,
+)
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
 from meta_package_manager.execution import CLIExecutor

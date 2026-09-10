@@ -202,6 +202,4 @@ class Go(PackageManager):
         $ go install golang.org/x/example/hello@latest
         ```
         """
-        return self.run_cli(
-            "install", f"{package_id}@{version if version else 'latest'}"
-        )
+        return self.run_cli("install", f"{package_id}@{version or 'latest'}")

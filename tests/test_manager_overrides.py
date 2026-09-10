@@ -27,12 +27,12 @@ import tomli_w
 from click_extra import ValidationError
 
 from meta_package_manager.config import (
-    MpmConfig,
     CONTRIBUTION_HINT_FIELDS,
     INVALIDATED_CACHED_PROPS,
     MAX_ISSUE_URL_LENGTH,
     RISKY_OVERRIDE_FIELDS,
     ContributionHint,
+    MpmConfig,
     _build_issue_url,
     apply_manager_overrides,
     dump_manager_overrides,

@@ -290,7 +290,7 @@
 - [mpm] Order the subcommand sections of `mpm --help` from the broadest to the narrowest, instead of by the alphabet of their source module.
 - [mpm] Redraw the readme's two CLI illustrations as SVG terminal windows, replacing captures that still pictured 14 managers and a `Supported` column mpm dropped.
 - [mpm] Refresh the readme's `outdated` and `upgrade --all` transcripts, which showed 2020-era packages and an output shape mpm replaced with the per-manager ✓ trail.
-- [mpm] List the readme's supported managers, unmaintained ones apart, instead of tabling every operation they implement. Each manager's own page keeps that detail.
+- [mpm] List the readme's supported managers as one roster, instead of tabling every operation they implement. Each manager's own page keeps that detail, upstream health included.
 - [mpm] Show the readme's command output as SVG terminal windows, and illustrate the headline features with them.
 - [mpm] Fold the readme's two quick-start sections into its feature list, and move the manager-detection walkthrough to the manager index page.
 - [mpm] Record the readme's `upgrade --all` under a release-age cooldown, showing which managers the window skips and which enforce it natively.

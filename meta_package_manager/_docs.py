@@ -741,11 +741,14 @@ def lock_families_table() -> str:
     )
 
 
-def manager_roster(*, unmaintained: bool = False) -> str:
+def manager_roster() -> str:
     """Produce a run of manager IDs, each linking to its documentation page.
 
-    Two of these open the manager section of `readme.md`: the maintained pool
-    first, then the few whose upstream is unmaintained.
+    One roster of the whole pool opens the manager section of `readme.md`. A
+    manager whose upstream is unmaintained is listed beside the rest: upstream
+    health is a per-manager fact, reported by the index of `docs/managers.md` on
+    its own glyph scale, and splitting the readme in two said it a second time
+    while leaving a reader to guess what the split meant.
 
     A roster rather than a matrix of supported operations, which is why nothing
     here reads a manager's capabilities. At a column per operation and a row per
@@ -758,14 +761,9 @@ def manager_roster(*, unmaintained: bool = False) -> str:
 
     Links are absolute, since the readme renders on GitHub and PyPI, where
     relative Sphinx links cannot resolve.
-
-    :param unmaintained: Render the managers carrying the `unmaintained` flag,
-        rather than the rest of the pool.
     """
     return FACT_SEPARATOR.join(
-        f"[`{mid}`]({manager_page_url(mid)})"
-        for mid, m in sorted(pool.items())
-        if m.unmaintained == unmaintained
+        f"[`{mid}`]({manager_page_url(mid)})" for mid in sorted(pool)
     )
 
 

@@ -41,6 +41,7 @@ import argparse
 import sys
 
 import tomlkit
+from wcwidth import wcswidth
 
 from meta_package_manager._docs import PROJECT_ROOT, manager_page_stub
 from meta_package_manager.labels import (
@@ -54,6 +55,15 @@ from meta_package_manager.pool import pool
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from pathlib import Path
+
+COLUMN_WIDTH = 120
+"""Line budget `pyproject-fmt` keeps an array inline within.
+
+Its own [`column_width`](https://pyproject-fmt.readthedocs.io/en/latest/#configuration)
+default, which this project never overrides. A line measuring past it is exploded
+one item per line, so {func}`_string_array` has to reach the same verdict or the
+`format-pyproject` and `update-docs` jobs rewrite each other forever.
+"""
 
 KEYWORDS_EXTRAS = (
     "appimage",
@@ -98,7 +108,7 @@ for free from the pool: {func}`update_keywords` merges both sets into
 """
 
 
-def _string_array(values: tuple[str, ...], multiline: bool = False):
+def _string_array(values: tuple[str, ...], key: str = "", multiline: bool = False):
     """Render strings as a `tomlkit` array, one item per line when asked or long.
 
     Both layouts replicate `pyproject-fmt`'s canonical style: inline arrays
@@ -107,11 +117,22 @@ def _string_array(values: tuple[str, ...], multiline: bool = False):
     comma. Any deviation is churn: the `format-pyproject` autofix job would
     endlessly rewrite what the `update-docs` job regenerates.
     `test_pyproject_updates_are_pyproject_fmt_fixpoint` guards the match.
+
+    The inline-or-exploded choice is `pyproject-fmt`'s own: it explodes an array
+    whose whole line passes {data}`COLUMN_WIDTH` *display columns*, so *key* is
+    the rendered key text the array is assigned to, without which a long key
+    goes unmeasured. Width, not length: every label name here opens on an emoji,
+    and `pyproject-fmt` 2.29 began counting a wide glyph as the two columns it
+    occupies. `wcswidth` reproduces that count for every glyph class tested,
+    where character arithmetic misses the wide ones and `unicodedata` alone
+    misjudges variation selectors, ZWJ sequences and keycaps.
+
+    :param key: Rendered key the array is assigned to, measured with it.
+    :param multiline: Explode unconditionally, whatever the width.
     """
     items = [tomlkit.item(value).as_string() for value in values]
     inline = f"[ {', '.join(items)} ]"
-    # 78 preserves the historical 76-character budget of the unpadded form.
-    if not multiline and len(inline) <= 78:
+    if not multiline and wcswidth(f"{key} = {inline}") <= COLUMN_WIDTH:
         return tomlkit.array(inline)
     body = "".join(f"  {item},\n" for item in items)
     return tomlkit.array(f"[\n{body}]")
@@ -169,7 +190,7 @@ def update_labels(*, check: bool = False) -> bool:
         # Carry a renamed label's predecessor, so `sync-labels` migrates it in place
         # instead of stranding the issues filed against the old name.
         if renamed_from := LABEL_RENAMES.get(name):
-            entry["rename-from"] = _string_array(renamed_from)
+            entry["rename-from"] = _string_array(renamed_from, key="rename-from")
         extra.append(entry)
 
     # The whole `labels` sub-tree is dropped and rebuilt, rather than assigned
@@ -190,7 +211,7 @@ def update_labels(*, check: bool = False) -> bool:
     ):
         for label, values in rules:
             key = tomlkit.key(["labels", section, label])
-            repomatic_table[key] = _string_array(values)
+            repomatic_table[key] = _string_array(values, key=key.as_string())
 
     # `append()` rather than item assignment on both lines: assigning a super
     # table over a key the dotted keys above just created discards them and

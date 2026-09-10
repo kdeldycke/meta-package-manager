@@ -1412,7 +1412,10 @@ labels.file-rules."📦 manager: platformio-core" = [
   "tests/*platformio_core*",
 ]
 labels.file-rules."📦 manager: prt-get" = [ "meta_package_manager/managers/prt_get.*", "tests/*prt_get*" ]
-labels.file-rules."📦 manager: pwsh-gallery" = [ "meta_package_manager/managers/pwsh_gallery.*", "tests/*pwsh_gallery*" ]
+labels.file-rules."📦 manager: pwsh-gallery" = [
+  "meta_package_manager/managers/pwsh_gallery.*",
+  "tests/*pwsh_gallery*",
+]
 labels.file-rules."📦 manager: pyenv" = [ "meta_package_manager/managers/pyenv.*", "tests/*pyenv*" ]
 labels.file-rules."📦 manager: pypi-based" = [
   "meta_package_manager/managers/pip.*",

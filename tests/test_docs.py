@@ -28,6 +28,7 @@ from urllib.parse import quote, urlparse
 
 import pytest
 from extra_platforms import Group, extract_members
+from wcwidth import wcswidth
 from yaml import Loader, load, safe_load
 
 from meta_package_manager import __version__, _docs, logo
@@ -420,6 +421,62 @@ def test_pyproject_updates_are_pyproject_fmt_fixpoint(monkeypatch, tmp_path):
     docs_update.update_keywords()
 
     assert pyproject_fmt.run(["--check", str(scratch)]) == 0
+
+
+@pytest.mark.parametrize(
+    "glyph",
+    sorted({
+        label[0]
+        for rules in (generate_content_rules(), generate_file_rules())
+        for label, _ in rules
+    }),
+)
+@pytest.mark.parametrize("columns", (119, 120, 121))
+def test_string_array_wraps_where_pyproject_fmt_wraps(glyph, columns, tmp_path):
+    """`_string_array` must reach `pyproject-fmt`'s own inline-or-exploded verdict.
+
+    The fixpoint test above only measures the arrays the pool happens to
+    generate today, so it stays green while the rule is wrong and no line sits
+    near the limit: a budget counting the array alone, ignoring its key, passed
+    for years until one label reached the boundary. This drives the boundary
+    directly, for every glyph a label opens on.
+
+    Width, not length: `pyproject-fmt` 2.29 began counting a wide glyph as two
+    columns, so a key carrying one loses a column of budget that character
+    arithmetic cannot see.
+
+    The array stays deliberately short and the *key* carries the padding, which
+    is the only shape that separates the two rules: an array long enough to
+    breach a budget of its own is exploded either way, and agreement there
+    proves nothing. Every label this project generates is exactly that shape,
+    a two-path array under a key half the line wide.
+    """
+    pyproject_fmt = pytest.importorskip(
+        "pyproject_fmt",
+        reason="pyproject-fmt is optional; hermetic builds run without it",
+    )
+    # Two short paths, mirroring a real file rule and well inside any budget an
+    # array alone could carry.
+    values = ("a" * 30, "b" * 30)
+    inline = '[ "' + '", "'.join(values) + '" ]'
+    # Pad the label name so the whole rendered line measures `columns` wide.
+    padding = columns - wcswidth(f'labels.file-rules."{glyph} " = {inline}')
+    assert padding > 0, "glyph too wide to probe this column count"
+    key = f'labels.file-rules."{glyph} {"n" * padding}"'
+
+    line = f"{key} = {docs_update._string_array(values, key=key).as_string()}"
+    assert wcswidth(line.splitlines()[0]) <= docs_update.COLUMN_WIDTH
+
+    # Only the generated section is judged: `pyproject-fmt` also normalizes
+    # `[project]`, whose churn would answer for the array being measured.
+    scratch = tmp_path / "pyproject.toml"
+    scratch.write_text(
+        f'[project]\nname = "x"\nversion = "1"\n\n[tool.repomatic]\n{line}\n',
+        encoding="UTF-8",
+    )
+    pyproject_fmt.run([str(scratch)])
+    section = scratch.read_text(encoding="UTF-8").partition("[tool.repomatic]\n")[2]
+    assert section.strip() == line.strip()
 
 
 def test_benchmark_toml_well_formed():

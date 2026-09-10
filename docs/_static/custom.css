@@ -199,7 +199,15 @@ body[data-theme="dark"] .manager-logo svg {
  */
 .sd-tab-set.tabs-vertical {
   display: grid;
-  grid-template-columns: minmax(7rem, max-content) 1fr;
+  /* The pane's track is floored at zero rather than left a bare `1fr`, which is
+   * shorthand for `minmax(auto, 1fr)`: an `auto` floor sizes the track to the
+   * widest line its pane cannot break, so one repository URL in a code block grew
+   * the track past the page. The pane then ran under the right sidebar with its
+   * prose clipped, while the label rail was squeezed to its 7rem minimum, where
+   * the labels broke mid-word. Floored at zero the track shrinks to what is left,
+   * and furo's `pre { overflow: auto }` scrolls the long line inside the pane.
+   */
+  grid-template-columns: minmax(7rem, max-content) minmax(0, 1fr);
   align-items: start;
 }
 

@@ -292,6 +292,7 @@
 - [mpm] Refresh the readme's `outdated` and `upgrade --all` transcripts, which showed 2020-era packages and an output shape mpm replaced with the per-manager ✓ trail.
 - [mpm] List the readme's supported managers, unmaintained ones apart, instead of tabling every operation they implement. Each manager's own page keeps that detail.
 - [mpm] Show the readme's command output as SVG terminal windows, and illustrate the headline features with them.
+- [mpm] Fold the readme's two quick-start sections into its feature list, and move the manager-detection walkthrough to the manager index page.
 - [mpm] Lead the readme's installation section with `uv`, which installs `mpm` on Linux, macOS and Windows alike.
 - **Breaking:** [mpm] Layer the discovered configuration files instead of applying only the first. A project's `[tool.mpm]` now wins key by key over a machine-wide config, which used to be dropped whole. An explicit `--config` still pins one file.
 - **Breaking:** [mpm] Pair each manager's selectors on one help-screen line, as `--brew / --no-brew`, instead of listing every manager twice. Their `no_<id>` configuration keys and `MPM_NO_<ID>` variables are gone: spell them `<id> = false` and `MPM_<ID>=false`.

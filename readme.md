@@ -22,58 +22,35 @@
 - `mpm` is like [`yt-dlp`](https://github.com/yt-dlp/yt-dlp), but for package managers instead of videos
 - `mpm` solves [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/)
 
----
-
-## Quick start
-
-Thanks to [`uv`](https://docs.astral.sh/uv/getting-started/installation/), you can run `mpm` on any platform in one command, without installation or venv:
-
-```shell-session
-$ uvx meta-package-manager
-```
-
-Take everything installed on this machine, whichever package manager put it there, and write it to a single file:
-
-```shell-session
-$ mpm dump packages.toml
-```
-
-On the next machine, put it all back:
-
-```shell-session
-$ mpm restore packages.toml
-```
-
 ## Features
 
-- [Snapshot installed packages](https://mpm.run/cli-parameters/#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once:
+- [Snapshot installed packages](https://mpm.run/cli-parameters/#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once, with `mpm dump packages.toml`:
   ![Every installed package written to a single TOML manifest](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-dump-cli.svg)
-- [Restore that manifest](https://mpm.run/cli-parameters/#mpm-restore) on another machine, and get the same set of packages back.
+- [Restore that manifest](https://mpm.run/cli-parameters/#mpm-restore) on the next machine with `mpm restore packages.toml`, and get the same set of packages back.
 - Inventory and list all [package managers](https://mpm.run/cli-parameters/#mpm-managers) available on the system:
   ![Package managers detected on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.svg)
-- Supports macOS, Linux and Windows.
-- [Standalone executables](#executables) for Linux, macOS and Windows.
-- [List installed packages](https://mpm.run/cli-parameters/#mpm-installed).
+- Runs on macOS, Linux, Windows, FreeBSD, NetBSD and OpenBSD, with [standalone executables](#executables) for the first three.
+- [List installed packages](https://mpm.run/cli-parameters/#mpm-installed):
+  ![Every package installed on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-installed-cli.svg)
 - [List duplicate installed packages](https://mpm.run/duplicates/).
 - [Search for packages](https://mpm.run/cli-parameters/#mpm-search).
 - [Install a package](https://mpm.run/cli-parameters/#mpm-install).
 - [Remove a package](https://mpm.run/cli-parameters/#mpm-remove).
-- [List outdated packages](https://mpm.run/cli-parameters/#mpm-outdated):
+- [List outdated packages](https://mpm.run/cli-parameters/#mpm-outdated), with the differing part of each version picked out in color, so a patch bump reads apart from a major one at a glance:
   ![Packages an upgrade is available for](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.svg)
 - [List orphaned packages](https://mpm.run/cli-parameters/#mpm-orphans).
 - [Sync local package infos](https://mpm.run/cli-parameters/#mpm-sync).
 - [Diagnose the health of package managers](https://mpm.run/cli-parameters/#mpm-doctor).
-- [Upgrade all outdated packages](https://mpm.run/cli-parameters/#mpm-upgrade).
-- [Mitigate supply-chain attacks](https://mpm.run/cooldown/) with a release-age cooldown that refuses too-recent versions: `mpm --cooldown "7 days" upgrade --all`.
+- [Upgrade all outdated packages](https://mpm.run/cli-parameters/#mpm-upgrade) from every manager at once, the primary use case of `mpm` and the main reason I built it, since [70% of vulnerabilities lie in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications). A manager that fails is marked `✘` and named in a closing summary, while the others carry on:
+  ![Every manager upgraded, in one command](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cli.svg)
+- [Mitigate supply-chain attacks](https://mpm.run/cooldown/) with a release-age cooldown that refuses any version published more recently than a threshold. A manager that cannot enforce the window is skipped, rather than run unguarded:
+  ![Upgrading under a release-age cooldown](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cooldown-cli.svg)
 - [Software Bill of Materials](https://mpm.run/cli-parameters/#mpm-sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
 - Pin-point commands to a [subset of package managers](https://mpm.run/configuration/#selecting-managers) (include/exclude selectors).
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
 - Export output to [JSON or user-friendly tables](https://mpm.run/cli-parameters/#mpm).
 - [Shell auto-completion](https://mpm.run/install/) for Bash, Zsh and Fish.
-- Provides a [SwiftBar/Xbar plugin](https://mpm.run/bar-plugin/) for
-  friendly macOS integration.
-- Provides a [GNOME Shell extension](https://mpm.run/gnome-shell/) for
-  friendly Linux desktop integration.
+- [Desktop menu bar integration](https://mpm.run/desktop-menus/): a SwiftBar/Xbar plugin on macOS, a GNOME Shell extension on Linux.
 - Because `mpm` tries to wrap all other package managers, it became another pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
 
 ## Supported package managers
@@ -104,6 +81,8 @@ print(manager_roster(unmaintained=True))
 
 `mpm` drives [`topgrade`](https://mpm.run/managers/topgrade/) for `upgrade --all` only, and topgrade in turn upgrades runtimes, shell plugins and OS updaters that `mpm` does not wrap: one `mpm upgrade --all` therefore reaches past the names above.
 
+If your favorite manager is not supported yet, you can help! See the [contribution guide](https://mpm.run/contributing/). A handful of tools are deliberately left out, each with its rationale: they are catalogued in [unsupported managers](https://mpm.run/unsupported/).
+
 ## Installation
 
 All [installation methods](https://mpm.run/install/) are available in the documentation. Below are the most popular ones:
@@ -115,6 +94,8 @@ All [installation methods](https://mpm.run/install/) are available in the docume
 ```shell-session
 $ uv tool install meta-package-manager
 ```
+
+To try `mpm` without installing anything, run `uvx meta-package-manager` instead.
 
 ### Homebrew
 
@@ -151,73 +132,6 @@ Standalone binaries of `mpm` latest version are available as direct downloads fo
 | **Windows** | [Download `meta-package-manager-windows-arm64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/meta-package-manager-windows-arm64.exe) | [Download `meta-package-manager-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/meta-package-manager-windows-x64.exe) |
 
 No need to install Python or `uv`. Useful for CI/CD pipelines running on minimal images, or old platforms where dependency management is painful.
-
-## Quickstart
-
-### List installed packages
-
-List all packages installed on current system:
-
-![Every package installed on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-installed-cli.svg)
-
-Narrow the listing to packages whose ID or name matches a query by passing it as an argument. The match is fuzzy by default (case-insensitive and tokenized); add `--exact` to require a verbatim match on the package ID or name:
-
-```shell-session
-$ mpm installed sphinx
-$ mpm installed --exact Sphinx
-```
-
-### List outdated packages
-
-List all packages installed for which an upgrade is available:
-
-![Packages an upgrade is available for](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.svg)
-
-On a terminal the differing part of each version is picked out in color, so a patch bump reads apart from a major one at a glance.
-
-The same query argument restricts the listing to outdated packages whose ID or name matches, again fuzzy by default and exact with `--exact`:
-
-```shell-session
-$ mpm outdated git
-```
-
-### Upgrade outdated packages
-
-[A recent study shows that 70% of vulnerabilities lie in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications), so keeping every piece of software up to date is one of the key habits of security professionals. `mpm` upgrades all packages from all managers with a one-liner:
-
-![Every manager upgraded, in one command](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cli.svg)
-
-Each manager is ticked off as it finishes, and managers sharing one backend lock run one at a time so they never race each other. A manager that fails is marked `✘` and named in a closing summary, while the others carry on: above, `gem` needs root on this machine and says so. Add `--verbosity INFO` to see the command run for each, or `--dry-run` to print them without running any.
-
-This is the primary use case of `mpm`, and the main reason I built it.
-
-### Upgrade with a supply-chain cooldown
-
-There is a counter-argument to the advice above. Chasing the newest release the moment it ships is exactly how supply-chain attacks reach you: a compromised version is usually detected and pulled within days of publication, but an immediate upgrade installs it before that happens. Blindly staying on the bleeding edge trades one risk (outdated, vulnerable libraries) for another (freshly poisoned releases).
-
-`mpm` reconciles the two with a release-age cooldown, refusing any version published more recently than a threshold:
-
-```shell-session
-$ mpm --cooldown "7 days" upgrade --all
-```
-
-You still pick up older security fixes promptly, while sitting out the risky first days of a brand-new release. See [the cooldown guide](https://mpm.run/cooldown/) for the full mechanism and which managers enforce it natively.
-
-### List managers
-
-`mpm` reports the package managers it detected on your system, and the version each one self-reports:
-
-![Package managers detected on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.svg)
-
-If you wonder why one of your package managers is not in that list, name it: a manager you select explicitly is always reported, and the extra columns spell out what `mpm` could not resolve.
-
-![Why a package manager cannot be driven](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-diagnostic-cli.svg)
-
-Four different reasons, one per row. `choco` only runs on Windows. `composer` is supported here but its CLI is nowhere on the `PATH`. `volta` is missing too, and is flagged unmaintained upstream, which is also why selecting it prints a deprecation notice on `stderr`. And `yarn-berry` is the interesting one: its CLI was found and is executable, but the `yarn` on this machine is a `1.x` that does not satisfy the `>=2.0.0` its wrapper requires, so `mpm` will not drive it.
-
-To browse the whole catalog instead, widen the view: `mpm managers --view supported` lists every manager your platform can run, found or not, and `mpm managers --view all` adds those `mpm` implements for other platforms and the unmaintained ones. The global `--all-managers` flag is a synonym for the widest of the three.
-
-If your favorite manager is not supported yet, you can help! See the [contribution guide](https://mpm.run/contributing/). A handful of tools are deliberately left out, each with its rationale: they are catalogued in [unsupported managers](https://mpm.run/unsupported/).
 
 ## Used in
 

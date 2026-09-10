@@ -58,6 +58,7 @@ It needs a machine with a comparable manager set, which the hosted runners are n
 from __future__ import annotations
 
 import argparse
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -84,7 +85,7 @@ stays legible in the readme's prose. A capture whose output needs another width
 states its own in `extra`, which then replaces this one rather than joining it.
 """
 
-OPT_IN_CAPTURES = frozenset({"mpm-upgrade-cli"})
+OPT_IN_CAPTURES = frozenset({"mpm-upgrade-cli", "mpm-upgrade-cooldown-cli"})
 """Captures a wholesale run skips, because their command changes the machine.
 
 `mpm upgrade --all` upgrades every package every manager holds, so it cannot ride
@@ -150,6 +151,14 @@ CAPTURES = (
         ("--record", "--rows", "24", "--timeout", "2400"),
     ),
     (
+        "mpm-upgrade-cooldown-cli",
+        ("--cooldown", "7 days", "upgrade", "--all"),
+        "Upgrading under a release-age cooldown",
+        # Recorded like the plain upgrade above, for the same reason: the ✓ trail
+        # and the skip warnings are a sequence of screens, not a block of text.
+        ("--record", "--rows", "24", "--timeout", "2400"),
+    ),
+    (
         "mpm-version-cli",
         ("--version",),
         "The brand mark, and what this install is",
@@ -201,8 +210,11 @@ def capture(
             title,
             # The captured binary is reached by path, so that path would otherwise
             # be the command line drawn above the output. Draw what a reader types.
+            # Quoted argument by argument: the drawn line is re-split on spaces
+            # before it is rendered, so joining a spaced argument back with plain
+            # spaces draws a command line that no longer runs.
             "--prompt",
-            " ".join(("mpm", *args)),
+            shlex.join(("mpm", *args)),
             # The renderer credits itself in the margin by default. The readme
             # embeds these small enough that the line is unreadable, and the
             # picture is this project's own CLI output, so nothing is owed.

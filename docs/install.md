@@ -300,17 +300,19 @@ $ ./xbps-src pkg mpm
 $ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
 ```
 
-The `pkg` step cascades through the 16 dependency packages the fork introduces, as detailed on [the packaging page](packaging.md#void-linux).
+The `pkg` step cascades through the five new Python packages the branch introduces, plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0`, as detailed on [the packaging page](packaging.md#void-linux).
 
-````{admonition} Help land it in void-packages
+````{admonition} Void Linux needs a contributor
 :class: important
-The package is pending review at [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532). Once merged, installation will be a one-liner:
+Void does not accept a package submitted by the author of the software, so I cannot land `mpm` in `void-packages` myself. [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532) was closed for that reason.
+
+The templates above are complete: they build on a current Void host, and every dependency passes its test suite there. If you run Void and use `mpm`, you are welcome to take them and submit them under your own name. They are then yours: put yourself in the `maintainer` field. Void [asks that submitters have a history of contributions](https://github.com/void-linux/void-packages/blob/master/CONTRIBUTING.md#package-requirements) to `void-packages`, so working on orphaned packages first is the recommended route.
+
+Once a package lands, installation becomes a one-liner:
 
 ```{code-block} shell-session
 $ xbps-install --sync mpm
 ```
-
-You can help move it forward by showing your support on [the pull request](https://github.com/void-linux/void-packages/pull/60532).
 ````
 `````
 

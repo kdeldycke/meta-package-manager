@@ -22,7 +22,6 @@ env:
   # local hostdir repo overrides Void's stale binary at smoke-test time.
   PACKAGES: >-
     python3-boltons
-    python3-click
     python3-cloup
     python3-deepmerge
     python3-packageurl-python
@@ -129,6 +128,9 @@ jobs:
           echo "**${failed} lint warnings** across packages." \
             >> "${GITHUB_STEP_SUMMARY}"
 
+      # `-Q` runs each package's check phase, for that target package only. A
+      # plain `xbps-src pkg` skips it, so every checkdepends list and do_check
+      # would go unverified while the job still reported green.
       - name: Build all packages in dependency order
         timeout-minutes: 90
         working-directory: /void-packages
@@ -145,7 +147,7 @@ jobs:
             log=$(mktemp)
             # shellcheck disable=SC2024
             # log is a runner-owned mktemp file; the redirect is intentionally not under sudo.
-            if sudo -Eu builder ./xbps-src pkg "${pkg}" > "${log}" 2>&1; then
+            if sudo -Eu builder ./xbps-src -Q pkg "${pkg}" > "${log}" 2>&1; then
               tail --lines=20 "${log}"
               echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
             else

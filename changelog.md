@@ -2035,7 +2035,7 @@
 - [bar-plugin] Rewrite BitBar plugin based on `mpm`. Closes [#13](https://github.com/kdeldycke/meta-package-manager/issues/13).
 - [bar-plugin] Render errors with a monospaced font in BitBar plugin.
 - [mpm] Add missing `CHANGES.rst` in `MANIFEST.in`.
-- [mpm] Make wheels generated under Python 2 environnment available for
+- [mpm] Make wheels generated under Python 2 environment available for
   Python 3 too.
 - [mpm] Only show latest changes in the long description of the package
   instead of the full changelog.

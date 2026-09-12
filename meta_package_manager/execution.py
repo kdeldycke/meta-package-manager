@@ -1380,6 +1380,8 @@ class CLIExecutor:
         if failed:
             # Produce an exception and eventually raise it.
             exception = CLIError(code, output, error)
+            # `id` is declared on the `PackageManager` subclass, not this mixin.
+            manager_id = self.id  # type: ignore[attr-defined]
             # A non-interactive escalation that could not authenticate is a
             # missing-credential problem, not a real command failure. Point the user
             # at the fix, naming the manager (this also answers "which one just asked
@@ -1392,7 +1394,7 @@ class CLIExecutor:
                     "credentials; re-run in a terminal, or with `mpm --sudo` "
                     "(or a `[mpm] sudo = true` entry in your configuration file) "
                     "to authenticate once up front.",
-                    extra={"label": self.id},  # type: ignore[attr-defined]
+                    extra={"label": manager_id},
                 )
             # Relay the command's own account of the failure at WARNING, the
             # moment it happened: the diagnosis is in hand right here, and a
@@ -1408,7 +1410,7 @@ class CLIExecutor:
             ):
                 logging.warning(
                     exception.diagnosis,
-                    extra={"label": self.id},  # type: ignore[attr-defined]
+                    extra={"label": manager_id},
                 )
             # A dormant privileged marker meeting a permission refusal: the
             # marker predicted exactly this failure, so name the opt-in. On top
@@ -1422,11 +1424,10 @@ class CLIExecutor:
                 logging.warning(
                     "The failed operation is marked privileged, but escalation "
                     "is off for this manager. Opt in with "
-                    f"`mpm --{self.id} --sudo`, or a "  # type: ignore[attr-defined]
-                    # type: ignore[attr-defined]
-                    f"`[mpm.overrides.{self.id}] sudo = true` "
+                    f"`mpm --{manager_id} --sudo`, or a "
+                    f"`[mpm.overrides.{manager_id}] sudo = true` "
                     "entry in your configuration file.",
-                    extra={"label": self.id},  # type: ignore[attr-defined]
+                    extra={"label": manager_id},
                 )
             # Accumulate before deciding whether to raise: the error is recorded
             # whether or not it also propagates (see the `cli_errors` docstring).

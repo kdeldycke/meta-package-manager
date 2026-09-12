@@ -37,7 +37,7 @@ Usage: mpm [OPTIONS] COMMAND [ARGS]...
 
 `````{tab-item} Specific version
 ```shell-session
-$ uvx meta-package-manager@7.6.1
+$ uvx meta-package-manager@8.0.0
 Installed 21 packages in 42ms
 Usage: mpm [OPTIONS] COMMAND [ARGS]...
 ```

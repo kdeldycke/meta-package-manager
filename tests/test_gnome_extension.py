@@ -57,7 +57,13 @@ SCHEMA_ID = "org.gnome.shell.extensions.mpm"
 
 GJS_RUNNER = PROJECT_ROOT / "tests" / "gnome" / "run-tests.js"
 
-EXPECTED_ICON_STATES = frozenset({"error", "unknown", "updates", "uptodate"})
+EXPECTED_ICON_STATES = frozenset({
+    "checking",
+    "error",
+    "unknown",
+    "updates",
+    "uptodate",
+})
 """Values of the `State` mapping in `extension.js`, each mapped by `STATE_ICONS`
 to a stock symbolic icon name."""
 

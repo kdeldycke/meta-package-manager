@@ -34,7 +34,7 @@ import * as Mpm from './mpm.js';
  * state of bar_plugin.py when no runnable mpm is found. */
 const State = {
     UNKNOWN: 'unknown',
-    CHECKING: 'unknown',
+    CHECKING: 'checking',
     UPTODATE: 'uptodate',
     UPDATES: 'updates',
     ERROR: 'error',
@@ -45,9 +45,19 @@ const State = {
  * artwork of our own: the shell recolors them with the panel foreground, the
  * user's theme (Yaru on Ubuntu) can restyle them, and they carry the meaning
  * every other GNOME updates indicator already gives them. `software-update-*`
- * name this domain exactly. */
+ * name this domain exactly.
+ *
+ * CHECKING keeps a static icon. The shell's own Spinner (ui/animation.js) is
+ * used in dialogs only, never in the top bar, and the sprite-sheet
+ * AnimatedIcon that once drove animated status icons has been dropped from
+ * the shell. An animation would also keep the compositor repainting for a
+ * background check nobody is watching. `view-refresh-symbolic` reads as work
+ * in progress, where `content-loading-symbolic` reads as an expandable "..."
+ * in a panel. apt-update-indicator picks `emblem-synchronizing-symbolic`,
+ * which modern Adwaita no longer ships. */
 const STATE_ICONS = {
     unknown: 'content-loading-symbolic',
+    checking: 'view-refresh-symbolic',
     uptodate: 'selection-mode-symbolic',
     updates: 'software-update-available-symbolic',
     error: 'software-update-urgent-symbolic',
@@ -177,6 +187,19 @@ class MpmIndicator extends PanelMenu.Button {
             state === State.ERROR || state === State.MISSING;
     }
 
+    /* The "Check now" row is the second half of the progress signal: greyed
+     * out and relabelled while a check runs, which is where arch-update and
+     * apt-update-indicator both report it rather than in the panel. */
+    _setCheckNowBusy(busy) {
+        this._checkNowItem.reactive = !busy;
+        this._checkNowItem.label.text = busy ? _('Checking…') : _('Check now');
+        const inactive = 'popup-inactive-menu-item';
+        if (busy)
+            this._checkNowItem.add_style_class_name(inactive);
+        else
+            this._checkNowItem.remove_style_class_name(inactive);
+    }
+
     _updateLastChecked() {
         if (lastCheck === null) {
             this._lastCheckedItem.visible = false;
@@ -241,8 +264,7 @@ class MpmIndicator extends PanelMenu.Button {
         const cancellable = new Gio.Cancellable();
         this._cancellable = cancellable;
         this._setPanelState(State.CHECKING);
-        this._checkNowItem.reactive = false;
-        this._checkNowItem.add_style_class_name('popup-inactive-menu-item');
+        this._setCheckNowBusy(true);
 
         try {
             const mpm = Mpm.findMpm(this._settings.get_string('mpm-command'));
@@ -300,9 +322,7 @@ class MpmIndicator extends PanelMenu.Button {
             if (!cancellable.is_cancelled()) {
                 lastCheck = new Date();
                 this._updateLastChecked();
-                this._checkNowItem.reactive = true;
-                this._checkNowItem.remove_style_class_name(
-                    'popup-inactive-menu-item');
+                this._setCheckNowBusy(false);
                 this._scheduleCheck();
             }
         }

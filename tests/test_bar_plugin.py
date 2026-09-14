@@ -31,7 +31,7 @@ from click_extra.color import COLOR_ENVVARS
 from click_extra.execution import args_cleanup
 from extra_platforms.pytest import unless_macos
 
-from meta_package_manager import bar_plugin
+from meta_package_manager import __version__, bar_plugin
 from meta_package_manager.bar_plugin_renderer import (
     DARK_MENU_NEW_COLOR,
     LIGHT_MENU_NEW_COLOR,
@@ -81,13 +81,31 @@ def test_check_mpm_missing_binary():
     Regression test for the `UnboundLocalError` on the `FileNotFoundError`
     path of `check_mpm()`, where `process` is never assigned.
     """
-    runnable, up_to_date, version, error = bar_plugin.MPMPlugin().check_mpm(
+    runnable, up_to_date, version, error, release = bar_plugin.MPMPlugin().check_mpm(
         ("/nonexistent/mpm-binary",),
     )
     assert runnable is False
     assert up_to_date is False
     assert version is None
+    assert release is None
     assert isinstance(error, FileNotFoundError)
+
+
+def test_check_mpm_keeps_the_release_suffix():
+    """Both readings of one string: the tuple compares, the release is verbatim.
+
+    Spawned through the running interpreter rather than a shell, so the probe
+    is the same on Windows. `check_mpm` appends its own `--no-color
+    --version`, which the script ignores.
+    """
+    runnable, up_to_date, version, error, release = bar_plugin.MPMPlugin().check_mpm(
+        (sys.executable, "-c", 'print("mpm, version 8.0.0.dev0+abc1234")'),
+    )
+    assert runnable is True
+    assert up_to_date is True
+    assert version == (8, 0, 0)
+    assert release == "8.0.0.dev0+abc1234"
+    assert not error
 
 
 def test_search_mpm_stops_at_home(monkeypatch, tmp_path):
@@ -391,10 +409,63 @@ def test_plugin_empty_mpm_output(monkeypatch, capsys, hide, reports_error):
     plugin = bar_plugin.MPMPlugin()
     # Short-circuit the search for a runnable mpm: a cached_property reads back
     # from the instance dictionary.
-    plugin.__dict__["best_mpm"] = (("mpm",), True, True, (9, 9, 9), None)
+    plugin.__dict__["best_mpm"] = (("mpm",), True, True, (9, 9, 9), None, "9.9.9")
     plugin.print_menu()
 
-    assert ("\u2757\ufe0f" in capsys.readouterr().out) is reports_error
+    out = capsys.readouterr().out
+    assert ("\u2757\ufe0f" in out) is reports_error
+    # Producing nothing at all is what makes the host hide the plugin, so not
+    # even the About footer may slip out.
+    assert bool(out) is reports_error
+
+
+def test_plugin_version_matches_the_package():
+    """The `<xbar.version>` header is kept in lockstep with the package by
+    bump-my-version, like the GNOME extension's `version-name`."""
+    assert bar_plugin.MPMPlugin().plugin_version == __version__
+
+
+@pytest.mark.parametrize(
+    ("swiftbar", "host"),
+    (
+        (False, "Xbar"),
+        (True, "SwiftBar"),
+    ),
+)
+def test_plugin_about_footer(monkeypatch, capsys, swiftbar, host):
+    """The footer names both halves of the install and the CLI behind them."""
+    if swiftbar:
+        monkeypatch.setenv("SWIFTBAR", "true")
+        monkeypatch.setenv("SWIFTBAR_VERSION", "2.1.0")
+    else:
+        monkeypatch.delenv("SWIFTBAR", raising=False)
+    monkeypatch.setenv("VAR_HIDE_WHEN_UP_TO_DATE", "false")
+    monkeypatch.setattr(
+        bar_plugin,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args, 0, stdout="\U0001f4e6\u2713 | dropdown=false", stderr=""
+        ),
+    )
+
+    plugin = bar_plugin.MPMPlugin()
+    plugin.__dict__["best_mpm"] = (
+        ("/somewhere/mpm",),
+        True,
+        True,
+        (9, 9, 9),
+        None,
+        "9.9.9.dev0+abc1234",
+    )
+    plugin.print_menu()
+
+    out = capsys.readouterr().out
+    assert f"--Meta Package Manager ({host} plugin) {plugin.plugin_version}" in out
+    # The release as printed, suffix included: the numeric tuple beside it
+    # would report this development build as a plain 9.9.9.
+    assert "--mpm 9.9.9.dev0+abc1234" in out
+    assert "--/somewhere/mpm" in out
+    assert f"href={bar_plugin.PLUGIN_DOCS_URL}" in out
 
 
 def _invocation_matrix(*iterables):
@@ -539,6 +610,14 @@ class TestBarPlugin:
             ),
             False,
         ),
+        # About footer. Every one of its rows is required: the footer closes
+        # any menu that renders at all, and these runs all render one.
+        (r"About \|( .+)?$", True),
+        (r"--Meta Package Manager \((SwiftBar|Xbar) plugin\) \S+ \|( .+)?$", True),
+        (r"--mpm (\S+|not found) \|( .+)?$", True),
+        # The resolved mpm command, the one About row carrying a path.
+        (r"--[^|]+ \| font=[Mm]enlo size=12$", True),
+        (r"--Documentation \| href=\S+( .+)?$", True),
     ]
 
     def _plugin_output_checks(self, checklist, extra_env: TEnvVars | None = None):

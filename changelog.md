@@ -239,6 +239,7 @@
 - [gnome-shell] Render every panel state and menu marker with a stock symbolic icon (`software-update-available-symbolic` and its neighbours), in place of four bundled SVGs and the 🆙 and ⚠️ emoji. The shell recolors a themed icon with the panel foreground and a desktop theme can restyle it, neither of which our own artwork allowed, and the emoji were a font glyph the shell could do nothing with.
 - [gnome-shell] Mark a running check with a refresh icon in the panel and a greyed *Checking…* row, in place of the three-dot loading icon.
 - [gnome-shell] Report the resolved `mpm` release and command in the preferences window, beside the extension's own version.
+- [bar-plugin] Add an *About* row to the menu, naming the plugin's own version, the `mpm` release it resolved and the command that answered.
 - [gnome-shell] Track every signal through `connectObject()` and `disconnectObject()`, and drop the `_destroyed` flag the GNOME guidelines forbid. Teardown now hangs off the indicator actor itself, and a check still in flight learns it was disabled from its own cancellable.
 - [gnome-shell] Require a cancellable in every `runCommand()` call, and drop its watchdog the moment that cancellable fires rather than whenever the abandoned read settles. A run nobody could cancel left a main loop source alive past `disable()`, free to fire on a locked session.
 - [gnome-shell] Run `shexli`, the static analyzer extensions.gnome.org applies to every upload, as its own CI job. It exits `0` whatever it finds, so the gate reads the finding count out of its JSON report.

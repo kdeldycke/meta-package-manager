@@ -234,7 +234,9 @@ The plugin prefers the `mpm` it is part of. It ships inside the package, so it w
 
 Failing that, it falls back to an `mpm` on the `PATH`, then to the module under the interpreter running the plugin, and under `python3`. Every candidate is run before it is ranked, so an unusable one is skipped instead of being picked.
 
-To see which one a menu is driving, ask the plugin. It prints each candidate it found, in the order it ranked them, with the version it answered and the error it failed with:
+The menu answers that in place. Its last row, *About*, expands to three lines: the version this script advertises to its host, the release of the `mpm` it resolved, and the command that answered. The two are installed separately, so a bug report needs both: a plugin file copied into the host's folder stays at the version it was copied at while `mpm` moves under it.
+
+To see every candidate it considered, and not the winner alone, ask the plugin. It prints each one it found, in the order it ranked them, with the version it answered and the error it failed with:
 
 ```shell-session
 $ python3 "$(mpm --bar-plugin-path)" --search-mpm

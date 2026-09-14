@@ -90,6 +90,13 @@ INSTALL_DOCS_URL = "https://mpm.run/install/"
 distribution package, Homebrew or a standalone binary all install `mpm` too.
 """
 
+PLUGIN_DOCS_URL = "https://mpm.run/bar-plugin/"
+"""Documentation of this plugin, linked from the About submenu.
+
+The same address the `<xbar.abouturl>` header hands the host, which only
+surfaces it in its own plugin browser and never in the menu.
+"""
+
 MPM_TIMEOUT = 60
 """Maximum duration in seconds the plugin lets any single `mpm` call run.
 
@@ -198,6 +205,22 @@ class MPMPlugin:
         If `True`, will aligns all items using a fixed-width font.
         """
         return self.getenv_bool("VAR_TABLE_RENDERING", True)
+
+    @cached_property
+    def plugin_version(self) -> str:
+        """Version this script advertises to its host.
+
+        Read back from the `<xbar.version>` header rather than kept in a
+        constant beside it: that header is the one place the number is
+        written, both hosts parse it out of the source, and `bump-my-version`
+        rewrites it on release. A second copy is a second thing to drift.
+        """
+        try:
+            source = Path(__file__).read_text(encoding="UTF-8")
+        except OSError:
+            return "unknown"
+        match = re.search(r"<xbar\.version>(?P<version>[^<]+)</xbar\.version>", source)
+        return match.group("version") if match else "unknown"
 
     @cached_property
     def hide_when_up_to_date(self) -> bool:
@@ -342,8 +365,17 @@ class MPMPlugin:
 
     def check_mpm(
         self, mpm_cli_args: tuple[str, ...]
-    ) -> tuple[bool, bool, tuple[int, ...] | None, str | Exception | None]:
-        """Test-run mpm execution and extract its version."""
+    ) -> tuple[
+        bool, bool, tuple[int, ...] | None, str | Exception | None, str | None
+    ]:
+        """Test-run mpm execution and extract its version.
+
+        Two readings of the same string come back. The numeric tuple is what
+        compares against {data}`MPM_MIN_VERSION`; the release is the token as
+        printed, which a development build spells `8.0.0.dev0+40ce0879`. The
+        release is last because `ranked_mpm` sorts candidates on this tuple:
+        anything inserted earlier would join the ranking.
+        """
         error: str | Exception | None = None
         try:
             process = run(
@@ -360,6 +392,7 @@ class MPMPlugin:
 
         runnable = False
         version = None
+        release = None
         up_to_date = False
         # Is mpm runnable as-is with provided CLI arguments? Check the error
         # first: on a FileNotFoundError probe, `process` was never assigned.
@@ -374,26 +407,35 @@ class MPMPlugin:
                 version                 # The "version" string
                 \                       # A space
                 [^\.]*?                 # Any minimal (non-greedy) string without a dot
-                (?P<version>[0-9]+(?:\.[0-9]+)+)   # Version composed of numbers and dots
-                .*?                     # Any trailing string (ANSI codes, .dev suffix, etc.)
+                (?P<release>
+                  (?P<version>[0-9]+(?:\.[0-9]+)+) # Version composed of numbers and dots
+                  [^\s\x1b]*            # Any suffix, stopping short of an ANSI escape
+                )
+                .*?                     # Any trailing string (ANSI codes, etc.)
                 $                       # End of the string
                 """,
                 re.VERBOSE | re.MULTILINE,
             ).search(process.stdout)
             if match:
                 version = self.str_to_version(match.groupdict()["version"])
+                release = match.groupdict()["release"]
                 # Is mpm too old?
                 if version >= MPM_MIN_VERSION:
                     up_to_date = True
 
-        return runnable, up_to_date, version, error
+        return runnable, up_to_date, version, error, release
 
     @cached_property
     def ranked_mpm(
         self,
     ) -> list[
         tuple[
-            tuple[str, ...], bool, bool, tuple[int, ...] | None, str | Exception | None
+            tuple[str, ...],
+            bool,
+            bool,
+            tuple[int, ...] | None,
+            str | Exception | None,
+            str | None,
         ]
     ]:
         """Rank the mpm candidates we found on the system.
@@ -419,7 +461,12 @@ class MPMPlugin:
     def best_mpm(
         self,
     ) -> tuple[
-        tuple[str, ...], bool, bool, tuple[int, ...] | None, str | Exception | None
+        tuple[str, ...],
+        bool,
+        bool,
+        tuple[int, ...] | None,
+        str | Exception | None,
+        str | None,
     ]:
         return self.ranked_mpm[0]
 
@@ -470,6 +517,34 @@ class MPMPlugin:
                     "symbolize=false" if self.is_swiftbar else "",
                 )
 
+    def print_about(self) -> None:
+        """Footer naming both halves of the install and the CLI behind them.
+
+        This script and `mpm` are installed separately and upgraded
+        separately: a plugin file copied into the host's folder stays at the
+        version it was copied at while `mpm` moves under it, and nothing else
+        in the menu shows that drift. The mpm line reports the release as
+        printed, suffix included, where the ranking compares numbers alone.
+
+        Kept to a single collapsed row so a menu opened for its packages is
+        not pushed down by three lines of provenance.
+        """
+        host = "SwiftBar" if self.is_swiftbar else "Xbar"
+        mpm_args, runnable, _up_to_date, _version, _error, release = self.best_mpm
+        print("---")
+        self.pp("About", self.default_font)
+        self.pp(
+            f"--Meta Package Manager ({host} plugin) {self.plugin_version}",
+            self.default_font,
+        )
+        self.pp(
+            f"--mpm {release}" if runnable else "--mpm not found",
+            self.default_font,
+        )
+        if runnable:
+            self.pp(f"--{' '.join(mpm_args)}", self.monospace_font)
+        self.pp("--Documentation", f"href={PLUGIN_DOCS_URL}", self.default_font)
+
     def print_menu(self) -> None:
         """Print the main menu."""
         # Check if we have a recent version of SwiftBar.
@@ -486,7 +561,7 @@ class MPMPlugin:
                 return
 
         # Check if we have a recent version of mpm.
-        mpm_args, runnable, up_to_date, _version, error = self.best_mpm
+        mpm_args, runnable, up_to_date, _version, error, _release = self.best_mpm
         if not runnable or not up_to_date:
             self.print_error_header()
             if error:
@@ -510,6 +585,7 @@ class MPMPlugin:
                 f"href={INSTALL_DOCS_URL}",
                 self.error_font,
             )
+            self.print_about()
             return
 
         # Force a sync of all local package databases.
@@ -545,12 +621,14 @@ class MPMPlugin:
         if process.stderr or (not process.stdout and not self.hide_when_up_to_date):
             self.print_error_header()
             self.print_error(process.stderr)
+            self.print_about()
             return
 
         # Capturing the output of mpm and re-printing it will introduce an extra
         # line returns, hence the extra rstrip() call.
         if process.stdout:
             print(process.stdout.rstrip())
+            self.print_about()
 
 
 if __name__ == "__main__":
@@ -565,10 +643,12 @@ if __name__ == "__main__":
     plugin = MPMPlugin()
 
     if args.search_mpm:
-        for mpm_args, runnable, up_to_date, version, error in plugin.ranked_mpm:
+        for candidate in plugin.ranked_mpm:
+            mpm_args, runnable, up_to_date, version, error, release = candidate
             print(
                 f"{' '.join(mpm_args)} | runnable: {runnable} | "
-                f"up to date: {up_to_date} | version: {version} | error: {error!r}"
+                f"up to date: {up_to_date} | version: {version} | "
+                f"release: {release} | error: {error!r}"
             )
 
     else:

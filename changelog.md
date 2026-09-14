@@ -312,6 +312,7 @@
 - [mpm] Rewrite the SBOM documentation page in short plain sentences, flip its coverage matrix to one column per manager, and fix its offline install example, which used `pip` instead of `uv`.
 - [bar-plugin,mpm] Drop the API reference sections the guide pages repeated at their foot; each module stays documented on its own API page.
 - [mpm] Regroup the documentation sidebar under ten topical sections, instead of one flat list of 19 entries and a `Development` catch-all.
+- [mpm] Fix the cross-references that rendered as plain text on the manager and configuration pages, where a short reference resolved only inside the API reference.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

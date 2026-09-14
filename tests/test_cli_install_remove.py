@@ -132,7 +132,7 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
     and asserted to fail the stable mpm way (exit `1` plus a ``Could not
     install:` message). It runs at `--verbosity INFO``: the minimum level at
     which the `Installation priority` dispatch signal is visible (the default
-    `WARNING` would hide it and make {meth}`check_manager_selection` pass
+    `WARNING` would hide it and make {meth}`~tests.test_cli.check_manager_selection` pass
     vacuously). No follow-up `remove`: the failed install left nothing to
     remove, and the working managers already cover the removal path.
 

@@ -215,11 +215,11 @@ class Pip(PackageManager):
         manager only ever targets a scope the user can actually install into:
 
         - mpm's own distributor-managed bundle (see
-          {meth}`_running_from_bundled_app`),
+          `_running_from_bundled_app`),
         - any externally-managed, non-virtualenv interpreter {pep}`668` would
-          forbid `pip install` into (see {meth}`_pip_install_blocked`), and
+          forbid `pip install` into (see `_pip_install_blocked`), and
         - any interpreter carrying no `pip` at all (see
-          {meth}`_pip_module_missing`).
+          `_pip_module_missing`).
 
         When every candidate is skipped the manager is left with no
         {attr}`~meta_package_manager.execution.CLIExecutor.cli_path` and reports as
@@ -231,7 +231,7 @@ class Pip(PackageManager):
         Evaluate [findpython](https://github.com/frostming/findpython) (the
         maintained MIT rewrite of `pythonfinder`) to replace the discovery
         loop here. It would only cover discovery: the eligibility filters
-        ({meth}`_running_from_bundled_app`, {meth}`_pip_install_blocked`)
+        (`_running_from_bundled_app`, `_pip_install_blocked`)
         stay mpm's job, since findpython locates interpreters but does not
         judge whether `pip install` is allowed into one.
         ```
@@ -294,7 +294,7 @@ class Pip(PackageManager):
         `mpm` in a private virtualenv, but are not detected here: they
         leave an `INSTALLER` of `pip` or `uv` and live outside
         `Cellar`, so these signals alone cannot tell them apart from a
-        deliberate user install. {meth}`_pip_module_missing` catches them
+        deliberate user install. `_pip_module_missing` catches them
         instead, on the conclusive signal that such a virtualenv carries no
         `pip` to drive. See [#1767](https://github.com/kdeldycke/meta-package-manager/issues/1767).
         ```
@@ -355,7 +355,7 @@ class Pip(PackageManager):
         This is what excludes the private virtualenv a standalone-app installer
         builds for `mpm` itself. `uv tool install` and `pipx` seed no `pip` there,
         so the environment `mpm` runs from is skipped on the one signal that is
-        conclusive, where the {meth}`_running_from_bundled_app` fingerprints cannot
+        conclusive, where the `_running_from_bundled_app` fingerprints cannot
         tell such an install apart from a deliberate one. A virtualenv the user
         does drive with `pip` keeps its `pip`, so it stays a candidate and the
         running interpreter is still preferred.
@@ -539,7 +539,7 @@ class Pip(PackageManager):
         dist: importlib.metadata.Distribution,
     ) -> PackageMetadata:
         """Translate an `importlib.metadata.Distribution` into
-        {class}`PackageMetadata`.
+        {class}`~meta_package_manager.package.PackageMetadata`.
         """
         # `Distribution.metadata` returns an `email.message.Message` at
         # runtime, but the typeshed protocol omits `.get()` on the older

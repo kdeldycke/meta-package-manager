@@ -22,7 +22,7 @@ up-front availability probe used during selection ({func}`warm_availability`),
 the two progress-wrapped fan-out primitives the CLI subcommands drive
 ({func}`collect_from_managers`, {func}`collect_per_package`) with their shared
 {func}`dispatch` engine, the backend-lock catalog that serializes conflicting
-managers ({data}`SHARED_LOCK_FAMILIES` and {func}`merge_into_lock_lanes`), and
+managers ({data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES` and {func}`merge_into_lock_lanes`), and
 the manager-bound `✓`/`✗` ledger ({class}`OperationTrail`) that the
 concurrent and sequential paths both report through.
 
@@ -246,7 +246,7 @@ FAN_OUT_CONCURRENT: Final[str] = "concurrent"
 """Every selected manager runs at once, one {func}`dispatch` lane each."""
 
 FAN_OUT_GROUPED: Final[str] = "grouped"
-"""Same, but {data}`SHARED_LOCK_FAMILIES` members are merged into one lane."""
+"""Same, but {data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES` members are merged into one lane."""
 
 FAN_OUT_SEQUENTIAL: Final[str] = "sequential"
 """One manager at a time, whatever `mpm --jobs` says."""
@@ -324,7 +324,7 @@ _LOCK_FAMILY_BY_MANAGER: Final[dict[str, LockFamily]] = {
     for family in SHARED_LOCK_FAMILIES
     for manager_id in family.members
 }
-"""Reverse index of {data}`SHARED_LOCK_FAMILIES`: each member maps to its family.
+"""Reverse index of {data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`: each member maps to its family.
 
 Lets {func}`merge_into_lock_lanes` resolve a manager's mutual-exclusion group in O(1).
 """
@@ -541,7 +541,7 @@ def dispatch(
     {func}`collect_per_package`. A *lane* is one or more managers paired with a list of
     callables; lanes run concurrently (one worker each) while a lane's own callables run
     serially, because a package manager cannot safely run two of its own invocations at
-    once, nor can two managers sharing a backend lock (see {data}`SHARED_LOCK_FAMILIES`).
+    once, nor can two managers sharing a backend lock (see {data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`).
     A lane usually wraps a single manager; {func}`merge_into_lock_lanes` is what bundles
     a whole lock family into one, and such a lane also gets a shared command cache (see
     {attr}`~meta_package_manager.execution.CLIExecutor.run_cache`) so its members
@@ -574,7 +574,7 @@ def dispatch(
         finisher reports the success count, ``{done_label} N/M {unit}``, `✗` on any
         failure).
     :param operation: the operation these lanes perform, matched by
-        {func}`~meta_package_manager.sudo._hidden_prompt_risk` to decide which lanes
+        `_hidden_prompt_risk` to decide which lanes
         are held back to the sequential tail. Left `None` by the read commands, whose
         operations never escalate, so their whole batch runs concurrently.
     :param ctx: the active click context, read only to size concurrency
@@ -685,7 +685,7 @@ def merge_into_lock_lanes(
 ) -> list[tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]]:
     """Group `(manager, task)` pairs into {func}`dispatch` lanes, one per lock family.
 
-    Managers sharing a {data}`SHARED_LOCK_FAMILIES` entry collapse into a single lane so
+    Managers sharing a {data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES` entry collapse into a single lane so
     their tasks run serially (the lane is {func}`dispatch`'s unit of mutual exclusion),
     while unrelated managers each keep their own lane and run concurrently. A manager not
     in any family keys on its own id, so its tasks still group together (a manager's own

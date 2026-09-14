@@ -41,8 +41,8 @@ class Roswell(PackageManager):
     install` accepts both an implementation and a Quicklisp system, but `ros
     list installed` answers for implementations alone: a system installed with
     `ros install cl-ppcre` never appears there. The two verbs disagree on their
-    object, and this wrap resolves it the way {class}`~meta_package_manager.managers.rustup.RustUp`
-    resolves the same question, by narrowing to what the listing can enumerate.
+    object, and this wrap resolves it the way the `rustup` definition resolves the
+    same question, by narrowing to what the listing can enumerate.
     ```
 
     ```{caution}
@@ -59,7 +59,7 @@ class Roswell(PackageManager):
     ```{caution}
     `upgrade` is absent for the same reason `remove` is, one level up: `ros
     update` resolves its argument through `asdf:find-system`, so it upgrades
-    Quicklisp systems, never the implementations {meth}`installed` reports.
+    Quicklisp systems, never the implementations {meth}`~meta_package_manager.manager.PackageManager.installed` reports.
     Mapping it here would upgrade something other than what mpm just listed.
     ```
 
@@ -111,7 +111,7 @@ class Roswell(PackageManager):
         {meth}`~meta_package_manager.execution.CLIExecutor.run_cli`, which is
         `<stdout>`, so it would find nothing and leave the manager permanently
         unavailable. The streams are reached through
-        {attr}`~meta_package_manager.execution.CLIExecutor._last_run` instead,
+        `_last_run` instead,
         the same attribute `bin` and `gext` read for their own
         `<stderr>`-reporting operations.
         """
@@ -200,7 +200,7 @@ class Roswell(PackageManager):
         """Install one Lisp implementation.
 
         A version is appended to the implementation with a slash, the same
-        `impl/version` spelling {meth}`installed` reports.
+        `impl/version` spelling {meth}`~meta_package_manager.manager.PackageManager.installed` reports.
 
         ```{code-block} shell-session
 

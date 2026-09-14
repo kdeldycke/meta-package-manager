@@ -53,7 +53,7 @@ class Pkgit(PackageManager):
     followed by `PANIC: unprotected error in call to Lua API (attempt to index
     a nil value)`, exiting `1` and leaving the package installed. It succeeds
     only on a repository pulled in as a build dependency, and even then leaves
-    the checkout behind so {meth}`installed` keeps reporting it.
+    the checkout behind so {meth}`~meta_package_manager.manager.PackageManager.installed` keeps reporting it.
     ```
 
     ```{note}

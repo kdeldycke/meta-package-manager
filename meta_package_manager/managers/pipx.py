@@ -98,7 +98,7 @@ class Pipx(PackageManager):
     `pipx list --outdated` (see
     [pypa/pipx#149](https://github.com/pypa/pipx/issues/149)). Kept
     apart from {attr}`requirement` (`>=1.0.0`) so an older pipx stays fully
-    usable, {attr}`outdated` falling back to one pip probe per venv.
+    usable, {attr}`~meta_package_manager.manager.PackageManager.outdated` falling back to one pip probe per venv.
     """
 
     @property

@@ -74,7 +74,7 @@ def _as_managers(*stubs: _StubManager) -> list[PackageManager]:
     The stubs implement the subset of the {class}`PackageManager` API
     `build_brewfile` actually exercises (`id`, `brewfile_entry_type`,
     `installed`, `brewfile_entry`). The cast keeps the test surface concise
-    without weakening {func}`build_brewfile`'s signature.
+    without weakening {func}`~meta_package_manager.brewfile.build_brewfile`'s signature.
     """
     return cast("list[PackageManager]", list(stubs))
 
@@ -331,7 +331,7 @@ def test_build_brewfile_round_trip_format_is_parseable_by_ruby_inspect():
     reason="`brew` not on PATH; cannot validate Brewfile round-trip.",
 )
 def test_brew_bundle_check_parses_generated_brewfile(tmp_path):
-    """Pipe {func}`build_brewfile` output through `brew bundle check` to
+    """Pipe {func}`~meta_package_manager.brewfile.build_brewfile` output through `brew bundle check` to
     catch DSL drift early.
 
     Uses a synthetic package set so the test runs in milliseconds rather than

@@ -35,7 +35,7 @@ class IPS(PackageManager):
 
     Documentation: [`pkg(1)` man page](https://docs.oracle.com/cd/E88353_01/html/E37839/pkg-1.html).
 
-    The CLI is named `pkg`, which the FreeBSD {class}`PKG` manager also claims.
+    The CLI is named `pkg`, which the FreeBSD {class}`~meta_package_manager.managers.pkg.PKG` manager also claims.
     The two never coexist, their `platforms` being disjoint, but the manager ID
     here is `ips` so the two stay addressable apart.
 

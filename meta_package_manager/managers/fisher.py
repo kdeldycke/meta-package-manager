@@ -165,7 +165,7 @@ class Fisher(PackageManager):
         the next shell instead of sitting on disk unreferenced.
 
         A `version` is passed straight through as Fisher's `@ref` suffix. That
-        round-trips exactly: the ref {meth}`installed` reports is the one
+        round-trips exactly: the ref {meth}`~meta_package_manager.manager.PackageManager.installed` reports is the one
         Fisher accepts back here.
 
         ```{code-block} shell-session

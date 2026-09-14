@@ -103,7 +103,7 @@ class Vagrant(PackageManager):
     requirement = ">=2.4.0"
     """The release whose listing groups boxes and renders the architecture as a
     trailing parenthesized segment, which is the shape
-    {attr}`_INSTALLED_REGEXP` parses.
+    `_INSTALLED_REGEXP` parses.
     """
 
     extra_env: ClassVar = {

@@ -269,7 +269,7 @@ class Pixi(PackageManager):
 
         `pixi global uninstall` removes a whole environment, deleting its prefix
         outright, which is the counterpart of the `pixi global install` that
-        created it and matches the unit {meth}`installed` reports. An
+        created it and matches the unit {meth}`~meta_package_manager.manager.PackageManager.installed` reports. An
         environment carrying co-installed extras loses those too.
 
         The sibling `pixi global remove` is deliberately not used: it drops one

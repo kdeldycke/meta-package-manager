@@ -147,7 +147,7 @@ class XBPS(PackageManager):
         """Fetch outdated packages.
 
         ```{caution}
-        Reads from the local repository cache. Run {meth}`sync` first
+        Reads from the local repository cache. Run {meth}`~meta_package_manager.manager.PackageManager.sync` first
         to refresh the index.
         ```
 

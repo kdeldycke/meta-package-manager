@@ -16,10 +16,10 @@
 """Privilege-escalation machinery for the mutating fan-outs.
 
 This module owns `sudo` credential priming ({func}`prime_sudo`) and its
-background keepalive ({func}`_start_sudo_keepalive`), escalation-policy
-resolution ({func}`_resolved_sudo`), sudo-failure detection
-({func}`_is_sudo_auth_failure`), and the hidden-prompt stall watchdog
-({class}`_StallWatchdog`). The execution engine
+background keepalive (`_start_sudo_keepalive`), escalation-policy
+resolution (`_resolved_sudo`), sudo-failure detection
+(`_is_sudo_auth_failure`), and the hidden-prompt stall watchdog
+(`_StallWatchdog`). The execution engine
 ({mod}`meta_package_manager.execution`) consumes the policy pieces to wrap and
 diagnose escalated commands; the CLI calls {func}`prime_sudo` at the top of
 each mutating subcommand.
@@ -93,7 +93,7 @@ insufficient in the field. It is also the only route serving a hardened
 and any implementation has to answer its two remaining points: the raw
 password it handles, and the tools it never reaches (`brew` honors the
 variable, `fink`'s plain `sudo` re-exec does not). The third, a still
-terminal for the prompt, {func}`_hidden_prompt_risk` now provides.
+terminal for the prompt, `_hidden_prompt_risk` now provides.
 ```
 """
 
@@ -133,7 +133,7 @@ ordinary quiet stretches (dependency resolution, download lulls that still tick
 progress lines) rarely trip it, yet far below
 {data}`~meta_package_manager.execution.MUTATING_TIMEOUT`, so the user gets the
 hint while the hidden password prompt can still be answered. See
-{class}`_StallWatchdog`.
+`_StallWatchdog`.
 """
 
 _STALL_NOTICE_OPERATIONS: Final[frozenset[str]] = frozenset(
@@ -155,7 +155,7 @@ prompt.
 _SUDO_CACHE_WARM: Final = threading.Event()
 """Set while the priming keepalive believes the credential cache is warm.
 
-Armed by {func}`_start_sudo_keepalive` and cleared when the context closes. A warm
+Armed by `_start_sudo_keepalive` and cleared when the context closes. A warm
 cache serves internal escalations ({attr}`CLIExecutor.internal_sudo
 <meta_package_manager.execution.CLIExecutor.internal_sudo>`) silently, so the
 silent-call stall watchdog skips arming while this flag is set.
@@ -211,7 +211,7 @@ class Escalator:
     passwordless_probe_args: tuple[str, ...] | None
     """Argv asking whether *one named command* runs without a password, or `None`.
 
-    Completed with the command's path by {func}`_escalation_is_passwordless`.
+    Completed with the command's path by `_escalation_is_passwordless`.
     `sudo --list -- <command>` answers precisely, reporting the command when the
     policy grants it unauthenticated and failing under `--non-interactive` when a
     password would be wanted. `doas` has no such query and gets `None`.
@@ -806,7 +806,7 @@ def _is_sudo_auth_failure(error: str) -> bool:
 def _is_sudo_denied(error: str) -> bool:
     """Whether `error` is `sudo` reporting the user is not authorized to run it.
 
-    Distinct from {func}`_is_sudo_auth_failure`: an authentication failure means
+    Distinct from `_is_sudo_auth_failure`: an authentication failure means
     the cache is cold and a password would unblock, while a denial means the
     `sudoers` policy grants this user nothing, so a prompt could only collect a
     password `sudo` then rejects. {func}`prime_sudo` skips its up-front prompt on
@@ -829,7 +829,7 @@ def _is_sudo_denied(error: str) -> bool:
     localhost`, which reading that phrasing as the pre-`1.9` one would drop.
 
     `sudo-rs` denies a `--validate` differently from a `--list`, which matters
-    because {attr}`~Escalator.probe_args` runs the former first: a user no
+    because {attr}`~meta_package_manager.sudo.Escalator.probe_args` runs the former first: a user no
     `sudoers` rule matches gets `I'm sorry {user}. I'm afraid I can't do that`
     (`Error::Authorization`) where `--list` says `may not run sudo`. Matching
     only the list wording left a non-sudoer on Ubuntu `25.10` and later being
@@ -910,7 +910,7 @@ class InstallRoot:
     filesystem evidence nobody reviewed is a posture change no diagnostic
     payoff justifies. The scoped `sudo = true` override stays the one road to
     escalating a dormant marker, and the failure-gate hint
-    ({func}`_is_permission_failure`) is what names it.
+    (`_is_permission_failure`) is what names it.
     """
 
     path: Path
@@ -1037,7 +1037,7 @@ def _escalation_is_passwordless(
 ) -> bool:
     """Whether every command mpm escalates already runs without a password.
 
-    Asked only after {attr}`~Escalator.probe_args` reported a cold cache, and
+    Asked only after {attr}`~meta_package_manager.sudo.Escalator.probe_args` reported a cold cache, and
     answering the question that probe cannot: `sudo --validate` refuses while any
     matching `sudoers` entry wants a password, where
     {attr}`~Escalator.passwordless_probe_args` names one command and reports the
@@ -1079,14 +1079,14 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     before considering any
     prompt. A warm cache (pre-authenticated `sudo --validate`, a `NOPASSWD` rule, a
     recent run) is silently kept fresh for the whole invocation by
-    {func}`_start_sudo_keepalive`, so every later escalation on the same
+    `_start_sudo_keepalive`, so every later escalation on the same
     terminal, mpm's own `sudo --non-interactive` as well as a manager's internal
     `sudo`
     ({attr}`CLIExecutor.internal_sudo
     <meta_package_manager.execution.CLIExecutor.internal_sudo>`), spends the cache
     instead of blocking on an invisible prompt inside the concurrent fan-out. Only
     a cold cache, on an interactive terminal, with managers that mpm itself
-    escalates ({func}`_resolved_sudo`), triggers the interactive path: a notice
+    escalates (`_resolved_sudo`), triggers the interactive path: a notice
     naming the managers and the subcommand, then a single branded `sudo` password
     prompt.
 
@@ -1106,7 +1106,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     - the `sudo` executable is missing (one warning is logged),
     - the probe finds the cache already warm (keepalive only, fully silent),
     - the probe reports the user is not authorized to run `sudo` at all
-      ({func}`_is_sudo_denied`): one warning names the managers mpm escalates and
+      (`_is_sudo_denied`): one warning names the managers mpm escalates and
       the remedy, since a prompt could only collect a password `sudo` then
       rejects, while an internal-only selection stays silent,
     - no interactive terminal is available: one warning names the managers mpm
@@ -1293,7 +1293,7 @@ def _hidden_prompt_risk(internal_sudo: bool, operation: str | None) -> bool:
 
     {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
     reads it once per call and spends it twice, so the two responses cannot drift
-    apart: it arms {class}`_StallWatchdog`, and it holds the call's spinner still.
+    apart: it arms `_StallWatchdog`, and it holds the call's spinner still.
 
     The still spinner is what makes the prompt answerable. `sudo` writes its
     prompt to `/dev/tty` with no trailing newline, so the prompt sits on the live
@@ -1336,7 +1336,7 @@ class _StallWatchdog(logging.Handler):
     episode.
 
     The notice only pays off because of the still spinner:
-    {func}`_hidden_prompt_risk` arms both for the same call, so a prompt the tool
+    `_hidden_prompt_risk` arms both for the same call, so a prompt the tool
     prints stays on screen to be answered. A notice raised while an animation
     erases that prompt names the stall but cannot end it.
 
@@ -1360,7 +1360,7 @@ class _StallWatchdog(logging.Handler):
     scoped `sudo = true` opt-in documented in `docs/sudo.md` already covers
     users wanting a guaranteed up-front prompt. Its third original reason, a
     side channel to pause the spinner that would smear its prompt, is spent:
-    {func}`_hidden_prompt_risk` already leaves such a call a still terminal,
+    `_hidden_prompt_risk` already leaves such a call a still terminal,
     holding its spinner and scheduling it clear of the batch indicator.
     ```
 

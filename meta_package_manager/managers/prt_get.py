@@ -42,7 +42,7 @@ class PrtGet(PackageManager):
     ```
 
     ```{note}
-    {meth}`sync` runs the sibling `ports` binary rather than `prt-get`, that
+    {meth}`~meta_package_manager.manager.PackageManager.sync` runs the sibling `ports` binary rather than `prt-get`, that
     being the tool CRUX gives the ports tree. `mpm` resolves it from the same
     directory as {attr}`cli_path
     <meta_package_manager.execution.CLIExecutor.cli_path>`.
@@ -53,7 +53,7 @@ class PrtGet(PackageManager):
     no packages depending on them", which on a stock CRUX install includes
     `bash`, `binutils` and `coreutils`: the base system is depended on by
     nothing, so feeding that list to an orphan sweep would remove the machine.
-    That is a different question from the one {meth}`~PackageManager.orphans`
+    That is a different question from the one {meth}`~meta_package_manager.manager.PackageManager.orphans`
     asks, which is which packages were pulled in as dependencies and are no
     longer required.
     ```
@@ -165,7 +165,7 @@ class PrtGet(PackageManager):
 
         ```{caution}
         Compares the installed packages against the local ports tree, so it
-        reports what the last {meth}`sync` fetched and not what CRUX publishes
+        reports what the last {meth}`~meta_package_manager.manager.PackageManager.sync` fetched and not what CRUX publishes
         right now.
         ```
 

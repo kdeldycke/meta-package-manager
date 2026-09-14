@@ -275,7 +275,7 @@ class Homebrew(PackageManager):
 
     def _formula_metadata(self, formula: dict) -> PackageMetadata:
         """Map one entry from `brew info --json=v2`'s `formulae` array
-        into the portable {class}`PackageMetadata`.
+        into the portable {class}`~meta_package_manager.package.PackageMetadata`.
         """
         installed_entries = formula.get("installed") or ()
         installed = installed_entries[-1] if installed_entries else {}

@@ -22,7 +22,7 @@ The `mpm` group itself, and the plumbing shared with the other subcommand
 modules, live in {mod}`meta_package_manager.cli`.
 
 ```{important}
-The two writer modules are imported **inside** {func}`sbom`, the one place in the
+The two writer modules are imported **inside** `sbom`, the one place in the
 codebase deliberately breaking the imports-at-module-level rule.
 {mod}`meta_package_manager.sbom.spdx` and {mod}`meta_package_manager.sbom.cyclonedx`
 each pull a heavy third-party library at import time (`spdx-tools`, itself dragging

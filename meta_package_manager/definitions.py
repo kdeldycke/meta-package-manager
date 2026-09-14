@@ -433,7 +433,7 @@ class OperationSpec:
 
     May embed the ``{package_id}`` and ``{query}`` placeholders, substituted at call
     time. ``{version}`` is intentionally unsupported: config-defined managers do not
-    pin versions (see {func}`_make_install`).
+    pin versions (see `_make_install`).
     """
 
     cli: str | None = None
@@ -497,7 +497,7 @@ class OperationSpec:
     `latest_version`) to its JSON selector, in `"json"` mode.
 
     A selector is a key name with an optional `[N]` list index
-    (`versions[0]`); see {data}`JSON_FIELD_SELECTOR_REGEX`.
+    (`versions[0]`); see {data}`~meta_package_manager.manager.JSON_FIELD_SELECTOR_REGEX`.
     """
 
 

@@ -76,7 +76,7 @@ class Flatpak(PackageManager):
     brewfile_entry_type = "flatpak"
     """Mapped to Homebrew Bundle's `flatpak` extension.
 
-    Its `with: ["remote"]` keyword goes unused, {meth}`installed` capturing no
+    Its `with: ["remote"]` keyword goes unused, {meth}`~meta_package_manager.manager.PackageManager.installed` capturing no
     origin remote to fill it with. See {doc}`/dump`, section "Flatpak remote".
     """
 

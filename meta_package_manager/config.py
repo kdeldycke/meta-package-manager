@@ -154,8 +154,8 @@ class MpmConfig:
     Typed as `dict[str, Any]` so click-extra treats the `[mpm.cooldown]`
     sub-tree as opaque: it carries no CLI flag of its own (the `--cooldown`
     option merges over it axis by axis at runtime instead) and its keys are
-    validated by {func}`validate_cooldown_section`, registered as a
-    {class}`click_extra.ConfigValidator`. The deprecated `[mpm] cooldown =
+    validated by {func}`~meta_package_manager.config.validate_cooldown_section`, registered as a
+    {class}`~click_extra.config.schema.ConfigValidator`. The deprecated `[mpm] cooldown =
     "<duration>"` string spelling stays accepted as the period."""
 
     description: bool = False
@@ -187,8 +187,8 @@ class MpmConfig:
 
     Typed as `dict[str, dict]` so click-extra treats the sub-tree as opaque:
     its keys are manager IDs (data, not flag names) and its leaf entries are
-    validated by {func}`validate_manager_overrides_section` registered as a
-    {class}`click_extra.ConfigValidator`. The field carries no CLI flag — it
+    validated by {func}`~meta_package_manager.config.validate_manager_overrides_section` registered as a
+    {class}`~click_extra.config.schema.ConfigValidator`. The field carries no CLI flag — it
     only exists in the schema to declare opacity and to enable `--validate-config`
     coverage of the override block."""
 
@@ -387,7 +387,7 @@ def validate_cooldown_section(section: Any) -> None:
 
 
 def build_cooldown_validator() -> ConfigValidator:
-    """Construct a {class}`click_extra.ConfigValidator` for the
+    """Construct a {class}`~click_extra.config.schema.ConfigValidator` for the
     `[mpm.cooldown]` sub-tree.
 
     Used by the CLI bootstrap (`@group` decorator) to register the validator
@@ -425,7 +425,7 @@ def validate_manager_overrides_section(
     Pure function: inspects `section` against the pool's registered managers
     and {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`, raises the first
     {class}`click_extra.ValidationError` it encounters, never mutates the pool.
-    Suitable for registration as a {class}`click_extra.ConfigValidator` and for
+    Suitable for registration as a {class}`~click_extra.config.schema.ConfigValidator` and for
     direct invocation by {func}`apply_manager_overrides` so both the
     `--validate-config` path and the runtime application path enforce the
     same rules.
@@ -509,7 +509,7 @@ def apply_manager_overrides(
     unconditionally forward whatever was parsed from the config file.
 
     Validation is delegated to
-    {func}`validate_manager_overrides_section`, which raises
+    {func}`~meta_package_manager.config.validate_manager_overrides_section`, which raises
     {class}`click_extra.ValidationError` on the first issue. Both the
     runtime config-loading path and the explicit `--validate-config` path
     enforce the same rules through that single validator, so a config that
@@ -518,7 +518,7 @@ def apply_manager_overrides(
     After validation succeeds, every override is applied as an instance
     attribute (shadowing the class default for the lifetime of the process),
     recorded in {attr}`~meta_package_manager.pool.ManagerPool.overridden_fields` so
-    {meth}`ManagerPool._select_managers` skips the matching global
+    `_select_managers` skips the matching global
     `--<flag>` defaults for that manager, and the cached properties derived
     from the affected attributes are evicted so the next access recomputes
     them. List-valued fields use *replace* semantics: the override fully
@@ -578,13 +578,13 @@ def apply_manager_overrides(
 
 
 def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
-    """Construct a {class}`click_extra.ConfigValidator` for the
-    `[mpm.overrides]` sub-tree, bound to a specific {class}`ManagerPool`.
+    """Construct a {class}`~click_extra.config.schema.ConfigValidator` for the
+    `[mpm.overrides]` sub-tree, bound to a specific {class}`~meta_package_manager.pool.ManagerPool`.
 
     Used by the CLI bootstrap (`@group` decorator) to register a validator
-    against the live pool. Wrapping {func}`validate_manager_overrides_section`
+    against the live pool. Wrapping {func}`~meta_package_manager.config.validate_manager_overrides_section`
     in a closure satisfies the
-    {attr}`click_extra.ConfigValidator.validator` signature
+    {attr}`~click_extra.config.schema.ConfigValidator.validator` signature
     (`Callable[[dict], None]`) while keeping the underlying validator pool-agnostic
     and testable in isolation.
     """
@@ -604,7 +604,7 @@ def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
     dict.
 
     Walks {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` in alphabetical order, reads each attribute
-    from the manager instance, and converts tuples to lists so {mod}`tomli_w`
+    from the manager instance, and converts tuples to lists so `tomli_w`
     can serialize the result without translation. Attributes whose value is
     `None` are skipped: TOML cannot express `None` and the user cannot
     override a field *to* `None` either, so emitting the key would be

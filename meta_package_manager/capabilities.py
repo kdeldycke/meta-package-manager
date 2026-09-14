@@ -170,7 +170,7 @@ def implements_method(
     variants of the `remove` and `cleanup` commands rather than standalone
     {class}`Operations`, so {func}`implements` cannot route them. This reports whether a
     manager overrides the base's stub for one, delegating the MRO walk to
-    {meth}`meta_package_manager.manager.PackageManager._defines` (shared with the
+    `_defines` (shared with the
     base `cleanup` composer), so it works for config-defined managers (whose methods
     live on the synthesized subclass) too.
     """

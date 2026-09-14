@@ -200,7 +200,7 @@ class Pacman(PackageManager):
     def orphans(self) -> Iterator[Package]:
         """Fetch packages installed as dependencies that nothing requires anymore.
 
-        Same `<name> <version>` listing shape as {meth}`installed`, narrowed
+        Same `<name> <version>` listing shape as {meth}`~meta_package_manager.manager.PackageManager.installed`, narrowed
         by `--deps --unrequired` (`-Qtd`) to the orphan set.
 
         ```{code-block} shell-session
@@ -351,7 +351,7 @@ class Aura(Pacman):
     """AUR helper wrapping `pacman`, driven through the `aura` binary.
 
     Aura reuses every parser and query of `Pacman` unchanged, but not its
-    forced arguments and not its {meth}`outdated`: those are the two places
+    forced arguments and not its {meth}`~meta_package_manager.manager.PackageManager.outdated`: those are the two places
     where a v4 aura genuinely differs from the helpers around it.
 
     ```{note}
@@ -367,7 +367,7 @@ class Aura(Pacman):
     local ALPM database against the sync databases, so it reports the official
     repositories alone and an out-of-date AUR package stays invisible to it.
     The AUR half lives behind `--aursync --sysupgrade --dryrun`, which reports
-    without acting. {meth}`outdated` runs both and concatenates them, so mpm
+    without acting. {meth}`~meta_package_manager.manager.PackageManager.outdated` runs both and concatenates them, so mpm
     reports what an `aura -Syu` followed by an `aura -Au` would actually
     upgrade.
     ```
@@ -899,7 +899,7 @@ class Yay(Pacman):
 
     Held while {meth}`cooldown_env` resolves {attr}`supports_cooldown`, whose
     {attr}`version <meta_package_manager.execution.CLIExecutor.version>` lookup runs
-    `yay --version` through {meth}`run`, which calls straight back into
+    `yay --version` through {meth}`~meta_package_manager.execution.CLIExecutor.run`, which calls straight back into
     {meth}`cooldown_env`. The nested call returns early so the probe runs without a
     cooldown env instead of recursing until the stack overflows.
     """
@@ -926,8 +926,8 @@ class Yay(Pacman):
         """Deliver the release-age cooldown through a private `XDG_CONFIG_HOME`.
 
         yay has no release-age option, so rather than injecting a single value mpm
-        points yay at {attr}`_cooldown_overlay_dir`: a throwaway config tree whose
-        generated `init.lua` ({data}`_YAY_COOLDOWN_INIT_LUA`) registers the
+        points yay at `_cooldown_overlay_dir`: a throwaway config tree whose
+        generated `init.lua` (`_YAY_COOLDOWN_INIT_LUA`) registers the
         cooldown Lua hooks. The cutoff travels as `MPM_COOLDOWN_EPOCH` (Unix seconds
         of `now - cooldown`), keeping the `init.lua` asset static, and
         `MPM_YAY_USER_DIR` lets it chain the user's real config so the redirect stays
@@ -994,7 +994,7 @@ class Yay(Pacman):
         Built once per manager instance and removed at interpreter exit. The tree holds
         two entries under `<root>/yay/`:
 
-        - `init.lua`: the static {data}`_YAY_COOLDOWN_INIT_LUA` policy.
+        - `init.lua`: the static `_YAY_COOLDOWN_INIT_LUA` policy.
         - `config.json`: a symlink to the user's real config, so the
           `XDG_CONFIG_HOME` redirect stays lossless. yay's `init.lua` only
           *overlays* `config.json`; it does not replace it, so the user's settings are

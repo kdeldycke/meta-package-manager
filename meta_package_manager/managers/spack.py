@@ -61,10 +61,10 @@ class Spack(PackageManager):
     environment in ...`.
 
     The flag is a global one, placed before the subcommand, which is why it is
-    declared as {attr}`pre_args` rather than repeated per operation. Note that
+    declared as {attr}`~meta_package_manager.execution.CLIExecutor.pre_args` rather than repeated per operation. Note that
     `-E` is *not* a portable shorthand for it: `spack gc` binds its own `-E` to
     `--except-any-environment`, so the long form is the only spelling that means
-    the same thing everywhere. The version probe skips {attr}`pre_args` entirely
+    the same thing everywhere. The version probe skips {attr}`~meta_package_manager.execution.CLIExecutor.pre_args` entirely
     and so runs bare.
 
     `haxelib` forces `--global` and `luarocks` `--no-project` against the same

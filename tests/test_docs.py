@@ -144,7 +144,7 @@ def test_docs_site_url_matches_pyproject():
 
     `docs/conf.py` reads it from there for `html_baseurl`, but runtime code
     cannot: `pyproject.toml` is not shipped in the wheel, so
-    {data}`_docs.DOCS_SITE_URL` repeats the literal. A drift would point the
+    `DOCS_SITE_URL` repeats the literal. A drift would point the
     readme's manager links at a different origin than the canonical tags,
     which is exactly the split-indexing the custom domain exists to avoid.
     """

@@ -363,7 +363,7 @@ class Mason(PackageManager):
     ```{caution}
     This floors *mason*, never the receipts it wrote. A host on a current mason
     still carries receipts from `1.x` for anything installed back then, which is
-    why {meth}`installed` reads both of their shapes.
+    why {meth}`~meta_package_manager.manager.PackageManager.installed` reads both of their shapes.
     ```
     """
 

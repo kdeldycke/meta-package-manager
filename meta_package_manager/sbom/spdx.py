@@ -236,20 +236,20 @@ class SPDX(SBOM):
 
         self.seen_ids = set()
         # `(manager_id, package_id) -> SPDX docid` lookup used by
-        # {meth}`finalize` to resolve declared dependencies into
+        # {meth}`~meta_package_manager.sbom.base.SBOM.finalize` to resolve declared dependencies into
         # `Relationship` entries. Populated by every {meth}`add_package`
         # call so cross-package edges can be wired up at the end of the scan
         # regardless of the order managers report their packages in.
         self.name_index = {}
         # `purl string -> docid` and `docid -> SPDXPackage` indexes used
         # to attach vulnerability data (keyed by purl) onto the right
-        # package object during {meth}`finalize`.
+        # package object during {meth}`~meta_package_manager.sbom.base.SBOM.finalize`.
         self.purl_index: dict[str, str] = {}
         self.package_by_docid: dict[str, Any] = {}
         # Each entry is `(source_docid, manager_id, target_id, relationship_type)`.
         # The renderer cannot turn declared dependencies into relationships
         # immediately because the dependency target may not have been added
-        # yet. Resolved in {meth}`finalize`.
+        # yet. Resolved in {meth}`~meta_package_manager.sbom.base.SBOM.finalize`.
         self.pending_relationships = []
         # `document_ref_id -> SHA1` for every per-package upstream SPDX file
         # we merged. Drives the `externalDocumentRefs` document section so
@@ -610,7 +610,7 @@ class SPDX(SBOM):
         Their aliases follow: a second coordinate for a package the
         inventory did add, which
         {meth}`~meta_package_manager.sbom.base.SBOM.resolve_purl_targets`
-        maps back in {meth}`finalize`.
+        maps back in {meth}`~meta_package_manager.sbom.base.SBOM.finalize`.
         """
         yield from self.purl_index
         yield from self.purl_aliases

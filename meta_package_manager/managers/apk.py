@@ -40,8 +40,8 @@ class APK(PackageManager):
 
     ```{note}
     The version floor is `2.10.0`, the release introducing the `list` applet
-    that {meth}`outdated` parses and {meth}`installed` falls back on. Where
-    {attr}`query_requirement` is met, `installed` reads the structured `query`
+    that {meth}`~meta_package_manager.manager.PackageManager.outdated` parses and {meth}`~meta_package_manager.manager.PackageManager.installed` falls back on. Where
+    {attr}`~meta_package_manager.managers.apk.APK.query_requirement` is met, `installed` reads the structured `query`
     applet instead. Progress output is disabled on every call to keep the
     parsed lines stable.
     ```
@@ -77,7 +77,7 @@ class APK(PackageManager):
     default_sudo = True
 
     requirement = ">=2.10.0"
-    """The `list` applet, used by {meth}`installed` and {meth}`outdated`,
+    """The `list` applet, used by {meth}`~meta_package_manager.manager.PackageManager.installed` and {meth}`~meta_package_manager.manager.PackageManager.outdated`,
     was introduced in version `2.10.0`.
     """
 
@@ -85,7 +85,7 @@ class APK(PackageManager):
     """Minimum apk version answering the `query` applet.
 
     `apk-tools` 3 added `query`, which reports the same inventory as `list` does
-    but in `json` or `yaml`, so {meth}`installed` reads names and versions
+    but in `json` or `yaml`, so {meth}`~meta_package_manager.manager.PackageManager.installed` reads names and versions
     outright instead of recovering them from a line's shape.
 
     Kept apart from {attr}`requirement` (`>=2.10.0`), following
@@ -135,7 +135,7 @@ class APK(PackageManager):
         """Whether this apk is known to answer the `query` applet.
 
         An undetectable version answers `False`, which only picks the `list`
-        dialect of {meth}`installed`: a manager whose version never resolved
+        dialect of {meth}`~meta_package_manager.manager.PackageManager.installed`: a manager whose version never resolved
         fails {attr}`~meta_package_manager.manager.PackageManager.fresh` and so
         runs no operation on a real host.
         """
@@ -204,7 +204,7 @@ class APK(PackageManager):
         python3-3.11.6-r0 x86_64 {python3} (PSF-2.0) [installed]
         ```
 
-        Which dialect to *ask* for is decided by {attr}`_has_query_applet`, but
+        Which dialect to *ask* for is decided by `_has_query_applet`, but
         both are parsed whatever the host, keyed on the payload being JSON. That
         is what lets each documented block above stand as a fixture, and it
         keeps the reading of an answer independent of the guess that produced
@@ -238,7 +238,7 @@ class APK(PackageManager):
         """Fetch outdated packages.
 
         ```{caution}
-        Reads from the local repository cache. Run {meth}`sync` first
+        Reads from the local repository cache. Run {meth}`~meta_package_manager.manager.PackageManager.sync` first
         to refresh the index.
         ```
 

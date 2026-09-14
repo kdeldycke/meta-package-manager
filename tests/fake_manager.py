@@ -18,7 +18,7 @@
 Real-manager iteration leaks the host environment into the test suite: a
 runner without `apk` skips it, a runner without `brew` skips it, and
 assertions about package counts or table rendering become a function of which
-binaries happen to be on PATH. The {class}`FakeManager` below sidesteps
+binaries happen to be on PATH. The {class}`~tests.fake_manager.FakeManager` below sidesteps
 that by reporting as available on every platform and yielding a fixed catalog
 of packages without ever invoking a subprocess.
 

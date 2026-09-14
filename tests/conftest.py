@@ -358,7 +358,7 @@ def _patch_pool_with(monkeypatch, fake):
 
     Mirrors the runtime knobs (timeout, stop_on_error, dry_run,
     ignore_auto_updates) that
-    {meth}`meta_package_manager.pool.ManagerPool._select_managers` would
+    `_select_managers` would
     forward, so the CLI exercises the same code path it does against real
     managers.
     """
@@ -383,7 +383,7 @@ def _patch_pool_with(monkeypatch, fake):
 
 @fixture
 def fake_pool(monkeypatch):
-    """Yield a single deterministic {class}`FakeManager` from the pool.
+    """Yield a single deterministic {class}`~tests.fake_manager.FakeManager` from the pool.
 
     Use for CLI plumbing tests (stats lines, table rendering, exit codes)
     that need a stable package set regardless of host PATH.
@@ -393,7 +393,7 @@ def fake_pool(monkeypatch):
 
 @fixture
 def slow_fake_pool(monkeypatch):
-    """Yield a {class}`TimingOutFakeManager` whose `outdated` exceeds `--timeout`.
+    """Yield a {class}`~tests.fake_manager.TimingOutFakeManager` whose `outdated` exceeds `--timeout`.
 
     Use only for tests that need to verify
     {meth}`meta_package_manager.execution.CLIExecutor.run` catches

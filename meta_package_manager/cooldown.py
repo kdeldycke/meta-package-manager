@@ -67,7 +67,7 @@ class CooldownPolicy(StrEnum):
     Only applies to managers without native release-age support; managers
     that can enforce the window natively always do, whatever the policy.
     The values double as the CLI keywords of the `--cooldown` option and
-    (except {attr}`off`) as the `policy` values of the `[mpm.cooldown]`
+    (except {attr}`~meta_package_manager.cooldown.CooldownPolicy.off`) as the `policy` values of the `[mpm.cooldown]`
     configuration table, so they spell exactly like the user types them.
     """
 
@@ -235,7 +235,7 @@ def resolve_cooldown(
 
     Axis-by-axis precedence: a flag duration overrides the configured window
     but inherits the configured policy; a flag policy overrides the
-    configured policy but inherits the configured window ({attr}`off`
+    configured policy but inherits the configured window ({attr}`~meta_package_manager.cooldown.CooldownPolicy.off`
     forces the window off too); an unset flag inherits both axes. Returns
     the effective `(window, policy)` pair, the policy defaulted to
     {attr}`CooldownPolicy.enforce` when neither side sets it.

@@ -75,13 +75,13 @@ class Emerge(PackageManager):
     pre_args = ("--quiet", "--color", "n", "--nospinner")
 
     _PARSED_PRE_ARGS = tuple(arg for arg in pre_args if arg != "--quiet")
-    """{attr}`pre_args` without `--quiet`, for the operations whose output a
+    """{attr}`~meta_package_manager.execution.CLIExecutor.pre_args` without `--quiet`, for the operations whose output a
     regex reads instead of a person.
 
     `--quiet` does not only drop noise, it changes the shape of what emerge
     prints. `--search` collapses each hit to a bare `*  category/name` line,
     losing the `Latest version available:` and `Description:` fields
-    {attr}`_SEARCH_REGEXP` needs. `--update --columns` drops the
+    `_SEARCH_REGEXP` needs. `--update --columns` drops the
     `[ebuild   U  ]` state prefix and leaves the latest version unbracketed,
     which are the two things {attr}`_OUTDATED_REGEXP` anchors on. Either regex
     then matches nothing, and the operation reports an empty set on a system
@@ -194,7 +194,7 @@ class Emerge(PackageManager):
         """Fetch outdated packages.
 
         Runs without `--quiet`, which would drop the `[ebuild   U  ]` state
-        prefix and unbracket the latest version. See {attr}`_PARSED_PRE_ARGS`.
+        prefix and unbracket the latest version. See `_PARSED_PRE_ARGS`.
 
         ```{code-block} shell-session
 
@@ -253,7 +253,7 @@ class Emerge(PackageManager):
 
         Runs without `--quiet`, which would collapse each hit to a bare
         `*  category/name` line and strip the two fields
-        {attr}`_SEARCH_REGEXP` reads. See {attr}`_PARSED_PRE_ARGS`.
+        `_SEARCH_REGEXP` reads. See `_PARSED_PRE_ARGS`.
 
         ```{code-block} shell-session
 

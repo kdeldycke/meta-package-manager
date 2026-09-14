@@ -958,7 +958,7 @@ def test_windows_pathext_tracks_cpython():
     change first, and turns a Windows-only detection failure into a named
     failure everywhere.
 
-    On divergence: update {data}`WIN_DEFAULT_PATHEXT` to the new value. If the
+    On divergence: update {data}`~meta_package_manager.execution.WIN_DEFAULT_PATHEXT` to the new value. If the
     attribute is gone for good, the fallback is already what the code uses.
     """
     cpython_value = getattr(shutil, "_WIN_DEFAULT_PATHEXT", None)
@@ -974,7 +974,7 @@ def test_windows_pathext_tracks_cpython():
 
 @pytest.mark.skipif(is_any_windows(), reason="`ENOEXEC` is POSIX-only.")
 def test_a_file_that_is_not_a_program_raises_enoexec(tmp_path):
-    """The premise {data}`UNRUNNABLE_ERRNOS` rests on.
+    """The premise {data}`~meta_package_manager.execution.UNRUNNABLE_ERRNOS` rests on.
 
     `subprocess` execs directly rather than through a shell, so it never falls
     back to interpreting a file the kernel refused. A wrong-architecture binary

@@ -383,7 +383,7 @@ class Aptitude(PackageManager):
         """Remove every package installed as a dependency and no longer required.
 
         Aptitude has no `autoremove` verb: the garbage set is named as a pattern
-        on `remove`, the same one {meth}`orphans` reports.
+        on `remove`, the same one {meth}`~meta_package_manager.manager.PackageManager.orphans` reports.
 
         ```{code-block} shell-session
 

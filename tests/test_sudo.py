@@ -18,7 +18,7 @@
 These exercise {func}`meta_package_manager.sudo.prime_sudo` and its keepalive with
 a mocked `subprocess.run` (no test ever launches a real `sudo`), the escalation
 policy inventories across the manager pool, and the
-{class}`meta_package_manager.sudo._StallWatchdog` end to end through
+`_StallWatchdog` end to end through
 {class}`tests.fake_manager.FakeManager` (whose CLI is the Python interpreter, so
 its subprocesses are real but harmless). The `sudo --non-interactive` command
 wrapping of

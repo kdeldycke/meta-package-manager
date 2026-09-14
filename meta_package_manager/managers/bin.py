@@ -100,7 +100,7 @@ class Bin(PackageManager):
     platforms = LINUX_LIKE, MACOS, WINDOWS
 
     requirement = ">=0.27.0"
-    """The release whose listing layout {meth}`installed` reproduces: it reserves
+    """The release whose listing layout {meth}`~meta_package_manager.manager.PackageManager.installed` reproduces: it reserves
     a leading column of the version field for the pin marker. The parser tolerates
     the older unreserved layout too, but the floor tracks what is verified.
     """

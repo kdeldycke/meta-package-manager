@@ -27,7 +27,7 @@ fields for output.
 reports through its native query commands. It backs every operation in
 {mod}`meta_package_manager.manager`.
 
-{class}`PackageMetadata` is the enrichment plane: licenses, supplier,
+{class}`~meta_package_manager.package.PackageMetadata` is the enrichment plane: licenses, supplier,
 checksums, declared dependency graph, on-disk per-package SBOMs, and other
 facts gathered through extra queries (CLI sub-commands, on-disk parsers,
 upstream registries). Populated by

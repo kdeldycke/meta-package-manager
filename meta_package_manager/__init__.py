@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Meta Package Manager: a unified CLI wrapping many package managers.
 
-Root package. Holds the canonical {data}`__version__`; the {command}`mpm` entry
+Root package. Holds the canonical `__version__`; the {command}`mpm` entry
 point lives in {mod}`meta_package_manager.cli`.
 """
 

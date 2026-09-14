@@ -202,7 +202,7 @@ class CLIError(Exception):
 _MUTATING_OPERATIONS: Final[frozenset[str]] = frozenset(
     {"install", "upgrade", "upgrade_all", "remove", "sync", "cleanup"},
 )
-"""State-changing operations, matched against {attr}`CLIExecutor._active_operation`.
+"""State-changing operations, matched against `_active_operation`.
 
 Under `mpm --plan` their CLI calls are captured into {data}`PLAN_RECORDER`
 instead of being executed, while the read-only queries (`installed`, `outdated`,
@@ -218,7 +218,7 @@ passes `force_exec=True` (`Ports._resolve_origin`), or runs under
 """
 
 VERSION_PROBE: Final = "version"
-"""Pseudo-operation stamped on {attr}`CLIExecutor._active_operation` during
+"""Pseudo-operation stamped on `_active_operation` during
 version detection.
 
 Not a member of {class}`meta_package_manager.capabilities.Operations` (no
@@ -301,7 +301,7 @@ PLAN_RECORDER: Final = _PlanRecorder()
 """Process-wide sink for {meth}`CLIExecutor.run`'s plan-mode captures.
 
 A module-level singleton because `run` executes in the fan-out's worker threads,
-where the click context is not reliably reachable. See {class}`_PlanRecorder`.
+where the click context is not reliably reachable. See `_PlanRecorder`.
 """
 
 
@@ -506,7 +506,7 @@ class CLIExecutor:
     read-only queries included), plan mode lets the read-only queries (`installed`,
     `outdated`, `search`) run for real so the resolved plan reflects actual
     system state, and records only the state-changing commands (see
-    {data}`_MUTATING_OPERATIONS`) into {data}`PLAN_RECORDER`.
+    `_MUTATING_OPERATIONS`) into {data}`PLAN_RECORDER`.
     """
 
     timeout: int | None = None
@@ -521,7 +521,7 @@ class CLIExecutor:
     _active_operation: str | None = None
     """Name of the operation this manager is currently performing.
 
-    Stamped by {meth}`meta_package_manager.pool.ManagerPool._select_managers`
+    Stamped by `_select_managers`
     just before the manager is handed to a subcommand, and by the {attr}`version`
     probe. Consumed by {meth}`_resolve_timeout` to pick a per-operation default.
     `None` (no known operation) falls back to {data}`DEFAULT_TIMEOUT`.
@@ -533,9 +533,9 @@ class CLIExecutor:
     Stamped by {meth}`build_cli` when an operation passes `sudo=True` but
     {func}`~meta_package_manager.sudo._resolved_sudo` keeps escalation off (the
     dormant markers of `pip`, `npm`, `gem` and `cpan`). Consumed by the failure
-    gate of {meth}`run`, which turns the permission error such a call is prone
+    gate of {meth}`~meta_package_manager.execution.CLIExecutor.run`, which turns the permission error such a call is prone
     to into the hint naming the scoped opt-in. Per-call state, safe for the same
-    reason {attr}`_active_operation` is: a manager instance runs one command at
+    reason `_active_operation` is: a manager instance runs one command at
     a time (see `SHARED_LOCK_FAMILIES` in
     {mod}`meta_package_manager.dispatch`).
     """
@@ -586,7 +586,7 @@ class CLIExecutor:
     every operation this manager marks privileged (a `build_cli(..., sudo=True)` call).
     Set globally by `mpm --sudo` / `mpm --no-sudo` and per manager by the
     `[mpm.overrides.<id>] sudo` config key, the latter winning (see
-    {meth}`meta_package_manager.pool.ManagerPool._select_managers`).
+    `_select_managers`).
 
     Only privileged operations are ever escalated, and only on a host carrying an
     escalator. Carrying one is the whole platform test, Windows included, since
@@ -594,7 +594,7 @@ class CLIExecutor:
     *internally* ({attr}`internal_sudo`) has no such markers and is never wrapped
     in `sudo` by `mpm`: its own `sudo` reuses the credential cache when
     {func}`~meta_package_manager.sudo.prime_sudo` finds it already warm, and is
-    otherwise covered by the silent-call notice in {meth}`run`.
+    otherwise covered by the silent-call notice in {meth}`~meta_package_manager.execution.CLIExecutor.run`.
     """
 
     default_sudo: bool = False
@@ -635,7 +635,7 @@ class CLIExecutor:
 
     `None` (the default) means the manager has no native release-age mechanism
     to feed through the environment; it may still honor a cooldown through the
-    per-package release-date probe (see {meth}`_probes_release_date`). A
+    per-package release-date probe (see `_probes_release_date`). A
     subclass that sets this string advertises native support (see
     {attr}`supports_cooldown`); the value produced by {meth}`cooldown_env_value`
     is then injected into the environment of every CLI call.
@@ -668,7 +668,7 @@ class CLIExecutor:
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package manager.
 
-    Every {class}`CLIError` produced by {meth}`run` lands here, whether or not it
+    Every {class}`CLIError` produced by {meth}`~meta_package_manager.execution.CLIExecutor.run` lands here, whether or not it
     is also raised: a failure the caller goes on to swallow
     ({meth}`~meta_package_manager.manager.PackageManager.installed_or_empty` and
     its peers) is still a failure this manager committed, and the end-of-run
@@ -682,21 +682,21 @@ class CLIExecutor:
     """
 
     _last_run: tuple[int, str, str] | None = None
-    """`(exit code, <stdout>, <stderr>)` of the most recent completed {meth}`run`.
+    """`(exit code, <stdout>, <stderr>)` of the most recent completed {meth}`~meta_package_manager.execution.CLIExecutor.run`.
 
     `None` until a run completes, and reset to `None` at the start of each run, so
     a spawn that never finished (timeout, interrupt, missing binary) leaves no stale
     result behind. Consumed by
     {meth}`meta_package_manager.manager.PackageManager.doctor`, whose health verdict
     is the exit code alone and whose report merges both streams: the return value of
-    {meth}`run` carries neither. Safe to read right after the call under mpm's
+    {meth}`~meta_package_manager.execution.CLIExecutor.run` carries neither. Safe to read right after the call under mpm's
     dispatch model, where a manager never runs two of its own invocations at once.
     """
 
     run_cache: dict[tuple, tuple[int, str, str]] | None = None
     """Optional cache that de-duplicates identical CLI runs across a lane's managers.
 
-    `None` by default, which disables caching: every {meth}`run` call spawns its own
+    `None` by default, which disables caching: every {meth}`~meta_package_manager.execution.CLIExecutor.run` call spawns its own
     subprocess. Two callers install a shared dict, each for the duration of one lane:
 
     - {func}`meta_package_manager.dispatch.dispatch`, on every multi-manager
@@ -708,7 +708,7 @@ class CLIExecutor:
       {func}`meta_package_manager.dispatch.merge_into_probe_lanes`), so `brew` and
       `cask` both probing `brew --version` spawn it once too.
 
-    The replay still walks {meth}`run`'s logging and failure gate, so a failed shared
+    The replay still walks {meth}`~meta_package_manager.execution.CLIExecutor.run`'s logging and failure gate, so a failed shared
     command is attributed to every member. Keyed on the resolved command line and its
     environment, so only genuinely identical invocations collapse.
 
@@ -731,7 +731,7 @@ class CLIExecutor:
 
         Either natively, by injecting {attr}`cooldown_env_var` into every CLI
         call, or through the per-package release-date probe advertised by
-        {meth}`_probes_release_date`.
+        `_probes_release_date`.
         """
         return self.cooldown_env_var is not None or self._probes_release_date()
 
@@ -777,7 +777,7 @@ class CLIExecutor:
 
         Returns an empty mapping unless a {attr}`cooldown` is set *and* the manager
         supports it *and* its {attr}`cooldown_policy` has not exempted it
-        (`off`). Merged into the environment of every {meth}`run` call.
+        (`off`). Merged into the environment of every {meth}`~meta_package_manager.execution.CLIExecutor.run` call.
         """
         if (
             self.cooldown is None
@@ -1034,7 +1034,7 @@ class CLIExecutor:
     ) -> Iterator[None]:
         """Temporarily adjust the manager's execution state, restoring it on exit.
 
-        `operation` re-stamps {attr}`_active_operation` (the per-operation
+        `operation` re-stamps `_active_operation` (the per-operation
         timeout and watchdog key) for the duration of the block; `None` leaves
         the current stamp untouched. `stop_on_error` likewise overrides the
         failure policy when set: the per-package state changers run their action
@@ -1042,7 +1042,7 @@ class CLIExecutor:
         by the caller instead of being silently accumulated.
 
         The public seam for callers needing a scoped state override: the CLI
-        layer must never poke {attr}`_active_operation` or {attr}`stop_on_error`
+        layer must never poke `_active_operation` or {attr}`stop_on_error`
         directly.
         """
         previous_operation = self._active_operation
@@ -1064,7 +1064,7 @@ class CLIExecutor:
 
         1. An explicit {attr}`timeout` (the user's `--timeout` flag or a
            per-manager `timeout` override) wins for every operation.
-        2. Otherwise the per-operation default keyed on {attr}`_active_operation`
+        2. Otherwise the per-operation default keyed on `_active_operation`
            (see {data}`OPERATION_TIMEOUTS`).
         3. An unknown operation falls back to {data}`DEFAULT_TIMEOUT`.
         """
@@ -1086,7 +1086,7 @@ class CLIExecutor:
         :param animate: pass `False` to hold the line still whatever
             {attr}`progress` says, for a call whose child may print a prompt of
             its own onto it (see
-            {func}`~meta_package_manager.sudo._hidden_prompt_risk`).
+            `_hidden_prompt_risk`).
         """
         manager_id = self.id  # type: ignore[attr-defined]
         operation = self._active_operation
@@ -1136,7 +1136,7 @@ class CLIExecutor:
           * flagging, on a terminal, the mutating call of an internal escalator
             that goes silent on a cold credential cache and may be blocked on a
             hidden password prompt (see
-            {class}`~meta_package_manager.sudo._StallWatchdog`)
+            `_StallWatchdog`)
           * detaching every other call into its own POSIX session and process
             group, so a timeout or Ctrl+C reaps the whole process tree and a
             wedged grandchild cannot linger as an orphan; the flagged call
@@ -1605,7 +1605,7 @@ class CLIExecutor:
           detection, `yarn global dir`), which must run for real even when the
           user asked to simulate or to only plan mutations.
         * `must_succeed` raises on non-zero exit regardless of
-          `mpm --stop-on-error`. See {meth}`run` for details.
+          `mpm --stop-on-error`. See {meth}`~meta_package_manager.execution.CLIExecutor.run` for details.
         """
         cli = self.build_cli(
             *args,

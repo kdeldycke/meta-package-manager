@@ -166,6 +166,49 @@ exclude_patterns = ["_build", "_linkcheck", "html", "Thumbs.db", ".DS_Store"]
 
 nitpicky = True
 
+# Two categories with no fix on this side of the build. Every other warning the
+# build emits is this project's to act on, which is the point of keeping the list
+# this short.
+suppress_warnings = [
+    # "Document headings start at H2, not H1". `index.md` includes `readme.md`,
+    # which opens at `## ` because GitHub supplies the H1 from the repository
+    # name. Starting it at H1 would put a second title on the landing page.
+    "myst.header",
+    # "Cannot resolve forward reference in type annotations of
+    # meta_package_manager.package.PackageURL (module packageurl): name
+    # 'ClassVar' is not defined". The annotation lives in `packageurl` and
+    # `click`, neither of which imports the name at runtime, so autodoc cannot
+    # resolve it whatever this project writes. Cosmetic: the signature still
+    # renders, with the unresolved name as plain text.
+    "sphinx_autodoc_typehints.forward_reference",
+]
+
+# `sphinx_autodoc_typehints` renders every annotation as a cross-reference, using
+# the name exactly as the source spells it. These seven are unresolvable by
+# construction rather than by mistake, so they are named here instead of being
+# chased through the annotations that emit them. Each reports as `<unknown>:1`,
+# carrying no source location, which is the tell that autodoc rather than a
+# docstring produced it.
+nitpick_ignore = [
+    # `TYPE_CHECKING`-only aliases of labels.py: they exist for mypy and have no
+    # runtime object for autodoc to document.
+    ("py:class", "TLabelGroup"),
+    ("py:class", "TLabelRules"),
+    # Annotated bare, so the extra-platforms inventory cannot match them. The
+    # qualified spelling resolves and is what every docstring here now uses.
+    ("py:class", "Group"),
+    ("py:class", "Platform"),
+    # Same bare-annotation case, for a class click-extra does publish.
+    ("py:class", "VersionScreen"),
+    # Rendered from `OperationTrail`'s own signature, where the names are
+    # parameters rather than members anything documents.
+    ("py:meth", "mark"),
+    ("py:meth", "operation"),
+    # Neither library publishes an objects.inv, so there is nothing to link to.
+    ("py:class", "packageurl.PackageURL"),
+    ("py:class", "spdx_tools.spdx.model.document.Document"),
+]
+
 # Concatenates the docstrings of the class and the __init__ method.
 autoclass_content = "both"
 # Keep the same ordering as in original source code.
@@ -189,6 +232,12 @@ intersphinx_mapping = {
     # `platforms` declaration and every `{class}` ref naming one. Without the
     # mapping each of those is an unresolved reference under `nitpicky`.
     "extra-platforms": ("https://kdeldycke.github.io/extra-platforms", None),
+    # The SBOM layer's document and component types, and the `tmp_path_factory`
+    # fixture the test-suite docstrings name. Both publish an inventory; the
+    # other SBOM libraries (`packageurl`, `spdx-tools`) publish none, so their
+    # types are named as code spans instead of linked.
+    "cyclonedx": ("https://cyclonedx-python-library.readthedocs.io/en/latest", None),
+    "pytest": ("https://docs.pytest.org/en/stable", None),
 }
 
 # Prefix document path to section labels, to use:

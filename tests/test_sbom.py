@@ -242,9 +242,9 @@ def test_minimal_mode_emits_bare_spdx_payload():
 
 
 def test_bundled_mode_spdx_populates_rich_fields():
-    """A populated {class}`PackageMetadata` flows into the SPDX
+    """A populated {class}`~meta_package_manager.package.PackageMetadata` flows into the SPDX
     document: license, supplier override, originator, checksum, and a
-    dependency relationship resolved at {meth}`finalize` time.
+    dependency relationship resolved at {meth}`~meta_package_manager.sbom.base.SBOM.finalize` time.
     """
     s = SPDX()
     s.init_doc()

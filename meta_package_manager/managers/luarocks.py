@@ -61,7 +61,7 @@ class LuaRocks(PackageManager):
     `--global` against the same hazard.
 
     The flag is a global one, placed before the subcommand, which is why it is
-    declared as {attr}`pre_args` rather than repeated per operation. The version
+    declared as {attr}`~meta_package_manager.execution.CLIExecutor.pre_args` rather than repeated per operation. The version
     probe skips `pre_args` entirely and so runs bare.
     ```
 

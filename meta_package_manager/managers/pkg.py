@@ -19,7 +19,7 @@
 Two managers share this module because they share the FreeBSD ecosystem and
 the same on-disk install database:
 
-- {class}`PKG` wraps the binary `pkg` frontend, which fetches
+- {class}`~meta_package_manager.managers.pkg.PKG` wraps the binary `pkg` frontend, which fetches
   pre-compiled artifacts from the official FreeBSD repository.
 - {class}`Ports` wraps the source-build workflow rooted at `/usr/ports`,
   driving {command}`make` recipes directly and delegating registry queries
@@ -458,7 +458,7 @@ class Ports(PackageManager):
     """FreeBSD ports tree: the source-build workflow rooted at `/usr/ports`.
 
     ```{note}
-    Coexists with {class}`PKG` on the same system: both share the install
+    Coexists with {class}`~meta_package_manager.managers.pkg.PKG` on the same system: both share the install
     database maintained by `pkg`. `Ports` builds and tracks ports compiled
     from source under `/usr/ports`, while `PKG` handles binary packages
     from the FreeBSD repository. Listing operations may overlap because `pkg`
@@ -666,7 +666,7 @@ class Ports(PackageManager):
 
         `package_id` may be either a bare port name like `nginx` or its full
         origin like `www/nginx`. A bare name is resolved to its origin through
-        {meth}`_resolve_origin`, which queries the active repository.
+        `_resolve_origin`, which queries the active repository.
 
         The block below illustrates rather than captures: the origin is
         resolved by a query, so the corpus cannot rebuild this command from a

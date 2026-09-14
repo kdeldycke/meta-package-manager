@@ -131,7 +131,7 @@ class CycloneDX(SBOM):
         doc_url = "https://mpm.run"
         self.document = Bom()
         # `(manager_id, package_id) -> Component` lookup, used by
-        # {meth}`finalize` to wire declared-dependency edges to their
+        # {meth}`~meta_package_manager.sbom.base.SBOM.finalize` to wire declared-dependency edges to their
         # already-emitted Component instances.
         self.component_index = {}
         # `(source_component, manager_id, target_id)` queue: dependency
@@ -436,7 +436,7 @@ class CycloneDX(SBOM):
 
         Each component's `bom_ref` is its purl string, so the same
         values double as the vulnerability `affects` targets in
-        {meth}`finalize`.
+        {meth}`~meta_package_manager.sbom.base.SBOM.finalize`.
 
         Their aliases follow: a second coordinate for a component the
         inventory did add, which

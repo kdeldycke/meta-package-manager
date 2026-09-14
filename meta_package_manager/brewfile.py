@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Render the installed-package inventory as a Brewfile.
 
-Defines {func}`build_brewfile` and the helpers used by `mpm dump --brewfile`
+Defines {func}`~meta_package_manager.brewfile.build_brewfile` and the helpers used by `mpm dump --brewfile`
 to emit a Brewfile that `brew bundle install` can consume.
 
 ```{note}

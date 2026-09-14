@@ -72,7 +72,7 @@ $ mpm --table-format csv installed > installed_package.csv
 $ cat installed_package.csv
 ```
 
-```csv
+```text
 Package ID,Name,Manager,Installed version
 arrow,,pip,1.2.3
 boltons,,pip,21.0.0

@@ -199,7 +199,7 @@ class EOPKG(PackageManager):
 
         `info` prints an `Installed package:` section before the repository one
         whenever the package is installed, and both open on an identically
-        shaped `Name :` line. That is why {attr}`_CANDIDATE_REGEXP` anchors on
+        shaped `Name :` line. That is why `_CANDIDATE_REGEXP` anchors on
         the repository heading rather than on the field name. The block below
         shows a package that is *not* installed, so only the repository half
         appears:

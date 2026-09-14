@@ -217,7 +217,7 @@ class SDKMAN(PackageManager):
 
         SDKMAN's `uninstall` command requires both the candidate and a specific
         version. The currently installed version is looked up from
-        {meth}`installed` and passed to the CLI.
+        {meth}`~meta_package_manager.manager.PackageManager.installed` and passed to the CLI.
 
         That lookup is stamped as the read it is: plan mode captures by the
         operation in flight, so an inventory read issued under `remove` would be

@@ -110,8 +110,8 @@ def test_shared_lock_family_members_exist_in_pool():
 def test_lock_families_nest_in_label_groups():
     """Every lock family must sit inside a single ecosystem label group.
 
-    The two constants answer different questions. {data}`MANAGER_LABEL_GROUPS` groups
-    managers by the packaging ecosystem an issue lands in, {data}`SHARED_LOCK_FAMILIES`
+    The two constants answer different questions. {data}`~meta_package_manager.labels.MANAGER_LABEL_GROUPS` groups
+    managers by the packaging ecosystem an issue lands in, {data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`
     the ones that cannot run at once on a real host. The implication runs one way only:
     contending for a backend lock means sharing that backend's ecosystem, so a lock
     family is always contained in a label group.
@@ -138,7 +138,7 @@ def test_delegating_managers_share_their_target_lock():
     """A manager delegating an operation to another's CLI runs that manager's own
     binary against that manager's own state, so the two must serialize.
 
-    The delegation is declared in the class body ({class}`Delegate`), which makes
+    The delegation is declared in the class body ({class}`~meta_package_manager.capabilities.Delegate`), which makes
     this derivable rather than a list to keep in step: wiring a new delegate without
     a lock family fails here.
     """

@@ -185,6 +185,10 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "click": ("https://click.palletsprojects.com", None),
     "click-extra": ("https://kdeldycke.github.io/click-extra", None),
+    # Platform and group types surface all over the manager API, in every
+    # `platforms` declaration and every `{class}` ref naming one. Without the
+    # mapping each of those is an unresolved reference under `nitpicky`.
+    "extra-platforms": ("https://kdeldycke.github.io/extra-platforms", None),
 }
 
 # Prefix document path to section labels, to use:
@@ -415,9 +419,10 @@ click_extra_manpages = [
     {"script": "meta_package_manager.cli:mpm", "prog_name": "mpm"},
 ]
 
-# Wire Sphinx's standard manpage role to the HTML siblings generated above.
-# Lets docstrings reference subcommands as {manpage}`mpm-install(1)` and
-# render them as proper hyperlinks in the docs.
+# Wire Sphinx's standard manpage role to the HTML siblings generated above, so
+# a `{manpage}` reference resolves to one. The `{click-extra-manpages}` index of
+# `man.md` does not go through it: that directive builds its own links from each
+# entry's `output_dir`.
 #
 # Rooted, not relative: this template is emitted verbatim into the page, with
 # none of the per-page rewriting Sphinx gives a link between two documents. A

@@ -226,35 +226,6 @@ Without `[sbom-offline]`, `mpm sbom` exits with an explanatory error pointing at
 - {doc}`dump`: TOML manifest and Brewfile snapshots for re-installation workflows.
 - {doc}`cooldown`: release-age gates that complement the SBOM workflow on the install side.
 
-## `meta_package_manager.sbom` API
-
-```{eval-rst}
-.. automodule:: meta_package_manager.sbom.base
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-.. automodule:: meta_package_manager.sbom.cyclonedx
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-.. automodule:: meta_package_manager.sbom.spdx
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-.. automodule:: meta_package_manager.sbom.vulnerabilities
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-.. automodule:: meta_package_manager.sbom._network
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 [^mpm]: [kdeldycke/meta-package-manager](https://github.com/kdeldycke/meta-package-manager)
 
 [^syft]: [anchore/syft](https://github.com/anchore/syft)

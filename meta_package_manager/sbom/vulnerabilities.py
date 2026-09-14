@@ -93,7 +93,7 @@ Two-stage protocol:
    can appear.
 
 Network transport, retries, and caching are handled by
-{class}`meta_package_manager.sbom._network.NetworkClient`.
+`meta_package_manager.sbom._network.NetworkClient`.
 """
 
 from __future__ import annotations
@@ -429,9 +429,8 @@ def scan_vulnerabilities(
     Returns a mapping from purl string to the tuple of vulnerabilities
     affecting it. Purls with no advisories (or no OSV coverage) are
     simply absent from the result. A network failure on the batch query
-    propagates as {class}`~meta_package_manager.sbom._network.NetworkError` for the
-    caller to handle; per-advisory detail failures are swallowed so a single bad
-    record only drops itself.
+    propagates as `NetworkError` for the caller to handle; per-advisory
+    detail failures are swallowed so a single bad record only drops itself.
     """
     queries = _parse_purls(purls)
     if not queries:

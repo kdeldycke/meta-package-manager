@@ -324,24 +324,6 @@ from meta_package_manager._docs import scope_changelog
 print(scope_changelog("bar-plugin"))
 ```
 
-## `meta_package_manager.bar_plugin` API
-
-```{eval-rst}
-.. automodule:: meta_package_manager.bar_plugin
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## `meta_package_manager.bar_plugin_renderer` API
-
-```{eval-rst}
-.. automodule:: meta_package_manager.bar_plugin_renderer
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 [^1]: Source: [https://endoflife.date/macos](https://endoflife.date/macos)
 
 [^2]: Source: [https://ihaveahax.net/wiki/Python_version_information#Xcode\_(macOS)](https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS)), whose table is keyed by toolchain version.

@@ -310,6 +310,8 @@
 - [mpm] Close an unmaintained manager's selector help with `(unmaintained)`, in the help screen, the man pages and the completion spec alike, replacing Click's `(DEPRECATED)`.
 - [mpm] Fix `mpm --tree`, which drew every subcommand's short help off the screen: `config-template` spelled its argument as the list of all manager IDs.
 - [mpm] Rewrite the SBOM documentation page in short plain sentences, flip its coverage matrix to one column per manager, and fix its offline install example, which used `pip` instead of `uv`.
+- [bar-plugin,mpm] Drop the API reference sections the guide pages repeated at their foot; each module stays documented on its own API page.
+- [mpm] Regroup the documentation sidebar under ten topical sections, instead of one flat list of 19 entries and a `Development` catch-all.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

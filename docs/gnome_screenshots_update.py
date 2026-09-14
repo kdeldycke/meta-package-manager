@@ -116,13 +116,11 @@ its bottom edge is simply not in the picture.
 PREFERENCES_WIDTH = 720
 """Logical width the preferences window is grown to, beside its height.
 
-`Adw.PreferencesWindow` opens at `640`, which wrapped the *About* row's title
-onto a second line: measured on the capture, that line ended 12 logical pixels
-short of fitting the word it dropped. The margin above that is deliberate, as a
-runner whose font renders a shade wider would otherwise wrap it again.
-
-The extra width lands on the title, the one part of a row that expands; the
-logo and the *Documentation* link keep their own size.
+`Adw.PreferencesWindow` opens at `640`. This buys the rows very little on its
+own, `Adw.PreferencesPage` clamping its content: measured across two captures,
+growing the window by 80 logical pixels widened the *About* title's room by 23
+and spent the rest on margin. The title that wrapped there was shortened
+instead, and this is the margin around that fix rather than the fix itself.
 """
 
 MONITOR_SCALE = 2

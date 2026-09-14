@@ -88,9 +88,14 @@ export default class MpmPreferences extends ExtensionPreferences {
 
         const about = new Adw.PreferencesGroup({title: _('About')});
         /* The product name alone would not tell the two rows apart: `mpm` is
-         * the name of the CLI below as much as of the extension. */
+         * the name of the CLI below as much as of the extension. "GNOME
+         * extension" rather than the fuller "GNOME Shell extension" because
+         * the longer one wraps onto a second line, and the row cannot be
+         * widened out of it: `Adw.PreferencesPage` clamps its content, so a
+         * window grown by 80 logical pixels passed only 23 of them to the
+         * title. */
         const aboutRow = new Adw.ActionRow({
-            title: _('%s (GNOME Shell extension)').format(this.metadata.name),
+            title: _('%s (GNOME extension)').format(this.metadata.name),
             subtitle: this.metadata['version-name'] ?? '',
         });
         const logo = Gtk.Image.new_from_file(`${this.path}/icons/mpm-logo.svg`);

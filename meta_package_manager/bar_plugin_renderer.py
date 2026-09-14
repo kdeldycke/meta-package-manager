@@ -118,43 +118,45 @@ the most readable recognizable red the xterm-256 palette can express (a pure
 def elide_versions(old: str, new: str, width: int) -> tuple[str, str]:
     """Shorten a version pair to `width` characters, keeping the two told apart.
 
-    The shared head goes first, because it is the half carrying no information:
-    a pair differing only in a late revision (`1:2.41.5-0+deb13u1` against its
-    `u2` rebuild) would otherwise be cut to the same string with an arrow
-    between them. Only when the diverging part alone overruns the budget does
-    its tail go, which is the shape of the identifiers motivating the cap: a
-    commit SHA, or Homebrew's `version,revision` pair.
+    The tail goes first, which is where a version keeps the part nobody reads: a
+    commit SHA, a platform triple, Homebrew's `version,revision` pair. That cut
+    fails on a rebuild differing only in its last characters
+    (`2.6.0-2.suse1699.10` against its `.11`), since both sides would come back
+    as the same string with an arrow between them. The shared head is what gives
+    way then, elided around the boundary
+    {func}`~meta_package_manager.version.common_prefix_length` reports, so the
+    `…` lands where the gray prefix hands over to the colored suffix.
 
-    Both cuts land on the boundary {func}`~meta_package_manager.version.common_prefix_length`
-    reports, so the `…` always sits where the gray prefix hands over to the
-    colored suffix.
-
-    A pair sharing more than `width` characters *and* carrying no separator
-    before they diverge still renders alike. No version in the survey behind
-    {data}`MAX_VERSION_WIDTH` does that: a string that long always has a
-    separator in it.
+    Which of the two applies is decided for the pair rather than per version.
+    Deciding per version once rendered `5.0.0~beta1-0ubuntu7` as
+    `….0~beta1-0ubuntu7` beside a `5.0.2-0ubuntu1~26…` that had kept its head,
+    so the column no longer lined up and the leading `5.0` was dropped from one
+    side only.
     """
     if max(len(old), len(new)) <= width:
         return old, new
 
-    common = common_prefix_length(old, new)
     budget = width - len(VERSION_ELLIPSIS)
+    cut_tail = tuple(
+        version if len(version) <= width else version[:budget] + VERSION_ELLIPSIS
+        for version in (old, new)
+    )
+    if cut_tail[0] != cut_tail[1]:
+        return cut_tail[0], cut_tail[1]
+
+    # Cutting the tail rendered the pair alike, so elide the shared head instead.
+    common = common_prefix_length(old, new)
     elided = []
     for version in (old, new):
-        if len(version) <= width:
-            elided.append(version)
-            continue
         suffix = version[common:]
-        if len(suffix) <= budget:
-            # The diverging part fits whole: spend what is left on the head of
-            # the shared prefix and elide its middle.
-            elided.append(version[: budget - len(suffix)] + VERSION_ELLIPSIS + suffix)
+        head = budget - len(suffix)
+        if head > 0:
+            elided.append(version[:head] + VERSION_ELLIPSIS + suffix)
         else:
-            # The diverging part alone overruns. Keep its head and drop the
-            # tail, holding the shared prefix to `budget - 1` so at least one
-            # diverging character always shows.
-            head = min(common, budget - 1)
-            elided.append(version[:head] + suffix[: budget - head] + VERSION_ELLIPSIS)
+            # Nothing of the shared head survives, which takes a version long
+            # enough to fill the budget on its own and carrying no separator to
+            # anchor on. Keep the tail, where the two differ.
+            elided.append(VERSION_ELLIPSIS + version[-budget:])
     return elided[0], elided[1]
 
 

@@ -323,6 +323,23 @@ def test_renderer_version_diff_colors_by_appearance(
             ("1.10.11+0.aarch64…", "1.12.6+0.aarch64.…"),
             id="build-triple",
         ),
+        # Both sides over the cap. They must come back cut the same way, or the
+        # column stops lining up: the per-version decision this replaced left
+        # one head-elided beside one tail-cut.
+        pytest.param(
+            "5.0.0~beta1-0ubuntu7",
+            "5.0.2-0ubuntu1~26.04.1",
+            ("5.0.0~beta1-0ubun…", "5.0.2-0ubuntu1~26…"),
+            id="both-sides-capped",
+        ),
+        # A separator-free pair long enough to fill the budget on its own, whose
+        # divergence sits past the cap: the tail is what has to show.
+        pytest.param(
+            "a" * 20 + "X1",
+            "a" * 20 + "X2",
+            ("…" + "a" * 15 + "X1", "…" + "a" * 15 + "X2"),
+            id="no-separator-late-divergence",
+        ),
         # A rebuild differing only in its last character. Cutting the tail would
         # render both sides alike, so the shared head is what gives way.
         pytest.param(

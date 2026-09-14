@@ -147,7 +147,7 @@ class Pipx(PackageManager):
 
         data = self.parse_json(output)
         if data:
-            for package_id, package_info in data["venvs"].items():
+            for package_id, package_info in data.get("venvs", {}).items():
                 yield self.package(
                     id=package_id,
                     installed_version=package_info["metadata"]["main_package"][
@@ -226,7 +226,7 @@ class Pipx(PackageManager):
             )
             data = self.parse_json(output)
             if data:
-                for package_info in data["data"]["packages"]:
+                for package_info in data.get("data", {}).get("packages", ()):
                     yield self.package(
                         id=package_info["package"],
                         installed_version=package_info["version"],

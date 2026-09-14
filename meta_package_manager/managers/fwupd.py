@@ -352,7 +352,15 @@ class FWUPD(PackageManager):
 
         data = self.parse_json(output)
         if data:
-            for device in data["Devices"]:
+            # Under `--json`, fwupd answers either its payload or an `Error`
+            # object, never both: `fu_cli_print_error_as_json()` of `fu-cli.c`
+            # replaces the whole document on any failure. Having nothing to
+            # manage is one of those failures, `FWUPD_ERROR_NOTHING_TO_DO`
+            # carrying its own `EXIT_NOTHING_TO_DO` (2), which is what every
+            # VM, container and device-less host returns. It lands on <stdout>
+            # with an empty <stderr>, so `run()` reads it as a status rather
+            # than a failure and the shape arrives here as data to parse.
+            for device in data.get("Devices", ()):
                 # Every device field is optional: fwupd writes one only when the
                 # daemon read a value for it. The ID is the handle every later
                 # operation addresses the device by, so it is the one field a
@@ -535,7 +543,15 @@ class FWUPD(PackageManager):
 
         data = self.parse_json(output)
         if data:
-            for device in data["Devices"]:
+            # Under `--json`, fwupd answers either its payload or an `Error`
+            # object, never both: `fu_cli_print_error_as_json()` of `fu-cli.c`
+            # replaces the whole document on any failure. Having nothing to
+            # manage is one of those failures, `FWUPD_ERROR_NOTHING_TO_DO`
+            # carrying its own `EXIT_NOTHING_TO_DO` (2), which is what every
+            # VM, container and device-less host returns. It lands on <stdout>
+            # with an empty <stderr>, so `run()` reads it as a status rather
+            # than a failure and the shape arrives here as data to parse.
+            for device in data.get("Devices", ()):
                 device_id = device.get("DeviceId")
                 if not device_id or "updatable" not in device.get("Flags", ()):
                     continue

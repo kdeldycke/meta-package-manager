@@ -66,6 +66,19 @@ ANONYMOUS = {"Name": "UEFI dbx", "Version": "0", "Flags": ["updatable"]}
 RELEASES = [{"Version": "21"}, {"Version": "26"}, {"Version": "22"}]
 """The three `UEFI dbx` releases of the captured `get-updates` sample."""
 
+NO_DEVICES = json.dumps({
+    "Error": {
+        "Domain": "FwupdError",
+        "Code": 9,
+        "Message": "No detected devices",
+    },
+})
+"""What both commands answer on a host fwupd finds nothing to manage on.
+
+Captured from Ubuntu 26.04 in a VM, where no device is updatable. `Devices` is
+absent entirely, and indexing it aborted every query carrying `fwupd`.
+"""
+
 
 def payload(*devices) -> str:
     """Wrap device records into a `get-devices` or `get-updates` payload."""
@@ -138,3 +151,16 @@ def test_installed(manager, stub_run_cli, devices, expected):
 def test_outdated(manager, stub_run_cli, devices, expected):
     stub_run_cli(manager, payload(*devices))
     assert reported(manager.outdated) == expected
+
+
+@pytest.mark.parametrize("query", ("installed", "outdated"))
+def test_no_detected_devices(manager, stub_run_cli, query):
+    """Both parsers survive the payload of a host with nothing to manage.
+
+    fwupd reports it as an `Error` object with no `Devices` key, written to
+    <stdout> with an empty <stderr> and exit code 2. `run()` reads that as a
+    status rather than a failure, exactly as it does for `npm outdated`, so the
+    parser receives the payload as data and has to cope with the shape.
+    """
+    stub_run_cli(manager, NO_DEVICES)
+    assert reported(getattr(manager, query)) == ()

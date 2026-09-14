@@ -1054,3 +1054,59 @@ def test_manager_keywords_are_normalized():
             offenders[manager.id] = malformed
 
     assert not offenders, f"Keywords that are not stripped and lowercase: {offenders}"
+
+
+def _parsed_json_subscripts(source: str) -> tuple[str, ...]:
+    """Constant-key subscripts applied to the result of a `parse_json()` call.
+
+    Walks each function for the names bound to a `self.parse_json(...)` result,
+    then reports every `name["key"]` reading one of them. Scoped to that one
+    helper: a parser decoding JSON some other way is out of reach here, and
+    nothing in the pool currently does.
+    """
+    findings = []
+    for func in ast.walk(ast.parse(source)):
+        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        parsed = set()
+        for node in ast.walk(func):
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call):
+                called = node.value.func
+                if isinstance(called, ast.Attribute) and called.attr == "parse_json":
+                    parsed.update(
+                        target.id
+                        for target in node.targets
+                        if isinstance(target, ast.Name)
+                    )
+        findings.extend(
+            f"{func.name}() line {node.lineno}: {node.value.id}[{node.slice.value!r}]"
+            for node in ast.walk(func)
+            if isinstance(node, ast.Subscript)
+            and isinstance(node.value, ast.Name)
+            and node.value.id in parsed
+            and isinstance(node.slice, ast.Constant)
+        )
+    return tuple(findings)
+
+
+def test_parsed_json_is_never_subscripted():
+    """No parser indexes a top-level key its tool is free to omit.
+
+    A CLI with nothing to report often answers a different shape rather than an
+    empty one. `fwupdmgr --json` replaces its whole payload with an `Error`
+    object and exits `2`, so `data["Devices"]` aborted every query reaching
+    `fwupd` on any host with no updatable device: a VM, a container, plenty of
+    real machines. Two such crashes came out of that one parser within a month
+    ([#2073](https://github.com/kdeldycke/meta-package-manager/pull/2073) was
+    the first), each found by a user rather than by CI.
+
+    They surface only on the empty result, which is the case nobody has the
+    hardware to stage, so the guard is structural rather than another fixture:
+    read a parsed payload with `.get()` and a default.
+    """
+    offenders = {}
+    for module_path in sorted(Path(managers_module.__file__).parent.glob("*.py")):
+        found = _parsed_json_subscripts(module_path.read_text(encoding="UTF-8"))
+        if found:
+            offenders[module_path.name] = found
+    assert not offenders, f"Parsed JSON subscripted directly: {offenders}"

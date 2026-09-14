@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [fwupd] Fix every query reaching `fwupd` aborting on a host with no updatable device, which is what a VM, a container and plenty of real machines report. fwupd answers that with an `Error` object replacing its whole payload, and `mpm installed`, `mpm outdated`, `mpm sbom` and the snapshot commands read it as a device list.
 - [aptitude] Add aptitude package manager, with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.
 - [pear] Add PEAR package manager, with inventory, outdated, install, remove, upgrade, channel sync and cache cleanup.
 - [roswell] Add Roswell package manager, listing and installing the Common Lisp implementations it manages.

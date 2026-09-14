@@ -594,7 +594,11 @@ class Homebrew(PackageManager):
 
         package_list = self.parse_json(output)
         if package_list:
-            for pkg_info in package_list["formulae"] + package_list["casks"]:
+            # A key absent from the payload is an empty section, not a crash:
+            # see `tests/test_managers.py::test_parsed_json_is_never_subscripted`.
+            for pkg_info in (
+                package_list.get("formulae", []) + package_list.get("casks", [])
+            ):
                 # Interpret installed versions.
                 versions = pkg_info["installed_versions"]
                 if isinstance(versions, str):

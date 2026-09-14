@@ -12,6 +12,7 @@
 # its settings UI.
 # <xbar.var>boolean(VAR_GROUP_BY_MANAGER="false"): Group each manager's packages into a section of its own.</xbar.var>
 # <xbar.var>boolean(VAR_TABLE_RENDERING="true"): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
+# <xbar.var>number(VAR_MAX_VERSION_WIDTH="18"): Widest a version renders in a menu line, in characters. Longer ones are shortened with an ellipsis.</xbar.var>
 # XXX Font options are declared SwiftBar-only, as Xbar truncates a default value at its
 # first `=` character. See: https://github.com/matryer/xbar/issues/832
 # <swiftbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</swiftbar.var>
@@ -141,6 +142,21 @@ class MPMPlugin:
         if value is None:
             return default
         return RawConfigParser.BOOLEAN_STATES[value]
+
+    @staticmethod
+    def getenv_int(var, default: int) -> int:
+        """Utility to normalize integer environment variables.
+
+        Falls back to the default on anything that is not a number, so a typo in
+        a plugin setting degrades the layout instead of killing the menu.
+        """
+        value = MPMPlugin.getenv_str(var)
+        if value is None:
+            return default
+        try:
+            return int(value)
+        except ValueError:
+            return default
 
     @staticmethod
     def normalize_params(font_string: str, valid_ids: set[str] | None = None) -> str:

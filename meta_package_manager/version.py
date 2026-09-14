@@ -751,6 +751,42 @@ def is_version(string: str) -> bool:
     return len(version.tokens) == 1
 
 
+def common_prefix_length(old: str, new: str) -> int:
+    """Length of the leading run `old` and `new` share, snapped to a token boundary.
+
+    The split point snaps back to the nearest separator so a divergence landing
+    inside a token takes the whole token with it, plus the separator before it.
+    It does not snap when the divergence already sits on a boundary, one version
+    being the other plus a whole new token: `14ubuntu6` and `14ubuntu6.1` share
+    `14ubuntu6`, where walking back would swallow the tokens that did match.
+
+    Both {func}`diff_versions` and the bar plugin's version elision anchor on
+    this one boundary, so the gray-to-red transition and the `…` a capped cell
+    shows always land in the same place.
+    """
+    # Longest common character prefix.
+    common = 0
+    for a, b in zip(old, new):
+        if a != b:
+            break
+        common += 1
+
+    diverges_mid_token = (
+        old[common : common + 1].isalnum() or new[common : common + 1].isalnum()
+    )
+    if not common or common >= max(len(old), len(new)) or not diverges_mid_token:
+        return common
+
+    snap = common
+    # Walk back past the partial alnum token.
+    while snap > 0 and old[snap - 1].isalnum():
+        snap -= 1
+    # Walk back past the separator itself.
+    while snap > 0 and not old[snap - 1].isalnum():
+        snap -= 1
+    return snap
+
+
 def diff_versions(
     old: str | TokenizedString,
     new: str | TokenizedString,
@@ -780,31 +816,7 @@ def diff_versions(
     """
     old = str(old)
     new = str(new)
-
-    # Longest common character prefix.
-    common = 0
-    for a, b in zip(old, new):
-        if a != b:
-            break
-        common += 1
-
-    # Snap back to a separator boundary when the strings actually differ, and
-    # only when the divergence lands inside a token. One version being the
-    # other plus a whole new token (`14ubuntu6` and `14ubuntu6.1`) already sits
-    # on a boundary: walking back would swallow the tokens that did match and
-    # color both versions in full, highlighting nothing.
-    diverges_mid_token = (
-        old[common : common + 1].isalnum() or new[common : common + 1].isalnum()
-    )
-    if common and common < max(len(old), len(new)) and diverges_mid_token:
-        snap = common
-        # Walk back past the partial alnum token.
-        while snap > 0 and old[snap - 1].isalnum():
-            snap -= 1
-        # Walk back past the separator itself.
-        while snap > 0 and not old[snap - 1].isalnum():
-            snap -= 1
-        common = snap
+    common = common_prefix_length(old, new)
 
     prefix = style(old[:common], fg=prefix_fg) if common else ""
     return (

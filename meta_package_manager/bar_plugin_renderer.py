@@ -44,7 +44,39 @@ from click_extra.table import TableFormat, render_table
 from .bar_plugin import MPMPlugin
 from .capabilities import Operations, implements
 from .pool import pool
-from .version import diff_versions
+from .version import common_prefix_length, diff_versions
+
+MAX_VERSION_WIDTH = 18
+"""Widest a version renders in a menu line, in characters.
+
+A macOS menu cannot scroll sideways, and the menu item is one line tall, so a
+row wider than the menu loses its tail: SwiftBar leaves the paragraph style at
+AppKit's default `.byWordWrapping`, which pushes the last whitespace-delimited
+token onto a second line the item never draws. The target version is that token,
+so one over-long package blanks the very column the menu exists to show. The cap
+also spares every *other* row, since the table aligns on the widest cell in the
+column.
+
+`18` comes from surveying 1087 version strings: the 578 captured in the bundled
+`[samples]` fixtures and the manager docstrings, plus 509 read off a live macOS
+inventory. The population has two parts with nothing in between. Versions people
+read run to 17 characters (`152.0.7977.82-1.1`, a Homebrew cask), and machine
+identifiers start at 26 (a Julia build triple, a 40-character commit SHA, and
+Homebrew's 50-character `version,revision` pair). `18` is the smallest cap that
+elides none of the first group. Linux package managers reach 22 in the fixtures
+(`2.7+git1722+daf2f52-r0`, an OpenWrt package), which this renderer never sees:
+SwiftBar and Xbar are macOS-only.
+
+Override it with the `VAR_MAX_VERSION_WIDTH` environment variable. See
+{meth}`BarPluginRenderer.max_version_width`.
+"""
+
+VERSION_ELLIPSIS = "…"
+"""Marker standing in for the characters {data}`MAX_VERSION_WIDTH` drops.
+
+One character wide in a monospace font, so it costs the table a single column
+where `...` would cost three.
+"""
 
 VERSION_PREFIX_COLOR = 245
 """Xterm-256 palette index coloring the unchanged version prefix in menu lines.
@@ -81,6 +113,49 @@ the most readable recognizable red the xterm-256 palette can express (a pure
 `#ff0000` scores lower, and brighter options read as orange). See
 {meth}`BarPluginRenderer.menu_diff_colors`.
 """
+
+
+def elide_versions(old: str, new: str, width: int) -> tuple[str, str]:
+    """Shorten a version pair to `width` characters, keeping the two told apart.
+
+    The shared head goes first, because it is the half carrying no information:
+    a pair differing only in a late revision (`1:2.41.5-0+deb13u1` against its
+    `u2` rebuild) would otherwise be cut to the same string with an arrow
+    between them. Only when the diverging part alone overruns the budget does
+    its tail go, which is the shape of the identifiers motivating the cap: a
+    commit SHA, or Homebrew's `version,revision` pair.
+
+    Both cuts land on the boundary {func}`~meta_package_manager.version.common_prefix_length`
+    reports, so the `…` always sits where the gray prefix hands over to the
+    colored suffix.
+
+    A pair sharing more than `width` characters *and* carrying no separator
+    before they diverge still renders alike. No version in the survey behind
+    {data}`MAX_VERSION_WIDTH` does that: a string that long always has a
+    separator in it.
+    """
+    if max(len(old), len(new)) <= width:
+        return old, new
+
+    common = common_prefix_length(old, new)
+    budget = width - len(VERSION_ELLIPSIS)
+    elided = []
+    for version in (old, new):
+        if len(version) <= width:
+            elided.append(version)
+            continue
+        suffix = version[common:]
+        if len(suffix) <= budget:
+            # The diverging part fits whole: spend what is left on the head of
+            # the shared prefix and elide its middle.
+            elided.append(version[: budget - len(suffix)] + VERSION_ELLIPSIS + suffix)
+        else:
+            # The diverging part alone overruns. Keep its head and drop the
+            # tail, holding the shared prefix to `budget - 1` so at least one
+            # diverging character always shows.
+            head = min(common, budget - 1)
+            elided.append(version[:head] + suffix[: budget - head] + VERSION_ELLIPSIS)
+    return elided[0], elided[1]
 
 
 class BarPluginRenderer(MPMPlugin):
@@ -135,6 +210,18 @@ class BarPluginRenderer(MPMPlugin):
         package sits in one continuous column.
         """
         return self.group_by_manager and not self.fold_sections
+
+    @cached_property
+    def max_version_width(self) -> int:
+        """How wide a version may render before it is elided, in characters.
+
+        Value is sourced from the `VAR_MAX_VERSION_WIDTH` environment variable,
+        and defaults to {data}`MAX_VERSION_WIDTH`. A value below `2` leaves no
+        room for the ellipsis and any content beside it, so it is read as
+        turning the cap off.
+        """
+        width = self.getenv_int("VAR_MAX_VERSION_WIDTH", MAX_VERSION_WIDTH)
+        return width if width > 1 else 0
 
     @cached_property
     def menu_diff_colors(self) -> dict[str, int]:
@@ -239,13 +326,21 @@ class BarPluginRenderer(MPMPlugin):
                 "refresh=true",
             )
 
-    def package_rows(self, manager) -> list[tuple[tuple[str, ...], str]]:
-        """One row of cells per outdated package, with the command it runs."""
-        rows: list[tuple[tuple[str, ...], str]] = []
+    def package_rows(self, manager) -> list[tuple[tuple[str, ...], str, str]]:
+        """One row of cells per outdated package, with the command it runs and
+        the tooltip restoring whatever the version cap elided."""
+        rows: list[tuple[tuple[str, ...], str, str]] = []
         for package in manager["packages"]:
+            full_old = package["installed_version"] or "?"
+            full_new = package["latest_version"]
+            old, new = (
+                elide_versions(full_old, full_new, self.max_version_width)
+                if self.max_version_width
+                else (full_old, full_new)
+            )
             installed, latest = diff_versions(
-                package["installed_version"] if package["installed_version"] else "?",
-                package["latest_version"],
+                old,
+                new,
                 prefix_fg=VERSION_PREFIX_COLOR,
                 **self.menu_diff_colors,
             )
@@ -260,8 +355,22 @@ class BarPluginRenderer(MPMPlugin):
             rows.append((
                 (label, "", installed, "→", latest),
                 package["upgrade_cli"],
+                self.version_tooltip(full_old, full_new, (old, new)),
             ))
         return rows
+
+    def version_tooltip(self, old: str, new: str, elided: tuple[str, str]) -> str:
+        """The untruncated version pair, for an item whose cells were elided.
+
+        SwiftBar shows a `tooltip` on hover, which is where the characters
+        {meth}`max_version_width` dropped stay reachable. Its parser reads a
+        quoted value whole, so the spaces around the arrow are safe. Xbar has no
+        such parameter and would render the text as part of the label, so it
+        gets nothing.
+        """
+        if not self.is_swiftbar or (old, new) == elided:
+            return ""
+        return f'tooltip="{old} → {new}"'
 
     @staticmethod
     def align_rows(rows: list[tuple[str, ...]]) -> list[str]:
@@ -280,7 +389,7 @@ class BarPluginRenderer(MPMPlugin):
         ).splitlines()
 
     def align_managers(
-        self, rows_by_manager: dict[str, list[tuple[tuple[str, ...], str]]]
+        self, rows_by_manager: dict[str, list[tuple[tuple[str, ...], str, str]]]
     ) -> dict[str, list[str]]:
         """Align every manager's rows, together or apart.
 
@@ -295,11 +404,11 @@ class BarPluginRenderer(MPMPlugin):
         """
         if self.own_panel_per_manager:
             return {
-                manager_id: self.align_rows([cells for cells, _ in rows])
+                manager_id: self.align_rows([cells for cells, *_ in rows])
                 for manager_id, rows in rows_by_manager.items()
             }
         lines = self.align_rows([
-            cells for rows in rows_by_manager.values() for cells, _ in rows
+            cells for rows in rows_by_manager.values() for cells, *_ in rows
         ])
         aligned, start = {}, 0
         for manager_id, rows in rows_by_manager.items():
@@ -379,11 +488,12 @@ class BarPluginRenderer(MPMPlugin):
                     if self.is_swiftbar
                     else f"{package_count} outdated {manager['name']} {package_label}"
                 )
-                formatted_lines = [" ".join(map(str, cells)) for cells, _ in table]
+                formatted_lines = [" ".join(map(str, cells)) for cells, *_ in table]
 
-            upgrade_cli_list = [cli for _, cli in table]
+            upgrade_cli_list = [cli for _, cli, _ in table]
+            tooltips = [tooltip for *_, tooltip in table]
 
-            assert len(formatted_lines) == len(upgrade_cli_list)
+            assert len(formatted_lines) == len(upgrade_cli_list) == len(tooltips)
 
             # Print section separator before printing the manager header.
             print("---")
@@ -402,12 +512,15 @@ class BarPluginRenderer(MPMPlugin):
             # Print a menu entry for each outdated packages. The ansi=true
             # parameter renders the version-diff colors; SwiftBar defaults it
             # to false, Xbar to true, so it is always spelled out.
-            for line, upgrade_cli in zip(formatted_lines, upgrade_cli_list):
+            for line, upgrade_cli, tooltip in zip(
+                formatted_lines, upgrade_cli_list, tooltips
+            ):
                 self.print_cli_item(
                     f"{submenu}{line}",
                     upgrade_cli,
                     font,
                     "ansi=true",
+                    tooltip,
                     "refresh=true",
                 )
 

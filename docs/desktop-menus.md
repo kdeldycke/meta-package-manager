@@ -33,7 +33,7 @@ A frontend's own settings only decide the menu layout and the check cadence. Eve
 
 ## Version diffs
 
-Each outdated package has its version diff colored with the same convention as `mpm outdated`: unchanged prefix in gray, installed-version suffix in red, latest-version suffix in green. Both frontends split a version at the same point, so a package listed in both reads the same way on either desktop.
+Each outdated package has its version diff colored with the same convention as `mpm outdated`: unchanged prefix in gray, installed-version suffix in red, latest-version suffix in green. Both frontends split a version at the same point, so a package listed in both reads the same way on either desktop. The menu bar plugin then shortens a version past `VAR_MAX_VERSION_WIDTH`, a macOS menu having no room to spare: see {doc}`bar-plugin`.
 
 ## When no `mpm` is found
 

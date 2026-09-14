@@ -36,8 +36,11 @@ from meta_package_manager.bar_plugin_renderer import (
     DARK_MENU_NEW_COLOR,
     LIGHT_MENU_NEW_COLOR,
     LIGHT_MENU_OLD_COLOR,
+    MAX_VERSION_WIDTH,
+    VERSION_ELLIPSIS,
     VERSION_PREFIX_COLOR,
     BarPluginRenderer,
+    elide_versions,
 )
 from meta_package_manager.version import parse_version
 
@@ -201,6 +204,7 @@ def _pin_plugin_env(
         "SWIFTBAR",
         "VAR_DEFAULT_FONT",
         "VAR_HIDE_WHEN_UP_TO_DATE",
+        "VAR_MAX_VERSION_WIDTH",
         "VAR_MONOSPACE_FONT",
         "VAR_GROUP_BY_MANAGER",
     ):
@@ -292,6 +296,123 @@ def test_renderer_version_diff_colors_by_appearance(
     for line in output.splitlines():
         if "ansi=true" not in line:
             assert "\x1b[" not in line
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "expected"),
+    (
+        # Homebrew's `version,revision` cask pair, the 50-character row that
+        # blanked its own target version in a real menu.
+        pytest.param(
+            "1.49585.0,41ad1dff5275eedc8af25989f59f33c5efe14063",
+            "1.52386.4,5078b3dcabffbffb717315a5f9a0e552c9ca54d6",
+            ("1.49585.0,41ad1df…", "1.52386.4,5078b3d…"),
+            id="cask-revision-pair",
+        ),
+        # A Neovim plugin pinned by commit: 40 characters diverging at the first.
+        pytest.param(
+            "016802de402556da54c36bd7359b441266b01cdd",
+            "5cb0114e6242625db56dd6440e945ed1ece10bc7",
+            ("016802de402556da5…", "5cb0114e6242625db…"),
+            id="commit-sha",
+        ),
+        # A Julia build triple, where the platform tail is the shared noise.
+        pytest.param(
+            "1.10.11+0.aarch64.apple.darwin14",
+            "1.12.6+0.aarch64.apple.darwin14",
+            ("1.10.11+0.aarch64…", "1.12.6+0.aarch64.…"),
+            id="build-triple",
+        ),
+        # A rebuild differing only in its last character. Cutting the tail would
+        # render both sides alike, so the shared head is what gives way.
+        pytest.param(
+            "2.6.0-2.suse1699.10",
+            "2.6.0-2.suse1699.11",
+            ("2.6.0-2.suse16….10", "2.6.0-2.suse16….11"),
+            id="late-divergence",
+        ),
+        # The longest version a person reads in the survey, and a plain pair:
+        # both sit under the cap and come back untouched.
+        pytest.param(
+            "152.0.7977.82-1.1",
+            "152.0.7977.82-1.2",
+            ("152.0.7977.82-1.1", "152.0.7977.82-1.2"),
+            id="longest-untouched",
+        ),
+        pytest.param("0.12.11", "0.12.13", ("0.12.11", "0.12.13"), id="plain-semver"),
+    ),
+)
+def test_elide_versions(old, new, expected):
+    """A capped pair stays within the cap, and stays distinguishable."""
+    elided = elide_versions(old, new, MAX_VERSION_WIDTH)
+    assert elided == expected
+    assert max(len(version) for version in elided) <= MAX_VERSION_WIDTH
+    assert elided[0] != elided[1]
+
+
+def test_elide_versions_keeps_the_diff_boundary():
+    """The `…` lands where the gray prefix hands over to the colored suffix, so
+    the elision and {func}`diff_versions` agree on one split point."""
+    old, new = elide_versions("1.0.0+build.20260101", "1.0.0+build.20260102", 16)
+    assert (old, new) == ("1.0.0+\u2026.20260101", "1.0.0+\u2026.20260102")
+    # The whole diverging token survives on both sides, so the eye lands on the
+    # one character that differs.
+    assert old.endswith(".20260101")
+    assert new.endswith(".20260102")
+
+
+@pytest.mark.parametrize("swiftbar", (True, False))
+def test_renderer_caps_version_cells(monkeypatch, swiftbar):
+    """An over-long version is elided in the menu line, and SwiftBar alone gets
+    the tooltip holding what was dropped."""
+    _pin_plugin_env(monkeypatch, table_rendering=True)
+    if swiftbar:
+        monkeypatch.setenv("SWIFTBAR", "1")
+    full_old = "1.49585.0,41ad1dff5275eedc8af25989f59f33c5efe14063"
+    full_new = "1.52386.4,5078b3dcabffbffb717315a5f9a0e552c9ca54d6"
+    fixture = _outdated_fixture()
+    fixture["fakemanager"]["packages"][0]["installed_version"] = full_old
+    fixture["fakemanager"]["packages"][0]["latest_version"] = full_new
+
+    output = BarPluginRenderer().render(fixture)
+
+    lines = [line for line in strip_ansi(output).splitlines() if "ansi=true" in line]
+    assert lines
+    # Widest package name of the fixture, its spacer, two capped version cells
+    # and the arrow between them.
+    widest = len("another-long-package") + 2 + MAX_VERSION_WIDTH + 3 + MAX_VERSION_WIDTH
+    for line in lines:
+        label = line.split(" | ")[0]
+        assert full_old not in label
+        assert len(label) <= widest
+    capped = [line for line in lines if VERSION_ELLIPSIS in line.split(" | ")[0]]
+    # The capped package, rendered as a terminal entry and an alternate one.
+    assert len(capped) == 2
+    for line in capped:
+        assert ("1.49585.0,41ad1df…" in line) and ("1.52386.4,5078b3d…" in line)
+        expected_tooltip = f'tooltip="{full_old} → {full_new}"'
+        assert (expected_tooltip in line) is swiftbar
+    # The pair already under the cap carries no tooltip.
+    for line in set(lines) - set(capped):
+        assert "tooltip=" not in line
+
+
+@pytest.mark.parametrize(
+    ("value", "capped"),
+    (("0", False), ("1", False), ("24", True), ("not-a-number", True)),
+)
+def test_renderer_version_cap_is_configurable(monkeypatch, value, capped):
+    """`VAR_MAX_VERSION_WIDTH` overrides the cap; a width leaving no room for
+    the ellipsis turns it off, and a value that is not a number falls back to
+    the default."""
+    _pin_plugin_env(monkeypatch, table_rendering=True)
+    monkeypatch.setenv("VAR_MAX_VERSION_WIDTH", value)
+    fixture = _outdated_fixture()
+    fixture["fakemanager"]["packages"][0]["installed_version"] = "1.0." + "a" * 30
+    fixture["fakemanager"]["packages"][0]["latest_version"] = "1.0." + "b" * 30
+
+    output = strip_ansi(BarPluginRenderer().render(fixture))
+    assert (VERSION_ELLIPSIS in output) is capped
 
 
 def test_renderer_table_alignment_survives_ansi(monkeypatch):

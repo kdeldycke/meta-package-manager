@@ -24,6 +24,7 @@ The plugin is configurable with these environment variables:
 | -------------------------- | -------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :------------------------------------------------: |
 | `VAR_GROUP_BY_MANAGER`     | Group each manager's packages into a section of its own.                         | Boolean | `False`              |        ✅        |                         ✅                         |
 | `VAR_TABLE_RENDERING`      | Aligns package names and versions in a table for easier visual parsing.          | Boolean | `True`               |        ✅        |                         ✅                         |
+| `VAR_MAX_VERSION_WIDTH`    | Widest a version renders in a menu line, in characters.                          | Number  | `18`                 |        ✅        |                         ✅                         |
 | `VAR_DEFAULT_FONT`         | Font parameters for regular text.                                                | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
 | `VAR_MONOSPACE_FONT`       | Font parameters for monospace text. Used for table rendering and error messages. | String  | `font=Menlo size=12` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
 | `VAR_HIDE_WHEN_UP_TO_DATE` | Hide the menu bar icon while nothing is outdated and no manager errored.         | Boolean | `False`              |        ✅        |                         ❌                         |
@@ -33,6 +34,8 @@ SwiftBar renders two things differently from Xbar: the outdated count sits in a 
 ```
 
 These variables only drive the menu layout: everything else comes from `mpm`'s own configuration, as {doc}`desktop-menus` explains.
+
+A macOS menu cannot scroll sideways, so `VAR_MAX_VERSION_WIDTH` keeps a row from outgrowing it. A version longer than the cap is shortened with an `…`, always on the side the two versions have in common, so the characters telling them apart stay on screen. SwiftBar carries the untruncated pair in the item tooltip. Homebrew casks are what makes this necessary: their `version,revision` pairs run to 50 characters, against 17 for the longest version anyone reads. Set the variable to `0` to render every version whole.
 
 ## Menu actions
 

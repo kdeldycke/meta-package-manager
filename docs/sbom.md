@@ -1,12 +1,12 @@
 # {octicon}`verified` SBOM: Software Bill of Materials
 
 ```{admonition} Context
-The [Log4Shell vulnerability](https://en.wikipedia.org/wiki/Log4Shell) debacle was a wake-up call for the industry. This dependency was deeply embedded in the legacy stack of companies and administrations. They all had huge difficulty to identify its presence, writing custom detection scripts and scanning their software artifacts.
+The [Log4Shell vulnerability](https://en.wikipedia.org/wiki/Log4Shell) was present in the legacy stack of many companies and administrations. They had trouble finding where it was installed, and wrote custom detection scripts to scan their software artifacts.
 
-As a response to this crisis, [SBOM tools have now became a category of their own](https://en.wikipedia.org/wiki/Software_supply_chain). To the point that [a US executive order has also been released](https://bidenwhitehouse.archives.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/) to modernize cybersecurity practices and enforce the production of SBOM to track the software supply chain.
+As a response, [SBOM tools became a category of their own](https://en.wikipedia.org/wiki/Software_supply_chain). A [US executive order](https://bidenwhitehouse.archives.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/) now requires the production of an SBOM to track the software supply chain.
 ```
 
-`mpm` can export the list of installed packages as a SBOM in two standards and multiple formats:
+`mpm` can export the list of installed packages as an SBOM in two standards and multiple formats:
 
 | Standard  | [SPDX](https://spdx.dev) | [CycloneDX](https://cyclonedx.org) |
 | --------- | :----------------------: | :--------------------------------: |
@@ -16,7 +16,7 @@ As a response to this crisis, [SBOM tools have now became a category of their ow
 | RDF XML   |            ✅            |                                    |
 | TAG VALUE |            ✅            |                                    |
 
-SBOM export is the compliance corner of `mpm`'s inventory exports: for re-installable snapshots see {doc}`dump`, and for ad-hoc JSON or CSV piping of a listing see {doc}`output-formats`.
+SBOM export is the compliance corner of `mpm`'s inventory exports. For re-installable snapshots, see {doc}`dump`. For ad-hoc JSON or CSV piping of a listing, see {doc}`output-formats`.
 
 For example:
 
@@ -94,7 +94,7 @@ relationships:
 spdxVersion: SPDX-2.3
 ```
 
-To export only a subset of the installed packages, filter with `--query`. The match is fuzzy by default (case-insensitive, tokenized), the same semantics as `mpm search`; pass `--exact` for a verbatim match on the package ID or name:
+To export only a subset of the installed packages, filter with `--query`. The match is fuzzy by default: case-insensitive and tokenized, the same semantics as `mpm search`. Pass `--exact` for a verbatim match on the package ID or name:
 
 ```shell-session
 $ mpm --brew sbom --query openssl > openssl.spdx.json
@@ -102,27 +102,27 @@ $ mpm --brew sbom --query openssl > openssl.spdx.json
 
 ## Scan mode: `--bundled` vs `--minimal`
 
-`mpm sbom` defaults to **bundled mode**: every manager that knows how is queried for richer per-package metadata (license, supplier, homepage, declared dependencies, source URL, checksums), per-package upstream SBOM documents are merged into the aggregate, and the result lands in the rendered SPDX or CycloneDX document. Bundled mode is the default because the magic of `mpm sbom` is collapsing N different manager APIs into one self-contained file.
+`mpm sbom` defaults to bundled mode. Every manager that can is queried for per-package metadata: license, supplier, homepage, declared dependencies, source URL, checksums. Per-package upstream SBOM documents are merged into the aggregate, and the result is written into the rendered SPDX or CycloneDX document. Bundled mode is the default because `mpm sbom` collapses N different manager APIs into one self-contained file.
 
-When I only need a fast inventory pass, the `--minimal` flag short-circuits the metadata extractors and produces today's bare output (name, version, purl):
+The `--minimal` flag short-circuits the metadata extractors and produces the bare output (name, version, purl):
 
 ```shell-session
 $ mpm --brew sbom --minimal > inventory.spdx.json
 ```
 
-Use `--minimal` for snapshot-style runs (cron jobs, drift detection) and `--bundled` (the default) for compliance, supply-chain audit, and vulnerability-scanner ingestion.
+Use `--minimal` for snapshot-style runs (cron jobs, drift detection). Use `--bundled`, the default, for compliance, supply-chain audit, and vulnerability-scanner ingestion.
 
 ## Layered SBOMs: aggregate + per-package upstream
 
-Some package managers now publish their own per-package SBOM documents. Homebrew, for example, writes `<prefix>/Cellar/<formula>/<version>/sbom.spdx.json` on every source install. These are full SPDX 2.3 documents with the formula's complete dependency closure, real download URLs, and bottle checksums. `HOMEBREW_SBOM` was the opt-in that turned this on in `5.2.0`; `6.0.7` made it a hidden opt-out, so the files are there unless someone turned them off.
+Some package managers now publish their own per-package SBOM documents. Homebrew, for example, writes `<prefix>/Cellar/<formula>/<version>/sbom.spdx.json` on every source install. These are full SPDX 2.3 documents with the formula's complete dependency closure, real download URLs, and bottle checksums. `HOMEBREW_SBOM` was the opt-in that turned this on in `5.2.0`. Since `6.0.7` it is a hidden opt-out, so the files are there unless someone turned them off.
 
-`mpm sbom --bundled` discovers those files, **splices them into the aggregate document**, and records each one in `externalDocumentRefs` with its SHA1 so the merge is auditable. Transitive packages from the upstream document are renamed under a `SPDXRef-brew-<formula>-<dep>` namespace to avoid collisions across formulae that share dependencies.
+`mpm sbom --bundled` discovers those files and splices them into the aggregate document. Each one is recorded in `externalDocumentRefs` with its SHA1, so the merge is auditable. Transitive packages from the upstream document are renamed under a `SPDXRef-brew-<formula>-<dep>` namespace. This avoids collisions across formulae that share dependencies.
 
-For the same data in CycloneDX, the per-formula file is attached to its component via an `externalReferences[type=bom]` entry.
+For the same data in CycloneDX, the per-formula file is attached to its component through an `externalReferences[type=bom]` entry.
 
-Both formats also read one field out of the upstream document without merging it: the purl Homebrew derives from the formula's source URL, naming the package in its own registry. `mpm` indexes it as an alias of the formula's `pkg:brew/…` purl, which is what makes a formula scannable for vulnerabilities. See [§ Vulnerability scanning](#vulnerability-scanning).
+Both formats also read one field out of the upstream document without merging it: the purl Homebrew derives from the formula's source URL. It names the package in its own registry. `mpm` indexes it as an alias of the formula's `pkg:brew/…` purl, which is what makes a formula scannable for vulnerabilities. See [§ Vulnerability scanning](#vulnerability-scanning).
 
-Where the file is missing (a `brew` older than `6.0.7`, a formula installed before it, a cask, or an opted-out install), `mpm` falls back silently to `brew info --json=v2` for the same fields. A reinstall writes one:
+The file can be missing: a `brew` older than `6.0.7`, a formula installed before it, a cask, or an opted-out install. There, `mpm` falls back to `brew info --json=v2` for the same fields. A reinstall writes one:
 
 ```shell-session
 $ brew reinstall <formula>
@@ -131,23 +131,27 @@ $ mpm --brew sbom > deep.spdx.json
 
 ## Coverage matrix
 
-| Manager                            | License | Homepage | Download URL | Checksums | Dependency graph | Per-package SBOM | Vulnerabilities  |
-| :--------------------------------- | :-----: | :------: | :----------: | :-------: | :--------------: | :--------------: | :--------------: |
-| [`brew`](managers/brew.md)         |   ✅    |    ✅    |      ✅      |    ✅     |        ✅        |        ✅        |   ✅ (partial)   |
-| [`pip`](managers/pip.md)           |   ✅    |    ✅    |              |           |        ✅        |                  | ✅ (`--network`) |
-| [`npm`](managers/npm.md)           |         |          |              |           |                  |                  | ✅ (`--network`) |
-| [`cargo`](managers/cargo.md)       |         |          |              |           |                  |                  | ✅ (`--network`) |
-| [`gem`](managers/gem.md)           |         |          |              |           |                  |                  | ✅ (`--network`) |
-| [`composer`](managers/composer.md) |         |          |              |           |                  |                  | ✅ (`--network`) |
-| Others                             |         |          |              |           |                  |                  |                  |
+| Capability         | [`brew`](managers/brew.md) | [`pip`](managers/pip.md) | [`npm`](managers/npm.md) | [`cargo`](managers/cargo.md) | [`gem`](managers/gem.md) | [`composer`](managers/composer.md) | Others |
+| :----------------- | :-----------------------: | :----------------------: | :----------------------: | :--------------------------: | :----------------------: | :--------------------------------: | :----: |
+| License            |            ✅             |            ✅             |                          |                              |                          |                                    |        |
+| Homepage           |            ✅             |            ✅             |                          |                              |                          |                                    |        |
+| Download URL       |            ✅             |                          |                          |                              |                          |                                    |        |
+| Checksums          |            ✅             |                          |                          |                              |                          |                                    |        |
+| Dependency graph   |            ✅             |            ✅             |                          |                              |                          |                                    |        |
+| Per-package SBOM   |            ✅             |                          |                          |                              |                          |                                    |        |
+| Vulnerabilities    |      ✅ (partial)         |      ✅ (`--network`)     |      ✅ (`--network`)     |        ✅ (`--network`)       |      ✅ (`--network`)     |          ✅ (`--network`)            |        |
 
-Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time. The vulnerability column tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems); a manager OSV does not index ([`mas`](managers/mas.md), the distro managers OSV needs a release qualifier for) gets no advisories rather than an error. [`brew`](managers/brew.md) is the exception: OSV indexes no formula, but it does index the upstream package a formula builds from, and `mpm` queries that coordinate under `--network` like the rest. It is marked partial because only a formula built from a registry archive carries one.
+Coverage will expand. Every manager exposes its metadata differently, and more extractors are added per manager over time.
 
-For the `license` column specifically, [Tern](https://github.com/tern-tools/tern) is a useful reference: a Python tool that derives per-package licenses across OS package managers and integrates ScanCode for file-level license detection, the data `mpm` would need to fill licenses beyond Homebrew and pip.
+The `Vulnerabilities` row tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems). A manager OSV does not index returns no advisories, and reports no error. That covers [`mas`](managers/mas.md), and the distro managers OSV needs a release qualifier for.
+
+[`brew`](managers/brew.md) is the exception. OSV indexes no formula, but it does index the upstream package a formula builds from. Under `--network`, `mpm` queries that coordinate like the rest. Its cell is marked partial because only a formula built from a registry archive carries one.
+
+For the `License` row, [Tern](https://github.com/tern-tools/tern) is a useful reference. It is a Python tool that derives per-package licenses across OS package managers, and it integrates ScanCode for file-level license detection. That is the data `mpm` would need to fill the `License` row beyond Homebrew and pip.
 
 ## How `mpm` compares to other SBOM tools
 
-`mpm` is not the only tool that emits an SBOM. The widely-used ones each occupy a different spot in the supply-chain landscape:
+Other tools emit an SBOM too. Each reads a different part of the supply chain:
 
 | Tool                                      | By              | Language   | License          | What it reads                                              |     SPDX      | CycloneDX |    purl    |
 | :---------------------------------------- | :-------------- | :--------- | :--------------- | :--------------------------------------------------------- | :-----------: | :-------: | :--------: |
@@ -159,35 +163,39 @@ For the `license` column specifically, [Tern](https://github.com/tern-tools/tern
 | component-detection[^component-detection] | Microsoft       | C#         | MIT              | source-tree manifests and lockfiles (~30 detectors)        | via sbom-tool |           | own schema |
 | sbom-tool[^sbom-tool]                     | Microsoft       | C#         | MIT              | build output and source tree (wraps component-detection)   |  ✅ 2.2, 3.0  |           |            |
 
-Versions shown are each tool's current default; Syft and cdxgen can also emit older spec revisions on request. `mpm` is on the newest CycloneDX (1.7), and cdxgen and sbom-tool reach the newest SPDX (3.0). Tern's README states no spec versions or purl support for its output.
+Versions shown are each tool's current default. Syft and cdxgen can also emit older spec revisions on request. `mpm` is on the newest CycloneDX (1.7), and cdxgen and sbom-tool reach the newest SPDX (3.0). Tern's README states no spec versions or purl support for its output.
 
-`mpm` differs from these tools in its data source, not its output format. Syft and Trivy read packages at rest: they parse the package databases already written into a container image or filesystem (the `dpkg`, [`apk`](managers/apk.md), or `rpm` database, or a committed lockfile). cdxgen, component-detection, and sbom-tool parse a project's declared manifests and lockfiles.
+`mpm` differs from these tools in its data source. Syft and Trivy read packages at rest. They parse the package databases already written into a container image or filesystem: the `dpkg`, [`apk`](managers/apk.md), or `rpm` database, or a committed lockfile. cdxgen, component-detection, and sbom-tool parse a project's declared manifests and lockfiles.
 
-`mpm` invokes the package managers' own command-line tools. It shells out to [`brew`](managers/brew.md), [`apt`](managers/apt.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), [`cargo`](managers/cargo.md), and the rest, and records what they report on the running host. That covers managers the file scanners do not model: Homebrew casks, [`mas`](managers/mas.md), [`flatpak`](managers/flatpak.md), [`snap`](managers/snap.md), [`mise`](managers/mise.md), and the others listed in {doc}`benchmark`. The trade-off is symmetric: `mpm` needs the managers installed and runnable, while Syft or Trivy can scan an image or directory the host never executed.
+`mpm` invokes the package managers' own command-line tools. It shells out to [`brew`](managers/brew.md), [`apt`](managers/apt.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), [`cargo`](managers/cargo.md), and the rest. It records what they report on the running host. That covers managers the file scanners do not model: Homebrew casks, [`mas`](managers/mas.md), [`flatpak`](managers/flatpak.md), [`snap`](managers/snap.md), [`mise`](managers/mise.md), and the others listed in {doc}`benchmark`.
 
-This invoke-the-real-tool approach is not unique to `mpm`. CycloneDX's own [cargo-cyclonedx](https://github.com/CycloneDX/cyclonedx-rust-cargo) invokes Cargo rather than only parsing `Cargo.lock`, and [Tern](https://github.com/tern-tools/tern) runs each container layer's package manager in a chroot rather than reading its on-disk database. Both reflect what the manager itself resolves. `mpm` applies that principle across every manager it drives, on the live host.
+The trade-off is symmetric. `mpm` needs the managers installed and runnable. Syft or Trivy can scan an image or a directory the host never executed.
 
-The tools are complementary. Reach for Syft, Trivy, or cdxgen to inventory a build artifact, container, or source repository; reach for `mpm sbom` to inventory the software actually installed on a machine.
+This approach is not unique to `mpm`. CycloneDX's own [cargo-cyclonedx](https://github.com/CycloneDX/cyclonedx-rust-cargo) invokes Cargo instead of only parsing `Cargo.lock`. [Tern](https://github.com/tern-tools/tern) runs each container layer's package manager in a chroot instead of reading its on-disk database. Both reflect what the manager itself resolves. `mpm` applies that principle across every manager it drives, on the live host.
+
+The tools are complementary. Reach for Syft, Trivy, or cdxgen to inventory a build artifact, a container, or a source repository. Reach for `mpm sbom` to inventory the software actually installed on a machine.
 
 ## Vulnerability scanning
 
-By default `mpm sbom` works entirely offline. Pass the global `--network` flag to enrich the document with known vulnerabilities, looked up against [OSV.dev](https://osv.dev):
+By default `mpm sbom` works entirely offline. Pass the global `--network` flag to add known vulnerabilities to the document, looked up against [OSV.dev](https://osv.dev):
 
 ```shell-session
 $ mpm --network sbom --cyclonedx > inventory.cdx.json
 ```
 
-In CycloneDX output each advisory lands in the document's `vulnerabilities` array, described once and pointing (through `affects`) at every component it impacts, with its severity rating, CVSS vector, CWE ids, aliases (the CVE behind a GHSA, for instance), and advisory links. SPDX 2.3 has no first-class vulnerability section, so each advisory is attached to its package as a `SECURITY`-category external reference of type `advisory`, with the severity and fixed-version facts folded into the reference comment.
+In CycloneDX output, each advisory appears once in the document's `vulnerabilities` array. It points, through `affects`, at every component it impacts. It carries the severity rating, the CVSS vector, the CWE ids, the aliases (the CVE behind a GHSA, for instance), and the advisory links.
 
-Coverage tracks OSV's ecosystems: language managers like pip, npm, cargo, gem, and composer resolve to OSV ecosystems and get scanned. A system manager's own coordinate is indexed nowhere, so its packages come back without advisories. Responses are cached on disk (under the OS user-cache directory) so repeat scans are fast and stay within OSV's rate limits.
+SPDX 2.3 has no first-class vulnerability section. Each advisory is attached to its package as a `SECURITY`-category external reference of type `advisory`. The severity and fixed-version facts are folded into the reference comment.
 
-[`brew`](managers/brew.md) reaches past that limit, through the coordinate its upstream carries rather than the one Homebrew assigns. Homebrew resolves each formula's source URL to the package's own registry and records the purl in that formula's `sbom.spdx.json`, across ten ecosystems from PyPI to CPAN. The ref first appeared in `6.0.18`, so a formula installed by an older `brew` carries none until it is reinstalled. `mpm` reads it and queries OSV with it, then attributes whatever comes back to the formula.
+Coverage tracks OSV's ecosystems. Language managers like pip, npm, cargo, gem, and composer resolve to OSV ecosystems and get scanned. A system manager's own coordinate is indexed nowhere, so its packages come back without advisories. Responses are cached on disk, under the OS user-cache directory, so repeat scans are fast and stay within OSV's rate limits.
 
-Only a formula built from a registry archive carries such a coordinate, which is a small share of any installation: 8 of the 246 formulae on the macOS host used to measure this. A formula built from a plain forge tarball stays unscanned for now.
+[`brew`](managers/brew.md) reaches past that limit. Homebrew resolves each formula's source URL to the package's own registry and records the purl in that formula's `sbom.spdx.json`, across ten ecosystems from PyPI to CPAN. `mpm` reads it and queries OSV with it, then attributes whatever comes back to the formula. The ref first appeared in `6.0.18`, so a formula installed by an older `brew` carries none until it is reinstalled.
 
-Homebrew ships its own scanner, `brew vulns` (since `6.0.11`), reading the same OSV database. It covers the forge tarballs too, by querying OSV's `GIT` ecosystem with the repository URL and release tag, which reaches another 124 formulae on that same host. So run `brew vulns` for the deepest answer about Homebrew specifically, and `mpm --network sbom` for one inventory spanning every manager on the machine.
+Only a formula built from a registry archive carries such a coordinate. That is a small share of any installation: 8 of the 246 formulae on the macOS host used to measure this. A formula built from a plain forge tarball stays unscanned for now.
 
-Network failures degrade gracefully: a missing extra, an unreachable OSV, or an unwritable cache logs a warning and still produces the SBOM, just without vulnerability data.
+Homebrew ships its own scanner, `brew vulns` (since `6.0.11`), reading the same OSV database. It covers the forge tarballs too, by querying OSV's `GIT` ecosystem with the repository URL and release tag. That reaches another 124 formulae on that same host. So run `brew vulns` for the most complete answer about Homebrew specifically. Run `mpm --network sbom` for one inventory spanning every manager on the machine.
+
+Network failures do not stop the export. A missing extra, an unreachable OSV, or an unwritable cache logs a warning. The SBOM is still produced, without vulnerability data.
 
 ```{caution}
 Running `--network` transmits the ecosystem coordinates of your installed packages (name, version, ecosystem) to OSV.dev. The offline default never makes network calls.
@@ -195,13 +203,13 @@ Running `--network` transmits the ecosystem coordinates of your installed packag
 
 ## Installation
 
-SBOM export is gated behind optional extras, split by usage:
+SBOM export requires optional extras, split by usage:
 
-- **`[sbom-offline]`** pulls the CycloneDX and SPDX writer libraries needed to render documents from local data. This is what `mpm sbom` needs for its default offline operation.
-- **`[sbom-online]`** adds the HTTP client and cache used by `mpm --network sbom` for the OSV.dev vulnerability lookups described above.
+- `[sbom-offline]` pulls the CycloneDX and SPDX writer libraries needed to render documents from local data. This is what `mpm sbom` needs for its default offline operation.
+- `[sbom-online]` adds the HTTP client and cache used by `mpm --network sbom` for the OSV.dev vulnerability lookups described above.
 
 ```shell-session
-$ pip install meta-package-manager[sbom-offline]
+$ uv tool install 'meta-package-manager[sbom-offline]'
 ```
 
 For vulnerability scanning, install both:
@@ -214,9 +222,9 @@ Without `[sbom-offline]`, `mpm sbom` exits with an explanatory error pointing at
 
 ## See also
 
-- {doc}`output-formats` — JSON and CSV table exports for ad-hoc piping of `installed`, `outdated`, `orphans`, and `search` results.
-- {doc}`dump` — TOML manifest and Brewfile snapshots for re-installation workflows.
-- {doc}`cooldown` — release-age gates that complement the SBOM workflow on the install side.
+- {doc}`output-formats`: JSON and CSV table exports for ad-hoc piping of `installed`, `outdated`, `orphans`, and `search` results.
+- {doc}`dump`: TOML manifest and Brewfile snapshots for re-installation workflows.
+- {doc}`cooldown`: release-age gates that complement the SBOM workflow on the install side.
 
 ## `meta_package_manager.sbom` API
 
@@ -247,16 +255,16 @@ Without `[sbom-offline]`, `mpm sbom` exits with an explanatory error pointing at
    :undoc-members:
 ```
 
-[^mpm]: [https://github.com/kdeldycke/meta-package-manager](https://github.com/kdeldycke/meta-package-manager)
+[^mpm]: [kdeldycke/meta-package-manager](https://github.com/kdeldycke/meta-package-manager)
 
-[^syft]: [https://github.com/anchore/syft](https://github.com/anchore/syft)
+[^syft]: [anchore/syft](https://github.com/anchore/syft)
 
-[^trivy]: [https://github.com/aquasecurity/trivy](https://github.com/aquasecurity/trivy)
+[^trivy]: [aquasecurity/trivy](https://github.com/aquasecurity/trivy)
 
-[^tern]: [https://github.com/tern-tools/tern](https://github.com/tern-tools/tern)
+[^tern]: [tern-tools/tern](https://github.com/tern-tools/tern)
 
-[^cdxgen]: [https://github.com/CycloneDX/cdxgen](https://github.com/CycloneDX/cdxgen)
+[^cdxgen]: [CycloneDX/cdxgen](https://github.com/CycloneDX/cdxgen)
 
-[^component-detection]: [https://github.com/microsoft/component-detection](https://github.com/microsoft/component-detection)
+[^component-detection]: [microsoft/component-detection](https://github.com/microsoft/component-detection)
 
-[^sbom-tool]: [https://github.com/microsoft/sbom-tool](https://github.com/microsoft/sbom-tool)
+[^sbom-tool]: [microsoft/sbom-tool](https://github.com/microsoft/sbom-tool)

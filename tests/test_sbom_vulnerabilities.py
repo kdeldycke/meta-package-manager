@@ -44,6 +44,7 @@ from meta_package_manager.sbom._network import (
 )
 from meta_package_manager.sbom.vulnerabilities import (
     OSV_BATCH_ENDPOINT,
+    OSV_ECOSYSTEMS,
     OSV_VULN_ENDPOINT,
     Vulnerability,
     _extract_fixed_versions,
@@ -182,12 +183,41 @@ def test_normalize_osv_record_full():
         (["pkg:brew/curl@8.9.0"], []),
         # Versionless purls are skipped.
         (["pkg:pip/django"], []),
+        # An alias lifted from an upstream document spells its type per
+        # the purl spec, not as an mpm manager id: `pypi`, never `pip`.
+        (["pkg:pypi/yt-dlp@2026.8.19"], [("PyPI", "yt-dlp", "2026.8.19")]),
+        (["pkg:maven/org.example/widget@1.0.0"], [("Maven", "widget", "1.0.0")]),
+        (["pkg:nuget/Newtonsoft.Json@13.0.3"], [("NuGet", "Newtonsoft.Json", "13.0.3")]),
+        # CPAN is the one registry Homebrew resolves that OSV does not
+        # index, so it must stay unmapped rather than query a bogus one.
+        (["pkg:cpan/DROLSKY/DateTime@1.65"], []),
     ),
 )
 def test_parse_purls_maps_ecosystems(purls, expected_coordinates):
     queries = _parse_purls(purls)
     coords = sorted((q.ecosystem, q.name, q.version) for q in queries.values())
     assert coords == sorted(expected_coordinates)
+
+
+def test_osv_ecosystems_cover_every_canonical_alias_type():
+    """Homebrew resolves a formula's source to one of ten registries.
+
+    Nine are OSV ecosystems and must be mapped under their canonical purl
+    type, or every alias is skipped and the upstream-coordinate route is a
+    no-op. CPAN is the tenth and stays out: OSV indexes no such ecosystem.
+    """
+    assert OSV_ECOSYSTEMS.keys() >= {
+        "cargo",
+        "cran",
+        "gem",
+        "hackage",
+        "hex",
+        "maven",
+        "npm",
+        "nuget",
+        "pypi",
+    }
+    assert "cpan" not in OSV_ECOSYSTEMS
 
 
 def test_parse_purls_dedupes_identical_coordinates():

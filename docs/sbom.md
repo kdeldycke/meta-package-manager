@@ -114,18 +114,18 @@ Use `--minimal` for snapshot-style runs (cron jobs, drift detection) and `--bund
 
 ## Layered SBOMs: aggregate + per-package upstream
 
-Some package managers now publish their own per-package SBOM documents. Homebrew, for example, writes `<prefix>/Cellar/<formula>/<version>/sbom.spdx.json` when a formula is installed under `HOMEBREW_SBOM=1` (added in `5.2.0`). These are full SPDX 2.3 documents with the formula's complete dependency closure, real download URLs, and bottle checksums.
+Some package managers now publish their own per-package SBOM documents. Homebrew, for example, writes `<prefix>/Cellar/<formula>/<version>/sbom.spdx.json` on every source install. These are full SPDX 2.3 documents with the formula's complete dependency closure, real download URLs, and bottle checksums. `HOMEBREW_SBOM` was the opt-in that turned this on in `5.2.0`; `6.0.7` made it a hidden opt-out, so the files are there unless someone turned them off.
 
 `mpm sbom --bundled` discovers those files, **splices them into the aggregate document**, and records each one in `externalDocumentRefs` with its SHA1 so the merge is auditable. Transitive packages from the upstream document are renamed under a `SPDXRef-brew-<formula>-<dep>` namespace to avoid collisions across formulae that share dependencies.
 
 For the same data in CycloneDX, the per-formula file is attached to its component via an `externalReferences[type=bom]` entry.
 
-If `HOMEBREW_SBOM=1` was never set, the file does not exist and `mpm` falls back silently to `brew info --json=v2` for the same fields.
+Both formats also read one field out of the upstream document without merging it: the purl Homebrew derives from the formula's source URL, naming the package in its own registry. `mpm` indexes it as an alias of the formula's `pkg:brew/…` purl, which is what makes a formula scannable for vulnerabilities. See [§ Vulnerability scanning](#vulnerability-scanning).
 
-To get the deepest data possible:
+Where the file is missing (a `brew` older than `6.0.7`, a formula installed before it, a cask, or an opted-out install), `mpm` falls back silently to `brew info --json=v2` for the same fields. A reinstall writes one:
 
 ```shell-session
-$ HOMEBREW_SBOM=1 brew reinstall <formula>
+$ brew reinstall <formula>
 $ mpm --brew sbom > deep.spdx.json
 ```
 
@@ -133,7 +133,7 @@ $ mpm --brew sbom > deep.spdx.json
 
 | Manager                            | License | Homepage | Download URL | Checksums | Dependency graph | Per-package SBOM | Vulnerabilities  |
 | :--------------------------------- | :-----: | :------: | :----------: | :-------: | :--------------: | :--------------: | :--------------: |
-| [`brew`](managers/brew.md)         |   ✅    |    ✅    |      ✅      |    ✅     |        ✅        |   ✅ (opt-in)    |                  |
+| [`brew`](managers/brew.md)         |   ✅    |    ✅    |      ✅      |    ✅     |        ✅        |        ✅        |   ✅ (partial)   |
 | [`pip`](managers/pip.md)           |   ✅    |    ✅    |              |           |        ✅        |                  | ✅ (`--network`) |
 | [`npm`](managers/npm.md)           |         |          |              |           |                  |                  | ✅ (`--network`) |
 | [`cargo`](managers/cargo.md)       |         |          |              |           |                  |                  | ✅ (`--network`) |
@@ -141,7 +141,7 @@ $ mpm --brew sbom > deep.spdx.json
 | [`composer`](managers/composer.md) |         |          |              |           |                  |                  | ✅ (`--network`) |
 | Others                             |         |          |              |           |                  |                  |                  |
 
-Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time. The vulnerability column tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems); a manager OSV does not index (Homebrew, [`mas`](managers/mas.md), the distro managers OSV needs a release qualifier for) gets no advisories rather than an error.
+Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time. The vulnerability column tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems); a manager OSV does not index ([`mas`](managers/mas.md), the distro managers OSV needs a release qualifier for) gets no advisories rather than an error. [`brew`](managers/brew.md) is the exception: OSV indexes no formula, but it does index the upstream package a formula builds from, and `mpm` queries that coordinate under `--network` like the rest. It is marked partial because only a formula built from a registry archive carries one.
 
 For the `license` column specifically, [Tern](https://github.com/tern-tools/tern) is a useful reference: a Python tool that derives per-package licenses across OS package managers and integrates ScanCode for file-level license detection, the data `mpm` would need to fill licenses beyond Homebrew and pip.
 
@@ -179,7 +179,13 @@ $ mpm --network sbom --cyclonedx > inventory.cdx.json
 
 In CycloneDX output each advisory lands in the document's `vulnerabilities` array, described once and pointing (through `affects`) at every component it impacts, with its severity rating, CVSS vector, CWE ids, aliases (the CVE behind a GHSA, for instance), and advisory links. SPDX 2.3 has no first-class vulnerability section, so each advisory is attached to its package as a `SECURITY`-category external reference of type `advisory`, with the severity and fixed-version facts folded into the reference comment.
 
-Coverage tracks OSV's ecosystems: language managers like pip, npm, cargo, gem, and composer resolve to OSV ecosystems and get scanned; system managers like Homebrew are not indexed by OSV, so their packages simply come back without advisories. Responses are cached on disk (under the OS user-cache directory) so repeat scans are fast and stay within OSV's rate limits.
+Coverage tracks OSV's ecosystems: language managers like pip, npm, cargo, gem, and composer resolve to OSV ecosystems and get scanned. A system manager's own coordinate is indexed nowhere, so its packages come back without advisories. Responses are cached on disk (under the OS user-cache directory) so repeat scans are fast and stay within OSV's rate limits.
+
+[`brew`](managers/brew.md) reaches past that limit, through the coordinate its upstream carries rather than the one Homebrew assigns. Homebrew resolves each formula's source URL to the package's own registry and records the purl in that formula's `sbom.spdx.json`, across ten ecosystems from PyPI to CPAN. The ref first appeared in `6.0.18`, so a formula installed by an older `brew` carries none until it is reinstalled. `mpm` reads it and queries OSV with it, then attributes whatever comes back to the formula.
+
+Only a formula built from a registry archive carries such a coordinate, which is a small share of any installation: 8 of the 246 formulae on the macOS host used to measure this. A formula built from a plain forge tarball stays unscanned for now.
+
+Homebrew ships its own scanner, `brew vulns` (since `6.0.11`), reading the same OSV database. It covers the forge tarballs too, by querying OSV's `GIT` ecosystem with the repository URL and release tag, which reaches another 124 formulae on that same host. So run `brew vulns` for the deepest answer about Homebrew specifically, and `mpm --network sbom` for one inventory spanning every manager on the machine.
 
 Network failures degrade gracefully: a missing extra, an unreachable OSV, or an unwritable cache logs a warning and still produces the SBOM, just without vulnerability data.
 

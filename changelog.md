@@ -13,6 +13,7 @@
 - [choosenim] Add choosenim Nim toolchain installer, with inventory, catalog search, install, remove and single-version upgrade.
 - [aura] Add aura AUR helper, reporting repository and AUR upgrades together.
 - [hyprpm] Add hyprpm Hyprland plugin manager, listing, installing, removing and upgrading plugin repositories.
+- [brew] Scan formulae for vulnerabilities: `mpm --network sbom` now queries OSV with the upstream registry purl Homebrew records for a formula, instead of the `pkg:brew/…` coordinate no advisory database indexes.
 - [mpm] Fix a crash rendering tables to a non-UTF-8 stream, which broke every table subcommand on Windows as soon as its output was redirected.
 - [mpm] Fix comparison of the Gentoo and Alpine post-release suffixes: `1.0_p1` and `1.0_git20240101` now rank above `1.0`, not below it.
 - [mpm] Escalate through `doas` where `sudo` is Alpine's `doas-sudo-shim`, which rejects every option the credential probes send and so reported a cold cache.

@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS
+from packageurl import PackageURL
 
 from ..capabilities import version_not_implemented
 from ..manager import PackageManager
@@ -189,10 +190,9 @@ class Homebrew(PackageManager):
         """Resolve `brew --prefix` once.
 
         Used to locate per-formula `<prefix>/Cellar/<formula>/<version>`
-        directories where Homebrew writes `sbom.spdx.json` when
-        installed under `HOMEBREW_SBOM=1`. Returns `None` if the
-        prefix cannot be determined, in which case the extractor falls
-        back to API-only metadata.
+        directories where Homebrew writes `sbom.spdx.json`. Returns
+        `None` if the prefix cannot be determined, in which case the
+        extractor falls back to API-only metadata.
         """
         try:
             output = self.run_cli(
@@ -214,10 +214,10 @@ class Homebrew(PackageManager):
         Runs `brew info --json=v2 --installed` in a single shell-out and
         joins the result back onto the inventory list by package ID. For
         each formula that has `<prefix>/Cellar/<name>/<version>/sbom.spdx.json`
-        on disk (the file Homebrew writes when installed under
-        `HOMEBREW_SBOM=1`), the metadata's `external_sbom_path` points
-        at it so the SPDX renderer can splice the upstream document into
-        the aggregate.
+        on disk, the metadata's `external_sbom_path` points at it so the
+        SPDX renderer can splice the upstream document into the
+        aggregate, and `_upstream_purls` lifts the registry coordinates
+        it records.
 
         Casks reuse the same JSON payload through the `casks` array but
         do not get the SBOM-file treatment (Homebrew does not emit one
@@ -320,10 +320,12 @@ class Homebrew(PackageManager):
 
         download_url = ((formula.get("urls") or {}).get("stable") or {}).get("url")
 
+        formula_name = formula.get("name")
         external_sbom_path = self._sbom_path_for_formula(
-            formula.get("name"),
+            formula_name,
             installed.get("version") or formula.get("versions", {}).get("stable"),
         )
+        extra_purls = self._upstream_purls(external_sbom_path, formula_name)
 
         tap = formula.get("tap")
         extras: dict[str, object] = {}
@@ -350,6 +352,7 @@ class Homebrew(PackageManager):
             dependencies=tuple(deps),
             checksums=tuple(checksums),
             external_sbom_path=external_sbom_path,
+            extra_purls=extra_purls,
             extras=extras,
         )
 
@@ -403,10 +406,14 @@ class Homebrew(PackageManager):
     ) -> Path | None:
         """Locate `<prefix>/Cellar/<formula>/<version>/sbom.spdx.json`.
 
-        Returns `None` if the brew prefix is unknown or the file does
-        not exist: that branch covers users who never set
-        `HOMEBREW_SBOM=1` at install time, formulae installed before
-        `5.2.0` introduced the flag, and casks.
+        Homebrew writes one per source install since `6.0.7` flipped
+        `HOMEBREW_SBOM` from the opt-in `5.2.0` introduced to a hidden
+        opt-out. That is above the `6.0.0` this manager requires, so a
+        supported host may still write none.
+
+        Returns `None` if the brew prefix is unknown or the file does not
+        exist: that branch covers a `brew` older than `6.0.7`, formulae
+        installed before it, anyone who turned the flag off, and casks.
         """
         if not formula_name or not version:
             return None
@@ -415,6 +422,59 @@ class Homebrew(PackageManager):
             return None
         candidate = prefix / "Cellar" / formula_name / str(version) / "sbom.spdx.json"
         return candidate if candidate.is_file() else None
+
+    @staticmethod
+    def _upstream_purls(
+        sbom_path: Path | None, formula_name: str | None
+    ) -> tuple[PackageURL, ...]:
+        """Lift the upstream registry coordinates out of a formula's SBOM.
+
+        Homebrew derives a registry purl from the formula's source URL and
+        records it beside the `pkg:brew/…` one on the source package,
+        covering the ten ecosystems its `Homebrew::Vulns::Identify`
+        resolver knows (PyPI, npm, crates.io, RubyGems, Maven, NuGet, Hex,
+        Hackage, CRAN, CPAN). A formula built from a plain forge tarball
+        gets none, and so does one written by a `brew` older than
+        `6.0.18`, which is where the ref first appeared.
+
+        That coordinate is what makes a formula answerable: no advisory
+        database indexes `pkg:brew/…`, so a scan keyed on the manager's own
+        purl comes back empty for every formula. Feeding the upstream purl
+        in as an alias is what gives
+        {func}`~meta_package_manager.sbom.vulnerabilities.scan_vulnerabilities`
+        something to ask about.
+
+        Only the `SPDXRef-Archive-<name>-src` package is read. The same
+        document describes the formula's build dependencies, which the
+        inventory pass never added as packages of their own: a coordinate
+        lifted from one of those would attribute its advisories to the
+        wrong formula.
+        """
+        if sbom_path is None or not formula_name:
+            return ()
+        try:
+            with open(sbom_path, "rb") as sbom_file:
+                document = json.load(sbom_file)
+        except Exception as exc:  # noqa: BLE001
+            logging.debug(f"Failed to read upstream purls from {sbom_path}: {exc}")
+            return ()
+
+        source_id = f"SPDXRef-Archive-{formula_name}-src"
+        purls = []
+        for spdx_package in document.get("packages") or ():
+            if spdx_package.get("SPDXID") != source_id:
+                continue
+            for ref in spdx_package.get("externalRefs") or ():
+                if ref.get("referenceType") != "purl":
+                    continue
+                locator = ref.get("referenceLocator") or ""
+                if not locator or locator.startswith("pkg:brew/"):
+                    continue
+                try:
+                    purls.append(PackageURL.from_string(locator))
+                except ValueError as exc:
+                    logging.debug(f"Skip unparseable purl {locator!r}: {exc}")
+        return tuple(purls)
 
     @property
     def outdated(self) -> Iterator[Package]:

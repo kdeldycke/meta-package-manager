@@ -88,13 +88,68 @@ class SBOM:
         # via {meth}`attach_vulnerabilities`. Renderers consume it in
         # their `finalize` override.
         self.vulnerabilities_by_purl: dict[str, tuple[Vulnerability, ...]] = {}
+        # `alias purl -> primary purls`, for packages a manager identifies
+        # through more than one coordinate system. Fed from
+        # `PackageMetadata.extra_purls` by {meth}`register_purl_aliases`.
+        # A list rather than a set: two packages can share one upstream
+        # coordinate, and the emission order must stay deterministic.
+        self.purl_aliases: dict[str, list[str]] = {}
+        # Every purl the inventory pass admitted as a package of its own,
+        # which is what tells a real coordinate apart from an alias that
+        # only points at one. Also fed by {meth}`register_purl_aliases`.
+        self.primary_purls: set[str] = set()
+
+    def register_purl_aliases(
+        self,
+        primary_purl: str,
+        metadata: PackageMetadata,
+    ) -> None:
+        """Index a package's `extra_purls` as aliases of its primary purl.
+
+        An alias is a second coordinate for the same installed package, so
+        an advisory found under it belongs to the package the inventory
+        pass added. Homebrew is the motivating case: a formula's own
+        `pkg:brew/…` coordinate is unknown to every advisory database,
+        while the upstream registry coordinate it records alongside is not.
+
+        Aliases join {meth}`all_purls`, so the network layer queries them
+        too, and {meth}`resolve_purl_targets` maps the answers back.
+
+        Called once per package, whatever its metadata holds, so it also
+        registers the primary purl itself.
+        """
+        self.primary_purls.add(primary_purl)
+        for extra in metadata.extra_purls:
+            extra_str = extra.to_string()
+            if extra_str == primary_purl:
+                continue
+            owners = self.purl_aliases.setdefault(extra_str, [])
+            if primary_purl not in owners:
+                owners.append(primary_purl)
+
+    def resolve_purl_targets(self, purl_str: str) -> tuple[str, ...]:
+        """Return every package purl an advisory key designates.
+
+        The key itself comes first, covering the ordinary case where the
+        scan queried a package's own purl. Its alias owners follow, so a
+        coordinate that is *both* one package's own purl and another's
+        alias reaches both: `pkg:pypi/ty@…` names the pip package
+        directly and the `ty` formula built from it, and the advisory
+        belongs to each.
+
+        Callers index each target against their own package map and skip
+        what does not resolve, which is what filters out the key when it
+        names no package of its own.
+        """
+        return (purl_str, *self.purl_aliases.get(purl_str, ()))
 
     def all_purls(self) -> Iterator[str]:
         """Yield every package purl present in the document.
 
         Powers the vulnerability scan: the network layer queries OSV once
         with the full purl set rather than once per package. Subclasses
-        implement this against their own component index.
+        implement this against their own component index, and add the
+        aliases {meth}`register_purl_aliases` collected.
         """
         raise NotImplementedError
 
@@ -150,8 +205,18 @@ class SBOM:
         """
         # Count unique advisories and the packages they affect. The same
         # advisory can affect several packages, so the vulnerability total
-        # is over distinct ids, not over the per-purl lists.
-        affected_purls = [p for p, v in self.vulnerabilities_by_purl.items() if v]
+        # is over distinct ids, not over the per-purl lists. A finding is
+        # counted against the packages it reaches rather than the
+        # coordinate it was found under, which are not the same thing once
+        # an alias is in play: an alias names no package of its own, and
+        # can name more than one.
+        affected_purls = {
+            target
+            for purl_str, vulns in self.vulnerabilities_by_purl.items()
+            if vulns
+            for target in self.resolve_purl_targets(purl_str)
+            if target in self.primary_purls
+        }
         unique_vuln_ids = {
             vuln.id for vulns in self.vulnerabilities_by_purl.values() for vuln in vulns
         }

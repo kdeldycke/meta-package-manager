@@ -46,6 +46,8 @@ from cyclonedx.schema import OutputFormat, SchemaVersion
 from cyclonedx.validation import make_schemabased_validator
 from cyclonedx.validation.json import JsonStrictValidator
 
+from packageurl import PackageURL
+
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.package import (
     EMPTY_METADATA,
@@ -582,6 +584,160 @@ def test_cyclonedx_renders_attached_vulnerabilities():
     affects = {target["ref"] for target in vulns[0]["affects"]}
     assert affects == {purl}
     assert vulns[0]["ratings"][0]["severity"] == "critical"
+
+
+UPSTREAM_ALIAS = "pkg:pypi/yt-dlp@2026.8.19"
+"""Registry coordinate Homebrew records beside a formula's own purl.
+
+Stands in for what the Homebrew extractor lifts out of
+`sbom.spdx.json`: OSV answers for this one, never for the
+`pkg:brew/...` the inventory pass assigns.
+"""
+
+
+def _aliased_brew_package():
+    """A formula carrying its upstream registry coordinate."""
+    package = _make_package("brew", "yt-dlp", "2026.8.19")
+    metadata = PackageMetadata(
+        extra_purls=(PackageURL.from_string(UPSTREAM_ALIAS),),
+    )
+    return package, metadata
+
+
+@pytest.mark.parametrize("renderer_class", (SPDX, CycloneDX))
+def test_all_purls_yields_aliases(renderer_class):
+    """The scan queries the alias: it is the only answerable coordinate."""
+    renderer = renderer_class()
+    renderer.init_doc()
+    package, metadata = _aliased_brew_package()
+    renderer.add_package(
+        _as_manager(_StubManager("brew", "Homebrew Formulae")), package, metadata
+    )
+    purls = set(renderer.all_purls())
+    assert purls == {package.purl.to_string(), UPSTREAM_ALIAS}
+
+
+@pytest.mark.parametrize("renderer_class", (SPDX, CycloneDX))
+def test_resolve_purl_targets_names_every_owner(renderer_class):
+    """The key comes first, then its alias owners. An unknown key stands alone."""
+    renderer = renderer_class()
+    renderer.init_doc()
+    package, metadata = _aliased_brew_package()
+    renderer.add_package(
+        _as_manager(_StubManager("brew", "Homebrew Formulae")), package, metadata
+    )
+    primary = package.purl.to_string()
+    assert renderer.resolve_purl_targets(UPSTREAM_ALIAS) == (UPSTREAM_ALIAS, primary)
+    assert renderer.resolve_purl_targets(primary) == (primary,)
+    assert renderer.resolve_purl_targets("pkg:pypi/django@1.0.0") == (
+        "pkg:pypi/django@1.0.0",
+    )
+
+
+@pytest.mark.parametrize("renderer_class", (SPDX, CycloneDX))
+def test_one_coordinate_shared_by_two_packages_reaches_both(renderer_class):
+    """Two formulae built from one upstream both own its advisories."""
+    renderer = renderer_class()
+    renderer.init_doc()
+    manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
+    metadata = PackageMetadata(extra_purls=(PackageURL.from_string(UPSTREAM_ALIAS),))
+    first = _make_package("brew", "yt-dlp", "2026.8.19")
+    second = _make_package("brew", "yt-dlp@stable", "2026.8.19")
+    renderer.add_package(manager, first, metadata)
+    renderer.add_package(manager, second, metadata)
+    assert renderer.resolve_purl_targets(UPSTREAM_ALIAS) == (
+        UPSTREAM_ALIAS,
+        first.purl.to_string(),
+        second.purl.to_string(),
+    )
+
+
+def test_cyclonedx_one_advisory_reaches_every_alias_owner():
+    """An advisory shared through one alias emits once, affecting both."""
+    c = CycloneDX()
+    c.init_doc()
+    manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
+    metadata = PackageMetadata(extra_purls=(PackageURL.from_string(UPSTREAM_ALIAS),))
+    first = _make_package("brew", "yt-dlp", "2026.8.19")
+    second = _make_package("brew", "yt-dlp@stable", "2026.8.19")
+    c.add_package(manager, first, metadata)
+    c.add_package(manager, second, metadata)
+    c.attach_vulnerabilities({UPSTREAM_ALIAS: (_sample_vulnerability(),)})
+    c.finalize()
+    content = c.export()
+    assert_valid_cyclonedx(content, ExportFormat.JSON)
+    vulns = json.loads(content).get("vulnerabilities", [])
+    assert len(vulns) == 1
+    affects = {target["ref"] for target in vulns[0]["affects"]}
+    assert affects == {first.purl.to_string(), second.purl.to_string()}
+
+
+@pytest.mark.parametrize("renderer_class", (SPDX, CycloneDX))
+def test_stats_count_the_packages_an_alias_reaches(renderer_class):
+    """`vulnerable_packages` counts packages, not the coordinates queried."""
+    renderer = renderer_class()
+    renderer.init_doc()
+    manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
+    metadata = PackageMetadata(extra_purls=(PackageURL.from_string(UPSTREAM_ALIAS),))
+    renderer.add_package(manager, _make_package("brew", "yt-dlp", "2026.8.19"), metadata)
+    renderer.add_package(
+        manager, _make_package("brew", "yt-dlp@stable", "2026.8.19"), metadata
+    )
+    renderer.attach_vulnerabilities({UPSTREAM_ALIAS: (_sample_vulnerability(),)})
+    renderer.finalize()
+    stats = renderer.stats()
+    assert stats["vulnerabilities_total"] == 1
+    # One advisory, found under one alias, reaching both formulae. Counting
+    # the queried coordinate instead would report a single package here.
+    assert stats["vulnerable_packages"] == 2
+def test_spdx_advisory_found_under_an_alias_lands_on_the_formula():
+    """An advisory keyed by the upstream purl attaches to the brew package."""
+    s = SPDX()
+    s.init_doc()
+    package, metadata = _aliased_brew_package()
+    s.add_package(
+        _as_manager(_StubManager("brew", "Homebrew Formulae")), package, metadata
+    )
+    s.attach_vulnerabilities({UPSTREAM_ALIAS: (_sample_vulnerability(),)})
+    s.finalize()
+    doc = json.loads(s.export())  # exporting also validates the document.
+    formula = next(p for p in doc["packages"] if p["name"] == "yt-dlp")
+    security_refs = [
+        ref
+        for ref in formula.get("externalRefs", [])
+        if ref["referenceCategory"] == "SECURITY" and ref["referenceType"] == "advisory"
+    ]
+    assert len(security_refs) == 1
+    assert "GHSA-aaaa-bbbb-cccc" in security_refs[0]["referenceLocator"]
+    # The alias is published beside the formula's own purl, so a consumer
+    # can retrace which coordinate the advisory was found under.
+    package_manager_refs = {
+        ref["referenceLocator"]
+        for ref in formula["externalRefs"]
+        # `spdx-tools` serializes the category with an underscore, where
+        # the SPDX 2.3 JSON schema spells it `PACKAGE-MANAGER`.
+        if ref["referenceCategory"] == "PACKAGE_MANAGER"
+    }
+    assert package_manager_refs == {package.purl.to_string(), UPSTREAM_ALIAS}
+
+
+def test_cyclonedx_advisory_found_under_an_alias_affects_the_formula():
+    """`affects` addresses the component by its own `bom_ref`, not the alias."""
+    c = CycloneDX()
+    c.init_doc()
+    package, metadata = _aliased_brew_package()
+    c.add_package(
+        _as_manager(_StubManager("brew", "Homebrew Formulae")), package, metadata
+    )
+    c.attach_vulnerabilities({UPSTREAM_ALIAS: (_sample_vulnerability(),)})
+    c.finalize()
+    content = c.export()
+    assert_valid_cyclonedx(content, ExportFormat.JSON)
+    doc = json.loads(content)
+    vulns = doc.get("vulnerabilities", [])
+    assert len(vulns) == 1
+    affects = {target["ref"] for target in vulns[0]["affects"]}
+    assert affects == {package.purl.to_string()}
 
 
 def test_shared_advisory_deduplicated_in_cyclonedx():

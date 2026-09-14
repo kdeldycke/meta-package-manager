@@ -24,24 +24,53 @@ renderers consume that mapping in their `finalize` step (CycloneDX into
 OSV is the single source for this first iteration because it indexes by
 ecosystem coordinates directly, sidestepping the fuzzy package-name to
 CPE matching that NVD would require. Coverage is strongest for language
-ecosystems (PyPI, npm, crates.io, RubyGems, Packagist); system package
-managers like Homebrew are not in OSV, so their packages come back with
-no advisories rather than an error.
+ecosystems (PyPI, npm, crates.io, RubyGems, Packagist). No advisory
+database indexes a system manager's own coordinate, so a `pkg:brew/…`
+or `pkg:apt/…` purl comes back with no advisories rather than an error.
 
 ```{note}
-Covering system package managers (`brew`, `apt`, `macports`,
-`mas`, ...) means going through NVD, which indexes by CPE
-(vendor/product plus version ranges) rather than by ecosystem
-coordinate. That route is deliberately deferred: mapping a package
-name to its CPE is fuzzy and the main source of false positives,
-and NVD offers no batch coordinate lookup to match OSV's
-`querybatch`. Until that lands, system-package coverage means
-pointing a CPE-based scanner (OSV-Scanner, Grype, Trivy, or Intel's
-cve-bin-tool) directly at the host. Feeding them the rendered
-CycloneDX/SPDX is not enough: the exported components carry purls
-but no CPEs, so a `pkg:brew/...` entry decodes as an
-unknown-ecosystem package and silently matches nothing (verified
-against Grype `0.115.0`).
+A system package is still reachable, through the coordinate its
+*upstream* carries rather than the one its manager assigns. Homebrew
+does exactly this in its own `brew vulns`, shipped in `6.0.11`: its
+`Homebrew::Vulns::Identify` resolver turns a formula's source URL
+into either a registry purl (ten ecosystems, from PyPI to CPAN) or a
+forge repository URL plus release tag, and queries OSV's `GIT`
+ecosystem with the latter. Managers whose recipes name an upstream
+source URL can all be read this way.
+
+`mpm` takes the first half today: the Homebrew extractor lifts the
+registry purl Homebrew records in each formula's `sbom.spdx.json`
+into `extra_purls`, which the renderers index as an alias of the
+formula's own purl. An advisory found under `pkg:pypi/yt-dlp@…`
+therefore lands on the `pkg:brew/yt-dlp@…` package.
+
+CPE is the fallback for what neither half reaches, and stays
+deliberately deferred: mapping a package name to its CPE is fuzzy and
+the main source of false positives, and NVD offers no batch
+coordinate lookup to match OSV's `querybatch`. Pointing a CPE-based
+scanner (OSV-Scanner, Grype, Trivy, or Intel's cve-bin-tool) directly
+at the host covers that remainder. Feeding them the rendered
+CycloneDX/SPDX is not enough: the exported components carry purls but
+no CPEs, so a `pkg:brew/...` entry decodes as an unknown-ecosystem
+package and silently matches nothing (verified against Grype
+`0.115.0`).
+```
+
+```{todo}
+Query OSV's `GIT` ecosystem with a forge repository URL and release
+tag, derived from the `download_url` and `vcs_url` every extractor
+already fills. That is the second half of Homebrew's approach, the half
+`brew vulns` itself runs on, and it reaches a package built from a
+plain forge tarball, which no registry purl covers.
+
+It is also where the coverage is. Driving Homebrew's own resolver over
+246 installed formulae on one macOS host, 8 resolve to a registry purl
+and 124 to a repository URL plus tag, with no formula in both and 114
+in neither.
+
+Needs a tag parser and a forge-URL normalizer, not a new advisory
+source, and widens the scan past Homebrew to every manager that
+records an upstream source URL.
 ```
 
 ```{seealso}
@@ -124,8 +153,23 @@ OSV_ECOSYSTEMS: dict[str, str] = {
     "pip": "PyPI",
     "pipx": "PyPI",
     "yarn": "npm",
+    # Canonical purl types, a second key space this map has to cover.
+    # A package's own purl takes its manager's id as the type, which is
+    # what every key above is. An alias does not: it is copied from an
+    # upstream document that spells the type per the purl specification,
+    # and `pkg:pypi/…` would be skipped by a map holding only `pip`.
+    # Types already spelled the same in both spaces are not repeated.
+    "cran": "CRAN",
+    "golang": "Go",
+    "hackage": "Hackage",
+    "hex": "Hex",
+    "maven": "Maven",
+    "nuget": "NuGet",
+    "pypi": "PyPI",
+    # `cpan` is deliberately absent: OSV indexes no CPAN ecosystem, and
+    # Perl advisories live in CPANSA, a separate database.
 }
-"""Maps mpm manager ids to [OSV ecosystem names](https://ossf.github.io/osv-schema/#defined-ecosystems)."""
+"""Maps purl types to [OSV ecosystem names](https://ossf.github.io/osv-schema/#defined-ecosystems)."""
 
 _SEVERITY_ALIASES = {
     "LOW": "low",

@@ -396,6 +396,7 @@ class SPDX(SBOM):
         self.seen_ids.add(package_docid)
         self.name_index[(manager.id, package.id)] = package_docid
         self.purl_index[package.purl.to_string()] = package_docid
+        self.register_purl_aliases(package.purl.to_string(), metadata)
         self._track_addition(manager.id, package.id, metadata)
 
         download_location = metadata.download_url or SpdxNoAssertion()
@@ -605,8 +606,14 @@ class SPDX(SBOM):
         upstream SBOMs are not queried for vulnerabilities (their own
         upstream document already carries that provenance, and they are
         not what the user installed).
+
+        Their aliases follow: a second coordinate for a package the
+        inventory did add, which
+        {meth}`~meta_package_manager.sbom.base.SBOM.resolve_purl_targets`
+        maps back in {meth}`finalize`.
         """
         yield from self.purl_index
+        yield from self.purl_aliases
 
     def finalize(self) -> None:
         """Emit pending dependency relationships and vulnerability refs.
@@ -621,7 +628,9 @@ class SPDX(SBOM):
         {meth}`~meta_package_manager.sbom.base.SBOM.attach_vulnerabilities`. SPDX 2.3
         has no first-class vulnerability section, so each advisory becomes a
         SECURITY-category `ExternalPackageRef` of type `advisory` on
-        the affected package, pointing at the advisory URL.
+        the affected package, pointing at the advisory URL. An advisory
+        found under an alias purl lands on every package that alias
+        stands for.
         """
         for source_docid, manager_id, target_id, rel_type in self.pending_relationships:
             target_docid = self.name_index.get((manager_id, target_id))
@@ -632,21 +641,22 @@ class SPDX(SBOM):
             )
 
         for purl_str, vulns in self.vulnerabilities_by_purl.items():
-            docid = self.purl_index.get(purl_str)
-            if not docid:
-                continue
-            spdx_package = self.package_by_docid.get(docid)
-            if spdx_package is None:
-                continue
-            for vuln in vulns:
-                spdx_package.external_references.append(
-                    ExternalPackageRef(
-                        ExternalPackageRefCategory.SECURITY,
-                        "advisory",
-                        vuln.advisory_url,
-                        comment=_vuln_comment(vuln),
+            for target in self.resolve_purl_targets(purl_str):
+                docid = self.purl_index.get(target)
+                if not docid:
+                    continue
+                spdx_package = self.package_by_docid.get(docid)
+                if spdx_package is None:
+                    continue
+                for vuln in vulns:
+                    spdx_package.external_references.append(
+                        ExternalPackageRef(
+                            ExternalPackageRefCategory.SECURITY,
+                            "advisory",
+                            vuln.advisory_url,
+                            comment=_vuln_comment(vuln),
+                        )
                     )
-                )
 
     def stats(self) -> dict[str, object]:
         """Extend the base stats with SPDX-specific counters.

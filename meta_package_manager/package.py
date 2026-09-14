@@ -319,7 +319,13 @@ class PackageMetadata:
 
     extra_purls: tuple[PackageURL, ...] = ()
     """Additional purls when the manager identifies the same package
-    through multiple coordinate systems (multi-arch, multi-origin)."""
+    through multiple coordinate systems (multi-arch, multi-origin, or the
+    upstream registry a recipe builds from).
+
+    SBOM renderers emit them as extra package-manager references and index
+    them as aliases of the package's own purl, so a vulnerability scan can
+    query a coordinate an advisory database recognizes.
+    """
 
     extras: dict[str, object] = field(default_factory=dict)
     """Manager-native metadata that does not map cleanly to portable

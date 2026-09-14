@@ -422,6 +422,7 @@ class CycloneDX(SBOM):
         )
         self.document.components.add(data)
         self.component_index[(manager.id, package.id)] = data
+        self.register_purl_aliases(package.purl.to_string(), metadata)
         self._track_addition(manager.id, package.id, metadata)
         self.document.register_dependency(
             self.document.metadata.component,  # type:ignore[arg-type]
@@ -436,10 +437,16 @@ class CycloneDX(SBOM):
         Each component's `bom_ref` is its purl string, so the same
         values double as the vulnerability `affects` targets in
         {meth}`finalize`.
+
+        Their aliases follow: a second coordinate for a component the
+        inventory did add, which
+        {meth}`~meta_package_manager.sbom.base.SBOM.resolve_purl_targets`
+        maps back to that component's `bom_ref`.
         """
         for component in self.component_index.values():
             if component.purl is not None:
                 yield component.purl.to_string()
+        yield from self.purl_aliases
 
     def finalize(self) -> None:
         """Resolve queued dependency edges and attach vulnerability records.
@@ -467,7 +474,10 @@ class CycloneDX(SBOM):
         """Build CycloneDX `Vulnerability` objects from attached data.
 
         Deduplicates by advisory id: an advisory that hits several
-        components is emitted once with multiple `affects` targets.
+        components is emitted once with multiple `affects` targets. An
+        advisory found under an alias purl affects every component that
+        alias stands for, since `affects` addresses a component by its
+        `bom_ref` and no component carries the alias.
         """
         if not self.vulnerabilities_by_purl:
             return
@@ -475,16 +485,17 @@ class CycloneDX(SBOM):
             c.purl.to_string() for c in self.component_index.values() if c.purl
         }
         by_id: dict[str, Any] = {}
-        for purl_str, vulns in self.vulnerabilities_by_purl.items():
-            if purl_str not in purls_with_component:
-                continue
-            for vuln in vulns:
-                cdx_vuln = by_id.get(vuln.id)
-                if cdx_vuln is None:
-                    cdx_vuln = self._build_cyclonedx_vuln(vuln)
-                    by_id[vuln.id] = cdx_vuln
-                    self.document.vulnerabilities.add(cdx_vuln)
-                cdx_vuln.affects.add(BomTarget(ref=purl_str))
+        for advisory_purl, vulns in self.vulnerabilities_by_purl.items():
+            for purl_str in self.resolve_purl_targets(advisory_purl):
+                if purl_str not in purls_with_component:
+                    continue
+                for vuln in vulns:
+                    cdx_vuln = by_id.get(vuln.id)
+                    if cdx_vuln is None:
+                        cdx_vuln = self._build_cyclonedx_vuln(vuln)
+                        by_id[vuln.id] = cdx_vuln
+                        self.document.vulnerabilities.add(cdx_vuln)
+                    cdx_vuln.affects.add(BomTarget(ref=purl_str))
 
     @staticmethod
     def _build_cyclonedx_vuln(vuln) -> Any:

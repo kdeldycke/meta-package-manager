@@ -151,6 +151,11 @@ jobs:
       # segfaults on some inputs) from passing as a clean run.
       - name: Run shexli
         run: |
+          # The root must be absolute: shexli resolves the files it walks but
+          # keeps the root as given, so a relative one makes its own
+          # `path.relative_to()` raise before any rule runs.
           set -euo pipefail
-          uvx shexli --format json "gnome-shell/mpm@kdeldycke.github.io" | tee "$RUNNER_TEMP/shexli.json"
+          uvx shexli --format json \
+            "$GITHUB_WORKSPACE/gnome-shell/mpm@kdeldycke.github.io" \
+            | tee "$RUNNER_TEMP/shexli.json"
           jq --exit-status '.summary.finding_count == 0' "$RUNNER_TEMP/shexli.json"

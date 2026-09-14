@@ -113,6 +113,18 @@ left some 200px of empty window below the *About* row. A group added to
 its bottom edge is simply not in the picture.
 """
 
+PREFERENCES_WIDTH = 720
+"""Logical width the preferences window is grown to, beside its height.
+
+`Adw.PreferencesWindow` opens at `640`, which wrapped the *About* row's title
+onto a second line: measured on the capture, that line ended 12 logical pixels
+short of fitting the word it dropped. The margin above that is deliberate, as a
+runner whose font renders a shade wider would otherwise wrap it again.
+
+The extra width lands on the title, the one part of a row that expands; the
+logo and the *Documentation* link keep their own size.
+"""
+
 MONITOR_SCALE = 2
 """Logical scale applied to that monitor, which is what makes the captures HiDPI.
 
@@ -515,7 +527,11 @@ has to be observed to land before the shutter, and a fixed sleep only guesses.
 
 
 def grow_prefs_window() -> str:
-    """JS asking the preferences window to grow to {data}`PREFERENCES_HEIGHT`."""
+    """JS asking the preferences window to grow to the size captured.
+
+    The frame keeps the `x` it opened at, as the capture crops to the window
+    and a centered one would look no different.
+    """
     return (
         js("""(() => {
     const windows = global.display.list_all_windows();
@@ -523,11 +539,12 @@ def grow_prefs_window() -> str:
     if (!match)
         return false;
     const frame = match.get_frame_rect();
-    match.move_resize_frame(false, frame.x, 0, frame.width, HEIGHT);
+    match.move_resize_frame(false, frame.x, 0, WIDTH, HEIGHT);
     return true;
 })()""")
         .replace("NAME", repr(extension_name()))
         .replace("HEIGHT", str(PREFERENCES_HEIGHT))
+        .replace("WIDTH", str(PREFERENCES_WIDTH))
     )
 
 

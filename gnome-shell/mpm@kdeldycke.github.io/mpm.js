@@ -40,6 +40,8 @@ export const INSTALL_DOCS_URL =
 
 const VERSION_REGEX = /\bversion\s+(\d+(?:\.\d+)+)/;
 
+const RELEASE_REGEX = /\bversion\s+(\S+)/;
+
 /* Well-known mpm locations probed when it is not on the session PATH, which
  * GNOME does not source from the user's shell profile. Mirrors the PATH tier
  * of bar_plugin.py's search_mpm(); the venv walk-back tiers make no sense
@@ -110,6 +112,21 @@ export function parseVersion(text) {
     if (!match)
         return null;
     return match[1].split('.').map(Number);
+}
+
+/**
+ * Extract the release string from `mpm --no-color --version` output.
+ *
+ * Where `parseVersion` keeps the numeric components alone so releases
+ * compare, this keeps the token as printed: a development build reports
+ * `8.0.0.dev0+40ce0879`, and that suffix is what identifies the build.
+ *
+ * @param {string} text - The command's stdout.
+ * @returns {string|null} the release as printed, or null when unparsable.
+ */
+export function parseRelease(text) {
+    const match = RELEASE_REGEX.exec(text ?? '');
+    return match ? match[1] : null;
 }
 
 /**
@@ -193,7 +210,7 @@ export async function runCommand(argv, cancellable, watchdogSeconds = 0) {
  * @param {Gio.Cancellable} cancellable - Cancelled on extension disable.
  * @param {number} watchdogSeconds - Hard kill for a wedged probe.
  * @returns {Promise<{runnable: boolean, upToDate: boolean,
- *   version: number[]|null, error: string|null}>}
+ *   version: number[]|null, release: string|null, error: string|null}>}
  */
 export async function probeMpm(mpm, cancellable, watchdogSeconds = 30) {
     let result;
@@ -201,16 +218,21 @@ export async function probeMpm(mpm, cancellable, watchdogSeconds = 30) {
         result = await runCommand(
             [...mpm, '--no-color', '--version'], cancellable, watchdogSeconds);
     } catch (error) {
-        return {runnable: false, upToDate: false, version: null, error: String(error)};
+        return {
+            runnable: false, upToDate: false, version: null, release: null,
+            error: String(error),
+        };
     }
     if (result.status !== 0 || result.stderr) {
         const error = result.stderr || `exit code ${result.status}`;
-        return {runnable: false, upToDate: false, version: null, error};
+        return {
+            runnable: false, upToDate: false, version: null, release: null, error,
+        };
     }
     const version = parseVersion(result.stdout);
     if (!version) {
         return {
-            runnable: true, upToDate: false, version: null,
+            runnable: true, upToDate: false, version: null, release: null,
             error: `unable to parse version from: ${result.stdout.trim()}`,
         };
     }
@@ -218,6 +240,7 @@ export async function probeMpm(mpm, cancellable, watchdogSeconds = 30) {
         runnable: true,
         upToDate: compareVersions(version, MPM_MIN_VERSION) >= 0,
         version,
+        release: parseRelease(result.stdout),
         error: null,
     };
 }

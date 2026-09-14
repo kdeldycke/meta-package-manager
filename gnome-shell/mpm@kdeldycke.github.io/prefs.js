@@ -13,6 +13,15 @@ import {
     gettext as _,
 } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+import * as Mpm from './mpm.js';
+
+/* A probe failure carries raw CLI output: flatten and clip it so one stderr
+ * dump never grows the row to a dozen lines. */
+function oneLine(text, limit = 120) {
+    const flat = String(text ?? '').replace(/\s+/g, ' ').trim();
+    return flat.length > limit ? `${flat.slice(0, limit - 1)}…` : flat;
+}
+
 export default class MpmPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
@@ -78,8 +87,10 @@ export default class MpmPreferences extends ExtensionPreferences {
         page.add(notifications);
 
         const about = new Adw.PreferencesGroup({title: _('About')});
+        /* The product name alone would not tell the two rows apart: `mpm` is
+         * the name of the CLI below as much as of the extension. */
         const aboutRow = new Adw.ActionRow({
-            title: this.metadata.name,
+            title: _('%s (GNOME Shell extension)').format(this.metadata.name),
             subtitle: this.metadata['version-name'] ?? '',
         });
         const logo = Gtk.Image.new_from_file(`${this.path}/icons/mpm-logo.svg`);
@@ -91,7 +102,60 @@ export default class MpmPreferences extends ExtensionPreferences {
         link.set_valign(Gtk.Align.CENTER);
         aboutRow.add_suffix(link);
         about.add(aboutRow);
+
+        /* The row above carries the extension's own version, compiled into
+         * metadata.json. This one reports the separately installed CLI it
+         * drives, which is the other half a bug report needs. The preferences
+         * run in their own process, with no access to the running indicator,
+         * so the tool is resolved and probed here exactly as the extension
+         * resolves and probes it. */
+        const toolRow = new Adw.ActionRow({
+            title: _('mpm command-line tool'),
+            subtitle: _('Looking for it…'),
+            subtitle_lines: 2,
+            use_markup: false,
+        });
+        about.add(toolRow);
+        const probe = new Gio.Cancellable();
+        window.connect('close-request', () => {
+            probe.cancel();
+            return false;
+        });
+        this._describeMpm(settings, probe)
+            .then(subtitle => {
+                if (!probe.is_cancelled())
+                    toolRow.subtitle = subtitle;
+            })
+            .catch(error => {
+                if (!probe.is_cancelled())
+                    toolRow.subtitle = oneLine(error);
+            });
         page.add(about);
+    }
+
+    /* Two lines for the About row: what the tool answers, then the command
+     * answering it. A missing or stale CLI shows up here rather than only as
+     * a broken menu. */
+    async _describeMpm(settings, cancellable) {
+        const mpm = Mpm.findMpm(settings.get_string('mpm-command'));
+        if (mpm === null) {
+            return _('Not found. Install it from %s')
+                .format(Mpm.INSTALL_DOCS_URL);
+        }
+        /* Plain join, not `shellJoin`: this is a label to read, and
+         * GLib.shell_quote wraps even an ordinary path in quotes. */
+        const command = mpm.join(' ');
+        const result = await Mpm.probeMpm(mpm, cancellable);
+        const release = result.release ?? result.version?.join('.');
+        let verdict;
+        if (!result.runnable)
+            verdict = _('Failed to run: %s').format(oneLine(result.error));
+        else if (!result.upToDate)
+            verdict = _('%s, older than the required %s').format(
+                release, Mpm.MPM_MIN_VERSION.join('.'));
+        else
+            verdict = release;
+        return `${verdict}\n${command}`;
     }
 
     /* Row builders: the Gtk.Adjustment bounds duplicate the gschema ranges,

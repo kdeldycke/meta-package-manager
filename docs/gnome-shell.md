@@ -122,6 +122,8 @@ Settings live in the extension preferences window, also reachable from the indic
 
 These settings only drive the menu layout and check cadence: everything else comes from `mpm`'s own configuration, as {doc}`desktop-menus` explains.
 
+The *About* group at the foot of the window names two versions. The first is the extension's own, compiled into its `metadata.json`. The second is the `mpm` release the extension resolved, with the command that answered it below. The two ship separately, so a bug report needs both.
+
 ## Panel icons
 
 The extension ships no state artwork. Each state names a stock symbolic icon, which the shell resolves against whichever icon theme is in force, recolors with the panel foreground, and lets a desktop theme restyle: an Ubuntu desktop draws Yaru's rendering of these names, not Adwaita's.

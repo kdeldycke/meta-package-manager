@@ -70,6 +70,14 @@ function testParseVersion() {
         Mpm.parseVersion('mpm, version 6.4.0\nmore lines'), [6, 4, 0]);
     check('parseVersion garbage', Mpm.parseVersion('no digits here'), null);
     check('parseVersion empty', Mpm.parseVersion(''), null);
+
+    check('parseRelease nominal', Mpm.parseRelease('mpm, version 7.5.0'), '7.5.0');
+    check('parseRelease keeps the dev suffix',
+        Mpm.parseRelease('mpm, version 7.5.1.dev0+abc1234'), '7.5.1.dev0+abc1234');
+    check('parseRelease multiline tail',
+        Mpm.parseRelease('mpm, version 6.4.0\nPython 3.14.7'), '6.4.0');
+    check('parseRelease garbage', Mpm.parseRelease('no digits here'), null);
+    check('parseRelease empty', Mpm.parseRelease(''), null);
 }
 
 function testCompareVersions() {
@@ -211,8 +219,16 @@ async function testSubprocess() {
     const fresh = await Mpm.probeMpm(
         ['sh', '-c', 'echo "mpm, version 6.4.0"'], live);
     check('probeMpm fresh enough',
-        [fresh.runnable, fresh.upToDate, fresh.version, fresh.error],
-        [true, true, [6, 4, 0], null]);
+        [fresh.runnable, fresh.upToDate, fresh.version, fresh.release, fresh.error],
+        [true, true, [6, 4, 0], '6.4.0', null]);
+
+    /* The preferences window reports this string as printed, suffix included,
+     * where the freshness verdict compares the numeric components alone. */
+    const dev = await Mpm.probeMpm(
+        ['sh', '-c', 'echo "mpm, version 8.0.0.dev0+abc1234"'], live);
+    check('probeMpm keeps the release suffix',
+        [dev.upToDate, dev.version, dev.release],
+        [true, [8, 0, 0], '8.0.0.dev0+abc1234']);
 
     const stale = await Mpm.probeMpm(
         ['sh', '-c', 'echo "mpm, version 5.0.0"'], live);

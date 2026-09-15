@@ -508,16 +508,22 @@ class MpmIndicator extends PanelMenu.Button {
             colorSpan(' → ', dim) +
             colorSpan(diff.prefix, dim) +
             colorSpan(diff.newSuffix, VERSION_COLORS.new);
+        /* Every block opens on one uncolored space, since a colored span
+         * starting at the very first character renders in the menu's own text
+         * color instead of its own. Pango parses the markup either way, and
+         * every row carries the space, so the column still lines up. */
         if (widths) {
             /* Padded with spaces, which only measure equally in a monospace
              * face: the whole block takes one, the way the bar plugin sets
              * its aligned rows. */
             const lead = padding(
-                widths.old - diff.prefix.length - diff.oldSuffix.length);
+                widths.old - diff.prefix.length - diff.oldSuffix.length + 1);
             const trail = padding(
                 widths.latest - diff.prefix.length - diff.newSuffix.length);
             markup =
                 `<span font_family="monospace">${lead}${markup}${trail}</span>`;
+        } else {
+            markup = ` ${markup}`;
         }
         const versions = new St.Label({y_align: Clutter.ActorAlign.CENTER});
         versions.clutter_text.set_markup(markup);

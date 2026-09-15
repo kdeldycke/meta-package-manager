@@ -63,6 +63,25 @@ const STATE_ICONS = {
     error: 'software-update-urgent-symbolic',
 };
 
+/* Version-diff colors, held here rather than in the stylesheet since the five
+ * labels spelling a row's versions collapsed into one markup label, and Pango
+ * markup takes a literal color. Mirrors the Xbar/SwiftBar convention: common
+ * prefix dimmed, installed suffix red, latest suffix green, each at a mid
+ * luminance that reads on the light and dark shell themes alike. */
+const VERSION_COLORS = {
+    prefix: '#9a9996',
+    old: '#ed333b',
+    new: '#2ec27e',
+};
+
+/* A Pango markup span, empty for empty text so a version sharing no prefix
+ * with its successor spells no span at all. */
+function colorSpan(text, color) {
+    if (!text)
+        return '';
+    return `<span color="${color}">${GLib.markup_escape_text(text, -1)}</span>`;
+}
+
 /* State deliberately kept at module scope so a screen-lock disable()/enable()
  * cycle neither re-triggers the boot check nor drops the last report (same
  * pattern as arch-update). Plain data only: GObject instances must never
@@ -421,30 +440,19 @@ class MpmIndicator extends PanelMenu.Button {
             style_class: 'mpm-package-name',
         }));
         const diff = Mpm.diffVersions(pkg.installedVersion, pkg.latestVersion);
-        const cells = [
-            [diff.prefix, 'mpm-version-prefix'],
-            [diff.oldSuffix, 'mpm-version-old'],
-            [' → ', 'mpm-version-arrow'],
-            [diff.prefix, 'mpm-version-prefix'],
-            [diff.newSuffix, 'mpm-version-new'],
-        ];
-        /* The cells spell out two version strings, so they go in a box of
-         * their own: added straight to the menu item, each would be held off
-         * the next by the shell theme's own popup-menu-item spacing, splitting
-         * "5.0.0~beta1" into "5.0." and "0~beta1". */
-        const versions = new St.BoxLayout({
-            y_align: Clutter.ActorAlign.CENTER,
-            style_class: 'mpm-version-diff',
-        });
-        for (const [text, styleClass] of cells) {
-            if (text === '')
-                continue;
-            versions.add_child(new St.Label({
-                text,
-                y_align: Clutter.ActorAlign.CENTER,
-                style_class: styleClass,
-            }));
-        }
+        /* One markup label rather than a box of five: a report of a thousand
+         * packages pays for every actor of every row on each scroll step, and
+         * spans inside one label cannot be held apart by the shell theme's own
+         * popup-menu-item spacing, which is what used to split "5.0.0~beta1"
+         * into "5.0." and "0~beta1". */
+        const dim = VERSION_COLORS.prefix;
+        const versions = new St.Label({y_align: Clutter.ActorAlign.CENTER});
+        versions.clutter_text.set_markup(
+            colorSpan(diff.prefix, dim) +
+            colorSpan(diff.oldSuffix, VERSION_COLORS.old) +
+            colorSpan(' → ', dim) +
+            colorSpan(diff.prefix, dim) +
+            colorSpan(diff.newSuffix, VERSION_COLORS.new));
         item.add_child(versions);
         item.connectObject('activate', () => {
             this.menu.close();

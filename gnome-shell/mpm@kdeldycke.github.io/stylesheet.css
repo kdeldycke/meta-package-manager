@@ -28,29 +28,6 @@
   padding-right: 1em;
 }
 
-/* Each version is spelled by two labels, so the box holding them declares no
-   spacing of its own: a gap between a prefix and its suffix would break the
-   version string apart, right where it reads as one word. */
-.mpm-version-diff {
-  spacing: 0;
-}
-
-/* Version diff, mirroring the Xbar/SwiftBar convention: common prefix dimmed,
-   installed suffix red, latest suffix green. Mid-luminance picks read on both
-   the light and dark shell themes. */
-.mpm-version-prefix,
-.mpm-version-arrow {
-  color: #9a9996;
-}
-
-.mpm-version-old {
-  color: #ed333b;
-}
-
-.mpm-version-new {
-  color: #2ec27e;
-}
-
 /* Manager error lines: the monospace red error font of the bar plugin. */
 .mpm-error-line {
   color: #ed333b;

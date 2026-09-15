@@ -50,7 +50,7 @@
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
 - Export output to [JSON or user-friendly tables](https://mpm.run/cli-parameters/#mpm).
 - [Shell auto-completion](https://mpm.run/install/) for Bash, Zsh and Fish.
-- [Desktop menu bar integration](https://mpm.run/desktop-menus/): a SwiftBar/Xbar plugin on macOS, a GNOME Shell extension on Linux.
+- A [SwiftBar/Xbar plugin](https://mpm.run/bar-plugin/) in the macOS menu bar, and a [GNOME Shell extension](https://mpm.run/gnome-shell/) on Linux: both list the outdated packages of every manager on the system, and upgrade them from the menu.
 - Because `mpm` tries to wrap all other package managers, it became another pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
 
 ## Supported package managers

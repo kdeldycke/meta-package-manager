@@ -56,7 +56,8 @@ security
 :hidden:
 cli-parameters
 man
-desktop-menus
+bar-plugin
+gnome-shell
 ```
 
 ```{toctree}

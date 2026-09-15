@@ -2,9 +2,9 @@
 
 The Meta Package Manager project is actively maintaining a plugin that is both compatible with [SwiftBar](https://github.com/swiftbar/SwiftBar) and [Xbar](https://github.com/matryer/xbar).
 
-The plugin is written in Python and is a small wrapper around the `mpm` CLI. It is one of the two {doc}`desktop menus <desktop-menus>` the project maintains, and that page holds what the two have in common.
+The plugin is written in Python and is a small wrapper around the `mpm` CLI: the menu it puts in the macOS menu bar lists the outdated packages `mpm outdated` reports across every package manager on the system, and upgrades them one by one or per manager. `mpm` `5.0.0` or newer is required, and is installed separately: see {doc}`install`.
 
-SwiftBar renders the [version-diff colors](desktop-menus.md#version-diffs) natively (package lines carry the `ansi=true` parameter); Xbar strips the color codes and shows plain text. On the translucent menus of recent macOS releases the suffixes adapt to the menu appearance, since the default system colors lose contrast against the material: a light menu darkens both suffixes, and a dark menu brightens the green.
+Each outdated package carries its version diff colored with the same convention as `mpm outdated`: unchanged prefix in gray, installed-version suffix in red, latest-version suffix in green. SwiftBar renders the colors natively (package lines carry the `ansi=true` parameter); Xbar strips the color codes and shows plain text. On the translucent menus of recent macOS releases the suffixes adapt to the menu appearance, since the default system colors lose contrast against the material: a light menu darkens both suffixes, and a dark menu brightens the green.
 
 ```{hint}
 I recommend SwiftBar, because Xbar has 2 outstanding issues:
@@ -33,13 +33,17 @@ The plugin is configurable with these environment variables:
 SwiftBar renders two things differently from Xbar: the outdated count sits in a native badge on each manager header rather than in its label, and the grouped layout folds every section into an inline accordion ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)) that expands in place without dismissing the menu. Both are visible in the screenshots below.
 ```
 
-These variables only drive the menu layout: everything else comes from `mpm`'s own configuration, as {doc}`desktop-menus` explains.
+These variables only drive the menu layout: everything else comes from `mpm`'s own configuration file, which applies to every run the plugin triggers. See {doc}`configuration` for the search paths and the full schema.
 
 A macOS menu cannot scroll sideways, so `VAR_MAX_VERSION_WIDTH` keeps a row from outgrowing it. A version longer than the cap is shortened with an `…`, always on the side the two versions have in common, so the characters telling them apart stay on screen. SwiftBar carries the untruncated pair in the item tooltip. Homebrew casks are what makes this necessary: their `version,revision` pairs run to 50 characters, against 17 for the longest version anyone reads. Set the variable to `0` to render every version whole.
 
 ## Menu actions
 
-A click runs `mpm` rather than the package manager, and inherits the policy of the run that rendered the menu: see {doc}`desktop-menus`. Both variants of each entry go through it, and the modifier picks between them: a plain click opens a terminal so the run can be followed, and holding the `Option` key runs it silently.
+Clicking a package runs `mpm --<manager-id> upgrade <package-id>`, and a section's *Upgrade all* entry runs `mpm --<manager-id> upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
+
+With a `cooldown` set, clicking a package of a manager that cannot enforce it natively skips it with a warning instead of upgrading it ungated. Set `policy = "best-effort"` in the `[mpm.cooldown]` table to let those managers run anyway, without the safeguard.
+
+Each entry comes in two variants, and the modifier picks between them: a plain click opens a terminal so the run can be followed, and holding the `Option` key runs it silently.
 
 ## Menu markers
 
@@ -53,8 +57,6 @@ The plugin has no icon files of its own: every state is an emoji, which SwiftBar
 | ❗️     | Menu bar title           | No runnable `mpm`: the bootstrap pair replaces the package list. |
 | ⚠️     | Manager section header   | That manager reported an error, in the grouped layout.           |
 | 🆙     | *Upgrade all* row        | Upgrades every outdated package of one manager.                  |
-
-The {doc}`GNOME Shell extension <gnome-shell>` names an icon for each of these states instead, and the [panel icons table](gnome-shell.md#panel-icons) lines the two vocabularies up.
 
 ## Screenshots
 
@@ -238,6 +240,8 @@ The plugin prefers the `mpm` it is part of. It ships inside the package, so it w
 Failing that, it falls back to an `mpm` on the `PATH`, then to the module under the interpreter running the plugin, and under `python3`. Every candidate is run before it is ranked, so an unusable one is skipped instead of being picked.
 
 The menu answers that in place. Its last row, *About*, expands to three lines: the version this script advertises to its host, the release of the `mpm` it resolved, and the command that answered. The two are installed separately, so a bug report needs both: a plugin file copied into the host's folder stays at the version it was copied at while `mpm` moves under it.
+
+When no candidate answers, or the one that answers is older than the version the plugin requires, the menu carries a bootstrap pair in place of the package list: an *Install mpm with uv* entry running `uv tool install --upgrade meta-package-manager`, and an *Open mpm installation instructions* entry opening {doc}`install` for the systems `uv` does not answer for.
 
 To see every candidate it considered, and not the winner alone, ask the plugin. It prints each one it found, in the order it ranked them, with the version it answered and the error it failed with:
 

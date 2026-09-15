@@ -69,6 +69,12 @@
 # half is the contributing page, which is where the rest of it is reachable from.
 /development.html                       /contributing/          301
 /development/                           /contributing/          301
+# The desktop menus hub never shipped in a release, but the site builds from
+# `main` on every push, so its URL was published for the two weeks it existed.
+# Two heirs, neither dominant, so the home page is the target: it renders the
+# readme, which links both frontends.
+/desktop-menus.html                      /                       301
+/desktop-menus/                          /                       301
 
 # API pages that autodoc no longer emits.
 # `modules` was the generated module index, suppressed by `--no-toc`. The

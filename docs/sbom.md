@@ -131,15 +131,15 @@ $ mpm --brew sbom > deep.spdx.json
 
 ## Coverage matrix
 
-| Capability         | [`brew`](managers/brew.md) | [`pip`](managers/pip.md) | [`npm`](managers/npm.md) | [`cargo`](managers/cargo.md) | [`gem`](managers/gem.md) | [`composer`](managers/composer.md) | Others |
-| :----------------- | :-----------------------: | :----------------------: | :----------------------: | :--------------------------: | :----------------------: | :--------------------------------: | :----: |
-| License            |            ✅             |            ✅             |                          |                              |                          |                                    |        |
-| Homepage           |            ✅             |            ✅             |                          |                              |                          |                                    |        |
-| Download URL       |            ✅             |                          |                          |                              |                          |                                    |        |
-| Checksums          |            ✅             |                          |                          |                              |                          |                                    |        |
-| Dependency graph   |            ✅             |            ✅             |                          |                              |                          |                                    |        |
-| Per-package SBOM   |            ✅             |                          |                          |                              |                          |                                    |        |
-| Vulnerabilities    |      ✅ (partial)         |      ✅ (`--network`)     |      ✅ (`--network`)     |        ✅ (`--network`)       |      ✅ (`--network`)     |          ✅ (`--network`)            |        |
+| Capability       | [`brew`](managers/brew.md) | [`pip`](managers/pip.md) | [`npm`](managers/npm.md) | [`cargo`](managers/cargo.md) | [`gem`](managers/gem.md) | [`composer`](managers/composer.md) | Others |
+| :--------------- | :------------------------: | :----------------------: | :----------------------: | :--------------------------: | :----------------------: | :--------------------------------: | :----: |
+| License          |             ✅             |            ✅            |                          |                              |                          |                                    |        |
+| Homepage         |             ✅             |            ✅            |                          |                              |                          |                                    |        |
+| Download URL     |             ✅             |                          |                          |                              |                          |                                    |        |
+| Checksums        |             ✅             |                          |                          |                              |                          |                                    |        |
+| Dependency graph |             ✅             |            ✅            |                          |                              |                          |                                    |        |
+| Per-package SBOM |             ✅             |                          |                          |                              |                          |                                    |        |
+| Vulnerabilities  |        ✅ (partial)        |     ✅ (`--network`)     |     ✅ (`--network`)     |       ✅ (`--network`)       |     ✅ (`--network`)     |          ✅ (`--network`)          |        |
 
 Coverage will expand. Every manager exposes its metadata differently, and more extractors are added per manager over time.
 

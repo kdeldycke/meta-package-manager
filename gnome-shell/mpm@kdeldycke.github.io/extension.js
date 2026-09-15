@@ -74,6 +74,11 @@ const VERSION_COLORS = {
     new: '#2ec27e',
 };
 
+/* Spaces filling a column, never a negative count. */
+function padding(width) {
+    return ' '.repeat(Math.max(0, width));
+}
+
 /* A Pango markup span, empty for empty text so a version sharing no prefix
  * with its successor spells no span at all. */
 function colorSpan(text, color) {
@@ -380,7 +385,26 @@ class MpmIndicator extends PanelMenu.Button {
         }
 
         const groupByManager = this._settings.get_boolean('group-by-manager');
+        const rowsByManager = new Map(lastModel.managers.map(manager => [
+            manager,
+            manager.packages.map(pkg => ({
+                pkg,
+                diff: Mpm.diffVersions(pkg.installedVersion, pkg.latestVersion),
+            })),
+        ]));
+        /* One table across every manager in the flat layout, where their rows
+         * share a column and a width taken per manager would leave each
+         * section's arrows ragged against the one above. A submenu is a panel
+         * of its own and takes its own width, a pooled one padding a short
+         * manager out to the longest version of the whole report. Mirrors
+         * `align_managers()` of the bar plugin. */
+        const pooled = groupByManager
+            ? null
+            : this._versionWidths([...rowsByManager.values()].flat());
+
         lastModel.managers.forEach((manager, index) => {
+            const rows = rowsByManager.get(manager);
+            const widths = groupByManager ? this._versionWidths(rows) : pooled;
             const count = manager.packages.length;
             const packageLabel = ngettext('package', 'packages', count);
             if (groupByManager) {
@@ -397,7 +421,7 @@ class MpmIndicator extends PanelMenu.Button {
                 const submenu = new PopupMenu.PopupSubMenuMenuItem(title, failed);
                 if (failed)
                     submenu.icon.icon_name = 'dialog-warning-symbolic';
-                this._fillManagerSection(submenu.menu, manager);
+                this._fillManagerSection(submenu.menu, manager, rows, widths);
                 this._reportSection.addMenuItem(submenu);
             } else {
                 /* The "---" separator the bar plugin prints between manager
@@ -413,7 +437,8 @@ class MpmIndicator extends PanelMenu.Button {
                     style_class: 'mpm-manager-header',
                 });
                 this._reportSection.addMenuItem(header);
-                this._fillManagerSection(this._reportSection, manager);
+                this._fillManagerSection(
+                    this._reportSection, manager, rows, widths);
             }
         });
 
@@ -425,11 +450,27 @@ class MpmIndicator extends PanelMenu.Button {
             this._setPanelState(State.UPTODATE);
     }
 
+    /* Column widths in characters for a set of rows, or null when the
+     * versions are set in the menu font instead. Both halves are padded so
+     * every block comes out the same width, and a constant-width block pushed
+     * right is what puts the arrows on one vertical line: a block sized to
+     * its own text leaves each arrow wherever its latest version ends. */
+    _versionWidths(rows) {
+        if (!this._settings.get_boolean('table-rendering'))
+            return null;
+        return {
+            old: Math.max(0, ...rows.map(
+                r => r.diff.prefix.length + r.diff.oldSuffix.length)),
+            latest: Math.max(0, ...rows.map(
+                r => r.diff.prefix.length + r.diff.newSuffix.length)),
+        };
+    }
+
     /* One manager's packages, upgrade-all entry and error lines, appended to
      * either the flat report section or its own submenu. */
-    _fillManagerSection(section, manager) {
-        for (const pkg of manager.packages)
-            section.addMenuItem(this._makePackageItem(manager, pkg));
+    _fillManagerSection(section, manager, rows, widths) {
+        for (const {pkg, diff} of rows)
+            section.addMenuItem(this._makePackageItem(manager, pkg, diff, widths));
         if (manager.packages.length > 0) {
             const upgradeAll = new PopupMenu.PopupImageMenuItem(
                 _('Upgrade all %s packages').format(manager.id),
@@ -447,7 +488,7 @@ class MpmIndicator extends PanelMenu.Button {
     /* A package row: name stretched left, version diff on the right with the
      * common prefix dimmed and the changed suffixes colored, mirroring
      * diff_versions(). Activating runs the mpm upgrade for that package. */
-    _makePackageItem(manager, pkg) {
+    _makePackageItem(manager, pkg, diff, widths) {
         const item = new PopupMenu.PopupBaseMenuItem();
         item.add_child(new St.Label({
             text: pkg.name,
@@ -455,20 +496,31 @@ class MpmIndicator extends PanelMenu.Button {
             y_align: Clutter.ActorAlign.CENTER,
             style_class: 'mpm-package-name',
         }));
-        const diff = Mpm.diffVersions(pkg.installedVersion, pkg.latestVersion);
         /* One markup label rather than a box of five: a report of a thousand
          * packages pays for every actor of every row on each scroll step, and
          * spans inside one label cannot be held apart by the shell theme's own
          * popup-menu-item spacing, which is what used to split "5.0.0~beta1"
          * into "5.0." and "0~beta1". */
         const dim = VERSION_COLORS.prefix;
-        const versions = new St.Label({y_align: Clutter.ActorAlign.CENTER});
-        versions.clutter_text.set_markup(
+        let markup =
             colorSpan(diff.prefix, dim) +
             colorSpan(diff.oldSuffix, VERSION_COLORS.old) +
             colorSpan(' → ', dim) +
             colorSpan(diff.prefix, dim) +
-            colorSpan(diff.newSuffix, VERSION_COLORS.new));
+            colorSpan(diff.newSuffix, VERSION_COLORS.new);
+        if (widths) {
+            /* Padded with spaces, which only measure equally in a monospace
+             * face: the whole block takes one, the way the bar plugin sets
+             * its aligned rows. */
+            const lead = padding(
+                widths.old - diff.prefix.length - diff.oldSuffix.length);
+            const trail = padding(
+                widths.latest - diff.prefix.length - diff.newSuffix.length);
+            markup =
+                `<span font_family="monospace">${lead}${markup}${trail}</span>`;
+        }
+        const versions = new St.Label({y_align: Clutter.ActorAlign.CENTER});
+        versions.clutter_text.set_markup(markup);
         item.add_child(versions);
         item.connectObject('activate', () => {
             this.menu.close();

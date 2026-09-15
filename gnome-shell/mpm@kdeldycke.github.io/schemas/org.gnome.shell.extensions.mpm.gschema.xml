@@ -47,6 +47,11 @@
       <summary>Show the outdated package count</summary>
       <description>Display the number of outdated packages next to the indicator icon.</description>
     </key>
+    <key name="table-rendering" type="b">
+      <default>true</default>
+      <summary>Align package versions in a table</summary>
+      <description>Mirror of the Xbar/SwiftBar plugin VAR_TABLE_RENDERING variable: pad every version pair to a common width and set it monospaced, so the arrows line up down the menu. When disabled, each pair is set in the menu font and sits flush right, where the arrow lands wherever its own text ends.</description>
+    </key>
     <key name="terminal-command" type="s">
       <default>''</default>
       <summary>Terminal command override</summary>

@@ -109,6 +109,7 @@ Settings live in the extension preferences window, also reachable from the indic
 | Setting                | Description                                                     | Type    | Default |
 | ---------------------- | --------------------------------------------------------------- | ------- | ------- |
 | `group-by-manager`     | Group each manager's packages into a section of its own.        | Boolean | `false` |
+| `table-rendering`      | Pad the version pairs to a common width, set monospaced.        | Boolean | `true`  |
 | `check-interval`       | Minutes between two package checks.                             | Integer | `420`   |
 | `boot-wait`            | Seconds before the first check after login.                     | Integer | `30`    |
 | `timeout`              | Seconds passed to `mpm --timeout` for background checks.        | Integer | `60`    |

@@ -19,6 +19,7 @@
 - [mpm] Fix a crash rendering tables to a non-UTF-8 stream, which broke every table subcommand on Windows as soon as its output was redirected.
 - [mpm] Fix comparison of the Gentoo and Alpine post-release suffixes: `1.0_p1` and `1.0_git20240101` now rank above `1.0`, not below it.
 - [mpm] Escalate through `doas` where `sudo` is Alpine's `doas-sudo-shim`, which rejects every option the credential probes send and so reported a cold cache.
+- [mpm] Name the running command in the progress spinner: a slow call now reads `cask.upgrade_all: brew upgrade --quiet --yes` instead of `cask upgrade_all`.
 - [mpm] Hold the progress spinner still during a call whose manager may prompt for a `sudo` password, so the prompt stays on screen instead of being erased by the animation.
 - [mpm] Run a manager that escalates internally after the concurrent batch, on its own, so its password prompt gets a terminal no other manager is writing to.
 - [mpm] Exit quietly on a Ctrl+C pressed while a run is already shutting down, instead of printing a `threading` traceback.
@@ -88,6 +89,7 @@
 - [gnome-shell] Illustrate the extension's page with screenshots of its menu, in both layouts and both shell appearances. Each one is captured from a real headless GNOME session by the new `docs-screenshots.yaml` workflow, which reshoots them whenever the extension changes.
 - [gnome-shell] Render each package row's version diff as one label instead of five, so a report of a thousand packages scrolls smoothly.
 - [gnome-shell] Drop the blank band and separator the menu showed above *Checking…*, before a session's first report has anything to list.
+- [gnome-shell] Align the menu's version pairs in a table, mirroring the plugin's `VAR_TABLE_RENDERING`, with a setting to switch it off.
 - [mpm] Replace the project's own forge sampler with repomatic's `sample-metrics`: the star-history charts and the manager cards' upstream readings now accrue in one committed CSV, appended and rendered by the new `metrics.yaml` workflow.
 - [mpm] Plot the benchmark's star-history charts on a logarithmic vertical axis, so the series orders of magnitude apart stay legible on one chart.
 - [nala] Sample the upstream project from GitLab, dropping the excuse that its forge went unqueried: the manager page gains the upstream stars and commit facts, and its live badges.

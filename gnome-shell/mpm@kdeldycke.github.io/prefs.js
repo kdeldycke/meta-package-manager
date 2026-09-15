@@ -63,6 +63,10 @@ export default class MpmPreferences extends ExtensionPreferences {
         menu.add(this._switchRow(settings, 'group-by-manager', {
             title: _('Group packages by manager'),
         }));
+        menu.add(this._switchRow(settings, 'table-rendering', {
+            title: _('Align versions in a table'),
+            subtitle: _('Sets them monospaced so the arrows line up.'),
+        }));
         page.add(menu);
 
         const actions = new Adw.PreferencesGroup({title: _('Upgrades')});

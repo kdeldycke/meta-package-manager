@@ -23,7 +23,7 @@ the two progress-wrapped fan-out primitives the CLI subcommands drive
 ({func}`collect_from_managers`, {func}`collect_per_package`) with their shared
 {func}`dispatch` engine, the backend-lock catalog that serializes conflicting
 managers ({data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES` and {func}`merge_into_lock_lanes`), and
-the manager-bound `✓`/`✗` ledger ({class}`OperationTrail`) that the
+the manager-bound `✓`/`✘` ledger ({class}`OperationTrail`) that the
 concurrent and sequential paths both report through.
 
 The generic layers live upstream in click-extra: the concurrency primitives in
@@ -442,11 +442,11 @@ def warm_availability(managers: Iterable[PackageManager]) -> None:
 
 
 def _state_failed(data: dict) -> bool:
-    """Whether a manager's result fails its `✓`/`✗` trail line.
+    """Whether a manager's result fails its `✓`/`✘` trail line.
 
     A non-empty `data["errors"]` (CLI errors, or a read query's error list) or an
     explicit `data["failed"]` flag (`upgrade --all`'s cooldown skips, which run
-    no CLI of their own) both mark the line `✗`.
+    no CLI of their own) both mark the line `✘`.
     """
     return bool(data.get("errors") or data.get("failed"))
 
@@ -535,7 +535,7 @@ def dispatch(
     operation: str | None = None,
     ctx: Context | None = None,
 ) -> None:
-    """Fan a set of work *lanes* out across managers, narrating a `✓`/`✗` trail.
+    """Fan a set of work *lanes* out across managers, narrating a `✓`/`✘` trail.
 
     The single scheduling primitive behind both {func}`collect_from_managers` and
     {func}`collect_per_package`. A *lane* is one or more managers paired with a list of
@@ -549,7 +549,7 @@ def dispatch(
 
     Each callable does its work, records its own outcome (output to `INFO`, failures
     into a caller-owned list) and returns `(ok, message)` for the trail: a per-outcome
-    `✓`/`✗` line plus one finisher, behind a single aggregate progress bar when
+    `✓`/`✘` line plus one finisher, behind a single aggregate progress bar when
     concurrent (a slow batch on a terminal) and silent otherwise.
 
     The batch runs in up to two phases, each through its own
@@ -571,7 +571,7 @@ def dispatch(
         result table is the output, so the sequential pass stays silent and the finisher
         reports coverage, ``{done_label} N {unit}``, always `✓`). Maintenance and
         state-changing commands leave it `False` (the trail *is* their output, so the
-        finisher reports the success count, ``{done_label} N/M {unit}``, `✗` on any
+        finisher reports the success count, ``{done_label} N/M {unit}``, `✘` on any
         failure).
     :param operation: the operation these lanes perform, matched by
         `_hidden_prompt_risk` to decide which lanes

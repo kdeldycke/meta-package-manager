@@ -129,7 +129,7 @@ def _maintenance_work(
     Logs `message` at the `announce` level, tagged with the manager ID (rendered
     into the level prefix, `info:brew:`), runs `operation(manager)`, and returns
     ``(id, {"errors": <CLI errors raised during the run>})`` so a manager that grows
-    its error list is marked `✗` in the trail. Shared by `sync` and `cleanup`,
+    its error list is marked `✘` in the trail. Shared by `sync` and `cleanup`,
     whose work differs only in the message and the manager method.
     """
 
@@ -260,10 +260,10 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> str:
 
     Thin adapter of {func}`_run_manager_action` for the sequential install
     paths, whose callers map the returned status (`installed`, `failed` or
-    `cooldown`) onto their `✓`/`✗` ledger and decide the retry/stop semantics
+    `cooldown`) onto their `✓`/`✘` ledger and decide the retry/stop semantics
     (the tied loop records every miss; the untied priority search falls
     through to the next manager). The `cooldown` status reports a package held
-    back by the per-package release-age probe: `✗` on the trail, but never a
+    back by the per-package release-age probe: `✘` on the trail, but never a
     recorded failure, so it cannot force a non-zero exit on its own.
     """
     hold = manager.cooldown_hold_reason(spec.package_id)
@@ -352,7 +352,7 @@ def install(ctx, packages_specs):
         failures_lock = threading.Lock()
 
         def make_cooldown_task(spec, mgr):
-            # cooldown_permits() already logged why; a skip is ✗ but not unresolved, so
+            # cooldown_permits() already logged why; a skip is ✘ but not unresolved, so
             # it never forces a non-zero exit.
             def task() -> tuple[bool, str]:
                 return False, f"{package_label(spec)} skipped in {mgr} (cooldown)"
@@ -395,17 +395,17 @@ def install(ctx, packages_specs):
     # (see warn_jobs_ignored).
     warn_jobs_ignored(ctx)
 
-    # Leave a per-package ✓/✗ ledger plus a persistent finisher (see OperationTrail),
+    # Leave a per-package ✓/✘ ledger plus a persistent finisher (see OperationTrail),
     # keyed by package and its resolving manager.
     total = sum(len(specs) for specs in packages_per_managers.values())
     op = OperationTrail(selected_managers)
     installed_count = 0
 
     def trail(spec: Specifier, manager_id: str, status: str) -> None:
-        """Map an install attempt to a `✓`/`✗` ledger line through `op`.
+        """Map an install attempt to a `✓`/`✘` ledger line through `op`.
 
         `status` is `installed` (✓), or `not_found` / `failed` / `cooldown`
-        (✗).
+        (✘).
         """
         mgr = theme().invoked_command(manager_id)
         reason = {
@@ -428,8 +428,8 @@ def install(ctx, packages_specs):
             continue
         for spec in package_specs:
             # A tied package has exactly one candidate manager, so a miss is final:
-            # record it as unresolved (forcing a non-zero exit) and mark the ✗ trail.
-            # A package held by the cooldown is ✗ too, but never unresolved.
+            # record it as unresolved (forcing a non-zero exit) and mark the ✘ trail.
+            # A package held by the cooldown is ✘ too, but never unresolved.
             status = _attempt_install(manager, spec)
             if status == "installed":
                 installed_count += 1
@@ -444,7 +444,7 @@ def install(ctx, packages_specs):
         held = False
         for manager in eligible_managers:
             # Is the package available on this manager? The per-attempt reason is INFO
-            # narration; the ✗ trail line below names the manager that missed.
+            # narration; the ✘ trail line below names the manager that missed.
             matches = None
             try:
                 # refiltered_search runs the read-only `search` operation. Stamp it
@@ -562,7 +562,7 @@ def upgrade(ctx, all, packages_specs):
         logging.info("No package provided, assume -A/--all option.")
         all = True
 
-    # Full upgrade: one ✓/✗ ledger line per manager plus a finisher (see
+    # Full upgrade: one ✓/✘ ledger line per manager plus a finisher (see
     # OperationTrail). A manager fails its line if it grows cli_errors while running.
     if all:
         if packages_specs:
@@ -579,7 +579,7 @@ def upgrade(ctx, all, packages_specs):
 
         def upgrade_all_work(manager: PackageManager) -> tuple[str, dict]:
             # cooldown_permits() already logs the reason at WARNING when it blocks;
-            # mark the manager ✗ without running its CLI.
+            # mark the manager ✘ without running its CLI.
             if not cooldown_permits(manager):
                 return manager.id, {
                     "failed": True,
@@ -597,7 +597,7 @@ def upgrade(ctx, all, packages_specs):
             return manager.id, {"errors": manager.cli_errors[before:]}
 
         # Full upgrade is independent per manager, so fan out concurrently with a
-        # ✓/✗ trail and a success-count finisher (see collect_from_managers).
+        # ✓/✘ trail and a success-count finisher (see collect_from_managers).
         collect_from_managers(
             "Upgrading",
             "Upgraded",
@@ -706,7 +706,7 @@ def sync(ctx):
     prime_sudo(ctx, managers)
     announce = _announce_level(ctx)
 
-    # Sync is independent per manager, so fan out concurrently with a ✓/✗ trail and
+    # Sync is independent per manager, so fan out concurrently with a ✓/✘ trail and
     # a success-count finisher (see collect_from_managers).
     collect_from_managers(
         "Syncing",
@@ -749,7 +749,7 @@ def _cleanup_steps(
     `--orphans` (`explicit_orphans`): a skip flag subtracts from the native
     categories and must never make a manager remove packages its plain `cleanup`
     would have left alone. The category names feed the per-manager narration and
-    the `✓`/`✗` trail labels, so the run discloses which categories each
+    the `✓`/`✘` trail labels, so the run discloses which categories each
     manager was dispatched.
     """
     steps: list[tuple[str, Callable[[], None]]] = []
@@ -870,7 +870,7 @@ def cleanup(ctx, orphans, cache, repair):
             "detail": categories,
         }
 
-    # Cleanup is independent per manager, so fan out concurrently with a ✓/✗ trail
+    # Cleanup is independent per manager, so fan out concurrently with a ✓/✘ trail
     # and a success-count finisher (see collect_from_managers).
     collect_from_managers(
         "Cleaning up",
@@ -900,7 +900,7 @@ def doctor(ctx):
     diagnosis being the product, not something `mpm` can parse — is relayed
     verbatim to `<stdout>`, one section per manager with findings.
 
-    The trail marks each manager `✓` (healthy) or `✗` (problems found), and the
+    The trail marks each manager `✓` (healthy) or `✘` (problems found), and the
     run exits non-zero when any manager reports problems, so the command can gate a
     CI job. `-0`/`--zero-exit` keeps the exit code at `0`. Managers with no
     diagnostic verb are skipped.
@@ -921,7 +921,7 @@ def doctor(ctx):
         }
 
     # The diagnosis is independent per manager, so fan out concurrently with a
-    # ✓/✗ trail and a success-count finisher; reports are relayed afterwards, in
+    # ✓/✘ trail and a success-count finisher; reports are relayed afterwards, in
     # manager order, so concurrent runs never interleave their output.
     results = collect_from_managers(
         "Diagnosing", "Diagnosed", managers, doctor_work, report_state=True

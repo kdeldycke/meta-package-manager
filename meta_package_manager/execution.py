@@ -24,7 +24,7 @@ themes a binary's name.
 
 Scheduling *many* managers at once is the next altitude up, and lives in
 {mod}`meta_package_manager.dispatch`: the concurrent fan-out primitives, the
-lock families and the shared `✓`/`✗` trail. The `sudo` machinery that cuts
+lock families and the shared `✓`/`✘` trail. The `sudo` machinery that cuts
 across both altitudes (credential priming, the keepalive, the hidden-prompt stall
 watchdog) lives in {mod}`meta_package_manager.sudo`: this module only consumes
 it, to wrap escalated commands and diagnose their failures.
@@ -873,7 +873,7 @@ class CLIExecutor:
     is also raised: a failure the caller goes on to swallow
     ({meth}`~meta_package_manager.manager.PackageManager.installed_or_empty` and
     its peers) is still a failure this manager committed, and the end-of-run
-    summary, the serialized `errors` payload and the ✓/✗ trail all read this list
+    summary, the serialized `errors` payload and the ✓/✘ trail all read this list
     to say so.
 
     Recording only the non-raising half made a manager's visibility hinge on

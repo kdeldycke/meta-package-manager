@@ -670,7 +670,7 @@ def test_cleanup_skip_orphans_keeps_native_categories(invoke, monkeypatch):
 
 def test_cleanup_narration_names_categories(invoke, monkeypatch):
     """The per-manager narration names the categories dispatched to it, matching
-    the `✓`/`✗` trail labels."""
+    the `✓`/`✘` trail labels."""
     fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
     result = invoke("--verbosity", "DEBUG", "cleanup", "--orphans", "--cache")
     assert result.exit_code == 0

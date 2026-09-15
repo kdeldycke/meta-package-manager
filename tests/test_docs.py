@@ -27,6 +27,7 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 
 import pytest
+from click_extra.theme import KO_GLYPH
 from extra_platforms import Group, extract_members
 from wcwidth import wcswidth
 from yaml import Loader, load, safe_load
@@ -1498,6 +1499,40 @@ def test_docstrings_carry_no_angle_bracket_link_destination():
         for match in ANGLE_LINK_DEST.finditer(doc)
     ]
     assert not hits, "Angle-bracketed link destinations:\n" + "\n".join(hits)
+
+
+TRAIL_FAILURE_GLYPH = "\u2718"
+"""The failure glyph every description of the trail in this tree writes.
+
+Pinned to click-extra's `KO_GLYPH` by `test_trail_glyph_matches_the_emitted_one`:
+the prose follows the emitted character. Its look-alike U+2717 reads the same on
+screen and matches nothing in real output.
+"""
+
+
+def test_trail_glyph_matches_the_emitted_one():
+    """Prose about the trail writes the glyph the trail emits.
+
+    A reader grepping the documented failure glyph must find it in real output,
+    so the tree carries `KO_GLYPH` and never its U+2717 look-alike. The scan is
+    raw text, comments included: a captured fixture printing U+2717 would need
+    an exclusion here, and none exists today.
+    """
+    assert KO_GLYPH == TRAIL_FAILURE_GLYPH
+    files = [
+        *sorted((PROJECT_ROOT / "meta_package_manager").rglob("*.py")),
+        *sorted((PROJECT_ROOT / "tests").glob("*.py")),
+        *sorted((PROJECT_ROOT / "docs").glob("*.md")),
+        PROJECT_ROOT / "claude.md",
+        PROJECT_ROOT / "readme.md",
+    ]
+    hits = []
+    for path in files:
+        lines = path.read_text(encoding="UTF-8").splitlines()
+        for lineno, line in enumerate(lines, 1):
+            if "\u2717" in line:
+                hits.append(f"{path.relative_to(PROJECT_ROOT)}:{lineno}")
+    assert not hits, "U+2717 where the trail emits U+2718:\n" + "\n".join(hits)
 
 
 def test_manager_traces_render_literal_blocks():

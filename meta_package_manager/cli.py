@@ -566,7 +566,7 @@ def group_params() -> list[Parameter]:
 
 
 @group(
-    # Verbosity stays at click-extra's WARNING default: the ✓/✗ trail and finisher
+    # Verbosity stays at click-extra's WARNING default: the ✓/✘ trail and finisher
     # print via echo (not logging) and survive it, so a default run shows just those
     # plus real warnings and critical. Per-operation narration (priority,
     # announcements, skip reasons) sits at INFO, one --verbosity INFO away.
@@ -1069,7 +1069,7 @@ def _cli_errors(manager: PackageManager) -> list[str]:
 
     Collected at the last minute — after the manager's query ran — so the list
     gathers everything the run produced. A non-empty list marks the manager's
-    `✗` in the concurrent spinner trail (see
+    `✘` in the concurrent spinner trail (see
     {func}`meta_package_manager.dispatch.collect_from_managers`) and ships in
     the serialized payloads.
     """
@@ -1168,7 +1168,7 @@ def _run_manager_action(
     watchdog policy, scoped to the attempt) and the manager forced to raise on
     failure, so a botched operation is recorded by the caller rather than
     silently swallowed. Narrates the per-attempt reason at `INFO` and logs the
-    CLI output on success. The caller maps the boolean onto its own `✓`/`✗`
+    CLI output on success. The caller maps the boolean onto its own `✓`/`✘`
     ledger and retry/stop semantics.
     """
     with manager.acting_as(operation, stop_on_error=True):
@@ -1211,9 +1211,9 @@ def _package_task(
     """Build one per-package task for {func}`collect_per_package`.
 
     Runs the attempt through {func}`_run_manager_action` and returns
-    `(ok, message)` for the `✓`/`✗` trail. On failure it appends the spec to a
+    `(ok, message)` for the `✓`/`✘` trail. On failure it appends the spec to a
     caller-owned list through `record_failure` (under `lock`, since the list is
-    shared across the concurrent lanes) and reports `✗`. Shared by `install`,
+    shared across the concurrent lanes) and reports `✘`. Shared by `install`,
     `remove`, `upgrade <packages>` and `restore`, whose tasks differ only in
     the action, the verb forms, and which failure list they feed.
 
@@ -1231,7 +1231,7 @@ def _package_task(
     def task() -> tuple[bool, str]:
         # A release-introducing attempt first passes the per-package cooldown
         # hold (a no-op unless the manager runs an active probe-backed gate).
-        # A held package is ✗ but never recorded as a failure, matching the
+        # A held package is ✘ but never recorded as a failure, matching the
         # manager-level cooldown skip: it must not force a non-zero exit.
         if operation in RELEASE_INTRODUCING_OPERATIONS:
             hold = manager.cooldown_hold_reason(spec.package_id)

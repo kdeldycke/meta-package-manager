@@ -264,7 +264,7 @@ def test_finisher_line_when_progress_bar_shown(monkeypatch):
 
 
 def test_failure_trail_marks_errored_managers(monkeypatch):
-    """A manager whose result carries errors gets a ✗ trail line; others get ✓."""
+    """A manager whose result carries errors gets a ✘ trail line; others get ✓."""
     monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.0)
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
@@ -474,7 +474,7 @@ def test_per_package_finisher_when_progress_bar_shown(monkeypatch):
 
 
 def test_per_package_failure_trail_marks_failed_tasks(monkeypatch):
-    """A failed task gets a ✗ line; the finisher reports the success count."""
+    """A failed task gets a ✘ line; the finisher reports the success count."""
     monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.0)
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
@@ -741,13 +741,13 @@ def test_sequential_tail_reports_one_batch_wide_finisher(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# OperationTrail: the sequential ✓/✗ ledger (drives install's priority search
+# OperationTrail: the sequential ✓/✘ ledger (drives install's priority search
 # and every sequential fallback).
 # ---------------------------------------------------------------------------
 
 
 def test_operation_trail_echoes_marks_and_finisher_on_tty(monkeypatch):
-    """On a TTY the ledger echoes a ✓/✗ line per mark, plus a finisher.
+    """On a TTY the ledger echoes a ✓/✘ line per mark, plus a finisher.
 
     The finisher carries an elapsed time only under `--time`: upstream gates it
     on `OperationTrail`'s `timer` argument, which mpm leaves at its `None`

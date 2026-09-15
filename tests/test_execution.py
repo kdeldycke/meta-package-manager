@@ -375,7 +375,7 @@ def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
 
 
 # Diagnosis relay: a failed run promotes its own error report to WARNING at the
-# failure gate, so the default verbosity carries the "why" and not just the ✗
+# failure gate, so the default verbosity carries the "why" and not just the ✘
 # signal (issue 1968). Successful chatter, tolerated exits, DEBUG-level runs and
 # exempt operations stay silent.
 

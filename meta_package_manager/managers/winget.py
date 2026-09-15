@@ -113,10 +113,11 @@ class WinGet(PackageManager):
         Disable interactive prompts.
 
     ```{todo}
-    Add the `--no-progress` option once it is available in the stable release:
-
-    - [microsoft/winget-cli#6049](https://github.com/microsoft/winget-cli/pull/6049)
-    - [microsoft/winget-cli#3494](https://github.com/microsoft/winget-cli/issues/3494#issuecomment-3921618377)
+    Add `--no-progress` to `post_args` and raise `requirement` to `1.29.280`, the
+    first stable release shipping the option
+    ([microsoft/winget-cli#6049](https://github.com/microsoft/winget-cli/pull/6049)).
+    The new argv invalidates every documented `pwsh-session` fixture below, so this
+    waits on a capture session on a real Windows host.
     ```
     """
 

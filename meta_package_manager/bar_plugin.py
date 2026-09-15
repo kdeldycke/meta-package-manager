@@ -29,7 +29,8 @@ quota.
 - [Xbar automatically bridge plugin options](https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html) between its UI
   and environment variable on script execution.
 
-- This is [in progress for SwiftBar](https://github.com/swiftbar/SwiftBar/issues/160).
+- SwiftBar bridges them the same way since `2.1.0` added `xbar.var` support
+  ([swiftbar/SwiftBar#472](https://github.com/swiftbar/SwiftBar/pull/472)).
 """
 
 from __future__ import annotations

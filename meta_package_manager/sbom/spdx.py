@@ -585,10 +585,11 @@ class SPDX(SBOM):
         # Record the upstream document for traceability. The
         # `documentNamespace` copied through from Homebrew points at
         # `https://formulae.brew.sh/spdx/<name>-<version>.json`, which
-        # 404s because nothing is published there; tracked upstream at
-        # https://github.com/Homebrew/brew/issues/22741. Carrying the
+        # 404s because nothing is published there, and Homebrew declined to
+        # publish the files (see
+        # https://github.com/Homebrew/brew/issues/22741). Carrying the
         # value verbatim keeps the aggregate document consistent with the
-        # source files until that issue is resolved.
+        # source files.
         self.merged_docs[doc_ref_id] = digest
         self.document.creation_info.external_document_refs.append(
             ExternalDocumentRef(

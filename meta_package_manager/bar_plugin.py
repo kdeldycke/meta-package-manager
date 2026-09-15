@@ -381,9 +381,7 @@ class MPMPlugin:
 
     def check_mpm(
         self, mpm_cli_args: tuple[str, ...]
-    ) -> tuple[
-        bool, bool, tuple[int, ...] | None, str | Exception | None, str | None
-    ]:
+    ) -> tuple[bool, bool, tuple[int, ...] | None, str | Exception | None, str | None]:
         """Test-run mpm execution and extract its version.
 
         Two readings of the same string come back. The numeric tuple is what

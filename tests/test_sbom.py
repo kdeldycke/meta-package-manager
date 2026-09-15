@@ -45,7 +45,6 @@ if not spdx_support:
 from cyclonedx.schema import OutputFormat, SchemaVersion
 from cyclonedx.validation import make_schemabased_validator
 from cyclonedx.validation.json import JsonStrictValidator
-
 from packageurl import PackageURL
 
 from meta_package_manager.manager import PackageManager
@@ -679,7 +678,9 @@ def test_stats_count_the_packages_an_alias_reaches(renderer_class):
     renderer.init_doc()
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     metadata = PackageMetadata(extra_purls=(PackageURL.from_string(UPSTREAM_ALIAS),))
-    renderer.add_package(manager, _make_package("brew", "yt-dlp", "2026.8.19"), metadata)
+    renderer.add_package(
+        manager, _make_package("brew", "yt-dlp", "2026.8.19"), metadata
+    )
     renderer.add_package(
         manager, _make_package("brew", "yt-dlp@stable", "2026.8.19"), metadata
     )
@@ -690,6 +691,8 @@ def test_stats_count_the_packages_an_alias_reaches(renderer_class):
     # One advisory, found under one alias, reaching both formulae. Counting
     # the queried coordinate instead would report a single package here.
     assert stats["vulnerable_packages"] == 2
+
+
 def test_spdx_advisory_found_under_an_alias_lands_on_the_formula():
     """An advisory keyed by the upstream purl attaches to the brew package."""
     s = SPDX()

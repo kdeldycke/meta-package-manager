@@ -77,6 +77,7 @@ contributing
 add-new-manager
 add-packaging-channel
 packaging
+upstream
 code-of-conduct
 ```
 

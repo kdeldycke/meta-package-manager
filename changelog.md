@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
 - [fwupd] Fix every query reaching `fwupd` aborting on a host with no updatable device, which is what a VM, a container and plenty of real machines report. fwupd answers that with an `Error` object replacing its whole payload, and `mpm installed`, `mpm outdated`, `mpm sbom` and the snapshot commands read it as a device list.
 - [aptitude] Add aptitude package manager, with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.
 - [pear] Add PEAR package manager, with inventory, outdated, install, remove, upgrade, channel sync and cache cleanup.
@@ -20,7 +21,9 @@
 - [mpm] Fix comparison of the Gentoo and Alpine post-release suffixes: `1.0_p1` and `1.0_git20240101` now rank above `1.0`, not below it.
 - [mpm] Escalate through `doas` where `sudo` is Alpine's `doas-sudo-shim`, which rejects every option the credential probes send and so reported a cold cache.
 - [mpm] Name the running command in the progress spinner: a slow call now reads `cask.upgrade_all: brew upgrade --quiet --yes` instead of `cask upgrade_all`.
+- [mpm] Name the operation on each `✓`/`✘` trail line, so `✓ brew` now reads `✓ brew.outdated` and matches the spinner's subject.
 - [mpm] Hold the progress spinner still during a call whose manager may prompt for a `sudo` password, so the prompt stays on screen instead of being erased by the animation.
+- [mpm] Start the hidden-password-prompt notice on a fresh line, so it no longer runs on from the `Password:` prompt it warns about.
 - [mpm] Run a manager that escalates internally after the concurrent batch, on its own, so its password prompt gets a terminal no other manager is writing to.
 - [mpm] Exit quietly on a Ctrl+C pressed while a run is already shutting down, instead of printing a `threading` traceback.
 - [dnf,dnf5,yum] Fix version detection against `dnf5`, whose banner was read as the version `dnf5`, dropping every RPM front-end from the pool on Fedora 41 and later.

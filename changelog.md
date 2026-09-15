@@ -87,6 +87,7 @@
 - [gnome-shell] Render each version of a package row as one string. The dimmed common prefix and its colored suffix are two labels, and the shell theme's own row spacing held them apart: `5.0.0~beta1-0ubuntu7` read as `5.0. 0~beta1-0ubuntu7`.
 - [gnome-shell] Illustrate the extension's page with screenshots of its menu, in both layouts and both shell appearances. Each one is captured from a real headless GNOME session by the new `docs-screenshots.yaml` workflow, which reshoots them whenever the extension changes.
 - [gnome-shell] Render each package row's version diff as one label instead of five, so a report of a thousand packages scrolls smoothly.
+- [gnome-shell] Drop the blank band and separator the menu showed above *Checking…*, before a session's first report has anything to list.
 - [mpm] Replace the project's own forge sampler with repomatic's `sample-metrics`: the star-history charts and the manager cards' upstream readings now accrue in one committed CSV, appended and rendered by the new `metrics.yaml` workflow.
 - [mpm] Plot the benchmark's star-history charts on a logarithmic vertical axis, so the series orders of magnitude apart stay legible on one chart.
 - [nala] Sample the upstream project from GitLab, dropping the excuse that its forge went unqueried: the manager page gains the upstream stars and commit facts, and its live badges.

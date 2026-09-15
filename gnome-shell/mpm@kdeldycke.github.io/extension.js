@@ -151,14 +151,18 @@ class MpmIndicator extends PanelMenu.Button {
          * close() instead of closing the panel menu. Action items therefore
          * close the menu explicitly. */
         this._reportSection = new PopupMenu.PopupMenuSection();
-        const scrollView = new St.ScrollView({
+        /* Hidden until a report fills it: the view keeps its own padding
+         * whatever it holds, which an empty one would spend on a band of
+         * blank menu. See `_showReport()`. */
+        this._reportView = new St.ScrollView({
             style_class: 'mpm-updates-list',
             hscrollbar_policy: St.PolicyType.NEVER,
             vscrollbar_policy: St.PolicyType.AUTOMATIC,
+            visible: false,
         });
-        scrollView.child = this._reportSection.actor;
+        this._reportView.child = this._reportSection.actor;
         const scrollWrapper = new PopupMenu.PopupMenuSection();
-        scrollWrapper.actor.add_child(scrollView);
+        scrollWrapper.actor.add_child(this._reportView);
         this.menu.addMenuItem(scrollWrapper);
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -347,10 +351,22 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
-    /* Render the last report: panel state plus the per-manager menu, in the
-     * same order as bar_plugin_renderer._render(). */
+    /* Render the last report, then hide the view when it came out empty.
+     *
+     * Empty is the state of a session's first check, and the view's padding
+     * would otherwise stand as a blank band above the menu. Hiding the actor
+     * also makes the section wrapping it read as empty to
+     * `isPopupMenuItemVisible()`, which is what lets the shell drop the
+     * separator underneath on the next open. */
     _showReport() {
         this._reportSection.removeAll();
+        this._fillReport();
+        this._reportView.visible = this._reportSection.numMenuItems > 0;
+    }
+
+    /* Panel state plus the per-manager menu, in the same order as
+     * bar_plugin_renderer._render(). */
+    _fillReport() {
         if (lastError !== null) {
             this._addErrorItems(this._reportSection, lastError);
             this._setPanelState(lastError.missing ? State.MISSING : State.ERROR);

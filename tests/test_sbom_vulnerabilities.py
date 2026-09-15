@@ -185,7 +185,10 @@ def test_normalize_osv_record_full():
         # the purl spec, not as an mpm manager id: `pypi`, never `pip`.
         (["pkg:pypi/yt-dlp@2026.8.19"], [("PyPI", "yt-dlp", "2026.8.19")]),
         (["pkg:maven/org.example/widget@1.0.0"], [("Maven", "widget", "1.0.0")]),
-        (["pkg:nuget/Newtonsoft.Json@13.0.3"], [("NuGet", "Newtonsoft.Json", "13.0.3")]),
+        (
+            ["pkg:nuget/Newtonsoft.Json@13.0.3"],
+            [("NuGet", "Newtonsoft.Json", "13.0.3")],
+        ),
         # CPAN is the one registry Homebrew resolves that OSV does not
         # index, so it must stay unmapped rather than query a bogus one.
         (["pkg:cpan/DROLSKY/DateTime@1.65"], []),

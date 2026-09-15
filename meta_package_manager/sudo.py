@@ -1459,6 +1459,16 @@ class _StallWatchdog(logging.Handler):
                 if len(last_line) > 120:
                     last_line = last_line[:119] + "…"
                 detail = f'Last output: "{last_line}"'
+            # Break the line the prompt may be sitting on, so the notice starts
+            # on a fresh one instead of running on from "Password:". The tool's
+            # prompt goes to `/dev/tty` without a trailing newline and never
+            # reaches the pipe mpm reads, so nothing here can know whether it is
+            # there: the watchdog is armed only when one is possible
+            # (`_hidden_prompt_risk`), which is what makes an unconditional break
+            # the right trade. The cost is a blank line on a call that stayed
+            # silent without prompting.
+            sys.stderr.write("\n")
+            sys.stderr.flush()
             # WARNING survives the default verbosity, and click-extra's handler
             # prints it above any animating spinner frame. The wording never
             # instructs the user to type blindly: the prompt may not exist.

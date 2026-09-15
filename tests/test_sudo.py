@@ -31,6 +31,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
+import sys
 import time
 from collections.abc import Callable
 from contextlib import ExitStack, contextmanager
@@ -1559,6 +1560,36 @@ def test_stall_watchdog_notices_silent_internal_escalator(monkeypatch, caplog):
         if 'Last output: "installer may ask"' in record.getMessage()
     ]
     assert len(quoting) == 1
+
+
+def test_stall_watchdog_notice_starts_on_a_fresh_line(monkeypatch, capsys):
+    """The notice breaks the line before writing, sparing a prompt sitting on it.
+
+    A tool's own `sudo` writes `Password:` to `/dev/tty` with no trailing
+    newline, and that never reaches the pipe mpm reads, so a notice written
+    straight to `stderr` runs on from it as `Password:warning:cask: No output
+    for 30s…` and buries the prompt mid-sentence.
+
+    The child here prints nothing, so its single silence episode leaves `stderr`
+    carrying the notice alone: a leading newline is then the whole difference.
+    """
+    assert not _SUDO_CACHE_WARM.is_set()
+    manager = FakeManager()
+    manager.internal_sudo = True
+    manager._active_operation = "install"
+    monkeypatch.setattr("meta_package_manager.sudo._STALL_NOTICE_DELAY", 0.2)
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    root = logging.getLogger()
+    root.addHandler(handler)
+    try:
+        with patch("sys.stderr.isatty", return_value=True):
+            manager.run_cli("-c", "import time; time.sleep(1)")
+    finally:
+        root.removeHandler(handler)
+    captured = capsys.readouterr().err
+    assert "No output for " in captured
+    assert captured.startswith("\n")
 
 
 @pytest.mark.parametrize(

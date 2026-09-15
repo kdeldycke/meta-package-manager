@@ -1,5 +1,10 @@
 # Changelog
 
+## [`8.0.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.0...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`8.0.0` (2026-09-15)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...v8.0.0)
 
 - [fwupd] Fix every query reaching `fwupd` aborting on a host with no updatable device, which is what a VM, a container and plenty of real machines report. fwupd answers that with an `Error` object replacing its whole payload, and `mpm installed`, `mpm outdated`, `mpm sbom` and the snapshot commands read it as a device list.

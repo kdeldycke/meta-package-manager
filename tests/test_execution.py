@@ -20,6 +20,7 @@ import errno
 import logging
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import threading
@@ -28,7 +29,9 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from click_extra.color import COLOR_ENVVARS
 from click_extra.execution import _LIVE_PROCESSES, terminate_live_processes
+from click_extra.theme import get_current_theme as theme
 from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
 from extra_platforms.pytest import write_fake_executable
 
@@ -47,6 +50,8 @@ from meta_package_manager.execution import (
     VERSION_PROBE,
     WIN_DEFAULT_PATHEXT,
     CLIError,
+    _lean_command,
+    _spinner_label,
     format_plan_command,
 )
 from meta_package_manager.pool import pool
@@ -146,15 +151,140 @@ def test_make_spinner_defers_to_tty_with_progress():
     assert manager._make_spinner().enabled is None
 
 
-def test_make_spinner_label_includes_manager_and_operation():
+@pytest.fixture
+def plain_labels(monkeypatch):
+    """Force spinner labels to plain text, whatever the host terminal answers.
+
+    Every recognized color variable is cleared and `NO_COLOR` set, so the label
+    carries no ANSI and the assertions below compare bare strings. Without it a
+    developer's `FORCE_COLOR` would style the label and fail them.
+    """
+    for envvar in COLOR_ENVVARS:
+        monkeypatch.delenv(envvar, raising=False)
+    monkeypatch.setenv("NO_COLOR", "1")
+
+
+# One argv per shape the strip has to handle, all captured from a real `--dry-run`
+# except the escalated one. `cli_path` is what splits an escalation prefix off the
+# manager's own binary.
+LEAN_COMMAND_CASES = (
+    # Trailing scope selector only, the `cask` shape.
+    (
+        "/opt/homebrew/bin/brew upgrade --quiet --yes --cask",
+        "/opt/homebrew/bin/brew",
+        (),
+        ("--cask",),
+        "brew upgrade --quiet --yes",
+    ),
+    # Leading plumbing only, the `npm` shape: the case that motivated the strip.
+    (
+        "/opt/homebrew/bin/npm --global --no-progress --no-update-notifier"
+        " --no-fund --no-audit search --json --no-description jq",
+        "/opt/homebrew/bin/npm",
+        (
+            "--global",
+            "--no-progress",
+            "--no-update-notifier",
+            "--no-fund",
+            "--no-audit",
+        ),
+        (),
+        "npm search --json --no-description jq",
+    ),
+    # Neither, the version-probe shape: nothing to strip, nothing lost.
+    ("/usr/bin/apt --version", "/usr/bin/apt", ("--quiet",), (), "apt --version"),
+    # An escalated call keeps its prefix, both binaries read by base name.
+    (
+        "/usr/bin/sudo --non-interactive /usr/bin/apt --quiet install --yes jq",
+        "/usr/bin/apt",
+        ("--quiet",),
+        (),
+        "sudo --non-interactive apt install --yes jq",
+    ),
+    # An argument needing shell quoting survives as one argument.
+    (
+        "/opt/homebrew/bin/brew search --quiet '/^jq$/' --formula",
+        "/opt/homebrew/bin/brew",
+        (),
+        ("--formula",),
+        "brew search --quiet '/^jq$/'",
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    ("argv", "cli_path", "pre_args", "post_args", "expected"),
+    LEAN_COMMAND_CASES,
+)
+def test_lean_command_strips_manager_plumbing(
+    argv, cli_path, pre_args, post_args, expected
+):
+    """Static plumbing is dropped; every operation-specific argument is kept."""
+    assert _lean_command(shlex.split(argv), cli_path, pre_args, post_args) == expected
+
+
+def test_lean_command_keeps_unmatched_plumbing():
+    """The strip matches the actual prefix and suffix, never slices by length.
+
+    A call built with `auto_pre_args=False` carries none of the declared
+    plumbing, so a length-based slice would eat a real argument instead.
+    """
+    argv = ("/usr/bin/gem", "--version")
+    assert _lean_command(argv, "/usr/bin/gem", ("--norc", "--backtrace")) == (
+        "gem --version"
+    )
+
+
+def test_lean_command_empty_argv():
+    assert _lean_command(()) == ""
+
+
+def test_spinner_label_is_plain_without_styling(plain_labels):
+    assert (
+        _spinner_label("cask.upgrade_all", "brew upgrade")
+        == "cask.upgrade_all: brew upgrade"
+    )
+
+
+def test_spinner_label_subject_alone_without_styling(plain_labels):
+    assert _spinner_label("cask.upgrade_all", "") == "cask.upgrade_all"
+
+
+@pytest.mark.parametrize(
+    ("term", "italic"),
+    (
+        # Measured with `infocmp`: these declare `sitm`, the rest do not.
+        ("xterm-256color", True),
+        ("xterm-ghostty", True),
+        ("tmux-256color", True),
+        ("screen-256color", False),
+        ("linux", False),
+    ),
+)
+def test_spinner_label_italic_follows_terminal_capability(monkeypatch, term, italic):
+    """The subject is always painted; the command takes italic where it renders.
+
+    The subject is compared against the theme's own rendering rather than a
+    literal escape, the `invoked_command` slot resolving to different codes on a
+    light and a dark background.
+    """
+    for envvar in COLOR_ENVVARS:
+        monkeypatch.delenv(envvar, raising=False)
+    monkeypatch.setenv("FORCE_COLOR", "1")
+    monkeypatch.setenv("TERM", term)
+    label = _spinner_label("cask.upgrade_all", "brew upgrade")
+    assert theme().invoked_command("cask.upgrade_all") in label
+    assert ("\x1b[3m" in label) is italic
+
+
+def test_make_spinner_label_names_operation_and_command(plain_labels):
     manager = FakeManager()
     manager._active_operation = "search"
-    label = manager._make_spinner().label
-    assert manager.id in label
-    assert "search" in label
+    label = manager._make_spinner((manager.cli_path, "--version")).label
+    assert label == f"{manager.id}.search: {manager.cli_path.name} --version"
 
 
-def test_make_spinner_label_without_operation():
+def test_make_spinner_label_without_operation(plain_labels):
     manager = FakeManager()
     manager._active_operation = None
     assert manager._make_spinner().label == str(manager.id)
@@ -162,6 +292,32 @@ def test_make_spinner_label_without_operation():
 
 def test_make_spinner_uses_configured_delay():
     assert FakeManager()._make_spinner().delay == SPINNER_DELAY
+
+
+@pytest.mark.parametrize(
+    ("color_enabled", "expected"),
+    (
+        (True, "\x1b[2m (24.2s)\x1b[0m"),
+        (False, " (24.2s)"),
+    ),
+)
+def test_spinner_clock_dims_the_parentheses_too(color_enabled, expected):
+    """The whole fragment is faint, brackets included, or none of it is.
+
+    Painting the duration alone through the `timer` callable would leave the
+    parentheses upstream adds around it at full weight, which is why this is an
+    override.
+    """
+    spinner = FakeManager()._make_spinner()
+    spinner._start_time, spinner._stop_time = 0.0, 24.2
+    spinner._color_enabled = color_enabled
+    assert spinner._clock() == expected
+
+
+def test_spinner_clock_is_plain_before_start():
+    """A spinner that never started reports color off, so it never dims."""
+    spinner = FakeManager()._make_spinner()
+    assert spinner._color_enabled is False
 
 
 # Tiny cross-platform CLIs that exit non-zero, differing only in which stream

@@ -54,6 +54,7 @@ import shlex
 import shutil
 import stat
 import subprocess
+import sys
 import threading
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -62,8 +63,11 @@ from pathlib import Path
 from textwrap import dedent, indent, shorten
 from typing import ClassVar, Final
 
+import click
 from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
+from click_extra import style
+from click_extra.color import is_a_tty, resolve_color_env
 from click_extra.execution import (
     INDENT,
     args_cleanup,
@@ -71,7 +75,7 @@ from click_extra.execution import (
     highlight_bin_name,
     run_cli,
 )
-from click_extra.spinner import Spinner
+from click_extra.spinner import Spinner as _Spinner
 from click_extra.theme import get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
 
@@ -388,6 +392,183 @@ stalled during the first second. Only the quickest calls (cached version probes,
 trivial metadata queries) finish within this delay and stay silent; anything
 slower (a `guix search`, a source build) shows the spinner right away.
 """
+
+ITALIC_CAPABLE_TERMS: Final = ("xterm", "tmux")
+"""`TERM` prefixes whose terminfo declares the italic capability (`sitm`).
+
+An allow-list, because the terminals that *lack* italic outnumber the ones that
+have it: `infocmp` reports no `sitm` for the `screen`, `linux`, `vt`, `ansi`,
+`rxvt`, `Eterm`, `cons25` and `sun` entries, against `xterm` and `tmux` which
+declare `sitm=\\E[3m`. Missing the capability is not benign: SGR `3` is then
+undefined rather than ignored, and some terminals render it as reverse video.
+
+The two prefixes cover what modern emulators actually export, `xterm-256color`
+being the default of iTerm2, Apple Terminal, VS Code and Alacritty, and
+`xterm-kitty` / `xterm-ghostty` the exceptions that ship their own entry. A
+terminal outside them (`wezterm`, an `alacritty` entry where it is installed)
+loses the italic and keeps the plain rendering, which costs emphasis and never
+correctness. See {func}`_spinner_label`.
+"""
+
+
+def _styling_enabled() -> bool:
+    """Whether the spinner label may carry ANSI attributes.
+
+    {class}`click_extra.spinner.Spinner` gates its own `style` argument on the
+    reconciled color state, but writes {attr}`~click_extra.spinner.Spinner.label`
+    to the stream verbatim: escapes embedded there reach the terminal whatever
+    `--no-color`, `NO_COLOR` or `TERM=dumb` say. Nor does
+    {func}`click_extra.style` strip them, being
+    {func}`click.style` and unconditional. So the label resolves the gate itself,
+    in the order the spinner resolves its own: the command context's reconciled
+    {attr}`ctx.color <click.Context.color>` first, then the environment through
+    {func}`~click_extra.color.resolve_color_env`, then TTY detection on the
+    stream the spinner draws to.
+
+    ```{todo}
+    Retire this in favour of a `label_style` argument on
+    {class}`click_extra.spinner.Spinner`, which would keep the gate where
+    `Spinner._resolve_color_enabled()` already lives instead of mirroring it
+    here. Not filed upstream yet.
+    ```
+    """
+    ctx = click.get_current_context(silent=True)
+    if ctx is not None and ctx.color is not None:
+        return ctx.color
+    from_env = resolve_color_env()
+    if from_env is not None:
+        return from_env
+    return is_a_tty(sys.stderr)
+
+
+def _lean_command(
+    cmd_args: Iterable[str],
+    cli_path: Path | str | None = None,
+    pre_args: tuple[str, ...] = (),
+    post_args: tuple[str, ...] = (),
+) -> str:
+    """Render an argv as the command a spinner label shows.
+
+    Three reductions turn the resolved argv into something that fits a terminal
+    line, none of which drop an argument that varies with the operation:
+
+    - The binary is shown by its base name, the directory it was found in being
+      what {attr}`~CLIExecutor.cli_path` already answers.
+    - {attr}`~CLIExecutor.pre_args` and {attr}`~CLIExecutor.post_args` are
+      dropped. They are the manager's static plumbing (`npm`'s `--no-fund
+      --no-audit`, `cargo`'s `--color never`) and its scope selector (`--cask`,
+      `--formula`, `--global`), and the label's own manager ID already names
+      that scope. It takes `npm`'s longest call from 127 columns to 62.
+    - The escalation prefix, when one is present, is kept: a call that runs
+      through `sudo` should say so.
+
+    The strip is opportunistic, matching the actual prefix and suffix rather than
+    slicing by length, so a call that built its argv with `auto_pre_args=False`
+    (the version probe) keeps every argument instead of losing a real one.
+
+    ```{caution}
+    The result is legible, not runnable: dropping `--formula` widens a `brew
+    search` to casks, and dropping `--global` repoints `npm` at the local
+    project. `--verbosity INFO` discloses the complete invocation (see
+    {func}`click_extra.execution.format_cli_prompt`), and that stays the
+    channel to reproduce a call by hand.
+    ```
+
+    :param cmd_args: the resolved argv, escalation prefix included.
+    :param cli_path: the manager binary, used to split the escalation prefix off.
+        Defaults to reading the first argument as the binary.
+    :param pre_args: the manager's leading plumbing, dropped when it matches.
+    :param post_args: the manager's trailing plumbing, dropped when it matches.
+    :return: the rendered command, shell-quoted, or an empty string for an empty
+        argv.
+    """
+    args = [str(arg) for arg in cmd_args]
+    if not args:
+        return ""
+    # Everything ahead of the manager's own binary is the escalator and its
+    # arguments: rendered as-is, since a privileged call must read as one.
+    split = args.index(str(cli_path)) if str(cli_path) in args else 0
+    escalation, binary, body = args[:split], args[split], args[split + 1 :]
+    if pre_args and body[: len(pre_args)] == list(pre_args):
+        body = body[len(pre_args) :]
+    if post_args and body[-len(post_args) :] == list(post_args):
+        body = body[: -len(post_args)]
+    # The escalator is a binary too, and reads as one by its base name.
+    if escalation:
+        escalation = [Path(escalation[0]).name, *escalation[1:]]
+    return " ".join(shlex.quote(arg) for arg in (*escalation, Path(binary).name, *body))
+
+
+def _spinner_label(subject: str, command: str) -> str:
+    """Compose the two halves a spinner label shows, styled when allowed.
+
+    The subject is the mpm-side attribute path the call runs under
+    (`cask.upgrade_all`), the command is what the system is running right now
+    (`brew upgrade --quiet --yes`). Both are needed because neither answers on
+    its own: one mpm operation drives several invocations, so the subject alone
+    goes static across them, while the command alone drops the manager a shared
+    binary is acting for (`brew` serves both `brew` and `cask`).
+
+    The subject takes the theme's `invoked_command` slot, the same paint the
+    `✓`/`✘` trail gives a manager ID (see
+    {func}`~meta_package_manager.dispatch.collect_from_managers`), so one manager
+    reads the same whichever of the two indicators is on screen. The command
+    takes italic instead of a color, marking it as the verbatim thing being
+    executed: every hue on this stream already carries a status (green for a
+    success, red for a failure, yellow for a warning, blue for a debug line), and
+    a command is none of them. Italic degrades to plain on a terminal that
+    declares no `sitm` (see {data}`ITALIC_CAPABLE_TERMS`), where the painted
+    subject still separates the halves, and both degrade to plain text when
+    {func}`_styling_enabled` says no.
+
+    :param subject: the mpm-side attribute path, never empty.
+    :param command: the rendered command, or an empty string to label the subject
+        alone.
+    :return: the label, ANSI escape sequences included when styling applies.
+    """
+    if not _styling_enabled():
+        return f"{subject}: {command}" if command else subject
+    styled = theme().invoked_command(subject)
+    if not command:
+        return styled
+    if os.environ.get("TERM", "").startswith(ITALIC_CAPABLE_TERMS):
+        return f"{styled}: {style(command, italic=True)}"
+    return f"{styled}: {command}"
+
+
+class Spinner(_Spinner):
+    """{class}`click_extra.spinner.Spinner` with a de-emphasized timer.
+
+    The elapsed time is the least important part of a spinner line, and the faint
+    attribute (SGR `2`) says so without spending a color: every hue on this
+    stream already carries a status, which is the same reason
+    {func}`_spinner_label` leaves the command uncolored. Faint also beats
+    `bright_black` for the job, that being a color rather than an attribute, and
+    one this project has already been bitten by (see
+    {data}`~meta_package_manager.bar_plugin_renderer.VERSION_PREFIX_COLOR`).
+
+    An override rather than the `timer` callable, because upstream composes the
+    fragment as `" ({duration})"`: the callable supplies the duration alone, so
+    it can paint the digits but never the parentheses around them, leaving the
+    brackets at full weight beside a faint number.
+
+    ```{todo}
+    Retire this for a `timer_style` argument on
+    {class}`click_extra.spinner.Spinner`, alongside the `label_style` that would
+    retire {func}`_styling_enabled`. Neither is filed upstream yet.
+    ```
+    """
+
+    def _clock(self) -> str:
+        """Paint the whole `" (2.3s)"` fragment faint, parentheses included.
+
+        Gated on the color state `Spinner.start()` resolved on the calling
+        thread, which is the reconciled answer `--no-color`, `NO_COLOR` and a
+        dumb `TERM` all feed into. A spinner that never started reports it as
+        off, and never draws either.
+        """
+        clock = super()._clock()
+        return style(clock, dim=True) if clock and self._color_enabled else clock
 
 
 class CLIExecutor:
@@ -1074,15 +1255,25 @@ class CLIExecutor:
             return DEFAULT_TIMEOUT
         return OPERATION_TIMEOUTS.get(self._active_operation, DEFAULT_TIMEOUT)
 
-    def _make_spinner(self, *, animate: bool = True) -> Spinner:
+    def _make_spinner(
+        self,
+        cmd_args: Iterable[str] = (),
+        *,
+        animate: bool = True,
+    ) -> Spinner:
         """Build a (not-yet-started) progress spinner for the current CLI call.
 
-        The label combines the manager ID and the active operation, so a slow call
-        reads like the command it runs (`guix search`, `brew install`). The
-        spinner is disabled unless {attr}`progress` is set; even then it only
-        animates on a TTY (see {class}`click_extra.Spinner`), so it stays silent
-        when output is piped or captured.
+        The label names both layers of a blocking call, rendering as
+        `cask.upgrade_all: brew upgrade --quiet --yes`: the mpm-side attribute
+        path the call runs under, then the invocation the system is running for
+        it (see {func}`_spinner_label` for why one half cannot stand alone, and
+        {func}`_lean_command` for what the rendering drops). The spinner is
+        disabled unless {attr}`progress` is set; even then it only animates on a
+        TTY (see {class}`click_extra.Spinner`), so it stays silent when output is
+        piped or captured.
 
+        :param cmd_args: the resolved argv this spinner covers. An empty one
+            labels the manager and its operation alone.
         :param animate: pass `False` to hold the line still whatever
             {attr}`progress` says, for a call whose child may print a prompt of
             its own onto it (see
@@ -1090,11 +1281,12 @@ class CLIExecutor:
         """
         manager_id = self.id  # type: ignore[attr-defined]
         operation = self._active_operation
-        label = f"{manager_id} {operation}" if operation else str(manager_id)
+        subject = f"{manager_id}.{operation}" if operation else str(manager_id)
+        command = _lean_command(cmd_args, self.cli_path, self.pre_args, self.post_args)
         # Append the elapsed time so a long call (a slow `guix search`) reads as
-        # "⠙ guix search (12.3s)" rather than looking stuck.
+        # "⠙ guix.search: guix search jq (12.3s)" rather than looking stuck.
         return Spinner(
-            label,
+            _spinner_label(subject, command),
             delay=SPINNER_DELAY,
             enabled=None if self.progress and animate else False,
             timer=True,
@@ -1249,7 +1441,7 @@ class CLIExecutor:
             hidden_prompt = _hidden_prompt_risk(
                 self.internal_sudo, self._active_operation
             )
-            spinner = self._make_spinner(animate=not hidden_prompt)
+            spinner = self._make_spinner(clean_args, animate=not hidden_prompt)
             watchdog = _StallWatchdog(manager_id) if hidden_prompt else None
             try:
                 # run_cli() owns the spawn: it registers the child in click-extra's

@@ -32,6 +32,7 @@ import threading
 import time
 
 import pytest
+from boltons.strutils import strip_ansi
 from click_extra.context import JOBS, VERBOSITY_LEVEL
 from click_extra.logging import LogLevel
 from click_extra.theme import KO_GLYPH, OK_GLYPH
@@ -56,14 +57,18 @@ class FakeContext:
 
 
 class StubManager:
-    """Minimal stand-in exposing `id`, `progress`, `run_cache` and `internal_sudo`.
+    """Minimal stand-in exposing what `dispatch` reads off a manager.
 
     `internal_sudo` defaults off, as it does on a real manager: `dispatch` reads it
     on every lane to decide which are held back to the sequential tail, so a stub
-    without it would be a manager no scheduler could place.
+    without it would be a manager no scheduler could place. `_active_operation`
+    defaults to `None` for the same reason, that being the class-level default of
+    {attr}`~meta_package_manager.execution.CLIExecutor._active_operation`: the trail
+    reads it to name each line's subject.
     """
 
     run_cache = None
+    _active_operation = None
 
     def __init__(
         self,
@@ -283,6 +288,39 @@ def test_failure_trail_marks_errored_managers(monkeypatch):
     output = tty.getvalue()
     assert KO_GLYPH in output  # The failure glyph, for m2.
     assert OK_GLYPH in output  # The success glyph, for the other managers.
+
+
+def test_trail_detail_composes_on_the_subject(monkeypatch):
+    """A `detail` renders as a parenthesized suffix, never in the subject's place.
+
+    `cleanup` passes its categories and `upgrade --all` the cooldown that held a
+    manager. Both used to replace the line's whole text, so those lines named
+    the bare manager while every other trail line named `manager.operation`.
+    """
+    monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.0)
+    tty = TTYStringIO()
+    monkeypatch.setattr("sys.stderr", tty)
+
+    ctx = FakeContext(jobs=4)
+    managers = [StubManager(f"m{i}", progress=True) for i in range(2)]
+    for manager in managers:
+        manager._active_operation = "cleanup"
+
+    def work(manager):
+        time.sleep(0.1)  # Outlast the zeroed delay so the bar draws a frame.
+        return manager.id, {"detail": "cache"} if manager.id == "m0" else {}
+
+    collect_from_managers(
+        "Cleaning up",
+        "Cleaned",
+        managers,  # type: ignore[arg-type]
+        work,
+        ctx=ctx,  # type: ignore[arg-type]
+    )
+    output = strip_ansi(tty.getvalue())
+    assert f"{OK_GLYPH} m0.cleanup (cache)" in output
+    assert f"{OK_GLYPH} m1.cleanup" in output
+    assert "m1.cleanup (" not in output
 
 
 def test_trail_includes_managers_that_finish_before_the_indicator_shows(monkeypatch):

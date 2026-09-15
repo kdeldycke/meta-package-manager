@@ -48,7 +48,7 @@ from click_extra.execution import resolve_jobs, run_lanes
 from click_extra.spinner import OperationTrail as _OperationTrail
 from click_extra.theme import get_current_theme as theme
 
-from .execution import SPINNER_DELAY
+from .execution import SPINNER_DELAY, operation_subject
 from .sudo import _hidden_prompt_risk
 
 TYPE_CHECKING = False
@@ -733,9 +733,9 @@ def collect_from_managers(
     `work` returns this manager's `(id, data)`; it must handle its own
     {class}`meta_package_manager.execution.CLIError` (each manager owns its
     subprocess and error list, so the call is thread-safe per manager). A truthy
-    `data["errors"]` (or `data["failed"]`) marks that manager's trail line `✗`;
-    an optional `data["label"]` overrides its text (`upgrade --all` uses it for
-    cooldown skips).
+    `data["errors"]` (or `data["failed"]`) marks that manager's trail line `✘`;
+    an optional `data["detail"]` suffixes its subject in parentheses (`cleanup`
+    passes its categories, `upgrade --all` the cooldown that held a manager).
 
     :param report_state: maintenance commands set it (their only output is the trail).
         It flips the finisher to a success count, keeps the trail in the sequential
@@ -752,7 +752,16 @@ def collect_from_managers(
         def unit() -> tuple[bool, str]:
             manager_id, data = work(manager)
             results[index] = (manager_id, data)
-            text = data.get("label") or theme().invoked_command(manager_id)
+            # The trail names the same subject the per-call spinner does, so a
+            # manager reads alike whichever indicator is on screen. The stamp
+            # survives the `acting_as` the work ran under, that context restoring
+            # what `_select_managers` set for this subcommand. A detail composes
+            # on the subject as a parenthesized suffix, never in its place.
+            subject = theme().invoked_command(
+                operation_subject(manager_id, manager._active_operation)
+            )
+            detail = data.get("detail")
+            text = f"{subject} ({detail})" if detail else subject
             return not _state_failed(data), text
 
         return unit

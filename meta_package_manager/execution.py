@@ -499,6 +499,26 @@ def _lean_command(
     return " ".join(shlex.quote(arg) for arg in (*escalation, Path(binary).name, *body))
 
 
+def operation_subject(manager_id: str, operation: str | None = None) -> str:
+    """Name what a manager is doing, as a `manager.operation` attribute path.
+
+    The subject both live indicators show: the per-call spinner of
+    `CLIExecutor._make_spinner` and the `✓`/`✘` trail line of
+    {func}`~meta_package_manager.dispatch.collect_from_managers`, so one manager
+    reads the same whichever of the two is on screen. Shared rather than spelled
+    twice, a drift between them being invisible until both are watched at once.
+
+    Only the *subject* is shared. The trail keeps naming the manager alone in its
+    command half's place, a trail line covering a whole task where a spinner
+    covers one invocation: `cleanup` dispatches several commands per manager, and
+    picking one of them to print would be arbitrary.
+
+    :param operation: the stamped `CLIExecutor._active_operation`. A call made
+        outside any operation falls back to the bare manager ID.
+    """
+    return f"{manager_id}.{operation}" if operation else str(manager_id)
+
+
 def _spinner_label(subject: str, command: str) -> str:
     """Compose the two halves a spinner label shows, styled when allowed.
 
@@ -1281,7 +1301,7 @@ class CLIExecutor:
         """
         manager_id = self.id  # type: ignore[attr-defined]
         operation = self._active_operation
-        subject = f"{manager_id}.{operation}" if operation else str(manager_id)
+        subject = operation_subject(manager_id, operation)
         command = _lean_command(cmd_args, self.cli_path, self.pre_args, self.post_args)
         # Append the elapsed time so a long call (a slow `guix search`) reads as
         # "⠙ guix.search: guix search jq (12.3s)" rather than looking stuck.

@@ -578,13 +578,12 @@ def upgrade(ctx, all, packages_specs):
         announce = _announce_level(ctx)
 
         def upgrade_all_work(manager: PackageManager) -> tuple[str, dict]:
-            mgr = theme().invoked_command(manager.id)
             # cooldown_permits() already logs the reason at WARNING when it blocks;
             # mark the manager ✗ without running its CLI.
             if not cooldown_permits(manager):
                 return manager.id, {
                     "failed": True,
-                    "label": f"{mgr} skipped (cooldown)",
+                    "detail": "cooldown",
                 }
             logging.log(
                 announce,
@@ -859,7 +858,7 @@ def cleanup(ctx, orphans, cache, repair):
     def cleanup_work(manager: PackageManager) -> tuple[str, dict]:
         # A bespoke variant of _maintenance_work: managers run different category
         # subsets, so both the narration and the trail label disclose each
-        # manager's own dispatch (`✓ brew (cache)`).
+        # manager's own dispatch (`✓ brew.cleanup (cache)`).
         steps = _cleanup_steps(manager, selected, explicit_orphans)
         categories = ", ".join(category for category, _step in steps)
         logging.log(announce, f"Cleanup ({categories})...", extra={"label": manager.id})
@@ -868,7 +867,7 @@ def cleanup(ctx, orphans, cache, repair):
             step()
         return manager.id, {
             "errors": manager.cli_errors[before:],
-            "label": f"{theme().invoked_command(manager.id)} ({categories})",
+            "detail": categories,
         }
 
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✗ trail

@@ -285,8 +285,50 @@ export function outdatedArgv(mpm, timeout = MPM_TIMEOUT, options = []) {
     ];
 }
 
+/* pURL types whose namespace qualifies a package without being part of its
+ * ID, mirroring PURL_QUALIFYING_NAMESPACES in meta_package_manager/package.py.
+ * tests/test_gnome_extension.py holds the two sets equal. */
+export const PURL_QUALIFYING_NAMESPACES = new Set([
+    'alpm', 'apk', 'cpan', 'deb', 'luarocks', 'rpm',
+]);
+
+/* Percent-encode one pURL segment like Python's `quote(text, safe="")`,
+ * keeping `:` as is. encodeURIComponent leaves `!'()*` alone, where Python
+ * encodes them. */
+function purlQuote(text) {
+    return encodeURIComponent(text)
+        .replace(/[!'()*]/g, char =>
+            `%${char.charCodeAt(0).toString(16).toUpperCase()}`)
+        .replaceAll('%3A', ':');
+}
+
+/**
+ * Render the version-less pURL tying a package to its manager, the form
+ * `mpm upgrade` resolves without looking the package up in the installed
+ * packages. Mirrors `manager_purl()` in meta_package_manager/package.py, and
+ * tests/purl-cases.json holds both to the same strings.
+ *
+ * @param {string} managerId - The manager ID, used as the pURL type.
+ * @param {string} packageId - The package ID, as mpm reports it.
+ * @returns {string} the pURL.
+ */
+export function packagePurl(managerId, packageId) {
+    const cut = packageId.lastIndexOf('/');
+    const namespace = cut < 0 ? [] : packageId.slice(0, cut).split('/');
+    const name = packageId.slice(cut + 1);
+    /* The whole ID stays the name when a split would leave an empty segment,
+     * like an absolute path or a URL, which a pURL parser drops. */
+    const whole = PURL_QUALIFYING_NAMESPACES.has(managerId) ||
+        namespace.length === 0 || namespace.includes('') || name === '';
+    const segments = whole ? [packageId] : [...namespace, name];
+    return `pkg:${managerId}/${segments.map(purlQuote).join('/')}`;
+}
+
 export function upgradePackageArgv(mpm, managerId, packageId, options = []) {
-    return [...mpm, `--${managerId}`, ...options, 'upgrade', packageId];
+    return [
+        ...mpm, `--${managerId}`, ...options,
+        'upgrade', packagePurl(managerId, packageId),
+    ];
 }
 
 export function upgradeAllArgv(mpm, managerId, options = []) {

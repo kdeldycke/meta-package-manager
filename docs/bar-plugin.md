@@ -78,7 +78,7 @@ A macOS menu cannot scroll sideways, so `VAR_MAX_VERSION_WIDTH` keeps a row from
 
 ## Menu actions
 
-Clicking a package runs `mpm --<manager-id> upgrade <package-id>`, and a section's *Upgrade all* entry runs `mpm --<manager-id> upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
+Clicking a package runs `mpm --<manager-id> upgrade pkg:<manager-id>/<package-id>`, and a section's *Upgrade all* entry runs `mpm --<manager-id> upgrade --all`. The pURL ties the package to its section's manager, so `mpm` upgrades it without first looking for it in the installed packages. Neither command invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
 
 With a `cooldown` set, clicking a package of a manager that cannot enforce it natively skips it with a warning instead of upgrading it ungated. Set `policy = "best-effort"` in the `[mpm.cooldown]` table to let those managers run anyway, without the safeguard.
 

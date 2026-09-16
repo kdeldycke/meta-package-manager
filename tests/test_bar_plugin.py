@@ -689,6 +689,21 @@ def test_renderer_actions_carry_the_options(monkeypatch):
     assert BarPluginRenderer().mpm_cli[-1] == "--dry-run"
 
 
+def test_renderer_ties_each_upgrade_to_its_manager(monkeypatch):
+    """A package's upgrade command names it with a pURL of its section's manager, so
+    `mpm` upgrades it without first looking for it in the installed packages."""
+    _pin_plugin_env(monkeypatch, align_columns=True)
+    data = BarPluginRenderer().add_upgrade_cli({
+        "npm": {"packages": [{"id": "@babel/core"}]},
+    })
+    upgrade_cli = data["npm"]["packages"][0]["upgrade_cli"]
+    assert [param.partition("=")[2] for param in upgrade_cli.split(" ")[-3:]] == [
+        "--npm",
+        "upgrade",
+        "pkg:npm/%40babel/core",
+    ]
+
+
 def test_plugin_version_matches_the_package():
     """The `<xbar.version>` header is kept in lockstep with the package by
     bump-my-version, like the GNOME extension's `version-name`."""

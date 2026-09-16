@@ -16,12 +16,15 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import asdict
 from itertools import chain
+from pathlib import Path
 from string import ascii_lowercase, digits
 
 import pytest
 
+from meta_package_manager.package import Package, manager_purl, purl_quote
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import PURL_MAP, EmptyReduction, Solver, Specifier
 
@@ -138,6 +141,15 @@ def props(spec: Specifier):
             id="purl_unregistered_manager",
         ),
         pytest.param(
+            "pkg:deb/debian/curl@8.14.1",
+            (
+                {"package_id": "curl", "manager_id": "apt", "version": "8.14.1"},
+                {"package_id": "curl", "manager_id": "apt-mint", "version": "8.14.1"},
+                {"package_id": "curl", "manager_id": "aptitude", "version": "8.14.1"},
+            ),
+            id="purl_qualifying_namespace",
+        ),
+        pytest.param(
             "pkg:npm/left-pad@2011-04.gamma",
             (
                 {
@@ -186,6 +198,42 @@ def test_parse_specs(spec_string, expected):
         spec_props.append(props(spec))
 
     assert sorted(spec_props) == sorted(sorted(s.items()) for s in expected)
+
+
+PURL_CASES = json.loads(
+    (Path(__file__).parent / "purl-cases.json").read_text(encoding="UTF-8")
+)
+"""Manager-tied pURLs shared with `tests/gnome/run-tests.js`, which holds the GNOME
+Shell extension's builder to the same strings."""
+
+
+@pytest.mark.parametrize("case", PURL_CASES, ids=lambda case: case["purl"])
+def test_manager_purl_reads_back(case):
+    """A manager-tied pURL renders as the shared table says, and reads back to the
+    same manager and package."""
+    manager_id, package_id, purl = case["manager_id"], case["package_id"], case["purl"]
+    assert manager_purl(manager_id, package_id) == purl
+
+    specs = Specifier.from_string(purl)
+    assert {spec.package_id for spec in specs} == {package_id}
+    assert manager_id in {spec.manager_id for spec in specs}
+
+    spec = Specifier(raw_spec=purl, package_id=package_id, manager_id=manager_id)
+    assert str(spec) == purl
+
+
+def test_package_purl_carries_the_namespace():
+    """A scoped npm package's pURL object holds its scope as the namespace, as the npm
+    type definition expects."""
+    purl = Package(id="@babel/core", manager_id="npm", installed_version="7.26.0").purl
+    assert (purl.namespace, purl.name) == ("@babel", "core")
+    assert purl.to_string() == "pkg:npm/%40babel/core@7.26.0"
+
+
+def test_purl_quote_encodes_a_slash():
+    """A slash inside a segment is encoded, where packageurl-python leaves the one in a
+    name alone."""
+    assert purl_quote("a/b:c") == "a%2Fb:c"
 
 
 @pytest.mark.parametrize(

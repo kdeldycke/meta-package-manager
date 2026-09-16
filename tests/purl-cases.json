@@ -1,0 +1,67 @@
+[
+  {
+    "manager_id": "apt",
+    "package_id": "g++",
+    "purl": "pkg:apt/g%2B%2B"
+  },
+  {
+    "manager_id": "bin",
+    "package_id": "/home/user/.local/bin/fzf",
+    "purl": "pkg:bin/%2Fhome%2Fuser%2F.local%2Fbin%2Ffzf"
+  },
+  {
+    "manager_id": "brew",
+    "package_id": "hashicorp/tap/terraform",
+    "purl": "pkg:brew/hashicorp/tap/terraform"
+  },
+  {
+    "manager_id": "brew",
+    "package_id": "python@3.12",
+    "purl": "pkg:brew/python%403.12"
+  },
+  {
+    "manager_id": "composer",
+    "package_id": "monolog/monolog",
+    "purl": "pkg:composer/monolog/monolog"
+  },
+  {
+    "manager_id": "cpan",
+    "package_id": "App::Prove::State::Result::Test",
+    "purl": "pkg:cpan/App::Prove::State::Result::Test"
+  },
+  {
+    "manager_id": "emerge",
+    "package_id": "games-misc/nyancat",
+    "purl": "pkg:emerge/games-misc/nyancat"
+  },
+  {
+    "manager_id": "gh-ext",
+    "package_id": "dlvhdr/gh-dash",
+    "purl": "pkg:gh-ext/dlvhdr/gh-dash"
+  },
+  {
+    "manager_id": "go",
+    "package_id": "github.com/nao1215/gup",
+    "purl": "pkg:go/github.com/nao1215/gup"
+  },
+  {
+    "manager_id": "julia",
+    "package_id": "Example",
+    "purl": "pkg:julia/Example"
+  },
+  {
+    "manager_id": "npm",
+    "package_id": "@babel/core",
+    "purl": "pkg:npm/%40babel/core"
+  },
+  {
+    "manager_id": "npm",
+    "package_id": "JSONStream",
+    "purl": "pkg:npm/JSONStream"
+  },
+  {
+    "manager_id": "vim-pack",
+    "package_id": "https://github.com/tpope/vim-sensible",
+    "purl": "pkg:vim-pack/https:%2F%2Fgithub.com%2Ftpope%2Fvim-sensible"
+  }
+]

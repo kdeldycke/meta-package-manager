@@ -44,6 +44,7 @@ from click_extra.table import TableFormat, render_table
 
 from .bar_plugin import MPMPlugin
 from .capabilities import Operations, implements
+from .package import manager_purl
 from .pool import pool
 from .version import common_prefix_length, diff_versions
 
@@ -571,8 +572,12 @@ class BarPluginRenderer(MPMPlugin):
         escapes all of them, silently upgrading a package `mpm` itself would have
         held back.
 
-        Only the manager selector and the operation are passed, so every other
-        setting is resolved from the user's configuration at click time.
+        Only the manager selector, the operation and the package are passed, so every
+        other setting is resolved from the user's configuration at click time. The
+        package is a pURL ({func}`~meta_package_manager.package.manager_purl`), which
+        ties it to the section's manager: `mpm` then upgrades it without first looking
+        for it in the installed packages, a lookup that misses the packages a manager
+        lists as outdated but not as installed.
 
         A manager is offered the action only when it
         {func}`~meta_package_manager.capabilities.implements` it, which is the same
@@ -597,7 +602,12 @@ class BarPluginRenderer(MPMPlugin):
                 package["upgrade_cli"] = None
                 if upgrades_one:
                     package["upgrade_cli"] = self.render_cli(
-                        (*self.mpm_cli, selector, "upgrade", package["id"]),
+                        (
+                            *self.mpm_cli,
+                            selector,
+                            "upgrade",
+                            manager_purl(manager_id, package["id"]),
+                        ),
                     )
 
         return outdated_data

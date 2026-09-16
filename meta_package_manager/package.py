@@ -45,6 +45,7 @@ import re
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from functools import cached_property
+from urllib.parse import quote
 
 from packageurl import PackageURL
 
@@ -57,6 +58,73 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from .version import TokenizedString
+
+
+PURL_QUALIFYING_NAMESPACES = frozenset((
+    "alpm",
+    "apk",
+    "cpan",
+    "deb",
+    "luarocks",
+    "rpm",
+))
+"""pURL types whose namespace qualifies a package without being part of its ID.
+
+For these types, the namespace names who distributes the package: the vendor for
+`alpm`, `apk`, `deb` and `rpm`, the author's CPAN ID for `cpan`, the user manifest
+for `luarocks`. Joining it to the name would ask `apt` for `debian/curl`. Every other
+type, a manager ID used as a pURL type included, reads the namespace as the part of
+the package ID before its last slash: an npm scope, a Composer vendor, a Homebrew tap.
+
+Each type's `namespace_definition` in the
+[pURL type definitions](https://github.com/package-url/purl-spec/tree/5d57978402cf113c37b974330e553e2bcb91e9fa/types)
+settles which side it falls on.
+"""
+
+
+def purl_parts(purl_type: str, package_id: str) -> tuple[str | None, str]:
+    """Split `package_id` into the namespace and the name of its pURL.
+
+    Everything before the last slash is the namespace. The whole ID stays the name for
+    the types of {data}`PURL_QUALIFYING_NAMESPACES`, and for an ID the split would
+    leave with an empty segment, like an absolute path or a URL: a pURL parser drops
+    empty segments, so the ID would not read back.
+    """
+    namespace, _, name = package_id.rpartition("/")
+    if (
+        purl_type in PURL_QUALIFYING_NAMESPACES
+        or not namespace
+        or not name
+        or "" in namespace.split("/")
+    ):
+        return None, package_id
+    return namespace, name
+
+
+def manager_purl(manager_id: str, package_id: str, version: str | None = None) -> str:
+    """Render the pURL tying `package_id` to `manager_id`, the manager ID as its type.
+
+    {meth}`~meta_package_manager.specifier.Specifier.parse_purl` reads it back to the
+    same manager ID, package ID and version, so a command handed this pURL skips
+    looking the package up.
+
+    Rendered here, not by packageurl-python's `PackageURL.to_string()`, which lowercases
+    the name of some types, npm among them. The npm type definition keeps names
+    case-sensitive, since packages published before 2015 may carry uppercase letters:
+    `JSONStream` would come back as `jsonstream`. `to_string()` also leaves a `/`
+    unencoded in a name ([package-url/packageurl-python#123](https://github.com/package-url/packageurl-python/pull/123)).
+    """
+    namespace, name = purl_parts(manager_id, package_id)
+    segments = (*(namespace.split("/") if namespace else ()), name)
+    purl = f"pkg:{manager_id}/{'/'.join(map(purl_quote, segments))}"
+    if version:
+        purl += f"@{purl_quote(version)}"
+    return purl
+
+
+def purl_quote(text: str) -> str:
+    """Percent-encode one pURL segment, a `/` included, keeping `:` as is."""
+    return quote(text, safe="").replace("%3A", ":")
 
 
 @dataclass
@@ -102,13 +170,19 @@ class Package:
 
     @cached_property
     def purl(self) -> PackageURL:
-        """Returns the package's pURL object."""
+        """Returns the package's pURL object.
+
+        {func}`purl_parts` splits the ID, so a scoped npm package or a tap-qualified
+        formula carries its namespace the way the pURL specification expects.
+        """
         qualifiers = {}
         if self.arch:
             qualifiers["arch"] = self.arch
+        namespace, name = purl_parts(self.manager_id, self.id)
         return PackageURL(
             type=self.manager_id,
-            name=self.id,
+            namespace=namespace,
+            name=name,
             version=str(self.installed_version),
             qualifiers=qualifiers,
         )

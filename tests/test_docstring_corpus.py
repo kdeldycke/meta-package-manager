@@ -61,7 +61,9 @@ from meta_package_manager.docstring_corpus import (
     is_fixture,
     split_session,
 )
+from meta_package_manager.package import manager_purl
 from meta_package_manager.pool import pool
+from meta_package_manager.specifier import Specifier
 from meta_package_manager.version import VersionRange, parse_version
 
 
@@ -163,14 +165,52 @@ def _fixtures():
                 yield pytest.param(manager, chained, None, id=f"{manager.id}-{chained}")
 
 
-@pytest.mark.parametrize("manager, member, output", list(_fixtures()))
-def test_documented_output_still_parses(manager, member, output, monkeypatch):
-    """The output documented next to a parser must still parse through it."""
-    # Neutralize the binary-resolution dependencies the parse path might touch.
+def _neutralize_binaries(manager, monkeypatch) -> None:
+    """Pin the binary-resolution dependencies a parse path might touch."""
     monkeypatch.setattr(manager, "which", lambda cli_name: Path("/usr/bin") / cli_name)
     monkeypatch.setattr(
         manager, "cli_path", Path("/usr/bin") / manager.cli_names[0], raising=False
     )
+
+
+def _documented_packages(manager, member, output, monkeypatch) -> list:
+    """Parse the packages a documented `member` block yields, the CLI stubbed."""
+    if member == "search":
+        # Routed through the same dispatch as `outdated`, so a manager
+        # documenting several modes answers each from its own block. Driven in
+        # the plain mode: what is under test is the parser reading a documented
+        # transcript, not the flag that selected it.
+        command_map = _query_commands(type(manager), ("search",))
+        default = _member_output(type(manager), "search")
+        monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
+        query = _documented_query(type(manager))
+        # Every mode is tried, and the first to yield decides. A manager may
+        # read a different table per mode, `winget`'s extended search carrying
+        # a `Match` column its plain search does not, so feeding one mode's
+        # transcript to another's parser proves nothing about either. What is
+        # under test is that the documented output parses through the member,
+        # not which flag selected it.
+        packages: list = []
+        for extended, exact in product((False, True), repeat=2):
+            with suppress(Exception):
+                packages = list(manager.search(query, extended=extended, exact=exact))
+            if packages:
+                break
+        return packages
+    if member == "outdated":
+        command_map = _query_commands(type(manager), ("installed", "outdated"))
+        default = _member_output(type(manager), "outdated")
+        monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
+        return list(manager.outdated)
+    # installed or orphans.
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    return list(getattr(manager, member))
+
+
+@pytest.mark.parametrize("manager, member, output", list(_fixtures()))
+def test_documented_output_still_parses(manager, member, output, monkeypatch):
+    """The output documented next to a parser must still parse through it."""
+    _neutralize_binaries(manager, monkeypatch)
 
     if member == "version_regexes":
         # Drive the real version probe (PackageManager.version) with the
@@ -217,36 +257,7 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
             manager.__dict__.pop("version", None)
         return
 
-    if member == "search":
-        # Routed through the same dispatch as `outdated`, so a manager
-        # documenting several modes answers each from its own block. Driven in
-        # the plain mode: what is under test is the parser reading a documented
-        # transcript, not the flag that selected it.
-        command_map = _query_commands(type(manager), ("search",))
-        default = _member_output(type(manager), "search")
-        monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
-        query = _documented_query(type(manager))
-        # Every mode is tried, and the first to yield decides. A manager may
-        # read a different table per mode, `winget`'s extended search carrying
-        # a `Match` column its plain search does not, so feeding one mode's
-        # transcript to another's parser proves nothing about either. What is
-        # under test is that the documented output parses through the member,
-        # not which flag selected it.
-        packages: list = []
-        for extended, exact in product((False, True), repeat=2):
-            with suppress(Exception):
-                packages = list(manager.search(query, extended=extended, exact=exact))
-            if packages:
-                break
-    elif member == "outdated":
-        command_map = _query_commands(type(manager), ("installed", "outdated"))
-        default = _member_output(type(manager), "outdated")
-        monkeypatch.setattr(manager, "run_cli", _dispatch(command_map, default))
-        packages = list(manager.outdated)
-    else:  # installed or orphans.
-        monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
-        packages = list(getattr(manager, member))
-
+    packages = _documented_packages(manager, member, output, monkeypatch)
     assert packages, "documented output parsed to zero packages"
     for package in packages:
         assert package.id, "parsed a package with an empty id"
@@ -255,6 +266,22 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         for version in (package.installed_version, package.latest_version):
             if version:
                 assert parse_version(str(version))
+
+
+@pytest.mark.parametrize(
+    "manager, member, output",
+    [param for param in _fixtures() if param.values[1] != "version_regexes"],
+)
+def test_documented_ids_read_back_from_their_purl(manager, member, output, monkeypatch):
+    """Every package ID a manager documents reads back from the pURL a menu action
+    passes to `mpm upgrade`, tied to the same manager."""
+    _neutralize_binaries(manager, monkeypatch)
+    for package in _documented_packages(manager, member, output, monkeypatch):
+        purl = manager_purl(manager.id, package.id)
+        resolved = {
+            (spec.manager_id, spec.package_id) for spec in Specifier.from_string(purl)
+        }
+        assert (manager.id, package.id) in resolved, purl
 
 
 def test_display_blocks_align_with_raw():

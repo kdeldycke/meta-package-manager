@@ -110,7 +110,7 @@ function testParseVersion() {
         ['mpm', '--brew', '--dry-run', 'upgrade', '--all']);
     check('upgradePackageArgv splices options after the manager',
         Mpm.upgradePackageArgv(['mpm'], 'brew', 'jq', ['--dry-run']),
-        ['mpm', '--brew', '--dry-run', 'upgrade', 'jq']);
+        ['mpm', '--brew', '--dry-run', 'upgrade', 'pkg:brew/jq']);
 }
 
 function testCompareVersions() {
@@ -132,7 +132,7 @@ function testArgvBuilders() {
     ]);
     check('upgradePackageArgv',
         Mpm.upgradePackageArgv(mpm, 'brew', 'wget'),
-        ['/usr/bin/mpm', '--brew', 'upgrade', 'wget']);
+        ['/usr/bin/mpm', '--brew', 'upgrade', 'pkg:brew/wget']);
     check('upgradeAllArgv', Mpm.upgradeAllArgv(mpm, 'apt'),
         ['/usr/bin/mpm', '--apt', 'upgrade', '--all']);
 }
@@ -173,6 +173,25 @@ const VERSION_DIFF_CASES = JSON.parse(new TextDecoder().decode(
         .get_parent()
         .get_child('version-diff-cases.json')
         .load_contents(null)[1]));
+
+/* The pURL each menu action passes to `mpm upgrade`, read from the same file
+ * as test_specifier.py::test_manager_purl_reads_back, which holds the Python
+ * manager_purl() to these strings and parses each one back. */
+const PURL_CASES = JSON.parse(new TextDecoder().decode(
+    Gio.File.new_for_uri(import.meta.url)
+        .get_parent()
+        .get_parent()
+        .get_child('purl-cases.json')
+        .load_contents(null)[1]));
+
+function testPackagePurl() {
+    check('purl corpus is populated', PURL_CASES.length > 0, true);
+    for (const testCase of PURL_CASES) {
+        check(`purl ${testCase.purl}`,
+            Mpm.packagePurl(testCase.manager_id, testCase.package_id),
+            testCase.purl);
+    }
+}
 
 function testDiffVersions() {
     /* An unreadable or empty corpus would otherwise report a clean run over
@@ -307,6 +326,7 @@ async function main() {
     testParseVersion();
     testCompareVersions();
     testArgvBuilders();
+    testPackagePurl();
     testParseOutdated();
     testDiffVersions();
     testShellHelpers();

@@ -22,9 +22,11 @@ from dataclasses import dataclass
 from functools import cached_property
 from itertools import groupby
 from operator import attrgetter
+from urllib.parse import unquote
 
 from packageurl import PackageURL
 
+from .package import PURL_QUALIFYING_NAMESPACES, manager_purl
 from .pool import pool
 from .version import is_version, parse_version
 
@@ -84,7 +86,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "gitea": None,
     "github": None,
     "gitlab": None,
-    "golang": None,
+    "golang": {"go"},
     "gradle": None,
     "guix": {"guix"},
     "hackage": None,
@@ -171,49 +173,46 @@ class Specifier:
 
         Yields `Specifier` objects or returns `None`.
 
-        ```{todo}
-        Reassemble the package ID from `purl.namespace` where the type calls for
-        it, instead of reading `purl.name` alone. Two claimed types carry a
-        namespace today and both resolve wrongly: `pkg:composer/monolog/monolog`
-        yields `monolog` where Composer needs `monolog/monolog`, and
-        `pkg:npm/@angular/animation` yields `animation`, which is a real and
-        unrelated package, so the install succeeds on the wrong thing rather
-        than failing. Claiming `golang` for {doc}`/managers/go` waits on the
-        same fix, the module path being exactly the part that gets dropped.
+        The package ID joins the namespace back to the name, as
+        {func}`~meta_package_manager.package.purl_parts` split them:
+        `pkg:npm/%40angular/animation` resolves to `@angular/animation`, not to the
+        unrelated `animation` package. The types of
+        {data}`~meta_package_manager.package.PURL_QUALIFYING_NAMESPACES` keep the
+        name alone, so `pkg:deb/debian/curl` resolves to `curl`.
 
-        The join cannot be blanket, which is what makes this more than a
-        one-liner: a `pkg:deb/debian/curl` namespace names the *distribution*
-        rather than half the package name, so joining it would ask `apt` for
-        `debian/curl`. The rule has to be per-type, and
-        `tests/test_specifier.py` covers only namespace-free pURLs today, which
-        is why nothing caught it.
-        ```
+        packageurl-python parses the string without its normalization, which lowercases
+        the name of some types, npm among them: `pkg:npm/JSONStream` would come back as
+        `jsonstream`. That also skips percent-decoding, done here part by part.
         """
         # Try to parse specifier as a pURL.
         try:
-            purl = PackageURL.from_string(spec_str)
+            purl = PackageURL.from_string(spec_str, normalize_purl=False)
         except ValueError as ex:
             logging.debug(f"{spec_str} is not a pURL: {ex}")
             return None
 
-        manager_ids: set[str] | None = None
-        # If the pURL type is recognized, it is used to find the corresponding manager.
-        if purl.type in PURL_MAP:
-            manager_ids = PURL_MAP.get(purl.type)
-        # If the pURL type matches a manager, we use it as-is.
-        elif purl.type in pool.all_manager_ids:
-            manager_ids = {purl.type}
+        purl_type = purl.type.lower()
+        # A recognized pURL type points to the managers handling it, and a manager ID
+        # to that manager, even when the map claims the type for no manager.
+        manager_ids = PURL_MAP.get(purl_type)
+        if not manager_ids and purl_type in pool.all_manager_ids:
+            manager_ids = {purl_type}
         if not manager_ids:
-            msg = f"Unrecognized {purl.type} pURL type."
+            msg = f"Unrecognized {purl_type} pURL type."
             raise ValueError(msg)
+
+        package_id = unquote(purl.name)
+        if purl.namespace and purl_type not in PURL_QUALIFYING_NAMESPACES:
+            namespace = "/".join(map(unquote, purl.namespace.split("/")))
+            package_id = f"{namespace}/{package_id}"
 
         # The pURL can be handled by one manager or more.
         return tuple(
             Specifier(
                 raw_spec=spec_str,
-                package_id=purl.name,
+                package_id=package_id,
                 manager_id=manager_id,
-                version=purl.version,
+                version=unquote(purl.version) if purl.version else None,
             )
             for manager_id in manager_ids
         )
@@ -270,14 +269,16 @@ class Specifier:
     def __str__(self) -> str:
         """Human readable string of the spec.
 
-        Dynamiccaly adds version, its separator and manage ID prefix (in pURL syntax).
+        A spec tied to a manager renders as the pURL
+        {func}`~meta_package_manager.package.manager_purl` builds, which parses back to
+        the same spec. An untied one renders as its package ID, followed by its version
+        when it has one.
         """
-        string = self.package_id
-        if self.version:
-            string = f"{string}{VERSION_SEP}{self.version}"
         if self.manager_id:
-            string = f"pkg:{self.manager_id}/{string}"
-        return string
+            return manager_purl(self.manager_id, self.package_id, self.version)
+        if self.version:
+            return f"{self.package_id}{VERSION_SEP}{self.version}"
+        return self.package_id
 
 
 class EmptyReduction(Exception):

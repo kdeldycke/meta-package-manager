@@ -80,19 +80,40 @@ def test_normalize_params(param_string, results):
 
 
 def test_check_mpm_missing_binary():
-    """A probe whose binary does not exist must report the error, not crash.
+    """A probe whose binary does not exist reports the error rather than raising."""
+    candidate = bar_plugin.MPMPlugin().check_mpm(("/nonexistent/mpm-binary",))
+    assert candidate.runnable is False
+    assert candidate.up_to_date is False
+    assert candidate.version is None
+    assert candidate.release is None
+    assert isinstance(candidate.error, FileNotFoundError)
 
-    Regression test for the `UnboundLocalError` on the `FileNotFoundError`
-    path of `check_mpm()`, where `process` is never assigned.
-    """
-    runnable, up_to_date, version, error, release = bar_plugin.MPMPlugin().check_mpm(
-        ("/nonexistent/mpm-binary",),
-    )
-    assert runnable is False
-    assert up_to_date is False
-    assert version is None
-    assert release is None
-    assert isinstance(error, FileNotFoundError)
+
+def test_ranked_mpm_orders_candidates(monkeypatch):
+    """Candidates rank on runnability, freshness and version, whatever their other
+    fields hold: two failed probes carry exceptions, which do not compare, and a
+    runnable probe with no version sits beside one with a version."""
+    candidates = {
+        ("a",): bar_plugin.Candidate(("a",), error=FileNotFoundError("a")),
+        ("b",): bar_plugin.Candidate(("b",), error=FileNotFoundError("b")),
+        ("c",): bar_plugin.Candidate(("c",), runnable=True),
+        ("d",): bar_plugin.Candidate(("d",), runnable=True, version=(4, 0, 0)),
+        ("e",): bar_plugin.Candidate(
+            ("e",), runnable=True, up_to_date=True, version=(9, 0, 0)
+        ),
+    }
+    plugin = bar_plugin.MPMPlugin()
+    monkeypatch.setattr(plugin, "search_mpm", lambda: iter(candidates))
+    monkeypatch.setattr(plugin, "check_mpm", candidates.__getitem__)
+
+    assert [candidate.args for candidate in plugin.ranked_mpm] == [
+        ("e",),
+        ("d",),
+        ("c",),
+        ("a",),
+        ("b",),
+    ]
+    assert plugin.best_mpm.args == ("e",)
 
 
 def test_check_mpm_keeps_the_release_suffix():
@@ -102,14 +123,14 @@ def test_check_mpm_keeps_the_release_suffix():
     is the same on Windows. `check_mpm` appends its own `--no-color
     --version`, which the script ignores.
     """
-    runnable, up_to_date, version, error, release = bar_plugin.MPMPlugin().check_mpm(
+    candidate = bar_plugin.MPMPlugin().check_mpm(
         (sys.executable, "-c", 'print("mpm, version 8.0.0.dev0+abc1234")'),
     )
-    assert runnable is True
-    assert up_to_date is True
-    assert version == (8, 0, 0)
-    assert release == "8.0.0.dev0+abc1234"
-    assert not error
+    assert candidate.runnable is True
+    assert candidate.up_to_date is True
+    assert candidate.version == (8, 0, 0)
+    assert candidate.release == "8.0.0.dev0+abc1234"
+    assert not candidate.error
 
 
 def test_search_mpm_stops_at_home(monkeypatch, tmp_path):
@@ -599,7 +620,9 @@ def test_plugin_empty_mpm_output(monkeypatch, capsys, hide, reports_error):
     plugin = bar_plugin.MPMPlugin()
     # Short-circuit the search for a runnable mpm: a cached_property reads back
     # from the instance dictionary.
-    plugin.__dict__["best_mpm"] = (("mpm",), True, True, (9, 9, 9), None, "9.9.9")
+    plugin.__dict__["best_mpm"] = bar_plugin.Candidate(
+        ("mpm",), True, True, (9, 9, 9), None, "9.9.9"
+    )
     plugin.print_menu()
 
     out = capsys.readouterr().out
@@ -634,7 +657,9 @@ def test_plugin_failure_reads_the_exit_code(
     )
 
     plugin = bar_plugin.MPMPlugin()
-    plugin.__dict__["best_mpm"] = (("mpm",), True, True, (9, 9, 9), None, "9.9.9")
+    plugin.__dict__["best_mpm"] = bar_plugin.Candidate(
+        ("mpm",), True, True, (9, 9, 9), None, "9.9.9"
+    )
     plugin.print_menu()
 
     out = capsys.readouterr().out
@@ -659,7 +684,7 @@ def test_plugin_options_reach_every_call(monkeypatch):
 
     monkeypatch.setattr(bar_plugin, "run", fake_run)
     plugin = bar_plugin.MPMPlugin()
-    plugin.__dict__["best_mpm"] = (
+    plugin.__dict__["best_mpm"] = bar_plugin.Candidate(
         ("/somewhere/mpm",),
         True,
         True,
@@ -734,7 +759,7 @@ def test_plugin_about_footer(monkeypatch, capsys, swiftbar, host):
     )
 
     plugin = bar_plugin.MPMPlugin()
-    plugin.__dict__["best_mpm"] = (
+    plugin.__dict__["best_mpm"] = bar_plugin.Candidate(
         ("/somewhere/mpm",),
         True,
         True,

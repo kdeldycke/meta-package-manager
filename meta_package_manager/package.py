@@ -72,9 +72,10 @@ PURL_QUALIFYING_NAMESPACES = frozenset((
 
 For these types, the namespace names who distributes the package: the vendor for
 `alpm`, `apk`, `deb` and `rpm`, the author's CPAN ID for `cpan`, the user manifest
-for `luarocks`. Joining it to the name would ask `apt` for `debian/curl`. Every other
-type, a manager ID used as a pURL type included, reads the namespace as the part of
-the package ID before its last slash: an npm scope, a Composer vendor, a Homebrew tap.
+for `luarocks`. {meth}`~meta_package_manager.specifier.Specifier.parse_purl` keeps
+the name alone for them, where joining the two would ask `apt` for `debian/curl`.
+Every other type reads the namespace as the part of the package ID before its last
+slash: an npm scope, a Composer vendor, a Homebrew tap.
 
 Each type's `namespace_definition` in the
 [pURL type definitions](https://github.com/package-url/purl-spec/tree/5d57978402cf113c37b974330e553e2bcb91e9fa/types)
@@ -82,21 +83,20 @@ settles which side it falls on.
 """
 
 
-def purl_parts(purl_type: str, package_id: str) -> tuple[str | None, str]:
+def purl_parts(package_id: str) -> tuple[str | None, str]:
     """Split `package_id` into the namespace and the name of its pURL.
 
-    Everything before the last slash is the namespace. The whole ID stays the name for
-    the types of {data}`PURL_QUALIFYING_NAMESPACES`, and for an ID the split would
-    leave with an empty segment, like an absolute path or a URL: a pURL parser drops
-    empty segments, so the ID would not read back.
+    Everything before the last slash is the namespace. The whole ID stays the name
+    when the split would leave an empty segment, like an absolute path or a URL: a
+    pURL parser drops empty segments, so the ID would not read back.
+
+    {data}`PURL_QUALIFYING_NAMESPACES` plays no part here. A pURL mpm writes carries a
+    manager ID as its type, and the managers whose ID is one of those types (`apk`,
+    `cpan`, `luarocks`) never put a slash in a package ID, which
+    `tests/test_docstring_corpus.py` holds across every documented package ID.
     """
     namespace, _, name = package_id.rpartition("/")
-    if (
-        purl_type in PURL_QUALIFYING_NAMESPACES
-        or not namespace
-        or not name
-        or "" in namespace.split("/")
-    ):
+    if not namespace or not name or "" in namespace.split("/"):
         return None, package_id
     return namespace, name
 
@@ -120,7 +120,7 @@ def manager_purl(manager_id: str, package_id: str, version: str | None = None) -
     and encodes a `/` in a name ([package-url/packageurl-python#123](https://github.com/package-url/packageurl-python/pull/123)).
     ```
     """
-    namespace, name = purl_parts(manager_id, package_id)
+    namespace, name = purl_parts(package_id)
     segments = (*(namespace.split("/") if namespace else ()), name)
     purl = f"pkg:{manager_id}/{'/'.join(map(purl_quote, segments))}"
     if version:
@@ -184,7 +184,7 @@ class Package:
         qualifiers = {}
         if self.arch:
             qualifiers["arch"] = self.arch
-        namespace, name = purl_parts(self.manager_id, self.id)
+        namespace, name = purl_parts(self.id)
         return PackageURL(
             type=self.manager_id,
             namespace=namespace,

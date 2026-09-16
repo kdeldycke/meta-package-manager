@@ -163,15 +163,11 @@ def elide_versions(old: str, new: str, width: int) -> tuple[str, str]:
 
 
 class BarPluginRenderer(MPMPlugin):
-    """All utilities used to render output compatible with both SwiftBar and Xbar plugin
-    dialect.
+    """Renders `mpm outdated` in the SwiftBar and Xbar plugin dialect.
 
-    The minimal code to locate `mpm`, then call it and print its output resides in the
-    plugin itself at {meth}`meta_package_manager.bar_plugin.MPMPlugin.best_mpm`.
-
-    All other stuff, especially the rendering code, is managed here, to allow for more
-    complex layouts relying on external Python dependencies. This also limits the number
-    of required updates on the plugin itself.
+    Extends the shipped {class}`~meta_package_manager.bar_plugin.MPMPlugin` with the
+    rendering, the half that may lean on mpm's own dependencies: see the module
+    docstring for the split.
     """
 
     @cached_property
@@ -309,7 +305,6 @@ class BarPluginRenderer(MPMPlugin):
         ```
         """
         plugin_params = []
-        # Serialize Path into string.
         for index, param_value in enumerate(map(str, flatten(cmd_args))):
             param_id = "shell" if index == 0 else f"param{index}"
             plugin_params.append(f"{param_id}={param_value}")
@@ -341,10 +336,9 @@ class BarPluginRenderer(MPMPlugin):
         the tooltip restoring whatever the version cap elided."""
         rows: list[tuple[tuple[str, ...], str, str]] = []
         for package in manager["packages"]:
-            # Everything below this line is string work, so the versions are
-            # rendered here rather than carried down as the TokenizedString
-            # objects `mpm outdated` puts in the payload: those answer len()
-            # but cannot be sliced, which is what elision does to them.
+            # Rendered to strings here: the TokenizedString objects `mpm outdated`
+            # puts in the payload answer len() but cannot be sliced, which is
+            # what elision does.
             full_old = str(package["installed_version"] or "?")
             full_new = str(package["latest_version"])
             old, new = (
@@ -358,13 +352,9 @@ class BarPluginRenderer(MPMPlugin):
                 prefix_fg=VERSION_PREFIX_COLOR,
                 **self.menu_diff_colors,
             )
-            # The empty cell is a spacer, and it earns its place in both
-            # renderings. Aligned, the longest name would otherwise sit one
-            # space from its version, too tight to read a package apart from
-            # what it upgrades to; the spacer column widens that gap to two
-            # without disturbing the alignment of the rest. Joined for the
-            # variable-width rendering, it falls out as the same double space
-            # between the two halves of the row.
+            # The empty cell is a spacer. Aligned, it widens the gap between the
+            # longest name and its version from one space to two; joined, it
+            # falls out as the same double space.
             label = package.get("name") or package.get("id")
             rows.append((
                 (label, "", installed, "→", latest),
@@ -446,7 +436,6 @@ class BarPluginRenderer(MPMPlugin):
         managers = outdated_data.values()
         font = self.monospace_font if self.align_columns else self.default_font
 
-        # Print menu bar icon with number of available upgrades.
         total_outdated = sum(len(m["packages"]) for m in managers)
         total_errors = sum(len(m.get("errors", [])) for m in managers)
 
@@ -462,7 +451,6 @@ class BarPluginRenderer(MPMPlugin):
             "dropdown=false",
         )
 
-        # Prefix for section content.
         submenu = "--" if self.group_by_manager else ""
 
         rows_by_manager = {
@@ -474,7 +462,6 @@ class BarPluginRenderer(MPMPlugin):
             package_count = len(manager["packages"])
             plural = "s" if package_count > 1 else ""
             package_label = f"package{plural}"
-
             table = rows_by_manager[manager["id"]]
 
             # SwiftBar renders the count as a native badge on the section
@@ -486,7 +473,6 @@ class BarPluginRenderer(MPMPlugin):
             if self.is_swiftbar and package_count:
                 badge = f"badge={package_count}"
 
-            # Table-like rendering
             if self.align_columns:
                 header = (
                     manager["id"]
@@ -494,8 +480,6 @@ class BarPluginRenderer(MPMPlugin):
                     else f"{manager['id']} - {package_count} {package_label}"
                 )
                 formatted_lines = aligned[manager["id"]]
-
-            # Variable-width / non-table / non-monospaced rendering.
             else:
                 header = (
                     manager["name"]
@@ -504,18 +488,8 @@ class BarPluginRenderer(MPMPlugin):
                 )
                 formatted_lines = [" ".join(map(str, cells)) for cells, *_ in table]
 
-            upgrade_cli_list = [cli for _, cli, _ in table]
-            tooltips = [tooltip for *_, tooltip in table]
-
-            assert len(formatted_lines) == len(upgrade_cli_list) == len(tooltips)
-
-            # Print section separator before printing the manager header.
             print("---")
-
-            # Print section header.
-            error = ""
-            if self.group_by_manager and manager.get("errors", None):
-                error = "⚠️ "
+            error = "⚠️ " if self.group_by_manager and manager.get("errors") else ""
             self.pp(
                 f"{error}{header}",
                 font,
@@ -523,11 +497,10 @@ class BarPluginRenderer(MPMPlugin):
                 "fold=true" if self.fold_sections else "",
             )
 
-            # Print a menu entry for each outdated packages. The ansi=true
-            # parameter renders the version-diff colors; SwiftBar defaults it
+            # `ansi=true` renders the version-diff colors: SwiftBar defaults it
             # to false, Xbar to true, so it is always spelled out.
-            for line, upgrade_cli, tooltip in zip(
-                formatted_lines, upgrade_cli_list, tooltips
+            for line, (_, upgrade_cli, tooltip) in zip(
+                formatted_lines, table, strict=True
             ):
                 self.print_cli_item(
                     f"{submenu}{line}",
@@ -596,7 +569,6 @@ class BarPluginRenderer(MPMPlugin):
                     (*self.mpm_cli, selector, "upgrade", "--all"),
                 )
 
-            # Add for each package its version-less upgrade CLI.
             upgrades_one = implements(manager, Operations.upgrade)
             for package in manager_data["packages"]:
                 package["upgrade_cli"] = None

@@ -147,21 +147,6 @@ def _install_argv(source: str) -> tuple[str, ...]:
     return tuple(re.findall(r"['\"]([^'\"]+)['\"]", literal.group(1)))
 
 
-def _qualifying_namespaces(source: str) -> set[str]:
-    """The `PURL_QUALIFYING_NAMESPACES` literal of a source file, JavaScript or Python.
-
-    A `new Set([...])` in one, a `frozenset((...))` in the other: both hold quoted
-    strings inside one pair of brackets.
-    """
-    literal = re.search(
-        r"PURL_QUALIFYING_NAMESPACES = (?:frozenset|new Set)\(\s*[\[(](.+?)[\])]",
-        source,
-        re.DOTALL,
-    )
-    assert literal
-    return set(re.findall(r"['\"]([^'\"]+)['\"]", literal.group(1)))
-
-
 def _extra_sources(workflow: str) -> set[str]:
     """Sources whitelisted with `--extra-source` by a workflow's pack step."""
     workflow_file = PROJECT_ROOT / ".github" / "workflows" / workflow
@@ -271,21 +256,6 @@ def test_install_bootstrap_matches_the_bar_plugin():
         encoding="UTF-8"
     )
     assert _install_argv(_extension_source("mpm.js")) == _install_argv(plugin)
-
-
-def test_purl_qualifying_namespaces_match_the_package_model():
-    """The extension builds a menu action's pURL from the same pURL types as
-    `manager_purl()`, whose namespace stays out of the package ID.
-
-    `tests/purl-cases.json` holds both builders to the same strings, but only for the
-    IDs it lists: a type added to one set alone would pass it.
-    """
-    package = (PROJECT_ROOT / "meta_package_manager" / "package.py").read_text(
-        encoding="UTF-8"
-    )
-    assert _qualifying_namespaces(_extension_source("mpm.js")) == (
-        _qualifying_namespaces(package)
-    )
 
 
 def test_pack_whitelists_are_identical():

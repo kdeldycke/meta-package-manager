@@ -16,36 +16,33 @@ import GLib from 'gi://GLib';
 
 Gio._promisify(Gio.Subprocess.prototype, 'communicate_utf8_async');
 
+/* mpm 6.4.0 renamed `--output-format` back to `--table-format`, the flag the
+ * JSON payload of `outdated` relies on. Everything else invoked here predates
+ * that release. */
 export const MPM_MIN_VERSION = [6, 4, 0];
-/* mpm 6.4.0 renamed `--output-format` back to `--table-format`, the flag this
- * extension relies on for the JSON payload of `outdated`. Everything else it
- * invokes (manager selectors, `upgrade --all`, `--no-color`, `--verbosity`,
- * `--timeout`, `sync`) predates that release. */
 
+/* Default `--timeout` in seconds, mirroring bar_plugin.py: mpm's own defaults
+ * suit interactive runs and are too long for a background refresh. */
 export const MPM_TIMEOUT = 60;
-/* Default `--timeout` (seconds), mirroring bar_plugin.py: mpm's own defaults
- * are tuned for interactive runs and are too long for a background refresh. */
 
+/* Bootstrap offered when no mpm is found, the command bar_plugin.py offers
+ * from its own menu (tests/test_gnome_extension.py holds the two equal). uv
+ * may itself be missing, which the companion documentation item covers. */
 export const INSTALL_ARGV = [
     'uv', 'tool', 'install', '--upgrade', 'meta-package-manager',
 ];
-/* Bootstrap offered when no mpm is found: a global uv tool install, the same
- * command bar_plugin.py offers from its own menu (kept in sync by
- * tests/test_gnome_extension.py). uv may itself be missing, and is not the
- * right answer on every distribution, which is what the companion
- * documentation item covers. */
 
-export const INSTALL_DOCS_URL =
-    'https://mpm.run/install/';
+export const INSTALL_DOCS_URL = 'https://mpm.run/install/';
 
+/* The two readings of `mpm --no-color --version`: the numeric components,
+ * which compare, and the token as printed, which names a development build. */
 const VERSION_REGEX = /\bversion\s+(\d+(?:\.\d+)+)/;
-
 const RELEASE_REGEX = /\bversion\s+(\S+)/;
 
 /* Well-known mpm locations probed when it is not on the session PATH, which
  * GNOME does not source from the user's shell profile. Mirrors the PATH tier
- * of bar_plugin.py's search_mpm(); the venv walk-back tiers make no sense
- * here since the extension does not live inside a Python project tree. */
+ * of bar_plugin.py's search_mpm(); its venv walk-back has no counterpart
+ * here, the extension living in no Python project tree. */
 function fallbackPaths() {
     return [
         GLib.build_filenamev([GLib.get_home_dir(), '.local', 'bin', 'mpm']),
@@ -73,12 +70,10 @@ export const TERMINAL_CANDIDATES = [
 function parseOverride(override) {
     try {
         const [ok, argv] = GLib.shell_parse_argv(override);
-        if (ok && argv.length > 0)
-            return argv;
+        return ok && argv.length > 0 ? argv : null;
     } catch {
         return null;
     }
-    return null;
 }
 
 /**
@@ -213,28 +208,22 @@ export async function runCommand(argv, cancellable, watchdogSeconds = 0) {
  *   version: number[]|null, release: string|null, error: string|null}>}
  */
 export async function probeMpm(mpm, cancellable, watchdogSeconds = 30) {
+    const noVersion = (runnable, error) => ({
+        runnable, upToDate: false, version: null, release: null, error,
+    });
     let result;
     try {
         result = await runCommand(
             [...mpm, '--no-color', '--version'], cancellable, watchdogSeconds);
     } catch (error) {
-        return {
-            runnable: false, upToDate: false, version: null, release: null,
-            error: String(error),
-        };
+        return noVersion(false, String(error));
     }
-    if (result.status !== 0 || result.stderr) {
-        const error = result.stderr || `exit code ${result.status}`;
-        return {
-            runnable: false, upToDate: false, version: null, release: null, error,
-        };
-    }
+    if (result.status !== 0 || result.stderr)
+        return noVersion(false, result.stderr || `exit code ${result.status}`);
     const version = parseVersion(result.stdout);
     if (!version) {
-        return {
-            runnable: true, upToDate: false, version: null, release: null,
-            error: `unable to parse version from: ${result.stdout.trim()}`,
-        };
+        return noVersion(
+            true, `unable to parse version from: ${result.stdout.trim()}`);
     }
     return {
         runnable: true,
@@ -285,13 +274,6 @@ export function outdatedArgv(mpm, timeout = MPM_TIMEOUT, options = []) {
     ];
 }
 
-/* pURL types whose namespace qualifies a package without being part of its
- * ID, mirroring PURL_QUALIFYING_NAMESPACES in meta_package_manager/package.py.
- * tests/test_gnome_extension.py holds the two sets equal. */
-export const PURL_QUALIFYING_NAMESPACES = new Set([
-    'alpm', 'apk', 'cpan', 'deb', 'luarocks', 'rpm',
-]);
-
 /* Percent-encode one pURL segment like Python's `quote(text, safe="")`,
  * keeping `:` as is. encodeURIComponent leaves `!'()*` alone, where Python
  * encodes them. */
@@ -318,8 +300,8 @@ export function packagePurl(managerId, packageId) {
     const name = packageId.slice(cut + 1);
     /* The whole ID stays the name when a split would leave an empty segment,
      * like an absolute path or a URL, which a pURL parser drops. */
-    const whole = PURL_QUALIFYING_NAMESPACES.has(managerId) ||
-        namespace.length === 0 || namespace.includes('') || name === '';
+    const whole = namespace.length === 0 || namespace.includes('') ||
+        name === '';
     const segments = whole ? [packageId] : [...namespace, name];
     return `pkg:${managerId}/${segments.map(purlQuote).join('/')}`;
 }
@@ -352,11 +334,11 @@ export function parseOutdated(text) {
     let totalOutdated = 0;
     let totalErrors = 0;
     for (const [id, info] of Object.entries(data)) {
+        /* The label and the `?` placeholder follow package_rows() of the bar
+         * plugin renderer. */
         const packages = (info.packages ?? []).map(pkg => ({
             id: pkg.id,
-            // Mirror the renderer's label fallback: name or id.
             name: pkg.name || pkg.id,
-            // Mirror the renderer's "?" placeholder for unknown versions.
             installedVersion: pkg.installed_version || '?',
             latestVersion: pkg.latest_version || '?',
         }));

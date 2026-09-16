@@ -42,12 +42,13 @@ import re
 import sys
 from configparser import RawConfigParser
 from functools import cached_property
-from operator import itemgetter, methodcaller
+from operator import attrgetter, methodcaller
 from pathlib import Path
 from shlex import shlex
 from shutil import which
 from subprocess import run
 from textwrap import dedent
+from typing import NamedTuple
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -63,9 +64,6 @@ build we validated on would lock the plugin out of every released SwiftBar.
 
 See [swiftbar/SwiftBar#445](https://github.com/swiftbar/SwiftBar/issues/445).
 """
-
-XBAR_MIN_VERSION = (2, 1, 7)
-"""Xbar v2.1.7-beta is the latest version available on Homebrew."""
 
 MPM_MIN_VERSION = (5, 0, 0)
 """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
@@ -110,6 +108,53 @@ for state-changing operations like `sync`). A wedged package manager then fails
 the whole refresh in a minute instead of freezing the menubar for several.
 """
 
+VERSION_REGEX = re.compile(
+    r"""
+    .+                      # Any string
+    \                       # A space
+    version                 # The "version" string
+    \                       # A space
+    [^\.]*?                 # Any minimal (non-greedy) string without a dot
+    (?P<release>
+      (?P<version>[0-9]+(?:\.[0-9]+)+) # Version composed of numbers and dots
+      [^\s\x1b]*            # Any suffix, stopping short of an ANSI escape
+    )
+    .*?                     # Any trailing string (ANSI codes, etc.)
+    $                       # End of the string
+    """,
+    re.VERBOSE | re.MULTILINE,
+)
+"""Both readings of the version `mpm --version` prints, ANSI-colored or not.
+
+`version` is the numeric part, `release` the whole token: a development build
+spells `8.0.0.dev0+40ce0879`, and the suffix is what identifies the build.
+"""
+
+
+class Candidate(NamedTuple):
+    """One way to run `mpm` found on the system, and what its version probe answered.
+
+    `version` is the tuple compared against {data}`MPM_MIN_VERSION`, `release` the
+    token as printed. The GNOME Shell extension's `probeMpm()` answers the same fields.
+    """
+
+    args: tuple[str, ...]
+    runnable: bool = False
+    up_to_date: bool = False
+    version: tuple[int, ...] | None = None
+    error: str | Exception | None = None
+    release: str | None = None
+
+    @property
+    def rank(self) -> tuple[bool, bool, tuple[int, ...]]:
+        """Sort key of {attr}`MPMPlugin.ranked_mpm`: runnable, then up to date, then
+        the newest version.
+
+        `error` and `release` stay out of it. Two exceptions do not compare, nor
+        does a missing version against a found one, and either makes the sort raise.
+        """
+        return self.runnable, self.up_to_date, self.version or ()
+
 
 class MPMPlugin:
     """Implements the minimal code necessary to locate and call the `mpm` CLI on the
@@ -122,7 +167,7 @@ class MPMPlugin:
     """
 
     @staticmethod
-    def getenv_str(var, default: str | None = None) -> str | None:
+    def getenv_str(var: str, default: str | None = None) -> str | None:
         """Utility to get environment variables.
 
         Note that all environment variables are strings. Always returns a lowered-case
@@ -134,7 +179,7 @@ class MPMPlugin:
         return str(value).lower()
 
     @staticmethod
-    def getenv_bool(var, default: bool = False) -> bool:
+    def getenv_bool(var: str, default: bool = False) -> bool:
         """Utility to normalize boolean environment variables.
 
         Relies on [`configparser.RawConfigParser.BOOLEAN_STATES`](https://github.com/python/cpython/blob/3c298e2e385fc6f462abaada2fd680deb1a2b58e/Lib/configparser.py#L596-L597)
@@ -146,7 +191,7 @@ class MPMPlugin:
         return RawConfigParser.BOOLEAN_STATES[value]
 
     @staticmethod
-    def getenv_int(var, default: int) -> int:
+    def getenv_int(var: str, default: int) -> int:
         """Utility to normalize integer environment variables.
 
         Falls back to the default on anything that is not a number, so a typo in
@@ -182,21 +227,17 @@ class MPMPlugin:
             valid_ids = {"color", "font", "size"}
         params = {}
 
+        # shlex yields `=` as a token of its own, so a value is whatever follows one.
         key = None
-        previous_token_is_separator = False
+        after_separator = False
         for token in shlex(font_string):
-            # Flag the token as a separator if it is an equal sign.
             if token == "=":
-                previous_token_is_separator = True
-            # Token positioned just after an equal sign is a value. Let's attach it to
-            # the key and store it in the params dictionary.
-            elif previous_token_is_separator:
+                after_separator = True
+            elif after_separator:
                 if key and key in valid_ids:
                     params[key] = token
-                # Reset the flag and key.
-                previous_token_is_separator = False
+                after_separator = False
                 key = None
-            # Any token is considered a potential key until we find an equal sign.
             else:
                 key = token
 
@@ -316,17 +357,15 @@ class MPMPlugin:
 
     @staticmethod
     def search_venv(folder: Path) -> tuple[str, ...] | None:
-        """Search for signs of a virtual env in the provided folder.
+        """The command running `mpm` from the project rooted at `folder`, or `None`.
 
-        Returns CLI arguments that can be used to run `mpm` from the virtualenv
-        context, or `None` if the folder is not a venv.
-
-        Inspired by [autoswitch_virtualenv.plugin.zsh](https://github.com/MichaelAquilina/zsh-autoswitch-virtualenv/blob/master/autoswitch_virtualenv.plugin.zsh#L50)
-        and [uv's get_interpreter_info.py](https://github.com/astral-sh/uv/blob/f770b25/crates/uv-python/python/get_interpreter_info.py).
+        A project is told by its lockfile, and the command is the one its tool offers
+        to run inside the environment it manages. A command opening on an environment
+        assignment is never returned: {meth}`check_mpm` spawns the command without a
+        shell, which would take the assignment for the program. A project with
+        neither lockfile is reached through the other candidates of
+        {meth}`search_mpm`.
         """
-        if (folder / "Pipfile").is_file():
-            return (f"PIPENV_PIPFILE='{folder}'", "pipenv", "run", "mpm")
-
         if (folder / "uv.lock").is_file():
             # Frozen, and pinned to the folder the lockfile was found in: a bare
             # `uv run` would bind to the process cwd instead, and re-lock that
@@ -335,14 +374,6 @@ class MPMPlugin:
 
         if (folder / "poetry.lock").is_file():
             return ("poetry", "run", "--directory", str(folder), "mpm")
-
-        if (folder / "requirements.txt").is_file() or (folder / "setup.py").is_file():
-            return (
-                f"VIRTUAL_ENV='{folder}'",
-                "python",
-                "-m",
-                "meta_package_manager",
-            )
 
         return None
 
@@ -368,12 +399,6 @@ class MPMPlugin:
         system-wide installation, then the module under an interpreter. None of
         them is trusted on sight, `check_mpm()` running each before it is ranked.
         """
-        # This script might be itself part of an mpm installation that was deployed in
-        # a virtualenv. So walk back the whole folder tree from here in search of a
-        # virtualenv. The path is resolved first: both hosts are installed by
-        # symlinking this file into their own plugin folder, and that folder is
-        # where an unresolved `__file__` walks, never the installation the script
-        # belongs to.
         for folder in Path(__file__).resolve().parents:
             # Stop at Home: neither it nor any folder above it is a project of
             # the user's, and scanning on reaches `/` by way of every shared
@@ -387,13 +412,10 @@ class MPMPlugin:
 
             yield venv_cli
 
-        # Search for an mpm executable in the environment, be it a script or a binary.
         mpm_bin = which("mpm")
         if mpm_bin:
             yield (mpm_bin,)
 
-        # Try the Python interpreter running this script, then python3 from PATH.
-        # No version probing needed: check_mpm() validates runnability.
         seen = set()
         for py_path in (sys.executable, which("python3")):
             if not py_path:
@@ -409,109 +431,53 @@ class MPMPlugin:
             seen.add(normalized)
             yield (py_path, "-m", "meta_package_manager")
 
-    def check_mpm(
-        self, mpm_cli_args: tuple[str, ...]
-    ) -> tuple[bool, bool, tuple[int, ...] | None, str | Exception | None, str | None]:
-        """Test-run mpm execution and extract its version.
+    def check_mpm(self, mpm_cli_args: tuple[str, ...]) -> Candidate:
+        """Run the version probe of one command, and read the answer.
 
-        Two readings of the same string come back. The numeric tuple is what
-        compares against {data}`MPM_MIN_VERSION`; the release is the token as
-        printed, which a development build spells `8.0.0.dev0+40ce0879`. The
-        release is last because `ranked_mpm` sorts candidates on this tuple:
-        anything inserted earlier would join the ranking.
+        `--no-color` keeps the answer parseable where Click would detect a terminal.
+        A command whose program is missing is a candidate like any other, carrying
+        the exception as its error.
         """
-        error: str | Exception | None = None
         try:
             process = run(
-                # Output a color-less version just in case the script is not run in a
-                # non-interactive shell, or Click/Click-Extra autodetection fails.
                 (*mpm_cli_args, "--no-color", "--version"),
                 capture_output=True,
                 encoding="utf-8",
                 check=False,
             )
-            error = process.stderr
         except FileNotFoundError as ex:
-            error = ex
+            return Candidate(mpm_cli_args, error=ex)
+        if process.returncode or process.stderr:
+            return Candidate(mpm_cli_args, error=process.stderr)
 
-        runnable = False
-        version = None
-        release = None
-        up_to_date = False
-        # Is mpm runnable as-is with provided CLI arguments? Check the error
-        # first: on a FileNotFoundError probe, `process` was never assigned.
-        if not error and not process.returncode:
-            runnable = True
-            # This regular expression is designed to extract the version number,
-            # whether it is surrounded by ANSI color escape sequence or not.
-            match = re.compile(
-                r"""
-                .+                      # Any string
-                \                       # A space
-                version                 # The "version" string
-                \                       # A space
-                [^\.]*?                 # Any minimal (non-greedy) string without a dot
-                (?P<release>
-                  (?P<version>[0-9]+(?:\.[0-9]+)+) # Version composed of numbers and dots
-                  [^\s\x1b]*            # Any suffix, stopping short of an ANSI escape
-                )
-                .*?                     # Any trailing string (ANSI codes, etc.)
-                $                       # End of the string
-                """,
-                re.VERBOSE | re.MULTILINE,
-            ).search(process.stdout)
-            if match:
-                version = self.str_to_version(match.groupdict()["version"])
-                release = match.groupdict()["release"]
-                # Is mpm too old?
-                if version >= MPM_MIN_VERSION:
-                    up_to_date = True
-
-        return runnable, up_to_date, version, error, release
-
-    @cached_property
-    def ranked_mpm(
-        self,
-    ) -> list[
-        tuple[
-            tuple[str, ...],
-            bool,
-            bool,
-            tuple[int, ...] | None,
-            str | Exception | None,
-            str | None,
-        ]
-    ]:
-        """Rank the mpm candidates we found on the system.
-
-        Sort them by:
-        - runnability
-        - up-to-date status
-        - version number
-        - error
-
-        On tie, the order from `search_mpm` is respected.
-        """
-        all_mpm = (
-            (mpm_candidate, self.check_mpm(mpm_candidate))
-            for mpm_candidate in self.search_mpm()
+        match = VERSION_REGEX.search(process.stdout)
+        if not match:
+            return Candidate(mpm_cli_args, runnable=True, error=process.stderr)
+        version = self.str_to_version(match.group("version"))
+        return Candidate(
+            mpm_cli_args,
+            runnable=True,
+            up_to_date=version >= MPM_MIN_VERSION,
+            version=version,
+            error=process.stderr,
+            release=match.group("release"),
         )
-        return [
-            (mpm_args, *mpm_status)
-            for mpm_args, mpm_status in sorted(all_mpm, key=itemgetter(1), reverse=True)
-        ]
 
     @cached_property
-    def best_mpm(
-        self,
-    ) -> tuple[
-        tuple[str, ...],
-        bool,
-        bool,
-        tuple[int, ...] | None,
-        str | Exception | None,
-        str | None,
-    ]:
+    def ranked_mpm(self) -> list[Candidate]:
+        """Every `mpm` found on the system, best first.
+
+        Sorted on {attr}`Candidate.rank`. Candidates ranking alike keep the order
+        {meth}`search_mpm` produced them in.
+        """
+        return sorted(
+            map(self.check_mpm, self.search_mpm()),
+            key=attrgetter("rank"),
+            reverse=True,
+        )
+
+    @cached_property
+    def best_mpm(self) -> Candidate:
         return self.ranked_mpm[0]
 
     @staticmethod
@@ -574,7 +540,7 @@ class MPMPlugin:
         not pushed down by three lines of provenance.
         """
         host = "SwiftBar" if self.is_swiftbar else "Xbar"
-        mpm_args, runnable, _up_to_date, _version, _error, release = self.best_mpm
+        best = self.best_mpm
         print("---")
         self.pp("About", self.default_font)
         self.pp(
@@ -582,17 +548,16 @@ class MPMPlugin:
             self.default_font,
         )
         self.pp(
-            f"--mpm {release}" if runnable else "--mpm not found",
+            f"--mpm {best.release}" if best.runnable else "--mpm not found",
             self.default_font,
         )
-        if runnable:
-            self.pp(f"--{' '.join(mpm_args)}", self.monospace_font)
+        if best.runnable:
+            self.pp(f"--{' '.join(best.args)}", self.monospace_font)
         self.pp("--Documentation", f"href={PLUGIN_DOCS_URL}", self.default_font)
 
     def print_menu(self) -> None:
         """Print the main menu."""
-        # Check if we have a recent version of SwiftBar.
-        # XXX Xbar does not provide yet a version number in the environment variables.
+        # Xbar exposes no version to its plugins, so only SwiftBar is gated.
         if self.is_swiftbar:
             swiftbar_version_str = self.getenv_str("SWIFTBAR_VERSION", "")
             swiftbar_version = self.str_to_version(swiftbar_version_str)
@@ -604,14 +569,13 @@ class MPMPlugin:
                 )
                 return
 
-        # Check if we have a recent version of mpm.
-        mpm_args, runnable, up_to_date, _version, error, _release = self.best_mpm
-        if not runnable or not up_to_date:
+        best = self.best_mpm
+        if not best.runnable or not best.up_to_date:
             self.print_error_header()
-            if error:
-                self.print_error(error)
+            if best.error:
+                self.print_error(best.error)
                 print("---")
-            action_msg = "Install" if not runnable else "Upgrade"
+            action_msg = "Install" if not best.runnable else "Upgrade"
             min_version_str = self.version_to_str(MPM_MIN_VERSION)
             self.pp(
                 f"{action_msg} mpm >= {min_version_str} with uv",
@@ -632,10 +596,10 @@ class MPMPlugin:
             self.print_about()
             return
 
-        # Force a sync of all local package databases.
+        # Refresh every manager's index first, best effort.
         run(
             (
-                *mpm_args,
+                *best.args,
                 "--verbosity",
                 "ERROR",
                 "--timeout",
@@ -646,14 +610,11 @@ class MPMPlugin:
             check=False,
         )
 
-        # Fetch outdated packages from all package managers available on the system.
-        # We defer all rendering to mpm itself so it can compute more intricate layouts.
+        # mpm renders the menu itself. A manager's errors come back inside its
+        # section, so only CRITICAL logs are let through.
         process = run(
-            # We silence all errors but the CRITICAL ones. All others will be captured
-            # by mpm in --plugin-output mode and rendered back into each manager
-            # section.
             (
-                *mpm_args,
+                *best.args,
                 "--verbosity",
                 "CRITICAL",
                 "--timeout",
@@ -680,8 +641,7 @@ class MPMPlugin:
             self.print_about()
             return
 
-        # Capturing the output of mpm and re-printing it will introduce an extra
-        # line returns, hence the extra rstrip() call.
+        # print() adds the line return the captured output already ends on.
         if process.stdout:
             print(process.stdout.rstrip())
             self.print_about()
@@ -700,11 +660,10 @@ if __name__ == "__main__":
 
     if args.search_mpm:
         for candidate in plugin.ranked_mpm:
-            mpm_args, runnable, up_to_date, version, error, release = candidate
             print(
-                f"{' '.join(mpm_args)} | runnable: {runnable} | "
-                f"up to date: {up_to_date} | version: {version} | "
-                f"release: {release} | error: {error!r}"
+                f"{' '.join(candidate.args)} | runnable: {candidate.runnable} | "
+                f"up to date: {candidate.up_to_date} | version: {candidate.version} | "
+                f"release: {candidate.release} | error: {candidate.error!r}"
             )
 
     else:

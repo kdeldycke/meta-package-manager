@@ -29,16 +29,15 @@ import {
 import * as Mpm from './mpm.js';
 
 /* Panel states, each mapped to a stock icon name below. UPDATES and UPTODATE
- * mirror the 🎁↑N / 📦✓ title states of the bar plugin; ERROR covers both a
- * failed check and the per-manager error marker; MISSING is the bootstrap
- * state of bar_plugin.py when no runnable mpm is found. */
+ * mirror the 🎁↑N / 📦✓ title states of the bar plugin; ERROR covers a failed
+ * check, a missing mpm (the ❗️ bootstrap state of bar_plugin.py) and the
+ * per-manager error marker. */
 const State = {
     UNKNOWN: 'unknown',
     CHECKING: 'checking',
     UPTODATE: 'uptodate',
     UPDATES: 'updates',
     ERROR: 'error',
-    MISSING: 'error',
 };
 
 /* Each state renders as a stock symbolic icon from the icon theme, not as
@@ -153,20 +152,18 @@ class MpmIndicator extends PanelMenu.Button {
         /* Interactive package items live in an inner PopupMenuSection wrapped
          * in a ScrollView, so a big report scrolls instead of overflowing the
          * screen (GNOME popup menus do not scroll natively; the max-height
-         * lives in stylesheet.css). The section is deliberately never
-         * registered with the menu, only its actor is embedded: its _parent
-         * stays null, so an item activation dead-ends in the section's no-op
-         * close() instead of closing the panel menu. Action items therefore
-         * close the menu explicitly. */
+         * lives in stylesheet.css). Only its actor is embedded, the section
+         * itself is never registered with the menu, so its `_parent` stays
+         * null: an item activation dead-ends in the section's no-op close()
+         * instead of closing the panel menu, and action items close the menu
+         * explicitly. */
         this._reportSection = new PopupMenu.PopupMenuSection();
-        /* The grouped layout fills this section with PopupSubMenuMenuItems,
-         * and its actor is embedded in the ScrollView below rather than added
-         * to the menu, so its `_parent` stays null and it is its own top menu.
-         * A submenu opening or closing calls `_setOpenedSubMenu` on that top
-         * menu, which a bare PopupMenuSection does not define: without it a
-         * grouped check throws inside a signal handler, and a `removeAll`
-         * tearing down an open submenu turns the throw into a shell crash.
-         * Copied from PopupMenu, so one manager stays open at a time. */
+        /* A parentless section is its own top menu, on which the submenus of
+         * the grouped layout call `_setOpenedSubMenu`. A bare PopupMenuSection
+         * lacks it: a grouped check then throws inside a signal handler, and a
+         * `removeAll` tearing down an open submenu turns the throw into a
+         * shell crash. Copied from PopupMenu, so one manager stays open at a
+         * time. */
         this._reportSection._openedSubMenu = null;
         this._reportSection._setOpenedSubMenu = submenu => {
             if (this._reportSection._openedSubMenu)
@@ -224,12 +221,11 @@ class MpmIndicator extends PanelMenu.Button {
     /* Panel icon, count label and indicator visibility for a given state. */
     _setPanelState(state, count = 0) {
         this._icon.gicon = this._stateIcon(state);
-        const showCount = this._settings.get_boolean('show-count');
-        this._countLabel.text = showCount && count > 0 ? String(count) : '';
-        this._countLabel.visible = showCount && count > 0;
-        const alwaysVisible = this._settings.get_boolean('always-visible');
-        this.visible = alwaysVisible || count > 0 ||
-            state === State.ERROR || state === State.MISSING;
+        const showCount = count > 0 && this._settings.get_boolean('show-count');
+        this._countLabel.text = showCount ? String(count) : '';
+        this._countLabel.visible = showCount;
+        this.visible = count > 0 || state === State.ERROR ||
+            this._settings.get_boolean('always-visible');
     }
 
     /* The "Check now" row is the second half of the progress signal: greyed
@@ -275,14 +271,18 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
-    /* Re-arm the recurring check, compensating for time already elapsed so
-     * lock/unlock cycles and settings changes never reset the countdown
-     * (arch-update's _scheduleCheck pattern). */
-    _scheduleCheck() {
+    _clearCheckTimer() {
         if (this._checkTimeoutId) {
             GLib.source_remove(this._checkTimeoutId);
             this._checkTimeoutId = null;
         }
+    }
+
+    /* Re-arm the recurring check, compensating for time already elapsed so
+     * lock/unlock cycles and settings changes never reset the countdown
+     * (arch-update's _scheduleCheck pattern). */
+    _scheduleCheck() {
+        this._clearCheckTimer();
         let delay = this._settings.get_int('check-interval') * 60;
         if (lastCheck !== null) {
             delay -= (Date.now() - lastCheck.getTime()) / 1000;
@@ -314,19 +314,21 @@ class MpmIndicator extends PanelMenu.Button {
         try {
             const mpm = Mpm.findMpm(this._settings.get_string('mpm-command'));
             if (mpm === null) {
-                this._setMissing(_('mpm not found on this system.'));
+                this._setError(_('mpm not found on this system.'), true);
                 return;
             }
             const probe = await Mpm.probeMpm(mpm, cancellable);
             if (!probe.runnable) {
-                this._setMissing(_('mpm cannot run: %s').format(probe.error));
+                this._setError(
+                    _('mpm cannot run: %s').format(probe.error), true);
                 return;
             }
             if (!probe.upToDate) {
                 const minimum = Mpm.MPM_MIN_VERSION.join('.');
-                this._setMissing(
+                this._setError(
                     _('mpm is too old: version %s or newer is required.')
-                        .format(minimum));
+                        .format(minimum),
+                    true);
                 return;
             }
             lastMpm = mpm;
@@ -399,7 +401,7 @@ class MpmIndicator extends PanelMenu.Button {
     _fillReport() {
         if (lastError !== null) {
             this._addErrorItems(this._reportSection, lastError);
-            this._setPanelState(lastError.missing ? State.MISSING : State.ERROR);
+            this._setPanelState(State.ERROR);
             if (lastError.missing)
                 this._addInstallItem();
             return;
@@ -603,7 +605,7 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
-    /* The bootstrap items of the MISSING state, the same pair bar_plugin.py
+    /* The bootstrap items shown under a missing mpm, the same pair bar_plugin.py
      * offers: a global uv install run through the regular action path, and the
      * installation page for every system uv does not answer for. */
     _addInstallItem() {
@@ -623,15 +625,11 @@ class MpmIndicator extends PanelMenu.Button {
         this._reportSection.addMenuItem(docs);
     }
 
-    _setMissing(message) {
+    /* Replace the report with an error. A missing mpm also gets the bootstrap
+     * items, which is what `missing` tells apart. */
+    _setError(message, missing = false) {
         lastModel = null;
-        lastError = {message, missing: true};
-        this._showReport();
-    }
-
-    _setError(message) {
-        lastModel = null;
-        lastError = {message, missing: false};
+        lastError = {message, missing};
         this._showReport();
     }
 
@@ -672,9 +670,6 @@ class MpmIndicator extends PanelMenu.Button {
         this._notifSource.addNotification(notification);
     }
 
-    /* Spawn an upgrade command, in a terminal by default so progress is
-     * visible and sudo can prompt. Then arm the post-upgrade re-check:
-     * terminal processes detach, so completion cannot be awaited. */
     /* The mpm-options setting as it stands when an action is built, not as
      * it stood at the last check: an option typed into the preferences
      * takes effect on the next click without a re-check. A syntax error
@@ -687,6 +682,9 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
+    /* Spawn an upgrade command, in a terminal by default so progress is
+     * visible and sudo can prompt. Then arm the post-upgrade re-check:
+     * terminal processes detach, so completion cannot be awaited. */
     _runAction(argv) {
         try {
             if (this._settings.get_boolean('upgrade-in-terminal')) {
@@ -746,10 +744,7 @@ class MpmIndicator extends PanelMenu.Button {
             this._actionCancellable.cancel();
             this._actionCancellable = null;
         }
-        if (this._checkTimeoutId) {
-            GLib.source_remove(this._checkTimeoutId);
-            this._checkTimeoutId = null;
-        }
+        this._clearCheckTimer();
         this._clearOneShot();
         this._settings.disconnectObject(this);
         if (this._notifSource !== null) {

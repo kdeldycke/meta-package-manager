@@ -124,7 +124,9 @@ Settings live in the extension preferences window, also reachable from the indic
 | `terminal-command`     | Custom terminal emulator, empty to autodetect.                  | String  | Empty   |
 | `post-upgrade-recheck` | Seconds before refreshing the list after an upgrade is started. | Integer | `300`   |
 
-These settings only drive the menu layout and check cadence: everything else comes from `mpm`'s own configuration file, which applies to every run the extension triggers. See {doc}`configuration` for the search paths and the full schema.
+These settings drive the menu layout, the check cadence and how `mpm` is called: everything else comes from `mpm`'s own configuration file, which applies to every run the extension triggers. See {doc}`configuration` for the search paths and the full schema.
+
+`mpm-options` goes after the extension's own options, so an option set twice takes the value given here. That includes `--verbosity`, which the extension sets to `CRITICAL` to list the outdated packages. A raised level never hides that list: only the exit status of `mpm` marks a check as failed. A successful check drops what `mpm` wrote to standard error. An upgrade run in a terminal shows its log there.
 
 The *About* group at the foot of the window names two versions. The first is the extension's own, compiled into its `metadata.json`. The second is the `mpm` release the extension resolved, with the command that answered it below. The two ship separately, so a bug report needs both.
 

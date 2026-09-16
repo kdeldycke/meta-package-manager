@@ -262,6 +262,7 @@
 - [gnome-shell] Add an `mpm-options` setting, extra options spliced into every `mpm` call the extension makes, before the subcommand.
 - [bar-plugin] Add an *About* row to the menu, naming the plugin's own version, the `mpm` release it resolved and the command that answered.
 - [bar-plugin] Add `VAR_MPM_OPTIONS`, extra options spliced into every `mpm` call the plugin makes, before the subcommand.
+- [bar-plugin,gnome-shell] Mark a package check as failed on the exit code of `mpm` only, so a `--verbosity` raised in the options no longer replaces the package list with log lines.
 - [gnome-shell] Track every signal through `connectObject()` and `disconnectObject()`, and drop the `_destroyed` flag the GNOME guidelines forbid. Teardown now hangs off the indicator actor itself, and a check still in flight learns it was disabled from its own cancellable.
 - [gnome-shell] Require a cancellable in every `runCommand()` call, and drop its watchdog the moment that cancellable fires rather than whenever the abandoned read settles. A run nobody could cancel left a main loop source alive past `disable()`, free to fire on a locked session.
 - [gnome-shell] Run `shexli`, the static analyzer extensions.gnome.org applies to every upload, as its own CI job. It exits `0` whatever it finds, so the gate reads the finding count out of its JSON report.

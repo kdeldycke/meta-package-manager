@@ -609,6 +609,40 @@ def test_plugin_empty_mpm_output(monkeypatch, capsys, hide, reports_error):
     assert bool(out) is reports_error
 
 
+@pytest.mark.parametrize(
+    ("returncode", "stderr", "reports_error"),
+    (
+        # A `--verbosity INFO` from VAR_MPM_OPTIONS logs a successful run.
+        (0, "info: Selected managers: platform defaults.\n", False),
+        (2, "critical: No manager selected.\n", True),
+    ),
+)
+def test_plugin_failure_reads_the_exit_code(
+    monkeypatch, capsys, returncode, stderr, reports_error
+):
+    """A refresh fails on the exit code of `mpm`, whatever it wrote to
+    `<stderr>`: a log line never hides the package list."""
+    monkeypatch.delenv("SWIFTBAR", raising=False)
+    monkeypatch.setenv("VAR_ALWAYS_VISIBLE", "true")
+    listing = "\U0001f4e6✓ | dropdown=false"
+    monkeypatch.setattr(
+        bar_plugin,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args, returncode, stdout=listing, stderr=stderr
+        ),
+    )
+
+    plugin = bar_plugin.MPMPlugin()
+    plugin.__dict__["best_mpm"] = (("mpm",), True, True, (9, 9, 9), None, "9.9.9")
+    plugin.print_menu()
+
+    out = capsys.readouterr().out
+    assert ("❗️" in out) is reports_error
+    assert (listing in out) is not reports_error
+    assert (stderr.strip() in out) is reports_error
+
+
 def test_plugin_options_reach_every_call(monkeypatch):
     """`VAR_MPM_OPTIONS` lands after the plugin's own options and before the
     subcommand on the sync and outdated calls, keeps its case, and never

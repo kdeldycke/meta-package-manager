@@ -343,7 +343,10 @@ class MpmIndicator extends PanelMenu.Button {
             const result = await Mpm.runCommand(
                 Mpm.outdatedArgv(mpm, timeout, options),
                 cancellable, watchdog);
-            if (result.stderr || !result.stdout) {
+            /* The exit status tells a failed check apart, never stderr alone:
+             * a --verbosity from mpm-options overrides the CRITICAL one of
+             * outdatedArgv(), and a successful check then logs there too. */
+            if (result.status !== 0 || !result.stdout) {
                 this._setError(result.stderr || _('mpm produced no output.'));
                 return;
             }

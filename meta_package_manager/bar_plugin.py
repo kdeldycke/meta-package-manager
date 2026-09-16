@@ -671,7 +671,10 @@ class MPMPlugin:
         # not able to produce any output. An empty output is deliberate when the
         # user asked for the icon to vanish while everything is up to date, and is
         # then forwarded as-is for the host to hide the plugin.
-        if process.stderr or (not process.stdout and self.always_visible):
+        # The exit code tells a failed run apart, never <stderr> alone: a
+        # `--verbosity` from `VAR_MPM_OPTIONS` overrides the CRITICAL one above,
+        # and a successful run then logs there too.
+        if process.returncode or (not process.stdout and self.always_visible):
             self.print_error_header()
             self.print_error(process.stderr)
             self.print_about()

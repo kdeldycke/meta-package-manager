@@ -34,7 +34,7 @@ The plugin is configurable with these environment variables:
 SwiftBar renders two things differently from Xbar: the outdated count sits in a native badge on each manager header rather than in its label, and the grouped layout folds every section into an inline accordion ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)) that expands in place without dismissing the menu. Both are visible in the screenshots below.
 ```
 
-These variables only drive the menu layout: everything else comes from `mpm`'s own configuration file, which applies to every run the plugin triggers. See {doc}`configuration` for the search paths and the full schema.
+These variables drive the menu layout and the options passed to `mpm`: everything else comes from `mpm`'s own configuration file, which applies to every run the plugin triggers. See {doc}`configuration` for the search paths and the full schema.
 
 SwiftBar exposes them in its preferences, under *Code Plugins*. The pane opens on the plugin's metadata and cannot be resized, so the variables and the *Save in Plugin File* button sit below its fold ([swiftbar/SwiftBar#555](https://github.com/swiftbar/SwiftBar/issues/555)): scroll down to reach them.
 
@@ -74,6 +74,8 @@ SwiftBar exposes them in its preferences, under *Code Plugins*. The pane opens o
 
 A macOS menu cannot scroll sideways, so `VAR_MAX_VERSION_WIDTH` keeps a row from outgrowing it. A version longer than the cap is shortened with an `…`, always on the side the two versions have in common, so the characters telling them apart stay on screen. SwiftBar carries the untruncated pair in the item tooltip. Homebrew casks are what makes this necessary: their `version,revision` pairs run to 50 characters, against 17 for the longest version anyone reads. Set the variable to `0` to render every version whole.
 
+`VAR_MPM_OPTIONS` goes after the plugin's own options, so an option set twice takes the value given here. That includes `--verbosity`, which the plugin sets to `CRITICAL` to list the outdated packages. A raised level never hides that list: only the exit code of `mpm` marks a refresh as failed. A successful refresh drops its log, and a failed one shows it with the error. An upgrade opened in a terminal shows its log there.
+
 ## Menu actions
 
 Clicking a package runs `mpm --<manager-id> upgrade <package-id>`, and a section's *Upgrade all* entry runs `mpm --<manager-id> upgrade --all`. Neither invokes the package manager directly, so a click is subject to the same policy as the `mpm` run that rendered the menu: manager selection, {doc}`sudo` escalation, per-manager {doc}`overrides` and the release-age {doc}`cooldown` all apply.
@@ -92,6 +94,7 @@ The plugin has no icon files of its own: every state is an emoji, which SwiftBar
 | 📦✓    | Menu bar title           | Every selected manager reports nothing to upgrade.               |
 | ⚠️N    | Menu bar title, appended | N managers reported errors during the run.                       |
 | ❗️     | Menu bar title           | No runnable `mpm`: the bootstrap pair replaces the package list. |
+| ❗️     | Menu bar title           | `mpm` failed: its error output replaces the package list.        |
 | ⚠️     | Manager section header   | That manager reported an error, in the grouped layout.           |
 | 🆙     | *Upgrade all* row        | Upgrades every outdated package of one manager.                  |
 

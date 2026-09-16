@@ -183,6 +183,12 @@ class Specifier:
         packageurl-python parses the string without its normalization, which lowercases
         the name of some types, npm among them: `pkg:npm/JSONStream` would come back as
         `jsonstream`. That also skips percent-decoding, done here part by part.
+
+        ```{todo}
+        Parse with packageurl-python's normalization, and drop the decoding done here,
+        once it keeps the case of npm names
+        ([package-url/packageurl-python#230](https://github.com/package-url/packageurl-python/issues/230)).
+        ```
         """
         # Try to parse specifier as a pURL.
         try:

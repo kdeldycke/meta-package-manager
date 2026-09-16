@@ -113,6 +113,12 @@ def manager_purl(manager_id: str, package_id: str, version: str | None = None) -
     case-sensitive, since packages published before 2015 may carry uppercase letters:
     `JSONStream` would come back as `jsonstream`. `to_string()` also leaves a `/`
     unencoded in a name ([package-url/packageurl-python#123](https://github.com/package-url/packageurl-python/pull/123)).
+
+    ```{todo}
+    Render with `PackageURL.to_string()` once packageurl-python keeps the case of
+    npm names ([package-url/packageurl-python#230](https://github.com/package-url/packageurl-python/issues/230))
+    and encodes a `/` in a name ([package-url/packageurl-python#123](https://github.com/package-url/packageurl-python/pull/123)).
+    ```
     """
     namespace, name = purl_parts(manager_id, package_id)
     segments = (*(namespace.split("/") if namespace else ()), name)

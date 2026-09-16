@@ -164,6 +164,7 @@ Each one is captured in both shell appearances, so the two are there to be compa
 
 The menu has two layout switches, both set in the preferences window above. `group-by-manager` lists every manager's packages inline under a header counting them, or gives each manager a section that expands on a click: the captures unfold the first one. `align-columns` sets each version pair in a monospaced font, centered on its arrow; off, the pair sits flush right in the menu's own font.
 The `flatpak` section also carries a manager error, which the flat layout renders as a monospace red line under the packages that did resolve, and the grouped one flags with the `dialog-warning-symbolic` icon documented above.
+The report scrolls past a set height instead of growing the menu to the screen, and the flat captures show that as it is: the list stops at its fold, under a scrollbar, and the sections below it are reached with the wheel.
 
 ```````{tab-set}
 ``````{tab-item} Light

@@ -156,6 +156,20 @@ class MpmIndicator extends PanelMenu.Button {
          * close() instead of closing the panel menu. Action items therefore
          * close the menu explicitly. */
         this._reportSection = new PopupMenu.PopupMenuSection();
+        /* The grouped layout fills this section with PopupSubMenuMenuItems,
+         * and its actor is embedded in the ScrollView below rather than added
+         * to the menu, so its `_parent` stays null and it is its own top menu.
+         * A submenu opening or closing calls `_setOpenedSubMenu` on that top
+         * menu, which a bare PopupMenuSection does not define: without it a
+         * grouped check throws inside a signal handler, and a `removeAll`
+         * tearing down an open submenu turns the throw into a shell crash.
+         * Copied from PopupMenu, so one manager stays open at a time. */
+        this._reportSection._openedSubMenu = null;
+        this._reportSection._setOpenedSubMenu = submenu => {
+            if (this._reportSection._openedSubMenu)
+                this._reportSection._openedSubMenu.close(true);
+            this._reportSection._openedSubMenu = submenu;
+        };
         /* Hidden until a report fills it: the view keeps its own padding
          * whatever it holds, which an empty one would spend on a band of
          * blank menu. See `_showReport()`. */

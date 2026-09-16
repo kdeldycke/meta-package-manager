@@ -95,6 +95,22 @@ def _extension_source(*names: str) -> str:
     )
 
 
+def test_report_section_hosts_submenus_safely():
+    """The detached report section must define `_setOpenedSubMenu`.
+
+    A narrow guard, keyed on the one line that stops a specific shell crash
+    rather than the whole class: the grouped layout adds `PopupSubMenuMenuItem`s
+    to `_reportSection`, whose actor is embedded in the ScrollView instead of
+    added to the menu, so the section is its own top menu. A submenu open or
+    close then calls `_setOpenedSubMenu` on it, which a bare `PopupMenuSection`
+    lacks, throwing inside a signal handler and crashing gnome-shell on the
+    next `removeAll`. Cannot run in the gjs suite, which never loads a shell.
+    """
+    source = _extension_source("extension.js")
+    assert "PopupSubMenuMenuItem" in source
+    assert "this._reportSection._setOpenedSubMenu" in source
+
+
 def _gschema() -> ElementTree.Element:
     """The `<schema>` element of the bundled GSettings schema."""
     schema_file = EXTENSION_DIR / "schemas" / f"{SCHEMA_ID}.gschema.xml"

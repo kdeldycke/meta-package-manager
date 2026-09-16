@@ -103,6 +103,7 @@
 - [gnome-shell] Drop the blank band and separator the menu showed above *Checking…*, before a session's first report has anything to list.
 - [gnome-shell] Center the menu's version pairs around their arrow, mirroring the plugin's `VAR_ALIGN_COLUMNS`, with an `align-columns` setting to switch it off.
 - [gnome-shell] Drop the expander arrow from a manager with nothing to report, which opened on an empty panel.
+- [gnome-shell] Fix a `gnome-shell` crash when a setting changed while a manager's submenu was open in the grouped layout.
 - [gnome-shell] Scroll the package list with the wheel while a manager's submenu is expanded, which until now only its scrollbar could do.
 - [mpm] Replace the project's own forge sampler with repomatic's `sample-metrics`: the star-history charts and the manager cards' upstream readings now accrue in one committed CSV, appended and rendered by the new `metrics.yaml` workflow.
 - [mpm] Plot the benchmark's star-history charts on a logarithmic vertical axis, so the series orders of magnitude apart stay legible on one chart.

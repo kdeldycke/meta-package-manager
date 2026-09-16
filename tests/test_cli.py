@@ -250,6 +250,30 @@ def test_summary(invoke, fake_pool, summary_arg, active_summary):
     assert active_summary is bool(summary_match)
 
 
+@pytest.mark.parametrize(
+    ("args", "message"),
+    (
+        (("--verbosity", "INFO"), "Resolved --jobs to"),
+        (("--jobs", "0"), "Requested 0 jobs"),
+    ),
+)
+@pytest.mark.parametrize(
+    ("table_format", "logged"), (("github", True), ("json", False))
+)
+def test_jobs_messages_follow_the_output_format(
+    invoke, fake_pool, args, message, table_format, logged
+):
+    """The `--jobs` messages reach `<stderr>` unless the output is serialized.
+
+    click-extra logs them from the option callback, which Click runs while it
+    parses the options: before the group body turns logging off for a
+    serialization format.
+    """
+    result = invoke(*args, "--table-format", table_format, "installed")
+    assert result.exit_code == 0
+    assert (message in result.stderr) is logged
+
+
 def managers_table_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
     """Signals telling whether `mid` shows up in the `mpm managers` table.
 

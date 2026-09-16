@@ -111,7 +111,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     import click
-    from click_extra import Context, Parameter
+    from click_extra import Context, JobsOption, Parameter
     from click_extra.table import ColumnSpec
 
 
@@ -244,6 +244,9 @@ The per-package cooldown hold of {meth}`cooldown_hold_reason
 applies to these: `remove` introduces nothing, and read-only queries are never
 blocked. `restore` rides the `install` operation name, so it is covered.
 """
+
+_DEFERRED_JOBS = "mpm_deferred_jobs"
+"""`ctx.meta` key of the `--jobs` value {func}`defer_jobs_resolution` holds back."""
 
 
 def guard_existing_output(ctx: Context, output_path: Path, *, overwrite: bool) -> None:
@@ -385,6 +388,19 @@ def single_manager_selectors():
         )
         for manager_id, manager in pool.items()
     )
+
+
+def defer_jobs_resolution(ctx: Context, param: Parameter, value: int) -> None:
+    """Hold the parsed `--jobs` count until the `mpm` group body resolves it.
+
+    click-extra's own callback, {meth}`~click_extra.execution.JobsOption.validate_jobs`,
+    logs the resolved count at `INFO`, and warns on a count of `0` or above the
+    logical CPUs. Run while options are parsed, those messages came before the group
+    body turns logging off for a serialization format, so they reached `<stderr>`
+    beside a JSON payload, whatever the option order. The body runs that callback
+    right after its decision instead.
+    """
+    ctx.meta[_DEFERRED_JOBS] = (param, value)
 
 
 def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
@@ -718,6 +734,7 @@ def group_params() -> list[Parameter]:
     jobs_option(
         "-j",
         "--jobs",
+        callback=defer_jobs_resolution,
         help="Maximum number of managers to run concurrently. Defaults to one "
         "less than the CPU count; set 1 to run sequentially. Applies to read-only "
         "queries (installed, outdated, search), maintenance commands (sync, "
@@ -875,6 +892,10 @@ def mpm(
             logging.disable(logging.NOTSET)
 
         ctx.call_on_close(remove_logging_override)
+
+    # Resolve --jobs once logging follows the output format.
+    jobs_param, jobs_value = ctx.meta.pop(_DEFERRED_JOBS)
+    cast("JobsOption", jobs_param).validate_jobs(ctx, jobs_param, jobs_value)
 
     # click-extra's default --progress/--no-progress option resolves the user's
     # intent (lowered by --accessible) into ctx.meta[PROGRESS],

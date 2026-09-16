@@ -5,8 +5,10 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [bar-plugin] Fix the menu crashing with a `TypeError` whenever a package's version pair was long enough to be elided.
 - [cpan] Stop reading `cpan`'s index-refresh progress lines as packages, which listed a `Fetching` upgrading from `with` to `HTTP::Tiny:`.
 - [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
+- [bar-plugin] Add screenshots of SwiftBar's *About* submenu and preferences pane to the plugin page.
 - [winget] Silence progress spinners by passing `--no-progress` on every invocation, which raises the winget floor to `1.29.280`.
 - [fwupd] Fix every query reaching `fwupd` aborting on a host with no updatable device, which is what a VM, a container and plenty of real machines report. fwupd answers that with an `Error` object replacing its whole payload, and `mpm installed`, `mpm outdated`, `mpm sbom` and the snapshot commands read it as a device list.
 - [aptitude] Add aptitude package manager, with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.
@@ -24,6 +26,8 @@
 - [mpm] Escalate through `doas` where `sudo` is Alpine's `doas-sudo-shim`, which rejects every option the credential probes send and so reported a cold cache.
 - [mpm] Name the running command in the progress spinner: a slow call now reads `cask.upgrade_all: brew upgrade --quiet --yes` instead of `cask upgrade_all`.
 - [mpm] Name the operation on each `✓`/`✘` trail line, so `✓ brew` now reads `✓ brew.outdated` and matches the spinner's subject.
+- [mpm] Name the operation and the package on each package trail line, `✓ brew.install: jq`, and close every trail line on its duration, as the spinner shows it.
+- [mpm] Label every line logged during an operation with it, `warning:brew.install:`, matching the spinner and the trail.
 - [mpm] Hold the progress spinner still during a call whose manager may prompt for a `sudo` password, so the prompt stays on screen instead of being erased by the animation.
 - [mpm] Start the hidden-password-prompt notice on a fresh line, so it no longer runs on from the `Password:` prompt it warns about.
 - [mpm] Run a manager that escalates internally after the concurrent batch, on its own, so its password prompt gets a terminal no other manager is writing to.

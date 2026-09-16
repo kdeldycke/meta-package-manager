@@ -333,8 +333,12 @@ class BarPluginRenderer(MPMPlugin):
         the tooltip restoring whatever the version cap elided."""
         rows: list[tuple[tuple[str, ...], str, str]] = []
         for package in manager["packages"]:
-            full_old = package["installed_version"] or "?"
-            full_new = package["latest_version"]
+            # Everything below this line is string work, so the versions are
+            # rendered here rather than carried down as the TokenizedString
+            # objects `mpm outdated` puts in the payload: those answer len()
+            # but cannot be sliced, which is what elision does to them.
+            full_old = str(package["installed_version"] or "?")
+            full_new = str(package["latest_version"])
             old, new = (
                 elide_versions(full_old, full_new, self.max_version_width)
                 if self.max_version_width

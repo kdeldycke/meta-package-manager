@@ -222,6 +222,10 @@ def _outdated_fixture(errors: list[str] | None = None) -> dict:
     prefix, red installed suffix, green latest suffix) are exercised. The
     second package carries no upgrade CLI, like a manager without a
     single-package upgrade command.
+
+    Versions are parsed rather than left as strings, which is what `mpm
+    outdated` puts in this payload: a renderer helper reaching for a string
+    method fails on the real type alone.
     """
     return {
         "fakemanager": {
@@ -231,15 +235,15 @@ def _outdated_fixture(errors: list[str] | None = None) -> dict:
                 {
                     "id": "pkg-one",
                     "name": "pkg-one",
-                    "installed_version": "8.2.1",
-                    "latest_version": "8.3.0",
+                    "installed_version": parse_version("8.2.1"),
+                    "latest_version": parse_version("8.3.0"),
                     "upgrade_cli": "shell=/bin/fake param1=upgrade param2=pkg-one",
                 },
                 {
                     "id": "another-long-package",
                     "name": "another-long-package",
-                    "installed_version": "2.0.0",
-                    "latest_version": "2.0.1",
+                    "installed_version": parse_version("2.0.0"),
+                    "latest_version": parse_version("2.0.1"),
                     "upgrade_cli": None,
                 },
             ],
@@ -441,6 +445,29 @@ def test_renderer_table_alignment_survives_ansi(monkeypatch):
     assert len(arrow_lines) == 4
     assert len({line.index("→") for line in arrow_lines}) == 1
     assert len({line.index(" | ") for line in arrow_lines}) == 1
+
+
+def test_renderer_elides_long_payload_versions(monkeypatch):
+    """A version pair past the cap is elided, as the payload's own type.
+
+    Regression test for the `TypeError` that took the whole menu down on any
+    package whose versions ran past {data}`MAX_VERSION_WIDTH`: `mpm outdated`
+    fills this payload with `TokenizedString` versions, which answer `len()`
+    but cannot be sliced, and elision slices.
+    """
+    _pin_plugin_env(monkeypatch, table_rendering=True)
+    payload = _outdated_fixture()
+    payload["fakemanager"]["packages"][0] |= {
+        "installed_version": parse_version("1:4.16.0-2+really2.41.3-3ubuntu2"),
+        "latest_version": parse_version("1:4.16.0-2+really2.41.3-3ubuntu2.2"),
+    }
+
+    rendered = strip_ansi(BarPluginRenderer().render(payload))
+
+    elided = [token for token in rendered.split() if VERSION_ELLIPSIS in token]
+    assert elided
+    for token in elided:
+        assert len(token) <= MAX_VERSION_WIDTH
 
 
 def test_renderer_sanitizes_error_lines(monkeypatch):

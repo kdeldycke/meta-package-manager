@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
+- [winget] Silence progress spinners by passing `--no-progress` on every invocation, which raises the winget floor to `1.29.280`.
 - [fwupd] Fix every query reaching `fwupd` aborting on a host with no updatable device, which is what a VM, a container and plenty of real machines report. fwupd answers that with an `Error` object replacing its whole payload, and `mpm installed`, `mpm outdated`, `mpm sbom` and the snapshot commands read it as a device list.
 - [aptitude] Add aptitude package manager, with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.
 - [pear] Add PEAR package manager, with inventory, outdated, install, remove, upgrade, channel sync and cache cleanup.

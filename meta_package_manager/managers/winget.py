@@ -91,9 +91,18 @@ class WinGet(PackageManager):
 
     platforms = WINDOWS
 
-    requirement = ">=1.28.190"
+    requirement = ">=1.29.280"
+    """[`1.29.280`](https://github.com/microsoft/winget-cli/releases/tag/v1.29.280)
+    is the first stable release shipping the `--no-progress` common argument that
+    `post_args` passes on every invocation
+    ([microsoft/winget-cli#6049](https://github.com/microsoft/winget-cli/pull/6049)).
+    """
 
-    post_args = ("--accept-source-agreements", "--disable-interactivity")
+    post_args = (
+        "--accept-source-agreements",
+        "--disable-interactivity",
+        "--no-progress",
+    )
     """
     `--accept-source-agreements`:
         Used to accept the source license agreement, and avoid the following prompt:
@@ -112,13 +121,9 @@ class WinGet(PackageManager):
     `--disable-interactivity`:
         Disable interactive prompts.
 
-    ```{todo}
-    Add `--no-progress` to `post_args` and raise `requirement` to `1.29.280`, the
-    first stable release shipping the option
-    ([microsoft/winget-cli#6049](https://github.com/microsoft/winget-cli/pull/6049)).
-    The new argv invalidates every documented `pwsh-session` fixture below, so this
-    waits on a capture session on a real Windows host.
-    ```
+    `--no-progress`:
+        Disable progress bar rendering, keeping spinner characters out of the
+        output `mpm` captures.
     """
 
     version_regexes = (r"v(?P<version>\S+)",)
@@ -126,7 +131,7 @@ class WinGet(PackageManager):
     ```{code-block} pwsh-session
 
     > winget --version
-    v1.28.220
+    v1.29.290
     ```
     """
 
@@ -301,7 +306,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget list --details --accept-source-agreements --disable-interactivity
+        > winget list --details --accept-source-agreements --disable-interactivity --no-progress
         (1/7) CCleaner [CCleaner]
         Version: 6.08
         Publisher: Piriform Software Ltd
@@ -340,7 +345,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget list --upgrade-available --details --accept-source-agreements --disable-interactivity
+        > winget list --upgrade-available --details --accept-source-agreements --disable-interactivity --no-progress
         (1/4) Git [Git.Git]
         Version: 2.37.3
         Publisher: The Git Development Community
@@ -376,7 +381,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget search --query vscode --accept-source-agreements --disable-interactivity
+        > winget search --query vscode --accept-source-agreements --disable-interactivity --no-progress
         Name                             Id                               Version      Match               Source
         ---------------------------------------------------------------------------------------------------------
         Microsoft Visual Studio Code     Microsoft.VisualStudioCode       1.89.1       Moniker: vscode     winget
@@ -394,7 +399,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget search --query vscode --exact --accept-source-agreements --disable-interactivity
+        > winget search --query vscode --exact --accept-source-agreements --disable-interactivity --no-progress
         Name                         Id                               Version      Match           Source
         -------------------------------------------------------------------------------------------------
         Microsoft Visual Studio Code Microsoft.VisualStudioCode       1.89.1       Moniker: vscode winget
@@ -411,7 +416,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget search --id VSCodium.VSCodium --accept-source-agreements --disable-interactivity
+        > winget search --id VSCodium.VSCodium --accept-source-agreements --disable-interactivity --no-progress
         Name              Id                         Version      Source
         ----------------------------------------------------------------
         VSCodium Insiders VSCodium.VSCodium.Insiders 1.88.0.24095 winget
@@ -420,7 +425,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget search --name Codium --accept-source-agreements --disable-interactivity
+        > winget search --name Codium --accept-source-agreements --disable-interactivity --no-progress
         Name              Id                         Version      Source
         ----------------------------------------------------------------
         Codium            Alex313031.Codium          1.86.2.24053 winget
@@ -430,7 +435,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget search --id VSCodium.VSCodium --exact --accept-source-agreements --disable-interactivity
+        > winget search --id VSCodium.VSCodium --exact --accept-source-agreements --disable-interactivity --no-progress
         Name     Id                Version      Source
         ----------------------------------------------
         VSCodium VSCodium.VSCodium 1.89.1.24130 winget
@@ -438,7 +443,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget search --name Codium --exact --accept-source-agreements --disable-interactivity
+        > winget search --name Codium --exact --accept-source-agreements --disable-interactivity --no-progress
         Name   Id                Version      Source
         --------------------------------------------
         Codium Alex313031.Codium 1.86.2.24053 winget
@@ -474,7 +479,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget install --id Microsoft.PowerToys --accept-package-agreements --accept-source-agreements --disable-interactivity
+        > winget install --id Microsoft.PowerToys --accept-package-agreements --accept-source-agreements --disable-interactivity --no-progress
         Found Power Toys [Microsoft.PowerToys] Version 0.15.2
         This application is licensed to you by its owner.
         Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
@@ -494,7 +499,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget update --all --accept-package-agreements --accept-source-agreements --disable-interactivity
+        > winget update --all --accept-package-agreements --accept-source-agreements --disable-interactivity --no-progress
         Name                            Id                            Version       Available     Source
         ------------------------------------------------------------------------------------------------
         Microsoft Edge                  Microsoft.Edge                109.0.1518.70 125.0.2535.51 winget
@@ -528,7 +533,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget install --id Git.Git --accept-package-agreements --accept-source-agreements --disable-interactivity
+        > winget install --id Git.Git --accept-package-agreements --accept-source-agreements --disable-interactivity --no-progress
         Found Git [Git.Git] Version 2.45.1
         This application is licensed to you by its owner.
         Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
@@ -560,7 +565,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget uninstall --id Microsoft.PowerToys --source winget --accept-source-agreements --disable-interactivity
+        > winget uninstall --id Microsoft.PowerToys --source winget --accept-source-agreements --disable-interactivity --no-progress
         Found PowerToys (Preview) [Microsoft.PowerToys]
         Starting package uninstall...
           ██████████████████████████████  100%
@@ -574,7 +579,7 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget source update --accept-source-agreements --disable-interactivity
+        > winget source update --accept-source-agreements --disable-interactivity --no-progress
         ```
         """
         self.run_cli("source", "update")

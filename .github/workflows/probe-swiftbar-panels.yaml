@@ -1,9 +1,13 @@
 ---
 name: 🔬 Probe SwiftBar panels
 "on":
+  workflow_dispatch:
   push:
     branches:
-      - swiftbar-panels
+      - main
+    paths:
+      - .github/workflows/probe-swiftbar-panels.yaml
+      - docs/bar_screenshots_update.py
 
 permissions: {}
 

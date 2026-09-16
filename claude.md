@@ -349,7 +349,7 @@ Live line and trail vocabulary, settled on 2026-09-15:
 - The spinner's command is lean, not runnable: `_lean_command()` drops `pre_args`/`post_args` because the subject already names that scope. A `$` opens the complete, copy-pasteable invocation and belongs to the `INFO` disclosure only; an italic command without `$` is what runs now. Never both on one line.
 - Color carries status only (green `✓`, red `✘`, yellow `warning:`, blue `debug:`, all spoken for), so a new element takes an attribute rather than a hue: italic for the command, faint for the timer. Every attribute is gated by `_styling_enabled()` and degrades to plain, and italic is allow-listed per `TERM` (`ITALIC_CAPABLE_TERMS`).
 - The failure glyph is click-extra's `KO_GLYPH` (`✘`, U+2718), never its U+2717 look-alike; `test_trail_glyph_matches_the_emitted_one` holds every mention in the tree to it.
-- A notice raised while a child may own the terminal line (the stall watchdog, armed by `_hidden_prompt_risk`) breaks the line before writing, so a `Password:` prompt with no trailing newline stays readable above it.
+- A call that may raise a hidden `sudo` prompt (`_hidden_prompt_risk`) never animates. It names itself once on a static line ended before the child starts (`· cask.upgrade: brew upgrade --quiet --yes tor-browser`), so the terminal is never blank and a prompt lands on a fresh line. A notice raised while that child may own the terminal line (the stall watchdog) breaks the line before writing, so a `Password:` prompt with no trailing newline stays readable above it.
 
 ### Exit codes
 

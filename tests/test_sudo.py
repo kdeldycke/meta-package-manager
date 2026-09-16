@@ -40,9 +40,11 @@ from unittest.mock import patch
 
 import click
 import pytest
+from click_extra.color import COLOR_ENVVARS
 from click_extra.spinner import Spinner
 from extra_platforms import UNIX, is_any_windows
 
+from meta_package_manager.execution import STILL_CALL_MARKER
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
@@ -1656,6 +1658,38 @@ def test_hidden_prompt_risk_holds_the_spinner_still(internal_sudo, expected_enab
     ):
         manager.run_cli("-c", "print('quick call')")
     assert built == [expected_enabled]
+
+
+@pytest.mark.parametrize(
+    ("internal_sudo", "progress", "announced"),
+    (
+        pytest.param(True, True, True, id="still-call-names-itself"),
+        pytest.param(False, True, False, id="animated-call-leaves-it-to-the-spinner"),
+        pytest.param(True, False, False, id="progress-off-stays-silent"),
+    ),
+)
+def test_still_call_prints_its_label_once(
+    monkeypatch, capsys, internal_sudo, progress, announced
+):
+    """A call whose spinner is held still names itself on a static line instead.
+
+    Without the line the terminal stays blank for the whole call. The line ends
+    before the child starts, so a prompt the tool raises lands on a fresh line.
+    """
+    assert not _SUDO_CACHE_WARM.is_set()
+    for envvar in COLOR_ENVVARS:
+        monkeypatch.delenv(envvar, raising=False)
+    monkeypatch.setenv("NO_COLOR", "1")
+    manager = FakeManager()
+    manager.internal_sudo = internal_sudo
+    manager._active_operation = "install"
+    manager.progress = progress
+    script = "print('quick call')"
+    with patch("sys.stderr.isatty", return_value=True):
+        manager.run_cli("-c", script)
+    label = manager._call_label((manager.cli_path, "-c", script))
+    line = f"{STILL_CALL_MARKER} {label}"
+    assert (f"{line}\n" in capsys.readouterr().err) is announced
 
 
 def test_stall_watchdog_tee_gates_debug_lines_at_default_verbosity(caplog):

@@ -65,7 +65,7 @@ from typing import ClassVar, Final
 
 from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
-from click_extra import style
+from click_extra import echo, style
 from click_extra.color import invocation_color, is_a_tty, resolve_color_env
 from click_extra.execution import (
     INDENT,
@@ -391,6 +391,15 @@ instant: prompt feedback makes `mpm` feel responsive from the start rather than
 stalled during the first second. Only the quickest calls (cached version probes,
 trivial metadata queries) finish within this delay and stay silent; anything
 slower (a `guix search`, a source build) shows the spinner right away.
+"""
+
+STILL_CALL_MARKER: Final = "·"
+"""Marker opening the static line a call held still prints in place of its spinner.
+
+A call that may raise a hidden `sudo` prompt cannot animate (see
+`_hidden_prompt_risk`), so it prints its spinner's label once instead, before
+the child starts. Deliberately not a spinner frame: a frozen `⠋` reads as a
+hung animation, where a neutral dot reads as a line that is not meant to move.
 """
 
 ITALIC_CAPABLE_TERMS: Final = ("xterm", "tmux")
@@ -1307,6 +1316,19 @@ class CLIExecutor:
             return DEFAULT_TIMEOUT
         return OPERATION_TIMEOUTS.get(self._active_operation, DEFAULT_TIMEOUT)
 
+    def _call_label(self, cmd_args: Iterable[str] = ()) -> str:
+        """Name a call on the terminal as `subject: command`.
+
+        Shared by the call's spinner and by the static line a call held still
+        prints in its place, so both read the same. See {func}`_spinner_label`
+        for the two halves and {func}`_lean_command` for what the rendering drops.
+
+        :param cmd_args: the resolved argv of the call. An empty one labels the
+            manager and its operation alone.
+        """
+        command = _lean_command(cmd_args, self.cli_path, self.pre_args, self.post_args)
+        return _spinner_label(self.subject, command)
+
     def _make_spinner(
         self,
         cmd_args: Iterable[str] = (),
@@ -1331,11 +1353,10 @@ class CLIExecutor:
             its own onto it (see
             `_hidden_prompt_risk`).
         """
-        command = _lean_command(cmd_args, self.cli_path, self.pre_args, self.post_args)
         # Append the elapsed time so a long call (a slow `guix search`) reads as
         # "⠙ guix.search: guix search jq (12.3s)" rather than looking stuck.
         return Spinner(
-            _spinner_label(self.subject, command),
+            self._call_label(cmd_args),
             delay=SPINNER_DELAY,
             enabled=None if self.progress and animate else False,
             timer=True,
@@ -1494,6 +1515,14 @@ class CLIExecutor:
                 self.internal_sudo, self._active_operation
             )
             spinner = self._make_spinner(clean_args, animate=not hidden_prompt)
+            if hidden_prompt and self.progress:
+                # A still spinner leaves the terminal blank for as long as the call
+                # runs, which for a cask upgrade is tens of seconds. Name the call
+                # once instead, on a line of its own: ended before the child starts,
+                # it leaves a prompt the tool raises at the start of a fresh line,
+                # and nothing redraws over it afterwards. The line stays on screen,
+                # since a prompt may sit below it by the time the call ends.
+                echo(f"{STILL_CALL_MARKER} {self._call_label(clean_args)}", err=True)
             watchdog = _StallWatchdog(subject) if hidden_prompt else None
             try:
                 # run_cli() owns the spawn: it registers the child in click-extra's

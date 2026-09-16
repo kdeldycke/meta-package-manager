@@ -1292,8 +1292,10 @@ def _hidden_prompt_risk(internal_sudo: bool, operation: str | None) -> bool:
     which the tool's own `sudo` prompts for a password nothing has primed.
 
     {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
-    reads it once per call and spends it twice, so the two responses cannot drift
-    apart: it arms `_StallWatchdog`, and it holds the call's spinner still.
+    reads it once per call and spends it on every response, so they cannot drift
+    apart: it arms `_StallWatchdog`, and it holds the call's spinner still,
+    naming the call once on a static line instead (see
+    {data}`~meta_package_manager.execution.STILL_CALL_MARKER`).
 
     The still spinner is what makes the prompt answerable. `sudo` writes its
     prompt to `/dev/tty` with no trailing newline, so the prompt sits on the live

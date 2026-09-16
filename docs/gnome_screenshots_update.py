@@ -65,6 +65,7 @@ import struct
 import subprocess
 import sys
 import time
+import zlib
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -97,20 +98,30 @@ MONITOR = (3840, 3200)
 
 Sized so that {data}`MONITOR_SCALE` divides it back to a `1920x1600` desktop:
 wide enough that no menu reaches an edge, and tall enough to hold the
-preferences window grown to {data}`PREFERENCES_HEIGHT`. The menu captures are
-cropped to the menu, so only the window one depends on this.
+preferences window grown to {data}`PREFERENCES_PROBE_HEIGHT`. The menu captures
+are cropped to the menu, so only the window one depends on this.
 """
 
-PREFERENCES_HEIGHT = 1180
-"""Logical height the preferences window is grown to before the shutter.
+PREFERENCES_PROBE_HEIGHT = 1500
+"""Logical height the preferences window is grown to before it is measured.
 
 `Adw.PreferencesWindow` opens at a size of its own choosing and scrolls its page,
 so a capture at that size documents the first two groups and hides the other
-four. Grown to the whole page instead, which is what the hand-made screenshot
-this replaces showed. Measured against the page rather than guessed: the first capture at `1320`
-left some 200px of empty window below the *About* row. A group added to
-`prefs.js` needs this raised, and the subject being the window, anything past
-its bottom edge is simply not in the picture.
+four. The window is grown past the whole page instead, then a strip down its
+middle is photographed: the blank band under the last card says how tall the
+page really is, and {func}`fit_prefs_window` shrinks the window to that before
+the shutter. A fixed height was tuned to the page first, and a row added to
+`prefs.js` later pushed the *About* group's last line under the window's edge
+([#2086](https://github.com/kdeldycke/meta-package-manager/pull/2086)), which
+is the failure a measured height cannot have. This only has to clear the page: a
+page taller than it fails the capture, naming the shortfall.
+"""
+
+PREFERENCES_FOOT = 32
+"""Logical pixels of page kept below the last card, once the window is fitted.
+
+What the fixed height left in the frame it was tuned against, and enough for
+the card's shadow to fade into the page instead of being cut by the edge.
 """
 
 PREFERENCES_WIDTH = 720
@@ -524,8 +535,8 @@ has to be observed to land before the shutter, and a fixed sleep only guesses.
 """
 
 
-def grow_prefs_window() -> str:
-    """JS asking the preferences window to grow to the size captured.
+def grow_prefs_window(height: int) -> str:
+    """JS asking the preferences window to take a height, at the width captured.
 
     The frame keeps the `x` it opened at, as the capture crops to the window
     and a centered one would look no different.
@@ -541,7 +552,7 @@ def grow_prefs_window() -> str:
     return true;
 })()""")
         .replace("NAME", repr(extension_name()))
-        .replace("HEIGHT", str(PREFERENCES_HEIGHT))
+        .replace("HEIGHT", str(height))
         .replace("WIDTH", str(PREFERENCES_WIDTH))
     )
 
@@ -560,8 +571,127 @@ def prefs_frame() -> str:
     if (!match)
         return null;
     const frame = match.get_frame_rect();
-    return {width: frame.width, height: frame.height};
+    return {x: frame.x, y: frame.y, width: frame.width, height: frame.height};
 })()""").replace("NAME", repr(extension_name()))
+
+
+def grow_prefs_to(height: int) -> dict[str, int]:
+    """Resize the preferences window to `height`, and return its frame once there.
+
+    Asked on every turn of the poll rather than once: a request sent to a
+    window still being mapped is simply dropped, and the client answers
+    whenever GTK gets to it. The observed height rides in the failure, so a
+    window that will not move says how far it got.
+    """
+    grow = grow_prefs_window(height)
+    frame = prefs_frame()
+    seen: object = None
+    deadline = time.monotonic() + REPORT_TIMEOUT
+    while time.monotonic() < deadline:
+        shell_eval(grow)
+        seen = shell_eval(frame)
+        if isinstance(seen, dict) and abs(int(seen["height"]) - height) <= 1:
+            return {key: int(seen[key]) for key in ("x", "y", "width", "height")}
+        time.sleep(0.5)
+    msg = f"The preferences window stopped at {seen!r}, short of {height}px."
+    raise RuntimeError(msg)
+
+
+def png_rows(target: Path) -> list[bytes]:
+    """Decode a small PNG into its rows of pixel bytes.
+
+    Enough of a decoder for the strip {func}`fit_prefs_window` photographs:
+    8-bit RGB or RGBA, not interlaced, a pixel or two wide. Every filter type is
+    unwound, any of the five being free to open any row, and the loop is per
+    byte, which a strip this narrow keeps to a few thousand iterations.
+    """
+    data = target.read_bytes()
+    width, height = png_size(target)
+    depth, color, interlace = data[24], data[25], data[28]
+    if depth != 8 or color not in (2, 6) or interlace:
+        msg = f"{target} is not an 8-bit RGB or RGBA non-interlaced PNG"
+        raise ValueError(msg)
+    channels = 4 if color == 6 else 3
+    stride = width * channels
+    compressed = b""
+    position = 8
+    while position < len(data):
+        length, kind = struct.unpack(">I4s", data[position : position + 8])
+        if kind == b"IDAT":
+            compressed += data[position + 8 : position + 8 + length]
+        position += 12 + length
+    raw = zlib.decompress(compressed)
+    rows: list[bytes] = []
+    above = bytearray(stride)
+    for index in range(height):
+        start = index * (stride + 1)
+        kind_byte = raw[start]
+        line = bytearray(raw[start + 1 : start + 1 + stride])
+        for offset in range(stride):
+            left = line[offset - channels] if offset >= channels else 0
+            up = above[offset]
+            corner = above[offset - channels] if offset >= channels else 0
+            if kind_byte == 1:
+                line[offset] = (line[offset] + left) & 0xFF
+            elif kind_byte == 2:
+                line[offset] = (line[offset] + up) & 0xFF
+            elif kind_byte == 3:
+                line[offset] = (line[offset] + (left + up) // 2) & 0xFF
+            elif kind_byte == 4:
+                estimate = left + up - corner
+                distances = (
+                    abs(estimate - left),
+                    abs(estimate - up),
+                    abs(estimate - corner),
+                )
+                nearest = (left, up, corner)[distances.index(min(distances))]
+                line[offset] = (line[offset] + nearest) & 0xFF
+        rows.append(bytes(line))
+        above = line
+    return rows
+
+
+def measure_page_foot(strip: Path) -> int:
+    """Device rows of bare page under the last card, read off a strip of window.
+
+    The page background is sampled a few rows above the window's bottom edge,
+    clear of the border the edge itself draws, and followed upwards until the
+    last card's shadow breaks it. A page that overflows the window has a card
+    there instead of the page, and the band comes back too short to fit.
+    """
+    rows = png_rows(strip)
+    index = len(rows) - 1 - 4 * MONITOR_SCALE
+    background = rows[index]
+    while index > 0 and rows[index] == background:
+        index -= 1
+    return len(rows) - 1 - index
+
+
+def fit_prefs_window(scratch: Path, frame: dict[str, int]) -> int:
+    """Height the window needs for its page plus {data}`PREFERENCES_FOOT` below it.
+
+    Measured on the window as grown to {data}`PREFERENCES_PROBE_HEIGHT`: a
+    one-pixel-wide strip down its middle is photographed, and the blank band
+    under the last card is what the probe height exceeds the page by.
+    """
+    strip = scratch / "preferences-strip.png"
+    screenshot_area(
+        frame["x"] + frame["width"] // 2,
+        frame["y"],
+        1,
+        frame["height"],
+        strip,
+    )
+    foot = measure_page_foot(strip)
+    wanted = PREFERENCES_FOOT * MONITOR_SCALE
+    if foot < wanted:
+        msg = (
+            f"The preferences page overflows the {frame['height']}px window: "
+            f"{foot} device rows of bare page at its foot, {wanted} wanted. "
+            "Raise PREFERENCES_PROBE_HEIGHT."
+        )
+        raise RuntimeError(msg)
+    return frame["height"] - (foot - wanted) // MONITOR_SCALE
 
 
 def prefs_window_probe() -> str:
@@ -819,27 +949,7 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
             REPORT_TIMEOUT,
             "the preferences window to appear",
         )
-        # Asked on every turn of the poll rather than once: a request sent to a
-        # window still being mapped is simply dropped, and the client answers
-        # whenever GTK gets to it. The observed height rides in the failure, so
-        # a window that will not grow says how far it got.
-        grow = grow_prefs_window()
-        frame = prefs_frame()
-        seen: object = None
-        deadline = time.monotonic() + REPORT_TIMEOUT
-        while time.monotonic() < deadline:
-            shell_eval(grow)
-            seen = shell_eval(frame)
-            if isinstance(seen, dict) and seen["height"] >= PREFERENCES_HEIGHT:
-                break
-            time.sleep(0.5)
-        else:
-            msg = (
-                f"The preferences window stopped at {seen!r}, short of "
-                f"{PREFERENCES_HEIGHT}px."
-            )
-            raise RuntimeError(msg)
-        window = seen
+        window = grow_prefs_to(PREFERENCES_PROBE_HEIGHT)
 
         # Mapped and activated is not yet focused: a window found the instant it
         # appears takes a moment to receive focus, and the shutter needs it.
@@ -850,6 +960,11 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
             "the preferences window to take focus",
         )
         # Focused, but its first frame still has to land.
+        time.sleep(1)
+        # Taller than the page by a margin, then fitted to it: the page's own
+        # height is what the frame should show, and only a capture can tell it.
+        window = grow_prefs_to(fit_prefs_window(scratch, window))
+        # Shrunk, and the page has to lay itself out again in the new height.
         time.sleep(1)
         screenshot_window(shot.path)
 

@@ -419,12 +419,15 @@ class MpmIndicator extends PanelMenu.Button {
                     /* A manager with nothing to report still earns its row,
                      * which is how the menu says it ran, but not the expander
                      * arrow of a submenu: that arrow promises packages behind
-                     * it and opens on an empty panel. Rendered as the header
-                     * the flat layout gives it instead. */
+                     * it and opens on an empty panel. Carries no weight of its
+                     * own either, since it sits among the manager rows rather
+                     * than above a list like the flat layout's header; being
+                     * unreactive dims it, which is signal enough that there is
+                     * nothing here to open. */
                     this._reportSection.addMenuItem(
                         new PopupMenu.PopupMenuItem(title, {
                             reactive: false,
-                            style_class: 'mpm-manager-header',
+                            can_focus: false,
                         }));
                     return;
                 }

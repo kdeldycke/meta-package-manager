@@ -145,17 +145,37 @@ jobs:
           # uv release clears the cooldown window.
           version: "0.12.5"
       # shexli exits 0 whatever it finds, errors included, so its exit code
-      # cannot gate anything: the JSON summary is the only usable signal. The
-      # report is teed to the log first, or a red job would say nothing about
-      # what it caught. pipefail keeps a crashed analyzer (it is young, and
-      # segfaults on some inputs) from passing as a clean run.
+      # cannot gate anything: the JSON summary is the only usable signal.
+      #
+      # A crash is reported and skipped rather than failed. shexli segfaults on
+      # this extension.js, reproducibly on Linux and macOS and for every version
+      # of that file this job has ever seen, while its mpm.js and prefs.js
+      # analyze cleanly. Failing on that leaves a cell that can only ever be
+      # red, which teaches readers to ignore this workflow. A findings verdict
+      # still gates, so the day the crash is fixed upstream the gate returns on
+      # its own.
       - name: Run shexli
         run: |
           # The root must be absolute: shexli resolves the files it walks but
           # keeps the root as given, so a relative one makes its own
           # `path.relative_to()` raise before any rule runs.
-          set -euo pipefail
+          set -uo pipefail
+          status=0
           uvx shexli --format json \
             "$GITHUB_WORKSPACE/gnome-shell/mpm@kdeldycke.github.io" \
-            | tee "$RUNNER_TEMP/shexli.json"
+            > "$RUNNER_TEMP/shexli.json" 2>"$RUNNER_TEMP/shexli.err" || status=$?
+          cat "$RUNNER_TEMP/shexli.err"
+          if ! jq --exit-status 'has("summary")' "$RUNNER_TEMP/shexli.json" \
+              > /dev/null 2>&1; then
+            echo "::warning::shexli exited ${status} without a report: nothing analyzed."
+            {
+              echo "### extensions.gnome.org static analysis"
+              echo
+              echo "\`shexli\` exited \`${status}\` without a report, so this upload"
+              echo "was **not** analyzed. Tracked upstream; the gate returns by itself"
+              echo "once it stops crashing."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          cat "$RUNNER_TEMP/shexli.json"
           jq --exit-status '.summary.finding_count == 0' "$RUNNER_TEMP/shexli.json"

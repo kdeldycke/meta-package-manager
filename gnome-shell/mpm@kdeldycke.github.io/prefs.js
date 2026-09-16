@@ -157,13 +157,14 @@ export default class MpmPreferences extends ExtensionPreferences {
         const result = await Mpm.probeMpm(mpm, cancellable);
         const release = result.release ?? result.version?.join('.');
         let verdict;
-        if (!result.runnable)
+        if (!result.runnable) {
             verdict = _('Failed to run: %s').format(oneLine(result.error));
-        else if (!result.upToDate)
+        } else if (!result.upToDate) {
             verdict = _('%s, older than the required %s').format(
                 release, Mpm.MPM_MIN_VERSION.join('.'));
-        else
+        } else {
             verdict = release;
+        }
         return `${verdict}\n${command}`;
     }
 

@@ -10,7 +10,7 @@
 # XXX Quotes around default values are required by SwiftBar, and optional in Xbar, which
 # strips them. Unquoted, the variable is silently ignored by SwiftBar and never reaches
 # its settings UI.
-# <xbar.var>boolean(VAR_GROUP_BY_MANAGER="false"): Group each manager's packages into a section of its own.</xbar.var>
+# <xbar.var>boolean(VAR_GROUP_BY_MANAGER="true"): Group each manager's packages into a section of its own.</xbar.var>
 # <xbar.var>boolean(VAR_ALIGN_COLUMNS="true"): Centers versions around the arrow and aligns names in a monospaced font.</xbar.var>
 # <xbar.var>number(VAR_MAX_VERSION_WIDTH="18"): Widest a version renders in a menu line, in characters. Longer ones are shortened with an ellipsis.</xbar.var>
 # <xbar.var>string(VAR_MPM_OPTIONS=""): Extra options for every mpm call the plugin makes, placed before the subcommand.</xbar.var>

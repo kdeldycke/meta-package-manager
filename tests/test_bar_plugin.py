@@ -446,10 +446,11 @@ def test_renderer_caps_version_cells(monkeypatch, swiftbar):
     lines = [line for line in strip_ansi(output).splitlines() if "ansi=true" in line]
     assert lines
     # Widest package name of the fixture, its spacer, two capped version cells
-    # and the arrow between them.
+    # and the arrow between them. The `--` nesting a row in its manager's
+    # section is host syntax, not rendered text.
     widest = len("another-long-package") + 2 + MAX_VERSION_WIDTH + 3 + MAX_VERSION_WIDTH
     for line in lines:
-        label = line.split(" | ")[0]
+        label = line.split(" | ")[0].removeprefix("--")
         assert full_old not in label
         assert len(label) <= widest
     capped = [line for line in lines if VERSION_ELLIPSIS in line.split(" | ")[0]]

@@ -22,7 +22,7 @@ The plugin is configurable with these environment variables:
 
 | Variable name              | Description                                                                      | Type    | Defaults             | SwiftBar support |                    Xbar support                    |
 | -------------------------- | -------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :------------------------------------------------: |
-| `VAR_GROUP_BY_MANAGER`     | Group each manager's packages into a section of its own.                         | Boolean | `False`              |        ✅        |                         ✅                         |
+| `VAR_GROUP_BY_MANAGER`     | Group each manager's packages into a section of its own.                         | Boolean | `True`               |        ✅        |                         ✅                         |
 | `VAR_ALIGN_COLUMNS`      | Centers versions around the arrow and aligns names in a monospaced font.         | Boolean | `True`               |        ✅        |                         ✅                         |
 | `VAR_MAX_VERSION_WIDTH`    | Widest a version renders in a menu line, in characters.                          | Number  | `18`                 |        ✅        |                         ✅                         |
 | `VAR_MPM_OPTIONS`        | Extra options for every `mpm` call, before the subcommand.                       | String  | Empty                |        ✅        |                         ✅                         |
@@ -115,12 +115,12 @@ The menu chrome is the host's, and only the version diff is the plugin's: its co
 :link: /_images/swiftbar-flat-standard-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span></br>(default)
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
 :img-top: assets/swiftbar-flat-table-rendering-light.png
 :link: /_images/swiftbar-flat-table-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span><br/>(default)
 :img-top: assets/swiftbar-grouped-table-rendering-light.png
 :link: /_images/swiftbar-grouped-table-rendering-light.png
 ```
@@ -141,12 +141,12 @@ The menu chrome is the host's, and only the version diff is the plugin's: its co
 :link: /_images/swiftbar-flat-standard-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span></br>(default)
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
 :img-top: assets/swiftbar-flat-table-rendering-dark.png
 :link: /_images/swiftbar-flat-table-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span><br/>(default)
 :img-top: assets/swiftbar-grouped-table-rendering-dark.png
 :link: /_images/swiftbar-grouped-table-rendering-dark.png
 ```
@@ -171,12 +171,12 @@ The menu chrome is the host's, and only the version diff is the plugin's: its co
 :link: /_images/xbar-flat-standard-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span></br>(default)
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
 :img-top: assets/xbar-flat-table-rendering-light.png
 :link: /_images/xbar-flat-table-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span><br/>(default)
 :img-top: assets/xbar-grouped-table-rendering-light.png
 :link: /_images/xbar-grouped-table-rendering-light.png
 ```
@@ -197,12 +197,12 @@ The menu chrome is the host's, and only the version diff is the plugin's: its co
 :link: /_images/xbar-flat-standard-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span></br>(default)
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
 :img-top: assets/xbar-flat-table-rendering-dark.png
 :link: /_images/xbar-flat-table-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span><br/>(default)
 :img-top: assets/xbar-grouped-table-rendering-dark.png
 :link: /_images/xbar-grouped-table-rendering-dark.png
 ```

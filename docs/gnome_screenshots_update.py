@@ -223,7 +223,7 @@ class Shot(NamedTuple):
 
     stem: str
     dark: bool
-    group_by_manager: bool = False
+    group_by_manager: bool = True
     align_columns: bool = True
     preferences: bool = False
     """Photograph the preferences window instead of the indicator menu."""

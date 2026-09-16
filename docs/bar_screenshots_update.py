@@ -535,7 +535,7 @@ SHOTS = (
         for dark in (False, True)
     ),
     *(
-        Shot(SWIFTBAR, False, True, dark, subject)
+        Shot(SWIFTBAR, True, True, dark, subject)
         for subject in ("about", "preferences")
         for dark in (False, True)
     ),
@@ -1814,7 +1814,8 @@ def capture_menu(shot: Shot, plugins: Path) -> None:
     """Open the menu, unfold whatever the shot asks for, and photograph it."""
     bounds = open_menu(shot, plugins)
 
-    if shot.group_by_manager:
+    # The About shot keeps every section folded, as the menu opens.
+    if shot.group_by_manager and shot.subject == "menu":
         expand_first_section(shot.host, bounds)
     if shot.subject == "about":
         unfold_about(shot.host)

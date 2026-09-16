@@ -7,6 +7,7 @@
 
 - **Breaking:** [bar-plugin] Rename the `VAR_TABLE_RENDERING` variable to `VAR_ALIGN_COLUMNS`, matching the GNOME Shell extension's own setting.
 - **Breaking:** [bar-plugin] Replace the `VAR_HIDE_WHEN_UP_TO_DATE` variable with `VAR_ALWAYS_VISIBLE`, which reads the other way round: set it to `false` to hide the icon.
+- [bar-plugin,gnome-shell] Group packages by manager by default. Set `VAR_GROUP_BY_MANAGER` in the plugin or `group-by-manager` in the extension to `false` to get the flat list back.
 - [bar-plugin] Fix the menu crashing with a `TypeError` whenever a package's version pair was long enough to be elided.
 - [cpan] Stop reading `cpan`'s index-refresh progress lines as packages, which listed a `Fetching` upgrading from `with` to `HTTP::Tiny:`.
 - [cpan] List the core modules Debian and Ubuntu reach through symlinked `@INC` directories, which `cpan -l` skips. Upgrading one no longer ends in `is not recognized by any of the selected manager`.

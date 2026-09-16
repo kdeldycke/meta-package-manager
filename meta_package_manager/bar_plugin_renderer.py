@@ -182,7 +182,7 @@ class BarPluginRenderer(MPMPlugin):
 
         Value is sourced from the `VAR_GROUP_BY_MANAGER` environment variable.
         """
-        return self.getenv_bool("VAR_GROUP_BY_MANAGER", False)
+        return self.getenv_bool("VAR_GROUP_BY_MANAGER", True)
 
     @cached_property
     def fold_sections(self) -> bool:

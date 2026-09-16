@@ -110,7 +110,7 @@ Settings live in the extension preferences window, also reachable from the indic
 
 | Setting                | Description                                                     | Type    | Default |
 | ---------------------- | --------------------------------------------------------------- | ------- | ------- |
-| `group-by-manager`     | Group each manager's packages into a section of its own.        | Boolean | `false` |
+| `group-by-manager`     | Group each manager's packages into a section of its own.        | Boolean | `true`  |
 | `align-columns`        | Center each version pair around its arrow, monospaced.          | Boolean | `true`  |
 | `check-interval`       | Minutes between two package checks.                             | Integer | `420`   |
 | `boot-wait`            | Seconds before the first check after login.                     | Integer | `30`    |
@@ -182,7 +182,7 @@ The report scrolls past a set height instead of growing the menu to the screen, 
 ````
 
 ````{grid-item}
-<span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>group-by-manager = false</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span><br/>(default)
+<span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>group-by-manager = false</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span>
 
 ```{image} assets/gnome-shell-flat-table-rendering-light.png
 :alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red, each version pair centered on its arrow in a monospaced font
@@ -192,7 +192,7 @@ The report scrolls past a set height instead of growing the menu to the screen, 
 ````
 
 ````{grid-item}
-<span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>group-by-manager = true</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span>
+<span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>group-by-manager = true</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span><br/>(default)
 
 ```{image} assets/gnome-shell-grouped-table-rendering-light.png
 :alt: The extension's menu with one section per package manager, the first one unfolded, the failing one carrying a warning icon, each version pair centered on its arrow in a monospaced font
@@ -228,7 +228,7 @@ The report scrolls past a set height instead of growing the menu to the screen, 
 ````
 
 ````{grid-item}
-<span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>group-by-manager = false</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span><br/>(default)
+<span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>group-by-manager = false</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span>
 
 ```{image} assets/gnome-shell-flat-table-rendering-dark.png
 :alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red, each version pair centered on its arrow in a monospaced font
@@ -238,7 +238,7 @@ The report scrolls past a set height instead of growing the menu to the screen, 
 ````
 
 ````{grid-item}
-<span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>group-by-manager = true</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span>
+<span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>group-by-manager = true</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span><br/>(default)
 
 ```{image} assets/gnome-shell-grouped-table-rendering-dark.png
 :alt: The extension's menu with one section per package manager, the first one unfolded, the failing one carrying a warning icon, each version pair centered on its arrow in a monospaced font

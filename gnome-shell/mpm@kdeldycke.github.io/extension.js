@@ -106,6 +106,9 @@ class MpmIndicator extends PanelMenu.Button {
         this._settings = extension.getSettings();
         this._checking = false;
         this._cancellable = null;
+        /* Cancelled on destroy, so an upgrade this indicator awaited
+         * cannot call back into it once it is gone. */
+        this._actionCancellable = new Gio.Cancellable();
         this._checkTimeoutId = null;
         this._oneShotTimeoutId = null;
         this._notifSource = null;
@@ -697,7 +700,24 @@ class MpmIndicator extends PanelMenu.Button {
                 }
                 Mpm.spawnDetached(Mpm.terminalArgv(terminal, argv));
             } else {
-                Mpm.spawnDetached(argv);
+                /* Nothing detaches here, so this process really is the
+                 * upgrade: wait for it and re-check as it exits, rather than
+                 * sitting out post-upgrade-recheck. Every terminal mpm knows
+                 * is client-server, which is why the branch above cannot. */
+                const proc = Mpm.spawnDetached(argv);
+                const cancellable = this._actionCancellable;
+                proc.wait_async(cancellable, (source, result) => {
+                    if (cancellable.is_cancelled())
+                        return;
+                    try {
+                        source.wait_finish(result);
+                    } catch (error) {
+                        logError(error, 'mpm: awaiting an upgrade');
+                    }
+                    /* A failed run is re-checked too: it may have upgraded
+                     * part of what it was given. */
+                    this._armOneShot(1);
+                });
             }
         } catch (error) {
             Main.notifyError(_('Could not launch the upgrade'), String(error));
@@ -721,6 +741,10 @@ class MpmIndicator extends PanelMenu.Button {
         if (this._cancellable !== null) {
             this._cancellable.cancel();
             this._cancellable = null;
+        }
+        if (this._actionCancellable !== null) {
+            this._actionCancellable.cancel();
+            this._actionCancellable = null;
         }
         if (this._checkTimeoutId) {
             GLib.source_remove(this._checkTimeoutId);

@@ -262,6 +262,7 @@
 - [gnome-shell] Mark a running check with a refresh icon in the panel and a greyed *Checking…* row, in place of the three-dot loading icon.
 - [gnome-shell] Report the resolved `mpm` release and command in the preferences window, beside the extension's own version.
 - [gnome-shell] Add an `mpm-options` setting, extra options spliced into every `mpm` call the extension makes, before the subcommand.
+- [gnome-shell] Refresh the package list as soon as a background upgrade exits, instead of waiting out the re-check delay.
 - [bar-plugin] Add an *About* row to the menu, naming the plugin's own version, the `mpm` release it resolved and the command that answered.
 - [bar-plugin] Add `VAR_MPM_OPTIONS`, extra options spliced into every `mpm` call the plugin makes, before the subcommand.
 - [bar-plugin,gnome-shell] Mark a package check as failed on the exit code of `mpm` only, so a `--verbosity` raised in the options no longer replaces the package list with log lines.

@@ -210,6 +210,7 @@ class Shot(NamedTuple):
     stem: str
     dark: bool
     group_by_manager: bool = False
+    align_columns: bool = True
     preferences: bool = False
     """Photograph the preferences window instead of the indicator menu."""
 
@@ -220,15 +221,32 @@ class Shot(NamedTuple):
 
 
 SHOTS = (
-    Shot("gnome-shell-flat-light", dark=False),
-    Shot("gnome-shell-flat-dark", dark=True),
-    Shot("gnome-shell-grouped-light", dark=False, group_by_manager=True),
-    Shot("gnome-shell-grouped-dark", dark=True, group_by_manager=True),
+    *(
+        Shot(
+            "-".join(
+                (
+                    "gnome-shell",
+                    "grouped" if grouped else "flat",
+                    "table" if aligned else "standard",
+                    "rendering",
+                    "dark" if dark else "light",
+                )
+            ),
+            dark=dark,
+            group_by_manager=grouped,
+            align_columns=aligned,
+        )
+        for grouped in (False, True)
+        for aligned in (False, True)
+        for dark in (False, True)
+    ),
     Shot("gnome-shell-preferences-light", dark=False, preferences=True),
     Shot("gnome-shell-preferences-dark", dark=True, preferences=True),
 )
-"""Everything the extension's page illustrates: the one layout switch the menu
-exposes and the preferences window, each in both shell appearances.
+"""Everything the extension's page illustrates: the two layout switches the menu
+exposes, in every combination, and the preferences window, each in both shell
+appearances. The stems spell the layout the way the SwiftBar and Xbar captures
+do, so the two pages line up frame for frame.
 
 Each shot gets a session of its own. The layout and the appearance are both
 applied live by a running shell, so one session could serve several, but a fresh
@@ -342,6 +360,20 @@ OPEN_MENU = js("""(() => {
     INDICATOR.menu.open(false);
     return true;
 })()""")
+
+EXPAND_FIRST_SECTION = js("""(() => {
+    const first = INDICATOR._reportSection._getMenuItems().find(item => item.menu);
+    if (!first)
+        return false;
+    first.menu.open(false);
+    return true;
+})()""")
+"""Unfold the first manager section of a grouped menu.
+
+Without it the two grouped captures of an appearance come out byte-identical:
+everything `align-columns` decides sits inside a section, and the top level
+shows nothing but manager rows. Opened without animation, like the menu itself.
+"""
 
 MENU_GEOMETRY = js("""(() => {
     const menu = INDICATOR.menu;
@@ -988,6 +1020,12 @@ def capture_menu(shot: Shot, scratch: Path, schema_dir: Path) -> None:
         "true" if shot.group_by_manager else "false",
         schema_dir=schema_dir,
     )
+    gsettings(
+        SCHEMA_ID,
+        "align-columns",
+        "true" if shot.align_columns else "false",
+        schema_dir=schema_dir,
+    )
 
     with shell_session(scratch / f"{shot.stem}.log"):
         apply_monitor_scale()
@@ -1006,6 +1044,11 @@ def capture_menu(shot: Shot, scratch: Path, schema_dir: Path) -> None:
         shell_eval(OPEN_MENU)
         # The menu opens unanimated, but still needs a frame to lay out.
         time.sleep(1)
+        if shot.group_by_manager:
+            if not shell_eval(EXPAND_FIRST_SECTION):
+                msg = f"{shot.stem}: the grouped menu holds no section to unfold"
+                raise RuntimeError(msg)
+            time.sleep(1)
 
         geometry = shell_eval(MENU_GEOMETRY)
         if not isinstance(geometry, dict):

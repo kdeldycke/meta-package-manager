@@ -159,57 +159,105 @@ A missing `mpm` puts a bootstrap pair in place of the package list: an *Install 
 
 ## Screenshots
 
-Both layouts, photographed from a real GNOME session driven by `docs/gnome_screenshots_update.py` and refreshed by [`docs-screenshots.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs-screenshots.yaml) whenever the extension changes.
+Every layout, photographed from a real GNOME session driven by `docs/gnome_screenshots_update.py` and refreshed by [`docs-screenshots.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs-screenshots.yaml) whenever the extension changes.
 Each one is captured in both shell appearances, so the two are there to be compared rather than picked for you: the shell restyles its menu with the desktop's light or dark preference, and the version diff has to keep its colors legible on both. The tabs are synchronized, so switching one switches the other.
 
-The default flat layout lists every manager's packages inline, under a header counting them.
-The `flatpak` section also carries a manager error, which the menu renders as a monospace red line under the packages that did resolve:
+The menu has two layout switches, both set in the preferences window above. `group-by-manager` lists every manager's packages inline under a header counting them, or gives each manager a section that expands on a click: the captures unfold the first one. `align-columns` sets each version pair in a monospaced font, centered on its arrow; off, the pair sits flush right in the menu's own font.
+The `flatpak` section also carries a manager error, which the flat layout renders as a monospace red line under the packages that did resolve, and the grouped one flags with the `dialog-warning-symbolic` icon documented above.
 
-``````{tab-set}
-`````{tab-item} Light
+```````{tab-set}
+``````{tab-item} Light
 :sync: light
 
-```{image} assets/gnome-shell-flat-light.png
-:alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
+`````{grid} 1 2 2 2
+````{grid-item}
+<span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>group-by-manager = false</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>align-columns = false</code></span>
+
+```{image} assets/gnome-shell-flat-standard-rendering-light.png
+:alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red, each version pair flush right in the menu font
 :align: center
 :scale: 50
 ```
-`````
+````
 
-`````{tab-item} Dark
-:sync: dark
+````{grid-item}
+<span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>group-by-manager = false</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span><br/>(default)
 
-```{image} assets/gnome-shell-flat-dark.png
-:alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red
+```{image} assets/gnome-shell-flat-table-rendering-light.png
+:alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red, each version pair centered on its arrow in a monospaced font
 :align: center
 :scale: 50
 ```
+````
+
+````{grid-item}
+<span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>group-by-manager = true</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span>
+
+```{image} assets/gnome-shell-grouped-table-rendering-light.png
+:alt: The extension's menu with one section per package manager, the first one unfolded, the failing one carrying a warning icon, each version pair centered on its arrow in a monospaced font
+:align: center
+:scale: 50
+```
+````
+
+````{grid-item}
+<span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>group-by-manager = true</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>align-columns = false</code></span>
+
+```{image} assets/gnome-shell-grouped-standard-rendering-light.png
+:alt: The extension's menu with one section per package manager, the first one unfolded, the failing one carrying a warning icon, each version pair flush right in the menu font
+:align: center
+:scale: 50
+```
+````
 `````
 ``````
 
-With `group-by-manager` enabled, each manager gets a section that expands on a click, and the one that reported an error takes the `dialog-warning-symbolic` icon documented above:
-
-``````{tab-set}
-`````{tab-item} Light
-:sync: light
-
-```{image} assets/gnome-shell-grouped-light.png
-:alt: The extension's menu with one section per package manager, the failing one carrying a warning icon
-:align: center
-:scale: 50
-```
-`````
-
-`````{tab-item} Dark
+``````{tab-item} Dark
 :sync: dark
 
-```{image} assets/gnome-shell-grouped-dark.png
-:alt: The extension's menu with one section per package manager, the failing one carrying a warning icon
+`````{grid} 1 2 2 2
+````{grid-item}
+<span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>group-by-manager = false</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>align-columns = false</code></span>
+
+```{image} assets/gnome-shell-flat-standard-rendering-dark.png
+:alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red, each version pair flush right in the menu font
 :align: center
 :scale: 50
 ```
+````
+
+````{grid-item}
+<span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>group-by-manager = false</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span><br/>(default)
+
+```{image} assets/gnome-shell-flat-table-rendering-dark.png
+:alt: The extension's menu listing outdated packages inline, one header per package manager, with one manager's error shown in red, each version pair centered on its arrow in a monospaced font
+:align: center
+:scale: 50
+```
+````
+
+````{grid-item}
+<span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>group-by-manager = true</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>align-columns = true</code></span>
+
+```{image} assets/gnome-shell-grouped-table-rendering-dark.png
+:alt: The extension's menu with one section per package manager, the first one unfolded, the failing one carrying a warning icon, each version pair centered on its arrow in a monospaced font
+:align: center
+:scale: 50
+```
+````
+
+````{grid-item}
+<span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>group-by-manager = true</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>align-columns = false</code></span>
+
+```{image} assets/gnome-shell-grouped-standard-rendering-dark.png
+:alt: The extension's menu with one section per package manager, the first one unfolded, the failing one carrying a warning icon, each version pair flush right in the menu font
+:align: center
+:scale: 50
+```
+````
 `````
 ``````
+```````
 
 ## Development workflow
 

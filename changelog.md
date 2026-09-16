@@ -11,6 +11,7 @@
 - [cpan] Stop reading `cpan`'s index-refresh progress lines as packages, which listed a `Fetching` upgrading from `with` to `HTTP::Tiny:`.
 - [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
 - [bar-plugin] Add screenshots of SwiftBar's *About* submenu and preferences pane to the plugin page.
+- [gnome-shell] Photograph every combination of the menu's two layout switches for the extension page, the grouped ones with their first section unfolded.
 - [winget] Silence progress spinners by passing `--no-progress` on every invocation, which raises the winget floor to `1.29.280`.
 - [fwupd] Fix every query reaching `fwupd` aborting on a host with no updatable device, which is what a VM, a container and plenty of real machines report. fwupd answers that with an `Error` object replacing its whole payload, and `mpm installed`, `mpm outdated`, `mpm sbom` and the snapshot commands read it as a device list.
 - [aptitude] Add aptitude package manager, with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.

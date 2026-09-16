@@ -302,13 +302,13 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
                 refilter = True
                 logging.info(
                     "Does not implement exact search operation.",
-                    extra={"label": self.id},
+                    extra={"label": self.subject},
                 )
             if extended and not extended_support:
                 refilter = True
                 logging.info(
                     "Does not implement extended search operation.",
-                    extra={"label": self.id},
+                    extra={"label": self.subject},
                 )
             if refilter:
                 logging.debug("Refiltering of raw results has been activated.")

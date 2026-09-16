@@ -49,7 +49,7 @@ def evaluate_signals(mid, stdout, stderr):
         # WARNING/INFO for explicit ones (`mpm --<mid> restore`).
         f":{mid}: Does not implement {Operations.install}." in stderr,
         f"No [{mid}] section found." in stderr,
-        f":{mid}: Restore packages..." in stderr,
+        f":{mid}.install: Restore packages." in stderr,
         f":{mid}: Skipped:" in stderr,
     )
 
@@ -143,8 +143,8 @@ def test_restore_single_manager(invoke, create_config):
     # Accept exit code 1: an end-to-end install can fail on a flaky backend.
     assert result.exit_code in (0, 1)
     assert "uv-npm-dummy.toml" in result.stderr
-    assert ":uv: Restore packages..." not in result.stderr
-    assert ":npm: Restore packages..." in result.stderr
+    assert ":uv.install: Restore packages." not in result.stderr
+    assert ":npm.install: Restore packages." in result.stderr
 
 
 @pytest.mark.destructive()
@@ -173,8 +173,8 @@ def test_restore_excluded_manager(invoke, create_config):
     # Accept exit code 1: an end-to-end install can fail on a flaky backend.
     assert result.exit_code in (0, 1)
     assert "uv-npm-dummy.toml" in result.stderr
-    assert ":uv: Restore packages..." in result.stderr
-    assert ":npm: Restore packages..." not in result.stderr
+    assert ":uv.install: Restore packages." in result.stderr
+    assert ":npm.install: Restore packages." not in result.stderr
 
 
 def test_empty_manager(invoke, create_config):
@@ -188,4 +188,4 @@ def test_empty_manager(invoke, create_config):
     result = invoke("--verbosity", "INFO", "restore", str(toml_path), color=False)
     assert result.exit_code == 0
     assert "uv-empty.toml" in result.stderr
-    assert ":uv: Restore packages..." in result.stderr
+    assert ":uv.install: Restore packages." in result.stderr

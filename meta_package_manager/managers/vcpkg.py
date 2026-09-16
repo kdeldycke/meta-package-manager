@@ -278,7 +278,7 @@ class VCPKG(PackageManager):
             return
         logging.debug(
             "Search did not answer JSON: parsing the column listing instead.",
-            extra={"label": self.id},
+            extra={"label": self.subject},
         )
         yield from self._parse_column_listing(output)
 

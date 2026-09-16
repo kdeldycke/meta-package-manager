@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
 
 from click_extra import STRING, ParameterSource, argument, echo, option, pass_context
 from click_extra.theme import get_current_theme as theme
@@ -58,9 +59,10 @@ from .dispatch import (
     OperationTrail,
     collect_from_managers,
     collect_per_package,
+    trail_label,
     warn_jobs_ignored,
 )
-from .execution import CLIError
+from .execution import CLIError, elapsed_clock, operation_subject
 from .manager import PackageManager
 from .pool import pool
 from .specifier import Solver, Specifier
@@ -96,14 +98,14 @@ def cooldown_permits(manager: PackageManager) -> bool:
         logging.warning(
             "Cannot enforce the release-age cooldown; running without the "
             "supply-chain safeguard.",
-            extra={"label": manager.id},
+            extra={"label": manager.subject},
         )
         return True
     logging.warning(
         "Skipped: cannot enforce the release-age cooldown. Run it anyway with "
         "`--cooldown best-effort`, or set `[mpm.cooldown] policy = "
         '"best-effort"` in your configuration file.',
-        extra={"label": manager.id},
+        extra={"label": manager.subject},
     )
     return False
 
@@ -114,7 +116,18 @@ def _announce_level(ctx: Context) -> int:
     An explicit `--<id>` selection announces loudly at `INFO`; an implicit
     "run everything" stays at `DEBUG` so the default view shows only the trail
     (matching the explicit/implicit levels `select_managers` already uses for
-    its skip messages). Shared by `sync`, `cleanup` and `upgrade --all`.
+    its skip messages). Shared by `sync`, `cleanup`, `upgrade --all` and
+    `doctor`.
+
+    ```{todo}
+    Drop every per-manager announcement (these four, plus `backup`, `restore`
+    and `sbom`) once mpm requires a click-extra release labeling the prompt line
+    `run_cli` logs. That `info:brew.sync: $ …` line then names the manager, the
+    operation and the command, which is all an announcement says. Two things
+    move in the same change: the selection tests read an announcement as proof
+    a manager acted, and a `restore` section with no package runs no command,
+    so the announcement is the only trace it leaves.
+    ```
     """
     return logging.INFO if ctx.obj.user_selection else logging.DEBUG
 
@@ -126,15 +139,16 @@ def _maintenance_work(
 ) -> Callable[[PackageManager], tuple[str, dict]]:
     """Build a `work` callable for a maintenance command's fan-out.
 
-    Logs `message` at the `announce` level, tagged with the manager ID (rendered
-    into the level prefix, `info:brew:`), runs `operation(manager)`, and returns
+    Logs `message` at the `announce` level, labeled with the manager's subject
+    (rendered into the level prefix, `info:brew.sync:`), runs `operation(manager)`,
+    and returns
     ``(id, {"errors": <CLI errors raised during the run>})`` so a manager that grows
     its error list is marked `✘` in the trail. Shared by `sync` and `cleanup`,
     whose work differs only in the message and the manager method.
     """
 
     def work(manager: PackageManager) -> tuple[str, dict]:
-        logging.log(announce, message, extra={"label": manager.id})
+        logging.log(announce, message, extra={"label": manager.subject})
         before = len(manager.cli_errors)
         operation(manager)
         return manager.id, {"errors": manager.cli_errors[before:]}
@@ -149,8 +163,6 @@ def _dispatch_sourced_operation(
     operation: Operations,
     action: Callable[[PackageManager, Specifier], str | None],
     verb: str,
-    past: str,
-    prep: str,
     label: str,
     done_label: str,
     apply_cooldown: bool = False,
@@ -239,8 +251,6 @@ def _dispatch_sourced_operation(
                     failures_lock,
                     action=action,
                     verb=verb,
-                    past=past,
-                    prep=prep,
                     # Each task re-stamps the mutating operation for its own
                     # attempt: the sourcing selection above stamped `installed` on
                     # the shared manager singletons, and the timeout and stall
@@ -270,7 +280,7 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> str:
     if hold:
         logging.warning(
             f"Hold {package_label(spec)}: {hold}.",
-            extra={"label": manager.id},
+            extra={"label": manager.subject},
         )
         return "cooldown"
     installed = _run_manager_action(
@@ -351,11 +361,12 @@ def install(ctx, packages_specs):
     if not unmatched_packages:
         failures_lock = threading.Lock()
 
-        def make_cooldown_task(spec, mgr):
+        def make_cooldown_task(spec, manager_id):
             # cooldown_permits() already logged why; a skip is ✘ but not unresolved, so
             # it never forces a non-zero exit.
             def task() -> tuple[bool, str]:
-                return False, f"{package_label(spec)} skipped in {mgr} (cooldown)"
+                subject = operation_subject(manager_id, Operations.install.name)
+                return False, trail_label(subject, package_label(spec), "cooldown")
 
             return task
 
@@ -364,7 +375,6 @@ def install(ctx, packages_specs):
             if not manager_id:
                 continue
             manager = pool.get(manager_id)
-            mgr = theme().invoked_command(manager_id)
             permitted = cooldown_permits(manager)
             for spec in package_specs:
                 if permitted:
@@ -374,15 +384,13 @@ def install(ctx, packages_specs):
                         failures_lock,
                         action=_install_action,
                         verb="install",
-                        past="installed",
-                        prep="with",
                         operation=Operations.install.name,
                         record_failure=lambda s: unresolved_labels.append(
                             package_label(s)
                         ),
                     )
                 else:
-                    task = make_cooldown_task(spec, mgr)
+                    task = make_cooldown_task(spec, manager_id)
                 tasks.append((manager, task))
         collect_per_package(
             "Installing", "Installed", tasks, operation=Operations.install.name
@@ -401,20 +409,17 @@ def install(ctx, packages_specs):
     op = OperationTrail(selected_managers)
     installed_count = 0
 
-    def trail(spec: Specifier, manager_id: str, status: str) -> None:
+    def trail(spec: Specifier, manager_id: str, status: str, seconds: float) -> None:
         """Map an install attempt to a `✓`/`✘` ledger line through `op`.
 
         `status` is `installed` (✓), or `not_found` / `failed` / `cooldown`
-        (✘).
+        (✘). `seconds` is how long the attempt took, closing the line the way
+        every other trail line closes.
         """
-        mgr = theme().invoked_command(manager_id)
-        reason = {
-            "installed": f"installed with {mgr}",
-            "not_found": f"not found in {mgr}",
-            "failed": f"failed to install with {mgr}",
-            "cooldown": f"skipped in {mgr} (cooldown)",
-        }[status]
-        op.mark(status == "installed", f"{package_label(spec)} {reason}")
+        detail = {"not_found": "not found", "cooldown": "cooldown"}.get(status)
+        subject = operation_subject(manager_id, Operations.install.name)
+        text = trail_label(subject, package_label(spec), detail)
+        op.mark(status == "installed", f"{text}{elapsed_clock(seconds)}")
 
     # Install all packages deterministically tied to a specific manager.
     for manager_id, package_specs in packages_per_managers.items():
@@ -424,18 +429,19 @@ def install(ctx, packages_specs):
         if not cooldown_permits(manager):
             # cooldown_permits() already logged why; mark the tied packages dropped.
             for spec in package_specs:
-                trail(spec, manager_id, "cooldown")
+                trail(spec, manager_id, "cooldown", 0.0)
             continue
         for spec in package_specs:
             # A tied package has exactly one candidate manager, so a miss is final:
             # record it as unresolved (forcing a non-zero exit) and mark the ✘ trail.
             # A package held by the cooldown is ✘ too, but never unresolved.
+            start = time.monotonic()
             status = _attempt_install(manager, spec)
             if status == "installed":
                 installed_count += 1
             elif status == "failed":
                 unresolved_labels.append(package_label(spec))
-            trail(spec, manager_id, status)
+            trail(spec, manager_id, status, time.monotonic() - start)
 
     # Drop managers that cannot honor an active cooldown (once, not per package).
     eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
@@ -443,6 +449,7 @@ def install(ctx, packages_specs):
         installed = False
         held = False
         for manager in eligible_managers:
+            start = time.monotonic()
             # Is the package available on this manager? The per-attempt reason is INFO
             # narration; the ✘ trail line below names the manager that missed.
             matches = None
@@ -463,7 +470,7 @@ def install(ctx, packages_specs):
             except NotImplementedError:
                 logging.info(
                     "Does not implement search operation.",
-                    extra={"label": manager.id},
+                    extra={"label": manager.subject},
                 )
                 logging.info(
                     f"{spec.package_id} existence unconfirmed, "
@@ -472,17 +479,17 @@ def install(ctx, packages_specs):
             except CLIError:
                 logging.info(
                     f"Could not search for {spec.package_id}.",
-                    extra={"label": manager.id},
+                    extra={"label": manager.subject},
                 )
-                trail(spec, manager.id, "not_found")
+                trail(spec, manager.id, "not_found", time.monotonic() - start)
                 continue
             else:
                 if not matches:
                     logging.info(
                         f"No {spec.package_id} package found.",
-                        extra={"label": manager.id},
+                        extra={"label": manager.subject},
                     )
-                    trail(spec, manager.id, "not_found")
+                    trail(spec, manager.id, "not_found", time.monotonic() - start)
                     continue
                 # Prevents any incomplete or bad implementation of exact search.
                 if len(matches) != 1:
@@ -495,16 +502,16 @@ def install(ctx, packages_specs):
             # to another ecosystem would sidestep the safeguard.
             if status == "cooldown":
                 held = True
-                trail(spec, manager.id, "cooldown")
+                trail(spec, manager.id, "cooldown", time.monotonic() - start)
                 break
             # On a failed install, fall through to the next manager in priority order.
             if status == "failed":
-                trail(spec, manager.id, "failed")
+                trail(spec, manager.id, "failed", time.monotonic() - start)
                 continue
             # Stop at the first (highest-priority) manager that provides the package.
             installed = True
             installed_count += 1
-            trail(spec, manager.id, "installed")
+            trail(spec, manager.id, "installed", time.monotonic() - start)
             break
 
         if not installed and not held:
@@ -587,13 +594,13 @@ def upgrade(ctx, all, packages_specs):
                 }
             logging.log(
                 announce,
-                "Upgrade all outdated packages...",
-                extra={"label": manager.id},
+                "Upgrade all outdated packages.",
+                extra={"label": manager.subject},
             )
             before = len(manager.cli_errors)
             output = manager.upgrade()
             if output:
-                logging.info(output, extra={"label": manager.id})
+                logging.info(output, extra={"label": manager.subject})
             return manager.id, {"errors": manager.cli_errors[before:]}
 
         # Full upgrade is independent per manager, so fan out concurrently with a
@@ -614,8 +621,6 @@ def upgrade(ctx, all, packages_specs):
         operation=Operations.upgrade,
         action=lambda m, s: m.upgrade(s.package_id, version=s.version),
         verb="upgrade",
-        past="upgraded",
-        prep="with",
         label="Upgrading",
         done_label="Upgraded",
         apply_cooldown=True,
@@ -674,7 +679,7 @@ def remove(ctx, orphans, packages_specs):
             except NotImplementedError:
                 logging.info(
                     "Does not implement orphan removal, removing the package only.",
-                    extra={"label": manager.id},
+                    extra={"label": manager.subject},
                 )
         return manager.remove(spec.package_id)
 
@@ -684,8 +689,6 @@ def remove(ctx, orphans, packages_specs):
         operation=Operations.remove,
         action=remove_action,
         verb="remove",
-        past="removed",
-        prep="from",
         label="Removing",
         done_label="Removed",
     )
@@ -712,7 +715,7 @@ def sync(ctx):
         "Syncing",
         "Synced",
         managers,
-        _maintenance_work(announce, "Sync package info...", lambda m: m.sync()),
+        _maintenance_work(announce, "Sync package info.", lambda m: m.sync()),
         report_state=True,
     )
 
@@ -861,7 +864,9 @@ def cleanup(ctx, orphans, cache, repair):
         # manager's own dispatch (`✓ brew.cleanup (cache)`).
         steps = _cleanup_steps(manager, selected, explicit_orphans)
         categories = ", ".join(category for category, _step in steps)
-        logging.log(announce, f"Cleanup ({categories})...", extra={"label": manager.id})
+        logging.log(
+            announce, f"Clean up {categories}.", extra={"label": manager.subject}
+        )
         before = len(manager.cli_errors)
         for _category, step in steps:
             step()
@@ -910,7 +915,7 @@ def doctor(ctx):
     announce = _announce_level(ctx)
 
     def doctor_work(manager: PackageManager) -> tuple[str, dict]:
-        logging.log(announce, "Diagnose...", extra={"label": manager.id})
+        logging.log(announce, "Check health.", extra={"label": manager.subject})
         healthy, report = manager.doctor()
         # Resolved here so the probes overlap with the diagnoses in the same
         # concurrent fan-out. Informational only: ownership never flips health.

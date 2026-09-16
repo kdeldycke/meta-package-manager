@@ -261,7 +261,7 @@ class UV(UVBase):
         if os.environ.get("UV"):
             logging.warning(
                 "mpm runs under uv, which locks its own cache: skip cache cleanup.",
-                extra={"label": self.id},
+                extra={"label": self.subject},
             )
             return
         self.run_cli("cache", "clean")

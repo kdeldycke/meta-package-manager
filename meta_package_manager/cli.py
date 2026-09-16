@@ -94,7 +94,8 @@ from .cooldown import (
     parse_cooldown_section,
     resolve_cooldown,
 )
-from .execution import PLAN_RECORDER, CLIError
+from .dispatch import trail_label
+from .execution import PLAN_RECORDER, CLIError, operation_subject
 from .logo import env_summary, version_screen_params
 from .manager import PackageManager
 from .package import Package
@@ -1177,17 +1178,19 @@ def _run_manager_action(
         except NotImplementedError:
             logging.info(
                 f"Does not implement {verb} operation.",
-                extra={"label": manager.id},
+                extra={"label": manager.subject},
             )
             return False
         except CLIError:
             logging.info(
                 f"Could not {verb} {package_label(spec)}.",
-                extra={"label": manager.id},
+                extra={"label": manager.subject},
             )
             return False
-    if output:
-        logging.info(output, extra={"label": manager.id})
+        # Logged under the stamp, so the label names this attempt rather than the
+        # selection stamp `acting_as` restores on exit.
+        if output:
+            logging.info(output, extra={"label": manager.subject})
     return True
 
 
@@ -1203,8 +1206,6 @@ def _package_task(
     *,
     action: Callable[[PackageManager, Specifier], str | None],
     verb: str,
-    past: str,
-    prep: str,
     operation: str,
     record_failure: Callable[[Specifier], None],
 ) -> Callable[[], tuple[bool, str]]:
@@ -1215,18 +1216,18 @@ def _package_task(
     caller-owned list through `record_failure` (under `lock`, since the list is
     shared across the concurrent lanes) and reports `✘`. Shared by `install`,
     `remove`, `upgrade <packages>` and `restore`, whose tasks differ only in
-    the action, the verb forms, and which failure list they feed.
+    the action, the verb, and which failure list they feed. Each outcome reads
+    `brew.install: jq` on the trail (see
+    {func}`~meta_package_manager.dispatch.trail_label`).
 
     :param action: performs the manager operation, returning its CLI output (or `None`).
-    :param verb: present-tense operation name ("install"), for the `INFO` lines and
-        the "failed to {verb}" trail.
-    :param past: past participle ("installed"), for the success trail.
-    :param prep: preposition joining the package and the manager ("with", "from").
+    :param verb: present-tense operation name ("install"), for the `INFO` lines.
     :param operation: {class}`~meta_package_manager.capabilities.Operations` member
         name stamped on the manager for the duration of the attempt.
     :param record_failure: appends the failed spec's label to a caller-owned list.
     """
-    mgr = theme().invoked_command(manager.id)
+    subject = operation_subject(manager.id, operation)
+    item = package_label(spec)
 
     def task() -> tuple[bool, str]:
         # A release-introducing attempt first passes the per-package cooldown
@@ -1236,18 +1237,15 @@ def _package_task(
         if operation in RELEASE_INTRODUCING_OPERATIONS:
             hold = manager.cooldown_hold_reason(spec.package_id)
             if hold:
-                logging.warning(
-                    f"Hold {package_label(spec)}: {hold}.",
-                    extra={"label": manager.id},
-                )
-                return False, f"{package_label(spec)} held in {mgr} (cooldown)"
+                logging.warning(f"Hold {item}: {hold}.", extra={"label": subject})
+                return False, trail_label(subject, item, "cooldown")
         if _run_manager_action(
             manager, spec, action=action, verb=verb, operation=operation
         ):
-            return True, f"{package_label(spec)} {past} {prep} {mgr}"
+            return True, trail_label(subject, item)
         with lock:
             record_failure(spec)
-        return False, f"{package_label(spec)} failed to {verb} {prep} {mgr}"
+        return False, trail_label(subject, item)
 
     return task
 

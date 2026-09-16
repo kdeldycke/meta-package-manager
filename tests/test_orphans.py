@@ -674,7 +674,7 @@ def test_cleanup_narration_names_categories(invoke, monkeypatch):
     fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
     result = invoke("--verbosity", "DEBUG", "cleanup", "--orphans", "--cache")
     assert result.exit_code == 0
-    assert "Cleanup (orphans, cache)..." in result.stderr
+    assert "Clean up orphans, cache." in result.stderr
     assert fake.calls == ["cleanup_orphan", "cleanup_cache"]
 
 

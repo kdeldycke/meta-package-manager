@@ -53,7 +53,7 @@ def evaluate_signals(mid, stdout, stderr):
         # WARNING/INFO for explicit ones (`mpm --<mid> upgrade`).
         f":{mid}: Does not implement upgrade_all_cli." in stderr,
         f":{mid}: Does not implement {Operations.upgrade_all}." in stderr,
-        f":{mid}: Upgrade all outdated packages..." in stderr,
+        f":{mid}.upgrade_all: Upgrade all outdated packages." in stderr,
         bool(re.search(rf"Upgrade \S+ with {mid}\.\.\.", stderr)),
         f":{mid}: Skipped:" in stderr,
     )
@@ -170,6 +170,7 @@ def test_sourcing_survives_a_failing_manager(
     result = invoke("--dry-run", subcommand, "fake-pkg-alpha")
     assert result.exit_code == 0
     assert "Traceback" not in result.stderr
-    assert f":{fake_pool.id}: Could not list installed packages." in result.stderr
+    listing_failure = f":{fake_pool.id}.installed: Could not list installed packages."
+    assert listing_failure in result.stderr
     # No manager could source the package, so it is skipped rather than fatal.
     assert "fake-pkg-alpha is not recognized" in result.stderr

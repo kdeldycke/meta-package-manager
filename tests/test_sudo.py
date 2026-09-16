@@ -665,7 +665,7 @@ def test_prime_sudo_audits_escalated_binaries(tmp_path, caplog, mode, expect_war
     if expect_warning:
         assert len(tamper_warnings) == 1
         assert str(binary) in tamper_warnings[0].getMessage()
-        assert tamper_warnings[0].label == manager.id
+        assert tamper_warnings[0].label == manager.subject
     else:
         assert not tamper_warnings
 
@@ -1550,7 +1550,7 @@ def test_stall_watchdog_notices_silent_internal_escalator(monkeypatch, caplog):
         if "hidden password prompt" in record.getMessage()
     ]
     assert notices
-    assert all(record.label == manager.id for record in notices)
+    assert all(record.label == manager.subject for record in notices)
     assert all(record.getMessage().startswith("No output for ") for record in notices)
     # A slow interpreter startup may trip an extra no-output-yet notice before the
     # line arrives; the episode quoting the line warns exactly once.
@@ -1691,4 +1691,4 @@ def test_stall_watchdog_tee_forwards_verbatim_at_debug(caplog):
     ]
     assert len(records) == 1
     assert records[0].levelno == logging.DEBUG
-    assert records[0].label == manager.id
+    assert records[0].label == manager.subject

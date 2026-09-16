@@ -63,11 +63,10 @@ from pathlib import Path
 from textwrap import dedent, indent, shorten
 from typing import ClassVar, Final
 
-import click
 from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
 from click_extra import style
-from click_extra.color import is_a_tty, resolve_color_env
+from click_extra.color import invocation_color, is_a_tty, resolve_color_env
 from click_extra.execution import (
     INDENT,
     args_cleanup,
@@ -75,6 +74,7 @@ from click_extra.execution import (
     highlight_bin_name,
     run_cli,
 )
+from click_extra.humanize import format_duration
 from click_extra.spinner import Spinner as _Spinner
 from click_extra.theme import get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
@@ -420,21 +420,26 @@ def _styling_enabled() -> bool:
     `--no-color`, `NO_COLOR` or `TERM=dumb` say. Nor does
     {func}`click_extra.style` strip them, being
     {func}`click.style` and unconditional. So the label resolves the gate itself,
-    in the order the spinner resolves its own: the command context's reconciled
-    {attr}`ctx.color <click.Context.color>` first, then the environment through
-    {func}`~click_extra.color.resolve_color_env`, then TTY detection on the
-    stream the spinner draws to.
+    in the order the spinner resolves its own: the invocation's color first,
+    then the environment through {func}`~click_extra.color.resolve_color_env`,
+    then TTY detection on the stream the spinner draws to. The invocation's color
+    comes through {func}`~click_extra.color.invocation_color`, not `ctx.color`:
+    trail lines are composed on the dispatch's worker threads, which the
+    thread-local command context does not reach, so `--no-color` would otherwise
+    stop at the main thread.
 
     ```{todo}
-    Retire this in favour of a `label_style` argument on
-    {class}`click_extra.spinner.Spinner`, which would keep the gate where
-    `Spinner._resolve_color_enabled()` already lives instead of mirroring it
-    here. Not filed upstream yet.
+    Delete this once mpm requires the click-extra release after `9.2.0`, and
+    paint unconditionally. Its commits `48812ca9` and `3f3e5812` make `Spinner`
+    and {class}`click_extra.spinner.OperationTrail` strip every escape whenever
+    color is off, on any thread, the ones embedded in a label or a trail
+    message included. {data}`ITALIC_CAPABLE_TERMS` stays: that gate is about
+    the terminal, not about color.
     ```
     """
-    ctx = click.get_current_context(silent=True)
-    if ctx is not None and ctx.color is not None:
-        return ctx.color
+    color = invocation_color()
+    if color is not None:
+        return color
     from_env = resolve_color_env()
     if from_env is not None:
         return from_env
@@ -556,6 +561,17 @@ def _spinner_label(subject: str, command: str) -> str:
     return f"{styled}: {command}"
 
 
+def elapsed_clock(seconds: float) -> str:
+    """Render how long a finished call took the way a running spinner shows it.
+
+    The same ` (2.3s)` fragment the spinner's timer draws, faint when styling
+    is allowed, so a `✓`/`✘` trail line closes on the clock its spinner was
+    counting (see {class}`Spinner`).
+    """
+    clock = f" ({format_duration(seconds)})"
+    return style(clock, dim=True) if _styling_enabled() else clock
+
+
 class Spinner(_Spinner):
     """{class}`click_extra.spinner.Spinner` with a de-emphasized timer.
 
@@ -573,9 +589,9 @@ class Spinner(_Spinner):
     brackets at full weight beside a faint number.
 
     ```{todo}
-    Retire this for a `timer_style` argument on
-    {class}`click_extra.spinner.Spinner`, alongside the `label_style` that would
-    retire {func}`_styling_enabled`. Neither is filed upstream yet.
+    Delete this subclass once mpm requires the click-extra release after `9.2.0`,
+    whose commit `48812ca9` adds `timer_style`: pass `timer_style=Style(dim=True)`
+    to the stock `Spinner` instead.
     ```
     """
 
@@ -1226,6 +1242,22 @@ class CLIExecutor:
             return False
         return True
 
+    @property
+    def subject(self) -> str:
+        """The `manager.operation` path naming what this manager is doing now.
+
+        Labels every line logged inside an operation (`warning:brew.install:`)
+        and names the spinner and the trail line of the same call, so one call
+        reads alike on all three. Outside any operation it is the bare ID: see
+        {func}`operation_subject`. A line about the manager itself, logged while
+        no operation runs (discovery, selection, capability checks), labels it
+        with the bare {attr}`id` instead.
+        """
+        return operation_subject(
+            self.id,  # type: ignore[attr-defined]
+            self._active_operation,
+        )
+
     @contextmanager
     def acting_as(
         self,
@@ -1299,14 +1331,11 @@ class CLIExecutor:
             its own onto it (see
             `_hidden_prompt_risk`).
         """
-        manager_id = self.id  # type: ignore[attr-defined]
-        operation = self._active_operation
-        subject = operation_subject(manager_id, operation)
         command = _lean_command(cmd_args, self.cli_path, self.pre_args, self.post_args)
         # Append the elapsed time so a long call (a slow `guix search`) reads as
         # "⠙ guix.search: guix search jq (12.3s)" rather than looking stuck.
         return Spinner(
-            _spinner_label(subject, command),
+            _spinner_label(self.subject, command),
             delay=SPINNER_DELAY,
             enabled=None if self.progress and animate else False,
             timer=True,
@@ -1433,7 +1462,11 @@ class CLIExecutor:
             # at the level the command disclosure it stands in for would have used:
             # it explains why this manager shows no prompt line of its own.
             code, output, error = cached
-            logging.log(command_level, f"Reuse peer result: {cli_msg}")
+            logging.log(
+                command_level,
+                f"Reuse peer result: {cli_msg}",
+                extra={"label": self.subject},
+            )
         elif self.plan and self._active_operation in _MUTATING_OPERATIONS:
             # Plan mode: record the state-changing command for inspection instead
             # of running it. A read dispatched as its own operation (and any
@@ -1445,10 +1478,9 @@ class CLIExecutor:
             plan_command = format_plan_command(clean_args, extra_env)
             PLAN_RECORDER.record(self.id, plan_command)  # type: ignore[attr-defined]
         elif self.dry_run and not self.plan:
-            logging.warning(f"Dry-run: {cli_msg}")
+            logging.warning(f"Dry-run: {cli_msg}", extra={"label": self.subject})
         else:
-            # `id` is declared on the `PackageManager` subclass, not this mixin.
-            manager_id: str = self.id  # type: ignore[attr-defined]
+            subject = self.subject
             effective_timeout = self._resolve_timeout()
             # A mutating command of an internal escalator (cask, fink) may block
             # on a hidden `sudo` password prompt when prime_sudo() found no warm
@@ -1462,7 +1494,7 @@ class CLIExecutor:
                 self.internal_sudo, self._active_operation
             )
             spinner = self._make_spinner(clean_args, animate=not hidden_prompt)
-            watchdog = _StallWatchdog(manager_id) if hidden_prompt else None
+            watchdog = _StallWatchdog(subject) if hidden_prompt else None
             try:
                 # run_cli() owns the spawn: it registers the child in click-extra's
                 # live-process registry (so the SIGINT handler installed by mpm's
@@ -1476,7 +1508,7 @@ class CLIExecutor:
                             clean_args,
                             extra_env=extra_env,
                             timeout=effective_timeout,
-                            label=manager_id,
+                            label=subject,
                             command_level=command_level,
                             windows_creation_flags=self.windows_creation_flags,
                             # Detach the child into its own POSIX session and
@@ -1532,7 +1564,7 @@ class CLIExecutor:
                 # detached into its own session, its whole tree on Windows.
                 self._cleanup_windows_processes()
                 msg = f"Timed out after {effective_timeout}s."
-                logging.warning(msg, extra={"label": manager_id})
+                logging.warning(msg, extra={"label": subject})
                 exception = CLIError(None, "", msg)
                 self.cli_errors.append(exception)
                 if must_succeed or self.stop_on_error:
@@ -1542,7 +1574,7 @@ class CLIExecutor:
                 # run_cli killed the child before re-raising; the spinner was
                 # stopped by the `with` teardown.
                 msg = "Subprocess interrupted by a console signal."
-                logging.warning(msg, extra={"label": manager_id})
+                logging.warning(msg, extra={"label": subject})
                 exception = CLIError(None, "", msg)
                 self.cli_errors.append(exception)
                 return ""
@@ -1606,7 +1638,7 @@ class CLIExecutor:
                     "credentials; re-run in a terminal, or with `mpm --sudo` "
                     "(or a `[mpm] sudo = true` entry in your configuration file) "
                     "to authenticate once up front.",
-                    extra={"label": manager_id},
+                    extra={"label": self.subject},
                 )
             # Relay the command's own account of the failure at WARNING, the
             # moment it happened: the diagnosis is in hand right here, and a
@@ -1622,7 +1654,7 @@ class CLIExecutor:
             ):
                 logging.warning(
                     exception.diagnosis,
-                    extra={"label": manager_id},
+                    extra={"label": self.subject},
                 )
             # A dormant privileged marker meeting a permission refusal: the
             # marker predicted exactly this failure, so name the opt-in. On top
@@ -1639,7 +1671,7 @@ class CLIExecutor:
                     f"`mpm --{manager_id} --sudo`, or a "
                     f"`[mpm.overrides.{manager_id}] sudo = true` "
                     "entry in your configuration file.",
-                    extra={"label": manager_id},
+                    extra={"label": self.subject},
                 )
             # Accumulate before deciding whether to raise: the error is recorded
             # whether or not it also propagates (see the `cli_errors` docstring).

@@ -198,7 +198,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     by_id = {manager.id: manager for manager in managers}
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        logging.info("Export packages...", extra={"label": manager.id})
+        logging.info("Export installed packages.", extra={"label": manager.subject})
         installed_packages = _snapshot_installed(manager, query, exact=exact)
         # In --bundled mode, enrich each package with its metadata here too, so the
         # slow per-manager metadata fetch parallelizes alongside the listing.
@@ -209,7 +209,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
             except Exception as exc:  # noqa: BLE001
                 logging.info(
                     f"Falling back to minimal SBOM data: {exc}",
-                    extra={"label": manager.id},
+                    extra={"label": manager.subject},
                 )
         return manager.id, {
             "packages": installed_packages,

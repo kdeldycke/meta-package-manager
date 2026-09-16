@@ -750,8 +750,6 @@ def test_package_task_holds_fresh_release(monkeypatch):
         threading.Lock(),
         action=lambda m, s: pytest.fail("a held package must not run its action"),
         verb="install",
-        past="installed",
-        prep="with",
         operation="install",
         record_failure=lambda s: pytest.fail(
             "a held package must not be recorded as a failure"

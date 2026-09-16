@@ -56,10 +56,10 @@ def evaluate_signals(mid, stdout, stderr):
         # The glued `:<mid>:` label form matches whatever level the
         # message lands at: demoted to DEBUG for implicit selection,
         # WARNING/INFO for explicit ones (`mpm --<mid> sbom`).
-        f":{mid}: Export packages..." in stderr,
+        f":{mid}.installed: Export installed packages." in stderr,
         f":{mid}: Does not implement {Operations.installed}" in stderr,
         f":{mid}: Skipped:" in stderr,
-        f":{mid}: Could not list installed packages." in stderr,
+        f":{mid}.installed: Could not list installed packages." in stderr,
     )
 
 

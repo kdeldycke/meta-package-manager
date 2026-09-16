@@ -386,7 +386,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         except json.JSONDecodeError as ex:
             logging.warning(
                 f"Could not parse JSON output: {ex}",
-                extra={"label": self.id},
+                extra={"label": self.subject},
             )
             return None
 
@@ -604,7 +604,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         except CLIError:
             logging.warning(
                 "Could not list installed packages.",
-                extra={"label": self.id},
+                extra={"label": self.subject},
             )
             return ()
 
@@ -805,7 +805,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                 logging.info(
                     f"Cannot date the latest release of {package_id}; "
                     "running without the supply-chain safeguard.",
-                    extra={"label": self.id},
+                    extra={"label": self.subject},
                 )
                 return None
             return "its latest release cannot be dated (fail-closed)"
@@ -951,7 +951,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                 logging.info(
                     "Active cooldown: hold back any release younger than the "
                     "window, and upgrade the rest.",
-                    extra={"label": self.id},
+                    extra={"label": self.subject},
                 )
                 return self._upgrade_all_with_cooldown()
             try:
@@ -990,7 +990,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             if hold:
                 logging.warning(
                     f"Hold {package.id}: {hold}.",
-                    extra={"label": self.id},
+                    extra={"label": self.subject},
                 )
                 held.append(package.id)
             else:
@@ -1123,7 +1123,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         logging.debug(
             "No native orphan sweep. Remove listed orphans one by one.",
-            extra={"label": self.id},
+            extra={"label": self.subject},
         )
         previous: frozenset[str] = frozenset()
         while True:

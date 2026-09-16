@@ -306,7 +306,7 @@ def _safe_packages(
     try:
         return tuple(packages_asdict(source(), fields))
     except CLIError:
-        logging.warning(f"Could not {action}.", extra={"label": manager.id})
+        logging.warning(f"Could not {action}.", extra={"label": manager.subject})
         return ()
 
 

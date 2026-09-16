@@ -33,6 +33,7 @@ import time
 
 import pytest
 from boltons.strutils import strip_ansi
+from click_extra.color import COLOR_ENVVARS
 from click_extra.context import JOBS, VERBOSITY_LEVEL
 from click_extra.logging import LogLevel
 from click_extra.theme import KO_GLYPH, OK_GLYPH
@@ -42,7 +43,9 @@ from meta_package_manager.dispatch import (
     OperationTrail,
     collect_from_managers,
     collect_per_package,
+    trail_label,
 )
+from meta_package_manager.execution import operation_subject
 from meta_package_manager.sudo import _SUDO_CACHE_WARM
 
 
@@ -63,12 +66,16 @@ class StubManager:
     on every lane to decide which are held back to the sequential tail, so a stub
     without it would be a manager no scheduler could place. `_active_operation`
     defaults to `None` for the same reason, that being the class-level default of
-    {attr}`~meta_package_manager.execution.CLIExecutor._active_operation`: the trail
-    reads it to name each line's subject.
+    {attr}`~meta_package_manager.execution.CLIExecutor._active_operation`, and
+    `subject` mirrors the property the trail reads to name each line.
     """
 
     run_cache = None
     _active_operation = None
+
+    @property
+    def subject(self) -> str:
+        return operation_subject(self.id, self._active_operation)
 
     def __init__(
         self,
@@ -290,6 +297,23 @@ def test_failure_trail_marks_errored_managers(monkeypatch):
     assert OK_GLYPH in output  # The success glyph, for the other managers.
 
 
+@pytest.mark.parametrize(
+    ("item", "detail", "expected"),
+    (
+        (None, None, "brew.sync"),
+        (None, "cache", "brew.sync (cache)"),
+        ("jq", None, "brew.sync: jq"),
+        ("jq", "not found", "brew.sync: jq (not found)"),
+    ),
+)
+def test_trail_label_shapes(monkeypatch, item, detail, expected):
+    """Subject, then the package for a package-keyed line, then a detail."""
+    for envvar in COLOR_ENVVARS:
+        monkeypatch.delenv(envvar, raising=False)
+    monkeypatch.setenv("NO_COLOR", "1")
+    assert trail_label("brew.sync", item, detail) == expected
+
+
 def test_trail_detail_composes_on_the_subject(monkeypatch):
     """A `detail` renders as a parenthesized suffix, never in the subject's place.
 
@@ -318,9 +342,9 @@ def test_trail_detail_composes_on_the_subject(monkeypatch):
         ctx=ctx,  # type: ignore[arg-type]
     )
     output = strip_ansi(tty.getvalue())
-    assert f"{OK_GLYPH} m0.cleanup (cache)" in output
-    assert f"{OK_GLYPH} m1.cleanup" in output
-    assert "m1.cleanup (" not in output
+    # Every line closes on its duration, the detail sitting before it when present.
+    assert re.search(rf"{OK_GLYPH} m0\.cleanup \(cache\) \(\d+\.\ds\)", output)
+    assert re.search(rf"{OK_GLYPH} m1\.cleanup \(\d+\.\ds\)", output)
 
 
 def test_trail_includes_managers_that_finish_before_the_indicator_shows(monkeypatch):
@@ -756,11 +780,11 @@ def test_operation_trail_echoes_marks_and_finisher_on_tty(monkeypatch):
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
     trail = OperationTrail([StubManager("brew", progress=True)])  # type: ignore[list-item]
-    trail.mark(True, "foo installed with brew")
+    trail.mark(True, "brew.install: foo")
     trail.mark(False, "bar failed with brew")
     trail.finish(False, "Installed 1/2 packages")
     output = tty.getvalue()
-    assert "foo installed with brew" in output
+    assert "brew.install: foo" in output
     assert "bar failed with brew" in output
     assert OK_GLYPH in output
     assert KO_GLYPH in output
@@ -770,6 +794,6 @@ def test_operation_trail_echoes_marks_and_finisher_on_tty(monkeypatch):
 def test_operation_trail_silent_off_terminal(capsys):
     """Off a terminal the sequential ledger stays silent."""
     trail = OperationTrail([StubManager("brew", progress=True)])  # type: ignore[list-item]
-    trail.mark(True, "foo installed with brew")
+    trail.mark(True, "brew.install: foo")
     trail.finish(True, "Installed 1/1 packages")
     assert capsys.readouterr().err == ""

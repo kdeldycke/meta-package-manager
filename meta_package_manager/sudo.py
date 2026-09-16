@@ -1165,7 +1165,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
                 "or root, or others can write to it or its directory. Fix its "
                 "ownership and permissions, or drop escalation with "
                 "`--no-sudo`.",
-                extra={"label": manager.id},
+                extra={"label": manager.subject},
             )
 
     probe_args = escalator.resolved_probe_args()
@@ -1390,10 +1390,10 @@ class _StallWatchdog(logging.Handler):
     every record reach {meth}`emit`: dropping is the root logger's decision.
     """
 
-    def __init__(self, manager_id: str) -> None:
-        """Arm the watchdog for one CLI call of `manager_id`."""
+    def __init__(self, label: str) -> None:
+        """Arm the watchdog for one CLI call, its notices labeled with `label`."""
         super().__init__()
-        self._manager_id = manager_id
+        self._label = label
         self._started = time.monotonic()
         # Latest child activity, one `(monotonic timestamp, output line)` pair.
         # Written by emit() in a single reference assignment and read the same way
@@ -1407,7 +1407,7 @@ class _StallWatchdog(logging.Handler):
         # registry (re-arming would reuse it, stacking handlers) and have no
         # parent, so this handler is its only sink and nothing double-emits.
         self.tee = logging.Logger(  # noqa: LOG001
-            f"mpm-stall-tee-{manager_id}", logging.DEBUG
+            f"mpm-stall-tee-{label}", logging.DEBUG
         )
         self.tee.addHandler(self)
         self._stop = threading.Event()
@@ -1475,7 +1475,7 @@ class _StallWatchdog(logging.Handler):
             logging.warning(
                 f"No output for {int(silence)}s: may be waiting on a hidden "
                 f"password prompt. {detail}",
-                extra={"label": self._manager_id},
+                extra={"label": self._label},
             )
 
     def stop(self) -> None:

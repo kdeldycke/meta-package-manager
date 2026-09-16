@@ -246,6 +246,26 @@ def test_spinner_label_is_plain_without_styling(plain_labels):
     )
 
 
+def test_styling_gate_reaches_worker_threads(monkeypatch):
+    """`--no-color` reaches a label composed on a worker thread.
+
+    Trail lines are composed on the dispatch's workers, where the thread-local
+    command context is absent. The gate reads the color the invocation published
+    for every thread instead, and that answer outranks the environment.
+    """
+    for envvar in COLOR_ENVVARS:
+        monkeypatch.delenv(envvar, raising=False)
+    monkeypatch.setenv("FORCE_COLOR", "1")
+    monkeypatch.setattr("click_extra.color._invocation_color", False)
+    labels = []
+    worker = threading.Thread(
+        target=lambda: labels.append(_spinner_label("cask.upgrade_all", "brew upgrade"))
+    )
+    worker.start()
+    worker.join()
+    assert labels == ["cask.upgrade_all: brew upgrade"]
+
+
 def test_spinner_label_subject_alone_without_styling(plain_labels):
     assert _spinner_label("cask.upgrade_all", "") == "cask.upgrade_all"
 
@@ -436,7 +456,7 @@ def test_failed_run_relays_diagnosis(stop_on_error, script, expected, caplog):
             manager.run_cli("-c", script)
     warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
     assert [r.getMessage() for r in warnings] == [expected]
-    assert warnings[0].label == manager.id
+    assert warnings[0].label == manager.subject
 
 
 @pytest.mark.parametrize(
@@ -848,7 +868,7 @@ def test_dormant_marker_permission_failure_hints_the_opt_in(caplog):
     assert len(hints) == 1
     assert "`mpm --fakemanager --sudo`" in hints[0].getMessage()
     assert "`[mpm.overrides.fakemanager] sudo = true`" in hints[0].getMessage()
-    assert hints[0].label == manager.id
+    assert hints[0].label == manager.subject
 
 
 @pytest.mark.parametrize(

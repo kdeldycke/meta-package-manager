@@ -166,7 +166,7 @@ Three mechanisms cover that rare prompt instead. When the up-front probe finds t
 ```shell-session
 $ mpm install macfuse
 (...)
-warning:cask: No output for 30s: may be waiting on a hidden password prompt. Last output: "==> Running installer for macfuse; your password may be necessary."
+warning:cask.install: No output for 30s: may be waiting on a hidden password prompt. Last output: "==> Running installer for macfuse; your password may be necessary."
 ```
 
 For a guaranteed one-prompt experience, opt the manager into up-front authentication with a scoped `sudo = true` override:

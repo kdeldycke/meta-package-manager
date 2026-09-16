@@ -38,6 +38,7 @@ policy: which managers must never overlap, how the trail binds to the pool's
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 from typing import Final
 
@@ -48,7 +49,7 @@ from click_extra.execution import resolve_jobs, run_lanes
 from click_extra.spinner import OperationTrail as _OperationTrail
 from click_extra.theme import get_current_theme as theme
 
-from .execution import SPINNER_DELAY, operation_subject
+from .execution import SPINNER_DELAY, _styling_enabled, elapsed_clock
 from .sudo import _hidden_prompt_risk
 
 TYPE_CHECKING = False
@@ -523,6 +524,30 @@ class OperationTrail(_OperationTrail):
         return super().__enter__()
 
 
+def trail_label(
+    subject: str, item: str | None = None, detail: str | None = None
+) -> str:
+    """Compose the text of one `✓`/`✘` trail line.
+
+    Reads ``{subject}: {item} ({detail})``: the `manager.operation` subject its
+    per-call spinner showed, painted the same way, then the package it acted on
+    for a package-keyed line, then a parenthesized detail when the outcome needs
+    one (`cache`, `cooldown`, `not found`). The glyph already says whether the
+    operation succeeded, so a plain failure carries no detail.
+    """
+    text = theme().invoked_command(subject) if _styling_enabled() else subject
+    if item:
+        text = f"{text}: {item}"
+    return f"{text} ({detail})" if detail else text
+
+
+def _timed(task: Callable[[], tuple[bool, str]]) -> tuple[bool, str]:
+    """Run one trail task and close its line on how long it took."""
+    start = time.monotonic()
+    ok, text = task()
+    return ok, f"{text}{elapsed_clock(time.monotonic() - start)}"
+
+
 def dispatch(
     label: str,
     done_label: str,
@@ -654,7 +679,7 @@ def dispatch(
             # completes; distinct lanes run concurrently, sized by `effective_jobs`.
             list(
                 run_lanes(
-                    lambda task: trail.mark(*task()),
+                    lambda task: trail.mark(*_timed(task)),
                     [tasks for _managers, tasks in phase_lanes],
                     jobs=phase_jobs,
                 )
@@ -755,13 +780,8 @@ def collect_from_managers(
             # The trail names the same subject the per-call spinner does, so a
             # manager reads alike whichever indicator is on screen. The stamp
             # survives the `acting_as` the work ran under, that context restoring
-            # what `_select_managers` set for this subcommand. A detail composes
-            # on the subject as a parenthesized suffix, never in its place.
-            subject = theme().invoked_command(
-                operation_subject(manager_id, manager._active_operation)
-            )
-            detail = data.get("detail")
-            text = f"{subject} ({detail})" if detail else subject
+            # what `_select_managers` set for this subcommand.
+            text = trail_label(manager.subject, detail=data.get("detail"))
             return not _state_failed(data), text
 
         return unit

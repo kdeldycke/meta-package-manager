@@ -23,7 +23,7 @@ Then choose your preferred package manager to install it:
 $ mpm --brew install broot
 (...)
 🍺  /usr/local/Cellar/broot/1.16.2: 8 files, 3.5MB
-✓ broot installed with brew
+✓ brew.install: broot (4.3s)
 Installed 1/1 packages
 ```
 
@@ -70,13 +70,13 @@ Removing every copy at once is a single command:
 $ mpm remove blah
 (...)
 Successfully uninstalled blah-0.0.0
-✓ blah removed from cargo
+✓ cargo.remove: blah (1.2s)
 (...)
 Successfully uninstalled blah-0.0.2
-✓ blah removed from gem
+✓ gem.remove: blah (0.9s)
 (...)
 Successfully uninstalled blah-5.2.1
-✓ blah removed from npm
+✓ npm.remove: blah (2.4s)
 Removed 3/3 packages
 ```
 

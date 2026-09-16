@@ -342,6 +342,15 @@ Trail conventions:
 - The finisher counts **per (package, manager) attempt**, matching the trail lines: a package acted on by two managers is `2/2`, not `1/1`.
 - A `✘` line is TTY-only, so failures also emit a `critical: Could not ...` (shown everywhere) as the durable record and the non-zero-exit rationale. Keep both despite the overlap on a TTY.
 
+Live line and trail vocabulary, settled on 2026-09-15:
+
+- One subject, `manager.operation`, built by `operation_subject()` in `execution.py` and painted with the theme's `invoked_command` slot, names the manager on the per-call spinner and on the manager-keyed trail line alike, so a user follows one manager through both by the same token. The log-line label carries the bare manager ID in the same paint. A trail detail composes on the subject in parentheses (`✓ brew.cleanup (cache)`, `✘ brew.upgrade_all (cooldown)`), never in its place: `collect_from_managers` takes `data["detail"]`, not a replacement text.
+- Each indicator names what it covers and nothing finer. The spinner is per CLI call and carries the command (`⠙ cask.outdated: brew outdated --json=v2 (0.2s)`); a trail line is per task, and a task spans several calls, so it carries the subject alone.
+- The spinner's command is lean, not runnable: `_lean_command()` drops `pre_args`/`post_args` because the subject already names that scope. A `$` opens the complete, copy-pasteable invocation and belongs to the `INFO` disclosure only; an italic command without `$` is what runs now. Never both on one line.
+- Color carries status only (green `✓`, red `✘`, yellow `warning:`, blue `debug:`, all spoken for), so a new element takes an attribute rather than a hue: italic for the command, faint for the timer. Every attribute is gated by `_styling_enabled()` and degrades to plain, and italic is allow-listed per `TERM` (`ITALIC_CAPABLE_TERMS`).
+- The failure glyph is click-extra's `KO_GLYPH` (`✘`, U+2718), never its U+2717 look-alike; `test_trail_glyph_matches_the_emitted_one` holds every mention in the tree to it.
+- A notice raised while a child may own the terminal line (the stall watchdog, armed by `_hidden_prompt_risk`) breaks the line before writing, so a `Password:` prompt with no trailing newline stays readable above it.
+
 ### Exit codes
 
 Action commands (`install`, `remove`, `upgrade <packages>`, `restore`) collect per-package failures and exit non-zero with a `critical:` summary. `-0`/`--zero-exit` opts out of that gate (see `exit_on_failures` in `cli.py`): the summary still prints but the exit stays `0`; usage and configuration errors keep exiting `2` regardless. Maintenance commands (`sync`, `cleanup`, `upgrade --all`) are best-effort: they mark a failed manager `✘` but stay exit-`0`. `doctor` is the third contract: read-only, it relays each manager's native diagnosis verbatim to stdout (the one deliberate exception to the raw-output-at-`DEBUG` rule, as the report is the product and cannot be parsed), reads health from the diagnostic command's exit code alone, and exits `1` when any manager reports problems (`-0` opts out).

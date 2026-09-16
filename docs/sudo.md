@@ -161,12 +161,12 @@ The probe also reads `sudo`'s answer: a user the `sudoers` policy does not autho
 
 Some managers run `sudo` from inside their own commands: on macOS, [`brew`](managers/brew.md) escalates while installing a cask with a privileged payload (the `macfuse` example above) and [`fink`](managers/fink.md) re-execs its root commands through `sudo`, while on Linux the AUR helpers call `sudo pacman` for their privileged phases, [`pacstall`](managers/pacstall.md) re-execs itself through `sudo pacstall`, [`shelly`](managers/shelly.md) calls `sudo` from inside every mutating verb, and [`topgrade`](managers/topgrade.md) drives each privileged step through its own per-step `sudo`. `mpm` never wraps these managers in `sudo` (`brew` even refuses to run as root, and `topgrade` warns and prompts when launched as root), and most of their runs never escalate, so a stock `mpm upgrade` does not pre-authenticate for them: prompting on every run would be worse than the rare mid-run prompt it avoids.
 
-Three mechanisms cover that rare prompt instead. When the up-front probe finds the credential cache already warm, the keepalive is armed for internal escalators too, so their mid-run `sudo` spends the cache silently. On a cold cache, such a manager is held back from the concurrent batch and run last, on its own ([why](concurrency.md#managers-that-escalate-on-their-own)), and its call runs without a spinner, naming itself once on a static line instead. The prompt the tool prints therefore lands on a fresh line of a still terminal, to be answered. A call that then stays silent for 30 seconds draws a warning:
+Three mechanisms cover that rare prompt instead. When the up-front probe finds the credential cache already warm, the keepalive is armed for internal escalators too, so their mid-run `sudo` spends the cache silently. On a cold cache, such a manager is held back from the concurrent batch and run last, on its own ([why](concurrency.md#managers-that-escalate-on-their-own)), and its call runs without a spinner, naming itself once on a static line instead, which says it may ask for your password. The prompt the tool prints therefore lands on a fresh line of a still terminal, to be answered. A call that then stays silent for 30 seconds draws a warning:
 
 ```shell-session
 $ mpm install macfuse
 (...)
-· cask.install: brew install --quiet macfuse
+· cask.install: brew install --quiet macfuse (may ask for your password)
 Password:
 warning:cask.install: No output for 30s: may be waiting on a hidden password prompt. Last output: "==> Running installer for macfuse; your password may be necessary."
 ```

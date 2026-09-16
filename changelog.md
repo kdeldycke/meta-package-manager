@@ -32,7 +32,7 @@
 - [mpm] Label every line logged during an operation with it, `warning:brew.install:`, matching the spinner and the trail.
 - [mpm] Hold the progress spinner still during a call whose manager may prompt for a `sudo` password, so the prompt stays on screen instead of being erased by the animation.
 - [mpm] Start the hidden-password-prompt notice on a fresh line, so it no longer runs on from the `Password:` prompt it warns about.
-- [mpm] Name a call held still for a possible `sudo` prompt on a static line, instead of leaving the terminal blank until it ends.
+- [mpm] Name a call held still for a possible `sudo` prompt on a static line saying it may ask for your password, instead of leaving the terminal blank until it ends.
 - [mpm] Run a manager that escalates internally after the concurrent batch, on its own, so its password prompt gets a terminal no other manager is writing to.
 - [mpm] Exit quietly on a Ctrl+C pressed while a run is already shutting down, instead of printing a `threading` traceback.
 - [dnf,dnf5,yum] Fix version detection against `dnf5`, whose banner was read as the version `dnf5`, dropping every RPM front-end from the pool on Fedora 41 and later.

@@ -44,7 +44,7 @@ from click_extra.color import COLOR_ENVVARS
 from click_extra.spinner import Spinner
 from extra_platforms import UNIX, is_any_windows
 
-from meta_package_manager.execution import STILL_CALL_MARKER
+from meta_package_manager.execution import STILL_CALL_HINT, STILL_CALL_MARKER
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
@@ -1673,8 +1673,9 @@ def test_still_call_prints_its_label_once(
 ):
     """A call whose spinner is held still names itself on a static line instead.
 
-    Without the line the terminal stays blank for the whole call. The line ends
-    before the child starts, so a prompt the tool raises lands on a fresh line.
+    Without the line the terminal stays blank for the whole call. The line says
+    a password may be asked, and ends before the child starts, so a prompt the
+    tool raises lands on a fresh line below that hint.
     """
     assert not _SUDO_CACHE_WARM.is_set()
     for envvar in COLOR_ENVVARS:
@@ -1688,7 +1689,7 @@ def test_still_call_prints_its_label_once(
     with patch("sys.stderr.isatty", return_value=True):
         manager.run_cli("-c", script)
     label = manager._call_label((manager.cli_path, "-c", script))
-    line = f"{STILL_CALL_MARKER} {label}"
+    line = f"{STILL_CALL_MARKER} {label} ({STILL_CALL_HINT})"
     assert (f"{line}\n" in capsys.readouterr().err) is announced
 
 

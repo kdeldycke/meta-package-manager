@@ -402,6 +402,14 @@ the child starts. Deliberately not a spinner frame: a frozen `⠋` reads as a
 hung animation, where a neutral dot reads as a line that is not meant to move.
 """
 
+STILL_CALL_HINT: Final = "may ask for your password"
+"""Hint closing the static line of a call held still, faint like a timer.
+
+It says why the line does not move and what may appear below it. It says
+"may", since most such calls never escalate, and it never tells the user to
+type, for the reason the stall notice does not: the prompt may never come.
+"""
+
 ITALIC_CAPABLE_TERMS: Final = ("xterm", "tmux")
 """`TERM` prefixes whose terminfo declares the italic capability (`sitm`).
 
@@ -1522,7 +1530,11 @@ class CLIExecutor:
                 # it leaves a prompt the tool raises at the start of a fresh line,
                 # and nothing redraws over it afterwards. The line stays on screen,
                 # since a prompt may sit below it by the time the call ends.
-                echo(f"{STILL_CALL_MARKER} {self._call_label(clean_args)}", err=True)
+                hint = f" ({STILL_CALL_HINT})"
+                if _styling_enabled():
+                    hint = style(hint, dim=True)
+                label = self._call_label(clean_args)
+                echo(f"{STILL_CALL_MARKER} {label}{hint}", err=True)
             watchdog = _StallWatchdog(subject) if hidden_prompt else None
             try:
                 # run_cli() owns the spawn: it registers the child in click-extra's

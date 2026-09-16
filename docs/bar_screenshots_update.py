@@ -14,20 +14,26 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Capture the SwiftBar/Xbar plugin's menu from a real SwiftBar.
+"""Capture the SwiftBar/Xbar plugin's menu, its About submenu and its preferences pane.
 
 The macOS counterpart of `docs/gnome_screenshots_update.py`, and the same
-bargain: a real host renders the real plugin, and only the package data is held
-still. SwiftBar is installed from a pinned, checksummed release zip, fed a
-plugin that prints what {class}`~meta_package_manager.bar_plugin_renderer.BarPluginRenderer`
-renders from {data}`FIXTURE`, and its menu is opened and photographed by window
-id.
+bargain: a real host runs the real plugin, and only the package data is held
+still. Each host is installed from a pinned, checksummed release zip and handed
+`meta_package_manager/bar_plugin.py` itself. The `mpm` that plugin resolves is
+a stand-in planted at {data}`FAKE_MPM`, which answers `--version` with the
+project's own and serves the menu
+{class}`~meta_package_manager.bar_plugin_renderer.BarPluginRenderer` renders
+from {data}`FIXTURE`. So the About submenu names a resolution that really
+happened, and the preferences pane lists the variables the plugin really
+declares. Every frame is photographed by window bounds.
 
 Driven by `.github/workflows/docs-screenshots.yaml`. A local run works the same
-way, on any Mac, and leaves the machine's own SwiftBar configuration alone:
+way, on any Mac whose login shell answers `mpm` with nothing, and leaves the
+machine's own SwiftBar configuration alone. A glob on the file stems selects a
+subset:
 
 ```shell-session
-$ uv run --frozen -- python docs/bar_screenshots_update.py
+$ uv run --frozen -- python docs/bar_screenshots_update.py --only 'swiftbar-about-*'
 ```
 
 ```{caution}
@@ -42,9 +48,11 @@ its release dismissing the menu the way a second click would.
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import hashlib
 import json
 import os
+import shutil
 import struct
 import subprocess
 import sys
@@ -55,6 +63,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory, gettempdir
 from typing import NamedTuple
 
+from meta_package_manager import __version__
 from meta_package_manager.bar_plugin_renderer import BarPluginRenderer
 
 TYPE_CHECKING = False
@@ -69,6 +78,67 @@ inventory and a reader comparing the two pages sees the same packages.
 """
 
 ASSET_DIR = PROJECT_ROOT / "docs" / "assets"
+
+PLUGIN_SOURCE = PROJECT_ROOT / "meta_package_manager" / "bar_plugin.py"
+"""The plugin, planted into each host's folder as it ships.
+
+A copy rather than a symlink. The plugin resolves its own path and walks up the
+folders above it for the project that installed it, and a link into this
+checkout would hand it the checkout's `uv.lock`, then the real `mpm` of its
+virtualenv, then whatever this runner has outdated. A copy sits under a
+temporary folder with nothing above it, so the walk finds nothing and the
+plugin falls through to the `mpm` on its `PATH`, which is {data}`FAKE_MPM`.
+"""
+
+FAKE_MPM = Path("/usr/local/bin/mpm")
+"""Where the stand-in `mpm` is planted, and so the command the About submenu names.
+
+The plugin resolves `mpm` off its `PATH`, and each host sets that `PATH` its
+own way. SwiftBar starts every plugin through a login shell (`bash -l -c`),
+whose `path_helper` puts `/usr/local/bin` on it from `/etc/paths`. Xbar starts
+the file directly, with its own launchd environment and whatever a `.vars.json`
+beside the plugin adds to it, which is how {func}`write_plugin` hands it the
+same folder. A path a reader recognizes as an install location, rather than a
+scratch folder, is what makes the line worth photographing.
+
+A machine whose login shell already answers `mpm` from somewhere earlier on
+that `PATH` would have its own resolved instead, so {func}`plant_fake_mpm`
+refuses to run there rather than photograph a real installation.
+"""
+
+FAKE_MPM_SOURCE = """#!/bin/bash
+# Stand-in for the `mpm` CLI, serving the plugin a recorded menu.
+#
+# Answers the three invocations the plugin makes: the `--version` probe, the
+# best-effort `sync`, and the `outdated --plugin-output` query whose output is
+# the menu. Every path is baked in at planting time, since a plugin's
+# environment is the host's to set.
+printf 'PATH=%s\\nargv=%s\\n' "$PATH" "$*" >> 'LOG'
+for arg in "$@"; do
+    case "$arg" in
+        --version)
+            echo 'mpm, version VERSION'
+            exit 0
+            ;;
+        outdated)
+            cat 'MENU'
+            exit 0
+            ;;
+    esac
+done
+exit 0
+"""
+"""Planted with its `LOG`, `VERSION` and `MENU` placeholders filled in."""
+
+MENU_FILE: Path | None = None
+"""The rendered menu of the shot in progress, which the stand-in serves verbatim."""
+
+FAKE_MPM_LOG: Path | None = None
+"""Every invocation the stand-in received, with the `PATH` it ran under.
+
+The one record of what each host handed the plugin, and so of why a resolution
+went wrong. Kept with the diagnostics when a caller asks for any.
+"""
 
 
 class Host(NamedTuple):
@@ -166,6 +236,30 @@ Matches the GNOME captures. It is also what puts the menu's own shadow in the
 frame, which a rectangle cropped to the menu's bounds cuts off.
 """
 
+WINDOW_MARGIN = 48
+"""Desktop kept around a window, in pixels.
+
+Wider than {data}`CAPTURE_MARGIN`: a window casts a far softer and deeper
+shadow than a menu, and a margin that cuts it leaves a hard edge in the frame.
+"""
+
+PREFERENCES_PANE = "Code Plugins"
+"""Toolbar item of SwiftBar's preferences holding the plugin's own settings.
+
+Also the title the window takes once that pane is selected, which is what the
+capture waits on.
+"""
+
+SCROLL_STEPS = (-400,) * 6
+"""Scroll wheel deltas posted over the preferences pane to reach its foot.
+
+Pixels, and far more of them than the pane can travel: past the end the view
+rubber-bands and settles, and the settle is waited out before the shot. The
+sign is checked rather than assumed, since the system inverts a wheel event
+when natural scrolling is on: a frame identical to the one taken at the top
+means the wheel ran the wrong way, and the steps are posted again negated.
+"""
+
 # Why the menu bar carries no Control Center modules.
 #
 # Fourteen of them were shown here for a while, to widen the cluster the plugin's
@@ -202,9 +296,12 @@ Blank rather than an icon, because whatever it drew would be in frame and would
 have to mean something. A gap means nothing, which is what is wanted.
 """
 
-PLUGIN_NAME = "mpm.1h.sh"
+PLUGIN_NAME = "mpm.1h.py"
 """Filename the plugin is planted under, which is also the name AppKit keys its
 status item's remembered position by.
+
+Both hosts run a file by its shebang, so the extension is documentation: this
+one says what the file is.
 """
 
 MENU_MARKER = "🎁"
@@ -333,28 +430,63 @@ MENU_TIMEOUT = 60
 
 
 class Shot(NamedTuple):
-    """One captured image: a host, the two plugin variables, and an appearance."""
+    """One capture: a host, the two plugin variables, an appearance and a subject."""
 
     host: Host
     group_by_manager: bool
     table_rendering: bool
     dark: bool
+    subject: str = "menu"
+    """What the frame holds.
+
+    `menu` is the plugin's menu as it opens. `about` is the same menu with its
+    *About* submenu unfolded, which names the `mpm` the plugin resolved.
+    `preferences` is the host's own settings pane for the plugin, photographed
+    twice: as it opens, and scrolled down to the plugin variables.
+    """
+
+    @property
+    def appearance(self) -> str:
+        """The system appearance, as the file stems spell it."""
+        return "dark" if self.dark else "light"
 
     @property
     def stem(self) -> str:
         """File stem, naming every axis that shapes the image."""
-        return "-".join((
-            self.host.name.lower(),
-            "grouped" if self.group_by_manager else "flat",
-            "table" if self.table_rendering else "standard",
-            "rendering",
-            "dark" if self.dark else "light",
-        ))
+        if self.subject == "menu":
+            return "-".join(
+                (
+                    self.host.name.lower(),
+                    "grouped" if self.group_by_manager else "flat",
+                    "table" if self.table_rendering else "standard",
+                    "rendering",
+                    self.appearance,
+                )
+            )
+        return "-".join((self.host.name.lower(), self.subject, self.appearance))
 
     @property
     def path(self) -> Path:
         """Destination of the capture, under `docs/assets/`."""
         return ASSET_DIR / f"{self.stem}.png"
+
+    @property
+    def variables_path(self) -> Path:
+        """Second frame of a `preferences` shot, scrolled to the plugin variables."""
+        return ASSET_DIR / "-".join(
+            (
+                self.host.name.lower(),
+                "preferences-variables",
+                f"{self.appearance}.png",
+            )
+        )
+
+    @property
+    def paths(self) -> tuple[Path, ...]:
+        """Every file the shot writes."""
+        if self.subject == "preferences":
+            return (self.path, self.variables_path)
+        return (self.path,)
 
     @property
     def environment(self) -> dict[str, str]:
@@ -372,19 +504,27 @@ class Shot(NamedTuple):
         }
 
 
-SHOTS = tuple(
-    Shot(host, submenu, table, dark)
-    for host in (SWIFTBAR, XBAR)
-    for submenu in (False, True)
-    for table in (False, True)
-    for dark in (False, True)
+SHOTS = (
+    *(
+        Shot(host, submenu, table, dark)
+        for host in (SWIFTBAR, XBAR)
+        for submenu in (False, True)
+        for table in (False, True)
+        for dark in (False, True)
+    ),
+    *(
+        Shot(SWIFTBAR, False, True, dark, subject)
+        for subject in ("about", "preferences")
+        for dark in (False, True)
+    ),
 )
 """Every combination the plugin's page documents.
 
 Both hosts, both layout switches, and both system appearances: the appearance is
 worth an axis of its own because the version diff has to stay legible on each,
 which is what {meth}`~meta_package_manager.bar_plugin_renderer.BarPluginRenderer.menu_diff_colors`
-picks its palette for.
+picks its palette for. Then, on SwiftBar alone and in the default layout, the
+About submenu and the preferences pane, each in both appearances.
 """
 
 
@@ -625,12 +765,12 @@ def spend_consent_prompt() -> None:
     dismiss_prompts()
 
 
-def write_plugin(plugins: Path, shot: Shot) -> None:
-    """Render this shot's menu and plant it as the plugin the host runs.
+def render_menu(shot: Shot) -> str:
+    """Render this shot's menu, as `mpm outdated --plugin-output` would print it.
 
-    The plugin prints a payload rendered ahead of time rather than calling `mpm`:
-    the subject is the menu, and a plugin that shells out would photograph
-    whatever the runner happened to have outdated.
+    Rendered here and served by the stand-in rather than produced by a real
+    `mpm` call: the subject is the menu, and an `mpm` querying the runner would
+    photograph whatever it happened to have outdated.
     """
     payload = json.loads(FIXTURE.read_text(encoding="UTF-8"))
     previous = dict(os.environ)
@@ -647,24 +787,106 @@ def write_plugin(plugins: Path, shot: Shot) -> None:
         # are the plugin dialect's own, derived per manager from what it
         # implements, and `mpm outdated --plugin-output` adds them on the way
         # out. Rendering without them raises `KeyError: 'upgrade_cli'`.
-        menu = renderer.render(renderer.add_upgrade_cli(payload))
+        return renderer.render(renderer.add_upgrade_cli(payload))
     finally:
         os.environ.clear()
         os.environ.update(previous)
 
+
+def write_plugin(plugins: Path, shot: Shot) -> None:
+    """Plant the plugin as it ships, and stage the menu its `mpm` will serve.
+
+    The plugin file is the real one, so the host reads its metadata (the
+    variables the preferences pane lists, the title the sidebar shows), and the
+    plugin itself prints the About submenu after resolving `mpm`. What it
+    resolves is the stand-in, which serves the menu rendered here.
+    """
+    if MENU_FILE is None:
+        msg = "No menu file to stage the rendering in."
+        raise RuntimeError(msg)
+    MENU_FILE.write_text(render_menu(shot), encoding="UTF-8")
+
     script = plugins / PLUGIN_NAME
-    body = "#!/bin/bash\ncat <<'MENU'\n" + menu.rstrip("\n") + "\nMENU\n"
-    script.write_text(body, encoding="UTF-8")
+    shutil.copyfile(PLUGIN_SOURCE, script)
     script.chmod(0o755)
 
+    # Xbar starts a plugin with its own launchd environment, whose `PATH` holds
+    # the system folders alone. The `.vars.json` it merges into that environment
+    # is where the stand-in's folder is added, ahead of them.
+    variables = plugins / f"{PLUGIN_NAME}.vars.json"
+    if shot.host is XBAR:
+        system_path = "/usr/bin:/bin:/usr/sbin:/sbin"
+        variables.write_text(
+            json.dumps({"PATH": f"{FAKE_MPM.parent}:{system_path}"}),
+            encoding="UTF-8",
+        )
+    else:
+        variables.unlink(missing_ok=True)
+
     # `trim=false` or the host strips the title back to nothing and the item
-    # collapses, taking the room it was planted for with it.
+    # collapses, taking the room it was planted for with it. Left out of a
+    # preferences shot: the pane's sidebar lists every plugin in the folder,
+    # and a spacer in it would be one more thing to explain.
     spacer = plugins / SPACER_NAME
+    if shot.subject == "preferences":
+        spacer.unlink(missing_ok=True)
+        return
     spacer.write_text(
         "#!/bin/bash\necho '" + " " * SPACER_WIDTH + "| trim=false'\n",
         encoding="UTF-8",
     )
     spacer.chmod(0o755)
+
+
+def plant_fake_mpm(scratch: Path) -> None:
+    """Put the stand-in `mpm` where every host's plugin resolves it.
+
+    Written straight into place when the folder allows it, which a hosted
+    runner does, and through `sudo` otherwise. Then checked from a bare login
+    shell, the environment a host starts a plugin in: anything but the stand-in
+    answering there means a real `mpm` sits earlier on that `PATH`, and the
+    captures would document that installation rather than the fixture.
+    """
+    if FAKE_MPM.exists():
+        msg = f"{FAKE_MPM} exists already: the captures would replace a real mpm."
+        raise RuntimeError(msg)
+    if MENU_FILE is None or FAKE_MPM_LOG is None:
+        msg = "The stand-in needs a menu file and a log to be planted."
+        raise RuntimeError(msg)
+    source = (
+        FAKE_MPM_SOURCE.replace("VERSION", __version__)
+        .replace("MENU", str(MENU_FILE))
+        .replace("LOG", str(FAKE_MPM_LOG))
+    )
+    staged = scratch / "mpm"
+    staged.write_text(source, encoding="UTF-8")
+    staged.chmod(0o755)
+    try:
+        shutil.copyfile(staged, FAKE_MPM)
+        FAKE_MPM.chmod(0o755)
+    except PermissionError:
+        run(("sudo", "install", "-m", "755", str(staged), str(FAKE_MPM)))
+    resolved = run(
+        ("env", "-i", f"HOME={Path.home()}", "/bin/bash", "-l", "-c", "command -v mpm"),
+        check=False,
+    ).stdout.strip()
+    if resolved != str(FAKE_MPM):
+        remove_fake_mpm()
+        msg = (
+            f"A login shell resolves mpm to {resolved or 'nothing'}, not to {FAKE_MPM}."
+        )
+        raise RuntimeError(msg)
+    print(f"stand-in mpm planted at {FAKE_MPM}")
+
+
+def remove_fake_mpm() -> None:
+    """Take the stand-in back out, however it got in."""
+    if not FAKE_MPM.exists():
+        return
+    try:
+        FAKE_MPM.unlink()
+    except PermissionError:
+        run(("sudo", "rm", "-f", str(FAKE_MPM)), check=False)
 
 
 def position_keys(plugins: Path) -> tuple[str, ...]:
@@ -771,8 +993,7 @@ for (let i = 0; i < list.count; i++) {
     }
 }
 JSON.stringify(boxes);
-"""
-        .replace("HOST", host.name)
+""".replace("HOST", host.name)
         .replace("LOW", str(low))
         .replace("HIGH", str(high)),
         language="JXA",
@@ -1211,6 +1432,45 @@ def menu_bounds(host: Host) -> dict[str, float] | None:
     }
 
 
+def menu_row(host: Host, *selectors: str) -> tuple[float, float] | None:
+    """Centre of one row of the open menu, or `None` when the host shows none.
+
+    Each selector is an AppleScript reference to a `menu item`, an index or a
+    quoted name, and each one after the first descends into the submenu of the
+    row before it. The last menu bar is the status bar, an agent app having no
+    app menu of its own, and the first item carrying a menu is the plugin's:
+    the spacer has none.
+
+    SwiftBar only. Xbar answers no accessibility at all, so its rows are
+    reckoned from the menu's bounds instead.
+    """
+    reference = "theItem"
+    for selector in selectors:
+        reference = f"menu item {selector} of menu 1 of {reference}"
+    reply = osascript(
+        bounded(f"""
+tell application "System Events"
+    tell process "{host.name}"
+        set theBar to menu bar (count of menu bars)
+        repeat with theItem in menu bar items of theBar
+            try
+                set theRow to {reference}
+                set {{rowX, rowY}} to position of theRow
+                set {{rowW, rowH}} to size of theRow
+                return ((rowX + rowW / 2) as string) & " " & ((rowY + rowH / 2) as string)
+            end try
+        end repeat
+        return "none"
+    end tell
+end tell
+""")
+    )
+    if reply == "none":
+        return None
+    left, top = (float(value) for value in reply.split())
+    return left, top
+
+
 def expand_first_section(host: Host, bounds: dict[str, float]) -> None:
     """Open the first group of a grouped menu, however this host opens one.
 
@@ -1225,36 +1485,188 @@ def expand_first_section(host: Host, bounds: dict[str, float]) -> None:
     answering nothing.
     """
     if host is SWIFTBAR:
-        reply = osascript(
-            bounded(f"""
+        row = menu_row(host, "1")
+        if row is None:
+            return
+        mouse("click", *row)
+    else:
+        mouse("move", bounds["x"] + FIRST_ROW[0], bounds["y"] + FIRST_ROW[1])
+    time.sleep(3)
+
+
+def unfold_about(host: Host) -> None:
+    """Rest the pointer on the plugin's *About* row until its submenu unfolds.
+
+    A hover rather than a click: a submenu opens on the pointer resting on its
+    row, where a click on that row closes the whole menu. Asked for by name,
+    and the first row of that name is the plugin's own, the host's *About*
+    sitting at the foot of the menu after it.
+    """
+    row = menu_row(host, '"About"')
+    if row is None:
+        msg = f"{host.name} shows no About row"
+        raise RuntimeError(msg)
+    mouse("move", *row)
+    time.sleep(3)
+
+
+def open_preferences(host: Host) -> None:
+    """From the open menu, reach *Preferences…* in the host's submenu and click it.
+
+    The pointer rests on the *SwiftBar* row first, until its submenu unfolds: a
+    row of a closed submenu reports a position, but not one worth clicking.
+    """
+    parent = menu_row(host, '"SwiftBar"')
+    if parent is None:
+        msg = f"{host.name} shows no SwiftBar row"
+        raise RuntimeError(msg)
+    mouse("move", *parent)
+    time.sleep(3)
+    row = menu_row(host, '"SwiftBar"', '"Preferences…"')
+    if row is None:
+        msg = f"{host.name} shows no Preferences… row in its SwiftBar submenu"
+        raise RuntimeError(msg)
+    mouse("click", *row)
+
+
+def host_windows(host: Host) -> list[dict[str, float | str]]:
+    """The host's ordinary windows, with their titles, from the window server.
+
+    Layer 0 is where a titled window lives, as opposed to the menu layers
+    {func}`menu_bounds` reads. The title is what tells the preferences window
+    apart, and what says which of its panes is showing: the window takes the
+    selected pane's name.
+    """
+    reply = osascript(
+        """
+ObjC.import("CoreGraphics");
+ObjC.import("Foundation");
+const raw = $.CGWindowListCopyWindowInfo(17, 0);
+const list = ObjC.castRefToObject(raw);
+const boxes = [];
+for (let i = 0; i < list.count; i++) {
+    const w = list.objectAtIndex(i);
+    const owner = ObjC.unwrap(w.objectForKey("kCGWindowOwnerName"));
+    const layer = ObjC.unwrap(w.objectForKey("kCGWindowLayer"));
+    if (owner === "HOST" && layer === 0) {
+        const b = ObjC.deepUnwrap(w.objectForKey("kCGWindowBounds"));
+        const rawName = w.objectForKey("kCGWindowName");
+        const name = rawName.isNil() ? "" : ObjC.unwrap(rawName);
+        boxes.push({name: name, x: b.X, y: b.Y, width: b.Width, height: b.Height});
+    }
+}
+JSON.stringify(boxes);
+""".replace("HOST", host.name),
+        language="JXA",
+    )
+    boxes: list[dict[str, float | str]] = json.loads(reply)
+    return boxes
+
+
+def wait_for_window(host: Host, title: str | None) -> dict[str, float]:
+    """Wait for the host to show a window, titled as asked when a title is given."""
+    deadline = time.monotonic() + MENU_TIMEOUT
+    while time.monotonic() < deadline:
+        for window in host_windows(host):
+            if float(window["width"]) < 200:
+                continue
+            if title is None or window["name"] == title:
+                return {
+                    key: float(window[key]) for key in ("x", "y", "width", "height")
+                }
+        time.sleep(0.5)
+    wanted = "a window" if title is None else f"a window titled {title!r}"
+    msg = f"{host.name} opened no {wanted}"
+    raise RuntimeError(msg)
+
+
+def toolbar_item(host: Host, label: str) -> tuple[float, float]:
+    """Centre of a toolbar item of the host's front window, found by its label."""
+    reply = osascript(
+        bounded(f"""
 tell application "System Events"
     tell process "{host.name}"
-        set theBar to menu bar (count of menu bars)
-        repeat with theItem in menu bar items of theBar
+        repeat with theElement in UI elements of toolbar 1 of window 1
             try
-                set theRow to menu item 1 of menu 1 of theItem
-                set {{rowX, rowY}} to position of theRow
-                set {{rowW, rowH}} to size of theRow
-                return ((rowX + rowW / 2) as string) & " " & ((rowY + rowH / 2) as string)
+                if (name of theElement) is "{label}" or (description of theElement) is "{label}" then
+                    set {{itemX, itemY}} to position of theElement
+                    set {{itemW, itemH}} to size of theElement
+                    return ((itemX + itemW / 2) as string) & " " & ((itemY + itemH / 2) as string)
+                end if
             end try
         end repeat
         return "none"
     end tell
 end tell
 """)
+    )
+    if reply == "none":
+        msg = f"{host.name} shows no {label!r} toolbar item"
+        raise RuntimeError(msg)
+    left, top = (float(value) for value in reply.split())
+    return left, top
+
+
+def scroll(deltas: tuple[int, ...]) -> None:
+    """Post scroll wheel events under the pointer, in pixels: negative is down.
+
+    Real events on the HID tap, like the clicks: the pane is a SwiftUI scroll
+    view, which answers the wheel and nothing else this driver can send it.
+    """
+    print(
+        swift(
+            """
+        import CoreGraphics
+        import Foundation
+        let source = CGEventSource(stateID: .hidSystemState)
+        for argument in CommandLine.arguments.dropFirst() {
+            let delta = Int32(argument) ?? 0
+            CGEvent(scrollWheelEvent2Source: source, units: .pixel, wheelCount: 1,
+                    wheel1: delta, wheel2: 0, wheel3: 0)?
+                .post(tap: .cghidEventTap)
+            usleep(150000)
+        }
+        print("scrolled by " + CommandLine.arguments.dropFirst().joined(separator: " "))
+        """,
+            *(str(delta) for delta in deltas),
         )
-        if reply == "none":
-            return
-        left, top = (float(value) for value in reply.split())
-        mouse("click", left, top)
-    else:
-        mouse("move", bounds["x"] + FIRST_ROW[0], bounds["y"] + FIRST_ROW[1])
-    time.sleep(3)
+    )
 
 
-def capture(shot: Shot, plugins: Path) -> None:
-    """Render one shot's menu, open it, and photograph it."""
-    print(f"Capturing {shot.path.name}")
+def park_pointer() -> None:
+    """Move the pointer off everything in frame, so no hover state is photographed."""
+    width, height = DISPLAY_MODE
+    mouse("move", width - 2, height / 2)
+
+
+def photograph(
+    frame: tuple[float, float, float, float], target: Path, label: str
+) -> None:
+    """Write one region of the screen to `target`, with the diagnostics asked for."""
+    left, top, right, bottom = frame
+    rect = f"{left},{top},{right - left},{bottom - top}"
+    if DIAGNOSTICS:
+        report_windows(label)
+        print(f"  frame: {rect}")
+        if CAPTURE_SCREENS:
+            DIAGNOSTICS.mkdir(parents=True, exist_ok=True)
+            run(
+                (
+                    "screencapture",
+                    "-x",
+                    "-o",
+                    "-t",
+                    "png",
+                    str(DIAGNOSTICS / f"{label}-screen.png"),
+                ),
+                check=False,
+            )
+    run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(target)))
+    print(f"  {target.name}: {png_size(target)}")
+
+
+def open_menu(shot: Shot, plugins: Path) -> dict[str, float]:
+    """Plant this shot's plugin, bring the host up on it, and open its menu."""
     write_plugin(plugins, shot)
     # Before the host starts, since what it reports is the age of the plugin's
     # run and that run happens as it comes up.
@@ -1269,22 +1681,29 @@ def capture(shot: Shot, plugins: Path) -> None:
         hold_clock()
     mouse("click", *status_item(shot.host))
     deadline = time.monotonic() + MENU_TIMEOUT
-    bounds = None
     while time.monotonic() < deadline:
         bounds = menu_bounds(shot.host)
         if bounds is not None:
-            break
+            return bounds
         time.sleep(0.5)
-    if bounds is None:
-        msg = f"{shot.stem}: no menu opened"
-        raise RuntimeError(msg)
+    msg = f"{shot.stem}: no menu opened"
+    raise RuntimeError(msg)
+
+
+def capture_menu(shot: Shot, plugins: Path) -> None:
+    """Open the menu, unfold whatever the shot asks for, and photograph it."""
+    bounds = open_menu(shot, plugins)
 
     if shot.group_by_manager:
         expand_first_section(shot.host, bounds)
-        bounds = menu_bounds(shot.host)
-        if bounds is None:
-            msg = f"{shot.stem}: the menu closed while opening a group"
+    if shot.subject == "about":
+        unfold_about(shot.host)
+    if shot.group_by_manager or shot.subject == "about":
+        unfolded = menu_bounds(shot.host)
+        if unfolded is None:
+            msg = f"{shot.stem}: the menu closed while unfolding a row"
             raise RuntimeError(msg)
+        bounds = unfolded
 
     # The whole panel, the host's own rows included. They were cut off for a
     # while, SwiftBar's footer carrying an *Updated N Seconds Ago* clock that
@@ -1304,29 +1723,65 @@ def capture(shot: Shot, plugins: Path) -> None:
     # clock has been ticking since the last shot.
     if CLOCK_PINNED:
         hold_clock()
-    rect = f"{left},{top},{right - left},{bottom - top}"
-    if DIAGNOSTICS:
-        report_windows(shot.stem)
-        print(f"  frame: {rect}")
-        if CAPTURE_SCREENS:
-            DIAGNOSTICS.mkdir(parents=True, exist_ok=True)
-            run(
-                (
-                    "screencapture",
-                    "-x",
-                    "-o",
-                    "-t",
-                    "png",
-                    str(DIAGNOSTICS / f"{shot.stem}-screen.png"),
-                ),
-                check=False,
-            )
-    run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(shot.path)))
+    photograph((left, top, right, bottom), shot.path, shot.stem)
 
     # Dismiss the menu so the next shot starts from a bare desktop.
     press_escape()
     time.sleep(1)
-    print(f"  {shot.path.name}: {png_size(shot.path)}")
+
+
+def capture_preferences(shot: Shot, plugins: Path) -> None:
+    """Open the host's preferences on the plugin's pane and photograph it twice.
+
+    Once as the pane opens, on the plugin's metadata, and once scrolled to its
+    foot, on the plugin variables and the buttons that save them. The pane is a
+    fixed 750 by 400 points and cannot be resized, which is why two frames are
+    needed: nothing in the first says that the second exists
+    ([swiftbar/SwiftBar#555](https://github.com/swiftbar/SwiftBar/issues/555)).
+    """
+    open_menu(shot, plugins)
+    open_preferences(shot.host)
+    wait_for_window(shot.host, None)
+    mouse("click", *toolbar_item(shot.host, PREFERENCES_PANE))
+    window = wait_for_window(shot.host, PREFERENCES_PANE)
+    park_pointer()
+    time.sleep(2)
+    width, height = DISPLAY_MODE
+    frame = (
+        max(0.0, window["x"] - WINDOW_MARGIN),
+        max(0.0, window["y"] - WINDOW_MARGIN),
+        min(float(width), window["x"] + window["width"] + WINDOW_MARGIN),
+        min(float(height), window["y"] + window["height"] + WINDOW_MARGIN),
+    )
+    photograph(frame, shot.path, shot.stem)
+
+    # The pointer over the pane, the wheel run past its end, the bounce waited
+    # out, the pointer parked again. Then the other way round, should the first
+    # frame show that nothing moved.
+    pane = (
+        window["x"] + window["width"] * 0.66,
+        window["y"] + window["height"] * 0.65,
+    )
+    top_frame = shot.path.read_bytes()
+    for deltas in (SCROLL_STEPS, tuple(-delta for delta in SCROLL_STEPS)):
+        mouse("move", *pane)
+        scroll(deltas)
+        time.sleep(2)
+        park_pointer()
+        time.sleep(1)
+        photograph(frame, shot.variables_path, f"{shot.stem}-variables")
+        if shot.variables_path.read_bytes() != top_frame:
+            break
+        print("  the wheel moved nothing this way, trying the other")
+
+
+def capture(shot: Shot, plugins: Path) -> None:
+    """Photograph one shot, whatever its subject."""
+    print(f"Capturing {', '.join(path.name for path in shot.paths)}")
+    if shot.subject == "preferences":
+        capture_preferences(shot, plugins)
+    else:
+        capture_menu(shot, plugins)
 
 
 def diagnose(label: str, host: Host) -> None:
@@ -1378,14 +1833,17 @@ def require_macos() -> None:
         sys.exit("These captures need macOS, and a bar app to drive.")
 
 
-def capture_all() -> None:
-    """Install both hosts, then walk every shot."""
+def capture_all(shots: tuple[Shot, ...]) -> None:
+    """Install the hosts the shots need, plant the stand-in, then walk every shot."""
     require_macos()
-    for host in (SWIFTBAR, XBAR):
+    hosts = tuple(
+        host for host in (SWIFTBAR, XBAR) if any(shot.host is host for shot in shots)
+    )
+    for host in hosts:
         install(host)
     raise_display()
     spend_consent_prompt()
-    global CLOCK_PINNED, SYSTEM_ITEMS_EDGE
+    global CLOCK_PINNED, SYSTEM_ITEMS_EDGE, MENU_FILE, FAKE_MPM_LOG
     report_menu_bar("startup")
     wallpaper = desktop_picture()
     paint_desktop()
@@ -1397,6 +1855,11 @@ def capture_all() -> None:
     print(f"the system's menu bar items start at {SYSTEM_ITEMS_EDGE}")
 
     with TemporaryDirectory(prefix="mpm-bar-capture-") as name:
+        # Beside the plugin folder rather than in it: a host loads every file
+        # it finds in that folder as a plugin.
+        MENU_FILE = Path(name) / "menu.txt"
+        FAKE_MPM_LOG = (DIAGNOSTICS or Path(name)) / "fake-mpm.log"
+        FAKE_MPM_LOG.parent.mkdir(parents=True, exist_ok=True)
         scratch = Path(name) / "plugins"
         scratch.mkdir(parents=True)
         # Remembered so a local run gives the developer their own plugins back.
@@ -1404,12 +1867,13 @@ def capture_all() -> None:
             ("defaults", "read", SWIFTBAR.domain, "PluginDirectory"),
             check=False,
         ).stdout.strip()
-        planted: list[Path] = []
+        planted: set[Path] = set()
         appearance: bool | None = None
         try:
+            plant_fake_mpm(Path(name))
             ASSET_DIR.mkdir(parents=True, exist_ok=True)
-            digests: dict[str, Shot] = {}
-            for shot in SHOTS:
+            digests: dict[str, Path] = {}
+            for shot in shots:
                 if shot.dark != appearance:
                     set_appearance(dark=shot.dark)
                     appearance = shot.dark
@@ -1418,21 +1882,29 @@ def capture_all() -> None:
                 plugins = shot.host.plugin_dir or scratch
                 plugins.mkdir(parents=True, exist_ok=True)
                 if shot.host.plugin_dir is not None:
-                    planted.append(plugins / PLUGIN_NAME)
-                    planted.append(plugins / SPACER_NAME)
+                    planted.update(
+                        plugins / leftover
+                        for leftover in (
+                            PLUGIN_NAME,
+                            f"{PLUGIN_NAME}.vars.json",
+                            SPACER_NAME,
+                        )
+                    )
                 try:
                     capture(shot, plugins)
                 except Exception:
                     diagnose(shot.stem, shot.host)
                     raise
 
-                digest = hashlib.sha256(shot.path.read_bytes()).hexdigest()
-                twin = digests.get(digest)
-                if twin is not None:
-                    msg = f"{shot.stem} and {twin.stem} came out byte-identical"
-                    raise RuntimeError(msg)
-                digests[digest] = shot
+                for path in shot.paths:
+                    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+                    twin = digests.get(digest)
+                    if twin is not None:
+                        msg = f"{path.name} and {twin.name} came out byte-identical"
+                        raise RuntimeError(msg)
+                    digests[digest] = path
         finally:
+            remove_fake_mpm()
             for host in (SWIFTBAR, XBAR):
                 run(
                     ("osascript", "-e", f'tell application "{host.name}" to quit'),
@@ -1479,7 +1951,7 @@ def capture_all() -> None:
 
 
 def main() -> None:
-    """Capture every shot."""
+    """Capture every shot, or the subset a glob selects."""
     global DIAGNOSTICS
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -1487,8 +1959,22 @@ def main() -> None:
         type=Path,
         help="Folder for a screenshot and window dump of any shot that fails.",
     )
-    DIAGNOSTICS = parser.parse_args().diagnostics
-    capture_all()
+    parser.add_argument(
+        "--only",
+        metavar="GLOB",
+        help="Capture only the shots whose file stem matches this glob, like "
+        "'swiftbar-preferences-*'.",
+    )
+    args = parser.parse_args()
+    DIAGNOSTICS = args.diagnostics
+    shots = tuple(
+        shot
+        for shot in SHOTS
+        if args.only is None or fnmatch.fnmatchcase(shot.stem, args.only)
+    )
+    if not shots:
+        sys.exit(f"No shot matches {args.only!r}.")
+    capture_all(shots)
 
 
 if __name__ == "__main__":

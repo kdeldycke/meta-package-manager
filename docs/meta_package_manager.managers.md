@@ -24,6 +24,7 @@
    meta_package_manager.managers.bin
    meta_package_manager.managers.composer
    meta_package_manager.managers.conda
+   meta_package_manager.managers.cpan
    meta_package_manager.managers.deb_get
    meta_package_manager.managers.dnf
    meta_package_manager.managers.dotnet

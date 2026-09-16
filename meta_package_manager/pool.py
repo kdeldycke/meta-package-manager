@@ -37,6 +37,7 @@ from .managers.asdf import ASDF
 from .managers.bin import Bin
 from .managers.composer import Composer
 from .managers.conda import Conda
+from .managers.cpan import CPAN
 from .managers.deb_get import Deb_Get
 from .managers.dnf import DNF, DNF5, YUM
 from .managers.dotnet import DotNet
@@ -135,6 +136,7 @@ manager_classes = (
     Cask,
     Composer,
     Conda,
+    CPAN,
     Deb_Get,
     DkpPacman,
     DNF,

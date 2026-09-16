@@ -79,10 +79,10 @@ def test_manager_classes_order():
 
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
-    assert len(manager_classes) == 89
-    # Fifty-seven extra beyond the built-in classes: the bundled config-defined
+    assert len(manager_classes) == 90
+    # Fifty-six extra beyond the built-in classes: the bundled config-defined
     # managers (apt-cyg, basalt, bob, bpkg, bun, cargo, cave, choco, chromebrew, claude-code-plugins,
-    # clib, cpan, elan, emacs, fink, gcloud, getnf, gh-ext, gup, haxelib, jpm, julia, juliaup, krew,
+    # clib, elan, emacs, fink, gcloud, getnf, gh-ext, gup, haxelib, jpm, julia, juliaup, krew,
     # macports, micro, ollama, opam, opkg, pamac, pearl, pi, pkg-tools, pipxu, pkgin, pkgm, platformio-core, pyenv,
     # raco, rustup, shelly, skills, slapt-get, soar, sorcery, steamcmd, stew, swupd, tlmgr,
     # topgrade, urpmi, vscode, vscodium, xcodes, yazi, zerobrew, zvm), shipped as

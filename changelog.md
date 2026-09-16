@@ -9,6 +9,7 @@
 - **Breaking:** [bar-plugin] Replace the `VAR_HIDE_WHEN_UP_TO_DATE` variable with `VAR_ALWAYS_VISIBLE`, which reads the other way round: set it to `false` to hide the icon.
 - [bar-plugin] Fix the menu crashing with a `TypeError` whenever a package's version pair was long enough to be elided.
 - [cpan] Stop reading `cpan`'s index-refresh progress lines as packages, which listed a `Fetching` upgrading from `with` to `HTTP::Tiny:`.
+- [cpan] List the core modules Debian and Ubuntu reach through symlinked `@INC` directories, which `cpan -l` skips. Upgrading one no longer ends in `is not recognized by any of the selected manager`.
 - [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
 - [bar-plugin] Add screenshots of SwiftBar's *About* submenu and preferences pane to the plugin page.
 - [gnome-shell] Photograph every combination of the menu's two layout switches for the extension page, the grouped ones with their first section unfolded.

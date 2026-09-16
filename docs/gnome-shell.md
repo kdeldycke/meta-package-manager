@@ -222,6 +222,10 @@ ok 1 - parseVersion nominal
 
 Static invariants (metadata, GSettings schema, stylesheet and icon drift) are enforced by `tests/test_gnome_extension.py` in the regular Python test suite. The [`tests-gnome-extension.yaml` workflow](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests-gnome-extension.yaml) runs the gjs suite, checks the sources with [`shexli`](https://pypi.org/project/shexli/) (the static analyzer extensions.gnome.org applies to every upload), packs the installable zip with `gnome-extensions pack`, and proves it installs with a `gnome-extensions install` round-trip.
 
+```{todo}
+Drop the `tree-sitter==0.25.2` pin the `shexli` job carries once the analyzer caps that dependency itself. `shexli` declares `tree-sitter>=0.25.0` with no ceiling, so a fresh install pairs core `0.26.0` with the `0.25.0` grammar, the newest `tree-sitter-javascript` published, and that pair segfaults on this extension every time. Tracked upstream as [extensions-web#398](https://gitlab.gnome.org/Infrastructure/extensions-web/-/issues/398).
+```
+
 Its `eslint` job holds the JavaScript to GNOME Shell's own coding style, with the [`eslint-config-gnome`](https://gitlab.gnome.org/World/javascript/eslint-config-gnome) rules declared by `gnome-shell/eslint.config.mjs` and pinned to the commit `gnome-shell` itself pins. No `package.json` or lockfile is committed: nobody would keep one refreshed, so the ESLint stack floats and a 7-day `npm --min-release-age` window gates the whole resolved tree, the same supply-chain guard `mpm --cooldown` applies to the packages `mpm` installs.
 
 To exercise the extension in a real session, install it from your checkout (see above), then run a nested GNOME Shell so crashes and reloads stay contained:

@@ -35,6 +35,42 @@ SwiftBar renders two things differently from Xbar: the outdated count sits in a 
 
 These variables only drive the menu layout: everything else comes from `mpm`'s own configuration file, which applies to every run the plugin triggers. See {doc}`configuration` for the search paths and the full schema.
 
+SwiftBar exposes them in its preferences, under *Code Plugins*. The pane opens on the plugin's metadata and cannot be resized, so the variables and the *Save in Plugin File* button sit below its fold ([swiftbar/SwiftBar#555](https://github.com/swiftbar/SwiftBar/issues/555)): scroll down to reach them.
+
+``````{tab-set}
+`````{tab-item} Light
+:sync: light
+
+````{grid} 1 2 2 2
+```{grid-item-card} As the pane opens
+:img-top: assets/swiftbar-preferences-light.png
+:link: /_images/swiftbar-preferences-light.png
+```
+
+```{grid-item-card} Scrolled down to the variables
+:img-top: assets/swiftbar-preferences-variables-light.png
+:link: /_images/swiftbar-preferences-variables-light.png
+```
+````
+`````
+
+`````{tab-item} Dark
+:sync: dark
+
+````{grid} 1 2 2 2
+```{grid-item-card} As the pane opens
+:img-top: assets/swiftbar-preferences-dark.png
+:link: /_images/swiftbar-preferences-dark.png
+```
+
+```{grid-item-card} Scrolled down to the variables
+:img-top: assets/swiftbar-preferences-variables-dark.png
+:link: /_images/swiftbar-preferences-variables-dark.png
+```
+````
+`````
+``````
+
 A macOS menu cannot scroll sideways, so `VAR_MAX_VERSION_WIDTH` keeps a row from outgrowing it. A version longer than the cap is shortened with an `…`, always on the side the two versions have in common, so the characters telling them apart stay on screen. SwiftBar carries the untruncated pair in the item tooltip. Homebrew casks are what makes this necessary: their `version,revision` pairs run to 50 characters, against 17 for the longest version anyone reads. Set the variable to `0` to render every version whole.
 
 ## Menu actions
@@ -240,6 +276,26 @@ The plugin prefers the `mpm` it is part of. It ships inside the package, so it w
 Failing that, it falls back to an `mpm` on the `PATH`, then to the module under the interpreter running the plugin, and under `python3`. Every candidate is run before it is ranked, so an unusable one is skipped instead of being picked.
 
 The menu answers that in place. Its last row, *About*, expands to three lines: the version this script advertises to its host, the release of the `mpm` it resolved, and the command that answered. The two are installed separately, so a bug report needs both: a plugin file copied into the host's folder stays at the version it was copied at while `mpm` moves under it.
+
+``````{tab-set}
+`````{tab-item} Light
+:sync: light
+
+```{image} assets/swiftbar-about-light.png
+:alt: The About submenu of the plugin, naming the mpm it resolved
+:align: center
+```
+`````
+
+`````{tab-item} Dark
+:sync: dark
+
+```{image} assets/swiftbar-about-dark.png
+:alt: The About submenu of the plugin, naming the mpm it resolved
+:align: center
+```
+`````
+``````
 
 When no candidate answers, or the one that answers is older than the version the plugin requires, the menu carries a bootstrap pair in place of the package list: an *Install mpm with uv* entry running `uv tool install --upgrade meta-package-manager`, and an *Open mpm installation instructions* entry opening {doc}`install` for the systems `uv` does not answer for.
 

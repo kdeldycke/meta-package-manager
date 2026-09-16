@@ -204,8 +204,9 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    # Sixteen captures across two hosts and both appearances, each restarting
-    # its host so a system appearance change reaches the menu.
+    # Twenty host restarts across two hosts and both appearances, since a system
+    # appearance change reaches a menu only through a restart. They produce
+    # twenty-two frames: the preferences pane is photographed twice per restart.
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

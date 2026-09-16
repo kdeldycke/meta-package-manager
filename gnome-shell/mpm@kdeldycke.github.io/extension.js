@@ -415,6 +415,19 @@ class MpmIndicator extends PanelMenu.Button {
                  * for icons. */
                 const title = `${manager.id} - ${count} ${packageLabel}`;
                 const failed = manager.errors.length > 0;
+                if (count === 0 && !failed) {
+                    /* A manager with nothing to report still earns its row,
+                     * which is how the menu says it ran, but not the expander
+                     * arrow of a submenu: that arrow promises packages behind
+                     * it and opens on an empty panel. Rendered as the header
+                     * the flat layout gives it instead. */
+                    this._reportSection.addMenuItem(
+                        new PopupMenu.PopupMenuItem(title, {
+                            reactive: false,
+                            style_class: 'mpm-manager-header',
+                        }));
+                    return;
+                }
                 /* The second argument is the submenu's own icon slot: asking
                  * for it only when there is something to report keeps the
                  * healthy rows flush with the flat layout. */

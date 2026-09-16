@@ -94,6 +94,7 @@
 - [gnome-shell] Render each package row's version diff as one label instead of five, so a report of a thousand packages scrolls smoothly.
 - [gnome-shell] Drop the blank band and separator the menu showed above *Checking…*, before a session's first report has anything to list.
 - [gnome-shell] Align the menu's version pairs in a table, mirroring the plugin's `VAR_TABLE_RENDERING`, with a setting to switch it off.
+- [gnome-shell] Drop the expander arrow from a manager with nothing to report, which opened on an empty panel.
 - [mpm] Replace the project's own forge sampler with repomatic's `sample-metrics`: the star-history charts and the manager cards' upstream readings now accrue in one committed CSV, appended and rendered by the new `metrics.yaml` workflow.
 - [mpm] Plot the benchmark's star-history charts on a logarithmic vertical axis, so the series orders of magnitude apart stay legible on one chart.
 - [nala] Sample the upstream project from GitLab, dropping the excuse that its forge went unqueried: the manager page gains the upstream stars and commit facts, and its live badges.

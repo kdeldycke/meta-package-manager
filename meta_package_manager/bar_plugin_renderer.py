@@ -38,7 +38,8 @@ from pathlib import Path
 
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
-from click_extra import echo, get_current_context
+from click_extra import echo
+from click_extra.color import invocation_color
 from click_extra.table import TableFormat, render_table
 
 from .bar_plugin import MPMPlugin
@@ -607,11 +608,13 @@ class BarPluginRenderer(MPMPlugin):
         SwiftBar or Xbar. TTY detection is meaningless for this dialect, which
         flags ANSI rendering per line with the `ansi=true`/`ansi=false`
         parameters. An explicit opt-out (`--color=never`, `NO_COLOR`) is still
-        honored: only the automatic (`None`) state is overridden.
+        honored: only the automatic (`None`) state is overridden. It is read
+        through {func}`~click_extra.color.invocation_color` rather than
+        `ctx.color`, so it also holds for a rendering done on a worker thread,
+        which the thread-local command context does not reach.
         """
         outdated_data = self.add_upgrade_cli(outdated_data)
-        ctx = get_current_context(silent=True)
-        color = ctx.color if ctx else None
+        color = invocation_color()
         echo(
             self.render(outdated_data).rstrip(),
             color=True if color is None else color,

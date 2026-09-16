@@ -20,6 +20,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 from collections import Counter
 from itertools import product
 from typing import ClassVar, cast
@@ -251,6 +252,29 @@ def _outdated_fixture(errors: list[str] | None = None) -> dict:
             "upgrade_all_cli": "shell=/bin/fake param1=upgrade param2=--all",
         },
     }
+
+
+def test_print_honors_a_color_opt_out_off_the_main_thread(
+    monkeypatch, capsys, fake_pool
+):
+    """An explicit `--no-color` strips the plugin output wherever it is rendered.
+
+    Only the automatic color state is forced on (see
+    `test_plugin_output_keeps_ansi`). The opt-out comes from the color the
+    invocation published for every thread, so it holds on a worker thread too,
+    where the thread-local command context is absent.
+    """
+    for var in (*COLOR_ENVVARS, "TERM"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setattr("click_extra.color._invocation_color", False)
+    worker = threading.Thread(
+        target=BarPluginRenderer().print, args=(_outdated_fixture(),)
+    )
+    worker.start()
+    worker.join()
+    output = capsys.readouterr().out
+    assert "pkg-one" in output
+    assert "\x1b[" not in output
 
 
 @pytest.mark.parametrize("align_columns", (True, False))

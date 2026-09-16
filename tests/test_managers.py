@@ -1064,11 +1064,11 @@ def _parsed_json_subscripts(source: str) -> tuple[str, ...]:
     helper: a parser decoding JSON some other way is out of reach here, and
     nothing in the pool currently does.
     """
-    findings = []
+    findings: list[str] = []
     for func in ast.walk(ast.parse(source)):
         if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
-        parsed = set()
+        parsed: set[str] = set()
         for node in ast.walk(func):
             if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call):
                 called = node.value.func

@@ -481,7 +481,7 @@ class MpmIndicator extends PanelMenu.Button {
      * right is what puts the arrows on one vertical line: a block sized to
      * its own text leaves each arrow wherever its latest version ends. */
     _versionWidths(rows) {
-        if (!this._settings.get_boolean('table-rendering'))
+        if (!this._settings.get_boolean('align-columns'))
             return null;
         return {
             old: Math.max(0, ...rows.map(

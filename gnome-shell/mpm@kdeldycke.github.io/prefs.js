@@ -63,7 +63,7 @@ export default class MpmPreferences extends ExtensionPreferences {
         menu.add(this._switchRow(settings, 'group-by-manager', {
             title: _('Group packages by manager'),
         }));
-        menu.add(this._switchRow(settings, 'table-rendering', {
+        menu.add(this._switchRow(settings, 'align-columns', {
             title: _('Center versions around the arrow'),
             subtitle: _('Sets them in a monospaced font.'),
         }));

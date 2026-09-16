@@ -23,11 +23,11 @@ The plugin is configurable with these environment variables:
 | Variable name              | Description                                                                      | Type    | Defaults             | SwiftBar support |                    Xbar support                    |
 | -------------------------- | -------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :------------------------------------------------: |
 | `VAR_GROUP_BY_MANAGER`     | Group each manager's packages into a section of its own.                         | Boolean | `False`              |        ✅        |                         ✅                         |
-| `VAR_TABLE_RENDERING`      | Centers versions around the arrow and aligns names in a monospaced font.         | Boolean | `True`               |        ✅        |                         ✅                         |
+| `VAR_ALIGN_COLUMNS`      | Centers versions around the arrow and aligns names in a monospaced font.         | Boolean | `True`               |        ✅        |                         ✅                         |
 | `VAR_MAX_VERSION_WIDTH`    | Widest a version renders in a menu line, in characters.                          | Number  | `18`                 |        ✅        |                         ✅                         |
 | `VAR_DEFAULT_FONT`         | Font parameters for regular text.                                                | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
 | `VAR_MONOSPACE_FONT`       | Font parameters for monospace text. Used for table rendering and error messages. | String  | `font=Menlo size=12` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
-| `VAR_HIDE_WHEN_UP_TO_DATE` | Hide the menu bar icon while nothing is outdated and no manager errored.         | Boolean | `False`              |        ✅        |                         ❌                         |
+| `VAR_ALWAYS_VISIBLE`       | Keep the menu bar icon while nothing is outdated and no manager errored.         | Boolean | `True`               |        ✅        |                         ❌                         |
 
 ```{note}
 SwiftBar renders two things differently from Xbar: the outdated count sits in a native badge on each manager header rather than in its label, and the grouped layout folds every section into an inline accordion ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)) that expands in place without dismissing the menu. Both are visible in the screenshots below.
@@ -106,22 +106,22 @@ The menu chrome is the host's, and only the version diff is the plugin's: its co
 :sync: light
 
 ````{grid} 1 2 2 2
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_ALIGN_COLUMNS = False</code></span>
 :img-top: assets/swiftbar-flat-standard-rendering-light.png
 :link: /_images/swiftbar-flat-standard-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span></br>(default)
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span></br>(default)
 :img-top: assets/swiftbar-flat-table-rendering-light.png
 :link: /_images/swiftbar-flat-table-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
 :img-top: assets/swiftbar-grouped-table-rendering-light.png
 :link: /_images/swiftbar-grouped-table-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_ALIGN_COLUMNS = False</code></span>
 :img-top: assets/swiftbar-grouped-standard-rendering-light.png
 :link: /_images/swiftbar-grouped-standard-rendering-light.png
 ```
@@ -132,22 +132,22 @@ The menu chrome is the host's, and only the version diff is the plugin's: its co
 :sync: dark
 
 ````{grid} 1 2 2 2
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_ALIGN_COLUMNS = False</code></span>
 :img-top: assets/swiftbar-flat-standard-rendering-dark.png
 :link: /_images/swiftbar-flat-standard-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span></br>(default)
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span></br>(default)
 :img-top: assets/swiftbar-flat-table-rendering-dark.png
 :link: /_images/swiftbar-flat-table-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
 :img-top: assets/swiftbar-grouped-table-rendering-dark.png
 :link: /_images/swiftbar-grouped-table-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_ALIGN_COLUMNS = False</code></span>
 :img-top: assets/swiftbar-grouped-standard-rendering-dark.png
 :link: /_images/swiftbar-grouped-standard-rendering-dark.png
 ```
@@ -162,22 +162,22 @@ The menu chrome is the host's, and only the version diff is the plugin's: its co
 :sync: light
 
 ````{grid} 1 2 2 2
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_ALIGN_COLUMNS = False</code></span>
 :img-top: assets/xbar-flat-standard-rendering-light.png
 :link: /_images/xbar-flat-standard-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span></br>(default)
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span></br>(default)
 :img-top: assets/xbar-flat-table-rendering-light.png
 :link: /_images/xbar-flat-table-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
 :img-top: assets/xbar-grouped-table-rendering-light.png
 :link: /_images/xbar-grouped-table-rendering-light.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_ALIGN_COLUMNS = False</code></span>
 :img-top: assets/xbar-grouped-standard-rendering-light.png
 :link: /_images/xbar-grouped-standard-rendering-light.png
 ```
@@ -188,22 +188,22 @@ The menu chrome is the host's, and only the version diff is the plugin's: its co
 :sync: dark
 
 ````{grid} 1 2 2 2
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_ALIGN_COLUMNS = False</code></span>
 :img-top: assets/xbar-flat-standard-rendering-dark.png
 :link: /_images/xbar-flat-standard-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span></br>(default)
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_GROUP_BY_MANAGER = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span></br>(default)
 :img-top: assets/xbar-flat-table-rendering-dark.png
 :link: /_images/xbar-flat-table-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_ALIGN_COLUMNS = True</code></span>
 :img-top: assets/xbar-grouped-table-rendering-dark.png
 :link: /_images/xbar-grouped-table-rendering-dark.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_GROUP_BY_MANAGER = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_ALIGN_COLUMNS = False</code></span>
 :img-top: assets/xbar-grouped-standard-rendering-dark.png
 :link: /_images/xbar-grouped-standard-rendering-dark.png
 ```

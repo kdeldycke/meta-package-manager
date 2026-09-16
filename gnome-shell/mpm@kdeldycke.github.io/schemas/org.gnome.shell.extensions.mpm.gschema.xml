@@ -4,6 +4,11 @@
      full parity table. Keys are sorted alphabetically. -->
 <schemalist>
   <schema id="org.gnome.shell.extensions.mpm" path="/org/gnome/shell/extensions/mpm/">
+    <key name="align-columns" type="b">
+      <default>true</default>
+      <summary>Center versions around the arrow</summary>
+      <description>Mirror of the Xbar/SwiftBar plugin VAR_ALIGN_COLUMNS variable: center each version pair around its arrow, so the arrow is what the eye follows down the menu and the versions grow outwards from it. Set in a monospaced font, which is what makes the padding measure equally. When disabled, each pair sits flush right in the menu font, where the arrow lands wherever its own text ends.</description>
+    </key>
     <key name="always-visible" type="b">
       <default>true</default>
       <summary>Always show the indicator</summary>
@@ -46,11 +51,6 @@
       <default>true</default>
       <summary>Show the outdated package count</summary>
       <description>Display the number of outdated packages next to the indicator icon.</description>
-    </key>
-    <key name="table-rendering" type="b">
-      <default>true</default>
-      <summary>Center versions around the arrow</summary>
-      <description>Mirror of the Xbar/SwiftBar plugin VAR_TABLE_RENDERING variable: center each version pair around its arrow, so the arrow is what the eye follows down the menu and the versions grow outwards from it. Set in a monospaced font, which is what makes the padding measure equally. When disabled, each pair sits flush right in the menu font, where the arrow lands wherever its own text ends.</description>
     </key>
     <key name="terminal-command" type="s">
       <default>''</default>

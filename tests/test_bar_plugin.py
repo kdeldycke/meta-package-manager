@@ -192,18 +192,18 @@ def test_search_mpm_resolves_a_symlinked_plugin(monkeypatch, tmp_path):
 
 
 def _pin_plugin_env(
-    monkeypatch, table_rendering: bool, os_appearance: str | None = None
+    monkeypatch, align_columns: bool, os_appearance: str | None = None
 ) -> None:
     """Pin the plugin environment variables so host values never leak in.
 
     `os_appearance` sets SwiftBar's `OS_APPEARANCE` variable when provided; it
     is deleted otherwise, so the host appearance never reaches the renderer.
     """
-    monkeypatch.setenv("VAR_TABLE_RENDERING", str(table_rendering))
+    monkeypatch.setenv("VAR_ALIGN_COLUMNS", str(align_columns))
     for var in (
         "SWIFTBAR",
         "VAR_DEFAULT_FONT",
-        "VAR_HIDE_WHEN_UP_TO_DATE",
+        "VAR_ALWAYS_VISIBLE",
         "VAR_MAX_VERSION_WIDTH",
         "VAR_MONOSPACE_FONT",
         "VAR_GROUP_BY_MANAGER",
@@ -253,7 +253,7 @@ def _outdated_fixture(errors: list[str] | None = None) -> dict:
     }
 
 
-@pytest.mark.parametrize("table_rendering", (True, False))
+@pytest.mark.parametrize("align_columns", (True, False))
 @pytest.mark.parametrize(
     ("os_appearance", "present", "absent"),
     (
@@ -278,12 +278,12 @@ def _outdated_fixture(errors: list[str] | None = None) -> dict:
     ),
 )
 def test_renderer_version_diff_colors_by_appearance(
-    monkeypatch, table_rendering, os_appearance, present, absent
+    monkeypatch, align_columns, os_appearance, present, absent
 ):
     """Package lines carry the appearance-appropriate version-diff colors with
     `ansi=true`; the prefix gray is constant and non-package lines stay free of
     escape codes."""
-    _pin_plugin_env(monkeypatch, table_rendering, os_appearance=os_appearance)
+    _pin_plugin_env(monkeypatch, align_columns, os_appearance=os_appearance)
     output = BarPluginRenderer().render(_outdated_fixture())
 
     package_lines = [line for line in output.splitlines() if "ansi=true" in line]
@@ -386,7 +386,7 @@ def test_elide_versions_keeps_the_diff_boundary():
 def test_renderer_caps_version_cells(monkeypatch, swiftbar):
     """An over-long version is elided in the menu line, and SwiftBar alone gets
     the tooltip holding what was dropped."""
-    _pin_plugin_env(monkeypatch, table_rendering=True)
+    _pin_plugin_env(monkeypatch, align_columns=True)
     if swiftbar:
         monkeypatch.setenv("SWIFTBAR", "1")
     full_old = "1.49585.0,41ad1dff5275eedc8af25989f59f33c5efe14063"
@@ -426,7 +426,7 @@ def test_renderer_version_cap_is_configurable(monkeypatch, value, capped):
     """`VAR_MAX_VERSION_WIDTH` overrides the cap; a width leaving no room for
     the ellipsis turns it off, and a value that is not a number falls back to
     the default."""
-    _pin_plugin_env(monkeypatch, table_rendering=True)
+    _pin_plugin_env(monkeypatch, align_columns=True)
     monkeypatch.setenv("VAR_MAX_VERSION_WIDTH", value)
     fixture = _outdated_fixture()
     fixture["fakemanager"]["packages"][0]["installed_version"] = "1.0." + "a" * 30
@@ -438,7 +438,7 @@ def test_renderer_version_cap_is_configurable(monkeypatch, value, capped):
 
 def test_renderer_table_alignment_survives_ansi(monkeypatch):
     """Column alignment is computed on visible widths, not raw string lengths."""
-    _pin_plugin_env(monkeypatch, table_rendering=True)
+    _pin_plugin_env(monkeypatch, align_columns=True)
     output = BarPluginRenderer().render(_outdated_fixture())
 
     arrow_lines = [line for line in strip_ansi(output).splitlines() if "→" in line]
@@ -455,7 +455,7 @@ def test_renderer_elides_long_payload_versions(monkeypatch):
     fills this payload with `TokenizedString` versions, which answer `len()`
     but cannot be sliced, and elision slices.
     """
-    _pin_plugin_env(monkeypatch, table_rendering=True)
+    _pin_plugin_env(monkeypatch, align_columns=True)
     payload = _outdated_fixture()
     payload["fakemanager"]["packages"][0] |= {
         "installed_version": parse_version("1:4.16.0-2+really2.41.3-3ubuntu2"),
@@ -473,7 +473,7 @@ def test_renderer_elides_long_payload_versions(monkeypatch):
 def test_renderer_sanitizes_error_lines(monkeypatch):
     """ANSI codes captured from a manager's output are stripped from error
     lines, which are marked `ansi=false` and would render them as raw text."""
-    _pin_plugin_env(monkeypatch, table_rendering=True)
+    _pin_plugin_env(monkeypatch, align_columns=True)
     output = BarPluginRenderer().render(
         _outdated_fixture(errors=["\x1b[31mboom\x1b[0m went wrong"]),
     )
@@ -486,7 +486,7 @@ def test_renderer_sanitizes_error_lines(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    ("is_swiftbar", "group_by_manager", "table_rendering", "outdated", "expected"),
+    ("is_swiftbar", "group_by_manager", "align_columns", "outdated", "expected"),
     (
         # Xbar renders neither parameter, so the count stays in the label.
         (False, False, True, True, "fakemanager - 2 packages | font=Menlo size=12"),
@@ -505,11 +505,11 @@ def test_renderer_sanitizes_error_lines(monkeypatch):
     ),
 )
 def test_renderer_section_header(
-    monkeypatch, is_swiftbar, group_by_manager, table_rendering, outdated, expected
+    monkeypatch, is_swiftbar, group_by_manager, align_columns, outdated, expected
 ):
     """The section header carries an actionable count badge and an accordion
     toggle on SwiftBar, and the labelled count everywhere else."""
-    _pin_plugin_env(monkeypatch, table_rendering=table_rendering)
+    _pin_plugin_env(monkeypatch, align_columns=align_columns)
     monkeypatch.setenv("VAR_GROUP_BY_MANAGER", str(group_by_manager))
     if is_swiftbar:
         monkeypatch.setenv("SWIFTBAR", "1")
@@ -535,8 +535,8 @@ def test_renderer_section_header(
 def test_renderer_hides_when_up_to_date(monkeypatch, hide, errors, renders):
     """An empty rendering is what makes the host drop the menu bar icon, so it
     is produced only when asked for and only when there is nothing to say."""
-    _pin_plugin_env(monkeypatch, table_rendering=True)
-    monkeypatch.setenv("VAR_HIDE_WHEN_UP_TO_DATE", str(hide))
+    _pin_plugin_env(monkeypatch, align_columns=True)
+    monkeypatch.setenv("VAR_ALWAYS_VISIBLE", str(not hide))
 
     output = BarPluginRenderer().render({
         "fakemanager": {
@@ -562,7 +562,7 @@ def test_plugin_empty_mpm_output(monkeypatch, capsys, hide, reports_error):
     """An `mpm` producing nothing is a failure to report, unless the user asked
     for the icon to vanish while everything is up to date."""
     monkeypatch.delenv("SWIFTBAR", raising=False)
-    monkeypatch.setenv("VAR_HIDE_WHEN_UP_TO_DATE", str(hide))
+    monkeypatch.setenv("VAR_ALWAYS_VISIBLE", str(not hide))
     monkeypatch.setattr(
         bar_plugin,
         "run",
@@ -604,7 +604,7 @@ def test_plugin_about_footer(monkeypatch, capsys, swiftbar, host):
         monkeypatch.setenv("SWIFTBAR_VERSION", "2.1.0")
     else:
         monkeypatch.delenv("SWIFTBAR", raising=False)
-    monkeypatch.setenv("VAR_HIDE_WHEN_UP_TO_DATE", "false")
+    monkeypatch.setenv("VAR_ALWAYS_VISIBLE", "true")
     monkeypatch.setattr(
         bar_plugin,
         "run",
@@ -842,8 +842,8 @@ class TestBarPlugin:
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
     @pytest.mark.parametrize("group_by_manager", (True, False, None))
-    @pytest.mark.parametrize("table_rendering", (True, False, None))
-    def test_rendering(self, group_by_manager, table_rendering):
+    @pytest.mark.parametrize("align_columns", (True, False, None))
+    def test_rendering(self, group_by_manager, align_columns):
         extra_checks: list[tuple[str, bool]] = []
         # XXX Package upgrade line is not required, as it may be skipped in the
         # final rendering of the plugin if no outdated packages are found:
@@ -853,7 +853,7 @@ class TestBarPlugin:
         #     ---
         #     cask - 0 package | font=Menlo size=12
         #     ...
-        if table_rendering is False:
+        if align_columns is False:
             extra_checks.extend(
                 (
                     # Package manager section header.
@@ -869,7 +869,7 @@ class TestBarPlugin:
                     ),
                 ),
             )
-        # Default case is VAR_TABLE_RENDERING=true.
+        # Default case is VAR_ALIGN_COLUMNS=true.
         else:
             extra_checks.extend(
                 (
@@ -890,8 +890,8 @@ class TestBarPlugin:
         extra_env = {}
         if group_by_manager is not None:
             extra_env["VAR_GROUP_BY_MANAGER"] = str(group_by_manager)
-        if table_rendering is not None:
-            extra_env["VAR_TABLE_RENDERING"] = str(table_rendering)
+        if align_columns is not None:
+            extra_env["VAR_ALIGN_COLUMNS"] = str(align_columns)
 
         self._plugin_output_checks(extra_checks, extra_env=extra_env)
 

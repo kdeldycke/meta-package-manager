@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- **Breaking:** [bar-plugin] Rename the `VAR_TABLE_RENDERING` variable to `VAR_ALIGN_COLUMNS`, matching the GNOME Shell extension's own setting.
+- **Breaking:** [bar-plugin] Replace the `VAR_HIDE_WHEN_UP_TO_DATE` variable with `VAR_ALWAYS_VISIBLE`, which reads the other way round: set it to `false` to hide the icon.
 - [bar-plugin] Fix the menu crashing with a `TypeError` whenever a package's version pair was long enough to be elided.
 - [cpan] Stop reading `cpan`'s index-refresh progress lines as packages, which listed a `Fetching` upgrading from `with` to `HTTP::Tiny:`.
 - [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
@@ -98,7 +100,7 @@
 - [gnome-shell] Illustrate the extension's page with screenshots of its menu, in both layouts and both shell appearances. Each one is captured from a real headless GNOME session by the new `docs-screenshots.yaml` workflow, which reshoots them whenever the extension changes.
 - [gnome-shell] Render each package row's version diff as one label instead of five, so a report of a thousand packages scrolls smoothly.
 - [gnome-shell] Drop the blank band and separator the menu showed above *Checking…*, before a session's first report has anything to list.
-- [gnome-shell] Align the menu's version pairs in a table, mirroring the plugin's `VAR_TABLE_RENDERING`, with a setting to switch it off.
+- [gnome-shell] Center the menu's version pairs around their arrow, mirroring the plugin's `VAR_ALIGN_COLUMNS`, with an `align-columns` setting to switch it off.
 - [gnome-shell] Drop the expander arrow from a manager with nothing to report, which opened on an empty panel.
 - [gnome-shell] Scroll the package list with the wheel while a manager's submenu is expanded, which until now only its scrollbar could do.
 - [mpm] Replace the project's own forge sampler with repomatic's `sample-metrics`: the star-history charts and the manager cards' upstream readings now accrue in one committed CSV, appended and rendered by the new `metrics.yaml` workflow.

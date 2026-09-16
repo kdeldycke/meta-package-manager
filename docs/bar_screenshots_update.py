@@ -434,7 +434,7 @@ class Shot(NamedTuple):
 
     host: Host
     group_by_manager: bool
-    table_rendering: bool
+    align_columns: bool
     dark: bool
     subject: str = "menu"
     """What the frame holds.
@@ -458,7 +458,7 @@ class Shot(NamedTuple):
                 (
                     self.host.name.lower(),
                     "grouped" if self.group_by_manager else "flat",
-                    "table" if self.table_rendering else "standard",
+                    "table" if self.align_columns else "standard",
                     "rendering",
                     self.appearance,
                 )
@@ -499,7 +499,7 @@ class Shot(NamedTuple):
         return {
             **self.host.environment,
             "VAR_GROUP_BY_MANAGER": str(self.group_by_manager).lower(),
-            "VAR_TABLE_RENDERING": str(self.table_rendering).lower(),
+            "VAR_ALIGN_COLUMNS": str(self.align_columns).lower(),
             "OS_APPEARANCE": "Dark" if self.dark else "Light",
         }
 
@@ -1475,7 +1475,7 @@ def expand_first_section(host: Host, bounds: dict[str, float]) -> None:
     """Open the first group of a grouped menu, however this host opens one.
 
     Without it the two grouped captures of a host come out byte-identical:
-    everything `VAR_TABLE_RENDERING` decides sits inside a group, and the top
+    everything `VAR_ALIGN_COLUMNS` decides sits inside a group, and the top
     level shows nothing but manager rows. SwiftBar `2.1` folds them into inline
     accordions a click expands in place; Xbar builds real submenus, which open
     on hover.

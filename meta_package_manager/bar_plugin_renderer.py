@@ -436,7 +436,7 @@ class BarPluginRenderer(MPMPlugin):
         menu lines opt into rendering them with the `ansi=true` parameter.
         """
         managers = outdated_data.values()
-        font = self.monospace_font if self.table_rendering else self.default_font
+        font = self.monospace_font if self.align_columns else self.default_font
 
         # Print menu bar icon with number of available upgrades.
         total_outdated = sum(len(m["packages"]) for m in managers)
@@ -445,7 +445,7 @@ class BarPluginRenderer(MPMPlugin):
         # Producing no output is what makes the host hide the plugin, so the
         # rendering stops before its first line. Errors keep the icon around:
         # they are the report, and silencing them would hide a broken manager.
-        if self.hide_when_up_to_date and not total_outdated and not total_errors:
+        if not self.always_visible and not total_outdated and not total_errors:
             return
 
         self.pp(
@@ -460,7 +460,7 @@ class BarPluginRenderer(MPMPlugin):
         rows_by_manager = {
             manager["id"]: self.package_rows(manager) for manager in managers
         }
-        aligned = self.align_managers(rows_by_manager) if self.table_rendering else {}
+        aligned = self.align_managers(rows_by_manager) if self.align_columns else {}
 
         for manager in managers:
             package_count = len(manager["packages"])
@@ -479,7 +479,7 @@ class BarPluginRenderer(MPMPlugin):
                 badge = f"badge={package_count}"
 
             # Table-like rendering
-            if self.table_rendering:
+            if self.align_columns:
                 header = (
                     manager["id"]
                     if self.is_swiftbar

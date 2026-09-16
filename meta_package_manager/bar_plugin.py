@@ -11,7 +11,7 @@
 # strips them. Unquoted, the variable is silently ignored by SwiftBar and never reaches
 # its settings UI.
 # <xbar.var>boolean(VAR_GROUP_BY_MANAGER="false"): Group each manager's packages into a section of its own.</xbar.var>
-# <xbar.var>boolean(VAR_TABLE_RENDERING="true"): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
+# <xbar.var>boolean(VAR_TABLE_RENDERING="true"): Centers versions around the arrow and aligns names in a monospaced font.</xbar.var>
 # <xbar.var>number(VAR_MAX_VERSION_WIDTH="18"): Widest a version renders in a menu line, in characters. Longer ones are shortened with an ellipsis.</xbar.var>
 # XXX Font options are declared SwiftBar-only, as Xbar truncates a default value at its
 # first `=` character. See: https://github.com/matryer/xbar/issues/832
@@ -217,9 +217,12 @@ class MPMPlugin:
 
     @cached_property
     def table_rendering(self) -> bool:
-        """Aligns package names and versions, like a table, for easier visual parsing.
+        """Centers each version pair around its arrow, and aligns package names.
 
-        If `True`, will aligns all items using a fixed-width font.
+        Set in a fixed-width font, which is what makes the padding measure
+        equally. See
+        {meth}`~meta_package_manager.bar_plugin_renderer.BarPluginRenderer.align_rows`
+        for why the arrow is the axis.
         """
         return self.getenv_bool("VAR_TABLE_RENDERING", True)
 

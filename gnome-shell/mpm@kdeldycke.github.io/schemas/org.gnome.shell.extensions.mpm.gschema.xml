@@ -49,8 +49,8 @@
     </key>
     <key name="table-rendering" type="b">
       <default>true</default>
-      <summary>Align package versions in a table</summary>
-      <description>Mirror of the Xbar/SwiftBar plugin VAR_TABLE_RENDERING variable: pad every version pair to a common width and set it monospaced, so the arrows line up down the menu. When disabled, each pair is set in the menu font and sits flush right, where the arrow lands wherever its own text ends.</description>
+      <summary>Center versions around the arrow</summary>
+      <description>Mirror of the Xbar/SwiftBar plugin VAR_TABLE_RENDERING variable: center each version pair around its arrow, so the arrow is what the eye follows down the menu and the versions grow outwards from it. Set in a monospaced font, which is what makes the padding measure equally. When disabled, each pair sits flush right in the menu font, where the arrow lands wherever its own text ends.</description>
     </key>
     <key name="terminal-command" type="s">
       <default>''</default>

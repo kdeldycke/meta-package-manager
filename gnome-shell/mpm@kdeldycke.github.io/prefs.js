@@ -64,8 +64,8 @@ export default class MpmPreferences extends ExtensionPreferences {
             title: _('Group packages by manager'),
         }));
         menu.add(this._switchRow(settings, 'table-rendering', {
-            title: _('Align versions in a table'),
-            subtitle: _('Sets them monospaced so the arrows line up.'),
+            title: _('Center versions around the arrow'),
+            subtitle: _('Sets them in a monospaced font.'),
         }));
         page.add(menu);
 

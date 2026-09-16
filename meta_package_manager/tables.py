@@ -38,6 +38,7 @@ command) but share the same output machinery. This module owns all of it:
 
 from __future__ import annotations
 
+import logging
 import shutil
 import sys
 from contextlib import contextmanager
@@ -375,10 +376,12 @@ def print_serialized_and_exit(ctx: Context, data: object) -> None:
     """
     table_format = ctx.meta[TABLE_FORMAT]
     if table_format in SERIALIZATION_FORMATS:
-        # A --columns selection does not apply here: serialized documents carry
-        # the full structured payload. No "ignoring option" note is logged
-        # either, since the mpm group body silences all logging for
-        # serialization formats (unless at DEBUG) to keep the streams clean.
+        # Serialized documents carry the full structured payload, which a
+        # --columns selection does not narrow.
+        if ctx.meta.get(COLUMNS):
+            logging.info(
+                "Ignore the --columns option: serialized output carries every field."
+            )
         print_data(
             data, table_format, root_element="mpm", package="meta-package-manager"
         )

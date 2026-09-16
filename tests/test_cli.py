@@ -250,28 +250,35 @@ def test_summary(invoke, fake_pool, summary_arg, active_summary):
     assert active_summary is bool(summary_match)
 
 
-@pytest.mark.parametrize(
-    ("args", "message"),
-    (
-        (("--verbosity", "INFO"), "Resolved --jobs to"),
-        (("--jobs", "0"), "Requested 0 jobs"),
-    ),
-)
-@pytest.mark.parametrize(
-    ("table_format", "logged"), (("github", True), ("json", False))
-)
-def test_jobs_messages_follow_the_output_format(
-    invoke, fake_pool, args, message, table_format, logged
+@pytest.mark.parametrize("table_format", ("github", "json"))
+def test_fatal_message_reaches_stderr_in_every_format(
+    invoke, monkeypatch, table_format
 ):
-    """The `--jobs` messages reach `<stderr>` unless the output is serialized.
+    """A run stopping on a critical message reports it, serialized output included:
+    the payload goes to `<stdout>` and logs to `<stderr>`, so neither spoils the
+    other."""
+    monkeypatch.setattr(pool, "_select_managers", lambda *args, **kwargs: iter(()))
+    result = invoke("--table-format", table_format, "installed")
+    assert_no_manager_selected(result)
 
-    click-extra logs them from the option callback, which Click runs while it
-    parses the options: before the group body turns logging off for a
-    serialization format.
-    """
-    result = invoke(*args, "--table-format", table_format, "installed")
+
+@pytest.mark.parametrize(("table_format", "noted"), (("github", False), ("json", True)))
+def test_serialized_output_notes_ignored_columns(
+    invoke, fake_pool, table_format, noted
+):
+    """A serialized document carries every field, so a `--columns` selection is
+    reported as ignored there, and applied to a table."""
+    result = invoke(
+        "--verbosity",
+        "INFO",
+        "--table-format",
+        table_format,
+        "installed",
+        "--columns",
+        "package_id",
+    )
     assert result.exit_code == 0
-    assert (message in result.stderr) is logged
+    assert ("Ignore the --columns option" in result.stderr) is noted
 
 
 def managers_table_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:

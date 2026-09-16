@@ -729,10 +729,9 @@ def print_contribution_hints(ctx: click.Context) -> None:
     """Print the collected contribution hints to `<stderr>`.
 
     Reads from {data}`CTX_HINTS_KEY` and writes via {func}`click_extra.echo`
-    rather than the logging module, so the message survives ``--verbosity
-    CRITICAL` and the `logging.disable()`` block that suppresses log output for
-    serialization formats. Caller is expected to gate this on the user's
-    `suggest_contribs` preference.
+    rather than the logging module, so the message survives `--verbosity
+    CRITICAL`. Caller is expected to gate this on the user's `suggest_contribs`
+    preference.
     """
     hints = ctx.meta.get(CTX_HINTS_KEY) or []
     message = format_contribution_hints(hints)

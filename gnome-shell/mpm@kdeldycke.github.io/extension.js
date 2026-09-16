@@ -432,6 +432,15 @@ class MpmIndicator extends PanelMenu.Button {
                  * for it only when there is something to report keeps the
                  * healthy rows flush with the flat layout. */
                 const submenu = new PopupMenu.PopupSubMenuMenuItem(title, failed);
+                /* A submenu is an St.ScrollView of its own, and St stops every
+                 * wheel event such a view receives, whether or not it can act
+                 * on one. An expanded panel therefore swallowed the wheel and
+                 * the report underneath never moved, leaving the scrollbar as
+                 * the only way down. Nothing is lost by refusing them here:
+                 * `PopupSubMenu._needsScrollbar()` reads the top menu's own
+                 * max-height, which this menu sets on an inner actor, so the
+                 * submenu never scrolls itself anyway. */
+                submenu.menu.actor.set_mouse_scrolling(false);
                 if (failed)
                     submenu.icon.icon_name = 'dialog-warning-symbolic';
                 this._fillManagerSection(submenu.menu, manager, rows, widths);

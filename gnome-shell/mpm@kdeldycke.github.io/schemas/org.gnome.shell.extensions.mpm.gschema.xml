@@ -36,6 +36,11 @@
       <summary>mpm command override</summary>
       <description>Command used to invoke mpm, parsed with shell syntax (so a multi-word launcher like "uv run mpm" works). Leave empty to autodetect mpm from PATH and well-known install locations.</description>
     </key>
+    <key name="mpm-options" type="s">
+      <default>''</default>
+      <summary>Extra mpm options</summary>
+      <description>Mirror of the Xbar/SwiftBar plugin VAR_MPM_OPTIONS variable: options passed to every mpm call the extension makes, after its own and before the subcommand, parsed with shell syntax. "--no-cpan" keeps one manager out of this menu alone; "--verbosity INFO" narrates each call in the terminal an upgrade opens. The version probe never takes them, so a mistyped option fails a check with mpm's own usage error instead of reading as a missing mpm.</description>
+    </key>
     <key name="notify" type="b">
       <default>false</default>
       <summary>Notify when new outdated packages appear</summary>

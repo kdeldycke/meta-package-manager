@@ -13,6 +13,7 @@
 # <xbar.var>boolean(VAR_GROUP_BY_MANAGER="false"): Group each manager's packages into a section of its own.</xbar.var>
 # <xbar.var>boolean(VAR_ALIGN_COLUMNS="true"): Centers versions around the arrow and aligns names in a monospaced font.</xbar.var>
 # <xbar.var>number(VAR_MAX_VERSION_WIDTH="18"): Widest a version renders in a menu line, in characters. Longer ones are shortened with an ellipsis.</xbar.var>
+# <xbar.var>string(VAR_MPM_OPTIONS=""): Extra options for every mpm call the plugin makes, placed before the subcommand.</xbar.var>
 # XXX Font options are declared SwiftBar-only, as Xbar truncates a default value at its
 # first `=` character. See: https://github.com/matryer/xbar/issues/832
 # <swiftbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</swiftbar.var>
@@ -241,6 +242,29 @@ class MPMPlugin:
             return "unknown"
         match = re.search(r"<xbar\.version>(?P<version>[^<]+)</xbar\.version>", source)
         return match.group("version") if match else "unknown"
+
+    @cached_property
+    def mpm_options(self) -> tuple[str, ...]:
+        """Options spliced into every `mpm` call, after the plugin's own and before
+        the subcommand, so a repeated single-value option like `--verbosity`
+        takes the user's value.
+
+        The version probe never takes them: a mistyped option then fails `sync`
+        with mpm's own usage error, which the menu renders, rather than reading
+        as a missing `mpm`. The menu's upgrade actions carry them too, since
+        {class}`~meta_package_manager.bar_plugin_renderer.BarPluginRenderer`
+        builds those inside the `outdated` call and inherits this environment.
+
+        Read raw rather than through {meth}`getenv_str`, which lower-cases: a
+        `--verbosity INFO` level and a path in `--config` both keep their case.
+        Sourced from `VAR_MPM_OPTIONS`; the GNOME Shell extension's
+        `mpm-options` setting is its mirror.
+        """
+        lexer = shlex(os.environ.get("VAR_MPM_OPTIONS", ""), posix=True)
+        # What `shlex.split()` sets: tokens break on whitespace alone, so
+        # `--config=/a/b` and `1:2` stay one argument each.
+        lexer.whitespace_split = True
+        return tuple(lexer)
 
     @cached_property
     def always_visible(self) -> bool:
@@ -610,7 +634,15 @@ class MPMPlugin:
 
         # Force a sync of all local package databases.
         run(
-            (*mpm_args, "--verbosity", "ERROR", "--timeout", str(MPM_TIMEOUT), "sync"),
+            (
+                *mpm_args,
+                "--verbosity",
+                "ERROR",
+                "--timeout",
+                str(MPM_TIMEOUT),
+                *self.mpm_options,
+                "sync",
+            ),
             check=False,
         )
 
@@ -626,6 +658,7 @@ class MPMPlugin:
                 "CRITICAL",
                 "--timeout",
                 str(MPM_TIMEOUT),
+                *self.mpm_options,
                 "outdated",
                 "--plugin-output",
             ),

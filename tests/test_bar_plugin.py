@@ -207,6 +207,7 @@ def _pin_plugin_env(
         "VAR_ALWAYS_VISIBLE",
         "VAR_MAX_VERSION_WIDTH",
         "VAR_MONOSPACE_FONT",
+        "VAR_MPM_OPTIONS",
         "VAR_GROUP_BY_MANAGER",
     ):
         monkeypatch.delenv(var, raising=False)
@@ -606,6 +607,52 @@ def test_plugin_empty_mpm_output(monkeypatch, capsys, hide, reports_error):
     # Producing nothing at all is what makes the host hide the plugin, so not
     # even the About footer may slip out.
     assert bool(out) is reports_error
+
+
+def test_plugin_options_reach_every_call(monkeypatch):
+    """`VAR_MPM_OPTIONS` lands after the plugin's own options and before the
+    subcommand on the sync and outdated calls, keeps its case, and never
+    reaches the version probe."""
+    _pin_plugin_env(monkeypatch, align_columns=True)
+    monkeypatch.setenv("VAR_MPM_OPTIONS", "--verbosity INFO --no-cpan")
+    calls: list[tuple[str, ...]] = []
+
+    def fake_run(args, **kwargs):
+        calls.append(tuple(args))
+        return subprocess.CompletedProcess(
+            args, 0, stdout="\U0001f4e6\u2713 | dropdown=false", stderr=""
+        )
+
+    monkeypatch.setattr(bar_plugin, "run", fake_run)
+    plugin = bar_plugin.MPMPlugin()
+    plugin.__dict__["best_mpm"] = (
+        ("/somewhere/mpm",),
+        True,
+        True,
+        (9, 9, 9),
+        None,
+        "9.9.9",
+    )
+
+    plugin.print_menu()
+    assert [args[-1] for args in calls] == ["sync", "--plugin-output"]
+    for args, subcommand in zip(calls, ("sync", "outdated")):
+        cut = args.index(subcommand)
+        assert args[cut - 3 : cut] == ("--verbosity", "INFO", "--no-cpan")
+        # The plugin's own verbosity comes first, so the user's wins in click.
+        assert args.index("--verbosity") < cut - 3
+
+    calls.clear()
+    plugin.check_mpm(("/somewhere/mpm",))
+    assert calls == [("/somewhere/mpm", "--no-color", "--version")]
+
+
+def test_renderer_actions_carry_the_options(monkeypatch):
+    """The upgrade commands the menu embeds carry the same options, read from
+    the environment the `outdated` call inherits."""
+    _pin_plugin_env(monkeypatch, align_columns=True)
+    monkeypatch.setenv("VAR_MPM_OPTIONS", "--dry-run")
+    assert BarPluginRenderer().mpm_cli[-1] == "--dry-run"
 
 
 def test_plugin_version_matches_the_package():

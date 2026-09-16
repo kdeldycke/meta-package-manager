@@ -80,6 +80,9 @@ export default class MpmPreferences extends ExtensionPreferences {
         actions.add(this._entryRow(settings, 'mpm-command', {
             title: _('mpm command (empty to autodetect)'),
         }));
+        actions.add(this._entryRow(settings, 'mpm-options', {
+            title: _('mpm options (empty for none)'),
+        }));
         page.add(actions);
 
         const notifications = new Adw.PreferencesGroup({

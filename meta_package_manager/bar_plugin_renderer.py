@@ -286,9 +286,15 @@ class BarPluginRenderer(MPMPlugin):
         ```
         """
         if "__compiled__" in globals():
-            return (sys.executable,)
+            return (sys.executable, *self.mpm_options)
         safe_path = ("-P",) if sys.version_info >= (3, 11) else ()
-        return (sys.executable, *safe_path, "-m", "meta_package_manager")
+        return (
+            sys.executable,
+            *safe_path,
+            "-m",
+            "meta_package_manager",
+            *self.mpm_options,
+        )
 
     @staticmethod
     def render_cli(cmd_args: tuple[str | Path, ...]) -> str:

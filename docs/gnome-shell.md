@@ -116,6 +116,7 @@ Settings live in the extension preferences window, also reachable from the indic
 | `boot-wait`            | Seconds before the first check after login.                     | Integer | `30`    |
 | `timeout`              | Seconds passed to `mpm --timeout` for background checks.        | Integer | `60`    |
 | `mpm-command`          | Custom `mpm` launcher, empty to autodetect.                     | String  | Empty   |
+| `mpm-options`          | Extra options for every `mpm` call, before the subcommand.      | String  | Empty   |
 | `always-visible`       | Show the indicator even when everything is up to date.          | Boolean | `true`  |
 | `show-count`           | Show the outdated package count next to the icon.               | Boolean | `true`  |
 | `notify`               | Desktop notification when new outdated packages appear.         | Boolean | `false` |

@@ -78,6 +78,39 @@ function testParseVersion() {
         Mpm.parseRelease('mpm, version 6.4.0\nPython 3.14.7'), '6.4.0');
     check('parseRelease garbage', Mpm.parseRelease('no digits here'), null);
     check('parseRelease empty', Mpm.parseRelease(''), null);
+
+    check('parseOptions empty', Mpm.parseOptions(''), []);
+    check('parseOptions blank', Mpm.parseOptions('   '), []);
+    check('parseOptions splits shell syntax',
+        Mpm.parseOptions('--verbosity INFO --no-cpan'),
+        ['--verbosity', 'INFO', '--no-cpan']);
+    check('parseOptions keeps a quoted value whole',
+        Mpm.parseOptions("--config '/tmp/my dir/mpm.toml'"),
+        ['--config', '/tmp/my dir/mpm.toml']);
+    let unmatched = false;
+    try {
+        Mpm.parseOptions("--config '/tmp/open");
+    } catch {
+        unmatched = true;
+    }
+    check('parseOptions rejects an unmatched quote', unmatched, true);
+
+    /* The options sit after the extension's own and before the subcommand,
+     * on every builder, and every builder still works without them. */
+    check('syncArgv without options',
+        Mpm.syncArgv(['mpm'], 60),
+        ['mpm', '--verbosity', 'ERROR', '--timeout', '60', 'sync']);
+    check('syncArgv splices options before the subcommand',
+        Mpm.syncArgv(['mpm'], 60, ['--no-cpan']).slice(-2), ['--no-cpan', 'sync']);
+    check('outdatedArgv splices options before the subcommand',
+        Mpm.outdatedArgv(['mpm'], 60, ['--verbosity', 'INFO']).slice(-3),
+        ['--verbosity', 'INFO', 'outdated']);
+    check('upgradeAllArgv splices options after the manager',
+        Mpm.upgradeAllArgv(['mpm'], 'brew', ['--dry-run']),
+        ['mpm', '--brew', '--dry-run', 'upgrade', '--all']);
+    check('upgradePackageArgv splices options after the manager',
+        Mpm.upgradePackageArgv(['mpm'], 'brew', 'jq', ['--dry-run']),
+        ['mpm', '--brew', '--dry-run', 'upgrade', 'jq']);
 }
 
 function testCompareVersions() {

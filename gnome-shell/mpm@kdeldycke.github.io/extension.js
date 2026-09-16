@@ -327,6 +327,10 @@ class MpmIndicator extends PanelMenu.Button {
                 return;
             }
             lastMpm = mpm;
+            /* Parsed here, inside the try, so an unmatched quote in the
+             * setting reports as this check's error. */
+            const options = Mpm.parseOptions(
+                this._settings.get_string('mpm-options'));
             const timeout = this._settings.get_int('timeout');
             /* --timeout caps each manager CLI inside mpm: give mpm itself a
              * proportional hard bound so a wedged run cannot pin the
@@ -335,9 +339,10 @@ class MpmIndicator extends PanelMenu.Button {
             /* Refresh the package indexes first, best-effort: failures will
              * resurface per manager in the outdated report. */
             await Mpm.runCommand(
-                Mpm.syncArgv(mpm, timeout), cancellable, watchdog);
+                Mpm.syncArgv(mpm, timeout, options), cancellable, watchdog);
             const result = await Mpm.runCommand(
-                Mpm.outdatedArgv(mpm, timeout), cancellable, watchdog);
+                Mpm.outdatedArgv(mpm, timeout, options),
+                cancellable, watchdog);
             if (result.stderr || !result.stdout) {
                 this._setError(result.stderr || _('mpm produced no output.'));
                 return;
@@ -516,7 +521,8 @@ class MpmIndicator extends PanelMenu.Button {
                 STATE_ICONS[State.UPDATES]);
             upgradeAll.connectObject('activate', () => {
                 this.menu.close();
-                this._runAction(Mpm.upgradeAllArgv(lastMpm, manager.id));
+                this._runAction(
+                    Mpm.upgradeAllArgv(lastMpm, manager.id, this._mpmOptions()));
             }, this);
             section.addMenuItem(upgradeAll);
         }
@@ -570,7 +576,8 @@ class MpmIndicator extends PanelMenu.Button {
         item.connectObject('activate', () => {
             this.menu.close();
             this._runAction(
-                Mpm.upgradePackageArgv(lastMpm, manager.id, pkg.id));
+                Mpm.upgradePackageArgv(
+                    lastMpm, manager.id, pkg.id, this._mpmOptions()));
         }, this);
         return item;
     }
@@ -662,6 +669,18 @@ class MpmIndicator extends PanelMenu.Button {
     /* Spawn an upgrade command, in a terminal by default so progress is
      * visible and sudo can prompt. Then arm the post-upgrade re-check:
      * terminal processes detach, so completion cannot be awaited. */
+    /* The mpm-options setting as it stands when an action is built, not as
+     * it stood at the last check: an option typed into the preferences
+     * takes effect on the next click without a re-check. A syntax error
+     * yields no options here, the check being where it is reported. */
+    _mpmOptions() {
+        try {
+            return Mpm.parseOptions(this._settings.get_string('mpm-options'));
+        } catch {
+            return [];
+        }
+    }
+
     _runAction(argv) {
         try {
             if (this._settings.get_boolean('upgrade-in-terminal')) {

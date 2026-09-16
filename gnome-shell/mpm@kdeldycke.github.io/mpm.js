@@ -251,23 +251,46 @@ export async function probeMpm(mpm, cancellable, watchdogSeconds = 30) {
  * to ERROR as best-effort noise, while outdated silences everything but
  * CRITICAL since per-manager errors come back inside the JSON payload. */
 
-export function syncArgv(mpm, timeout = MPM_TIMEOUT) {
-    return [...mpm, '--verbosity', 'ERROR', '--timeout', String(timeout), 'sync'];
+/**
+ * Parse the `mpm-options` setting into the argv fragment every builder below
+ * splices in: after the extension's own options and before the subcommand,
+ * so a repeated single-value option like `--verbosity` takes the user's value.
+ * The version probe never takes them, so a mistyped option fails a check with
+ * mpm's own usage error in the menu rather than reading as a missing mpm.
+ *
+ * @param {string} text - The setting, in shell syntax; empty for none.
+ * @returns {string[]} the options, empty when the setting is.
+ * @throws {GLib.Error} on a shell syntax error, such as an unmatched quote,
+ *   which the check reports rather than running without the options.
+ */
+export function parseOptions(text) {
+    if (!text.trim())
+        return [];
+    const [ok, argv] = GLib.shell_parse_argv(text);
+    return ok ? argv : [];
 }
 
-export function outdatedArgv(mpm, timeout = MPM_TIMEOUT) {
+export function syncArgv(mpm, timeout = MPM_TIMEOUT, options = []) {
     return [
-        ...mpm, '--no-color', '--verbosity', 'CRITICAL',
-        '--timeout', String(timeout), '--table-format', 'json', 'outdated',
+        ...mpm, '--verbosity', 'ERROR', '--timeout', String(timeout),
+        ...options, 'sync',
     ];
 }
 
-export function upgradePackageArgv(mpm, managerId, packageId) {
-    return [...mpm, `--${managerId}`, 'upgrade', packageId];
+export function outdatedArgv(mpm, timeout = MPM_TIMEOUT, options = []) {
+    return [
+        ...mpm, '--no-color', '--verbosity', 'CRITICAL',
+        '--timeout', String(timeout), '--table-format', 'json',
+        ...options, 'outdated',
+    ];
 }
 
-export function upgradeAllArgv(mpm, managerId) {
-    return [...mpm, `--${managerId}`, 'upgrade', '--all'];
+export function upgradePackageArgv(mpm, managerId, packageId, options = []) {
+    return [...mpm, `--${managerId}`, ...options, 'upgrade', packageId];
+}
+
+export function upgradeAllArgv(mpm, managerId, options = []) {
+    return [...mpm, `--${managerId}`, ...options, 'upgrade', '--all'];
 }
 
 /**

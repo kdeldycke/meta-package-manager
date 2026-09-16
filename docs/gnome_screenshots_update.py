@@ -117,6 +117,20 @@ is the failure a measured height cannot have. This only has to clear the page: a
 page taller than it fails the capture, naming the shortfall.
 """
 
+FRAME_TOLERANCE_LEVELS = 2
+"""Largest per-channel difference a fresh capture may show against the committed
+frame and still count as the same picture.
+
+A live desktop repaints one menu with rounding jitter: two runs of a single
+commit differed by one level on eleven pixels along a menu's rounded corners,
+and a sync comparing bytes rewrote the file for it
+([#2090](https://github.com/kdeldycke/meta-package-manager/pull/2090)). A
+change worth committing moves whole rows, which no cap this low lets through.
+"""
+
+FRAME_TOLERANCE_SHARE = 0.001
+"""Largest share of a frame's pixels allowed to differ within that cap."""
+
 PREFERENCES_FOOT = 32
 """Logical pixels of page kept below the last card, once the window is fitted.
 
@@ -629,13 +643,21 @@ def grow_prefs_to(height: int) -> dict[str, int]:
     raise RuntimeError(msg)
 
 
-def png_rows(target: Path) -> list[bytes]:
-    """Decode a small PNG into its rows of pixel bytes.
+class Frame(NamedTuple):
+    """A decoded PNG: its geometry and its rows of pixel bytes."""
 
-    Enough of a decoder for the strip {func}`fit_prefs_window` photographs:
-    8-bit RGB or RGBA, not interlaced, a pixel or two wide. Every filter type is
-    unwound, any of the five being free to open any row, and the loop is per
-    byte, which a strip this narrow keeps to a few thousand iterations.
+    width: int
+    channels: int
+    rows: list[bytes]
+
+
+def png_rows(target: Path) -> Frame:
+    """Decode a PNG into its rows of pixel bytes.
+
+    Enough of a decoder for what this driver reads back: 8-bit RGB or RGBA,
+    not interlaced. Every filter type is unwound, any of the five being free to
+    open any row, and the loop is per byte: a second or so for a full frame,
+    nothing for the strip {func}`fit_prefs_window` photographs.
     """
     data = target.read_bytes()
     width, height = png_size(target)
@@ -680,7 +702,48 @@ def png_rows(target: Path) -> list[bytes]:
                 line[offset] = (line[offset] + nearest) & 0xFF
         rows.append(bytes(line))
         above = line
-    return rows
+    return Frame(width, channels, rows)
+
+
+def settle_frame(fresh: Path, target: Path) -> None:
+    """Put a fresh capture in place of the committed frame, unless it is the same picture.
+
+    Kept when the capture differs from the frame by no more than
+    {data}`FRAME_TOLERANCE_LEVELS` on fewer than {data}`FRAME_TOLERANCE_SHARE`
+    of its pixels, and replaced otherwise. A frame with no committed version, or
+    one of another size, is always written. Compared on the color channels: the
+    optimizer that stored the committed frame drops an alpha channel that is
+    opaque throughout, and a capture carries one.
+    """
+    if not target.exists() or png_size(fresh) != png_size(target):
+        shutil.move(fresh, target)
+        print(f"  {target.name}: written")
+        return
+    old, new = png_rows(target), png_rows(fresh)
+    differing = 0
+    worst = 0
+    for row_old, row_new in zip(old.rows, new.rows, strict=True):
+        planes_old = [row_old[channel :: old.channels] for channel in range(3)]
+        planes_new = [row_new[channel :: new.channels] for channel in range(3)]
+        if planes_old == planes_new:
+            continue
+        for x in range(old.width):
+            deltas = [abs(planes_old[c][x] - planes_new[c][x]) for c in range(3)]
+            if any(deltas):
+                differing += 1
+                worst = max(worst, *deltas)
+    share = differing / (old.width * len(old.rows))
+    levels = "level" if worst == 1 else "levels"
+    verdict = (
+        f"differs from the committed frame on {differing} pixels, "
+        f"by at most {worst} {levels}"
+    )
+    if worst <= FRAME_TOLERANCE_LEVELS and share <= FRAME_TOLERANCE_SHARE:
+        fresh.unlink()
+        print(f"  {target.name}: kept, the capture {verdict}")
+        return
+    shutil.move(fresh, target)
+    print(f"  {target.name}: replaced, the capture {verdict}")
 
 
 def measure_page_foot(strip: Path) -> int:
@@ -691,7 +754,7 @@ def measure_page_foot(strip: Path) -> int:
     last card's shadow breaks it. A page that overflows the window has a card
     there instead of the page, and the band comes back too short to fit.
     """
-    rows = png_rows(strip)
+    rows = png_rows(strip).rows
     index = len(rows) - 1 - 4 * MONITOR_SCALE
     background = rows[index]
     while index > 0 and rows[index] == background:
@@ -998,16 +1061,18 @@ def capture_preferences(shot: Shot, scratch: Path, schema_dir: Path) -> None:
         window = grow_prefs_to(fit_prefs_window(scratch, window))
         # Shrunk, and the page has to lay itself out again in the new height.
         time.sleep(1)
-        screenshot_window(shot.path)
+        fresh = scratch / f"{shot.stem}.capture.png"
+        screenshot_window(fresh)
 
         # The HiDPI guard of the menu shots, as a floor rather than an equality:
         # what a window capture includes and what `get_frame_rect` reports need
         # not agree to the pixel, but a session that lost its scale cannot clear
         # the floor.
-        captured = png_size(shot.path)
+        captured = png_size(fresh)
         if captured[0] < window["width"] * MONITOR_SCALE:
             msg = f"{shot.path.name} came out {captured}, below {MONITOR_SCALE}x"
             raise RuntimeError(msg)
+        settle_frame(fresh, shot.path)
 
 
 def capture_menu(shot: Shot, scratch: Path, schema_dir: Path) -> None:
@@ -1065,16 +1130,18 @@ def capture_menu(shot: Shot, scratch: Path, schema_dir: Path) -> None:
         )
         # Anchored at the top of the screen: the top bar is part of the subject,
         # the indicator icon and its outdated count being what the menu hangs off.
-        screenshot_area(left, 0, right - left, bottom, shot.path)
+        fresh = scratch / f"{shot.stem}.capture.png"
+        screenshot_area(left, 0, right - left, bottom, fresh)
 
         # The area is requested in logical pixels and must come back drawn in
         # device ones. A capture that matches the request one for one means the
         # session lost its scale, and the images would silently go back to 1x.
         expected = ((right - left) * MONITOR_SCALE, bottom * MONITOR_SCALE)
-        captured = png_size(shot.path)
+        captured = png_size(fresh)
         if captured != expected:
             msg = f"{shot.path.name} came out {captured}, expected {expected}"
             raise RuntimeError(msg)
+        settle_frame(fresh, shot.path)
 
 
 def capture_all(workspace: Path | None = None) -> None:

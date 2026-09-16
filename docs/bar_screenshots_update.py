@@ -428,6 +428,28 @@ this diagnostic makes what it looks for more likely the longer it runs.
 MENU_TIMEOUT = 60
 """Seconds allowed for SwiftBar to render a plugin and open its menu."""
 
+FRAME_TOLERANCE_LEVELS = 2
+"""Largest per-channel difference a fresh capture may show against the committed
+frame and still count as the same picture.
+
+A live desktop repaints one menu with rounding jitter: two runs of a single
+commit differed by one level on eleven pixels along the menu's rounded corners,
+and a sync comparing bytes rewrote the file for it
+([#2090](https://github.com/kdeldycke/meta-package-manager/pull/2090)). A
+change worth committing moves whole rows, which no cap this low lets through.
+"""
+
+FRAME_TOLERANCE_SHARE = 0.001
+"""Largest share of a frame's pixels allowed to differ within that cap."""
+
+
+class Frame(NamedTuple):
+    """A decoded PNG: its geometry and its rows of pixel bytes."""
+
+    width: int
+    channels: int
+    rows: list[bytes]
+
 
 class Shot(NamedTuple):
     """One capture: a host, the two plugin variables, an appearance and a subject."""
@@ -612,6 +634,101 @@ def png_size(target: Path) -> tuple[int, int]:
         raise ValueError(msg)
     width, height = struct.unpack(">II", header[16:24])
     return width, height
+
+
+def png_rows(target: Path) -> Frame:
+    """Decode a PNG into its rows of pixel bytes.
+
+    The same decoder `docs/gnome_screenshots_update.py` carries, the two drivers
+    being standalone scripts: 8-bit RGB or RGBA, not interlaced, every filter
+    type unwound since any of the five is free to open any row. A per-byte loop,
+    which costs a second or so for a frame this size.
+    """
+    data = target.read_bytes()
+    width, height = png_size(target)
+    depth, color, interlace = data[24], data[25], data[28]
+    if depth != 8 or color not in (2, 6) or interlace:
+        msg = f"{target} is not an 8-bit RGB or RGBA non-interlaced PNG"
+        raise ValueError(msg)
+    channels = 4 if color == 6 else 3
+    stride = width * channels
+    compressed = b""
+    position = 8
+    while position < len(data):
+        length, kind = struct.unpack(">I4s", data[position : position + 8])
+        if kind == b"IDAT":
+            compressed += data[position + 8 : position + 8 + length]
+        position += 12 + length
+    raw = zlib.decompress(compressed)
+    rows: list[bytes] = []
+    above = bytearray(stride)
+    for index in range(height):
+        start = index * (stride + 1)
+        kind_byte = raw[start]
+        line = bytearray(raw[start + 1 : start + 1 + stride])
+        for offset in range(stride):
+            left = line[offset - channels] if offset >= channels else 0
+            up = above[offset]
+            corner = above[offset - channels] if offset >= channels else 0
+            if kind_byte == 1:
+                line[offset] = (line[offset] + left) & 0xFF
+            elif kind_byte == 2:
+                line[offset] = (line[offset] + up) & 0xFF
+            elif kind_byte == 3:
+                line[offset] = (line[offset] + (left + up) // 2) & 0xFF
+            elif kind_byte == 4:
+                estimate = left + up - corner
+                distances = (
+                    abs(estimate - left),
+                    abs(estimate - up),
+                    abs(estimate - corner),
+                )
+                nearest = (left, up, corner)[distances.index(min(distances))]
+                line[offset] = (line[offset] + nearest) & 0xFF
+        rows.append(bytes(line))
+        above = line
+    return Frame(width, channels, rows)
+
+
+def settle_frame(fresh: Path, target: Path) -> None:
+    """Put a fresh capture in place of the committed frame, unless it is the same picture.
+
+    Kept when the capture differs from the frame by no more than
+    {data}`FRAME_TOLERANCE_LEVELS` on fewer than {data}`FRAME_TOLERANCE_SHARE`
+    of its pixels, and replaced otherwise. A frame with no committed version, or
+    one of another size, is always written. Compared on the color channels: the
+    optimizer that stored the committed frame drops an alpha channel that is
+    opaque throughout, and a capture carries one.
+    """
+    if not target.exists() or png_size(fresh) != png_size(target):
+        shutil.move(fresh, target)
+        print(f"  {target.name}: written")
+        return
+    old, new = png_rows(target), png_rows(fresh)
+    differing = 0
+    worst = 0
+    for row_old, row_new in zip(old.rows, new.rows, strict=True):
+        planes_old = [row_old[channel :: old.channels] for channel in range(3)]
+        planes_new = [row_new[channel :: new.channels] for channel in range(3)]
+        if planes_old == planes_new:
+            continue
+        for x in range(old.width):
+            deltas = [abs(planes_old[c][x] - planes_new[c][x]) for c in range(3)]
+            if any(deltas):
+                differing += 1
+                worst = max(worst, *deltas)
+    share = differing / (old.width * len(old.rows))
+    levels = "level" if worst == 1 else "levels"
+    verdict = (
+        f"differs from the committed frame on {differing} pixels, "
+        f"by at most {worst} {levels}"
+    )
+    if worst <= FRAME_TOLERANCE_LEVELS and share <= FRAME_TOLERANCE_SHARE:
+        fresh.unlink()
+        print(f"  {target.name}: kept, the capture {verdict}")
+        return
+    shutil.move(fresh, target)
+    print(f"  {target.name}: replaced, the capture {verdict}")
 
 
 def install(host: Host) -> Path:
@@ -1661,8 +1778,11 @@ def photograph(
                 ),
                 check=False,
             )
-    run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(target)))
-    print(f"  {target.name}: {png_size(target)}")
+    with TemporaryDirectory(prefix="mpm-frame-") as name:
+        fresh = Path(name) / target.name
+        run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(fresh)))
+        print(f"  {target.name}: {png_size(fresh)}")
+        settle_frame(fresh, target)
 
 
 def open_menu(shot: Shot, plugins: Path) -> dict[str, float]:

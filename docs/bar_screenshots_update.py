@@ -2014,8 +2014,15 @@ def settled_window(host: Host, title: str) -> dict[str, float]:
         window = settled
 
 
-def toolbar_item(host: Host, label: str) -> tuple[float, float]:
-    """Centre of a toolbar item of the host's front window, found by its label."""
+def press_toolbar_item(host: Host, label: str) -> None:
+    """Press a toolbar item of the host's front window, found by its label.
+
+    An accessibility press rather than a mouse click: a toolbar item is a plain
+    AppKit button, which answers one, and the press leaves the pointer where it
+    is. A real click parked the pointer on the item, and what it left behind
+    dimmed the selected item's tint by ten levels in one run of four (run
+    35209830394), on a frame that was otherwise still.
+    """
     reply = osascript(
         bounded(f"""
 tell application "System Events"
@@ -2023,9 +2030,8 @@ tell application "System Events"
         repeat with theElement in UI elements of toolbar 1 of window 1
             try
                 if (name of theElement) is "{label}" or (description of theElement) is "{label}" then
-                    set {{itemX, itemY}} to position of theElement
-                    set {{itemW, itemH}} to size of theElement
-                    return ((itemX + itemW / 2) as string) & " " & ((itemY + itemH / 2) as string)
+                    click theElement
+                    return "pressed"
                 end if
             end try
         end repeat
@@ -2034,11 +2040,9 @@ tell application "System Events"
 end tell
 """)
     )
-    if reply == "none":
+    if reply != "pressed":
         msg = f"{host.name} shows no {label!r} toolbar item"
         raise RuntimeError(msg)
-    left, top = (float(value) for value in reply.split())
-    return left, top
 
 
 def scroll(deltas: tuple[int, ...]) -> None:
@@ -2194,7 +2198,7 @@ def capture_preferences(shot: Shot, plugins: Path) -> None:
     open_menu(shot, plugins)
     open_preferences(shot.host)
     wait_for_window(shot.host, None)
-    mouse("click", *toolbar_item(shot.host, PREFERENCES_PANE))
+    press_toolbar_item(shot.host, PREFERENCES_PANE)
     window = settled_window(shot.host, PREFERENCES_PANE)
     park_pointer()
     time.sleep(2)

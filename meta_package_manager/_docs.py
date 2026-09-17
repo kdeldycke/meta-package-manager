@@ -1372,7 +1372,9 @@ def manager_card(manager_id: str) -> str:
     """
     m = pool[manager_id]
     source_url = manager_source_url(manager_id)
-    source_path = source_url.removeprefix(f"{GITHUB_BLOB_URL}/").partition("#")[0]
+    # The file name alone: every manager lives in the same package directory, and
+    # the full path wrapped mid-word in a box this narrow.
+    source_file = source_url.partition("#")[0].rpartition("/")[2]
 
     # Where to read about the project: its own site, then its Wikipedia article.
     # Fixed labels rather than the addresses, which wrapped mid-URL in a box this
@@ -1474,7 +1476,7 @@ def manager_card(manager_id: str) -> str:
         f"<{manager_label_url(manager_id)}>`"
     )
     facts.append(("Issues and PRs", badge))
-    facts.append(("Source", f"[`{source_path}`]({source_url})"))
+    facts.append(("Source", f"[`{source_file}`]({source_url})"))
 
     # A definition list, so each fact reads as a labelled row of the box.
     rows = "\n\n".join(f"**{label}**\n: {value}" for label, value in facts)

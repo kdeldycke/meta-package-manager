@@ -1196,6 +1196,12 @@ def test_manager_card_renders(manager):
     badge = f"{{bdg-link-secondary}}`{label_name} <{url}>`"
     assert f"**Issues and PRs**\n: {badge}\n\n**Source**\n: " in card
     assert "**" not in card.partition("**Source**\n: ")[2]
+    # The link reads as the file name alone, which is unambiguous only while every
+    # manager lives in the one package directory.
+    source_url = _docs.manager_source_url(manager.id)
+    source_dir, _, source_file = source_url.partition("#")[0].rpartition("/")
+    assert source_dir == f"{_docs.GITHUB_BLOB_URL}/meta_package_manager/managers"
+    assert f"**Source**\n: [`{source_file}`]({source_url})" in card
 
     # Only the ASCII specials are escaped, the way GitHub's own label links are,
     # and the search is narrowed to what is still open: a closed backlog is not

@@ -103,6 +103,7 @@ def test_default_sudo_matches_system_managers():
         "eopkg",
         "ips",
         "macports",
+        "microdnf",
         "nala",
         "pacman",
         "pkg",

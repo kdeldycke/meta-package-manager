@@ -137,6 +137,10 @@ def main() -> None:
     global SYSTEM_EDGE
     driver.require_macos()
     driver.install(HOST)
+    # The runner's screen comes up 1024 wide, and macOS hides the status items
+    # that do not fit beside the front app's menus: the 665-pixel spacer never
+    # showed on it, and took the plugin's item down with it.
+    driver.raise_display()
     quit_host()
     edge = driver.measure_system_items()
     if edge is None:

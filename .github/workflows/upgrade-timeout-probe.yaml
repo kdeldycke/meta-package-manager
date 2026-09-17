@@ -1,0 +1,140 @@
+# TEMPORARY probe workflow, to be deleted once it is known whether the destructive `upgrade --all` tests of `cpan`
+# and `winget` finish their work, or are killed at the 500s `MUTATING_TIMEOUT` of `meta_package_manager/execution.py`.
+---
+name: 🔬 Upgrade timeout probe
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/upgrade-timeout-probe.yaml
+      - meta_package_manager/execution.py
+      - meta_package_manager/managers/cpan.py
+      - meta_package_manager/managers/winget.py
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Supply-chain cooldown: no package published within the window can be resolved
+# by any command in this workflow. Held equal to `[tool.repomatic]
+# minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+  # Same workaround as tests.yaml, for Windows runners redirecting output to files.
+  PYTHONIOENCODING: "utf8"
+
+jobs:
+
+  probe:
+    name: ${{ matrix.manager }} on ${{ matrix.os }}, timeout ${{ matrix.timeout }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - manager: cpan
+            os: ubuntu-26.04-arm
+            timeout: default
+          - manager: cpan
+            os: ubuntu-26.04-arm
+            timeout: "3000"
+          - manager: winget
+            os: windows-2025
+            timeout: default
+          - manager: winget
+            os: windows-2025
+            timeout: "3000"
+    runs-on: ${{ matrix.os }}
+    permissions: {}
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Copied from the Windows cell of tests.yaml, so winget faces the outdated set the destructive tests see.
+      - name: Chocolatey - Windows self-upgrade
+        if: runner.os == 'Windows'
+        run: choco upgrade chocolatey --no-progress --yes --retry-count=3
+      - name: Chocolatey - Pin un-upgradeable packages
+        if: runner.os == 'Windows'
+        run: |
+          choco pin add --name="strawberryperl"
+          choco pin add --name="rtools"
+          choco pin add --name="nginx"
+      - name: Chocolatey - Windows full upgrade
+        if: runner.os == 'Windows'
+        run: |
+          choco upgrade all --no-progress --yes --ignore-package-exit-codes --ignore-detected-reboot --retry-count=3
+          exit 0
+      - name: WinGet - Windows install
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: >
+          winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+          || & { "ignore failure"; $global:LASTEXITCODE = 0 }
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.12.5"
+      - name: Install project
+        run: uv --no-progress sync --frozen
+
+      - name: Outdated packages before the upgrade
+        shell: bash {0}
+        env:
+          MANAGER: ${{ matrix.manager }}
+        run: uv --no-progress run --frozen -- mpm "--${MANAGER}" --verbosity INFO outdated
+
+      # DEBUG streams the raw output of the manager line by line, so the log shows what it was doing when killed.
+      - name: Upgrade all packages
+        shell: bash {0}
+        env:
+          MANAGER: ${{ matrix.manager }}
+          TIMEOUT: ${{ matrix.timeout }}
+        run: |
+          timeout_option=()
+          if [ "${TIMEOUT}" != "default" ]; then
+            timeout_option=(--timeout "${TIMEOUT}")
+          fi
+          start=$(date +%s)
+          uv --no-progress run --frozen -- \
+            mpm "--${MANAGER}" --verbosity DEBUG "${timeout_option[@]}" upgrade --all 2>&1 | tee upgrade.log
+          code=${PIPESTATUS[0]}
+          elapsed=$(( $(date +%s) - start ))
+          echo "mpm exit code: ${code}"
+          echo "elapsed seconds: ${elapsed}"
+          echo "${elapsed}" > elapsed.txt
+          {
+            echo "| Manager | Timeout | Exit code | Elapsed |"
+            echo "| :-- | :-- | --: | --: |"
+            echo "| ${MANAGER} | ${TIMEOUT} | ${code} | ${elapsed}s |"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: "Gate: the default timeout kills the upgrade"
+        if: matrix.timeout == 'default'
+        shell: bash
+        run: |
+          grep --fixed-strings "Timed out after 500s." upgrade.log
+          elapsed=$(cat elapsed.txt)
+          test "${elapsed}" -ge 500
+
+      - name: "Gate: a raised timeout lets the upgrade run past 500s"
+        if: matrix.timeout != 'default'
+        shell: bash
+        env:
+          TIMEOUT: ${{ matrix.timeout }}
+        run: |
+          if grep --fixed-strings "Timed out after 500s." upgrade.log; then
+            echo "The raised timeout did not apply."
+            exit 1
+          fi
+          elapsed=$(cat elapsed.txt)
+          test "${elapsed}" -gt 500
+          grep --fixed-strings "Timed out after ${TIMEOUT}s." upgrade.log \
+            || echo "Finished before the ${TIMEOUT}s timeout."

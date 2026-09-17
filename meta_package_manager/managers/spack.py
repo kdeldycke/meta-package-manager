@@ -113,6 +113,7 @@ class Spack(PackageManager):
     name = "Spack"
 
     homepage_url = "https://spack.io"
+    repository_url = "https://github.com/spack/spack"
 
     platforms = LINUX_LIKE, MACOS
 

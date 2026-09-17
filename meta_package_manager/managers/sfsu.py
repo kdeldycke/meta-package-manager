@@ -52,7 +52,7 @@ class SFSU(PackageManager):
 
     name = "Scoop sfsu"
 
-    homepage_url = "https://github.com/winpax/sfsu"
+    repository_url = "https://github.com/winpax/sfsu"
 
     platforms = WINDOWS
 

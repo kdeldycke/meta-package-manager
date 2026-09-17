@@ -91,13 +91,12 @@ class Zim(PackageManager):
     parseable list, and no upstream sample pins its format down. `upgrade
     --all` still works and mpm auto-skips the operation.
     ```
-
-    Documentation: [zimfw](https://zimfw.sh).
     """
 
     name = "Zsh Zim"
 
     homepage_url = "https://zimfw.sh"
+    repository_url = "https://github.com/zimfw/zimfw"
     logo = "zsh"
 
     platforms = LINUX_LIKE, MACOS

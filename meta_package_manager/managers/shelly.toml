@@ -41,7 +41,7 @@
 
 [mpm.overrides.shelly]
 name = "Shelly"
-homepage_url = "https://github.com/Seafoam-Labs/Shelly-ALPM"
+repository_url = "https://github.com/Seafoam-Labs/Shelly-ALPM"
 logo = "archlinux"
 # Its own prerequisites name "Arch Linux (or an Arch-based distribution)", and
 # it links against the `libalpm` that `pacman` provides.

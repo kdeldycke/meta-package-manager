@@ -36,6 +36,7 @@
 [mpm.overrides.emacs]
 name = "GNU Emacs packages"
 homepage_url = "https://www.gnu.org/software/emacs/"
+repository_url = "https://cgit.git.savannah.gnu.org/cgit/emacs.git"
 wikipedia_url = "https://en.wikipedia.org/wiki/GNU_Emacs"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["emacs"]

@@ -89,7 +89,7 @@
 
 [mpm.overrides.choosenim]
 name = "Nim choosenim"
-homepage_url = "https://github.com/nim-lang/choosenim"
+repository_url = "https://github.com/nim-lang/choosenim"
 logo = "nim"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["choosenim"]

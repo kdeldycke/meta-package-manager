@@ -45,7 +45,6 @@ class Yarn(PackageManager):
     [antfu-collective/ni](https://github.com/antfu-collective/ni?tab=readme-ov-file#ni).
     """
 
-    homepage_url = "https://yarnpkg.com"
     logo = "yarn"
 
     platforms = ALL_PLATFORMS
@@ -93,6 +92,8 @@ class YarnClassic(Yarn):
     id = "yarn"
 
     name = "Yarn Classic"
+    homepage_url = "https://yarnpkg.com"
+    repository_url = "https://github.com/yarnpkg/yarn"
     wikipedia_url = "https://en.wikipedia.org/wiki/Yarn_(package_manager)"
 
     requirement = ">=1.20.0,<2.0.0"
@@ -363,6 +364,8 @@ class YarnBerry(Yarn):
     id = "yarn-berry"
 
     name = "Yarn Berry"
+    homepage_url = "https://yarnpkg.com"
+    repository_url = "https://github.com/yarnpkg/berry"
     wikipedia_url = "https://en.wikipedia.org/wiki/Yarn_(package_manager)"
 
     requirement = ">=2.0.0"

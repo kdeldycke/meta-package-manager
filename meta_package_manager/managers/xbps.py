@@ -45,7 +45,7 @@ class XBPS(PackageManager):
 
     name = "Void XBPS"
 
-    homepage_url = "https://github.com/void-linux/xbps"
+    repository_url = "https://github.com/void-linux/xbps"
     wikipedia_url = "https://en.wikipedia.org/wiki/XBPS"
     logo = "voidlinux"
 

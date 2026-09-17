@@ -58,13 +58,12 @@ class Sheldon(PackageManager):
     performing the update. `upgrade --all` still works, and mpm auto-skips the
     operation.
     ```
-
-    Documentation: [sheldon](https://sheldon.cli.rs).
     """
 
     name = "Sheldon"
 
     homepage_url = "https://sheldon.cli.rs"
+    repository_url = "https://github.com/rossmacarthur/sheldon"
 
     platforms = LINUX_LIKE, MACOS
 

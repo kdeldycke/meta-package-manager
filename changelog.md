@@ -15,7 +15,7 @@
 - [go] Resolve `pkg:golang` pURLs to the `go` manager.
 - [bar-plugin,gnome-shell] Name the package of each upgrade action with a pURL of its manager, so `mpm` no longer looks it up in the installed packages first.
 - [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
-- [mpm] Link a manager's source repository and Wikipedia article from its documentation page, and a declined tool's article from its [unsupported](https://mpm.run/unsupported/) verdict. Manager definitions accept a `wikipedia_url` key.
+- [mpm] Link a manager's source repository and Wikipedia article from its documentation page, and a declined tool's article from its [unsupported](https://mpm.run/unsupported/) verdict. Manager definitions accept `repository_url` and `wikipedia_url` keys.
 - [mpm] Fold 39 single-tool verdicts on the [unsupported](https://mpm.run/unsupported/) page into family sections sharing one verdict each. Those tools' anchors move to the family name.
 - [bar-plugin] Add screenshots of SwiftBar's *About* submenu and preferences pane to the plugin page.
 - [bar-plugin] Capture the SwiftBar and Xbar screenshots at 2x, on a HiDPI virtual display the capture job raises over the runner's own screen.

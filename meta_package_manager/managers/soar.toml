@@ -18,7 +18,7 @@
 
 [mpm.overrides.soar]
 name = "Soar"
-homepage_url = "https://github.com/pkgforge/soar"
+repository_url = "https://github.com/pkgforge/soar"
 # soar is Linux-only (it relies on landlock and other Linux syscalls); "linux_like" also
 # covers WSL.
 platforms = ["linux_like"]

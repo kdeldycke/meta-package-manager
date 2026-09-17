@@ -14,7 +14,7 @@
 
 [mpm.overrides.apt-cyg]
 name = "apt-cyg"
-homepage_url = "https://github.com/transcode-open/apt-cyg"
+repository_url = "https://github.com/transcode-open/apt-cyg"
 # No logo: Simple Icons carries no Cygwin mark. A request has been open since 2024,
 # with a Wikimedia SVG proposed on it but never acted on:
 # https://github.com/simple-icons/simple-icons/issues/11310

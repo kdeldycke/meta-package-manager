@@ -88,13 +88,11 @@ class Antigen(PackageManager):
     performing the update. `upgrade --all` still works, and mpm auto-skips the
     operation.
     ```
-
-    Documentation: [antigen](https://github.com/zsh-users/antigen).
     """
 
     name = "Zsh Antigen"
 
-    homepage_url = "https://github.com/zsh-users/antigen"
+    repository_url = "https://github.com/zsh-users/antigen"
     logo = "zsh"
 
     platforms = LINUX_LIKE, MACOS

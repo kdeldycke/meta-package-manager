@@ -60,7 +60,7 @@
 
 [mpm.overrides.pyenv]
 name = "Python pyenv"
-homepage_url = "https://github.com/pyenv/pyenv"
+repository_url = "https://github.com/pyenv/pyenv"
 logo = "python"
 platforms = ["linux_like", "macos"]
 cli_names = ["pyenv"]

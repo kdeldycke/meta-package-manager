@@ -48,6 +48,7 @@
 [mpm.overrides.haxelib]
 name = "Haxe haxelib"
 homepage_url = "https://lib.haxe.org"
+repository_url = "https://github.com/HaxeFoundation/haxelib"
 logo = "haxe"
 platforms = ["all_platforms"]
 cli_names = ["haxelib"]

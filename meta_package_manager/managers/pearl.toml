@@ -37,7 +37,7 @@
 
 [mpm.overrides.pearl]
 name = "Pearl"
-homepage_url = "https://github.com/pearl-core/pearl"
+repository_url = "https://github.com/pearl-core/pearl"
 platforms = ["linux_like", "macos"]
 cli_names = ["pearl"]
 # No version floor is declared. Every verb driven here was present in the

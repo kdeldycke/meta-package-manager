@@ -69,7 +69,7 @@ class Pkgit(PackageManager):
 
     name = "pkgit"
 
-    homepage_url = "https://git.symlinx.net/pkgit"
+    repository_url = "https://git.symlinx.net/pkgit"
 
     platforms = LINUX_LIKE
     """`src/files.c` opens with `O_NOFOLLOW` behind no feature-test macro, which

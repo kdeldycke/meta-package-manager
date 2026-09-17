@@ -11,6 +11,7 @@
 [mpm.overrides.gh-ext]
 name = "GitHub CLI extensions"
 homepage_url = "https://cli.github.com"
+repository_url = "https://github.com/cli/cli"
 logo = "github"
 # "linux_like" covers every Linux distribution plus WSL, matching gh's Linux binary.
 platforms = ["linux_like", "macos", "windows"]

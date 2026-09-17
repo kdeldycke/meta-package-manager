@@ -65,7 +65,7 @@
 
 [mpm.overrides.bob]
 name = "bob"
-homepage_url = "https://github.com/MordechaiHadad/bob"
+repository_url = "https://github.com/MordechaiHadad/bob"
 logo = "neovim"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["bob"]

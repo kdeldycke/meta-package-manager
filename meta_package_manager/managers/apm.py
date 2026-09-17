@@ -53,6 +53,7 @@ class APM(PackageManager):
     name = "Atom apm"
 
     homepage_url = "https://atom.io/packages"
+    repository_url = "https://github.com/atom/apm"
 
     keywords = ("atom",)
 

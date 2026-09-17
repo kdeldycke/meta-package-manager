@@ -19,6 +19,7 @@
 [mpm.overrides.slapt-get]
 name = "slapt-get"
 homepage_url = "https://software.jaos.org/"
+repository_url = "https://github.com/jaos/slapt-get"
 wikipedia_url = "https://en.wikipedia.org/wiki/Slapt-get"
 logo = "slackware"
 platforms = ["slackware"]

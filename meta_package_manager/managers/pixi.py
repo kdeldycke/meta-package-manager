@@ -108,6 +108,7 @@ class Pixi(PackageManager):
     name = "pixi"
 
     homepage_url = "https://pixi.sh"
+    repository_url = "https://github.com/prefix-dev/pixi"
 
     # No `logo`: Simple Icons carries no pixi mark yet. Their request is open and
     # already cleared of trademark concerns (labelled `permission not needed`):

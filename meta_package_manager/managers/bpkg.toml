@@ -26,6 +26,7 @@
 [mpm.overrides.bpkg]
 name = "bpkg"
 homepage_url = "https://www.bpkg.sh"
+repository_url = "https://github.com/bpkg/bpkg"
 # Bash, curl and git: no Windows support is documented upstream.
 platforms = ["linux_like", "macos"]
 cli_names = ["bpkg"]

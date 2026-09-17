@@ -44,6 +44,7 @@
 [mpm.overrides.platformio-core]
 name = "PlatformIO Core"
 homepage_url = "https://platformio.org"
+repository_url = "https://github.com/platformio/platformio-core"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["pio"]
 # No version floor is declared. Every verb driven here was present in the

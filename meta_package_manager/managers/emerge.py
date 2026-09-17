@@ -62,6 +62,7 @@ class Emerge(PackageManager):
     name = "Gentoo emerge"
 
     homepage_url = "https://wiki.gentoo.org/wiki/Portage#emerge"
+    repository_url = "https://github.com/gentoo/portage"
     wikipedia_url = "https://en.wikipedia.org/wiki/Portage_(software)"
     logo = "gentoo"
 

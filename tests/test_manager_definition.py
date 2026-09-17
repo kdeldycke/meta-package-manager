@@ -536,6 +536,7 @@ def _definition(**operations):
         name="My Tool",
         platforms=("all_platforms",),
         homepage_url=None,
+        repository_url=None,
         wikipedia_url=None,
         logo=None,
         cli_fields={"cli_names": ("mytool",)},
@@ -962,6 +963,7 @@ def test_register_rejects_builtin_collision(reset_definitions, caplog):
         name="Fake Pip",
         platforms=("all_platforms",),
         homepage_url=None,
+        repository_url=None,
         wikipedia_url=None,
         logo=None,
         cli_fields={},
@@ -993,6 +995,7 @@ def test_factory_functional(tmp_path, fake_tool, reset_definitions):
         name="My Tool",
         platforms=("all_platforms",),
         homepage_url=None,
+        repository_url=None,
         wikipedia_url=None,
         logo=None,
         cli_fields={
@@ -1034,6 +1037,7 @@ def test_factory_functional_version_cli(tmp_path, fake_tool, reset_definitions):
         name="My Tool",
         platforms=("all_platforms",),
         homepage_url=None,
+        repository_url=None,
         wikipedia_url=None,
         logo=None,
         cli_fields={
@@ -1175,7 +1179,7 @@ def test_bundled_registered(toml_path):
         manager.definition_source == f"meta_package_manager/managers/{toml_path.name}"
     )
     assert manager.name
-    assert manager.homepage_url
+    assert manager.homepage_url or manager.repository_url
 
     # Validate the shape of the sample fixtures consumed by the tests below.
     samples = data.get("samples", {})

@@ -39,7 +39,7 @@
 
 [mpm.overrides.pamac]
 name = "Manjaro pamac"
-homepage_url = "https://github.com/manjaro/pamac-cli"
+repository_url = "https://github.com/manjaro/pamac-cli"
 wikipedia_url = "https://en.wikipedia.org/wiki/Pamac"
 logo = "manjaro"
 platforms = ["linux_like"]

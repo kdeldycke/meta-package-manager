@@ -58,13 +58,11 @@ class Zef(PackageManager):
     No `outdated`: zef reports no staleness of its own. `upgrade` covers both the
     bulk and the single-package cases natively, so neither is synthesized.
     ```
-
-    Documentation: [zef README](https://github.com/ugexe/zef#readme).
     """
 
     name = "Zef"
 
-    homepage_url = "https://github.com/ugexe/zef"
+    repository_url = "https://github.com/ugexe/zef"
 
     platforms = ALL_PLATFORMS
 

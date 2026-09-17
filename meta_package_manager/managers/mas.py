@@ -65,7 +65,7 @@ class MAS(PackageManager):
 
     name = "Mac App Store"
 
-    homepage_url = "https://github.com/mas-cli/mas"
+    repository_url = "https://github.com/mas-cli/mas"
     logo = "appstore"
 
     keywords = ("app store", "app-store")

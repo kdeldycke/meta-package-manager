@@ -60,7 +60,7 @@
 
 [mpm.overrides.getnf]
 name = "getnf"
-homepage_url = "https://github.com/getnf/getnf"
+repository_url = "https://github.com/getnf/getnf"
 platforms = ["linux_like", "macos"]
 keywords = ["nerd font", "nerd fonts"]
 cli_names = ["getnf"]

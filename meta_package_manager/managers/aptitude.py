@@ -107,7 +107,7 @@ class Aptitude(PackageManager):
 
     name = "aptitude"
 
-    homepage_url = "https://salsa.debian.org/apt-team/aptitude"
+    repository_url = "https://salsa.debian.org/apt-team/aptitude"
     wikipedia_url = "https://en.wikipedia.org/wiki/Aptitude_(software)"
     logo = "debian"
 

@@ -69,7 +69,7 @@
 
 [mpm.overrides.hyprpm]
 name = "Hyprland hyprpm"
-homepage_url = "https://github.com/hyprwm/Hyprland"
+repository_url = "https://github.com/hyprwm/Hyprland"
 platforms = ["linux_like"]
 keywords = ["hyprland"]
 cli_names = ["hyprpm"]

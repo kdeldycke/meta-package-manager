@@ -35,6 +35,7 @@
 [mpm.overrides.pi]
 name = "Pi extensions"
 homepage_url = "https://pi.dev"
+repository_url = "https://github.com/earendil-works/pi"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["pi"]
 # No version floor is declared. Every verb driven here was present in the

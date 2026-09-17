@@ -90,6 +90,7 @@ class Pacman(PackageManager):
     name = "Arch Linux pacman"
 
     homepage_url = "https://wiki.archlinux.org/title/pacman"
+    repository_url = "https://gitlab.archlinux.org/pacman/pacman"
     wikipedia_url = "https://en.wikipedia.org/wiki/Pacman_(package_manager)"
 
     logo: str | None = "archlinux"
@@ -378,7 +379,7 @@ class Aura(Pacman):
 
     name = "Arch Linux aura"
 
-    homepage_url = "https://github.com/fosskers/aura"
+    repository_url = "https://github.com/fosskers/aura"
     logo = "archlinux"
 
     default_sudo = False
@@ -476,15 +477,13 @@ class DkpPacman(Pacman):
 
     Unlike the AUR helpers below this one is not a helper at all but pacman
     itself, so it keeps the `default_sudo` inherited from `Pacman`.
-
-    Documentation: [devkitPro pacman](https://github.com/devkitPro/pacman).
     """
 
     id = "dkp-pacman"
 
     name = "devkitPro pacman"
 
-    homepage_url = "https://github.com/devkitPro/pacman"
+    repository_url = "https://github.com/devkitPro/pacman"
 
     logo = None
     """No mark of its own, and Arch's would misattribute a devkitPro tool: the
@@ -534,7 +533,7 @@ class Pacaur(Pacman):
 
     name = "Arch Linux pacaur"
 
-    homepage_url = "https://github.com/E5ten/pacaur"
+    repository_url = "https://github.com/E5ten/pacaur"
     logo = "archlinux"
 
     default_sudo = False
@@ -577,7 +576,7 @@ class Paru(Pacman):
 
     name = "Arch Linux paru"
 
-    homepage_url = "https://github.com/Morganamilo/paru"
+    repository_url = "https://github.com/Morganamilo/paru"
     logo = "archlinux"
 
     default_sudo = False
@@ -714,13 +713,11 @@ class Pikaur(Pacman):
     `--noconfirm` forced by {attr}`Pacman.pre_args` is what keeps that split
     unattended.
     ```
-
-    Documentation: [pikaur](https://github.com/actionless/pikaur).
     """
 
     name = "Arch Linux pikaur"
 
-    homepage_url = "https://github.com/actionless/pikaur"
+    repository_url = "https://github.com/actionless/pikaur"
     logo = "archlinux"
 
     default_sudo = False
@@ -783,13 +780,11 @@ class Trizen(Pacman):
     the stability policy keys `unmaintained` on an abandoned upstream, not on a
     quiet release cadence.
     ```
-
-    Documentation: [trizen](https://github.com/trizen/trizen).
     """
 
     name = "Arch Linux trizen"
 
-    homepage_url = "https://github.com/trizen/trizen"
+    repository_url = "https://github.com/trizen/trizen"
     logo = "archlinux"
 
     default_sudo = False
@@ -849,7 +844,7 @@ class Yay(Pacman):
 
     name = "Arch Linux yay"
 
-    homepage_url = "https://github.com/Jguer/yay"
+    repository_url = "https://github.com/Jguer/yay"
     logo = "archlinux"
 
     default_sudo = False

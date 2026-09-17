@@ -20,6 +20,7 @@
 [mpm.overrides.chromebrew]
 name = "Chromebrew"
 homepage_url = "https://chromebrew.github.io"
+repository_url = "https://github.com/chromebrew/chromebrew"
 logo = "googlechrome"
 platforms = ["chromeos"]
 keywords = ["chrome os", "chromeos"]

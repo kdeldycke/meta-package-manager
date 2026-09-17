@@ -89,13 +89,11 @@ class Bin(PackageManager):
 
     No escalation: bin installs into a directory it picked from `$PATH` for being
     writable, and never needs root.
-
-    Documentation: [bin](https://github.com/marcosnils/bin).
     """
 
     name = "bin"
 
-    homepage_url = "https://github.com/marcosnils/bin"
+    repository_url = "https://github.com/marcosnils/bin"
 
     platforms = LINUX_LIKE, MACOS, WINDOWS
 

@@ -94,13 +94,12 @@ class ZeroInstall(PackageManager):
     the oldest release upstream's `CHANGES.md` documents, so no floor could be
     verified rather than guessed. The class was driven against `2.18`.
     ```
-
-    Documentation: [0install](https://0install.net).
     """
 
     name = "Zero Install"
 
     homepage_url = "https://0install.net"
+    repository_url = "https://github.com/0install/0install"
 
     platforms = ALL_PLATFORMS
     """The OCaml implementation builds for Windows alongside every Unix, and

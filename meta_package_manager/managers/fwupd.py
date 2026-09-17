@@ -63,6 +63,7 @@ class FWUPD(PackageManager):
     name = "Linux fwupd"
 
     homepage_url = "https://fwupd.org"
+    repository_url = "https://github.com/fwupd/fwupd"
     wikipedia_url = "https://en.wikipedia.org/wiki/Fwupd"
     logo = "linuxfoundation"
 

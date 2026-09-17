@@ -42,7 +42,7 @@
 
 [mpm.overrides.pipxu]
 name = "pipxu"
-homepage_url = "https://github.com/bulletmark/pipxu"
+repository_url = "https://github.com/bulletmark/pipxu"
 platforms = ["linux_like", "macos"]
 cli_names = ["pipxu"]
 # No version floor is declared. Every verb driven here was present in the

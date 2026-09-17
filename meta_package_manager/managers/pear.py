@@ -100,6 +100,7 @@ class PEAR(PackageManager):
     name = "PEAR"
 
     homepage_url = "https://pear.php.net"
+    repository_url = "https://github.com/pear/pear-core"
     wikipedia_url = "https://en.wikipedia.org/wiki/PEAR"
     logo = "php"
 

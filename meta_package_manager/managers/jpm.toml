@@ -23,7 +23,7 @@
 
 [mpm.overrides.jpm]
 name = "jpm"
-homepage_url = "https://github.com/janet-lang/jpm"
+repository_url = "https://github.com/janet-lang/jpm"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["jpm"]
 version_cli = "janet"

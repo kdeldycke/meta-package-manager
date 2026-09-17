@@ -12,7 +12,7 @@
 
 [mpm.overrides.opkg]
 name = "opkg"
-homepage_url = "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/"
+repository_url = "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/"
 logo = "openwrt"
 platforms = ["unix_without_macos"]
 requirement = ">=0.2.0"

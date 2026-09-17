@@ -103,6 +103,7 @@ class GHCup(PackageManager):
     name = "Haskell ghcup"
 
     homepage_url = "https://www.haskell.org/ghcup/"
+    repository_url = "https://github.com/haskell/ghcup-hs"
     logo = "haskell"
 
     platforms = LINUX_LIKE, MACOS, WINDOWS

@@ -33,8 +33,6 @@ if TYPE_CHECKING:
 class PrtGet(PackageManager):
     """The ports front-end of CRUX.
 
-    Documentation: [`prt-get(8)` man page](https://crux.nu/Main/Prt-get).
-
     ```{caution}
     CRUX builds every port from source, so an install or an upgrade compiles.
     `mpm` caps a mutating operation at 500 seconds, which a large port outlasts

@@ -76,6 +76,7 @@ class Mamba(PackageManager):
     name = "Mamba"
 
     homepage_url = "https://mamba.readthedocs.io"
+    repository_url = "https://github.com/mamba-org/mamba"
     logo = "anaconda"
 
     platforms = LINUX_LIKE, MACOS, WINDOWS
@@ -391,5 +392,6 @@ class Micromamba(Mamba):
     name = "Micromamba"
 
     homepage_url = "https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html"
+    repository_url = "https://github.com/mamba-org/mamba"
 
     cli_names = ("micromamba",)

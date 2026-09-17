@@ -39,6 +39,7 @@
 [mpm.overrides.skills]
 name = "Agent Skills"
 homepage_url = "https://skills.sh"
+repository_url = "https://github.com/vercel-labs/skills"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["skills"]
 # No version floor is declared. Every verb driven here was present in the

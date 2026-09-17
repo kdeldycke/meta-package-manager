@@ -34,7 +34,6 @@ if TYPE_CHECKING:
 class UVBase(PackageManager):
     """Virtual base shared by the `UV` and `UVX` managers defined below."""
 
-    homepage_url = "https://docs.astral.sh/uv"
     logo = "uv"
 
     requirement = ">=0.5.0"
@@ -130,6 +129,8 @@ class UV(UVBase):
     """
 
     name = "Python uv"
+    homepage_url = "https://docs.astral.sh/uv"
+    repository_url = "https://github.com/astral-sh/uv"
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -287,6 +288,7 @@ class UVX(UVBase):
     name = "Python uvx"
 
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
+    repository_url = "https://github.com/astral-sh/uv"
 
     brewfile_entry_type = "uv"
     """Mapped to Homebrew Bundle's `uv` entry type, which installs via

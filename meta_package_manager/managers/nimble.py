@@ -75,13 +75,11 @@ class Nimble(PackageManager):
     rather than replacing it, so reporting that as an upgrade would misstate
     what happened.
     ```
-
-    Documentation: [Nimble README](https://github.com/nim-lang/nimble#readme).
     """
 
     name = "Nimble"
 
-    homepage_url = "https://github.com/nim-lang/nimble"
+    repository_url = "https://github.com/nim-lang/nimble"
 
     platforms = ALL_PLATFORMS
 

@@ -81,13 +81,11 @@ class Nala(PackageManager):
     therefore goes through `install`, which moves an already-installed package
     to its candidate version, exactly as `apt` does.
     ```
-
-    Documentation: [nala](https://gitlab.com/volian/nala).
     """
 
     name = "Nala"
 
-    homepage_url = "https://gitlab.com/volian/nala"
+    repository_url = "https://gitlab.com/volian/nala"
     logo = "debian"
 
     platforms = LINUX_LIKE

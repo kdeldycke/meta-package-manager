@@ -49,7 +49,7 @@
 
 [mpm.overrides.pkgm]
 name = "pkgm"
-homepage_url = "https://github.com/pkgxdev/pkgm"
+repository_url = "https://github.com/pkgxdev/pkgm"
 # Upstream ships installation instructions for Homebrew and its own shell
 # installer only, and every path it writes is Unix-shaped.
 platforms = ["linux_like", "macos"]

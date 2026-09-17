@@ -23,6 +23,7 @@
 [mpm.overrides.pkgin]
 name = "Pkgin"
 homepage_url = "https://pkgin.net"
+repository_url = "https://github.com/NetBSDfr/pkgin"
 logo = "netbsd"
 platforms = ["netbsd"]
 keywords = ["netbsd", "pkgsrc"]

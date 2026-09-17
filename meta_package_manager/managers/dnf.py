@@ -74,7 +74,7 @@ class DNF(PackageManager):
 
     name = "Fedora DNF"
 
-    homepage_url = "https://github.com/rpm-software-management/dnf"
+    repository_url = "https://github.com/rpm-software-management/dnf"
     wikipedia_url = "https://en.wikipedia.org/wiki/DNF_(software)"
     logo = "fedora"
 
@@ -459,7 +459,7 @@ class DNF5(DNF):
 
     name = "Fedora DNF5"
 
-    homepage_url = "https://github.com/rpm-software-management/dnf5"
+    repository_url = "https://github.com/rpm-software-management/dnf5"
     wikipedia_url = "https://en.wikipedia.org/wiki/DNF_(software)"
     logo = "fedora"
 
@@ -512,6 +512,7 @@ class YUM(DNF):
     name = "Fedora YUM"
 
     homepage_url = "http://yum.baseurl.org"
+    repository_url = "https://github.com/rpm-software-management/yum"
     wikipedia_url = "https://en.wikipedia.org/wiki/Yum_(software)"
     logo = "fedora"
 

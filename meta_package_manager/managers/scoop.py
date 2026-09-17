@@ -38,8 +38,6 @@ class Scoop(PackageManager):
     refuses to run as an administrator at all, answering `Running the installer
     as administrator is disabled by default` and aborting.
 
-    Documentation: [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop).
-
     ```{note}
     The `installed`, `outdated` and `search` listings are column
     tables introduced by a `---` separator line: mpm drops everything up
@@ -63,6 +61,7 @@ class Scoop(PackageManager):
     name = "Scoop"
 
     homepage_url = "https://scoop.sh"
+    repository_url = "https://github.com/ScoopInstaller/Scoop"
     wikipedia_url = "https://en.wikipedia.org/wiki/Scoop_Package_Manager"
 
     # No `logo`: Simple Icons carries no Scoop mark yet. Of the marks missing from

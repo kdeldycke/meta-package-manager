@@ -49,7 +49,7 @@
 
 [mpm.overrides.elan]
 name = "Lean elan"
-homepage_url = "https://github.com/leanprover/elan"
+repository_url = "https://github.com/leanprover/elan"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["elan"]
 requirement = ">=4.0.0"

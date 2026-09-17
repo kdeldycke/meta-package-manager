@@ -10,6 +10,7 @@
 [mpm.overrides.cargo]
 name = "Rust cargo"
 homepage_url = "https://doc.rust-lang.org/cargo/"
+repository_url = "https://github.com/rust-lang/cargo"
 wikipedia_url = "https://en.wikipedia.org/wiki/Cargo_(software)"
 logo = "rust"
 platforms = ["all_platforms"]

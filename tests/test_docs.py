@@ -420,6 +420,7 @@ def test_pyproject_updates_are_pyproject_fmt_fixpoint(monkeypatch, tmp_path):
     monkeypatch.setattr(docs_update, "PROJECT_ROOT", tmp_path)
     docs_update.update_labels()
     docs_update.update_keywords()
+    docs_update.update_metrics_subjects()
 
     assert pyproject_fmt.run(["--check", str(scratch)]) == 0
 
@@ -642,13 +643,14 @@ def test_benchmark_homepages_cover_non_pool_managers():
 
 @all_managers
 def test_manager_homepage_url(manager):
-    """Every pool manager defines a non-empty homepage URL.
+    """Every pool manager links its upstream, by home page or by repository.
 
-    Sourced by the benchmark table generator to link each manager identifier
-    to its upstream documentation. An empty or malformed URL breaks the
-    rendered table.
+    A malformed URL breaks the rendered card, and a Wikipedia article has a slot
+    of its own.
     """
-    assert manager.homepage_url
+    assert manager.homepage_url or manager.repository_url
+    if manager.homepage_url is None:
+        return
     assert isinstance(manager.homepage_url, str)
     assert manager.homepage_url.startswith(("http://", "https://"))
     assert "wikipedia.org" not in manager.homepage_url, "use `wikipedia_url`"
@@ -747,9 +749,7 @@ def test_manager_upstreams_cover_the_pool():
     assert measured | excused == set(pool)
     assert not measured & excused
 
-    forges = {"codeberg.org", "github.com", "gitlab.com"} | set(
-        _metrics_config()["forges"]
-    )
+    forges = set(docs_update.SAMPLED_FORGES) | set(_metrics_config()["forges"])
     for manager_id in measured:
         url = _canonical_repo_url(subjects[manager_id])
         assert url.startswith("https://"), f"{manager_id} needs an https URL"
@@ -763,6 +763,27 @@ def test_manager_upstreams_cover_the_pool():
     # manager shows nothing.
     for reason in _docs.NO_UPSTREAM.values():
         assert reason.endswith(".")
+
+
+def test_metrics_subjects_in_pyproject():
+    """Check the manager entries of the metrics subjects follow `repository_url`.
+
+    Drift means a manager's repository changed without running
+    `docs/docs_update.py`, and the weekly sample would go on reading the old one.
+
+    A mirror stands in only for a repository the sampler cannot read, and must
+    itself be readable, or it replaces a subject for nothing.
+    """
+    assert not docs_update.update_metrics_subjects(check=True)
+
+    forges = set(docs_update.SAMPLED_FORGES) | set(_metrics_config()["forges"])
+    for manager_id, mirror in docs_update.METRICS_MIRRORS.items():
+        repository = pool[manager_id].repository_url
+        assert repository, f"{manager_id} mirrors no repository"
+        assert urlparse(repository).netloc not in forges, (
+            f"{manager_id} needs no mirror: {repository} is sampled directly"
+        )
+        assert urlparse(mirror).netloc in forges
 
 
 def test_metrics_charts_are_committed():
@@ -1249,21 +1270,16 @@ def test_manager_card_renders(manager):
         )
     assert f": `{manager.id}`" in card
     # The home page, the repository and the Wikipedia article, each a fixed label
-    # after its icon, inside a link the stylesheet keeps whole. A home page that
-    # is the repository is listed once, as the repository.
-    subject = _metrics_config()["subjects"].get(manager.id)
-    repository = _canonical_repo_url(subject) if subject else None
-    assert _docs.manager_repository_url(manager.id) == repository
-    targets = []
-    home = manager.homepage_url.rstrip("/").casefold().replace("://www.", "://")
-    if repository and repository.casefold() == home:
-        repository = manager.homepage_url
-    else:
-        targets.append(("home", "Home page", manager.homepage_url))
-    if repository:
-        targets.append(("code", "Repository", repository))
-    if manager.wikipedia_url:
-        targets.append(("book", "Wikipedia", manager.wikipedia_url))
+    # after its icon, inside a link the stylesheet keeps whole.
+    targets = [
+        (icon, label, url)
+        for icon, label, url in (
+            ("home", "Home page", manager.homepage_url),
+            ("code", "Repository", manager.repository_url),
+            ("book", "Wikipedia", manager.wikipedia_url),
+        )
+        if url
+    ]
     links = [
         f"[{{octicon}}`{icon}` {label}]({url}){{.manager-link}}"
         for icon, label, url in targets
@@ -1465,7 +1481,8 @@ def test_manager_page_sections_render(manager):
         # only the prose between them must stay heading-free.
         assert not heading.search(fence.sub("", output))
 
-    assert manager.homepage_url in _docs.manager_intro(manager.id)
+    upstream = manager.homepage_url or manager.repository_url
+    assert upstream in _docs.manager_intro(manager.id)
     # Header, separator, then one row per operation.
     operations = _docs.manager_operations(manager.id)
     assert len(operations.splitlines()) == 2 + len(Operations)

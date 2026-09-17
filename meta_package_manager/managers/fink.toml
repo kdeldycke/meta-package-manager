@@ -22,6 +22,7 @@
 [mpm.overrides.fink]
 name = "Fink"
 homepage_url = "https://www.finkproject.org"
+repository_url = "https://github.com/fink/fink"
 wikipedia_url = "https://en.wikipedia.org/wiki/Fink_(software)"
 platforms = ["macos"]
 maintenance_note = "[Fink](https://github.com/fink/fink) is in deep maintenance mode: no engine release since `0.45.6` (February 2022), though its package tree still receives occasional commits."

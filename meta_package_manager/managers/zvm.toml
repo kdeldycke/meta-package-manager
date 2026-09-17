@@ -34,7 +34,7 @@
 
 [mpm.overrides.zvm]
 name = "zvm"
-homepage_url = "https://github.com/tristanisham/zvm"
+repository_url = "https://github.com/tristanisham/zvm"
 # Upstream publishes release binaries for Linux, macOS and Windows, and for
 # FreeBSD, NetBSD, OpenBSD and Solaris besides.
 platforms = ["linux_like", "macos", "windows"]

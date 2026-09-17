@@ -69,6 +69,7 @@ class Roswell(PackageManager):
     name = "Roswell"
 
     homepage_url = "https://roswell.github.io/"
+    repository_url = "https://github.com/roswell/roswell"
     logo = "commonlisp"
 
     keywords = ("common lisp", "quicklisp")

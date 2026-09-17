@@ -154,6 +154,7 @@ class Pip(PackageManager):
     name = "Python pip"
 
     homepage_url = "https://pip.pypa.io"
+    repository_url = "https://github.com/pypa/pip"
     wikipedia_url = "https://en.wikipedia.org/wiki/Pip_(package_manager)"
     logo = "pypi"
 

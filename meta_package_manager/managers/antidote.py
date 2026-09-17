@@ -113,11 +113,10 @@ class Antidote(PackageManager):
     `--self` and `--bundles` scope flags, so a single bundle cannot be
     targeted. mpm auto-skips the operation and `upgrade --all` still works.
     ```
-
-    Documentation: [antidote.sh](https://antidote.sh).
     """
 
     homepage_url = "https://antidote.sh"
+    repository_url = "https://github.com/mattmc3/antidote"
     logo = "zsh"
 
     platforms = LINUX_LIKE, MACOS

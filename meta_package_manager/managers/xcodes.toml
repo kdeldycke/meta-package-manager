@@ -54,7 +54,7 @@
 
 [mpm.overrides.xcodes]
 name = "Xcode xcodes"
-homepage_url = "https://github.com/XcodesOrg/xcodes"
+repository_url = "https://github.com/XcodesOrg/xcodes"
 logo = "xcode"
 platforms = ["macos"]
 cli_names = ["xcodes"]

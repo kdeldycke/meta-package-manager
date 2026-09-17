@@ -48,7 +48,7 @@
 
 [mpm.overrides.juliaup]
 name = "Julia juliaup"
-homepage_url = "https://github.com/JuliaLang/juliaup"
+repository_url = "https://github.com/JuliaLang/juliaup"
 logo = "julia"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["juliaup"]

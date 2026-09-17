@@ -33,7 +33,7 @@
 
 [mpm.overrides.topgrade]
 name = "Topgrade"
-homepage_url = "https://github.com/topgrade-rs/topgrade"
+repository_url = "https://github.com/topgrade-rs/topgrade"
 platforms = ["bsd", "linux_like", "macos", "all_windows"]
 cli_names = ["topgrade"]
 # topgrade self-escalates: it runs each privileged step through its own sudo (its

@@ -25,7 +25,7 @@
 
 [mpm.overrides.clib]
 name = "clib"
-homepage_url = "https://github.com/clibs/clib"
+repository_url = "https://github.com/clibs/clib"
 # No Windows: upstream documents Homebrew, MacPorts, Ubuntu, Fedora and NixOS
 # installs only, and expects libcurl to be linkable.
 platforms = ["linux_like", "macos"]

@@ -66,8 +66,6 @@ class Lure(PackageManager):
     a listing costs a network round-trip and prints the git progress on
     `<stderr>`. Only the packages themselves reach `<stdout>`.
     ```
-
-    Documentation: [LURE readme](https://github.com/lure-sh/lure).
     """
 
     maintenance_note: str | None = (
@@ -83,7 +81,7 @@ class Lure(PackageManager):
 
     name = "LURE"
 
-    homepage_url = "https://github.com/lure-sh/lure"
+    repository_url = "https://github.com/lure-sh/lure"
 
     platforms = LINUX_LIKE
 

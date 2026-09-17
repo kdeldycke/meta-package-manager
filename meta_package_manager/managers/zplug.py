@@ -78,13 +78,11 @@ class Zplug(PackageManager):
     its output is not pinned by any upstream sample this implementation could
     be held to. `upgrade --all` still works and mpm auto-skips the operation.
     ```
-
-    Documentation: [zplug](https://github.com/zplug/zplug).
     """
 
     name = "Zsh zplug"
 
-    homepage_url = "https://github.com/zplug/zplug"
+    repository_url = "https://github.com/zplug/zplug"
     logo = "zsh"
 
     platforms = LINUX_LIKE, MACOS

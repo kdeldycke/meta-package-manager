@@ -18,6 +18,7 @@
 [mpm.overrides.cave]
 name = "cave"
 homepage_url = "https://exherbo.org"
+repository_url = "https://gitlab.exherbo.org/paludis/paludis"
 platforms = ["exherbo"]
 keywords = ["exherbo", "paludis"]
 maintenance_note = "[Paludis / cave](https://exherbo.org) is slow-moving: its last release (`3.0.2`) and commits date to around March 2025, though the project is not archived and carries no retirement notice."

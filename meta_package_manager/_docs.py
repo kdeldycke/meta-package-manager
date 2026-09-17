@@ -1377,21 +1377,20 @@ def manager_card(manager_id: str) -> str:
     source_file = source_url.partition("#")[0].rpartition("/")[2]
 
     # Where to read about the project: its own site, the repository holding its
-    # code, then its Wikipedia article. A home page that is the repository itself
-    # is listed once, as the repository. Fixed labels rather than the addresses,
-    # which wrapped mid-URL in a box this narrow. Each icon sits inside its link,
-    # which the stylesheet keeps from wrapping, so a line breaks between links and
-    # never between an icon and its label.
-    repository = manager_repository_url(manager_id)
-    targets = []
-    if repository and _url_key(repository) == _url_key(m.homepage_url):
-        repository = m.homepage_url
-    else:
-        targets.append(("home", "Home page", m.homepage_url))
-    if repository:
-        targets.append(("code", "Repository", repository))
-    if m.wikipedia_url:
-        targets.append(("book", "Wikipedia", m.wikipedia_url))
+    # code, then its Wikipedia article. A project whose home page is its repository
+    # declares only the repository. Fixed labels rather than the addresses, which
+    # wrapped mid-URL in a box this narrow. Each icon sits inside its link, which
+    # the stylesheet keeps from wrapping, so a line breaks between links and never
+    # between an icon and its label.
+    targets = [
+        (icon, label, url)
+        for icon, label, url in (
+            ("home", "Home page", m.homepage_url),
+            ("code", "Repository", m.repository_url),
+            ("book", "Wikipedia", m.wikipedia_url),
+        )
+        if url
+    ]
     links = [
         f"[{{octicon}}`{icon}` {label}]({url}){{.manager-link}}"
         for icon, label, url in targets
@@ -2612,9 +2611,10 @@ facts their cards state.
 def _metrics_config() -> dict:
     """Parse the `[tool.repomatic.metrics]` table of `pyproject.toml`.
 
-    The sampler's own configuration is the single source declaring which
-    repository each subject measures, so the manager pages join the store
-    against it rather than carrying a second map.
+    The sampler's own configuration declares which repository each subject
+    measures, so the manager pages join the store against it rather than carrying
+    a second map. Its manager entries are written by `docs/docs_update.py` from
+    each manager's `repository_url`.
     """
     content = (PROJECT_ROOT / "pyproject.toml").read_text(encoding="UTF-8")
     config = tomllib.loads(content)
@@ -2630,31 +2630,6 @@ def _canonical_repo_url(target: str) -> str:
     if "://" in target:
         return target
     return f"https://github.com/{target}"
-
-
-def manager_repository_url(manager_id: str) -> str | None:
-    """Locate the repository holding a manager's own code, when one is declared.
-
-    Read from the subjects of {func}`_metrics_config`, which already name the
-    repository the weekly sample measures for each manager, rather than from a
-    second map to keep in step with it. A manager {data}`NO_UPSTREAM` excuses
-    from the sample has none: its code is proprietary, or hosted where no API
-    answers.
-    """
-    subject = _metrics_config()["subjects"].get(manager_id)
-    return _canonical_repo_url(subject) if subject else None
-
-
-def _url_key(url: str) -> str:
-    """Reduce a URL to what tells two addresses of one page apart.
-
-    The scheme, a `www.` prefix, a trailing slash and letter case never do on
-    the forges a home page and a repository share, where `ivan-hc/AM` and
-    `ivan-hc/am` are the same repository.
-    """
-    parsed = urlparse(url)
-    host = parsed.netloc.casefold().removeprefix("www.")
-    return f"{host}{parsed.path.rstrip('/').casefold()}"
 
 
 @cache

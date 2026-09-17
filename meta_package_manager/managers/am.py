@@ -80,13 +80,11 @@ class AM(PackageManager):
     printed, so a record wraps across lines with no marker to rejoin it, and its
     description is unrecoverable once wrapped.
     ```
-
-    Documentation: [AM](https://github.com/ivan-hc/AM).
     """
 
     name = "AppImage Manager"
 
-    homepage_url = "https://github.com/ivan-hc/AM"
+    repository_url = "https://github.com/ivan-hc/AM"
 
     platforms = LINUX_LIKE
 

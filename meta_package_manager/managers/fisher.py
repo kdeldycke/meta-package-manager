@@ -60,13 +60,11 @@ class Fisher(PackageManager):
     No `search`: Fisher resolves plugins straight from forge URLs and indexes
     no registry to search.
     ```
-
-    Documentation: [fisher](https://github.com/jorgebucaran/fisher).
     """
 
     name = "Fish fisher"
 
-    homepage_url = "https://github.com/jorgebucaran/fisher"
+    repository_url = "https://github.com/jorgebucaran/fisher"
 
     platforms = LINUX_LIKE, MACOS
 

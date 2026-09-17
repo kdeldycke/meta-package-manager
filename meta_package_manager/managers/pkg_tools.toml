@@ -22,6 +22,7 @@
 [mpm.overrides.pkg-tools]
 name = "OpenBSD pkg tools"
 homepage_url = "https://man.openbsd.org/pkg_add"
+repository_url = "https://github.com/openbsd/src"
 logo = "openbsd"
 platforms = ["openbsd"]
 keywords = ["openbsd"]

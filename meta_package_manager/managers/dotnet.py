@@ -40,8 +40,6 @@ class DotNet(PackageManager):
     no operation escalates: elevation is only ever needed for the separate
     `--tool-path` scenario, which this wrapper does not drive.
 
-    Documentation: [.NET global tools](https://learn.microsoft.com/dotnet/core/tools/global-tools).
-
     ```{note}
     The listing and the search results are column tables whose headers are
     localized resource strings, translated into thirteen languages. Rather
@@ -83,6 +81,7 @@ class DotNet(PackageManager):
     name = "dotnet tool"
 
     homepage_url = "https://learn.microsoft.com/dotnet/core/tools/global-tools"
+    repository_url = "https://github.com/dotnet/sdk"
     logo = "dotnet"
 
     keywords = ("nuget",)

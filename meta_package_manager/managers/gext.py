@@ -79,13 +79,11 @@ class Gext(PackageManager):
     refresh. No `cleanup`: nothing prunes anything.
 
     No escalation: extensions install under the user's own data directory.
-
-    Documentation: [gnome-extensions-cli](https://github.com/essembeh/gnome-extensions-cli).
     """
 
     name = "GNOME Shell extensions"
 
-    homepage_url = "https://github.com/essembeh/gnome-extensions-cli"
+    repository_url = "https://github.com/essembeh/gnome-extensions-cli"
     logo = "gnome"
 
     platforms = UNIX_WITHOUT_MACOS

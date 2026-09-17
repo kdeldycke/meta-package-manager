@@ -34,8 +34,6 @@ if TYPE_CHECKING:
 class Pkcon(PackageManager):
     """PackageKit's console client.
 
-    Documentation: [PackageKit/PackageKit](https://github.com/PackageKit/PackageKit).
-
     pkcon is an unprivileged client handing transactions to the `packagekitd`
     daemon over D-Bus, with the distro's native backend (apt, dnf, zypp, alpm, ...)
     doing the real work. Escalation is polkit's job, so no operation is marked
@@ -54,6 +52,7 @@ class Pkcon(PackageManager):
     name = "PackageKit"
 
     homepage_url = "https://www.freedesktop.org/software/PackageKit/"
+    repository_url = "https://github.com/PackageKit/PackageKit"
     wikipedia_url = "https://en.wikipedia.org/wiki/PackageKit"
     logo = "freedesktopdotorg"
 

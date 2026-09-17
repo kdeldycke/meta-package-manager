@@ -74,6 +74,7 @@ class Gem(PackageManager):
     name = "RubyGems"
 
     homepage_url = "https://rubygems.org"
+    repository_url = "https://github.com/ruby/rubygems"
     wikipedia_url = "https://en.wikipedia.org/wiki/RubyGems"
     logo = "rubygems"
 

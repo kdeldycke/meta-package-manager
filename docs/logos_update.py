@@ -308,8 +308,9 @@ def candidate_slugs(manager) -> set[str]:
     candidates = {slugify(manager.id), slugify(manager.name)}
     candidates.update(slugify(word) for word in manager.name.split())
 
-    if manager.homepage_url:
-        host = urllib.parse.urlparse(manager.homepage_url).hostname or ""
+    upstream = manager.homepage_url or manager.repository_url
+    if upstream:
+        host = urllib.parse.urlparse(upstream).hostname or ""
         # Drop the public suffix, then the forge and doc-site hosts.
         for label in host.split(".")[:-1]:
             slug = slugify(label)

@@ -50,6 +50,7 @@
 [mpm.overrides.ollama]
 name = "Ollama"
 homepage_url = "https://ollama.com"
+repository_url = "https://github.com/ollama/ollama"
 wikipedia_url = "https://en.wikipedia.org/wiki/Ollama"
 logo = "ollama"
 platforms = ["linux_like", "macos", "windows"]

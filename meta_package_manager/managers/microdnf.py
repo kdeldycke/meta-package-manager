@@ -70,7 +70,7 @@ class MicroDNF(PackageManager):
 
     name = "microdnf"
 
-    homepage_url = "https://github.com/rpm-software-management/microdnf"
+    repository_url = "https://github.com/rpm-software-management/microdnf"
     logo = "fedora"
 
     platforms = LINUX_LIKE

@@ -61,6 +61,7 @@ class Mise(PackageManager):
     name = "mise"
 
     homepage_url = "https://mise.jdx.dev"
+    repository_url = "https://github.com/jdx/mise"
 
     # No `logo`: Simple Icons carries no mise mark yet. Their request sits in the
     # `permissions in review` stage, where they check with the trademark owner

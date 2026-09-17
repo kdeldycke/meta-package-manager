@@ -16,7 +16,7 @@
 
 [mpm.overrides.swupd]
 name = "Clear Linux Software Updater"
-homepage_url = "https://github.com/clearlinux/swupd-client"
+repository_url = "https://github.com/clearlinux/swupd-client"
 logo = "intel"
 platforms = ["clearlinux"]
 keywords = ["clear linux", "clearlinux"]

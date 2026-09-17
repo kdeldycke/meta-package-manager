@@ -85,15 +85,13 @@ class OhMyFish(PackageManager):
     printed by a private `__omf.cli.search.output` helper whose format no
     upstream sample pins down, so declaring it would mean guessing at a parser.
     ```
-
-    Documentation: [Oh My Fish](https://github.com/oh-my-fish/oh-my-fish).
     """
 
     id = "oh-my-fish"
 
     name = "Fish Oh My Fish"
 
-    homepage_url = "https://github.com/oh-my-fish/oh-my-fish"
+    repository_url = "https://github.com/oh-my-fish/oh-my-fish"
 
     platforms = LINUX_LIKE, MACOS
 

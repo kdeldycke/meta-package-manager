@@ -17,8 +17,9 @@
 """Regenerate the committed, pool-derived artifacts that Sphinx does not own.
 
 Called by repomatic's `update-docs` job. Writes the pool-derived blocks of
-`pyproject.toml` (the `[project]` keywords, the label registry and the labeller
-rules), the operation-matrix platform footnotes spliced into `readme.md`, and the
+`pyproject.toml` (the `[project]` keywords, the metrics subjects, the label registry
+and the labeller rules), the operation-matrix platform footnotes spliced into
+`readme.md`, and the
 stub *file set* of `docs/managers/` (one `<id>.md` per pool manager, created and
 deleted as managers join or leave the pool).
 
@@ -38,7 +39,9 @@ would keep writing and report a clean tree.
 from __future__ import annotations
 
 import argparse
+import re
 import sys
+from urllib.parse import urlparse
 
 import tomlkit
 from wcwidth import wcswidth
@@ -106,6 +109,29 @@ for free from the pool: {func}`update_keywords` merges both sets into
 `pyproject.toml`. A term naming one specific manager belongs on that manager's own
 `keywords` attribute instead, where it cannot outlive the class it describes.
 """
+
+METRICS_MIRRORS = {
+    "emacs": "https://github.com/emacs-mirror/emacs",
+}
+"""Repositories the metrics sample reads in place of a manager's own.
+
+For a manager whose `repository_url` sits on a host no forge API answers, but whose
+history is mirrored on one that does: Savannah serves Emacs through cgit, and the
+GitHub mirror carries the same commits.
+"""
+
+SAMPLED_FORGES = ("codeberg.org", "github.com", "gitlab.com")
+"""Hosts the metrics sampler reads without an entry in its `forges` table.
+
+repomatic's own `FORGE_APIS`. Every other host must be declared under
+`[tool.repomatic.metrics] forges`, and a repository elsewhere cannot be sampled.
+"""
+
+_SUBJECT_LINE = re.compile(
+    r'^metrics\.subjects\.(?P<key>[\w-]+) = "(?P<url>[^"]*)"\n',
+    re.MULTILINE,
+)
+"""One `metrics.subjects.<name> = "<url>"` line, as `pyproject-fmt` writes it."""
 
 
 def _string_array(values: tuple[str, ...], key: str = "", multiline: bool = False):
@@ -264,6 +290,59 @@ def update_keywords(*, check: bool = False) -> bool:
     return _sync_file(pyproject, tomlkit.dumps(doc), check=check)
 
 
+def generate_metrics_subjects(forges: dict[str, str]) -> dict[str, str]:
+    """Map each manager whose repository can be sampled to the URL to sample.
+
+    A manager's `repository_url`, or its {data}`METRICS_MIRRORS` entry, when that
+    URL's host is one the sampler reads: a {data}`SAMPLED_FORGES` host, or one of
+    the self-hosted `forges` the configuration declares. A manager with no public
+    repository, or one no API answers for, has no subject, and explains why in
+    {data}`~meta_package_manager._docs.NO_UPSTREAM`.
+
+    :param forges: The `[tool.repomatic.metrics] forges` table.
+    """
+    sampled = {*SAMPLED_FORGES, *forges}
+    subjects = {}
+    for manager_id, manager in pool.items():
+        url = METRICS_MIRRORS.get(manager_id, manager.repository_url)
+        if url and urlparse(url).netloc in sampled:
+            subjects[manager_id] = url
+    return subjects
+
+
+def update_metrics_subjects(*, check: bool = False) -> bool:
+    """Sync the manager entries of the `[tool.repomatic.metrics] subjects` table.
+
+    The manager entries come from {func}`generate_metrics_subjects`; the others,
+    naming projects that are not managers (`mpm` and its benchmarked peers), are
+    kept as written. The block is rewritten as text rather than through `tomlkit`,
+    whose proxy over these dotted keys fails to delete them, and it keeps the one
+    line per subject, sorted by name, that `pyproject-fmt` leaves alone.
+
+    :param check: Report only, leaving `pyproject.toml` untouched.
+    :return: `True` when the subjects are out of date.
+    """
+    pyproject = PROJECT_ROOT / "pyproject.toml"
+    content = pyproject.read_text(encoding="UTF-8")
+    metrics = tomlkit.parse(content)["tool"]["repomatic"]["metrics"].unwrap()
+
+    lines = list(_SUBJECT_LINE.finditer(content))
+    start, end = lines[0].start(), lines[-1].end()
+    assert content[start:end] == "".join(line[0] for line in lines), (
+        "the metrics.subjects lines of pyproject.toml must form one block"
+    )
+
+    subjects = {
+        line["key"]: line["url"] for line in lines if line["key"] not in pool
+    }
+    subjects |= generate_metrics_subjects(metrics.get("forges", {}))
+    block = "".join(
+        f'metrics.subjects.{name} = "{url}"\n'
+        for name, url in sorted(subjects.items())
+    )
+    return _sync_file(pyproject, content[:start] + block + content[end:], check=check)
+
+
 def update_manager_stubs(*, check: bool = False) -> bool:
     """Sync the committed page stubs of `docs/managers/`.
 
@@ -313,6 +392,7 @@ def main() -> int:
     # needs the second read to see what the first one wrote.
     updaters = {
         "pyproject.toml [project] keywords": update_keywords,
+        "pyproject.toml [tool.repomatic.metrics] subjects": update_metrics_subjects,
         "pyproject.toml [tool.repomatic.labels] arrays": update_labels,
         "docs/managers/ page stubs": update_manager_stubs,
     }

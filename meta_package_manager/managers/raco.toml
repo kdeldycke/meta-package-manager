@@ -32,6 +32,7 @@
 [mpm.overrides.raco]
 name = "raco"
 homepage_url = "https://docs.racket-lang.org/pkg/"
+repository_url = "https://github.com/racket/racket"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["raco"]
 version_cli = "racket"

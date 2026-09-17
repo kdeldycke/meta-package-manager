@@ -125,10 +125,90 @@ def test_unique_names():
 
 @all_managers
 def test_homepage_url(manager):
-    assert manager.homepage_url
+    """A home page is optional where the repository stands for it."""
+    assert manager.homepage_url or manager.repository_url
+    if manager.homepage_url is None:
+        return
     location = URL(manager.homepage_url)
     assert location
     assert location.scheme.lower() in ("http", "https")
+
+
+@all_managers
+def test_repository_url(manager):
+    """A repository is optional, since proprietary tools have none."""
+    if manager.repository_url is None:
+        return
+    location = URL(manager.repository_url)
+    assert location.scheme == "https"
+    assert location.host
+    assert "wikipedia.org" not in location.host
+
+
+URL_ATTRIBUTES = tuple(
+    sorted(name for name in dir(PackageManager) if name.endswith("_url"))
+)
+"""Every link attribute a manager may declare, found by name rather than listed."""
+
+
+def _address(url: str) -> str:
+    """Reduce a URL to what tells two addresses of one page apart.
+
+    The scheme, a `www.` prefix, a trailing slash and letter case never do on the
+    hosts these links point at, where `ivan-hc/AM` and `ivan-hc/am` are the same
+    repository.
+    """
+    location = URL(url)
+    host = location.host.casefold().removeprefix("www.")
+    return f"{host}{location.path.rstrip('/').casefold()}"
+
+
+@all_managers
+def test_url_attributes_are_distinct(manager):
+    """Check a manager's links each point somewhere the others do not.
+
+    A home page that is the repository is declared once, as `repository_url`:
+    stating it twice links the same page twice from the manager's card, under
+    two labels. Every link belongs to the class declaring it, never inherited,
+    since a subclass often wraps a project of its own.
+    """
+    assert URL_ATTRIBUTES, "no `*_url` attribute found on PackageManager"
+    declared = {}
+    for name in URL_ATTRIBUTES:
+        assert name in vars(type(manager)), f"{manager.id} inherits `{name}`"
+        url = getattr(manager, name)
+        if url is None:
+            continue
+        duplicate = declared.get(_address(url))
+        assert duplicate is None, (
+            f"{manager.id} points `{name}` and `{duplicate}` at the same {url}: "
+            "keep only the more specific one"
+        )
+        declared[_address(url)] = name
+
+
+DOCUMENTATION_LINE = re.compile(r"^Documentation: (.+)$", re.MULTILINE)
+"""The one-reference line a manager docstring cites its documentation with."""
+
+MARKDOWN_LINK_URL = re.compile(r"\]\((https?://(?:[^()\s]|\([^()\s]*\))+)\)")
+"""The address of a markdown link, balanced parentheses included."""
+
+
+@all_managers
+def test_documentation_line_repeats_no_url_attribute(manager):
+    """Check a docstring's `Documentation:` line cites a page the card lacks.
+
+    The manager's page opens on its card, which links every `*_url` attribute
+    already: a reference line pointing at one of them states that link twice on
+    the same page.
+    """
+    own = {_address(url) for name in URL_ATTRIBUTES if (url := getattr(manager, name))}
+    docstring = inspect.getdoc(type(manager)) or ""
+    for line in DOCUMENTATION_LINE.findall(docstring):
+        for url in MARKDOWN_LINK_URL.findall(line):
+            assert _address(url) not in own, (
+                f"{manager.id} cites {url} as documentation, which its card links"
+            )
 
 
 @all_managers
@@ -637,6 +717,7 @@ CANONICAL_ATTRS = (
     "id",
     "name",
     "homepage_url",
+    "repository_url",
     "wikipedia_url",
     "logo",
     "keywords",

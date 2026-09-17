@@ -69,6 +69,7 @@ class Flatpak(PackageManager):
     """
 
     homepage_url = "https://flatpak.org"
+    repository_url = "https://github.com/flatpak/flatpak"
     wikipedia_url = "https://en.wikipedia.org/wiki/Flatpak"
     logo = "flatpak"
 

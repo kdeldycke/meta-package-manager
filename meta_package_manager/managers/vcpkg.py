@@ -84,6 +84,7 @@ class VCPKG(PackageManager):
     name = "vcpkg"
 
     homepage_url = "https://vcpkg.io"
+    repository_url = "https://github.com/microsoft/vcpkg"
     wikipedia_url = "https://en.wikipedia.org/wiki/Vcpkg"
 
     platforms = LINUX_LIKE, MACOS, WINDOWS

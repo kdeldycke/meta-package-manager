@@ -161,10 +161,11 @@ class MetaPackageManager(type):
         if "cli_names" not in dct:
             cls.cli_names = (cls.id,)
 
-        # A subclass often wraps a distinct project, which its parent's article
-        # does not describe.
-        if "wikipedia_url" not in dct:
-            cls.wikipedia_url = None
+        # A subclass often wraps a distinct project, whose home page, repository and
+        # article are not its parent's.
+        for link in ("homepage_url", "repository_url", "wikipedia_url"):
+            if link not in dct:
+                setattr(cls, link, None)
 
         if "virtual" not in dct:
             cls.virtual = name == "PackageManager" or not cls.cli_names
@@ -259,7 +260,24 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """
 
     homepage_url: str | None = None
-    """Home page of the project, only used in documentation for reference."""
+    """Home page of the project, only used in documentation for reference.
+
+    Left unset when the home page is the project's repository, which
+    {attr}`repository_url` names on its own. Never inherited, like the other links.
+    """
+
+    repository_url: str | None = None
+    """Repository holding the project's code, or `None` when it has no public one.
+
+    Linked from the manager's documentation page. Also what the weekly metrics
+    sample reads:
+    `docs/docs_update.py` writes it into the `[tool.repomatic.metrics] subjects`
+    of `pyproject.toml` when its forge answers the sampler, through a mirror for a
+    forge that does not.
+
+    Never inherited, for the same reason as {attr}`wikipedia_url`: the AUR helpers
+    extending `pacman` each live in a repository of their own.
+    """
 
     wikipedia_url: str | None = None
     """English Wikipedia article about the project, or `None` when it has none.

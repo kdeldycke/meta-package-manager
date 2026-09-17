@@ -171,8 +171,6 @@ class Lazy(PackageManager):
     contract for. mpm auto-skips the operation and `upgrade --all` still
     works.
     ```
-
-    Documentation: [lazy.folke.io](https://lazy.folke.io).
     """
 
     name = "Neovim lazy-nvim"
@@ -181,6 +179,7 @@ class Lazy(PackageManager):
     used verbatim."""
 
     homepage_url = "https://lazy.folke.io"
+    repository_url = "https://github.com/folke/lazy.nvim"
     logo = "neovim"
 
     platforms = ALL_PLATFORMS
@@ -341,13 +340,11 @@ class Mason(PackageManager):
     `install_root_dir` elsewhere leaves the inventory empty, since finding the
     override would mean loading the very plugin the read path avoids.
     ```
-
-    Documentation: [mason.nvim](https://github.com/mason-org/mason.nvim).
     """
 
     name = "Neovim mason-nvim"
 
-    homepage_url = "https://github.com/mason-org/mason.nvim"
+    repository_url = "https://github.com/mason-org/mason.nvim"
     logo = "neovim"
 
     platforms = ALL_PLATFORMS
@@ -590,6 +587,7 @@ class Vim_Pack(PackageManager):
     verbatim."""
 
     homepage_url = "https://neovim.io/doc/user/pack.html"
+    repository_url = "https://github.com/neovim/neovim"
     logo = "neovim"
 
     platforms = ALL_PLATFORMS

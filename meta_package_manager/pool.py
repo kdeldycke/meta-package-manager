@@ -57,6 +57,7 @@ from .managers.luarocks import LuaRocks
 from .managers.lure import Lure
 from .managers.mamba import Mamba, Micromamba
 from .managers.mas import MAS
+from .managers.microdnf import MicroDNF
 from .managers.miktex import MiKTeX
 from .managers.mise import Mise
 from .managers.nala import Nala
@@ -159,6 +160,7 @@ manager_classes = (
     Mamba,
     MAS,
     Mason,
+    MicroDNF,
     Micromamba,
     MiKTeX,
     Mise,

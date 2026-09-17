@@ -102,6 +102,7 @@ icons:
     managers:
     - dnf
     - dnf5
+    - microdnf
     - yum
     source: https://docs.fedoraproject.org/en-US/project/brand/
     title: Fedora

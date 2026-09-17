@@ -44,6 +44,7 @@
    meta_package_manager.managers.lure
    meta_package_manager.managers.mamba
    meta_package_manager.managers.mas
+   meta_package_manager.managers.microdnf
    meta_package_manager.managers.miktex
    meta_package_manager.managers.mise
    meta_package_manager.managers.nala

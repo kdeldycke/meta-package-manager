@@ -116,9 +116,9 @@ SHARED_LOCK_FAMILIES: Final[tuple[LockFamily, ...]] = (
     ),
     LockFamily(
         "RPM database",
-        frozenset({"dnf", "dnf5", "urpmi", "yum", "zypper"}),
-        "they all reach the RPM database, and a second writer waits on its lock "
-        "for as long as the first one holds it, rather than failing",
+        frozenset({"dnf", "dnf5", "microdnf", "urpmi", "yum", "zypper"}),
+        "they all reach the RPM database, where a second writer either waits for "
+        "the first one to finish or fails on its lock",
     ),
     LockFamily(
         "pacman database",
@@ -170,15 +170,20 @@ serialize on its lock:
   cache alone. Concurrent runs corrupt rather than block, which upstream closed as
   not planned ([conda/conda#13037](https://github.com/conda/conda/issues/13037)).
   Serializing them here is what keeps that out of reach.
-- `dnf`, `dnf5`, `yum`, `zypper` and `urpmi` all reach the RPM database. `urpmi`
-  fronts `librpm` directly, having no listing of its own, and the Mandriva lineage
-  it serves ships `dnf` alongside it, so the two genuinely coexist on one host.
-  This family waits where the pacman one below fails, which is what makes
-  serializing it worth more: a second `dnf5` sits in `fcntl_setlk` for as long as
-  the first holds the lock, so an unserialized pair would spend the whole mutating
-  timeout achieving nothing instead of reporting a collision. Measured on Fedora
-  44 with dnf5 `5.4.3.0`, and it is easy to hit by accident, since a `dnf` whose
-  caller was killed keeps the lock.
+- `dnf`, `dnf5`, `microdnf`, `yum`, `zypper` and `urpmi` all reach the RPM
+  database. `urpmi` fronts `librpm` directly, having no listing of its own, and the
+  Mandriva lineage it serves ships `dnf` alongside it, so the two genuinely coexist
+  on one host. This family mostly waits where the pacman one below fails, which is
+  what makes serializing it worth more: a second `dnf5` sits in `fcntl_setlk` for
+  as long as the first holds the lock, so an unserialized pair would spend the
+  whole mutating timeout achieving nothing instead of reporting a collision.
+  Measured on Fedora 44 with dnf5 `5.4.3.0`, and it is easy to hit by accident,
+  since a `dnf` whose caller was killed keeps the lock. `microdnf` is the
+  exception within the family: libdnf takes its own lock files under
+  `/var/cache/yum/lock` and refuses a second `microdnf` at once, with
+  `rpmdb[process] already locked by microdnf(PID)`, while a `microdnf` arriving
+  during a `dnf` transaction waits for it. Measured on AlmaLinux 10.2 with
+  microdnf `3.10.1` and dnf `4.20.0`.
 - `pacman` and the AUR helpers `pacaur`, `pamac`, `paru`, `pikaur`, `trizen` and
   `yay` all reach the pacman database (`/var/lib/pacman/db.lck`). The helpers are
   front-ends rather than reimplementations: each shells out to `sudo pacman` for the

@@ -53,6 +53,7 @@ print(augmentations_table())
 | [`mamba`](managers/mamba.md)               |                      |              |              |       ✅        |               |
 | [`mas`](managers/mas.md)                   |                      |              |      ✅      |       ✅        |      ✅       |
 | [`micro`](managers/micro.md)               |                      |              |      ✅      |       ✅        |               |
+| [`microdnf`](managers/microdnf.md)         |                      |              |      ✅      |       ✅        |               |
 | [`micromamba`](managers/micromamba.md)     |                      |              |              |       ✅        |               |
 | [`mise`](managers/mise.md)                 |                      |              |      ✅      |                 |               |
 | [`nala`](managers/nala.md)                 |                      |              |      ✅      |       ✅        |               |

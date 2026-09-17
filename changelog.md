@@ -29,6 +29,7 @@
 - [choosenim] Add choosenim Nim toolchain installer, with inventory, catalog search, install, remove and single-version upgrade.
 - [aura] Add aura AUR helper, reporting repository and AUR upgrades together.
 - [hyprpm] Add hyprpm Hyprland plugin manager, listing, installing, removing and upgrading plugin repositories.
+- [microdnf] Add microdnf, the package manager of RHEL-family minimal images, with inventory, outdated, name search, version-pinned install and upgrade, remove, sync and cache cleanup.
 - [bar-plugin] Cap how wide a version renders in a menu line, so an over-long one no longer blanks the target version of its own row. Tune it with `VAR_MAX_VERSION_WIDTH`.
 - [brew] Scan formulae for vulnerabilities: `mpm --network sbom` now queries OSV with the upstream registry purl Homebrew records for a formula, instead of the `pkg:brew/…` coordinate no advisory database indexes.
 - [mpm] Fix a crash rendering tables to a non-UTF-8 stream, which broke every table subcommand on Windows as soon as its output was redirected.

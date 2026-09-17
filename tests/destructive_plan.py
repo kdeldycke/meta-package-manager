@@ -179,6 +179,9 @@ PACKAGE_IDS = {
     # A plugin of micro's own channel. Tiny, pure Lua, and not bundled with
     # the editor, so the round-trip actually installs and removes something.
     "micro": "bounce",
+    # nyancat ships in EPEL, which RHEL-family images do not enable. tree is a
+    # single binary in their BaseOS, and nothing depends on it.
+    "microdnf": "tree",
     # A small, dependency-free TeX package of MiKTeX's own catalog.
     "micromamba": "zstd",
     "miktex": "fancyhdr",
@@ -623,11 +626,11 @@ def pearl_bash_too_old() -> bool:
 def rpm_distro_missing() -> bool:
     """Whether this host is not backed by a working RPM distribution.
 
-    The RPM front-ends (`dnf`, `dnf5`, `yum`, `zypper`) resolve nothing on a host
-    whose RPM database was never populated: they find no release version and no
-    repositories, and fail at the search step before reaching the privileged
-    install. A Debian-based runner carrying one of their binaries is exactly that
-    host.
+    The RPM front-ends (`dnf`, `dnf5`, `microdnf`, `yum`, `zypper`) resolve
+    nothing on a host whose RPM database was never populated: they find no
+    release version and no repositories, and fail at the search step before
+    reaching the privileged install. A Debian-based runner carrying one of their
+    binaries is exactly that host.
 
     Keyed on the database rather than on the platform, so a real openSUSE or
     Fedora machine runs the round-trip instead of inheriting a CI artifact. The
@@ -711,6 +714,7 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # Debian-based runners are, so they fail before the privileged install step.
     "dnf": rpm_distro_missing,
     "dnf5": rpm_distro_missing,
+    "microdnf": rpm_distro_missing,
     "yum": rpm_distro_missing,
     "zypper": rpm_distro_missing,
     # flatpak needs a remote to resolve apps from and polkit to authorize the

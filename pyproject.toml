@@ -119,6 +119,7 @@ keywords = [
   "mason",
   "meta-package-manager",
   "micro",
+  "microdnf",
   "micromamba",
   "miktex",
   "miniconda",
@@ -1108,6 +1109,7 @@ metrics.subjects.mas = "https://github.com/mas-cli/mas"
 metrics.subjects.mason = "https://github.com/mason-org/mason.nvim"
 metrics.subjects.metapac = "ripytide/metapac"
 metrics.subjects.micro = "https://github.com/micro-editor/micro"
+metrics.subjects.microdnf = "https://github.com/rpm-software-management/microdnf"
 metrics.subjects.micromamba = "https://github.com/mamba-org/mamba"
 metrics.subjects.miktex = "https://github.com/MiKTeX/miktex"
 metrics.subjects.mise = "https://github.com/jdx/mise"
@@ -1426,10 +1428,12 @@ labels.file-rules."📦 manager: raco" = [ "meta_package_manager/managers/raco.*
 labels.file-rules."📦 manager: roswell" = [ "meta_package_manager/managers/roswell.*", "tests/*roswell*" ]
 labels.file-rules."📦 manager: rpm-based" = [
   "meta_package_manager/managers/dnf.*",
+  "meta_package_manager/managers/microdnf.*",
   "meta_package_manager/managers/urpmi.*",
   "meta_package_manager/managers/zypper.*",
   "tests/*dnf*",
   "tests/*dnf5*",
+  "tests/*microdnf*",
   "tests/*urpmi*",
   "tests/*yum*",
   "tests/*zypper*",
@@ -1850,7 +1854,7 @@ description = "roswell"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: rpm-based"
 color = "bfdadc"
-description = "dnf, dnf5, urpmi, yum, zypper"
+description = "dnf, dnf5, microdnf, urpmi, yum, zypper"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: rust-based"

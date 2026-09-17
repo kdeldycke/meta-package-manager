@@ -705,3 +705,56 @@ jobs:
           uv --no-progress run --frozen -- mpm --dnf5 orphans > orphans.txt
           cat orphans.txt
           grep --quiet tree orphans.txt
+
+  microdnf-container:
+    name: 🎩 Drive mpm against microdnf
+    # `needs: metadata` is for its skip gate, as in `dnf5-container` above.
+    needs:
+      - metadata
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    # The only CI machine carrying the C microdnf: no runner image ships it, and on Fedora the name is a dnf5 symlink.
+    # AlmaLinux's minimal image installs it without dnf, the environment it is built for.
+    container:
+      image: quay.io/almalinuxorg/10-minimal:10
+    steps:
+      # The image lacks what both actions below need: `git` for `checkout`, and `tar` plus `gzip` for `setup-uv`.
+      # microdnf only reads a boolean option as `0` or `1`.
+      - name: Install container prerequisites
+        run: microdnf --assumeyes --nodocs --setopt=install_weak_deps=0 install git-core gzip tar
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          # Pin what CI downloads, as in `dnf5-container` above.
+          version: "0.12.5"
+      - name: Install Python
+        run: uv --no-progress venv --python 3.14
+      - name: Install project
+        run: uv --no-progress sync --frozen --all-extras
+      - name: Report the RPM front-ends
+        run: uv --no-progress run --frozen -- mpm --dnf --dnf5 --microdnf --yum managers
+      # microdnf is installed on its own image, so finding its row proves the `rpm` version probe passed: a manager
+      # with no version leaves the pool and lists nothing. CSV rows start with the package ID, where a table's footer
+      # names the manager whatever it found.
+      - name: Drive mpm against microdnf
+        run: |
+          uv --no-progress run --frozen -- mpm --microdnf --verbosity INFO --table-format csv installed > installed.csv
+          cat installed.csv
+          grep --quiet "^microdnf," installed.csv
+          uv --no-progress run --frozen -- mpm --microdnf --table-format csv search tree > search.csv
+          cat search.csv
+          grep --quiet "^tree," search.csv
+      # Rows are not asserted on, a fresh image being often current. A failing query logs `Could not ...` and still
+      # exits `0`, so the wording is the only signal.
+      - name: Exercise outdated
+        run: |
+          uv --no-progress run --frozen -- mpm --microdnf --verbosity INFO outdated 2> outdated.err
+          cat outdated.err
+          if grep --quiet "Could not" outdated.err; then exit 1; fi
+      - name: Round-trip a package
+        run: |
+          uv --no-progress run --frozen -- mpm --microdnf install tree
+          uv --no-progress run --frozen -- mpm --microdnf --table-format csv installed tree > installed-tree.csv
+          cat installed-tree.csv
+          grep --quiet "^tree," installed-tree.csv
+          uv --no-progress run --frozen -- mpm --microdnf remove tree

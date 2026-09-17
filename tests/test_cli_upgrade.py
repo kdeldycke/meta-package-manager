@@ -27,6 +27,7 @@ from meta_package_manager.execution import CLIError
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
+from .destructive_plan import SHORT_FAILURE_TIMEOUT, upgrade_all_blocked
 from .fake_manager import FakeManager
 from .test_cli import assert_no_manager_selected, check_manager_selection
 
@@ -85,12 +86,12 @@ def test_all_managers_dry_run_upgrade_all(invoke, all_option):
 
 @pytest.mark.destructive()
 @pytest.mark.destructive_all_managers()
-def test_all_managers_upgrade_all(invoke):
+def test_all_managers_upgrade_all(invoke, monkeypatch):
     # Only the explicit `--all` spelling runs destructively: the bare
     # `upgrade` alias is already asserted by both dry-run variants above,
-    # and the non-convergent managers (cpan rebuilds, gem re-walks every
-    # installed gem even when current) repeat their full upgrade on a
-    # second pass, doubling the destructive wall-clock for the sake of an
+    # and the non-convergent managers (gem re-walks every installed gem
+    # even when current) repeat their full upgrade on a second pass,
+    # doubling the destructive wall-clock for the sake of an
     # argument-parsing message.
     #
     # Every default manager is selected explicitly because both halves of
@@ -101,6 +102,18 @@ def test_all_managers_upgrade_all(invoke):
     # selection keeps every signal visible at INFO, where the grouped
     # concurrent dispatch engages: this is the one destructive exercise of
     # the concurrent `upgrade --all` path.
+    #
+    # A manager in UPGRADE_ALL_BLOCKED_WHEN would hold the run until the
+    # mutating timeout, so its CLI calls are capped the way an
+    # `[mpm.overrides.<id>] timeout` entry caps them.
+    capped = [mid for mid in pool.default_manager_ids if upgrade_all_blocked(mid)]
+    for mid in capped:
+        monkeypatch.setattr(pool[mid], "timeout", SHORT_FAILURE_TIMEOUT)
+        monkeypatch.setitem(
+            pool.overridden_fields,
+            mid,
+            {*pool.overridden_fields.get(mid, ()), "timeout"},
+        )
     result = invoke(
         *(f"--{mid}" for mid in pool.default_manager_ids),
         "--verbosity",
@@ -115,6 +128,10 @@ def test_all_managers_upgrade_all(invoke):
     # mpm dispatched to every selected manager and surfaced their output.
     assert result.exit_code in (0, 1)
     check_selection(result)
+    timed_out = f"Timed out after {SHORT_FAILURE_TIMEOUT}s."
+    for mid in capped:
+        if f":{mid}.upgrade_all: Upgrade all outdated packages." in result.stderr:
+            assert f":{mid}.upgrade_all: {timed_out}" in result.stderr
 
 
 @default_manager_ids
@@ -141,13 +158,20 @@ def test_single_manager_dry_run_upgrade_all(invoke, manager_id, all_option):
 def test_single_manager_upgrade_all(invoke, manager_id):
     # Only the explicit `--all` spelling runs destructively: see
     # test_all_managers_upgrade_all.
-    result = invoke(f"--{manager_id}", "--verbosity", "INFO", "upgrade", "--all")
+    # A manager in UPGRADE_ALL_BLOCKED_WHEN cannot finish before the mutating
+    # timeout: cap its calls and assert mpm reports the timeout instead.
+    blocked = upgrade_all_blocked(manager_id)
+    cap = ("--timeout", str(SHORT_FAILURE_TIMEOUT)) if blocked else ()
+    result = invoke(f"--{manager_id}", "--verbosity", "INFO", *cap, "upgrade", "--all")
     if result.exit_code == 2:
         assert_no_manager_selected(result)
-    else:
-        # Accept exit code 1: see test_all_managers_upgrade_all.
-        assert result.exit_code in (0, 1)
-        check_selection(result, {manager_id})
+        return
+    # Accept exit code 1: see test_all_managers_upgrade_all.
+    assert result.exit_code in (0, 1)
+    check_selection(result, {manager_id})
+    if blocked:
+        timed_out = f"Timed out after {SHORT_FAILURE_TIMEOUT}s."
+        assert f":{manager_id}.upgrade_all: {timed_out}" in result.stderr
 
 
 def test_installed_ids_tolerates_a_failing_cli(

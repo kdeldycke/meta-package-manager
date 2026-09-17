@@ -13,12 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""The plan driving the destructive install/remove round-trips.
+"""The plan driving the destructive install/remove round-trips and upgrades.
 
 Which package each manager installs and removes, which managers cannot
-complete that round-trip on a given host, and which of them may not run at the
-same time as another. Kept out of `conftest.py` because the whole of it serves
-three test modules: the shared fixtures are what a reader opens conftest for.
+complete that round-trip or a full upgrade on a given host, and which of them
+may not run at the same time as another. Kept out of `conftest.py` because the
+whole of it serves four test modules: the shared fixtures are what a reader
+opens conftest for.
 """
 
 from __future__ import annotations
@@ -437,14 +438,16 @@ def destructive_group(manager_id: str) -> str:
 
 
 SHORT_FAILURE_TIMEOUT = 10
-"""Seconds to cap a destructive install that is *expected* to fail.
+"""Seconds to cap a destructive operation that is *expected* to fail.
 
 The managers in {data}`INSTALL_REMOVE_BLOCKED_WHEN` cannot complete a real install in the
-test environment. Most fail within a second (a permission error, a missing remote, an
+test environment, and those in {data}`UPGRADE_ALL_BLOCKED_WHEN` cannot complete a full
+upgrade. Most installs fail within a second (a permission error, a missing remote, an
 empty search), but a few (`scoop` and `sfsu` on Windows, `pwsh-gallery` on macOS)
-hang with no error until the state-change timeout would otherwise elapse. Capping their
-CLI calls keeps the doomed attempts cheap: long enough for the fast failures to surface,
-short enough that the genuine hangs do not dominate the destructive job's wall-clock.
+hang with no error until the state-change timeout would otherwise elapse, and a blocked
+upgrade always does. Capping their CLI calls keeps the doomed attempts cheap: long
+enough for the fast failures to surface, short enough that the genuine hangs do not
+dominate the destructive job's wall-clock.
 """
 
 
@@ -482,6 +485,19 @@ def cpan_install_blocked() -> bool:
     unknown, not an assumed failure.
     """
     return is_linux() and is_x86_64()
+
+
+def cpan_upgrade_all_blocked() -> bool:
+    """Whether `cpan -u` cannot complete a full upgrade on this host.
+
+    Measured on the `ubuntu-26.04-arm` runner on 2026-09-17. `cpan -O` lists 527
+    outdated modules, and one pass of `cpan -u` builds and tests them for 754
+    seconds. All 128 of its `make install` steps then fail, because the unelevated
+    user cannot create `/usr/local/man/man1` and `/usr/local/man/man3`. Nothing
+    converges, so every run starts over. The x86 runner also hits the 500-second
+    timeout, while `cpan -u` finishes within it on macOS and Windows.
+    """
+    return is_github_ci() and is_linux()
 
 
 def pear_install_blocked() -> bool:
@@ -837,6 +853,36 @@ refusal asserted, keeping the signal that the manager still fails the expected w
 Unconditional rather than host-resolved: the refusal is the tool's own rule, so no
 environment satisfies it.
 """
+
+
+UPGRADE_ALL_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
+    # cpan builds and tests hundreds of modules it cannot install on Linux runners.
+    "cpan": cpan_upgrade_all_blocked,
+    # winget upgrades every outdated application of the runner image. On windows-2025
+    # on 2026-09-17, its 17 upgrades took 42 minutes, 23 of them for Visual Studio.
+    "winget": is_github_ci,
+}
+"""Managers whose `upgrade --all` cannot complete within
+{data}`~meta_package_manager.execution.MUTATING_TIMEOUT`, mapped to the condition under
+which that is true.
+
+Read and resolved like {data}`INSTALL_REMOVE_BLOCKED_WHEN`, through
+{func}`upgrade_all_blocked`. Left alone, such a manager runs until mpm kills it at the
+timeout, and that wait sets the length of both destructive CI steps. The destructive
+upgrade tests drive it anyway, cap its CLI calls at {data}`SHORT_FAILURE_TIMEOUT`, and
+assert that mpm reports the timeout.
+"""
+
+
+def upgrade_all_blocked(manager_id: str) -> bool:
+    """Whether `manager_id` cannot complete a full upgrade here.
+
+    Resolves the {data}`UPGRADE_ALL_BLOCKED_WHEN` condition, which is either a
+    constant or a callable evaluated against the running host. A manager with no
+    entry is not blocked.
+    """
+    condition = UPGRADE_ALL_BLOCKED_WHEN.get(manager_id, False)
+    return condition() if callable(condition) else condition
 
 
 # Unmaintained managers are excluded: their upstreams are unreliable or gone, so a real

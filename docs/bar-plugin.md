@@ -31,7 +31,7 @@ The plugin is configurable with these environment variables:
 | `VAR_ALWAYS_VISIBLE`    | Keep the menu bar icon while nothing is outdated and no manager errored.         | Boolean | `True`               |        ✅        |                         ❌                         |
 
 ```{note}
-SwiftBar renders two things differently from Xbar: the outdated count sits in a native badge on each manager header rather than in its label, and the grouped layout folds every section into an inline accordion ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)) that expands in place without dismissing the menu. Both are visible in the screenshots below.
+SwiftBar renders two things differently from Xbar: the outdated count sits in a native badge on each manager header rather than in its label, and the grouped layout folds every section into an inline accordion ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)) that expands in place without dismissing the menu. Both are visible in the screenshots below, where the count on each accordion header sits right of its badge's center ([swiftbar/SwiftBar#557](https://github.com/swiftbar/SwiftBar/issues/557)).
 ```
 
 These variables drive the menu layout and the options passed to `mpm`: everything else comes from `mpm`'s own configuration file, which applies to every run the plugin triggers. See {doc}`configuration` for the search paths and the full schema.

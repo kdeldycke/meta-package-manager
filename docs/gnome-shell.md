@@ -141,7 +141,7 @@ The *About* group at the foot of the window names two versions. The first is the
 | Error             |  <img src="https://raw.githubusercontent.com/StorageB/icons/main/GNOME48Adwaita/neutral/status/software-update-urgent-symbolic.svg" width="18">   |  <img src="https://raw.githubusercontent.com/ubuntu/yaru/master/icons/Yaru/scalable/status/software-update-urgent-symbolic.svg" width="18">   | `software-update-urgent-symbolic`    | A check failed, or no runnable `mpm` was found.              |
 | Manager failed    |      <img src="https://raw.githubusercontent.com/StorageB/icons/main/GNOME48Adwaita/neutral/status/dialog-warning-symbolic.svg" width="18">       |     <img src="https://raw.githubusercontent.com/ubuntu/yaru/master/icons/Yaru/scalable/generic-symbols/warning-symbolic.svg" width="18">      | `dialog-warning-symbolic`            | On the sub-menu header of a manager that reported errors.    |
 
-Both previews are shown from the upstream repositories. Browse the full [Adwaita](https://github.com/StorageB/icons/blob/main/GNOME48Adwaita/icons.md) and [Yaru](https://github.com/StorageB/icons/blob/main/Yaru/icons.md) icon lists.
+See the full [Adwaita](https://github.com/StorageB/icons/blob/main/GNOME48Adwaita/icons.md) and [Yaru](https://github.com/StorageB/icons/blob/main/Yaru/icons.md) icon lists.
 
 ## Menu actions
 

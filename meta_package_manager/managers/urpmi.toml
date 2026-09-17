@@ -23,6 +23,7 @@
 [mpm.overrides.urpmi]
 name = "urpmi"
 homepage_url = "https://wiki.mageia.org/en/URPMI"
+repository_url = "https://gitweb.mageia.org/software/rpm/urpmi/"
 wikipedia_url = "https://en.wikipedia.org/wiki/Urpmi"
 platforms = ["mageia", "mandriva"]
 keywords = ["mageia"]

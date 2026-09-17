@@ -57,11 +57,14 @@ class WinGet(PackageManager):
     ```
 
     ```{note}
-    `installed` and `outdated` keep only rows whose `Origin Source` is
-    `winget`, dropping packages winget merely tracks (sideloaded, portable
-    or Microsoft Store). Store entries still surface in `search`, but their
-    real version cannot be queried through `winget`, so mpm tags them with
-    an `msstore` sentinel version and sorts them below winget-native ones.
+    `installed` keeps only rows whose `Origin Source` is `winget`, which winget
+    prints for a package it installed itself. `outdated` keeps every row with an
+    upgrade from the `winget` source instead, because `winget update --all`
+    also upgrades an application installed without winget once winget matches
+    it to its catalog, like a vendor's own MSI. Store entries still surface in
+    `search`, but their real version cannot be queried through `winget`, so mpm
+    tags them with an `msstore` sentinel version and sorts them below
+    winget-native ones.
     ```
 
     ```{warning}
@@ -175,8 +178,8 @@ class WinGet(PackageManager):
     )
 
     def _parse_details(
-        self, output: str, filter_by_source: bool = False
-    ) -> Iterator[tuple[str, str, str, str | None]]:
+        self, output: str
+    ) -> Iterator[tuple[str, str, str, str | None, dict[str, str]]]:
         """Parse `--details` output from `winget list`.
 
         Each package block starts with a header line and is followed by
@@ -192,8 +195,12 @@ class WinGet(PackageManager):
           winget [<latest_version>]
         ```
 
-        :param filter_by_source: If `True`, only yield packages whose
-            `Origin Source` is `winget`.
+        Each block yields its name, ID, installed version, `Origin Source` (`None`
+        when the line is absent) and the newest version each source offers. winget
+        prints `Origin Source` only for a package it installed from a source, and
+        `Available Upgrades` for any package a source holds a newer version of,
+        however that package was installed: see
+        [`WorkflowBase.cpp`](https://github.com/microsoft/winget-cli/blob/5b62860167520b1503b3880d5a026809eb07c6f4/src/AppInstallerCLICore/Workflows/WorkflowBase.cpp#L435-L458).
         """
         # Split output into per-package blocks on the header line.
         # The \S anchor after the optional (N/M) prefix prevents the split from
@@ -229,21 +236,22 @@ class WinGet(PackageManager):
             if not version:
                 continue
 
-            if filter_by_source and fields.get("Origin Source") != "winget":
-                continue
-
-            # Extract latest version from the "Available Upgrades" section.
-            # The upgrade line looks like `  winget [1.2.3]`.
-            latest_version = None
-            upgrade_match = re.search(
-                r"^Available Upgrades:\s*\n\s+\S+\s+\[([^\]]+)\]",
-                block,
-                flags=re.MULTILINE,
+            # The "Available Upgrades" section closes the block, one indented
+            # `<source> [<version>]` line per source.
+            upgrades: dict[str, str] = {}
+            section = re.split(
+                r"^Available Upgrades:\s*$", block, maxsplit=1, flags=re.MULTILINE
             )
-            if upgrade_match:
-                latest_version = upgrade_match.group(1)
+            if len(section) == 2:
+                upgrades = dict(
+                    re.findall(
+                        r"^\s+(\S+)\s+\[([^\]]+)\]\s*$",
+                        section[1],
+                        flags=re.MULTILINE,
+                    )
+                )
 
-            yield name, package_id, version, latest_version
+            yield name, package_id, version, fields.get("Origin Source"), upgrades
 
     def _parse_table(self, output: str) -> Iterator[Generator[str, None, None]]:
         """Parse a table from the output of a winget command and returns a generator of cells."""
@@ -331,9 +339,11 @@ class WinGet(PackageManager):
         """
         output = self.run_cli("list", "--details")
 
-        for name, package_id, installed_version, _ in self._parse_details(
-            output, filter_by_source=True
+        for name, package_id, installed_version, origin, _ in self._parse_details(
+            output
         ):
+            if origin != "winget":
+                continue
             yield self.package(
                 id=package_id,
                 name=name,
@@ -362,14 +372,18 @@ class WinGet(PackageManager):
           winget [125.0.2535.51]
         ```
 
-        Only returns packages with Origin Source: winget to exclude packages
-        installed via other sources (e.g., sideload, portable).
+        Returns every package with an upgrade from the `winget` source, whatever
+        installed it: `winget update --all` upgrades all of them. A package only
+        `msstore` offers an upgrade for is left out.
         """
         output = self.run_cli("list", "--upgrade-available", "--details")
 
-        for name, package_id, installed_version, latest_version in self._parse_details(
-            output, filter_by_source=True
+        for name, package_id, installed_version, _, upgrades in self._parse_details(
+            output
         ):
+            latest_version = upgrades.get("winget")
+            if latest_version is None:
+                continue
             yield self.package(
                 id=package_id,
                 name=name,

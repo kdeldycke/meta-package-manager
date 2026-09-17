@@ -85,30 +85,79 @@ def test_parse_details_ignores_indented_upgrade_line(winget):
         """)
 
     blocks = list(winget._parse_details(output))
-    assert len(blocks) == 1
-    name, package_id, version, latest_version = blocks[0]
-    assert name == "Git"
-    assert package_id == "Git.Git"
-    assert version == "2.37.3"
-    assert latest_version == "2.45.1"
+    assert blocks == [
+        ("Git", "Git.Git", "2.37.3", "winget", {"winget": "2.45.1"}),
+    ]
 
 
-def test_parse_details_filter_by_source(winget):
-    output = dedent("""\
-        (1/2) Git [Git.Git]
+# Two blocks captured verbatim from `winget list --upgrade-available --details` on
+# the windows-2025 GitHub runner, winget 1.29.290. The image installs these
+# applications with their own MSI and EXE installers, so winget prints no `Origin
+# Source` line, yet `winget update --all` upgrades both.
+RUNNER_UPGRADES = r"""
+(1/20) AWS Command Line Interface v2 [Amazon.AWSCLI]
+Version: 2.36.40.0
+Publisher: Amazon Web Services
+Local Identifier: ARP\Machine\X64\{9F6E7A28-2D5A-4592-91F3-B357BD1640CE}
+Product Code: {9f6e7a28-2d5a-4592-91f3-b357bd1640ce}
+Upgrade Code: {e1c1971c-384e-4d6d-8d02-f1ac48281cf8}
+Installer Category: msi
+Installed Scope: Machine
+Installed Locale: en-US
+Available Upgrades:
+  winget [2.36.47]
+(5/20) ImageMagick 7.1.2-25 Q16-HDRI (64-bit) (2026-06-04) [ImageMagick.ImageMagick]
+Version: 7.1.2.25
+Publisher: ImageMagick Studio LLC
+Local Identifier: ARP\Machine\X64\ImageMagick 7.1.2 Q16-HDRI (64-bit)_is1
+Product Code: imagemagick 7.1.2 q16-hdri (64-bit)_is1
+Installer Category: exe
+Installed Scope: Machine
+Installed Location: C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\
+Available Upgrades:
+  winget [7.1.2.31]
+"""
+
+
+def test_installed_keeps_packages_winget_installed(winget, monkeypatch):
+    output = RUNNER_UPGRADES + dedent("""\
+        (21/22) Git [Git.Git]
         Version: 2.37.3
         Origin Source: winget
-
-        (2/2) Some Store App [9PF4QZKKRZ7N]
-        Version: Unknown
+        (22/22) Some Store App [9PF4QZKKRZ7N]
+        Version: 1.0.0
         Origin Source: msstore
         """)
+    monkeypatch.setattr(winget, "run_cli", lambda *args, **kwargs: output)
 
-    all_blocks = list(winget._parse_details(output))
-    winget_only = list(winget._parse_details(output, filter_by_source=True))
-    assert len(all_blocks) == 2
-    assert len(winget_only) == 1
-    assert winget_only[0][1] == "Git.Git"
+    assert [package.id for package in winget.installed] == ["Git.Git"]
+
+
+def test_outdated_keeps_every_winget_upgrade(winget, monkeypatch):
+    output = RUNNER_UPGRADES + dedent("""\
+        (21/22) Some Store App [9PF4QZKKRZ7N]
+        Version: 1.0.0
+        Origin Source: msstore
+        Available Upgrades:
+          msstore [2.0.0]
+        (22/22) Git [Git.Git]
+        Version: 2.37.3
+        Origin Source: winget
+        Available Upgrades:
+          msstore [2.40.0]
+          winget [2.45.1]
+        """)
+    monkeypatch.setattr(winget, "run_cli", lambda *args, **kwargs: output)
+
+    packages = {
+        package.id: (str(package.installed_version), str(package.latest_version))
+        for package in winget.outdated
+    }
+    assert packages == {
+        "Amazon.AWSCLI": ("2.36.40.0", "2.36.47"),
+        "ImageMagick.ImageMagick": ("7.1.2.25", "7.1.2.31"),
+        "Git.Git": ("2.37.3", "2.45.1"),
+    }
 
 
 def test_parse_table_handles_short_header_line(winget):

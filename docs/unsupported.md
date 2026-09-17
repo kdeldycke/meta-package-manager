@@ -27,7 +27,7 @@ The same AppImage manager as [`am`](managers/am.md), which `mpm` wraps, under a 
 
 Declined in {mpm-release}`8.0.0`.
 
-## `apt-rpm` ☠️
+## [`apt-rpm`](https://web.archive.org/web/20071230212545/http://apt-rpm.org/) ☠️
 
 APT ported onto RPM, and its last release is `0.5.15lorg3.2` from 2006-06-22. Its original maintainer had stepped away a year before that, announcing in March 2005 "that he would not continue developing it and that he would instead focus on Smart Package Manager, which was planned as a successor to APT-RPM". That successor is on this page too, as [`smart`](#smart), and it is retired as well.
 
@@ -41,7 +41,7 @@ A CPU speed and power optimizer for Linux, running as a daemon that switches gov
 
 Declined in {mpm-release}`8.0.0`.
 
-## `autopackage` ☠️
+## [`autopackage`](https://web.archive.org/web/20090215003815/http://autopackage.org/) ☠️
 
 Cross-distribution installer for Linux binaries, and there is nothing left to drive. Its last stable release is `1.4.2` from 2009-05-24, and in August 2010 "Listaller and Autopackage announced that the projects will merge", a successor that no longer ships either. Its own site survives through the Wayback Machine alone.
 
@@ -110,7 +110,7 @@ Wikipedia: [OneGet](https://en.wikipedia.org/wiki/OneGet).
 
 Declined in {mpm-release}`8.0.0`.
 
-## `cydia` ☠️
+## [`cydia`](https://cydia.saurik.com) ☠️
 
 Package front-end for jailbroken iOS, described by Wikipedia as "a graphical user interface of APT for iOS". Its last release is `1.1.36` from 2020-06-24 and its store closed on 2018-12-16. Dormancy is not the only objection: the APT it drives runs on a phone rather than on the host, which is the scope that declined [`fdroidcl`](#fdroidcl).
 
@@ -338,7 +338,7 @@ Wikipedia: [OpenCSW](https://en.wikipedia.org/wiki/OpenCSW).
 
 Declined in {mpm-release}`8.0.0`.
 
-## `openpkg` ☠️
+## [`openpkg`](https://web.archive.org/web/20100121142959/http://www.openpkg.org/) ☠️
 
 Cross-platform RPM-based packaging for Linux, BSD and Solaris. Its own site no longer serves: `openpkg.org` answers with an expired TLS certificate over HTTPS and HTTP alike. Its Wikipedia stub carries nothing newer than "in June 2005 it offered more than 880 freely available packages".
 
@@ -443,7 +443,7 @@ Neither installs anything and neither owns a package: each reacts to what a real
 
 Declined in {mpm-release}`8.0.0`.
 
-## `ppm` ☠️
+## [`ppm`](https://code.activestate.com/ppm/) ☠️
 
 ActiveState's Perl Package Manager, which ships inside ActivePerl rather than on its own. That distribution's last release is `5.28.1` from 2019-05-30, seven years back, so the manager has had no vehicle since. CPAN itself stays reachable through [`cpan`](managers/cpan.md).
 

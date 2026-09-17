@@ -43,6 +43,13 @@ jobs:
         shell: bash {0}
         run: winget --version
 
+      # Control: a package winget installs itself must stay in the source-filtered listing.
+      - name: Install a package through winget
+        shell: bash {0}
+        run: >
+          winget install --id sharkdp.hyperfine --source winget --accept-package-agreements
+          --accept-source-agreements --disable-interactivity --no-progress
+
       - name: Raw details listing, winget source only
         shell: bash {0}
         run: |
@@ -101,4 +108,5 @@ jobs:
           assert set(filtered) <= set(every), "the filter listed a package the plain listing lacks"
           assert None in filtered.values(), "no package installed outside winget was kept"
           assert "winget" not in dropped.values(), "the filter dropped a package winget installed"
+          assert filtered.get("sharkdp.hyperfine") == "winget", "the control package is missing or not from winget"
           PY

@@ -1,14 +1,14 @@
-/* Shell-free logic of the Meta Package Manager GNOME Shell extension.
+/* Logic of the Meta Package Manager GNOME Shell extension, with no shell code.
  *
  * This module is the GJS counterpart of the SwiftBar/Xbar plugin launcher
- * (meta_package_manager/bar_plugin.py): locate a runnable mpm, gate on a
- * minimum version, run `sync` then `outdated`, and build the commands behind
- * the menu actions. Rendering lives in extension.js.
+ * (meta_package_manager/bar_plugin.py): find a runnable mpm, check its version
+ * against a minimum, run `sync` and then `outdated`, and build the commands of
+ * the menu actions. extension.js holds the rendering.
  *
- * It deliberately imports only gi://Gio and gi://GLib, never any
- * resource:///org/gnome/shell/* module, so the whole file loads under a bare
- * `gjs -m` interpreter: the test suite drives every function below outside a
- * GNOME session (see tests/gnome/run-tests.js in the repository).
+ * This file imports gi://Gio and gi://GLib only, and no
+ * resource:///org/gnome/shell/* module. The whole file then loads in a bare
+ * `gjs -m` interpreter, and the test suite calls every function below outside
+ * a GNOME session (see tests/gnome/run-tests.js in the repository).
  */
 
 import Gio from 'gi://Gio';
@@ -16,18 +16,20 @@ import GLib from 'gi://GLib';
 
 Gio._promisify(Gio.Subprocess.prototype, 'communicate_utf8_async');
 
-/* mpm 6.4.0 renamed `--output-format` back to `--table-format`, the flag the
- * JSON payload of `outdated` relies on. Everything else invoked here predates
- * that release. */
+/* mpm 6.4.0 changed `--output-format` back to `--table-format`, which is the
+ * option that the `outdated` JSON payload needs. Every other option used
+ * here existed before that release. */
 export const MPM_MIN_VERSION = [6, 4, 0];
 
-/* Default `--timeout` in seconds, mirroring bar_plugin.py: mpm's own defaults
- * suit interactive runs and are too long for a background refresh. */
+/* Default `--timeout` in seconds, the same value as in bar_plugin.py. The mpm
+ * defaults are for interactive runs and are too long for a background
+ * refresh. */
 export const MPM_TIMEOUT = 60;
 
-/* Bootstrap offered when no mpm is found, the command bar_plugin.py offers
- * from its own menu (tests/test_gnome_extension.py holds the two equal). uv
- * may itself be missing, which the companion documentation item covers. */
+/* Command offered when no mpm is found. bar_plugin.py offers the same command
+ * in its own menu, and tests/test_gnome_extension.py checks that the two are
+ * equal. uv may be missing too, and the documentation item next to it covers
+ * that case. */
 export const INSTALL_ARGV = [
     'uv', 'tool', 'install', '--upgrade', 'meta-package-manager',
 ];
@@ -35,14 +37,16 @@ export const INSTALL_ARGV = [
 export const INSTALL_DOCS_URL = 'https://mpm.run/install/';
 
 /* The two readings of `mpm --no-color --version`: the numeric components,
- * which compare, and the token as printed, which names a development build. */
+ * which the code compares, and the token as printed, which names a development
+ * build. */
 const VERSION_REGEX = /\bversion\s+(\d+(?:\.\d+)+)/;
 const RELEASE_REGEX = /\bversion\s+(\S+)/;
 
-/* Well-known mpm locations probed when it is not on the session PATH, which
- * GNOME does not source from the user's shell profile. Mirrors the PATH tier
- * of bar_plugin.py's search_mpm(); its venv walk-back has no counterpart
- * here, the extension living in no Python project tree. */
+/* Known locations of mpm, probed when mpm is not on the session PATH. GNOME
+ * does not read that PATH from the user's shell profile. This is
+ * the PATH step of search_mpm() in bar_plugin.py. The walk up to a virtual
+ * environment has no counterpart here, because the extension is in no Python
+ * project tree. */
 function fallbackPaths() {
     return [
         GLib.build_filenamev([GLib.get_home_dir(), '.local', 'bin', 'mpm']),
@@ -51,12 +55,13 @@ function fallbackPaths() {
     ];
 }
 
-/* Terminal emulators probed in order when no override is configured, each
- * with its own "run this argv" dialect. xdg-terminal-exec is the freedesktop
- * spec entry point (trailing args are the command argv); Ptyxis and Console
- * (kgx) are the modern GNOME terminals; gnome-terminal is the legacy
- * fallback. Console has no trailing-argv form: terminalArgv() gives it its
- * `--command` single-string dialect, keyed on the program name. */
+/* Terminal emulators, probed in this order when the user sets no override.
+ * Each one has its own syntax for "run this argv". xdg-terminal-exec is the
+ * freedesktop specification's entry point, and its trailing arguments are
+ * the command argv. Ptyxis and Console (kgx) are the recent GNOME terminals.
+ * gnome-terminal is the older alternative. Console has no trailing-argv form,
+ * so terminalArgv() gives it the `--command` option, which takes one string.
+ * That function selects the syntax from the program name. */
 export const TERMINAL_CANDIDATES = [
     ['xdg-terminal-exec'],
     ['ptyxis', '--'],
@@ -64,9 +69,10 @@ export const TERMINAL_CANDIDATES = [
     ['gnome-terminal', '--'],
 ];
 
-/* Shared by both command-override settings: a non-empty value is parsed with
- * shell syntax, and anything unparsable or empty resolves to null rather than
- * silently falling back to autodetection. */
+/* Shared by the two command-override settings. A value that is not empty is
+ * parsed with the shell syntax. A value that is empty, or that cannot be
+ * parsed, gives null: the code does not fall back to autodetection in that
+ * case. */
 function parseOverride(override) {
     try {
         const [ok, argv] = GLib.shell_parse_argv(override);
@@ -77,10 +83,11 @@ function parseOverride(override) {
 }
 
 /**
- * Resolve the mpm invocation to use, as an argv array.
+ * Return the mpm command to use, as an argv array.
  *
  * @param {string} override - The `mpm-command` setting, parsed with shell
- *   syntax so multi-word launchers like "uv run mpm" work. Empty means auto.
+ *   syntax, so a command of several words like "uv run mpm" works. An empty
+ *   value means autodetection.
  * @returns {string[]|null} argv, or null when nothing is found.
  */
 export function findMpm(override = '') {
@@ -97,10 +104,11 @@ export function findMpm(override = '') {
 }
 
 /**
- * Extract a version tuple from `mpm --no-color --version` output.
+ * Return the version tuple from the output of `mpm --no-color --version`.
  *
- * @param {string} text - The command's stdout.
- * @returns {number[]|null} version components, or null when unparsable.
+ * @param {string} text - The stdout of the command.
+ * @returns {number[]|null} version components, or null when the text cannot be
+ *   parsed.
  */
 export function parseVersion(text) {
     const match = VERSION_REGEX.exec(text ?? '');
@@ -110,14 +118,15 @@ export function parseVersion(text) {
 }
 
 /**
- * Extract the release string from `mpm --no-color --version` output.
+ * Return the release string from the output of `mpm --no-color --version`.
  *
- * Where `parseVersion` keeps the numeric components alone so releases
- * compare, this keeps the token as printed: a development build reports
- * `8.0.0.dev0+40ce0879`, and that suffix is what identifies the build.
+ * `parseVersion` keeps the numeric components only, so two releases can be
+ * compared. This function keeps the token as printed: a development build
+ * reports `8.0.0.dev0+40ce0879`, and its suffix identifies the build.
  *
- * @param {string} text - The command's stdout.
- * @returns {string|null} the release as printed, or null when unparsable.
+ * @param {string} text - The stdout of the command.
+ * @returns {string|null} the release as printed, or null when the text cannot
+ *   be parsed.
  */
 export function parseRelease(text) {
     const match = RELEASE_REGEX.exec(text ?? '');
@@ -125,7 +134,7 @@ export function parseRelease(text) {
 }
 
 /**
- * Compare two version tuples component-wise.
+ * Compare two version tuples, one component at a time.
  *
  * @param {number[]} left - Version components.
  * @param {number[]} right - Version components.
@@ -142,15 +151,16 @@ export function compareVersions(left, right) {
 }
 
 /**
- * Run a command asynchronously and capture its output.
+ * Run a command without blocking, and capture its output.
  *
  * @param {string[]} argv - Command to run.
- * @param {Gio.Cancellable} cancellable - Cancelled on extension disable.
- *   Required, never defaulted: a caller with nothing to cancel leaves the
- *   watchdog below as the one source `disable()` cannot reach.
- * @param {number} watchdogSeconds - Hard kill after this delay, 0 to disable.
- *   mpm's own `--timeout` only bounds each manager CLI it runs internally,
- *   not a wedged mpm process itself.
+ * @param {Gio.Cancellable} cancellable - Cancelled when the extension is
+ *   disabled. This parameter is required and has no default: a caller with
+ *   nothing to cancel would leave the watchdog below as the one source that
+ *   `disable()` cannot stop.
+ * @param {number} watchdogSeconds - Kill the command after this delay. Use 0
+ *   for no watchdog. mpm's own `--timeout` option limits each manager command
+ *   that mpm runs, and it does not limit a hung mpm process.
  * @returns {Promise<{status: number, stdout: string, stderr: string}>}
  */
 export async function runCommand(argv, cancellable, watchdogSeconds = 0) {
@@ -164,11 +174,11 @@ export async function runCommand(argv, cancellable, watchdogSeconds = 0) {
             watchdogId = 0;
         }
     };
-    /* Cancelling communicate_utf8_async only abandons the read and leaves the
-     * child running: hook the cancellable so the child is actually killed, and
-     * the watchdog dropped on the spot rather than whenever the abandoned read
-     * settles. A main loop source that outlives disable() keeps firing, on a
-     * session that may be locked by then. */
+    /* Cancelling communicate_utf8_async stops the read only, and the child
+     * process keeps running. This handler kills the child and removes the
+     * watchdog at once, and it does not wait for the abandoned read to end. A
+     * main loop source that still exists after disable() keeps firing, and the
+     * session may be locked by then. */
     const cancelId = cancellable.connect(() => {
         clearWatchdog();
         proc.force_exit();
@@ -185,8 +195,9 @@ export async function runCommand(argv, cancellable, watchdogSeconds = 0) {
         const [stdout, stderr] =
             await proc.communicate_utf8_async(null, cancellable);
         return {
-            /* get_exit_status() asserts on signal deaths (force_exit kills
-             * with SIGKILL): report those as -1. */
+            /* get_exit_status() fails an assertion when a signal killed the
+             * process, and force_exit kills it with SIGKILL. Report that case
+             * as -1. */
             status: proc.get_if_exited() ? proc.get_exit_status() : -1,
             stdout: stdout ?? '',
             stderr: stderr ?? '',
@@ -198,12 +209,14 @@ export async function runCommand(argv, cancellable, watchdogSeconds = 0) {
 }
 
 /**
- * Probe an mpm candidate, mirroring bar_plugin.py's check_mpm(): runnable
- * means a clean exit and an empty stderr; up to date means >= MPM_MIN_VERSION.
+ * Probe one mpm candidate. This is check_mpm() of bar_plugin.py: runnable
+ * means an exit with no error and an empty stderr, and up to date means a
+ * version equal to or higher than MPM_MIN_VERSION.
  *
  * @param {string[]} mpm - The mpm argv to probe.
- * @param {Gio.Cancellable} cancellable - Cancelled on extension disable.
- * @param {number} watchdogSeconds - Hard kill for a wedged probe.
+ * @param {Gio.Cancellable} cancellable - Cancelled when the extension is
+ *   disabled.
+ * @param {number} watchdogSeconds - Kill a probe that does not end.
  * @returns {Promise<{runnable: boolean, upToDate: boolean,
  *   version: number[]|null, release: string|null, error: string|null}>}
  */
@@ -234,23 +247,25 @@ export async function probeMpm(mpm, cancellable, watchdogSeconds = 30) {
     };
 }
 
-/* Argv builders. Long-form options only, mirroring the repository-wide rule
- * for every argv mpm itself constructs at runtime. The sync/outdated pair
- * replicates bar_plugin.py's print_menu() contract: sync errors are lowered
- * to ERROR as best-effort noise, while outdated silences everything but
- * CRITICAL since per-manager errors come back inside the JSON payload. */
+/* Argv builders. They use long-form options only, which is this repository's
+ * rule for every argv that mpm builds at runtime. The sync and outdated pair
+ * follows bar_plugin.py's print_menu(): the sync call logs at the ERROR
+ * level, because a failure there is not fatal, and the outdated call logs
+ * CRITICAL messages only, because each manager's errors come back in the JSON
+ * payload. */
 
 /**
- * Parse the `mpm-options` setting into the argv fragment every builder below
- * splices in: after the extension's own options and before the subcommand,
- * so a repeated single-value option like `--verbosity` takes the user's value.
- * The version probe never takes them, so a mistyped option fails a check with
- * mpm's own usage error in the menu rather than reading as a missing mpm.
+ * Parse the `mpm-options` setting into the argv fragment that every builder
+ * below inserts. It goes after the extension's own options and before the
+ * subcommand, so a single-value option that occurs twice, like `--verbosity`,
+ * takes the value from the user. The version probe does not use these options,
+ * so a mistyped option makes a check fail with mpm's own usage error in the
+ * menu. Without this, the same typo would look like a missing mpm.
  *
- * @param {string} text - The setting, in shell syntax; empty for none.
- * @returns {string[]} the options, empty when the setting is.
- * @throws {GLib.Error} on a shell syntax error, such as an unmatched quote,
- *   which the check reports rather than running without the options.
+ * @param {string} text - The setting, in shell syntax. Empty for no option.
+ * @returns {string[]} the options, empty when the setting is empty.
+ * @throws {GLib.Error} on a shell syntax error, like a quote with no pair. The
+ *   check reports that error, and it does not run without the options.
  */
 export function parseOptions(text) {
     if (!text.trim())
@@ -274,9 +289,9 @@ export function outdatedArgv(mpm, timeout = MPM_TIMEOUT, options = []) {
     ];
 }
 
-/* Percent-encode one pURL segment like Python's `quote(text, safe="")`,
- * keeping `:` as is. encodeURIComponent leaves `!'()*` alone, where Python
- * encodes them. */
+/* Percent-encode one pURL segment the way Python's `quote(text, safe="")`
+ * does it, and keep `:` as it is. encodeURIComponent does not encode `!'()*`,
+ * and Python encodes them. */
 function purlQuote(text) {
     return encodeURIComponent(text)
         .replace(/[!'()*]/g, char =>
@@ -285,10 +300,10 @@ function purlQuote(text) {
 }
 
 /**
- * Render the version-less pURL tying a package to its manager, the form
- * `mpm upgrade` resolves without looking the package up in the installed
- * packages. Mirrors `manager_purl()` in meta_package_manager/package.py, and
- * tests/purl-cases.json holds both to the same strings.
+ * Return the pURL, with no version, that ties a package to its manager.
+ * `mpm upgrade` resolves this form with no search in the installed packages.
+ * This is `manager_purl()` in meta_package_manager/package.py, and
+ * tests/purl-cases.json checks that both produce the same strings.
  *
  * @param {string} managerId - The manager ID, used as the pURL type.
  * @param {string} packageId - The package ID, as mpm reports it.
@@ -298,8 +313,9 @@ export function packagePurl(managerId, packageId) {
     const cut = packageId.lastIndexOf('/');
     const namespace = cut < 0 ? [] : packageId.slice(0, cut).split('/');
     const name = packageId.slice(cut + 1);
-    /* The whole ID stays the name when a split would leave an empty segment,
-     * like an absolute path or a URL, which a pURL parser drops. */
+    /* The whole ID stays the name when a split would leave an empty segment.
+     * This happens for an absolute path or a URL, and a pURL parser drops an
+     * empty segment. */
     const whole = namespace.length === 0 || namespace.includes('') ||
         name === '';
     const segments = whole ? [packageId] : [...namespace, name];
@@ -319,10 +335,10 @@ export function upgradeAllArgv(mpm, managerId, options = []) {
 
 /**
  * Parse the JSON payload of `mpm --table-format json outdated` into a plain
- * menu model. The payload shape is guarded upstream by
- * tests/test_cli.py::check_packages_payload.
+ * menu model. tests/test_cli.py::check_packages_payload checks the shape of
+ * that payload upstream.
  *
- * @param {string} text - Raw stdout of the outdated call.
+ * @param {string} text - The raw stdout of the outdated call.
  * @returns {{managers: Array<{id: string, name: string,
  *   packages: Array<{id: string, name: string, installedVersion: string,
  *   latestVersion: string}>, errors: string[]}>,
@@ -353,15 +369,16 @@ export function parseOutdated(text) {
 }
 
 /**
- * Split a version pair into a common prefix and colored suffixes, mirroring
- * the diff_versions() convention of the bar plugin: unchanged prefix dimmed,
- * installed suffix red, latest suffix green. The split snaps back to a
- * separator boundary, so a digit run is never cut in half and the separator
- * introducing the diverging token is colored with it: "1.23" vs "1.24" diffs
- * as ".23"/".24", not "3"/"4" nor "23"/"24".
+ * Split a pair of versions into a common prefix and two colored suffixes. The
+ * convention is the bar plugin's diff_versions(): the unchanged prefix is
+ * dimmed, the installed suffix is red and the latest suffix is green. The
+ * split moves back to a separator, so the code never cuts a run of digits in
+ * half, and the separator in front of the different token is colored with
+ * it. "1.23" against "1.24" gives ".23" and ".24", and not "3" and "4", and
+ * not "23" and "24".
  *
- * Held to the Python implementation by tests/version-diff-cases.json, the
- * shared corpus both test suites assert against.
+ * tests/version-diff-cases.json is the corpus that both test suites check,
+ * each against its own implementation.
  *
  * @param {string} installed - Installed version string.
  * @param {string} latest - Latest version string.
@@ -373,16 +390,17 @@ export function diffVersions(installed, latest) {
     while (split < shortest && installed[split] === latest[split])
         split++;
     const isAlnum = character => /[\p{L}\p{N}]/u.test(character ?? '');
-    // Snap back to a separator boundary, so the whole diverging token and the
-    // separator introducing it are colored, the way diff_versions() does it.
-    // Only when the divergence lands inside a token, though: one version being
-    // the other plus a whole new token already sits on a boundary, and walking
-    // back would swallow the tokens that did match.
+    // Move the split back to a separator, so the whole different token and
+    // the separator in front of it are colored, as diff_versions() does it. Do
+    // this only when the difference starts inside a token. When one version is
+    // the other plus one new token, the split is already on a separator, and a
+    // move back would take tokens that are equal.
     if (
         split > 0 && split < Math.max(installed.length, latest.length) &&
         (isAlnum(installed[split]) || isAlnum(latest[split]))
     ) {
-        // Walk back past the partial alnum token, then past the separator.
+        // Move back past the incomplete alnum token, then past the
+        // separator.
         while (split > 0 && isAlnum(installed[split - 1]))
             split--;
         while (split > 0 && !isAlnum(installed[split - 1]))
@@ -396,11 +414,13 @@ export function diffVersions(installed, latest) {
 }
 
 /**
- * Resolve the terminal emulator to wrap upgrade commands in.
+ * Return the terminal emulator that runs the upgrade commands.
  *
- * @param {string} override - The `terminal-command` setting, parsed with
- *   shell syntax. Empty means autodetect from TERMINAL_CANDIDATES.
- * @returns {string[]|null} terminal argv prefix, or null when none found.
+ * @param {string} override - The `terminal-command` setting, parsed with shell
+ *   syntax. An empty value means autodetection from
+ *   TERMINAL_CANDIDATES.
+ * @returns {string[]|null} the terminal argv prefix, or null when none is
+ *   found.
  */
 export function findTerminal(override = '') {
     if (override)
@@ -413,7 +433,7 @@ export function findTerminal(override = '') {
 }
 
 /**
- * Shell-quote an argv into a single command string.
+ * Quote an argv into one command string for a shell.
  *
  * @param {string[]} argv - Command to quote.
  * @returns {string} the escaped command line.
@@ -423,13 +443,13 @@ export function shellJoin(argv) {
 }
 
 /**
- * Wrap a command into a terminal invocation that keeps the window open once
- * the command completes, surfacing its exit status (same trick as
- * arch-update's default update command).
+ * Put a command into a terminal invocation that keeps the window open after
+ * the command ends and shows its exit status. arch-update uses the same method
+ * for its default update command.
  *
- * @param {string[]} terminal - Terminal argv prefix from findTerminal().
- * @param {string[]} argv - Command to run inside the terminal.
- * @returns {string[]} the full argv to spawn.
+ * @param {string[]} terminal - The terminal argv prefix from findTerminal().
+ * @param {string[]} argv - The command to run inside the terminal.
+ * @returns {string[]} the full argv to start.
  */
 export function terminalArgv(terminal, argv) {
     const script =
@@ -438,24 +458,24 @@ export function terminalArgv(terminal, argv) {
         'read -r _line';
     const inner = ['sh', '-c', script];
     /* Console (kgx) has no trailing-argv form: its `--command` option takes
-     * the whole command as one shell-parsed string. The dialect is keyed on
-     * the program name, never on a trailing `-e` marker, whose semantics
-     * differ per terminal (kgx parses a string, alacritty and xterm exec a
-     * trailing argv): a marker heuristic would misroute an `alacritty -e`
-     * override. Every other terminal, overrides included, gets the argv
-     * appended. */
+     * the whole command as one string that a shell parses. This code selects
+     * the syntax from the program name, and not from a trailing `-e` marker.
+     * That marker means a different thing in each terminal: kgx parses a
+     * string, and alacritty and xterm run a trailing argv. A test on the marker
+     * would send an `alacritty -e` override down the wrong path. Every other
+     * terminal, including an override, gets the argv at the end. */
     if (GLib.path_get_basename(terminal[0]) === 'kgx')
         return [...terminal, '--command', shellJoin(inner)];
     return [...terminal, ...inner];
 }
 
 /**
- * Fire-and-forget spawn of an action command, either wrapped in a terminal
- * or silenced in the background (the NOPASSWD path documented at
- * https://mpm.run/sudo/).
+ * Start an action command and do not wait for it. The command is either inside
+ * a terminal or in the background with no output, which is the NOPASSWD case
+ * documented at https://mpm.run/sudo/.
  *
- * @param {string[]} argv - Command to spawn.
- * @returns {Gio.Subprocess} the spawned process handle.
+ * @param {string[]} argv - Command to start.
+ * @returns {Gio.Subprocess} the handle of the started process.
  */
 export function spawnDetached(argv) {
     return Gio.Subprocess.new(

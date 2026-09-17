@@ -1,12 +1,13 @@
 /* Meta Package Manager GNOME Shell extension.
  *
- * Panel indicator mirroring the SwiftBar/Xbar plugin: it lists outdated
- * packages reported by `mpm outdated` across every package manager, and every
- * menu action runs `mpm` itself so the user's mpm configuration file governs
- * clicks (manager selection, sudo policy, per-manager overrides, cooldown).
+ * A panel indicator with the same job as the SwiftBar/Xbar plugin: it lists
+ * the outdated packages that `mpm outdated` reports for every package manager.
+ * Each menu action runs `mpm`, so the user's mpm configuration file governs
+ * the click (manager selection, sudo policy, per-manager overrides,
+ * cooldown).
  *
- * The subprocess plumbing and menu model live in mpm.js; this file owns the
- * widgetry, timers and lifecycle.
+ * mpm.js holds the subprocess code and the menu model. This file holds the
+ * widgets, the timers and the lifecycle.
  */
 
 import Clutter from 'gi://Clutter';
@@ -28,10 +29,10 @@ import {
 
 import * as Mpm from './mpm.js';
 
-/* Panel states, each mapped to a stock icon name below. UPDATES and UPTODATE
- * mirror the 🎁↑N / 📦✓ title states of the bar plugin; ERROR covers a failed
- * check, a missing mpm (the ❗️ bootstrap state of bar_plugin.py) and the
- * per-manager error marker. */
+/* States of the panel indicator. STATE_ICONS below gives each one an icon
+ * name. UPDATES and UPTODATE match the 🎁↑N and 📦✓ title states of the bar
+ * plugin. ERROR covers a failed check, a missing mpm (the ❗️ state of
+ * bar_plugin.py) and one manager's error marker. */
 const State = {
     UNKNOWN: 'unknown',
     CHECKING: 'checking',
@@ -40,20 +41,20 @@ const State = {
     ERROR: 'error',
 };
 
-/* Each state renders as a stock symbolic icon from the icon theme, not as
- * artwork of our own: the shell recolors them with the panel foreground, the
- * user's theme (Yaru on Ubuntu) can restyle them, and they carry the meaning
- * every other GNOME updates indicator already gives them. `software-update-*`
- * name this domain exactly.
+/* Each state renders as a stock symbolic icon from the icon theme, with no
+ * artwork of our own. The shell colors these icons with the panel foreground,
+ * the user's theme (Yaru on Ubuntu) can change their style, and every
+ * other GNOME update indicator already gives them the same meaning. The
+ * `software-update-*` names are for this exact use.
  *
- * CHECKING keeps a static icon. The shell's own Spinner (ui/animation.js) is
- * used in dialogs only, never in the top bar, and the sprite-sheet
- * AnimatedIcon that once drove animated status icons has been dropped from
- * the shell. An animation would also keep the compositor repainting for a
- * background check nobody is watching. `view-refresh-symbolic` reads as work
- * in progress, where `content-loading-symbolic` reads as an expandable "..."
- * in a panel. apt-update-indicator picks `emblem-synchronizing-symbolic`,
- * which modern Adwaita no longer ships. */
+ * CHECKING keeps a static icon. The Spinner of the shell (ui/animation.js) is
+ * for dialogs only and never for the top bar, and the shell removed the
+ * AnimatedIcon sprite sheet that used to drive animated status icons. An
+ * animation would also make the compositor repaint during a background check
+ * that nobody watches. `view-refresh-symbolic` means work in progress.
+ * `content-loading-symbolic` means an expandable "..." in a panel.
+ * apt-update-indicator uses `emblem-synchronizing-symbolic`, which a recent
+ * Adwaita no longer ships. */
 const STATE_ICONS = {
     unknown: 'content-loading-symbolic',
     checking: 'view-refresh-symbolic',
@@ -62,34 +63,36 @@ const STATE_ICONS = {
     error: 'software-update-urgent-symbolic',
 };
 
-/* Version-diff colors, held here rather than in the stylesheet since the five
- * labels spelling a row's versions collapsed into one markup label, and Pango
- * markup takes a literal color. Mirrors the Xbar/SwiftBar convention: common
- * prefix dimmed, installed suffix red, latest suffix green, each at a mid
- * luminance that reads on the light and dark shell themes alike. */
+/* Colors of the version diff. They are here and not in the stylesheet,
+ * because the five labels of one row became one label with Pango markup, and
+ * Pango markup takes a literal color. The convention matches Xbar and
+ * SwiftBar: the common prefix is dimmed, the installed suffix is red and the
+ * latest suffix is green. Each color has a mid luminance, which is readable on
+ * the light and on the dark shell theme. */
 const VERSION_COLORS = {
     prefix: '#9a9996',
     old: '#ed333b',
     new: '#2ec27e',
 };
 
-/* Spaces filling a column, never a negative count. */
+/* Return spaces to fill a column. The count is never negative. */
 function padding(width) {
     return ' '.repeat(Math.max(0, width));
 }
 
-/* A Pango markup span, empty for empty text so a version sharing no prefix
- * with its successor spells no span at all. */
+/* Return one Pango markup span. The result is empty for an empty text, so a
+ * version with no common prefix with the next one renders no span for that
+ * prefix. */
 function colorSpan(text, color) {
     if (!text)
         return '';
     return `<span color="${color}">${GLib.markup_escape_text(text, -1)}</span>`;
 }
 
-/* State deliberately kept at module scope so a screen-lock disable()/enable()
- * cycle neither re-triggers the boot check nor drops the last report (same
- * pattern as arch-update). Plain data only: GObject instances must never
- * outlive disable(). */
+/* This state is at module scope, so a disable()/enable() cycle at screen lock
+ * does not start the boot check again and does not lose the last report. This
+ * is the same pattern as arch-update. The state holds plain data only: a
+ * GObject instance must not exist after disable(). */
 let firstBoot = true;
 let lastCheck = null;
 let lastMpm = null;
@@ -105,8 +108,8 @@ class MpmIndicator extends PanelMenu.Button {
         this._settings = extension.getSettings();
         this._checking = false;
         this._cancellable = null;
-        /* Cancelled on destroy, so an upgrade this indicator awaited
-         * cannot call back into it once it is gone. */
+        /* destroy() cancels it, so an upgrade that this indicator waited for
+         * cannot call the indicator after the indicator is gone. */
         this._actionCancellable = new Gio.Cancellable();
         this._checkTimeoutId = null;
         this._oneShotTimeoutId = null;
@@ -129,16 +132,16 @@ class MpmIndicator extends PanelMenu.Button {
 
         this._buildMenu();
 
-        /* Every signal is tracked against this indicator through
-         * connectObject(), so teardown is one disconnectObject() per emitter
-         * instead of a handler id per connection: the shell disconnects the
-         * rest with the actor itself. */
+        /* connectObject() records every signal against this indicator, so
+         * teardown is one disconnectObject() call per emitter and not one
+         * handler id per connection. The shell disconnects the other handlers
+         * with the actor. */
         this._settings.connectObject(
             'changed', () => this._onSettingsChanged(), this);
 
         if (firstBoot) {
-            /* Delay the very first check to keep session startup snappy. Not
-             * re-armed on later enable() cycles (screen lock). */
+            /* Delay the first check, to keep the session start fast. A later
+             * enable() cycle (screen lock) does not set this delay again. */
             this._armOneShot(this._settings.get_int('boot-wait'));
         } else {
             this._showReport();
@@ -146,23 +149,24 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
-    /* Static menu skeleton. The report section is rebuilt on every refresh;
-     * the footer (Check now, last-checked, Settings) is permanent. */
+    /* Build the fixed parts of the menu. The report section is rebuilt at
+     * each refresh. The footer (Check now, last-checked, Settings) stays. */
     _buildMenu() {
-        /* Interactive package items live in an inner PopupMenuSection wrapped
-         * in a ScrollView, so a big report scrolls instead of overflowing the
-         * screen (GNOME popup menus do not scroll natively; the max-height
-         * lives in stylesheet.css). Only its actor is embedded, the section
-         * itself is never registered with the menu, so its `_parent` stays
-         * null: an item activation dead-ends in the section's no-op close()
-         * instead of closing the panel menu, and action items close the menu
-         * explicitly. */
+        /* The interactive package items are in an inner PopupMenuSection
+         * inside a ScrollView, so a large report scrolls and does not grow past
+         * the screen. GNOME popup menus do not scroll on their own, and
+         * stylesheet.css sets the maximum height. Only the actor of the section
+         * is embedded, and the section itself is never registered with the
+         * menu, so its `_parent` stays null. An item activation then stops in
+         * the section's own close() method, which does nothing, and the panel
+         * menu stays open. The action items close the menu themselves. */
         this._reportSection = new PopupMenu.PopupMenuSection();
-        /* A parentless section is its own top menu, on which the submenus of
-         * the grouped layout call `_setOpenedSubMenu`. A bare PopupMenuSection
-         * lacks it: a grouped check then throws inside a signal handler, and a
-         * `removeAll` tearing down an open submenu turns the throw into a
-         * shell crash. Copied from PopupMenu, so one manager stays open at a
+        /* A section with no parent is a top menu of its own, and the submenus
+         * of the grouped layout call `_setOpenedSubMenu` on it. A plain
+         * PopupMenuSection has no such method. A grouped check would then raise
+         * an error inside a signal handler, and a `removeAll` that removes an
+         * open submenu would turn that error into a shell crash. This code is a
+         * copy of the one in PopupMenu, so one manager section stays open at a
          * time. */
         this._reportSection._openedSubMenu = null;
         this._reportSection._setOpenedSubMenu = submenu => {
@@ -170,9 +174,9 @@ class MpmIndicator extends PanelMenu.Button {
                 this._reportSection._openedSubMenu.close(true);
             this._reportSection._openedSubMenu = submenu;
         };
-        /* Hidden until a report fills it: the view keeps its own padding
-         * whatever it holds, which an empty one would spend on a band of
-         * blank menu. See `_showReport()`. */
+        /* Hidden until a report fills it. The view always has its own
+         * padding, so an empty view would show a band of blank menu. See
+         * `_showReport()`. */
         this._reportView = new St.ScrollView({
             style_class: 'mpm-updates-list',
             hscrollbar_policy: St.PolicyType.NEVER,
@@ -186,10 +190,10 @@ class MpmIndicator extends PanelMenu.Button {
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-        /* "Check now" must keep the menu open: adding the item to the section
-         * box directly (not addMenuItem) skips the activate-closes-the-menu
-         * wiring while keeping the row clickable (same trick as
-         * arch-update). */
+        /* "Check now" must keep the menu open. Adding the item to the section
+         * box directly, with no addMenuItem call, skips the code that
+         * closes the menu on activation, and the row stays clickable. This is
+         * the method arch-update uses. */
         this._checkNowItem = new PopupMenu.PopupMenuItem(_('Check now'));
         this._checkNowItem.connectObject(
             'activate', () => this._checkUpdates(), this);
@@ -218,7 +222,7 @@ class MpmIndicator extends PanelMenu.Button {
         return new Gio.ThemedIcon({name: STATE_ICONS[state]});
     }
 
-    /* Panel icon, count label and indicator visibility for a given state. */
+    /* Set the panel icon, the count label and the visibility for one state. */
     _setPanelState(state, count = 0) {
         this._icon.gicon = this._stateIcon(state);
         const showCount = count > 0 && this._settings.get_boolean('show-count');
@@ -228,9 +232,9 @@ class MpmIndicator extends PanelMenu.Button {
             this._settings.get_boolean('always-visible');
     }
 
-    /* The "Check now" row is the second half of the progress signal: greyed
-     * out and relabelled while a check runs, which is where arch-update and
-     * apt-update-indicator both report it rather than in the panel. */
+    /* Show the progress of a check on the "Check now" row too: the row is
+     * greyed out and its label changes while a check runs. arch-update and
+     * apt-update-indicator both report progress here and not in the panel. */
     _setCheckNowBusy(busy) {
         this._checkNowItem.reactive = !busy;
         this._checkNowItem.label.text = busy ? _('Checking…') : _('Check now');
@@ -251,8 +255,8 @@ class MpmIndicator extends PanelMenu.Button {
         this._lastCheckedItem.label.text = _('Last checked %s').format(time);
     }
 
-    /* One-shot timer shared by the boot delay and the post-upgrade re-check:
-     * both funnel into a full check. */
+    /* One single-run timer for the boot delay and for the re-check after an
+     * upgrade. Both start a full check. */
     _armOneShot(seconds) {
         this._clearOneShot();
         this._oneShotTimeoutId = GLib.timeout_add_seconds(
@@ -278,9 +282,9 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
-    /* Re-arm the recurring check, compensating for time already elapsed so
-     * lock/unlock cycles and settings changes never reset the countdown
-     * (arch-update's _scheduleCheck pattern). */
+    /* Start the recurring check again. The delay is reduced by the time
+     * already spent, so a lock/unlock cycle or a settings change does not reset
+     * the countdown. This is arch-update's _scheduleCheck pattern. */
     _scheduleCheck() {
         this._clearCheckTimer();
         let delay = this._settings.get_int('check-interval') * 60;
@@ -296,16 +300,17 @@ class MpmIndicator extends PanelMenu.Button {
             });
     }
 
-    /* The full refresh pipeline, mirroring bar_plugin.py print_menu(): locate
-     * mpm, gate on version, best-effort `sync`, then `outdated` as JSON. */
+    /* The full refresh sequence, the same one as bar_plugin.py's
+     * print_menu(): find mpm, check its version, run `sync` and ignore its
+     * failures, then run `outdated` with a JSON output. */
     async _checkUpdates() {
         if (this._checking)
             return;
         this._checking = true;
-        /* The cancellable is also the liveness handle: destroy() cancels it,
-         * so a check outliving the indicator learns that from its own
-         * cancellation. Held in a local as well, because destroy() clears the
-         * field while this run still needs to consult it. */
+        /* The cancellable also tells a check that the indicator is gone:
+         * destroy() cancels it, and the check reads its own cancellation. The
+         * local variable keeps a second reference, because destroy() sets the
+         * field to null while this run still reads it. */
         const cancellable = new Gio.Cancellable();
         this._cancellable = cancellable;
         this._setPanelState(State.CHECKING);
@@ -332,25 +337,26 @@ class MpmIndicator extends PanelMenu.Button {
                 return;
             }
             lastMpm = mpm;
-            /* Parsed here, inside the try, so an unmatched quote in the
-             * setting reports as this check's error. */
+            /* Parsed here, inside the try block, so a quote with no pair in
+             * the setting is reported as the error of this check. */
             const options = Mpm.parseOptions(
                 this._settings.get_string('mpm-options'));
             const timeout = this._settings.get_int('timeout');
-            /* --timeout caps each manager CLI inside mpm: give mpm itself a
-             * proportional hard bound so a wedged run cannot pin the
+            /* --timeout limits each manager command that mpm runs. mpm itself
+             * needs a limit too, in proportion, so a hung run cannot leave the
              * indicator in the checking state forever. */
             const watchdog = timeout * 4;
-            /* Refresh the package indexes first, best-effort: failures will
-             * resurface per manager in the outdated report. */
+            /* Refresh the package indexes first, and ignore the failures: the
+             * outdated report shows them again, one manager at a time. */
             await Mpm.runCommand(
                 Mpm.syncArgv(mpm, timeout, options), cancellable, watchdog);
             const result = await Mpm.runCommand(
                 Mpm.outdatedArgv(mpm, timeout, options),
                 cancellable, watchdog);
-            /* The exit status tells a failed check apart, never stderr alone:
-             * a --verbosity from mpm-options overrides the CRITICAL one of
-             * outdatedArgv(), and a successful check then logs there too. */
+            /* The exit status is the test for a failed check. stderr alone is
+             * not enough: a --verbosity option from mpm-options replaces the
+             * CRITICAL value that outdatedArgv() sets, and a successful check
+             * writes to stderr too. */
             if (result.status !== 0 || !result.stdout) {
                 this._setError(result.stderr || _('mpm produced no output.'));
                 return;
@@ -383,21 +389,21 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
-    /* Render the last report, then hide the view when it came out empty.
+    /* Render the last report, then hide the view when the report is empty.
      *
-     * Empty is the state of a session's first check, and the view's padding
-     * would otherwise stand as a blank band above the menu. Hiding the actor
-     * also makes the section wrapping it read as empty to
-     * `isPopupMenuItemVisible()`, which is what lets the shell drop the
-     * separator underneath on the next open. */
+     * The report is empty before the first check of a session, and the view's
+     * padding would then show as a blank band above the menu. Hiding the
+     * actor also makes the section around it look empty to
+     * `isPopupMenuItemVisible()`. The shell then removes the separator below it
+     * at the next open of the menu. */
     _showReport() {
         this._reportSection.removeAll();
         this._fillReport();
         this._reportView.visible = this._reportSection.numMenuItems > 0;
     }
 
-    /* Panel state plus the per-manager menu, in the same order as
-     * bar_plugin_renderer._render(). */
+    /* Set the panel state and build the menu of each manager, in the same
+     * order as bar_plugin_renderer._render(). */
     _fillReport() {
         if (lastError !== null) {
             this._addErrorItems(this._reportSection, lastError);
@@ -419,12 +425,12 @@ class MpmIndicator extends PanelMenu.Button {
                 diff: Mpm.diffVersions(pkg.installedVersion, pkg.latestVersion),
             })),
         ]));
-        /* One table across every manager in the flat layout, where their rows
-         * share a column and a width taken per manager would leave each
-         * section's arrows ragged against the one above. A submenu is a panel
-         * of its own and takes its own width, a pooled one padding a short
-         * manager out to the longest version of the whole report. Mirrors
-         * `align_managers()` of the bar plugin. */
+        /* The flat layout uses one table for every manager. Its rows share a
+         * column, and a width taken for one manager alone would leave the
+         * arrows of each section out of line with the section above. A submenu
+         * is a panel of its own and takes its own width: a width from all the
+         * managers would pad a short manager to the longest version of the
+         * report. This is the bar plugin's `align_managers()`. */
         const pooled = groupByManager
             ? null
             : this._versionWidths([...rowsByManager.values()].flat());
@@ -435,22 +441,23 @@ class MpmIndicator extends PanelMenu.Button {
             const count = manager.packages.length;
             const packageLabel = ngettext('package', 'packages', count);
             if (groupByManager) {
-                /* Submenu header mirrors the table-mode section title. Where
-                 * the bar plugin prefixes a ⚠️ character, this marks the same
-                 * fact with the themed warning icon: an emoji is a font
-                 * glyph the shell cannot restyle, and the GNOME reviewers ask
-                 * for icons. */
+                /* The submenu header is the section title of the table mode.
+                 * The bar plugin puts a ⚠️ character in front of it. This code
+                 * shows the same fact with the themed warning icon: an
+                 * emoji is a font glyph that the shell cannot restyle, and the
+                 * GNOME reviewers ask for icons. */
                 const title = `${manager.id} - ${count} ${packageLabel}`;
                 const failed = manager.errors.length > 0;
                 if (count === 0 && !failed) {
-                    /* A manager with nothing to report still earns its row,
-                     * which is how the menu says it ran, but not the expander
-                     * arrow of a submenu: that arrow promises packages behind
-                     * it and opens on an empty panel. Carries no weight of its
-                     * own either, since it sits among the manager rows rather
-                     * than above a list like the flat layout's header; being
-                     * unreactive dims it, which is signal enough that there is
-                     * nothing here to open. */
+                    /* A manager with nothing to report still gets its row:
+                     * the row tells the user that the manager ran. It gets no
+                     * submenu, because a submenu's expander arrow says
+                     * that packages are behind it and then opens an empty
+                     * panel. This row needs no header style of its own either.
+                     * It sits between the manager rows, and not above a list
+                     * like the flat layout's header. A non-reactive row is
+                     * dimmed, and that is enough to say that there is nothing
+                     * to open. */
                     this._reportSection.addMenuItem(
                         new PopupMenu.PopupMenuItem(title, {
                             reactive: false,
@@ -458,26 +465,27 @@ class MpmIndicator extends PanelMenu.Button {
                         }));
                     return;
                 }
-                /* The second argument is the submenu's own icon slot: asking
-                 * for it only when there is something to report keeps the
-                 * healthy rows flush with the flat layout. */
+                /* The second argument asks for the submenu's own icon slot.
+                 * The code asks for it only when the manager has something to
+                 * report, so the other rows keep the same left margin as in the
+                 * flat layout. */
                 const submenu = new PopupMenu.PopupSubMenuMenuItem(title, failed);
-                /* A submenu is an St.ScrollView of its own, and St stops every
-                 * wheel event such a view receives, whether or not it can act
-                 * on one. An expanded panel therefore swallowed the wheel and
-                 * the report underneath never moved, leaving the scrollbar as
-                 * the only way down. Nothing is lost by refusing them here:
-                 * `PopupSubMenu._needsScrollbar()` reads the top menu's own
-                 * max-height, which this menu sets on an inner actor, so the
-                 * submenu never scrolls itself anyway. */
+                /* A submenu is an St.ScrollView of its own, and St stops
+                 * every wheel event that such a view receives, whether the view
+                 * can use it or not. An expanded panel therefore took the wheel
+                 * events, the report below it did not move, and the scrollbar
+                 * was the only way down. Removing the events here costs
+                 * nothing: `PopupSubMenu._needsScrollbar()` reads the maximum
+                 * height of the top menu, and this menu sets that height on an
+                 * inner actor, so the submenu never scrolls on its own. */
                 submenu.menu.actor.set_mouse_scrolling(false);
                 if (failed)
                     submenu.icon.icon_name = 'dialog-warning-symbolic';
                 this._fillManagerSection(submenu.menu, manager, rows, widths);
                 this._reportSection.addMenuItem(submenu);
             } else {
-                /* The "---" separator the bar plugin prints between manager
-                 * sections. */
+                /* The "---" separator that the bar plugin prints between the
+                 * manager sections. */
                 if (index > 0) {
                     this._reportSection.addMenuItem(
                         new PopupMenu.PopupSeparatorMenuItem());
@@ -502,11 +510,11 @@ class MpmIndicator extends PanelMenu.Button {
             this._setPanelState(State.UPTODATE);
     }
 
-    /* Column widths in characters for a set of rows, or null when the
-     * versions are set in the menu font instead. Both halves are padded so
-     * every block comes out the same width, and a constant-width block pushed
-     * right is what puts the arrows on one vertical line: a block sized to
-     * its own text leaves each arrow wherever its latest version ends. */
+    /* Return the column widths in characters for a set of rows, or null when
+     * the versions use the menu font instead. The two halves of a version are
+     * padded, so every block has the same width. A block with a fixed width,
+     * aligned to the right, puts the arrows on one vertical line. A block sized
+     * for its own text leaves each arrow where its latest version ends. */
     _versionWidths(rows) {
         if (!this._settings.get_boolean('align-columns'))
             return null;
@@ -518,8 +526,8 @@ class MpmIndicator extends PanelMenu.Button {
         };
     }
 
-    /* One manager's packages, upgrade-all entry and error lines, appended to
-     * either the flat report section or its own submenu. */
+    /* Add one manager's packages, upgrade-all entry and error lines, to the
+     * flat report section or to that manager's submenu. */
     _fillManagerSection(section, manager, rows, widths) {
         for (const {pkg, diff} of rows)
             section.addMenuItem(this._makePackageItem(manager, pkg, diff, widths));
@@ -538,9 +546,10 @@ class MpmIndicator extends PanelMenu.Button {
             this._addErrorItems(section, {message: error});
     }
 
-    /* A package row: name stretched left, version diff on the right with the
-     * common prefix dimmed and the changed suffixes colored, mirroring
-     * diff_versions(). Activating runs the mpm upgrade for that package. */
+    /* Build one package row: the name on the left, and the version diff on
+     * the right with the common prefix dimmed and the changed suffixes
+     * colored, as in diff_versions(). Activation runs the mpm upgrade for that
+     * package. */
     _makePackageItem(manager, pkg, diff, widths) {
         const item = new PopupMenu.PopupBaseMenuItem();
         item.add_child(new St.Label({
@@ -549,11 +558,11 @@ class MpmIndicator extends PanelMenu.Button {
             y_align: Clutter.ActorAlign.CENTER,
             style_class: 'mpm-package-name',
         }));
-        /* One markup label rather than a box of five: a report of a thousand
-         * packages pays for every actor of every row on each scroll step, and
-         * spans inside one label cannot be held apart by the shell theme's own
-         * popup-menu-item spacing, which is what used to split "5.0.0~beta1"
-         * into "5.0." and "0~beta1". */
+        /* One label with markup, and not a box with five labels. A report of a
+         * thousand packages would need every actor of every row at each scroll
+         * step. Spans inside one label also cannot be separated by the shell
+         * theme's popup-menu-item spacing. That spacing used to
+         * split "5.0.0~beta1" into "5.0." and "0~beta1". */
         const dim = VERSION_COLORS.prefix;
         let markup =
             colorSpan(diff.prefix, dim) +
@@ -561,14 +570,15 @@ class MpmIndicator extends PanelMenu.Button {
             colorSpan(' → ', dim) +
             colorSpan(diff.prefix, dim) +
             colorSpan(diff.newSuffix, VERSION_COLORS.new);
-        /* Every block opens on one uncolored space, since a colored span
-         * starting at the very first character renders in the menu's own text
-         * color instead of its own. Pango parses the markup either way, and
-         * every row carries the space, so the column still lines up. */
+        /* Every block starts with one space that has no color. A colored span
+         * at the first character of a label renders in the menu's own text
+         * color, and not in the color of the span. Pango parses the markup in
+         * both cases, and every row has the space, so the column still
+         * lines up. */
         if (widths) {
-            /* Padded with spaces, which only measure equally in a monospace
-             * face: the whole block takes one, the way the bar plugin sets
-             * its aligned rows. */
+            /* Padded with spaces. Spaces have an equal width in a monospace
+             * font only, so the whole block uses one. This is how the bar
+             * plugin sets its aligned rows. */
             const lead = padding(
                 widths.old - diff.prefix.length - diff.oldSuffix.length + 1);
             const trail = padding(
@@ -590,8 +600,9 @@ class MpmIndicator extends PanelMenu.Button {
         return item;
     }
 
-    /* Red monospace error lines, non-reactive, one per line of the message
-     * (the print_error() rendering of the bar plugin). */
+    /* Add the error lines: red, monospace, non-reactive, and one item per
+     * line of the message. This is the bar plugin's print_error()
+     * rendering. */
     _addErrorItems(section, error) {
         for (const line of String(error.message).split('\n')) {
             if (line.trim() === '')
@@ -605,9 +616,9 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
-    /* The bootstrap items shown under a missing mpm, the same pair bar_plugin.py
-     * offers: a global uv install run through the regular action path, and the
-     * installation page for every system uv does not answer for. */
+    /* Add the two items shown when mpm is missing. bar_plugin.py offers the
+     * same pair: a global uv install, run through the regular action path, and
+     * the installation page for a system where uv is not the right method. */
     _addInstallItem() {
         const install = new PopupMenu.PopupMenuItem(_('Install mpm with uv'));
         install.connectObject('activate', () => {
@@ -625,16 +636,17 @@ class MpmIndicator extends PanelMenu.Button {
         this._reportSection.addMenuItem(docs);
     }
 
-    /* Replace the report with an error. A missing mpm also gets the bootstrap
-     * items, which is what `missing` tells apart. */
+    /* Replace the report with an error. The `missing` flag also asks for the
+     * two install items for a missing mpm. */
     _setError(message, missing = false) {
         lastModel = null;
         lastError = {message, missing};
         this._showReport();
     }
 
-    /* Desktop notification when outdated packages appear that were not in the
-     * previous report. Opt-in, GNOME 46 MessageTray API. */
+    /* Send a desktop notification when the report holds outdated packages that
+     * the previous report did not have. The user must enable this option. Uses
+     * the GNOME 46 MessageTray API. */
     _maybeNotify(model) {
         const current = new Set();
         for (const manager of model.managers) {
@@ -670,10 +682,10 @@ class MpmIndicator extends PanelMenu.Button {
         this._notifSource.addNotification(notification);
     }
 
-    /* The mpm-options setting as it stands when an action is built, not as
-     * it stood at the last check: an option typed into the preferences
-     * takes effect on the next click without a re-check. A syntax error
-     * yields no options here, the check being where it is reported. */
+    /* Read the mpm-options setting at the time the action is built, and not at
+     * the time of the last check. An option typed into the preferences then
+     * takes effect at the next click, with no new check. A syntax error gives
+     * no options here: the check is the place that reports it. */
     _mpmOptions() {
         try {
             return Mpm.parseOptions(this._settings.get_string('mpm-options'));
@@ -682,9 +694,10 @@ class MpmIndicator extends PanelMenu.Button {
         }
     }
 
-    /* Spawn an upgrade command, in a terminal by default so progress is
-     * visible and sudo can prompt. Then arm the post-upgrade re-check:
-     * terminal processes detach, so completion cannot be awaited. */
+    /* Start an upgrade command. The default is a terminal, so the user sees
+     * the progress and sudo can ask for a password. Then start the re-check
+     * after the upgrade: a terminal process detaches, so the code cannot wait
+     * for its end. */
     _runAction(argv) {
         try {
             if (this._settings.get_boolean('upgrade-in-terminal')) {
@@ -698,10 +711,11 @@ class MpmIndicator extends PanelMenu.Button {
                 }
                 Mpm.spawnDetached(Mpm.terminalArgv(terminal, argv));
             } else {
-                /* Nothing detaches here, so this process really is the
-                 * upgrade: wait for it and re-check as it exits, rather than
-                 * sitting out post-upgrade-recheck. Every terminal mpm knows
-                 * is client-server, which is why the branch above cannot. */
+                /* Nothing detaches here, so this process is the upgrade
+                 * itself. Wait for it and run the re-check when it exits, with
+                 * no post-upgrade-recheck delay. The branch above cannot do
+                 * this: every terminal that mpm knows is a client of a server
+                 * process. */
                 const proc = Mpm.spawnDetached(argv);
                 const cancellable = this._actionCancellable;
                 proc.wait_async(cancellable, (source, result) => {
@@ -712,8 +726,8 @@ class MpmIndicator extends PanelMenu.Button {
                     } catch (error) {
                         logError(error, 'mpm: awaiting an upgrade');
                     }
-                    /* A failed run is re-checked too: it may have upgraded
-                     * part of what it was given. */
+                    /* A failed run also gets a re-check: it may have upgraded
+                     * some of the packages it received. */
                     this._armOneShot(1);
                 });
             }
@@ -724,7 +738,8 @@ class MpmIndicator extends PanelMenu.Button {
         this._armOneShot(this._settings.get_int('post-upgrade-recheck'));
     }
 
-    /* Settings changes re-render and re-arm timers, but never re-check. */
+    /* A settings change renders the report again and starts the timers again.
+     * It does not start a new check. */
     _onSettingsChanged() {
         this._showReport();
         this._updateLastChecked();
@@ -733,9 +748,10 @@ class MpmIndicator extends PanelMenu.Button {
     }
 
     destroy() {
-        /* Cancel first: that is what tells an in-flight check it has outlived
-         * the indicator, and what drops the watchdog source runCommand armed
-         * for it. Then no timer, signal or source is left to fire. */
+        /* Cancel first. The cancellation tells a running check that the
+         * indicator is gone, and it removes the watchdog source that runCommand
+         * started for that check. After this, no timer, signal or source can
+         * still fire. */
         if (this._cancellable !== null) {
             this._cancellable.cancel();
             this._cancellable = null;

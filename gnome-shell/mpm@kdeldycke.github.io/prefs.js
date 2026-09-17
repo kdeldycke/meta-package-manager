@@ -1,7 +1,7 @@
 /* Preferences window of the Meta Package Manager GNOME Shell extension.
  *
- * Every row is bound declaratively to its GSettings key: the gschema file is
- * the single source of truth for types, ranges and defaults.
+ * Each row is bound to its GSettings key. The gschema file is the only source
+ * for the types, the ranges and the default values.
  */
 
 import Adw from 'gi://Adw';
@@ -15,8 +15,8 @@ import {
 
 import * as Mpm from './mpm.js';
 
-/* A probe failure carries raw CLI output: flatten and clip it so one stderr
- * dump never grows the row to a dozen lines. */
+/* A failed probe's error holds raw CLI output. Put it on one line and cut
+ * it, so one stderr dump does not make the row a dozen lines high. */
 function oneLine(text, limit = 120) {
     const flat = String(text ?? '').replace(/\s+/g, ' ').trim();
     return flat.length > limit ? `${flat.slice(0, limit - 1)}…` : flat;
@@ -94,13 +94,12 @@ export default class MpmPreferences extends ExtensionPreferences {
         page.add(notifications);
 
         const about = new Adw.PreferencesGroup({title: _('About')});
-        /* The product name alone would not tell the two rows apart: `mpm` is
-         * the name of the CLI below as much as of the extension. "GNOME
-         * extension" rather than the fuller "GNOME Shell extension" because
-         * the longer one wraps onto a second line, and the row cannot be
-         * widened out of it: `Adw.PreferencesPage` clamps its content, so a
-         * window grown by 80 logical pixels passed only 23 of them to the
-         * title. */
+        /* The product name alone does not separate the two rows: `mpm` is the
+         * name of the CLI below as much as the name of the extension. The text
+         * says "GNOME extension" and not "GNOME Shell extension", because the
+         * longer one goes onto a second line and the row cannot get more space.
+         * `Adw.PreferencesPage` limits the width of its content: a window 80
+         * logical pixels wider gave only 23 of them to the title. */
         const aboutRow = new Adw.ActionRow({
             title: _('%s (GNOME extension)').format(this.metadata.name),
             subtitle: this.metadata['version-name'] ?? '',
@@ -115,12 +114,12 @@ export default class MpmPreferences extends ExtensionPreferences {
         aboutRow.add_suffix(link);
         about.add(aboutRow);
 
-        /* The row above carries the extension's own version, compiled into
-         * metadata.json. This one reports the separately installed CLI it
-         * drives, which is the other half a bug report needs. The preferences
-         * run in their own process, with no access to the running indicator,
-         * so the tool is resolved and probed here exactly as the extension
-         * resolves and probes it. */
+        /* The row above shows the extension's own version, compiled into
+         * metadata.json. This row shows the CLI, which is installed separately
+         * and which the extension runs. A bug report needs both. The
+         * preferences run in a process of their own and cannot read the running
+         * indicator, so this code finds the tool and probes it in the same way
+         * as the extension does. */
         const toolRow = new Adw.ActionRow({
             title: _('mpm command-line tool'),
             subtitle: _('Looking for it…'),
@@ -145,17 +144,18 @@ export default class MpmPreferences extends ExtensionPreferences {
         page.add(about);
     }
 
-    /* Two lines for the About row: what the tool answers, then the command
-     * answering it. A missing or stale CLI shows up here rather than only as
-     * a broken menu. */
+    /* Return two lines for the About row: the answer of the tool, then the
+     * command that gave it. A missing or outdated CLI is visible here, and not
+     * only as a broken menu. */
     async _describeMpm(settings, cancellable) {
         const mpm = Mpm.findMpm(settings.get_string('mpm-command'));
         if (mpm === null) {
             return _('Not found. Install it from %s')
                 .format(Mpm.INSTALL_DOCS_URL);
         }
-        /* Plain join, not `shellJoin`: this is a label to read, and
-         * GLib.shell_quote wraps even an ordinary path in quotes. */
+        /* A plain join, and not `shellJoin`: this is a label for the user to
+         * read, and GLib.shell_quote puts quotes around an ordinary path
+         * too. */
         const command = mpm.join(' ');
         const result = await Mpm.probeMpm(mpm, cancellable);
         const release = result.release ?? result.version?.join('.');
@@ -171,8 +171,9 @@ export default class MpmPreferences extends ExtensionPreferences {
         return `${verdict}\n${command}`;
     }
 
-    /* Row builders: the Gtk.Adjustment bounds duplicate the gschema ranges,
-     * which remain authoritative (out-of-range writes are rejected there). */
+    /* Row builders. The bounds of the Gtk.Adjustment repeat the ranges of the
+     * gschema, and the gschema is the authority: it rejects a write outside its
+     * range. */
 
     _spinRow(settings, key, params) {
         const range = settings.get_range(key).deep_unpack()[1].deep_unpack();

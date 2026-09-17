@@ -453,9 +453,10 @@ SPACER_NAME = "aaa-spacer.1h.sh"
 """Filename of a plugin that draws nothing but takes up room.
 
 The system modules above are not enough on their own, and this makes up the
-rest. It sorts before the real plugin so the host loads it first, which is what
+rest. It sorts before the real plugin so Xbar loads it first, which is what
 puts the real one to its left: AppKit gives each new status item the leftmost
-slot among an app's own.
+slot among an app's own. SwiftBar's item lands on whichever side its position
+key decides, under any spacer name (run 35207075425): see {func}`restart`.
 """
 
 SPACER_WIDTH = 180
@@ -485,24 +486,22 @@ whatever other plugins they run.
 """
 
 STATUS_ITEM_POSITION = 700.0
-"""Where the plugin's status item is asked to sit, in screen coordinates.
+"""Value written under `NSStatusItem Preferred Position` for the plugin's item.
 
-Left of where macOS would otherwise put it, and the reason is Xbar's submenus.
-A menu opens under its item unless that would run off the right edge, in which
-case it is pushed left until its right edge meets the screen's. From there a
-submenu has nowhere to fly but leftwards, back over its own parent. Moving the
-item left leaves room for the submenu to open to the right of the parent, which
-is both the readable arrangement and the one a user with a fuller menu bar sees.
-It also carries the menu clear of the clock, which is the other thing in that
-strip nobody wants photographed.
+The number is not read: what AppKit acts on is the key's presence. With one
+stored, whatever it says, SwiftBar's item is packed against the system's own
+items, at the right end of the strip; with none, AppKit gives the item the
+leftmost slot among the app's own, left of the spacer. Run 35207075425
+measured `1295` under `100`, `700` and `900` alike, and `630` under no key, on
+the `1600`-wide display. So the key is written for the shots that want the
+item beside the clock, and deleted for the ones that need room to the right
+of the menu: see {func}`restart`.
 
-Asked for through `NSStatusItem Preferred Position`, which AppKit maintains
-itself for a status item whose owner gave it an autosave name. SwiftBar does,
-and the name is the plugin's path, which is what {func}`position_keys` spells:
-a machine running SwiftBar `2.1.1` carries both a path-keyed entry and an older
-filename-keyed one, and writing the bare filename alone moved nothing (run
-32444526285). A host that names its items differently, or not at all, ignores
-the write, and the capture still finds the item wherever it landed.
+The key names are the ones AppKit maintains for a status item whose owner gave
+it an autosave name. SwiftBar names its item after the plugin's resolved path,
+which is what {func}`position_keys` spells, with the older filename-keyed form
+beside it. Xbar names its items not at all, ignores the write, and the capture
+finds the item wherever it landed.
 """
 
 FIRST_ROW = (40, 15)
@@ -1312,12 +1311,20 @@ def position_keys(plugins: Path) -> tuple[str, ...]:
     )
 
 
-def restart(host: Host, plugins: Path) -> None:
+def restart(host: Host, plugins: Path, *, leftmost: bool = False) -> None:
     """Bring the host back up on whatever the plugin folder now holds.
 
     A restart rather than a refresh call, because the two hosts refresh
     differently and one of them has to be restarted anyway for a system
     appearance change to reach its menu.
+
+    `leftmost` puts the plugin's item left of the spacer instead of against the
+    system's own items, by deleting its position key rather than writing it:
+    see {data}`STATUS_ITEM_POSITION`. A menu opens under its item unless that
+    would run off the right edge, in which case it is pushed left until its
+    right edge meets the screen's, and from there a submenu has nowhere to
+    unfold but leftwards, back over its own parent. The About shot needs the
+    room to the right; the others keep the item beside the clock.
 
     Every other host is quit first, not just this one. Two bar apps running at
     once put two plugin items in the menu bar, and since macOS draws them into a
@@ -1337,6 +1344,9 @@ def restart(host: Host, plugins: Path) -> None:
     # While the host is down, since a running app rewrites its preferences from
     # memory when it quits, and AppKit reads this one as it creates the item.
     for key in position_keys(plugins):
+        if leftmost:
+            run(("defaults", "delete", host.domain, key), check=False)
+            continue
         run(
             (
                 "defaults",
@@ -2113,7 +2123,7 @@ def open_menu(shot: Shot, plugins: Path) -> dict[str, float]:
     # run and that run happens as it comes up.
     if CLOCK_PINNED:
         age_plugin_run()
-    restart(shot.host, plugins)
+    restart(shot.host, plugins, leftmost=shot.subject == "about")
 
     dismiss_prompts()
     # Forward again before the menu is built, since that is when the host reads

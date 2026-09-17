@@ -1,0 +1,104 @@
+# TEMPORARY probe workflow, to be deleted once it is known why `mpm --winget outdated` lists fewer packages than
+# `winget update --all` upgrades on a GitHub Windows runner.
+---
+name: 🔬 WinGet outdated probe
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/winget-outdated-probe.yaml
+      - meta_package_manager/managers/winget.py
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Supply-chain cooldown: no package published within the window can be resolved
+# by any command in this workflow. Held equal to `[tool.repomatic]
+# minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+  # Same workaround as tests.yaml, for Windows runners redirecting output to files.
+  PYTHONIOENCODING: "utf8"
+
+jobs:
+
+  probe:
+    name: WinGet outdated on windows-2025
+    runs-on: windows-2025
+    permissions: {}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: WinGet - Windows install
+        shell: pwsh
+        run: >
+          winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+          || & { "ignore failure"; $global:LASTEXITCODE = 0 }
+      - name: Install UV
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.12.5"
+      - name: Install project
+        run: uv --no-progress sync --frozen
+
+      - name: Raw details listing
+        shell: bash {0}
+        run: |
+          winget list --upgrade-available --details --accept-source-agreements --disable-interactivity --no-progress \
+            > details.txt 2>&1
+          echo "winget exit code: $?"
+          cat details.txt
+
+      - name: Raw table listing
+        shell: bash {0}
+        run: |
+          winget list --upgrade-available --accept-source-agreements --disable-interactivity --no-progress \
+            > table.txt 2>&1
+          echo "winget exit code: $?"
+          cat table.txt
+
+      - name: mpm outdated
+        shell: bash {0}
+        run: |
+          uv --no-progress run --frozen -- mpm --winget --verbosity DEBUG outdated > mpm.txt 2>&1
+          echo "mpm exit code: $?"
+          cat mpm.txt
+
+      - name: "Gate: the Origin Source filter accounts for every package mpm drops"
+        shell: bash
+        run: |
+          uv --no-progress run --frozen -- python - <<'PY'
+          import re
+          from collections import Counter
+          from pathlib import Path
+
+          details = Path("details.txt").read_text(encoding="UTF-8", errors="replace")
+          header = re.compile(r"^(?:\(\d+/\d+\)\s+)?\S.+\[[^\]]+\]\s*$", re.MULTILINE)
+          starts = [match.start() for match in header.finditer(details)]
+          blocks = [details[a:b] for a, b in zip(starts, [*starts[1:], len(details)])]
+          origins = Counter()
+          for block in blocks:
+              match = re.search(r"^Origin Source:\s*(.*)$", block, re.MULTILINE)
+              origins[match.group(1).strip() if match else "<no Origin Source line>"] += 1
+          print(f"blocks in the details listing: {len(blocks)}")
+          for origin, count in origins.most_common():
+              print(f"  Origin Source {origin!r}: {count}")
+
+          mpm = Path("mpm.txt").read_text(encoding="UTF-8", errors="replace")
+          total = re.search(r"(\d+) packages? total \(winget: (\d+)\)", mpm)
+          assert total, "mpm printed no package total"
+          reported = int(total.group(2))
+          print(f"packages mpm reports: {reported}")
+
+          assert blocks, "the details listing holds no package"
+          assert reported == origins["winget"], "the Origin Source filter does not explain mpm's count"
+          assert len(blocks) > reported, "no package is dropped, so the gap did not reproduce"
+          PY

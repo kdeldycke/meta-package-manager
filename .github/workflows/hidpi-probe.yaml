@@ -1,0 +1,175 @@
+---
+# TEMPORARY probe workflow, to be deleted once this question is answered: can a
+# hosted `macos-26` runner photograph a 2x (HiDPI) display?
+#
+# The runner's own screen tops out at 1600x1200 pixels at 1x, which is why the
+# SwiftBar and Xbar captures on the bar plugin page are 1x where the GNOME ones
+# are 2x. The private `CGVirtualDisplay` API, the one DeskPad and FluffyDisplay
+# build on, declares a display with a 2x backing store. `docs/hidpi_probe.m`
+# creates one, then either makes it the main display or mirrors the runner's
+# screen onto it, and this workflow measures what `screencapture -R` returns in
+# each arrangement against a 1x control taken on the runner's own screen.
+name: 🔬 HiDPI probe
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/hidpi-probe.yaml
+      - docs/hidpi_probe.m
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Supply-chain cooldown: no package published within the window can be resolved
+# by any command in this workflow. Held equal to `[tool.repomatic]
+# minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
+jobs:
+
+  probe:
+    name: Photograph a virtual 2x display
+    runs-on: macos-26
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Record the host
+        run: |
+          sw_vers
+          system_profiler SPDisplaysDataType
+
+      # Diagnostic, not a gate. The driver enumerated modes with no options, and
+      # CoreGraphics then hides every mode duplicating a resolution at another
+      # pixel density, which is what a HiDPI mode is. Listed with the flag, so
+      # the runner's own screen answers whether it hides a 2x mode.
+      - name: Inventory the runner's display modes
+        continue-on-error: true
+        run: |
+          cat > "${RUNNER_TEMP}/modes.swift" <<'EOF'
+          import CoreGraphics
+          let display = CGMainDisplayID()
+          let bounds = CGDisplayBounds(display)
+          print("display \(display): \(CGDisplayPixelsWide(display))x\(CGDisplayPixelsHigh(display)) px,",
+                "\(Int(bounds.width))x\(Int(bounds.height)) pt")
+          let options = [kCGDisplayShowDuplicateLowResolutionModes: true] as CFDictionary
+          for mode in CGDisplayCopyAllDisplayModes(display, options) as? [CGDisplayMode] ?? [] {
+              print("mode \(mode.width)x\(mode.height) pt, \(mode.pixelWidth)x\(mode.pixelHeight) px,",
+                    "\(mode.refreshRate) Hz, flags \(mode.ioFlags)")
+          }
+          EOF
+          swift "${RUNNER_TEMP}/modes.swift"
+
+      - name: Compile the helper
+        run: >
+          clang -fobjc-arc -framework Foundation -framework CoreGraphics
+          -o "${RUNNER_TEMP}/hidpi" docs/hidpi_probe.m
+
+      # The PNG header alone says what `screencapture` produced.
+      - name: Write the measuring tools
+        run: |
+          mkdir -p "${RUNNER_TEMP}/probe"
+          cat > "${RUNNER_TEMP}/pngsize.py" <<'EOF'
+          import struct
+          import sys
+          from pathlib import Path
+
+          for name in sys.argv[1:]:
+              path = Path(name)
+              if not path.is_file():
+                  print("missing")
+                  continue
+              print("%dx%d" % struct.unpack(">II", path.read_bytes()[16:24]))
+          EOF
+          cat > "${RUNNER_TEMP}/photograph.sh" <<'EOF'
+          #!/bin/bash
+          # photograph.sh ARRANGEMENT: bring the helper up in that arrangement,
+          # photograph a fixed region and the whole main display, take it down.
+          set -u
+          label="$1"
+          out="${RUNNER_TEMP}/probe/${label}"
+          mkdir -p "${out}"
+          "${RUNNER_TEMP}/hidpi" 1600 1200 "${label}" > "${out}/helper.log" 2>&1 &
+          helper=$!
+          for _ in $(seq 1 60); do
+            grep -q '^ready' "${out}/helper.log" && break
+            kill -0 "${helper}" 2>/dev/null || break
+            sleep 1
+          done
+          sleep 3
+          screencapture -x -o -t png -R 0,0,300,200 "${out}/region.png"
+          # `-m`: the main display alone. Given one file and two displays,
+          # `screencapture` otherwise writes one file per display.
+          screencapture -x -o -m -t png "${out}/screen.png"
+          kill "${helper}" 2>/dev/null
+          wait "${helper}" 2>/dev/null
+          echo "helper exit: $?"
+          cat "${out}/helper.log"
+          echo "${label} region: $(/usr/bin/python3 "${RUNNER_TEMP}/pngsize.py" "${out}/region.png")"
+          echo "${label} screen: $(/usr/bin/python3 "${RUNNER_TEMP}/pngsize.py" "${out}/screen.png")"
+          EOF
+
+      # The control: the runner's own screen, which the driver knows to be 1x.
+      # A region that does not come back at 300x200 voids the whole probe, since
+      # the capture path then measures something other than pixel density.
+      - name: Photograph the runner's own display
+        shell: bash {0}
+        run: |
+          mkdir -p "${RUNNER_TEMP}/probe/baseline"
+          screencapture -x -o -t png -R 0,0,300,200 "${RUNNER_TEMP}/probe/baseline/region.png"
+          size="$(/usr/bin/python3 "${RUNNER_TEMP}/pngsize.py" "${RUNNER_TEMP}/probe/baseline/region.png")"
+          echo "baseline region: ${size}" | tee -a "${RUNNER_TEMP}/probe/results.txt"
+
+      - name: Photograph a virtual display made main
+        shell: bash {0}
+        run: bash "${RUNNER_TEMP}/photograph.sh" main | tee -a "${RUNNER_TEMP}/probe/results.txt"
+
+      - name: Photograph a virtual display the runner's screen mirrors
+        shell: bash {0}
+        run: bash "${RUNNER_TEMP}/photograph.sh" mirror | tee -a "${RUNNER_TEMP}/probe/results.txt"
+
+      # The gates. A 300x200 region photographed at 600x400 is a 2x display,
+      # and either arrangement giving one answers the question.
+      - name: Verdict
+        shell: bash {0}
+        run: |
+          results="${RUNNER_TEMP}/probe/results.txt"
+          if ! grep -q '^baseline region: 300x200$' "${results}"; then
+            echo "probe void: the runner's own display did not photograph at 1x"
+            exit 1
+          fi
+          main=0
+          mirror=0
+          grep -q '^main region: 600x400$' "${results}" && main=1
+          grep -q '^mirror region: 600x400$' "${results}" && mirror=1
+          {
+            echo '## HiDPI probe'
+            echo
+            echo "| Arrangement | 300x200 region | Whole main display |"
+            echo "| :--- | :--- | :--- |"
+            for label in baseline main mirror; do
+              region="$(grep "^${label} region: " "${results}" | cut -d' ' -f3-)"
+              screen="$(grep "^${label} screen: " "${results}" | cut -d' ' -f3-)"
+              echo "| ${label} | ${region:-not taken} | ${screen:-not taken} |"
+            done
+          } | tee -a "${GITHUB_STEP_SUMMARY}"
+          [ "${main}" = 1 ] || [ "${mirror}" = 1 ]
+
+      - name: Upload the captures and logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: hidpi-probe
+          path: ${{ runner.temp }}/probe
+          if-no-files-found: warn

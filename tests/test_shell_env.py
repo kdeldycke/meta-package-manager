@@ -69,6 +69,8 @@ def bare_environ(tmp_path, shell: str | None) -> dict[str, str]:
     [
         pytest.param("/bin/zsh", ("-i", "-l", "-c"), id="zsh"),
         pytest.param("/opt/homebrew/bin/fish", ("-i", "-l", "-c"), id="fish"),
+        pytest.param("/usr/local/bin/nu", ("-i", "-l", "-c"), id="nushell"),
+        pytest.param("/bin/csh", ("-ic",), id="csh"),
         pytest.param("/bin/tcsh", ("-ic",), id="tcsh"),
         pytest.param("/usr/local/bin/pwsh", ("-Login", "-Command"), id="pwsh"),
     ],

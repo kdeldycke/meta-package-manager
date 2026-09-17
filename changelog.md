@@ -16,6 +16,7 @@
 - [bar-plugin,gnome-shell] Name the package of each upgrade action with a pURL of its manager, so `mpm` no longer looks it up in the installed packages first.
 - [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
 - [bar-plugin] Add screenshots of SwiftBar's *About* submenu and preferences pane to the plugin page.
+- [bar-plugin] Capture the SwiftBar and Xbar screenshots at 2x, on a HiDPI virtual display the capture job raises over the runner's own screen.
 - [gnome-shell] Photograph every combination of the menu's two layout switches for the extension page, the grouped ones with their first section unfolded.
 - [winget] Silence progress spinners by passing `--no-progress` on every invocation, which raises the winget floor to `1.29.280`.
 - [fwupd] Fix every query reaching `fwupd` aborting on a host with no updatable device, which is what a VM, a container and plenty of real machines report. fwupd answers that with an `Error` object replacing its whole payload, and `mpm installed`, `mpm outdated`, `mpm sbom` and the snapshot commands read it as a device list.

@@ -288,6 +288,7 @@ The menu answers that in place. Its last row, *About*, expands to three lines: t
 ```{image} assets/swiftbar-about-light.png
 :alt: The About submenu of the plugin, naming the mpm it resolved
 :align: center
+:scale: 50
 ```
 `````
 
@@ -297,6 +298,7 @@ The menu answers that in place. Its last row, *About*, expands to three lines: t
 ```{image} assets/swiftbar-about-dark.png
 :alt: The About submenu of the plugin, naming the mpm it resolved
 :align: center
+:scale: 50
 ```
 `````
 ``````

@@ -45,9 +45,10 @@ concurrency:
 # SwiftBar menu needs Screen Recording and Accessibility, which a hosted runner
 # was assumed to withhold. Measured instead of assumed, `macos-26` ships both
 # already granted to `/bin/bash` and `osascript`, and runs with SIP disabled, so
-# the second job is real. What the runner does not offer is a HiDPI display: its
-# screen is 1x, where the GNOME job renders at 2x on a virtual monitor it sizes
-# itself.
+# the second job is real. Neither runner offers a HiDPI screen, so each job
+# renders at 2x on a virtual display it raises itself: `gnome-shell` on a
+# virtual monitor it sizes, macOS on a `CGVirtualDisplay` the driver mirrors the
+# runner's own screen onto.
 #
 # Scheduled on nothing: the images move when the extension or the payload moves,
 # and a cron would only manufacture churn. The trigger paths deliberately exclude
@@ -195,9 +196,9 @@ jobs:
   # The macOS half, and the one I first called impossible: these runners disable
   # SIP, run a full Aqua session, and ship screen-recording and accessibility
   # already granted, so a real SwiftBar can be installed, driven and photographed
-  # with no TCC manipulation of any kind. What the images cost is resolution:
-  # every mode the virtual display offers has a backing store equal to its
-  # logical size, so these are 1x where the GNOME captures are 2x.
+  # with no TCC manipulation of any kind. The runner's own screen is 1x in every
+  # mode it offers, so the driver photographs a 2x virtual display it raises
+  # over it. See `docs/bar_screenshots_update.py` for the rationale.
   update-bar-plugin-screenshots:
     name: Capture the SwiftBar/Xbar plugin menu
     runs-on: macos-26

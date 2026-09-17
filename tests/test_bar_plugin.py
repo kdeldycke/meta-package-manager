@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import os
 import re
 import subprocess
@@ -23,6 +24,7 @@ import sys
 import threading
 from collections import Counter
 from itertools import product
+from pathlib import Path
 from typing import ClassVar, cast
 
 import pytest
@@ -777,6 +779,42 @@ def test_plugin_about_footer(monkeypatch, capsys, swiftbar, host):
     assert "--mpm 9.9.9.dev0+abc1234" in out
     assert "--/somewhere/mpm" in out
     assert f"href={bar_plugin.PLUGIN_DOCS_URL}" in out
+
+
+PROJECT_ROOT = Path(__file__).parent.parent
+
+
+def _capture_driver():
+    """Load `docs/bar_screenshots_update.py` by path, `docs` being no package."""
+    spec = importlib.util.spec_from_file_location(
+        "bar_screenshots_update",
+        PROJECT_ROOT / "docs" / "bar_screenshots_update.py",
+    )
+    module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    return module
+
+
+def test_captures_are_referenced_by_the_docs():
+    """Each capture is shown on the plugin's page, and none is an orphan.
+
+    The twin of the GNOME extension's check, with the same scale rule: a
+    capture shown through an image directive carries the reciprocal of the
+    display scale, or it renders at twice the size of everything else, while a
+    card sizes its image to the card and needs none.
+    """
+    driver = _capture_driver()
+    page = (PROJECT_ROOT / "docs" / "bar-plugin.md").read_text(encoding="UTF-8")
+    produced = {path for shot in driver.SHOTS for path in shot.paths}
+    for path in produced:
+        assert f"assets/{path.name}" in page, path.name
+    images = re.findall(r"^```\{image\} assets/(?:swiftbar|xbar)-", page, re.MULTILINE)
+    assert page.count(f":scale: {100 // driver.DISPLAY_SCALE}") == len(images)
+    # The same globs the capture workflow stages, so a committed file the driver
+    # no longer produces is reported here rather than lingering.
+    assets = PROJECT_ROOT / "docs" / "assets"
+    committed = set(assets.glob("swiftbar-*.png")) | set(assets.glob("xbar-*.png"))
+    assert committed <= produced
 
 
 def _invocation_matrix(*iterables):

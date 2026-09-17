@@ -59,6 +59,7 @@ import sys
 import time
 import urllib.request
 import zlib
+from contextlib import contextmanager, suppress
 from pathlib import Path
 from tempfile import TemporaryDirectory, gettempdir
 from typing import NamedTuple
@@ -68,7 +69,7 @@ from meta_package_manager.bar_plugin_renderer import BarPluginRenderer
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Iterator, Mapping
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
@@ -213,12 +214,184 @@ second ago: without it `open -a <name>` cannot resolve the name.
 """
 
 DISPLAY_MODE = (1600, 1200)
-"""Tallest mode the hosted runner's virtual display offers.
+"""Size of the display the menus are photographed on, in points.
 
-Every mode it advertises has a backing store equal to its logical size, so a
-HiDPI capture is not available and these images are `1x` where the GNOME ones
-are `2x`. Height is what a menu runs out of, so the tallest mode is the one
-worth having.
+The tallest mode the hosted runner's own screen offers, height being what a
+menu runs out of. That screen is `1x` throughout: every mode it lists, with
+`kCGDisplayShowDuplicateLowResolutionModes` on, has a backing store equal to
+its size in points, the largest being `1920x1080`. The `2x` captures come from
+the display of {data}`VIRTUAL_DISPLAY_SOURCE`, declared at this same size in
+points.
+"""
+
+DISPLAY_SCALE = 2
+"""Pixels per point of the display the menus are photographed on.
+
+Every capture is checked against it: `screencapture` returns a rectangle at the
+backing scale of the display it lies on, so a frame coming back at `1x` means
+the virtual display was not there, and the shot is refused rather than
+committed at half the resolution of every other.
+"""
+
+VIRTUAL_DISPLAY_SOURCE = r"""
+// Puts a 2x display under the captures. See `docs/bar_screenshots_update.py`.
+#import <CoreGraphics/CoreGraphics.h>
+#import <Foundation/Foundation.h>
+#import <signal.h>
+#import <unistd.h>
+
+// The private interfaces, as the ObjC runtime of macOS 26 lists them.
+@interface CGVirtualDisplayDescriptor : NSObject
+@property(nonatomic, copy) NSString *name;
+@property(nonatomic, strong) dispatch_queue_t queue;
+@property(nonatomic) unsigned int maxPixelsWide;
+@property(nonatomic) unsigned int maxPixelsHigh;
+@property(nonatomic) CGSize sizeInMillimeters;
+@property(nonatomic) unsigned int serialNum;
+@property(nonatomic) unsigned int productID;
+@property(nonatomic) unsigned int vendorID;
+@property(nonatomic) CGPoint whitePoint;
+@property(nonatomic) CGPoint redPrimary;
+@property(nonatomic) CGPoint greenPrimary;
+@property(nonatomic) CGPoint bluePrimary;
+@end
+
+@interface CGVirtualDisplayMode : NSObject
+- (instancetype)initWithWidth:(unsigned int)width
+                       height:(unsigned int)height
+                  refreshRate:(double)refreshRate;
+@end
+
+@interface CGVirtualDisplaySettings : NSObject
+@property(nonatomic) unsigned int hiDPI;
+@property(nonatomic, strong) NSArray<CGVirtualDisplayMode *> *modes;
+@end
+
+@interface CGVirtualDisplay : NSObject
+@property(nonatomic, readonly) CGDirectDisplayID displayID;
+- (instancetype)initWithDescriptor:(CGVirtualDisplayDescriptor *)descriptor;
+- (BOOL)applySettings:(CGVirtualDisplaySettings *)settings;
+@end
+
+static volatile sig_atomic_t stopped = 0;
+
+static void on_signal(int signum) {
+    (void)signum;
+    stopped = 1;
+}
+
+static void report_displays(const char *label) {
+    CGDirectDisplayID ids[8];
+    uint32_t count = 0;
+    CGGetActiveDisplayList(8, ids, &count);
+    printf("%s: main=%u active=%u\n", label, CGMainDisplayID(), count);
+    for (uint32_t i = 0; i < count; i++) {
+        CGRect bounds = CGDisplayBounds(ids[i]);
+        printf("  display %u: origin (%.0f,%.0f) %.0fx%.0f pt, mirrors=%u\n",
+               ids[i], bounds.origin.x, bounds.origin.y, bounds.size.width,
+               bounds.size.height, CGDisplayMirrorsDisplay(ids[i]));
+    }
+    fflush(stdout);
+}
+
+int main(int argc, char **argv) {
+    if (argc != 3) {
+        fprintf(stderr, "usage: %s WIDTH HEIGHT\n", argv[0]);
+        return 2;
+    }
+    unsigned int width = (unsigned int)atoi(argv[1]);
+    unsigned int height = (unsigned int)atoi(argv[2]);
+    CGDirectDisplayID original = CGMainDisplayID();
+    report_displays("before");
+
+    CGVirtualDisplayDescriptor *descriptor = [CGVirtualDisplayDescriptor new];
+    descriptor.name = @"mpm capture display";
+    descriptor.queue =
+        dispatch_queue_create("mpm.capture-display", DISPATCH_QUEUE_SERIAL);
+    descriptor.maxPixelsWide = width * 2;
+    descriptor.maxPixelsHigh = height * 2;
+    // 220 pixels per inch, a Retina panel's density.
+    descriptor.sizeInMillimeters =
+        CGSizeMake(25.4 * width * 2 / 220.0, 25.4 * height * 2 / 220.0);
+    descriptor.serialNum = 1;
+    descriptor.productID = 1;
+    descriptor.vendorID = 1;
+    // sRGB primaries and a D65 white point.
+    descriptor.whitePoint = CGPointMake(0.3125, 0.3291);
+    descriptor.redPrimary = CGPointMake(0.6797, 0.3203);
+    descriptor.greenPrimary = CGPointMake(0.2559, 0.6983);
+    descriptor.bluePrimary = CGPointMake(0.1494, 0.0557);
+
+    // Kept alive to the end of main: the display goes away with it.
+    __attribute__((objc_precise_lifetime)) CGVirtualDisplay *display =
+        [[CGVirtualDisplay alloc] initWithDescriptor:descriptor];
+    if (!display) {
+        printf("failed: initWithDescriptor returned nil\n");
+        return 3;
+    }
+    CGVirtualDisplaySettings *settings = [CGVirtualDisplaySettings new];
+    settings.hiDPI = 1;
+    // With hiDPI set, the mode is declared in points.
+    settings.modes = @[ [[CGVirtualDisplayMode alloc] initWithWidth:width
+                                                             height:height
+                                                        refreshRate:60] ];
+    if (![display applySettings:settings]) {
+        printf("failed: applySettings refused\n");
+        return 3;
+    }
+    CGDirectDisplayID created = display.displayID;
+    for (int i = 0; i < 100 && !CGDisplayIsActive(created); i++) {
+        usleep(100000);
+    }
+    report_displays("created");
+
+    CGDisplayConfigRef config = NULL;
+    CGBeginDisplayConfiguration(&config);
+    CGError mirrored = CGConfigureDisplayMirrorOfDisplay(config, original, created);
+    CGError completed = CGCompleteDisplayConfiguration(config, kCGConfigureForSession);
+    for (int i = 0; i < 100 && CGMainDisplayID() != created; i++) {
+        usleep(100000);
+    }
+    report_displays("mirrored");
+    if (mirrored != kCGErrorSuccess || completed != kCGErrorSuccess
+        || CGMainDisplayID() != created) {
+        printf("failed: mirror=%d complete=%d main=%u\n", mirrored, completed,
+               CGMainDisplayID());
+        return 3;
+    }
+    printf("ready: display %u\n", created);
+    fflush(stdout);
+
+    signal(SIGTERM, on_signal);
+    signal(SIGINT, on_signal);
+    while (!stopped) {
+        sleep(1);
+    }
+    printf("stopped: display %u released\n", display.displayID);
+    return 0;
+}
+"""
+"""Objective-C source of the helper that puts a `2x` display under the captures.
+
+The runner's own screen has no HiDPI mode to switch to. The private
+`CGVirtualDisplay` API, the one [DeskPad](https://github.com/Stengo/DeskPad)
+and [FluffyDisplay](https://github.com/tml1024/FluffyDisplay) build on, declares
+a display with a backing store of its own instead. With `hiDPI` set and one
+{data}`DISPLAY_MODE` mode, `screencapture` returns twice the points on each
+axis, and draws the menu bar at that scale rather than upscaling it: run
+35183365671 measured a `300x200` region at `600x400` and the whole display at
+`3200x2400`, on macOS `26.6.2`.
+
+The runner's screen is then made a mirror of the new display, which takes it
+out of the active list. The virtual display is the only one left, at the
+origin, so nothing reading a window's bounds meets a second screen. Moving the
+runner's screen beside the new one worked as well in that run, and was not kept
+for that reason.
+
+The display lives as long as the process that created it, so the helper stays
+up until it is terminated, and reports `ready` once the arrangement is in
+place. `CGDisplayPixelsWide` answers in points for such a display, which is why
+the scale is checked on the captures rather than asked of the display.
 """
 
 BACKGROUND_COLOR = (0x2D, 0x23, 0x64)
@@ -754,18 +927,111 @@ def install(host: Host) -> Path:
     return app
 
 
+def clang(source: str, folder: Path, name: str) -> Path:
+    """Compile an Objective-C snippet into `folder`, for the private CoreGraphics classes.
+
+    `swift` cannot name a class the SDK has no header for, and these have none.
+    """
+    script = folder / f"{name}.m"
+    script.write_text(source, encoding="UTF-8")
+    binary = folder / name
+    run(
+        (
+            "clang",
+            "-fobjc-arc",
+            "-framework",
+            "Foundation",
+            "-framework",
+            "CoreGraphics",
+            "-o",
+            str(binary),
+            str(script),
+        )
+    )
+    return binary
+
+
+def display_scale() -> float:
+    """Pixels per point of the main display, as CoreGraphics reports them.
+
+    Asked before any virtual display exists: for one of those CoreGraphics
+    answers `1` whatever the backing store, and only a capture tells.
+    """
+    return float(
+        swift(
+            """
+        import CoreGraphics
+        let display = CGMainDisplayID()
+        print(Double(CGDisplayPixelsWide(display)) / Double(CGDisplayBounds(display).width))
+        """
+        )
+    )
+
+
+@contextmanager
+def virtual_display() -> Iterator[None]:
+    """Hold a {data}`DISPLAY_SCALE` display under everything photographed in the block.
+
+    Nothing is created over a main display already at that scale, which is what
+    a developer's Retina Mac answers, so a local run photographs the machine's
+    own screen. Over a `1x` screen, the runner's or an external monitor, the
+    helper of {data}`VIRTUAL_DISPLAY_SOURCE` is compiled and started, then
+    stopped on the way out, which gives the screen back as it was.
+    """
+    scale = display_scale()
+    if scale >= DISPLAY_SCALE:
+        print(f"the main display is already {scale:g}x")
+        yield
+        return
+    print(f"the main display is {scale:g}x: raising a {DISPLAY_SCALE}x one over it")
+    with TemporaryDirectory(prefix="mpm-display-") as name:
+        folder = Path(name)
+        helper = clang(VIRTUAL_DISPLAY_SOURCE, folder, "virtual-display")
+        log = folder / "virtual-display.log"
+        width, height = DISPLAY_MODE
+        with log.open("w", encoding="UTF-8") as sink:
+            process = subprocess.Popen(
+                (str(helper), str(width), str(height)),
+                stdout=sink,
+                stderr=subprocess.STDOUT,
+            )
+        try:
+            deadline = time.monotonic() + 60
+            while "ready:" not in log.read_text(encoding="UTF-8"):
+                if process.poll() is not None or time.monotonic() > deadline:
+                    msg = "The virtual display did not come up:\n" + log.read_text(
+                        encoding="UTF-8"
+                    )
+                    raise RuntimeError(msg)
+                time.sleep(0.5)
+            print(log.read_text(encoding="UTF-8").rstrip())
+            yield
+        finally:
+            process.terminate()
+            with suppress(subprocess.TimeoutExpired):
+                process.wait(timeout=10)
+
+
 def raise_display() -> None:
-    """Switch the main display to {data}`DISPLAY_MODE`."""
+    """Switch the main display to {data}`DISPLAY_MODE`, unless it is there already.
+
+    Under {func}`virtual_display` it is, and a mirrored display is left alone
+    rather than reconfigured to the mode it already shows.
+    """
     print(
         swift(
             """
         import CoreGraphics
         let display = CGMainDisplayID()
-        let modes = CGDisplayCopyAllDisplayModes(display, nil) as? [CGDisplayMode]
-        let wanted = (modes ?? []).first {
-            $0.width == Int(CommandLine.arguments[1])!
-                && $0.height == Int(CommandLine.arguments[2])!
+        let width = Int(CommandLine.arguments[1])!
+        let height = Int(CommandLine.arguments[2])!
+        let bounds = CGDisplayBounds(display)
+        if Int(bounds.width) == width && Int(bounds.height) == height {
+            print("display already \\(width)x\\(height)")
+            exit(0)
         }
+        let modes = CGDisplayCopyAllDisplayModes(display, nil) as? [CGDisplayMode]
+        let wanted = (modes ?? []).first { $0.width == width && $0.height == height }
         guard let mode = wanted else { exit(2) }
         var config: CGDisplayConfigRef?
         CGBeginDisplayConfiguration(&config)
@@ -1781,7 +2047,20 @@ def photograph(
     with TemporaryDirectory(prefix="mpm-frame-") as name:
         fresh = Path(name) / target.name
         run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(fresh)))
-        print(f"  {target.name}: {png_size(fresh)}")
+        captured = png_size(fresh)
+        print(f"  {target.name}: {captured}")
+        # A floor rather than an equality, the edges of a fractional rectangle
+        # rounding either way: what it refuses is a frame at the wrong scale.
+        floor = tuple(
+            round(side * DISPLAY_SCALE) - DISPLAY_SCALE
+            for side in (right - left, bottom - top)
+        )
+        if captured[0] < floor[0] or captured[1] < floor[1]:
+            msg = (
+                f"{target.name} came out {captured}, below the {floor} a "
+                f"{DISPLAY_SCALE}x display gives {rect}"
+            )
+            raise RuntimeError(msg)
         settle_frame(fresh, target)
 
 
@@ -1956,7 +2235,6 @@ def require_macos() -> None:
 
 def capture_all(shots: tuple[Shot, ...]) -> None:
     """Install the hosts the shots need, plant the stand-in, then walk every shot."""
-    require_macos()
     hosts = tuple(
         host for host in (SWIFTBAR, XBAR) if any(shot.host is host for shot in shots)
     )
@@ -2095,7 +2373,9 @@ def main() -> None:
     )
     if not shots:
         sys.exit(f"No shot matches {args.only!r}.")
-    capture_all(shots)
+    require_macos()
+    with virtual_display():
+        capture_all(shots)
 
 
 if __name__ == "__main__":

@@ -155,8 +155,8 @@ Every coordinate the shell reports, and every one `ScreenshotArea` takes, stays
 logical; only the framebuffer behind them doubles. So the menu lays out exactly
 as it would on a `1920x1200` desktop and comes back drawn at twice the pixels,
 which is what a Retina reader needs and what upscaling a `1x` capture cannot
-fake. The documentation renders these at `:scale: 50` to land back at their
-logical size.
+fake. An image directive in the documentation shows a capture at `:scale: 50`,
+its logical size. A card stretches its image to the width of the card instead.
 """
 
 CAPTURE_MARGIN = 24

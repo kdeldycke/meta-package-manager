@@ -390,9 +390,11 @@ def test_captures_are_referenced_by_the_docs():
     produced = {shot.path for shot in driver.SHOTS}
     for path in produced:
         assert f"assets/{path.name}" in page, path.name
-    # Captured at MONITOR_SCALE, so displayed at its reciprocal: the two move
-    # together or the images render at twice the size of everything else.
-    assert page.count(f":scale: {100 // driver.MONITOR_SCALE}") == len(produced)
+    # Captured at MONITOR_SCALE, so an image directive displays a capture at the
+    # reciprocal scale, or it renders at twice the size of everything else. A card
+    # needs none: it stretches its image to the width of the card.
+    images = re.findall(r"^```\{image\} assets/gnome-shell-", page, re.MULTILINE)
+    assert page.count(f":scale: {100 // driver.MONITOR_SCALE}") == len(images)
     # The same glob the capture workflow stages, so a committed file the driver
     # no longer produces is reported here rather than lingering.
     committed = set((PROJECT_ROOT / "docs" / "assets").glob("gnome-shell-*.png"))

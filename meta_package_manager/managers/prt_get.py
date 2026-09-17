@@ -64,7 +64,7 @@ class PrtGet(PackageManager):
 
     name = "CRUX prt-get"
 
-    homepage_url = "https://crux.nu/Main/Prt-get"
+    homepage_url = "https://crux.nu/doc/prt-get%20-%20User%20Manual.html"
 
     keywords = ("crux",)
 

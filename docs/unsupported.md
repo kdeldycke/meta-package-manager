@@ -21,18 +21,6 @@ One section per tool, except where several share a verdict word for word: those 
 None of these verdicts are permanent. Each section closes on the `mpm` release that first published its verdict, so an old one rests on an older reading of the tool. If a tool here looks misjudged, make the case in a [new manager request](https://github.com/kdeldycke/meta-package-manager/issues/new?template=new-package-manager.yml) and the entry will be reassessed.
 ```
 
-## [`antibody`](https://github.com/getantibody/antibody) ☠️ 🛟
-
-Zsh plugin manager, archived on 2022-05-27 and superseded by [`antidote`](managers/antidote.md), which `mpm` wraps.
-
-Declined in {mpm-release}`7.6.0`.
-
-## [`antigravity`](https://antigravity.google) ❌ 🛟
-
-Google ships two separate products under the name: the Antigravity **IDE**, a VS Code fork that `topgrade` drives with `--update-extensions`, and the Antigravity **CLI** (`agy`), whose [plugin subcommands](https://antigravity.google/docs/cli/plugins) manage an unrelated set. The IDE's extension flags are documented nowhere, so the row `topgrade` covers has no contract to build on. The `agy plugin list`/`install`/`uninstall` surface is a different tool and would be its own candidate.
-
-Declined in {mpm-release}`8.0.0`.
-
 ## [`app-man`](https://github.com/ivan-hc/AppMan) ❌ 🛟
 
 The same AppImage manager as [`am`](managers/am.md), which `mpm` wraps, under a second name. Its repository carries no implementation at all, only a stub that replaces its own contents with AM's and re-executes it: "*Since version 5, "AppMan" and "AM" have been meged to share the same code*". The script then reads the path it was invoked through to decide whether to install system-wide or under the user's home, which is the entire difference between the two. Wrapping it would also double-count, since `am -fi` already lists AppMan's applications in a table of their own.
@@ -54,12 +42,6 @@ Declined in {mpm-release}`8.0.0`.
 ## [`autopackage`](https://en.wikipedia.org/wiki/Autopackage) ☠️
 
 Cross-distribution installer for Linux binaries, and there is nothing left to drive. Its last stable release is `1.4.2` from 2009-05-24, and in August 2010 "Listaller and Autopackage announced that the projects will merge", a successor that no longer ships either. Its own site survives through the Wayback Machine alone.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`bash-it`](https://bash-it.readthedocs.io) ❌ 🛟
-
-Bash configuration framework shipping no registry of its own: its plugins, aliases and completions all live inside the single git checkout under `plugins/available`, `aliases/available` and `completion/available`, so `bash-it enable plugin git` only symlinks a file the clone already put on disk and `bash-it disable` removes that symlink again. Nothing is fetched and nothing carries a version of its own: `bash-it update` runs `git fetch` and checks out a tag or `master` across the whole tree, a mechanism its maintainer describes as "*we assume we cloned the project, and we run `git fetch` and things like that*" ([Bash-it/bash-it#1819](https://github.com/Bash-it/bash-it/issues/1819)).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -97,23 +79,24 @@ Nothing there is a package operation. There is no install and no removal, both o
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`component`](https://github.com/componentjs/component) ☠️
-
-Front-end package manager and build tool for modular web applications, archived on GitHub with a last push of 2017-12-16. It installed into the working tree rather than onto the machine, so it would have landed among the project-scoped ecosystems below even while alive.
-
-Declined in {mpm-release}`8.0.0`.
-
 ## Container runtimes ❌ 🛟
 
-[`colima`](https://colima.run), [`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`podman`](https://podman.io) and [`toolbx`](https://containertoolbx.org).
+[`colima`](https://colima.run), [`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`podman`](https://podman.io), [`toolbx`](https://containertoolbx.org) and [`waydroid`](https://waydro.id).
 
-Manage container images and running containers, not packages. An image is a filesystem bundle addressed by tag or digest rather than a versioned package, and pulling a newer tag is not an upgrade `mpm` can reason about.
+Manage containers and the systems running inside them, not packages. An image is a filesystem bundle addressed by tag or digest rather than a versioned package, and pulling a newer tag is not an upgrade `mpm` can reason about. What runs inside a container is another system's own inventory, out of reach of the host's package managers, so neither the runtime nor its guest can be listed, searched, installed by name or removed from here. `waydroid` is the plainest case of that second half: it runs a whole Android system in a container and installs no packages of its own.
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`cursor`](https://cursor.com) ❌ 🛟
+## Cross-manager aliases ❌
 
-A VS Code fork that did not inherit the CLI intact: `--list-extensions` launches the Cursor window instead of listing anything ([forum.cursor.com](https://forum.cursor.com/t/command-line-list-extensions/103565), where a moderator grants "*this is not expected behavior*" and the thread closes with no fix). Silently opening a GUI where a listing was asked for is worse than an error, since nothing signals the failure. Cursor's own [CLI documentation](https://cursor.com/docs/cli/installation) covers the separate [`cursor-agent`](#self-updating-applications) binary and never documents the extension flags at all, so there is no contract to build on. Contrast [`vscode`](managers/vscode.md), whose `--list-extensions --show-versions` is documented and stable.
+[`oneget`](https://github.com/OneGet/oneget), [`pkg-termux`](https://github.com/termux/termux-tools), [`upm`](https://github.com/epitron/upm) and [`upt`](https://github.com/sigoden/upt).
+
+None owns a registry: each is a layer over managers `mpm` already wraps directly, translating one CLI vocabulary onto them or brokering transactions out to them, so it reaches no package `mpm` cannot. Each reads as a peer of `mpm` rather than a candidate to wrap.
+
+- `oneget` is Windows' package-manager *manager*: PackageManagement brokers transactions out to providers (NuGet, PowerShellGet, Chocolatey) instead of owning packages itself, so everything it reaches through PowerShellGet `mpm` reaches directly through [`pwsh-gallery`](managers/pwsh-gallery.md). Wrapping it would buy a delegation layer and not one extra package, the shape [`metapac`](#declarative-package-set-managers) is declined for too. Its upstream has stopped moving besides: the readme declares the module "*currently not in development*" and "*no longer accepting any pull requests*", naming AnyPackage and PowerShellGet as the successors.
+- `pkg-termux` is Termux's `pkg`, a dispatcher over two managers `mpm` already wraps. Its script branches on `TERMUX_APP_PACKAGE_MANAGER` and forwards every command: under apt, `install` becomes `apt install`, `list-installed` becomes `apt list --installed`, `uninstall` becomes `apt remove`, `files` becomes `dpkg -L` and `search` becomes `apt search`; under pacman the same commands become `pacman -Sy --needed`, `pacman -Q`, `pacman -Rcns`, `pacman -Ql` and `pacman -Sys`. Nothing it accepts reaches a package [`apt`](managers/apt.md) or [`pacman`](managers/pacman.md) cannot. What it adds is a mirror selection and a cache refresh in front of some of those calls, `select_mirror` and `update_apt_cache`, which is convenience rather than a registry. That is the line [`nala`](managers/nala.md) sits on the other side of: nala was wrapped for owning its own vocabulary, downloader and rollback history, where `pkg` forwards its argv unchanged.
+- `upm` puts one syntax over apk, apt, guix, opkg, pacman, pkg, pkg_add, pkgin, xbps and yum.
+- `upt` translates onto the single OS-level manager it detects, never more than one per invocation. Upstream states the shape in as many words, its maintainer's own account being "*upt is just aliases, nothing more*" ([sigoden/upt#60](https://github.com/sigoden/upt/issues/60#issuecomment-2560419544)).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -123,23 +106,32 @@ Package front-end for jailbroken iOS, described by Wikipedia as "a graphical use
 
 Declined in {mpm-release}`8.0.0`.
 
+## Data feed refreshers ❌ 🛟
+
+[`maza`](https://github.com/tanrax/maza-ad-blocking), [`pihole`](https://pi-hole.net) and [`tldr`](https://tldr.sh).
+
+Each refreshes a local copy of data fetched from upstream, and that data is not a package: there is nothing to enumerate, version, install or uninstall. `maza` rewrites the local hosts file from an upstream blocklist. `pihole` is a DNS ad blocker updating its own installation and its blocklists, so it manages a network service and its data rather than packages on the host. `tldr` refreshes a local cache of community-written command summaries, and those pages are documentation.
+
+Contrast the [system database refreshers](#system-database-refreshers), which rebuild from files already on disk.
+
+Declined in {mpm-release}`8.0.0`.
+
+## Declarative package-set managers ❌
+
+[`decman`](https://github.com/kiviktnm/decman) and [`metapac`](https://github.com/ripytide/metapac).
+
+The package set is a file, so there is no per-package verb: every run reconciles the whole declared state, and every backend either one delegates to is wrapped by `mpm` directly.
+
+- `decman` is an Arch system manager with no operation verbs at all, flags only. Its packages come from pacman and its own in-house AUR builder, both already `mpm` territory. It also manages dotfiles, systemd units, users and PGP keys, outside the system scope every `mpm` manager holds to.
+- `metapac` delegates to 21 backends, and its per-package `install`/`remove` was removed by design ([ripytide/metapac#197](https://github.com/ripytide/metapac/issues/197)). It is the successor to the archived [`pacdef`](#pacdef), and it is actively maintained.
+
+Declined in {mpm-release}`8.0.0`.
+
 ## [`declaro`](https://github.com/mantinhas/declaro) ❌
 
 Snapshots one already-installed manager at a time into an editable package list. No unique registry, no license, and its own multi-manager request has sat unaddressed since December 2025 ([mantinhas/declaro#31](https://github.com/mantinhas/declaro/issues/31)).
 
 Declined in {mpm-release}`8.0.0`.
-
-## [`decman`](https://github.com/kiviktnm/decman) ❌
-
-Arch declarative system manager with no operation verbs at all, flags only: every run reconciles the whole declared state. Its packages come from pacman and its own in-house AUR builder, both already `mpm` territory. Also manages dotfiles, systemd units, users and PGP keys, outside the system scope every `mpm` manager holds to.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`dein`](https://github.com/Shougo/dein.vim) ☠️ 🛟
-
-Vim and Neovim plugin manager whose development stopped, superseded by [`dpp`](#dpp), last commit on 2025-09-13. Pure Vimscript, so it also exposes neither a binary to run nor a version to report.
-
-Declined in {mpm-release}`7.6.0`.
 
 ## Dotfiles and repository syncers ❌ 🛟
 
@@ -151,19 +143,13 @@ Declined in {mpm-release}`8.0.0`.
 
 ## [`dpp`](https://github.com/Shougo/dpp.vim) ❌
 
-Vim and Neovim plugin manager, the live successor to [`dein`](#dein), but drivable only from inside the editor: its work happens in a Deno process ([denops.vim](https://github.com/vim-denops/denops.vim)) that Vim starts, and it documents no headless entry point. It reports no version and ships no binary of its own either, so it fails the same two requirements `dein` does, with nothing left to key the manager on.
+Vim and Neovim plugin manager, the live successor to [`dein`](#retired-plugin-managers), but drivable only from inside the editor: its work happens in a Deno process ([denops.vim](https://github.com/vim-denops/denops.vim)) that Vim starts, and it documents no headless entry point. It reports no version and ships no binary of its own either, so it fails the same two requirements `dein` does, with nothing left to key the manager on.
 
 Declined in {mpm-release}`8.0.0`.
 
 ## [`entropy`](https://github.com/Sabayon/entropy) ☠️
 
 Sabayon Linux's own binary package manager, last pushed 2020-09-07. Six years of silence is twice the span the stability policy reads as abandonment, and no fork has picked it up.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`etc-update`](https://wiki.gentoo.org/wiki/Etc-update) ❌ 🛟
-
-Merges pending `/etc` configuration files left behind by a Portage upgrade. It resolves conflicts, installs nothing, and is already covered by [`emerge`](managers/emerge.md), which `mpm` wraps.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -195,17 +181,11 @@ Describes itself as "*Bundler for your dot files*": it sources shell configurati
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`fundle`](https://github.com/danhper/fundle) ☠️ 🛟
-
-Fish plugin manager with no commit since 2023-01-05.
-
-Declined in {mpm-release}`7.6.0`.
-
 ## [`gearlever`](https://gearlever.mijorus.it) ❌ 🛟
 
 Painfully close, and it fails on the version alone. Gear Lever manages the AppImages on a machine and its command line is better shaped than most of this page: `list-installed` enumerates the integrated apps, `list-updates` reports the stale ones, both take a `--json` flag emitting a document with a `schema_version` and per-app `current_version` and `available_version` fields, and `remove`, `update` and `integrate` all act on one app.
 
-None of that is reachable, because nothing reports Gear Lever's own version. Its `Cli.options` table declares `integrate`, `update`, `remove`, `remove-all`, `list-installed`, `list-updates`, `list-update-managers`, `set-update-url`, `set-update-source` and a background fetch, and no version among them. The failure mode is the aggravating part: `Cli.from_options` returns `-1` for an option it does not know, after which `main()` falls through to `GearleverApplication(...).run(sys.argv)`, so a version probe does not fail, it launches the GTK window. That is [`cursor`](#cursor)'s verdict, where opening a GUI in place of an answer is worse than an error because nothing signals it, layered on [`zgenom`](#zgenom)'s. A `--version` upstream would reopen this immediately.
+None of that is reachable, because nothing reports Gear Lever's own version. Its `Cli.options` table declares `integrate`, `update`, `remove`, `remove-all`, `list-installed`, `list-updates`, `list-update-managers`, `set-update-url`, `set-update-source` and a background fetch, and no version among them. The failure mode is the aggravating part: `Cli.from_options` returns `-1` for an option it does not know, after which `main()` falls through to `GearleverApplication(...).run(sys.argv)`, so a version probe does not fail, it launches the GTK window. That is [`cursor`](#vs-code-forks)'s verdict, where opening a GUI in place of an answer is worse than an error because nothing signals it, layered on [`zgenom`](#zgenom)'s. A `--version` upstream would reopen this immediately.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -243,21 +223,9 @@ The line is not that Kubernetes is out of bounds: [`krew`](managers/krew.md) is 
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`home-manager`](https://github.com/nix-community/home-manager) ❌ 🛟
-
-Draws its packages from nixpkgs, the registry `mpm` already reaches through [`nix`](managers/nix.md): the manual states that "*Nixpkgs packages can be installed to the user profile using `home.packages`*", an option typed `list of package`. No per-package verb either, its command dispatch accepting only whole-state operations like `build`, `switch` and `generations`, so a package is added by editing `home.nix` and running `home-manager switch`. It does report what it installed, through `home-manager packages`, but that inventory is a view onto the same profile `mpm` already reads.
-
-Declined in {mpm-release}`8.0.0`.
-
 ## [`install-release`](https://github.com/Rishang/install-release) ❌ 🛟
 
 Installer of single-binary tools from GitHub and GitLab releases, reporting no version of its own, which is the requirement {attr}`~meta_package_manager.manager.PackageManager.fresh` enforces: without one the manager is never considered available. Both executables it ships, `ir` and `install-release`, reject `--version`, `-V`, `-v` and a `version` subcommand alike, all four checked against `0.8.4`, and no request for one has ever been filed upstream. The companion-binary route that rescued [`raco`](managers/raco.md) does not apply either, the two executables being one entry point under two names rather than a versioned sibling. Otherwise well shaped, which is worth recording: `ls`, `get`, `rm`, `upgrade` and `hold` would have mapped cleanly. The [`zgenom`](#zgenom) verdict. Its own scope is narrower than its help suggests, too: every invocation on macOS answers "*Package installation is only supported on Linux*" and lists nothing, where the help advertises "*Linux/MacOS*".
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`jam`](https://github.com/caolan/jam) ☠️
-
-Browser-focused JavaScript package manager built on RequireJS, archived on GitHub with a last push of 2016-10-06.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -283,7 +251,7 @@ Declined in {mpm-release}`7.6.0`.
 
 ## [`kakoune`](https://kakoune.org) ❌ 🛟
 
-Editor shipping no plugin manager of any kind, so there is nothing to wrap. Its whole command-line surface is sessions, filters and user-interface selection: `-e` and `-E` execute a command on client or server startup, `-l` lists sessions, and `-d` runs headless, with no install, list or update flag anywhere among them. Plugins are not packages either, being `*.kak` files the user drops into a directory that the readme describes loading wholesale: "*If the `$XDG_CONFIG_HOME/kak/autoload` directory exists, load every `*.kak` files in it, and load recursively any subdirectory*". Nothing names a source, a version or a registry, so what [`topgrade`](managers/topgrade.md) reaches through this editor is a *third-party* plugin manager running inside a headless session, not Kakoune. The [`helix`](#helix) reading, and the same one that leaves the shell frameworks unwrapped. Checked against Kakoune `2026.05.21`.
+Editor shipping no plugin manager of any kind, so there is nothing to wrap. Its whole command-line surface is sessions, filters and user-interface selection: `-e` and `-E` execute a command on client or server startup, `-l` lists sessions, and `-d` runs headless, with no install, list or update flag anywhere among them. Plugins are not packages either, being `*.kak` files the user drops into a directory that the readme describes loading wholesale: "*If the `$XDG_CONFIG_HOME/kak/autoload` directory exists, load every `*.kak` files in it, and load recursively any subdirectory*". Nothing names a source, a version or a registry, so what [`topgrade`](managers/topgrade.md) reaches through this editor is a *third-party* plugin manager running inside a headless session, not Kakoune. The [`helix`](#helix) reading, and the same one that leaves the [shell configuration frameworks](#shell-configuration-frameworks) unwrapped. Checked against Kakoune `2026.05.21`.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -301,27 +269,11 @@ The version probe is not what fails, and the way it reads is worth naming: the s
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`maza`](https://github.com/tanrax/maza-ad-blocking) ❌ 🛟
+## Microsoft bulk updaters ❌ 🛟
 
-Rewrites the local hosts file from an upstream blocklist. A host list is data, not a package: there is nothing to enumerate, version or uninstall.
+[`microsoft-office`](https://www.microsoft.com/microsoft-365) and [`microsoft-store`](https://apps.microsoft.com).
 
-Declined in {mpm-release}`8.0.0`.
-
-## [`metapac`](https://github.com/ripytide/metapac) ❌
-
-Declarative multi-backend package manager delegating to 21 backends `mpm` already wraps directly. No per-package `install`/`remove` verb: removed by design, see [ripytide/metapac#197](https://github.com/ripytide/metapac/issues/197). The successor to the archived [`pacdef`](#pacdef), and actively maintained.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`microsoft-office`](https://www.microsoft.com/microsoft-365) ❌ 🛟
-
-Runs Microsoft's own updater for one suite of applications. It has a fixed, single-vendor scope with no catalog to search and no packages to enumerate.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`microsoft-store`](https://apps.microsoft.com) ❌ 🛟
-
-Driven through a PowerShell call that triggers the Store's own bulk update. It exposes no per-package command line, so there is nothing to list, install or remove individually. Contrast [`winget`](managers/winget.md), Microsoft's actual package CLI, which `mpm` wraps.
+A Microsoft channel driven as one bulk update, with a fixed single-vendor scope: there is no catalog to search, no packages to enumerate and no per-package command line, so nothing can be listed, installed or removed individually. Contrast [`winget`](managers/winget.md), Microsoft's actual package CLI, which `mpm` wraps. `microsoft-office` runs the vendor's own updater for one suite of applications, and `microsoft-store` is reached through a PowerShell call that triggers the Store's own bulk update.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -331,39 +283,20 @@ openSUSE's graphical package manager, for selecting packages and patterns to ins
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`neobundle`](https://github.com/Shougo/neobundle.vim) ☠️ 🛟
-
-Vim plugin manager with no commit since 2018-07-26, superseded by [`dein`](#dein), itself superseded by [`dpp`](#dpp).
-
-Declined in {mpm-release}`7.6.0`.
-
-## [`nh`](https://github.com/nix-community/nh) ❌ 🛟
-
-Reimplements the NixOS, Home Manager and nix-darwin workflows, so every package it reaches comes from nixpkgs, the registry [`nix`](managers/nix.md) already reads. Its whole command tree is five subcommands, `os`, `home`, `darwin`, `search` and `clean`, and not one of them acts on a single package: `nh os switch` rebuilds the system from its configuration, `nh search` queries the same nixpkgs index, and `nh clean` extends `nix-collect-garbage`. It lists nothing either, `nh os info` reporting generations rather than packages. The [`home-manager`](#home-manager) verdict one layer up, since `nh home` drives that very tool.
-
-Declined in {mpm-release}`8.0.0`.
-
 ## [`ninite`](https://ninite.com) ❌
 
-Installs from a real catalog of Windows applications, so the packages are there, but the free product exposes no command line to reach them with: the whole interface is a web form that generates a bespoke `.exe` bundling the selected apps. That installer takes no package argument, lists nothing and removes nothing, which is the same shape that rules out [`microsoft-store`](#microsoft-store). A command line exists only in Ninite Pro, behind a per-machine monthly subscription with no free tier, so no `mpm` install could exercise it and the destructive install/remove round-trip the test suite runs on every wrapped manager could never be provisioned.
+Installs from a real catalog of Windows applications, so the packages are there, but the free product exposes no command line to reach them with: the whole interface is a web form that generates a bespoke `.exe` bundling the selected apps. That installer takes no package argument, lists nothing and removes nothing, which is the same shape that rules out [`microsoft-store`](#microsoft-bulk-updaters). A command line exists only in Ninite Pro, behind a per-machine monthly subscription with no free tier, so no `mpm` install could exercise it and the destructive install/remove round-trip the test suite runs on every wrapped manager could never be provisioned.
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`oh-my-bash`](https://ohmybash.nntoan.com) ❌ 🛟
+## Nix configuration front-ends ❌ 🛟
 
-Bash configuration framework with no registry of its own: its plugins and themes are files inside the single git checkout, loaded by name from the `plugins=()` array a user hand-edits into `~/.bashrc` and resolved against `$OSH/plugins/<name>/`, so nothing is independently fetched or versioned and a new plugin arrives only as a pull request against the framework itself ([ohmybash/oh-my-bash#771](https://github.com/ohmybash/oh-my-bash/pull/771)). `upgrade_oh_my_bash` is correspondingly a `git pull --rebase` of that one checkout, which is the whole of what `topgrade` already drives. Nor is there a surface to drive it through: [`lib/cli.bash`](https://github.com/ohmybash/oh-my-bash/blob/master/lib/cli.bash) advertises `plugin`, `theme` and `version` subcommands in its completion table but implements all three as `echo 'Not yet implemented'` stubs, leaving no inventory command and no per-package verb.
+[`home-manager`](https://github.com/nix-community/home-manager) and [`nh`](https://github.com/nix-community/nh).
 
-Declined in {mpm-release}`8.0.0`.
+Every package either one reaches comes from nixpkgs, the registry [`nix`](managers/nix.md) already reads, and neither carries a per-package verb: a package is added by editing a configuration file, and the command then reconciles the whole declared state. The inventory each reports is a view onto a profile `mpm` already reads.
 
-## [`oh-my-zsh`](https://ohmyz.sh) ❌ 🛟
-
-Zsh configuration framework with no registry of its own: every plugin ships inside the git checkout, and `omz plugin list` is a directory glob over `$ZSH/plugins` and `$ZSH_CUSTOM/plugins` rather than a query against an index. The verb set confirms it, offering only `disable`, `enable`, `info`, `list` and `load`, where `enable` just rewrites the `plugins=()` array in `~/.zshrc` for a directory already on disk: adding a third-party plugin means hand-creating `$ZSH_CUSTOM/plugins/foobar/foobar.plugin.zsh` yourself ([Customization](https://github.com/ohmyzsh/ohmyzsh/wiki/Customization#adding-a-new-plugin)), and the [External plugins](https://github.com/ohmyzsh/ohmyzsh/wiki/External-plugins) page is a hand-curated list of links, not an index. Nothing versioned to install against either: upstream carries no tags, so `omz version` falls through `git describe --tags HEAD` to the branch name.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`oneget`](https://github.com/OneGet/oneget) ❌
-
-Windows package-manager *manager*: PackageManagement brokers transactions out to providers (NuGet, PowerShellGet, Chocolatey) instead of owning packages itself, so everything it reaches through PowerShellGet `mpm` already reaches directly through [`pwsh-gallery`](managers/pwsh-gallery.md). Wrapping it would buy a delegation layer and not one extra package, which is the verdict [`metapac`](#metapac) and [`upt`](#upt) get for the same shape. Its upstream has stopped moving besides: the readme declares the module "*currently not in development*" and "*no longer accepting any pull requests*", naming AnyPackage and PowerShellGet as the successors.
+- `home-manager` documents the first half in its own manual: "*Nixpkgs packages can be installed to the user profile using `home.packages`*", an option typed `list of package`. Its command dispatch accepts only whole-state operations like `build`, `switch` and `generations`, so a package is added by editing `home.nix` and running `home-manager switch`. It does report what it installed, through `home-manager packages`, but that listing is the same profile again.
+- `nh` reimplements the NixOS, Home Manager and nix-darwin workflows, which is the same verdict one layer up, since `nh home` drives home-manager itself. Its whole command tree is five subcommands, `os`, `home`, `darwin`, `search` and `clean`, and not one of them acts on a single package: `nh os switch` rebuilds the system from its configuration, `nh search` queries the same nixpkgs index, and `nh clean` extends `nix-collect-garbage`. It lists nothing either, `nh os info` reporting generations rather than packages.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -375,7 +308,7 @@ Declined in {mpm-release}`8.0.0`.
 
 ## [`openpkg`](https://en.wikipedia.org/wiki/OpenPKG) ☠️
 
-Cross-platform RPM-based packaging for Linux, BSD and Solaris. Its own site no longer serves: `openpkg.org` answers with an expired TLS certificate over HTTPS and HTTP alike, which is why this section links Wikipedia instead. That stub carries nothing newer than "in June 2005 it offered more than 880 freely available packages".
+Cross-platform RPM-based packaging for Linux, BSD and Solaris. Its own site no longer serves: `openpkg.org` answers with an expired TLS certificate over HTTPS and HTTP alike. Its Wikipedia stub carries nothing newer than "in June 2005 it offered more than 880 freely available packages".
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -393,39 +326,15 @@ The openSUSE Commander, a command-line client for the Open Build Service. It ins
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`pacapt`](https://github.com/icy/pacapt) ☠️
-
-Cross-manager wrapper retired in 2022. All 19 of the package managers it drove are shipped by `mpm`.
-
-Declined in {mpm-release}`7.6.0`.
-
 ## [`pacdef`](https://github.com/steven-omaha/pacdef) ☠️ 🛟
 
-Arch meta package manager, archived on 2025-08-05, its README pointing to [`metapac`](#metapac) as its successor.
+Arch meta package manager, archived on 2025-08-05, its README pointing to [`metapac`](#declarative-package-set-managers) as its successor.
 
 Declined in {mpm-release}`7.6.0`.
 
 ## [`package-control`](https://packagecontrol.io) ❌
 
 Sublime Text's package manager, thoroughly alive and backed by a registry of its own at packagecontrol.io. It is drivable only from inside the editor, though: its readme documents installation as three steps through the `Command Palette`, and no command-line entry point exists to list, install or remove anything with nobody at the keyboard. That is the test [`pckr-nvim`](#pckr-nvim) and [`dpp`](#dpp) fail too. Contrast [`micro`](managers/micro.md), an editor `mpm` does wrap, whose plugin flag is handled before its screen is ever initialised and so prints and exits.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`packer-aur`](https://github.com/keenerd/packer) ☠️
-
-Arch AUR helper with no commit since 2016-03-25. Superseded by the same AUR helpers as [`yaourt`](#yaourt); the bare `packer` name belongs to HashiCorp's tool and to [`packer-nvim`](#packer-nvim), hence the suffix.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`packer-nvim`](https://github.com/wbthomason/packer.nvim) ☠️ 🛟
-
-Neovim plugin manager whose README has declared it unmaintained since August 2023, pointing at [`lazy`](managers/lazy.md), which `mpm` wraps, and at [`pckr-nvim`](#pckr-nvim).
-
-Declined in {mpm-release}`7.6.0`.
-
-## [`pakku`](https://github.com/kitsunyan/pakku) ☠️
-
-Pacman wrapper with AUR support, abandoned: its last release is `v0.14` from 2019-12-20 and its last commit 2020-11-12. Nothing is out of reach for want of it either, `mpm` wrapping six live tools over the same ground in [`pacaur`](managers/pacaur.md), [`pamac`](managers/pamac.md), [`paru`](managers/paru.md), [`pikaur`](managers/pikaur.md), [`trizen`](managers/trizen.md) and [`yay`](managers/yay.md).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -449,39 +358,24 @@ Declined in {mpm-release}`8.0.0`.
 
 ## [`pckr-nvim`](https://github.com/lewis6991/pckr.nvim) ❌
 
-Successor to [`packer-nvim`](#packer-nvim) and actively developed, but drivable only from inside Neovim, and less so than its predecessor was. packer.nvim documented a headless recipe, `nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'`, which closed on the completion event named in it; the rewrite emits no autocommand at all, so an unattended run has nothing to wait on, and its `pckr/cli.lua` is the `:Pckr` Ex-command dispatcher rather than the shell entry point the name suggests. Removal blocks on an `OK to remove? [y/N]` prompt in `pckr/display.lua`. Its lockfile is opt-in, written only by the `:Pckr lock` action, and is a Lua table keyed by remote URL, so it is neither guaranteed to exist nor readable without an evaluator the way [`lazy`](managers/lazy.md)'s JSON one is. A request for a synchronous entry point was closed with a redirect to `config` and dependencies ([lewis6991/pckr.nvim#12](https://github.com/lewis6991/pckr.nvim/issues/12)).
+Successor to [`packer-nvim`](#retired-plugin-managers) and actively developed, but drivable only from inside Neovim, and less so than its predecessor was. packer.nvim documented a headless recipe, `nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'`, which closed on the completion event named in it; the rewrite emits no autocommand at all, so an unattended run has nothing to wait on, and its `pckr/cli.lua` is the `:Pckr` Ex-command dispatcher rather than the shell entry point the name suggests. Removal blocks on an `OK to remove? [y/N]` prompt in `pckr/display.lua`. Its lockfile is opt-in, written only by the `:Pckr lock` action, and is a Lua table keyed by remote URL, so it is neither guaranteed to exist nor readable without an evaluator the way [`lazy`](managers/lazy.md)'s JSON one is. A request for a synchronous entry point was closed with a redirect to `config` and dependencies ([lewis6991/pckr.nvim#12](https://github.com/lewis6991/pckr.nvim/issues/12)).
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`pihole`](https://pi-hole.net) ❌ 🛟
+## `pip` upgrade wrappers ❌ 🛟
 
-DNS ad blocker that updates its own installation and blocklists. It manages a network service and its data, not packages on the host.
+[`pip-review`](https://github.com/jgonggrijp/pip-review) and [`pipupgrade`](https://github.com/achillesrasquinha/pipupgrade).
 
-Declined in {mpm-release}`8.0.0`.
+A convenience layer over [`pip`](managers/pip.md), which `mpm` wraps directly. Each defers to `pip` for every call it makes, so it owns no registry, no installed-package inventory and no per-package verb, and its whole reach is the packages `mpm` already has.
 
-## [`pip-review`](https://github.com/jgonggrijp/pip-review) ❌ 🛟
-
-A convenience layer over [`pip`](managers/pip.md), which `mpm` wraps directly: its [readme](https://github.com/jgonggrijp/pip-review/blob/develop/README.rst) opens by calling it "*a convenience wrapper around `pip`*" that lists updates "*by deferring to `pip list --outdated`*" and installs them "*by deferring to `pip install`*". It owns no registry, no installed-package inventory and no per-package verb: `pip-review` takes no package argument, and its flags only choose how to present the same all-outdated set.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`pipupgrade`](https://github.com/achillesrasquinha/pipupgrade) ❌ 🛟
-
-Wraps `pip` and nothing else: it discovers the `pip`, `pip3` and `pip2` executables on `PATH` and shells out to them, resolving every candidate version against PyPI, so its whole inventory is the packages `mpm` already reaches through [`pip`](managers/pip.md). Its readme calls it "*The missing command for `pip`*", and what it adds on top is project-file rewriting of `requirements.txt` and `Pipfile` plus a semver-aware upgrade gate, both outside the system scope every `mpm` manager holds to.
+- `pip-review` takes no package argument at all, its flags only choosing how to present the same all-outdated set. Its [readme](https://github.com/jgonggrijp/pip-review/blob/develop/README.rst) opens by calling it "*a convenience wrapper around `pip`*" that lists updates "*by deferring to `pip list --outdated`*" and installs them "*by deferring to `pip install`*".
+- `pipupgrade` discovers the `pip`, `pip3` and `pip2` executables on `PATH`, shells out to them and resolves every candidate version against PyPI itself. It calls itself "*The missing command for `pip`*", and what it adds on top is project-file rewriting of `requirements.txt` and `Pipfile`, plus a semver-aware upgrade gate, both outside the system scope every `mpm` manager holds to.
 
 Declined in {mpm-release}`8.0.0`.
 
 ## [`pisi`](https://github.com/pisilinux/pisi) ☠️
 
 Pardus' package manager, left behind by the distribution that created it: "Pardus used to use Pisi, but migrated to APT in 2013". The PisiLinux fork carrying it on was last pushed 2022-03-28, past the silence the stability policy reads as abandonment. Its living descendant is Solus' [`eopkg`](managers/eopkg.md), which `mpm` wraps.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`pkg-termux`](https://github.com/termux/termux-tools) ❌
-
-Termux's `pkg` is a dispatcher over two managers `mpm` already wraps, which is [`upt`](#upt)'s verdict reached by a different route. Its script branches on `TERMUX_APP_PACKAGE_MANAGER` and forwards every command: under apt, `install` becomes `apt install`, `list-installed` becomes `apt list --installed`, `uninstall` becomes `apt remove`, `files` becomes `dpkg -L` and `search` becomes `apt search`; under pacman the same commands become `pacman -Sy --needed`, `pacman -Q`, `pacman -Rcns`, `pacman -Ql` and `pacman -Sys`. Nothing it accepts reaches a package [`apt`](managers/apt.md) or [`pacman`](managers/pacman.md) cannot.
-
-What it adds is a mirror selection and a cache refresh in front of some of those calls, `select_mirror` and `update_apt_cache`, which is convenience rather than a registry. That is the line [`nala`](managers/nala.md) sits on the other side of: nala was wrapped for owning its own vocabulary, downloader and rollback history, where `pkg` forwards its argv unchanged.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -501,7 +395,15 @@ Declined in {mpm-release}`8.0.0`.
 
 ## [`plug`](https://github.com/junegunn/vim-plug) ❌ 🛟
 
-Vim and Neovim plugin manager, drivable unattended unlike [`dein`](#dein) and [`dpp`](#dpp): `PlugInstall` runs under `--headless` and exits cleanly. It reports no version, though, and by design. It ships as a single file the documented install fetches from `master`, so no release tag ever reaches the copy on disk, and it records no manifest either: the plugin list lives in the user's own config. The request for a version command was closed on the maintainer's ["it doesn't have a version number in it, so it's not currently possible"](https://github.com/junegunn/vim-plug/issues/1266#issuecomment-1983679360).
+Vim and Neovim plugin manager, drivable unattended unlike [`dein`](#retired-plugin-managers) and [`dpp`](#dpp): `PlugInstall` runs under `--headless` and exits cleanly. It reports no version, though, and by design. It ships as a single file the documented install fetches from `master`, so no release tag ever reaches the copy on disk, and it records no manifest either: the plugin list lives in the user's own config. The request for a version command was closed on the maintainer's ["it doesn't have a version number in it, so it's not currently possible"](https://github.com/junegunn/vim-plug/issues/1266#issuecomment-1983679360).
+
+Declined in {mpm-release}`8.0.0`.
+
+## Post-upgrade housekeeping ❌ 🛟
+
+[`etc-update`](https://wiki.gentoo.org/wiki/Etc-update) and [`restarts`](https://github.com/liske/needrestart).
+
+Neither installs anything and neither owns a package: each reacts to what a real package manager just did. `etc-update` merges the pending `/etc` configuration files a Portage upgrade left behind, resolving their conflicts, and is already covered by [`emerge`](managers/emerge.md), which `mpm` wraps. `restarts` is [`needrestart`](https://github.com/liske/needrestart), restarting the services whose libraries an upgrade replaced.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -511,11 +413,52 @@ ActiveState's Perl Package Manager, which ships inside ActivePerl rather than on
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`restarts`](https://github.com/liske/needrestart) ❌ 🛟
+## Retired AUR helpers ☠️
 
-[`needrestart`](https://github.com/liske/needrestart) restarts services whose libraries were replaced by an upgrade. It installs nothing and owns no packages: it reacts to what a real package manager just did.
+[`packer-aur`](https://github.com/keenerd/packer), [`pakku`](https://github.com/kitsunyan/pakku) and [`yaourt`](https://github.com/archlinuxfr/yaourt).
+
+Arch AUR helpers whose development stopped, and nothing is out of reach for want of them: `mpm` wraps six live tools over the same ground in [`pacaur`](managers/pacaur.md), [`pamac`](managers/pamac.md), [`paru`](managers/paru.md), [`pikaur`](managers/pikaur.md), [`trizen`](managers/trizen.md) and [`yay`](managers/yay.md).
+
+- `packer-aur` has no commit since 2016-03-25. The bare `packer` name belongs to HashiCorp's tool and to [`packer-nvim`](#retired-plugin-managers), hence the suffix.
+- `pakku` shipped its last release, `v0.14`, on 2019-12-20, and its last commit on 2020-11-12.
+- `yaourt` is archived and self-described `[unmaintained]` in its own repository description, with no commit since 2018-12. It was the dominant AUR helper before `yay`.
 
 Declined in {mpm-release}`8.0.0`.
+
+## Retired cross-manager tools ☠️
+
+[`pacapt`](https://github.com/icy/pacapt), [`sysget`](https://github.com/cvengler/sysget) and [`whohas`](https://github.com/whohas/whohas).
+
+Each spanned the distribution managers of its day from one command line, two by driving them and one by searching their archives. All three upstreams have retired, and everything they reached is shipped by `mpm`: all 19 of the package managers `pacapt` drove (retired in 2022), all 21 of `sysget`'s (retired in 2019), and all 16 of the distribution archives `whohas` searched (retired in 2015).
+
+Declined in {mpm-release}`7.6.0`.
+
+## Retired front-end package managers ☠️
+
+[`component`](https://github.com/componentjs/component), [`jam`](https://github.com/caolan/jam), [`spm`](https://github.com/spmjs/spm) and [`volo`](https://github.com/volojs/volo).
+
+Four package managers for browser-side JavaScript, each archived or silent past the span the stability policy reads as abandonment. All four installed into a working tree rather than onto the machine, so each would have landed among the project-scoped ecosystems below even while alive.
+
+- `component`, a build tool for modular web applications, archived on GitHub with a last push of 2017-12-16.
+- `jam`, built on RequireJS, archived on GitHub with a last push of 2016-10-06.
+- `spm`, a static package manager for front-end assets, archived on GitHub with a last push of 2018-08-15. It shares its abbreviation with Swift's package manager, which is a different tool and project-scoped.
+- `volo`, which added dependencies by fetching them from GitHub and created a project template rather than machine-wide state, last pushed 2022-11-25.
+
+Declined in {mpm-release}`8.0.0`.
+
+## Retired plugin managers ☠️ 🛟
+
+[`antibody`](https://getantibody.github.io), [`dein`](https://github.com/Shougo/dein.vim), [`fundle`](https://github.com/danhper/fundle), [`neobundle`](https://github.com/Shougo/neobundle.vim) and [`packer-nvim`](https://github.com/wbthomason/packer.nvim).
+
+Shell and editor plugin managers whose development stopped. Where a successor exists, it is a tool `mpm` wraps or another entry on this page.
+
+- `antibody`, a Zsh plugin manager archived on 2022-05-27 and superseded by [`antidote`](managers/antidote.md).
+- `dein`, a Vim and Neovim plugin manager superseded by [`dpp`](#dpp), with its last commit on 2025-09-13. Pure Vimscript, so it also exposes neither a binary to run nor a version to report.
+- `fundle`, a Fish plugin manager with no commit since 2023-01-05.
+- `neobundle`, a Vim plugin manager with no commit since 2018-07-26, superseded by `dein`, itself superseded by [`dpp`](#dpp).
+- `packer-nvim`, a Neovim plugin manager whose README has declared it unmaintained since August 2023, pointing at [`lazy`](managers/lazy.md) and at [`pckr-nvim`](#pckr-nvim).
+
+Declined in {mpm-release}`7.6.0`.
 
 ## [`ruckzuck`](https://github.com/rzander/ruckzuck) ❌
 
@@ -553,6 +496,20 @@ What it has no route to is its own version. The script holds one internally, `ve
 
 Declined in {mpm-release}`8.0.0`.
 
+## Shell configuration frameworks ❌ 🛟
+
+[`bash-it`](https://bash-it.readthedocs.io), [`oh-my-bash`](https://ohmybash.nntoan.com) and [`oh-my-zsh`](https://ohmyz.sh).
+
+A shell configuration framework ships no registry of its own. Its plugins, themes, aliases and completions are files inside the single git checkout the install clones, so enabling one points at a path already on disk, and nothing is fetched or versioned independently. A third-party plugin arrives as a pull request against the framework itself ([ohmybash/oh-my-bash#771](https://github.com/ohmybash/oh-my-bash/pull/771)), or as a directory the user creates by hand ([oh-my-zsh Customization](https://github.com/ohmyzsh/ohmyzsh/wiki/Customization#adding-a-new-plugin)). The upgrade `topgrade` drives is a `git pull` of that one checkout, which is the whole of it. Nor is there an inventory to report: the plugin set is whatever the user's own configuration array lists.
+
+Each carries evidence of its own, and any one of them is a route back in:
+
+- `bash-it enable plugin git` symlinks a file the clone already put under `plugins/available`, and `bash-it update` runs `git fetch` and checks out a tag or `master` across the whole tree, a mechanism its maintainer describes as "*we assume we cloned the project, and we run `git fetch` and things like that*" ([Bash-it/bash-it#1819](https://github.com/Bash-it/bash-it/issues/1819)).
+- `oh-my-bash` advertises `plugin`, `theme` and `version` subcommands in the completion table of [`lib/cli.bash`](https://github.com/ohmybash/oh-my-bash/blob/master/lib/cli.bash), and implements all three as `echo 'Not yet implemented'` stubs, so it has neither an inventory command nor a version.
+- `oh-my-zsh` does carry a verb set, `disable`, `enable`, `info`, `list` and `load`, but `omz plugin list` is a directory glob over `$ZSH/plugins` and `$ZSH_CUSTOM/plugins` rather than a query against an index, and its [External plugins](https://github.com/ohmyzsh/ohmyzsh/wiki/External-plugins) page is a hand-curated list of links. Upstream carries no tags, so `omz version` falls through `git describe --tags HEAD` to the branch name.
+
+Declined in {mpm-release}`8.0.0`.
+
 ## [`smart`](https://github.com/smartpm/smart) ☠️
 
 No commit since 2016-10-27. An early cross-distribution package manager over the RPM and dpkg archives among others, chasing the same goal as `mpm`; every archive it drove has a manager today.
@@ -567,29 +524,11 @@ An update framework developers embed in their own macOS applications, described 
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`spm`](https://github.com/spmjs/spm) ☠️
-
-Static package manager for front-end assets, archived on GitHub with a last push of 2018-08-15. It shares its abbreviation with Swift's package manager, which is a different tool and project-scoped.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`sysget`](https://github.com/cvengler/sysget) ☠️
-
-Cross-manager wrapper retired in 2019. All 21 of the package managers it drove are shipped by `mpm`.
-
-Declined in {mpm-release}`7.6.0`.
-
 ## System database refreshers ❌ 🛟
 
 [`clam-av-db`](https://www.clamav.net), [`lensfun`](https://lensfun.github.io) and [`mandb`](https://man-db.gitlab.io/man-db).
 
 Rebuild a local database from files already on disk. Nothing is fetched, installed or removed, and the database has no package identity to report.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`tldr`](https://tldr.sh) ❌ 🛟
-
-Refreshes a local cache of community-written command summaries. The pages are documentation, not packages: nothing is installed, versioned or removable.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -631,29 +570,11 @@ Red Hat's RPM updater, retired by its own vendor: "As of Fedora Core 5 and Red H
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`upm`](https://github.com/epitron/upm) ❌
-
-"*Universal Package Manager*", putting one syntax over apk, apt, guix, opkg, pacman, pkg, pkg_add, pkgin, xbps and yum. It owns no registry: every command is translated to whichever of those the host already carries, all of them wrapped by `mpm` directly, so it reaches no package `mpm` cannot. That is [`upt`](#upt)'s verdict word for word, and like `upt` it reads as a peer of `mpm` rather than a candidate to wrap.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`upt`](https://github.com/sigoden/upt) ❌
-
-Translates one CLI vocabulary onto whichever single OS-level manager is detected, never more than one per invocation, by the maintainer's own account: "*upt is just aliases, nothing more*" ([sigoden/upt#60](https://github.com/sigoden/upt/issues/60#issuecomment-2560419544)).
-
-Declined in {mpm-release}`8.0.0`.
-
 ## [`vim`](https://www.vim.org) ❌ 🛟
 
 Vim's own package feature loads plugins but never fetches them, which leaves nothing to wrap. Asked directly, Vim `9.2` reports `has('packages')` as `1` and `exists(':packadd')` as `2`, while `:PackUpdate` and `:PackAdd` both come back `0`: the one command it has puts a package already on disk onto the runtime path. Getting it there is the user's job, a plugin being a directory under `pack/*/start/` that they clone or copy themselves, so there is no registry, no listing, and no install, update or removal of anything.
 
 That is precisely what separates it from [`vim-pack`](managers/vim-pack.md), which `mpm` does wrap: Neovim's manager takes sources and records them, where Vim's feature only reads a directory. What [`topgrade`](managers/topgrade.md) drives through this row is third-party managers anyway, its Vim step forcing a vim-plug update or running a `update_plugins.py` the user supplies.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`volo`](https://github.com/volojs/volo) ☠️
-
-Front-end project tool that added dependencies by fetching them from GitHub, last pushed 2022-11-25. That is past the roughly three years of silence the stability policy reads as abandonment, and what it created was a project template rather than machine-wide state.
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -665,6 +586,18 @@ The tool it does name is declined on the same two grounds as the rest of this fa
 
 Declined in {mpm-release}`8.0.0`.
 
+## VS Code forks ❌ 🛟
+
+[`antigravity`](https://antigravity.google), [`cursor`](https://cursor.com) and [`windsurf`](https://windsurf.com).
+
+None of them documents the extension flags VS Code does, so there is no contract to build on, and the one fork the community tested opens a window where a listing was asked for. Contrast [`vscode`](managers/vscode.md), whose `--list-extensions --show-versions` is documented and stable, which is why it is wrapped.
+
+- `antigravity` is two separate products under one name: the Antigravity **IDE**, a VS Code fork that `topgrade` drives with `--update-extensions`, and the Antigravity **CLI** (`agy`), whose [plugin subcommands](https://antigravity.google/docs/cli/plugins) manage an unrelated set. The IDE's extension flags are documented nowhere, so the row `topgrade` covers has no contract to build on. The `agy plugin list`/`install`/`uninstall` surface is a different tool and would be its own candidate.
+- `cursor` opens the editor window instead of listing anything: `--list-extensions` launches the Cursor GUI ([forum.cursor.com](https://forum.cursor.com/t/command-line-list-extensions/103565), where a moderator grants "*this is not expected behavior*" and the thread closes with no fix). Silently opening a window where a listing was asked for is worse than an error, since nothing signals the failure. Its own [CLI documentation](https://cursor.com/docs/cli/installation) covers the separate [`cursor-agent`](#self-updating-applications) binary and never documents the extension flags at all.
+- `windsurf` documents a launcher (`windsurf .`) and never the extension-management flags, so nothing upstream commits to `--list-extensions` behaving as it does in VS Code. The one fork where the community did test it is `cursor`, above. Reassess with a citation the day Windsurf documents the flags or a listing is confirmed working.
+
+Declined in {mpm-release}`8.0.0`.
+
 ## [`vundle`](https://github.com/VundleVim/Vundle.vim) ❌ 🛟
 
 Vim plugin manager reporting no version through anything a probe can read, which is what [`PackageManager.fresh`](managers.md) requires: `g:vundle_version` does not exist, checked by asking Vim for it, and the `0.10.2` in `autoload/vundle.vim` is a comment rather than a variable. Upstream tags releases but publishes none, and the documented install clones `master`, so the copy on disk names no version either. The companion-binary route does not help: the binary here is `vim`, whose version is Vim's own, which is the argument that settled [`zigup`](#zigup).
@@ -672,18 +605,6 @@ Vim plugin manager reporting no version through anything a probe can read, which
 It clears more of the bar than most of this page, which is worth recording. Driven under `vim -es -u <vimrc>`, `PluginInstall tpope/vim-surround` really did install a plugin the configuration never declared, so it reaches packages one at a time, unlike [`tmux`](#tmux) or [`fish-plug`](#fish-plug). What it has no shape for is an inventory: the only listing is the `g:vundle#bundles` list built from the `Plugin` lines of the user's `vimrc`, so it echoes the configuration rather than the machine. After that ad-hoc install it still reported two plugins while three sat on disk. Checked against Vundle `0.10.2` and Vim `9.2`.
 
 Declined in {mpm-release}`8.0.0`.
-
-## [`waydroid`](https://waydro.id) ❌ 🛟
-
-Runs an Android system in a container. It installs no packages of its own, and what runs inside it is out of reach of the host's package managers.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`whohas`](https://github.com/whohas/whohas) ☠️
-
-Cross-distribution search retired in 2015. All 16 of the distribution archives it queried have a manager in `mpm`.
-
-Declined in {mpm-release}`7.6.0`.
 
 ## Windows Subsystem for Linux ❌ 🛟
 
@@ -693,21 +614,9 @@ Update the WSL kernel and its distributions. WSL is a platform, not a package ma
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`windsurf`](https://windsurf.com) ❌ 🛟
-
-A VS Code fork whose vendor documents a launcher (`windsurf .`) and never the extension-management flags, so nothing upstream commits to `--list-extensions` behaving as it does in VS Code. The one fork where the community did test it, [`cursor`](#cursor), found the listing opens the editor window instead. Reassess with a citation the day Windsurf documents the flags or a listing is confirmed working.
-
-Declined in {mpm-release}`8.0.0`.
-
 ## [`wpkg`](https://windowspackager.org) ☠️
 
 Windows Packager, a dpkg clone bringing Debian-style packaging and apt-like verbs to Windows. Its upstream is gone: windowspackager.org now serves a parking page offering the domain for sale, no canonical repository survives it, and the only trace left on GitHub is a single-star fork carrying no releases. Not to be confused with the unrelated [WPKG](https://wpkg.org) deployment tool, which shares the name and nothing else.
-
-Declined in {mpm-release}`8.0.0`.
-
-## [`yaourt`](https://github.com/archlinuxfr/yaourt) ☠️
-
-Archived, and self-described `[unmaintained]` in its own repository description, with no commit since 2018-12. The dominant AUR helper before `yay`; `mpm` wraps its successors [`yay`](managers/yay.md) and [`paru`](managers/paru.md).
 
 Declined in {mpm-release}`8.0.0`.
 

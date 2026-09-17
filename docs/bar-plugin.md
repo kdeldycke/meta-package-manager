@@ -36,7 +36,7 @@ SwiftBar renders two things differently from Xbar: the outdated count sits in a 
 
 These variables drive the menu layout and the options passed to `mpm`: everything else comes from `mpm`'s own configuration file, which applies to every run the plugin triggers. See {doc}`configuration` for the search paths and the full schema.
 
-SwiftBar exposes them in its preferences, under *Code Plugins*. The pane opens on the plugin's metadata and cannot be resized, so the variables and the *Save in Plugin File* button sit below its fold ([swiftbar/SwiftBar#555](https://github.com/swiftbar/SwiftBar/issues/555)): scroll down to reach them.
+SwiftBar exposes them in its preferences, under *Code Plugins*, in a pane that cannot be resized and opens on the plugin's metadata ([swiftbar/SwiftBar#555](https://github.com/swiftbar/SwiftBar/issues/555)).
 
 ``````{tab-set}
 `````{tab-item} Light
@@ -279,7 +279,7 @@ The plugin prefers the `mpm` it is part of. It ships inside the package, so it w
 
 Failing that, it falls back to an `mpm` on the `PATH`, then to the module under the interpreter running the plugin, and under `python3`. Every candidate is run before it is ranked, so an unusable one is skipped instead of being picked.
 
-The menu answers that in place. Its last row, *About*, expands to three lines: the version this script advertises to its host, the release of the `mpm` it resolved, and the command that answered. The two are installed separately, so a bug report needs both: a plugin file copied into the host's folder stays at the version it was copied at while `mpm` moves under it.
+The menu answers that in place, in its *About* row. The plugin and the `mpm` it resolved are installed separately, so a bug report needs both: a plugin file copied into the host's folder stays at the version it was copied at while `mpm` moves under it.
 
 ``````{tab-set}
 `````{tab-item} Light
@@ -339,8 +339,6 @@ Every macOS still receiving security updates answers `3.9.6`. Monterey is the on
 Active development of the plugin is happening here, as a side-project of {command}`mpm` itself.
 
 Releases of the plugin are synchronized with the package. Both share the exact same version to simplify management. This explains why the plugin can appear to jump ahead a couple of major/minor versions while providing tiny or no changes at all.
-
-A release is ready when both the package and the plugin reach a stable state.
 
 If the plugin has been changed between releases, a [copy of the plugin is pushed](https://github.com/matryer/xbar-plugins/pulls?q=is%3Apr%20%22Meta%20Package%20Manager%22) under the name `meta_package_manager.7h.py`, to the [official Xbar plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
 

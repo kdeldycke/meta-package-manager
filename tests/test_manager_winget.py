@@ -85,9 +85,7 @@ def test_parse_details_ignores_indented_upgrade_line(winget):
         """)
 
     blocks = list(winget._parse_details(output))
-    assert blocks == [
-        ("Git", "Git.Git", "2.37.3", "winget", {"winget": "2.45.1"}),
-    ]
+    assert blocks == [("Git", "Git.Git", "2.37.3", {"winget": "2.45.1"})]
 
 
 # Two blocks captured verbatim from `winget list --upgrade-available --details` on
@@ -119,18 +117,45 @@ Available Upgrades:
 """
 
 
-def test_installed_keeps_packages_winget_installed(winget, monkeypatch):
-    output = RUNNER_UPGRADES + dedent("""\
-        (21/22) Git [Git.Git]
-        Version: 2.37.3
-        Origin Source: winget
-        (22/22) Some Store App [9PF4QZKKRZ7N]
-        Version: 1.0.0
-        Origin Source: msstore
-        """)
-    monkeypatch.setattr(winget, "run_cli", lambda *args, **kwargs: output)
+# Two blocks captured verbatim from `winget list --source winget --details` on the
+# windows-2025 GitHub runner, winget 1.29.290: an application the image installed
+# itself, which winget matches to its catalog, and one winget installed.
+RUNNER_INSTALLED = r"""
+(1/53) 7-Zip 26.03 (x64) [7zip.7zip]
+Version: 26.03
+Publisher: Igor Pavlov
+Local Identifier: ARP\Machine\X64\7-Zip
+Product Code: 7-zip
+Installer Category: exe
+Installed Scope: Machine
+Installed Location: C:\Program Files\7-Zip\
+(10/53) hyperfine [sharkdp.hyperfine]
+Version: 1.20.0
+Publisher: David Peter
+Local Identifier: ARP\User\X64\sharkdp.hyperfine_Microsoft.Winget.Source_8wekyb3d8bbwe
+Product Code: sharkdp.hyperfine_microsoft.winget.source_8wekyb3d8bbwe
+Installer Category: portable
+Installed Scope: User
+Installed Architecture: X64
+Installed Location: C:\Users\runneradmin\AppData\Local\Microsoft\WinGet\Packages\sharkdp.hyperfine_Microsoft.Winget.Source_8wekyb3d8bbwe
+Origin Source: winget
+"""
 
-    assert [package.id for package in winget.installed] == ["Git.Git"]
+
+def test_installed_lists_every_catalog_match(winget, monkeypatch):
+    calls = []
+
+    def run_cli(*args, **kwargs):
+        calls.append(args)
+        return RUNNER_INSTALLED
+
+    monkeypatch.setattr(winget, "run_cli", run_cli)
+
+    assert [package.id for package in winget.installed] == [
+        "7zip.7zip",
+        "sharkdp.hyperfine",
+    ]
+    assert calls == [("list", "--source", "winget", "--details")]
 
 
 def test_outdated_keeps_every_winget_upgrade(winget, monkeypatch):

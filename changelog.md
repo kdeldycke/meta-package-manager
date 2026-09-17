@@ -23,7 +23,7 @@
 - [bar-plugin] Capture the SwiftBar and Xbar screenshots at 2x, on a HiDPI virtual display the capture job raises over the runner's own screen.
 - [gnome-shell] Photograph every combination of the menu's two layout switches for the extension page, the grouped ones with their first section unfolded.
 - [winget] Silence progress spinners by passing `--no-progress` on every invocation, which raises the winget floor to `1.29.280`.
-- [winget] Fix `outdated` leaving out applications installed without winget, like a vendor's own MSI, although `upgrade --all` upgrades them.
+- [winget] Fix `installed` and `outdated` leaving out applications installed without winget, like a vendor's own MSI, although `upgrade --all` upgrades them.
 - [fwupd] Fix every query reaching `fwupd` aborting on a host with no updatable device, which is what a VM, a container and plenty of real machines report. fwupd answers that with an `Error` object replacing its whole payload, and `mpm installed`, `mpm outdated`, `mpm sbom` and the snapshot commands read it as a device list.
 - [aptitude] Add aptitude package manager, with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.
 - [pear] Add PEAR package manager, with inventory, outdated, install, remove, upgrade, channel sync and cache cleanup.

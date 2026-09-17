@@ -57,11 +57,10 @@ class WinGet(PackageManager):
     ```
 
     ```{note}
-    `installed` keeps only rows whose `Origin Source` is `winget`, which winget
-    prints for a package it installed itself. `outdated` keeps every row with an
-    upgrade from the `winget` source instead, because `winget update --all`
-    also upgrades an application installed without winget once winget matches
-    it to its catalog, like a vendor's own MSI. Store entries still surface in
+    `installed` and `outdated` read every application the `winget` catalog
+    matches, whether winget installed it or not, like a vendor's own MSI:
+    `winget update --all` upgrades those too. An application no source matches,
+    or only `msstore` does, is left out. Store entries still surface in
     `search`, but their real version cannot be queried through `winget`, so mpm
     tags them with an `msstore` sentinel version and sorts them below
     winget-native ones.
@@ -99,7 +98,10 @@ class WinGet(PackageManager):
     """[`1.29.280`](https://github.com/microsoft/winget-cli/releases/tag/v1.29.280)
     is the first stable release shipping the `--no-progress` common argument that
     `post_args` passes on every invocation
-    ([microsoft/winget-cli#6049](https://github.com/microsoft/winget-cli/pull/6049)).
+    ([microsoft/winget-cli#6049](https://github.com/microsoft/winget-cli/pull/6049)),
+    and the first whose `list --source` drops the packages that source does not
+    match, which `installed` relies on
+    ([microsoft/winget-cli#6159](https://github.com/microsoft/winget-cli/pull/6159)).
     """
 
     post_args = (
@@ -179,7 +181,7 @@ class WinGet(PackageManager):
 
     def _parse_details(
         self, output: str
-    ) -> Iterator[tuple[str, str, str, str | None, dict[str, str]]]:
+    ) -> Iterator[tuple[str, str, str, dict[str, str]]]:
         """Parse `--details` output from `winget list`.
 
         Each package block starts with a header line and is followed by
@@ -195,11 +197,10 @@ class WinGet(PackageManager):
           winget [<latest_version>]
         ```
 
-        Each block yields its name, ID, installed version, `Origin Source` (`None`
-        when the line is absent) and the newest version each source offers. winget
-        prints `Origin Source` only for a package it installed from a source, and
-        `Available Upgrades` for any package a source holds a newer version of,
-        however that package was installed: see
+        Each block yields its name, ID, installed version and the newest version
+        each source offers. winget prints `Origin Source` only for a package it
+        installed from a source, and `Available Upgrades` for any package a source
+        holds a newer version of, however that package was installed: see
         [`WorkflowBase.cpp`](https://github.com/microsoft/winget-cli/blob/5b62860167520b1503b3880d5a026809eb07c6f4/src/AppInstallerCLICore/Workflows/WorkflowBase.cpp#L435-L458).
         """
         # Split output into per-package blocks on the header line.
@@ -251,7 +252,7 @@ class WinGet(PackageManager):
                     )
                 )
 
-            yield name, package_id, version, fields.get("Origin Source"), upgrades
+            yield name, package_id, version, upgrades
 
     def _parse_table(self, output: str) -> Iterator[Generator[str, None, None]]:
         """Parse a table from the output of a winget command and returns a generator of cells."""
@@ -315,35 +316,33 @@ class WinGet(PackageManager):
 
         ```{code-block} pwsh-session
 
-        > winget list --details --accept-source-agreements --disable-interactivity --no-progress
-        (1/7) CCleaner [CCleaner]
-        Version: 6.08
-        Publisher: Piriform Software Ltd
-        Local Identifier: ARP\\Machine\\X64\\CCleaner
-        Product Code: CCleaner
+        > winget list --source winget --details --accept-source-agreements --disable-interactivity --no-progress
+        (1/53) 7-Zip 26.03 (x64) [7zip.7zip]
+        Version: 26.03
+        Publisher: Igor Pavlov
+        Local Identifier: ARP\\Machine\\X64\\7-Zip
+        Product Code: 7-zip
         Installer Category: exe
         Installed Scope: Machine
+        Installed Location: C:\\Program Files\\7-Zip\\
+        (10/53) hyperfine [sharkdp.hyperfine]
+        Version: 1.20.0
+        Publisher: David Peter
+        Local Identifier: ARP\\User\\X64\\sharkdp.hyperfine_Microsoft.Winget.Source_8wekyb3d8bbwe
+        Product Code: sharkdp.hyperfine_microsoft.winget.source_8wekyb3d8bbwe
+        Installer Category: portable
+        Installed Scope: User
         Installed Architecture: X64
-        Installed Locale: en-US
-        Origin Source: winget
-        Available Upgrades:
-
-        (2/7) Git [Git.Git]
-        Version: 2.37.3
-        Publisher: The Git Development Community
+        Installed Location: C:\\Users\\runneradmin\\AppData\\Local\\Microsoft\\WinGet\\Packages\\sharkdp.hyperfine_Microsoft.Winget.Source_8wekyb3d8bbwe
         Origin Source: winget
         ```
 
-        Only returns packages with Origin Source: winget to exclude packages
-        installed via other sources (e.g., sideload, portable).
+        `--source winget` lists every installed package the `winget` catalog
+        matches, whatever installed it, and leaves out the others.
         """
-        output = self.run_cli("list", "--details")
+        output = self.run_cli("list", "--source", "winget", "--details")
 
-        for name, package_id, installed_version, origin, _ in self._parse_details(
-            output
-        ):
-            if origin != "winget":
-                continue
+        for name, package_id, installed_version, _ in self._parse_details(output):
             yield self.package(
                 id=package_id,
                 name=name,
@@ -378,7 +377,7 @@ class WinGet(PackageManager):
         """
         output = self.run_cli("list", "--upgrade-available", "--details")
 
-        for name, package_id, installed_version, _, upgrades in self._parse_details(
+        for name, package_id, installed_version, upgrades in self._parse_details(
             output
         ):
             latest_version = upgrades.get("winget")

@@ -149,6 +149,16 @@ def _install_argv(source: str) -> tuple[str, ...]:
     return tuple(re.findall(r"['\"]([^'\"]+)['\"]", literal.group(1)))
 
 
+def _shell_env_gate(source: str) -> tuple[int, ...]:
+    """The `SHELL_ENV_MIN_VERSION` literal of a source file, JavaScript or Python.
+
+    Same two dialects as {func}`_install_argv`: a bracketed list of integers.
+    """
+    literal = re.search(r"SHELL_ENV_MIN_VERSION = [\[(](.+?)[\])]", source)
+    assert literal
+    return tuple(int(part) for part in re.findall(r"\d+", literal.group(1)))
+
+
 def _extra_sources(workflow: str) -> set[str]:
     """Sources whitelisted with `--extra-source` by a workflow's pack step."""
     workflow_file = PROJECT_ROOT / ".github" / "workflows" / workflow
@@ -295,6 +305,18 @@ def test_bundled_license_matches_the_project():
     assert bundled == (PROJECT_ROOT / "license").read_text(encoding="UTF-8")
 
 
+def test_shell_env_gate_matches_the_bar_plugin():
+    """Both frontends pass `--shell-env` from the same `mpm` release on.
+
+    An older `mpm` rejects the option as unknown, so the gate is what keeps a
+    distribution's `mpm` working under a newer frontend.
+    """
+    plugin = (PROJECT_ROOT / "meta_package_manager" / "bar_plugin.py").read_text(
+        encoding="UTF-8"
+    )
+    assert _shell_env_gate(_extension_source("mpm.js")) == _shell_env_gate(plugin)
+
+
 def test_runtime_argv_long_form():
     """The argv builders only emit long-form options.
 
@@ -312,6 +334,7 @@ def test_runtime_argv_long_form():
         "'--timeout'",
         "'--verbosity'",
         "'--all'",
+        "'--shell-env'",
     ):
         assert flag in source
 

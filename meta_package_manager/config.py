@@ -145,6 +145,14 @@ class MpmConfig:
     keywords `auto` (one fewer than the logical CPU count, the default) and
     `max` (every logical CPU); set `1` to run sequentially."""
 
+    shell_env: bool = field(
+        default=False,
+        metadata={CONFIG_PATH_METADATA_KEY: "shell_env"},
+    )
+    """Adopt the environment of the user's login shell before probing managers,
+    for a run started outside a terminal: a menu bar plugin, a desktop
+    extension, a scheduled job. See {mod}`meta_package_manager.shell_env`."""
+
     cooldown: dict[str, Any] = field(default_factory=dict)
     """Release-age cooldown gate: `period` is the minimum age a package version
     must reach before it can be installed or upgraded, `policy` the posture for

@@ -21,6 +21,15 @@ Gio._promisify(Gio.Subprocess.prototype, 'communicate_utf8_async');
  * here existed before that release. */
 export const MPM_MIN_VERSION = [6, 4, 0];
 
+/* First mpm release accepting --shell-env. GNOME Shell starts the extension
+ * with the environment of the session, which never reads .bashrc or .zshrc,
+ * so a manager installed under the home directory is invisible to mpm until
+ * mpm adopts the login shell's environment itself. An older mpm rejects the
+ * option as unknown, which is worse than the narrow PATH. bar_plugin.py
+ * carries the same gate, and tests/test_gnome_extension.py holds the two in
+ * sync. */
+export const SHELL_ENV_MIN_VERSION = [8, 0, 0];
+
 /* Default `--timeout` in seconds, the same value as in bar_plugin.py. The mpm
  * defaults are for interactive runs and are too long for a background
  * refresh. */
@@ -272,6 +281,20 @@ export function parseOptions(text) {
         return [];
     const [ok, argv] = GLib.shell_parse_argv(text);
     return ok ? argv : [];
+}
+
+/**
+ * The `--shell-env` option for an mpm that accepts it, nothing for an older
+ * one. It goes ahead of the user's options, so a `--no-shell-env` typed into
+ * the mpm-options setting wins.
+ *
+ * @param {number[]|null} version - The probed mpm version, null when unknown.
+ * @returns {string[]} the option, or an empty list.
+ */
+export function shellEnvOptions(version) {
+    if (version && compareVersions(version, SHELL_ENV_MIN_VERSION) >= 0)
+        return ['--shell-env'];
+    return [];
 }
 
 export function syncArgv(mpm, timeout = MPM_TIMEOUT, options = []) {

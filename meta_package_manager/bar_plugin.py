@@ -70,6 +70,21 @@ See [swiftbar/SwiftBar#445](https://github.com/swiftbar/SwiftBar/issues/445).
 MPM_MIN_VERSION = (5, 0, 0)
 """`mpm` `5.0.0` is the first version that renders the complete menu layout."""
 
+SHELL_ENV_MIN_VERSION = (8, 0, 0)
+"""First `mpm` release accepting `--shell-env`, which the plugin passes to it.
+
+Both hosts start this plugin outside a terminal. SwiftBar runs it through
+`$SHELL -l -c`, a login shell that reads `.zprofile` and skips `.zshrc`, and Xbar
+runs it with no shell at all, on the `PATH` of the desktop session. The option
+makes `mpm` adopt the environment of an interactive login shell before it looks
+for managers, so the menu lists what a terminal would. An older `mpm` gets no
+such option: it would reject it as unknown, which is worse than the narrow
+`PATH`.
+
+The GNOME Shell extension carries the same gate, and
+`tests/test_gnome_extension.py` holds the two in sync.
+"""
+
 INSTALL_ARGV = ("uv", "tool", "install", "--upgrade", "meta-package-manager")
 """Install command offered when no runnable `mpm` is found.
 
@@ -497,6 +512,18 @@ class MPMPlugin:
     def best_mpm(self) -> Candidate:
         return self.ranked_mpm[0]
 
+    @property
+    def shell_env_options(self) -> tuple[str, ...]:
+        """`--shell-env` for an `mpm` that accepts it, nothing for an older one.
+
+        Goes right after the `mpm` command and ahead of {attr}`mpm_options`, so
+        a `--no-shell-env` typed into `VAR_MPM_OPTIONS` wins.
+        """
+        version = self.best_mpm.version
+        if version and version >= SHELL_ENV_MIN_VERSION:
+            return ("--shell-env",)
+        return ()
+
     @staticmethod
     def pp(label: str, *args: str | None) -> None:
         """Print one menu line in the SwiftBar and Xbar dialect.
@@ -620,6 +647,7 @@ class MPMPlugin:
         run(
             (
                 *best.args,
+                *self.shell_env_options,
                 "--verbosity",
                 "ERROR",
                 "--timeout",
@@ -635,6 +663,7 @@ class MPMPlugin:
         process = run(
             (
                 *best.args,
+                *self.shell_env_options,
                 "--verbosity",
                 "CRITICAL",
                 "--timeout",

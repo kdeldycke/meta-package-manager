@@ -37,7 +37,7 @@ from pathlib import Path
 
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
-from click_extra import echo
+from click_extra import echo, get_current_context
 from click_extra.color import invocation_color
 from click_extra.table import TableFormat, render_table
 
@@ -290,16 +290,33 @@ class BarPluginRenderer(MPMPlugin):
         the `launchd` `PATH` alone, and that `PATH` cannot find such a name.
         ```
         """
+        options = (*self.shell_env_options, *self.mpm_options)
         if "__compiled__" in globals():
-            return (sys.executable, *self.mpm_options)
+            return (sys.executable, *options)
         safe_path = ("-P",) if sys.version_info >= (3, 11) else ()
         return (
             sys.executable,
             *safe_path,
             "-m",
             "meta_package_manager",
-            *self.mpm_options,
+            *options,
         )
+
+    @property
+    def shell_env_options(self) -> tuple[str, ...]:
+        """`--shell-env` when the run rendering the menu adopted the login shell
+        environment, nothing otherwise.
+
+        An action starts the way the plugin does, outside a terminal, so it
+        needs the environment the menu was rendered from. The flag is read off
+        the root context of the `mpm outdated --plugin-output` run, and stays
+        ahead of {attr}`mpm_options` so a `--no-shell-env` typed there wins. A
+        renderer built outside a run, like the test suite does, carries none.
+        """
+        ctx = get_current_context(silent=True)
+        if ctx and ctx.find_root().params.get("shell_env"):
+            return ("--shell-env",)
+        return ()
 
     @staticmethod
     def render_cli(cmd_args: tuple[str | Path, ...]) -> str:

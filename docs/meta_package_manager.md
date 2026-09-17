@@ -44,6 +44,7 @@
    meta_package_manager.package
    meta_package_manager.platforms
    meta_package_manager.pool
+   meta_package_manager.shell_env
    meta_package_manager.specifier
    meta_package_manager.sudo
    meta_package_manager.summary

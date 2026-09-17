@@ -105,6 +105,11 @@ function testParseVersion() {
     check('outdatedArgv splices options before the subcommand',
         Mpm.outdatedArgv(['mpm'], 60, ['--verbosity', 'INFO']).slice(-3),
         ['--verbosity', 'INFO', 'outdated']);
+    check('shellEnvOptions gates on the probed version',
+        Mpm.shellEnvOptions([8, 0, 0]), ['--shell-env']);
+    check('shellEnvOptions leaves an older mpm alone',
+        Mpm.shellEnvOptions([7, 9, 9]), []);
+    check('shellEnvOptions needs a version', Mpm.shellEnvOptions(null), []);
     check('upgradeAllArgv splices options after the manager',
         Mpm.upgradeAllArgv(['mpm'], 'brew', ['--dry-run']),
         ['mpm', '--brew', '--dry-run', 'upgrade', '--all']);

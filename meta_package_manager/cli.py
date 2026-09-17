@@ -100,6 +100,7 @@ from .logo import env_summary, version_screen_params
 from .manager import PackageManager
 from .package import Package
 from .pool import pool
+from .shell_env import import_shell_env
 from .specifier import VERSION_SEP, Specifier
 from .sudo import ESCALATION, ESCALATORS
 from .tables import SortableField
@@ -744,6 +745,19 @@ def group_params() -> list[Parameter]:
         "release-age support (" + ", ".join(COOLDOWN_SUPPORTED_MANAGERS) + "); "
         "the others are skipped unless the best-effort posture is selected.",
     ),
+    option(
+        "--shell-env/--no-shell-env",
+        default=False,
+        help="Adopt the environment of your login shell before looking for "
+        "managers. Meant for a run started outside a terminal, like a menu bar "
+        "plugin, a desktop extension or a scheduled job: such a run inherits the "
+        "bare PATH of the desktop session, which hides every manager installed "
+        "under your home directory and makes pnpm refuse its global commands. "
+        "mpm runs the shell named by SHELL as an interactive login shell, reads "
+        "what it exports and adopts it, PATH included, or keeps its own "
+        "environment when the shell does not answer within 10 seconds. Ignored "
+        "on Windows, where desktop programs already get your PATH.",
+    ),
 )
 # Not `Output options`: click-extra 9.1 groups its own defaults under that
 # exact title, and two groups sharing one name read as a rendering bug. This
@@ -823,12 +837,18 @@ def mpm(
     plan,
     timeout,
     cooldown,
+    shell_env,
     description,
     summary,
     network,
     suggest_contribs,
 ):
     """CLI options shared by all subcommands."""
+    # Adopt the login shell's environment before anything reads PATH: the
+    # escalator selection below and every manager probe walk it.
+    if shell_env:
+        import_shell_env()
+
     # Make the first Ctrl+C terminate any in-flight package-manager subprocesses so a
     # concurrent fan-out (upgrade, install, ...) aborts cleanly instead of hanging on
     # worker threads whose children survived the terminal signal. Restored on close.

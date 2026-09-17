@@ -709,6 +709,44 @@ def test_plugin_options_reach_every_call(monkeypatch):
     assert calls == [("/somewhere/mpm", "--no-color", "--version")]
 
 
+@pytest.mark.parametrize(
+    ("version", "passes"),
+    [
+        pytest.param((7, 9, 9), False, id="older"),
+        pytest.param((8, 0, 0), True, id="gate"),
+        pytest.param((9, 1, 0), True, id="newer"),
+        pytest.param(None, False, id="unknown"),
+    ],
+)
+def test_plugin_shell_env_follows_the_mpm_version(monkeypatch, version, passes):
+    """`--shell-env` reaches the sync and outdated calls of an `mpm` that accepts
+    it, right after the command and ahead of `VAR_MPM_OPTIONS`, and never reaches
+    an older one."""
+    _pin_plugin_env(monkeypatch, align_columns=True)
+    monkeypatch.setenv("VAR_MPM_OPTIONS", "--no-shell-env")
+    calls: list[tuple[str, ...]] = []
+
+    def fake_run(args, **kwargs):
+        calls.append(tuple(args))
+        return subprocess.CompletedProcess(
+            args, 0, stdout="\U0001f4e6\u2713 | dropdown=false", stderr=""
+        )
+
+    monkeypatch.setattr(bar_plugin, "run", fake_run)
+    plugin = bar_plugin.MPMPlugin()
+    plugin.__dict__["best_mpm"] = bar_plugin.Candidate(
+        ("/somewhere/mpm",), True, True, version, None, "9.9.9"
+    )
+
+    plugin.print_menu()
+    assert [args[-1] for args in calls] == ["sync", "--plugin-output"]
+    for args in calls:
+        assert (args[1] == "--shell-env") is passes
+        assert args.count("--shell-env") == int(passes)
+        # The user's opt-out lands after the plugin's own option.
+        assert args.index("--no-shell-env") > args.index("--verbosity")
+
+
 def test_renderer_actions_carry_the_options(monkeypatch):
     """The upgrade commands the menu embeds carry the same options, read from
     the environment the `outdated` call inherits."""

@@ -96,6 +96,7 @@ function colorSpan(text, color) {
 let firstBoot = true;
 let lastCheck = null;
 let lastMpm = null;
+let lastVersion = null;
 let lastModel = null;
 let lastError = null;
 let knownOutdated = null;
@@ -338,10 +339,13 @@ class MpmIndicator extends PanelMenu.Button {
                 return;
             }
             lastMpm = mpm;
+            lastVersion = probe.version;
             /* Parsed here, inside the try block, so a quote with no pair in
              * the setting is reported as the error of this check. */
-            const options = Mpm.parseOptions(
-                this._settings.get_string('mpm-options'));
+            const options = [
+                ...Mpm.shellEnvOptions(probe.version),
+                ...Mpm.parseOptions(this._settings.get_string('mpm-options')),
+            ];
             const timeout = this._settings.get_int('timeout');
             /* --timeout limits each manager command that mpm runs. mpm itself
              * needs a limit too, in proportion, so a hung run cannot leave the
@@ -686,12 +690,18 @@ class MpmIndicator extends PanelMenu.Button {
     /* Read the mpm-options setting at the time the action is built, and not at
      * the time of the last check. An option typed into the preferences then
      * takes effect at the next click, with no new check. A syntax error gives
-     * no options here: the check is the place that reports it. */
+     * no options here: the check is the place that reports it. The --shell-env
+     * gate of the last check comes first either way, so a --no-shell-env typed
+     * into the setting wins. */
     _mpmOptions() {
+        const gate = Mpm.shellEnvOptions(lastVersion);
         try {
-            return Mpm.parseOptions(this._settings.get_string('mpm-options'));
+            return [
+                ...gate,
+                ...Mpm.parseOptions(this._settings.get_string('mpm-options')),
+            ];
         } catch {
-            return [];
+            return gate;
         }
     }
 

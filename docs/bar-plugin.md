@@ -20,15 +20,15 @@ SwiftBar `2.1.0` or newer is required: older releases mangle the variable defaul
 
 The plugin is configurable with these environment variables:
 
-| Variable name              | Description                                                                      | Type    | Defaults             | SwiftBar support |                    Xbar support                    |
-| -------------------------- | -------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :------------------------------------------------: |
-| `VAR_GROUP_BY_MANAGER`     | Group each manager's packages into a section of its own.                         | Boolean | `True`               |        ✅        |                         ✅                         |
-| `VAR_ALIGN_COLUMNS`      | Centers versions around the arrow and aligns names in a monospaced font.         | Boolean | `True`               |        ✅        |                         ✅                         |
-| `VAR_MAX_VERSION_WIDTH`    | Widest a version renders in a menu line, in characters.                          | Number  | `18`                 |        ✅        |                         ✅                         |
-| `VAR_MPM_OPTIONS`        | Extra options for every `mpm` call, before the subcommand.                       | String  | Empty                |        ✅        |                         ✅                         |
-| `VAR_DEFAULT_FONT`         | Font parameters for regular text.                                                | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
-| `VAR_MONOSPACE_FONT`       | Font parameters for monospace text. Used for table rendering and error messages. | String  | `font=Menlo size=12` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
-| `VAR_ALWAYS_VISIBLE`       | Keep the menu bar icon while nothing is outdated and no manager errored.         | Boolean | `True`               |        ✅        |                         ❌                         |
+| Variable name           | Description                                                                      | Type    | Defaults             | SwiftBar support |                    Xbar support                    |
+| ----------------------- | -------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :------------------------------------------------: |
+| `VAR_GROUP_BY_MANAGER`  | Group each manager's packages into a section of its own.                         | Boolean | `True`               |        ✅        |                         ✅                         |
+| `VAR_ALIGN_COLUMNS`     | Centers versions around the arrow and aligns names in a monospaced font.         | Boolean | `True`               |        ✅        |                         ✅                         |
+| `VAR_MAX_VERSION_WIDTH` | Widest a version renders in a menu line, in characters.                          | Number  | `18`                 |        ✅        |                         ✅                         |
+| `VAR_MPM_OPTIONS`       | Extra options for every `mpm` call, before the subcommand.                       | String  | Empty                |        ✅        |                         ✅                         |
+| `VAR_DEFAULT_FONT`      | Font parameters for regular text.                                                | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
+| `VAR_MONOSPACE_FONT`    | Font parameters for monospace text. Used for table rendering and error messages. | String  | `font=Menlo size=12` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
+| `VAR_ALWAYS_VISIBLE`    | Keep the menu bar icon while nothing is outdated and no manager errored.         | Boolean | `True`               |        ✅        |                         ❌                         |
 
 ```{note}
 SwiftBar renders two things differently from Xbar: the outdated count sits in a native badge on each manager header rather than in its label, and the grouped layout folds every section into an inline accordion ([swiftbar/SwiftBar#480](https://github.com/swiftbar/SwiftBar/pull/480)) that expands in place without dismissing the menu. Both are visible in the screenshots below.

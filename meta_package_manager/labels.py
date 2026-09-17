@@ -28,6 +28,7 @@ gets no content rule and is labelled by hand.
 from __future__ import annotations
 
 import inspect
+from functools import cache
 from pathlib import Path
 
 from boltons.iterutils import flatten
@@ -393,18 +394,20 @@ PLATFORM_CONTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
 assert set(PLATFORM_CONTENT_KEYWORDS) == {p_obj.name for p_obj in MAIN_PLATFORMS}
 
 
-def _label_members() -> dict[str, set[str]]:
+@cache
+def _label_members() -> dict[str, frozenset[str]]:
     """Regroup {data}`MANAGER_LABELS` by label: ``{label_name: {manager_id, ...}}``.
 
     The `mpm` pseudo-manager is left out: it maps to no pool entry and its label
-    is ruled by {data}`FILE_RULES_STATIC`.
+    is ruled by {data}`FILE_RULES_STATIC`. Cached, the content and file rules
+    both reading it off the same static registry.
     """
     members: dict[str, set[str]] = {}
     for manager_id, label_name in MANAGER_LABELS.items():
         if manager_id == "mpm":
             continue
         members.setdefault(label_name, set()).add(manager_id)
-    return members
+    return {label: frozenset(ids) for label, ids in members.items()}
 
 
 def _definition_stem(manager_id: str) -> str:

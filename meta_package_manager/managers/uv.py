@@ -304,9 +304,12 @@ class UVX(UVBase):
 
     cli_names = ("uv",)
 
-    _INSTALLED_REGEXP = re.compile(r"^(?P<package_id>\S+)\s+v(?P<version>\S+)$")
+    _INSTALLED_REGEXP = re.compile(
+        r"^(?P<package_id>\S+)\s+v(?P<installed_version>\S+)$",
+    )
     _OUTDATED_REGEXP = re.compile(
-        r"^(?P<package_id>\S+)\s+v(?P<version>\S+)\s+\[latest:\s+(?P<latest>\S+)\]$",
+        r"^(?P<package_id>\S+)\s+v(?P<installed_version>\S+)"
+        r"\s+\[latest:\s+(?P<latest_version>\S+)\]$",
     )
 
     @property
@@ -321,15 +324,7 @@ class UVX(UVBase):
         ```
         """
         output = self.run_cli("tool", "list")
-
-        if output:
-            for line in output.splitlines():
-                match = self._INSTALLED_REGEXP.match(line)
-                if match:
-                    yield self.package(
-                        id=match.group("package_id"),
-                        installed_version=match.group("version"),
-                    )
+        yield from self.parse_regex_lines(self._INSTALLED_REGEXP, output)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -343,16 +338,7 @@ class UVX(UVBase):
         ```
         """
         output = self.run_cli("tool", "list", "--outdated", must_succeed=True)
-
-        if output:
-            for line in output.splitlines():
-                match = self._OUTDATED_REGEXP.match(line)
-                if match:
-                    yield self.package(
-                        id=match.group("package_id"),
-                        installed_version=match.group("version"),
-                        latest_version=match.group("latest"),
-                    )
+        yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
 
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.

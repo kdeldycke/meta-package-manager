@@ -137,6 +137,7 @@ from click_extra import style
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
+    from typing import Any
 
 
 _ALNUM_PATTERN = r"""(
@@ -311,43 +312,39 @@ class Token:
     # higher: numeric version segments outrank alphabetic pre-release
     # tags (e.g., `1 > "beta"`).
 
-    def _match_type(self, other):
-        """Returns the safe type with which we can compare the two values."""
-        if self.isint:
-            if isinstance(other, int):
-                return int
-            if isinstance(other, Token) and other.isint:
-                return int
-        return str
+    def _compare(
+        self, other: object, comparison: Callable[[Any, Any], bool]
+    ) -> bool | None:
+        """Apply `comparison` to the values `self` and `other` compare by.
 
-    def _mixed_type_order(self, other: object) -> int:
-        """Return ordering hint for mixed integer/string `Token` pairs.
-
-        Returns `1` if `self` should sort higher (int vs str), `-1` if lower
-        (str vs int), or `0` when both are the same kind and normal comparison
-        applies.
+        Two integer tokens compare as integers, as does an integer token
+        against a bare `int`. Everything else compares as strings. `None`
+        means the pair mixes an integer token with a string one, where the
+        integer always sorts higher and no value comparison applies.
         """
-        if not isinstance(other, Token):
-            return 0
-        if self.isint and not other.isint:
-            return 1
-        if not self.isint and other.isint:
-            return -1
-        return 0
+        if isinstance(other, Token):
+            if self.isint != other.isint:
+                return None
+            if self.isint:
+                return comparison(self.integer, other.integer)
+            return comparison(self.string, other.string)
+        if self.isint and isinstance(other, int):
+            return comparison(self.integer, other)
+        return comparison(self.string, str(other))
 
     # Only __eq__ and __lt__ are defined; @total_ordering fills in the rest, and
     # Python derives __ne__ from __eq__.
 
     def __eq__(self, other: object) -> bool:
-        if self._mixed_type_order(other):
-            return False
-        return bool(operator.eq(*map(self._match_type(other), [self, other])))
+        equal = self._compare(other, operator.eq)
+        return False if equal is None else equal
 
     def __lt__(self, other: object) -> bool:
-        order = self._mixed_type_order(other)
-        if order:
-            return order < 0
-        return bool(operator.lt(*map(self._match_type(other), [self, other])))
+        lower = self._compare(other, operator.lt)
+        if lower is None:
+            # A string token sorts below an integer one.
+            return not self.isint
+        return lower
 
 
 @total_ordering

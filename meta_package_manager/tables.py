@@ -75,7 +75,42 @@ class SortableField(StrEnum):
     VERSION = "version"
 
 
-MANAGERS_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
+TColumn = tuple[ColumnSpec, "SortableField | None"]
+"""One column of a registry: its spec, and the field it sorts on, if any."""
+
+PACKAGE_ID_COLUMN: TColumn = (
+    ColumnSpec("package_id", "Package ID", "Package's identifier."),
+    SortableField.PACKAGE_ID,
+)
+"""The `package_id` column every package table opens on.
+
+Deliberately the one column of every package table left uncapped, and the rule
+holds wherever it is reused. It is the value the user copies back into an
+`mpm install`, `mpm remove` or `mpm upgrade` invocation, and a cell wrapped over
+two lines cannot be selected in one go. So it never wraps, and the shrinking
+falls on its neighbors instead: the name is free prose, and a version is read
+rather than retyped.
+
+The trade is explicit. A package ID wider than the terminal on its own still
+pushes the table past the edge, because the alternative is handing the user a
+broken identifier. Both halves of the trade are real here: `vim-pack` names its
+plugins by GitHub URL (50 characters), and Homebrew Cask reports versions like
+`1.26832.0,056ee2be623b207f6a4d24dfb1b2fb5a82db0ecf`.
+"""
+
+PACKAGE_NAME_COLUMN: TColumn = (
+    ColumnSpec(
+        "package_name",
+        "Name",
+        "Package's common name.",
+        max_width=AUTO_WIDTH,
+    ),
+    SortableField.PACKAGE_NAME,
+)
+"""The `package_name` column following {data}`PACKAGE_ID_COLUMN` in every
+package table, wrapping inside its own cell."""
+
+MANAGERS_COLUMNS: tuple[TColumn, ...] = (
     (
         ColumnSpec("manager_id", "Manager ID", "Manager's identifier."),
         SortableField.MANAGER_ID,
@@ -141,20 +176,9 @@ platform or a missing binary makes them vary again. Only the *default* selection
 narrows: `--columns` still addresses every column of {data}`MANAGERS_COLUMNS`.
 """
 
-INSTALLED_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
-    (
-        ColumnSpec("package_id", "Package ID", "Package's identifier."),
-        SortableField.PACKAGE_ID,
-    ),
-    (
-        ColumnSpec(
-            "package_name",
-            "Name",
-            "Package's common name.",
-            max_width=AUTO_WIDTH,
-        ),
-        SortableField.PACKAGE_NAME,
-    ),
+INSTALLED_COLUMNS: tuple[TColumn, ...] = (
+    PACKAGE_ID_COLUMN,
+    PACKAGE_NAME_COLUMN,
     (
         ColumnSpec("manager_id", "Manager", "Manager reporting the package."),
         SortableField.MANAGER_ID,
@@ -169,25 +193,13 @@ INSTALLED_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
         SortableField.VERSION,
     ),
 )
-"""Columns of the `mpm installed` table.
+"""Columns of the `mpm installed` table, and of the `mpm orphans` one.
 
-```{important}
-`package_id` is deliberately the one column of every package table left
-uncapped, and the rule holds wherever these specs are reused. It is the value
-the user copies back into an `mpm install`, `mpm remove` or `mpm upgrade`
-invocation, and a cell wrapped over two lines cannot be selected in one go. So
-it never wraps, and the shrinking falls on its neighbors instead: the name is
-free prose, and a version is read rather than retyped.
-
-The trade is explicit. A package ID wider than the terminal on its own still
-pushes the table past the edge, because the alternative is handing the user a
-broken identifier. Both halves of the trade are real here: `vim-pack` names its
-plugins by GitHub URL (50 characters), and Homebrew Cask reports versions like
-`1.26832.0,056ee2be623b207f6a4d24dfb1b2fb5a82db0ecf`.
-```
+The width policy is the one {data}`PACKAGE_ID_COLUMN` documents: the ID never
+wraps, every other column does.
 """
 
-OUTDATED_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
+OUTDATED_COLUMNS: tuple[TColumn, ...] = (
     *INSTALLED_COLUMNS,
     (
         ColumnSpec(
@@ -201,24 +213,13 @@ OUTDATED_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
 )
 """Columns of the `mpm outdated` table.
 
-Inherits the width policy documented on {data}`INSTALLED_COLUMNS`: the second
+Inherits the width policy documented on {data}`PACKAGE_ID_COLUMN`: the second
 version column wraps like the first, `package_id` still does not.
 """
 
-SEARCH_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
-    (
-        ColumnSpec("package_id", "Package ID", "Package's identifier."),
-        SortableField.PACKAGE_ID,
-    ),
-    (
-        ColumnSpec(
-            "package_name",
-            "Name",
-            "Package's common name.",
-            max_width=AUTO_WIDTH,
-        ),
-        SortableField.PACKAGE_NAME,
-    ),
+SEARCH_COLUMNS: tuple[TColumn, ...] = (
+    PACKAGE_ID_COLUMN,
+    PACKAGE_NAME_COLUMN,
     (
         ColumnSpec("manager_id", "Manager", "Manager reporting the match."),
         SortableField.MANAGER_ID,
@@ -255,10 +256,10 @@ every row at the edge, mangling the borders.
 {data}`~click_extra.table.AUTO_WIDTH` caps it at whatever the other columns
 leave on the terminal, so the description wraps inside its own cell. The name
 and version columns share that treatment, and `package_id` is exempt from it,
-per the width policy documented on {data}`INSTALLED_COLUMNS`.
+per the width policy documented on {data}`PACKAGE_ID_COLUMN`.
 """
 
-WHICH_COLUMNS: tuple[tuple[ColumnSpec, SortableField | None], ...] = (
+WHICH_COLUMNS: tuple[TColumn, ...] = (
     (
         ColumnSpec(
             "manager_id", "Manager ID", "Manager whose search path found the binary."

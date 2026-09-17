@@ -61,13 +61,13 @@ from click_extra import (
 from .capabilities import Operations
 from .cli import (
     SBOM_SECTION,
-    _cli_errors,
-    _snapshot_installed,
     guard_existing_output,
     mpm,
     overwrite_option,
     query_exact_option,
     query_option,
+    serialized_errors,
+    snapshot_installed,
 )
 from .dispatch import collect_from_managers
 from .sbom.base import SBOM, ExportFormat
@@ -199,7 +199,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         logging.info("Export installed packages.", extra={"label": manager.subject})
-        installed_packages = _snapshot_installed(manager, query, exact=exact)
+        installed_packages = snapshot_installed(manager, query, exact=exact)
         # In --bundled mode, enrich each package with its metadata here too, so the
         # slow per-manager metadata fetch parallelizes alongside the listing.
         enriched = None
@@ -214,7 +214,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
         return manager.id, {
             "packages": installed_packages,
             "enriched": enriched,
-            "errors": _cli_errors(manager),
+            "errors": serialized_errors(manager),
         }
 
     # Query (and, for --bundled, enrich) each manager concurrently, then add the

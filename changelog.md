@@ -15,6 +15,7 @@
 - [cpan] List the core modules Debian and Ubuntu reach through symlinked `@INC` directories, which `cpan -l` skips. Upgrading one no longer ends in `is not recognized by any of the selected manager`.
 - [mpm] Fix pURLs losing part of the package ID: `pkg:npm/%40angular/animation` now resolves to `@angular/animation` rather than the unrelated `animation`, `pkg:npm/JSONStream` keeps its case, and a manager ID like `julia` resolves as a type.
 - [go] Resolve `pkg:golang` pURLs to the `go` manager.
+- [pkg,vagrant,vcpkg,yarn] Warn and report no package, instead of crashing, when a JSON listing cannot be parsed.
 - [bar-plugin,gnome-shell] Name the package of each upgrade action with a pURL of its manager, so `mpm` no longer looks it up in the installed packages first.
 - [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
 - [mpm] Link a manager's source repository and Wikipedia article from its documentation page, and a declined tool's article from its [unsupported](https://mpm.run/unsupported/) verdict. Manager definitions accept `repository_url` and `wikipedia_url` keys.

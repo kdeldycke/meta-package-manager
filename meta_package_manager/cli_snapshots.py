@@ -52,17 +52,17 @@ from .brewfile import build_brewfile
 from .capabilities import Operations
 from .cli import (
     SNAPSHOTS,
-    _cli_errors,
-    _install_action,
-    _package_task,
-    _snapshot_installed,
     exit_on_failures,
     guard_existing_output,
+    install_action,
     mpm,
     overwrite_option,
     package_label,
+    package_task,
     query_exact_option,
     query_option,
+    serialized_errors,
+    snapshot_installed,
 )
 from .dispatch import collect_from_managers, collect_per_package
 from .package import packages_asdict
@@ -289,11 +289,11 @@ def _dump_toml(
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         logging.info("Dump installed packages.", extra={"label": manager.subject})
         packages = tuple(
-            packages_asdict(_snapshot_installed(manager, query, exact=exact), fields)
+            packages_asdict(snapshot_installed(manager, query, exact=exact), fields)
         )
         return manager.id, {
             "packages": packages,
-            "errors": _cli_errors(manager),
+            "errors": serialized_errors(manager),
         }
 
     # Query each manager's installed packages concurrently, then assemble the
@@ -351,8 +351,8 @@ def _dump_brewfile(
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         return manager.id, {
-            "packages": _snapshot_installed(manager, query, exact=exact),
-            "errors": _cli_errors(manager),
+            "packages": snapshot_installed(manager, query, exact=exact),
+            "errors": serialized_errors(manager),
         }
 
     # Query each manager's installed packages concurrently, then build the Brewfile
@@ -468,11 +468,11 @@ def restore(ctx, toml_files):
                 )
                 tasks.append((
                     manager,
-                    _package_task(
+                    package_task(
                         manager,
                         spec,
                         failures_lock,
-                        action=_install_action,
+                        action=install_action,
                         verb="install",
                         operation=Operations.install.name,
                         record_failure=lambda s: restore_failures.append(

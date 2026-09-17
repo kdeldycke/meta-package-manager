@@ -1075,8 +1075,11 @@ mpm.extra_keywords = HelpKeywords(  # type: ignore[attr-defined]
 mpm.excluded_keywords = HelpKeywords(choices={"version"})  # type: ignore[attr-defined]
 
 
-def _cli_errors(manager: PackageManager) -> list[str]:
+def serialized_errors(manager: PackageManager) -> list[str]:
     """Serialize the distinct CLI errors `manager` accumulated so far.
+
+    The `errors` entry of every serialized payload, in the shape the ✓/✘ trail
+    and the bar plugin read it.
 
     Collected at the last minute — after the manager's query ran — so the list
     gathers everything the run produced. A non-empty list marks the manager's
@@ -1087,7 +1090,7 @@ def _cli_errors(manager: PackageManager) -> list[str]:
     return list({expt.error for expt in manager.cli_errors})
 
 
-def _snapshot_installed(
+def snapshot_installed(
     manager: PackageManager,
     query: str | None,
     *,
@@ -1099,12 +1102,12 @@ def _snapshot_installed(
     `dump --brewfile`, `sbom`): a best-effort
     {meth}`~meta_package_manager.manager.PackageManager.installed_or_empty`
     snapshot (a broken manager yields no packages instead of aborting the batch),
-    post-filtered through {func}`_filter_matches`.
+    post-filtered through {func}`filter_matches`.
     """
-    return tuple(_filter_matches(manager.installed_or_empty(), query, exact=exact))
+    return tuple(filter_matches(manager.installed_or_empty(), query, exact=exact))
 
 
-def _filter_matches(
+def filter_matches(
     packages: Iterable[Package],
     query: str | None,
     *,
@@ -1162,7 +1165,7 @@ def package_label(spec: Specifier) -> str:
     return spec.package_id
 
 
-def _run_manager_action(
+def run_manager_action(
     manager: PackageManager,
     spec: Specifier,
     *,
@@ -1204,7 +1207,7 @@ def _run_manager_action(
     return True
 
 
-def _install_action(manager: PackageManager, spec: Specifier) -> str | None:
+def install_action(manager: PackageManager, spec: Specifier) -> str | None:
     """The canonical install `action`, shared by `install` and `restore`.
 
     After the install, a package that the manager may already hold as a
@@ -1233,7 +1236,7 @@ def _install_action(manager: PackageManager, spec: Specifier) -> str | None:
     return "\n".join(text for text in (output, marked) if text)
 
 
-def _package_task(
+def package_task(
     manager: PackageManager,
     spec: Specifier,
     lock: threading.Lock,
@@ -1245,7 +1248,7 @@ def _package_task(
 ) -> Callable[[], tuple[bool, str]]:
     """Build one per-package task for {func}`collect_per_package`.
 
-    Runs the attempt through {func}`_run_manager_action` and returns
+    Runs the attempt through {func}`run_manager_action` and returns
     `(ok, message)` for the `✓`/`✘` trail. On failure it appends the spec to a
     caller-owned list through `record_failure` (under `lock`, since the list is
     shared across the concurrent lanes) and reports `✘`. Shared by `install`,
@@ -1273,7 +1276,7 @@ def _package_task(
             if hold:
                 logging.warning(f"Hold {item}: {hold}.", extra={"label": subject})
                 return False, trail_label(subject, item, "cooldown")
-        if _run_manager_action(
+        if run_manager_action(
             manager, spec, action=action, verb=verb, operation=operation
         ):
             return True, trail_label(subject, item)

@@ -17,21 +17,17 @@
 from __future__ import annotations
 
 import re
-from functools import cached_property
 
 from extra_platforms import LINUX_LIKE
 
 from ..capabilities import search_capabilities, version_not_implemented
-from ..execution import VERSION_PROBE
 from ..manager import PackageManager
-from ..version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from ..package import Package
-    from ..version import TokenizedString
 
 
 class Lure(PackageManager):
@@ -120,41 +116,9 @@ class Lure(PackageManager):
     ```
     """
 
-    @cached_property
-    def version(self) -> TokenizedString | None:
-        """Parse the version off `<stderr>`, where LURE alone prints it.
-
-        `lure version` reaches Go's builtin `println`, which writes to
-        `<stderr>` and leaves `<stdout>` empty, so the inherited probe (reading
-        the return value of
-        {meth}`~meta_package_manager.execution.CLIExecutor.run_cli`) would find
-        nothing and leave the manager permanently unavailable.
-
-        Both streams are searched, not `<stderr>` alone: a version that moved to
-        `<stdout>` should not take the manager offline.
-        """
-        if not self.executable:
-            return None
-
-        self._active_operation = VERSION_PROBE
-        output = self.run_cli(
-            self.version_cli_options,
-            auto_pre_cmds=False,
-            auto_pre_args=False,
-            auto_post_args=False,
-            force_exec=True,
-        )
-
-        error = self._last_run[2] if self._last_run else ""
-        haystack = "\n".join(stream for stream in (output, error) if stream)
-
-        for regex in self.version_regexes:
-            match = re.compile(regex, re.MULTILINE).search(haystack)
-            if match:
-                version_string = match.groupdict().get("version")
-                if version_string:
-                    return parse_version(version_string)
-        return None
+    version_from_stderr = True
+    """`lure version` reaches Go's builtin `println`, which writes to `<stderr>`
+    and leaves `<stdout>` empty."""
 
     def _parse_rows(self, output: str) -> Iterator[tuple[str, str]]:
         """Yield `(package_id, version)` per row of a `list` output.

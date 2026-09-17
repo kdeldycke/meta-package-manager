@@ -727,6 +727,22 @@ class CLIExecutor:
     ```
     """
 
+    version_from_stderr: bool = False
+    """Search `<stderr>` too for the version, after `<stdout>`.
+
+    Some tools print their version on `<stderr>` and leave `<stdout>` empty:
+    LURE reaches Go's builtin `println`, and roswell prints its banner there.
+    The probe reads the return value of {meth}`run_cli`, which is `<stdout>`
+    alone, so it would find nothing and leave such a manager permanently
+    unavailable.
+
+    Both streams are searched, `<stdout>` first, rather than `<stderr>` alone: a
+    version that moves to `<stdout>` in a later release must not take the
+    manager offline. Off by default on purpose. A tool that prints nothing on
+    `<stdout>` when broken often prints a warning on `<stderr>`, and the default
+    {attr}`version_regexes` would read a version out of that warning.
+    """
+
     stop_on_error: bool = False
     """Tell the manager to either raise or continue on errors."""
 
@@ -1070,7 +1086,8 @@ class CLIExecutor:
         # variation of the CLI name with any of these suffixes.
         # Code below is inspired by the original implementation of `shutil.which()`:
         # https://github.com/python/cpython/blob/8d46c7e/Lib/shutil.py#L1478-L1491
-        if is_any_windows():
+        on_windows = is_any_windows()
+        if on_windows:
             # `_WIN_DEFAULT_PATHEXT` is private, so fall back to our own copy
             # rather than crash the whole detection if a release drops it.
             win_pathext = getattr(shutil, "_WIN_DEFAULT_PATHEXT", WIN_DEFAULT_PATHEXT)
@@ -1119,7 +1136,7 @@ class CLIExecutor:
                 file = search_path / filename
                 # On Windows, check for reparse points (e.g., Windows App Execution Aliases like winget).
                 # These return False for is_file() and 0 for getsize(), so we detect them separately.
-                if is_any_windows():
+                if on_windows:
                     try:
                         file_stat = file.lstat()
                         if (
@@ -1209,41 +1226,65 @@ class CLIExecutor:
         # this mixin: mypy does not see it, but every concrete instance does.
         if not self.supported:  # type: ignore[attr-defined]
             return None
-        if self.executable:
-            # An alternate version binary must resolve, or the version is unknowable.
-            version_cli_path = None
-            if self.version_cli:
-                version_cli_path = self.which(self.version_cli)
-                if not version_cli_path:
-                    logging.debug(f"Version binary {self.version_cli!r} not found.")
-                    return None
-            # Version detection is a fast liveness probe, so tag it as a read-only
-            # operation: a wedged binary then trips the short timeout instead of the
-            # long mutating one. Safe to leave set: `_select_managers` re-stamps the
-            # real operation before any subcommand runs, and an explicit `--timeout`
-            # still wins inside `_resolve_timeout`.
-            self._active_operation = VERSION_PROBE
-            output = self.run_cli(
-                self.version_cli_options,
-                override_cli_path=version_cli_path,
-                auto_pre_cmds=False,
-                auto_pre_args=False,
-                auto_post_args=False,
-                force_exec=True,
-            )
+        if not self.executable:
+            return None
+        output = self._probe_version()
+        if output is None:
+            return None
+        return self._parse_version(output)
 
-            # Try each regex to extract the version.
-            for regex in self.version_regexes:
-                logging.debug(f"Use {regex!r} to extracting version.")
-                parts = re.compile(regex, re.MULTILINE).search(output)
-                if parts:
-                    version_string = parts.groupdict().get("version")
-                    logging.debug(f"Extracted version: {version_string!r}")
-                    if version_string:
-                        parsed_version = parse_version(version_string)
-                        logging.debug(f"Parsed version: {parsed_version!r}")
-                        if parsed_version:
-                            return parsed_version
+    def _probe_version(self) -> str | None:
+        """Run the version probe and return the text to search for the version.
+
+        `None` when the probe cannot run at all: an alternate {attr}`version_cli`
+        binary that does not resolve leaves the version unknowable. The returned
+        text is `<stdout>`, followed by `<stderr>` when
+        {attr}`version_from_stderr` asks for it.
+        """
+        # An alternate version binary must resolve, or the version is unknowable.
+        version_cli_path = None
+        if self.version_cli:
+            version_cli_path = self.which(self.version_cli)
+            if not version_cli_path:
+                logging.debug(f"Version binary {self.version_cli!r} not found.")
+                return None
+        # Version detection is a fast liveness probe, so tag it as a read-only
+        # operation: a wedged binary then trips the short timeout instead of the
+        # long mutating one. Safe to leave set: `_select_managers` re-stamps the
+        # real operation before any subcommand runs, and an explicit `--timeout`
+        # still wins inside `_resolve_timeout`.
+        self._active_operation = VERSION_PROBE
+        output = self.run_cli(
+            self.version_cli_options,
+            override_cli_path=version_cli_path,
+            auto_pre_cmds=False,
+            auto_pre_args=False,
+            auto_post_args=False,
+            force_exec=True,
+        )
+        if not self.version_from_stderr:
+            return output
+        error = self._last_run[2] if self._last_run else ""
+        return "\n".join(stream for stream in (output, error) if stream)
+
+    def _parse_version(self, output: str) -> TokenizedString | None:
+        """Extract the version from the probe's `output` with {attr}`version_regexes`.
+
+        The first regex producing a non-empty `<version>` group wins. `None`
+        when no regex matches, which reads as a manager whose version is
+        unknown.
+        """
+        for regex in self.version_regexes:
+            logging.debug(f"Use {regex!r} to extracting version.")
+            parts = re.compile(regex, re.MULTILINE).search(output)
+            if parts:
+                version_string = parts.groupdict().get("version")
+                logging.debug(f"Extracted version: {version_string!r}")
+                if version_string:
+                    parsed_version = parse_version(version_string)
+                    logging.debug(f"Parsed version: {parsed_version!r}")
+                    if parsed_version:
+                        return parsed_version
         return None
 
     @cached_property
@@ -1306,6 +1347,23 @@ class CLIExecutor:
         finally:
             self._active_operation = previous_operation
             self.stop_on_error = previous_stop
+
+    @contextmanager
+    def new_errors(self) -> Iterator[list[CLIError]]:
+        """Collect the {attr}`cli_errors` this manager accumulates inside the block.
+
+        The yielded list is filled when the block exits, whatever the exit: a
+        fan-out task reads it after the operation ran to decide whether the
+        manager failed its `✓`/`✘` trail line. Only the errors of this block
+        are reported, since the pool's instances live for the whole process
+        and carry the errors of every previous invocation.
+        """
+        errors: list[CLIError] = []
+        start = len(self.cli_errors)
+        try:
+            yield errors
+        finally:
+            errors.extend(self.cli_errors[start:])
 
     def _resolve_timeout(self) -> int:
         """Resolve the timeout (in seconds) for the current CLI call.
@@ -1509,120 +1567,16 @@ class CLIExecutor:
         elif self.dry_run and not self.plan:
             logging.warning(f"Dry-run: {cli_msg}", extra={"label": self.subject})
         else:
-            subject = self.subject
-            effective_timeout = self._resolve_timeout()
-            # A mutating command of an internal escalator (cask, fink) may block
-            # on a hidden `sudo` password prompt when prime_sudo() found no warm
-            # credential cache to keep alive, or when the keepalive has since
-            # found the cache dropped (every Homebrew command resets it). Two
-            # things follow, and both must hold for the prompt to be answerable:
-            # the spinner stays still, leaving the terminal line the tool writes
-            # its prompt on, and the stall watchdog flags the silence for a
-            # prompt that never appears.
-            hidden_prompt = _hidden_prompt_risk(
-                self.internal_sudo, self._active_operation
+            spawned = self._spawn(
+                clean_args,
+                extra_env,
+                command_level=command_level,
+                is_escalation=is_escalation,
+                must_succeed=must_succeed,
             )
-            spinner = self._make_spinner(clean_args, animate=not hidden_prompt)
-            if hidden_prompt and self.progress:
-                # A still spinner leaves the terminal blank for as long as the call
-                # runs, which for a cask upgrade is tens of seconds. Name the call
-                # once instead, on a line of its own: ended before the child starts,
-                # it leaves a prompt the tool raises at the start of a fresh line,
-                # and nothing redraws over it afterwards. The line stays on screen,
-                # since a prompt may sit below it by the time the call ends.
-                hint = f" ({STILL_CALL_HINT})"
-                if _styling_enabled():
-                    hint = style(hint, dim=True)
-                label = self._call_label(clean_args)
-                echo(f"{STILL_CALL_MARKER} {label}{hint}", err=True)
-            watchdog = _StallWatchdog(subject) if hidden_prompt else None
-            try:
-                # run_cli() owns the spawn: it registers the child in click-extra's
-                # live-process registry (so the SIGINT handler installed by mpm's
-                # CLI terminates it on Ctrl+C), streams the raw output to DEBUG
-                # logs line by line (prefixed with the manager ID), and enforces
-                # the timeout. The spinner wraps the whole call; its 0.1s delay
-                # keeps it invisible while the invocation line is disclosed.
-                try:
-                    with spinner:
-                        result = run_cli(
-                            clean_args,
-                            extra_env=extra_env,
-                            timeout=effective_timeout,
-                            label=subject,
-                            command_level=command_level,
-                            windows_creation_flags=self.windows_creation_flags,
-                            # Detach the child into its own POSIX session and
-                            # process group, so timeout and Ctrl+C kill the
-                            # whole tree and a wedged grandchild (mas) cannot
-                            # linger as an orphan. Two kinds of call keep the
-                            # controlling terminal instead: the one the armed
-                            # watchdog marks, whose internal sudo could not
-                            # otherwise reach /dev/tty, and mpm's own
-                            # escalations, because sudo keys its credential
-                            # cache per terminal (tty_tickets) and a session of
-                            # its own hides the very cache prime_sudo() just
-                            # probed. No-op on Windows.
-                            start_new_session=watchdog is None and not is_escalation,
-                            # The tee routes each streamed record through the
-                            # armed watchdog before the root logger. `None` is
-                            # run_cli's default, the untouched root-logger path.
-                            log=watchdog.tee if watchdog is not None else None,
-                        )
-                finally:
-                    # Disarm on every exit of the spawn: success, spawn failure,
-                    # timeout and Ctrl+C all stop the notice thread before their
-                    # handlers below log their own diagnosis.
-                    if watchdog is not None:
-                        watchdog.stop()
-            except OSError as ex:
-                winerror = getattr(ex, "winerror", None)
-                # Windows shims trigger WinError 193 when spawned as a subprocess.
-                if winerror == 193:
-                    logging.debug(
-                        f"{highlight_cli_name(self.cli_path, self.cli_names)} "
-                        "is not a valid Windows application.",
-                    )
-                    self.executable = False
-                    return ""
-                # Something is at that path but cannot be spawned: it vanished
-                # between the availability check and execution (only a .bat
-                # wrapper found on Windows while the underlying binary is
-                # absent), it is not executable by this user, or it is not a
-                # program this machine can run at all. See UNRUNNABLE_ERRNOS.
-                if ex.errno in UNRUNNABLE_ERRNOS:
-                    logging.debug(
-                        f"{highlight_cli_name(self.cli_path, self.cli_names)} "
-                        f"cannot be executed: {ex.strerror}.",
-                    )
-                    self.executable = False
-                    return ""
-                raise
-            except subprocess.TimeoutExpired:
-                # The spinner was stopped by the `with` teardown as the exception
-                # propagated, so the warning below lands on a clean line. run_cli
-                # already killed the child: its whole POSIX process group when
-                # detached into its own session, its whole tree on Windows.
-                self._cleanup_windows_processes()
-                msg = f"Timed out after {effective_timeout}s."
-                logging.warning(msg, extra={"label": subject})
-                exception = CLIError(None, "", msg)
-                self.cli_errors.append(exception)
-                if must_succeed or self.stop_on_error:
-                    raise exception
+            if spawned is None:
                 return ""
-            except KeyboardInterrupt:
-                # run_cli killed the child before re-raising; the spinner was
-                # stopped by the `with` teardown.
-                msg = "Subprocess interrupted by a console signal."
-                logging.warning(msg, extra={"label": subject})
-                exception = CLIError(None, "", msg)
-                self.cli_errors.append(exception)
-                return ""
-            code = result.returncode
-            output = result.stdout or ""
-            error = result.stderr or ""
-            self._cleanup_windows_processes()
+            code, output, error = spawned
 
         # Publish a freshly produced result — real or dry-run — so the lane's peers
         # replay it instead of re-running, collapsing identical invocations even under
@@ -1663,57 +1617,8 @@ class CLIExecutor:
         strict = self.stop_on_error and not must_succeed
         failed = bool(code) if strict else bool(code and error)
         if failed:
-            # Produce an exception and eventually raise it.
             exception = CLIError(code, output, error)
-            # `id` is declared on the `PackageManager` subclass, not this mixin.
-            manager_id = self.id  # type: ignore[attr-defined]
-            # A non-interactive escalation that could not authenticate is a
-            # missing-credential problem, not a real command failure. Point the user
-            # at the fix, naming the manager (this also answers "which one just asked
-            # for my password?"). The tailored message stands in for the generic
-            # diagnosis relay below: the raw "password is required" tail carries
-            # less than the fix.
-            if is_escalation and _is_sudo_auth_failure(error):
-                logging.warning(
-                    "Needs administrator rights but sudo has no cached "
-                    "credentials; re-run in a terminal, or with `mpm --sudo` "
-                    "(or a `[mpm] sudo = true` entry in your configuration file) "
-                    "to authenticate once up front.",
-                    extra={"label": self.subject},
-                )
-            # Relay the command's own account of the failure at WARNING, the
-            # moment it happened: the diagnosis is in hand right here, and a
-            # mutating operation cannot be re-run at DEBUG to regenerate it (the
-            # failed run may have half-applied its changes, and a cooldown may
-            # block the retry). Only a *failed* run earns the relay: a successful
-            # command's <stderr> chatter stays at DEBUG. Also skipped at DEBUG
-            # verbosity, where run_cli already streamed the raw output inline.
-            # See https://github.com/kdeldycke/meta-package-manager/issues/1968.
-            elif (
-                self._active_operation not in _DIAGNOSIS_EXEMPT_OPERATIONS
-                and logging.getLogger().getEffectiveLevel() > logging.DEBUG
-            ):
-                logging.warning(
-                    exception.diagnosis,
-                    extra={"label": self.subject},
-                )
-            # A dormant privileged marker meeting a permission refusal: the
-            # marker predicted exactly this failure, so name the opt-in. On top
-            # of the relay above, which carries the tool's own account, usually
-            # naming the very directory it could not write.
-            if (
-                self._dormant_sudo
-                and _is_permission_failure(error)
-                and getattr(os, "geteuid", lambda: 1)() != 0
-            ):
-                logging.warning(
-                    "The failed operation is marked privileged, but escalation "
-                    "is off for this manager. Opt in with "
-                    f"`mpm --{manager_id} --sudo`, or a "
-                    f"`[mpm.overrides.{manager_id}] sudo = true` "
-                    "entry in your configuration file.",
-                    extra={"label": self.subject},
-                )
+            self._relay_failure(exception, is_escalation=is_escalation)
             # Accumulate before deciding whether to raise: the error is recorded
             # whether or not it also propagates (see the `cli_errors` docstring).
             self.cli_errors.append(exception)
@@ -1721,6 +1626,190 @@ class CLIExecutor:
                 raise exception
 
         return output
+
+    def _spawn(
+        self,
+        clean_args: tuple[str, ...],
+        extra_env: TEnvVars | None,
+        *,
+        command_level: int,
+        is_escalation: bool,
+        must_succeed: bool,
+    ) -> tuple[int, str, str] | None:
+        """Run `clean_args` in a subprocess and return its `(code, stdout, stderr)`.
+
+        The one place a child process is started. Returns `None` when the call
+        produced no result {meth}`run` can gate: a binary that cannot be spawned
+        (which also marks the manager as not {attr}`executable`), a timeout, or
+        a console interrupt. The last two are recorded in {attr}`cli_errors`
+        first, and a timeout raises when the caller asked for `must_succeed` or
+        the manager runs under {attr}`stop_on_error`.
+        """
+        subject = self.subject
+        effective_timeout = self._resolve_timeout()
+        # A mutating command of an internal escalator (cask, fink) may block
+        # on a hidden `sudo` password prompt when prime_sudo() found no warm
+        # credential cache to keep alive, or when the keepalive has since
+        # found the cache dropped (every Homebrew command resets it). Two
+        # things follow, and both must hold for the prompt to be answerable:
+        # the spinner stays still, leaving the terminal line the tool writes
+        # its prompt on, and the stall watchdog flags the silence for a
+        # prompt that never appears.
+        hidden_prompt = _hidden_prompt_risk(self.internal_sudo, self._active_operation)
+        spinner = self._make_spinner(clean_args, animate=not hidden_prompt)
+        if hidden_prompt and self.progress:
+            # A still spinner leaves the terminal blank for as long as the call
+            # runs, which for a cask upgrade is tens of seconds. Name the call
+            # once instead, on a line of its own: ended before the child starts,
+            # it leaves a prompt the tool raises at the start of a fresh line,
+            # and nothing redraws over it afterwards. The line stays on screen,
+            # since a prompt may sit below it by the time the call ends.
+            hint = f" ({STILL_CALL_HINT})"
+            if _styling_enabled():
+                hint = style(hint, dim=True)
+            label = self._call_label(clean_args)
+            echo(f"{STILL_CALL_MARKER} {label}{hint}", err=True)
+        watchdog = _StallWatchdog(subject) if hidden_prompt else None
+        try:
+            # run_cli() owns the spawn: it registers the child in click-extra's
+            # live-process registry (so the SIGINT handler installed by mpm's
+            # CLI terminates it on Ctrl+C), streams the raw output to DEBUG
+            # logs line by line (prefixed with the manager ID), and enforces
+            # the timeout. The spinner wraps the whole call; its 0.1s delay
+            # keeps it invisible while the invocation line is disclosed.
+            try:
+                with spinner:
+                    result = run_cli(
+                        clean_args,
+                        extra_env=extra_env,
+                        timeout=effective_timeout,
+                        label=subject,
+                        command_level=command_level,
+                        windows_creation_flags=self.windows_creation_flags,
+                        # Detach the child into its own POSIX session and
+                        # process group, so timeout and Ctrl+C kill the
+                        # whole tree and a wedged grandchild (mas) cannot
+                        # linger as an orphan. Two kinds of call keep the
+                        # controlling terminal instead: the one the armed
+                        # watchdog marks, whose internal sudo could not
+                        # otherwise reach /dev/tty, and mpm's own
+                        # escalations, because sudo keys its credential
+                        # cache per terminal (tty_tickets) and a session of
+                        # its own hides the very cache prime_sudo() just
+                        # probed. No-op on Windows.
+                        start_new_session=watchdog is None and not is_escalation,
+                        # The tee routes each streamed record through the
+                        # armed watchdog before the root logger. `None` is
+                        # run_cli's default, the untouched root-logger path.
+                        log=watchdog.tee if watchdog is not None else None,
+                    )
+            finally:
+                # Disarm on every exit of the spawn: success, spawn failure,
+                # timeout and Ctrl+C all stop the notice thread before their
+                # handlers below log their own diagnosis.
+                if watchdog is not None:
+                    watchdog.stop()
+        except OSError as ex:
+            winerror = getattr(ex, "winerror", None)
+            # Windows shims trigger WinError 193 when spawned as a subprocess.
+            if winerror == 193:
+                logging.debug(
+                    f"{highlight_cli_name(self.cli_path, self.cli_names)} "
+                    "is not a valid Windows application.",
+                )
+                self.executable = False
+                return None
+            # Something is at that path but cannot be spawned: it vanished
+            # between the availability check and execution (only a .bat
+            # wrapper found on Windows while the underlying binary is
+            # absent), it is not executable by this user, or it is not a
+            # program this machine can run at all. See UNRUNNABLE_ERRNOS.
+            if ex.errno in UNRUNNABLE_ERRNOS:
+                logging.debug(
+                    f"{highlight_cli_name(self.cli_path, self.cli_names)} "
+                    f"cannot be executed: {ex.strerror}.",
+                )
+                self.executable = False
+                return None
+            raise
+        except subprocess.TimeoutExpired:
+            # The spinner was stopped by the `with` teardown as the exception
+            # propagated, so the warning below lands on a clean line. run_cli
+            # already killed the child: its whole POSIX process group when
+            # detached into its own session, its whole tree on Windows.
+            self._cleanup_windows_processes()
+            msg = f"Timed out after {effective_timeout}s."
+            logging.warning(msg, extra={"label": subject})
+            exception = CLIError(None, "", msg)
+            self.cli_errors.append(exception)
+            if must_succeed or self.stop_on_error:
+                raise exception
+            return None
+        except KeyboardInterrupt:
+            # run_cli killed the child before re-raising; the spinner was
+            # stopped by the `with` teardown.
+            msg = "Subprocess interrupted by a console signal."
+            logging.warning(msg, extra={"label": subject})
+            self.cli_errors.append(CLIError(None, "", msg))
+            return None
+        self._cleanup_windows_processes()
+        return result.returncode, result.stdout or "", result.stderr or ""
+
+    def _relay_failure(self, exception: CLIError, *, is_escalation: bool) -> None:
+        """Log what a failed run has to say, the moment it happened.
+
+        Three notices, each gated on what the failure looks like: the credential
+        hint of an escalation that could not authenticate, the command's own
+        diagnosis otherwise, and the opt-in hint when a dormant privileged
+        marker meets a permission refusal.
+        """
+        error = exception.error
+        # `id` is declared on the `PackageManager` subclass, not this mixin.
+        manager_id = self.id  # type: ignore[attr-defined]
+        # A non-interactive escalation that could not authenticate is a
+        # missing-credential problem, not a real command failure. Point the user
+        # at the fix, naming the manager (this also answers "which one just asked
+        # for my password?"). The tailored message stands in for the generic
+        # diagnosis relay below: the raw "password is required" tail carries
+        # less than the fix.
+        if is_escalation and _is_sudo_auth_failure(error):
+            logging.warning(
+                "Needs administrator rights but sudo has no cached "
+                "credentials; re-run in a terminal, or with `mpm --sudo` "
+                "(or a `[mpm] sudo = true` entry in your configuration file) "
+                "to authenticate once up front.",
+                extra={"label": self.subject},
+            )
+        # Relay the command's own account of the failure at WARNING, the
+        # moment it happened: the diagnosis is in hand right here, and a
+        # mutating operation cannot be re-run at DEBUG to regenerate it (the
+        # failed run may have half-applied its changes, and a cooldown may
+        # block the retry). Only a *failed* run earns the relay: a successful
+        # command's <stderr> chatter stays at DEBUG. Also skipped at DEBUG
+        # verbosity, where run_cli already streamed the raw output inline.
+        # See https://github.com/kdeldycke/meta-package-manager/issues/1968.
+        elif (
+            self._active_operation not in _DIAGNOSIS_EXEMPT_OPERATIONS
+            and logging.getLogger().getEffectiveLevel() > logging.DEBUG
+        ):
+            logging.warning(exception.diagnosis, extra={"label": self.subject})
+        # A dormant privileged marker meeting a permission refusal: the
+        # marker predicted exactly this failure, so name the opt-in. On top
+        # of the relay above, which carries the tool's own account, usually
+        # naming the very directory it could not write.
+        if (
+            self._dormant_sudo
+            and _is_permission_failure(error)
+            and getattr(os, "geteuid", lambda: 1)() != 0
+        ):
+            logging.warning(
+                "The failed operation is marked privileged, but escalation "
+                "is off for this manager. Opt in with "
+                f"`mpm --{manager_id} --sudo`, or a "
+                f"`[mpm.overrides.{manager_id}] sudo = true` "
+                "entry in your configuration file.",
+                extra={"label": self.subject},
+            )
 
     def build_cli(
         self,

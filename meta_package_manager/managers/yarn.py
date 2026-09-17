@@ -389,10 +389,13 @@ class YarnBerry(Yarn):
         """
         output = self.run_cli("npm", "info", query, "--json")
 
-        if output:
-            package = json.loads(output)
+        package = self.parse_json(output)
+        if not isinstance(package, dict):
+            return
+        package_id = package.get("name")
+        if package_id:
             yield self.package(
-                id=package["name"],
+                id=package_id,
                 description=package.get("description"),
                 latest_version=package.get("dist-tags", {}).get("latest")
                 or package.get("version"),

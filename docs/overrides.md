@@ -97,7 +97,7 @@ A manager definition makes `mpm` run the commands you declare. Definitions are o
 
 Every [overridable field](#overridable-fields) (`cli_names`, `cli_search_path`, `requirement`, `version_regexes`, `pre_args`, `extra_env`, `timeout`, ...) may also be set, plus `name`, `homepage_url`, `repository_url` (the repository holding the tool's code), `wikipedia_url` (the English Wikipedia article about the tool) and `logo` (the slug of a brand mark vendored under `docs/assets/managers/`, inlined at the top of that page). When `cli_names` is omitted it defaults to the manager ID.
 
-Five definition-only fields have no override counterpart:
+Nine definition-only fields have no override counterpart:
 
 | Key                     | Type    | Description                                                                                                                                                                                                                                                            |
 | :---------------------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -105,7 +105,11 @@ Five definition-only fields have no override counterpart:
 | `brewfile_skip_warning` | string  | Warning emitted when this manager's installed packages are deliberately left out of a Brewfile export, where staying silent would mislead. Supports a `{count}` placeholder for the number of packages skipped.                                                        |
 | `default_sudo`          | boolean | The manager's built-in escalation policy: operations marked `sudo = true` escalate by default. The user's global `--sudo`/`--no-sudo` flag or a `sudo` override still win. See [privilege escalation](sudo.md).                                                        |
 | `internal_sudo`         | boolean | Marks a manager whose CLI invokes `sudo` itself mid-run, like [`fink`](managers/fink.md): `mpm` never wraps its commands, and instead reuses a warm credential cache or warns when a silent call may be hiding a password prompt. See [privilege escalation](sudo.md). |
+| `keywords`              | list of strings | Well-known names of the manager its ID does not already carry, merged into the PyPI keywords and the issue labeller rules.                                                                                                                                     |
+| `maintenance_note`      | string  | A watch note about a still-maintained upstream whose activity is slowing, rendered as a note atop the manager's page.                                                                                                                                                  |
+| `unmaintained_message`  | string  | Evidence and rationale for the `unmaintained` flag, rendered as a warning atop the manager's page. Required when `unmaintained = true`.                                                                                                                                |
 | `version_cli`           | string  | Alternate binary probed for the manager's version, for tool suites whose own binaries report none (OpenBSD's `pkg_add`: the suite is versioned with the OS, so `uname` reports it). Probed with `version_cli_options`, parsed with `version_regexes`.                  |
+| `version_from_stderr`   | boolean | Search `<stderr>` too for the version, after `<stdout>`, for a tool printing its version there and nothing on `<stdout>` (LURE, roswell).                                                                                                                              |
 
 ### Operations
 

@@ -335,14 +335,7 @@ class DNF(PackageManager):
         ```
         """
         output = self.run_cli("search", query)
-
-        for line in output.splitlines():
-            match = self._SEARCH_REGEXP.match(line)
-            if match:
-                yield self.package(
-                    id=match.group("package_id"),
-                    description=match.group("description"),
-                )
+        yield from self.parse_regex_lines(self._SEARCH_REGEXP, output)
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

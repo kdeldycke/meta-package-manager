@@ -357,7 +357,7 @@ class Flatpak(PackageManager):
             output = self.run_cli("list", "--runtime", "--columns=application,branch")
         except CLIError:
             return False
-        refs = set()
+        refs: set[str] = set()
         for line in output.splitlines():
             application, _, branch = line.partition("\t")
             refs.update((application, f"{application}//{branch}"))

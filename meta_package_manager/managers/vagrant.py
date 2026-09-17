@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import json
 import re
 from typing import ClassVar
 
@@ -246,7 +245,7 @@ class Vagrant(PackageManager):
         ```
         """
         output = self.run_cli("cloud", "search", query, "--json")
-        for entry in json.loads(output) if output.strip() else ():
+        for entry in self.parse_json(output) or ():
             package_id = entry.get("name")
             if not package_id:
                 continue

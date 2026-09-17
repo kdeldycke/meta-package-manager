@@ -485,31 +485,12 @@ class ManagerPool:
                 if "timeout" not in self.overridden_fields.get(manager_id, set()):
                     self.register[manager_id].timeout = timeout
 
-        # Probe every candidate's availability (its --version detection) up front
-        # and in parallel, so the sequential string of probes below becomes a single
-        # round capped at the slowest manager. This shaves startup latency off any
-        # command that touches many managers; the filter loop stays sequential, so
-        # its skip / "does not implement" logging keeps its order.
-        #
-        # Warming is not conditioned on `drop_not_found`: a caller keeping
-        # unavailable managers still reads the very same probes, just later. `mpm
-        # managers` is the one such caller, and it reads them one row at a time
-        # while rendering its table, which is the slowest way to get them.
-        candidates = [
-            self.register[manager_id]
-            for manager_id in selected_ids
-            if not implements_operation
-            or implements(self.register[manager_id], implements_operation)
-        ]
-        warm_availability(candidates)
-
-        # Deduplicate managers IDs while preserving order, then remove excluded
-        # managers.
+        # Check if operation is not implemented before calling `.available`. It
+        # saves one call to the package manager CLI, and the skipped managers
+        # stay out of the probing round below.
+        candidates = []
         for manager_id in selected_ids:
             manager = self.register[manager_id]
-
-            # Check if operation is not implemented before calling `.available`. It
-            # saves one call to the package manager CLI.
             if implements_operation and not implements(manager, implements_operation):
                 # An unsupported operation is narration, not a problem: keep it at INFO
                 # (matching the not-available skip below), hidden by the WARNING default.
@@ -519,6 +500,22 @@ class ManagerPool:
                     extra={"label": manager_id},
                 )
                 continue
+            candidates.append(manager)
+
+        # Probe every candidate's availability (its --version detection) up front
+        # and in parallel, so the sequential string of probes below becomes a single
+        # round capped at the slowest manager. This shaves startup latency off any
+        # command that touches many managers; the filter loop stays sequential, so
+        # its skip logging keeps its order.
+        #
+        # Warming is not conditioned on `drop_not_found`: a caller keeping
+        # unavailable managers still reads the very same probes, just later. `mpm
+        # managers` is the one such caller, and it reads them one row at a time
+        # while rendering its table, which is the slowest way to get them.
+        warm_availability(candidates)
+
+        for manager in candidates:
+            manager_id = manager.id
 
             # Filters out managers whose CLI was not found.
             if drop_not_found and not manager.available:

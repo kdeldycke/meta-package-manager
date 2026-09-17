@@ -156,6 +156,19 @@ def _to_str_dict(value: Any) -> dict[str, str]:
     return dict(value)
 
 
+def _convert(path: str, converter: Callable[[Any], Any], value: Any) -> Any:
+    """Run a converter on a section value, reporting a type error at `path`.
+
+    The converters above raise {exc}`TypeError`; the configuration layer wants a
+    {class}`click_extra.ValidationError` naming the key that failed, so every
+    parse site goes through here.
+    """
+    try:
+        return converter(value)
+    except TypeError as ex:
+        raise ValidationError(path, str(ex), code="invalid_type") from ex
+
+
 OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "cli_names": _to_str_tuple,
     "cli_search_path": _to_str_tuple,
@@ -230,6 +243,7 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "maintenance_note": _to_str,
     "unmaintained_message": _to_str,
     "version_cli": _to_str,
+    "version_from_stderr": _to_bool,
 }
 """CLI-execution attributes a definition may set, mostly reusing the override
 converters.
@@ -240,7 +254,7 @@ manager's identity, and resolve through the usual option precedence. `unmaintain
 is reused from the override converters so a TOML-defined manager can flag its own
 upstream as abandoned (see `docs/cooldown.md` for the affected managers).
 
-Seven fields are definition-only:
+Eight fields are definition-only:
 
 - `brewfile_entry_type` maps the manager onto a Homebrew Bundle DSL entry so its
   installed packages join `mpm dump --brewfile` exports (see
@@ -265,19 +279,27 @@ Seven fields are definition-only:
 - `version_cli` names an alternate binary for the version probe (see
   {attr}`~meta_package_manager.execution.CLIExecutor.version_cli`), for suites
   whose own binaries expose no version flag (OpenBSD's `pkg_add`).
+- `version_from_stderr` makes the version probe search `<stderr>` too (see
+  {attr}`~meta_package_manager.execution.CLIExecutor.version_from_stderr`), for
+  tools printing their version there and nothing on `<stdout>`.
+"""
+
+
+DEFINITION_LINK_FIELDS: Final[tuple[str, ...]] = (
+    "homepage_url",
+    "repository_url",
+    "wikipedia_url",
+    "logo",
+)
+"""Optional documentation-only strings of a definition, `None` when absent.
+
+Each names the {class}`~meta_package_manager.manager.PackageManager` attribute it
+lands on, and the {class}`ManagerDefinition` field of the same name.
 """
 
 
 DEFINITION_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
-    {
-        "name",
-        "platforms",
-        "homepage_url",
-        "repository_url",
-        "wikipedia_url",
-        "logo",
-        "operations",
-    },
+    {"name", "platforms", "operations", *DEFINITION_LINK_FIELDS},
 )
 """Top-level keys of a definition section that are not CLI-execution fields."""
 
@@ -607,12 +629,7 @@ def parse_manager_definition(
                 code="missing_field",
             )
 
-    try:
-        platforms = _to_str_tuple(section["platforms"])
-    except TypeError as ex:
-        raise ValidationError(
-            f"{manager_id}.platforms", str(ex), code="invalid_type"
-        ) from ex
+    platforms = _convert(f"{manager_id}.platforms", _to_str_tuple, section["platforms"])
     if not platforms:
         raise ValidationError(
             f"{manager_id}.platforms",
@@ -629,44 +646,13 @@ def parse_manager_definition(
 
     name = manager_id
     if "name" in section:
-        try:
-            name = _to_str(section["name"])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{manager_id}.name", str(ex), code="invalid_type"
-            ) from ex
-    homepage_url = None
-    if "homepage_url" in section:
-        try:
-            homepage_url = _to_str(section["homepage_url"])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{manager_id}.homepage_url", str(ex), code="invalid_type"
-            ) from ex
-    repository_url = None
-    if "repository_url" in section:
-        try:
-            repository_url = _to_str(section["repository_url"])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{manager_id}.repository_url", str(ex), code="invalid_type"
-            ) from ex
-    wikipedia_url = None
-    if "wikipedia_url" in section:
-        try:
-            wikipedia_url = _to_str(section["wikipedia_url"])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{manager_id}.wikipedia_url", str(ex), code="invalid_type"
-            ) from ex
-    logo = None
-    if "logo" in section:
-        try:
-            logo = _to_str(section["logo"])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{manager_id}.logo", str(ex), code="invalid_type"
-            ) from ex
+        name = _convert(f"{manager_id}.name", _to_str, section["name"])
+    links = {
+        field: _convert(f"{manager_id}.{field}", _to_str, section[field])
+        if field in section
+        else None
+        for field in DEFINITION_LINK_FIELDS
+    }
 
     cli_fields: dict[str, Any] = {}
     for key, value in section.items():
@@ -680,24 +666,15 @@ def parse_manager_definition(
                 f"unknown field. Allowed: {', '.join(allowed)}.",
                 code="unknown_field",
             )
-        try:
-            cli_fields[key] = converter(value)
-        except TypeError as ex:
-            raise ValidationError(
-                f"{manager_id}.{key}", str(ex), code="invalid_type"
-            ) from ex
+        cli_fields[key] = _convert(f"{manager_id}.{key}", converter, value)
 
-    operations = _parse_operations(manager_id, section["operations"])
     return ManagerDefinition(
         manager_id=manager_id,
         name=name,
         platforms=platforms,
-        homepage_url=homepage_url,
-        repository_url=repository_url,
-        wikipedia_url=wikipedia_url,
-        logo=logo,
         cli_fields=cli_fields,
-        operations=operations,
+        operations=_parse_operations(manager_id, section["operations"]),
+        **links,
     )
 
 
@@ -761,10 +738,7 @@ def _parse_operation_spec(
 
     if "args" not in raw:
         raise ValidationError(f"{path}.args", "required.", code="missing_field")
-    try:
-        args = _to_str_tuple(raw["args"])
-    except TypeError as ex:
-        raise ValidationError(f"{path}.args", str(ex), code="invalid_type") from ex
+    args = _convert(f"{path}.args", _to_str_tuple, raw["args"])
     if not args:
         raise ValidationError(
             f"{path}.args", "must be a non-empty list.", code="invalid_value"
@@ -798,10 +772,7 @@ def _parse_operation_spec(
 
     cli = None
     if "cli" in raw:
-        try:
-            cli = _to_str(raw["cli"])
-        except TypeError as ex:
-            raise ValidationError(f"{path}.cli", str(ex), code="invalid_type") from ex
+        cli = _convert(f"{path}.cli", _to_str, raw["cli"])
         if not cli:
             raise ValidationError(
                 f"{path}.cli", "must be a non-empty string.", code="invalid_value"
@@ -809,10 +780,7 @@ def _parse_operation_spec(
 
     sudo = False
     if "sudo" in raw:
-        try:
-            sudo = _to_bool(raw["sudo"])
-        except TypeError as ex:
-            raise ValidationError(f"{path}.sudo", str(ex), code="invalid_type") from ex
+        sudo = _convert(f"{path}.sudo", _to_bool, raw["sudo"])
 
     common = _parse_search_refinements(path, args, raw, found_placeholders)
     common.update(cli=cli, sudo=sudo)
@@ -859,12 +827,7 @@ def _parse_search_refinements(
                     code="invalid_value",
                 )
             continue
-        try:
-            values = _to_str_tuple(raw[refinement])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{path}.{refinement}", str(ex), code="invalid_type"
-            ) from ex
+        values = _convert(f"{path}.{refinement}", _to_str_tuple, raw[refinement])
         for value in values:
             if ARG_PLACEHOLDER_REGEX.search(value):
                 raise ValidationError(
@@ -909,10 +872,7 @@ def _parse_query_spec(
     required = REQUIRED_PARSE_FIELDS[op_name]
 
     if has_regex:
-        try:
-            regex = _to_str(raw["regex"])
-        except TypeError as ex:
-            raise ValidationError(f"{path}.regex", str(ex), code="invalid_type") from ex
+        regex = _convert(f"{path}.regex", _to_str, raw["regex"])
         try:
             compiled = re.compile(regex)
         except re.error as ex:
@@ -930,10 +890,7 @@ def _parse_query_spec(
             "JSON parsing requires a 'fields' mapping.",
             code="missing_field",
         )
-    try:
-        fields = _to_str_dict(raw["fields"])
-    except TypeError as ex:
-        raise ValidationError(f"{path}.fields", str(ex), code="invalid_type") from ex
+    fields = _convert(f"{path}.fields", _to_str_dict, raw["fields"])
     _check_parse_fields(f"{path}.fields", set(fields), required)
     for role, selector in fields.items():
         if not JSON_FIELD_SELECTOR_REGEX.match(selector):
@@ -945,12 +902,7 @@ def _parse_query_spec(
             )
     list_path = None
     if "list_path" in raw:
-        try:
-            list_path = _to_str(raw["list_path"])
-        except TypeError as ex:
-            raise ValidationError(
-                f"{path}.list_path", str(ex), code="invalid_type"
-            ) from ex
+        list_path = _convert(f"{path}.list_path", _to_str, raw["list_path"])
     return OperationSpec(
         args=args, parse_mode="json", list_path=list_path, fields=fields, **common
     )
@@ -1192,6 +1144,35 @@ def _make_cli_builder(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
     return cli_builder
 
 
+OPERATION_FACTORIES: Final[Mapping[str, tuple[str, Callable[..., object]]]] = {
+    "installed": ("installed", _make_query_property),
+    "outdated": ("outdated", _make_query_property),
+    "orphans": ("orphans", _make_query_property),
+    "search": ("search", _make_search),
+    "install": ("install", _make_install),
+    "mark_explicit": ("mark_explicit", _make_package_command),
+    "remove": ("remove", _make_package_command),
+    "remove_orphan": ("remove_orphan", _make_package_command),
+    "sync": ("sync", _make_void),
+    "cleanup_orphan": ("cleanup_orphan", _make_void),
+    "cleanup_cache": ("cleanup_cache", _make_void),
+    "cleanup_repair": ("cleanup_repair", _make_void),
+    "doctor": ("doctor_cli", _make_cli_builder),
+    "upgrade_one": ("upgrade_one_cli", _make_upgrade_one_cli),
+    "upgrade_all": ("upgrade_all_cli", _make_cli_builder),
+}
+"""Method each declared operation lands on, and the factory synthesizing it.
+
+Keyed by the operation name of the definition schema
+({data}`ALL_DEFINITION_OPERATIONS`), which differs from the method name for
+the three that hand a command line to a base-class orchestrator: `doctor`
+lands on `doctor_cli`, `upgrade_one` on `upgrade_one_cli` and `upgrade_all` on
+`upgrade_all_cli`. The query factories take the compiled regex too, which
+{func}`build_manager_class` passes to every factory of a
+{data}`QUERY_OPERATIONS` member.
+"""
+
+
 def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManager]:
     """Synthesize a {class}`~meta_package_manager.manager.PackageManager` subclass
     from a validated definition.
@@ -1221,35 +1202,15 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
     namespace.update(definition.cli_fields)
 
     for op_name, spec in definition.operations.items():
-        compiled = None
-        if spec.parse_mode == "regex":
-            assert spec.regex is not None
-            compiled = re.compile(spec.regex, re.MULTILINE)
-        if op_name == "installed":
-            namespace["installed"] = _make_query_property(spec, compiled)
-        elif op_name == "outdated":
-            namespace["outdated"] = _make_query_property(spec, compiled)
-        elif op_name == "orphans":
-            namespace["orphans"] = _make_query_property(spec, compiled)
-        elif op_name == "search":
-            namespace["search"] = _make_search(spec, compiled)
-        elif op_name == "install":
-            namespace["install"] = _make_install(spec)
-        elif op_name in ("mark_explicit", "remove", "remove_orphan"):
-            namespace[op_name] = _make_package_command(spec)
-        elif op_name in (
-            "sync",
-            "cleanup_orphan",
-            "cleanup_cache",
-            "cleanup_repair",
-        ):
-            namespace[op_name] = _make_void(spec)
-        elif op_name == "doctor":
-            namespace["doctor_cli"] = _make_cli_builder(spec)
-        elif op_name == "upgrade_one":
-            namespace["upgrade_one_cli"] = _make_upgrade_one_cli(spec)
-        elif op_name == "upgrade_all":
-            namespace["upgrade_all_cli"] = _make_cli_builder(spec)
+        method_name, factory = OPERATION_FACTORIES[op_name]
+        if op_name in QUERY_OPERATIONS:
+            compiled = None
+            if spec.parse_mode == "regex":
+                assert spec.regex is not None
+                compiled = re.compile(spec.regex, re.MULTILINE)
+            namespace[method_name] = factory(spec, compiled)
+        else:
+            namespace[method_name] = factory(spec)
 
     class_name = "Config_" + definition.manager_id.replace("-", "_")
     return cast(

@@ -231,15 +231,11 @@ class SDKMAN(PackageManager):
         $ sdk uninstall java 21.0.4-tem
         ```
         """
-        installed_version = None
         with self.acting_as("installed"):
-            for pkg in self.installed:
-                if pkg.id == package_id:
-                    installed_version = str(pkg.installed_version)
-                    break
+            installed_version = self.installed_version_map.get(package_id)
         if installed_version is None:
             raise ValueError(f"{package_id} is not installed")
-        return self.run_cli("uninstall", package_id, installed_version)
+        return self.run_cli("uninstall", package_id, str(installed_version))
 
     def sync(self) -> None:
         """Sync package metadata.

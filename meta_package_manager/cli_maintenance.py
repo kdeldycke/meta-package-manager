@@ -46,19 +46,20 @@ from .capabilities import (
 )
 from .cli import (
     MAINTENANCE,
-    _install_action,
-    _package_task,
-    _run_manager_action,
     exit_on_failures,
     fail_unless_zero_exit,
+    install_action,
     mpm,
     package_label,
+    package_task,
+    run_manager_action,
 )
 from .cooldown import CooldownPolicy
 from .dispatch import (
     OperationTrail,
     collect_from_managers,
     collect_per_package,
+    timed_task,
     trail_label,
     warn_jobs_ignored,
 )
@@ -149,9 +150,9 @@ def _maintenance_work(
 
     def work(manager: PackageManager) -> tuple[str, dict]:
         logging.log(announce, message, extra={"label": manager.subject})
-        before = len(manager.cli_errors)
-        operation(manager)
-        return manager.id, {"errors": manager.cli_errors[before:]}
+        with manager.new_errors() as errors:
+            operation(manager)
+        return manager.id, {"errors": errors}
 
     return work
 
@@ -245,7 +246,7 @@ def _dispatch_sourced_operation(
                 continue
             tasks.append((
                 manager,
-                _package_task(
+                package_task(
                     manager,
                     spec,
                     failures_lock,
@@ -268,7 +269,7 @@ def _dispatch_sourced_operation(
 def _attempt_install(manager: PackageManager, spec: Specifier) -> str:
     """Try installing one `spec` with one `manager`, returning the trail status.
 
-    Thin adapter of {func}`_run_manager_action` for the sequential install
+    Thin adapter of {func}`run_manager_action` for the sequential install
     paths, whose callers map the returned status (`installed`, `failed` or
     `cooldown`) onto their `✓`/`✘` ledger and decide the retry/stop semantics
     (the tied loop records every miss; the untied priority search falls
@@ -283,14 +284,66 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> str:
             extra={"label": manager.subject},
         )
         return "cooldown"
-    installed = _run_manager_action(
+    installed = run_manager_action(
         manager,
         spec,
-        action=_install_action,
+        action=install_action,
         verb="install",
         operation=Operations.install.name,
     )
     return "installed" if installed else "failed"
+
+
+def _cooldown_skip_task(
+    manager_id: str, spec: Specifier
+) -> Callable[[], tuple[bool, str]]:
+    """Build the task marking a tied package `✘` on a manager the cooldown skips.
+
+    {func}`cooldown_permits` already logged why. The skip is `✘` on the trail
+    but never a recorded failure, so it cannot force a non-zero exit on its own.
+    """
+
+    def task() -> tuple[bool, str]:
+        subject = operation_subject(manager_id, Operations.install.name)
+        return False, trail_label(subject, package_label(spec), "cooldown")
+
+    return task
+
+
+def _tied_install_tasks(
+    packages_per_managers: dict[str | None, set[Specifier]],
+    failures_lock: threading.Lock,
+    unresolved_labels: list[str],
+) -> list[tuple[PackageManager, Callable[[], tuple[bool, str]]]]:
+    """Build one install task per package the solver tied to a manager.
+
+    A tied package has exactly one candidate manager, so a miss is final: the
+    task records it in `unresolved_labels` (forcing a non-zero exit) and marks
+    the `✘` trail. A package held by the cooldown is `✘` too, but never
+    unresolved. A manager that cannot honor an active cooldown gets its tied
+    packages dropped once, through {func}`_cooldown_skip_task`.
+    """
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
+    for manager_id, package_specs in packages_per_managers.items():
+        if not manager_id:
+            continue
+        manager = pool.get(manager_id)
+        permitted = cooldown_permits(manager)
+        for spec in package_specs:
+            if permitted:
+                task = package_task(
+                    manager,
+                    spec,
+                    failures_lock,
+                    action=install_action,
+                    verb="install",
+                    operation=Operations.install.name,
+                    record_failure=lambda s: unresolved_labels.append(package_label(s)),
+                )
+            else:
+                task = _cooldown_skip_task(manager_id, spec)
+            tasks.append((manager, task))
+    return tasks
 
 
 @mpm.command(
@@ -352,6 +405,8 @@ def install(ctx, packages_specs):
     # Collect the label of every requested spec that no manager could install, to
     # raise a non-zero exit code at the end of the command.
     unresolved_labels: list[str] = []
+    failures_lock = threading.Lock()
+    tasks = _tied_install_tasks(packages_per_managers, failures_lock, unresolved_labels)
 
     # Packages tied to a manager (purls, or a single-manager selection) install
     # concurrently across managers, serial within each (see collect_per_package). An
@@ -359,43 +414,9 @@ def install(ctx, packages_specs):
     # it, skip the rest), which is cross-manager-sequential; its presence drops the
     # whole command onto the sequential path below.
     if not unmatched_packages:
-        failures_lock = threading.Lock()
-
-        def make_cooldown_task(spec, manager_id):
-            # cooldown_permits() already logged why; a skip is ✘ but not unresolved, so
-            # it never forces a non-zero exit.
-            def task() -> tuple[bool, str]:
-                subject = operation_subject(manager_id, Operations.install.name)
-                return False, trail_label(subject, package_label(spec), "cooldown")
-
-            return task
-
-        tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
-        for manager_id, package_specs in packages_per_managers.items():
-            if not manager_id:
-                continue
-            manager = pool.get(manager_id)
-            permitted = cooldown_permits(manager)
-            for spec in package_specs:
-                if permitted:
-                    task = _package_task(
-                        manager,
-                        spec,
-                        failures_lock,
-                        action=_install_action,
-                        verb="install",
-                        operation=Operations.install.name,
-                        record_failure=lambda s: unresolved_labels.append(
-                            package_label(s)
-                        ),
-                    )
-                else:
-                    task = make_cooldown_task(spec, manager_id)
-                tasks.append((manager, task))
         collect_per_package(
             "Installing", "Installed", tasks, operation=Operations.install.name
         )
-
         exit_on_failures(ctx, "install", unresolved_labels)
         return
 
@@ -409,6 +430,13 @@ def install(ctx, packages_specs):
     op = OperationTrail(selected_managers)
     installed_count = 0
 
+    # Install all packages deterministically tied to a specific manager, through the
+    # very tasks the concurrent path runs, one at a time.
+    for _manager, task in tasks:
+        ok, text = timed_task(task)
+        installed_count += ok
+        op.mark(ok, text)
+
     def trail(spec: Specifier, manager_id: str, status: str, seconds: float) -> None:
         """Map an install attempt to a `✓`/`✘` ledger line through `op`.
 
@@ -420,28 +448,6 @@ def install(ctx, packages_specs):
         subject = operation_subject(manager_id, Operations.install.name)
         text = trail_label(subject, package_label(spec), detail)
         op.mark(status == "installed", f"{text}{elapsed_clock(seconds)}")
-
-    # Install all packages deterministically tied to a specific manager.
-    for manager_id, package_specs in packages_per_managers.items():
-        if not manager_id:
-            continue
-        manager = pool.get(manager_id)
-        if not cooldown_permits(manager):
-            # cooldown_permits() already logged why; mark the tied packages dropped.
-            for spec in package_specs:
-                trail(spec, manager_id, "cooldown", 0.0)
-            continue
-        for spec in package_specs:
-            # A tied package has exactly one candidate manager, so a miss is final:
-            # record it as unresolved (forcing a non-zero exit) and mark the ✘ trail.
-            # A package held by the cooldown is ✘ too, but never unresolved.
-            start = time.monotonic()
-            status = _attempt_install(manager, spec)
-            if status == "installed":
-                installed_count += 1
-            elif status == "failed":
-                unresolved_labels.append(package_label(spec))
-            trail(spec, manager_id, status, time.monotonic() - start)
 
     # Drop managers that cannot honor an active cooldown (once, not per package).
     eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
@@ -597,11 +603,11 @@ def upgrade(ctx, all, packages_specs):
                 "Upgrade all outdated packages.",
                 extra={"label": manager.subject},
             )
-            before = len(manager.cli_errors)
-            output = manager.upgrade()
+            with manager.new_errors() as errors:
+                output = manager.upgrade()
             if output:
                 logging.info(output, extra={"label": manager.subject})
-            return manager.id, {"errors": manager.cli_errors[before:]}
+            return manager.id, {"errors": errors}
 
         # Full upgrade is independent per manager, so fan out concurrently with a
         # ✓/✘ trail and a success-count finisher (see collect_from_managers).
@@ -671,7 +677,7 @@ def remove(ctx, orphans, packages_specs):
     def remove_action(manager: PackageManager, spec: Specifier) -> str | None:
         # --orphans routes to the native cascade verb, falling back to the plain
         # removal (with an INFO capability-skip) for managers that lack one. The
-        # NotImplementedError is caught here so it never reaches _package_task, which
+        # NotImplementedError is caught here so it never reaches package_task, which
         # would otherwise record the package as a failure.
         if orphans:
             try:
@@ -867,13 +873,10 @@ def cleanup(ctx, orphans, cache, repair):
         logging.log(
             announce, f"Clean up {categories}.", extra={"label": manager.subject}
         )
-        before = len(manager.cli_errors)
-        for _category, step in steps:
-            step()
-        return manager.id, {
-            "errors": manager.cli_errors[before:],
-            "detail": categories,
-        }
+        with manager.new_errors() as errors:
+            for _category, step in steps:
+                step()
+        return manager.id, {"errors": errors, "detail": categories}
 
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✘ trail
     # and a success-count finisher (see collect_from_managers).

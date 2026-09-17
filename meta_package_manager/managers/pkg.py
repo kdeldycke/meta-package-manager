@@ -34,7 +34,6 @@ References:
 
 from __future__ import annotations
 
-import json
 import re
 from functools import cached_property
 from pathlib import Path
@@ -309,7 +308,7 @@ class PKG(PackageManager):
 
         # A single top-level array, not one object per line: `json-compact`
         # compacts the whitespace and keeps the array `--raw` wraps results in.
-        for package in json.loads(output) if output.strip() else ():
+        for package in self.parse_json(output) or ():
             yield self.package(
                 id=package["name"],
                 description=package["comment"],

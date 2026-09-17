@@ -17,11 +17,9 @@
 from __future__ import annotations
 
 import re
-from functools import cached_property
 
 from extra_platforms import ALL_PLATFORMS
 
-from ..execution import VERSION_PROBE
 from ..manager import PackageManager
 from ..version import parse_version
 
@@ -30,7 +28,6 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from ..package import Package
-    from ..version import TokenizedString
 
 
 class Roswell(PackageManager):
@@ -102,47 +99,9 @@ class Roswell(PackageManager):
     ```
     """
 
-    @cached_property
-    def version(self) -> TokenizedString | None:
-        """Parse the version off `<stderr>`, where roswell alone prints it.
-
-        Both `ros --version` and `ros version` leave `<stdout>` empty and write
-        to `<stderr>`, measured at 0 and 35 bytes respectively. The inherited
-        probe reads the return value of
-        {meth}`~meta_package_manager.execution.CLIExecutor.run_cli`, which is
-        `<stdout>`, so it would find nothing and leave the manager permanently
-        unavailable. The streams are reached through
-        `_last_run` instead,
-        the same attribute `bin` and `gext` read for their own
-        `<stderr>`-reporting operations.
-        """
-        if not self.executable:
-            return None
-
-        # Matches the inherited probe: a version check is a read-only liveness
-        # test, so it takes the short timeout rather than the mutating one.
-        self._active_operation = VERSION_PROBE
-        output = self.run_cli(
-            self.version_cli_options,
-            auto_pre_cmds=False,
-            auto_pre_args=False,
-            auto_post_args=False,
-            force_exec=True,
-        )
-
-        # Both streams are searched rather than `<stderr>` alone: roswell prints
-        # there today, and a version that moved to `<stdout>` would otherwise
-        # take the manager offline for no reason.
-        error = self._last_run[2] if self._last_run else ""
-        haystack = "\n".join(stream for stream in (output, error) if stream)
-
-        for regex in self.version_regexes:
-            match = re.compile(regex, re.MULTILINE).search(haystack)
-            if match:
-                version_string = match.groupdict().get("version")
-                if version_string:
-                    return parse_version(version_string)
-        return None
+    version_from_stderr = True
+    """Both `ros --version` and `ros version` leave `<stdout>` empty and write to
+    `<stderr>`, measured at 0 and 35 bytes respectively."""
 
     @property
     def installed(self) -> Iterator[Package]:

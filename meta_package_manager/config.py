@@ -409,18 +409,27 @@ def build_cooldown_validator() -> ConfigValidator:
     )
 
 
-def cooldown_section(ctx: click.Context) -> Any:
-    """Return the raw `[mpm.cooldown]` value from the loaded config, or `None`.
+def _mpm_config_value(ctx: click.Context, key: str) -> Any:
+    """Return the raw `[mpm.<key>]` value from the loaded config, or `None`.
 
     Reads the full parsed config {mod}`click_extra` exposes under
     {data}`~click_extra.context.CONF_FULL`, tolerating a missing or malformed
-    layer at each step: resolution decides how to read the value, and an
-    invalid one already failed the load-time validator. The deprecated
-    top-level string spelling comes through here unchanged.
+    layer at each step: the caller decides how to read the value, and an invalid
+    one already failed the load-time validator. Every shape the configuration
+    holds comes through, which is what lets the callers report a deprecated
+    spelling {mod}`click_extra` would otherwise drop in silence.
     """
     conf_full = ctx.meta.get(CONF_FULL) or {}
     mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
-    return mpm_section.get("cooldown") if isinstance(mpm_section, dict) else None
+    return mpm_section.get(key) if isinstance(mpm_section, dict) else None
+
+
+def cooldown_section(ctx: click.Context) -> Any:
+    """Return the raw `[mpm.cooldown]` value from the loaded config, or `None`.
+
+    The deprecated top-level string spelling comes through unchanged.
+    """
+    return _mpm_config_value(ctx, "cooldown")
 
 
 def validate_manager_overrides_section(
@@ -642,17 +651,11 @@ accumulated between {func}`apply_manager_overrides_from_context` and
 def _overrides_section(ctx: click.Context) -> Mapping[str, Any] | None:
     """Return the `[mpm.overrides]` mapping from the loaded config, or `None`.
 
-    Reads the full parsed config {mod}`click_extra` exposes under
-    {data}`~click_extra.context.CONF_FULL` and drills into `["mpm"]["overrides"]`,
-    tolerating a missing or malformed layer at each step. Shared by
-    {func}`apply_manager_overrides_from_context` (the override pass) and
-    {func}`register_config_managers_from_context` (the definition pass).
+    Shared by {func}`apply_manager_overrides_from_context` (the override pass)
+    and {func}`register_config_managers_from_context` (the definition pass).
     """
-    conf_full = ctx.meta.get(CONF_FULL) or {}
-    mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
-    if not isinstance(mpm_section, dict):
-        return None
-    return mpm_section.get(OVERRIDES_SECTION)
+    section = _mpm_config_value(ctx, OVERRIDES_SECTION)
+    return section if isinstance(section, dict) else None
 
 
 def stale_overrides_section(ctx: click.Context) -> tuple[str, ...]:
@@ -668,9 +671,7 @@ def stale_overrides_section(ctx: click.Context) -> tuple[str, ...]:
     {data}`~click_extra.context.CONF_FULL`, which carries every shape the
     configuration holds, rather than the parsed parameters.
     """
-    conf_full = ctx.meta.get(CONF_FULL) or {}
-    mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
-    section = mpm_section.get("managers") if isinstance(mpm_section, dict) else None
+    section = _mpm_config_value(ctx, "managers")
     if not isinstance(section, dict):
         return ()
     return tuple(

@@ -185,9 +185,10 @@ class VCPKG(PackageManager):
         it, and only when it is not zero.
         """
         output = self.run_cli("list", "--x-json")
-        if not output.strip():
+        listing = self.parse_json(output)
+        if not isinstance(listing, dict):
             return
-        for spec, data in json.loads(output).items():
+        for spec, data in listing.items():
             if not isinstance(data, dict):
                 continue
             version = data.get("version")

@@ -744,6 +744,7 @@ CANONICAL_ATTRS = (
     "version_cli",
     "version_cli_options",
     "version_regexes",
+    "version_from_stderr",
     # Behavior toggles and platform specifics.
     "ignore_auto_updates",
     "stop_on_error",

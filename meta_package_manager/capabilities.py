@@ -80,41 +80,54 @@ class Operations(Enum):
         return str(self)
 
 
+OPERATION_METHOD_DEPS: dict[Operations, tuple[frozenset[str], ...]] = {
+    # A single-package `upgrade` depends on `upgrade_one_cli()`, plus `installed`
+    # since resolving which manager sources a package requires querying its
+    # inventory.
+    Operations.upgrade: (frozenset({"installed", "upgrade_one_cli"}),),
+    # `upgrade_all` depends on either `upgrade_all_cli()`, or on the pair the
+    # base class simulates it with: `outdated` and `upgrade_one_cli()`.
+    Operations.upgrade_all: (
+        frozenset({"upgrade_all_cli"}),
+        frozenset({"outdated", "upgrade_one_cli"}),
+    ),
+    # Managers define cleanup category methods, never `cleanup()` itself: the base
+    # class composes the overridden categories, and any category implies support.
+    Operations.cleanup: (
+        frozenset({"cleanup_orphan"}),
+        frozenset({"cleanup_cache"}),
+        frozenset({"cleanup_repair"}),
+    ),
+    # Managers declare the diagnostic invocation only; the base `doctor()`
+    # orchestrator runs it and interprets its exit code and streams.
+    Operations.doctor: (frozenset({"doctor_cli"}),),
+}
+"""Methods a manager class must define to implement an operation.
+
+Each operation maps to the alternatives that implement it: a manager implements
+the operation as soon as one alternative has every one of its methods defined on
+a class of its own hierarchy. An operation absent from this map is implemented by
+the method sharing its name, which is the general case.
+"""
+
+
+def _manager_class(
+    manager: PackageManager | type[PackageManager],
+) -> type[PackageManager]:
+    """The class a capability question is asked of, from an instance or a class."""
+    return manager if isinstance(manager, type) else type(manager)
+
+
 def implements(manager: PackageManager | type[PackageManager], op: Operations) -> bool:
     """Inspect a manager's implementation to check for proper support of an operation.
 
     Accepts either a manager instance or its class; support is determined from the
-    class hierarchy. The verdict is narrated as a single answered `DEBUG` line
-    (`brew implements installed.`), keyed on the manager ID rather than the raw
-    class repr.
+    class hierarchy, against {data}`OPERATION_METHOD_DEPS`. The verdict is narrated
+    as a single answered `DEBUG` line (`brew implements installed.`), keyed on the
+    manager ID rather than the raw class repr.
     """
-    cls = manager if isinstance(manager, type) else type(manager)
-
-    # General case: the operation and the method implementing it shares the same ID.
-    method_deps: tuple[set[str], ...] = ({op.name},)
-
-    # Special case for single-package `upgrade`: we depend on `upgrade_one_cli()`,
-    # plus `installed()` since resolving which manager sources a package requires
-    # querying its inventory.
-    if op == Operations.upgrade:
-        method_deps = ({"installed", "upgrade_one_cli"},)
-
-    # For `upgrade_all`: we depend on either `upgrade_all_cli()`, or we can
-    # simulate the latter with a combination of `outdated()` and
-    # `upgrade_one_cli()`.
-    elif op == Operations.upgrade_all:
-        method_deps = ({"upgrade_all_cli"}, {"outdated", "upgrade_one_cli"})
-
-    # For `cleanup`: managers define category methods, never `cleanup()` itself
-    # (the base class composes the overridden categories). Any category implies
-    # support of the operation.
-    elif op == Operations.cleanup:
-        method_deps = ({"cleanup_orphan"}, {"cleanup_cache"}, {"cleanup_repair"})
-
-    # For `doctor`: managers declare the diagnostic invocation only; the base
-    # `doctor()` orchestrator runs it and interprets exit code and streams.
-    elif op == Operations.doctor:
-        method_deps = ({"doctor_cli"},)
+    cls = _manager_class(manager)
+    method_deps = OPERATION_METHOD_DEPS.get(op, (frozenset({op.name}),))
 
     # If none of the classes in the inheritance hierarchy up to the base one
     # implements the operation, then we can be certain the manager doesn't implement
@@ -174,8 +187,7 @@ def implements_method(
     base `cleanup` composer), so it works for config-defined managers (whose methods
     live on the synthesized subclass) too.
     """
-    cls = manager if isinstance(manager, type) else type(manager)
-    return cls._defines(method_name)
+    return _manager_class(manager)._defines(method_name)
 
 
 def cleanup_orphan_is_synthesized(
@@ -216,8 +228,9 @@ def cooldown_is_synthesized(
     Feeds the per-manager table of `docs/augmentations.md`, rendered live by
     `meta_package_manager._docs`.
     """
-    cls = manager if isinstance(manager, type) else type(manager)
-    return cls.cooldown_env_var is None and implements_method(manager, "release_date")
+    return _manager_class(manager).cooldown_env_var is None and implements_method(
+        manager, "release_date"
+    )
 
 
 def supports_cleanup_cache(
@@ -248,8 +261,8 @@ def _search_refinement_is_synthesized(
     """
     if not implements(manager, Operations.search):
         return False
-    cls = manager if isinstance(manager, type) else type(manager)
-    return not getattr(getattr(cls, "search", None), flag_name, True)
+    search = getattr(_manager_class(manager), "search", None)
+    return not getattr(search, flag_name, True)
 
 
 def exact_search_is_synthesized(

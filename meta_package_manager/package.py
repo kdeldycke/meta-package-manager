@@ -42,9 +42,9 @@ manager engine ({mod}`meta_package_manager.manager`).
 from __future__ import annotations
 
 import re
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from enum import Enum
-from functools import cached_property
+from functools import cached_property, lru_cache
 from urllib.parse import quote
 
 from packageurl import PackageURL
@@ -194,16 +194,18 @@ class Package:
         )
 
     @staticmethod
-    def query_parts(query: str) -> set[str]:
+    @lru_cache(maxsize=64)
+    def query_parts(query: str) -> frozenset[str]:
         """Split `query` into its contiguous alphanumeric segments.
 
         Contrary to {class}`meta_package_manager.version.TokenizedString`,
         does not split on collated number/alphabetic junctions.
 
         Canonical tokenizer behind {meth}`matches` and the
-        `search`/`installed`/`outdated` query matching.
+        `search`/`installed`/`outdated` query matching. Cached, since a run
+        asks it the same question once per package of every manager.
         """
-        return {p for p in re.split(r"\W+", query) if p}
+        return frozenset(p for p in re.split(r"\W+", query) if p)
 
     def matches(
         self,
@@ -246,9 +248,15 @@ class Package:
 
 
 def packages_asdict(packages: Iterable[Package], keep_fields: tuple[str, ...]):
-    """Returns a list of packages casted to a `dict` with only a subset of its
-    fields."""
-    return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
+    """Yield each package as a `dict` holding the `keep_fields` subset of its fields.
+
+    The fields are read straight off the instance rather than through
+    {func}`dataclasses.asdict`, which deep-copies every value: a version is an
+    immutable {class}`~meta_package_manager.version.TokenizedString` that the
+    renderers only read, and copying thousands of them per query cost more than
+    the query's own parsing.
+    """
+    return ({field: getattr(p, field) for field in keep_fields} for p in packages)
 
 
 class DependencyScope(str, Enum):

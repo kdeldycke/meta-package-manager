@@ -546,8 +546,13 @@ def trail_label(
     return f"{text} ({detail})" if detail else text
 
 
-def _timed(task: Callable[[], tuple[bool, str]]) -> tuple[bool, str]:
-    """Run one trail task and close its line on how long it took."""
+def timed_task(task: Callable[[], tuple[bool, str]]) -> tuple[bool, str]:
+    """Run one trail task and close its line on how long it took.
+
+    Every task a {func}`dispatch` batch runs goes through here, and so does a
+    task the sequential `install` path runs on its own, so a `✓`/`✘` line closes
+    on the same clock whichever path produced it.
+    """
     start = time.monotonic()
     ok, text = task()
     return ok, f"{text}{elapsed_clock(time.monotonic() - start)}"
@@ -684,7 +689,7 @@ def dispatch(
             # completes; distinct lanes run concurrently, sized by `effective_jobs`.
             list(
                 run_lanes(
-                    lambda task: trail.mark(*_timed(task)),
+                    lambda task: trail.mark(*timed_task(task)),
                     [tasks for _managers, tasks in phase_lanes],
                     jobs=phase_jobs,
                 )

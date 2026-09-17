@@ -70,10 +70,10 @@ from .bar_plugin_renderer import BarPluginRenderer
 from .capabilities import Operations
 from .cli import (
     EXPLORE,
-    _cli_errors,
-    _filter_matches,
-    _snapshot_installed,
+    filter_matches,
     mpm,
+    serialized_errors,
+    snapshot_installed,
 )
 from .config import dump_manager_overrides
 from .definitions import OVERRIDES_SECTION
@@ -214,7 +214,7 @@ def managers(ctx, view):
         )
         for manager in selection:
             manager_data[manager.id] = {fid: getattr(manager, fid) for fid in fields}
-            manager_data[manager.id]["errors"] = _cli_errors(manager)
+            manager_data[manager.id]["errors"] = serialized_errors(manager)
 
         print_serialized_and_exit(ctx, manager_data)
 
@@ -287,7 +287,7 @@ def _manager_result(
         "id": manager.id,
         "name": manager.name,
         "packages": packages,
-        "errors": _cli_errors(manager),
+        "errors": serialized_errors(manager),
     }
 
 
@@ -332,6 +332,11 @@ def _collect_manager_data(
     }
 
 
+def _version_cell(version: object) -> str:
+    """Render a version cell, with a `?` placeholder when the manager reports none."""
+    return str(version) if version else "?"
+
+
 def _inventory_rows(
     data: dict[str, dict],
     highlight_query: Callable[[str], str],
@@ -345,12 +350,10 @@ def _inventory_rows(
     """
     return [
         {
-            "package_id": highlight_query(info["id"]) if info["id"] else "",
-            "package_name": highlight_query(info["name"]) if info["name"] else "",
+            "package_id": highlight_query(info["id"] or ""),
+            "package_name": highlight_query(info["name"] or ""),
             "manager_id": manager_id,
-            "installed_version": str(info["installed_version"])
-            if info["installed_version"]
-            else "?",
+            "installed_version": _version_cell(info["installed_version"]),
         }
         for manager_id, payload in data.items()
         for info in payload["packages"]
@@ -363,8 +366,10 @@ def _query_highlighter(query: str | None) -> Callable[[str], str]:
     Returns a cached, case-insensitive callable that wraps each occurrence of the
     query (and its alphanumeric parts) in the active theme's `search` style, so
     the matched substring stands out in the rendered table. When no query was
-    given, returns an identity function instead, leaving cells untouched. Shared by
-    the `search`, `installed` and `outdated` renderers.
+    given, returns an identity function instead, leaving cells untouched. An
+    empty cell passes through either way, so a row builder can hand it the
+    `None` a missing name reads as, coerced to an empty string. Shared by the
+    `search`, `installed` and `outdated` renderers.
     """
     if not query:
         return lambda value: value
@@ -439,7 +444,7 @@ def installed(ctx, exact, duplicates, query):
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         packages = tuple(
-            packages_asdict(_snapshot_installed(manager, query, exact=exact), fields)
+            packages_asdict(snapshot_installed(manager, query, exact=exact), fields)
         )
         return _manager_result(manager, packages)
 
@@ -527,7 +532,7 @@ def outdated(ctx, exact, plugin_output, query):
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         packages = _safe_packages(
             manager,
-            lambda: _filter_matches(manager.refiltered_outdated, query, exact=exact),
+            lambda: filter_matches(manager.refiltered_outdated, query, exact=exact),
             fields,
             "list outdated packages",
         )
@@ -551,12 +556,12 @@ def outdated(ctx, exact, plugin_output, query):
     for manager_id, outdated_pkg in outdated_data.items():
         for info in outdated_pkg["packages"]:
             installed_version, latest_version = diff_versions(
-                info["installed_version"] if info["installed_version"] else "?",
+                _version_cell(info["installed_version"]),
                 info["latest_version"],
             )
             table.append({
-                "package_id": highlight_query(info["id"]) if info["id"] else "",
-                "package_name": highlight_query(info["name"]) if info["name"] else "",
+                "package_id": highlight_query(info["id"] or ""),
+                "package_name": highlight_query(info["name"] or ""),
                 "manager_id": manager_id,
                 "installed_version": installed_version,
                 "latest_version": latest_version,
@@ -602,7 +607,7 @@ def orphans(ctx, exact, query):
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         packages = _safe_packages(
             manager,
-            lambda: _filter_matches(manager.orphans, query, exact=exact),
+            lambda: filter_matches(manager.orphans, query, exact=exact),
             fields,
             "list orphaned packages",
         )
@@ -694,15 +699,11 @@ def search(ctx, extended, exact, refilter, query):
     for manager_id, matching_pkg in matches.items():
         for pkg in matching_pkg["packages"]:
             table.append({
-                "package_id": highlight_query(pkg["id"]) if pkg["id"] else "",
-                "package_name": highlight_query(pkg["name"]) if pkg["name"] else "",
+                "package_id": highlight_query(pkg["id"] or ""),
+                "package_name": highlight_query(pkg["name"] or ""),
                 "manager_id": manager_id,
-                "latest_version": str(pkg["latest_version"])
-                if pkg["latest_version"]
-                else "?",
-                "description": highlight_query(pkg.get("description"))
-                if pkg.get("description")
-                else "",
+                "latest_version": _version_cell(pkg["latest_version"]),
+                "description": highlight_query(pkg.get("description") or ""),
             })
 
     default_ids = tuple(

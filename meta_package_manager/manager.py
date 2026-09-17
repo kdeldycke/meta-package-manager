@@ -423,10 +423,11 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         swallow a failed CLI call into an empty result.
 
         Queries whose failure semantics differ keep their own parsing: a per-line
-        NDJSON stream (`pkg search`), a hard
+        NDJSON stream (`antidote`, `yarn`), a hard
         {exc}`~meta_package_manager.execution.CLIError` on malformed
         payloads (`pwsh-gallery`), a best-effort metadata enrichment logging at
-        `DEBUG` (`brew info`).
+        `DEBUG` (`brew info`), and a listing that falls back to a column format
+        when the tool answers no JSON (`vcpkg search`).
         """
         if not output:
             return None
@@ -1069,47 +1070,49 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         (`flatpak update` also pulls runtimes), and whatever the listing did
         not enumerate was never probed.
         """
-        with self.acting_as("outdated"):
-            outdated_packages = tuple(self.refiltered_outdated)
         held = []
         eligible = []
-        for package in outdated_packages:
-            hold = self.cooldown_hold_reason(package.id)
+        for package_id in self._outdated_ids():
+            hold = self.cooldown_hold_reason(package_id)
             if hold:
                 logging.warning(
-                    f"Hold {package.id}: {hold}.",
+                    f"Hold {package_id}: {hold}.",
                     extra={"label": self.subject},
                 )
-                held.append(package.id)
+                held.append(package_id)
             else:
-                eligible.append(package.id)
+                eligible.append(package_id)
         if self._defines("upgrade_all_cli_excluding"):
             if held:
                 cli = self.upgrade_all_cli_excluding(tuple(held))
             else:
                 cli = self.upgrade_all_cli()
             return self.run(cli, extra_env=self.extra_env)
-        logs = []
-        for package_id in eligible:
-            output = self.upgrade(package_id)
-            if output:
-                logs.append(output)
-        return "\n".join(logs)
+        return self._upgrade_each(eligible)
 
     def _upgrade_all_one_by_one(self) -> str:
         """Upgrade every outdated package through its own one-package CLI.
 
         The fallback behind managers with no native one-shot upgrade command.
         """
-        # The listing is a read-only query, so it runs under the `outdated`
-        # stamp: it resolves the short read-only timeout, and `mpm --plan`
-        # executes it for real instead of capturing it, so the plan lists the
-        # actual per-package upgrade commands.
+        return self._upgrade_each(self._outdated_ids())
+
+    def _outdated_ids(self) -> tuple[str, ...]:
+        """IDs of the outdated packages, listed under the `outdated` stamp.
+
+        The listing is a read-only query, so it runs under that stamp: it
+        resolves the short read-only timeout, and `mpm --plan` executes it for
+        real instead of capturing it, so the plan lists the actual per-package
+        upgrade commands.
+        """
         with self.acting_as("outdated"):
-            outdated_packages = tuple(self.refiltered_outdated)
+            return tuple(package.id for package in self.refiltered_outdated)
+
+    def _upgrade_each(self, package_ids: Iterable[str]) -> str:
+        """Upgrade `package_ids` one by one, joining the outputs of the calls."""
         logs = []
-        for package in outdated_packages:
-            output = self.upgrade(package.id)
+        for package_id in package_ids:
+            output = self.upgrade(package_id)
             if output:
                 logs.append(output)
         return "\n".join(logs)

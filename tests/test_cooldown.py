@@ -27,7 +27,7 @@ import pytest
 from click_extra import Duration
 
 from meta_package_manager.capabilities import cooldown_is_synthesized
-from meta_package_manager.cli import _package_task
+from meta_package_manager.cli import package_task
 from meta_package_manager.cli_maintenance import _attempt_install, cooldown_permits
 from meta_package_manager.cooldown import (
     Cooldown,
@@ -744,7 +744,7 @@ def test_package_task_holds_fresh_release(monkeypatch):
     fresh = datetime.now(tz=timezone.utc) - timedelta(days=1)
     manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh})
     spec = Specifier(raw_spec="org.example.Kiwi", package_id="org.example.Kiwi")
-    task = _package_task(
+    task = package_task(
         manager,
         spec,
         threading.Lock(),

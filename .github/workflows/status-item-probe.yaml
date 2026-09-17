@@ -1,0 +1,53 @@
+---
+# TEMPORARY probe workflow, to be deleted once this question is answered: how
+# does AppKit read the `NSStatusItem Preferred Position` key the capture driver
+# writes for SwiftBar's status item? The item lands packed against the system's
+# own items whatever the key says, so its menu opens at the screen's right edge
+# and the About submenu has nowhere to unfold but leftwards. `docs/status_item_probe.py`
+# relaunches SwiftBar under several values of the key and prints where the item
+# lands and what AppKit stores back.
+name: 🔬 Status item probe
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/status-item-probe.yaml
+      - docs/status_item_probe.py
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Supply-chain cooldown: no package published within the window can be resolved
+# by any command in this workflow. Held equal to `[tool.repomatic]
+# minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
+jobs:
+
+  probe:
+    name: Relaunch SwiftBar under each position key
+    runs-on: macos-26
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.12.5"
+
+      # The probe imports the capture driver, which imports the package.
+      - name: Install project
+        run: uv --no-progress sync --frozen --all-extras --all-groups
+
+      - name: Relaunch SwiftBar under each key value
+        run: uv --no-progress run --frozen -- python docs/status_item_probe.py

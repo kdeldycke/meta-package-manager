@@ -146,6 +146,7 @@ def props(spec: Specifier):
                 {"package_id": "curl", "manager_id": "apt", "version": "8.14.1"},
                 {"package_id": "curl", "manager_id": "apt-mint", "version": "8.14.1"},
                 {"package_id": "curl", "manager_id": "aptitude", "version": "8.14.1"},
+                {"package_id": "curl", "manager_id": "nala", "version": "8.14.1"},
             ),
             id="purl_qualifying_namespace",
         ),

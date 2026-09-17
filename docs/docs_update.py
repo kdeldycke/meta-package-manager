@@ -332,13 +332,10 @@ def update_metrics_subjects(*, check: bool = False) -> bool:
         "the metrics.subjects lines of pyproject.toml must form one block"
     )
 
-    subjects = {
-        line["key"]: line["url"] for line in lines if line["key"] not in pool
-    }
+    subjects = {line["key"]: line["url"] for line in lines if line["key"] not in pool}
     subjects |= generate_metrics_subjects(metrics.get("forges", {}))
     block = "".join(
-        f'metrics.subjects.{name} = "{url}"\n'
-        for name, url in sorted(subjects.items())
+        f'metrics.subjects.{name} = "{url}"\n' for name, url in sorted(subjects.items())
     )
     return _sync_file(pyproject, content[:start] + block + content[end:], check=check)
 

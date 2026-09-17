@@ -104,7 +104,9 @@ def test_report_section_hosts_submenus_safely():
     added to the menu, so the section is its own top menu. A submenu open or
     close then calls `_setOpenedSubMenu` on it, which a bare `PopupMenuSection`
     lacks, throwing inside a signal handler and crashing gnome-shell on the
-    next `removeAll`. Cannot run in the gjs suite, which never loads a shell.
+    next `removeAll`. Reported upstream as
+    [GNOME/gnome-shell#9424](https://gitlab.gnome.org/GNOME/gnome-shell/-/work_items/9424).
+    Cannot run in the gjs suite, which never loads a shell.
     """
     source = _extension_source("extension.js")
     assert "PopupSubMenuMenuItem" in source

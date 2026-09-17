@@ -163,11 +163,12 @@ class MpmIndicator extends PanelMenu.Button {
         this._reportSection = new PopupMenu.PopupMenuSection();
         /* A section with no parent is a top menu of its own, and the submenus
          * of the grouped layout call `_setOpenedSubMenu` on it. A plain
-         * PopupMenuSection has no such method. A grouped check would then raise
-         * an error inside a signal handler, and a `removeAll` that removes an
-         * open submenu would turn that error into a shell crash. This code is a
-         * copy of the one in PopupMenu, so one manager section stays open at a
-         * time. */
+         * PopupMenuSection has no such method, as reported upstream in
+         * https://gitlab.gnome.org/GNOME/gnome-shell/-/work_items/9424. A
+         * grouped check would then raise an error inside a signal handler, and
+         * a `removeAll` that removes an open submenu would turn that error into
+         * a shell crash. This code is a copy of the one in PopupMenu, so one
+         * manager section stays open at a time. */
         this._reportSection._openedSubMenu = null;
         this._reportSection._setOpenedSubMenu = submenu => {
             if (this._reportSection._openedSubMenu)

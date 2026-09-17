@@ -1,0 +1,91 @@
+# TEMPORARY probe workflow, to be deleted once it is known whether the capped `cpan` and `winget` destructive upgrade
+# tests pass on real runners, since `tests.yaml` on `main` currently stops before its destructive steps.
+---
+name: 🔬 Upgrade cap probe
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/upgrade-cap-probe.yaml
+      - tests/destructive_plan.py
+      - tests/test_cli_upgrade.py
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Supply-chain cooldown: no package published within the window can be resolved
+# by any command in this workflow. Held equal to `[tool.repomatic]
+# minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+  # Same workaround as tests.yaml, for Windows runners redirecting output to files.
+  PYTHONIOENCODING: "utf8"
+
+jobs:
+
+  probe:
+    name: Capped upgrade tests on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-26.04-arm
+          - windows-2025
+    runs-on: ${{ matrix.os }}
+    permissions: {}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Copied from the Windows cell of tests.yaml, which pre-upgrades Chocolatey so its own upgrade stays short.
+      - name: Chocolatey - Windows self-upgrade
+        if: runner.os == 'Windows'
+        run: choco upgrade chocolatey --no-progress --yes --retry-count=3
+      - name: Chocolatey - Pin un-upgradeable packages
+        if: runner.os == 'Windows'
+        run: |
+          choco pin add --name="strawberryperl"
+          choco pin add --name="rtools"
+          choco pin add --name="nginx"
+      - name: Chocolatey - Windows full upgrade
+        if: runner.os == 'Windows'
+        run: |
+          choco upgrade all --no-progress --yes --ignore-package-exit-codes --ignore-detected-reboot --retry-count=3
+          exit 0
+      - name: WinGet - Windows install
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: >
+          winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+          || & { "ignore failure"; $global:LASTEXITCODE = 0 }
+      - name: Install UV
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.12.5"
+      - name: Install project
+        run: uv --no-progress sync --frozen --all-extras --group test
+
+      - name: "Gate: the capped single-manager upgrade passes within two minutes"
+        shell: bash
+        run: |
+          start=$(date +%s)
+          uv --no-progress run --frozen -- pytest --no-cov --numprocesses=0 --durations=5 \
+            --skip-non-destructive --run-destructive \
+            "tests/test_cli_upgrade.py::test_single_manager_upgrade_all" -k "cpan or winget"
+          elapsed=$(( $(date +%s) - start ))
+          echo "elapsed seconds: ${elapsed}"
+          test "${elapsed}" -lt 120
+
+      - name: "Gate: the all-managers upgrade passes with the cap applied"
+        shell: bash
+        run: >
+          uv --no-progress run --frozen -- pytest --no-cov --numprocesses=0 --durations=5
+          --skip-non-destructive --run-destructive
+          "tests/test_cli_upgrade.py::test_all_managers_upgrade_all"

@@ -237,15 +237,13 @@ class Shot(NamedTuple):
 SHOTS = (
     *(
         Shot(
-            "-".join(
-                (
-                    "gnome-shell",
-                    "grouped" if grouped else "flat",
-                    "table" if aligned else "standard",
-                    "rendering",
-                    "dark" if dark else "light",
-                )
-            ),
+            "-".join((
+                "gnome-shell",
+                "grouped" if grouped else "flat",
+                "table" if aligned else "standard",
+                "rendering",
+                "dark" if dark else "light",
+            )),
             dark=dark,
             group_by_manager=grouped,
             align_columns=aligned,

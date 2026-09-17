@@ -648,15 +648,13 @@ class Shot(NamedTuple):
     def stem(self) -> str:
         """File stem, naming every axis that shapes the image."""
         if self.subject == "menu":
-            return "-".join(
-                (
-                    self.host.name.lower(),
-                    "grouped" if self.group_by_manager else "flat",
-                    "table" if self.align_columns else "standard",
-                    "rendering",
-                    self.appearance,
-                )
-            )
+            return "-".join((
+                self.host.name.lower(),
+                "grouped" if self.group_by_manager else "flat",
+                "table" if self.align_columns else "standard",
+                "rendering",
+                self.appearance,
+            ))
         return "-".join((self.host.name.lower(), self.subject, self.appearance))
 
     @property
@@ -667,13 +665,11 @@ class Shot(NamedTuple):
     @property
     def variables_path(self) -> Path:
         """Second frame of a `preferences` shot, scrolled to the plugin variables."""
-        return ASSET_DIR / "-".join(
-            (
-                self.host.name.lower(),
-                "preferences-variables",
-                f"{self.appearance}.png",
-            )
-        )
+        return ASSET_DIR / "-".join((
+            self.host.name.lower(),
+            "preferences-variables",
+            f"{self.appearance}.png",
+        ))
 
     @property
     def paths(self) -> tuple[Path, ...]:
@@ -957,19 +953,17 @@ def clang(source: str, folder: Path, name: str) -> Path:
     script = folder / f"{name}.m"
     script.write_text(source, encoding="UTF-8")
     binary = folder / name
-    run(
-        (
-            "clang",
-            "-fobjc-arc",
-            "-framework",
-            "Foundation",
-            "-framework",
-            "CoreGraphics",
-            "-o",
-            str(binary),
-            str(script),
-        )
-    )
+    run((
+        "clang",
+        "-fobjc-arc",
+        "-framework",
+        "Foundation",
+        "-framework",
+        "CoreGraphics",
+        "-o",
+        str(binary),
+        str(script),
+    ))
     return binary
 
 
@@ -1259,7 +1253,8 @@ def plant_fake_mpm(scratch: Path) -> None:
         msg = "The stand-in needs a menu file and a log to be planted."
         raise RuntimeError(msg)
     source = (
-        FAKE_MPM_SOURCE.replace("VERSION", __version__)
+        FAKE_MPM_SOURCE
+        .replace("VERSION", __version__)
         .replace("MENU", str(MENU_FILE))
         .replace("LOG", str(FAKE_MPM_LOG))
     )
@@ -1409,7 +1404,8 @@ for (let i = 0; i < list.count; i++) {
     }
 }
 JSON.stringify(boxes);
-""".replace("HOST", host.name)
+"""
+        .replace("HOST", host.name)
         .replace("LOW", str(low))
         .replace("HIGH", str(high)),
         language="JXA",

@@ -49,6 +49,7 @@
 [mpm.overrides.bun]
 name = "Bun"
 homepage_url = "https://bun.sh"
+wikipedia_url = "https://en.wikipedia.org/wiki/Bun_(software)"
 logo = "bun"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["bun"]

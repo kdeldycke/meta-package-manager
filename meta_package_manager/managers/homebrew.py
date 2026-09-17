@@ -998,6 +998,7 @@ class Brew(Homebrew):
     name = "Homebrew Formulae"
 
     homepage_url = "https://brew.sh"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Homebrew_(package_manager)"
     logo = "homebrew"
 
     keywords = ("homebrew",)

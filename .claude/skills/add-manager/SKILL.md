@@ -206,7 +206,7 @@ Typical manager modules range from 140 to 260 lines. Larger implementations (350
 
 Create `meta_package_manager/managers/<name>.py`. Follow the import pattern, class structure, and `TYPE_CHECKING` block from your template exactly.
 
-Class-level attributes and methods must follow the canonical order defined in `PackageManager` (enforced by `test_content_order`). The order is: `homepage_url`, `logo`, `platforms`, `requirement`, `cli_names`, `cli_search_path`, `extra_env`, `pre_cmds`, `pre_args`, `post_args`, `version_cli_options`, `version_regexes`, then operations (`installed`, `outdated`, `release_date`, `search`, `install`, `upgrade_all_cli`, `upgrade_one_cli`, `upgrade_all_cli_excluding`, `remove`, `sync`, `cleanup`).
+Class-level attributes and methods must follow the canonical order defined in `PackageManager` (enforced by `test_content_order`). The order is: `homepage_url`, `wikipedia_url`, `logo`, `platforms`, `requirement`, `cli_names`, `cli_search_path`, `extra_env`, `pre_cmds`, `pre_args`, `post_args`, `version_cli_options`, `version_regexes`, then operations (`installed`, `outdated`, `release_date`, `search`, `install`, `upgrade_all_cli`, `upgrade_one_cli`, `upgrade_all_cli_excluding`, `remove`, `sync`, `cleanup`).
 
 ### The class docstring is the manager's page
 
@@ -230,6 +230,8 @@ Required:
 - `platforms`: use constants from `extra_platforms` (`ALL_PLATFORMS`, `LINUX_LIKE`, `MACOS`, `WINDOWS`, `UNIX_WITHOUT_MACOS`, etc.). Combine with tuples: `platforms = LINUX_LIKE, MACOS`.
 
 Common optional:
+
+- `wikipedia_url`: the English Wikipedia article about the project `homepage_url` names, shown on the manager's page. A redirect Wikipedia keeps under the tool's name counts when it lands on a passage describing the tool (`Cargo_(software)` opens the Cargo section of the Rust article), and so does an article Wikidata attaches to the project's home page or repository. A passing mention does not, nor does an article about the ecosystem or distribution around the tool. Write the address as Wikipedia's own, capitalized and with underscores, or it answers with a redirect. A subclass never inherits its parent's article: declare it on every class that has one.
 
 - `logo`: slug of the brand mark shown atop the manager's documentation page, naming an SVG vendored under `docs/assets/managers/`. Run `uv run -- python docs/logos_update.py --scan-gaps` to see whether Simple Icons carries one; if it does, declare the slug and re-run the tool without the flag to vendor the file and refresh `logos.yaml`. Leave it unset when there is none, which is the right outcome for roughly a quarter of the pool: the page keeps its generic package glyph, and no placeholder is invented. Managers wrapping the same upstream share one slug (`brew` and `cask` are both `homebrew`), declared once on their virtual base when they have one. A tool with no mark of its own takes its ecosystem's (`apt` under Debian's, `cargo` under Rust's). Never hand-vendor a mark whose brand had its icons pulled from Simple Icons after a legal request: see the comments in `winget.py` and `sun_tools.py`.
 

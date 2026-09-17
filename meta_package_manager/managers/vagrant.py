@@ -96,6 +96,7 @@ class Vagrant(PackageManager):
     name = "Vagrant"
 
     homepage_url = "https://www.vagrantup.com"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Vagrant_(software)"
     logo = "vagrant"
 
     platforms = LINUX_LIKE, MACOS, WINDOWS

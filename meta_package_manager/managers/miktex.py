@@ -104,6 +104,7 @@ class MiKTeX(PackageManager):
     name = "MiKTeX"
 
     homepage_url = "https://miktex.org"
+    wikipedia_url = "https://en.wikipedia.org/wiki/MiKTeX"
     logo = "latex"
 
     platforms = LINUX_LIKE, WINDOWS

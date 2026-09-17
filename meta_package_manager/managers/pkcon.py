@@ -54,6 +54,7 @@ class Pkcon(PackageManager):
     name = "PackageKit"
 
     homepage_url = "https://www.freedesktop.org/software/PackageKit/"
+    wikipedia_url = "https://en.wikipedia.org/wiki/PackageKit"
     logo = "freedesktopdotorg"
 
     keywords = ("packagekit",)

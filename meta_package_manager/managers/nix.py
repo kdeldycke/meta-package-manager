@@ -45,6 +45,7 @@ class Nix(PackageManager):
     """
 
     homepage_url = "https://nixos.org"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Nix_(package_manager)"
     logo = "nixos"
 
     keywords = ("nixos", "nixpkgs")

@@ -63,6 +63,7 @@ class Tazpkg(PackageManager):
     name = "TazPkg"
 
     homepage_url = "https://slitaz.org"
+    wikipedia_url = "https://en.wikipedia.org/wiki/SliTaz"
 
     keywords = ("slitaz",)
 

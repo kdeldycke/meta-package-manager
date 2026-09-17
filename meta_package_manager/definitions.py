@@ -269,7 +269,7 @@ Seven fields are definition-only:
 
 
 DEFINITION_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
-    {"name", "platforms", "homepage_url", "logo", "operations"},
+    {"name", "platforms", "homepage_url", "wikipedia_url", "logo", "operations"},
 )
 """Top-level keys of a definition section that are not CLI-execution fields."""
 
@@ -522,6 +522,10 @@ class ManagerDefinition:
     homepage_url: str | None
     """Project home page, for documentation reference only."""
 
+    wikipedia_url: str | None
+    """English Wikipedia article about the project, for documentation reference
+    only."""
+
     logo: str | None
     """Slug of the brand mark vendored under `docs/assets/managers/`, or `None`."""
 
@@ -625,6 +629,14 @@ def parse_manager_definition(
             raise ValidationError(
                 f"{manager_id}.homepage_url", str(ex), code="invalid_type"
             ) from ex
+    wikipedia_url = None
+    if "wikipedia_url" in section:
+        try:
+            wikipedia_url = _to_str(section["wikipedia_url"])
+        except TypeError as ex:
+            raise ValidationError(
+                f"{manager_id}.wikipedia_url", str(ex), code="invalid_type"
+            ) from ex
     logo = None
     if "logo" in section:
         try:
@@ -659,6 +671,7 @@ def parse_manager_definition(
         name=name,
         platforms=platforms,
         homepage_url=homepage_url,
+        wikipedia_url=wikipedia_url,
         logo=logo,
         cli_fields=cli_fields,
         operations=operations,
@@ -1173,6 +1186,7 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
         "id": definition.manager_id,
         "name": definition.name,
         "homepage_url": definition.homepage_url,
+        "wikipedia_url": definition.wikipedia_url,
         "logo": definition.logo,
         "platforms": traits_from_ids(*definition.platforms),
         "__module__": __name__,

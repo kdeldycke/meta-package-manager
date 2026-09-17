@@ -88,6 +88,7 @@ class Zypper(PackageManager):
     name = "openSUSE Zypper"
 
     homepage_url = "https://en.opensuse.org/Portal:Zypper"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Zypper"
     logo = "opensuse"
 
     keywords = ("opensuse", "suse")

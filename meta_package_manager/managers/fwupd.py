@@ -63,6 +63,7 @@ class FWUPD(PackageManager):
     name = "Linux fwupd"
 
     homepage_url = "https://fwupd.org"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Fwupd"
     logo = "linuxfoundation"
 
     keywords = ("lvfs",)

@@ -95,6 +95,7 @@ class LuaRocks(PackageManager):
     name = "LuaRocks"
 
     homepage_url = "https://luarocks.org"
+    wikipedia_url = "https://en.wikipedia.org/wiki/LuaRocks"
 
     platforms = ALL_PLATFORMS
 

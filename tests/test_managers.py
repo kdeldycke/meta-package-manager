@@ -637,6 +637,7 @@ CANONICAL_ATTRS = (
     "id",
     "name",
     "homepage_url",
+    "wikipedia_url",
     "logo",
     "keywords",
     # Export mappings.

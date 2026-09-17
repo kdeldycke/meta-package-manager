@@ -88,6 +88,7 @@ class CPAN(PackageManager):
     name = "Perl CPAN"
 
     homepage_url = "https://www.cpan.org"
+    wikipedia_url = "https://en.wikipedia.org/wiki/CPAN"
     logo = "perl"
 
     keywords = ("perl",)

@@ -62,6 +62,7 @@ class Conda(PackageManager):
     name = "Conda"
 
     homepage_url = "https://conda.org"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Conda_(package_manager)"
     logo = "anaconda"
 
     keywords = ("anaconda", "conda-forge", "miniconda")

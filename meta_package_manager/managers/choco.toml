@@ -27,6 +27,7 @@
 [mpm.overrides.choco]
 name = "Chocolatey"
 homepage_url = "https://chocolatey.org"
+wikipedia_url = "https://en.wikipedia.org/wiki/Chocolatey"
 logo = "chocolatey"
 platforms = ["windows"]
 keywords = ["chocolatey"]

@@ -56,6 +56,7 @@ class Guix(PackageManager):
     name = "GNU Guix"
 
     homepage_url = "https://guix.gnu.org"
+    wikipedia_url = "https://en.wikipedia.org/wiki/GNU_Guix"
     logo = "gnu"
 
     keywords = ("gnu guix",)

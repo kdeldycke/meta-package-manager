@@ -86,6 +86,7 @@ class PKG(PackageManager):
     name = "FreeBSD pkg"
 
     homepage_url = "https://github.com/freebsd/pkg"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Pkg_(FreeBSD)"
     logo = "freebsd"
 
     keywords = ("freebsd",)
@@ -506,6 +507,7 @@ class Ports(PackageManager):
     name = "FreeBSD Ports Collection"
 
     homepage_url = "https://www.freebsd.org/ports/"
+    wikipedia_url = "https://en.wikipedia.org/wiki/FreeBSD_Ports"
     logo = "freebsd"
 
     keywords = ("freebsd ports",)

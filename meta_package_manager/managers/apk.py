@@ -68,6 +68,7 @@ class APK(PackageManager):
     name = "Alpine apk"
 
     homepage_url = "https://gitlab.alpinelinux.org/alpine/apk-tools"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Alpine_Package_Keeper"
     logo = "alpinelinux"
 
     keywords = ("alpine", "alpine linux")

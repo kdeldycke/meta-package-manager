@@ -72,6 +72,7 @@ class IPS(PackageManager):
     name = "Image Packaging System"
 
     homepage_url = "https://github.com/OpenIndiana/pkg5"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Image_Packaging_System"
 
     # No `logo`, and there never will be: Oracle's marks were pulled from Simple
     # Icons, so do not file a request, and do not vendor one by hand:

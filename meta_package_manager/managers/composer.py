@@ -45,6 +45,7 @@ class Composer(PackageManager):
     name = "PHP Composer"
 
     homepage_url = "https://getcomposer.org"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Composer_(software)"
     logo = "composer"
 
     keywords = ("php",)

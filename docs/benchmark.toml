@@ -20,10 +20,12 @@
 #
 # `homepages` only needs to contain URLs for managers that mpm does not
 # implement. For mpm-implemented managers the homepage is sourced from the
-# class's `homepage_url` attribute. Cross-tool naming differences are
-# resolved by using mpm's identifier as the canonical row key: a flag means
-# "this competitor supports the manager identified by this row", even if the
-# competitor internally calls it something else (like topgrade's
+# class's `homepage_url` attribute. A Wikipedia article is never a home page:
+# an archived tool whose site is gone has no entry, and its article is linked
+# from its verdict in `docs/unsupported.md` instead. Cross-tool naming
+# differences are resolved by using mpm's identifier as the canonical row key:
+# a flag means "this competitor supports the manager identified by this row",
+# even if the competitor internally calls it something else (like topgrade's
 # `brew_formula` for our `brew`).
 #
 # `coarse_support` is a third table with entries shaped like `managers`.
@@ -398,11 +400,9 @@ android-studio = "https://developer.android.com/studio"
 antibody = "https://getantibody.github.io"
 antigravity = "https://antigravity.google"
 app-man = "https://github.com/ivan-hc/AppMan"
-apt-rpm = "https://en.wikipedia.org/wiki/APT-RPM"
 aqua = "https://aquaproj.github.io"
 atuin = "https://atuin.sh"
 auto-cpufreq = "https://github.com/AdnanHodzic/auto-cpufreq"
-autopackage = "https://en.wikipedia.org/wiki/Autopackage"
 bash-it = "https://bash-it.readthedocs.io"
 basher = "https://github.com/basherpm/basher"
 bower = "https://bower.io"
@@ -421,7 +421,6 @@ component = "https://github.com/componentjs/component"
 containers = "https://github.com/containers/podman"
 cursor = "https://cursor.com"
 cursor-agent = "https://cursor.com/cli"
-cydia = "https://en.wikipedia.org/wiki/Cydia"
 declaro = "https://github.com/mantinhas/declaro"
 decman = "https://github.com/kiviktnm/decman"
 dein = "https://github.com/Shougo/dein.vim"
@@ -479,7 +478,7 @@ microsoft-store = "https://apps.microsoft.com"
 myrepos = "https://myrepos.branchable.com"
 myrlyn = "https://github.com/shundhammer/myrlyn"
 neobundle = "https://github.com/Shougo/neobundle.vim"
-netpkg = "https://en.wikipedia.org/wiki/Zenwalk"
+netpkg = "http://www.zenwalk.org"
 nh = "https://github.com/nix-community/nh"
 ninite = "https://ninite.com"
 oh-my-bash = "https://ohmybash.nntoan.com"
@@ -487,7 +486,6 @@ oh-my-zsh = "https://ohmyz.sh"
 oneget = "https://github.com/OneGet/oneget"
 opencode = "https://github.com/sst/opencode"
 opencsw = "https://www.opencsw.org"
-openpkg = "https://en.wikipedia.org/wiki/OpenPKG"
 opi = "https://github.com/openSUSE/opi"
 osc = "https://github.com/openSUSE/osc"
 pacapt = "https://github.com/icy/pacapt"
@@ -511,7 +509,6 @@ pkgx = "https://pkgx.sh"
 plug = "https://github.com/junegunn/vim-plug"
 podman = "https://podman.io"
 poetry = "https://python-poetry.org"
-ppm = "https://en.wikipedia.org/wiki/ActivePerl"
 protonplus = "https://github.com/Vysp3r/ProtonPlus"
 protonup = "https://github.com/AUNaseef/protonup"
 rcm = "https://github.com/thoughtbot/rcm"
@@ -537,7 +534,6 @@ toolbx = "https://containertoolbx.org"
 tpack = "https://github.com/tmuxpack/tpack"
 transactional-update = "https://github.com/openSUSE/transactional-update"
 typst = "https://typst.app"
-up2date = "https://en.wikipedia.org/wiki/Up2date"
 upkg = "https://paldo.org"
 upm = "https://github.com/epitron/upm"
 upt = "https://github.com/sigoden/upt"

@@ -66,6 +66,7 @@ class NPM(PackageManager):
     name = "Node npm"
 
     homepage_url = "https://www.npmjs.com"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Npm"
     logo = "npm"
 
     keywords = ("node.js", "nodejs")

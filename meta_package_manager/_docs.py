@@ -305,11 +305,12 @@ def unsupported_sections() -> tuple[UnsupportedSection, ...]:
     """Parse `docs/unsupported.md` into its verdict sections, in page order.
 
     A section covers the managers whose IDs appear as linked code spans in its
-    own title; where the title names a family instead of a tool, they are the
-    linked code spans of the paragraph opening the section. That fallback is
-    what lets a verdict shared word for word be written once: fifteen JetBrains
-    IDEs answer to a single section rather than fifteen copies of one
-    paragraph.
+    own title, or the one tool a title names as a bare code span when no home
+    page is known for it. Where the title names a family instead of a tool, they
+    are the linked code spans of the paragraph opening the section. That
+    fallback is what lets a verdict shared word for word be written once:
+    fifteen JetBrains IDEs answer to a single section rather than fifteen copies
+    of one paragraph.
 
     A family shares its {data}`DECLINE_STAMP` too, since its members were
     declined together. A tool joining one later is declined into a verdict that
@@ -331,7 +332,7 @@ def unsupported_sections() -> tuple[UnsupportedSection, ...]:
         text,
         re.MULTILINE | re.DOTALL,
     ):
-        ids = re.findall(r"\[`([^`]+)`\]", title)
+        ids = re.findall(r"\[`([^`]+)`\]", title) or re.findall(r"^`([^`]+)`$", title)
         if not ids:
             ids = re.findall(r"\[`([^`]+)`\]", body.strip().partition("\n")[0])
         stamp = DECLINE_STAMP.search(body)
@@ -1350,7 +1351,7 @@ def manager_card(manager_id: str) -> str:
     A manager with no mark still gets the box, headerless: the facts are the
     point, and the artwork is the bonus.
 
-    The upstream readings sit beside the home page they describe, read from
+    The upstream readings sit beside the links to the project they describe, read from
     {func}`_manager_upstreams`: a star count and a commit date are two short
     facts, and a box of facts is where they belong. The rest of what a forge
     knows about the project is a section of its own further down the page
@@ -1373,12 +1374,18 @@ def manager_card(manager_id: str) -> str:
     source_url = manager_source_url(manager_id)
     source_path = source_url.removeprefix(f"{GITHUB_BLOB_URL}/").partition("#")[0]
 
+    # Where to read about the project: its own site, then its Wikipedia article.
+    # Fixed labels rather than the addresses, which wrapped mid-URL in a box this
+    # narrow. Each icon is glued to its label, like the platform icons.
+    links = [f"{{octicon}}`home`\u00a0[Home page]({m.homepage_url})"]
+    if m.wikipedia_url:
+        links.append(f"{{octicon}}`book`\u00a0[Wikipedia]({m.wikipedia_url})")
     facts = [
         ("ID", f"`{manager_id}`"),
-        ("Home page", f"<{m.homepage_url}>"),
+        ("Links" if len(links) > 1 else "Link", FACT_SEPARATOR.join(links)),
     ]
 
-    # How the manager's own project is doing, beside the home page it describes.
+    # How the manager's own project is doing, beside the links describing it.
     # These sat in the manager index as three columns, which asked a reader
     # comparing one tool to scan a hundred rows for it; on the page devoted to
     # that tool they are read where the question is actually asked. Absent for a

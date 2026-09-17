@@ -36,6 +36,7 @@
 [mpm.overrides.emacs]
 name = "GNU Emacs packages"
 homepage_url = "https://www.gnu.org/software/emacs/"
+wikipedia_url = "https://en.wikipedia.org/wiki/GNU_Emacs"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["emacs"]
 # No version floor is declared. `package.el` has shipped with Emacs since

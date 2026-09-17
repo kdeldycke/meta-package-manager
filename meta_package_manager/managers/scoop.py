@@ -63,6 +63,7 @@ class Scoop(PackageManager):
     name = "Scoop"
 
     homepage_url = "https://scoop.sh"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Scoop_Package_Manager"
 
     # No `logo`: Simple Icons carries no Scoop mark yet. Of the marks missing from
     # the pool, this request is the likeliest to land, now that

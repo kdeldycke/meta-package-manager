@@ -14,6 +14,7 @@
 [mpm.overrides.vscode]
 name = "Visual Studio Code"
 homepage_url = "https://code.visualstudio.com"
+wikipedia_url = "https://en.wikipedia.org/wiki/Visual_Studio_Code"
 # No logo, and there never will be: Simple Icons dropped every Microsoft mark in its
 # 13.0.0, after Microsoft's legal team restricted them to four approved sources,
 # usable without edits. Re-requests are auto-closed as duplicates of the removal, so

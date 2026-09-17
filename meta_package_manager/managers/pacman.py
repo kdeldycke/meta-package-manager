@@ -90,6 +90,7 @@ class Pacman(PackageManager):
     name = "Arch Linux pacman"
 
     homepage_url = "https://wiki.archlinux.org/title/pacman"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Pacman_(package_manager)"
 
     logo: str | None = "archlinux"
     """Annotated so a subclass may drop the mark: `DkpPacman` is a pacman fork

@@ -60,6 +60,7 @@ class Go(PackageManager):
     name = "Go"
 
     homepage_url = "https://go.dev"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Go_(programming_language)"
 
     platforms = ALL_PLATFORMS
 

@@ -62,6 +62,7 @@ class APT(PackageManager):
     name = "Debian apt"
 
     homepage_url = "https://wiki.debian.org/AptCLI"
+    wikipedia_url = "https://en.wikipedia.org/wiki/APT_(software)"
     logo = "debian"
 
     keywords = ("debian", "dpkg", "ubuntu")

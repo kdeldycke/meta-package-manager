@@ -93,6 +93,7 @@ class YarnClassic(Yarn):
     id = "yarn"
 
     name = "Yarn Classic"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Yarn_(package_manager)"
 
     requirement = ">=1.20.0,<2.0.0"
 
@@ -362,6 +363,7 @@ class YarnBerry(Yarn):
     id = "yarn-berry"
 
     name = "Yarn Berry"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Yarn_(package_manager)"
 
     requirement = ">=2.0.0"
 

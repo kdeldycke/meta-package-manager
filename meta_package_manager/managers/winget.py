@@ -80,6 +80,7 @@ class WinGet(PackageManager):
     """
 
     homepage_url = "https://github.com/microsoft/winget-cli"
+    wikipedia_url = "https://en.wikipedia.org/wiki/Windows_Package_Manager"
 
     # No `logo`, and there never will be: Simple Icons dropped every Microsoft mark
     # in its `13.0.0`, after Microsoft's legal team restricted them to four approved

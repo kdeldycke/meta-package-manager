@@ -25,6 +25,7 @@
 [mpm.overrides.sorcery]
 name = "Sorcery"
 homepage_url = "https://sourcemage.org"
+wikipedia_url = "https://en.wikipedia.org/wiki/Sorcery_(package_manager)"
 platforms = ["sourcemage"]
 keywords = ["source mage"]
 maintenance_note = "[Source Mage](https://sourcemage.org) is a small, slow-moving distribution; its `sorcery` scripts still receive commits but formal releases are rare."

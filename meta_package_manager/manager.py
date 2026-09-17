@@ -161,6 +161,11 @@ class MetaPackageManager(type):
         if "cli_names" not in dct:
             cls.cli_names = (cls.id,)
 
+        # A subclass often wraps a distinct project, which its parent's article
+        # does not describe.
+        if "wikipedia_url" not in dct:
+            cls.wikipedia_url = None
+
         if "virtual" not in dct:
             cls.virtual = name == "PackageManager" or not cls.cli_names
 
@@ -255,6 +260,23 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
+
+    wikipedia_url: str | None = None
+    """English Wikipedia article about the project, or `None` when it has none.
+
+    Listed after {attr}`homepage_url` in the links of the manager's documentation
+    page. The article covers the project that home page names, or
+    is a redirect Wikipedia keeps under the project's name, landing on the part of
+    a broader article that describes it: `Cargo_(software)` opens the Cargo
+    section of the Rust article. An article that merely mentions the project does
+    not count, nor does one about a related subject: `lazy` is a Neovim plugin
+    manager, and the Neovim article is not about it.
+
+    Never inherited: the metaclass resets it to `None` on any class not declaring
+    its own. A subclass often wraps a distinct project, like the six AUR helpers
+    extending `pacman`, and would otherwise present pacman's article as its own.
+    Documentation-only, like {attr}`homepage_url`.
+    """
 
     logo: str | None = None
     """Slug of the brand mark standing for this manager in the documentation.

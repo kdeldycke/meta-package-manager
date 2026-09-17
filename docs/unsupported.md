@@ -27,9 +27,11 @@ The same AppImage manager as [`am`](managers/am.md), which `mpm` wraps, under a 
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`apt-rpm`](https://en.wikipedia.org/wiki/APT-RPM) ☠️
+## `apt-rpm` ☠️
 
 APT ported onto RPM, and its last release is `0.5.15lorg3.2` from 2006-06-22. Its original maintainer had stepped away a year before that, announcing in March 2005 "that he would not continue developing it and that he would instead focus on Smart Package Manager, which was planned as a successor to APT-RPM". That successor is on this page too, as [`smart`](#smart), and it is retired as well.
+
+Wikipedia: [APT-RPM](https://en.wikipedia.org/wiki/APT-RPM).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -39,9 +41,11 @@ A CPU speed and power optimizer for Linux, running as a daemon that switches gov
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`autopackage`](https://en.wikipedia.org/wiki/Autopackage) ☠️
+## `autopackage` ☠️
 
 Cross-distribution installer for Linux binaries, and there is nothing left to drive. Its last stable release is `1.4.2` from 2009-05-24, and in August 2010 "Listaller and Autopackage announced that the projects will merge", a successor that no longer ships either. Its own site survives through the Wayback Machine alone.
+
+Wikipedia: [Autopackage](https://en.wikipedia.org/wiki/Autopackage).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -69,6 +73,8 @@ Declined in {mpm-release}`8.0.0`.
 
 The EFF's ACME client, obtaining and renewing TLS certificates. `topgrade` runs `certbot renew` beside its package steps, which is what lands it in this table, but a certificate is not a package: it is issued against a domain the host proves it controls, expires on a schedule of its own, and comes from no catalog anyone can enumerate. Nothing here can be listed, searched, installed by name or removed.
 
+Wikipedia: [Certbot](https://en.wikipedia.org/wiki/Certbot).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## [`cinnamon-spices`](https://cinnamon-spices.linuxmint.com) ❌ 🛟
@@ -85,6 +91,8 @@ Declined in {mpm-release}`8.0.0`.
 
 Manage containers and the systems running inside them, not packages. An image is a filesystem bundle addressed by tag or digest rather than a versioned package, and pulling a newer tag is not an upgrade `mpm` can reason about. What runs inside a container is another system's own inventory, out of reach of the host's package managers, so neither the runtime nor its guest can be listed, searched, installed by name or removed from here. `waydroid` is the plainest case of that second half: it runs a whole Android system in a container and installs no packages of its own.
 
+Wikipedia: [Podman](https://en.wikipedia.org/wiki/Podman), [Distrobox](https://en.wikipedia.org/wiki/Distrobox) and [Waydroid](https://en.wikipedia.org/wiki/Waydroid).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## Cross-manager aliases ❌
@@ -98,11 +106,15 @@ None owns a registry: each is a layer over managers `mpm` already wraps directly
 - `upm` puts one syntax over apk, apt, guix, opkg, pacman, pkg, pkg_add, pkgin, xbps and yum.
 - `upt` translates onto the single OS-level manager it detects, never more than one per invocation. Upstream states the shape in as many words, its maintainer's own account being "*upt is just aliases, nothing more*" ([sigoden/upt#60](https://github.com/sigoden/upt/issues/60#issuecomment-2560419544)).
 
+Wikipedia: [OneGet](https://en.wikipedia.org/wiki/OneGet).
+
 Declined in {mpm-release}`8.0.0`.
 
-## [`cydia`](https://en.wikipedia.org/wiki/Cydia) ☠️
+## `cydia` ☠️
 
 Package front-end for jailbroken iOS, described by Wikipedia as "a graphical user interface of APT for iOS". Its last release is `1.1.36` from 2020-06-24 and its store closed on 2018-12-16. Dormancy is not the only objection: the APT it drives runs on a phone rather than on the host, which is the scope that declined [`fdroidcl`](#fdroidcl).
+
+Wikipedia: [Cydia](https://en.wikipedia.org/wiki/Cydia).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -113,6 +125,8 @@ Declined in {mpm-release}`8.0.0`.
 Each refreshes a local copy of data fetched from upstream, and that data is not a package: there is nothing to enumerate, version, install or uninstall. `maza` rewrites the local hosts file from an upstream blocklist. `pihole` is a DNS ad blocker updating its own installation and its blocklists, so it manages a network service and its data rather than packages on the host. `tldr` refreshes a local cache of community-written command summaries, and those pages are documentation.
 
 Contrast the [system database refreshers](#system-database-refreshers), which rebuild from files already on disk.
+
+Wikipedia: [Pi-hole](https://en.wikipedia.org/wiki/Pi-hole) and [TLDR Pages](https://en.wikipedia.org/wiki/TLDR_Pages).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -139,6 +153,8 @@ Declined in {mpm-release}`8.0.0`.
 
 Synchronize files and Git checkouts, not packages. There is no registry, no package identity and no version: what they track is the user's own content, which is outside the system scope every `mpm` manager holds to.
 
+Wikipedia: [Git](https://en.wikipedia.org/wiki/Git).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## [`dpp`](https://github.com/Shougo/dpp.vim) ❌
@@ -150,6 +166,8 @@ Declined in {mpm-release}`8.0.0`.
 ## [`entropy`](https://github.com/Sabayon/entropy) ☠️
 
 Sabayon Linux's own binary package manager, last pushed 2020-09-07. Six years of silence is twice the span the stability policy reads as abandonment, and no fork has picked it up.
+
+Wikipedia: [Entropy (package manager)](https://en.wikipedia.org/wiki/Entropy_(package_manager)).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -221,6 +239,8 @@ Helm does not install onto the machine. Installing a chart "*creates a new relea
 
 The line is not that Kubernetes is out of bounds: [`krew`](managers/krew.md) is wrapped, and installs `kubectl` plugins as binaries under the user's own home. The object is what differs, a local binary against a remote deployment.
 
+Wikipedia: [Helm (package manager)](https://en.wikipedia.org/wiki/Helm_(package_manager)).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## [`install-release`](https://github.com/Rishang/install-release) ❌ 🛟
@@ -234,6 +254,8 @@ Declined in {mpm-release}`8.0.0`.
 [`android-studio`](https://developer.android.com/studio), [`jetbrains-aqua`](https://www.jetbrains.com/aqua/), [`jetbrains-clion`](https://www.jetbrains.com/clion/), [`jetbrains-datagrip`](https://www.jetbrains.com/datagrip/), [`jetbrains-dataspell`](https://www.jetbrains.com/dataspell/), [`jetbrains-gateway`](https://www.jetbrains.com/remote-development/gateway/), [`jetbrains-goland`](https://www.jetbrains.com/go/), [`jetbrains-idea`](https://www.jetbrains.com/idea/), [`jetbrains-mps`](https://www.jetbrains.com/mps/), [`jetbrains-phpstorm`](https://www.jetbrains.com/phpstorm/), [`jetbrains-pycharm`](https://www.jetbrains.com/pycharm/), [`jetbrains-rider`](https://www.jetbrains.com/rider/), [`jetbrains-rubymine`](https://www.jetbrains.com/ruby/), [`jetbrains-rustrover`](https://www.jetbrains.com/rust/) and [`jetbrains-webstorm`](https://www.jetbrains.com/webstorm/).
 
 Plugins are driven through an **undocumented** `update` subcommand of the IDE binary (topgrade's own comment: "*The `update` command is undocumented, but tested on all of the below*"), which lists nothing, reports free-form text, and refuses outright while the IDE is open ("*Only one instance of … can be run at a time.*", exit 1). No inventory, no contract, and unusable on the very machines where the IDE is in use. Contrast [`vscode`](managers/vscode.md), whose `--list-extensions` is documented and stable, which is why it is wrapped.
+
+Wikipedia: [Android Studio](https://en.wikipedia.org/wiki/Android_Studio), [CLion](https://en.wikipedia.org/wiki/CLion), [DataGrip](https://en.wikipedia.org/wiki/DataGrip), [GoLand](https://en.wikipedia.org/wiki/GoLand), [IntelliJ IDEA](https://en.wikipedia.org/wiki/IntelliJ_IDEA), [JetBrains MPS](https://en.wikipedia.org/wiki/JetBrains_MPS), [PhpStorm](https://en.wikipedia.org/wiki/PhpStorm), [PyCharm](https://en.wikipedia.org/wiki/PyCharm), [JetBrains Rider](https://en.wikipedia.org/wiki/JetBrains_Rider), [RubyMine](https://en.wikipedia.org/wiki/RubyMine) and [WebStorm](https://en.wikipedia.org/wiki/WebStorm).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -253,11 +275,15 @@ Declined in {mpm-release}`7.6.0`.
 
 Editor shipping no plugin manager of any kind, so there is nothing to wrap. Its whole command-line surface is sessions, filters and user-interface selection: `-e` and `-E` execute a command on client or server startup, `-l` lists sessions, and `-d` runs headless, with no install, list or update flag anywhere among them. Plugins are not packages either, being `*.kak` files the user drops into a directory that the readme describes loading wholesale: "*If the `$XDG_CONFIG_HOME/kak/autoload` directory exists, load every `*.kak` files in it, and load recursively any subdirectory*". Nothing names a source, a version or a registry, so what [`topgrade`](managers/topgrade.md) reaches through this editor is a *third-party* plugin manager running inside a headless session, not Kakoune. The [`helix`](#helix) reading, and the same one that leaves the [shell configuration frameworks](#shell-configuration-frameworks) unwrapped. Checked against Kakoune `2026.05.21`.
 
+Wikipedia: [Kakoune](https://en.wikipedia.org/wiki/Kakoune).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## [`macos`](https://www.apple.com/macos/) ❌ 🛟
 
 Apple's `softwareupdate(8)` updates the operating system rather than managing packages, putting it outside `mpm`'s domain along with every other system updater a competitor happens to drive. Nothing about it is inventoriable either: `--list` reports the updates *pending* for the machine, `--history` is a log of those applied through the tool and prints its header alone on a current host, and no verb lists installed components, searches a catalog or removes anything. A macOS update cannot be uninstalled.
+
+Wikipedia: [macOS](https://en.wikipedia.org/wiki/MacOS).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -275,6 +301,8 @@ Declined in {mpm-release}`8.0.0`.
 
 A Microsoft channel driven as one bulk update, with a fixed single-vendor scope: there is no catalog to search, no packages to enumerate and no per-package command line, so nothing can be listed, installed or removed individually. Contrast [`winget`](managers/winget.md), Microsoft's actual package CLI, which `mpm` wraps. `microsoft-office` runs the vendor's own updater for one suite of applications, and `microsoft-store` is reached through a PowerShell call that triggers the Store's own bulk update.
 
+Wikipedia: [Microsoft 365](https://en.wikipedia.org/wiki/Microsoft_365) and [Microsoft Store](https://en.wikipedia.org/wiki/Microsoft_Store).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## [`myrlyn`](https://github.com/shundhammer/myrlyn) ❌
@@ -286,6 +314,8 @@ Declined in {mpm-release}`8.0.0`.
 ## [`ninite`](https://ninite.com) ❌
 
 Installs from a real catalog of Windows applications, so the packages are there, but the free product exposes no command line to reach them with: the whole interface is a web form that generates a bespoke `.exe` bundling the selected apps. That installer takes no package argument, lists nothing and removes nothing, which is the same shape that rules out [`microsoft-store`](#microsoft-bulk-updaters). A command line exists only in Ninite Pro, behind a per-machine monthly subscription with no free tier, so no `mpm` install could exercise it and the destructive install/remove round-trip the test suite runs on every wrapped manager could never be provisioned.
+
+Wikipedia: [Ninite](https://en.wikipedia.org/wiki/Ninite).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -304,11 +334,15 @@ Declined in {mpm-release}`8.0.0`.
 
 Community collection of Solaris packages in SysV format. Its own front page has announced nothing since 2022-02-15, "Unbound version 1.15.0 has been pushed to unstable", which is four years of silence on a catalogue whose whole value is how current it is.
 
+Wikipedia: [OpenCSW](https://en.wikipedia.org/wiki/OpenCSW).
+
 Declined in {mpm-release}`8.0.0`.
 
-## [`openpkg`](https://en.wikipedia.org/wiki/OpenPKG) ☠️
+## `openpkg` ☠️
 
 Cross-platform RPM-based packaging for Linux, BSD and Solaris. Its own site no longer serves: `openpkg.org` answers with an expired TLS certificate over HTTPS and HTTP alike. Its Wikipedia stub carries nothing newer than "in June 2005 it offered more than 880 freely available packages".
+
+Wikipedia: [OpenPKG](https://en.wikipedia.org/wiki/OpenPKG).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -353,6 +387,8 @@ Declined in {mpm-release}`8.0.0`.
 ## [`pbi`](https://github.com/trueos/trueos) ☠️
 
 PC-BSD's Push Button Installer format and the `pbi_*` tools around it. PC-BSD became TrueOS, whose repository is archived with a last push of 2020-04-22, and FreeBSD's own [`pkg`](managers/pkg.md) is what the platform installs with today.
+
+Wikipedia: [TrueOS](https://en.wikipedia.org/wiki/TrueOS).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -407,9 +443,11 @@ Neither installs anything and neither owns a package: each reacts to what a real
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`ppm`](https://en.wikipedia.org/wiki/ActivePerl) ☠️
+## `ppm` ☠️
 
 ActiveState's Perl Package Manager, which ships inside ActivePerl rather than on its own. That distribution's last release is `5.28.1` from 2019-05-30, seven years back, so the manager has had no vehicle since. CPAN itself stays reachable through [`cpan`](managers/cpan.md).
+
+Wikipedia: [Perl package manager](https://en.wikipedia.org/wiki/Perl_package_manager).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -486,6 +524,8 @@ Declined in {mpm-release}`8.0.0`.
 
 Update only themselves. There is no catalog, no inventory and no per-package operation to map: the whole surface is one command that replaces the binary in place.
 
+Wikipedia: [Claude Code](https://en.wikipedia.org/wiki/Claude_Code), [Codex CLI](https://en.wikipedia.org/wiki/Codex_CLI), [Deno (software)](https://en.wikipedia.org/wiki/Deno_(software)), [Flutter (software)](https://en.wikipedia.org/wiki/Flutter_(software)), [Fossil (software)](https://en.wikipedia.org/wiki/Fossil_(software)), [Hermes Agent](https://en.wikipedia.org/wiki/Hermes_Agent), [OpenCode](https://en.wikipedia.org/wiki/OpenCode) and [Typst](https://en.wikipedia.org/wiki/Typst).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## [`sera`](https://gitlab.com/cscs/sera) ❌ 🛟
@@ -508,6 +548,8 @@ Each carries evidence of its own, and any one of them is a route back in:
 - `oh-my-bash` advertises `plugin`, `theme` and `version` subcommands in the completion table of [`lib/cli.bash`](https://github.com/ohmybash/oh-my-bash/blob/master/lib/cli.bash), and implements all three as `echo 'Not yet implemented'` stubs, so it has neither an inventory command nor a version.
 - `oh-my-zsh` does carry a verb set, `disable`, `enable`, `info`, `list` and `load`, but `omz plugin list` is a directory glob over `$ZSH/plugins` and `$ZSH_CUSTOM/plugins` rather than a query against an index, and its [External plugins](https://github.com/ohmyzsh/ohmyzsh/wiki/External-plugins) page is a hand-curated list of links. Upstream carries no tags, so `omz version` falls through `git describe --tags HEAD` to the branch name.
 
+Wikipedia: [Oh My Zsh](https://en.wikipedia.org/wiki/Oh_My_Zsh).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## [`smart`](https://github.com/smartpm/smart) ☠️
@@ -522,6 +564,8 @@ An update framework developers embed in their own macOS applications, described 
 
 `topgrade` reaches it by supplying the enumeration itself, walking `/Applications`, probing every bundle with `--probe` and updating whichever answer. That is a directory listing performed by the caller, not something Sparkle exposes, and it leaves nothing here to list, search, install by name or remove.
 
+Wikipedia: [Sparkle (software)](https://en.wikipedia.org/wiki/Sparkle_(software)).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## System database refreshers ❌ 🛟
@@ -529,6 +573,8 @@ Declined in {mpm-release}`8.0.0`.
 [`clam-av-db`](https://www.clamav.net), [`lensfun`](https://lensfun.github.io) and [`mandb`](https://man-db.gitlab.io/man-db).
 
 Rebuild a local database from files already on disk. Nothing is fetched, installed or removed, and the database has no package identity to report.
+
+Wikipedia: [ClamAV](https://en.wikipedia.org/wiki/ClamAV) and [man-db](https://en.wikipedia.org/wiki/Man-db).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -564,9 +610,11 @@ The snapshot model would defeat a wrapper even with the verbs in place. The tool
 
 Declined in {mpm-release}`8.0.0`.
 
-## [`up2date`](https://en.wikipedia.org/wiki/Up2date) ☠️
+## `up2date` ☠️
 
 Red Hat's RPM updater, retired by its own vendor: "As of Fedora Core 5 and Red Hat Enterprise Linux 5, up2date is no longer shipped with the distribution; yum is used instead." That successor is wrapped as [`yum`](managers/yum.md).
+
+Wikipedia: [up2date](https://en.wikipedia.org/wiki/Up2date).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -575,6 +623,8 @@ Declined in {mpm-release}`8.0.0`.
 Vim's own package feature loads plugins but never fetches them, which leaves nothing to wrap. Asked directly, Vim `9.2` reports `has('packages')` as `1` and `exists(':packadd')` as `2`, while `:PackUpdate` and `:PackAdd` both come back `0`: the one command it has puts a package already on disk onto the runtime path. Getting it there is the user's job, a plugin being a directory under `pack/*/start/` that they clone or copy themselves, so there is no registry, no listing, and no install, update or removal of anything.
 
 That is precisely what separates it from [`vim-pack`](managers/vim-pack.md), which `mpm` does wrap: Neovim's manager takes sources and records them, where Vim's feature only reads a directory. What [`topgrade`](managers/topgrade.md) drives through this row is third-party managers anyway, its Vim step forcing a vim-plug update or running a `update_plugins.py` the user supplies.
+
+Wikipedia: [Vim (text editor)](https://en.wikipedia.org/wiki/Vim_(text_editor)).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -596,6 +646,8 @@ None of them documents the extension flags VS Code does, so there is no contract
 - `cursor` opens the editor window instead of listing anything: `--list-extensions` launches the Cursor GUI ([forum.cursor.com](https://forum.cursor.com/t/command-line-list-extensions/103565), where a moderator grants "*this is not expected behavior*" and the thread closes with no fix). Silently opening a window where a listing was asked for is worse than an error, since nothing signals the failure. Its own [CLI documentation](https://cursor.com/docs/cli/installation) covers the separate [`cursor-agent`](#self-updating-applications) binary and never documents the extension flags at all.
 - `windsurf` documents a launcher (`windsurf .`) and never the extension-management flags, so nothing upstream commits to `--list-extensions` behaving as it does in VS Code. The one fork where the community did test it is `cursor`, above. Reassess with a citation the day Windsurf documents the flags or a listing is confirmed working.
 
+Wikipedia: [Google Antigravity](https://en.wikipedia.org/wiki/Google_Antigravity) and [Cursor (code editor)](https://en.wikipedia.org/wiki/Cursor_(code_editor)).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## [`vundle`](https://github.com/VundleVim/Vundle.vim) ❌ 🛟
@@ -612,6 +664,8 @@ Declined in {mpm-release}`8.0.0`.
 
 Update the WSL kernel and its distributions. WSL is a platform, not a package manager: the managers that run inside a WSL distribution are the ones `mpm` wraps, and it wraps them directly.
 
+Wikipedia: [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux).
+
 Declined in {mpm-release}`8.0.0`.
 
 ## [`wpkg`](https://windowspackager.org) ☠️
@@ -625,6 +679,8 @@ Declined in {mpm-release}`8.0.0`.
 A command-line audio and video downloader, not a package manager: what it fetches is media, addressed by URL, carrying no name, no version and no catalog to enumerate. Its `--update` flag replaces its own binary in place, which is the whole of its resemblance to one and the reason it keeps being suggested.
 
 That is the verdict the [self-updating applications](#self-updating-applications) family carries, and yt-dlp would sit there but for the lifebuoy: no competitor drives it, so it cannot share a title promising `topgrade` reaches it.
+
+Wikipedia: [yt-dlp](https://en.wikipedia.org/wiki/Yt-dlp).
 
 Declined in {mpm-release}`8.0.0`.
 

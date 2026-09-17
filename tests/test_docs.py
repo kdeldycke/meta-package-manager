@@ -611,6 +611,10 @@ def test_benchmark_homepages_cover_non_pool_managers():
     Pool-implemented managers are excluded: their URL is sourced from the
     class's `homepage_url` attribute, and a redundant entry in the TOML
     would create two sources of truth.
+
+    A tool declined for a dead upstream is exempt, its site being possibly gone
+    too. A Wikipedia article never stands in for the missing home page: it has a
+    slot of its own, so a home page found later is added rather than swapped in.
     """
     toml_path = PROJECT_ROOT / "docs" / "benchmark.toml"
     data = tomllib.loads(toml_path.read_text(encoding="UTF-8"))
@@ -619,8 +623,9 @@ def test_benchmark_homepages_cover_non_pool_managers():
     benchmark_ids = set(data["managers"])
     homepage_ids = set(data["homepages"])
 
-    # Every non-pool TOML manager must have a homepage URL.
-    missing = (benchmark_ids - pool_ids) - homepage_ids
+    # Every non-pool TOML manager must have a homepage URL, unless archived.
+    archived = {mid for mid, s in data["unsupported"].items() if s == "archived"}
+    missing = (benchmark_ids - pool_ids - archived) - homepage_ids
     assert not missing, f"Missing homepage URLs in benchmark.toml: {sorted(missing)}"
 
     # Homepages must not duplicate pool managers (those come from the class).
@@ -630,6 +635,9 @@ def test_benchmark_homepages_cover_non_pool_managers():
     # Homepages must not include unknown manager IDs.
     extra = homepage_ids - benchmark_ids
     assert not extra, f"Unknown manager IDs in homepages: {sorted(extra)}"
+
+    articles = sorted(m for m, u in data["homepages"].items() if "wikipedia.org" in u)
+    assert not articles, f"Wikipedia articles used as home pages: {articles}"
 
 
 @all_managers
@@ -643,6 +651,39 @@ def test_manager_homepage_url(manager):
     assert manager.homepage_url
     assert isinstance(manager.homepage_url, str)
     assert manager.homepage_url.startswith(("http://", "https://"))
+    assert "wikipedia.org" not in manager.homepage_url, "use `wikipedia_url`"
+
+
+WIKIPEDIA_URL = "https://en.wikipedia.org/wiki/"
+
+
+def check_wikipedia_url(url: str) -> None:
+    """Check a URL names an English Wikipedia article the way its address bar does.
+
+    MediaWiki answers a title spelled any other way with a permanent redirect,
+    which the link checker then reports: a space instead of an underscore, or a
+    lowercase first letter where the software capitalizes it.
+    """
+    assert url.startswith(WIKIPEDIA_URL), f"{url} is no English Wikipedia article"
+    title = url.removeprefix(WIKIPEDIA_URL)
+    assert title, f"{url} names no article"
+    assert " " not in title, f"{url} must spell spaces as underscores"
+    assert not title[0].islower(), f"{url} must capitalize the title's first letter"
+
+
+@all_managers
+def test_manager_wikipedia_url(manager):
+    """Check a manager's Wikipedia article is an English one, and its own.
+
+    The metaclass resets the attribute on every class not declaring it, so a
+    subclass never shows its parent's article: `paru` extends `pacman` in code,
+    but is a project of its own.
+    """
+    assert "wikipedia_url" in vars(type(manager)), f"{manager.id} inherits it"
+    url = manager.wikipedia_url
+    if url is None:
+        return
+    check_wikipedia_url(url)
 
 
 def test_benchmark_table_renders():
@@ -1138,7 +1179,7 @@ def test_manager_card_renders(manager):
     assert card in _docs.manager_intro(manager.id)
 
     # Every fact is a definition-list row, so it reads as a labelled entry.
-    for label in ("ID", "Home page", "Issues and PRs", "Source", "Platforms"):
+    for label in ("ID", "Issues and PRs", "Source", "Platforms"):
         assert f"**{label}**\n: " in card
     # The former Platforms and Ecosystem sections now live here.
     assert "**purl types**\n: `pkg:" in card
@@ -1202,6 +1243,14 @@ def test_manager_card_renders(manager):
         )
     assert f": `{manager.id}`" in card
     assert manager.homepage_url in card
+    # The home page, then the Wikipedia article when there is one, each a fixed
+    # label glued to its icon, so no address wraps in the box.
+    links = f"{{octicon}}`home`\u00a0[Home page]({manager.homepage_url})"
+    if manager.wikipedia_url:
+        links += f"{_docs.FACT_SEPARATOR}{{octicon}}`book`\u00a0"
+        links += f"[Wikipedia]({manager.wikipedia_url})"
+    label = "Links" if manager.wikipedia_url else "Link"
+    assert f"**{label}**\n: {links}\n" in card
     if manager.requirement:
         # Unstyled like the readme matrix's own Version column, with both angle
         # brackets escaped: a leading `>` would otherwise open a blockquote and
@@ -2218,6 +2267,44 @@ def test_unsupported_verdicts_cite_a_release():
         "docs/conf.py must register the `mpm-release` role the decline stamps "
         "of docs/unsupported.md are written with"
     )
+
+
+def test_unsupported_wikipedia_references():
+    """Check the Wikipedia references of `docs/unsupported.md` read one way.
+
+    A verdict section links the English Wikipedia articles of the tools it
+    covers on a single line, right before the stamp closing it, as
+    `Wikipedia: [title](url), [title](url) and [title](url).`
+    """
+    page = PROJECT_ROOT.joinpath("docs", "unsupported.md").read_text(encoding="UTF-8")
+    # A title links the tool's home page, and an article is not one.
+    titles = re.findall(r"^## .*wikipedia\.org.*$", page, re.MULTILINE)
+    assert not titles, f"titles linking Wikipedia as a home page: {titles}"
+
+    link = re.compile(r"\[([^\]]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)")
+    references = re.findall(r"^Wikipedia: .+$", page, re.MULTILINE)
+    assert references, "docs/unsupported.md links no Wikipedia article"
+    for line in references:
+        links = link.findall(line)
+        assert links, f"{line!r} links nothing"
+        urls = [url for _label, url in links]
+        for url in urls:
+            check_wikipedia_url(url)
+        assert len(urls) == len(set(urls)), f"{line!r} links an article twice"
+        rendered = [f"[{label}]({url})" for label, url in links]
+        listed = (
+            rendered[0]
+            if len(rendered) == 1
+            else f"{', '.join(rendered[:-1])} and {rendered[-1]}"
+        )
+        assert line == f"Wikipedia: {listed}.", (
+            f"{line!r} must read `Wikipedia: [title](url), [title](url) and "
+            "[title](url).`"
+        )
+        follower = page.partition(f"{line}\n\n")[2].partition("\n")[0]
+        assert _docs.DECLINE_STAMP.fullmatch(follower), (
+            f"{line!r} must sit right before its section's decline stamp"
+        )
 
 
 def test_unsupported_anchors_match_docutils():

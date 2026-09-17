@@ -1376,12 +1376,26 @@ def manager_card(manager_id: str) -> str:
     # the full path wrapped mid-word in a box this narrow.
     source_file = source_url.partition("#")[0].rpartition("/")[2]
 
-    # Where to read about the project: its own site, then its Wikipedia article.
-    # Fixed labels rather than the addresses, which wrapped mid-URL in a box this
-    # narrow. Each icon is glued to its label, like the platform icons.
-    links = [f"{{octicon}}`home`\u00a0[Home page]({m.homepage_url})"]
+    # Where to read about the project: its own site, the repository holding its
+    # code, then its Wikipedia article. A home page that is the repository itself
+    # is listed once, as the repository. Fixed labels rather than the addresses,
+    # which wrapped mid-URL in a box this narrow. Each icon sits inside its link,
+    # which the stylesheet keeps from wrapping, so a line breaks between links and
+    # never between an icon and its label.
+    repository = manager_repository_url(manager_id)
+    targets = []
+    if repository and _url_key(repository) == _url_key(m.homepage_url):
+        repository = m.homepage_url
+    else:
+        targets.append(("home", "Home page", m.homepage_url))
+    if repository:
+        targets.append(("code", "Repository", repository))
     if m.wikipedia_url:
-        links.append(f"{{octicon}}`book`\u00a0[Wikipedia]({m.wikipedia_url})")
+        targets.append(("book", "Wikipedia", m.wikipedia_url))
+    links = [
+        f"[{{octicon}}`{icon}` {label}]({url}){{.manager-link}}"
+        for icon, label, url in targets
+    ]
     facts = [
         ("ID", f"`{manager_id}`"),
         ("Links" if len(links) > 1 else "Link", FACT_SEPARATOR.join(links)),
@@ -2616,6 +2630,31 @@ def _canonical_repo_url(target: str) -> str:
     if "://" in target:
         return target
     return f"https://github.com/{target}"
+
+
+def manager_repository_url(manager_id: str) -> str | None:
+    """Locate the repository holding a manager's own code, when one is declared.
+
+    Read from the subjects of {func}`_metrics_config`, which already name the
+    repository the weekly sample measures for each manager, rather than from a
+    second map to keep in step with it. A manager {data}`NO_UPSTREAM` excuses
+    from the sample has none: its code is proprietary, or hosted where no API
+    answers.
+    """
+    subject = _metrics_config()["subjects"].get(manager_id)
+    return _canonical_repo_url(subject) if subject else None
+
+
+def _url_key(url: str) -> str:
+    """Reduce a URL to what tells two addresses of one page apart.
+
+    The scheme, a `www.` prefix, a trailing slash and letter case never do on
+    the forges a home page and a repository share, where `ivan-hc/AM` and
+    `ivan-hc/am` are the same repository.
+    """
+    parsed = urlparse(url)
+    host = parsed.netloc.casefold().removeprefix("www.")
+    return f"{host}{parsed.path.rstrip('/').casefold()}"
 
 
 @cache

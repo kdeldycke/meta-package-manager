@@ -121,6 +121,13 @@ article p[align="center"]:has(img[alt="Meta Package Manager"]) {
 .manager-card dl {
   margin-bottom: 0;
 }
+/* A link and the icon inside it wrap as one unit: an inline SVG is a break
+ * opportunity even beside a non-breaking space, and a label pushed to the next
+ * line reads as orphaned from its icon.
+ */
+.manager-card a.manager-link {
+  white-space: nowrap;
+}
 /* The tracker label wears the color GitHub paints it with (MANAGER_LABEL_COLOR
  * in labels.py, kept in step by test_manager_label_badge_color), so the badge
  * reads as the label itself rather than as one more link. The pale chip carries

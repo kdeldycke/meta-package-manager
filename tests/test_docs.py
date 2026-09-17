@@ -1248,15 +1248,29 @@ def test_manager_card_renders(manager):
             f"{row} must not fall back to commas"
         )
     assert f": `{manager.id}`" in card
-    assert manager.homepage_url in card
-    # The home page, then the Wikipedia article when there is one, each a fixed
-    # label glued to its icon, so no address wraps in the box.
-    links = f"{{octicon}}`home`\u00a0[Home page]({manager.homepage_url})"
+    # The home page, the repository and the Wikipedia article, each a fixed label
+    # after its icon, inside a link the stylesheet keeps whole. A home page that
+    # is the repository is listed once, as the repository.
+    subject = _metrics_config()["subjects"].get(manager.id)
+    repository = _canonical_repo_url(subject) if subject else None
+    assert _docs.manager_repository_url(manager.id) == repository
+    targets = []
+    home = manager.homepage_url.rstrip("/").casefold().replace("://www.", "://")
+    if repository and repository.casefold() == home:
+        repository = manager.homepage_url
+    else:
+        targets.append(("home", "Home page", manager.homepage_url))
+    if repository:
+        targets.append(("code", "Repository", repository))
     if manager.wikipedia_url:
-        links += f"{_docs.FACT_SEPARATOR}{{octicon}}`book`\u00a0"
-        links += f"[Wikipedia]({manager.wikipedia_url})"
-    label = "Links" if manager.wikipedia_url else "Link"
-    assert f"**{label}**\n: {links}\n" in card
+        targets.append(("book", "Wikipedia", manager.wikipedia_url))
+    links = [
+        f"[{{octicon}}`{icon}` {label}]({url}){{.manager-link}}"
+        for icon, label, url in targets
+    ]
+    assert links, f"{manager.id} links nothing"
+    label = "Links" if len(links) > 1 else "Link"
+    assert f"**{label}**\n: {_docs.FACT_SEPARATOR.join(links)}\n" in card
     if manager.requirement:
         # Unstyled like the readme matrix's own Version column, with both angle
         # brackets escaped: a leading `>` would otherwise open a blockquote and
@@ -1293,6 +1307,21 @@ def test_manager_label_badge_color():
     )
     rule = css.partition(".manager-card a.sd-badge {")[2].partition("}")[0]
     assert rule.count(MANAGER_LABEL_COLOR) == 2, "background and border color"
+
+
+def test_manager_links_never_wrap_inside():
+    """Check the stylesheet keeps each card link whole, icon and label together.
+
+    The card marks its links with a class the stylesheet alone gives meaning to,
+    so the two are held together here: a renamed class would leave every link
+    free to wrap between its icon and its label again.
+    """
+    css = (PROJECT_ROOT / "docs" / "_static" / "custom.css").read_text(
+        encoding="UTF-8",
+    )
+    rule = css.partition(".manager-card a.manager-link {")[2].partition("}")[0]
+    assert "white-space: nowrap;" in rule
+    assert "{.manager-link}" in _docs.manager_card("brew")
 
 
 def test_manager_logo_credits_renders():

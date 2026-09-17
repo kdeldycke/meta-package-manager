@@ -84,7 +84,15 @@ class Flatpak(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
-    requirement = ">=1.2.0"
+    requirement = ">=1.9.1"
+    """The first release that pins a runtime installed on explicit request, so
+    that `uninstall --unused` keeps it, and that ships the `pin` command
+    {meth}`~meta_package_manager.managers.flatpak.Flatpak.mark_explicit` runs.
+    Below it,
+    {meth}`~meta_package_manager.managers.flatpak.Flatpak.cleanup_orphan`
+    removes every runtime no application uses, including one the user just
+    installed.
+    """
 
     _LIST_REGEXP = re.compile(
         r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)",
@@ -115,11 +123,15 @@ class Flatpak(PackageManager):
     """
 
     version_regexes = (r"Flatpak\s+(?P<version>\S+)",)
-    """
+    """Read from the `PACKAGE_STRING` that `--version` prints, which
+    [`meson.build`](https://github.com/flatpak/flatpak/blob/1.16.1/meson.build#L328-L331)
+    sets to `Flatpak` followed by the project version. The sample below comes
+    from that source, not from a captured run.
+
     ```{code-block} shell-session
 
     $ flatpak --version
-    Flatpak 1.4.2
+    Flatpak 1.16.1
     ```
     """
 
@@ -325,6 +337,46 @@ class Flatpak(PackageManager):
         """
         return self.run_cli("install", "--noninteractive", package_id)
 
+    def may_hold_as_dependency(self, package_id: str) -> bool:
+        """Whether `package_id` names an installed runtime.
+
+        `uninstall --unused` never removes an application, and the inventory
+        lists applications only. So the default check against
+        {attr}`~meta_package_manager.manager.PackageManager.installed_ids` never
+        sees the one kind of package that can be a dependency: a runtime, or an
+        extension of one. This reads the installed runtimes instead, matching
+        both the bare ID and the `ID//BRANCH` form. A failed listing answers
+        `False`, leaving the install itself untouched.
+
+        ```{code-block} console
+
+        $ flatpak list --runtime --columns=application,branch
+        ```
+        """
+        try:
+            output = self.run_cli("list", "--runtime", "--columns=application,branch")
+        except CLIError:
+            return False
+        refs = set()
+        for line in output.splitlines():
+            application, _, branch = line.partition("\t")
+            refs.update((application, f"{application}//{branch}"))
+        return package_id in refs
+
+    def mark_explicit(self, package_id: str) -> str:
+        """Pin an installed runtime, so that `uninstall --unused` keeps it.
+
+        flatpak pins a runtime it installs on explicit request. A runtime that
+        is already installed is skipped before the pin:
+        [`flatpak-transaction.c`](https://github.com/flatpak/flatpak/blob/8726a5aef7b26dc9574dc0556b3b7e6bd4dd71ec/common/flatpak-transaction.c#L2766-L2778).
+
+        ```{code-block} shell-session
+
+        $ flatpak pin org.gnome.Platform//48
+        ```
+        """
+        return self.run_cli("pin", package_id)
+
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
@@ -362,6 +414,8 @@ class Flatpak(PackageManager):
 
     def cleanup_orphan(self) -> None:
         """Uninstall runtimes and extensions no longer used by any installed app.
+
+        A pinned runtime stays: see {meth}`mark_explicit`.
 
         ```{code-block} shell-session
 

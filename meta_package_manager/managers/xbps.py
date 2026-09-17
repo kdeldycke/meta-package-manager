@@ -242,6 +242,27 @@ class XBPS(PackageManager):
         """
         return self.run_cli("--yes", package_id, sudo=True)
 
+    def mark_explicit(self, package_id: str) -> str:
+        """Mark an installed package as manually installed.
+
+        `xbps-install` returns early for a package that is already installed,
+        and an update copies the old `automatic-install` flag to the new
+        version:
+        [`transaction_ops.c`](https://github.com/void-linux/xbps/blob/0.60.7/lib/transaction_ops.c#L137-L175).
+
+        ```{code-block} shell-session
+
+        $ sudo xbps-pkgdb --mode manual firefox
+        ```
+        """
+        return self.run_cli(
+            "--mode",
+            "manual",
+            package_id,
+            override_cli_path=self.sibling_cli("xbps-pkgdb", same_dir=True),
+            sudo=True,
+        )
+
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 

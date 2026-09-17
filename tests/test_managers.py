@@ -995,6 +995,7 @@ def test_reads_inside_mutating_methods_survive_plan_mode():
         "cleanup_orphan",
         "cleanup_repair",
         "install",
+        "mark_explicit",
         "remove",
         "remove_orphan",
         "restore",

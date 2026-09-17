@@ -76,6 +76,12 @@ fields = { package_id = "Name", latest_version = "Version" }
 [mpm.overrides.shelly.operations.install]
 args = ["install", "standard", "{package_id}"]
 
+# `install standard` sets libalpm's `needed` flag, so a package that is already
+# installed is skipped and keeps its dependency install reason. `mark explicit`
+# changes only that reason. Read from the 3.1.4 source, not driven on a host.
+[mpm.overrides.shelly.operations.mark_explicit]
+args = ["mark", "explicit", "{package_id}"]
+
 [mpm.overrides.shelly.operations.remove]
 args = ["remove", "standard", "{package_id}"]
 

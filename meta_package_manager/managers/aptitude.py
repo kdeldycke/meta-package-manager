@@ -324,6 +324,20 @@ class Aptitude(PackageManager):
             sudo=True,
         )
 
+    def mark_explicit(self, package_id: str) -> str:
+        """Mark an installed package as manually installed.
+
+        `aptitude install` restores the automatic flag a package had before, so
+        an automatically installed package stays automatic:
+        [`aptcache.cc`](https://salsa.debian.org/apt-team/aptitude/-/blob/d24eb35bb7168169774b68b270b08f8079a2c9a5/src/generic/apt/aptcache.cc#L1231-1252).
+
+        ```{code-block} shell-session
+
+        $ sudo aptitude --quiet --disable-columns unmarkauto nyancat
+        ```
+        """
+        return self.run_cli("unmarkauto", package_id, sudo=True)
+
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 

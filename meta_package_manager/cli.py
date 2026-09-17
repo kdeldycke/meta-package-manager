@@ -78,6 +78,7 @@ from click_extra.table import SERIALIZATION_FORMATS
 from click_extra.theme import get_current_theme as theme
 
 from . import bar_plugin
+from .capabilities import Operations, implements_method
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,
@@ -97,7 +98,7 @@ from .cooldown import (
 from .dispatch import trail_label
 from .execution import PLAN_RECORDER, CLIError, operation_subject
 from .logo import env_summary, version_screen_params
-from .manager import PackageManager
+from .manager import INVENTORY_CACHES, PackageManager
 from .package import Package
 from .pool import pool
 from .shell_env import import_shell_env
@@ -973,6 +974,17 @@ def mpm(
 
     ctx.call_on_close(summarize_cli_errors)
 
+    def drop_inventory_caches():
+        """Forget the inventory snapshots this invocation cached on each manager.
+
+        See {data}`~meta_package_manager.manager.INVENTORY_CACHES`.
+        """
+        for manager in pool.values():
+            for cache in INVENTORY_CACHES:
+                manager.__dict__.pop(cache, None)
+
+    ctx.call_on_close(drop_inventory_caches)
+
     # Normalize to None if no manager selectors have been used. This prevent the
     # pool.select_managers() method to iterate over an empty population of managers to
     # choose from.
@@ -1193,8 +1205,32 @@ def _run_manager_action(
 
 
 def _install_action(manager: PackageManager, spec: Specifier) -> str | None:
-    """The canonical install `action`, shared by `install` and `restore`."""
-    return manager.install(spec.package_id, version=spec.version)
+    """The canonical install `action`, shared by `install` and `restore`.
+
+    After the install, a package that the manager may already hold as a
+    dependency is marked as explicitly installed, so an orphan sweep keeps it
+    (see {meth}`~meta_package_manager.manager.PackageManager.mark_explicit`).
+    The check runs before the install and under the stamp of the read it does,
+    so `mpm --plan` runs it and captures only the mutations.
+    """
+    mark = False
+    if implements_method(manager, "mark_explicit"):
+        with manager.acting_as(Operations.installed.name):
+            mark = manager.may_hold_as_dependency(spec.package_id)
+    output = manager.install(spec.package_id, version=spec.version)
+    if not mark:
+        return output
+    try:
+        marked = manager.mark_explicit(spec.package_id)
+    except CLIError:
+        # The failure gate of `run` already relayed the tool's own diagnosis.
+        logging.warning(
+            f"Could not mark {spec.package_id} as explicitly installed. "
+            "An orphan sweep can still remove it.",
+            extra={"label": manager.subject},
+        )
+        return output
+    return "\n".join(text for text in (output, marked) if text)
 
 
 def _package_task(

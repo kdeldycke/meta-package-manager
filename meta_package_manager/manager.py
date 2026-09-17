@@ -74,6 +74,15 @@ bare `datetime.min` would read as a bug.
 """
 
 
+INVENTORY_CACHES = ("installed_ids", "installed_version_map")
+"""Inventory snapshots {class}`PackageManager` caches for one invocation.
+
+An install or a removal makes them stale. The CLI drops them when each
+invocation closes, so the next invocation in the same process reads the system
+again: the test suite chains many invocations on the pooled manager instances.
+"""
+
+
 JSON_FIELD_SELECTOR_REGEX = re.compile(
     r"^(?P<key>[^\[\]]+?)(?:\[(?P<index>\d+)\])?$",
 )
@@ -929,6 +938,45 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Install one package and one only.
 
         Allows a specific `version` to be provided.
+        """
+        raise NotImplementedError
+
+    def may_hold_as_dependency(self, package_id: str) -> bool:
+        """Whether the manager may already hold `package_id` as a dependency.
+
+        `mpm install` and `mpm restore` ask this before they install a package,
+        to decide whether {meth}`mark_explicit` runs after the install. Only a
+        package that is already installed can carry a dependency install reason:
+        a fresh install records the named package as explicitly installed.
+
+        Defaults to membership in {attr}`installed_ids`. That snapshot is taken
+        before the manager's first install of the run and is reused for the
+        next ones. So a package that an earlier install of the same run pulled
+        in keeps the install reason the manager gave it.
+
+        A manager whose {attr}`~meta_package_manager.manager.PackageManager.installed`
+        listing leaves dependencies out overrides this method. See
+        {meth}`meta_package_manager.managers.flatpak.Flatpak.may_hold_as_dependency`.
+        """
+        return package_id in self.installed_ids
+
+    def mark_explicit(self, package_id: str) -> str:
+        """Record an installed package as explicitly installed.
+
+        Some managers keep the dependency install reason of a package that they
+        are asked to install again. Their orphan sweep can then remove a package
+        the user asked for, through {meth}`cleanup_orphan` or
+        {meth}`remove_orphan`. After a successful install of a package that
+        {meth}`may_hold_as_dependency` reported, `mpm install` and `mpm restore`
+        run the manager's command that changes only the install reason
+        (`pacman --database --asexplicit`, `apt-mark manual`,
+        `dnf mark install`, ...).
+
+        The command must also succeed for a package that is already explicit. A
+        failure does not fail the install: `mpm` logs a warning instead.
+
+        Optional. A manager whose install already records the package as
+        explicit, or that has no such command, leaves it unimplemented.
         """
         raise NotImplementedError
 

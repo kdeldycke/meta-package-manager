@@ -19,9 +19,10 @@
 {meth}`~meta_package_manager.manager.PackageManager.remove_orphan`) drops one
 package's own orphaned dependencies; `cleanup --orphans` (system-wide,
 {meth}`~meta_package_manager.manager.PackageManager.cleanup_orphan`) sweeps every
-orphaned package. The argv assertions stub `run_cli` on the pooled manager
-singleton to capture command tokens without spawning a subprocess, so they run
-identically on any host.
+orphaned package. `mark_explicit` keeps both from removing a package the user
+installed again while the manager still held it as a dependency. The argv
+assertions stub `run_cli` on the pooled manager singleton to capture command
+tokens without spawning a subprocess, so they run identically on any host.
 """
 
 from __future__ import annotations
@@ -38,8 +39,10 @@ from meta_package_manager.capabilities import (
     supports_cleanup_cache,
     supports_cleanup_repair,
 )
+from meta_package_manager.execution import CLIError
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.pool import pool
+from meta_package_manager.version import parse_version
 
 from .conftest import _patch_pool_with
 from .fake_manager import FakeManager
@@ -498,6 +501,138 @@ def test_base_orphan_operations_not_implemented():
         PackageManager().cleanup_orphan()
 
 
+# mark_explicit: a package installed again stops being a dependency.
+
+
+EXPLICIT_INSTALL_NOT_MARKED = {
+    "brew": "`brew install` sets `installed_on_request` on a formula it holds.",
+    "cask": "`brew autoremove` never removes a cask.",
+    "cave": "`cave resolve` adds its target to the world set.",
+    "claude-code-plugins": "`plugin install` clears the `auto` flag of a plugin.",
+    "elan": "`toolchain gc` removes unused toolchains, whatever the reason.",
+    "emerge": "`emerge` adds its target to the world set.",
+    "juliaup": "`gc` keeps every version a channel points at.",
+    "pkg-tools": "`pkg_add` tags an installed package as installed manually.",
+    "spack": "`spack install` marks an installed spec as explicit.",
+    "vagrant": "`box prune` removes older box versions, whatever the reason.",
+    "zypper": "zypper has no command that changes only the install reason.",
+}
+"""Managers that remove orphans but need no `mark_explicit`, with the reason."""
+
+
+def _removes_orphans(manager: PackageManager) -> bool:
+    """Whether an orphan sweep or a recursive removal reaches this manager."""
+    return (
+        implements_method(manager, "cleanup_orphan")
+        or cleanup_orphan_is_synthesized(manager)
+        or implements_method(manager, "remove_orphan")
+    )
+
+
+@pytest.mark.parametrize(
+    "manager",
+    [manager for manager in pool.values() if _removes_orphans(manager)],
+    ids=lambda manager: manager.id,
+)
+def test_orphan_removal_spares_explicit_installs(manager):
+    """A manager that removes orphans marks an explicit install, or says why it
+    needs not."""
+    assert implements_method(manager, "mark_explicit") is (
+        manager.id not in EXPLICIT_INSTALL_NOT_MARKED
+    )
+
+
+def test_explicit_install_exemptions_remove_orphans():
+    """Every exemption names a manager that still removes orphans."""
+    assert not [
+        manager_id
+        for manager_id in EXPLICIT_INSTALL_NOT_MARKED
+        if not _removes_orphans(pool[manager_id])
+    ]
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "expected"),
+    (
+        ("apt", ["manual", "firefox"]),
+        ("apt-mint", ["manual", "firefox"]),
+        ("aptitude", ["unmarkauto", "firefox"]),
+        ("aura", ["--database", "--asexplicit", "firefox"]),
+        ("dkp-pacman", ["--database", "--asexplicit", "firefox"]),
+        ("dnf", ["mark", "install", "firefox"]),
+        ("dnf5", ["mark", "user", "firefox"]),
+        ("flatpak", ["pin", "firefox"]),
+        ("nala", ["manual", "firefox"]),
+        ("pacaur", ["--database", "--asexplicit", "firefox"]),
+        ("pacman", ["--database", "--asexplicit", "firefox"]),
+        ("pamac", ["--database", "--asexplicit", "firefox"]),
+        ("paru", ["--database", "--asexplicit", "firefox"]),
+        ("pikaur", ["--database", "--asexplicit", "firefox"]),
+        ("pkg", ["set", "--automatic", "0", "--yes", "firefox"]),
+        ("shelly", ["mark", "explicit", "firefox"]),
+        ("trizen", ["--database", "--asexplicit", "firefox"]),
+        ("xbps", ["--mode", "manual", "firefox"]),
+        ("yay", ["--database", "--asexplicit", "firefox"]),
+    ),
+)
+def test_mark_explicit_uses_native_command(monkeypatch, manager_id, expected):
+    """`mark_explicit` runs the command that changes only the install reason."""
+    tokens = _capture_run_cli(
+        monkeypatch, manager_id, lambda m: m.mark_explicit("firefox")
+    )
+    assert tokens == expected
+
+
+@pytest.mark.parametrize(
+    ("version", "verb"),
+    ((None, "install"), ("4.24.0", "install"), ("5.4.3.0", "user")),
+)
+def test_yum_mark_explicit_follows_dnf_generation(monkeypatch, version, verb):
+    """`yum` fronts dnf4 or dnf5, whose `mark` verbs differ."""
+    monkeypatch.setitem(
+        pool["yum"].__dict__, "version", parse_version(version) if version else None
+    )
+    tokens = _capture_run_cli(monkeypatch, "yum", lambda m: m.mark_explicit("firefox"))
+    assert tokens == ["mark", verb, "firefox"]
+
+
+@pytest.mark.parametrize("manager_id", ("brew", "emerge", "spack", "zypper"))
+def test_mark_explicit_unsupported_raises_not_implemented(manager_id):
+    with pytest.raises(NotImplementedError):
+        pool[manager_id].mark_explicit("firefox")
+
+
+_FLATPAK_RUNTIMES = "org.freedesktop.Platform\t24.08\norg.gnome.Platform\t48\n"
+
+
+@pytest.mark.parametrize(
+    ("package_id", "expected"),
+    (
+        ("org.gnome.Platform", True),
+        ("org.gnome.Platform//48", True),
+        ("org.gnome.Platform//47", False),
+        ("org.gnome.Dictionary", False),
+    ),
+)
+def test_flatpak_may_hold_only_runtimes_as_dependencies(
+    monkeypatch, package_id, expected
+):
+    """Only an installed runtime can be a dependency, by ID or by `ID//BRANCH`."""
+    manager = pool["flatpak"]
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: _FLATPAK_RUNTIMES)
+    assert manager.may_hold_as_dependency(package_id) is expected
+
+
+def test_flatpak_may_hold_as_dependency_survives_a_failed_listing(monkeypatch):
+    manager = pool["flatpak"]
+
+    def failing_run_cli(*args, **kwargs):
+        raise CLIError(1, "", "error: runtime listing failed")
+
+    monkeypatch.setattr(manager, "run_cli", failing_run_cli)
+    assert manager.may_hold_as_dependency("org.gnome.Platform") is False
+
+
 # CLI plumbing, driven through deterministic fakes.
 
 
@@ -686,3 +821,77 @@ def test_cleanup_all_categories_skipped_errors(invoke, monkeypatch):
     assert result.exit_code == 2
     assert "Every cleanup category is skipped." in result.stderr
     assert fake.calls == []
+
+
+class ReasonKeepingFakeManager(FakeManager):
+    """Fake manager that keeps the dependency install reason of a package it
+    installs again, and has a command changing only that reason.
+
+    Its `installed` listing holds `fake-pkg-alpha`, and its search finds any
+    package, so a plain `mpm install` reaches it.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.calls: list[str] = []
+
+    def search(self, query, extended, exact):
+        yield self.package(id=query, latest_version="1.0.0")
+
+    def install(self, package_id, version=None):
+        self.calls.append(f"install:{package_id}")
+        return ""
+
+    def mark_explicit(self, package_id):
+        self.calls.append(f"mark_explicit:{package_id}")
+        return ""
+
+
+class FailingMarkFakeManager(ReasonKeepingFakeManager):
+    """Fake manager whose install reason command fails."""
+
+    def mark_explicit(self, package_id):
+        raise CLIError(1, "", "error: database is locked")
+
+
+def test_install_marks_an_installed_package_explicit(invoke, monkeypatch):
+    fake = _patch_pool_with(monkeypatch, ReasonKeepingFakeManager())
+    result = invoke("install", "fake-pkg-alpha")
+    assert result.exit_code == 0
+    assert fake.calls == ["install:fake-pkg-alpha", "mark_explicit:fake-pkg-alpha"]
+
+
+def test_install_leaves_a_fresh_package_alone(invoke, monkeypatch):
+    """A fresh install is explicit already: no reason command runs."""
+    fake = _patch_pool_with(monkeypatch, ReasonKeepingFakeManager())
+    result = invoke("install", "fake-pkg-gamma")
+    assert result.exit_code == 0
+    assert fake.calls == ["install:fake-pkg-gamma"]
+
+
+def test_install_survives_a_failed_mark(invoke, monkeypatch):
+    """The package is installed even when its reason cannot change: warn only."""
+    _patch_pool_with(monkeypatch, FailingMarkFakeManager())
+    result = invoke("install", "fake-pkg-alpha")
+    assert result.exit_code == 0
+    assert "Could not mark fake-pkg-alpha as explicitly installed." in result.stderr
+
+
+def test_restore_marks_an_installed_package_explicit(invoke, monkeypatch, tmp_path):
+    fake = _patch_pool_with(monkeypatch, ReasonKeepingFakeManager())
+    snapshot = tmp_path / "packages.toml"
+    snapshot.write_text(f'[{fake.id}]\nfake-pkg-alpha = "1.0.0"\n', encoding="UTF-8")
+    result = invoke("restore", str(snapshot))
+    assert result.exit_code == 0
+    assert fake.calls == ["install:fake-pkg-alpha", "mark_explicit:fake-pkg-alpha"]
+
+
+def test_invocation_drops_inventory_caches(invoke, monkeypatch):
+    """The inventory an invocation cached is gone once it closes, so the next
+    invocation in the same process sees the package the first one installed."""
+    fake = _patch_pool_with(monkeypatch, ReasonKeepingFakeManager())
+    fake.__dict__["installed_ids"] = frozenset({"fake-pkg-alpha"})
+    result = invoke("install", "fake-pkg-gamma")
+    assert result.exit_code == 0
+    assert fake.calls == ["install:fake-pkg-gamma"]
+    assert "installed_ids" not in fake.__dict__

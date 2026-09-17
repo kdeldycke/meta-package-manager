@@ -116,6 +116,7 @@ Each entry under `[mpm.overrides.<id>.operations]` declares one operation. Every
 | Operation        | Required placeholder | Maps to                                              |
 | :--------------- | :------------------- | :--------------------------------------------------- |
 | `install`        | `{package_id}`       | `mpm install`                                        |
+| `mark_explicit`  | `{package_id}`       | `mpm install` of a package already installed         |
 | `remove`         | `{package_id}`       | `mpm remove`                                         |
 | `remove_orphan`  | `{package_id}`       | `mpm remove --orphans`                               |
 | `upgrade_one`    | `{package_id}`       | single-package `mpm upgrade` (needs `installed` too) |

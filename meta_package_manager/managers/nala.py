@@ -247,6 +247,27 @@ class Nala(PackageManager):
         """
         return self.run_cli("install", "--assume-yes", package_id, sudo=True)
 
+    def mark_explicit(self, package_id: str) -> str:
+        """Mark an installed package as manually installed.
+
+        `nala install` returns early for a package already at its newest
+        version, before it touches the automatic flag:
+        [`install.py`](https://gitlab.com/volian/nala/-/blob/7784856980039ecb5f1a4449fd03dd569889ec60/nala/install.py#L1086-1099).
+        nala has no command to change that flag, so this goes through the
+        `apt-mark` sibling of the apt suite nala depends on.
+
+        ```{code-block} shell-session
+
+        $ sudo apt-mark manual firefox
+        ```
+        """
+        return self.run_cli(
+            "manual",
+            package_id,
+            override_cli_path=self.sibling_cli("apt-mark"),
+            sudo=True,
+        )
+
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 

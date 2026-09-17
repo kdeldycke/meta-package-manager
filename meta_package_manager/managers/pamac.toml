@@ -94,6 +94,16 @@ regex = '^(?P<package_id>\S+)\s{2}(?P<latest_version>\S+)\s'
 [mpm.overrides.pamac.operations.install]
 args = ["install", "--no-confirm", "{package_id}"]
 
+# `pamac install` skips a package that is already installed, keeping its
+# dependency install reason, and pamac has no command changing that reason
+# alone: `reinstall --as-explicit` downloads the package again, and refuses an
+# AUR one. So the reason goes through pacman's own database operation, which
+# needs root rather than pamac's polkit broker.
+[mpm.overrides.pamac.operations.mark_explicit]
+cli = "pacman"
+args = ["--database", "--asexplicit", "{package_id}"]
+sudo = true
+
 [mpm.overrides.pamac.operations.remove]
 args = ["remove", "--no-confirm", "{package_id}"]
 

@@ -79,6 +79,14 @@ class Zypper(PackageManager):
     collapse those duplicates.
     ```
 
+    ```{caution}
+    `zypper install` leaves a package that is already installed and up to date
+    marked as automatically installed, and zypper has no command that changes
+    only that mark. So `mpm cleanup --orphans` can still remove a package that
+    `mpm install` named while zypper held it as a dependency. See
+    [`SolverRequester.cc`](https://github.com/openSUSE/zypper/blob/697f8809b2c6c0104cdb20fe4bb1fa048d8227ab/src/SolverRequester.cc#L679-L695).
+    ```
+
     Documentation:
 
     - [Concept guide](https://documentation.suse.com/smart/systems-management/html/concept-zypper/index.html)

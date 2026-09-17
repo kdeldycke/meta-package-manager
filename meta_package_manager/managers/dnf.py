@@ -22,6 +22,7 @@ from extra_platforms import UNIX_WITHOUT_MACOS
 
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
+from ..version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -354,6 +355,20 @@ class DNF(PackageManager):
         """
         return self.run_cli("--assumeyes", "install", package_id, sudo=True)
 
+    def mark_explicit(self, package_id: str) -> str:
+        """Mark an installed package as installed by the user.
+
+        `dnf install` only logs a package that is already installed, and keeps
+        its `dependency` reason:
+        [`base.py`](https://github.com/rpm-software-management/dnf/blob/e47634fbe3565d0580e89ec21adb7c1b308642ce/dnf/base.py#L2854-L2857).
+
+        ```{code-block} shell-session
+
+        $ sudo dnf --color=never --quiet mark install pip
+        ```
+        """
+        return self.run_cli("mark", "install", package_id, sudo=True)
+
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
@@ -494,6 +509,21 @@ class DNF5(DNF):
     ```
     """
 
+    def mark_explicit(self, package_id: str) -> str:
+        """Mark an installed package as installed by the user.
+
+        dnf5 renamed the verb: its `mark` takes `user` where dnf4 takes
+        `install`. `dnf5 install` changes the reason of an installed package
+        only when rpm installed it outside dnf:
+        [`goal.cpp`](https://github.com/rpm-software-management/dnf5/blob/eced3531fd92f20e9a4fb93ab88e2b24e99a294b/libdnf5/base/goal.cpp#L1539-L1544).
+
+        ```{code-block} shell-session
+
+        $ sudo dnf5 --quiet mark user pip
+        ```
+        """
+        return self.run_cli("mark", "user", package_id, sudo=True)
+
 
 class YUM(DNF):
     """YUM, the package manager DNF superseded.
@@ -526,3 +556,21 @@ class YUM(DNF):
     """
 
     cli_names = ("yum",)
+
+    def mark_explicit(self, package_id: str) -> str:
+        """Mark an installed package as installed by the user.
+
+        The `mark` verb follows the dnf generation behind `yum`: `install` on
+        dnf4, `user` on dnf5 (see {meth}`DNF5.mark_explicit`).
+
+        ```{code-block} console
+
+        $ sudo yum --color=never --quiet mark install pip
+        $ sudo yum --color=never --quiet mark user pip
+        ```
+        """
+        on_dnf5 = self.version is not None and self.version in VersionRange(
+            DNF5.requirement
+        )
+        verb = "user" if on_dnf5 else "install"
+        return self.run_cli("mark", verb, package_id, sudo=True)

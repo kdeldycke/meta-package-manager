@@ -1007,6 +1007,10 @@ def augmentations_table() -> str:
       `mpm cleanup --orphans` synthesizes it from the manager's orphan listing
       and per-package removal
       ({func}`meta_package_manager.capabilities.cleanup_orphan_is_synthesized`).
+    - *Explicit install*: the manager keeps the dependency install reason of a
+      package it is asked to install again, so `mpm install` and `mpm restore`
+      mark that package as explicitly installed
+      ({meth}`meta_package_manager.manager.PackageManager.mark_explicit`).
     - *Exact search* and *Extended search*: the manager's native search cannot
       filter that way, so `mpm` refilters the raw results itself (the
       `exact_support`/`extended_support` flags set by
@@ -1024,15 +1028,19 @@ def augmentations_table() -> str:
     for mid, manager in sorted(pool.items()):
         upgrade_all = upgrade_all_is_synthesized(manager)
         orphan_sweep = cleanup_orphan_is_synthesized(manager)
+        explicit = implements_method(manager, "mark_explicit")
         exact = exact_search_is_synthesized(manager)
         extended = extended_search_is_synthesized(manager)
         cooldown = cooldown_is_synthesized(manager)
-        if not (upgrade_all or orphan_sweep or exact or extended or cooldown):
+        if not (
+            upgrade_all or orphan_sweep or explicit or exact or extended or cooldown
+        ):
             continue
         table.append([
             f"[`{mid}`](managers/{mid}.md)",
             "✅" if upgrade_all else "",
             "✅" if orphan_sweep else "",
+            "✅" if explicit else "",
             "✅" if exact else "",
             "✅" if extended else "",
             "✅" if cooldown else "",
@@ -1044,12 +1052,13 @@ def augmentations_table() -> str:
             "Manager",
             "Full `upgrade --all`",
             "Orphan sweep",
+            "Explicit install",
             "Exact search",
             "Extended search",
             "Cooldown gate",
         ],
         table_format=TableFormat.GITHUB,
-        colalign=["left", "center", "center", "center", "center", "center"],
+        colalign=["left", "center", "center", "center", "center", "center", "center"],
         disable_numparse=True,
     )
 
@@ -1991,6 +2000,15 @@ def manager_operations(manager_id: str) -> str:
                     f"{' and '.join(missing)} search "
                     "[backfilled by `mpm`](../augmentations.md)"
                 )
+        elif (
+            supported
+            and op is Operations.install
+            and implements_method(m, "mark_explicit")
+        ):
+            note = (
+                "a package already installed as a dependency is "
+                "[marked explicit by `mpm`](../augmentations.md)"
+            )
         elif (
             supported
             and op is Operations.remove

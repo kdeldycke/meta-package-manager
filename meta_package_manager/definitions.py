@@ -291,6 +291,7 @@ QUERY_OPERATIONS: Final[frozenset[str]] = frozenset(
 COMMAND_OPERATIONS: Final[frozenset[str]] = frozenset(
     {
         "install",
+        "mark_explicit",
         "remove",
         "remove_orphan",
         "sync",
@@ -339,6 +340,7 @@ capture stays mandatory.
 
 OPERATION_ARG_PLACEHOLDER: Final[Mapping[str, str]] = {
     "install": "package_id",
+    "mark_explicit": "package_id",
     "remove": "package_id",
     "remove_orphan": "package_id",
     "upgrade_one": "package_id",
@@ -378,6 +380,7 @@ refines the results client-side either way, exactly as for the built-in managers
 
 ALLOWED_ARG_PLACEHOLDERS: Final[Mapping[str, frozenset[str]]] = {
     "install": frozenset({"package_id"}),
+    "mark_explicit": frozenset({"package_id"}),
     "remove": frozenset({"package_id"}),
     "remove_orphan": frozenset({"package_id"}),
     "search": frozenset({"query"}) | SEARCH_REFINEMENT_KEYS,
@@ -1125,8 +1128,8 @@ def _make_package_command(spec: OperationSpec) -> Callable[..., str]:
     """Build a per-package command method substituting ``{package_id}`` into the
     args.
 
-    Serves both `remove` and `remove_orphan`, whose synthesized methods are
-    identical: only the namespace key they land under differs.
+    Serves `remove`, `remove_orphan` and `mark_explicit`, whose synthesized
+    methods are identical: only the namespace key they land under differs.
     """
 
     def package_command(self: PackageManager, package_id: str) -> str:
@@ -1232,7 +1235,7 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
             namespace["search"] = _make_search(spec, compiled)
         elif op_name == "install":
             namespace["install"] = _make_install(spec)
-        elif op_name in ("remove", "remove_orphan"):
+        elif op_name in ("mark_explicit", "remove", "remove_orphan"):
             namespace[op_name] = _make_package_command(spec)
         elif op_name in (
             "sync",

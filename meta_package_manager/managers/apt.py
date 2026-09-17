@@ -273,6 +273,28 @@ class APT(PackageManager):
         """
         return self.run_cli("--yes", "install", package_id, sudo=True)
 
+    def mark_explicit(self, package_id: str) -> str:
+        """Mark an installed package as manually installed.
+
+        `apt install` already does this for a package at its candidate version.
+        When the install upgrades a package that another one still requires, a
+        reading of
+        [`depcache.cc`](https://salsa.debian.org/apt-team/apt/-/blob/981706948a59a239c0616c83d81d9661fc6a6f3b/apt-pkg/depcache.cc#L1209-1229)
+        shows that apt keeps it automatic. The command goes through the
+        `apt-mark` sibling, as `apt` has no such verb.
+
+        ```{code-block} shell-session
+
+        $ sudo apt-mark --quiet manual git
+        ```
+        """
+        return self.run_cli(
+            "manual",
+            package_id,
+            override_cli_path=self.sibling_cli("apt-mark"),
+            sudo=True,
+        )
+
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 

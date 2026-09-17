@@ -362,6 +362,7 @@ MUTATION_MEMBERS = (
     # Not a mutation, but its docstring documents the exact CLI it builds too.
     "doctor_cli",
     "install",
+    "mark_explicit",
     "remove",
     "remove_orphan",
     # Not a mutation either, and the member that most needs the check: a
@@ -601,6 +602,8 @@ def test_documented_command_matches_construction(
         # version support may balk: the unpinned record is enough for them.
         with suppress(Exception):
             manager.install(PID_SENTINEL, version=PID_SENTINEL)
+    elif member == "mark_explicit":
+        manager.mark_explicit(PID_SENTINEL)
     elif member == "remove":
         manager.remove(PID_SENTINEL)
     elif member == "remove_orphan":

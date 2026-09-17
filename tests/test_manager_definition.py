@@ -161,15 +161,17 @@ def test_parse_definition_rejects_legacy_cleanup():
         )
 
 
-def test_parse_definition_remove_orphan_requires_package_id():
-    """`remove_orphan` targets nothing without ``{package_id}``, so it is rejected."""
+@pytest.mark.parametrize("operation", ("mark_explicit", "remove_orphan"))
+def test_parse_definition_package_operation_requires_package_id(operation):
+    """A per-package operation targets nothing without ``{package_id}``, so it is
+    rejected."""
     with pytest.raises(ValidationError, match="package_id"):
         parse_manager_definition(
             "mytool",
             {
                 "platforms": ["all_platforms"],
                 "cli_names": ["mytool"],
-                "operations": {"remove_orphan": {"args": ["remove", "--cascade"]}},
+                "operations": {operation: {"args": ["mark", "--cascade"]}},
             },
         )
 
@@ -747,6 +749,24 @@ def test_factory_orphan_operations(monkeypatch):
     assert implements_method(manager, "cleanup_orphan") is True
     assert implements_method(manager, "cleanup_cache") is True
     assert implements_method(manager, "cleanup_repair") is True
+
+
+def test_factory_mark_explicit(monkeypatch):
+    """A config-defined manager can declare `mark_explicit`, which substitutes
+    ``{package_id}`` like `remove` and registers as implemented."""
+    manager = build_manager_class(
+        _definition(mark_explicit=OperationSpec(args=("mark", "{package_id}"))),
+    )()
+    captured: list[tuple[str, ...]] = []
+
+    def record_run_cli(*args, **kwargs):
+        captured.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", record_run_cli)
+    manager.mark_explicit("jq")
+    assert captured == [("mark", "jq")]
+    assert implements_method(manager, "mark_explicit") is True
 
 
 def test_factory_operation_sudo(monkeypatch):

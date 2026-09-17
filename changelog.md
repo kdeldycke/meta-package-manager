@@ -350,6 +350,8 @@
 - [bar-plugin,mpm] Drop the API reference sections the guide pages repeated at their foot; each module stays documented on its own API page.
 - [mpm] Regroup the documentation sidebar under ten topical sections, instead of one flat list of 19 entries and a `Development` catch-all.
 - [mpm] Fix the cross-references that rendered as plain text on the manager and configuration pages, where a short reference resolved only inside the API reference.
+- [apt,apt-mint,aptitude,aura,dkp-pacman,dnf,dnf5,nala,pacaur,pacman,pamac,paru,pikaur,pkg,shelly,trizen,xbps,yay,yum] Mark a package already installed as a dependency as explicitly installed when `mpm install` or `mpm restore` names it, so `mpm cleanup --orphans` keeps it.
+- [flatpak] Pin a runtime already installed as a dependency when `mpm install` or `mpm restore` names it, so `mpm cleanup --orphans` keeps it. This raises the flatpak floor to `1.9.1`.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

@@ -339,6 +339,20 @@ class PKG(PackageManager):
         """
         return self.run_cli("install", "--quiet", "--yes", package_id, sudo=True)
 
+    def mark_explicit(self, package_id: str) -> str:
+        """Clear the automatic flag of an installed package.
+
+        `pkg install` clears it only when the package is already up to date, and
+        only since `2.7.0`. An upgrade keeps the flag of the installed package:
+        [`pkg_jobs.c`](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_jobs.c#L1318-L1342).
+
+        ```{code-block} shell-session
+
+        $ sudo pkg set --automatic 0 --yes dmg2img
+        ```
+        """
+        return self.run_cli("set", "--automatic", "0", "--yes", package_id, sudo=True)
+
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 

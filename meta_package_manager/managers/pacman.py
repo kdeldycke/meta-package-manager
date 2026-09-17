@@ -267,6 +267,28 @@ class Pacman(PackageManager):
         """
         return self.run_cli("--sync", package_id, sudo=True)
 
+    def mark_explicit(self, package_id: str) -> str:
+        """Mark an installed package as explicitly installed.
+
+        libalpm copies the old install reason when it reinstalls a package, so
+        `--sync` alone leaves a dependency marked as one:
+        [`add.c`](https://github.com/devkitPro/pacman/blob/cf473bcfbd275044250fa6ce3703dd7059a52273/lib/libalpm/add.c#L452-L453).
+        Passing `--asexplicit` to the install instead is not an option: that
+        flag applies to every package of the transaction, so it also marks the
+        dependencies the install pulls in.
+
+        `--database` takes an exact installed package name only, and exits `1`
+        on a group or a provides name.
+
+        The AUR helpers pass `--database` to pacman and escalate it themselves.
+
+        ```{code-block} shell-session
+
+        $ sudo pacman --noconfirm --color never --database --asexplicit firefox
+        ```
+        """
+        return self.run_cli("--database", "--asexplicit", package_id, sudo=True)
+
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 

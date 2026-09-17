@@ -809,6 +809,29 @@ def png_size(target: Path) -> tuple[int, int]:
     return width, height
 
 
+def strip_profile(target: Path) -> None:
+    """Drop the `iCCP` chunk `screencapture` embeds, which changes on every run.
+
+    The window server generates the virtual display's color profile when the
+    display is created and stamps it with that time, so two captures of the
+    same pixels differed in one byte of that chunk and nowhere else (run
+    35185591204). The profile is sRGB to the bit, its curve within `0.00/255`
+    of the sRGB one over its 1024 points and its primaries sRGB's, and a PNG
+    carrying no profile is read as sRGB: the chunk holds nothing but the
+    timestamp. The GNOME captures carry none either.
+    """
+    data = target.read_bytes()
+    kept = [data[:8]]
+    offset = 8
+    while offset < len(data):
+        length, kind = struct.unpack(">I4s", data[offset : offset + 8])
+        end = offset + 12 + length
+        if kind != b"iCCP":
+            kept.append(data[offset:end])
+        offset = end
+    target.write_bytes(b"".join(kept))
+
+
 def png_rows(target: Path) -> Frame:
     """Decode a PNG into its rows of pixel bytes.
 
@@ -1963,6 +1986,24 @@ def wait_for_window(host: Host, title: str | None) -> dict[str, float]:
     raise RuntimeError(msg)
 
 
+def settled_window(host: Host, title: str) -> dict[str, float]:
+    """Bounds of the host's window titled `title`, once they have stopped moving.
+
+    A pane change resizes the preferences window with an animation, and the
+    title changes before the frame does: run 35185591204 photographed the dark
+    pane at the General pane's `500x392`, from bounds read as the title
+    appeared, while the window listing taken at the shutter already showed
+    `750x488`.
+    """
+    window = wait_for_window(host, title)
+    while True:
+        time.sleep(1)
+        settled = wait_for_window(host, title)
+        if settled == window:
+            return settled
+        window = settled
+
+
 def toolbar_item(host: Host, label: str) -> tuple[float, float]:
     """Centre of a toolbar item of the host's front window, found by its label."""
     reply = osascript(
@@ -2047,6 +2088,7 @@ def photograph(
     with TemporaryDirectory(prefix="mpm-frame-") as name:
         fresh = Path(name) / target.name
         run(("screencapture", "-x", "-o", "-t", "png", "-R", rect, str(fresh)))
+        strip_profile(fresh)
         captured = png_size(fresh)
         print(f"  {target.name}: {captured}")
         # A floor rather than an equality, the edges of a fractional rectangle
@@ -2143,7 +2185,7 @@ def capture_preferences(shot: Shot, plugins: Path) -> None:
     open_preferences(shot.host)
     wait_for_window(shot.host, None)
     mouse("click", *toolbar_item(shot.host, PREFERENCES_PANE))
-    window = wait_for_window(shot.host, PREFERENCES_PANE)
+    window = settled_window(shot.host, PREFERENCES_PANE)
     park_pointer()
     time.sleep(2)
     width, height = DISPLAY_MODE

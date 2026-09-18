@@ -176,6 +176,11 @@ class Go(PackageManager):
         where the destination is the `bin` subdirectory of the first `GOPATH`
         entry instead.
 
+        Rendered with forward slashes regardless of host: `go` accepts them on
+        every platform it targets, and it keeps this value byte-identical to
+        the documented command below on Windows, where `str(Path(...))` would
+        otherwise render the joined path with backslashes.
+
         ```{code-block} shell-session
 
         $ go env GOBIN
@@ -191,7 +196,7 @@ class Go(PackageManager):
         if gobin:
             return gobin
         gopath = self.run_cli("env", "GOPATH", force_exec=True).strip()
-        return str(Path(gopath) / "bin")
+        return (Path(gopath) / "bin").as_posix()
 
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.

@@ -721,8 +721,6 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # token file of its own, and needs the environment its shell-init snippet exports.
     # Neither is set up on a runner.
     "basalt": is_github_ci,
-    # choco installs to an admin-only location the unelevated CI process cannot write to.
-    "choco": is_github_ci,
     # Claude Code resolves a plugin through the marketplaces configured for the
     # user, and a fresh host has none, so the install fails for want of a registry.
     "claude-code-plugins": claude_marketplace_missing,

@@ -195,7 +195,7 @@ class MiKTeX(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
-        Naming packages genuinely restricts the run to them, the rest being
+        Naming packages restricts the run to them, the rest being
         reported as already up to date.
 
         ```{code-block} shell-session

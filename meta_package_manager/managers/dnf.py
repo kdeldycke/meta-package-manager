@@ -47,7 +47,7 @@ class DNF(PackageManager):
     answers for *available* packages, so it describes the upgrade candidate and
     never the package installed, and `repoquery` offers no tag for the latter.
     The installed set is therefore read separately and joined on name and
-    architecture. It is also the one place versions are reported as `%{evr}`,
+    architecture. It is also the one place versions are reported as ``%{evr}``,
     epoch and release included, since an upgrade may move only the release.
     ```
 
@@ -152,8 +152,8 @@ class DNF(PackageManager):
     indents the line and separates the two fields with a tab. Matching both is
     what keeps the parser working across the Fedora 41 cutover.
 
-    The trailing `.+` is what captures a summary whole. A `\\S+` there stopped at
-    the first space, so every description was stored as its own first word.
+    The trailing `.+` captures a summary whole, where a `\\S+` would stop at
+    its first space and keep only the first word of each description.
 
     Nothing else is needed to reject the section headers both binaries print
     (dnf4's `===` rules, dnf5's `Matched fields:` lines) or dnf4's metadata
@@ -175,9 +175,9 @@ class DNF(PackageManager):
         NetworkManager-wifi___MPM___1.56.1___MPM___Wifi plugin for NetworkManager___MPM___aarch64
         ```
 
-        `%{version}` is the upstream version alone: the first of those three is
+        ``%{version}`` is the upstream version alone: the first of those three is
         installed as `1:1.56.1-2.fc44`, and neither its epoch nor its release
-        reaches this listing. `outdated` below reports `%{evr}` instead, which
+        reaches this listing. `outdated` below reports ``%{evr}`` instead, which
         carries both.
         """
         qf = ["%{name}", "%{version}", "%{summary}", "%{arch}\n"]
@@ -212,12 +212,12 @@ class DNF(PackageManager):
         architecture: the pair is what identifies a package on a multilib host,
         where the same name is installed for two of them.
 
-        Both sides are reported as `%{evr}`, the epoch-version-release triplet
-        RPM actually orders packages by. A bare `%{version}` would hide the
+        Both sides are reported as ``%{evr}``, the epoch-version-release triplet
+        RPM actually orders packages by. A bare ``%{version}`` would hide the
         release, and a release-only rebuild (`1.21.0-1.fc44` to
         `1.21.0-2.fc44`) is a real upgrade that would then read as an identical
         version on both sides. This is the one operation where that matters,
-        which is why `installed` above still reports `%{version}`: changing it
+        which is why `installed` above still reports ``%{version}``: changing it
         would rewrite the version string every snapshot carries.
 
         One format serves both, the summary going unread on the installed pass.
@@ -487,10 +487,9 @@ class DNF5(DNF):
     version_regexes = (r"dnf5\s+version\s+(?P<version>\S+)",)
     """`dnf5` opens its own name, where dnf4 answers with a bare version.
 
-    The bare `(?P<version>\\S+)` default reads that first token as the version
-    itself, so the manager reported `dnf5` and then refused its own
-    `requirement`, taking Fedora's reference package manager out of the pool
-    entirely.
+    The bare `(?P<version>\\S+)` default would read that first token as the
+    version itself, and the manager would then refuse its own `requirement`,
+    taking Fedora's reference package manager out of the pool entirely.
 
     ```{code-block} shell-session
 

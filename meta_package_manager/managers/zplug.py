@@ -25,6 +25,7 @@ from typing import ClassVar
 from click_extra.execution import args_cleanup
 from extra_platforms import LINUX_LIKE, MACOS
 
+from ..capabilities import version_not_implemented
 from ..manager import PackageManager
 
 TYPE_CHECKING = False
@@ -201,6 +202,7 @@ class Zplug(PackageManager):
         """
         return self.build_cli("update")
 
+    @version_not_implemented
     def upgrade_one_cli(
         self,
         package_id: str,

@@ -13,6 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+"""`mpm upgrade` CLI tests.
+
+```{danger}
+All tests here must be marked as destructive unless the `--dry-run` parameter is
+passed.
+```
+"""
 
 from __future__ import annotations
 
@@ -55,21 +62,13 @@ def evaluate_signals(mid, stdout, stderr):
         f":{mid}: Does not implement upgrade_all_cli." in stderr,
         f":{mid}: Does not implement {Operations.upgrade_all}." in stderr,
         f":{mid}.upgrade_all: Upgrade all outdated packages." in stderr,
-        bool(re.search(rf"Upgrade \S+ with {mid}\.\.\.", stderr)),
+        bool(re.search(rf"Upgrade \S+ with\b.*\b{mid}\b", stderr)),
         f":{mid}: Skipped:" in stderr,
     )
 
 
 check_selection = partial(check_manager_selection, signals=evaluate_signals)
 """Selection assertions reading this subcommand's own signals."""
-
-
-# Test the system-wide upgrade sub-command.
-#
-# ```{danger}
-# All tests here should me marked as destructive unless --dry-run parameter is
-# passed.
-# ```
 
 
 @pytest.mark.parametrize("all_option", ("--all", None))

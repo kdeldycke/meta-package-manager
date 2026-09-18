@@ -80,12 +80,12 @@ class Emerge(PackageManager):
     """{attr}`~meta_package_manager.execution.CLIExecutor.pre_args` without `--quiet`, for the operations whose output a
     regex reads instead of a person.
 
-    `--quiet` does not only drop noise, it changes the shape of what emerge
-    prints. `--search` collapses each hit to a bare `*  category/name` line,
+    `--quiet` changes the shape of what emerge prints, beyond dropping noise.
+    `--search` collapses each hit to a bare `*  category/name` line,
     losing the `Latest version available:` and `Description:` fields
     `_SEARCH_REGEXP` needs. `--update --columns` drops the
     `[ebuild   U  ]` state prefix and leaves the latest version unbracketed,
-    which are the two things {attr}`_OUTDATED_REGEXP` anchors on. Either regex
+    which are the two things `_OUTDATED_REGEXP` anchors on. Either regex
     then matches nothing, and the operation reports an empty set on a system
     that has results.
     """

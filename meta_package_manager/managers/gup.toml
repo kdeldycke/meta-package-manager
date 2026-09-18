@@ -13,7 +13,7 @@
 # purpose: the Go toolchain has no removal verb in any scope and reports no
 # staleness, so `remove`, `outdated` and `upgrade` are reachable through gup
 # alone. A host carrying both therefore reports every Go command twice, under
-# two ids, `go` keying on the module path and gup on the binary name.
+# two ids, `go` keying on the import path and gup on the binary name.
 # ```
 #
 # Parsing notes, verified against gup 1.8.1 on macOS:

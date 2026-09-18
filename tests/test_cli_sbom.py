@@ -90,7 +90,7 @@ def test_unrecognized_extension_without_format(invoke, subcmd):
     assert "Cannot guess export format from 'help'" in result.stderr
     assert "Use --format to pick one of: json, xml, yaml, tag, rdf." in result.stderr
     # The collection loop must not have run.
-    assert "Export packages from" not in result.stderr
+    assert "Export installed packages." not in result.stderr
 
 
 def test_unrecognized_extension_with_explicit_format(

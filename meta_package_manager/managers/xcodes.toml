@@ -58,10 +58,10 @@ repository_url = "https://github.com/XcodesOrg/xcodes"
 logo = "xcode"
 platforms = ["macos"]
 cli_names = ["xcodes"]
-requirement = ">=1.0.0"
 # The tab-separated listing and its `<version> (<build>)` column have been
 # unchanged since the first release; the later architecture label is absorbed by
 # the pattern below rather than requiring a newer xcodes.
+requirement = ">=1.0.0"
 # `xcodes version` prints the bare version and nothing else. Note the
 # subcommand: there is no `--version` flag.
 version_cli_options = ["version"]

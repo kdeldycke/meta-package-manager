@@ -262,12 +262,13 @@ def test_search_skips_running_interpreter_without_pip():
     failing against an environment the user never asked mpm to manage.
     """
     fake_exec = "/home/kde/.local/share/uv/tools/meta-package-manager/bin/python"
+    missing = Path(fake_exec)
     with (
         patch(PATCH_EXEC, fake_exec),
         patch.object(Pip, "_running_from_bundled_app", return_value=False),
         patch.object(Pip, "_pip_install_blocked", return_value=False),
         patch.object(
-            Pip, "_pip_module_missing", side_effect=lambda path: str(path) == fake_exec
+            Pip, "_pip_module_missing", side_effect=lambda path: path == missing
         ),
         patch.object(CLIExecutor, "search_all_cli", _fake_base_search),
     ):

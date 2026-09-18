@@ -42,7 +42,7 @@ import click
 import pytest
 from click_extra.color import COLOR_ENVVARS
 from click_extra.spinner import Spinner
-from extra_platforms import UNIX, is_any_windows
+from extra_platforms import is_any_windows
 
 from meta_package_manager.execution import STILL_CALL_HINT, STILL_CALL_MARKER
 from meta_package_manager.pool import pool
@@ -65,11 +65,6 @@ from .fake_manager import FakeManager
 # consuming it are skipped.
 if not is_any_windows():
     import pwd
-
-# A UNIX platform to force build_cli's platform gate deterministically,
-# independent of the host the tests run on. Not imported from
-# tests.test_execution, which already imports from this module.
-_UNIX_PLATFORM = next(iter(UNIX))
 
 # Escalation policy inventories: which managers escalate through mpm and which run
 # sudo themselves, pinned across the whole pool so a new manager cannot silently
@@ -285,13 +280,12 @@ def test_prime_sudo_skips_when_no_manager_escalates():
 
 
 def test_prime_sudo_leaves_a_stock_windows_run_alone():
-    """Windows is no longer skipped by a platform guard, and a stock run there
-    still spends no subprocess.
+    """A stock Windows run spends no subprocess, with no platform guard in the way.
 
     What returns early is the empty selection, not the platform: no manager
     escalates by default on Windows, so only `--sudo` or a
-    `[mpm.overrides.<id>] sudo = true` entry reaches the probe. Keeping the
-    guard out of the way is what lets `gsudo` be probed at all when one does.
+    `[mpm.overrides.<id>] sudo = true` entry reaches the probe, which is what
+    lets `gsudo` be probed at all when one does.
     """
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env() as run, only_escalator("gsudo"):
@@ -358,10 +352,10 @@ def test_prime_sudo_skips_the_prompt_under_a_passwordless_policy(caplog):
     `sudo --validate` refuses whenever *any* matching `sudoers` entry wants a
     password, so the `NOPASSWD` rule `docs/sudo.md` recommends reads as a cold
     cache once a distribution's stock `ALL ALL=(ALL) ALL` sits beside it.
-    openSUSE ships exactly that pair, where mpm used to warn that managers "may
-    fail" and then watch them succeed. Off-terminal on purpose: that is the path
-    the spurious warning came from, and a policy needing no password needs no
-    terminal either.
+    openSUSE ships exactly that pair, where mpm would otherwise warn that
+    managers "may fail" and then watch them succeed. Off-terminal on purpose:
+    that is the path such a warning comes from, and a policy needing no password
+    needs no terminal either.
     """
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
@@ -1439,15 +1433,7 @@ def test_sudo_command_reaches_the_config_file(invoke, tmp_path):
 )
 def test_build_cli_escalates_with_the_selected_binary(escalator_id, expected_prefix):
     manager = _escalating_manager()
-    with (
-        # Pin the platform gate too: a Windows host never escalates, whatever
-        # the escalator, and this test's subject is the argv dialect.
-        patch(
-            "meta_package_manager.execution.current_platform",
-            return_value=_UNIX_PLATFORM,
-        ),
-        only_escalator(escalator_id, selected=escalator_id),
-    ):
+    with only_escalator(escalator_id, selected=escalator_id):
         args = manager.build_cli("install", "pkg", sudo=True)
     assert tuple(str(a) for a in args[: len(expected_prefix)]) == expected_prefix
 
@@ -1689,7 +1675,7 @@ def test_still_call_prints_its_label_once(
     script = "print('quick call')"
     with patch("sys.stderr.isatty", return_value=True):
         manager.run_cli("-c", script)
-    label = manager._call_label((manager.cli_path, "-c", script))
+    label = manager._call_label((str(manager.cli_path), "-c", script))
     line = f"{STILL_CALL_MARKER} {label} ({STILL_CALL_HINT})"
     assert (f"{line}\n" in capsys.readouterr().err) is announced
 

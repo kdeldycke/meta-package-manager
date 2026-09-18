@@ -18,17 +18,15 @@
 
 Called by repomatic's `update-docs` job. Writes the pool-derived blocks of
 `pyproject.toml` (the `[project]` keywords, the metrics subjects, the label registry
-and the labeller rules), the operation-matrix platform footnotes spliced into
-`readme.md`, and the
-stub *file set* of `docs/managers/` (one `<id>.md` per pool manager, created and
-deleted as managers join or leave the pool).
+and the labeller rules), and the stub *file set* of `docs/managers/` (one `<id>.md`
+per pool manager, created and deleted as managers join or leave the pool).
 
 Everything that renders live at Sphinx build time -- the benchmark, augmentations
 and per-manager tables, and the `<!-- matrix ... -->` compatibility blocks -- is
 produced by the generators in {mod}`meta_package_manager._docs` and needs no
-regeneration step here. The readme's Sankey diagram and operation matrix call
-those same generators from `<!-- mirror-src -->` blocks, refreshed by
-`click-extra refresh-directives` in the same `update-docs` job.
+regeneration step here. The readme's manager roster calls those same generators
+from a `<!-- mirror-src -->` block, refreshed by `click-extra refresh-directives`
+in the same `update-docs` job.
 
 `--check` reports which artifacts are out of date and exits non-zero without
 touching the tree, so `repomatic update-docs --check` can detect drift in CI.

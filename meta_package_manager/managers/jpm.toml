@@ -4,10 +4,10 @@
 # meta_package_manager/definitions.py (build_bundled_managers) for the loader.
 #
 # Parsing notes, verified against jpm shipped with Janet 1.41.2 on macOS:
-#   - jpm reports no version of its own. `jpm --version` does not merely go
-#     unrecognised, it fails: "error: unknown cli option version". jpm ships with
-#     Janet and is versioned with it, so the probe reads the interpreter it sits
-#     beside, which is what `version_cli` exists for.
+#   - jpm reports no version of its own: `jpm --version` fails with
+#     "error: unknown cli option version". jpm ships with Janet and is versioned
+#     with it, so the probe reads the interpreter it sits beside, which is what
+#     `version_cli` exists for.
 #   - No inventory: jpm has no listing command of any kind, so `installed` and
 #     `outdated` are not declared and mpm auto-skips them. There is no `search`
 #     either. What remains is the mutating surface plus a sync and a cache purge.

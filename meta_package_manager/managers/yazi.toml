@@ -73,7 +73,7 @@ args = ["pkg", "add", "{package_id}"]
 [mpm.overrides.yazi.operations.remove]
 args = ["pkg", "delete", "{package_id}"]
 
-# Naming packages genuinely restricts the upgrade to them; the bare form
+# Naming packages restricts the upgrade to them; the bare form
 # upgrades everything, which is what upstream documents the argument as.
 [mpm.overrides.yazi.operations.upgrade_one]
 args = ["pkg", "upgrade", "{package_id}"]

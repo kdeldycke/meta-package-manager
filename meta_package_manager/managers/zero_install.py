@@ -17,7 +17,6 @@
 from __future__ import annotations
 
 import re
-from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -127,7 +126,7 @@ class ZeroInstall(PackageManager):
     """
     ```{code-block} shell-session
 
-    $ 0install --console --version
+    $ 0install --version
     0install (zero-install) 2.18
     Copyright (C) 2019 Thomas Leonard
     This program comes with ABSOLUTELY NO WARRANTY,
@@ -139,7 +138,7 @@ class ZeroInstall(PackageManager):
     ```
     """
 
-    _SEARCH_REGEXP: ClassVar = re.compile(
+    _SEARCH_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\n {2}(?P<name>\S+) - (?P<description>.*) \[\d+%\]$",
         re.MULTILINE,
     )

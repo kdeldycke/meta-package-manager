@@ -113,9 +113,9 @@ class Cooldown(click.ParamType):
         token = value.strip()
         if not token:
             return None
-        for policy in CooldownPolicy:
-            if token.casefold() == policy.value.casefold():
-                return policy
+        policy = parse_policy_token(token)
+        if policy is not None:
+            return policy
         # Delegate the duration grammar (friendly, ISO 8601, RFC 3339) to
         # click-extra, which raises the canonical "not a valid duration"
         # error on anything else.
@@ -141,8 +141,8 @@ class CooldownSettings:
 
     legacy: bool = False
     """Whether the section used the deprecated `[mpm] cooldown = "<duration>"`
-    top-level string spelling, accepted as the window for one migration
-    window."""
+    top-level string spelling, accepted as the window until a later release
+    drops it."""
 
 
 def parse_policy_token(token: Any) -> CooldownPolicy | None:

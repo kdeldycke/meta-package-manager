@@ -41,11 +41,10 @@ concurrency:
 # morning. See `docs/gnome_screenshots_update.py` and
 # `docs/bar_screenshots_update.py` for the rationale of each stub.
 #
-# The macOS half was written off as impossible first: photographing an Xbar or
-# SwiftBar menu needs Screen Recording and Accessibility, which a hosted runner
-# was assumed to withhold. Measured instead of assumed, `macos-26` ships both
-# already granted to `/bin/bash` and `osascript`, and runs with SIP disabled, so
-# the second job is real. Neither runner offers a HiDPI screen, so each job
+# Photographing an Xbar or SwiftBar menu needs Screen Recording and
+# Accessibility, and a hosted `macos-26` runner ships both already granted to
+# `/bin/bash` and `osascript`, and runs with SIP disabled, so the second job
+# captures a real menu. Neither runner offers a HiDPI screen, so each job
 # renders at 2x on a virtual display it raises itself: `gnome-shell` on a
 # virtual monitor it sizes, macOS on a `CGVirtualDisplay` the driver mirrors the
 # runner's own screen onto.
@@ -174,14 +173,13 @@ jobs:
           uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.15.0' \
             format-images | tee --append "${GITHUB_STEP_SUMMARY}"
 
-      # One call for what three steps did by hand. It opens the pull request when
-      # the captures moved, refreshes it when they move again, does nothing at all
-      # when they match what is already on the branch, and closes it, branch and
-      # all, once a change is reverted: that last state is the one a hand-rolled
-      # upsert never handled, leaving a stale PR open forever. The branch name and
-      # the label come from the template, so no step repeats them. `--add-path` is
-      # a git pathspec, quoted so git expands it rather than the shell, and one
-      # matching nothing is dropped instead of fatal.
+      # `pr-sync` owns the pull request's whole lifecycle. It opens the pull
+      # request when the captures moved, refreshes it when they move again, does
+      # nothing at all when they match what is already on the branch, and closes
+      # it, branch and all, once a change is reverted, so no stale PR stays open.
+      # The branch name and the label come from the template, so no step repeats
+      # them. `--add-path` is a git pathspec, quoted so git expands it rather than
+      # the shell, and one matching nothing is dropped instead of fatal.
       - name: Sync pull request
         env:
           # The PAT when the repository has one, so the PR it opens triggers the
@@ -193,12 +191,12 @@ jobs:
           --template-arg shell_version="${SHELL_VERSION}"
           --add-path 'docs/assets/gnome-shell-*.png'
 
-  # The macOS half, and the one I first called impossible: these runners disable
-  # SIP, run a full Aqua session, and ship screen-recording and accessibility
-  # already granted, so a real SwiftBar can be installed, driven and photographed
-  # with no TCC manipulation of any kind. The runner's own screen is 1x in every
-  # mode it offers, so the driver photographs a 2x virtual display it raises
-  # over it. See `docs/bar_screenshots_update.py` for the rationale.
+  # The macOS half: these runners disable SIP, run a full Aqua session, and ship
+  # screen-recording and accessibility already granted, so a real SwiftBar can be
+  # installed, driven and photographed with no TCC manipulation of any kind. The
+  # runner's own screen is 1x in every mode it offers, so the driver photographs
+  # a 2x virtual display it raises over it. See `docs/bar_screenshots_update.py`
+  # for the rationale.
   update-bar-plugin-screenshots:
     name: Capture the SwiftBar/Xbar plugin menu
     runs-on: macos-26

@@ -310,8 +310,9 @@ class BarPluginRenderer(MPMPlugin):
         An action starts the way the plugin does, outside a terminal, so it
         needs the environment the menu was rendered from. The flag is read off
         the root context of the `mpm outdated --plugin-output` run, and stays
-        ahead of {attr}`mpm_options` so a `--no-shell-env` typed there wins. A
-        renderer built outside a run, like the test suite does, carries none.
+        ahead of {attr}`~meta_package_manager.bar_plugin.MPMPlugin.mpm_options`
+        so a `--no-shell-env` typed there wins. A renderer built outside a run,
+        like the test suite does, carries none.
         """
         ctx = get_current_context(silent=True)
         if ctx and ctx.find_root().params.get("shell_env"):

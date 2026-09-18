@@ -51,7 +51,7 @@ class Spack(PackageManager):
     ```
 
     ```{caution}
-    `--no-env` is load-bearing, and silently so. Spack scopes every command to
+    `--no-env` is required, and silently so. Spack scopes every command to
     the active environment, which the user activates with `spack env activate`
     or by exporting `SPACK_ENV`, and an environment is a *project*, not the
     machine. With one active, `spack find` reports that environment's contents:
@@ -235,7 +235,7 @@ class Spack(PackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        `--all` is load-bearing rather than a convenience. Naming a package that
+        `--all` is required rather than a convenience. Naming a package that
         the host holds more than one build of is refused outright, with `Error:
         zlib matches multiple packages`, so without the flag a removal fails on
         exactly the hosts Spack exists to serve.

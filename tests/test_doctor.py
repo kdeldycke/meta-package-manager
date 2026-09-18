@@ -31,7 +31,6 @@ from meta_package_manager.capabilities import Operations, implements
 from meta_package_manager.execution import CLIError
 from meta_package_manager.pool import pool
 
-from .conftest import _patch_pool_with
 from .fake_manager import FakeManager
 
 
@@ -180,16 +179,16 @@ class SilentDoctorFakeManager(HealthyDoctorFakeManager):
         return True, ""
 
 
-def test_doctor_healthy_relays_report(invoke, monkeypatch):
-    fake = _patch_pool_with(monkeypatch, HealthyDoctorFakeManager())
+def test_doctor_healthy_relays_report(invoke, patch_pool_with):
+    fake = patch_pool_with(HealthyDoctorFakeManager())
     result = invoke("doctor")
     assert result.exit_code == 0
     assert f"{fake.id}:" in result.stdout
     assert "Your system is ready." in result.stdout
 
 
-def test_doctor_unhealthy_exits_nonzero(invoke, monkeypatch):
-    fake = _patch_pool_with(monkeypatch, SickDoctorFakeManager())
+def test_doctor_unhealthy_exits_nonzero(invoke, patch_pool_with):
+    fake = patch_pool_with(SickDoctorFakeManager())
     result = invoke("doctor")
     assert result.exit_code == 1
     assert "Broken linkage found." in result.stdout
@@ -197,19 +196,19 @@ def test_doctor_unhealthy_exits_nonzero(invoke, monkeypatch):
 
 
 @pytest.mark.parametrize("flag", ("--zero-exit", "-0"))
-def test_doctor_zero_exit_opt_out(invoke, monkeypatch, flag):
+def test_doctor_zero_exit_opt_out(invoke, patch_pool_with, flag):
     """-0/--zero-exit keeps the exit code at 0; the critical summary stays as the
     durable record."""
-    fake = _patch_pool_with(monkeypatch, SickDoctorFakeManager())
+    fake = patch_pool_with(SickDoctorFakeManager())
     result = invoke(flag, "doctor")
     assert result.exit_code == 0
     assert f"1 manager reported problems ({fake.id})." in result.stderr
 
 
-def test_doctor_silent_healthy_prints_no_section(invoke, monkeypatch):
+def test_doctor_silent_healthy_prints_no_section(invoke, patch_pool_with):
     """A healthy manager with an empty report gets no stdout section: the trail
     already says everything."""
-    fake = _patch_pool_with(monkeypatch, SilentDoctorFakeManager())
+    fake = patch_pool_with(SilentDoctorFakeManager())
     result = invoke("doctor")
     assert result.exit_code == 0
     assert f"{fake.id}:" not in result.stdout

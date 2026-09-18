@@ -102,7 +102,6 @@ class PrtGet(PackageManager):
 
     _INSTALLED_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s*$",
-        re.MULTILINE,
     )
     """Match the `name version-release` rows of `prt-get listinst -v`."""
 
@@ -110,7 +109,6 @@ class PrtGet(PackageManager):
         r"^(?P<package_id>\S+)\s+"
         r"(?P<installed_version>\S+)\s+"
         r"(?P<latest_version>\S+)\s*$",
-        re.MULTILINE,
     )
     """Match the rows of the `prt-get diff` table, skipping its two-line header.
 
@@ -124,10 +122,12 @@ class PrtGet(PackageManager):
     _SEARCH_REGEXP = re.compile(
         r"^(?P<package_id>[^|]+)\|"
         r"(?P<latest_version>[^|]*)\|"
-        r"(?P<description>.*)$",
-        re.MULTILINE,
+        r"\s*(?P<description>.*?)\s*$",
     )
-    """Match the `name|version|description` rows of the `printf` projection."""
+    """Match the `name|version|description` rows of the `printf` projection.
+
+    The description is captured without its surrounding whitespace.
+    """
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -150,12 +150,7 @@ class PrtGet(PackageManager):
         """
         # `-v` has no long form: prt-get documents it as a bare general option.
         output = self.run_cli("listinst", "-v")
-
-        for match in self._INSTALLED_REGEXP.finditer(output):
-            yield self.package(
-                id=match.group("package_id"),
-                installed_version=match.group("installed_version"),
-            )
+        yield from self.parse_regex_lines(self._INSTALLED_REGEXP, output)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -182,13 +177,7 @@ class PrtGet(PackageManager):
         ```
         """
         output = self.run_cli("diff")
-
-        for match in self._OUTDATED_REGEXP.finditer(output):
-            yield self.package(
-                id=match.group("package_id"),
-                installed_version=match.group("installed_version"),
-                latest_version=match.group("latest_version"),
-            )
+        yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
@@ -217,13 +206,7 @@ class PrtGet(PackageManager):
         ```
         """
         output = self.run_cli("printf", r"%n|%v|%d\n")
-
-        for match in self._SEARCH_REGEXP.finditer(output):
-            yield self.package(
-                id=match.group("package_id"),
-                description=match.group("description").strip(),
-                latest_version=match.group("latest_version"),
-            )
+        yield from self.parse_regex_lines(self._SEARCH_REGEXP, output)
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

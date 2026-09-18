@@ -70,9 +70,10 @@ class Pacman(PackageManager):
     `--query --upgrades`; searches hit the sync databases via
     `--sync --search`.
 
-    The `Pacaur`, `Paru` and `Yay` subclasses are AUR helpers that reuse
-    every parser and forced argument here unchanged, overriding only the binary
-    (and, for `yay`, adding a release-age cooldown).
+    The AUR helpers `Aura`, `Pacaur`, `Paru`, `Pikaur`, `Trizen` and `Yay`
+    subclass it, reusing its parsers and overriding the binary and the version
+    probe; each class docstring names what else differs. `DkpPacman` is
+    pacman itself, built for devkitPro's repositories.
 
     Command equivalences with other managers are listed in
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
@@ -80,10 +81,11 @@ class Pacman(PackageManager):
     ```{caution}
     `--query --upgrades` only reports updates for packages tracked in a
     sync database, so foreign packages (installed with `pacman -U`, as AUR
-    helpers do) stay invisible to the base `pacman` binary. `Pacaur`, `Paru`
-    and `Yay` escape this because their own binary also queries the AUR RPC,
-    which is verified for `yay`: see {meth}`Pacman.outdated`. `Aura` does not
-    escape it and reports the two halves separately.
+    helpers do) stay invisible to the base `pacman` binary. `Pacaur`, `Paru`,
+    `Pikaur`, `Trizen` and `Yay` escape this because their own binary also
+    queries the AUR RPC, which is verified for `yay`: see
+    {meth}`Pacman.outdated`. `Aura` does not escape it and reports the two
+    halves separately.
     ```
     """
 
@@ -179,12 +181,11 @@ class Pacman(PackageManager):
         installed with `pacman -U` as most AUR helpers do, are invisible
         to `-Qu` and surface only under `-Qm`.
 
-        The `Pacaur`, `Paru` and `Yay` subclasses inherit this method
-        verbatim, yet still see AUR updates because their own binary's
-        `-Qu` additionally queries the AUR RPC for foreign packages. The
-        per-subclass binary override is therefore load-bearing: routing
-        these helpers through `pacman` directly would silently drop every
-        AUR update from the results.
+        The AUR helper subclasses inherit this method verbatim, yet still
+        see AUR updates because their own binary's `-Qu` additionally
+        queries the AUR RPC for foreign packages. Each therefore overrides
+        the binary: routing these helpers through `pacman` directly would
+        silently drop every AUR update from the results.
 
         ```{caution}
         Confirmed on a live Arch box against `yay` 13.0.1: with an AUR
@@ -376,7 +377,7 @@ class Aura(Pacman):
 
     Aura reuses every parser and query of `Pacman` unchanged, but not its
     forced arguments and not its {meth}`~meta_package_manager.manager.PackageManager.outdated`: those are the two places
-    where a v4 aura genuinely differs from the helpers around it.
+    where a v4 aura differs from the helpers around it.
 
     ```{note}
     Every v4 subcommand answers to a long name, a pacman letter and a long
@@ -497,8 +498,8 @@ class DkpPacman(Pacman):
     still comes from the same `printf(" .--.    Pacman v%s - libalpm v%s")`
     call, so the inherited {attr}`Pacman.version_regexes` reads it as-is.
 
-    Unlike the AUR helpers below this one is not a helper at all but pacman
-    itself, so it keeps the `default_sudo` inherited from `Pacman`.
+    The AUR helpers below wrap pacman; this one is pacman itself, so it keeps
+    the `default_sudo` inherited from `Pacman`.
     """
 
     id = "dkp-pacman"
@@ -584,11 +585,11 @@ class Pacaur(Pacman):
 class Paru(Pacman):
     """AUR helper wrapping `pacman`, driven through the `paru` binary.
 
-    Inherits every operation, parser and forced argument from `Pacman`; only
-    the binary and version probe differ. Its own `--query --upgrades` reports
-    AUR updates on top of the official repositories. The `>=1.9.3` floor is the
-    first `paru` release to implement `--sysupgrade`, the flag the inherited
-    `upgrade_all_cli` builds.
+    Inherits every operation, parser and forced argument from `Pacman`; the
+    binary, the version probe and the per-package cooldown probe below are what
+    differ. Its own `--query --upgrades` reports AUR updates on top of the
+    official repositories. The `>=1.9.3` floor is the first `paru` release to
+    implement `--sysupgrade`, the flag the inherited `upgrade_all_cli` builds.
 
     Unlike `pacman`, the helper must run as the regular user: any transaction
     building AUR packages aborts under root (`can't install AUR package as
@@ -765,9 +766,9 @@ class Pikaur(Pacman):
     version_regexes = (r".*Pikaur\s+v(?P<version>\S+)",)
     r"""Search version right after the `Pikaur ` string.
 
-    Anchoring on `Pikaur` rather than the inherited `Pacman` pattern is
-    load-bearing: pikaur reports *both* versions, embedding the second line of
-    `pacman --version` in its own output, so the inherited regex would silently
+    The pattern anchors on `Pikaur` rather than inheriting `Pacman`'s because
+    pikaur reports *both* versions, embedding the second line of
+    `pacman --version` in its own output: the inherited regex would silently
     report the version of pacman instead.
 
     ```{code-block} console

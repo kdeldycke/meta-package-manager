@@ -27,10 +27,10 @@ fields for output.
 reports through its native query commands. It backs every operation in
 {mod}`meta_package_manager.manager`.
 
-{class}`~meta_package_manager.package.PackageMetadata` is the enrichment plane: licenses, supplier,
-checksums, declared dependency graph, on-disk per-package SBOMs, and other
-facts gathered through extra queries (CLI sub-commands, on-disk parsers,
-upstream registries). Populated by
+{class}`~meta_package_manager.package.PackageMetadata` is the enrichment plane:
+licenses, supplier, checksums, declared dependency graph, on-disk per-package
+SBOMs, and other facts gathered through extra queries (CLI sub-commands, on-disk
+parsers, upstream registries). Populated by
 {meth}`meta_package_manager.manager.PackageManager.package_metadata_batch`,
 consumed by {mod}`meta_package_manager.sbom` today and reserved for any
 future caller that wants more than the bare inventory.

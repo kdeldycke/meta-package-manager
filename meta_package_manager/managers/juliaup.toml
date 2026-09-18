@@ -40,7 +40,7 @@
 # Unlike its peers in this family, juliaup never updates itself as a side
 # effect: `update` touches only channels, and self-update lives in a separate
 # `self update` command whose behavior depends on which cargo feature the
-# distributor built with. Naming a channel genuinely restricts the run to it.
+# distributor built with. Naming a channel restricts the run to it.
 # ```
 #
 # No escalation: juliaup installs under `$JULIAUP_DEPOT_PATH/juliaup`, falling

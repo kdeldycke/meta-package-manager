@@ -182,10 +182,9 @@ def implements_method(
     The orphan refinements `remove_orphan` and `cleanup_orphan` are optional
     variants of the `remove` and `cleanup` commands rather than standalone
     {class}`Operations`, so {func}`implements` cannot route them. This reports whether a
-    manager overrides the base's stub for one, delegating the MRO walk to
-    `_defines` (shared with the
-    base `cleanup` composer), so it works for config-defined managers (whose methods
-    live on the synthesized subclass) too.
+    manager overrides the base's stub for one, delegating the MRO walk to `_defines`
+    (shared with the base `cleanup` composer), so it works for config-defined managers
+    (whose methods live on the synthesized subclass) too.
     """
     return _manager_class(manager)._defines(method_name)
 

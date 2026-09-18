@@ -42,6 +42,7 @@ from meta_package_manager.config import (
     validate_manager_overrides_section,
 )
 from meta_package_manager.definitions import (
+    OVERRIDES_SECTION,
     ConfigDrivenManager,
     ManagerDefinition,
     OperationSpec,
@@ -532,16 +533,24 @@ def test_routing_definition_is_validated():
 # Factory.
 
 
-def _definition(**operations):
+def _definition(
+    manager_id: str = "mytool",
+    name: str = "My Tool",
+    cli_fields: dict[str, object] | None = None,
+    **operations,
+):
+    """Build a definition from its operations, with stand-in identity fields."""
+    if cli_fields is None:
+        cli_fields = {"cli_names": (manager_id,)}
     return ManagerDefinition(
-        manager_id="mytool",
-        name="My Tool",
+        manager_id=manager_id,
+        name=name,
         platforms=("all_platforms",),
         homepage_url=None,
         repository_url=None,
         wikipedia_url=None,
         logo=None,
-        cli_fields={"cli_names": ("mytool",)},
+        cli_fields=cli_fields,
         operations=operations,
     )
 
@@ -978,16 +987,11 @@ def test_register_refuses_url(reset_definitions, caplog):
 
 
 def test_register_rejects_builtin_collision(reset_definitions, caplog):
-    definition = ManagerDefinition(
+    definition = _definition(
         manager_id="pip",
         name="Fake Pip",
-        platforms=("all_platforms",),
-        homepage_url=None,
-        repository_url=None,
-        wikipedia_url=None,
-        logo=None,
         cli_fields={},
-        operations={"sync": OperationSpec(args=("update",))},
+        sync=OperationSpec(args=("update",)),
     )
     registered = register_config_managers(pool, {"pip": definition}, source=None)
     assert registered == []
@@ -1010,33 +1014,24 @@ def test_register_is_idempotent(reset_definitions):
 
 @skip_windows
 def test_factory_functional(tmp_path, fake_tool, reset_definitions):
-    definition = ManagerDefinition(
-        manager_id="mytool",
-        name="My Tool",
-        platforms=("all_platforms",),
-        homepage_url=None,
-        repository_url=None,
-        wikipedia_url=None,
-        logo=None,
+    definition = _definition(
         cli_fields={
             "cli_names": ("mytool",),
             "cli_search_path": (str(tmp_path),),
             "requirement": ">=1.0",
             "version_regexes": (r"mytool (?P<version>\S+)",),
         },
-        operations={
-            "installed": OperationSpec(
-                args=("list",),
-                parse_mode="regex",
-                regex=r"^(?P<package_id>\S+)@(?P<installed_version>\S+)$",
-            ),
-            "search": OperationSpec(
-                args=("search", "{query}"),
-                parse_mode="regex",
-                regex=r"^(?P<package_id>\S+)@(?P<latest_version>\S+)$",
-            ),
-            "upgrade_one": OperationSpec(args=("install", "--force", "{package_id}")),
-        },
+        installed=OperationSpec(
+            args=("list",),
+            parse_mode="regex",
+            regex=r"^(?P<package_id>\S+)@(?P<installed_version>\S+)$",
+        ),
+        search=OperationSpec(
+            args=("search", "{query}"),
+            parse_mode="regex",
+            regex=r"^(?P<package_id>\S+)@(?P<latest_version>\S+)$",
+        ),
+        upgrade_one=OperationSpec(args=("install", "--force", "{package_id}")),
     )
     manager = build_manager_class(definition)()
     assert manager.available is True
@@ -1052,14 +1047,7 @@ def test_factory_functional_version_cli(tmp_path, fake_tool, reset_definitions):
     probe = tmp_path / "myuname"
     probe.write_text("#!/bin/sh\necho '7.7'\n")
     probe.chmod(0o755)
-    definition = ManagerDefinition(
-        manager_id="mytool",
-        name="My Tool",
-        platforms=("all_platforms",),
-        homepage_url=None,
-        repository_url=None,
-        wikipedia_url=None,
-        logo=None,
+    definition = _definition(
         cli_fields={
             "cli_names": ("mytool",),
             "cli_search_path": (str(tmp_path),),
@@ -1068,9 +1056,7 @@ def test_factory_functional_version_cli(tmp_path, fake_tool, reset_definitions):
             "version_cli_options": ("-r",),
             "version_regexes": (r"(?P<version>[\d.]+)",),
         },
-        operations={
-            "sync": OperationSpec(args=("update",)),
-        },
+        sync=OperationSpec(args=("update",)),
     )
     manager = build_manager_class(definition)()
     assert str(manager.version) == "7.7"
@@ -1171,7 +1157,7 @@ def test_bundled_inventory():
     assert BUNDLED_DEFINITION_FILES
     file_ids = set()
     for toml_path, data in BUNDLED_FILE_DATA.items():
-        sections = data["mpm"]["overrides"]
+        sections = data["mpm"][OVERRIDES_SECTION]
         assert len(sections) == 1, f"{toml_path.name} must define a single manager"
         file_ids.update(sections)
     assert file_ids == set(pool.bundled_manager_ids)
@@ -1190,7 +1176,7 @@ def test_bundled_registered(toml_path):
         f"unexpected top-level keys in {toml_path.name}"
     )
 
-    manager_id = next(iter(data["mpm"]["overrides"]))
+    manager_id = next(iter(data["mpm"][OVERRIDES_SECTION]))
     assert toml_path.stem == manager_id.replace("-", "_")
     assert manager_id in pool.bundled_manager_ids
     manager = pool[manager_id]
@@ -1219,16 +1205,16 @@ def test_bundled_registered(toml_path):
 
 @pytest.mark.parametrize("toml_path", BUNDLED_DEFINITION_FILES, ids=attrgetter("stem"))
 def test_bundled_definition_carries_no_boilerplate(toml_path):
-    """No shipped definition reintroduces the tag line every file once opened on.
+    """No shipped definition opens on a tag line saying it ships with mpm.
 
-    `_toml_definition_intro()` used to filter that line out before rendering, and
-    the filter was dropped along with the line, so a file carrying it now prints
-    it at the top of the manager's page. A file sitting under
-    `meta_package_manager/managers/` already says everything the line said.
+    `_toml_definition_intro()` renders a definition's opening comment verbatim
+    as the manager page's intro, so such a line would print at the top of the
+    page. A file sitting under `meta_package_manager/managers/` already says
+    everything the line would.
 
-    This is a test rather than a review note because the mistake spreads on its
-    own: the next definition written after the cleanup restored the line, and the
-    one after that inherited it by being modelled on the first.
+    A test rather than a review note, because a new definition is written by
+    copying an existing one: a single file carrying the line seeds every file
+    modelled on it.
     """
     assert "definition shipped with mpm" not in toml_path.read_text(encoding="UTF-8"), (
         f"{toml_path.name} carries the boilerplate tag line dropped from every "
@@ -1258,7 +1244,7 @@ def _version_sample_params():
     """One param per shipped definition file, from its `[samples.version]` fixture."""
     params = []
     for data in BUNDLED_FILE_DATA.values():
-        manager_id = next(iter(data["mpm"]["overrides"]))
+        manager_id = next(iter(data["mpm"][OVERRIDES_SECTION]))
         sample = data.get("samples", {}).get("version")
         if sample:
             params.append(
@@ -1324,7 +1310,7 @@ def _parsing_sample_params():
     """One param per query-operation sample shipped in the definition files."""
     params = []
     for data in BUNDLED_FILE_DATA.values():
-        manager_id = next(iter(data["mpm"]["overrides"]))
+        manager_id = next(iter(data["mpm"][OVERRIDES_SECTION]))
         samples = data.get("samples", {})
         for operation in ("installed", "outdated", "orphans", "search"):
             op_samples = samples.get(operation, ())

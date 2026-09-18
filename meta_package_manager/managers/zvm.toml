@@ -21,7 +21,7 @@
 #     anything at the start of a line. Dropping `master` would have been the
 #     easy mistake: it sits on the last row, formatted
 #     `master (remote) (0.17.0-dev…)`, and it is installable like any other.
-#   - **No `upgrade_all`, and the name is the trap.** `zvm upgrade` is
+#   - No `upgrade_all`, and the name is the trap. `zvm upgrade` is
 #     documented as "Self-upgrade ZVM": it replaces the tool, not any installed
 #     Zig. Nothing upgrades a compiler in place either, a newer one being an
 #     `install`, so no upgrade of any kind is declared.

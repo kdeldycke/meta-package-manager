@@ -115,10 +115,11 @@ def _json_field(item: dict, selector: str) -> Any:
     """Resolve a field `selector` against one JSON package `item`.
 
     A bare key returns the key's value; a `key[N]` selector picks the `N`-th
-    element out of a list-valued key (see {data}`~meta_package_manager.manager.JSON_FIELD_SELECTOR_REGEX`).
-    Anything that does not resolve — missing key, non-list value under an indexed
-    selector, out-of-range index — returns `None`, so an unexpected payload
-    yields incomplete packages rather than raising.
+    element out of a list-valued key (see
+    {data}`~meta_package_manager.manager.JSON_FIELD_SELECTOR_REGEX`). Anything that
+    does not resolve — missing key, non-list value under an indexed selector,
+    out-of-range index — returns `None`, so an unexpected payload yields incomplete
+    packages rather than raising.
     """
     match = JSON_FIELD_SELECTOR_REGEX.match(selector)
     assert match is not None, f"unvalidated selector {selector!r}"
@@ -414,13 +415,12 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Parse a query's JSON `output`, tolerating empty and malformed captures.
 
         The shared first step of every JSON-emitting query, for built-in managers
-        and config-defined operations alike (see
-        `_parse_spec_output`). Returns `None`
-        when the command produced no output (a manager with nothing to report often
-        prints nothing at all), and when the output is not valid JSON, which logs
-        one warning tagged with the manager ID instead of raising: a query that
-        cannot be parsed yields no packages, mirroring how the fan-out commands
-        swallow a failed CLI call into an empty result.
+        and config-defined operations alike (see `_parse_spec_output`). Returns
+        `None` when the command produced no output (a manager with nothing to
+        report often prints nothing at all), and when the output is not valid JSON,
+        which logs one warning tagged with the manager ID instead of raising: a
+        query that cannot be parsed yields no packages, mirroring how the fan-out
+        commands swallow a failed CLI call into an empty result.
 
         Queries whose failure semantics differ keep their own parsing: a per-line
         NDJSON stream (`antidote`, `yarn`), a hard
@@ -448,12 +448,11 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Yield one package per line of `output` matching `pattern`.
 
         The shared engine of every line-oriented text listing, for built-in
-        managers and config-defined operations alike (see
-        `_make_query_property`). The
-        pattern is searched in each line, and its named groups map straight onto
-        the package fields: `package_id` (required: a match without one is
-        skipped), `installed_version`, `latest_version`, `name`,
-        `description` and `arch`, empty and absent groups being dropped.
+        managers and config-defined operations alike (see `_make_query_property`).
+        The pattern is searched in each line, and its named groups map straight
+        onto the package fields: `package_id` (required: a match without one is
+        skipped), `installed_version`, `latest_version`, `name`, `description`
+        and `arch`, empty and absent groups being dropped.
 
         Managers whose listings need per-line post-processing (multi-version
         reduction, name/version splitting, cross-query joins) keep their own
@@ -482,17 +481,16 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Yield one package per item of a JSON listing.
 
         The shared engine of every flat-JSON query, for built-in managers and
-        config-defined operations alike (see
-        `_make_query_property`). The
-        document is parsed through {meth}`parse_json` (so a malformed payload
-        warns and yields nothing), the package array is reached by walking the
-        dotted `list_path` (`None` when the document is itself the array), and
-        `fields` maps each package field (`package_id`, required, plus any of
-        `installed_version`, `latest_version`, `name`, `description`,
-        `arch`) to its JSON selector: a key name with an optional `[N]` list
-        index, like `version` or `versions[0]` (see
-        {data}`~meta_package_manager.manager.JSON_FIELD_SELECTOR_REGEX`). Items missing their `package_id`
-        and fields resolving to `None` are dropped.
+        config-defined operations alike (see `_make_query_property`). The document
+        is parsed through {meth}`parse_json` (so a malformed payload warns and
+        yields nothing), the package array is reached by walking the dotted
+        `list_path` (`None` when the document is itself the array), and `fields`
+        maps each package field (`package_id`, required, plus any of
+        `installed_version`, `latest_version`, `name`, `description`, `arch`) to
+        its JSON selector: a key name with an optional `[N]` list index, like
+        `version` or `versions[0]` (see
+        {data}`~meta_package_manager.manager.JSON_FIELD_SELECTOR_REGEX`). Items
+        missing their `package_id` and fields resolving to `None` are dropped.
         """
         data = self.parse_json(output)
         if data is None:
@@ -638,7 +636,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         raise NotImplementedError
 
     def installed_or_empty(self) -> tuple[Package, ...]:
-        """Materialized {attr}`~meta_package_manager.manager.PackageManager.installed`, or an empty tuple on CLI failure.
+        """Materialized {attr}`~meta_package_manager.manager.PackageManager.installed`,
+        or an empty tuple on CLI failure.
 
         Best-effort inventory snapshot for the `installed`, `dump` and
         `sbom` subcommands, and for the {attr}`installed_ids` lookup behind
@@ -663,12 +662,13 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Installed package IDs, materialized once from {meth}`installed_or_empty`.
 
         Routed through the tolerant {meth}`installed_or_empty` rather than
-        {meth}`~meta_package_manager.manager.PackageManager.installed` because its callers ask a *discovery* question: which
-        managers have this package? A manager whose CLI just failed has no answer
-        to give, which is not the same as a fatal error. Sourcing a spec for
-        `remove` and `upgrade <packages>` reads this for every selected manager,
-        so a single broken CLI would otherwise abort the whole command before the
-        managers that do have the package are ever tried.
+        {meth}`~meta_package_manager.manager.PackageManager.installed` because its
+        callers ask a *discovery* question: which managers have this package? A
+        manager whose CLI just failed has no answer to give, which is not the same
+        as a fatal error. Sourcing a spec for `remove` and `upgrade <packages>`
+        reads this for every selected manager, so a single broken CLI would
+        otherwise abort the whole command before the managers that do have the
+        package are ever tried.
 
         Contrast {attr}`installed_version_map`, which deliberately keeps raising:
         it is read from inside an `outdated` parser, where an empty map does not
@@ -748,7 +748,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     @property
     def refiltered_outdated(self) -> Iterator[Package]:
-        """Wraps {meth}`~meta_package_manager.manager.PackageManager.outdated` with a version-equality filter.
+        """Wraps {meth}`~meta_package_manager.manager.PackageManager.outdated` with a
+        version-equality filter.
 
         Some package managers report packages as outdated when the version
         strings differ at the character level but are numerically equal after
@@ -966,10 +967,13 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
         Some managers keep the dependency install reason of a package that they
         are asked to install again. Their orphan sweep can then remove a package
-        the user asked for, through {meth}`cleanup_orphan` or
-        {meth}`remove_orphan`. After a successful install of a package that
-        {meth}`may_hold_as_dependency` reported, `mpm install` and `mpm restore`
-        run the manager's command that changes only the install reason
+        the user asked for, through
+        {meth}`~meta_package_manager.manager.PackageManager.cleanup_orphan` or
+        {meth}`~meta_package_manager.manager.PackageManager.remove_orphan`. After
+        a successful install of a package that
+        {meth}`~meta_package_manager.manager.PackageManager.may_hold_as_dependency`
+        reported, `mpm install` and `mpm restore` run the manager's command that
+        changes only the install reason
         (`pacman --database --asexplicit`, `apt-mark manual`,
         `dnf mark install`, ...).
 
@@ -1154,8 +1158,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
         The introspection primitive behind
         {func}`meta_package_manager.capabilities.implements_method` (which
-        delegates here) and the {meth}`~meta_package_manager.manager.PackageManager.cleanup` composer below, hosted on the
-        class to stay importable from both sides without a cycle.
+        delegates here) and the
+        {meth}`~meta_package_manager.manager.PackageManager.cleanup` composer below,
+        hosted on the class to stay importable from both sides without a cycle.
         """
         for klass in cls.mro():
             if klass is PackageManager:
@@ -1190,27 +1195,30 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         The system-wide "remove all packages nothing depends on anymore" sweep
         (`apt autoremove`, `brew autoremove`, `flatpak uninstall --unused`, ...).
         The one cleanup category that removes packages, so it is deliberately kept out
-        of the plain {meth}`~meta_package_manager.manager.PackageManager.cleanup` composition and only runs on an explicit
-        `mpm cleanup --orphans`.
+        of the plain {meth}`~meta_package_manager.manager.PackageManager.cleanup`
+        composition and only runs on an explicit `mpm cleanup --orphans`.
 
         Distinct from
         {meth}`meta_package_manager.manager.PackageManager.remove_orphan`, which is
-        scoped to one package's own orphaned dependencies. As with {meth}`~meta_package_manager.manager.PackageManager.cleanup`,
-        {program}`mpm` builds no dependency graph: the manager decides what is orphaned.
+        scoped to one package's own orphaned dependencies. As with
+        {meth}`~meta_package_manager.manager.PackageManager.cleanup`, {program}`mpm`
+        builds no dependency graph: the manager decides what is orphaned.
 
         A manager with no native sweep verb is backfilled by this base implementation
-        when it supports both the {attr}`~meta_package_manager.manager.PackageManager.orphans` query and package removal: list
-        the orphans, remove each one (with {meth}`~meta_package_manager.manager.PackageManager.remove_orphan` when available, so
-        every listed root takes its own now-orphaned subtree along), then re-query and
-        repeat until the listing settles, since removing an orphan can orphan its own
-        dependencies. The exact pattern of the synthesized full `upgrade --all`, and
-        the in-process equivalent of Arch's classic `pacman -Rns $(pacman -Qtdq)`
-        idiom. The re-query loop stops as soon as a round makes no progress, so
-        removal failures cannot spin it forever.
+        when it supports both the
+        {attr}`~meta_package_manager.manager.PackageManager.orphans` query and package
+        removal: list the orphans, remove each one (with
+        {meth}`~meta_package_manager.manager.PackageManager.remove_orphan` when
+        available, so every listed root takes its own now-orphaned subtree along),
+        then re-query and repeat until the listing settles, since removing an orphan
+        can orphan its own dependencies. The exact pattern of the synthesized full
+        `upgrade --all`, and the in-process equivalent of Arch's classic
+        `pacman -Rns $(pacman -Qtdq)` idiom. The re-query loop stops as soon as a
+        round makes no progress, so removal failures cannot spin it forever.
 
-        A manager implementing neither a native sweep nor the {attr}`~meta_package_manager.manager.PackageManager.orphans`
-        query propagates {exc}`NotImplementedError`, and `mpm cleanup --orphans`
-        simply skips it.
+        A manager implementing neither a native sweep nor the
+        {attr}`~meta_package_manager.manager.PackageManager.orphans` query propagates
+        {exc}`NotImplementedError`, and `mpm cleanup --orphans` simply skips it.
         """
         logging.debug(
             "No native orphan sweep. Remove listed orphans one by one.",
@@ -1238,7 +1246,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def cleanup_cache(self) -> None:
         """Prune the manager's caches, downloads and other left-over artifacts.
 
-        The cache category of {meth}`~meta_package_manager.manager.PackageManager.cleanup`, surfaced as
+        The cache category of
+        {meth}`~meta_package_manager.manager.PackageManager.cleanup`, surfaced as
         `mpm cleanup --cache` and subtracted by `--skip-cache` (`apt clean`,
         `dnf clean all`, `brew cleanup`, `npm cache clean`, ...). The broadest
         category: for most managers the whole cleanup amounts to it.
@@ -1250,7 +1259,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def cleanup_repair(self) -> None:
         """Verify and repair the manager's local installation state.
 
-        The repair category of {meth}`~meta_package_manager.manager.PackageManager.cleanup`, surfaced as
+        The repair category of
+        {meth}`~meta_package_manager.manager.PackageManager.cleanup`, surfaced as
         `mpm cleanup --repair` and subtracted by `--skip-repair`
         (`flatpak repair --user`).
 
@@ -1273,8 +1283,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def doctor(self) -> tuple[bool, str]:
         """Run the native self-diagnosis, returning `(healthy, report)`.
 
-        Runs {meth}`~meta_package_manager.manager.PackageManager.doctor_cli` and interprets the outcome with a contract of
-        its own, distinct from every other operation:
+        Runs {meth}`~meta_package_manager.manager.PackageManager.doctor_cli` and
+        interprets the outcome with a contract of its own, distinct from every other
+        operation:
 
         - **Health is the exit code alone.**
           {meth}`~meta_package_manager.execution.CLIExecutor.run`'s failure gate

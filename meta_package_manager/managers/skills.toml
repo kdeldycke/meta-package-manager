@@ -7,7 +7,7 @@
 # name is what `remove` takes. It is not what `add` takes: see below.
 #
 # Parsing notes, verified against skills 1.5.23 on macOS:
-#   - **Every operation is scoped with `--global`.** Without it the tool answers
+#   - Every operation is scoped with `--global`. Without it the tool answers
 #     for the working directory, and run from a repository carrying its own
 #     `.claude/skills` it reports that repository's skills as the inventory.
 #     `list --global` is directory-independent, checked by running it from two
@@ -19,7 +19,7 @@
 #     `0install` split, with the halves the other way round.
 #   - No `outdated`, nothing reporting staleness without acting, and no
 #     `search`: `find` is documented as interactive.
-#   - The inventory carries **no version at all**, only a name, a path, the
+#   - The inventory carries *no version at all*, only a name, a path, the
 #     agents it was linked into and the repository it came from. That is a
 #     supported shape rather than a gap, `installed_version` being optional,
 #     and the same reading `rustup` and `pyenv` settled.

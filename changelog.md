@@ -5,356 +5,231 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
-- **Breaking:** [bar-plugin] Rename the `VAR_TABLE_RENDERING` variable to `VAR_ALIGN_COLUMNS`, matching the GNOME Shell extension's own setting.
-- **Breaking:** [bar-plugin] Replace the `VAR_HIDE_WHEN_UP_TO_DATE` variable with `VAR_ALWAYS_VISIBLE`, which reads the other way round: set it to `false` to hide the icon.
-- [mpm] Add `--shell-env` to adopt the environment of the login shell before looking for managers, so a run started by a menu bar plugin, a desktop extension or a scheduled job sees the same managers as a terminal.
-- [bar-plugin,gnome-shell] Pass `--shell-env` to `mpm` `8.0.0` and newer, so the menu lists the managers installed under the home directory and pnpm's global packages.
-- [bar-plugin,gnome-shell] Group packages by manager by default. Set `VAR_GROUP_BY_MANAGER` in the plugin or `group-by-manager` in the extension to `false` to get the flat list back.
-- [bar-plugin] Fix the menu crashing with a `TypeError` whenever a package's version pair was long enough to be elided.
-- [cpan] Stop reading `cpan`'s index-refresh progress lines as packages, which listed a `Fetching` upgrading from `with` to `HTTP::Tiny:`.
-- [cpan] List the core modules Debian and Ubuntu reach through symlinked `@INC` directories, which `cpan -l` skips. Upgrading one no longer ends in `is not recognized by any of the selected manager`.
-- [mpm] Fix pURLs losing part of the package ID: `pkg:npm/%40angular/animation` now resolves to `@angular/animation` rather than the unrelated `animation`, `pkg:npm/JSONStream` keeps its case, and a manager ID like `julia` resolves as a type.
-- [go] Resolve `pkg:golang` pURLs to the `go` manager.
-- [dkp-pacman,emacs,mamba,micromamba,nala,pikaur,pipxu,trizen,urpmi,uvx] Resolve `pkg:alpm`, `pkg:conda`, `pkg:deb`, `pkg:melpa`, `pkg:pypi` and `pkg:rpm` pURLs to these managers too, alongside the ones already handling each type.
-- [pkg,vagrant,vcpkg,yarn] Warn and report no package, instead of crashing, when a JSON listing cannot be parsed.
-- [bar-plugin,gnome-shell] Name the package of each upgrade action with a pURL of its manager, so `mpm` no longer looks it up in the installed packages first.
-- [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
-- [mpm] Link a manager's source repository and Wikipedia article from its documentation page, and a declined tool's article from its [unsupported](https://mpm.run/unsupported/) verdict. Manager definitions accept `repository_url` and `wikipedia_url` keys.
-- [mpm] Fold 39 single-tool verdicts on the [unsupported](https://mpm.run/unsupported/) page into family sections sharing one verdict each. Those tools' anchors move to the family name.
-- [bar-plugin] Add screenshots of SwiftBar's *About* submenu and preferences pane to the plugin page.
-- [bar-plugin] Capture the SwiftBar and Xbar screenshots at 2x, on a HiDPI virtual display the capture job raises over the runner's own screen.
-- [gnome-shell] Photograph every combination of the menu's two layout switches for the extension page, the grouped ones with their first section unfolded.
-- [winget] Silence progress spinners by passing `--no-progress` on every invocation, which raises the winget floor to `1.29.280`.
-- [winget] Fix `installed` and `outdated` leaving out applications installed without winget, like a vendor's own MSI, although `upgrade --all` upgrades them.
-- [fwupd] Fix every query reaching `fwupd` aborting on a host with no updatable device, which is what a VM, a container and plenty of real machines report. fwupd answers that with an `Error` object replacing its whole payload, and `mpm installed`, `mpm outdated`, `mpm sbom` and the snapshot commands read it as a device list.
-- [aptitude] Add aptitude package manager, with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.
-- [pear] Add PEAR package manager, with inventory, outdated, install, remove, upgrade, channel sync and cache cleanup.
-- [roswell] Add Roswell package manager, listing and installing the Common Lisp implementations it manages.
-- [pkgit] Add pkgit package manager, with inventory, search, install and full upgrade of the packages it compiles from git repositories.
-- [lure] Add LURE package manager, with inventory, catalog search, install and repository refresh.
-- [choosenim] Add choosenim Nim toolchain installer, with inventory, catalog search, install, remove and single-version upgrade.
-- [aura] Add aura AUR helper, reporting repository and AUR upgrades together.
-- [hyprpm] Add hyprpm Hyprland plugin manager, listing, installing, removing and upgrading plugin repositories.
-- [microdnf] Add microdnf, the package manager of RHEL-family minimal images, with inventory, outdated, name search, version-pinned install and upgrade, remove, sync and cache cleanup.
-- [bar-plugin] Cap how wide a version renders in a menu line, so an over-long one no longer blanks the target version of its own row. Tune it with `VAR_MAX_VERSION_WIDTH`.
-- [brew] Scan formulae for vulnerabilities: `mpm --network sbom` now queries OSV with the upstream registry purl Homebrew records for a formula, instead of the `pkg:brew/…` coordinate no advisory database indexes.
-- [mpm] Fix a crash rendering tables to a non-UTF-8 stream, which broke every table subcommand on Windows as soon as its output was redirected.
-- [mpm] Fix comparison of the Gentoo and Alpine post-release suffixes: `1.0_p1` and `1.0_git20240101` now rank above `1.0`, not below it.
-- [mpm] Stop silencing log messages in serialized output: a fatal error like `No manager selected.` now reaches `<stderr>`, and an ignored `--columns` selection is reported at `INFO`.
-- [mpm] Escalate through `doas` where `sudo` is Alpine's `doas-sudo-shim`, which rejects every option the credential probes send and so reported a cold cache.
-- [mpm] Name the running command in the progress spinner: a slow call now reads `cask.upgrade_all: brew upgrade --quiet --yes` instead of `cask upgrade_all`.
-- [mpm] Name the operation on each `✓`/`✘` trail line, so `✓ brew` now reads `✓ brew.outdated` and matches the spinner's subject.
-- [mpm] Name the operation and the package on each package trail line, `✓ brew.install: jq`, and close every trail line on its duration, as the spinner shows it.
-- [mpm] Label every line logged during an operation with it, `warning:brew.install:`, matching the spinner and the trail.
-- [mpm] Hold the progress spinner still during a call whose manager may prompt for a `sudo` password, so the prompt stays on screen instead of being erased by the animation.
-- [mpm] Start the hidden-password-prompt notice on a fresh line, so it no longer runs on from the `Password:` prompt it warns about.
-- [mpm] Name a call held still for a possible `sudo` prompt on a static line saying it may ask for your password, instead of leaving the terminal blank until it ends.
-- [mpm] Run a manager that escalates internally after the concurrent batch, on its own, so its password prompt gets a terminal no other manager is writing to.
-- [mpm] Exit quietly on a Ctrl+C pressed while a run is already shutting down, instead of printing a `threading` traceback.
-- [dnf,dnf5,yum] Fix version detection against `dnf5`, whose banner was read as the version `dnf5`, dropping every RPM front-end from the pool on Fedora 41 and later.
-- [dnf,dnf5,yum] Fix `search` on `dnf5`, which returned no results at all, and keep whole package descriptions instead of their first word.
-- [dnf] Decline a `dnf5` binary reached through the `dnf` name, leaving it to the `dnf5` manager instead of reporting the same RPM database twice.
-- [dnf,dnf5,yum] Fix `outdated`, which reported the upgrade candidate's own version as the installed one, and now names the epoch and release both sides differ by.
-- [mpm] Record `rpm-ostree` as a queued wrap candidate, blocked on an ostree-booted host: Silverblue, Kinoite, IoT and CoreOS ship no `dnf` to reach instead.
-- [apk] Read the installed inventory from the structured `apk query` applet on apk-tools 3, keeping the `apk list` parser for apk-tools 2.
-- [pkg] Fix every operation on FreeBSD, where `pkg` rejects the global `--quiet` it was passed, and repair `search`, which omitted its subcommand and mis-parsed the results.
-- [ports] Fix the FreeBSD ports manager, which reported no version and so never activated, and repair `installed`, `outdated`, `install` and `upgrade`.
-- [ports,sdkman] Fix `--plan` for the operations that query before they act: they reported every package as missing instead of printing the command.
-- [ports] Fix `upgrade`, which hung on FreeBSD's port options dialog until it timed out, having built nothing.
-- [xbps] Fix version detection, whose banner opens with the suite name: `XBPS:` was read as the version, dropping the manager from the pool on every Void Linux host. Closes [#2074](https://github.com/kdeldycke/meta-package-manager/issues/2074).
-- [xbps] Fix `search`, which returned no results: the long `--repository` option takes a URL and was consuming the `--search` that followed it, turning the query into a request for one package's properties.
-- [eopkg] Fix `search`, which passed an empty argument to `eopkg` in extended mode.
-- [eopkg] Fix version detection on eopkg `5.0.0`, which calls itself `eopkg.bin` in its banner: the manager left the pool on every Solus host running it.
-- [eopkg] Fix `installed` and `outdated`, which silently dropped the last two packages of every listing.
-- [eopkg] Decode the character references `search` descriptions carry, so `ImageMagick&#xAE; suite` reads as `ImageMagick® suite`.
-- [eopkg] Report the upgrade target in `outdated`, which had none. Both sides now name the release, so a rebuild no longer reads as the same version.
-- [emerge] Fix `outdated` and `search`, which reported nothing on Gentoo: the global `--quiet` they sent strips the version and description fields their parsers read.
-- [composer,dnf,emerge,eopkg,pacman,sfsu] Correct the `search` commands shown on each manager's page, which named fewer options than `mpm` actually runs.
-- [composer,dnf,pacman,pwsh-gallery,sfsu,yarn] Correct the inventory and outdated commands shown on each manager's page, which named fewer options than `mpm` actually runs.
-- [flatpak] Fix the search output shown on its page, whose tab separators had been flattened to spaces, leaving a transcript its own parser could not read.
-- [ips] Add the Image Packaging System of Solaris and illumos, with inventory, search, install, remove, upgrade, catalog sync and history purge.
-- [sun-tools] Activate on illumos as well as Solaris: OpenIndiana and its siblings inherit the SVR4 `pkginfo`, `pkgadd` and `pkgrm` tools.
-- [sun-tools] Report each package's human-readable name, which was parsed from `pkginfo -l` and then dropped.
-- [ips,mpm,sun-tools] Fix `mpm` crashing on every illumos host, where the platform probe matched Solaris too and the `i86pc` machine string went unrecognized.
-- [mpm] Detect CRUX and NuTyX, two source-based Linux distributions.
-- [eopkg,mpm] Detect Solus, where every run reported an unrecognized platform and selected no manager at all.
-- [prt-get] Add the CRUX ports front-end, with inventory, outdated, catalog search, install, remove, single-port upgrade, full upgrade and ports-tree sync.
-- [claude-code-plugins] Add Claude Code plugins manager, with inventory, install, remove, single-plugin upgrade, marketplace sync and orphan cleanup.
-- [go] Add Go package manager, listing and installing the commands `go install` puts on the machine.
-- [gup] Add gup package manager, reporting, removing and upgrading the binaries `go install` leaves under `$GOBIN`.
-- [skills] Add Agent Skills manager, listing, removing and upgrading the skills installed for the coding agents on a machine.
-- [platformio-core] Add PlatformIO Core package manager, listing and upgrading the platforms, tools and libraries it installs machine-wide.
-- [emacs] Add GNU Emacs package manager, driving `package.el` headlessly for inventory, install, remove and archive refresh.
-- [julia] Add Julia `Pkg` package manager, with inventory, outdated, install, remove, upgrade and registry refresh.
-- [zvm] Add zvm Zig version manager, with inventory, catalog search, install, remove and build-cache cleanup.
-- [pearl] Add Pearl package manager, with inventory, search, install, remove and single-package upgrade.
-- [pi] Add Pi extensions manager, with inventory, install, remove and upgrade of the packages that extend the Pi coding agent.
-- [pipxu] Add pipxu package manager, with inventory, install, remove and upgrade support.
-- [pkgm] Add pkgm package manager, with inventory, outdated, install, remove and full upgrade support.
-- [zeroinstall] Add Zero Install package manager, with search, remove and cache cleanup support.
-- [flatpak,mpm] Gate `flatpak` under `--cooldown` with a per-app probe: `mpm` reads the publication date of each app's latest build from its remote and holds back any release younger than the window.
-- [mas] Gate the Mac App Store under `--cooldown` with the same per-app probe, reading each app's release date from the catalog record of `mas lookup --json`.
-- [paru] Gate `paru`'s AUR half under `--cooldown`: too-fresh AUR packages, dated by the RPC's `LastModified`, are held out of the `--sysupgrade` transaction with `--ignore` while official-repository packages pass untouched.
-- [bar-plugin] Name SwiftBar ahead of Xbar wherever the pair appears, the plugin page title included. SwiftBar is the maintained host of the two.
-- [mpm] Open the manager index with a proportion bar, cut into one region per support state, each as wide as its share of the assessed pool.
-- [mpm] Highlight the hovered row, and not only its column, in the benchmark, SBOM, cooldown and augmentations tables. The row half of the crosshair had never painted.
-- [mpm] Group the manager index by support state, each group opening on a title row spanning the table. Managers stay alphabetical inside their group.
-- [mpm] Make every row of the manager index clickable end to end and highlight it on hover, following the manager's page or a declined tool's verdict.
-- [mpm] Shorten the manager index legend to one label per state, reused as the title of the group of rows carrying that glyph.
-- [mpm] Restore the crosshair highlight of the benchmark, SBOM, cooldown and augmentations tables, dead since the documentation moved to extension-less URLs.
-- [bar-plugin] Render an error line at the same size as every other monospace row. Its own smaller size left a visible gap under the message, both hosts putting the surplus below the text rather than around it.
-- [bar-plugin] Separate a package name from its version diff by two spaces, in the fixed-width table and the variable-width rendering alike. A single space left `bind9-dnsutils 1:9.20.18-1ubuntu2.1 → 1:9.20.24-1ubuntu0.1` reading as one run of text.
-- [bar-plugin] Give the plugin's location section one tab per host. SwiftBar has no default plugin folder and must not be pointed at `~/Library/Application Support/SwiftBar/Plugins`, which is its own data directory; the conventional `~/.swiftbar` needs SwiftBar `2.1.1`. Xbar's folder is fixed.
-- [bar-plugin] Say where the macOS `python3` comes from: `/usr/bin/python3` is a stub running the interpreter of the Command Line Tools, which is what the version table is keyed by.
-- [bar-plugin,gnome-shell] Make each frontend's documentation page self-contained, covering what a click runs, where its settings stop and `mpm`'s configuration starts, the version-diff colors and the bootstrap pair.
-- [bar-plugin,gnome-shell] **Breaking:** rename the grouped-layout setting to `VAR_GROUP_BY_MANAGER` in the plugin and `group-by-manager` in the extension. Only Xbar ever opened a real sub-menu; SwiftBar folds an accordion and the extension expands inline, so the old name described one host's rendering rather than the setting. Any configuration setting the old name reverts to the default.
-- [bar-plugin] Align the version arrows across every manager in the table rendering, so they line up down the whole menu instead of only within a section. Xbar's grouped layout keeps its per-manager widths, each sub-menu being a panel of its own.
-- [mpm] Collect nine more entries onto the documentation's todo-list page, gathering future work that sat unindexed in code comments, docstrings and documentation prose.
-- [bar-plugin,gnome-shell] Split a version diff at the same point in both frontends. The GNOME menu left the separator introducing the diverging token in the dimmed prefix, where the bar plugin colors it: `5.0.0~beta1-0ubuntu7` highlighted `0~beta1-0ubuntu7` in one and `.0~beta1-0ubuntu7` in the other, and 17 of 21 sampled pairs disagreed.
-- [bar-plugin,gnome-shell] Stop coloring both versions in full when one is the other plus a whole new token. `14ubuntu6` → `14ubuntu6.1` highlights `.1` alone, in place of every token including the ones that matched.
-- [mpm] Fix the eight screenshot links of the bar plugin page, which resolved against the page's own URL and 404ed. Sphinx emits a card's `:link:` verbatim, without the per-page rewriting it gives the image above it.
-- [gnome-shell] Render each version of a package row as one string. The dimmed common prefix and its colored suffix are two labels, and the shell theme's own row spacing held them apart: `5.0.0~beta1-0ubuntu7` read as `5.0. 0~beta1-0ubuntu7`.
-- [gnome-shell] Illustrate the extension's page with screenshots of its menu, in both layouts and both shell appearances. Each one is captured from a real headless GNOME session by the new `docs-screenshots.yaml` workflow, which reshoots them whenever the extension changes.
-- [gnome-shell] Render each package row's version diff as one label instead of five, so a report of a thousand packages scrolls smoothly.
-- [gnome-shell] Drop the blank band and separator the menu showed above *Checking…*, before a session's first report has anything to list.
-- [gnome-shell] Center the menu's version pairs around their arrow, mirroring the plugin's `VAR_ALIGN_COLUMNS`, with an `align-columns` setting to switch it off.
-- [gnome-shell] Drop the expander arrow from a manager with nothing to report, which opened on an empty panel.
-- [gnome-shell] Fix a `gnome-shell` crash when a setting changed while a manager's submenu was open in the grouped layout.
-- [gnome-shell] Scroll the package list with the wheel while a manager's submenu is expanded, which until now only its scrollbar could do.
-- [mpm] Replace the project's own forge sampler with repomatic's `sample-metrics`: the star-history charts and the manager cards' upstream readings now accrue in one committed CSV, appended and rendered by the new `metrics.yaml` workflow.
-- [mpm] Plot the benchmark's star-history charts on a logarithmic vertical axis, so the series orders of magnitude apart stay legible on one chart.
-- [nala] Sample the upstream project from GitLab, dropping the excuse that its forge went unqueried: the manager page gains the upstream stars and commit facts, and its live badges.
-- [mpm] Deploy the documentation to Cloudflare Pages from the shared docs workflow through repomatic's `site.deploy` switch, completing the hosting move below: until then the workflow still uploaded to the GitHub Pages site the domain no longer serves from. Its config-drift check, monthly run and token-expiry warning land with the same repomatic upgrade.
-- [mpm] Publish an index of every man page at `https://mpm.run/man/`, the directory their `.1` files and HTML renderings are already served from, and which answered `404` until now despite being linked from the installation page. The index moves there from the CLI parameters page, which keeps a pointer.
-- [mpm] Link to the documentation site at its extension-less URLs everywhere the project names one: the readme, the issue templates and the GNOME Shell extension. Each `.html` link still resolved, through a redirect.
-- [mpm] Link the benchmark page to `mpm`'s own documentation by relative path, the convention the rest of its rows already followed, rather than by absolute URL into the published site. Sphinx resolves those at build time, so they survive a local build and a read on the forge.
-- [mpm] Redirect every documentation URL retired since the first Sphinx build in 2016 to the page that inherited it, instead of letting it 404. Covers the pages renamed (`usage` and `cli-help` to `cli-parameters`, `alternatives` to `benchmark`, `bitbar` and `xbar` to `bar-plugin`, `features` to `augmentations`), the pages dissolved into others (`usecase`, `development`, `desktop-menus`), the autodoc pages no longer emitted (`modules`, the bar plugin's, the test suite's) and the `/api/` subtree of the Read the Docs era.
-- [mpm] Run the destructive tests in parallel, scheduled by shared-backend lock family: tests of managers contending for one lock serialize on a single worker while independent families run at once, and the cross-manager tests that drive every available manager keep a sequential run of their own behind the new `destructive_all_managers` marker.
-- [mpm] Wrap the name and version columns of `mpm installed`, `mpm outdated` and `mpm search` inside their own cell, so their tables stop overflowing the terminal. `package_id` stays uncapped and never wraps: it is the value copied back into an install, removal or upgrade command, and an identifier split over two lines cannot be selected in one go.
-- [mpm] Wrap the `Supported` and `CLI` columns of `mpm managers` inside their own cell, instead of stretching the table past the edge of the terminal and mangling every border. Tables are also measured against the width of the terminal now, rather than against the 80-column budget that lays out help screens.
-- [am,miktex,nala,pamac,pkcon] Declare support for the Linux compatibility layers, WSL included, in place of the Linux distributions alone. Their platform set matched none of the groups the documentation classifies against, so the readme's operation matrix reported no platform at all for `am`, `nala`, `pamac` and `pkcon`, and Windows alone for `miktex`.
-- [mpm] Report only the detected managers in `mpm managers`, and drop the `Supported` and `Executable` columns there, both a ✓ on every such row. The new `--view supported` restores the previous listing, `--view all` (or the global `--all-managers`) reports every manager `mpm` implements, and both bring the two columns back. Naming managers explicitly still reports them whatever their state.
-- [mpm] Show a spinner while `mpm managers` detects the pool.
-- [mpm] Detect managers concurrently in `mpm managers`, which alone kept probing them one at a time.
-- [mpm] Run the version probe of managers sharing a CLI once instead of once each, `brew`/`cask`, `uv`/`uvx` and `yarn`/`yarn-berry` among them. Detection groups them into lanes that take turns over a shared command cache, the mechanism a lock family already uses for its operations.
-- [mpm] Warn when the `sudo` credentials primed for a run are dropped mid-flight, as every Homebrew command does on startup, and re-arm the hidden-prompt notices.
-- [mpm] Warn before escalating a manager whose binary is not owned by the user or root, or can be modified by others.
-- [mpm] Skip the up-front password prompt when `sudo` reports the user is not authorized to run it at all, warning that escalating managers will fail.
-- [mpm] Escalate through `doas` on a host carrying no `sudo`, as OpenBSD, Alpine and NetBSD do by default. Add `--sudo-command` and its `[mpm] sudo_command` key to name the escalator explicitly.
-- [apk] Parse the search output of `apk-tools` 3, which appends each package's description where version 2 printed the bare name and version. Every result was dropped on Alpine edge.
-- [flatpak] Fix `search` reporting only its first result and silently dropping every other match.
-- [cpan,gem,npm,pip] Warn with the scoped `sudo = true` remedy when an operation carrying a dormant privileged marker fails on a permission error, like a global install into a root-owned prefix.
-- [gem,npm,pip] Report each manager's install root and its owner in `mpm doctor`, resolved through the manager's own discovery verb.
-- [mpm] Narrate the sudo priming decisions at `--verbosity INFO`, and expose the probe's raw answer and every cache refresh at `DEBUG`.
-- [mpm] Chart the privilege-escalation decision path on the sudo documentation page, from the up-front probe to the end of the run.
-- [mpm] Load the SPDX and CycloneDX writer libraries only when `mpm sbom` runs, instead of on every invocation. Cuts about 300 ms off the startup of every other command for anyone carrying the `[sbom-offline]` extra.
-- [elan] Add elan as a bundled definition, with `installed`, `install`, `remove`, `orphans` and `cleanup` support. It manages Lean toolchains, so a toolchain name is what it calls a package, and no version is reported beside it, the listing resolving a channel to a concrete name that already carries one. `elan toolchain gc` reports the toolchains no project references and `--delete` collects them, which is a read-only orphan query and its cleanup in one verb pair.
-- [bob] Add bob as a bundled definition, with `installed`, `search`, `install`, `remove` and `upgrade` support. It manages Neovim versions, so a version token is what it calls a package, `nightly` included; no version is reported alongside, the token being the identity. Its listing is a box-drawing table read by anchoring on the `Used`/`Installed` status column, colour escapes and all, bob emitting those whether or not it writes to a terminal.
-- [spack] Add Spack package manager, with `installed`, `search`, `install`, `remove`, `sync` and `cleanup` support. Every call forces `--no-env`, without which an activated environment answers for a project instead of the machine. Holding several builds of one package at once being the point of Spack, the inventory is reduced to one entry per name. No `outdated` and no `upgrade`: installing over a package adds a second build rather than replacing the first.
-- [getnf] Add getnf as a bundled definition, with `installed`, `search`, `install`, `remove` and `upgrade` support. It installs Nerd Fonts, so a font is what it calls a package and the Nerd Fonts release it was cut from is the version. Every call forces `TERM=dumb`, getnf coloring its headings through `tput` whether or not it writes to a terminal.
-- [raco] Add Racket's `raco pkg` as a bundled definition, with `installed`, `install`, `remove` and `upgrade` support. The listing forces `--all`, without which auto-installed packages are hidden behind a summary line, and `--long`, without which the checksum standing in for a version is truncated. Mutating operations force `--auto`, their default dependency mode asking for permission interactively.
-- [zef] Add Zef package manager, with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support. Raku identity strings are colon-separated, so both listings match the distribution name lazily up to `:ver<` and reduce the rows to one entry per name.
-- [basalt] Add Basalt package manager as a bundled definition, with `installed`, `install` and `remove` support. Every operation goes through its `global` subcommand tree, the bare ones acting on the current directory's project instead. Versions are the commit hashes basalt pins each package to.
-- [bpkg] Add bpkg package manager as a bundled definition, with `install` support. `install` forces `--global`, without which bpkg vendors the package into a `deps/` directory relative to the working directory. It exposes no inventory and no removal verb, and its catalogue read is left unmapped because `bpkg update` cannot sync an index.
-- [jpm] Add jpm package manager as a bundled definition, with `install`, `remove`, `upgrade --all`, `sync` and cache cleanup support. It reports no version of its own, so the probe reads the Janet interpreter it ships beside. No listing command exists, so no inventory is declared.
-- [clib] Add clib package manager as a bundled definition, with `search`, `install` and `remove` support. `install` forces `--global`, without which clib vendors sources into a `deps/` directory relative to the working directory. It ships no listing command, so no inventory is declared.
-- [nimble] Add Nimble package manager, with `installed`, `search`, `install`, `remove` and `sync` support. The inventory forces `--ver`, without which every package is reported with no version at all.
-- [luarocks] Add LuaRocks package manager, with `installed`, `outdated`, `search`, `install`, `upgrade` and `remove` support. Every call forces `--no-project` so the inventory answers for the machine rather than for the working directory's project tree, and search results are reduced to one entry per rock.
-- [gext] Implement `gext`, covering GNOME Shell extensions from extensions.gnome.org. The inventory forces `--all`, without which only enabled extensions are reported, and `outdated` reads a dry run that exits `17` once it has something to report.
-- [mpm] Document concurrency on a page of its own: how far `--jobs` spreads a command, a per-subcommand table of what runs at once, and the managers that queue on a shared backend. The readme's flat diagram of one band per manager moves there and gains a level, grouping the serialized managers under the backend they contend for.
-- [mpm] Merge the readme's *Metadata and operations* table into its *Supported package managers* section.
-- [mpm] Close each verdict of the unsupported-managers page on the release that first published it, with that release's date, so a reader can tell how old a verdict is.
-- [mpm] Split the unsupported-managers page into one section per declined tool, in place of the single table. Each title carries the tool and its verdict glyphs, so the manager ID doubles as the anchor a decision can be cited by, and the benchmark now links each glyph to the section that explains it instead of to the top of the page. Tools whose verdict was repeated word for word are grouped into one family section naming its members, collapsing the fifteen identical JetBrains entries into one.
-- [mpm] Merge the manager index into a single table: the managers `mpm` wraps open it alphabetically, and the ones it declined close it grouped by verdict. Its glyph legend now counts the managers in each state, in place of the prose summary that used to open the page.
-- [mpm] Link the tracker badge of each manager card to the open issues and pull requests carrying its label, rather than to every one ever filed.
-- [mpm] Redraw the mark flat: no outline, one tone per isometric plane, and two interior walls filling the open box behind the floating cube. The palette is now two purples and the midpoint between them, in place of the three unrelated shades that left the box mismatched with the wordmark beside it. A dark rendering moves the lettering alone, the mark being legible on any surface. Covers the logo, banner, favicon, social card, app icons, the GNOME Shell extension's icon and the ANSI mark of `--version`, all regenerated by the new `docs/brand_update.py`.
-- [mpm] Host the documentation on Cloudflare Pages instead of GitHub Pages, which lets the `mpm.run` apex sit behind the proxy: a certificate no longer has to validate against the origin over HTTP. The redirect stubs standing in for the pre-`dirhtml` URLs give way to a `_redirects` file answering them with a real `301`, and a `404.html` now answers an unknown path, which Cloudflare otherwise serves as the home page under a `200`.
-- [mpm] Stop publishing a copy of every documentation source under `_sources/`, and the `.buildinfo` marker beside it. Nothing linked to either: no page carries a source link, and the marker is bookkeeping for incremental builds.
-- [mpm] Publish the documentation at extension-less URLs: `https://mpm.run/managers/apk/` instead of `https://mpm.run/managers/apk.html`. Every path published under the former scheme keeps answering.
-- [mpm] Package `mpm` for openSUSE. The spec builds on Tumbleweed against the dependency set the distribution already ships, introducing none of its own, and installs today from a personal project on the Open Build Service while the submission to `system:packagemanager` is prepared. A `check-opensuse-spec` workflow validates the spec's form, its build, and the installed package driving `zypper`.
-- [bin] Report outdated binaries. The check writes its findings to `stderr` and exits `3` when it finds any, neither of which a declarative definition can express, so `bin` moves from a bundled definition to a class.
-- [bun] Implement `bun`, covering what it installs globally. It resolves the npm registry like the rest of that family but installs into its own prefix, so nothing it holds appears in `npm`, `pnpm` or `yarn` inventories. Upgrades force `--latest`, without which a package pinned at install time is held at its recorded range and the upgrade reports success while changing nothing.
-- [yazi] Implement `yazi`, the package manager of the `ya` command-line companion to the Yazi file manager. Plugins and flavors are reported as one inventory, each identified by its Git coordinates and versioned by the commit it is checked out at.
-- [mason] Implement `mason`, the Neovim installer for LSP servers, DAP adapters, linters and formatters. The inventory is read straight off mason's install tree by a `--clean` Neovim, so it costs no plugin loading and reports packages that reach no other manager: mason redirects every backend it uses into the package's own directory, so a tool it installed is invisible to `npm`, `pip` and the rest.
-- [mamba,micromamba] Implement `mamba` and `micromamba`, the C++ reimplementation of conda and its statically linked twin. Both read the inventory from `list --json`, accepting the array both bare and inside the envelope `2.9.0` introduced, and synthesize `outdated` from the dry-run transaction the way the `conda` wrapper does. Search matches package names exactly without falling back to `mpm`'s own refiltering.
-- [conda,mamba,micromamba] Stop running `conda`, `mamba` and `micromamba` concurrently. They act on one environment prefix and one package cache, and `conda` honors none of the locks `mamba` takes on them.
-- [mpm] Render the brand mark as ANSI art beside the `--version` metadata, adding the interpreter, the platform, the number of managers supported here and the documentation URL. The mark is an isometric open box shaded by the three planes its surfaces face, symmetric about its vertical axis. Drops back to the plain two-line output when colors are off, when the terminal is too narrow, or when `--accessible` is set.
-- [mpm] Add a *Concurrency* section to each manager's documentation page, naming the managers `mpm` will never run it alongside and what they contend for. Rendered from the lock families themselves, so a page cannot promise a guarantee the dispatcher does not implement, and omitted for a manager sharing no backend.
-- [nala] Label `nala` issues and pull requests with the shared `dpkg-based` group rather than a manager label of its own.
-- [basalt,bpkg] Label `basalt` and `bpkg` issues and pull requests with a shared `bash-based` group rather than a manager label each, so the Bash plugin managers group by their host shell like the `fish-based` and `zsh-based` ones already do.
-- [urpmi] Stop running `urpmi` concurrently with the other RPM front-ends. It has no listing of its own and fronts `librpm` directly, and the Mandriva lineage it serves ships `dnf` alongside it, so the two reach one database on the same host.
-- [pkg,ports] Stop running `ports` concurrently with `pkg`. The ports tree keeps no registry of its own and registers what it builds through `pkg`, whose advisory lock on that shared install database refuses a second writer.
-- [scoop,sfsu] Stop running `sfsu` concurrently with `scoop`. sfsu delegates every mutating operation to the `scoop` binary and its own `update` and `cleanup` reach the same buckets and cache, so a concurrent bucket refresh was two `git pull` in one repository.
-- [pacaur,pacman,pamac,paru,pikaur,trizen,yay] Stop running the AUR helpers concurrently with `pacman` and with each other. All of them drive the same pacman database, either by shelling out to `sudo pacman` or, for `pamac`, through Manjaro's own `libalpm` binding, so two mutating at once failed to init their transaction.
-- [pacstall] Serialize `pacstall` against the `apt` family rather than against `pacman`. It builds its pacscripts into `.deb` archives and installs them through `dpkg`, so it contends for dpkg's lock and never touches pacman's.
-- [mpm] Plot the GitHub star history of `mpm` and its benchmarked peers from a locally sampled database, replacing the star-history.com embeds GitHub's stargazer API restriction broke. The weekly `metrics.yaml` workflow runs `repomatic sample-metrics`, which snapshots the aggregate star count of every tracked repository, reconstructs `mpm`'s own curve from per-star timestamps, backfills the competitors from archived GitHub pages, and renders the charts as committed SVGs.
-- [mpm] Add a star chart plotted against each project's age instead of the calendar, alongside the absolute one on the benchmark page. Every series is anchored at its repository's creation date, the only zero-star origin the five share.
-- [mpm] Report each manager's upstream popularity and activity on the manager index: its star count, the date of its newest release or tag, and the date of its newest commit. The same weekly `sample-metrics` run reads every measurable upstream from GitHub, GitLab and Codeberg into the committed database, so the pages stay offline at build time. The managers whose upstream cannot be measured render empty cells.
-- [bar-plugin,gnome-shell,mpm] Publish the documentation at `https://mpm.run`. Every absolute link in `readme.md`, the benchmark tables, the packaging specs and both frontends' metadata points at the new origin; the former `kdeldycke.github.io` URLs redirect to it.
-- [mpm] Emit a canonical URL on every documentation page, plus a `sitemap.xml` listing all of them and a `robots.txt` pointing crawlers at it.
-- [mpm] Open every installation method with a command that works today. The Alpine Linux, Chocolatey, Nix and Void Linux tabs carry the condensed build recipe from their packaging section instead of a one-liner the reader cannot run yet, and the pending channels close on an admonition inviting support on their upstream pull request.
-- [mpm] Raise the click-extra floor from `8.8.1` to `8.9.1`, whose `click-extra-manpages` directive resolves its links against the page's own URL rather than its docname, which a directory-published page sits one level below.
-- [mpm] Cap the description column of `mpm search` to the width the other columns leave on the terminal, wrapping a long description inside its own cell instead of letting a verbose match push the table past the terminal edge and mangle its borders.
-- [mpm] Distinguish, in the Python compatibility table, a version a release rules out (❌) from one that did not exist yet when that release was cut (–), which used to render as a refusal too.
-- [mpm] Bump the in-repo Alpine, MacPorts and Nix packaging specs to build click-extra from `8.9.0`, the Alpine one jumping from `8.6.2`. Its dependencies, test dependencies and build backend are unchanged across the whole range, so the specs need no other edit.
-- [mpm] Bump the in-repo Alpine specs to build `mpm` `7.6.1`, click-extra `8.9.1` and extra-platforms `13.7.0`.
-- [mpm] Fix the Nix build of `click-extra` erroring out on every `tests/test_config.py` case on macOS. Those tests are served by a local `pytest-httpserver` binding to `localhost`, a name the Darwin build sandbox cuts the build off from resolving, so the package now allows local networking there.
-- [mpm] Fix `nix run github:kdeldycke/meta-package-manager?dir=packaging/nix` failing in `cloup`'s patch phase. The flake kept the `--replace-fail` form of the `setuptools-scm` pin relaxation, which errors out now that nixpkgs strips that pin itself; `default.nix` had already moved to `--replace-quiet`.
-- [mpm] Build the `nix-source` job inside the sandbox on macOS, which Nix leaves off there while Hydra and `nixpkgs-review` turn it on, and extend it to the flake alongside the `default.nix` entry point.
-- [mpm] Fix both Guix jobs of `tests-install.yaml` failing before they install anything. They fetched the Guix installer from Savannah, which answers a GitHub runner with an HTTP error, so `wget` exited 8 under `--quiet` and said nothing; the script now comes from Codeberg, where Guix development moved, with retries and audible errors.
-- [mpm] Drive the Guix installer with `yes ''` rather than `yes`, the newline-feeding form its authors document as the only supported automation, and retry it to absorb the 502 answered by `ftpmirror.gnu.org`, the redirector it hardcodes as the source of the Guix tarball.
-- [mpm] Fix the `guix-source` job resolving `python-click-extra` and `python-extra-platforms` to an unbound variable. It installed from the Guix `1.5.0` binary without pulling, and that channel snapshot predates both packages landing upstream.
-- [mpm] Fix `packaging/nix/update.py` rewriting whichever definition it is pointed at with mpm's own version and source hash. Each file now resolves the upstream repository it tracks, so the dependency pins can be bumped with it too, and an unrecognized file is refused instead of guessed at.
-- [antidote] Add the Antidote Zsh plugin manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support. Zsh is the CLI mpm executes, since Antidote ships as a sourced shell function rather than an executable.
-- [mpm] Record `zgenom` as an unsupported manager: it reports no version through any binary, and its `list` prints the generated `init.zsh` rather than an inventory.
-- [mpm] Record `zr` as an unsupported manager: plugins are the arguments handed to it, so it owns no inventory to report.
-- [conda,dotnet,pixi] Resolve the `pkg:conda` and `pkg:nuget` purl types, which both raised instead of routing: a type declared with no manager short-circuits the fallback that would otherwise match it against the manager IDs. `pkg:conda` now fans out to `conda` and `pixi`, and `pkg:nuget` reaches `dotnet`.
-- [mpm] Rename the `📦 manager: conda` GitHub label to `📦 manager: conda-based`, now covering `pixi` alongside `conda`. Both resolve the same conda channels, so a report about either lands in the same tracker search.
-- [dotnet] Add the .NET global tool manager with `installed`, `search`, `install`, `upgrade` and `remove` support, including version pinning. Both listings are column tables whose headers are localized, so the parsers key on the row shape and the CLI language is pinned through the environment.
-- [pixi] Add the pixi global tool manager with `installed`, `install`, `upgrade`, `remove` and `cleanup` support. Packages are keyed on the global environment, the unit `pixi global uninstall` and `pixi global update` address, and the version is read from the dependency the environment is named after.
-- [opam] Add the OCaml opam package manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support. Listings go through `--short --columns=name,version`, which drops the header and joins columns with a space.
-- [krew] Add the krew kubectl plugin manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support. Its piped listing carries no version, which is an upstream branch on whether stdout is a terminal.
-- [miktex] Add the MiKTeX TeX package manager with `installed`, `install`, `upgrade`, `remove` and `sync` support, shipped as a bundled definition. Its catalog listing is filtered to the inventory through a format template, MiKTeX having no installed-only listing, and queries disable its on-the-fly installer so a read leaves the system alone. It declares no `outdated`: MiKTeX's update check names packages without any version to report them against.
-- [vcpkg] Add the vcpkg C and C++ library manager, covering its classic mode: every call forces `--classic`, so the inventory is the machine's rather than whichever project the working directory sits in. Packages are keyed on the `name:triplet` specification vcpkg itself addresses them by, and the listing is read as JSON, its human form truncating long specifications until no separator remains before the version.
-- [nala] Add the Nala front-end to Debian's apt with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support. Every call forces `LC_ALL=C`, which pins its runtime-translated output to the strings the parsers expect and selects its ASCII tree glyphs at once. It joins the dpkg lock family, and its per-package upgrade routes through `install`, nala's own `upgrade` accepting no package arguments.
-- [ollama] Add the Ollama model manager with `installed`, `install`, `upgrade` and `remove` support, shipped as a bundled definition. Models are keyed on the `name:tag` pair its listing prints. It declares no `outdated`, nothing reporting that a local model is behind without downloading it, and so no `upgrade --all` either. Note that listing models starts ollama's daemon on macOS and Windows where it is not already running.
-- [am] Add the AM AppImage manager with `installed`, `upgrade`, `remove` and `cleanup` support. Its listing locates the version by reading the table header, the column count depending on the applications installed. It declares no `install`, which blocks on an escalation prompt, no `outdated`, which the catalog cannot answer, and no `search`, whose records are folded to the terminal width.
-- [mpm] Record `app-man` as an unsupported manager: it is the same script as `am` under a second name, and its applications already appear in `am`'s own listing.
-- [micro] Add the micro editor's plugin manager with `installed`, `search`, `install`, `upgrade` and `remove` support, shipped as a bundled definition. Its plugin flag is handled before the editor's screen is initialized, so it runs headlessly, and its plugins come from a channel micro curates rather than from arbitrary Git URLs. Note that micro exits zero from every plugin command whatever the outcome, so a failed install is reported as a success.
-- [vagrant] Add Vagrant's box manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove` and `cleanup` support. Boxes are the packages rather than plugins, which offer neither an `outdated` nor a search. Both listings report one row per version and provider, so they are reduced to one package per box name. `outdated` and the per-box upgrade force the flags that scope them to the machine, since both otherwise answer for the current directory's Vagrantfile.
-- [gcloud] Add the Google Cloud CLI's component manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support, shipped as a bundled definition. Listings go through `--format=value(...)`, which prints tab-separated fields with no heading, bypassing the bordered table entirely. It declares no single-package `upgrade`: naming components expands the selection through their dependency and consumer closures.
-- [xcodes] Add the xcodes Xcode version manager with `installed`, `remove` and `sync` support, shipped as a bundled definition. Listings read the tab-separated form xcodes emits when its output is not a terminal. It declares no `install`: downloading an Xcode always authenticates against an Apple ID, and two-factor authentication has no non-interactive path.
-- [pyenv] Add the Python pyenv version manager with `installed`, `search`, `install` and `remove` support, shipped as a bundled definition. Listings go through `--bare`, which is what makes them independent of the working directory. Virtualenvs are excluded: `pyenv uninstall` reduces its argument to the part after the last slash, so removing one by the id the listing prints deletes a compatibility symlink and orphans the environment. It declares no `outdated` or `upgrade`, pyenv having no in-place interpreter upgrade.
-- [juliaup] Add the Julia juliaup version manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove` and `cleanup` support, shipped as a bundled definition. Channels are the packages, since every juliaup verb takes one channel token and concrete versions are not addressable. It declares no `sync`: only the mutating operations refresh its versions database, so `outdated` answers offline from whatever they last left behind.
-- [ghcup] Add the Haskell ghcup toolchain installer with `installed`, `search`, `install`, `remove`, `sync` and `cleanup` support. Every tool it installs is a package, keyed as `<tool>-<version>` and split back on the first hyphen so cross-compiling GHCs survive. It declares neither upgrade operation: `ghcup upgrade` replaces the ghcup binary rather than the installed tools, and no in-place tool upgrade exists.
-- [rustup] Add the Rust rustup toolchain installer with `installed`, `outdated`, `install`, `upgrade` and `remove` support, shipped as a bundled definition. Toolchains are the packages: components are scoped to a toolchain and a bare component listing answers for whichever one is active. Every mutating call forces `--no-self-update`, so upgrading a toolchain no longer replaces the `rustup` binary as a side effect. Installed toolchains carry no version, which only `outdated` reports.
-- [bin] Add the bin binary manager with `installed`, `upgrade` and `remove` support, shipped as a bundled definition. Packages are keyed on the installed binary's absolute path, the only identifier its non-installing operations accept. It declares no `install`, since bin installs from a source spec no listing reports back, and no `outdated`, since `update --dry-run` signals its findings through an exit code and writes them to stderr.
-- [haxelib] Add the Haxe haxelib package manager with `installed`, `search`, `install`, `upgrade` and `remove` support, shipped as a bundled definition. Every call forces `--global`, since haxelib otherwise walks up the directory tree and silently switches to any project-local repository it finds. It declares no `outdated`: haxelib computes staleness only while upgrading.
-- [mpm] Resolve the `pkg:haxe` purl type, which raised instead of routing to `haxelib`.
-- [pamac] Add Manjaro's pamac package manager with `installed`, `outdated`, `orphans`, `search`, `install`, `upgrade`, `remove` and `cleanup` support, shipped as a bundled definition. Operations are scoped to the official repositories, and escalation is left to polkit. Single-package upgrades route through `install --no-upgrade`, since `pamac upgrade` ignores its package arguments and upgrades the whole system.
-- [mpm] Record `bash-it`, `oh-my-bash` and `oh-my-zsh` as unsupported managers: none owns a registry, their plugins and themes shipping inside the framework's own git checkout and being enabled by editing a shell array or symlinking a file already on disk.
-- [mpm] Record `pip-review` and `pipupgrade` as unsupported managers: both shell out to `pip` and resolve against PyPI, reaching no package `mpm` does not already reach through `pip`.
-- [mpm] Record `home-manager` as an unsupported manager: it draws its packages from nixpkgs, the registry `nix` already covers, and adds them by editing `home.nix` rather than through a per-package verb.
-- [mpm] Record `pkgfile` as an unsupported manager: it searches the `.files` metadata published on `pacman` mirrors to answer which package owns a file, and installs, removes and versions nothing.
-- [mpm] Add a `Haskell` row to the project-scoped dependency managers table, the last mainstream ecosystem missing one.
-- [mpm] Record `windsurf` and `antigravity` as unsupported managers: neither vendor documents the extension-management flags of its VS Code fork. Google ships the `agy` plugin CLI as a separate product from the Antigravity IDE.
-- [mpm] Record `cursor` and `cursor-agent` as unsupported managers. Cursor forked VS Code without inheriting a working `--list-extensions`: it opens the editor window instead of listing, and its own CLI documentation never covers the extension flags.
-- [mpm] Mark with 🛟 the unsupported managers `topgrade` still reaches, on both the unsupported page and the benchmark. 56 of the 69 are upgradable through `mpm upgrade --topgrade` despite not being wrapped. The marker is derived from the benchmark data, never hand-written.
-- [mpm] Record 47 more unsupported managers, covering the JetBrains IDE plugin updaters, the dotfile syncers, the self-updating applications, the container runtimes and the system-database refreshers. Every tool assessed now lands either in the pool or on the unsupported page.
-- [antigen] Add the Antigen Zsh plugin manager with `installed`, `upgrade` and `remove` support. It declares no `install`: `antigen bundle` loads a bundle for the current shell only, writing nothing back.
-- [sheldon] Add the Sheldon shell plugin manager with `upgrade` and `remove` support. It declares no `installed` (Sheldon prints no listing) and no `install` (`sheldon add` needs both a local name and a source flag).
-- [zim] Add the Zim Zsh module manager with `installed` and `upgrade` support. It declares no `install` or `remove`: Zim materializes only the module set the user's own `.zimrc` names.
-- [oh-my-fish] Add the Oh My Fish framework with `installed`, `install`, `upgrade` and `remove` support. Fish is the CLI mpm executes, since Oh My Fish ships as a sourced shell function rather than an executable.
-- [zplug] Add the zplug Zsh plugin manager with `installed` and `upgrade` support. It declares no `install` or `remove`: zplug materializes only the plugin set the user's own `.zshrc` names.
-- [fisher] Add the Fisher Fish plugin manager with `installed`, `install`, `upgrade` and `remove` support. Fish is the CLI mpm executes, since Fisher ships as an autoloaded shell function rather than an executable.
-- [dkp-pacman] Add devkitPro's `pacman` fork, covering the console homebrew toolchains, with the full operation set inherited from `pacman`.
-- [bar-plugin] Fix the plugin rendering a version error instead of its menu on every released SwiftBar. The minimum requirement was pinned on an unreleased `2.1.2` test build, while the fix it targets shipped in `2.1.0`.
-- [bar-plugin] Quote the default values of the plugin variables, so SwiftBar `2.1.0` and above parses them and exposes them in its settings UI. Xbar still trims the quotes.
-- [bar-plugin] Declare the font variables as `swiftbar.var` and drop the `swiftbar.environment` block they were hidden in, so all four variables are editable from SwiftBar's UI.
-- [bar-plugin] Fold each manager section into an inline accordion on SwiftBar `2.1.0` and above, expanding in place on click instead of opening a sub-menu, in the grouped layout.
-- [bar-plugin] Render each manager's outdated count as a native SwiftBar badge on its section header, in place of the count spelled out in the label.
-- [bar-plugin] Add the `VAR_HIDE_WHEN_UP_TO_DATE` variable, removing the menu bar icon entirely while no package is outdated and no manager reported an error.
-- [bar-plugin] Stop the plugin's virtualenv search at the user's home folder, as its comment always claimed: it kept climbing to `/Users` and `/`, where a stray lockfile in a shared parent would have been taken for the plugin's own project.
-- [lazy] Add the lazy.nvim Neovim plugin manager with `installed` and `upgrade` support. It declares no `install` or `remove`: lazy.nvim materializes only the plugin set the user's own Lua configuration names.
-- [mpm] Add the GNOME Shell extension to the benchmark's feature matrix.
-- [mpm] Link every feature label of the benchmark's matrix to the same page its `mpm` cell points at, a convention only the Xbar/SwiftBar plugin row followed. The `purl` row now points at the augmentation section describing purls, instead of the generated `install` help.
-- [mpm] Add ten features to the benchmark's matrix: accessible output, skipping auto-updating packages, exact and fuzzy search, SBOM export, vulnerability scan, per-manager overrides, command plan, per-call timeout, offline by default and man pages.
-- [mpm] Link every manager named in the documentation pages to its own page, at most once per paragraph.
-- [mpm] Back 75 competitor cells of the benchmark's feature matrix with a link to the documentation, configuration example, CLI declaration or issue that proves the verdict. Six cells found nothing citable and keep a bare glyph.
-- [mpm] Back 102 of the 105 competitor cells of the benchmark's operations table with a link to the documentation, CLI declaration, source line or maintainer decision that proves the verdict. 46 operations a tool rules out by design are now marked ❌, most of them `topgrade`'s, whose steps are upgrade routines by definition. Three cells found nothing citable and stay blank.
-- [mpm] Link every ✅ of the benchmark's operations table `mpm` column to the subcommand implementing it, as the feature matrix already did.
-- [mpm] Credit `pacaptr`'s `-Qo` file-ownership lookup and `metapac`'s `unmanaged` listing in the benchmark's operations table. `topgrade`'s package-index refresh and `metapac`'s orphan sweep drop to 🟡: both only run bundled inside another operation.
-- [mpm] Record `dpp.vim` as an unsupported manager: it is drivable only from inside the editor, and reports neither a binary nor a version.
-- [pikaur] Add the pikaur AUR helper with the full operation set inherited from `pacman`.
-- [trizen] Add the trizen AUR helper with the full operation set inherited from `pacman`.
-- [mpm] Add 47 managers to the benchmark's support table, covering every tool `topgrade` drives that had no row yet: the Android Studio, Antigravity, Cursor, Windsurf and fifteen JetBrains plugin managers, plus `bob`, `colima`, `elan`, `gearlever`, `helix-db`, `hyprpm`, `install-release`, `skills`, `tpack`, `vite-plus` and eighteen others.
-- [mpm] Flag `topgrade`'s support for `soar` and `zerobrew` in the benchmark, which was left blank.
-- [mpm] Flag `mpm`'s own support for desktop notifications in the benchmark, left blank since the GNOME Shell extension shipped its `notify` setting in `7.6.0`.
-- [mpm] Drop the `topgrade` refusals recorded against `opencode` and `zerobrew`: both requests were closed as not-planned, then implemented anyway.
-- [mpm] List declined managers on the manager index too, in a second block below the wrapped ones sharing the same columns. Their `Support` cell renders the benchmark's own ☠️/❌/🛟 glyphs, linked to the verdict in `docs/unsupported.md`, and folds in what used to be a dedicated `Unmaintained` column. A population summary opens the page with how many managers have been assessed, wrapped and declined so far.
-- [gnome-shell] Render every panel state and menu marker with a stock symbolic icon (`software-update-available-symbolic` and its neighbours), in place of four bundled SVGs and the 🆙 and ⚠️ emoji. The shell recolors a themed icon with the panel foreground and a desktop theme can restyle it, neither of which our own artwork allowed, and the emoji were a font glyph the shell could do nothing with.
-- [gnome-shell] Mark a running check with a refresh icon in the panel and a greyed *Checking…* row, in place of the three-dot loading icon.
-- [gnome-shell] Report the resolved `mpm` release and command in the preferences window, beside the extension's own version.
-- [gnome-shell] Add an `mpm-options` setting, extra options spliced into every `mpm` call the extension makes, before the subcommand.
-- [gnome-shell] Refresh the package list as soon as a background upgrade exits, instead of waiting out the re-check delay.
-- [bar-plugin] Add an *About* row to the menu, naming the plugin's own version, the `mpm` release it resolved and the command that answered.
-- [bar-plugin] Add `VAR_MPM_OPTIONS`, extra options spliced into every `mpm` call the plugin makes, before the subcommand.
-- [bar-plugin,gnome-shell] Mark a package check as failed on the exit code of `mpm` only, so a `--verbosity` raised in the options no longer replaces the package list with log lines.
-- [gnome-shell] Track every signal through `connectObject()` and `disconnectObject()`, and drop the `_destroyed` flag the GNOME guidelines forbid. Teardown now hangs off the indicator actor itself, and a check still in flight learns it was disabled from its own cancellable.
-- [gnome-shell] Require a cancellable in every `runCommand()` call, and drop its watchdog the moment that cancellable fires rather than whenever the abandoned read settles. A run nobody could cancel left a main loop source alive past `disable()`, free to fire on a locked session.
-- [gnome-shell] Run `shexli`, the static analyzer extensions.gnome.org applies to every upload, as its own CI job. It exits `0` whatever it finds, so the gate reads the finding count out of its JSON report.
-- [gnome-shell] Pack the extension from the commit being released. The zip attached to a release was built from the post-release version bump instead, so `v7.6.1` shipped an extension advertising `7.6.2.dev0` as its `version-name`, the string extensions.gnome.org shows users.
-- [gnome-shell] Bundle the license in the packed extension, which is distributed detached from the repository carrying it.
-- [mpm] Fix every escalated command failing for want of a password on a warm `sudo` credential cache. Such commands were detached into a POSIX session of their own, which loses the controlling terminal, and `sudo` keys its cache per terminal: the credentials `mpm` had just probed, prompted for and kept alive were unreadable by the very commands they were acquired for. They now keep the terminal, and only the calls `mpm` does not escalate are still detached.
-- [mpm] Print the command to copy-paste in the end-of-run error summary, in place of the bare `--verbosity DEBUG` pointer. A frontend click opens a terminal on an invocation the user never typed, leaving nothing to re-run by hand.
-- [mpm] Narrow that suggested re-run to the managers that actually reported errors: their `--<id>` selectors are injected into the copy-pasteable command, so the `DEBUG` transcript is a diagnosis instead of a replay of the whole pool.
-- **Breaking:** [mpm] Replace the `--require-cooldown-support`/`--allow-unsupported-managers` flag pair with enforcement keywords on `--cooldown` itself: the option now accepts `enforce`, `best-effort` and `off` beside its duration, spelling the posture for managers that cannot enforce the window. The configuration moves from the `[mpm] cooldown` and `require_cooldown_support` keys to a `[mpm.cooldown]` table with `period` and `policy` keys; the former `cooldown` string spelling stays accepted as the `period`, with a deprecation warning. A keyword inherits the other axis from the configuration, so `--cooldown best-effort` reuses the configured window, and a duration reuses the configured policy.
-- [mpm] Override the cooldown enforcement policy per manager: a `cooldown_policy` key under `[mpm.managers.<id>]` pins a single manager to `enforce`, `best-effort` or `off`, taking precedence over the policy resolved from `--cooldown` and the `[mpm.cooldown]` table. `off` exempts the manager from the gate entirely, holding back the cutoff injection even where it could be honored.
-- [mpm] Recognize the authentication failure of `sudo-rs`, the Rust rewrite Ubuntu ships as its default `sudo` since `25.10`. It answers `interactive authentication is required` where the original says `a password is required`, so every escalation that failed for want of a password on a current Ubuntu was reported as an opaque error instead of the hint naming the ways to pre-authenticate.
-- [bar-plugin,gnome-shell] Offer `uv tool install --upgrade meta-package-manager` when no `mpm` is found, beside an entry opening the installation page for the systems `uv` does not answer for.
-- [gnome-shell] Restart the GNOME session before enabling the extension, in the documented installation steps. `gnome-extensions enable` asks the running shell rather than the disk, so it answered `Extension "mpm@kdeldycke.github.io" does not exist` when run right after a successful install.
-- [mpm] Point the documentation's links to repomatic at `repomatic.net`, and drop the retired `CLOUDFLARE_ACCOUNT_ID` secret from the infrastructure page.
-- [mpm] Give every module its own API reference page, in place of the three pages that stacked a whole package each. The `managers` page alone carried 64 modules.
-- [bar-plugin] Stop a menu action from importing a source checkout it happens to be spawned from, instead of the installed `mpm`.
-- [bar-plugin,gnome-shell] Give each frontend page a release history of its own, built from the changelog entries scoped to it.
-- [bar-plugin] Follow the symlink both hosts are installed through when looking for the `mpm` the plugin ships with, in place of the plugin folder it sits in.
-- [bar-plugin] Probe a virtualenv interpreter as itself, in place of the interpreter it was built from, which sees none of the virtualenv's packages.
-- [zypper] Fix `installed`, `outdated` and `search`, which crashed whenever the query matched exactly one package. An exact search and a host one update behind are both ordinary states.
-- [zypper] Show captured openSUSE Tumbleweed output in the manager page's reference traces, in place of placeholder package names.
-- [mpm] Ask for the password of the account `sudo` accepts it from, which is root rather than the caller under openSUSE's default `targetpw` policy.
-- [mpm] Skip a manager whose CLI cannot be executed instead of aborting the run: a wrong-architecture or non-program binary anywhere on `PATH` used to crash every subcommand.
-- [mpm] Recognize a `NOPASSWD` policy that `sudo --validate` reports as a cold cache, so escalation on such a host stops warning that managers may fail and then watching them succeed.
-- [mpm] Record why `opi`, `osc`, `myrlyn` and `transactional-update` are not wrapped, on the unsupported-managers page.
-- [mpm] Record `nh` as an unsupported manager: it reimplements the NixOS, Home Manager and nix-darwin workflows over nixpkgs, the registry `nix` already reaches, and switches whole system states rather than packages.
-- [mpm] Queue `cards`, `pkgman`, `prt-get` and `slackpkg` as wrap candidates, leaving the benchmark with no unassessed manager: each clears the vetting ladder and waits on a NuTyX, Haiku, CRUX or Slackware host.
-- [shelly] Add Shelly package manager, with inventory, outdated, search, install, remove, upgrade, database sync and cache and orphan cleanup.
-- [mpm] Document how to write the `NOPASSWD` rule unattended escalation needs, and why a `/etc/sudoers.d` drop-in can be silently overridden by a later rule.
-- [mpm] Recognize `sudo-rs` as a genuine `sudo`. Its `--version` banner failed the identity probe, so a host carrying `doas` too escalated through `doas` instead, against the documented preference.
-- [mpm] Report a user no `sudoers` rule matches as unauthorized on `sudo-rs`, instead of prompting for a password that cannot authorize them. Its `--validate` denial words itself unlike its `--list` one.
-- [mpm] Document what each privilege escalator can answer, and why `pkexec` and the Windows ones cannot be primed the way `sudo` is.
-- [mpm] Escalate through `run0` on systemd hosts carrying neither `sudo` nor `doas`, and accept it as a `--sudo-command` choice. A command it escalates outlives an interrupted run, because systemd owns the payload rather than `mpm`.
-- [mpm] Accept `pkexec` as a `--sudo-command` choice, on hosts whose polkit rule already grants `org.freedesktop.policykit.exec`. It cannot escalate without prompting, so `mpm` asks `pkcheck` first and declines the run where the rule is missing.
-- [mpm] Escalate through `gsudo` on Windows, which no longer refuses to escalate at all. A manager only reaches it by asking, with `--sudo` or a `[mpm.managers.<id>] sudo = true` entry, since none escalates there by default.
-- [mpm] Escalate through Microsoft's `sudo.exe`, ranked behind `gsudo`: it ships with Windows `24H2` where `gsudo` must be installed, but caches nothing, so each escalation raises its own UAC dialog.
-- [mpm] Carry a forced environment across a `run0` escalation. Its payload runs in a fresh service inheriting nothing, so `nala`, `tazpkg` and `urpmi` were losing the `LC_ALL=C` pinning their parsers, and `ports` the `BATCH=yes` keeping it out of a dialog.
-- [cargo,gem,mamba,micromamba] Record that each tool's shipped release-age gate never reaches the commands `mpm` drives, in place of a pending upstream proposal.
-- [vscode,vscodium] Point the cooldown status at the open request covering extension installs: the delay VS Code shipped holds back automatic updates only.
-- [winget] Record the optional `ReleaseDate` its manifests carry as author-supplied, so it cannot back a release-age gate any more than the commit date.
-- [fwupd] Fix a crash on a host whose `fwupdmgr` lists a device with no flags, name or version: `installed` and `outdated` aborted the whole run with a `KeyError`. Refs [#1528](https://github.com/kdeldycke/meta-package-manager/issues/1528).
-- [pip] Skip an interpreter carrying no `pip`, so an `mpm` installed by `uv tool` or `pipx` drives a real Python instead of reporting its own virtualenv as an errored manager on every run.
-- [pip] Skip a Windows `python3.exe` app-execution alias with no Python behind it. It shadowed every real interpreter, leaving `pip` reported as broken on a stock Windows and warning on every run.
-- [choco] Fix `installed`, `outdated` and `search`, which returned nothing at all: every invocation carried a `--retry-count=3` option Chocolatey does not have, and its parser passed it on as a package filter matching nothing.
-- [choco] Escalate `install`, `remove` and both upgrade paths. Chocolatey locks its `C:\ProgramData\chocolatey` tree to administrators, so each of them failed unprivileged with a permission error.
-- [mpm] Raise the click-extra floor from `8.9.1` to `9`, whose `wrap --help-format man` renders the man pages each release attaches. `--man` no longer writes roff.
-- [mpm] Shrink the `--table-format` and `--config` entries of every help screen, which spelled out fifty table formats and every configuration file pattern.
-- [mpm] Rename the `Output options` help section to `Reporting options`, leaving the old name to click-extra's own color, theme and table options.
-- [mpm] Fix three documented commands that no longer run: the Carapace spec export, the man-page install for packagers, and reading a manual with `--man`.
-- [mpm] Document `plist` among the `--export-config` formats, and which configuration formats need no extra dependency.
-- [mpm] Repoint six documentation links at the click-extra pages that now carry the configuration formats and the `matrix` directive.
-- [mpm] Add an `Examples` section to `mpm --help` and every subcommand's, listing worked invocations. They render in the man pages too.
-- [mpm] Order the subcommand sections of `mpm --help` from the broadest to the narrowest, instead of by the alphabet of their source module.
-- [mpm] Redraw the readme's two CLI illustrations as SVG terminal windows, replacing captures that still pictured 14 managers and a `Supported` column mpm dropped.
-- [mpm] Refresh the readme's `outdated` and `upgrade --all` transcripts, which showed 2020-era packages and an output shape mpm replaced with the per-manager ✓ trail.
-- [mpm] List the readme's supported managers as one roster, instead of tabling every operation they implement. Each manager's own page keeps that detail, upstream health included.
-- [mpm] Show the readme's command output as SVG terminal windows, and illustrate the headline features with them.
-- [mpm] Fold the readme's two quick-start sections into its feature list, and move the manager-detection walkthrough to the manager index page.
-- [mpm] Record the readme's `upgrade --all` under a release-age cooldown, showing which managers the window skips and which enforce it natively.
-- [mpm] Fix the installation page's vertical tabs: a long URL in one tab widened its pane past the page, clipping the prose and breaking every label mid-word.
-- [mpm] Lead the readme's installation section with `uv`, which installs `mpm` on Linux, macOS and Windows alike.
-- **Breaking:** [mpm] Layer the discovered configuration files instead of applying only the first. A project's `[tool.mpm]` now wins key by key over a machine-wide config, which used to be dropped whole. An explicit `--config` still pins one file.
-- **Breaking:** [mpm] Pair each manager's selectors on one help-screen line, as `--brew / --no-brew`, instead of listing every manager twice. Their `no_<id>` configuration keys and `MPM_NO_<ID>` variables are gone: spell them `<id> = false` and `MPM_<ID>=false`.
+- **Breaking:** [mpm] Replace the `--require-cooldown-support` and `--allow-unsupported-managers` flags with `enforce`, `best-effort` and `off` keywords on `--cooldown`. Configuration moves to a `[mpm.cooldown]` table with `period` and `policy` keys; the former `[mpm] cooldown` string still sets the `period`, with a deprecation warning.
 - **Breaking:** [mpm] Move the per-manager overrides to `[mpm.overrides.<id>]`, from `[mpm.managers.<id>]`, which collided with the `managers` subcommand's own options. A stale section is named in a warning and ignored.
-- [mpm] Report on the `--version` screen of a downloaded binary when and for what target it was compiled. A source install shows neither, its interpreter and platform saying the same thing.
-- [mpm] Stop calling a Click helper deprecated for removal in Click `9`, which warned on every colored `--version`.
-- [mpm] Picture the `--version` screen on the install page, and drop the `7.6.0` output the page still showed beside it.
-- [mpm] Close an unmaintained manager's selector help with `(unmaintained)`, in the help screen, the man pages and the completion spec alike, replacing Click's `(DEPRECATED)`.
-- [mpm] Fix `mpm --tree`, which drew every subcommand's short help off the screen: `config-template` spelled its argument as the list of all manager IDs.
-- [mpm] Rewrite the SBOM documentation page in short plain sentences, flip its coverage matrix to one column per manager, and fix its offline install example, which used `pip` instead of `uv`.
-- [bar-plugin,mpm] Drop the API reference sections the guide pages repeated at their foot; each module stays documented on its own API page.
-- [mpm] Regroup the documentation sidebar under ten topical sections, instead of one flat list of 19 entries and a `Development` catch-all.
-- [mpm] Fix the cross-references that rendered as plain text on the manager and configuration pages, where a short reference resolved only inside the API reference.
+- **Breaking:** [mpm] Pair each manager's selectors on one help-screen line, as `--brew / --no-brew`. Their `no_<id>` configuration keys and `MPM_NO_<ID>` variables are gone: spell them `<id> = false` and `MPM_<ID>=false`.
+- **Breaking:** [mpm] Layer the discovered configuration files instead of applying only the first: a project's `[tool.mpm]` now wins key by key over a machine-wide config. An explicit `--config` still pins one file.
+- **Breaking:** [bar-plugin,gnome-shell] Rename the grouped-layout setting to `VAR_GROUP_BY_MANAGER` in the plugin and `group-by-manager` in the extension, from `VAR_SUBMENU_LAYOUT` and `submenu-layout`, and turn it on by default. A configuration still using the old name gets the default.
+- **Breaking:** [bar-plugin] Rename the `VAR_TABLE_RENDERING` variable to `VAR_ALIGN_COLUMNS`, matching the GNOME Shell extension's own setting.
+- [mpm] Add `--shell-env` to adopt the environment of the login shell before looking for managers, so a run started by a menu bar plugin, a desktop extension or a scheduled job sees the same managers as a terminal.
+- [mpm] Add `--sudo-command` and its `[mpm] sudo_command` key to name the privilege escalator, and escalate through `doas` on a host carrying no `sudo`, as OpenBSD, Alpine and NetBSD do, or through `run0` on a systemd host carrying neither.
+- [mpm] Accept `pkexec` as a `--sudo-command` choice on hosts whose polkit rule grants `org.freedesktop.policykit.exec`, declining the run where the rule is missing.
+- [mpm] Escalate on Windows through `gsudo`, or Microsoft's `sudo.exe` behind it, for a manager asked to with `--sudo` or a `[mpm.overrides.<id>] sudo = true` entry.
+- [mpm] Escalate through `doas` where `sudo` is Alpine's `doas-sudo-shim`, which rejects every option the credential probes send and so reported a cold cache.
+- [mpm] Override the cooldown policy per manager with a `cooldown_policy` key under `[mpm.overrides.<id>]`, pinning it to `enforce`, `best-effort` or `off` whatever `--cooldown` and `[mpm.cooldown]` resolve to.
+- [flatpak,mpm] Gate `flatpak` under `--cooldown` with a per-app probe reading the publication date of each app's latest build from its remote, holding back any release younger than the window.
+- [mas] Gate the Mac App Store under `--cooldown` with the same per-app probe, reading each app's release date from `mas lookup --json`.
+- [paru] Gate `paru`'s AUR half under `--cooldown`: too-fresh AUR packages, dated by the RPC's `LastModified`, are held out of the `--sysupgrade` transaction with `--ignore`.
+- [mpm] Report only the detected managers in `mpm managers`, dropping the `Supported` and `Executable` columns. `--view supported` restores the previous listing, `--view all` reports every manager `mpm` implements.
+- [mpm] Detect managers concurrently in `mpm managers`, behind a spinner, and probe the version of managers sharing a CLI once instead of once each, `brew`/`cask`, `uv`/`uvx` and `yarn`/`yarn-berry` among them.
+- [mpm] Draw the brand mark as ANSI art on the `--version` screen, beside the interpreter, the platform, the number of managers usable here and, for a downloaded binary, when and for what target it was compiled.
+- [mpm] Name the running command in the progress spinner, and the operation on every `✓`/`✘` trail line, which now closes on its duration: `✓ brew.install: jq (1.2s)`. Lines logged during an operation carry the same `warning:brew.install:` label.
+- [mpm] Hold the spinner still during a call whose manager may prompt for a `sudo` password, naming it on a static line, and run a manager that escalates internally after the concurrent batch, so its prompt gets a quiet terminal.
+- [mpm] Print the command to copy-paste in the end-of-run error summary, narrowed to the managers that reported errors, in place of the bare `--verbosity DEBUG` pointer.
+- [mpm] Add an `Examples` section to `mpm --help` and every subcommand's, rendered in the man pages too, and order the subcommand sections from the broadest to the narrowest.
+- [mpm] Rename the `Output options` help section to `Reporting options`, shrink the `--table-format` and `--config` entries, and close an unmaintained manager's selector help with `(unmaintained)` in place of Click's `(DEPRECATED)`.
+- [mpm] Wrap the name and version columns of `mpm installed`, `mpm outdated` and `mpm search`, and the `Supported` and `CLI` columns of `mpm managers`, inside their cell, measuring tables against the terminal width. `package_id` never wraps.
+- [mpm] Load the SPDX and CycloneDX writer libraries only when `mpm sbom` runs, cutting about 300 ms off the startup of every other command for anyone carrying the `[sbom-offline]` extra.
+- [brew] Scan formulae for vulnerabilities: `mpm --network sbom` now queries OSV with the upstream registry purl Homebrew records for a formula, instead of the `pkg:brew/…` coordinate no advisory database indexes.
 - [apt,apt-mint,aptitude,aura,dkp-pacman,dnf,dnf5,nala,pacaur,pacman,pamac,paru,pikaur,pkg,shelly,trizen,xbps,yay,yum] Mark a package already installed as a dependency as explicitly installed when `mpm install` or `mpm restore` names it, so `mpm cleanup --orphans` keeps it.
 - [flatpak] Pin a runtime already installed as a dependency when `mpm install` or `mpm restore` names it, so `mpm cleanup --orphans` keeps it. This raises the flatpak floor to `1.9.1`.
+- [winget] Silence progress spinners by passing `--no-progress` on every invocation, which raises the winget floor to `1.29.280`.
+- [gem,npm,pip] Report each manager's install root and its owner in `mpm doctor`.
+- [cpan,gem,npm,pip] Warn with the `[mpm.overrides.<id>] sudo = true` remedy when an operation carrying a dormant privileged marker fails on a permission error, like a global install into a root-owned prefix.
+- [conda,dotnet,go,haxelib,pixi] Resolve the `pkg:conda`, `pkg:golang`, `pkg:haxe` and `pkg:nuget` pURL types to these managers, which raised instead of routing.
+- [dkp-pacman,emacs,mamba,micromamba,nala,pikaur,pipxu,trizen,urpmi,uvx] Resolve `pkg:alpm`, `pkg:conda`, `pkg:deb`, `pkg:melpa`, `pkg:pypi` and `pkg:rpm` pURLs to these managers too, alongside the ones already handling each type.
+- [mpm] Detect CRUX and NuTyX, two source-based Linux distributions.
+- [eopkg,mpm] Detect Solus, where every run reported an unrecognized platform and selected no manager at all.
+- [am,miktex,nala,pamac,pkcon] Declare support for the Linux compatibility layers, WSL included, in place of the Linux distributions alone, so the readme's operation matrix reports their platforms.
+- [sun-tools] Activate on illumos as well as Solaris, and report each package's human-readable name, which was parsed from `pkginfo -l` and then dropped.
+- [am] Add the AM AppImage manager with `installed`, `upgrade`, `remove` and `cleanup` support. It declares no `install`, which blocks on an escalation prompt, no `outdated` and no `search`.
+- [antidote] Add the Antidote Zsh plugin manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support, executed through Zsh since Antidote ships as a sourced shell function.
+- [antigen] Add the Antigen Zsh plugin manager with `installed`, `upgrade` and `remove` support. It declares no `install`: `antigen bundle` loads a bundle for the current shell only.
+- [aptitude] Add aptitude with inventory, outdated, search, orphans, install, remove, upgrade, sync and cache cleanup.
+- [aura] Add the aura AUR helper, reporting repository and AUR upgrades together.
+- [basalt] Add the Basalt Bash package manager with `installed`, `install` and `remove` support, every operation going through its `global` subcommand tree.
+- [bin] Add the bin binary manager with `installed`, `outdated`, `upgrade` and `remove` support, keyed on the installed binary's absolute path. It declares no `install`, since bin installs from a source spec no listing reports back.
+- [bob] Add the bob Neovim version manager with `installed`, `search`, `install`, `remove` and `upgrade` support, a version token being what it calls a package, `nightly` included.
+- [bpkg] Add the bpkg Bash package manager with `install` support, forced `--global`. It exposes no inventory and no removal verb.
+- [bun] Add `bun`, covering what it installs globally into its own prefix, invisible to `npm`, `pnpm` and `yarn`. Upgrades force `--latest`, without which a package held at its recorded range reports success while changing nothing.
+- [choosenim] Add the choosenim Nim toolchain installer with inventory, catalog search, install, remove and single-version upgrade.
+- [claude-code-plugins] Add the Claude Code plugins manager with inventory, install, remove, single-plugin upgrade, marketplace sync and orphan cleanup.
+- [clib] Add the clib C package manager with `search`, `install` and `remove` support, `install` forced `--global`. It ships no listing command, so no inventory is declared.
+- [dkp-pacman] Add devkitPro's `pacman` fork, covering the console homebrew toolchains, with the full operation set inherited from `pacman`.
+- [dotnet] Add the .NET global tool manager with `installed`, `search`, `install`, `upgrade` and `remove` support, including version pinning, its localized listings pinned to one language.
+- [elan] Add the elan Lean toolchain manager with `installed`, `install`, `remove`, `orphans` and `cleanup` support, a toolchain name being what it calls a package.
+- [emacs] Add the GNU Emacs package manager, driving `package.el` headlessly for inventory, install, remove and archive refresh.
+- [fisher] Add the Fisher Fish plugin manager with `installed`, `install`, `upgrade` and `remove` support, executed through Fish since Fisher ships as an autoloaded shell function.
+- [gcloud] Add the Google Cloud CLI's component manager with `installed`, `outdated`, `install`, `upgrade` and `remove` support. It declares no single-package `upgrade`, naming components expanding the selection through their dependencies.
+- [getnf] Add the getnf Nerd Fonts installer with `installed`, `search`, `install`, `remove` and `upgrade` support, a font being what it calls a package.
+- [gext] Add `gext`, covering the GNOME Shell extensions installed from extensions.gnome.org, the inventory forcing `--all` so disabled extensions are reported too.
+- [ghcup] Add the Haskell ghcup toolchain installer with `installed`, `search`, `install`, `remove`, `sync` and `cleanup` support, every tool keyed as `<tool>-<version>`. It declares neither upgrade operation, `ghcup upgrade` replacing the ghcup binary itself.
+- [go] Add the Go package manager, listing and installing the commands `go install` puts on the machine.
+- [gup] Add the gup package manager, reporting, removing and upgrading the binaries `go install` leaves under `$GOBIN`.
+- [haxelib] Add the Haxe haxelib package manager with `installed`, `search`, `install`, `upgrade` and `remove` support, every call forced `--global`. It declares no `outdated`, haxelib computing staleness only while upgrading.
+- [hyprpm] Add the hyprpm Hyprland plugin manager, listing, installing, removing and upgrading plugin repositories.
+- [ips] Add the Image Packaging System of Solaris and illumos, with inventory, search, install, remove, upgrade, catalog sync and history purge.
+- [jpm] Add the jpm Janet package manager with `install`, `remove`, `upgrade --all`, `sync` and cache cleanup support. No listing command exists, so no inventory is declared.
+- [julia] Add the Julia `Pkg` package manager, with inventory, outdated, install, remove, upgrade and registry refresh.
+- [juliaup] Add the juliaup Julia version manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove` and `cleanup` support, channels being the packages. It declares no `sync`, only the mutating operations refreshing its versions database.
+- [krew] Add the krew kubectl plugin manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support. Its piped listing carries no version.
+- [lazy] Add the lazy.nvim Neovim plugin manager with `installed` and `upgrade` support. It declares no `install` or `remove`: lazy.nvim materializes only the plugin set the user's own Lua configuration names.
+- [luarocks] Add the LuaRocks package manager with `installed`, `outdated`, `search`, `install`, `upgrade` and `remove` support, every call forced `--no-project` so the inventory answers for the machine.
+- [lure] Add the LURE package manager with inventory, catalog search, install and repository refresh.
+- [mamba,micromamba] Add `mamba` and `micromamba`, reading the inventory from `list --json` and synthesizing `outdated` from the dry-run transaction the way the `conda` wrapper does. Search matches package names exactly.
+- [mason] Add `mason`, the Neovim installer for LSP servers, DAP adapters, linters and formatters, its inventory read off mason's install tree by a `--clean` Neovim.
+- [micro] Add the micro editor's plugin manager with `installed`, `search`, `install`, `upgrade` and `remove` support, run headlessly. micro exits zero from every plugin command whatever the outcome, so failures are read from its output.
+- [microdnf] Add microdnf, the package manager of RHEL-family minimal images, with inventory, outdated, name search, version-pinned install and upgrade, remove, sync and cache cleanup.
+- [miktex] Add the MiKTeX TeX package manager with `installed`, `install`, `upgrade`, `remove` and `sync` support, queries disabling its on-the-fly installer. It declares no `outdated`.
+- [nala] Add the Nala front-end to Debian's apt with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support, every call forced `LC_ALL=C`. It joins the dpkg lock family.
+- [nimble] Add the Nimble Nim package manager with `installed`, `search`, `install`, `remove` and `sync` support, the inventory forcing `--ver` so every package carries its version.
+- [oh-my-fish] Add the Oh My Fish framework with `installed`, `install`, `upgrade` and `remove` support, executed through Fish since Oh My Fish ships as a sourced shell function.
+- [ollama] Add the Ollama model manager with `installed`, `install`, `upgrade` and `remove` support, models keyed on their `name:tag` pair. It declares no `outdated`, nothing reporting a stale model without downloading it. Listing models starts ollama's daemon on macOS and Windows.
+- [opam] Add the OCaml opam package manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support.
+- [pamac] Add Manjaro's pamac package manager with `installed`, `outdated`, `orphans`, `search`, `install`, `upgrade`, `remove` and `cleanup` support, scoped to the official repositories, escalation left to polkit.
+- [pear] Add the PEAR package manager with inventory, outdated, install, remove, upgrade, channel sync and cache cleanup.
+- [pearl] Add the Pearl package manager with inventory, search, install, remove and single-package upgrade.
+- [pi] Add the Pi extensions manager with inventory, install, remove and upgrade of the packages that extend the Pi coding agent.
+- [pikaur] Add the pikaur AUR helper with the full operation set inherited from `pacman`.
+- [pipxu] Add the pipxu package manager with inventory, install, remove and upgrade support.
+- [pixi] Add the pixi global tool manager with `installed`, `install`, `upgrade`, `remove` and `cleanup` support, packages keyed on the global environment `pixi global` addresses.
+- [pkgit] Add the pkgit package manager with inventory, search, install and full upgrade of the packages it compiles from git repositories.
+- [pkgm] Add the pkgm package manager with inventory, outdated, install, remove and full upgrade support.
+- [platformio-core] Add the PlatformIO Core package manager, listing and upgrading the platforms, tools and libraries it installs machine-wide.
+- [prt-get] Add the CRUX ports front-end with inventory, outdated, catalog search, install, remove, single-port upgrade, full upgrade and ports-tree sync.
+- [pyenv] Add the pyenv Python version manager with `installed`, `search`, `install` and `remove` support, virtualenvs excluded since `pyenv uninstall` would delete their base version instead.
+- [raco] Add Racket's `raco pkg` with `installed`, `install`, `remove` and `upgrade` support, the listing forcing `--all` and `--long` so auto-installed packages and their full checksums are reported.
+- [roswell] Add the Roswell package manager, listing and installing the Common Lisp implementations it manages.
+- [rustup] Add the rustup Rust toolchain installer with `installed`, `outdated`, `install`, `upgrade` and `remove` support, toolchains being the packages. Every mutating call forces `--no-self-update`.
+- [sheldon] Add the Sheldon shell plugin manager with `upgrade` and `remove` support. It declares no `installed`, Sheldon printing no listing, and no `install`, `sheldon add` needing both a local name and a source flag.
+- [shelly] Add the Shelly package manager with inventory, outdated, search, install, remove, upgrade, database sync and cache and orphan cleanup.
+- [skills] Add the Agent Skills manager, listing, removing and upgrading the skills installed for the coding agents on a machine.
+- [spack] Add the Spack package manager with `installed`, `search`, `install`, `remove`, `sync` and `cleanup` support, every call forced `--no-env`. No `outdated` and no `upgrade`: installing over a package adds a second build rather than replacing the first.
+- [trizen] Add the trizen AUR helper with the full operation set inherited from `pacman`.
+- [vagrant] Add Vagrant's box manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove` and `cleanup` support, one package per box name.
+- [vcpkg] Add the vcpkg C and C++ library manager, covering its classic mode: every call forces `--classic`, and packages are keyed on the `name:triplet` specification vcpkg addresses them by.
+- [xcodes] Add the xcodes Xcode version manager with `installed`, `remove` and `sync` support. It declares no `install`: downloading an Xcode always authenticates against an Apple ID, with no non-interactive path.
+- [yazi] Add `yazi`, the package manager of the `ya` companion to the Yazi file manager, reporting plugins and flavors as one inventory keyed on their Git coordinates.
+- [zef] Add the Zef Raku package manager with `installed`, `search`, `install`, `upgrade`, `remove` and `sync` support, both listings reduced to one entry per distribution name.
+- [zeroinstall] Add the Zero Install package manager with search, remove and cache cleanup support.
+- [zim] Add the Zim Zsh module manager with `installed` and `upgrade` support. It declares no `install` or `remove`: Zim materializes only the module set the user's own `.zimrc` names.
+- [zplug] Add the zplug Zsh plugin manager with `installed` and `upgrade` support. It declares no `install` or `remove`: zplug materializes only the plugin set the user's own `.zshrc` names.
+- [zvm] Add the zvm Zig version manager with inventory, catalog search, install, remove and build-cache cleanup.
+- [bar-plugin,gnome-shell] Pass `--shell-env` to `mpm` `8.0.0` and newer, so the menu lists the managers installed under the home directory and pnpm's global packages.
+- [bar-plugin,gnome-shell] Name the package of each upgrade action with a pURL of its manager, so `mpm` no longer looks it up in the installed packages first.
+- [bar-plugin,gnome-shell] Offer `uv tool install --upgrade meta-package-manager` when no `mpm` is found, beside an entry opening the installation page for the systems `uv` does not answer for.
+- [bar-plugin,gnome-shell] Split a version diff at the same point in both frontends, and highlight only the new token when one version is the other plus a whole token: `14ubuntu6` → `14ubuntu6.1` highlights `.1` alone.
+- [bar-plugin] Add `VAR_ALWAYS_VISIBLE`: set it to `false` to hide the menu bar icon while no package is outdated and no manager reported an error.
+- [bar-plugin] Add `VAR_MPM_OPTIONS`, extra options spliced into every `mpm` call before the subcommand, and an *About* row naming the plugin's version, the `mpm` release it resolved and the command that answered.
+- [bar-plugin] Cap how wide a version renders in a menu line, tunable with `VAR_MAX_VERSION_WIDTH`, so an over-long one no longer blanks the target version of its own row.
+- [bar-plugin] Fold each manager section into an inline accordion carrying a native badge for its outdated count on SwiftBar `2.1.0` and above, in the grouped layout. Xbar keeps its sub-menus.
+- [bar-plugin] Align the version arrows across every manager in the table rendering, so they line up down the whole menu instead of only within a section.
+- [bar-plugin] Quote the default values of the plugin variables and declare the font variables as `swiftbar.var`, so SwiftBar `2.1.0` and above exposes all of them in its settings UI.
+- [gnome-shell] Center the menu's version pairs around their arrow, mirroring the plugin's `VAR_ALIGN_COLUMNS`, with an `align-columns` setting to switch it off.
+- [gnome-shell] Add an `mpm-options` setting, extra options spliced into every `mpm` call the extension makes, and report the resolved `mpm` release and command in the preferences window.
+- [gnome-shell] Render every panel state and menu marker with a stock symbolic icon, in place of four bundled SVGs and the 🆙 and ⚠️ emoji, and mark a running check with a refresh icon and a greyed *Checking…* row.
+- [gnome-shell] Render each package row's version diff as one label instead of five, so a report of a thousand packages scrolls smoothly, and each version as one string, closing the gap that split `5.0.0~beta1-0ubuntu7`.
+- [gnome-shell] Refresh the package list as soon as a background upgrade exits, instead of waiting out the re-check delay.
+- [gnome-shell] Scroll the package list with the wheel while a manager's submenu is expanded, drop the expander arrow from a manager with nothing to report, and drop the blank band shown above *Checking…* before the first report.
+- [gnome-shell] Pack the extension from the commit being released, and bundle the license in it: `v7.6.1` shipped a zip advertising `7.6.2.dev0` as its `version-name`.
+- [mpm] Raise the click-extra floor to `9`, whose `wrap --help-format man` renders the man pages each release attaches. `--man` no longer writes roff.
+- [mpm] Stop silencing log messages in serialized output: a fatal error like `No manager selected.` now reaches `<stderr>`, and an ignored `--columns` selection is reported at `INFO`.
+- [mpm] Narrate the sudo priming decisions at `--verbosity INFO`, and expose the probe's raw answer and every cache refresh at `DEBUG`.
+- [mpm] Warn before escalating a manager whose binary is not owned by the user or root, and when the `sudo` credentials primed for a run are dropped mid-flight, as every Homebrew command does on startup.
+- [mpm] Skip the up-front password prompt when `sudo` reports the user is not authorized to run it at all, and recognize a `NOPASSWD` policy that `sudo --validate` reports as a cold cache.
+- [mpm] Ask for the password of the account `sudo` accepts it from, which is root under openSUSE's default `targetpw` policy.
+- [mpm] Recognize `sudo-rs`, Ubuntu's default `sudo` since `25.10`: its version banner, its `interactive authentication is required` failure, and its denial of a user no `sudoers` rule matches.
+- [mpm] Exit quietly on a Ctrl+C pressed while a run is already shutting down, instead of printing a `threading` traceback.
+- [mpm] Skip a manager whose CLI cannot be executed instead of aborting the run: a wrong-architecture or non-program binary anywhere on `PATH` used to crash every subcommand.
+- [conda,mamba,micromamba] Stop running `conda`, `mamba` and `micromamba` concurrently: they act on one environment prefix and one package cache.
+- [pacaur,pacman,pamac,paru,pikaur,trizen,yay] Stop running the AUR helpers concurrently with `pacman` and with each other, all of them driving the same pacman database.
+- [pkg,ports] Stop running `ports` concurrently with `pkg`, which holds the advisory lock on the install database both register into.
+- [scoop,sfsu] Stop running `sfsu` concurrently with `scoop`, whose buckets and cache its own `update` and `cleanup` reach.
+- [urpmi] Stop running `urpmi` concurrently with the other RPM front-ends, which reach one database on the same host.
+- [pacstall] Serialize `pacstall` against the `apt` family rather than against `pacman`, since it installs through `dpkg`.
+- [cargo,gem,mamba,micromamba] Record that each tool's shipped release-age gate never reaches the commands `mpm` drives, in place of a pending upstream proposal.
+- [vscode,vscodium] Point the cooldown status at the open request covering extension installs: the delay VS Code shipped holds back automatic updates only.
+- [winget] Record the optional `ReleaseDate` its manifests carry as author-supplied, so it cannot back a release-age gate.
+- [mpm] Package `mpm` for openSUSE: the spec builds on Tumbleweed against the dependencies the distribution ships, and installs today from a personal Open Build Service project while the submission to `system:packagemanager` is prepared.
+- [mpm] Bump the in-repo packaging specs: Alpine builds `mpm` `7.6.1`, click-extra `8.9.1` and extra-platforms `13.8.0`, MacPorts and Nix build click-extra `8.9.0`.
+- [mpm] Fix the Nix package build on macOS, where the Darwin sandbox cut click-extra's tests off from `localhost`, and `nix run github:kdeldycke/meta-package-manager?dir=packaging/nix` failing in `cloup`'s patch phase.
+- [mpm] Regroup the GitHub manager labels: `conda-based` now covers `mamba`, `micromamba` and `pixi` beside `conda`, `dpkg-based` covers `nala`, and a `bash-based` group collects `basalt` and `bpkg`.
+- [mpm] Fix every escalated command failing for want of a password on a warm `sudo` credential cache: commands were detached into a session of their own, losing the terminal `sudo` keys its cache on.
+- [mpm] Fix pURLs losing part of the package ID: `pkg:npm/%40angular/animation` now resolves to `@angular/animation` rather than the unrelated `animation`, `pkg:npm/JSONStream` keeps its case, and a manager ID like `julia` resolves as a type.
+- [mpm] Fix a crash rendering tables to a non-UTF-8 stream, which broke every table subcommand on Windows as soon as its output was redirected.
+- [mpm] Fix comparison of the Gentoo and Alpine post-release suffixes: `1.0_p1` and `1.0_git20240101` now rank above `1.0`, not below it.
+- [mpm] Fix `mpm --tree`, which drew every subcommand's short help off the screen.
+- [ips,mpm,sun-tools] Fix `mpm` crashing on every illumos host, where the platform probe matched Solaris too and the `i86pc` machine string went unrecognized.
+- [ports,sdkman] Fix `--plan` for the operations that query before they act: they reported every package as missing instead of printing the command.
+- [pkg,vagrant,vcpkg,yarn] Warn and report no package, instead of crashing, when a JSON listing cannot be parsed.
+- [apk] Read the installed inventory from the structured `apk query` applet on apk-tools 3, and parse its `search` output, which appends each package's description. Every result was dropped on Alpine edge.
+- [choco] Fix `installed`, `outdated` and `search`, which returned nothing at all because of a `--retry-count=3` option Chocolatey does not have, and escalate `install`, `remove` and both upgrade paths, which failed unprivileged.
+- [cpan] Stop reading `cpan`'s index-refresh progress lines as packages, and list the core modules Debian and Ubuntu reach through symlinked `@INC` directories, which `cpan -l` skips.
+- [dnf,dnf5,yum] Fix version detection against `dnf5`, whose banner was read as the version `dnf5`, dropping every RPM front-end from the pool on Fedora 41 and later.
+- [dnf,dnf5,yum] Fix `search` on `dnf5`, which returned no results at all, and `outdated`, which reported the upgrade candidate's own version as the installed one.
+- [dnf] Decline a `dnf5` binary reached through the `dnf` name, leaving it to the `dnf5` manager instead of reporting the same RPM database twice.
+- [emerge] Fix `outdated` and `search`, which reported nothing on Gentoo: the global `--quiet` they sent strips the fields their parsers read.
+- [eopkg] Fix version detection on eopkg `5.0.0`, which calls itself `eopkg.bin` in its banner: the manager left the pool on every Solus host running it.
+- [eopkg] Fix `installed` and `outdated`, which silently dropped the last two packages of every listing, and report the upgrade target in `outdated`, which had none.
+- [eopkg] Fix `search`, which passed an empty argument to `eopkg` in extended mode, and decode the character references its descriptions carry.
+- [flatpak] Fix `search` reporting only its first result and silently dropping every other match.
+- [fwupd] Fix every query aborting on a host with no updatable device, which fwupd answers with an `Error` object in place of its device list, or with a device carrying no flags, name or version. Refs [#1528](https://github.com/kdeldycke/meta-package-manager/issues/1528).
+- [pip] Skip an interpreter carrying no `pip`, so an `mpm` installed by `uv tool` or `pipx` drives a real Python instead of its own virtualenv, and skip a Windows `python3.exe` app-execution alias with no Python behind it.
+- [pkg] Fix every operation on FreeBSD, where `pkg` rejects the global `--quiet` it was passed, and repair `search`, which omitted its subcommand and mis-parsed the results.
+- [ports] Fix the FreeBSD ports manager, which reported no version and so never activated, and repair `installed`, `outdated`, `install` and `upgrade`, the last of which hung on the port options dialog until it timed out.
+- [winget] Fix `installed` and `outdated` leaving out applications installed without winget, like a vendor's own MSI, although `upgrade --all` upgrades them.
+- [xbps] Fix version detection, whose `XBPS:` banner was read as the version, dropping the manager from the pool on every Void Linux host. Closes [#2074](https://github.com/kdeldycke/meta-package-manager/issues/2074).
+- [xbps] Fix `search`, which returned no results: the long `--repository` option takes a URL and was consuming the `--search` that followed it.
+- [zypper] Fix `installed`, `outdated` and `search`, which crashed whenever the query matched exactly one package.
+- [bar-plugin,gnome-shell] Mark a package check as failed on the exit code of `mpm` only, so a `--verbosity` raised in the options no longer replaces the package list with log lines.
+- [bar-plugin] Fix the plugin rendering a version error instead of its menu on every released SwiftBar: the minimum requirement was pinned on an unreleased `2.1.2` test build.
+- [bar-plugin] Follow the symlink both hosts are installed through when looking for the `mpm` the plugin ships with, probe a virtualenv interpreter as itself, and stop a menu action from importing a source checkout it is spawned from.
+- [bar-plugin] Stop the plugin's virtualenv search at the user's home folder, as its comment always claimed.
+- [bar-plugin] Separate a package name from its version diff by two spaces, and render an error line at the same size as every other monospace row.
+- [gnome-shell] Fix a `gnome-shell` crash when a setting changed while a manager's submenu was open in the grouped layout.
+- [gnome-shell] Fix a check still in flight outliving `disable()`, which left a main loop source free to fire on a locked session.
+- [bar-plugin,gnome-shell,mpm] Publish the documentation at `https://mpm.run`, hosted on Cloudflare Pages. Every link in the readme, the benchmark, the packaging specs and both frontends points at the new origin, and the former `kdeldycke.github.io` URLs redirect to it.
+- [mpm] Publish every documentation page at an extension-less URL, `https://mpm.run/managers/apk/` instead of `https://mpm.run/managers/apk.html`, and redirect every URL retired since the first Sphinx build in 2016 to the page that inherited it.
+- [mpm] Publish an index of every man page at `https://mpm.run/man/`, a canonical URL on every page, a `sitemap.xml` and a `robots.txt`.
+- [mpm] Regroup the documentation sidebar under ten topical sections, give every module its own API reference page, and drop the API sections the guide pages repeated at their foot.
+- [mpm] Add an upstream contributions page at [mpm.run/upstream](https://mpm.run/upstream/), tracking the fixes, reports and workarounds sent to the managers, frontends and toolchain `mpm` builds on.
+- [mpm] Document concurrency on a page of its own: how far `--jobs` spreads a command, a per-subcommand table of what runs at once, and a diagram of the managers queuing on a shared backend.
+- [mpm] Add a *Concurrency* section to each manager's page, naming the managers `mpm` never runs it alongside and what they contend for, rendered from the lock families themselves.
+- [mpm] Link a manager's source repository and Wikipedia article from its page, and a declined tool's article from its [unsupported](https://mpm.run/unsupported/) verdict. Manager definitions accept `repository_url` and `wikipedia_url` keys.
+- [mpm] Report each manager's upstream stars, newest release or tag and newest commit on the manager index and its card, sampled weekly by repomatic's `sample-metrics` into one committed CSV through the new `metrics.yaml` workflow.
+- [nala] Sample the upstream project from GitLab, so the manager page gains the upstream stars and commit facts, and its live badges.
+- [mpm] Link the tracker badge of each manager card to the open issues and pull requests carrying its label, rather than to every one ever filed.
+- [mpm] Merge the manager index into a single table opening on a proportion bar of the support states: wrapped managers first, then the declined ones grouped by verdict, every row clickable, with one legend label per state.
+- [mpm] Split the unsupported-managers page into one section per declined tool, titled by the tool and its verdict glyphs so the manager ID is the anchor, and close each verdict on the release that first published it.
+- [mpm] Fold the tools sharing a verdict word for word into family sections on the [unsupported](https://mpm.run/unsupported/) page. Those tools' anchors move to the family name.
+- [mpm] Record 47 more unsupported managers, covering the JetBrains IDE plugin updaters, the dotfile syncers, the self-updating applications, the container runtimes and the system-database refreshers, so every tool assessed lands in the pool or on the unsupported page.
+- [mpm] Record as unsupported `zgenom`, `zr`, `app-man`, `bash-it`, `oh-my-bash`, `oh-my-zsh`, `pip-review`, `pipupgrade`, `home-manager`, `pkgfile`, `windsurf`, `antigravity`, `cursor`, `cursor-agent`, `dpp.vim`, `nh`, `opi`, `osc`, `myrlyn` and `transactional-update`, each with its verdict on the page.
+- [mpm] Mark with 🛟 the unsupported managers `topgrade` still reaches, on the unsupported page and the benchmark: 56 of the 69 are upgradable through `mpm upgrade --topgrade`.
+- [mpm] Queue `cards`, `pkgman` and `slackpkg` as wrap candidates, each waiting on a NuTyX, Haiku or Slackware host, and `rpm-ostree` on an ostree-booted host, leaving the benchmark with no unassessed manager.
+- [mpm] Add 47 managers to the benchmark's support table, covering every tool `topgrade` drives that had no row yet, and the GNOME Shell extension and desktop notifications to its feature matrix.
+- [mpm] Add ten features to the benchmark's matrix: accessible output, skipping auto-updating packages, exact and fuzzy search, SBOM export, vulnerability scan, per-manager overrides, command plan, per-call timeout, offline by default and man pages.
+- [mpm] Back 177 competitor cells of the benchmark's feature and operations tables with a link proving each verdict, mark 46 operations a tool rules out by design as ❌, and link every `mpm` ✅ to the page implementing it.
+- [mpm] Refresh the benchmark's `topgrade`, `pacaptr` and `metapac` cells: `soar` and `zerobrew` support, the `-Qo` lookup, the `unmanaged` listing, two bundled operations demoted to 🟡 and two withdrawn refusals.
+- [mpm] Plot the star history of `mpm` and its benchmarked peers from the sampled database on a logarithmic axis, absolute and against each project's age, replacing the star-history.com embeds GitHub's API restriction broke.
+- [mpm] Highlight the hovered row, and not only its column, in the benchmark, SBOM, cooldown and augmentations tables.
+- [mpm] Redraw the brand mark flat, in two purples and their midpoint, across the logo, the banner, the social card, the favicon and the icons the binaries ship.
+- [mpm] Rework the readme: SVG terminal windows picture the headline features and `upgrade --all` under a cooldown, the transcripts are refreshed, and the two quick-start sections fold into the feature list.
+- [mpm] List the readme's supported managers as one roster, instead of tabling every operation they implement, and lead its installation section with `uv`.
+- [mpm] Open every installation method with a command that works today: the Alpine Linux, Chocolatey, Nix and Void Linux tabs carry the condensed build recipe from their packaging section, and close on an invitation to support the upstream pull request.
+- [mpm] Fix the installation page's vertical tabs, which a long URL in one tab widened past the page, and picture the `--version` screen on it.
+- [mpm] Chart the privilege-escalation decision path on the sudo page, document what each escalator can answer, and how to write the `NOPASSWD` rule unattended escalation needs.
+- [mpm] Rewrite the SBOM page in short plain sentences, flip its coverage matrix to one column per manager, and fix its offline install example, which used `pip` instead of `uv`.
+- [mpm] Fix three documented commands that no longer ran (the Carapace spec export, the man-page install for packagers, reading a manual with `--man`), and document `plist` among the `--export-config` formats.
+- [mpm] Distinguish, in the Python compatibility table, a version a release rules out (❌) from one that did not exist yet when that release was cut (–).
+- [mpm] Link every manager named in the documentation pages to its own page, at most once per paragraph, and fix the cross-references that rendered as plain text on the manager and configuration pages.
+- [composer,dnf,emerge,eopkg,pacman,pwsh-gallery,sfsu,yarn] Correct the commands shown on each manager's page, which named fewer options than `mpm` actually runs.
+- [flatpak] Fix the search output shown on its page, whose tab separators had been flattened to spaces, leaving a transcript its own parser could not read.
+- [zypper] Show captured openSUSE Tumbleweed output in the manager page's reference traces, in place of placeholder package names.
+- [bar-plugin,gnome-shell] Give each frontend page a release history of its own, built from the changelog entries scoped to it, and make each page self-contained: what a click runs, where its settings stop and `mpm`'s configuration starts, the version-diff colors.
+- [bar-plugin] Add screenshots of SwiftBar's *About* submenu and preferences pane to the plugin page, captured at 2x on a HiDPI virtual display, and name SwiftBar ahead of Xbar wherever the pair appears.
+- [bar-plugin] Document the plugin folder of each host, SwiftBar having no default one, and where the macOS `python3` comes from.
+- [gnome-shell] Illustrate the extension's page with screenshots of its menu in both layouts and both shell appearances, captured from a real headless GNOME session by the new `docs-screenshots.yaml` workflow.
+- [gnome-shell] Restart the GNOME session before enabling the extension, in the documented installation steps: `gnome-extensions enable` asks the running shell rather than the disk.
 
 ## [`7.6.1` (2026-08-11)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.0...v7.6.1)
 

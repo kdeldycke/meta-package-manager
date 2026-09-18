@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import re
 import shlex
 from typing import ClassVar
 
@@ -100,6 +101,16 @@ class Fisher(PackageManager):
     ```
     """
 
+    _INSTALLED_REGEXP = re.compile(
+        r"^\s*(?P<package_id>[^@]+?)(?:@(?P<installed_version>.*?))?\s*$",
+    )
+    """A plugin's slug or local path, then the `@ref` it was pinned to when it
+    carries one.
+
+    Only the ref suffix is split off: a bare slug or a local path carries no
+    `@` and yields no version.
+    """
+
     def build_cli(self, *args, **kwargs) -> tuple[str, ...]:
         """Wrap all CLI invocations in the Fish shell Fisher needs.
 
@@ -146,14 +157,7 @@ class Fisher(PackageManager):
         ```
         """
         output = self.run_cli("list")
-        for line in output.splitlines():
-            plugin = line.strip()
-            if not plugin:
-                continue
-            # Only the ref suffix is split off: a bare slug or a local path
-            # carries no "@" and yields no version.
-            package_id, _, ref = plugin.partition("@")
-            yield self.package(id=package_id, installed_version=ref or None)
+        yield from self.parse_regex_lines(self._INSTALLED_REGEXP, output)
 
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shlex
 from pathlib import Path
 from typing import ClassVar
@@ -142,6 +143,13 @@ class Antigen(PackageManager):
     ```
     """
 
+    _INSTALLED_REGEXP = re.compile(r"^\s*(?P<package_id>\S.*?)\s*$")
+    """One bare bundle name per line, which is all the `--simple` listing prints.
+
+    Antigen reports no version alongside it: a bundle is a Git clone tracking a
+    branch.
+    """
+
     def build_cli(self, *args, **kwargs) -> tuple[str, ...]:
         """Wrap all CLI invocations in the Zsh shell Antigen needs.
 
@@ -188,10 +196,7 @@ class Antigen(PackageManager):
         ```
         """
         output = self.run_cli("list", "--simple")
-        for line in output.splitlines():
-            bundle = line.strip()
-            if bundle:
-                yield self.package(id=bundle)
+        yield from self.parse_regex_lines(self._INSTALLED_REGEXP, output)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.

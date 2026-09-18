@@ -111,24 +111,15 @@ print(augmentations_table())
 
 ## Free `upgrade --all`
 
-Some managers cannot upgrade every outdated package in a single command. [`pip`, for instance, has no full-upgrade subcommand](https://github.com/pypa/pip/issues/4551). When a manager only knows how to upgrade one package at a time, `mpm` synthesizes the bulk operation: it lists the outdated packages and upgrades them one by one, so `mpm upgrade --all` works everywhere.
+Some managers cannot upgrade every outdated package in a single command. [`pip`, for instance, has no full-upgrade subcommand](https://github.com/pypa/pip/issues/4551). When a manager only knows how to upgrade one package at a time, `mpm` synthesizes the bulk operation: it lists the outdated packages and upgrades them one by one, so `mpm upgrade --all` works everywhere. The `--plan` option shows the synthesis, one upgrade command per outdated package where a native bulk upgrade is a single command:
 
 ```shell-session
-$ mpm --pip upgrade --all
-Updating all outdated packages from pip...
-warning: pip doesn't seems to implement a full upgrade subcommand. Call
-single-package upgrade CLI one by one.
-
-Collecting boltons
-  Using cached boltons-20.1.0-py2.py3-none-any.whl (169 kB)
-Installing collected packages: boltons
-Successfully installed boltons-20.1.0
-
-Collecting graphviz
-  Using cached graphviz-0.14-py2.py3-none-any.whl (18 kB)
-Installing collected packages: graphviz
-Successfully installed graphviz-0.14
-(...)
+$ mpm --uv --plan upgrade --all
+/opt/homebrew/bin/uv --color never --no-progress pip install --upgrade anyio
+/opt/homebrew/bin/uv --color never --no-progress pip install --upgrade docutils
+/opt/homebrew/bin/uv --color never --no-progress pip install --upgrade platformdirs
+/opt/homebrew/bin/uv --color never --no-progress pip install --upgrade pyproject-fmt
+/opt/homebrew/bin/uv --color never --no-progress pip install --upgrade sphinx-autodoc-typehints
 ```
 
 The *Full `upgrade --all`* column above lists the managers relying on this backfill.

@@ -34,9 +34,9 @@ class Scoop(PackageManager):
     """Scoop is a user-level command-line installer for Windows.
 
     Apps unpack under `~/scoop` without elevation, so no operation is marked
-    `sudo`. Escalating would not merely be redundant but fatal: the installer
-    refuses to run as an administrator at all, answering `Running the installer
-    as administrator is disabled by default` and aborting.
+    `sudo`. Escalating would be fatal: the installer refuses to run as an
+    administrator at all, answering `Running the installer as administrator is
+    disabled by default` and aborting.
 
     ```{note}
     The `installed`, `outdated` and `search` listings are column

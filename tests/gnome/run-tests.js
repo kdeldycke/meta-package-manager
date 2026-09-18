@@ -261,8 +261,8 @@ function testFinders() {
 
 async function testSubprocess() {
     /* Every call takes a cancellable, the extension's own liveness handle:
-     * runCommand no longer defaults it, so a watchdog always has something
-     * able to drop it. This one is never cancelled. */
+     * runCommand requires it, so a watchdog always has something able to
+     * drop it. This one is never cancelled. */
     const live = new Gio.Cancellable();
 
     const result = await Mpm.runCommand(

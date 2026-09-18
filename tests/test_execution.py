@@ -57,12 +57,12 @@ from meta_package_manager.execution import (
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import _STALL_NOTICE_OPERATIONS
 
-from .conftest import _patch_pool_with
 from .fake_manager import FakeManager
 from .test_sudo import only_escalator
 
-# A UNIX and a non-UNIX platform to force build_cli's platform gate deterministically,
-# independent of the host the tests run on.
+# A UNIX and a non-UNIX platform, pinned so the tests read the same on every host:
+# escalation itself ignores the platform, while the dormant-marker bookkeeping of
+# `build_cli` still gates on UNIX.
 _UNIX_PLATFORM = next(iter(UNIX))
 _NON_UNIX_PLATFORM = next(p for p in ALL_PLATFORMS if p not in UNIX)
 
@@ -178,8 +178,10 @@ LEAN_COMMAND_CASES = (
     ),
     # Leading plumbing only, the `npm` shape: the case that motivated the strip.
     (
-        "/opt/homebrew/bin/npm --global --no-progress --no-update-notifier"
-        " --no-fund --no-audit search --json --no-description jq",
+        (
+            "/opt/homebrew/bin/npm --global --no-progress --no-update-notifier"
+            " --no-fund --no-audit search --json --no-description jq"
+        ),
         "/opt/homebrew/bin/npm",
         (
             "--global",
@@ -300,7 +302,7 @@ def test_spinner_label_italic_follows_terminal_capability(monkeypatch, term, ita
 def test_make_spinner_label_names_operation_and_command(plain_labels):
     manager = FakeManager()
     manager._active_operation = "search"
-    label = manager._make_spinner((manager.cli_path, "--version")).label
+    label = manager._make_spinner((str(manager.cli_path), "--version")).label
     assert label == f"{manager.id}.search: {manager.cli_path.name} --version"
 
 
@@ -660,7 +662,7 @@ class _SynthesizedUpgradeFakeManager(FakeManager):
         raise NotImplementedError
 
 
-def test_plan_synthesized_upgrade_all_resolves_reads(invoke, monkeypatch):
+def test_plan_synthesized_upgrade_all_resolves_reads(invoke, patch_pool_with):
     """`mpm --plan upgrade` on a synthesized upgrade-all prints the per-package
     upgrade commands, resolved against a really-executed `outdated` read.
 
@@ -670,7 +672,7 @@ def test_plan_synthesized_upgrade_all_resolves_reads(invoke, monkeypatch):
     `outdated`, plan mode captured the read itself — leaving the plan without
     the actual mutating commands it exists to disclose.
     """
-    _patch_pool_with(monkeypatch, _SynthesizedUpgradeFakeManager())
+    patch_pool_with(_SynthesizedUpgradeFakeManager())
     result = invoke("--plan", "upgrade", "--all")
     assert result.exit_code == 0
     plan_lines = result.stdout.splitlines()
@@ -748,13 +750,7 @@ def test_build_cli_escalates_with_sudo_n_when_policy_on():
     """
     manager = FakeManager()
     manager.sudo = True
-    with (
-        patch(
-            "meta_package_manager.execution.current_platform",
-            return_value=_UNIX_PLATFORM,
-        ),
-        only_escalator("sudo"),
-    ):
+    with only_escalator("sudo"):
         cli = manager.build_cli("install", "pkg", sudo=True)
     assert cli[:2] == ("sudo", "--non-interactive")
 
@@ -763,20 +759,15 @@ def test_build_cli_no_escalation_when_policy_off():
     """`--no-sudo` (policy False) drops escalation even on a privileged op."""
     manager = FakeManager()
     manager.sudo = False
-    with patch(
-        "meta_package_manager.execution.current_platform", return_value=_UNIX_PLATFORM
-    ):
-        cli = manager.build_cli("install", "pkg", sudo=True)
+    cli = manager.build_cli("install", "pkg", sudo=True)
     assert "sudo" not in cli
 
 
 def test_build_cli_escalation_follows_the_escalator_not_the_platform():
     """Carrying an escalator is what decides escalation, on any platform.
 
-    A UNIX gate used to stand here, which made the `gsudo` entry inert on the
-    one platform it exists for. What replaced it reaches further: a host with
-    no escalator cannot escalate whatever it runs, and one that has it can,
-    Windows included.
+    A host with no escalator cannot escalate whatever it runs, and one that has
+    it can, Windows included: the `gsudo` entry exists for that one platform.
     """
     manager = FakeManager()
     manager.sudo = True
@@ -793,7 +784,7 @@ def test_build_cli_escalation_follows_the_escalator_not_the_platform():
 
 def test_build_cli_no_escalation_without_an_escalator():
     """A host carrying none runs unprivileged rather than crashing on a missing
-    binary, which is what the platform gate used to cover."""
+    binary, on any platform."""
     manager = FakeManager()
     manager.sudo = True
     with (
@@ -826,14 +817,8 @@ def test_npm_sudo_marker_dormant_until_opted_in():
 
     manager = NPM()
     assert manager.default_sudo is False
-    with (
-        patch(
-            "meta_package_manager.execution.current_platform",
-            return_value=_UNIX_PLATFORM,
-        ),
-        # Pinned, not detected: a Windows runner carries no `sudo` on `PATH`.
-        only_escalator("sudo"),
-    ):
+    # Pinned, not detected: a Windows runner carries no `sudo` on `PATH`.
+    with only_escalator("sudo"):
         assert "sudo" not in manager.build_cli("update", sudo=True)
         manager.sudo = True
         assert manager.build_cli("update", sudo=True)[:2] == (
@@ -927,13 +912,7 @@ def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
     # `run0` on a systemd runner and nothing on macOS, and `resolve_escalator`
     # caches, so the failure only lands when this test is the first in its
     # worker to resolve one.
-    with (
-        patch(
-            "meta_package_manager.execution.current_platform",
-            return_value=_UNIX_PLATFORM,
-        ),
-        only_escalator("sudo"),
-    ):
+    with only_escalator("sudo"):
         cli = manager.build_cli("-c", "pass", sudo=True)
         assert cli[:2] == ("sudo", "--non-interactive")
         with caplog.at_level(logging.WARNING):
@@ -955,10 +934,6 @@ def test_escalated_calls_keep_the_controlling_terminal(escalate):
     manager = FakeManager()
     manager.sudo = True
     with (
-        patch(
-            "meta_package_manager.execution.current_platform",
-            return_value=_UNIX_PLATFORM,
-        ),
         # Pinned, not detected: a Windows runner carries no `sudo` on `PATH`.
         only_escalator("sudo"),
         patch("meta_package_manager.execution.run_cli") as spawn,
@@ -981,10 +956,6 @@ def test_run_forwards_a_forced_environment_across_run0():
     manager = FakeManager()
     manager.sudo = True
     with (
-        patch(
-            "meta_package_manager.execution.current_platform",
-            return_value=_UNIX_PLATFORM,
-        ),
         only_escalator("run0"),
         patch("meta_package_manager.execution.run_cli") as spawn,
     ):
@@ -1005,10 +976,6 @@ def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():
     manager = FakeManager()
     manager.sudo = True
     with (
-        patch(
-            "meta_package_manager.execution.current_platform",
-            return_value=_UNIX_PLATFORM,
-        ),
         only_escalator("sudo"),
         patch("meta_package_manager.execution.run_cli") as spawn,
     ):
@@ -1160,7 +1127,7 @@ def test_a_file_that_is_not_a_program_raises_enoexec(tmp_path):
     not_a_program.write_bytes(b"\x7fELF is how one starts, and this is not one")
     not_a_program.chmod(0o755)
     with pytest.raises(OSError) as caught:
-        subprocess.run((str(not_a_program),), capture_output=True)
+        subprocess.run((str(not_a_program),), capture_output=True, check=False)
     assert caught.value.errno == errno.ENOEXEC
 
 
@@ -1179,9 +1146,11 @@ def test_unrunnable_cli_degrades_instead_of_crashing(error_code, caplog):
     """
     manager = FakeManager()
     refusal = OSError(error_code, os.strerror(error_code), "/usr/local/bin/pnpm")
-    with patch("meta_package_manager.execution.run_cli", side_effect=refusal):
-        with caplog.at_level(logging.DEBUG):
-            output = manager.run("--version")
+    with (
+        patch("meta_package_manager.execution.run_cli", side_effect=refusal),
+        caplog.at_level(logging.DEBUG),
+    ):
+        output = manager.run("--version")
     assert output == ""
     assert manager.executable is False
     assert any("cannot be executed" in r.getMessage() for r in caplog.records)

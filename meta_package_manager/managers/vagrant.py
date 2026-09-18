@@ -62,7 +62,7 @@ class Vagrant(PackageManager):
     `vagrant box outdated` inspects only the boxes the *current directory's*
     Vagrantfile declares unless `--global` is passed, and `vagrant box update`
     is scoped the same way unless `--box` names one. Both forced flags are
-    therefore load-bearing: without them the answer would depend on where mpm
+    therefore required: without them the answer would depend on where mpm
     happened to be invoked, and would fail outright outside a Vagrant project.
 
     One piece of ambient state cannot be escaped: Vagrant evaluates the
@@ -245,11 +245,10 @@ class Vagrant(PackageManager):
         ```
         """
         output = self.run_cli("cloud", "search", query, "--json")
-        for entry in self.parse_json(output) or ():
-            package_id = entry.get("name")
-            if not package_id:
-                continue
-            yield self.package(id=package_id, latest_version=entry.get("version"))
+        yield from self.parse_json_items(
+            output,
+            fields={"package_id": "name", "latest_version": "version"},
+        )
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

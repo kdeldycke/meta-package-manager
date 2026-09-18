@@ -13,7 +13,7 @@ Two reasons put a tool in the sections below, and the section title carries the 
 
 A third marker rides alongside either of them:
 
-- 🛟 [`topgrade`](managers/topgrade.md) reaches it anyway, so `mpm upgrade --topgrade` still upgrades it. `mpm` wraps `topgrade` as the catch-all for tools too thin to earn a manager of their own, which is why most of this page is still upgradable without being wrapped.
+- 🛟 [`topgrade`](managers/topgrade.md) reaches it anyway, so `mpm --topgrade upgrade --all` still upgrades it. `mpm` wraps `topgrade` as the catch-all for tools too thin to earn a manager of their own, which is why most of this page is still upgradable without being wrapped.
 
 One section per tool, except where several share a verdict word for word: those are grouped under the family they belong to, which names its members up front. Each section is an anchor, so a decision can be cited from anywhere in the documentation, the code or an issue: `https://mpm.run/unsupported/#paq`.
 
@@ -227,7 +227,7 @@ Declined in {mpm-release}`8.0.0`.
 
 ## [`helix`](https://helix-editor.com) ❌ 🛟
 
-Editor whose whole package-adjacent surface is one flag, `-g, --grammar {fetch|build}`, and it takes no package argument: both modes act on every tree-sitter grammar listed in `languages.toml` at once, so there is no install, remove or upgrade of a single grammar to declare. Nothing reports an inventory either. `hx --health languages` prints a capability matrix over the languages helix ships configuration for, three hundred rows of ✓ and ✘ across the language server, debug adapter, formatter, highlight, textobject and indent columns, truncated to the terminal width and carrying no version anywhere; it answers what helix knows about rather than what the host holds. The grammars are not a registry of helix's own, each being a git repository pinned by revision in that same configuration file. That leaves an all-or-nothing refresh as the only real operation, which is exactly what [`topgrade`](managers/topgrade.md) already runs, so `mpm upgrade --topgrade` reaches it without `mpm` learning the editor. The [`zr`](#zr) reading. Checked against helix `25.07.1`.
+Editor whose whole package-adjacent surface is one flag, `-g, --grammar {fetch|build}`, and it takes no package argument: both modes act on every tree-sitter grammar listed in `languages.toml` at once, so there is no install, remove or upgrade of a single grammar to declare. Nothing reports an inventory either. `hx --health languages` prints a capability matrix over the languages helix ships configuration for, three hundred rows of ✓ and ✘ across the language server, debug adapter, formatter, highlight, textobject and indent columns, truncated to the terminal width and carrying no version anywhere; it answers what helix knows about rather than what the host holds. The grammars are not a registry of helix's own, each being a git repository pinned by revision in that same configuration file. That leaves an all-or-nothing refresh as the only real operation, which is exactly what [`topgrade`](managers/topgrade.md) already runs, so `mpm --topgrade upgrade --all` reaches it without `mpm` learning the editor. The [`zr`](#zr) reading. Checked against helix `25.07.1`.
 
 Declined in {mpm-release}`8.0.0`.
 

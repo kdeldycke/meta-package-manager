@@ -13,7 +13,7 @@
 # [XKCD #927](https://xkcd.com/927/): for the system package managers both
 # reach, routing through topgrade is structurally redundant. Everything else
 # is the point.
-# topgrade drives far more tools than mpm wraps, so it serves as the pool's
+# topgrade drives far more tools than mpm wraps, so it is the pool's
 # deliberate sinkhole: every runtime, plugin and OS updater too thin to earn a
 # manager of its own stays reachable in the same `mpm upgrade --all` invocation
 # (rustup, oh-my-zsh, JetBrains plugins, vim/tmux plugin managers, and so on)

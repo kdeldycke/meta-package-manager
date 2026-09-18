@@ -66,12 +66,10 @@ _PIP_PROBE_MARKER = "mpm-pip-probe"
 """Sentinel {data}`_PIP_MODULE_PROBE` prefixes its answer with.
 
 Separates *the interpreter ran our code* from *something else answered*, which a
-bare `1`/`0` cannot. Windows installs `python.exe` and `python3.exe`
-app-execution aliases on a machine carrying no Python at all: they write an
-advert for the Microsoft Store to `<stderr>`, leave `<stdout>` empty and exit
-`9009`. Empty output is not the `0` those aliases would need to print to be
-skipped, so without a marker to look for they read as a Python whose `pip`
-merely could not be located.
+bare `1`/`0` cannot: a Windows app-execution alias with no Python behind it
+leaves `<stdout>` empty (see `Pip._pip_module_missing`), and empty output is not
+the `0` it would need to print to be skipped. Without the marker such an alias
+reads as a Python whose `pip` merely could not be located.
 """
 
 
@@ -134,12 +132,12 @@ class Pip(PackageManager):
 
     Interpreter discovery probes the running Python first, so an `mpm`
     installed inside a virtualenv manages that virtualenv, then the Python(s)
-    on `PATH`. Two kinds are skipped so the manager only targets a scope
+    on `PATH`. Three kinds are skipped so the manager only targets a scope
     the user can install into: `mpm`'s own distributor-managed bundle
-    (Homebrew stages it under a `Cellar` prefix) and any
-    externally-managed, non-virtualenv interpreter that {pep}`668` forbids
-    `pip install` into. When every candidate is skipped, the manager
-    reports as unavailable.
+    (Homebrew stages it under a `Cellar` prefix), any externally-managed,
+    non-virtualenv interpreter that {pep}`668` forbids `pip install` into,
+    and any interpreter carrying no `pip` to drive. When every candidate is
+    skipped, the manager reports as unavailable.
     ```
 
     ```{note}
@@ -233,9 +231,10 @@ class Pip(PackageManager):
         Evaluate [findpython](https://github.com/frostming/findpython) (the
         maintained MIT rewrite of `pythonfinder`) to replace the discovery
         loop here. It would only cover discovery: the eligibility filters
-        (`_running_from_bundled_app`, `_pip_install_blocked`)
-        stay mpm's job, since findpython locates interpreters but does not
-        judge whether `pip install` is allowed into one.
+        (`_running_from_bundled_app`, `_pip_install_blocked`,
+        `_pip_module_missing`) stay mpm's job, since findpython locates
+        interpreters but judges neither whether one carries `pip` nor whether
+        `pip install` is allowed into it.
         ```
         """
         current_python = None
@@ -314,6 +313,35 @@ class Pip(PackageManager):
             return False
         return installer.strip().lower() == "brew"
 
+    def _probe_interpreter(
+        self,
+        python_path: Path,
+        code: str,
+    ) -> subprocess.CompletedProcess[str] | None:
+        """Run the `code` one-liner inside the candidate interpreter at `python_path`.
+
+        The plumbing shared by the two eligibility guards below, which each hand
+        over their own one-liner and read the answer off the captured `<stdout>`
+        and exit code. The probe inherits the `--timeout` override when one is
+        set, else the {data}`~meta_package_manager.execution.READ_ONLY_TIMEOUT`
+        read-only cap.
+
+        Returns `None` when the probe never ran to completion (a missing or
+        non-executable file, an interpreter hanging past the timeout), so the
+        caller keeps the candidate rather than hide a usable interpreter.
+        """
+        timeout = self.timeout if self.timeout is not None else READ_ONLY_TIMEOUT
+        try:
+            return subprocess.run(
+                (str(python_path), "-c", code),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return None
+
     def _pip_install_blocked(self, python_path: Path) -> bool:
         """Would {pep}`668` block `pip install` into `python_path`'s default scope?
 
@@ -325,23 +353,12 @@ class Pip(PackageManager):
         surfacing that environment's distro-managed packages as outdated pip upgrades
         whose installation pip would reject.
 
-        The probe inherits the `--timeout` override when one is set, else the
-        {data}`~meta_package_manager.execution.READ_ONLY_TIMEOUT` read-only cap.
-
         Errs on the side of keeping a candidate: a probe that times out, crashes, or
         prints anything unexpected returns `False`, leaving discovery untouched
         rather than hiding a usable interpreter.
         """
-        timeout = self.timeout if self.timeout is not None else READ_ONLY_TIMEOUT
-        try:
-            result = subprocess.run(
-                (str(python_path), "-c", _EXTERNALLY_MANAGED_PROBE),
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                check=False,
-            )
-        except (OSError, subprocess.SubprocessError):
+        result = self._probe_interpreter(python_path, _EXTERNALLY_MANAGED_PROBE)
+        if result is None:
             return False
         return result.stdout.strip() == "1"
 
@@ -370,24 +387,13 @@ class Pip(PackageManager):
         without ever reaching {data}`_PIP_PROBE_MARKER` is read as unusable rather
         than as a Python whose `pip` went missing.
 
-        The probe inherits the `--timeout` override when one is set, else the
-        {data}`~meta_package_manager.execution.READ_ONLY_TIMEOUT` read-only cap.
-
         Errs on the side of keeping a candidate everywhere else: a probe that times
         out, crashes before running, or exits `0` saying something unexpected
         returns `False`, leaving discovery untouched rather than hiding a usable
         interpreter.
         """
-        timeout = self.timeout if self.timeout is not None else READ_ONLY_TIMEOUT
-        try:
-            result = subprocess.run(
-                (str(python_path), "-c", _PIP_MODULE_PROBE),
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                check=False,
-            )
-        except (OSError, subprocess.SubprocessError):
+        result = self._probe_interpreter(python_path, _PIP_MODULE_PROBE)
+        if result is None:
             return False
         stdout = result.stdout or ""
         if f"{_PIP_PROBE_MARKER} 1" in stdout:

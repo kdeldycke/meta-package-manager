@@ -85,8 +85,9 @@ class Mamba(PackageManager):
     """The release that made mamba a standalone C++ program.
 
     Chosen over the newer `2.9.0`, where the inventory settled on one shape, so
-    the floor does not exclude every release a user is realistically running:
-    `2.9.0` is days old. {meth}`~meta_package_manager.manager.PackageManager.installed` reads both shapes instead.
+    the floor does not exclude the releases users still run:
+    {meth}`~meta_package_manager.manager.PackageManager.installed` reads both
+    shapes instead.
     """
 
     version_regexes = (r"^(?P<version>\d+\.\d+\.\d+\S*)$",)

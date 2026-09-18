@@ -54,7 +54,7 @@ class LuaRocks(PackageManager):
     ```
 
     ```{caution}
-    `--no-project` is load-bearing. LuaRocks walks up from the working directory
+    `--no-project` is required. LuaRocks walks up from the working directory
     looking for a project tree and silently switches to it when one is found, so
     without the flag the inventory would answer for whichever directory mpm
     happened to be invoked from instead of for the machine. `haxelib` forces
@@ -73,7 +73,7 @@ class LuaRocks(PackageManager):
     the default one, so removing a rock that lives in the *other* tree fails
     with `Error: Could not find rock 'say' in /opt/homebrew`.
 
-    That asymmetry is left as LuaRocks defines it rather than papered over.
+    That asymmetry is left as LuaRocks defines it.
     Forcing `--local` would make the user tree writable at the cost of the
     system one, and forcing `--global` the reverse; neither is right for every
     host, and the failure is loud, immediate and names the tree it searched.
@@ -260,7 +260,7 @@ class LuaRocks(PackageManager):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generate the CLI to upgrade one package.
+        """Generates the CLI to upgrade one package.
 
         LuaRocks has no `upgrade` verb: installing a rock that is already
         present replaces it with the newer build, which is the upgrade.

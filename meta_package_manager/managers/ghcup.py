@@ -60,8 +60,8 @@ class GHCup(PackageManager):
     able to install and remove.
 
     A package is therefore identified as `<tool>-<version>`, and split back on
-    its **first** hyphen to rebuild the pair. First rather than last is
-    load-bearing: a cross-compiling GHC renders its target into the version
+    its *first* hyphen to rebuild the pair. First rather than last is
+    required: a cross-compiling GHC renders its target into the version
     cell, so `ghc-aarch64-unknown-linux-gnu-9.4.8` has to split into `ghc` and
     `aarch64-unknown-linux-gnu-9.4.8`, and that remainder is exactly the token
     ghcup's own version parser accepts. No tool name contains a hyphen today.
@@ -77,7 +77,7 @@ class GHCup(PackageManager):
 
     ```{caution}
     Neither upgrade operation is declared, and neither is an oversight.
-    `ghcup upgrade` upgrades **the ghcup binary itself**, not the tools it
+    `ghcup upgrade` upgrades *the ghcup binary itself*, not the tools it
     installs, so mapping it onto `upgrade --all` would replace the user's
     package manager when they asked to upgrade their packages. And ghcup has no
     in-place upgrade for a tool at all: a newer GHC is a fresh side-by-side

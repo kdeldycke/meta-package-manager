@@ -93,7 +93,7 @@ class Gext(PackageManager):
 
     The parser most likely tolerates the `0.10.x` series, whose output is not
     known to differ, but the floor tracks what was verified rather than what was
-    assumed: the dry run's exit code in particular is load-bearing here and was
+    assumed: the `outdated` query depends on the dry run's exit code, which was
     only observed on this release.
     """
 
@@ -270,7 +270,7 @@ class Gext(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
-        Naming an extension genuinely restricts the run to it.
+        Naming an extension restricts the run to it.
 
         ```{code-block} shell-session
 

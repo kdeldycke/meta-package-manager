@@ -89,9 +89,8 @@ class Aptitude(PackageManager):
     ```{caution}
     A query reaches aptitude as a *regular expression*, not as a literal
     substring, so it is escaped by {func}`escape_pattern` before being spliced
-    into a `~n` or `~d` term. Skipping that step is not a near-miss but a silent
-    empty result: `~n^libsigc++-2.0-0v5$` compiles to a regex matching no
-    package at all.
+    into a `~n` or `~d` term. Skipping that step gives a silent empty result:
+    `~n^libsigc++-2.0-0v5$` compiles to a regex matching no package at all.
     ```
 
     ```{note}

@@ -103,17 +103,19 @@ class Pixi(PackageManager):
     channels. Mapping `mpm sync` onto it would make a read-shaped command
     mutate the machine.
     ```
+
+    ```{todo}
+    Declare a `logo` once Simple Icons ships the pixi mark requested in
+    [simple-icons/simple-icons#13796](https://github.com/simple-icons/simple-icons/issues/13796),
+    a request already cleared of trademark concerns (labelled `permission not
+    needed`). Their `pixiv` mark is an unrelated brand, not a stand-in.
+    ```
     """
 
     name = "pixi"
 
     homepage_url = "https://pixi.sh"
     repository_url = "https://github.com/prefix-dev/pixi"
-
-    # No `logo`: Simple Icons carries no pixi mark yet. Their request is open and
-    # already cleared of trademark concerns (labelled `permission not needed`):
-    # https://github.com/simple-icons/simple-icons/issues/13796
-    # Do not reach for their `pixiv` mark, which is an unrelated brand.
 
     keywords = ("prefix.dev",)
 
@@ -162,13 +164,10 @@ class Pixi(PackageManager):
         that is not installed in the prefix, and the optional `platform` key is
         omitted unless the environment pins one.
 
-        The block below was reconstructed from pixi's
-        `serde_json::to_string_pretty` serialization of `GlobalEnvironmentJson`
-        and the `ripgrep` entry of its own
-        [`pixi global list` reference output](https://pixi.sh/latest/reference/cli/pixi/global/list/),
-        back when no host here could run the tool. It has since been confirmed
-        byte for byte against `pixi 0.78.0` driven for real, so it is a capture
-        now rather than a reconstruction.
+        The block below is a capture from `pixi 0.78.0`. Its `ripgrep` entry is
+        the one pixi's own
+        [`pixi global list` reference output](https://pixi.sh/latest/reference/cli/pixi/global/list/)
+        documents.
 
         ```{code-block} shell-session
 

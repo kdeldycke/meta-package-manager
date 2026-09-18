@@ -24,7 +24,6 @@ import sys
 import threading
 from collections import Counter
 from itertools import product
-from pathlib import Path
 from typing import ClassVar, cast
 
 import pytest
@@ -46,6 +45,8 @@ from meta_package_manager.bar_plugin_renderer import (
     elide_versions,
 )
 from meta_package_manager.version import parse_version
+
+from .conftest import PROJECT_ROOT
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -164,7 +165,7 @@ def test_mpm_cli_ignores_the_spawn_directory(tmp_path):
     """A menu action imports the installed `mpm`, wherever it is spawned from.
 
     `-m` prepends the working directory to `sys.path`, so an action started
-    from a source checkout used to import that tree with the dependencies the
+    from a source checkout would import that tree, with the dependencies the
     installed version pinned.
     """
     decoy = tmp_path / "meta_package_manager"
@@ -376,8 +377,7 @@ def test_renderer_version_diff_colors_by_appearance(
             id="build-triple",
         ),
         # Both sides over the cap. They must come back cut the same way, or the
-        # column stops lining up: the per-version decision this replaced left
-        # one head-elided beside one tail-cut.
+        # column stops lining up, one side head-elided beside one tail-cut.
         pytest.param(
             "5.0.0~beta1-0ubuntu7",
             "5.0.2-0ubuntu1~26.04.1",
@@ -421,7 +421,8 @@ def test_elide_versions(old, new, expected):
 
 def test_elide_versions_keeps_the_diff_boundary():
     """The `…` lands where the gray prefix hands over to the colored suffix, so
-    the elision and {func}`diff_versions` agree on one split point."""
+    the elision and {func}`~meta_package_manager.version.diff_versions` agree
+    on one split point."""
     old, new = elide_versions("1.0.0+build.20260101", "1.0.0+build.20260102", 16)
     assert (old, new) == ("1.0.0+\u2026.20260101", "1.0.0+\u2026.20260102")
     # The whole diverging token survives on both sides, so the eye lands on the
@@ -500,9 +501,10 @@ def test_renderer_elides_long_payload_versions(monkeypatch):
     """A version pair past the cap is elided, as the payload's own type.
 
     Regression test for the `TypeError` that took the whole menu down on any
-    package whose versions ran past {data}`MAX_VERSION_WIDTH`: `mpm outdated`
-    fills this payload with `TokenizedString` versions, which answer `len()`
-    but cannot be sliced, and elision slices.
+    package whose versions ran past
+    {data}`~meta_package_manager.bar_plugin_renderer.MAX_VERSION_WIDTH`:
+    `mpm outdated` fills this payload with `TokenizedString` versions, which
+    answer `len()` but cannot be sliced, and elision slices.
     """
     _pin_plugin_env(monkeypatch, align_columns=True)
     payload = _outdated_fixture()
@@ -817,9 +819,6 @@ def test_plugin_about_footer(monkeypatch, capsys, swiftbar, host):
     assert "--mpm 9.9.9.dev0+abc1234" in out
     assert "--/somewhere/mpm" in out
     assert f"href={bar_plugin.PLUGIN_DOCS_URL}" in out
-
-
-PROJECT_ROOT = Path(__file__).parent.parent
 
 
 def _capture_driver():

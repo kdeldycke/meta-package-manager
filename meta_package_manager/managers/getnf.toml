@@ -20,8 +20,8 @@
 #   - A font installed outside getnf, or by a getnf too old to record where it
 #     came from, has no release marker and renders as `<name> - unknown
 #     version`. One alternation spans both shapes without letting that marker
-#     land in the version field: such a font is genuinely installed and can be
-#     removed, it just carries no version. The `micro` definition takes the same
+#     land in the version field: such a font is installed and can be removed,
+#     and only its version is unknown. The `micro` definition takes the same
 #     approach for its bundled plugins.
 #   - The user scope is the wrapped one. `-l`, `-i` and `-u` all address the
 #     per-user font directory, `~/Library/Fonts` on macOS and

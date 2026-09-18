@@ -101,8 +101,8 @@ TOPGRADE_FALLBACK_GLYPH = "🛟"
 
 `topgrade` is the pool's deliberate sinkhole: it auto-detects and upgrades
 whatever it finds on the host, so a tool `mpm` declined to wrap directly stays
-reachable through `mpm upgrade --topgrade`. For the majority of the unsupported
-table that turns "not supported" into "not wrapped, still upgradable", which is
+reachable through `mpm --topgrade upgrade --all`. For the majority of the unsupported
+page that turns "not supported" into "not wrapped, still upgradable", which is
 a different answer to the only question the page exists to settle.
 
 Derived, never hand-written: membership is `topgrade` appearing in the manager's
@@ -117,7 +117,7 @@ WRAPPED_GLYPHS = {"maintained": "✅", "unmaintained": "⚠️"}
 """Glyph rendered for a manager `mpm` wraps, keyed by its `unmaintained` flag.
 
 The counterpart of {data}`UNSUPPORTED_GLYPHS` on the wrapped side of the scale,
-so every glyph literal of the five-state support scale is written once.
+so every glyph literal of the six-state support scale is written once.
 """
 
 QUEUED_GLYPH = "🚧"
@@ -143,8 +143,8 @@ UNSUPPORTED_GLYPHS = {"archived": "☠️", "excluded": "❌"}
 
 A skull marks a tool whose upstream is retired: the wrapper is not missing, its
 subject is gone. A cross marks a live tool `mpm` declined on its own merits.
-Both link to {data}`UNSUPPORTED_DOCS_URL`, whose table carries the reason and
-repeats the same glyph in its own status column, followed by
+Both link to {data}`UNSUPPORTED_DOCS_URL`, whose verdict sections carry the
+reason and repeat the same glyph in their titles, followed by
 {data}`TOPGRADE_FALLBACK_GLYPH` where it applies.
 """
 
@@ -154,9 +154,11 @@ def unsupported_status(mid: str, status: str, competitors: Iterable[str]) -> str
 
     Returns the {data}`UNSUPPORTED_GLYPHS` entry for `status`, suffixed with
     {data}`TOPGRADE_FALLBACK_GLYPH` when `topgrade` is among the manager's
-    `competitors`. Shared by the benchmark's `mpm` column and the sync test
-    guarding `docs/unsupported.md`, so the two can never disagree on what a row
-    should show.
+    `competitors`. This is the verdict each section title of
+    `docs/unsupported.md` ends with, and what
+    `test_unsupported_page_matches_benchmark` holds every title to. The
+    benchmark's `mpm` column reads the same data through
+    {func}`_bare_support_glyph`, which shows the lifebuoy alone.
     """
     glyph = UNSUPPORTED_GLYPHS[status]
     if "topgrade" in competitors:
@@ -384,13 +386,11 @@ def manager_page_url(manager_id: str) -> str:
     `[tool.repomatic] sphinx.builder` publishes: the page is written as
     `managers/apk/index.html`, and the trailing slash is what keeps the server
     from answering a redirect on the way there. The `.html` URLs this site used
-    to publish still resolve, through the stubs `docs/conf.py` writes beside
-    every page.
+    to publish still resolve, through the rules of `docs/_redirects`.
 
-    A function rather than an f-string repeated at each call site: the readme
-    matrix and the manager-index prose both build it, and the shape of a
-    published URL is exactly the kind of fact that drifts when it lives in two
-    places.
+    A function rather than an f-string at the call site: the shape of a
+    published URL is exactly the kind of fact that drifts when it is spelled
+    out in more than one place.
     """
     return f"{DOCS_SITE_URL}/managers/{manager_id}/"
 
@@ -2635,8 +2635,9 @@ def _metrics_config() -> dict:
     each manager's `repository_url`.
     """
     content = (PROJECT_ROOT / "pyproject.toml").read_text(encoding="UTF-8")
-    config = tomllib.loads(content)
-    return config["tool"]["repomatic"]["metrics"]  # type: ignore[no-any-return]
+    # Annotated local, as in `_load_benchmark_toml` above.
+    metrics: dict = tomllib.loads(content)["tool"]["repomatic"]["metrics"]
+    return metrics
 
 
 def _canonical_repo_url(target: str) -> str:
@@ -2881,11 +2882,11 @@ def manager_support_bar() -> str:
     """Produce the support bar opening `docs/managers.md`.
 
     Rendered live at Sphinx build time, above the legend naming its regions and
-    the index they summarize: one full-width bar cut into the five
+    the index they summarize: one full-width bar cut into the six
     {data}`SUPPORT_SCALE` states, in scale order, each region as wide as its
     share of the assessed population. It answers in one glance the question the
     page exists for, how much of what has been assessed `mpm` actually drives,
-    where the legend answers it in five numbers a reader has to add up.
+    where the legend answers it in six numbers a reader has to add up.
 
     Emitted as raw HTML rather than as a chart image: the shares are three
     numbers and a ratio, a picture nothing but CSS is needed to draw, and a

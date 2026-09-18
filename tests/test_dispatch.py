@@ -66,12 +66,12 @@ class StubManager:
     on every lane to decide which are held back to the sequential tail, so a stub
     without it would be a manager no scheduler could place. `_active_operation`
     defaults to `None` for the same reason, that being the class-level default of
-    {attr}`~meta_package_manager.execution.CLIExecutor._active_operation`, and
+    `CLIExecutor._active_operation`, and
     `subject` mirrors the property the trail reads to name each line.
     """
 
     run_cache = None
-    _active_operation = None
+    _active_operation: str | None = None
 
     @property
     def subject(self) -> str:

@@ -16,8 +16,6 @@
 
 from __future__ import annotations
 
-import json
-import logging
 import re
 
 from extra_platforms import LINUX_LIKE
@@ -144,29 +142,6 @@ class APK(PackageManager):
             return False
         return self.version in VersionRange(self.query_requirement)
 
-    @staticmethod
-    def _parse_query_json(output: str) -> tuple[tuple[str, str], ...]:
-        """Extract `(name, version)` pairs from a `query --format json` payload.
-
-        An empty selection prints `[]`, and a refusal (an `apk-tools` 2 meeting
-        the applet, a repository it cannot reach) prints no JSON at all. Both
-        yield nothing rather than raising, so a caller reports an empty set the
-        way every other parser here does.
-        """
-        try:
-            entries = json.loads(output)
-        except ValueError:
-            logging.debug("apk query returned no JSON payload.")
-            return ()
-        if not isinstance(entries, list):
-            logging.debug("apk query returned JSON that is not a list of packages.")
-            return ()
-        return tuple(
-            (entry["name"], entry["version"])
-            for entry in entries
-            if isinstance(entry, dict) and entry.get("name") and entry.get("version")
-        )
-
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
@@ -209,7 +184,9 @@ class APK(PackageManager):
         both are parsed whatever the host, keyed on the payload being JSON. That
         is what lets each documented block above stand as a fixture, and it
         keeps the reading of an answer independent of the guess that produced
-        it.
+        it. A refusal (an `apk-tools` 2 meeting the applet, a repository it
+        cannot reach) prints no JSON at all, so it reaches the `list` parser
+        and yields nothing.
         """
         if self._has_query_applet:
             output = self.run_cli(
@@ -225,8 +202,10 @@ class APK(PackageManager):
             output = self.run_cli("list", "--installed")
 
         if output.lstrip().startswith("["):
-            for package_id, version in self._parse_query_json(output):
-                yield self.package(id=package_id, installed_version=version)
+            yield from self.parse_json_items(
+                output,
+                fields={"package_id": "name", "installed_version": "version"},
+            )
             return
 
         for match in self._INSTALLED_REGEXP.finditer(output):

@@ -24,12 +24,10 @@ Fedora since 41 presents and which no CI runner reproduces.
 
 from __future__ import annotations
 
-import re
-
 import pytest
 
 from meta_package_manager.managers.dnf import DNF, DNF5, YUM
-from meta_package_manager.version import TokenizedString, VersionRange, parse_version
+from meta_package_manager.version import VersionRange, parse_version
 
 DNF5_VERSION = """dnf5 version 5.4.3.0
 dnf5 plugin API version 2.0
@@ -73,15 +71,6 @@ DNF4_SEARCH = (
 """The dnf4 shape, kept so one parser is held to both."""
 
 
-def probe_version(cls: type[DNF], output: str) -> TokenizedString | None:
-    """Reproduce the version probe: first matching regex wins."""
-    for regex in cls.version_regexes:
-        match = re.compile(regex, re.MULTILINE).search(output)
-        if match and match.groupdict().get("version"):
-            return parse_version(match.groupdict()["version"])
-    return None
-
-
 @pytest.mark.parametrize(
     ("manager_class", "output", "expected_version", "expected_fresh"),
     (
@@ -102,7 +91,7 @@ def test_version_probe_reads_both_generations(
     manager_class, output, expected_version, expected_fresh
 ):
     """Each front-end reads a real version, and gates itself on that version."""
-    version = probe_version(manager_class, output)
+    version = manager_class()._parse_version(output)
     assert version is not None
     assert str(version) == expected_version
     fresh = version in VersionRange(manager_class.requirement)

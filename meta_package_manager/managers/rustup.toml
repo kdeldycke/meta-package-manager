@@ -100,7 +100,7 @@ args = ["toolchain", "install", "--no-self-update", "{package_id}"]
 [mpm.overrides.rustup.operations.remove]
 args = ["toolchain", "uninstall", "{package_id}"]
 
-# Naming a toolchain genuinely restricts the run to it: the named branch never
+# Naming a toolchain restricts the run to it: the named branch never
 # reaches the update-everything path.
 [mpm.overrides.rustup.operations.upgrade_one]
 args = ["update", "--no-self-update", "{package_id}"]

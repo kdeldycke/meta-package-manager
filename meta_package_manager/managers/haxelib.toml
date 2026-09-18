@@ -3,14 +3,14 @@
 # new manager") for the schema and meta_package_manager/definitions.py
 # (build_bundled_managers) for the loader.
 #
-# Every invocation carries `--global`, and that is load-bearing rather than
-# tidy. Without it `RepoManager.getPath` walks the whole directory tree upwards
-# looking for a `.haxelib` directory and silently switches to that project-local
-# repository the moment it finds one, so any ancestor of the working directory
-# can hijack the listing. `--global` calls `Repository.getGlobal()` instead,
-# which never consults the working directory at all. `HAXELIB_PATH` is not a
-# substitute: it only redirects which repository counts as the global one, and
-# is consulted after the local lookup has already won.
+# Every invocation carries `--global`. Without it `RepoManager.getPath` walks
+# the whole directory tree upwards looking for a `.haxelib` directory and
+# silently switches to that project-local repository the moment it finds one,
+# so any ancestor of the working directory can hijack the listing. `--global`
+# calls `Repository.getGlobal()` instead, which never consults the working
+# directory at all. `HAXELIB_PATH` is not a substitute: it only redirects which
+# repository counts as the global one, and is consulted after the local lookup
+# has already won.
 #
 # `--always` answers every prompt yes. haxelib prompts on paths mpm must not
 # block on: setting an already-downloaded version as current, and, for a
@@ -53,9 +53,11 @@ logo = "haxe"
 platforms = ["all_platforms"]
 cli_names = ["haxelib"]
 requirement = ">=4.0.0"
-# `haxelib version` prints the bare version, and appends " (<sha>)" or
-# " (<sha> - dirty)" when the client was itself built from a git checkout.
-# Anchored so the suffix is ignored.
+# `version` is a command, not a switch: `haxelib --version` fails with `Unknown
+# switch`. It prints the bare version, and appends " (<sha>)" or " (<sha> -
+# dirty)" when the client was itself built from a git checkout. Anchored so the
+# suffix is ignored.
+version_cli_options = ["version"]
 version_regexes = ['^(?P<version>\d+\.\d+\.\d+(?:-[a-z]+(?:\.\d+)?)?)']
 
 # One line per library: `name:` followed by every installed version, with the

@@ -64,7 +64,7 @@ class Lure(PackageManager):
     ```
     """
 
-    maintenance_note: str | None = (
+    maintenance_note = (
         "LURE's own forge at `git.elara.ws` answers `502` and `lure.sh` answers "
         "`404` behind a placeholder certificate, so its installer and release "
         "binaries are both unreachable and the tool has to be built from source. "
@@ -84,23 +84,9 @@ class Lure(PackageManager):
     requirement = ">=0.1.3"
     """The newest release, and the one this parser was checked against: `list.go`
     already carries the `installed` flag there.
-
-    The build driven here is that tag plus a single commit touching the install
-    script, LURE having tagged nothing since.
     """
 
     cli_names = ("lure",)
-
-    _LIST_REGEXP = re.compile(
-        r"^[^/\s]+/(?P<package_id>\S+)\s+(?P<version>\S+)$",
-    )
-    """A row is `<repo>/<name> <version>`.
-
-    The repository is matched but dropped: `lure install` takes the bare name,
-    so that is what a package ID has to be for mpm to hand one back. Two
-    repositories shipping the same name would collapse onto one entry, which in
-    practice is a single `default` repository.
-    """
 
     version_cli_options = ("version",)
     """`lure --version` is rejected as `flag provided but not defined`, the
@@ -119,6 +105,17 @@ class Lure(PackageManager):
     version_from_stderr = True
     """`lure version` reaches Go's builtin `println`, which writes to `<stderr>`
     and leaves `<stdout>` empty."""
+
+    _LIST_REGEXP = re.compile(
+        r"^[^/\s]+/(?P<package_id>\S+)\s+(?P<version>\S+)$",
+    )
+    """A row is `<repo>/<name> <version>`.
+
+    The repository is matched but dropped: `lure install` takes the bare name,
+    so that is what a package ID has to be for mpm to hand one back. Two
+    repositories shipping the same name would collapse onto one entry, which in
+    practice is a single `default` repository.
+    """
 
     def _parse_rows(self, output: str) -> Iterator[tuple[str, str]]:
         """Yield `(package_id, version)` per row of a `list` output.

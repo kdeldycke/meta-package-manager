@@ -133,10 +133,9 @@ class CPAN(PackageManager):
     separates its columns by at least two spaces and both versions are numeric.
     Both halves of that shape are required, because a bare three-token match also
     catches the progress line CPAN::FTP prints while it refreshes its index,
-    `Fetching with HTTP::Tiny:`, which arrived in the menu as a package named
-    `Fetching` upgrading from `with` to `HTTP::Tiny:`. The banner, the `Reading`
-    line, the indented `Database was generated` line, the column header and the
-    dashed separator fail on the same two counts.
+    `Fetching with HTTP::Tiny:`. The banner, the `Reading` line, the indented
+    `Database was generated` line, the column header and the dashed separator
+    fail on the same two counts.
     """
 
     _INC_PROBE = 'print "$_\\n" for @INC'
@@ -261,7 +260,7 @@ class CPAN(PackageManager):
         return self.run_cli(package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generate the CLI to upgrade all modules.
+        """Generates the CLI to upgrade all modules.
 
         ```{code-block} shell-session
 
@@ -276,7 +275,7 @@ class CPAN(PackageManager):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generate the CLI to upgrade one module.
+        """Generates the CLI to upgrade one module.
 
         ```{code-block} shell-session
 

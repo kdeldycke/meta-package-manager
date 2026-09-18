@@ -20,19 +20,20 @@ half-block raster: two sub-pixel rows share one terminal line, so {data}`LOGO` p
 as half as many lines as it has rows.
 
 Half-blocks are the primitive because a terminal cell is twice as tall as it is
-wide, which makes their sub-pixels square. That also rules out the alternative worth
-naming, since it looks obvious and is not: drawing the mark as directional line-art
-characters (`╱`, `╲`, `│`), the way edge-detection ASCII art does. An isometric edge
-sits at slope `0.25` in cell space, far too shallow for `╱`, and that figure is
-scale-invariant — no height fixes it. Stretching the projection to 45° earns the
-diagonals but leaves the mark only ~12 columns wide, too few for the four flaps.
+wide, which makes their sub-pixels square. That also rules out the alternative
+worth naming, since it looks obvious and is not: drawing the mark as directional
+line-art characters (`╱`, `╲`, `│`), the way edge-detection ASCII art does. An
+isometric edge sits at slope `0.25` in cell space, far too shallow for `╱`, and
+that figure is scale-invariant: no height fixes it. Stretching the projection to
+45° earns the diagonals but leaves the mark only ~12 columns wide, too few for
+the four flaps.
 
 ```{caution}
 The mark's structure is carried by *color* alone: strip the ANSI codes and it
 collapses into one solid silhouette. {class}`LogoVersionOption` therefore only draws
 it when color reaches the output, falling back to click-extra's plain rendering
-everywhere else — which is also the form machine readers parse, the bar plugin
-probing `mpm --no-color --version`.
+everywhere else. That plain form is also the one machine readers parse, the bar
+plugin probing `mpm --no-color --version`.
 ```
 """
 
@@ -91,13 +92,14 @@ the plane the sub-pixel faces, which is what an isometric solid shades by: `.` u
 (the flap tops and the cube's lid), `:` right, `+` left. No outlines: the solid is
 reconstructed from the three shades its planes catch, the way an unlit render reads.
 
-Rasterized from a model re-derived from the SVG's polygon geometry — rim, flap fold
-depth, body height and cube placement all measured off it — then mirrored about its
-vertical axis, swapping `+` for `:` since what faces left on one side faces right on
-the other. Symmetry is imposed at that point rather than left to the rasterizer,
-which drifted three separate ways: a column count rounded off the row scale left the
-sampling grid off-centre, paint order tilted mirror-paired surfaces, and an odd
-column count gave the axis a column that would have had to face both ways at once.
+Rasterized from a model re-derived from the SVG's polygon geometry, with the rim,
+flap fold depth, body height and cube placement all measured off it, then mirrored
+about its vertical axis, swapping `+` for `:` since what faces left on one side
+faces right on the other. Symmetry is imposed at that point rather than left to the
+rasterizer, which drifted three separate ways: a column count rounded off the row
+scale left the sampling grid off-centre, paint order tilted mirror-paired surfaces,
+and an odd column count gave the axis a column that would have had to face both
+ways at once.
 
 The box is open, so the two far walls show through its rim, and they carry the
 plane *opposite* the one they sit behind: the far-left wall is lit as a right-facing
@@ -123,18 +125,15 @@ read the SVG sources, which are not shipped in the wheel;
 BRAND_INK = "#2d2364"
 """The deep purple of the artwork's shadowed planes, and of its lettering.
 
-The second brand color. It used to be the wordmark's alone, the box outline
-carrying a third, lighter purple that this mark's shadow faces stood in for, so
-the terminal rendition inherited a mismatch the artwork has since dropped.
+The second of the two brand colors, with {data}`BRAND_WASH`.
 """
 
 BRAND_MID = "#807bad"
 """The midpoint of the two, for the third plane an isometric solid needs.
 
 Computed rather than chosen, so the palette remains two colors and a derivation.
-The artwork gained it when the mark went flat: with no outline left to separate
-the faces, a right-facing plane can no longer share a value with a left-facing
-one.
+With no outline separating the faces, a right-facing plane cannot share a value
+with a left-facing one.
 """
 
 TONES: dict[str, int] = {
@@ -149,8 +148,8 @@ faces take {data}`BRAND_WASH`, the shadowed ones {data}`BRAND_INK`, and the
 right-hand planes {data}`BRAND_MID`.
 
 Indices rather than truecolor: the 256-color cube is the widest-supported palette,
-and click emits no downgrade of its own for a terminal that cannot do 24-bit —
-including Apple's own Terminal, where a 24-bit sequence would take the mark with
+and click emits no downgrade of its own for a terminal that cannot do 24-bit,
+Apple's own Terminal included, where a 24-bit sequence would take the mark with
 it. The cost is borne entirely by the ink: the cube resolves dark colors coarsely,
 so `#00005f` is as close as it gets (a perceptual distance of ~24, against ~3 for
 the wash). It is the nearest entry that keeps any chroma at all, the closer ones
@@ -354,8 +353,8 @@ class LogoVersionOption(VersionOption):
     """`--version`, upgraded to the full version screen when the terminal allows it.
 
     Three conditions gate the screen, and failing any one of them falls back to
-    click-extra's plain `message` template unchanged — which is a deliberate
-    guarantee, not just a default: that plain form is the one every machine reader
+    click-extra's plain `message` template unchanged. That is a deliberate
+    guarantee rather than a default: the plain form is the one every machine reader
     parses.
 
     - **Color reaches the output.** The mark keeps its structure in its colors alone,

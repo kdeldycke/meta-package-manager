@@ -123,9 +123,9 @@ Each marks the manager unavailable and yields empty output, the same way `WinErr
 193 does on Windows: something was found at that path, and it is not a program this
 host can run. `ENOEXEC` is the POSIX twin of that Windows code, raised for a
 wrong-architecture binary, a truncated download, or a text file carrying the
-executable bit. GitHub's `ubuntu-26.04-arm` image ships one: an x86 `pnpm` at
-`/usr/local/bin/pnpm`, which crashed every `mpm` run on that host until this set
-existed, since the pool probes every manager it can see.
+executable bit. GitHub's `ubuntu-26.04-arm` image ships one, an x86 `pnpm` at
+`/usr/local/bin/pnpm`, and the pool probes every manager it can see, so without
+this set that one binary aborts every `mpm` run on the host.
 
 Anything outside this set (a file-descriptor ceiling, an out-of-memory refusal)
 describes the machine rather than the CLI, and still propagates.
@@ -137,7 +137,7 @@ WIN_DEFAULT_PATHEXT: Final = ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC"
 A copy of CPython's own `shutil._WIN_DEFAULT_PATHEXT`, which
 {meth}`CLIExecutor.search_all_cli` reads to mirror {func}`shutil.which`'s
 behaviour. That attribute is private, so it can be renamed or dropped by any
-release without notice, and reading it unguarded made every manager detection
+release without notice, so reading it unguarded leaves every manager detection
 on Windows one `AttributeError` away from failing. This constant is the
 fallback; `test_windows_pathext_tracks_cpython` compares the two on every
 platform and every interpreter the matrix covers, so a divergence surfaces as
@@ -424,7 +424,7 @@ being the default of iTerm2, Apple Terminal, VS Code and Alacritty, and
 `xterm-kitty` / `xterm-ghostty` the exceptions that ship their own entry. A
 terminal outside them (`wezterm`, an `alacritty` entry where it is installed)
 loses the italic and keeps the plain rendering, which costs emphasis and never
-correctness. See {func}`_spinner_label`.
+correctness. See `_spinner_label()`.
 """
 
 
@@ -595,7 +595,7 @@ class Spinner(_Spinner):
     The elapsed time is the least important part of a spinner line, and the faint
     attribute (SGR `2`) says so without spending a color: every hue on this
     stream already carries a status, which is the same reason
-    {func}`_spinner_label` leaves the command uncolored. Faint also beats
+    `_spinner_label()` leaves the command uncolored. Faint also beats
     `bright_black` for the job, that being a color rather than an attribute, and
     one this project has already been bitten by (see
     {data}`~meta_package_manager.bar_plugin_renderer.VERSION_PREFIX_COLOR`).
@@ -1309,7 +1309,8 @@ class CLIExecutor:
         reads alike on all three. Outside any operation it is the bare ID: see
         {func}`operation_subject`. A line about the manager itself, logged while
         no operation runs (discovery, selection, capability checks), labels it
-        with the bare {attr}`id` instead.
+        with the bare {attr}`~meta_package_manager.manager.PackageManager.id`
+        instead.
         """
         return operation_subject(
             self.id,  # type: ignore[attr-defined]
@@ -1884,26 +1885,21 @@ class CLIExecutor:
         # Resolve whether this privileged operation is actually escalated: the caller
         # marks the operation as needing root (`sudo`), the per-manager policy opts in
         # (the `sudo` override, else `default_sudo`), and the host carries an
-        # escalator.
-        # Which binary escalates is a machine-level fact, held process-wide
-        # rather than per manager: see ESCALATION.
+        # escalator. Which binary escalates is a machine-level fact, held
+        # process-wide rather than per manager: see ESCALATION.
         escalator = ESCALATION.resolve()
-        escalate = bool(
-            sudo
-            and _resolved_sudo(self)
-            # Carrying an escalator is the whole platform test now that `gsudo`
-            # gives Windows one. It stands in for the UNIX gate this replaced,
-            # and reaches further than it: a host with no escalator cannot
-            # escalate whatever it runs. prime_sudo() has already warned about
-            # that, so the command runs unprivileged and fails on the manager's
-            # own permission error rather than on a missing binary.
-            and escalator is not None
-        )
+        policy_escalates = _resolved_sudo(self)
+        # Carrying an escalator is the whole platform test, Windows included: a
+        # host with no escalator cannot escalate whatever it runs. prime_sudo()
+        # has already warned about that, so the command runs unprivileged and
+        # fails on the manager's own permission error rather than on a missing
+        # binary.
+        escalate = bool(sudo and policy_escalates and escalator is not None)
         # A privileged marker the policy left dormant, remembered for the
         # failure gate of run(): a permission error is then the marker's
         # prediction coming true, worth the hint naming the opt-in.
         self._dormant_sudo = bool(
-            sudo and not _resolved_sudo(self) and current_platform() in UNIX
+            sudo and not policy_escalates and current_platform() in UNIX
         )
         # Sudo replaces any pre-command, be it overridden or automatic.
         # The non-interactive prefix spends the credential cache warmed up front by

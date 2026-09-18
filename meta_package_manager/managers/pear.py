@@ -115,19 +115,9 @@ class PEAR(PackageManager):
     in `1.9.5`.
     """
 
-    _INSTALLED_REGEXP = re.compile(
-        rf"^(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+(?:{_STATES})\s*$",
-    )
-    _OUTDATED_REGEXP = re.compile(
-        rf"^\S+\s+(?P<package_id>\S+)"
-        rf"\s+(?P<installed_version>\S+)\s+\((?:{_STATES})\)"
-        rf"\s+(?P<latest_version>\S+)\s+\((?:{_STATES})\)"
-        rf"\s+\S+\s*$",
-    )
-
     version_cli_options = ("version",)
-    """`pear --version` is not a thing: it is rejected as `Command '--version'
-    is not valid`, and the version comes from the `version` verb instead.
+    """`pear --version` is rejected as `Command '--version' is not valid`, so the
+    version comes from the `version` verb instead.
     """
 
     version_regexes = (r"PEAR Version:\s+(?P<version>\S+)",)
@@ -141,6 +131,16 @@ class PEAR(PackageManager):
     Running on: Linux debian 6.12.94+deb13-arm64 #1 SMP Debian 6.12.94-1 (2026-06-20) aarch64
     ```
     """
+
+    _INSTALLED_REGEXP = re.compile(
+        rf"^(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+(?:{_STATES})\s*$",
+    )
+    _OUTDATED_REGEXP = re.compile(
+        rf"^\S+\s+(?P<package_id>\S+)"
+        rf"\s+(?P<installed_version>\S+)\s+\((?:{_STATES})\)"
+        rf"\s+(?P<latest_version>\S+)\s+\((?:{_STATES})\)"
+        rf"\s+\S+\s*$",
+    )
 
     @property
     def installed(self) -> Iterator[Package]:

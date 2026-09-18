@@ -55,9 +55,9 @@ wikipedia_url = "https://en.wikipedia.org/wiki/Ollama"
 logo = "ollama"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["ollama"]
-requirement = ">=0.5.0"
 # The release from which the listing and the version probe have been unchanged,
 # so a parser written against either holds from there to today.
+requirement = ">=0.5.0"
 # `ollama --version` reports the daemon's version, and adds a `Warning:` line
 # naming the client's own when the two differ or the daemon is unreachable.
 # Both lines carry the same `version is` phrase, so the first match is the

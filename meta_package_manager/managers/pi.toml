@@ -9,7 +9,7 @@
 # single-package update all accept it, so ids round-trip without translation.
 #
 # Parsing notes, verified against pi 0.84.2 on macOS:
-#   - **Bare `pi update` updates pi itself**, not the packages: `--self` is its
+#   - Bare `pi update` updates pi itself, not the packages: `--self` is its
 #     documented default when no target is given. `upgrade_all` therefore names
 #     `--extensions` explicitly, and `upgrade_one` uses `--extension <source>`,
 #     which was checked to name the package it is given rather than sweeping
@@ -18,7 +18,7 @@
 #     resolved to, under a `User packages:` heading. Only the first carries the
 #     id, so the pattern keys on the two-space indent that the four-space path
 #     line and the unindented heading both fail.
-#   - The inventory carries **no version**, only a spec and a path, which is a
+#   - The inventory carries *no version*, only a spec and a path, which is a
 #     supported shape rather than a gap: `installed_version` is optional, the
 #     same reading `rustup` and `pyenv` settled.
 #   - An empty inventory prints `No packages installed.` and exits `0`, so it is

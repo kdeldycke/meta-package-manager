@@ -13,6 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+"""`mpm install` and `mpm remove` CLI tests.
+
+The two operations are siblings, so they share one module.
+"""
 
 from __future__ import annotations
 
@@ -59,16 +63,6 @@ def evaluate_signals(mid, stdout, stderr):
 
 check_selection = partial(check_manager_selection, signals=evaluate_signals)
 """Selection assertions reading this subcommand's own signals."""
-
-
-# Install and remove operations are siblings and sensible, so we regroup them under
-# the same test suite.
-#
-# ```{tip}
-#
-# Where we can, we invoke the `install` subcommand to install `mpm` with
-# itself, so we can [test externally contributed packaging](https://github.com/kdeldycke/meta-package-manager/issues/527).
-# ```
 
 
 @pytest.mark.parametrize("operation", ("install", "remove"))

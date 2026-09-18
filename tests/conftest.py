@@ -260,12 +260,11 @@ def warm_manager_probes():
     on that worker. Warming the whole pool here, before any test and outside
     any runner isolation, seeds those caches from the real environment.
 
-    test_pool.py's selection cases used to provide this warming as an accident
-    of materializing their expected manager lists at import time, until
-    probing at collection made xdist workers' collected parametrize lists
-    diverge. A session fixture runs after collection, so workers still agree
-    on the test list, and once per worker, so the cost matches what
-    collection-time probing already paid.
+    A session fixture rather than a collection-time probe, because a probe
+    that answers differently on two xdist workers leaves them with diverging
+    parametrize lists and aborts the session. Running after collection keeps
+    the workers agreeing on the test list, and once per worker keeps the cost
+    to one pass.
 
     Not routed through {func}`~meta_package_manager.dispatch.warm_availability`,
     which sizes its thread pool from the active click context: a pytest session
@@ -353,53 +352,61 @@ def capture_run_cli(monkeypatch):
     return capture
 
 
-def _patch_pool_with(monkeypatch, fake):
-    """Replace `pool.select_managers` with a generator yielding `fake`.
+@fixture
+def patch_pool_with(monkeypatch, request):
+    """Return a function installing a fake manager into the pool for one test.
 
-    Mirrors the runtime knobs (timeout, stop_on_error, dry_run,
-    ignore_auto_updates) that
-    `_select_managers` would
-    forward, so the CLI exercises the same code path it does against real
-    managers.
+    The function replaces `pool.select_managers` with a generator yielding its
+    `fake` alone, mirroring the runtime knobs (timeout, stop_on_error, dry_run,
+    ignore_auto_updates) that `_select_managers` would forward, so the CLI
+    exercises the same code path it does against real managers. It also registers
+    the fake in the pool, for the code paths re-resolving a manager from its ID
+    through `pool.get()` (like the bar-plugin renderer's upgrade-CLI
+    augmentation), and de-registers it at teardown. Both steps go through
+    {meth}`~meta_package_manager.pool.ManagerPool.add_manager` and
+    {meth}`~meta_package_manager.pool.ManagerPool.remove_manager`, which evict the
+    pool's cached ID lists: a fake left in `all_manager_ids` after its test
+    crashes the next test recomputing `maintained_manager_ids` from it.
     """
 
-    def fake_select_managers(*args, **kwargs):
-        for option in ManagerPool.ALLOWED_EXTRA_OPTION:
-            if option in kwargs:
-                setattr(fake, option, kwargs[option])
-        # Mirror the per-operation stamping done by the real _select_managers so
-        # CLI tests resolve timeouts the same way production does.
-        op = kwargs.get("implements_operation")
-        fake._active_operation = op.name if op else None
-        yield fake
+    def install(fake):
+        def fake_select_managers(*args, **kwargs):
+            for option in ManagerPool.ALLOWED_EXTRA_OPTION:
+                if option in kwargs:
+                    setattr(fake, option, kwargs[option])
+            # Mirror the per-operation stamping done by the real _select_managers
+            # so CLI tests resolve timeouts the same way production does.
+            op = kwargs.get("implements_operation")
+            fake._active_operation = op.name if op else None
+            yield fake
 
-    monkeypatch.setattr(pool, "select_managers", fake_select_managers)
-    # Expose the fake in the registry too: code paths re-resolving a manager
-    # from its ID (like the bar-plugin renderer's upgrade-CLI augmentation)
-    # go through `pool.get()` instead of the selection generator.
-    monkeypatch.setitem(pool.register, fake.id, fake)
-    return fake
+        monkeypatch.setattr(pool, "select_managers", fake_select_managers)
+        pool.add_manager(fake)
+        request.addfinalizer(partial(pool.remove_manager, fake.id))
+        return fake
+
+    return install
 
 
 @fixture
-def fake_pool(monkeypatch):
+def fake_pool(patch_pool_with):
     """Yield a single deterministic {class}`~tests.fake_manager.FakeManager` from the pool.
 
     Use for CLI plumbing tests (stats lines, table rendering, exit codes)
     that need a stable package set regardless of host PATH.
     """
-    return _patch_pool_with(monkeypatch, FakeManager())
+    return patch_pool_with(FakeManager())
 
 
 @fixture
-def slow_fake_pool(monkeypatch):
+def slow_fake_pool(patch_pool_with):
     """Yield a {class}`~tests.fake_manager.TimingOutFakeManager` whose `outdated` exceeds `--timeout`.
 
     Use only for tests that need to verify
     {meth}`meta_package_manager.execution.CLIExecutor.run` catches
     {exc}`subprocess.TimeoutExpired` and logs the expected warning.
     """
-    return _patch_pool_with(monkeypatch, TimingOutFakeManager())
+    return patch_pool_with(TimingOutFakeManager())
 
 
 @fixture

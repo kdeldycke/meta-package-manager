@@ -31,17 +31,6 @@ if TYPE_CHECKING:
     from ..package import Package
 
 
-_ANSI_REGEXP = re.compile(r"\x1b\[[0-9;]*m")
-"""Style sequences to strip before parsing the update report.
-
-bin colors its two streams through separate libraries, and only one of them
-honors `NO_COLOR`. That one is `fatih/color`, governing the version strings; the
-`caarlos0/log` lines carrying them are styled independently and keep their color
-whenever `CI` is non-empty, which every GitHub Actions run sets. The escape lands
-on the bullet the pattern anchors on, so it is removed rather than matched
-around.
-"""
-
 DRY_RUN_UPDATES_FOUND = 3
 """Exit code `bin update --dry-run` uses to report that updates exist.
 
@@ -104,9 +93,11 @@ class Bin(PackageManager):
     """
 
     extra_env: ClassVar = {
-        # bin colors on its own initiative whenever `CI` is non-empty. This keeps
-        # the stdout table clean; the stderr report is stripped separately, that
-        # stream's styling being beyond this lever's reach.
+        # bin colors on its own initiative whenever `CI` is non-empty, which
+        # every GitHub Actions run sets. This keeps the stdout table clean, but
+        # only `fatih/color`, which styles the version strings, honors it: the
+        # `caarlos0/log` lines of the stderr report keep their color, and
+        # `CLIExecutor.run` strips them like every capture.
         "NO_COLOR": "1",
     }
 
@@ -220,10 +211,7 @@ class Bin(PackageManager):
         # recorded is not a failure to carry into mpm's own error tally.
         del self.cli_errors[before:]
 
-        yield from self.parse_regex_lines(
-            self._OUTDATED_REGEXP,
-            _ANSI_REGEXP.sub("", stderr),
-        )
+        yield from self.parse_regex_lines(self._OUTDATED_REGEXP, stderr)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
@@ -247,8 +235,8 @@ class Bin(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
-        Unlike some whole-system upgraders, naming a binary genuinely restricts
-        the run to it.
+        Unlike some whole-system upgraders, naming a binary restricts the run
+        to it.
 
         ```{code-block} shell-session
 

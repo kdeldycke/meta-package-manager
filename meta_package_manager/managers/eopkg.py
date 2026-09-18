@@ -84,10 +84,11 @@ class EOPKG(PackageManager):
         r"^(?P<package_id>\S+)\s+\|.+?\|\s*(?P<version>\S+)"
         r"\s*\|\s*(?P<release>\S+)\s*\|.+?\|.+$",
     )
-    """{attr}`_LIST_REGEXP` with the `Rel.` column captured too.
+    """`_LIST_REGEXP` with the `Rel.` column captured too.
 
-    The two cannot be one pattern: {meth}`parse_regex_lines` maps every named
-    group onto a package field, and `release` is not one of them.
+    The two cannot be one pattern:
+    {meth}`~meta_package_manager.manager.PackageManager.parse_regex_lines` maps
+    every named group onto a package field, and `release` is not one of them.
     """
     _CANDIDATE_REGEXP = re.compile(
         r"^Package found in .+ repository:\n"
@@ -97,9 +98,8 @@ class EOPKG(PackageManager):
     )
     """The upgrade candidate, read from the repository half of an `info` block.
 
-    `info` prints an `Installed package:` section before this one, opening on an
-    identically shaped `Name :` line, so the pattern anchors on the repository
-    heading and takes the line directly under it.
+    Anchored on the repository heading, taking the line directly under it,
+    since the `Name :` line alone is ambiguous: see `outdated`.
     """
     _SEARCH_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\s+- (?P<description>.+)$",

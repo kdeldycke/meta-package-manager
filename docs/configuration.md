@@ -53,7 +53,7 @@ The `[tool.mpm]` section maps directly to `[mpm]` in a standalone config file. T
 
 ## Available options
 
-Every CLI option on the root `mpm` group and its subcommands can be set in the configuration file. The TOML key is the option name with leading dashes removed and remaining dashes replaced by underscores (or kept as-is for manager IDs like [`apt-mint`](managers/apt-mint.md)).
+Every CLI option on the root `mpm` group and its subcommands can be set in the configuration file. The TOML key is the option name without its leading dashes, in either spelling: `--table-format` is read as `table-format` or `table_format`, and a manager selector like `--apt-mint` as `apt-mint` or `apt_mint`. `--export-config` writes the dashed form.
 
 ### Global options
 
@@ -77,7 +77,7 @@ Click-extra's built-in options ride the same configuration pipeline. The most us
 
 `cooldown` is a supply-chain safeguard: it refuses to install or upgrade any package version published more recently than the given age, giving a freshly-published (and possibly compromised) release time to be caught and pulled before it reaches the system.
 
-`mpm` enforces the cooldown through each manager's own release-age mechanism, so coverage is limited to the managers `mpm` can gate: [`uv`](managers/uv.md) and [`uvx`](managers/uvx.md) (via `exclude-newer`), [`npm`](managers/npm.md) (via `min-release-age`), [`pnpm`](managers/pnpm.md) (via `minimumReleaseAge`), [`pip`](managers/pip.md) (via `--uploaded-prior-to`), [`pipx`](managers/pipx.md) (which inherits the pip setting), and [`yay`](managers/yay.md) (through a generated Lua-hook overlay, since yay ships no release-age option of its own). Managers without native support cannot honor the gate. By default they are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Re-run with `--cooldown best-effort` (or set `policy = "best-effort"` in the `[mpm.cooldown]` table) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
+`mpm` enforces the cooldown through each manager's own release-age mechanism where one exists: [`uv`](managers/uv.md) and [`uvx`](managers/uvx.md) (via `exclude-newer`), [`npm`](managers/npm.md) (via `min-release-age`), [`pnpm`](managers/pnpm.md) (via `minimumReleaseAge`), [`pip`](managers/pip.md) (via `--uploaded-prior-to`), [`pipx`](managers/pipx.md) (which inherits the pip setting), and [`yay`](managers/yay.md) (through a generated Lua-hook overlay, since yay ships no release-age option of its own). Three more are gated by `mpm`'s own per-package release-date probe, which holds back each too-fresh package individually: [`flatpak`](managers/flatpak.md), [`mas`](managers/mas.md) and the AUR half of [`paru`](managers/paru.md). Every other manager cannot honor the gate. By default those are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Re-run with `--cooldown best-effort` (or set `policy = "best-effort"` in the `[mpm.cooldown]` table) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
 
 See {doc}`cooldown` for the full support matrix and the rationale.
 

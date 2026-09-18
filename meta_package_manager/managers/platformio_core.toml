@@ -9,7 +9,7 @@
 # line, so the kind is context rather than part of the id.
 #
 # Parsing notes, verified against PlatformIO Core 6.1.19 on macOS:
-#   - **Global scope is a flag on every command.** Without `--global` the whole
+#   - Global scope is a flag on every command. Without `--global` the whole
 #     `pkg` surface answers for the project in the working directory, which is
 #     the `haxelib` hazard. `list`, `install`, `uninstall` and `update` all take
 #     it.
@@ -18,7 +18,7 @@
 #     and `--environment`. Its single staleness read therefore answers for a
 #     working tree rather than for the host, which is the `cabal outdated`
 #     shape.
-#   - **No `install` and no `remove`, because a package's *kind* is a flag.**
+#   - No `install` and no `remove`, because a package's *kind* is a flag.
 #     `pio pkg install` and `pio pkg uninstall` take the specification as the
 #     value of `--library`, `--platform` or `--tool`, never as a positional:
 #     both answer `Error: Got unexpected extra argument` when handed a bare
@@ -26,7 +26,7 @@
 #     cannot infer a kind for a package it has never seen. The listing does
 #     carry the kind in its headings, so a Python class could look up what to
 #     remove; a definition cannot, one operation being one command.
-#   - **The ids are a pair.** The listing prints the short name, `ArduinoJson`,
+#   - The ids are a pair. The listing prints the short name, `ArduinoJson`,
 #     while install and search use the owner-qualified `bblanchon/ArduinoJson`
 #     that the entry shows only inside its `(required: ...)` suffix. Removal
 #     accepts the short name, so the id yielded here is the one that would

@@ -12,7 +12,7 @@
 # are written together.
 #
 # Parsing notes, verified against Julia 1.12.7 on macOS:
-#   - **The scope is the default environment**, `~/.julia/environments/v<major>.<minor>`,
+#   - The scope is the default environment, `~/.julia/environments/v<major>.<minor>`,
 #     which is user-wide rather than tied to a directory. Julia does not
 #     activate a project from the working directory on its own, so the reading
 #     is stable, but `JULIA_PROJECT` and `--project` both override it. Nothing

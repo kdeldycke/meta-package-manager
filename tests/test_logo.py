@@ -89,7 +89,7 @@ def test_logo_carries_structure():
     """The mark must shade in more than one tone.
 
     Its structure lives entirely in the shading, so a single-tone map would render
-    as a featureless silhouette — the failure the color gate exists to avoid.
+    as a featureless silhouette, the failure the color gate exists to avoid.
     """
     assert len({char for row in LOGO for char in row} - {BLANK}) > 1
 

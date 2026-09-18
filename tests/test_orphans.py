@@ -44,7 +44,6 @@ from meta_package_manager.manager import PackageManager
 from meta_package_manager.pool import pool
 from meta_package_manager.version import parse_version
 
-from .conftest import _patch_pool_with
 from .fake_manager import FakeManager
 
 
@@ -684,13 +683,8 @@ class DecomposedCleanupFakeManager(CleanupFakeManager):
 
 
 @pytest.fixture
-def removable_fake_pool(monkeypatch):
-    fake = _patch_pool_with(monkeypatch, RemovableFakeManager())
-    # _dispatch_sourced_operation resolves each source manager via pool.get(id), which
-    # reads pool.register. _patch_pool_with only stubs select_managers, so register the
-    # fake as well for the per-package dispatch to find it.
-    monkeypatch.setitem(pool.register, fake.id, fake)
-    return fake
+def removable_fake_pool(patch_pool_with):
+    return patch_pool_with(RemovableFakeManager())
 
 
 def test_remove_orphans_falls_back_to_plain_removal(invoke, removable_fake_pool):
@@ -703,36 +697,36 @@ def test_remove_orphans_falls_back_to_plain_removal(invoke, removable_fake_pool)
     )
 
 
-def test_cleanup_orphans_runs_only_the_sweep(invoke, monkeypatch):
+def test_cleanup_orphans_runs_only_the_sweep(invoke, patch_pool_with):
     """`cleanup --orphans` runs `cleanup_orphan`, not the full `cleanup`."""
-    fake = _patch_pool_with(monkeypatch, OrphanCleanupFakeManager())
+    fake = patch_pool_with(OrphanCleanupFakeManager())
     result = invoke("cleanup", "--orphans")
     assert result.exit_code == 0
     assert fake.calls == ["cleanup_orphan"]
 
 
-def test_cleanup_without_flags_runs_default_categories(invoke, monkeypatch):
+def test_cleanup_without_flags_runs_default_categories(invoke, patch_pool_with):
     """Plain `cleanup` runs the non-destructive default categories only: a native
     orphan sweep does not join in without an explicit `--orphans`."""
-    fake = _patch_pool_with(monkeypatch, OrphanCleanupFakeManager())
+    fake = patch_pool_with(OrphanCleanupFakeManager())
     result = invoke("cleanup")
     assert result.exit_code == 0
     assert fake.calls == ["cleanup_cache"]
 
 
-def test_cleanup_orphans_skips_manager_without_sweep(invoke, monkeypatch):
+def test_cleanup_orphans_skips_manager_without_sweep(invoke, patch_pool_with):
     """A cleanup-capable manager with no orphan sweep at all (an orphan listing but
     no removal) is skipped by `--orphans`, not fully cleaned up."""
-    fake = _patch_pool_with(monkeypatch, CleanupFakeManager())
+    fake = patch_pool_with(CleanupFakeManager())
     result = invoke("cleanup", "--orphans")
     assert result.exit_code == 0
     assert fake.calls == []
 
 
-def test_cleanup_orphans_runs_synthesized_sweep(invoke, monkeypatch):
+def test_cleanup_orphans_runs_synthesized_sweep(invoke, patch_pool_with):
     """`cleanup --orphans` on a manager without a native sweep verb synthesizes it:
     the listed orphans are removed one by one, and the full `cleanup` never runs."""
-    fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
+    fake = patch_pool_with(SweepSynthesizingFakeManager())
     result = invoke("cleanup", "--orphans")
     assert result.exit_code == 0
     assert fake.calls == ["remove:fake-orphan-alpha"]
@@ -756,67 +750,67 @@ def test_cleanup_orphans_runs_synthesized_sweep(invoke, monkeypatch):
         (("--repair",), []),
     ),
 )
-def test_cleanup_category_selection(invoke, monkeypatch, args, expected_calls):
+def test_cleanup_category_selection(invoke, patch_pool_with, args, expected_calls):
     """The tri-state category flags compose on a decomposed manager."""
-    fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
+    fake = patch_pool_with(DecomposedCleanupFakeManager())
     result = invoke("cleanup", *args)
     assert result.exit_code == 0
     assert fake.calls == expected_calls
 
 
-def test_cleanup_cache_category_alone(invoke, monkeypatch):
+def test_cleanup_cache_category_alone(invoke, patch_pool_with):
     """A cache-only manager runs its single category under `--cache` and under a
     plain `cleanup` alike."""
-    fake = _patch_pool_with(monkeypatch, CleanupFakeManager())
+    fake = patch_pool_with(CleanupFakeManager())
     result = invoke("cleanup", "--cache")
     assert result.exit_code == 0
     assert fake.calls == ["cleanup_cache"]
 
 
-def test_plain_cleanup_never_engages_synthesized_sweep(invoke, monkeypatch):
+def test_plain_cleanup_never_engages_synthesized_sweep(invoke, patch_pool_with):
     """Plain `cleanup` runs native categories only: the flag pairs default to
     `True` (so `--help` renders each default as its positive side), and only a
     flag the user actually set may count as a positive and engage the synthesized
     sweep."""
-    fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
+    fake = patch_pool_with(SweepSynthesizingFakeManager())
     result = invoke("cleanup")
     assert result.exit_code == 0
     assert fake.calls == ["cleanup_cache"]
 
 
-def test_cleanup_skip_never_engages_synthesized_sweep(invoke, monkeypatch):
+def test_cleanup_skip_never_engages_synthesized_sweep(invoke, patch_pool_with):
     """A skip flag subtracts from the native bundle only: on a monolithic manager
     with a synthesizable sweep, `--skip-cache` must not surprise-remove packages,
     so the manager is skipped entirely."""
-    fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
+    fake = patch_pool_with(SweepSynthesizingFakeManager())
     result = invoke("cleanup", "--skip-cache")
     assert result.exit_code == 0
     assert fake.calls == []
 
 
-def test_cleanup_skip_orphans_keeps_native_categories(invoke, monkeypatch):
+def test_cleanup_skip_orphans_keeps_native_categories(invoke, patch_pool_with):
     """`--skip-orphans` on a manager with a synthesizable-but-not-native sweep
     keeps its native categories running: only the sweep is subtracted."""
-    fake = _patch_pool_with(monkeypatch, SweepSynthesizingFakeManager())
+    fake = patch_pool_with(SweepSynthesizingFakeManager())
     result = invoke("cleanup", "--skip-orphans")
     assert result.exit_code == 0
     assert fake.calls == ["cleanup_cache"]
 
 
-def test_cleanup_narration_names_categories(invoke, monkeypatch):
+def test_cleanup_narration_names_categories(invoke, patch_pool_with):
     """The per-manager narration names the categories dispatched to it, matching
     the `✓`/`✘` trail labels."""
-    fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
+    fake = patch_pool_with(DecomposedCleanupFakeManager())
     result = invoke("--verbosity", "DEBUG", "cleanup", "--orphans", "--cache")
     assert result.exit_code == 0
     assert "Clean up orphans, cache." in result.stderr
     assert fake.calls == ["cleanup_orphan", "cleanup_cache"]
 
 
-def test_cleanup_all_categories_skipped_errors(invoke, monkeypatch):
+def test_cleanup_all_categories_skipped_errors(invoke, patch_pool_with):
     """Skipping every default category is a usage error, not a silent no-op:
     `--skip-orphans` is not needed, as orphans is not in the default set."""
-    fake = _patch_pool_with(monkeypatch, DecomposedCleanupFakeManager())
+    fake = patch_pool_with(DecomposedCleanupFakeManager())
     result = invoke("cleanup", "--skip-cache", "--skip-repair")
     assert result.exit_code == 2
     assert "Every cleanup category is skipped." in result.stderr
@@ -854,31 +848,31 @@ class FailingMarkFakeManager(ReasonKeepingFakeManager):
         raise CLIError(1, "", "error: database is locked")
 
 
-def test_install_marks_an_installed_package_explicit(invoke, monkeypatch):
-    fake = _patch_pool_with(monkeypatch, ReasonKeepingFakeManager())
+def test_install_marks_an_installed_package_explicit(invoke, patch_pool_with):
+    fake = patch_pool_with(ReasonKeepingFakeManager())
     result = invoke("install", "fake-pkg-alpha")
     assert result.exit_code == 0
     assert fake.calls == ["install:fake-pkg-alpha", "mark_explicit:fake-pkg-alpha"]
 
 
-def test_install_leaves_a_fresh_package_alone(invoke, monkeypatch):
+def test_install_leaves_a_fresh_package_alone(invoke, patch_pool_with):
     """A fresh install is explicit already: no reason command runs."""
-    fake = _patch_pool_with(monkeypatch, ReasonKeepingFakeManager())
+    fake = patch_pool_with(ReasonKeepingFakeManager())
     result = invoke("install", "fake-pkg-gamma")
     assert result.exit_code == 0
     assert fake.calls == ["install:fake-pkg-gamma"]
 
 
-def test_install_survives_a_failed_mark(invoke, monkeypatch):
+def test_install_survives_a_failed_mark(invoke, patch_pool_with):
     """The package is installed even when its reason cannot change: warn only."""
-    _patch_pool_with(monkeypatch, FailingMarkFakeManager())
+    patch_pool_with(FailingMarkFakeManager())
     result = invoke("install", "fake-pkg-alpha")
     assert result.exit_code == 0
     assert "Could not mark fake-pkg-alpha as explicitly installed." in result.stderr
 
 
-def test_restore_marks_an_installed_package_explicit(invoke, monkeypatch, tmp_path):
-    fake = _patch_pool_with(monkeypatch, ReasonKeepingFakeManager())
+def test_restore_marks_an_installed_package_explicit(invoke, patch_pool_with, tmp_path):
+    fake = patch_pool_with(ReasonKeepingFakeManager())
     snapshot = tmp_path / "packages.toml"
     snapshot.write_text(f'[{fake.id}]\nfake-pkg-alpha = "1.0.0"\n', encoding="UTF-8")
     result = invoke("restore", str(snapshot))
@@ -886,10 +880,10 @@ def test_restore_marks_an_installed_package_explicit(invoke, monkeypatch, tmp_pa
     assert fake.calls == ["install:fake-pkg-alpha", "mark_explicit:fake-pkg-alpha"]
 
 
-def test_invocation_drops_inventory_caches(invoke, monkeypatch):
+def test_invocation_drops_inventory_caches(invoke, patch_pool_with):
     """The inventory an invocation cached is gone once it closes, so the next
     invocation in the same process sees the package the first one installed."""
-    fake = _patch_pool_with(monkeypatch, ReasonKeepingFakeManager())
+    fake = patch_pool_with(ReasonKeepingFakeManager())
     fake.__dict__["installed_ids"] = frozenset({"fake-pkg-alpha"})
     result = invoke("install", "fake-pkg-gamma")
     assert result.exit_code == 0

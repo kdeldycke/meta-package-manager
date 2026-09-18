@@ -29,7 +29,7 @@
 - [Restore that manifest](https://mpm.run/cli-parameters/#mpm-restore) on the next machine with `mpm restore packages.toml`, and get the same set of packages back.
 - Inventory and list all [package managers](https://mpm.run/cli-parameters/#mpm-managers) available on the system:
   ![Package managers detected on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.svg)
-- Runs on macOS, Linux, Windows, FreeBSD, NetBSD and OpenBSD, with [standalone executables](#executables) for the first three.
+- Runs on macOS, Linux, Windows, FreeBSD, NetBSD, OpenBSD, illumos and Solaris, with [standalone executables](#executables) for the first three.
 - [List installed packages](https://mpm.run/cli-parameters/#mpm-installed):
   ![Every package installed on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-installed-cli.svg)
 - [List duplicate installed packages](https://mpm.run/duplicates/).

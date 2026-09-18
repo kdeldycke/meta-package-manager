@@ -46,6 +46,7 @@ from __future__ import annotations
 
 import re
 import shlex
+from collections.abc import Callable
 from contextlib import suppress
 from functools import cached_property
 from itertools import product
@@ -113,7 +114,9 @@ def _documented_query(cls: type) -> str:
     return "python"
 
 
-def _dispatch(command_map: list[tuple[list[str], str]], default: str = ""):
+def _dispatch(
+    command_map: list[tuple[list[str], str]], default: str = ""
+) -> Callable[..., str]:
     """A `run_cli` stub returning the output whose documented command best
     matches the invocation.
 
@@ -703,10 +706,7 @@ def test_documented_query_command_matches_construction(
     manager, member, documented, monkeypatch
 ):
     """The command a query docstring shows must be the one the member builds."""
-    monkeypatch.setattr(manager, "which", lambda cli_name: Path("/usr/bin") / cli_name)
-    monkeypatch.setattr(
-        manager, "cli_path", Path("/usr/bin") / manager.cli_names[0], raising=False
-    )
+    _neutralize_binaries(manager, monkeypatch)
     monkeypatch.delenv("UV", raising=False)
 
     dispatch = _dispatch(_class_command_map(type(manager)))

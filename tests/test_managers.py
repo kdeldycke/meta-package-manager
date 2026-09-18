@@ -173,7 +173,7 @@ def test_url_attributes_are_distinct(manager):
     since a subclass often wraps a project of its own.
     """
     assert URL_ATTRIBUTES, "no `*_url` attribute found on PackageManager"
-    declared = {}
+    declared: dict[str, str] = {}
     for name in URL_ATTRIBUTES:
         assert name in vars(type(manager)), f"{manager.id} inherits `{name}`"
         url = getattr(manager, name)

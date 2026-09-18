@@ -347,9 +347,9 @@ class ManagerPool:
     def _evict_id_caches(self) -> None:
         """Drop the cached ID lists so the next access recomputes them.
 
-        Called whenever the pool's membership changes, so selection, default-set
-        computation and the dynamic CLI flags observe the new member set. The test
-        suite reuses it to de-register the managers it injects.
+        {meth}`add_manager` and {meth}`remove_manager` call it whenever the pool's
+        membership changes, so selection, default-set computation and the dynamic
+        CLI flags observe the new member set.
         """
         for cached_list in (
             "all_manager_ids",
@@ -370,6 +370,19 @@ class ManagerPool:
         """
         self.register[manager.id] = manager
         self.config_defined_ids.add(manager.id)
+        self._evict_id_caches()
+
+    def remove_manager(self, manager_id: str) -> None:
+        """Drop a manager from the pool, the reverse of {meth}`add_manager`.
+
+        Removes the instance and evicts the cached ID lists, so selection,
+        default-set computation and the dynamic CLI flags stop observing it. A
+        manager stays registered for the life of a run: the test suite is the one
+        caller, de-registering the managers it injects through the pool, so an ID
+        list cached during a test never outlives its member.
+        """
+        self.register.pop(manager_id, None)
+        self.config_defined_ids.discard(manager_id)
         self._evict_id_caches()
 
     # Pre-compute all sorts of constants.

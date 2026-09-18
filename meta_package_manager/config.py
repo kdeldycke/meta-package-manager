@@ -381,10 +381,11 @@ def validate_cooldown_section(section: Any) -> None:
 
     Delegates the shape and value checks to
     {func}`meta_package_manager.cooldown.parse_cooldown_section`, translating
-    its `ValueError` into a {class}`click_extra.ValidationError`. click-extra
-    only hands dict sub-trees to extension validators, so the deprecated
-    top-level string spelling never lands here: its migration warning is
-    logged at runtime instead (see the `mpm` group body).
+    its `TypeError` and `ValueError` into a
+    {class}`click_extra.ValidationError`. click-extra only hands dict sub-trees
+    to extension validators, so the deprecated top-level string spelling never
+    lands here: its migration warning is logged at runtime instead (see the
+    `mpm` group body).
 
     :raises click_extra.ValidationError: when the section is malformed.
     """

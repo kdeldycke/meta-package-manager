@@ -347,8 +347,6 @@ class MPMPlugin:
 
         The value comes from the `VAR_ALWAYS_VISIBLE` environment variable. The
         name matches the `always-visible` setting of the GNOME Shell extension.
-        The two frontends used different names and opposite values for one
-        behavior.
         """
         return self.getenv_bool("VAR_ALWAYS_VISIBLE", True)
 

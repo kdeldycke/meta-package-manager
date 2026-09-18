@@ -20,7 +20,7 @@
 #     alike. The flag prints the tool's own version, `pipxu==1.34`, in the very
 #     shape a package line takes, so the version probe and the inventory must
 #     not be swapped.
-#   - `upgrade` genuinely restricts itself to the applications it is given,
+#   - `upgrade` restricts itself to the applications it is given,
 #     checked against an unknown name rather than assumed: it answers
 #     `Error: Unknown package` and upgrades nothing. That is what makes
 #     `upgrade_one` declarable here where `pamac` and `pkgm` refuse it.

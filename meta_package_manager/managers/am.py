@@ -105,8 +105,8 @@ class AM(PackageManager):
     """
 
     extra_env: ClassVar = {
-        # Belt and braces: `am` already drops its colouring when its output is
-        # not a terminal, and honours this on top of that.
+        # `am` already drops its colouring when its output is not a terminal,
+        # and honours this variable as well.
         "NO_COLOR": "1",
     }
 
@@ -179,7 +179,7 @@ class AM(PackageManager):
         ```
 
         ```{note}
-        A version is genuinely optional here: an application whose updater
+        A version is optional here: an application whose updater
         reports none renders an empty cell, and one is yielded without a version
         rather than with a placeholder.
         ```
@@ -207,7 +207,7 @@ class AM(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
-        Naming an application genuinely restricts the run to it.
+        Naming an application restricts the run to it.
 
         ```{code-block} shell-session
 

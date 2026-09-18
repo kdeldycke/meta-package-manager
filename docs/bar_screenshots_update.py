@@ -452,11 +452,12 @@ means the wheel ran the wrong way, and the steps are posted again negated.
 SPACER_NAME = "aaa-spacer.1h.sh"
 """Filename of a plugin that draws nothing but takes up room.
 
-The system modules above are not enough on their own, and this makes up the
-rest. It sorts before the real plugin so Xbar loads it first, which is what
-puts the real one to its left: AppKit gives each new status item the leftmost
-slot among an app's own. SwiftBar's item lands on whichever side its position
-key decides, under any spacer name (run 35207075425): see {func}`restart`.
+It makes all the room the plugin's item needs: the comment above says why no
+Control Center module helps. It sorts before the real plugin so Xbar loads it
+first, which is what puts the real one to its left: AppKit gives each new
+status item the leftmost slot among an app's own. SwiftBar's item lands on
+whichever side its position key decides, under any spacer name (run
+35207075425): see {func}`restart`.
 """
 
 SPACER_WIDTH = 180
@@ -1061,6 +1062,15 @@ def raise_display() -> None:
     )
 
 
+def quit_hosts() -> None:
+    """Ask both hosts to quit, and ignore any failure: one may not be running."""
+    for host in (SWIFTBAR, XBAR):
+        run(
+            ("osascript", "-e", f'tell application "{host.name}" to quit'),
+            check=False,
+        )
+
+
 def set_appearance(*, dark: bool) -> None:
     """Put the whole system into light or dark mode.
 
@@ -1071,11 +1081,7 @@ def set_appearance(*, dark: bool) -> None:
     # Every host is quit first. A bar app holding a menu open, or one that
     # answers no accessibility at all, leaves System Events wedged, and this is
     # the one appearance switch the whole shot depends on.
-    for host in (SWIFTBAR, XBAR):
-        run(
-            ("osascript", "-e", f'tell application "{host.name}" to quit'),
-            check=False,
-        )
+    quit_hosts()
     time.sleep(3)
     for attempt in range(1, 4):
         try:
@@ -1328,11 +1334,7 @@ def restart(host: Host, plugins: Path, *, leftmost: bool = False) -> None:
     happens to sit leftmost. That is what opened a SwiftBar menu during an Xbar
     shot, and what left the capture looking for a menu Xbar never had.
     """
-    for other in (SWIFTBAR, XBAR):
-        run(
-            ("osascript", "-e", f'tell application "{other.name}" to quit'),
-            check=False,
-        )
+    quit_hosts()
     time.sleep(3)
     if host.plugin_dir is None:
         run(("defaults", "write", host.domain, "PluginDirectory", str(plugins)))
@@ -1438,14 +1440,6 @@ locally has other plugins, and each of them owns a status item too. The last
 menu bar is the status bar, an agent app having no app menu of its own.
 """
 
-"""macOS 26 groups the third-party status items into one window of its own,
-owned by Control Center rather than by the app that drew them, which is why no
-window is ever listed for SwiftBar or Xbar. With a single bar app running, that
-window holds exactly one item and its centre is where to click. Measured against
-accessibility on the host that answers it: SwiftBar's item reports `x=1331`, and
-this window spans `1288` to `1374`.
-"""
-
 
 def menu_bar_windows(low: int = 60, high: int = 120) -> list[dict[str, float]]:
     """Menu bar windows whose width falls in a range."""
@@ -1494,8 +1488,9 @@ def system_items() -> list[dict[str, float]]:
     """Bounds of every status item a plugin drew, newest first.
 
     Anything at or right of {data}`SYSTEM_ITEMS_EDGE` belongs to macOS. Without
-    that measurement the old width band stands in, which is wrong often enough
-    to have earned the function above, but is all there is.
+    that measurement the default width band of {func}`menu_bar_windows` stands
+    in, which is wrong often enough to have earned {func}`measure_system_items`,
+    but is all there is.
     """
     if SYSTEM_ITEMS_EDGE is None:
         return menu_bar_windows()
@@ -1515,7 +1510,8 @@ def status_item(host: Host) -> tuple[float, float]:
     it is given. And a status item is not a window either, the menu bar being
     drawn for an app rather than by it, so the window server cannot stand in.
     What it does list is every menu bar window, and with a single bar app
-    running the one item left of {data}`SYSTEM_ITEMS_EDGE` is the plugin's.
+    running the leftmost item left of {data}`SYSTEM_ITEMS_EDGE` is the
+    plugin's, the spacer of {data}`SPACER_NAME` sitting to its right.
     """
     if host is SWIFTBAR:
         script = bounded(
@@ -2356,11 +2352,7 @@ def capture_all(shots: tuple[Shot, ...]) -> None:
                     digests[digest] = path
         finally:
             remove_fake_mpm()
-            for host in (SWIFTBAR, XBAR):
-                run(
-                    ("osascript", "-e", f'tell application "{host.name}" to quit'),
-                    check=False,
-                )
+            quit_hosts()
             # Written per shot against a folder that is gone by now, so a
             # developer running this locally keeps the menu bar they arranged.
             for host in (SWIFTBAR, XBAR):

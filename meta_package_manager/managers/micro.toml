@@ -92,9 +92,9 @@ args = ["-plugin", "install", "{package_id}"]
 [mpm.overrides.micro.operations.remove]
 args = ["-plugin", "remove", "{package_id}"]
 
-# Naming a plugin genuinely restricts the update to it, rather than quietly
-# updating everything. micro's own version is always folded in as a constraint,
-# so a plugin demanding a newer editor is held back instead of breaking it.
+# Naming a plugin restricts the update to it, rather than updating everything.
+# micro's own version is always folded in as a constraint, so a plugin demanding
+# a newer editor is held back instead of breaking it.
 [mpm.overrides.micro.operations.upgrade_one]
 args = ["-plugin", "update", "{package_id}"]
 
@@ -105,9 +105,10 @@ args = ["-plugin", "update"]
 # by tests/test_manager_definition.py; ignored by mpm's loader.
 #
 # Both are real transcripts. The listing is from a checked-in dotfiles
-# repository running a recent micro, and carries the three shapes together:
-# versioned plugins alongside bundled ones. No search fixture: that listing's
-# order varies between runs, so nothing about it would be reproducible.
+# repository running a recent micro, and carries two of the three shapes,
+# versioned plugins alongside bundled ones, with no bare init script row. No
+# search fixture: that listing's order varies between runs, so nothing about it
+# would be reproducible.
 [samples.version]
 output = """
 Version: 2.0.12

@@ -42,11 +42,11 @@ if TYPE_CHECKING:
 
 
 PACKAGE_IDS = {
-    # Purpose-built empty Zsh plugin, shared with zinit below: nothing to source,
-    # nothing to break, and it is the ecosystem's established inert package.
     # An application of AM's own catalog. Declares no install operation, since
     # installing blocks on an escalation prompt, so the round-trip auto-skips.
     "am": "appimageupdate",
+    # Purpose-built empty Zsh plugin, shared with zinit below: nothing to source,
+    # nothing to break, and it is the ecosystem's established inert package.
     "antidote": "zdharma-continuum/null",
     # Declares no install operation: the round-trip auto-skips.
     "antigen": "zdharma-continuum/null",
@@ -89,11 +89,11 @@ PACKAGE_IDS = {
     # A plugin of the official marketplace, named with the `plugin@marketplace`
     # form every verb takes.
     "claude-code-plugins": "pyright-lsp@claude-plugins-official",
-    "composer": "ralouphie/getallheaders",
-    "conda": "pytz",  # Pure-Python, zero-dependency leaf on the default channel.
     # One of the registry's few "executables" entries, so a --global install has
     # something to place in the prefix.
     "clib": "stephenmathieson/tabs-to-spaces",
+    "composer": "ralouphie/getallheaders",
+    "conda": "pytz",  # Pure-Python, zero-dependency leaf on the default channel.
     "cpan": "Try::Tiny",
     "deb-get": "deb-get",
     # devkitPro's repositories carry console toolchains and their libraries, not
@@ -147,10 +147,6 @@ PACKAGE_IDS = {
     # on. Declares no install operation: the round-trip auto-skips.
     "gup": "hello",
     "haxelib": "hxjsonast",  # Tiny zero-dependency JSON parser.
-    # A channel, which is what juliaup calls a package. An old released series
-    # rather than `release`: every Julia is a large download, and removing the
-    # channel the host actually uses is what `remove` refuses outright.
-    # janet-lang's own argument parser: pure Janet, so no compiler is involved.
     # A git URL, which is the only form `hyprpm add` takes; `remove` accepts it
     # too, so the round-trip is symmetric. Needs headers from a prior
     # `hyprpm update`, so it only runs on a real Hyprland host.
@@ -159,10 +155,14 @@ PACKAGE_IDS = {
     # `pkg search -p` and absent from a fresh install, so the round-trip really
     # installs it. IPS package IDs are `category/name` paths.
     "ips": "archiver/ofarc",
+    # janet-lang's own argument parser: pure Janet, so no compiler is involved.
     "jpm": "argparse",
     # The General registry's canonical example package: pure Julia, no
     # dependencies, and it exists precisely to be installed by tests.
     "julia": "Example",
+    # A channel, which is what juliaup calls a package. An old released series
+    # rather than `release`: every Julia is a large download, and removing the
+    # channel the host actually uses is what `remove` refuses outright.
     "juliaup": "1.6",
     "krew": "ctx",  # Tiny context-switcher plugin of krew's own index.
     # Declares no install operation: the round-trip auto-skips. lazy.nvim manages
@@ -175,16 +175,16 @@ PACKAGE_IDS = {
     "lure": "neofetch",
     "macports": "hello",
     "mamba": "zstd",
-    "mas": "747648890",
-    "mason": "stylua",  # Telegram (test is always skipped).
+    "mas": "747648890",  # Telegram (test is always skipped).
+    "mason": "stylua",
     # A plugin of micro's own channel. Tiny, pure Lua, and not bundled with
     # the editor, so the round-trip actually installs and removes something.
     "micro": "bounce",
     # nyancat ships in EPEL, which RHEL-family images do not enable. tree is a
     # single binary in their BaseOS, and nothing depends on it.
     "microdnf": "tree",
-    # A small, dependency-free TeX package of MiKTeX's own catalog.
     "micromamba": "zstd",
+    # A small, dependency-free TeX package of MiKTeX's own catalog.
     "miktex": "fancyhdr",
     "mise": "jq",
     "nala": "nyancat",
@@ -204,12 +204,12 @@ PACKAGE_IDS = {
     "pacstall": "hello",
     "pamac": "nyancat",
     "paru": "nyancat",
-    # A small library of pi's own npm scope. The id carries its scheme, which
-    # is the form every verb takes.
+    "pear": "Text_Password",
     # A vim statusline plugin of Pearl's own repository: a git clone with no
     # build. The id carries its repository prefix, which every verb takes.
-    "pear": "Text_Password",
     "pearl": "pearl/airline",
+    # A small library of pi's own npm scope. The id carries its scheme, which
+    # is the form every verb takes.
     "pi": "npm:@earendil-works/pi-telemetry",
     "pikaur": "nyancat",
     "pip": "pytz",
@@ -220,11 +220,11 @@ PACKAGE_IDS = {
     "pixi": "hyperfine",
     "pkcon": "hello",
     "pkg": "nyancat",
+    "pkg-tools": "nyancat",
+    "pkgin": "nyancat",
     # pkgit has no catalog of its own: the shipped default config declares
     # exactly one repository, pkgit's own.
     "pkgit": "pkgit",
-    "pkg-tools": "nyancat",
-    "pkgin": "nyancat",
     # A pantry path rather than the `jq` executable name: both install, but only
     # the path is what `pkgm list` reports back, so only it round-trips.
     "pkgm": "stedolan.github.io/jq",
@@ -239,17 +239,17 @@ PACKAGE_IDS = {
     # OpenSSL and readline along with it, where this definition downloads a
     # prebuilt archive. Still a large download, which is the lightest pyenv has.
     "pyenv": "pypy3.11-7.3.20",
+    # A one-module pure-Racket package with no build step.
+    "raco": "uuid",
+    # A Lisp implementation: roswell lists and installs those, never Quicklisp
+    # systems (see the Roswell class docstring).
+    "roswell": "sbcl-bin",
     # A toolchain, which is what rustup calls a package, named by release so it
     # resolves to whatever target triple the host runs. Pinned to an old release
     # nobody builds against today, since removing `stable` or `nightly` would
     # take the host's working Rust with it. Every rustup artifact is a large
     # download, so this is the lightest available rather than a small one, as
     # with `sdkman` below.
-    # A one-module pure-Racket package with no build step.
-    "raco": "uuid",
-    # A Lisp implementation: roswell lists and installs those, never Quicklisp
-    # systems (see the Roswell class docstring).
-    "roswell": "sbcl-bin",
     "rustup": "1.60.0",
     "scoop": "main/hyperfine",
     "sdkman": "jbang",
@@ -282,11 +282,15 @@ PACKAGE_IDS = {
     "urpmi": "figlet",
     "uv": "pytz",
     "uvx": "pycowsay",
-    # A single-file Vim plugin with no dependencies. vim.pack keys packages on
-    # their source URL, the only id it accepts for an install.
+    # A box. Chosen for being tiny by Vagrant standards and published by
+    # HashiCorp itself, so it stays available; every box is still a large
+    # download, which is the lightest this ecosystem offers.
+    "vagrant": "hashicorp/bionic64",
     # A tiny header-only library, and one of the smallest ports vcpkg
     # carries. The triplet is left off so it resolves to the host default.
     "vcpkg": "zlib",
+    # A single-file Vim plugin with no dependencies. vim.pack keys packages on
+    # their source URL, the only id it accepts for an install.
     "vim-pack": "https://github.com/tpope/vim-sensible",
     # Zero-dependency and ships a bin: Volta manages CLI tools, so the usual
     # bin-less npm pick (ms) is out.
@@ -295,31 +299,27 @@ PACKAGE_IDS = {
     "vscodium": "tamasfe.even-better-toml",
     "winget": "sharkdp.hyperfine",
     "xbps": "sl",
-    "yazi": "yazi-rs/plugins:full-border",
     # Declares no install operation, since downloading an Xcode always
     # authenticates interactively: the round-trip auto-skips. A marketing
     # version is what xcodes addresses a bundle by.
     "xcodes": "16.2",
-    # A box. Chosen for being tiny by Vagrant standards and published by
-    # HashiCorp itself, so it stays available; every box is still a large
-    # download, which is the lightest this ecosystem offers.
-    "vagrant": "hashicorp/bionic64",
     "yarn": "ms",
     "yarn-berry": "ms",
     "yay": "nyancat",
+    "yazi": "yazi-rs/plugins:full-border",
     "yum": "nyancat",
+    # A leaf Raku distribution: pure Raku, no dependencies of its own.
+    "zef": "hyperize",
     "zerobrew": "nyancat",
     # Declares no install operation, `0install add` needing a pet name and a
     # feed URI where mpm carries one id: the round-trip auto-skips. A pet name
     # is what removal takes, and the user invents it, so there is no canonical
     # one to name here.
     "zeroinstall": "zeroinstall",
+    # Declares no install operation: the round-trip auto-skips.
+    "zim": "zsh-users/zsh-completions",
     # Zinit's own do-nothing plugin: an empty repository it documents for
     # ice-only usage, so loading and deleting it runs no third-party code.
-    # Declares no install operation: the round-trip auto-skips.
-    # A leaf Raku distribution: pure Raku, no dependencies of its own.
-    "zef": "hyperize",
-    "zim": "zsh-users/zsh-completions",
     "zinit": "zdharma-continuum/null",
     # Declares no install operation: the round-trip auto-skips.
     "zplug": "zdharma-continuum/null",
@@ -601,14 +601,15 @@ def claude_marketplace_missing() -> bool:
     is a condition of the machine rather than of the platform: the maintainer's
     own workstation carries two, and a runner carries none.
     """
-    marketplaces = which("claude")
-    if not marketplaces:
+    claude_path = which("claude")
+    if not claude_path:
         # A missing CLI is not flagged: selection then finds no available
         # manager and the test exits on its "No manager selected" path.
         return False
     result = subprocess.run(
-        ("claude", "plugin", "marketplace", "list"),
+        (claude_path, "plugin", "marketplace", "list"),
         capture_output=True,
+        check=False,
         text=True,
         encoding="UTF-8",
     )
@@ -630,6 +631,7 @@ def pearl_bash_too_old() -> bool:
     result = subprocess.run(
         (bash, "--version"),
         capture_output=True,
+        check=False,
         text=True,
         encoding="UTF-8",
     )
@@ -649,9 +651,7 @@ def rpm_distro_missing() -> bool:
     binaries is exactly that host.
 
     Keyed on the database rather than on the platform, so a real openSUSE or
-    Fedora machine runs the round-trip instead of inheriting a CI artifact. The
-    flat `is_linux` this replaces blocked every Linux, which meant the four
-    front-ends were never exercised anywhere.
+    Fedora machine runs the round-trip instead of inheriting a CI artifact.
     """
     rpm_path = which("rpm")
     if not rpm_path:
@@ -717,15 +717,17 @@ def flatpak_install_blocked() -> bool:
 
 
 INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
+    # basalt refuses every command, the read-only listing included, without a GitHub
+    # token file of its own, and needs the environment its shell-init snippet exports.
+    # Neither is set up on a runner.
+    "basalt": is_github_ci,
+    # choco installs to an admin-only location the unelevated CI process cannot write to.
+    "choco": is_github_ci,
     # Claude Code resolves a plugin through the marketplaces configured for the
     # user, and a fresh host has none, so the install fails for want of a registry.
     "claude-code-plugins": claude_marketplace_missing,
-    # choco installs to an admin-only location the unelevated CI process cannot write to.
-    "choco": is_github_ci,
     # cpan writes to the system Perl tree, out of reach only on the x86 Linux runners.
     "cpan": cpan_install_blocked,
-    # pear writes to the PHP interpreter's php_dir, root-owned on a distro install.
-    "pear": pear_install_blocked,
     # The RPM front-ends resolve no package where the RPM database is empty, which the
     # Debian-based runners are, so they fail before the privileged install step.
     "dnf": rpm_distro_missing,
@@ -736,17 +738,12 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # flatpak needs a remote to resolve apps from and polkit to authorize the
     # system-scope deploy; an unattended session clears neither.
     "flatpak": flatpak_install_blocked,
-    # basalt refuses every command, the read-only listing included, without a GitHub
-    # token file of its own, and needs the environment its shell-init snippet exports.
-    # Neither is set up on a runner.
-    "basalt": is_github_ci,
     # fwupd flashes firmware; the CI VMs expose no flashable hardware, so the install
     # exits non-zero.
     "fwupd": True,
     # gem carries no blocker: RubyGems falls back to a user install when the system
     # gem directory is not writable, so the round-trip completes on every runner,
-    # Linux included. The `is_linux` blocker that used to sit here asserted a failure
-    # that no longer happens on any image.
+    # Linux included.
     # gcloud refuses component mutations when it was installed through a package
     # manager, but runner images ship both that layout and the tarball one whose
     # component manager works, so the state is probed live per host.
@@ -757,6 +754,8 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # mas resolves an install through an App Store search that finds nothing for the
     # numeric id on the headless runners, so the install fails.
     "mas": is_github_ci,
+    # pear writes to the PHP interpreter's php_dir, root-owned on a distro install.
+    "pear": pear_install_blocked,
     # Pearl's hook functions need Bash 4.1; macOS ships 3.2, where an install
     # fails inside the package's own hooks while the listings still work.
     "pearl": pearl_bash_too_old,
@@ -794,8 +793,8 @@ that is true. Read an entry as "`<manager>` is blocked when `<condition>`".
 The name carries the polarity so the values do not have to: a bare `is_github_ci` next
 to a manager id reads as a *statement about* that manager unless the mapping says which
 way round it goes. The inverse shape (listing where each manager *is* installable) was
-weighed and dropped: fifteen of these seventeen entries are naturally phrased as "blocked
-when X", so inverting would spell them all as negation lambdas to spare the two constants.
+weighed and dropped: every entry but the two constants is naturally phrased as "blocked
+when X", so inverting would spell them all as negation lambdas to spare those two.
 
 Rather than skip these managers (which would also drop their dispatch coverage and any
 signal that they still fail the *expected* way), the destructive install/remove test drives

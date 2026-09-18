@@ -182,7 +182,7 @@ class Zef(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generate the CLI to upgrade all packages.
+        """Generates the CLI to upgrade all packages.
 
         ```{code-block} shell-session
 
@@ -197,7 +197,7 @@ class Zef(PackageManager):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generate the CLI to upgrade one package.
+        """Generates the CLI to upgrade one package.
 
         ```{code-block} shell-session
 

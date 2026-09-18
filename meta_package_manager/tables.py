@@ -288,9 +288,7 @@ WHICH_COLUMNS: tuple[TColumn, ...] = (
 """Columns of the `mpm which` table."""
 
 
-def column_specs(
-    columns: Sequence[tuple[ColumnSpec, str | None]],
-) -> tuple[ColumnSpec, ...]:
+def column_specs(columns: Sequence[TColumn]) -> tuple[ColumnSpec, ...]:
     """Extract the bare {class}`~click_extra.table.ColumnSpec` tuple from a column
     registry."""
     return tuple(spec for spec, _ in columns)
@@ -324,7 +322,7 @@ def _terminal_width_budget(ctx: Context) -> Iterator[None]:
 
 def print_projected_table(
     ctx: Context,
-    columns: Sequence[tuple[ColumnSpec, str | None]],
+    columns: Sequence[TColumn],
     rows: Iterable[dict[str, str | None]],
     default_ids: Sequence[str] | None = None,
 ) -> None:

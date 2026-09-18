@@ -369,7 +369,7 @@ class MicroDNF(PackageManager):
         self.run_cli("makecache", sudo=True)
 
     def cleanup_cache(self) -> None:
-        """Remove the cached packages and repository metadata.
+        """Clear the cached packages and repository metadata.
 
         ```{code-block} shell-session
 

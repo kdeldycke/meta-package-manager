@@ -25,7 +25,7 @@
 #   - Unlike rustup, `elan toolchain list` marks nothing: a default toolchain
 #     renders exactly like any other, the `(default)` suffix appearing only in
 #     `elan show`. Nothing has to be stripped from the id.
-#   - `elan toolchain gc` **reports** the toolchains no known project references
+#   - `elan toolchain gc` *reports* the toolchains no known project references
 #     and `--delete` removes them, which is a read-only orphan query and its
 #     collection in one verb pair. Its rows are `- <toolchain>`; the
 #     `Known projects:` block that follows renders as

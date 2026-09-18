@@ -482,23 +482,21 @@ docs = [
   # for the GitHub label sync in docs/docs_update.py.
   "tomlkit>=0.13",
 ]
+# Stubs for the untyped libraries mpm imports: boltons, xmltodict in
+# managers/zypper.py, docutils and PyYAML in tests/test_docs.py. mypy needs the
+# docutils stub even though the library itself ships with the docs group alone.
+# These floors are freshness markers rather than API minima: typeshed
+# republishes a stub on every upstream change and ships no changelog to pin a
+# symbol against, so each floor is the release current when the stub was
+# declared. Raise one only when mypy reports a symbol the older stub lacks.
 typing = [
-  # Stubs for the untyped libraries mpm imports: boltons, xmltodict in
-  # managers/zypper.py, docutils and PyYAML in tests/test_docs.py. mypy needs the
-  # docutils stub even though the library itself ships with the docs group alone.
-  #
-  # These floors are freshness markers rather than API minima. typeshed
-  # republishes a stub on every upstream change and ships no changelog to pin a
-  # symbol against, so each floor is simply the release current when the stub was
-  # declared. Raise one only when mypy reports a symbol the older stub lacks.
-  #
-  # The runtime dependency above is gated on `python_version<'3.11'`, so the
-  # package is absent from the 3.14 runner mypy runs on while `--python-version
-  # 3.10` sends it down the backport branch of every `StrEnum` import. It then
-  # resolves `StrEnum` to `Any`, which silently untypes each enum built on it:
-  # members degrade to `str` and the class stops being iterable. Declared here
-  # unconditionally so the bundled stub is on disk whatever the interpreter.
+  # Gated on `python_version<'3.11'` at runtime, so mypy's 3.14 runner lacks it
+  # while `--python-version 3.10` follows the backport branch of every `StrEnum`
+  # import and resolves it to `Any`. Declared unconditionally to keep the stub on
+  # disk whatever the interpreter.
   "backports-strenum>=1",
+  # Declared for boltons, imported across the package. Floor is the stub current
+  # when it was declared.
   "types-boltons>=25.0.0.20250919",
   # Declared for `docutils.nodes`, which mypy follows into tests/test_docs.py even
   # though the import there is guarded by `ImportError`. Floor is the stub current

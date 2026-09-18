@@ -247,15 +247,16 @@ class VCPKG(PackageManager):
         `--x-json` is experimental, as its `x` prefix announces, and a vcpkg
         predating it *ignores it silently* rather than refusing it: the command
         succeeds and prints the human column listing instead. Decoding that as
-        JSON raises, and since nothing isolates one manager's failure from the
-        rest of a fan-out, the exception took down an entire `mpm search` on any
-        host carrying such a build. A version floor could not have caught it,
-        vcpkg numbering its releases by date, as {attr}`requirement` explains,
+        JSON raises, and nothing isolates one manager's failure from the rest
+        of a fan-out, so an unhandled decode error would take down the entire
+        `mpm search` on any host carrying such a build. A version floor cannot
+        catch it, vcpkg numbering its releases by date, as
+        {attr}`~meta_package_manager.managers.vcpkg.VCPKG.requirement` explains,
         so the column listing is parsed instead when the JSON does not decode.
 
-        Falling back rather than merely reporting the loss matters beyond
-        search: `install` picks its manager by searching first, so a vcpkg whose
-        search answers nothing can install nothing either.
+        The fallback matters beyond search: `install` picks its manager by
+        searching first, so a vcpkg whose search answers nothing can install
+        nothing either.
         ```
 
         ```{code-block} console

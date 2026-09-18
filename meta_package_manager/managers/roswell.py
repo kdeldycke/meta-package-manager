@@ -34,7 +34,7 @@ class Roswell(PackageManager):
     """Roswell, a Common Lisp implementation installer and launcher.
 
     ```{important}
-    A roswell package is a **Lisp implementation**, not a Lisp library. `ros
+    A roswell package is a *Lisp implementation*, not a Lisp library. `ros
     install` accepts both an implementation and a Quicklisp system, but `ros
     list installed` answers for implementations alone: a system installed with
     `ros install cl-ppcre` never appears there. The two verbs disagree on their

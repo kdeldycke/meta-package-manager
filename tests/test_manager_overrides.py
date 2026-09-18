@@ -668,8 +668,8 @@ def test_cli_config_template_one_manager(invoke):
     result = invoke("config-template", "winget")
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
-    assert list(parsed["mpm"]["overrides"]) == ["winget"]
-    winget = parsed["mpm"]["overrides"]["winget"]
+    assert list(parsed["mpm"][OVERRIDES_SECTION]) == ["winget"]
+    winget = parsed["mpm"][OVERRIDES_SECTION]["winget"]
     # Every key present must be an overridable field.
     assert set(winget).issubset(OVERRIDABLE_FIELDS)
 
@@ -679,7 +679,7 @@ def test_cli_config_template_multiple_managers(invoke):
     result = invoke("config-template", "winget", "pip")
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
-    assert set(parsed["mpm"]["overrides"]) == {"winget", "pip"}
+    assert set(parsed["mpm"][OVERRIDES_SECTION]) == {"winget", "pip"}
 
 
 def test_cli_config_template_no_args_dumps_all_maintained(invoke):
@@ -687,7 +687,7 @@ def test_cli_config_template_no_args_dumps_all_maintained(invoke):
     result = invoke("config-template")
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
-    assert set(parsed["mpm"]["overrides"]) == set(pool.maintained_manager_ids)
+    assert set(parsed["mpm"][OVERRIDES_SECTION]) == set(pool.maintained_manager_ids)
 
 
 def test_cli_config_template_unknown_manager_errors(invoke):
@@ -705,7 +705,7 @@ def test_cli_config_template_output_is_applicable(invoke, reset_overrides):
     result = invoke("config-template", OVERRIDE_TARGET)
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
-    apply_manager_overrides(pool, parsed["mpm"]["overrides"])
+    apply_manager_overrides(pool, parsed["mpm"][OVERRIDES_SECTION])
 
     for field, original in before.items():
         assert getattr(manager, field) == original, (

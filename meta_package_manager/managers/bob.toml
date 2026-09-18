@@ -30,8 +30,8 @@
 #   - Both patterns are deliberately insensitive to whitespace and column width.
 #     The table widens from seven columns to sixteen when a nightly rollback
 #     exists, and upstream removed the padding from the catalog outright in
-#     `v4.1.4` ([bob#333](https://github.com/MordechaiHadad/bob/pull/333)), so
-#     alignment is the one thing about this output that has already changed.
+#     `v4.1.4` ([MordechaiHadad/bob#333](https://github.com/MordechaiHadad/bob/pull/333)),
+#     so alignment is the one thing about this output that has already changed.
 #   - The catalog lists released tags alone, and that costs more than a search
 #     hit. `nightly` never appears in it, so mpm, which resolves a package it
 #     was handed no manager for by searching the catalog first, refuses to
@@ -57,7 +57,7 @@
 # ```
 #
 # ```{note}
-# An empty inventory is reported honestly: `bob list` writes a timestamped
+# An empty inventory is not an error: `bob list` writes a timestamped
 # `There are no versions installed` line to standard output and exits zero. It
 # carries no table row, so the pattern yields nothing and mpm reports an empty
 # inventory rather than a failure.
@@ -91,7 +91,7 @@ args = ["install", "{package_id}"]
 [mpm.overrides.bob.operations.remove]
 args = ["uninstall", "{package_id}"]
 
-# Naming a version genuinely restricts the update to it. Bare `update` refuses
+# Naming a version restricts the update to it. Bare `update` refuses
 # to run without either a version or `--all`.
 [mpm.overrides.bob.operations.upgrade_one]
 args = ["update", "{package_id}"]

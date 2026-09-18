@@ -1879,7 +1879,7 @@ def _row_manager_id(row: str) -> str:
 
 
 def test_managers_index_table_renders():
-    """Check the manager index renders as one well-formed table: five verdict
+    """Check the manager index renders as one well-formed table: six verdict
     groups, each opening on its own title row, wrapped managers linking to their
     documentation page and declined ones to their verdict, in the same columns.
 

@@ -859,15 +859,15 @@ def mpm(
     install_teardown_interrupt_guard(ctx)
     install_interrupt_handler(ctx)
 
-    # Plan mode collects the state-changing commands it would run (see
-    # CLIExecutor.run) into a process-wide recorder, then prints them to stdout at
-    # close, one copy-pasteable line each. Reset first so a previous in-process
-    # invocation (the test suite drives the CLI repeatedly) cannot leak into this one.
     # Which binary escalates is a machine-level fact, so it is held once for the
     # process instead of copied onto every manager. Assigned unconditionally, for
     # the same reason PLAN_RECORDER is reset below.
     ESCALATION.select(sudo_command)
 
+    # Plan mode collects the state-changing commands it would run (see
+    # CLIExecutor.run) into a process-wide recorder, then prints them to stdout at
+    # close, one copy-pasteable line each. Reset first so a previous in-process
+    # invocation (the test suite drives the CLI repeatedly) cannot leak into this one.
     if plan:
         PLAN_RECORDER.reset()
 
@@ -1246,7 +1246,8 @@ def package_task(
     operation: str,
     record_failure: Callable[[Specifier], None],
 ) -> Callable[[], tuple[bool, str]]:
-    """Build one per-package task for {func}`collect_per_package`.
+    """Build one per-package task for
+    {func}`~meta_package_manager.dispatch.collect_per_package`.
 
     Runs the attempt through {func}`run_manager_action` and returns
     `(ok, message)` for the `✓`/`✘` trail. On failure it appends the spec to a

@@ -106,8 +106,8 @@ class IPS(PackageManager):
     """
 
     _LIST_REGEXP = re.compile(
-        r"^(?P<package_id>\S+)(?:\s+\([^)]+\))?\s+(?P<version>\S+)\s+[a-z-]{3}$",
-        re.MULTILINE,
+        r"^(?P<package_id>\S+)(?:\s+\([^)]+\))?\s+"
+        r"(?P<installed_version>\S+)\s+[a-z-]{3}$",
     )
     """Matches one `pkg list` row, anchored on the three-character `IFO` column.
 
@@ -121,8 +121,7 @@ class IPS(PackageManager):
     """
 
     _SEARCH_REGEXP = re.compile(
-        r"^pkg:/(?P<package_id>[^@\s]+)@(?P<version>\S+)\s+\S+$",
-        re.MULTILINE,
+        r"^pkg:/(?P<package_id>[^@\s]+)@(?P<latest_version>\S+)\s+\S+$",
     )
     """Matches one `pkg search -p` row: an FMRI and its publisher, tab-separated.
 
@@ -145,12 +144,7 @@ class IPS(PackageManager):
         ```
         """
         output = self.run_cli("list", "-H", "--no-refresh")
-
-        for match in self._LIST_REGEXP.finditer(output):
-            yield self.package(
-                id=match.group("package_id"),
-                installed_version=match.group("version"),
-            )
+        yield from self.parse_regex_lines(self._LIST_REGEXP, output)
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
@@ -176,12 +170,7 @@ class IPS(PackageManager):
         ```
         """
         output = self.run_cli("search", "-H", "-p", query)
-
-        for match in self._SEARCH_REGEXP.finditer(output):
-            yield self.package(
-                id=match.group("package_id"),
-                latest_version=match.group("version"),
-            )
+        yield from self.parse_regex_lines(self._SEARCH_REGEXP, output)
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:
@@ -242,11 +231,12 @@ class IPS(PackageManager):
         """
         self.run_cli("refresh", sudo=True)
 
-    def cleanup(self) -> None:
+    def cleanup_cache(self) -> None:
         """Purge the image's operation history.
 
         IPS caches nothing a user can reclaim: downloaded content lands straight
-        in the image, so `purge-history` is the only space this manager frees.
+        in the image, so `purge-history` is the only space this manager frees,
+        and `mpm cleanup --cache` is the category that reaches it.
 
         ```{code-block} shell-session
 

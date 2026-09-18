@@ -80,13 +80,9 @@ def test_manager_classes_order():
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
     assert len(manager_classes) == 91
-    # Fifty-six extra beyond the built-in classes: the bundled config-defined
-    # managers (apt-cyg, basalt, bob, bpkg, bun, cargo, cave, choco, chromebrew, claude-code-plugins,
-    # clib, elan, emacs, fink, gcloud, getnf, gh-ext, gup, haxelib, jpm, julia, juliaup, krew,
-    # macports, micro, ollama, opam, opkg, pamac, pearl, pi, pkg-tools, pipxu, pkgin, pkgm, platformio-core, pyenv,
-    # raco, rustup, shelly, skills, slapt-get, soar, sorcery, steamcmd, stew, swupd, tlmgr,
-    # topgrade, urpmi, vscode, vscodium, xcodes, yazi, zerobrew, zvm), shipped as
-    # package data and loaded into the pool at construction.
+    # The rest are the bundled config-defined managers, shipped as package data
+    # and loaded into the pool at construction.
+    assert len(pool) == len(manager_classes) + len(pool.bundled_manager_ids)
     assert len(pool) == 149
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))
@@ -110,11 +106,13 @@ def test_shared_lock_family_members_exist_in_pool():
 def test_lock_families_nest_in_label_groups():
     """Every lock family must sit inside a single ecosystem label group.
 
-    The two constants answer different questions. {data}`~meta_package_manager.labels.MANAGER_LABEL_GROUPS` groups
-    managers by the packaging ecosystem an issue lands in, {data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`
-    the ones that cannot run at once on a real host. The implication runs one way only:
-    contending for a backend lock means sharing that backend's ecosystem, so a lock
-    family is always contained in a label group.
+    The two constants answer different questions.
+    {data}`~meta_package_manager.labels.MANAGER_LABEL_GROUPS` groups managers by the
+    packaging ecosystem an issue lands in,
+    {data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES` the ones that cannot
+    run at once on a real host. The implication runs one way only: contending for a
+    backend lock means sharing that backend's ecosystem, so a lock family is always
+    contained in a label group.
 
     Never the reverse, and the gaps are the point: `fink` and `opkg` speak dpkg through
     databases of their own, `zerobrew` has its own prefix and `dkp-pacman` its own
@@ -138,9 +136,10 @@ def test_delegating_managers_share_their_target_lock():
     """A manager delegating an operation to another's CLI runs that manager's own
     binary against that manager's own state, so the two must serialize.
 
-    The delegation is declared in the class body ({class}`~meta_package_manager.capabilities.Delegate`), which makes
-    this derivable rather than a list to keep in step: wiring a new delegate without
-    a lock family fails here.
+    The delegation is declared in the class body
+    ({class}`~meta_package_manager.capabilities.Delegate`), which makes this derivable
+    rather than a list to keep in step: wiring a new delegate without a lock family
+    fails here.
     """
     family_of = {mid: f for f in SHARED_LOCK_FAMILIES for mid in f.members}
     id_of = {type(pool[manager_id]): manager_id for manager_id in pool.all_manager_ids}

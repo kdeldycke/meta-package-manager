@@ -13,14 +13,14 @@
 # together, and neither can drift without the other.
 #
 # Parsing notes, verified against GNU Emacs 31.1 on macOS:
-#   - **`package-initialize` is mandatory in batch mode.** `emacs --batch` skips
+#   - `package-initialize` is mandatory in batch mode. `emacs --batch` skips
 #     the init file, so `package-alist` is empty until it runs, and the
 #     inventory would report nothing at all rather than failing.
 #   - The inventory holds only what `package.el` installed. Emacs's own bundled
 #     libraries are not in `package-alist`, which is the right scope: they are
 #     part of the editor rather than packages a user manages.
-#   - An empty inventory prints nothing and exits `0`, so it is honest rather
-#     than an error.
+#   - An empty inventory prints nothing and exits `0`, so mpm reports no
+#     packages and no error.
 #   - Removal takes the package *description* rather than the symbol, hence the
 #     `alist-get` lookup: `package-delete` refuses a bare symbol.
 #   - `sync` is `package-refresh-contents`, which contacts every configured
@@ -91,8 +91,8 @@ Copyright (C) 2026 Free Software Foundation, Inc.
 GNU Emacs comes with ABSOLUTELY NO WARRANTY."""
 expected = "31.1"
 
-# One package, which is the whole inventory the drive produced: `queue` was
-# installed from GNU ELPA for this capture and removed again afterwards.
+# One package, which is the whole inventory the drive produced: `queue`,
+# installed from GNU ELPA for this capture.
 [[samples.installed]]
 output = """
 queue 0.2"""

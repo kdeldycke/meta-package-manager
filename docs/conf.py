@@ -184,11 +184,11 @@ suppress_warnings = [
 ]
 
 # `sphinx_autodoc_typehints` renders every annotation as a cross-reference, using
-# the name exactly as the source spells it. These seven are unresolvable by
-# construction rather than by mistake, so they are named here instead of being
-# chased through the annotations that emit them. Each reports as `<unknown>:1`,
-# carrying no source location, which is the tell that autodoc rather than a
-# docstring produced it.
+# the name exactly as the source spells it. The entries below are unresolvable
+# by construction rather than by mistake, so they are listed here instead of
+# being chased through the annotations that emit them. Each reports as
+# `<unknown>:1`, carrying no source location, which is the tell that autodoc
+# rather than a docstring produced it.
 nitpick_ignore = [
     # `TYPE_CHECKING`-only aliases of labels.py: they exist for mypy and have no
     # runtime object for autodoc to document.
@@ -207,6 +207,17 @@ nitpick_ignore = [
     # Neither library publishes an objects.inv, so there is nothing to link to.
     ("py:class", "packageurl.PackageURL"),
     ("py:class", "spdx_tools.spdx.model.document.Document"),
+    # The locked click-extra defines `ColumnSpec` in `click_extra.table`, the
+    # path every annotation renders with, while the published inventory
+    # documents it under `click_extra.columns`. Resolves on its own once the
+    # floor moves past that rename.
+    ("py:class", "click_extra.table.ColumnSpec"),
+    # Short references of click-extra's `Spinner.__init__` docstring, which
+    # `autoclass_content` concatenates onto the `execution.Spinner` subclass:
+    # they resolve in click-extra's own build and nowhere else.
+    ("py:class", "ProgressOption"),
+    ("py:meth", "ok"),
+    ("py:meth", "fail"),
 ]
 
 # Concatenates the docstrings of the class and the __init__ method.

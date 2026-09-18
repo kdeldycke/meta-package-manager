@@ -85,8 +85,6 @@ class Pkgit(PackageManager):
     `1.2.0` too, and no version string separates the two.
     """
 
-    _INSTALLED_REGEXP = re.compile(r"^(?P<package_id>\S+)$")
-
     version_regexes = (r"(?P<version>\d+\S*)",)
     """
     ```{code-block} shell-session
@@ -95,6 +93,8 @@ class Pkgit(PackageManager):
     1.2.0
     ```
     """
+
+    _INSTALLED_REGEXP = re.compile(r"^(?P<package_id>\S+)$")
 
     @property
     def installed(self) -> Iterator[Package]:

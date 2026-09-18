@@ -306,7 +306,7 @@ skip_platforms = "windows"
 exit_code = 0
 stdout_regex_matches = "<(cargo|dnf)>"
 
-# Globals introduced this cycle. `--man` exercises the roff renderer click-extra
+# Global options. `--man` exercises the roff renderer click-extra
 # 7.19 ships and its embedded data files; `--summary` replaces the old
 # `--stats`; `--accessible` swaps to the plain renderer; `--cooldown` parses
 # both halves of its union, a duration string and an enforcement keyword. The
@@ -315,7 +315,10 @@ stdout_regex_matches = "<(cargo|dnf)>"
 [[cases]]
 cli_parameters = "--man"
 exit_code = 0
-stdout_contains = ".TH \"MPM\""
+# The manual is typeset through groff or mandoc where one exists, and printed
+# as roff source where none does (Windows), so the check reads the NAME line
+# both renderings carry.
+stdout_contains = "CLI options shared by all subcommands"
 
 [[cases]]
 cli_parameters = "--params"

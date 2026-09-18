@@ -23,9 +23,10 @@ backend: {class}`Lazy` and {class}`Vim_Pack` clone plugins straight from upstrea
 Git into their own trees, while {class}`Mason` installs ordinary developer tools
 through whichever ecosystem ships them.
 
-Keying three managers on the same `nvim` binary is legitimate but needs care, so
-each one's version probe answers only for its own component and stays silent on a
-host that merely has an editor.
+Keying three managers on the same `nvim` binary is legitimate but needs care.
+{class}`Vim_Pack` ships with the editor, so Neovim's own version is its version.
+The other two probe for their own checkout and stay silent on a host that merely
+has an editor.
 """
 
 from __future__ import annotations

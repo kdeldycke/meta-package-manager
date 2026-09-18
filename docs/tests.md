@@ -40,10 +40,15 @@
    tests.test_gnome_extension
    tests.test_help
    tests.test_logo
+   tests.test_main
    tests.test_manager_apt
+   tests.test_manager_cpan
    tests.test_manager_definition
+   tests.test_manager_dnf
+   tests.test_manager_fwupd
    tests.test_manager_homebrew
    tests.test_manager_mas
+   tests.test_manager_microdnf
    tests.test_manager_mise
    tests.test_manager_overrides
    tests.test_manager_pip
@@ -51,12 +56,14 @@
    tests.test_manager_pwsh_gallery
    tests.test_manager_uv
    tests.test_manager_winget
+   tests.test_manager_zypper
    tests.test_managers
    tests.test_metadata
    tests.test_orphans
    tests.test_pool
    tests.test_sbom
    tests.test_sbom_vulnerabilities
+   tests.test_shell_env
    tests.test_specifier
    tests.test_sphinx_crossrefs
    tests.test_sudo

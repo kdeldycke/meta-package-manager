@@ -60,9 +60,9 @@ homepage_url = "https://cloud.google.com/sdk/gcloud"
 logo = "googlecloud"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["gcloud"]
-requirement = ">=170.0.0"
 # The release that added `--only-local-state`, which is what lets the inventory
 # be read without a network round-trip.
+requirement = ">=170.0.0"
 # `gcloud --version` prints one `<key> <value>` line per bundled component,
 # sorted, so the SDK's own line is found by its key rather than by position.
 # That key contains spaces, which is why the pattern names it in full.

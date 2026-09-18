@@ -7,7 +7,7 @@
 #   - raco reports no version of its own: `raco --version` is refused outright
 #     with "A flag must follow a command". raco ships with Racket and is
 #     versioned with it, so the probe reads the interpreter beside it.
-#   - The listing forces `--all` and `--long`, and both are load-bearing. Without
+#   - The listing forces `--all` and `--long`, and both are required. Without
 #     `--all` raco hides auto-installed packages behind a summary line, "[1
 #     auto-installed package not shown]", so an inventory would silently omit
 #     every dependency pulled in on the user's behalf. Without `--long` the

@@ -22,12 +22,10 @@ table pads its heading and `replacing` rows to the width of the table.
 
 from __future__ import annotations
 
-import re
-
 import pytest
 
 from meta_package_manager.managers.microdnf import MicroDNF
-from meta_package_manager.version import VersionRange, parse_version
+from meta_package_manager.version import VersionRange
 
 UPGRADE_PREVIEW = (
     "Package                                             Repository     Size\n"
@@ -103,15 +101,6 @@ SEARCH_COLD_CACHE = (
 """`microdnf repoquery bash` on a cold cache, which reports each download too."""
 
 
-def probe_version(output: str):
-    """Reproduce the version probe: the first matching regex wins."""
-    for regex in MicroDNF.version_regexes:
-        match = re.compile(regex, re.MULTILINE).search(output)
-        if match and match.group("version"):
-            return parse_version(match.group("version"))
-    return None
-
-
 @pytest.mark.parametrize(
     ("output", "expected"),
     (
@@ -123,10 +112,11 @@ def probe_version(output: str):
 )
 def test_version_probe(output, expected):
     """Only a bare version is read, and it clears the requirement."""
-    version = probe_version(output)
+    version = MicroDNF()._parse_version(output)
     if expected is None:
         assert version is None
         return
+    assert version is not None
     assert str(version) == expected
     assert version in VersionRange(MicroDNF.requirement)
 

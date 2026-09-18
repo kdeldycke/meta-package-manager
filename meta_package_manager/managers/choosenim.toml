@@ -38,7 +38,7 @@
 #     digit or a `#` keeps all four out without pinning the label width.
 #   - The ` (latest)` suffix on the newest release is left out of the id by
 #     stopping the token at the first space.
-#   - `--noColor` is load-bearing rather than tidiness. choosenim writes SGR
+#   - `--noColor` is required rather than tidiness. choosenim writes SGR
 #     escapes whether or not it holds a terminal, and ignores `NO_COLOR`, both
 #     verified. The escapes wrap the *label*, so they sit between the
 #     indentation and the version and no pattern could step over them the way
@@ -74,13 +74,13 @@
 # ```
 #
 # ```{note}
-# choosenim used to block on an interactive telemetry prompt the first time it
-# ran, which no unattended caller could answer. `0.8.16` compiles the whole
-# analytics block out behind a `when false:` carrying a TODO to re-enable it, so
-# the prompt is gone for now. `CHOOSENIM_NO_ANALYTICS` is set regardless: it is
-# honored by every release that has the prompt, it opts out rather than in where
-# `--yes` would have agreed to be tracked, and it keeps mpm unattended on the day
-# that TODO is acted on.
+# A release that still carries the analytics block stops at an interactive
+# telemetry prompt the first time it runs, which no unattended caller can
+# answer. `0.8.16` compiles that block out behind a `when false:` whose TODO says
+# to re-enable it, so it never prompts. `CHOOSENIM_NO_ANALYTICS` is set on every
+# release regardless: each release that prompts honors it, it opts out rather
+# than in where `--yes` would have agreed to be tracked, and it keeps mpm
+# unattended once the block is compiled back in.
 # ```
 #
 # No escalation: choosenim installs under `~/.choosenim` and has no system-wide
@@ -124,7 +124,7 @@ args = ["{package_id}"]
 [mpm.overrides.choosenim.operations.remove]
 args = ["remove", "{package_id}"]
 
-# Naming a version genuinely restricts the update to it, and is the only form
+# Naming a version restricts the update to it, and is the only form
 # that does. See the caution above for why no `upgrade_all` is declared.
 [mpm.overrides.choosenim.operations.upgrade_one]
 args = ["update", "{package_id}"]

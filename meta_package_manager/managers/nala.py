@@ -31,15 +31,6 @@ if TYPE_CHECKING:
     from ..package import Package
 
 
-_ANSI_REGEXP = re.compile(r"\x1b\[[0-9;]*m")
-"""Style sequences to strip before parsing.
-
-Nala drops its colouring when its output is not a terminal, with one leak: the
-branch describing a package that carries no description interpolates an italic
-sequence directly instead of going through the helper that checks for a
-terminal, so it is emitted even through a pipe.
-"""
-
 _BRANCH_PREFIXES = ("+--", "`--", "├──", "└──")
 """Openings of the two lines continuing a record, whichever glyphs are in play.
 
@@ -135,6 +126,12 @@ class Nala(PackageManager):
 
         A record spans a header and the branches below it, so the header is
         held while its branches are read, and emitted once the record closes.
+
+        Nala drops its colouring when its output is not a terminal, with one
+        leak: the branch of a package that carries no description is emitted
+        with an italic sequence even through a pipe. Every capture reaches this
+        parser through {meth}`~meta_package_manager.execution.CLIExecutor.run`,
+        which strips ANSI sequences before returning it.
         """
         package_id: str | None = None
         installed_version: str | None = None
@@ -144,8 +141,7 @@ class Nala(PackageManager):
             if package_id and installed_version:
                 yield package_id, installed_version, latest_version
 
-        for raw_line in output.splitlines():
-            line = _ANSI_REGEXP.sub("", raw_line)
+        for line in output.splitlines():
             stripped = line.strip()
 
             if stripped.startswith(_BRANCH_PREFIXES):
@@ -269,7 +265,7 @@ class Nala(PackageManager):
         )
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages.
+        """Generates the CLI to upgrade all outdated packages.
 
         ```{code-block} shell-session
 
@@ -284,7 +280,7 @@ class Nala(PackageManager):
         package_id: str,
         version: str | None = None,
     ) -> tuple[str, ...]:
-        """Generates the CLI to upgrade the package provided as parameter.
+        """Generates the CLI to upgrade the provided package.
 
         Routed through `install`, since nala's own `upgrade` accepts no package
         arguments and would upgrade everything. Installing a package already
@@ -298,7 +294,7 @@ class Nala(PackageManager):
         return self.build_cli("install", "--assume-yes", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
-        """Removes a package.
+        """Remove one package.
 
         ```{code-block} shell-session
 
@@ -318,7 +314,7 @@ class Nala(PackageManager):
         self.run_cli("update", sudo=True)
 
     def cleanup_orphan(self) -> None:
-        """Removes packages nothing depends on anymore.
+        """Remove every package nothing depends on anymore.
 
         ```{code-block} shell-session
 

@@ -215,8 +215,7 @@ against. It installs Neovim itself rather than anything into it, and is the only
 `mpm` does not key on the `nvim` binary, being its own executable in its own definition.
 It groups here regardless, because the axis is what a report is *about* and every bob
 report is about Neovim: leaving it out would split the editor across two labels and two
-tracker searches, which is the split this group exists to prevent. `volta` is the same
-call already taken elsewhere, kept under `npm-based` though it manages a runtime too.
+tracker searches, which is the split this group exists to prevent.
 
 `sheldon` is the one shell plugin manager left ungrouped, and it fails both halves of
 that test: it manages plugins for any shell rather than for one, and it is a compiled
@@ -457,11 +456,8 @@ def generate_content_rules() -> TLabelRules:
     Keywords are emitted raw, one pattern each, because repomatic's `apply-labels`
     applies a label as soon as *any* one of its patterns matches, and compiles a
     bare pattern case-insensitively with a `\b` anchor on each edge that is itself
-    a word character. That is what the retired `github/issue-labeler` needed
-    hand-built here: its all-of semantics forced a `/…/i` alternation to mean "any
-    keyword wins", and its case-sensitive default forced the `i` flag. Keep the
-    keywords bare, and reach for the `/body/flags` escape hatch only for something
-    an anchored literal cannot express.
+    a word character. Keep the keywords bare, and reach for the `/body/flags`
+    escape hatch only for something an anchored literal cannot express.
 
     A label with no keyword is skipped: that manager gets no content rule, only its
     file rule. Rules are sorted by label, and each label's keywords among

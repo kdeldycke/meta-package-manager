@@ -80,6 +80,13 @@ class PKG(PackageManager):
     environment reset would strip from the escalated call. Support for that
     setting is also why the version floor is `1.11`.
     ```
+
+    ```{note}
+    `--quiet` is passed after the subcommand, never as a global option: `pkg`
+    2.x answers a leading `--quiet` or `-q` with ``pkg: unrecognized option
+    `--quiet'`` and exit `1`. `query` is the one subcommand that rejects the
+    flag, so its listings run without it.
+    ```
     """
 
     name = "FreeBSD pkg"
@@ -102,15 +109,6 @@ class PKG(PackageManager):
     $ pkg --version
     1.20.9
     ```
-    """
-
-    """`--quiet` is deliberately absent from `pre_args`, and cannot go back.
-
-    `pkg` accepts it only *after* the subcommand: as a global argument both
-    `--quiet` and `-q` are answered with ``pkg: unrecognized option `--quiet'``
-    and exit `1`, which broke every operation on `pkg` 2.x. Each subcommand
-    that takes the flag therefore carries it in its own argument list, and
-    `query` never gets it at all, being the one subcommand that rejects it.
     """
 
     _INSTALLED_REGEXP = re.compile(r"(\S+) (\S+) (.+)")
@@ -247,8 +245,8 @@ class PKG(PackageManager):
         ```{caution}
         The result is a single JSON *array*, not one object per line. `--raw`
         wraps every match in one, and `json-compact` only strips the
-        whitespace. The stream of bare objects this once parsed was `pkg` 1.x's
-        shape; the array below is what 2.7.5 returns.
+        whitespace. `pkg` 1.x printed a stream of bare objects instead; the
+        array below is what 2.7.5 returns.
         ```
 
         ```{caution}
@@ -301,19 +299,19 @@ class PKG(PackageManager):
         if extended:
             search_args += ["--search", "comment", "--search", "description"]
 
-        # No `must_succeed`: `pkg` exits `1` on a search that matches nothing,
-        # writing an empty JSON array and nothing to `<stderr>`, so the default
-        # non-strict rule reads that as the empty result it is.
+        # No `must_succeed`: an empty match exits `1` with a silent `<stderr>`,
+        # as the docstring explains.
         output = self.run_cli(search_args, query)
 
-        # A single top-level array, not one object per line: `json-compact`
-        # compacts the whitespace and keeps the array `--raw` wraps results in.
-        for package in self.parse_json(output) or ():
-            yield self.package(
-                id=package["name"],
-                description=package["comment"],
-                latest_version=package["version"],
-            )
+        # The document is the array itself, so there is no `list_path` to walk.
+        yield from self.parse_json_items(
+            output,
+            fields={
+                "package_id": "name",
+                "description": "comment",
+                "latest_version": "version",
+            },
+        )
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:
@@ -554,10 +552,9 @@ class Ports(PackageManager):
 
     The variable is `MAKE_VERSION`, the one `make(1)` documents as "the version
     of make (...) typically the date of last import from NetBSD". The dotted
-    `.MAKE.VERSION` this once read is not among the `.MAKE.*` family that page
-    lists, and expands to the empty string: the probe then found no version at
-    all, which left `ports` permanently unavailable rather than merely
-    misreported.
+    `.MAKE.VERSION` is not among the `.MAKE.*` family that page lists and
+    expands to the empty string, which would leave the probe with no version
+    and the manager unavailable rather than merely misreported.
     """
 
     version_regexes = (r"(?P<version>\d{8,})",)

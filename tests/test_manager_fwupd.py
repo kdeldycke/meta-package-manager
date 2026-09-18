@@ -48,7 +48,7 @@ FIXED = {
     "Flags": ["internal", "registered", "can-verify", "can-verify-image"],
 }
 """A device fwupd cannot update, captured as-is: it already carries no
-`Version`, which the `updatable` test used to shadow."""
+`Version`."""
 
 FLAGLESS = {
     "DeviceId": "20de1d77d0d1787bc56ef62f7d05de49361e1e07",

@@ -365,6 +365,29 @@ def _probed_flatpak(monkeypatch, dates, cooldown=timedelta(days=7)):
     return manager
 
 
+def _stub_outdated(monkeypatch, manager_class, package_ids):
+    """List `package_ids` as the outdated packages of `manager_class`."""
+    outdated = tuple(
+        SimpleNamespace(id=package_id, installed_version="1.0", latest_version="2.0")
+        for package_id in package_ids
+    )
+    monkeypatch.setattr(
+        manager_class, "outdated", property(lambda self: iter(outdated))
+    )
+
+
+def _record_runs(monkeypatch, manager):
+    """Replace `manager.run` with a stub, returning the list of commands it gets."""
+    ran = []
+
+    def fake_run(*args, **kwargs):
+        ran.append(args[0])
+        return ""
+
+    monkeypatch.setattr(manager, "run", fake_run)
+    return ran
+
+
 @pytest.mark.parametrize("manager_class", (Flatpak, MAS, Paru))
 def test_probe_managers_advertise_synthesized_cooldown(manager_class):
     manager = manager_class()
@@ -483,11 +506,7 @@ def test_synthesized_gate_reroutes_upgrade_all(monkeypatch):
         "org.example.Kiwi": now - timedelta(days=1),
     }
     monkeypatch.setattr(manager, "release_date", dates.get)
-    outdated = tuple(
-        SimpleNamespace(id=package_id, installed_version="1.0", latest_version="2.0")
-        for package_id in sorted(dates)
-    )
-    monkeypatch.setattr(Flatpak, "outdated", property(lambda self: iter(outdated)))
+    _stub_outdated(monkeypatch, Flatpak, sorted(dates))
     monkeypatch.setattr(
         manager,
         "upgrade_all_cli",
@@ -498,13 +517,7 @@ def test_synthesized_gate_reroutes_upgrade_all(monkeypatch):
         "upgrade_one_cli",
         lambda package_id, version=None: ("flatpak", "update", package_id),
     )
-    ran = []
-
-    def fake_run(*args, **kwargs):
-        ran.append(args[0])
-        return ""
-
-    monkeypatch.setattr(manager, "run", fake_run)
+    ran = _record_runs(monkeypatch, manager)
     manager.upgrade()
     assert ran == [("flatpak", "update", "org.example.Fig")]
 
@@ -517,13 +530,7 @@ def test_upgrade_all_without_cooldown_keeps_native_path(monkeypatch):
         "upgrade_all_cli",
         lambda: ("flatpak", "update", "--noninteractive"),
     )
-    ran = []
-
-    def fake_run(*args, **kwargs):
-        ran.append(args[0])
-        return ""
-
-    monkeypatch.setattr(manager, "run", fake_run)
+    ran = _record_runs(monkeypatch, manager)
     manager.upgrade()
     assert ran == [("flatpak", "update", "--noninteractive")]
 
@@ -654,19 +661,9 @@ def test_paru_gated_upgrade_all_rides_the_ignore_flag(monkeypatch):
         "plum": now - timedelta(days=30),
     }
     monkeypatch.setattr(manager, "release_date", dates.get)
-    outdated = tuple(
-        SimpleNamespace(id=package_id, installed_version="1.0", latest_version="2.0")
-        for package_id in sorted(dates)
-    )
-    monkeypatch.setattr(Paru, "outdated", property(lambda self: iter(outdated)))
+    _stub_outdated(monkeypatch, Paru, sorted(dates))
     monkeypatch.setattr(manager, "build_cli", lambda *args, sudo=False: ("paru", *args))
-    ran = []
-
-    def fake_run(*args, **kwargs):
-        ran.append(args[0])
-        return ""
-
-    monkeypatch.setattr(manager, "run", fake_run)
+    ran = _record_runs(monkeypatch, manager)
     manager.upgrade()
     assert ran == [
         ("paru", "--sync", "--refresh", "--sysupgrade", "--ignore=kiwi"),
@@ -680,19 +677,9 @@ def test_paru_gated_upgrade_all_without_holds_keeps_native_cli(monkeypatch):
     monkeypatch.setattr(
         manager, "release_date", {"fig": COOLDOWN_EXEMPT, "plum": aged}.get
     )
-    outdated = tuple(
-        SimpleNamespace(id=package_id, installed_version="1.0", latest_version="2.0")
-        for package_id in ("fig", "plum")
-    )
-    monkeypatch.setattr(Paru, "outdated", property(lambda self: iter(outdated)))
+    _stub_outdated(monkeypatch, Paru, ("fig", "plum"))
     monkeypatch.setattr(manager, "build_cli", lambda *args, sudo=False: ("paru", *args))
-    ran = []
-
-    def fake_run(*args, **kwargs):
-        ran.append(args[0])
-        return ""
-
-    monkeypatch.setattr(manager, "run", fake_run)
+    ran = _record_runs(monkeypatch, manager)
     manager.upgrade()
     assert ran == [("paru", "--sync", "--refresh", "--sysupgrade")]
 

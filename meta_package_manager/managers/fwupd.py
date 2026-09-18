@@ -25,6 +25,7 @@ from ..version import parse_version
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
+    from typing import Any
 
     from ..package import Package
 
@@ -103,6 +104,37 @@ class FWUPD(PackageManager):
     runtime   org.kernel                    6.8.0-48-generic
     ```
     """
+
+    def _updatable_devices(self, output: str) -> Iterator[tuple[str, dict[str, Any]]]:
+        """Yield `(device_id, device)` for each updatable device of a JSON report.
+
+        The shared head of
+        {meth}`~meta_package_manager.manager.PackageManager.installed` and
+        {meth}`~meta_package_manager.manager.PackageManager.outdated`, which
+        read `get-devices --json` and `get-updates --json` respectively.
+
+        Under `--json`, fwupd answers either its payload or an `Error` object,
+        never both: `fu_cli_print_error_as_json()` of `fu-cli.c` replaces the
+        whole document on any failure. Having nothing to manage is one of those
+        failures, `FWUPD_ERROR_NOTHING_TO_DO` carrying its own
+        `EXIT_NOTHING_TO_DO` (2), which is what every VM, container and
+        device-less host returns. It lands on `<stdout>` with an empty
+        `<stderr>`, so `run()` reads it as a status rather than a failure, and
+        the `Error` document arrives here as data: it has no `Devices` key and
+        yields nothing.
+
+        Every device field is optional: fwupd writes one only when the daemon
+        read a value for it. The ID is the handle every later operation
+        addresses the device by, so it is the one field a package cannot do
+        without.
+        """
+        data = self.parse_json(output)
+        if not data:
+            return
+        for device in data.get("Devices", ()):
+            device_id = device.get("DeviceId")
+            if device_id and "updatable" in device.get("Flags", ()):
+                yield device_id, device
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -352,28 +384,12 @@ class FWUPD(PackageManager):
         """
         output = self.run_cli("get-devices", "--json", must_succeed=True)
 
-        data = self.parse_json(output)
-        if data:
-            # Under `--json`, fwupd answers either its payload or an `Error`
-            # object, never both: `fu_cli_print_error_as_json()` of `fu-cli.c`
-            # replaces the whole document on any failure. Having nothing to
-            # manage is one of those failures, `FWUPD_ERROR_NOTHING_TO_DO`
-            # carrying its own `EXIT_NOTHING_TO_DO` (2), which is what every
-            # VM, container and device-less host returns. It lands on <stdout>
-            # with an empty <stderr>, so `run()` reads it as a status rather
-            # than a failure and the shape arrives here as data to parse.
-            for device in data.get("Devices", ()):
-                # Every device field is optional: fwupd writes one only when the
-                # daemon read a value for it. The ID is the handle every later
-                # operation addresses the device by, so it is the one field a
-                # package cannot do without.
-                device_id = device.get("DeviceId")
-                if device_id and "updatable" in device.get("Flags", ()):
-                    yield self.package(
-                        id=device_id,
-                        name=device.get("Name"),
-                        installed_version=device.get("Version"),
-                    )
+        for device_id, device in self._updatable_devices(output):
+            yield self.package(
+                id=device_id,
+                name=device.get("Name"),
+                installed_version=device.get("Version"),
+            )
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -543,36 +559,23 @@ class FWUPD(PackageManager):
         """
         output = self.run_cli("get-updates", "--json", must_succeed=True)
 
-        data = self.parse_json(output)
-        if data:
-            # Under `--json`, fwupd answers either its payload or an `Error`
-            # object, never both: `fu_cli_print_error_as_json()` of `fu-cli.c`
-            # replaces the whole document on any failure. Having nothing to
-            # manage is one of those failures, `FWUPD_ERROR_NOTHING_TO_DO`
-            # carrying its own `EXIT_NOTHING_TO_DO` (2), which is what every
-            # VM, container and device-less host returns. It lands on <stdout>
-            # with an empty <stderr>, so `run()` reads it as a status rather
-            # than a failure and the shape arrives here as data to parse.
-            for device in data.get("Devices", ()):
-                device_id = device.get("DeviceId")
-                if not device_id or "updatable" not in device.get("Flags", ()):
-                    continue
-                # A release carries a version only when fwupd read one, and an
-                # outdated package with no version to upgrade to reports
-                # nothing actionable.
-                versions = [
-                    parse_version(release["Version"])
-                    for release in device.get("Releases", ())
-                    if "Version" in release
-                ]
-                if not versions:
-                    continue
-                yield self.package(
-                    id=device_id,
-                    name=device.get("Name"),
-                    latest_version=max(versions),
-                    installed_version=device.get("Version"),
-                )
+        for device_id, device in self._updatable_devices(output):
+            # A release carries a version only when fwupd read one, and an
+            # outdated package with no version to upgrade to reports nothing
+            # actionable.
+            versions = [
+                parse_version(release["Version"])
+                for release in device.get("Releases", ())
+                if "Version" in release
+            ]
+            if not versions:
+                continue
+            yield self.package(
+                id=device_id,
+                name=device.get("Name"),
+                latest_version=max(versions),
+                installed_version=device.get("Version"),
+            )
 
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.

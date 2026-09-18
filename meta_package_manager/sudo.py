@@ -89,11 +89,10 @@ Rebrand the hidden password prompt of an internal escalator with a
 `SUDO_ASKPASS` helper, once the stall notice of `_StallWatchdog` proves
 insufficient in the field. It is also the only route serving a hardened
 `sudoers` policy, whose timestamps the primed cache cannot reach (see
-`_SUDO_CACHE_WARM`). That class records why the helper was rejected first,
-and any implementation has to answer its two remaining points: the raw
-password it handles, and the tools it never reaches (`brew` honors the
-variable, `fink`'s plain `sudo` re-exec does not). The third, a still
-terminal for the prompt, `_hidden_prompt_risk` now provides.
+`_SUDO_CACHE_WARM`). That class records why the helper was rejected, and any
+implementation has to answer both of its points: the raw password it handles,
+and the tools it never reaches (`brew` honors the variable, `fink`'s plain
+`sudo` re-exec does not).
 ```
 """
 
@@ -222,7 +221,8 @@ class Escalator:
     `NOPASSWD`. openSUSE stacks exactly that pair: its stock `ALL ALL=(ALL) ALL`
     sits under the `NOPASSWD` rule `docs/sudo.md` recommends, so `--validate`
     reports a cold cache on a host where every escalation in fact runs untouched,
-    and mpm warned that managers "may fail" before they went on to succeed.
+    and without this probe mpm warns that managers "may fail" before they go on
+    to succeed.
 
     That is a property of `--validate` rather than of one distribution's policy,
     and Fedora reaches it by an unrelated route: its stock `%wheel ALL=(ALL) ALL`
@@ -291,9 +291,9 @@ class Escalator:
     Several markers rather than one because a reimplementation brands its own
     banner: `sudo --version` prints `Sudo version 1.9.17` on the original and
     `sudo-rs 0.2.13` on the Rust rewrite Ubuntu ships as its default `sudo`
-    since `25.10`. Matching the first alone rejected sudo-rs as a stand-in, and
-    {func}`resolve_escalator` then fell through to `doas` on a host carrying
-    both, inverting the documented preference. Upstream's `SUDO_RS_VERSION`
+    since `25.10`. Matching the first alone would reject sudo-rs as a stand-in,
+    {func}`resolve_escalator` then falling through to `doas` on a host carrying
+    both and inverting the documented preference. Upstream's `SUDO_RS_VERSION`
     override replaces the number and never the `sudo-rs` prefix, so the prefix
     is what the second marker keys on.
 
@@ -561,7 +561,7 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # `CLIExecutor.run` forces are already in the environment it spawns
         # `sudo` with, and this is what carries them across the elevation.
         # Without it the escalated child loses the `LC_ALL=C` a parser is pinned
-        # against, the way `run0` did before it grew its own forwarding.
+        # against.
         escalate_args=("sudo", "--inline", "--preserve-env"),
         # There is no credential cache to read: every escalation raises its own
         # UAC dialog. So the probe answers the only question mpm can act on
@@ -752,7 +752,7 @@ def _is_sudo_auth_failure(error: str) -> bool:
     The wordings are not interchangeable across implementations: `sudo-rs`, the
     Rust rewrite Ubuntu ships as the default `sudo` since `25.10`, answers
     `sudo: interactive authentication is required` where the original says
-    `sudo: a password is required`. Matching only the latter left every
+    `sudo: a password is required`. Matching only the latter would leave every
     escalation failure on a current Ubuntu unrecognized, and the hint unprinted.
 
     `run0` needs its own branch. It hands the refusal to systemd's bus layer,
@@ -832,8 +832,8 @@ def _is_sudo_denied(error: str) -> bool:
     because {attr}`~meta_package_manager.sudo.Escalator.probe_args` runs the former first: a user no
     `sudoers` rule matches gets `I'm sorry {user}. I'm afraid I can't do that`
     (`Error::Authorization`) where `--list` says `may not run sudo`. Matching
-    only the list wording left a non-sudoer on Ubuntu `25.10` and later being
-    prompted for a password that could never authorize them.
+    only the list wording would leave a non-sudoer on Ubuntu `25.10` and later
+    being prompted for a password that could never authorize them.
     """
     lowered = error.lower()
     if any(
@@ -1099,11 +1099,12 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     Call at the top of each mutating subcommand, before the fan-out draws its
     spinner. Never prompts when:
 
-    - Windows (no `sudo`) or the process is already root,
+    - the process is already root,
     - no selected manager escalates, through mpm or internally,
     - a dry run or a plan run (no state-changing CLI is executed),
     - already primed once this invocation (idempotent),
-    - the `sudo` executable is missing (one warning is logged),
+    - no escalator is on `PATH`, or `sudo_command` names an unknown one (one
+      warning is logged),
     - the probe finds the cache already warm (keepalive only, fully silent),
     - the probe reports the user is not authorized to run `sudo` at all
       (`_is_sudo_denied`): one warning names the managers mpm escalates and
@@ -1117,11 +1118,11 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
       notice instead.
     """
     managers = list(managers)
-    # Windows is no longer excluded outright: `gsudo` gives it an escalator to
-    # probe and a cache to warm. Nothing changes for a stock Windows run all
-    # the same, since no manager there escalates by default and the next guard
-    # returns on the empty selection: only `--sudo`, or a `[mpm.overrides.<id>]
-    # sudo = true` entry, reaches past this point.
+    # Root has nothing to escalate. Windows passes this guard like any other
+    # host, since `gsudo` gives it an escalator to probe and a cache to warm:
+    # a stock run there returns on the empty selection below instead, no
+    # manager escalating by default on Windows, so only `--sudo`, or a
+    # `[mpm.overrides.<id>] sudo = true` entry, reaches the probe.
     if getattr(os, "geteuid", lambda: 1)() == 0:
         return
     escalating = sorted({m.id for m in managers if _resolved_sudo(m)})
@@ -1360,10 +1361,7 @@ class _StallWatchdog(logging.Handler):
     surface this notice avoids entirely), and it only covers tools honoring
     the variable (`brew` does, `fink`'s plain `sudo` re-exec does not). The
     scoped `sudo = true` opt-in documented in `docs/sudo.md` already covers
-    users wanting a guaranteed up-front prompt. Its third original reason, a
-    side channel to pause the spinner that would smear its prompt, is spent:
-    `_hidden_prompt_risk` already leaves such a call a still terminal,
-    holding its spinner and scheduling it clear of the batch indicator.
+    users wanting a guaranteed up-front prompt.
     ```
 
     ```{note}

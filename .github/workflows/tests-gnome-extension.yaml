@@ -143,7 +143,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.5"
+          version: "0.12.13"
       # shexli exits 0 whatever it finds, errors included, so its exit code
       # cannot gate anything: the JSON summary is the only usable signal.
       #
@@ -165,7 +165,7 @@ jobs:
           # `path.relative_to()` raise before any rule runs.
           set -uo pipefail
           status=0
-          uvx --with 'tree-sitter==0.25.2' shexli --format json \
+          uvx --with 'tree-sitter==0.26.0' shexli --format json \
             "$GITHUB_WORKSPACE/gnome-shell/mpm@kdeldycke.github.io" \
             > "$RUNNER_TEMP/shexli.json" 2>"$RUNNER_TEMP/shexli.err" || status=$?
           cat "$RUNNER_TEMP/shexli.err"

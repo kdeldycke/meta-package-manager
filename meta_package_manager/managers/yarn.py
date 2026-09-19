@@ -23,6 +23,7 @@ from functools import cached_property
 from extra_platforms import ALL_PLATFORMS
 
 from ..capabilities import search_capabilities, version_not_implemented
+from ..execution import CLIError
 from ..manager import PackageManager
 
 TYPE_CHECKING = False
@@ -30,6 +31,29 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from ..package import Package
+
+
+NOT_FOUND_STATUSES = frozenset({400, 401, 404})
+"""Registry answers that Yarn Classic reads as "no such package".
+
+Its request manager resolves a request answered with one of these codes to an
+empty result instead of an error. See
+[`request-manager.js`](https://github.com/yarnpkg/yarn/blob/740c38c3a962c30ddb344a919bbfb7065620714b/src/util/request-manager.js#L454-L456).
+"""
+
+
+def _json_records(stream: str) -> Iterator[dict]:
+    """Yield the JSON objects of a `--json` stream, skipping every other line.
+
+    Node writes its own warnings to the same streams, as plain text.
+    """
+    for line in stream.splitlines():
+        try:
+            record = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(record, dict):
+            yield record
 
 
 class Yarn(PackageManager):
@@ -115,6 +139,10 @@ class YarnClassic(Yarn):
     1.22.11
     ```
     """
+
+    _REQUEST_STATUS_REGEXP = re.compile(
+        r"finished with status code (?P<status>\d+)\.$",
+    )
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -217,7 +245,7 @@ class YarnClassic(Yarn):
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
-        """Fetch matching packages.
+        r"""Fetch matching packages.
 
         ```{warning}
         Yarn maintainers have [decided to not implement a dedicated search command](https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299).
@@ -226,26 +254,87 @@ class YarnClassic(Yarn):
         works for exact match.
         ```
 
+        ```{note}
+        `yarn info` prints the same `Received invalid response from npm.` error
+        record, and exits `0`, both for a package that does not exist and for a
+        registry request that failed. `--verbose` adds the status code each
+        request finished with, which tells them apart: a
+        {data}`~meta_package_manager.managers.yarn.NOT_FOUND_STATUSES` answer is
+        a package that does not exist, while any other answer, or none at all,
+        raises a {class}`~meta_package_manager.execution.CLIError` naming it.
+        ```
+
         ```{code-block} shell-session
 
-        $ yarn --silent --json info @bouzuya/borage
+        $ yarn --silent --json --verbose info @bouzuya/borage
+        {"type":"verbose","data":"Checking for configuration file \"~/.npmrc\"."}
+        {"type":"verbose","data":"Found configuration file \"~/.npmrc\"."}
+        {"type":"verbose","data":"Checking for configuration file \"~/.npmrc\"."}
+        {"type":"verbose","data":"Found configuration file \"~/.npmrc\"."}
+        {"type":"verbose","data":"Checking for configuration file \"/opt/homebrew/Cellar/node/26.9.0/etc/npmrc\"."}
+        {"type":"verbose","data":"Checking for configuration file \"~/.npmrc\"."}
+        {"type":"verbose","data":"Found configuration file \"~/.npmrc\"."}
+        {"type":"verbose","data":"Checking for configuration file \"/Users/.npmrc\"."}
+        {"type":"verbose","data":"Checking for configuration file \"~/.yarnrc\"."}
+        {"type":"verbose","data":"Checking for configuration file \"~/.yarnrc\"."}
+        {"type":"verbose","data":"Checking for configuration file \"/opt/homebrew/Cellar/node/26.9.0/etc/yarnrc\"."}
+        {"type":"verbose","data":"Checking for configuration file \"~/.yarnrc\"."}
+        {"type":"verbose","data":"Checking for configuration file \"/Users/.yarnrc\"."}
+        {"type":"verbose","data":"current time: 2026-09-19T18:18:56.700Z"}
+        {"type":"verbose","data":"Performing \"GET\" request to \"https://registry.yarnpkg.com/@bouzuya%2fborage\"."}
+        {"type":"verbose","data":"Request \"https://registry.yarnpkg.com/@bouzuya%2fborage\" finished with status code 200."}
         {"type":"inspect","data":{"name":"@bouzuya/borage","description":"A GitHub Pages deployer for bouzuya/blog.bouzuya.net","dist-tags":{"latest":"3.1.2"},"versions":["3.1.2"],"maintainers":[{"name":"bouzuya","email":"m@bouzuya.net"}],"time":{"modified":"2022-06-12T15:26:55.277Z","created":"2017-05-21T23:27:30.332Z","3.1.2":"2017-05-21T23:27:30.332Z"},"homepage":"https://github.com/bouzuya/borage","keywords":["bouzuya","bbn"],"repository":{"type":"git","url":"git+https://github.com/bouzuya/borage.git"},"author":{"name":"bouzuya","email":"m@bouzuya.net","url":"http://bouzuya.net"},"bugs":{"url":"https://github.com/bouzuya/borage/issues"},"license":"MIT","readmeFilename":"README.md","version":"3.1.2","dependencies":{"aws-sdk":"^2.1.30","es6-promise":"^2.1.1","glob":"^5.0.9","mime":"^1.3.4"},"devDependencies":{"coffee-script":"^1.9.2","del":"^1.1.1","gulp":"^3.8.11","gulp-coffee":"^2.3.1","gulp-concat":"^2.5.2","gulp-espower":"^0.10.1","gulp-mocha":"^2.0.1","gulp-sourcemaps":"^1.5.2","gulp-uglify":"^1.2.0","gulp-util":"^3.0.4","gulp-watch":"^4.2.4","power-assert":"^0.11.0","run-sequence":"^1.1.0","sinon":"^1.14.1"},"main":"index.js","scripts":{"build":"gulp build","clean":"gulp clean","start":"gulp","test":"gulp test","watch":"gulp watch"},"gitHead":"0f45887778f89ccf9a17e0a097067ae085c515e5","dist":{"shasum":"9be1578d9d2859833cca435d3501d439f6f27489","tarball":"https://registry.npmjs.org/@bouzuya/borage/-/borage-3.1.2.tgz","integrity":"sha512-gBp5eS2+5VSQqqgHs7fBwesw+ZhbfwewPoiyaINPIchhiIkAjnJ8gPN7RsBqzUftZNXF04x5HuHZG9xe/PHptw==","signatures":[{"keyid":"SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA","sig":"MEQCIBDqfLdL4pGDRKMfJ3HvGGE6tmWoM2uKV8jZWAVshLaKAiAhfqB0YTsKYVz2SUSa1Jz/ZiBPlkF3jAPGqV7UN+lpBw=="}]}}}
         ```
         """
-        output = self.run_cli("--json", "info", query, must_succeed=True)
+        previous = self._last_run
+        output = self.run_cli("--json", "--verbose", "info", query, must_succeed=True)
+        # Only the run this call produced says anything about this query.
+        if self._last_run is not previous:
+            self._raise_hidden_failure(self._last_run)
 
-        if output:
-            for line in output.splitlines():
-                if not line:
-                    continue
-                result = json.loads(line)
-                if result["type"] == "inspect":
-                    package = result["data"]
-                    yield self.package(
-                        id=package["name"],
-                        description=package["description"],
-                        latest_version=package["version"],
-                    )
+        for record in _json_records(output):
+            if record.get("type") == "inspect":
+                package = record["data"]
+                yield self.package(
+                    id=package["name"],
+                    description=package["description"],
+                    latest_version=package["version"],
+                )
+
+    def _raise_hidden_failure(self, run: tuple[int, str, str] | None) -> None:
+        """Raise the registry failure a `yarn info` run reported on a zero exit.
+
+        The failure is relayed at `WARNING` and recorded in
+        {attr}`~meta_package_manager.execution.CLIExecutor.cli_errors`, as the
+        executor's own failure gate does for a non-zero exit.
+        """
+        if run is None:
+            return
+        code, output, error = run
+        messages = [
+            str(record.get("data"))
+            for record in _json_records(error)
+            if record.get("type") == "error"
+        ]
+        if not messages:
+            return
+        statuses = []
+        for record in _json_records(output):
+            if record.get("type") != "verbose":
+                continue
+            match = self._REQUEST_STATUS_REGEXP.search(str(record.get("data")))
+            if match:
+                statuses.append(int(match.group("status")))
+        if statuses and statuses[-1] in NOT_FOUND_STATUSES:
+            return
+        if statuses:
+            answer = f"The registry answered HTTP {statuses[-1]}."
+        else:
+            answer = "The registry did not answer."
+        exception = CLIError(code, output, " ".join((*messages, answer)))
+        self._relay_failure(exception, is_escalation=False)
+        self.cli_errors.append(exception)
+        raise exception
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

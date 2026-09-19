@@ -743,6 +743,16 @@ class CLIExecutor:
     {attr}`version_regexes` would read a version out of that warning.
     """
 
+    stderr_noise: re.Pattern[str] | None = None
+    """Lines of `<stderr>` that report no failure, like a tool's routine warnings.
+
+    The failure gate of {meth}`run` drops them before it reads `<stderr>`. A
+    non-zero exit whose `<stderr>` holds nothing else then reads as a status, the
+    way a silent `<stderr>` already does, and the diagnosis of a real failure
+    keeps only the lines that explain it. The run snapshot keeps the whole
+    stream. `None` keeps every line.
+    """
+
     stop_on_error: bool = False
     """Tell the manager to either raise or continue on errors."""
 
@@ -1484,9 +1494,10 @@ class CLIExecutor:
             preference, rather than accumulating the error for an end-of-run
             summary. Use for calls whose output is parsed (JSON, XML, regex),
             where a swallowed failure would be indistinguishable from empty
-            results. A non-zero exit that leaves `<stderr>` empty is tolerated
-            as a benign status code (`npm` and `pnpm outdated` exit `1`
-            when updates exist); only the per-package state changers, which run
+            results. A non-zero exit that leaves `<stderr>` empty, or holding
+            only {attr}`stderr_noise`, is tolerated as a benign status code
+            (`npm` and `pnpm outdated` exit `1` when updates exist); only the
+            per-package state changers, which run
             under a patched {attr}`stop_on_error`, treat every non-zero exit
             as a failure. See the failure gate below for details.
         """
@@ -1606,7 +1617,9 @@ class CLIExecutor:
         # code as a status while writing their payload to <stdout> and leaving
         # <stderr> empty: `npm` and `pnpm outdated` exit 1 when updates
         # exist. Flagging those would break the parsing of their output, so a
-        # silent <stderr> earns the benefit of the doubt.
+        # silent <stderr> earns the benefit of the doubt. So does a <stderr>
+        # holding only the manager's declared `stderr_noise`: `yarn outdated`
+        # exits 1 the same way, and repeats its routine warnings there.
         #
         # The per-package state changers (install/remove/upgrade <packages>/
         # restore) cannot afford that tolerance. They run under a patched
@@ -1615,6 +1628,11 @@ class CLIExecutor:
         # <stdout> and left <stderr> empty: steamcmd prints "not logged in to
         # Steam" this way on Windows, so a failed install was mistaken for a
         # success. For them the <stderr> condition is dropped.
+        if error and self.stderr_noise:
+            noise = self.stderr_noise
+            error = "\n".join(
+                line for line in error.splitlines() if not noise.search(line)
+            ).strip()
         strict = self.stop_on_error and not must_succeed
         failed = bool(code) if strict else bool(code and error)
         if failed:

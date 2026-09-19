@@ -13,15 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Yarn Classic search tests.
+"""Yarn Classic query tests.
 
-These tests replay `yarn --silent --json --verbose info` streams through
-`YarnClassic.search`. They do not invoke `yarn`.
+These tests replay captured `yarn --silent --json` streams through
+`YarnClassic.search` and `YarnClassic.outdated`. They do not invoke `yarn`.
 """
 
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 import pytest
 
@@ -45,6 +46,16 @@ NODE_WARNING = (
     "'FORCE_COLOR' env being set."
 )
 
+OUTDATED_TABLE = (
+    '{"type":"table","data":{"head":["Package","Current","Wanted","Latest",'
+    '"Package Type","URL"],"body":[["ms","2.0.0","2.0.0","2.1.3","dependencies",'
+    '"https://github.com/vercel/ms#readme"]]}}'
+)
+
+LICENSE_WARNING = '{"type":"warning","data":"package.json: No license field"}'
+
+REFUSED = '{"type":"error","data":"Error: connect ECONNREFUSED 127.0.0.1:59055"}'
+
 
 def finished(status: int) -> str:
     """The `--verbose` record yarn prints when the registry answers."""
@@ -58,6 +69,10 @@ def finished(status: int) -> str:
 def yarn(monkeypatch):
     manager = YarnClassic()
     monkeypatch.setattr(manager, "cli_errors", [])
+    monkeypatch.setattr(manager, "cli_path", Path("/usr/bin/yarn"), raising=False)
+    monkeypatch.setattr(
+        manager, "global_dir", "/home/user/.config/yarn/global", raising=False
+    )
     return manager
 
 
@@ -69,6 +84,36 @@ def replay(monkeypatch, manager, stdout: str, stderr: str) -> None:
         return stdout
 
     monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+
+
+def spawn(monkeypatch, manager, code: int, stdout: str, stderr: str) -> None:
+    """Stand in for the child process, so the failure gate of `run()` runs."""
+    monkeypatch.setattr(
+        manager, "_spawn", lambda *args, **kwargs: (code, stdout, stderr)
+    )
+
+
+def test_outdated_reads_exit_1_as_updates(yarn, monkeypatch, caplog):
+    """Yarn exits 1 when updates exist, its warnings on `<stderr>`."""
+    caplog.set_level(logging.WARNING)
+    spawn(monkeypatch, yarn, 1, OUTDATED_TABLE, f"{LICENSE_WARNING}\n{NODE_WARNING}")
+    packages = [
+        (p.id, str(p.installed_version), str(p.latest_version)) for p in yarn.outdated
+    ]
+    assert packages == [("ms", "2.0.0", "2.1.3")]
+    assert yarn.cli_errors == []
+    assert not caplog.records
+
+
+def test_outdated_registry_failure(yarn, monkeypatch, caplog):
+    """A failed registry request still fails, relaying only its `error` record."""
+    caplog.set_level(logging.WARNING)
+    spawn(monkeypatch, yarn, 1, "", f"{LICENSE_WARNING}\n{REFUSED}")
+    with pytest.raises(CLIError) as excinfo:
+        list(yarn.outdated)
+    assert excinfo.value.error == REFUSED
+    assert yarn.cli_errors == [excinfo.value]
+    assert [record.getMessage() for record in caplog.records] == [REFUSED]
 
 
 def test_search_found(yarn, monkeypatch):

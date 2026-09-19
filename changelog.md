@@ -182,6 +182,7 @@
 - [xbps] Fix version detection, whose `XBPS:` banner was read as the version, dropping the manager from the pool on every Void Linux host. Closes [#2074](https://github.com/kdeldycke/meta-package-manager/issues/2074).
 - [xbps] Fix `search`, which returned no results: the long `--repository` option takes a URL and was consuming the `--search` that followed it.
 - [yarn] Fix `search` and `install` reading a failed registry request as a missing package: the failure now prints as a warning naming the registry's answer.
+- [yarn] Fix `outdated` reporting an error instead of the packages whenever an update exists.
 - [zypper] Fix `installed`, `outdated` and `search`, which crashed whenever the query matched exactly one package.
 - [bar-plugin,gnome-shell] Mark a package check as failed on the exit code of `mpm` only, so a `--verbosity` raised in the options no longer replaces the package list with log lines.
 - [bar-plugin] Fix the plugin rendering a version error instead of its menu on every released SwiftBar: the minimum requirement was pinned on an unreleased `2.1.2` test build.

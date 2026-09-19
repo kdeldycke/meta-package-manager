@@ -396,6 +396,34 @@ def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
         assert manager.cli_errors == []
 
 
+NOISY_STATUS = (
+    "import sys; sys.stdout.write('boom'); sys.stderr.write('chatter\\n'); sys.exit(8)"
+)
+"""Exits non-zero as a status, with only routine chatter on `<stderr>`."""
+NOISY_FAILURE = "import sys; sys.stderr.write('chatter\\nbroken\\n'); sys.exit(8)"
+"""Fails for real, its diagnosis written after the same routine chatter."""
+
+
+def test_run_failure_gate_tolerates_stderr_noise(monkeypatch):
+    """A `<stderr>` holding only declared noise is as good as a silent one."""
+    manager = FakeManager()
+    monkeypatch.setattr(manager, "stderr_noise", re.compile(r"^chatter$"))
+    assert manager.run_cli("-c", NOISY_STATUS, must_succeed=True) == "boom"
+    assert manager.cli_errors == []
+    # The snapshot keeps the whole stream.
+    assert manager._last_run == (8, "boom", "chatter")
+
+
+def test_run_failure_gate_drops_stderr_noise_from_the_diagnosis(monkeypatch):
+    """A real failure still raises, its diagnosis cleared of the noise."""
+    manager = FakeManager()
+    monkeypatch.setattr(manager, "stderr_noise", re.compile(r"^chatter$"))
+    with pytest.raises(CLIError) as excinfo:
+        manager.run_cli("-c", NOISY_FAILURE, must_succeed=True)
+    assert excinfo.value.error == "broken"
+    assert manager.cli_errors == [excinfo.value]
+
+
 # Diagnosis relay: a failed run promotes its own error report to WARNING at the
 # failure gate, so the default verbosity carries the "why" and not just the ✘
 # signal (issue 1968). Successful chatter, tolerated exits, DEBUG-level runs and

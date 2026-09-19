@@ -126,6 +126,14 @@ class YarnClassic(Yarn):
 
     pre_args = ("--silent",)
 
+    # Yarn prints its routine warnings on <stderr> even under `--silent`, like
+    # `package.json: No license field` for the global folder, and Node adds its
+    # own runtime warnings there. `outdated` exits 1 whenever an update exists,
+    # so none of these lines may read as a failure.
+    stderr_noise = re.compile(
+        r'^(?:\{"type":"warning",|warning |\(node:\d+\) |\(Use `node --trace-)'
+    )
+
     _INSTALLED_REGEXP = re.compile(
         r"^.+\"data\":\"\\\"(?P<package_id>\S+)"
         r"@(?P<version>\S+)\\\" has binaries:\"\}$",
@@ -223,6 +231,14 @@ class YarnClassic(Yarn):
         Package  Current Wanted Latest Package Type URL
         markdown 0.4.0   0.4.0  0.5.0  dependencies git://github.com/.../md-js.git
         ✨  Done in 0.95s.
+        ```
+
+        ```{note}
+        `yarn outdated` exits `1` whenever an update exists, with its warnings on
+        `<stderr>`. Those warnings are
+        {attr}`~meta_package_manager.execution.CLIExecutor.stderr_noise`, so the
+        exit reads as a status. A failed registry request prints an `error`
+        record there instead, and still fails the run.
         ```
         """
         output = self.run_cli(

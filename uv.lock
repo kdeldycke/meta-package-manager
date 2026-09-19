@@ -366,15 +366,15 @@ yaml = [
 
 [[package]]
 name = "cloup"
-version = "3.1.0"
+version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/ca/cf02e965cfeb70d65c61fd3abb8022aaf5111a0de71b3c73a6ec2113aa25/cloup-3.1.0.tar.gz", hash = "sha256:637c1e628fe98f3f20a5e44da591a72b42bf54d7d4527190bf39ed5f64af7585", size = 230167, upload-time = "2026-05-26T02:48:18.11Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/05/e2/d41446c6195eff0db3b671ddb202e39f42f9ea7c0dd15cd43fbf5cf0d7f7/cloup-4.0.0.tar.gz", hash = "sha256:83b0870ee863bcc85129e40e1b208bcfdebe4cd2142e9ce1d0daf7d276cab038", size = 252135, upload-time = "2026-09-12T03:23:39.698Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/21/07/644976263e2d346935b35305908bf89eb660ced7fbc7292b096f38c0a80d/cloup-3.1.0-py2.py3-none-any.whl", hash = "sha256:f4cfbdcdc96d30bcbd8c75eaffb0651e9c57180f2aee4b300cf0dd168b8415ed", size = 55028, upload-time = "2026-05-26T02:48:16.711Z" },
+    { url = "https://files.pythonhosted.org/packages/2c/34/20224fd9d52e8ce7e3b319b5d6b7126da25e89d00cd1a5692b4b46ed2d26/cloup-4.0.0-py3-none-any.whl", hash = "sha256:0678744a3a2753e1d78dd3ea5c6e4cbbc3b41561fd7a7a7d075dbc8dad74f74f", size = 55776, upload-time = "2026-09-12T03:23:38.564Z" },
 ]
 
 [[package]]
@@ -2259,11 +2259,11 @@ wheels = [
 
 [[package]]
 name = "types-docutils"
-version = "0.23.0.20260827"
+version = "0.23.0.20260911"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3c/f8/55b739a017fe34c1790a1e8cf1a63c8cf50d7e64777e9b2f12032a73515d/types_docutils-0.23.0.20260827.tar.gz", hash = "sha256:757ca7313a337f83b761d917fe71e60d723376898338105aa78505b5214f4c5c", size = 58209, upload-time = "2026-08-27T12:06:52.325Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ad/31/daaf8f24c9ddd31c316ae6a79ac90771d980ff8b5033baca596fe9dfefbe/types_docutils-0.23.0.20260911.tar.gz", hash = "sha256:f6b487b2817e54566a15202162f762834dd8fa4bca2cd2e7adff724dc74cd16c", size = 58223, upload-time = "2026-09-11T06:45:20.319Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3a/ab/6939f1ce2b1e02e2f19e7ce85728570a27740224031fb13a9dd044731943/types_docutils-0.23.0.20260827-py3-none-any.whl", hash = "sha256:4db1342b6defed4de29cb2d65ab295e3ecc13808f2718ee2980ed18cfafef730", size = 92112, upload-time = "2026-08-27T12:06:51.31Z" },
+    { url = "https://files.pythonhosted.org/packages/20/aa/faa98655f5dc9f912b068e15f22a37f4fd7298cc3b8f95bf9e8425f5dd73/types_docutils-0.23.0.20260911-py3-none-any.whl", hash = "sha256:ca346921debccd62bada70ed3bb69209253730a1cfdda28a0e3ee010156fa474", size = 92114, upload-time = "2026-09-11T06:45:19.224Z" },
 ]
 
 [[package]]

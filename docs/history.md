@@ -12,4 +12,4 @@ With its complexity increasing, it was [decided to move the plugin](https://gith
 
 ![Star history of mpm](assets/star-history-mpm.svg)
 
-Reconstructed from the timestamp of every star the repository still holds, so the curve dips where followers were lost rather than only ever climbing. See the [benchmark](benchmark.md#popularity) for the same history plotted against competing tools.
+Reconstructed from the stars the repository still holds, dated to the week each was given, so the curve dips where followers were lost rather than only ever climbing. See the [benchmark](benchmark.md#popularity) for the same history plotted against competing tools.

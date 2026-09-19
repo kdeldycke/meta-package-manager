@@ -822,10 +822,10 @@ def test_metrics_predecessor_is_sampled():
 def test_metrics_series_start_at_creation():
     """Check every charted repository is anchored by a zero-star origin.
 
-    The relative chart measures each curve from its repository's creation, and
-    a competitor backfilled from the archives has no knowable first star: its
-    earliest capture already shows a count. Without the anchor its curve would
-    begin in mid-air, and the relative axis would have nothing to align on.
+    The relative chart measures each curve from its first point, which the
+    `created` row places on the repository's creation day. Without the anchor
+    a curve starts at its first reading instead, and the chart no longer
+    compares the projects by age.
     """
     config = _metrics_config()
     rows = _load_metrics_store()

@@ -1,9 +1,6 @@
 # Changelog
 
-## [`8.0.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`8.0.0` (2026-09-19)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...v8.0.0)
 
 - **Breaking:** [mpm] Replace the `--require-cooldown-support` and `--allow-unsupported-managers` flags with `enforce`, `best-effort` and `off` keywords on `--cooldown`. Configuration moves to a `[mpm.cooldown]` table with `period` and `policy` keys; the former `[mpm] cooldown` string still sets the `period`, with a deprecation warning.
 - **Breaking:** [mpm] Move the per-manager overrides to `[mpm.overrides.<id>]`, from `[mpm.managers.<id>]`, which collided with the `managers` subcommand's own options. A stale section is named in a warning and ignored.

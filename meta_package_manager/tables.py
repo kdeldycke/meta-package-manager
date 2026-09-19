@@ -43,15 +43,9 @@ import shutil
 import sys
 from contextlib import contextmanager
 
+from click_extra import ColumnSpec, print_data, select_columns, select_row
 from click_extra.context import COLUMNS, TABLE_FORMAT
-from click_extra.table import (
-    AUTO_WIDTH,
-    SERIALIZATION_FORMATS,
-    ColumnSpec,
-    print_data,
-    select_columns,
-    select_row,
-)
+from click_extra.table import AUTO_WIDTH, SERIALIZATION_FORMATS
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum

@@ -159,6 +159,7 @@
 - [mpm] Fix a crash rendering tables to a non-UTF-8 stream, which broke every table subcommand on Windows as soon as its output was redirected.
 - [mpm] Fix comparison of the Gentoo and Alpine post-release suffixes: `1.0_p1` and `1.0_git20240101` now rank above `1.0`, not below it.
 - [mpm] Fix `mpm --tree`, which drew every subcommand's short help off the screen.
+- [mpm] Fix `mpm` crashing at startup with click-extra `9.3.0` and `9.3.1`.
 - [ips,mpm,sun-tools] Fix `mpm` crashing on every illumos host, where the platform probe matched Solaris too and the `i86pc` machine string went unrecognized.
 - [ports,sdkman] Fix `--plan` for the operations that query before they act: they reported every package as missing instead of printing the command.
 - [pkg,vagrant,vcpkg,yarn] Warn and report no package, instead of crashing, when a JSON listing cannot be parsed.

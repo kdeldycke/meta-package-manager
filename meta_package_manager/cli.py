@@ -113,8 +113,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     import click
-    from click_extra import Context, Parameter
-    from click_extra.table import ColumnSpec
+    from click_extra import ColumnSpec, Context, Parameter
 
 
 # Subcommand sections.

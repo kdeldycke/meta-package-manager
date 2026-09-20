@@ -18,14 +18,13 @@ flowchart LR
     pygments(["`pygments`"])
     requests(["`requests`"])
     anyio(["`anyio`"])
-    click_0(["`click`"])
     idna(["`idna`"])
     jinja2(["`jinja2`"])
     arrow(["`arrow`"])
     beautifulsoup4(["`beautifulsoup4`"])
     certifi(["`certifi`"])
+    click_0(["`click`"])
     cloup(["`cloup`"])
-    colorama(["`colorama`"])
     docutils(["`docutils`"])
     exceptiongroup(["`exceptiongroup`"])
     httpcore(["`httpcore`"])
@@ -35,6 +34,7 @@ flowchart LR
     rdflib(["`rdflib`"])
     accessible_pygments(["`accessible-pygments`"])
     attrs(["`attrs`"])
+    colorama(["`colorama`"])
     isoduration(["`isoduration`"])
     jsonschema_specifications(["`jsonschema-specifications`"])
     mdit_py_plugins(["`mdit-py-plugins`"])
@@ -140,20 +140,20 @@ flowchart LR
         types_xmltodict{{"`types-xmltodict >=1.0.1.20250920`"}}
     end
 
-    meta_package_manager ==>|" >=8.9.1 "| click_extra
+    meta_package_manager ==>|" >=9 "| click_extra
     meta_package_manager ==>|" >=2 "| tomli
     meta_package_manager ==>|" >=0.12 "| xmltodict
     meta_package_manager ==>|" >=25 "| boltons
-    meta_package_manager ==>|" >=13.8 "| extra_platforms
+    meta_package_manager ==>|" >=13.9 "| extra_platforms
     meta_package_manager ==>|" >=0.11 "| packageurl_python
     meta_package_manager ==>|" >=1 "| backports_strenum
     meta_package_manager ==>|" >=1 "| tomli_w
     sphinx --> pygments
     sphinx --> requests
     sphinx --> jinja2
-    sphinx --> colorama
     sphinx --> docutils
     sphinx --> packaging
+    sphinx --> colorama
     sphinx --> alabaster
     sphinx --> babel
     sphinx --> imagesize
@@ -169,8 +169,8 @@ flowchart LR
     click_extra --> pytest
     click_extra --> pygments
     click_extra --> pyyaml
-    click_extra --> click_0
     click_extra --> tomli
+    click_extra --> click_0
     click_extra --> cloup
     click_extra --> docutils
     click_extra --> xmltodict
@@ -186,9 +186,9 @@ flowchart LR
     click_extra --> json5
     pytest --> pygments
     pytest --> tomli
-    pytest --> colorama
     pytest --> exceptiongroup
     pytest --> packaging
+    pytest --> colorama
     pytest --> pluggy
     pytest --> iniconfig
     spdx_tools --> pyyaml
@@ -268,7 +268,6 @@ flowchart LR
     anyio --> typing_extensions
     anyio --> idna
     anyio --> exceptiongroup
-    click_0 --> colorama
     jinja2 --> markupsafe
     beautifulsoup4 --> typing_extensions
     beautifulsoup4 --> soupsieve

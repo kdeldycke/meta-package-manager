@@ -8,6 +8,6 @@ name: 📈 Forge metrics
 jobs:
 
   metrics:
-    uses: kdeldycke/repomatic/.github/workflows/metrics.yaml@2e7b4cd29c6decc9304bc810be03e83844077644 # v7.16.0
+    uses: kdeldycke/repomatic/.github/workflows/metrics.yaml@35cc8a45d65954faebaf8b4bb9960b525d446554 # v7.16.2
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

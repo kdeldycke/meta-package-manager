@@ -7,6 +7,9 @@
 
 ## [`8.0.0` (2026-09-20)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...v8.0.0)
 
+> [!NOTE]
+> `8.0.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/8.0.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.0.0).
+
 - **Breaking:** [mpm] Replace the `--require-cooldown-support` and `--allow-unsupported-managers` flags with `enforce`, `best-effort` and `off` keywords on `--cooldown`. Configuration moves to a `[mpm.cooldown]` table with `period` and `policy` keys; the former `[mpm] cooldown` string still sets the `period`, with a deprecation warning.
 - **Breaking:** [mpm] Move the per-manager overrides to `[mpm.overrides.<id>]`, from `[mpm.managers.<id>]`, which collided with the `managers` subcommand's own options. A stale section is named in a warning and ignored.
 - **Breaking:** [mpm] Pair each manager's selectors on one help-screen line, as `--brew / --no-brew`. Their `no_<id>` configuration keys and `MPM_NO_<ID>` variables are gone: spell them `<id> = false` and `MPM_<ID>=false`.

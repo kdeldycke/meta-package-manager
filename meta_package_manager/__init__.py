@@ -21,7 +21,7 @@ point lives in {mod}`meta_package_manager.cli`.
 
 from __future__ import annotations
 
-__version__ = "8.0.0"
+__version__ = "8.0.1.dev0"
 # Empty placeholders `click-extra prebake all` fills in the release workflow, right
 # before the binary is compiled, so a downloaded executable can say when and for what
 # target it was built. They stay empty on every other install, where the interpreter

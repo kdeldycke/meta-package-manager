@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [pixi] Record that the global `exclude-newer` gate merged upstream, still unreleased and declarative-only, so `mpm` has no knob to inject.
+
 ## [`8.0.0` (2026-09-20)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...v8.0.0)
 
 > [!NOTE]

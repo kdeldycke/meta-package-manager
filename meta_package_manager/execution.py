@@ -939,6 +939,19 @@ class CLIExecutor:
     whether its query happened to pass `must_succeed`: {command}`mpm list` printed
     "Could not list installed packages." and still scored the manager ✓, leaving
     it out of the closing count.
+
+    A failed {data}`VERSION_PROBE` stays out, and is the only thing that does.
+    The probe is a liveness question about whatever binary {attr}`cli_path`
+    resolved in `PATH`, not work the user asked for, and
+    {attr}`~meta_package_manager.manager.PackageManager.unavailable_reason`
+    already reports its answer. Kept here, it named a manager mpm had correctly
+    dropped in the end-of-run summary of every command, on every host where an
+    unrelated binary shadows a manager's name: PearCleaner's `pear` symlink had
+    {command}`mpm outdated` warn about a PHP manager the user never installed
+    ([issue 2119](https://github.com/kdeldycke/meta-package-manager/issues/2119)).
+    A probe that never completed keeps its entry, a timeout or an interrupt
+    being plumbing rather than a verdict: that path appends from
+    {meth}`_spawn` and never reaches the gate.
     """
 
     _last_run: tuple[int, str, str] | None = None
@@ -1639,8 +1652,13 @@ class CLIExecutor:
             exception = CLIError(code, output, error)
             self._relay_failure(exception, is_escalation=is_escalation)
             # Accumulate before deciding whether to raise: the error is recorded
-            # whether or not it also propagates (see the `cli_errors` docstring).
-            self.cli_errors.append(exception)
+            # whether or not it also propagates. A rejected version probe is the
+            # one exemption: see the `cli_errors` docstring for why, and note it
+            # is narrower than `_DIAGNOSIS_EXEMPT_OPERATIONS`, since `doctor`
+            # reclaims its own entry and keeps the one of a run that never
+            # completed.
+            if self._active_operation != VERSION_PROBE:
+                self.cli_errors.append(exception)
             if must_succeed or self.stop_on_error:
                 raise exception
 

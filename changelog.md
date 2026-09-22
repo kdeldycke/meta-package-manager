@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [pixi] Record that the global `exclude-newer` gate merged upstream, still unreleased and declarative-only, so `mpm` has no knob to inject.
+- [mpm] Stop counting a failed manager version probe as a run error, so an unrelated binary shadowing a manager's name no longer warns on every command.
 
 ## [`8.0.0` (2026-09-20)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...v8.0.0)
 

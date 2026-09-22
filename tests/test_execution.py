@@ -521,7 +521,43 @@ def test_exempt_operations_skip_diagnosis_relay(operation, caplog):
     with caplog.at_level(logging.INFO), manager.acting_as(operation):
         manager.run_cli("-c", FAIL_ON_STDERR)
     assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
-    assert [error.code for error in manager.cli_errors] == [8]
+    # The relay exemption says nothing about accumulation: only the probe is
+    # exempt from that too, and it has its own test below.
+    expected = [] if operation == VERSION_PROBE else [8]
+    assert [error.code for error in manager.cli_errors] == expected
+
+
+def test_version_probe_failure_stays_out_of_cli_errors():
+    """A binary rejecting the version verb records no error.
+
+    The probe is how mpm settles that a `PATH` hit is not the manager it names,
+    so its rejection is a verdict `unavailable_reason` already reports. Left in
+    `cli_errors`, it named a manager mpm had correctly dropped in the end-of-run
+    summary of every command: issue 2119, where PearCleaner's `pear` symlink had
+    `mpm outdated` warn about a PHP manager the user never installed.
+    """
+    manager = FakeManager()
+    with manager.acting_as(VERSION_PROBE):
+        manager.run_cli("-c", FAIL_ON_STDERR)
+    assert manager.cli_errors == []
+    # The run is still published, so the caller reads an empty <stdout> and
+    # reports the manager unavailable instead of crashing.
+    last_run = manager._last_run
+    assert last_run is not None
+    assert last_run[0] == 8
+
+
+def test_version_probe_incomplete_run_stays_an_error():
+    """A probe that never completed is plumbing, not a verdict: it stays in the
+    tally, mirroring `doctor`'s own split."""
+    manager = FakeManager()
+    manager.timeout = 1
+    with manager.acting_as(VERSION_PROBE):
+        manager.run_cli("-c", "import time; time.sleep(30)")
+    assert len(manager.cli_errors) == 1
+    assert manager.cli_errors[0].code is None
+    assert "Timed out" in manager.cli_errors[0].error
+    assert manager._last_run is None
 
 
 # CLIExecutor.run_cache: a lane's peers replay a byte-identical command instead of

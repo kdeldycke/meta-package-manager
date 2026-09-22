@@ -1429,14 +1429,15 @@ def test_manager_page_headings_survive_a_build(tmp_path):
     assert f"<title>{pool[manager_id].name}" in html
 
     # Backticked identifiers render as code spans, and every heading trails the
-    # permalink anchor Sphinx appends.
+    # permalink anchor Sphinx appends. The level matters as much as the text: a
+    # subsection flattened by the nested parse would still read as a heading.
     rendered = [
-        re.sub(r"<[^>]+>", "", found).strip()
-        for found in re.findall(r"<h2>(.*?)<a class", html, re.DOTALL)
+        (int(level), re.sub(r"<[^>]+>", "", text).strip())
+        for level, text in re.findall(r"<h([23])>(.*?)<a class", html, re.DOTALL)
     ]
     expected = [
-        title.format(manager_id=manager_id).replace("`", "")
-        for title, func_name in _docs.MANAGER_SECTIONS
+        (level, title.format(manager_id=manager_id).replace("`", ""))
+        for title, func_name, level in _docs.MANAGER_SECTIONS
         if title and getattr(_docs, func_name)(manager_id).strip()
     ]
     assert rendered == expected
@@ -1461,7 +1462,7 @@ def test_manager_page_sections_render(manager):
     """
     heading = re.compile(r"^#{1,6} ", re.MULTILINE)
     fence = re.compile(r"(?ms)^(`{3,}).*?^\1$")
-    for _title, func_name in _docs.MANAGER_SECTIONS:
+    for _title, func_name, _level in _docs.MANAGER_SECTIONS:
         output = getattr(_docs, func_name)(manager.id)
         # Four sections are omitted for some managers (a section with no output
         # is dropped from the page by manager_page): reference traces for a
@@ -1489,6 +1490,29 @@ def test_manager_page_sections_render(manager):
     configuration = _docs.manager_configuration(manager.id)
     assert f"--no-{manager.id}" in configuration
     assert f"[mpm.overrides.{manager.id}]" in configuration
+
+
+def test_version_probe_nests_under_the_reference_traces():
+    """Check the version probe is a subsection of the reference traces, and a
+    section of its own on a page carrying no traces.
+
+    `MANAGER_SECTIONS` declares the probe one level below `manager_traces`, and
+    `manager_page()` promotes a subsection whose parent rendered nothing. Both
+    halves regress silently: a lost level flattens the probe back into a
+    section, and a lost promotion orphans it under whatever heading precedes
+    the traces on every page documenting no native output sample.
+    """
+    for manager_id in pool.all_manager_ids:
+        page = _docs.manager_page(manager_id)
+        if _docs.manager_traces(manager_id).strip():
+            assert "\n## Reference traces\n" in page, manager_id
+            assert "\n### Version probe\n" in page, manager_id
+            assert page.index("## Reference traces") < page.index(
+                "### Version probe"
+            ), manager_id
+        else:
+            assert "\n## Version probe\n" in page, manager_id
+            assert "### Version probe" not in page, manager_id
 
 
 DOCSTRING_FENCE = re.compile(

@@ -452,20 +452,20 @@ The `issues` endpoint rather than `pulls`: a search there returns issues *and*
 pull requests, while `pulls` silently restricts itself to the latter.
 """
 
-MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
-    (None, "manager_intro"),
-    ("What `mpm` adds to `{manager_id}`", "manager_augments"),
-    ("Your `{manager_id}` commands, in `mpm`", "manager_rosetta"),
-    ("Operations", "manager_operations"),
-    ("Configuration", "manager_configuration"),
-    ("Recipes", "manager_recipes"),
-    ("Privilege escalation", "manager_sudo"),
-    ("Concurrency", "manager_concurrency"),
-    ("Cooldown", "manager_cooldown"),
-    ("Version probe", "manager_version_probe"),
-    ("Reference traces", "manager_traces"),
-    ("Upstream project", "manager_upstream"),
-    ("Changelog", "scope_changelog"),
+MANAGER_SECTIONS: tuple[tuple[str | None, str, int], ...] = (
+    (None, "manager_intro", 2),
+    ("What `mpm` adds to `{manager_id}`", "manager_augments", 2),
+    ("Your `{manager_id}` commands, in `mpm`", "manager_rosetta", 2),
+    ("Operations", "manager_operations", 2),
+    ("Configuration", "manager_configuration", 2),
+    ("Recipes", "manager_recipes", 2),
+    ("Privilege escalation", "manager_sudo", 2),
+    ("Concurrency", "manager_concurrency", 2),
+    ("Cooldown", "manager_cooldown", 2),
+    ("Reference traces", "manager_traces", 2),
+    ("Version probe", "manager_version_probe", 3),
+    ("Upstream project", "manager_upstream", 2),
+    ("Changelog", "scope_changelog", 2),
 )
 """Layout of a per-manager documentation page: section title, generator function.
 
@@ -482,7 +482,14 @@ facts rather than prose, so they read better as rows of the page's infobox
 ({func}`manager_card`).
 
 Each title is a `str.format` template receiving the manager ID, so a heading
-can name its manager; a title with no replacement field renders unchanged.
+can name its manager; a title with no replacement field renders unchanged. The
+untitled entry is the lede, and its level is never read.
+
+The third field is the heading level. A level-3 entry is a subsection of the
+level-2 entry above it, and {func}`manager_page` promotes it back to a section
+when that parent rendered nothing for this manager: a manager documenting no
+reference traces still reports its version probe, as a section of its own
+rather than as an orphan nested under whatever heading precedes it.
 
 Every generator listed here emits heading-free MyST: the headings around them
 belong to {func}`manager_page`, the one place a page's layout is written down.
@@ -1448,9 +1455,11 @@ def manager_card(manager_id: str) -> str:
     purl_types = sorted(
         {manager_id} | {t for t, ids in PURL_MAP.items() if ids and manager_id in ids},
     )
+    # The trailing slash is the pURL syntax cue: `pkg:type/` is the prefix a
+    # package name completes, so a type reads as a coordinate, not as a word.
     facts.append((
         "purl types",
-        FACT_SEPARATOR.join(f"`pkg:{t}`" for t in purl_types),
+        FACT_SEPARATOR.join(f"`pkg:{t}/`" for t in purl_types),
     ))
 
     # How mpm invokes the tool. Only the CLI names are unconditional: the rest is
@@ -2055,14 +2064,15 @@ def _python_regex_literal(pattern: str) -> str:
 
 
 def manager_version_probe(manager_id: str) -> str:
-    """Produce the version-probe section of a manager's documentation page.
+    """Produce the version-probe subsection of a manager's documentation page.
 
     The command `mpm` runs to read the manager's version, the output that
     command was captured producing, and the regexes pulling the version out of
     it. The transcript comes from the `[samples.version]` fixture of a bundled
     TOML manager or the `version_regexes` docstring of a class-based one; the
-    per-operation samples render in the reference-traces section
-    ({func}`manager_traces`).
+    per-operation samples render in the enclosing reference-traces section
+    ({func}`manager_traces`), which {func}`manager_page` leaves out for a
+    manager documenting none, promoting this subsection back to a section.
 
     The rest of the invocation plumbing (binary names and lookup paths, forced
     arguments and environment) reads as one-line facts, so it sits in the page's
@@ -2362,9 +2372,10 @@ def manager_traces(manager_id: str) -> str:
     `installed`/`outdated` docstrings (harvested by
     {func}`~meta_package_manager.docstring_corpus.literal_blocks`, the same
     literal blocks the corpus test round-trips). Empty for managers without such
-    samples (the section is then omitted from the stub); the version probe
-    transcript keeps its own section ({func}`manager_version_probe`), next to
-    the regexes consuming it.
+    samples (the section is then omitted from the stub, and its
+    {func}`manager_version_probe` subsection is promoted to a section of its
+    own); the version probe transcript renders below them, next to the regexes
+    consuming it.
     """
     m = pool[manager_id]
     source = getattr(m, "definition_source", None)
@@ -2393,21 +2404,14 @@ def manager_traces(manager_id: str) -> str:
         source_label = "manager source"
     if not fences:
         return ""
+    source_link = f"[{source_label}]({manager_source_url(manager_id)})"
     intro = (
-        "Raw native outputs captured in the "
-        f"[{source_label}]({manager_source_url(manager_id)}): the reference "
-        f"`mpm`'s parsers were written against. If you know {m.name} well and a "
+        "A collection of raw native outputs captured from the manager's own CLI "
+        f"and recorded in the {source_link}. If you know {m.name} well and a "
         "transcript below looks wrong, or a newer release changed its output "
         f"format, [report it]({GITHUB_ISSUES_URL})."
     )
-    outro = (
-        "Feed any of these through `mpm` and the raw output becomes one uniform "
-        "table, the same shape for every manager: filter it, project columns, or "
-        f"export it (`mpm --{manager_id} installed --output json`, or `csv`, "
-        "`toml`, `yaml`), each package carrying a purl and a version comparable "
-        "across managers."
-    )
-    return "\n\n".join((intro, *fences, outro))
+    return "\n\n".join((intro, *fences))
 
 
 class ChangelogEntry(NamedTuple):
@@ -2980,7 +2984,9 @@ def manager_page(manager_id: str) -> str:
     entry renders as the lede, a titled one as its heading followed by its
     generator's output. A section whose generator produces nothing for this
     manager (like reference traces for a manager documenting no literal output
-    samples) is skipped.
+    samples) is skipped, and a subsection left without its parent is promoted
+    to a section of its own, so no page nests a heading under one that never
+    rendered.
 
     Nothing is left for the stub but the call, which is the point: a section
     added, renamed or dropped is an edit to {data}`MANAGER_SECTIONS` alone,
@@ -3002,12 +3008,19 @@ def manager_page(manager_id: str) -> str:
     """
     m = pool[manager_id]
     blocks = [f"# {{octicon}}`package` {m.name}"]
-    for title, func_name in MANAGER_SECTIONS:
+    parent_rendered = False
+    for title, func_name, level in MANAGER_SECTIONS:
         body = globals()[func_name](manager_id)
         if not body.strip():
+            if level == 2:
+                parent_rendered = False
             continue
+        heading = level if level == 2 or parent_rendered else 2
         if title:
-            blocks.append(f"## {title.format(manager_id=manager_id)}")
+            hashes = "#" * heading
+            blocks.append(f"{hashes} {title.format(manager_id=manager_id)}")
+        if level == 2:
+            parent_rendered = bool(title)
         blocks.append(body)
     return "\n\n".join(blocks) + "\n"
 

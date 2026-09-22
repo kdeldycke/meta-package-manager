@@ -8,6 +8,8 @@
 - [pixi] Record that the global `exclude-newer` gate merged upstream, still unreleased and declarative-only, so `mpm` has no knob to inject.
 - [mpm] Stop counting a failed manager version probe as a run error, so an unrelated binary shadowing a manager's name no longer warns on every command.
 - [mpm] Rename each manager page's `Selecting and configuring <id>` section to `Configuration`, and list its levers as bullets.
+- [mpm] Nest each manager page's `Version probe` under `Reference traces`, reword that section's intro, and drop its closing pitch, which the augmentations section already carries.
+- [mpm] Render each manager page's purl types as `pkg:<type>/`, the trailing slash being the pURL cue.
 
 ## [`8.0.0` (2026-09-20)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...v8.0.0)
 

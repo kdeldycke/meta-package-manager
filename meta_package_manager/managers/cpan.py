@@ -69,8 +69,8 @@ class CPAN(PackageManager):
     next release reopens the window.
 
     If you do not track Perl modules with `cpan` at all,
-    [disable the manager entirely](#selecting-and-configuring-cpan): set
-    `cpan = false` in your mpm config, or pass `--no-cpan`. See
+    [disable the manager entirely](#configuration): set `cpan = false` in your
+    mpm config, or pass `--no-cpan`. See
     [#1983](https://github.com/kdeldycke/meta-package-manager/issues/1983) for the
     original report.
     ```

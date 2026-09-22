@@ -42,7 +42,7 @@ from collections import Counter
 from functools import cache
 from itertools import groupby
 from pathlib import Path
-from textwrap import dedent
+from textwrap import dedent, indent
 from typing import NamedTuple
 from urllib.parse import quote, urlparse
 
@@ -457,7 +457,7 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str], ...] = (
     ("What `mpm` adds to `{manager_id}`", "manager_augments"),
     ("Your `{manager_id}` commands, in `mpm`", "manager_rosetta"),
     ("Operations", "manager_operations"),
-    ("Selecting and configuring `{manager_id}`", "manager_selection"),
+    ("Configuration", "manager_configuration"),
     ("Recipes", "manager_recipes"),
     ("Privilege escalation", "manager_sudo"),
     ("Concurrency", "manager_concurrency"),
@@ -1347,7 +1347,7 @@ def manager_card(manager_id: str) -> str:
     forced on every call. They are one-line facts, so a box row states each one
     more plainly than a bulleted section could, and the rationale for forcing
     them sits next to the lever that overrides them
-    ({func}`manager_selection`). What did not fit — the version probe and the
+    ({func}`manager_configuration`). What did not fit — the version probe and the
     regexes reading it — kept a section of its own
     ({func}`manager_version_probe`).
 
@@ -2104,46 +2104,53 @@ def manager_version_probe(manager_id: str) -> str:
     return "\n\n".join(parts)
 
 
-def manager_selection(manager_id: str) -> str:
-    """Produce the selection-and-configuration section of a manager's page.
+def manager_configuration(manager_id: str) -> str:
+    """Produce the configuration section of a manager's page.
 
-    The levers to control this manager's participation: the one-run
-    `--no-<id>` deselector, the persistent selection toggle in the
-    configuration file, and a per-manager override block for tuning how `mpm`
-    drives it. The command-to-command mapping lives in the Rosetta section
+    One bullet per lever on this manager's participation: the one-run
+    `--no-<id>` deselector, the persistent toggle in the configuration file, a
+    per-manager override tuning how `mpm` drives it, and the command printing
+    the override template. A bullet states one choice, so the four are scanned
+    instead of parsed out of prose. Each snippet is indented under its bullet,
+    which is what keeps a fence inside a list item.
+
+    The command-to-command mapping lives in the Rosetta section
     ({func}`manager_rosetta`); this one points at the fuller
     [configuration](configuration.md) and [overrides](overrides.md) references
     rather than restating them.
 
     A manager whose calls carry forced arguments or environment variables
-    (listed in the infobox by {func}`manager_card`) gets the rationale for them
-    here, where the lever that overrides them is.
+    (listed in the infobox by {func}`manager_card`) closes the section on the
+    rationale for them, where the lever that overrides them is.
     """
     m = pool[manager_id]
-    select = (
-        f"Deselect `{manager_id}` for a single run with `--no-{manager_id}`, or "
-        "persist the choice in your [configuration](../configuration.md):"
-    )
     select_toml = _fenced(f"[mpm]\n{manager_id} = false", "toml")
-    forced = (
-        "The arguments and environment variables listed in the box atop this "
-        f"page are forced on every `{manager_id}` call, so runs stay quiet, "
-        "non-interactive and reproducible: the defaults you would set in CI "
-        "anyway."
-        if m.pre_args or m.post_args or m.extra_env
-        else ""
-    )
-    tune = (
-        "Keep it enabled but tune how `mpm` drives it with a "
-        "[per-manager override](../overrides.md):"
-    )
     tune_toml = _fenced(f"[mpm.overrides.{manager_id}]\ntimeout = 900", "toml")
-    template = (
-        f"`mpm config-template {manager_id}` prints every overridable attribute "
-        "as a ready-to-paste block."
+    bullets = (
+        f"Deselect `{manager_id}` for a single run with `--no-{manager_id}`.",
+        (
+            "Deselect it for every run from your "
+            f"[configuration](../configuration.md):\n\n{indent(select_toml, '  ')}"
+        ),
+        (
+            "Keep it enabled and tune how `mpm` drives it with a "
+            "[per-manager override](../overrides.md). This one raises the "
+            f"timeout of each of its calls:\n\n{indent(tune_toml, '  ')}"
+        ),
+        (
+            f"`mpm config-template {manager_id}` prints every overridable "
+            "attribute as a ready-to-paste block."
+        ),
     )
-    parts = [select, select_toml, forced, tune, tune_toml, template]
-    return "\n\n".join(filter(None, parts))
+    parts = ["\n".join(f"- {bullet}" for bullet in bullets)]
+    if m.pre_args or m.post_args or m.extra_env:
+        parts.append(
+            "The arguments and environment variables listed in the box atop "
+            f"this page are forced on every `{manager_id}` call, so runs stay "
+            "quiet, non-interactive and reproducible: the defaults you would "
+            "set in CI anyway."
+        )
+    return "\n\n".join(parts)
 
 
 def manager_sudo(manager_id: str) -> str:

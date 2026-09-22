@@ -1486,9 +1486,9 @@ def test_manager_page_sections_render(manager):
     # Header, separator, then one row per operation.
     operations = _docs.manager_operations(manager.id)
     assert len(operations.splitlines()) == 2 + len(Operations)
-    selection = _docs.manager_selection(manager.id)
-    assert f"--no-{manager.id}" in selection
-    assert f"[mpm.overrides.{manager.id}]" in selection
+    configuration = _docs.manager_configuration(manager.id)
+    assert f"--no-{manager.id}" in configuration
+    assert f"[mpm.overrides.{manager.id}]" in configuration
 
 
 DOCSTRING_FENCE = re.compile(

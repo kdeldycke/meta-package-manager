@@ -821,12 +821,20 @@ def test_metrics_predecessor_is_sampled():
 
 
 def test_metrics_series_start_at_creation():
-    """Check every charted repository is anchored by a zero-star origin.
+    """Check every charted repository starts its curve on its creation day.
 
-    The relative chart measures each curve from its first point, which the
-    `created` row places on the repository's creation day. Without the anchor
-    a curve starts at its first reading instead, and the chart no longer
-    compares the projects by age.
+    The relative chart measures each curve from its first point, so that point
+    must fall on the day the repository was created. Otherwise a curve starts
+    at its first reading instead, and the chart no longer compares the projects
+    by age.
+
+    Two shapes satisfy it. The usual one is a `created` row: the sampler writes
+    it at zero stars, and it precedes every measurement. The other is a
+    repository that gained a star on its creation day. A real reading of that
+    day outranks the assumed zero and replaces it, since the store holds one
+    row per day. The sampler re-asserts the anchor on every run, so a
+    forward-sampled repository with no `created` row can only be in that second
+    case, and its first point is the creation day it displaced.
     """
     config = _metrics_config()
     rows = _load_metrics_store()
@@ -835,11 +843,19 @@ def test_metrics_series_start_at_creation():
         star_rows = [
             row for row in rows if row["repo"] == url and row["metric"] == "stars"
         ]
+        assert star_rows, f"{name} has no star reading"
         origins = [row for row in star_rows if row["source"] == "created"]
-        assert origins, f"{name} has no creation anchor"
-        assert origins[0]["value"] == "0"
-        # The anchor must precede every measurement of that repository.
-        assert all(row["date"] >= origins[0]["date"] for row in star_rows)
+        if origins:
+            assert origins[0]["value"] == "0"
+            # The anchor must precede every measurement of that repository.
+            assert all(row["date"] >= origins[0]["date"] for row in star_rows)
+            continue
+        # No anchor, so a measurement of the creation day must hold it. Only a
+        # forward sample proves the collector ran and lost the row to one.
+        sampled = [row for row in star_rows if row["source"] == "sample"]
+        assert sampled, f"{name} has no creation anchor and was never sampled"
+        first = min(row["date"] for row in star_rows)
+        assert first <= sampled[0]["date"], f"{name} starts after it was sampled"
 
 
 def test_metrics_store_well_formed():

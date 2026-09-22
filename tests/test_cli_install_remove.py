@@ -187,18 +187,27 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
             )
             continue
 
-        # cargo, conda, cpan, npm and winget installs are flaky on the CI
-        # runners: they depend on live registries (crates.io, the Anaconda
-        # channels, CPAN, npm, the winget community source) plus a healthy
-        # toolchain, and regularly surface transient failures (conda's
-        # solver times out or fails to resolve on the Windows runner, and
-        # part of the Windows fleet ships a Strawberry Perl whose CPAN is
-        # configured for its SQLite index without DBD::SQLite installed, so
-        # every install dies on "install_driver(SQLite) failed"). Accept
-        # exit 1 like test_single_manager_upgrade_all does for the same
-        # reason; the check_manager_selection below still asserts mpm
-        # dispatched to the manager.
-        if manager_id in {"cargo", "conda", "cpan", "npm", "winget"}:
+        # These installs read a live registry (crates.io, the Anaconda channels,
+        # CPAN, npm, the winget community source) and need a healthy toolchain
+        # behind it, so they regularly surface transient failures on the CI
+        # runners. conda's solver times out or fails to resolve on the Windows
+        # runner. Part of the Windows fleet ships a Strawberry Perl whose CPAN
+        # is configured for its SQLite index without DBD::SQLite installed, so
+        # every install dies on "install_driver(SQLite) failed". And one slow or
+        # reset answer from the npm registry fails `npm`, `yarn` and
+        # `yarn-berry` alike, since all three read it. Accept exit 1 like
+        # test_single_manager_upgrade_all does for the same reason; the
+        # check_manager_selection below still asserts mpm dispatched to the
+        # manager.
+        if manager_id in {
+            "cargo",
+            "conda",
+            "cpan",
+            "npm",
+            "winget",
+            "yarn",
+            "yarn-berry",
+        }:
             assert result.exit_code in (0, 1)
         else:
             assert result.exit_code == 0

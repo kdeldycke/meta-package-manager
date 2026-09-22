@@ -24,6 +24,7 @@ import shutil
 from datetime import date, datetime, timezone
 from itertools import permutations
 from pathlib import Path
+from textwrap import indent
 from urllib.parse import quote, urlparse
 
 import pytest
@@ -1513,6 +1514,35 @@ def test_version_probe_nests_under_the_reference_traces():
         else:
             assert "\n## Version probe\n" in page, manager_id
             assert "### Version probe" not in page, manager_id
+
+
+@pytest.mark.parametrize("manager_id", ["brew", "pear"])
+def test_config_template_block_is_the_command_output(manager_id, invoke):
+    """Check a manager page shows the block `mpm config-template` prints.
+
+    The page composes the command's own pieces, so a change to its output (a
+    header comment, a renamed table, a different wrapping) would otherwise
+    leave every page showing a block the CLI no longer produces. `brew` adds an
+    `extra_env` sub-table to the shape `pear` has.
+    """
+    result = invoke("config-template", manager_id)
+    assert result.exit_code == 0
+    block = f"```toml\n{result.output.rstrip()}\n```"
+    assert indent(block, "  ") in _docs.manager_configuration(manager_id)
+
+
+def test_configuration_section_names_no_build_host():
+    """Check no manager page carries a path from the machine that built it.
+
+    An overridable field can hold one: SDKMAN resolves its search path from
+    `$SDKMAN_DIR`, whose default sits under `$HOME`, and the template block
+    prints the value as it stands. `_config_template` collapses a path under
+    the builder's home to `~`, the rule the infobox already applies, so the
+    published pages are identical on every host.
+    """
+    home = str(Path.home())
+    for manager_id in pool.all_manager_ids:
+        assert home not in _docs.manager_configuration(manager_id), manager_id
 
 
 DOCSTRING_FENCE = re.compile(

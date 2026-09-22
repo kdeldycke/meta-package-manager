@@ -10,6 +10,7 @@
 - [mpm] Rename each manager page's `Selecting and configuring <id>` section to `Configuration`, and list its levers as bullets.
 - [mpm] Nest each manager page's `Version probe` under `Reference traces`, reword that section's intro, and drop its closing pitch, which the augmentations section already carries.
 - [mpm] Render each manager page's purl types as `pkg:<type>/`, the trailing slash being the pURL cue.
+- [mpm] Reword the `Configuration` levers and print each manager's `mpm config-template <id>` block under the last one.
 
 ## [`8.0.0` (2026-09-20)](https://github.com/kdeldycke/meta-package-manager/compare/v7.6.1...v8.0.0)
 

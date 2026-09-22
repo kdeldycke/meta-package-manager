@@ -46,6 +46,7 @@ from textwrap import dedent, indent
 from typing import NamedTuple
 from urllib.parse import quote, urlparse
 
+import tomli_w
 import yaml
 from click_extra.table import TableFormat, render_table
 from extra_platforms import extract_members
@@ -60,6 +61,7 @@ from meta_package_manager.capabilities import (
     implements_method,
     upgrade_all_is_synthesized,
 )
+from meta_package_manager.config import dump_manager_overrides
 from meta_package_manager.definitions import OVERRIDES_SECTION
 from meta_package_manager.dispatch import (
     COMMAND_FAN_OUT,
@@ -2114,20 +2116,40 @@ def manager_version_probe(manager_id: str) -> str:
     return "\n\n".join(parts)
 
 
+def _config_template(manager_id: str) -> str:
+    """Render the block `mpm config-template <id>` prints, for a manager's page.
+
+    The command's own composition ({func}`~meta_package_manager.config.dump_manager_overrides`
+    wrapped in its `[mpm.overrides]` table), so a page shows the bytes the CLI
+    prints and doubles as that command's reference output.
+
+    One difference: a path under the builder's home collapses to `~`, the rule
+    {func}`_collapse_home` applies to the infobox's search paths. An overridable
+    field can carry one (SDKMAN resolves its search path from `$SDKMAN_DIR`,
+    whose default sits under `$HOME`), and a published page names no machine.
+    """
+    overrides = {manager_id: dump_manager_overrides(pool[manager_id])}
+    template = tomli_w.dumps({"mpm": {OVERRIDES_SECTION: overrides}})
+    home = str(Path.home())
+    # The escaped spelling first: `tomli_w` doubles the backslashes of a
+    # Windows path, which the plain replacement would then miss.
+    escaped = home.replace("\\", "\\\\")
+    return template.replace(escaped, "~").replace(home, "~").rstrip("\n")
+
+
 def manager_configuration(manager_id: str) -> str:
     """Produce the configuration section of a manager's page.
 
     One bullet per lever on this manager's participation: the one-run
-    `--no-<id>` deselector, the persistent toggle in the configuration file, a
-    per-manager override tuning how `mpm` drives it, and the command printing
-    the override template. A bullet states one choice, so the four are scanned
-    instead of parsed out of prose. Each snippet is indented under its bullet,
-    which is what keeps a fence inside a list item.
+    `--no-<id>` flag, the persistent toggle in the configuration file, a
+    per-manager override, and the block `mpm config-template` prints for it
+    ({func}`_config_template`). A bullet states one choice, so the four are
+    scanned instead of parsed out of prose. Each snippet is indented under its
+    bullet, which is what keeps a fence inside a list item.
 
     The command-to-command mapping lives in the Rosetta section
     ({func}`manager_rosetta`); this one points at the fuller
-    [configuration](configuration.md) and [overrides](overrides.md) references
-    rather than restating them.
+    [configuration](configuration.md) reference rather than restating it.
 
     A manager whose calls carry forced arguments or environment variables
     (listed in the infobox by {func}`manager_card`) closes the section on the
@@ -2136,20 +2158,24 @@ def manager_configuration(manager_id: str) -> str:
     m = pool[manager_id]
     select_toml = _fenced(f"[mpm]\n{manager_id} = false", "toml")
     tune_toml = _fenced(f"[mpm.overrides.{manager_id}]\ntimeout = 900", "toml")
+    template_toml = _fenced(_config_template(manager_id), "toml")
     bullets = (
-        f"Deselect `{manager_id}` for a single run with `--no-{manager_id}`.",
         (
-            "Deselect it for every run from your "
+            f"Ignore `{manager_id}` on the `mpm` CLI by passing the "
+            f"`--no-{manager_id}` option."
+        ),
+        (
+            "Ignore it for every run in your "
             f"[configuration](../configuration.md):\n\n{indent(select_toml, '  ')}"
         ),
         (
-            "Keep it enabled and tune how `mpm` drives it with a "
-            "[per-manager override](../overrides.md). This one raises the "
-            f"timeout of each of its calls:\n\n{indent(tune_toml, '  ')}"
+            f"Raise the timeout of all `{manager_id}` calls:\n\n"
+            f"{indent(tune_toml, '  ')}"
         ),
         (
-            f"`mpm config-template {manager_id}` prints every overridable "
-            "attribute as a ready-to-paste block."
+            f"Run `mpm config-template {manager_id}` to print all overridable "
+            f"settings for your configuration file:\n\n"
+            f"{indent(template_toml, '  ')}"
         ),
     )
     parts = ["\n".join(f"- {bullet}" for bullet in bullets)]

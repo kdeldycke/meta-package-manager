@@ -2155,12 +2155,14 @@ def test_mirror_blocks_in_sync(monkeypatch):
         from click_extra.sphinx.python import update_mirror_blocks
     except ImportError:
         pytest.skip("needs the docs dependency group (click-extra[sphinx])")
-    # click-extra measures an emoji-presentation sequence (⚠️, ☠️) one column
-    # narrower under `$TERM_PROGRAM=Apple_Terminal`, which padded every row of the
-    # benchmark mirror carrying one a space short and reported the committed table
-    # as stale on that terminal alone. Fixed for markup renderings in click-extra
-    # `9.3.0`, which the `>=9` floor still lets a build resolve below, so the
-    # environment is pinned here instead of left to the host:
+    # click-extra measures an emoji-presentation sequence (⚠️, ☠️) by the running
+    # terminal's advance rather than by the Unicode tables, and which terminals
+    # advance one column for it is `wcwidth`'s answer, not a roster kept in either
+    # project. Under one of them the benchmark mirror regenerates a space short on
+    # every row carrying such a glyph, so the committed table reads as stale.
+    # Markup needs no terminal, and click-extra exempts it from `9.3.0` on, which
+    # the `>=9` floor still lets a build resolve below, so the environment is
+    # pinned here instead of left to the host:
     # https://github.com/kdeldycke/click-extra/commit/4f7d2785374f48319882bddc2ea8134383d191d9
     monkeypatch.delenv("TERM_PROGRAM", raising=False)
     stale = update_mirror_blocks(

@@ -130,6 +130,29 @@ jobs:
         with:
           fetch-tags: true
 
+      # APT daily machinery
+      - name: APT - Linux disable the daily upgrade daemons
+        if: runner.os == 'Linux'
+        # The Ubuntu runners boot with apt-daily and unattended-upgrades on timers, and a firing one
+        # holds /var/lib/dpkg/lock-frontend for minutes. The destructive apt and aptitude round-trips
+        # then fail on that lock instead of on anything mpm did, and which matrix cells lose depends
+        # only on when the timer happens to fire. Mask rather than stop, since a stopped service is
+        # still timer-activated later in the run; `--now` stops an in-flight one, and `systemctl stop`
+        # waits for it to finish. The apt lock timeout is a second, independent mechanism: apt then
+        # waits out a lock it cannot take instead of failing on the spot.
+        run: |
+          sudo systemctl mask --now \
+            apt-daily.timer apt-daily-upgrade.timer \
+            apt-daily.service apt-daily-upgrade.service \
+            unattended-upgrades.service
+          echo 'DPkg::Lock::Timeout "120";' | sudo tee /etc/apt/apt.conf.d/99mpm-lock-timeout
+          if command -v fuser > /dev/null; then
+            while sudo fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; do
+              echo "Waiting for the dpkg frontend lock to be released..."
+              sleep 5
+            done
+          fi
+
       ### Install or upgrade package managers on each platform, and made them
       ### ready to use for mpm.
 

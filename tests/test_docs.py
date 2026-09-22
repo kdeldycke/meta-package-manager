@@ -2135,7 +2135,7 @@ def test_matrix_blocks_in_sync():
     assert not stale
 
 
-def test_mirror_blocks_in_sync():
+def test_mirror_blocks_in_sync(monkeypatch):
     """Check the `<!-- mirror-src -->` and `:mirror:` blocks embedded in the docs
     and readme match a fresh regeneration from their generators.
 
@@ -2144,6 +2144,10 @@ def test_mirror_blocks_in_sync():
     repomatic's `update-docs` job refreshed the embedded blocks with
     `click-extra refresh-directives`.
 
+    Regenerated with no `$TERM_PROGRAM` in the environment: a mirror is a
+    checked-in markup file, so the padding it is compared against cannot be a
+    function of the terminal the check happens to run in.
+
     Skipped when click-extra's `[sphinx]` extra (pulled by the `docs`
     dependency group) is missing, as in the hermetic unit-test environment.
     """
@@ -2151,6 +2155,14 @@ def test_mirror_blocks_in_sync():
         from click_extra.sphinx.python import update_mirror_blocks
     except ImportError:
         pytest.skip("needs the docs dependency group (click-extra[sphinx])")
+    # click-extra measures an emoji-presentation sequence (⚠️, ☠️) one column
+    # narrower under `$TERM_PROGRAM=Apple_Terminal`, which padded every row of the
+    # benchmark mirror carrying one a space short and reported the committed table
+    # as stale on that terminal alone. Fixed for markup renderings in click-extra
+    # `9.3.0`, which the `>=9` floor still lets a build resolve below, so the
+    # environment is pinned here instead of left to the host:
+    # https://github.com/kdeldycke/click-extra/commit/4f7d2785374f48319882bddc2ea8134383d191d9
+    monkeypatch.delenv("TERM_PROGRAM", raising=False)
     stale = update_mirror_blocks(
         (PROJECT_ROOT / "docs", PROJECT_ROOT / "readme.md"),
         check=True,

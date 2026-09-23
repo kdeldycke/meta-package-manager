@@ -1501,6 +1501,22 @@ class CLIExecutor:
           * letting `mpm --dry-run` and `mpm --stop-on-error` have
             expected effect on execution
 
+        The exception above has a second member: a call mpm escalates itself
+        keeps the controlling terminal too, because `sudo` keys its credential
+        cache to the terminal a session would hide. The timeout kill of such
+        a call therefore reaches the `sudo` process alone, and never the
+        manager binary `sudo` spawned.
+
+        ```{todo}
+        Reap the grandchild a timed-out escalation leaves behind. The kill has
+        no process group of its own to reach, so the manager binary `sudo`
+        spawned keeps running behind the reported timeout: an `apt upgrade`
+        outlasting the state-change timeout leaves `apt` holding
+        `/var/lib/dpkg/lock-frontend`, and the next `apt` or `aptitude` call
+        fails on a lock mpm already declared finished. Enumerate the dead
+        child's descendants and kill them once the timeout fires.
+        ```
+
         :param must_succeed: if `True`, raise
             {class}`meta_package_manager.execution.CLIError` when the command
             fails, regardless of the user-facing {attr}`stop_on_error`

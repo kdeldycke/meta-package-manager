@@ -189,6 +189,16 @@ jobs:
           # lxml has no pre-built wheel for development Python (3.15+), so it
           # must compile from source, which needs libxml2 and libxslt headers.
           sudo apt-get --quiet --yes install libxml2-dev libxslt-dev
+          # Drain the image's pending upgrades, so the destructive
+          # `upgrade --all` round-trip finds nothing to install and returns in
+          # seconds. Left pending, a big backlog runs past mpm's 500s
+          # state-change timeout, whose kill reaches `sudo` alone and orphans
+          # `apt` still holding /var/lib/dpkg/lock-frontend: the `apt` and
+          # `aptitude` install round-trips on the same worker then wait out
+          # their own lock timeout and fail. The two variables keep conffile
+          # and service-restart prompts from blocking the unattended run.
+          sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a \
+            apt-get --quiet --yes upgrade
 
       # Aptitude
       - name: Aptitude - Linux install

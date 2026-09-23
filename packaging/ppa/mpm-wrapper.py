@@ -16,7 +16,7 @@ import sys
 
 sys.path.insert(0, "/usr/share/meta-package-manager")
 
-from meta_package_manager.__main__ import main  # noqa: E402
+from meta_package_manager.__main__ import main
 
 if __name__ == "__main__":
     sys.exit(main())

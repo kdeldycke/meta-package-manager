@@ -55,7 +55,7 @@ SERIES = ("jammy", "noble", "resolute", "stonking")
 MAINTAINER = "Kevin Deldycke <kevin@deldycke.com>"
 
 
-def run(*args: str, **kwargs) -> subprocess.CompletedProcess:
+def run(*args: str, **kwargs) -> subprocess.CompletedProcess[str]:
     """Run a command, echoing it the way the workflows disclose theirs."""
     print(f"$ {' '.join(map(str, args))}", file=sys.stderr)
     return subprocess.run(args, check=True, text=True, encoding="UTF-8", **kwargs)
@@ -113,7 +113,7 @@ def export_tag_metadata(version: str, workdir: Path) -> Path:
 def python_floor(project: Path) -> str:
     """Read `requires-python` and return its bare floor, like `3.10`."""
     content = (project / "pyproject.toml").read_text(encoding="UTF-8")
-    match = re.search(r'^requires-python\s*=\s*"[^0-9]*([0-9]+\.[0-9]+)', content, re.M)
+    match = re.search(r'^requires-python\s*=\s*"[^0-9]*([0-9]+\.[0-9]+)', content, re.MULTILINE)
     if not match:
         msg = "No `requires-python` floor found in the tag's pyproject.toml."
         raise SystemExit(msg)

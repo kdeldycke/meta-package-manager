@@ -2,44 +2,119 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: meta-package-manager
 Upstream-Contact: Kevin Deldycke <kevin@deldycke.com>
 Source: https://github.com/kdeldycke/meta-package-manager
+Comment:
+ vendor/ holds the unpacked wheels mpm runs against, so each one keeps its own
+ stanza below. Every notice was read from that package's own license file as
+ published, or from its metadata where the license states none.
 
 Files: *
-Copyright: Kevin Deldycke <kevin@deldycke.com> and contributors
+Copyright: Copyright 2016-2026 Kevin Deldycke <kevin@deldycke.com> and contributors
 License: GPL-2+
-
-Files: vendor/click_extra/*
-Copyright: Kevin Deldycke <kevin@deldycke.com> and contributors
-License: GPL-2+
-
-Files: vendor/extra_platforms/*
-Copyright: Kevin Deldycke <kevin@deldycke.com> and contributors
-License: Apache-2.0
-
-Files: vendor/click/*
- vendor/cloup/*
-Copyright: Pallets and contributors
- Gianluca Gippetto and contributors
-License: BSD-3-Clause
-
-Files: vendor/boltons/*
-Copyright: Mahmoud Hashemi and contributors
-License: BSD-3-Clause
-
-Files: vendor/typing_extensions.py
-Copyright: Python Software Foundation
-License: PSF-2.0
 
 Files: vendor/backports/*
- vendor/bracex/*
- vendor/deepmerge/*
- vendor/packageurl/*
- vendor/tabulate/*
- vendor/tomli/*
- vendor/tomli_w/*
- vendor/wcmatch/*
- vendor/wcwidth/*
+ vendor/backports.py
+ vendor/backports-*
+Copyright: Copyright Chris L. Barnes
+License: MIT
+Comment: backports-strenum ships no year in its license.
+
+Files: vendor/boltons/*
+ vendor/boltons.py
+ vendor/boltons-*
+Copyright: Copyright (c) 2013, Mahmoud Hashemi
+License: BSD-3-Clause
+
+Files: vendor/bracex/*
+ vendor/bracex.py
+ vendor/bracex-*
+Copyright: Copyright (c) 2018 - 2026 Isaac Muse
+License: MIT
+
+Files: vendor/click/*
+ vendor/click.py
+ vendor/click-*
+Copyright: Copyright 2014 Pallets
+License: BSD-3-Clause
+
+Files: vendor/click_extra/*
+ vendor/click_extra.py
+ vendor/click_extra-*
+Copyright: Copyright 2016-2026 Kevin Deldycke <kevin@deldycke.com> and contributors
+License: GPL-2+
+
+Files: vendor/cloup/*
+ vendor/cloup.py
+ vendor/cloup-*
+Copyright: Copyright (c) 2021, Gianluca Gippetto
+License: BSD-3-Clause
+
+Files: vendor/deepmerge/*
+ vendor/deepmerge.py
+ vendor/deepmerge-*
+Copyright: Copyright (c) 2016 Yusuke Tsutsumi
+License: MIT
+
+Files: vendor/extra_platforms/*
+ vendor/extra_platforms.py
+ vendor/extra_platforms-*
+Copyright: Copyright 2016-2026 Kevin Deldycke <kevin@deldycke.com> and contributors
+License: Apache-2.0
+
+Files: vendor/meta_package_manager/*
+ vendor/meta_package_manager.py
+ vendor/meta_package_manager-*
+Copyright: Copyright 2016-2026 Kevin Deldycke <kevin@deldycke.com> and contributors
+License: GPL-2+
+
+Files: vendor/packageurl/*
+ vendor/packageurl.py
+ vendor/packageurl-*
+Copyright: Copyright the purl authors
+License: MIT
+Comment: packageurl-python ships no year in its license.
+
+Files: vendor/tabulate/*
+ vendor/tabulate.py
+ vendor/tabulate-*
+Copyright: Copyright (c) 2011-2020 Sergey Astanin and contributors
+License: MIT
+
+Files: vendor/tomli/*
+ vendor/tomli.py
+ vendor/tomli-*
+Copyright: Copyright (c) 2021 Taneli Hukkinen
+License: MIT
+
+Files: vendor/tomli_w/*
+ vendor/tomli_w.py
+ vendor/tomli_w-*
+Copyright: Copyright Taneli Hukkinen
+License: MIT
+Comment: tomli-w ships no year in its license.
+
+Files: vendor/typing_extensions/*
+ vendor/typing_extensions.py
+ vendor/typing_extensions-*
+Copyright: Copyright Python Software Foundation
+License: PSF-2.0
+Comment: The shipped license enumerates every year from 2001 on.
+
+Files: vendor/wcmatch/*
+ vendor/wcmatch.py
+ vendor/wcmatch-*
+Copyright: Copyright (c) 2018 - 2026 Isaac Muse
+License: MIT
+
+Files: vendor/wcwidth/*
+ vendor/wcwidth.py
+ vendor/wcwidth-*
+Copyright: Copyright (c) 2014 Jeff Quast <contact@jeffquast.com>
+License: MIT
+
+Files: vendor/xmltodict/*
  vendor/xmltodict.py
-Copyright: the respective upstream authors
+ vendor/xmltodict-*
+Copyright: Copyright (C) 2012 Martin Blech and individual contributors
 License: MIT
 
 License: GPL-2+
@@ -62,14 +137,14 @@ License: Apache-2.0
 License: BSD-3-Clause
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the conditions of the 3-clause BSD
- License are met. The full text ships beside each package under
- /usr/share/meta-package-manager.
+ License are met. Each package ships its own copy of the full text beside it
+ under /usr/share/meta-package-manager.
 
 License: MIT
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files, to deal in the Software
- without restriction. The full text ships beside each package under
- /usr/share/meta-package-manager.
+ without restriction. Each package ships its own copy of the full text beside
+ it under /usr/share/meta-package-manager.
 
 License: PSF-2.0
  Licensed under the Python Software Foundation License Version 2. The full

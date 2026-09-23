@@ -248,7 +248,7 @@ No package built against the Ubuntu archive could work. Ubuntu ships neither `cl
 
 The build runs no check phase, the one channel that does not. What it installs is the published wheels, which `mpm`'s own test matrix already covered, and the `ppa-source` job drives the installed CLI against the host `apt` instead, which a builder could not do.
 
-To build and install one series by hand, with [`uv`](install.md#uv) on the machine:
+To build and install one series by hand, with [`uv`](https://docs.astral.sh/uv/) on `PATH`, which a shell that never sourced a login profile does not have:
 
 ```{code-block} shell-session
 $ sudo apt-get install --no-install-recommends build-essential debhelper dh-python dpkg-dev fakeroot git

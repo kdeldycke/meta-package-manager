@@ -61,6 +61,22 @@ def run(*args: str, **kwargs) -> subprocess.CompletedProcess:
     return subprocess.run(args, check=True, text=True, encoding="UTF-8", **kwargs)
 
 
+def require_tools() -> None:
+    """Fail early and legibly when `git` or `uv` is missing from `PATH`.
+
+    Both are invoked by name, so a shell that never sourced a login profile
+    finds neither, `~/.local/bin` being where the uv installer puts it. That
+    otherwise surfaces as a bare `FileNotFoundError` naming no remedy.
+    """
+    missing = [tool for tool in ("git", "uv") if shutil.which(tool) is None]
+    if missing:
+        msg = (
+            f"Not on PATH: {', '.join(missing)}. A non-login shell often misses "
+            "~/.local/bin; add it and run again."
+        )
+        raise SystemExit(msg)
+
+
 def newest_tag() -> str:
     """Return the version of the newest `v*` tag, with no `v` prefix."""
     tags = run(
@@ -195,6 +211,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    require_tools()
     version = args.mpm_version or newest_tag()
     series_list = args.series or list(SERIES)
     args.output.mkdir(parents=True, exist_ok=True)

@@ -465,7 +465,7 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str, int], ...] = (
     ("Concurrency", "manager_concurrency", 2),
     ("Cooldown", "manager_cooldown", 2),
     ("Reference traces", "manager_traces", 2),
-    ("Version probe", "manager_version_probe", 3),
+    ("Version check", "manager_version_probe", 3),
     ("Upstream project", "manager_upstream", 2),
     ("Changelog", "scope_changelog", 2),
 )

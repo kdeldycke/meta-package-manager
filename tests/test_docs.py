@@ -1580,13 +1580,13 @@ def test_version_probe_nests_under_the_reference_traces():
         page = _docs.manager_page(manager_id)
         if _docs.manager_traces(manager_id).strip():
             assert "\n## Reference traces\n" in page, manager_id
-            assert "\n### Version probe\n" in page, manager_id
+            assert "\n### Version check\n" in page, manager_id
             assert page.index("## Reference traces") < page.index(
-                "### Version probe"
+                "### Version check"
             ), manager_id
         else:
-            assert "\n## Version probe\n" in page, manager_id
-            assert "### Version probe" not in page, manager_id
+            assert "\n## Version check\n" in page, manager_id
+            assert "### Version check" not in page, manager_id
 
 
 @pytest.mark.parametrize("manager_id", ["brew", "pear"])

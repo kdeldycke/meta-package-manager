@@ -132,10 +132,13 @@ def build_vendor_tree(version: str, project: Path, target: Path) -> None:
     shutil.rmtree(target / "bin", ignore_errors=True)
     (target / ".lock").unlink(missing_ok=True)
 
-    # A few library modules open on `#!/usr/bin/env python`, which lintian and
-    # dh_python3 both read as a script asking for an interpreter Debian does not
-    # ship. Nothing ever executes them: /usr/bin/mpm is mpm-wrapper.py.
+    # A library module opening on `#!/usr/bin/env python` asks for an
+    # interpreter Debian does not ship, and nothing ever runs it: /usr/bin/mpm
+    # is mpm-wrapper.py. An executable module is a different case and keeps its
+    # line, `bar_plugin.py` being the script SwiftBar runs directly.
     for module in target.rglob("*.py"):
+        if module.stat().st_mode & 0o111:
+            continue
         source = module.read_bytes()
         if source.startswith(b"#!"):
             _, _, body = source.partition(b"\n")

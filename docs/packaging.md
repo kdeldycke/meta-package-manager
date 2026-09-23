@@ -246,6 +246,8 @@ No package built against the Ubuntu archive could work. Ubuntu ships neither `cl
 
 `build-source.py` assembles one `3.0 (native)` source tree per series, pinning the dependency closure from the release tag's own lockfile. It resolves there rather than on the builder, which has no network. The package is `Architecture: all` and everything it carries is pure Python, so one build serves every architecture a series has, and `dh_python3` byte-compiles the private tree at install time for the Python that series ships.
 
+The build runs no check phase, the one channel that does not. What it installs is the published wheels, which `mpm`'s own test matrix already covered, and the `ppa-source` job drives the installed CLI against the host `apt` instead, which a builder could not do.
+
 To build and install one series by hand, with [`uv`](install.md#uv) on the machine:
 
 ```{code-block} shell-session

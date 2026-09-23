@@ -1,9 +1,6 @@
 # Changelog
 
-## [`8.0.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.0...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`8.0.1` (2026-09-23)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.0...v8.0.1)
 
 - [mpm] Stop counting a failed manager version probe as a run error, so an unrelated binary shadowing a manager's name no longer warns on every command.
 - [mpm] Reshape each manager page: `Configuration` replaces `Selecting and configuring <id>` and prints the `config-template` block, `Version probe` nests under `Reference traces`, and purl types read `pkg:<type>/`.

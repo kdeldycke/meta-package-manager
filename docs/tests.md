@@ -56,6 +56,7 @@
    tests.test_manager_pwsh_gallery
    tests.test_manager_uv
    tests.test_manager_winget
+   tests.test_manager_yarn
    tests.test_manager_zypper
    tests.test_managers
    tests.test_metadata

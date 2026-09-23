@@ -1392,6 +1392,61 @@ def test_manager_stubs_in_sync():
         assert path.read_text(encoding="utf-8") == _docs.manager_page_stub(mid)
 
 
+def test_api_stubs_are_reachable_from_a_toctree():
+    """Every generated API page sits in the toctree of its parent index.
+
+    A page in no toctree still builds, so Sphinx reports it as a warning and
+    the build stays green: `tests.test_manager_yarn` was unreachable from
+    `tests.md` for as long as the module existed. The parent is the longest
+    `<prefix>.md` above a page, which is what puts a sub-package's modules in
+    its own index rather than the top-level one.
+    """
+    docs = PROJECT_ROOT / "docs"
+    pages = {path.stem for path in docs.glob("*.md") if "." in path.stem}
+    indexes = {"meta_package_manager", "tests"} | pages
+
+    def parent_of(stem: str) -> str | None:
+        parts = stem.split(".")
+        for cut in range(len(parts) - 1, 0, -1):
+            candidate = ".".join(parts[:cut])
+            if candidate in indexes and (docs / f"{candidate}.md").exists():
+                return candidate
+        return None
+
+    listed = {}
+    for stem in indexes:
+        index = docs / f"{stem}.md"
+        if index.exists():
+            listed[stem] = set(
+                re.findall(
+                    r"^\s+(\w+(?:\.\w+)+)\s*$",
+                    index.read_text(encoding="UTF-8"),
+                    re.MULTILINE,
+                )
+            )
+
+    orphans = []
+    for stem in sorted(pages):
+        if not stem.startswith(("meta_package_manager.", "tests.")):
+            continue
+        parent = parent_of(stem)
+        if parent is None:
+            orphans.append(f"{stem}: no parent index page")
+        elif stem not in listed[parent]:
+            orphans.append(f"{stem}: missing from {parent}.md")
+    assert not orphans, "API pages outside every toctree:\n" + "\n".join(orphans)
+
+    dangling = [
+        f"{entry}: listed in {stem}.md but no page"
+        for stem, entries in listed.items()
+        for entry in sorted(entries)
+        if entry.startswith(("meta_package_manager", "tests"))
+        and entry not in pages
+        and not (docs / f"{entry}.md").exists()
+    ]
+    assert not dangling, "toctree entries with no page:\n" + "\n".join(dangling)
+
+
 def test_manager_page_headings_survive_a_build(tmp_path):
     """Check a real Sphinx build turns the generated headings into sections,
     under a generated title and below the lede.

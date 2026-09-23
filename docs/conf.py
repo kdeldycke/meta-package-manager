@@ -254,6 +254,15 @@ intersphinx_mapping = {
 # Prefix document path to section labels, to use:
 # `path/to/file:heading` instead of just `heading`
 autosectionlabel_prefix_document = True
+# Label the top-level sections alone. The document prefix above only
+# separates pages, so two `###` headings sharing a title inside one page
+# still collide: `upstream.md` reports the same project under `Code
+# contributed upstream`, `Upstreamed from meta-package-manager` and `Open
+# upstream`, which is the page working as intended. Nothing cross-
+# references a subsection this way (the three `{ref}` roles in the tree
+# all target explicit `(anchor)=` labels), and `myst_heading_anchors`
+# still gives every heading a markdown anchor to link.
+autosectionlabel_maxdepth = 2
 
 # Theme config.
 html_theme = "furo"

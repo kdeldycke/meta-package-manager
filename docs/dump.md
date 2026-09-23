@@ -43,7 +43,7 @@ aom = "1.0.0"
 apr = "1.7.0"
 apr-util = "1.6.1_3"
 arss = "0.2.3"
-(...)
+# (...)
 ```
 
 To keep the list above up to date, use the `--update-version` option to refresh the versions of entries already in the file:

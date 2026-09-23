@@ -1,0 +1,76 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: meta-package-manager
+Upstream-Contact: Kevin Deldycke <kevin@deldycke.com>
+Source: https://github.com/kdeldycke/meta-package-manager
+
+Files: *
+Copyright: Kevin Deldycke <kevin@deldycke.com> and contributors
+License: GPL-2+
+
+Files: vendor/click_extra/*
+Copyright: Kevin Deldycke <kevin@deldycke.com> and contributors
+License: GPL-2+
+
+Files: vendor/extra_platforms/*
+Copyright: Kevin Deldycke <kevin@deldycke.com> and contributors
+License: Apache-2.0
+
+Files: vendor/click/*
+ vendor/cloup/*
+Copyright: Pallets and contributors
+ Gianluca Gippetto and contributors
+License: BSD-3-Clause
+
+Files: vendor/boltons/*
+Copyright: Mahmoud Hashemi and contributors
+License: BSD-3-Clause
+
+Files: vendor/typing_extensions.py
+Copyright: Python Software Foundation
+License: PSF-2.0
+
+Files: vendor/backports/*
+ vendor/bracex/*
+ vendor/deepmerge/*
+ vendor/packageurl/*
+ vendor/tabulate/*
+ vendor/tomli/*
+ vendor/tomli_w/*
+ vendor/wcmatch/*
+ vendor/wcwidth/*
+ vendor/xmltodict.py
+Copyright: the respective upstream authors
+License: MIT
+
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation; either version 2 of the License, or (at your option) any later
+ version.
+ .
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ .
+ On Debian systems, the full text of the GNU General Public License version 2
+ is found in /usr/share/common-licenses/GPL-2.
+
+License: Apache-2.0
+ Licensed under the Apache License, Version 2.0. On Debian systems, the full
+ text is found in /usr/share/common-licenses/Apache-2.0.
+
+License: BSD-3-Clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the conditions of the 3-clause BSD
+ License are met. The full text ships beside each package under
+ /usr/share/meta-package-manager.
+
+License: MIT
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files, to deal in the Software
+ without restriction. The full text ships beside each package under
+ /usr/share/meta-package-manager.
+
+License: PSF-2.0
+ Licensed under the Python Software Foundation License Version 2. The full
+ text ships beside the package under /usr/share/meta-package-manager.

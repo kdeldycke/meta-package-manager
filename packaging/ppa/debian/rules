@@ -1,0 +1,35 @@
+#!/usr/bin/make -f
+
+# Where the vendored dependency tree lands. mpm-wrapper.py puts it first on
+# sys.path, so none of mpm's imports resolve from the system dist-packages.
+PRIVATE_DIR := /usr/share/meta-package-manager
+PKG_DIR := debian/meta-package-manager
+
+%:
+	dh $@ --with python3
+
+# vendor/ is already a set of unpacked pure-Python wheels, resolved and checked
+# when the source package was assembled, so nothing here configures, compiles or
+# tests. That is also what lets the build run with no network, which is all a
+# Launchpad builder offers.
+override_dh_auto_configure:
+override_dh_auto_test:
+
+# click-extra renders the same roff source mpm's own release job publishes. It
+# reads the vendored tree and nothing else.
+override_dh_auto_build:
+	PYTHONPATH=vendor python3 -m meta_package_manager --man > debian/mpm.1
+
+override_dh_auto_install:
+	install --directory $(PKG_DIR)$(PRIVATE_DIR)
+	cp --archive vendor/. $(PKG_DIR)$(PRIVATE_DIR)/
+	install --directory $(PKG_DIR)/usr/bin
+	install --mode 755 mpm-wrapper.py $(PKG_DIR)/usr/bin/mpm
+	ln --symbolic mpm $(PKG_DIR)/usr/bin/meta-package-manager
+
+# The vendored tree keeps the .dist-info of every dependency, which dh_python3
+# reads as a request for the archive's own python3-* packages. None of them is
+# used, and two of them do not exist in Ubuntu at all. Byte-compilation still
+# happens, at install time, for the Python the series ships.
+override_dh_python3:
+	dh_python3 --no-guessing-deps $(PRIVATE_DIR)

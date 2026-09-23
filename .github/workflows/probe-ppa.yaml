@@ -1,0 +1,156 @@
+---
+name: 🧪 Probe PPA
+"on":
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/probe-ppa.yaml
+      - packaging/ppa/**
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Temporary probe: does the packaging/ppa/ source tree build and install on
+# every live Ubuntu series? Retire it once ppa-source lands in
+# tests-install.yaml.
+
+# Same opt-out as tests-install.yaml: the subject is a released artifact, and
+# the assembled tree pins exact versions off the release tag's lockfile, so a
+# window would only make those pins unresolvable.
+env:
+  UV_EXCLUDE_NEWER: P0D
+
+jobs:
+
+  build:
+    name: "🧪 ${{ matrix.series }}"
+    runs-on: ubuntu-26.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - series: jammy
+            image: ubuntu:22.04
+          - series: noble
+            image: ubuntu:24.04
+          - series: resolute
+            image: ubuntu:26.04
+          - series: stonking
+            image: ubuntu:devel
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      # git must land before the checkout, or the action falls back to the
+      # REST tarball and build-source.py finds no tag to read the lock from.
+      # curl and ca-certificates are what setup-uv needs to fetch uv.
+      - name: Install checkout prerequisites
+        run: |
+          apt-get update --quiet
+          apt-get install --quiet --yes --no-install-recommends ca-certificates curl git
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.12.5"
+
+      - name: Report the series Python
+        run: |
+          apt-get install --quiet --yes --no-install-recommends python3
+          python3 --version
+
+      - name: Assemble the source tree
+        run: >
+          uv run --script ./packaging/ppa/build-source.py
+          --series ${{ matrix.series }} --output ./dist
+
+      - name: Install build tooling
+        run: >
+          apt-get install --quiet --yes --no-install-recommends
+          debhelper dh-python dpkg-dev fakeroot lintian
+
+      # What dh_python3 offers varies by series, and --no-guessing-deps is what
+      # keeps the vendored .dist-info from pulling archive python3-* packages.
+      - name: Report dh_python3 capabilities
+        run: dh_python3 --help 2>&1 | grep --extended-regexp 'guess|private|skip' || true
+
+      # A Launchpad builder has no network. Pointing every proxy at a dead port
+      # fails the build here if anything in debian/rules reaches out.
+      - name: Build the binary package offline
+        working-directory: ./dist/meta-package-manager-7.6.1ppa1~${{ matrix.series }}1
+        env:
+          http_proxy: http://127.0.0.1:9
+          https_proxy: http://127.0.0.1:9
+          ftp_proxy: http://127.0.0.1:9
+        run: dpkg-buildpackage --build=binary --no-sign --unsigned-changes
+
+      - name: Build the source package
+        working-directory: ./dist/meta-package-manager-7.6.1ppa1~${{ matrix.series }}1
+        run: dpkg-buildpackage --build=source --no-sign --unsigned-changes
+
+      - name: Report the built package
+        working-directory: ./dist
+        run: |
+          ls -l
+          dpkg-deb --field meta-package-manager_*.deb
+          lintian --no-tag-display-limit meta-package-manager_*.deb || true
+
+      # The whole point of vendoring: adding this PPA must pull no Python
+      # library from the archive, and upgrade none of the ones already there.
+      - name: Assert the package depends on no Python library
+        working-directory: ./dist
+        run: |
+          deps=$(dpkg-deb --field meta-package-manager_*.deb Depends)
+          echo "Depends: ${deps}"
+          case "${deps}" in
+            *python3-*)
+              echo "::error::Package depends on an archive Python library: ${deps}"
+              exit 1
+              ;;
+          esac
+          case "${deps}" in
+            *python3*) ;;
+            *)
+              echo "::error::Package declares no python3 dependency: ${deps}"
+              exit 1
+              ;;
+          esac
+
+      - name: Install the package
+        working-directory: ./dist
+        run: apt-get install --quiet --yes ./meta-package-manager_*.deb
+
+      - name: Assert mpm runs and reports its version
+        run: |
+          mpm --version
+          mpm --version | grep --quiet 'mpm, version 7.6.1'
+          meta-package-manager --version | grep --quiet 'mpm, version 7.6.1'
+
+      - name: Assert the man page is installed
+        run: |
+          dpkg --listfiles meta-package-manager | grep --quiet 'man1/mpm.1'
+          man --where mpm
+
+      - name: Assert mpm drives the system apt
+        run: |
+          mpm --apt --verbosity INFO installed > installed.txt
+          cat installed.txt
+          grep --quiet dpkg installed.txt
+
+      - name: Assert removal leaves nothing behind
+        run: |
+          apt-get purge --quiet --yes meta-package-manager
+          test ! -e /usr/bin/mpm
+          test ! -d /usr/share/meta-package-manager

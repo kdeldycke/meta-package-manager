@@ -1,0 +1,27 @@
+Source: meta-package-manager
+Section: admin
+Priority: optional
+Maintainer: Kevin Deldycke <kevin@deldycke.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-python,
+ python3,
+Standards-Version: 4.7.2
+Homepage: https://mpm.run
+Vcs-Browser: https://github.com/kdeldycke/meta-package-manager
+Vcs-Git: https://github.com/kdeldycke/meta-package-manager.git
+Rules-Requires-Root: no
+
+Package: meta-package-manager
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${python3:Depends},
+Description: unified command line for every package manager on the machine
+ Meta Package Manager wraps the package managers installed on a machine behind
+ one command. It lists, searches, installs, upgrades and removes packages
+ through all of them at once, and writes the whole inventory to a single file
+ that restores it on another machine.
+ .
+ The package carries its own Python dependencies in a private directory. It
+ adds nothing to the system-wide Python libraries and changes none of them.

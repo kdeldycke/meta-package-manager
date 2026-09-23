@@ -1503,18 +1503,23 @@ class CLIExecutor:
 
         The exception above has a second member: a call mpm escalates itself
         keeps the controlling terminal too, because `sudo` keys its credential
-        cache to the terminal a session would hide. The timeout kill of such
-        a call therefore reaches the `sudo` process alone, and never the
-        manager binary `sudo` spawned.
+        cache to the terminal a session would hide. Such a call leads no
+        process group of its own, so its timeout kill reaches the `sudo`
+        process alone. `sudo` runs the command under a monitor process whenever
+        `use_pty` is on, its upstream default since `1.9.14`, so the manager
+        binary survives the kill: an `apt upgrade` outlasting the state-change
+        timeout keeps `/var/lib/dpkg/lock-frontend`, and the next `apt` or
+        `aptitude` call fails on a lock mpm already declared finished.
 
         ```{todo}
-        Reap the grandchild a timed-out escalation leaves behind. The kill has
-        no process group of its own to reach, so the manager binary `sudo`
-        spawned keeps running behind the reported timeout: an `apt upgrade`
-        outlasting the state-change timeout leaves `apt` holding
-        `/var/lib/dpkg/lock-frontend`, and the next `apt` or `aptitude` call
-        fails on a lock mpm already declared finished. Enumerate the dead
-        child's descendants and kill them once the timeout fires.
+        Delete the paragraph above once the click-extra floor reaches the
+        release whose `run_cli` also kills a child's descendants one PID at a
+        time. It reads the process tree before the kill and signals every
+        descendant, which reaps the escalated command with the `sudo` that
+        spawned it. mpm cannot do this itself: it never sees the child's PID,
+        and the kill reparents the descendants before
+        {exc}`subprocess.TimeoutExpired` surfaces, cutting the links a walk
+        follows.
         ```
 
         :param must_succeed: if `True`, raise

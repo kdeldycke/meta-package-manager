@@ -11,6 +11,7 @@ name: 🏪 Test distributors
       - packaging/guix/**
       - packaging/macports/**
       - packaging/nix/**
+      - packaging/ppa/**
   pull_request:
     paths:
       - .github/workflows/tests-install.yaml
@@ -19,6 +20,7 @@ name: 🏪 Test distributors
       - packaging/guix/**
       - packaging/macports/**
       - packaging/nix/**
+      - packaging/ppa/**
   workflow_dispatch:
   schedule:
     # Run weekly to catch regressions from packaging or distribution changes.
@@ -34,7 +36,8 @@ concurrency:
 # install the released artifact from external feeds (PyPI, Homebrew, Scoop,
 # GitHub Releases, etc.). The `*-source` jobs install from the in-repo
 # packaging specs (packaging/alpine/, packaging/choco/, packaging/guix/,
-# packaging/macports/, packaging/nix/) and validate the build instructions
+# packaging/macports/, packaging/nix/, packaging/ppa/) and validate the build
+# instructions
 # documented in docs/packaging.md.
 #
 # Keep in sync with the "Installation methods" tabs in docs/install.md and
@@ -621,6 +624,108 @@ jobs:
           uv --no-progress tool install pipx
           pipx run --spec git+https://github.com/kdeldycke/meta-package-manager mpm                  --version
           pipx run --spec git+https://github.com/kdeldycke/meta-package-manager meta-package-manager --version
+
+  # https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa
+  # Assemble and build the in-repo Debian source package on every Ubuntu series
+  # still receiving updates, plus the development one. Ubuntu ships neither
+  # click-extra nor extra-platforms, and its click and deepmerge are older than
+  # click-extra accepts, so the package carries its whole dependency tree and
+  # depends on python3 alone. That is what the job asserts: a Depends naming an
+  # archive python3-* library is the regression it exists to catch.
+  ppa-source:
+    name: "⁉️ ppa-source (${{ matrix.series }})"
+    runs-on: ubuntu-26.04
+    timeout-minutes: 25
+    continue-on-error: true
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - series: jammy
+            image: ubuntu:22.04
+          - series: noble
+            image: ubuntu:24.04
+          - series: resolute
+            image: ubuntu:26.04
+          - series: stonking
+            image: ubuntu:devel
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      # git must land before the checkout, or the action falls back to the REST
+      # tarball and build-source.py finds no tag to read the lockfile from.
+      - name: Install checkout prerequisites
+        run: |
+          apt-get update --quiet
+          apt-get install --quiet --yes --no-install-recommends ca-certificates curl git
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      # The checkout belongs to the runner's UID and not to the container's
+      # root, so git refuses it as `dubious ownership` until it is trusted.
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.12.5"
+      - name: Assemble the source tree
+        run: uv run --script ./packaging/ppa/build-source.py --series ${{ matrix.series }} --output ./dist
+      # build-essential compiles nothing here, but dpkg-checkbuilddeps requires
+      # it of every source package, and a Launchpad builder carries it.
+      - name: Install build tooling
+        run: >
+          apt-get install --quiet --yes --no-install-recommends
+          build-essential debhelper dh-python dpkg-dev fakeroot
+      # A Launchpad builder has no network. Every proxy points at a dead port
+      # here, so the build fails if debian/rules ever reaches out.
+      - name: Build the packages offline
+        env:
+          http_proxy: http://127.0.0.1:9
+          https_proxy: http://127.0.0.1:9
+          ftp_proxy: http://127.0.0.1:9
+        run: |
+          cd ./dist/meta-package-manager-*
+          dpkg-buildpackage --build=binary --no-sign
+          dpkg-buildpackage --build=source --no-sign
+      - name: Assert the package depends on no archive Python library
+        working-directory: ./dist
+        run: |
+          deps=$(dpkg-deb --field meta-package-manager_*.deb Depends)
+          echo "Depends: ${deps}"
+          case "${deps}" in
+            *python3-*) echo "::error::Depends on an archive Python library: ${deps}"; exit 1 ;;
+          esac
+          case "${deps}" in
+            *python3*) ;;
+            *) echo "::error::No python3 dependency declared: ${deps}"; exit 1 ;;
+          esac
+      - name: Install mpm
+        working-directory: ./dist
+        run: apt-get install --quiet --yes ./meta-package-manager_*.deb
+      - name: Assert mpm reports the packaged version
+        working-directory: ./dist
+        run: |
+          version=$(dpkg-deb --field meta-package-manager_*.deb Version | sed 's/ppa[0-9]*~.*//')
+          mpm --version
+          mpm --version | grep --quiet "mpm, version ${version}"
+          meta-package-manager --version | grep --quiet "mpm, version ${version}"
+          dpkg --listfiles meta-package-manager | grep --quiet 'man1/mpm.1'
+      # The only job with apt on the machine: no runner image here is Debian
+      # based and the test matrix carries no apt host, so this is the one place
+      # mpm's apt manager is driven against the real tool.
+      - name: Drive mpm against apt
+        run: |
+          mpm --apt --verbosity INFO installed > installed.txt
+          cat installed.txt
+          grep --quiet dpkg installed.txt
+      - name: Assert removal leaves nothing behind
+        run: |
+          apt-get purge --quiet --yes meta-package-manager
+          test ! -e /usr/bin/mpm
+          test ! -d /usr/share/meta-package-manager
 
   # https://scoop.sh/#/apps?q=meta-package-manager
   # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json

@@ -132,6 +132,15 @@ def build_vendor_tree(version: str, project: Path, target: Path) -> None:
     shutil.rmtree(target / "bin", ignore_errors=True)
     (target / ".lock").unlink(missing_ok=True)
 
+    # A few library modules open on `#!/usr/bin/env python`, which lintian and
+    # dh_python3 both read as a script asking for an interpreter Debian does not
+    # ship. Nothing ever executes them: /usr/bin/mpm is mpm-wrapper.py.
+    for module in target.rglob("*.py"):
+        source = module.read_bytes()
+        if source.startswith(b"#!"):
+            _, _, body = source.partition(b"\n")
+            module.write_bytes(body)
+
 
 def write_changelog(tree: Path, deb_version: str, series: str, version: str) -> None:
     stamp = email.utils.format_datetime(datetime.now(timezone.utc))

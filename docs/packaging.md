@@ -100,6 +100,7 @@ Where `mpm` stands on each distribution channel whose packaging is maintained fr
 | MacPorts         | [`packaging/macports/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports)                | [landed upstream on 2026-07-22](https://github.com/macports/macports-ports/pull/33609)                    | `macports-source`                                                                    | manual       |
 | Nix              | [`packaging/nix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix)                          | [pending review](https://github.com/NixOS/nixpkgs/pull/506145)                                            | `nix-source`                                                                         | automated    |
 | openSUSE         | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [building in a home project](https://build.opensuse.org/package/show/home:kdeldycke/meta-package-manager) | `check-opensuse-spec`                                                                | manual       |
+| Ubuntu (PPA)     | [`packaging/ppa/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa)                          | pending PPA creation                                                                                      | `ppa-source`                                                                         | manual       |
 | Void Linux       | [`void-packages` fork](https://github.com/kdeldycke/void-packages/tree/mpm)                                            | [pending review](https://github.com/void-linux/void-packages/pull/60532)                                  | —                                                                                    | manual       |
 
 The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) build and install each in-repo spec on every change to it and on a weekly schedule. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)); manual specs pin the released version and its source checksums, refreshed by hand at each release.
@@ -237,6 +238,37 @@ Every runtime dependency is already packaged in Tumbleweed, so this is the one c
 
 ```{note}
 The package is not in openSUSE proper yet: it is being prepared for submission to the `system:packagemanager` development project, the route to Tumbleweed and then Leap. The home-project repository above is the supported install in the meantime. [`zypper`](managers/zypper.md) is itself one of the managers `mpm` drives.
+```
+
+### Ubuntu (PPA)
+
+No package built against the Ubuntu archive could work. Ubuntu ships neither `click-extra` nor `extra-platforms`, and its `python3-click` and `python3-deepmerge` are older than `click-extra` accepts on every series up to and including `26.04`. Publishing newer copies of those two in the PPA would upgrade `click` for every Python application on any machine that adds it. So [the source package maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa) carries the whole dependency tree under `/usr/share/meta-package-manager` and depends on `python3` alone: adding the PPA installs no Python library system-wide, and upgrades none of the ones already there.
+
+`build-source.py` assembles one `3.0 (native)` source tree per series, pinning the dependency closure from the release tag's own lockfile. It resolves there rather than on the builder, which has no network. The package is `Architecture: all` and everything it carries is pure Python, so one build serves every architecture a series has, and `dh_python3` byte-compiles the private tree at install time for the Python that series ships.
+
+To build and install one series by hand, with [`uv`](install.md#uv) on the machine:
+
+```{code-block} shell-session
+$ sudo apt-get install --no-install-recommends build-essential debhelper dh-python dpkg-dev fakeroot git
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ cd ./meta-package-manager
+$ ./packaging/ppa/build-source.py --mpm-version 7.6.1 --series noble --output ./dist
+$ cd ./dist/meta-package-manager-7.6.1ppa1~noble1
+$ dpkg-buildpackage --build=binary --no-sign
+$ sudo apt-get install ../meta-package-manager_*.deb
+```
+
+Uploading signs the source package instead, once per series:
+
+```{code-block} shell-session
+$ debuild -S -sa
+$ dput ppa:kdeldycke/mpm ../meta-package-manager_7.6.1ppa1~noble1_source.changes
+```
+
+The `~{series}` suffixes sort in release order, the Ubuntu codenames happening to be alphabetical, so a machine upgrading from one series to the next picks the newer build up on its own. The targets are `jammy`, `noble`, `resolute` and `stonking`; `questing` reached its end of life in July 2026.
+
+```{note}
+The PPA is not published yet: it waits on a Launchpad account, an OpenPGP key registered there, and a signed Ubuntu Code of Conduct. The recipe above is the supported install in the meantime. [`apt`](managers/apt.md) is itself one of the managers `mpm` drives.
 ```
 
 ### Void Linux

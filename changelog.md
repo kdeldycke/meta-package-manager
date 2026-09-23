@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Add an Ubuntu PPA source package, carrying `mpm` and its Python dependencies in a private directory so nothing system-wide changes, with a `ppa-source` job building it on every live series.
 - [mpm] Link each manager's own documentation from its page, through a new `documentation_url` attribute that manager definitions accept too.
 - [mpm] Carry one-sentence hints in the `Notes` column of each manager page's `Operations` table, explaining why an unsupported operation is missing or what a supported one partially implements.
 - [mpm] Mark each `Operations` table with the benchmark's support glyphs: `✅` for a supported operation, `❌` for a missing one whose note documents the reason.

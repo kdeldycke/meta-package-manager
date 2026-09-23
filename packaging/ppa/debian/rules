@@ -19,6 +19,7 @@ override_dh_auto_test:
 # reads the vendored tree and nothing else.
 override_dh_auto_build:
 	PYTHONPATH=vendor python3 -m meta_package_manager --man > debian/mpm.1
+	printf '.so man1/mpm.1\n' > debian/meta-package-manager.1
 
 override_dh_auto_install:
 	install --directory $(PKG_DIR)$(PRIVATE_DIR)

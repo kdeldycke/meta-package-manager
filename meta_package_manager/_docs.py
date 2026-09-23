@@ -469,7 +469,8 @@ MANAGER_SECTIONS: tuple[tuple[str | None, str, int], ...] = (
     ("Upstream project", "manager_upstream", 2),
     ("Changelog", "scope_changelog", 2),
 )
-"""Layout of a per-manager documentation page: section title, generator function.
+"""Layout of a per-manager documentation page: section title, generator
+function and heading level.
 
 Single source of truth for {func}`manager_page` and the structural tests.
 Sections lead with the `mpm` pitch (what it adds to the native tool) and its
@@ -487,11 +488,11 @@ Each title is a `str.format` template receiving the manager ID, so a heading
 can name its manager; a title with no replacement field renders unchanged. The
 untitled entry is the lede, and its level is never read.
 
-The third field is the heading level. A level-3 entry is a subsection of the
-level-2 entry above it, and {func}`manager_page` promotes it back to a section
-when that parent rendered nothing for this manager: a manager documenting no
-reference traces still reports its version probe, as a section of its own
-rather than as an orphan nested under whatever heading precedes it.
+A level-3 entry is a subsection of the level-2 entry above it, and
+{func}`manager_page` promotes it back to a section when that parent rendered
+nothing for this manager: a manager documenting no reference traces still
+reports its version probe, as a section of its own rather than as an orphan
+nested under whatever heading precedes it.
 
 Every generator listed here emits heading-free MyST: the headings around them
 belong to {func}`manager_page`, the one place a page's layout is written down.
@@ -2073,8 +2074,8 @@ def manager_version_probe(manager_id: str) -> str:
     it. The transcript comes from the `[samples.version]` fixture of a bundled
     TOML manager or the `version_regexes` docstring of a class-based one; the
     per-operation samples render in the enclosing reference-traces section
-    ({func}`manager_traces`), which {func}`manager_page` leaves out for a
-    manager documenting none, promoting this subsection back to a section.
+    ({func}`manager_traces`), which this subsection nests under.
+    {data}`MANAGER_SECTIONS` declares the levels.
 
     The rest of the invocation plumbing (binary names and lookup paths, forced
     arguments and environment) reads as one-line facts, so it sits in the page's
@@ -2398,10 +2399,9 @@ def manager_traces(manager_id: str) -> str:
     `installed`/`outdated` docstrings (harvested by
     {func}`~meta_package_manager.docstring_corpus.literal_blocks`, the same
     literal blocks the corpus test round-trips). Empty for managers without such
-    samples (the section is then omitted from the stub, and its
-    {func}`manager_version_probe` subsection is promoted to a section of its
-    own); the version probe transcript renders below them, next to the regexes
-    consuming it.
+    samples, in which case the section is left out of the page. The version
+    probe transcript renders below them, in a subsection of its own
+    ({func}`manager_version_probe`) next to the regexes consuming it.
     """
     m = pool[manager_id]
     source = getattr(m, "definition_source", None)

@@ -364,14 +364,14 @@ If the plugin has been changed between releases, a [copy of the plugin is pushed
 3. Create a new branch and switch to it:
 
    ```shell-session
-   $ git branch "meta-package-manager-v7.6.0"
-   $ git checkout "meta-package-manager-v7.6.0"
+   $ git branch "meta-package-manager-v8.0.0"
+   $ git checkout "meta-package-manager-v8.0.0"
    ```
 
 4. Replace existing copy of the plugin with the latest tagged version:
 
    ```shell-session
-   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v7.6.0/meta_package_manager/bar_plugin.py
+   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v8.0.0/meta_package_manager/bar_plugin.py
    $ mv ./bar_plugin.py ./Dev/meta_package_manager.7h.py
    $ chmod 755 ./Dev/meta_package_manager.7h.py
    ```
@@ -380,13 +380,13 @@ If the plugin has been changed between releases, a [copy of the plugin is pushed
 
    ```shell-session
    $ git add ./Dev/meta_package_manager.7h.py
-   $ git commit -m "Upgrade to Meta Package Manager plugin v7.6.0"
+   $ git commit -m "Upgrade to Meta Package Manager plugin v8.0.0"
    ```
 
 6. Push new branch:
 
    ```shell-session
-   $ git push --set-upstream origin "meta-package-manager-v7.6.0"
+   $ git push --set-upstream origin "meta-package-manager-v8.0.0"
    ```
 
 7. [Create a pull-request](https://help.github.com/articles/creating-a-pull-request/) in the original repository.

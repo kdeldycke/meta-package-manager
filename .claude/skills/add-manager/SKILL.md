@@ -335,7 +335,7 @@ Probe traps, each hit in the first three implementations (`flatpak`, `mas`, `par
 
 - Field labels are localized and timestamps may render in local time: force `LC_ALL=C.UTF-8` (plus `TZ=UTC` where needed, as for `paru`) through `override_extra_env` on the probe calls only, never through `extra_env`.
 - Verify the exact timestamp rendering from the tool's *source*, the same way listing formats are verified: `flatpak` hardcodes a literal `+0000`, `paru` formats `%a, %e %b %Y %T` after converting to local time. A probe docstring whose sample was reconstructed from source uses a `console` fence, not `shell-session`.
-- Design the probe so its expected path never fails: a failing CLI call lands in `cli_errors` and flips the manager's trail to `✗`, so resolve the right remote or scope *before* the call that could miss (`flatpak` reads the installed app's origin first, and only falls back to trying every remote for an app not installed yet).
+- Design the probe so its expected path never fails: a failing CLI call lands in `cli_errors` and flips the manager's trail to `✘`, so resolve the right remote or scope *before* the call that could miss (`flatpak` reads the installed app's origin first, and only falls back to trying every remote for an app not installed yet).
 
 ### CLI output guidelines
 
@@ -426,7 +426,7 @@ Common validation failures after adding a manager:
 
 - **`test_manager_count`**: forgot to increment the count in `test_pool.py`.
 - **`test_content_order`**: class attributes are not in the canonical order (like `version_regexes` before `post_args`).
-- **`test_manager_logos_resolve`** (in `tests/test_docs.py`, so the `Validate` command above does not catch it): a declared `logo` slug with no vendored SVG, or a vendored mark no manager claims. Run `docs/logos_update.py`.
+- **`test_manager_logos_resolve`**: a declared `logo` slug with no vendored SVG, or a vendored mark no manager claims. Run `docs/logos_update.py`.
 - **Label group collision**: the group name in `labels.py` collides with a manager ID. Use the `-based` suffix (like `scoop-based`, `pypi-based`).
 - **Whole-suite collection abort**: `tests/destructive_plan.py` asserts `PACKAGE_IDS` covers exactly the managers mpm ships, bundled definitions included, at import time; a missing or stray entry kills every test, not one.
 - **`test_docstring_corpus`**: the `$ ...` shell-session samples in operation docstrings are checked against the real CLI construction. Write them in build order: binary, `pre_args`, the declared arguments with the package ID exactly where the code puts it, `post_args` last (`pkcon install --noninteractive hello --plain`, not `pkcon install hello --noninteractive --plain`).

@@ -746,11 +746,12 @@ class CLIExecutor:
     stderr_noise: re.Pattern[str] | None = None
     """Lines of `<stderr>` that report no failure, like a tool's routine warnings.
 
-    The failure gate of {meth}`run` drops them before it reads `<stderr>`. A
-    non-zero exit whose `<stderr>` holds nothing else then reads as a status, the
-    way a silent `<stderr>` already does, and the diagnosis of a real failure
-    keeps only the lines that explain it. The run snapshot keeps the whole
-    stream. `None` keeps every line.
+    The failure gate of
+    {meth}`~meta_package_manager.execution.CLIExecutor.run` drops them before it
+    reads `<stderr>`. A non-zero exit whose `<stderr>` holds nothing else then
+    reads as a status, the way a silent `<stderr>` already does, and the
+    diagnosis of a real failure keeps only the lines that explain it. The run
+    snapshot keeps the whole stream. `None` keeps every line.
     """
 
     stop_on_error: bool = False
@@ -950,8 +951,8 @@ class CLIExecutor:
     {command}`mpm outdated` warn about a PHP manager the user never installed
     ([issue 2119](https://github.com/kdeldycke/meta-package-manager/issues/2119)).
     A probe that never completed keeps its entry, a timeout or an interrupt
-    being plumbing rather than a verdict: that path appends from
-    {meth}`_spawn` and never reaches the gate.
+    being plumbing rather than a verdict: that path appends from `_spawn` and
+    never reaches the gate.
     """
 
     _last_run: tuple[int, str, str] | None = None

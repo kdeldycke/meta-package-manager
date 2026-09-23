@@ -830,11 +830,12 @@ def test_metrics_series_start_at_creation():
 
     Two shapes satisfy it. The usual one is a `created` row: the sampler writes
     it at zero stars, and it precedes every measurement. The other is a
-    repository that gained a star on its creation day. A real reading of that
-    day outranks the assumed zero and replaces it, since the store holds one
-    row per day. The sampler re-asserts the anchor on every run, so a
-    forward-sampled repository with no `created` row can only be in that second
-    case, and its first point is the creation day it displaced.
+    repository whose historical backfill already covers its creation day. A
+    real reading of that day outranks the assumed zero and replaces it, since
+    the store holds one row per day. So a series with no `created` row must
+    open on a backfilled reading. Opening on a forward `sample` instead means
+    the anchor was never written, and the curve starts on whichever day mpm
+    first read the repository.
     """
     config = _metrics_config()
     rows = _load_metrics_store()
@@ -850,12 +851,11 @@ def test_metrics_series_start_at_creation():
             # The anchor must precede every measurement of that repository.
             assert all(row["date"] >= origins[0]["date"] for row in star_rows)
             continue
-        # No anchor, so a measurement of the creation day must hold it. Only a
-        # forward sample proves the collector ran and lost the row to one.
-        sampled = [row for row in star_rows if row["source"] == "sample"]
-        assert sampled, f"{name} has no creation anchor and was never sampled"
-        first = min(row["date"] for row in star_rows)
-        assert first <= sampled[0]["date"], f"{name} starts after it was sampled"
+        # No anchor, so the backfill that displaced it must open the series.
+        first = min(star_rows, key=lambda row: row["date"])
+        assert first["source"] != "sample", (
+            f"{name} has no creation anchor and opens on a forward sample"
+        )
 
 
 def test_metrics_store_well_formed():
@@ -1688,12 +1688,18 @@ def test_trail_glyph_matches_the_emitted_one():
     so the tree carries `KO_GLYPH` and never its U+2717 look-alike. The scan is
     raw text, comments included: a captured fixture printing U+2717 would need
     an exclusion here, and none exists today.
+
+    The bundled skills are scanned as well as `docs/`, because a skill body
+    publishes: `docs/add-new-manager.md` is a bare `{include}` of
+    `.claude/skills/add-manager/SKILL.md`, so a `docs/*.md` glob reads the
+    three lines of the directive and never the prose the page renders.
     """
     assert KO_GLYPH == TRAIL_FAILURE_GLYPH
     files = [
         *sorted((PROJECT_ROOT / "meta_package_manager").rglob("*.py")),
         *sorted((PROJECT_ROOT / "tests").glob("*.py")),
         *sorted((PROJECT_ROOT / "docs").glob("*.md")),
+        *sorted((PROJECT_ROOT / ".claude" / "skills").rglob("*.md")),
         PROJECT_ROOT / "claude.md",
         PROJECT_ROOT / "readme.md",
     ]

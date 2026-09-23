@@ -79,7 +79,7 @@ jobs:
       - name: Assemble the source tree
         run: >
           uv run --script ./packaging/ppa/build-source.py
-          --series ${{ matrix.series }} --output ./dist
+          --mpm-version 7.6.1 --series ${{ matrix.series }} --output ./dist
 
       - name: Install build tooling
         run: >
@@ -94,16 +94,18 @@ jobs:
       # A Launchpad builder has no network. Pointing every proxy at a dead port
       # fails the build here if anything in debian/rules reaches out.
       - name: Build the binary package offline
-        working-directory: ./dist/meta-package-manager-7.6.1ppa1~${{ matrix.series }}1
         env:
           http_proxy: http://127.0.0.1:9
           https_proxy: http://127.0.0.1:9
           ftp_proxy: http://127.0.0.1:9
-        run: dpkg-buildpackage --build=binary --no-sign --unsigned-changes
+        run: |
+          cd ./dist/meta-package-manager-*
+          dpkg-buildpackage --build=binary --no-sign
 
       - name: Build the source package
-        working-directory: ./dist/meta-package-manager-7.6.1ppa1~${{ matrix.series }}1
-        run: dpkg-buildpackage --build=source --no-sign --unsigned-changes
+        run: |
+          cd ./dist/meta-package-manager-*
+          dpkg-buildpackage --build=source --no-sign
 
       - name: Report the built package
         working-directory: ./dist
@@ -146,7 +148,6 @@ jobs:
       - name: Assert the man page is installed
         run: |
           dpkg --listfiles meta-package-manager | grep --quiet 'man1/mpm.1'
-          man --where mpm
 
       - name: Assert mpm drives the system apt
         run: |

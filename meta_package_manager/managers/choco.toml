@@ -27,6 +27,7 @@
 [mpm.overrides.choco]
 name = "Chocolatey"
 homepage_url = "https://chocolatey.org"
+documentation_url = "https://docs.chocolatey.org/en-us/choco/"
 repository_url = "https://github.com/chocolatey/choco"
 wikipedia_url = "https://en.wikipedia.org/wiki/Chocolatey"
 logo = "chocolatey"

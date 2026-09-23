@@ -59,13 +59,12 @@ class Roswell(PackageManager):
     Quicklisp systems, never the implementations {meth}`~meta_package_manager.manager.PackageManager.installed` reports.
     Mapping it here would upgrade something other than what mpm just listed.
     ```
-
-    Documentation: [Roswell wiki](https://github.com/roswell/roswell/wiki).
     """
 
     name = "Roswell"
 
     homepage_url = "https://roswell.github.io/"
+    documentation_url = "https://github.com/roswell/roswell/wiki"
     repository_url = "https://github.com/roswell/roswell"
     logo = "commonlisp"
 

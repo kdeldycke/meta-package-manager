@@ -96,6 +96,7 @@ class Zim(PackageManager):
     name = "Zsh Zim"
 
     homepage_url = "https://zimfw.sh"
+    documentation_url = "https://zimfw.sh/docs/"
     repository_url = "https://github.com/zimfw/zimfw"
     logo = "zsh"
 

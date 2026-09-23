@@ -287,6 +287,7 @@ Eight fields are definition-only:
 
 DEFINITION_LINK_FIELDS: Final[tuple[str, ...]] = (
     "homepage_url",
+    "documentation_url",
     "repository_url",
     "wikipedia_url",
     "logo",
@@ -554,6 +555,10 @@ class ManagerDefinition:
 
     homepage_url: str | None
     """Project home page, for documentation reference only."""
+
+    documentation_url: str | None
+    """Entry point of the project's own documentation, for documentation
+    reference only."""
 
     repository_url: str | None
     """Repository holding the project's code, for documentation reference only."""
@@ -1190,6 +1195,7 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
         "id": definition.manager_id,
         "name": definition.name,
         "homepage_url": definition.homepage_url,
+        "documentation_url": definition.documentation_url,
         "repository_url": definition.repository_url,
         "wikipedia_url": definition.wikipedia_url,
         "logo": definition.logo,

@@ -62,6 +62,7 @@ class Conda(PackageManager):
     name = "Conda"
 
     homepage_url = "https://conda.org"
+    documentation_url = "https://docs.conda.io/projects/conda/en/latest/"
     repository_url = "https://github.com/conda/conda"
     wikipedia_url = "https://en.wikipedia.org/wiki/Conda_(package_manager)"
     logo = "anaconda"

@@ -80,6 +80,7 @@ class WinGet(PackageManager):
     ```
     """
 
+    documentation_url = "https://learn.microsoft.com/en-us/windows/package-manager/"
     repository_url = "https://github.com/microsoft/winget-cli"
     wikipedia_url = "https://en.wikipedia.org/wiki/Windows_Package_Manager"
 

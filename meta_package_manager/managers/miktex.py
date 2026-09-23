@@ -97,13 +97,12 @@ class MiKTeX(PackageManager):
     different thing entirely, taking a package *level* such as `basic` or
     `complete` and erroring without one, so it is never used here.
     ```
-
-    Documentation: [MiKTeX packages](https://docs.miktex.org/manual/miktex-packages.html).
     """
 
     name = "MiKTeX"
 
     homepage_url = "https://miktex.org"
+    documentation_url = "https://docs.miktex.org/manual/miktex-packages.html"
     repository_url = "https://github.com/MiKTeX/miktex"
     wikipedia_url = "https://en.wikipedia.org/wiki/MiKTeX"
     logo = "latex"

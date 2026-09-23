@@ -52,6 +52,9 @@ class Pkcon(PackageManager):
     name = "PackageKit"
 
     homepage_url = "https://www.freedesktop.org/software/PackageKit/"
+    documentation_url = (
+        "https://manpages.debian.org/unstable/packagekit-tools/pkcon.1.en.html"
+    )
     repository_url = "https://github.com/PackageKit/PackageKit"
     wikipedia_url = "https://en.wikipedia.org/wiki/PackageKit"
     logo = "freedesktopdotorg"

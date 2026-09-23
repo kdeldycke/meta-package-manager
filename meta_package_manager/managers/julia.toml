@@ -37,6 +37,7 @@
 [mpm.overrides.julia]
 name = "Julia Pkg"
 homepage_url = "https://julialang.org"
+documentation_url = "https://pkgdocs.julialang.org/v1/"
 repository_url = "https://github.com/JuliaLang/Pkg.jl"
 wikipedia_url = "https://en.wikipedia.org/wiki/Julia_(programming_language)"
 platforms = ["linux_like", "macos", "windows"]

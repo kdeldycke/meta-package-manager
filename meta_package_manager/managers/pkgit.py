@@ -63,12 +63,11 @@ class Pkgit(PackageManager):
     Build dependencies are cloned as packages too and appear alongside what was
     asked for.
     ```
-
-    Documentation: [pkgit README](https://git.symlinx.net/pkgit/about/).
     """
 
     name = "pkgit"
 
+    documentation_url = "https://git.symlinx.net/pkgit/about/"
     repository_url = "https://git.symlinx.net/pkgit"
 
     platforms = LINUX_LIKE

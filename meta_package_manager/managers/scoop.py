@@ -61,6 +61,7 @@ class Scoop(PackageManager):
     name = "Scoop"
 
     homepage_url = "https://scoop.sh"
+    documentation_url = "https://github.com/ScoopInstaller/Scoop/wiki"
     repository_url = "https://github.com/ScoopInstaller/Scoop"
     wikipedia_url = "https://en.wikipedia.org/wiki/Scoop_Package_Manager"
 

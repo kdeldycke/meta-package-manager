@@ -22,6 +22,7 @@
 [mpm.overrides.fink]
 name = "Fink"
 homepage_url = "https://www.finkproject.org"
+documentation_url = "https://www.finkproject.org/help/"
 repository_url = "https://github.com/fink/fink"
 wikipedia_url = "https://en.wikipedia.org/wiki/Fink_(software)"
 platforms = ["macos"]

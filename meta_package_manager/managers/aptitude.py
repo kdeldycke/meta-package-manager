@@ -100,12 +100,13 @@ class Aptitude(PackageManager):
     width explicitly), and the flag is what the manual's own example uses to ask
     for unformatted output.
     ```
-
-    Documentation: [`aptitude(8)` man page](https://manpages.debian.org/unstable/aptitude/aptitude.8.en.html).
     """
 
     name = "aptitude"
 
+    documentation_url = (
+        "https://manpages.debian.org/unstable/aptitude/aptitude.8.en.html"
+    )
     repository_url = "https://salsa.debian.org/apt-team/aptitude"
     wikipedia_url = "https://en.wikipedia.org/wiki/Aptitude_(software)"
     logo = "debian"

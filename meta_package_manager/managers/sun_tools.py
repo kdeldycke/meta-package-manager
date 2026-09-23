@@ -32,13 +32,11 @@ if TYPE_CHECKING:
 class Sun_Tools(PackageManager):
     """Solaris' legacy System V Release 4 packaging tools.
 
-    Documentation:
-
-    - [`pkgadd(1M)` man page](https://docs.oracle.com/cd/E26502_01/html/E29031/pkgadd-1m.html)
-    - [`pkgrm(1M)` man page](https://docs.oracle.com/cd/E26502_01/html/E29031/pkgrm-1m.html)
-
     The suite spans several binaries: `pkginfo` (the read-only query tool, used as
-    the main CLI), `pkgadd` and `pkgrm`.
+    the main CLI), `pkgadd` and `pkgrm`. The other two have a man page of their
+    own:
+    [`pkgadd(1M)`](https://docs.oracle.com/cd/E26502_01/html/E29031/pkgadd-1m.html)
+    and [`pkgrm(1M)`](https://docs.oracle.com/cd/E26502_01/html/E29031/pkgrm-1m.html).
 
     ```{note}
     SVR4 packages come from local media or datastream files, not a network

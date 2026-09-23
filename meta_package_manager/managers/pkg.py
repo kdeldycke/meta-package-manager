@@ -91,6 +91,7 @@ class PKG(PackageManager):
 
     name = "FreeBSD pkg"
 
+    documentation_url = "https://man.freebsd.org/cgi/man.cgi?query=pkg&sektion=8"
     repository_url = "https://github.com/freebsd/pkg"
     wikipedia_url = "https://en.wikipedia.org/wiki/Pkg_(FreeBSD)"
     logo = "freebsd"
@@ -518,6 +519,7 @@ class Ports(PackageManager):
     name = "FreeBSD Ports Collection"
 
     homepage_url = "https://www.freebsd.org/ports/"
+    documentation_url = "https://docs.freebsd.org/en/books/handbook/ports/"
     repository_url = "https://github.com/freebsd/freebsd-ports"
     wikipedia_url = "https://en.wikipedia.org/wiki/FreeBSD_Ports"
     logo = "freebsd"

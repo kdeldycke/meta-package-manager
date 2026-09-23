@@ -33,8 +33,6 @@ if TYPE_CHECKING:
 class Emerge(PackageManager):
     """Portage's `emerge`, Gentoo's source-based package manager.
 
-    Documentation: [`emerge(1)` man page](https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html).
-
     Command equivalences with other managers are listed in
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
 
@@ -62,6 +60,7 @@ class Emerge(PackageManager):
     name = "Gentoo emerge"
 
     homepage_url = "https://wiki.gentoo.org/wiki/Portage#emerge"
+    documentation_url = "https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html"
     repository_url = "https://github.com/gentoo/portage"
     wikipedia_url = "https://en.wikipedia.org/wiki/Portage_(software)"
     logo = "gentoo"

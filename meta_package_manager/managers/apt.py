@@ -33,8 +33,6 @@ if TYPE_CHECKING:
 class APT(PackageManager):
     """Base class for Debian's `apt` front-end and its variants.
 
-    Documentation: [`apt(8)` man page](https://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html).
-
     Command equivalences with other managers are listed in
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
 
@@ -62,6 +60,7 @@ class APT(PackageManager):
     name = "Debian apt"
 
     homepage_url = "https://wiki.debian.org/AptCLI"
+    documentation_url = "https://manpages.debian.org/unstable/apt/apt.8.en.html"
     repository_url = "https://salsa.debian.org/apt-team/apt"
     wikipedia_url = "https://en.wikipedia.org/wiki/APT_(software)"
     logo = "debian"
@@ -429,6 +428,7 @@ class APT_Mint(APT):
     name = "Linux Mint apt"
 
     homepage_url = "https://github.com/kdeldycke/meta-package-manager/issues/52"
+    documentation_url = "https://manpages.debian.org/unstable/apt/apt.8.en.html"
     logo = "linuxmint"
 
     _MINT_SEARCH_REGEXP = re.compile(

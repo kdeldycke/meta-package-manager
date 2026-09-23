@@ -64,6 +64,7 @@ class ASDF(PackageManager):
     name = "asdf"
 
     homepage_url = "https://asdf-vm.com"
+    documentation_url = "https://asdf-vm.com/manage/commands.html"
     repository_url = "https://github.com/asdf-vm/asdf"
 
     keywords = ("asdf-vm",)

@@ -98,6 +98,7 @@ class ZeroInstall(PackageManager):
     name = "Zero Install"
 
     homepage_url = "https://0install.net"
+    documentation_url = "https://docs.0install.net/"
     repository_url = "https://github.com/0install/0install"
 
     platforms = ALL_PLATFORMS

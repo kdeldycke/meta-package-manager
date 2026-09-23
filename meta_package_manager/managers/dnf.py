@@ -60,10 +60,8 @@ class DNF(PackageManager):
     The `DNF5` and `YUM` subclasses reuse everything here, differing only in
     the binary and forced arguments.
 
-    Documentation:
-
-    - [DNF command reference](https://dnf.readthedocs.io/en/latest/command_ref.html)
-    - [Command equivalences with other managers](https://wiki.archlinux.org/title/Pacman/Rosetta)
+    Command equivalences with other managers are listed in
+    [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
     """
 
     maintenance_note: str | None = (
@@ -75,6 +73,7 @@ class DNF(PackageManager):
 
     name = "Fedora DNF"
 
+    documentation_url = "https://dnf.readthedocs.io/en/latest/command_ref.html"
     repository_url = "https://github.com/rpm-software-management/dnf"
     wikipedia_url = "https://en.wikipedia.org/wiki/DNF_(software)"
     logo = "fedora"
@@ -467,6 +466,7 @@ class DNF5(DNF):
 
     name = "Fedora DNF5"
 
+    documentation_url = "https://dnf5.readthedocs.io/en/latest/"
     repository_url = "https://github.com/rpm-software-management/dnf5"
     wikipedia_url = "https://en.wikipedia.org/wiki/DNF_(software)"
     logo = "fedora"
@@ -534,6 +534,7 @@ class YUM(DNF):
     name = "Fedora YUM"
 
     homepage_url = "http://yum.baseurl.org"
+    documentation_url = "https://man7.org/linux/man-pages/man8/yum.8.html"
     repository_url = "https://github.com/rpm-software-management/yum"
     wikipedia_url = "https://en.wikipedia.org/wiki/Yum_(software)"
     logo = "fedora"

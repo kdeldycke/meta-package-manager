@@ -92,6 +92,7 @@ class Pacman(PackageManager):
     name = "Arch Linux pacman"
 
     homepage_url = "https://wiki.archlinux.org/title/pacman"
+    documentation_url = "https://man.archlinux.org/man/pacman.8.en"
     repository_url = "https://gitlab.archlinux.org/pacman/pacman"
     wikipedia_url = "https://en.wikipedia.org/wiki/Pacman_(package_manager)"
 
@@ -396,12 +397,11 @@ class Aura(Pacman):
     reports what an `aura -Syu` followed by an `aura -Au` would actually
     upgrade.
     ```
-
-    Documentation: [Aura manual](https://fosskers.github.io/aura/).
     """
 
     name = "Arch Linux aura"
 
+    documentation_url = "https://fosskers.github.io/aura/"
     repository_url = "https://github.com/fosskers/aura"
     logo = "archlinux"
 
@@ -506,6 +506,7 @@ class DkpPacman(Pacman):
 
     name = "devkitPro pacman"
 
+    documentation_url = "https://devkitpro.org/wiki/Getting_Started"
     repository_url = "https://github.com/devkitPro/pacman"
 
     logo = None
@@ -807,6 +808,7 @@ class Trizen(Pacman):
 
     name = "Arch Linux trizen"
 
+    documentation_url = "https://github.com/trizen/trizen/blob/master/TRIZEN.md"
     repository_url = "https://github.com/trizen/trizen"
     logo = "archlinux"
 
@@ -867,6 +869,7 @@ class Yay(Pacman):
 
     name = "Arch Linux yay"
 
+    documentation_url = "https://jguer.github.io/yay/"
     repository_url = "https://github.com/Jguer/yay"
     logo = "archlinux"
 

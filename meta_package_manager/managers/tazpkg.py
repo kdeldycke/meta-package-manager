@@ -34,10 +34,8 @@ if TYPE_CHECKING:
 class Tazpkg(PackageManager):
     """SliTaz GNU/Linux's package manager.
 
-    Documentation:
-
-    - [tazpkg handbook](https://doc.slitaz.org/en:handbook:tazpkg)
-    - [SliTaz-official/tazpkg](https://github.com/SliTaz-official/tazpkg)
+    The code also lives in a git clone,
+    [SliTaz-official/tazpkg](https://github.com/SliTaz-official/tazpkg).
 
     ```{note}
     tazpkg decorates every listing with localized, colorized titles, separators
@@ -63,6 +61,7 @@ class Tazpkg(PackageManager):
     name = "TazPkg"
 
     homepage_url = "https://slitaz.org"
+    documentation_url = "https://doc.slitaz.org/en:handbook:tazpkg"
     repository_url = "https://hg.slitaz.org/tazpkg"
     wikipedia_url = "https://en.wikipedia.org/wiki/SliTaz"
 

@@ -25,6 +25,7 @@
 [mpm.overrides.tlmgr]
 name = "TeX Live Manager"
 homepage_url = "https://www.tug.org/texlive/"
+documentation_url = "https://www.tug.org/texlive/doc/tlmgr.html"
 repository_url = "https://github.com/TeX-Live/texlive-source"
 logo = "latex"
 platforms = ["unix", "windows"]

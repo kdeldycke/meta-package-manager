@@ -25,6 +25,7 @@
 [mpm.overrides.sorcery]
 name = "Sorcery"
 homepage_url = "https://sourcemage.org"
+documentation_url = "https://sourcemage.org/Docs"
 repository_url = "https://github.com/sourcemage/sorcery"
 wikipedia_url = "https://en.wikipedia.org/wiki/Sorcery_(package_manager)"
 platforms = ["sourcemage"]

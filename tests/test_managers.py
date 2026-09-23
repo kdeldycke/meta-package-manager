@@ -145,6 +145,23 @@ def test_repository_url(manager):
     assert "wikipedia.org" not in location.host
 
 
+@all_managers
+def test_documentation_url(manager):
+    """A documentation link is optional, and always a page of its own.
+
+    A tool documenting itself in its repository README alone declares none, the
+    repository link already reaching it, and neither does a project whose home
+    page is its manual. What is declared names the tool, so an article about it
+    stays in `wikipedia_url`, and every link is served over TLS.
+    """
+    if manager.documentation_url is None:
+        return
+    location = URL(manager.documentation_url)
+    assert location.scheme == "https"
+    assert location.host
+    assert "wikipedia.org" not in location.host
+
+
 URL_ATTRIBUTES = tuple(
     sorted(name for name in dir(PackageManager) if name.endswith("_url"))
 )
@@ -187,28 +204,33 @@ def test_url_attributes_are_distinct(manager):
         declared[_address(url)] = name
 
 
-DOCUMENTATION_LINE = re.compile(r"^Documentation: (.+)$", re.MULTILINE)
-"""The one-reference line a manager docstring cites its documentation with."""
+DOCUMENTATION_LABEL = re.compile(r"^Documentation:", re.MULTILINE)
+"""A `Documentation:` label opening a line of a manager docstring."""
 
 MARKDOWN_LINK_URL = re.compile(r"\]\((https?://(?:[^()\s]|\([^()\s]*\))+)\)")
 """The address of a markdown link, balanced parentheses included."""
 
 
 @all_managers
-def test_documentation_line_repeats_no_url_attribute(manager):
-    """Check a docstring's `Documentation:` line cites a page the card lacks.
+def test_docstring_repeats_no_card_link(manager):
+    """Check a docstring states no link its card already carries.
 
-    The manager's page opens on its card, which links every `*_url` attribute
-    already: a reference line pointing at one of them states that link twice on
-    the same page.
+    The manager's page opens on its card, which links every `*_url` attribute,
+    the documentation entry point among them. A `Documentation:` line therefore
+    has nothing left to name, and a prose link to an address the card holds
+    states it twice on one page. A further reference keeps its own sentence,
+    unlabelled, the way the command-equivalence tables do.
     """
     own = {_address(url) for name in URL_ATTRIBUTES if (url := getattr(manager, name))}
     docstring = inspect.getdoc(type(manager)) or ""
-    for line in DOCUMENTATION_LINE.findall(docstring):
-        for url in MARKDOWN_LINK_URL.findall(line):
-            assert _address(url) not in own, (
-                f"{manager.id} cites {url} as documentation, which its card links"
-            )
+    assert not DOCUMENTATION_LABEL.search(docstring), (
+        f"{manager.id} labels a reference `Documentation:` in its docstring; "
+        "declare `documentation_url` instead"
+    )
+    for url in MARKDOWN_LINK_URL.findall(docstring):
+        assert _address(url) not in own, (
+            f"{manager.id} links {url} in its docstring, which its card links"
+        )
 
 
 @all_managers
@@ -717,6 +739,7 @@ CANONICAL_ATTRS = (
     "id",
     "name",
     "homepage_url",
+    "documentation_url",
     "repository_url",
     "wikipedia_url",
     "logo",

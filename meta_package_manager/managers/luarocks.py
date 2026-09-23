@@ -88,13 +88,12 @@ class LuaRocks(PackageManager):
     and no `cleanup`: `luarocks purge` empties an entire tree rather than
     reclaiming anything, which is a mass removal and not a cleanup.
     ```
-
-    Documentation: [LuaRocks documentation](https://github.com/luarocks/luarocks/wiki/Documentation).
     """
 
     name = "LuaRocks"
 
     homepage_url = "https://luarocks.org"
+    documentation_url = "https://github.com/luarocks/luarocks/wiki/Documentation"
     repository_url = "https://github.com/luarocks/luarocks"
     wikipedia_url = "https://en.wikipedia.org/wiki/LuaRocks"
 

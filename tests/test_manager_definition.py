@@ -547,6 +547,7 @@ def _definition(
         name=name,
         platforms=("all_platforms",),
         homepage_url=None,
+        documentation_url=None,
         repository_url=None,
         wikipedia_url=None,
         logo=None,

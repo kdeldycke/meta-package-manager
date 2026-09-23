@@ -28,6 +28,7 @@
 
 [mpm.overrides.basalt]
 name = "Basalt"
+documentation_url = "https://bash-bastion.github.io/basalt/"
 repository_url = "https://github.com/hyperupcall/basalt"
 # Bash 4.3 or newer: no Windows support, and macOS needs a Bash newer than the
 # 3.2 it ships.

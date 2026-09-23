@@ -93,6 +93,7 @@ class Antigen(PackageManager):
 
     name = "Zsh Antigen"
 
+    documentation_url = "https://github.com/zsh-users/antigen/wiki"
     repository_url = "https://github.com/zsh-users/antigen"
     logo = "zsh"
 

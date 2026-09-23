@@ -106,13 +106,12 @@ class Spack(PackageManager):
     answering. `ollama` starting a daemon from a listing is the same shape,
     smaller.
     ```
-
-    Documentation: [Spack documentation](https://spack.readthedocs.io).
     """
 
     name = "Spack"
 
     homepage_url = "https://spack.io"
+    documentation_url = "https://spack.readthedocs.io/en/latest/"
     repository_url = "https://github.com/spack/spack"
 
     platforms = LINUX_LIKE, MACOS

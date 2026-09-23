@@ -62,7 +62,7 @@ class Sheldon(PackageManager):
 
     name = "Sheldon"
 
-    homepage_url = "https://sheldon.cli.rs"
+    documentation_url = "https://sheldon.cli.rs"
     repository_url = "https://github.com/rossmacarthur/sheldon"
 
     platforms = LINUX_LIKE, MACOS

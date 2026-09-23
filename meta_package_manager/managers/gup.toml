@@ -44,6 +44,7 @@
 
 [mpm.overrides.gup]
 name = "gup"
+documentation_url = "https://nao1215.github.io/gup/"
 repository_url = "https://github.com/nao1215/gup"
 # Upstream builds for those three alone, and its own help calls gup
 # "cross-platform software that runs on Windows, Mac and Linux".

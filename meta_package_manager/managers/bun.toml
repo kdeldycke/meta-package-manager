@@ -49,6 +49,7 @@
 [mpm.overrides.bun]
 name = "Bun"
 homepage_url = "https://bun.sh"
+documentation_url = "https://bun.com/docs"
 repository_url = "https://github.com/oven-sh/bun"
 wikipedia_url = "https://en.wikipedia.org/wiki/Bun_(software)"
 logo = "bun"

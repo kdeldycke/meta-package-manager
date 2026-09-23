@@ -37,8 +37,6 @@ class Pixi(PackageManager):
     conda channels, `conda-forge` by default, and land in their own prefix
     under `$PIXI_HOME`.
 
-    Documentation: [pixi global tools](https://pixi.sh/latest/global_tools/introduction/).
-
     ```{important}
     pixi isolates each global tool in its own *environment*, and `mpm` keys
     packages on the **environment** name, not on the conda package names inside
@@ -115,6 +113,7 @@ class Pixi(PackageManager):
     name = "pixi"
 
     homepage_url = "https://pixi.sh"
+    documentation_url = "https://pixi.prefix.dev/latest/global_tools/introduction/"
     repository_url = "https://github.com/prefix-dev/pixi"
 
     keywords = ("prefix.dev",)

@@ -108,6 +108,7 @@ class Zinit(PackageManager):
     ```
     """
 
+    documentation_url = "https://zdharma-continuum.github.io/zinit/wiki/"
     repository_url = "https://github.com/zdharma-continuum/zinit"
     logo = "zsh"
 

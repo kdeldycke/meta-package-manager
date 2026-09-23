@@ -1395,18 +1395,22 @@ def manager_card(manager_id: str) -> str:
     # the full path wrapped mid-word in a box this narrow.
     source_file = source_url.partition("#")[0].rpartition("/")[2]
 
-    # Where to read about the project: its own site, the repository holding its
-    # code, then its Wikipedia article. A project whose home page is its repository
-    # declares only the repository. Fixed labels rather than the addresses, which
-    # wrapped mid-URL in a box this narrow. Each icon sits inside its link, which
-    # the stylesheet keeps from wrapping, so a line breaks between links and never
-    # between an icon and its label.
+    # Where to read about the project: its own site, the manual of the CLI mpm
+    # drives, the repository holding its code, then its Wikipedia article. A
+    # project whose home page is its repository declares only the repository.
+    # Fixed labels rather than the addresses, which wrapped mid-URL in a box this
+    # narrow. Each icon sits inside its link, which the stylesheet keeps from
+    # wrapping, so a line breaks between links and never between an icon and its
+    # label. Two links never share one icon, which would leave the labels doing
+    # all the work: `book` is the manual, so the encyclopedia takes the globe it
+    # is known by.
     targets = [
         (icon, label, url)
         for icon, label, url in (
             ("home", "Home page", m.homepage_url),
+            ("book", "Documentation", m.documentation_url),
             ("code", "Repository", m.repository_url),
-            ("book", "Wikipedia", m.wikipedia_url),
+            ("globe", "Wikipedia", m.wikipedia_url),
         )
         if url
     ]

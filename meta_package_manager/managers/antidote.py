@@ -116,6 +116,7 @@ class Antidote(PackageManager):
     """
 
     homepage_url = "https://antidote.sh"
+    documentation_url = "https://antidote.sh/commands"
     repository_url = "https://github.com/mattmc3/antidote"
     logo = "zsh"
 

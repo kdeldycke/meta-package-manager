@@ -83,6 +83,7 @@ class PWSH_Gallery(PackageManager):
     """
 
     homepage_url = "https://www.powershellgallery.com"
+    documentation_url = "https://learn.microsoft.com/powershell/module/microsoft.powershell.psresourceget"
     repository_url = "https://github.com/PowerShell/PSResourceGet"
 
     # No `logo`: Simple Icons dropped every Microsoft mark in its `13.0.0`, after

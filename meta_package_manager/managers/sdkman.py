@@ -61,6 +61,7 @@ class SDKMAN(PackageManager):
     """
 
     homepage_url = "https://sdkman.io"
+    documentation_url = "https://sdkman.io/usage/"
     repository_url = "https://github.com/sdkman/sdkman-cli"
     logo = "openjdk"
 

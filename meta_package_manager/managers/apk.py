@@ -34,8 +34,6 @@ if TYPE_CHECKING:
 class APK(PackageManager):
     """Alpine Package Keeper (`apk`) used by Alpine Linux.
 
-    Documentation: [Alpine Package Keeper](https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper).
-
     ```{note}
     The version floor is `2.10.0`, the release introducing the `list` applet
     that {meth}`~meta_package_manager.manager.PackageManager.outdated` parses and {meth}`~meta_package_manager.manager.PackageManager.installed` falls back on. Where
@@ -65,6 +63,7 @@ class APK(PackageManager):
 
     name = "Alpine apk"
 
+    documentation_url = "https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper"
     repository_url = "https://gitlab.alpinelinux.org/alpine/apk-tools"
     wikipedia_url = "https://en.wikipedia.org/wiki/Alpine_Package_Keeper"
     logo = "alpinelinux"

@@ -35,7 +35,7 @@
 
 [mpm.overrides.claude-code-plugins]
 name = "Claude Code plugins"
-homepage_url = "https://docs.claude.com/en/docs/claude-code/plugins"
+documentation_url = "https://code.claude.com/docs/en/plugins"
 repository_url = "https://github.com/anthropics/claude-code"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["claude"]

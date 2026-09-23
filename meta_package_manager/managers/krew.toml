@@ -16,6 +16,7 @@
 [mpm.overrides.krew]
 name = "kubectl krew"
 homepage_url = "https://krew.sigs.k8s.io"
+documentation_url = "https://krew.sigs.k8s.io/docs/"
 repository_url = "https://github.com/kubernetes-sigs/krew"
 logo = "kubernetes"
 platforms = ["all_platforms"]

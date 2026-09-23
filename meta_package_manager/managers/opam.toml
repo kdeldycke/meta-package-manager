@@ -18,6 +18,7 @@
 [mpm.overrides.opam]
 name = "OCaml opam"
 homepage_url = "https://opam.ocaml.org"
+documentation_url = "https://opam.ocaml.org/doc/Manual.html"
 repository_url = "https://github.com/ocaml/opam"
 logo = "ocaml"
 platforms = ["bsd", "linux_like", "macos"]

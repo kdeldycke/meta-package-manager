@@ -53,13 +53,12 @@ class Go(PackageManager):
     back. Nothing reports staleness either. Both absences are why
     [nao1215/gup](https://github.com/nao1215/gup) exists as a separate tool.
     ```
-
-    Documentation: [go install](https://go.dev/ref/mod#go-install).
     """
 
     name = "Go"
 
     homepage_url = "https://go.dev"
+    documentation_url = "https://go.dev/ref/mod#go-install"
     repository_url = "https://github.com/golang/go"
     wikipedia_url = "https://en.wikipedia.org/wiki/Go_(programming_language)"
 

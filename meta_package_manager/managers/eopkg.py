@@ -63,6 +63,7 @@ class EOPKG(PackageManager):
 
     name = "Solus eopkg"
 
+    documentation_url = "https://help.getsol.us/docs/user/package-management/basics/"
     repository_url = "https://github.com/getsolus/eopkg"
     logo = "solus"
 

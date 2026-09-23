@@ -62,7 +62,7 @@
 
 [mpm.overrides.rustup]
 name = "Rust rustup"
-homepage_url = "https://rustup.rs"
+documentation_url = "https://rust-lang.github.io/rustup/"
 repository_url = "https://github.com/rust-lang/rustup"
 logo = "rust"
 platforms = ["linux_like", "macos", "windows"]

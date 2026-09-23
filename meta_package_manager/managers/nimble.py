@@ -79,6 +79,7 @@ class Nimble(PackageManager):
 
     name = "Nimble"
 
+    documentation_url = "https://nim-lang.github.io/nimble/index.html"
     repository_url = "https://github.com/nim-lang/nimble"
 
     platforms = ALL_PLATFORMS

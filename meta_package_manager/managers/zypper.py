@@ -87,15 +87,14 @@ class Zypper(PackageManager):
     [`SolverRequester.cc`](https://github.com/openSUSE/zypper/blob/697f8809b2c6c0104cdb20fe4bb1fa048d8227ab/src/SolverRequester.cc#L679-L695).
     ```
 
-    Documentation:
-
-    - [Concept guide](https://documentation.suse.com/smart/systems-management/html/concept-zypper/index.html)
-    - [Command equivalences with other managers](https://wiki.archlinux.org/title/Pacman/Rosetta)
+    Command equivalences with other managers are listed in
+    [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
     """
 
     name = "openSUSE Zypper"
 
     homepage_url = "https://en.opensuse.org/Portal:Zypper"
+    documentation_url = "https://documentation.suse.com/smart/systems-management/html/concept-zypper/index.html"
     repository_url = "https://github.com/openSUSE/zypper"
     wikipedia_url = "https://en.wikipedia.org/wiki/Zypper"
     logo = "opensuse"

@@ -88,6 +88,7 @@ class CPAN(PackageManager):
     name = "Perl CPAN"
 
     homepage_url = "https://www.cpan.org"
+    documentation_url = "https://metacpan.org/pod/CPAN"
     repository_url = "https://github.com/andk/cpanpm"
     wikipedia_url = "https://en.wikipedia.org/wiki/CPAN"
     logo = "perl"

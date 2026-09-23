@@ -171,9 +171,14 @@ class MetaPackageManager(type):
         if "cli_names" not in dct:
             cls.cli_names = (cls.id,)
 
-        # A subclass often wraps a distinct project, whose home page, repository and
-        # article are not its parent's.
-        for link in ("homepage_url", "repository_url", "wikipedia_url"):
+        # A subclass often wraps a distinct project, whose home page, manual,
+        # repository and article are not its parent's.
+        for link in (
+            "homepage_url",
+            "documentation_url",
+            "repository_url",
+            "wikipedia_url",
+        ):
             if link not in dct:
                 setattr(cls, link, None)
 
@@ -276,6 +281,25 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     {attr}`repository_url` names on its own. Never inherited, like the other links.
     """
 
+    documentation_url: str | None = None
+    """Entry point of the project's own documentation, or `None` when it has none.
+
+    The manual, the documentation site, or the man page of the CLI `mpm` drives:
+    whichever page a user reads to learn the commands this manager wraps. Listed
+    between {attr}`homepage_url` and {attr}`repository_url` in the links of the
+    manager's page, so a reader reaching for the tool's reference finds it in the
+    box of facts rather than in the prose below it.
+
+    Left unset where a link would state a fact twice or invent one: a tool
+    documenting itself in its repository alone, whose README
+    {attr}`repository_url` already reaches, and a project whose home page *is*
+    its documentation, which {attr}`homepage_url` then names. A page about the
+    ecosystem rather than the tool does not qualify either.
+
+    Never inherited, like every other link: the AUR helpers extending `pacman`
+    each document themselves.
+    """
+
     repository_url: str | None = None
     """Repository holding the project's code, or `None` when it has no public one.
 
@@ -292,8 +316,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     wikipedia_url: str | None = None
     """English Wikipedia article about the project, or `None` when it has none.
 
-    Listed after {attr}`homepage_url` in the links of the manager's documentation
-    page. The article covers the project that home page names, or
+    Listed last in the links of the manager's documentation page. The article
+    covers the project that home page names, or
     is a redirect Wikipedia keeps under the project's name, landing on the part of
     a broader article that describes it: `Cargo_(software)` opens the Cargo
     section of the Rust article. An article that merely mentions the project does

@@ -92,6 +92,7 @@ class OhMyFish(PackageManager):
 
     name = "Fish Oh My Fish"
 
+    documentation_url = "https://github.com/oh-my-fish/oh-my-fish/wiki"
     repository_url = "https://github.com/oh-my-fish/oh-my-fish"
 
     platforms = LINUX_LIKE, MACOS

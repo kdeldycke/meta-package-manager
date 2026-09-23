@@ -45,6 +45,7 @@ class Nix(PackageManager):
     """
 
     homepage_url = "https://nixos.org"
+    documentation_url = "https://nix.dev/reference/nix-manual"
     repository_url = "https://github.com/NixOS/nix"
     wikipedia_url = "https://en.wikipedia.org/wiki/Nix_(package_manager)"
     logo = "nixos"

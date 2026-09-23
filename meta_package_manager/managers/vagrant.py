@@ -81,8 +81,6 @@ class Vagrant(PackageManager):
     boxes: it emits four lines per box with an empty target column, so nothing
     correlates them back into a record.
     ```
-
-    Documentation: [Vagrant boxes](https://developer.hashicorp.com/vagrant/docs/boxes).
     """
 
     maintenance_note = (
@@ -95,6 +93,7 @@ class Vagrant(PackageManager):
     name = "Vagrant"
 
     homepage_url = "https://www.vagrantup.com"
+    documentation_url = "https://developer.hashicorp.com/vagrant/docs"
     repository_url = "https://github.com/hashicorp/vagrant"
     wikipedia_url = "https://en.wikipedia.org/wiki/Vagrant_(software)"
     logo = "vagrant"

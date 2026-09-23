@@ -57,6 +57,7 @@ class Volta(PackageManager):
     )
 
     homepage_url = "https://volta.sh"
+    documentation_url = "https://docs.volta.sh/"
     repository_url = "https://github.com/volta-cli/volta"
 
     platforms = LINUX_LIKE, MACOS, WINDOWS

@@ -33,8 +33,6 @@ if TYPE_CHECKING:
 class IPS(PackageManager):
     """The Image Packaging System, the native `pkg` of Solaris and illumos.
 
-    Documentation: [`pkg(1)` man page](https://docs.oracle.com/cd/E88353_01/html/E37839/pkg-1.html).
-
     The CLI is named `pkg`, which the FreeBSD {class}`~meta_package_manager.managers.pkg.PKG` manager also claims.
     The two never coexist, their `platforms` being disjoint, but the manager ID
     here is `ips` so the two stay addressable apart.
@@ -71,6 +69,7 @@ class IPS(PackageManager):
 
     name = "Image Packaging System"
 
+    documentation_url = "https://docs.oracle.com/cd/E88353_01/html/E37839/pkg-1.html"
     repository_url = "https://github.com/OpenIndiana/pkg5"
     wikipedia_url = "https://en.wikipedia.org/wiki/Image_Packaging_System"
 

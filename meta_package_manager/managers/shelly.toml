@@ -41,6 +41,7 @@
 
 [mpm.overrides.shelly]
 name = "Shelly"
+documentation_url = "https://www.seafoam-labs.org/shelly-alpm/docs/cli-reference/"
 repository_url = "https://github.com/Seafoam-Labs/Shelly-ALPM"
 logo = "archlinux"
 # Its own prerequisites name "Arch Linux (or an Arch-based distribution)", and

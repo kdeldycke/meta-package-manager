@@ -83,6 +83,7 @@ class Zplug(PackageManager):
 
     name = "Zsh zplug"
 
+    documentation_url = "https://github.com/zplug/zplug/wiki"
     repository_url = "https://github.com/zplug/zplug"
     logo = "zsh"
 

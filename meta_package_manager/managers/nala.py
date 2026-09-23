@@ -76,6 +76,7 @@ class Nala(PackageManager):
 
     name = "Nala"
 
+    documentation_url = "https://gitlab.com/volian/nala/-/wikis/home"
     repository_url = "https://gitlab.com/volian/nala"
     logo = "debian"
 

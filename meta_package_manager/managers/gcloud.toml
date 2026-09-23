@@ -57,6 +57,7 @@
 [mpm.overrides.gcloud]
 name = "Google Cloud CLI"
 homepage_url = "https://cloud.google.com/sdk/gcloud"
+documentation_url = "https://docs.cloud.google.com/sdk/gcloud/reference"
 logo = "googlecloud"
 platforms = ["linux_like", "macos", "windows"]
 cli_names = ["gcloud"]

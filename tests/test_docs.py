@@ -1286,14 +1286,16 @@ def test_manager_card_renders(manager):
             f"{row} must not fall back to commas"
         )
     assert f": `{manager.id}`" in card
-    # The home page, the repository and the Wikipedia article, each a fixed label
-    # after its icon, inside a link the stylesheet keeps whole.
+    # The home page, the tool's own manual, the repository and the Wikipedia
+    # article, each a fixed label after its icon, inside a link the stylesheet
+    # keeps whole.
     targets = [
         (icon, label, url)
         for icon, label, url in (
             ("home", "Home page", manager.homepage_url),
+            ("book", "Documentation", manager.documentation_url),
             ("code", "Repository", manager.repository_url),
-            ("book", "Wikipedia", manager.wikipedia_url),
+            ("globe", "Wikipedia", manager.wikipedia_url),
         )
         if url
     ]

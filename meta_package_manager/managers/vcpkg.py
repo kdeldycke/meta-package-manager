@@ -77,13 +77,12 @@ class VCPKG(PackageManager):
     Homebrew ships exactly that, and says so in its own caveats. The failure is
     loud and self-explanatory rather than silent.
     ```
-
-    Documentation: [vcpkg classic mode](https://learn.microsoft.com/en-us/vcpkg/concepts/classic-mode).
     """
 
     name = "vcpkg"
 
     homepage_url = "https://vcpkg.io"
+    documentation_url = "https://learn.microsoft.com/en-us/vcpkg/"
     repository_url = "https://github.com/microsoft/vcpkg"
     wikipedia_url = "https://en.wikipedia.org/wiki/Vcpkg"
 

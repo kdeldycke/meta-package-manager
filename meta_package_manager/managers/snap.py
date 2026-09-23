@@ -60,6 +60,7 @@ class Snap(PackageManager):
     """
 
     homepage_url = "https://snapcraft.io"
+    documentation_url = "https://snapcraft.io/docs/"
     repository_url = "https://github.com/canonical/snapd"
     wikipedia_url = "https://en.wikipedia.org/wiki/Snap_(software)"
     logo = "snapcraft"

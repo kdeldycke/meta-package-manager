@@ -998,6 +998,7 @@ class Brew(Homebrew):
     name = "Homebrew Formulae"
 
     homepage_url = "https://brew.sh"
+    documentation_url = "https://docs.brew.sh/"
     repository_url = "https://github.com/Homebrew/brew"
     wikipedia_url = "https://en.wikipedia.org/wiki/Homebrew_(package_manager)"
     logo = "homebrew"
@@ -1075,6 +1076,7 @@ class Cask(Homebrew):
 
     name = "Homebrew Cask"
 
+    documentation_url = "https://docs.brew.sh/Manpage"
     repository_url = "https://github.com/Homebrew/homebrew-cask"
     logo = "homebrew"
 

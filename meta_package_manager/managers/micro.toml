@@ -49,6 +49,7 @@
 [mpm.overrides.micro]
 name = "micro editor"
 homepage_url = "https://micro-editor.github.io"
+documentation_url = "https://github.com/micro-editor/micro/tree/master/runtime/help"
 repository_url = "https://github.com/micro-editor/micro"
 platforms = ["all_platforms"]
 cli_names = ["micro"]

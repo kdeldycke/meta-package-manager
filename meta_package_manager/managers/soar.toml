@@ -18,6 +18,7 @@
 
 [mpm.overrides.soar]
 name = "Soar"
+documentation_url = "https://soar.qaidvoid.dev/cli-reference"
 repository_url = "https://github.com/pkgforge/soar"
 # soar is Linux-only (it relies on landlock and other Linux syscalls); "linux_like" also
 # covers WSL.

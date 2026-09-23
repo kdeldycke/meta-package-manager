@@ -206,7 +206,7 @@ A manager module runs about 300 lines, half of them between 235 and 385. The lon
 
 Create `meta_package_manager/managers/<name>.py`. Follow the import pattern, class structure, and `TYPE_CHECKING` block from your template exactly.
 
-Class-level attributes and methods must follow the canonical order defined in `PackageManager` (enforced by `test_content_order`). The order is: `homepage_url`, `repository_url`, `wikipedia_url`, `logo`, `keywords`, `platforms`, `requirement`, `cli_names`, `cli_search_path`, `extra_env`, `pre_cmds`, `pre_args`, `post_args`, `version_cli_options`, `version_regexes`, then operations (`installed`, `outdated`, `release_date`, `search`, `install`, `upgrade_all_cli`, `upgrade_one_cli`, `upgrade_all_cli_excluding`, `remove`, `sync`, `cleanup`).
+Class-level attributes and methods must follow the canonical order defined in `PackageManager` (enforced by `test_content_order`). The order is: `homepage_url`, `documentation_url`, `repository_url`, `wikipedia_url`, `logo`, `keywords`, `platforms`, `requirement`, `cli_names`, `cli_search_path`, `extra_env`, `pre_cmds`, `pre_args`, `post_args`, `version_cli_options`, `version_regexes`, then operations (`installed`, `outdated`, `release_date`, `search`, `install`, `upgrade_all_cli`, `upgrade_one_cli`, `upgrade_all_cli_excluding`, `remove`, `sync`, `cleanup`).
 
 ### The class docstring is the manager's page
 
@@ -226,10 +226,12 @@ State the fact where the user meets it, and name the concrete key, path or comma
 
 Required:
 
-- `homepage_url` or `repository_url`, at least one: the project's home page, and the repository holding its code. Declare only `repository_url` when the home page is the repository, since `test_url_attributes_are_distinct` refuses two links to one page. For the same reason, a `Documentation:` line in the docstring never cites either.
+- `homepage_url` or `repository_url`, at least one: the project's home page, and the repository holding its code. Declare only `repository_url` when the home page is the repository, since `test_url_attributes_are_distinct` refuses two links to one page. Where the project's only site is its manual, declare that address as `documentation_url` and leave the home page unset.
 - `platforms`: use constants from `extra_platforms` (`ALL_PLATFORMS`, `LINUX_LIKE`, `MACOS`, `WINDOWS`, `UNIX_WITHOUT_MACOS`, etc.). Combine with tuples: `platforms = LINUX_LIKE, MACOS`.
 
 Common optional:
+
+- `documentation_url`: the entry point of the project's own documentation, shown on the manager's page: the manual, the docs site, or the man page of the CLI mpm drives. Point it at the page a user reads to learn the commands this manager wraps, not at a page about the ecosystem around it. Leave it unset when the tool documents itself in its repository README alone, which `repository_url` already reaches, and when the address would repeat another slot's. A wiki or a separate manual document inside the repository counts as documentation; the README does not. Verify the address answers before declaring it, and use the target of a redirect rather than the redirect.
 
 - `repository_url`: the repository holding the project's code, on any host. Shown on the manager's page, and written into the metrics subjects by `docs/docs_update.py` when a forge API answers for its host; for a host without one, add a mirror to `METRICS_MIRRORS` there, or a `NO_UPSTREAM` reason. Leave it unset for a proprietary tool. A subclass never inherits it.
 

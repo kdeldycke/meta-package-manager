@@ -62,6 +62,7 @@ class Pacstall(PackageManager):
     """
 
     homepage_url = "https://pacstall.dev"
+    documentation_url = "https://pacstall.dev/docs/"
     repository_url = "https://github.com/pacstall/pacstall"
 
     platforms = LINUX_LIKE

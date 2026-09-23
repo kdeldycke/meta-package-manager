@@ -80,7 +80,7 @@ class DotNet(PackageManager):
 
     name = "dotnet tool"
 
-    homepage_url = "https://learn.microsoft.com/dotnet/core/tools/global-tools"
+    documentation_url = "https://learn.microsoft.com/dotnet/core/tools/global-tools"
     repository_url = "https://github.com/dotnet/sdk"
     logo = "dotnet"
 

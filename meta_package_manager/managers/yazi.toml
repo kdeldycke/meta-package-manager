@@ -46,6 +46,7 @@
 [mpm.overrides.yazi]
 name = "Yazi ya"
 homepage_url = "https://yazi-rs.github.io"
+documentation_url = "https://yazi-rs.github.io/docs/cli/"
 repository_url = "https://github.com/sxyazi/yazi"
 platforms = ["all_platforms"]
 cli_names = ["ya"]

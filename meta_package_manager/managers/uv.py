@@ -129,7 +129,7 @@ class UV(UVBase):
     """
 
     name = "Python uv"
-    homepage_url = "https://docs.astral.sh/uv"
+    documentation_url = "https://docs.astral.sh/uv/"
     repository_url = "https://github.com/astral-sh/uv"
 
     @property
@@ -287,7 +287,7 @@ class UVX(UVBase):
 
     name = "Python uvx"
 
-    homepage_url = "https://docs.astral.sh/uv/guides/tools/"
+    documentation_url = "https://docs.astral.sh/uv/guides/tools/"
     repository_url = "https://github.com/astral-sh/uv"
 
     brewfile_entry_type = "uv"

@@ -96,13 +96,12 @@ class GHCup(PackageManager):
     deduplicates itself against a cache file so a second run prints nothing,
     and it fires as a side effect of unrelated commands.
     ```
-
-    Documentation: [ghcup user guide](https://www.haskell.org/ghcup/guide/).
     """
 
     name = "Haskell ghcup"
 
     homepage_url = "https://www.haskell.org/ghcup/"
+    documentation_url = "https://www.haskell.org/ghcup/guide/"
     repository_url = "https://github.com/haskell/ghcup-hs"
     logo = "haskell"
 

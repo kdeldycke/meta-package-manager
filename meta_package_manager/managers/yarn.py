@@ -117,6 +117,7 @@ class YarnClassic(Yarn):
 
     name = "Yarn Classic"
     homepage_url = "https://yarnpkg.com"
+    documentation_url = "https://classic.yarnpkg.com/en/docs/cli/"
     repository_url = "https://github.com/yarnpkg/yarn"
     wikipedia_url = "https://en.wikipedia.org/wiki/Yarn_(package_manager)"
 
@@ -470,6 +471,7 @@ class YarnBerry(Yarn):
 
     name = "Yarn Berry"
     homepage_url = "https://yarnpkg.com"
+    documentation_url = "https://yarnpkg.com/cli"
     repository_url = "https://github.com/yarnpkg/berry"
     wikipedia_url = "https://en.wikipedia.org/wiki/Yarn_(package_manager)"
 

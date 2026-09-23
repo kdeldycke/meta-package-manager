@@ -93,13 +93,12 @@ class PEAR(PackageManager):
     so two channels shipping the same name would collapse onto one entry; in
     practice `pear.php.net` is the only populated one.
     ```
-
-    Documentation: [PEAR manual](https://pear.php.net/manual/en/guide.users.commandline.cli.php).
     """
 
     name = "PEAR"
 
     homepage_url = "https://pear.php.net"
+    documentation_url = "https://pear.php.net/manual/en/guide.users.commandline.cli.php"
     repository_url = "https://github.com/pear/pear-core"
     wikipedia_url = "https://en.wikipedia.org/wiki/PEAR"
     logo = "php"

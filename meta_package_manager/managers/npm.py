@@ -66,6 +66,7 @@ class NPM(PackageManager):
     name = "Node npm"
 
     homepage_url = "https://www.npmjs.com"
+    documentation_url = "https://docs.npmjs.com/cli/"
     repository_url = "https://github.com/npm/cli"
     wikipedia_url = "https://en.wikipedia.org/wiki/Npm"
     logo = "npm"

@@ -179,7 +179,7 @@ class Lazy(PackageManager):
     spaces, apostrophes and dashes, so the `lazy.nvim` project name cannot be
     used verbatim."""
 
-    homepage_url = "https://lazy.folke.io"
+    documentation_url = "https://lazy.folke.io"
     repository_url = "https://github.com/folke/lazy.nvim"
     logo = "neovim"
 
@@ -534,8 +534,8 @@ class Mason(PackageManager):
 class Vim_Pack(PackageManager):
     """Neovim's built-in plugin manager.
 
-    `vim.pack` is a Lua API shipped in Neovim's core since
-    [0.12](https://neovim.io/doc/user/pack.html), not a standalone binary: each
+    `vim.pack` is a Lua API shipped in Neovim's core since `0.12`, not a
+    standalone binary: each
     operation below is a Lua one-liner evaluated by a throw-away Neovim
     process. Plugins are Git clones under `stdpath('data')/site/pack/core/opt`,
     pinned by a `nvim-pack-lock.json` lock file in `stdpath('config')`.
@@ -587,7 +587,7 @@ class Vim_Pack(PackageManager):
     spaces, apostrophes and dashes, so the `vim.pack` API name cannot be used
     verbatim."""
 
-    homepage_url = "https://neovim.io/doc/user/pack.html"
+    documentation_url = "https://neovim.io/doc/user/pack.html"
     repository_url = "https://github.com/neovim/neovim"
     logo = "neovim"
 

@@ -69,13 +69,12 @@ class Mamba(PackageManager):
     calling it exits non-zero on an unexpected argument. Upgrades go through
     `update`.
     ```
-
-    Documentation: [mamba user guide](https://mamba.readthedocs.io/en/latest/user_guide/mamba.html).
     """
 
     name = "Mamba"
 
     homepage_url = "https://mamba.readthedocs.io"
+    documentation_url = "https://mamba.readthedocs.io/en/latest/user_guide/mamba.html"
     repository_url = "https://github.com/mamba-org/mamba"
     logo = "anaconda"
 
@@ -392,7 +391,10 @@ class Micromamba(Mamba):
 
     name = "Micromamba"
 
-    homepage_url = "https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html"
+    homepage_url = "https://mamba.readthedocs.io"
+    documentation_url = (
+        "https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html"
+    )
     repository_url = "https://github.com/mamba-org/mamba"
 
     cli_names = ("micromamba",)

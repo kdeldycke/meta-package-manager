@@ -142,8 +142,10 @@ Keep the comments in those specs tight. Their audience is each channel's own mai
 
 ### Type checking
 
+The `typing` group carries the stub packages alone, so mypy itself rides along as an overlay:
+
 ```shell-session
-$ uv run --group typing mypy meta_package_manager
+$ uv run --with mypy --group typing mypy meta_package_manager
 ```
 
 ### Documentation
@@ -178,7 +180,7 @@ The exception is the material that must be real to be correct: the `[samples]` f
 
 The benchmark compares `mpm` against related tools. It mixes one generated table with several hand-maintained ones, and its cells follow strict evidence rules.
 
-**Generated vs hand-maintained.** Only the "Package manager support" table is generated: it renders live at Sphinx build time through the `{python:render}` block in `docs/benchmark.md`, which calls `benchmark_managers_table()` from `meta_package_manager/_docs.py`, fed by `docs/benchmark.toml`; its competitor set is the `BENCHMARK_COMPETITORS` tuple. Every other table (Features, Operations, OS, Distribution, Activity, Popularity, Metadata) is edited by hand. The block carries the `:mirror:` flag: a generated copy of the table is checked in right below the fence, between `<!-- mirror -->`/`<!-- mirror-end -->` markers, so it is reviewable in raw diffs and renders on GitHub. Never hand-edit the mirrored region: `click-extra refresh-directives` (run by repomatic's `update-docs` job, or by hand from the repository root) regenerates it. Sphinx builds keep rendering the live output in memory and never read the mirror, so the published table cannot drift even when the checked-in copy is stale; the mpm-column ✅ links (class source-line anchors) are computed at render time, so the mirror legitimately churns whenever manager source lines shift. `test_benchmark_table_renders` guards the generator against crashes and structural regressions.
+**Generated vs hand-maintained.** Only the "Package manager support" table is generated: it renders live at Sphinx build time through the `{python:render}` block in `docs/benchmark.md`, which calls `benchmark_managers_table()` from `meta_package_manager/_docs.py`, fed by `docs/benchmark.toml`; its competitor set is the `BENCHMARK_COMPETITORS` tuple. Every other table (Features, Operations, OS, Distribution, Activity, Popularity, Metadata) is edited by hand. The block carries the `:mirror:` flag: a generated copy of the table is checked in right below the fence, between `<!-- mirror -->`/`<!-- mirror-end -->` markers, so it is reviewable in raw diffs and renders on GitHub. Never hand-edit the mirrored region: `click-extra refresh-directives` (run by repomatic's `update-docs` job, or by hand from the repository root) regenerates it. By hand means `env -u TERM_PROGRAM`, which is what `test_mirror_blocks_in_sync` pins: click-extra measures an emoji-presentation glyph (⚠️, ☠️) by the running terminal's advance, so a regeneration in Apple Terminal pads those rows one space differently and the freshly written table then reads as stale. Sphinx builds keep rendering the live output in memory and never read the mirror, so the published table cannot drift even when the checked-in copy is stale; the mpm-column ✅ links (class source-line anchors) are computed at render time, so the mirror legitimately churns whenever manager source lines shift. `test_benchmark_table_renders` guards the generator against crashes and structural regressions.
 
 **Cell glyphs.** ✅/❌ are shared by the docs' comparison and capability tables: the benchmark tables, the SBOM page's coverage matrix and tool-comparison table, the cooldown support table and the augmentations table. Never backtick-quote a glyph, in a table cell or in prose: a glyph is not an identifier, the backticks render as a code span around a pictograph, and in the benchmark's `mpm` column ✅ and ⚠️ are links, which a code span would flatten.
 

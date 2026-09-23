@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE
 
@@ -54,12 +55,12 @@ class MicroDNF(PackageManager):
     with `failed to obtain lock 'metadata'`. `mpm --microdnf sync` runs
     `makecache` with `sudo` to rebuild the cache.
     ```
-
-    `microdnf` has no autoremove and no self-check, so `mpm` offers no orphan
-    operations and no `doctor` for it. Its `leaves` command is no substitute:
-    it lists every installed package that nothing else requires, including the
-    packages installed on request.
     """
+
+    # `microdnf` has no autoremove and no self-check, so `mpm` offers no
+    # orphan operations and no `doctor` for it. Its `leaves` command is no
+    # substitute: it lists every installed package that nothing else
+    # requires, including the packages installed on request.
 
     maintenance_note = (
         "Superseded by [dnf5](https://github.com/rpm-software-management/dnf5) on "
@@ -67,6 +68,14 @@ class MicroDNF(PackageManager):
         "maintained for RHEL 10 and older, whose minimal images ship it; mpm wraps "
         "`dnf5` as a separate manager."
     )
+
+    operation_notes: ClassVar = {
+        "orphans": (
+            "No autoremove exists, and the `leaves` command lists every "
+            "installed package that nothing else requires."
+        ),
+        "doctor": "The tool ships no diagnostic command of its own.",
+    }
 
     name = "microdnf"
 

@@ -43,23 +43,12 @@ class EOPKG(PackageManager):
     they run unattended.
 
     ```{note}
-    eopkg `4.x` and `5.x` ship as a [Nuitka](https://nuitka.net) onefile bundle,
-    and the Python each carries reads its stdout encoding from the locale alone.
-    Under `C` or `POSIX` that encoding is `ascii`. The first summary holding a
-    character it cannot encode then aborts the command with
-    `Error: System error. Program terminated.` and exit `1`, after a truncated
-    listing. `list-upgrades` and `list-available` write every summary raw, so
-    either `Cap’n Proto` or `ImageMagick®` stops them; `search` escapes `®` but
-    not `’`, so only the first stops it.
-
-    No `extra_env` pins the locale here, because mpm never reaches that state.
-    [PEP 538](https://peps.python.org/pep-0538/) coercion exports
-    `LC_CTYPE=C.UTF-8` from mpm's own interpreter, and eopkg inherits it. A
-    shell exports nothing, which is why the same command fails by hand and
-    works through mpm. Measured on Solus `4.9`, against eopkg `4.4.0` and
-    `5.0.0` alike.
+    eopkg `4.x` and `5.x` read their output encoding from the locale alone, so
+    the same command run by hand can abort on a non-ASCII package summary
+    where it works through `mpm`, which exports a UTF-8 locale.
     ```
     """
+
 
     name = "Solus eopkg"
 

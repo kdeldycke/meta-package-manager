@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
+from typing import ClassVar
 
 from extra_platforms import UNIX_WITHOUT_MACOS
 
@@ -37,9 +38,7 @@ class Flatpak(PackageManager):
     Flathub.
 
     mpm covers applications only: every listing passes `--app`, so runtimes
-    and SDKs stay out of scope. Listings are requested with
-    `--columns=name,application,version --ostree-verbose` and parsed as
-    tab-separated rows.
+    and SDKs stay out of scope.
 
     ```{note}
     All operations target the system-wide scope except `cleanup` which only
@@ -54,19 +53,26 @@ class Flatpak(PackageManager):
     `flatpak install`). Under a strict polkit policy, unattended mutations
     need a rule permitting them without interactive authentication.
     ```
-
-    ```{caution}
-    `outdated` reads each pending update's latest version from
-    `remote-ls --updates`, then runs one `flatpak info` per package to
-    recover its installed version: a follow-up CLI call for every outdated
-    app.
-    ```
-
-    ```{note}
-    A `--brewfile` dump emits the bare `flatpak "id"` form, mpm capturing no
-    origin remote per app. See {doc}`/dump`, section "Flatpak remote".
-    ```
     """
+
+    # Listings are requested with
+    # `--columns=name,application,version --ostree-verbose` and parsed as
+    # tab-separated rows.
+    #
+    # `outdated` reads each pending update's latest version from
+    # `remote-ls --updates`, then runs one `flatpak info` per package to
+    # recover its installed version: a follow-up CLI call for every outdated
+    # app.
+    #
+    # A `--brewfile` dump emits the bare `flatpak "id"` form, mpm capturing
+    # no origin remote per app. See `docs/dump.md`, section "Flatpak remote",
+    # which owns that caveat.
+    operation_notes: ClassVar = {
+        "outdated": (
+            "Each pending update costs one follow-up `flatpak info` call to "
+            "recover its installed version."
+        ),
+    }
 
     homepage_url = "https://flatpak.org"
     documentation_url = "https://docs.flatpak.org/en/latest/"

@@ -54,14 +54,12 @@ class NPM(PackageManager):
     configured age. The version floor exists for it: `min-release-age` first
     shipped in `11.10.0`, and older releases silently ignore the setting.
     ```
-
-    ```{caution}
-    A fatal npm error (usually a local node version out of sync) is reported
-    both on `<stderr>` and as a JSON blob on `<stdout>`. The `run_cli`
-    override blanks that JSON so the failure surfaces once, through
-    `<stderr>`, rather than being parsed as a package listing.
-    ```
     """
+
+    # A fatal npm error (usually a local node version out of sync) is
+    # reported both on `<stderr>` and as a JSON blob on `<stdout>`. The
+    # `run_cli` override blanks that JSON so the failure surfaces once,
+    # through `<stderr>`, rather than being parsed as a package listing.
 
     name = "Node npm"
 

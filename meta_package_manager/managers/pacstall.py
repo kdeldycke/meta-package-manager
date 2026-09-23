@@ -47,19 +47,24 @@ class Pacstall(PackageManager):
     <meta_package_manager.execution.CLIExecutor.internal_sudo>` instead: a warm
     `sudo` credential cache is kept alive for its mid-run re-exec, and the
     hidden-prompt watchdog covers the cold-cache case.
-
-    ```{note}
-    Listing installed packages is a two-step probe: piped `--list` prints
-    bare names with no versions, so `mpm` follows each with a
-    `--cache-info <pkg> version` call to recover its version.
-    ```
-
-    ```{note}
-    `--search` matches names only and reports no versions. There is no
-    per-package upgrade verb either, so upgrading one package reinstalls it
-    through `--install`.
-    ```
     """
+
+    # Listing installed packages is a two-step probe: piped `--list` prints
+    # bare names with no versions, so `mpm` follows each with a
+    # `--cache-info <pkg> version` call to recover its version.
+    #
+    # `--search` matches names only and reports no versions.
+    operation_notes: ClassVar = {
+        "installed": (
+            "Each listed package costs a follow-up `--cache-info` call to "
+            "recover its version."
+        ),
+        "search": "Matches names only and reports no versions.",
+        "upgrade": (
+            "There is no per-package upgrade verb, so upgrading one package "
+            "reinstalls it through `--install`."
+        ),
+    }
 
     homepage_url = "https://pacstall.dev"
     documentation_url = "https://pacstall.dev/docs/"

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -36,46 +37,50 @@ class Nimble(PackageManager):
 
     A package is a Nim library or binary, identified by the bare name the
     registry publishes it under.
-
-    ```{caution}
-    The inventory forces `--ver`, and that flag is the whole difference between
-    a useful listing and a misleading one. Without it `nimble list --installed`
-    prints package names and nothing else, so every package would be reported
-    with no version at all while looking perfectly healthy. Upstream tracked the
-    flag being ignored as
-    [nim-lang/nimble#1469](https://github.com/nim-lang/nimble/issues/1469),
-    closed as completed; the fix is what sets the requirement floor below.
-    ```
-
-    ```{note}
-    Both listings open with a three-line legend describing the format, whose
-    own lines look exactly like the records that follow: a `{PackageName}`
-    placeholder where a name goes, and a `└── @{Version} (...)` placeholder
-    where a version goes. Both parsers therefore demand a *real* value, refusing
-    the brace-wrapped placeholders, rather than skipping a fixed number of
-    header lines that a future release could renumber.
-    ```
-
-    ```{note}
-    Records span two lines, a name followed by one indented line per version
-    held, which is what makes this a class rather than a bundled definition.
-    Nimble keeps several versions of a package side by side, so the versions are
-    reduced here to the newest per name.
-    ```
-
-    ```{note}
-    No `outdated`: Nimble has no command reporting which installed packages have
-    newer releases.
-
-    No upgrade either, and that is a deliberate reading rather than an
-    oversight. `nimble upgrade` is documented as upgrading "*a list of packages
-    in the lock file*", which is a project operation on a `nimble.lock` and not
-    something that acts on the machine. Installing a package again does fetch
-    the newest release, but Nimble adds it *beside* the version already held
-    rather than replacing it, so reporting that as an upgrade would misstate
-    what happened.
-    ```
     """
+
+    # The inventory forces `--ver`, and that flag is the whole difference
+    # between a useful listing and a misleading one: without it
+    # `nimble list --installed` prints package names and nothing else, so
+    # every package would be reported with no version at all while looking
+    # perfectly healthy. Upstream tracked the flag being ignored as
+    # https://github.com/nim-lang/nimble/issues/1469, closed as completed;
+    # the fix is what sets the `requirement` floor.
+    #
+    # Both listings open with a three-line legend describing the format,
+    # whose own lines look exactly like the records that follow: a
+    # `{PackageName}` placeholder where a name goes, and a
+    # `└── @{Version} (...)` placeholder where a version goes. Both parsers
+    # therefore demand a *real* value, refusing the brace-wrapped
+    # placeholders, rather than skipping a fixed number of header lines that
+    # a future release could renumber.
+    #
+    # Records span two lines, a name followed by one indented line per
+    # version held, which is what makes this a class rather than a bundled
+    # definition.
+    #
+    # `upgrade` is a deliberate reading rather than an oversight:
+    # `nimble upgrade` is documented as upgrading "*a list of packages in the
+    # lock file*", which is a project operation on a `nimble.lock` and not
+    # something that acts on the machine. Installing a package again does
+    # fetch the newest release, but Nimble adds it *beside* the version
+    # already held rather than replacing it, so reporting that as an upgrade
+    # would misstate what happened.
+    operation_notes: ClassVar = {
+        "installed": (
+            "Nimble keeps several versions of a package side by side; the "
+            "listing reports the newest per name."
+        ),
+        "outdated": (
+            "No command reports which installed packages have newer "
+            "releases."
+        ),
+        "upgrade": (
+            "The tool's `upgrade` acts on a project's lock file, not the "
+            "machine, and a reinstall adds the newest version beside the "
+            "old one."
+        ),
+    }
 
     name = "Nimble"
 

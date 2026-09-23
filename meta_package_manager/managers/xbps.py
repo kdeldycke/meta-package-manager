@@ -33,14 +33,9 @@ if TYPE_CHECKING:
 class XBPS(PackageManager):
     """X Binary Package System used by Void Linux.
 
-    ```{note}
     XBPS is split across several sibling binaries: `xbps-query` for
     read-only operations, `xbps-install` for installs, sync and
     upgrades, and `xbps-remove` for uninstalls and cache cleanup.
-    `mpm` resolves the siblings from the same directory as
-    {attr}`cli_path
-    <meta_package_manager.execution.CLIExecutor.cli_path>`.
-    ```
     """
 
     name = "Void XBPS"

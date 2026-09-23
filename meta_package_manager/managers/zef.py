@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -40,25 +41,33 @@ class Zef(PackageManager):
     (`JSON::Fast:ver<0.20>:auth<zef:timo>`), so every pattern here matches the
     name lazily up to the literal `:ver<` rather than splitting on colons.
 
-    ```{note}
-    Two distributions may share a name and differ only by the `auth` field, and
-    several versions of one may be installed side by side. mpm keys a package on
-    its id alone, so both listings are reduced here to one entry per name,
-    keeping the highest version. That reduction is what makes this a class
-    rather than a bundled definition.
-    ```
-
-    ```{note}
-    Search compounds the same problem rather than avoiding it: it answers with a
-    pipe-delimited table carrying one row per *(distribution, version)* pair, so
-    a single module comes back once per release it has ever published.
-    ```
-
-    ```{note}
-    No `outdated`: zef reports no staleness of its own. `upgrade` covers both the
-    bulk and the single-package cases natively, so neither is synthesized.
-    ```
     """
+
+    # Two distributions may share a name and differ only by the `auth`
+    # field, and several versions of one may be installed side by side. mpm
+    # keys a package on its id alone, so both listings are reduced here to
+    # one entry per name, keeping the highest version. That reduction is
+    # what makes this a class rather than a bundled definition.
+    #
+    # Search answers with a pipe-delimited table carrying one row per
+    # *(distribution, version)* pair, so a single module comes back once
+    # per release it has ever published, and the rows are reduced here too.
+    #
+    # `outdated`: zef reports no staleness of its own. `upgrade` covers both
+    # the bulk and the single-package cases natively, so neither is
+    # synthesized.
+    operation_notes: ClassVar = {
+        "installed": (
+            "Two distributions may share a name and differ only by their "
+            "`auth` field; the listing keeps one entry per name at the "
+            "highest version."
+        ),
+        "search": (
+            "The tool's search answers one row per *(distribution, "
+            "version)* pair, so results are reduced to one entry per name."
+        ),
+        "outdated": "The tool reports no staleness of its own.",
+    }
 
     name = "Zef"
 

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import UNIX_WITHOUT_MACOS
 
@@ -37,25 +38,28 @@ class Emerge(PackageManager):
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
 
     The outdated listing and the whole-system upgrade operate against the
-    `@world` set. The progress spinner and ANSI coloring are disabled on every
-    call, leaving output the regexes can parse.
-
-    ```{note}
-    Two operations lean on companion Portage tools rather than `emerge`
-    itself: `installed` reads the package list through `qlist` and
-    `cleanup` trims distfiles through `eclean`. Neither is resolved
-    through {attr}`cli_path
-    <meta_package_manager.execution.CLIExecutor.cli_path>` the way the
-    reference `emerge` binary is; both are expected on the `PATH`.
-    ```
-
-    ```{warning}
-    `cleanup` forces a full `@world` upgrade before running
-    `--depclean`: Portage refuses to remove packages until every
-    dependency is resolved, so depcleaning a partially-upgraded system
-    could drop still-needed packages.
-    ```
+    `@world` set.
     """
+
+    # The progress spinner and ANSI coloring are disabled on every call,
+    # leaving output the regexes can parse.
+    #
+    # Neither `qlist` nor `eclean` is resolved through `cli_path` the way the
+    # reference `emerge` binary is; both are expected on the `PATH`.
+    #
+    # `cleanup` forces a full `@world` upgrade before running `--depclean`:
+    # Portage refuses to remove packages until every dependency is resolved,
+    # so depcleaning a partially-upgraded system could drop still-needed
+    # packages.
+    operation_notes: ClassVar = {
+        "installed": (
+            "Reads through the companion `qlist` tool, expected on the `PATH`."
+        ),
+        "cleanup": (
+            "Trims distfiles through the companion `eclean` tool, after a "
+            "full `@world` upgrade that makes `--depclean` safe."
+        ),
+    }
 
     name = "Gentoo emerge"
 

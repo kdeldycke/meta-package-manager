@@ -1990,18 +1990,34 @@ def manager_operations(manager_id: str) -> str:
     """Produce the operations table of a manager's documentation page.
 
     One row per member of {class}`~meta_package_manager.capabilities.Operations`,
-    in enum order. The *Notes* column points out the capabilities `mpm`
-    synthesizes on top of the native CLI, mirroring the introspection of
-    {func}`augmentations_table`, and is dropped entirely for the managers
-    needing no backfill.
+    in enum order. The *Notes* column carries the manager's declared
+    {attr}`~meta_package_manager.manager.PackageManager.operation_notes` — the
+    one-sentence hint of why an operation is missing or partial, the pointer a
+    motivated reader needs to judge whether the gap is one they could help
+    close — beside the capabilities `mpm` synthesizes on top of the native CLI,
+    mirroring the introspection of {func}`augmentations_table`. Each note is a
+    full sentence, capitalized and closed with a period, so a cell reads
+    standalone beside its row. The column is dropped entirely for the managers
+    declaring no note and needing no backfill.
+
+    The *Supported* column follows the benchmark's glyph vocabulary
+    (`docs/benchmark.md`): `✅` for a supported operation, `❌` for a missing
+    one whose note documents the reason (the twin of the benchmark's rule
+    that `❌` only ever carries evidence), and a blank cell for an absence
+    nothing documents.
     """
     m = pool[manager_id]
     table = []
     for op in Operations:
         supported = implements(m, op)
-        note = ""
+        notes = []
+        declared = m.operation_notes.get(op.name)
+        if declared:
+            notes.append(declared)
         if supported and op is Operations.upgrade_all and upgrade_all_is_synthesized(m):
-            note = "[backfilled by `mpm`](../augmentations.md)"
+            notes.append(
+                "No native `upgrade --all`; [backfilled by `mpm`](../augmentations.md)."
+            )
         elif supported and op is Operations.search:
             missing = [
                 label
@@ -2012,31 +2028,40 @@ def manager_operations(manager_id: str) -> str:
                 if synthesized
             ]
             if missing:
-                note = (
-                    f"{' and '.join(missing)} search "
-                    "[backfilled by `mpm`](../augmentations.md)"
+                notes.append(
+                    f"{' and '.join(missing).capitalize()} search "
+                    "[backfilled by `mpm`](../augmentations.md)."
                 )
         elif (
             supported
             and op is Operations.install
             and implements_method(m, "mark_explicit")
         ):
-            note = (
-                "a package already installed as a dependency is "
-                "[marked explicit by `mpm`](../augmentations.md)"
+            notes.append(
+                "A package already installed as a dependency is "
+                "[marked explicit by `mpm`](../augmentations.md)."
             )
         elif (
             supported
             and op is Operations.remove
             and implements_method(m, "remove_orphan")
         ):
-            note = "`--orphans` also drops the package's orphaned dependencies"
+            notes.append(
+                "The `--orphans` flag also drops the package's orphaned dependencies."
+            )
         elif supported and op is Operations.cleanup:
             if implements_method(m, "cleanup_orphan"):
-                note = "`--orphans` runs the system-wide orphan sweep"
+                notes.append("The `--orphans` flag runs the system-wide orphan sweep.")
             elif cleanup_orphan_is_synthesized(m):
-                note = "`--orphans` sweep [backfilled by `mpm`](../augmentations.md)"
-        table.append([f"`{op.name}`", "✓" if supported else "", note])
+                notes.append(
+                    "The `--orphans` sweep is [backfilled by `mpm`](../augmentations.md)."
+                )
+        # The glyph follows the benchmark's vocabulary: ❌ marks an absence
+        # the note beside it documents, mirroring the benchmark's rule that ❌
+        # only ever carries evidence. An undocumented absence stays blank,
+        # the benchmark's "not assessed" blank.
+        state = "✅" if supported else ("❌" if declared else "")
+        table.append([f"`{op.name}`", state, " ".join(notes)])
 
     headers = ["Operation", "Supported", "Notes"]
     colalign = ["left", "center", "left"]

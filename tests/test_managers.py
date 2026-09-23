@@ -100,6 +100,26 @@ def test_maintenance_note(manager):
 
 
 @all_managers
+def test_operation_notes(manager):
+    """Every declared operation note keys a real operation and stays one full
+    sentence.
+
+    The *Notes* column of the manager pages renders each entry verbatim beside
+    its operation row, so a key outside the `Operations` vocabulary
+    would never reach a page, and a note spanning lines, or not reading as a
+    standalone sentence (no capital to open it, no period to close it, or an
+    opening code span a capital cannot sit on), would break the column's shape.
+    """
+    for op_name, note in manager.operation_notes.items():
+        assert op_name in {op.name for op in Operations}
+        assert note.strip(), f"Empty operation note for {op_name!r}."
+        assert "\n" not in note, f"Multi-line operation note for {op_name!r}."
+        assert note[0].isupper(), f"Operation note {op_name!r} does not start with a capital."
+        assert not note.startswith("`"), f"Operation note {op_name!r} starts on a code span."
+        assert note.endswith("."), f"Operation note {op_name!r} does not end with a period."
+
+
+@all_managers
 def test_ascii_id(manager):
     """All package manager IDs should be short ASCII strings."""
     assert manager.id
@@ -736,6 +756,7 @@ CANONICAL_ATTRS = (
     "unmaintained",
     "unmaintained_message",
     "maintenance_note",
+    "operation_notes",
     "id",
     "name",
     "homepage_url",

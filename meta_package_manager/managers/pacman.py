@@ -25,6 +25,7 @@ from datetime import datetime, timezone
 from functools import cached_property
 from importlib import resources
 from pathlib import Path
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS, UNIX_WITHOUT_MACOS
 
@@ -77,17 +78,22 @@ class Pacman(PackageManager):
 
     Command equivalences with other managers are listed in
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
-
-    ```{caution}
-    `--query --upgrades` only reports updates for packages tracked in a
-    sync database, so foreign packages (installed with `pacman -U`, as AUR
-    helpers do) stay invisible to the base `pacman` binary. `Pacaur`, `Paru`,
-    `Pikaur`, `Trizen` and `Yay` escape this because their own binary also
-    queries the AUR RPC, which is verified for `yay`: see
-    {meth}`Pacman.outdated`. `Aura` does not escape it and reports the two
-    halves separately.
-    ```
     """
+
+    # `--query --upgrades` only reports updates for packages tracked in a
+    # sync database, so foreign packages (installed with `pacman -U`, as AUR
+    # helpers do) stay invisible to the base `pacman` binary. `Pacaur`,
+    # `Paru`, `Pikaur`, `Trizen` and `Yay` escape this because their own
+    # binary also queries the AUR RPC, which is verified for `yay`: see the
+    # `outdated` docstring. `Aura` does not escape it and reports the two
+    # halves separately.
+    operation_notes: ClassVar = {
+        "outdated": (
+            "Only packages tracked in a sync database are reported; foreign "
+            "packages (AUR builds, `-U` installs) stay invisible to the "
+            "plain `pacman` binary."
+        ),
+    }
 
     name = "Arch Linux pacman"
 

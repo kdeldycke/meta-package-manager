@@ -65,29 +65,24 @@ class PKG(PackageManager):
 
     Only root may modify the package database, so mutating operations escalate
     through `sudo` by default, like the {class}`Ports` sibling.
-
-    ```{note}
-    `outdated` parses `pkg upgrade --dry-run` rather than `pkg version`,
-    because only the dry-run names the target version each package would move
-    to.
-    ```
-
-    ```{caution}
-    `sync` forces `IGNORE_OSVERSION=yes`: a package built for a newer
-    FreeBSD than the running kernel would otherwise trigger an interactive
-    confirmation that hangs the subprocess. It is passed as a `-o`
-    command-line option rather than an environment variable, which sudo's
-    environment reset would strip from the escalated call. Support for that
-    setting is also why the version floor is `1.11`.
-    ```
-
-    ```{note}
-    `--quiet` is passed after the subcommand, never as a global option: `pkg`
-    2.x answers a leading `--quiet` or `-q` with ``pkg: unrecognized option
-    `--quiet'`` and exit `1`. `query` is the one subcommand that rejects the
-    flag, so its listings run without it.
-    ```
     """
+
+    # `outdated` parses `pkg upgrade --dry-run` rather than `pkg version`,
+    # because only the dry-run names the target version each package would
+    # move to.
+    #
+    # `sync` forces `IGNORE_OSVERSION=yes`: a package built for a newer
+    # FreeBSD than the running kernel would otherwise trigger an interactive
+    # confirmation that hangs the subprocess. It is passed as a `-o`
+    # command-line option rather than an environment variable, which sudo's
+    # environment reset would strip from the escalated call. Support for
+    # that setting is also why the version floor is `1.11`: see the
+    # `requirement` docstring.
+    #
+    # `--quiet` is passed after the subcommand, never as a global option:
+    # `pkg` 2.x answers a leading `--quiet` or `-q` with
+    # "pkg: unrecognized option `--quiet'" and exit `1`. `query` is the one
+    # subcommand that rejects the flag, so its listings run without it.
 
     name = "FreeBSD pkg"
 

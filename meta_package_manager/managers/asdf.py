@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS
 
@@ -39,27 +40,33 @@ class ASDF(PackageManager):
     subcommands (`asdf list all`, `asdf plugin add`) that replaced the
     hyphenated forms (`list-all`, `plugin-add`) of the older Bash asdf, which
     is unsupported.
-
-    ```{note}
-    asdf is plugin-driven: every tool the user can install is gated
-    behind a plugin (`asdf plugin add nodejs`). `mpm install` does
-    not auto-add plugins; the user is expected to register them first
-    with `asdf plugin add`.
-    ```
-
-    ```{note}
-    Each `(plugin, installed_version)` pair is reported as a
-    distinct package, so a tool installed at multiple versions yields
-    multiple entries sharing the same ID.
-    ```
-
-    ```{caution}
-    `mpm outdated` only reports tools that have a currently-active
-    version (marked with `*` in `asdf list`) different from their
-    latest stable release. A tool installed without being activated
-    through a `.tool-versions` file does not surface as outdated.
-    ```
     """
+
+    # Every tool install is gated behind a plugin the user registers with
+    # `asdf plugin add`: `mpm install` does not auto-add plugins.
+    #
+    # The inventory reports each `(plugin, installed_version)` pair as a
+    # distinct package, so a tool installed at multiple versions yields
+    # multiple entries sharing the same ID.
+    #
+    # `outdated` only reports tools that have a currently-active version
+    # (marked with `*` in `asdf list`) different from their latest stable
+    # release. A tool installed without being activated through a
+    # `.tool-versions` file does not surface as outdated.
+    operation_notes: ClassVar = {
+        "install": (
+            "Every tool is gated behind a plugin that must be registered with "
+            "`asdf plugin add` first."
+        ),
+        "installed": (
+            "A tool installed at several versions yields one entry per "
+            "version, all sharing the same ID."
+        ),
+        "outdated": (
+            "Only tools with a currently-active version different from their "
+            "latest stable release are reported."
+        ),
+    }
 
     name = "asdf"
 

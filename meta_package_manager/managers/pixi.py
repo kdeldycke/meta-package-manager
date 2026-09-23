@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
 
 from ..capabilities import version_not_implemented
@@ -45,61 +47,6 @@ class Pixi(PackageManager):
     environment, neither taking a package name. `pixi global install <pkg>`
     names the environment after the package, so for everything `mpm` installs
     the two are the same string and every operation round-trips.
-
-    Keying on the inner `dependencies` instead was tried and is unsafe: it
-    reports packages that `remove` cannot address one at a time, so removing
-    one of them deletes the whole environment and silently takes its siblings
-    with it.
-    ```
-
-    ```{caution}
-    An environment holding more than the package it is named after, built with
-    `pixi global install <pkg> --with <other>` or `pixi global add`, is
-    therefore reported as the single package `<pkg>`. Its extra packages are
-    invisible to `mpm`, and removing `<pkg>` destroys them along with the
-    environment, which is exactly what a bare `pixi global uninstall <pkg>`
-    does. `mpm` neither widens nor narrows that behavior.
-    ```
-
-    ```{note}
-    An environment whose `dependencies` do not include the package it is named
-    after reports no version. That is the same signal pixi's own listing gives:
-    it prints `<name>: <version>` inline only while the environment resolves to
-    its eponymous package, and drops the version once the contents diverge.
-    ```
-
-    ```{caution}
-    No `search` operation is declared, though `pixi search` exists. Its
-    `--json` mode cannot be capped: the flag `conflicts_with_all` the
-    `--limit` and `--limit-packages` options that bound the human view, and
-    outside a workspace pixi falls back to `Platform::all()` and queries every
-    known conda subdir, roughly thirty of them, which is exactly how `mpm`
-    runs it. Repodata carries no summary or description either, so the results
-    would be name-only. Declaring nothing lets `mpm` skip the manager during a
-    search rather than stall on it.
-
-    Bounding it means passing `--platform`, which would put a host-to-conda-subdir
-    mapping in `mpm` that pixi already owns, and an empty result set is an error
-    rather than an empty document, so reviving `search` is a deliberate piece of
-    work rather than a one-line addition.
-    ```
-
-    ```{caution}
-    No `outdated` operation is declared: nothing in `pixi global` reports
-    upgradable packages without performing the upgrade. `pixi global update`
-    has no dry-run mode, and the request for a dedicated command
-    ([prefix-dev/pixi#6279](https://github.com/prefix-dev/pixi/issues/6279))
-    was closed pointing at the workspace-scoped `pixi update --dry-run`, which
-    does not cover the global scope. `upgrade --all` is unaffected and maps to
-    the native bare `pixi global update`.
-    ```
-
-    ```{note}
-    No `sync` operation either, despite the name of `pixi global sync`: that
-    command reconciles installed environments against the manifest, installing
-    and removing to match it, rather than refreshing package metadata from the
-    channels. Mapping `mpm sync` onto it would make a read-shaped command
-    mutate the machine.
     ```
 
     ```{todo}
@@ -109,6 +56,67 @@ class Pixi(PackageManager):
     needed`). Their `pixiv` mark is an unrelated brand, not a stand-in.
     ```
     """
+
+    # Keying on the inner `dependencies` instead was tried and is unsafe: it
+    # reports packages that `remove` cannot address one at a time, so removing
+    # one of them deletes the whole environment and silently takes its
+    # siblings with it.
+    #
+    # An environment whose `dependencies` do not include the package it is
+    # named after reports no version. That is the same signal pixi's own
+    # listing gives: it prints `<name>: <version>` inline only while the
+    # environment resolves to its eponymous package, and drops the version
+    # once the contents diverge.
+    #
+    # `search`: `pixi search` exists, but its `--json` mode cannot be capped:
+    # the flag `conflicts_with_all` the `--limit` and `--limit-packages`
+    # options that bound the human view, and outside a workspace pixi falls
+    # back to `Platform::all()` and queries every known conda subdir, roughly
+    # thirty of them. Repodata carries no summary or description either, so
+    # the results would be name-only. Declaring nothing lets `mpm` skip the
+    # manager during a search rather than stall on it. Bounding it means
+    # passing `--platform`, which would put a host-to-conda-subdir mapping in
+    # `mpm` that pixi already owns, and an empty result set is an error rather
+    # than an empty document, so reviving `search` is a deliberate piece of
+    # work rather than a one-line addition.
+    #
+    # `outdated`: nothing in `pixi global` reports upgradable packages
+    # without performing the upgrade. `pixi global update` has no dry-run
+    # mode, and the request for a dedicated command
+    # (https://github.com/prefix-dev/pixi/issues/6279) was closed pointing at
+    # the workspace-scoped `pixi update --dry-run`, which does not cover the
+    # global scope.
+    #
+    # `sync`: `pixi global sync` reconciles installed environments against
+    # the manifest, installing and removing to match it, rather than
+    # refreshing package metadata from the channels. Mapping `mpm sync` onto
+    # it would make a read-shaped command mutate the machine.
+    operation_notes: ClassVar = {
+        "installed": (
+            "An environment is reported as the single package it is named "
+            "after, with no version once its contents diverge; its extra "
+            "packages are invisible to `mpm`."
+        ),
+        "remove": (
+            "Removing a package deletes its whole environment, taking any "
+            "extra packages installed beside it."
+        ),
+        "search": (
+            "The `--json` mode cannot be capped and queries every known "
+            "conda subdir, so a search would stall on it."
+        ),
+        "outdated": (
+            "Nothing reports upgradable packages without performing the "
+            "upgrade "
+            "([prefix-dev/pixi#6279](https://github.com/prefix-dev/pixi/issues/6279), "
+            "closed pointing at a workspace-scoped dry run); `upgrade --all` "
+            "maps to the native `pixi global update`."
+        ),
+        "sync": (
+            "The `pixi global sync` command reconciles the manifest by "
+            "installing and removing, so it mutates rather than refreshes."
+        ),
+    }
 
     name = "pixi"
 

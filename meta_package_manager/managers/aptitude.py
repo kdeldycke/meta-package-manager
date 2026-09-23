@@ -77,30 +77,25 @@ class Aptitude(PackageManager):
     a distinct tool with a vocabulary of its own, rather than a translation
     layer over another CLI. It shares dpkg's lock with the rest of that family,
     so mpm runs it serially against them.
-
-    ```{note}
-    Every listing is a `search` over aptitude's own pattern language (`~i` for
-    installed, `~U` for upgradable, `~i~g` for installed garbage) rendered
-    through an explicit `--display-format`. That projection is what makes the
-    output a flat `package,version` table instead of the padded columns the
-    interactive interface draws.
-    ```
-
-    ```{caution}
-    A query reaches aptitude as a *regular expression*, not as a literal
-    substring, so it is escaped by {func}`escape_pattern` before being spliced
-    into a `~n` or `~d` term. Skipping that step gives a silent empty result:
-    `~n^libsigc++-2.0-0v5$` compiles to a regex matching no package at all.
-    ```
-
-    ```{note}
-    `--disable-columns` is redundant on a pipe, aptitude having disabled
-    columns on a redirection since `0.7.5`, and is passed anyway: that heuristic
-    is a moving target (a later release narrowed it again for a caller setting a
-    width explicitly), and the flag is what the manual's own example uses to ask
-    for unformatted output.
-    ```
     """
+
+    # Every listing is a `search` over aptitude's own pattern language (`~i`
+    # for installed, `~U` for upgradable, `~i~g` for installed garbage)
+    # rendered through an explicit `--display-format`. That projection is
+    # what makes the output a flat `package,version` table instead of the
+    # padded columns the interactive interface draws.
+    #
+    # A query reaches aptitude as a *regular expression*, not as a literal
+    # substring, so it is escaped by `escape_pattern` before being spliced
+    # into a `~n` or `~d` term. Skipping that step gives a silent empty
+    # result: `~n^libsigc++-2.0-0v5$` compiles to a regex matching no
+    # package at all.
+    #
+    # `--disable-columns` is redundant on a pipe, aptitude having disabled
+    # columns on a redirection since `0.7.5`, and is passed anyway: that
+    # heuristic is a moving target (a later release narrowed it again for a
+    # caller setting a width explicitly), and the flag is what the manual's
+    # own example uses to ask for unformatted output.
 
     name = "aptitude"
 

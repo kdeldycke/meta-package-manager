@@ -42,8 +42,7 @@ class CPAN(PackageManager):
     Installs may require `sudo` when using the system Perl; `local::lib` gives
     user-local installs instead. The write operations carry dormant privileged
     markers: `--sudo` or a `sudo = true` override escalates them, while nothing
-    escalates by default. cpan cannot uninstall a module, so no remove operation
-    is declared.
+    escalates by default.
 
     ```{caution}
     Perl's core modules (`warnings`, `feature`, `POSIX`, `B`, and the like) exist
@@ -74,16 +73,21 @@ class CPAN(PackageManager):
     [#1983](https://github.com/kdeldycke/meta-package-manager/issues/1983) for the
     original report.
     ```
-
-    ```{note}
-    On Debian and Ubuntu, Perl reaches its core modules through `@INC` directories
-    that are symlinks, like `/usr/share/perl/5.40` pointing to `5.40.1`. `cpan -l`
-    does not enter a directory it is given as a symlink, so it lists none of those
-    modules, while `cpan -O` still reports them as outdated. `mpm` therefore runs
-    `cpan -l` a second time with the resolved directories in `PERL5LIB`, and adds
-    the modules that only this second run finds.
-    ```
     """
+
+    # cpan cannot uninstall a module, which is why no `remove` operation is
+    # declared.
+    #
+    # On Debian and Ubuntu, Perl reaches its core modules through `@INC`
+    # directories that are symlinks, like `/usr/share/perl/5.40` pointing to
+    # `5.40.1`. `cpan -l` does not enter a directory it is given as a symlink,
+    # so it lists none of those modules, while `cpan -O` still reports them
+    # as outdated. `mpm` therefore runs `cpan -l` a second time with the
+    # resolved directories in `PERL5LIB`, and adds the modules that only this
+    # second run finds.
+    operation_notes: ClassVar = {
+        "remove": "CPAN's client cannot uninstall a module at all.",
+    }
 
     name = "Perl CPAN"
 

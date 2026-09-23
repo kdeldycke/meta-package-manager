@@ -39,44 +39,41 @@ class DotNet(PackageManager):
     tools land under `~/.dotnet/tools` and are never shared between users, so
     no operation escalates: elevation is only ever needed for the separate
     `--tool-path` scenario, which this wrapper does not drive.
-
-    ```{note}
-    The listing and the search results are column tables whose headers are
-    localized resource strings, translated into thirteen languages. Rather
-    than match English literals, {attr}`DotNet.extra_env` pins the CLI language and
-    both parsers key on the shape of the row: a package ID, two or more
-    spaces, then a version starting with a digit. That skips the header, the
-    dashed rule and any diagnostic prose the SDK prints above the table, such
-    as the broken-tool warning of
-    [dotnet/sdk#4111](https://github.com/dotnet/sdk/issues/4111).
-    ```
-
-    ```{note}
-    `dotnet tool list` also speaks JSON, through an undocumented
-    `--format json` that landed in the `9.0.100` SDK
-    ([dotnet/sdk#37394](https://github.com/dotnet/sdk/pull/37394)). mpm
-    deliberately parses the table instead: the three columns of the global
-    listing are all whitespace-free, so nothing is gained, while keying on
-    JSON would raise the floor past `8.0.4xx`, the oldest SDK band still
-    supported.
-    ```
-
-    ```{caution}
-    No `outdated` operation is declared: the SDK ships no way to compare
-    installed tools against NuGet without mutating them. A spec for
-    `dotnet tool list --outdated` was written by an SDK maintainer in
-    [dotnet/sdk#22853](https://github.com/dotnet/sdk/issues/22853), which was
-    then closed as not planned. `upgrade --all` is unaffected and maps to the
-    native `dotnet tool update --all`.
-    ```
-
-    ```{note}
-    No `cleanup` either. The obvious candidate, `dotnet nuget locals all
-    --clear`, empties the machine-wide NuGet package folder every .NET project
-    restores against, so a tool-scoped cleanup would invalidate unrelated
-    builds. Nothing clears only what the global tools pulled.
-    ```
     """
+
+    # The listing and the search results are column tables whose headers are
+    # localized resource strings, translated into thirteen languages. Rather
+    # than match English literals, `extra_env` pins the CLI language and both
+    # parsers key on the shape of the row: a package ID, two or more spaces,
+    # then a version starting with a digit. That skips the header, the dashed
+    # rule and any diagnostic prose the SDK prints above the table, such as
+    # the broken-tool warning of
+    # https://github.com/dotnet/sdk/issues/4111
+    #
+    # `dotnet tool list` also speaks JSON, through an undocumented
+    # `--format json` that landed in the `9.0.100` SDK
+    # (https://github.com/dotnet/sdk/pull/37394). mpm deliberately parses
+    # the table instead: the three columns of the global listing are all
+    # whitespace-free, so nothing is gained, while keying on JSON would raise
+    # the floor past `8.0.4xx`, the oldest SDK band still supported.
+    #
+    # `cleanup`: the obvious candidate, `dotnet nuget locals all --clear`,
+    # empties the machine-wide NuGet package folder every .NET project
+    # restores against, so a tool-scoped cleanup would invalidate unrelated
+    # builds. Nothing clears only what the global tools pulled.
+    operation_notes: ClassVar = {
+        "outdated": (
+            "The SDK ships no way to compare installed tools against NuGet "
+            "without mutating them "
+            "([dotnet/sdk#22853](https://github.com/dotnet/sdk/issues/22853), "
+            "closed as not planned); `upgrade --all` is unaffected."
+        ),
+        "cleanup": (
+            "Nothing clears only the global tools' cache; `dotnet nuget "
+            "locals` empties the machine-wide folder every .NET project "
+            "restores against."
+        ),
+    }
 
     name = "dotnet tool"
 

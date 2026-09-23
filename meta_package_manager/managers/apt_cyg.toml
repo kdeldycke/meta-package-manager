@@ -4,13 +4,6 @@
 # (build_bundled_managers) for the loader.
 #
 # Cygwin has no root/sudo concept: every operation runs as the invoking user.
-# apt-cyg has no upgrade, outdated or cache-cleaning command at all: packages are
-# upgraded by re-running Cygwin's own `setup` program.
-#
-# Both `list` (installed) and `listall` (search) print bare package names, one per
-# line, with no version or description. apt-cyg applies the search query as a
-# regular expression over the downloaded `setup.ini` catalog, so mpm refilters
-# exact and extended matches itself.
 
 [mpm.overrides.apt-cyg]
 name = "apt-cyg"
@@ -27,6 +20,17 @@ unmaintained_message = "The author [stopped maintaining apt-cyg in 2017](https:/
 #   $ apt-cyg --version
 #   apt-cyg version 1
 version_regexes = ['apt-cyg version (?P<version>\S+)']
+
+# apt-cyg has no upgrade, outdated or cache-cleaning command at all: packages
+# are upgraded by re-running Cygwin's own `setup` program, which the notes
+# below carry to the Operations table of the manager page, one row at a time.
+[mpm.overrides.apt-cyg.operation_notes]
+upgrade = "No upgrade command: Cygwin packages are upgraded by re-running the `setup` program."
+upgrade_all = "No upgrade command: re-run Cygwin's `setup` program to upgrade packages."
+outdated = "No command lists available upgrades."
+cleanup = "No cache or cleanup command at all."
+installed = "Listings carry bare package names, with no version."
+search = "Results carry no version or description."
 
 # `apt-cyg list` skips the INSTALLED.DB header and prints one bare package name per
 # line (the script's own awk implementation), without any version.

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE
 
@@ -46,24 +47,29 @@ class Pkgit(PackageManager):
     probe finds nothing and mpm reports the manager unavailable until
     `make defconfig` has run.
     ```
-
-    ```{caution}
-    `remove` is deliberately absent. `pkgit --remove <package>` aborts on a
-    package declared in `init.lua`, with `'repositories' is not a table.`
-    followed by `PANIC: unprotected error in call to Lua API (attempt to index
-    a nil value)`, exiting `1` and leaving the package installed. It succeeds
-    only on a repository pulled in as a build dependency, and even then leaves
-    the checkout behind so {meth}`~meta_package_manager.manager.PackageManager.installed` keeps reporting it.
-    ```
-
-    ```{note}
-    A listing carries no version. pkgit enumerates the directories under its
-    share tree, one per cloned repository, and a package is whatever `HEAD`
-    currently points at, so there is nothing to report as an installed version.
-    Build dependencies are cloned as packages too and appear alongside what was
-    asked for.
-    ```
     """
+
+    # `remove` is deliberately absent. `pkgit --remove <package>` aborts on
+    # a package declared in `init.lua`, with `'repositories' is not a table.`
+    # followed by `PANIC: unprotected error in call to Lua API (attempt to
+    # index a nil value)`, exiting `1` and leaving the package installed. It
+    # succeeds only on a repository pulled in as a build dependency, and even
+    # then leaves the checkout behind so `installed` keeps reporting it.
+    #
+    # A listing carries no version. pkgit enumerates the directories under
+    # its share tree, one per cloned repository, and a package is whatever
+    # `HEAD` currently points at, so there is nothing to report as an
+    # installed version.
+    operation_notes: ClassVar = {
+        "remove": (
+            "The `--remove` command aborts on a package declared in the "
+            "configuration and panics, leaving the package installed."
+        ),
+        "installed": (
+            "A package is whatever `HEAD` points at, so listings carry no "
+            "version; build dependencies appear alongside what was asked for."
+        ),
+    }
 
     name = "pkgit"
 

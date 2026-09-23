@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE
 
@@ -46,23 +47,22 @@ class Lure(PackageManager):
     same treatment [`chromebrew`](chromebrew.md) gets.
     ```
 
-    ```{caution}
-    `remove` and `upgrade` are absent, and the reason is one field. LURE's
-    default backend options set `NoConfirm: false`, and only its build path
-    flips it true, so an install reaches the backend as `apt install -y` while a
-    removal reaches it as a bare `apt remove` and blocks forever on a
-    confirmation prompt no mpm run can answer. `--pm-args` can push a flag
-    through, but the right flag is the backend's own: `-y` suits apt, dnf and
-    zypper, while pacman reads `-y` as *refresh the databases*, so there is no
-    value mpm could pass without knowing a backend it cannot resolve.
-    ```
-
     ```{note}
     Every subcommand pulls its repositories before doing anything else, so even
     a listing costs a network round-trip and prints the git progress on
     `<stderr>`. Only the packages themselves reach `<stdout>`.
     ```
     """
+
+    # `remove` and `upgrade` are absent, and the reason is one field. LURE's
+    # default backend options set `NoConfirm: false`, and only its build
+    # path flips it true, so an install reaches the backend as `apt install
+    # -y` while a removal reaches it as a bare `apt remove` and blocks
+    # forever on a confirmation prompt no mpm run can answer. `--pm-args`
+    # can push a flag through, but the right flag is the backend's own:
+    # `-y` suits apt, dnf and zypper, while pacman reads `-y` as *refresh
+    # the databases*, so there is no value mpm could pass without knowing
+    # a backend it cannot resolve.
 
     maintenance_note = (
         "LURE's own forge at `git.elara.ws` answers `502` and `lure.sh` answers "
@@ -74,6 +74,17 @@ class Lure(PackageManager):
         'stable position again"*, and the recipe repository this manager reads '
         "is on GitHub and still moving."
     )
+
+    operation_notes: ClassVar = {
+        "remove": (
+            "A removal reaches the backend without `-y`, so it blocks on a "
+            "confirmation prompt `mpm` cannot answer."
+        ),
+        "upgrade": (
+            "An upgrade reaches the backend without `-y`, so it blocks on a "
+            "confirmation prompt `mpm` cannot answer."
+        ),
+    }
 
     name = "LURE"
 

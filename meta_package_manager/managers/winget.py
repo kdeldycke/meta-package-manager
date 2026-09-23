@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import re
 import subprocess
+from typing import ClassVar
 
 from extra_platforms import WINDOWS
 
@@ -34,8 +35,7 @@ class WinGet(PackageManager):
     """Microsoft's official Windows package manager.
 
     mpm reads inventory from `winget list --details`, whose `Key: Value`
-    blocks carry the installed version and an `Available Upgrades` section,
-    and reads `search` from winget's fixed-width column table.
+    blocks carry the installed version and an `Available Upgrades` section.
 
     ```{note}
     No operation is marked `sudo`, and escalating would be wrong. winget runs
@@ -58,27 +58,42 @@ class WinGet(PackageManager):
     ```{note}
     `installed` and `outdated` read every application the `winget` catalog
     matches, whether winget installed it or not, like a vendor's own MSI:
-    `winget update --all` upgrades those too. An application no source matches,
-    or only `msstore` does, is left out. Store entries still surface in
-    `search`, but their real version cannot be queried through `winget`, so mpm
-    tags them with an `msstore` sentinel version and sorts them below
-    winget-native ones.
-    ```
-
-    ```{warning}
-    Two Windows-only, process-level workarounds keep winget from taking the
-    calling process down with it:
-
-    - winget is spawned with `DETACHED_PROCESS`. Its COM server and
-      installer children call `GenerateConsoleCtrlEvent` as they shut
-      down, broadcasting a `CTRL_C_EVENT` to every process sharing their
-      console: detaching removes winget from that console, so the signal
-      never reaches the caller.
-    - `WindowsPackageManagerServer.exe` is killed by image name after each
-      call. This COM server is activated out-of-process, so it never
-      inherits mpm's pipes and is never reaped by `communicate()`.
+    `winget update --all` upgrades those too. An application no source
+    matches, or only `msstore` does, is left out.
     ```
     """
+
+    # Search is read from winget's fixed-width column table. Store entries
+    # still surface in `search`, but their real version cannot be queried
+    # through `winget`, so mpm tags them with an `msstore` sentinel version
+    # and sorts them below winget-native ones.
+    #
+    # Two Windows-only, process-level workarounds keep winget from taking
+    # the calling process down with it:
+    #
+    # - winget is spawned with `DETACHED_PROCESS`. Its COM server and
+    #   installer children call `GenerateConsoleCtrlEvent` as they shut
+    #   down, broadcasting a `CTRL_C_EVENT` to every process sharing their
+    #   console: detaching removes winget from that console, so the signal
+    #   never reaches the caller.
+    # - `WindowsPackageManagerServer.exe` is killed by image name after
+    #   each call. This COM server is activated out-of-process, so it never
+    #   inherits mpm's pipes and is never reaped by `communicate()`.
+    operation_notes: ClassVar = {
+        "installed": (
+            "Every application the catalog matches is reported, whether the "
+            "tool installed it or not, like a vendor's own MSI."
+        ),
+        "outdated": (
+            "Every application the catalog matches is reported, whether the "
+            "tool installed it or not, like a vendor's own MSI."
+        ),
+        "search": (
+            "Store (`msstore`) entries cannot be queried for a real "
+            "version, so they carry a sentinel version sorted below native "
+            "ones."
+        ),
+    }
 
     documentation_url = "https://learn.microsoft.com/en-us/windows/package-manager/"
     repository_url = "https://github.com/microsoft/winget-cli"

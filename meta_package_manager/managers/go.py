@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from functools import cached_property
 from pathlib import Path
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -38,22 +39,29 @@ class Go(PackageManager):
     stays until the file is deleted. Libraries are a module's own business and
     are scoped to the module that declares them, so they are outside what a
     system package manager can address.
-
-    ```{note}
-    The inventory is `go version -m`, not `go list`. Pointed at a directory,
-    `go version` walks it recursively and reports the build information Go
-    embeds in every binary it produced, which over the binary directory is
-    exactly the set `go install` created. `go list` answers for the module in
-    the working directory instead, so it reports nothing about the host.
-    ```
-
-    ```{caution}
-    Go has no uninstall verb, in any scope: removing a command means deleting
-    its file, which is not something a wrapper should do behind the tool's
-    back. Nothing reports staleness either. Both absences are why
-    [nao1215/gup](https://github.com/nao1215/gup) exists as a separate tool.
-    ```
     """
+
+    # The inventory is `go version -m`, not `go list`. Pointed at a directory,
+    # `go version` walks it recursively and reports the build information Go
+    # embeds in every binary it produced, which over the binary directory is
+    # exactly the set `go install` created. `go list` answers for the module
+    # in the working directory instead, so it reports nothing about the host.
+    #
+    # Go has no uninstall verb, in any scope: removing a command means
+    # deleting its file, which is not something a wrapper should do behind
+    # the tool's back. Nothing reports staleness either. Both absences are
+    # why https://github.com/nao1215/gup exists as a separate tool.
+    operation_notes: ClassVar = {
+        "remove": (
+            "Go has no uninstall verb in any scope; removing a command means "
+            "deleting its file."
+        ),
+        "outdated": (
+            "Nothing reports staleness: "
+            "[nao1215/gup](https://github.com/nao1215/gup) is the separate "
+            "tool built to fill that gap."
+        ),
+    }
 
     name = "Go"
 

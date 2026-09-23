@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -48,15 +49,20 @@ class Mise(PackageManager):
     of the package ID; `mpm install pipx:ruff` resolves the backend
     through `mise` itself.
     ```
-
-    ```{caution}
-    `mise outdated --json` only reports tools tracked in a `mise.toml`
-    (global or project). A tool installed bare with `mise install <tool>`
-    and never pinned with `mise use` will not appear in the outdated
-    list, so `mpm outdated --mise` understates the upgrade surface for
-    those entries.
-    ```
     """
+
+    # `outdated`: `mise outdated --json` only reports tools tracked in a
+    # `mise.toml` (global or project). A tool installed bare with
+    # `mise install <tool>` and never pinned with `mise use` will not
+    # appear in the outdated list, so `mpm outdated --mise` understates
+    # the upgrade surface for those entries.
+    operation_notes: ClassVar = {
+        "outdated": (
+            "Only tools tracked in a `mise.toml` are reported, so a bare "
+            "`mise install` the user never pinned understates the upgrade "
+            "surface."
+        ),
+    }
 
     name = "mise"
 

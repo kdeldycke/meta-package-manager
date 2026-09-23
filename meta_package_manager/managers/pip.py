@@ -23,7 +23,7 @@ import subprocess
 import sys
 from functools import cached_property
 from pathlib import Path
-from typing import cast
+from typing import ClassVar, cast
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -116,9 +116,8 @@ class Pip(PackageManager):
     Installed and outdated packages are read from pip's `list --format=json`
     output. The `outdated` query adds `--not-required` to report only
     top-level packages, since upgrading a transitive dependency can break its
-    parent's version constraints ([#1214](https://github.com/kdeldycke/meta-package-manager/issues/1214)). There is
-    no `search`: PyPI disabled its server-side search API in 2020 under
-    unmanageable load, so `pip search` no longer works (see [pypa/pip#5216](https://github.com/pypa/pip/issues/5216#issuecomment-744605466)).
+    parent's version constraints
+    ([#1214](https://github.com/kdeldycke/meta-package-manager/issues/1214)).
 
     ```{note}
 
@@ -148,6 +147,17 @@ class Pip(PackageManager):
     `--uploaded-prior-to`; older pip silently ignores the release-age gate.
     ```
     """
+
+    # PyPI disabled its server-side search API in 2020 under unmanageable
+    # load, so `pip search` no longer works
+    # (https://github.com/pypa/pip/issues/5216#issuecomment-744605466).
+    operation_notes: ClassVar = {
+        "search": (
+            "PyPI disabled its server-side search API in 2020 "
+            "([pypa/pip#5216](https://github.com/pypa/pip/issues/5216#issuecomment-744605466)), "
+            "so `pip search` no longer works."
+        ),
+    }
 
     name = "Python pip"
 

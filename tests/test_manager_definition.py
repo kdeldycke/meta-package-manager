@@ -129,6 +129,31 @@ def test_parse_definition_returns_dataclass():
     assert definition.operations["install"].parse_mode == "none"
 
 
+def test_parse_definition_accepts_operation_notes():
+    """An `operation_notes` table lands on the class with its keys validated.
+
+    A key naming no `Operations` member is rejected by the converter, the
+    parse-time twin of `test_operation_notes` over the pool: a definition
+    declaring one would otherwise render no note at all, with no error naming
+    the key.
+    """
+    definition = parse_manager_definition(
+        "mytool",
+        {
+            "platforms": ["linux"],
+            "operations": {"sync": {"args": ["update"]}},
+            "operation_notes": {
+                "upgrade": "no upgrade command at all",
+                "outdated": "no command lists available upgrades",
+            },
+        },
+    )
+    assert definition.cli_fields["operation_notes"] == {
+        "upgrade": "no upgrade command at all",
+        "outdated": "no command lists available upgrades",
+    }
+
+
 def test_parse_definition_accepts_orphan_operations():
     """The schema recognizes the `remove_orphan` and `cleanup_orphan` refinements;
     `remove_orphan` requires its ``{package_id}`` placeholder like `remove`."""
@@ -417,6 +442,15 @@ def test_parse_definition_versionless_catalog_manager():
             },
             "expected a boolean",
             id="non-boolean-internal-sudo",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {"sync": {"args": ["s"]}},
+                "operation_notes": {"upgrade": "no upgrade command", "upgrade-all": ""},
+            },
+            "unknown operation 'upgrade-all' in operation_notes",
+            id="unknown-operation-note-key",
         ),
         pytest.param(
             {"platforms": ["linux"]},

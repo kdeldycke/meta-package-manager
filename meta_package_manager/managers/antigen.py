@@ -66,30 +66,40 @@ class Antigen(PackageManager):
     `owner/repo` name Antigen reports, which is the id mpm keys them on.
 
     ```{caution}
-    `antigen` is a shell function, not a standalone binary: it is defined by
-    sourcing an `antigen.zsh` file, so it cannot serve as the manager's CLI.
-    Every invocation is therefore wrapped in `zsh -c`. Zsh is the binary mpm
-    executes, and Antigen's own presence is established by the version probe.
-
-    Unlike its siblings, Antigen documents no canonical install path, so
-    {func}`antigen_source_path` can only guess at the conventional ones. A user
-    who sources it from elsewhere leaves the manager unavailable.
-    ```
-
-    ```{caution}
-    No `install`: Antigen materializes exactly the bundle set the user's own
-    `.zshrc` declares. `antigen bundle` clones and loads a bundle for the
-    current shell only, writing nothing back, so a package installed through
-    mpm would vanish with the process. Installing one for real would mean mpm
-    editing the user's `.zshrc`, which is configuration mpm does not own.
-    ```
-
-    ```{note}
-    No `outdated`: Antigen compares nothing against its remotes short of
-    performing the update. `upgrade --all` still works, and mpm auto-skips the
-    operation.
+    Antigen documents no canonical install path, so a host sourcing it from
+    a nonstandard location leaves the manager unavailable.
     ```
     """
+
+    # `antigen` is a shell function, not a standalone binary: it is defined
+    # by sourcing an `antigen.zsh` file, so it cannot serve as the manager's
+    # CLI and every invocation is wrapped in `zsh -c`. Zsh is the binary mpm
+    # executes, and Antigen's own presence is established by the version
+    # probe. Because no canonical install path is documented,
+    # `antigen_source_path` guesses at the conventional ones. See the
+    # `cli_names` docstring for the other half of this story.
+    #
+    # `install`: Antigen materializes exactly the bundle set the user's own
+    # `.zshrc` declares. `antigen bundle` clones and loads a bundle for the
+    # current shell only, writing nothing back, so a package installed
+    # through mpm would vanish with the process. Installing one for real would
+    # mean mpm editing the user's `.zshrc`, which is configuration mpm does
+    # not own.
+    #
+    # `outdated`: Antigen compares nothing against its remotes short of
+    # performing the update. `upgrade --all` still works, and mpm auto-skips
+    # the operation.
+    operation_notes: ClassVar = {
+        "install": (
+            "A bundle is loaded for the current shell only, and installing one "
+            "for real means editing the user's `.zshrc`, which `mpm` does not "
+            "own."
+        ),
+        "outdated": (
+            "Antigen compares nothing against its remotes short of performing "
+            "the update; `upgrade --all` still works."
+        ),
+    }
 
     name = "Zsh Antigen"
 

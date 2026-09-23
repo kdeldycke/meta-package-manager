@@ -42,15 +42,6 @@ after printing its report, so neither is a failure. Anything else is.
 class Gext(PackageManager):
     """Manager of GNOME Shell extensions, from [extensions.gnome.org](https://extensions.gnome.org).
 
-    ```{note}
-    GNOME ships an official `gnome-extensions` tool, which is deliberately not
-    what this wraps. That one installs from a local bundle and never reaches the
-    extension registry, has no search, and offers no upgrade verb at all; its
-    `list --updates` filters on a boolean carrying no available version, so it
-    could not report an outdated package even in principle. `gext` reaches the
-    registry, and every operation below rests on that.
-    ```
-
     ```{caution}
     An extension is identified by its UUID (`caffeine@patapon.info`), which is
     what the listing reports and what every other operation accepts. The
@@ -68,18 +59,35 @@ class Gext(PackageManager):
     path that works there.
     ```
 
-    ```{warning}
-    The inventory forces `--all`. Left off, `gext list` reports only the
-    *enabled* extensions, silently omitting every installed-but-disabled one:
-    that is the tool's own default and it would make the inventory a lie rather
-    than a shorter list.
-    ```
-
-    No `sync`: the registry is queried per operation and there is no index to
-    refresh. No `cleanup`: nothing prunes anything.
-
-    No escalation: extensions install under the user's own data directory.
+    No escalation is ever needed: extensions install under the user's own data
+    directory.
     """
+
+    # GNOME ships an official `gnome-extensions` tool, which is deliberately
+    # not what this wraps. That one installs from a local bundle and never
+    # reaches the extension registry, has no search, and offers no upgrade
+    # verb at all; its `list --updates` filters on a boolean carrying no
+    # available version, so it could not report an outdated package even in
+    # principle. `gext` reaches the registry, and every operation below rests
+    # on that.
+    #
+    # The inventory forces `--all`. Left off, `gext list` reports only the
+    # *enabled* extensions, silently omitting every installed-but-disabled
+    # one: that is the tool's own default and it would make the inventory a
+    # lie rather than a shorter list.
+    #
+    # `sync`: the registry is queried per operation and there is no index to
+    # refresh.
+    #
+    # `cleanup`: nothing prunes anything.
+    operation_notes: ClassVar = {
+        "sync": (
+            "The registry is queried per operation, so there is no index to refresh."
+        ),
+        "cleanup": (
+            "The tool ships nothing that prunes, so there is no cache to clear."
+        ),
+    }
 
     name = "GNOME Shell extensions"
 

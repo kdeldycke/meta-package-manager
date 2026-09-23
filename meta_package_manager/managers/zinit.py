@@ -75,38 +75,44 @@ class Zinit(PackageManager):
     keys them on. A plugin the user renamed through the `id-as` ice reports
     under that alias instead, and feeds back into every operation just the
     same.
-
-    ```{caution}
-    `zinit` is a shell function, not a standalone binary, so every invocation
-    is wrapped in `zsh -c 'source <zinit.zsh> && zinit <args>'`. Zsh is
-    therefore the manager's CLI, and Zinit's own presence is established by
-    the version probe: a host with Zsh but no Zinit fails to source and
-    reports no version, which leaves the manager unavailable.
-    ```
-
-    ```{caution}
-    {meth}`Zinit.installed` is the one operation that cannot use that wrapper.
-    Zinit tracks plugins in shell state populated by the `zinit load` calls of
-    the user's `.zshrc`, so a freshly sourced non-interactive shell knows of
-    none. That query therefore runs `zsh --interactive`, paying a full shell
-    startup to inventory what the user's Zsh actually loads. Plugins deferred
-    with the `wait` ice (Zinit's turbo mode) load asynchronously after the
-    prompt would have been drawn, so a non-interactive run may miss them.
-    ```
-
-    ```{note}
-    No `outdated`: Zinit's only "what would change" command is
-    `zinit status --all`, which unconditionally runs `.zinit-self-update`
-    first, pulling and recompiling Zinit itself. A query that mutates the
-    manager is not a query, so mpm auto-skips the operation and
-    `upgrade --all` still works.
-    ```
-
-    ```{note}
-    No `search`: Zinit resolves plugins straight from forge URLs and indexes
-    no registry to search.
-    ```
     """
+
+    # `zinit` is a shell function, not a standalone binary, so every
+    # invocation is wrapped in `zsh -c 'source <zinit.zsh> && zinit <args>'`:
+    # see the `cli_names` and `build_cli` docstrings, which carry the same
+    # story from the code side.
+    #
+    # `installed` is the one operation that cannot use that wrapper. Zinit
+    # tracks plugins in shell state populated by the `zinit load` calls of
+    # the user's `.zshrc`, so a freshly sourced non-interactive shell knows
+    # of none. That query therefore runs `zsh --interactive`, paying a full
+    # shell startup to inventory what the user's Zsh actually loads. Plugins
+    # deferred with the `wait` ice (Zinit's turbo mode) load asynchronously
+    # after the prompt would have been drawn, so a non-interactive run may
+    # miss them.
+    #
+    # `outdated`: Zinit's only "what would change" command is
+    # `zinit status --all`, which unconditionally runs `.zinit-self-update`
+    # first, pulling and recompiling Zinit itself. A query that mutates the
+    # manager is not a query, so mpm auto-skips the operation and
+    # `upgrade --all` still works.
+    #
+    # `search`: Zinit resolves plugins straight from forge URLs and indexes
+    # no registry to search.
+    operation_notes: ClassVar = {
+        "installed": (
+            "The inventory runs a full interactive shell startup, and may "
+            "miss plugins deferred with the `wait` ice."
+        ),
+        "outdated": (
+            'The only "what would change" command self-updates Zinit first, '
+            "so it mutates rather than queries; `upgrade --all` still works."
+        ),
+        "search": (
+            "Zinit resolves plugins straight from forge URLs and indexes no "
+            "registry to search."
+        ),
+    }
 
     documentation_url = "https://zdharma-continuum.github.io/zinit/wiki/"
     repository_url = "https://github.com/zdharma-continuum/zinit"

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -37,29 +38,37 @@ class Roswell(PackageManager):
     A roswell package is a *Lisp implementation*, not a Lisp library. `ros
     install` accepts both an implementation and a Quicklisp system, but `ros
     list installed` answers for implementations alone: a system installed with
-    `ros install cl-ppcre` never appears there. The two verbs disagree on their
-    object, and this wrap resolves it the way the `rustup` definition resolves the
-    same question, by narrowing to what the listing can enumerate.
-    ```
-
-    ```{caution}
-    `remove` is deliberately absent. `ros delete <impl>` reports success on
-    every channel that matters, exiting `0` with `sbcl-bin was deleted
-    successfully.` and an empty `<stderr>`, and leaves roswell unusable: its own
-    runtime core was built against the implementation just deleted, so every
-    later subcommand answers `<impl>/<version> does not exist.stop.`. Recovery
-    means deleting `~/.roswell` and running `ros setup` again, `ros config set`
-    being just as broken as the rest. mpm will not drive a removal that reports
-    success and breaks the tool.
-    ```
-
-    ```{caution}
-    `upgrade` is absent for the same reason `remove` is, one level up: `ros
-    update` resolves its argument through `asdf:find-system`, so it upgrades
-    Quicklisp systems, never the implementations {meth}`~meta_package_manager.manager.PackageManager.installed` reports.
-    Mapping it here would upgrade something other than what mpm just listed.
+    `ros install cl-ppcre` never appears there.
     ```
     """
+
+    # The two verbs disagree on their object, and this wrap resolves it the
+    # way the `rustup` definition resolves the same question, by narrowing
+    # to what the listing can enumerate.
+    #
+    # `remove` is deliberately absent. `ros delete <impl>` reports success
+    # on every channel that matters, exiting `0` with `sbcl-bin was deleted
+    # successfully.` and an empty `<stderr>`, and leaves roswell unusable:
+    # its own runtime core was built against the implementation just
+    # deleted, so every later subcommand answers
+    # `<impl>/<version> does not exist.stop.`. Recovery means deleting
+    # `~/.roswell` and running `ros setup` again, `ros config set` being just
+    # as broken as the rest.
+    #
+    # `upgrade` is absent for the same reason `remove` is, one level up:
+    # `ros update` resolves its argument through `asdf:find-system`, so it
+    # upgrades Quicklisp systems, never the implementations `installed`
+    # reports.
+    operation_notes: ClassVar = {
+        "remove": (
+            "The `ros delete` command reports success and breaks roswell's "
+            "own runtime, so `mpm` will not drive it."
+        ),
+        "upgrade": (
+            "The `ros update` command upgrades Quicklisp systems, never the "
+            "implementations the listing reports."
+        ),
+    }
 
     name = "Roswell"
 

@@ -41,27 +41,32 @@ class Fisher(PackageManager):
     reports and accepts, which is the id mpm keys them on. A plugin may carry
     an `@ref` suffix pinning it to a Git tag or branch, and that suffix is what
     mpm surfaces as the installed version.
-
-    ```{caution}
-    `fisher` is a Fish function, not a standalone binary: it ships as a
-    `functions/fisher.fish` file that Fish autoloads, so it cannot serve as the
-    manager's CLI. Every invocation is therefore wrapped in `fish -c`. Fish is
-    the binary mpm executes, and Fisher's own presence is established by the
-    version probe: a host with Fish but no Fisher autoloads nothing, reports no
-    version, and leaves the manager unavailable.
-    ```
-
-    ```{note}
-    No `outdated`: Fisher exposes no dry run and no upstream comparison. It
-    tracks a branch rather than a release, so "behind" is not a question it
-    answers. `upgrade --all` still works, and mpm auto-skips the operation.
-    ```
-
-    ```{note}
-    No `search`: Fisher resolves plugins straight from forge URLs and indexes
-    no registry to search.
-    ```
     """
+
+    # `fisher` is a Fish function, not a standalone binary: it ships as a
+    # `functions/fisher.fish` file that Fish autoloads, so it cannot serve as
+    # the manager's CLI and every invocation is wrapped in `fish -c`. Fish is
+    # the binary mpm executes, and Fisher's own presence is established by
+    # the version probe: a host with Fish but no Fisher autoloads nothing,
+    # reports no version, and leaves the manager unavailable. See the
+    # `cli_names` docstring for the same story from the code side.
+    #
+    # `outdated`: Fisher exposes no dry run and no upstream comparison. It
+    # tracks a branch rather than a release, so "behind" is not a question it
+    # answers. `upgrade --all` still works, and mpm auto-skips the operation.
+    #
+    # `search`: Fisher resolves plugins straight from forge URLs and indexes
+    # no registry to search.
+    operation_notes: ClassVar = {
+        "outdated": (
+            'Fisher tracks a branch rather than a release, so "behind" is '
+            "not a question it answers; `upgrade --all` still works."
+        ),
+        "search": (
+            "Fisher resolves plugins straight from forge URLs and indexes no "
+            "registry to search."
+        ),
+    }
 
     name = "Fish fisher"
 

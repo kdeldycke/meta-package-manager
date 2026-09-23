@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ILLUMOS, SOLARIS
 
@@ -44,28 +45,36 @@ class IPS(PackageManager):
     ```
 
     ```{caution}
-    `installed` passes `--no-refresh` to keep the inventory a local read. Left
-    off, `pkg list` contacts every configured publisher first, which turns a
-    listing into a network round-trip and fails outright when the host is
-    offline.
-    ```
-
-    ```{todo}
-    `outdated` is not implemented. The operation needs a sample naming both the
-    installed and the available version, and the only illumos host available
-    reported `no packages have newer versions available`.
-
-    That state cannot be manufactured on a consistent image, so do not spend
-    time trying: installing a superseded build to force one is refused with
-    ``did not match any allowable packages``, the release incorporations
-    constraining an image to one allowable version per package. Inventing a
-    fixture is not an option either, a sample having to parse through this
-    manager's own parser and having to be real.
-
-    Capture it on a host whose image has fallen behind its publisher, which is
-    the only state that emits the output.
+    The inventory is a local read: the catalog is not refreshed, so the
+    listing works offline.
     ```
     """
+
+    # `installed` passes `--no-refresh` to keep the inventory a local read.
+    # Left off, `pkg list` contacts every configured publisher first, which
+    # turns a listing into a network round-trip and fails outright when the
+    # host is offline.
+    #
+    # `outdated` is not implemented. The operation needs a sample naming both
+    # the installed and the available version, and the only illumos host
+    # available reported `no packages have newer versions available`.
+    #
+    # That state cannot be manufactured on a consistent image, so do not
+    # spend time trying: installing a superseded build to force one is
+    # refused with `did not match any allowable packages`, the release
+    # incorporations constraining an image to one allowable version per
+    # package. Inventing a fixture is not an option either, a sample having
+    # to parse through this manager's own parser and having to be real.
+    #
+    # Capture it on a host whose image has fallen behind its publisher,
+    # which is the only state that emits the output.
+    operation_notes: ClassVar = {
+        "outdated": (
+            "Awaiting a real sample naming both the installed and the "
+            "available version, which only a host whose image has fallen "
+            "behind its publisher emits."
+        ),
+    }
 
     name = "Image Packaging System"
 

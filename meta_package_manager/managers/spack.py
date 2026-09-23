@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS
 
@@ -40,73 +41,75 @@ class Spack(PackageManager):
     reduced to the name every verb accepts back.
 
     ```{note}
-    Holding several builds of one package at once is Spack's whole purpose, so
-    the inventory repeats a name as many times as the host has builds of it.
-    That reduction to one entry per id is what makes this a class rather than a
-    bundled definition, the same case `luarocks` and `vagrant` answer.
-
-    Reducing on the version alone is a deliberate loss: two builds of the *same*
-    version differing only in compiler or build options collapse into one entry,
-    which mpm has no way to tell apart and no verb to address separately.
-    ```
-
-    ```{caution}
-    `--no-env` is required, and silently so. Spack scopes every command to
-    the active environment, which the user activates with `spack env activate`
-    or by exporting `SPACK_ENV`, and an environment is a *project*, not the
-    machine. With one active, `spack find` reports that environment's contents:
-    a host holding four installed packages reports none at all, an empty answer
-    indistinguishable from an empty machine. Worse, an `SPACK_ENV` left pointing
-    at a deleted environment makes the command fail outright with `Error: no
-    environment in ...`.
-
-    The flag is a global one, placed before the subcommand, which is why it is
-    declared as {attr}`~meta_package_manager.execution.CLIExecutor.pre_args` rather than repeated per operation. Note that
-    `-E` is *not* a portable shorthand for it: `spack gc` binds its own `-E` to
-    `--except-any-environment`, so the long form is the only spelling that means
-    the same thing everywhere. The version probe skips {attr}`~meta_package_manager.execution.CLIExecutor.pre_args` entirely
-    and so runs bare.
-
-    `haxelib` forces `--global` and `luarocks` `--no-project` against the same
-    hazard.
-    ```
-
-    ```{note}
-    The inventory is a projection rather than the default display. `spack find`
-    normally groups its output under `-- darwin-tahoe-m1 / %c=apple-clang@21.0.0`
-    banners whose text depends on the host's architecture and compilers, while
-    `--format` prints the requested fields alone. `gcloud` reaches for the same
-    escape.
-    ```
-
-    ```{note}
-    Every spec Spack's database holds is reported, which is broader than what
-    Spack built. Packages pulled in as build dependencies appear, matching the
-    `raco` reading that an inventory hiding what was installed on the user's
-    behalf is the wrong answer, and so do *externals*: the system compiler
-    Spack registers on first use is listed as `apple-clang`, since Spack tracks
-    it as installed and its own garbage collector removes it. No flag separates
-    them out.
+    Every spec the tool's database holds is reported, which is broader than
+    what it built: packages pulled in as build dependencies appear, and so do
+    *externals* like the system compiler it registers on first use. No flag
+    separates them out.
     ```
 
     ```{warning}
-    Spack has no `outdated` and no upgrade verb, and neither is faked. Installing
-    a package that is already present *adds* a second build rather than replacing
-    the first, which is the point of the tool, so wiring `upgrade` to `install`
-    would leave the old build in place while reporting success. Reclaiming the
-    superseded build is what `cleanup --orphans` does.
-    ```
-
-    ```{warning}
-    A read bootstraps the host on first use. Since Spack 1.0 the package recipes
-    live in [spack/spack-packages](https://github.com/spack/spack-packages)
-    rather than in Spack itself, and upstream states Spack "clones the package
-    repository automatically when you first run", so an inventory or a search on
-    a fresh install fetches some twenty thousand objects into `~/.spack` before
-    answering. `ollama` starting a daemon from a listing is the same shape,
-    smaller.
+    A read bootstraps the host on first use: upstream clones the package
+    repository automatically on the first run, so an inventory or a search on
+    a fresh install fetches some twenty thousand objects into `~/.spack`
+    before answering.
     ```
     """
+
+    # Holding several builds of one package at once is Spack's whole purpose,
+    # so the inventory repeats a name as many times as the host has builds of
+    # it. That reduction to one entry per id is what makes this a class rather
+    # than a bundled definition, the same case `luarocks` and `vagrant`
+    # answer. Reducing on the version alone is a deliberate loss: two builds
+    # of the *same* version differing only in compiler or build options
+    # collapse into one entry, which mpm has no way to tell apart and no verb
+    # to address separately.
+    #
+    # `--no-env` is required, and silently so. Spack scopes every command to
+    # the active environment, which the user activates with `spack env
+    # activate` or by exporting `SPACK_ENV`, and an environment is a
+    # *project*, not the machine. With one active, `spack find` reports that
+    # environment's contents: a host holding four installed packages reports
+    # none at all, an empty answer indistinguishable from an empty machine.
+    # Worse, an `SPACK_ENV` left pointing at a deleted environment makes the
+    # command fail outright with `Error: no environment in ...`. The flag is
+    # a global one, placed before the subcommand, which is why it is declared
+    # as `pre_args` rather than repeated per operation. Note that `-E` is
+    # *not* a portable shorthand for it: `spack gc` binds its own `-E` to
+    # `--except-any-environment`, so the long form is the only spelling that
+    # means the same thing everywhere. The version probe skips `pre_args`
+    # entirely and so runs bare. `haxelib` forces `--global` and `luarocks`
+    # `--no-project` against the same hazard.
+    #
+    # The inventory is a projection rather than the default display: `spack
+    # find` normally groups its output under
+    # `-- darwin-tahoe-m1 / %c=apple-clang@21.0.0` banners whose text depends
+    # on the host's architecture and compilers, while `--format` prints the
+    # requested fields alone. `gcloud` reaches for the same escape.
+    #
+    # Spack has no `outdated` and no upgrade verb, and neither is faked.
+    # Installing a package that is already present *adds* a second build
+    # rather than replacing the first, which is the point of the tool, so
+    # wiring `upgrade` to `install` would leave the old build in place while
+    # reporting success. Reclaiming the superseded build is what
+    # `cleanup --orphans` does.
+    operation_notes: ClassVar = {
+        "installed": (
+            "The inventory repeats a name as many times as the host has "
+            "builds of it, holding several builds at once being the tool's "
+            "whole purpose."
+        ),
+        "outdated": "The tool ships no comparison command at all.",
+        "upgrade": (
+            "Installing an already-present package adds a second build "
+            "rather than replacing the first, so an upgrade wired to it "
+            "would report success and leave the old build in place."
+        ),
+        "upgrade_all": (
+            "Installing an already-present package adds a second build "
+            "rather than replacing the first, so an upgrade wired to it "
+            "would report success and leave the old build in place."
+        ),
+    }
 
     name = "Spack"
 

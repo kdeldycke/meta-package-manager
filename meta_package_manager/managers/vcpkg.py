@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
 
@@ -44,30 +45,10 @@ class VCPKG(PackageManager):
     what this wraps, on the same footing as the runtime managers mpm wraps for
     what they install globally.
 
-    ```{important}
-    `--classic` is forced on every invocation, and it is the whole basis of
-    that scoping. vcpkg otherwise searches upwards from the working directory
-    for a `vcpkg.json` and silently switches modes on finding one, so a listing
-    taken inside a C++ project would report that project's dependencies instead
-    of the machine's. Unlike the equivalent levers on other managers, this one
-    is a documented, stable switch rather than a workaround.
-    ```
-
     ```{caution}
     A package is identified by its full specification, `name:triplet`, because
     that is vcpkg's own unit: the same library built for two triplets is two
-    installations, removed independently. Search results are named without a
-    triplet, since nothing is installed yet and a bare name resolves against
-    the default triplet at install time.
-    ```
-
-    ```{note}
-    The inventory is read as JSON rather than from the human listing, which
-    cannot be parsed safely: that listing pads the specification to a fixed
-    fifty columns and truncates anything longer to exactly fifty characters,
-    leaving no separator at all before the version. Real specifications exceed
-    that width, so the rows whose identifier was already corrupted are also the
-    rows a whitespace split would silently misread.
+    installations, removed independently.
     ```
 
     ```{warning}
@@ -78,6 +59,31 @@ class VCPKG(PackageManager):
     loud and self-explanatory rather than silent.
     ```
     """
+
+    # `--classic` is forced on every invocation, and it is the whole basis of
+    # the scoping above. vcpkg otherwise searches upwards from the working
+    # directory for a `vcpkg.json` and silently switches modes on finding one,
+    # so a listing taken inside a C++ project would report that project's
+    # dependencies instead of the machine's. Unlike the equivalent levers on
+    # other managers, this one is a documented, stable switch rather than a
+    # workaround.
+    #
+    # The inventory is read as JSON rather than from the human listing, which
+    # cannot be parsed safely: that listing pads the specification to a fixed
+    # fifty columns and truncates anything longer to exactly fifty characters,
+    # leaving no separator at all before the version. Real specifications
+    # exceed that width, so the rows whose identifier was already corrupted
+    # are also the rows a whitespace split would silently misread.
+    #
+    # Search results are named without a triplet, since nothing is installed
+    # yet and a bare name resolves against the default triplet at install
+    # time.
+    operation_notes: ClassVar = {
+        "search": (
+            "Results are named without a triplet; a bare name resolves "
+            "against the default triplet at install time."
+        ),
+    }
 
     name = "vcpkg"
 

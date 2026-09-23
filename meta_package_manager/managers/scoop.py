@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import WINDOWS
 
@@ -37,26 +38,27 @@ class Scoop(PackageManager):
     `sudo`. Escalating would be fatal: the installer refuses to run as an
     administrator at all, answering `Running the installer as administrator is
     disabled by default` and aborting.
-
-    ```{note}
-    The `installed`, `outdated` and `search` listings are column
-    tables introduced by a `---` separator line: mpm drops everything up
-    to that separator, then splits each row positionally on whitespace.
-    ```
-
-    ```{attention}
-    `scoop --version` does not reliably print a clean version: it often
-    emits the raw `git log` line of the checkout instead. The probe
-    therefore carries fallbacks that recover the version from a
-    `tag: vX.Y.Z` ref or a `Bump to version` commit subject. See
-    [Scoop's own version-reporting issue](https://github.com/ScoopInstaller/Scoop/issues/6457).
-    ```
-
-    ```{caution}
-    `remove` uninstalls with `--purge`, so a package's persisted data
-    directory is deleted with it rather than kept for a later reinstall.
-    ```
     """
+
+    # The `installed`, `outdated` and `search` listings are column tables
+    # introduced by a `---` separator line: mpm drops everything up to that
+    # separator, then splits each row positionally on whitespace.
+    #
+    # `scoop --version` does not reliably print a clean version: it often
+    # emits the raw `git log` line of the checkout instead. The probe
+    # therefore carries fallbacks that recover the version from a
+    # `tag: vX.Y.Z` ref or a `Bump to version` commit subject. See
+    # https://github.com/ScoopInstaller/Scoop/issues/6457.
+    #
+    # `remove` uninstalls with `--purge`, so a package's persisted data
+    # directory is deleted with it rather than kept for a later reinstall.
+    operation_notes: ClassVar = {
+        "remove": (
+            "The `remove` command uninstalls with `--purge`, so a package's "
+            "persisted data directory is deleted rather than kept for a "
+            "later reinstall."
+        ),
+    }
 
     name = "Scoop"
 

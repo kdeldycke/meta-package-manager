@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import CRUX
 
@@ -38,24 +39,26 @@ class PrtGet(PackageManager):
     `mpm` caps a mutating operation at 500 seconds, which a large port outlasts
     by hours. Raise it for this manager with `[mpm.overrides.prt-get] timeout`.
     ```
-
-    ```{note}
-    {meth}`~meta_package_manager.manager.PackageManager.sync` runs the sibling `ports` binary rather than `prt-get`, that
-    being the tool CRUX gives the ports tree. `mpm` resolves it from the same
-    directory as {attr}`cli_path
-    <meta_package_manager.execution.CLIExecutor.cli_path>`.
-    ```
-
-    ```{warning}
-    `prt-get listorphans` is deliberately left unmapped. It lists "ports with
-    no packages depending on them", which on a stock CRUX install includes
-    `bash`, `binutils` and `coreutils`: the base system is depended on by
-    nothing, so feeding that list to an orphan sweep would remove the machine.
-    That is a different question from the one {meth}`~meta_package_manager.manager.PackageManager.orphans`
-    asks, which is which packages were pulled in as dependencies and are no
-    longer required.
-    ```
     """
+
+    # `sync` runs the sibling `ports` binary rather than `prt-get`, that
+    # being the tool CRUX gives the ports tree. `mpm` resolves it from the
+    # same directory as `cli_path`.
+    #
+    # `prt-get listorphans` is deliberately left unmapped. It lists "ports
+    # with no packages depending on them", which on a stock CRUX install
+    # includes `bash`, `binutils` and `coreutils`: the base system is depended
+    # on by nothing, so feeding that list to an orphan sweep would remove the
+    # machine. That is a different question from the one `orphans` asks,
+    # which is which packages were pulled in as dependencies and are no
+    # longer required.
+    operation_notes: ClassVar = {
+        "orphans": (
+            "The `listorphans` command lists ports nothing depends on, which "
+            "on a stock install includes the base system, so mapping it "
+            "would remove the machine."
+        ),
+    }
 
     id = "prt-get"
     """The CLI name, which the `PrtGet` class name cannot spell: a hyphen is not

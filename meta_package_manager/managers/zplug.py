@@ -54,32 +54,40 @@ class Zplug(PackageManager):
     Plugins are declared in the user's `.zshrc` with `zplug "user/repo"` calls,
     then materialized under `$ZPLUG_HOME/repos`. Packages are identified by the
     `user/repo` slug zplug reports, which is the id mpm keys them on.
-
-    ```{caution}
-    `zplug` is a shell function, not a standalone binary: it is defined by
-    sourcing `$ZPLUG_HOME/init.zsh`, so it cannot serve as the manager's CLI.
-    Every invocation is therefore wrapped in `zsh -c`. Zsh is the binary mpm
-    executes, and zplug's own presence is established by the version probe: a
-    host with Zsh but no zplug fails to source and reports no version, which
-    leaves the manager unavailable.
-    ```
-
-    ```{caution}
-    No `install` and no `remove`: zplug materializes exactly the plugin set the
-    user's own `.zshrc` declares. `zplug install` clones what that file already
-    names and `zplug clean` drops repositories it no longer names, so neither
-    takes a plugin of mpm's choosing. Installing one would mean mpm editing the
-    user's `.zshrc`, which is configuration mpm does not own. Both operations
-    are therefore not implemented rather than faked, and mpm auto-skips them.
-    ```
-
-    ```{note}
-    No `outdated`: `zplug status` does check each plugin against its remote,
-    but it reports through a progress display rather than a parseable list, and
-    its output is not pinned by any upstream sample this implementation could
-    be held to. `upgrade --all` still works and mpm auto-skips the operation.
-    ```
     """
+
+    # `zplug` is a shell function, not a standalone binary: it is defined by
+    # sourcing `$ZPLUG_HOME/init.zsh`, so every invocation is wrapped in
+    # `zsh -c`. See the `cli_names` docstring, which carries the same story
+    # from the code side.
+    #
+    # `install` and `remove`: zplug materializes exactly the plugin set the
+    # user's own `.zshrc` declares. `zplug install` clones what that file
+    # already names and `zplug clean` drops repositories it no longer names,
+    # so neither takes a plugin of mpm's choosing. Installing one would mean
+    # mpm editing the user's `.zshrc`, which is configuration mpm does not
+    # own. Both operations are therefore not implemented rather than faked,
+    # and mpm auto-skips them.
+    #
+    # `outdated`: `zplug status` does check each plugin against its remote,
+    # but it reports through a progress display rather than a parseable list,
+    # and its output is not pinned by any upstream sample this implementation
+    # could be held to. `upgrade --all` still works and mpm auto-skips the
+    # operation.
+    operation_notes: ClassVar = {
+        "install": (
+            "A plugin is installed only by declaring it in the user's "
+            "`.zshrc`, which `mpm` does not own."
+        ),
+        "remove": (
+            "A plugin is removed only by dropping its `zplug` line from the "
+            "user's `.zshrc`, which `mpm` does not own."
+        ),
+        "outdated": (
+            "The `zplug status` check reports through a progress display, "
+            "not a parseable list; `upgrade --all` still works."
+        ),
+    }
 
     name = "Zsh zplug"
 

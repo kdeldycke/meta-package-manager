@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -43,57 +44,71 @@ class ZeroInstall(PackageManager):
     A second identifier sits beside the URI. An *application* is a pet name the
     user invents and binds to a feed, which is what `destroy` and `update`
     address. The two identifier spaces are what shape the operation set below.
-
-    ```{caution}
-    No `installed`: `0install list` looks like an inventory and is not. It
-    prints the URI of every feed in the local cache, which is the set of feeds
-    ever fetched rather than the set of programs installed. Upstream says so in
-    the command's own source, `src/cli/list_ifaces.ml`, which calls
-    `Feed_cache.list_all_feeds` under the comment *"Actually, we list all the
-    cached feeds. Close enough."*
-
-    Driving it proves how wide the gap is. On a host where exactly one
-    application was added, `0install list` returned thirteen URIs: the feeds
-    the solver merely consulted to resolve dependencies, and `xz`, whose
-    selection had failed outright with *"No usable implementations"* and which
-    downloaded not one byte. Reporting those as installed would be false.
-    The listing also never prints a pet name, so nothing it emits can be
-    handed back to `destroy`.
-    ```
-
-    ```{caution}
-    No `install`: `0install add` takes *two* mandatory arguments, the pet name
-    to create and the feed URI to bind it to, and refuses a lone URI. mpm's
-    install carries a single package id, which cannot supply both, and
-    inventing a pet name for the user would name their application for them.
-    `sheldon` declines the operation for the same reason.
-    ```
-
-    ```{note}
-    No `outdated`: nothing reports staleness without acting on it. `update`
-    does print when a newer version exists, but it is the upgrade itself and
-    needs an application named on the command line.
-    ```
-
-    ```{note}
-    No `upgrade` of either shape. `0install update` requires an application or
-    a URI and the tool ships no bulk form, so there is no `upgrade --all` to
-    build. The single-package form is out for a second reason: mpm resolves
-    which manager sources a package by querying its inventory, and this manager
-    has none to query, so the operation could never be dispatched here.
-    ```
-
-    ```{note}
-    No `sync`: refreshing is the `--refresh` flag of the commands that already
-    resolve a feed, never a command of its own.
-    ```
-
-    ```{note}
-    No version floor is declared. Every subcommand this class drives predates
-    the oldest release upstream's `CHANGES.md` documents, so no floor could be
-    verified rather than guessed. The class was driven against `2.18`.
-    ```
     """
+
+    # No version floor is declared. Every subcommand this class drives predates
+    # the oldest release upstream's `CHANGES.md` documents, so no floor could
+    # be verified rather than guessed. The class was driven against `2.18`.
+
+    # The operation gaps below, and why none is faked:
+    #
+    # `installed`: `0install list` looks like an inventory and is not. It
+    # prints the URI of every feed in the local cache, which is the set of
+    # feeds ever fetched rather than the set of programs installed. Upstream
+    # says so in the command's own source, `src/cli/list_ifaces.ml`, which
+    # calls `Feed_cache.list_all_feeds` under the comment *"Actually, we list
+    # all the cached feeds. Close enough."* Driving it proves how wide the
+    # gap is: on a host where exactly one application was added, `0install
+    # list` returned thirteen URIs: the feeds the solver merely consulted to
+    # resolve dependencies, and `xz`, whose selection had failed outright
+    # with *"No usable implementations"* and which downloaded not one byte.
+    # Reporting those as installed would be false. The listing also never
+    # prints a pet name, so nothing it emits can be handed back to `destroy`.
+    #
+    # `install`: `0install add` takes *two* mandatory arguments, the pet name
+    # to create and the feed URI to bind it to, and refuses a lone URI. mpm's
+    # install carries a single package id, which cannot supply both, and
+    # inventing a pet name for the user would name their application for
+    # them. `sheldon` declines the operation for the same reason.
+    #
+    # `outdated`: nothing reports staleness without acting on it. `update`
+    # does print when a newer version exists, but it is the upgrade itself
+    # and needs an application named on the command line.
+    #
+    # `upgrade`: `0install update` requires an application or a URI and the
+    # tool ships no bulk form. The single-package form is out for a second
+    # reason: mpm resolves which manager sources a package by querying its
+    # inventory, and this manager has none to query, so the operation could
+    # never be dispatched here.
+    #
+    # `sync`: refreshing is the `--refresh` flag of the commands that already
+    # resolve a feed, never a command of its own.
+    operation_notes: ClassVar = {
+        "installed": (
+            "The `0install list` inventory is the set of cached feeds, not the "
+            "set of installed programs."
+        ),
+        "install": (
+            "The `0install add` command takes a pet name and a feed URI, and "
+            "`mpm` cannot invent one for the user."
+        ),
+        "outdated": (
+            "Nothing reports staleness without acting on it; `update` is the "
+            "upgrade itself."
+        ),
+        "upgrade": (
+            "A single-package upgrade could never be dispatched: `mpm` "
+            "resolves the source manager by querying an inventory this "
+            "manager has none."
+        ),
+        "upgrade_all": (
+            "The tool takes one application or URI per update, and ships no bulk form."
+        ),
+        "sync": (
+            "Refreshing is the `--refresh` flag of the commands that resolve "
+            "a feed, never a command of its own."
+        ),
+    }
 
     name = "Zero Install"
 

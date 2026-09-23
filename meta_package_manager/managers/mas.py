@@ -40,20 +40,7 @@ class MAS(PackageManager):
 
     Every query reads `--json` output, the supported programmatic interface
     since the `>=7.0.0` floor added `--json` to `list`, `outdated` and
-    `search`. It sidesteps the column-alignment ambiguities of the tabular
-    listing, where an app name carrying parentheses or padding whitespace would
-    derail a positional parser.
-
-    ```{note}
-
-    `mas` prints one JSON object per app, concatenated rather than wrapped
-    in an array, and leaves control characters (embedded newlines,
-    `U+2028`) unescaped inside name and description strings ([mas-cli/mas#1248](https://github.com/mas-cli/mas/issues/1248)). mpm decodes the buffer
-    one object at a time with `strict=False` so each object ends at its own
-    closing brace instead of splitting on those bytes. The bug is fixed
-    upstream for the (still unreleased) `7.1.0`, so this workaround can be
-    retired once the `requirement` floor rises to `>=7.1.0`.
-    ```
+    `search`.
 
     ```{note}
 
@@ -62,6 +49,19 @@ class MAS(PackageManager):
     its own `sudo`.
     ```
     """
+
+    # Reading `--json` sidesteps the column-alignment ambiguities of the
+    # tabular listing, where an app name carrying parentheses or padding
+    # whitespace would derail a positional parser.
+    #
+    # `mas` prints one JSON object per app, concatenated rather than wrapped
+    # in an array, and leaves control characters (embedded newlines,
+    # `U+2028`) unescaped inside name and description strings
+    # (https://github.com/mas-cli/mas/issues/1248). mpm decodes the buffer
+    # one object at a time with `strict=False` so each object ends at its
+    # own closing brace instead of splitting on those bytes. The bug is
+    # fixed upstream for the (still unreleased) `7.1.0`: retire this
+    # workaround once the `requirement` floor rises to `>=7.1.0`.
 
     name = "Mac App Store"
 

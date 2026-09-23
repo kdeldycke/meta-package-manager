@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -38,57 +39,66 @@ class LuaRocks(PackageManager):
     version carries a packaging revision after a dash (`3.1.2-0`), kept verbatim
     because that is the form `luarocks install` accepts back.
 
-    ```{note}
-    Every read passes `--porcelain`, which replaces the default grouped display
-    with one tab-separated record per line.
-    ```
-
-    ```{note}
-    Search is what makes this a class rather than a bundled definition.
-    `luarocks search` prints one row per *(rock, version, kind)* triple, so a
-    single rock comes back a dozen times over: once per published version, and
-    again for each of the `rockspec` and `src` forms it ships in. mpm keys a
-    package on its id alone, so the rows are reduced here to one entry per rock.
-    The installed and outdated listings get the same treatment, LuaRocks being
-    able to hold several versions of a rock in one tree.
-    ```
-
     ```{caution}
-    `--no-project` is required. LuaRocks walks up from the working directory
-    looking for a project tree and silently switches to it when one is found, so
-    without the flag the inventory would answer for whichever directory mpm
-    happened to be invoked from instead of for the machine. `haxelib` forces
-    `--global` against the same hazard.
-
-    The flag is a global one, placed before the subcommand, which is why it is
-    declared as {attr}`~meta_package_manager.execution.CLIExecutor.pre_args` rather than repeated per operation. The version
-    probe skips `pre_args` entirely and so runs bare.
-    ```
-
-    ```{caution}
-    Reads and writes disagree about scope, and deliberately so. `list` reports
-    every configured tree at once, which is the right answer for an inventory of
-    the machine: the system tree and the user's `~/.luarocks` both show up, each
-    row naming the tree holding it. `install` and `remove` act on one tree only,
-    the default one, so removing a rock that lives in the *other* tree fails
-    with `Error: Could not find rock 'say' in /opt/homebrew`.
-
-    That asymmetry is left as LuaRocks defines it.
-    Forcing `--local` would make the user tree writable at the cost of the
-    system one, and forcing `--global` the reverse; neither is right for every
-    host, and the failure is loud, immediate and names the tree it searched.
-    ```
-
-    ```{note}
-    No `upgrade --all`: LuaRocks has no command updating every installed rock,
-    `install` being what upgrades a named one in place. mpm backfills the bulk
-    case from `outdated` plus the per-rock upgrade.
-
-    No `sync` either, nothing refreshing the manifest without also downloading,
-    and no `cleanup`: `luarocks purge` empties an entire tree rather than
-    reclaiming anything, which is a mass removal and not a cleanup.
+    The listing reports every configured tree at once, while `install` and
+    `remove` act on the default tree only: removing a rock that lives in
+    another tree fails and names the tree it searched.
     ```
     """
+
+    # Every read passes `--porcelain`, which replaces the default grouped
+    # display with one tab-separated record per line.
+    #
+    # Search is what makes this a class rather than a bundled definition:
+    # `luarocks search` prints one row per *(rock, version, kind)* triple, so
+    # a single rock comes back a dozen times over: once per published
+    # version, and again for each of the `rockspec` and `src` forms it ships
+    # in. mpm keys a package on its id alone, so the rows are reduced here to
+    # one entry per rock. The installed and outdated listings get the same
+    # treatment, LuaRocks being able to hold several versions of a rock in
+    # one tree.
+    #
+    # `--no-project` is required. LuaRocks walks up from the working
+    # directory looking for a project tree and silently switches to it when
+    # one is found, so without the flag the inventory would answer for
+    # whichever directory mpm happened to be invoked from instead of for the
+    # machine. `haxelib` forces `--global` against the same hazard. The flag
+    # is a global one, placed before the subcommand, which is why it is
+    # declared as `pre_args` rather than repeated per operation. The version
+    # probe skips `pre_args` entirely and so runs bare.
+    #
+    # Reads and writes disagree about scope, and deliberately so: `list`
+    # reporting every configured tree at once is the right answer for an
+    # inventory of the machine, while `install` and `remove` acting on the
+    # default tree only is left as LuaRocks defines it. Forcing `--local`
+    # would make the user tree writable at the cost of the system one, and
+    # forcing `--global` the reverse; neither is right for every host, and
+    # the failure is loud, immediate and names the tree it searched.
+    #
+    # `upgrade --all`: LuaRocks has no command updating every installed rock,
+    # `install` being what upgrades a named one in place. mpm backfills the
+    # bulk case from `outdated` plus the per-rock upgrade (rendered by the
+    # synthesized note of the operations table).
+    #
+    # `sync`: nothing refreshes the manifest without also downloading.
+    #
+    # `cleanup`: `luarocks purge` empties an entire tree rather than
+    # reclaiming anything, which is a mass removal and not a cleanup.
+    operation_notes: ClassVar = {
+        "installed": (
+            "A rock can be held at several versions in one tree; the listing "
+            "reports one entry per rock."
+        ),
+        "search": (
+            "Results are reduced to one entry per rock, the tool printing one "
+            "row per version and per form."
+        ),
+        "sync": "Nothing refreshes the manifest without also downloading.",
+        "cleanup": (
+            "The `purge` command empties an entire tree rather than "
+            "reclaiming anything."
+        ),
+    }
 
     name = "LuaRocks"
 

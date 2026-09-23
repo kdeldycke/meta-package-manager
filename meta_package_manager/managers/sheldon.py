@@ -34,31 +34,41 @@ class Sheldon(PackageManager):
     Unlike the other shell plugin managers mpm wraps, Sheldon is a real
     compiled binary rather than a sourced shell function, so it needs no
     interpreter wrapper: mpm calls `sheldon` directly.
-
-    ```{caution}
-    No `installed`: Sheldon ships no command that prints its plugins. The
-    inventory does exist, in the `plugins.toml` config file, but reaching it
-    would mean mpm reading and parsing a configuration file instead of calling
-    a CLI, which is not how a manager gathers packages here. The upstream
-    command set is `init`, `add`, `edit`, `remove`, `lock`, `source`,
-    `completions` and `version`: none of them lists anything.
-    ```
-
-    ```{caution}
-    No `install`: `sheldon add` requires *two* values, a unique local name and
-    a source flag naming where the plugin comes from (`--github`, `--git`,
-    `--gist`, `--remote` or `--local`). mpm's install carries a single package
-    id, which cannot supply both, and guessing a source from the id would be
-    inventing a mapping Sheldon never defined. The operation is therefore not
-    implemented rather than faked, and mpm auto-skips it.
-    ```
-
-    ```{note}
-    No `outdated`: Sheldon compares nothing against its remotes short of
-    performing the update. `upgrade --all` still works, and mpm auto-skips the
-    operation.
-    ```
     """
+
+    # The operation gaps below, and why none is faked:
+    #
+    # `installed`: Sheldon ships no command that prints its plugins. The
+    # inventory does exist, in the `plugins.toml` config file, but reaching it
+    # would mean mpm reading and parsing a configuration file instead of
+    # calling a CLI, which is not how a manager gathers packages here. The
+    # upstream command set is `init`, `add`, `edit`, `remove`, `lock`,
+    # `source`, `completions` and `version`: none of them lists anything.
+    #
+    # `install`: `sheldon add` requires *two* values, a unique local name and
+    # a source flag naming where the plugin comes from (`--github`, `--git`,
+    # `--gist`, `--remote` or `--local`). mpm's install carries a single
+    # package id, which cannot supply both, and guessing a source from the id
+    # would be inventing a mapping Sheldon never defined. The operation is
+    # therefore not implemented rather than faked, and mpm auto-skips it.
+    #
+    # `outdated`: Sheldon compares nothing against its remotes short of
+    # performing the update. `upgrade --all` still works, and mpm auto-skips
+    # the operation.
+    operation_notes: ClassVar = {
+        "installed": (
+            "Sheldon ships no command that prints its plugins; the inventory "
+            "lives in the `plugins.toml` config file."
+        ),
+        "install": (
+            "The `sheldon add` command takes a local name and a source flag, "
+            "and `mpm` cannot guess the source from an id."
+        ),
+        "outdated": (
+            "Sheldon compares nothing against its remotes short of performing "
+            "the update; `upgrade --all` still works."
+        ),
+    }
 
     name = "Sheldon"
 

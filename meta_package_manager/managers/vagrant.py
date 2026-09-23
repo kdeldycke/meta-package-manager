@@ -48,40 +48,38 @@ class Vagrant(PackageManager):
     full URL. The provider and the architecture are deliberately dropped from
     the identifier.
 
-    ```{note}
-    That last point is what makes this a class rather than a definition. Vagrant
-    lists one row per *(name, provider, version)* triple, so a box installed in
-    three versions appears three times, and the same is true of the outdated
-    report. mpm keys a package on its id alone, so both listings are reduced
-    here to one entry per name, keeping the newest version installed.
-    ```
-
     ```{caution}
-    Every box command reads the registry under `~/.vagrant.d` and needs no
-    Vagrantfile, with two exceptions that are avoided rather than handled:
-    `vagrant box outdated` inspects only the boxes the *current directory's*
-    Vagrantfile declares unless `--global` is passed, and `vagrant box update`
-    is scoped the same way unless `--box` names one. Both forced flags are
-    therefore required: without them the answer would depend on where mpm
-    happened to be invoked, and would fail outright outside a Vagrant project.
-
-    One piece of ambient state cannot be escaped: Vagrant evaluates the
-    Vagrantfile's trigger configuration on every subcommand, so a *malformed*
-    Vagrantfile in the working directory breaks even `box list`. Only the
-    version probe is immune.
-    ```
-
-    ```{note}
-    No `upgrade --all`: Vagrant has no command that updates every installed box,
-    `box update` addressing either one named box or the current project's. mpm
-    backfills it from `outdated` plus the per-box upgrade instead.
-
-    No `sync` either, there being no command that refreshes box metadata without
-    also downloading, and the machine-readable output mode is unusable for
-    boxes: it emits four lines per box with an empty target column, so nothing
-    correlates them back into a record.
+    Vagrant evaluates the working directory's Vagrantfile trigger
+    configuration on every subcommand, so a *malformed* Vagrantfile breaks
+    even `box list`. Only the version probe is immune.
     ```
     """
+
+    # Vagrant lists one row per *(name, provider, version)* triple, so a box
+    # installed in three versions appears three times, and the same is true
+    # of the outdated report. mpm keys a package on its id alone, so both
+    # listings are reduced here to one entry per name, keeping the newest
+    # version installed. That reduction is what makes this a class rather
+    # than a bundled definition.
+    #
+    # Every box command reads the registry under `~/.vagrant.d` and needs no
+    # Vagrantfile, with two exceptions that are avoided rather than handled:
+    # `vagrant box outdated` inspects only the boxes the *current directory's*
+    # Vagrantfile declares unless `--global` is passed, and `vagrant box
+    # update` is scoped the same way unless `--box` names one. Both forced
+    # flags are therefore required: without them the answer would depend on
+    # where mpm happened to be invoked, and would fail outright outside a
+    # Vagrant project.
+    #
+    # `upgrade --all`: Vagrant has no command that updates every installed
+    # box, `box update` addressing either one named box or the current
+    # project's. mpm backfills it from `outdated` plus the per-box upgrade
+    # (rendered by the synthesized note of the operations table).
+    #
+    # `sync`: nothing refreshes box metadata without also downloading. The
+    # machine-readable output mode is unusable for boxes: it emits four lines
+    # per box with an empty target column, so nothing correlates them back
+    # into a record.
 
     maintenance_note = (
         "Upstream has slowed: the last stable release is `2.4.9` of August 2025, "
@@ -89,6 +87,16 @@ class Vagrant(PackageManager):
         "distributed under the Business Source License from `2.4.3` onwards, "
         "which some distributions treat as non-free."
     )
+
+    operation_notes: ClassVar = {
+        "installed": (
+            "A box installed in several versions appears once per name, "
+            "keeping the newest version."
+        ),
+        "sync": (
+            "There is no command that refreshes box metadata without also downloading."
+        ),
+    }
 
     name = "Vagrant"
 

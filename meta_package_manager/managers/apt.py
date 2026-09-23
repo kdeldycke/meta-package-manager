@@ -40,22 +40,18 @@ class APT(PackageManager):
     over system-wide packages. Mutations escalate through `sudo` and force
     `--yes` to stay non-interactive. {class}`APT_Mint` retargets Linux
     Mint's same-named but differently-behaved `apt`.
-
-    ```{note}
-    apt's listing and search commands emit `Listing...`, `Sorting...`
-    and `Full Text Search...` preambles plus progress indicators.
-    `--quiet` drops the progress bars, and each parser anchors on the
-    `name/suite version arch` row shape, so the preamble lines fall
-    through.
-    ```
-
-    ```{note}
-    `search` matches names only by default. An exact query is wrapped as
-    the `^query$` regex apt supports natively; an extended query switches
-    to `--full` to pull descriptions into the output for mpm to
-    post-filter.
-    ```
     """
+
+    # apt's listing and search commands emit `Listing...`, `Sorting...`
+    # and `Full Text Search...` preambles plus progress indicators.
+    # `--quiet` drops the progress bars, and each parser anchors on the
+    # `name/suite version arch` row shape, so the preamble lines fall
+    # through.
+    #
+    # `search` matches names only by default. An exact query is wrapped as
+    # the `^query$` regex apt supports natively; an extended query switches
+    # to `--full` to pull descriptions into the output for mpm to
+    # post-filter.
 
     name = "Debian apt"
 

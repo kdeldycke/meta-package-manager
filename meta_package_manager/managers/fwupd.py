@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from extra_platforms import LINUX_LIKE
 
 from ..capabilities import version_not_implemented
@@ -39,17 +41,8 @@ class FWUPD(PackageManager):
     (`get-devices --json`, `get-updates --json`), which sets the version floor
     at `1.9.5`: the first release to emit JSON for `get-devices`.
 
-    ```{note}
-    `installed` and `outdated` report only devices carrying the
-    `updatable` flag: fixed or unsupported hardware is skipped even though
-    `fwupdmgr` still lists it.
-    ```
-
-    ```{note}
-    No `search` (firmware has no name catalog to query) and no `remove`
-    (firmware cannot be uninstalled). Flashing is forced non-interactive:
-    no confirmation prompt, no reboot check, no device-selection prompt.
-    ```
+    Flashing is forced non-interactive: no confirmation prompt, no reboot
+    check, no device-selection prompt.
 
     ```{note}
     Escalation is polkit's job, so no operation is marked `sudo`:
@@ -60,6 +53,25 @@ class FWUPD(PackageManager):
     authentication.
     ```
     """
+
+    # `installed` and `outdated` report only devices carrying the `updatable`
+    # flag: fixed or unsupported hardware is skipped even though `fwupdmgr`
+    # still lists it.
+    #
+    # `search`: firmware has no name catalog to query. `remove`: firmware
+    # cannot be uninstalled.
+    operation_notes: ClassVar = {
+        "installed": (
+            "Only devices carrying the `updatable` flag are reported; fixed "
+            "or unsupported hardware is skipped."
+        ),
+        "outdated": (
+            "Only devices carrying the `updatable` flag are reported; fixed "
+            "or unsupported hardware is skipped."
+        ),
+        "search": "Firmware has no name catalog to query.",
+        "remove": "Firmware cannot be uninstalled.",
+    }
 
     name = "Linux fwupd"
 

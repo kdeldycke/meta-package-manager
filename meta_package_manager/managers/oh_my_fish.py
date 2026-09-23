@@ -65,28 +65,34 @@ class OhMyFish(PackageManager):
     file. Oh My Fish manages two kinds of package, plugins and themes, and
     reports both from one listing: mpm yields them together, since a name is
     unique across the two and every mutating command takes either.
-
-    ```{caution}
-    `omf` is a Fish function, not a standalone binary: it is defined by
-    sourcing `$OMF_PATH/init.fish`, so it cannot serve as the manager's CLI.
-    Every invocation is therefore wrapped in `fish -c`. Fish is the binary mpm
-    executes, and Oh My Fish's own presence is established by the version
-    probe: a host with Fish but no Oh My Fish fails to source and reports no
-    version, which leaves the manager unavailable.
-    ```
-
-    ```{note}
-    No `outdated`: Oh My Fish compares nothing against its remotes short of
-    performing the update. `upgrade --all` still works, and mpm auto-skips the
-    operation.
-    ```
-
-    ```{note}
-    No `search`: `omf search` exists and would map cleanly, but its results are
-    printed by a private `__omf.cli.search.output` helper whose format no
-    upstream sample pins down, so declaring it would mean guessing at a parser.
-    ```
     """
+
+    # `omf` is a Fish function, not a standalone binary: it is defined by
+    # sourcing `$OMF_PATH/init.fish`, so it cannot serve as the manager's CLI
+    # and every invocation is wrapped in `fish -c`. Fish is the binary mpm
+    # executes, and Oh My Fish's own presence is established by the version
+    # probe: a host with Fish but no Oh My Fish fails to source and reports
+    # no version, which leaves the manager unavailable. See the `cli_names`
+    # docstring for the same story from the code side.
+    #
+    # `outdated`: Oh My Fish compares nothing against its remotes short of
+    # performing the update. `upgrade --all` still works, and mpm auto-skips
+    # the operation.
+    #
+    # `search`: `omf search` exists and would map cleanly, but its results are
+    # printed by a private `__omf.cli.search.output` helper whose format no
+    # upstream sample pins down, so declaring it would mean guessing at a
+    # parser.
+    operation_notes: ClassVar = {
+        "outdated": (
+            "Oh My Fish compares nothing against its remotes short of "
+            "performing the update; `upgrade --all` still works."
+        ),
+        "search": (
+            "The `omf search` output comes from a private helper no upstream "
+            "sample pins down, so a parser would be a guess."
+        ),
+    }
 
     id = "oh-my-fish"
 

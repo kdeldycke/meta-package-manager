@@ -258,6 +258,29 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     instead. Enforced by `test_maintenance_note`.
     """
 
+    operation_notes: ClassVar[dict[str, str]] = {}
+    """Per-operation hints rendered in the *Notes* column of the manager page's
+    *Operations* table.
+
+    Keyed by the {class}`~meta_package_manager.capabilities.Operations` member
+    name, each value is a single short sentence explaining why the manager lacks
+    the operation, or what makes its implementation partial: the pointer a
+    reader needs to judge whether the gap is one they could help close. Each
+    sentence starts with a capital and closes with a period, and starts on a
+    word rather than a code span, so the cell reads standalone beside its row.
+    A blank cell stays silent: a manager documenting nothing documents no gap.
+
+    The full rationale never lives here: it belongs in a comment beside the
+    implementing method (or beside this declaration, for an operation with no
+    method to hang it on), so the sentence on the page stays a hint and the code
+    keeps the story. The class docstring follows the same split: it keeps only
+    what a user needs to run the tool day to day, never how `mpm` wraps it.
+
+    Validated by `test_operation_notes`, which also checks every key matches a
+    real operation: a key outside the enum's vocabulary would never reach a
+    page.
+    """
+
     id: str
     """Package manager's ID.
 

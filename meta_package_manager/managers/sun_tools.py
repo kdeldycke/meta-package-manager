@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ILLUMOS, SOLARIS
 
@@ -38,14 +39,15 @@ class Sun_Tools(PackageManager):
     [`pkgadd(1M)`](https://docs.oracle.com/cd/E26502_01/html/E29031/pkgadd-1m.html)
     and [`pkgrm(1M)`](https://docs.oracle.com/cd/E26502_01/html/E29031/pkgrm-1m.html).
 
-    ```{note}
     SVR4 packages come from local media or datastream files, not a network
-    repository: there is no catalog to search, refresh or diff against, and
-    `pkgadd` installs a specific local artifact rather than resolving a name.
-    Only `installed` and `remove` are therefore implemented; Solaris 11's
-    modern repository-based interface is IPS (`pkg`), a different manager.
-    ```
+    repository: there is no catalog to search, refresh or diff against.
     """
+
+    # Solaris 11's modern repository-based interface is IPS (`pkg`), a
+    # different manager wrapped separately.
+    #
+    # `pkgadd` installs a specific local artifact rather than resolving a
+    # name.
 
     maintenance_note = (
         "The SVR4 packaging commands are legacy, superseded by IPS since Solaris 11, "
@@ -53,6 +55,19 @@ class Sun_Tools(PackageManager):
         "(https://docs.oracle.com/cd/E37838_01/html/E61051/pkgsvr4.html), whose "
         "support runs through 2037."
     )
+
+    operation_notes: ClassVar = {
+        "install": (
+            "The `pkgadd` command installs a specific local artifact rather "
+            "than resolving a name."
+        ),
+        "search": (
+            "Packages come from local media or datastream files, so there "
+            "is no catalog to search."
+        ),
+        "outdated": "There is no repository to diff against.",
+        "sync": "There is no catalog to refresh.",
+    }
 
     name = "Solaris SVR4 package tools"
 

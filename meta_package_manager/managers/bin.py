@@ -43,42 +43,49 @@ class Bin(PackageManager):
     """Installer of binaries straight from GitHub releases and similar sources.
 
     ```{caution}
-    The package identifier is the absolute path of the installed binary, which is
-    what `list` reports and what `remove` and `update` accept. That choice is
-    forced rather than preferred: bin names a package differently depending on
-    the verb. Installing takes a source spec (`github.com/junegunn/fzf`, a
-    release-tag URL, `goinstall://…`, `docker://…`, a vendor host), while
-    everything afterwards is keyed on the installed path. Handing a source spec
-    back to `remove` does not resolve, and a bare basename resolves through
-    `$PATH` first, so a managed binary shadowed by another copy on `$PATH` fails
-    outright. The absolute path is the only identifier every non-installing
-    operation accepts.
-    ```
-
-    ```{note}
-    That asymmetry is also why `install` is not implemented: no identifier `list`
-    reports can be handed to it, so `mpm` could never install what it had just
-    listed. Installing through bin stays a `bin install <spec>` the user runs
-    themselves, and `mpm` reports and maintains the result.
-
-    No `search`: bin has no registry to search, only sources the user names. No
-    `sync`: there is no index to refresh. `bin prune` is left alone too, since it
-    drops configuration entries whose file has vanished rather than cleaning up
-    packages.
+    The package identifier is the absolute path of the installed binary, which
+    is what the listing reports and what `remove` and `update` accept. A
+    source spec (`github.com/junegunn/fzf`, a release-tag URL, `goinstall://…`)
+    does not resolve outside the install command itself.
     ```
 
     ```{caution}
     A bin that has never been configured prompts for its download directory on
-    *every* command, the listing included, and cannot be driven until someone
-    answers once interactively. `mpm` sees that as a failed version probe and
-    treats the manager as unavailable, which is the right outcome: an
-    uninitialised bin has no inventory to report, and reporting zero packages
-    would be a lie.
+    *every* command and cannot be driven until someone answers once
+    interactively. Until then `mpm` treats the manager as unavailable rather
+    than reporting zero packages.
     ```
 
-    No escalation: bin installs into a directory it picked from `$PATH` for being
-    writable, and never needs root.
+    No escalation is ever needed: bin installs into a directory it picked from
+    `$PATH` for being writable.
     """
+
+    # The path identifier is forced rather than preferred: bin names a
+    # package differently depending on the verb. Installing takes a source
+    # spec (`github.com/junegunn/fzf`, a release-tag URL, `goinstall://…`,
+    # `docker://…`, a vendor host), while everything afterwards is keyed on
+    # the installed path. Handing a source spec back to `remove` does not
+    # resolve, and a bare basename resolves through `$PATH` first, so a
+    # managed binary shadowed by another copy on `$PATH` fails outright. The
+    # absolute path is the only identifier every non-installing operation
+    # accepts.
+    #
+    # That asymmetry is also why `install` is not implemented: no identifier
+    # the listing reports can be handed to it, so `mpm` could never install
+    # what it had just listed. Installing through bin stays a
+    # `bin install <spec>` the user runs themselves, and `mpm` reports and
+    # maintains the result.
+    #
+    # `bin prune` is left alone too, since it drops configuration entries
+    # whose file has vanished rather than cleaning up packages.
+    operation_notes: ClassVar = {
+        "install": (
+            "No identifier the listing reports can be handed back to the "
+            "install command, which takes a source spec."
+        ),
+        "search": ("There is no registry to search, only sources the user names."),
+        "sync": "There is no index to refresh.",
+    }
 
     name = "bin"
 

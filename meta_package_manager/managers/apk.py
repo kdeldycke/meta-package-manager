@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE
 
@@ -32,34 +33,36 @@ if TYPE_CHECKING:
 
 
 class APK(PackageManager):
-    """Alpine Package Keeper (`apk`) used by Alpine Linux.
+    """Alpine Package Keeper (`apk`) used by Alpine Linux."""
 
-    ```{note}
-    The version floor is `2.10.0`, the release introducing the `list` applet
-    that {meth}`~meta_package_manager.manager.PackageManager.outdated` parses and {meth}`~meta_package_manager.manager.PackageManager.installed` falls back on. Where
-    {attr}`~meta_package_manager.managers.apk.APK.query_requirement` is met, `installed` reads the structured `query`
-    applet instead. Progress output is disabled on every call to keep the
-    parsed lines stable.
-    ```
-
-    ```{caution}
-    `outdated` reads the local repository cache rather than the remote, so
-    `sync` must run first for an accurate upgrade list.
-    ```
-
-    ```{warning}
-    `orphans` is deliberately not implemented, and `apk query --orphaned` must
-    not be mapped onto it. The two words name different sets: mpm's orphan is a
-    package installed as a dependency that nothing requires any more, where
-    apk's is one no configured repository provides any more. Measured on Alpine
-    `3.24.1` with apk-tools `3.0.8`: pointing apk at no repository
-    (`--repositories-file /dev/null`) reports all 86 installed packages as
-    orphaned, and the stock repositories report none, while a package dropped
-    from `apk-world(5)` and required by nothing is never reported at all.
-    Wiring that selector to `cleanup --orphans` would delete a working system
-    whenever its mirrors were unreachable.
-    ```
-    """
+    # The version floor is `2.10.0`, the release introducing the `list`
+    # applet that `outdated` parses and `installed` falls back on; see the
+    # `requirement` and `query_requirement` docstrings, which carry the floor
+    # story. Where `query_requirement` is met, `installed` reads the
+    # structured `query` applet instead. Progress output is disabled on
+    # every call to keep the parsed lines stable.
+    #
+    # `orphans` is deliberately not implemented, and `apk query --orphaned`
+    # must not be mapped onto it. The two words name different sets: mpm's
+    # orphan is a package installed as a dependency that nothing requires
+    # any more, where apk's is one no configured repository provides any more.
+    # Measured on Alpine `3.24.1` with apk-tools `3.0.8`: pointing apk at no
+    # repository (`--repositories-file /dev/null`) reports all 86 installed
+    # packages as orphaned, and the stock repositories report none, while a
+    # package dropped from `apk-world(5)` and required by nothing is never
+    # reported at all. Wiring that selector to `cleanup --orphans` would
+    # delete a working system whenever its mirrors were unreachable.
+    operation_notes: ClassVar = {
+        "outdated": (
+            "The listing reads the local repository cache rather than the "
+            "remote, so run `sync` first for an accurate upgrade list."
+        ),
+        "orphans": (
+            "The `--orphaned` selector names packages no repository provides "
+            "any more, not packages nothing requires, so mapping it would "
+            "delete a working system whose mirrors are unreachable."
+        ),
+    }
 
     name = "Alpine apk"
 

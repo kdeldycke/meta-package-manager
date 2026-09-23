@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, WINDOWS
 
@@ -64,40 +65,48 @@ class MiKTeX(PackageManager):
     which is reason enough never to reach for it.
     ```
 
-    ```{caution}
-    `--admin` is deliberately never passed, and the reasoning inverts what its
-    name suggests. Left alone, MiKTeX reports the packages installed for the
-    user *and* those installed system-wide; the flag narrows that to the
-    system-wide ones alone. The default is therefore already the wider listing,
-    and passing it would drop rows rather than pin them. It is fatal outright
-    on an installation that is not shared, and warns about privileges it may
-    lack when run without them. The cost is that removing a system-wide package
-    is out of reach, needing both that flag and administrator rights.
-    ```
-
     ```{important}
     Queries pass `--disable-installer`. MiKTeX installs packages on the fly by
     default, so without it reading the inventory is not guaranteed to leave the
     system as it found it.
     ```
-
-    ```{note}
-    No `outdated`, though MiKTeX does have a non-mutating check: it prints bare
-    package names and no version of any kind, where reporting something as
-    outdated needs a version to report it against. The only route to one is
-    asking after each package individually, thousands of invocations for a
-    single answer. `upgrade --all` is unaffected.
-
-    No `search`, MiKTeX having no such command, and no `cleanup`: nothing in
-    the package surface purges a cache or sweeps orphans.
-    ```
-
-    ```{warning}
-    The command that upgrades everything is `update`. MiKTeX's `upgrade` is a
-    different thing entirely, taking a package *level* such as `basic` or
-    `complete` and erroring without one, so it is never used here.
-    ```
     """
+
+    # `--admin` is deliberately never passed, and the reasoning inverts
+    # what its name suggests. Left alone, MiKTeX reports the packages
+    # installed for the user *and* those installed system-wide; the flag
+    # narrows that to the system-wide ones alone. The default is therefore
+    # already the wider listing, and passing it would drop rows rather
+    # than pin them. It is fatal outright on an installation that is not
+    # shared, and warns about privileges it may lack when run without them.
+    #
+    # `outdated`: MiKTeX does have a non-mutating check, but it prints bare
+    # package names and no version of any kind, where reporting something as
+    # outdated needs a version to report it against. The only route to one
+    # is asking after each package individually, thousands of invocations
+    # for a single answer. `upgrade --all` is unaffected.
+    #
+    # `search`: MiKTeX has no such command.
+    #
+    # `cleanup`: nothing in the package surface purges a cache or sweeps
+    # orphans.
+    #
+    # The command that upgrades everything is `update`. MiKTeX's `upgrade`
+    # is a different thing entirely, taking a package *level* such as
+    # `basic` or `complete` and erroring without one, so it is never used
+    # here.
+    operation_notes: ClassVar = {
+        "remove": (
+            "Removing a system-wide package needs the `--admin` flag and "
+            "administrator rights, which `mpm` never passes."
+        ),
+        "outdated": (
+            "The tool's check prints bare package names with no version to "
+            "report against; `upgrade --all` is unaffected."
+        ),
+        "search": "MiKTeX has no such command.",
+        "cleanup": ("Nothing in the package surface purges a cache or sweeps orphans."),
+    }
 
     name = "MiKTeX"
 

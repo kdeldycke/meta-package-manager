@@ -65,38 +65,47 @@ class GHCup(PackageManager):
     cell, so `ghc-aarch64-unknown-linux-gnu-9.4.8` has to split into `ghc` and
     `aarch64-unknown-linux-gnu-9.4.8`, and that remainder is exactly the token
     ghcup's own version parser accepts. No tool name contains a hyphen today.
-
-    ```{note}
-    Every listing forces `--show-revisions none`. ghcup otherwise appends a
-    `-rN` metadata-revision suffix to versions that have one, and that suffixed
-    string is not a version `ghcup rm` will match: the inventory would then
-    report packages that cannot be removed. The suffix appears only while a
-    revision is pending, so the corruption is intermittent, which is worse than
-    a consistent one.
-    ```
-
-    ```{caution}
-    Neither upgrade operation is declared, and neither is an oversight.
-    `ghcup upgrade` upgrades *the ghcup binary itself*, not the tools it
-    installs, so mapping it onto `upgrade --all` would replace the user's
-    package manager when they asked to upgrade their packages. And ghcup has no
-    in-place upgrade for a tool at all: a newer GHC is a fresh side-by-side
-    install that leaves the old one in place, which is what `install` already
-    does.
-    ```
-
-    ```{note}
-    No `outdated` either, for a reason that follows from the package identity
-    above rather than from any missing command. Since the version is part of
-    the id, a package having a newer version is a contradiction: the newer
-    version is a *different* package, installed alongside rather than over. A
-    report pairing `ghc-9.6.7` with a latest of `9.10.1` would also name an
-    upgrade mpm cannot perform, both upgrade operations being absent. ghcup's
-    own new-version notice is no help here: it is prose on stderr, it
-    deduplicates itself against a cache file so a second run prints nothing,
-    and it fires as a side effect of unrelated commands.
-    ```
     """
+
+    # Every listing forces `--show-revisions none`. ghcup otherwise appends a
+    # `-rN` metadata-revision suffix to versions that have one, and that
+    # suffixed string is not a version `ghcup rm` will match: the inventory
+    # would then report packages that cannot be removed. The suffix appears
+    # only while a revision is pending, so the corruption is intermittent,
+    # which is worse than a consistent one.
+    #
+    # Neither upgrade operation is declared, and neither is an oversight:
+    # `ghcup upgrade` upgrades *the ghcup binary itself*, not the tools it
+    # installs, so mapping it onto `upgrade --all` would replace the user's
+    # package manager when they asked to upgrade their packages. And ghcup
+    # has no in-place upgrade for a tool at all: a newer GHC is a fresh
+    # side-by-side install that leaves the old one in place, which is what
+    # `install` already does.
+    #
+    # `outdated` follows from the package identity above rather than from any
+    # missing command: since the version is part of the id, a package having
+    # a newer version is a contradiction: the newer version is a *different*
+    # package, installed alongside rather than over. A report pairing
+    # `ghc-9.6.7` with a latest of `9.10.1` would also name an upgrade mpm
+    # cannot perform, both upgrade operations being absent. ghcup's own
+    # new-version notice is no help here: it is prose on stderr, it
+    # deduplicates itself against a cache file so a second run prints nothing,
+    # and it fires as a side effect of unrelated commands.
+    operation_notes: ClassVar = {
+        "upgrade": (
+            "The `ghcup upgrade` command upgrades the ghcup binary itself, "
+            "and a tool has no in-place upgrade at all."
+        ),
+        "upgrade_all": (
+            "The `ghcup upgrade` command upgrades the ghcup binary itself, "
+            "not the packages it manages."
+        ),
+        "outdated": (
+            "The version is part of the package id, so a newer version is a "
+            "different package installed alongside, not an upgrade of this "
+            "one."
+        ),
+    }
 
     name = "Haskell ghcup"
 

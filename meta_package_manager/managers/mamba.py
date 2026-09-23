@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
 
 from ..capabilities import search_capabilities
@@ -47,29 +49,31 @@ class Mamba(PackageManager):
     call in the same shell would, and exactly as the conda wrapper does.
     Per-environment targeting is not supported yet.
     ```
-
-    ```{caution}
-    Sharing that prefix with conda is why the two are serialized against each
-    other. mamba takes a real lock on the environment and on every package
-    cache directory for the length of a transaction, and conda honors none of
-    them: its own locking covers the repodata cache alone. Running them at once
-    corrupts rather than blocks, which upstream has closed as not planned
-    ([conda/conda#13037](https://github.com/conda/conda/issues/13037)).
-    ```
-
-    ```{note}
-    No `sync`. Nothing in the command set refreshes the index on its own, the
-    closest being `clean --index-cache`, which only forces a refetch on the
-    next operation. The conda wrapper implements none either, so this is parity
-    rather than a gap.
-    ```
-
-    ```{warning}
-    `mamba upgrade` does not exist: unlike conda, mamba never aliased it, and
-    calling it exits non-zero on an unexpected argument. Upgrades go through
-    `update`.
-    ```
     """
+
+    # Sharing that prefix with conda is why the two are serialized against
+    # each other in SHARED_LOCK_FAMILIES. mamba takes a real lock on the
+    # environment and on every package cache directory for the length of a
+    # transaction, and conda honors none of them: its own locking covers
+    # the repodata cache alone. Running them at once corrupts rather than
+    # blocks, which upstream has closed as not planned
+    # (https://github.com/conda/conda/issues/13037).
+    #
+    # `sync`: nothing in the command set refreshes the index on its own, the
+    # closest being `clean --index-cache`, which only forces a refetch on the
+    # next operation. The conda wrapper implements none either, so this is
+    # parity rather than a gap.
+    #
+    # `mamba upgrade` does not exist: unlike conda, mamba never aliased it,
+    # and calling it exits non-zero on an unexpected argument. Upgrades go
+    # through `update`.
+    operation_notes: ClassVar = {
+        "sync": (
+            "Nothing in the command set refreshes the index on its own; the "
+            "conda wrapper implements none either, so this is parity rather "
+            "than a gap."
+        ),
+    }
 
     name = "Mamba"
 

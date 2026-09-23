@@ -39,15 +39,13 @@ class Pkcon(PackageManager):
     doing the real work. Escalation is polkit's job, so no operation is marked
     `sudo`: under a strict polkit policy, unattended mutations need a policy
     permitting them without interactive authentication.
-
-    ```{note}
-    pkcon renders packages as a fused `name-version.arch (repo)` string and
-    never exposes the raw `name;version;arch;repo` ID. Names and versions both
-    legitimately contain dashes, so the name/version split below anchors on the
-    first dash followed by a digit: a documented heuristic, not an exact
-    science.
-    ```
     """
+
+    # pkcon renders packages as a fused `name-version.arch (repo)` string and
+    # never exposes the raw `name;version;arch;repo` ID. Names and versions
+    # both legitimately contain dashes, so the name/version split below
+    # anchors on the first dash followed by a digit: a documented heuristic,
+    # not an exact science.
 
     name = "PackageKit"
 

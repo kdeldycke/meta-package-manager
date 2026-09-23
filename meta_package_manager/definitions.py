@@ -55,6 +55,7 @@ from typing import cast
 from click_extra.config import ValidationError
 from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS, traits_from_ids
 
+from .capabilities import Operations
 from .cooldown import CooldownPolicy, parse_policy_token
 from .manager import JSON_FIELD_SELECTOR_REGEX, MetaPackageManager, PackageManager
 
@@ -156,6 +157,25 @@ def _to_str_dict(value: Any) -> dict[str, str]:
     return dict(value)
 
 
+def _to_operation_notes(value: Any) -> dict[str, str]:
+    """Validate the value as a table of operation names to one-line hints.
+
+    The renderer of the manager pages' *Operations* table looks each key up by
+    {class}`~meta_package_manager.capabilities.Operations` member name, so a
+    key outside that vocabulary would never reach a page: reject it here, at
+    parse time, where the error can name the offending key.
+    """
+    notes = _to_str_dict(value)
+    valid = {op.name for op in Operations}
+    for key in notes:
+        if key not in valid:
+            raise TypeError(
+                f"unknown operation {key!r} in operation_notes. "
+                f"Allowed: {', '.join(sorted(valid))}."
+            )
+    return notes
+
+
 def _convert(path: str, converter: Callable[[Any], Any], value: Any) -> Any:
     """Run a converter on a section value, reporting a type error at `path`.
 
@@ -241,6 +261,7 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "internal_sudo": _to_bool,
     "keywords": _to_str_tuple,
     "maintenance_note": _to_str,
+    "operation_notes": _to_operation_notes,
     "unmaintained_message": _to_str,
     "version_cli": _to_str,
     "version_from_stderr": _to_bool,
@@ -254,7 +275,7 @@ manager's identity, and resolve through the usual option precedence. `unmaintain
 is reused from the override converters so a TOML-defined manager can flag its own
 upstream as abandoned (see `docs/cooldown.md` for the affected managers).
 
-Eight fields are definition-only:
+Nine fields are definition-only:
 
 - `brewfile_entry_type` maps the manager onto a Homebrew Bundle DSL entry so its
   installed packages join `mpm dump --brewfile` exports (see
@@ -273,6 +294,10 @@ Eight fields are definition-only:
 - `maintenance_note` renders a ``{note}`` admonition atop the manager's page for a
   still-maintained upstream under watch (see
   {attr}`~meta_package_manager.manager.PackageManager.maintenance_note`).
+- `operation_notes` fills the *Notes* column of the manager page's *Operations*
+  table with one-sentence hints (see
+  {attr}`~meta_package_manager.manager.PackageManager.operation_notes`): why an
+  operation is missing, or what makes a declared one partial.
 - `unmaintained_message` documents an abandoned upstream, rendering a ``{warning}``
   admonition and the `⚠️` table markers (see
   {attr}`~meta_package_manager.manager.PackageManager.unmaintained_message`).

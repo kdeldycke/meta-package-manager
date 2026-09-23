@@ -37,19 +37,6 @@ class Tazpkg(PackageManager):
     The code also lives in a git clone,
     [SliTaz-official/tazpkg](https://github.com/SliTaz-official/tazpkg).
 
-    ```{note}
-    tazpkg decorates every listing with localized, colorized titles, separators
-    and count footers, with no terminal detection: `LC_ALL=C` pins the text to
-    English, `--output=raw` switches the decorations to plain text, and any
-    remaining ANSI sequence is stripped before parsing. Data rows are then
-    matched by their digit-led version column, which no decoration line carries.
-    ```
-
-    ```{note}
-    No `outdated` operation: `tazpkg up --check` requires root and recharges
-    the package lists from the mirror even when only listing, so there is no
-    cleanly read-only upgradable listing.
-    ```
     """
 
     maintenance_note = (

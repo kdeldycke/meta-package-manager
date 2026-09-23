@@ -48,31 +48,34 @@ class Nala(PackageManager):
     distinct tool with a vocabulary of its own, rather than a translation layer
     over another CLI. It shares dpkg's lock with the rest of that family, so
     mpm runs it serially against them.
-
-    ```{important}
-    Every invocation forces `LC_ALL=C`, and it is doing two jobs at once. Nala
-    translates its own output at runtime, so a French host reports `est
-    installé` where the parsers expect `is installed`; and it picks its tree
-    glyphs from the encoding of its output stream. The same flag that pins the
-    language to the untranslated strings also selects the ASCII glyphs, giving
-    one stable shape to parse instead of a matrix of locale and encoding.
-    ```
-
-    ```{caution}
-    A listing is a record of three lines, not a line per package: a header
-    naming the package and its version, a branch giving its status, and another
-    carrying its description. That is why this is a class rather than a
-    declarative definition, and why `outdated` correlates two lines to pair an
-    installed version with the candidate it can move to.
-    ```
-
-    ```{note}
-    Nala's own `upgrade` takes no package arguments at all, accepting only
-    exclusions, so naming a package cannot restrict it. Upgrading one package
-    therefore goes through `install`, which moves an already-installed package
-    to its candidate version, exactly as `apt` does.
-    ```
     """
+
+    # Every invocation forces `LC_ALL=C`, and it is doing two jobs at once:
+    # Nala translates its own output at runtime, so a French host reports
+    # `est installé` where the parsers expect `is installed`; and it picks
+    # its tree glyphs from the encoding of its output stream. The same flag
+    # that pins the language to the untranslated strings also selects the
+    # ASCII glyphs, giving one stable shape to parse instead of a matrix of
+    # locale and encoding.
+    #
+    # A listing is a record of three lines, not a line per package: a header
+    # naming the package and its version, a branch giving its status, and
+    # another carrying its description. That is why this is a class rather
+    # than a declarative definition, and why `outdated` correlates two lines
+    # to pair an installed version with the candidate it can move to.
+    #
+    # `upgrade`: Nala's own `upgrade` takes no package arguments at all,
+    # accepting only exclusions, so naming a package cannot restrict it.
+    # Upgrading one package therefore goes through `install`, which moves an
+    # already-installed package to its candidate version, exactly as `apt`
+    # does.
+    operation_notes: ClassVar = {
+        "upgrade": (
+            "The tool's `upgrade` takes no package argument, so a single "
+            "upgrade runs through `install`, which moves an installed package "
+            "to its candidate."
+        ),
+    }
 
     name = "Nala"
 

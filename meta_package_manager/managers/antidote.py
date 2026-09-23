@@ -91,29 +91,33 @@ class Antidote(PackageManager):
     `$ANTIDOTE_HOME`, and records it in the user's `.zsh_plugins.txt` file.
     Packages are identified by the `user/repo` slug Antidote both reports and
     accepts, which is the id mpm keys them on.
-
-    ```{caution}
-    `antidote` is a shell function, not a standalone binary: the `antidote`
-    script shipped in the repository carries a Zsh shebang but is not
-    executable, and Homebrew installs it as package data under
-    `share/antidote` rather than linking it into `bin`. Every invocation is
-    therefore wrapped in `zsh -c 'source <antidote.zsh> && antidote <args>'`.
-    Zsh is the manager's CLI, and Antidote's own presence is established by
-    the version probe: a host with Zsh but no Antidote fails to source and
-    reports no version, which leaves the manager unavailable.
-    ```
-
-    ```{note}
-    No `search`: Antidote resolves bundles straight from forge URLs and
-    indexes no registry to search.
-    ```
-
-    ```{note}
-    No `upgrade_one`: `antidote update` takes no bundle argument, only the
-    `--self` and `--bundles` scope flags, so a single bundle cannot be
-    targeted. mpm auto-skips the operation and `upgrade --all` still works.
-    ```
     """
+
+    # `antidote` is a shell function, not a standalone binary: the `antidote`
+    # script shipped in the repository carries a Zsh shebang but is not
+    # executable, and Homebrew installs it as package data under
+    # `share/antidote` rather than linking it into `bin`, so every invocation
+    # is wrapped in `zsh -c 'source <antidote.zsh> && antidote <args>'`. See
+    # the `cli_names` and `build_cli` docstrings, which carry the same story
+    # from the code side.
+    #
+    # `search`: Antidote resolves bundles straight from forge URLs and
+    # indexes no registry to search.
+    #
+    # `upgrade`: `antidote update` takes no bundle argument, only the
+    # `--self` and `--bundles` scope flags, so a single bundle cannot be
+    # targeted. mpm auto-skips the operation and `upgrade --all` still works.
+    operation_notes: ClassVar = {
+        "search": (
+            "Antidote resolves bundles straight from forge URLs and indexes "
+            "no registry to search."
+        ),
+        "upgrade": (
+            "The `antidote update` command takes no bundle argument, only "
+            "`--self` and `--bundles` scope flags; `upgrade --all` still "
+            "works."
+        ),
+    }
 
     homepage_url = "https://antidote.sh"
     documentation_url = "https://antidote.sh/commands"

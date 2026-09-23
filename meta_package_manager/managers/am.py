@@ -44,43 +44,51 @@ locked or sandboxed one, and a tick or cross for the checksum verdict.
 
 
 class AM(PackageManager):
-    """AppImage manager, covering the applications of its own catalog.
+    """AppImage manager, covering the applications of its own catalog."""
 
-    ```{note}
-    `am` and `appman` are the same script under two names, and only this one is
-    wrapped. AppMan's repository holds no implementation at all, just a stub
-    that replaces itself with this script, which then reads its own path to
-    decide whether to run system-wide or under the user's home. Wrapping both
-    would double-count: `am -fi` renders AppMan's applications in a second
-    table of its own whenever AppMan is configured, so they are already
-    reported here. See {doc}`/unsupported` for the recorded decision.
-    ```
-
-    ```{caution}
-    The listing's column count depends on its contents: a fifth column appears
-    between the name and the version whenever an application resolves to a
-    third-party catalog. The version is therefore located by reading the header
-    rather than by counting from the left, which is also what lets a listing
-    carrying two tables be parsed in one pass.
-    ```
-
-    ```{note}
-    No `install`. `am` refuses to be run under `sudo` and escalates on its own
-    instead, priming the credential cache before it installs anything, so an
-    install blocks on a password prompt that no flag of its own can answer.
-    Removal is unaffected, `-R` needing no confirmation and no escalation mpm
-    has to arrange.
-
-    No `outdated` either: nothing reports a remote version without installing
-    it, and the catalog carries no versions at all. Its maintainer declined to
-    publish a machine-readable feed, so this is settled rather than pending, and
-    `upgrade --all` is unaffected.
-
-    No `search`: results are folded to the terminal width before they are
-    printed, so a record wraps across lines with no marker to rejoin it, and its
-    description is unrecoverable once wrapped.
-    ```
-    """
+    # `am` and `appman` are the same script under two names, and only this
+    # one is wrapped. AppMan's repository holds no implementation at all,
+    # just a stub that replaces itself with this script, which then reads
+    # its own path to decide whether to run system-wide or under the user's
+    # home. Wrapping both would double-count: `am -fi` renders AppMan's
+    # applications in a second table of its own whenever AppMan is
+    # configured, so they are already reported here. See
+    # `docs/unsupported.md` for the recorded decision.
+    #
+    # The listing's column count depends on its contents: a fifth column
+    # appears between the name and the version whenever an application
+    # resolves to a third-party catalog. The version is therefore located by
+    # reading the header rather than by counting from the left, which is also
+    # what lets a listing carrying two tables be parsed in one pass.
+    #
+    # `install`: `am` refuses to be run under `sudo` and escalates on its own
+    # instead, priming the credential cache before it installs anything, so
+    # an install blocks on a password prompt that no flag of its own can
+    # answer. Removal is unaffected, `-R` needing no confirmation and no
+    # escalation mpm has to arrange.
+    #
+    # `outdated`: nothing reports a remote version without installing it,
+    # and the catalog carries no versions at all. Its maintainer declined to
+    # publish a machine-readable feed, so this is settled rather than
+    # pending, and `upgrade --all` is unaffected.
+    #
+    # `search`: results are folded to the terminal width before they are
+    # printed, so a record wraps across lines with no marker to rejoin it,
+    # and its description is unrecoverable once wrapped.
+    operation_notes: ClassVar = {
+        "install": (
+            "The tool escalates on its own and blocks on a password prompt "
+            "that no flag of its own can answer."
+        ),
+        "outdated": (
+            "The catalog carries no versions and its maintainer declined a "
+            "machine-readable feed; `upgrade --all` is unaffected."
+        ),
+        "search": (
+            "Results are folded to the terminal width, so a record wraps "
+            "across lines with no marker to rejoin it."
+        ),
+    }
 
     name = "AppImage Manager"
 

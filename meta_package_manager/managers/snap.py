@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import UNIX_WITHOUT_MACOS
 
@@ -42,22 +43,27 @@ class Snap(PackageManager):
     host authenticated against the store with `snap login` (or granted a
     polkit rule) can drop the wrap with `--no-sudo` or a
     `[mpm.overrides.snap] sudo = false` override.
-
-    ```{note}
-    snap localizes and colorizes its table headers with no terminal
-    detection. mpm pins nothing to English: `--color=never` strips the
-    ANSI, the header row is dropped, and every row is split on whitespace
-    and read by column position, so the translated headers never reach the
-    parser.
-    ```
-
-    ```{note}
-    `snap refresh --list` reports only the available version, so
-    `outdated` looks each installed version up by ID from the cached
-    installed set. `search` runs `snap find`, which matches summaries as
-    well as names, so mpm refilters the results.
-    ```
     """
+
+    # snap localizes and colorizes its table headers with no terminal
+    # detection. mpm pins nothing to English: `--color=never` strips the
+    # ANSI, the header row is dropped, and every row is split on whitespace
+    # and read by column position, so the translated headers never reach the
+    # parser.
+    #
+    # `snap refresh --list` reports only the available version, so
+    # `outdated` looks each installed version up by ID from the cached
+    # installed set.
+    operation_notes: ClassVar = {
+        "outdated": (
+            "The `refresh --list` output reports only the available version, "
+            "so each installed version is looked up separately."
+        ),
+        "search": (
+            "The `snap find` command matches summaries as well as names, so "
+            "`mpm` refilters the results."
+        ),
+    }
 
     homepage_url = "https://snapcraft.io"
     documentation_url = "https://snapcraft.io/docs/"

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import UNIX_WITHOUT_MACOS
 
@@ -34,29 +35,6 @@ if TYPE_CHECKING:
 class DNF(PackageManager):
     """Fedora's RPM package manager.
 
-    `mpm` reads the inventory through `repoquery` rather than the human-facing
-    listing: `--userinstalled` for packages installed on request (dependencies
-    pulled in automatically are skipped), `--upgrades` for pending updates and
-    `--unneeded` for the orphans, each with a `--queryformat` that joins the
-    fields on a private `___MPM___` delimiter so summaries containing spaces stay
-    splittable. Every call is forced `--color=never` and `--quiet` for parseable
-    output.
-
-    ```{note}
-    `outdated` is the one operation that runs two of those queries. `--upgrades`
-    answers for *available* packages, so it describes the upgrade candidate and
-    never the package installed, and `repoquery` offers no tag for the latter.
-    The installed set is therefore read separately and joined on name and
-    architecture. It is also the one place versions are reported as ``%{evr}``,
-    epoch and release included, since an upgrade may move only the release.
-    ```
-
-    ```{note}
-    `remove` runs `autoremove`, so removing a package also drops the
-    dependencies it leaves orphaned. `search` matches names only, with no
-    exact or extended mode.
-    ```
-
     The `DNF5` and `YUM` subclasses reuse everything here, differing only in
     the binary and forced arguments.
 
@@ -64,12 +42,37 @@ class DNF(PackageManager):
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
     """
 
+    # mpm reads the inventory through `repoquery` rather than the
+    # human-facing listing: `--userinstalled` for packages installed on
+    # request (dependencies pulled in automatically are skipped),
+    # `--upgrades` for pending updates and `--unneeded` for the orphans,
+    # each with a `--queryformat` that joins the fields on a private
+    # `___MPM___` delimiter so summaries containing spaces stay splittable.
+    # Every call is forced `--color=never` and `--quiet` for parseable
+    # output.
+    #
+    # `outdated` is the one operation that runs two of those queries.
+    # `--upgrades` answers for *available* packages, so it describes the
+    # upgrade candidate and never the package installed, and `repoquery`
+    # offers no tag for the latter. The installed set is therefore read
+    # separately and joined on name and architecture. It is also the one
+    # place versions are reported as `%{evr}`, epoch and release included,
+    # since an upgrade may move only the release.
+
     maintenance_note: str | None = (
         "DNF 4 is superseded by "
         "[dnf5](https://github.com/rpm-software-management/dnf5) (Fedora's default "
         "since Fedora 41) but stays maintained for the RHEL 8/9 family; mpm wraps "
         "`dnf5` as a separate manager."
     )
+
+    operation_notes: ClassVar = {
+        "remove": (
+            "Removing a package also drops the dependencies it leaves "
+            "orphaned, since `remove` runs `autoremove`."
+        ),
+        "search": "Matches names only, with no exact or extended mode.",
+    }
 
     name = "Fedora DNF"
 

@@ -32,6 +32,7 @@ has an editor.
 from __future__ import annotations
 
 import json
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 from packageurl import PackageURL
@@ -137,42 +138,49 @@ class Lazy(PackageManager):
     a Lua one-liner evaluated by a throw-away Neovim process. Plugins are Git
     clones under `stdpath('data')/lazy`, pinned by a `lazy-lock.json` lock file
     in `stdpath('config')` that records the exact commit of each one.
-
-    ```{caution}
-    Neovim is the binary mpm executes, and mpm already wraps Neovim's built-in
-    {class}`Vim_Pack`, which legitimately keys on the same `nvim`. The two are
-    told apart by the version probe: it reports a version only when
-    lazy.nvim's own checkout is found and its `version` constant reads back,
-    so a host running Neovim without lazy.nvim leaves this manager
-    unavailable instead of shadowing every editor on every machine.
-    ```
-
-    ```{note}
-    This manager is deliberately limited to inventorying and updating, the two
-    operations lazy.nvim can carry out with nobody at the keyboard. That is
-    already more than the coarse, whole-category upgrade a tool like
-    `topgrade` performs for the same plugins, since the inventory comes with
-    it.
-    ```
-
-    ```{caution}
-    No `install` and no `remove`: lazy.nvim materializes exactly the plugin
-    set declared in the user's own Lua configuration. `:Lazy install` clones
-    what that configuration already names and `:Lazy clean` drops what it no
-    longer names, so neither takes a plugin of mpm's choosing. Installing one
-    would mean mpm editing the user's `init.lua`, which is configuration mpm
-    does not own. The two operations are therefore not implemented rather
-    than faked, and mpm auto-skips them.
-    ```
-
-    ```{note}
-    No `outdated`: `:Lazy check` does fetch each remote without touching a
-    working tree, but the pending revisions it computes are only readable
-    through a plugin's private `_.updates` field, which lazy.nvim documents no
-    contract for. mpm auto-skips the operation and `upgrade --all` still
-    works.
-    ```
     """
+
+    # Neovim is the binary mpm executes, and mpm already wraps Neovim's
+    # built-in Vim_Pack, which legitimately keys on the same `nvim`. The two
+    # are told apart by the version probe: it reports a version only when
+    # lazy.nvim's own checkout is found and its `version` constant reads back,
+    # so a host running Neovim without lazy.nvim leaves this manager
+    # unavailable instead of shadowing every editor on every machine. See the
+    # `version_cli_options` docstring, which carries this from the probe side.
+    #
+    # The manager is deliberately limited to inventorying and updating, the
+    # two operations lazy.nvim can carry out with nobody at the keyboard.
+    # That is already more than the coarse, whole-category upgrade a tool
+    # like `topgrade` performs for the same plugins, since the inventory
+    # comes with it.
+    #
+    # `install` and `remove`: lazy.nvim materializes exactly the plugin set
+    # declared in the user's own Lua configuration. `:Lazy install` clones
+    # what that configuration already names and `:Lazy clean` drops what it
+    # no longer names, so neither takes a plugin of mpm's choosing.
+    # Installing one would mean mpm editing the user's `init.lua`, which is
+    # configuration mpm does not own. The two operations are therefore not
+    # implemented rather than faked, and mpm auto-skips them.
+    #
+    # `outdated`: `:Lazy check` does fetch each remote without touching a
+    # working tree, but the pending revisions it computes are only readable
+    # through a plugin's private `_.updates` field, which lazy.nvim documents
+    # no contract for. mpm auto-skips the operation and `upgrade --all` still
+    # works.
+    operation_notes: ClassVar = {
+        "install": (
+            "A plugin is installed only by declaring it in the user's own Lua "
+            "configuration, which `mpm` does not own."
+        ),
+        "remove": (
+            "A plugin is removed only by dropping its spec from the user's "
+            "Lua configuration, which `mpm` does not own."
+        ),
+        "outdated": (
+            "The `:Lazy check` comparison reaches its result only through a "
+            "private field no contract covers; `upgrade --all` still works."
+        ),
+    }
 
     name = "Neovim lazy-nvim"
     """Spelled with a dash: manager names are restricted to letters, digits,
@@ -310,38 +318,39 @@ class Mason(PackageManager):
     ```
 
     ```{note}
-    Wrapping it is what makes those tools visible at all. mason redirects every
-    backend it shells out to into the package's own directory: a local `npm
-    install` rather than a global one, a `venv` per package, `cargo install --root
-    .`, `GOBIN` and `GEM_HOME` pointed inside. So a `pyright` installed by mason
-    appears in no other manager's inventory, and without this wrapper `mpm` would
-    not see it.
-    ```
-
-    ```{caution}
-    Reads and writes drive Neovim differently, and deliberately.
-
-    The inventory is read by a `--clean` process straight off mason's own install
-    tree, costing no plugin loading and immune to whatever the user's
-    configuration does. Mutations cannot work that way: `MasonInstall` and its
-    siblings are user commands that exist only once mason is loaded, so those run
-    without `--clean` and let the configuration supply them. That is mason's own
-    documented recipe for unattended use.
-    ```
-
-    ```{note}
-    Every mutating command blocks in headless mode rather than returning while
-    work continues in the background: mason branches on `#vim.api.nvim_list_uis()
-    == 0` and runs the transaction synchronously, refusing an unknown package name
-    up front instead of failing silently.
+    Wrapping it is what makes those tools visible at all: mason redirects every
+    backend it shells out to into the package's own directory, so a `pyright`
+    installed by mason appears in no other manager's inventory.
     ```
 
     ```{warning}
     The install root is assumed to be mason's default. A configuration moving
-    `install_root_dir` elsewhere leaves the inventory empty, since finding the
-    override would mean loading the very plugin the read path avoids.
+    `install_root_dir` elsewhere leaves the inventory empty.
     ```
     """
+
+    # Reads and writes drive Neovim differently, and deliberately. The
+    # inventory is read by a `--clean` process straight off mason's own
+    # install tree, costing no plugin loading and immune to whatever the
+    # user's configuration does. Mutations cannot work that way:
+    # `MasonInstall` and its siblings are user commands that exist only once
+    # mason is loaded, so those run without `--clean` and let the
+    # configuration supply them. That is mason's own documented recipe for
+    # unattended use.
+    #
+    # The visibility note above is enabled by mason redirecting every backend
+    # it shells out to into the package's own directory: a local `npm install`
+    # rather than a global one, a `venv` per package, `cargo install --root
+    # .`, `GOBIN` and `GEM_HOME` pointed inside.
+    #
+    # Every mutating command blocks in headless mode rather than returning
+    # while work continues in the background: mason branches on
+    # `#vim.api.nvim_list_uis() == 0` and runs the transaction synchronously,
+    # refusing an unknown package name up front instead of failing silently.
+    #
+    # The install root is assumed to be mason's default because finding a
+    # moved `install_root_dir` would mean loading the very plugin the read
+    # path avoids.
 
     name = "Neovim mason-nvim"
 
@@ -539,48 +548,48 @@ class Vim_Pack(PackageManager):
     operation below is a Lua one-liner evaluated by a throw-away Neovim
     process. Plugins are Git clones under `stdpath('data')/site/pack/core/opt`,
     pinned by a `nvim-pack-lock.json` lock file in `stdpath('config')`.
-
-    ```{note}
-    Every invocation runs `--clean`, so the user's `init.lua` is never
-    sourced. `vim.pack.get()` reads the lock file rather than the current
-    session, so the inventory stays complete without paying for, nor being
-    perturbed by, a full editor startup. `stdpath()` is XDG-derived and
-    `--clean` does not move it, so both the lock file and the plugin
-    directory still resolve.
-    ```
-
-    ```{caution}
-    Neovim exits `0` even when a `-c` command raises, which would hide every
-    failure from mpm. {attr}`Vim_Pack.post_args` therefore closes each invocation with
-    `-c 'cquit'`: on success the Lua payload has already called
-    `os.exit(0)`, and on error control falls through to that gate and Neovim
-    exits `1`.
-    ```
-
-    ```{caution}
-    Installing a plugin registers it in the lock file and clones it to disk,
-    but mpm does not edit the user's `init.lua`. A plugin installed through
-    mpm is therefore on disk but not loaded by the next editor start until a
-    matching `vim.pack.add()` call is added to the configuration.
-    ```
-
-    ```{note}
-    Packages are keyed on their `src` URL. `vim.pack` accepts no registry
-    shorthand: {meth}`Vim_Pack.install` needs a URL while {meth}`Vim_Pack.remove` and
-    {meth}`Vim_Pack.upgrade_one_cli` address plugins by the short name Neovim derives
-    from it, so the URL is the only identifier mpm can feed back into every
-    operation. Package ids therefore round-trip through install, remove,
-    upgrade and backup/restore.
-    ```
-
-    ```{note}
-    No `outdated`: `vim.pack` exposes no read-only "list upgradable" call.
-    `vim.pack.update()` fetches and then either applies the new revisions or
-    renders them into a confirmation buffer, neither of which mpm can consume
-    as a query, so mpm auto-skips the operation and `upgrade --all` still
-    works.
-    ```
+    Packages are keyed on their `src` URL, the only identifier that
+    round-trips through every operation below.
     """
+
+    # Every invocation runs `--clean`, so the user's `init.lua` is never
+    # sourced. `vim.pack.get()` reads the lock file rather than the current
+    # session, so the inventory stays complete without paying for, nor being
+    # perturbed by, a full editor startup. `stdpath()` is XDG-derived and
+    # `--clean` does not move it, so both the lock file and the plugin
+    # directory still resolve.
+    #
+    # Neovim exits `0` even when a `-c` command raises, which would hide
+    # every failure from mpm. `post_args` therefore closes each invocation
+    # with `-c 'cquit'`: on success the Lua payload has already called
+    # `os.exit(0)`, and on error control falls through to that gate and
+    # Neovim exits `1`. See the `post_args` docstring for the same gate.
+    #
+    # `install` registers the plugin in the lock file and clones it to disk,
+    # but mpm does not edit the user's `init.lua`: a plugin installed through
+    # mpm is on disk but not loaded by the next editor start until a matching
+    # `vim.pack.add()` call is added to the configuration.
+    #
+    # `vim.pack` accepts no registry shorthand: `install` needs a URL while
+    # `remove` and `upgrade_one_cli` address plugins by the short name Neovim
+    # derives from it, so the URL is the only identifier mpm can feed back
+    # into every operation. Package ids therefore round-trip through
+    # install, remove, upgrade and backup/restore.
+    #
+    # `outdated`: `vim.pack` exposes no read-only "list upgradable" call.
+    # `vim.pack.update()` fetches and then either applies the new revisions
+    # or renders them into a confirmation buffer, neither of which mpm can
+    # consume as a query, so mpm auto-skips the operation and `upgrade --all`
+    # still works.
+    operation_notes: ClassVar = {
+        "install": (
+            "A plugin is on disk after the install but loads only once a "
+            "matching `vim.pack.add()` call is added to the configuration."
+        ),
+        "outdated": (
+            'There is no read-only "list upgradable" call; `upgrade --all` still works.'
+        ),
+    }
 
     name = "Neovim vim-pack"
     """Spelled with a dash: manager names are restricted to letters, digits,

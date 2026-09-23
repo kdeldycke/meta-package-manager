@@ -65,33 +65,39 @@ class Zim(PackageManager):
     Modules are declared in the user's `.zimrc`, then cloned under `$ZIM_HOME`.
     Packages are identified by the module name Zim reports, which is the id mpm
     keys them on.
-
-    ```{caution}
-    `zimfw` is a shell function, not a standalone binary: it is defined by
-    sourcing `$ZIM_HOME/init.zsh`, and the `zimfw.zsh` script behind it carries
-    no shebang. Every invocation is therefore wrapped in `zsh -c`. Zsh is the
-    binary mpm executes, and Zim's own presence is established by the version
-    probe: a host with Zsh but no Zim fails to source and reports no version,
-    which leaves the manager unavailable.
-    ```
-
-    ```{caution}
-    No `install` and no `remove`: Zim materializes exactly the module set the
-    user's own `.zimrc` declares. `zimfw install` fetches what that file
-    already names and `zimfw uninstall` drops what it no longer names, so
-    neither takes a module of mpm's choosing. Installing one would mean mpm
-    editing the user's `.zimrc`, which is configuration mpm does not own. Both
-    operations are therefore not implemented rather than faked, and mpm
-    auto-skips them.
-    ```
-
-    ```{note}
-    No `outdated`: `zimfw check` does compare each module against its remote,
-    but it reports through the same progress display as `update` rather than a
-    parseable list, and no upstream sample pins its format down. `upgrade
-    --all` still works and mpm auto-skips the operation.
-    ```
     """
+
+    # `zimfw` is a shell function, not a standalone binary: it is defined by
+    # sourcing `$ZIM_HOME/init.zsh`, and the `zimfw.zsh` script behind it
+    # carries no shebang, so every invocation is wrapped in `zsh -c`. See the
+    # `cli_names` docstring, which carries the same story from the code side.
+    #
+    # `install` and `remove`: Zim materializes exactly the module set the
+    # user's own `.zimrc` declares. `zimfw install` fetches what that file
+    # already names and `zimfw uninstall` drops what it no longer names, so
+    # neither takes a module of mpm's choosing. Installing one would mean mpm
+    # editing the user's `.zimrc`, which is configuration mpm does not own.
+    # Both operations are therefore not implemented rather than faked, and mpm
+    # auto-skips them.
+    #
+    # `outdated`: `zimfw check` does compare each module against its remote,
+    # but it reports through the same progress display as `update` rather than
+    # a parseable list, and no upstream sample pins its format down.
+    # `upgrade --all` still works and mpm auto-skips the operation.
+    operation_notes: ClassVar = {
+        "install": (
+            "A module is installed only by declaring it in the user's "
+            "`.zimrc`, which `mpm` does not own."
+        ),
+        "remove": (
+            "A module is removed only by dropping its line from the user's "
+            "`.zimrc`, which `mpm` does not own."
+        ),
+        "outdated": (
+            "The `zimfw check` comparison reports through a progress display, "
+            "not a parseable list; `upgrade --all` still works."
+        ),
+    }
 
     name = "Zsh Zim"
 

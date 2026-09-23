@@ -44,14 +44,12 @@ class PNPM(PackageManager):
     earlier `minimumReleaseAge` floor, so one requirement guards every
     advertised operation.
     ```
-
-    ```{caution}
-    `pnpm outdated` exits `1` when it finds outdated packages, printing the
-    report to `<stdout>` with an empty `<stderr>`. The query passes
-    `must_succeed` so this benign non-zero exit is tolerated instead of
-    raising.
-    ```
     """
+
+    # `pnpm outdated` exits `1` when it finds outdated packages, printing
+    # the report to `<stdout>` with an empty `<stderr>`. The query passes
+    # `must_succeed` so this benign non-zero exit is tolerated instead of
+    # raising.
 
     name = "Node pnpm"
 

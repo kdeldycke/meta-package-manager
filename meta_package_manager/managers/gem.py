@@ -19,6 +19,7 @@ from __future__ import annotations
 import re
 from functools import cached_property
 from pathlib import Path
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -35,11 +36,6 @@ if TYPE_CHECKING:
 
 class Gem(PackageManager):
     """The RubyGems package manager.
-
-    gem emits no machine-readable format, so installed, outdated and search
-    listings are parsed from its text output. A gem can keep several versions
-    installed side by side (`molinillo (0.5.4, 0.4.5, 0.2.3)`); mpm reports
-    the highest as the installed version.
 
     ```{note}
 
@@ -70,6 +66,19 @@ class Gem(PackageManager):
     uncomment it and save.
     :::
     """
+
+    # gem emits no machine-readable format, so installed, outdated and
+    # search listings are parsed from its text output.
+    #
+    # A gem can keep several versions installed side by side
+    # (`molinillo (0.5.4, 0.4.5, 0.2.3)`); mpm reports the highest as the
+    # installed version.
+    operation_notes: ClassVar = {
+        "installed": (
+            "A gem can keep several versions installed side by side; the "
+            "highest is reported as the installed version."
+        ),
+    }
 
     name = "RubyGems"
 

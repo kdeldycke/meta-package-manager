@@ -19,6 +19,7 @@ from __future__ import annotations
 import re
 from itertools import groupby
 from operator import itemgetter
+from typing import ClassVar
 
 import xmltodict
 from extra_platforms import UNIX_WITHOUT_MACOS
@@ -71,25 +72,40 @@ class Zypper(PackageManager):
     never touches removable media or auto-refreshes metadata (`mpm` refreshes
     explicitly through `sync`).
 
-    ```{note}
-    Both `installed` and `search` run `search --details --type package`:
-    `--details` is the only mode exposing versions, but it returns one row
-    per source package, architecture and past release. `mpm` drops
-    `other-version` rows and keeps the highest edition per package name to
-    collapse those duplicates.
-    ```
-
-    ```{caution}
-    `zypper install` leaves a package that is already installed and up to date
-    marked as automatically installed, and zypper has no command that changes
-    only that mark. So `mpm cleanup --orphans` can still remove a package that
-    `mpm install` named while zypper held it as a dependency. See
-    [`SolverRequester.cc`](https://github.com/openSUSE/zypper/blob/697f8809b2c6c0104cdb20fe4bb1fa048d8227ab/src/SolverRequester.cc#L679-L695).
-    ```
 
     Command equivalences with other managers are listed in
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
     """
+
+    # Both `installed` and `search` run `search --details --type package`:
+    # `--details` is the only mode exposing versions, but it returns one row
+    # per source package, architecture and past release. `mpm` drops
+    # `other-version` rows and keeps the highest edition per package name to
+    # collapse those duplicates.
+    #
+    # `zypper install` leaves a package that is already installed and up to
+    # date marked as automatically installed, and zypper has no command that
+    # changes only that mark. So `mpm cleanup --orphans` can still remove a
+    # package that `mpm install` named while zypper held it as a dependency.
+    # See SolverRequester.cc:
+    # https://github.com/openSUSE/zypper/blob/697f8809b2c6c0104cdb20fe4bb1fa048d8227ab/src/SolverRequester.cc#L679-L695
+    operation_notes: ClassVar = {
+        "installed": (
+            "The `--details` listing returns one row per source package, "
+            "architecture and past release; duplicates are collapsed to the "
+            "highest edition per name."
+        ),
+        "search": (
+            "The `--details` results return one row per source package and "
+            "past release; duplicates are collapsed to the highest edition "
+            "per name."
+        ),
+        "install": (
+            "Installing an already-installed package re-marks it as "
+            "automatically installed, so `cleanup --orphans` can later "
+            "remove what `mpm install` named."
+        ),
+    }
 
     name = "openSUSE Zypper"
 
@@ -174,8 +190,7 @@ class Zypper(PackageManager):
             return
 
         package_list = _xml_items(
-            xmltodict
-            .parse(output)
+            xmltodict.parse(output)
             .get("stream", {})
             .get("search-result", {})
             .get("solvable-list", {}),
@@ -241,8 +256,7 @@ class Zypper(PackageManager):
             return
 
         update_list = (
-            xmltodict
-            .parse(output)
+            xmltodict.parse(output)
             .get("stream", {})
             .get("update-status", {})
             .get("update-list", {})

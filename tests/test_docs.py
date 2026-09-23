@@ -1566,6 +1566,46 @@ def test_manager_page_sections_render(manager):
     assert f"[mpm.overrides.{manager.id}]" in configuration
 
 
+@all_managers
+def test_operation_notes_reach_the_operations_table(manager):
+    """Check every declared operation note lands verbatim in the table.
+
+    The *Notes* column renders the declaration beside its operation row, so a
+    note missing from the table names a key the renderer dropped: an operation
+    renamed, or a vocabulary drift between
+    {attr}`~meta_package_manager.manager.PackageManager.operation_notes` and
+    {class}`~meta_package_manager.capabilities.Operations`.
+    """
+    operations = _docs.manager_operations(manager.id)
+    for op_name, note in manager.operation_notes.items():
+        assert note in operations, f"The {op_name!r} note is missing from the table."
+
+
+@all_managers
+def test_operations_notes_are_full_sentences(manager):
+    """Check every populated *Notes* cell of the operations table reads as
+    standalone sentences.
+
+    The column mixes the manager's declared notes with the synthesized backfill
+    captions, so the sentence shape (a capital to open, a period to close, no
+    leading code span) is what keeps the two halves reading alike. Rows are
+    parsed off the rendered table so the check covers both sources at once.
+    """
+    for line in _docs.manager_operations(manager.id).splitlines():
+        if not line.startswith("| `"):
+            continue
+        cells = [cell.strip() for cell in line.split("|")]
+        if len(cells) < 5:
+            # No Notes column.
+            continue
+        note = cells[3]
+        if not note:
+            continue
+        assert note[0].isupper(), f"A note cell does not open on a capital: {note!r}."
+        assert not note.startswith("`"), f"A note cell opens on a code span: {note!r}."
+        assert note.endswith("."), f"A note cell does not close on a period: {note!r}."
+
+
 def test_version_probe_nests_under_the_reference_traces():
     """Check the version probe is a subsection of the reference traces, and a
     section of its own on a page carrying no traces.

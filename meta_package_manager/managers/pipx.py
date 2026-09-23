@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 from operator import attrgetter
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -34,21 +35,6 @@ if TYPE_CHECKING:
 class Pipx(PackageManager):
     """pipx installs Python CLI applications, each in its own isolated venv.
 
-    Installed applications come from `pipx list --json`; only each venv's main
-    package is tracked, never the packages injected beside it. There is no
-    `search` operation: the request was closed as not planned, since PyPI
-    exposes no search API and custom search is out of pipx's scope (see [pypa/pipx#777](https://github.com/pypa/pipx/issues/777#issuecomment-990919047)).
-
-    ```{note}
-
-    The outdated query prefers pipx `1.16.0`'s native
-    `pipx list --outdated`, which checks every venv in one call, each
-    against its own backend (pip or uv). An older pipx falls back to probing
-    each venv with its embedded pip, one call per application. The version
-    floor stays at `1.0.0` so an older pipx remains fully usable: only the
-    outdated path degrades.
-    ```
-
     ```{note}
 
     The supply-chain cooldown rides on the underlying pip and needs that pip
@@ -56,6 +42,36 @@ class Pipx(PackageManager):
     `--uploaded-prior-to`; older pip silently ignores the release-age gate.
     ```
     """
+
+    # Installed applications come from `pipx list --json`; only each venv's
+    # main package is tracked, never the packages injected beside it.
+    #
+    # The outdated query prefers pipx `1.16.0`'s native
+    # `pipx list --outdated`, which checks every venv in one call, each
+    # against its own backend (pip or uv). An older pipx falls back to
+    # probing each venv with its embedded pip, one call per application.
+    # The version floor stays at `1.0.0` so an older pipx remains fully
+    # usable: only the outdated path degrades.
+    #
+    # `search`: the request was closed as not planned, since PyPI exposes no
+    # search API and custom search is out of pipx's scope
+    # (https://github.com/pypa/pipx/issues/777#issuecomment-990919047).
+    operation_notes: ClassVar = {
+        "installed": (
+            "Only each venv's main package is tracked, never the packages "
+            "injected beside it."
+        ),
+        "outdated": (
+            "On pipx older than `1.16.0`, each application costs its own "
+            "probe; newer versions check every venv in one call."
+        ),
+        "search": (
+            "The request was closed as not planned "
+            "([pypa/pipx#777](https://github.com/pypa/pipx/issues/777#issuecomment-990919047)): "
+            "PyPI exposes no search API and custom search is out of pipx's "
+            "scope."
+        ),
+    }
 
     name = "Python pipx"
 

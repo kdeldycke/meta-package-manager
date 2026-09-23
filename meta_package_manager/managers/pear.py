@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -51,20 +52,13 @@ class PEAR(PackageManager):
     `php_dir`, against its own registry at `pear.php.net`.
 
     ```{important}
-    Whether that needs root is a property of the PHP install, not of PEAR: a
-    distribution's `php_dir` is `/usr/share/php` and refuses an ordinary user
-    with `Cannot install, php_dir for channel "pear.php.net" is not writable
-    by the current user`. So the mutating operations carry privileged markers
-    but leave them dormant, exactly as the other language managers do: `mpm
-    --sudo`, or a `[mpm.overrides.pear] sudo = true` entry, escalates them.
-
-    The better fix is to own the prefix instead. PEAR is fully relocatable, and
-    every role directory has to move together: repointing `php_dir` alone fails
-    late, on `failed to mkdir /usr/share/php/tests/...`, because `test_dir` is
-    a separate setting. With `php_dir`, `bin_dir`, `data_dir`, `test_dir`,
-    `doc_dir`, `cfg_dir`, `www_dir`, `man_dir`, `temp_dir`, `download_dir` and
-    `cache_dir` all under one writable prefix, an install needs no privilege at
-    all.
+    Whether an install needs root is a property of the PHP install, not of
+    PEAR: a distribution's `php_dir` is `/usr/share/php` and refuses an
+    ordinary user with `Cannot install, php_dir for channel "pear.php.net"
+    is not writable by the current user`. Escalate the mutating operations
+    with `mpm --sudo`, or a `[mpm.overrides.pear] sudo = true` entry. The
+    privilege-free alternative is relocating the PEAR prefix to a directory
+    you own.
     ```
 
     ```{caution}
@@ -75,25 +69,38 @@ class PEAR(PackageManager):
     `mpm --timeout` on a host with more. `installed` is unaffected, reading the
     local registry with no network at all.
     ```
-
-    ```{note}
-    `search` is not implemented. `pear search` resolves through the same
-    per-package REST walk (`PEAR_REST_10::listAll()` with its `$basic`
-    parameter false, one `p/<name>/info.xml` fetch apiece), and no run of it
-    here ever returned: two attempts were abandoned after 15 and 30 minutes,
-    the second having reached "50%". `remote-list` is no way around it either,
-    costing 524 seconds on a cold cache. Both are far past the read-only cap,
-    so mpm skips the operation and `install` falls through to installing the
-    named package directly.
-    ```
-
-    ```{note}
-    A package is reported under its bare name, the spelling `pear install`
-    takes. PEAR identities are really channel-qualified (`[channel/]package`),
-    so two channels shipping the same name would collapse onto one entry; in
-    practice `pear.php.net` is the only populated one.
-    ```
     """
+
+    # The mutating operations below carry privileged markers but leave them
+    # dormant: they escalate only under `mpm --sudo` or a
+    # `[mpm.overrides.pear] sudo = true` entry. The marker-free alternative is
+    # to own the prefix instead. PEAR is fully relocatable, and every role
+    # directory has to move together: repointing `php_dir` alone fails late,
+    # on `failed to mkdir /usr/share/php/tests/...`, because `test_dir` is a
+    # separate setting. With `php_dir`, `bin_dir`, `data_dir`, `test_dir`,
+    # `doc_dir`, `cfg_dir`, `www_dir`, `man_dir`, `temp_dir`, `download_dir`
+    # and `cache_dir` all under one writable prefix, an install needs no
+    # privilege at all.
+
+    # `search` is not implemented, and no workaround exists: `pear search`
+    # resolves through the same per-package REST walk as `outdated`
+    # (`PEAR_REST_10::listAll()` with its `$basic` parameter false, one
+    # `p/<name>/info.xml` fetch apiece), and no run of it here ever returned:
+    # two attempts were abandoned after 15 and 30 minutes, the second having
+    # reached "50%". `remote-list` is no way around it either, costing
+    # 524 seconds on a cold cache. Both sit far past the read-only timeout, so
+    # the operation is skipped and `install` falls through to installing the
+    # named package directly.
+    operation_notes: ClassVar = {
+        "search": (
+            "Search needs one REST call per package against `pear.php.net` "
+            "and never completes within `mpm`'s read-only timeout."
+        ),
+        "installed": (
+            "Each package is reported under its bare name, so the same name "
+            "on two channels would collapse onto one entry."
+        ),
+    }
 
     name = "PEAR"
 
@@ -131,6 +138,11 @@ class PEAR(PackageManager):
     ```
     """
 
+    # Both parsers key on the bare package name, the spelling `pear install`
+    # takes: PEAR identities are really channel-qualified
+    # (`[channel/]package`), so two channels shipping the same name would
+    # collapse onto one entry. In practice `pear.php.net` is the only
+    # populated channel.
     _INSTALLED_REGEXP = re.compile(
         rf"^(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+(?:{_STATES})\s*$",
     )
@@ -224,8 +236,6 @@ class PEAR(PackageManager):
         install ok: channel://pear.php.net/Text_Password-1.2.1
         ```
         """
-        # Marked privileged so --sudo / `[mpm.overrides.pear] sudo = true` can
-        # escalate a system-PHP install; dormant by default.
         return self.run_cli(
             "install",
             f"{package_id}-{version}" if version else package_id,

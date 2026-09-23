@@ -15,6 +15,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 from __future__ import annotations
 
+from typing import ClassVar
+
 from extra_platforms import WINDOWS
 
 from ..capabilities import Delegate, search_capabilities
@@ -36,16 +38,30 @@ class SFSU(PackageManager):
     mpm reaches for sfsu only where it is both faster than Scoop and speaks
     JSON: `installed`, `outdated` and `search` all pass `--json` and are
     parsed as structured objects instead of the whitespace tables Scoop prints.
-
-    ```{note}
-    sfsu implements no mutating verbs, so `install`, `remove` and both
-    upgrade commands are bound straight to
-    {class}`~meta_package_manager.managers.scoop.Scoop` through the
-    {class}`~meta_package_manager.capabilities.Delegate` descriptor: those
-    operations run the `scoop` binary, and a host with sfsu but no Scoop
-    cannot mutate anything.
-    ```
     """
+
+    # sfsu implements no mutating verbs, so `install`, `remove` and both
+    # upgrade commands are bound straight to Scoop through the `Delegate`
+    # descriptor: those operations run the `scoop` binary, and a host with
+    # sfsu but no Scoop cannot mutate anything.
+    operation_notes: ClassVar = {
+        "install": (
+            "The tool ships no mutating verb, so the operation runs the "
+            "`scoop` binary instead."
+        ),
+        "remove": (
+            "The tool ships no mutating verb, so the operation runs the "
+            "`scoop` binary instead."
+        ),
+        "upgrade": (
+            "The tool ships no mutating verb, so the operation runs the "
+            "`scoop` binary instead."
+        ),
+        "upgrade_all": (
+            "The tool ships no mutating verb, so the operation runs the "
+            "`scoop` binary instead."
+        ),
+    }
 
     # Mutating operations delegate to the Scoop CLI.
     _scoop = Delegate(Scoop)

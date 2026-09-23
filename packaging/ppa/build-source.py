@@ -80,7 +80,13 @@ def require_tools() -> None:
 def newest_tag() -> str:
     """Return the version of the newest `v*` tag, with no `v` prefix."""
     tags = run(
-        "git", "-C", str(REPO_DIR), "tag", "--sort=-v:refname", "--list", "v*",
+        "git",
+        "-C",
+        str(REPO_DIR),
+        "tag",
+        "--sort=-v:refname",
+        "--list",
+        "v*",
         stdout=subprocess.PIPE,
     ).stdout.split()
     if not tags:
@@ -99,8 +105,13 @@ def export_tag_metadata(version: str, workdir: Path) -> Path:
     archive = workdir / "tag.tar"
     with archive.open("wb") as stream:
         run(
-            "git", "-C", str(REPO_DIR), "archive", f"v{version}",
-            "pyproject.toml", "uv.lock",
+            "git",
+            "-C",
+            str(REPO_DIR),
+            "archive",
+            f"v{version}",
+            "pyproject.toml",
+            "uv.lock",
             stdout=stream,
         )
     project = workdir / "project"
@@ -113,7 +124,9 @@ def export_tag_metadata(version: str, workdir: Path) -> Path:
 def python_floor(project: Path) -> str:
     """Read `requires-python` and return its bare floor, like `3.10`."""
     content = (project / "pyproject.toml").read_text(encoding="UTF-8")
-    match = re.search(r'^requires-python\s*=\s*"[^0-9]*([0-9]+\.[0-9]+)', content, re.MULTILINE)
+    match = re.search(
+        r'^requires-python\s*=\s*"[^0-9]*([0-9]+\.[0-9]+)', content, re.MULTILINE
+    )
     if not match:
         msg = "No `requires-python` floor found in the tag's pyproject.toml."
         raise SystemExit(msg)
@@ -125,22 +138,37 @@ def build_vendor_tree(version: str, project: Path, target: Path) -> None:
     requirements = project / "requirements.txt"
     with requirements.open("w", encoding="UTF-8") as stream:
         run(
-            "uv", "export", "--project", str(project), "--frozen", "--no-dev",
-            "--no-emit-project", "--no-hashes", "--format", "requirements.txt",
+            "uv",
+            "export",
+            "--project",
+            str(project),
+            "--frozen",
+            "--no-dev",
+            "--no-emit-project",
+            "--no-hashes",
+            "--format",
+            "requirements.txt",
             stdout=stream,
         )
     with requirements.open("a", encoding="UTF-8") as stream:
         stream.write(f"meta-package-manager=={version}\n")
 
     run(
-        "uv", "pip", "install", "--no-progress", "--target", str(target),
+        "uv",
+        "pip",
+        "install",
+        "--no-progress",
+        "--target",
+        str(target),
         # Resolve markers at the floor, so the tree carries the shims the
         # oldest series needs; a newer interpreter never imports them.
-        "--python-version", python_floor(project),
+        "--python-version",
+        python_floor(project),
         # `dh_python3` byte-compiles at install time, for the Python the
         # series ships, which is the only version tag that can be right.
         "--no-compile-bytecode",
-        "--requirements", str(requirements),
+        "--requirements",
+        str(requirements),
     )
 
     # uv leaves its own lock behind, and writes console scripts carrying the
@@ -173,8 +201,9 @@ def write_changelog(tree: Path, deb_version: str, series: str, version: str) -> 
     )
 
 
-def assemble(version: str, series: str, vendor: Path, output: Path, ppa_rev: int,
-             series_rev: int) -> Path:
+def assemble(
+    version: str, series: str, vendor: Path, output: Path, ppa_rev: int, series_rev: int
+) -> Path:
     deb_version = f"{version}ppa{ppa_rev}~{series}{series_rev}"
     tree = output / f"meta-package-manager-{deb_version}"
     shutil.rmtree(tree, ignore_errors=True)
@@ -194,19 +223,27 @@ def main() -> int:
         help="Released version to package. Defaults to the newest `v*` tag.",
     )
     parser.add_argument(
-        "--series", action="append", choices=SERIES,
+        "--series",
+        action="append",
+        choices=SERIES,
         help="Ubuntu series to assemble for. Repeatable. Defaults to all of them.",
     )
     parser.add_argument(
-        "--output", type=Path, default=Path("dist"),
+        "--output",
+        type=Path,
+        default=Path("dist"),
         help="Directory the source trees are written to.",
     )
     parser.add_argument(
-        "--ppa-revision", type=int, default=1,
+        "--ppa-revision",
+        type=int,
+        default=1,
         help="Bumped when a series is rebuilt from the same mpm version.",
     )
     parser.add_argument(
-        "--series-revision", type=int, default=1,
+        "--series-revision",
+        type=int,
+        default=1,
         help="Bumped when one series alone is rebuilt.",
     )
     args = parser.parse_args()
@@ -223,8 +260,12 @@ def main() -> int:
         build_vendor_tree(version, project, vendor)
         for series in series_list:
             tree = assemble(
-                version, series, vendor, args.output,
-                args.ppa_revision, args.series_revision,
+                version,
+                series,
+                vendor,
+                args.output,
+                args.ppa_revision,
+                args.series_revision,
             )
             print(tree)
     return 0

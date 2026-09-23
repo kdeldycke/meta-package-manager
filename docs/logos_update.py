@@ -304,6 +304,10 @@ def candidate_slugs(manager) -> set[str]:
     nothing with the manager's ID, name or home page (Cygwin, for `apt-cyg` hosted
     on GitHub) is invisible here. That is why each pending request is also linked
     from the manager's own source.
+
+    `documentation_url` stays out of the chain. The documentation hosts of the
+    managers declaring one contribute no slug the catalog files a mark under,
+    while a man-page host contributes `man`, which matches the vehicle brand.
     """
     candidates = {slugify(manager.id), slugify(manager.name)}
     candidates.update(slugify(word) for word in manager.name.split())

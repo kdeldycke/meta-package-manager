@@ -81,10 +81,12 @@ jobs:
           uv run --script ./packaging/ppa/build-source.py
           --mpm-version 7.6.1 --series ${{ matrix.series }} --output ./dist
 
+      # build-essential compiles nothing here, but dpkg-checkbuilddeps
+      # requires it of every source package, and a Launchpad builder has it.
       - name: Install build tooling
         run: >
           apt-get install --quiet --yes --no-install-recommends
-          debhelper dh-python dpkg-dev fakeroot lintian
+          build-essential debhelper dh-python dpkg-dev fakeroot lintian
 
       # What dh_python3 offers varies by series, and --no-guessing-deps is what
       # keeps the vendored .dist-info from pulling archive python3-* packages.

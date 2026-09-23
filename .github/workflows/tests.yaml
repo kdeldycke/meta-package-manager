@@ -296,15 +296,34 @@ jobs:
         if: runner.os == 'macOS'
         # GitHub-hosted macOS images ship pwsh 7.x and PSResourceGet, but install both defensively in case the image
         # has not been refreshed yet on a given runner.
+        # The gallery serves CI runners an empty search result every now and then, which Install-Module reports as
+        # "No match was found" rather than as a network error, so retry. The image already bundles the module, so an
+        # exhausted retry warns instead of failing the whole cell over a refresh.
         run: |
           brew install --cask powershell || true
-          pwsh -NoProfile -NonInteractive \
-            -Command "Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser"
+          # The single quotes are deliberate: pwsh expands ${attempt} and $_, not bash.
+          # shellcheck disable=SC2016
+          pwsh -NoProfile -NonInteractive -Command '
+            $ErrorActionPreference = "Stop"
+            foreach ($attempt in 1..3) {
+              try {
+                Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser
+                exit 0
+              } catch {
+                Write-Output "Install-Module PSResourceGet failed (attempt ${attempt}/3): $_"
+                Start-Sleep -Seconds 10
+              }
+            }
+            Write-Output "::warning::Could not refresh PSResourceGet; keeping the copy the image bundles."
+          '
       - name: PowerShell Gallery - Linux install
         if: runner.os == 'Linux'
         # See: https://learn.microsoft.com/en-us/powershell/scripting/install/install-ubuntu
         # The snap store is intermittently flaky on the Ubuntu runners, and a failed download of the
         # snapd prerequisite aborts the whole step, so retry a few times before giving up.
+        # The gallery leg retries for the same reason the macOS and Windows ones do, but it fails rather
+        # than warns once the retries run out: pwsh here comes from the snap and bundles no PSResourceGet,
+        # so a persistent gallery failure is a real blocker for the `pwsh-gallery` manager, not a lag.
         run: |
           for attempt in 1 2 3; do
               if sudo snap install powershell --classic; then
@@ -315,14 +334,41 @@ jobs:
               sleep 10
           done
           [ -n "${installed}" ] || exit 1
-          pwsh -NoProfile -NonInteractive \
-            -Command "Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser"
+          # The single quotes are deliberate: pwsh expands ${attempt} and $_, not bash.
+          # shellcheck disable=SC2016
+          pwsh -NoProfile -NonInteractive -Command '
+            $ErrorActionPreference = "Stop"
+            foreach ($attempt in 1..3) {
+              try {
+                Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser
+                exit 0
+              } catch {
+                Write-Output "Install-Module PSResourceGet failed (attempt ${attempt}/3): $_"
+                Start-Sleep -Seconds 10
+              }
+            }
+            exit 1
+          '
       - name: PowerShell Gallery - Windows bootstrap
         if: runner.os == 'Windows'
         shell: pwsh
         # pwsh 7.4+ is pre-installed on windows-latest runners. Refresh PSResourceGet to the latest published version so
-        # the bundled copy does not lag behind the version mpm exercises in tests.
-        run: Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser
+        # The bundled copy does not lag behind the version mpm exercises in tests.
+        # The gallery serves CI runners an empty search result every now and then, which Install-Module
+        # reports as "No match was found" rather than as a network error, so retry. The runner already
+        # bundles the module, so an exhausted retry warns instead of failing the whole cell over a refresh.
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($attempt in 1..3) {
+            try {
+              Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser
+              exit 0
+            } catch {
+              Write-Output "Install-Module PSResourceGet failed (attempt ${attempt}/3): $_"
+              Start-Sleep -Seconds 10
+            }
+          }
+          Write-Output '::warning::Could not refresh PSResourceGet; keeping the bundled copy.'
 
       # Scoop
       - name: Scoop - Windows install

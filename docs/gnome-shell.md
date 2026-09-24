@@ -18,8 +18,14 @@ The extension looks for `mpm` on the session `PATH`, then in well-known location
 
 ### From extensions.gnome.org
 
-```{todo}
-The extension is not yet published on [extensions.gnome.org](https://extensions.gnome.org). Once it lands there, it will be installable with one click from the site. Until then, use one of the methods below.
+The extension is published at [extensions.gnome.org/extension/10714/meta-package-manager](https://extensions.gnome.org/extension/10714/meta-package-manager/), for GNOME Shell `46` to `50`.
+
+The Install button on that page needs GNOME Shell integration on the host. The site describes it as "two parts: browser extension and native host messaging application". Most distributions package the second part as [`gnome-browser-connector`](https://gitlab.gnome.org/GNOME/gnome-browser-connector). Without both, the button reports the integration as missing.
+
+Two other routes reach the same catalog and need neither part. [Extension Manager](https://github.com/mattjakeman/ExtensionManager) browses and installs it from a desktop application. [`gext`](managers/gext.md), one of the managers `mpm` wraps, installs it from a shell:
+
+```shell-session
+$ gext install mpm@kdeldycke.github.io
 ```
 
 ### From a release zip

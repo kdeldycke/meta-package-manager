@@ -86,8 +86,8 @@ class Homebrew(PackageManager):
         # since the beginning of mpm:
         # https://github.com/kdeldycke/meta-package-manager/issues/36
         "HOMEBREW_NO_AUTO_UPDATE": "1",
-        # See: https://docs.brew.sh/FAQ#why-cant-i-open-a-mac-app-from-an-unidentified-developer
-        # "HOMEBREW_CASK_OPTS": "--no-quarantine",
+        # No quarantine key here: brew applies it to every cask download and offers
+        # no switch to opt out.
     }
 
     _INSTALLED_REGEXP = re.compile(

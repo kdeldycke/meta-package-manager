@@ -290,28 +290,18 @@ $ sudo zypper install meta-package-manager
 `````
 
 `````{tab-item} Ubuntu
-Build and install from [the Debian source package maintained in the repository](packaging.md#ubuntu-ppa), on Ubuntu `22.04` and later. Assembling the dependency tree needs `uv`, and `noble` below stands for your own series, which `lsb_release --codename --short` prints:
-
-```{code-block} shell-session
-$ sudo apt-get install --no-install-recommends build-essential debhelper dh-python dpkg-dev fakeroot git
-$ git clone https://github.com/kdeldycke/meta-package-manager.git
-$ cd ./meta-package-manager
-$ ./packaging/ppa/build-source.py --mpm-version 7.6.1 --series noble --output ./dist
-$ cd ./dist/meta-package-manager-7.6.1ppa1~noble1
-$ dpkg-buildpackage --build=binary --no-sign
-$ sudo apt-get install ../meta-package-manager_*.deb
-```
-
-The package carries its own Python dependencies, so it installs no Python library system-wide and upgrades none of the ones already there.
-
-````{admonition} A PPA is on the way
-:class: important
-Ubuntu ships no `mpm` package, and none built against its archive could work, for the reasons [the packaging page](packaging.md#ubuntu-ppa) gives. A Launchpad PPA is the route instead. Once it is published, installation is two lines on every supported Ubuntu:
+Install from [my PPA](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm), on Ubuntu `22.04` and later:
 
 ```{code-block} shell-session
 $ sudo add-apt-repository ppa:kdeldycke/mpm
 $ sudo apt install meta-package-manager
 ```
+
+`add-apt-repository` comes from `software-properties-common`, which the desktop and server images carry. The package brings its own Python dependencies, so it installs no Python library system-wide and upgrades none of the ones already there.
+
+````{admonition} Why a PPA rather than the Ubuntu archive
+:class: note
+Ubuntu ships neither `click-extra` nor `extra-platforms`, and its `python3-click` and `python3-deepmerge` are older than `click-extra` accepts on every series up to and including `26.04`, so no package built against the archive could work. [The packaging page](packaging.md#ubuntu-ppa) covers that trade-off, and how to build the source package by hand.
 ````
 `````
 

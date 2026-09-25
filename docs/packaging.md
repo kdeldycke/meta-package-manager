@@ -100,7 +100,7 @@ Where `mpm` stands on each distribution channel whose packaging is maintained fr
 | MacPorts         | [`packaging/macports/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports)                | [landed upstream on 2026-07-22](https://github.com/macports/macports-ports/pull/33609)                    | `macports-source`                                                                    | manual       |
 | Nix              | [`packaging/nix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix)                          | [pending review](https://github.com/NixOS/nixpkgs/pull/506145)                                            | `nix-source`                                                                         | automated    |
 | openSUSE         | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [building in a home project](https://build.opensuse.org/package/show/home:kdeldycke/meta-package-manager) | `check-opensuse-spec`                                                                | manual       |
-| Ubuntu (PPA)     | [`packaging/ppa/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa)                          | pending PPA creation                                                                                      | `ppa-source`                                                                         | manual       |
+| Ubuntu (PPA)     | [`packaging/ppa/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa)                          | [published](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm)                            | `ppa-source`                                                                         | manual       |
 | Void Linux       | [`void-packages` fork](https://github.com/kdeldycke/void-packages/tree/mpm)                                            | [pending review](https://github.com/void-linux/void-packages/pull/60532)                                  | —                                                                                    | manual       |
 
 The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) build and install each in-repo spec on every change to it and on a weekly schedule. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)); manual specs pin the released version and its source checksums, refreshed by hand at each release.
@@ -248,7 +248,16 @@ No package built against the Ubuntu archive could work. Ubuntu ships neither `cl
 
 The build runs no check phase, the one channel that does not. What it installs is the published wheels, which `mpm`'s own test matrix already covered, and the `ppa-source` job drives the installed CLI against the host `apt` instead, which a builder could not do.
 
-To build and install one series by hand, with [`uv`](https://docs.astral.sh/uv/) on `PATH`, which a shell that never sourced a login profile does not have:
+Install from [the PPA](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm), on Ubuntu `22.04` and later:
+
+```{code-block} shell-session
+$ sudo add-apt-repository ppa:kdeldycke/mpm
+$ sudo apt install meta-package-manager
+```
+
+`add-apt-repository` comes from `software-properties-common`, which the desktop and server images carry.
+
+To build one series by hand instead, with [`uv`](https://docs.astral.sh/uv/) on `PATH`, which a shell that never sourced a login profile does not have:
 
 ```{code-block} shell-session
 $ sudo apt-get install --no-install-recommends build-essential debhelper dh-python dpkg-dev fakeroot git
@@ -270,7 +279,7 @@ $ dput ppa:kdeldycke/mpm ../meta-package-manager_7.6.1ppa1~noble1_source.changes
 The `~{series}` suffixes sort in release order, the Ubuntu codenames happening to be alphabetical, so a machine upgrading from one series to the next picks the newer build up on its own. The targets are `jammy`, `noble`, `resolute` and `stonking`; `questing` reached its end of life in July 2026.
 
 ```{note}
-The PPA is not published yet: it waits on a Launchpad account, an OpenPGP key registered there, and a signed Ubuntu Code of Conduct. The recipe above is the supported install in the meantime. [`apt`](managers/apt.md) is itself one of the managers `mpm` drives.
+Each release is uploaded by hand, once per series, so the PPA can trail the newest version by a few days: `mpm`'s own supply-chain cooldown refuses a release younger than a week, which is what the assembly step resolves against. [`apt`](managers/apt.md) is itself one of the managers `mpm` drives.
 ```
 
 ### Void Linux

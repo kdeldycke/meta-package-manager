@@ -634,10 +634,9 @@ jobs:
   # depends on python3 alone. That is what the job asserts: a Depends naming an
   # archive python3-* library is the regression it exists to catch.
   ppa-source:
-    name: "⁉️ ppa-source (${{ matrix.series }})"
+    name: "✅ ppa-source (${{ matrix.series }})"
     runs-on: ubuntu-26.04
     timeout-minutes: 25
-    continue-on-error: true
     container:
       image: ${{ matrix.image }}
     strategy:

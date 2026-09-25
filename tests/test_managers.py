@@ -114,9 +114,15 @@ def test_operation_notes(manager):
         assert op_name in {op.name for op in Operations}
         assert note.strip(), f"Empty operation note for {op_name!r}."
         assert "\n" not in note, f"Multi-line operation note for {op_name!r}."
-        assert note[0].isupper(), f"Operation note {op_name!r} does not start with a capital."
-        assert not note.startswith("`"), f"Operation note {op_name!r} starts on a code span."
-        assert note.endswith("."), f"Operation note {op_name!r} does not end with a period."
+        assert note[0].isupper(), (
+            f"Operation note {op_name!r} does not start with a capital."
+        )
+        assert not note.startswith("`"), (
+            f"Operation note {op_name!r} starts on a code span."
+        )
+        assert note.endswith("."), (
+            f"Operation note {op_name!r} does not end with a period."
+        )
 
 
 @all_managers

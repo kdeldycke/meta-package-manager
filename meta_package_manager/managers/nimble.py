@@ -72,8 +72,7 @@ class Nimble(PackageManager):
             "listing reports the newest per name."
         ),
         "outdated": (
-            "No command reports which installed packages have newer "
-            "releases."
+            "No command reports which installed packages have newer releases."
         ),
         "upgrade": (
             "The tool's `upgrade` acts on a project's lock file, not the "

@@ -220,7 +220,7 @@ jobs:
           # satisfying `required-version`, leaving the tool that enforces every
           # cooldown installed without one. `sync-workflow-pins` walks it forward
           # once a uv release clears the window.
-          version: "0.12.5"
+          version: "0.12.12"
       - name: Render PR body
         if: steps.check.outputs.needs_update == 'true'
         env:
@@ -348,7 +348,7 @@ jobs:
           # satisfying `required-version`, leaving the tool that enforces every
           # cooldown installed without one. `sync-workflow-pins` walks it forward
           # once a uv release clears the window.
-          version: "0.12.5"
+          version: "0.12.12"
       - name: Render PR body
         if: steps.check.outputs.needs_update == 'true'
         env:

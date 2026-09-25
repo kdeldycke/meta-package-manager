@@ -1,5 +1,10 @@
 # Changelog
 
+## [`8.0.3.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.2...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`8.0.2` (2026-09-25)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 
 - [mpm] Publish `mpm` for Ubuntu `22.04` and later at `ppa:kdeldycke/mpm`, carrying its Python dependencies in a private directory so nothing system-wide changes, with a `ppa-source` job building the spec on every live series.

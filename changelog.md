@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Document the `host_environment` marker and the corrected auto-skip hook on the packaging page, which named a function that no longer exists.
 - [mpm] Skip the tests needing a real host, a login shell or a sudo policy inside a hermetic build sandbox, so packagers run a plain `pytest` with no per-distribution deselect list.
 - [mpm] Name the SBOM writer library that is missing or too old when `sbom` refuses, instead of advising an extra that is already installed.
 - [mpm] Publish `mpm` for Ubuntu `22.04` and later at `ppa:kdeldycke/mpm`, carrying its Python dependencies in a private directory so nothing system-wide changes, with a `ppa-source` job building the spec on every live series.

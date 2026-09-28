@@ -10,10 +10,10 @@ To install `mpm` on your own system, head to the [installation methods](install.
 
 ## Test suite
 
-The `mpm` test suite splits into two layers, separated by the `integration` pytest marker:
+The `mpm` test suite splits into two layers, separated by the `integration` and `host_environment` pytest markers:
 
-- A **hermetic layer** (everything not marked `integration`) needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox. Beyond `pytest` it imports `pyyaml` and `tomlkit` (both pulled in by `tests/test_docs.py`); the SBOM tests additionally want the `[sbom-offline]` and `[sbom-online]` extras but **skip themselves when those are absent**, so a lean build never has to ignore them. `pyproject-fmt` stays optional too, its formatting-fixpoint test auto-skipping when missing.
-- An **integration layer** (marked `integration`: `tests/test_manager_*.py`, `tests/test_cli*.py` and the SwiftBar/Xbar plugin suite) drives the ~70 real package managers ([`apt`](managers/apt.md), [`brew`](managers/brew.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), and more) and the `mpm` CLI end-to-end. It cannot run in a hermetic builder.
+- A **hermetic layer** (everything marked neither `integration` nor `host_environment`) needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox. Beyond `pytest` it imports `pyyaml` and `tomlkit` (both pulled in by `tests/test_docs.py`); the SBOM tests additionally want the `[sbom-offline]` and `[sbom-online]` extras but **skip themselves when those are absent, or too old for the renderer**, so a lean build never has to ignore them. `pyproject-fmt` stays optional too, its formatting-fixpoint test auto-skipping when missing.
+- An **integration layer** (marked `integration`: `tests/test_manager_*.py`, `tests/test_cli*.py`, any test *named* `test_cli_*` wherever it lives, and the SwiftBar/Xbar plugin suite) drives the ~70 real package managers ([`apt`](managers/apt.md), [`brew`](managers/brew.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), and more) and the `mpm` CLI end-to-end. It cannot run in a hermetic builder. Marked `host_environment` beside it is the smaller set needing something only a real host offers: a login shell, a passwd entry for the build user, or a sudo policy. Both are skipped together.
 
 Pick the skip path that fits the builder. Either way no per-module ignore list is needed, and the selection stays correct as test modules are added:
 
@@ -23,7 +23,9 @@ Pick the skip path that fits the builder. Either way no per-module ignore list i
   $ pytest -m "not integration"
   ```
 
-- **Sandbox builders that set `HOME=/homeless-shelter`** (Guix, Nix) get the integration layer **auto-skipped** through `extra_platforms.pytest.skip_guix_build` (wired up in `tests/conftest.py`), so a plain `pytest` already runs only the hermetic layer. Do **not** override `$HOME` back to a writable path, or the auto-skip stops firing and the integration tests fail.
+  A builder whose user has no login shell, no passwd entry or no sudo policy deselects the smaller host layer as well, with `-m "not integration and not host_environment"`. Alpine's abuild and RPM mock need neither: they run as a real user with a real shell.
+
+- **Sandbox builders that set `HOME=/homeless-shelter`** (Guix, Nix) get the integration and host layers **auto-skipped** through `extra_platforms.pytest.skip_hermetic_build` (wired up in `tests/conftest.py`), so a plain `pytest` already runs only the hermetic layer. Do **not** override `$HOME` back to a writable path, or the auto-skip stops firing and the integration tests fail.
 
 Repo-maintenance sync guards (which regenerate a committed artifact from the installed tooling and compare) skip automatically outside a git checkout, so a tarball or sdist build never trips on a tooling-version mismatch. A builder that packages the SBOM extras can install `[sbom-offline]` / `[sbom-online]` to exercise the SBOM tests instead of skipping them.
 

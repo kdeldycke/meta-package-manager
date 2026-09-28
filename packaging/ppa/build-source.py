@@ -58,7 +58,14 @@ MAINTAINER = "Kevin Deldycke <kevin@deldycke.com>"
 def run(*args: str, **kwargs) -> subprocess.CompletedProcess[str]:
     """Run a command, echoing it the way the workflows disclose theirs."""
     print(f"$ {' '.join(map(str, args))}", file=sys.stderr)
-    return subprocess.run(args, check=True, text=True, encoding="UTF-8", **kwargs)
+    try:
+        return subprocess.run(args, check=True, text=True, encoding="UTF-8", **kwargs)
+    except subprocess.CalledProcessError as error:
+        # The child already printed its own diagnosis to stderr, and uv's is
+        # good: it names the package a cooldown filtered and the cutoff it hit.
+        # A traceback on top buries that under frames nobody needs.
+        msg = f"`{args[0]}` failed with exit status {error.returncode}, see above."
+        raise SystemExit(msg) from None
 
 
 def require_tools() -> None:

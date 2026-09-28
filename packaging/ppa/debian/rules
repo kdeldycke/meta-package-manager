@@ -16,10 +16,13 @@ override_dh_auto_configure:
 
 # There is no suite to re-run: the package content is the published wheels,
 # which mpm's own test matrix already covered. What this checks is the
-# vendoring, the one thing assembled here and tested nowhere else. A dependency
-# left out of the tree, a module mangled by the shebang strip or a private
-# directory the wrapper cannot reach all surface as an import failure, and
-# building the command graph walks every module the CLI touches.
+# vendoring, the one thing assembled here and tested nowhere else.
+#
+# Rendering the man page above already imports the tree, so a missing module is
+# caught there first. Stating the check here anyway keeps it deliberate rather
+# than a side effect, survives any change to that step, and adds the two paths
+# roff rendering does not walk: platform detection behind `--version`, and
+# click-extra's help rendering.
 override_dh_auto_test:
 	PYTHONPATH=vendor python3 -m meta_package_manager --version
 	PYTHONPATH=vendor python3 -m meta_package_manager --help > /dev/null

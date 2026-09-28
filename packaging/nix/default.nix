@@ -26,41 +26,25 @@ let
             --replace-quiet "setuptools_scm<10" "setuptools_scm"
         '';
       });
-      # click-extra 9 declares `click>=8.4.1`, `boltons>=26.2` and
-      # `wcwidth>=0.8.3`, all of which nixpkgs sits below, so the runtime
-      # dependency check rejects it before mpm is reached. Each is pinned to
-      # the version `uv.lock` records for the packaged mpm release rather than
-      # to the bare floor, so the build reproduces the combination upstream
-      # tested. Overriding inside this package set leaves the rest of nixpkgs
-      # untouched, and each entry goes away as nixpkgs catches up.
-      boltons = super.boltons.overridePythonAttrs (_: rec {
-        version = "26.2.0";
-        src = pkgs.fetchFromGitHub {
-          owner = "mahmoud";
-          repo = "boltons";
-          tag = version;
-          hash = "sha256-V6Kdamn2HHOjucKGrjCqjE/xExCJmyUAE11YwLjOkzI=";
-        };
-        # nixpkgs patches a pytest 9 compatibility fix into 25.0.0 that 26.2
-        # already carries upstream, so the patch no longer applies.
-        patches = [ ];
-      });
+      # click-extra 9 declares `click>=8.4.1`, above the 8.3.x nixpkgs ships,
+      # so its runtime dependency check rejects it before mpm is reached.
+      #
+      # Pinned to that floor rather than to the newer release `uv.lock` records,
+      # because an override here reaches every package in this set, not just
+      # click-extra: 8.5.0 deprecates `CliRunner.isolated_filesystem`, and
+      # httpx2 turns that warning into an error, which broke respx and with it
+      # mpm's own check inputs. Pinning click-extra itself to the lowest 9.x is
+      # what keeps this to one override: 9.2 onwards also raises boltons to
+      # >=26.2 and wcwidth to >=0.8.3, neither of which nixpkgs carries.
+      #
+      # Drop this once nixpkgs ships click 8.4.1 or newer.
       click = super.click.overridePythonAttrs (_: rec {
-        version = "8.5.0";
+        version = "8.4.1";
         src = pkgs.fetchFromGitHub {
           owner = "pallets";
           repo = "click";
           tag = version;
-          hash = "sha256-VYdaEN9l2MRVz42I8t8IDOpG5XeDM8bf34dLZy3yf10=";
-        };
-      });
-      wcwidth = super.wcwidth.overridePythonAttrs (_: rec {
-        version = "0.8.3";
-        src = pkgs.fetchFromGitHub {
-          owner = "jquast";
-          repo = "wcwidth";
-          tag = version;
-          hash = "sha256-4GzYqoXdYqZjyB/iIsuOnwSjJGSKY9LitVKVDT2aUCo=";
+          hash = "sha256-c+Bt6h14WDLjjyemuRjAt6OZ2tqJ9yIRAiB9N6RZ0KE=";
         };
       });
       extra-platforms = self.callPackage ./extra-platforms.nix { };

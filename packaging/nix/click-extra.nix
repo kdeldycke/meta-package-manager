@@ -27,14 +27,14 @@
 
 buildPythonPackage (finalAttrs: {
   pname = "click-extra";
-  version = "9.0.0";
+  version = "9.3.5";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";
     repo = "click-extra";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-boswFU+u+LmZtz+r9tHFDP0igXh37JsGzwb7I+md89w=";
+    hash = "sha256-nIqZEneIRbmApNcmAbtv18C7k4wrcisM+QCZSDpfAhI=";
   };
 
   build-system = [ uv-build ];

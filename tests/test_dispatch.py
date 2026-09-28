@@ -49,6 +49,24 @@ from meta_package_manager.execution import operation_subject
 from meta_package_manager.sudo import _SUDO_CACHE_WARM
 
 
+@pytest.fixture(autouse=True)
+def capable_term(monkeypatch):
+    """Pin `TERM` to a terminal the progress indicator can draw on.
+
+    Every test below fakes an interactive terminal with `TTYStringIO`, whose
+    `isatty()` says yes while `TERM` keeps whatever the environment holds. No
+    real terminal pairs those: a developer shell carries a capable `TERM` and
+    the tests pass, an RPM or Debian build sandbox carries `TERM=unknown` and
+    click-extra silences the aggregate indicator, taking the `✓`/`✘` trail with
+    it. Five tests then fail for a reason no user meets, since `mpm` itself
+    prints the trail under `unknown` and `dumb` alike.
+
+    Pinned for the module rather than per test, so a test added later inherits
+    a terminal instead of the build host's.
+    """
+    monkeypatch.setenv("TERM", "xterm-256color")
+
+
 class FakeContext:
     """Minimal stand-in exposing only the `meta` keys the helper reads."""
 

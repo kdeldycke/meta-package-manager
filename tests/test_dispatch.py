@@ -522,13 +522,18 @@ def test_per_package_failure_trail_marks_failed_tasks(monkeypatch):
     assert "Removed 2/3 packages" in output
 
 
-def test_per_package_no_finisher_off_terminal(capsys):
-    """Off a terminal nothing leaks (the trail and finisher are indicator-gated)."""
+def test_per_package_finisher_survives_off_terminal(capsys):
+    """Off a terminal the finisher still prints: the record must reach a log.
+
+    The animated aggregate indicator cannot draw on a pipe, so the plain lines
+    take over. That is the whole point of the split, and it is why a CI log or
+    a redirected run keeps an account of what happened.
+    """
     ctx = FakeContext(jobs=4)
     managers = [StubManager(f"m{i}", progress=True) for i in range(4)]
     tasks = [(m, lambda mid=m.id: (True, f"{mid} ok")) for m in managers]
     collect_per_package("Removing", "Removed", tasks, ctx=ctx)  # type: ignore[arg-type]
-    assert "Removed" not in capsys.readouterr().err
+    assert "Removed" in capsys.readouterr().err
 
 
 # ---------------------------------------------------------------------------
@@ -791,9 +796,31 @@ def test_operation_trail_echoes_marks_and_finisher_on_tty(monkeypatch):
     assert "Installed 1/2 packages" in output
 
 
-def test_operation_trail_silent_off_terminal(capsys):
-    """Off a terminal the sequential ledger stays silent."""
-    trail = OperationTrail([StubManager("brew", progress=True)])  # type: ignore[list-item]
+def test_operation_trail_silent_without_progress(capsys):
+    """Progress off is the one thing that silences the ledger.
+
+    The control for the two tests around it: they assert the lines survive a
+    pipe, and this pins what still suppresses them. It guards the `visible`
+    argument the trail is built with, which is not interchangeable with `live`:
+    the latter only moves the aggregate indicator, and where that cannot draw
+    each outcome line prints instead, so gating on it would silence nothing.
+    """
+    trail = OperationTrail([StubManager("brew", progress=False)])  # type: ignore[list-item]
     trail.mark(True, "brew.install: foo")
     trail.finish(True, "Installed 1/1 packages")
     assert capsys.readouterr().err == ""
+
+
+def test_operation_trail_echoes_off_terminal(capsys):
+    """Off a terminal the sequential ledger prints rather than staying silent.
+
+    Its lines only ever append, so they survive a pipe where an animation
+    redrawing in place could not. Progress off is what silences them, through
+    `visible`, not the absence of a terminal.
+    """
+    trail = OperationTrail([StubManager("brew", progress=True)])  # type: ignore[list-item]
+    trail.mark(True, "brew.install: foo")
+    trail.finish(True, "Installed 1/1 packages")
+    output = capsys.readouterr().err
+    assert "brew.install: foo" in output
+    assert "Installed 1/1 packages" in output

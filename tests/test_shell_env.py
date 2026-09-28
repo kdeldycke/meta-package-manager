@@ -33,11 +33,17 @@ from meta_package_manager.shell_env import (
     shell_argv,
 )
 
-pytestmark = pytest.mark.skipif(
-    is_any_windows(),
-    reason="The import is a no-op on Windows, and the stand-in shells are POSIX "
-    "scripts.",
-)
+pytestmark = [
+    pytest.mark.skipif(
+        is_any_windows(),
+        reason="The import is a no-op on Windows, and the stand-in shells are "
+        "POSIX scripts.",
+    ),
+    # Every test here spawns the user's login shell and reads what it exports.
+    # A hermetic build sandbox gives its build user neither a shell nor a
+    # passwd entry, so the module is host-dependent throughout.
+    pytest.mark.host_environment,
+]
 
 
 def fake_shell(tmp_path, body: str = "") -> str:

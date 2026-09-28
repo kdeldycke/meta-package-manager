@@ -37,10 +37,21 @@ pytest.importorskip("spdx_tools")
 # than the coarse package import above, which would let a partial install
 # through and crash the SPDX tests with a NameError. A fully-absent extra is
 # already handled by the importorskip calls; this only catches partial installs.
+from meta_package_manager.sbom.cyclonedx import cyclonedx_support
 from meta_package_manager.sbom.spdx import spdx_support
 
 if not spdx_support:
     pytest.skip("spdx-tools writer stack not fully importable", allow_module_level=True)
+
+# The same partial-install hazard on the CycloneDX side, which this module had
+# no guard for: `cyclonedx` imports while the symbols mpm's renderer needs are
+# absent from an older release, and every CycloneDX test then dies on a
+# NameError rather than skipping. NixOS carries such a cyclonedx-python-lib.
+if not cyclonedx_support:
+    pytest.skip(
+        "cyclonedx-python-lib writer stack not fully importable",
+        allow_module_level=True,
+    )
 
 from cyclonedx.schema import OutputFormat, SchemaVersion
 from cyclonedx.validation import make_schemabased_validator

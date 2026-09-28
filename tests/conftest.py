@@ -110,6 +110,13 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers",
+        "host_environment: mark test as needing something only a real host "
+        "offers: a login shell, a passwd entry for the build user, or a sudo "
+        "policy. A hermetic build sandbox has none of them, so these are "
+        "skipped there alongside the integration layer.",
+    )
+    config.addinivalue_line(
+        "markers",
         "repo_maintenance: mark test as a sync guard comparing a committed "
         "artifact against a regeneration from the installed tooling. Only "
         "meaningful in a git checkout of the repository, not a packager build.",
@@ -175,14 +182,21 @@ def pytest_collection_modifyitems(config, items):
         # readable marker lets writable-$HOME builders (Alpine, Debian, RPM mock)
         # select `-m "not integration"` instead of hand-listing modules, and
         # frees the classification from the module-naming convention.
-        if item.path.name.startswith(("test_manager_", "test_cli")):
+        # Keyed on the test name as well as the module: `test_cli_cooldown_*`
+        # drives the CLI end-to-end from `test_cooldown.py`, whose name matches
+        # no convention, and exits 2 on `No manager selected` in a sandbox.
+        if item.path.name.startswith(("test_manager_", "test_cli")) or item.name.startswith(
+            "test_cli_"
+        ):
             item.add_marker(pytest.mark.integration)
 
         # The integration layer has no package managers to drive in a hermetic
         # build sandbox. Auto-skip it inside one (detected by `extra_platforms`
         # through `HOME=/homeless-shelter`, as Guix and Nixpkgs both set) so
         # those distributors run a plain `pytest` with no ignores.
-        if item.get_closest_marker("integration"):
+        if item.get_closest_marker("integration") or item.get_closest_marker(
+            "host_environment"
+        ):
             item.add_marker(skip_hermetic_build)
 
         # Drop the repo-maintenance guards outside a developer checkout.

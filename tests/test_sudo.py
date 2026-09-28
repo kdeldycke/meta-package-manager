@@ -346,6 +346,7 @@ def test_prime_sudo_warns_without_tty(caplog):
     )
 
 
+@pytest.mark.host_environment
 def test_prime_sudo_skips_the_prompt_under_a_passwordless_policy(caplog):
     """A cold cache whose policy still runs every escalated command unauthenticated.
 
@@ -425,6 +426,7 @@ def test_prime_sudo_is_idempotent():
     assert run.call_args.args[0] == ("sudo", "--non-interactive", "--validate")
 
 
+@pytest.mark.host_environment
 def test_prime_sudo_warm_probe_stays_silent_on_tty(capsys):
     """A warm credential cache (pre-authenticated, NOPASSWD): no notice, no
     prompt, just the keepalive until the context closes."""
@@ -442,6 +444,7 @@ def test_prime_sudo_warm_probe_stays_silent_on_tty(capsys):
     assert capsys.readouterr().err == ""
 
 
+@pytest.mark.host_environment
 def test_prime_sudo_warm_probe_keeps_alive_off_tty(caplog):
     """The probe short-circuits before the terminal check: a CI job with
     pre-cached credentials gets the keepalive instead of the no-terminal

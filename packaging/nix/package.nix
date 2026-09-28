@@ -53,17 +53,19 @@ python3Packages.buildPythonApplication (finalAttrs: {
     # through the login shells it targets.
     ++ lib.optionals stdenv.hostPlatform.isDarwin [ zsh ];
 
-  # A Nix build sandbox carries no package manager, no login shell and no
-  # passwd entry for the build user, and nixpkgs' cyclonedx-python-lib trails
-  # the release mpm builds its CycloneDX renderer against.
+  # Temporary, and deletable at the first release carrying the `integration`
+  # and `host_environment` markers: `tests/conftest.py` skips both inside a
+  # hermetic build automatically, and `tests/test_sbom.py` now skips itself
+  # when cyclonedx-python-lib is too old. Until then this builds the v8.0.1
+  # tarball, whose suite predates all three, so the names stay listed here.
   disabledTests = [
     # Drive the CLI, which exits 2 on `No manager selected`: there are none.
     "test_cli_cooldown_config_table"
     "test_cli_cooldown_keyword_without_window_is_a_noop"
     "test_cli_cooldown_legacy_config_spelling"
-    # `NameError: PredefinedLifecycle` against nixpkgs' cyclonedx-python-lib
-    # 11.7, below the 11.12 mpm locks. Both spellings are needed: these match
-    # parametrised ids too, so the SPDX half of each shared case keeps running.
+    # `NameError: PredefinedLifecycle` against nixpkgs' cyclonedx-python-lib,
+    # below the floor `[sbom-offline]` declares. Both spellings are needed:
+    # these match parametrised ids, so each case's SPDX half keeps running.
     "cyclonedx"
     "CycloneDX"
     # Probe for a sudo binary and a policy the sandbox does not have.

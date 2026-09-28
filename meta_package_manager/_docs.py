@@ -93,6 +93,7 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Container, Iterable
 
+
 def _find_project_root() -> Path:
     """Locate the source tree whose committed files this module renders.
 

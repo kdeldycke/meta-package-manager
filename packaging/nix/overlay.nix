@@ -20,7 +20,10 @@ self: super: {
   # this to one override: 9.2 onwards also raises boltons to >=26.2 and wcwidth
   # to >=0.8.3, neither of which nixpkgs carries.
   #
-  # Drop this once nixpkgs ships click 8.4.1 or newer.
+  # Drop this once nixpkgs ships click 8.4.1 or newer, which
+  # https://github.com/NixOS/nixpkgs/pull/544890 (8.3.3 -> 8.4.2) would do.
+  # That same PR is what lets NixOS/nixpkgs#506145 be refreshed past mpm
+  # 7.6.1: click-extra 9 cannot build in nixpkgs until it lands.
   click = super.click.overridePythonAttrs (_: rec {
     version = "8.4.1";
     src = pkgs.fetchFromGitHub {

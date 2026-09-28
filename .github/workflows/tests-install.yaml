@@ -387,6 +387,14 @@ jobs:
   # (darwin_any), so the buildbot publishes a single archive that serves every
   # runner and `port install` fetches it in seconds instead of compiling from
   # source.
+  #
+  # Failing on both architectures since 2026-09, and not on anything this
+  # repository owns: MacPorts' own py314-wcwidth port builds with
+  # `--no-isolation` and declares no setuptools build dependency, so it dies on
+  # `ModuleNotFoundError: No module named 'setuptools'` and takes mpm's whole
+  # dependency closure with it. No upstream ticket found, though their Trac
+  # refuses automated search, so check https://trac.macports.org by hand before
+  # filing one.
   macports:
     name: "✅ macports (${{ matrix.os }})"
     strategy:
@@ -570,8 +578,11 @@ jobs:
   # artifact carrying it. https://github.com/beartype/beartype/issues/631
   #
   # Current cause has moved on again, and no longer involves beartype at all:
-  # python-click-extra requires `python-click>=8.4.1` while Arch still ships
-  # 8.3.x, so dependency resolution fails before any build starts. The same
+  # python-click-extra requires `python-click>=8.4.1` while Arch's `extra` still
+  # ships 8.3.3, so dependency resolution fails before any build starts. Nothing
+  # to report: python-click 8.5.0 has been in `extra-testing` since 2026-09-11
+  # (https://archlinux.org/packages/extra-testing/any/python-click/), so these
+  # three go green on their own once it reaches `extra`. The same
   # click floor blocks Ubuntu and forced the nixpkgs override in
   # packaging/nix/overlay.nix: one constraint, three ecosystems, and each has
   # to ship click 8.4.1 on its own.
@@ -867,15 +878,20 @@ jobs:
 
   # https://github.com/lucasgelfond/zerobrew
   #
-  # Only the macos-15-intel cell is advisory, and the marker is per cell rather
-  # than per job so the other three keep gating. That one has no prebuilt
-  # `openssl@3` for its architecture, so it alone falls back to a source build
-  # and dies in ZeroBrew's formula shim: `undefined method 'which' for an
-  # instance of OpensslAT3`. Nothing here can fix that, and a cell that can only
-  # ever be red teaches readers to ignore this workflow's red runs, which is how
-  # its ZeroBrew pin sat three months past a CVE unnoticed. Reported upstream as
-  # https://github.com/lucasgelfond/zerobrew/issues/404: restore the gate once
-  # that closes.
+  # Every cell gates: each reports what a ZeroBrew user can install today, so a
+  # red one is the cue to carry a fix upstream.
+  #
+  # macos-15-intel is the one that fails, and only it, because no prebuilt
+  # archive exists for that architecture, so it alone falls back to a source
+  # build and dies in ZeroBrew's formula shim. The failure has moved: it was
+  # `undefined method 'which' for an instance of OpensslAT3`
+  # (https://github.com/lucasgelfond/zerobrew/issues/404), and is now
+  # `uninitialized constant Language::Python::Virtualenv`, the Homebrew module
+  # mpm's formula includes. Both are the same gap, tracked as
+  # https://github.com/lucasgelfond/zerobrew/issues/339, which asks for the
+  # shim layer itself. ZeroBrew's own error says to use Homebrew instead, after
+  # printing the raw Ruby backtrace three times, which is
+  # https://github.com/lucasgelfond/zerobrew/issues/348.
   zerobrew:
     name: "${{ matrix.mark }} zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
     continue-on-error: ${{ matrix.unstable }}

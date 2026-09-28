@@ -10,6 +10,7 @@
 - [mpm] Link each manager's own documentation from its page, through a new `documentation_url` attribute that manager definitions accept too.
 - [mpm] Mark each manager page's `Operations` table with `✅`/`❌` glyphs and a `Notes` hint, moving the implementation detail out of the page's introduction.
 - [mpm] Skip the tests needing a real host, a login shell or a sudo policy in a hermetic build sandbox, so packagers run a plain `pytest`.
+- [mpm] Ship the bundled `add-manager` skill in the source distribution, so the two documentation tests reading it pass for a packager.
 - [mpm] Ship the bundled manager definitions and `yay_cooldown.lua` in setuptools-built packages, which distributors substituting that backend were silently dropping.
 - [mpm] Keep the `✓`/`✘` trail and its finisher on a pipe or a CI log, where the animated indicator cannot draw. `--no-progress` is now the only thing that silences them.
 - [bar-plugin,gnome-shell] Keep the `sync` progress trail out of the host app's log, by turning it off on the refresh cycle.

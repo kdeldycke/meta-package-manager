@@ -554,6 +554,10 @@ build-backend.source-exclude = [
 # https://mpm.run/packaging/
 build-backend.source-include = [
   ".github/**",
+  # tests/test_docs.py asserts on the bundled skill, so a packager running a
+  # plain pytest from the sdist needs it. Only skills/: the rest of .claude/ is
+  # machine-local state.
+  ".claude/skills/**",
   "changelog.md",
   "docs/**",
   # The GNOME Shell extension: sdist-only, so distribution packagers can ship

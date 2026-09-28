@@ -26,6 +26,43 @@ let
             --replace-quiet "setuptools_scm<10" "setuptools_scm"
         '';
       });
+      # click-extra 9 declares `click>=8.4.1`, `boltons>=26.2` and
+      # `wcwidth>=0.8.3`, all of which nixpkgs sits below, so the runtime
+      # dependency check rejects it before mpm is reached. Each is pinned to
+      # the version `uv.lock` records for the packaged mpm release rather than
+      # to the bare floor, so the build reproduces the combination upstream
+      # tested. Overriding inside this package set leaves the rest of nixpkgs
+      # untouched, and each entry goes away as nixpkgs catches up.
+      boltons = super.boltons.overridePythonAttrs (_: rec {
+        version = "26.2.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "mahmoud";
+          repo = "boltons";
+          tag = version;
+          hash = "sha256-V6Kdamn2HHOjucKGrjCqjE/xExCJmyUAE11YwLjOkzI=";
+        };
+        # nixpkgs patches a pytest 9 compatibility fix into 25.0.0 that 26.2
+        # already carries upstream, so the patch no longer applies.
+        patches = [ ];
+      });
+      click = super.click.overridePythonAttrs (_: rec {
+        version = "8.5.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "pallets";
+          repo = "click";
+          tag = version;
+          hash = "sha256-VYdaEN9l2MRVz42I8t8IDOpG5XeDM8bf34dLZy3yf10=";
+        };
+      });
+      wcwidth = super.wcwidth.overridePythonAttrs (_: rec {
+        version = "0.8.3";
+        src = pkgs.fetchFromGitHub {
+          owner = "jquast";
+          repo = "wcwidth";
+          tag = version;
+          hash = "sha256-4GzYqoXdYqZjyB/iIsuOnwSjJGSKY9LitVKVDT2aUCo=";
+        };
+      });
       extra-platforms = self.callPackage ./extra-platforms.nix { };
     };
   };

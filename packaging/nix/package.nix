@@ -53,6 +53,27 @@ python3Packages.buildPythonApplication (finalAttrs: {
     # through the login shells it targets.
     ++ lib.optionals stdenv.hostPlatform.isDarwin [ zsh ];
 
+  # A Nix build sandbox carries no package manager, no login shell and no
+  # passwd entry for the build user, and nixpkgs' cyclonedx-python-lib trails
+  # the release mpm builds its CycloneDX renderer against.
+  disabledTests = [
+    # Drive the CLI, which exits 2 on `No manager selected`: there are none.
+    "test_cli_cooldown_config_table"
+    "test_cli_cooldown_keyword_without_window_is_a_noop"
+    "test_cli_cooldown_legacy_config_spelling"
+    # `NameError: PredefinedLifecycle` against nixpkgs' cyclonedx-python-lib
+    # 11.7, below the 11.12 mpm locks. Both spellings are needed: these match
+    # parametrised ids too, so the SPDX half of each shared case keeps running.
+    "cyclonedx"
+    "CycloneDX"
+    # Probe for a sudo binary and a policy the sandbox does not have.
+    "test_prime_sudo"
+  ];
+
+  # Imports the environment of a login shell, which the build user has neither
+  # a passwd entry nor a shell for.
+  disabledTestPaths = [ "tests/test_shell_env.py" ];
+
   pythonImportsCheck = [ "meta_package_manager" ];
 
   meta = {

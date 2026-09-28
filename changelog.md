@@ -9,6 +9,9 @@
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 
+> [!NOTE]
+> `8.0.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/8.0.2/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.0.2).
+
 - [mpm] Publish `mpm` for Ubuntu `22.04` and later at `ppa:kdeldycke/mpm`, carrying its Python dependencies in a private directory so nothing system-wide changes.
 - [gnome-shell] Publish the extension on [extensions.gnome.org](https://extensions.gnome.org/extension/10714/meta-package-manager/), for GNOME Shell `46` to `50`.
 - [mpm] Link each manager's own documentation from its page, through a new `documentation_url` attribute that manager definitions accept too.

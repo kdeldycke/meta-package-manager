@@ -766,11 +766,17 @@ def test_manager_upstreams_cover_the_pool():
         assert reason.endswith(".")
 
 
+@pytest.mark.repo_maintenance
 def test_metrics_subjects_in_pyproject():
     """Check the manager entries of the metrics subjects follow `repository_url`.
 
     Drift means a manager's repository changed without running
     `docs/docs_update.py`, and the weekly sample would go on reading the old one.
+
+    Repo-maintenance guard: it rewrites `pyproject.toml` from the pool and
+    compares, and `uv_build` normalizes that file into the sdist, dropping the
+    one-line-per-subject shape the comparison reads. So the check is void
+    outside a git checkout, where `conftest` skips it.
 
     A mirror stands in only for a repository the sampler cannot read, and must
     itself be readable, or it replaces a subject for nothing.

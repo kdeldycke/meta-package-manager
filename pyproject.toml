@@ -559,6 +559,9 @@ build-backend.source-include = [
   # machine-local state.
   ".claude/skills/**",
   "changelog.md",
+  # Two tree-scanning tests read it for defect classes (a look-alike glyph, a
+  # dead self-referencing URL), so a packager's plain pytest needs it.
+  "claude.md",
   "docs/**",
   # The GNOME Shell extension: sdist-only, so distribution packagers can ship
   # it from the same tarball as mpm itself.

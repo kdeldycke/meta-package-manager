@@ -93,7 +93,30 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Container, Iterable
 
-PROJECT_ROOT = Path(__file__).parent.parent
+def _find_project_root() -> Path:
+    """Locate the source tree whose committed files this module renders.
+
+    Every generator below reads a file the repository commits and the wheel
+    deliberately does not carry, so this module is only ever driven from a
+    source tree: by Sphinx, by `docs/docs_update.py`, and by the test suite.
+
+    The installed module's own parent is that tree in a checkout. It is
+    `site-packages` when a distribution packager runs the suite against the
+    *installed* package, as openSUSE's `%pytest` does, and none of those files
+    sit there. The working directory is the unpacked source in that case, so
+    it answers where `__file__` cannot.
+
+    :return: The first candidate carrying the repository data, falling back to
+        the module's own parent so a missing file still raises where it reads.
+    """
+    for candidate in (Path(__file__).parent.parent, Path.cwd()):
+        if (candidate / "docs" / "benchmark.toml").is_file():
+            return candidate
+    return Path(__file__).parent.parent
+
+
+PROJECT_ROOT = _find_project_root()
+"""Source tree holding the committed files the generators below read."""
 
 BENCHMARK_COMPETITORS = ("topgrade", "upt", "pacaptr", "metapac")
 """Competing tools shown alongside `mpm` in the benchmark page, in column order."""
@@ -820,8 +843,12 @@ def manager_source_url(manager_id: str) -> str:
     if source:
         return f"{GITHUB_BLOB_URL}/{source}"
     cls = type(manager)
-    src = Path(inspect.getsourcefile(cls)).resolve()  # type: ignore[arg-type]
-    rel = src.relative_to(PROJECT_ROOT)
+    # The repository path comes from the dotted module name, not from the file
+    # on disk: a packager running the suite against the *installed* package
+    # imports the class from `site-packages`, which sits under no source tree
+    # and which `Path.relative_to` then refuses. The name is the same either
+    # way, and it is what the link needs.
+    rel = Path(*cls.__module__.split(".")).with_suffix(".py")
     _, lineno = inspect.getsourcelines(cls)
     return f"{GITHUB_BLOB_URL}/{rel.as_posix()}#L{lineno}"
 

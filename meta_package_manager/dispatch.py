@@ -519,7 +519,10 @@ class OperationTrail(_OperationTrail):
             # spinner for the (unused) concurrent-without-a-total case.
             progress_bar=jobs > 1 and total > 0,
             # Progress off forces full silence; on, the upstream TTY gate decides.
-            live="auto" if progress else "never",
+            # `visible`, not `live`: on an OperationTrail the latter only moves
+            # the aggregate indicator, and where that cannot draw each outcome
+            # line prints instead, so `live="never"` would still echo the trail.
+            visible=progress,
             echo_sequential=not coverage,
             delay=SPINNER_DELAY,
         )

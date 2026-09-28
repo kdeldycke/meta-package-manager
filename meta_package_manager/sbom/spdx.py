@@ -83,9 +83,7 @@ try:
     from spdx_tools.spdx.writer.yaml import yaml_writer
 except ImportError as import_error:
     spdx_support = False
-    spdx_unavailable_reason = writer_unavailable_reason(
-        "spdx-tools", import_error
-    )
+    spdx_unavailable_reason = writer_unavailable_reason("spdx-tools", import_error)
     logging.getLogger("meta_package_manager").debug(
         f"SPDX support disabled: {spdx_unavailable_reason}",
     )

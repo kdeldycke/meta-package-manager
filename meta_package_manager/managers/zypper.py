@@ -190,7 +190,8 @@ class Zypper(PackageManager):
             return
 
         package_list = _xml_items(
-            xmltodict.parse(output)
+            xmltodict
+            .parse(output)
             .get("stream", {})
             .get("search-result", {})
             .get("solvable-list", {}),
@@ -256,7 +257,8 @@ class Zypper(PackageManager):
             return
 
         update_list = (
-            xmltodict.parse(output)
+            xmltodict
+            .parse(output)
             .get("stream", {})
             .get("update-status", {})
             .get("update-list", {})

@@ -185,9 +185,10 @@ def pytest_collection_modifyitems(config, items):
         # Keyed on the test name as well as the module: `test_cli_cooldown_*`
         # drives the CLI end-to-end from `test_cooldown.py`, whose name matches
         # no convention, and exits 2 on `No manager selected` in a sandbox.
-        if item.path.name.startswith(("test_manager_", "test_cli")) or item.name.startswith(
-            "test_cli_"
-        ):
+        if item.path.name.startswith((
+            "test_manager_",
+            "test_cli",
+        )) or item.name.startswith("test_cli_"):
             item.add_marker(pytest.mark.integration)
 
         # The integration layer has no package managers to drive in a hermetic

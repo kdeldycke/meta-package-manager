@@ -1809,6 +1809,44 @@ def test_trail_glyph_matches_the_emitted_one():
     assert not hits, "U+2717 where the trail emits U+2718:\n" + "\n".join(hits)
 
 
+def test_self_referencing_urls_name_a_file_the_tree_holds():
+    """A `raw.githubusercontent.com` URL pointing at this repository's own
+    `main` names a file the tree still carries.
+
+    Nothing else resolves these: they are fetched by a reader far from any test.
+    The `<xbar.image>` header of the bar plugin is what xbarapp.com renders as
+    the plugin's preview, and the readme images are served to every GitHub
+    visitor. So renaming a file under `docs/assets/` breaks them silently, which
+    is how the plugin shipped a dead preview for five weeks after `fc8adbfb`
+    recaptured the screenshots under new names.
+
+    A URL pinned to a tag names a historical tree and is skipped, the working
+    copy being no evidence about what that tag held.
+    """
+    url_re = re.compile(
+        r"https://raw\.githubusercontent\.com/kdeldycke/meta-package-manager/"
+        r"(?:refs/heads/)?main/(?P<path>[^\s<>\"')|]+)"
+    )
+    files = [
+        *sorted((PROJECT_ROOT / "meta_package_manager").rglob("*.py")),
+        *sorted((PROJECT_ROOT / "tests").glob("*.py")),
+        *sorted((PROJECT_ROOT / "docs").glob("*.md")),
+        *sorted((PROJECT_ROOT / ".claude" / "skills").rglob("*.md")),
+        PROJECT_ROOT / "claude.md",
+        PROJECT_ROOT / "readme.md",
+    ]
+    hits = []
+    for path in files:
+        lines = path.read_text(encoding="UTF-8").splitlines()
+        for lineno, line in enumerate(lines, 1):
+            for match in url_re.finditer(line):
+                target = match.group("path")
+                if not (PROJECT_ROOT / target).is_file():
+                    source = path.relative_to(PROJECT_ROOT)
+                    hits.append(f"{source}:{lineno} names {target}")
+    assert not hits, "URLs naming a file the tree no longer holds:\n" + "\n".join(hits)
+
+
 def test_manager_traces_render_literal_blocks():
     """A class-based manager's reference traces surface exactly the literal
     installed/outdated/orphans blocks the corpus validates, in terminal-facing

@@ -5,7 +5,7 @@
 # <xbar.author.github>kdeldycke</xbar.author.github>
 # <xbar.desc>List outdated packages and manage upgrades.</xbar.desc>
 # <xbar.dependencies>python,mpm</xbar.dependencies>
-# <xbar.image>https://raw.githubusercontent.com/kdeldycke/meta-package-manager/refs/heads/main/docs/assets/xbar-submenu-table-rendering.png</xbar.image>
+# <xbar.image>https://raw.githubusercontent.com/kdeldycke/meta-package-manager/refs/heads/main/docs/assets/xbar-grouped-table-rendering-light.png</xbar.image>
 # <xbar.abouturl>https://mpm.run/bar-plugin/</xbar.abouturl>
 # XXX SwiftBar requires quotes around a default value. Xbar accepts them and removes
 # them. Without the quotes, SwiftBar ignores the variable and never shows it in its

@@ -15,6 +15,9 @@
 
 ## [`8.0.1` (2026-09-23)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.0...v8.0.1)
 
+> [!NOTE]
+> `8.0.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/8.0.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.0.1).
+
 - [mpm] Stop counting a failed manager version probe as a run error, so an unrelated binary shadowing a manager's name no longer warns on every command.
 - [mpm] Reshape each manager page: `Configuration` replaces `Selecting and configuring <id>` and prints the `config-template` block, `Version probe` nests under `Reference traces`, and purl types read `pkg:<type>/`.
 - [pixi] Record the global `exclude-newer` gate `pixi` merged, which stays declarative-only, so `mpm` has no knob to inject.

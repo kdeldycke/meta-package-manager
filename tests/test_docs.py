@@ -1582,7 +1582,7 @@ def test_operation_notes_reach_the_operations_table(manager):
 
 
 @all_managers
-def test_operations_notes_are_full_sentences(manager):
+def test_operation_notes_are_full_sentences(manager):
     """Check every populated *Notes* cell of the operations table reads as
     standalone sentences.
 

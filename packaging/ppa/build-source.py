@@ -24,9 +24,9 @@ Building and uploading the assembled trees:
 
 ```shell-session
 $ ./packaging/ppa/build-source.py --output ./dist
-$ cd ./dist/meta-package-manager-7.6.1ppa1~noble1
+$ cd ./dist/meta-package-manager-8.0.1ppa1~noble1
 $ debuild -S -sa
-$ dput ppa:kdeldycke/mpm ../meta-package-manager_7.6.1ppa1~noble1_source.changes
+$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.0.1ppa1~noble1_source.changes
 ```
 """
 
@@ -146,6 +146,7 @@ def build_vendor_tree(version: str, project: Path, target: Path) -> None:
     with requirements.open("w", encoding="UTF-8") as stream:
         run(
             "uv",
+            "--no-progress",
             "export",
             "--project",
             str(project),
@@ -162,9 +163,9 @@ def build_vendor_tree(version: str, project: Path, target: Path) -> None:
 
     run(
         "uv",
+        "--no-progress",
         "pip",
         "install",
-        "--no-progress",
         "--target",
         str(target),
         # Resolve markers at the floor, so the tree carries the shims the

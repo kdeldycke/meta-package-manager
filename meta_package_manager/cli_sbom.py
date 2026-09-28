@@ -178,13 +178,13 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     if spdx:
         if not spdx_support:
             raise UsageError(
-                f"SPDX SBOM generation is unavailable. {spdx_unavailable_reason}",
+                f"{standard} SBOM generation is unavailable. {spdx_unavailable_reason}",
             )
         sbom_class = SPDX
     else:
         if not cyclonedx_support:
             raise UsageError(
-                "CycloneDX SBOM generation is unavailable. "
+                f"{standard} SBOM generation is unavailable. "
                 f"{cyclonedx_unavailable_reason}",
             )
         if export_format not in (ExportFormat.JSON, ExportFormat.XML):

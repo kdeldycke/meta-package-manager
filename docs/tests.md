@@ -63,6 +63,7 @@
    tests.test_orphans
    tests.test_pool
    tests.test_sbom
+   tests.test_sbom_base
    tests.test_sbom_vulnerabilities
    tests.test_shell_env
    tests.test_specifier

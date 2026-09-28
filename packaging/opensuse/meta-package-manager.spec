@@ -23,7 +23,7 @@
 %define pythons %{primary_python}
 
 Name:           meta-package-manager
-Version:        7.6.1
+Version:        8.0.1
 Release:        0
 Summary:        Wraps all package managers with a unifying CLI
 License:        GPL-2.0-or-later
@@ -35,9 +35,14 @@ BuildRequires:  python3-uv-build >= 0.8
 BuildRequires:  fdupes
 BuildRequires:  python-rpm-macros
 # SECTION runtime requirements, also imported by the test suite
+# Each floor mirrors [project.dependencies] of pyproject.toml, so the built
+# package can only pair mpm with a dependency set it runs on. A floor Tumbleweed
+# has not reached yet fails the build rather than shipping a broken package:
+# the 2026-09-07 run stopped on `python3-extra-platforms >= 13.8 is needed`,
+# and the channel waits on the distribution, not on this file.
 BuildRequires:  python3-boltons >= 25
-BuildRequires:  python3-click-extra >= 8.8.1
-BuildRequires:  python3-extra-platforms >= 13.8
+BuildRequires:  python3-click-extra >= 9
+BuildRequires:  python3-extra-platforms >= 13.9
 BuildRequires:  python3-packageurl-python >= 0.11
 BuildRequires:  python3-tomli-w >= 1
 BuildRequires:  python3-xmltodict >= 0.12
@@ -49,13 +54,13 @@ BuildRequires:  openSUSE-release
 # PyYAML and tomlkit are parsers the documentation tests need; the SBOM tests
 # skip themselves when cyclonedx-python-lib and spdx-tools are absent, which
 # they are on openSUSE.
-BuildRequires:  python3-PyYAML
+BuildRequires:  python3-PyYAML >= 6
 BuildRequires:  python3-pytest >= 9
-BuildRequires:  python3-tomlkit
+BuildRequires:  python3-tomlkit >= 0.13
 # /SECTION
 Requires:       python3-boltons >= 25
-Requires:       python3-click-extra >= 8.8.1
-Requires:       python3-extra-platforms >= 13.8
+Requires:       python3-click-extra >= 9
+Requires:       python3-extra-platforms >= 13.9
 Requires:       python3-packageurl-python >= 0.11
 Requires:       python3-tomli-w >= 1
 Requires:       python3-xmltodict >= 0.12
@@ -70,7 +75,7 @@ list, search, install, upgrade and remove packages across all of them at
 once, snapshot the whole inventory to one file and restore it on another
 machine.
 
-zypper is one of the ~70 managers it drives.
+zypper is one of the ~150 managers it drives.
 
 %prep
 %autosetup -p1 -n meta_package_manager-%{version}

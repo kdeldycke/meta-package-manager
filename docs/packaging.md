@@ -13,7 +13,7 @@ To install `mpm` on your own system, head to the [installation methods](install.
 The `mpm` test suite splits into two layers, separated by the `integration` and `host_environment` pytest markers:
 
 - A **hermetic layer** (everything marked neither `integration` nor `host_environment`) needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox. Beyond `pytest` it imports `pyyaml` and `tomlkit` (both pulled in by `tests/test_docs.py`); the SBOM tests additionally want the `[sbom-offline]` and `[sbom-online]` extras but **skip themselves when those are absent, or too old for the renderer**, so a lean build never has to ignore them. `pyproject-fmt` stays optional too, its formatting-fixpoint test auto-skipping when missing.
-- An **integration layer** (marked `integration`: `tests/test_manager_*.py`, `tests/test_cli*.py`, any test *named* `test_cli_*` wherever it lives, and the SwiftBar/Xbar plugin suite) drives the ~70 real package managers ([`apt`](managers/apt.md), [`brew`](managers/brew.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), and more) and the `mpm` CLI end-to-end. It cannot run in a hermetic builder. Marked `host_environment` beside it is the smaller set needing something only a real host offers: a login shell, a passwd entry for the build user, or a sudo policy. Both are skipped together.
+- An **integration layer** (marked `integration`: `tests/test_manager_*.py`, `tests/test_cli*.py`, any test *named* `test_cli_*` wherever it lives, and the SwiftBar/Xbar plugin suite) drives the ~150 real package managers ([`apt`](managers/apt.md), [`brew`](managers/brew.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), and more) and the `mpm` CLI end-to-end. It cannot run in a hermetic builder. Marked `host_environment` beside it is the smaller set needing something only a real host offers: a login shell, a passwd entry for the build user, or a sudo policy. Both are skipped together.
 
 Pick the skip path that fits the builder. Either way no per-module ignore list is needed, and the selection stays correct as test modules are added:
 
@@ -231,7 +231,7 @@ $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager/packaging/opensuse
 $ sudo zypper install --no-recommends $(rpmspec --query --buildrequires meta-package-manager.spec | cut --delimiter=' ' --fields=1)
 $ mkdir --parents ~/rpmbuild/SOURCES
-$ curl --location --output ~/rpmbuild/SOURCES/meta_package_manager-7.6.1.tar.gz https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-7.6.1.tar.gz
+$ curl --location --output ~/rpmbuild/SOURCES/meta_package_manager-8.0.1.tar.gz https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-8.0.1.tar.gz
 $ rpmbuild -ba meta-package-manager.spec
 $ sudo zypper install --allow-unsigned-rpm ~/rpmbuild/RPMS/noarch/meta-package-manager-*.rpm
 ```
@@ -265,8 +265,8 @@ To build one series by hand instead, with [`uv`](https://docs.astral.sh/uv/) on 
 $ sudo apt-get install --no-install-recommends build-essential debhelper dh-python dpkg-dev fakeroot git
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager
-$ ./packaging/ppa/build-source.py --mpm-version 7.6.1 --series noble --output ./dist
-$ cd ./dist/meta-package-manager-7.6.1ppa1~noble1
+$ ./packaging/ppa/build-source.py --mpm-version 8.0.1 --series noble --output ./dist
+$ cd ./dist/meta-package-manager-8.0.1ppa1~noble1
 $ dpkg-buildpackage --build=binary --no-sign
 $ sudo apt-get install ../meta-package-manager_*.deb
 ```
@@ -275,7 +275,7 @@ Uploading signs the source package instead, once per series:
 
 ```{code-block} shell-session
 $ debuild -S -sa
-$ dput ppa:kdeldycke/mpm ../meta-package-manager_7.6.1ppa1~noble1_source.changes
+$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.0.1ppa1~noble1_source.changes
 ```
 
 The `~{series}` suffixes sort in release order, the Ubuntu codenames happening to be alphabetical, so a machine upgrading from one series to the next picks the newer build up on its own. The targets are `jammy`, `noble`, `resolute` and `stonking`; `questing` reached its end of life in July 2026.

@@ -5,19 +5,15 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
-- [mpm] Ship the bundled manager definitions and `yay_cooldown.lua` in setuptools-built packages, which distributors substituting that backend were silently dropping: Guix's `mpm` died on a missing file before printing anything.
-- [mpm] Keep the `✓`/`✘` trail and its finisher on a pipe or a CI log, where the animated indicator cannot draw. `--no-progress` is now the only thing that silences them.
-- [bar-plugin,gnome-shell] Keep the `sync` progress trail out of the host app's log, by turning it off on the refresh cycle.
-- [mpm] Drive the progress spinner through click-extra's `live` setting, replacing the `enabled` flag it deprecated in `9.3`.
-- [mpm] Document the `host_environment` marker and the corrected auto-skip hook on the packaging page, which named a function that no longer exists.
-- [mpm] Skip the tests needing a real host, a login shell or a sudo policy inside a hermetic build sandbox, so packagers run a plain `pytest` with no per-distribution deselect list.
-- [mpm] Name the SBOM writer library that is missing or too old when `sbom` refuses, instead of advising an extra that is already installed.
-- [mpm] Publish `mpm` for Ubuntu `22.04` and later at `ppa:kdeldycke/mpm`, carrying its Python dependencies in a private directory so nothing system-wide changes, with a `ppa-source` job building the spec on every live series.
+- [mpm] Publish `mpm` for Ubuntu `22.04` and later at `ppa:kdeldycke/mpm`, carrying its Python dependencies in a private directory so nothing system-wide changes.
 - [gnome-shell] Publish the extension on [extensions.gnome.org](https://extensions.gnome.org/extension/10714/meta-package-manager/), for GNOME Shell `46` to `50`.
 - [mpm] Link each manager's own documentation from its page, through a new `documentation_url` attribute that manager definitions accept too.
-- [mpm] Carry one-sentence hints in the `Notes` column of each manager page's `Operations` table, explaining why an unsupported operation is missing or what a supported one partially implements.
-- [mpm] Mark each `Operations` table with the benchmark's support glyphs: `✅` for a supported operation, `❌` for a missing one whose note documents the reason.
-- [mpm] Slim every manager page's introduction to what a user needs day to day, moving implementation details into code comments.
+- [mpm] Mark each manager page's `Operations` table with `✅`/`❌` glyphs and a `Notes` hint, moving the implementation detail out of the page's introduction.
+- [mpm] Skip the tests needing a real host, a login shell or a sudo policy in a hermetic build sandbox, so packagers run a plain `pytest`.
+- [mpm] Ship the bundled manager definitions and `yay_cooldown.lua` in setuptools-built packages, which distributors substituting that backend were silently dropping.
+- [mpm] Keep the `✓`/`✘` trail and its finisher on a pipe or a CI log, where the animated indicator cannot draw. `--no-progress` is now the only thing that silences them.
+- [bar-plugin,gnome-shell] Keep the `sync` progress trail out of the host app's log, by turning it off on the refresh cycle.
+- [mpm] Name the SBOM writer library that is missing or too old when `sbom` refuses, instead of advising an extra that is already installed.
 - [mpm] Rename the `Version probe` section of each manager page to `Version check`.
 
 ## [`8.0.1` (2026-09-23)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.0...v8.0.1)

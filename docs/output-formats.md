@@ -85,7 +85,7 @@ CSV flattens the per-manager grouping into one row per package, with `Manager` a
 
 ## Accessibility
 
-For screen readers, pass `--accessible` (or set `ACCESSIBLE=1` in the environment) to strip ANSI colors and replace the Unicode box-drawing characters with plain `+--` / `|` separators. This switch is independent of `--table-format`: `mpm --accessible --table-format json installed` still emits JSON, just without color codes interleaved in log messages.
+For screen readers, pass `--accessible` (or set `ACCESSIBLE=1` in the environment) to strip ANSI colors, replace the Unicode box-drawing characters with plain `+--` / `|` separators, and stop the progress output (see [the accessibility section](configuration.md#accessibility)). This switch is independent of `--table-format`: `mpm --accessible --table-format json installed` still emits JSON, just without color codes interleaved in log messages.
 
 ## See also
 

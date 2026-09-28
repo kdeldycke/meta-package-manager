@@ -37,11 +37,13 @@ concurrency:
 # GitHub Releases, etc.). The `*-source` jobs install from the in-repo
 # packaging specs (packaging/alpine/, packaging/choco/, packaging/guix/,
 # packaging/macports/, packaging/nix/, packaging/ppa/) and validate the build
-# instructions
-# documented in docs/packaging.md.
+# instructions documented in docs/packaging.md.
 #
 # Keep in sync with the "Installation methods" tabs in docs/install.md and
 # the per-channel catalog and build instructions in docs/packaging.md.
+#
+# Every matrix opts out of fail-fast: one broken cell must not cancel its
+# siblings, and a cancelled cell hides whether its own channel is broken too.
 
 # The one workflow that opts out of the supply-chain cooldown every other
 # workflow sets, by declaring a zero-length window. Its subject IS the freshly
@@ -148,9 +150,6 @@ jobs:
   brew:
     name: "✅ brew (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -178,9 +177,6 @@ jobs:
   choco-source:
     name: "✅ choco-source (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -209,9 +205,6 @@ jobs:
   github-release:
     name: "✅ github-release (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         include:
@@ -398,9 +391,6 @@ jobs:
   macports:
     name: "✅ macports (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -447,9 +437,6 @@ jobs:
   macports-source:
     name: "✅ macports-source (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -507,9 +494,6 @@ jobs:
     # Promote this one the day the PR lands.
     continue-on-error: true
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -532,9 +516,6 @@ jobs:
   nix-source:
     name: "✅ nix-source (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -594,9 +575,6 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         include:
@@ -624,9 +602,6 @@ jobs:
   pip:
     name: "✅ pip (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -657,9 +632,6 @@ jobs:
   pipx:
     name: "✅ pipx (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -799,9 +771,6 @@ jobs:
   scoop:
     name: "✅ scoop (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -825,9 +794,6 @@ jobs:
   uv:
     name: "✅ uv (${{ matrix.os }})"
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         os:
@@ -896,9 +862,6 @@ jobs:
     name: "${{ matrix.mark }} zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
     continue-on-error: ${{ matrix.unstable }}
     strategy:
-      # One broken cell must not cancel its siblings: each names a
-      # different platform, and a cancelled one hides whether that
-      # platform is broken too.
       fail-fast: false
       matrix:
         include:

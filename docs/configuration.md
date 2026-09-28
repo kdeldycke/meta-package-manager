@@ -67,11 +67,11 @@ See the [release-age cooldown](#release-age-cooldown) section below for the safe
 
 Click-extra's built-in options ride the same configuration pipeline. The most useful ones:
 
-| Key            | Type    | Default             | Description                                                                                                                                                                                                                                                                            |
-| :------------- | :------ | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `verbosity`    | string  | `"WARNING"`         | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`.                                                                                                                                                                                                                     |
-| `progress`     | boolean | `true`              | Show progress on stderr: a spinner during a long manager CLI call, and a progress bar over a batch of managers running concurrently. Self-disabled off a terminal (pipes, `TERM=dumb`, CI) and by `--accessible`; mpm also suppresses it for serialized output and at DEBUG verbosity. |
-| `table_format` | string  | `"rounded-outline"` | Table rendering style (see `mpm --help` for all choices).                                                                                                                                                                                                                              |
+| Key            | Type    | Default             | Description                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :------------- | :------ | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verbosity`    | string  | `"WARNING"`         | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`.                                                                                                                                                                                                                                                                                                                                          |
+| `progress`     | boolean | `true`              | Show progress on stderr: a spinner during a long manager CLI call, a progress bar over a batch of managers running concurrently, and the per-manager ✓/✘ trail. The spinner and the bar self-disable off a terminal (pipes, `TERM=dumb`, CI); the trail appends, so it prints on any stream. `--accessible` turns all three off, and mpm also suppresses them for serialized output and at DEBUG verbosity. |
+| `table_format` | string  | `"rounded-outline"` | Table rendering style (see `mpm --help` for all choices).                                                                                                                                                                                                                                                                                                                                                   |
 
 ### Release-age cooldown
 
@@ -102,13 +102,13 @@ Name the release that drops the deprecated `[mpm] cooldown = "<duration>"` top-l
 
 ### Accessibility
 
-The `--accessible` flag (or the `ACCESSIBLE=1` environment variable) is a shortcut for `--no-color --table-format plain`: it strips ANSI codes and replaces Unicode box-drawing characters with plain ASCII, so the output is friendly to screen readers and braille displays.
+The `--accessible` flag (or the `ACCESSIBLE=1` environment variable) is a shortcut for `--no-color --table-format plain --no-progress`: it strips ANSI codes, replaces Unicode box-drawing characters with plain ASCII, and stops the progress output, so what reaches a screen reader or a braille display is the result alone.
 
 ```{code-block} shell-session
 $ mpm --accessible managers
 ```
 
-An explicit `--color` / `--no-color` or `--table-format` setting (on the command line, in an environment variable, or in this configuration file) keeps precedence over `--accessible`, so you can toggle a single dimension back on:
+An explicit `--color` / `--no-color`, `--table-format` or `--progress` setting (on the command line, in an environment variable, or in this configuration file) keeps precedence over `--accessible`, so you can toggle a single dimension back on:
 
 ```{code-block} shell-session
 $ mpm --accessible --table-format rounded-outline managers

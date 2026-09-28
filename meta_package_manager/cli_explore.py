@@ -192,7 +192,7 @@ def managers(ctx, view):
     with Spinner(
         "Detecting package managers",
         delay=SPINNER_DELAY,
-        enabled=None if ctx.obj.progress else False,
+        live="auto" if ctx.obj.progress else "never",
         timer=True,
     ):
         selection = tuple(inventory())

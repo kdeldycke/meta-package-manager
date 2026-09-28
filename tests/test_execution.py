@@ -141,14 +141,14 @@ def test_make_spinner_disabled_without_progress():
     """Without the progress opt-in, the spinner is forced off."""
     manager = FakeManager()
     manager.progress = False
-    assert manager._make_spinner().enabled is False
+    assert manager._make_spinner().live == "never"
 
 
 def test_make_spinner_defers_to_tty_with_progress():
     """With progress on, the spinner is left to auto-detect a TTY at runtime."""
     manager = FakeManager()
     manager.progress = True
-    assert manager._make_spinner().enabled is None
+    assert manager._make_spinner().live == "auto"
 
 
 @pytest.fixture

@@ -519,7 +519,7 @@ class OperationTrail(_OperationTrail):
             # spinner for the (unused) concurrent-without-a-total case.
             progress_bar=jobs > 1 and total > 0,
             # Progress off forces full silence; on, the upstream TTY gate decides.
-            enabled=None if progress else False,
+            live="auto" if progress else "never",
             echo_sequential=not coverage,
             delay=SPINNER_DELAY,
         )

@@ -1449,7 +1449,7 @@ class CLIExecutor:
         return Spinner(
             self._call_label(cmd_args),
             delay=SPINNER_DELAY,
-            enabled=None if self.progress and animate else False,
+            live="auto" if self.progress and animate else "never",
             timer=True,
         )
 

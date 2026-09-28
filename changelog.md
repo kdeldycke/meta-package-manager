@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Drive the progress spinner through click-extra's `live` setting, replacing the `enabled` flag it deprecated in `9.3`.
 - [mpm] Document the `host_environment` marker and the corrected auto-skip hook on the packaging page, which named a function that no longer exists.
 - [mpm] Skip the tests needing a real host, a login shell or a sudo policy inside a hermetic build sandbox, so packagers run a plain `pytest` with no per-distribution deselect list.
 - [mpm] Name the SBOM writer library that is missing or too old when `sbom` refuses, instead of advising an extra that is already installed.

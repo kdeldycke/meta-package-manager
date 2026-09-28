@@ -148,6 +148,10 @@ jobs:
   brew:
     name: "✅ brew (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - ubuntu-26.04-arm
@@ -174,6 +178,10 @@ jobs:
   choco-source:
     name: "✅ choco-source (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - windows-2025
@@ -201,6 +209,10 @@ jobs:
   github-release:
     name: "✅ github-release (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-26.04-arm
@@ -238,11 +250,11 @@ jobs:
   # meta-package-manager landed in Guix upstream via
   # https://codeberg.org/guix/guix/pulls/8047 (merged into master 2026-06-28).
   # `guix pull` refreshes the local channel to a commit that ships it before
-  # installing. Heavyweight (the pull can build for a while) and Linux-only, so
-  # keep it continue-on-error.
+  # installing. Heavyweight (the pull can build for a while) and Linux-only,
+  # but it gates: it reports what a Guix user can install today, so a red run
+  # is the cue to fix the package upstream rather than something to wave past.
   guix:
-    name: ⁉️ guix
-    continue-on-error: true
+    name: ✅ guix
     runs-on: ubuntu-26.04
     timeout-minutes: 60
     steps:
@@ -291,6 +303,18 @@ jobs:
   # definition to validate the documented build instructions.
   # Guix is Linux-only and the official install script is heavyweight; mark
   # as continue-on-error until the setup is proven stable.
+  #
+  # Currently blocked, and not by anything this repository controls. The
+  # checkout derivation runs `git init` as an unprivileged Guix build user,
+  # which gets EACCES on /etc/gitconfig and dies: git 2.52 turned that from a
+  # warning into `fatal: unknown error occurred while reading the configuration
+  # files`, exit 128. The host file is already mode 644, so chmod changes
+  # nothing -- the denial is the build container's own /etc, which the build
+  # user cannot traverse, and no host-side step reaches inside it. The
+  # content-addressed mirrors then 404, which reads as a network fault and
+  # hides the real cause. Fixing it means either a git that tolerates EACCES
+  # again, or switching the definition from git-fetch to url-fetch on the tag
+  # tarball, which drops the git dependency entirely.
   guix-source:
     name: ⁉️ guix-source
     continue-on-error: true
@@ -339,19 +363,6 @@ jobs:
       # the job goes red saying nothing. Dump the recent ones: a break in an
       # upstream dependency can be read off ci.guix.gnu.org, but one in the
       # definition below is built nowhere else and has no log to consult.
-      # Guix builds its checkout derivation as an unprivileged build user, and
-      # git 2.52 turned an unreadable /etc/gitconfig from a warning into a fatal
-      # error. The runner image ships that file unreadable to others, so
-      # `git init` inside the build exits 128 and every content-addressed
-      # mirror then 404s, which reads as a network fault rather than a
-      # permission one.
-      - name: Let the Guix build users read the system git config
-        run: |
-          if [ -e /etc/gitconfig ]; then
-            ls -l /etc/gitconfig
-            sudo chmod a+r /etc/gitconfig
-          fi
-
       - name: Install mpm from the local definition
         run: |
           set -o pipefail
@@ -379,6 +390,10 @@ jobs:
   macports:
     name: "✅ macports (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - macos-15-intel
@@ -424,6 +439,10 @@ jobs:
   macports-source:
     name: "✅ macports-source (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - macos-15-intel
@@ -472,9 +491,18 @@ jobs:
   # No macos-15-intel entry: nixpkgs 26.11 dropped x86_64-darwin support.
   nix:
     name: "⁉️ nix (${{ matrix.os }})"
-    # Not yet accepted in nixpkgs.
+    # The one external-feed job that does not gate, and for a reason the others
+    # do not share: mpm is not in nixpkgs yet (NixOS/nixpkgs#506145 is still
+    # open), so there is nothing published for a user to consume and nothing
+    # upstream a red run would prompt anyone to fix. Every other feed job gates
+    # because its channel ships mpm today and a failure there is actionable.
+    # Promote this one the day the PR lands.
     continue-on-error: true
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - ubuntu-26.04-arm
@@ -496,6 +524,10 @@ jobs:
   nix-source:
     name: "✅ nix-source (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - ubuntu-26.04-arm
@@ -525,9 +557,9 @@ jobs:
       # input resolves to the revision the channel above already built.
       - run: nix build --no-link --print-build-logs ./packaging/nix
 
-  # AUR builds from source with full test suites. Upstream PKGBUILD check()
-  # failures in transitive dependencies cascade to every downstream package and
-  # are not fixable from this project, hence the continue-on-error below. See:
+  # AUR builds from source with full test suites, so a failure in any transitive
+  # dependency cascades to mpm. It gates all the same: it reports what an Arch
+  # user can install today, and red is the cue to carry a fix upstream. See:
   # https://aur.archlinux.org/packages/meta-package-manager#comment-1065663
   # https://aur.archlinux.org/packages/python-boltons#comment-1065664
   # https://aur.archlinux.org/packages/python-beartype#comment-1065661
@@ -537,20 +569,24 @@ jobs:
   # but still unreleased: 0.22.9 predates it, 0.23.0rc0 (2026-08-08) is the first
   # artifact carrying it. https://github.com/beartype/beartype/issues/631
   #
-  # Current cause is a different one, and fails on the first run: beartype 0.22.9
-  # expects a bare numpy NDArray to be a PEP 585 subscripted builtin, which numpy
-  # 2.5 no longer makes true, failing 12 of its tests on Python 3.14. Also fixed
-  # in 0.23.0rc0, so unblocking needs stable 0.23.0 and an AUR python-beartype
-  # bump. Nothing to report upstream.
+  # Current cause has moved on again, and no longer involves beartype at all:
+  # python-click-extra requires `python-click>=8.4.1` while Arch still ships
+  # 8.3.x, so dependency resolution fails before any build starts. The same
+  # click floor blocks Ubuntu and forced the nixpkgs override in
+  # packaging/nix/overlay.nix: one constraint, three ecosystems, and each has
+  # to ship click 8.4.1 on its own.
 
   # https://aur.archlinux.org/packages/meta-package-manager
   # https://aur.archlinux.org/packages/meta-package-manager-bin
   aur:
-    name: "⁉️ ${{ matrix.helper }}"
+    name: "✅ ${{ matrix.helper }}"
     runs-on: ubuntu-26.04
     timeout-minutes: 30
-    continue-on-error: true
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         include:
           - helper: pacaur
@@ -577,6 +613,10 @@ jobs:
   pip:
     name: "✅ pip (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - ubuntu-26.04-arm
@@ -606,6 +646,10 @@ jobs:
   pipx:
     name: "✅ pipx (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - ubuntu-26.04-arm
@@ -744,6 +788,10 @@ jobs:
   scoop:
     name: "✅ scoop (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - windows-2025      # x86
@@ -766,6 +814,10 @@ jobs:
   uv:
     name: "✅ uv (${{ matrix.os }})"
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         os:
           - ubuntu-26.04-arm
@@ -828,6 +880,10 @@ jobs:
     name: "${{ matrix.mark }} zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
     continue-on-error: ${{ matrix.unstable }}
     strategy:
+      # One broken cell must not cancel its siblings: each names a
+      # different platform, and a cancelled one hides whether that
+      # platform is broken too.
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-26.04-arm
@@ -840,8 +896,8 @@ jobs:
             unstable: false
           - os: macos-15-intel
             asset: zb-darwin-x64
-            mark: "⁉️"
-            unstable: true
+            mark: "✅"
+            unstable: false
           - os: macos-26
             asset: zb-darwin-arm64
             mark: "✅"

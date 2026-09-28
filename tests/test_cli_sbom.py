@@ -44,9 +44,7 @@ from meta_package_manager.sbom.cyclonedx import cyclonedx_support
 from meta_package_manager.sbom.spdx import spdx_support
 
 if not (spdx_support and cyclonedx_support):
-    pytest.skip(
-        "SBOM writer stack not fully importable", allow_module_level=True
-    )
+    pytest.skip("SBOM writer stack not fully importable", allow_module_level=True)
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.sbom.base import ExportFormat

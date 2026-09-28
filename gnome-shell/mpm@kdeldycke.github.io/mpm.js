@@ -297,10 +297,13 @@ export function shellEnvOptions(version) {
     return [];
 }
 
+/* `sync` reports its state through the per-manager trail, which prints on any
+ * stream. Nothing reads it here, so the extension turns it off rather than
+ * build a record it discards. */
 export function syncArgv(mpm, timeout = MPM_TIMEOUT, options = []) {
     return [
-        ...mpm, '--verbosity', 'ERROR', '--timeout', String(timeout),
-        ...options, 'sync',
+        ...mpm, '--verbosity', 'ERROR', '--no-progress',
+        '--timeout', String(timeout), ...options, 'sync',
     ];
 }
 

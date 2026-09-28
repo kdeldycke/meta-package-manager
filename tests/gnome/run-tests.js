@@ -99,7 +99,8 @@ function testParseVersion() {
      * on every builder, and every builder still works without them. */
     check('syncArgv without options',
         Mpm.syncArgv(['mpm'], 60),
-        ['mpm', '--verbosity', 'ERROR', '--timeout', '60', 'sync']);
+        ['mpm', '--verbosity', 'ERROR', '--no-progress',
+            '--timeout', '60', 'sync']);
     check('syncArgv splices options before the subcommand',
         Mpm.syncArgv(['mpm'], 60, ['--no-cpan']).slice(-2), ['--no-cpan', 'sync']);
     check('outdatedArgv splices options before the subcommand',
@@ -129,7 +130,8 @@ function testCompareVersions() {
 function testArgvBuilders() {
     const mpm = ['/usr/bin/mpm'];
     check('syncArgv', Mpm.syncArgv(mpm, 60), [
-        '/usr/bin/mpm', '--verbosity', 'ERROR', '--timeout', '60', 'sync',
+        '/usr/bin/mpm', '--verbosity', 'ERROR', '--no-progress',
+        '--timeout', '60', 'sync',
     ]);
     check('outdatedArgv', Mpm.outdatedArgv(mpm, 42), [
         '/usr/bin/mpm', '--no-color', '--verbosity', 'CRITICAL',

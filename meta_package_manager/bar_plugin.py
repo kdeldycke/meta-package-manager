@@ -642,12 +642,16 @@ class MPMPlugin:
             return
 
         # Refresh the index of every manager first. A failure is not fatal.
+        # `sync` reports its state through the per-manager trail, which prints
+        # on any stream: uncaptured here, it would land in the host app's log
+        # on every refresh, so the plugin turns it off rather than read it.
         run(
             (
                 *best.args,
                 *self.shell_env_options,
                 "--verbosity",
                 "ERROR",
+                "--no-progress",
                 "--timeout",
                 str(MPM_TIMEOUT),
                 *self.mpm_options,

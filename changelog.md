@@ -7,6 +7,7 @@
 
 - [mpm] Ship the bundled manager definitions and `yay_cooldown.lua` in setuptools-built packages, which distributors substituting that backend were silently dropping: Guix's `mpm` died on a missing file before printing anything.
 - [mpm] Keep the `✓`/`✘` trail and its finisher on a pipe or a CI log, where the animated indicator cannot draw. `--no-progress` is now the only thing that silences them.
+- [bar-plugin,gnome-shell] Keep the `sync` progress trail out of the host app's log, by turning it off on the refresh cycle.
 - [mpm] Drive the progress spinner through click-extra's `live` setting, replacing the `enabled` flag it deprecated in `9.3`.
 - [mpm] Document the `host_environment` marker and the corrected auto-skip hook on the packaging page, which named a function that no longer exists.
 - [mpm] Skip the tests needing a real host, a login shell or a sudo policy inside a hermetic build sandbox, so packagers run a plain `pytest` with no per-distribution deselect list.

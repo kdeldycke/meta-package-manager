@@ -8,12 +8,21 @@ PKG_DIR := debian/meta-package-manager
 %:
 	dh $@ --with python3
 
-# vendor/ is already a set of unpacked pure-Python wheels, resolved and checked
-# when the source package was assembled, so nothing here configures, compiles or
-# tests. That is also what lets the build run with no network, which is all a
-# Launchpad builder offers.
+# vendor/ is already a set of unpacked pure-Python wheels, resolved when the
+# source package was assembled, so nothing here configures or compiles. That is
+# also what lets the build run with no network, which is all a Launchpad
+# builder offers.
 override_dh_auto_configure:
+
+# There is no suite to re-run: the package content is the published wheels,
+# which mpm's own test matrix already covered. What this checks is the
+# vendoring, the one thing assembled here and tested nowhere else. A dependency
+# left out of the tree, a module mangled by the shebang strip or a private
+# directory the wrapper cannot reach all surface as an import failure, and
+# building the command graph walks every module the CLI touches.
 override_dh_auto_test:
+	PYTHONPATH=vendor python3 -m meta_package_manager --version
+	PYTHONPATH=vendor python3 -m meta_package_manager --help > /dev/null
 
 # click-extra renders the same roff source mpm's own release job publishes. It
 # reads the vendored tree and nothing else.

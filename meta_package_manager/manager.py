@@ -301,7 +301,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """Home page of the project, only used in documentation for reference.
 
     Left unset when the home page is the project's repository, which
-    {attr}`repository_url` names on its own. Never inherited, like the other links.
+    {attr}`repository_url` names on its own, and when it is the project's manual,
+    which {attr}`documentation_url` names. Never inherited, like the other links.
     """
 
     documentation_url: str | None = None
@@ -315,9 +316,12 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     Left unset where a link would state a fact twice or invent one: a tool
     documenting itself in its repository alone, whose README
-    {attr}`repository_url` already reaches, and a project whose home page *is*
-    its documentation, which {attr}`homepage_url` then names. A page about the
-    ecosystem rather than the tool does not qualify either.
+    {attr}`repository_url` already reaches. A page about the ecosystem rather
+    than the tool does not qualify either.
+
+    Where a project's only site is its manual, that address belongs here and
+    {attr}`homepage_url` stays unset: the slot names what the page *is*, and a
+    reader reaching for the reference looks under the documentation link.
 
     Never inherited, like every other link: the AUR helpers extending `pacman`
     each document themselves.

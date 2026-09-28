@@ -20,7 +20,7 @@
 (define-public meta-package-manager
   (package
     (name "meta-package-manager")
-    (version "8.0.1")
+    (version "8.0.2")
     (source
      (origin
        (method git-fetch)
@@ -29,7 +29,7 @@
               (commit (string-append "v" version))))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "17qy7w02l08gmb8izldh3kz3aqdwja3zfwhiicqvdsdkv59n06qr"))))
+        (base32 "1zs7c3n92bn5bnjf30yqyfrxzm0iqgcsq873gk0qyjkh230qd3jl"))))
     (build-system pyproject-build-system)
     ;; Upstream uses uv-build which is not yet available in Guix.
     (arguments

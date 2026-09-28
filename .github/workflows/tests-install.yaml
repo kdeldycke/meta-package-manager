@@ -339,6 +339,19 @@ jobs:
       # the job goes red saying nothing. Dump the recent ones: a break in an
       # upstream dependency can be read off ci.guix.gnu.org, but one in the
       # definition below is built nowhere else and has no log to consult.
+      # Guix builds its checkout derivation as an unprivileged build user, and
+      # git 2.52 turned an unreadable /etc/gitconfig from a warning into a fatal
+      # error. The runner image ships that file unreadable to others, so
+      # `git init` inside the build exits 128 and every content-addressed
+      # mirror then 404s, which reads as a network fault rather than a
+      # permission one.
+      - name: Let the Guix build users read the system git config
+        run: |
+          if [ -e /etc/gitconfig ]; then
+            ls -l /etc/gitconfig
+            sudo chmod a+r /etc/gitconfig
+          fi
+
       - name: Install mpm from the local definition
         run: |
           set -o pipefail

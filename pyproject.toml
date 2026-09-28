@@ -518,6 +518,11 @@ typing = [
 # other hand ignores this section completely (it relies on [tool.uv].build-backend.module-root instead), so this is
 # purely a compatibility shim for setuptools-based builds.
 packages.find.include = [ "meta_package_manager*" ]
+# setuptools drops a package's own data files unless named here, the same gap Nuitka has
+# in [tool.nuitka] include-package-data below. Guix hit it: its 7.6.1 package ships no
+# yay_cooldown.lua, so `mpm --version` dies on FileNotFoundError before printing
+# anything. The .toml files are the bundled manager definitions, equally fatal to lose.
+package-data."meta_package_manager.managers" = [ "*.lua", "*.toml" ]
 
 [tool.uv]
 required-version = ">=0.11.15"

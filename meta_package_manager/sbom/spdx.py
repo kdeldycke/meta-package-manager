@@ -47,9 +47,10 @@ from ..package import (
     DependencyScope,
     PackageMetadata,
 )
-from .base import SBOM, ExportFormat
+from .base import SBOM, ExportFormat, writer_unavailable_reason
 
 spdx_support = True
+spdx_unavailable_reason = ""
 try:
     from spdx_tools.common.spdx_licensing import (  # type: ignore[import-untyped]
         spdx_licensing,
@@ -80,11 +81,13 @@ try:
     from spdx_tools.spdx.writer.write_utils import convert
     from spdx_tools.spdx.writer.xml import xml_writer
     from spdx_tools.spdx.writer.yaml import yaml_writer
-except ImportError:
+except ImportError as import_error:
     spdx_support = False
+    spdx_unavailable_reason = writer_unavailable_reason(
+        "spdx-tools", import_error
+    )
     logging.getLogger("meta_package_manager").debug(
-        "SPDX support disabled: "
-        "install meta-package-manager[sbom-offline] to enable it.",
+        f"SPDX support disabled: {spdx_unavailable_reason}",
     )
 
 TYPE_CHECKING = False

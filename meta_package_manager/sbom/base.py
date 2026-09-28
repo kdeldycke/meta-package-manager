@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from importlib.metadata import PackageNotFoundError, version
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum
@@ -37,6 +38,34 @@ if TYPE_CHECKING:
 
     from ..package import PackageMetadata
     from .vulnerabilities import Vulnerability
+
+
+def writer_unavailable_reason(distribution: str, error: Exception) -> str:
+    """Explain why an SBOM writer library could not be imported.
+
+    Tells apart the library being absent from it being installed but older
+    than what the renderer imports. The two need opposite remedies, and the
+    install-the-extra advice is actively misleading for the second: a
+    distribution shipping an older release satisfies the extra already, so the
+    reader installs it again, sees no change, and is left with a symbol name
+    and no idea which package owns it. NixOS hits exactly this, carrying a
+    `cyclonedx-python-lib` below the floor `[sbom-offline]` declares.
+
+    The floor itself is deliberately not repeated here: `error` already names
+    the symbol that is missing, which is more precise than a version number
+    and cannot drift away from `pyproject.toml`.
+    """
+    try:
+        installed = version(distribution)
+    except PackageNotFoundError:
+        return (
+            f"{distribution} is not installed. "
+            f"Install it with: pip install meta-package-manager[sbom-offline]"
+        )
+    return (
+        f"{distribution} {installed} is installed but too old: {error}. "
+        f"Upgrade it with: pip install --upgrade meta-package-manager[sbom-offline]"
+    )
 
 
 class ExportFormat(StrEnum):

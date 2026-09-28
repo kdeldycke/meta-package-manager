@@ -35,7 +35,7 @@ import pytest
 from yaml import Loader, load
 
 from meta_package_manager.capabilities import Operations
-from meta_package_manager.sbom.base import ExportFormat
+from meta_package_manager.sbom.base import ExportFormat, writer_unavailable_reason
 
 from .test_cli import check_manager_selection
 from .test_sbom import assert_valid_cyclonedx
@@ -270,3 +270,28 @@ def test_sbom_command_loads_the_deferred_libraries(invoke, fake_pool):
     result = invoke("sbom", "--minimal")
     assert result.exit_code == 0
     assert result.stdout.strip()
+
+
+def test_writer_unavailable_reason_separates_absent_from_outdated():
+    """The two failure modes need opposite remedies, so they cannot share a
+    message. A distribution shipping a writer library below the floor already
+    satisfies `[sbom-offline]`, so telling its user to install that extra
+    strands them: they install it again, nothing changes, and the only clue
+    left is a symbol name belonging to no package they can name. NixOS carries
+    exactly such a `cyclonedx-python-lib`.
+    """
+    absent = writer_unavailable_reason(
+        "no-such-distribution", ImportError("No module named 'nope'")
+    )
+    assert "is not installed" in absent
+    assert "--upgrade" not in absent
+
+    # Any installed distribution stands in for the outdated case: the branch
+    # turns on the distribution being present, not on which one it is.
+    outdated = writer_unavailable_reason(
+        "meta-package-manager",
+        ImportError("cannot import name 'PredefinedLifecycle'"),
+    )
+    assert "is installed but too old" in outdated
+    assert "PredefinedLifecycle" in outdated
+    assert "--upgrade" in outdated

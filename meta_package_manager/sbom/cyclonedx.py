@@ -37,10 +37,11 @@ from ..package import (
     ChecksumAlgorithm,
     PackageMetadata,
 )
-from .base import SBOM, ExportFormat
+from .base import SBOM, ExportFormat, writer_unavailable_reason
 from .spdx import _parse_license_expression
 
 cyclonedx_support = True
+cyclonedx_unavailable_reason = ""
 try:
     from cyclonedx.model import (
         ExternalReference,
@@ -71,11 +72,13 @@ try:
     from cyclonedx.output import make_outputter
     from cyclonedx.output.json import JsonV1Dot7
     from cyclonedx.schema import OutputFormat, SchemaVersion
-except ImportError:
+except ImportError as import_error:
     cyclonedx_support = False
+    cyclonedx_unavailable_reason = writer_unavailable_reason(
+        "cyclonedx-python-lib", import_error
+    )
     logging.getLogger("meta_package_manager").debug(
-        "CycloneDX support disabled: "
-        "install meta-package-manager[sbom-offline] to enable it.",
+        f"CycloneDX support disabled: {cyclonedx_unavailable_reason}",
     )
 
 TYPE_CHECKING = False

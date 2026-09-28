@@ -136,8 +136,12 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     # Deferred on purpose: these two modules carry the heavy writer libraries, and
     # importing them at module level would tax every other subcommand. See the
     # module docstring for the measurement and the rule it deliberately breaks.
-    from .sbom.cyclonedx import CycloneDX, cyclonedx_support
-    from .sbom.spdx import SPDX, spdx_support
+    from .sbom.cyclonedx import (
+        CycloneDX,
+        cyclonedx_support,
+        cyclonedx_unavailable_reason,
+    )
+    from .sbom.spdx import SPDX, spdx_support, spdx_unavailable_reason
 
     standard = "SPDX" if spdx else "CycloneDX"
 
@@ -174,15 +178,14 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     if spdx:
         if not spdx_support:
             raise UsageError(
-                "SPDX SBOM generation requires the [sbom-offline] extra. "
-                "Install with: pip install meta-package-manager[sbom-offline]",
+                f"SPDX SBOM generation is unavailable. {spdx_unavailable_reason}",
             )
         sbom_class = SPDX
     else:
         if not cyclonedx_support:
             raise UsageError(
-                "CycloneDX SBOM generation requires the [sbom-offline] extra. "
-                "Install with: pip install meta-package-manager[sbom-offline]",
+                "CycloneDX SBOM generation is unavailable. "
+                f"{cyclonedx_unavailable_reason}",
             )
         if export_format not in (ExportFormat.JSON, ExportFormat.XML):
             logging.critical(f"{standard} does not support {export_format} format.")

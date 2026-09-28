@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Name the SBOM writer library that is missing or too old when `sbom` refuses, instead of advising an extra that is already installed.
 - [mpm] Publish `mpm` for Ubuntu `22.04` and later at `ppa:kdeldycke/mpm`, carrying its Python dependencies in a private directory so nothing system-wide changes, with a `ppa-source` job building the spec on every live series.
 - [gnome-shell] Publish the extension on [extensions.gnome.org](https://extensions.gnome.org/extension/10714/meta-package-manager/), for GNOME Shell `46` to `50`.
 - [mpm] Link each manager's own documentation from its page, through a new `documentation_url` attribute that manager definitions accept too.

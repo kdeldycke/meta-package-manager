@@ -1,6 +1,10 @@
 # Maintainer: Kevin Deldycke <kevin@deldycke.com>
+
+# Held at the lowest 9.x: 9.2 onwards raises boltons to >= 26.2 and wcwidth
+# to >= 0.8.3, and edge carries 26.1.0 and 0.6.0. Raise this once aports
+# ships both, which is also what meta-package-manager 8.x waits on.
 pkgname=py3-click-extra
-pkgver=8.9.1
+pkgver=9.0.0
 pkgrel=0
 pkgdesc="Drop-in replacement for Click to build user-friendly and colorful CLIs"
 url="https://github.com/kdeldycke/click-extra"
@@ -59,5 +63,5 @@ package() {
 }
 
 sha512sums="
-d952498d6daa018daa010acd91138c3f48d9f0a2245aad639f8213ac0d29826cfe368dfd3a5507118f37120dfaa9814eac8db9227b8958ccc61c351f17b98806  click_extra-8.9.1.tar.gz
+a41babd3fbc2dae597e84e3fe1ea8a1a70935539be59e79a7c2f402cdb5380ce89547eaef56a7197485fe337dc5b5f8ba2ced1c8a18dbeec44fb9e3371b3eef4  click_extra-9.0.0.tar.gz
 "

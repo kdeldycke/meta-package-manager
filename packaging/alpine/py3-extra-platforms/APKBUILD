@@ -1,6 +1,6 @@
 # Maintainer: Kevin Deldycke <kevin@deldycke.com>
 pkgname=py3-extra-platforms
-pkgver=13.8.0
+pkgver=13.10.1
 pkgrel=0
 pkgdesc="Detect platforms, OSes, distributions and group them by family"
 url="https://github.com/kdeldycke/extra-platforms"
@@ -36,5 +36,5 @@ package() {
 }
 
 sha512sums="
-7532c1f99b11c38bf1e28c200fab7fdcb7661b994fa5635f0eac3db2aff5f838a0544a468632023f2ec85a6fb9a3311c7805aafc9d47e726561031c648f871cf  extra_platforms-13.8.0.tar.gz
+5c9d0fa6afb3eabeff900ba3a1819f7571ec4db41a982e257dea32b6b5cc6172e98beded202a05cea82e6ec1fc82eba551e1be577f70be78e097dc086858d035  extra_platforms-13.10.1.tar.gz
 "

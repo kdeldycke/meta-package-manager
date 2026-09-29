@@ -4,6 +4,8 @@
 # py3-boltons >= 25 floor are not available in the stable branches.
 # backports-strenum and tomli are omitted from depends: both are
 # Python < 3.11 markers and edge's python3 is newer.
+# Held at 7.6.1: 8.x needs click-extra >= 9.3, which edge cannot satisfy yet.
+# See the note in py3-click-extra.
 pkgname=meta-package-manager
 pkgver=7.6.1
 pkgrel=0

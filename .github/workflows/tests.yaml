@@ -197,6 +197,10 @@ jobs:
           # lxml has no pre-built wheel for development Python (3.15+), so it
           # must compile from source, which needs libxml2 and libxslt headers.
           sudo apt-get --quiet --yes install libxml2-dev libxslt-dev
+          # Ubuntu's firefox deb wraps a snap: upgrading it fetches the snap and
+          # its runtimes from the snap store, whose timeouts (HTTP 408) fail the
+          # whole upgrade. No test drives a browser, so hold it where it is.
+          sudo apt-mark hold firefox
           # Drain the image's pending upgrades, so the destructive
           # `upgrade --all` round-trip finds nothing to install and returns in
           # seconds. Left pending, a big backlog runs past mpm's 500s

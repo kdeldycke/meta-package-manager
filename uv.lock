@@ -11,6 +11,9 @@ resolution-markers = [
 exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P1W"
 
+[options.exclude-newer-package]
+repomatic = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+
 [[package]]
 name = "accessible-pygments"
 version = "0.0.5"
@@ -1178,7 +1181,7 @@ typing = [
 requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1" },
     { name = "boltons", specifier = ">=25" },
-    { name = "click-extra", specifier = ">=9" },
+    { name = "click-extra", specifier = ">=9.3" },
     { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
     { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
     { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },

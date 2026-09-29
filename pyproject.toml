@@ -324,10 +324,10 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 9 moved the roff source of `wrap` from `--man` to
-  # `--help-format man`, the invocation repomatic's `manpages` release job runs.
-  # Below it that job fails, and the published release keeps no man-page asset.
-  "click-extra>=9",
+  # click-extra 9.3 renamed the `Spinner` argument `enabled` to `live`, which
+  # `CLIExecutor._make_spinner` in execution.py passes by keyword. Below it every
+  # manager call raises `TypeError: unexpected keyword argument 'live'`.
+  "click-extra>=9.3",
   # extra-platforms 13.9 detects Solus. Below it every mpm run there reports an
   # unrecognized platform and selects no manager at all, which strands
   # managers/eopkg.py on the only distribution it targets.

@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Raise the `click-extra` floor to `9.3`, the release `mpm` already needs: below it every manager call died on a `TypeError`.
 - [bar-plugin] Fix the preview screenshot Xbar's website shows for the plugin, which named a renamed file.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)

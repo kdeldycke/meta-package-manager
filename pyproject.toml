@@ -328,10 +328,10 @@ dependencies = [
   # `CLIExecutor._make_spinner` in execution.py passes by keyword. Below it every
   # manager call raises `TypeError: unexpected keyword argument 'live'`.
   "click-extra>=9.3",
-  # extra-platforms 13.9 detects Solus. Below it every mpm run there reports an
-  # unrecognized platform and selects no manager at all, which strands
-  # managers/eopkg.py on the only distribution it targets.
-  "extra-platforms>=13.9",
+  # extra-platforms 13.10 added shell_from_path(), which shell_argv() in
+  # shell_env.py resolves the login shell's family with. Below it the import
+  # fails and no mpm command runs.
+  "extra-platforms>=13.10",
   # Required at runtime by meta_package_manager.package and
   # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
   # cross-manager package identification, independent of SBOM features. That API

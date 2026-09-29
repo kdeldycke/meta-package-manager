@@ -52,10 +52,9 @@ import secrets
 import signal
 import subprocess
 import sys
-from pathlib import Path
 from typing import Final
 
-from extra_platforms import C_SHELLS, WINDOWS_SHELLS, is_any_windows
+from extra_platforms import C_SHELLS, WINDOWS_SHELLS, is_any_windows, shell_from_path
 
 # Windows has no passwd database, and never reaches the lookup either.
 if sys.platform != "win32":
@@ -118,23 +117,19 @@ def shell_argv(shell: str, mark: str) -> tuple[str, ...]:
 
     Follows VS Code's `shellEnv.ts`: `-i -l -c` for every Bourne-family shell,
     fish and nushell included, `-ic` for the C shells, whose `-l` has to be the
-    only flag, and `-Login -Command` for PowerShell. The family is read off
-    extra-platforms' shell catalog, keyed by the file name of the resolved path,
-    so `/bin/sh` linking to `bash` is treated as `bash`.
+    only flag, and `-Login -Command` for PowerShell.
 
-    ```{todo}
-    Match the file name through `extra_platforms.shell_from_path()` and drop the
-    `pwsh` special case once the floor reaches the extra-platforms release
-    carrying [kdeldycke/extra-platforms@9a9393d](https://github.com/kdeldycke/extra-platforms/commit/9a9393d28a643a79043249247582bece80bb1fff):
-    the catalog keys PowerShell by `powershell`, where its binary is `pwsh` on
-    every platform since `6.0`.
-    ```
+    {func}`~extra_platforms.shell_from_path` names the family. It resolves the
+    path through its symlinks, so `/bin/sh` linking to `bash` is treated as
+    `bash`, and matches the file name against each shell's own executable names,
+    so a `pwsh` binary is PowerShell. A name the catalog does not know falls to
+    the Bourne default.
     """
     command = _ENV_DUMP.format(mark=mark)
-    stem = Path(shell).resolve().stem.lower()
-    if stem in C_SHELLS:
+    family = shell_from_path(shell)
+    if family in C_SHELLS:
         return (shell, "-ic", command)
-    if stem in WINDOWS_SHELLS or stem == "pwsh":
+    if family in WINDOWS_SHELLS:
         return (shell, "-Login", "-Command", command)
     return (shell, "-i", "-l", "-c", command)
 

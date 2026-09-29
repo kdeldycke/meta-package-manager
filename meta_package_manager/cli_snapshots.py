@@ -37,6 +37,7 @@ import tomli_w
 from click_extra import (
     File,
     argument,
+    columns_option,
     echo,
     file_path,
     is_stdout,
@@ -52,6 +53,7 @@ from .brewfile import build_brewfile
 from .capabilities import Operations
 from .cli import (
     SNAPSHOTS,
+    ChangeReport,
     exit_on_failures,
     guard_existing_output,
     install_action,
@@ -70,6 +72,7 @@ from .pool import pool
 from .specifier import VERSION_SEP, Specifier
 from .sudo import prime_sudo
 from .summary import print_summary
+from .tables import CHANGE_REPORT_COLUMNS, column_specs
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -407,6 +410,7 @@ def _dump_brewfile(
         ("Replay several manifests in one run", "mpm restore base.toml laptop.toml"),
     ],
 )
+@columns_option(columns=column_specs(CHANGE_REPORT_COLUMNS))
 @argument("toml_files", type=File("r"), required=True, nargs=-1)
 @pass_context
 def restore(ctx, toml_files):
@@ -481,9 +485,15 @@ def restore(ctx, toml_files):
                     ),
                 ))
 
+    # Two inventory readings frame each manager's installs (see ChangeReport).
+    report = ChangeReport()
     collect_per_package(
-        "Restoring", "Restored", tasks, operation=Operations.install.name
+        "Restoring",
+        "Restored",
+        report.bracket(tasks),
+        operation=Operations.install.name,
     )
+    report.show(ctx)
 
     # Fail with a non-zero exit code if any referenced package could not be installed.
     exit_on_failures(ctx, "restore", restore_failures)

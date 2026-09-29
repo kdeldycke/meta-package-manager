@@ -41,7 +41,7 @@ from meta_package_manager.dispatch import merge_into_probe_lanes
 from meta_package_manager.pool import ManagerPool, manager_classes, pool
 
 from .destructive_plan import destructive_group
-from .fake_manager import FakeManager, TimingOutFakeManager, UpgradingFakeManager
+from .fake_manager import ChangingFakeManager, FakeManager, TimingOutFakeManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -425,13 +425,14 @@ def slow_fake_pool(patch_pool_with):
 
 
 @fixture
-def upgrading_fake_pool(patch_pool_with):
-    """Yield an {class}`~tests.fake_manager.UpgradingFakeManager`, whose inventory
-    moves on `upgrade --all`.
+def changing_fake_pool(patch_pool_with):
+    """Yield a {class}`~tests.fake_manager.ChangingFakeManager`, whose inventory
+    changes when a command acts on it.
 
-    Use for the tests of the report closing a full upgrade.
+    Use for the tests of the change report closing the commands that install,
+    remove or upgrade packages.
     """
-    return patch_pool_with(UpgradingFakeManager())
+    return patch_pool_with(ChangingFakeManager())
 
 
 @fixture

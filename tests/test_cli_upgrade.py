@@ -32,16 +32,21 @@ import pytest
 from boltons.strutils import strip_ansi
 
 from meta_package_manager.capabilities import Operations
-from meta_package_manager.cli_maintenance import _outcome_detail, upgrade_outcomes
+from meta_package_manager.cli import outcome_detail, package_outcomes
+from meta_package_manager.cli_maintenance import SWEEP_RESULTS, UPGRADE_RESULTS
 from meta_package_manager.execution import CLIError
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
-from meta_package_manager.tables import UPGRADE_OUTCOME_GLYPHS, UpgradeOutcome
+from meta_package_manager.tables import PACKAGE_OUTCOME_GLYPHS, PackageOutcome
 
 from .conftest import default_manager_ids
 from .destructive_plan import SHORT_FAILURE_TIMEOUT, upgrade_all_blocked
 from .fake_manager import FakeManager
-from .test_cli import assert_no_manager_selected, check_manager_selection
+from .test_cli import (
+    assert_no_manager_selected,
+    check_manager_selection,
+    report_rows,
+)
 
 
 @pytest.fixture
@@ -291,7 +296,7 @@ def test_upgrade_outcomes_classification():
             _package("grape", "8.0", "9.0"),
         )
     }
-    rows = upgrade_outcomes(
+    rows = package_outcomes(
         before,
         after,
         expected,
@@ -308,7 +313,7 @@ def test_upgrade_outcomes_classification():
         ("kiwi", "", "0.1", "installed"),
     ]
     assert all(isinstance(r["status"], str) for r in rows)
-    assert not any(isinstance(r["status"], UpgradeOutcome) for r in rows)
+    assert not any(isinstance(r["status"], PackageOutcome) for r in rows)
 
 
 @pytest.mark.parametrize(
@@ -331,7 +336,7 @@ def test_upgrade_outcomes_classification():
 def test_upgrade_outcomes_direction(before, after, announced, status):
     """A move reads as a downgrade only when its direction is certain."""
     expected = {"plum": _package("plum", before, announced)} if announced else None
-    rows = upgrade_outcomes(
+    rows = package_outcomes(
         {"plum": _package("plum", before)},
         {"plum": _package("plum", after)},
         expected,
@@ -342,53 +347,58 @@ def test_upgrade_outcomes_direction(before, after, announced, status):
 
 def test_upgrade_outcome_glyphs_cover_every_outcome():
     """Every outcome leads its table cell with a glyph of its own."""
-    assert set(UPGRADE_OUTCOME_GLYPHS) == set(UpgradeOutcome)
-    assert len(set(UPGRADE_OUTCOME_GLYPHS.values())) == len(UpgradeOutcome)
+    assert set(PACKAGE_OUTCOME_GLYPHS) == set(PackageOutcome)
+    assert len(set(PACKAGE_OUTCOME_GLYPHS.values())) == len(PackageOutcome)
 
 
 def test_upgrade_outcomes_without_an_outdated_listing():
     """A manager that cannot list its outdated packages still reports what moved."""
     before = {"apple": _package("apple", "1.0"), "fig": _package("fig", "5.0")}
     after = {"apple": _package("apple", "1.1"), "fig": _package("fig", "5.0")}
-    rows = upgrade_outcomes(before, after, None, hold_reason=lambda _: None)
+    rows = package_outcomes(before, after, None, hold_reason=lambda _: None)
     assert [(r["id"], r["status"]) for r in rows] == [("apple", "upgraded")]
 
 
 @pytest.mark.parametrize(
-    ("statuses", "detail"),
+    ("results", "statuses", "detail"),
     (
-        ((), "nothing upgraded"),
-        (("upgraded",), "1 upgraded"),
-        (("upgraded", "upgraded", "installed", "removed"), "2 upgraded"),
+        (UPGRADE_RESULTS, (), "nothing upgraded"),
+        (UPGRADE_RESULTS, ("upgraded",), "1 upgraded"),
         (
+            UPGRADE_RESULTS,
+            ("upgraded", "upgraded", "installed", "removed"),
+            "2 upgraded",
+        ),
+        (
+            UPGRADE_RESULTS,
             ("held", "still outdated", "still outdated"),
             "nothing upgraded, 1 held, 2 still outdated",
         ),
-        (("upgraded", "held"), "1 upgraded, 1 held"),
-        (("downgraded",), "nothing upgraded, 1 downgraded"),
-        (("upgraded", "downgraded", "held"), "1 upgraded, 1 downgraded, 1 held"),
+        (UPGRADE_RESULTS, ("upgraded", "held"), "1 upgraded, 1 held"),
+        (UPGRADE_RESULTS, ("downgraded",), "nothing upgraded, 1 downgraded"),
+        (
+            UPGRADE_RESULTS,
+            ("upgraded", "downgraded", "held"),
+            "1 upgraded, 1 downgraded, 1 held",
+        ),
+        (SWEEP_RESULTS, (), "nothing removed"),
+        (SWEEP_RESULTS, ("removed", "removed", "upgraded"), "2 removed"),
     ),
 )
-def test_outcome_detail(statuses, detail):
-    assert _outcome_detail([{"status": status} for status in statuses]) == detail
+def test_outcome_detail(results, statuses, detail):
+    rows = [{"status": status} for status in statuses]
+    assert outcome_detail(rows, results) == detail
 
 
-def test_upgrade_all_reports_what_moved(invoke, upgrading_fake_pool):
+def test_upgrade_all_reports_what_moved(invoke, changing_fake_pool):
     """The trail line counts the outcomes and the table names each package."""
     result = invoke("upgrade", "--all")
     assert result.exit_code == 0
-    mid = upgrading_fake_pool.id
+    mid = changing_fake_pool.id
     stderr = strip_ansi(result.stderr)
     assert f"✓ {mid}.upgrade_all (1 upgraded, 1 downgraded, 1 still outdated)" in stderr
     assert "✓ Upgraded 1/1 managers" in stderr
-    table = strip_ansi(result.stdout)
-    # Whitespace runs collapse: a terminal that paints a glyph wider than it
-    # advances gets one more space after it.
-    cells = {
-        line.split()[1]: " ".join(line.split())
-        for line in table.splitlines()
-        if "fake-pkg-" in line
-    }
+    cells = report_rows(result.stdout)
     assert set(cells) == {
         "fake-pkg-alpha",
         "fake-pkg-beta",
@@ -397,27 +407,47 @@ def test_upgrade_all_reports_what_moved(invoke, upgrading_fake_pool):
         "fake-pkg-zeta",
     }
     expected = {
-        "fake-pkg-alpha": ("1.0.0", "1.1.0", UpgradeOutcome.UPGRADED.label),
-        "fake-pkg-beta": ("2.5.3", "2.6.0", UpgradeOutcome.STILL_OUTDATED.label),
-        "fake-pkg-epsilon": ("5.2.0", UpgradeOutcome.REMOVED.label),
-        "fake-pkg-gamma": ("0.1.0", UpgradeOutcome.INSTALLED.label),
-        "fake-pkg-zeta": ("3.0.0", "2.9.0", UpgradeOutcome.DOWNGRADED.label),
+        "fake-pkg-alpha": ("1.0.0", "1.1.0", PackageOutcome.UPGRADED.label),
+        "fake-pkg-beta": ("2.5.3", "2.6.0", PackageOutcome.STILL_OUTDATED.label),
+        "fake-pkg-epsilon": ("5.2.0", PackageOutcome.REMOVED.label),
+        "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+        "fake-pkg-zeta": ("3.0.0", "2.9.0", PackageOutcome.DOWNGRADED.label),
     }
     for package_id, words in expected.items():
         assert all(word in cells[package_id] for word in words), cells[package_id]
     # The package the upgrade never touched earns no row.
-    assert "fake-pkg-delta" not in table
+    assert "fake-pkg-delta" not in result.stdout
 
 
-def test_upgrade_all_report_serialized(invoke, upgrading_fake_pool):
+def test_upgrade_packages_reports_what_moved(invoke, changing_fake_pool):
+    """Upgrading named packages reports each one moved or left behind."""
+    result = invoke("upgrade", "fake-pkg-alpha", "fake-pkg-beta")
+    assert result.exit_code == 0
+    mid = changing_fake_pool.id
+    stderr = strip_ansi(result.stderr)
+    assert f"✓ {mid}.upgrade: fake-pkg-alpha" in stderr
+    assert f"✓ {mid}.upgrade: fake-pkg-beta" in stderr
+    cells = report_rows(result.stdout)
+    expected = {
+        "fake-pkg-alpha": ("1.0.0", "1.1.0", PackageOutcome.UPGRADED.label),
+        # The command succeeded, yet the pinned package did not move.
+        "fake-pkg-beta": ("2.5.3", "2.6.0", PackageOutcome.STILL_OUTDATED.label),
+        "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+    }
+    assert set(cells) == set(expected)
+    for package_id, words in expected.items():
+        assert all(word in cells[package_id] for word in words), cells[package_id]
+
+
+def test_upgrade_all_report_serialized(invoke, changing_fake_pool):
     """The serialized report keeps the shape of the other package listings."""
     result = invoke("--table-format", "json", "upgrade", "--all")
     assert result.exit_code == 0
-    mid = upgrading_fake_pool.id
+    mid = changing_fake_pool.id
     assert json.loads(result.stdout) == {
         mid: {
             "id": mid,
-            "name": upgrading_fake_pool.name,
+            "name": changing_fake_pool.name,
             "errors": [],
             "packages": [
                 {
@@ -461,11 +491,11 @@ def test_upgrade_all_report_serialized(invoke, upgrading_fake_pool):
 
 
 @pytest.mark.parametrize("mode", ("--dry-run", "--plan"))
-def test_upgrade_all_simulation_skips_the_report(invoke, upgrading_fake_pool, mode):
+def test_upgrade_all_simulation_skips_the_report(invoke, changing_fake_pool, mode):
     """A simulated upgrade moves nothing, so no diff is taken and none printed."""
     result = invoke(mode, "upgrade", "--all")
     assert result.exit_code == 0
-    mid = upgrading_fake_pool.id
+    mid = changing_fake_pool.id
     stderr = strip_ansi(result.stderr)
     assert f"✓ {mid}.upgrade_all (" in stderr
     assert "upgraded" not in stderr

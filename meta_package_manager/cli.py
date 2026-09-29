@@ -39,6 +39,7 @@ import shlex
 import signal
 import sys
 import threading
+from collections import Counter
 from collections.abc import Iterable
 from dataclasses import dataclass
 from functools import partial
@@ -104,11 +105,18 @@ from .pool import pool
 from .shell_env import import_shell_env
 from .specifier import VERSION_SEP, Specifier
 from .sudo import ESCALATION, ESCALATORS
-from .tables import SortableField
+from .tables import (
+    CHANGE_REPORT_COLUMNS,
+    PackageOutcome,
+    SortableField,
+    print_projected_table,
+    print_serialized,
+)
+from .version import TokenizedString, diff_versions
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Collection, Iterator, Mapping
     from types import FrameType
     from typing import Any
 
@@ -1315,6 +1323,375 @@ def exit_on_failures(ctx: Context, verb: str, failures: Iterable[object]) -> Non
     if not items:
         return
     fail_unless_zero_exit(ctx, f"Could not {verb}: " + ", ".join(items) + ".")
+
+
+def _versioned(inventory: Mapping[str, Package]) -> bool:
+    """Whether an inventory can tell that a package moved.
+
+    A listing that reports no version for any package diffs as unchanged
+    whatever the command did, and every outdated package in it would then read
+    as left behind. Such a reading disqualifies the report rather than
+    misstating it. An empty inventory passes: it has nothing to misstate.
+    """
+    return not inventory or any(
+        package.installed_version is not None for package in inventory.values()
+    )
+
+
+def _outcome_row(
+    package: Package,
+    from_version: TokenizedString | str | None,
+    to_version: TokenizedString | str | None,
+    status: PackageOutcome,
+) -> dict[str, object]:
+    """One row of the change report, in the field vocabulary of
+    {data}`~meta_package_manager.tables.CHANGE_REPORT_COLUMNS`.
+
+    The status travels as its bare string, the payload being serialized by
+    encoders that do not all accept a `str` subclass.
+    """
+    return {
+        "id": package.id,
+        "name": package.name,
+        "from_version": from_version,
+        "to_version": to_version,
+        "status": status.value,
+    }
+
+
+def _stepped_back(old: Package, new: Package, announced: Package | None) -> bool:
+    """Whether a version move goes back to an older release.
+
+    `mpm`'s version ordering decides, except in three cases where it could
+    report a false downgrade. The move then counts as an upgrade:
+
+    - one of the two versions is unknown, so the move has no direction;
+    - one of them carries a hex hash, which the ordering compares as a string:
+      two commits of one project sort in no meaningful order;
+    - `announced`, the package's entry in the outdated listing, names the new
+      version as the latest one. The manager's own listing outranks a
+      heuristic ordering, which sorts a project moving from calendar to
+      semantic versions backward.
+    """
+    before = old.installed_version
+    after = new.installed_version
+    if not isinstance(before, TokenizedString) or not isinstance(
+        after, TokenizedString
+    ):
+        return False
+    if before.has_hex_hash or after.has_hex_hash:
+        return False
+    if announced is not None and announced.latest_version == after:
+        return False
+    return after < before
+
+
+def package_outcomes(
+    before: Mapping[str, Package],
+    after: Mapping[str, Package],
+    expected: Mapping[str, Package] | None,
+    hold_reason: Callable[[str], str | None],
+) -> list[dict[str, object]]:
+    """Classify every package a command moved, or should have.
+
+    `before` and `after` are the two
+    {meth}`~meta_package_manager.manager.PackageManager.installed_inventory`
+    readings framing a manager's part of the command. `expected` is the
+    {meth}`~meta_package_manager.manager.PackageManager.outdated_inventory` an
+    upgrade takes before it runs, and `None` for a command that expects no
+    package to move in particular. `hold_reason` is the manager's
+    {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold_reason`.
+    Each row names the package and its versions and carries one
+    {class}`~meta_package_manager.tables.PackageOutcome` as `status`:
+
+    - a version that differs between the two readings is `downgraded` when it
+      moved back to an older release, and `upgraded` otherwise, a move whose
+      direction the version ordering cannot tell included;
+    - a package only the second reading lists is `installed`: one the command
+      installed, or a dependency it pulled in. One only the first lists is
+      `removed`;
+    - an expected package whose version did not move is `held` when the
+      cooldown still holds it back, `still outdated` otherwise: a failed build,
+      a pinned package, or one the native command leaves alone. Its
+      `to_version` is the one still available.
+
+    An expected package neither reading lists cannot be told moved from
+    unmoved, so it gets no row rather than a guess. Rows come sorted by package
+    ID.
+    """
+    rows = []
+    for package_id in sorted(before.keys() | after.keys()):
+        old = before.get(package_id)
+        new = after.get(package_id)
+        if old is None:
+            assert new is not None
+            rows.append(
+                _outcome_row(new, None, new.installed_version, PackageOutcome.INSTALLED)
+            )
+        elif new is None:
+            rows.append(
+                _outcome_row(old, old.installed_version, None, PackageOutcome.REMOVED)
+            )
+        elif old.installed_version != new.installed_version:
+            announced = expected.get(package_id) if expected is not None else None
+            status = (
+                PackageOutcome.DOWNGRADED
+                if _stepped_back(old, new, announced)
+                else PackageOutcome.UPGRADED
+            )
+            rows.append(
+                _outcome_row(new, old.installed_version, new.installed_version, status)
+            )
+        elif expected is not None and package_id in expected:
+            status = (
+                PackageOutcome.HELD
+                if hold_reason(package_id)
+                else PackageOutcome.STILL_OUTDATED
+            )
+            rows.append(
+                _outcome_row(
+                    new,
+                    new.installed_version,
+                    expected[package_id].latest_version,
+                    status,
+                )
+            )
+    return rows
+
+
+def outcome_detail(
+    rows: list[dict[str, object]], results: tuple[PackageOutcome, ...]
+) -> str:
+    """Count the `results` among a manager's rows, for its trail line.
+
+    Reads `1 upgraded, 2 held`. Always opens on the first of `results`, zero
+    included (`nothing upgraded`), so a run that changed nothing says so where a
+    run that changed something says how much. The other `results` follow when
+    there are any. An outcome left out of `results` stays in the table, being a
+    consequence rather than a result: the dependencies an upgrade pulled in or
+    dropped.
+    """
+    counts = Counter(str(row["status"]) for row in rows)
+    lead, *others = results
+    parts = [f"{counts[lead]} {lead}" if counts[lead] else f"nothing {lead}"]
+    parts.extend(
+        f"{counts[outcome]} {outcome}" for outcome in others if counts[outcome]
+    )
+    return ", ".join(parts)
+
+
+def print_change_report(ctx: Context, report: Mapping[str, dict]) -> None:
+    """Print what a command changed in the installed inventory.
+
+    `report` is keyed by manager ID, each payload shaped like the `installed`
+    and `outdated` ones (`id`, `name`, `packages`, `errors`) with the rows of
+    {func}`package_outcomes` as `packages`. A serialization `--table-format`
+    gets the whole payload, and the command goes on to its own exit code.
+    Otherwise the rows render as one table through
+    {data}`~meta_package_manager.tables.CHANGE_REPORT_COLUMNS`, the version pair
+    of a package colored the way `mpm outdated` colors it, and its status shown
+    as its {attr}`~meta_package_manager.tables.PackageOutcome.label`. An empty
+    table prints nothing: the trail already said nothing moved.
+    """
+    if print_serialized(ctx, report):
+        return
+    table: list[dict[str, str | None]] = []
+    for manager_id, payload in report.items():
+        for row in payload["packages"]:
+            from_version = str(row["from_version"] or "")
+            to_version = str(row["to_version"] or "")
+            if from_version and to_version:
+                from_version, to_version = diff_versions(from_version, to_version)
+            table.append({
+                "package_id": str(row["id"]),
+                "package_name": str(row["name"] or ""),
+                "manager_id": manager_id,
+                "from_version": from_version,
+                "to_version": to_version,
+                "status": PackageOutcome(row["status"]).label,
+            })
+    if table:
+        print_projected_table(ctx, CHANGE_REPORT_COLUMNS, table)
+
+
+class ChangeReport:
+    """What a command did to the installed inventory of each manager.
+
+    Frames each manager's part of the command with two
+    {meth}`~meta_package_manager.manager.PackageManager.installed_inventory`
+    readings, {meth}`open` before and {meth}`close` after, and classifies their
+    difference through {func}`package_outcomes`. A native command reports what it
+    changed in its own words, or not at all: the diff gives every manager the
+    same report, whatever it printed. Shared by `install`, `remove`, `upgrade`,
+    `restore` and `cleanup --orphans`, each closing on {meth}`show`.
+
+    No reading is taken under `--dry-run`, whose simulated reads list nothing,
+    nor under `--plan`, whose captured mutations move nothing: the diff would
+    then read as a run that changed nothing.
+
+    Thread-safe: a concurrent fan-out opens and closes different managers on
+    different workers, and a manager's own tasks never overlap.
+    """
+
+    def __init__(self, managers: Iterable[PackageManager] = ()) -> None:
+        """`managers` fixes the order of the report up front, for a fan-out whose
+        managers finish in any order. A manager opened later joins at the end."""
+        self._lock = threading.Lock()
+        self._order: list[str] = [manager.id for manager in managers]
+        self._opened: dict[
+            str, tuple[PackageManager, dict[str, Package], dict[str, Package] | None]
+        ] = {}
+        self._payloads: dict[str, dict] = {}
+
+    def open(
+        self,
+        manager: PackageManager,
+        *,
+        outdated: bool = False,
+        among: Collection[str] | None = None,
+    ) -> dict[str, Package] | None:
+        """Take the reading before `manager` changes its inventory.
+
+        With `outdated`, also read the packages the command is expected to move,
+        kept to the IDs in `among` when given, and return them: `upgrade --all`
+        hands them to the upgrade, so it does not list them twice. Returns `None`
+        otherwise, or when the manager cannot be read.
+
+        A manager already open keeps its first reading, so a command attempting
+        one manager several times frames all of its attempts.
+        """
+        with self._lock:
+            if manager.id in self._opened:
+                return self._opened[manager.id][2]
+        if manager.dry_run or manager.plan:
+            return None
+        before = manager.installed_inventory()
+        if before is None:
+            return None
+        expected = None
+        if outdated:
+            expected = manager.outdated_inventory()
+            if expected is not None and among is not None:
+                expected = {
+                    package_id: package
+                    for package_id, package in expected.items()
+                    if package_id in among
+                }
+        with self._lock:
+            self._opened[manager.id] = (manager, before, expected)
+            if manager.id not in self._order:
+                self._order.append(manager.id)
+        return expected
+
+    def close(self, manager: PackageManager) -> list[dict[str, object]] | None:
+        """Take the reading after `manager` changed its inventory, and file the
+        difference as the manager's rows of the report.
+
+        Returns the rows, or `None` when the manager stays out of the report: it
+        was never open, its second reading failed, or a reading carries no
+        version at all.
+        """
+        with self._lock:
+            opened = self._opened.pop(manager.id, None)
+        if opened is None:
+            return None
+        _manager, before, expected = opened
+        after = manager.installed_inventory()
+        if after is None or not _versioned(before) or not _versioned(after):
+            return None
+        rows = package_outcomes(before, after, expected, manager.cooldown_hold_reason)
+        with self._lock:
+            self._payloads[manager.id] = {
+                "id": manager.id,
+                "name": manager.name,
+                "packages": rows,
+                "errors": serialized_errors(manager),
+            }
+        return rows
+
+    def close_all(self) -> None:
+        """Close every manager still open: the sequential `install` path opens
+        each manager on its first attempt and closes them all at the end."""
+        with self._lock:
+            managers = [
+                manager for manager, _before, _expected in self._opened.values()
+            ]
+        for manager in managers:
+            self.close(manager)
+
+    def bracket(
+        self,
+        tasks: Iterable[tuple[PackageManager, Callable[[], tuple[bool, str]]]],
+        *,
+        outdated: Mapping[str, Collection[str]] | None = None,
+    ) -> list[tuple[PackageManager, Callable[[], tuple[bool, str]]]]:
+        """Wrap per-package tasks so each manager's run is read on both sides.
+
+        The tasks come back grouped by manager, each manager's in their original
+        order: its first task opens it and its last closes it. Grouping keeps the
+        members of a lock family from interleaving on their shared lane, so each
+        pair of readings frames the tasks of its own manager alone. `outdated`
+        maps a manager ID to the package IDs its tasks are expected to move (see
+        {meth}`open`).
+        """
+        grouped: dict[PackageManager, list[Callable[[], tuple[bool, str]]]] = {}
+        for manager, task in tasks:
+            grouped.setdefault(manager, []).append(task)
+        with self._lock:
+            for manager in grouped:
+                if manager.id not in self._order:
+                    self._order.append(manager.id)
+        bracketed = []
+        for manager, manager_tasks in grouped.items():
+            among = None if outdated is None else outdated.get(manager.id, ())
+            last = len(manager_tasks) - 1
+            for index, task in enumerate(manager_tasks):
+                bracketed.append((
+                    manager,
+                    self._framed(
+                        manager, task, first=index == 0, last=index == last, among=among
+                    ),
+                ))
+        return bracketed
+
+    def _framed(
+        self,
+        manager: PackageManager,
+        task: Callable[[], tuple[bool, str]],
+        *,
+        first: bool,
+        last: bool,
+        among: Collection[str] | None,
+    ) -> Callable[[], tuple[bool, str]]:
+        """Run `task`, opening `manager` before it when `first` and closing it
+        after when `last`."""
+
+        def framed() -> tuple[bool, str]:
+            if first:
+                self.open(manager, outdated=among is not None, among=among)
+            outcome = task()
+            if last:
+                self.close(manager)
+            return outcome
+
+        return framed
+
+    @property
+    def payload(self) -> dict[str, dict]:
+        """The report so far, one payload per manager read on both sides."""
+        with self._lock:
+            return {
+                manager_id: self._payloads[manager_id]
+                for manager_id in self._order
+                if manager_id in self._payloads
+            }
+
+    def show(self, ctx: Context) -> None:
+        """Print the report through {func}`print_change_report`, when any manager
+        could be read on both sides of the command."""
+        payload = self.payload
+        if payload:
+            print_change_report(ctx, payload)
 
 
 # Register every subcommand module onto the group. Placed at the bottom so the

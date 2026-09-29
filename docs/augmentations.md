@@ -191,9 +191,9 @@ HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_ENV_HINTS=1 HOMEBREW_NO_AUTO_UPDATE=1 /opt/h
 
 Each line carries the resolved binary path and the forced environment, so the plan doubles as an audit trail and pipes straight into a shell.
 
-### A report of what each upgrade moved
+### A report of what each command changed
 
-Most managers upgrade everything in one native command, which reports what it did in its own words, or not at all. `mpm upgrade --all` reads each manager's installed inventory before and after that command and diffs the two readings, so every manager gets the same report. Each manager's trail line counts the outcomes:
+A native command reports what it changed in its own words, or not at all. `mpm` reads each manager's installed inventory before and after it runs `install`, `remove`, `upgrade`, `restore` or `cleanup --orphans`, and diffs the two readings, so every manager gets the same report. On the trail, `upgrade --all` counts the outcomes of each manager, and the orphan sweep counts its removals beside its category:
 
 ```console
 $ mpm --brew upgrade --all
@@ -207,12 +207,12 @@ The table follows on stdout, one row per package with its `From` and `To` versio
 | :---------------- | :----------------------------------------------------------------------------------------------------------- |
 | 🆙 upgraded       | The installed version moved to a newer one.                                                                  |
 | ⏪ downgraded     | The installed version moved back to an older one.                                                            |
-| 🆕 installed      | A dependency the upgrade pulled in.                                                                          |
-| 🗑️ removed        | A package the upgrade dropped.                                                                               |
+| 🆕 installed      | A package the command installed, or a dependency it pulled in.                                               |
+| 🗑️ removed        | A package the command removed, or one it dropped along the way.                                              |
 | ⏸️ held           | Still outdated: the [cooldown](cooldown.md) holds it back.                                                   |
 | ⏳ still outdated | Still outdated for another reason: a failed build, a pinned package, or one the native command leaves alone. |
 
-The table takes the format `--table-format` selects and the columns `--columns` keeps. A serialized format like JSON carries the bare status words, for a script to match. The report costs one `installed` listing on each side of the upgrade and one `outdated` listing before it. A manager whose listing carries no versions gets no report, and neither does a `--dry-run` or `--plan` run, which moves nothing.
+Only an upgrade names the packages it expects to move, so only an upgrade reports `held` and `still outdated` rows. The table takes the format `--table-format` selects and the columns `--columns` keeps. A serialized format like JSON carries the bare status words, for a script to match. The report costs one `installed` listing on each side of the command, plus one `outdated` listing before an upgrade. A manager whose listing carries no versions gets no report, and neither does a `--dry-run` or `--plan` run, which moves nothing.
 
 ### Comparable versions across schemes
 

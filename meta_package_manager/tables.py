@@ -31,9 +31,10 @@ command) but share the same output machinery. This module owns all of it:
   truth for its command: the same tuple feeds the `@columns_option` declaration
   (which validates the user selection) and {func}`print_projected_table`
   (which projects headers and rows before rendering).
-- {func}`print_projected_table` and {func}`print_serialized_and_exit`, the
+- {func}`print_projected_table` and {func}`print_serialized`, the
   human-friendly and machine-friendly rendering paths every table-producing
-  subcommand goes through.
+  subcommand goes through. The read commands serialize through
+  {func}`print_serialized_and_exit`, which stops the command there.
 """
 
 from __future__ import annotations
@@ -69,13 +70,13 @@ class SortableField(StrEnum):
     VERSION = "version"
 
 
-class UpgradeOutcome(StrEnum):
-    """What a full upgrade did to one package, as the `status` column of
-    {data}`UPGRADE_COLUMNS` spells it.
+class PackageOutcome(StrEnum):
+    """What a command did to one package, as the `status` column of
+    {data}`CHANGE_REPORT_COLUMNS` spells it.
 
-    Classified by {func}`meta_package_manager.cli_maintenance.upgrade_outcomes`
-    from the inventory a manager reports before and after its native upgrade.
-    The values are the words the serialized payload carries and the trail line
+    Classified by {func}`meta_package_manager.cli.package_outcomes` from the
+    inventory a manager reports before and after the command changes it. The
+    values are the words the serialized payload carries and the trail line
     counts (`1 upgraded, 2 held`), so a member reads as a word rather than as an
     identifier. The table shows each one as its {attr}`label`.
     """
@@ -88,10 +89,11 @@ class UpgradeOutcome(StrEnum):
     """The installed version moved back to an older release."""
 
     INSTALLED = "installed"
-    """Absent before the upgrade: a dependency it pulled in."""
+    """Absent before the command: a package it installed, or a dependency it
+    pulled in."""
 
     REMOVED = "removed"
-    """Present before the upgrade, gone after it."""
+    """Present before the command, gone after it."""
 
     HELD = "held"
     """Still outdated because the release-age cooldown holds it back."""
@@ -103,25 +105,25 @@ class UpgradeOutcome(StrEnum):
     @property
     def label(self) -> str:
         """The outcome as the report table shows it: its glyph from
-        {data}`UPGRADE_OUTCOME_GLYPHS`, then its word."""
-        return f"{UPGRADE_OUTCOME_GLYPHS[self]} {self.value}"
+        {data}`PACKAGE_OUTCOME_GLYPHS`, then its word."""
+        return f"{PACKAGE_OUTCOME_GLYPHS[self]} {self.value}"
 
 
-UPGRADE_OUTCOME_GLYPHS: dict[UpgradeOutcome, str] = {
-    UpgradeOutcome.UPGRADED: "🆙",
-    UpgradeOutcome.DOWNGRADED: "⏪",
-    UpgradeOutcome.INSTALLED: "🆕",
-    UpgradeOutcome.REMOVED: "🗑️",
-    UpgradeOutcome.HELD: "⏸️",
-    UpgradeOutcome.STILL_OUTDATED: "⏳",
+PACKAGE_OUTCOME_GLYPHS: dict[PackageOutcome, str] = {
+    PackageOutcome.UPGRADED: "🆙",
+    PackageOutcome.DOWNGRADED: "⏪",
+    PackageOutcome.INSTALLED: "🆕",
+    PackageOutcome.REMOVED: "🗑️",
+    PackageOutcome.HELD: "⏸️",
+    PackageOutcome.STILL_OUTDATED: "⏳",
 }
-"""The glyph leading each {class}`UpgradeOutcome` in the report table.
+"""The glyph leading each {class}`PackageOutcome` in the report table.
 
 All but one come from the legend repomatic's dependency reports use for the
 same moves (🆙 updated, ⏪ stepped back, 🆕 new, 🗑️ removed, ⏸️ held back by
 cooldown), so a reader of both reads one legend. `still outdated` has no
-counterpart there:
-⏳ marks a package whose upgrade is still pending, whatever the cause.
+counterpart there: ⏳ marks a package whose upgrade is still pending, whatever
+the cause.
 
 Only the table carries them. The serialized report and the trail line keep the
 bare word, which is what a script matches.
@@ -312,18 +314,18 @@ and version columns share that treatment, and `package_id` is exempt from it,
 per the width policy documented on {data}`PACKAGE_ID_COLUMN`.
 """
 
-UPGRADE_COLUMNS: tuple[TColumn, ...] = (
+CHANGE_REPORT_COLUMNS: tuple[TColumn, ...] = (
     PACKAGE_ID_COLUMN,
     PACKAGE_NAME_COLUMN,
     (
-        ColumnSpec("manager_id", "Manager", "Manager that ran the upgrade."),
+        ColumnSpec("manager_id", "Manager", "Manager whose inventory changed."),
         SortableField.MANAGER_ID,
     ),
     (
         ColumnSpec(
             "from_version",
             "From",
-            "Version installed before the upgrade.",
+            "Version installed before the command.",
             max_width=AUTO_WIDTH,
         ),
         None,
@@ -332,7 +334,7 @@ UPGRADE_COLUMNS: tuple[TColumn, ...] = (
         ColumnSpec(
             "to_version",
             "To",
-            "Version installed after the upgrade, or the one still available for "
+            "Version installed after the command, or the one still available for "
             "a package that did not move.",
             max_width=AUTO_WIDTH,
         ),
@@ -342,18 +344,18 @@ UPGRADE_COLUMNS: tuple[TColumn, ...] = (
         ColumnSpec(
             "status",
             "Status",
-            f"What the upgrade did to the package: {', '.join(UpgradeOutcome)}.",
+            f"What the command did to the package: {', '.join(PackageOutcome)}.",
         ),
         None,
     ),
 )
-"""Columns of the report closing `mpm upgrade --all`.
+"""Columns of the change report closing every command that changes the installed
+inventory: `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans`.
 
-One row per package the run moved or should have, each carrying one
-{class}`UpgradeOutcome`; see
-{func}`meta_package_manager.cli_maintenance.upgrade_outcomes` for how a row is
-classified. The version columns wrap like every other table's, and
-`package_id` does not, per {data}`PACKAGE_ID_COLUMN`. Neither version column
+One row per package the command moved or should have, each carrying one
+{class}`PackageOutcome`; see {func}`meta_package_manager.cli.package_outcomes`
+for how a row is classified. The version columns wrap like every other table's,
+and `package_id` does not, per {data}`PACKAGE_ID_COLUMN`. Neither version column
 drives `--sort-by`: a report sorts by what moved, not by how far.
 """
 
@@ -478,23 +480,33 @@ def print_projected_table(
         )
 
 
-def print_serialized_and_exit(ctx: Context, data: object) -> None:
-    """Render `data` in the active serialization format, then exit.
+def print_serialized(ctx: Context, data: object) -> bool:
+    """Render `data` in the active serialization format, if one is active.
 
     When the global `--table-format` resolves to one of the structured
     serialization formats (JSON, YAML, TOML, XML, ...), serialize `data` under
-    the shared `mpm` root element and stop the program. Otherwise return, so
-    the caller falls through to its human-friendly table rendering.
+    the shared `mpm` root element and return `True`. Otherwise print nothing and
+    return `False`, so the caller falls through to its human-friendly rendering.
     """
     table_format = ctx.meta[TABLE_FORMAT]
-    if table_format in SERIALIZATION_FORMATS:
-        # Serialized documents carry the full structured payload, which a
-        # --columns selection does not narrow.
-        if ctx.meta.get(COLUMNS):
-            logging.info(
-                "Ignore the --columns option: serialized output carries every field."
-            )
-        print_data(
-            data, table_format, root_element="mpm", package="meta-package-manager"
+    if table_format not in SERIALIZATION_FORMATS:
+        return False
+    # Serialized documents carry the full structured payload, which a
+    # --columns selection does not narrow.
+    if ctx.meta.get(COLUMNS):
+        logging.info(
+            "Ignore the --columns option: serialized output carries every field."
         )
+    print_data(data, table_format, root_element="mpm", package="meta-package-manager")
+    return True
+
+
+def print_serialized_and_exit(ctx: Context, data: object) -> None:
+    """Render `data` in the active serialization format, then exit.
+
+    The read commands' variant of {func}`print_serialized`: their serialized
+    document is their whole output, so the command stops there. Otherwise
+    return, so the caller falls through to its human-friendly table rendering.
+    """
+    if print_serialized(ctx, data):
         ctx.exit()

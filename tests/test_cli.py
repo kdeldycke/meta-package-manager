@@ -138,6 +138,19 @@ def assert_no_manager_selected(result) -> None:
     assert "critical: No manager selected.\n" in result.stderr
 
 
+def report_rows(stdout: str) -> dict[str, str]:
+    """Map each package ID of a change report table to its row.
+
+    Whitespace runs collapse to one space: a terminal that paints a glyph wider
+    than it advances gets one more space after it.
+    """
+    return {
+        line.split()[1]: " ".join(line.split())
+        for line in strip_ansi(stdout).splitlines()
+        if "fake-pkg-" in line
+    }
+
+
 def check_filtered_ids(result, expected_ids: set[str]) -> None:
     """Assert the serialized payload reports exactly `expected_ids`."""
     assert result.exit_code == 0

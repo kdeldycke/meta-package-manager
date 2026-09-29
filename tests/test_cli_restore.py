@@ -22,10 +22,15 @@ import pytest
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.pool import pool
+from meta_package_manager.tables import PackageOutcome
 
 from .conftest import default_manager_ids
 from .destructive_plan import destructive_group
-from .test_cli import assert_no_manager_selected, check_manager_selection
+from .test_cli import (
+    assert_no_manager_selected,
+    check_manager_selection,
+    report_rows,
+)
 
 
 @pytest.fixture
@@ -189,3 +194,25 @@ def test_empty_manager(invoke, create_config):
     assert result.exit_code == 0
     assert "uv-empty.toml" in result.stderr
     assert ":uv.install: Restore packages." in result.stderr
+
+
+def test_restore_reports_what_moved(invoke, create_config, changing_fake_pool):
+    """Restoring a snapshot reports each package installed, at its version."""
+    mid = changing_fake_pool.id
+    toml_path = create_config(
+        "snapshot.toml",
+        f"""
+        [{mid}]
+        fake-pkg-theta = "2.0.0"
+        """,
+    )
+    result = invoke("restore", str(toml_path))
+    assert result.exit_code == 0
+    rows = report_rows(result.stdout)
+    expected = {
+        "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+        "fake-pkg-theta": ("2.0.0", PackageOutcome.INSTALLED.label),
+    }
+    assert set(rows) == set(expected)
+    for package_id, words in expected.items():
+        assert all(word in rows[package_id] for word in words), rows[package_id]

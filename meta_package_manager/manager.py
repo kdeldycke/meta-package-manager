@@ -744,16 +744,16 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def installed_inventory(self) -> dict[str, Package] | None:
         """Installed packages keyed by ID, read fresh from the system.
 
-        The reading `mpm upgrade --all` takes on either side of a manager's
-        native full upgrade, then diffs into its report of what moved. Both
-        readings come from this one listing, so the diff stays self-consistent
-        even where a manager's `outdated` and `installed` disagree on a
-        package's ID.
+        The reading the change report takes on either side of a command that
+        changes the inventory, then diffs into its rows (see
+        {class}`meta_package_manager.cli.ChangeReport`). Both readings come
+        from this one listing, so the diff stays self-consistent even where a
+        manager's `outdated` and `installed` disagree on a package's ID.
 
         Never served from a memoized view, since the point is to observe a
-        change. The two views memoized on the instance, {attr}`installed_ids`
-        and {attr}`installed_version_map`, are dropped on the way out: read
-        before an upgrade, they describe a system that no longer exists.
+        change. The views the instance memoizes, listed in
+        {data}`INVENTORY_CACHES`, are dropped on the way out: read before an
+        upgrade, they describe a system that no longer exists.
 
         Returns `None` rather than an empty inventory when the manager has no
         answer: no `installed` at all, or a listing whose CLI failed. A diff
@@ -766,7 +766,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         try:
             return self._read_inventory("installed", lambda: self.installed)
         finally:
-            for memoized in ("installed_ids", "installed_version_map"):
+            for memoized in INVENTORY_CACHES:
                 self.__dict__.pop(memoized, None)
 
     def _read_inventory(
@@ -868,9 +868,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def outdated_inventory(self) -> dict[str, Package] | None:
         """Outdated packages keyed by ID, read fresh from the system.
 
-        What `mpm upgrade --all` expects a full upgrade to move, read once
-        before it runs so the report can name what did not. The one-by-one
-        fallback and the cooldown hold upgrade from the same listing, which
+        What an upgrade is expected to move, read once before it runs so the
+        change report can name what did not. The one-by-one fallback and the
+        cooldown hold of a full upgrade work from the same listing, which
         {meth}`upgrade` takes through `outdated_ids` so a run lists once.
 
         Same contract as {meth}`installed_inventory`: fresh, read under the

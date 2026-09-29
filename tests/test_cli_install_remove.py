@@ -20,12 +20,15 @@ The two operations are siblings, so they share one module.
 
 from __future__ import annotations
 
+import json
 import re
 from functools import partial
 
 import pytest
+from boltons.strutils import strip_ansi
 
 from meta_package_manager.pool import pool
+from meta_package_manager.tables import PackageOutcome
 
 from . import conftest
 from .destructive_plan import (
@@ -34,7 +37,11 @@ from .destructive_plan import (
     install_remove_blocked,
     maintained_manager_ids_and_dummy_package,
 )
-from .test_cli import assert_no_manager_selected, check_manager_selection
+from .test_cli import (
+    assert_no_manager_selected,
+    check_manager_selection,
+    report_rows,
+)
 
 
 @pytest.fixture
@@ -99,6 +106,85 @@ def test_remove_absent_package_is_idempotent(invoke, fake_pool):
     """
     result = invoke("remove", "package-installed-by-no-manager")
     assert result.exit_code == 0
+
+
+def check_report(stdout: str, expected: dict[str, tuple[str, ...]]) -> None:
+    """Assert the change report holds exactly the `expected` rows, each carrying
+    its words."""
+    rows = report_rows(stdout)
+    assert set(rows) == set(expected)
+    for package_id, words in expected.items():
+        assert all(word in rows[package_id] for word in words), rows[package_id]
+
+
+def test_install_reports_what_moved(invoke, changing_fake_pool):
+    """A package tied to its manager installs on the concurrent path, and the
+    report names it with the dependency it pulled in."""
+    mid = changing_fake_pool.id
+    result = invoke("install", f"pkg:{mid}/fake-pkg-theta")
+    assert result.exit_code == 0
+    assert f"✓ {mid}.install: fake-pkg-theta" in strip_ansi(result.stderr)
+    check_report(
+        result.stdout,
+        {
+            "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+            "fake-pkg-theta": ("1.0.0", PackageOutcome.INSTALLED.label),
+        },
+    )
+
+
+def test_install_untied_reports_every_attempt(invoke, changing_fake_pool):
+    """Packages left untied install through the sequential priority search. Its
+    manager opens once, so the report keeps the first install too."""
+    result = invoke("install", "fake-pkg-theta", "fake-pkg-iota")
+    assert result.exit_code == 0
+    check_report(
+        result.stdout,
+        {
+            "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+            "fake-pkg-iota": ("1.0.0", PackageOutcome.INSTALLED.label),
+            "fake-pkg-theta": ("1.0.0", PackageOutcome.INSTALLED.label),
+        },
+    )
+
+
+def test_install_report_serialized_keeps_the_exit_code(invoke, changing_fake_pool):
+    """The serialized report prints, and a failed package still exits non-zero."""
+    mid = changing_fake_pool.id
+    result = invoke(
+        "--table-format",
+        "json",
+        "install",
+        f"pkg:{mid}/fake-pkg-theta",
+        f"pkg:{mid}/fake-pkg-broken",
+    )
+    assert result.exit_code == 1
+    assert "Could not install: fake-pkg-broken." in result.stderr
+    packages = json.loads(result.stdout)[mid]["packages"]
+    assert [(p["id"], p["status"]) for p in packages] == [
+        ("fake-pkg-gamma", "installed"),
+        ("fake-pkg-theta", "installed"),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("args", "removed"),
+    (
+        ((), {"fake-pkg-delta": "4.0.0"}),
+        (("--orphans",), {"fake-pkg-delta": "4.0.0", "fake-pkg-epsilon": "5.2.0"}),
+    ),
+)
+def test_remove_reports_what_moved(invoke, changing_fake_pool, args, removed):
+    """The report names the removed package, and the orphan its cascade took."""
+    result = invoke("remove", *args, "fake-pkg-delta")
+    assert result.exit_code == 0
+    check_report(
+        result.stdout,
+        {
+            package_id: (version, PackageOutcome.REMOVED.label)
+            for package_id, version in removed.items()
+        },
+    )
 
 
 @pytest.mark.destructive()

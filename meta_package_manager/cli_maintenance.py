@@ -33,7 +33,6 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from collections import Counter
 
 from click_extra import (
     STRING,
@@ -55,14 +54,15 @@ from .capabilities import (
 )
 from .cli import (
     MAINTENANCE,
+    ChangeReport,
     exit_on_failures,
     fail_unless_zero_exit,
     install_action,
     mpm,
+    outcome_detail,
     package_label,
     package_task,
     run_manager_action,
-    serialized_errors,
 )
 from .cooldown import CooldownPolicy
 from .dispatch import (
@@ -78,22 +78,26 @@ from .manager import PackageManager
 from .pool import pool
 from .specifier import Solver, Specifier
 from .sudo import inspect_install_root, prime_sudo
-from .tables import (
-    UPGRADE_COLUMNS,
-    UpgradeOutcome,
-    column_specs,
-    print_projected_table,
-    print_serialized_and_exit,
-)
-from .version import TokenizedString, diff_versions
+from .tables import CHANGE_REPORT_COLUMNS, PackageOutcome, column_specs
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Callable
 
     from click_extra import Context
 
-    from .package import Package
+
+UPGRADE_RESULTS = (
+    PackageOutcome.UPGRADED,
+    PackageOutcome.DOWNGRADED,
+    PackageOutcome.HELD,
+    PackageOutcome.STILL_OUTDATED,
+)
+"""The outcomes a full upgrade counts on each manager's trail line, the upgrades
+first."""
+
+SWEEP_RESULTS = (PackageOutcome.REMOVED,)
+"""The outcome an orphan sweep counts on each manager's trail line."""
 
 
 def cooldown_permits(manager: PackageManager) -> bool:
@@ -187,6 +191,7 @@ def _dispatch_sourced_operation(
     label: str,
     done_label: str,
     apply_cooldown: bool = False,
+    report_outdated: bool = False,
 ) -> None:
     """Resolve each package spec to its source managers, then fan `action` out.
 
@@ -201,6 +206,11 @@ def _dispatch_sourced_operation(
     `apply_cooldown` gates each manager through {func}`cooldown_permits` first, so a
     release-introducing `upgrade` skips a manager that cannot honor an active cooldown;
     `remove` (which introduces nothing) leaves it `False`.
+
+    The command closes on the change report of each manager it acted with (see
+    {class}`~meta_package_manager.cli.ChangeReport`). `report_outdated` reads the
+    outdated listing first, so the report also names each requested package the
+    command left behind: `upgrade` sets it.
     """
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=operation),
@@ -226,6 +236,8 @@ def _dispatch_sourced_operation(
     # manager's own packages are processed one at a time (see collect_per_package).
     failures_lock = threading.Lock()
     tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
+    # The package IDs each manager acts on, the ones an upgrade expects to move.
+    requested: dict[str, set[str]] = {}
     solver = Solver(packages_specs, manager_priority=manager_ids)
     for package_id, spec in solver.resolve_package_specs():
         source_manager_ids = set()
@@ -264,6 +276,7 @@ def _dispatch_sourced_operation(
             manager = pool.get(manager_id)
             if apply_cooldown and not cooldown_permits(manager):
                 continue
+            requested.setdefault(manager.id, set()).add(package_id)
             tasks.append((
                 manager,
                 package_task(
@@ -281,7 +294,14 @@ def _dispatch_sourced_operation(
                 ),
             ))
 
-    collect_per_package(label, done_label, tasks, operation=operation.name)
+    report = ChangeReport()
+    collect_per_package(
+        label,
+        done_label,
+        report.bracket(tasks, outdated=requested if report_outdated else None),
+        operation=operation.name,
+    )
+    report.show(ctx)
 
     exit_on_failures(ctx, verb, failures)
 
@@ -384,6 +404,7 @@ def _tied_install_tasks(
     help="A mix of plain <package_id>, simple <package_id@version> specifiers or full "
     "<pkg:npm/left-pad> purls.",
 )
+@columns_option(columns=column_specs(CHANGE_REPORT_COLUMNS))
 @pass_context
 def install(ctx, packages_specs):
     """Install one or more packages.
@@ -427,6 +448,8 @@ def install(ctx, packages_specs):
     unresolved_labels: list[str] = []
     failures_lock = threading.Lock()
     tasks = _tied_install_tasks(packages_per_managers, failures_lock, unresolved_labels)
+    # Frames each manager's installs with two inventory readings (see ChangeReport).
+    report = ChangeReport()
 
     # Packages tied to a manager (purls, or a single-manager selection) install
     # concurrently across managers, serial within each (see collect_per_package). An
@@ -435,8 +458,12 @@ def install(ctx, packages_specs):
     # whole command onto the sequential path below.
     if not unmatched_packages:
         collect_per_package(
-            "Installing", "Installed", tasks, operation=Operations.install.name
+            "Installing",
+            "Installed",
+            report.bracket(tasks),
+            operation=Operations.install.name,
         )
+        report.show(ctx)
         exit_on_failures(ctx, "install", unresolved_labels)
         return
 
@@ -451,8 +478,10 @@ def install(ctx, packages_specs):
     installed_count = 0
 
     # Install all packages deterministically tied to a specific manager, through the
-    # very tasks the concurrent path runs, one at a time.
-    for _manager, task in tasks:
+    # very tasks the concurrent path runs, one at a time. Each manager opens on its
+    # first attempt, here or in the priority search below, and all close at the end.
+    for manager, task in tasks:
+        report.open(manager)
         ok, text = timed_task(task)
         installed_count += ok
         op.mark(ok, text)
@@ -522,6 +551,7 @@ def install(ctx, packages_specs):
                     msg = "Exact search returned multiple packages."
                     raise ValueError(msg)
 
+            report.open(manager)
             status = _attempt_install(manager, spec)
             # A package held by the cooldown ends the search: the highest-
             # priority manager providing it has answered, and falling through
@@ -544,196 +574,12 @@ def install(ctx, packages_specs):
             unresolved_labels.append(package_label(spec))
 
     op.finish(installed_count == total, f"Installed {installed_count}/{total} packages")
+    report.close_all()
+    report.show(ctx)
 
     # Fail with a non-zero exit code if any requested package went uninstalled by every
     # selected manager.
     exit_on_failures(ctx, "install", unresolved_labels)
-
-
-def _versioned(inventory: Mapping[str, Package]) -> bool:
-    """Whether an inventory can tell that a package moved.
-
-    A listing that reports no version for any package diffs as unchanged
-    whatever the upgrade did, and every outdated package in it would then read
-    as left behind. Such a reading disqualifies the report rather than
-    misstating it. An empty inventory passes: it has nothing to misstate.
-    """
-    return not inventory or any(
-        package.installed_version is not None for package in inventory.values()
-    )
-
-
-def _outcome_row(
-    package: Package,
-    from_version: TokenizedString | str | None,
-    to_version: TokenizedString | str | None,
-    status: UpgradeOutcome,
-) -> dict[str, object]:
-    """One row of the report, in the field vocabulary of
-    {data}`~meta_package_manager.tables.UPGRADE_COLUMNS`.
-
-    The status travels as its bare string, the payload being serialized by
-    encoders that do not all accept a `str` subclass.
-    """
-    return {
-        "id": package.id,
-        "name": package.name,
-        "from_version": from_version,
-        "to_version": to_version,
-        "status": status.value,
-    }
-
-
-def _stepped_back(old: Package, new: Package, announced: Package | None) -> bool:
-    """Whether a version move goes back to an older release.
-
-    `mpm`'s version ordering decides, except in three cases where it could
-    report a false downgrade. The move then counts as an upgrade:
-
-    - one of the two versions is unknown, so the move has no direction;
-    - one of them carries a hex hash, which the ordering compares as a string:
-      two commits of one project sort in no meaningful order;
-    - `announced`, the package's entry in the outdated listing, names the new
-      version as the latest one. The manager's own listing outranks a
-      heuristic ordering, which sorts a project moving from calendar to
-      semantic versions backward.
-    """
-    before = old.installed_version
-    after = new.installed_version
-    if not isinstance(before, TokenizedString) or not isinstance(
-        after, TokenizedString
-    ):
-        return False
-    if before.has_hex_hash or after.has_hex_hash:
-        return False
-    if announced is not None and announced.latest_version == after:
-        return False
-    return after < before
-
-
-def upgrade_outcomes(
-    before: Mapping[str, Package],
-    after: Mapping[str, Package],
-    expected: Mapping[str, Package] | None,
-    hold_reason: Callable[[str], str | None],
-) -> list[dict[str, object]]:
-    """Classify every package a full upgrade moved, or should have.
-
-    `before` and `after` are the two
-    {meth}`~meta_package_manager.manager.PackageManager.installed_inventory`
-    readings bracketing a manager's native upgrade, `expected` the
-    {meth}`~meta_package_manager.manager.PackageManager.outdated_inventory` taken
-    before it, or `None` for a manager that cannot list its outdated packages.
-    `hold_reason` is the manager's
-    {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold_reason`.
-    Each row names the package and its versions and carries one
-    {class}`~meta_package_manager.tables.UpgradeOutcome` as `status`:
-
-    - a version that differs between the two readings is `downgraded` when it
-      moved back to an older release, and `upgraded` otherwise, a move whose
-      direction the version ordering cannot tell included;
-    - a package only the second reading lists is `installed`, a dependency the
-      upgrade pulled in, and one only the first lists is `removed`;
-    - an outdated package whose version did not move is `held` when the cooldown
-      still holds it back, `still outdated` otherwise: a failed build, a pinned
-      package, or one the native command leaves alone. Its `to_version` is the
-      one still available.
-
-    An outdated package neither reading lists cannot be told moved from unmoved,
-    so it gets no row rather than a guess. Rows come sorted by package ID.
-    """
-    rows = []
-    for package_id in sorted(before.keys() | after.keys()):
-        old = before.get(package_id)
-        new = after.get(package_id)
-        if old is None:
-            assert new is not None
-            rows.append(
-                _outcome_row(new, None, new.installed_version, UpgradeOutcome.INSTALLED)
-            )
-        elif new is None:
-            rows.append(
-                _outcome_row(old, old.installed_version, None, UpgradeOutcome.REMOVED)
-            )
-        elif old.installed_version != new.installed_version:
-            announced = expected.get(package_id) if expected is not None else None
-            status = (
-                UpgradeOutcome.DOWNGRADED
-                if _stepped_back(old, new, announced)
-                else UpgradeOutcome.UPGRADED
-            )
-            rows.append(
-                _outcome_row(new, old.installed_version, new.installed_version, status)
-            )
-        elif expected is not None and package_id in expected:
-            status = (
-                UpgradeOutcome.HELD
-                if hold_reason(package_id)
-                else UpgradeOutcome.STILL_OUTDATED
-            )
-            rows.append(
-                _outcome_row(
-                    new,
-                    new.installed_version,
-                    expected[package_id].latest_version,
-                    status,
-                )
-            )
-    return rows
-
-
-def _outcome_detail(rows: list[dict[str, object]]) -> str:
-    """Count a manager's outcomes for its trail line: `1 upgraded, 2 held`.
-
-    Always opens on the upgrades, `nothing upgraded` included, so a run that
-    moved nothing says so where a run that moved something says how much. The
-    downgrades and the packages left behind follow when there are any. The
-    dependencies pulled in or dropped stay in the table, being consequences
-    rather than results.
-    """
-    counts = Counter(str(row["status"]) for row in rows)
-    upgraded = counts[UpgradeOutcome.UPGRADED]
-    parts = [f"{upgraded} upgraded" if upgraded else "nothing upgraded"]
-    for status in (
-        UpgradeOutcome.DOWNGRADED,
-        UpgradeOutcome.HELD,
-        UpgradeOutcome.STILL_OUTDATED,
-    ):
-        if counts[status]:
-            parts.append(f"{counts[status]} {status}")
-    return ", ".join(parts)
-
-
-def print_upgrade_report(ctx: Context, report: dict[str, dict]) -> None:
-    """Close a full upgrade on the report of what it moved.
-
-    `report` is keyed by manager ID, each payload shaped like the `installed`
-    and `outdated` ones (`id`, `name`, `packages`, `errors`) with the rows of
-    {func}`upgrade_outcomes` as `packages`. A serialization `--table-format`
-    gets the whole payload and exits; otherwise the rows render as one table
-    through {data}`~meta_package_manager.tables.UPGRADE_COLUMNS`, the version
-    pair of a package colored the way `mpm outdated` colors it, and its status
-    shown as its {attr}`~meta_package_manager.tables.UpgradeOutcome.label`. An
-    empty table prints nothing: the trail already said nothing moved.
-    """
-    print_serialized_and_exit(ctx, report)
-    table: list[dict[str, str | None]] = []
-    for manager_id, payload in report.items():
-        for row in payload["packages"]:
-            from_version = str(row["from_version"] or "")
-            to_version = str(row["to_version"] or "")
-            if from_version and to_version:
-                from_version, to_version = diff_versions(from_version, to_version)
-            table.append({
-                "package_id": str(row["id"]),
-                "package_name": str(row["name"] or ""),
-                "manager_id": manager_id,
-                "from_version": from_version,
-                "to_version": to_version,
-                "status": UpgradeOutcome(row["status"]).label,
-            })
-    if table:
-        print_projected_table(ctx, UPGRADE_COLUMNS, table)
 
 
 @mpm.command(
@@ -757,7 +603,7 @@ def print_upgrade_report(ctx: Context, report: dict[str, dict]) -> None:
     help="Upgrade all outdated packages. "
     "Will make the command ignore package IDs provided as parameters.",
 )
-@columns_option(columns=column_specs(UPGRADE_COLUMNS))
+@columns_option(columns=column_specs(CHANGE_REPORT_COLUMNS))
 @argument(
     "packages_specs",
     type=STRING,
@@ -796,6 +642,7 @@ def upgrade(ctx, all, packages_specs):
         )
         prime_sudo(ctx, managers)
         announce = _announce_level(ctx)
+        report = ChangeReport(managers)
 
         def upgrade_all_work(manager: PackageManager) -> tuple[str, dict]:
             # cooldown_permits() already logs the reason at WARNING when it blocks;
@@ -810,19 +657,10 @@ def upgrade(ctx, all, packages_specs):
                 "Upgrade all outdated packages.",
                 extra={"label": manager.subject},
             )
-            # Two inventory readings bracket the native upgrade, and their diff
-            # is the report of what it moved. Neither is taken under --dry-run,
-            # whose simulated reads list nothing, nor under --plan, whose
-            # captured mutation moves nothing: the diff would then read as a
-            # run that upgraded nothing. The outdated listing rides along to
-            # name what did not move, and is handed to the upgrade so the paths
-            # enumerating it do not list twice.
-            before = None
-            expected = None
-            if not (manager.dry_run or manager.plan):
-                before = manager.installed_inventory()
-                if before is not None:
-                    expected = manager.outdated_inventory()
+            # Two inventory readings frame the native upgrade (see ChangeReport).
+            # The outdated listing rides along to name what did not move, and is
+            # handed to the upgrade so the paths enumerating it do not list twice.
+            expected = report.open(manager, outdated=True)
             with manager.new_errors() as errors:
                 output = manager.upgrade(
                     outdated_ids=None if expected is None else tuple(expected),
@@ -830,19 +668,14 @@ def upgrade(ctx, all, packages_specs):
             if output:
                 logging.info(output, extra={"label": manager.subject})
             data: dict = {"errors": errors}
-            if before is not None:
-                after = manager.installed_inventory()
-                if after is not None and _versioned(before) and _versioned(after):
-                    rows = upgrade_outcomes(
-                        before, after, expected, manager.cooldown_hold_reason
-                    )
-                    data["detail"] = _outcome_detail(rows)
-                    data["packages"] = rows
+            rows = report.close(manager)
+            if rows is not None:
+                data["detail"] = outcome_detail(rows, UPGRADE_RESULTS)
             return manager.id, data
 
         # Full upgrade is independent per manager, so fan out concurrently with a
         # ✓/✘ trail and a success-count finisher (see collect_from_managers).
-        results = collect_from_managers(
+        collect_from_managers(
             "Upgrading",
             "Upgraded",
             managers,
@@ -850,20 +683,7 @@ def upgrade(ctx, all, packages_specs):
             report_state=True,
             operation=Operations.upgrade_all.name,
         )
-        # One payload per manager whose inventory could be read on both sides of
-        # its upgrade, in the shape of every other serialized listing.
-        report = {
-            manager.id: {
-                "id": manager.id,
-                "name": manager.name,
-                "packages": data["packages"],
-                "errors": serialized_errors(manager),
-            }
-            for manager, (_manager_id, data) in zip(managers, results, strict=True)
-            if "packages" in data
-        }
-        if report:
-            print_upgrade_report(ctx, report)
+        report.show(ctx)
         ctx.exit()
 
     _dispatch_sourced_operation(
@@ -875,6 +695,7 @@ def upgrade(ctx, all, packages_specs):
         label="Upgrading",
         done_label="Upgraded",
         apply_cooldown=True,
+        report_outdated=True,
     )
 
 
@@ -903,6 +724,7 @@ def upgrade(ctx, all, packages_specs):
     help="A mix of plain <package_id>, simple <package_id@version> specifiers or full "
     "<pkg:npm/left-pad> purls.",
 )
+@columns_option(columns=column_specs(CHANGE_REPORT_COLUMNS))
 @pass_context
 def remove(ctx, orphans, packages_specs):
     """Remove one or more packages.
@@ -1050,6 +872,7 @@ def _cleanup_steps(
     help="Verify and repair the manager's local installation state (like "
     "`flatpak repair`).",
 )
+@columns_option(columns=column_specs(CHANGE_REPORT_COLUMNS))
 @pass_context
 def cleanup(ctx, orphans, cache, repair):
     """Cleanup local data and temporary artifacts.
@@ -1108,20 +931,35 @@ def cleanup(ctx, orphans, cache, repair):
 
     prime_sudo(ctx, managers)
     announce = _announce_level(ctx)
+    report = ChangeReport(managers)
 
     def cleanup_work(manager: PackageManager) -> tuple[str, dict]:
         # A bespoke variant of _maintenance_work: managers run different category
         # subsets, so both the narration and the trail label disclose each
         # manager's own dispatch (`✓ brew.cleanup (cache)`).
         steps = _cleanup_steps(manager, selected, explicit_orphans)
-        categories = ", ".join(category for category, _step in steps)
+        categories = [category for category, _step in steps]
         logging.log(
-            announce, f"Clean up {categories}.", extra={"label": manager.subject}
+            announce,
+            f"Clean up {', '.join(categories)}.",
+            extra={"label": manager.subject},
         )
+        # The orphan sweep is the one category removing packages, so two
+        # inventory readings frame the run to report what it removed (see
+        # ChangeReport). Its count joins the category on the trail line.
+        sweeps = "orphans" in categories
+        if sweeps:
+            report.open(manager)
         with manager.new_errors() as errors:
             for _category, step in steps:
                 step()
-        return manager.id, {"errors": errors, "detail": categories}
+        if sweeps:
+            rows = report.close(manager)
+            if rows is not None:
+                categories[categories.index("orphans")] = (
+                    f"orphans: {outcome_detail(rows, SWEEP_RESULTS)}"
+                )
+        return manager.id, {"errors": errors, "detail": ", ".join(categories)}
 
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✘ trail
     # and a success-count finisher (see collect_from_managers).
@@ -1132,6 +970,7 @@ def cleanup(ctx, orphans, cache, repair):
         cleanup_work,
         report_state=True,
     )
+    report.show(ctx)
 
 
 @mpm.command(

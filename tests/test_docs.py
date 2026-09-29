@@ -56,7 +56,7 @@ from meta_package_manager.labels import (
 )
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
-from meta_package_manager.tables import UpgradeOutcome
+from meta_package_manager.tables import PackageOutcome
 
 from .conftest import PROJECT_ROOT, all_managers, tomllib
 
@@ -1086,7 +1086,7 @@ def test_augmentations_table_renders():
     )
 
 
-@pytest.mark.parametrize("outcome", UpgradeOutcome)
+@pytest.mark.parametrize("outcome", PackageOutcome)
 def test_upgrade_report_legend(outcome):
     """The legend of the upgrade report names every outcome with its glyph."""
     page = PROJECT_ROOT.joinpath("docs", "augmentations.md").read_text(encoding="UTF-8")

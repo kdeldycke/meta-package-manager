@@ -30,6 +30,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from boltons.strutils import strip_ansi
 
 from meta_package_manager.capabilities import (
     Operations,
@@ -42,9 +43,11 @@ from meta_package_manager.capabilities import (
 from meta_package_manager.execution import CLIError
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.pool import pool
+from meta_package_manager.tables import PackageOutcome
 from meta_package_manager.version import parse_version
 
 from .fake_manager import FakeManager
+from .test_cli import report_rows
 
 
 def _capture_run_cli(monkeypatch, manager_id, call):
@@ -703,6 +706,18 @@ def test_cleanup_orphans_runs_only_the_sweep(invoke, patch_pool_with):
     result = invoke("cleanup", "--orphans")
     assert result.exit_code == 0
     assert fake.calls == ["cleanup_orphan"]
+
+
+def test_cleanup_orphans_reports_the_sweep(invoke, changing_fake_pool):
+    """The trail line counts the packages the sweep removed, and the report names
+    them."""
+    result = invoke("cleanup", "--orphans")
+    assert result.exit_code == 0
+    mid = changing_fake_pool.id
+    assert f"✓ {mid}.cleanup (orphans: 1 removed)" in strip_ansi(result.stderr)
+    rows = report_rows(result.stdout)
+    assert set(rows) == {"fake-pkg-epsilon"}
+    assert PackageOutcome.REMOVED.label in rows["fake-pkg-epsilon"]
 
 
 def test_cleanup_without_flags_runs_default_categories(invoke, patch_pool_with):

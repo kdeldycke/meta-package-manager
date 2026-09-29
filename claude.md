@@ -336,7 +336,7 @@ Fan-out operations report state with a per-item `✓`/`✘` trail plus a persist
 
 Concurrency is decided by cross-manager *ordering*, not by whether a command mutates state. Three fan-out primitives, all bounded by `--jobs`:
 
-- **Per manager, concurrent** (`meta_package_manager.dispatch.collect_from_managers`, one result per manager): commands whose work is independent and reported per manager. The read-only queries (`installed`/`outdated`/`search`), the maintenance commands (`sync`/`cleanup`/`upgrade --all`, which pass `report_state=True` since the trail is their only output), and the inventory exporters (`dump`/`backup`, `sbom`, which collect concurrently then assemble in manager order).
+- **Per manager, concurrent** (`meta_package_manager.dispatch.collect_from_managers`, one result per manager): commands whose work is independent and reported per manager. The read-only queries (`installed`/`outdated`/`search`), the maintenance commands (`sync`/`cleanup`/`upgrade --all`, which pass `report_state=True` since the trail is their output; `upgrade --all` alone follows it with a report table on stdout, diffed from the `installed` inventory it reads before and after each manager's native command), and the inventory exporters (`dump`/`backup`, `sbom`, which collect concurrently then assemble in manager order).
 - **Per package, concurrent across managers and serial within each** (`meta_package_manager.dispatch.collect_per_package`, one result per (package, manager)): the ordering-free state changers `remove`, `upgrade <packages>`, `restore`, and the manager-tied specs of `install`. Managers run in parallel; one manager's own packages run one at a time, since a manager cannot safely run two of its own invocations at once (see `SHARED_LOCK_FAMILIES`).
 - **Sequential** (`OperationTrail` in `dispatch.py`): only `install` when a package is left untied to a manager. Such a package needs a priority search (install with the first manager that has it, skip the rest), which is genuinely cross-manager-sequential. `warn_jobs_ignored` notes at `INFO` when an explicit `--jobs` is therefore ignored.
 
@@ -344,7 +344,7 @@ The shared-lock families that make within-family concurrency unsafe (`brew`/`cas
 
 Trail conventions:
 
-- Two shapes: **package-keyed** (`✓ brew.install: foo`, for `install`/`remove`/`upgrade <packages>`/`restore`) and **manager-keyed** (`✓ brew.sync`, `✓ Synced N/M managers`, for `sync`/`cleanup`/`upgrade --all`). `cleanup` suffixes each manager line with the categories dispatched to it (`✓ brew.cleanup (cache)`), since the per-manager subsets differ.
+- Two shapes: **package-keyed** (`✓ brew.install: foo`, for `install`/`remove`/`upgrade <packages>`/`restore`) and **manager-keyed** (`✓ brew.sync`, `✓ Synced N/M managers`, for `sync`/`cleanup`/`upgrade --all`). `cleanup` suffixes each manager line with the categories dispatched to it (`✓ brew.cleanup (cache)`), since the per-manager subsets differ, and `upgrade --all` with its outcome counts (`✓ brew.upgrade_all (1 upgraded, 2 still outdated)`), the per-package rows going to the report table.
 - The finisher counts **per (package, manager) attempt**, matching the trail lines: a package acted on by two managers is `2/2`, not `1/1`.
 - A `✘` line is gone under `--no-progress`, a serialized `--table-format` and `DEBUG` verbosity, so failures also emit a `critical: Could not ...` (shown everywhere) as the durable record and the non-zero-exit rationale. Keep both despite the overlap.
 

@@ -33,8 +33,17 @@ from __future__ import annotations
 import logging
 import threading
 import time
+from collections import Counter
 
-from click_extra import STRING, ParameterSource, argument, echo, option, pass_context
+from click_extra import (
+    STRING,
+    ParameterSource,
+    argument,
+    columns_option,
+    echo,
+    option,
+    pass_context,
+)
 from click_extra.theme import get_current_theme as theme
 
 from .capabilities import (
@@ -53,6 +62,7 @@ from .cli import (
     package_label,
     package_task,
     run_manager_action,
+    serialized_errors,
 )
 from .cooldown import CooldownPolicy
 from .dispatch import (
@@ -68,12 +78,23 @@ from .manager import PackageManager
 from .pool import pool
 from .specifier import Solver, Specifier
 from .sudo import inspect_install_root, prime_sudo
+from .tables import (
+    UPGRADE_COLUMNS,
+    UpgradeOutcome,
+    column_specs,
+    print_projected_table,
+    print_serialized_and_exit,
+)
+from .version import diff_versions
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Mapping
 
     from click_extra import Context
+
+    from .package import Package
+    from .version import TokenizedString
 
 
 def cooldown_permits(manager: PackageManager) -> bool:
@@ -530,6 +551,158 @@ def install(ctx, packages_specs):
     exit_on_failures(ctx, "install", unresolved_labels)
 
 
+def _versioned(inventory: Mapping[str, Package]) -> bool:
+    """Whether an inventory can tell that a package moved.
+
+    A listing that reports no version for any package diffs as unchanged
+    whatever the upgrade did, and every outdated package in it would then read
+    as left behind. Such a reading disqualifies the report rather than
+    misstating it. An empty inventory passes: it has nothing to misstate.
+    """
+    return not inventory or any(
+        package.installed_version is not None for package in inventory.values()
+    )
+
+
+def _outcome_row(
+    package: Package,
+    from_version: TokenizedString | str | None,
+    to_version: TokenizedString | str | None,
+    status: UpgradeOutcome,
+) -> dict[str, object]:
+    """One row of the report, in the field vocabulary of
+    {data}`~meta_package_manager.tables.UPGRADE_COLUMNS`.
+
+    The status travels as its bare string, the payload being serialized by
+    encoders that do not all accept a `str` subclass.
+    """
+    return {
+        "id": package.id,
+        "name": package.name,
+        "from_version": from_version,
+        "to_version": to_version,
+        "status": status.value,
+    }
+
+
+def upgrade_outcomes(
+    before: Mapping[str, Package],
+    after: Mapping[str, Package],
+    expected: Mapping[str, Package] | None,
+    hold_reason: Callable[[str], str | None],
+) -> list[dict[str, object]]:
+    """Classify every package a full upgrade moved, or should have.
+
+    `before` and `after` are the two
+    {meth}`~meta_package_manager.manager.PackageManager.installed_inventory`
+    readings bracketing a manager's native upgrade, `expected` the
+    {meth}`~meta_package_manager.manager.PackageManager.outdated_inventory` taken
+    before it, or `None` for a manager that cannot list its outdated packages.
+    `hold_reason` is the manager's
+    {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold_reason`.
+    Each row names the package and its versions and carries one
+    {class}`~meta_package_manager.tables.UpgradeOutcome` as `status`:
+
+    - a version that differs between the two readings is `upgraded`, whichever
+      way it moved: a full upgrade rarely downgrades, and when a manager does
+      (a formula reverted upstream), the row still names both versions;
+    - a package only the second reading lists is `installed`, a dependency the
+      upgrade pulled in, and one only the first lists is `removed`;
+    - an outdated package whose version did not move is `held` when the cooldown
+      still holds it back, `still outdated` otherwise: a failed build, a pinned
+      package, or one the native command leaves alone. Its `to_version` is the
+      one still available.
+
+    An outdated package neither reading lists cannot be told moved from unmoved,
+    so it gets no row rather than a guess. Rows come sorted by package ID.
+    """
+    rows = []
+    for package_id in sorted(before.keys() | after.keys()):
+        old = before.get(package_id)
+        new = after.get(package_id)
+        if old is None:
+            assert new is not None
+            rows.append(
+                _outcome_row(new, None, new.installed_version, UpgradeOutcome.INSTALLED)
+            )
+        elif new is None:
+            rows.append(
+                _outcome_row(old, old.installed_version, None, UpgradeOutcome.REMOVED)
+            )
+        elif old.installed_version != new.installed_version:
+            rows.append(
+                _outcome_row(
+                    new,
+                    old.installed_version,
+                    new.installed_version,
+                    UpgradeOutcome.UPGRADED,
+                )
+            )
+        elif expected is not None and package_id in expected:
+            status = (
+                UpgradeOutcome.HELD
+                if hold_reason(package_id)
+                else UpgradeOutcome.STILL_OUTDATED
+            )
+            rows.append(
+                _outcome_row(
+                    new,
+                    new.installed_version,
+                    expected[package_id].latest_version,
+                    status,
+                )
+            )
+    return rows
+
+
+def _outcome_detail(rows: list[dict[str, object]]) -> str:
+    """Count a manager's outcomes for its trail line: `1 upgraded, 2 held`.
+
+    Always opens on the upgrades, `nothing upgraded` included, so a run that
+    moved nothing says so where a run that moved something says how much. The
+    packages left behind follow when there are any. The dependencies pulled in
+    or dropped stay in the table, being consequences rather than results.
+    """
+    counts = Counter(str(row["status"]) for row in rows)
+    upgraded = counts[UpgradeOutcome.UPGRADED]
+    parts = [f"{upgraded} upgraded" if upgraded else "nothing upgraded"]
+    for status in (UpgradeOutcome.HELD, UpgradeOutcome.STILL_OUTDATED):
+        if counts[status]:
+            parts.append(f"{counts[status]} {status}")
+    return ", ".join(parts)
+
+
+def print_upgrade_report(ctx: Context, report: dict[str, dict]) -> None:
+    """Close a full upgrade on the report of what it moved.
+
+    `report` is keyed by manager ID, each payload shaped like the `installed`
+    and `outdated` ones (`id`, `name`, `packages`, `errors`) with the rows of
+    {func}`upgrade_outcomes` as `packages`. A serialization `--table-format`
+    gets the whole payload and exits; otherwise the rows render as one table
+    through {data}`~meta_package_manager.tables.UPGRADE_COLUMNS`, the version
+    pair of a package colored the way `mpm outdated` colors it. An empty table
+    prints nothing: the trail already said nothing moved.
+    """
+    print_serialized_and_exit(ctx, report)
+    table: list[dict[str, str | None]] = []
+    for manager_id, payload in report.items():
+        for row in payload["packages"]:
+            from_version = str(row["from_version"] or "")
+            to_version = str(row["to_version"] or "")
+            if from_version and to_version:
+                from_version, to_version = diff_versions(from_version, to_version)
+            table.append({
+                "package_id": str(row["id"]),
+                "package_name": str(row["name"] or ""),
+                "manager_id": manager_id,
+                "from_version": from_version,
+                "to_version": to_version,
+                "status": str(row["status"]),
+            })
+    if table:
+        print_projected_table(ctx, UPGRADE_COLUMNS, table)
+
+
 @mpm.command(
     aliases=["update"],
     short_help="Upgrade packages.",
@@ -551,6 +724,7 @@ def install(ctx, packages_specs):
     help="Upgrade all outdated packages. "
     "Will make the command ignore package IDs provided as parameters.",
 )
+@columns_option(columns=column_specs(UPGRADE_COLUMNS))
 @argument(
     "packages_specs",
     type=STRING,
@@ -603,15 +777,39 @@ def upgrade(ctx, all, packages_specs):
                 "Upgrade all outdated packages.",
                 extra={"label": manager.subject},
             )
+            # Two inventory readings bracket the native upgrade, and their diff
+            # is the report of what it moved. Neither is taken under --dry-run,
+            # whose simulated reads list nothing, nor under --plan, whose
+            # captured mutation moves nothing: the diff would then read as a
+            # run that upgraded nothing. The outdated listing rides along to
+            # name what did not move, and is handed to the upgrade so the paths
+            # enumerating it do not list twice.
+            before = None
+            expected = None
+            if not (manager.dry_run or manager.plan):
+                before = manager.installed_inventory()
+                if before is not None:
+                    expected = manager.outdated_inventory()
             with manager.new_errors() as errors:
-                output = manager.upgrade()
+                output = manager.upgrade(
+                    outdated_ids=None if expected is None else tuple(expected),
+                )
             if output:
                 logging.info(output, extra={"label": manager.subject})
-            return manager.id, {"errors": errors}
+            data: dict = {"errors": errors}
+            if before is not None:
+                after = manager.installed_inventory()
+                if after is not None and _versioned(before) and _versioned(after):
+                    rows = upgrade_outcomes(
+                        before, after, expected, manager.cooldown_hold_reason
+                    )
+                    data["detail"] = _outcome_detail(rows)
+                    data["packages"] = rows
+            return manager.id, data
 
         # Full upgrade is independent per manager, so fan out concurrently with a
         # ✓/✘ trail and a success-count finisher (see collect_from_managers).
-        collect_from_managers(
+        results = collect_from_managers(
             "Upgrading",
             "Upgraded",
             managers,
@@ -619,6 +817,20 @@ def upgrade(ctx, all, packages_specs):
             report_state=True,
             operation=Operations.upgrade_all.name,
         )
+        # One payload per manager whose inventory could be read on both sides of
+        # its upgrade, in the shape of every other serialized listing.
+        report = {
+            manager.id: {
+                "id": manager.id,
+                "name": manager.name,
+                "packages": data["packages"],
+                "errors": serialized_errors(manager),
+            }
+            for manager, (_manager_id, data) in zip(managers, results, strict=True)
+            if "packages" in data
+        }
+        if report:
+            print_upgrade_report(ctx, report)
         ctx.exit()
 
     _dispatch_sourced_operation(

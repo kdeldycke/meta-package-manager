@@ -191,6 +191,18 @@ HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_ENV_HINTS=1 HOMEBREW_NO_AUTO_UPDATE=1 /opt/h
 
 Each line carries the resolved binary path and the forced environment, so the plan doubles as an audit trail and pipes straight into a shell.
 
+### A report of what each upgrade moved
+
+Most managers upgrade everything in one native command, which reports what it did in its own words, or not at all. `mpm upgrade --all` reads each manager's installed inventory before and after that command and diffs the two readings, so every manager gets the same report: each package upgraded, with the version it left and the one it reached, each dependency the upgrade pulled in or dropped, and each outdated package the upgrade left behind, marked `held` when the [cooldown](cooldown.md) held it back and `still outdated` otherwise. Each manager's trail line counts the outcomes:
+
+```console
+$ mpm --brew upgrade --all
+✓ brew.upgrade_all (1 upgraded) (15.6s)
+✓ Upgraded 1/1 managers
+```
+
+The table follows on stdout, one row per package with its `From` and `To` versions and its `Status`, in the format `--table-format` selects and the columns `--columns` keeps, so a script reads the same report as JSON. The report costs one `installed` listing on each side of the upgrade and one `outdated` listing before it. A manager whose listing carries no versions gets no report, and neither does a `--dry-run` or `--plan` run, which moves nothing.
+
 ### Comparable versions across schemes
 
 Package managers report versions in mutually incompatible schemes: semver, PEP 440, calendar versioning, Debian epochs, Gentoo suffixes, and more. Rather than a parser per format, `mpm` runs every version through a single tokenizer that yields a good-enough ordering, so `outdated` shows a meaningful installed-to-latest comparison even for managers whose native output never could.

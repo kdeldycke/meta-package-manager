@@ -53,7 +53,7 @@ from .version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Mapping
+    from collections.abc import Callable, Iterable, Iterator, Mapping
     from pathlib import Path
     from typing import Any
 
@@ -741,6 +741,56 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         return {pkg.id: pkg.installed_version for pkg in self.installed}
 
+    def installed_inventory(self) -> dict[str, Package] | None:
+        """Installed packages keyed by ID, read fresh from the system.
+
+        The reading `mpm upgrade --all` takes on either side of a manager's
+        native full upgrade, then diffs into its report of what moved. Both
+        readings come from this one listing, so the diff stays self-consistent
+        even where a manager's `outdated` and `installed` disagree on a
+        package's ID.
+
+        Never served from a memoized view, since the point is to observe a
+        change. The two views memoized on the instance, {attr}`installed_ids`
+        and {attr}`installed_version_map`, are dropped on the way out: read
+        before an upgrade, they describe a system that no longer exists.
+
+        Returns `None` rather than an empty inventory when the manager has no
+        answer: no `installed` at all, or a listing whose CLI failed. A diff
+        against an empty reading would report every package as removed, so a
+        caller must tell "no answer" from "nothing installed". See
+        {meth}`_read_inventory` for how a failed listing is detected.
+        """
+        if not self._defines("installed"):
+            return None
+        try:
+            return self._read_inventory("installed", lambda: self.installed)
+        finally:
+            for memoized in ("installed_ids", "installed_version_map"):
+                self.__dict__.pop(memoized, None)
+
+    def _read_inventory(
+        self,
+        operation: str,
+        listing: Callable[[], Iterable[Package]],
+    ) -> dict[str, Package] | None:
+        """Materialize `listing()` keyed by package ID, or `None` when it failed.
+
+        Runs under the `operation` stamp, so the listing resolves the read-only
+        timeout and executes for real under `mpm --plan`. A failed listing is
+        caught two ways: the {exc}`~meta_package_manager.execution.CLIError` a
+        `must_succeed` query raises, and the error a tolerant query accumulates
+        instead of raising, which {meth}`new_errors` collects. Either one makes
+        the reading untrustworthy, and a partial inventory diffed against a
+        complete one reads as a wave of removals, so both return `None`.
+        """
+        try:
+            with self.acting_as(operation), self.new_errors() as errors:
+                inventory = {package.id: package for package in listing()}
+        except CLIError:
+            return None
+        return None if errors else inventory
+
     def package_metadata_batch(
         self,
         packages: Iterable[Package],
@@ -814,6 +864,21 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                 or pkg.installed_version != pkg.latest_version
             ):
                 yield pkg
+
+    def outdated_inventory(self) -> dict[str, Package] | None:
+        """Outdated packages keyed by ID, read fresh from the system.
+
+        What `mpm upgrade --all` expects a full upgrade to move, read once
+        before it runs so the report can name what did not. The one-by-one
+        fallback and the cooldown hold upgrade from the same listing, which
+        {meth}`upgrade` takes through `outdated_ids` so a run lists once.
+
+        Same contract as {meth}`installed_inventory`: fresh, read under the
+        `outdated` stamp, `None` for a manager with no answer.
+        """
+        if not self._defines("outdated"):
+            return None
+        return self._read_inventory("outdated", lambda: self.refiltered_outdated)
 
     def release_date(self, package_id: str) -> datetime | None:
         """Publication timestamp of the latest release of a package.
@@ -1065,7 +1130,13 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
-    def upgrade(self, package_id: str | None = None, version: str | None = None) -> str:
+    def upgrade(
+        self,
+        package_id: str | None = None,
+        version: str | None = None,
+        *,
+        outdated_ids: Iterable[str] | None = None,
+    ) -> str:
         """Perform an upgrade of either all or one package.
 
         Executes the CLI provided by either
@@ -1086,6 +1157,13 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         routes through `_upgrade_all_with_cooldown` instead of the plain
         one-shot command, so individual too-fresh releases can be held back
         while the rest of the upgrade proceeds.
+
+        `outdated_ids` hands over the outdated packages the caller already
+        listed, so neither path enumerating them (the one-by-one fallback and
+        the cooldown hold) lists a second time: `mpm upgrade --all` passes the
+        {meth}`outdated_inventory` its report took. A single-package upgrade
+        and the native one-shot command ignore it, and a full upgrade left
+        without it lists on its own.
         """
         if package_id:
             cli = self.upgrade_one_cli(package_id, version=version)
@@ -1097,7 +1175,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                     "window, and upgrade the rest.",
                     extra={"label": self.subject},
                 )
-                return self._upgrade_all_with_cooldown()
+                return self._upgrade_all_with_cooldown(outdated_ids)
             try:
                 cli = self.upgrade_all_cli()
             except NotImplementedError:
@@ -1105,11 +1183,14 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                     "upgrade_all_cli operation not implemented. "
                     "Call single upgrade operation on each package, one-by-one.",
                 )
-                return self._upgrade_all_one_by_one()
+                return self._upgrade_all_one_by_one(outdated_ids)
 
         return self.run(cli, extra_env=self.extra_env)
 
-    def _upgrade_all_with_cooldown(self) -> str:
+    def _upgrade_all_with_cooldown(
+        self,
+        outdated_ids: Iterable[str] | None = None,
+    ) -> str:
         """Upgrade all outdated packages, holding back the too-fresh ones.
 
         The full-upgrade path of an active probe-backed cooldown: each
@@ -1124,10 +1205,15 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         its one-shot command may cover more than the packages enumerated here
         (`flatpak update` also pulls runtimes), and whatever the listing did
         not enumerate was never probed.
+
+        Lists the outdated packages itself unless `outdated_ids` hands them
+        over.
         """
         held = []
         eligible = []
-        for package_id in self._outdated_ids():
+        if outdated_ids is None:
+            outdated_ids = self._outdated_ids()
+        for package_id in outdated_ids:
             hold = self.cooldown_hold_reason(package_id)
             if hold:
                 logging.warning(
@@ -1145,12 +1231,19 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             return self.run(cli, extra_env=self.extra_env)
         return self._upgrade_each(eligible)
 
-    def _upgrade_all_one_by_one(self) -> str:
+    def _upgrade_all_one_by_one(
+        self,
+        outdated_ids: Iterable[str] | None = None,
+    ) -> str:
         """Upgrade every outdated package through its own one-package CLI.
 
         The fallback behind managers with no native one-shot upgrade command.
+        Lists the outdated packages itself unless `outdated_ids` hands them
+        over.
         """
-        return self._upgrade_each(self._outdated_ids())
+        if outdated_ids is None:
+            outdated_ids = self._outdated_ids()
+        return self._upgrade_each(outdated_ids)
 
     def _outdated_ids(self) -> tuple[str, ...]:
         """IDs of the outdated packages, listed under the `outdated` stamp.

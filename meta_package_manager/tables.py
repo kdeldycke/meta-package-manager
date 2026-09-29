@@ -69,6 +69,34 @@ class SortableField(StrEnum):
     VERSION = "version"
 
 
+class UpgradeOutcome(StrEnum):
+    """What a full upgrade did to one package, as the `status` column of
+    {data}`UPGRADE_COLUMNS` spells it.
+
+    Classified by {func}`meta_package_manager.cli_maintenance.upgrade_outcomes`
+    from the inventory a manager reports before and after its native upgrade.
+    The values are the words the table shows, the serialized payload carries and
+    the trail line counts (`1 upgraded, 2 held`), so a member reads as a cell
+    rather than as an identifier.
+    """
+
+    UPGRADED = "upgraded"
+    """The installed version differs from the one before the upgrade."""
+
+    INSTALLED = "installed"
+    """Absent before the upgrade: a dependency it pulled in."""
+
+    REMOVED = "removed"
+    """Present before the upgrade, gone after it."""
+
+    HELD = "held"
+    """Still outdated because the release-age cooldown holds it back."""
+
+    STILL_OUTDATED = "still outdated"
+    """Still outdated for any other reason: a failed build, a pinned package, or
+    one the native command leaves alone."""
+
+
 TColumn = tuple[ColumnSpec, "SortableField | None"]
 """One column of a registry: its spec, and the field it sorts on, if any."""
 
@@ -251,6 +279,51 @@ every row at the edge, mangling the borders.
 leave on the terminal, so the description wraps inside its own cell. The name
 and version columns share that treatment, and `package_id` is exempt from it,
 per the width policy documented on {data}`PACKAGE_ID_COLUMN`.
+"""
+
+UPGRADE_COLUMNS: tuple[TColumn, ...] = (
+    PACKAGE_ID_COLUMN,
+    PACKAGE_NAME_COLUMN,
+    (
+        ColumnSpec("manager_id", "Manager", "Manager that ran the upgrade."),
+        SortableField.MANAGER_ID,
+    ),
+    (
+        ColumnSpec(
+            "from_version",
+            "From",
+            "Version installed before the upgrade.",
+            max_width=AUTO_WIDTH,
+        ),
+        None,
+    ),
+    (
+        ColumnSpec(
+            "to_version",
+            "To",
+            "Version installed after the upgrade, or the one still available for "
+            "a package that did not move.",
+            max_width=AUTO_WIDTH,
+        ),
+        None,
+    ),
+    (
+        ColumnSpec(
+            "status",
+            "Status",
+            f"What the upgrade did to the package: {', '.join(UpgradeOutcome)}.",
+        ),
+        None,
+    ),
+)
+"""Columns of the report closing `mpm upgrade --all`.
+
+One row per package the run moved or should have, each carrying one
+{class}`UpgradeOutcome`; see
+{func}`meta_package_manager.cli_maintenance.upgrade_outcomes` for how a row is
+classified. The version columns wrap like every other table's, and
+`package_id` does not, per {data}`PACKAGE_ID_COLUMN`. Neither version column
+drives `--sort-by`: a report sorts by what moved, not by how far.
 """
 
 WHICH_COLUMNS: tuple[TColumn, ...] = (

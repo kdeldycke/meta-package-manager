@@ -23,15 +23,20 @@ passed.
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 from functools import partial
 
 import pytest
+from boltons.strutils import strip_ansi
 
 from meta_package_manager.capabilities import Operations
+from meta_package_manager.cli_maintenance import _outcome_detail, upgrade_outcomes
 from meta_package_manager.execution import CLIError
+from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
+from meta_package_manager.tables import UpgradeOutcome
 
 from .conftest import default_manager_ids
 from .destructive_plan import SHORT_FAILURE_TIMEOUT, upgrade_all_blocked
@@ -197,3 +202,221 @@ def test_sourcing_survives_a_failing_manager(
     assert listing_failure in result.stderr
     # No manager could source the package, so it is skipped rather than fatal.
     assert "fake-pkg-alpha is not recognized" in result.stderr
+
+
+def test_installed_inventory_reads_none_on_a_failing_cli(
+    fake_pool, failing_installed_query
+):
+    """A listing whose CLI raises is no answer, never an empty inventory."""
+    assert fake_pool.installed_inventory() is None
+
+
+def test_installed_inventory_distrusts_an_accumulated_error(fake_pool, monkeypatch):
+    """A listing that logged an error instead of raising is no answer either."""
+
+    def noisy_listing(manager):
+        manager.cli_errors.append(CLIError(1, "", "Registry unreachable."))
+        yield manager.package(id="fake-pkg-alpha", installed_version="1.0.0")
+
+    monkeypatch.setattr(FakeManager, "installed", property(noisy_listing))
+    assert fake_pool.installed_inventory() is None
+
+
+def test_installed_inventory_drops_the_memoized_views(fake_pool):
+    """A fresh reading evicts the views memoized before an upgrade."""
+    assert fake_pool.installed_ids == frozenset({"fake-pkg-alpha", "fake-pkg-beta"})
+    assert "installed_ids" in vars(fake_pool)
+    inventory = fake_pool.installed_inventory()
+    assert inventory is not None
+    assert set(inventory) == {"fake-pkg-alpha", "fake-pkg-beta"}
+    assert "installed_ids" not in vars(fake_pool)
+
+
+def test_upgrade_all_takes_the_listing_it_is_handed(monkeypatch):
+    """A full upgrade handed `outdated_ids` never lists the outdated packages."""
+    manager = FakeManager()
+
+    def no_native_upgrade(self):
+        raise NotImplementedError
+
+    monkeypatch.setattr(FakeManager, "upgrade_all_cli", no_native_upgrade)
+    monkeypatch.setattr(
+        FakeManager,
+        "outdated",
+        property(lambda self: pytest.fail("the outdated packages were listed twice")),
+    )
+    ran = []
+    monkeypatch.setattr(manager, "run", lambda *args, **kwargs: ran.append(args[0]))
+    manager.upgrade(outdated_ids=("fake-pkg-alpha", "fake-pkg-beta"))
+    assert [cli[1:] for cli in ran] == [
+        ("upgrade", "fake-pkg-alpha"),
+        ("upgrade", "fake-pkg-beta"),
+    ]
+
+
+def _package(package_id, installed_version=None, latest_version=None):
+    return Package(
+        id=package_id,
+        manager_id="orchard",
+        installed_version=installed_version,
+        latest_version=latest_version,
+    )
+
+
+def test_upgrade_outcomes_classification():
+    before = {
+        p.id: p
+        for p in (
+            _package("apple", "1.0"),
+            _package("banana", "2.0"),
+            _package("cherry", "3.0"),
+            _package("fig", "5.0"),
+        )
+    }
+    after = {
+        p.id: p
+        for p in (
+            _package("apple", "1.1"),
+            _package("banana", "2.0"),
+            _package("cherry", "3.0"),
+            _package("kiwi", "0.1"),
+        )
+    }
+    # `grape` is outdated for the manager but in neither reading: no row.
+    expected = {
+        p.id: p
+        for p in (
+            _package("banana", "2.0", "2.5"),
+            _package("cherry", "3.0", "3.5"),
+            _package("grape", "8.0", "9.0"),
+        )
+    }
+    rows = upgrade_outcomes(
+        before,
+        after,
+        expected,
+        hold_reason=lambda package_id: "fresh" if package_id == "banana" else None,
+    )
+    assert [
+        (r["id"], str(r["from_version"] or ""), str(r["to_version"] or ""), r["status"])
+        for r in rows
+    ] == [
+        ("apple", "1.0", "1.1", "upgraded"),
+        ("banana", "2.0", "2.5", "held"),
+        ("cherry", "3.0", "3.5", "still outdated"),
+        ("fig", "5.0", "", "removed"),
+        ("kiwi", "", "0.1", "installed"),
+    ]
+    assert all(isinstance(r["status"], str) for r in rows)
+    assert not any(isinstance(r["status"], UpgradeOutcome) for r in rows)
+
+
+def test_upgrade_outcomes_without_an_outdated_listing():
+    """A manager that cannot list its outdated packages still reports what moved."""
+    before = {"apple": _package("apple", "1.0"), "fig": _package("fig", "5.0")}
+    after = {"apple": _package("apple", "1.1"), "fig": _package("fig", "5.0")}
+    rows = upgrade_outcomes(before, after, None, hold_reason=lambda _: None)
+    assert [(r["id"], r["status"]) for r in rows] == [("apple", "upgraded")]
+
+
+@pytest.mark.parametrize(
+    ("statuses", "detail"),
+    (
+        ((), "nothing upgraded"),
+        (("upgraded",), "1 upgraded"),
+        (("upgraded", "upgraded", "installed", "removed"), "2 upgraded"),
+        (
+            ("held", "still outdated", "still outdated"),
+            "nothing upgraded, 1 held, 2 still outdated",
+        ),
+        (("upgraded", "held"), "1 upgraded, 1 held"),
+    ),
+)
+def test_outcome_detail(statuses, detail):
+    assert _outcome_detail([{"status": status} for status in statuses]) == detail
+
+
+def test_upgrade_all_reports_what_moved(invoke, upgrading_fake_pool):
+    """The trail line counts the outcomes and the table names each package."""
+    result = invoke("upgrade", "--all")
+    assert result.exit_code == 0
+    mid = upgrading_fake_pool.id
+    stderr = strip_ansi(result.stderr)
+    assert f"✓ {mid}.upgrade_all (1 upgraded, 1 still outdated)" in stderr
+    assert "✓ Upgraded 1/1 managers" in stderr
+    table = strip_ansi(result.stdout)
+    cells = {
+        line.split()[1]: line for line in table.splitlines() if "fake-pkg-" in line
+    }
+    assert set(cells) == {
+        "fake-pkg-alpha",
+        "fake-pkg-beta",
+        "fake-pkg-epsilon",
+        "fake-pkg-gamma",
+    }
+    assert all(
+        word in cells["fake-pkg-alpha"] for word in ("1.0.0", "1.1.0", "upgraded")
+    )
+    assert all(
+        word in cells["fake-pkg-beta"] for word in ("2.5.3", "2.6.0", "still outdated")
+    )
+    assert all(word in cells["fake-pkg-epsilon"] for word in ("5.2.0", "removed"))
+    assert all(word in cells["fake-pkg-gamma"] for word in ("0.1.0", "installed"))
+    # The package the upgrade never touched earns no row.
+    assert "fake-pkg-delta" not in table
+
+
+def test_upgrade_all_report_serialized(invoke, upgrading_fake_pool):
+    """The serialized report keeps the shape of the other package listings."""
+    result = invoke("--table-format", "json", "upgrade", "--all")
+    assert result.exit_code == 0
+    mid = upgrading_fake_pool.id
+    assert json.loads(result.stdout) == {
+        mid: {
+            "id": mid,
+            "name": upgrading_fake_pool.name,
+            "errors": [],
+            "packages": [
+                {
+                    "id": "fake-pkg-alpha",
+                    "name": None,
+                    "from_version": "1.0.0",
+                    "to_version": "1.1.0",
+                    "status": "upgraded",
+                },
+                {
+                    "id": "fake-pkg-beta",
+                    "name": None,
+                    "from_version": "2.5.3",
+                    "to_version": "2.6.0",
+                    "status": "still outdated",
+                },
+                {
+                    "id": "fake-pkg-epsilon",
+                    "name": None,
+                    "from_version": "5.2.0",
+                    "to_version": None,
+                    "status": "removed",
+                },
+                {
+                    "id": "fake-pkg-gamma",
+                    "name": None,
+                    "from_version": None,
+                    "to_version": "0.1.0",
+                    "status": "installed",
+                },
+            ],
+        }
+    }
+
+
+@pytest.mark.parametrize("mode", ("--dry-run", "--plan"))
+def test_upgrade_all_simulation_skips_the_report(invoke, upgrading_fake_pool, mode):
+    """A simulated upgrade moves nothing, so no diff is taken and none printed."""
+    result = invoke(mode, "upgrade", "--all")
+    assert result.exit_code == 0
+    mid = upgrading_fake_pool.id
+    stderr = strip_ansi(result.stderr)
+    assert f"✓ {mid}.upgrade_all (" in stderr
+    assert "upgraded" not in stderr
+    assert "fake-pkg-" not in result.stdout

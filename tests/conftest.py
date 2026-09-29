@@ -41,7 +41,7 @@ from meta_package_manager.dispatch import merge_into_probe_lanes
 from meta_package_manager.pool import ManagerPool, manager_classes, pool
 
 from .destructive_plan import destructive_group
-from .fake_manager import FakeManager, TimingOutFakeManager
+from .fake_manager import FakeManager, TimingOutFakeManager, UpgradingFakeManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -422,6 +422,16 @@ def slow_fake_pool(patch_pool_with):
     {exc}`subprocess.TimeoutExpired` and logs the expected warning.
     """
     return patch_pool_with(TimingOutFakeManager())
+
+
+@fixture
+def upgrading_fake_pool(patch_pool_with):
+    """Yield an {class}`~tests.fake_manager.UpgradingFakeManager`, whose inventory
+    moves on `upgrade --all`.
+
+    Use for the tests of the report closing a full upgrade.
+    """
+    return patch_pool_with(UpgradingFakeManager())
 
 
 @fixture

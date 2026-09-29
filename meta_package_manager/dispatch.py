@@ -780,7 +780,8 @@ def collect_from_managers(
     an optional `data["detail"]` suffixes its subject in parentheses (`cleanup`
     passes its categories, `upgrade --all` the cooldown that held a manager).
 
-    :param report_state: maintenance commands set it (their only output is the trail).
+    :param report_state: maintenance commands set it (the trail is their output,
+        which `upgrade --all` alone follows with a report table on stdout).
         It flips the finisher to a success count, keeps the trail in the sequential
         fallback, and turns on lock-family serialization. Read commands leave it
         `False`: their table is the output, so the sequential fallback is silent and

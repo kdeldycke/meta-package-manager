@@ -40,7 +40,7 @@ from meta_package_manager.version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
 
     from meta_package_manager.package import Package
     from meta_package_manager.version import TokenizedString
@@ -121,6 +121,60 @@ class FakeManager(PackageManager):
         version: str | None = None,
     ) -> tuple[str, ...]:
         return (str(self.cli_path), "upgrade", package_id)
+
+
+class UpgradingFakeManager(FakeManager):
+    """Variant whose inventory moves when its full upgrade runs.
+
+    Models what the report of `upgrade --all` reads on a real host: an outdated
+    package the upgrade moves, one it leaves behind, a dependency it pulls in, a
+    package it drops, and one it never touches. The upgrade CLI is the
+    interpreter running a no-op, so the run spawns a real subprocess that exits
+    `0`, and the flip of {attr}`upgraded` on the way out is what moves the
+    inventory.
+    """
+
+    upgraded = False
+
+    @property
+    def installed(self) -> Iterator[Package]:
+        yield self.package(
+            id="fake-pkg-alpha",
+            installed_version="1.1.0" if self.upgraded else "1.0.0",
+        )
+        yield self.package(id="fake-pkg-beta", installed_version="2.5.3")
+        yield self.package(id="fake-pkg-delta", installed_version="4.0.0")
+        if self.upgraded:
+            yield self.package(id="fake-pkg-gamma", installed_version="0.1.0")
+        else:
+            yield self.package(id="fake-pkg-epsilon", installed_version="5.2.0")
+
+    @property
+    def outdated(self) -> Iterator[Package]:
+        yield self.package(
+            id="fake-pkg-alpha",
+            installed_version="1.0.0",
+            latest_version="1.1.0",
+        )
+        yield self.package(
+            id="fake-pkg-beta",
+            installed_version="2.5.3",
+            latest_version="2.6.0",
+        )
+
+    def upgrade_all_cli(self) -> tuple[str, ...]:
+        return (str(self.cli_path), "-c", "pass")
+
+    def upgrade(
+        self,
+        package_id: str | None = None,
+        version: str | None = None,
+        *,
+        outdated_ids: Iterable[str] | None = None,
+    ) -> str:
+        output = super().upgrade(package_id, version, outdated_ids=outdated_ids)
+        self.upgraded = True
+        return output
 
 
 class TimingOutFakeManager(FakeManager):

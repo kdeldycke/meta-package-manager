@@ -42,6 +42,20 @@ concurrency:
 # Keep in sync with the "Installation methods" tabs in docs/install.md and
 # the per-channel catalog and build instructions in docs/packaging.md.
 #
+# A job that installs a released artifact tests the published version, not the
+# code of the push. So this workflow runs on a schedule and on dispatch, and a
+# push starts it only through the `paths:` filters above: the specs and this
+# file. A new job of that kind never goes into a workflow that runs on each push.
+#
+# Each job that tests a third-party distributor carries a comment above it with
+# the precise URLs that show the status of the package on that platform: the
+# public package page first (like `formulae.brew.sh`), then the source
+# definition (the formula `.rb`, the manifest `.json`).
+#
+# The file is long: each channel needs its own install commands. It holds no
+# other logic. An invariant of the project is a test, never a `grep` in a
+# `run:` block.
+#
 # Every matrix opts out of fail-fast: one broken cell must not cancel its
 # siblings, and a cancelled cell hides whether its own channel is broken too.
 

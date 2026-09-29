@@ -468,9 +468,11 @@ class OperationTrail(_OperationTrail):
     gating; this subclass supplies mpm's policy around it:
 
     - **Enablement follows `--progress`**, folded into each manager's
-      `progress` flag by the CLI (a TTY, no serialized output, not at `DEBUG`
-      verbosity): any enabled manager turns the trail on, auto-gated on an
-      interactive stderr.
+      `progress` flag by the CLI (no serialized output, not at `DEBUG`
+      verbosity): any enabled manager turns the trail on. The aggregate
+      indicator draws on an interactive stderr only. The `✓`/`✘` lines and the
+      finisher only append, so they print on any stream, and a pipe or a CI log
+      keeps the record of a run.
     - **A concurrent batch mutes the managers' own per-call spinners** (which
       would collide on stderr) for the duration of the aggregate one.
     - **A concurrent batch's aggregate indicator is a determinate progress
@@ -484,6 +486,19 @@ class OperationTrail(_OperationTrail):
     The ordering-bound sequential state changers (`install`'s priority search)
     construct it bare; every {func}`dispatch` batch drives it as a context
     manager.
+
+    ```{note}
+    The lines print with `echo` on `<stderr>`, never through `logging`, so they
+    outlive the `WARNING` default of `--verbosity`. They come in two shapes,
+    both composed by {func}`trail_label`: package-keyed for `install`, `remove`,
+    `upgrade <packages>` and `restore`, manager-keyed for `sync`, `cleanup` and
+    `upgrade --all`. The finisher counts each (package, manager) attempt, as the
+    lines do: a package that two managers acted on counts `2/2`.
+
+    `--no-progress`, a serialized `--table-format` and `DEBUG` verbosity remove
+    the `✘` lines. So a failure also logs a `critical: Could not ...` line, which
+    prints in every mode and explains the non-zero exit. Keep both.
+    ```
 
     :param managers: the batch's managers, read for the `--progress` gate and
         (when concurrent) to mute their per-call spinners.

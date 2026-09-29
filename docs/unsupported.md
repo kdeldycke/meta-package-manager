@@ -1,5 +1,11 @@
 # {octicon}`circle-slash` Unsupported managers
 
+<!-- This page is the user-facing record, not the reasoning. A section carries the verdict of a tool, the reason
+     for it, the Wikipedia articles of the tools it covers and the release that published it, and nothing else.
+     The guidelines behind a verdict, and the format of a section, live in the add-manager skill
+     (docs/add-new-manager.md): rationale added here belongs there. `unsupported_sections()` of
+     meta_package_manager/_docs.py parses this page, and tests/test_docs.py holds its contract. -->
+
 `mpm` wraps [a long list of package managers](managers.md), but not everything that installs software.
 
 Every tool that installs software belongs in one of exactly two places: the [supported list](managers.md), or this page. There is no third state, and absence from both is a gap to be closed rather than a verdict of its own. The goal is total coverage: if it installs software and anyone has heard of it, `mpm` either wraps it or records here why it does not. A blank cell in the [benchmark](benchmark.md) is therefore a to-do, not an answer.

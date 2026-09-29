@@ -26,6 +26,33 @@ imported from `__init__`, so `import meta_package_manager` stays dependency-ligh
 The file-writing orchestration (readme, pyproject, the `docs/managers/` stub set)
 lives in `docs/docs_update.py`.
 
+Generators read static declarations and committed files only. Among them: class
+attributes, the bundled TOML definitions, the docstring corpus, `changelog.md`,
+`docs/benchmark.toml`, the hand-curated tables of `docs/cooldown.md`, the
+sampled metrics and {mod}`meta_package_manager.labels`. They never read a
+host-probing property (`cli_path`, `version`, `available`, the installed
+packages), so a page renders the same on any build host.
+
+```{caution}
+A `:mirror:` region is a checked-in copy of a generator's output, kept for raw
+diffs and for GitHub. Never edit one by hand. `click-extra refresh-directives`
+regenerates them, from repomatic's `update-docs` job or from the repository root.
+Run it by hand under `env -u TERM_PROGRAM`, the environment
+`test_mirror_blocks_in_sync` pins: click-extra measures an emoji-presentation
+glyph by the advance of the running terminal, so some terminals pad those rows
+one space short. Sphinx renders the live output and never reads the mirror, so a
+stale copy cannot reach the published site. A mirror carrying source-line
+anchors changes each time a manager class moves in its module.
+```
+
+```{caution}
+An edit to a generator does not invalidate the Sphinx cache. An incremental
+build reads a document again only when its own source file changed, and an edit
+here, to a manager docstring or to `changelog.md` leaves each page untouched. The
+pages then render the previous output. Rebuild with `sphinx-build --fresh-env`
+after such an edit. CI builds from scratch each time.
+```
+
 ```{warning}
 The generated Mermaid syntax targets the version bundled with
 `sphinxcontrib-mermaid`, currently `11.12.1`. Avoid features introduced later.
@@ -242,6 +269,21 @@ the sort of {func}`managers_index_table`: the whole index groups by verdict
 rather than running one alphabet from `am` to `zypper`, since the question a
 reader brings to it is what became of a tool. Alphabetical order survives
 inside each group.
+
+The pool, the `queued` table and the `unsupported` table of
+`docs/benchmark.toml` partition everything assessed: a manager sits in one of
+the three and no more, so the support bar counts the population once. A blank
+cell means that nobody assessed the tool, and only the benchmark shows one.
+
+```{note}
+✅ and ❌ are shared by every comparison and capability table of `docs/`. Some
+glyphs stay local to one table. The benchmark adds 🟡 for coarse support. The
+cooldown support table adds 🔜 and ➖, and gives 🚧 a meaning of its own:
+proposed upstream. The ⚠️ of the bar plugin counts runtime errors and says
+nothing about upstream health. A glyph is never written in backticks, in a
+cell or in prose: it is no identifier, and a code span flattens the link that
+a support cell carries.
+```
 """
 
 
@@ -502,6 +544,10 @@ usage, then document `mpm`'s preconceptions about the tool (the captured
 transcripts backing the version probe and the parsers), and close on the
 release history of that support. A section whose generator produces nothing for
 a given manager is omitted from its page.
+
+A section states its own subject, and opens on a plain sentence naming what it
+shows. The `mpm` pitch belongs to {func}`manager_augments` alone: no other
+section restates the uniform table, the purls or the export formats.
 
 How `mpm` invokes the tool (binary names and lookup paths, the arguments and
 environment forced on every call) has no section of its own: those are one-line
@@ -1192,6 +1238,14 @@ def _cooldown_table(section_title: str) -> tuple[tuple[str, ...], ...]:
     `##` heading, and every pipe-prefixed line of at least four cells is kept
     with its markdown preserved. The header and separator lines come along
     harmlessly, as no manager ID ever matches them.
+
+    ```{caution}
+    Never reformat these tables with a local `mdformat`. The repository pins no
+    `mdformat` configuration: the upstream `format-markdown` job owns it, so a
+    local run resolves other defaults and other plugins than CI, and pads each
+    cell again. To edit a row, copy the padding of the row above it and leave
+    the rest of the file untouched.
+    ```
     """
     text = (PROJECT_ROOT / "docs" / "cooldown.md").read_text(encoding="UTF-8")
     section = text.partition(section_title)[2].partition("\n## ")[0]
@@ -1612,6 +1666,16 @@ def manager_intro(manager_id: str) -> str:
     description comment atop their bundled TOML definition
     ({func}`_toml_definition_intro`) instead of their synthesized class
     docstring, with a pointer to the file as fallback.
+
+    ```{caution}
+    A manager class docstring renders on two pages, so it obeys two rules. A
+    cross-reference is fully qualified or names a module sibling
+    (`` {class}`PKG` ``, `` {meth}`Yay.cooldown_env` ``): a bare class-member
+    reference resolves in the API docs and breaks on the manager page. A code
+    block nested in an admonition gives that admonition a colon fence
+    (`:::{note}`): an unclosed fence, or a 3-backtick fence inside another one,
+    garbles both pages.
+    ```
     """
     m = pool[manager_id]
     blocks = []
@@ -2684,6 +2748,24 @@ def scope_changelog(scope: str) -> str:
     A change scoped to several subjects is repeated verbatim on each of their
     pages, carrying no marker of the others: a reader is on one page to read
     about that one subject.
+
+    ```{important}
+    These pages decide how a changelog bullet is tagged:
+
+    - A tag naming a manager describes the support `mpm` gives that manager.
+      Work on the downstream package of `mpm` for a channel sharing a manager's
+      name (Guix, Nix, MacPorts, Alpine) is scoped `mpm`, like all packaging
+      work.
+    - A bullet reads correctly on each page its tags select. A multi-scope
+      bullet states only what is true for all its scopes, and names the history
+      of no other subject.
+    - The tags cover each subject the change reached. No test can check that:
+      compare them against the files the commit touched. One version-diff fix
+      reached `version.py` and the GNOME Shell extension, was tagged
+      `bar-plugin` alone, and stayed off the page of the extension.
+    - A new manager needs a bullet of its own: `test_manager_changelog_entries`
+      asserts one for each pool manager.
+    ```
 
     ```{note}
     Released headings are not linkable: `myst_heading_slug_func` is

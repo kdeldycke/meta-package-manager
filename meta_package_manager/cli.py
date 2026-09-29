@@ -29,6 +29,50 @@ this module so their `@mpm.command` registrations run. Each subcommand
 selects the managers from {mod}`meta_package_manager.pool` that implement the
 matching {class}`meta_package_manager.capabilities.Operations` action, runs it
 across all of them, and renders the aggregated, multi-manager result.
+
+```{important}
+`mpm` keeps two output channels apart. The *state* of an operation prints with
+`echo`: the `✓`/`✘` trail and its finisher, gated by `--progress` (see
+{mod}`meta_package_manager.dispatch`). *Log messages* go through `logging`,
+gated by `--verbosity`, and each call belongs to one tier:
+
+- `WARNING`, the default view, holds problems only: a failure with no other
+  signal on screen, the diagnosis tail of a failed command, a safety notice
+  (cooldown safeguard skipped, file about to be overwritten, silent call that
+  may hide a `sudo` prompt), the end-of-run error summary and timeouts.
+  `critical` is for fatal conditions. Keep this tier sparse.
+- `INFO` holds the narration: the selection summary, the install priority,
+  per-manager announcements, discovery, capability skips, options with no
+  effect, and each CLI invocation run on the system.
+- `DEBUG` holds the mechanics: raw CLI output, version probes, refiltering,
+  selection parsing and data dumps.
+
+A line that narrates a decision, a step or a command is `INFO`. An option that
+had no effect is `INFO` too, never `WARNING`. A problem that the trail already
+shows needs no `WARNING`.
+
+A manager-scoped line names its manager through a label, never in its message:
+`extra={"label": manager.subject}` inside an operation, `manager.id` outside
+one. The formatter of click-extra glues the label into the level prefix
+(`warning:gem.installed:`), so a log greps by manager. The ID stays in the
+prose where it is the object of the sentence, or names a configuration
+artifact.
+
+An enum shown in a message renders as its bare member name, so it defines
+`__str__` and `__format__` to return `self.name`, as
+{class}`~meta_package_manager.capabilities.Operations` does.
+```
+
+```{important}
+Three exit contracts. The action commands (`install`, `remove`,
+`upgrade <packages>`, `restore`) collect per-package failures and exit `1` on a
+`critical:` summary, through {func}`exit_on_failures`. The maintenance commands
+(`sync`, `cleanup`, `upgrade --all`) are best-effort: a failed manager gets a
+`✘` and the exit stays `0`. `doctor` reads health from the exit code of each
+diagnostic command, relays the native report verbatim to `<stdout>`, and exits
+`1` when a manager reports problems. `-0`/`--zero-exit` opts out of both gates.
+Usage and configuration errors exit `2` in every case.
+```
 """
 
 from __future__ import annotations

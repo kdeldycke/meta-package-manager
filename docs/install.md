@@ -75,9 +75,16 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ## Installation methods
 
-<!-- Keep in sync with .github/workflows/tests-install.yaml -->
+<!-- Keep in sync with .github/workflows/tests-install.yaml and the channel catalog of packaging.md -->
 
 <!-- Tabs are sorted by popularity: uv first, then by estimated user base. -->
+
+<!-- This page is for end users: each tab opens with commands that work today on the reader's machine, whatever
+     the upstream status of the channel. A released channel shows its one-liner. A channel not yet released through
+     its distribution carries the condensed build recipe of its packaging.md section, trimmed to the commands, then
+     an admonition that names the upstream pull request and invites a +1. Never reduce such a tab to a status line
+     and a pointer. The copy is the accepted cost: update both pages when the build steps of a channel change.
+     Everything aimed at distribution packagers goes to packaging.md. -->
 
 `mpm` is available on several popular package managers:
 

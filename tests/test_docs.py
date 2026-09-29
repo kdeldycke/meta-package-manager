@@ -243,6 +243,14 @@ def test_verbatim_card_links_are_rooted():
 
 
 def test_changelog():
+    """Check every changelog bullet opens with a known `[scope]` tag.
+
+    The tags are sorted, deduplicated and drawn from the pool manager IDs, the
+    platform IDs and the `mpm`, `bar-plugin` and `gnome-shell` scopes. The
+    vocabulary is not cosmetic: `scope_changelog()` indexes it to build the
+    release history of each manager and frontend page, and its docstring holds
+    the rules to choose a tag.
+    """
     content = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
     assert content.startswith("# Changelog\n")
 
@@ -1762,6 +1770,9 @@ def test_docstrings_carry_no_bare_url():
     text, both in the API docs and in the manager pages inlining the class
     docstrings. URLs inside a fenced block are captured CLI output (fwupd's
     `See https://…` warnings) and are left alone.
+
+    Write a titled markdown link, and keep its `]` and `(` on one source line:
+    a line break between them disables the link with no warning.
     """
     bare = [
         f"{path.relative_to(PROJECT_ROOT)}:{lineno}: {match.group()}"

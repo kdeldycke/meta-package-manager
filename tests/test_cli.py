@@ -14,6 +14,24 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+"""Common tests for all CLI basic features and templates for subcommands.
+
+A test class earns its place here by sharing tests, never by grouping them.
+The module keeps two template classes, {class}`CLITableTests` and
+{class}`CLIQueryTests`. Each one gives its subclasses a battery of inherited
+behavior tests, for the price of a `subcmd` fixture and a little per-command
+data. All other tests are functions: a module inheriting no template writes
+module-level tests, the file being the grouping. Shared assertion logic is a
+module-level helper ({func}`check_packages_payload`,
+{func}`check_filtered_ids`), and the parametrize data of a command stays in the
+file of that command. A subcommand with no specific behavior needs no
+`test_cli_*.py` file.
+
+The two templates stay classes by decision. A command×behavior parametrize was
+assessed and rejected: it pulls the specifics of each command out of its own
+file, into one central cross-product that is harder to read and to extend.
+"""
+
 from __future__ import annotations
 
 import dataclasses
@@ -40,9 +58,6 @@ from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
-
-""" Common tests for all CLI basic features and templates for subcommands. """
-
 
 TEST_CONF_FILE = """\
 # Comment

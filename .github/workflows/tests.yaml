@@ -158,6 +158,11 @@ jobs:
 
       ### Install or upgrade package managers on each platform, and made them
       ### ready to use for mpm.
+      #
+      # These steps drive real package managers against live third-party feeds, so they flake on top of the
+      # usual races. Absorb a flake with a retry loop or a forced `exit 0`, as the `choco upgrade all` and
+      # `snap install code` steps do. A forced `exit 0` belongs on a setup step that is best-effort by nature,
+      # never on the assertion the job exists to make.
 
       # Pip
       - name: Pip & Setuptools - Upgrade

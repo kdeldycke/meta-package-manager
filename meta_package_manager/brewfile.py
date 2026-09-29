@@ -18,6 +18,12 @@
 Defines {func}`~meta_package_manager.brewfile.build_brewfile` and the helpers used by `mpm dump --brewfile`
 to emit a Brewfile that `brew bundle install` can consume.
 
+{doc}`/dump` is the canonical home of every user-facing Brewfile fact: the table
+of managers and entry keywords, the header, the taps and the per-manager
+caveats. Every other place keeps one contextual line that points there. Never
+list the covered managers or entry types in prose: read them off
+{data}`BUNDLE_ENTRY_TYPES` or the generated table.
+
 ```{note}
 
 Brewfile is a Ruby DSL. The format reference is the Homebrew Bundle source at

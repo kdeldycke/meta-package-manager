@@ -52,6 +52,18 @@ concurrency:
 # Scheduled on nothing: the images move when the extension or the payload moves,
 # and a cron would only manufacture churn. The trigger paths deliberately exclude
 # `docs/assets/`, so merging this job's own pull request cannot retrigger it.
+#
+# A committed capture is byte-reproducible, and two runs prove it. Dispatch the
+# workflow twice on the same commit: the set has converged when the second pull
+# request commit holds the same image blobs as the first. Compare the blobs and
+# not the commits, since `pr-sync` writes the branch again once `main` moved
+# between the runs. The drivers record each thing they pin against the run that
+# exposed it: read those comments before adding an element to a frame.
+#
+# Measure a capture that moved before explaining it. The changed rectangle and
+# its count of pixels past a threshold tell a moved element from a shifted tint.
+# The window census of `report_windows()` and the `capture_screens` input give
+# those measures.
 
 # Supply-chain cooldown: no package published within the window can be resolved
 # by any command in this workflow. Held equal to `[tool.repomatic]

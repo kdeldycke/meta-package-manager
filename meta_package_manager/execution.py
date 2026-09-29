@@ -1736,6 +1736,18 @@ class CLIExecutor:
             # logs line by line (prefixed with the manager ID), and enforces
             # the timeout. The spinner wraps the whole call; its 0.1s delay
             # keeps it invisible while the invocation line is disclosed.
+            #
+            # The raw output stays at DEBUG for a mutating operation too, by
+            # decision. A line-pumped stream cannot reproduce a raw passthrough,
+            # each `\r` progress redraw becoming a prefixed line of its own, and
+            # it would swamp the INFO narration:
+            # https://github.com/kdeldycke/meta-package-manager/issues/1938
+            # A failed run is the exception, since its output is its diagnosis
+            # and the run cannot be repeated at DEBUG: _relay_failure() promotes
+            # the tail to WARNING:
+            # https://github.com/kdeldycke/meta-package-manager/issues/1968
+            # Should live output be wanted with concurrency, run_cli() takes a
+            # per-call `output_level` to pass here, keyed on `_active_operation`.
             try:
                 with spinner:
                     result = run_cli(

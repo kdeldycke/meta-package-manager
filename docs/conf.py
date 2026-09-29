@@ -164,6 +164,12 @@ datatables_options = r"""
 
 exclude_patterns = ["_build", "_linkcheck", "html", "Thumbs.db", ".DS_Store"]
 
+# An unresolved cross-reference reports as a warning, and the build never fails
+# on one. A move of an attribute between classes or modules breaks each
+# `` {attr}`x <old.path>` `` that names its old home: grep the whole tree for
+# the old dotted path after the move. When docstrings gain a new rendering
+# surface, one malformed fence or stale reference found calls for a sweep of
+# the whole corpus for that defect class, not for a spot fix.
 nitpicky = True
 
 # Two categories with no fix on this side of the build. Every other warning the
@@ -541,8 +547,9 @@ def prune_build_artifacts(app, exception):
 
     The cost of dropping the markers is local and small: a subsequent
     incremental build finds none and re-reads every document, as it already has
-    to whenever a generator changes (see `CLAUDE.md` on the Sphinx cache). CI
-    builds are always fresh, so they lose nothing at all.
+    to whenever a generator changes (see the module docstring of
+    `meta_package_manager/_docs.py` on the Sphinx cache). CI builds are always
+    fresh, so they lose nothing at all.
     """
     if exception:
         return

@@ -552,7 +552,16 @@ def _mutation_fixtures():
 def test_documented_command_matches_construction(
     manager, member, documented, monkeypatch
 ):
-    """The command a mutation docstring shows must be the one the method builds."""
+    """The command a mutation docstring shows must be the one the method builds.
+
+    A `shell-session` fence is no proof of verification on its own.
+    `_documented_commands` reads a command holding `&&` or a pipe as an
+    illustration and skips it, so a mutation block written as a shell line
+    (`cd {dir} && make install`) sits in the corpus unchecked. Give such a block
+    the `console` fence. Where the argv cannot be rebuilt from a stand-in package
+    ID, as for `Ports.install` which resolves its origin by query, the docstring
+    says so.
+    """
     monkeypatch.setattr(manager, "which", lambda cli_name: Path("/usr/bin") / cli_name)
     monkeypatch.setattr(
         manager, "cli_path", Path("/usr/bin") / manager.cli_names[0], raising=False

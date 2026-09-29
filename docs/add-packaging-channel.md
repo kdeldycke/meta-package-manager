@@ -5,7 +5,7 @@ A *channel* is a route by which users install `mpm`: a Linux distribution's pack
 Channels come in two shapes:
 
 - **Spec-based**: a build recipe lives in the repository under `packaging/{channel}/`, CI builds and installs from it, and it is usually submitted upstream to the distribution. This is the full procedure below.
-- **Released-artifact only** (PyPI, Homebrew, Scoop, GitHub Releases, Stew, ZeroBrew): no in-repo recipe, just an install method plus a scheduled job that tests the published artifact. For these, only steps 4 and 5 apply, and the test job runs on a schedule rather than every push (see the `schedule` trigger and the *Schedule-only workflows* rule).
+- **Released-artifact only** (PyPI, Homebrew, Scoop, GitHub Releases, Stew, ZeroBrew): no in-repo recipe, just an install method plus a scheduled job that tests the published artifact. For these, only steps 4 and 5 apply, and the test job runs on a schedule rather than every push: it tests the published version, not the code being pushed (see the `schedule` trigger and the header comment of `tests-install.yaml`).
 
 ## 1. Learn the target's conventions
 
@@ -30,13 +30,17 @@ Write one recipe for `mpm` and one per missing dependency, in the target's forma
 
 Keep the load-bearing comments that explain a non-obvious choice (why the tag tarball, why a test is ignored or deselected) and drop overlay-only chatter that means nothing upstream.
 
+Keep those comments tight. Their readers are the maintainers of the channel, who know their own build-sandbox conventions: the `/homeless-shelter` auto-skip, the standard `make_check` and test-phase behavior. Drop those explanations, drop pointers to documentation pages, and reduce a per-dependency breakdown to one line. When unsure, favor the tighter comment. The rule holds for the in-repo `packaging/*` specs and for their copies on a downstream branch.
+
+Where a spec or an upstream submission must cite the packaging guidance, it cites `https://mpm.run/packaging/`, never a file of this repository.
+
 ## 4. Add an advisory CI job
 
-Add a `{channel}-source` job to [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) that builds and installs from the in-repo recipe, then runs `mpm --version`. Start it advisory: name it `⁉️ {channel}-source` with `continue-on-error: true`, and promote it to ✅ (dropping `continue-on-error`) only once it has gone green end-to-end, the way `macports-source` and `apk-source` did. Update the workflow's `paths:` filters and its header comment, and add the source-URL comment the *Workflow source URLs* rule requires. Containerized distributions pin `runs-on: ubuntu-26.04`, as the existing container jobs do.
+Add a `{channel}-source` job to [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) that builds and installs from the in-repo recipe, then runs `mpm --version`. Start it advisory: name it `⁉️ {channel}-source` with `continue-on-error: true`, and promote it to ✅ (dropping `continue-on-error`) only once it has gone green end-to-end, the way `macports-source` and `apk-source` did. Update the workflow's `paths:` filters and its header comment. Add a comment above the job with the precise URLs that show the status of the package on that platform: the public package page first, then the source definition. Containerized distributions pin `runs-on: ubuntu-26.04`, as the existing container jobs do.
 
 ## 5. Wire the docs
 
-Three files plus the workflow move together (the *Distributor sync* set):
+Three files plus the workflow move together. `docs/install.md`, `docs/packaging.md` and `tests-install.yaml` each carry a `Keep in sync` comment that names the others:
 
 - [`docs/packaging.md`](packaging.md): add a row to the channels table and a build-from-spec section.
 - [`docs/install.md`](install.md): add a tab opening with commands that work today. A released channel gets its one-liner; a channel still pending upstream review gets the condensed build recipe from its `packaging.md` section, followed by an admonition naming the upstream pull request and inviting the reader to +1 it.

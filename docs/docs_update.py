@@ -197,6 +197,14 @@ def update_labels(*, check: bool = False) -> bool:
     pass without churn.
     ```
 
+    ```{caution}
+    `[[tool.repomatic.labels.extra]]` stays the last array-of-tables of
+    `[tool.repomatic]`: the labels subtree is dropped then appended at the end
+    of the section, and `test_pyproject_updates_are_pyproject_fmt_fixpoint`
+    fails on an array-of-tables placed after it. A setting that wants that shape
+    goes in as an inline array, like `[tool.repomatic.metrics] charts`.
+    ```
+
     :param check: Report only, leaving `pyproject.toml` untouched.
     :return: `True` when the label arrays are out of date.
     """

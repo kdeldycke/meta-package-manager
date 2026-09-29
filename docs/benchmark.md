@@ -5,6 +5,26 @@ Attempting to unify all package managers is a Sisyphean task.
 This did not prevent me or others to try to solve that problem. It is not easy to explain why
 but [there might be a greater need for such tools](augmentations.md) out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
 
+<!-- Editing rules of this page:
+     - Only the "Package manager support" table is generated, from docs/benchmark.toml. Every other table is
+       edited by hand.
+     - Rows cover capabilities in mpm's domain only: cross-manager package operations, output, configuration and
+       distribution. A competitor's out-of-domain feature gets no row (the shims of a runtime version manager, a
+       task runner, per-project version files).
+     - An `mpm` ✅ is always a link to the user documentation of the feature, and the label of its row carries
+       the same target. A competitor ✅ links what proves the support: its documentation, a configuration
+       example, its CLI declaration or the source line. It stays bare only when nothing citable exists.
+     - A ❌ always links explicit evidence that the project lacks or rejects the feature: an issue or pull
+       request closed as not planned, a maintainer comment, a feature request left open, an official page
+       stating the limit. Absence of the feature is never enough: with no citable source, the cell stays blank.
+     - Verify each URL before committing it, and keep the exact quote that supports it. Prefer an
+       `#issuecomment-{id}` anchor where a maintainer states the position.
+     - To audit a column, research one competitor at a time, and report "no evidence" as a blank cell.
+     - The support table is a coverage map: a manager that only a competitor wraps earns a row, and a retired
+       tool keeps its row. Two groups of rows are no refusal. Competitors like topgrade also drive system
+       updaters and dotfile managers, which are outside mpm's domain. And mpm wraps asdf, mise and volta for
+       what they install globally, so their rows say nothing about per-project pinning. -->
+
 ## Features
 
 <!-- The absolute cli-parameters.html links below are deliberate: their

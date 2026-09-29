@@ -182,6 +182,13 @@ def only_escalator(escalator_id: str | None, *, selected: str | None = None):
     That keeps the call counts these tests assert on measuring credential
     probes alone, and keeps a pretended host from probing the real one. A test
     about an impostor patches `is_genuine` itself instead.
+
+    A test that plants a stand-in escalator binary on `PATH` runs under this
+    context. `write_fake_executable` answers every argv the same way, so the
+    stand-in fails the identity probe and `resolve_escalator` falls through to
+    the escalator of the host: `run0` on a systemd runner, none on macOS. The
+    test then passes locally and fails in CI. Clearing the cache alone makes
+    that failure deterministic and does not remove it.
     """
     with (
         patch(

@@ -435,7 +435,7 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
     Escalator(
         id="doas",
         # `doas` parses short options only, so the long-form convention of
-        # `docs/cli-parameters.md` cannot apply here: `-n` is the whole
+        # `docs/add-new-manager.md` cannot apply here: `-n` is the whole
         # vocabulary for "do not prompt".
         escalate_args=("doas", "-n"),
         probe_args=("doas", "-n", "true"),

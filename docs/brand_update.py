@@ -26,6 +26,17 @@ different purples in the first place.
 Run by hand, like `docs/logos_update.py` beside it, and never from a docs build:
 the exports are committed, so a build stays hermetic and needs no rasterizer.
 
+The palette is {data}`INK`, {data}`WASH` and their computed midpoint
+{data}`MID`. Each other tone of a source is one of the three at a reduced
+opacity: the tagline is the ink at 80%, the veins of the social banner the ink
+at 12%. `--check-palette` reports a color outside that set.
+
+Two copies of the mark live outside this script. The GNOME Shell extension
+bundles `icon.svg` as `icons/mpm-logo.svg`: copy it over after an edit, since
+`test_logo_matches_the_brand_mark` holds the two files identical. The terminal
+rendition of `meta_package_manager/logo.py` repeats the colors as literals,
+held to the artwork by `test_ansi_logo_tracks_the_brand_palette`.
+
 ```{note}
 Only the lettering and the social card's own background differ between themes.
 The mark itself is one artwork everywhere: flat faces need no outline, and a flat

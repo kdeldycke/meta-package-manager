@@ -988,6 +988,17 @@ test-matrix.remove.os = [ "macos-26-intel", "windows-11-arm" ]
 # `python-version` axis, so an exclude naming it matches nothing and is dropped
 # with a warning. repomatic already lands it on ubuntu-26.04-arm alone, and
 # marks it stable (3.14's free-threaded build is supported).
+#
+# A failing cell has no same-OS twin left to tell a bug from a host artifact:
+# run it again before diagnosing it. Ask the measured question again before
+# widening the matrix.
+#
+# Every runner literal stays within repomatic's curated axes (`KNOWN_RUNNERS`),
+# which `lint-repo` enforces. This file declares no `[tool.actionlint]` section
+# on purpose: one would replace repomatic's bundled `actionlint.yaml` instead
+# of extending it, so a local label means restating every label repomatic
+# ships. The one exception is `check-void-deps.yaml` on `ubuntu-22.04`, pinned
+# by its apparmor comment.
 # See repomatic's test-matrix guide.
 test-matrix.exclude = [
   { os = "ubuntu-26.04", python-version = "3.10" },

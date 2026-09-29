@@ -209,15 +209,23 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """A manager whose upstream project is no longer maintained.
 
     Covers projects that are officially retired and those we infer are abandoned:
-    archived on their forge, left without a release or commit for years, formally
-    superseded by a successor, or part of a discontinued platform. See the
-    stability policy in `CLAUDE.md` for the full criteria.
+    archived on their forge, left without a release or commit for about three
+    years, formally superseded by a successor, or part of a discontinued platform.
+    A superseded tool that its upstream keeps shipping is not unmaintained: `yum`
+    stays a compatibility alias fronting `dnf`. An upstream that only slows down
+    carries a
+    {attr}`~meta_package_manager.manager.PackageManager.maintenance_note`
+    instead.
 
     An unmaintained manager is hidden from package selection by default (you can
     still use it by explicitly calling for it on the command line), and is exempt
-    from the project stability policy: it may be dropped, in part or in full, in
-    any release and without notice, once keeping it working becomes too
-    burdensome.
+    from the project's {doc}`stability policy </contributing>`: it may be dropped,
+    in part or in full, in any release and without notice, once keeping it working
+    becomes too burdensome.
+
+    The flag is a different axis from being unsupported: an unmaintained manager
+    is still wrapped and usable, where the tools of {doc}`/unsupported` were never
+    wrapped at all.
 
     Unmaintained managers are kept out of the functional and integration test
     matrices, so an unreliable or flaky one never blocks a release and we save CI
@@ -383,6 +391,12 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     Reserve `KEYWORDS_EXTRAS` for terms belonging to no manager in particular, like
     `cyclonedx` or `package manager`. Documentation-only: no CLI output reads it.
+
+    Each keyword also becomes a content rule of the issue labeller, so its
+    precision bar applies here: see
+    {func}`~meta_package_manager.labels.generate_content_rules`. A subclass
+    inherits the terms of its parent without claiming them, since
+    `test_manager_keywords_have_one_owner` reads what a class declares itself.
     """
 
     brewfile_entry_type: ClassVar[str | None] = None

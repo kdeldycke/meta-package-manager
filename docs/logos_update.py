@@ -31,7 +31,13 @@ Artwork comes from [Simple Icons](https://simpleicons.org), pinned to
 license override for the marks whose owner requires attribution; both are recorded
 in the manifest, which feeds the credits block of `docs/license.md`. Simple Icons
 honors brand removal requests, so a manager whose upstream polices its mark simply
-has no `logo` and keeps the default package glyph on its page.
+has no `logo` and keeps the default package glyph on its page. The module of such
+a manager records the removal beside its missing `logo`. Do not request a removed
+mark again, and do not vendor one by hand.
+
+Marks are never hotlinked. The linkcheck builder resolves each image URI, so a
+remote mark per manager page costs one request each, against a budget that
+github.com already throttles to about one request per minute.
 
 ```{note}
 Every mark is stored monochrome and unfilled, so the page inherits `currentColor`

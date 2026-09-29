@@ -23,6 +23,12 @@ The cooldown is a supply-chain safeguard with two independent axes:
 - the **policy**: what happens to managers that cannot natively enforce an
   active window ({class}`~meta_package_manager.cooldown.CooldownPolicy`).
 
+This vocabulary is settled, so code, messages and documentation reuse it. The
+policy is also named the *posture*. A manager is *gateable* when it carries a
+release-age mechanism, native or probed by `mpm`, and *ungateable* otherwise.
+"Unsupported managers" never names the ungateable ones: that phrase belongs to
+the tools `mpm` declined to wrap ({doc}`/unsupported`) and to platform support.
+
 The CLI spells both axes on the single `--cooldown` option (a duration, or
 one of the policy keywords), while the configuration file spells them as the
 two keys of the `[mpm.cooldown]` table (`period` and `policy`). Resolution
@@ -69,6 +75,10 @@ class CooldownPolicy(StrEnum):
     The values double as the CLI keywords of the `--cooldown` option and
     (except {attr}`~meta_package_manager.cooldown.CooldownPolicy.off`) as the `policy` values of the `[mpm.cooldown]`
     configuration table, so they spell exactly like the user types them.
+
+    Strength words (`strict`, `soft`, `full`, `partial`) stay out of the keyword
+    set: they read as a weaker window, where a policy changes the scope of the
+    gate and never its duration.
     """
 
     enforce = "enforce"

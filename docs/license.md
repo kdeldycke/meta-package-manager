@@ -1,5 +1,10 @@
 # {octicon}`law` Legal notices
 
+<!-- The single legal sink of the project: legal text goes here and nowhere else, so that no credit sits beside
+     the artwork it covers, where nobody looks for it. A new third-party asset means a new entry here, and an
+     attribution-bearing license makes that entry mandatory. The file keeps the `license.md` name and URL to
+     stay aligned with the upstream repomatic docs tree, and stays the last page of its toctree in index.md. -->
+
 ## License
 
 Copyright Kevin Deldycke and contributors.

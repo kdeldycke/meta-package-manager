@@ -41,8 +41,8 @@ BuildRequires:  python-rpm-macros
 # the 2026-09-07 run stopped on `python3-extra-platforms >= 13.8 is needed`,
 # and the channel waits on the distribution, not on this file.
 BuildRequires:  python3-boltons >= 25
-BuildRequires:  python3-click-extra >= 9
-BuildRequires:  python3-extra-platforms >= 13.9
+BuildRequires:  python3-click-extra >= 9.3
+BuildRequires:  python3-extra-platforms >= 13.10
 BuildRequires:  python3-packageurl-python >= 0.11
 BuildRequires:  python3-tomli-w >= 1
 BuildRequires:  python3-xmltodict >= 0.12
@@ -59,8 +59,8 @@ BuildRequires:  python3-pytest >= 9
 BuildRequires:  python3-tomlkit >= 0.13
 # /SECTION
 Requires:       python3-boltons >= 25
-Requires:       python3-click-extra >= 9
-Requires:       python3-extra-platforms >= 13.9
+Requires:       python3-click-extra >= 9.3
+Requires:       python3-extra-platforms >= 13.10
 Requires:       python3-packageurl-python >= 0.11
 Requires:       python3-tomli-w >= 1
 Requires:       python3-xmltodict >= 0.12

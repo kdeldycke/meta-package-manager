@@ -89,6 +89,9 @@ class Nala(PackageManager):
     """Nala checks for root and exits with a message rather than escalating on
     its own, so mpm supplies the privilege for the operations that mutate.
     """
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=0.12.2"
     """The oldest release still shipped by a supported distribution, and the

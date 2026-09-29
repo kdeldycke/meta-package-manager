@@ -92,6 +92,10 @@ class Gem(PackageManager):
 
     platforms = ALL_PLATFORMS
 
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "upgrade", "upgrade_all"},
+    )
+
     # Default to the version shipped with the latest maintained macOS version:
     # macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
     requirement = ">=2.5.0"

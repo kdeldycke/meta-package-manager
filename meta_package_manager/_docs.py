@@ -2316,9 +2316,10 @@ def manager_sudo(manager_id: str) -> str:
 
     States which escalation policy applies (system-wide `sudo` wrapping,
     internal escalation, or none) and how to flip it, deriving everything from
-    the escalation attributes so the page can never contradict the code. For
-    config-defined managers that do not escalate internally, the operations
-    marked `sudo = true` in the bundled TOML definition are listed by name.
+    the escalation attributes so the page can never contradict the code. For a
+    manager that does not escalate internally, the section lists its
+    {attr}`~meta_package_manager.execution.CLIExecutor.privileged_operations`
+    by name.
     """
     m = pool[manager_id]
     if m.internal_sudo:
@@ -2346,24 +2347,15 @@ def manager_sudo(manager_id: str) -> str:
         )
 
     parts = [policy]
-    source = getattr(m, "definition_source", None)
-    if source and not m.internal_sudo:
-        operations = _toml_definition(source)["mpm"][OVERRIDES_SECTION][manager_id].get(
-            "operations",
-            {},
-        )
-        # Map the definition-schema operation names to the user-facing ones.
-        privileged = sorted(
-            {"upgrade_one": "upgrade"}.get(op, op)
-            for op, spec in operations.items()
-            if spec.get("sudo")
-        )
-        if privileged:
-            ops_list = ", ".join(f"`{op}`" for op in privileged)
-            plural = "s" if len(privileged) > 1 else ""
-            parts.append(f"Root is required for its {ops_list} operation{plural}.")
+    if not m.internal_sudo:
+        privileged = sorted(m.privileged_operations)
+        ops_list = ", ".join(f"`{op}`" for op in privileged)
+        if len(privileged) > 1:
+            parts.append(f"Its privileged operations are {ops_list}.")
+        elif privileged:
+            parts.append(f"Its privileged operation is {ops_list}.")
         else:
-            parts.append("None of its operations needs root.")
+            parts.append("None of its operations is privileged.")
     parts.append("See [privilege escalation](../sudo.md) for the full policy.")
     return "\n\n".join(parts)
 

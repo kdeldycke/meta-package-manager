@@ -50,6 +50,9 @@ class XBPS(PackageManager):
     platforms = LINUX_LIKE
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=0.59"
     """Version 0.59 is the first to ship the long-form options

@@ -44,6 +44,7 @@ from click_extra.color import COLOR_ENVVARS
 from click_extra.spinner import Spinner
 from extra_platforms import is_any_windows
 
+from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import STILL_CALL_HINT, STILL_CALL_MARKER
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import (
@@ -65,6 +66,10 @@ from .fake_manager import FakeManager
 # consuming it are skipped.
 if not is_any_windows():
     import pwd
+
+INSTALL_RUN = (Operations.install,)
+"""Operations of the run the fakes below are primed for: `install`, the one
+operation `_escalating_manager` marks privileged."""
 
 # Escalation policy inventories: which managers escalate through mpm and which run
 # sudo themselves, pinned across the whole pool so a new manager cannot silently
@@ -227,9 +232,11 @@ def _prompt_argv(run):
 
 
 def _escalating_manager() -> FakeManager:
-    """A fake manager whose policy escalates, to trip prime_sudo."""
+    """A fake manager whose policy escalates its `install`, to trip prime_sudo in
+    an {data}`INSTALL_RUN`."""
     manager = FakeManager()
     manager.sudo = True
+    manager.privileged_operations = frozenset({Operations.install.name})
     return manager
 
 
@@ -282,8 +289,37 @@ def prime_sudo_env(
 def test_prime_sudo_skips_when_no_manager_escalates():
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env() as run:
-        prime_sudo(ctx, [FakeManager()])
+        prime_sudo(ctx, [FakeManager()], operations=INSTALL_RUN)
     run.assert_not_called()
+
+
+def test_prime_sudo_skips_a_run_of_unprivileged_operations():
+    """A manager forced to escalate asks for nothing in a run that reaches none of
+    its privileged operations.
+
+    The case of `gem` under `[mpm.overrides.gem] sudo = true`: its `sync` runs
+    `gem sources --update`, which carries no marker, so the password `mpm sync`
+    would collect on a terminal serves no command.
+    """
+    ctx = click.Context(click.Command("mpm"))
+    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
+        prime_sudo(ctx, [_escalating_manager()], operations=(Operations.sync,))
+    run.assert_not_called()
+
+
+def test_prime_sudo_counts_an_internal_escalator_on_its_policy():
+    """A forced policy keeps an internal escalator in the prompt of every run.
+
+    `mpm` cannot see which of its commands call `sudo` (`fink` does it on `sync`),
+    so the operations of the run leave it in.
+    """
+    ctx = click.Context(click.Command("mpm"))
+    manager = _internal_manager()
+    manager.sudo = True
+    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
+        run.return_value = subprocess.CompletedProcess((), 1)
+        prime_sudo(ctx, [manager], operations=(Operations.sync,))
+    assert any("--prompt" in call.args[0] for call in run.call_args_list)
 
 
 def test_prime_sudo_leaves_a_stock_windows_run_alone():
@@ -296,7 +332,7 @@ def test_prime_sudo_leaves_a_stock_windows_run_alone():
     """
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env() as run, only_escalator("gsudo"):
-        prime_sudo(ctx, [FakeManager()])
+        prime_sudo(ctx, [FakeManager()], operations=INSTALL_RUN)
     run.assert_not_called()
 
 
@@ -309,7 +345,7 @@ def test_prime_sudo_probes_gsudo_when_windows_escalation_is_asked_for():
             (), 0, stdout=b'{"IsElevated":false,"CacheAvailable":false}', stderr=b""
         )
         with only_escalator("gsudo"):
-            prime_sudo(ctx, [_escalating_manager()])
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
     assert run.call_args_list, "the gsudo probe never ran"
     assert run.call_args_list[0].args[0] == ("gsudo", "status", "--json")
 
@@ -317,7 +353,7 @@ def test_prime_sudo_probes_gsudo_when_windows_escalation_is_asked_for():
 def test_prime_sudo_skips_when_root():
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env(root=True) as run:
-        prime_sudo(ctx, [_escalating_manager()])
+        prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
     run.assert_not_called()
 
 
@@ -329,7 +365,7 @@ def test_prime_sudo_skips_on_simulation(simulation_flag):
     manager = _escalating_manager()
     setattr(manager, simulation_flag, True)
     with prime_sudo_env() as run:
-        prime_sudo(ctx, [manager])
+        prime_sudo(ctx, [manager], operations=INSTALL_RUN)
     run.assert_not_called()
 
 
@@ -339,7 +375,7 @@ def test_prime_sudo_warns_without_tty(caplog):
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
         run.return_value = subprocess.CompletedProcess((), 1)
-        prime_sudo(ctx, [_escalating_manager()])
+        prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
     # Two non-interactive probes and no prompt: the cache is cold, the policy
     # grants nothing unauthenticated, and nothing could be answered off-terminal.
     assert [call.args[0][:3] for call in run.call_args_list] == [
@@ -374,7 +410,7 @@ def test_prime_sudo_skips_the_prompt_under_a_passwordless_policy(caplog):
 
         run.side_effect = answer
         try:
-            prime_sudo(ctx, [_escalating_manager()])
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
             assert _SUDO_CACHE_WARM.is_set()
         finally:
             ctx.close()
@@ -398,7 +434,7 @@ def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
 
         run.side_effect = answer
         try:
-            prime_sudo(ctx, [_escalating_manager()])
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
             # The non-interactive probe runs first, then authenticates once, up
             # front, before the fan-out, with the branded prompt.
             assert run.call_args_list[0].args[0] == (
@@ -425,8 +461,8 @@ def test_prime_sudo_is_idempotent():
     with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
         run.return_value = subprocess.CompletedProcess((), 0)
         try:
-            prime_sudo(ctx, [_escalating_manager()])
-            prime_sudo(ctx, [_escalating_manager()])
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
         finally:
             ctx.close()
     assert run.call_count == 1
@@ -441,7 +477,7 @@ def test_prime_sudo_warm_probe_stays_silent_on_tty(capsys):
     with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
         run.return_value = subprocess.CompletedProcess((), 0)
         try:
-            prime_sudo(ctx, [_escalating_manager()])
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
             assert run.call_count == 1
             assert run.call_args.args[0] == ("sudo", "--non-interactive", "--validate")
             assert _SUDO_CACHE_WARM.is_set()
@@ -460,7 +496,7 @@ def test_prime_sudo_warm_probe_keeps_alive_off_tty(caplog):
     with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
         run.return_value = subprocess.CompletedProcess((), 0)
         try:
-            prime_sudo(ctx, [_escalating_manager()])
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
             assert run.call_count == 1
             assert _SUDO_CACHE_WARM.is_set()
         finally:
@@ -500,7 +536,7 @@ def test_keepalive_drop_warns_once_and_rearms(monkeypatch, caplog):
     with prime_sudo_env() as run, caplog.at_level(logging.INFO):
         run.side_effect = fake_run
         try:
-            prime_sudo(ctx, [_escalating_manager()])
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
             assert _SUDO_CACHE_WARM.is_set()
             # Drop the credentials: the next refresh finds them gone.
             refresh_rc[0] = 1
@@ -529,7 +565,7 @@ def test_prime_sudo_narrates_warm_probe_at_info(caplog):
     with prime_sudo_env() as run, caplog.at_level(logging.INFO):
         run.return_value = subprocess.CompletedProcess((), 0)
         try:
-            prime_sudo(ctx, [_escalating_manager()])
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
         finally:
             ctx.close()
     messages = [record.getMessage() for record in caplog.records]
@@ -546,7 +582,7 @@ def test_prime_sudo_narrates_internal_only_skip_at_info(caplog):
         caplog.at_level(logging.INFO),
     ):
         run.return_value = subprocess.CompletedProcess((), 1)
-        prime_sudo(ctx, [_internal_manager()])
+        prime_sudo(ctx, [_internal_manager()], operations=INSTALL_RUN)
     skips = [
         record
         for record in caplog.records
@@ -567,7 +603,7 @@ def test_prime_sudo_cold_internal_only_never_prompts_on_tty(capsys, caplog):
     ):
         run.return_value = subprocess.CompletedProcess((), 1)
         try:
-            prime_sudo(ctx, [_internal_manager()])
+            prime_sudo(ctx, [_internal_manager()], operations=INSTALL_RUN)
         finally:
             ctx.close()
     assert run.call_count == 1
@@ -584,7 +620,7 @@ def test_prime_sudo_cold_internal_only_stays_silent_off_tty(caplog):
     with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
         run.return_value = subprocess.CompletedProcess((), 1)
         try:
-            prime_sudo(ctx, [_internal_manager()])
+            prime_sudo(ctx, [_internal_manager()], operations=INSTALL_RUN)
         finally:
             ctx.close()
     assert run.call_count == 1
@@ -606,7 +642,7 @@ def test_prime_sudo_denied_user_skips_prompt(caplog):
             1,
             stderr=b"Sorry, user kevin may not run sudo on host.\n",
         )
-        prime_sudo(ctx, [_escalating_manager()])
+        prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
     # The non-interactive probe is the only subprocess: no prompt is raised.
     assert run.call_count == 1
     assert not _SUDO_CACHE_WARM.is_set()
@@ -631,7 +667,7 @@ def test_prime_sudo_denied_internal_only_stays_silent(caplog):
             1,
             stderr=b"Sorry, user kevin may not run sudo on host.\n",
         )
-        prime_sudo(ctx, [_internal_manager()])
+        prime_sudo(ctx, [_internal_manager()], operations=INSTALL_RUN)
     assert run.call_count == 1
     assert not caplog.records
 
@@ -660,7 +696,7 @@ def test_prime_sudo_audits_escalated_binaries(tmp_path, caplog, mode, expect_war
     with prime_sudo_env(stdin_tty=False) as run, caplog.at_level(logging.WARNING):
         run.return_value = subprocess.CompletedProcess((), 0)
         try:
-            prime_sudo(ctx, [manager])
+            prime_sudo(ctx, [manager], operations=INSTALL_RUN)
         finally:
             ctx.close()
     assert run.call_count == 1
@@ -690,7 +726,7 @@ def test_prime_sudo_warns_when_sudo_cannot_run(caplog, probe_error):
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env() as run, caplog.at_level(logging.WARNING):
         run.side_effect = probe_error
-        prime_sudo(ctx, [_escalating_manager()])
+        prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
     assert not _SUDO_CACHE_WARM.is_set()
     assert any(
         "sudo could not be run" in record.getMessage() for record in caplog.records
@@ -729,7 +765,7 @@ def test_prime_sudo_notice_names_managers_and_subcommand(
         # Cold probe, then a failed password prompt: no keepalive to tear down.
         run.return_value = subprocess.CompletedProcess((), 1)
         try:
-            prime_sudo(ctx, managers)
+            prime_sudo(ctx, managers, operations=INSTALL_RUN)
         finally:
             ctx.close()
     assert expected_notice in capsys.readouterr().err
@@ -777,7 +813,7 @@ def test_sudo_prompt_respects_sudo_constraints(manager_ids):
         # Cold probe, then a failed password prompt: no keepalive to tear down.
         run.return_value = subprocess.CompletedProcess((), 1)
         try:
-            prime_sudo(ctx, managers)
+            prime_sudo(ctx, managers, operations=INSTALL_RUN)
         finally:
             ctx.close()
     prompt_argv = _prompt_argv(run)
@@ -808,7 +844,7 @@ def test_sudo_prompt_names_the_account_that_owns_the_password():
     with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
         run.return_value = subprocess.CompletedProcess((), 1)
         try:
-            prime_sudo(ctx, [manager])
+            prime_sudo(ctx, [manager], operations=INSTALL_RUN)
         finally:
             ctx.close()
     prompt = _prompt_argv(run)[3]
@@ -1465,7 +1501,7 @@ def test_prime_sudo_warns_without_any_escalator(caplog):
         only_escalator(None),
         caplog.at_level(logging.WARNING),
     ):
-        prime_sudo(ctx, [_escalating_manager()])
+        prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
     run.assert_not_called()
     assert any("Found none of sudo, doas" in r.getMessage() for r in caplog.records)
 
@@ -1485,7 +1521,7 @@ def test_prime_sudo_probes_and_prompts_through_doas(capsys):
             subprocess.CompletedProcess((), 0),  # Successful password prompt.
         )
         try:
-            prime_sudo(ctx, [manager])
+            prime_sudo(ctx, [manager], operations=INSTALL_RUN)
             assert run.call_args_list[0].args[0] == ("doas", "-n", "true")
             assert run.call_args_list[1].args[0] == ("doas", "true")
         finally:
@@ -1506,7 +1542,7 @@ def test_doas_gets_no_keepalive_thread(caplog):
     ):
         run.return_value = subprocess.CompletedProcess((), 0)
         try:
-            prime_sudo(ctx, [manager])
+            prime_sudo(ctx, [manager], operations=INSTALL_RUN)
             assert _SUDO_CACHE_WARM.is_set()
             # The probe is the only subprocess: no refresh tick follows it.
             assert run.call_count == 1

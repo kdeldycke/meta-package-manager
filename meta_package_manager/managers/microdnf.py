@@ -85,6 +85,9 @@ class MicroDNF(PackageManager):
     platforms = LINUX_LIKE
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=3.8.0"
     """`3.8.0` is the first release with the `makecache` command that `sync` runs

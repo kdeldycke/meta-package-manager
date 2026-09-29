@@ -118,6 +118,7 @@ if TYPE_CHECKING:
 
     from click import Context
 
+    from .capabilities import Operations
     from .execution import CLIExecutor
     from .manager import PackageManager
 
@@ -728,6 +729,27 @@ def _resolved_sudo(manager: CLIExecutor) -> bool:
     return manager.sudo if manager.sudo is not None else manager.default_sudo
 
 
+def _escalates_in(manager: CLIExecutor, operations: frozenset[str]) -> bool:
+    """Whether `manager` escalates a command of a run over `operations`.
+
+    `operations` holds the names of the
+    {class}`~meta_package_manager.capabilities.Operations` the run can reach.
+    The policy must escalate (`_resolved_sudo`), and one of those
+    operations must be in its
+    {attr}`~meta_package_manager.execution.CLIExecutor.privileged_operations`.
+
+    An internal escalator counts on its policy alone: `mpm` cannot see which of
+    its commands call `sudo`, and `fink` does it on `sync` and `cleanup` too. A
+    forced `sudo = true` on one keeps it in the up-front prompt of every run (see
+    {attr}`~meta_package_manager.execution.CLIExecutor.internal_sudo`).
+    """
+    if not _resolved_sudo(manager):
+        return False
+    if manager.internal_sudo:
+        return True
+    return not operations.isdisjoint(manager.privileged_operations)
+
+
 def _names_an_escalator(error: str) -> bool:
     """Whether `error` is prefixed by one of the escalators mpm drives.
 
@@ -1072,7 +1094,12 @@ def _escalation_is_passwordless(
     return True
 
 
-def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
+def prime_sudo(
+    ctx: Context,
+    managers: Iterable[PackageManager],
+    *,
+    operations: Iterable[Operations],
+) -> None:
     """Warm the `sudo` credential cache, up front, for a mutating fan-out.
 
     Probes the cache non-interactively (`sudo --non-interactive --validate`)
@@ -1086,12 +1113,17 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     <meta_package_manager.execution.CLIExecutor.internal_sudo>`), spends the cache
     instead of blocking on an invisible prompt inside the concurrent fan-out. Only
     a cold cache, on an interactive terminal, with managers that mpm itself
-    escalates (`_resolved_sudo`), triggers the interactive path: a notice
-    naming the managers and the subcommand, then a single branded `sudo` password
-    prompt.
+    escalates in this run (`_escalates_in`), triggers the interactive path: a
+    notice naming the managers and the subcommand, then a single branded `sudo`
+    password prompt.
 
-    Before probing, the binary of each manager mpm escalates is audited with the
-    same tamper test the config loader applies
+    `operations` lists every operation the run of the subcommand can reach, the
+    reads included. A manager escalates in this run only when one of them is in
+    its {attr}`~meta_package_manager.execution.CLIExecutor.privileged_operations`,
+    so no password is asked for a manager whose commands stay unprivileged.
+
+    Before probing, the binary of each manager that escalates in this run is
+    audited with the same tamper test the config loader applies
     ({func}`~meta_package_manager.config.config_file_is_trusted`): a binary that
     others can modify, handed to `sudo`, runs their code as root, so it draws one
     warning per manager (see `docs/security.md`).
@@ -1100,7 +1132,8 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     spinner. Never prompts when:
 
     - the process is already root,
-    - no selected manager escalates, through mpm or internally,
+    - no selected manager escalates a command of this run, through mpm or
+      internally,
     - a dry run or a plan run (no state-changing CLI is executed),
     - already primed once this invocation (idempotent),
     - no escalator is on `PATH`, or `sudo_command` names an unknown one (one
@@ -1125,7 +1158,9 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     # `[mpm.overrides.<id>] sudo = true` entry, reaches the probe.
     if getattr(os, "geteuid", lambda: 1)() == 0:
         return
-    escalating = sorted({m.id for m in managers if _resolved_sudo(m)})
+    run_operations = frozenset(operation.name for operation in operations)
+    escalating_managers = [m for m in managers if _escalates_in(m, run_operations)]
+    escalating = sorted({m.id for m in escalating_managers})
     internal = any(m.internal_sudo for m in managers)
     if not escalating and not internal:
         return
@@ -1152,9 +1187,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
     # imports back into this module through `manager` and `execution`.
     from .config import config_file_is_trusted
 
-    for manager in managers:
-        if not _resolved_sudo(manager):
-            continue
+    for manager in escalating_managers:
         # The same file-plus-parent tamper test the config loader applies (see
         # `docs/security.md`): a binary that others can modify, handed to
         # `sudo`, runs their code as root. The warning does not block: like the
@@ -1218,7 +1251,7 @@ def prime_sudo(ctx: Context, managers: Iterable[PackageManager]) -> None:
         # each manager's own sudo surfaces the denial through its error path.
         return
 
-    if _escalation_is_passwordless(escalator, managers):
+    if _escalation_is_passwordless(escalator, escalating_managers):
         # No credential is involved, so there is none to prompt for, refresh or
         # lose mid-run. The flag still goes up: it gates the stall watchdog, and
         # nothing can stall on a password the policy never asks for.

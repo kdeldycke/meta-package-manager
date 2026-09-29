@@ -101,6 +101,8 @@ class CPAN(PackageManager):
 
     platforms = ALL_PLATFORMS
 
+    privileged_operations = frozenset({"install", "upgrade", "upgrade_all"})
+
     requirement = ">=1.64"
 
     extra_env: ClassVar = {"PERL_MM_USE_DEFAULT": "1"}

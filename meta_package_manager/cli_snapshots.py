@@ -425,7 +425,13 @@ def restore(ctx, toml_files):
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.install),
     )
-    prime_sudo(ctx, selected_managers)
+    # The run also reads the inventory, for its report and to mark a dependency as
+    # explicit.
+    prime_sudo(
+        ctx,
+        selected_managers,
+        operations=(Operations.install, Operations.installed),
+    )
 
     # Collect every package a manager failed to install, to raise a non-zero exit code
     # at the end (matching install, remove and upgrade).

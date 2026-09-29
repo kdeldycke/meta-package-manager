@@ -112,6 +112,10 @@ class PEAR(PackageManager):
 
     platforms = ALL_PLATFORMS
 
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
+
     requirement = ">=1.10.0"
     """The series every current distribution ships, and the one upstream still
     releases from (`1.10.18`, 2026-01-25).

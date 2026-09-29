@@ -75,6 +75,8 @@ class NPM(PackageManager):
 
     platforms = ALL_PLATFORMS
 
+    privileged_operations = frozenset({"install", "remove", "upgrade", "upgrade_all"})
+
     requirement = ">=11.10.0"
     """[11.10.0](https://github.com/npm/cli/releases/tag/v11.10.0) is the first
     version to ship `min-release-age`, the purpose-built release-age gate mpm uses

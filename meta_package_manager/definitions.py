@@ -55,7 +55,7 @@ from typing import cast
 from click_extra.config import ValidationError
 from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS, traits_from_ids
 
-from .capabilities import Operations
+from .capabilities import METHOD_OPERATIONS, Operations
 from .cooldown import CooldownPolicy, parse_policy_token
 from .manager import JSON_FIELD_SELECTOR_REGEX, MetaPackageManager, PackageManager
 
@@ -1208,7 +1208,10 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
     from a validated definition.
 
     Assembles a class namespace from the definition's identity and CLI fields, then
-    adds one method (or property) per declared operation. Only the declared operations
+    adds one method (or property) per declared operation. The operations marked
+    `sudo = true` make up its
+    {attr}`~meta_package_manager.execution.CLIExecutor.privileged_operations`.
+    Only the declared operations
     land in the namespace, so {func}`meta_package_manager.capabilities.implements`
     reflects exactly what the user configured. Single- and all-package upgrades map to
     {meth}`~meta_package_manager.manager.PackageManager.upgrade_one_cli` /
@@ -1232,6 +1235,7 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
     }
     namespace.update(definition.cli_fields)
 
+    privileged: set[str] = set()
     for op_name, spec in definition.operations.items():
         method_name, factory = OPERATION_FACTORIES[op_name]
         if op_name in QUERY_OPERATIONS:
@@ -1242,6 +1246,9 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
             namespace[method_name] = factory(spec, compiled)
         else:
             namespace[method_name] = factory(spec)
+        if spec.sudo:
+            privileged.add(METHOD_OPERATIONS[method_name].name)
+    namespace["privileged_operations"] = frozenset(privileged)
 
     class_name = "Config_" + definition.manager_id.replace("-", "_")
     return cast(

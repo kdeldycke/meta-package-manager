@@ -112,6 +112,9 @@ class Aptitude(PackageManager):
     """Aptitude reports `are you root?` and exits rather than escalating on its
     own, so mpm supplies the privilege for the operations that mutate.
     """
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=0.4.11.4"
     """The release adding `--disable-columns`, announced in aptitude's own `NEWS`

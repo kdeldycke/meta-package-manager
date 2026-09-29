@@ -120,6 +120,9 @@ class Zypper(PackageManager):
     platforms = UNIX_WITHOUT_MACOS
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=1.14.0"
 

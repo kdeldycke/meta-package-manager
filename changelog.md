@@ -9,6 +9,8 @@
 - [mpm] Raise the `extra-platforms` floor to `13.10`, whose new `shell_from_path()` resolves the login shell `--shell-env` runs, replacing `mpm`'s own PowerShell special case.
 - [bar-plugin] Fix the preview screenshot Xbar's website shows for the plugin, which named a renamed file.
 - [mpm] Close `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans` on a report of every package upgraded, downgraded, installed, removed, held or still outdated, with its versions, as a table honoring `--table-format` and `--columns`.
+- [mpm] List the privileged operations of every manager on its page, not only those of the bundled definitions.
+- [mpm] Ask for the `sudo` password up front only for managers whose commands in the run need root: a `gem` forced to escalate no longer prompts on `sync`.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

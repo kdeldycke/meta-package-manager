@@ -66,6 +66,9 @@ class Deb_Get(PackageManager):
     platforms = LINUX_LIKE
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "outdated", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     version_cli_options = ("version",)
     """

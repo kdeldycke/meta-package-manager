@@ -76,6 +76,7 @@ class Snap(PackageManager):
     platforms = UNIX_WITHOUT_MACOS
 
     default_sudo = True
+    privileged_operations = frozenset({"install", "remove", "upgrade", "upgrade_all"})
 
     requirement = ">=2.0.0"
 

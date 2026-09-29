@@ -107,7 +107,7 @@ Config-based skips the class machinery: no Python module, no `pool.py` registrat
 
 Whatever the path, identify the tool's escalation model before mapping operations — each demands a different treatment:
 
-- **Plain root-requiring** (most system managers): mark mutating operations privileged (`sudo = true` in a definition; `run_cli(..., sudo=True)` plus `default_sudo = True` in a class).
+- **Plain root-requiring** (most system managers): mark mutating operations privileged (`sudo = true` in a definition; `run_cli(..., sudo=True)` plus `default_sudo = True` in a class). A class also lists those operations in `privileged_operations`, which `test_privileged_operations` holds to its markers.
 - **Self-escalating** (fink re-execs itself under `/usr/bin/sudo` and no-ops when already root): never mark operations privileged, or sudo stacks on sudo.
 - **Broker-based** (pkcon hands transactions to a polkit-authorized daemon): no escalation at all; note that unattended runs depend on the broker's policy.
 - **Root-refusing** (chromebrew hard-aborts as root): no escalation, and never wrap in sudo manually.

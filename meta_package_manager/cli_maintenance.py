@@ -218,8 +218,13 @@ def _dispatch_sourced_operation(
     manager_ids = tuple(manager.id for manager in selected_managers)
 
     # Authenticate sudo once up front if any selected manager will escalate, so a
-    # password prompt never stalls the concurrent fan-out below.
-    prime_sudo(ctx, selected_managers)
+    # password prompt never stalls the concurrent fan-out below. The run reads the
+    # inventory to source the specs, and the outdated listing for a report naming
+    # what the command left behind.
+    reads = [Operations.installed]
+    if report_outdated:
+        reads.append(Operations.outdated)
+    prime_sudo(ctx, selected_managers, operations=(operation, *reads))
 
     # Subset of selected managers implementing `installed`, queried to discover which
     # manager(s) a spec untied to one was installed with.
@@ -437,7 +442,13 @@ def install(ctx, packages_specs):
 
     # Authenticate sudo once up front if any selected manager will escalate, covering
     # both the concurrent tied-package fan-out and the sequential priority search below.
-    prime_sudo(ctx, selected_managers)
+    # The run also reads the inventory, for its report and to mark a dependency as
+    # explicit.
+    prime_sudo(
+        ctx,
+        selected_managers,
+        operations=(Operations.install, Operations.installed, Operations.search),
+    )
 
     solver = Solver(packages_specs, manager_priority=manager_ids)
     packages_per_managers = solver.resolve_specs_group_by_managers()
@@ -640,7 +651,18 @@ def upgrade(ctx, all, packages_specs):
         managers = list(
             ctx.obj.selected_managers(implements_operation=Operations.upgrade_all),
         )
-        prime_sudo(ctx, managers)
+        # A full upgrade can fall back to upgrading the packages one by one, and
+        # reads the inventory and the outdated listing for its report.
+        prime_sudo(
+            ctx,
+            managers,
+            operations=(
+                Operations.upgrade_all,
+                Operations.upgrade,
+                Operations.installed,
+                Operations.outdated,
+            ),
+        )
         announce = _announce_level(ctx)
         report = ChangeReport(managers)
 
@@ -779,7 +801,7 @@ def remove(ctx, orphans, packages_specs):
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.sync))
-    prime_sudo(ctx, managers)
+    prime_sudo(ctx, managers, operations=(Operations.sync,))
     announce = _announce_level(ctx)
 
     # Sync is independent per manager, so fan out concurrently with a ✓/✘ trail and
@@ -929,7 +951,14 @@ def cleanup(ctx, orphans, cache, repair):
     # skipped by the non-destructive default and reached through --orphans.
     managers = [m for m in managers if _cleanup_steps(m, selected, explicit_orphans)]
 
-    prime_sudo(ctx, managers)
+    # The orphan sweep lists the orphans, removes them, and reads the inventory for
+    # its report.
+    sweep = (Operations.orphans, Operations.remove, Operations.installed)
+    prime_sudo(
+        ctx,
+        managers,
+        operations=(Operations.cleanup, *(sweep if "orphans" in selected else ())),
+    )
     announce = _announce_level(ctx)
     report = ChangeReport(managers)
 
@@ -998,7 +1027,7 @@ def doctor(ctx):
     diagnostic verb are skipped.
     """
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.doctor))
-    prime_sudo(ctx, managers)
+    prime_sudo(ctx, managers, operations=(Operations.doctor,))
     announce = _announce_level(ctx)
 
     def doctor_work(manager: PackageManager) -> tuple[str, dict]:

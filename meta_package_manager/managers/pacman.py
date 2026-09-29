@@ -117,6 +117,9 @@ class Pacman(PackageManager):
     """
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=5.0.0"
 

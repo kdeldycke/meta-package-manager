@@ -111,6 +111,42 @@ the method sharing its name, which is the general case.
 """
 
 
+METHOD_OPERATIONS: dict[str, Operations] = {
+    "cleanup_cache": Operations.cleanup,
+    "cleanup_orphan": Operations.cleanup,
+    "cleanup_repair": Operations.cleanup,
+    "doctor_cli": Operations.doctor,
+    "install": Operations.install,
+    "installed": Operations.installed,
+    # The install action runs this hook once the package is in.
+    "mark_explicit": Operations.install,
+    "orphans": Operations.orphans,
+    "outdated": Operations.outdated,
+    "remove": Operations.remove,
+    # The `--orphans` refinement of `remove`.
+    "remove_orphan": Operations.remove,
+    "search": Operations.search,
+    "sync": Operations.sync,
+    "upgrade_all_cli": Operations.upgrade_all,
+    # The variant of `upgrade_all_cli` for a run that holds packages back.
+    "upgrade_all_cli_excluding": Operations.upgrade_all,
+    "upgrade_one_cli": Operations.upgrade,
+}
+"""Operation each manager method belongs to, for every method that can build a
+privileged command.
+
+Ties a `sudo=True` marker to the entry of
+{attr}`~meta_package_manager.execution.CLIExecutor.privileged_operations` it
+accounts for: a definition derives that set through this map, and
+`test_privileged_operations` checks the set a class declares against it.
+
+A method belongs to the operation that routes to it, not to every run that
+calls it. The per-package fallback of a full upgrade calls `upgrade_one_cli`,
+which stays an `upgrade` method: each subcommand passes all the operations its
+run can reach to {func}`~meta_package_manager.sudo.prime_sudo`.
+"""
+
+
 def _manager_class(
     manager: PackageManager | type[PackageManager],
 ) -> type[PackageManager]:

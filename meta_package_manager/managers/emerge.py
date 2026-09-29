@@ -74,6 +74,9 @@ class Emerge(PackageManager):
     platforms = UNIX_WITHOUT_MACOS
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=3.0.0"
 

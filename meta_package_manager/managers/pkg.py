@@ -96,6 +96,9 @@ class PKG(PackageManager):
     platforms = FREEBSD
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=1.11"
     """1.11 is the first version to support the `IGNORE_OSVERSION` setting.
@@ -524,6 +527,9 @@ class Ports(PackageManager):
     platforms = FREEBSD
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     cli_names = ("make",)
     """The ports tree is driven by FreeBSD's {command}`make`.

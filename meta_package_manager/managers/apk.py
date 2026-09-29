@@ -76,6 +76,9 @@ class APK(PackageManager):
     platforms = LINUX_LIKE
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=2.10.0"
     """The `list` applet, used by {meth}`~meta_package_manager.manager.PackageManager.installed` and {meth}`~meta_package_manager.manager.PackageManager.outdated`,

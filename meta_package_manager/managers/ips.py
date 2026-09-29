@@ -95,6 +95,9 @@ class IPS(PackageManager):
     platforms = ILLUMOS, SOLARIS
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     cli_names = ("pkg",)
 

@@ -74,6 +74,9 @@ class PrtGet(PackageManager):
     platforms = CRUX
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=5.19"
     """The `5.19` series is what every supported CRUX ships: `5.19.6` on CRUX

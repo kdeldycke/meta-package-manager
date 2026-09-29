@@ -86,6 +86,9 @@ class DNF(PackageManager):
     platforms = UNIX_WITHOUT_MACOS
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "upgrade", "upgrade_all"},
+    )
 
     requirement = ">=4.0.0,<5"
     """Ceiling because `dnf` is no longer dnf4 everywhere.

@@ -21,6 +21,8 @@ import inspect
 import os
 import re
 import sys
+import textwrap
+from functools import cached_property
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
 
@@ -34,15 +36,24 @@ from meta_package_manager import (
     cli_maintenance,
     managers as managers_module,
 )
-from meta_package_manager.capabilities import Operations
+from meta_package_manager.capabilities import (
+    METHOD_OPERATIONS,
+    DelegatedMethod,
+    Operations,
+)
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
+from meta_package_manager.definitions import (
+    OPERATION_FACTORIES,
+    OVERRIDES_SECTION,
+    ConfigDrivenManager,
+)
 from meta_package_manager.execution import CLIExecutor
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 from meta_package_manager.version import TokenizedString
 
-from .conftest import all_managers, manager_classes_params
+from .conftest import PROJECT_ROOT, all_managers, manager_classes_params, tomllib
 
 """ Test the structure, data and types returned by all package managers.
 
@@ -123,6 +134,85 @@ def test_operation_notes(manager):
         assert note.endswith("."), (
             f"Operation note {op_name!r} does not end with a period."
         )
+
+
+def _privileged_methods(cls: type[PackageManager]) -> set[str]:
+    """Names of the methods of `cls` whose body passes `sudo=True` to a call.
+
+    Each name resolves through the MRO, so a subclass answers for the methods it
+    inherits, and a delegated method answers with its source. The scan stops at
+    the base classes, which build no privileged command of their own.
+    """
+    bases = (PackageManager, CLIExecutor, object)
+    names = {name for klass in cls.mro() if klass not in bases for name in vars(klass)}
+    marked = set()
+    for name in names:
+        owner = next(klass for klass in cls.mro() if name in vars(klass))
+        if owner in bases:
+            continue
+        member = vars(owner)[name]
+        if isinstance(member, DelegatedMethod):
+            member = member.method
+        elif isinstance(member, property):
+            member = member.fget
+        elif isinstance(member, cached_property):
+            member = member.func
+        elif isinstance(member, (staticmethod, classmethod)):
+            member = member.__func__
+        if not inspect.isfunction(member):
+            continue
+        tree = ast.parse(textwrap.dedent(inspect.getsource(member)))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            for keyword in node.keywords:
+                if keyword.arg != "sudo":
+                    continue
+                # A computed value would hide which way the call goes.
+                assert isinstance(keyword.value, ast.Constant), (
+                    f"{owner.__name__}.{name} passes a computed `sudo` value."
+                )
+                if keyword.value.value:
+                    marked.add(name)
+    return marked
+
+
+@all_managers
+def test_privileged_operations(manager):
+    """`privileged_operations` names exactly the operations whose methods carry a
+    `sudo=True` marker.
+
+    `prime_sudo` reads the set to choose the managers of the up-front password
+    prompt. A missing operation lets an escalated command meet a cold cache
+    inside the fan-out, and an extra one asks for a password no command uses. A
+    marker on a method outside `METHOD_OPERATIONS` belongs to no operation, so it
+    fails the test too. A config-defined manager derives the set from its
+    definition, which is checked against the raw TOML.
+    """
+    assert manager.privileged_operations <= {op.name for op in Operations}
+    if isinstance(manager, ConfigDrivenManager):
+        assert manager.definition_source
+        document = tomllib.loads(
+            (PROJECT_ROOT / manager.definition_source).read_text(encoding="UTF-8"),
+        )
+        definition = document["mpm"][OVERRIDES_SECTION][manager.id]
+        marked = {
+            OPERATION_FACTORIES[op_name][0]
+            for op_name, spec in definition.get("operations", {}).items()
+            if spec.get("sudo")
+        }
+    else:
+        marked = _privileged_methods(type(manager))
+    unmapped = marked - METHOD_OPERATIONS.keys()
+    assert not unmapped, (
+        f"{manager.id} marks {sorted(unmapped)} privileged, which no operation "
+        "claims in METHOD_OPERATIONS."
+    )
+    expected = {METHOD_OPERATIONS[name].name for name in marked}
+    assert manager.privileged_operations == expected, (
+        f"{manager.id} declares {sorted(manager.privileged_operations)}, but its "
+        f"markers make it {sorted(expected)}."
+    )
 
 
 @all_managers
@@ -780,6 +870,7 @@ CANONICAL_ATTRS = (
     "sudo",
     "default_sudo",
     "internal_sudo",
+    "privileged_operations",
     # Version gate and native cooldown marker.
     "requirement",
     "cooldown_env_var",

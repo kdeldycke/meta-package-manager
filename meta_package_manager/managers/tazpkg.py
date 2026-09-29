@@ -57,6 +57,9 @@ class Tazpkg(PackageManager):
     platforms = SLITAZ
 
     default_sudo = True
+    privileged_operations = frozenset(
+        {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
+    )
 
     # Keep gettext-localized headers and prompts in English.
     extra_env: ClassVar = {"LC_ALL": "C"}

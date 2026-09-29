@@ -171,6 +171,8 @@ class Pip(PackageManager):
 
     platforms = ALL_PLATFORMS
 
+    privileged_operations = frozenset({"install", "remove", "upgrade"})
+
     requirement = ">=26.1.0"
     """[26.1](https://github.com/pypa/pip/releases/tag/26.1) is the first version to
     ship `--uploaded-prior-to`, the release-age gate mpm uses for the supply-chain

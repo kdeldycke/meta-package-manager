@@ -891,6 +891,27 @@ class CLIExecutor:
     {func}`~meta_package_manager.sudo.prime_sudo`.
     """
 
+    privileged_operations: ClassVar[frozenset[str]] = frozenset()
+    """Operations with at least one command this manager marks privileged.
+
+    Keyed by the {class}`~meta_package_manager.capabilities.Operations` member
+    name, like
+    {attr}`~meta_package_manager.manager.PackageManager.operation_notes`. An
+    operation belongs here when a method implementing it passes `sudo=True` to
+    {meth}`run_cli` or {meth}`build_cli`, with the method-to-operation map of
+    {data}`~meta_package_manager.capabilities.METHOD_OPERATIONS`. Those commands
+    are the only ones the escalation policy ({attr}`sudo`, else
+    {attr}`default_sudo`) wraps in the escalator. A definition derives the set
+    from the operations it marks `sudo = true`.
+
+    {func}`~meta_package_manager.sudo.prime_sudo` reads it to prompt only for
+    the managers that escalate a command of the current run. With
+    `[mpm.overrides.gem] sudo = true`, `mpm sync` asks for no password: the
+    `gem sources --update` command of `sync` carries no marker.
+    `test_privileged_operations` holds the set to the markers in the method
+    bodies.
+    """
+
     cooldown_env_var: ClassVar[str | None] = None
     """Environment variable this manager reads to honor a {attr}`cooldown`.
 

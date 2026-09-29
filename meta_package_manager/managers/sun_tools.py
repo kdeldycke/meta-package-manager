@@ -86,6 +86,7 @@ class Sun_Tools(PackageManager):
     """
 
     default_sudo = True
+    privileged_operations = frozenset({"remove"})
 
     cli_names = ("pkginfo",)
 

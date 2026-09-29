@@ -243,6 +243,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "${branch}"
           git add --update packaging/guix/
+          # Nothing staged: the definition was already current.
+          if git diff --cached --quiet; then
+            echo "No Guix definition changed; nothing to propose."
+            exit 0
+          fi
           git commit --message "Update Guix package definition to v${VERSION}"
           git push --force --set-upstream origin "${branch}"
           existing=$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number')
@@ -371,6 +376,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "${branch}"
           git add --update packaging/nix/
+          # Nothing staged: every definition was already current, or held back by its `update-hold:` marker.
+          if git diff --cached --quiet; then
+            echo "No Nix definition changed; nothing to propose."
+            exit 0
+          fi
           git commit --message "Update Nix package definition to v${VERSION}"
           git push --force --set-upstream origin "${branch}"
           existing=$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number')

@@ -8,7 +8,9 @@
 
 python3Packages.buildPythonApplication (finalAttrs: {
   pname = "meta-package-manager";
-  version = "8.0.2";
+  # update-hold: 8.x needs click-extra >= 9.3, which this overlay cannot carry
+  # while nixpkgs lacks the boltons and wcwidth floors click-extra.nix names.
+  version = "8.0.1";
   pyproject = true;
   __structuredAttrs = true;
 
@@ -16,7 +18,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
     owner = "kdeldycke";
     repo = "meta-package-manager";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-VI6GwRBwSo/BfOMgrNnDEdTfs/PYg+GkXcUukexgR/8=";
+    hash = "sha256-GRtgU9mz6bYxixFy94eSvGE1/hyw0R/Rqg8BKgA/Hp8=";
   };
 
   build-system = with python3Packages; [ uv-build ];

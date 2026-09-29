@@ -36,7 +36,7 @@ from meta_package_manager.cli_maintenance import _outcome_detail, upgrade_outcom
 from meta_package_manager.execution import CLIError
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
-from meta_package_manager.tables import UpgradeOutcome
+from meta_package_manager.tables import UPGRADE_OUTCOME_GLYPHS, UpgradeOutcome
 
 from .conftest import default_manager_ids
 from .destructive_plan import SHORT_FAILURE_TIMEOUT, upgrade_all_blocked
@@ -311,6 +311,41 @@ def test_upgrade_outcomes_classification():
     assert not any(isinstance(r["status"], UpgradeOutcome) for r in rows)
 
 
+@pytest.mark.parametrize(
+    ("before", "after", "announced", "status"),
+    (
+        ("1.0", "1.1", None, "upgraded"),
+        ("1.1", "1.0", None, "downgraded"),
+        ("2:1.0", "1:2.0", None, "downgraded"),
+        # The manager's own listing outranks the version ordering.
+        ("2024.10", "1.0", "1.0", "upgraded"),
+        ("2024.10", "1.0", None, "downgraded"),
+        # A hex hash sorts as a string, in no meaningful order.
+        ("f00d1e5", "0badc0de", None, "upgraded"),
+        ("1.8.6-125-g6cd4c31", "1.8.6-124-g0badc0d", None, "upgraded"),
+        # A version appearing or vanishing has no direction.
+        (None, "1.0", None, "upgraded"),
+        ("1.0", None, None, "upgraded"),
+    ),
+)
+def test_upgrade_outcomes_direction(before, after, announced, status):
+    """A move reads as a downgrade only when its direction is certain."""
+    expected = {"plum": _package("plum", before, announced)} if announced else None
+    rows = upgrade_outcomes(
+        {"plum": _package("plum", before)},
+        {"plum": _package("plum", after)},
+        expected,
+        hold_reason=lambda _: None,
+    )
+    assert [row["status"] for row in rows] == [status]
+
+
+def test_upgrade_outcome_glyphs_cover_every_outcome():
+    """Every outcome leads its table cell with a glyph of its own."""
+    assert set(UPGRADE_OUTCOME_GLYPHS) == set(UpgradeOutcome)
+    assert len(set(UPGRADE_OUTCOME_GLYPHS.values())) == len(UpgradeOutcome)
+
+
 def test_upgrade_outcomes_without_an_outdated_listing():
     """A manager that cannot list its outdated packages still reports what moved."""
     before = {"apple": _package("apple", "1.0"), "fig": _package("fig", "5.0")}
@@ -330,6 +365,8 @@ def test_upgrade_outcomes_without_an_outdated_listing():
             "nothing upgraded, 1 held, 2 still outdated",
         ),
         (("upgraded", "held"), "1 upgraded, 1 held"),
+        (("downgraded",), "nothing upgraded, 1 downgraded"),
+        (("upgraded", "downgraded", "held"), "1 upgraded, 1 downgraded, 1 held"),
     ),
 )
 def test_outcome_detail(statuses, detail):
@@ -342,26 +379,32 @@ def test_upgrade_all_reports_what_moved(invoke, upgrading_fake_pool):
     assert result.exit_code == 0
     mid = upgrading_fake_pool.id
     stderr = strip_ansi(result.stderr)
-    assert f"✓ {mid}.upgrade_all (1 upgraded, 1 still outdated)" in stderr
+    assert f"✓ {mid}.upgrade_all (1 upgraded, 1 downgraded, 1 still outdated)" in stderr
     assert "✓ Upgraded 1/1 managers" in stderr
     table = strip_ansi(result.stdout)
+    # Whitespace runs collapse: a terminal that paints a glyph wider than it
+    # advances gets one more space after it.
     cells = {
-        line.split()[1]: line for line in table.splitlines() if "fake-pkg-" in line
+        line.split()[1]: " ".join(line.split())
+        for line in table.splitlines()
+        if "fake-pkg-" in line
     }
     assert set(cells) == {
         "fake-pkg-alpha",
         "fake-pkg-beta",
         "fake-pkg-epsilon",
         "fake-pkg-gamma",
+        "fake-pkg-zeta",
     }
-    assert all(
-        word in cells["fake-pkg-alpha"] for word in ("1.0.0", "1.1.0", "upgraded")
-    )
-    assert all(
-        word in cells["fake-pkg-beta"] for word in ("2.5.3", "2.6.0", "still outdated")
-    )
-    assert all(word in cells["fake-pkg-epsilon"] for word in ("5.2.0", "removed"))
-    assert all(word in cells["fake-pkg-gamma"] for word in ("0.1.0", "installed"))
+    expected = {
+        "fake-pkg-alpha": ("1.0.0", "1.1.0", UpgradeOutcome.UPGRADED.label),
+        "fake-pkg-beta": ("2.5.3", "2.6.0", UpgradeOutcome.STILL_OUTDATED.label),
+        "fake-pkg-epsilon": ("5.2.0", UpgradeOutcome.REMOVED.label),
+        "fake-pkg-gamma": ("0.1.0", UpgradeOutcome.INSTALLED.label),
+        "fake-pkg-zeta": ("3.0.0", "2.9.0", UpgradeOutcome.DOWNGRADED.label),
+    }
+    for package_id, words in expected.items():
+        assert all(word in cells[package_id] for word in words), cells[package_id]
     # The package the upgrade never touched earns no row.
     assert "fake-pkg-delta" not in table
 
@@ -404,6 +447,13 @@ def test_upgrade_all_report_serialized(invoke, upgrading_fake_pool):
                     "from_version": None,
                     "to_version": "0.1.0",
                     "status": "installed",
+                },
+                {
+                    "id": "fake-pkg-zeta",
+                    "name": None,
+                    "from_version": "3.0.0",
+                    "to_version": "2.9.0",
+                    "status": "downgraded",
                 },
             ],
         }

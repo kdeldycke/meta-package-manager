@@ -193,7 +193,7 @@ Each line carries the resolved binary path and the forced environment, so the pl
 
 ### A report of what each upgrade moved
 
-Most managers upgrade everything in one native command, which reports what it did in its own words, or not at all. `mpm upgrade --all` reads each manager's installed inventory before and after that command and diffs the two readings, so every manager gets the same report: each package upgraded, with the version it left and the one it reached, each dependency the upgrade pulled in or dropped, and each outdated package the upgrade left behind, marked `held` when the [cooldown](cooldown.md) held it back and `still outdated` otherwise. Each manager's trail line counts the outcomes:
+Most managers upgrade everything in one native command, which reports what it did in its own words, or not at all. `mpm upgrade --all` reads each manager's installed inventory before and after that command and diffs the two readings, so every manager gets the same report. Each manager's trail line counts the outcomes:
 
 ```console
 $ mpm --brew upgrade --all
@@ -201,7 +201,18 @@ $ mpm --brew upgrade --all
 ✓ Upgraded 1/1 managers
 ```
 
-The table follows on stdout, one row per package with its `From` and `To` versions and its `Status`, in the format `--table-format` selects and the columns `--columns` keeps, so a script reads the same report as JSON. The report costs one `installed` listing on each side of the upgrade and one `outdated` listing before it. A manager whose listing carries no versions gets no report, and neither does a `--dry-run` or `--plan` run, which moves nothing.
+The table follows on stdout, one row per package with its `From` and `To` versions and its `Status`:
+
+| Status            | Meaning                                                                                                      |
+| :---------------- | :----------------------------------------------------------------------------------------------------------- |
+| 🆙 upgraded       | The installed version moved to a newer one.                                                                  |
+| ⏪ downgraded     | The installed version moved back to an older one.                                                            |
+| 🆕 installed      | A dependency the upgrade pulled in.                                                                          |
+| 🗑️ removed        | A package the upgrade dropped.                                                                               |
+| ⏸️ held           | Still outdated: the [cooldown](cooldown.md) holds it back.                                                   |
+| ⏳ still outdated | Still outdated for another reason: a failed build, a pinned package, or one the native command leaves alone. |
+
+The table takes the format `--table-format` selects and the columns `--columns` keeps. A serialized format like JSON carries the bare status words, for a script to match. The report costs one `installed` listing on each side of the upgrade and one `outdated` listing before it. A manager whose listing carries no versions gets no report, and neither does a `--dry-run` or `--plan` run, which moves nothing.
 
 ### Comparable versions across schemes
 

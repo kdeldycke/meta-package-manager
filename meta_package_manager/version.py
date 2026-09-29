@@ -458,6 +458,18 @@ class TokenizedString:
                 parts.append(self.separators[i])
         return "".join(parts)
 
+    @property
+    def has_hex_hash(self) -> bool:
+        """Whether one of the tokens is a hex hash, which the tokenizer keeps whole.
+
+        Such a token compares as a string, so two commits of one project sort in
+        no meaningful order. The other tokens hold digits or letters alone, so a
+        token mixing both is a hash.
+        """
+        return any(
+            not token.isint and not token.string.isalpha() for token in self.tokens
+        )
+
     @staticmethod
     def _canonical_token(value: str, preceding_separator: str) -> str:
         """Normalize one split part to the spelling used for comparison.

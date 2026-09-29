@@ -542,6 +542,22 @@ def test_is_version(v_string, expected):
     assert is_version(v_string) is expected
 
 
+@pytest.mark.parametrize(
+    ("v_string", "expected"),
+    (
+        ("1.2.3", False),
+        ("14ubuntu6", False),
+        ("2.0.0rc1", False),
+        # Hex characters with a single digit/letter transition: not a hash.
+        ("eeaccee231", False),
+        ("1.8.6-124-g6cd4c31", True),
+        ("1.0+git71+c79e264-r0", True),
+    ),
+)
+def test_has_hex_hash(v_string, expected):
+    assert TokenizedString(v_string).has_hex_hash is expected
+
+
 compared_gt = (
     ("1", None),
     ("2.0", "1.0"),

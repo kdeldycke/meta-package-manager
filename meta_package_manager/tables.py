@@ -75,13 +75,17 @@ class UpgradeOutcome(StrEnum):
 
     Classified by {func}`meta_package_manager.cli_maintenance.upgrade_outcomes`
     from the inventory a manager reports before and after its native upgrade.
-    The values are the words the table shows, the serialized payload carries and
-    the trail line counts (`1 upgraded, 2 held`), so a member reads as a cell
-    rather than as an identifier.
+    The values are the words the serialized payload carries and the trail line
+    counts (`1 upgraded, 2 held`), so a member reads as a word rather than as an
+    identifier. The table shows each one as its {attr}`label`.
     """
 
     UPGRADED = "upgraded"
-    """The installed version differs from the one before the upgrade."""
+    """The installed version moved to a newer release, or in a direction that
+    `mpm` cannot tell."""
+
+    DOWNGRADED = "downgraded"
+    """The installed version moved back to an older release."""
 
     INSTALLED = "installed"
     """Absent before the upgrade: a dependency it pulled in."""
@@ -95,6 +99,33 @@ class UpgradeOutcome(StrEnum):
     STILL_OUTDATED = "still outdated"
     """Still outdated for any other reason: a failed build, a pinned package, or
     one the native command leaves alone."""
+
+    @property
+    def label(self) -> str:
+        """The outcome as the report table shows it: its glyph from
+        {data}`UPGRADE_OUTCOME_GLYPHS`, then its word."""
+        return f"{UPGRADE_OUTCOME_GLYPHS[self]} {self.value}"
+
+
+UPGRADE_OUTCOME_GLYPHS: dict[UpgradeOutcome, str] = {
+    UpgradeOutcome.UPGRADED: "🆙",
+    UpgradeOutcome.DOWNGRADED: "⏪",
+    UpgradeOutcome.INSTALLED: "🆕",
+    UpgradeOutcome.REMOVED: "🗑️",
+    UpgradeOutcome.HELD: "⏸️",
+    UpgradeOutcome.STILL_OUTDATED: "⏳",
+}
+"""The glyph leading each {class}`UpgradeOutcome` in the report table.
+
+All but one come from the legend repomatic's dependency reports use for the
+same moves (🆙 updated, ⏪ stepped back, 🆕 new, 🗑️ removed, ⏸️ held back by
+cooldown), so a reader of both reads one legend. `still outdated` has no
+counterpart there:
+⏳ marks a package whose upgrade is still pending, whatever the cause.
+
+Only the table carries them. The serialized report and the trail line keep the
+bare word, which is what a script matches.
+"""
 
 
 TColumn = tuple[ColumnSpec, "SortableField | None"]

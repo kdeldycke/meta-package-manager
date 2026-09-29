@@ -127,8 +127,8 @@ class UpgradingFakeManager(FakeManager):
     """Variant whose inventory moves when its full upgrade runs.
 
     Models what the report of `upgrade --all` reads on a real host: an outdated
-    package the upgrade moves, one it leaves behind, a dependency it pulls in, a
-    package it drops, and one it never touches. The upgrade CLI is the
+    package the upgrade moves, one it leaves behind, a package it moves back, a
+    dependency it pulls in, a package it drops, and one it never touches. The upgrade CLI is the
     interpreter running a no-op, so the run spawns a real subprocess that exits
     `0`, and the flip of {attr}`upgraded` on the way out is what moves the
     inventory.
@@ -144,6 +144,10 @@ class UpgradingFakeManager(FakeManager):
         )
         yield self.package(id="fake-pkg-beta", installed_version="2.5.3")
         yield self.package(id="fake-pkg-delta", installed_version="4.0.0")
+        yield self.package(
+            id="fake-pkg-zeta",
+            installed_version="2.9.0" if self.upgraded else "3.0.0",
+        )
         if self.upgraded:
             yield self.package(id="fake-pkg-gamma", installed_version="0.1.0")
         else:

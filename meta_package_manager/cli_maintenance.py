@@ -85,7 +85,7 @@ from .tables import (
     print_projected_table,
     print_serialized_and_exit,
 )
-from .version import diff_versions
+from .version import TokenizedString, diff_versions
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -94,7 +94,6 @@ if TYPE_CHECKING:
     from click_extra import Context
 
     from .package import Package
-    from .version import TokenizedString
 
 
 def cooldown_permits(manager: PackageManager) -> bool:
@@ -585,6 +584,33 @@ def _outcome_row(
     }
 
 
+def _stepped_back(old: Package, new: Package, announced: Package | None) -> bool:
+    """Whether a version move goes back to an older release.
+
+    `mpm`'s version ordering decides, except in three cases where it could
+    report a false downgrade. The move then counts as an upgrade:
+
+    - one of the two versions is unknown, so the move has no direction;
+    - one of them carries a hex hash, which the ordering compares as a string:
+      two commits of one project sort in no meaningful order;
+    - `announced`, the package's entry in the outdated listing, names the new
+      version as the latest one. The manager's own listing outranks a
+      heuristic ordering, which sorts a project moving from calendar to
+      semantic versions backward.
+    """
+    before = old.installed_version
+    after = new.installed_version
+    if not isinstance(before, TokenizedString) or not isinstance(
+        after, TokenizedString
+    ):
+        return False
+    if before.has_hex_hash or after.has_hex_hash:
+        return False
+    if announced is not None and announced.latest_version == after:
+        return False
+    return after < before
+
+
 def upgrade_outcomes(
     before: Mapping[str, Package],
     after: Mapping[str, Package],
@@ -603,9 +629,9 @@ def upgrade_outcomes(
     Each row names the package and its versions and carries one
     {class}`~meta_package_manager.tables.UpgradeOutcome` as `status`:
 
-    - a version that differs between the two readings is `upgraded`, whichever
-      way it moved: a full upgrade rarely downgrades, and when a manager does
-      (a formula reverted upstream), the row still names both versions;
+    - a version that differs between the two readings is `downgraded` when it
+      moved back to an older release, and `upgraded` otherwise, a move whose
+      direction the version ordering cannot tell included;
     - a package only the second reading lists is `installed`, a dependency the
       upgrade pulled in, and one only the first lists is `removed`;
     - an outdated package whose version did not move is `held` when the cooldown
@@ -630,13 +656,14 @@ def upgrade_outcomes(
                 _outcome_row(old, old.installed_version, None, UpgradeOutcome.REMOVED)
             )
         elif old.installed_version != new.installed_version:
+            announced = expected.get(package_id) if expected is not None else None
+            status = (
+                UpgradeOutcome.DOWNGRADED
+                if _stepped_back(old, new, announced)
+                else UpgradeOutcome.UPGRADED
+            )
             rows.append(
-                _outcome_row(
-                    new,
-                    old.installed_version,
-                    new.installed_version,
-                    UpgradeOutcome.UPGRADED,
-                )
+                _outcome_row(new, old.installed_version, new.installed_version, status)
             )
         elif expected is not None and package_id in expected:
             status = (
@@ -660,13 +687,18 @@ def _outcome_detail(rows: list[dict[str, object]]) -> str:
 
     Always opens on the upgrades, `nothing upgraded` included, so a run that
     moved nothing says so where a run that moved something says how much. The
-    packages left behind follow when there are any. The dependencies pulled in
-    or dropped stay in the table, being consequences rather than results.
+    downgrades and the packages left behind follow when there are any. The
+    dependencies pulled in or dropped stay in the table, being consequences
+    rather than results.
     """
     counts = Counter(str(row["status"]) for row in rows)
     upgraded = counts[UpgradeOutcome.UPGRADED]
     parts = [f"{upgraded} upgraded" if upgraded else "nothing upgraded"]
-    for status in (UpgradeOutcome.HELD, UpgradeOutcome.STILL_OUTDATED):
+    for status in (
+        UpgradeOutcome.DOWNGRADED,
+        UpgradeOutcome.HELD,
+        UpgradeOutcome.STILL_OUTDATED,
+    ):
         if counts[status]:
             parts.append(f"{counts[status]} {status}")
     return ", ".join(parts)
@@ -680,8 +712,9 @@ def print_upgrade_report(ctx: Context, report: dict[str, dict]) -> None:
     {func}`upgrade_outcomes` as `packages`. A serialization `--table-format`
     gets the whole payload and exits; otherwise the rows render as one table
     through {data}`~meta_package_manager.tables.UPGRADE_COLUMNS`, the version
-    pair of a package colored the way `mpm outdated` colors it. An empty table
-    prints nothing: the trail already said nothing moved.
+    pair of a package colored the way `mpm outdated` colors it, and its status
+    shown as its {attr}`~meta_package_manager.tables.UpgradeOutcome.label`. An
+    empty table prints nothing: the trail already said nothing moved.
     """
     print_serialized_and_exit(ctx, report)
     table: list[dict[str, str | None]] = []
@@ -697,7 +730,7 @@ def print_upgrade_report(ctx: Context, report: dict[str, dict]) -> None:
                 "manager_id": manager_id,
                 "from_version": from_version,
                 "to_version": to_version,
-                "status": str(row["status"]),
+                "status": UpgradeOutcome(row["status"]).label,
             })
     if table:
         print_projected_table(ctx, UPGRADE_COLUMNS, table)

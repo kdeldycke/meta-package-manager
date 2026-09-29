@@ -1674,8 +1674,11 @@ class ChangeReport:
         The tasks come back grouped by manager, each manager's in their original
         order: its first task opens it and its last closes it. Grouping keeps the
         members of a lock family from interleaving on their shared lane, so each
-        pair of readings frames the tasks of its own manager alone. `outdated`
-        maps a manager ID to the package IDs its tasks are expected to move (see
+        pair of readings frames the tasks of its own manager alone. The first
+        reading is taken there, right before the first task, and never reused
+        from an earlier listing like the one sourcing a spec: a peer's reading
+        must see what the peer ahead of it on the lane changed. `outdated` maps a
+        manager ID to the package IDs its tasks are expected to move (see
         {meth}`open`).
         """
         grouped: dict[PackageManager, list[Callable[[], tuple[bool, str]]]] = {}

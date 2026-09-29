@@ -310,6 +310,17 @@ $ sudo apt install meta-package-manager
 :class: note
 Ubuntu ships neither `click-extra` nor `extra-platforms`, and its `python3-click` and `python3-deepmerge` are older than `click-extra` accepts on every series up to and including `26.04`, so no package built against the archive could work. [The packaging page](packaging.md#ubuntu-ppa) covers that trade-off, and how to build the source package by hand.
 ````
+
+````{admonition} Help land it in deb-get
+:class: tip
+Support for [`deb-get`](managers/deb-get.md) is pending review at [wimpysworld/deb-get#2036](https://github.com/wimpysworld/deb-get/pull/2036). Once merged, `deb-get` adds the PPA and installs the package in one step:
+
+```{code-block} shell-session
+$ deb-get install meta-package-manager
+```
+
+You can help move it forward by showing your support on [the pull request](https://github.com/wimpysworld/deb-get/pull/2036).
+````
 `````
 
 `````{tab-item} Void Linux

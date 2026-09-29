@@ -150,6 +150,7 @@ The SPDX documents `brew` generates point their `documentNamespace` at `https://
 
 ### [SwiftBar](https://github.com/swiftbar/SwiftBar)
 
+- [swiftbar/SwiftBar#578](https://github.com/swiftbar/SwiftBar/issues/578): a `terminal=true` action reaches the terminal cut to 1024 bytes, counting the `export` prefix SwiftBar adds, and waits at the prompt without running.
 - [swiftbar/SwiftBar#557](https://github.com/swiftbar/SwiftBar/issues/557): the badge count on a `fold=true` row sits right of its pill's center.
 - [swiftbar/SwiftBar#555](https://github.com/swiftbar/SwiftBar/issues/555): nothing shows that plugin settings continue below the window edge, and the preferences window cannot be resized.
 

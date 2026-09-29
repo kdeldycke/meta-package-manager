@@ -84,6 +84,8 @@ With a `cooldown` set, clicking a package of a manager that cannot enforce it na
 
 Each entry comes in two variants, and the modifier picks between them: a plain click opens a terminal so the run can be followed, and holding the `Option` key runs it silently.
 
+On a long command, a plain click can leave a cut command waiting at the prompt ([swiftbar/SwiftBar#578](https://github.com/swiftbar/SwiftBar/issues/578)). SwiftBar types the command after an `export` of its environment. While the new shell starts, macOS keeps only the first 1024 bytes of that line. Close that terminal without running the cut command, and hold `Option` instead: that variant runs without a terminal.
+
 ## Menu markers
 
 The plugin has no icon files of its own: every state is an emoji, which SwiftBar and Xbar render as text wherever it appears.

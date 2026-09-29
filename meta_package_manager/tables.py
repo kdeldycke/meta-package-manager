@@ -25,7 +25,7 @@ command) but share the same output machinery. This module owns all of it:
   carries none) happens inside {func}`click_extra.table.print_table`, from the
   field each header pairs with its column in the registries below.
 - The per-command **column registries**, each pairing a click-extra
-  {class}`~click_extra.table.ColumnSpec` (whose ID addresses the column from
+  {class}`~click_extra.columns.ColumnSpec` (whose ID addresses the column from
   `--columns`) with the {class}`SortableField` the column carries (`None`
   for a column that cannot drive the sort). A registry is the single source of
   truth for its command: the same tuple feeds the `@columns_option` declaration
@@ -283,9 +283,28 @@ WHICH_COLUMNS: tuple[TColumn, ...] = (
 
 
 def column_specs(columns: Sequence[TColumn]) -> tuple[ColumnSpec, ...]:
-    """Extract the bare {class}`~click_extra.table.ColumnSpec` tuple from a column
+    """Extract the bare {class}`~click_extra.columns.ColumnSpec` tuple from a column
     registry."""
     return tuple(spec for spec, _ in columns)
+
+
+def sort_header(spec: ColumnSpec, field: SortableField | None) -> ColumnSpec:
+    """The header `spec` renders under, keyed by the field it sorts on.
+
+    click-extra reads a header's ID as the field `--sort-by` addresses. For mpm
+    that is the {class}`SortableField` the column carries, not the column's own
+    ID: `installed_version` sorts on `version`. A column carrying no field keeps
+    its own ID and declares `sortable=False`, which drops it from the selection.
+
+    The spec carries its own `max_width`, which click-extra reads off the header
+    to size the column.
+    """
+    return ColumnSpec(
+        field or spec.id,
+        spec.label,
+        max_width=spec.max_width,
+        sortable=bool(field),
+    )
 
 
 @contextmanager
@@ -339,12 +358,9 @@ def print_projected_table(
     original row order.
 
     ```{note}
-    The width limits are forwarded by hand, from the same specs the projection
-    just resolved. click-extra reads them off {class}`~click_extra.table.ColumnSpec`
-    headers on its own, but mpm's headers are `(label, sortable field)` pairs
-    instead: a spec's ID addresses the column for `--columns` while the field it
-    sorts on may differ (`installed_version` sorts on `version`) or be absent
-    altogether, which a bare spec cannot express.
+    A rendered header addresses its column by the field it sorts on, not by the
+    ID `--columns` selects it with: the two can differ, and a column may sort on
+    nothing at all. {func}`sort_header` builds each one.
     ```
     """
     selected = ctx.meta.get(COLUMNS) or tuple(default_ids or ())
@@ -354,8 +370,7 @@ def print_projected_table(
     with _terminal_width_budget(ctx):
         ctx.print_table(
             [select_row(row, ids, ids) for row in rows],
-            tuple((spec.label, sort_field[spec.id]) for spec in projected),
-            max_column_widths=tuple(spec.max_width for spec in projected),
+            tuple(sort_header(spec, sort_field[spec.id]) for spec in projected),
         )
 
 

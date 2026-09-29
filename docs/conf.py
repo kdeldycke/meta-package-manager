@@ -207,11 +207,6 @@ nitpick_ignore = [
     # Neither library publishes an objects.inv, so there is nothing to link to.
     ("py:class", "packageurl.PackageURL"),
     ("py:class", "spdx_tools.spdx.model.document.Document"),
-    # The locked click-extra defines `ColumnSpec` in `click_extra.table`, the
-    # path every annotation renders with, while the published inventory
-    # documents it under `click_extra.columns`. Resolves on its own once the
-    # floor moves past that rename.
-    ("py:class", "click_extra.table.ColumnSpec"),
     # Short references of click-extra's `Spinner.__init__` docstring, which
     # `autoclass_content` concatenates onto the `execution.Spinner` subclass:
     # they resolve in click-extra's own build and nowhere else.

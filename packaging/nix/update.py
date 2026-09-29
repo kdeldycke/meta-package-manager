@@ -30,6 +30,16 @@ releases it is bumped against then cannot be paired by mistake, which is the
 one way this script could write a version belonging to another project.
 """
 
+HOLD_MARKER = "# update-hold:"
+"""Comment marking a definition deliberately pinned below its newest release.
+
+A definition carrying it is left alone, and the text after the marker says
+why. The reason sits in the file it governs rather than in a sibling, since
+this script reads no other: `click-extra.nix` is held because 9.2 onwards
+raises floors nixpkgs does not carry, and an unguarded bump past it turns
+every `nix-source` cell of `tests-install.yaml` red.
+"""
+
 RELEASES_API = "https://api.github.com/repos/{repo}/releases/latest"
 GITHUB_TARBALL = "https://github.com/{repo}/archive/refs/tags/v{version}.tar.gz"
 PACKAGE_NIX = Path(__file__).parent / "package.nix"
@@ -68,6 +78,19 @@ def get_current_version(nix_path: Path) -> str:
         msg = f"Cannot find version string in {nix_path}"
         raise RuntimeError(msg)
     return match.group(1)
+
+
+def get_hold_reason(nix_path: Path) -> str | None:
+    """Return why a definition is held back, or `None` when it is free to move.
+
+    :param nix_path: The definition to inspect.
+    :return: The text following {data}`HOLD_MARKER`, stripped, or `None`.
+    """
+    for line in nix_path.read_text(encoding="utf-8").splitlines():
+        marker = line.find(HOLD_MARKER)
+        if marker != -1:
+            return line[marker + len(HOLD_MARKER) :].strip()
+    return None
 
 
 def compute_sri_hash(url: str) -> str:
@@ -114,6 +137,12 @@ def update_nix(nix_path: Path, version: str, sri_hash: str) -> None:
 def main() -> None:
     """Check for a new release and update the Nix package definition."""
     nix_path = Path(sys.argv[1]) if len(sys.argv) > 1 else PACKAGE_NIX
+
+    hold = get_hold_reason(nix_path)
+    if hold is not None:
+        print(f"{nix_path} is held back: {hold}")
+        return
+
     repo = get_upstream_repo(nix_path)
 
     latest = get_latest_version(repo)

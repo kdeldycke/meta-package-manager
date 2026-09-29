@@ -27,14 +27,16 @@
 
 buildPythonPackage (finalAttrs: {
   pname = "click-extra";
-  version = "9.3.5";
+  # update-hold: 9.2 onwards raises boltons to >= 26.2 and wcwidth to >= 0.8.3,
+  # neither of which nixpkgs carries. See the override in overlay.nix.
+  version = "9.0.0";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";
     repo = "click-extra";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-nIqZEneIRbmApNcmAbtv18C7k4wrcisM+QCZSDpfAhI=";
+    hash = "sha256-boswFU+u+LmZtz+r9tHFDP0igXh37JsGzwb7I+md89w=";
   };
 
   build-system = [ uv-build ];

@@ -146,7 +146,7 @@ def _find_project_root() -> Path:
 PROJECT_ROOT = _find_project_root()
 """Source tree holding the committed files the generators below read."""
 
-BENCHMARK_COMPETITORS = ("topgrade", "upt", "pacaptr", "metapac")
+BENCHMARK_COMPETITORS = ("topgrade", "pacaptr", "metapac")
 """Competing tools shown alongside `mpm` in the benchmark page, in column order."""
 
 TOPGRADE_FALLBACK_GLYPH = "🛟"

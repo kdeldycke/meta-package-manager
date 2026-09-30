@@ -1041,8 +1041,8 @@ manpages.asset-name = "mpm-manpages"
 # pair measures the vertical axis in powers of ten, so the series orders of
 # magnitude apart stay legible on one chart.
 metrics.charts = [
-  { only = [ "mpm", "topgrade", "upt", "pacaptr", "metapac" ], output = "./docs/assets/star-history.svg", scale = "logarithmic", title = "Star history of mpm and its benchmarked peers" },
-  { mode = "relative", only = [ "mpm", "topgrade", "upt", "pacaptr", "metapac" ], output = "./docs/assets/star-history-relative.svg", scale = "logarithmic", title = "Stars of mpm and its benchmarked peers by project age" },
+  { only = [ "mpm", "topgrade", "pacaptr", "metapac" ], output = "./docs/assets/star-history.svg", scale = "logarithmic", title = "Star history of mpm and its benchmarked peers" },
+  { mode = "relative", only = [ "mpm", "topgrade", "pacaptr", "metapac" ], output = "./docs/assets/star-history-relative.svg", scale = "logarithmic", title = "Stars of mpm and its benchmarked peers by project age" },
   { only = [ "mpm" ], output = "./docs/assets/star-history-mpm.svg", title = "Star history of mpm" },
 ]
 # Forge readings the docs pages display: the star-history charts of the
@@ -1055,7 +1055,6 @@ metrics.sync = true
 # Hues of the plotted series, light and dark, in draw order.
 metrics.colors.mpm = [ "#2a78d6", "#3987e5" ]
 metrics.colors.topgrade = [ "#eb6834", "#d95926" ]
-metrics.colors.upt = [ "#1baf7a", "#199e70" ]
 metrics.colors.pacaptr = [ "#eda100", "#c98500" ]
 metrics.colors.metapac = [ "#e87ba4", "#d55181" ]
 # The four self-hosted GitLab instances the pool's upstreams live on.
@@ -1190,7 +1189,6 @@ metrics.subjects.swupd = "https://github.com/clearlinux/swupd-client"
 metrics.subjects.tlmgr = "https://github.com/TeX-Live/texlive-source"
 metrics.subjects.topgrade = "https://github.com/topgrade-rs/topgrade"
 metrics.subjects.trizen = "https://github.com/trizen/trizen"
-metrics.subjects.upt = "sigoden/upt"
 metrics.subjects.uv = "https://github.com/astral-sh/uv"
 metrics.subjects.uvx = "https://github.com/astral-sh/uv"
 metrics.subjects.vagrant = "https://github.com/hashicorp/vagrant"

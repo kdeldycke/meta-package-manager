@@ -131,16 +131,16 @@ Every cell links to its evidence: a ✅ to the documentation, CLI declaration or
 
 Every glyph used below:
 
-| Glyph | Meaning                                                                                                                                                                                                                                 |
-| :---- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✅    | Supported. In the `mpm` column, links to the manager's page; in a competitor's, to whatever documents its support.                                                                                                                      |
-| ⚠️    | Wrapped by `mpm` and usable, but its [upstream is gone](managers.md).                                                                                                                                                                   |
-| 🚧    | Assessed as a candidate and not wrapped yet, waiting on a host, a date, an upstream release, or the [project scope](unsupported.md) `mpm` does not implement. The blocker is recorded per manager in `benchmark.toml`'s `queued` table. |
-| 🛟    | Not wrapped, yet still reachable through [`mpm --topgrade upgrade --all`](unsupported.md), which upgrades whatever it detects on the host.                                                                                              |
-| ☠️    | Never wrapped, and its [upstream is retired](unsupported.md).                                                                                                                                                                           |
-| ❌    | Never wrapped: a live tool [declined on its own merits](unsupported.md).                                                                                                                                                                |
-| 🟡    | Coarse support a competitor cannot invoke for this manager alone, only as part of a wider sweep.                                                                                                                                        |
-| Blank | Nobody has assessed that tool yet, and [it is very likely available for the writing](add-new-manager.md).                                                                                                                               |
+| Glyph | Meaning                                                                                                                                                                                                                                               |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅    | Supported. In the `mpm` column, links to the manager's page; in a competitor's, to whatever documents its support.                                                                                                                                    |
+| ⚠️    | Wrapped by `mpm` and usable, but its [upstream is gone](managers.md).                                                                                                                                                                                 |
+| 🚧    | Assessed as a candidate and not wrapped yet, waiting on a host, a date, an upstream release, or the [project scope](unsupported.md) `mpm` does not implement. The blocker of each is listed among the [queued managers](managers.md#queued-managers). |
+| 🛟    | Not wrapped, yet still reachable through [`mpm --topgrade upgrade --all`](unsupported.md), which upgrades whatever it detects on the host.                                                                                                            |
+| ☠️    | Never wrapped, and its [upstream is retired](unsupported.md).                                                                                                                                                                                         |
+| ❌    | Never wrapped: a live tool [declined on its own merits](unsupported.md).                                                                                                                                                                              |
+| 🟡    | Coarse support a competitor cannot invoke for this manager alone, only as part of a wider sweep.                                                                                                                                                      |
+| Blank | Nobody has assessed that tool yet, and [it is very likely available for the writing](add-new-manager.md).                                                                                                                                             |
 
 ```{python:render}
 :mirror:

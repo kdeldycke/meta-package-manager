@@ -184,7 +184,8 @@ is not, a date a dead-upstream recheck waits on, an upstream release a
 merged fix waits on, or the project scope `mpm` does not implement yet.
 Only the second kind carries this glyph, and `docs/benchmark.toml`'s
 `queued` table is where the blocker is written down, one line per manager,
-since the glyph alone cannot say which.
+since the glyph alone cannot say which. {func}`queued_todos` publishes those
+lines.
 
 It is deliberately unlinked in a support cell, unlike every other state.
 A wrapped manager has a class to point at and a declined one a verdict
@@ -3037,6 +3038,27 @@ def managers_index_table() -> str:
         )
 
     return rendered
+
+
+def queued_todos() -> str:
+    """Produce one `{todo}` admonition per entry of the `queued` table.
+
+    Rendered live on `docs/managers.md`, below the index that shows each of
+    these managers as {data}`QUEUED_GLYPH` without saying what it waits on.
+    Each admonition carries the blocker as `docs/benchmark.toml` states it, so
+    the TOML stays the one place a blocker is written, while `sphinx.ext.todo`
+    collects every queued manager onto `docs/todolist.md` beside the rest of the
+    project's pending work.
+    """
+    data = _load_benchmark_toml()
+    queued: dict[str, str] = data.get("queued", {})
+    homepages: dict[str, str] = data.get("homepages", {})
+    blocks = []
+    for mid, blocker in sorted(queued.items()):
+        url = homepages.get(mid)
+        label = f"[`{mid}`]({url})" if url else f"`{mid}`"
+        blocks.append(f"```{{todo}}\n{label}: {blocker}\n```")
+    return "\n\n".join(blocks)
 
 
 def _support_population() -> Counter[str]:

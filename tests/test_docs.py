@@ -2236,6 +2236,24 @@ def test_managers_index_table_renders():
     assert lines[-1].startswith("|")
 
 
+def test_queued_todos_render():
+    """Check each `queued` entry becomes one `{todo}` carrying its blocker verbatim.
+
+    `sphinx.ext.todo` collects them onto `docs/todolist.md`, the one page
+    listing every 🚧 manager beside what it waits on, but only from a page that
+    renders them.
+    """
+    queued: dict[str, str] = _docs._load_benchmark_toml()["queued"]
+    blocks = _docs.queued_todos().split("\n\n")
+    assert len(blocks) == len(queued)
+    for block, (mid, blocker) in zip(blocks, sorted(queued.items()), strict=True):
+        assert block.startswith("```{todo}\n")
+        assert block.endswith(f": {blocker}\n```")
+        assert f"`{mid}`" in block.splitlines()[1]
+    page = (PROJECT_ROOT / "docs" / "managers.md").read_text(encoding="UTF-8")
+    assert "print(queued_todos())" in page
+
+
 def test_brewfile_managers_table_renders():
     """Check the Brewfile table lists exactly the managers that reach a dump.
 

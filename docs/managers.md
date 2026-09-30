@@ -27,6 +27,16 @@ managers/*
 
 The full reason behind each declined tool lives in [unsupported managers](unsupported.md).
 
+## Queued managers
+
+Each of these tools was assessed as a wrap candidate, and waits on the one blocker its entry names. The [todo list](todolist.md) collects them with the rest of the pending work.
+
+```{python:render}
+from meta_package_manager._docs import queued_todos
+
+print(queued_todos())
+```
+
 ## Detecting managers on your system
 
 `mpm managers` reports the package managers it found on your machine, and the version each one self-reports. If one of yours is missing from that report, name it: a manager you select explicitly is always reported, and the extra columns spell out what `mpm` could not resolve.

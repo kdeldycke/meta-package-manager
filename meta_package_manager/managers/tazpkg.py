@@ -131,15 +131,23 @@ class Tazpkg(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
+        Captured on a minimal SliTaz 5.0 system, holding `tazpkg` and its
+        dependencies alone.
+
         ```{code-block} shell-session
 
         $ tazpkg list --output=raw
+
         List of all installed packages
         ================================================================================
-        busybox                            1.36.0            base-system
-        nano                               6.2               editors
+        busybox                            1.37.0            base-system
+        gettext-base                       0.21              base-system
+        glibc-base                         2.20              base-system
+        ncurses-common                     6.4               base-system
+        slitaz-base-files                  348               base-system
+        tazpkg                             5.9.5             base-system
         ================================================================================
-        2 packages installed.
+        6 packages installed.
         ```
         """
         output = self.run_cli("list")

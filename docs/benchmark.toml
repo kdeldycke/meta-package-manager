@@ -82,15 +82,18 @@
 # used to be, `tomllib` rejects a repeated key outright.
 
 [managers]
+adless = ["topgrade"]
 am = ["topgrade"]
 android-studio = ["topgrade"]
 antibody = ["topgrade"]
 antidote = ["topgrade"]
 antigen = ["topgrade"]
 antigravity = ["topgrade"]
+antigravity-cli = ["topgrade"]
 apk = ["topgrade", "upt", "pacaptr"]
 apm = ["topgrade"]
 app-man = ["topgrade"]
+app-manager = ["topgrade"]
 apt = ["topgrade", "upt", "pacaptr", "metapac"]
 apt-cyg = []
 apt-mint = []
@@ -384,6 +387,7 @@ yay = ["topgrade", "upt", "metapac"]
 yazi = ["topgrade"]
 yt-dlp = []
 yum = ["topgrade", "upt"]
+zed = ["topgrade"]
 zef = []
 zerobrew = ["topgrade"]
 zeroinstall = []
@@ -397,10 +401,13 @@ zvm = ["topgrade"]
 zypper = ["topgrade", "upt", "pacaptr", "metapac"]
 
 [homepages]
+adless = "https://github.com/WIttyJudge/adless"
 android-studio = "https://developer.android.com/studio"
 antibody = "https://getantibody.github.io"
 antigravity = "https://antigravity.google"
+antigravity-cli = "https://antigravity.google/product/antigravity-cli"
 app-man = "https://github.com/ivan-hc/AppMan"
+app-manager = "https://github.com/kem-a/AppManager"
 apt-rpm = "https://web.archive.org/web/20071230212545/http://apt-rpm.org/"
 aqua = "https://aquaproj.github.io"
 atuin = "https://atuin.sh"
@@ -558,6 +565,7 @@ wsl-update = "https://learn.microsoft.com/windows/wsl/"
 yadm = "https://yadm.io"
 yaourt = "https://github.com/archlinuxfr/yaourt"
 yt-dlp = "https://github.com/yt-dlp/yt-dlp"
+zed = "https://zed.dev"
 zgenom = "https://github.com/jandamm/zgenom"
 zigup = "https://github.com/marler8997/zigup"
 zr = "https://github.com/jedahan/zr"
@@ -603,15 +611,15 @@ topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420
 # can be asked for on its own, and the same step is the only route topgrade
 # has to anything `go install` put on the machine.
 [coarse_support.go]
-topgrade = "https://github.com/topgrade-rs/topgrade/blob/v17.9.0/src/step.rs#L380-L383"
+topgrade = "https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/step.rs#L396-L399"
 
 [coarse_support.go-global-update]
-topgrade = "https://github.com/topgrade-rs/topgrade/blob/v17.9.0/src/step.rs#L380-L383"
+topgrade = "https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/step.rs#L396-L399"
 
 # One `Go` step runs `go-global-update` and `gup` back to back, so neither
 # can be asked for on its own.
 [coarse_support.gup]
-topgrade = "https://github.com/topgrade-rs/topgrade/blob/v17.9.0/src/step.rs#L380-L383"
+topgrade = "https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/step.rs#L396-L399"
 
 [coarse_support.lazy]
 topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"

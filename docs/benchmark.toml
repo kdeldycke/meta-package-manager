@@ -696,9 +696,11 @@ topgrade = "https://github.com/topgrade-rs/topgrade/issues/320#issuecomment-3536
 # Keys are sorted alphabetically, and every key needs a matching row in
 # `docs/unsupported.md`: the glyph links there for the reason.
 [unsupported]
+adless = "excluded"
 android-studio = "excluded"
 antibody = "archived"
 antigravity = "excluded"
+antigravity-cli = "excluded"
 app-man = "excluded"
 apt-rpm = "archived"
 atuin = "excluded"
@@ -843,6 +845,7 @@ wsl-update = "excluded"
 yadm = "excluded"
 yaourt = "archived"
 yt-dlp = "excluded"
+zed = "excluded"
 zgenom = "excluded"
 zigup = "excluded"
 zr = "excluded"

@@ -44,9 +44,17 @@ class Scoop(PackageManager):
     # introduced by a `---` separator line: mpm drops everything up to that
     # separator, then splits each row positionally on whitespace.
     #
+    # `install` with a version passes `<package>@<version>`: Scoop installs it
+    # from a generated manifest, which `scoop status` and `scoop update` then
+    # compare the package against, so it never reads as outdated.
+    #
     # `remove` uninstalls with `--purge`, so a package's persisted data
     # directory is deleted with it rather than kept for a later reinstall.
     operation_notes: ClassVar = {
+        "install": (
+            "A version installs the manifest that shipped it, which pins the "
+            "package: `outdated` and `upgrade` then skip it."
+        ),
         "remove": (
             "The `remove` command uninstalls with `--purge`, so a package's "
             "persisted data directory is deleted rather than kept for a "
@@ -218,9 +226,12 @@ class Scoop(PackageManager):
         ):
             yield self.package(id=package_id, latest_version=version)
 
-    @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:
-        """Install one package.
+        r"""Install one package.
+
+        A `version` installs the manifest that shipped it, which Scoop looks up
+        in the bucket's Git history before it falls back to generating one from
+        the `autoupdate` rules of the current manifest.
 
         ```{code-block} pwsh-session
 
@@ -229,7 +240,7 @@ class Scoop(PackageManager):
         7z2201-x64.msi (1.8 MB) [====================] 100%
         Checking hash of 7z2201-x64.msi ... ok.
         Extracting 7z2201-x64.msi ... done.
-        Linking ~\\scoop\apps\7zip\\current => ~\\scoop\apps\7zip\22.01
+        Linking ~\scoop\apps\7zip\current => ~\scoop\apps\7zip\22.01
         Creating shim for '7z'.
         Creating shortcut for 7-Zip (7zFM.exe)
         Persisting Codecs
@@ -239,10 +250,25 @@ class Scoop(PackageManager):
 
         Notes
         -----
-        Add 7-Zip as a context menu by running: "C:\\scoop\\...install-context.reg"
+        Add 7-Zip as a context menu by running: "C:\scoop\...install-context.reg"
+        ```
+
+        ```{code-block} pwsh-session
+
+        > scoop install hyperfine@1.18.0
+        INFO  Resolving historical manifest for 'hyperfine' (1.18.0)
+        Installing 'hyperfine' (1.18.0) [64bit] from generated manifest
+        Downloading https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine-v1.18.0-x86_64-pc-windows-msvc.zip (569.1 KB)...
+        Checking hash of hyperfine-v1.18.0-x86_64-pc-windows-msvc.zip... OK.
+        Extracting hyperfine-v1.18.0-x86_64-pc-windows-msvc.zip... Done.
+        Linking ~\scoop\apps\hyperfine\current => ~\scoop\apps\hyperfine\1.18.0
+        Creating shim for 'hyperfine'.
+        'hyperfine' (1.18.0) was installed successfully!
         ```
         """
-        return self.run_cli("install", package_id)
+        return self.run_cli(
+            "install", f"{package_id}@{version}" if version else package_id
+        )
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.

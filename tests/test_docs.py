@@ -700,12 +700,12 @@ def test_manager_wikipedia_url(manager):
 
 def test_benchmark_table_renders():
     """Check the `Package manager support` table generator still produces a
-    well-formed table from the current pool and YAML.
+    well-formed table from the current pool and TOML.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
-    block in `docs/benchmark.md`, so there is no checked-in copy to compare
-    against: this test only guards the generator against crashes and structural
-    regressions (a broken YAML entry, a manager without a source file).
+    block in `docs/benchmark.md`, and `test_mirror_blocks_in_sync` compares its
+    checked-in copy: this test only guards the generator against crashes and
+    structural regressions, like a broken TOML entry.
     """
     table = _docs.benchmark_managers_table()
     lines = table.splitlines()
@@ -715,17 +715,22 @@ def test_benchmark_table_renders():
     assert "`mpm`" in header
     for competitor in _docs.BENCHMARK_COMPETITORS:
         assert f"`{competitor}`" in header
-    # Every pool manager must land one row backed by a source link, its
-    # identifier linking to its dedicated documentation page. A wrapped
-    # manager shows ✅, or ⚠️ when its upstream is gone: the two partition the
-    # pool, so together they must account for every manager exactly once.
+    # Every pool manager lands one row, its identifier and its glyph both
+    # linking to its dedicated documentation page. A wrapped manager shows ✅,
+    # or ⚠️ when its upstream is gone: the two partition the pool, so together
+    # they must account for every manager exactly once.
     unmaintained = sum(1 for m in pool.values() if m.unmaintained)
     assert unmaintained, "expected at least one unmaintained manager in the pool"
     assert sum(line.count("[✅](") for line in lines) == len(pool) - unmaintained
     assert sum(line.count("[⚠️](") for line in lines) == unmaintained
-    assert sum(line.count("](managers/") for line in lines) == len(pool)
+    assert sum(line.count("](managers/") for line in lines) == 2 * len(pool)
+    rows = {line.split("|")[1].strip(): line for line in lines[2:]}
+    for mid, manager in pool.items():
+        page = f"managers/{mid}.md"
+        glyph = "⚠️" if manager.unmaintained else "✅"
+        assert f"[{glyph}]({page})" in rows[f"[`{mid}`]({page})"]
     # ☠️ marks what mpm never wrapped, so it must never land on a pool manager.
-    assert "[☠️](https://github.com/kdeldycke" not in table
+    assert "[☠️](managers/" not in table
 
 
 def _metrics_config() -> dict:
@@ -2376,8 +2381,7 @@ def test_mirror_blocks_in_sync(monkeypatch):
     and readme match a fresh regeneration from their generators.
 
     Drift here means a generator's output changed (a manager joined or left the
-    pool, a class moved so the benchmark source-line anchors shifted) before
-    repomatic's `update-docs` job refreshed the embedded blocks with
+    pool) before repomatic's `update-docs` job refreshed the embedded blocks with
     `click-extra refresh-directives`.
 
     Regenerated with no `$TERM_PROGRAM` in the environment: a mirror is a

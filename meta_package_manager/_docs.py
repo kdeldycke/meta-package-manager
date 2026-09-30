@@ -41,8 +41,9 @@ Run it by hand under `env -u TERM_PROGRAM`, the environment
 `test_mirror_blocks_in_sync` pins: click-extra measures an emoji-presentation
 glyph by the advance of the running terminal, so some terminals pad those rows
 one space short. Sphinx renders the live output and never reads the mirror, so a
-stale copy cannot reach the published site. A mirror carrying source-line
-anchors changes each time a manager class moves in its module.
+stale copy cannot reach the published site. Keep source-line anchors out of a
+mirror: they shift each time a manager class moves in its module, which stales
+the copy on commits that never touched the docs.
 ```
 
 ```{caution}
@@ -883,8 +884,8 @@ def manager_source_url(manager_id: str) -> str:
 
     Resolves the manager class via {data}`meta_package_manager.pool.pool`,
     then uses {mod}`inspect` to derive the source file and line number of
-    the class declaration. Used by the benchmark page to back each `✅` in
-    the `mpm` column with a link to its implementation.
+    the class declaration. Used by each manager page, and by the manager index
+    to back each wrapped manager's glyph with a link to its implementation.
     """
     manager = pool[manager_id]
     # A config-defined manager (built from a shipped TOML file, not a class body) has no
@@ -964,15 +965,17 @@ def _support_glyph(
     anchors: dict[str, str],
     competitor_data: dict[str, list[str]],
     queued: Container[str],
+    *,
+    wrapped_url: str | None = None,
 ) -> str:
     """Linked support glyph for a manager ID: the benchmark's own `mpm` column rule.
 
     The glyph comes from {func}`_bare_support_glyph`; all this adds is its
-    target. A wrapped manager links to the class proving it, a declined one to
-    its own section of {data}`UNSUPPORTED_DOCS_URL`, a queued one stays
-    unlinked for want of either, and a manager assessed by nobody yet renders
-    an empty cell. Shared by
-    {func}`benchmark_managers_table` and {func}`managers_index_table`, so the
+    target. A wrapped manager links to `wrapped_url`, or to the class proving
+    it when the caller passes none. A declined one links to its own section of
+    {data}`UNSUPPORTED_DOCS_URL`, a queued one stays unlinked for want of
+    either, and a manager assessed by nobody yet renders an empty cell. Shared
+    by {func}`benchmark_managers_table` and {func}`managers_index_table`, so the
     two pages can never disagree on what a manager's glyph should be.
     """
     glyph = _bare_support_glyph(mid, unsupported, competitor_data, queued)
@@ -981,7 +984,7 @@ def _support_glyph(
     if glyph == QUEUED_GLYPH:
         return glyph
     if mid in pool:
-        return f"[{glyph}]({manager_source_url(mid)})"
+        return f"[{glyph}]({wrapped_url or manager_source_url(mid)})"
     anchor = anchors.get(mid)
     target = f"{UNSUPPORTED_DOCS_URL}#{anchor}" if anchor else UNSUPPORTED_DOCS_URL
     return f"[{glyph}]({target})"
@@ -991,8 +994,7 @@ def benchmark_managers_table() -> str:
     """Produce the `Package manager support` table of the benchmark page.
 
     Rendered live at Sphinx build time by the ``{python:render}`` block in
-    `docs/benchmark.md`, so the table (and its source-line anchors) always
-    matches the code being documented without a checked-in copy.
+    `docs/benchmark.md`, so the table always matches the code being documented.
 
     The `mpm` column is rendered by {func}`_support_glyph`, shared with the manager
     index so the two pages can never disagree on a manager's status. Competitor
@@ -1002,7 +1004,10 @@ def benchmark_managers_table() -> str:
     Each manager identifier in the first column is rendered as a link: to its
     dedicated documentation page for implemented managers, or to its homepage
     from the TOML's `homepages` mapping for competitor-only managers. IDs
-    without any known URL render as plain ``\\`code\\```.
+    without any known URL render as plain ``\\`code\\```. A wrapped manager's
+    `mpm` glyph links to that same page, the rule every `mpm` ✅ of the
+    hand-edited tables follows. The page's card links the source file, so the
+    checked-in mirror holds no line anchor that shifts when a class moves.
 
     Support cells are normally `✅`, but render as `[🟡](url)` when the
     `(manager_id, competitor)` pair is listed in the TOML's
@@ -1040,14 +1045,17 @@ def benchmark_managers_table() -> str:
 
     table = []
     for mid in all_ids:
-        if mid in pool_ids:
-            label = f"[`{mid}`](managers/{mid}.md)"
+        page = f"managers/{mid}.md" if mid in pool_ids else None
+        if page:
+            label = f"[`{mid}`]({page})"
         else:
             url = homepages.get(mid)
             label = f"[`{mid}`]({url})" if url else f"`{mid}`"
         row = [
             label,
-            _support_glyph(mid, unsupported, anchors, competitor_data, queued),
+            _support_glyph(
+                mid, unsupported, anchors, competitor_data, queued, wrapped_url=page
+            ),
         ]
         flags = set(competitor_data.get(mid, []))
         coarse_map = coarse_support.get(mid, {})

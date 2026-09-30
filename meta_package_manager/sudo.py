@@ -1243,6 +1243,8 @@ def prime_sudo(
     run_operations = frozenset(operation.name for operation in operations)
     escalating_managers = [m for m in managers if _escalates_in(m, run_operations)]
     escalating = sorted({m.id for m in escalating_managers})
+    # The pronoun of the warnings below, agreeing with the managers they name.
+    they = "it" if len(escalating) == 1 else "they"
     internal = any(m.internal_sudo for m in managers)
     if not escalating and not internal:
         return
@@ -1259,7 +1261,7 @@ def prime_sudo(
         if escalating:
             logging.warning(
                 f"Found none of {', '.join(e.id for e in ESCALATORS)} to escalate "
-                f"{', '.join(escalating)} with: they may fail. Install one, or "
+                f"{', '.join(escalating)} with: {they} may fail. Install one, or "
                 "drop escalation with `--no-sudo` or a `[mpm] sudo = false` "
                 "entry in your configuration file.",
             )
@@ -1326,7 +1328,7 @@ def prime_sudo(
             logging.warning(
                 f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
                 f"rights, but you are not authorized to run {escalator.id} on "
-                "this host: they will fail. Drop escalation with `--no-sudo` or "
+                f"this host: {they} will fail. Drop escalation with `--no-sudo` or "
                 "a `[mpm] sudo = false` entry in your configuration file.",
             )
         # An internal-only selection stays silent, as on the no-terminal path:
@@ -1350,7 +1352,7 @@ def prime_sudo(
             logging.warning(
                 f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
                 "rights, but no terminal is available to prompt for a password: "
-                f"they may fail. Re-run in a terminal, pre-authenticate with "
+                f"{they} may fail. Re-run in a terminal, pre-authenticate with "
                 f"`{' '.join(escalator.prompt_args)}`, or drop escalation with "
                 "`--no-sudo` or a `[mpm] sudo = false` entry in your "
                 "configuration file.",

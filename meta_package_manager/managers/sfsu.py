@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class SFSU(PackageManager):
-    """sfsu (Scoop For Speed and Usability) is a Rust reimplementation of
+    """sfsu (Stupid Fast Scoop Utils) is a Rust reimplementation of
     Scoop's slower read paths, working against the same buckets and `~/scoop`
     install tree.
 

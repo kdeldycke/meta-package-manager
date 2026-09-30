@@ -198,7 +198,7 @@ or scope the global flag to the manager: `mpm --cask --sudo upgrade`. Prefer the
 
 ## Running `mpm` itself as root
 
-On Linux you may instead install and run `mpm` under `sudo`, so every manager it drives is already privileged:
+On Linux you may instead install and run `mpm` under `sudo`, so every manager it drives is already privileged, and `mpm` wraps none of their commands in an escalator:
 
 ```shell-session
 $ sudo uv tool install meta-package-manager

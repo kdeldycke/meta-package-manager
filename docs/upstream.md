@@ -60,6 +60,10 @@ Problems this project hit first and reported upstream, since fixed there.
 
 - [mas-cli/mas#1248](https://github.com/mas-cli/mas/issues/1248): `--json` output contained unescaped control characters. The permissive decoding in [`mas`](managers/mas.md)'s wrapper stays, for the releases still in the wild.
 
+### `scoop`
+
+- [ScoopInstaller/Scoop#6457](https://github.com/ScoopInstaller/Scoop/issues/6457): `scoop --version` printed the raw `git log` line of its checkout instead of a clean version, from `0.4.0` until the fix in `0.6.0`. `mpm` now requires that release for [`scoop`](managers/scoop.md), and its fallback parsing is gone.
+
 ### `uv`
 
 - [astral-sh/uv#19089](https://github.com/astral-sh/uv/issues/19089): a span-shaped `exclude-newer-package` value resolved to a no-op timestamp.
@@ -90,10 +94,6 @@ The user-facing inventory of what `mpm` backfills on top of native tools is [the
 [`dotnet`](managers/dotnet.md) never implemented `dotnet tool list --outdated`: an SDK maintainer wrote the spec in [dotnet/sdk#22853](https://github.com/dotnet/sdk/issues/22853), which was then closed as not planned. `mpm` checks the installed tools against NuGet itself, without mutating them.
 
 [`brew`](managers/brew.md) rejects `--formula` next to `--greedy` ever since [Homebrew/brew#8229](https://github.com/Homebrew/brew/pull/8229) added the selector to `brew upgrade`, and tolerating the pair as a no-op was declined in [Homebrew/brew#16135](https://github.com/Homebrew/brew/issues/16135). `mpm` shapes its formula and cask outdated queries around the conflict.
-
-### Version detection
-
-[`scoop`](managers/scoop.md) does not always report a clean version of itself ([ScoopInstaller/Scoop#6457](https://github.com/ScoopInstaller/Scoop/issues/6457), still open). `mpm` recovers the version from a `tag: vX.Y.Z` ref or a `Bump to version` commit subject.
 
 ### Concurrency
 

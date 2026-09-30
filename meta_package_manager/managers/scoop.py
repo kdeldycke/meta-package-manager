@@ -44,12 +44,6 @@ class Scoop(PackageManager):
     # introduced by a `---` separator line: mpm drops everything up to that
     # separator, then splits each row positionally on whitespace.
     #
-    # `scoop --version` does not reliably print a clean version: it often
-    # emits the raw `git log` line of the checkout instead. The probe
-    # therefore carries fallbacks that recover the version from a
-    # `tag: vX.Y.Z` ref or a `Bump to version` commit subject. See
-    # https://github.com/ScoopInstaller/Scoop/issues/6457.
-    #
     # `remove` uninstalls with `--purge`, so a package's persisted data
     # directory is deleted with it rather than kept for a later reinstall.
     operation_notes: ClassVar = {
@@ -74,7 +68,10 @@ class Scoop(PackageManager):
 
     platforms = WINDOWS
 
-    requirement = ">=0.2.4"
+    # `0.6.0` fixed `scoop --version`, which printed the raw `git log` line of
+    # the checkout instead of a clean version:
+    # https://github.com/ScoopInstaller/Scoop/issues/6457.
+    requirement = ">=0.6.0"
 
     _LIST_REGEXP = re.compile(
         r"""
@@ -107,53 +104,21 @@ class Scoop(PackageManager):
         re.VERBOSE,
     )
 
-    version_regexes = (
-        r"^v(?P<version>\S+)\s.+",
-        # XXX Scoop does not always provide a clean version string:
-        # https://github.com/ScoopInstaller/Scoop/issues/6457
-        # https://github.com/ScoopInstaller/Scoop/issues/6270
-        # https://github.com/ScoopInstaller/Scoop/pull/6463
-        r"^.+,\stag:\sv(?P<version>\S+),\s.+",
-        r"^.+\sBump\sto\sversion\s(?P<version>\S+)\s.+",
-    )
+    version_regexes = (r"^v(?P<version>\S+)\s.+",)
     """Search version at the start of a line.
 
     ```{code-block} pwsh-session
 
     > scoop --version
     Current Scoop version:
-    v0.2.4 - Released at 2022-08-08
+    v0.6.0 - Released at 2026-09-30
 
     'main' bucket:
-    5a5b13b6c (HEAD -> master, origin/HEAD) oh-my-posh: Update to version 11.1.1
+    22fbffff92 tombi: Update to version 1.6.1
+
+    'extras' bucket:
+    a149ee2c79 suwayomi-server: Update to version 2.4.2366
     ```
-
-    :::{attention}
-
-    [Scoop does not always provide a clean version string](https://github.com/ScoopInstaller/Scoop/issues/6457).
-
-    So we fallback on parsing various `git log` output:
-
-    ```{code-block} pwsh-session
-
-    > scoop --version
-    Current Scoop version:
-    b588a06e (HEAD -> master, tag: v0.5.3, origin/master, origin/HEAD) Bump 0.5.3
-
-    'main' bucket:
-    46c50c6b0 (HEAD -> master, origin/master, origin/HEAD) fix arm64 version
-    ```
-
-    ```{code-block} pwsh-session
-
-    > scoop --version
-    Current Scoop version:
-    b588a06e chore(release): Bump to version 0.5.3 (resync) (#6436)
-
-    'main' bucket:
-    46c50c6b0 aqua: fix arm64 version (#7071)
-    ```
-    :::
     """
 
     @staticmethod

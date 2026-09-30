@@ -180,10 +180,11 @@ QUEUED_GLYPH = "🚧"
 The state a blank cell used to swallow. A manager absent from the pool and
 from {data}`UNSUPPORTED_GLYPHS` may be one nobody has looked at, or one
 looked at closely and queued behind something: a host the assessing machine
-is not, a date a dead-upstream recheck waits on, or the project scope
-`mpm` does not implement yet. Only the second kind carries this glyph, and
-`docs/benchmark.toml`'s `queued` table is where the blocker is written
-down, one line per manager, since the glyph alone cannot say which.
+is not, a date a dead-upstream recheck waits on, an upstream release a
+merged fix waits on, or the project scope `mpm` does not implement yet.
+Only the second kind carries this glyph, and `docs/benchmark.toml`'s
+`queued` table is where the blocker is written down, one line per manager,
+since the glyph alone cannot say which.
 
 It is deliberately unlinked in a support cell, unlike every other state.
 A wrapped manager has a class to point at and a declined one a verdict
@@ -933,7 +934,7 @@ def _bare_support_glyph(
     `unmaintained` flag. A declined one takes {data}`TOPGRADE_FALLBACK_GLYPH`
     where `topgrade` still reaches it, and its {data}`UNSUPPORTED_GLYPHS`
     verdict otherwise. A manager `queued` names takes {data}`QUEUED_GLYPH`: it
-    is a candidate whose wrap waits on something the assessing host lacks. A
+    is a candidate whose wrap waits on the blocker its entry names. A
     manager in none of the three, assessed by nobody yet, has no glyph at all.
 
     One glyph per manager. Where `topgrade` still reaches the tool, the lifebuoy

@@ -42,13 +42,14 @@
 # `queued` is an alphabetically-sorted table mapping manager id to the one
 # thing that blocks its wrap. These are candidates rather than refusals:
 # each has been assessed against the vetting ladder and each would be
-# written today but for one of three blockers, named in its own entry: a
+# written today but for one of four blockers, named in its own entry: a
 # host the assessing machine is not, a date a dead-upstream recheck waits
-# on, or the project scope `mpm` does not implement yet. The entries own
-# that detail because wrapping a manager deletes its line, so a list
-# repeated up here goes stale on the next wrap. Their `mpm` cell renders
-# `QUEUED_GLYPH` unlinked, which is what separates them from the blank cell
-# of a tool nobody has looked at.
+# on, an upstream release a merged fix waits on, or the project scope
+# `mpm` does not implement yet. The entries own that detail because
+# wrapping a manager deletes its line, so a list repeated up here goes
+# stale on the next wrap. Their `mpm` cell renders `QUEUED_GLYPH`
+# unlinked, which is what separates them from the blank cell of a tool
+# nobody has looked at.
 # A manager cannot be both queued and unsupported, nor queued and wrapped:
 # landing the wrap is what removes its entry here.
 #
@@ -861,7 +862,7 @@ netpkg = "A Zenwalk host. Assessed: it is that distribution's own manager, addin
 pkgman = "A Haiku host. Assessed: `pkgman search --all --installed-only` is the inventory, beside install, uninstall, update, full-sync, refresh, search and cleanup. No binary of the suite reports a version, the usage screen offering `--help` alone, so the probe has to read Haiku's own revision through a companion binary, as `sun-tools` does on Solaris."
 poetry = "Project scope, tracked in issue 1725. The archetype of the group, named in the `scope` docstring of `meta_package_manager/manager.py`."
 protonplus = "A Linux host with a Steam-like launcher, and a Python class: every verb is keyed on a launcher-and-runner pair, which a bundled definition cannot compose."
-protonup = "A dead-upstream recheck after 2026-10-19. The supersession premise failed, the repository being unarchived and its readme carrying no deprecation notice, so the calendar is all that is left."
+protonup = "A release after `0.1.5`, the newest on PyPI, which crashes installing any Proton-GE from `GE-Proton11-4` on (upstream issue 46). The fix, pull request 47, merged on 2026-08-31 without a version bump, so no `requirement` can exclude the broken build. Assessed: `-l` lists the installed builds, and `-t` and `-r` install and remove one. No option prints a version, so the probe has to read the package metadata through the interpreter of the script."
 rpm-ostree = "A host booted on an ostree image, which Fedora Server is not: every verb refuses a package-based system. Assessed: `rpm-ostree status --json` reports the layered packages and the deployments carrying them, beside `install`, `uninstall`, `upgrade` and `rollback`, and `rpm-ostree --version` answers the probe. What it layers are the same Fedora RPMs `dnf5` reaches, but Silverblue, Kinoite, IoT and CoreOS ship no `dnf` at all, so on those hosts nothing else reaches them."
 slackpkg = "A Slackware host. Assessed: it owns no listing, but `install`, `upgrade` and `remove` each take a package, which is what the vetting ladder asks of a tool with no inventory. `slackpkg help` prints the version, and `-batch=on -default_answer=y` answers the dialogs. Its relationship to the wrapped `slapt-get` has to be settled against a real install, like `netpkg`'s."
 stack = "Project scope, tracked in issue 1725. Predominantly a project build tool: no inventory, no outdated, and an `uninstall` that only prints instructions. The one host-wide axis it owns, fetching GHC, belongs to the wrapped `ghcup`."
